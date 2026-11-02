@@ -1,62 +1,48 @@
 #+TITLE: CHILL+ versus cages
 #+OPTIONS: toc:nil num:nil
 
-Two classifiers live in ~libyodaLib~. They answer different questions
-and they do not imply each other.
+Two classifiers live in ~libyodaLib~.
+They answer different questions and they do not imply each other.
 
 * Four-neighbour star
 
-CHILL (~seams chill~, ~chill::getCorrel~ / ~getIceTypeNoPrint~) and
-CHILL+ (~seams chill-plus~, ~chill::getCorrelPlus~ /
-~getIceTypePlusNoPrint~) look at the four-neighbour star. Both stay
-on the host. They compute bond-order correlations ~c_ij~ on the four
-nearest neighbours of each oxygen (or each mW site) and label the
-atom cubic, hexagonal, interfacial, clathrate, or water from the
-staggered and eclipsed pattern of that star.
+CHILL (~seams chill~, ~chill::getCorrel~ / ~getIceTypeNoPrint~) and CHILL+ (~seams chill-plus~, ~chill::getCorrelPlus~ / ~getIceTypePlusNoPrint~) look at the four-neighbour star.
+Both stay on the host.
+They compute bond-order correlations ~c_ij~ on the four nearest neighbours of each oxygen (or each mW site) and label the atom cubic, hexagonal, interfacial, clathrate, or water from the staggered and eclipsed pattern of that star.
 
-A molecule is cubic or hexagonal when its four bonds look like ice,
-even if those neighbours do not close a cage.
+A molecule is cubic or hexagonal when its four bonds look like ice, even if those neighbours do not close a cage.
 
-CHILL+: Nguyen and Molinero, *J. Phys. Chem. B* 2015
-([[https://doi.org/10.1021/jp510289t][10.1021/jp510289t]]).
+CHILL+: Nguyen and Molinero, *J. Phys. Chem. B* 2015 ([[https://doi.org/10.1021/jp510289t][10.1021/jp510289t]]).
 CHILL: Moore et al., *Phys. Chem. Chem. Phys.* 2010.
 
 * Cage membership
 
-The ice score (~seams cages~, ~ring::seededCageAffiliation~ by
-default) is cage membership. A molecule in a hexagonal cage (HC) is
-ice Ih. A molecule in a double-diamond cage (DDC) is ice Ic. A
-molecule in neither is water. The cages are assembled from
-six-membered primitive rings on a chosen bond graph, not from the
-four-neighbour star.
+The ice score (~seams cages~, ~ring::seededCageAffiliation~ by default) is cage membership.
+A molecule in a hexagonal cage (HC) is ice Ih.
+A molecule in a double-diamond cage (DDC) is ice Ic.
+A molecule in neither is water.
+The cages are assembled from six-membered primitive rings on a chosen bond graph, not from the four-neighbour star.
 
-This is topological unit matching (TUM). The methods paper is the
-2020 JCIM article (see [[file:citation.org][Citation]]).
+This is topological unit matching (TUM).
+The methods paper is the 2020 JCIM article (see [[file:citation.org][Citation]]).
 
-The GPU path (~gpu::analyzeResident~) is that TUM ice score only:
-~linkcell::gpu~ k-nearest, the mutual four-nearest graph, primitive
-six-rings, and HC/DDC affiliation. CHILL, CHILL+, and \(q_{lm}\)
-stay on the host. Only cage labels come back.
+The GPU path (~gpu::analyzeResident~) is that TUM ice score only: ~linkcell::gpu~ k-nearest, the mutual four-nearest graph, primitive six-rings, and HC/DDC affiliation.
+CHILL, CHILL+, and \(q_{lm}\) stay on the host.
+Only cage labels come back.
 
 * Why they disagree
 
-A configuration can agree exactly on the closed star of a vertex
-(same induced graph, same coordinates on those five atoms) and still
-disagree on that vertex's cage label, because the cage predicates
-read a larger neighbourhood of six-rings. The Catch2 suite encodes
-that fact: cage membership is not a function of the four-neighbour
-star.
+A configuration can agree exactly on the closed star of a vertex (same induced graph, same coordinates on those five atoms) and still disagree on that vertex's cage label, because the cage predicates read a larger neighbourhood of six-rings.
+The Catch2 suite encodes that fact: cage membership is not a function of the four-neighbour star.
 
-On the in-tree mixed TIP4P dump
-(~input/traj/exampleTraj.lammpstrj~), CHILL+ reports 12 interfacial
-clathrate and 238 water. Seeded cages report zero HC and zero DDC.
-A three-eclipsed star is not cage membership. Walk through the
-commands in [[file:../tutorials/bulk-ice.org][the mixed TIP4P tutorial]].
+On the in-tree mixed TIP4P dump (~input/traj/exampleTraj.lammpstrj~), ~seams chill-plus~ uses the cutoff list by default and prints 12 interfacial clathrate and 238 water; ~--graph mutual~ prints 1 clathrate, 7 interfacial clathrate, and 242 water.
+Seeded cages report zero HC and zero DDC.
+A three-eclipsed star is not cage membership.
+Walk through the commands in [[file:../tutorials/bulk-ice.org][the mixed TIP4P tutorial]].
 
 * Bond graph
 
-~seams cages --graph~ chooses the bond graph those rings are found
-on:
+~seams cages --graph~ chooses the bond graph those rings are found on:
 
 | value | graph |
 |-------+-------|
@@ -65,18 +51,14 @@ on:
 | ~knn-union~ | union k-nearest (completion graph of the seeded rule) |
 | ~seeded~ | mutual seeds, union completions (CLI default) |
 
-On a perfect cubic crystal the four graphs coincide. On a mixed
-nucleation dump they do not have to.
+On a perfect cubic crystal the four graphs coincide.
+On a mixed nucleation dump they do not have to.
 
 * Ring-adjacent completion
 
-~ring::seededCageAffiliation~ takes a fifth argument,
-~ringAdjacentCompletion~, default ~false~. When the flag is ~true~,
-the accepted labels pass through ~ring::ringAdjacentCompletion~: a
-permissive six-ring with all but one vertex labelled fills that last
-vertex, iterated to a fixed point. Hexagonal cage (HC) flags and
-double-diamond cage (DDC) flags run as two walks.
+~ring::seededCageAffiliation~ takes a fifth argument, ~ringAdjacentCompletion~, default ~false~.
+When the flag is ~true~, the accepted labels pass through ~ring::ringAdjacentCompletion~: a permissive six-ring with all but one vertex labelled fills that last vertex, iterated to a fixed point.
+Hexagonal cage (HC) flags and double-diamond cage (DDC) flags run as two walks.
 
-~seams cages --complete~ sets the flag. The rule, the least-fixed-point
-claim, and the Lean build live on
-[[file:ring-completion.org][Ring-adjacent completion]].
+~seams cages --complete~ sets the flag.
+The rule, the least-fixed-point claim, and the Lean build live on [[file:ring-completion.org][Ring-adjacent completion]].

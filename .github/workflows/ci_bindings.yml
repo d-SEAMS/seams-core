@@ -1,0 +1,65 @@
+name: Bindings
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: "3.12"
+      - run: pip install pydseamslib==2.11.1 pytest
+      - run: pytest docs/tutorials -q
+
+  r-julia:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-bindings-
+      - run: pixi run meson setup bbdir-py -Dwith_python=false -Dwith_tests=true -Dwith_cli=true
+      - run: pixi run ninja -C bbdir-py bindings/libseams_lang.so bindings/test_seams_lang
+      - run: pixi run meson test -C bbdir-py seams_lang_fixtures --print-errorlogs
+      - name: Install R
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y r-base-dev
+          sudo Rscript -e 'install.packages(c("cpp11", "testthat"), repos="https://cloud.r-project.org")'
+      - name: Install the R package
+        run: |
+          export SEAMS_INCLUDE="$PWD/bindings/cxx"
+          export SEAMS_LIBDIR="$PWD/bbdir-py/bindings"
+          export LD_LIBRARY_PATH="$SEAMS_LIBDIR:$PWD/bbdir-py/src:${LD_LIBRARY_PATH:-}"
+          sudo -E R CMD INSTALL bindings/r/dseams
+      - name: Test R
+        run: |
+          export DSEAMS_ROOT="$PWD"
+          export LD_LIBRARY_PATH="$PWD/bbdir-py/bindings:$PWD/bbdir-py/src:${LD_LIBRARY_PATH:-}"
+          Rscript -e 'testthat::test_file("bindings/r/dseams/tests/testthat/test-ice.R", stop_on_failure=TRUE)'
+      - name: Install Julia
+        run: |
+          curl -fsSL -o /tmp/julia.tar.gz https://julialang-s3.julialang.org/bin/linux/x86_64/1.11/julia-1.11.6-linux-x86_64.tar.gz
+          sudo tar -xzf /tmp/julia.tar.gz -C /opt
+          echo /opt/julia-1.11.6/bin >> "$GITHUB_PATH"
+      - name: Test Julia
+        run: |
+          export DSEAMS_ROOT="$PWD"
+          export SEAMS_LANG_LIB="$PWD/bbdir-py/bindings/libseams_lang.so"
+          export LD_LIBRARY_PATH="$PWD/bbdir-py/bindings:$PWD/bbdir-py/src:${LD_LIBRARY_PATH:-}"
+          julia --project=bindings/julia/Dseams -e 'using Pkg; Pkg.instantiate()'
+          julia --project=bindings/julia/Dseams bindings/julia/Dseams/test/runtests.jl
+      - name: Install pydseamslib with chill_plus(graph=)
+        run: pixi run python -m pip install "pydseamslib @ git+https://github.com/d-SEAMS/PydSEAMSlib@${PYDSEAMSLIB_REF:-main}"
+      - name: CHILL+ agrees across the CLI, Python, R, and Julia
+        run: |
+          export DSEAMS_ROOT="$PWD"
+          export LD_LIBRARY_PATH="$PWD/bbdir-py/bindings:$PWD/bbdir-py/src:${LD_LIBRARY_PATH:-}"
+          pixi run ninja -C bbdir-py seams
+          pixi run python tests/chill_plus_fronts.py bbdir-py/seams bbdir-py/bindings/libseams_lang.so --require-all

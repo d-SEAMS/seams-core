@@ -57,13 +57,13 @@ Every file under =src/include/internal=.
 | =bop.hpp= | ~chill~, ~sph~ | CHILL, CHILL+, ~q6~, Steinhardt ~ql~ |
 | =franzblau.hpp= | ~primitive~ | Franzblau primitive rings |
 | =ring.hpp= | ~ring~ | ring helpers and ~strucType~ |
-| =topo_bulk.hpp= | ~ring~, ~prism3~ | HC / DDC search, bulk polygons |
+| =topo_bulk.hpp= | ~ring~, ~prism3~ | HC / DDC search, bulk polygons; ~contractibleRings~ drops rings that wind the periodic cell |
 | =topo_one_dim.hpp= | ~ring~ | ice-nanotube prisms |
 | =topo_two_dim.hpp= | ~ring~ | monolayer polygons |
 | =cage.hpp= | ~cage~ | ~Cage~, ~cageType~, ~iceType~, ~Signature~ |
 | =cage_affiliation.hpp= | ~ring~ | claim-free HC / DDC flags; ~seededCageAffiliation~ and ~ringAdjacentCompletion~ |
 | =cage_canon.hpp= | ~cage~ | nauty canonical certificates |
-| =cage_enum.hpp= | ~cage~ | ~findBySignature~, closed polyhedra from a ring-size census; ~findIncompleteBySignature~, cups and incomplete cages on the same ring adjacency |
+| =cage_enum.hpp= | ~cage~ | ~findBySignature~, closed polyhedra from a ring-size census whose faces tile a sphere; ~findBySignatures~, several signatures in one search; ~isSpherePolyhedron~; ~findIncompleteBySignature~, cups and incomplete cages on the same ring adjacency |
 | =bulkTUM.hpp= | ~tum3~ | topological unit matching |
 | =bond.hpp= | ~bond~ | geometric hydrogen bonds |
 | =absOrientation.hpp= | ~absor~ | Horn absolute orientation |

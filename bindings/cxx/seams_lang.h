@@ -1,0 +1,98 @@
+#ifndef SEAMS_LANG_H_
+#define SEAMS_LANG_H_
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/* C ABI shared by the Python, R, and Julia fronts.
+ * The classifiers are the engine's. This file does not implement them.
+ *
+ * Ice labels, same order as molSys::atom_state_type:
+ *   0 cubic, 1 hexagonal, 2 water, 3 interfacial, 4 clathrate,
+ *   5 interClathrate, 6 unclassified, 7 reCubic, 8 reHex.
+ * Cage codes on an atom: 0 water, 1 hexagonal only, 2 double-diamond only,
+ * 3 both. seams_frame_cages writes the same four disjoint counters
+ * (n_hex, n_cubic, n_water, n_both); they sum to the number of kept atoms.
+ * Inclusive totals are n_hex + n_both and n_cubic + n_both.
+ * A box is nine doubles: ox, oy, oz, lx, ly, lz, xy, xz, yz.
+ * type_filter: 0 guesses oxygen (LAMMPS type 2, else 1); >0 keeps that
+ * type; <0 keeps every atom.
+ * graph is "mutual" (also "knn"), "cutoff", "knn-union", or "seeded"
+ * (cages only). CHILL and CHILL+ take "cutoff" (the default, used when
+ * graph is NULL or "") or "mutual", the mutual four-nearest list with
+ * candidates inside cutoff + 1.5. Returns 0 on success. */
+
+typedef struct seams_frame seams_frame;
+
+const char *seams_lang_version(void);
+const char *seams_last_error(void);
+
+int seams_path_nframes(const char *path);
+
+seams_frame *seams_frame_read(const char *path, int frame, int type_filter);
+seams_frame *seams_frame_from_arrays(const double *xyz, int n,
+                                    const double *box9, const int *types,
+                                    const int *ids);
+void seams_frame_free(seams_frame *frame);
+
+int seams_frame_nop(const seams_frame *frame);
+int seams_frame_index(const seams_frame *frame);
+void seams_frame_box(const seams_frame *frame, double box9[9]);
+const double *seams_frame_positions(const seams_frame *frame);
+const int *seams_frame_types(const seams_frame *frame);
+const int *seams_frame_ids(const seams_frame *frame);
+
+int seams_frame_chill_plus(seams_frame *frame, double cutoff, int type,
+                           const char *graph, int *labels, int counts9[9]);
+int seams_frame_chill(seams_frame *frame, double cutoff, int type,
+                      const char *graph, int *labels, int counts9[9]);
+
+/* counts[i] is the number of primitive rings of size i.
+ * counts_len must be at least max_depth + 1. */
+int seams_frame_rings(seams_frame *frame, double cutoff, int type,
+                      const char *graph, int max_depth, int *counts,
+                      int counts_len);
+
+int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
+                           int order_l, double *ql, double *qlbar);
+
+int seams_frame_cages(seams_frame *frame, double cutoff, int type, int k,
+                      const char *graph, int complete, int *per_atom,
+                      int *n_hex, int *n_cubic, int *n_water, int *n_both);
+
+/* Ring-size census. spec is "512" or "5:12,6:2". graph is not seeded. */
+int seams_frame_signature(seams_frame *frame, double cutoff, int type,
+                          const char *graph, const char *spec, int *n_cages,
+                          int *n_atoms);
+
+int seams_frame_rdf_nbins(double rmax, int nbins);
+int seams_frame_rdf(const seams_frame *frame, double rmax, int nbins,
+                    int type_i, int type_j, double *r, double *g, int *count,
+                    double *volume);
+
+int seams_frame_rdf2d_nbin(double cutoff, double binwidth);
+/* output_dir NULL skips the topoMonolayer/rdf.dat writer. */
+int seams_frame_rdf2d(seams_frame *frame, double cutoff, double binwidth,
+                      const char *output_dir, double *r, double *g);
+
+typedef struct seams_prism_row {
+  int size;
+  int perfect;
+  int imperfect;
+} seams_prism_row;
+
+/* rows NULL asks for the row count in *n_rows (max_depth - 2). */
+int seams_frame_prisms(seams_frame *frame, double cutoff, int type,
+                       int max_depth, const char *output_dir,
+                       seams_prism_row *rows, int *n_rows);
+
+int seams_frame_monolayer(seams_frame *frame, double cutoff, int type,
+                          int max_depth, double sheet_area,
+                          const char *output_dir, int *counts, int counts_len);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

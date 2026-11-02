@@ -22,6 +22,13 @@
 namespace tum {
 namespace device {
 
+/** Longest atom row the kernels accept. Candidate buffers are sized by
+ *  it and ddcFrom keeps one bit per entry in an unsigned. A liquid atom
+ *  of a 3.5 A cutoff graph can lie in more than 16 six-rings; a graph
+ *  with a longer row goes to the host (tum_offload.hpp). */
+constexpr int kRowCap = 32;
+static_assert(kRowCap <= 32, "ddcFrom marks row entries in 32-bit masks");
+
 inline bool bonded(const int *deg, const int *cols, int nAtoms, int kMax,
                    int a, int b) {
   if (a < 0 || b < 0 || a >= nAtoms || b >= nAtoms) {
@@ -120,20 +127,6 @@ inline bool hopBoundPrimitiveSix(const int *r, const int *deg, const int *cols,
   return true;
 }
 
-inline bool basalNeighbours(const int *deg, const int *cols, int nAtoms,
-                            int kMax, int n1, int n2, int atomOne,
-                            int atomTwo) {
-  const bool n1one = bonded(deg, cols, nAtoms, kMax, atomOne, n1);
-  const bool n1two = bonded(deg, cols, nAtoms, kMax, atomTwo, n1);
-  if (!n1one && !n1two) {
-    return false;
-  }
-  if (n1one) {
-    return bonded(deg, cols, nAtoms, kMax, atomTwo, n2);
-  }
-  return bonded(deg, cols, nAtoms, kMax, atomOne, n2);
-}
-
 inline bool notNeighboursOfRing(const int *deg, const int *cols, int nAtoms,
                                 int kMax, const int *trip, const int *ring) {
   for (int i = 0; i < 3; ++i) {
@@ -146,93 +139,34 @@ inline bool notNeighboursOfRing(const int *deg, const int *cols, int nAtoms,
   return true;
 }
 
+/** beta(b1, b2) for rings sharing no atom: some alternating triplet
+ *  {l_p, l_p+2, l_p+4} of b1 bonds one-to-one onto an alternating triplet
+ *  {m_q, m_q+2, m_q+4} of b2, and no other atom of b2 is bonded to b1.
+ *  All 2 x 2 x 6 alignments are tried, so rotation, direction and ring
+ *  order do not matter. */
 inline bool basalConditions(const int *deg, const int *cols, int nAtoms,
                             int kMax, const int *b1, const int *b2) {
-  int kIndex = -1;
-  int compare1 = 0;
-  int compare2 = 0;
-  bool l1n = false;
-  bool l2n = false;
-  const int l1 = b1[0];
-  const int l2 = b1[1];
-  for (int k = 0; k < 6; ++k) {
-    const int mk = b2[k];
-    if (bonded(deg, cols, nAtoms, kMax, l1, mk)) {
-      compare1 = b1[2];
-      compare2 = b1[4];
-      kIndex = k;
-      l1n = true;
-      break;
-    }
-    if (bonded(deg, cols, nAtoms, kMax, l2, mk)) {
-      compare1 = b1[3];
-      compare2 = b1[5];
-      kIndex = k;
-      l2n = true;
-      break;
-    }
-  }
-  if (!l1n && !l2n) {
-    return false;
-  }
-  int evenT[3];
-  int oddT[3];
-  int ie = 0;
-  int io = 0;
-  for (int k = 0; k <= 5; ++k) {
-    int ck = kIndex + k;
-    if (ck >= 6) {
-      ck -= 6;
-    }
-    if (k % 2 == 0) {
-      evenT[ie++] = b2[ck];
-    } else {
-      oddT[io++] = b2[ck];
-    }
-  }
-  if (!basalNeighbours(deg, cols, nAtoms, kMax, evenT[1], evenT[2], compare1,
-                       compare2)) {
-    return false;
-  }
-  return notNeighboursOfRing(deg, cols, nAtoms, kMax, oddT, b1);
-}
-
-inline int firstRingThrough(const int *A, int nA, const int *B, int nB,
-                            const int *C, int nC, int skipA, int skipB) {
-  int i = 0;
-  int j = 0;
-  int k = 0;
-  while (i < nA && j < nB && k < nC) {
-    const int x = A[i];
-    const int y = B[j];
-    const int z = C[k];
-    if (x == y && y == z) {
-      if (x != skipA && x != skipB) {
-        return x;
-      }
-      ++i;
-      ++j;
-      ++k;
+  const int perm[6][3] = {{0, 1, 2}, {0, 2, 1}, {1, 0, 2},
+                          {1, 2, 0}, {2, 0, 1}, {2, 1, 0}};
+  for (int q = 0; q < 2; ++q) {
+    const int oddT[3] = {b2[q + 1], b2[q + 3], b2[(q + 5) % 6]};
+    if (!notNeighboursOfRing(deg, cols, nAtoms, kMax, oddT, b1)) {
       continue;
     }
-    int lo = x;
-    if (y < lo) {
-      lo = y;
-    }
-    if (z < lo) {
-      lo = z;
-    }
-    if (x == lo) {
-      ++i;
-    }
-    if (y == lo) {
-      ++j;
-    }
-    if (z == lo) {
-      ++k;
+    for (int p = 0; p < 2; ++p) {
+      for (int s = 0; s < 6; ++s) {
+        bool all = true;
+        for (int t = 0; t < 3 && all; ++t) {
+          all = bonded(deg, cols, nAtoms, kMax, b1[p + 2 * t],
+                       b2[q + 2 * perm[s][t]]);
+        }
+        if (all) {
+          return true;
+        }
+      }
     }
   }
-  return -1;
+  return false;
 }
 
 inline int ringsThrough(const int *A, int nA, const int *B, int nB,
@@ -286,10 +220,10 @@ inline int fetchAdd(int *p) {
   return old;
 }
 
-/** Enumerate hop-bound primitive six-rings whose lowest vertex is i. */
+/** Enumerate hop-bound primitive six-rings whose lowest vertex is i.
+ *  nRings counts every ring found; only the first maxRings are stored. */
 inline void enumSixFrom(int i, const int *deg, const int *cols, int nAtoms,
-                        int kMax, int maxRings, int *nRings, int *ringAtoms,
-                        int *dropped) {
+                        int kMax, int maxRings, int *nRings, int *ringAtoms) {
   const int di = deg[i];
   if (di < 2) {
     return;
@@ -338,7 +272,6 @@ inline void enumSixFrom(int i, const int *deg, const int *cols, int nAtoms,
             }
             const int slot = fetchAdd(nRings);
             if (slot >= maxRings) {
-              fetchAdd(dropped);
               continue;
             }
             const int dest = slot * 6;
@@ -352,6 +285,8 @@ inline void enumSixFrom(int i, const int *deg, const int *cols, int nAtoms,
   }
 }
 
+/** throughCount counts every stored ring through the atom; only the
+ *  first maxPer ids are kept. */
 inline void invertOneRing(int r, const int *nRings, const int *ringAtoms,
                           int nAtoms, int maxPer, int *throughCount,
                           int *through) {
@@ -383,6 +318,40 @@ inline void sortThroughRow(int *row, int n) {
   }
 }
 
+/** True when ring j is in the through row of a bond neighbour of
+ *  bi[0] or bi[1] visited before (slot, n), so each candidate is tested
+ *  once. */
+inline bool seenEarlier(const int *bi, const int *deg, const int *cols,
+                        const int *throughCount, const int *through,
+                        int nAtoms, int kMax, int maxPer, int slot, int n,
+                        int j) {
+  for (int s = 0; s <= slot; ++s) {
+    const int anchor = bi[s];
+    if (anchor < 0 || anchor >= nAtoms) {
+      continue;
+    }
+    const int arow = anchor * kMax;
+    const int stop = s < slot ? deg[anchor] : n;
+    for (int m = 0; m < stop; ++m) {
+      const int nb = cols[arow + m];
+      if (nb < 0 || nb >= nAtoms) {
+        continue;
+      }
+      const int nr = throughCount[nb];
+      const int *row = through + nb * maxPer;
+      for (int t = 0; t < nr; ++t) {
+        if (row[t] == j) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+/** Ordered basal pairs (i, j). Every pair passing beta has a bond from
+ *  bi[0] or bi[1] into bj, so the neighbours of those two atoms reach
+ *  every candidate. */
 inline void emitBasalFrom(int i, const int *nRings, const int *ringAtoms,
                           const int *deg, const int *cols,
                           const int *throughCount, const int *through,
@@ -409,6 +378,10 @@ inline void emitBasalFrom(int i, const int *nRings, const int *ringAtoms,
       for (int t = 0; t < nr; ++t) {
         const int j = row[t];
         if (j == i) {
+          continue;
+        }
+        if (seenEarlier(bi, deg, cols, throughCount, through, nAtoms, kMax,
+                        maxPer, slot, n, j)) {
           continue;
         }
         const int *bj = ringAtoms + j * 6;
@@ -451,25 +424,34 @@ inline void applyHcPair(int p, const int *nPairs, const int *pairs,
     const int *A = through + trip[0] * maxPer;
     const int *B = through + trip[1] * maxPer;
     const int *C = through + trip[2] * maxPer;
-    int cand[16];
-    const int nc = ringsThrough(A, nA, B, nB, C, nC, i, j, cand, 16);
+    int cand[kRowCap];
+    const int nc = ringsThrough(A, nA, B, nB, C, nC, i, j, cand, kRowCap);
     for (int c = 0; c < nc; ++c) {
       const int kr = cand[c];
       const int *bk = ringAtoms + kr * 6;
-      int rest[3];
-      int nrst = 0;
+      int rest = 0;
+      int restInJ = 0;
       for (int u = 0; u < 6; ++u) {
-        if (!inSix(trip, bk[u]) && nrst < 3) {
-          rest[nrst++] = bk[u];
+        const int a = bk[u];
+        if (a != trip[0] && a != trip[1] && a != trip[2]) {
+          ++rest;
+          if (inSix(bj, a)) {
+            ++restInJ;
+          }
         }
       }
-      if (nrst == 3 && commonCount(rest, bj) == 3) {
+      if (rest == 3 && restInJ == 3) {
         hc[kr] = 1;
       }
     }
   }
 }
 
+/** epsilon(i) for a ring that is not HC, as ring::equatorialConditions:
+ *  every atom in 3 other rings, and pairwise distinct P_k in T_k with P_0,
+ *  P_2, P_4 sharing an atom, P_1, P_3, P_5 sharing an atom and, for some
+ *  starting atom and direction of i, the alternate pairs sharing 3 atoms.
+ *  On a pass marks i and every P_k of every valid assignment. */
 inline void ddcFrom(int i, const int *nRings, const int *ringAtoms,
                     const int *throughCount, const int *through, const int *hc,
                     int nAtoms, int maxPer, int *ddc) {
@@ -480,8 +462,6 @@ inline void ddcFrom(int i, const int *nRings, const int *ringAtoms,
     return;
   }
   const int *bi = ringAtoms + i * 6;
-  int peri[32];
-  int nPeri = 0;
   for (int m = 0; m < 6; ++m) {
     const int atom = bi[m];
     if (atom < 0 || atom >= nAtoms) {
@@ -491,19 +471,17 @@ inline void ddcFrom(int i, const int *nRings, const int *ringAtoms,
     const int *row = through + atom * maxPer;
     int common = 0;
     for (int t = 0; t < nr; ++t) {
-      if (row[t] == i) {
-        continue;
-      }
-      ++common;
-      if (nPeri < 32) {
-        peri[nPeri++] = row[t];
+      if (row[t] != i) {
+        ++common;
       }
     }
     if (common < 3) {
       return;
     }
   }
-  int newP[6];
+  // T[k]: every ring but i through bi[k], bi[k+1], bi[k+2]
+  int T[6][kRowCap];
+  int nT[6];
   for (int k = 0; k < 6; ++k) {
     int trip[3];
     for (int t = 0; t < 3; ++t) {
@@ -515,33 +493,98 @@ inline void ddcFrom(int i, const int *nRings, const int *ringAtoms,
     const int *A = through + trip[0] * maxPer;
     const int *B = through + trip[1] * maxPer;
     const int *C = through + trip[2] * maxPer;
-    const int j = firstRingThrough(A, nA, B, nB, C, nC, i, -1);
-    if (j < 0) {
+    nT[k] = ringsThrough(A, nA, B, nB, C, nC, i, -1, T[k], kRowCap);
+    if (nT[k] == 0) {
       return;
     }
-    newP[k] = j;
   }
-  const int *p0 = ringAtoms + newP[0] * 6;
-  const int *p1 = ringAtoms + newP[1] * 6;
-  const int *p2 = ringAtoms + newP[2] * 6;
-  const int *p3 = ringAtoms + newP[3] * 6;
-  const int *p4 = ringAtoms + newP[4] * 6;
-  const int *p5 = ringAtoms + newP[5] * 6;
-  if (!commonInThree(p0, p2, p4)) {
-    return;
-  }
-  if (!commonInThree(p1, p3, p5)) {
-    return;
-  }
-  const int *pairs[4][2] = {{p0, p2}, {p1, p3}, {p2, p4}, {p3, p5}};
-  for (int t = 0; t < 4; ++t) {
-    if (commonCount(pairs[t][0], pairs[t][1]) < 3) {
-      return;
+  // Bit t of used[k] marks T[k][t] as P_k of some valid assignment
+  unsigned used[6] = {0U, 0U, 0U, 0U, 0U, 0U};
+  bool any = false;
+  for (int a = 0; a < nT[0]; ++a) {
+    const int r0 = T[0][a];
+    const int *p0 = ringAtoms + r0 * 6;
+    for (int c = 0; c < nT[2]; ++c) {
+      const int r2 = T[2][c];
+      const int *p2 = ringAtoms + r2 * 6;
+      if (r2 == r0) {
+        continue;
+      }
+      const bool e02 = commonCount(p0, p2) >= 3;
+      for (int e = 0; e < nT[4]; ++e) {
+        const int r4 = T[4][e];
+        const int *p4 = ringAtoms + r4 * 6;
+        if (r4 == r0 || r4 == r2 || !commonInThree(p0, p2, p4)) {
+          continue;
+        }
+        const bool e24 = commonCount(p2, p4) >= 3;
+        const bool e40 = commonCount(p4, p0) >= 3;
+        // Bit t: the ring on triplet 2t shares 3 atoms with both others
+        const unsigned mE = (e40 && e02 ? 1U : 0U) |
+                            (e02 && e24 ? 2U : 0U) |
+                            (e24 && e40 ? 4U : 0U);
+        if (mE == 0U) {
+          continue;
+        }
+        // Some start and direction of i puts an even middle 2t next to an
+        // odd middle 2t+1 or 2t-1
+        unsigned partners = 0U;
+        for (int t = 0; t < 3; ++t) {
+          if ((mE >> t) & 1U) {
+            partners |= (1U << t) | (1U << ((t + 2) % 3));
+          }
+        }
+        for (int b = 0; b < nT[1]; ++b) {
+          const int r1 = T[1][b];
+          const int *p1 = ringAtoms + r1 * 6;
+          if (r1 == r0 || r1 == r2 || r1 == r4) {
+            continue;
+          }
+          for (int d = 0; d < nT[3]; ++d) {
+            const int r3 = T[3][d];
+            const int *p3 = ringAtoms + r3 * 6;
+            if (r3 == r0 || r3 == r2 || r3 == r4 || r3 == r1) {
+              continue;
+            }
+            const bool o13 = commonCount(p1, p3) >= 3;
+            for (int g = 0; g < nT[5]; ++g) {
+              const int r5 = T[5][g];
+              const int *p5 = ringAtoms + r5 * 6;
+              if (r5 == r0 || r5 == r2 || r5 == r4 || r5 == r1 || r5 == r3 ||
+                  !commonInThree(p1, p3, p5)) {
+                continue;
+              }
+              const bool o35 = commonCount(p3, p5) >= 3;
+              const bool o51 = commonCount(p5, p1) >= 3;
+              const unsigned mO = (o51 && o13 ? 1U : 0U) |
+                                  (o13 && o35 ? 2U : 0U) |
+                                  (o35 && o51 ? 4U : 0U);
+              if ((partners & mO) == 0U) {
+                continue;
+              }
+              any = true;
+              used[0] |= 1U << a;
+              used[1] |= 1U << b;
+              used[2] |= 1U << c;
+              used[3] |= 1U << d;
+              used[4] |= 1U << e;
+              used[5] |= 1U << g;
+            }
+          }
+        }
+      }
     }
+  }
+  if (!any) {
+    return;
   }
   ddc[i] = 1;
-  for (int t = 0; t < 6; ++t) {
-    ddc[newP[t]] = 1;
+  for (int k = 0; k < 6; ++k) {
+    for (int t = 0; t < nT[k]; ++t) {
+      if ((used[k] >> t) & 1U) {
+        ddc[T[k][t]] = 1;
+      }
+    }
   }
 }
 

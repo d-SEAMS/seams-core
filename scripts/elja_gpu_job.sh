@@ -22,9 +22,9 @@
 # a Catch2 3 wrap.
 set -euo pipefail
 
-EB=/hpcapps/lib-edda/easybuild/software
+EB=${SEAMS_EASYBUILD:?set SEAMS_EASYBUILD to the EasyBuild software root}
 NVHPC_23=$EB/NVHPC/23.7-CUDA-12.2.0/Linux_x86_64/23.7
-NVHPC_22=/opt/ohpc/pub/compiler/nvhpc/22.3/Linux_x86_64/22.3
+NVHPC_22=${SEAMS_NVHPC_22:-}
 NVHPC_ROOT=$NVHPC_23
 MESON_PRE=$EB/Meson/1.4.0-GCCcore-13.3.0
 NINJA_PRE=$EB/Ninja/1.12.1-GCCcore-13.3.0
@@ -166,13 +166,13 @@ export SEAMS_OFFLOAD=${SEAMS_OFFLOAD:-1}
 # objects and headers without hiding the runtime libc.
 if [[ ${SEAMS_IN_SYSROOT:-0} != 1 ]]; then
   export SEAMS_IN_SYSROOT=1
-  OVL=/tmp/seams-ovl-${SLURM_JOB_ID:-$$}
+  OVL=${SEAMS_OVL:-${TMPDIR:-/tmp}/seams-ovl-${SLURM_JOB_ID:-$$}}
   mkdir -p "$OVL/lib64-upper" "$OVL/lib64-work" "$OVL/lib64-merged"
   export SEAMS_OVL=$OVL
   exec unshare --user --map-root-user --mount bash "$0" "$@"
 fi
 
-OVL=${SEAMS_OVL:-/tmp/seams-ovl-${SLURM_JOB_ID:-$$}}
+OVL=${SEAMS_OVL:-${TMPDIR:-/tmp}/seams-ovl-${SLURM_JOB_ID:-$$}}
 if ! grep -q ' /usr/lib64 ' /proc/mounts; then
   mount -t overlay overlay \
     -o "lowerdir=/usr/lib64,upperdir=$OVL/lib64-upper,workdir=$OVL/lib64-work" \
@@ -276,11 +276,18 @@ if configure_offload nvc++ nvc++ "$GCCCORE/bin/gcc"; then
 else
   echo "nvc++ 23.7 offload configure failed; trying nvc++ 22.3" \
     | tee -a "$OUT/setup.log"
+  if [[ -n "$NVHPC_22" ]]; then
   apply_nvhpc "$NVHPC_22" 11.6
-  export NVHPC=/opt/ohpc/pub/compiler/nvhpc/22.3
+  export NVHPC=${SEAMS_NVHPC_22_ROOT:-$(dirname "$(dirname "$NVHPC_22")")}
   if configure_offload nvc++ nvc++ "$GCCCORE/bin/gcc"; then
     USED_COMPILER=nvc++-22.3
   else
+    echo "nvc++ 22.3 offload configure failed" | tee -a "$OUT/setup.log"
+  fi
+  else
+    echo "SEAMS_NVHPC_22 is unset; skipping the 22.3 fallback" | tee -a "$OUT/setup.log"
+  fi
+  if [[ -z "$USED_COMPILER" ]]; then
     echo "nvc++ offload configure failed; trying clang++ 17" \
       | tee -a "$OUT/setup.log"
     export PATH=$CLANG17/bin:$PATH

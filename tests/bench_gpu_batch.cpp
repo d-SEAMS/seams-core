@@ -125,6 +125,7 @@ int main(int argc, char **argv) {
     nSix += v;
   }
   std::printf("ice_hc_atoms %d\nice_ddc_atoms %d\n", nHc, nDdc);
-  std::printf("six_rings %d\nrings_dropped %d\n", nSix, best.ringsDropped);
+  std::printf("six_rings %d\nretries %d\nhost_frames %zu\n", nSix,
+              best.retries, best.hostFrames.size());
   return 0;
 }

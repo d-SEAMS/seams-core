@@ -12,10 +12,22 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
+#include <generic.hpp>
 #include <topo_bulk.hpp>
 
 #include <algorithm>
 #include <array>
+#include <chrono>
+#include <cstdint>
+#include <cstdio>
+#include <limits>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
 
 namespace {
 
@@ -27,20 +39,149 @@ const std::vector<int> kEmptyRings;
  *  assembly claims rings as it accepts cages, so the accepted set depends on
  *  the order rings are tested; keying that order to the rings themselves
  *  makes the result independent of how the ring network was enumerated.
+ *  Each atom enters the key as its rank when @a atomRank is given, and as
+ *  its index otherwise.
  */
-std::vector<int> canonicalRingOrder(const std::vector<std::vector<int>> &rings) {
-  std::vector<std::vector<int>> keys(rings.size());
-  for (size_t i = 0; i < rings.size(); i++) {
-    keys[i] = rings[i];
-    std::sort(keys[i].begin(), keys[i].end());
+// Lexicographically least reading of a ring under rotation and reversal.
+// Rings in the cage search are at most a handful of atoms, so the key lives
+// on the stack and the sort comparator does not allocate.
+struct CycleKey {
+  int n = 0;
+  std::array<int, 16> v{};
+
+  bool operator<(const CycleKey &other) const {
+    if (n != other.n) {
+      return n < other.n;
+    }
+    for (int i = 0; i < n; i++) {
+      if (v[static_cast<size_t>(i)] != other.v[static_cast<size_t>(i)]) {
+        return v[static_cast<size_t>(i)] < other.v[static_cast<size_t>(i)];
+      }
+    }
+    return false;
   }
-  std::vector<int> order(rings.size());
-  for (size_t i = 0; i < rings.size(); i++) {
-    order[i] = static_cast<int>(i);
+};
+
+CycleKey bestCycle(const std::vector<int> &ringAtoms) {
+  CycleKey best;
+  const int k = static_cast<int>(ringAtoms.size());
+  best.n = k;
+  if (k <= 0 || k > static_cast<int>(best.v.size())) {
+    return best;
   }
-  std::sort(order.begin(), order.end(),
-            [&keys](int a, int b) { return keys[a] < keys[b]; });
+  bool any = false;
+  CycleKey candidate;
+  candidate.n = k;
+  for (int dir = 0; dir < 2; dir++) {
+    for (int start = 0; start < k; start++) {
+      for (int m = 0; m < k; m++) {
+        const int at =
+            dir == 0 ? (start + m) % k : (start + k - m) % k;
+        candidate.v[static_cast<size_t>(m)] =
+            ringAtoms[static_cast<size_t>(at)];
+      }
+      if (!any || candidate < best) {
+        best = candidate;
+        any = true;
+      }
+    }
+  }
+  return best;
+}
+
+std::vector<int> canonicalRingOrder(const std::vector<std::vector<int>> &rings,
+                                    const std::vector<int> &atomRank) {
+  const int ranked = static_cast<int>(atomRank.size());
+  const int n = static_cast<int>(rings.size());
+  std::vector<std::vector<int>> keys(static_cast<size_t>(n));
+  std::vector<CycleKey> cycles(static_cast<size_t>(n));
+  for (int i = 0; i < n; i++) {
+    std::vector<int> mapped = rings[static_cast<size_t>(i)];
+    for (int &atom : mapped) {
+      if (atom >= 0 && atom < ranked) {
+        atom = atomRank[static_cast<size_t>(atom)];
+      }
+    }
+    cycles[static_cast<size_t>(i)] = bestCycle(mapped);
+    std::sort(mapped.begin(), mapped.end());
+    keys[static_cast<size_t>(i)] = std::move(mapped);
+  }
+  std::vector<int> order(static_cast<size_t>(n));
+  for (int i = 0; i < n; i++) {
+    order[static_cast<size_t>(i)] = i;
+  }
+  // Two rings over the same atoms differ in their cycle
+  std::stable_sort(order.begin(), order.end(), [&](int a, int b) {
+    if (keys[static_cast<size_t>(a)] != keys[static_cast<size_t>(b)]) {
+      return keys[static_cast<size_t>(a)] < keys[static_cast<size_t>(b)];
+    }
+    return cycles[static_cast<size_t>(a)] < cycles[static_cast<size_t>(b)];
+  });
   return order;
+}
+
+template <class Bonded>
+bool basalConditionsOf(Bonded &&bonded, const std::vector<int> &basal1,
+                       const std::vector<int> &basal2) {
+  if (basal1.size() != 6 || basal2.size() != 6) {
+    return false;
+  }
+  std::array<std::array<bool, 6>, 6> bond{};
+  for (int i = 0; i < 6; i++) {
+    const int left = basal1[static_cast<size_t>(i)];
+    for (int j = 0; j < 6; j++) {
+      bond[static_cast<size_t>(i)][static_cast<size_t>(j)] =
+          bonded(left, basal2[static_cast<size_t>(j)]);
+    }
+  }
+  static constexpr int kPerm[6][3] = {{0, 1, 2}, {0, 2, 1}, {1, 0, 2},
+                                      {1, 2, 0}, {2, 0, 1}, {2, 1, 0}};
+  for (int q = 0; q < 2; q++) {
+    bool quiet = true;
+    for (int t = 0; t < 3 && quiet; t++) {
+      const int j = q + 1 + 2 * t;
+      for (int i = 0; i < 6; i++) {
+        if (bond[static_cast<size_t>(i)][static_cast<size_t>(j % 6)]) {
+          quiet = false;
+          break;
+        }
+      }
+    }
+    if (!quiet) {
+      continue;
+    }
+    for (int p = 0; p < 2; p++) {
+      for (const auto &s : kPerm) {
+        if (bond[static_cast<size_t>(p)][static_cast<size_t>(q + 2 * s[0])] &&
+            bond[static_cast<size_t>(p + 2)]
+                [static_cast<size_t>(q + 2 * s[1])] &&
+            bond[static_cast<size_t>(p + 4)]
+                [static_cast<size_t>(q + 2 * s[2])]) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+int sharedAtoms(const std::vector<int> &a, const std::vector<int> &b) {
+  int n = 0;
+  for (const int x : a) {
+    n += static_cast<int>(std::find(b.begin(), b.end(), x) != b.end());
+  }
+  return n;
+}
+
+bool commonAtom(const std::vector<int> &a, const std::vector<int> &b,
+                const std::vector<int> &c) {
+  for (const int x : a) {
+    if (std::find(b.begin(), b.end(), x) != b.end() &&
+        std::find(c.begin(), c.end(), x) != c.end()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 const std::vector<int> &atomRow(const ring::RingSearchIndex &index, int atom) {
@@ -51,46 +192,38 @@ const std::vector<int> &atomRow(const ring::RingSearchIndex &index, int atom) {
   return index.ringsContainingAtom[atom];
 }
 
-// Lowest ring ID that contains all three atoms and is not skipA or skipB.
-// Rows are already ascending. -1 if none.
-int firstRingThrough(const ring::RingSearchIndex &index, int a, int b, int c,
-                     int skipA, int skipB = -1) {
-  const auto &A = atomRow(index, a);
-  const auto &B = atomRow(index, b);
-  const auto &C = atomRow(index, c);
-  size_t i = 0;
-  size_t j = 0;
-  size_t k = 0;
-  while (i < A.size() && j < B.size() && k < C.size()) {
-    const int x = A[i];
-    const int y = B[j];
-    const int z = C[k];
-    if (x == y && y == z) {
-      if (x != skipA && x != skipB) {
-        return x;
-      }
-      ++i;
-      ++j;
-      ++k;
-      continue;
-    }
-    const int lo = std::min(x, std::min(y, z));
-    if (x == lo) {
-      ++i;
-    }
-    if (y == lo) {
-      ++j;
-    }
-    if (z == lo) {
-      ++k;
+// Six triplet lists per ring stay on the stack. Ice puts one ring in each.
+struct IntBuf {
+  int stack[16]{};
+  int nStack = 0;
+  std::vector<int> extra;
+  void push_back(int x) {
+    if (nStack < 16) {
+      stack[nStack++] = x;
+    } else {
+      extra.push_back(x);
     }
   }
-  return -1;
-}
+  void clear() {
+    nStack = 0;
+    extra.clear();
+  }
+  [[nodiscard]] int size() const {
+    return nStack + static_cast<int>(extra.size());
+  }
+  [[nodiscard]] bool empty() const { return size() == 0; }
+  [[nodiscard]] int operator[](int i) const {
+    return i < nStack ? stack[i] : extra[static_cast<size_t>(i - nStack)];
+  }
+  [[nodiscard]] int operator[](std::size_t i) const {
+    return operator[](static_cast<int>(i));
+  }
+};
 
 // Every ring that contains all three atoms, except skipA and skipB.
+template <class Out>
 void ringsThrough(const ring::RingSearchIndex &index, int a, int b, int c,
-                  int skipA, int skipB, std::vector<int> &out) {
+                  int skipA, int skipB, Out &out) {
   const auto &A = atomRow(index, a);
   const auto &B = atomRow(index, b);
   const auto &C = atomRow(index, c);
@@ -121,6 +254,668 @@ void ringsThrough(const ring::RingSearchIndex &index, int a, int b, int c,
       ++k;
     }
   }
+}
+
+// A partner ring on an adjacent triplet already shares the atoms of that
+// triplet. share>=3 is then a count of the remaining atoms, so the pairs
+// are the edges of a sparse graph rather than the full product of the
+// three triplet sets. Chains and the assignment chosen from them are the
+// same ones the triple loop would accept.
+struct DdcChain {
+  std::array<int, 3> r;
+  unsigned middles;
+};
+
+struct PartnerScratch {
+  std::vector<std::vector<int>> bucket;
+  std::vector<int> used;
+  std::vector<int> stamp;
+  std::vector<int> hits;
+  std::vector<int> seen;
+  std::vector<unsigned char> inTrip;
+  int tick = 0;
+
+  void prepare(int nAtoms, int nRight) {
+    if (static_cast<int>(bucket.size()) < nAtoms) {
+      bucket.resize(static_cast<size_t>(nAtoms));
+    }
+    if (static_cast<int>(inTrip.size()) < nAtoms) {
+      inTrip.assign(static_cast<size_t>(nAtoms), 0);
+    }
+    if (static_cast<int>(stamp.size()) < nRight) {
+      stamp.resize(static_cast<size_t>(nRight), 0);
+      hits.resize(static_cast<size_t>(nRight), 0);
+    }
+  }
+
+  void clearBuckets() {
+    for (const int atom : used) {
+      bucket[static_cast<size_t>(atom)].clear();
+    }
+    used.clear();
+  }
+};
+
+void partnersOf(const std::vector<std::vector<int>> &rings,
+                const IntBuf &left, const IntBuf &right,
+                const int *tripRight, int nAtoms, PartnerScratch &scratch,
+                std::vector<std::vector<int>> &adj) {
+  const int nRight = static_cast<int>(right.size());
+  adj.assign(left.size(), {});
+  scratch.prepare(nAtoms, nRight);
+  scratch.clearBuckets();
+  std::fill(scratch.inTrip.begin(), scratch.inTrip.end(), 0);
+  for (int t = 0; t < 3; ++t) {
+    const int atom = tripRight[t];
+    if (atom >= 0 && atom < nAtoms) {
+      scratch.inTrip[static_cast<size_t>(atom)] = 1;
+    }
+  }
+  for (int j = 0; j < nRight; ++j) {
+    const int ring = right[static_cast<size_t>(j)];
+    for (const int atom : rings[static_cast<size_t>(ring)]) {
+      if (atom < 0 || atom >= nAtoms ||
+          scratch.inTrip[static_cast<size_t>(atom)]) {
+        continue;
+      }
+      auto &bucket = scratch.bucket[static_cast<size_t>(atom)];
+      if (bucket.empty()) {
+        scratch.used.push_back(atom);
+      }
+      bucket.push_back(j);
+    }
+  }
+  for (int i = 0; i < static_cast<int>(left.size()); ++i) {
+    const int ra = left[static_cast<size_t>(i)];
+    const auto &atoms = rings[static_cast<size_t>(ra)];
+    int always = 0;
+    for (const int atom : atoms) {
+      if (atom >= 0 && atom < nAtoms &&
+          scratch.inTrip[static_cast<size_t>(atom)]) {
+        ++always;
+      }
+    }
+    if (always >= 3) {
+      auto &out = adj[static_cast<size_t>(i)];
+      out.reserve(static_cast<size_t>(nRight));
+      for (int j = 0; j < nRight; ++j) {
+        if (right[static_cast<size_t>(j)] != ra) {
+          out.push_back(j);
+        }
+      }
+      continue;
+    }
+    if (++scratch.tick <= 0) {
+      std::fill(scratch.stamp.begin(), scratch.stamp.end(), 0);
+      scratch.tick = 1;
+    }
+    scratch.seen.clear();
+    for (const int atom : atoms) {
+      if (atom < 0 || atom >= nAtoms ||
+          scratch.inTrip[static_cast<size_t>(atom)]) {
+        continue;
+      }
+      for (const int j : scratch.bucket[static_cast<size_t>(atom)]) {
+        if (scratch.stamp[static_cast<size_t>(j)] != scratch.tick) {
+          scratch.stamp[static_cast<size_t>(j)] = scratch.tick;
+          scratch.hits[static_cast<size_t>(j)] = 0;
+          scratch.seen.push_back(j);
+        }
+        ++scratch.hits[static_cast<size_t>(j)];
+      }
+    }
+    auto &out = adj[static_cast<size_t>(i)];
+    for (const int j : scratch.seen) {
+      if (always + scratch.hits[static_cast<size_t>(j)] >= 3 &&
+          right[static_cast<size_t>(j)] != ra) {
+        out.push_back(j);
+      }
+    }
+  }
+}
+
+unsigned ddcPartnerMask(unsigned middles) {
+  unsigned partners = 0U;
+  for (unsigned t = 0; t < 3; ++t) {
+    if ((middles >> t) & 1U) {
+      partners |= (1U << t) | (1U << ((t + 2U) % 3U));
+    }
+  }
+  return partners;
+}
+
+bool ddcDistinct(const DdcChain &e, const DdcChain &o) {
+  for (const int x : e.r) {
+    for (const int y : o.r) {
+      if (x == y) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+std::uint64_t ddcPack2(int a, int b) {
+  if (a > b) {
+    std::swap(a, b);
+  }
+  return static_cast<std::uint64_t>(a) |
+         (static_cast<std::uint64_t>(b) << 21);
+}
+
+std::uint64_t ddcPack3(int a, int b, int c) {
+  if (a > b) {
+    std::swap(a, b);
+  }
+  if (b > c) {
+    std::swap(b, c);
+  }
+  if (a > b) {
+    std::swap(a, b);
+  }
+  return static_cast<std::uint64_t>(a) |
+         (static_cast<std::uint64_t>(b) << 21) |
+         (static_cast<std::uint64_t>(c) << 42);
+}
+
+struct DdcGroup {
+  int total = 0;
+  std::unordered_map<int, int> cnt;
+  std::unordered_map<std::uint64_t, int> pairs;
+  std::unordered_map<std::uint64_t, int> triples;
+};
+
+int ddcLookup(const std::unordered_map<int, int> &m, int key) {
+  const auto it = m.find(key);
+  return it == m.end() ? 0 : it->second;
+}
+
+int ddcLookup(const std::unordered_map<std::uint64_t, int> &m,
+              std::uint64_t key) {
+  const auto it = m.find(key);
+  return it == m.end() ? 0 : it->second;
+}
+
+void ddcFillGroup(const std::vector<DdcChain> &chains, DdcGroup groups[8]) {
+  for (const DdcChain &chain : chains) {
+    DdcGroup &group = groups[chain.middles & 7U];
+    ++group.total;
+    for (const int ring : chain.r) {
+      ++group.cnt[ring];
+    }
+    ++group.pairs[ddcPack2(chain.r[0], chain.r[1])];
+    ++group.pairs[ddcPack2(chain.r[0], chain.r[2])];
+    ++group.pairs[ddcPack2(chain.r[1], chain.r[2])];
+    ++group.triples[ddcPack3(chain.r[0], chain.r[1], chain.r[2])];
+  }
+}
+
+bool ddcLive(const DdcChain &chain, const DdcGroup groups[8]) {
+  const unsigned partners = ddcPartnerMask(chain.middles);
+  const int a = chain.r[0];
+  const int b = chain.r[1];
+  const int c = chain.r[2];
+  for (unsigned mask = 1; mask <= 7; ++mask) {
+    if ((mask & partners) == 0U) {
+      continue;
+    }
+    const DdcGroup &group = groups[mask];
+    if (group.total == 0) {
+      continue;
+    }
+    const int ca = ddcLookup(group.cnt, a);
+    const int cb = ddcLookup(group.cnt, b);
+    const int cc = ddcLookup(group.cnt, c);
+    if (group.total > ca + cb + cc) {
+      return true;
+    }
+    const int cover = ca + cb + cc -
+                      ddcLookup(group.pairs, ddcPack2(a, b)) -
+                      ddcLookup(group.pairs, ddcPack2(a, c)) -
+                      ddcLookup(group.pairs, ddcPack2(b, c)) +
+                      ddcLookup(group.triples, ddcPack3(a, b, c));
+    if (group.total > cover) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void ddcChains(const std::vector<std::vector<int>> &rings,
+               const std::vector<int> &equatorial,
+               const std::array<IntBuf, 6> &T, int parity,
+               int nAtoms, PartnerScratch &scratch,
+               std::vector<DdcChain> &out) {
+  out.clear();
+  const IntBuf &A = T[static_cast<size_t>(parity)];
+  const IntBuf &B = T[static_cast<size_t>(parity + 2)];
+  const IntBuf &C = T[static_cast<size_t>(parity + 4)];
+  int tripB[3];
+  int tripC[3];
+  for (int t = 0; t < 3; ++t) {
+    tripB[t] = equatorial[static_cast<size_t>((parity + 2 + t) % 6)];
+    tripC[t] = equatorial[static_cast<size_t>((parity + 4 + t) % 6)];
+  }
+  std::vector<std::vector<int>> ab;
+  std::vector<std::vector<int>> ac;
+  std::vector<std::vector<int>> bc;
+  partnersOf(rings, A, B, tripB, nAtoms, scratch, ab);
+  partnersOf(rings, A, C, tripC, nAtoms, scratch, ac);
+  partnersOf(rings, B, C, tripC, nAtoms, scratch, bc);
+  for (auto &row : bc) {
+    std::sort(row.begin(), row.end());
+  }
+  std::vector<std::vector<int>> bcFromC(C.size());
+  for (int j = 0; j < static_cast<int>(B.size()); ++j) {
+    for (const int kc : bc[static_cast<size_t>(j)]) {
+      bcFromC[static_cast<size_t>(kc)].push_back(j);
+    }
+  }
+  std::vector<int> markB(B.size(), 0);
+  std::vector<int> markC(C.size(), 0);
+  int tickB = 0;
+  int tickC = 0;
+  auto fresh = [](int &tick, std::vector<int> &mark) {
+    if (++tick <= 0) {
+      std::fill(mark.begin(), mark.end(), 0);
+      tick = 1;
+    }
+    return tick;
+  };
+  for (int i = 0; i < static_cast<int>(A.size()); ++i) {
+    const int onB = fresh(tickB, markB);
+    const int onC = fresh(tickC, markC);
+    for (const int jb : ab[static_cast<size_t>(i)]) {
+      markB[static_cast<size_t>(jb)] = onB;
+    }
+    for (const int kc : ac[static_cast<size_t>(i)]) {
+      markC[static_cast<size_t>(kc)] = onC;
+    }
+    const int ra = A[static_cast<size_t>(i)];
+    const auto &atomsA = rings[static_cast<size_t>(ra)];
+    for (const int jb : ab[static_cast<size_t>(i)]) {
+      const int rb = B[static_cast<size_t>(jb)];
+      if (rb == ra) {
+        continue;
+      }
+      const auto &atomsB = rings[static_cast<size_t>(rb)];
+      for (const int kc : ac[static_cast<size_t>(i)]) {
+        const int rc = C[static_cast<size_t>(kc)];
+        if (rc == ra || rc == rb) {
+          continue;
+        }
+        const bool bcOK =
+            std::binary_search(bc[static_cast<size_t>(jb)].begin(),
+                               bc[static_cast<size_t>(jb)].end(), kc);
+        const unsigned middles =
+            1U | (bcOK ? 2U : 0U) | (bcOK ? 4U : 0U);
+        if (!commonAtom(atomsA, atomsB, rings[static_cast<size_t>(rc)])) {
+          continue;
+        }
+        out.push_back(DdcChain{{ra, rb, rc}, middles});
+      }
+      for (const int kc : bc[static_cast<size_t>(jb)]) {
+        if (markC[static_cast<size_t>(kc)] == onC) {
+          continue;
+        }
+        const int rc = C[static_cast<size_t>(kc)];
+        if (rc == ra || rc == rb) {
+          continue;
+        }
+        if (!commonAtom(atomsA, atomsB, rings[static_cast<size_t>(rc)])) {
+          continue;
+        }
+        out.push_back(DdcChain{{ra, rb, rc}, 2U});
+      }
+    }
+    for (const int kc : ac[static_cast<size_t>(i)]) {
+      const int rc = C[static_cast<size_t>(kc)];
+      if (rc == ra) {
+        continue;
+      }
+      const auto &atomsC = rings[static_cast<size_t>(rc)];
+      for (const int jb : bcFromC[static_cast<size_t>(kc)]) {
+        if (markB[static_cast<size_t>(jb)] == onB) {
+          continue;
+        }
+        const int rb = B[static_cast<size_t>(jb)];
+        if (rb == ra || rb == rc) {
+          continue;
+        }
+        if (!commonAtom(atomsA, rings[static_cast<size_t>(rb)], atomsC)) {
+          continue;
+        }
+        out.push_back(DdcChain{{ra, rb, rc}, 4U});
+      }
+    }
+  }
+}
+
+bool ddcFourteen(const std::vector<std::vector<int>> &rings,
+                 const std::vector<int> &equatorial, const DdcChain &e,
+                 const DdcChain &o) {
+  int atoms[42];
+  int nAtomsHere = 0;
+  auto take = [&](const std::vector<int> &cycle) -> bool {
+    if (cycle.size() != 6 || nAtomsHere + 6 > 42) {
+      return false;
+    }
+    for (const int a : cycle) {
+      atoms[nAtomsHere++] = a;
+    }
+    return true;
+  };
+  if (!take(equatorial)) {
+    return false;
+  }
+  for (const int ri : e.r) {
+    if (!take(rings[static_cast<size_t>(ri)])) {
+      return false;
+    }
+  }
+  for (const int ri : o.r) {
+    if (!take(rings[static_cast<size_t>(ri)])) {
+      return false;
+    }
+  }
+  std::sort(atoms, atoms + nAtomsHere);
+  if (std::unique(atoms, atoms + nAtomsHere) - atoms != 14) {
+    return false;
+  }
+  for (const int ri : e.r) {
+    if (sharedAtoms(rings[static_cast<size_t>(ri)], equatorial) != 3) {
+      return false;
+    }
+  }
+  for (const int ri : o.r) {
+    if (sharedAtoms(rings[static_cast<size_t>(ri)], equatorial) != 3) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool equatorialLarge(const std::vector<std::vector<int>> &rings,
+                     const std::vector<int> &equatorial,
+                     const std::array<IntBuf, 6> &T, int nAtoms,
+                     std::vector<int> *peripheralUnion,
+                     std::vector<int> *chosen, const std::vector<int> *rank,
+                     ring::EquatorChoice *raw) {
+  PartnerScratch scratch;
+  std::vector<DdcChain> even;
+  std::vector<DdcChain> odd;
+  ddcChains(rings, equatorial, T, 0, nAtoms, scratch, even);
+  if (even.empty()) {
+    return false;
+  }
+  ddcChains(rings, equatorial, T, 1, nAtoms, scratch, odd);
+  if (odd.empty()) {
+    return false;
+  }
+  DdcGroup oddGroups[8];
+  DdcGroup evenGroups[8];
+  ddcFillGroup(odd, oddGroups);
+  ddcFillGroup(even, evenGroups);
+  std::vector<char> evenLive(even.size(), 0);
+  std::vector<char> oddLive(odd.size(), 0);
+  bool any = false;
+  for (size_t i = 0; i < even.size(); ++i) {
+    if (ddcLive(even[i], oddGroups)) {
+      evenLive[i] = 1;
+      any = true;
+    }
+  }
+  if (!any) {
+    return false;
+  }
+  any = false;
+  for (size_t i = 0; i < odd.size(); ++i) {
+    if (ddcLive(odd[i], evenGroups)) {
+      oddLive[i] = 1;
+      any = true;
+    }
+  }
+  if (!any) {
+    return false;
+  }
+  const bool wantBest =
+      rank != nullptr && (chosen != nullptr || raw != nullptr);
+  auto pairIsKept = [&](const DdcChain &e, const DdcChain &o) {
+    return (ddcPartnerMask(e.middles) & o.middles) != 0U && ddcDistinct(e, o) &&
+           ddcFourteen(rings, equatorial, e, o);
+  };
+  if (!wantBest && peripheralUnion == nullptr) {
+    for (size_t i = 0; i < even.size(); ++i) {
+      if (!evenLive[i]) {
+        continue;
+      }
+      for (size_t j = 0; j < odd.size(); ++j) {
+        if (!oddLive[j]) {
+          continue;
+        }
+        if (pairIsKept(even[i], odd[j])) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  if (peripheralUnion != nullptr) {
+    for (size_t i = 0; i < even.size(); ++i) {
+      if (!evenLive[i]) {
+        continue;
+      }
+      for (size_t j = 0; j < odd.size(); ++j) {
+        if (!oddLive[j]) {
+          continue;
+        }
+        if (!pairIsKept(even[i], odd[j])) {
+          continue;
+        }
+        peripheralUnion->insert(peripheralUnion->end(), even[i].r.begin(),
+                                even[i].r.end());
+        peripheralUnion->insert(peripheralUnion->end(), odd[i].r.begin(),
+                                odd[i].r.end());
+      }
+    }
+    std::sort(peripheralUnion->begin(), peripheralUnion->end());
+    peripheralUnion->erase(
+        std::unique(peripheralUnion->begin(), peripheralUnion->end()),
+        peripheralUnion->end());
+    if (peripheralUnion->empty() && !wantBest) {
+      return false;
+    }
+  }
+  if (wantBest) {
+    int bestRank = std::numeric_limits<int>::max();
+    int pivot = -1;
+    auto consider = [&](int ring) {
+      const int rk = (*rank)[static_cast<size_t>(ring)];
+      if (rk < bestRank) {
+        bestRank = rk;
+        pivot = ring;
+      }
+    };
+    for (size_t i = 0; i < even.size(); ++i) {
+      if (!evenLive[i]) {
+        continue;
+      }
+      for (const int ring : even[i].r) {
+        consider(ring);
+      }
+    }
+    for (size_t i = 0; i < odd.size(); ++i) {
+      if (!oddLive[i]) {
+        continue;
+      }
+      for (const int ring : odd[i].r) {
+        consider(ring);
+      }
+    }
+    std::vector<int> bestKey;
+    std::vector<int> bestRings;
+    auto tryPair = [&](const DdcChain &e, const DdcChain &o) {
+      if ((ddcPartnerMask(e.middles) & o.middles) == 0U ||
+          !ddcDistinct(e, o) ||
+          !ddcFourteen(rings, equatorial, e, o)) {
+        return;
+      }
+      int key[6];
+      key[0] = (*rank)[static_cast<size_t>(e.r[0])];
+      key[1] = (*rank)[static_cast<size_t>(e.r[1])];
+      key[2] = (*rank)[static_cast<size_t>(e.r[2])];
+      key[3] = (*rank)[static_cast<size_t>(o.r[0])];
+      key[4] = (*rank)[static_cast<size_t>(o.r[1])];
+      key[5] = (*rank)[static_cast<size_t>(o.r[2])];
+      int first = key[0];
+      int second = key[1];
+      if (second < first) {
+        std::swap(first, second);
+      }
+      for (int t = 2; t < 6; ++t) {
+        const int v = key[t];
+        if (v < first) {
+          second = first;
+          first = v;
+        } else if (v < second) {
+          second = v;
+        }
+      }
+      if (!bestKey.empty() && second > bestKey[1]) {
+        return;
+      }
+      for (int i = 1; i < 6; ++i) {
+        const int v = key[i];
+        int j = i;
+        while (j > 0 && key[j - 1] > v) {
+          key[j] = key[j - 1];
+          --j;
+        }
+        key[j] = v;
+      }
+      if (!bestKey.empty()) {
+        for (int i = 0; i < 6; ++i) {
+          if (key[i] != bestKey[static_cast<size_t>(i)]) {
+            if (key[i] > bestKey[static_cast<size_t>(i)]) {
+              return;
+            }
+            break;
+          }
+          if (i == 5) {
+            return;
+          }
+        }
+      }
+      bestKey.assign(key, key + 6);
+      bestRings.clear();
+      bestRings.insert(bestRings.end(), e.r.begin(), e.r.end());
+      bestRings.insert(bestRings.end(), o.r.begin(), o.r.end());
+    };
+    auto chainMin = [&](const DdcChain &chain) {
+      const int a = (*rank)[static_cast<size_t>(chain.r[0])];
+      const int b = (*rank)[static_cast<size_t>(chain.r[1])];
+      const int c = (*rank)[static_cast<size_t>(chain.r[2])];
+      return std::min(a, std::min(b, c));
+    };
+    auto companion = [&](const DdcChain &chain) {
+      int m = std::numeric_limits<int>::max();
+      for (const int ring : chain.r) {
+        if (ring == pivot) {
+          continue;
+        }
+        m = std::min(m, (*rank)[static_cast<size_t>(ring)]);
+      }
+      return m;
+    };
+    std::vector<int> evenHit;
+    std::vector<int> oddHit;
+    std::vector<int> evenLiveIdx;
+    std::vector<int> oddLiveIdx;
+    evenHit.reserve(even.size());
+    oddHit.reserve(odd.size());
+    evenLiveIdx.reserve(even.size());
+    oddLiveIdx.reserve(odd.size());
+    for (int i = 0; i < static_cast<int>(even.size()); ++i) {
+      if (!evenLive[static_cast<size_t>(i)]) {
+        continue;
+      }
+      evenLiveIdx.push_back(i);
+      for (const int ring : even[static_cast<size_t>(i)].r) {
+        if (ring == pivot) {
+          evenHit.push_back(i);
+          break;
+        }
+      }
+    }
+    for (int i = 0; i < static_cast<int>(odd.size()); ++i) {
+      if (!oddLive[static_cast<size_t>(i)]) {
+        continue;
+      }
+      oddLiveIdx.push_back(i);
+      for (const int ring : odd[static_cast<size_t>(i)].r) {
+        if (ring == pivot) {
+          oddHit.push_back(i);
+          break;
+        }
+      }
+    }
+    std::sort(evenHit.begin(), evenHit.end(), [&](int a, int b) {
+      return companion(even[static_cast<size_t>(a)]) <
+             companion(even[static_cast<size_t>(b)]);
+    });
+    std::sort(oddHit.begin(), oddHit.end(), [&](int a, int b) {
+      return companion(odd[static_cast<size_t>(a)]) <
+             companion(odd[static_cast<size_t>(b)]);
+    });
+    std::sort(evenLiveIdx.begin(), evenLiveIdx.end(), [&](int a, int b) {
+      return chainMin(even[static_cast<size_t>(a)]) <
+             chainMin(even[static_cast<size_t>(b)]);
+    });
+    std::sort(oddLiveIdx.begin(), oddLiveIdx.end(), [&](int a, int b) {
+      return chainMin(odd[static_cast<size_t>(a)]) <
+             chainMin(odd[static_cast<size_t>(b)]);
+    });
+    for (const int i : evenHit) {
+      const int gate = companion(even[static_cast<size_t>(i)]);
+      for (const int j : oddLiveIdx) {
+        if (!bestKey.empty() && gate > bestKey[1] &&
+            chainMin(odd[static_cast<size_t>(j)]) > bestKey[1]) {
+          break;
+        }
+        tryPair(even[static_cast<size_t>(i)], odd[static_cast<size_t>(j)]);
+      }
+    }
+    for (const int j : oddHit) {
+      const int gate = companion(odd[static_cast<size_t>(j)]);
+      for (const int i : evenLiveIdx) {
+        if (!bestKey.empty() && gate > bestKey[1] &&
+            chainMin(even[static_cast<size_t>(i)]) > bestKey[1]) {
+          break;
+        }
+        tryPair(even[static_cast<size_t>(i)], odd[static_cast<size_t>(j)]);
+      }
+    }
+    if (bestRings.empty()) {
+      return false;
+    }
+    int ids[6];
+    for (int t = 0; t < 6; ++t) {
+      ids[t] = bestRings[static_cast<size_t>(t)];
+    }
+    std::sort(ids, ids + 6, [rank](int a, int b) {
+      return (*rank)[static_cast<size_t>(a)] < (*rank)[static_cast<size_t>(b)];
+    });
+    if (chosen != nullptr) {
+      chosen->assign(ids, ids + 6);
+    }
+    if (raw != nullptr) {
+      for (int t = 0; t < 6; ++t) {
+        raw->ring[t] = ids[t];
+      }
+      raw->n = 6;
+    }
+  }
+  return true;
 }
 
 } // namespace
@@ -316,8 +1111,7 @@ int ring::topoBulkAnalysis(
       // Get the cages
 
       // Find HC rings, saving the ring IDs (starting from 0) to listHC
-      const auto ringIndex = ring::buildRingSearchIndex(
-          ringsOneType, static_cast<int>(nList.size()));
+      const auto ringIndex = ring::buildRingSearchIndex(ringsOneType, yCloud);
       listHC = ring::findHC(ringsOneType, ringType, nList, cageList, ringIndex);
 
       // Find DDC rings, saving the IDs to listDDC
@@ -362,41 +1156,6 @@ int ring::topoBulkAnalysis(
 }
 
 /**
- * @details Determines which hexagonal rings are DDC rings. This function
- * returns a vector which contains the ring IDs of all the rings which are DDC
- * rings. The ring IDs correspond to the index of the rings inside the vector of
- * vector rings, starting from 0. DDC rings can be found using a three-step
- * procedure, in which equatorial rings and their corresponding rings can be
- * found. Peripheral rings can be shared, so first all the equatorial rings must
- * be found. Whenever an equatorial ring and the corresponding peripheral rings
- * are found, their values must be updated to DDC enum type inside the ringType
- * vector, which has been passed as an input to this function. At the end, the
- * output vector can be updated to avoid adding the same ring index more than
- * once (this may happen for peripheral rings, which can be shared). Internally,
- * the function calls the following:
- * - ring::conditionOneDDC (Step one: Finds all rings which contain each index
- * (m_k) of the equatorial ring, iring, in at least three other rings).
- * - ring::conditionTwoDDC (Step two: For every triplet in iring, there is at
- * least one hexagonal ring other than iring that passes through the triplet.
- * The peripheral rings are stored in order of the starting element of each
- * triplet.)
- * - ring::conditionThreeDDC (Step three: For every triplet in the equatorial
- * ring, there is at least one hexagonal ring other than iring that passes
- * through the triplet. Rings corresponding to triplets need not be searched
- * again since peripheralRings are stored in that order. Rings corresponding to
- * T1, T3, T5 must have a common element. Similarly rings corresponding to T2,
- * T4, T6 must have at least one common element. Alternating rings corresponding
- * to triplets must have at least three common elements).
- *
- * @param[in] rings Vector of vectors containing 6-membered primitive rings
- *  (wherein each ring contains the atom indices of the particles which
- * constitute the ring).
- * @param[in] ringType Vector containing a ring::strucType (structure type) for
- *  each ring.
- * @param[in] cageList Vector in which every cage is saved.
- * @return A vector of all the ring indices which constitute DDCs.
- */
-/**
  * @details Builds the inverted atom-to-rings index. Rows stay in ascending
  *  ring order, which is the order a linear scan over the ring network would
  *  have visited them in, so callers that substitute a lookup for the scan see
@@ -422,6 +1181,177 @@ ring::buildRingSearchIndex(const std::vector<std::vector<int>> &rings,
   return index;
 }
 
+ring::RingSearchIndex ring::buildRingSearchIndex(
+    const std::vector<std::vector<int>> &rings,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  auto index =
+      ring::buildRingSearchIndex(rings, static_cast<int>(yCloud.pts.size()));
+  // The claim key is the ring's atoms and its unwrapped shift, not the
+  // absolute position. positionRank stays available for callers that want
+  // the coordinate order; it is not the cage order.
+  const auto box = gen::makeFracBox(yCloud);
+  index.ringShift.assign(rings.size(), {0, 0, 0});
+  if (box.ok) {
+    const int nAtoms = static_cast<int>(yCloud.pts.size());
+    for (size_t r = 0; r < rings.size(); r++) {
+      const auto &ring = rings[r];
+      std::array<int, 3> wind{0, 0, 0};
+      bool inFrame = true;
+      for (size_t i = 0; i < ring.size() && inFrame; i++) {
+        const int a = ring[i];
+        const int b = ring[(i + 1) % ring.size()];
+        if (a < 0 || b < 0 || a >= nAtoms || b >= nAtoms) {
+          inFrame = false;
+          break;
+        }
+        const auto &pa = yCloud.pts[static_cast<size_t>(a)];
+        const auto &pb = yCloud.pts[static_cast<size_t>(b)];
+        const auto mic = gen::fracDelta(box, pb.x, pb.y, pb.z, pa.x, pa.y, pa.z);
+        const double raw[3] = {pb.x - pa.x, pb.y - pa.y, pb.z - pa.z};
+        const double len[3] = {box.lx, box.ly, box.lz};
+        for (int k = 0; k < 3; k++) {
+          if (!(len[k] > 0.0)) {
+            continue;
+          }
+          wind[static_cast<size_t>(k)] +=
+              static_cast<int>(std::lround((raw[k] - mic[static_cast<size_t>(k)]) / len[k]));
+        }
+      }
+      if (inFrame) {
+        index.ringShift[r] = wind;
+      }
+    }
+  }
+  return index;
+}
+
+/**
+ * @details Throws std::invalid_argument when two atoms share a wrapped
+ *  position: no position order separates them.
+ */
+std::vector<int> ring::positionRank(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  const int n = static_cast<int>(yCloud.pts.size());
+  std::vector<std::array<double, 3>> wrapped(n);
+  for (int i = 0; i < n; i++) {
+    const auto &p = yCloud.pts[i];
+    wrapped[i] = {p.x, p.y, p.z};
+    for (size_t d = 0; d < 3; d++) {
+      if (d < yCloud.box.size() && yCloud.box[d] > 0) {
+        const double lo = d < yCloud.boxLow.size() ? yCloud.boxLow[d] : 0.0;
+        wrapped[i][d] -=
+            yCloud.box[d] * std::floor((wrapped[i][d] - lo) / yCloud.box[d]);
+      }
+    }
+  }
+  std::vector<int> order(n);
+  for (int i = 0; i < n; i++) {
+    order[i] = i;
+  }
+  std::sort(order.begin(), order.end(), [&wrapped](int a, int b) {
+    return wrapped[a] != wrapped[b] ? wrapped[a] < wrapped[b] : a < b;
+  });
+  for (int r = 1; r < n; r++) {
+    if (wrapped[order[r]] == wrapped[order[r - 1]]) {
+      throw std::invalid_argument("atoms " + std::to_string(order[r - 1]) +
+                                  " and " + std::to_string(order[r]) +
+                                  " share a wrapped position");
+    }
+  }
+  std::vector<int> rank(n);
+  for (int r = 0; r < n; r++) {
+    rank[order[r]] = r;
+  }
+  return rank;
+}
+
+namespace {
+
+// Lattice image of the minimum-image step from a to b. The same wrap as
+// gen::fracDelta: orthorhombic axes use floor(d/L + 1/2), a tilt box wraps
+// the fractional coordinates with round. Summed around a cycle the images
+// are the winding. A contractible ring sums to zero.
+std::array<int, 3> bondImage(const gen::FracBox &box, double ax, double ay,
+                             double az, double bx, double by, double bz) {
+  if (!box.triclinic) {
+    auto shift = [](double d, double len) {
+      return static_cast<int>(std::floor(d / len + 0.5));
+    };
+    return {shift(bx - ax, box.lx), shift(by - ay, box.ly),
+            shift(bz - az, box.lz)};
+  }
+  const double szA = (az - box.oz) / box.lz;
+  const double syA = (ay - box.oy - box.yz * szA) / box.ly;
+  const double sxA = (ax - box.ox - box.xy * syA - box.xz * szA) / box.lx;
+  const double szB = (bz - box.oz) / box.lz;
+  const double syB = (by - box.oy - box.yz * szB) / box.ly;
+  const double sxB = (bx - box.ox - box.xy * syB - box.xz * szB) / box.lx;
+  return {static_cast<int>(std::round(sxB - sxA)),
+          static_cast<int>(std::round(syB - syA)),
+          static_cast<int>(std::round(szB - szA))};
+}
+
+} // namespace
+
+/**
+ * @details Each bond contributes the integer lattice image of its minimum-image
+ *  step. Those images sum to zero exactly when the ring does not wind. A
+ *  floating sum against half the cell confuses a short lattice vector with
+ *  noise once the cell is thin; the integers do not.
+ */
+std::vector<std::vector<int>> ring::contractibleRings(
+    const std::vector<std::vector<int>> &rings,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  const auto box = gen::makeFracBox(yCloud);
+  if (!box.ok) {
+    return rings;
+  }
+  const int nAtoms = static_cast<int>(yCloud.pts.size());
+  std::vector<std::vector<int>> kept;
+  kept.reserve(rings.size());
+  for (const auto &r : rings) {
+    const std::size_t n = r.size();
+    std::array<int, 3> sum = {0, 0, 0};
+    bool inFrame = true;
+    for (std::size_t i = 0; i < n && inFrame; i++) {
+      const int a = r[i];
+      const int b = r[(i + 1) % n];
+      if (a < 0 || b < 0 || a >= nAtoms || b >= nAtoms) {
+        inFrame = false;
+        break;
+      }
+      const auto &pa = yCloud.pts[static_cast<std::size_t>(a)];
+      const auto &pb = yCloud.pts[static_cast<std::size_t>(b)];
+      const auto image =
+          bondImage(box, pa.x, pa.y, pa.z, pb.x, pb.y, pb.z);
+      sum[0] += image[0];
+      sum[1] += image[1];
+      sum[2] += image[2];
+    }
+    if (inFrame && sum[0] == 0 && sum[1] == 0 && sum[2] == 0) {
+      kept.push_back(r);
+    }
+  }
+  return kept;
+}
+
+std::vector<std::vector<int>> ring::cageRings(
+    const std::vector<std::vector<int>> &rings,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    double cutoff) {
+  const auto box = gen::makeFracBox(yCloud);
+  // Smith: below half the narrowest face separation a pair has one image
+  // inside the cutoff. At or beyond that length the index graph has collapsed
+  // two images of one neighbour into one edge, and a cage built from it is
+  // not a cage of the structure.
+  if (box.ok && !(cutoff + 1e-12 < box.halfMin)) {
+    throw std::invalid_argument(
+        "cage search refused: the cell is thinner than twice the neighbour "
+        "cutoff, so one pair can meet through more than one periodic image");
+  }
+  return ring::contractibleRings(rings, yCloud);
+}
+
 /**
  * @details Convenience overload that builds the index itself. Prefer the
  *  overload taking a prebuilt index when several searches run over one ring
@@ -441,122 +1371,515 @@ std::vector<int> ring::findDDC(const std::vector<std::vector<int>> &rings,
   return ring::findDDC(rings, ringType, listHC, cageList, index);
 }
 
+/**
+ * @details Determines which hexagonal rings are DDC rings. This function
+ * returns a vector which contains the ring IDs of all the rings which are DDC
+ * rings. The ring IDs correspond to the index of the rings inside the vector of
+ * vector rings, starting from 0. Candidate equatorial rings are visited in the
+ * order of canonicalRingOrder (sorted atom indices, then the unwrapped shift,
+ * then the cyclic reading). HC rings are never equatorial. Every other ring
+ * that passes ring::equatorialConditions is a candidate: every atom of the
+ * ring lies in at least three other rings, every triplet of the ring lies in
+ * at least one other ring, and six distinct peripheral rings satisfy the
+ * alternating-triplet conditions. Of the passing choices of peripherals, the
+ * one whose ring keys are least is taken. Two candidates conflict when each
+ * equator's ring lies in the other's peripheral set, so at most one of them
+ * can be claimed. The reported cages are a maximum non-conflicting set. The
+ * equatorial ring and its peripherals are then set to the DDC type inside
+ * ringType (bothBasal or bothPrismatic for a peripheral that is already an
+ * HC ring), and the cage is appended to cageList.
+ *
+ * @param[in] rings Vector of vectors containing 6-membered primitive rings
+ *  (wherein each ring contains the atom indices of the particles which
+ * constitute the ring).
+ * @param[in] ringType Vector containing a ring::strucType (structure type) for
+ *  each ring.
+ * @param[in] listHC Ring IDs of the HC rings, which are never equatorial.
+ * @param[in] cageList Vector in which every cage is saved.
+ * @param[in] index Atom-to-rings index of rings. ringShift, when set, is the
+ *  unwrapped winding of each ring and is part of the ring key.
+ * @return A vector of all the ring indices which constitute DDCs.
+ */
+std::vector<int> canonicalRingOrderByAtoms(
+    const std::vector<std::vector<int>> &rings, const ring::RingSearchIndex &index) {
+  const int n = static_cast<int>(rings.size());
+  struct Key {
+    std::array<int, 6> id{};
+    int len = 0;
+    std::array<int, 3> shift{};
+    CycleKey cycle{};
+    bool cycleReady = false;
+  };
+  std::vector<Key> keys(static_cast<size_t>(n));
+  for (int i = 0; i < n; i++) {
+    const auto &ring = rings[static_cast<size_t>(i)];
+    Key &k = keys[static_cast<size_t>(i)];
+    k.len = static_cast<int>(std::min<size_t>(ring.size(), 6));
+    for (int j = 0; j < k.len; j++) {
+      k.id[static_cast<size_t>(j)] = ring[static_cast<size_t>(j)];
+    }
+    std::sort(k.id.begin(), k.id.begin() + k.len);
+    if (static_cast<size_t>(i) < index.ringShift.size()) {
+      k.shift = index.ringShift[static_cast<size_t>(i)];
+    }
+  }
+  int maxAtom = 0;
+  for (int i = 0; i < n; i++) {
+    if (keys[static_cast<size_t>(i)].len > 0) {
+      maxAtom = std::max(maxAtom, keys[static_cast<size_t>(i)].id[0]);
+    }
+  }
+  std::vector<int> bucket(static_cast<size_t>(maxAtom + 3), 0);
+  for (int i = 0; i < n; i++) {
+    const int b = keys[static_cast<size_t>(i)].len > 0 ? keys[static_cast<size_t>(i)].id[0] + 1 : 0;
+    bucket[static_cast<size_t>(b + 1)]++;
+  }
+  for (int b = 0; b <= maxAtom + 1; b++) {
+    bucket[static_cast<size_t>(b + 1)] += bucket[static_cast<size_t>(b)];
+  }
+  std::vector<int> order(static_cast<size_t>(n));
+  std::vector<int> cursor = bucket;
+  for (int i = 0; i < n; i++) {
+    const int b = keys[static_cast<size_t>(i)].len > 0 ? keys[static_cast<size_t>(i)].id[0] + 1 : 0;
+    order[static_cast<size_t>(cursor[static_cast<size_t>(b)]++)] = i;
+  }
+  auto before = [&](int a, int b) {
+    const Key &ka = keys[static_cast<size_t>(a)];
+    const Key &kb = keys[static_cast<size_t>(b)];
+    const int m = ka.len < kb.len ? ka.len : kb.len;
+    for (int i = 0; i < m; i++) {
+      if (ka.id[static_cast<size_t>(i)] != kb.id[static_cast<size_t>(i)]) {
+        return ka.id[static_cast<size_t>(i)] < kb.id[static_cast<size_t>(i)];
+      }
+    }
+    if (ka.len != kb.len) {
+      return ka.len < kb.len;
+    }
+    if (ka.shift != kb.shift) {
+      return ka.shift < kb.shift;
+    }
+    if (!keys[static_cast<size_t>(a)].cycleReady) {
+      keys[static_cast<size_t>(a)].cycle = bestCycle(rings[static_cast<size_t>(a)]);
+      keys[static_cast<size_t>(a)].cycleReady = true;
+    }
+    if (!keys[static_cast<size_t>(b)].cycleReady) {
+      keys[static_cast<size_t>(b)].cycle = bestCycle(rings[static_cast<size_t>(b)]);
+      keys[static_cast<size_t>(b)].cycleReady = true;
+    }
+    return keys[static_cast<size_t>(a)].cycle < keys[static_cast<size_t>(b)].cycle;
+  };
+  for (int b = 0; b <= maxAtom + 1; b++) {
+    const int lo = bucket[static_cast<size_t>(b)];
+    const int hi = bucket[static_cast<size_t>(b + 1)];
+    if (hi - lo > 1) {
+      std::sort(order.begin() + lo, order.begin() + hi, before);
+    }
+  }
+  return order;
+}
+
 std::vector<int> ring::findDDC(const std::vector<std::vector<int>> &rings,
                                std::vector<ring::strucType> &ringType,
                                const std::vector<int> &listHC,
                                std::vector<cage::Cage> &cageList,
-                               const ring::RingSearchIndex &index) {
+                               const ring::RingSearchIndex &index,
+                               ring::PackingCertificate *certificate) {
   std::vector<int> listDDC;
-  int totalRingNum = rings.size();  // Total number of hexagonal rings
-  std::vector<int> peripheralRings; // Indices which may be peripheral rings
-  bool cond1, cond2, cond3;         // Conditions for DDC
-  int jring;                        // Index for peripheral ring being added
-  std::vector<int> DDCRings; // Indices of rings which constitute a single DDC,
-                             // with the equatorial ring first
-  // Vector for checking if a ring is basal, prismatic or peripheral
-  std::vector<bool>
-      notEquatorial; // true if the ring is prismatic, basal or peripheral.
-  notEquatorial.resize(totalRingNum); // Initialized to false
-
-  // --------
-  // Set all basal and prismatic rings to true (which are part of an HC)
-  for (int i = 0; i < listHC.size(); i++) {
-    int currentRingIndex = listHC[i];
-    // Set this to true
+  const int totalRingNum = static_cast<int>(rings.size());
+  std::vector<int> peripheralRings;
+  std::vector<int> DDCRings; // Equatorial ring first, then the peripherals
+  // true if the ring is prismatic, basal or peripheral
+  std::vector<char> notEquatorial(static_cast<size_t>(totalRingNum), 0);
+  for (const int currentRingIndex : listHC) {
     notEquatorial[currentRingIndex] = true;
-  } // end of update of notEquatorial
-  // --------
+  }
 
-  // To search for equatorial rings, loop through all the hexagonal rings, in
-  // the canonical order so that the greedy claiming below is independent of
-  // the enumeration order of the ring network
-  const std::vector<int> visitOrder = canonicalRingOrder(rings);
-  for (const int iring : visitOrder) {
-    // ------------
-    // Step zero: If the ring has been classified as a basal or prismatic ring
-    // in an HC or is a peripheral ring, then it cannot be the equatiorial ring
-    // in a DDC
-    //
-    if (notEquatorial[iring]) {
-      continue;
-    } // skip for rings which are not equatorial
-    //
-    // ------------
-    // Init
-    peripheralRings.clear();
-    // ------------
-    // Step one: Find all rings which contain each index (m_k) of the equatorial
-    // ring, iring, in at least three other rings
-    cond1 = ring::conditionOneDDC(rings, peripheralRings, iring, index);
-    if (!cond1) {
+  // The peripheral tie-break and the emitted order use the ring key
+  // (sorted atom ids, unwrapped shift). Which equators are kept is a
+  // maximum non-conflicting set, so the count does not follow a claim order.
+  const auto td0 = std::chrono::steady_clock::now();
+  const std::vector<int> visitOrder = canonicalRingOrderByAtoms(rings, index);
+  const auto td1 = std::chrono::steady_clock::now();
+  std::vector<int> rank(static_cast<size_t>(totalRingNum));
+  for (int r = 0; r < totalRingNum; r++) {
+    rank[static_cast<size_t>(visitOrder[static_cast<size_t>(r)])] = r;
+  }
+  std::vector<ring::EquatorChoice> chosenPeriph(static_cast<size_t>(totalRingNum));
+#if defined(SEAMS_HAS_OPENMP)
+#pragma omp parallel for schedule(static, 64) if (totalRingNum >= 256)
+#endif
+  for (int iring = 0; iring < totalRingNum; iring++) {
+    if (notEquatorial[static_cast<size_t>(iring)]) {
       continue;
     }
-    // ------------
-    // Step two: For every triplet in iring, there is at least one
-    // hexagonal ring other than iring that passes through the triplet.
-    // The peripheral rings are stored in order of the starting element
-    // of each triplet.
-    cond2 = ring::conditionTwoDDC(rings, peripheralRings, iring, index);
-    if (!cond2) {
+    ring::EquatorChoice local;
+    if (!ring::equatorialConditions(rings, iring, index, nullptr, nullptr, &rank, &local)) {
       continue;
     }
-    // ------------
-    // Step three: For every triplet in the equatorial ring, there is at least
-    // one hexagonal ring other than iring that passes through the triplet.
-    // Rings corresponding to triplets need not be searched again since
-    // peripheralRings are stored in that order. Rings corresponding to T1, T3,
-    // T5 must have a common element. Similarly rings corresponding to T2, T4,
-    // T6 must have at least one common element. Alternating rings corresponding
-    // to triplets must have at least three common elements
-    cond3 = ring::conditionThreeDDC(rings, peripheralRings);
-    if (!cond3) {
-      continue;
-    }
-    // ------------
-    // If the peripheral rings are duplicates, skip everything
-    sort(peripheralRings.begin(), peripheralRings.end());
-    peripheralRings.erase(
-        unique(peripheralRings.begin(), peripheralRings.end()),
-        peripheralRings.end());
-    // There should be 6 unique peripheral rings
-    if (peripheralRings.size() != 6) {
-      continue;
-    }
-    // ------------
-    // If iring is an equatorial ring, add it to the listDDC vector
+    chosenPeriph[static_cast<size_t>(iring)] = local;
+  }
+  const auto td2 = std::chrono::steady_clock::now();
+  const std::vector<int> equators =
+      ring::maximumEquators(chosenPeriph, visitOrder, certificate);
+  if (const char *st = std::getenv("DSEAMS_CAGE_TIME")) {
+    (void)st;
+    std::fprintf(stderr, "ddc order %.3f eq %.3f pack %.3f kept %zu\n",
+                 std::chrono::duration<double, std::milli>(td1 - td0).count(),
+                 std::chrono::duration<double, std::milli>(td2 - td1).count(),
+                 std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - td2)
+                     .count(),
+                 equators.size());
+  }
+  for (const int iring : equators) {
+    const ring::EquatorChoice &choice = chosenPeriph[static_cast<size_t>(iring)];
+    peripheralRings.assign(choice.ring, choice.ring + choice.n);
     if (ringType[iring] == ring::strucType::unclassified) {
       ringType[iring] = ring::strucType::DDC;
       listDDC.push_back(iring);
     }
-    // Add the peripheral ring IDs too
-    for (int j = 0; j < peripheralRings.size(); j++) {
-      jring = peripheralRings[j];
+    for (const int jring : peripheralRings) {
       if (ringType[jring] == ring::strucType::unclassified) {
         ringType[jring] = ring::strucType::DDC;
         listDDC.push_back(jring);
       } else if (ringType[jring] == ring::strucType::HCbasal) {
         ringType[jring] = ring::strucType::bothBasal;
         listDDC.push_back(jring);
-      } // end of update
-      // never true
-      else if (ringType[jring] == ring::strucType::HCprismatic) {
+      } else if (ringType[jring] == ring::strucType::HCprismatic) {
         ringType[jring] = ring::strucType::bothPrismatic;
         listDDC.push_back(jring);
       }
-      //
-      // Update the notEquatorial vector
-      notEquatorial[jring] = true;
-    } // end of update for peripheral rings
-    // Add rings to the cageList vector of struct Cages.
-    DDCRings.clear();          // init
-    DDCRings.push_back(iring); // Add the equatorial ring first
-    DDCRings.insert(std::end(DDCRings), std::begin(peripheralRings),
-                    std::end(peripheralRings));
+    }
+    DDCRings.clear();
+    DDCRings.push_back(iring);
+    DDCRings.insert(DDCRings.end(), peripheralRings.begin(),
+                    peripheralRings.end());
     cageList.push_back({cage::cageType::DoubleDiaC, DDCRings});
-    // ------------
-  } // end of loop through all hexagonal rings
+  }
 
   return listDDC;
+}
+
+/**
+ * @details The triplet T_k of ring iring is (m_k, m_{k+1}, m_{k+2}). A
+ *  rotation or reversal of the ring maps the triplets onto each other and
+ *  the even ones onto the even or the odd ones, so the conditions are
+ *  tested for every starting atom and direction at once: a chain of three
+ *  alternate rings records which of its rings can sit in the middle (sharing
+ *  three atoms with both others), and an even and an odd chain combine when
+ *  two of their middles sit on adjacent triplets. The choice of P_k is
+ *  existential as well, with the six rings distinct.
+ */
+bool ring::equatorialConditions(const std::vector<std::vector<int>> &rings,
+                                int iring, const ring::RingSearchIndex &index,
+                                std::vector<int> *peripheralUnion,
+                                std::vector<int> *chosen,
+                                const std::vector<int> *rank,
+                                ring::EquatorChoice *raw) {
+  if (peripheralUnion != nullptr) {
+    peripheralUnion->clear();
+  }
+  if (chosen != nullptr) {
+    chosen->clear();
+  }
+  if (raw != nullptr) {
+    raw->n = 0;
+  }
+  const std::vector<int> &R = rings[iring];
+  if (R.size() != 6) {
+    return false;
+  }
+  for (const int atom : R) {
+    const std::vector<int> &row = atomRow(index, atom);
+    int others = 0;
+    for (const int r : row) {
+      others += static_cast<int>(r != iring);
+    }
+    if (others < 3) {
+      return false;
+    }
+  }
+  std::array<IntBuf, 6> T;
+  for (int k = 0; k < 6; k++) {
+    ringsThrough(index, R[k], R[(k + 1) % 6], R[(k + 2) % 6], iring, -1, T[k]);
+    if (T[k].empty()) {
+      return false;
+    }
+  }
+  // One ring on every triplet is the ice network. That assignment is the
+  // only candidate, so the chain search is a single 14-molecule check.
+  bool oneEach = true;
+  for (int k = 0; k < 6; k++) {
+    if (T[k].size() != 1) {
+      oneEach = false;
+      break;
+    }
+  }
+  if (oneEach) {
+    int r[6];
+    bool distinct = true;
+    for (int k = 0; k < 6; k++) {
+      r[k] = T[k][0];
+      for (int j = 0; j < k; j++) {
+        distinct = distinct && r[j] != r[k];
+      }
+    }
+    auto share6 = [](const std::vector<int> &a, const std::vector<int> &b) {
+      const int *x = a.data();
+      const int *y = b.data();
+      int n = 0;
+      for (int i = 0; i < 6; i++) {
+        const int v = x[i];
+        n += (v == y[0]) + (v == y[1]) + (v == y[2]) + (v == y[3]) + (v == y[4]) + (v == y[5]);
+      }
+      return n;
+    };
+    auto chainBits = [&](int a, int b, int c) -> unsigned {
+      const auto &A = rings[static_cast<size_t>(a)];
+      const auto &B = rings[static_cast<size_t>(b)];
+      const auto &C = rings[static_cast<size_t>(c)];
+      if (!commonAtom(A, B, C)) {
+        return 0U;
+      }
+      const bool ab = share6(A, B) >= 3;
+      const bool bc = share6(B, C) >= 3;
+      const bool ca = share6(C, A) >= 3;
+      return (ca && ab ? 1U : 0U) | (ab && bc ? 2U : 0U) | (bc && ca ? 4U : 0U);
+    };
+    const unsigned evenBits = chainBits(r[0], r[2], r[4]);
+    const unsigned oddBits = chainBits(r[1], r[3], r[5]);
+    unsigned partners = 0U;
+    for (unsigned t = 0; t < 3; t++) {
+      if ((evenBits >> t) & 1U) {
+        partners |= (1U << t) | (1U << ((t + 2) % 3));
+      }
+    }
+    if (!(distinct && evenBits != 0U && (partners & oddBits) != 0U)) {
+      return false;
+    }
+    bool hex = true;
+    for (int k = 0; k < 6; k++) {
+      hex = hex && rings[static_cast<size_t>(r[k])].size() == 6;
+    }
+    if (!hex) {
+      return false;
+    }
+    int atoms[42];
+    int nAtomsHere = 0;
+    auto take = [&](const std::vector<int> &cycle) {
+      for (const int a : cycle) {
+        atoms[nAtomsHere++] = a;
+      }
+    };
+    take(R);
+    for (int k = 0; k < 6; k++) {
+      take(rings[static_cast<size_t>(r[k])]);
+    }
+    std::sort(atoms, atoms + nAtomsHere);
+    const auto nUnique = static_cast<int>(std::unique(atoms, atoms + nAtomsHere) - atoms);
+    bool folded = nUnique != 14;
+    for (int k = 0; k < 6 && !folded; k++) {
+      folded = share6(rings[static_cast<size_t>(r[k])], R) != 3;
+    }
+    if (folded) {
+      return false;
+    }
+    if (peripheralUnion != nullptr) {
+      peripheralUnion->assign(r, r + 6);
+      std::sort(peripheralUnion->begin(), peripheralUnion->end());
+    }
+    if (rank != nullptr && (chosen != nullptr || raw != nullptr)) {
+      int ord[6] = {r[0], r[1], r[2], r[3], r[4], r[5]};
+      std::sort(ord, ord + 6, [rank](int a, int b) {
+        return (*rank)[static_cast<size_t>(a)] < (*rank)[static_cast<size_t>(b)];
+      });
+      if (chosen != nullptr) {
+        chosen->assign(ord, ord + 6);
+      }
+      if (raw != nullptr) {
+        for (int k = 0; k < 6; k++) {
+          raw->ring[k] = ord[k];
+        }
+        raw->n = 6;
+      }
+    }
+    return true;
+  }
+  const std::int64_t prodEven = static_cast<std::int64_t>(T[0].size()) *
+                                static_cast<std::int64_t>(T[2].size()) *
+                                static_cast<std::int64_t>(T[4].size());
+  const std::int64_t prodOdd = static_cast<std::int64_t>(T[1].size()) *
+                               static_cast<std::int64_t>(T[3].size()) *
+                               static_cast<std::int64_t>(T[5].size());
+  // Products at or below 256, including cubic mW (1) and frame 148 (at most
+  // 16), stay on the triple loop. Above that the share graph enumerates the
+  // same chains, and a pair is kept only when the seven rings span 14 molecules.
+  if (prodEven > 256 || prodOdd > 256) {
+    return equatorialLarge(rings, R, T,
+                           static_cast<int>(index.ringsContainingAtom.size()),
+                           peripheralUnion, chosen, rank, raw);
+  }
+  struct Chain {
+    std::array<int, 3> r;
+    unsigned middles; // bit t: the ring on triplet parity + 2t is a middle
+  };
+  auto chainsOf = [&](int parity) {
+    std::vector<Chain> out;
+    const IntBuf &Ta = T[static_cast<size_t>(parity)];
+    const IntBuf &Tb = T[static_cast<size_t>(parity + 2)];
+    const IntBuf &Tc = T[static_cast<size_t>(parity + 4)];
+    for (int ia = 0; ia < Ta.size(); ia++) {
+      const int a = Ta[ia];
+      for (int ib = 0; ib < Tb.size(); ib++) {
+        const int b = Tb[ib];
+        if (b == a) {
+          continue;
+        }
+        for (int ic = 0; ic < Tc.size(); ic++) {
+          const int c = Tc[ic];
+          if (c == a || c == b) {
+            continue;
+          }
+          const auto &A = rings[a];
+          const auto &B = rings[b];
+          const auto &C = rings[c];
+          if (!commonAtom(A, B, C)) {
+            continue;
+          }
+          const bool ab = sharedAtoms(A, B) >= 3;
+          const bool bc = sharedAtoms(B, C) >= 3;
+          const bool ca = sharedAtoms(C, A) >= 3;
+          const unsigned middles = (ca && ab ? 1U : 0U) |
+                                   (ab && bc ? 2U : 0U) | (bc && ca ? 4U : 0U);
+          if (middles != 0U) {
+            out.push_back({{a, b, c}, middles});
+          }
+        }
+      }
+    }
+    return out;
+  };
+  const std::vector<Chain> even = chainsOf(0);
+  if (even.empty()) {
+    return false;
+  }
+  const std::vector<Chain> odd = chainsOf(1);
+  if (odd.empty()) {
+    return false;
+  }
+  bool pass = false;
+  std::vector<int> best;
+  std::vector<int> candidate(6);
+  int bestIds[6] = {};
+  bool haveBest = false;
+  for (const Chain &e : even) {
+    // Even middle 2t sits next to the odd middles 2t+1 and 2t-1
+    unsigned partners = 0U;
+    for (unsigned t = 0; t < 3; t++) {
+      if ((e.middles >> t) & 1U) {
+        partners |= (1U << t) | (1U << ((t + 2) % 3));
+      }
+    }
+    for (const Chain &o : odd) {
+      if ((partners & o.middles) == 0U) {
+        continue;
+      }
+      bool distinct = true;
+      for (const int x : e.r) {
+        for (const int y : o.r) {
+          distinct = distinct && x != y;
+        }
+      }
+      if (!distinct) {
+        continue;
+      }
+      // Seven hexagons of a DDC span 14 molecules: the equatorial ring,
+      // three first neighbours and an apex on each staggered triplet.
+      // A peripheral that shares a fourth equatorial atom is not that cage.
+      int atoms[42];
+      int nAtomsHere = 0;
+      bool hexagons = true;
+      auto take = [&](const std::vector<int> &cycle) {
+        if (cycle.size() != 6 || nAtomsHere + 6 > 42) {
+          hexagons = false;
+          return;
+        }
+        for (const int a : cycle) {
+          atoms[nAtomsHere++] = a;
+        }
+      };
+      take(R);
+      for (const int ri : e.r) {
+        take(rings[static_cast<std::size_t>(ri)]);
+      }
+      for (const int ri : o.r) {
+        take(rings[static_cast<std::size_t>(ri)]);
+      }
+      if (!hexagons) {
+        continue;
+      }
+      std::sort(atoms, atoms + nAtomsHere);
+      const auto nUnique = std::unique(atoms, atoms + nAtomsHere) - atoms;
+      bool folded = false;
+      for (const int ri : e.r) {
+        folded = folded || sharedAtoms(rings[static_cast<std::size_t>(ri)], R) != 3;
+      }
+      for (const int ri : o.r) {
+        folded = folded || sharedAtoms(rings[static_cast<std::size_t>(ri)], R) != 3;
+      }
+      if (folded || nUnique != 14) {
+        continue;
+      }
+      pass = true;
+      if (peripheralUnion != nullptr) {
+        peripheralUnion->insert(peripheralUnion->end(), e.r.begin(), e.r.end());
+        peripheralUnion->insert(peripheralUnion->end(), o.r.begin(), o.r.end());
+      }
+      if (rank != nullptr && (chosen != nullptr || raw != nullptr)) {
+        for (int t = 0; t < 3; t++) {
+          candidate[t] = (*rank)[static_cast<size_t>(e.r[static_cast<size_t>(t)])];
+          candidate[3 + t] = (*rank)[static_cast<size_t>(o.r[static_cast<size_t>(t)])];
+        }
+        std::sort(candidate.begin(), candidate.end());
+        if (!haveBest || candidate < best) {
+          best = candidate;
+          haveBest = true;
+          for (int t = 0; t < 3; t++) {
+            bestIds[t] = e.r[static_cast<size_t>(t)];
+            bestIds[3 + t] = o.r[static_cast<size_t>(t)];
+          }
+          if (chosen != nullptr) {
+            chosen->assign(bestIds, bestIds + 6);
+          }
+        }
+      } else if (peripheralUnion == nullptr && raw == nullptr) {
+        return true;
+      }
+    }
+  }
+  if (!pass) {
+    return false;
+  }
+  if (peripheralUnion != nullptr) {
+    std::sort(peripheralUnion->begin(), peripheralUnion->end());
+    peripheralUnion->erase(
+        std::unique(peripheralUnion->begin(), peripheralUnion->end()),
+        peripheralUnion->end());
+  }
+  if (haveBest && rank != nullptr) {
+    std::sort(bestIds, bestIds + 6, [rank](int a, int b) {
+      return (*rank)[static_cast<size_t>(a)] < (*rank)[static_cast<size_t>(b)];
+    });
+    if (chosen != nullptr) {
+      chosen->assign(bestIds, bestIds + 6);
+    }
+    if (raw != nullptr) {
+      for (int t = 0; t < 6; t++) {
+        raw->ring[t] = bestIds[t];
+      }
+      raw->n = 6;
+    }
+  }
+  return true;
 }
 
 /**
@@ -647,153 +1970,6 @@ bool ring::conditionOneDDC(const std::vector<std::vector<int>> &rings,
 }
 
 /**
- * @details For a given ring, which is being tested as the equatorial ring,
- * this function tests if each triplet that can be formed from the ring is
- * common to at least one other ring or not. Returns false if this is not true.
- * The ring indices of rings that have the common triplet are ultimately saved
- * inside the periperal ring vector as potential peripheral rings, which is
- * passed as an input to the subsequent condition-testing functions. The
- * function calls the following function internally:
- * - ring::findTripletInRing (Searches inside another ring with index jring for
- * the current triplet, which was obtained from iring).
- * @param[in] rings Vector of vectors containing the 6-membered primitive
- *  rings.
- * @param[in] peripheralRings Vector containing the indices of rings which are
- *  potential peripheral rings.
- * @param[in] iring Index of the ring being tested as equatorial.
- * @return A bool; true if ring being tested as equatorial, iring, satisfies
- *  the above condition for being an equatorial ring, and false otherwise.
- */
-bool ring::conditionTwoDDC(const std::vector<std::vector<int>> &rings,
-                           std::vector<int> &peripheralRings, int iring) {
-  int maxAtom = 0;
-  for (const auto &r : rings) {
-    for (const int atom : r) {
-      maxAtom = std::max(maxAtom, atom);
-    }
-  }
-  const auto index = ring::buildRingSearchIndex(rings, maxAtom + 1);
-  return ring::conditionTwoDDC(rings, peripheralRings, iring, index);
-}
-
-bool ring::conditionTwoDDC(const std::vector<std::vector<int>> &rings,
-                           std::vector<int> &peripheralRings, int iring,
-                           const ring::RingSearchIndex &index) {
-  std::vector<int> triplet; //  Triplet formed from iring
-  int ringSize = 6;         // Here, all the rings are hexagons
-  int j;                    // Used for making the triplet
-  int jring;                // Peripheral ring ID to be searched
-  std::vector<int>
-      newPeripherals; // Vector in which the new peripheral ring IDs are saved.
-                      // This will be swapped with peripheralRings later
-  newPeripherals.reserve(6);
-
-  for (int k = 0; k < ringSize; k++) {
-    triplet.clear(); // Clear the triplet
-    // Get a triplet
-    for (int i = k; i < k + 3; i++) {
-      j = i;
-      if (i >= ringSize) {
-        j = i - ringSize;
-      }
-      triplet.push_back(rings[iring][j]);
-    } // end of getting a triplet from k
-    jring = firstRingThrough(index, triplet[0], triplet[1], triplet[2], iring);
-    if (jring < 0) {
-      return false;
-    }
-    newPeripherals.push_back(jring);
-  } // end of looping through 0-6 to get triplets
-
-  // Swap the old peripheral rings vector with the new one
-  peripheralRings.swap(newPeripherals);
-
-  // If there are more than 6 peripheral rings, the code will fail
-  // Comment this out if you want
-  if (peripheralRings.size() > 6) {
-    std::cerr
-        << "There are more than 6 peripheral rings. The code will fail. \n";
-    return false;
-  } // end of check for more than 6 peripherals
-
-  return true;
-}
-
-/**
- * @details For a given ring, which is being tested as the equatorial ring,
- * this function tests the following, given peripheralRings stored in increasing
- * order of the triplet starting element:
- * 1. Rings corresponding to T1, T3, T5 should have at least one common element.
- * 2. Rings corresponding to T2, T4, T6 should have at least one common element.
- * 3. The following rings should have at least three common elements- {T1, T3},
- * {T2, T4}, {T3, T5}, {T4, T6}.
- * Internally calls the following functions:
- * - ring::commonElementsInThreeRings (CONDITION 1: Rings corresponding to T1,
- * T3, T5 should have at least one common element).
- * - ring::commonElementsInThreeRings (CONDITION 2: Rings corresponding to T1,
- * T3, T5 should have at least one common element).
- * - ring::findsCommonElements (Gets the common elements between a pair of
- * rings).
- * @param[in] rings Vector of vectors containing the 6-membered primitive
- *  rings.
- * @param[in] peripheralRings Vector containing the indices of rings which are
- *  potential peripheral rings.
- * @return A bool; true if ring being tested as equatorial satisfies
- *  the above condition for being an equatorial ring, and false otherwise.
- */
-bool ring::conditionThreeDDC(const std::vector<std::vector<int>> &rings,
-                             std::vector<int> &peripheralRings) {
-  // New
-  std::vector<int> common; // Vector containing common elements
-  bool hasCommon;          // true if the rings have a common element
-  int iring, jring;        // Pairs of peripheral rings
-  // ----------------------------------------------------------------------------
-  // CONDITION 1: Rings corresponding to T1, T3, T5 should have at least one
-  // common element.
-  hasCommon = ring::commonElementsInThreeRings(rings[peripheralRings[0]],
-                                               rings[peripheralRings[2]],
-                                               rings[peripheralRings[4]]);
-
-  // If T1, T3, T5 don't have a common element, return false
-  if (!hasCommon) {
-    return false;
-  } // not a DDC
-  // ----------------------------------------------------------------------------
-  // CONDITION 2: Rings corresponding to T1, T3, T5 should have at least one
-  // common element.
-  hasCommon = ring::commonElementsInThreeRings(rings[peripheralRings[1]],
-                                               rings[peripheralRings[3]],
-                                               rings[peripheralRings[5]]);
-
-  // If T1, T3, T5 don't have a common element, return false
-  if (!hasCommon) {
-    return false;
-  } // not a DDC
-  // ----------------------------------------------------------------------------
-  // CONDITION 3: Rings corresponding to {T1, T3}, {T2, T4}, {T3, T5}, {T4,
-  // T6}
-  // must have three elements in common amongst them
-
-  // Loops to get pairs of rings corresponding to the right triplets
-  for (int i = 0; i <= 3; i++) {
-    common.clear(); // init
-    // Pairs of rings corresponding to triplets.
-    iring = peripheralRings[i];
-    jring = peripheralRings[i + 2];
-    // Get the common elements
-    common = ring::findsCommonElements(rings[iring], rings[jring]);
-    // There should be at least three elements
-    if (common.size() < 3) {
-      return false;
-    } // not a DDC
-  }   // end of getting iring and jring
-  // ----------------------------------------------------------------------------
-
-  // iring is an equatorial ring and peripheralRings has the 6 peripheral rings
-  return true;
-}
-
-/**
  * @details Determines which hexagonal rings are HCs. This function
  * returns a vector which contains the ring IDs of all the rings which are HC
  * rings. The ring IDs correspond to the index of the rings inside the vector of
@@ -840,8 +2016,9 @@ std::vector<int> ring::findHC(const std::vector<std::vector<int>> &rings,
  *  atom that neighbours the first or second atom of the first ring, and a pair
  *  it rejects leaves no state behind. Only rings holding one of those
  *  neighbours are therefore worth testing, which is a small set rather than
- *  the whole network. Candidates are visited in ascending ring order, so the
- *  rings are claimed in the same sequence as the exhaustive search.
+ *  the whole network. Candidates are visited in the canonical order of
+ *  @a index, so the rings are claimed in the same sequence as an exhaustive
+ *  search in that order.
  * @param[in] rings Vector of vectors containing the 6-membered primitive
  *  rings.
  * @param[in,out] ringType Vector describing the type of each ring.
@@ -856,135 +2033,305 @@ std::vector<int> ring::findHC(const std::vector<std::vector<int>> &rings,
                               std::vector<cage::Cage> &cageList,
                               const ring::RingSearchIndex &index) {
   std::vector<int> listHC;
-  std::vector<int> candidates; // Rings worth testing against the current ring
-  int totalRingNum = rings.size(); // Total number of hexagonal rings
-  std::vector<int> basal1;         // First basal ring
-  std::vector<int> basal2;         // Second basal ring
-  bool cond1, cond2; // Conditions for rings to be basal (true) or not (false)
+  int totalRingNum = static_cast<int>(rings.size());
   std::vector<int>
       HCRings; // Indices of rings which constitute a single HC, with the basal
                // rings first, followed by prismatic rings
   std::vector<int> prismaticRings; // Ring indices of prismatic rings
-  int kring;                       // Ring index of the prismatic rings
   std::vector<bool>
       isPrismatic; // Flag for checking if the ring is prismatic (true) or not
                    // (false), since the basal rings are checked
-  isPrismatic.resize(totalRingNum); // Initialized to false
+  isPrismatic.resize(static_cast<size_t>(totalRingNum)); // Initialized to false
 
-  // Two loops through all the rings are required to find pairs of basal rings
-  for (int iring = 0; iring < totalRingNum - 1; iring++) {
-    // -----------------------
-    // Skip if iring is prismatic
-    if (isPrismatic[iring]) {
-      continue;
-    } // Skip if prismatic
-    // -----------------------
-    cond1 = false;
-    cond2 = false;
-    basal1 = rings[iring]; // Assign iring to basal1
+  // Rings are claimed as prismatic as cages are accepted, so visit them in
+  // the canonical order and test each unordered pair once, in both
+  // directions. The pair test does not depend on earlier claims; the claim
+  // does. Several threads can therefore test pairs, and one thread then
+  // accepts them in visit order, which is the serial result at every
+  // thread count.
+  const std::vector<int> visitOrder = canonicalRingOrder(rings, index.atomRank);
+  std::vector<int> rank(static_cast<size_t>(totalRingNum));
+  for (int r = 0; r < totalRingNum; r++) {
+    rank[static_cast<size_t>(visitOrder[static_cast<size_t>(r)])] = r;
+  }
+  ring::NeighBond bonds;
+  bonds.build(nList);
 
-    // Gather the rings that could satisfy ring::basalConditions against
-    // basal1: those holding a neighbour of its first or second atom
-    candidates.clear();
-    for (const int anchor : {basal1[0], basal1[1]}) {
-      if (anchor < 0 || anchor >= static_cast<int>(nList.size())) {
-        continue;
+  // basalConditions(iring, jring) and the swapped call both need jring to
+  // hold a neighbour of each atom of some alternate triplet of iring. Rings
+  // that fail that test cannot be the second basal ring, so they are not
+  // gathered. The surviving rings are still tested with basalConditions and
+  // claimed in rank order.
+  const int nAtoms = static_cast<int>(nList.size());
+  struct GatherScratch {
+    std::vector<int> onRing;
+    std::vector<int> arm1;
+    std::vector<int> arm2;
+    std::vector<int> seen;
+    int tickOn = 0;
+    int tick1 = 0;
+    int tick2 = 0;
+    int tickSeen = 0;
+    void prepare(int atoms, int nRings) {
+      if (static_cast<int>(onRing.size()) < atoms) {
+        onRing.assign(static_cast<size_t>(atoms), 0);
+        arm1.assign(static_cast<size_t>(atoms), 0);
+        arm2.assign(static_cast<size_t>(atoms), 0);
       }
-      // Skip the leading self entry of the neighbour list row
-      for (size_t n = 1; n < nList[anchor].size(); n++) {
-        const int neighbour = nList[anchor][n];
-        if (neighbour < 0 ||
-            neighbour >= static_cast<int>(index.ringsContainingAtom.size())) {
+      if (static_cast<int>(seen.size()) < nRings) {
+        seen.assign(static_cast<size_t>(nRings), 0);
+      }
+    }
+    int next(int &tick, std::vector<int> &stamp) {
+      if (++tick <= 0) {
+        std::fill(stamp.begin(), stamp.end(), 0);
+        tick = 1;
+      }
+      return tick;
+    }
+  };
+
+  auto gatherCandidates = [&](int iring, std::vector<int> &candidates,
+                              GatherScratch &scratch) {
+    candidates.clear();
+    const std::vector<int> &basal1 = rings[static_cast<size_t>(iring)];
+    if (basal1.size() != 6) {
+      return;
+    }
+    scratch.prepare(nAtoms, totalRingNum);
+    const int on = scratch.next(scratch.tickOn, scratch.onRing);
+    for (const int atom : basal1) {
+      if (atom >= 0 && atom < nAtoms) {
+        scratch.onRing[static_cast<size_t>(atom)] = on;
+      }
+    }
+    auto neighbourSpan = [&](int atom) {
+      int span = 0;
+      if (atom < 0 || atom >= nAtoms) {
+        return span;
+      }
+      const auto &row = nList[static_cast<size_t>(atom)];
+      for (size_t n = 1; n < row.size(); n++) {
+        const int nb = row[n];
+        if (nb < 0 || nb >= nAtoms ||
+            scratch.onRing[static_cast<size_t>(nb)] == on ||
+            nb >= static_cast<int>(index.ringsContainingAtom.size())) {
           continue;
         }
-        for (const int candidate : index.ringsContainingAtom[neighbour]) {
-          if (candidate > iring) {
+        span += static_cast<int>(index.ringsContainingAtom[static_cast<size_t>(nb)].size());
+      }
+      return span;
+    };
+    auto stampArm = [&](int atom, std::vector<int> &stamp, int tick) {
+      if (atom < 0 || atom >= nAtoms) {
+        return;
+      }
+      const auto &row = nList[static_cast<size_t>(atom)];
+      for (size_t n = 1; n < row.size(); n++) {
+        const int nb = row[n];
+        if (nb >= 0 && nb < nAtoms && scratch.onRing[static_cast<size_t>(nb)] != on) {
+          stamp[static_cast<size_t>(nb)] = tick;
+        }
+      }
+    };
+    for (int parity = 0; parity < 2; parity++) {
+      int spans[3];
+      int arm = 0;
+      int best = 0;
+      for (int t = 0; t < 3; t++) {
+        spans[t] = neighbourSpan(basal1[static_cast<size_t>((parity + 2 * t) % 6)]);
+        if (t == 0 || spans[t] < best) {
+          best = spans[t];
+          arm = t;
+        }
+      }
+      const int tick1 = scratch.next(scratch.tick1, scratch.arm1);
+      const int tick2 = scratch.next(scratch.tick2, scratch.arm2);
+      stampArm(basal1[static_cast<size_t>((parity + 2 * ((arm + 1) % 3)) % 6)],
+               scratch.arm1, tick1);
+      stampArm(basal1[static_cast<size_t>((parity + 2 * ((arm + 2) % 3)) % 6)],
+               scratch.arm2, tick2);
+      const int seenTick = scratch.next(scratch.tickSeen, scratch.seen);
+      const int pivot =
+          basal1[static_cast<size_t>((parity + 2 * arm) % 6)];
+      if (pivot < 0 || pivot >= nAtoms) {
+        continue;
+      }
+      const auto &row = nList[static_cast<size_t>(pivot)];
+      for (size_t n = 1; n < row.size(); n++) {
+        const int nb = row[n];
+        if (nb < 0 || nb >= nAtoms ||
+            scratch.onRing[static_cast<size_t>(nb)] == on ||
+            nb >= static_cast<int>(index.ringsContainingAtom.size())) {
+          continue;
+        }
+        for (const int candidate :
+             index.ringsContainingAtom[static_cast<size_t>(nb)]) {
+          if (scratch.seen[static_cast<size_t>(candidate)] == seenTick) {
+            continue;
+          }
+          scratch.seen[static_cast<size_t>(candidate)] = seenTick;
+          if (rank[static_cast<size_t>(candidate)] <=
+              rank[static_cast<size_t>(iring)]) {
+            continue;
+          }
+          bool share = false;
+          bool hit1 = false;
+          bool hit2 = false;
+          for (const int atom : rings[static_cast<size_t>(candidate)]) {
+            if (atom < 0 || atom >= nAtoms) {
+              continue;
+            }
+            if (scratch.onRing[static_cast<size_t>(atom)] == on) {
+              share = true;
+            }
+            if (scratch.arm1[static_cast<size_t>(atom)] == tick1) {
+              hit1 = true;
+            }
+            if (scratch.arm2[static_cast<size_t>(atom)] == tick2) {
+              hit2 = true;
+            }
+          }
+          if (!share && hit1 && hit2) {
             candidates.push_back(candidate);
           }
         }
       }
     }
-    std::sort(candidates.begin(), candidates.end());
+    std::sort(candidates.begin(), candidates.end(),
+              [&rank](int a, int b) {
+                return rank[static_cast<size_t>(a)] < rank[static_cast<size_t>(b)];
+              });
     candidates.erase(std::unique(candidates.begin(), candidates.end()),
                      candidates.end());
+  };
 
-    // Loop through the candidate rings to get a pair
-    for (const int jring : candidates) {
-      // -----------------------
-      // Skip if iring is prismatic
-      if (isPrismatic[jring]) {
-        continue;
-      }                      // Skip if prismatic
-                             // -----------------------
-      basal2 = rings[jring]; // Assign jring to basal2
-      // ------------
-      // Step one: Check to see if basal1 and basal2 have common
-      // elements or not. If they don't, then they cannot be basal rings
-      cond1 = ring::hasCommonElements(basal1, basal2);
-      if (cond1) {
-        continue;
+  auto claimPair = [&](int iring, int jring, bool cond2, bool reverse) {
+    if (ringType[static_cast<size_t>(iring)] == ring::strucType::unclassified) {
+      ringType[static_cast<size_t>(iring)] = ring::strucType::HCbasal;
+      listHC.push_back(iring);
+    } else if (ringType[static_cast<size_t>(iring)] == ring::strucType::DDC) {
+      ringType[static_cast<size_t>(iring)] = ring::strucType::bothBasal;
+      listHC.push_back(iring);
+    }
+    if (ringType[static_cast<size_t>(jring)] == ring::strucType::unclassified) {
+      ringType[static_cast<size_t>(jring)] = ring::strucType::HCbasal;
+      listHC.push_back(jring);
+    } else if (ringType[static_cast<size_t>(jring)] == ring::strucType::DDC) {
+      ringType[static_cast<size_t>(jring)] = ring::strucType::bothBasal;
+      listHC.push_back(jring);
+    }
+    prismaticRings.clear();
+    if (cond2) {
+      ring::findPrismatic(rings, listHC, ringType, iring, jring, prismaticRings,
+                          index);
+    }
+    if (reverse) {
+      ring::findPrismatic(rings, listHC, ringType, jring, iring, prismaticRings,
+                          index);
+    }
+    std::sort(prismaticRings.begin(), prismaticRings.end(),
+              [&rank](int a, int b) {
+                return rank[static_cast<size_t>(a)] < rank[static_cast<size_t>(b)];
+              });
+    prismaticRings.erase(
+        std::unique(prismaticRings.begin(), prismaticRings.end()),
+        prismaticRings.end());
+    for (const int kring : prismaticRings) {
+      if (ringType[static_cast<size_t>(kring)] == ring::strucType::unclassified) {
+        ringType[static_cast<size_t>(kring)] = ring::strucType::HCprismatic;
+        listHC.push_back(kring);
+      } else if (ringType[static_cast<size_t>(kring)] == ring::strucType::DDC) {
+        ringType[static_cast<size_t>(kring)] = ring::strucType::bothPrismatic;
+        listHC.push_back(kring);
       }
-      // -----------
-      // Step two and three: One of the elements of basal2 must be the nearest
-      // neighbour of either the first (index0; l1) or second (index1; l2)
-      // element of basal1. If m_k is the nearest neighbour of l1, m_{k+2} and
-      // m_{k+4} must be neighbours of l3 and l5(l5 or l3). Modify for l2.
-      cond2 = ring::basalConditions(nList, basal1, basal2);
-      if (!cond2) {
-        continue;
-      }
-      // -----------
-      // iring and jring are basal rings!
-      // Update iring
-      if (ringType[iring] == ring::strucType::unclassified) {
-        ringType[iring] = ring::strucType::HCbasal;
-        listHC.push_back(iring);
-      } else if (ringType[iring] == ring::strucType::DDC) {
-        ringType[iring] = ring::strucType::bothBasal;
-        listHC.push_back(iring);
-      }
-      // Update jring
-      if (ringType[jring] == ring::strucType::unclassified) {
-        ringType[jring] = ring::strucType::HCbasal;
-        listHC.push_back(jring);
-      } else if (ringType[jring] == ring::strucType::DDC) {
-        ringType[jring] = ring::strucType::bothBasal;
-        listHC.push_back(jring);
-      }
-      // Find the prismatic rings
-      prismaticRings.clear(); // Clear the prismatic ring vector first
-      ring::findPrismatic(rings, listHC, ringType, iring, jring,
-                          prismaticRings, index);
-      // Update the prismatic rings
-      for (int k = 0; k < prismaticRings.size(); k++) {
-        kring =
-            prismaticRings[k]; // Current ring index of the (3) prismatic rings
-        // Update kring
-        if (ringType[kring] == ring::strucType::unclassified) {
-          ringType[kring] = ring::strucType::HCprismatic;
-          listHC.push_back(kring);
-        } else if (ringType[kring] == ring::strucType::DDC) {
-          ringType[kring] = ring::strucType::bothPrismatic;
-          listHC.push_back(kring);
+      isPrismatic[static_cast<size_t>(kring)] = true;
+    }
+    HCRings.clear();
+    HCRings.push_back(iring);
+    HCRings.push_back(jring);
+    HCRings.insert(HCRings.end(), prismaticRings.begin(), prismaticRings.end());
+    cageList.push_back({cage::cageType::HexC, HCRings});
+  };
+
+  struct Passing {
+    int jring;
+    bool cond2;
+    bool reverse;
+  };
+  const int nThreads =
+#if defined(SEAMS_HAS_OPENMP)
+      omp_in_parallel() ? 1 : omp_get_max_threads();
+#else
+      1;
+#endif
+  const bool parallel = nThreads > 1 && totalRingNum >= 256;
+  if (parallel) {
+    std::vector<std::vector<Passing>> passing(static_cast<size_t>(totalRingNum));
+#if defined(SEAMS_HAS_OPENMP)
+#pragma omp parallel
+#endif
+    {
+      std::vector<int> candidates;
+      GatherScratch scratch;
+#if defined(SEAMS_HAS_OPENMP)
+#pragma omp for schedule(static)
+#endif
+      for (int t = 0; t < totalRingNum; t++) {
+        const int iring = visitOrder[static_cast<size_t>(t)];
+        gatherCandidates(iring, candidates, scratch);
+        auto &row = passing[static_cast<size_t>(iring)];
+        for (const int jring : candidates) {
+          const std::vector<int> &basal1 = rings[static_cast<size_t>(iring)];
+          const std::vector<int> &basal2 = rings[static_cast<size_t>(jring)];
+          if (ring::hasCommonElements(basal1, basal2)) {
+            continue;
+          }
+          const bool cond2 = ring::basalConditions(bonds, basal1, basal2);
+          const bool reverse = ring::basalConditions(bonds, basal2, basal1);
+          if (cond2 || reverse) {
+            row.push_back({jring, cond2, reverse});
+          }
         }
-        //
-        // Update the isPrismatic vector
-        isPrismatic[kring] = true;
-        //
-      } // End of update of prismatic rings in listHC
-      // -----------
-      // Update the cageList vector of Cages
-      // Update the basal rings
-      HCRings.clear();
-      HCRings.push_back(iring);
-      HCRings.push_back(jring);
-      // Add the prismaticRings
-      HCRings.insert(std::end(HCRings), std::begin(prismaticRings),
-                     std::end(prismaticRings));
-      cageList.push_back({cage::cageType::HexC, HCRings});
-      // -----------
-    } // end of loop through rest of the rings to get the second basal ring
-  }   // end of loop through all rings for first basal ring
+      }
+    }
+    for (const int iring : visitOrder) {
+      if (isPrismatic[static_cast<size_t>(iring)]) {
+        continue;
+      }
+      for (const Passing &hit : passing[static_cast<size_t>(iring)]) {
+        if (isPrismatic[static_cast<size_t>(hit.jring)]) {
+          continue;
+        }
+        claimPair(iring, hit.jring, hit.cond2, hit.reverse);
+      }
+    }
+  } else {
+    std::vector<int> candidates;
+    GatherScratch scratch;
+    for (const int iring : visitOrder) {
+      if (isPrismatic[static_cast<size_t>(iring)]) {
+        continue;
+      }
+      gatherCandidates(iring, candidates, scratch);
+      const std::vector<int> &basal1 = rings[static_cast<size_t>(iring)];
+      for (const int jring : candidates) {
+        if (isPrismatic[static_cast<size_t>(jring)]) {
+          continue;
+        }
+        const std::vector<int> &basal2 = rings[static_cast<size_t>(jring)];
+        if (ring::hasCommonElements(basal1, basal2)) {
+          continue;
+        }
+        const bool cond2 = ring::basalConditions(bonds, basal1, basal2);
+        const bool reverse = ring::basalConditions(bonds, basal2, basal1);
+        if (!cond2 && !reverse) {
+          continue;
+        }
+        claimPair(iring, jring, cond2, reverse);
+      }
+    }
+  }
 
   sort(listHC.begin(), listHC.end());
   auto ip = std::unique(listHC.begin(), listHC.end());
@@ -1013,122 +2360,56 @@ std::vector<int> ring::findHC(const std::vector<std::vector<int>> &rings,
  * @return A bool; true if the basal rings being tested fulfill this condition
  *  for being the basal rings of an HC.
  */
+void ring::NeighBond::build(const std::vector<std::vector<int>> &nList) {
+  n_ = static_cast<int>(nList.size());
+  words_ = (n_ + 63) >> 6;
+  bits_.assign(static_cast<size_t>(n_) * static_cast<size_t>(words_), 0);
+  for (int i = 0; i < n_; i++) {
+    std::uint64_t *row =
+        bits_.data() + static_cast<size_t>(i) * static_cast<size_t>(words_);
+    const auto &nbrs = nList[static_cast<size_t>(i)];
+    for (size_t k = 1; k < nbrs.size(); k++) {
+      const int j = nbrs[k];
+      if (j >= 0 && j < n_) {
+        row[static_cast<size_t>(j >> 6)] |=
+            std::uint64_t{1} << (j & 63);
+      }
+    }
+  }
+}
+
+bool ring::NeighBond::operator()(int i, int j) const {
+  if (i < 0 || j < 0 || i >= n_ || j >= n_ || words_ == 0) {
+    return false;
+  }
+  const std::uint64_t word =
+      bits_[static_cast<size_t>(i) * static_cast<size_t>(words_) +
+            static_cast<size_t>(j >> 6)];
+  return (word >> (j & 63)) & 1u;
+}
+
 bool ring::basalConditions(const std::vector<std::vector<int>> &nList,
                            const std::vector<int> &basal1,
                            const std::vector<int> &basal2) {
-  int l1 = basal1[0]; // first element of basal1 ring
-  int l2 = basal1[1]; // second element of basal1 ring
-  int ringSize = 6;      // Size of the ring; each ring contains 6 elements
-  int m_k;               // Atom Index (in pointCloud) of element in basal2
-  int kIndex;            // Index of m_k in basal2, corresponding to m_k
-  int currentKindex;     // Current k index when finding alternating elements of
-                         // basal2
-  // Hot, and called from every thread of cageAffiliation's sweeps
-  static thread_local std::vector<int> evenTriplet; // m_k, m_{k+2}, m_{k+4}
-  static thread_local std::vector<int> oddTriplet; // m_{k+1}, m_{k+3}, m_{k+5}
-  evenTriplet.clear();
-  oddTriplet.clear();
-  int compare1, compare2;       // l3 and l5 OR l4 and l6
-  int index;
-  bool l1_neighbour, l2_neighbour; // m_k is a neighbour of l1(true) or not
-                                   // (false); m_k is a neighbour of l2(true)
-  bool isNeigh, notNeigh; // Used to check if the rings are basal or not
+  // An empty neighbour row has no bonds, which fails the one-to-one test
+  return basalConditionsOf(
+      [&](int left, int right) {
+        if (left < 0 || left >= static_cast<int>(nList.size()) ||
+            nList[static_cast<size_t>(left)].empty()) {
+          return false;
+        }
+        const auto &row = nList[static_cast<size_t>(left)];
+        return std::find(row.begin() + 1, row.end(), right) != row.end();
+      },
+      basal1, basal2);
+}
 
-  // ---------------------------------------------
-  // SEARCH FOR L1_NEIGHBOUR OR L2_NEIGHBOUR
-  // Search for whether an element of basal2 is a neighbour of l1 or l2
-  for (int k = 0; k < ringSize; k++) {
-    // init
-    l1_neighbour = false;
-    l2_neighbour = false;
-    m_k = basal2[k];
-
-    // ---------------
-    // CHECK IF M_K MATCHES L1 NEIGHBOURS
-    auto it1 = std::find(nList[l1].begin() + 1, nList[l1].end(), m_k);
-    // If m_k was found in l1's nList
-    if (it1 != nList[l1].end()) {
-      compare1 = basal1[2]; // l3
-      compare2 = basal1[4]; // l5
-      kIndex = k;              // Saving the array index of m_k
-      l1_neighbour = true;
-      break;
-    } // m_k found in l1's nList
-    // ---------------
-    // CHECK IF M_K MATCHES L2 NEIGHBOURS
-    auto it2 = std::find(nList[l2].begin() + 1, nList[l2].end(), m_k);
-    // If m_k was found in l1's nList
-    if (it2 != nList[l2].end()) {
-      compare1 = basal1[3]; // l4
-      compare2 = basal1[5]; // l6
-      kIndex = k;              // Saving the array index of m_k
-      l2_neighbour = true;
-      break;
-    } // m_k found in l1's nList
-    // ---------------
-  } // End of search for basal2 elements in l1 or l2's nList
-  // ---------------------------------------------
-
-  // Return false if neither l1 nor l2 have any neighbours
-  // in basal2
-
-  if (!l1_neighbour && !l2_neighbour) {
-    return false;
-  } // basal conditions not fulfilled
-
-  // Get the alternating elements starting with kIndex.
-  // 'evenTriplet': m_k, m_{k+2}, m_{k+4} - neighbours of compare1 and compare2.
-  // 'oddTriplet': m_{k+1}, m_{k+3}, m_{k+5}- cannot be neighbours of basal1
-  for (int k = 0; k <= 5; k++) {
-    currentKindex = kIndex + k; // k
-    // Wrap-around
-    if (currentKindex >= ringSize) {
-      currentKindex -= ringSize;
-    } // end of wrap-around of k
-    //
-    // Update 'evenTriplet'
-    if (k % 2 == 0) {
-      evenTriplet.push_back(basal2[currentKindex]);
-    } // end of update of evenTriplet
-    // Update 'oddTriplet'
-    else {
-      oddTriplet.push_back(basal2[currentKindex]);
-    } // end of update of oddTriplet
-  }   // End of getting alternating triplets
-
-  // ---------------------------------------------
-  // CONDITION1: m_{k+2} and m_{k+4} must be bonded to l3 and l5 (if l1 is a
-  // neighbour) or m_{k+2} and m_{k+4} must be bonded to l4 and l6 (if l2 is a
-  // neighbour) Basically, this boils down to checking whether compare1 and
-  // compare2 are in the neighbour lists of the last two elements of evenTriplet
-
-  isNeigh = ring::basalNeighbours(nList, evenTriplet, compare1, compare2);
-
-  // If condition1 is not true, then the candidate
-  // rings are not part of an HC
-  if (!isNeigh) {
-    return false;
-  } // Not an HC
-
-  // ---------------------------------------------
-  // CONDITION2: m_{k+1}, m_{k+3} and m_{k+5} must NOT be bonded to any element
-  // in basal1.
-  // Basically, this boils down to checking whether the elements of oddTriplet
-  // are in the neighbour lists of all the elements of basal1.
-
-  // condition 2. This must be true for an HC
-  notNeigh = ring::notNeighboursOfRing(nList, oddTriplet, basal1);
-
-  // If condition2 is not true, the the candidate rings
-  // are not part of an HC
-  if (!notNeigh) {
-    return false;
-  } // Not an HC
-
-  // Otherwise, all the conditions are true and this is an HC
-  return true;
-
-} // end of function
+bool ring::basalConditions(const ring::NeighBond &bonds,
+                           const std::vector<int> &basal1,
+                           const std::vector<int> &basal2) {
+  return basalConditionsOf(
+      [&](int left, int right) { return bonds(left, right); }, basal1, basal2);
+}
 
 /**
  * @details Tests whether the last two elements of a triplet are neighbours of

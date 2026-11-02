@@ -16,7 +16,8 @@ const char *kKeys[] = {
     "SEAMS_CONFIG",  "SEAMS_FRAME",    "SEAMS_LAST",     "SEAMS_JOBS",
     "SEAMS_TYPE",    "SEAMS_CUTOFF",   "SEAMS_K",        "SEAMS_GRAPH",
     "SEAMS_FAMILY",  "SEAMS_RESIDENT", "SEAMS_CELL",    "SEAMS_TPP",
-    "SEAMS_BLOCK",   "SEAMS_OFFLOAD", "LINKCELL_TPP",   "LINKCELL_BLOCK",
+    "SEAMS_BLOCK",   "SEAMS_OFFLOAD", "SEAMS_CARRY",   "LINKCELL_TPP",
+    "LINKCELL_BLOCK",
     "YODA_FENNEL_PATH", "YODA_LUA_PATH"};
 
 struct EnvGuard {
@@ -68,6 +69,7 @@ TEST_CASE("defaults when the environment is empty") {
   REQUIRE(cfg.tpp == 0);
   REQUIRE(cfg.block == 0);
   REQUIRE_FALSE(cfg.offload);
+  REQUIRE(cfg.carry);
   REQUIRE(cfg.source.empty());
 }
 
@@ -78,12 +80,14 @@ TEST_CASE("environment fills the runtime table") {
   setenv("SEAMS_RESIDENT", "0.7", 1);
   setenv("LINKCELL_TPP", "4", 1);
   setenv("SEAMS_OFFLOAD", "1", 1);
+  setenv("SEAMS_CARRY", "0", 1);
   const auto cfg = seams::cfg::load();
   REQUIRE(cfg.k == 16);
   REQUIRE(cfg.cutoff == 3.25);
   REQUIRE(cfg.resident == 0.7);
   REQUIRE(cfg.tpp == 4);
   REQUIRE(cfg.offload);
+  REQUIRE_FALSE(cfg.carry);
 }
 
 TEST_CASE("file sets only unset keys") {

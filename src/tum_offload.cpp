@@ -14,6 +14,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <limits>
 #include <vector>
 
 #ifdef SEAMS_HAS_OFFLOAD
@@ -65,19 +66,42 @@ void tallyAtoms(tum::CageCounts &out) {
   }
 }
 
-tum::CageCounts runSpecialized(FlatGraph g, bool onDevice) {
-  tum::CageCounts out;
-  out.usedDevice = onDevice;
-  if (g.nAtoms <= 0) {
-    return out;
-  }
+// Buffer sizes of one pass.
+struct Caps {
+  int rowCap = 0;
+  int ringCap = 0;
+  int pairCap = 0;
+};
+
+// What a pass needed: rings and basal pairs as counted, and the longest
+// atom row before the clamp. A stage after the first overflow is skipped
+// and reports 0.
+struct Need {
+  int nRings = 0;
+  int rowMax = 0;
+  int nPairs = 0;
+};
+
+bool fits(const Need &need, const Caps &caps) {
+  return need.nRings <= caps.ringCap && need.rowMax <= caps.rowCap &&
+         need.nPairs <= caps.pairCap;
+}
+
+int capProduct(long long a, long long b, long long limit) {
+  const long long v = std::max(1LL, a * b);
+  return static_cast<int>(std::min(v, limit));
+}
+
+// One pass over fixed buffers. out holds the labels only when the
+// returned Need fits caps.
+Need onePass(const FlatGraph &g, bool target, const Caps &caps,
+             tum::CageCounts &out) {
   const int nAtoms = g.nAtoms;
   const int kMax = g.kMax;
-  const int maxPer = 16;
-  const int maxRings = nAtoms * maxPer;
-  const int maxPairs = maxRings * 8;
+  const int maxPer = caps.rowCap;
+  const int maxRings = caps.ringCap;
+  const int maxPairs = caps.pairCap;
   std::vector<int> nRings(1, 0);
-  std::vector<int> dropped(1, 0);
   std::vector<int> nPairs(1, 0);
   std::vector<int> ringAtoms(static_cast<std::size_t>(maxRings) * 6, -1);
   std::vector<int> throughCount(static_cast<std::size_t>(nAtoms), 0);
@@ -90,10 +114,9 @@ tum::CageCounts runSpecialized(FlatGraph g, bool onDevice) {
   out.atomHc.assign(static_cast<std::size_t>(nAtoms), 0);
   out.atomDdc.assign(static_cast<std::size_t>(nAtoms), 0);
 
-  int *deg = g.deg.data();
-  int *cols = g.cols.data();
+  const int *deg = g.deg.data();
+  const int *cols = g.cols.data();
   int *nRingsP = nRings.data();
-  int *droppedP = dropped.data();
   int *ringAtomsP = ringAtoms.data();
   int *throughCountP = throughCount.data();
   int *throughP = through.data();
@@ -103,129 +126,181 @@ tum::CageCounts runSpecialized(FlatGraph g, bool onDevice) {
   int *pairsP = pairs.data();
   int *atomHcP = out.atomHc.data();
   int *atomDdcP = out.atomDdc.data();
-  const int degN = nAtoms;
-  const int colN = nAtoms * kMax;
-  const int ringN = maxRings * 6;
-  const int thruN = nAtoms * maxPer;
-  const int pairN = maxPairs * 2;
+  int rowMax = 0;
 
 #ifdef SEAMS_HAS_OFFLOAD
-  if (onDevice) {
+  if (target) {
+    const int degN = nAtoms;
+    const int colN = nAtoms * kMax;
+    const int ringN = maxRings * 6;
+    const int thruN = nAtoms * maxPer;
+    const int pairN = maxPairs * 2;
 #pragma omp target data map(to : deg[0 : degN], cols[0 : colN], nAtoms, kMax,  \
                                 maxRings, maxPer, maxPairs)                    \
-    map(tofrom : nRingsP[0 : 1], droppedP[0 : 1], nPairsP[0 : 1],              \
-            ringAtomsP[0 : ringN], throughCountP[0 : nAtoms],                  \
-            throughP[0 : thruN], hcP[0 : maxRings], ddcP[0 : maxRings],        \
-            pairsP[0 : pairN], atomHcP[0 : nAtoms], atomDdcP[0 : nAtoms])
+    map(tofrom : nRingsP[0 : 1], nPairsP[0 : 1], ringAtomsP[0 : ringN],        \
+            throughCountP[0 : nAtoms], throughP[0 : thruN], hcP[0 : maxRings], \
+            ddcP[0 : maxRings], pairsP[0 : pairN], atomHcP[0 : nAtoms],        \
+            atomDdcP[0 : nAtoms])
     {
 #pragma omp target teams distribute parallel for
       for (int i = 0; i < nAtoms; ++i) {
         tum::device::enumSixFrom(i, deg, cols, nAtoms, kMax, maxRings, nRingsP,
-                                 ringAtomsP, droppedP);
+                                 ringAtomsP);
       }
-      // Kernels no-op when the index is past nRings/nPairs; do not read
-      // those counters on the host inside the target data region.
+      // Kernels no-op past nRings/nPairs. The host reads a counter only
+      // after a target update.
+#pragma omp target update from(nRingsP[0 : 1])
+      bool more = nRingsP[0] <= maxRings;
+      if (more) {
 #pragma omp target teams distribute parallel for
-      for (int r = 0; r < maxRings; ++r) {
+        for (int r = 0; r < maxRings; ++r) {
+          tum::device::invertOneRing(r, nRingsP, ringAtomsP, nAtoms, maxPer,
+                                     throughCountP, throughP);
+        }
+#pragma omp target teams distribute parallel for reduction(max : rowMax)     \
+    map(tofrom : rowMax)
+        for (int a = 0; a < nAtoms; ++a) {
+          int n = throughCountP[a];
+          rowMax = n > rowMax ? n : rowMax;
+          if (n > maxPer) {
+            n = maxPer;
+          }
+          throughCountP[a] = n;
+          tum::device::sortThroughRow(throughP + a * maxPer, n);
+        }
+        more = rowMax <= maxPer;
+      }
+      if (more) {
+#pragma omp target teams distribute parallel for
+        for (int r = 0; r < maxRings; ++r) {
+          tum::device::emitBasalFrom(r, nRingsP, ringAtomsP, deg, cols,
+                                     throughCountP, throughP, nAtoms, kMax,
+                                     maxPer, maxPairs, nPairsP, pairsP);
+        }
+#pragma omp target update from(nPairsP[0 : 1])
+        more = nPairsP[0] <= maxPairs;
+      }
+      if (more) {
+#pragma omp target teams distribute parallel for
+        for (int p = 0; p < maxPairs; ++p) {
+          tum::device::applyHcPair(p, nPairsP, pairsP, ringAtomsP,
+                                   throughCountP, throughP, nAtoms, maxPer,
+                                   hcP);
+        }
+#pragma omp target teams distribute parallel for
+        for (int r = 0; r < maxRings; ++r) {
+          tum::device::ddcFrom(r, nRingsP, ringAtomsP, throughCountP, throughP,
+                               hcP, nAtoms, maxPer, ddcP);
+        }
+#pragma omp target teams distribute parallel for
+        for (int r = 0; r < maxRings; ++r) {
+          tum::device::atomIceFrom(r, nRingsP, ringAtomsP, hcP, ddcP, nAtoms,
+                                   atomHcP, atomDdcP);
+        }
+      }
+    }
+  } else
+#else
+  (void)target;
+#endif
+  {
+    for (int i = 0; i < nAtoms; ++i) {
+      tum::device::enumSixFrom(i, deg, cols, nAtoms, kMax, maxRings, nRingsP,
+                               ringAtomsP);
+    }
+    bool more = nRings[0] <= maxRings;
+    if (more) {
+      for (int r = 0; r < nRings[0]; ++r) {
         tum::device::invertOneRing(r, nRingsP, ringAtomsP, nAtoms, maxPer,
                                    throughCountP, throughP);
       }
-#pragma omp target teams distribute parallel for
       for (int a = 0; a < nAtoms; ++a) {
-        int n = throughCountP[a];
-        if (n > maxPer) {
-          n = maxPer;
-        }
-        throughCountP[a] = n;
+        int n = throughCount[static_cast<std::size_t>(a)];
+        rowMax = std::max(rowMax, n);
+        n = std::min(n, maxPer);
+        throughCount[static_cast<std::size_t>(a)] = n;
         tum::device::sortThroughRow(throughP + a * maxPer, n);
       }
-#pragma omp target teams distribute parallel for
-      for (int r = 0; r < maxRings; ++r) {
+      more = rowMax <= maxPer;
+    }
+    if (more) {
+      for (int r = 0; r < nRings[0]; ++r) {
         tum::device::emitBasalFrom(r, nRingsP, ringAtomsP, deg, cols,
                                    throughCountP, throughP, nAtoms, kMax,
                                    maxPer, maxPairs, nPairsP, pairsP);
       }
-#pragma omp target teams distribute parallel for
-      for (int p = 0; p < maxPairs; ++p) {
+      more = nPairs[0] <= maxPairs;
+    }
+    if (more) {
+      for (int p = 0; p < nPairs[0]; ++p) {
         tum::device::applyHcPair(p, nPairsP, pairsP, ringAtomsP, throughCountP,
                                  throughP, nAtoms, maxPer, hcP);
       }
-#pragma omp target teams distribute parallel for
-      for (int r = 0; r < maxRings; ++r) {
+      for (int r = 0; r < nRings[0]; ++r) {
         tum::device::ddcFrom(r, nRingsP, ringAtomsP, throughCountP, throughP,
                              hcP, nAtoms, maxPer, ddcP);
       }
-#pragma omp target teams distribute parallel for
-      for (int r = 0; r < maxRings; ++r) {
+      for (int r = 0; r < nRings[0]; ++r) {
         tum::device::atomIceFrom(r, nRingsP, ringAtomsP, hcP, ddcP, nAtoms,
                                  atomHcP, atomDdcP);
       }
     }
-    out.nSix = nRings[0] < maxRings ? nRings[0] : maxRings;
-    out.ringsDropped = dropped[0];
-    out.nHcRings = 0;
-    out.nDdcRings = 0;
-    for (int r = 0; r < out.nSix; ++r) {
-      out.nHcRings += hc[static_cast<std::size_t>(r)];
-      out.nDdcRings += ddc[static_cast<std::size_t>(r)];
-    }
-    tallyAtoms(out);
-    return out;
   }
-#else
-  (void)onDevice;
-  (void)degN;
-  (void)colN;
-  (void)ringN;
-  (void)thruN;
-  (void)pairN;
-#endif
 
-  for (int i = 0; i < nAtoms; ++i) {
-    tum::device::enumSixFrom(i, deg, cols, nAtoms, kMax, maxRings, nRingsP,
-                             ringAtomsP, droppedP);
+  const Need need{nRings[0], rowMax, nPairs[0]};
+  if (!fits(need, caps)) {
+    return need;
   }
-  const int found = nRings[0] < maxRings ? nRings[0] : maxRings;
-  for (int r = 0; r < found; ++r) {
-    tum::device::invertOneRing(r, nRingsP, ringAtomsP, nAtoms, maxPer,
-                               throughCountP, throughP);
-  }
-  for (int a = 0; a < nAtoms; ++a) {
-    int n = throughCount[static_cast<std::size_t>(a)];
-    if (n > maxPer) {
-      n = maxPer;
-    }
-    throughCount[static_cast<std::size_t>(a)] = n;
-    tum::device::sortThroughRow(throughP + a * maxPer, n);
-  }
-  for (int r = 0; r < found; ++r) {
-    tum::device::emitBasalFrom(r, nRingsP, ringAtomsP, deg, cols, throughCountP,
-                               throughP, nAtoms, kMax, maxPer, maxPairs,
-                               nPairsP, pairsP);
-  }
-  const int np = nPairs[0] < maxPairs ? nPairs[0] : maxPairs;
-  for (int p = 0; p < np; ++p) {
-    tum::device::applyHcPair(p, nPairsP, pairsP, ringAtomsP, throughCountP,
-                             throughP, nAtoms, maxPer, hcP);
-  }
-  for (int r = 0; r < found; ++r) {
-    tum::device::ddcFrom(r, nRingsP, ringAtomsP, throughCountP, throughP, hcP,
-                         nAtoms, maxPer, ddcP);
-  }
-  for (int r = 0; r < found; ++r) {
-    tum::device::atomIceFrom(r, nRingsP, ringAtomsP, hcP, ddcP, nAtoms, atomHcP,
-                             atomDdcP);
-  }
-  out.nSix = found;
-  out.ringsDropped = dropped[0];
+  out.nSix = nRings[0];
   out.nHcRings = 0;
   out.nDdcRings = 0;
-  for (int r = 0; r < found; ++r) {
+  for (int r = 0; r < out.nSix; ++r) {
     out.nHcRings += hc[static_cast<std::size_t>(r)];
     out.nDdcRings += ddc[static_cast<std::size_t>(r)];
   }
+  out.atomSix = std::move(throughCount);
   tallyAtoms(out);
-  return out;
+  return need;
+}
+
+// Rerun with every overflowed buffer grown to what the pass counted.
+// Caps only grow and never past the true sizes, so the loop ends.
+tum::CageCounts runSpecialized(const std::vector<std::vector<int>> &nList,
+                               bool target, bool usedDevice,
+                               const tum::SpecializedCaps &start) {
+  const FlatGraph g = flattenIndexList(nList);
+  tum::CageCounts out;
+  out.usedDevice = usedDevice;
+  if (g.nAtoms <= 0) {
+    return out;
+  }
+  constexpr long long kIntMax = std::numeric_limits<int>::max();
+  Caps caps;
+  caps.rowCap = std::clamp(start.rowCap, 1, tum::device::kRowCap);
+  caps.ringCap = start.ringCap > 0 ? capProduct(start.ringCap, 1, kIntMax / 6)
+                                   : capProduct(g.nAtoms, 16, kIntMax / 6);
+  caps.pairCap = start.pairCap > 0 ? capProduct(start.pairCap, 1, kIntMax / 2)
+                                   : capProduct(caps.ringCap, 8, kIntMax / 2);
+  int retries = 0;
+  for (;;) {
+    out = tum::CageCounts{};
+    out.usedDevice = usedDevice;
+    const Need need = onePass(g, target, caps, out);
+    if (need.rowMax > tum::device::kRowCap) {
+      out = tum::hostCageCounts(nList);
+      out.retries = retries;
+      out.hostFallback = true;
+      return out;
+    }
+    if (fits(need, caps)) {
+      out.retries = retries;
+      return out;
+    }
+    caps.ringCap = std::max(caps.ringCap, need.nRings);
+    caps.rowCap = std::max(caps.rowCap, need.rowMax);
+    caps.pairCap = std::max(caps.pairCap, need.nPairs);
+    ++retries;
+  }
 }
 
 } // namespace
@@ -253,6 +328,7 @@ tum::hostCageCounts(const std::vector<std::vector<int>> &nList) {
   }
   const auto aff = ring::cageAffiliation(six, nList);
   out.nSix = static_cast<int>(six.size());
+  out.atomSix.assign(static_cast<std::size_t>(nAtoms), 0);
   out.atomHc.assign(static_cast<std::size_t>(nAtoms), 0);
   out.atomDdc.assign(static_cast<std::size_t>(nAtoms), 0);
   for (std::size_t r = 0; r < six.size(); ++r) {
@@ -264,6 +340,7 @@ tum::hostCageCounts(const std::vector<std::vector<int>> &nList) {
     }
     for (const int a : six[r]) {
       if (a >= 0 && a < nAtoms) {
+        ++out.atomSix[static_cast<std::size_t>(a)];
         if (aff.hc[r]) {
           out.atomHc[static_cast<std::size_t>(a)] = 1;
         }
@@ -279,13 +356,19 @@ tum::hostCageCounts(const std::vector<std::vector<int>> &nList) {
 
 tum::CageCounts
 tum::specializedCageCounts(const std::vector<std::vector<int>> &nList) {
-  const FlatGraph g = flattenIndexList(nList);
+  return specializedCageCounts(nList, SpecializedCaps{});
+}
+
+tum::CageCounts
+tum::specializedCageCounts(const std::vector<std::vector<int>> &nList,
+                           const SpecializedCaps &caps) {
 #ifdef SEAMS_HAS_OFFLOAD
-  if (preferOffload() && omp_get_num_devices() > 0) {
-    return runSpecialized(g, true);
+  const bool device = preferOffload() && omp_get_num_devices() > 0;
+  if (device || caps.forceTarget) {
+    return runSpecialized(nList, true, device, caps);
   }
 #endif
-  return runSpecialized(g, false);
+  return runSpecialized(nList, false, false, caps);
 }
 
 tum::CageCounts tum::cageCounts(const std::vector<std::vector<int>> &nList) {

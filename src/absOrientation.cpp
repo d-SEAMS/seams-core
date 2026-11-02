@@ -13,6 +13,9 @@
 //-----------------------------------------------------------------------------------
 
 #include <absOrientation.hpp>
+#include <ozaki.hpp>
+
+#include <vector>
 
 /**
  * @details Get the absolute orientation using Horn's algorithm (with
@@ -130,8 +133,29 @@ int absor::hornAbsOrientation(const Eigen::MatrixXd &refPoints,
 Eigen::MatrixXd absor::calcMatrixS(const Eigen::MatrixXd &centeredRefPnts,
                                    const Eigen::MatrixXd &centeredTargetPnts,
                                    int nop, int dim) {
-  // S = target^T * ref (each column dot product gives Sij)
-  return centeredTargetPnts.transpose() * centeredRefPnts;
+  // S = target^T * ref (each column dot product gives Sij).
+  // The default path is Eigen's product. Ozaki-I / Dot2 / Ozaki-II replace
+  // that  dim x nop x dim  product when a product mode is selected. nop is
+  // the shell size (about 6 to 12), so this is a short dot, not a tile.
+  const auto productMode = seams::product::mode();
+  if (productMode == seams::product::Mode::Fp64 || nop <= 0 || dim <= 0) {
+    return centeredTargetPnts.transpose() * centeredRefPnts;
+  }
+  Eigen::MatrixXd S(dim, dim);
+  std::vector<double> left(static_cast<std::size_t>(nop));
+  std::vector<double> right(static_cast<std::size_t>(nop));
+  for (int i = 0; i < dim; i++) {
+    for (int t = 0; t < nop; t++) {
+      left[static_cast<std::size_t>(t)] = centeredTargetPnts(t, i);
+    }
+    for (int j = 0; j < dim; j++) {
+      for (int t = 0; t < nop; t++) {
+        right[static_cast<std::size_t>(t)] = centeredRefPnts(t, j);
+      }
+      S(i, j) = seams::product::realDot(left.data(), right.data(), nop, productMode).value;
+    }
+  }
+  return S;
 } // end of function
 
 /**

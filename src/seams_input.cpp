@@ -25,6 +25,7 @@
 #include <fstream>
 #include <generic.hpp>
 #include <map>
+#include <neighbours.hpp>
 #include <memory>
 #include <mutex>
 #include <seams_input.hpp>
@@ -434,14 +435,44 @@ std::vector<std::vector<int>> sinp::readBonds(std::string filename) {
       tokens = gen::tokenizer(line);
 
       id.clear();
-
-      for (int i = 0; i < tokens.size(); i++) {
-        id.push_back(std::stoi(tokens[i]));
-      } // end of for, assigning values to id
-
+      bool ok = true;
+      for (int i = 0; i < static_cast<int>(tokens.size()); i++) {
+        try {
+          id.push_back(std::stoi(tokens[i]));
+        } catch (const std::exception &) {
+          ok = false;
+          break;
+        }
+      }
+      if (!ok || id.empty()) {
+        continue;
+      }
       bonds.push_back(id);
 
     } // end of while, till EOF
+    // The comment above this function shows a RINGS line whose last
+    // column is a constant 0/1 flag, not an atom ID. Drop that column
+    // only when every row carries the same flag and is wider than a pair.
+    bool dropFlag = !bonds.empty();
+    int flag = 0;
+    for (std::size_t row = 0; row < bonds.size(); row++) {
+      const auto &ids = bonds[row];
+      if (ids.size() < 3 || (ids.back() != 0 && ids.back() != 1)) {
+        dropFlag = false;
+        break;
+      }
+      if (row == 0) {
+        flag = ids.back();
+      } else if (ids.back() != flag) {
+        dropFlag = false;
+        break;
+      }
+    }
+    if (dropFlag) {
+      for (auto &ids : bonds) {
+        ids.pop_back();
+      }
+    }
     // ----------------------------------------------------------
   } // End of if file open statement
 
@@ -490,7 +521,20 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
 
     // The first line contains the number of atoms
     std::getline((*xyzFile), line);
-    nop = std::stoi(line);
+    try {
+      nop = std::stoi(line);
+    } catch (const std::exception &) {
+      xyzFile->close();
+      std::cerr << "XYZ header is not an atom count.\n";
+      yCloud.nop = 0;
+      return yCloud;
+    }
+    if (nop < 0) {
+      xyzFile->close();
+      std::cerr << "XYZ header is not an atom count.\n";
+      yCloud.nop = 0;
+      return yCloud;
+    }
     // Skip the comment line
     std::getline((*xyzFile), line);
     // Reserve memory for atom coordinates using nop read in
@@ -535,9 +579,13 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
       } else {
         iPoint.type = 1;
       }
-      iPoint.x = std::stod(tokens[coordinateOffset]);
-      iPoint.y = std::stod(tokens[coordinateOffset + 1]);
-      iPoint.z = std::stod(tokens[coordinateOffset + 2]);
+      try {
+        iPoint.x = std::stod(tokens[coordinateOffset]);
+        iPoint.y = std::stod(tokens[coordinateOffset + 1]);
+        iPoint.z = std::stod(tokens[coordinateOffset + 2]);
+      } catch (const std::exception &) {
+        continue;
+      }
       if (yCloud.pts.empty()) {
         xLo = xHi = iPoint.x;
         yLo = yHi = iPoint.y;
@@ -571,8 +619,11 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
   yCloud.boxLow = {xLo, yLo, zLo};
   yCloud.currentFrame = 1;
 
-  if (yCloud.pts.size() != yCloud.nop) {
-    std::cout << "Atoms didn't get filled in properly.\n";
+  if (yCloud.pts.size() != static_cast<std::size_t>(yCloud.nop)) {
+    std::cerr << "Atoms didn't get filled in properly.\n";
+    // Callers index pts with nop. A short file must not keep the header
+    // count, or the next loop reads past pts.
+    yCloud.nop = static_cast<int>(yCloud.pts.size());
   }
 
   return yCloud;
@@ -602,8 +653,11 @@ void parseLammpsFrameBody(
   int yIndex = -1;
   int zIndex = -1;
   int typeIndex = -1;
-  int molIndex = 0;
-  int atomIndex = 0;
+  int molIndex = -1;
+  int atomIndex = -1;
+  bool sawId = false;
+  bool sawMol = false;
+  int nextSyntheticId = 1;
   bool isTriclinic = false;
   int nKept = 0;
   molSys::Point<double> iPoint;
@@ -662,12 +716,31 @@ void parseLammpsFrameBody(
         yIndex >= 0 && zIndex >= 0) {
       double fields[kMaxDumpFields];
       const int n = parseDumpFields(line, fields, kMaxDumpFields);
-      const int need = std::max({typeIndex, xIndex, yIndex, zIndex, molIndex,
-                                 atomIndex});
-      if (n > need) {
+      int need = std::max({typeIndex, xIndex, yIndex, zIndex});
+      if (sawId) {
+        need = std::max(need, atomIndex);
+      }
+      if (sawMol) {
+        need = std::max(need, molIndex);
+      }
+      // n is the field count, and need is a 0-based column, so the line
+      // must hold at least need + 1 fields.
+      if (n > need && typeIndex >= 0) {
         iPoint.type = static_cast<int>(fields[typeIndex]);
-        iPoint.molID = static_cast<int>(fields[molIndex]);
-        iPoint.atomID = static_cast<int>(fields[atomIndex]);
+        // A dump with no id column cannot reuse the type column: every
+        // oxygen would share one ID and the last atom would win the map.
+        if (sawId) {
+          iPoint.atomID = static_cast<int>(fields[atomIndex]);
+        } else {
+          iPoint.atomID = nextSyntheticId++;
+        }
+        // mol in column 0 is a real column. A missing mol column used to
+        // be detected by molIndex staying 0, which overwrote that column.
+        if (sawMol) {
+          iPoint.molID = static_cast<int>(fields[molIndex]);
+        } else {
+          iPoint.molID = iPoint.atomID;
+        }
         iPoint.x = fields[xIndex];
         iPoint.y = fields[yIndex];
         iPoint.z = fields[zIndex];
@@ -695,21 +768,23 @@ void parseLammpsFrameBody(
       } else if (tokens[1] == "ATOMS") {
         readAtoms = true;
         xIndex = yIndex = zIndex = typeIndex = -1;
-        molIndex = 0;
-        atomIndex = 0;
+        molIndex = -1;
+        atomIndex = -1;
+        sawId = false;
+        sawMol = false;
+        nextSyntheticId = 1;
         for (int i = 2; i < static_cast<int>(tokens.size()); i++) {
           if (tokens[i] == "type") {
             typeIndex = i - 2;
           } else if (tokens[i] == "mol") {
             molIndex = i - 2;
+            sawMol = true;
           } else if (tokens[i] == "id") {
             atomIndex = i - 2;
+            sawId = true;
           } else {
             noteCoordColumn(i - 2, tokens[i], xIndex, yIndex, zIndex);
           }
-        }
-        if (molIndex == 0) {
-          molIndex = atomIndex;
         }
       }
     }
@@ -722,9 +797,14 @@ void parseLammpsFrameBody(
     if (yCloud.pts.size() != static_cast<std::size_t>(nKept)) {
       std::cerr << "Atoms didn't get filled in properly.\n";
     }
-  } else if (nop >= 0 && yCloud.pts.size() != static_cast<std::size_t>(yCloud.nop)) {
+  } else if (yCloud.pts.size() !=
+             static_cast<std::size_t>(yCloud.nop < 0 ? 0 : yCloud.nop)) {
+    // A count that does not fit in int leaves nop unset. The atoms that
+    // were actually read are the frame.
+    if (nop >= 0 || !yCloud.pts.empty()) {
+      std::cerr << "Atoms didn't get filled in properly.\n";
+    }
     yCloud.nop = static_cast<int>(yCloud.pts.size());
-    std::cerr << "Atoms didn't get filled in properly.\n";
   }
 }
 
@@ -887,9 +967,13 @@ sinp::readChemfiles(std::string filename, int targetFrame,
   auto positions = frame.positions();
   auto cell = frame.cell();
 
-  // Box dimensions
-  yCloud.box = {cell.lengths()[0], cell.lengths()[1], cell.lengths()[2]};
-  yCloud.boxLow = {0.0, 0.0, 0.0};
+  // Lengths alone drop the cell angles. A GRO or PDB triclinic cell
+  // then takes orthorhombic minimum images.
+  const auto lengths = cell.lengths();
+  const auto angles = cell.angles();
+  nneigh::setBoxFromLengthsAngles(yCloud.box, yCloud.boxLow, lengths[0],
+                                 lengths[1], lengths[2], angles[0], angles[1],
+                                 angles[2]);
 
   auto &topology = frame.topology();
 
@@ -952,9 +1036,7 @@ sinp::readChemfiles(std::string filename, int targetFrame,
 
 #ifdef SEAMS_HAS_READCON
 #include <readcon-core.hpp>
-#ifdef SEAMS_HAS_MINIMAGE
-#include <minimage.h>
-#endif
+#include <numbers>
 #ifdef SEAMS_HAS_READCON_DB
 #include <readcon-db.h>
 #endif
@@ -970,39 +1052,50 @@ bool conAnglesOrtho(const double angles[3]) {
   return true;
 }
 
-// CON lengths and angles are minimage's from_con_box basis. An
-// orthorhombic cell stays three bound spans so the pair loop does not
-// take the triclinic path. A shear is stored as dump spans plus xy, xz,
-// yz, which is the box lammpsBoxToLcCell already copies onto lc_cell.
+// CON lengths and angles are the ASE / eOn crystallographic basis.
+// An orthorhombic cell stays three bound spans so the pair loop does
+// not take the triclinic path. A shear is stored as dump spans plus
+// xy, xz, yz, the same box a tilt dump already carries. The conversion
+// does not need libminimage.
 void applyConCell(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                   const double cell[3], const double angles[3]) {
-#ifdef SEAMS_HAS_MINIMAGE
-  mi_cell raw{};
-  if (mi_cell_from_con_box(cell, angles, &raw) == 0) {
-    if (conAnglesOrtho(angles)) {
-      yCloud.box = {raw.ax, raw.by, raw.cz};
-      yCloud.boxLow = {raw.ox, raw.oy, raw.oz};
-      return;
-    }
-    const double xy = raw.bx;
-    const double xz = raw.cx;
-    const double yz = raw.cy;
-    const double lx = raw.ax;
-    const double ly = raw.by;
-    const double lz = raw.cz;
-    const double xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));
-    const double xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));
-    const double ymin = std::min(0.0, yz);
-    const double ymax = std::max(0.0, yz);
-    yCloud.box = {lx + xmax - xmin, ly + ymax - ymin, lz, xy, xz, yz};
-    yCloud.boxLow = {raw.ox + xmin, raw.oy + ymin, raw.oz};
+  const double aLen = cell[0];
+  const double bLen = cell[1];
+  const double cLen = cell[2];
+  yCloud.boxLow = {0.0, 0.0, 0.0};
+  if (!(aLen > 0.0 && bLen > 0.0 && cLen > 0.0)) {
+    yCloud.box = {aLen, bLen, cLen};
     return;
   }
-#else
-  (void)angles;
-#endif
-  yCloud.box = {cell[0], cell[1], cell[2]};
-  yCloud.boxLow = {0.0, 0.0, 0.0};
+  constexpr double deg = std::numbers::pi / 180.0;
+  const double cosA = std::cos(angles[0] * deg);
+  const double cosB = std::cos(angles[1] * deg);
+  const double cosG = std::cos(angles[2] * deg);
+  const double sinG = std::sin(angles[2] * deg);
+  if (std::abs(sinG) < 1e-18) {
+    yCloud.box = {aLen, bLen, cLen};
+    return;
+  }
+  const double xy = bLen * cosG;
+  const double ly = bLen * sinG;
+  const double xz = cLen * cosB;
+  const double yz = cLen * (cosA - cosB * cosG) / sinG;
+  const double cz2 = cLen * cLen - xz * xz - yz * yz;
+  if (!(cz2 > 0.0)) {
+    yCloud.box = {aLen, bLen, cLen};
+    return;
+  }
+  const double lz = std::sqrt(cz2);
+  if (conAnglesOrtho(angles)) {
+    yCloud.box = {aLen, ly, lz};
+    return;
+  }
+  const double xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));
+  const double xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));
+  const double ymin = std::min(0.0, yz);
+  const double ymax = std::max(0.0, yz);
+  yCloud.box = {aLen + xmax - xmin, ly + ymax - ymin, lz, xy, xz, yz};
+  yCloud.boxLow = {xmin, ymin, 0.0};
 }
 
 bool cloudFromHandle(
@@ -1015,10 +1108,15 @@ bool cloudFromHandle(
   applyConCell(yCloud, frame->cell, frame->angles);
   uintptr_t nxyz = 0;
   const double *xyz = readcon::rkr_frame_xyz_f64(handle, &nxyz);
+  // n is the atom count and the buffer is row-major xyz. Matching only
+  // y and z of atom 0 accepts a column-major buffer when that atom has
+  // y == z and the next x happens to equal them.
   const bool rowMajor =
       xyz != nullptr && nxyz == frame->num_atoms &&
       (frame->num_atoms == 0 ||
-       (xyz[1] == frame->atoms[0].y && xyz[2] == frame->atoms[0].z));
+       (xyz[0] == frame->atoms[0].x && xyz[1] == frame->atoms[0].y &&
+        xyz[2] == frame->atoms[0].z &&
+        (frame->num_atoms < 2 || xyz[3] == frame->atoms[1].x)));
   yCloud.pts.reserve(frame->num_atoms);
   for (size_t i = 0; i < frame->num_atoms; i++) {
     const readcon::CAtom &atom = frame->atoms[i];

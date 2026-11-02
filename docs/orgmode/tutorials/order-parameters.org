@@ -1,0 +1,31 @@
+#+TITLE: Bond-orientational order parameters
+#+OPTIONS: toc:nil num:nil
+
+~Frame.steinhardt(l)~ returns the local ~q_l~ and the Lechner-Dellago average for every atom.
+The neighbour list is the cutoff list.
+Degrees 3, 4, 6, 8, and 12 are computed.
+~seams steinhardt~ uses the mutual four-nearest list, so its means on the mixed frame are not these means.
+
+The runnable copy is =docs/tutorials/test_order_parameters.py=.
+
+#+begin_src python
+import pydseams as ds
+
+frame = ds.read("input/traj/exampleTraj.lammpstrj", atom_type=2)
+q3 = frame.steinhardt(3)
+#+end_src
+
+~q3["ql"]~ and ~q3["ql_bar"]~ are the per-atom arrays.
+On this frame the finite means are about 0.374897 and 0.187542.
+
+The local parameter is
+
+\[
+q_l(i) = \sqrt{\frac{4\pi}{2l+1} \sum_{m=-l}^{l} |q_{lm}(i)|^2}
+\]
+
+with
+
+\[
+q_{lm}(i) = \frac{1}{N_b(i)} \sum_{j \in N(i)} Y_{lm}(\hat r_{ij}).
+\]

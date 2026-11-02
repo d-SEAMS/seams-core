@@ -1,0 +1,140 @@
+#' Read one trajectory frame.
+#'
+#' `type = 0` guesses oxygen (LAMMPS type 2, otherwise type 1). A positive
+#' type keeps that species. A negative type keeps every atom.
+#'
+#' @param path Path to a LAMMPS dump, or an XYZ file.
+#' @param frame 1-based frame index.
+#' @param type LAMMPS type filter.
+#' @return An object of class `dseams_frame`.
+#' @export
+read_frame <- function(path, frame = 1L, type = 0L) {
+  path <- normalizePath(path, mustWork = TRUE)
+  ptr <- read_frame_(path, as.integer(frame), as.integer(type))
+  structure(
+    list(ptr = ptr, path = path, frame = as.integer(frame), type = as.integer(type)),
+    class = "dseams_frame"
+  )
+}
+
+#' Number of LAMMPS timesteps in a dump. An XYZ file counts as one.
+#' @param path Trajectory path.
+#' @export
+nframes <- function(path) {
+  nframes_(normalizePath(path, mustWork = TRUE))
+}
+
+#' @export
+print.dseams_frame <- function(x, ...) {
+  cat("dseams frame", x$frame, "nop", nop_(x$ptr), "\n", sep = " ")
+  invisible(x)
+}
+
+#' Atom positions, one row per atom.
+#' @param frame A `dseams_frame`.
+#' @export
+positions <- function(frame) {
+  UseMethod("positions")
+}
+
+#' @export
+positions.dseams_frame <- function(frame) {
+  n <- nop_(frame$ptr)
+  matrix(positions_(frame$ptr), nrow = n, ncol = 3, byrow = TRUE,
+         dimnames = list(NULL, c("x", "y", "z")))
+}
+
+#' CHILL+ ice labels.
+#'
+#' `graph = "cutoff"` (the default) bonds every pair closer than `cutoff`,
+#' as `seams chill-plus`, pydseamslib, and Julia do by default.
+#' `graph = "mutual"` keeps the mutual four nearest neighbours inside
+#' `cutoff + 1.5`.
+#'
+#' @param frame A `dseams_frame`.
+#' @param cutoff Neighbour cutoff in angstrom. For the mutual graph this is
+#'   only the cell-size hint (`cutoff + 1.5`).
+#' @param type LAMMPS type. 0 uses the first atom's type.
+#' @param graph `"cutoff"` or `"mutual"`.
+#' @return A data.frame with columns `atom`, `type`, `label`, `name`.
+#'   The `counts` attribute is the nine-label histogram.
+#' @export
+chill_plus <- function(frame, cutoff = 3.5, type = 0L, graph = "cutoff") {
+  UseMethod("chill_plus")
+}
+
+#' @export
+chill_plus.dseams_frame <- function(frame, cutoff = 3.5, type = 0L,
+                                    graph = "cutoff") {
+  out <- chill_plus_(frame$ptr, cutoff, as.integer(type), graph)
+  class(out) <- c("dseams_ice", "data.frame")
+  out
+}
+
+#' Hexagonal-cage and double-diamond membership.
+#'
+#' @param frame A `dseams_frame`.
+#' @param cutoff Neighbour cutoff in angstrom.
+#' @param type LAMMPS type. 0 uses the first atom's type.
+#' @param k Neighbours kept by the k-nearest graphs.
+#' @param graph `"seeded"`, `"mutual"`, `"cutoff"`, or `"knn-union"`.
+#' @return A data.frame with columns `atom`, `cage`, `name`.
+#'   Attributes `n_ih`, `n_ic`, `n_both`, `n_water` are disjoint and match
+#'   `seams cages` (hexagonal only, cubic only, both, water). Per-atom
+#'   `cage` is 0 water, 1 hexagonal, 2 cubic, 3 both.
+#' @export
+cages <- function(frame, cutoff = 3.5, type = 0L, k = 4L, graph = "seeded") {
+  UseMethod("cages")
+}
+
+#' @export
+cages.dseams_frame <- function(frame, cutoff = 3.5, type = 0L, k = 4L,
+                               graph = "seeded") {
+  out <- cages_(frame$ptr, cutoff, as.integer(type), as.integer(k), graph)
+  class(out) <- c("dseams_cages", "data.frame")
+  out
+}
+
+#' Primitive ring census.
+#'
+#' @param frame A `dseams_frame`.
+#' @param cutoff Neighbour cutoff in angstrom.
+#' @param type LAMMPS type.
+#' @param graph `"mutual"` or `"cutoff"`.
+#' @param max_depth Largest ring retained.
+#' @return A data.frame with columns `size` and `n`.
+#' @export
+primitive_rings <- function(frame, cutoff = 3.5, type = 0L, graph = "mutual",
+                            max_depth = 6L) {
+  UseMethod("primitive_rings")
+}
+
+#' @export
+primitive_rings.dseams_frame <- function(frame, cutoff = 3.5, type = 0L,
+                                         graph = "mutual", max_depth = 6L) {
+  out <- rings_(frame$ptr, cutoff, as.integer(type), graph, as.integer(max_depth))
+  class(out) <- c("dseams_rings", "data.frame")
+  out
+}
+
+#' Steinhardt order parameters.
+#'
+#' `ql` is the local parameter. `qlbar` is the Lechner-Dellago neighbour average.
+#'
+#' @param frame A `dseams_frame`.
+#' @param order_l Spherical-harmonic degree. 3, 4, 6, 8, and 12 are computed.
+#' @param cutoff Neighbour cutoff in angstrom. The neighbour list is the
+#'   mutual four-nearest, with `cutoff + 1.5` as the cell hint.
+#' @param type LAMMPS type.
+#' @return A data.frame with columns `atom`, `ql`, `qlbar`.
+#' @export
+steinhardt <- function(frame, order_l = 6L, cutoff = 3.5, type = 0L) {
+  UseMethod("steinhardt")
+}
+
+#' @export
+steinhardt.dseams_frame <- function(frame, order_l = 6L, cutoff = 3.5, type = 0L) {
+  out <- steinhardt_(frame$ptr, cutoff, as.integer(type), as.integer(order_l))
+  class(out) <- c("dseams_steinhardt", "data.frame")
+  out
+}

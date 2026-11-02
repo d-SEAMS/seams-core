@@ -33,7 +33,9 @@ double mic1(double d, double L) {
     return d;
   }
   const double q = d / L;
-  const double n = q >= 0.0 ? (long long)(q + 0.5) : (long long)(q - 0.5);
+  // (long long)(q + 0.5) rounds the wrong way for several negative
+  // values and for a half that is not exactly representable.
+  const double n = static_cast<double>(std::llround(q));
   return d - L * n;
 }
 

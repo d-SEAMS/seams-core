@@ -53,7 +53,13 @@ std::vector<double> localDensity(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     double rcut);
 
-//! Bulk mass density in g/cm^3 from nop and the box (18.015 g/mol).
+//! Bulk mass density in g/cm^3. The volume is the triclinic cell
+//! volume, not the product of the bound spans. molarMass is g/mol.
+double frameDensity(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    double molarMass);
+
+//! Water, 18.015 g/mol.
 double frameDensity(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 

@@ -535,3 +535,12 @@ TEST_CASE("createBondsFromCages with no matching cage type returns empty",
 
   REQUIRE(nRings == 0);
 }
+
+TEST_CASE("createBondsFromCages with no rings returns empty", "[bond]") {
+  std::vector<std::vector<int>> rings;
+  std::vector<cage::Cage> cageList;
+  int nRings = 7;
+  auto bonds =
+      bond::createBondsFromCages(rings, cageList, cage::cageType::HexC, nRings);
+  REQUIRE(bonds.empty());
+}

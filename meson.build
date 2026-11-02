@@ -7,8 +7,8 @@
 #-----------------------------------------------------------------------------------
 
 project('seams-core', ['cpp', 'c'],
-  version: '2.11.0',
-  default_options: ['warning_level=2', 'cpp_std=c++20'],
+  version: '2.12.0',
+  default_options: ['warning_level=2', 'cpp_std=c++20', 'b_ndebug=if-release'],
   meson_version: '>=1.3.0')
 
 host_system = host_machine.system()
@@ -472,9 +472,10 @@ if get_option('with_tests')
   subdir('tests')
 endif
 
-# Python bindings are not in this repository.
+# Python is PydSEAMSlib (pip install pydseamslib). R and Julia call
+# libseams_lang. Do not build a second Python module here.
 if get_option('with_python')
-  error('Python is pydseams: https://github.com/d-SEAMS/PydSEAMSlib')
+  error('Python is pydseamslib: https://github.com/d-SEAMS/PydSEAMSlib')
 endif
 
 # Lua is a library in the yodaStruct / luadseams repo, not this one.
@@ -637,6 +638,16 @@ if get_option('with_cli')
     workdir: meson.project_source_root(),
     timeout: 120)
   test(
+    'seams_chill_plus_default_is_cutoff_list',
+    python3,
+    args: [
+      '-c',
+      'import subprocess,sys; run=lambda *a: subprocess.run([sys.argv[1],"chill-plus",sys.argv[2],"--cutoff","3.5",*a],capture_output=True,text=True); d=run(); m=run("--graph","mutual"); ok=d.returncode==0 and m.returncode==0 and "interClathrate 12 water 238" in d.stdout and "clathrate 1 interClathrate 7 water 242" in m.stdout; sys.exit(0 if ok else 1)',
+      seams_exe.full_path(),
+      meson.project_source_root() / 'input' / 'traj' / 'exampleTraj.lammpstrj',
+    ],
+    depends: [seams_exe])
+  test(
     'seams_help_mentions_domains',
     python3,
     args: [
@@ -719,6 +730,16 @@ if get_option('with_cli')
     ],
     depends: [seams_exe],
     timeout: 60)
+  test(
+    'seams_carried_frames_match_rebuild',
+    python3,
+    args: [
+      files('tests/cli_carry.py'),
+      seams_exe.full_path(),
+      meson.project_source_root() / 'input' / 'traj',
+    ],
+    depends: [seams_exe],
+    timeout: 600)
   _mpiexec = find_program('mpiexec', required: false)
   if mpi_found and _mpiexec.found()
     test(
@@ -736,3 +757,5 @@ if get_option('with_cli')
       timeout: 300)
   endif
 endif
+
+subdir('bindings')

@@ -13,6 +13,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <algorithm>
+#include <cstdint>
 #include <numeric>
 #include <vector>
 
@@ -98,6 +99,29 @@ struct BoundedBalls {
     fillList(adjacency, radius, all);
   }
 
+  // Same sweep as fillList, keeping each ball's buffer when the
+  // vertex count has not changed. A whole-frame refill only.
+  template <typename Graph> void refillAll(const Graph &adjacency, int radius) {
+    const int nVertices = static_cast<int>(adjacency.size());
+    if (static_cast<int>(ball.size()) != nVertices) {
+      ball.assign(static_cast<std::size_t>(nVertices), {});
+    }
+    const int nWhich = nVertices;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (nWhich >= 256 && !omp_in_parallel())
+#endif
+    {
+      std::vector<int> dist(nVertices, -1);
+      std::vector<int> touched, frontier, next;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
+      for (int v = 0; v < nWhich; v++) {
+        fillVertex(v, adjacency, radius, dist, touched, frontier, next);
+      }
+    }
+  }
+
   template <typename Graph>
   void fillList(const Graph &adjacency, int radius,
                 const std::vector<int> &which) {
@@ -120,15 +144,18 @@ struct BoundedBalls {
   }
 
   // Balls that can change are those of vertices within `radius` of a
-  // changed endpoint, in the union of the two frames' graphs.
-  int refreshNear(const std::vector<std::vector<int>> &unionAdj,
-                  const std::vector<std::vector<int>> &newAdj,
+  // changed endpoint, in the union of the two frames' graphs. Unchanged
+  // rows are identical, so the union is walked as the new row everywhere
+  // and the old row as well on a changed vertex.
+  template <typename Graph>
+  int refreshNear(const Graph &oldAdj, const Graph &newAdj,
                   const std::vector<int> &changed, int radius) {
     const int nVertices = static_cast<int>(newAdj.size());
     if (static_cast<int>(ball.size()) != nVertices) {
-      fillAll(newAdj, radius);
+      refillAll(newAdj, radius);
       return nVertices;
     }
+    std::vector<char> isChanged(static_cast<std::size_t>(nVertices), 0);
     std::vector<int> dist(nVertices, -1);
     std::vector<int> frontier, next, affected;
     for (const int v : changed) {
@@ -136,12 +163,22 @@ struct BoundedBalls {
         dist[v] = 0;
         frontier.push_back(v);
         affected.push_back(v);
+        isChanged[static_cast<std::size_t>(v)] = 1;
       }
     }
     for (int depth = 1; depth <= radius && !frontier.empty(); depth++) {
       next.clear();
       for (const int u : frontier) {
-        for (const int w : unionAdj[u]) {
+        if (isChanged[static_cast<std::size_t>(u)]) {
+          for (const int w : oldAdj[u]) {
+            if (w >= 0 && w < nVertices && dist[w] == -1) {
+              dist[w] = depth;
+              affected.push_back(w);
+              next.push_back(w);
+            }
+          }
+        }
+        for (const int w : newAdj[u]) {
           if (w >= 0 && w < nVertices && dist[w] == -1) {
             dist[w] = depth;
             affected.push_back(w);
@@ -233,7 +270,7 @@ inline bool pushUniqueMember(std::vector<int> &ring, int v) {
  *  of lvl[v] vertices (source excluded, v last), stored back to back in
  *  pathBuf from pathFirst[v].
  */
-struct RingScratch {
+struct alignas(64) RingScratch {
   std::vector<int> lvl;
   std::vector<int> touched, frontier, next;
   std::vector<int> pathFirst, pathCount, pathBuf;
@@ -282,14 +319,44 @@ void shortestPathsFrom(const Graph &adjacency, int src, RingScratch &scr) {
 
 /**
  * @details Enumerates every primitive ring whose lowest-indexed member is
- *  @a src, appending to @a out. Shared by the whole-frame construction and
- *  the incremental updater, which re-runs it only for sources a
- *  frame-to-frame change can reach.
+ *  @a src, appending them to @a out in canonical form (from the lowest
+ *  member toward its lesser neighbour) and sorted. With @a through, every
+ *  primitive ring through @a src whose lowest flagged member is @a src
+ *  instead, appended unsorted: the incremental updater collects those for
+ *  the flagged vertices around a change.
  */
-template <typename Graph>
+//! Logical prefix of a persistent ring buffer. push_back assigns into storage
+//! that already has capacity, so a later frame does not allocate. One pool
+//! occupies its own cache line: adjacent sources are often in flight on
+//! different threads, and a shared line makes those writes wait on each other.
+struct alignas(64) RingPool {
+  std::vector<std::vector<int>> storage;
+  std::size_t n = 0;
+
+  void reset() { n = 0; }
+  std::size_t size() const { return n; }
+
+  void push_back(const std::vector<int> &ring) {
+    if (n == storage.size()) {
+      storage.emplace_back();
+    }
+    auto &dst = storage[n];
+    if (dst.capacity() < ring.size()) {
+      dst.reserve(ring.size());
+    }
+    dst.assign(ring.begin(), ring.end());
+    ++n;
+  }
+
+  using iterator = std::vector<std::vector<int>>::iterator;
+  iterator begin() { return storage.begin(); }
+  iterator end() { return storage.begin() + static_cast<std::ptrdiff_t>(n); }
+};
+
+template <typename Graph, typename Out>
 void enumerateFromSource(const Graph &adjacency, const BoundedBalls &balls,
                          int src, int maxDepth, int maxLvl, RingScratch &scr,
-                         std::vector<std::vector<int>> &out) {
+                         Out &out, const std::vector<char> *through = nullptr) {
   const int nVertices = static_cast<int>(adjacency.size());
   if (static_cast<int>(scr.lvl.size()) != nVertices) {
     scr.lvl.assign(nVertices, -1);
@@ -300,12 +367,29 @@ void enumerateFromSource(const Graph &adjacency, const BoundedBalls &balls,
   // Directing: only the lowest-indexed member of a ring enumerates it, so
   // vertices below the source leave the level field entirely. Only touched
   // vertices hold a level.
-  for (const int v : scr.touched) {
-    if (v < src) {
-      scr.lvl[v] = -1;
+  if (through == nullptr) {
+    for (const int v : scr.touched) {
+      if (v < src) {
+        scr.lvl[v] = -1;
+      }
     }
   }
   shortestPathsFrom(adjacency, src, scr);
+  const std::size_t first = out.size();
+  auto keep = [&](std::vector<int> &r) {
+    if (through != nullptr) {
+      for (const int v : r) {
+        if (v < src && (*through)[static_cast<std::size_t>(v)]) {
+          return;
+        }
+      }
+      std::rotate(r.begin(), std::min_element(r.begin(), r.end()), r.end());
+    }
+    if (r.size() > 2 && r[1] > r.back()) {
+      std::reverse(r.begin() + 1, r.end());
+    }
+    out.push_back(r);
+  };
   std::vector<int> &ring = scr.ring;
   for (const int p : scr.touched) {
     const int lp = scr.lvl[p];
@@ -329,7 +413,7 @@ void enumerateFromSource(const Graph &adjacency, const BoundedBalls &balls,
             ok = pushUniqueMember(ring, pb[i]);
           }
           if (ok && ringIsPrimitive(balls, ring)) {
-            out.push_back(ring);
+            keep(ring);
           }
         }
       }
@@ -354,12 +438,15 @@ void enumerateFromSource(const Graph &adjacency, const BoundedBalls &balls,
               ok = pushUniqueMember(ring, pb[i]);
             }
             if (ok && ringIsPrimitive(balls, ring)) {
-              out.push_back(ring);
+              keep(ring);
             }
           }
         }
       }
     }
+  }
+  if (through == nullptr) {
+    std::sort(out.begin() + static_cast<std::ptrdiff_t>(first), out.end());
   }
 }
 
@@ -385,6 +472,11 @@ void enumerateFromSource(const Graph &adjacency, const BoundedBalls &balls,
  *  fewer edges than around the ring. Each such question is answered by a
  *  lookup into per-vertex bounded neighbourhoods computed once for the whole
  *  search.
+ *
+ *  Each ring starts at its lowest-indexed member and runs toward the lesser
+ *  of that member's two ring neighbours, and the rings are sorted
+ *  lexicographically: the output depends on the graph alone, not on the
+ *  order of the neighbour rows.
  *
  *  primitive::countAllRingsFromIndex and primitive::removeNonSPrings remain
  *  available and produce the same ring set by the generate-then-filter route.
@@ -414,21 +506,44 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth,
   }
 
   // Adjacency by index; the first element of each nList row is the vertex
-  // itself, so it is skipped
+  // itself, so it is skipped. A repeated neighbour is one edge. A self
+  // entry and an index outside the cloud are not edges.
   const int nVertices = static_cast<int>(nList.size());
+  std::vector<std::vector<int>> uniq(static_cast<std::size_t>(nVertices));
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nVertices >= 256 && !omp_in_parallel())
+#endif
+  for (int i = 0; i < nVertices; i++) {
+    if (nList[static_cast<std::size_t>(i)].size() <= 1) {
+      continue;
+    }
+    auto &row = uniq[static_cast<std::size_t>(i)];
+    row.reserve(nList[static_cast<std::size_t>(i)].size() - 1);
+    for (std::size_t k = 1; k < nList[static_cast<std::size_t>(i)].size(); k++) {
+      const int j = nList[static_cast<std::size_t>(i)][k];
+      if (j < 0 || j >= nVertices || j == i) {
+        continue;
+      }
+      if (std::find(row.begin(), row.end(), j) == row.end()) {
+        row.push_back(j);
+      }
+    }
+  }
   PackedRows adjacency;
   adjacency.first.assign(nVertices + 1, 0);
   for (int i = 0; i < nVertices; i++) {
     adjacency.first[i + 1] =
-        adjacency.first[i] + (nList[i].empty() ? 0 : nList[i].size() - 1);
+        adjacency.first[i] +
+        static_cast<int>(uniq[static_cast<std::size_t>(i)].size());
   }
   adjacency.cols.resize(adjacency.first[nVertices]);
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (nVertices >= 256 && !omp_in_parallel())
 #endif
   for (int i = 0; i < nVertices; i++) {
-    if (nList[i].size() > 1) {
-      std::copy(nList[i].begin() + 1, nList[i].end(),
+    const auto &row = uniq[static_cast<std::size_t>(i)];
+    if (!row.empty()) {
+      std::copy(row.begin(), row.end(),
                 adjacency.cols.begin() +
                     static_cast<std::ptrdiff_t>(adjacency.first[i]));
     }
@@ -684,8 +799,11 @@ primitive::Graph primitive::populateGraphFromNListID(
         jatomIndex = it->second;
       } // found jatomIndex
       else {
-        std::cerr << "Panic induced!\n";
-        return fullGraph;
+        // A missing ID used to return the vertices built so far. Callers
+        // then treated that prefix as the whole graph.
+        std::cerr << "Skipping neighbour ID " << jatomID
+                  << " which is not in the frame.\n";
+        continue;
       } // jatomIndex not found
       // Update iNeigh
       iNeigh.push_back(jatomIndex);
@@ -961,37 +1079,296 @@ primitive::Graph primitive::clearGraph(Graph &currentGraph) {
 /**
  * @details Implementation state of primitive::RingUpdater.
  *
- *  The locality bound that makes the update exact: every member of a ring of
- *  size at most maxDepth lies within maxLvl = maxDepth/2 hops of the ring's
- *  lowest-indexed member, and the primitivity of the ring is decided by paths
- *  of fewer than maxLvl edges between members. Enumeration from a source
- *  reads adjacency to maxLvl hops and ball contents to 2*maxLvl-1. A source
- *  further than 2*maxLvl-1 hops from every endpoint of a changed edge,
- *  measured in the union of the old and the new graph, therefore encloses
- *  its rings and every path that could decide them entirely in unchanged
- *  territory: its ring set cannot differ between frames. Distances in the
- *  union graph never exceed those in either frame's graph, so measuring
- *  there errs only toward recomputing more. Balls of a vertex change only
- *  when an edge within ballRadius = maxLvl-1 of that vertex changes, so
- *  they are refreshed on the same union graph at that smaller radius.
+ *  The locality bound that makes the update exact. Let C hold the vertices
+ *  whose adjacency row differs between the old graph G and the new graph
+ *  G', the endpoints of every added or removed edge. A cycle of at most
+ *  maxDepth members is a primitive ring of one graph and not of the other
+ *  only if it holds a changed edge, whose endpoints are in C, or if a
+ *  changed edge lies on a shortcut: a path of l < d edges between two
+ *  members d apart around the ring. There d <= maxLvl = maxDepth/2, and one
+ *  endpoint of the changed edge lies within (l-1)/2 <= reach = (maxLvl-2)/2
+ *  edges of a member along the path. Every ring that differs therefore
+ *  meets T, the vertices within reach of C in the union of G and G'; reach
+ *  is 0 up to maxDepth 7, where T is C. The update drops the stored rings
+ *  that meet T and adds the rings of G' that meet T, each enumerated once,
+ *  from its lowest-indexed member in T. Rings are held in the canonical
+ *  form and sorted order of ringNetwork, so the result equals a full
+ *  recomputation element by element. The balls of a vertex change only when
+ *  an edge within ballRadius = maxLvl-1 of it changes, so they are refreshed
+ *  around C on the union graph.
  */
 struct primitive::RingUpdater::Impl {
   int maxDepth = 0;
   int maxLvl = 0;
   int ballRadius = 1;
-  std::vector<std::vector<int>> adjacency;              // previous frame
-  std::vector<std::vector<std::vector<int>>> bySource;  // rings, by source
-  std::vector<std::vector<int>> flattened;              // last returned set
+  int reach = 0;
+  // Two packed, sorted adjacency buffers. `which` is the previous frame.
+  // One allocation holds every row, and frame 2 onward reuses it.
+  PackedRows graph[2];
+  int which = 0;
+  bool primed = false;
+  std::vector<std::vector<int>> flattened;
+  bool ballsStale = true;
   BoundedBalls balls;
+  std::vector<RingPool> bySource;
+  std::vector<RingScratch> scratches;
   int recomputed = 0;
   int ballsRefreshed = 0;
+  int changedBonds = 0;
+  double changedBondFraction = 0.0;
+  bool bondsPending = false;
+  int pendingOld = 0;
+  bool slotSorted[2] = {false, false};
+  bool hot = false;
+  double fullPassFraction = 0.2;
+  // Changed bonds per molecule above which the reused whole-frame pass
+  // replaces the splice. setBondCrossover overrides it. A negative value
+  // disables this test and leaves the vertex fraction in charge.
+  double bondCrossover = 0.15;
+
+  // A whole-frame pass on more than one thread. Later frames skip the
+  // sorted diff: that diff, and the second copy out of the per-source
+  // pools, were slower than a fresh search on the imbalanced frames.
+  // One thread keeps the diff. Its reused pass stays ahead of a rebuild
+  // through the highest bond fraction measured on these dumps (2.6896).
+  static bool skipDiffAfterFullPass(int threads) { return threads > 1; }
+
+  void writeGraph(const std::vector<std::vector<int>> &nList, int slot,
+                  bool sortRows) {
+    auto &dst = graph[slot];
+    const int nVertices = static_cast<int>(nList.size());
+    dst.first.resize(static_cast<std::size_t>(nVertices) + 1);
+    dst.first[0] = 0;
+    for (int v = 0; v < nVertices; v++) {
+      const auto n =
+          nList[static_cast<std::size_t>(v)].empty()
+              ? 0
+              : nList[static_cast<std::size_t>(v)].size() - 1;
+      dst.first[static_cast<std::size_t>(v) + 1] =
+          dst.first[static_cast<std::size_t>(v)] + n;
+    }
+    dst.cols.resize(dst.first[static_cast<std::size_t>(nVertices)]);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nVertices >= 1024 && !omp_in_parallel())
+#endif
+    for (int v = 0; v < nVertices; v++) {
+      const auto n = dst.first[static_cast<std::size_t>(v) + 1] -
+                     dst.first[static_cast<std::size_t>(v)];
+      if (n == 0) {
+        continue;
+      }
+      int *row = dst.cols.data() +
+                 static_cast<std::ptrdiff_t>(dst.first[static_cast<std::size_t>(v)]);
+      std::copy(nList[static_cast<std::size_t>(v)].begin() + 1,
+                nList[static_cast<std::size_t>(v)].end(), row);
+      if (sortRows && n > 1) {
+        std::sort(row, row + static_cast<std::ptrdiff_t>(n));
+      }
+    }
+    slotSorted[slot] = sortRows;
+  }
+
+  void sortSlot(int slot) {
+    if (slotSorted[slot]) {
+      return;
+    }
+    const int nVertices = static_cast<int>(graph[slot].size());
+    auto &g = graph[slot];
+    for (int v = 0; v < nVertices; v++) {
+      auto row = g[static_cast<std::size_t>(v)];
+      if (row.end() - row.begin() > 1) {
+        std::sort(const_cast<int *>(row.begin()), const_cast<int *>(row.end()));
+      }
+    }
+    slotSorted[slot] = true;
+  }
+
+  void resolveBonds() {
+    if (!bondsPending) {
+      return;
+    }
+    bondsPending = false;
+    const int nVertices = static_cast<int>(graph[which].size());
+    sortSlot(which);
+    if (pendingOld == which ||
+        graph[pendingOld].size() != graph[which].size()) {
+      changedBonds = 0;
+      changedBondFraction = 0.0;
+      return;
+    }
+    sortSlot(pendingOld);
+    int directed = 0;
+    for (int v = 0; v < nVertices; v++) {
+      const auto a = graph[pendingOld][static_cast<std::size_t>(v)];
+      const auto b = graph[which][static_cast<std::size_t>(v)];
+      const int *ab = a.begin();
+      const int *ae = a.end();
+      const int *bb = b.begin();
+      const int *be = b.end();
+      if (std::equal(ab, ae, bb, be)) {
+        continue;
+      }
+      while (ab != ae || bb != be) {
+        if (bb == be || (ab != ae && *ab < *bb)) {
+          ++directed;
+          ++ab;
+        } else if (ab == ae || *bb < *ab) {
+          ++directed;
+          ++bb;
+        } else {
+          ++ab;
+          ++bb;
+        }
+      }
+    }
+    changedBonds = directed / 2;
+    changedBondFraction =
+        nVertices > 0 ? static_cast<double>(changedBonds) / nVertices : 0.0;
+  }
+
+  // Whole-frame enumeration into persistent per-source pools, then a copy
+  // into the flattened buffer that keeps each ring's allocation.
+  template <typename Graph> void fastEnumerate(const Graph &adj) {
+    const int nVertices = static_cast<int>(adj.size());
+    balls.refillAll(adj, ballRadius);
+    ballsStale = false;
+    ballsRefreshed = nVertices;
+    if (static_cast<int>(bySource.size()) != nVertices) {
+      bySource.assign(static_cast<std::size_t>(nVertices), {});
+    }
+    int nThreads = 1;
+#ifdef SEAMS_HAS_OPENMP
+    if (nVertices >= 256 && !omp_in_parallel()) {
+      nThreads = omp_get_max_threads();
+    }
+#endif
+    if (static_cast<int>(scratches.size()) < nThreads) {
+      scratches.resize(static_cast<std::size_t>(nThreads));
+    }
+#ifdef SEAMS_HAS_OPENMP
+    if (nThreads > 1) {
+#pragma omp parallel
+      {
+        RingScratch &scratch = scratches[static_cast<std::size_t>(omp_get_thread_num())];
+        // Short chunks: a nucleus and a partial shell put much heavier
+        // sources next to empty ones, and a chunk of 64 leaves the last
+        // busy chunk with nothing left to steal.
+#pragma omp for schedule(dynamic, 16)
+        for (int src = 0; src < nVertices; src++) {
+          bySource[static_cast<std::size_t>(src)].reset();
+          enumerateFromSource(adj, balls, src, maxDepth, maxLvl, scratch,
+                              bySource[static_cast<std::size_t>(src)]);
+        }
+      }
+    } else
+#endif
+    {
+      if (scratches.empty()) {
+        scratches.emplace_back();
+      }
+      for (int src = 0; src < nVertices; src++) {
+        bySource[static_cast<std::size_t>(src)].reset();
+        enumerateFromSource(adj, balls, src, maxDepth, maxLvl, scratches[0],
+                            bySource[static_cast<std::size_t>(src)]);
+      }
+    }
+
+    std::vector<std::size_t> offset(static_cast<std::size_t>(nVertices) + 1, 0);
+    for (int src = 0; src < nVertices; src++) {
+      offset[static_cast<std::size_t>(src) + 1] =
+          offset[static_cast<std::size_t>(src)] +
+          bySource[static_cast<std::size_t>(src)].n;
+    }
+    const std::size_t total = offset[static_cast<std::size_t>(nVertices)];
+    if (flattened.size() < total) {
+      flattened.resize(total);
+    }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nVertices >= 256 && !omp_in_parallel())
+#endif
+    for (int src = 0; src < nVertices; src++) {
+      RingPool &pool = bySource[static_cast<std::size_t>(src)];
+      std::size_t at = offset[static_cast<std::size_t>(src)];
+      for (std::size_t k = 0; k < pool.n; k++) {
+        // Exchange buffers with the previous frame. The ints are not
+        // copied, and the pool keeps a buffer for the next frame.
+        flattened[at++].swap(pool.storage[k]);
+      }
+    }
+    if (flattened.size() != total) {
+      flattened.resize(total);
+    }
+    recomputed = nVertices;
+  }
+
+  template <typename Graph>
+  std::vector<std::vector<int>>
+  ringsMeeting(const Graph &adj, const std::vector<int> &T,
+               const std::vector<char> &inT) {
+    const int n = static_cast<int>(T.size());
+    std::vector<std::vector<std::vector<int>>> fresh(T.size());
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (n >= 256 && !omp_in_parallel())
+#endif
+    {
+      RingScratch scratch;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(dynamic, 16)
+#endif
+      for (int k = 0; k < n; k++) {
+        enumerateFromSource(adj, balls, T[static_cast<std::size_t>(k)],
+                            maxDepth, maxLvl, scratch,
+                            fresh[static_cast<std::size_t>(k)], &inT);
+      }
+    }
+    std::size_t total = 0;
+    for (const auto &f : fresh) {
+      total += f.size();
+    }
+    std::vector<std::vector<int>> out;
+    out.reserve(total);
+    for (auto &f : fresh) {
+      for (auto &r : f) {
+        out.push_back(std::move(r));
+      }
+    }
+    std::sort(out.begin(), out.end());
+    return out;
+  }
+
+  void splice(const std::vector<char> &inT,
+              std::vector<std::vector<int>> added) {
+    std::vector<std::vector<int>> merged;
+    merged.reserve(flattened.size() + added.size());
+    auto a = added.begin();
+    for (auto &r : flattened) {
+      bool meets = false;
+      for (const int v : r) {
+        if (inT[static_cast<std::size_t>(v)]) {
+          meets = true;
+          break;
+        }
+      }
+      if (meets) {
+        continue;
+      }
+      while (a != added.end() && *a < r) {
+        merged.push_back(std::move(*a++));
+      }
+      merged.push_back(std::move(r));
+    }
+    while (a != added.end()) {
+      merged.push_back(std::move(*a++));
+    }
+    flattened.swap(merged);
+  }
 };
 
-primitive::RingUpdater::RingUpdater(int maxDepth)
-    : impl_(new Impl) {
+primitive::RingUpdater::RingUpdater(int maxDepth) : impl_(new Impl) {
   impl_->maxDepth = maxDepth;
   impl_->maxLvl = maxDepth / 2;
   impl_->ballRadius = std::max(impl_->maxLvl - 1, 1);
+  impl_->reach = std::max((impl_->maxLvl - 2) / 2, 0);
 }
 
 primitive::RingUpdater::~RingUpdater() = default;
@@ -1007,101 +1384,190 @@ int primitive::RingUpdater::lastBallsRefreshed() const {
   return impl_->ballsRefreshed;
 }
 
+int primitive::RingUpdater::lastChangedBonds() const {
+  impl_->resolveBonds();
+  return impl_->changedBonds;
+}
+
+double primitive::RingUpdater::lastChangedBondFraction() const {
+  impl_->resolveBonds();
+  return impl_->changedBondFraction;
+}
+
+void primitive::RingUpdater::setFullPassFraction(double fraction) {
+  impl_->fullPassFraction = fraction;
+}
+
+void primitive::RingUpdater::setBondCrossover(double changedBondsPerMolecule) {
+  impl_->bondCrossover = changedBondsPerMolecule;
+}
+
 const std::vector<std::vector<int>> &
 primitive::RingUpdater::update(const std::vector<std::vector<int>> &nList) {
   Impl &st = *impl_;
   const int nVertices = static_cast<int>(nList.size());
-
-  // Adjacency rows sorted, so frame-to-frame comparison is a vector compare
-  std::vector<std::vector<int>> newAdj(nVertices);
-  for (int i = 0; i < nVertices; i++) {
-    for (size_t j = 1; j < nList[i].size(); j++) {
-      newAdj[i].push_back(nList[i][j]);
-    }
-    std::sort(newAdj[i].begin(), newAdj[i].end());
+  st.resolveBonds();
+  if (nVertices == 0 || st.maxDepth < 3) {
+    st.hot = false;
+    st.flattened.clear();
+    st.recomputed = 0;
+    st.ballsRefreshed = 0;
+    st.changedBonds = 0;
+    st.changedBondFraction = 0.0;
+    st.primed = false;
+    return st.flattened;
   }
 
-  const bool fullPass =
-      st.adjacency.size() != static_cast<size_t>(nVertices) ||
-      st.maxDepth < 3;
+  const bool sameSize =
+      st.primed && st.graph[st.which].size() == static_cast<std::size_t>(nVertices);
+  const int slot = sameSize ? 1 - st.which : 0;
+  if (st.hot && sameSize && st.fullPassFraction < 1.0) {
+    // Packed rows in list order, balls and ring slots kept. The sorted diff
+    // is what made this thread count slower than a fresh ringNetwork.
+    st.writeGraph(nList, slot, false);
+    st.which = slot;
+    st.fastEnumerate(st.graph[st.which]);
+    return st.flattened;
+  }
+  st.writeGraph(nList, slot, true);
+  if (!sameSize) {
+    // A missing frame or a different molecule count leaves no row to diff.
+    // Comparing past the stored prefix walks off the packed table.
+    st.hot = false;
+    st.which = slot;
+    st.primed = true;
+    st.changedBonds = 0;
+    st.changedBondFraction = 0.0;
+    st.fastEnumerate(st.graph[st.which]);
+    return st.flattened;
+  }
 
-  if (fullPass) {
-    st.adjacency = std::move(newAdj);
-    st.bySource.assign(nVertices, {});
-    RingScratch scratch;
-    st.balls.fillAll(st.adjacency, st.ballRadius);
-    st.ballsRefreshed = nVertices;
-    st.recomputed = nVertices;
-    for (int src = 0; src < nVertices; src++) {
-      enumerateFromSource(st.adjacency, st.balls, src, st.maxDepth, st.maxLvl,
-                          scratch, st.bySource[src]);
+  std::vector<int> changed;
+  int directed = 0;
+  const auto &prev = st.graph[st.which];
+  const auto &next = st.graph[slot];
+  auto scanRow = [&](int v, int &localDirected, std::vector<int> &local) {
+    const auto a = prev[static_cast<std::size_t>(v)];
+    const auto b = next[static_cast<std::size_t>(v)];
+    const int *ab = a.begin();
+    const int *ae = a.end();
+    const int *bb = b.begin();
+    const int *be = b.end();
+    if (std::equal(ab, ae, bb, be)) {
+      return;
     }
-  } else {
-    // Vertices whose adjacency row changed: the endpoints of every added or
-    // removed edge
-    std::vector<int> changed;
-    for (int v = 0; v < nVertices; v++) {
-      if (st.adjacency[v] != newAdj[v]) {
-        changed.push_back(v);
+    local.push_back(v);
+    while (ab != ae || bb != be) {
+      if (bb == be || (ab != ae && *ab < *bb)) {
+        ++localDirected;
+        ++ab;
+      } else if (ab == ae || *bb < *ab) {
+        ++localDirected;
+        ++bb;
+      } else {
+        ++ab;
+        ++bb;
       }
     }
-
-    if (!changed.empty()) {
-      // Union graph reaches everything either frame can reach
-      std::vector<std::vector<int>> unionAdj(nVertices);
+  };
+  int nThreads = 1;
+#ifdef SEAMS_HAS_OPENMP
+  if (!omp_in_parallel()) {
+    nThreads = omp_get_max_threads();
+  }
+  if (nVertices >= 1024 && nThreads > 1) {
+    struct alignas(64) Acc {
+      std::vector<int> vs;
+      int directed = 0;
+    };
+    std::vector<Acc> acc(static_cast<std::size_t>(nThreads));
+#pragma omp parallel
+    {
+      Acc &me = acc[static_cast<std::size_t>(omp_get_thread_num())];
+#pragma omp for schedule(static)
       for (int v = 0; v < nVertices; v++) {
-        unionAdj[v] = st.adjacency[v];
-        unionAdj[v].insert(unionAdj[v].end(), newAdj[v].begin(),
-                           newAdj[v].end());
-        std::sort(unionAdj[v].begin(), unionAdj[v].end());
-        unionAdj[v].erase(
-            std::unique(unionAdj[v].begin(), unionAdj[v].end()),
-            unionAdj[v].end());
+        scanRow(v, me.directed, me.vs);
       }
-
-      const int reach = 2 * st.maxLvl - 1;
-      std::vector<int> dist(nVertices, -1);
-      std::vector<int> frontier, next;
-      for (const int v : changed) {
-        dist[v] = 0;
-        frontier.push_back(v);
-      }
-      std::vector<int> affected = changed;
-      for (int depth = 1; depth <= reach && !frontier.empty(); depth++) {
-        next.clear();
-        for (const int u : frontier) {
-          for (const int w : unionAdj[u]) {
-            if (w >= 0 && w < nVertices && dist[w] == -1) {
-              dist[w] = depth;
-              affected.push_back(w);
-              next.push_back(w);
-            }
-          }
-        }
-        frontier.swap(next);
-      }
-
-      st.ballsRefreshed = st.balls.refreshNear(unionAdj, newAdj, changed,
-                                               st.ballRadius);
-      st.adjacency = std::move(newAdj);
-
-      RingScratch scratch;
-      st.recomputed = 0;
-      for (const int src : affected) {
-        st.bySource[src].clear();
-        enumerateFromSource(st.adjacency, st.balls, src, st.maxDepth,
-                            st.maxLvl, scratch, st.bySource[src]);
-        st.recomputed++;
-      }
-    } else {
-      st.recomputed = 0;
-      st.ballsRefreshed = 0;
+    }
+    for (const Acc &me : acc) {
+      directed += me.directed;
+      changed.insert(changed.end(), me.vs.begin(), me.vs.end());
+    }
+  } else
+#endif
+  {
+    for (int v = 0; v < nVertices; v++) {
+      scanRow(v, directed, changed);
     }
   }
+  // Each undirected bond is an endpoint in two rows.
+  st.changedBonds = directed / 2;
+  st.changedBondFraction =
+      nVertices > 0 ? static_cast<double>(st.changedBonds) / nVertices : 0.0;
 
-  st.flattened.clear();
-  for (const auto &group : st.bySource) {
-    st.flattened.insert(st.flattened.end(), group.begin(), group.end());
+  if (changed.empty()) {
+    st.recomputed = 0;
+    st.ballsRefreshed = 0;
+    return st.flattened;
   }
+
+  const bool forceIncremental = st.fullPassFraction >= 1.0;
+  const bool forceFull = st.fullPassFraction <= 0.0;
+  const auto atomLimit =
+      static_cast<std::size_t>(st.fullPassFraction * nVertices);
+  const bool overBonds =
+      st.bondCrossover >= 0.0 && st.changedBondFraction > st.bondCrossover;
+  const bool overAtoms = changed.size() > atomLimit;
+  if (!forceIncremental && (forceFull || overAtoms || overBonds)) {
+    st.which = slot;
+    if (Impl::skipDiffAfterFullPass(nThreads)) {
+      st.hot = true;
+    }
+    st.fastEnumerate(st.graph[st.which]);
+    return st.flattened;
+  }
+
+  // T: within reach of a changed vertex in the union of both frames' graphs.
+  // Below the crossover this set is a small patch; above it the caller has
+  // already taken the reused whole-frame pass.
+  std::vector<char> inT(static_cast<std::size_t>(nVertices), 0);
+  std::vector<int> T = changed;
+  for (const int v : changed) {
+    inT[static_cast<std::size_t>(v)] = 1;
+  }
+  std::vector<int> frontier = changed;
+  std::vector<int> wave;
+  for (int depth = 1; depth <= st.reach && !frontier.empty(); depth++) {
+    wave.clear();
+    for (const int u : frontier) {
+      for (const int w : prev[static_cast<std::size_t>(u)]) {
+        if (w >= 0 && w < nVertices && !inT[static_cast<std::size_t>(w)]) {
+          inT[static_cast<std::size_t>(w)] = 1;
+          T.push_back(w);
+          wave.push_back(w);
+        }
+      }
+      for (const int w : next[static_cast<std::size_t>(u)]) {
+        if (w >= 0 && w < nVertices && !inT[static_cast<std::size_t>(w)]) {
+          inT[static_cast<std::size_t>(w)] = 1;
+          T.push_back(w);
+          wave.push_back(w);
+        }
+      }
+    }
+    frontier.swap(wave);
+  }
+
+  if (st.ballsStale) {
+    st.balls.refillAll(next, st.ballRadius);
+    st.ballsStale = false;
+    st.ballsRefreshed = nVertices;
+  } else {
+    st.ballsRefreshed =
+        st.balls.refreshNear(prev, next, changed, st.ballRadius);
+  }
+  st.splice(inT, st.ringsMeeting(next, T, inT));
+  st.which = slot;
+  st.recomputed = static_cast<int>(T.size());
   return st.flattened;
 }

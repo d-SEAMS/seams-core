@@ -206,14 +206,16 @@ ring::getSingleRingSize(const std::vector<std::vector<int>> &rings, int ringSize
  * @return A bool which is true if the input vectors have at least one common
  * element, and false if there are no common elements.
  */
-bool ring::hasCommonElements(std::vector<int> ring1, std::vector<int> ring2) {
-  std::sort(ring1.begin(), ring1.end());
-  std::sort(ring2.begin(), ring2.end());
-
-  std::vector<int> commonElements;
-  std::set_intersection(ring1.begin(), ring1.end(), ring2.begin(),
-                        ring2.end(), std::back_inserter(commonElements));
-  return !commonElements.empty();
+bool ring::hasCommonElements(const std::vector<int> &ring1,
+                             const std::vector<int> &ring2) {
+  const std::vector<int> &small = ring1.size() <= ring2.size() ? ring1 : ring2;
+  const std::vector<int> &large = ring1.size() <= ring2.size() ? ring2 : ring1;
+  for (const int atom : small) {
+    if (std::find(large.begin(), large.end(), atom) != large.end()) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**

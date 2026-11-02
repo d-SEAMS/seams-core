@@ -4,6 +4,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <structure_desc.hpp>
+#include <ozaki.hpp>
 
 #include <absOrientation.hpp>
 #include <bop.hpp>
@@ -258,12 +259,20 @@ std::vector<double> soapOne(const Cloud &yCloud, const gen::FracBox &frame,
     for (int np = 0; np < nMax; np++) {
       for (int l = 0; l <= lMax; l++) {
         const int base = l * l;
-        std::complex<double> acc = 0.0;
-        for (int m = 0; m < 2 * l + 1; m++) {
-          acc += coeff[static_cast<size_t>(n) * nComp + base + m] *
-                 std::conj(coeff[static_cast<size_t>(np) * nComp + base + m]);
+        const auto productMode = seams::product::mode();
+        if (productMode == seams::product::Mode::Fp64) {
+          std::complex<double> acc = 0.0;
+          for (int m = 0; m < 2 * l + 1; m++) {
+            acc += coeff[static_cast<size_t>(n) * nComp + base + m] *
+                   std::conj(coeff[static_cast<size_t>(np) * nComp + base + m]);
+          }
+          spec[static_cast<size_t>(slot++)] = acc.real();
+        } else {
+          spec[static_cast<size_t>(slot++)] = seams::product::complexDot(
+              coeff.data() + static_cast<size_t>(n) * nComp + base,
+              coeff.data() + static_cast<size_t>(np) * nComp + base, 2 * l + 1,
+              productMode).re;
         }
-        spec[static_cast<size_t>(slot++)] = acc.real();
       }
     }
   }

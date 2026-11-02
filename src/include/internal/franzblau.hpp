@@ -113,8 +113,9 @@ struct Graph {
 
 //! Returns a vector of vectors containing the rings (of all sizes), by atom
 //! index, given the neighbour list also by index (preferably the
-//! hydrogen-bonded neighbour list). Internally uses the Graph and Vertex
-//! objects.
+//! hydrogen-bonded neighbour list). Each ring starts at its lowest-indexed
+//! member and runs toward the lesser of that member's ring neighbours, and
+//! the rings are sorted lexicographically.
 std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,
                                           int maxDepth);
 
@@ -164,13 +165,13 @@ Graph clearGraph(Graph &currentGraph);
 /** @class primitive::RingUpdater
  * @brief Exact frame-to-frame maintenance of the primitive ring network.
  * @details Consecutive trajectory frames share almost all of their bond
- *  topology. Rings are stored partitioned by their lowest-indexed member, and
- *  on a new frame only sources within a proven locality radius of a changed
- *  edge are re-enumerated: a ring's members and every path that can decide
- *  its primitivity lie within a bounded neighbourhood of its source, so a
- *  source far enough from every change keeps its rings unchanged. The output
- *  equals a full recomputation exactly, at a cost that scales with the edge
- *  churn between frames rather than with system size.
+ *  topology. A ring of at most maxDepth members can appear or vanish between
+ *  frames only if it passes within (maxDepth/2 - 2)/2 bonds of a vertex
+ *  whose neighbour row changed, which is on the ring itself up to maxDepth
+ *  7. On a new frame the stored rings that meet that set are dropped and the
+ *  rings through it are enumerated afresh. The output equals ringNetwork
+ *  element by element, at a cost that scales with the number of changed
+ *  rows rather than with system size.
  */
 class RingUpdater {
 public:
@@ -186,12 +187,33 @@ public:
   const std::vector<std::vector<int>> &
   update(const std::vector<std::vector<int>> &nList);
 
-  //! Sources re-enumerated by the last update; the full vertex count on the
-  //! first frame, zero when nothing changed
+  //! Vertices the last update enumerated rings through; the full vertex
+  //! count on a whole-frame pass, zero when nothing changed
   [[nodiscard]] int lastRecomputedSources() const;
 
   //! Vertices whose bounded balls were rebuilt on the last update
   [[nodiscard]] int lastBallsRefreshed() const;
+
+  //! Undirected bonds whose endpoints differ from the previous frame.
+  //! Zero on the first frame and when the bond set is unchanged. The
+  //! fraction below is this count divided by the molecule count, maintained
+  //! while the rows are compared and readable in constant time afterwards.
+  [[nodiscard]] int lastChangedBonds() const;
+
+  //! Changed bonds per molecule on the last update.
+  [[nodiscard]] double lastChangedBondFraction() const;
+
+  //! Above this fraction of vertices with a changed row, update recomputes
+  //! the whole frame in one pass instead (default 0.2; 1 never falls back;
+  //! 0 always does). The pass reuses its balls and ring buffers. With more
+  //! than one thread, later frames of a run that has already crossed this
+  //! line skip the bond diff and search from the unsorted neighbour rows.
+  void setFullPassFraction(double fraction);
+
+  //! Above this many changed bonds per molecule, update takes the same
+  //! whole-frame pass (default 0.15). A negative value disables the test.
+  //! Ignored when the vertex fraction is at least 1.
+  void setBondCrossover(double changedBondsPerMolecule);
 
 private:
   struct Impl;

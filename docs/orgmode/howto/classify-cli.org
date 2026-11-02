@@ -17,6 +17,8 @@ seams rdf FILE --type 2 --cutoff 10
 
 ~chill~ is the original CHILL rule. ~chill-plus~ is CHILL+.
 ~chill_plus~ is a CLI alias of ~chill-plus~.
+Both bond every pair closer than ~--cutoff~ (~--graph cutoff~, the default).
+~--graph mutual~ uses the mutual four nearest neighbours instead.
 
 * Type
 

@@ -1,0 +1,36 @@
+#+TITLE: Ice and clathrate labels
+#+OPTIONS: toc:nil num:nil
+
+You label one frame two ways.
+CHILL+ reads a staggered or eclipsed star.
+A cage signature counts closed polyhedra of a given ring census.
+The runnable copy is =docs/tutorials/test_ice_and_clathrate.py=.
+Python is ~pip install pydseamslib~.
+The import is ~pydseams~.
+
+* The mixed TIP4P frame
+
+=input/traj/exampleTraj.lammpstrj= has 750 atoms and 250 oxygens (LAMMPS type 2).
+
+#+begin_src python
+import pydseams as ds
+
+frame = ds.read("input/traj/exampleTraj.lammpstrj", atom_type=2)
+print(frame.chill_plus())
+print(frame.cages())
+#+end_src
+
+~Frame.chill_plus~ uses the cutoff neighbour list.
+~IceCounts(interClathrate=12, water=238)~.
+~CageScore(n_ih=0, n_ic=0, n_water=250)~.
+
+~seams chill-plus~ on the same file uses the mutual four-neighbour list and prints ~clathrate 1 interClathrate 7 water 242~.
+The cage score matches the CLI.
+The CHILL+ histogram does not match the CLI.
+
+* Cubic ice and an sI cage
+
+=input/traj/mW_cubic.lammpstrj= frame 1 is 4096 mW sites.
+Both the cutoff list and the mutual four-neighbour list label every site cubic, and every site sits in a double-diamond cage.
+
+=input/traj/genice_sI.lammpstrj= with ~cages_by_signature("512")~ returns 2 cages and 40 vertices.

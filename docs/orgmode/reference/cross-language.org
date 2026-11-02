@@ -1,0 +1,39 @@
+#+TITLE: One task, four fronts
+#+OPTIONS: toc:nil num:nil
+
+The task is CHILL+ on frame 1 of =input/traj/mW_cubic.lammpstrj=, LAMMPS type 1.
+The result is 4096 cubic sites.
+=docs/tutorials/test_cross_language.py= runs the fronts.
+
+| language | call | cubic |
+|----------+------+-------|
+| CLI | =seams chill-plus input/traj/mW_cubic.lammpstrj --type 1 --frame 1= | 4096 |
+| Python | =pydseams.read(path, atom_type=1).chill_plus().cubic= | 4096 |
+| R | =sum(chill_plus(read_frame(path, type=1L))$name == "cubic")= | 4096 |
+| Julia | =chill_plus(read_frame(path; type=1)).counts["cubic"]= | 4096 |
+
+Python is ~pip install pydseamslib~.
+The import is ~pydseams~.
+~import pydseamslib~ is the same package.
+The package name the d-SEAMS paper should use is ~pydseamslib~.
+R is =bindings/r/dseams=.
+Julia is =bindings/julia/Dseams= and calls =libseams_lang= with =ccall=.
+
+Every front defaults to the cutoff neighbour list (~graph = "cutoff"~, pairs closer than ~cutoff~, 3.5 Å).
+~graph = "mutual"~ is the mutual four-nearest list with candidates inside ~cutoff + 1.5~, under the same name on every front.
+On this lattice the two lists label the same sites cubic.
+On the mixed TIP4P dump (=input/traj/exampleTraj.lammpstrj=, type 2) they do not:
+
+| front | mutual-list call |
+|-------+------------------|
+| CLI | =seams chill-plus FILE --type 2 --graph mutual= |
+| Python | =frame.chill_plus(graph="mutual")= |
+| R | =chill_plus(frame, graph = "mutual")= |
+| Julia | =chill_plus(frame; graph = "mutual")= |
+
+The cutoff list gives 12 interClathrate and 238 water.
+The mutual list gives 1 clathrate, 7 interClathrate, and 242 water.
+
+=tests/chill_plus_fronts.py= (Meson test ~chill_plus_fronts_agree~) runs all four fronts on that dump with both lists.
+It checks the histograms on all four and the per-atom labels on Python, R, and Julia.
+The Python front needs a pydseamslib whose ~chill_plus~ takes ~graph~.

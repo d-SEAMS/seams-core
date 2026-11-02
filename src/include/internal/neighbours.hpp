@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -169,6 +170,84 @@ inline double dumpVolume(const std::vector<double> &box,
 inline double dumpVolume(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   return dumpVolume(yCloud.box, yCloud.boxLow);
+}
+
+/// LAMMPS edge origin and edge lengths, plus tilt, as a dump box.
+///
+/// `lx, ly, lz` are `xhi - xlo` and not the bound spans. A zero tilt
+/// stays three spans so the orthorhombic pair loop is unchanged.
+/// Returns false when an edge is not positive.
+inline bool setBoxFromLammpsEdges(std::vector<double> &box,
+                                 std::vector<double> &boxLow, double xlo,
+                                 double ylo, double zlo, double lx, double ly,
+                                 double lz, double xy, double xz, double yz) {
+  if (!(lx > 0.0 && ly > 0.0 && lz > 0.0)) {
+    box.clear();
+    boxLow.clear();
+    return false;
+  }
+  const bool tilt =
+      std::abs(xy) > 0.0 || std::abs(xz) > 0.0 || std::abs(yz) > 0.0;
+  if (!tilt) {
+    box = {lx, ly, lz};
+    boxLow = {xlo, ylo, zlo};
+    return true;
+  }
+  const double xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));
+  const double xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));
+  const double ymin = std::min(0.0, yz);
+  const double ymax = std::max(0.0, yz);
+  box = {lx + xmax - xmin, ly + ymax - ymin, lz, xy, xz, yz};
+  boxLow = {xlo + xmin, ylo + ymin, zlo};
+  return true;
+}
+
+/// Crystallographic lengths and angles in degrees, stored as a dump box.
+///
+/// `alpha` is between b and c, `beta` between a and c, `gamma` between
+/// a and b. The basis is the reduced triclinic frame: a along x, b in
+/// the xy plane. Returns false when the cell is not a positive volume.
+inline bool setBoxFromLengthsAngles(std::vector<double> &box,
+                                   std::vector<double> &boxLow, double a,
+                                   double b, double c, double alphaDeg,
+                                   double betaDeg, double gammaDeg) {
+  constexpr double kDeg = 3.14159265358979323846 / 180.0;
+  const double alpha = alphaDeg * kDeg;
+  const double beta = betaDeg * kDeg;
+  const double gamma = gammaDeg * kDeg;
+  const double cosA = std::cos(alpha);
+  const double cosB = std::cos(beta);
+  const double cosG = std::cos(gamma);
+  const double sinG = std::sin(gamma);
+  if (!(a > 0.0 && b > 0.0 && c > 0.0) || std::abs(sinG) < 1e-18) {
+    box.clear();
+    boxLow.clear();
+    return false;
+  }
+  double xy = b * cosG;
+  const double ly = b * sinG;
+  double xz = c * cosB;
+  double yz = c * (cosA - cosB * cosG) / sinG;
+  // cos(90 deg) is a few ulps, not zero. A right angle must stay
+  // orthorhombic, or the pair loop takes the triclinic path.
+  const double tol = 1e-10 * std::max(a, std::max(b, c));
+  if (std::abs(xy) < tol) {
+    xy = 0.0;
+  }
+  if (std::abs(xz) < tol) {
+    xz = 0.0;
+  }
+  if (std::abs(yz) < tol) {
+    yz = 0.0;
+  }
+  const double lz2 = c * c - xz * xz - yz * yz;
+  if (!(ly > 0.0) || !(lz2 > 0.0)) {
+    box.clear();
+    boxLow.clear();
+    return false;
+  }
+  return setBoxFromLammpsEdges(box, boxLow, 0.0, 0.0, 0.0, a, ly, std::sqrt(lz2),
+                              xy, xz, yz);
 }
 
 #ifdef SEAMS_HAS_LINKCELL

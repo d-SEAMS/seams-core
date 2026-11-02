@@ -41,10 +41,10 @@ pairs | density-z | domains~. ~chill_plus~ is an accepted alias of
 | command | action | stdout |
 |---------+--------+--------|
 | ~read~ | print the loaded cloud | ~nop N frame F box Lx Ly Lz~ and, when ~box.size() >= 6~, ~xy xz yz~ |
-| ~chill~ | CHILL four-neighbour labels | ~nop N~ then ~name count~ for each ice type present |
-| ~chill-plus~ | CHILL+ four-neighbour labels | same as ~chill~ |
+| ~chill~ | CHILL labels | ~nop N~ then ~name count~ for each ice type present |
+| ~chill-plus~ | CHILL+ labels | same as ~chill~ |
 | ~cages~ | ice score on six-membered rings | ~nop N graph KIND hexagonal IH cubic IC water W~ |
-| ~cages --signature SPEC~ | closed polyhedra whose ring-size census matches ~SPEC~ | ~nop N graph KIND signature S cages C atoms A~ and, with ~--incomplete~, ~incomplete K~ cups on the ring graph; with ~--guest-types~, ~guests G occupied O multiple M free F~ |
+| ~cages --signature SPEC~ | closed polyhedra whose ring-size census matches ~SPEC~; each vertex lies on at least three faces that close around it, V - E + F = 2, and rings that wind the periodic cell are left out | one line per signature, ~nop N graph KIND signature S cages C atoms A~ and, with ~--incomplete~, ~incomplete K~ cups on the ring graph; with ~--guest-types~, ~guests G occupied O multiple M free F~ |
 | ~fingerprint~ | topology keys of the bonded graph | ~nop N graph KIND hops H method M key K classes C rings 3:a 4:b ... top key=count ...~ |
 | ~fingerprint --emit-library LABEL~ | the frame's distinct keys as library lines | ~# method M hops H colours C~ then ~key LABEL~ rows |
 | ~fingerprint --library FILE[,FILE...]~ | atoms named by key libraries | ~nop N graph KIND hops H method M matched X label=count ... unmatched=U~ and, with several libraries, ~depth H1=n1 H2=n2~ |
@@ -59,9 +59,10 @@ pairs | density-z | domains~. ~chill_plus~ is an accepted alias of
 | ~density-z~ | type-resolved \(\rho\) along one axis | ~# z rho~ then one ~z rho~ row per bin |
 | ~domains --site --subset~ | polar/apolar Stoddard component | ~subset polar n N largest L P P_inf~ |
 
-~chill~ / ~chill-plus~ call ~nneigh::kNearestNeighbourList~ with
-~k = 4~ (mutual). ~--cutoff~ is only the cell-size hint
-(~cutoff + 1.5~); vesin cutoff pairs stay on ~neighListO~. Then
+~chill~ / ~chill-plus~ default to ~--graph cutoff~: ~nneigh::neighListO~,
+every pair closer than ~--cutoff~. ~--graph mutual~ (alias ~knn~) calls
+~nneigh::kNearestNeighbourList~ with ~k = 4~, mutual; there ~--cutoff~
+is only the cell-size hint (~cutoff + 1.5~). Other graphs exit 2. Then
 ~chill::getCorrel~ / ~chill::getIceTypeNoPrint~ or
 ~chill::getCorrelPlus~ / ~chill::getIceTypePlusNoPrint~.
 ~--water-types T,U~ is the neighbour mask (OW only); ~--type~ is the
@@ -131,6 +132,7 @@ initializers (Argum does not write defaults into the help).
 | ~-f~, ~--frame N~ | ~1~ | ~First frame (1-based)~ |
 | ~--last N~ | omitted (~0~) | ~Last frame (inclusive). Omit for a single --frame~ |
 | ~-j~, ~--jobs N~ | ~1~ | ~Parallel frame workers (OpenMP). 1 is serial~ |
+| ~--rebuild~ | off | ~Recompute rings and cages on every frame. A one-worker frame range otherwise updates them from the previous frame; the output is the same~ |
 | ~--format KIND~ | ~text~ | ~Output format: ~text~ (default) or ~json~ (JSONL)~ |
 | ~--strict-input~ | off | ~Fail when a requested frame produces no atoms~ |
 | ~-t~, ~--type I~ | ~0~ | ~Atom type (0 guesses oxygen then type 1; density-z: 0 is every atom)~ |
@@ -143,9 +145,9 @@ initializers (Argum does not write defaults into the help).
 | ~--bins N~ | ~rmax / 0.1~ or ~L / 0.1~ | ~Histogram bins (rdf: rmax/0.1; density-z: bound span / 0.1)~ |
 | ~--axis XYZ~ | ~z~ | ~Histogram axis for density-z (x, y, or z)~ |
 | ~-k N~ | ~4~ | ~k for knn / seeded cages~ |
-| ~--graph KIND~ | ~seeded~ | ~Bond graph for cages: cutoff \| knn \| knn-union \| seeded~ |
+| ~--graph KIND~ | ~seeded~ | ~Bond graph for cages: cutoff, knn, knn-union or seeded~ |
 | ~--complete~ | off | Seeded cages: fill the last vertex of six-rings whose other vertices carry a label (ring completion) |
-| ~--signature SPEC~ | | ~cages: ring-size census (4:6,6:8) or a named table entry (sodalite\vert{}alpha\vert{}512\vert{}51262\vert{}51264\vert{}51268\vert{}sh\vert{}hc\vert{}ddc)~ |
+| ~--signature SPEC~ | | ~cages: ring-size census (4:6,6:8) or a named table entry (sodalite\vert{}alpha\vert{}512\vert{}51262\vert{}51264\vert{}51268\vert{}sh\vert{}hc\vert{}ddc); join several with + for one line each~. Joined signatures share one ring network and one cage search |
 | ~--incomplete~ | off | ~cages --signature: also report cups and incomplete cages on the ring graph~ |
 | ~--guest-types T,U~ | | ~cages --signature: LAMMPS types of guests (methane, THF, ions) placed in the found cages by their periodic centroids~ |
 | ~--guest-radius R~ | ~4.0~ | ~cages --signature: a guest belongs to the nearest cage centre within R~ |
@@ -266,6 +268,7 @@ the table.
 |----------+---------|
 | ~SEAMS_FRAME~ / ~SEAMS_LAST~ | ~1~ / ~0~ |
 | ~SEAMS_JOBS~ | ~1~ |
+| ~SEAMS_CARRY~ | ~1~ (~0~ is ~--rebuild~) |
 | ~SEAMS_TYPE~ | ~0~ |
 | ~SEAMS_CUTOFF~ | ~3.5~ |
 | ~SEAMS_K~ | ~4~ |
@@ -307,6 +310,12 @@ deterministic output order. XYZ is a single-frame input and emits frame 1
 at most. Chemfiles and readcon inputs are read serially until the requested
 range or the first missing frame. ~--jobs 1~ is serial; non-LAMMPS readers
 do not use OpenMP workers.
+
+A serial range carries rings and cage affiliation from one frame to the
+next: ~primitive::RingUpdater~ and ~ring::AffiliationUpdater~ recompute only
+the atoms whose bounded ball changed. LAMMPS ranges with ~--jobs~ above 1,
+MPI ranks, single frames and ~--rebuild~ rebuild every frame. The output is
+the same either way; ~tests/cli_carry.py~ checks that.
 
 An MPI build (~-Dwith_mpi=enabled~) started by ~mpiexec~ shares a LAMMPS
 dump's frames among the ranks in serpentine rounds: of R ranks, rank r takes

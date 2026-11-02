@@ -18,6 +18,8 @@
 #include <omp.h>
 #endif
 
+#include <algorithm>
+#include <array>
 #include <cstdlib>
 #include <filesystem>
 #include <vector>
@@ -188,7 +190,8 @@ TEST_CASE("SEAMS_OFFLOAD TUM cage counts match host on mW cubic",
 
   setenv("SEAMS_OFFLOAD", "1", 1);
   const auto off = tum::specializedCageCounts(nList);
-  REQUIRE(off.ringsDropped == 0);
+  REQUIRE(off.retries == 0);
+  REQUIRE_FALSE(off.hostFallback);
   REQUIRE(off.nSix == host.nSix);
   REQUIRE(off.nHcRings == host.nHcRings);
   REQUIRE(off.nDdcRings == host.nDdcRings);
@@ -204,6 +207,96 @@ TEST_CASE("SEAMS_OFFLOAD TUM cage counts match host on mW cubic",
     REQUIRE(off.usedDevice);
   }
 #endif
+}
+
+namespace {
+
+// Point-line incidence graph of PG(2, q), q prime, with leading self
+// entries: girth 6, q^3 (q+1) / 2 six-rings through every vertex
+std::vector<std::vector<int>> leviGraph(int q) {
+  std::vector<std::array<int, 3>> v;
+  for (int a = 0; a < q; ++a) {
+    for (int b = 0; b < q; ++b) {
+      for (int c = 0; c < q; ++c) {
+        const int lead = a != 0 ? a : (b != 0 ? b : c);
+        if (lead == 1) {
+          v.push_back({a, b, c});
+        }
+      }
+    }
+  }
+  const int m = static_cast<int>(v.size());
+  std::vector<std::vector<int>> nList(static_cast<std::size_t>(2 * m));
+  for (int i = 0; i < 2 * m; ++i) {
+    nList[i].push_back(i);
+  }
+  for (int p = 0; p < m; ++p) {
+    for (int l = 0; l < m; ++l) {
+      if ((v[p][0] * v[l][0] + v[p][1] * v[l][1] + v[p][2] * v[l][2]) % q ==
+          0) {
+        nList[p].push_back(m + l);
+        nList[m + l].push_back(p);
+      }
+    }
+  }
+  return nList;
+}
+
+void requireSameLabels(const tum::CageCounts &a, const tum::CageCounts &b) {
+  REQUIRE(a.nSix == b.nSix);
+  REQUIRE(a.nHcRings == b.nHcRings);
+  REQUIRE(a.nDdcRings == b.nDdcRings);
+  REQUIRE(a.atomSix == b.atomSix);
+  REQUIRE(a.atomHc == b.atomHc);
+  REQUIRE(a.atomDdc == b.atomDdc);
+}
+
+tum::SpecializedCaps oneEntryCaps() {
+  tum::SpecializedCaps caps;
+  caps.rowCap = 1;
+  caps.ringCap = 1;
+  caps.pairCap = 1;
+  return caps;
+}
+
+} // namespace
+
+TEST_CASE("hop-bound path grows overflowed buffers to the host labels",
+          "[bulkTUM][offload]") {
+  auto yCloud = readMwCubicFrame1();
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  nList = nneigh::neighbourListByIndex(yCloud, nList);
+  const auto host = tum::hostCageCounts(nList);
+  for (const bool target : {false, true}) {
+    auto caps = oneEntryCaps();
+    caps.forceTarget = target;
+    const auto grown = tum::specializedCageCounts(nList, caps);
+    INFO("target " << target);
+    REQUIRE(grown.retries > 0);
+    REQUIRE_FALSE(grown.hostFallback);
+    requireSameLabels(grown, host);
+  }
+}
+
+TEST_CASE("hop-bound path on high-incidence Levi graphs matches the host",
+          "[bulkTUM][offload]") {
+  // q = 2: 12 rings per vertex, inside the row cap. q = 3 and 5: 54 and
+  // 375, past it, and for q = 5 past 16n rings in total.
+  for (const int q : {2, 3, 5}) {
+    INFO("PG(2," << q << ")");
+    const auto nList = leviGraph(q);
+    const int n = static_cast<int>(nList.size());
+    const int perVertex = q * q * q * (q + 1) / 2;
+    const auto host = tum::hostCageCounts(nList);
+    REQUIRE(host.nSix == perVertex * n / 6);
+    REQUIRE(std::all_of(host.atomSix.begin(), host.atomSix.end(),
+                        [&](int v) { return v == perVertex; }));
+    for (const auto &caps : {tum::SpecializedCaps{}, oneEntryCaps()}) {
+      const auto dev = tum::specializedCageCounts(nList, caps);
+      REQUIRE(dev.hostFallback == (perVertex > 32));
+      requireSameLabels(dev, host);
+    }
+  }
 }
 
 TEST_CASE("atomsFromCages extracts unique atom indices from cage list",

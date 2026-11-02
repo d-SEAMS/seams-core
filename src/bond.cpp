@@ -356,15 +356,15 @@ bond::createBondsFromCages(const std::vector<std::vector<int>> &rings,
                            cage::cageType type, int &nRings) {
   std::vector<std::vector<int>> bonds; // Output vector of vectors
   std::vector<int> currentBond;        // Vector for the current bond
-  int ringSize = rings[0].size();
-  int currentRing; // (vector) index of the current ring in a particular cage
 
-  // Error handling
+  // Error handling. rings[0] is not valid until this returns.
   if (rings.empty()) {
     // There is some problem!
     std::cerr << "There are no rings in the system!\n";
     return bonds;
   }
+  int ringSize = static_cast<int>(rings[0].size());
+  int currentRing; // (vector) index of the current ring in a particular cage
 
   // Form of the bonds vector of vectors:
   // 272    214

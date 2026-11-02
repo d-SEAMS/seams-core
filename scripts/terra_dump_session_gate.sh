@@ -3,15 +3,23 @@
 # time Niu dump I/O, and walk a short incremental path.
 set -euo pipefail
 
-ROOT="${SEAMS_ROOT:-$HOME/seams-core-merge}"
-BUILD="${SEAMS_BUILD:-$ROOT/bcpp}"
-PIXI_ENV="${ROOT}/.pixi/envs/default"
-DUMP_DIR="${ROOT}/repro/public-ice/nucleation/Ice_nucleation_trajectory"
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+ROOT="${SEAMS_ROOT:-$(cd -- "$SCRIPT_DIR/.." && pwd)}"
+BUILD="${SEAMS_BUILD:-$ROOT/build}"
+PIXI_ENV="${SEAMS_PIXI_ENV:-$ROOT/.pixi/envs/default}"
+DUMP_DIR="${SEAMS_NIU_DIR:-$ROOT/data/public-ice/nucleation/Ice_nucleation_trajectory}"
 DUMP3="${DUMP_DIR}/Nucleation_trajectory-3"
 DUMP2="${DUMP_DIR}/Nucleation_trajectory-2"
-LOG="${SEAMS_LOG:-/tmp/seams-dump-session-gate.log}"
+LOG="${SEAMS_LOG:-$ROOT/logs/seams-dump-session-gate.log}"
+mkdir -p "$(dirname "$LOG")" "$DUMP_DIR"
 
-export PATH="${PIXI_ENV}/bin:${HOME}/.pixi/bin:/usr/bin:/bin"
+if [[ ! -f "$DUMP3" || ! -f "$DUMP2" ]]; then
+  python3 "$SCRIPT_DIR/fetch_niu_trajectory.py" --dest "$(dirname "$(dirname "$DUMP_DIR")")"
+fi
+
+if [[ -d "${PIXI_ENV}/bin" ]]; then
+  export PATH="${PIXI_ENV}/bin:${PATH}"
+fi
 export LD_LIBRARY_PATH="${BUILD}/src${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 {
@@ -45,9 +53,11 @@ export LD_LIBRARY_PATH="${BUILD}/src${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
   "${BUILD}/tests/bench_lammps_io" "${DUMP2}" 50 1
 
   echo "=== incremental dump-3 first 30 ==="
-  "${BUILD}/tests/bench_trajectory_incremental" "${DUMP3}" 30 1 6 | tee /tmp/niu-inc-30.txt
+  INC_LOG="${SEAMS_INC_LOG:-$ROOT/logs/niu-inc-30.txt}"
+  mkdir -p "$(dirname "$INC_LOG")"
+  "${BUILD}/tests/bench_trajectory_incremental" "${DUMP3}" 30 1 6 | tee "$INC_LOG"
   echo "=== incremental dump-3 last 3 lines ==="
-  tail -5 /tmp/niu-inc-30.txt
+  tail -5 "$INC_LOG"
 
   echo "=== done $(date -Iseconds) ==="
 } 2>&1 | tee "${LOG}"

@@ -99,6 +99,25 @@ foreach name, src : test_sources
     timeout: _timeout)
 endforeach
 
+mpfr_dep = cppc.find_library('mpfr', required: true)
+gmp_dep = cppc.find_library('gmp', required: true)
+test('ozaki',
+  executable('test_ozaki', 'test_ozaki.cpp',
+    dependencies: [yds_dep, catch2_dep, mpfr_dep, gmp_dep],
+    cpp_args: _args,
+    link_args: _test_link_args,
+    include_directories: _incdirs,
+    build_rpath: _test_rpath),
+  workdir: meson.project_source_root() / 'input',
+  env: _test_env,
+  timeout: 180)
+executable('bench_ozaki', 'bench_ozaki.cpp',
+  dependencies: [yds_dep, mpfr_dep, gmp_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
 if mpi_found
   _mpiexec = find_program('mpiexec', required: false)
   if _mpiexec.found()
@@ -195,6 +214,13 @@ executable('bench_cages', 'bench_cages.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
+executable('bench_cage_h2h', 'bench_cage_h2h.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
 executable('bench_strong', 'bench_strong.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
@@ -203,6 +229,27 @@ executable('bench_strong', 'bench_strong.cpp',
   build_rpath: '$ORIGIN/../src')
 
 executable('bench_rings_incremental', 'bench_rings_incremental.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+_check_invariance = executable('check_invariance', 'check_invariance.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+_fuzz_cage = executable('fuzz_cage_invariance', 'fuzz_cage_invariance.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_churn_sweep', 'bench_churn_sweep.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
   link_args: _test_link_args,
@@ -294,3 +341,74 @@ executable('gen_figure_data', 'gen_figure_data.cpp',
   link_args: _test_link_args,
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
+
+# Host cageAffiliation vs the offload cage pipeline vs a spec reference
+_check_device_host = executable('check_device_host', 'check_device_host.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+# Both checks exit 1 on any mismatch. levi:<q> is the PG(2, q) incidence
+# graph, with 12, 54 and 375 six-rings through each vertex for q = 2, 3, 5.
+_device_host_cases = {
+  'mW_cutoff': ['traj/mW_cubic.lammpstrj', '1', '1', '3.5', '2', 'cutoff'],
+  'mW_knn': ['traj/mW_cubic.lammpstrj', '1', '1', '3.5', '2', 'knn'],
+  'example_cutoff': ['traj/exampleTraj.lammpstrj', '1', '2', '3.5', '2', 'cutoff'],
+  'example_knn': ['traj/exampleTraj.lammpstrj', '1', '2', '3.5', '2', 'knn'],
+  'levi2': ['levi:2', '2'],
+  'levi3': ['levi:3', '2'],
+  'levi5': ['levi:5', '1'],
+}
+foreach name, args : _device_host_cases
+  test('device_host_' + name, _check_device_host,
+    args: args,
+    workdir: meson.project_source_root() / 'input',
+    env: _test_env,
+    timeout: 300)
+endforeach
+
+# The CUDA batch kernels on the host, no device needed
+_cuda_kernels = custom_target('gpu_batch_kernels',
+  input: meson.project_source_root() / 'src' / 'gpu_batch.cpp',
+  output: 'gpu_batch_kernels.inc',
+  command: [find_program('python3'), files('extract_cuda_kernels.py'),
+            '@INPUT@', '@OUTPUT@'])
+test('gpu_kernels_host',
+  executable('gpu_kernels_host', ['gpu_kernels_host.cpp', _cuda_kernels],
+    dependencies: [yds_dep],
+    cpp_args: _args,
+    link_args: _test_link_args,
+    include_directories: _incdirs,
+    build_rpath: _test_rpath),
+  env: _test_env,
+  timeout: 120)
+
+_invariance_cases = {
+  'mW': ['traj/mW_cubic.lammpstrj', '1', '3.5', '1', '1'],
+  'example': ['traj/exampleTraj.lammpstrj', '1', '3.5', '2', '1'],
+}
+foreach name, args : _invariance_cases
+  test('invariance_' + name, _check_invariance,
+    args: args,
+    workdir: meson.project_source_root() / 'input',
+    env: _test_env,
+    timeout: 300)
+endforeach
+test('invariance_missing_input', _check_invariance,
+  args: ['traj/no_such_file.lammpstrj'],
+  workdir: meson.project_source_root() / 'input',
+  env: _test_env,
+  should_fail: true)
+test('invariance_empty_frame', _check_invariance,
+  args: ['traj/mW_cubic.lammpstrj', '1', '3.5', '9'],
+  workdir: meson.project_source_root() / 'input',
+  env: _test_env,
+  should_fail: true)
+# 1000 translations and 1000 permutations on every deposited frame, plus
+# the eight half-box shifts. The cage stage is the cost.
+test('fuzz_cage_shift_permute', _fuzz_cage,
+  args: [meson.project_source_root() / 'input' / 'traj', '1000'],
+  env: _test_env,
+  timeout: 0)

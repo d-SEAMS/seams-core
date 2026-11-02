@@ -1,7 +1,9 @@
 # WASM classify
 
 The C ABI is `seams_chill_plus` in `src/include/internal/seams_c_api.h`.
-It is the same CHILL+ path as `seams chill-plus` (mutual 4-NN).
+It is the same CHILL+ path as `seams chill-plus`: the 3.5 A cutoff list.
+`seams_chill_plus_graph` takes the cutoff and `"cutoff"` or `"mutual"`,
+as `seams chill-plus --cutoff R --graph mutual` does.
 
 Emscripten, when the host has `emcc`:
 

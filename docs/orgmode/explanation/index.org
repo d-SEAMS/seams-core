@@ -8,6 +8,7 @@ These pages are for understanding. They are not recipes.
 | [[file:architecture.org][Three repositories]] | Why the engine, Python, and Lua are three packages |
 | [[file:chill-plus-vs-cages.org][CHILL+ versus cages]] | Why the two scores disagree |
 | [[file:ring-completion.org][Ring-adjacent completion]] | ~ringAdjacentCompletion~ and the seeded flag |
+| [[file:topological-network.org][Topological network criteria]] | The formulae the classifiers use |
 | [[file:citation.org][Citation]] | What to cite |
 
 #+begin_export rst
@@ -17,5 +18,6 @@ These pages are for understanding. They are not recipes.
    architecture
    chill-plus-vs-cages
    ring-completion
+   topological-network
    citation
 #+end_export

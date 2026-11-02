@@ -28,7 +28,7 @@ seams cages water.lammpstrj
 
 Scripting front ends are separate packages:
 
-- Python: `pydseams` ([PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib))
+- Python: `pydseamslib` ([PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib))
 - Lua/Fennel: `dseams` ([yodaStruct](https://github.com/d-SEAMS/yodaStruct))
 
 Periodic k-nearest neighbour search is
@@ -113,7 +113,7 @@ builds `libyodaLib` and the `seams` CLI. Lua is
 
 ```bash
 pixi run setup && pixi run build && pixi run test
-./bbdir/src/seams read input/traj/exampleTraj.lammpstrj
+./bbdir/seams read input/traj/exampleTraj.lammpstrj
 ```
 
 `environment.yml` is a micromamba fallback (meson, Eigen, BLAS,
@@ -287,8 +287,8 @@ This will ensure that new commits are in accordance to the `clang-format` file.
 nix develop
 meson setup bbdir -Dwith_tests=true
 meson compile -C bbdir
-./bbdir/src/seams read input/traj/exampleTraj.lammpstrj
-gdb --args ./bbdir/src/seams read input/traj/exampleTraj.lammpstrj
+./bbdir/seams read input/traj/exampleTraj.lammpstrj
+gdb --args ./bbdir/seams read input/traj/exampleTraj.lammpstrj
 ```
 
 To load debugging symbols from the shared library inside `gdb`:
@@ -332,3 +332,14 @@ The libraries used are:
 - [Blaze](https://bitbucket.org/blaze-lib/blaze/) for very fast modern linear algebra
 - [nanoflann](https://github.com/jlblancoc/nanoflann) to calculate nearest neighbors
 - [icecream-cpp](https://github.com/renatoGarcia/icecream-cpp) for pretty-printing and debugging
+
+# Language fronts
+
+Python is [pydseamslib](https://github.com/d-SEAMS/PydSEAMSlib)
+(`pip install pydseamslib`, `import pydseamslib`). Do not build a second
+Python module in this repository.
+
+`libseams_lang` is built with the engine for the R package
+(`bindings/r/dseams`) and the Julia package
+(`bindings/julia/Dseams`). It calls the same classifiers as the CLI.
+The how-to is `docs/orgmode/howto/bindings.org`.

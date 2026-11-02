@@ -1676,21 +1676,18 @@ int sout::writeLAMMPSdataPrisms(
     const std::vector<int> &listPrism, const std::vector<std::vector<int>> &nList,
     std::string filename) {
   std::ofstream outputFile;
-  std::vector<int> atoms;         // Holds all atom IDs to print
-  int ringSize = rings[0].size(); // Ring size of each ring in rings
-  bool padAtoms = false;          // Add extra atoms if the atom IDs are skipped
+  std::vector<int> atoms; // Holds all atom IDs to print
+  bool padAtoms = false;  // Add extra atoms if the atom IDs are skipped
   int bondTypes = 1;
+  if (rings.empty() || listPrism.empty()) {
+    return 1;
+  }
+  int ringSize = static_cast<int>(rings[0].size()); // Ring size of each ring in rings
   // Bond stuff
   std::vector<std::vector<int>> bonds; // Vector of vector, with each row
                                        // containing the atom IDs of each bond
   bool atomOne, atomTwo;               // If bond atoms are in the prism or not
   bool isPrismBond;
-
-  // ----------------
-  // Return if there are no prisms
-  if (listPrism.empty()) {
-    return 1;
-  }
 
   // ---------------
   // Get the bonds

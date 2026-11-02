@@ -1,0 +1,311 @@
+#+TITLE: Benchmarks
+#+OPTIONS: toc:nil num:nil ^:nil
+
+Timing tables of the d-SEAMS 2.0 paper and its supplement. Each table
+names its record, a directory or file under =results/reference/= of
+[[https://github.com/d-SEAMS/dseams2_repro][dseams2_repro]]. The
+values below are those of seams-core v2.12.0, the release the paper
+describes. A rerun at a later release adds its own table under the
+same heading and names its record, so the paper's values stay
+readable next to the current ones. [[file:reproduce.org][Reproduce]]
+gives the commands, and [[file:versions.org][Versions]] gives the
+machines and the codes.
+
+* Records
+
+| record | processor | allocation | engine | read by |
+|--------+-----------+------------+--------+---------|
+| ~elja-1788072~ | 2 x Xeon Platinum 8358 | exclusive ~64cpu_256mem~, load 0.95 | v2.6.0 sources | neighbour-list and ring scaling, cage stages |
+| ~paper_manifest-elja-1785712.json~ | 2 x Xeon Platinum 8358 | ~64cpu_256mem~, load 4.96 | ~13c95cec~ | one frame against d-SEAMS 1 |
+| ~elja-1798666~ | 2 x AMD EPYC 7713 | exclusive ~128cpu_256mem~, load 0.24 | ~e7856408~ | second architecture, \(q_l\) check, walk control |
+| ~terra-2026-09-01~ | Ryzen 9 9950X | shared workstation, load 4.32 | ~770accf9~ | walk and PTM controls |
+| ~sota-heldout-2026-10-31~ | Xeon, 8-vCPU cloud VM | labels only, no timing | v2.12.0 | lattice-label retention |
+| ~md-heldout-2026-10-31~ | Xeon, 8-vCPU cloud VM | labels only, no timing | v2.12.0 | held-out mW trajectories |
+| ~h2h-2026-10-31~ | Xeon, 8-vCPU cloud VM | pinned core 3, load 0.33 | v2.12.0 | head-to-head table |
+| ~bench-2026-10-31~ | Xeon, 8-vCPU cloud VM | pinned core 3 and cores 0-7, load 0.20 | v2.12.0 | cage drivers, incremental and churn timings |
+| ~cli-carry-2026-10-31~ | Xeon, 8-vCPU cloud VM | pinned core 3 | v2.12.0 | carried command line |
+| ~hydrate-inside-2026-10-31~ | Xeon, 8-vCPU cloud VM | labels only | v2.12.0 | ray-parity hydrate occupancy |
+| ~walks-2026-10-31~ | Xeon, 8-vCPU cloud VM | labels only | v2.12.0 | label walks of the applications |
+| ~terra-2026-09-02~ | Ryzen 9 9950X | shared workstation | ~0a7fc546~ | OpenMP strong scaling, GenIce atlas and ions, hydrate occupancy |
+| ~tip-gpu-batch-elja-1787449.txt~ | 2 x A100-PCIE-40GB | ~gpu-2xA100~, load 0.00 | not named in the record | device-resident batch |
+| ~elja-production~ | 2 x Xeon Platinum 8358 | exclusive ~64cpu_256mem~, one job per temperature | v2.9.2 (~d1983d53~) | seeding and brine campaigns |
+
+Every Elja CPU timing record built the d-SEAMS 1 baseline, seams-core
+commit ~1c8efa38~, next to the engine commit listed. The GPU job built
+only the engine. Load is the one-minute load average when the record
+started, and ~elja-1788072~ gives it before the workflow.
+
+* One frame against d-SEAMS 1
+
+The 4096-molecule mW cubic frame has 8192 six-rings. Both versions
+assign none of them to a hexagonal cage (HC) and every one to a
+double-diamond cage (DDC). One core, best of five calls per stage,
+record ~paper_manifest-elja-1785712.json~.
+
+| stage | d-SEAMS 1 baseline | d-SEAMS 2.0 |
+|-------+--------------------+-------------|
+| ring detection | 101 ms | 14 ms |
+| HC search | 3.6 s | 45 ms |
+| HC and DDC searches in one call | 3.9 s | 48.6 ms |
+| DDC, the combined minimum less the HC minimum | 0.30 s | 3.5 ms |
+| ring detection plus the combined call | 4.0 s | 63 ms |
+
+The path is 63.6 times faster. The drivers of this record time the HC
+call and the combined call, which builds its local ring-type and cage
+vectors inside the timer.
+
+On pinned core 3 of the cloud VM, record ~bench-2026-10-31~, the
+drivers time ~findDDC~ alone. The ring types and cages that ~findHC~
+leaves are computed once and restored outside the timer before each
+call. Values are medians over three sessions.
+
+| stage | d-SEAMS 1 baseline | d-SEAMS 2.0 |
+|-------+--------------------+-------------|
+| ring detection | 89 ms | 3.9 ms |
+| ~findHC~ | 2.73 s | 47.5 ms |
+| ~findDDC~ | 255 ms | 3.06 ms |
+| sum of the three stages | 3.0 s | 54 ms |
+| combined HC and DDC call | | 50.3 ms |
+
+The sum is 56 times faster. Built with the ~-O3 -funroll-loops~ of the
+engine's drivers instead of ~-O2~, the baseline drivers time each
+stage within 1.5% of the ~-O2~ build, and the three cage-driver stages
+within 0.2%.
+
+* Neighbour lists, CHILL+ and rings against system size
+
+Single core of exclusive Elja ~64cpu_256mem~, record ~elja-1788072~,
+milliseconds. "base" columns are baseline commit ~1c8efa38~, the
+others engine v2.6.0. Cutoff list and index-ordered builder at
+\(r_c=3.5\) Å; CHILL+ bond correlations (~getCorrelPlus~) on the
+cutoff list; primitive rings with \(D=6\) on the index-ordered list.
+The cells are synthetic cubic cells at the mW number density of
+0.0332 Å^-3 with a deterministic jitter.
+
+| n | cutoff, base | cutoff | index, base | index | CHILL+, base | CHILL+ | rings, base | rings |
+|-------+---------+--------+----------+--------+---------+--------+----------+---------|
+| 1000 | 1.975 | 1.461 | 6.794 | 1.443 | 3.446 | 1.404 | 116.282 | 8.064 |
+| 2000 | 5.650 | 2.781 | 22.015 | 2.738 | 7.274 | 2.865 | 406.376 | 19.870 |
+| 4000 | 17.793 | 5.305 | 99.424 | 5.291 | 13.915 | 5.648 | 576.520 | 37.208 |
+| 8000 | 61.986 | 11.030 | 387.840 | 10.796 | 27.182 | 11.401 | 965.459 | 78.731 |
+| 16000 | 225.734 | 22.712 | 1516.346 | 22.345 | 59.033 | 23.363 | 3626.729 | 226.554 |
+| 32000 | 859.556 | 43.663 | 5975.106 | 42.700 | 110.161 | 45.881 | 4486.953 | 528.897 |
+
+From 1000 to 32000 atoms the 2.0 cutoff list grows by a factor of 30,
+and the baseline list by a factor of 435. At 32000 atoms the
+index-ordered builder falls from 6.0 s to 43 ms, and the two builders
+together from 6.8 s to 86 ms.
+
+* OpenMP strong scaling
+
+A fixed 65536-molecule cell, every host stage of the pipeline, best of
+seven runs per thread count, one thread per physical core
+(~OMP_PLACES=cores~, ~OMP_PROC_BIND=close~). The machine is the
+16-core Ryzen 9 9950X workstation, not reserved for the run, record
+~terra-2026-09-02~, engine ~0a7fc546~ with OpenMP and without vesin.
+
+| stage | 1 thread | 16 threads | speed-up |
+|-------+----------+------------+----------|
+| whole pipeline | 906 ms | 99 ms | 9.1 |
+| primitive rings | 802 ms | 76 ms | 10.6 |
+| Steinhardt kernel | 12.6 ms | 4.8 ms | |
+| cutoff neighbour list | 46 ms | 11 ms | 4.3 |
+| index-ordered neighbour list | 45 ms | 8 ms | 5.8 |
+
+At sixteen threads the pipeline is 43 ms above the ideal line. The
+rings account for 26 ms of that and the two neighbour lists for 13 ms.
+
+* Second architecture
+
+One core of an AMD EPYC 7713 (Elja ~128cpu_256mem~, load 0.2 at
+start), record ~elja-1798666~, engine commit ~e7856408~. The reference
+column is baseline commit ~1c8efa38~ in the first six rows, the full
+rebuild of the same engine in the two incremental rows, and one thread
+against 32 in the last row. Milliseconds.
+
+| stage | reference | 2.0 | factor |
+|-------+-----------+-----+--------|
+| index-ordered neighbours, 32000 | 8689.6 | 59.3 | 147 |
+| cell-list neighbours, 32000 | 862.8 | 61.0 | 14 |
+| CHILL+, 32000 | 128.6 | 66.6 | 1.9 |
+| primitive rings, 32000 | 5111.5 | 752.9 | 6.8 |
+| hexagonal-cage search, mW 4096 | 4926.9 | 68.7 | 72 |
+| ring-and-cage path, mW 4096 | 5255.8 | 93.0 | 57 |
+| incremental rings, steady frame | 20.5 | 1.0 | 20 |
+| incremental affiliation, steady frame | 97.3 | 11.3 | 8.6 |
+| ring construction, 65536 atoms, 1 to 32 threads | 1893.9 | 119.2 | 16 |
+
+* Incremental updates
+
+Record ~bench-2026-10-31~, pinned core 3 of the cloud VM unless noted.
+Every updated ring set and every updated cage flag equals the rebuild.
+
+| case | update | rebuild |
+|------+--------+---------|
+| jittered 8000-molecule cell, three perturbed sites per frame, smallest over five frames | 4.4 ms | 32 ms |
+| mW cubic trajectory, mutual four-nearest graph, frames 2-11 means, rings | 0.21 ms | 3.7 ms |
+| mW cubic trajectory, mutual four-nearest graph, frames 2-11 means, affiliation | 0.25 ms | 48.6 ms |
+| nucleation excerpt, cutoff graph, rings, one thread | 14.9 ms | 14.3 ms |
+| nucleation excerpt, cutoff graph, affiliation, one thread | 18.0 ms | 17.5 ms |
+| nucleation excerpt, cutoff graph, rings, eight threads (cores 0-7) | 3.07 ms | 2.65 ms |
+| nucleation excerpt, cutoff graph, affiliation, eight threads (cores 0-7) | 4.26 ms | 4.18 ms |
+| Niu trajectory 3, cutoff graph, rings, one thread | 11.9 ms | 11.2 ms |
+| Niu trajectory 3, cutoff graph, affiliation, one thread | 11.1 ms | 10.3 ms |
+| Niu trajectory 3, cutoff graph, rings, eight threads (cores 0-7) | 2.244 ms | 2.184 ms |
+| Niu trajectory 3, cutoff graph, affiliation, eight threads (cores 0-7) | 2.725 ms | 2.622 ms |
+
+On the last frame of the 8000-molecule cell the ring update enumerates
+794 of the 8000 sources again. The 8000-molecule and mW cubic values
+are medians over three sessions, and the nucleation and Niu values,
+frames 2-11 means, come from one session. On frames 2-11 of the nucleation excerpt 2845 bonds
+change per frame on average, and 1948 on frames 2-11 of Niu trajectory
+3 (2880 molecules), so both updaters take the batch pass there.
+
+** Churn sweep
+
+~tests/bench_churn_sweep.cpp~ starts from frame 147 of the figshare mW
+nucleation excerpt (4096 molecules, cutoff graph) and moves the
+molecules within a radius of the box centre to their frame-148
+positions. Median of seven repetitions, one thread, one session.
+
+| changed bonds | ring update | ring rebuild | affiliation update | affiliation rebuild |
+|---------------+-------------+--------------+--------------------+---------------------|
+| 0 | 0.21 ms | | 0.26 ms | |
+| 3 | 1.52 ms | 14.6 ms | 8.0 ms | 22.5 ms |
+| 17 | 2.70 ms | 17.8 ms | 11.3 ms | 25.2 ms |
+| 340 | 8.1 ms | 13.1 to 19.0 ms over the sweep | batch pass | |
+
+From 57 changed bonds the affiliation update runs the batch pass.
+
+* Carried command line
+
+~seams cages~ over a frame range on pinned core 3 of the cloud VM,
+~OMP_NUM_THREADS=1~, record ~cli-carry-2026-10-31~. Milliseconds per
+frame, whole process. The ratio is rebuild over carry, so a value
+above 1 means the carried walk is faster. The last column is the same
+ratio for the build without the back-off. The carried and rebuilt
+JSON outputs are identical byte for byte in every case.
+
+| trajectory | graph | frames | rebuild | carried | ratio | no back-off |
+|------------+-------+--------+---------+---------+-------+-------------|
+| mW cubic, 4096 | seeded | 11 | 127.13 | 20.60 | 6.171 | 6.281 |
+| mW cubic, 4096 | cutoff | 11 | 48.90 | 9.10 | 5.374 | 5.453 |
+| nucleation excerpt, 4096 | seeded | 148 | 51.50 | 51.98 | 0.991 | 0.961 |
+| nucleation excerpt, 4096 | cutoff | 148 | 35.19 | 34.54 | 1.019 | 0.954 |
+| Niu trajectory 3, 2880 | seeded | 148 | 32.51 | 32.94 | 0.987 | 0.961 |
+| Niu trajectory 3, 2880 | cutoff | 148 | 20.13 | 20.54 | 0.980 | 0.958 |
+
+These values are medians over three alternating sessions of the
+record's =run.sh=. The record itself runs five.
+
+* Comparison with other codes
+
+Single-core timings in milliseconds on the same frames, record
+~h2h-2026-10-31~. Outside the R.I.N.G.S. rows each entry times the
+analysis call with the frame in memory, as the best of seven runs
+after one warm-up, and each timer holds the neighbour search of its
+code. The R.I.N.G.S. rows time one whole process on each side, input
+included, and their d-SEAMS side is ~seams fingerprint~, which also
+finds the seven-rings, so the rings of size six and below are
+compared. The mW R.I.N.G.S. entry is one timed run after one warm-up.
+The last row times the completed seeded cage rule against PTM on the
+512-molecule jittered lattice at \(\sigma=0.3\) Å, generator seed 5;
+PTM has no d-SEAMS counterpart, so that row is not the same
+computation.
+
+| computation | frame | other code | d-SEAMS 2.0 | other | agreement |
+|-------------+-------+------------+-------------+-------+-----------|
+| CHILL+ labels | mW cubic, 4096 | OVITO | 6.09 | 22.7 | 4096 of 4096 |
+| CHILL+ labels | Niu final frame, 2880 | OVITO | 5.28 | 21.3 | 2610 of 2880 |
+| \(q_6\), \(\bar q_6\), four nearest | mW cubic, 4096 | freud | 3.50 | 31.9 | 2.2e-7 |
+| \(q_6\), \(\bar q_6\), four nearest | Niu final frame, 2880 | freud | 2.58 | 26.4 | 0.32; 3.0e-5 on one graph |
+| primitive rings, \(D=6\), whole workflow | mW cubic, 4096 | R.I.N.G.S. | 31.0 | 2070379 | same census, 8192 rings |
+| primitive rings, \(D=6\), whole workflow | CRN1, 1000 | R.I.N.G.S. | 13.5 | 137797 | same census, 1238 rings |
+| shortcut-free rings, \(D=6\) | mW cubic, 4096 | GenIce2 | 6.44 | 10666 | same 8192 rings |
+| shortcut-free rings, \(D=6\) | CRN1, 1000 | GenIce2 | 2.64 | 1773 | same 1238 rings |
+| 5^12 and 5^12 6^2 cages | sI, 368 | GenIce2 | 28.1 | 436 | 16 and 48 in both |
+| Ic/Ih labels | jittered Ic, 512 | OVITO PTM | 15.6 | 16.4 | 512 and 502 Ic |
+
+The frames are the 4096-molecule mW cubic frame, the final frame of
+the 2880-water Niu dump, the 1000-molecule continuous random network
+CRN1 and the 2 x 2 x 2 GenIce sI framework of 368 waters. Every code
+gets the same oxygen coordinates and orthorhombic cell, and every
+library runs on one thread.
+
+OVITO CHILL+ and the d-SEAMS CHILL+\((r_c)\) both run at
+\(r_c=3.5\) Å. d-SEAMS clathrate, interfacial clathrate and water
+match OVITO hydrate, interfacial hydrate and other. The CHILL+ labels
+agree on every mW molecule and differ at 270 Niu molecules, 109 of
+which d-SEAMS labels interfacial clathrate and OVITO other. freud's
+timer holds two neighbour searches, since the plain and averaged
+parameters are two objects, and freud stores coordinates in single
+precision. d-SEAMS evaluates \(q_6\) on the mutual four-nearest graph
+and freud on the four nearest neighbours; the two graphs differ at 175
+of the 2880 Niu molecules. Given freud's neighbour rows, the engine
+returns freud's values to 3.0e-5. R.I.N.G.S. puts 97% of each run in
+the distance matrix of the 5 x 5 x 5 superlattice it builds for a
+periodic cell.
+
+The calls on each side are these.
+
+- d-SEAMS CHILL+\((r_c)\): ~neighListO~, ~getCorrelPlus~ and
+  ~getIceTypePlusNoPrint~ through PydSEAMSlib on the 3.5 Å cutoff list
+- d-SEAMS \(q_6\) and \(\bar q_6\): ~kNearestNeighbourList~ and
+  ~steinhardtQl~
+- d-SEAMS rings: ~neighListO~, ~neighbourListByIndex~ and
+  ~ringNetwork~, with ~findBySignature~ added for the sI cages
+- d-SEAMS against PTM: the completed seeded rule of
+  ~scripts/sota_compare.py~
+- d-SEAMS against R.I.N.G.S.: ~seams fingerprint crn.lammpstrj --cutoff 3.5 --type 1~
+- OVITO CHILL+: ~ChillPlusModifier(cutoff=3.5)~ on a ~DataCollection~
+- OVITO PTM: ~PolyhedralTemplateMatchingModifier~
+- freud: ~freud.order.Steinhardt(l=6)~ with ~average=False~ and with
+  ~average=True~, each over four nearest neighbours
+- GenIce2 rings: ~pairlist.pairs_iter~ at 3.5 Å into a networkx
+  graph, then ~cycles_iter(graph, 6, pos)~ of ~cycless.cycles~
+- GenIce2 cages: those rings, then ~polyhedra_iter(rings, 14)~ of
+  ~cycless.polyhed~, keeping the cages of 12 and 14 five- and
+  six-rings, as the genice2-cage formatter does
+- R.I.N.G.S.: ~rings input~ on the same coordinates with one species,
+  periodic boundaries, primitive rings only, search depth 3 (rings of
+  up to six members) and the O-O bond at 3.5 Å
+
+The genice2-cage formatter run from the command line first replicates
+the sI unit cell and builds a hydrogen-bond graph, so the record runs
+it once, untimed, and it returns the same 16 and 48 cages.
+
+* Steinhardt parameters across codes
+
+The rules ~ql_compare_dseams~ and ~ql_compare_python~ evaluate
+Steinhardt \(q_4\), \(q_6\) and \(q_8\) with the engine, freud and
+pyscal3 on an ideal fcc cell (108 atoms in a 12 Å box, cutoff 3.2 Å)
+and an ideal bcc cell (54 atoms, same box, cutoff 4.0 Å). Record
+~elja-1798666~, files =ql-dseams.txt= and =ql-python.txt=.
+
+| cell | \(q_4\) | \(q_6\) | \(q_8\) |
+|------+---------+---------+---------|
+| fcc | 0.190941 | 0.574524 | 0.403915 |
+| bcc | 0.509175 | 0.628539 | 0.212762 |
+
+The three codes print the same six decimals.
+
+* Device-resident batch
+
+One process of ~bench_gpu_batch~ under ~nsys~ on the eleven stored
+frames of the 4096-molecule mW cubic dump, one NVIDIA
+A100-PCIE-40GB of an Elja ~gpu-2xA100~ node, CUDA 12.2, record
+~tip-gpu-batch-elja-1787449.txt~.
+
+| quantity | value |
+|----------+-------|
+| working set of one frame \(W\) | 2867712 bytes |
+| frames that fit, \(\lfloor A/W\rfloor\) | 11672 |
+| cold call, compute, NVRTC compile included | 6394 ms |
+| best of five warm calls, compute, eleven frames | 21.986 ms |
+| upload | 0.120 ms |
+| download | 0.176 ms |
+| molecules labelled Ic | 45056 of 45056 |
+| six-rings | 90112 |
+| kernel time in the \(k\)-nearest walk | 69.9% |
+| kernel time in primitive hexagons | 17.9% |
+| kernel time in basal emission | 7.2% |

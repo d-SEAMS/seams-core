@@ -14,6 +14,14 @@
  *  four-nearest graph, primitive six-rings, and the HC/DDC affiliation
  *  predicates. CHILL and \(q_{lm}\) stay on the host. Only cage labels
  *  come back.
+ *
+ *  Every device counter is incremented before its bound check. A frame
+ *  whose rings, atom rows or basal pairs overflow the planned buffers
+ *  reruns with those buffers grown to the counted sizes. A frame with an
+ *  atom row longer than the kernels' 32 entries, or whose grown buffers
+ *  cannot be allocated after a completed pass, is evaluated on the host
+ *  from its mutual graph. A batch the planner rejects, or whose first
+ *  allocation fails, returns BatchResult::error.
  */
 
 namespace gpu {
@@ -23,11 +31,13 @@ struct BatchResult {
   std::vector<int> sixCount;
   std::vector<int> atomHc;  // 1 if the atom sits on an HC-affiliated ring
   std::vector<int> atomDdc; // 1 if the atom sits on a DDC-affiliated ring
-  std::vector<int> nRings;  // per frame
-  int ringsDropped = 0;
+  std::vector<int> nRings;     // per frame
+  int retries = 0;             // passes rerun with grown buffers
+  std::vector<int> hostFrames; // frames evaluated on the host
   double uploadMs = 0.0;
   double computeMs = 0.0;
   double downloadMs = 0.0;
+  double hostMs = 0.0;
   std::string error;
 };
 

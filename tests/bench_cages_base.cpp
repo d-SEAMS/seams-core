@@ -28,9 +28,12 @@
 
 namespace {
 
-template <typename Fn> double bestMillis(Fn &&fn, int reps) {
+// setup() runs before every rep, outside the timer.
+template <typename Setup, typename Fn>
+double bestMillis(Setup &&setup, Fn &&fn, int reps) {
   double best = std::numeric_limits<double>::max();
   for (int rep = 0; rep < reps; rep++) {
+    setup();
     const auto start = std::chrono::steady_clock::now();
     fn();
     const auto end = std::chrono::steady_clock::now();
@@ -38,6 +41,10 @@ template <typename Fn> double bestMillis(Fn &&fn, int reps) {
         best, std::chrono::duration<double, std::milli>(end - start).count());
   }
   return best;
+}
+
+template <typename Fn> double bestMillis(Fn &&fn, int reps) {
+  return bestMillis([]() {}, fn, reps);
 }
 
 } // namespace
@@ -85,24 +92,26 @@ int main(int argc, char **argv) {
       },
       reps);
 
-  const double tDDC = bestMillis(
-      [&]() {
-        std::vector<ring::strucType> rt(sixRings.size(),
-                                        ring::strucType::unclassified);
-        std::vector<cage::Cage> cl;
-        auto hc = ring::findHC(sixRings, rt, hbondIdx, cl);
-        listDDC = ring::findDDC(sixRings, rt, hc, cl);
-      },
-      reps);
-
+  // findDDC reads the ring types and cages findHC left; that state is
+  // computed once here and restored outside the timer before every rep.
   ringType.assign(sixRings.size(), ring::strucType::unclassified);
   cageList.clear();
   listHC = ring::findHC(sixRings, ringType, hbondIdx, cageList);
-  listDDC = ring::findDDC(sixRings, ringType, listHC, cageList);
+  const std::vector<ring::strucType> ringTypeAfterHC = ringType;
+  const std::vector<cage::Cage> cageListAfterHC = cageList;
+
+  const double tDDC = bestMillis(
+      [&]() {
+        ringType = ringTypeAfterHC;
+        cageList = cageListAfterHC;
+      },
+      [&]() { listDDC = ring::findDDC(sixRings, ringType, listHC, cageList); },
+      reps);
 
   std::cout << "ringNetwork/ms " << tRings << "\n"
             << "findHC/ms      " << tHC << "\n"
             << "findDDC/ms     " << tDDC << "\n"
+            << "pipeline/ms    " << (tRings + tHC + tDDC) << "\n"
             << "nHCrings       " << listHC.size() << "\n"
             << "nDDCrings      " << listDDC.size() << "\n"
             << "nCages         " << cageList.size() << "\n";

@@ -1,0 +1,3 @@
+Frame 1 (timestep 15677000) of the d-SEAMS mW nucleation trajectory, doi:10.6084/m9.figshare.11448702.v1
+https://ndownloader.figshare.com/files/20418309 (nucleation.lammpstrj, md5 c28fc209a2854d2ba49e8f9b55accbe8)
+head -n 4105 nucleation.lammpstrj writes this dump.

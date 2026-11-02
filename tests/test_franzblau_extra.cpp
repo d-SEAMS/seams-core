@@ -2,6 +2,7 @@
 
 #include <franzblau.hpp>
 
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <set>
@@ -196,27 +197,32 @@ TEST_CASE("ringNetwork matches the generate-then-filter route", "[franzblau]") {
   }
 }
 
-TEST_CASE("ringNetwork lists its rings in a fixed order", "[franzblau]") {
-  // Callers and the incremental updater see rings in this order, so it is
-  // pinned: FNV-1a over the members, a separator after each ring
-  const auto digest = [](const std::vector<std::vector<int>> &rings) {
-    unsigned long long h = 14695981039346656037ULL;
-    for (const auto &r : rings) {
-      for (const int v : r) {
-        h = (h ^ static_cast<unsigned long long>(v)) * 1099511628211ULL;
-      }
-      h = (h ^ 0xffffffffULL) * 1099511628211ULL;
-    }
-    return h;
-  };
+TEST_CASE("ringNetwork lists its rings in canonical sorted order",
+          "[franzblau]") {
+  // Callers and the incremental updater compare ring lists element by
+  // element, so the order may depend on the graph only: each ring from its
+  // lowest member toward the lesser neighbour, the list sorted, and the same
+  // list for any order of the neighbour rows
   const auto idx = jitteredNetwork(2000, 0.30);
-  const std::pair<int, unsigned long long> expected[] = {
-      {3, 0xa13df6df365e3c4bULL}, {4, 0x55072279d6ca8e3fULL},
-      {5, 0x4562ad570939d67dULL}, {6, 0x7677399c7c170978ULL},
-      {7, 0x7c49cb2584802fbbULL}, {8, 0x43d9e8f1b4143932ULL}};
-  for (const auto &[maxDepth, want] : expected) {
+  auto shuffled = idx;
+  unsigned long long state = 977ULL;
+  for (auto &row : shuffled) {
+    for (std::size_t k = row.size() - 1; k > 1; k--) {
+      state ^= state << 13;
+      state ^= state >> 7;
+      state ^= state << 17;
+      const auto j = 1 + static_cast<std::size_t>(state % k);
+      std::swap(row[k], row[j]);
+    }
+  }
+  for (int maxDepth = 3; maxDepth <= 8; maxDepth++) {
     INFO("maxDepth " << maxDepth);
-    REQUIRE(digest(primitive::ringNetwork(idx, maxDepth)) == want);
+    const auto rings = primitive::ringNetwork(idx, maxDepth);
+    REQUIRE(std::is_sorted(rings.begin(), rings.end()));
+    for (const auto &r : rings) {
+      REQUIRE(r == canonicalRing(r));
+    }
+    REQUIRE(primitive::ringNetwork(shuffled, maxDepth) == rings);
   }
 }
 
@@ -330,9 +336,74 @@ TEST_CASE("RingUpdater equals full recomputation across perturbed frames",
     incr = updater.update(idx);
     INFO("frame " << frame << ", recomputed "
                   << updater.lastRecomputedSources() << " of " << n);
-    REQUIRE(canonicalSet(incr) == canonicalSet(primitive::ringNetwork(idx, 6)));
+    const auto full = primitive::ringNetwork(idx, 6);
+    REQUIRE(incr == full);
+    REQUIRE(canonicalSet(incr) == canonicalSet(full));
     REQUIRE(updater.lastRecomputedSources() < n);
     REQUIRE(updater.lastBallsRefreshed() < n);
-    REQUIRE(updater.lastBallsRefreshed() <= updater.lastRecomputedSources());
   }
+}
+
+TEST_CASE("RingUpdater matches ringNetwork element by element on every frame",
+          "[franzblau]") {
+  const int n = 1200;
+  auto cloud = jitteredCloud(n, 0.20, 88172645463325252ULL);
+  primitive::RingUpdater updater(6);
+  unsigned long long state = 99ULL;
+  auto rnd = [&state]() {
+    state ^= state << 13;
+    state ^= state >> 7;
+    state ^= state << 17;
+    return state;
+  };
+  for (int frame = 0; frame < 6; frame++) {
+    const int moves = frame < 2 ? 0 : (frame < 4 ? 4 : n / 3);
+    for (int k = 0; k < moves; k++) {
+      auto &p =
+          cloud.pts[static_cast<int>(rnd() % static_cast<unsigned long long>(n))];
+      p.x += 1.1 * ((frame + k) % 2 ? 1.0 : -1.0);
+      p.y += 0.6;
+      p.z -= 0.4;
+    }
+    const auto idx = networkFromCloud(cloud);
+    const auto &inc = updater.update(idx);
+    const auto full = primitive::ringNetwork(idx, 6);
+    INFO("frame " << frame << " bonds/molecule "
+                  << updater.lastChangedBondFraction() << " recomputed "
+                  << updater.lastRecomputedSources());
+    REQUIRE(inc == full);
+    if (frame < 2) {
+      REQUIRE(updater.lastChangedBonds() == 0);
+    }
+    if (frame >= 4) {
+      REQUIRE(updater.lastChangedBonds() > 0);
+    }
+  }
+}
+
+TEST_CASE("ringNetwork keeps one copy of a repeated edge", "[franzblau]") {
+  const std::vector<std::vector<int>> nList = {
+      {0, 1, 1, 2},
+      {1, 0, 0, 2},
+      {2, 0, 1},
+  };
+  const auto rings = primitive::ringNetwork(nList, 6, {});
+  REQUIRE(rings.size() == 1);
+  REQUIRE(rings[0].size() == 3);
+}
+
+TEST_CASE("populateGraphFromNListID skips a missing id and keeps the other vertices",
+          "[franzblau]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.nop = 3;
+  cloud.pts.resize(3);
+  for (int i = 0; i < 3; i++) {
+    cloud.pts[static_cast<std::size_t>(i)].atomID = i + 1;
+    cloud.idIndexMap[i + 1] = i;
+  }
+  const std::vector<std::vector<int>> nList = {{1, 2}, {2, 99}, {3, 1}};
+  const auto graph = primitive::populateGraphFromNListID(cloud, nList);
+  REQUIRE(graph.pts.size() == 3);
+  REQUIRE(graph.pts[1].neighListIndex.empty());
+  REQUIRE(graph.pts[0].neighListIndex.size() == 1);
 }

@@ -17,7 +17,9 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 SEAMS_ROOT=${SEAMS_ROOT:-$(dirname "$SCRIPT_DIR")}
-BASE_SHA=${BASE_SHA:-1c8efa382c4ae88ebc68e40a991260c4d57edbd5}
+# Published d-SEAMS 1 is v1.0.1 (6e51956f), built by scripts/baseline_dseams1.sh.
+# 1c8efa38 is a 2026 surrogate and is not the default.
+BASE_SHA=${BASE_SHA:-6e51956f3b9059729f36bcc208f6b6d18c3fec22}
 JOB_ID=${SLURM_JOB_ID:-nojob}
 OUT_DIR=${OUT_DIR:-$SEAMS_ROOT/bench-elja-$JOB_ID}
 BASE_TREE=${BASE_TREE:-$SEAMS_ROOT/../seams-base}
@@ -26,18 +28,22 @@ BASE_TREE=${BASE_TREE:-$SEAMS_ROOT/../seams-base}
 # the baseline worktree plus the recorded tip SHA behind for the job body.
 if [ "${1:-}" = "prep" ]; then
   cd "$SEAMS_ROOT"
-  export PATH=$HOME/.pixi/bin:$PATH
-  pixi install
-  pixi run -- meson subprojects download || true
+  if [[ -d ${SEAMS_PIXI_BIN:-$HOME/.pixi/bin} ]]; then
+    export PATH=${SEAMS_PIXI_BIN:-$HOME/.pixi/bin}:$PATH
+  fi
+  if command -v pixi >/dev/null; then
+    pixi install
+    pixi run -- meson subprojects download || true
+  fi
   git rev-parse HEAD > .tip_sha
   if [ ! -d "$BASE_TREE" ]; then
     git worktree add --detach "$BASE_TREE" "$BASE_SHA"
   fi
-  # The baseline tree downloads its own subproject wraps; compute nodes are
-  # offline
-  (cd "$BASE_TREE" &&
-   pixi run --manifest-path "$SEAMS_ROOT/pixi.toml" -- \
-     meson subprojects download || true)
+  if [[ -f $BASE_TREE/meson.build ]] && command -v pixi >/dev/null; then
+    (cd "$BASE_TREE" &&
+     pixi run --manifest-path "$SEAMS_ROOT/pixi.toml" -- \
+       meson subprojects download || true)
+  fi
   echo "prep done: tip $(cat .tip_sha), base tree $BASE_TREE"
   exit 0
 fi
@@ -65,8 +71,14 @@ log "tip $TIP_SHA base $BASE_SHA job $JOB_ID node $(hostname)"
 } > "$OUT_DIR/conditions.txt"
 
 # ------------------------------------------------------------------ tip build
-export PATH=$HOME/.pixi/bin:$PATH
-run() { pixi run --manifest-path "$SEAMS_ROOT/pixi.toml" -- "$@"; }
+if [[ -d ${SEAMS_PIXI_BIN:-$HOME/.pixi/bin} ]]; then
+  export PATH=${SEAMS_PIXI_BIN:-$HOME/.pixi/bin}:$PATH
+fi
+if command -v pixi >/dev/null; then
+  run() { pixi run --manifest-path "$SEAMS_ROOT/pixi.toml" -- "$@"; }
+else
+  run() { "$@"; }
+fi
 
 log "configuring tip"
 run meson setup build-tip --buildtype=release \
@@ -88,26 +100,34 @@ log "tip suite green"
 
 # ----------------------------------------------------------------- base build
 log "configuring base at $BASE_SHA"
-(
-  cd "$BASE_TREE"
-  run meson setup build-base --buildtype=release \
-    -Dwith_python=false -Dwith_tests=false \
-    > "$OUT_DIR/base-setup.log" 2>&1
-  run meson compile -C build-base >> "$OUT_DIR/base-setup.log" 2>&1
-)
-
-# Baseline drivers: compiled straight against the baseline library, since the
-# baseline predates the bench targets
-EIGEN_INC=$(run bash -c 'echo $CONDA_PREFIX/include/eigen3')
-BASE_INC="-I$BASE_TREE/src/include/internal -I$BASE_TREE/src/include/external -I$EIGEN_INC"
-BASE_LINK="-L$BASE_TREE/build-base/src -lyodaLib -Wl,-rpath,$BASE_TREE/build-base/src -Wl,--enable-new-dtags -Wl,--allow-shlib-undefined"
-log "compiling baseline drivers"
-run g++ -std=c++20 -O2 -o "$OUT_DIR/base_bench_scaling" \
-  tests/bench_scaling.cpp $BASE_INC $BASE_LINK \
-  >> "$OUT_DIR/driver.log" 2>&1
-run g++ -std=c++20 -O2 -o "$OUT_DIR/base_bench_cages" \
-  tests/bench_cages_base.cpp $BASE_INC $BASE_LINK \
-  >> "$OUT_DIR/driver.log" 2>&1
+BASE_KIND=meson
+if [[ -f $BASE_TREE/meson.build ]]; then
+  (
+    cd "$BASE_TREE"
+    run meson setup build-base --buildtype=release \
+      -Dwith_python=false -Dwith_tests=false \
+      > "$OUT_DIR/base-setup.log" 2>&1
+    run meson compile -C build-base >> "$OUT_DIR/base-setup.log" 2>&1
+  )
+  EIGEN_INC=$(run bash -c 'echo $CONDA_PREFIX/include/eigen3')
+  BASE_INC="-I$BASE_TREE/src/include/internal -I$BASE_TREE/src/include/external -I$EIGEN_INC"
+  BASE_LINK="-L$BASE_TREE/build-base/src -lyodaLib -Wl,-rpath,$BASE_TREE/build-base/src -Wl,--enable-new-dtags -Wl,--allow-shlib-undefined"
+  log "compiling baseline drivers"
+  run g++ -std=c++20 -O2 -o "$OUT_DIR/base_bench_scaling" \
+    tests/bench_scaling.cpp $BASE_INC $BASE_LINK \
+    >> "$OUT_DIR/driver.log" 2>&1
+  run g++ -std=c++20 -O2 -o "$OUT_DIR/base_bench_cages" \
+    tests/bench_cages_base.cpp $BASE_INC $BASE_LINK \
+    >> "$OUT_DIR/driver.log" 2>&1
+else
+  BASE_KIND=release
+  log "baseline $BASE_SHA is the published d-SEAMS 1 tree"
+  SEAMS_ROOT="$SEAMS_ROOT" SEAMS_BASELINE="$BASE_TREE" \
+    SEAMS_BASELINE_COMMIT="$BASE_SHA" SEAMS_REPS=5 \
+    SEAMS_TRAJ="$SEAMS_ROOT/input/traj/mW_cubic.lammpstrj" \
+    SEAMS_OUT="$OUT_DIR/base-cages.json" \
+    bash "$SCRIPT_DIR/baseline_dseams1.sh" >> "$OUT_DIR/driver.log" 2>&1
+fi
 
 # ------------------------------------------------------------------ run gates
 export OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores
@@ -138,19 +158,24 @@ for t in 1 2 4; do
 done
 
 # --------------------------------------------------------------- base benches
-log "base bench_scaling"
-"$OUT_DIR/base_bench_scaling" 1000 2000 4000 8000 16000 32000 \
-  > "$OUT_DIR/base-scaling.txt" 2>&1
-log "base bench_cages"
-"$OUT_DIR/base_bench_cages" traj/mW_cubic.lammpstrj 1 5 \
-  > "$OUT_DIR/base-cages.txt" 2>&1
+if [[ $BASE_KIND == meson ]]; then
+  log "base bench_scaling"
+  "$OUT_DIR/base_bench_scaling" 1000 2000 4000 8000 16000 32000 \
+    > "$OUT_DIR/base-scaling.txt" 2>&1
+  log "base bench_cages"
+  "$OUT_DIR/base_bench_cages" traj/mW_cubic.lammpstrj 1 5 \
+    > "$OUT_DIR/base-cages.txt" 2>&1
+else
+  log "published baseline JSON is $OUT_DIR/base-cages.json"
+fi
 
 # ------------------------------------------------------------ identity checks
-for f in tip-cages base-cages; do
-  if ! grep -q 'six-rings  8192' "$OUT_DIR/$f.txt"; then
-    log "WARNING: $f does not report 8192 six-rings"
-  fi
-done
+if ! grep -q 'six-rings  8192' "$OUT_DIR/tip-cages.txt"; then
+  log "WARNING: tip-cages does not report 8192 six-rings"
+fi
+if [[ $BASE_KIND == meson ]] && ! grep -q 'six-rings  8192' "$OUT_DIR/base-cages.txt"; then
+  log "WARNING: base-cages does not report 8192 six-rings"
+fi
 
 echo "loadavg_at_end: $(cut -d' ' -f1 /proc/loadavg)" >> "$OUT_DIR/conditions.txt"
 log "assembling bench.json"

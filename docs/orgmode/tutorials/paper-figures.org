@@ -1,0 +1,31 @@
+#+TITLE: Paper figures
+#+OPTIONS: toc:nil num:nil
+
+The 2020 JCIM figures are drawn from figshare project 73545.
+This page is the same calls on the dumps that are in the tree.
+The runnable copy is =docs/tutorials/test_paper_figures.py=.
+Python is ~pip install pydseamslib~.
+
+| figure | dump in this tree | call | result |
+|--------+-------------------+------+--------|
+| cubic ice, CHILL+ | =mW_cubic.lammpstrj= frame 1, type 1 | ~chill_plus()~ | 4096 cubic |
+| cubic ice, cages | the same frame | ~cages()~ | ~n_ic~ 4096 |
+| sI 5^12 cages | =genice_sI.lammpstrj=, type 1 | ~cages_by_signature("512")~ | 2 cages, 40 atoms |
+| mixed frame | =exampleTraj.lammpstrj=, type 2 | cutoff CHILL+ versus cages | 12 interfacial clathrate, no complete cage |
+
+The R and Julia fronts also report 4096 cubic on the first row.
+They call ~libseams_lang~ with the mutual four-neighbour list.
+On this lattice that list and the cutoff list agree.
+
+The nucleation, nanotube, monolayer, and in-plane RDF figures need the figshare dumps.
+Point the same functions at those files.
+
+#+begin_src python
+import pydseams as ds
+
+ice = ds.read("input/traj/mW_cubic.lammpstrj", frame=1, atom_type=1)
+print(ice.chill_plus().cubic, ice.cages().n_ic)
+
+guest = ds.read("input/traj/genice_sI.lammpstrj", atom_type=1)
+print(len(guest.cages_by_signature("512")))
+#+end_src

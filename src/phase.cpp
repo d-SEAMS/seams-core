@@ -1,6 +1,7 @@
 #include <phase.hpp>
 #include <cage_enum.hpp>
 #include <franzblau.hpp>
+#include <topo_bulk.hpp>
 #include <generic.hpp>
 #include <neighbours.hpp>
 #include <topo_fingerprint.hpp>
@@ -106,9 +107,9 @@ int channelComponents(const std::vector<std::vector<int>> &six,
 int phase::openChannelCount(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList) {
-  (void)yCloud;
   const auto sig = cage::Signature::parse("512");
-  const auto rings7 = primitive::ringNetwork(nList, 7);
+  const auto rings7 =
+      ring::contractibleRings(primitive::ringNetwork(nList, 7), yCloud);
   const auto closed = cage::findBySignature(rings7, nList, sig);
   if (!closed.empty()) {
     return 0;
@@ -199,12 +200,13 @@ phase::IceXXIHit phase::iceXXILibrary(
   IceXXIHit hit;
   hit.nSites = yCloud.nop;
   if (yCloud.box.size() >= 3) {
-    hit.a = 0.5 * (yCloud.box[0] + yCloud.box[1]);
-    hit.c = yCloud.box[2];
+    // box[0..2] are bound spans. Tilt makes those longer than a and c.
+    double lengths[3] = {0.0, 0.0, 0.0};
+    nneigh::dumpCellLengths(yCloud.box, yCloud.boxLow, lengths);
+    hit.a = 0.5 * (lengths[0] + lengths[1]);
+    hit.c = lengths[2];
   }
-  const double vol = (yCloud.box.size() >= 3)
-                         ? yCloud.box[0] * yCloud.box[1] * yCloud.box[2]
-                         : 0.0;
+  const double vol = nneigh::dumpVolume(yCloud);
   const double mass = static_cast<double>(yCloud.nop) * 18.015 / 6.02214076e23;
   hit.density = vol > 0.0 ? (mass / (vol * 1e-24)) : 0.0;
   const bool nOk = yCloud.nop == kXXIn;
@@ -257,12 +259,18 @@ std::vector<double> phase::localDensity(
 }
 
 double phase::frameDensity(
-    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
-  const double vol = (yCloud.box.size() >= 3)
-                         ? yCloud.box[0] * yCloud.box[1] * yCloud.box[2]
-                         : 0.0;
-  const double mass = static_cast<double>(yCloud.nop) * 18.015 / 6.02214076e23;
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    double molarMass) {
+  const double vol = nneigh::dumpVolume(yCloud);
+  const double mass =
+      static_cast<double>(yCloud.nop) * molarMass / 6.02214076e23;
   return vol > 0.0 ? (mass / (vol * 1e-24)) : 0.0;
+}
+
+double phase::frameDensity(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  // Water. A solute or a salt needs the molar-mass overload.
+  return frameDensity(yCloud, 18.015);
 }
 
 phase::GlassKind phase::glassFromDensity(double rho, double iceMax,

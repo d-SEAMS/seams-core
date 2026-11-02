@@ -10,8 +10,13 @@
 
 // Standard
 #include <algorithm>
+#include <cmath>
 #include <filesystem>
 #include <iostream>
+#include <numeric>
+#include <random>
+#include <stdexcept>
+#include <utility>
 
 #include <catch2/catch_test_macros.hpp>
 #include <rang.hpp>
@@ -717,8 +722,9 @@ TEST_CASE("DDC cage assembly is independent of ring enumeration order",
     std::vector<ring::strucType> rt(shuffled.size(),
                                     ring::strucType::unclassified);
     std::vector<cage::Cage> cl;
-    auto hc = ring::findHC(shuffled, rt, idx, cl);
-    auto ddc = ring::findDDC(shuffled, rt, hc, cl);
+    const auto index = ring::buildRingSearchIndex(shuffled, yCloud);
+    auto hc = ring::findHC(shuffled, rt, idx, cl, index);
+    auto ddc = ring::findDDC(shuffled, rt, hc, cl, index);
     if (variant == 0) {
       referenceCages = cl.size();
       referenceDDCRings = ddc.size();
@@ -728,4 +734,170 @@ TEST_CASE("DDC cage assembly is independent of ring enumeration order",
       REQUIRE(ddc.size() == referenceDDCRings);
     }
   }
+}
+
+TEST_CASE("Cage counts are invariant under atom relabelling",
+          "[topo_bulk]") {
+  // The frame is relabelled at random and its neighbour list and rings are
+  // rebuilt. The cage count is the size of a maximum non-conflicting set,
+  // so it does not depend on the labels. The particular packing is the one
+  // selected by the atom-index key.
+  using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
+  Cloud yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  REQUIRE(yCloud.nop > 0);
+  const int n = yCloud.nop;
+
+  using Cages = std::vector<std::pair<int, std::vector<std::vector<int>>>>;
+  auto cagesOf = [](Cloud &cloud, const std::vector<int> &label) {
+    auto nList = nneigh::neighListO(3.5, cloud, 1);
+    auto idx = nneigh::neighbourListByIndex(cloud, nList);
+    std::vector<std::vector<int>> six;
+    for (const auto &r : primitive::ringNetwork(idx, 6)) {
+      if (r.size() == 6) {
+        six.push_back(r);
+      }
+    }
+    const auto index = ring::buildRingSearchIndex(six, cloud);
+    std::vector<ring::strucType> rt(six.size(), ring::strucType::unclassified);
+    std::vector<cage::Cage> cl;
+    const auto hc = ring::findHC(six, rt, idx, cl, index);
+    (void)ring::findDDC(six, rt, hc, cl, index);
+    Cages out;
+    for (const auto &c : cl) {
+      std::vector<std::vector<int>> faces;
+      for (const int ri : c.rings) {
+        std::vector<int> face;
+        for (const int a : six[ri]) {
+          face.push_back(label[a]);
+        }
+        std::sort(face.begin(), face.end());
+        faces.push_back(face);
+      }
+      std::sort(faces.begin(), faces.end());
+      out.emplace_back(c.type == cage::cageType::HexC ? 0 : 1, faces);
+    }
+    std::sort(out.begin(), out.end());
+    return out;
+  };
+
+  std::vector<int> identity(n);
+  std::iota(identity.begin(), identity.end(), 0);
+  const Cages reference = cagesOf(yCloud, identity);
+  REQUIRE(!reference.empty());
+  int refHc = 0;
+  int refDdc = 0;
+  for (const auto &c : reference) {
+    (c.first == 0 ? refHc : refDdc)++;
+  }
+
+  for (const unsigned seed : {1U, 2U, 3U}) {
+    std::vector<int> perm(identity);
+    std::mt19937 rng(seed);
+    std::shuffle(perm.begin(), perm.end(), rng);
+    Cloud relabelled = yCloud;
+    std::vector<int> back(n);
+    for (int a = 0; a < n; a++) {
+      relabelled.pts[perm[a]] = yCloud.pts[a];
+      back[perm[a]] = a;
+    }
+    relabelled.idIndexMap.clear();
+    for (int i = 0; i < n; i++) {
+      relabelled.pts[i].atomID = i + 1;
+      relabelled.idIndexMap[i + 1] = i;
+    }
+    const Cages got = cagesOf(relabelled, back);
+    int hc = 0;
+    int ddc = 0;
+    for (const auto &c : got) {
+      (c.first == 0 ? hc : ddc)++;
+    }
+    // Cardinality is the maximum packing. The particular cages follow the
+    // atom-index key, so they are not the same set after a relabeling.
+    REQUIRE(hc == refHc);
+    REQUIRE(ddc == refDdc);
+    REQUIRE(got.size() == reference.size());
+  }
+}
+
+TEST_CASE("Cage objects are invariant under a periodic translation",
+          "[topo_bulk]") {
+  // Shifting the same frame by a fraction of the box and rewrapping does
+  // not change the bonds. The cage set is a maximum packing keyed by atom
+  // indices and the unwrapped shift, so it does not move with the origin.
+  using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
+  auto cagesOf = [](Cloud &cloud) {
+    auto nList = nneigh::neighListO(3.5, cloud, 1);
+    auto idx = nneigh::neighbourListByIndex(cloud, nList);
+    std::vector<std::vector<int>> six;
+    for (const auto &r : primitive::ringNetwork(idx, 6)) {
+      if (r.size() == 6) {
+        six.push_back(r);
+      }
+    }
+    const auto index = ring::buildRingSearchIndex(six, cloud);
+    std::vector<ring::strucType> rt(six.size(), ring::strucType::unclassified);
+    std::vector<cage::Cage> cl;
+    const auto hc = ring::findHC(six, rt, idx, cl, index);
+    (void)ring::findDDC(six, rt, hc, cl, index);
+    std::vector<std::pair<int, std::vector<std::vector<int>>>> out;
+    for (const auto &c : cl) {
+      std::vector<std::vector<int>> faces;
+      for (const int ri : c.rings) {
+        auto face = six[static_cast<size_t>(ri)];
+        std::sort(face.begin(), face.end());
+        faces.push_back(std::move(face));
+      }
+      std::sort(faces.begin(), faces.end());
+      out.emplace_back(c.type == cage::cageType::HexC ? 0 : 1, faces);
+    }
+    std::sort(out.begin(), out.end());
+    return out;
+  };
+  Cloud cloud;
+  cloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, cloud, 1);
+  REQUIRE(cloud.nop == 4096);
+  const auto reference = cagesOf(cloud);
+  int ddc = 0;
+  for (const auto &c : reference) {
+    ddc += c.first == 1 ? 1 : 0;
+  }
+  // One equator for every two molecules: the conflict graph is the line
+  // graph of a 4-regular bipartite graph on the molecules' rings, so the
+  // maximum packing has n/2 cages.
+  REQUIRE(ddc == 2048);
+  const double frac[3] = {0.37, 0.21, 0.53};
+  for (int k = 0; k < 3; k++) {
+    const double lo = k < static_cast<int>(cloud.boxLow.size()) ? cloud.boxLow[static_cast<size_t>(k)] : 0.0;
+    const double len = cloud.box[static_cast<size_t>(k)];
+    for (int i = 0; i < cloud.nop; i++) {
+      double *coord = k == 0 ? &cloud.pts[static_cast<size_t>(i)].x
+                              : k == 1 ? &cloud.pts[static_cast<size_t>(i)].y
+                                       : &cloud.pts[static_cast<size_t>(i)].z;
+      double v = *coord - lo + frac[k] * len;
+      v -= len * std::floor(v / len);
+      *coord = lo + v;
+    }
+  }
+  REQUIRE(cagesOf(cloud) == reference);
+}
+
+TEST_CASE("positionRank rejects two atoms at one wrapped position",
+          "[topo_bulk]") {
+  // An atom and the periodic image of another wrap onto one point, which no
+  // position order separates, so the frame is rejected
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {10.0, 10.0, 10.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.pts.resize(3);
+  const double xs[3] = {2.0, 1.0, 3.0};
+  for (int i = 0; i < 3; i++) {
+    cloud.pts[i].x = xs[i];
+    cloud.pts[i].y = 1.0;
+    cloud.pts[i].z = 1.0;
+  }
+  cloud.nop = 3;
+  REQUIRE(ring::positionRank(cloud) == std::vector<int>{1, 0, 2});
+  cloud.pts[2].x = 12.0;
+  REQUIRE_THROWS_AS(ring::positionRank(cloud), std::invalid_argument);
 }

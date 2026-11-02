@@ -1,0 +1,27 @@
+Package: dseams
+Type: Package
+Title: Ice Classification and Ring Statistics for Molecular Simulations
+Version: 2.12.0
+Authors@R: person("Rohit", "Goswami", email = "rgoswami@ieee.org",
+                  role = c("aut", "cre"),
+                  comment = c(ORCID = "0000-0002-2393-6242"))
+Description: S3 bindings to the d-SEAMS engine. Frames come back as
+    data.frames for ice-type labels, primitive-ring censuses, and
+    bond-orientational order parameters. The classifiers are libyodaLib;
+    this package does not reimplement them.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+LinkingTo: cpp11
+SystemRequirements: libseams_lang and libyodaLib from a seams-core build
+    (pkg-config seams-lang, or SEAMS_LIBDIR and SEAMS_INCLUDE)
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+NeedsCompilation: yes
+Config/testthat/edition: 3
+URL: https://docs.dseams.info
+BugReports: https://github.com/d-SEAMS/seams-core/issues

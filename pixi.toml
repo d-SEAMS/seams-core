@@ -1,6 +1,6 @@
 [workspace]
 name = "seams-core"
-version = "2.11.0"
+version = "2.12.0"
 channels = ["conda-forge"]
 platforms = ["linux-64", "osx-64", "osx-arm64"]
 authors = ["Rohit Goswami <rgoswami@ieee.org>"]
@@ -30,6 +30,9 @@ setup = "meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_pytho
 build = { cmd = "ninja -j4 -C bbdir", depends-on = ["setup"] }
 test = { cmd = "meson test -C bbdir -v", depends-on = ["build"] }
 install = { cmd = "meson install -C bbdir", depends-on = ["build"] }
+setup-bindings = { cmd = "meson setup bbdir-lang --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=false -Dwith_cli=true" }
+build-bindings = { cmd = "ninja -C bbdir-lang bindings/test_seams_lang", depends-on = ["setup-bindings"] }
+test-bindings = { cmd = "meson test -C bbdir-lang seams_lang_fixtures --print-errorlogs", depends-on = ["build-bindings"] }
 # Python tests live in d-SEAMS/PydSEAMSlib
 coverage-setup = "meson setup bbdir-cov --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=false -Db_coverage=true -Dbuildtype=debugoptimized --wipe 2>/dev/null; meson setup bbdir-cov --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=false -Db_coverage=true -Dbuildtype=debugoptimized"
 coverage-build = { cmd = "ninja -j4 -C bbdir-cov", depends-on = ["coverage-setup"] }

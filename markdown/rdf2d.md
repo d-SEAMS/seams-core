@@ -7,7 +7,8 @@ Figshare:
 [In-plane 2D RDF LAMMPS Trajectory](https://figshare.com/articles/In_plane_2D_RDF_LAMMPS_Trajectory/11448711).
 fMSI at 320 K. The pair histogram is normalized to an ideal gas.
 
-The `seams` CLI has no RDF command.
+`seams rdf` is the three-dimensional partial RDF. The in-plane
+histogram below is not that command.
 
 ## Python
 

@@ -2,8 +2,10 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <mol_sys.hpp>
+#include <neighbours.hpp>
 #include <seams_input.hpp>
 
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -503,6 +505,129 @@ TEST_CASE("readChemfiles matches the hand-rolled LAMMPS reader", "[seams_input]"
                    Catch::Matchers::WithinAbs(hand.pts[i].z, 1e-9));
     }
   }
+}
+
+TEST_CASE("readLammpsTrj assigns ids when the dump has no id column",
+          "[seams_input]") {
+  const auto path =
+      fs::temp_directory_path() / "dseams_test_noid.lammpstrj";
+  {
+    std::ofstream f(path);
+    f << "ITEM: TIMESTEP\n0\nITEM: NUMBER OF ATOMS\n3\n"
+      << "ITEM: BOX BOUNDS pp pp pp\n0 10\n0 10\n0 10\n"
+      << "ITEM: ATOMS type x y z\n"
+      << "1 1 1 1\n1 4 1 1\n1 1 5 1\n";
+  }
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud = sinp::readLammpsTrj(path.string(), 1, cloud);
+  REQUIRE(cloud.nop == 3);
+  REQUIRE(cloud.idIndexMap.size() == 3);
+  REQUIRE(cloud.pts[0].atomID == 1);
+  REQUIRE(cloud.pts[1].atomID == 2);
+  REQUIRE(cloud.pts[2].atomID == 3);
+  fs::remove(path);
+  sinp::dropLammpsDumpIndex(path.string());
+}
+
+TEST_CASE("readLammpsTrj keeps a mol column that sits in column 0",
+          "[seams_input]") {
+  const auto path =
+      fs::temp_directory_path() / "dseams_test_molfirst.lammpstrj";
+  {
+    std::ofstream f(path);
+    f << "ITEM: TIMESTEP\n0\nITEM: NUMBER OF ATOMS\n2\n"
+      << "ITEM: BOX BOUNDS pp pp pp\n0 10\n0 10\n0 10\n"
+      << "ITEM: ATOMS mol id type x y z\n"
+      << "10 1 1 1 1 1\n20 2 1 3 1 1\n";
+  }
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud = sinp::readLammpsTrj(path.string(), 1, cloud);
+  REQUIRE(cloud.pts[0].atomID == 1);
+  REQUIRE(cloud.pts[0].molID == 10);
+  REQUIRE(cloud.pts[1].atomID == 2);
+  REQUIRE(cloud.pts[1].molID == 20);
+  fs::remove(path);
+  sinp::dropLammpsDumpIndex(path.string());
+}
+
+TEST_CASE("readLammpsTrj sets nop from the atoms when the count overflows",
+          "[seams_input]") {
+  const auto path =
+      fs::temp_directory_path() / "dseams_test_huge.lammpstrj";
+  {
+    std::ofstream f(path);
+    f << "ITEM: TIMESTEP\n0\nITEM: NUMBER OF ATOMS\n999999999999\n"
+      << "ITEM: BOX BOUNDS pp pp pp\n0 10\n0 10\n0 10\n"
+      << "ITEM: ATOMS id type x y z\n1 1 1 1 1\n2 1 2 1 1\n";
+  }
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud = sinp::readLammpsTrj(path.string(), 1, cloud);
+  REQUIRE(cloud.nop == 2);
+  REQUIRE(cloud.pts.size() == 2);
+  fs::remove(path);
+  sinp::dropLammpsDumpIndex(path.string());
+}
+
+TEST_CASE("readXYZ sets nop to the atoms that were parsed", "[seams_input]") {
+  const auto path = fs::temp_directory_path() / "dseams_test_short.xyz";
+  {
+    std::ofstream f(path);
+    f << "5\ncomment\nO 0 0 0\nO 1 0 0\n";
+  }
+  auto cloud = sinp::readXYZ(path.string());
+  REQUIRE(cloud.nop == 2);
+  REQUIRE(cloud.pts.size() == 2);
+  fs::remove(path);
+}
+
+TEST_CASE("readXYZ skips a coordinate that is not a number", "[seams_input]") {
+  const auto path = fs::temp_directory_path() / "dseams_test_bad.xyz";
+  {
+    std::ofstream f(path);
+    f << "2\ncomment\nO 0 0 0\nO foo bar baz\n";
+  }
+  auto cloud = sinp::readXYZ(path.string());
+  REQUIRE(cloud.nop == 1);
+  REQUIRE(cloud.pts.size() == 1);
+  fs::remove(path);
+}
+
+TEST_CASE("readBonds drops a constant trailing 0/1 flag", "[seams_input]") {
+  const auto path = fs::temp_directory_path() / "dseams_test_ringsflag.dat";
+  {
+    std::ofstream f(path);
+    f << "2 Bonds\n272 214 906 1361 388 1\n388 1361 1042 1548 237 1\n";
+  }
+  auto bonds = sinp::readBonds(path.string());
+  REQUIRE(bonds.size() == 2);
+  REQUIRE(bonds[0].size() == 5);
+  REQUIRE(bonds[0].back() == 388);
+  fs::remove(path);
+}
+
+TEST_CASE("lengths and angles of 90 degrees stay an orthorhombic dump box",
+          "[seams_input]") {
+  std::vector<double> box;
+  std::vector<double> boxLow;
+  REQUIRE(nneigh::setBoxFromLengthsAngles(box, boxLow, 10, 12, 14, 90, 90, 90));
+  REQUIRE(box.size() == 3);
+  REQUIRE_THAT(box[0], Catch::Matchers::WithinAbs(10, 1e-9));
+  REQUIRE_THAT(box[1], Catch::Matchers::WithinAbs(12, 1e-9));
+  REQUIRE_THAT(box[2], Catch::Matchers::WithinAbs(14, 1e-9));
+  const double vol = nneigh::dumpVolume(box, boxLow);
+  REQUIRE_THAT(vol, Catch::Matchers::WithinAbs(10 * 12 * 14, 1e-6));
+}
+
+TEST_CASE("a 60 degree gamma uses the cell volume not the bound-span product",
+          "[seams_input]") {
+  std::vector<double> box;
+  std::vector<double> boxLow;
+  REQUIRE(nneigh::setBoxFromLengthsAngles(box, boxLow, 10, 10, 10, 90, 90, 60));
+  REQUIRE(box.size() == 6);
+  const double vol = nneigh::dumpVolume(box, boxLow);
+  const double expect = 1000.0 * std::sin(60.0 * 3.14159265358979323846 / 180.0);
+  REQUIRE_THAT(vol, Catch::Matchers::WithinAbs(expect, 1e-6));
+  REQUIRE(box[0] * box[1] * box[2] > vol + 1.0);
 }
 
 TEST_CASE("readChemfiles reports unreadable files without terminating",

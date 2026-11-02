@@ -1312,3 +1312,39 @@ TEST_CASE("mixed AgI+water dump keeps Ag and I out of the water 4-NN list",
   REQUIRE(nList[static_cast<std::size_t>(agIdx)].size() <= 1);
   REQUIRE(nList[static_cast<std::size_t>(iIdx)].size() <= 1);
 }
+
+TEST_CASE("a non-positive box does not return a neighbour list", "[neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.nop = 2;
+  cloud.box = {0, 0, 0};
+  cloud.boxLow = {0, 0, 0};
+  cloud.pts.resize(2);
+  cloud.pts[0].type = 1;
+  cloud.pts[0].atomID = 1;
+  cloud.pts[1].type = 1;
+  cloud.pts[1].atomID = 2;
+  cloud.pts[1].x = 1;
+  cloud.idIndexMap[1] = 0;
+  cloud.idIndexMap[2] = 1;
+  const auto nList = nneigh::neighListO(3.5, cloud, 1);
+  REQUIRE(nList.empty());
+}
+
+TEST_CASE("a pair exactly at the cutoff is not a neighbour", "[neighbours]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.nop = 2;
+  cloud.box = {20, 20, 20};
+  cloud.boxLow = {0, 0, 0};
+  cloud.pts.resize(2);
+  cloud.pts[0].type = 1;
+  cloud.pts[0].atomID = 1;
+  cloud.pts[1].type = 1;
+  cloud.pts[1].atomID = 2;
+  cloud.pts[1].x = 4.0;
+  cloud.idIndexMap[1] = 0;
+  cloud.idIndexMap[2] = 1;
+  const auto on = nneigh::neighListO(4.0, cloud, 1);
+  REQUIRE(on[0].size() == 1);
+  const auto inside = nneigh::neighListO(4.0 + 1e-6, cloud, 1);
+  REQUIRE(inside[0].size() == 2);
+}

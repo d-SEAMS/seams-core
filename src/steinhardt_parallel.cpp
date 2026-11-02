@@ -10,6 +10,7 @@
 
 #include <bop.hpp>
 #include <generic.hpp>
+#include <ozaki.hpp>
 #include <sphericart_ylm.hpp>
 #include <steinhardt_device.hpp>
 
@@ -84,10 +85,18 @@ NeighbourCSR flatten(const molSys::PointCloud<molSys::Point<double>, double> &yC
 #endif
   for (int i = 0; i < nRows; i++) {
     int kept = 0;
+    std::vector<int> seen;
+    seen.reserve(8);
     for (size_t j = 1; j < nList[static_cast<size_t>(i)].size(); j++) {
-      if (indexOf(nList[static_cast<size_t>(i)][j]) >= 0) {
-        kept++;
+      const int jidx = indexOf(nList[static_cast<size_t>(i)][j]);
+      if (jidx < 0) {
+        continue;
       }
+      if (std::find(seen.begin(), seen.end(), jidx) != seen.end()) {
+        continue;
+      }
+      seen.push_back(jidx);
+      kept++;
     }
     g.offsets[static_cast<size_t>(i) + 1] = kept;
   }
@@ -102,11 +111,17 @@ NeighbourCSR flatten(const molSys::PointCloud<molSys::Point<double>, double> &yC
 #endif
   for (int i = 0; i < nRows; i++) {
     int k = g.offsets[static_cast<size_t>(i)];
+    std::vector<int> seen;
+    seen.reserve(8);
     for (size_t j = 1; j < nList[static_cast<size_t>(i)].size(); j++) {
       const int jidx = indexOf(nList[static_cast<size_t>(i)][j]);
       if (jidx < 0) {
         continue;
       }
+      if (std::find(seen.begin(), seen.end(), jidx) != seen.end()) {
+        continue;
+      }
+      seen.push_back(jidx);
       const auto &pj = yCloud.pts[static_cast<size_t>(jidx)];
       const auto d = gen::relDistFromPoint(frame, yCloud, i, pj.x, pj.y, pj.z);
       g.cols[static_cast<size_t>(k)] = jidx;
@@ -308,13 +323,46 @@ void runPass1Sphericart(const NeighbourCSR &g, int orderL, int begin, int end,
     }
     return;
   }
-  for (int k = 0; k < b; k++) {
-    const int i = owner[static_cast<size_t>(k)];
-    const size_t row = static_cast<size_t>(i) * nComp;
-    const double *src = ylm.data() + static_cast<size_t>(k) * nComp * 2;
-    for (int m = 0; m < nComp; m++) {
-      qlm[2 * (row + static_cast<size_t>(m))] += src[2 * m];
-      qlm[2 * (row + static_cast<size_t>(m)) + 1] += src[2 * m + 1];
+  const bool pairwise =
+      seams::product::reduction() != seams::product::Reduction::Left;
+  if (!pairwise) {
+    for (int k = 0; k < b; k++) {
+      const int i = owner[static_cast<size_t>(k)];
+      const size_t row = static_cast<size_t>(i) * nComp;
+      const double *src = ylm.data() + static_cast<size_t>(k) * nComp * 2;
+      for (int m = 0; m < nComp; m++) {
+        qlm[2 * (row + static_cast<size_t>(m))] += src[2 * m];
+        qlm[2 * (row + static_cast<size_t>(m)) + 1] += src[2 * m + 1];
+      }
+    }
+  } else {
+    int k = 0;
+    while (k < b) {
+      const int i = owner[static_cast<size_t>(k)];
+      int k1 = k + 1;
+      while (k1 < b && owner[static_cast<size_t>(k1)] == i) {
+        ++k1;
+      }
+      const int cnt = k1 - k;
+      std::vector<double> comp(static_cast<size_t>(cnt));
+      const size_t row = static_cast<size_t>(i) * nComp;
+      for (int m = 0; m < nComp; m++) {
+        for (int t = 0; t < cnt; t++) {
+          const double *src =
+              ylm.data() + static_cast<size_t>(k + t) * nComp * 2;
+          comp[static_cast<size_t>(t)] = src[2 * m];
+        }
+        qlm[2 * (row + static_cast<size_t>(m))] = seams::product::reduce(
+            comp.data(), cnt, seams::product::reduction());
+        for (int t = 0; t < cnt; t++) {
+          const double *src =
+              ylm.data() + static_cast<size_t>(k + t) * nComp * 2;
+          comp[static_cast<size_t>(t)] = src[2 * m + 1];
+        }
+        qlm[2 * (row + static_cast<size_t>(m)) + 1] = seams::product::reduce(
+            comp.data(), cnt, seams::product::reduction());
+      }
+      k = k1;
     }
   }
   for (int i = begin; i < end; i++) {
@@ -337,6 +385,57 @@ void runPass1Sphericart(const NeighbourCSR &g, int orderL, int begin, int end,
 }
 #endif
 
+void qlmOneAtomDrPairwise(int iatom, int orderL, const double *dr,
+                          const int *offsets, double *qlmInterleaved) {
+  const int nComp = 2 * orderL + 1;
+  const int row = iatom * nComp;
+  for (int m = 0; m < nComp; m++) {
+    qlmInterleaved[2 * (row + m)] = 0.0;
+    qlmInterleaved[2 * (row + m) + 1] = 0.0;
+  }
+  if (orderL > 8) {
+    return;
+  }
+  const int j0 = offsets[iatom];
+  const int j1 = offsets[iatom + 1];
+  std::vector<double> bonds;
+  bonds.reserve(static_cast<std::size_t>(std::max(0, j1 - j0)) * nComp * 2);
+  int nUsed = 0;
+  for (int p = j0; p < j1; p++) {
+    double tmp[34] = {};
+    int one = 0;
+    seams::steinhardt::qlmAddBond(orderL, dr[3 * p], dr[3 * p + 1], dr[3 * p + 2],
+                                  tmp, 0, nComp, one);
+    if (one == 0) {
+      continue;
+    }
+    bonds.insert(bonds.end(), tmp, tmp + nComp * 2);
+    ++nUsed;
+  }
+  if (nUsed == 0) {
+    return;
+  }
+  std::vector<double> comp(static_cast<std::size_t>(nUsed));
+  for (int m = 0; m < nComp; m++) {
+    for (int t = 0; t < nUsed; t++) {
+      comp[static_cast<std::size_t>(t)] = bonds[static_cast<std::size_t>(t) * nComp * 2 + 2 * m];
+    }
+    qlmInterleaved[2 * (row + m)] =
+        seams::product::reduce(comp.data(), nUsed, seams::product::reduction());
+    for (int t = 0; t < nUsed; t++) {
+      comp[static_cast<std::size_t>(t)] =
+          bonds[static_cast<std::size_t>(t) * nComp * 2 + 2 * m + 1];
+    }
+    qlmInterleaved[2 * (row + m) + 1] =
+        seams::product::reduce(comp.data(), nUsed, seams::product::reduction());
+  }
+  const double inv = 1.0 / static_cast<double>(nUsed);
+  for (int m = 0; m < nComp; m++) {
+    qlmInterleaved[2 * (row + m)] *= inv;
+    qlmInterleaved[2 * (row + m) + 1] *= inv;
+  }
+}
+
 void runPass1(const NeighbourCSR &g, int orderL, int begin, int end,
               std::vector<double> &qlm) {
   // l=12 is host-only. Prefer sphericart; otherwise associated Legendre.
@@ -357,13 +456,19 @@ void runPass1(const NeighbourCSR &g, int orderL, int begin, int end,
     return;
   }
 #endif
+  const bool pairwise =
+      seams::product::reduction() != seams::product::Reduction::Left && orderL <= 8;
 #ifdef SEAMS_HAS_OPENMP
   const bool useThreads = g.nop >= kParallelThreshold;
 #pragma omp parallel for schedule(static) if (useThreads)
 #endif
   for (int i = begin; i < end; i++) {
-    seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
-                                    g.cols.data(), qlm.data());
+    if (pairwise) {
+      qlmOneAtomDrPairwise(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
+    } else {
+      seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
+                                      g.cols.data(), qlm.data());
+    }
   }
 }
 
@@ -425,13 +530,49 @@ void runPass2Host(const NeighbourCSR &g, int orderL, int begin, int end,
 void runPass2(const NeighbourCSR &g, int orderL, int begin, int end,
               const std::vector<double> &qlm, std::vector<double> &ql,
               std::vector<double> &qlBar) {
+  const bool stock =
+      seams::product::mode() == seams::product::Mode::Fp64 &&
+      seams::product::reduction() == seams::product::Reduction::Left;
 #ifdef SEAMS_HAS_OPENMP
   const bool useThreads = g.nop >= kParallelThreshold;
 #pragma omp parallel for schedule(static) if (useThreads)
 #endif
   for (int i = begin; i < end; i++) {
-    seams::steinhardt::qlOneAtom(i, orderL, qlm.data(), g.offsets.data(),
-                                 g.cols.data(), ql.data(), qlBar.data());
+    if (stock) {
+      seams::steinhardt::qlOneAtom(i, orderL, qlm.data(), g.offsets.data(),
+                                   g.cols.data(), ql.data(), qlBar.data());
+      continue;
+    }
+    const int nComp = 2 * orderL + 1;
+    constexpr double pi = 3.14159265358979323846;
+    const double prefactor = 4.0 * pi / (2.0 * orderL + 1.0);
+    const int row = i * nComp;
+    const auto norm = seams::product::realDot(qlm.data() + 2 * row, qlm.data() + 2 * row,
+                                              2 * nComp, seams::product::mode());
+    ql[static_cast<size_t>(i)] = std::sqrt(prefactor * norm.value);
+    const int j0 = g.offsets[static_cast<size_t>(i)];
+    const int j1 = g.offsets[static_cast<size_t>(i) + 1];
+    if (j0 == j1) {
+      qlBar[static_cast<size_t>(i)] = ql[static_cast<size_t>(i)];
+      continue;
+    }
+    const int nContrib = 1 + (j1 - j0);
+    std::vector<double> comp(static_cast<size_t>(nContrib));
+    std::vector<double> bar(static_cast<size_t>(2 * nComp));
+    for (int m = 0; m < 2 * nComp; m++) {
+      comp[0] = qlm[static_cast<size_t>(2 * row + m)];
+      for (int p = j0; p < j1; p++) {
+        const int jatom = g.cols[static_cast<size_t>(p)];
+        comp[static_cast<size_t>(1 + (p - j0))] =
+            qlm[static_cast<size_t>(2 * (jatom * nComp) + m)];
+      }
+      bar[static_cast<size_t>(m)] =
+          seams::product::reduce(comp.data(), nContrib, seams::product::reduction()) /
+          static_cast<double>(nContrib);
+    }
+    const auto barNorm = seams::product::realDot(bar.data(), bar.data(), 2 * nComp,
+                                                 seams::product::mode());
+    qlBar[static_cast<size_t>(i)] = std::sqrt(prefactor * barNorm.value);
   }
 }
 

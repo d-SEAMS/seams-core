@@ -28,6 +28,8 @@
 
 #ifdef SEAMS_HAS_MINIMAGE
 #include <minimage.h>
+#else
+#include <euclidean_mic.hpp>
 #endif
 
 // C++20
@@ -366,7 +368,9 @@ periodicDistSq(const FracBox &b,
   const auto &pi = yCloud.pts[static_cast<std::size_t>(iatom)];
   const auto &pj = yCloud.pts[static_cast<std::size_t>(jatom)];
   if (b.ok) {
-    const double r2 = fracDistSq(b, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+    const auto wrapped = fracDelta(b, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+    const double r2 =
+        wrapped[0] * wrapped[0] + wrapped[1] * wrapped[1] + wrapped[2] * wrapped[2];
     if (smithInside(b, r2)) {
       return r2;
     }
@@ -375,8 +379,13 @@ periodicDistSq(const FracBox &b,
     if (euclideanDelta(yCloud, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z, ed)) {
       return ed[0] * ed[0] + ed[1] * ed[1] + ed[2] * ed[2];
     }
-#endif
     return r2;
+#else
+    const std::array<double, 3> raw = {pi.x - pj.x, pi.y - pj.y, pi.z - pj.z};
+    const auto euc = mic::euclideanIfShorter(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz,
+                                             raw, wrapped);
+    return euc[0] * euc[0] + euc[1] * euc[1] + euc[2] * euc[2];
+#endif
   }
   if (yCloud.box.size() >= 6) {
     const auto dr =
@@ -525,8 +534,11 @@ inline std::array<double, 3> relDistFromPoint(
     if (euclideanDelta(yCloud, pi.x, pi.y, pi.z, xj, yj, zj, ed)) {
       return {ed[0], ed[1], ed[2]};
     }
-#endif
     return dr;
+#else
+    const std::array<double, 3> raw = {pi.x - xj, pi.y - yj, pi.z - zj};
+    return mic::euclideanIfShorter(b.lx, b.ly, b.lz, b.xy, b.xz, b.yz, raw, dr);
+#endif
   }
   if (yCloud.box.size() >= 6) {
     return triclinicMinImage(yCloud, yCloud.pts[iatom].x, yCloud.pts[iatom].y,

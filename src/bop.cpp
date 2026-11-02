@@ -13,6 +13,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <bop.hpp>
+#include <ozaki.hpp>
 #include <algorithm>
 #include <cmath>
 #include <complex>
@@ -20,6 +21,9 @@
 #include <numbers>
 #include <unordered_map>
 #include <utility>
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
 
 namespace {
 
@@ -562,10 +566,188 @@ std::complex<double> sph::lookupTableQ6(int m, std::array<double, 2> angles) {
  *  and getCorrelPlus call this with the CHILL and CHILL+ water rules; other
  *  materials pass their own registered rules.
  */
+static void classifyBondsLeftFp64(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<std::vector<int>> &nList, const chill::BondClassifier &rule,
+    bool isSlice) {
+  constexpr int l = 3;
+  constexpr int nComp = 2 * l + 1;
+  const int nop = yCloud.nop;
+  const int keepMax = rule.coordinationNumber;
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
+
+  int maxId = 0;
+  for (int i = 0; i < nop; i++) {
+    maxId = std::max(maxId, yCloud.pts[static_cast<std::size_t>(i)].atomID);
+  }
+  const bool denseIds = maxId > 0 && maxId < nop * 4;
+  std::vector<int> idToIndex;
+  if (denseIds) {
+    idToIndex.assign(static_cast<std::size_t>(maxId) + 1, -1);
+    for (int i = 0; i < nop; i++) {
+      const int id = yCloud.pts[static_cast<std::size_t>(i)].atomID;
+      if (id >= 0) {
+        idToIndex[static_cast<std::size_t>(id)] = i;
+      }
+    }
+  }
+  const auto resolve = [&](int id) {
+    if (denseIds) {
+      return (id >= 0 && id <= maxId) ? idToIndex[static_cast<std::size_t>(id)] : -1;
+    }
+    const auto it = yCloud.idIndexMap.find(id);
+    return it == yCloud.idIndexMap.end() ? -1 : it->second;
+  };
+
+  // Real and imaginary parts of q_lm, m = -l..l. Dividing by the neighbour
+  // count cancels in c_ij, so the sum is stored unnormalised.
+  // Coordinates are copied first so the parallel loop does not read a Point
+  // while another thread clears that Point's bond list.
+  struct Xyz {
+    double x, y, z;
+  };
+  std::vector<Xyz> xyz(static_cast<std::size_t>(nop));
+  for (int i = 0; i < nop; i++) {
+    auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    xyz[static_cast<std::size_t>(i)] = {p.x, p.y, p.z};
+    p.c_ij.clear();
+  }
+  std::vector<double> qReal(static_cast<std::size_t>(nop) * nComp, 0.0);
+  std::vector<double> qImag(static_cast<std::size_t>(nop) * nComp, 0.0);
+  const bool fixedKeep = keepMax > 0;
+  std::vector<int> chosen;
+  std::vector<std::vector<int>> ragged;
+  std::vector<int> nkeep(static_cast<std::size_t>(nop), 0);
+  if (fixedKeep) {
+    chosen.assign(static_cast<std::size_t>(nop) * static_cast<std::size_t>(keepMax), -1);
+  } else {
+    ragged.resize(static_cast<std::size_t>(nop));
+  }
+
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+  for (int iatom = 0; iatom < nop; iatom++) {
+    if (static_cast<std::size_t>(iatom) >= nList.size()) {
+      continue;
+    }
+    std::vector<std::pair<double, int>> candidates;
+    candidates.reserve(nList[static_cast<std::size_t>(iatom)].size());
+    const Xyz pi = xyz[static_cast<std::size_t>(iatom)];
+    for (std::size_t j = 1; j < nList[static_cast<std::size_t>(iatom)].size(); j++) {
+      const int jatom = resolve(nList[static_cast<std::size_t>(iatom)][j]);
+      if (jatom < 0) {
+        continue;
+      }
+      const Xyz pj = xyz[static_cast<std::size_t>(jatom)];
+      const auto dr = gen::fracDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+      const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+      candidates.emplace_back(d2, jatom);
+    }
+    const std::size_t keep =
+        (keepMax > 0) ? std::min(static_cast<std::size_t>(keepMax), candidates.size())
+                      : candidates.size();
+    if (keep == 0) {
+      continue;
+    }
+    std::partial_sort(candidates.begin(), candidates.begin() + static_cast<std::ptrdiff_t>(keep),
+                      candidates.end());
+    nkeep[static_cast<std::size_t>(iatom)] = static_cast<int>(keep);
+    std::array<double, nComp> accRe{};
+    std::array<double, nComp> accIm{};
+    for (std::size_t j = 0; j < keep; j++) {
+      const int jatom = candidates[j].second;
+      if (fixedKeep) {
+        chosen[static_cast<std::size_t>(iatom) * static_cast<std::size_t>(keepMax) + j] = jatom;
+      } else {
+        ragged[static_cast<std::size_t>(iatom)].push_back(jatom);
+      }
+      const Xyz pj = xyz[static_cast<std::size_t>(jatom)];
+      const auto dr = gen::fracDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+      const std::array<double, 2> angles = sph::radialCoord(dr);
+      const AngularTerms terms(angles[1], angles[0]);
+      for (int m = 0; m <= l; m++) {
+        const auto harm = harmonicPair(l, m, terms);
+        accRe[l - m] += harm.first.real();
+        accIm[l - m] += harm.first.imag();
+        if (m == 0) {
+          continue;
+        }
+        accRe[l + m] += harm.second.real();
+        accIm[l + m] += harm.second.imag();
+      }
+    }
+    double *re = qReal.data() + static_cast<std::size_t>(iatom) * nComp;
+    double *im = qImag.data() + static_cast<std::size_t>(iatom) * nComp;
+    for (int m = 0; m < nComp; m++) {
+      re[m] = accRe[m];
+      im[m] = accIm[m];
+    }
+  }
+
+  // c_ij from the real part of the complex inner product. The neighbour
+  // count cancels between the averaged harmonics and the norms.
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+  for (int iatom = 0; iatom < nop; iatom++) {
+    if (isSlice && !yCloud.pts[static_cast<std::size_t>(iatom)].inSlice) {
+      continue;
+    }
+    const int keep = nkeep[static_cast<std::size_t>(iatom)];
+    if (keep <= 0) {
+      continue;
+    }
+    const double *reI = qReal.data() + static_cast<std::size_t>(iatom) * nComp;
+    const double *imI = qImag.data() + static_cast<std::size_t>(iatom) * nComp;
+    double normI = 0.0;
+    for (int m = 0; m < nComp; m++) {
+      normI += reI[m] * reI[m] + imI[m] * imI[m];
+    }
+    auto &bonds = yCloud.pts[static_cast<std::size_t>(iatom)].c_ij;
+    bonds.reserve(static_cast<std::size_t>(keep));
+    for (int j = 0; j < keep; j++) {
+      const int jatom =
+          fixedKeep ? chosen[static_cast<std::size_t>(iatom) * static_cast<std::size_t>(keepMax) +
+                             static_cast<std::size_t>(j)]
+                    : ragged[static_cast<std::size_t>(iatom)][static_cast<std::size_t>(j)];
+      if (jatom < 0) {
+        continue;
+      }
+      const double *reJ = qReal.data() + static_cast<std::size_t>(jatom) * nComp;
+      const double *imJ = qImag.data() + static_cast<std::size_t>(jatom) * nComp;
+      double dot = 0.0;
+      double normJ = 0.0;
+      for (int m = 0; m < nComp; m++) {
+        dot += reI[m] * reJ[m] + imI[m] * imJ[m];
+        normJ += reJ[m] * reJ[m] + imJ[m] * imJ[m];
+      }
+      const double cij_real = dot / std::sqrt(normI * normJ);
+      molSys::Result temp_cij;
+      temp_cij.c_value = cij_real;
+      if (cij_real <= rule.staggeredMax) {
+        temp_cij.classifier = molSys::bond_type::staggered;
+      } else if (cij_real >= rule.eclipsedMin && cij_real <= rule.eclipsedMax) {
+        temp_cij.classifier = molSys::bond_type::eclipsed;
+      } else {
+        temp_cij.classifier = molSys::bond_type::out_of_range;
+      }
+      bonds.push_back(temp_cij);
+    }
+  }
+}
+
 void chill::classifyBonds(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, const chill::BondClassifier &rule,
     bool isSlice) {
+  // Left-to-right fp64 is the path CHILL and CHILL+ run on. A different
+  // product reduction or a non-fp64 dot product keeps the pairwise sum.
+  if (seams::product::reduction() == seams::product::Reduction::Left &&
+      seams::product::mode() == seams::product::Mode::Fp64) {
+    classifyBondsLeftFp64(yCloud, nList, rule, isSlice);
+    return;
+  }
   constexpr int l = 3;
   chill::QlmAtom QlmTotal; // Qlm for each iatom
   std::vector<std::complex<double>>
@@ -584,6 +766,14 @@ void chill::classifyBonds(
     const std::vector<int> nearest = nearestNeighbourIndices(
         yCloud, nList, iatom, rule.coordinationNumber);
     const int nnumNeighbours = static_cast<int>(nearest.size());
+    const bool pairwiseQlm =
+        seams::product::reduction() != seams::product::Reduction::Left;
+    std::vector<double> qlmRe;
+    std::vector<double> qlmIm;
+    if (pairwiseQlm) {
+      qlmRe.assign(static_cast<std::size_t>(nnumNeighbours) * (2 * l + 1), 0.0);
+      qlmIm.assign(static_cast<std::size_t>(nnumNeighbours) * (2 * l + 1), 0.0);
+    }
     for (int j = 0; j < nnumNeighbours; j++) {
       const int jatomIndex = nearest[j];
 
@@ -595,15 +785,34 @@ void chill::classifyBonds(
       const std::array<double, 2> angles = sph::radialCoord(delta);
 
       // Now add over all nearest neighbours
-      if (j == 0) {
-        sph::spheriHarmoInto(l, angles, QlmTotal.ptq[iatom].ylm);
+      sph::spheriHarmoInto(l, angles, yl);
+      if (pairwiseQlm) {
+        for (int m = 0; m < 2 * l + 1; m++) {
+          qlmRe[static_cast<std::size_t>(m) * nnumNeighbours + j] = yl[m].real();
+          qlmIm[static_cast<std::size_t>(m) * nnumNeighbours + j] = yl[m].imag();
+        }
         continue;
       }
-      sph::spheriHarmoInto(l, angles, yl);
+      if (j == 0) {
+        QlmTotal.ptq[iatom].ylm = yl;
+        continue;
+      }
       for (int m = 0; m < 2 * l + 1; m++) {
         QlmTotal.ptq[iatom].ylm[m] += yl[m];
       }
     } // End of loop over nearest neighbours
+    if (pairwiseQlm) {
+      QlmTotal.ptq[iatom].ylm.assign(static_cast<std::size_t>(2 * l + 1), {0.0, 0.0});
+      for (int m = 0; m < 2 * l + 1; m++) {
+        const double re = seams::product::reduce(
+            qlmRe.data() + static_cast<std::size_t>(m) * nnumNeighbours,
+            nnumNeighbours, seams::product::reduction());
+        const double im = seams::product::reduce(
+            qlmIm.data() + static_cast<std::size_t>(m) * nnumNeighbours,
+            nnumNeighbours, seams::product::reduction());
+        QlmTotal.ptq[iatom].ylm[static_cast<std::size_t>(m)] = {re, im};
+      }
+    }
 
     // Average over the bond count
     QlmTotal.ptq[iatom].ylm =
@@ -622,17 +831,27 @@ void chill::classifyBonds(
     const std::vector<int> nearestBonds = nearestNeighbourIndices(
         yCloud, nList, iatom, rule.coordinationNumber);
     yCloud.pts[iatom].c_ij.reserve(nearestBonds.size());
+    const seams::product::Mode productMode = seams::product::mode();
     for (const int jatomIndex : nearestBonds) {
       std::complex<double> dot_product = {0, 0};
       std::complex<double> Inorm = {0, 0};
       std::complex<double> Jnorm = {0, 0};
-      for (int m = 0; m < 2 * l + 1; m++) {
-        const std::complex<double> qI = QlmTotal.ptq[iatom].ylm[m];
-        const std::complex<double> qJ = QlmTotal.ptq[jatomIndex].ylm[m];
-        dot_product += qI * std::conj(qJ); // unnormalized
-        Inorm += qI * std::conj(qI);
-        Jnorm += qJ * std::conj(qJ);
-      } // end loop over m components
+      if (productMode == seams::product::Mode::Fp64) {
+        for (int m = 0; m < 2 * l + 1; m++) {
+          const std::complex<double> qI = QlmTotal.ptq[iatom].ylm[m];
+          const std::complex<double> qJ = QlmTotal.ptq[jatomIndex].ylm[m];
+          dot_product += qI * std::conj(qJ); // unnormalized
+          Inorm += qI * std::conj(qI);
+          Jnorm += qJ * std::conj(qJ);
+        } // end loop over m components
+      } else {
+        const auto got = seams::product::complexDot(
+            QlmTotal.ptq[iatom].ylm.data(),
+            QlmTotal.ptq[jatomIndex].ylm.data(), 2 * l + 1, productMode);
+        dot_product = {got.re, got.im};
+        Inorm = {got.normA, 0.0};
+        Jnorm = {got.normB, 0.0};
+      }
       const std::complex<double> complexCij =
           dot_product / std::sqrt(Inorm * Jnorm);
       molSys::Result temp_cij;

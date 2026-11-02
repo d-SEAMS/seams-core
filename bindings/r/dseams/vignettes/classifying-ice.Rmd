@@ -1,0 +1,36 @@
+---
+title: "Classify one ice frame"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Classify one ice frame}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = FALSE)
+root <- Sys.getenv("DSEAMS_ROOT", unset = "")
+tip <- file.path(root, "input", "traj", "exampleTraj.lammpstrj")
+knitr::opts_chunk$set(eval = root != "" && file.exists(tip))
+```
+
+This vignette classifies the in-tree mixed TIP4P dump. The engine has
+to be on the link line (`SEAMS_LIBDIR`) and `DSEAMS_ROOT` has to point
+at a seams-core checkout. Without those, the chunks stay unevaluated.
+
+```{r}
+library(dseams)
+tip <- file.path(Sys.getenv("DSEAMS_ROOT"), "input", "traj", "exampleTraj.lammpstrj")
+frame <- read_frame(tip, type = 2L)
+ice <- chill_plus(frame)
+table(ice$name)
+table(chill_plus(frame, graph = "mutual")$name)
+head(primitive_rings(frame, max_depth = 6L))
+head(steinhardt(frame, order_l = 3L))
+```
+
+`graph = "cutoff"`, the default, is the distance list. `graph = "mutual"`
+is the mutual four-neighbour list. On this dump the cutoff list gives
+12 interClathrate and 238 water, and the mutual list gives 1 clathrate,
+7 interClathrate, and 242 water. The
+columns are a data.frame, so the usual subsetting works.

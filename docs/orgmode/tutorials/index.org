@@ -8,13 +8,27 @@ in-tree mixed TIP4P dump two ways.
 | tutorial | you learn |
 |----------+-----------|
 | [[file:bulk-ice.org][Classify ice on the mixed TIP4P example]] | ~seams read~, CHILL+, cages, and why the scores disagree |
+| [[file:ice-and-clathrate.org][Ice and clathrate labels]] | CHILL+ and cage signatures from Python |
+| [[file:rings.org][Primitive rings]] | Franzblau census on one frame |
+| [[file:order-parameters.org][Bond-orientational order]] | ~q_l~ and the Lechner-Dellago average |
+| [[file:confined-water.org][Confined water]] | in-plane RDF, sheet rings, prisms |
+| [[file:paper-figures.org][Paper figures]] | the in-tree numbers behind the 2020 figures |
 
 How-tos solve a goal you already have. Reference names flags and
 headers. Explanation is why the two classifiers exist.
+
+The Python files under =docs/tutorials= are the runs. CI executes
+them. The pages here say what you are doing and what number you
+should see.
 
 #+begin_export rst
 .. toctree::
    :maxdepth: 1
 
    bulk-ice
+   ice-and-clathrate
+   rings
+   order-parameters
+   confined-water
+   paper-figures
 #+end_export

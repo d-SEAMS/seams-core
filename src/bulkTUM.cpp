@@ -618,11 +618,12 @@ std::vector<cage::Cage> tum3::topoBulkCriteria(
   // ----------------------------------------------
   // Get the cages
 
+  const auto ringIndex = ring::buildRingSearchIndex(rings, yCloud);
   // Find HC rings, saving the ring IDs (starting from 0) to listHC
-  listHC = ring::findHC(rings, ringType, nList, cageList);
+  listHC = ring::findHC(rings, ringType, nList, cageList, ringIndex);
 
   // Find DDC rings, saving the IDs to listDDC
-  listDDC = ring::findDDC(rings, ringType, listHC, cageList);
+  listDDC = ring::findDDC(rings, ringType, listHC, cageList, ringIndex);
 
   // Find rings which are both DDCs and HCs (mixed)
   // A dummy value of -10 in the listDDC and listHC vectors for mixed rings

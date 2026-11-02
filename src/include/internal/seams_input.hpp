@@ -70,7 +70,9 @@ void dropLammpsDumpIndex(const std::string &filename);
 //! typeFilter <= 0 keeps every atom. nThreads <= 0 uses the OpenMP default;
 //! 1 is serial. Each worker opens its own handle and seeks the shared
 //! offset table. Incremental RingUpdater / AffiliationUpdater state
-//! cannot be shared across workers: use the batch classifiers.
+//! cannot be shared across workers: with nThreads 1 the frames arrive in
+//! order on one thread and may carry it, otherwise use the batch
+//! classifiers.
 void forEachLammpsFrame(
     const std::string &filename, int first, int last, int typeFilter,
     const std::function<void(

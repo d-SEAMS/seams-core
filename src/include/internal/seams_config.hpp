@@ -40,6 +40,7 @@ struct Runtime {
   int tpp = 0;
   int block = 0;
   bool offload = false;
+  bool carry = true;
   std::string fennel;
   std::string luaPath;
   std::string source;

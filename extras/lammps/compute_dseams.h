@@ -7,6 +7,8 @@ ComputeStyle(dseams, ComputeDseams)
 
 #include "compute.h"
 
+#include <string>
+
 namespace LAMMPS_NS {
 
 class ComputeDseams : public Compute {
@@ -19,6 +21,8 @@ public:
 private:
   int nmax;
   double *chill;
+  double cutoff;
+  std::string graph;
 };
 
 } // namespace LAMMPS_NS

@@ -2,13 +2,22 @@
 # Reconfigure, compile the frame-parallel walk, Catch2, I/O and cages benches.
 set -euo pipefail
 
-ROOT="${SEAMS_ROOT:-$HOME/seams-core-merge}"
-BUILD="${SEAMS_BUILD:-$ROOT/bcpp}"
-PIXI_ENV="${ROOT}/.pixi/envs/default"
-DUMP3="${ROOT}/repro/public-ice/nucleation/Ice_nucleation_trajectory/Nucleation_trajectory-3"
-LOG="${SEAMS_LOG:-/tmp/seams-parallel-walk-gate.log}"
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+ROOT="${SEAMS_ROOT:-$(cd -- "$SCRIPT_DIR/.." && pwd)}"
+BUILD="${SEAMS_BUILD:-$ROOT/build}"
+PIXI_ENV="${SEAMS_PIXI_ENV:-$ROOT/.pixi/envs/default}"
+DUMP_DIR="${SEAMS_NIU_DIR:-$ROOT/data/public-ice/nucleation/Ice_nucleation_trajectory}"
+DUMP3="${DUMP_DIR}/Nucleation_trajectory-3"
+LOG="${SEAMS_LOG:-$ROOT/logs/seams-parallel-walk-gate.log}"
+mkdir -p "$(dirname "$LOG")"
 
-export PATH="${PIXI_ENV}/bin:${HOME}/.pixi/bin:/usr/bin:/bin"
+if [[ ! -f "$DUMP3" ]]; then
+  python3 "$SCRIPT_DIR/fetch_niu_trajectory.py" --dest "$(dirname "$(dirname "$DUMP_DIR")")"
+fi
+
+if [[ -d "${PIXI_ENV}/bin" ]]; then
+  export PATH="${PIXI_ENV}/bin:${PATH}"
+fi
 export LD_LIBRARY_PATH="${BUILD}/src${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 {

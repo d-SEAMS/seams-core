@@ -19,6 +19,7 @@
 #include <seams_config.hpp>
 #include <seams_input.hpp>
 #include <site.hpp>
+#include <topo_bulk.hpp>
 #include <topo_fingerprint.hpp>
 #include <tum_offload.hpp>
 
@@ -28,6 +29,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <set>
 #include <sstream>
@@ -437,7 +439,7 @@ std::string iceColor(std::string_view name) {
   if (name == "clathrate" || name == "interClathrate") {
     return colorizer.progName(name);
   }
-  if (name == "water") {
+  if (name == "water" || name == "both") {
     return std::string(name);
   }
   return colorizer.error(name);
@@ -745,6 +747,63 @@ int cmdDensityZ(std::ostream &os, Cloud &cloud, int typeI, int bins, int axis) {
   return 0;
 }
 
+//! The graphs one command builds on a frame, each with its own carried state
+enum class GraphSlot { single, strict, permissive };
+
+/** Rings and cage affiliation carried from one frame to the next.
+ *  A frame walk on one worker visits frames in order through a single
+ *  instance, so RingUpdater and AffiliationUpdater redo only the part of
+ *  each frame near a changed bond. Their results equal ringNetwork and
+ *  cageAffiliation on the same frame. Single frames, parallel workers and
+ *  --rebuild use an instance with carry off, which recomputes every call.
+ */
+class FrameCarry {
+public:
+  using Rows = std::vector<std::vector<int>>;
+
+  explicit FrameCarry(bool carry) : carry_(carry) {}
+
+  const Rows &rings(GraphSlot slot, const Rows &idx, int depth) {
+    const int key = static_cast<int>(slot);
+    if (!carry_) {
+      return scratchRings_[key] = primitive::ringNetwork(idx, depth);
+    }
+    auto it = ringUpdaters_.find({key, depth});
+    if (it == ringUpdaters_.end()) {
+      it = ringUpdaters_.emplace(std::make_pair(key, depth),
+                                 primitive::RingUpdater(depth))
+               .first;
+    }
+    return it->second.update(idx);
+  }
+
+  const ring::CageAffiliation &affiliation(GraphSlot slot, const Rows &six,
+                                           const Rows &idx) {
+    const int key = static_cast<int>(slot);
+    if (!carry_) {
+      return scratchAffiliation_[key] = ring::cageAffiliation(six, idx);
+    }
+    return affiliationUpdaters_[key].update(six, idx);
+  }
+
+private:
+  bool carry_;
+  std::map<std::pair<int, int>, primitive::RingUpdater> ringUpdaters_;
+  std::map<int, ring::AffiliationUpdater> affiliationUpdaters_;
+  std::map<int, Rows> scratchRings_;
+  std::map<int, ring::CageAffiliation> scratchAffiliation_;
+};
+
+std::vector<std::vector<int>> sixRings(const std::vector<std::vector<int>> &rings) {
+  std::vector<std::vector<int>> six;
+  for (const auto &r : rings) {
+    if (r.size() == 6) {
+      six.push_back(r);
+    }
+  }
+  return six;
+}
+
 // Label-independent topology keys of the bonded graph: one key per atom
 // for the rooted neighbourhood within `hops` bonds, the histogram of keys,
 // the primitive ring census, and a frame key over all of it.
@@ -769,7 +828,8 @@ void writePerAtomDump(const std::string &path, const Cloud &cloud, const std::st
   }
 }
 
-int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
+int cmdFingerprint(std::ostream &os, FrameCarry &carry, Cloud &cloud,
+                   double cutoff, int typeI, int k,
                    const std::string &graphName, int hops, bool colourTypes,
                    const std::string &libraryPath, const std::string &emitLabel,
                    const std::string &perAtomPath = {}, bool byAtom = false) {
@@ -890,7 +950,7 @@ int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int
     for (int i = 0; i < cloud.nop && static_cast<std::size_t>(i) < species.size(); ++i) {
       species[static_cast<std::size_t>(i)] = cloud.pts[static_cast<std::size_t>(i)].type;
     }
-    const auto rings = primitive::ringNetwork(rows, std::max(hops, 6));
+    const auto &rings = carry.rings(GraphSlot::single, rows, std::max(hops, 6));
     const auto table = cage::formerRows(rows, rings, species, -1);
     os << "\n";
     for (const auto &row : table) {
@@ -933,7 +993,8 @@ int cmdFingerprint(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int
 
 // Ions read against the seeded cage assignment of the water: how many sit
 // in ice, at the front, or in liquid by their first water shell.
-int cmdIons(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
+int cmdIons(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
+            int typeI, int k,
             bool complete, const std::vector<int> &ionTypes, double ionCutoff,
             const std::string &perAtomPath = {},
             const std::vector<int> &waterTypes = {}) {
@@ -959,18 +1020,11 @@ int cmdIons(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
           : nneigh::kNearestNeighbourPair(cloud, k, cand, waterTypes);
   auto idxS = nneigh::neighbourListByIndex(cloud, graphs.first);
   auto idxU = nneigh::neighbourListByIndex(cloud, graphs.second);
-  auto sixOf = [](const std::vector<std::vector<int>> &rings) {
-    std::vector<std::vector<int>> six;
-    for (const auto &r : rings) {
-      if (r.size() == 6) {
-        six.push_back(r);
-      }
-    }
-    return six;
-  };
-  const auto sixS = sixOf(primitive::ringNetwork(idxS, 6));
-  const auto sixU = sixOf(primitive::ringNetwork(idxU, 6));
-  const auto aff = ring::seededCageAffiliation(sixS, idxS, sixU, idxU, complete);
+  const auto sixS = sixRings(carry.rings(GraphSlot::strict, idxS, 6));
+  const auto sixU = sixRings(carry.rings(GraphSlot::permissive, idxU, 6));
+  const auto aff = ring::seededCageAffiliation(
+      sixS, carry.affiliation(GraphSlot::strict, sixS, idxS), sixU,
+      carry.affiliation(GraphSlot::permissive, sixU, idxU), idxU, complete);
   std::vector<bool> ice(static_cast<std::size_t>(cloud.nop), false);
   int nIce = 0;
   for (std::size_t i = 0; i < ice.size() && i < aff.hc.size(); ++i) {
@@ -1063,16 +1117,35 @@ int cmdCn(std::ostream &os, Cloud &cloud, double rmax, int bins, int typeI,
   return 0;
 }
 
-int cmdChillPlus(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
-                 bool layers = false, bool tumLayers = false, int axis = 2,
-                 double layerWidth = 3.7,
+// CHILL and CHILL+ read one graph: cutoff (the default) or mutual. The
+// cages default (seeded) falls back to cutoff.
+std::vector<std::vector<int>>
+chillGraph(Cloud &cloud, double cutoff, int typ, const std::string &graphName,
+           const std::vector<int> &waterTypes) {
+  const std::string name =
+      (graphName.empty() || graphName == "seeded") ? std::string("cutoff") : graphName;
+  const auto graph = nneigh::bondGraphFromName(name);
+  if (graph == nneigh::BondGraph::Cutoff) {
+    return nneigh::neighListO(cutoff, cloud,
+                              waterTypes.empty() ? typ : waterTypes.front());
+  }
+  if (graph != nneigh::BondGraph::KnnMutual) {
+    throw std::invalid_argument("CHILL and CHILL+ take --graph cutoff or mutual");
+  }
+  return waterGraph(cloud, cutoff, typ, waterTypes, 4, true);
+}
+
+int cmdChillPlus(std::ostream &os, FrameCarry &carry, Cloud &cloud,
+                 double cutoff, int typeI,
+                 const std::string &graphName, bool layers = false,
+                 bool tumLayers = false, int axis = 2, double layerWidth = 3.7,
                  const std::vector<int> &waterTypes = {}) {
   if (cloud.nop == 0) {
     printCounts(os, cloud);
     return 0;
   }
   const int typ = typeOf(cloud, typeI);
-  auto nList = waterGraph(cloud, cutoff, typ, waterTypes);
+  auto nList = chillGraph(cloud, cutoff, typ, graphName, waterTypes);
   chill::getCorrelPlus(cloud, nList, false);
   chill::getIceTypePlusNoPrint(cloud, nList, false);
   chill::clearIceTypesExcept(cloud, waterTypes);
@@ -1084,12 +1157,7 @@ int cmdChillPlus(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
   }
   if (tumLayers) {
     auto idx = nneigh::neighbourListByIndex(cloud, nList);
-    std::vector<std::vector<int>> six;
-    for (const auto &r : primitive::ringNetwork(idx, 6)) {
-      if (r.size() == 6) {
-        six.push_back(r);
-      }
-    }
+    const auto six = sixRings(carry.rings(GraphSlot::single, idx, 6));
     const auto planes = ring::stackingPlanes(six, idx);
     const auto st =
         topoparam::tumLayerStack(cloud, six, planes.basal, planes.equatorial,
@@ -1101,13 +1169,14 @@ int cmdChillPlus(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
 }
 
 int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
+             const std::string &graphName,
              const std::vector<int> &waterTypes = {}) {
   if (cloud.nop == 0) {
     printCounts(os, cloud);
     return 0;
   }
   const int typ = typeOf(cloud, typeI);
-  auto nList = waterGraph(cloud, cutoff, typ, waterTypes);
+  auto nList = chillGraph(cloud, cutoff, typ, graphName, waterTypes);
   chill::getCorrel(cloud, nList, false);
   chill::getIceTypeNoPrint(cloud, nList, false);
   chill::clearIceTypesExcept(cloud, waterTypes);
@@ -1166,7 +1235,22 @@ int cmdSteinhardt(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
   return 0;
 }
 
-int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
+// Several signatures joined with '+' share one ring network and one search.
+std::vector<cage::Signature> parseSignatures(const std::string &spec) {
+  std::vector<cage::Signature> sigs;
+  std::string part;
+  std::istringstream in(spec);
+  while (std::getline(in, part, '+')) {
+    sigs.push_back(cage::Signature::parse(part));
+  }
+  if (sigs.empty()) {
+    sigs.push_back(cage::Signature::parse(spec));
+  }
+  return sigs;
+}
+
+int cmdCages(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
+             int typeI, int k,
              const std::string &graphName, bool complete = false,
              const std::string &signatureSpec = {},
              const std::vector<int> &guestTypes = {}, double guestRadius = 4.0,
@@ -1175,17 +1259,18 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
              bool shape = false) {
   if (cloud.nop == 0) {
     if (!signatureSpec.empty()) {
-      const auto sig = cage::Signature::parse(signatureSpec);
-      os << colorizer.heading("nop") << " 0 "
-         << colorizer.longOption("graph") << " " << graphName << " "
-         << colorizer.longOption("signature") << " " << sig.str()
-         << " cages 0 atoms 0\n";
+      for (const auto &sig : parseSignatures(signatureSpec)) {
+        os << colorizer.heading("nop") << " 0 "
+           << colorizer.longOption("graph") << " " << graphName << " "
+           << colorizer.longOption("signature") << " " << sig.str()
+           << " cages 0 atoms 0\n";
+      }
       return 0;
     }
     os << colorizer.heading("nop") << " 0 "
        << colorizer.longOption("graph") << " " << graphName << " "
        << iceColor("hexagonal") << " 0 " << iceColor("cubic") << " 0 "
-       << iceColor("water") << " 0\n";
+       << iceColor("both") << " 0 " << iceColor("water") << " 0\n";
     return 0;
   }
   const int typ = typeOf(cloud, typeI);
@@ -1204,77 +1289,86 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
   };
 
   if (!signatureSpec.empty()) {
+    const auto sigs = parseSignatures(signatureSpec);
     const auto emit = [&](const std::vector<std::vector<int>> &idx) {
-      const auto sig = cage::Signature::parse(signatureSpec);
-      const int depth = std::max(sig.maxRingSize(), 3);
-      const auto rings = primitive::ringNetwork(idx, depth);
-      const auto found = cage::findBySignature(rings, idx, sig);
-      std::vector<cage::FoundCage> cups;
-      if (incomplete) {
-        cups = cage::findIncompleteBySignature(rings, sig, 0);
+      int depth = 3;
+      for (const auto &sig : sigs) {
+        depth = std::max(depth, sig.maxRingSize());
       }
-      std::set<int> atoms;
-      for (const auto &c : found) {
-        atoms.insert(c.vertices.begin(), c.vertices.end());
-      }
-      os << colorizer.heading("nop") << " " << cloud.nop << " "
-         << colorizer.longOption("graph") << " " << graphName << " "
-         << colorizer.longOption("signature") << " " << sig.str() << " cages "
-         << found.size() << " atoms " << atoms.size();
-      if (incomplete) {
-        os << " " << colorizer.longOption("incomplete") << " " << cups.size();
-      }
-      if (!guestTypes.empty()) {
-        // guests (methane, THF, ions) placed in the found cages by the
-        // periodic centroid of each cage's vertices
-        std::vector<int> guests;
-        for (int i = 0; i < cloud.nop; ++i) {
-          const int t = cloud.pts[static_cast<std::size_t>(i)].type;
-          if (std::find(guestTypes.begin(), guestTypes.end(), t) != guestTypes.end()) {
-            guests.push_back(i);
-          }
+      const auto rings = ring::cageRings(
+          carry.rings(GraphSlot::single, idx, depth), cloud, cutoff);
+      const auto rank = ring::positionRank(cloud);
+      const auto foundOf = cage::findBySignatures(rings, idx, sigs, rank);
+      for (size_t si = 0; si < sigs.size(); ++si) {
+        const auto &sig = sigs[si];
+        const auto &found = foundOf[si];
+        std::vector<cage::FoundCage> cups;
+        if (incomplete) {
+          cups = cage::findIncompleteBySignature(rings, sig, 0);
         }
-        std::vector<std::vector<int>> cages;
-        cages.reserve(found.size());
+        std::set<int> atoms;
         for (const auto &c : found) {
-          cages.push_back(c.vertices);
+          atoms.insert(c.vertices.begin(), c.vertices.end());
         }
-        site::GuestOccupancy occ;
-        if (inside) {
-          std::vector<std::vector<int>> faces;
-          faces.reserve(found.size());
+        os << colorizer.heading("nop") << " " << cloud.nop << " "
+           << colorizer.longOption("graph") << " " << graphName << " "
+           << colorizer.longOption("signature") << " " << sig.str() << " cages "
+           << found.size() << " atoms " << atoms.size();
+        if (incomplete) {
+          os << " " << colorizer.longOption("incomplete") << " " << cups.size();
+        }
+        if (!guestTypes.empty()) {
+          // guests (methane, THF, ions) placed in the found cages by the
+          // periodic centroid of each cage's vertices
+          std::vector<int> guests;
+          for (int i = 0; i < cloud.nop; ++i) {
+            const int t = cloud.pts[static_cast<std::size_t>(i)].type;
+            if (std::find(guestTypes.begin(), guestTypes.end(), t) != guestTypes.end()) {
+              guests.push_back(i);
+            }
+          }
+          std::vector<std::vector<int>> cages;
+          cages.reserve(found.size());
           for (const auto &c : found) {
-            faces.push_back(c.faces);
+            cages.push_back(c.vertices);
           }
-          occ = site::guestOccupancyInside(cloud, rings, faces, guests);
-        } else {
-          occ = site::guestOccupancy(cloud, cages, guests, guestRadius);
-        }
-        os << " " << colorizer.longOption("guests") << " " << guests.size() << " occupied "
-           << occ.occupied << " multiple " << occ.multiply << " free " << occ.free
-           << (inside ? " inside 1" : "");
-        if (!occ.occupancyHistogram.empty()) {
-          os << " " << colorizer.longOption("occ");
-          for (std::size_t k = 0; k < occ.occupancyHistogram.size(); ++k) {
-            os << " " << k << ":" << occ.occupancyHistogram[k];
+          site::GuestOccupancy occ;
+          if (inside) {
+            std::vector<std::vector<int>> faces;
+            faces.reserve(found.size());
+            for (const auto &c : found) {
+              faces.push_back(c.faces);
+            }
+            occ = site::guestOccupancyInside(cloud, rings, faces, guests);
+          } else {
+            occ = site::guestOccupancy(cloud, cages, guests, guestRadius);
+          }
+          os << " " << colorizer.longOption("guests") << " " << guests.size() << " occupied "
+             << occ.occupied << " multiple " << occ.multiply << " free " << occ.free
+             << (inside ? " inside 1" : "");
+          if (!occ.occupancyHistogram.empty()) {
+            os << " " << colorizer.longOption("occ");
+            for (std::size_t k = 0; k < occ.occupancyHistogram.size(); ++k) {
+              os << " " << k << ":" << occ.occupancyHistogram[k];
+            }
           }
         }
-      }
-      if (shape) {
-        std::vector<std::array<double, 3>> all(static_cast<std::size_t>(cloud.nop));
-        for (int i = 0; i < cloud.nop; ++i) {
-          const auto &p = cloud.pts[static_cast<std::size_t>(i)];
-          all[static_cast<std::size_t>(i)] = {p.x, p.y, p.z};
+        if (shape) {
+          std::vector<std::array<double, 3>> all(static_cast<std::size_t>(cloud.nop));
+          for (int i = 0; i < cloud.nop; ++i) {
+            const auto &p = cloud.pts[static_cast<std::size_t>(i)];
+            all[static_cast<std::size_t>(i)] = {p.x, p.y, p.z};
+          }
+          os << " " << colorizer.longOption("shape");
+          for (const auto &c : found) {
+            const auto xyz = cage::coordsOfVertices(all, c.vertices);
+            const auto sh = cage::shapeOfVertices(xyz);
+            os << " " << sh.nVertices << ":"
+               << (sh.status == 0 ? sh.pointGroup : "off");
+          }
         }
-        os << " " << colorizer.longOption("shape");
-        for (const auto &c : found) {
-          const auto xyz = cage::coordsOfVertices(all, c.vertices);
-          const auto sh = cage::shapeOfVertices(xyz);
-          os << " " << sh.nVertices << ":"
-             << (sh.status == 0 ? sh.pointGroup : "off");
-        }
+        os << "\n";
       }
-      os << "\n";
       return 0;
     };
     if (graphName == "seeded") {
@@ -1295,31 +1389,30 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
     return emit(idx);
   }
 
-  auto sixOf = [](const std::vector<std::vector<int>> &rings) {
-    std::vector<std::vector<int>> six;
-    for (const auto &r : rings) {
-      if (r.size() == 6) {
-        six.push_back(r);
-      }
-    }
-    return six;
-  };
-
   int ih = 0;
   int ic = 0;
+  int both = 0;
   int water = 0;
   const auto tallyAtoms = [&](const std::vector<bool> &hc,
                               const std::vector<bool> &ddc) {
-    ih = ic = water = 0;
+    // Disjoint: hexagonal only, cubic only, both, water. A molecule on
+    // both cage types is `both`, not hexagonal. Per-atom codes are
+    // 0 water, 1 hexagonal, 2 cubic, 3 both. The four counters sum to
+    // the number of water molecules.
+    ih = ic = both = water = 0;
     const int n = static_cast<int>(hc.size());
     for (int i = 0; i < n; ++i) {
       if (i < cloud.nop && !isWaterType(cloud.pts[static_cast<std::size_t>(i)].type,
                                         waterTypes)) {
         continue;
       }
-      if (hc[static_cast<std::size_t>(i)]) {
+      const bool h = hc[static_cast<std::size_t>(i)];
+      const bool d = ddc[static_cast<std::size_t>(i)];
+      if (h && d) {
+        ++both;
+      } else if (h) {
         ++ih;
-      } else if (ddc[static_cast<std::size_t>(i)]) {
+      } else if (d) {
         ++ic;
       } else {
         ++water;
@@ -1343,27 +1436,16 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
     const auto &uni = graphs.second;
     auto idxS = nneigh::neighbourListByIndex(cloud, mutual);
     auto idxU = nneigh::neighbourListByIndex(cloud, uni);
-    if (tum::preferOffload()) {
-      // Hop-bound cages on the union 4-NN graph. The dual-graph seeded
-      // affiliation stays on the host when SEAMS_OFFLOAD is unset or 0.
-      const auto counts = tum::cageCounts(idxU);
-      std::vector<bool> hc(static_cast<std::size_t>(cloud.nop), false);
-      std::vector<bool> ddc(static_cast<std::size_t>(cloud.nop), false);
-      const int n = std::min(cloud.nop, static_cast<int>(counts.atomHc.size()));
-      for (int i = 0; i < n; ++i) {
-        hc[static_cast<std::size_t>(i)] =
-            counts.atomHc[static_cast<std::size_t>(i)] != 0;
-        ddc[static_cast<std::size_t>(i)] =
-            counts.atomDdc[static_cast<std::size_t>(i)] != 0;
-      }
-      tallyAtoms(hc, ddc);
-    } else {
-      auto sixS = sixOf(primitive::ringNetwork(idxS, 6));
-      auto sixU = sixOf(primitive::ringNetwork(idxU, 6));
-      const auto aff =
-          ring::seededCageAffiliation(sixS, idxS, sixU, idxU, complete);
-      tallyAtoms(aff.hc, aff.ddc);
-    }
+    // tum::cageCounts reads one graph and has no ring completion, so the
+    // seeded assignment stays on the host whatever SEAMS_OFFLOAD says.
+    const auto sixS = ring::contractibleRings(
+        sixRings(carry.rings(GraphSlot::strict, idxS, 6)), cloud);
+    const auto sixU = ring::contractibleRings(
+        sixRings(carry.rings(GraphSlot::permissive, idxU, 6)), cloud);
+    const auto aff = ring::seededCageAffiliation(
+        sixS, carry.affiliation(GraphSlot::strict, sixS, idxS), sixU,
+        carry.affiliation(GraphSlot::permissive, sixU, idxU), idxU, complete);
+    tallyAtoms(aff.hc, aff.ddc);
   } else {
     const auto graph = nneigh::bondGraphFromName(graphName);
     std::vector<std::vector<int>> nList;
@@ -1386,8 +1468,9 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
       }
       tallyAtoms(hc, ddc);
     } else {
-      auto six = sixOf(primitive::ringNetwork(idx, 6));
-      const auto aff = ring::cageAffiliation(six, idx);
+      const auto six = ring::contractibleRings(
+          sixRings(carry.rings(GraphSlot::single, idx, 6)), cloud);
+      const auto &aff = carry.affiliation(GraphSlot::single, six, idx);
       std::vector<bool> hc(static_cast<std::size_t>(cloud.nop), false);
       std::vector<bool> ddc(static_cast<std::size_t>(cloud.nop), false);
       for (std::size_t r = 0; r < six.size(); ++r) {
@@ -1406,7 +1489,8 @@ int cmdCages(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int k,
   os << colorizer.heading("nop") << " " << waterNop(cloud, waterTypes) << " "
      << colorizer.longOption("graph") << " " << graphName << " "
      << iceColor("hexagonal") << " " << ih << " " << iceColor("cubic") << " "
-     << ic << " " << iceColor("water") << " " << water << "\n";
+     << ic << " " << iceColor("both") << " " << both << " "
+     << iceColor("water") << " " << water << "\n";
   return 0;
 }
 
@@ -1453,6 +1537,7 @@ int main(int argc, char *argv[]) {
   int frame = cfg.frame;
   int last = cfg.last;
   int jobs = cfg.jobs;
+  bool carryFrames = cfg.carry;
   int typeI = cfg.type;
   double cutoff = cfg.cutoff;
   int k = cfg.k;
@@ -1565,6 +1650,12 @@ int main(int argc, char *argv[]) {
                    jobs = parseIntegral<int>(value);
                  }));
 
+  parser.add(Option("--rebuild")
+                 .help("Recompute rings and cages on every frame. A one-worker "
+                       "frame range otherwise updates them from the previous "
+                       "frame; the output is the same")
+                 .handler([&]() { carryFrames = false; }));
+
   parser.add(Option("--type", "-t")
                  .argName("I")
                  .help("Atom type (0 guesses oxygen then type 1; "
@@ -1638,7 +1729,8 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--graph")
                  .argName("KIND")
-                 .help("Bond graph for cages: cutoff | knn | knn-union | seeded")
+                 .help("Bond graph for cages: cutoff | knn | knn-union | seeded; "
+                       "chill, chill-plus: cutoff (default) | mutual")
                  .handler([&](std::string_view value) { graph = value; }));
 
   parser.add(Option("--complete")
@@ -1654,7 +1746,8 @@ int main(int argc, char *argv[]) {
   parser.add(Option("--signature")
                  .argName("SPEC")
                  .help("cages: ring-size census (4:6,6:8) or a named table "
-                       "entry (sodalite|alpha|512|51262|51264|51268|sh|hc|ddc)")
+                       "entry (sodalite|alpha|512|51262|51264|51268|sh|hc|ddc); "
+                       "join several with + for one line each")
                  .handler([&](std::string_view value) {
                    signatureSpec = std::string(value);
                  }));
@@ -1873,6 +1966,7 @@ int main(int argc, char *argv[]) {
   cfg.frame = frame;
   cfg.last = last;
   cfg.jobs = jobs;
+  cfg.carry = carryFrames;
   cfg.type = typeI;
   cfg.cutoff = cutoff;
   cfg.k = k;
@@ -1991,7 +2085,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  auto runOne = [&](std::ostream &os, Cloud &cloud) {
+  auto runOne = [&](std::ostream &os, FrameCarry &carry, Cloud &cloud) {
     if (strictInput && cloud.nop == 0) {
       os << "input frame " << cloud.currentFrame << " contains no atoms\n";
       return 2;
@@ -2007,11 +2101,21 @@ int main(int argc, char *argv[]) {
       return cmdRead(os, cloud);
     }
     if (cmd == "chill-plus" || cmd == "chill_plus") {
-      return cmdChillPlus(os, cloud, cutoff, typeI, layersFlag, tumLayersFlag,
-                          densAxis, 3.7, waterTypes);
+      try {
+        return cmdChillPlus(os, carry, cloud, cutoff, typeI, graph, layersFlag,
+                            tumLayersFlag, densAxis, 3.7, waterTypes);
+      } catch (const std::exception &e) {
+        os << colorizer.error(e.what()) << "\n";
+        return 2;
+      }
     }
     if (cmd == "chill") {
-      return cmdChill(os, cloud, cutoff, typeI, waterTypes);
+      try {
+        return cmdChill(os, cloud, cutoff, typeI, graph, waterTypes);
+      } catch (const std::exception &e) {
+        os << colorizer.error(e.what()) << "\n";
+        return 2;
+      }
     }
     if (cmd == "cages") {
       try {
@@ -2023,7 +2127,7 @@ int main(int argc, char *argv[]) {
             guestTypes.push_back(parseIntegral<int>(tok));
           }
         }
-        return cmdCages(os, cloud, cutoff, typeI, k, graph, completeFlag,
+        return cmdCages(os, carry, cloud, cutoff, typeI, k, graph, completeFlag,
                         signatureSpec, guestTypes, guestRadius, perAtomPath,
                         insideFlag, incompleteFlag, waterTypes, shapeFlag);
       } catch (const std::exception &e) {
@@ -2033,7 +2137,8 @@ int main(int argc, char *argv[]) {
     }
     if (cmd == "fingerprint") {
       try {
-        return cmdFingerprint(os, cloud, cutoff, typeI, k, graph, hops, colourTypes,
+        return cmdFingerprint(os, carry, cloud, cutoff, typeI, k, graph, hops,
+                              colourTypes,
                               libraryPath, emitLabel, perAtomPath, byAtomFlag);
       } catch (const std::exception &e) {
         os << colorizer.error(e.what()) << "\n";
@@ -2049,7 +2154,7 @@ int main(int argc, char *argv[]) {
           ionTypes.push_back(parseIntegral<int>(tok));
         }
       }
-      return cmdIons(os, cloud, cutoff, typeI, k, completeFlag, ionTypes,
+      return cmdIons(os, carry, cloud, cutoff, typeI, k, completeFlag, ionTypes,
                      ionCutoff > 0.0 ? ionCutoff : cutoff, perAtomPath,
                      waterTypes);
     }
@@ -2102,7 +2207,8 @@ int main(int argc, char *argv[]) {
 #endif
     Cloud cloud = load(file, frame, loadType);
     std::ostringstream line;
-    const int rc = runOne(line, cloud);
+    FrameCarry once(false);
+    const int rc = runOne(line, once, cloud);
     emitResult(std::cout, outputFormat, cmd, cloud.currentFrame, rc,
                line.str());
     return rc;
@@ -2114,12 +2220,15 @@ int main(int argc, char *argv[]) {
   std::vector<int> outputStatus(static_cast<std::size_t>(outputCount), 0);
   std::vector<bool> outputSeen(static_cast<std::size_t>(outputCount), false);
   const int typeFilter = loadAll ? 0 : (typeI > 0 ? typeI : 0);
+  // Set below, before the walk starts, once the frame split is known
+  std::unique_ptr<FrameCarry> walkCarry;
   auto processFrame = [&](int fr, Cloud &cloud) {
         if (typeFilter <= 0 && cloud.nop == 0) {
           cloud = load(file, cloud.currentFrame, loadType);
         }
         std::ostringstream line;
-        const int one = runOne(line, cloud);
+        FrameCarry fresh(false);
+        const int one = runOne(line, walkCarry ? *walkCarry : fresh, cloud);
         {
           std::lock_guard<std::mutex> lock(outMu);
           const int index = fr - frame;
@@ -2144,6 +2253,12 @@ int main(int argc, char *argv[]) {
     lo = hi + 1;
   }
 #endif
+  // One worker sees every frame of its range in order; RingUpdater state
+  // cannot be shared between workers
+  if (carryFrames && parts == 1 &&
+      (jobs == 1 || frameSource(file) != FrameSource::dump)) {
+    walkCarry = std::make_unique<FrameCarry>(true);
+  }
   const bool ranged =
       lo > hi || forEachInputFrame(file, lo, hi, typeFilter, jobs, processFrame,
                                    part, parts);

@@ -4,9 +4,9 @@
 ** SPDX-License-Identifier: MIT
 **
 ** Frame-by-frame validation and timing of the incremental topological path
-** on a real trajectory: RingUpdater against a full ringNetwork by canonical
-** ring-set equality, and AffiliationUpdater against batch cageAffiliation by
-** flag equality. Emits one whitespace-separated record per frame plus a
+** on a real trajectory: RingUpdater against a full ringNetwork element by
+** element, and AffiliationUpdater against batch cageAffiliation by flag
+** equality. Emits one whitespace-separated record per frame plus a
 ** summary, machine-parsable for the reproducibility workflow.
 **
 ** Run from the input/ directory:
@@ -26,7 +26,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <exception>
-#include <set>
 #include <string>
 #include <vector>
 
@@ -36,19 +35,6 @@ using Clock = std::chrono::steady_clock;
 
 double ms(Clock::time_point a, Clock::time_point b) {
   return std::chrono::duration<double, std::milli>(b - a).count();
-}
-
-std::set<std::vector<int>> canon(const std::vector<std::vector<int>> &rings) {
-  std::set<std::vector<int>> out;
-  for (auto r : rings) {
-    auto it = std::min_element(r.begin(), r.end());
-    std::rotate(r.begin(), it, r.end());
-    if (r.size() > 2 && r[1] > r.back()) {
-      std::reverse(r.begin() + 1, r.end());
-    }
-    out.insert(r);
-  }
-  return out;
 }
 
 } // namespace
@@ -72,7 +58,16 @@ int main(int argc, char **argv) {
     return 2;
   }
   nneigh::SkinNeighborList skin(3.5, skinWidth, atomType, graph);
+  // Fallback thresholds of the two updaters; 1 keeps every frame on the
+  // incremental path
+  if (argc > 7) {
+    ringUpd.setFullPassFraction(std::atof(argv[7]));
+  }
+  if (argc > 8) {
+    affilUpd.setBatchFraction(std::atof(argv[8]));
+  }
 
+  std::vector<std::vector<int>> prevIdx;
   double ringFullSum = 0.0, ringIncSum = 0.0;
   double affilBatchSum = 0.0, affilIncSum = 0.0;
   int steadyFrames = 0;
@@ -82,13 +77,14 @@ int main(int argc, char **argv) {
               skinWidth);
   std::printf("# frame nAtoms nRings nSix nHC nDDC ringFull_ms ringInc_ms "
               "ringRecomp affilBatch_ms affilInc_ms affilReclass "
-              "skinRebuild bondChurn ringsEqual affilEqual\n");
+              "skinRebuild changedAtoms changedBonds "
+              "changedBondsPerMolecule ringsEqual affilEqual\n");
 
   for (int frame = 1; frame <= frames; frame++) {
     molSys::PointCloud<molSys::Point<double>, double> cloud;
     cloud = sinp::readLammpsTrjO(traj, frame, cloud, atomType);
     if (cloud.nop == 0) {
-      std::printf("%d 0 0 0 0 0 0 0 0 0 0 0 . 0 yes yes\n", frame);
+      std::printf("%d 0 0 0 0 0 0 0 0 0 0 0 . 0 0 0.0000 yes yes\n", frame);
       continue;
     }
     auto nList = skin.update(cloud);
@@ -99,7 +95,7 @@ int main(int argc, char **argv) {
     const auto t1 = Clock::now();
     const auto &inc = ringUpd.update(idx);
     const auto t2 = Clock::now();
-    const bool ringsEqual = canon(full) == canon(inc);
+    const bool ringsEqual = full == inc;
 
     // The cage stage runs on the six-membered rings of the incremental set
     std::vector<std::vector<int>> six;
@@ -124,12 +120,46 @@ int main(int argc, char **argv) {
     }
 
     allEqual = allEqual && ringsEqual && affilEqual;
-    std::printf("%d %d %zu %zu %d %d %.3f %.3f %d %.3f %.3f %d %s %d %s %s\n",
+    // Counted after the timers. Undirected symmetric difference of the
+    // neighbour rows, so a direct ringNetwork inside the updater is timed
+    // alone.
+    int changedBonds = 0;
+    if (prevIdx.size() == idx.size()) {
+      std::vector<int> ra, rb;
+      int directed = 0;
+      for (std::size_t v = 0; v < idx.size(); v++) {
+        ra.assign(idx[v].begin() + (idx[v].empty() ? 0 : 1), idx[v].end());
+        rb.assign(prevIdx[v].begin() + (prevIdx[v].empty() ? 0 : 1),
+                  prevIdx[v].end());
+        std::sort(ra.begin(), ra.end());
+        std::sort(rb.begin(), rb.end());
+        std::size_t i = 0;
+        std::size_t j = 0;
+        while (i < ra.size() || j < rb.size()) {
+          if (j == rb.size() || (i < ra.size() && ra[i] < rb[j])) {
+            ++directed;
+            ++i;
+          } else if (i == ra.size() || rb[j] < ra[i]) {
+            ++directed;
+            ++j;
+          } else {
+            ++i;
+            ++j;
+          }
+        }
+      }
+      changedBonds = directed / 2;
+    }
+    prevIdx = idx;
+    const double perMol =
+        cloud.nop > 0 ? static_cast<double>(changedBonds) / cloud.nop : 0.0;
+    std::printf("%d %d %zu %zu %d %d %.3f %.3f %d %.3f %.3f %d %s %d %d %.4f %s %s\n",
                 frame, cloud.nop, full.size(), six.size(), nHC, nDDC,
                 ms(t0, t1), ms(t1, t2), ringUpd.lastRecomputedSources(),
                 ms(t3, t4), ms(t4, t5), affilUpd.lastReclassified(),
                 skin.lastRebuilt() ? "R" : ".", skin.lastChangedAtoms(),
-                ringsEqual ? "yes" : "NO", affilEqual ? "yes" : "NO");
+                changedBonds, perMol, ringsEqual ? "yes" : "NO",
+                affilEqual ? "yes" : "NO");
 
     if (frame > 1) {
       ringFullSum += ms(t0, t1);

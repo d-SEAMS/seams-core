@@ -58,7 +58,15 @@ namespace {
 bool hasPeriodicBox(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   if (yCloud.box.size() >= 3) {
-    return true;
+    double H[3][3];
+    double origin[3];
+    nneigh::dumpBoundsToH(yCloud.box, yCloud.boxLow, H, origin);
+    if (H[0][0] > 0.0 && H[1][1] > 0.0 && H[2][2] > 0.0) {
+      return true;
+    }
+    std::cerr << "The simulation box has a non-positive edge; cannot build a "
+                 "neighbour list.\n";
+    return false;
   }
   std::cerr << "The point cloud has no simulation box; cannot build a "
                "neighbour list.\n";
@@ -696,6 +704,183 @@ bool nneigh::cellListRowsThreaded(
   return true;
 }
 
+namespace {
+
+// Orthorhombic cutoff list. One pass, OpenMP over cells, one stencil shared
+// by every atom in the cell. Interior cells skip the periodic wrap. A pair
+// is kept when the squared minimum image is strictly below the cutoff
+// squared. A pair that lands within 1e-8 of that square is left to the
+// caller: linkcell's SIMD square rounds the other way there, and the row
+// has to stay identical to that list. Each row starts with the atom's own ID.
+bool orthoFullList(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                   const std::vector<int> &subset, double rcutoff,
+                   const std::vector<int> &indexToID,
+                   std::vector<std::vector<int>> &nList) {
+  if (yCloud.box.size() != 3 || subset.size() < 2048 || rcutoff <= 0.0) {
+    return false;
+  }
+  const double len[3] = {yCloud.box[0], yCloud.box[1], yCloud.box[2]};
+  if (!(len[0] > 0.0 && len[1] > 0.0 && len[2] > 0.0)) {
+    return false;
+  }
+  int ncell[3];
+  for (int d = 0; d < 3; d++) {
+    ncell[d] = static_cast<int>(std::floor(len[d] / rcutoff));
+    if (ncell[d] < 3) {
+      return false;
+    }
+  }
+  const double origin[3] = {
+      yCloud.boxLow.size() > 0 ? yCloud.boxLow[0] : 0.0,
+      yCloud.boxLow.size() > 1 ? yCloud.boxLow[1] : 0.0,
+      yCloud.boxLow.size() > 2 ? yCloud.boxLow[2] : 0.0};
+  const std::size_t n = subset.size();
+  const double rc2 = rcutoff * rcutoff;
+  const int nCells = ncell[0] * ncell[1] * ncell[2];
+  struct Packed {
+    double x, y, z;
+  };
+  std::vector<Packed> packed(n);
+  std::vector<int> cellOf(n);
+  for (std::size_t k = 0; k < n; k++) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(subset[k])];
+    const double coord[3] = {p.x, p.y, p.z};
+    double f[3];
+    int c[3];
+    for (int d = 0; d < 3; d++) {
+      f[d] = (coord[d] - origin[d]) / len[d];
+      f[d] -= std::floor(f[d]);
+      if (f[d] >= 1.0) {
+        f[d] = 0.0;
+      }
+      c[d] = std::min(ncell[d] - 1, static_cast<int>(f[d] * ncell[d]));
+    }
+    // Fold into the orthorhombic cell first. Unwrapped coordinates sit
+    // outside the bounds, and the raw difference is then not the minimum
+    // image even for an interior cell.
+    packed[k] = {origin[0] + f[0] * len[0], origin[1] + f[1] * len[1],
+                 origin[2] + f[2] * len[2]};
+    cellOf[k] = (c[0] * ncell[1] + c[1]) * ncell[2] + c[2];
+  }
+  std::vector<int> cellStart(static_cast<std::size_t>(nCells) + 1, 0);
+  for (std::size_t k = 0; k < n; k++) {
+    ++cellStart[static_cast<std::size_t>(cellOf[k]) + 1];
+  }
+  for (int c = 0; c < nCells; c++) {
+    cellStart[static_cast<std::size_t>(c) + 1] += cellStart[static_cast<std::size_t>(c)];
+  }
+  std::vector<int> cellAtoms(n);
+  {
+    std::vector<int> fill(cellStart.begin(), cellStart.end() - 1);
+    for (std::size_t k = 0; k < n; k++) {
+      cellAtoms[static_cast<std::size_t>(
+          fill[static_cast<std::size_t>(cellOf[k])]++)] = static_cast<int>(k);
+    }
+  }
+
+  nList.assign(static_cast<std::size_t>(yCloud.nop), {});
+  int borderline = 0;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel
+#endif
+  {
+    std::vector<int> keep;
+    keep.reserve(16);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (int c = 0; c < nCells; c++) {
+      const int beginHere = cellStart[static_cast<std::size_t>(c)];
+      const int endHere = cellStart[static_cast<std::size_t>(c) + 1];
+      if (beginHere == endHere) {
+        continue;
+      }
+      const int cz = c % ncell[2];
+      const int cy = (c / ncell[2]) % ncell[1];
+      const int cx = c / (ncell[1] * ncell[2]);
+      const bool interior = cx > 0 && cx + 1 < ncell[0] && cy > 0 && cy + 1 < ncell[1] &&
+                            cz > 0 && cz + 1 < ncell[2];
+      int neigh[27];
+      int nNeigh = 0;
+      for (int dx = -1; dx <= 1; dx++) {
+        const int nx = interior ? cx + dx : (cx + dx + ncell[0]) % ncell[0];
+        for (int dy = -1; dy <= 1; dy++) {
+          const int ny = interior ? cy + dy : (cy + dy + ncell[1]) % ncell[1];
+          const int row = nx * ncell[1] + ny;
+          for (int dz = -1; dz <= 1; dz++) {
+            const int nz = interior ? cz + dz : (cz + dz + ncell[2]) % ncell[2];
+            neigh[nNeigh++] = row * ncell[2] + nz;
+          }
+        }
+      }
+      for (int mine = beginHere; mine < endHere; mine++) {
+        const int k = cellAtoms[static_cast<std::size_t>(mine)];
+        const int i = subset[static_cast<std::size_t>(k)];
+        if (indexToID[static_cast<std::size_t>(i)] == -1) {
+          continue;
+        }
+        const Packed pi = packed[static_cast<std::size_t>(k)];
+        keep.clear();
+        for (int t = 0; t < nNeigh; t++) {
+          const int ncid = neigh[t];
+          const int begin = cellStart[static_cast<std::size_t>(ncid)];
+          const int end = cellStart[static_cast<std::size_t>(ncid) + 1];
+          for (int m = begin; m < end; m++) {
+            const int jk = cellAtoms[static_cast<std::size_t>(m)];
+            if (jk == k) {
+              continue;
+            }
+            const Packed pj = packed[static_cast<std::size_t>(jk)];
+            double dxp = pi.x - pj.x;
+            double dyp = pi.y - pj.y;
+            double dzp = pi.z - pj.z;
+            if (!interior) {
+              dxp -= len[0] * std::floor(dxp / len[0] + 0.5);
+              dyp -= len[1] * std::floor(dyp / len[1] + 0.5);
+              dzp -= len[2] * std::floor(dzp / len[2] + 0.5);
+            }
+            const double d2 = dxp * dxp + dyp * dyp + dzp * dzp;
+            if (std::fabs(d2 - rc2) < 1e-8) {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp atomic write
+#endif
+              borderline = 1;
+            }
+            if (d2 < rc2) {
+              const int j = subset[static_cast<std::size_t>(jk)];
+              if (indexToID[static_cast<std::size_t>(j)] != -1) {
+                keep.push_back(j);
+              }
+            }
+          }
+        }
+        std::sort(keep.begin(), keep.end());
+        auto &row = nList[static_cast<std::size_t>(i)];
+        row.reserve(1 + keep.size());
+        row.push_back(indexToID[static_cast<std::size_t>(i)]);
+        for (const int j : keep) {
+          row.push_back(indexToID[static_cast<std::size_t>(j)]);
+        }
+      }
+    }
+  }
+  if (borderline) {
+    return false;
+  }
+  if (subset.size() != static_cast<std::size_t>(yCloud.nop)) {
+    for (int i = 0; i < yCloud.nop; i++) {
+      if (nList[static_cast<std::size_t>(i)].empty() &&
+          indexToID[static_cast<std::size_t>(i)] != -1) {
+        nList[static_cast<std::size_t>(i)].push_back(
+            indexToID[static_cast<std::size_t>(i)]);
+      }
+    }
+  }
+  return true;
+}
+
+}  // namespace
+
 std::vector<std::vector<int>>
 nneigh::neighListO(double rcutoff,
                    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
@@ -716,6 +901,10 @@ nneigh::neighListO(double rcutoff,
     if (yCloud.pts[i].type == typeI) {
       typeIIndices.push_back(i);
     }
+  }
+
+  if (orthoFullList(yCloud, typeIIndices, rcutoff, indexToID, nList)) {
+    return nList;
   }
 
 #ifdef SEAMS_HAS_OPENMP
@@ -781,7 +970,7 @@ nneigh::neighListO(double rcutoff,
 
     // Filter by cutoff and update neighbour lists
     for (size_t jj = 0; jj < remaining; jj++) {
-      if (distSq[jj] > rcutoffSq) {
+      if (distSq[jj] >= rcutoffSq) {
         continue;
       }
       const int jatom = typeIIndices[ii + 1 + jj];
@@ -869,7 +1058,7 @@ nneigh::neighListPair(
     fillPairDistSq(yCloud, iatom, jIdx.data(), jIdx.size(), dx.data(),
                    dy.data(), dz.data(), distSq.data());
     for (size_t jj = 0; jj < jIdx.size(); jj++) {
-      if (distSq[jj] > rcutoffSq) {
+      if (distSq[jj] >= rcutoffSq) {
         continue;
       }
       const int jatom = jIdx[jj];
@@ -944,7 +1133,7 @@ nneigh::halfNeighList(double rcutoff,
         continue;
       }
       // If the distance is greater than rcutoff, continue
-      if (gen::periodicDistSq(frame, yCloud, iatom, jatom) > rcutoffSq) {
+      if (gen::periodicDistSq(frame, yCloud, iatom, jatom) >= rcutoffSq) {
         continue;
       }
 
@@ -1039,7 +1228,7 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
 
     // Update the neighbour indices for iatom and jatom both (full list)
     for (size_t jj = 0; jj < remaining; jj++) {
-      if (distSq[jj] > cutoffSq) {
+      if (distSq[jj] >= cutoffSq) {
         continue;
       }
       const int jatom = iatom + 1 + static_cast<int>(jj);
@@ -1736,8 +1925,12 @@ bool nneigh::SkinNeighborList::mustRebuild(
   if (yCloud.box.size() != box0_.size()) {
     return true;
   }
+  // Same trigger as an atom: a box edge or tilt that has changed by at
+  // most skin/2 cannot bring a pair from outside the candidate shell
+  // inside the cutoff.
+  const double trigger = 0.5 * skin_;
   for (std::size_t k = 0; k < yCloud.box.size(); k++) {
-    if (std::fabs(yCloud.box[k] - box0_[k]) > 1e-8) {
+    if (std::fabs(yCloud.box[k] - box0_[k]) > trigger) {
       return true;
     }
   }
@@ -1849,7 +2042,7 @@ void nneigh::SkinNeighborList::refreshBonds(
       if (i < 0 || j < 0 || i >= yCloud.nop || j >= yCloud.nop) {
         continue;
       }
-      if (r2[t] <= cutoffSq_) {
+      if (r2[t] < cutoffSq_) {
         next.emplace_back(i, j);
       }
     }

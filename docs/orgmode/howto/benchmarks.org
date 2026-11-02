@@ -1,0 +1,24 @@
+#+TITLE: Benchmarks
+#+OPTIONS: toc:nil num:nil
+
+Timings belong on the docs site of the commit that produced them.
+This repository does not vendor a number from a laptop.
+
+The drivers that exist today:
+
+| driver | what it times |
+|--------+---------------|
+| =tests/bench_cages= | HC and DDC affiliation |
+| =tests/bench_cages_base= | the =findDDC= baseline |
+| =tests/bench_churn_sweep= | incremental affiliation against a full pass |
+| =tests/bench_trajectory_incremental= | a trajectory update |
+| =tests/bench_gpu_batch= | a device-resident batch, when the build has one |
+
+Build with tests and run the binary.
+Record the host, the compiler, the commit, and whether =SEAMS_OFFLOAD= was set.
+A host-only build takes the host branch of the device code.
+Say so.
+
+=pixi run -e repro= is the Snakemake campaign (freud, pyscal3, the paper benches).
+That environment is Linux only.
+It is not part of =pixi run test=.

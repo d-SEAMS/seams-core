@@ -111,6 +111,24 @@ ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 std::vector<int> shellRingCensus(const std::vector<std::vector<int>> &rings,
                                  const std::vector<int> &shell, int maxRingSize);
 
+/// Capped rings: the water-only primitive rings of `rings` (the ring network
+/// of the water graph, ions not vertices) of at most `maxRingSize` members,
+/// every member of which lies in `shell`. The ion sits above a complete
+/// water ring.
+std::vector<std::vector<int>> cappedRings(const std::vector<std::vector<int>> &rings,
+                                          const std::vector<int> &shell,
+                                          int maxRingSize);
+
+/// Broken rings: the primitive rings, of at most `maxRingSize` members, of
+/// the water graph `nList` (by index, leading self entry, ions not bonded)
+/// plus one virtual ion vertex bonded to every water of `shell`, that
+/// contain the ion. These are the rings the water-only network lost. Each
+/// ring is in ring order and writes the virtual ion as
+/// `static_cast<int>(nList.size())`.
+std::vector<std::vector<int>> brokenRings(const std::vector<std::vector<int>> &nList,
+                                          const std::vector<int> &shell,
+                                          int maxRingSize);
+
 /// Guests read against enumerated cages. A cage is a set of vertex atoms;
 /// its centre is the periodic centroid of the vertices. A guest (methane,
 /// THF, an ion, any atom outside the network) sits in the cage whose
@@ -140,9 +158,41 @@ std::array<double, 3>
 periodicCentroid(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  const std::vector<int> &atoms);
 
-/// Occupancy by ray-parity: a guest sits in a cage when a ray from the
-/// guest, in the frame that unwraps the cage about its periodic
-/// centroid, crosses an odd number of fan-triangulated faces. Among
+/// Relative tolerance of the inside test, in units of the largest distance
+/// from c_F to a cage vertex.
+inline constexpr double kInsideRelTol = 1e-9;
+
+/// The fixed, ordered unit directions the inside test casts rays along.
+const std::vector<std::array<double, 3>> &insideRayDirections();
+
+struct InsideTrace {
+  bool inside = false;
+  bool onFace = false; ///< the guest lies on a triangle within tolerance
+  int rays = 0;        ///< directions tried, grazing ones included
+  int crossings = 0;   ///< triangles met by the ray that decided
+};
+
+/// The inside predicate for one cage. The face vertices and the guest are
+/// unwrapped about c_F (`centre`, or the periodic centroid of the distinct
+/// face vertices when null) and each face is fan-triangulated from its own
+/// centroid. The guest is inside when it lies on a triangle within
+/// `kInsideRelTol`; otherwise a ray is cast along the first direction of
+/// `insideRayDirections()` that passes no triangle edge or vertex within
+/// that tolerance, and the guest is inside when the ray meets an odd number
+/// of triangles. When every direction grazes, the one with the widest
+/// clearance decides.
+InsideTrace
+pointInFacesTrace(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                  const std::vector<std::vector<int>> &rings,
+                  const std::vector<int> &faces, const std::array<double, 3> &guest,
+                  const std::array<double, 3> *centre = nullptr);
+
+bool pointInFaces(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                  const std::vector<std::vector<int>> &rings,
+                  const std::vector<int> &faces, const std::array<double, 3> &guest,
+                  const std::array<double, 3> *centre = nullptr);
+
+/// Occupancy by the inside predicate (`pointInFaces`) on every cage. Among
 /// cages that contain the guest the nearest centroid wins. `rings` is
 /// the ring list the cage faces index; `cageFaces[c]` is the face
 /// indices of cage c.

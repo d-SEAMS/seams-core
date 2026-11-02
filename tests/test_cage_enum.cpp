@@ -525,3 +525,238 @@ TEST_CASE("IRA and SOFI see the cage vertices and not the frame", "[cage_enum]")
     REQUIRE(same.rmsd < 1e-6);
   }
 }
+
+static DumpCages contractibleCagesOnDump(const char *path, const char *spec) {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO(path, 1, yCloud, 1);
+  REQUIRE(yCloud.nop > 0);
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  nList = nneigh::neighbourListByIndex(yCloud, nList);
+  const auto sig = cage::Signature::parse(spec);
+  DumpCages out;
+  out.rings = ring::cageRings(
+      primitive::ringNetwork(nList, std::max(sig.maxRingSize(), 6)), yCloud,
+      3.5);
+  out.found = cage::findBySignature(out.rings, nList, sig);
+  return out;
+}
+
+static std::size_t cagesOnCloud(
+    molSys::PointCloud<molSys::Point<double>, double> cloud, const char *spec,
+    double cutoff = 3.5) {
+  auto nList = nneigh::neighListO(cutoff, cloud, 1);
+  nList = nneigh::neighbourListByIndex(cloud, nList);
+  const auto sig = cage::Signature::parse(spec);
+  const auto rings = ring::cageRings(
+      primitive::ringNetwork(nList, std::max(sig.maxRingSize(), 6)), cloud,
+      cutoff);
+  return cage::findBySignature(rings, nList, sig).size();
+}
+
+TEST_CASE("rings that wind the sI unit cell bound no cage", "[cage_enum]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/genice_sI.lammpstrj", 1, yCloud, 1);
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  nList = nneigh::neighbourListByIndex(yCloud, nList);
+  const auto all = primitive::ringNetwork(nList, 6);
+  const auto kept = ring::contractibleRings(all, yCloud);
+  REQUIRE(kept.size() < all.size());
+  REQUIRE(contractibleCagesOnDump("traj/genice_sI.lammpstrj", "512")
+              .found.size() == 2);
+  REQUIRE(contractibleCagesOnDump("traj/genice_sI.lammpstrj", "51262")
+              .found.size() == 6);
+  REQUIRE(contractibleCagesOnDump("traj/genice_sI.lammpstrj", "51264")
+              .found.empty());
+  REQUIRE(contractibleCagesOnDump("traj/genice_sI.lammpstrj", "51268")
+              .found.empty());
+  REQUIRE(contractibleCagesOnDump("traj/genice_sI.lammpstrj", "sh")
+              .found.empty());
+}
+
+TEST_CASE("a 2x2x2 sI supercell has eight times the unit-cell cages",
+          "[cage_enum]") {
+  molSys::PointCloud<molSys::Point<double>, double> unit;
+  unit = sinp::readLammpsTrjO("traj/genice_sI.lammpstrj", 1, unit, 1);
+  REQUIRE(unit.nop == 46);
+  REQUIRE(unit.box.size() >= 3);
+  const double lx = unit.box[0];
+  const double ly = unit.box[1];
+  const double lz = unit.box[2];
+  molSys::PointCloud<molSys::Point<double>, double> super;
+  super.box = {2.0 * lx, 2.0 * ly, 2.0 * lz};
+  super.boxLow = unit.boxLow;
+  super.currentFrame = 1;
+  int id = 1;
+  for (int ix = 0; ix < 2; ++ix) {
+    for (int iy = 0; iy < 2; ++iy) {
+      for (int iz = 0; iz < 2; ++iz) {
+        for (const auto &src : unit.pts) {
+          auto p = src;
+          p.x += ix * lx;
+          p.y += iy * ly;
+          p.z += iz * lz;
+          p.atomID = id;
+          super.idIndexMap[id] = super.nop;
+          super.pts.push_back(p);
+          ++super.nop;
+          ++id;
+        }
+      }
+    }
+  }
+  REQUIRE(super.nop == 8 * unit.nop);
+  const char *specs[] = {"512", "51262", "51264", "51268", "sh"};
+  const std::size_t unitCounts[] = {2, 6, 0, 0, 0};
+  for (int i = 0; i < 5; ++i) {
+    INFO(specs[i]);
+    const auto one = cagesOnCloud(unit, specs[i]);
+    const auto eight = cagesOnCloud(super, specs[i]);
+    REQUIRE(one == unitCounts[i]);
+    REQUIRE(eight == 8 * one);
+  }
+}
+
+TEST_CASE("doubling the thin sH edge doubles each cage kind and adds none",
+          "[cage_enum]") {
+  molSys::PointCloud<molSys::Point<double>, double> cell;
+  cell = sinp::readLammpsTrjO("traj/genice_sH.lammpstrj", 1, cell, 1);
+  REQUIRE(cell.box.size() >= 6);
+  const double lz = cell.box[2];
+  molSys::PointCloud<molSys::Point<double>, double> doubled = cell;
+  doubled.pts.clear();
+  doubled.idIndexMap.clear();
+  doubled.nop = 0;
+  doubled.box[2] = 2.0 * lz;
+  int id = 1;
+  for (int iz = 0; iz < 2; ++iz) {
+    for (const auto &src : cell.pts) {
+      auto p = src;
+      p.z += iz * lz;
+      p.atomID = id;
+      doubled.idIndexMap[id] = doubled.nop;
+      doubled.pts.push_back(p);
+      ++doubled.nop;
+      ++id;
+    }
+  }
+  const char *specs[] = {"512", "51262", "51264", "51268", "sh"};
+  const std::size_t cellCounts[] = {12, 0, 0, 4, 8};
+  for (int i = 0; i < 5; ++i) {
+    INFO(specs[i]);
+    const auto one = cagesOnCloud(cell, specs[i]);
+    const auto two = cagesOnCloud(doubled, specs[i]);
+    REQUIRE(one == cellCounts[i]);
+    REQUIRE(two == 2 * one);
+  }
+}
+
+TEST_CASE("a cell thinner than twice the cutoff is refused", "[cage_enum]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/genice_sI.lammpstrj", 1, yCloud, 1);
+  const std::vector<std::vector<int>> none;
+  yCloud.box = {6.0, 12.0, 12.0};
+  REQUIRE_THROWS_AS(ring::cageRings(none, yCloud, 3.5), std::invalid_argument);
+  yCloud.box = {12.0034886, 12.0034886, 12.0034886};
+  REQUIRE_NOTHROW(ring::cageRings(none, yCloud, 3.5));
+}
+
+TEST_CASE("a cloud without a box keeps every ring", "[cage_enum]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  buildHCCloud(yCloud);
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  nList = nneigh::neighbourListByIndex(yCloud, nList);
+  const auto rings = primitive::ringNetwork(nList, 7);
+  REQUIRE(ring::contractibleRings(rings, yCloud) == rings);
+  yCloud.box.clear();
+  REQUIRE(ring::contractibleRings(rings, yCloud) == rings);
+}
+
+TEST_CASE("the triclinic sH cell gives its three cage kinds and no others",
+          "[cage_enum]") {
+  const char *path = "traj/genice_sH.lammpstrj";
+  REQUIRE(contractibleCagesOnDump(path, "512").found.size() == 12);
+  REQUIRE(contractibleCagesOnDump(path, "51262").found.empty());
+  REQUIRE(contractibleCagesOnDump(path, "51264").found.empty());
+  REQUIRE(contractibleCagesOnDump(path, "51268").found.size() == 4);
+  REQUIRE(contractibleCagesOnDump(path, "sh").found.size() == 8);
+}
+
+TEST_CASE("paired edges alone do not make a sphere", "[cage_enum]") {
+  const std::vector<std::vector<int>> pillow = {{0, 1, 2}, {2, 1, 0}};
+  REQUIRE(cage::isClosedPolyhedron(pillow, {0, 1}));
+  REQUIRE_FALSE(cage::isSpherePolyhedron(pillow, {0, 1}));
+  REQUIRE(cage::findBySignature(pillow, cage::Signature::parse("3:2")).empty());
+
+  const std::vector<std::vector<int>> pinched = {
+      {0, 1, 2}, {0, 2, 3}, {0, 3, 1}, {1, 3, 2},
+      {0, 4, 5}, {0, 5, 6}, {0, 6, 4}, {4, 6, 5}};
+  const std::vector<int> both = {0, 1, 2, 3, 4, 5, 6, 7};
+  REQUIRE(cage::isClosedPolyhedron(pinched, both));
+  REQUIRE_FALSE(cage::isSpherePolyhedron(pinched, both));
+  REQUIRE(cage::isSpherePolyhedron(pinched, {0, 1, 2, 3}));
+  REQUIRE(cage::isSpherePolyhedron(pinched, {4, 5, 6, 7}));
+  REQUIRE(cage::findBySignature(pinched, cage::Signature::parse("3:8")).empty());
+  REQUIRE(cage::findBySignature(pinched, cage::Signature::parse("3:4")).size() ==
+          2);
+
+  const auto prism = hexPrismRings();
+  REQUIRE(cage::isSpherePolyhedron(prism, {0, 1, 2, 3, 4, 5, 6, 7}));
+}
+
+TEST_CASE("liquid mW at the start of a nucleation run has no hydrate cages",
+          "[cage_enum]") {
+  for (const char *spec : {"512", "51262", "51264", "51268", "sh"}) {
+    INFO("signature " << spec);
+    const auto run = cagesOnDump("traj/nucleation_f1.lammpstrj", spec);
+    REQUIRE(run.found.empty());
+  }
+}
+
+TEST_CASE("a seven-vertex torus has paired edges but is no cage",
+          "[cage_enum]") {
+  std::vector<std::vector<int>> torus;
+  for (int i = 0; i < 7; ++i) {
+    torus.push_back({i, (i + 1) % 7, (i + 3) % 7});
+    torus.push_back({i, (i + 3) % 7, (i + 2) % 7});
+  }
+  std::vector<int> all(torus.size());
+  for (size_t i = 0; i < torus.size(); ++i) {
+    all[i] = static_cast<int>(i);
+  }
+  REQUIRE(cage::isClosedPolyhedron(torus, all));
+  REQUIRE(cage::findBySignature(torus, cage::Signature::parse("3:14")).empty());
+  REQUIRE_FALSE(cage::isSpherePolyhedron(torus, all));
+}
+
+TEST_CASE("signatures searched together give the cages of each alone",
+          "[cage_enum]") {
+  for (const char *path :
+       {"traj/genice_sH.lammpstrj", "traj/genice_sII.lammpstrj",
+        "traj/nucleation_f1.lammpstrj"}) {
+    INFO(path);
+    molSys::PointCloud<molSys::Point<double>, double> yCloud;
+    yCloud = sinp::readLammpsTrjO(path, 1, yCloud, 1);
+    auto nList = nneigh::neighListO(3.5, yCloud, 1);
+    nList = nneigh::neighbourListByIndex(yCloud, nList);
+    const auto rings = ring::contractibleRings(
+        primitive::ringNetwork(nList, 6), yCloud);
+    std::vector<cage::Signature> sigs;
+    for (const char *spec :
+         {"512", "51262", "51264", "51268", "sh", "hc", "512", "4:6"}) {
+      sigs.push_back(cage::Signature::parse(spec));
+    }
+    const auto together = cage::findBySignatures(rings, nList, sigs, {});
+    REQUIRE(together.size() == sigs.size());
+    for (size_t i = 0; i < sigs.size(); ++i) {
+      INFO("signature " << sigs[i].str());
+      const auto alone = cage::findBySignature(rings, nList, sigs[i], {});
+      REQUIRE(together[i].size() == alone.size());
+      for (size_t c = 0; c < alone.size(); ++c) {
+        REQUIRE(together[i][c].faces == alone[c].faces);
+        REQUIRE(together[i][c].vertices == alone[c].vertices);
+        REQUIRE(together[i][c].certificate == alone[c].certificate);
+        REQUIRE(together[i][c].signature == alone[c].signature);
+      }
+    }
+  }
+}

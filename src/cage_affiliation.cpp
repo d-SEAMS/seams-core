@@ -12,9 +12,9 @@
 #include <topo_bulk.hpp>
 
 #include <algorithm>
-#include <map>
-#include <unordered_map>
-#include <unordered_set>
+#include <cstdint>
+#include <memory>
+#include <numeric>
 #include <vector>
 
 #ifdef SEAMS_HAS_OPENMP
@@ -23,62 +23,92 @@
 
 namespace {
 
-//! Canonical cycle of a ring: the lexicographically least sequence over all
-//! rotations and both directions, so the same ring keys identically however
-//! it was enumerated
-std::vector<int> canonicalKey(const std::vector<int> &ringAtoms) {
-  const size_t k = ringAtoms.size();
-  std::vector<int> best;
-  std::vector<int> candidate(k);
-  for (int dir = 0; dir < 2; dir++) {
-    for (size_t start = 0; start < k; start++) {
-      for (size_t m = 0; m < k; m++) {
-        const size_t idx =
-            (dir == 0) ? (start + m) % k : (start + k - m) % k;
-        candidate[m] = ringAtoms[idx];
-      }
-      if (best.empty() || candidate < best) {
-        best = candidate;
-      }
+//! Fingerprint of a ring's cycle, the same however the ring was rotated or
+//! traversed: ring atoms are distinct, so the lexicographically least
+//! reading starts at the least atom and runs toward its lesser neighbour
+std::uint64_t cycleHash(const int *atoms, std::size_t k) {
+  std::uint64_t h = 1469598103934665603ULL ^ k;
+  if (k == 0) {
+    return h;
+  }
+  const std::size_t start =
+      static_cast<std::size_t>(std::min_element(atoms, atoms + k) - atoms);
+  const bool forward = atoms[(start + 1) % k] <= atoms[(start + k - 1) % k];
+  for (std::size_t m = 0; m < k; m++) {
+    h ^= static_cast<std::uint32_t>(
+        atoms[forward ? (start + m) % k : (start + k - m) % k]);
+    h *= 1099511628211ULL;
+  }
+  return h;
+}
+
+bool sameCycle(const int *a, std::size_t ka, const int *b, std::size_t kb) {
+  if (ka != kb) {
+    return false;
+  }
+  if (ka == 0) {
+    return true;
+  }
+  const std::size_t sa =
+      static_cast<std::size_t>(std::min_element(a, a + ka) - a);
+  const std::size_t sb =
+      static_cast<std::size_t>(std::min_element(b, b + kb) - b);
+  const bool fa = a[(sa + 1) % ka] <= a[(sa + ka - 1) % ka];
+  const bool fb = b[(sb + 1) % kb] <= b[(sb + kb - 1) % kb];
+  for (std::size_t m = 0; m < ka; m++) {
+    if (a[fa ? (sa + m) % ka : (sa + ka - m) % ka] !=
+        b[fb ? (sb + m) % kb : (sb + kb - m) % kb]) {
+      return false;
     }
   }
-  return best;
+  return true;
 }
 
 //! Shared per-frame machinery: the inverted index, sorted ring copies for
 //! overlap tests, and cached basal/adjacency lists (one sort per ring).
 struct FrameContext {
-  const std::vector<std::vector<int>> &rings;
-  const std::vector<std::vector<int>> &nList;
+  // Pointers so a caller can keep one context and rebind it each frame.
+  const std::vector<std::vector<int>> *rings = nullptr;
+  const std::vector<std::vector<int>> *nList = nullptr;
   ring::RingSearchIndex index;
   std::vector<std::vector<int>> sortedRings;
-  mutable std::vector<std::vector<int>> basalCand;
+  mutable   std::vector<std::vector<int>> basalCand;
   mutable std::vector<char> basalReady;
   mutable std::vector<std::vector<int>> adjRings;
   mutable std::vector<char> adjReady;
+  ring::NeighBond bonds;
   // Scratch for findPrismatic, which appends to a list and stamps a type
   // vector neither of which affiliation reads
   std::vector<int> scratchListHC;
   std::vector<ring::strucType> scratchType;
 
+  FrameContext() = default;
+
   FrameContext(const std::vector<std::vector<int>> &rings_,
-               const std::vector<std::vector<int>> &nList_)
-      : rings(rings_), nList(nList_) {
+               const std::vector<std::vector<int>> &nList_) {
+    prepare(rings_, nList_);
+  }
+
+  void prepare(const std::vector<std::vector<int>> &rings_,
+               const std::vector<std::vector<int>> &nList_) {
+    rings = &rings_;
+    nList = &nList_;
     int maxAtom = 0;
-    for (const auto &r : rings) {
+    for (const auto &r : rings_) {
       for (const int a : r) {
         maxAtom = std::max(maxAtom, a);
       }
     }
-    index = ring::buildRingSearchIndex(rings, maxAtom + 1);
-    const int nR = static_cast<int>(rings.size());
+    index = ring::buildRingSearchIndex(rings_, maxAtom + 1);
+    bonds.build(nList_);
+    const int nR = static_cast<int>(rings_.size());
     sortedRings.resize(static_cast<std::size_t>(nR));
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
 #pragma omp parallel for schedule(static) if (nR >= 1024 && !omp_in_parallel())
 #endif
     for (int i = 0; i < nR; i++) {
       sortedRings[static_cast<std::size_t>(i)] =
-          rings[static_cast<std::size_t>(i)];
+          rings_[static_cast<std::size_t>(i)];
       std::sort(sortedRings[static_cast<std::size_t>(i)].begin(),
                 sortedRings[static_cast<std::size_t>(i)].end());
     }
@@ -88,6 +118,20 @@ struct FrameContext {
     adjRings.resize(static_cast<std::size_t>(nR));
     adjReady.assign(static_cast<std::size_t>(nR), 0);
     basalReady.assign(static_cast<std::size_t>(nR), 0);
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp parallel if (nR >= 256 && !omp_in_parallel())
+#endif
+    {
+      BasalScratch scratch;
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp for schedule(static)
+#endif
+      for (int i = 0; i < nR; i++) {
+        basalCand[static_cast<std::size_t>(i)] =
+            collectBasalCandidates(i, scratch);
+        basalReady[static_cast<std::size_t>(i)] = 1;
+      }
+    }
   }
 
   [[nodiscard]] bool shareAtoms(int i, int j) const {
@@ -114,15 +158,15 @@ struct FrameContext {
 
   [[nodiscard]] std::vector<int> collectAdjacentRings(int r) const {
     std::vector<int> out;
-    for (const int atom : rings[r]) {
+    for (const int atom : (*rings)[r]) {
       for (const int s : ringsThroughAtom(atom)) {
         if (s != r) {
           out.push_back(s);
         }
       }
-      if (atom >= 0 && atom < static_cast<int>(nList.size())) {
-        for (size_t n = 1; n < nList[atom].size(); n++) {
-          for (const int s : ringsThroughAtom(nList[atom][n])) {
+      if (atom >= 0 && atom < static_cast<int>(nList->size())) {
+        for (size_t n = 1; n < (*nList)[atom].size(); n++) {
+          for (const int s : ringsThroughAtom((*nList)[atom][n])) {
             if (s != r) {
               out.push_back(s);
             }
@@ -140,7 +184,8 @@ struct FrameContext {
     if (i == j || shareAtoms(i, j)) {
       return false;
     }
-    return ring::basalConditions(nList, rings[i], rings[j]);
+    return ring::basalConditions(bonds, (*rings)[static_cast<std::size_t>(i)],
+                                 (*rings)[static_cast<std::size_t>(j)]);
   }
 
   [[nodiscard]] const std::vector<int> &adjacentRings(int r) {
@@ -155,21 +200,136 @@ struct FrameContext {
     return adjRings[static_cast<std::size_t>(r)];
   }
 
-  //! Candidate second-basal rings for i in the findHC gathering order:
-  //! rings holding a bond-neighbour of i's first or second atom
-  [[nodiscard]] std::vector<int> collectBasalCandidates(int i) const {
+  //! Rings that can pass basalConditions with ring i as the first argument.
+  //! A passing partner holds a neighbour of each atom of some alternate
+  //! triplet of i. Other rings are not candidates.
+  struct BasalScratch {
+    std::vector<int> onRing;
+    std::vector<int> arm1;
+    std::vector<int> arm2;
+    std::vector<int> seen;
+    int tickOn = 0;
+    int tick1 = 0;
+    int tick2 = 0;
+    int tickSeen = 0;
+    void prepare(int atoms, int nRings) {
+      if (static_cast<int>(onRing.size()) < atoms) {
+        onRing.assign(static_cast<size_t>(atoms), 0);
+        arm1.assign(static_cast<size_t>(atoms), 0);
+        arm2.assign(static_cast<size_t>(atoms), 0);
+      }
+      if (static_cast<int>(seen.size()) < nRings) {
+        seen.assign(static_cast<size_t>(nRings), 0);
+      }
+    }
+    int next(int &tick, std::vector<int> &stamp) {
+      if (++tick <= 0) {
+        std::fill(stamp.begin(), stamp.end(), 0);
+        tick = 1;
+      }
+      return tick;
+    }
+  };
+
+  [[nodiscard]] std::vector<int> collectBasalCandidates(int i,
+                                                        BasalScratch &scratch) const {
     std::vector<int> out;
-    for (int slot = 0; slot < 2 &&
-                       slot < static_cast<int>(rings[i].size());
-         slot++) {
-      const int anchor = rings[i][slot];
-      if (anchor < 0 || anchor >= static_cast<int>(nList.size())) {
+    const std::vector<int> &basal1 = (*rings)[static_cast<size_t>(i)];
+    if (basal1.size() != 6) {
+      return out;
+    }
+    const int nAtoms = static_cast<int>(nList->size());
+    const int nRings = static_cast<int>(rings->size());
+    scratch.prepare(nAtoms, nRings);
+    const int on = scratch.next(scratch.tickOn, scratch.onRing);
+    for (const int atom : basal1) {
+      if (atom >= 0 && atom < nAtoms) {
+        scratch.onRing[static_cast<size_t>(atom)] = on;
+      }
+    }
+    auto neighbourSpan = [&](int atom) {
+      int span = 0;
+      if (atom < 0 || atom >= nAtoms) {
+        return span;
+      }
+      const auto &row = (*nList)[static_cast<size_t>(atom)];
+      for (size_t n = 1; n < row.size(); n++) {
+        const int nb = row[n];
+        if (nb < 0 || nb >= nAtoms ||
+            scratch.onRing[static_cast<size_t>(nb)] == on) {
+          continue;
+        }
+        span += static_cast<int>(ringsThroughAtom(nb).size());
+      }
+      return span;
+    };
+    auto stampArm = [&](int atom, std::vector<int> &stamp, int tick) {
+      if (atom < 0 || atom >= nAtoms) {
+        return;
+      }
+      const auto &row = (*nList)[static_cast<size_t>(atom)];
+      for (size_t n = 1; n < row.size(); n++) {
+        const int nb = row[n];
+        if (nb >= 0 && nb < nAtoms &&
+            scratch.onRing[static_cast<size_t>(nb)] != on) {
+          stamp[static_cast<size_t>(nb)] = tick;
+        }
+      }
+    };
+    for (int parity = 0; parity < 2; parity++) {
+      int arm = 0;
+      int best = 0;
+      for (int t = 0; t < 3; t++) {
+        const int span =
+            neighbourSpan(basal1[static_cast<size_t>((parity + 2 * t) % 6)]);
+        if (t == 0 || span < best) {
+          best = span;
+          arm = t;
+        }
+      }
+      const int tick1 = scratch.next(scratch.tick1, scratch.arm1);
+      const int tick2 = scratch.next(scratch.tick2, scratch.arm2);
+      stampArm(basal1[static_cast<size_t>((parity + 2 * ((arm + 1) % 3)) % 6)],
+               scratch.arm1, tick1);
+      stampArm(basal1[static_cast<size_t>((parity + 2 * ((arm + 2) % 3)) % 6)],
+               scratch.arm2, tick2);
+      const int seenTick = scratch.next(scratch.tickSeen, scratch.seen);
+      const int pivot = basal1[static_cast<size_t>((parity + 2 * arm) % 6)];
+      if (pivot < 0 || pivot >= nAtoms) {
         continue;
       }
-      for (size_t n = 1; n < nList[anchor].size(); n++) {
-        for (const int s : ringsThroughAtom(nList[anchor][n])) {
-          if (s != i) {
-            out.push_back(s);
+      const auto &row = (*nList)[static_cast<size_t>(pivot)];
+      for (size_t n = 1; n < row.size(); n++) {
+        const int nb = row[n];
+        if (nb < 0 || nb >= nAtoms ||
+            scratch.onRing[static_cast<size_t>(nb)] == on) {
+          continue;
+        }
+        for (const int candidate : ringsThroughAtom(nb)) {
+          if (scratch.seen[static_cast<size_t>(candidate)] == seenTick ||
+              candidate == i) {
+            continue;
+          }
+          scratch.seen[static_cast<size_t>(candidate)] = seenTick;
+          bool share = false;
+          bool hit1 = false;
+          bool hit2 = false;
+          for (const int atom : (*rings)[static_cast<size_t>(candidate)]) {
+            if (atom < 0 || atom >= nAtoms) {
+              continue;
+            }
+            if (scratch.onRing[static_cast<size_t>(atom)] == on) {
+              share = true;
+            }
+            if (scratch.arm1[static_cast<size_t>(atom)] == tick1) {
+              hit1 = true;
+            }
+            if (scratch.arm2[static_cast<size_t>(atom)] == tick2) {
+              hit2 = true;
+            }
+          }
+          if (!share && hit1 && hit2) {
+            out.push_back(candidate);
           }
         }
       }
@@ -179,13 +339,16 @@ struct FrameContext {
     return out;
   }
 
+  mutable BasalScratch lazyScratch;
+
   [[nodiscard]] const std::vector<int> &basalCandidates(int i) {
     static const std::vector<int> empty;
     if (i < 0 || i >= static_cast<int>(basalCand.size())) {
       return empty;
     }
     if (!basalReady[static_cast<std::size_t>(i)]) {
-      basalCand[static_cast<std::size_t>(i)] = collectBasalCandidates(i);
+      basalCand[static_cast<std::size_t>(i)] =
+          collectBasalCandidates(i, lazyScratch);
       basalReady[static_cast<std::size_t>(i)] = 1;
     }
     return basalCand[static_cast<std::size_t>(i)];
@@ -201,84 +364,35 @@ struct FrameContext {
                                std::vector<ring::strucType> &types) const {
     std::vector<int> prismatic;
     listHC.clear();
-    (void)ring::findPrismatic(rings, listHC, types, i, j, prismatic, index);
+    (void)ring::findPrismatic(*rings, listHC, types, i, j, prismatic, index);
     return prismatic;
   }
 
   //! The equatorial-conditions test of findDDC without the claim skip; on a
-  //! pass, fills the six unique peripheral ring indices
+  //! pass, fills every ring that is a peripheral in some valid assignment
   bool equatorialPass(int i, bool hcAffiliated,
                       std::vector<int> &peripherals) const {
+    peripherals.clear();
     if (hcAffiliated) {
       return false;
     }
-    peripherals.clear();
-    if (!ring::conditionOneDDC(rings, peripherals, i, index)) {
-      return false;
-    }
-    if (!ring::conditionTwoDDC(rings, peripherals, i, index)) {
-      return false;
-    }
-    if (!ring::conditionThreeDDC(rings, peripherals)) {
-      return false;
-    }
-    std::sort(peripherals.begin(), peripherals.end());
-    peripherals.erase(std::unique(peripherals.begin(), peripherals.end()),
-                      peripherals.end());
-    return peripherals.size() == 6;
+    return ring::equatorialConditions(*rings, i, index, &peripherals);
   }
 };
 
-//! HC affiliation of one ring from its own perspective: basal of a passing
-//! ordered pair in either direction, or prismatic of a passing pair drawn
-//! from its adjacency neighbourhood (any pair with a prismatic ring k has
-//! both members inside A(k))
-bool hcAffiliatedOf(FrameContext &ctx, int r,
-                    const std::vector<int> &adjacency) {
-  for (const int s : adjacency) {
-    if (ctx.basalPair(r, s) || ctx.basalPair(s, r)) {
-      return true;
-    }
-  }
-  for (const int i : adjacency) {
-    if (i == r) {
-      continue;
-    }
-    const std::vector<int> &candidates = ctx.basalCandidates(i);
-    for (const int j : candidates) {
-      if (j == r) {
-        continue;
-      }
-      // Both members of a pair with r prismatic lie in A(r)
-      if (!std::binary_search(adjacency.begin(), adjacency.end(), j)) {
-        continue;
-      }
-      if (!ctx.basalPair(i, j)) {
-        continue;
-      }
-      const std::vector<int> prismatic = ctx.prismaticOf(i, j);
-      if (std::find(prismatic.begin(), prismatic.end(), r) !=
-          prismatic.end()) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
 } // namespace
 
-ring::CageAffiliation
-ring::cageAffiliation(const std::vector<std::vector<int>> &rings,
-                      const std::vector<std::vector<int>> &nList) {
-  CageAffiliation result;
+namespace {
+
+ring::CageAffiliation batchSweep(const FrameContext &ctx) {
+  const std::vector<std::vector<int>> &rings = *ctx.rings;
+  ring::CageAffiliation result;
   const size_t nRings = rings.size();
   result.hc.assign(nRings, false);
   result.ddc.assign(nRings, false);
   if (nRings == 0) {
     return result;
   }
-  const FrameContext ctx(rings, nList);
   const int nR = static_cast<int>(nRings);
   // nvc++ -mp=gpu (SEAMS_HAS_OFFLOAD) SIGSEGVs host parallel-fors in libnvomp
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
@@ -300,7 +414,7 @@ ring::cageAffiliation(const std::vector<std::vector<int>> &rings,
 #pragma omp for schedule(dynamic, 256) nowait
 #endif
     for (int i = 0; i < nR; i++) {
-      for (const int j : ctx.collectBasalCandidates(i)) {
+      for (const int j : ctx.basalCand[static_cast<size_t>(i)]) {
         if (!ctx.basalPair(i, j)) {
           continue;
         }
@@ -347,6 +461,18 @@ ring::cageAffiliation(const std::vector<std::vector<int>> &rings,
   return result;
 }
 
+} // namespace
+
+ring::CageAffiliation
+ring::cageAffiliation(const std::vector<std::vector<int>> &rings,
+                      const std::vector<std::vector<int>> &nList) {
+  if (rings.empty()) {
+    return batchSweep(FrameContext(rings, nList));
+  }
+  const FrameContext ctx(rings, nList);
+  return batchSweep(ctx);
+}
+
 ring::StackingPlanes
 ring::stackingPlanes(const std::vector<std::vector<int>> &rings,
                      const std::vector<std::vector<int>> &nList) {
@@ -387,38 +513,341 @@ ring::stackingPlanes(const std::vector<std::vector<int>> &rings,
 
 // ---------------------------------------------------------------------------
 
+/**
+ * @details Implementation state of ring::AffiliationUpdater.
+ *
+ *  What each answer reads. The ordered basal pair (i, j) of batchSweep, and
+ *  the prismatic rings it marks, read the rings i and j, the neighbour rows
+ *  of the atoms of i, and the rings sharing an atom with i; a partner j
+ *  bonds an atom of i. The equatorial test of i reads the rings sharing an
+ *  atom with i, and the DDC sweep runs it only on rings without an HC flag.
+ *  The flags are unions over the passing pairs and the passing equatorial
+ *  rings. So the update stores, per ring, its passing pairs with their
+ *  prismatic rings and its equatorial result, and evaluates again only the
+ *  pairs of rings that are new, hold an atom whose row changed, or hold or
+ *  bond an atom of an added or removed ring, and the equatorial test of
+ *  rings that are new or hold an atom of an added or removed ring. Every
+ *  other stored answer reads the same input in both frames and carries
+ *  over; the flags are then the same unions, which equal the batch sweep.
+ */
 struct ring::AffiliationUpdater::Impl {
   bool primed = false;
-  std::vector<std::vector<int>> prevRings;
-  std::vector<std::vector<int>> prevSortedRows; // nList rows, sorted
-  std::map<std::vector<int>, std::pair<bool, bool>>
-      storedByKey; // canonical key -> (hc, ddc)
-  std::vector<std::vector<int>> keys; // canonical key per previous ring
+  // Previous frame: rings flattened, neighbour rows sorted, and the answers
+  std::vector<int> prevAtoms;
+  std::vector<std::size_t> prevOffset;
+  bool prevSorted = false;
+  std::vector<std::vector<int>> prevSortedRows;
+  std::vector<std::vector<int>> incoming;
+  // False after a whole-frame cageAffiliation that did not store pairs.
+  bool answersValid = false;
+  // Once a frame has crossed into the whole-frame sweep, the next frame
+  // skips the row diff. The diff plus a sweep was slower than the sweep
+  // alone on the mid-radius shells.
+  bool batchHot = false;
+  // Reused across whole-frame passes. The cold cageAffiliation builds a
+  // fresh context, so this only speeds the updater.
+  std::unique_ptr<FrameContext> warm;
+
+  void fastAffiliation(const std::vector<std::vector<int>> &rings,
+                       const std::vector<std::vector<int>> &nList) {
+    if (!warm) {
+      warm = std::make_unique<FrameContext>();
+    }
+    warm->prepare(rings, nList);
+    current = batchSweep(*warm);
+    lastReclassified = static_cast<int>(rings.size());
+  }
+  // Passing pairs of ring i as runs [j, m, k_1 .. k_m] (partner, then its m
+  // prismatic rings) in pairData[pairOffset[i]] up to pairOffset[i + 1]
+  std::vector<int> pairData;
+  std::vector<std::size_t> pairOffset;
+  // Equatorial result per ring: -1 not evaluated (an HC ring), 0 fails,
+  // 1 passes with its peripherals in periData[periOffset[i]..]
+  std::vector<signed char> eq;
+  std::vector<int> periData;
+  std::vector<std::size_t> periOffset;
   CageAffiliation current;
   int lastReclassified = 0;
+  double batchFraction = 0.25;
+  // The back-off of RingUpdater: after a frame that went to batch on churn,
+  // the next `skip` frames run cageAffiliation with no diff state, the wait
+  // doubling from 1 to kMaxBackoff while frames keep going to batch
+  int backoff = 0;
+  int skip = 0;
+  static constexpr int kMaxBackoff = 8;
 
-  void primeFull(const std::vector<std::vector<int>> &rings,
-                 const std::vector<std::vector<int>> &nList) {
-    current = ring::cageAffiliation(rings, nList);
-    lastReclassified = static_cast<int>(rings.size());
-    remember(rings, nList);
+  void fellBack() {
+    backoff = std::min(std::max(1, 2 * backoff), kMaxBackoff);
+    skip = backoff;
+  }
+
+  void release() {
+    std::vector<std::vector<int>>().swap(prevSortedRows);
+    std::vector<int>().swap(prevAtoms);
+    std::vector<std::size_t>().swap(prevOffset);
+    std::vector<int>().swap(pairData);
+    std::vector<std::size_t>().swap(pairOffset);
+    std::vector<signed char>().swap(eq);
+    std::vector<int>().swap(periData);
+    std::vector<std::size_t>().swap(periOffset);
+    primed = false;
+  }
+
+  // Filled in place. The outer vector and each row keep their buffers.
+  void fillSorted(const std::vector<std::vector<int>> &nList,
+                  std::vector<std::vector<int>> &out) const {
+    const int n = static_cast<int>(nList.size());
+    if (static_cast<int>(out.size()) != n) {
+      out.assign(static_cast<std::size_t>(n), {});
+    }
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp parallel for schedule(static) if (n >= 1024 && !omp_in_parallel())
+#endif
+    for (int a = 0; a < n; a++) {
+      auto &row = out[static_cast<std::size_t>(a)];
+      row.assign(nList[static_cast<std::size_t>(a)].begin(),
+                 nList[static_cast<std::size_t>(a)].end());
+      std::sort(row.begin(), row.end());
+    }
+  }
+
+  // The passing pairs (i, j) of batchSweep with their prismatic rings
+  static void pairsOf(const FrameContext &ctx, int i, std::vector<int> &listHC,
+                      std::vector<ring::strucType> &types,
+                      std::vector<int> &out, FrameContext::BasalScratch &scratch) {
+    out.clear();
+    for (const int j : ctx.collectBasalCandidates(i, scratch)) {
+      if (!ctx.basalPair(i, j)) {
+        continue;
+      }
+      const std::vector<int> prismatic = ctx.prismaticOf(i, j, listHC, types);
+      out.push_back(j);
+      out.push_back(static_cast<int>(prismatic.size()));
+      out.insert(out.end(), prismatic.begin(), prismatic.end());
+    }
+  }
+
+  // Evaluate the pairs of the rings in `which` into per-ring runs
+  static std::vector<std::vector<int>>
+  evaluatePairs(const FrameContext &ctx, const std::vector<int> &which) {
+    const int n = static_cast<int>(which.size());
+    std::vector<std::vector<int>> out(which.size());
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp parallel if (n >= 256 && !omp_in_parallel())
+#endif
+    {
+      std::vector<int> listHC;
+      std::vector<ring::strucType> types(ctx.rings->size(),
+                                         ring::strucType::unclassified);
+      FrameContext::BasalScratch scratch;
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp for schedule(dynamic, 64)
+#endif
+      for (int k = 0; k < n; k++) {
+        pairsOf(ctx, which[static_cast<std::size_t>(k)], listHC, types,
+                out[static_cast<std::size_t>(k)], scratch);
+      }
+    }
+    return out;
+  }
+
+  // HC flags from the stored pairs; then the equatorial test of every ring
+  // without one that has no stored result, and the DDC flags
+  void flags(const FrameContext &ctx, int &evaluated) {
+    const std::size_t nR = ctx.rings->size();
+    current.hc.assign(nR, false);
+    current.ddc.assign(nR, false);
+    for (std::size_t i = 0; i < nR; i++) {
+      std::size_t p = pairOffset[i];
+      const std::size_t end = pairOffset[i + 1];
+      if (p < end) {
+        current.hc[i] = true;
+      }
+      while (p < end) {
+        current.hc[static_cast<std::size_t>(pairData[p])] = true;
+        const int m = pairData[p + 1];
+        for (int t = 0; t < m; t++) {
+          current.hc[static_cast<std::size_t>(pairData[p + 2 + t])] = true;
+        }
+        p += 2 + static_cast<std::size_t>(m);
+      }
+    }
+    std::vector<int> pending;
+    for (std::size_t i = 0; i < nR; i++) {
+      if (!current.hc[i] && eq[i] < 0) {
+        pending.push_back(static_cast<int>(i));
+      }
+    }
+    const int n = static_cast<int>(pending.size());
+    std::vector<std::vector<int>> found(pending.size());
+    std::vector<signed char> pass(pending.size(), 0);
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp parallel for schedule(dynamic, 64) if (n >= 256 && !omp_in_parallel())
+#endif
+    for (int k = 0; k < n; k++) {
+      pass[static_cast<std::size_t>(k)] =
+          ctx.equatorialPass(pending[static_cast<std::size_t>(k)], false,
+                             found[static_cast<std::size_t>(k)])
+              ? 1
+              : 0;
+    }
+    evaluated += n;
+    if (n > 0) {
+      // Splice the new peripheral lists in ring order
+      std::vector<int> data;
+      std::vector<std::size_t> offset(nR + 1, 0);
+      std::size_t k = 0;
+      for (std::size_t i = 0; i < nR; i++) {
+        if (k < pending.size() &&
+            static_cast<std::size_t>(pending[k]) == i) {
+          eq[i] = pass[k];
+          if (pass[k] != 0) {
+            data.insert(data.end(), found[k].begin(), found[k].end());
+          }
+          ++k;
+        } else {
+          data.insert(data.end(),
+                      periData.begin() +
+                          static_cast<std::ptrdiff_t>(periOffset[i]),
+                      periData.begin() +
+                          static_cast<std::ptrdiff_t>(periOffset[i + 1]));
+        }
+        offset[i + 1] = data.size();
+      }
+      periData.swap(data);
+      periOffset.swap(offset);
+    }
+    for (std::size_t i = 0; i < nR; i++) {
+      if (current.hc[i] || eq[i] != 1) {
+        continue;
+      }
+      current.ddc[i] = true;
+      for (std::size_t p = periOffset[i]; p < periOffset[i + 1]; p++) {
+        current.ddc[static_cast<std::size_t>(periData[p])] = true;
+      }
+    }
+  }
+
+  // Whole-frame evaluation that also fills the stored answers
+  void batch(const std::vector<std::vector<int>> &rings,
+             const std::vector<std::vector<int>> &nList,
+             std::vector<std::vector<int>> rows, const FrameContext *given) {
+    std::unique_ptr<FrameContext> own;
+    if (given == nullptr) {
+      own = std::make_unique<FrameContext>(rings, nList);
+      given = own.get();
+    }
+    const FrameContext &ctx = *given;
+    const int nR = static_cast<int>(rings.size());
+    std::vector<int> all(rings.size());
+    std::iota(all.begin(), all.end(), 0);
+    const auto fresh = evaluatePairs(ctx, all);
+    pairOffset.assign(rings.size() + 1, 0);
+    pairData.clear();
+    for (int i = 0; i < nR; i++) {
+      pairData.insert(pairData.end(), fresh[static_cast<std::size_t>(i)].begin(),
+                      fresh[static_cast<std::size_t>(i)].end());
+      pairOffset[static_cast<std::size_t>(i) + 1] = pairData.size();
+    }
+    eq.assign(rings.size(), -1);
+    periData.clear();
+    periOffset.assign(rings.size() + 1, 0);
+    int evaluated = 0;
+    flags(ctx, evaluated);
+    lastReclassified = nR;
+    remember(rings, std::move(rows));
     primed = true;
   }
 
   void remember(const std::vector<std::vector<int>> &rings,
-                const std::vector<std::vector<int>> &nList) {
-    prevRings = rings;
-    prevSortedRows.resize(nList.size());
-    for (size_t a = 0; a < nList.size(); a++) {
-      prevSortedRows[a] = nList[a];
-      std::sort(prevSortedRows[a].begin(), prevSortedRows[a].end());
+                std::vector<std::vector<int>> rows) {
+    prevOffset.assign(rings.size() + 1, 0);
+    for (std::size_t i = 0; i < rings.size(); i++) {
+      prevOffset[i + 1] = prevOffset[i] + rings[i].size();
     }
-    keys.resize(rings.size());
-    storedByKey.clear();
-    for (size_t i = 0; i < rings.size(); i++) {
-      keys[i] = canonicalKey(rings[i]);
-      storedByKey[keys[i]] = {current.hc[i], current.ddc[i]};
+    prevAtoms.resize(prevOffset.back());
+    for (std::size_t i = 0; i < rings.size(); i++) {
+      std::copy(rings[i].begin(), rings[i].end(),
+                prevAtoms.begin() + static_cast<std::ptrdiff_t>(prevOffset[i]));
     }
+    prevSorted = std::is_sorted(rings.begin(), rings.end());
+    prevSortedRows = std::move(rows);
+  }
+
+  // prevOf[i]: the previous index of ring i, or -1 for an added ring. Two
+  // sorted lists (the order RingUpdater returns) are matched by a merge on
+  // equal atom sequences; otherwise by a fingerprint of the canonical cycle,
+  // confirmed atom by atom on a match.
+  std::vector<int> matchRings(const std::vector<std::vector<int>> &rings) const {
+    const std::size_t nPrev = prevOffset.size() - 1;
+    std::vector<int> prevOf(rings.size(), -1);
+    if (prevSorted && std::is_sorted(rings.begin(), rings.end())) {
+      std::size_t p = 0;
+      for (std::size_t q = 0; q < rings.size() && p < nPrev;) {
+        const int *a = prevAtoms.data() + prevOffset[p];
+        const int *aEnd = prevAtoms.data() + prevOffset[p + 1];
+        const auto &b = rings[q];
+        if (std::lexicographical_compare(a, aEnd, b.begin(), b.end())) {
+          ++p;
+        } else if (std::lexicographical_compare(b.begin(), b.end(), a, aEnd)) {
+          ++q;
+        } else {
+          prevOf[q] = static_cast<int>(p);
+          ++p;
+          ++q;
+        }
+      }
+      return prevOf;
+    }
+    std::vector<std::pair<std::uint64_t, int>> prevFP(nPrev);
+    std::vector<std::pair<std::uint64_t, int>> newFP(rings.size());
+    for (std::size_t i = 0; i < nPrev; i++) {
+      prevFP[i] = {cycleHash(prevAtoms.data() + prevOffset[i],
+                             prevOffset[i + 1] - prevOffset[i]),
+                   static_cast<int>(i)};
+    }
+    for (std::size_t i = 0; i < rings.size(); i++) {
+      newFP[i] = {cycleHash(rings[i].data(), rings[i].size()),
+                  static_cast<int>(i)};
+    }
+    std::sort(prevFP.begin(), prevFP.end());
+    std::sort(newFP.begin(), newFP.end());
+    std::vector<char> prevMatched(nPrev, 0);
+    for (std::size_t p = 0, q = 0; p < nPrev && q < newFP.size();) {
+      if (prevFP[p].first < newFP[q].first) {
+        ++p;
+        continue;
+      }
+      if (newFP[q].first < prevFP[p].first) {
+        ++q;
+        continue;
+      }
+      std::size_t pEnd = p;
+      std::size_t qEnd = q;
+      while (pEnd < nPrev && prevFP[pEnd].first == prevFP[p].first) {
+        ++pEnd;
+      }
+      while (qEnd < newFP.size() && newFP[qEnd].first == newFP[q].first) {
+        ++qEnd;
+      }
+      for (std::size_t y = q; y < qEnd; y++) {
+        const auto &r = rings[static_cast<std::size_t>(newFP[y].second)];
+        for (std::size_t x = p; x < pEnd; x++) {
+          const int i = prevFP[x].second;
+          if (!prevMatched[static_cast<std::size_t>(i)] &&
+              sameCycle(r.data(), r.size(),
+                        prevAtoms.data() + prevOffset[i],
+                        prevOffset[i + 1] - prevOffset[i])) {
+            prevMatched[static_cast<std::size_t>(i)] = 1;
+            prevOf[static_cast<std::size_t>(newFP[y].second)] = i;
+            break;
+          }
+        }
+      }
+      p = pEnd;
+      q = qEnd;
+    }
+    return prevOf;
   }
 };
 
@@ -433,155 +862,289 @@ int ring::AffiliationUpdater::lastReclassified() const {
   return impl_->lastReclassified;
 }
 
+void ring::AffiliationUpdater::setBatchFraction(double fraction) {
+  impl_->batchFraction = fraction;
+}
+
 const ring::CageAffiliation &
 ring::AffiliationUpdater::update(const std::vector<std::vector<int>> &rings,
                                  const std::vector<std::vector<int>> &nList) {
   Impl &st = *impl_;
-  if (!st.primed || st.prevSortedRows.size() != nList.size()) {
-    st.primeFull(rings, nList);
-    return st.current;
-  }
-
-  // ------------------------------------------------------------------ diff
-  // Seed atoms: atoms of added or removed rings, plus atoms whose neighbour
-  // row changed. Unchanged rows are identical in both frames, so expanding
-  // the seeds through the new rows reaches everything the old graph reached.
-  std::vector<std::vector<int>> newKeys(rings.size());
-  std::unordered_set<int> seedAtoms;
-  {
-    std::map<std::vector<int>, int> newByKey;
-    for (size_t i = 0; i < rings.size(); i++) {
-      newKeys[i] = canonicalKey(rings[i]);
-      newByKey.emplace(newKeys[i], static_cast<int>(i));
-    }
-    for (size_t i = 0; i < rings.size(); i++) { // added rings
-      if (st.storedByKey.find(newKeys[i]) == st.storedByKey.end()) {
-        seedAtoms.insert(rings[i].begin(), rings[i].end());
-      }
-    }
-    for (size_t i = 0; i < st.prevRings.size(); i++) { // removed rings
-      if (newByKey.find(st.keys[i]) == newByKey.end()) {
-        seedAtoms.insert(st.prevRings[i].begin(), st.prevRings[i].end());
-      }
-    }
-    std::vector<int> row;
-    for (size_t a = 0; a < nList.size(); a++) { // changed neighbour rows
-      row = nList[a];
-      std::sort(row.begin(), row.end());
-      if (row != st.prevSortedRows[a]) {
-        seedAtoms.insert(static_cast<int>(a));
-      }
-    }
-  }
-
-  if (seedAtoms.empty()) {
-    // Same topology; only the ring order may differ. Carry stored answers.
-    st.current.hc.assign(rings.size(), false);
-    st.current.ddc.assign(rings.size(), false);
-    for (size_t i = 0; i < rings.size(); i++) {
-      const auto it = st.storedByKey.find(newKeys[i]);
-      st.current.hc[i] = it->second.first;
-      st.current.ddc[i] = it->second.second;
-    }
+  if (rings.empty()) {
+    // No six-ring to classify. A full context build still walks the
+    // neighbour list; the flags are empty either way. Drop the diff state
+    // so the next non-empty frame starts from a clean batch.
+    st.current.hc.clear();
+    st.current.ddc.clear();
     st.lastReclassified = 0;
-    st.remember(rings, nList);
+    st.batchHot = false;
+    st.primed = false;
+    st.answersValid = false;
     return st.current;
   }
-
-  FrameContext ctx(rings, nList);
-
-  // Dirty closure: two rounds of (atoms -> one bond-hop -> rings -> atoms),
-  // matching the A(A(r)) dependence of the DDC predicate
-  auto expandOnce = [&](const std::unordered_set<int> &atoms) {
-    std::unordered_set<int> dirty;
-    for (const int a : atoms) {
-      for (const int r : ctx.ringsThroughAtom(a)) {
-        dirty.insert(r);
-      }
-      if (a >= 0 && a < static_cast<int>(nList.size())) {
-        for (size_t n = 1; n < nList[a].size(); n++) {
-          for (const int r : ctx.ringsThroughAtom(nList[a][n])) {
-            dirty.insert(r);
-          }
-        }
-      }
-    }
-    return dirty;
-  };
-  std::unordered_set<int> dirty1 = expandOnce(seedAtoms);
-  std::unordered_set<int> atoms2 = seedAtoms;
-  for (const int r : dirty1) {
-    atoms2.insert(rings[r].begin(), rings[r].end());
+  if (st.skip > 0) {
+    // A plain affiliation, keeping the sorted-row buffers for the next diff.
+    st.skip--;
+    st.current = ring::cageAffiliation(rings, nList);
+    st.lastReclassified = static_cast<int>(rings.size());
+    st.answersValid = false;
+    st.batchHot = false;
+    st.fillSorted(nList, st.incoming);
+    st.prevSortedRows.swap(st.incoming);
+    return st.current;
   }
-  std::unordered_set<int> dirty = expandOnce(atoms2);
-  dirty.insert(dirty1.begin(), dirty1.end());
-
-  // ----------------------------------------------------------- reclassify
-  st.current.hc.assign(rings.size(), false);
-  st.current.ddc.assign(rings.size(), false);
-  for (size_t i = 0; i < rings.size(); i++) {
-    if (dirty.count(static_cast<int>(i))) {
-      continue;
-    }
-    const auto it = st.storedByKey.find(newKeys[i]);
-    // A clean ring existed in the previous frame: it is not added, and its
-    // locality closure is untouched
-    st.current.hc[i] = it->second.first;
-    st.current.ddc[i] = it->second.second;
+  if (st.batchHot && st.warm && st.primed &&
+      st.prevSortedRows.size() == nList.size()) {
+    st.fastAffiliation(rings, nList);
+    return st.current;
   }
+  st.fillSorted(nList, st.incoming);
+  auto &rows = st.incoming;
+  if (!st.primed || st.prevSortedRows.size() != nList.size()) {
+    st.batchHot = false;
+    st.batch(rings, nList, rows, nullptr);
+    st.answersValid = true;
+    return st.current;
+  }
+  const int nR = static_cast<int>(rings.size());
+  const int nAtoms = static_cast<int>(nList.size());
+  const auto batchLimit = static_cast<std::size_t>(st.batchFraction * nR);
 
-  // Per-ring recomputation on the new frame for the dirty closure. Cache the
-  // helper answers shared between neighbouring dirty rings.
-  std::unordered_map<int, bool> hcCache;
-  auto hcOf = [&](int r) {
-    const auto it = hcCache.find(r);
-    if (it != hcCache.end()) {
-      return it->second;
+  std::vector<char> changedRow(static_cast<std::size_t>(nAtoms), 0);
+  std::size_t nChanged = 0;
+  for (int a = 0; a < nAtoms; a++) {
+    if (rows[static_cast<std::size_t>(a)] !=
+        st.prevSortedRows[static_cast<std::size_t>(a)]) {
+      changedRow[static_cast<std::size_t>(a)] = 1;
+      ++nChanged;
     }
-    const bool value = hcAffiliatedOf(ctx, r, ctx.adjacentRings(r));
-    hcCache.emplace(r, value);
-    return value;
-  };
-  std::unordered_map<int, std::pair<bool, std::vector<int>>> eqCache;
-  auto eqOf = [&](int r) -> const std::pair<bool, std::vector<int>> & {
-    auto it = eqCache.find(r);
-    if (it == eqCache.end()) {
-      std::vector<int> peripherals;
-      const bool pass = ctx.equatorialPass(r, hcOf(r), peripherals);
-      it = eqCache.emplace(r, std::make_pair(pass, std::move(peripherals)))
-               .first;
-    }
-    return it->second;
-  };
-
-  for (const int r : dirty) {
-    st.current.hc[r] = hcOf(r);
-    // DDC: r passes itself, or a ring sharing an atom with r passes and
-    // lists r among its peripherals
-    bool ddc = eqOf(r).first;
-    if (!ddc) {
-      for (const int atom : rings[r]) {
-        for (const int i : ctx.ringsThroughAtom(atom)) {
-          if (i == r) {
-            continue;
-          }
-          const auto &eq = eqOf(i);
-          if (eq.first && std::find(eq.second.begin(), eq.second.end(), r) !=
-                              eq.second.end()) {
-            ddc = true;
-            break;
-          }
-        }
-        if (ddc) {
+  }
+  // Every ring through a changed row is evaluated again: past the limit, go
+  // to batch before matching rings or building any index
+  std::size_t throughChanged = 0;
+  if (static_cast<double>(nChanged) * nR <=
+      static_cast<double>(batchLimit) * nAtoms) {
+    for (const auto &r : rings) {
+      for (const int a : r) {
+        if (a < 0 || a >= nAtoms || changedRow[static_cast<std::size_t>(a)]) {
+          ++throughChanged;
           break;
         }
       }
+      if (throughChanged > batchLimit) {
+        break;
+      }
     }
-    st.current.ddc[r] = ddc;
+  }
+  if (static_cast<double>(nChanged) * nR >
+          static_cast<double>(batchLimit) * nAtoms ||
+      throughChanged > batchLimit) {
+    // The batch pass stores every pair. On a frame this large the stored
+    // pairs are not reused, and building them is slower than cageAffiliation.
+    st.fastAffiliation(rings, nList);
+    st.prevSortedRows.swap(st.incoming);
+    st.answersValid = false;
+    st.batchHot = true;
+    return st.current;
+  }
+  if (!st.answersValid) {
+    st.batch(rings, nList, rows, nullptr);
+    st.answersValid = true;
+    return st.current;
   }
 
-  st.lastReclassified = static_cast<int>(dirty.size());
-  st.remember(rings, nList);
+  const std::vector<int> prevOf = st.matchRings(rings);
+  const std::size_t nPrev = st.prevOffset.size() - 1;
+  std::vector<int> newOf(nPrev, -1);
+  for (int i = 0; i < nR; i++) {
+    if (prevOf[static_cast<std::size_t>(i)] >= 0) {
+      newOf[static_cast<std::size_t>(prevOf[static_cast<std::size_t>(i)])] = i;
+    }
+  }
+  if (nChanged == 0 && nPrev == rings.size() &&
+      std::find(prevOf.begin(), prevOf.end(), -1) == prevOf.end()) {
+    bool same = true;
+    for (int i = 0; i < nR && same; i++) {
+      same = prevOf[static_cast<std::size_t>(i)] == i;
+    }
+    if (same) {
+      st.lastReclassified = 0;
+      st.backoff = 0;
+      return st.current;
+    }
+  }
+
+  // Atoms of added and removed rings
+  std::vector<char> moved(static_cast<std::size_t>(nAtoms), 0);
+  auto markAtom = [&](int a) {
+    if (a >= 0 && a < nAtoms) {
+      moved[static_cast<std::size_t>(a)] = 1;
+    }
+  };
+  for (int i = 0; i < nR; i++) {
+    if (prevOf[static_cast<std::size_t>(i)] < 0) {
+      for (const int a : rings[static_cast<std::size_t>(i)]) {
+        markAtom(a);
+      }
+    }
+  }
+  for (std::size_t p = 0; p < nPrev; p++) {
+    if (newOf[p] < 0) {
+      for (std::size_t k = st.prevOffset[p]; k < st.prevOffset[p + 1]; k++) {
+        markAtom(st.prevAtoms[k]);
+      }
+    }
+  }
+
+  std::vector<int> dirtyPairs;
+  std::vector<char> dirtyEq(static_cast<std::size_t>(nR), 0);
+  std::vector<char> isDirty(static_cast<std::size_t>(nR), 0);
+  for (int i = 0; i < nR; i++) {
+    const auto &r = rings[static_cast<std::size_t>(i)];
+    bool pairs = prevOf[static_cast<std::size_t>(i)] < 0;
+    bool equatorial = pairs;
+    for (const int a : r) {
+      if (a < 0 || a >= nAtoms) {
+        pairs = equatorial = true;
+        break;
+      }
+      if (moved[static_cast<std::size_t>(a)]) {
+        pairs = equatorial = true;
+        break;
+      }
+      if (changedRow[static_cast<std::size_t>(a)]) {
+        pairs = true;
+        continue;
+      }
+      if (!pairs) {
+        const auto &row = nList[static_cast<std::size_t>(a)];
+        for (std::size_t m = 1; m < row.size(); m++) {
+          const int b = row[m];
+          if (b >= 0 && b < nAtoms && moved[static_cast<std::size_t>(b)]) {
+            pairs = true;
+            break;
+          }
+        }
+      }
+    }
+    if (pairs) {
+      dirtyPairs.push_back(i);
+      isDirty[static_cast<std::size_t>(i)] = 1;
+    }
+    dirtyEq[static_cast<std::size_t>(i)] = equatorial ? 1 : 0;
+  }
+  if (dirtyPairs.size() > batchLimit) {
+    st.fastAffiliation(rings, nList);
+    st.prevSortedRows.swap(st.incoming);
+    st.answersValid = false;
+    st.batchHot = true;
+    return st.current;
+    st.fellBack();
+    return st.current;
+  }
+
+  // Carried answers name previous ring indices: map them, and evaluate a
+  // ring again if one of them has no image
+  std::vector<int> pairData;
+  std::vector<std::size_t> pairOffset(rings.size() + 1, 0);
+  std::vector<int> reeval;
+  for (int i = 0; i < nR; i++) {
+    if (isDirty[static_cast<std::size_t>(i)]) {
+      pairOffset[static_cast<std::size_t>(i) + 1] = pairData.size();
+      continue;
+    }
+    const auto was = static_cast<std::size_t>(prevOf[static_cast<std::size_t>(i)]);
+    const std::size_t mark = pairData.size();
+    bool ok = true;
+    for (std::size_t p = st.pairOffset[was]; p < st.pairOffset[was + 1] && ok;) {
+      const int j = newOf[static_cast<std::size_t>(st.pairData[p])];
+      const int m = st.pairData[p + 1];
+      ok = j >= 0;
+      pairData.push_back(j);
+      pairData.push_back(m);
+      for (int t = 0; t < m && ok; t++) {
+        const int k = newOf[static_cast<std::size_t>(st.pairData[p + 2 + t])];
+        ok = k >= 0;
+        pairData.push_back(k);
+      }
+      p += 2 + static_cast<std::size_t>(m);
+    }
+    if (!ok) {
+      pairData.resize(mark);
+      isDirty[static_cast<std::size_t>(i)] = 1;
+      reeval.push_back(i);
+    }
+    pairOffset[static_cast<std::size_t>(i) + 1] = pairData.size();
+  }
+  if (!reeval.empty()) {
+    dirtyPairs.insert(dirtyPairs.end(), reeval.begin(), reeval.end());
+    std::sort(dirtyPairs.begin(), dirtyPairs.end());
+  }
+
+  const FrameContext ctx(rings, nList);
+  const auto fresh = Impl::evaluatePairs(ctx, dirtyPairs);
+  {
+    // Merge the fresh runs of the dirty rings into ring order
+    std::vector<int> data;
+    data.reserve(pairData.size() + 16 * dirtyPairs.size());
+    std::vector<std::size_t> offset(rings.size() + 1, 0);
+    std::size_t k = 0;
+    for (int i = 0; i < nR; i++) {
+      if (k < dirtyPairs.size() && dirtyPairs[k] == i) {
+        data.insert(data.end(), fresh[k].begin(), fresh[k].end());
+        ++k;
+      } else {
+        data.insert(data.end(),
+                    pairData.begin() + static_cast<std::ptrdiff_t>(
+                                           pairOffset[static_cast<std::size_t>(i)]),
+                    pairData.begin() + static_cast<std::ptrdiff_t>(
+                                           pairOffset[static_cast<std::size_t>(i) + 1]));
+      }
+      offset[static_cast<std::size_t>(i) + 1] = data.size();
+    }
+    st.pairData.swap(data);
+    st.pairOffset.swap(offset);
+  }
+
+  // Equatorial answers carry over unless the ring is dirty for them
+  std::vector<signed char> eq(rings.size(), -1);
+  std::vector<int> periData;
+  std::vector<std::size_t> periOffset(rings.size() + 1, 0);
+  for (int i = 0; i < nR; i++) {
+    const auto ii = static_cast<std::size_t>(i);
+    if (!dirtyEq[ii]) {
+      const auto was = static_cast<std::size_t>(prevOf[ii]);
+      eq[ii] = st.eq[was];
+      const std::size_t mark = periData.size();
+      for (std::size_t p = st.periOffset[was]; p < st.periOffset[was + 1]; p++) {
+        const int k = newOf[static_cast<std::size_t>(st.periData[p])];
+        if (k < 0) {
+          eq[ii] = -1;
+          periData.resize(mark);
+          break;
+        }
+        periData.push_back(k);
+      }
+    }
+    periOffset[ii + 1] = periData.size();
+  }
+  st.eq.swap(eq);
+  st.periData.swap(periData);
+  st.periOffset.swap(periOffset);
+
+  int evaluated = 0;
+  st.flags(ctx, evaluated);
+  std::size_t touched = 0;
+  for (int i = 0; i < nR; i++) {
+    touched += (isDirty[static_cast<std::size_t>(i)] ||
+                dirtyEq[static_cast<std::size_t>(i)])
+                   ? 1
+                   : 0;
+  }
+  st.lastReclassified = static_cast<int>(touched);
+  st.remember(rings, rows);
+  st.answersValid = true;
+  st.backoff = 0;
   return st.current;
 }
 
@@ -589,6 +1152,19 @@ ring::SeededAtomLabels ring::seededCageAffiliation(
     const std::vector<std::vector<int>> &strictRings,
     const std::vector<std::vector<int>> &strictNList,
     const std::vector<std::vector<int>> &permissiveRings,
+    const std::vector<std::vector<int>> &permissiveNList,
+    bool ringAdjacentCompletion) {
+  return seededCageAffiliation(
+      strictRings, cageAffiliation(strictRings, strictNList), permissiveRings,
+      cageAffiliation(permissiveRings, permissiveNList), permissiveNList,
+      ringAdjacentCompletion);
+}
+
+ring::SeededAtomLabels ring::seededCageAffiliation(
+    const std::vector<std::vector<int>> &strictRings,
+    const CageAffiliation &strictAffiliation,
+    const std::vector<std::vector<int>> &permissiveRings,
+    const CageAffiliation &permissiveAffiliation,
     const std::vector<std::vector<int>> &permissiveNList,
     bool ringAdjacentCompletion) {
   const int nAtoms = static_cast<int>(permissiveNList.size());
@@ -619,10 +1195,8 @@ ring::SeededAtomLabels ring::seededCageAffiliation(
     return flags;
   };
 
-  const auto [hcS, ddcS] =
-      toAtoms(strictRings, cageAffiliation(strictRings, strictNList));
-  const auto [hcP, ddcP] = toAtoms(
-      permissiveRings, cageAffiliation(permissiveRings, permissiveNList));
+  const auto [hcS, ddcS] = toAtoms(strictRings, strictAffiliation);
+  const auto [hcP, ddcP] = toAtoms(permissiveRings, permissiveAffiliation);
 
   // One flood per cage type: an HC seed must not keep a DDC-only atom
   // that happens to sit in the same permissive H-bond component.

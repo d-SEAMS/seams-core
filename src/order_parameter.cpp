@@ -15,9 +15,11 @@
 #include <order_parameter.hpp>
 #include <generic.hpp>
 #include <neighbours.hpp>
+#include <ozaki.hpp>
 
 #include <algorithm>
 #include <array>
+#include <vector>
 #include <cmath>
 #include <limits>
 #include <unordered_map>
@@ -245,6 +247,9 @@ topoparam::rodgerF4(const molSys::PointCloud<molSys::Point<double>, double> &yCl
     }
     double acc = 0.0;
     int nPair = 0;
+    const bool fold =
+        seams::product::reduction() == seams::product::Reduction::Left;
+    std::vector<double> terms;
     for (std::size_t m = 1; m < nList[static_cast<std::size_t>(i)].size(); m++) {
       const int jid = nList[static_cast<std::size_t>(i)][m];
       const auto it = yCloud.idIndexMap.find(jid);
@@ -273,18 +278,30 @@ topoparam::rodgerF4(const molSys::PointCloud<molSys::Point<double>, double> &yCl
       const auto h2o2 = gen::relDist(yCloud, h2, j);
       double c3 = 0.0;
       if (dihedralCos3(o1h1, o2o1, h2o2, c3)) {
-        acc += c3;
+        if (fold) {
+          acc += c3;
+        } else {
+          terms.push_back(c3);
+        }
         ++nPair;
       }
     }
     if (nPair > 0) {
-      out[static_cast<std::size_t>(i)] = acc / static_cast<double>(nPair);
+      const double sum =
+          fold ? acc
+               : seams::product::reduce(terms.data(), static_cast<int>(terms.size()),
+                                        seams::product::reduction());
+      out[static_cast<std::size_t>(i)] = sum / static_cast<double>(nPair);
     }
   }
   return out;
 }
 
 double topoparam::meanFinite(const std::vector<double> &values) {
+  if (seams::product::reduction() != seams::product::Reduction::Left) {
+    return seams::product::meanOfFinite(values.data(), static_cast<int>(values.size()),
+                                        seams::product::reduction());
+  }
   double acc = 0.0;
   int n = 0;
   for (double v : values) {

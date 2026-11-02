@@ -944,6 +944,10 @@ TEST_CASE("steinhardtQl averages only the bonds that resolve", "[bop]") {
   REQUIRE_THAT(qPadded.ql[0], Catch::Matchers::WithinAbs(qClean.ql[0], 1e-15));
   REQUIRE_THAT(qPadded.qlBar[0],
                Catch::Matchers::WithinAbs(qClean.qlBar[0], 1e-15));
+
+  std::vector<std::vector<int>> doubled = {{1, 2, 2}, {2, 1, 1}};
+  const auto qDoubled = chill::steinhardtQl(cloud, doubled, 6);
+  REQUIRE_THAT(qDoubled.ql[0], Catch::Matchers::WithinAbs(qClean.ql[0], 1e-15));
 }
 
 TEST_CASE("steinhardtQl skips neighbour indices outside the cloud", "[bop]") {
@@ -1575,8 +1579,11 @@ TEST_CASE("steinhardtQl flatten uses dump H not span minImage", "[bop]") {
   const double xyz[9] = {0.5, 0.5, 1.0, 1.0, 8.0, 1.0, 2.5, 0.5, 1.0};
   const int offsets[2] = {0, 2};
   const int cols[2] = {1, 2};
-  std::vector<double> qlmDr(1 * 13 * 2, 0.0);
-  std::vector<double> qlmSpan(1 * 13 * 2, 0.0);
+  // qlOneAtom averages q_lm of the atoms in cols. Those columns are
+  // 1 and 2, so the buffer has to cover three atoms or the average
+  // reads off the end. The local q_l of atom 0 is the first block.
+  std::vector<double> qlmDr(3 * 13 * 2, 0.0);
+  std::vector<double> qlmSpan(3 * 13 * 2, 0.0);
   seams::steinhardt::qlmOneAtomDr(0, 6, packed, offsets, cols, qlmDr.data());
   seams::steinhardt::qlmOneAtom(0, 6, xyz, offsets, cols, cloud.box[0],
                                 cloud.box[1], cloud.box[2], qlmSpan.data());

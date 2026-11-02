@@ -51,8 +51,7 @@ int main(int argc, char **argv) {
   std::vector<ring::strucType> ringType(sixRings.size(),
                                         ring::strucType::unclassified);
   std::vector<cage::Cage> cageList;
-  const auto index =
-      ring::buildRingSearchIndex(sixRings, static_cast<int>(nListIdx.size()));
+  const auto index = ring::buildRingSearchIndex(sixRings, yCloud);
 
   auto listHC = ring::findHC(sixRings, ringType, nListIdx, cageList, index);
   auto listDDC = ring::findDDC(sixRings, ringType, listHC, cageList, index);

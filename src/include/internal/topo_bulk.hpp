@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <iterator>
@@ -71,14 +72,52 @@ namespace ring {
  *  the ring count. One pass over the ring network answers it in constant time
  *  thereafter, and the ring indices in each row stay ascending, which is the
  *  order the searches previously visited them in.
+ *
+ *  findHC visits rings in the order of a key that does not use absolute
+ *  coordinates: the sorted atom indices, then the unwrapped shift of the
+ *  cycle. findDDC reports a maximum set of cages under the same key, so the
+ *  cage count is independent of the order in which rings are claimed and
+ *  does not change when the frame is translated.
  */
 struct RingSearchIndex {
   std::vector<std::vector<int>> ringsContainingAtom;
+  std::vector<int> atomRank;
+  //! Integer minimum-image winding of each ring. Empty if no box was supplied.
+  std::vector<std::array<int, 3>> ringShift;
 };
 
 //! Builds the inverted atom-to-rings index used by the cage searches
 [[nodiscard]] RingSearchIndex
 buildRingSearchIndex(const std::vector<std::vector<int>> &rings, int numAtoms);
+
+//! As buildRingSearchIndex, ranking the atoms by position (ring::positionRank)
+[[nodiscard]] RingSearchIndex buildRingSearchIndex(
+    const std::vector<std::vector<int>> &rings,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+
+//! Rank of every atom of @a yCloud when the atoms are sorted by position
+//! wrapped into the box, compared by x, then y, then z. Throws
+//! std::invalid_argument when two atoms share a wrapped position
+[[nodiscard]] std::vector<int>
+positionRank(const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+
+//! The rings of @a rings whose minimum-image bonds have integer lattice
+//! images summing to zero. Any other ring winds through the periodic cell
+//! and bounds no face. A cell narrower than a ring's span has such rings.
+//! Without a box every ring is kept
+[[nodiscard]] std::vector<std::vector<int>> contractibleRings(
+    const std::vector<std::vector<int>> &rings,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+
+//! Faces for a cage search: contractibleRings, after refusing a cutoff that
+//! can contain more than one periodic image of a pair. The narrowest face
+//! separation must be longer than twice @a cutoff. A cloud without a box
+//! keeps every ring. Throws std::invalid_argument when the cell is too thin
+//! for @a cutoff
+[[nodiscard]] std::vector<std::vector<int>> cageRings(
+    const std::vector<std::vector<int>> &rings,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    double cutoff);
 
 //! Find out which hexagonal rings are DDC (Double Diamond Cages) rings.
 //! Returns a vector containing all the ring IDs which are DDC rings
@@ -87,12 +126,49 @@ std::vector<int> findDDC(const std::vector<std::vector<int>> &rings,
                          const std::vector<int> &listHC,
                          std::vector<cage::Cage> &cageList);
 
-//! As findDDC, reusing an index the caller has already built
+/** Proof that the reported number of equatorial rings is maximum.
+ *  method 1: the mutual-conflict graph is the line graph of a bipartite
+ *  graph, and a matching equals a König cover.
+ *  method 2: each connected component was solved by branch-and-bound. The
+ *  cover is a clique partition (an upper bound). When it equals the set,
+ *  that partition is the certificate; otherwise the exhausted search is.
+ */
+struct PackingCertificate {
+  int cages = 0;
+  int upper = -1;
+  int matching = 0;
+  int cover = 0;
+  int isolates = 0;
+  int vertices = 0;
+  int edges = 0;
+  int components = 0;
+  int method = 0;
+  bool tight = false;
+  double milliseconds = 0;
+};
+
+//! Six peripheral rings of one equatorial candidate. n == 0 when the ring
+//! is not a candidate. The rings are stored in ascending canonical rank.
+struct EquatorChoice {
+  int ring[6]{};
+  int n = 0;
+};
+
+//! Maximum set of mutually non-conflicting equatorial rings. @a periph[i].n
+//! is 0 when ring i is not a candidate. The returned ids are a maximum
+//! packing; @a certificate is filled when non-null.
+[[nodiscard]] std::vector<int>
+maximumEquators(const std::vector<EquatorChoice> &periph,
+                const std::vector<int> &order, PackingCertificate *certificate);
+
+//! As findDDC, reusing an index the caller has already built. When
+//! @a certificate is given it receives the matching or search bound.
 std::vector<int> findDDC(const std::vector<std::vector<int>> &rings,
                          std::vector<strucType> &ringType,
                          const std::vector<int> &listHC,
                          std::vector<cage::Cage> &cageList,
-                         const RingSearchIndex &index);
+                         const RingSearchIndex &index,
+                         PackingCertificate *certificate = nullptr);
 
 //! Find out which hexagonal rings are both DDCs (Double Diamond Cages) and HCs
 //! (Hexagonal Cages). Returns a vector containing all the ring IDs which are
@@ -126,24 +202,44 @@ bool conditionOneDDC(const std::vector<std::vector<int>> &rings,
                      std::vector<int> &peripheralRings, int iring,
                      const RingSearchIndex &index);
 
-//! Second condition for the DDC: There must be at least 1 other
-//! ring for every triplet in the equatorial  ring
-bool conditionTwoDDC(const std::vector<std::vector<int>> &rings,
-                     std::vector<int> &peripheralRings, int iring);
+//! Equatorial test of a DDC. Holds when every atom of ring iring lies in at
+//! least three other rings and, for some starting atom and direction of
+//! iring, six distinct rings P_k through its consecutive triplets satisfy
+//! the even/odd common-atom and alternate-pair conditions. When
+//! @a peripheralUnion is given it receives every ring that serves as a P_k
+//! in some valid assignment, sorted. When @a chosen and @a rank are given,
+//! @a chosen receives the six rings of the valid assignment whose ranks,
+//! sorted, are lexicographically least, in ascending rank.
+bool equatorialConditions(const std::vector<std::vector<int>> &rings,
+                          int iring, const RingSearchIndex &index,
+                          std::vector<int> *peripheralUnion,
+                          std::vector<int> *chosen = nullptr,
+                          const std::vector<int> *rank = nullptr,
+                          EquatorChoice *raw = nullptr);
 
-//! As conditionTwoDDC, answering each triplet from the inverted index
-bool conditionTwoDDC(const std::vector<std::vector<int>> &rings,
-                     std::vector<int> &peripheralRings, int iring,
-                     const RingSearchIndex &index);
+//! Membership of the neighbour rows after the leading self entry.
+//! Built once per frame so the basal test does not scan those rows.
+class NeighBond {
+public:
+  void build(const std::vector<std::vector<int>> &nList);
+  [[nodiscard]] bool operator()(int i, int j) const;
 
-//! Third condition for the DDC: Even (by vector index) numbered index triplets
-//! and odd triplets must have at least one element in common
-bool conditionThreeDDC(const std::vector<std::vector<int>> &rings,
-                       std::vector<int> &peripheralRings);
+private:
+  int n_ = 0;
+  int words_ = 0;
+  std::vector<std::uint64_t> bits_;
+};
 
-//! Tests whether two rings are basal rings (true) or not (false)
+//! Tests whether two rings are basal rings (true) or not (false): some
+//! alternate triplet of basal1, starting at its first or second atom, is
+//! bonded one-to-one to an alternate triplet of basal2, and no atom of the
+//! other triplet of basal2 is bonded to basal1
 bool basalConditions(const std::vector<std::vector<int>> &nList,
                      const std::vector<int> &basal1,
+                     const std::vector<int> &basal2);
+
+//! As basalConditions, answering bonds from a prebuilt NeighBond
+bool basalConditions(const NeighBond &bonds, const std::vector<int> &basal1,
                      const std::vector<int> &basal2);
 
 //! Tests whether the last two elements of a triplet are neighbours of two atom

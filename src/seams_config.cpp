@@ -1,7 +1,9 @@
 #include <seams_config.hpp>
 
 #include <cctype>
+#include <charconv>
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <stdexcept>
 #include <string>
@@ -57,7 +59,13 @@ int envInt(const char *key, int fallback) {
   if (v == nullptr) {
     return fallback;
   }
-  return std::atoi(v);
+  int out = 0;
+  const char *end = v + std::strlen(v);
+  const auto parsed = std::from_chars(v, end, out);
+  if (parsed.ec != std::errc{} || parsed.ptr != end) {
+    return fallback;
+  }
+  return out;
 }
 
 double envDouble(const char *key, double fallback) {
@@ -65,7 +73,13 @@ double envDouble(const char *key, double fallback) {
   if (v == nullptr) {
     return fallback;
   }
-  return std::atof(v);
+  double out = 0.0;
+  const char *end = v + std::strlen(v);
+  const auto parsed = std::from_chars(v, end, out);
+  if (parsed.ec != std::errc{} || parsed.ptr != end) {
+    return fallback;
+  }
+  return out;
 }
 
 bool envBool(const char *key, bool fallback) {
@@ -282,6 +296,7 @@ Runtime load(std::string_view explicitFile) {
   r.block =
       firstPositive(envInt("LINKCELL_BLOCK", 0), envInt("SEAMS_BLOCK", 0));
   r.offload = envBool("SEAMS_OFFLOAD", r.offload);
+  r.carry = envBool("SEAMS_CARRY", r.carry);
   r.fennel = envStr("YODA_FENNEL_PATH");
   r.luaPath = envStr("YODA_LUA_PATH");
   r.source = chosen;
@@ -308,6 +323,7 @@ void exportEnviron(const Runtime &cfg) {
     putEnv("SEAMS_BLOCK", std::to_string(cfg.block), true);
   }
   putEnv("SEAMS_OFFLOAD", cfg.offload ? "1" : "0", true);
+  putEnv("SEAMS_CARRY", cfg.carry ? "1" : "0", true);
   if (!cfg.fennel.empty()) {
     putEnv("YODA_FENNEL_PATH", cfg.fennel, true);
   }
@@ -334,6 +350,7 @@ void dump(const Runtime &cfg, std::ostream &os) {
     os << "LINKCELL_BLOCK=" << cfg.block << "\n";
   }
   os << "SEAMS_OFFLOAD=" << (cfg.offload ? "1" : "0") << "\n";
+  os << "SEAMS_CARRY=" << (cfg.carry ? "1" : "0") << "\n";
   if (!cfg.fennel.empty()) {
     os << "YODA_FENNEL_PATH=" << cfg.fennel << "\n";
   }

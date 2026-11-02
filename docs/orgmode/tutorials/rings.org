@@ -1,0 +1,20 @@
+#+TITLE: Primitive rings
+#+OPTIONS: toc:nil num:nil
+
+A primitive ring is a cycle that survives the Franzblau shortest-path test.
+For every pair of vertices on the cycle, a shortest path between them lies on the cycle.
+~pydseams.band.ring_census~ counts those rings on ~Frame.bonds_by_index~.
+For an oxygen-only frame that list is the cutoff neighbour list.
+
+The runnable copy is =docs/tutorials/test_rings.py=.
+
+#+begin_src python
+import pydseams as ds
+from pydseams.band import ring_census
+
+frame = ds.read("input/traj/exampleTraj.lammpstrj", atom_type=2)
+print(ring_census(frame, max_size=8))
+#+end_src
+
+On the 250 oxygens the census is 1 three-ring, 230 four-rings, 4 five-rings, and 192 six-rings.
+The CLI CHILL+ graph is the mutual four-nearest list, so a census of that graph is a different number.

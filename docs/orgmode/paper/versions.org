@@ -1,0 +1,119 @@
+#+TITLE: Versions
+#+OPTIONS: toc:nil num:nil ^:nil
+
+Versions of every component that the records of the d-SEAMS 2.0 paper
+built or called. The paper describes seams-core v2.12.0. A rerun at a
+later release adds a row here and leaves the v2.12.0 rows in place.
+
+* Engine and front ends
+
+| component | version | notes |
+|-----------+---------+-------|
+| seams-core | v2.12.0 | v2.11.0 (~9f963b72~) with two patches; the first holds the ring, cage-affiliation, update, device and command-line changes with their tests, and the second sets the version to 2.12.0 |
+| d-SEAMS 1 baseline | seams-core commit ~1c8efa38~ (2026-05-28) | between v2.0.1 and v2.1.0; walk enumeration, the pair-scan HC search followed by the DDC search, and the all-pairs index-ordered neighbour builder |
+| PydSEAMSlib (Python, ~import pydseamslib~) | 2.11.1 on PyPI | the wheel wraps seams-core v2.11.0; the label tables and the head-to-head table use its sdist built with v2.12.0 as the seams-core subproject |
+| yodaStruct (Lua, ~require("dseams")~) | v2.10.0 | a separately versioned front end that builds seams-core v2.10.0 |
+| dseams-plumed (PLUMED action ~DSEAMS_CAGES~) | builds seams-core commit ~bdc9b74b~ | separate MIT module, [[https://github.com/d-SEAMS/dseams-plumed][d-SEAMS/dseams-plumed]] |
+| LAMMPS compute ~compute dseams~ | in seams-core | ~extras/lammps/compute_dseams.cpp~ and ~compute_dseams.h~ |
+| Lean development of the supplement | Lean toolchain v4.15.0 | the =lean/= folder of the supplementary archive, no other library |
+
+The =lean/= directory of seams-core is a separate development (Lean
+4.15.0 with Mathlib v4.15.0, see [[file:../contributing/lean.org][Lean proofs]]),
+and the paper does not use it.
+
+* Reproducibility package lock
+
+=config/ecosystem-lock.json= of
+[[https://github.com/d-SEAMS/dseams2_repro][dseams2_repro]] clones
+these revisions.
+
+| component | revision |
+|-----------+----------|
+| seams-core | ~9f963b725b6665b162a7487840574446a47fe408~ (v2.11.0) |
+| seams-base (d-SEAMS 1 baseline) | ~1c8efa382c4ae88ebc68e40a991260c4d57edbd5~ |
+| linkcell | ~2e26b83c0c9bbc07d09eb056011dd8e2cec6f4a5~ |
+| PydSEAMSlib | ~445fc5820c3c5a2172ccfecb7ed330c73599fbf8~ |
+| yodaStruct | ~a905ca57b2eb030902b307d93c8e72f2cf077eda~ |
+
+* Build dependencies
+
+The wrap files under =subprojects/= of v2.12.0 pin these sources.
+
+| wrap | pin |
+|------+-----|
+| Catch2 | v3.14.0 |
+| gpulite | ~1e90edb6d573289a7678c18d25b5dbf62f374abe~ |
+| linkcell | ~2e26b83c0c9bbc07d09eb056011dd8e2cec6f4a5~ |
+| minimage | v0.1.4 |
+| nanobind | v2.14.0 |
+| readcon-core | ~91181ef2699ef4c46fd7827cee1127776a32aa55~ |
+| readcon-db | ~0001a2c5a931bdde6bc8fe9b308f666dc28f4fe5~ |
+| robin-map | v1.4.0 |
+| vesin | v0.5.7 |
+
+=meson.build= of v2.12.0 asks for these versions.
+
+| dependency | constraint | build option |
+|------------+------------+--------------|
+| Eigen | >= 3.4.0 | required |
+| linkcell | >= 0.3.11 | ~with_linkcell~ (auto) |
+| minimage | >= 0.1.4 | ~with_minimage~ (auto) |
+| readcon-core | >= 0.16.2 | optional |
+| readcon-db | >= 0.1.8 | optional |
+| Highway | >= 1.3.0 | optional SIMD paths |
+| vesin, chemfiles | any | optional |
+| gpulite | any | ~with_gpulite~ (auto), needs CUDA and NVRTC |
+| IRA, sphericart, nauty | any | ~with_ira~, ~with_sphericart~, ~with_nauty~ (auto) |
+| MPI | any | ~with_mpi~ (disabled) |
+| OpenMP | any | optional; target offload is ~with_openmp_offload~ (disabled) |
+
+The pixi environment pins the conda-forge compilers, Eigen 3.4.0,
+Catch2 and Meson, and the library is C++20. PydSEAMSlib needs Python
+3.11 or later.
+
+* Comparison codes
+
+The head-to-head table of the paper (record ~h2h-2026-10-31~) and the
+label tables call these versions. The pixi lock of dseams2_repro pins
+OVITO, freud, GenIce2, cycless, pyscal3 and Snakemake. genice2-cage
+comes from pip, and R.I.N.G.S. is built from its SourceForge archive.
+
+| code | version | used for |
+|------+---------+----------|
+| OVITO Python module | 3.15.5 | CHILL+ and polyhedral template matching |
+| freud | 3.5.0 | Steinhardt \(q_6\) and \(\bar q_6\) on the four nearest neighbours |
+| GenIce2 | 2.2.13.3 | test lattices; its ring formatter calls cycless |
+| cycless | 0.7 | shortcut-free rings and polyhedral cages |
+| genice2-cage | 2.5.2 (pip) | the cage formatter, run once untimed on sI |
+| analice2 | 2.2.13.3 | not used: it stops with an ~AttributeError~ on both the mW and the sI input |
+| R.I.N.G.S. | rings-code 1.3.5 (SourceForge) | primitive ring census |
+| pyscal3 | 3.3.2 | Steinhardt cross-check |
+| Snakemake | 9.6.2 | the reproducibility workflow |
+
+* Codes of the related work
+
+The related work of the paper reads these releases. Each one computes
+the rings of a frame from that frame alone.
+
+| code | version read |
+|------+--------------|
+| R.I.N.G.S. | rings-code 1.3.5 |
+| ISAACS | 2.10 |
+| atomes | 1.3.2 |
+| ChemNetworks | 2.2 (C, commit ~ca583fb2~) and the C++ version (commit ~f9f4d210~) |
+| cycless | 0.7 |
+| CountRings | 0.1.7 |
+| RingsStatisticsMatter.jl | commit ~a186bc3~ |
+| fastatomstruct | 2.1.0 |
+| Trajan (lammps-trajan) | 0.0.19 |
+| RingDetect-HPC | 1.4.0 |
+
+* Machines
+
+| machine | stack | records |
+|---------+-------+---------|
+| cloud VM, 8 vCPU KVM guest, Intel Xeon (family 6, model 207) | Ubuntu 24.04.5, GCC 13.3.0, Python 3.12.3, NumPy 2.5.4, SciPy 1.18.1 | ~bench-2026-10-31~, ~cli-carry-2026-10-31~, ~h2h-2026-10-31~ and the label records |
+| Elja, dual-socket Intel Xeon Platinum 8358 (32 cores per socket, 2.60 GHz) | conda-forge GCC of the pixi environment | ~paper_manifest-elja-1785712.json~, ~elja-1788072~, ~elja-production~ |
+| Elja, two AMD EPYC 7713 (64 cores per socket) | conda-forge toolchain of the pixi environment, Python 3.12.14 | ~elja-1798666~ |
+| Elja, two A100-PCIE-40GB | CUDA and NVRTC | ~tip-gpu-batch-elja-1787449.txt~ |
+| AMD Ryzen 9 9950X workstation, 16 cores, 32 threads | conda-forge GCC, OpenMP on (~terra-2026-09-02~) | ~terra-2026-09-01~, ~terra-2026-09-02~ |

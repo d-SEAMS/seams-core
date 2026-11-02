@@ -5,6 +5,7 @@
 
 #include <site.hpp>
 
+#include <franzblau.hpp>
 #include <generic.hpp>
 #include <mol_sys.hpp>
 
@@ -365,6 +366,84 @@ std::vector<int> shellRingCensus(const std::vector<std::vector<int>> &rings,
   return census;
 }
 
+std::vector<std::vector<int>> cappedRings(const std::vector<std::vector<int>> &rings,
+                                          const std::vector<int> &shell,
+                                          int maxRingSize) {
+  std::vector<std::vector<int>> out;
+  const std::unordered_set<int> inShell(shell.begin(), shell.end());
+  for (const auto &ring : rings) {
+    if (ring.empty() || static_cast<int>(ring.size()) > maxRingSize) {
+      continue;
+    }
+    if (std::all_of(ring.begin(), ring.end(),
+                    [&](int a) { return inShell.count(a) != 0; })) {
+      out.push_back(ring);
+    }
+  }
+  return out;
+}
+
+std::vector<std::vector<int>> brokenRings(const std::vector<std::vector<int>> &nList,
+                                          const std::vector<int> &shell,
+                                          int maxRingSize) {
+  std::vector<std::vector<int>> out;
+  const int n = static_cast<int>(nList.size());
+  std::vector<int> members;
+  for (int w : shell) {
+    if (w >= 0 && w < n) {
+      members.push_back(w);
+    }
+  }
+  std::sort(members.begin(), members.end());
+  members.erase(std::unique(members.begin(), members.end()), members.end());
+  if (members.empty() || maxRingSize < 3) {
+    return out;
+  }
+  const int ion = n;
+  std::vector<std::vector<int>> aug;
+  aug.reserve(static_cast<std::size_t>(n) + 1);
+  aug.assign(nList.begin(), nList.end());
+  std::vector<int> ionRow = {ion};
+  for (int w : members) {
+    auto &row = aug[static_cast<std::size_t>(w)];
+    if (row.empty()) {
+      row.push_back(w);
+    }
+    row.push_back(ion);
+    ionRow.push_back(w);
+  }
+  aug.push_back(std::move(ionRow));
+
+  // A ring through the ion has its lowest-indexed member within
+  // maxRingSize / 2 hops of the ion, so only those sources are searched.
+  std::vector<char> sources(aug.size(), 0);
+  std::vector<int> dist(aug.size(), -1);
+  std::vector<int> frontier = {ion};
+  dist[static_cast<std::size_t>(ion)] = 0;
+  sources[static_cast<std::size_t>(ion)] = 1;
+  for (int depth = 1; depth <= maxRingSize / 2 && !frontier.empty(); depth++) {
+    std::vector<int> next;
+    for (int u : frontier) {
+      const auto &row = aug[static_cast<std::size_t>(u)];
+      for (std::size_t m = 1; m < row.size(); m++) {
+        const int v = row[m];
+        if (v >= 0 && v <= ion && dist[static_cast<std::size_t>(v)] < 0) {
+          dist[static_cast<std::size_t>(v)] = depth;
+          sources[static_cast<std::size_t>(v)] = 1;
+          next.push_back(v);
+        }
+      }
+    }
+    frontier.swap(next);
+  }
+  for (auto &ring : primitive::ringNetwork(aug, maxRingSize, sources)) {
+    if (std::find(ring.begin(), ring.end(), ion) != ring.end()) {
+      out.push_back(std::move(ring));
+    }
+  }
+  return out;
+}
+
 
 namespace {
 // minimum-image displacement r - p for a point r and a reference p
@@ -463,33 +542,127 @@ guestOccupancy(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 
 namespace {
 
-std::array<double, 3> sub3(const std::array<double, 3> &a,
-                           const std::array<double, 3> &b) {
+using Vec3 = std::array<double, 3>;
+
+Vec3 sub3(const Vec3 &a, const Vec3 &b) {
   return {a[0] - b[0], a[1] - b[1], a[2] - b[2]};
 }
 
-std::array<double, 3> crossP(const std::array<double, 3> &a,
-                             const std::array<double, 3> &b) {
+Vec3 addScaled(const Vec3 &a, const Vec3 &d, double s) {
+  return {a[0] + s * d[0], a[1] + s * d[1], a[2] + s * d[2]};
+}
+
+Vec3 crossP(const Vec3 &a, const Vec3 &b) {
   return {a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2],
           a[0] * b[1] - a[1] * b[0]};
 }
 
-double dotP(const std::array<double, 3> &a, const std::array<double, 3> &b) {
+double dotP(const Vec3 &a, const Vec3 &b) {
   return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
 
-// Moller-Trumbore: ray origin + t * dir hits triangle abc, t > eps.
-bool rayHitsTriangle(const std::array<double, 3> &orig,
-                     const std::array<double, 3> &dir,
-                     const std::array<double, 3> &a,
-                     const std::array<double, 3> &b,
-                     const std::array<double, 3> &c) {
-  constexpr double eps = 1e-12;
+double distSq(const Vec3 &a, const Vec3 &b) {
+  const auto d = sub3(a, b);
+  return dotP(d, d);
+}
+
+// Squared distance between segments p1q1 and p2q2 (Ericson, Real-Time
+// Collision Detection, 5.1.9).
+double segmentDistSq(const Vec3 &p1, const Vec3 &q1, const Vec3 &p2,
+                     const Vec3 &q2) {
+  constexpr double tiny = 1e-300;
+  const auto d1 = sub3(q1, p1);
+  const auto d2 = sub3(q2, p2);
+  const auto r = sub3(p1, p2);
+  const double a = dotP(d1, d1);
+  const double e = dotP(d2, d2);
+  const double f = dotP(d2, r);
+  double s = 0.0;
+  double t = 0.0;
+  if (a <= tiny && e <= tiny) {
+    return dotP(r, r);
+  }
+  if (a <= tiny) {
+    t = std::clamp(f / e, 0.0, 1.0);
+  } else {
+    const double c = dotP(d1, r);
+    if (e <= tiny) {
+      s = std::clamp(-c / a, 0.0, 1.0);
+    } else {
+      const double b = dotP(d1, d2);
+      const double denom = a * e - b * b;
+      s = denom > 0.0 ? std::clamp((b * f - c * e) / denom, 0.0, 1.0) : 0.0;
+      t = (b * s + f) / e;
+      if (t < 0.0) {
+        t = 0.0;
+        s = std::clamp(-c / a, 0.0, 1.0);
+      } else if (t > 1.0) {
+        t = 1.0;
+        s = std::clamp((b - c) / a, 0.0, 1.0);
+      }
+    }
+  }
+  return distSq(addScaled(p1, d1, s), addScaled(p2, d2, t));
+}
+
+// Squared distance from p to triangle abc (Ericson, 5.1.5); a triangle of
+// zero area is measured as its three edges.
+double triangleDistSq(const Vec3 &p, const Vec3 &a, const Vec3 &b,
+                      const Vec3 &c) {
+  const auto ab = sub3(b, a);
+  const auto ac = sub3(c, a);
+  const auto n = crossP(ab, ac);
+  const double scale = std::max(dotP(ab, ab), dotP(ac, ac));
+  if (dotP(n, n) <= 1e-24 * scale * scale) {
+    return std::min({segmentDistSq(p, p, a, b), segmentDistSq(p, p, b, c),
+                     segmentDistSq(p, p, c, a)});
+  }
+  const auto ap = sub3(p, a);
+  const double d1 = dotP(ab, ap);
+  const double d2 = dotP(ac, ap);
+  if (d1 <= 0.0 && d2 <= 0.0) {
+    return distSq(p, a);
+  }
+  const auto bp = sub3(p, b);
+  const double d3 = dotP(ab, bp);
+  const double d4 = dotP(ac, bp);
+  if (d3 >= 0.0 && d4 <= d3) {
+    return distSq(p, b);
+  }
+  const double vc = d1 * d4 - d3 * d2;
+  if (vc <= 0.0 && d1 >= 0.0 && d3 <= 0.0) {
+    return distSq(p, addScaled(a, ab, d1 / (d1 - d3)));
+  }
+  const auto cp = sub3(p, c);
+  const double d5 = dotP(ab, cp);
+  const double d6 = dotP(ac, cp);
+  if (d6 >= 0.0 && d5 <= d6) {
+    return distSq(p, c);
+  }
+  const double vb = d5 * d2 - d1 * d6;
+  if (vb <= 0.0 && d2 >= 0.0 && d6 <= 0.0) {
+    return distSq(p, addScaled(a, ac, d2 / (d2 - d6)));
+  }
+  const double va = d3 * d6 - d5 * d4;
+  if (va <= 0.0 && (d4 - d3) >= 0.0 && (d5 - d6) >= 0.0) {
+    return distSq(p, addScaled(b, sub3(c, b),
+                               (d4 - d3) / ((d4 - d3) + (d5 - d6))));
+  }
+  const double denom = 1.0 / (va + vb + vc);
+  return distSq(p, addScaled(addScaled(a, ab, vb * denom), ac, vc * denom));
+}
+
+// Moller-Trumbore for a unit direction. A ray within 1e-12 radians of the
+// triangle's plane is a miss here: if it met the triangle it also passed
+// next to an edge, which the caller tests first.
+bool rayHitsTriangle(const Vec3 &orig, const Vec3 &dir, const Vec3 &a,
+                     const Vec3 &b, const Vec3 &c) {
   const auto e1 = sub3(b, a);
   const auto e2 = sub3(c, a);
   const auto pvec = crossP(dir, e2);
   const double det = dotP(e1, pvec);
-  if (std::fabs(det) < eps) {
+  const auto n = crossP(e1, e2);
+  if (std::fabs(det) <= 1e-12 * std::sqrt(dotP(n, n))) {
     return false;
   }
   const double inv = 1.0 / det;
@@ -503,49 +676,64 @@ bool rayHitsTriangle(const std::array<double, 3> &orig,
   if (v < 0.0 || u + v > 1.0) {
     return false;
   }
-  const double t = inv * dotP(e2, qvec);
-  return t > eps;
+  return inv * dotP(e2, qvec) > 0.0;
 }
 
-bool pointInFaces(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+struct Triangle {
+  Vec3 a, b, c;
+};
+
+} // namespace
+
+const std::vector<std::array<double, 3>> &insideRayDirections() {
+  static const std::vector<std::array<double, 3>> dirs = [] {
+    std::vector<std::array<double, 3>> raw = {
+        {0.64278761, 0.58778525, 0.49240388},
+        {-0.52991926, 0.71933980, 0.44964913},
+        {0.37460659, -0.79863551, 0.47101007},
+        {0.47942554, 0.33873792, -0.80934170},
+        {-0.65605903, -0.42261826, 0.62524649},
+        {0.84147098, -0.30901699, -0.44276253},
+        {-0.29237170, 0.53582679, -0.79209936},
+        {-0.41614684, -0.75470958, -0.50731958}};
+    for (auto &d : raw) {
+      const double inv = 1.0 / std::sqrt(dotP(d, d));
+      d = {d[0] * inv, d[1] * inv, d[2] * inv};
+    }
+    return raw;
+  }();
+  return dirs;
+}
+
+InsideTrace
+pointInFacesTrace(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                   const std::vector<std::vector<int>> &rings,
-                  const std::vector<int> &faces,
-                  const std::array<double, 3> &guest,
-                  const std::array<double, 3> *centreOpt = nullptr) {
-  if (faces.empty()) {
-    return false;
-  }
-  std::array<double, 3> centreStore{};
-  const std::array<double, 3> *centre = centreOpt;
-  if (centre == nullptr) {
-    std::vector<int> verts;
-    for (int f : faces) {
-      if (f < 0 || static_cast<std::size_t>(f) >= rings.size()) {
-        continue;
-      }
-      verts.insert(verts.end(), rings[static_cast<std::size_t>(f)].begin(),
-                   rings[static_cast<std::size_t>(f)].end());
+                  const std::vector<int> &faces, const std::array<double, 3> &guest,
+                  const std::array<double, 3> *centreOpt) {
+  InsideTrace out;
+  std::vector<int> verts;
+  for (int f : faces) {
+    if (f < 0 || static_cast<std::size_t>(f) >= rings.size()) {
+      continue;
     }
-    if (verts.empty()) {
-      return false;
-    }
-    centreStore = periodicCentroid(yCloud, verts);
-    centre = &centreStore;
+    verts.insert(verts.end(), rings[static_cast<std::size_t>(f)].begin(),
+                 rings[static_cast<std::size_t>(f)].end());
   }
-  auto unwrap = [&](int atom) {
-    const auto &p = yCloud.pts[static_cast<std::size_t>(atom)];
-    const auto dr = minImage(yCloud, p.x, p.y, p.z, (*centre)[0], (*centre)[1],
-                             (*centre)[2]);
-    return std::array<double, 3>{(*centre)[0] + dr[0], (*centre)[1] + dr[1],
-                                 (*centre)[2] + dr[2]};
+  std::sort(verts.begin(), verts.end());
+  verts.erase(std::unique(verts.begin(), verts.end()), verts.end());
+  if (verts.empty()) {
+    return out;
+  }
+  const Vec3 centre = centreOpt != nullptr ? *centreOpt : periodicCentroid(yCloud, verts);
+  auto unwrap = [&](double x, double y, double z) {
+    const auto dr = minImage(yCloud, x, y, z, centre[0], centre[1], centre[2]);
+    return Vec3{centre[0] + dr[0], centre[1] + dr[1], centre[2] + dr[2]};
   };
-  const auto gdr = minImage(yCloud, guest[0], guest[1], guest[2], (*centre)[0],
-                            (*centre)[1], (*centre)[2]);
-  const std::array<double, 3> orig = {(*centre)[0] + gdr[0], (*centre)[1] + gdr[1],
-                                      (*centre)[2] + gdr[2]};
-  // Slightly off-axis ray so a hit is not an edge of a cube face.
-  const std::array<double, 3> dir = {1.0, 1e-4, 2e-4};
-  int hits = 0;
+
+  // Fan each face from its own centroid, in the frame unwrapped about c_F.
+  std::vector<Triangle> tris;
+  double radius = 0.0;
+  std::vector<Vec3> poly;
   for (int f : faces) {
     if (f < 0 || static_cast<std::size_t>(f) >= rings.size()) {
       continue;
@@ -554,17 +742,95 @@ bool pointInFaces(const molSys::PointCloud<molSys::Point<double>, double> &yClou
     if (ring.size() < 3) {
       continue;
     }
-    const auto a = unwrap(ring[0]);
-    for (std::size_t k = 1; k + 1 < ring.size(); k++) {
-      if (rayHitsTriangle(orig, dir, a, unwrap(ring[k]), unwrap(ring[k + 1]))) {
-        ++hits;
+    poly.clear();
+    Vec3 m = {0.0, 0.0, 0.0};
+    for (int atom : ring) {
+      const auto &p = yCloud.pts[static_cast<std::size_t>(atom)];
+      poly.push_back(unwrap(p.x, p.y, p.z));
+      for (int k = 0; k < 3; k++) {
+        m[static_cast<std::size_t>(k)] += poly.back()[static_cast<std::size_t>(k)];
       }
+      radius = std::max(radius, std::sqrt(distSq(poly.back(), centre)));
+    }
+    const double inv = 1.0 / static_cast<double>(poly.size());
+    m = {m[0] * inv, m[1] * inv, m[2] * inv};
+    for (std::size_t k = 0; k < poly.size(); k++) {
+      tris.push_back({m, poly[k], poly[(k + 1) % poly.size()]});
     }
   }
-  return (hits % 2) == 1;
+  if (tris.empty()) {
+    return out;
+  }
+
+  const Vec3 g = unwrap(guest[0], guest[1], guest[2]);
+  const double tol = kInsideRelTol * radius;
+  const double tolSq = tol * tol;
+  const double gc = std::sqrt(distSq(g, centre));
+  // Every triangle lies in the ball of radius `radius` about c_F.
+  if (gc > radius + tol) {
+    return out;
+  }
+  for (const auto &t : tris) {
+    if (triangleDistSq(g, t.a, t.b, t.c) <= tolSq) {
+      out.onFace = true;
+      out.inside = true;
+      return out;
+    }
+  }
+
+  // The segment g + s * dir, s in [0, reach], leaves that ball.
+  const double reach = 2.0 * (gc + radius);
+  const auto &dirs = insideRayDirections();
+  auto clearanceSq = [&](const Vec3 &end, bool stopAtGraze) {
+    double best = std::numeric_limits<double>::infinity();
+    for (const auto &t : tris) {
+      best = std::min({best, segmentDistSq(g, end, t.a, t.b),
+                       segmentDistSq(g, end, t.b, t.c),
+                       segmentDistSq(g, end, t.c, t.a)});
+      if (stopAtGraze && best <= tolSq) {
+        break;
+      }
+    }
+    return best;
+  };
+  auto crossings = [&](const Vec3 &dir) {
+    int hits = 0;
+    for (const auto &t : tris) {
+      hits += rayHitsTriangle(g, dir, t.a, t.b, t.c) ? 1 : 0;
+    }
+    return hits;
+  };
+  for (const auto &dir : dirs) {
+    ++out.rays;
+    if (clearanceSq(addScaled(g, dir, reach), true) <= tolSq) {
+      continue;
+    }
+    out.crossings = crossings(dir);
+    out.inside = (out.crossings % 2) == 1;
+    return out;
+  }
+  // Every direction of the list grazes an edge: count along the one with
+  // the widest clearance.
+  std::size_t bestDir = 0;
+  double bestClear = -1.0;
+  for (std::size_t d = 0; d < dirs.size(); d++) {
+    const double c = clearanceSq(addScaled(g, dirs[d], reach), false);
+    if (c > bestClear) {
+      bestClear = c;
+      bestDir = d;
+    }
+  }
+  out.crossings = crossings(dirs[bestDir]);
+  out.inside = (out.crossings % 2) == 1;
+  return out;
 }
 
-} // namespace
+bool pointInFaces(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                  const std::vector<std::vector<int>> &rings,
+                  const std::vector<int> &faces, const std::array<double, 3> &guest,
+                  const std::array<double, 3> *centre) {
+  return pointInFacesTrace(yCloud, rings, faces, guest, centre).inside;
+}
 
 GuestOccupancy
 guestOccupancyInside(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
@@ -587,6 +853,7 @@ guestOccupancyInside(const molSys::PointCloud<molSys::Point<double>, double> &yC
       }
     }
     cageVerts[c].assign(uniq.begin(), uniq.end());
+    std::sort(cageVerts[c].begin(), cageVerts[c].end());
     centres.push_back(periodicCentroid(yCloud, cageVerts[c]));
   }
   for (int g : guestIndices) {

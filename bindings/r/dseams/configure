@@ -1,0 +1,11 @@
+#!/bin/sh
+# Point the compile at a seams-core build. The engine is not a CRAN
+# system library, so the paths are explicit.
+if [ -z "$SEAMS_INCLUDE" ] || [ -z "$SEAMS_LIBDIR" ]; then
+  echo "Set SEAMS_INCLUDE (directory of seams_lang.h) and SEAMS_LIBDIR (directory of libseams_lang.so)." >&2
+  exit 1
+fi
+cat > src/Makevars << EOF
+PKG_CXXFLAGS = -I${SEAMS_INCLUDE}
+PKG_LIBS = -L${SEAMS_LIBDIR} -lseams_lang -Wl,-rpath,${SEAMS_LIBDIR}
+EOF

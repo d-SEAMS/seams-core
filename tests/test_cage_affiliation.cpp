@@ -8,6 +8,8 @@
 #include <ring.hpp>
 #include <seams_input.hpp>
 #include <topo_bulk.hpp>
+#include <tum_device.hpp>
+#include <tum_offload.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -273,6 +275,34 @@ TEST_CASE("cageAffiliation marks hexagonal ice HC on every thread count",
 #endif
 }
 
+TEST_CASE("hop-bound path grows its ring, row and pair buffers on ice Ih",
+          "[cage_affiliation][offload]") {
+  auto yCloud = iceIh(4, 3, 3);
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  auto idx = nneigh::neighbourListByIndex(yCloud, nList);
+  const auto host = tum::hostCageCounts(idx);
+  REQUIRE(host.nSix > 0);
+  REQUIRE(host.nHcRings == host.nSix);
+  tum::SpecializedCaps caps;
+  caps.rowCap = 1;
+  caps.ringCap = 1;
+  caps.pairCap = 1;
+  for (const bool target : {false, true}) {
+    INFO("target " << target);
+    caps.forceTarget = target;
+    const auto dev = tum::specializedCageCounts(idx, caps);
+    // The ring table overflows, then the rows, then the basal pairs
+    REQUIRE(dev.retries == 3);
+    REQUIRE_FALSE(dev.hostFallback);
+    REQUIRE(dev.nSix == host.nSix);
+    REQUIRE(dev.nHcRings == host.nHcRings);
+    REQUIRE(dev.nDdcRings == host.nDdcRings);
+    REQUIRE(dev.atomSix == host.atomSix);
+    REQUIRE(dev.atomHc == host.atomHc);
+    REQUIRE(dev.atomDdc == host.atomDdc);
+  }
+}
+
 TEST_CASE("cageAffiliation is invariant under ring permutation",
           "[cage_affiliation]") {
   auto yCloud = hcCloud();
@@ -336,6 +366,8 @@ TEST_CASE("AffiliationUpdater tracks synthetic topology churn exactly",
   };
 
   ring::AffiliationUpdater updater;
+  // Exercise the restricted update on every step, not the batch fallback
+  updater.setBatchFraction(1.0);
   uint64_t rng = 88172645463325252ULL;
   auto rows = idx;
   for (int step = 0; step < 4; step++) {
@@ -589,4 +621,194 @@ TEST_CASE("ring-adjacent completion: identity on a crystal, empty on nothing",
   const auto still = ring::ringAdjacentCompletion(empty, six);
   REQUIRE(std::count(still.hc.begin(), still.hc.end(), true) == 0);
   REQUIRE(std::count(still.ddc.begin(), still.ddc.end(), true) == 0);
+}
+
+namespace {
+
+// Ring E = {0..5} and peripherals on its triplets T_k = (k, k+1, k+2).
+// Without the extra ring the only choice of P_0..P_5 that meets every
+// equatorial condition puts one ring in two slots: Q holds T_0 and T_1
+// in the first set, Q2 holds T_0, T_1 and T_2 in the second. The extra
+// ring is a distinct witness for the repeated slot.
+struct DdcFixture {
+  const char *name;
+  std::vector<std::vector<int>> rings;
+  std::vector<int> extra;
+};
+
+std::vector<DdcFixture> repeatedWitnessFixtures() {
+  return {
+      {"P_1 = P_0",
+       {{0, 1, 2, 3, 4, 5},
+        {0, 1, 2, 3, 6, 7},
+        {2, 3, 4, 6, 8, 9},
+        {4, 5, 0, 6, 7, 10},
+        {3, 4, 5, 7, 6, 11},
+        {5, 0, 1, 7, 12, 13},
+        {1, 2, 14, 15, 16, 17}},
+       {1, 2, 3, 7, 6, 12}},
+      {"P_2 = P_0",
+       {{0, 1, 2, 3, 4, 5},
+        {0, 1, 2, 3, 4, 6},
+        {4, 5, 0, 6, 8, 9},
+        {1, 2, 3, 7, 10, 11},
+        {3, 4, 5, 7, 10, 12},
+        {5, 0, 1, 7, 11, 13},
+        {2, 14, 15, 16, 17, 18}},
+       {2, 3, 4, 6, 19, 20}},
+  };
+}
+
+// tum::device::ddcFrom over every ring of an explicit ring list
+std::vector<int> deviceDdc(const std::vector<std::vector<int>> &rings,
+                           int nAtoms) {
+  const int nRings = static_cast<int>(rings.size());
+  const int maxPer = tum::device::kRowCap;
+  std::vector<int> ringAtoms;
+  for (const auto &r : rings) {
+    ringAtoms.insert(ringAtoms.end(), r.begin(), r.end());
+  }
+  std::vector<int> count(nAtoms, 0);
+  std::vector<int> through(static_cast<std::size_t>(nAtoms) * maxPer, -1);
+  for (int r = 0; r < nRings; ++r) {
+    for (const int a : rings[r]) {
+      through[a * maxPer + count[a]++] = r;
+    }
+  }
+  std::vector<int> hc(nRings, 0);
+  std::vector<int> ddc(nRings, 0);
+  for (int r = 0; r < nRings; ++r) {
+    tum::device::ddcFrom(r, &nRings, ringAtoms.data(), count.data(),
+                         through.data(), hc.data(), nAtoms, maxPer,
+                         ddc.data());
+  }
+  return ddc;
+}
+
+} // namespace
+
+TEST_CASE("DDC needs six distinct peripheral rings", "[cage_affiliation]") {
+  for (const auto &fx : repeatedWitnessFixtures()) {
+    INFO(fx.name);
+    for (const bool withExtra : {false, true}) {
+      INFO("extra ring " << withExtra);
+      auto rings = fx.rings;
+      if (withExtra) {
+        rings.push_back(fx.extra);
+      }
+      int nAtoms = 0;
+      for (const auto &r : rings) {
+        nAtoms = std::max(nAtoms, *std::max_element(r.begin(), r.end()) + 1);
+      }
+      // No bonds: no basal pair, so no HC ring
+      std::vector<std::vector<int>> nList(nAtoms);
+      for (int a = 0; a < nAtoms; ++a) {
+        nList[a] = {a};
+      }
+      const auto index = ring::buildRingSearchIndex(rings, nAtoms);
+      // Series 05 keeps a peripheral set only when the seven rings span
+      // 14 molecules and each peripheral shares exactly three equatorial
+      // atoms. These witnesses share four, so the host rejects both.
+      REQUIRE_FALSE(ring::equatorialConditions(rings, 0, index, nullptr, nullptr,
+                                              nullptr));
+
+      const auto aff = ring::cageAffiliation(rings, nList);
+      for (std::size_t r = 0; r < rings.size(); ++r) {
+        INFO("ring " << r);
+        REQUIRE_FALSE(aff.hc[r]);
+        REQUIRE_FALSE(aff.ddc[r]);
+      }
+      (void)withExtra;
+
+      std::vector<ring::strucType> types(rings.size(),
+                                         ring::strucType::unclassified);
+      std::vector<cage::Cage> cages;
+      const auto listDDC = ring::findDDC(rings, types, {}, cages);
+      REQUIRE(std::count(listDDC.begin(), listDDC.end(), 0) == 0);
+      REQUIRE(cages.empty());
+    }
+  }
+}
+
+TEST_CASE("AffiliationUpdater matches a forced HC/DDC edge flip with fallback off",
+          "[cage_affiliation]") {
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/nucleation_f1.lammpstrj", 1, yCloud, 1);
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  auto rows = nneigh::neighbourListByIndex(yCloud, nList);
+  auto six = sixMembered(primitive::ringNetwork(rows, 6));
+  REQUIRE_FALSE(six.empty());
+
+  ring::AffiliationUpdater updater;
+  updater.setBatchFraction(1.0);
+  const auto &first = updater.update(six, rows);
+  const auto batch0 = ring::cageAffiliation(six, rows);
+  REQUIRE(first.hc == batch0.hc);
+  REQUIRE(first.ddc == batch0.ddc);
+  const int nHc =
+      static_cast<int>(std::count(batch0.hc.begin(), batch0.hc.end(), true));
+  const int nDdc =
+      static_cast<int>(std::count(batch0.ddc.begin(), batch0.ddc.end(), true));
+  REQUIRE(nHc > 0);
+  REQUIRE(nDdc > 0);
+
+  auto dropBond = [](std::vector<std::vector<int>> &graph, int a, int b) {
+    auto drop = [](std::vector<int> &row, int value) {
+      row.erase(std::remove(row.begin() + 1, row.end(), value), row.end());
+    };
+    drop(graph[a], b);
+    drop(graph[b], a);
+  };
+  auto addBond = [](std::vector<std::vector<int>> &graph, int a, int b) {
+    if (std::find(graph[a].begin(), graph[a].end(), b) == graph[a].end()) {
+      graph[a].push_back(b);
+    }
+    if (std::find(graph[b].begin(), graph[b].end(), a) == graph[b].end()) {
+      graph[b].push_back(a);
+    }
+  };
+
+  bool sawSwitch = false;
+  const auto baseRows = rows;
+  const auto baseHc = batch0.hc;
+  const auto baseDdc = batch0.ddc;
+  const int nAtoms = static_cast<int>(rows.size());
+  for (int a = 0; a < nAtoms && !sawSwitch; ++a) {
+    if (rows[a].size() < 3) {
+      continue;
+    }
+    const int b = rows[a][1];
+    int c = -1;
+    for (int cand = 0; cand < nAtoms; ++cand) {
+      if (cand == a || cand == b) {
+        continue;
+      }
+      if (std::find(rows[a].begin(), rows[a].end(), cand) == rows[a].end()) {
+        c = cand;
+        break;
+      }
+    }
+    if (c < 0) {
+      continue;
+    }
+    auto flipped = baseRows;
+    dropBond(flipped, a, b);
+    addBond(flipped, a, c);
+    auto sixFlip = sixMembered(primitive::ringNetwork(flipped, 6));
+    ring::AffiliationUpdater step;
+    step.setBatchFraction(1.0);
+    (void)step.update(six, baseRows);
+    const auto &inc = step.update(sixFlip, flipped);
+    const auto batch = ring::cageAffiliation(sixFlip, flipped);
+    REQUIRE(inc.hc == batch.hc);
+    REQUIRE(inc.ddc == batch.ddc);
+    REQUIRE(step.lastReclassified() > 0);
+    REQUIRE(step.lastReclassified() < static_cast<int>(sixFlip.size()));
+    const bool hcChanged = inc.hc != baseHc;
+    const bool ddcChanged = inc.ddc != baseDdc;
+    if (hcChanged || ddcChanged) {
+      sawSwitch = true;
+    }
+  }
+  REQUIRE(sawSwitch);
 }

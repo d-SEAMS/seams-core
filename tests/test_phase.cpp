@@ -218,6 +218,20 @@ TEST_CASE("ice XXI library hits the Lee 2026 I-42d oxygen cell", "[phase]") {
   REQUIRE(hit.match);
 }
 
+TEST_CASE("frameDensity uses the triclinic cell volume", "[phase]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.nop = 10;
+  cloud.box = {15.0, 10.0, 10.0, 5.0, 0.0, 0.0};
+  cloud.boxLow = {0, 0, 0};
+  const double vol = nneigh::dumpVolume(cloud);
+  REQUIRE_THAT(vol, Catch::Matchers::WithinAbs(1000.0, 1e-9));
+  const double mass = 10.0 * 18.015 / 6.02214076e23;
+  const double rho = phase::frameDensity(cloud);
+  REQUIRE_THAT(rho, Catch::Matchers::WithinAbs(mass / (vol * 1e-24), 1e-9));
+  const double nacl = phase::frameDensity(cloud, 58.44);
+  REQUIRE(nacl > rho);
+}
+
 TEST_CASE("dense local shells bin as HDA; tetrahedral ice does not",
           "[phase]") {
   molSys::PointCloud<molSys::Point<double>, double> ic;

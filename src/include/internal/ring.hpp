@@ -131,7 +131,8 @@ getSingleRingSize(const std::vector<std::vector<int>> &rings, int ringSize);
 //! Check to see if two vectors have common elements or not
 //! True, if common elements are present and false if there are no common
 //! elements
-bool hasCommonElements(std::vector<int> ring1, std::vector<int> ring2);
+bool hasCommonElements(const std::vector<int> &ring1,
+                       const std::vector<int> &ring2);
 
 //! Compares two disordered vectors and checks to see if they contain the same
 //! elements

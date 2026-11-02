@@ -51,3 +51,9 @@ seams --features
 ~-Dwith_python=true~ and ~-Dwith_lua=enabled~ are Meson errors that
 name [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] and
 [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]].
+
+* Front ends and simulation interfaces
+
+The Python and Lua front ends, the LAMMPS compute and the PLUMED
+module install as in [[file:../paper/reproduce.org][Reproduce]], which
+also pins the release of the d-SEAMS 2.0 paper.

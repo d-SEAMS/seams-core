@@ -18,10 +18,16 @@
  *  A cage is a connected set of primitive rings (faces) whose size
  *  census matches a Signature and whose edges form a closed
  *  polyhedron: every edge of every face is shared by exactly two
- *  faces of the set. Growth walks the ring adjacency graph (two
- *  rings are adjacent when they share an edge) and stays inside the
- *  signature budget. Distinct cages are the distinct sorted vertex
- *  sets; the nauty certificate, when linked, names the isomorphism
+ *  faces of the set, at least three faces around each vertex form
+ *  one cycle, and V - E + F = 2, so the faces tile a sphere.
+ *  Production entry points pass rings through ring::cageRings first:
+ *  a ring whose minimum-image lattice shifts sum to a nonzero winding
+ *  is not a face, and a cutoff that can see two images of one pair is
+ *  refused. Growth
+ *  walks the ring adjacency graph (two rings are adjacent when they
+ *  share an edge) and stays inside the signature budget. Distinct
+ *  cages are the distinct sorted vertex sets, listed by their sorted
+ *  faces; the nauty certificate, when linked, names the isomorphism
  *  class of each cage.
  */
 namespace cage {
@@ -32,13 +38,20 @@ struct FoundCage {
   std::vector<int> faces;     ///< ring indices into the input vector
   std::vector<int> vertices;  ///< sorted unique atom indices
   std::string certificate;    ///< nauty hex, empty when nauty is off
-  bool closed = true;         ///< every face edge used twice
+  bool closed = true;         ///< faces tile a sphere
   int danglingEdges = 0;      ///< edges used once (cups / incomplete)
 };
 
 /** True when every edge of the listed faces is used by exactly two
  *  of those faces. An empty face list is not closed. */
 bool isClosedPolyhedron(const std::vector<std::vector<int>> &rings,
+                        const std::vector<int> &faces);
+
+/** True when the listed faces are closed (isClosedPolyhedron), at
+ *  least three faces around each of their vertices form a single cycle,
+ *  and V - E + F = 2. Paired edges alone also admit pinched vertices,
+ *  two faces that share two edges, and surfaces of higher genus. */
+bool isSpherePolyhedron(const std::vector<std::vector<int>> &rings,
                         const std::vector<int> &faces);
 
 /** Face-sharing rings whose size census equals `signature` and whose
@@ -70,6 +83,24 @@ std::vector<FoundCage>
 findBySignature(const std::vector<std::vector<int>> &rings,
                 const std::vector<std::vector<int>> &nList,
                 const Signature &signature);
+
+/** As above, with findHC / findDDC claiming rings in the order of
+ *  `atomRank` (ring::positionRank of the frame), so the `hc` and `ddc`
+ *  cages do not depend on the atom labels. */
+std::vector<FoundCage>
+findBySignature(const std::vector<std::vector<int>> &rings,
+                const std::vector<std::vector<int>> &nList,
+                const Signature &signature, const std::vector<int> &atomRank);
+
+/** findBySignature for each of `signatures`, one list per entry. The
+ *  ring-size censuses share one search, so a face set that fits several
+ *  of them is grown once; `hc` and `ddc` go to findHC / findDDC as in
+ *  findBySignature. Each list equals findBySignature on its entry. */
+std::vector<std::vector<FoundCage>>
+findBySignatures(const std::vector<std::vector<int>> &rings,
+                 const std::vector<std::vector<int>> &nList,
+                 const std::vector<Signature> &signatures,
+                 const std::vector<int> &atomRank);
 
 /** Connected face sets that stay inside the signature budget, have at
  *  least `minFaces` faces, and are not closed. Cups and incomplete

@@ -35,9 +35,12 @@
 
 namespace {
 
-template <typename Fn> double bestMillis(Fn &&fn, int reps) {
+// setup() runs before every rep, outside the timer.
+template <typename Setup, typename Fn>
+double bestMillis(Setup &&setup, Fn &&fn, int reps) {
   double best = std::numeric_limits<double>::max();
   for (int rep = 0; rep < reps; rep++) {
+    setup();
     const auto start = std::chrono::steady_clock::now();
     fn();
     const auto end = std::chrono::steady_clock::now();
@@ -45,6 +48,10 @@ template <typename Fn> double bestMillis(Fn &&fn, int reps) {
         best, std::chrono::duration<double, std::milli>(end - start).count());
   }
   return best;
+}
+
+template <typename Fn> double bestMillis(Fn &&fn, int reps) {
+  return bestMillis([]() {}, fn, reps);
 }
 
 } // namespace
@@ -87,14 +94,7 @@ int main(int argc, char **argv) {
   std::vector<int> listHC, listDDC;
   std::vector<cage::Cage> cageList;
   std::vector<ring::strucType> ringType;
-  int maxAtom = 0;
-  for (const auto &r : sixRings) {
-    for (const int a : r) {
-      maxAtom = std::max(maxAtom, a);
-    }
-  }
-  const auto ringIndex =
-      ring::buildRingSearchIndex(sixRings, maxAtom + 1);
+  const auto ringIndex = ring::buildRingSearchIndex(sixRings, yCloud);
 
   const double tHC = bestMillis(
       [&]() {
@@ -105,7 +105,7 @@ int main(int argc, char **argv) {
       },
       reps);
 
-  const double tDDC = bestMillis(
+  const double tBoth = bestMillis(
       [&]() {
         std::vector<ring::strucType> rt(sixRings.size(),
                                         ring::strucType::unclassified);
@@ -115,10 +115,24 @@ int main(int argc, char **argv) {
       },
       reps);
 
+  // findDDC reads the ring types and cages findHC left; that state is
+  // computed once here and restored outside the timer before every rep.
   ringType.assign(sixRings.size(), ring::strucType::unclassified);
   cageList.clear();
   listHC = ring::findHC(sixRings, ringType, hbondIdx, cageList, ringIndex);
-  listDDC = ring::findDDC(sixRings, ringType, listHC, cageList, ringIndex);
+  const std::vector<ring::strucType> ringTypeAfterHC = ringType;
+  const std::vector<cage::Cage> cageListAfterHC = cageList;
+
+  const double tDDC = bestMillis(
+      [&]() {
+        ringType = ringTypeAfterHC;
+        cageList = cageListAfterHC;
+      },
+      [&]() {
+        listDDC =
+            ring::findDDC(sixRings, ringType, listHC, cageList, ringIndex);
+      },
+      reps);
 
   // Steinhardt parameters, which the OpenMP build spreads over threads
   auto qRef = chill::steinhardtQl(yCloud, nList, 6);
@@ -193,8 +207,8 @@ int main(int argc, char **argv) {
   std::cout << std::left << std::setw(28) << "ringNetwork/ms" << std::fixed
             << std::setprecision(3) << tRings << "\n"
             << std::setw(28) << "findHC/ms" << tHC << "\n"
-            << std::setw(28) << "findHC+findDDC/ms" << tDDC << "\n"
-            << std::setw(28) << "findDDC alone/ms" << (tDDC - tHC) << "\n";
+            << std::setw(28) << "findDDC/ms" << tDDC << "\n"
+            << std::setw(28) << "findHC+findDDC/ms" << tBoth << "\n";
   if (tNauty >= 0.0) {
     std::cout << std::setw(28) << "nauty cert six-rings/ms" << tNauty << "\n";
   }

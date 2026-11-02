@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <cctype>
 #include <cstdint>
 #include <map>
@@ -21,6 +22,10 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
 
 namespace {
 
@@ -98,6 +103,61 @@ std::vector<int> uniqueVertices(const std::vector<std::vector<int>> &rings,
     }
   }
   return {verts.begin(), verts.end()};
+}
+
+bool facesTileSphere(const std::vector<std::vector<int>> &rings,
+                     const std::vector<int> &faces) {
+  std::unordered_map<int, std::vector<std::pair<int, int>>> wedges;
+  std::set<Edge> edgeSet;
+  for (const int fi : faces) {
+    const auto &ring = rings[static_cast<size_t>(fi)];
+    const size_t n = ring.size();
+    for (size_t i = 0; i < n; ++i) {
+      const int prev = ring[(i + n - 1) % n];
+      const int next = ring[(i + 1) % n];
+      wedges[ring[i]].emplace_back(prev, next);
+      edgeSet.insert(packEdge(ring[i], next));
+    }
+  }
+  const long v = static_cast<long>(wedges.size());
+  const long e = static_cast<long>(edgeSet.size());
+  const long f = static_cast<long>(faces.size());
+  if (v - e + f != 2) {
+    return false;
+  }
+  // With paired edges every neighbour of a vertex closes exactly two of its
+  // wedges, so the wedges form cycles; one cycle must hold them all.
+  for (const auto &kv : wedges) {
+    const auto &w = kv.second;
+    if (w.size() < 3) {
+      return false;
+    }
+    std::vector<char> seen(w.size(), 0);
+    size_t at = 0;
+    int tail = w[0].second;
+    size_t walked = 1;
+    seen[0] = 1;
+    for (;;) {
+      size_t nextWedge = w.size();
+      for (size_t k = 0; k < w.size(); ++k) {
+        if (k != at && !seen[k] && (w[k].first == tail || w[k].second == tail)) {
+          nextWedge = k;
+          break;
+        }
+      }
+      if (nextWedge == w.size()) {
+        break;
+      }
+      seen[nextWedge] = 1;
+      tail = w[nextWedge].first == tail ? w[nextWedge].second : w[nextWedge].first;
+      at = nextWedge;
+      ++walked;
+    }
+    if (walked != w.size()) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool countsEqual(const std::map<int, int> &have, const cage::Signature &sig) {
@@ -363,7 +423,7 @@ struct Search {
       return;
     }
     if (countsEqual(have, sig)) {
-      if (allEdgesPaired()) {
+      if (allEdgesPaired() && facesTileSphere(rings, chosen)) {
         accept(true);
       } else {
         maybeAcceptIncomplete();
@@ -408,6 +468,505 @@ struct Search {
       search();
       undoRing();
     }
+  }
+};
+
+// Closed cages only, with Search's forced moves and branching on dense
+// edge ids. Two cuts follow from facesTileSphere and drop no cage: a ring
+// that shares two consecutive edges with a chosen ring leaves their common
+// vertex in two faces, and a ring through a vertex whose chosen faces
+// already close around it gives that vertex a second cycle. Up to 32
+// signatures share one search: a face set grows while its census fits in
+// one of them, and a closed set is a cage of the signature it equals.
+struct ClosedSearch {
+  const std::vector<std::vector<int>> &rings;
+  const std::vector<cage::Signature> &sigs;
+  int maxFaces = 0;
+  std::vector<std::vector<int>> need;
+  std::vector<int> facesOf;
+  std::vector<int> maxVerts;
+  std::vector<int> maxEdges;
+  std::vector<int> have;
+  // room[s]: the signatures with space for one more ring of size s.
+  // fits[d]: the signatures whose census holds the first d chosen rings.
+  std::vector<unsigned> room;
+  std::vector<unsigned> fits;
+  std::vector<int> cand;
+  std::vector<int> ringSize;
+  std::vector<std::vector<int>> ringEdges;
+  std::vector<std::vector<int>> ringWedges;
+  std::vector<std::vector<int>> ringVerts;
+  std::vector<std::vector<int>> ringsOfEdge;
+  std::vector<std::array<int, 2>> edgeEnds;
+  std::vector<unsigned char> edgeUse;
+  std::vector<unsigned char> wedgeUse;
+  std::vector<int> half;
+  std::vector<int> halfPos;
+  std::vector<int> openAt;
+  std::vector<int> facesAt;
+  std::vector<char> used;
+  std::vector<int> chosen;
+  std::vector<std::vector<int>> optsAt;
+  std::vector<std::vector<cage::FoundCage>> found;
+  int seed = 0;
+  int nVerts = 0;
+  int nEdges = 0;
+
+  ClosedSearch(const std::vector<std::vector<int>> &allRings,
+               const std::vector<cage::Signature> &signatures,
+               const std::vector<char> *admit = nullptr)
+      : rings(allRings), sigs(signatures) {
+    const size_t nSig = sigs.size();
+    int maxSize = 0;
+    for (const auto &s : sigs) {
+      maxSize = std::max(maxSize, s.maxRingSize());
+    }
+    need.assign(nSig, std::vector<int>(static_cast<size_t>(maxSize) + 1, 0));
+    facesOf.assign(nSig, 0);
+    maxVerts.assign(nSig, 0);
+    maxEdges.assign(nSig, 0);
+    std::vector<char> inSome(static_cast<size_t>(maxSize) + 1, 0);
+    for (size_t k = 0; k < nSig; ++k) {
+      int sides = 0;
+      for (const auto &kv : sigs[k].counts) {
+        need[k][static_cast<size_t>(kv.first)] = kv.second;
+        inSome[static_cast<size_t>(kv.first)] = 1;
+        sides += kv.first * kv.second;
+      }
+      facesOf[k] = sigs[k].faceCount();
+      maxFaces = std::max(maxFaces, facesOf[k]);
+      // A sphere with every edge in two faces has E = sides / 2 and
+      // V = 2 - F + E.
+      maxEdges[k] = sides / 2;
+      maxVerts[k] = 2 - facesOf[k] + maxEdges[k];
+    }
+    have.assign(static_cast<size_t>(maxSize) + 1, 0);
+    room.assign(have.size(), 0);
+    for (int s = 0; s <= maxSize; ++s) {
+      updateRoom(s);
+    }
+    fits.assign(static_cast<size_t>(maxFaces) + 1, 0);
+    fits[0] = nSig >= 32 ? ~0u : (1u << nSig) - 1u;
+    const int nRings = static_cast<int>(rings.size());
+    used.assign(static_cast<size_t>(nRings), 0);
+    ringSize.assign(static_cast<size_t>(nRings), 0);
+    ringEdges.resize(static_cast<size_t>(nRings));
+    ringWedges.resize(static_cast<size_t>(nRings));
+    ringVerts.resize(static_cast<size_t>(nRings));
+    std::unordered_map<Edge, int> edgeId;
+    std::unordered_map<std::uint64_t, int> wedgeId;
+    std::unordered_map<int, int> vertexId;
+    std::vector<int> ordered;
+    for (int i = 0; i < nRings; ++i) {
+      const auto &ring = rings[static_cast<size_t>(i)];
+      const int sz = static_cast<int>(ring.size());
+      if (admit != nullptr &&
+          (static_cast<size_t>(i) >= admit->size() ||
+           (*admit)[static_cast<size_t>(i)] == 0)) {
+        continue;
+      }
+      if (sz < 3 || sz > maxSize || inSome[static_cast<size_t>(sz)] == 0) {
+        continue;
+      }
+      std::set<int> distinct(ring.begin(), ring.end());
+      if (static_cast<int>(distinct.size()) != sz) {
+        continue;
+      }
+      cand.push_back(i);
+      ringSize[static_cast<size_t>(i)] = sz;
+      ordered.assign(static_cast<size_t>(sz), 0);
+      for (int k = 0; k < sz; ++k) {
+        const int a = ring[static_cast<size_t>(k)];
+        const int b = ring[static_cast<size_t>((k + 1) % sz)];
+        const Edge e = packEdge(a, b);
+        auto ins = edgeId.emplace(e, static_cast<int>(edgeEnds.size()));
+        if (ins.second) {
+          edgeEnds.push_back({std::min(a, b), std::max(a, b)});
+          ringsOfEdge.emplace_back();
+        }
+        ordered[static_cast<size_t>(k)] = ins.first->second;
+        ringsOfEdge[static_cast<size_t>(ins.first->second)].push_back(i);
+        auto vin = vertexId.emplace(a, static_cast<int>(vertexId.size()));
+        ringVerts[static_cast<size_t>(i)].push_back(vin.first->second);
+      }
+      ringEdges[static_cast<size_t>(i)] = ordered;
+      for (int k = 0; k < sz; ++k) {
+        const auto e1 = static_cast<std::uint64_t>(ordered[static_cast<size_t>(k)]);
+        const auto e2 = static_cast<std::uint64_t>(
+            ordered[static_cast<size_t>((k + 1) % sz)]);
+        const std::uint64_t key = (std::min(e1, e2) << 32) | std::max(e1, e2);
+        auto win = wedgeId.emplace(key, static_cast<int>(wedgeId.size()));
+        ringWedges[static_cast<size_t>(i)].push_back(win.first->second);
+      }
+    }
+    for (auto &ends : edgeEnds) {
+      ends = {vertexId.at(ends[0]), vertexId.at(ends[1])};
+    }
+    edgeUse.assign(edgeEnds.size(), 0);
+    halfPos.assign(edgeEnds.size(), -1);
+    wedgeUse.assign(wedgeId.size(), 0);
+    openAt.assign(vertexId.size(), 0);
+    facesAt.assign(vertexId.size(), 0);
+    optsAt.resize(static_cast<size_t>(maxFaces) + 1);
+    found.resize(nSig);
+  }
+
+  void updateRoom(int s) {
+    unsigned m = 0;
+    for (size_t k = 0; k < sigs.size(); ++k) {
+      if (have[static_cast<size_t>(s)] < need[k][static_cast<size_t>(s)]) {
+        m |= 1u << k;
+      }
+    }
+    room[static_cast<size_t>(s)] = m;
+  }
+
+  void halfAdd(int e) {
+    halfPos[static_cast<size_t>(e)] = static_cast<int>(half.size());
+    half.push_back(e);
+  }
+
+  void halfDrop(int e) {
+    const int at = halfPos[static_cast<size_t>(e)];
+    const int last = half.back();
+    half[static_cast<size_t>(at)] = last;
+    halfPos[static_cast<size_t>(last)] = at;
+    half.pop_back();
+    halfPos[static_cast<size_t>(e)] = -1;
+  }
+
+  bool canAdd(int ring) const {
+    if (ring < seed || used[static_cast<size_t>(ring)]) {
+      return false;
+    }
+    const int sz = ringSize[static_cast<size_t>(ring)];
+    const unsigned m = fits[chosen.size()] & room[static_cast<size_t>(sz)];
+    if (m == 0) {
+      return false;
+    }
+    for (const int e : ringEdges[static_cast<size_t>(ring)]) {
+      if (edgeUse[static_cast<size_t>(e)] >= 2) {
+        return false;
+      }
+    }
+    for (const int w : ringWedges[static_cast<size_t>(ring)]) {
+      if (wedgeUse[static_cast<size_t>(w)] != 0) {
+        return false;
+      }
+    }
+    int newVerts = 0;
+    for (const int v : ringVerts[static_cast<size_t>(ring)]) {
+      if (facesAt[static_cast<size_t>(v)] == 0) {
+        ++newVerts;
+      } else if (openAt[static_cast<size_t>(v)] == 0) {
+        return false;
+      }
+    }
+    int newEdges = 0;
+    for (const int e : ringEdges[static_cast<size_t>(ring)]) {
+      newEdges += edgeUse[static_cast<size_t>(e)] == 0 ? 1 : 0;
+    }
+    for (unsigned b = m; b != 0; b &= b - 1) {
+      const auto k = static_cast<size_t>(std::countr_zero(b));
+      if (nVerts + newVerts <= maxVerts[k] && nEdges + newEdges <= maxEdges[k]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void addRing(int ring) {
+    const int sz = ringSize[static_cast<size_t>(ring)];
+    const unsigned m = fits[chosen.size()] & room[static_cast<size_t>(sz)];
+    used[static_cast<size_t>(ring)] = 1;
+    chosen.push_back(ring);
+    fits[chosen.size()] = m;
+    have[static_cast<size_t>(sz)] += 1;
+    updateRoom(sz);
+    for (const int e : ringEdges[static_cast<size_t>(ring)]) {
+      const auto &ends = edgeEnds[static_cast<size_t>(e)];
+      auto &u = edgeUse[static_cast<size_t>(e)];
+      if (u == 0) {
+        ++nEdges;
+        halfAdd(e);
+        ++openAt[static_cast<size_t>(ends[0])];
+        ++openAt[static_cast<size_t>(ends[1])];
+      } else {
+        halfDrop(e);
+        --openAt[static_cast<size_t>(ends[0])];
+        --openAt[static_cast<size_t>(ends[1])];
+      }
+      ++u;
+    }
+    for (const int w : ringWedges[static_cast<size_t>(ring)]) {
+      ++wedgeUse[static_cast<size_t>(w)];
+    }
+    for (const int v : ringVerts[static_cast<size_t>(ring)]) {
+      nVerts += facesAt[static_cast<size_t>(v)] == 0 ? 1 : 0;
+      ++facesAt[static_cast<size_t>(v)];
+    }
+  }
+
+  void undoRing() {
+    const int ring = chosen.back();
+    const int sz = ringSize[static_cast<size_t>(ring)];
+    chosen.pop_back();
+    used[static_cast<size_t>(ring)] = 0;
+    have[static_cast<size_t>(sz)] -= 1;
+    updateRoom(sz);
+    for (const int e : ringEdges[static_cast<size_t>(ring)]) {
+      const auto &ends = edgeEnds[static_cast<size_t>(e)];
+      auto &u = edgeUse[static_cast<size_t>(e)];
+      --u;
+      if (u == 0) {
+        --nEdges;
+        halfDrop(e);
+        --openAt[static_cast<size_t>(ends[0])];
+        --openAt[static_cast<size_t>(ends[1])];
+      } else {
+        halfAdd(e);
+        ++openAt[static_cast<size_t>(ends[0])];
+        ++openAt[static_cast<size_t>(ends[1])];
+      }
+    }
+    for (const int w : ringWedges[static_cast<size_t>(ring)]) {
+      --wedgeUse[static_cast<size_t>(w)];
+    }
+    for (const int v : ringVerts[static_cast<size_t>(ring)]) {
+      --facesAt[static_cast<size_t>(v)];
+      nVerts -= facesAt[static_cast<size_t>(v)] == 0 ? 1 : 0;
+    }
+  }
+
+  void restore(size_t mark) {
+    while (chosen.size() > mark) {
+      undoRing();
+    }
+  }
+
+  // Adds every ring that is the only choice for its open edge, then returns
+  // the open edge with the fewest choices: -1 when no edge is open, -2 when
+  // an open edge has none.
+  int narrow() {
+    for (;;) {
+      int bestEdge = -1;
+      size_t best = 0;
+      bool forced = false;
+      for (const int e : half) {
+        size_t n = 0;
+        int only = -1;
+        for (const int r : ringsOfEdge[static_cast<size_t>(e)]) {
+          if (!canAdd(r)) {
+            continue;
+          }
+          only = r;
+          if (++n > 1 && bestEdge >= 0 && n >= best) {
+            break;
+          }
+        }
+        if (n == 0) {
+          return -2;
+        }
+        if (n == 1) {
+          addRing(only);
+          forced = true;
+          break;
+        }
+        if (bestEdge < 0 || n < best) {
+          best = n;
+          bestEdge = e;
+        }
+      }
+      if (!forced) {
+        return bestEdge;
+      }
+    }
+  }
+
+  void accept() {
+    const unsigned m = fits[chosen.size()];
+    for (size_t k = 0; k < sigs.size(); ++k) {
+      if (((m >> k) & 1u) == 0 ||
+          static_cast<int>(chosen.size()) != facesOf[k]) {
+        continue;
+      }
+      if (!facesTileSphere(rings, chosen)) {
+        return;
+      }
+      cage::FoundCage cage;
+      cage.signature = sigs[k];
+      cage.faces = chosen;
+      std::sort(cage.faces.begin(), cage.faces.end());
+      cage.vertices = uniqueVertices(rings, cage.faces);
+      found[k].push_back(std::move(cage));
+      return;
+    }
+  }
+
+  void search() {
+    const size_t mark = chosen.size();
+    const int edge = narrow();
+    if (edge == -2) {
+      restore(mark);
+      return;
+    }
+    if (half.empty()) {
+      accept();
+      restore(mark);
+      return;
+    }
+    auto &opts = optsAt[chosen.size()];
+    opts.clear();
+    for (const int r : ringsOfEdge[static_cast<size_t>(edge)]) {
+      if (canAdd(r)) {
+        opts.push_back(r);
+      }
+    }
+    for (size_t k = 0; k < opts.size(); ++k) {
+      const int r = opts[k];
+      if (!canAdd(r)) {
+        continue;
+      }
+      addRing(r);
+      search();
+      undoRing();
+    }
+    restore(mark);
+  }
+
+  // A signature whose ring-size census exceeds the rings on hand cannot
+  // match. Ice, which has no pentagons, then skips the clathrate search.
+  bool feasible() const {
+    if (sigs.empty()) {
+      return false;
+    }
+    std::vector<int> got(room.size(), 0);
+    for (const int r : cand) {
+      const int s = ringSize[static_cast<size_t>(r)];
+      if (s >= 0 && s < static_cast<int>(got.size())) {
+        ++got[static_cast<size_t>(s)];
+      }
+    }
+    for (size_t k = 0; k < sigs.size(); ++k) {
+      bool ok = true;
+      for (size_t s = 0; s < got.size(); ++s) {
+        if (need[k][s] > got[s]) {
+          ok = false;
+          break;
+        }
+      }
+      if (ok) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void searchSeeds(const std::vector<int> &seeds) {
+    for (const int r : seeds) {
+      seed = r;
+      bool seedOk = true;
+      for (const int e : ringEdges[static_cast<size_t>(r)]) {
+        if (ringsOfEdge[static_cast<size_t>(e)].size() < 2) {
+          seedOk = false;
+          break;
+        }
+      }
+      if (!seedOk) {
+        continue;
+      }
+      addRing(r);
+      search();
+      undoRing();
+    }
+  }
+
+  void publish() {
+    for (auto &list : found) {
+      std::sort(list.begin(), list.end(),
+                [](const cage::FoundCage &a, const cage::FoundCage &b) {
+                  return a.vertices != b.vertices ? a.vertices < b.vertices
+                                                  : a.faces < b.faces;
+                });
+      list.erase(std::unique(list.begin(), list.end(),
+                             [](const cage::FoundCage &a,
+                                const cage::FoundCage &b) {
+                               return a.vertices == b.vertices;
+                             }),
+                 list.end());
+      std::sort(list.begin(), list.end(),
+                [](const cage::FoundCage &a, const cage::FoundCage &b) {
+                  return a.faces < b.faces;
+                });
+      std::vector<std::vector<int>> faceRings;
+      for (auto &c : list) {
+        faceRings.clear();
+        for (const int fi : c.faces) {
+          faceRings.push_back(rings[static_cast<size_t>(fi)]);
+        }
+        c.certificate = cage::canonicalCertificate(faceRings);
+      }
+    }
+  }
+
+  // Every face set is reached once, from its lowest ring. Face sets that
+  // share their vertices keep the one with the lowest faces, so the result
+  // does not depend on the search order or on the other signatures.
+  // Threads search disjoint seeds and the lists are merged before that
+  // sort, so the cages do not depend on the thread count.
+  void run() {
+    if (!feasible()) {
+      publish();
+      return;
+    }
+    int nThreads = 1;
+#if defined(SEAMS_HAS_OPENMP)
+    if (!omp_in_parallel()) {
+      nThreads = omp_get_max_threads();
+    }
+#endif
+    if (nThreads <= 1 || cand.size() < 96) {
+      searchSeeds(cand);
+    } else {
+      std::vector<std::vector<std::vector<cage::FoundCage>>> partial(
+          static_cast<size_t>(nThreads));
+#if defined(SEAMS_HAS_OPENMP)
+#pragma omp parallel
+#endif
+      {
+#if defined(SEAMS_HAS_OPENMP)
+        const int tid = omp_get_thread_num();
+        const int team = omp_get_num_threads();
+#else
+        const int tid = 0;
+        const int team = 1;
+#endif
+        ClosedSearch local(*this);
+        for (auto &list : local.found) {
+          list.clear();
+        }
+        std::vector<int> mine;
+        mine.reserve(cand.size() / static_cast<size_t>(team) + 1);
+        for (size_t i = static_cast<size_t>(tid); i < cand.size();
+             i += static_cast<size_t>(team)) {
+          mine.push_back(cand[i]);
+        }
+        local.searchSeeds(mine);
+        if (tid < nThreads) {
+          partial[static_cast<size_t>(tid)] = std::move(local.found);
+        }
+      }
+      for (int t = 0; t < nThreads; t++) {
+        if (partial[static_cast<size_t>(t)].size() != found.size()) {
+          continue;
+        }
+        for (size_t k = 0; k < found.size(); k++) {
+          auto &src = partial[static_cast<size_t>(t)][k];
+          found[k].insert(found[k].end(), src.begin(), src.end());
+        }
+      }
+    }
+    publish();
   }
 };
 
@@ -583,14 +1142,20 @@ bool isClosedPolyhedron(const std::vector<std::vector<int>> &rings,
   return true;
 }
 
+bool isSpherePolyhedron(const std::vector<std::vector<int>> &rings,
+                        const std::vector<int> &faces) {
+  return isClosedPolyhedron(rings, faces) && facesTileSphere(rings, faces);
+}
+
 std::vector<FoundCage> findBySignature(const std::vector<std::vector<int>> &rings,
                                        const Signature &signature) {
   if (signature.counts.empty() || signature.faceCount() <= 0) {
     return {};
   }
-  Search search(rings, signature);
+  const std::vector<Signature> one = {signature};
+  ClosedSearch search(rings, one);
   search.run();
-  return search.found;
+  return std::move(search.found[0]);
 }
 
 std::vector<FoundCage>
@@ -604,9 +1169,10 @@ findBySignature(const std::vector<std::vector<int>> &rings,
     return {};
   }
   const auto admit = admitBySpecies(rings, species, patterns);
-  Search search(rings, signature, &admit);
+  const std::vector<Signature> one = {signature};
+  ClosedSearch search(rings, one, &admit);
   search.run();
-  return search.found;
+  return std::move(search.found[0]);
 }
 
 namespace {
@@ -770,7 +1336,7 @@ namespace {
 std::vector<FoundCage>
 tumByType(const std::vector<std::vector<int>> &rings,
           const std::vector<std::vector<int>> &nList, cageType want,
-          const Signature &signature) {
+          const Signature &signature, const std::vector<int> &atomRank) {
   std::vector<std::vector<int>> six;
   std::vector<int> origin;
   six.reserve(rings.size());
@@ -783,9 +1349,11 @@ tumByType(const std::vector<std::vector<int>> &rings,
   }
   std::vector<ring::strucType> ringType(six.size());
   std::vector<Cage> cageList;
-  const auto listHC = ring::findHC(six, ringType, nList, cageList);
+  auto index = ring::buildRingSearchIndex(six, static_cast<int>(nList.size()));
+  index.atomRank = atomRank;
+  const auto listHC = ring::findHC(six, ringType, nList, cageList, index);
   if (want == cageType::DoubleDiaC) {
-    ring::findDDC(six, ringType, listHC, cageList);
+    ring::findDDC(six, ringType, listHC, cageList, index);
   }
   std::vector<FoundCage> out;
   for (const auto &c : cageList) {
@@ -818,13 +1386,85 @@ std::vector<FoundCage>
 findBySignature(const std::vector<std::vector<int>> &rings,
                 const std::vector<std::vector<int>> &nList,
                 const Signature &signature) {
+  return findBySignature(rings, nList, signature, {});
+}
+
+std::vector<FoundCage>
+findBySignature(const std::vector<std::vector<int>> &rings,
+                const std::vector<std::vector<int>> &nList,
+                const Signature &signature, const std::vector<int> &atomRank) {
   if (signature.kind == Signature::Kind::HexC) {
-    return tumByType(rings, nList, cageType::HexC, signature);
+    return tumByType(rings, nList, cageType::HexC, signature, atomRank);
   }
   if (signature.kind == Signature::Kind::DoubleDiaC) {
-    return tumByType(rings, nList, cageType::DoubleDiaC, signature);
+    return tumByType(rings, nList, cageType::DoubleDiaC, signature, atomRank);
   }
   return findBySignature(rings, signature);
+}
+
+std::vector<std::vector<FoundCage>>
+findBySignatures(const std::vector<std::vector<int>> &rings,
+                 const std::vector<std::vector<int>> &nList,
+                 const std::vector<Signature> &signatures,
+                 const std::vector<int> &atomRank) {
+  std::vector<std::vector<FoundCage>> out(signatures.size());
+  std::vector<Signature> census;
+  std::vector<std::vector<size_t>> askedAt;
+  for (size_t i = 0; i < signatures.size(); ++i) {
+    const auto &s = signatures[i];
+    if (s.kind != Signature::Kind::Census || s.counts.empty() ||
+        s.faceCount() <= 0) {
+      out[i] = findBySignature(rings, nList, s, atomRank);
+      continue;
+    }
+    const auto at = std::find(census.begin(), census.end(), s);
+    if (at == census.end()) {
+      census.push_back(s);
+      askedAt.push_back({i});
+    } else {
+      askedAt[static_cast<size_t>(at - census.begin())].push_back(i);
+    }
+  }
+  constexpr size_t kPerSearch = 32;
+  for (size_t from = 0; from < census.size(); from += kPerSearch) {
+    const size_t to = std::min(census.size(), from + kPerSearch);
+    const std::vector<Signature> chunk(census.begin() + static_cast<std::ptrdiff_t>(from),
+                                       census.begin() + static_cast<std::ptrdiff_t>(to));
+    int maxSize = 0;
+    for (const auto &s : chunk) {
+      maxSize = std::max(maxSize, s.maxRingSize());
+    }
+    std::vector<int> got(static_cast<size_t>(maxSize) + 1, 0);
+    for (const auto &ring : rings) {
+      const int sz = static_cast<int>(ring.size());
+      if (sz >= 0 && sz <= maxSize) {
+        ++got[static_cast<size_t>(sz)];
+      }
+    }
+    bool any = false;
+    for (const auto &s : chunk) {
+      bool ok = true;
+      for (const auto &kv : s.counts) {
+        if (kv.first > maxSize ||
+            got[static_cast<size_t>(kv.first)] < kv.second) {
+          ok = false;
+          break;
+        }
+      }
+      any = any || ok;
+    }
+    if (!any) {
+      continue;
+    }
+    ClosedSearch search(rings, chunk);
+    search.run();
+    for (size_t j = 0; j < chunk.size(); ++j) {
+      for (const size_t i : askedAt[from + j]) {
+        out[i] = search.found[j];
+      }
+    }
+  }
+  return out;
 }
 
 } // namespace cage

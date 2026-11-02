@@ -88,12 +88,14 @@ struct StackingPlanes {
 
 /** @class AffiliationUpdater
  * @brief Exact incremental affiliation across frames.
- * @details Diffs the six-ring set (by canonical ring key) and the neighbour
- *  rows against the previous frame, recomputes affiliation inside the
- *  locality closure of the changes, and carries stored answers elsewhere.
- *  The result is identical to cageAffiliation on the new frame. The
- *  neighbour graph should come from SkinNeighborList (default: mutual
- *  four-nearest, the TUM v2 graph).
+ * @details Stores, per six-ring, its passing basal pairs with their
+ *  prismatic rings and its equatorial result. On a new frame it matches the
+ *  rings to the previous frame's and evaluates again only the pairs of
+ *  rings that are new, hold an atom whose neighbour row changed, or hold or
+ *  bond an atom of an added or removed ring, and the equatorial test of
+ *  rings that are new or hold an atom of an added or removed ring. The
+ *  flags are the unions over the stored answers, identical to
+ *  cageAffiliation on the new frame.
  */
 class AffiliationUpdater {
 public:
@@ -110,9 +112,15 @@ public:
   const CageAffiliation &update(const std::vector<std::vector<int>> &rings,
                                 const std::vector<std::vector<int>> &nList);
 
-  //! Rings reclassified by the last update (the dirty closure); the first
-  //! call reports every ring.
+  //! Rings whose pairs or equatorial test the last update evaluated again;
+  //! the first call reports every ring.
   [[nodiscard]] int lastReclassified() const;
+
+  //! Above this fraction of dirty rings, update runs the batch sweep instead
+  //! (default 0.25; 1 never falls back). After such a frame the next 1, 2,
+  //! 4, then at most 8 frames run the batch sweep without the diff, while
+  //! frames keep falling back
+  void setBatchFraction(double fraction);
 
 private:
   struct Impl;
@@ -152,6 +160,25 @@ struct SeededAtomLabels {
     const std::vector<std::vector<int>> &strictRings,
     const std::vector<std::vector<int>> &strictNList,
     const std::vector<std::vector<int>> &permissiveRings,
+    const std::vector<std::vector<int>> &permissiveNList,
+    bool ringAdjacentCompletion = false);
+
+/** The same labels from the affiliation of each graph's six-rings, computed
+ *  by the caller. A frame walk passes AffiliationUpdater results here, so
+ *  both graphs carry their per-ring answers across frames.
+ * @param[in] strictRings Six-membered rings of the strict graph.
+ * @param[in] strictAffiliation cageAffiliation of strictRings.
+ * @param[in] permissiveRings Six-membered rings of the permissive graph.
+ * @param[in] permissiveAffiliation cageAffiliation of permissiveRings.
+ * @param[in] permissiveNList Permissive graph, by index with leading self
+ *  entries.
+ * @param[in] ringAdjacentCompletion As in the overload above.
+ */
+[[nodiscard]] SeededAtomLabels seededCageAffiliation(
+    const std::vector<std::vector<int>> &strictRings,
+    const CageAffiliation &strictAffiliation,
+    const std::vector<std::vector<int>> &permissiveRings,
+    const CageAffiliation &permissiveAffiliation,
     const std::vector<std::vector<int>> &permissiveNList,
     bool ringAdjacentCompletion = false);
 

@@ -11,6 +11,7 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 | [[file:api.org][API map]] | fronts and headers; the tree is =api/index= |
 | [[file:../api/index][API Reference]] | Doxygen comments, via doxyrest |
 | [[file:nix.org][Nix flake]] | ~nix build~, ~nix develop~, flake outputs |
+| [[file:cross-language.org][One task, three languages]] | CHILL+ on the cubic mW frame |
 | [[file:glossary.org][glossary]] | Engine terms |
 
 #+begin_export rst
@@ -23,5 +24,6 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
    api
    ../api/index
    nix
+   cross-language
    glossary
 #+end_export

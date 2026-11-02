@@ -71,8 +71,9 @@
  *
  *  To account for the geometry of the slab-like quasi-two-dimensional system,
  * the RDF must be additionally normalized by a form factor @f$f@f$ such that
- * @f$f = \frac{h}{2r}@f$ for @f$r>h@f$ and @f$f = \frac{h}{2r}@f$ for @f$r \le
- * h@f$; where @f$h@f$ is the height of the quasi-two-dimensional system.
+ * @f$f = 1 - \frac{r}{2h}@f$ for @f$r \le h@f$ and @f$f = \frac{h}{2r}@f$ for
+ * @f$r > h@f$; where @f$h@f$ is the height of the quasi-two-dimensional system.
+ * That is what @c rdf2::normalizeRDF implements.
  *
  *    ### Changelog ###
  *
