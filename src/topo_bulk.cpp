@@ -272,15 +272,18 @@ struct PartnerScratch {
   std::vector<int> stamp;
   std::vector<int> hits;
   std::vector<int> seen;
-  std::vector<unsigned char> inTrip;
+  std::vector<int> tripSeen;
   int tick = 0;
+  int tripTick = 1;
+  int markTickB = 0;
+  int markTickC = 0;
 
   void prepare(int nAtoms, int nRight) {
     if (static_cast<int>(bucket.size()) < nAtoms) {
       bucket.resize(static_cast<size_t>(nAtoms));
     }
-    if (static_cast<int>(inTrip.size()) < nAtoms) {
-      inTrip.assign(static_cast<size_t>(nAtoms), 0);
+    if (static_cast<int>(tripSeen.size()) < nAtoms) {
+      tripSeen.assign(static_cast<size_t>(nAtoms), 0);
     }
     if (static_cast<int>(stamp.size()) < nRight) {
       stamp.resize(static_cast<size_t>(nRight), 0);
@@ -304,18 +307,22 @@ void partnersOf(const std::vector<std::vector<int>> &rings,
   adj.assign(left.size(), {});
   scratch.prepare(nAtoms, nRight);
   scratch.clearBuckets();
-  std::fill(scratch.inTrip.begin(), scratch.inTrip.end(), 0);
+  if (++scratch.tripTick <= 0) {
+    std::fill(scratch.tripSeen.begin(), scratch.tripSeen.end(), 0);
+    scratch.tripTick = 1;
+  }
+  const int tripMark = scratch.tripTick;
   for (int t = 0; t < 3; ++t) {
     const int atom = tripRight[t];
     if (atom >= 0 && atom < nAtoms) {
-      scratch.inTrip[static_cast<size_t>(atom)] = 1;
+      scratch.tripSeen[static_cast<size_t>(atom)] = tripMark;
     }
   }
   for (int j = 0; j < nRight; ++j) {
     const int ring = right[static_cast<size_t>(j)];
     for (const int atom : rings[static_cast<size_t>(ring)]) {
       if (atom < 0 || atom >= nAtoms ||
-          scratch.inTrip[static_cast<size_t>(atom)]) {
+          scratch.tripSeen[static_cast<size_t>(atom)] == tripMark) {
         continue;
       }
       auto &bucket = scratch.bucket[static_cast<size_t>(atom)];
@@ -331,7 +338,7 @@ void partnersOf(const std::vector<std::vector<int>> &rings,
     int always = 0;
     for (const int atom : atoms) {
       if (atom >= 0 && atom < nAtoms &&
-          scratch.inTrip[static_cast<size_t>(atom)]) {
+          scratch.tripSeen[static_cast<size_t>(atom)] == tripMark) {
         ++always;
       }
     }
@@ -352,7 +359,7 @@ void partnersOf(const std::vector<std::vector<int>> &rings,
     scratch.seen.clear();
     for (const int atom : atoms) {
       if (atom < 0 || atom >= nAtoms ||
-          scratch.inTrip[static_cast<size_t>(atom)]) {
+          scratch.tripSeen[static_cast<size_t>(atom)] == tripMark) {
         continue;
       }
       for (const int j : scratch.bucket[static_cast<size_t>(atom)]) {
@@ -395,97 +402,178 @@ bool ddcDistinct(const DdcChain &e, const DdcChain &o) {
   return true;
 }
 
-std::uint64_t ddcPack2(int a, int b) {
-  if (a > b) {
-    std::swap(a, b);
-  }
-  return static_cast<std::uint64_t>(a) |
-         (static_cast<std::uint64_t>(b) << 21);
-}
-
-std::uint64_t ddcPack3(int a, int b, int c) {
-  if (a > b) {
-    std::swap(a, b);
-  }
-  if (b > c) {
-    std::swap(b, c);
-  }
-  if (a > b) {
-    std::swap(a, b);
-  }
-  return static_cast<std::uint64_t>(a) |
-         (static_cast<std::uint64_t>(b) << 21) |
-         (static_cast<std::uint64_t>(c) << 42);
-}
-
-struct DdcGroup {
+// Counts of rings inside one middle-mask of the opposite parity. A stamp
+// replaces the hash map: only the rings touched by this mask are written.
+struct DdcMaskCount {
+  int tick = 1;
   int total = 0;
-  std::unordered_map<int, int> cnt;
-  std::unordered_map<std::uint64_t, int> pairs;
-  std::unordered_map<std::uint64_t, int> triples;
+  std::vector<int> touch;
+  std::vector<int> cnt;
+  std::vector<std::vector<int>> at;
+  std::vector<int> used;
+  std::vector<int> chainSeen;
+  int chainTick = 1;
+
+  void prepare(int nRings) {
+    if (static_cast<int>(touch.size()) < nRings) {
+      touch.assign(static_cast<size_t>(nRings), 0);
+      cnt.assign(static_cast<size_t>(nRings), 0);
+      at.resize(static_cast<size_t>(nRings));
+    }
+  }
+
+  void reset() {
+    for (const int ring : used) {
+      at[static_cast<size_t>(ring)].clear();
+    }
+    used.clear();
+    if (++tick <= 0) {
+      std::fill(touch.begin(), touch.end(), 0);
+      tick = 1;
+    }
+    total = 0;
+  }
+
+  void add(int ring) {
+    if (ring < 0 || ring >= static_cast<int>(touch.size())) {
+      return;
+    }
+    if (touch[static_cast<size_t>(ring)] != tick) {
+      touch[static_cast<size_t>(ring)] = tick;
+      cnt[static_cast<size_t>(ring)] = 0;
+    }
+    ++cnt[static_cast<size_t>(ring)];
+  }
+
+  [[nodiscard]] int get(int ring) const {
+    if (ring < 0 || ring >= static_cast<int>(touch.size()) ||
+        touch[static_cast<size_t>(ring)] != tick) {
+      return 0;
+    }
+    return cnt[static_cast<size_t>(ring)];
+  }
+
+  void lists(const std::vector<int> &ids, const std::vector<DdcChain> &chains) {
+    for (const int id : ids) {
+      for (const int ring : chains[static_cast<size_t>(id)].r) {
+        if (ring < 0 || ring >= static_cast<int>(at.size())) {
+          continue;
+        }
+        auto &row = at[static_cast<size_t>(ring)];
+        if (row.empty()) {
+          used.push_back(ring);
+        }
+        row.push_back(id);
+      }
+    }
+  }
+
+  void prepareChains(int nChains) {
+    if (static_cast<int>(chainSeen.size()) < nChains) {
+      chainSeen.assign(static_cast<size_t>(nChains), 0);
+      chainTick = 1;
+    }
+  }
+
+  // True when some chain of this mask is disjoint from {a, b, c}.
+  // Chain ids are indexes into the opposite chain vector.
+  [[nodiscard]] bool hasDisjoint(int a, int b, int c) {
+    if (++chainTick <= 0) {
+      std::fill(chainSeen.begin(), chainSeen.end(), 0);
+      chainTick = 1;
+    }
+    int cover = 0;
+    const int ringsHere[3] = {a, b, c};
+    for (const int ring : ringsHere) {
+      if (ring < 0 || ring >= static_cast<int>(at.size())) {
+        continue;
+      }
+      for (const int id : at[static_cast<size_t>(ring)]) {
+        if (id < 0 || id >= static_cast<int>(chainSeen.size())) {
+          continue;
+        }
+        if (chainSeen[static_cast<size_t>(id)] == chainTick) {
+          continue;
+        }
+        chainSeen[static_cast<size_t>(id)] = chainTick;
+        ++cover;
+      }
+    }
+    return total > cover;
+  }
 };
 
-int ddcLookup(const std::unordered_map<int, int> &m, int key) {
-  const auto it = m.find(key);
-  return it == m.end() ? 0 : it->second;
-}
-
-int ddcLookup(const std::unordered_map<std::uint64_t, int> &m,
-              std::uint64_t key) {
-  const auto it = m.find(key);
-  return it == m.end() ? 0 : it->second;
-}
-
-void ddcFillGroup(const std::vector<DdcChain> &chains, DdcGroup groups[8]) {
-  for (const DdcChain &chain : chains) {
-    DdcGroup &group = groups[chain.middles & 7U];
-    ++group.total;
-    for (const int ring : chain.r) {
-      ++group.cnt[ring];
-    }
-    ++group.pairs[ddcPack2(chain.r[0], chain.r[1])];
-    ++group.pairs[ddcPack2(chain.r[0], chain.r[2])];
-    ++group.pairs[ddcPack2(chain.r[1], chain.r[2])];
-    ++group.triples[ddcPack3(chain.r[0], chain.r[1], chain.r[2])];
+void markDdcLive(const std::vector<DdcChain> &self,
+                 const std::vector<DdcChain> &other, int nRings,
+                 std::vector<char> &live, DdcMaskCount &count) {
+  count.prepare(nRings);
+  count.prepareChains(static_cast<int>(other.size()));
+  live.assign(self.size(), 0);
+  std::array<std::vector<int>, 8> bucket;
+  for (int i = 0; i < static_cast<int>(other.size()); ++i) {
+    bucket[other[static_cast<size_t>(i)].middles & 7U].push_back(i);
   }
-}
-
-bool ddcLive(const DdcChain &chain, const DdcGroup groups[8]) {
-  const unsigned partners = ddcPartnerMask(chain.middles);
-  const int a = chain.r[0];
-  const int b = chain.r[1];
-  const int c = chain.r[2];
+  std::vector<int> slow;
   for (unsigned mask = 1; mask <= 7; ++mask) {
-    if ((mask & partners) == 0U) {
+    const std::vector<int> &ids = bucket[mask];
+    if (ids.empty()) {
       continue;
     }
-    const DdcGroup &group = groups[mask];
-    if (group.total == 0) {
+    count.reset();
+    count.total = static_cast<int>(ids.size());
+    for (const int id : ids) {
+      for (const int ring : other[static_cast<size_t>(id)].r) {
+        count.add(ring);
+      }
+    }
+    slow.clear();
+    bool needLists = false;
+    for (int i = 0; i < static_cast<int>(self.size()); ++i) {
+      if (live[static_cast<size_t>(i)] != 0) {
+        continue;
+      }
+      const unsigned partners =
+          ddcPartnerMask(self[static_cast<size_t>(i)].middles);
+      if ((partners & mask) == 0U) {
+        continue;
+      }
+      const auto &chain = self[static_cast<size_t>(i)];
+      const int coverBound = count.get(chain.r[0]) + count.get(chain.r[1]) +
+                             count.get(chain.r[2]);
+      if (count.total > coverBound) {
+        live[static_cast<size_t>(i)] = 1;
+      } else {
+        slow.push_back(i);
+        needLists = true;
+      }
+    }
+    if (!needLists) {
       continue;
     }
-    const int ca = ddcLookup(group.cnt, a);
-    const int cb = ddcLookup(group.cnt, b);
-    const int cc = ddcLookup(group.cnt, c);
-    if (group.total > ca + cb + cc) {
-      return true;
-    }
-    const int cover = ca + cb + cc -
-                      ddcLookup(group.pairs, ddcPack2(a, b)) -
-                      ddcLookup(group.pairs, ddcPack2(a, c)) -
-                      ddcLookup(group.pairs, ddcPack2(b, c)) +
-                      ddcLookup(group.triples, ddcPack3(a, b, c));
-    if (group.total > cover) {
-      return true;
+    count.lists(ids, other);
+    for (const int i : slow) {
+      if (live[static_cast<size_t>(i)] != 0) {
+        continue;
+      }
+      const auto &chain = self[static_cast<size_t>(i)];
+      if (count.hasDisjoint(chain.r[0], chain.r[1], chain.r[2])) {
+        live[static_cast<size_t>(i)] = 1;
+      }
     }
   }
-  return false;
 }
 
 void ddcChains(const std::vector<std::vector<int>> &rings,
                const std::vector<int> &equatorial,
-               const std::array<IntBuf, 6> &T, int parity,
-               int nAtoms, PartnerScratch &scratch,
+               const std::array<IntBuf, 6> &T, int parity, int nAtoms,
                std::vector<DdcChain> &out) {
+  thread_local PartnerScratch scratch;
+  thread_local std::vector<std::vector<int>> ab;
+  thread_local std::vector<std::vector<int>> ac;
+  thread_local std::vector<std::vector<int>> bc;
+  thread_local std::vector<std::vector<int>> bcFromC;
+  thread_local std::vector<int> markB;
+  thread_local std::vector<int> markC;
   out.clear();
   const IntBuf &A = T[static_cast<size_t>(parity)];
   const IntBuf &B = T[static_cast<size_t>(parity + 2)];
@@ -496,25 +584,31 @@ void ddcChains(const std::vector<std::vector<int>> &rings,
     tripB[t] = equatorial[static_cast<size_t>((parity + 2 + t) % 6)];
     tripC[t] = equatorial[static_cast<size_t>((parity + 4 + t) % 6)];
   }
-  std::vector<std::vector<int>> ab;
-  std::vector<std::vector<int>> ac;
-  std::vector<std::vector<int>> bc;
   partnersOf(rings, A, B, tripB, nAtoms, scratch, ab);
   partnersOf(rings, A, C, tripC, nAtoms, scratch, ac);
   partnersOf(rings, B, C, tripC, nAtoms, scratch, bc);
   for (auto &row : bc) {
     std::sort(row.begin(), row.end());
   }
-  std::vector<std::vector<int>> bcFromC(C.size());
+  if (bcFromC.size() < C.size()) {
+    bcFromC.resize(static_cast<size_t>(C.size()));
+  }
+  for (int ci = 0; ci < C.size(); ++ci) {
+    bcFromC[static_cast<size_t>(ci)].clear();
+  }
   for (int j = 0; j < static_cast<int>(B.size()); ++j) {
     for (const int kc : bc[static_cast<size_t>(j)]) {
       bcFromC[static_cast<size_t>(kc)].push_back(j);
     }
   }
-  std::vector<int> markB(B.size(), 0);
-  std::vector<int> markC(C.size(), 0);
-  int tickB = 0;
-  int tickC = 0;
+  if (markB.size() < static_cast<size_t>(B.size())) {
+    markB.resize(static_cast<size_t>(B.size()));
+  }
+  if (markC.size() < static_cast<size_t>(C.size())) {
+    markC.resize(static_cast<size_t>(C.size()));
+  }
+  int tickB = scratch.markTickB;
+  int tickC = scratch.markTickC;
   auto fresh = [](int &tick, std::vector<int> &mark) {
     if (++tick <= 0) {
       std::fill(mark.begin(), mark.end(), 0);
@@ -547,8 +641,7 @@ void ddcChains(const std::vector<std::vector<int>> &rings,
         const bool bcOK =
             std::binary_search(bc[static_cast<size_t>(jb)].begin(),
                                bc[static_cast<size_t>(jb)].end(), kc);
-        const unsigned middles =
-            1U | (bcOK ? 2U : 0U) | (bcOK ? 4U : 0U);
+        const unsigned middles = 1U | (bcOK ? 2U : 0U) | (bcOK ? 4U : 0U);
         if (!commonAtom(atomsA, atomsB, rings[static_cast<size_t>(rc)])) {
           continue;
         }
@@ -589,91 +682,210 @@ void ddcChains(const std::vector<std::vector<int>> &rings,
       }
     }
   }
+  scratch.markTickB = tickB;
+  scratch.markTickC = tickC;
 }
 
+// Seven hexagons of a DDC span 14 molecules, and each peripheral shares
+// exactly three atoms with the equator. The stamp is the same test as the
+// sort in the triple loop.
 bool ddcFourteen(const std::vector<std::vector<int>> &rings,
                  const std::vector<int> &equatorial, const DdcChain &e,
-                 const DdcChain &o) {
-  int atoms[42];
-  int nAtomsHere = 0;
-  auto take = [&](const std::vector<int> &cycle) -> bool {
-    if (cycle.size() != 6 || nAtomsHere + 6 > 42) {
+                 const DdcChain &o, int nAtoms) {
+  thread_local std::vector<int> stamp;
+  thread_local int tick = 1;
+  if (static_cast<int>(stamp.size()) < nAtoms) {
+    stamp.assign(static_cast<size_t>(nAtoms), 0);
+  }
+  auto fresh = [&]() {
+    if (++tick <= 0) {
+      std::fill(stamp.begin(), stamp.end(), 0);
+      tick = 1;
+    }
+    return tick;
+  };
+  const int eqMark = fresh();
+  int eqN = 0;
+  for (const int atom : equatorial) {
+    if (atom < 0 || atom >= nAtoms || stamp[static_cast<size_t>(atom)] == eqMark) {
       return false;
     }
-    for (const int a : cycle) {
-      atoms[nAtomsHere++] = a;
+    stamp[static_cast<size_t>(atom)] = eqMark;
+    ++eqN;
+  }
+  if (eqN != 6) {
+    return false;
+  }
+  const int ids[6] = {e.r[0], e.r[1], e.r[2], o.r[0], o.r[1], o.r[2]};
+  for (const int ri : ids) {
+    const auto &cycle = rings[static_cast<size_t>(ri)];
+    if (cycle.size() != 6) {
+      return false;
+    }
+    int share = 0;
+    for (const int atom : cycle) {
+      if (atom < 0 || atom >= nAtoms) {
+        return false;
+      }
+      share += stamp[static_cast<size_t>(atom)] == eqMark ? 1 : 0;
+    }
+    if (share != 3) {
+      return false;
+    }
+  }
+  const int allMark = fresh();
+  int unique = 0;
+  auto take = [&](const std::vector<int> &cycle) {
+    for (const int atom : cycle) {
+      if (stamp[static_cast<size_t>(atom)] != allMark) {
+        stamp[static_cast<size_t>(atom)] = allMark;
+        ++unique;
+      }
+    }
+  };
+  take(equatorial);
+  for (const int ri : ids) {
+    take(rings[static_cast<size_t>(ri)]);
+  }
+  return unique == 14;
+}
+
+// One chain plus the equator is a subset of the seven rings, so more than
+// 14 molecules cannot be completed to a DDC.
+bool ddcChainRoom(const std::vector<std::vector<int>> &rings,
+                  const std::vector<int> &equatorial, const DdcChain &chain,
+                  int nAtoms) {
+  thread_local std::vector<int> stamp;
+  thread_local int tick = 1;
+  if (static_cast<int>(stamp.size()) < nAtoms) {
+    stamp.assign(static_cast<size_t>(nAtoms), 0);
+  }
+  if (++tick <= 0) {
+    std::fill(stamp.begin(), stamp.end(), 0);
+    tick = 1;
+  }
+  const int mark = tick;
+  int unique = 0;
+  auto take = [&](const std::vector<int> &cycle) -> bool {
+    for (const int atom : cycle) {
+      if (atom < 0 || atom >= nAtoms) {
+        return false;
+      }
+      if (stamp[static_cast<size_t>(atom)] != mark) {
+        stamp[static_cast<size_t>(atom)] = mark;
+        ++unique;
+        if (unique > 14) {
+          return false;
+        }
+      }
     }
     return true;
   };
   if (!take(equatorial)) {
     return false;
   }
-  for (const int ri : e.r) {
+  for (const int ri : chain.r) {
     if (!take(rings[static_cast<size_t>(ri)])) {
-      return false;
-    }
-  }
-  for (const int ri : o.r) {
-    if (!take(rings[static_cast<size_t>(ri)])) {
-      return false;
-    }
-  }
-  std::sort(atoms, atoms + nAtomsHere);
-  if (std::unique(atoms, atoms + nAtomsHere) - atoms != 14) {
-    return false;
-  }
-  for (const int ri : e.r) {
-    if (sharedAtoms(rings[static_cast<size_t>(ri)], equatorial) != 3) {
-      return false;
-    }
-  }
-  for (const int ri : o.r) {
-    if (sharedAtoms(rings[static_cast<size_t>(ri)], equatorial) != 3) {
       return false;
     }
   }
   return true;
 }
 
-bool equatorialLarge(const std::vector<std::vector<int>> &rings,
+void ddcKeepRoom(const std::vector<std::vector<int>> &rings,
+                 const std::vector<int> &equatorial, int nAtoms,
+                 std::vector<DdcChain> &chains) {
+  size_t w = 0;
+  for (size_t i = 0; i < chains.size(); ++i) {
+    if (ddcChainRoom(rings, equatorial, chains[i], nAtoms)) {
+      if (w != i) {
+        chains[w] = chains[i];
+      }
+      ++w;
+    }
+  }
+  chains.resize(w);
+}
+
+[[gnu::noinline, gnu::cold]] bool equatorialLarge(const std::vector<std::vector<int>> &rings,
                      const std::vector<int> &equatorial,
                      const std::array<IntBuf, 6> &T, int nAtoms,
                      std::vector<int> *peripheralUnion,
                      std::vector<int> *chosen, const std::vector<int> *rank,
                      ring::EquatorChoice *raw) {
-  PartnerScratch scratch;
+  // A peripheral that meets the equator in a fourth atom is not a DDC face.
+  // Dropping it here leaves the pairs the triple loop would keep.
+  thread_local std::vector<int> eqStamp;
+  thread_local int eqTick = 1;
+  if (static_cast<int>(eqStamp.size()) < nAtoms) {
+    eqStamp.assign(static_cast<size_t>(nAtoms), 0);
+  }
+  if (++eqTick <= 0) {
+    std::fill(eqStamp.begin(), eqStamp.end(), 0);
+    eqTick = 1;
+  }
+  const int eqMark = eqTick;
+  for (const int atom : equatorial) {
+    if (atom >= 0 && atom < nAtoms) {
+      eqStamp[static_cast<size_t>(atom)] = eqMark;
+    }
+  }
+  thread_local std::array<IntBuf, 6> kept;
+  for (int k = 0; k < 6; ++k) {
+    kept[static_cast<size_t>(k)].clear();
+    const IntBuf &src = T[static_cast<size_t>(k)];
+    for (int i = 0; i < src.size(); ++i) {
+      const int ring = src[static_cast<size_t>(i)];
+      const auto &cycle = rings[static_cast<size_t>(ring)];
+      if (cycle.size() != 6) {
+        continue;
+      }
+      int share = 0;
+      for (const int atom : cycle) {
+        if (atom >= 0 && atom < nAtoms &&
+            eqStamp[static_cast<size_t>(atom)] == eqMark) {
+          ++share;
+        }
+      }
+      if (share == 3) {
+        kept[static_cast<size_t>(k)].push_back(ring);
+      }
+    }
+    if (kept[static_cast<size_t>(k)].empty()) {
+      return false;
+    }
+  }
   std::vector<DdcChain> even;
   std::vector<DdcChain> odd;
-  ddcChains(rings, equatorial, T, 0, nAtoms, scratch, even);
+  ddcChains(rings, equatorial, kept, 0, nAtoms, even);
   if (even.empty()) {
     return false;
   }
-  ddcChains(rings, equatorial, T, 1, nAtoms, scratch, odd);
+  ddcChains(rings, equatorial, kept, 1, nAtoms, odd);
   if (odd.empty()) {
     return false;
   }
-  DdcGroup oddGroups[8];
-  DdcGroup evenGroups[8];
-  ddcFillGroup(odd, oddGroups);
-  ddcFillGroup(even, evenGroups);
-  std::vector<char> evenLive(even.size(), 0);
-  std::vector<char> oddLive(odd.size(), 0);
+  ddcKeepRoom(rings, equatorial, nAtoms, even);
+  ddcKeepRoom(rings, equatorial, nAtoms, odd);
+  if (even.empty() || odd.empty()) {
+    return false;
+  }
+  thread_local DdcMaskCount maskCount;
+  std::vector<char> evenLive;
+  std::vector<char> oddLive;
+  const int nRings = static_cast<int>(rings.size());
+  markDdcLive(even, odd, nRings, evenLive, maskCount);
   bool any = false;
-  for (size_t i = 0; i < even.size(); ++i) {
-    if (ddcLive(even[i], oddGroups)) {
-      evenLive[i] = 1;
-      any = true;
-    }
+  for (const char flag : evenLive) {
+    any = any || flag != 0;
   }
   if (!any) {
     return false;
   }
+  markDdcLive(odd, even, nRings, oddLive, maskCount);
   any = false;
-  for (size_t i = 0; i < odd.size(); ++i) {
-    if (ddcLive(odd[i], evenGroups)) {
-      oddLive[i] = 1;
-      any = true;
-    }
+  for (const char flag : oddLive) {
+    any = any || flag != 0;
   }
   if (!any) {
     return false;
@@ -682,15 +894,15 @@ bool equatorialLarge(const std::vector<std::vector<int>> &rings,
       rank != nullptr && (chosen != nullptr || raw != nullptr);
   auto pairIsKept = [&](const DdcChain &e, const DdcChain &o) {
     return (ddcPartnerMask(e.middles) & o.middles) != 0U && ddcDistinct(e, o) &&
-           ddcFourteen(rings, equatorial, e, o);
+           ddcFourteen(rings, equatorial, e, o, nAtoms);
   };
   if (!wantBest && peripheralUnion == nullptr) {
     for (size_t i = 0; i < even.size(); ++i) {
-      if (!evenLive[i]) {
+      if (evenLive[static_cast<size_t>(i)] == 0) {
         continue;
       }
       for (size_t j = 0; j < odd.size(); ++j) {
-        if (!oddLive[j]) {
+        if (oddLive[static_cast<size_t>(j)] == 0) {
           continue;
         }
         if (pairIsKept(even[i], odd[j])) {
@@ -702,11 +914,11 @@ bool equatorialLarge(const std::vector<std::vector<int>> &rings,
   }
   if (peripheralUnion != nullptr) {
     for (size_t i = 0; i < even.size(); ++i) {
-      if (!evenLive[i]) {
+      if (evenLive[static_cast<size_t>(i)] == 0) {
         continue;
       }
       for (size_t j = 0; j < odd.size(); ++j) {
-        if (!oddLive[j]) {
+        if (oddLive[static_cast<size_t>(j)] == 0) {
           continue;
         }
         if (!pairIsKept(even[i], odd[j])) {
@@ -714,8 +926,8 @@ bool equatorialLarge(const std::vector<std::vector<int>> &rings,
         }
         peripheralUnion->insert(peripheralUnion->end(), even[i].r.begin(),
                                 even[i].r.end());
-        peripheralUnion->insert(peripheralUnion->end(), odd[i].r.begin(),
-                                odd[i].r.end());
+        peripheralUnion->insert(peripheralUnion->end(), odd[j].r.begin(),
+                                odd[j].r.end());
       }
     }
     std::sort(peripheralUnion->begin(), peripheralUnion->end());
@@ -737,27 +949,25 @@ bool equatorialLarge(const std::vector<std::vector<int>> &rings,
       }
     };
     for (size_t i = 0; i < even.size(); ++i) {
-      if (!evenLive[i]) {
+      if (evenLive[static_cast<size_t>(i)] == 0) {
         continue;
       }
-      for (const int ring : even[i].r) {
+      for (const int ring : even[static_cast<size_t>(i)].r) {
         consider(ring);
       }
     }
     for (size_t i = 0; i < odd.size(); ++i) {
-      if (!oddLive[i]) {
+      if (oddLive[static_cast<size_t>(i)] == 0) {
         continue;
       }
-      for (const int ring : odd[i].r) {
+      for (const int ring : odd[static_cast<size_t>(i)].r) {
         consider(ring);
       }
     }
     std::vector<int> bestKey;
     std::vector<int> bestRings;
     auto tryPair = [&](const DdcChain &e, const DdcChain &o) {
-      if ((ddcPartnerMask(e.middles) & o.middles) == 0U ||
-          !ddcDistinct(e, o) ||
-          !ddcFourteen(rings, equatorial, e, o)) {
+      if ((ddcPartnerMask(e.middles) & o.middles) == 0U || !ddcDistinct(e, o)) {
         return;
       }
       int key[6];
@@ -806,18 +1016,21 @@ bool equatorialLarge(const std::vector<std::vector<int>> &rings,
           }
         }
       }
+      if (!ddcFourteen(rings, equatorial, e, o, nAtoms)) {
+        return;
+      }
       bestKey.assign(key, key + 6);
       bestRings.clear();
       bestRings.insert(bestRings.end(), e.r.begin(), e.r.end());
       bestRings.insert(bestRings.end(), o.r.begin(), o.r.end());
     };
-    auto chainMin = [&](const DdcChain &chain) {
+    auto threeMin = [&](const DdcChain &chain) {
       const int a = (*rank)[static_cast<size_t>(chain.r[0])];
       const int b = (*rank)[static_cast<size_t>(chain.r[1])];
       const int c = (*rank)[static_cast<size_t>(chain.r[2])];
       return std::min(a, std::min(b, c));
     };
-    auto companion = [&](const DdcChain &chain) {
+    auto companionOf = [&](const DdcChain &chain) {
       int m = std::numeric_limits<int>::max();
       for (const int ring : chain.r) {
         if (ring == pivot) {
@@ -827,19 +1040,17 @@ bool equatorialLarge(const std::vector<std::vector<int>> &rings,
       }
       return m;
     };
+    std::array<std::vector<int>, 8> evenBucket;
+    std::array<std::vector<int>, 8> oddBucket;
     std::vector<int> evenHit;
     std::vector<int> oddHit;
-    std::vector<int> evenLiveIdx;
-    std::vector<int> oddLiveIdx;
-    evenHit.reserve(even.size());
-    oddHit.reserve(odd.size());
-    evenLiveIdx.reserve(even.size());
-    oddLiveIdx.reserve(odd.size());
+    evenHit.reserve(even.size() / 8 + 1);
+    oddHit.reserve(odd.size() / 8 + 1);
     for (int i = 0; i < static_cast<int>(even.size()); ++i) {
-      if (!evenLive[static_cast<size_t>(i)]) {
+      if (evenLive[static_cast<size_t>(i)] == 0) {
         continue;
       }
-      evenLiveIdx.push_back(i);
+      evenBucket[even[static_cast<size_t>(i)].middles & 7U].push_back(i);
       for (const int ring : even[static_cast<size_t>(i)].r) {
         if (ring == pivot) {
           evenHit.push_back(i);
@@ -848,10 +1059,10 @@ bool equatorialLarge(const std::vector<std::vector<int>> &rings,
       }
     }
     for (int i = 0; i < static_cast<int>(odd.size()); ++i) {
-      if (!oddLive[static_cast<size_t>(i)]) {
+      if (oddLive[static_cast<size_t>(i)] == 0) {
         continue;
       }
-      oddLiveIdx.push_back(i);
+      oddBucket[odd[static_cast<size_t>(i)].middles & 7U].push_back(i);
       for (const int ring : odd[static_cast<size_t>(i)].r) {
         if (ring == pivot) {
           oddHit.push_back(i);
@@ -859,40 +1070,76 @@ bool equatorialLarge(const std::vector<std::vector<int>> &rings,
         }
       }
     }
+    std::vector<int> evenMin(even.size());
+    std::vector<int> oddMin(odd.size());
+    std::vector<int> evenGate(even.size());
+    std::vector<int> oddGate(odd.size());
+    for (unsigned mask = 1; mask <= 7; ++mask) {
+      for (const int i : evenBucket[mask]) {
+        evenMin[static_cast<size_t>(i)] =
+            threeMin(even[static_cast<size_t>(i)]);
+      }
+      for (const int i : oddBucket[mask]) {
+        oddMin[static_cast<size_t>(i)] = threeMin(odd[static_cast<size_t>(i)]);
+      }
+      std::sort(evenBucket[mask].begin(), evenBucket[mask].end(),
+                [&](int a, int b) {
+                  return evenMin[static_cast<size_t>(a)] <
+                         evenMin[static_cast<size_t>(b)];
+                });
+      std::sort(oddBucket[mask].begin(), oddBucket[mask].end(),
+                [&](int a, int b) {
+                  return oddMin[static_cast<size_t>(a)] <
+                         oddMin[static_cast<size_t>(b)];
+                });
+    }
+    for (const int i : evenHit) {
+      evenGate[static_cast<size_t>(i)] =
+          companionOf(even[static_cast<size_t>(i)]);
+    }
+    for (const int i : oddHit) {
+      oddGate[static_cast<size_t>(i)] = companionOf(odd[static_cast<size_t>(i)]);
+    }
     std::sort(evenHit.begin(), evenHit.end(), [&](int a, int b) {
-      return companion(even[static_cast<size_t>(a)]) <
-             companion(even[static_cast<size_t>(b)]);
+      return evenGate[static_cast<size_t>(a)] < evenGate[static_cast<size_t>(b)];
     });
     std::sort(oddHit.begin(), oddHit.end(), [&](int a, int b) {
-      return companion(odd[static_cast<size_t>(a)]) <
-             companion(odd[static_cast<size_t>(b)]);
-    });
-    std::sort(evenLiveIdx.begin(), evenLiveIdx.end(), [&](int a, int b) {
-      return chainMin(even[static_cast<size_t>(a)]) <
-             chainMin(even[static_cast<size_t>(b)]);
-    });
-    std::sort(oddLiveIdx.begin(), oddLiveIdx.end(), [&](int a, int b) {
-      return chainMin(odd[static_cast<size_t>(a)]) <
-             chainMin(odd[static_cast<size_t>(b)]);
+      return oddGate[static_cast<size_t>(a)] < oddGate[static_cast<size_t>(b)];
     });
     for (const int i : evenHit) {
-      const int gate = companion(even[static_cast<size_t>(i)]);
-      for (const int j : oddLiveIdx) {
-        if (!bestKey.empty() && gate > bestKey[1] &&
-            chainMin(odd[static_cast<size_t>(j)]) > bestKey[1]) {
-          break;
+      const int gate = evenGate[static_cast<size_t>(i)];
+      const unsigned partners =
+          ddcPartnerMask(even[static_cast<size_t>(i)].middles);
+      for (unsigned mask = 1; mask <= 7; ++mask) {
+        if ((partners & mask) == 0U) {
+          continue;
         }
-        tryPair(even[static_cast<size_t>(i)], odd[static_cast<size_t>(j)]);
+        for (const int j : oddBucket[mask]) {
+          if (!bestKey.empty() && gate > bestKey[1] &&
+              oddMin[static_cast<size_t>(j)] > bestKey[1]) {
+            break;
+          }
+          tryPair(even[static_cast<size_t>(i)], odd[static_cast<size_t>(j)]);
+        }
       }
     }
     for (const int j : oddHit) {
-      const int gate = companion(odd[static_cast<size_t>(j)]);
-      for (const int i : evenLiveIdx) {
-        if (!bestKey.empty() && gate > bestKey[1] &&
-            chainMin(even[static_cast<size_t>(i)]) > bestKey[1]) {
-          break;
+      const int gate = oddGate[static_cast<size_t>(j)];
+      const unsigned oddMiddles = odd[static_cast<size_t>(j)].middles;
+      for (unsigned mask = 1; mask <= 7; ++mask) {
+        // tryPair tests partner(even) & odd. The mask that reaches an even
+        // chain is the even middles, so the odd chain has to meet
+        // partner(that mask), not partner(odd) & mask.
+        if ((ddcPartnerMask(mask) & oddMiddles) == 0U) {
+          continue;
         }
-        tryPair(even[static_cast<size_t>(i)], odd[static_cast<size_t>(j)]);
+        for (const int i : evenBucket[mask]) {
+          if (!bestKey.empty() && gate > bestKey[1] &&
+              evenMin[static_cast<size_t>(i)] > bestKey[1]) {
+            break;
+          }
+          tryPair(even[static_cast<size_t>(i)], odd[static_cast<size_t>(j)]);
+        }
       }
     }
     if (bestRings.empty()) {

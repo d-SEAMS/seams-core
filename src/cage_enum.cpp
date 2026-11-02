@@ -508,6 +508,8 @@ struct ClosedSearch {
   std::vector<int> chosen;
   std::vector<std::vector<int>> optsAt;
   std::vector<std::vector<cage::FoundCage>> found;
+  std::vector<int> branchOverride;
+  bool trivalent = true;
   int seed = 0;
   int nVerts = 0;
   int nEdges = 0;
@@ -539,6 +541,9 @@ struct ClosedSearch {
       // V = 2 - F + E.
       maxEdges[k] = sides / 2;
       maxVerts[k] = 2 - facesOf[k] + maxEdges[k];
+      if (2 * maxEdges[k] != 3 * maxVerts[k]) {
+        trivalent = false;
+      }
     }
     have.assign(static_cast<size_t>(maxSize) + 1, 0);
     room.assign(have.size(), 0);
@@ -744,22 +749,153 @@ struct ClosedSearch {
     }
   }
 
-  // Adds every ring that is the only choice for its open edge, then returns
-  // the open edge with the fewest choices: -1 when no edge is open, -2 when
-  // an open edge has none.
+  // These three clathrate signatures are trivalent, and so are the hydrate
+  // cages the tests ask for when every requested signature has 2E = 3V.
+  // A vertex then never takes a fourth face, three faces leave it closed,
+  // and two faces leave exactly one open wedge.
+  [[nodiscard]] bool shortVertex(int ring) const {
+    if (!trivalent) {
+      return false;
+    }
+    for (const int v : ringVerts[static_cast<size_t>(ring)]) {
+      const int faces = facesAt[static_cast<size_t>(v)];
+      const int open = openAt[static_cast<size_t>(v)];
+      if (faces > 3) {
+        return true;
+      }
+      if (faces == 3 && open != 0) {
+        return true;
+      }
+      if (faces >= 2 && open > 2) {
+        return true;
+      }
+      if (faces == 2 && open != 2) {
+        return true;
+      }
+      if (faces > 0 && faces < 3 && open == 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // Each open edge still needs one face-edge. Faces not yet placed have only
+  // so many edges between them.
+  [[nodiscard]] bool boundaryCloseable() const {
+    const int facesNow = static_cast<int>(chosen.size());
+    if (facesNow > maxFaces) {
+      return false;
+    }
+    const int openEdges = static_cast<int>(half.size());
+    if (openEdges == 0) {
+      return true;
+    }
+    const unsigned mask = fits[static_cast<size_t>(facesNow)];
+    for (size_t k = 0; k < sigs.size(); ++k) {
+      if (((mask >> k) & 1u) == 0u) {
+        continue;
+      }
+      int cap = 0;
+      for (size_t s = 0; s < need[k].size(); ++s) {
+        const int left = need[k][s] - have[static_cast<size_t>(s)];
+        if (left > 0) {
+          cap += left * static_cast<int>(s);
+        }
+      }
+      if (openEdges <= cap) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // A vertex with two faces in a trivalent cage has two open edges, and the
+  // third face is a ring through both. That ring is tried before a free
+  // choice on a single edge.
+  bool forceWedge(int &edgeOut) {
+    branchOverride.clear();
+    if (!trivalent) {
+      return false;
+    }
+    for (const int e : half) {
+      const auto &ends = edgeEnds[static_cast<size_t>(e)];
+      for (int t = 0; t < 2; ++t) {
+        const int v = ends[static_cast<size_t>(t)];
+        if (facesAt[static_cast<size_t>(v)] != 2 ||
+            openAt[static_cast<size_t>(v)] != 2) {
+          continue;
+        }
+        int e1 = -1;
+        int e2 = -1;
+        for (const int h : half) {
+          const auto &he = edgeEnds[static_cast<size_t>(h)];
+          if (he[0] != v && he[1] != v) {
+            continue;
+          }
+          if (e1 < 0) {
+            e1 = h;
+          } else {
+            e2 = h;
+          }
+        }
+        if (e1 < 0 || e2 < 0) {
+          return false;
+        }
+        const auto &a = ringsOfEdge[static_cast<size_t>(e1)];
+        const auto &b = ringsOfEdge[static_cast<size_t>(e2)];
+        auto ia = std::lower_bound(a.begin(), a.end(), seed);
+        auto ib = std::lower_bound(b.begin(), b.end(), seed);
+        while (ia != a.end() && ib != b.end()) {
+          if (*ia == *ib) {
+            if (canAdd(*ia)) {
+              branchOverride.push_back(*ia);
+            }
+            ++ia;
+            ++ib;
+          } else if (*ia < *ib) {
+            ++ia;
+          } else {
+            ++ib;
+          }
+        }
+        edgeOut = e1;
+        return true;
+      }
+    }
+    return false;
+  }
+
   int narrow() {
     for (;;) {
+      int wedgeEdge = -1;
+      if (forceWedge(wedgeEdge)) {
+        if (branchOverride.empty()) {
+          return -2;
+        }
+        if (branchOverride.size() == 1) {
+          const int only = branchOverride[0];
+          branchOverride.clear();
+          addRing(only);
+          if (shortVertex(only) || !boundaryCloseable()) {
+            return -2;
+          }
+          continue;
+        }
+        return wedgeEdge;
+      }
       int bestEdge = -1;
       size_t best = 0;
       bool forced = false;
       for (const int e : half) {
         size_t n = 0;
         int only = -1;
-        for (const int r : ringsOfEdge[static_cast<size_t>(e)]) {
-          if (!canAdd(r)) {
+        const auto &row = ringsOfEdge[static_cast<size_t>(e)];
+        for (auto it = std::lower_bound(row.begin(), row.end(), seed);
+             it != row.end(); ++it) {
+          if (!canAdd(*it)) {
             continue;
           }
-          only = r;
+          only = *it;
           if (++n > 1 && bestEdge >= 0 && n >= best) {
             break;
           }
@@ -769,6 +905,9 @@ struct ClosedSearch {
         }
         if (n == 1) {
           addRing(only);
+          if (shortVertex(only) || !boundaryCloseable()) {
+            return -2;
+          }
           forced = true;
           break;
         }
@@ -815,11 +954,21 @@ struct ClosedSearch {
       restore(mark);
       return;
     }
+    if (edge < 0 || !boundaryCloseable()) {
+      restore(mark);
+      return;
+    }
     auto &opts = optsAt[chosen.size()];
     opts.clear();
-    for (const int r : ringsOfEdge[static_cast<size_t>(edge)]) {
-      if (canAdd(r)) {
-        opts.push_back(r);
+    if (!branchOverride.empty()) {
+      opts.swap(branchOverride);
+    } else {
+      const auto &row = ringsOfEdge[static_cast<size_t>(edge)];
+      for (auto it = std::lower_bound(row.begin(), row.end(), seed);
+           it != row.end(); ++it) {
+        if (canAdd(*it)) {
+          opts.push_back(*it);
+        }
       }
     }
     for (size_t k = 0; k < opts.size(); ++k) {
@@ -828,6 +977,10 @@ struct ClosedSearch {
         continue;
       }
       addRing(r);
+      if (shortVertex(r) || !boundaryCloseable()) {
+        undoRing();
+        continue;
+      }
       search();
       undoRing();
     }
