@@ -92,11 +92,19 @@ data-aria-dark="Switch to auto color mode">
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/ice-and-clathrate.html">Ice and clathrate labels</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/rings.html">Primitive rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/order-parameters.html">Bond-orientational order parameters</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/confined-water.html">Confined water</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-figures.html">Paper figures</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">How-to</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/bindings.html">Build the language fronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/versions.html">Version pins</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/openmp-offload.html">OpenMP target offload</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/sheared-cells.html">Sheared cells</a></li>
@@ -113,6 +121,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Repositories</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/ring-completion.html">Ring-adjacent completion</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/topological-network.html">Topological network criteria</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
@@ -124,6 +133,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="api.html">API map</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api/index.html">API Reference</a></li>
 <li class="toctree-l2"><a class="reference internal" href="nix.html">Nix flake</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cross-language.html">One task, four fronts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="glossary.html">Glossary</a></li>
 </ul>
 </li>
@@ -131,10 +141,18 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="data-formats.html">Data Formats</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="walk-compare.html">walk_compare</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="nix.html">Nix flake</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="cross-language.html">One task, four fronts</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="api.html">API map</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/index.html">API Reference</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="glossary.html">Glossary</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">d-SEAMS 2.0 paper</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/index.html">d-SEAMS 2.0 paper</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/versions.html">Versions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/reproduce.html">Reproduce</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
 <ul>
@@ -158,6 +176,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#types"><code class="docutils literal notranslate"><span class="pre">--types</span></code></a></li>
 <li><a class="reference internal" href="#seams-read-and-the-box"><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code> and the box</a></li>
 <li><a class="reference internal" href="#graph"><code class="docutils literal notranslate"><span class="pre">--graph</span></code></a></li>
+<li><a class="reference internal" href="#cage-edge"><code class="docutils literal notranslate"><span class="pre">--cage-edge</span></code></a></li>
 <li><a class="reference internal" href="#runtime-knobs">Runtime knobs</a></li>
 <li><a class="reference internal" href="#file-suffix">File suffix</a></li>
 <li><a class="reference internal" href="#frame-ranges">Frame ranges</a></li>
@@ -303,11 +322,11 @@ frame has no atoms; without it, empty input retains the legacy text output.</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">N</span> <span class="pre">frame</span> <span class="pre">F</span> <span class="pre">box</span> <span class="pre">Lx</span> <span class="pre">Ly</span> <span class="pre">Lz</span></code> and, when <code class="docutils literal notranslate"><span class="pre">box.size()</span> <span class="pre">&gt;=</span> <span class="pre">6</span></code>, <code class="docutils literal notranslate"><span class="pre">xy</span> <span class="pre">xz</span> <span class="pre">yz</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">chill</span></code></p></td>
-<td><p>CHILL four-neighbour labels</p></td>
+<td><p>CHILL labels</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">N</span></code> then <code class="docutils literal notranslate"><span class="pre">name</span> <span class="pre">count</span></code> for each ice type present</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">chill-plus</span></code></p></td>
-<td><p>CHILL+ four-neighbour labels</p></td>
+<td><p>CHILL+ labels</p></td>
 <td><p>same as <code class="docutils literal notranslate"><span class="pre">chill</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cages</span></code></p></td>
@@ -315,8 +334,8 @@ frame has no atoms; without it, empty input retains the legacy text output.</p>
 <td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">N</span> <span class="pre">graph</span> <span class="pre">KIND</span> <span class="pre">hexagonal</span> <span class="pre">IH</span> <span class="pre">cubic</span> <span class="pre">IC</span> <span class="pre">water</span> <span class="pre">W</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cages</span> <span class="pre">--signature</span> <span class="pre">SPEC</span></code></p></td>
-<td><p>closed polyhedra whose ring-size census matches <code class="docutils literal notranslate"><span class="pre">SPEC</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">N</span> <span class="pre">graph</span> <span class="pre">KIND</span> <span class="pre">signature</span> <span class="pre">S</span> <span class="pre">cages</span> <span class="pre">C</span> <span class="pre">atoms</span> <span class="pre">A</span></code> and, with <code class="docutils literal notranslate"><span class="pre">--incomplete</span></code>, <code class="docutils literal notranslate"><span class="pre">incomplete</span> <span class="pre">K</span></code> cups on the ring graph; with <code class="docutils literal notranslate"><span class="pre">--guest-types</span></code>, <code class="docutils literal notranslate"><span class="pre">guests</span> <span class="pre">G</span> <span class="pre">occupied</span> <span class="pre">O</span> <span class="pre">multiple</span> <span class="pre">M</span> <span class="pre">free</span> <span class="pre">F</span></code></p></td>
+<td><p>closed polyhedra whose ring-size census matches <code class="docutils literal notranslate"><span class="pre">SPEC</span></code>; each vertex lies on at least three faces that close around it, V - E + F = 2, and rings that wind the periodic cell are left out</p></td>
+<td><p>one line per signature, <code class="docutils literal notranslate"><span class="pre">nop</span> <span class="pre">N</span> <span class="pre">graph</span> <span class="pre">KIND</span> <span class="pre">signature</span> <span class="pre">S</span> <span class="pre">cages</span> <span class="pre">C</span> <span class="pre">atoms</span> <span class="pre">A</span></code> and, with <code class="docutils literal notranslate"><span class="pre">--incomplete</span></code>, <code class="docutils literal notranslate"><span class="pre">incomplete</span> <span class="pre">K</span></code> cups on the ring graph; with <code class="docutils literal notranslate"><span class="pre">--guest-types</span></code>, <code class="docutils literal notranslate"><span class="pre">guests</span> <span class="pre">G</span> <span class="pre">occupied</span> <span class="pre">O</span> <span class="pre">multiple</span> <span class="pre">M</span> <span class="pre">free</span> <span class="pre">F</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fingerprint</span></code></p></td>
 <td><p>topology keys of the bonded graph</p></td>
@@ -373,9 +392,10 @@ frame has no atoms; without it, empty input retains the legacy text output.</p>
 </tbody>
 </table>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">chill</span></code> / <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code> call <code class="docutils literal notranslate"><span class="pre">nneigh::kNearestNeighbourList</span></code> with
-<code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">4</span></code> (mutual). <code class="docutils literal notranslate"><span class="pre">--cutoff</span></code> is only the cell-size hint
-(<code class="docutils literal notranslate"><span class="pre">cutoff</span> <span class="pre">+</span> <span class="pre">1.5</span></code>); vesin cutoff pairs stay on <code class="docutils literal notranslate"><span class="pre">neighListO</span></code>. Then
+<p><code class="docutils literal notranslate"><span class="pre">chill</span></code> / <code class="docutils literal notranslate"><span class="pre">chill-plus</span></code> default to <code class="docutils literal notranslate"><span class="pre">--graph</span> <span class="pre">cutoff</span></code>: <code class="docutils literal notranslate"><span class="pre">nneigh::neighListO</span></code>,
+every pair closer than <code class="docutils literal notranslate"><span class="pre">--cutoff</span></code>. <code class="docutils literal notranslate"><span class="pre">--graph</span> <span class="pre">mutual</span></code> (alias <code class="docutils literal notranslate"><span class="pre">knn</span></code>) calls
+<code class="docutils literal notranslate"><span class="pre">nneigh::kNearestNeighbourList</span></code> with <code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">=</span> <span class="pre">4</span></code>, mutual; there <code class="docutils literal notranslate"><span class="pre">--cutoff</span></code>
+is only the cell-size hint (<code class="docutils literal notranslate"><span class="pre">cutoff</span> <span class="pre">+</span> <span class="pre">1.5</span></code>). Other graphs exit 2. Then
 <code class="docutils literal notranslate"><span class="pre">chill::getCorrel</span></code> / <code class="docutils literal notranslate"><span class="pre">chill::getIceTypeNoPrint</span></code> or
 <code class="docutils literal notranslate"><span class="pre">chill::getCorrelPlus</span></code> / <code class="docutils literal notranslate"><span class="pre">chill::getIceTypePlusNoPrint</span></code>.
 <code class="docutils literal notranslate"><span class="pre">--water-types</span> <span class="pre">T,U</span></code> is the neighbour mask (OW only); <code class="docutils literal notranslate"><span class="pre">--type</span></code> is the
@@ -428,6 +448,186 @@ not an ionic-liquid criterion.</p>
 <p>Names and help text are the Argum <code class="docutils literal notranslate"><span class="pre">Option</span></code> / <code class="docutils literal notranslate"><span class="pre">Positional</span></code>
 definitions in <code class="docutils literal notranslate"><span class="pre">src/seams_cli.cpp</span></code>. Defaults are the C++
 initializers (Argum does not write defaults into the help).</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>flag</p></th>
+<th class="head"><p>default</p></th>
+<th class="head"><p>Argum help</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">-h</span></code>, <code class="docutils literal notranslate"><span class="pre">--help</span></code></p></td>
+<td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">show</span> <span class="pre">this</span> <span class="pre">help</span> <span class="pre">message</span> <span class="pre">and</span> <span class="pre">exit</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-v</span></code>, <code class="docutils literal notranslate"><span class="pre">--version</span></code></p></td>
+<td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Print</span> <span class="pre">version</span> <span class="pre">information</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--features</span></code></p></td>
+<td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Print</span> <span class="pre">compile-time</span> <span class="pre">backends</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-f</span></code>, <code class="docutils literal notranslate"><span class="pre">--frame</span> <span class="pre">N</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">First</span> <span class="pre">frame</span> <span class="pre">(1-based)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--last</span> <span class="pre">N</span></code></p></td>
+<td><p>omitted (<code class="docutils literal notranslate"><span class="pre">0</span></code>)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Last</span> <span class="pre">frame</span> <span class="pre">(inclusive).</span> <span class="pre">Omit</span> <span class="pre">for</span> <span class="pre">a</span> <span class="pre">single</span> <span class="pre">--frame</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-j</span></code>, <code class="docutils literal notranslate"><span class="pre">--jobs</span> <span class="pre">N</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Parallel</span> <span class="pre">frame</span> <span class="pre">workers</span> <span class="pre">(OpenMP).</span> <span class="pre">1</span> <span class="pre">is</span> <span class="pre">serial</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--rebuild</span></code></p></td>
+<td><p>off</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Recompute</span> <span class="pre">rings</span> <span class="pre">and</span> <span class="pre">cages</span> <span class="pre">on</span> <span class="pre">every</span> <span class="pre">frame.</span> <span class="pre">A</span> <span class="pre">one-worker</span> <span class="pre">frame</span> <span class="pre">range</span> <span class="pre">otherwise</span> <span class="pre">updates</span> <span class="pre">them</span> <span class="pre">from</span> <span class="pre">the</span> <span class="pre">previous</span> <span class="pre">frame;</span> <span class="pre">the</span> <span class="pre">output</span> <span class="pre">is</span> <span class="pre">the</span> <span class="pre">same</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">KIND</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">text</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Output</span> <span class="pre">format:</span> <span class="pre">~text</span></code> (default) or <code class="docutils literal notranslate"><span class="pre">json</span></code> (JSONL)~</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--strict-input</span></code></p></td>
+<td><p>off</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Fail</span> <span class="pre">when</span> <span class="pre">a</span> <span class="pre">requested</span> <span class="pre">frame</span> <span class="pre">produces</span> <span class="pre">no</span> <span class="pre">atoms</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-t</span></code>, <code class="docutils literal notranslate"><span class="pre">--type</span> <span class="pre">I</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Atom</span> <span class="pre">type</span> <span class="pre">(0</span> <span class="pre">guesses</span> <span class="pre">oxygen</span> <span class="pre">then</span> <span class="pre">type</span> <span class="pre">1;</span> <span class="pre">density-z:</span> <span class="pre">0</span> <span class="pre">is</span> <span class="pre">every</span> <span class="pre">atom)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--water-types</span> <span class="pre">T,U</span></code></p></td>
+<td><p>unset</p></td>
+<td><p>Neighbour graph on these LAMMPS types only (OW). Substrate and ions never enter the 4-NN list</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--types</span> <span class="pre">I,J</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">I</span> <span class="pre">=</span> <span class="pre">J</span> <span class="pre">=</span> <span class="pre">--type</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Pair</span> <span class="pre">types</span> <span class="pre">for</span> <span class="pre">site-site</span> <span class="pre">rdf/cn</span> <span class="pre">(default</span> <span class="pre">I=J=--type)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--family</span> <span class="pre">NAME</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">waterIce</span></code></p></td>
+<td><p>Material family. Ice scores refuse every value except <code class="docutils literal notranslate"><span class="pre">waterIce</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--site</span> <span class="pre">SPEC</span></code></p></td>
+<td><p></p></td>
+<td><p>Type-to-kind map for <code class="docutils literal notranslate"><span class="pre">ionCloud</span></code> (<code class="docutils literal notranslate"><span class="pre">1=cationHead,2=anion</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--ions</span></code></p></td>
+<td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cn</span></code> on <code class="docutils literal notranslate"><span class="pre">ionCloud</span></code> cage degree (needs <code class="docutils literal notranslate"><span class="pre">--site</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-c</span></code>, <code class="docutils literal notranslate"><span class="pre">--cutoff</span> <span class="pre">ANGSTROM</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3.5</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Neighbour</span> <span class="pre">cutoff</span> <span class="pre">(rdf/cn</span> <span class="pre">rmax;</span> <span class="pre">hbonds</span> <span class="pre">heavy-atom</span> <span class="pre">nList)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--cage-edge</span> <span class="pre">SPEC</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2.65,3.15</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cages</span> <span class="pre">--signature:</span> <span class="pre">keep</span> <span class="pre">a</span> <span class="pre">face</span> <span class="pre">only</span> <span class="pre">when</span> <span class="pre">every</span> <span class="pre">edge</span> <span class="pre">lies</span> <span class="pre">in</span> <span class="pre">LO,HI,</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">coordinate</span> <span class="pre">units</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">file.</span> <span class="pre">~none</span></code> leaves the cage bound to the face census (<code class="docutils literal notranslate"><span class="pre">SEAMS_CAGE_EDGE</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--bins</span> <span class="pre">N</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rmax</span> <span class="pre">/</span> <span class="pre">0.1</span></code> or <code class="docutils literal notranslate"><span class="pre">L</span> <span class="pre">/</span> <span class="pre">0.1</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Histogram</span> <span class="pre">bins</span> <span class="pre">(rdf:</span> <span class="pre">rmax/0.1;</span> <span class="pre">density-z:</span> <span class="pre">bound</span> <span class="pre">span</span> <span class="pre">/</span> <span class="pre">0.1)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--axis</span> <span class="pre">XYZ</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">z</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Histogram</span> <span class="pre">axis</span> <span class="pre">for</span> <span class="pre">density-z</span> <span class="pre">(x,</span> <span class="pre">y,</span> <span class="pre">or</span> <span class="pre">z)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">-k</span> <span class="pre">N</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">4</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">k</span> <span class="pre">for</span> <span class="pre">knn</span> <span class="pre">/</span> <span class="pre">seeded</span> <span class="pre">cages</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--graph</span> <span class="pre">KIND</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">seeded</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Bond</span> <span class="pre">graph</span> <span class="pre">for</span> <span class="pre">cages:</span> <span class="pre">cutoff,</span> <span class="pre">knn,</span> <span class="pre">knn-union</span> <span class="pre">or</span> <span class="pre">seeded</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--complete</span></code></p></td>
+<td><p>off</p></td>
+<td><p>Seeded cages: fill the last vertex of six-rings whose other vertices carry a label (ring completion)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--signature</span> <span class="pre">SPEC</span></code></p></td>
+<td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cages:</span> <span class="pre">ring-size</span> <span class="pre">census</span> <span class="pre">(4:6,6:8)</span> <span class="pre">or</span> <span class="pre">a</span> <span class="pre">named</span> <span class="pre">table</span> <span class="pre">entry</span> <span class="pre">(sodalite\vert{}alpha\vert{}512\vert{}51262\vert{}51264\vert{}51268\vert{}sh\vert{}hc\vert{}ddc);</span> <span class="pre">join</span> <span class="pre">several</span> <span class="pre">with</span> <span class="pre">+</span> <span class="pre">for</span> <span class="pre">one</span> <span class="pre">line</span> <span class="pre">each</span></code>. Joined signatures share one ring network and one cage search</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--incomplete</span></code></p></td>
+<td><p>off</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cages</span> <span class="pre">--signature:</span> <span class="pre">also</span> <span class="pre">report</span> <span class="pre">cups</span> <span class="pre">and</span> <span class="pre">incomplete</span> <span class="pre">cages</span> <span class="pre">on</span> <span class="pre">the</span> <span class="pre">ring</span> <span class="pre">graph</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--guest-types</span> <span class="pre">T,U</span></code></p></td>
+<td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cages</span> <span class="pre">--signature:</span> <span class="pre">LAMMPS</span> <span class="pre">types</span> <span class="pre">of</span> <span class="pre">guests</span> <span class="pre">(methane,</span> <span class="pre">THF,</span> <span class="pre">ions)</span> <span class="pre">placed</span> <span class="pre">in</span> <span class="pre">the</span> <span class="pre">found</span> <span class="pre">cages</span> <span class="pre">by</span> <span class="pre">their</span> <span class="pre">periodic</span> <span class="pre">centroids</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--guest-radius</span> <span class="pre">R</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">4.0</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cages</span> <span class="pre">--signature:</span> <span class="pre">a</span> <span class="pre">guest</span> <span class="pre">belongs</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">nearest</span> <span class="pre">cage</span> <span class="pre">centre</span> <span class="pre">within</span> <span class="pre">R</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--hops</span> <span class="pre">N</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fingerprint:</span> <span class="pre">bonds</span> <span class="pre">from</span> <span class="pre">the</span> <span class="pre">centre</span> <span class="pre">in</span> <span class="pre">each</span> <span class="pre">local</span> <span class="pre">key</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--colour-types</span></code></p></td>
+<td><p>off</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fingerprint:</span> <span class="pre">colour</span> <span class="pre">vertices</span> <span class="pre">by</span> <span class="pre">LAMMPS</span> <span class="pre">type,</span> <span class="pre">so</span> <span class="pre">species</span> <span class="pre">never</span> <span class="pre">match</span> <span class="pre">across</span> <span class="pre">types</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--library</span> <span class="pre">FILE</span></code></p></td>
+<td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fingerprint:</span> <span class="pre">key</span> <span class="pre">library</span> <span class="pre">(from</span> <span class="pre">--emit-library)</span> <span class="pre">to</span> <span class="pre">name</span> <span class="pre">atoms</span> <span class="pre">by;</span> <span class="pre">several,</span> <span class="pre">comma</span> <span class="pre">separated,</span> <span class="pre">at</span> <span class="pre">different</span> <span class="pre">hop</span> <span class="pre">counts</span> <span class="pre">name</span> <span class="pre">each</span> <span class="pre">atom</span> <span class="pre">by</span> <span class="pre">the</span> <span class="pre">deepest</span> <span class="pre">that</span> <span class="pre">knows</span> <span class="pre">it</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--emit-library</span> <span class="pre">LABEL</span></code></p></td>
+<td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">fingerprint:</span> <span class="pre">print</span> <span class="pre">the</span> <span class="pre">frame's</span> <span class="pre">distinct</span> <span class="pre">keys</span> <span class="pre">as</span> <span class="pre">library</span> <span class="pre">lines</span> <span class="pre">under</span> <span class="pre">LABEL</span> <span class="pre">instead</span> <span class="pre">of</span> <span class="pre">the</span> <span class="pre">summary</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--ion-types</span> <span class="pre">I,J</span></code></p></td>
+<td><p></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ions:</span> <span class="pre">LAMMPS</span> <span class="pre">types</span> <span class="pre">read</span> <span class="pre">against</span> <span class="pre">the</span> <span class="pre">cage</span> <span class="pre">assignment</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--ion-cutoff</span> <span class="pre">ANGSTROM</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">--cutoff</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ions:</span> <span class="pre">first</span> <span class="pre">water</span> <span class="pre">shell</span> <span class="pre">radius</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--htype</span> <span class="pre">I</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Hydrogen</span> <span class="pre">atom</span> <span class="pre">type</span> <span class="pre">for</span> <span class="pre">hbonds</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--hdist</span> <span class="pre">ANGSTROM</span></code></p></td>
+<td><p>water C++ default</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Acceptor-H</span> <span class="pre">distance</span> <span class="pre">cutoff</span> <span class="pre">for</span> <span class="pre">hbonds</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--hangle</span> <span class="pre">DEG</span></code></p></td>
+<td><p>water C++ default</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">O-O-H</span> <span class="pre">angle</span> <span class="pre">cutoff</span> <span class="pre">for</span> <span class="pre">hbonds</span> <span class="pre">(acceptor-centered)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--donors</span></code></p></td>
+<td><p>off</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Use</span> <span class="pre">every</span> <span class="pre">hydrogen</span> <span class="pre">as</span> <span class="pre">a</span> <span class="pre">donor</span> <span class="pre">candidate</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--config</span> <span class="pre">FILE</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_CONFIG</span></code> or <code class="docutils literal notranslate"><span class="pre">./seams.env</span></code></p></td>
+<td><p>Dotenv of <code class="docutils literal notranslate"><span class="pre">SEAMS_*</span></code> / <code class="docutils literal notranslate"><span class="pre">LINKCELL_*</span></code> knobs. Env wins over the file</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--print-config</span></code></p></td>
+<td><p></p></td>
+<td><p>Print the resolved runtime knobs and exit</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--tpp</span> <span class="pre">N</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code> (occupancy picker)</p></td>
+<td><p>Threads per particle for the device k-NN (<code class="docutils literal notranslate"><span class="pre">LINKCELL_TPP</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--block</span> <span class="pre">N</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0</span></code> (occupancy picker)</p></td>
+<td><p>CUDA block size (<code class="docutils literal notranslate"><span class="pre">LINKCELL_BLOCK</span></code> / <code class="docutils literal notranslate"><span class="pre">SEAMS_BLOCK</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">--resident</span> <span class="pre">FRAC</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0.80</span></code></p></td>
+<td><p>Fraction of free device memory for a resident batch (<code class="docutils literal notranslate"><span class="pre">SEAMS_RESIDENT</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">--cell</span> <span class="pre">ANGSTROM</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">3</span></code></p></td>
+<td><p>Link-cell hint so NPT frames share a grid (<code class="docutils literal notranslate"><span class="pre">SEAMS_CELL</span></code>)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <p><code class="docutils literal notranslate"><span class="pre">--help</span></code>, <code class="docutils literal notranslate"><span class="pre">--version</span></code>, <code class="docutils literal notranslate"><span class="pre">--features</span></code>, and <code class="docutils literal notranslate"><span class="pre">--print-config</span></code> print and
 exit 0 before any file is opened.</p>
 <p><code class="docutils literal notranslate"><span class="pre">--tpp</span></code>, <code class="docutils literal notranslate"><span class="pre">--block</span></code>, <code class="docutils literal notranslate"><span class="pre">--resident</span></code>, and <code class="docutils literal notranslate"><span class="pre">--cell</span></code> apply to the device
@@ -557,6 +757,29 @@ and is not a <code class="docutils literal notranslate"><span class="pre">BondGr
 <code class="docutils literal notranslate"><span class="pre">std::invalid_argument</span></code> (<code class="docutils literal notranslate"><span class="pre">unknown</span> <span class="pre">bond</span> <span class="pre">graph</span> <span class="pre">'NAME'</span> <span class="pre">(use</span> <span class="pre">cutoff,</span> <span class="pre">knn,</span> <span class="pre">knn-union)</span></code>) and <code class="docutils literal notranslate"><span class="pre">cages</span></code> exits 2.</p>
 <p>Candidate cutoff for the knn graphs is <code class="docutils literal notranslate"><span class="pre">--cutoff</span> <span class="pre">+</span> <span class="pre">1.5</span></code>.</p>
 </section>
+<section id="cage-edge">
+<h2><code class="docutils literal notranslate"><span class="pre">--cage-edge</span></code><a class="headerlink" href="#cage-edge" title="Link to this heading">¶</a></h2>
+<p>Used by <code class="docutils literal notranslate"><span class="pre">cages</span> <span class="pre">--signature</span></code>.
+Each face is kept when every minimum-image edge lies in the window.
+The default is <code class="docutils literal notranslate"><span class="pre">2.65,3.15</span></code>.
+<code class="docutils literal notranslate"><span class="pre">none</span></code> (also <code class="docutils literal notranslate"><span class="pre">off</span></code> or <code class="docutils literal notranslate"><span class="pre">false</span></code>) leaves that test out, and the cage bound is the face census alone, which is the search from before the window existed.
+<code class="docutils literal notranslate"><span class="pre">hc</span></code> and <code class="docutils literal notranslate"><span class="pre">ddc</span></code> keep their geometric finders. The window applies to the ring-census search.</p>
+<p>The numbers are in the coordinate units of the file.
+The LAMMPS dumps in this tree are angstroms, and the default covers the oxygen-oxygen contacts of the reference cells (about 2.74 to 2.81).
+Set the window to the heavy-atom contact range of the model.
+Widen it for a compressed cell or a guest that stretches a cage.
+A file in nanometres uses <code class="docutils literal notranslate"><span class="pre">0.265,0.315</span></code>, or <code class="docutils literal notranslate"><span class="pre">none</span></code> when the contact range is unknown.
+Use a comma, a colon, or a slash. <code class="docutils literal notranslate"><span class="pre">2.65-3.15</span></code> is rejected.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">seams<span class="w"> </span>cages<span class="w"> </span>FILE<span class="w"> </span>--graph<span class="w"> </span>cutoff<span class="w"> </span>--signature<span class="w"> </span><span class="m">512</span>
+</span><span data-line="2">seams<span class="w"> </span>cages<span class="w"> </span>FILE<span class="w"> </span>--graph<span class="w"> </span>cutoff<span class="w"> </span>--signature<span class="w"> </span><span class="m">512</span><span class="w"> </span>--cage-edge<span class="w"> </span>none
+</span><span data-line="3">seams<span class="w"> </span>cages<span class="w"> </span>FILE<span class="w"> </span>--graph<span class="w"> </span>cutoff<span class="w"> </span>--signature<span class="w"> </span><span class="m">512</span><span class="w"> </span>--cage-edge<span class="w"> </span><span class="m">2</span>.4,3.4
+</span></pre></div>
+</div>
+<p>The same string is <code class="docutils literal notranslate"><span class="pre">SEAMS_CAGE_EDGE</span></code>.
+Python passes it as <code class="docutils literal notranslate"><span class="pre">frame.cages_by_signature(&quot;512&quot;,</span> <span class="pre">edge=&quot;none&quot;)</span></code>.
+Lua passes it as <code class="docutils literal notranslate"><span class="pre">dseams.cages_by_signature(frame,</span> <span class="pre">&quot;512&quot;,</span> <span class="pre">{edge</span> <span class="pre">=</span> <span class="pre">&quot;none&quot;})</span></code> with <code class="docutils literal notranslate"><span class="pre">require(&quot;dseams&quot;)</span></code>.
+The C entry is <code class="docutils literal notranslate"><span class="pre">seams_frame_signature_edge</span></code>; a null edge string is the default window.</p>
+</section>
 <section id="runtime-knobs">
 <h2>Runtime knobs<a class="headerlink" href="#runtime-knobs" title="Link to this heading">¶</a></h2>
 <p>Defaults live in the binary. An optional dotenv (<code class="docutils literal notranslate"><span class="pre">SEAMS_CONFIG</span></code> or
@@ -577,11 +800,17 @@ the table.</p>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_JOBS</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">1</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_TYPE</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_CARRY</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">1</span></code> (<code class="docutils literal notranslate"><span class="pre">0</span></code> is <code class="docutils literal notranslate"><span class="pre">--rebuild</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_TYPE</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">0</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_CUTOFF</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_CUTOFF</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">3.5</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_CAGE_EDGE</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2.65,3.15</span></code> (<code class="docutils literal notranslate"><span class="pre">none</span></code> turns the window off)</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">SEAMS_K</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">4</span></code></p></td>
@@ -661,6 +890,11 @@ deterministic output order. XYZ is a single-frame input and emits frame 1
 at most. Chemfiles and readcon inputs are read serially until the requested
 range or the first missing frame. <code class="docutils literal notranslate"><span class="pre">--jobs</span> <span class="pre">1</span></code> is serial; non-LAMMPS readers
 do not use OpenMP workers.</p>
+<p>A serial range carries rings and cage affiliation from one frame to the
+next: <code class="docutils literal notranslate"><span class="pre">primitive::RingUpdater</span></code> and <code class="docutils literal notranslate"><span class="pre">ring::AffiliationUpdater</span></code> recompute only
+the atoms whose bounded ball changed. LAMMPS ranges with <code class="docutils literal notranslate"><span class="pre">--jobs</span></code> above 1,
+MPI ranks, single frames and <code class="docutils literal notranslate"><span class="pre">--rebuild</span></code> rebuild every frame. The output is
+the same either way; <code class="docutils literal notranslate"><span class="pre">tests/cli_carry.py</span></code> checks that.</p>
 <p>An MPI build (<code class="docutils literal notranslate"><span class="pre">-Dwith_mpi=enabled</span></code>) started by <code class="docutils literal notranslate"><span class="pre">mpiexec</span></code> shares a LAMMPS
 dump’s frames among the ranks in serpentine rounds: of R ranks, rank r takes
 slot r of even rounds and slot R-1-r of odd ones, so a cost that steps,

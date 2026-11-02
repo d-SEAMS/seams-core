@@ -16,7 +16,7 @@ One network-former atom: coordination, same-species bonds, and the primitive rin
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <cage_enum.hpp>
+	#include <src/include/internal/cage_enum.hpp>
 	
 	struct FormerRow {
 		// fields

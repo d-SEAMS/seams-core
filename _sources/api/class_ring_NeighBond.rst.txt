@@ -1,0 +1,24 @@
+.. index:: pair: class; ring::NeighBond
+.. _doxid-classring_1_1_neigh_bond:
+
+class ring::NeighBond
+=====================
+
+.. toctree::
+	:hidden:
+
+Membership of the neighbour rows after the leading self entry. Built once per frame so the basal test does not scan those rows.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/topo_bulk.hpp>
+	
+	class NeighBond {
+	public:
+		// methods
+	
+		void :target:`build<doxid-classring_1_1_neigh_bond_1adede93d18467191b18db5a9960a3dcfa>`(const std::vector<std::vector<int>>& nList);
+		bool :target:`operator()<doxid-classring_1_1_neigh_bond_1ae05df58a91640cf5f7e93a70e45563f5>`(int i, int j) const;
+	};

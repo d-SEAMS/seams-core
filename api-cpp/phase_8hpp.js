@@ -9,6 +9,7 @@ var phase_8hpp =
       [ "phase::GlassKind::hda", "namespacephase.html#a45206ea8c1350d175974e9a54cde9c71a34131c9eef54abfe3aaed6fa275d01dd", null ]
     ] ],
     [ "phase::frameDensity", "namespacephase.html#a548c3829160adf36ec9d7ba7dbb065a1", null ],
+    [ "phase::frameDensity", "namespacephase.html#a84767cd8f9f4d99ea98a21b748583172", null ],
     [ "phase::glassFromDensity", "namespacephase.html#a8eaa4d3fda3aef905fddd4f5e9bc502c", null ],
     [ "phase::glassFromDensity", "namespacephase.html#a201ed8bb3cd747bc5663cce11a23c2fa", null ],
     [ "phase::glassFromDensity", "namespacephase.html#a31b88f162592c1601d40e4363cb87898", null ],

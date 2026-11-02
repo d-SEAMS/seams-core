@@ -4,6 +4,7 @@ API Reference
 .. toctree::
 	:hidden:
 
+	generated_targets.rst
 	group_bond.rst
 	group_prism3.rst
 	group_cage.rst

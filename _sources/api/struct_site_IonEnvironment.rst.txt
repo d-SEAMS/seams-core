@@ -16,7 +16,7 @@ Overview
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <site.hpp>
+	#include <src/include/internal/site.hpp>
 	
 	struct IonEnvironment {
 		// fields

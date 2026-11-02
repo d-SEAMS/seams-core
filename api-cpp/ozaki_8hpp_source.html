@@ -1,0 +1,483 @@
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML header for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<meta name="generator" content="Doxygen 1.17.0"/>
+<title>seams-core: src/include/internal/ozaki.hpp Source File</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="dynsections.js"></script>
+<script type="text/javascript" src="codefolding.js"></script>
+<link href="navtree.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="navtreedata.js"></script>
+<script type="text/javascript" src="navtree.js"></script>
+<script type="text/javascript" src="cookie.js"></script>
+<link href="search/search.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript" src="search/searchdata.js"></script>
+<script type="text/javascript" src="search/search.js"></script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default';
+mermaid.initialize({ startOnLoad: true, theme: theme });
+</script>
+<!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener("click",function(e){var a=e.target.closest("a");if(a&&a.hostname!==location.hostname)antics.event("Outbound Link",{url:a.href});});</script>
+<!-- doxyYoda owns presentation; stock doxygen.css is not linked (theme SCSS covers Doxygen classes). -->
+<link href="doxyYoda.min.css" rel="stylesheet" type="text/css"/>
+<script type="text/javascript">
+/* doxyYoda theme boot: apply stored or OS preference before first paint */
+(function () {
+  try {
+    var stored = localStorage.getItem("doxyYoda-theme");
+    var root = document.documentElement;
+    if (stored === "dark") {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    } else if (stored === "light") {
+      root.classList.add("light");
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      root.classList.add("dark");
+      root.classList.add("dark-mode");
+    }
+  } catch (e) { /* private mode */ }
+})();
+</script>
+</head>
+<body>
+<div class="grid-contents">
+<div id="top"><!-- do not remove this div, it is closed by doxygen! -->
+<nav class="title_area" aria-label="Project">
+<div class="title_area__start"></div>
+<div class="title_area__center">
+<span class="project_info">seams-core v2.12.0</span>
+<span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
+</div>
+<div class="title_area__end">
+<button type="button" class="dark-mode-toggle" id="darkModeToggle" title="Toggle dark mode" aria-label="Toggle dark mode" aria-pressed="false">&#9790;</button>
+</div>
+</nav>
+<!-- end header part -->
+<script type="text/javascript">
+/* doxyYoda interactive: foldable fragments, copy buttons, dark-mode toggle */
+document.addEventListener("DOMContentLoaded", function () {
+  function prefersDark() {
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function isDarkMode() {
+    var root = document.documentElement;
+    if (root.classList.contains("dark") || root.classList.contains("dark-mode")) return true;
+    if (root.classList.contains("light")) return false;
+    return prefersDark();
+  }
+  // Optional folding: wrap .fragment in open <details class="code-details">.
+  // Skip fragments already inside details and native Doxygen .foldopen listings.
+  document.querySelectorAll(".fragment").forEach(function (frag) {
+    if (frag.closest("details.code-details")) return;
+    if (frag.querySelector(".foldopen")) return;
+    var details = document.createElement("details");
+    details.className = "code-details";
+    details.open = true;
+    var summary = document.createElement("summary");
+    summary.textContent = "Code";
+    frag.parentNode.insertBefore(details, frag);
+    details.appendChild(summary);
+    details.appendChild(frag);
+  });
+  // Copy-to-clipboard on div.fragment (themed .copy-btn only)
+  document.querySelectorAll("div.fragment").forEach(function (frag) {
+    if (frag.querySelector(".copy-btn")) return;
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-btn";
+    btn.textContent = "Copy";
+    btn.setAttribute("aria-label", "Copy code");
+    btn.addEventListener("click", function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      var clone = frag.cloneNode(true);
+      var extra = clone.querySelector(".copy-btn");
+      if (extra) extra.remove();
+      var lines = clone.querySelectorAll(".line");
+      var text = lines.length
+        ? Array.prototype.map.call(lines, function (l) { return l.textContent; }).join("\n")
+        : clone.textContent;
+      var done = function () {
+        btn.textContent = "Copied!";
+        setTimeout(function () { btn.textContent = "Copy"; }, 2000);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(function () {
+          /* ignore */
+        });
+      }
+    });
+    frag.appendChild(btn);
+  });
+  // Dark mode toggle
+  var toggle = document.getElementById("darkModeToggle");
+  if (toggle) {
+    function updateIcon() {
+      var dark = isDarkMode();
+      toggle.innerHTML = dark ? "&#9788;" : "&#9790;";
+      toggle.setAttribute("aria-pressed", dark ? "true" : "false");
+    }
+    updateIcon();
+    toggle.addEventListener("click", function () {
+      var root = document.documentElement;
+      var nextDark = !isDarkMode();
+      root.classList.toggle("dark", nextDark);
+      root.classList.toggle("dark-mode", nextDark);
+      root.classList.toggle("light", !nextDark);
+      try {
+        localStorage.setItem("doxyYoda-theme", nextDark ? "dark" : "light");
+      } catch (e) { /* private mode */ }
+      updateIcon();
+    });
+  }
+});
+</script>
+<!-- Generated by Doxygen 1.17.0 -->
+<script type="text/javascript">
+let searchBox = new SearchBox("searchBox", "search/",'.html');
+</script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', codefold.init);
+</script>
+<script type="text/javascript" src="menudata.js"></script>
+<script type="text/javascript" src="menu.js"></script>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', () => {
+  initMenu('',true);
+  init_search();
+});
+</script>
+<div id="main-nav-mobile">
+<div class="sm sm-dox"><input id="main-menu-state" type="checkbox"/>
+<label class="main-menu-btn" for="main-menu-state">
+<span class="main-menu-btn-icon"></span> Toggle main menu visibility</label>
+<span id="searchBoxPos1" style="position:absolute;right:8px;top:8px;height:36px;"></span>
+</div>
+</div><!-- main-nav-mobile -->
+<div id="main-nav">
+  <ul class="sm sm-dox" id="main-menu">
+    <li id="searchBoxPos2" style="float:right">
+        <div id="MSearchBox" class="MSearchBoxInactive">
+        <span class="left">
+          <span id="MSearchSelect" class="search-icon" onmouseover="return searchBox.OnSearchSelectShow()" onmouseout="return searchBox.OnSearchSelectHide()"><span class="search-icon-dropdown"></span></span>
+          <input type="text" id="MSearchField" value="" placeholder="Search" accesskey="S"
+               onfocus="searchBox.OnSearchFieldFocus(true)" 
+               onblur="searchBox.OnSearchFieldFocus(false)" 
+               onkeyup="searchBox.OnSearchFieldChange(event)"/>
+          </span><span class="right">
+            <a id="MSearchClose" href="javascript:searchBox.CloseResultsWindow()"><div id="MSearchCloseImg" class="close-icon"></div></a>
+          </span>
+        </div>
+    </li>
+  </ul>
+</div><!-- main-nav -->
+</div><!-- top -->
+<div id="side-nav" class="ui-resizable side-nav-resizable">
+  <div id="nav-tree">
+    <div id="nav-tree-contents">
+      <div id="nav-sync" class="sync"></div>
+    </div>
+  </div>
+  <div id="splitbar" style="-moz-user-select:none;" 
+       class="ui-resizable-handle">
+  </div>
+</div>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded',() => { initNavTree('ozaki_8hpp_source.html','',''); });
+</script>
+<div id="container">
+<div id="doc-content">
+<!-- window showing the filter options -->
+<div id="MSearchSelectWindow"
+     onmouseover="return searchBox.OnSearchSelectShow()"
+     onmouseout="return searchBox.OnSearchSelectHide()"
+     onkeydown="return searchBox.OnSearchSelectKey(event)">
+</div>
+
+<!-- iframe showing the search results (closed by default) -->
+<div id="MSearchResultsWindow">
+<div id="MSearchResults">
+<div class="SRPage">
+<div id="SRIndex">
+<div id="SRResults"></div>
+<div class="SRStatus" id="Loading">Loading...</div>
+<div class="SRStatus" id="Searching">Searching...</div>
+<div class="SRStatus" id="NoMatches">No Matches</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="header">
+  <div class="headertitle"><div class="title">ozaki.hpp</div></div>
+</div><!--header-->
+<div class="contents">
+<a href="ozaki_8hpp.html">Go to the documentation of this file.</a><div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef SEAMS_OZAKI_H_</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define SEAMS_OZAKI_H_</span></div>
+<div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="comment">// Emulated products for the short dots and the one tiny GEMM in d-SEAMS.</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="comment">//</span></div>
+<div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span><span class="comment">// Ozaki scheme I splits a floating-point vector into slices whose products</span></div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="comment">// are exact in FP64 (Ozaki, Ogita and Oishi, Numer. Algorithms 59, 95, 2012).</span></div>
+<div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span><span class="comment">// Ozaki scheme II replaces that slicing by an integer matrix product modulo</span></div>
+<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="comment">// several coprime moduli and a Chinese-remainder reconstruction (Ozaki,</span></div>
+<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span><span class="comment">// Uchino and Imamura, arXiv:2504.08009, 2025). The INT8 products use</span></div>
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// AVX-512 VNNI or AMX-INT8 when the shape fills a tile; shorter products</span></div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// use an INT32 accumulator, which is exact for the lengths that occur here.</span></div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment">//</span></div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment">// TwoProd / TwoSum and pairwise summation are the error-free transformations</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment">// of Dekker, Knuth, and Ogita, Rump and Oishi (SIAM J. Sci. Comput. 26,</span></div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment">// 2005). Pairwise summation is the reduction whose error Higham bounds by</span></div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment">// gamma_{ceil(log2 n)} (Accuracy and Stability of Numerical Algorithms,</span></div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">// SIAM, 2002). It does not depend on a left-to-right fold.</span></div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &lt;complex&gt;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &lt;cstddef&gt;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &lt;vector&gt;</span></div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
+<div class="foldopen" id="foldopen00024" data-start="{" data-end="}">
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html">   24</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespaceseams_1_1product.html">seams::product</a> {</div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
+<div class="foldopen" id="foldopen00026" data-start="{" data-end="};">
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69">   26</a></span><span class="keyword">enum class</span> <a class="code hl_enumeration" href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69">Mode</a> {</div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69a9827fcb63f1f5c7962e8056d676ede53">   27</a></span>  <a class="code hl_enumvalue" href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69a9827fcb63f1f5c7962e8056d676ede53">Fp64</a> = 0,</div>
+<div class="line"><a id="l00028" name="l00028"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69a2a6a9dcb2d287b32ffa0c53d6637bc4b">   28</a></span>  <a class="code hl_enumvalue" href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69a2a6a9dcb2d287b32ffa0c53d6637bc4b">Dot2</a> = 1,</div>
+<div class="line"><a id="l00029" name="l00029"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69a7d2eb2a8d1989de6609b0a82c81a5bda">   29</a></span>  <a class="code hl_enumvalue" href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69a7d2eb2a8d1989de6609b0a82c81a5bda">OzakiI</a> = 2,</div>
+<div class="line"><a id="l00030" name="l00030"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69aa46279a71e0342c8fb462fe5276caafd">   30</a></span>  <a class="code hl_enumvalue" href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69aa46279a71e0342c8fb462fe5276caafd">OzakiII</a> = 3,</div>
+<div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>};</div>
+</div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span> </div>
+<div class="foldopen" id="foldopen00033" data-start="{" data-end="};">
+<div class="line"><a id="l00033" name="l00033"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#a41d6db9da7369504f08bf87d37ab354d">   33</a></span><span class="keyword">enum class</span> <a class="code hl_enumeration" href="namespaceseams_1_1product.html#a41d6db9da7369504f08bf87d37ab354d">Reduction</a> {</div>
+<div class="line"><a id="l00034" name="l00034"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#a41d6db9da7369504f08bf87d37ab354da945d5e233cf7d6240f6b783b36a374ff">   34</a></span>  <a class="code hl_enumvalue" href="namespaceseams_1_1product.html#a41d6db9da7369504f08bf87d37ab354da945d5e233cf7d6240f6b783b36a374ff">Left</a> = 0,</div>
+<div class="line"><a id="l00035" name="l00035"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#a41d6db9da7369504f08bf87d37ab354da327036a1ef7ccbd87697bb2a2197d9ae">   35</a></span>  <a class="code hl_enumvalue" href="namespaceseams_1_1product.html#a41d6db9da7369504f08bf87d37ab354da327036a1ef7ccbd87697bb2a2197d9ae">Pairwise</a> = 1,</div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#a41d6db9da7369504f08bf87d37ab354da5f9bd7eb1d224fad881861ca41579be0">   36</a></span>  <a class="code hl_enumvalue" href="namespaceseams_1_1product.html#a41d6db9da7369504f08bf87d37ab354da5f9bd7eb1d224fad881861ca41579be0">Neumaier</a> = 2,</div>
+<div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>};</div>
+</div>
+<div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
+<div class="foldopen" id="foldopen00039" data-start="{" data-end="};">
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8">   39</a></span><span class="keyword">enum class</span> <a class="code hl_enumeration" href="namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8">Int8Backend</a> {</div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8a06b9281e396db002010bde1de57262eb">   40</a></span>  <a class="code hl_enumvalue" href="namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8a06b9281e396db002010bde1de57262eb">Auto</a> = 0,</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8af60357a8d17e45793298323f1b372a74">   41</a></span>  <a class="code hl_enumvalue" href="namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8af60357a8d17e45793298323f1b372a74">Scalar</a> = 1,</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8a60784d4c7f952be5623c33b16173682d">   42</a></span>  <a class="code hl_enumvalue" href="namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8a60784d4c7f952be5623c33b16173682d">Vnni</a> = 2,</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8ae0af394473a027ea1fe1d8ad86af15ea">   43</a></span>  <a class="code hl_enumvalue" href="namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8ae0af394473a027ea1fe1d8ad86af15ea">Amx</a> = 3,</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>};</div>
+</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
+<div class="foldopen" id="foldopen00046" data-start="{" data-end="};">
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1RealDot.html">   46</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structseams_1_1product_1_1RealDot.html">RealDot</a> {</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1RealDot.html#aefef1ba97a24b2676b5455b4c747ba73">   47</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structseams_1_1product_1_1RealDot.html#aefef1ba97a24b2676b5455b4c747ba73">value</a>;</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1RealDot.html#a54d2cb040fb9812f13ea6743ba36a3e6">   48</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structseams_1_1product_1_1RealDot.html#a54d2cb040fb9812f13ea6743ba36a3e6">bound</a>;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1RealDot.html#a10ab65138796b89008f65a28ce04180b">   49</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="structseams_1_1product_1_1RealDot.html#a10ab65138796b89008f65a28ce04180b">certified</a>;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1RealDot.html#a8e418852023347c545edab43a3bc8ec2">   50</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structseams_1_1product_1_1RealDot.html#a8e418852023347c545edab43a3bc8ec2">work</a>;</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1RealDot.html#a370538360b39ac1bd03fac89cbc922cb">   51</a></span>  <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_variable" href="structseams_1_1product_1_1RealDot.html#a370538360b39ac1bd03fac89cbc922cb">backend</a>;</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>};</div>
+</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="foldopen" id="foldopen00054" data-start="{" data-end="};">
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1ComplexDot.html">   54</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structseams_1_1product_1_1ComplexDot.html">ComplexDot</a> {</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1ComplexDot.html#a8000531988969be701ea4e1eaa84c39f">   55</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structseams_1_1product_1_1ComplexDot.html#a8000531988969be701ea4e1eaa84c39f">re</a>;</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1ComplexDot.html#aba2931a5cf0edce218d4058e56ad263b">   56</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structseams_1_1product_1_1ComplexDot.html#aba2931a5cf0edce218d4058e56ad263b">im</a>;</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1ComplexDot.html#a3f8e15c6ade5c30543120c318f55ef37">   57</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structseams_1_1product_1_1ComplexDot.html#a3f8e15c6ade5c30543120c318f55ef37">normA</a>;</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1ComplexDot.html#ab478be72937fcfa2e2eaee31e68b2a2c">   58</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structseams_1_1product_1_1ComplexDot.html#ab478be72937fcfa2e2eaee31e68b2a2c">normB</a>;</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1ComplexDot.html#afb8296f5d023bd70cc99fed67d6477e7">   59</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structseams_1_1product_1_1ComplexDot.html#afb8296f5d023bd70cc99fed67d6477e7">boundRe</a>;</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1ComplexDot.html#af7901f655269bf275eb43163c548ab1e">   60</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structseams_1_1product_1_1ComplexDot.html#af7901f655269bf275eb43163c548ab1e">boundIm</a>;</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1ComplexDot.html#a4c2b801829172633d09aed85d9a0a410">   61</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structseams_1_1product_1_1ComplexDot.html#a4c2b801829172633d09aed85d9a0a410">boundNormA</a>;</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1ComplexDot.html#aecde2d704d34f2a08fd6bc7ed77cc1db">   62</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structseams_1_1product_1_1ComplexDot.html#aecde2d704d34f2a08fd6bc7ed77cc1db">boundNormB</a>;</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1ComplexDot.html#a4ebaee7a2a9057b39371151637ff3001">   63</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="structseams_1_1product_1_1ComplexDot.html#a4ebaee7a2a9057b39371151637ff3001">certified</a>;</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1ComplexDot.html#ad5559f7c7ad30016d9bfbc6e4493f044">   64</a></span>  <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_variable" href="structseams_1_1product_1_1ComplexDot.html#ad5559f7c7ad30016d9bfbc6e4493f044">backend</a>;</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>};</div>
+</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span> </div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#a4f480de28c1ceac46c4297f4f6766650">   67</a></span><a class="code hl_enumeration" href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69">Mode</a> <a class="code hl_function" href="namespaceseams_1_1product.html#a4f480de28c1ceac46c4297f4f6766650">mode</a>();</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#acbca62f54637a86bcfc18f10fcdf5926">   68</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespaceseams_1_1product.html#acbca62f54637a86bcfc18f10fcdf5926">setMode</a>(<a class="code hl_enumeration" href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69">Mode</a> m);</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#ac474bce9a90d2ddedbe613731fde239b">   69</a></span><span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_function" href="namespaceseams_1_1product.html#ac474bce9a90d2ddedbe613731fde239b">modeName</a>(<a class="code hl_enumeration" href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69">Mode</a> m);</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span> </div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#a7bd291c2c3f15b242c1406a3cf5fcc3c">   71</a></span><a class="code hl_enumeration" href="namespaceseams_1_1product.html#a41d6db9da7369504f08bf87d37ab354d">Reduction</a> <a class="code hl_function" href="namespaceseams_1_1product.html#a7bd291c2c3f15b242c1406a3cf5fcc3c">reduction</a>();</div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#a3b3fc8031879e5515251ea7cb61d2522">   72</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespaceseams_1_1product.html#a3b3fc8031879e5515251ea7cb61d2522">setReduction</a>(<a class="code hl_enumeration" href="namespaceseams_1_1product.html#a41d6db9da7369504f08bf87d37ab354d">Reduction</a> r);</div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#a9d5ce001681251855a29c04303fbf402">   73</a></span><span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_function" href="namespaceseams_1_1product.html#a9d5ce001681251855a29c04303fbf402">reductionName</a>(<a class="code hl_enumeration" href="namespaceseams_1_1product.html#a41d6db9da7369504f08bf87d37ab354d">Reduction</a> r);</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
+<div class="line"><a id="l00075" name="l00075"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#a695f556d936855ecae9952acc337ca28">   75</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceseams_1_1product.html#a695f556d936855ecae9952acc337ca28">amxAvailable</a>();</div>
+<div class="line"><a id="l00076" name="l00076"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#aff92d3adb921e5b30fd79cf9c129d287">   76</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceseams_1_1product.html#aff92d3adb921e5b30fd79cf9c129d287">vnniAvailable</a>();</div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span> </div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#ab9db9fbc435ff6f8211bcfd3fd1c3ac7">   78</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespaceseams_1_1product.html#ab9db9fbc435ff6f8211bcfd3fd1c3ac7">twoSum</a>(<span class="keywordtype">double</span> a, <span class="keywordtype">double</span> b, <span class="keywordtype">double</span> &amp;s, <span class="keywordtype">double</span> &amp;e);</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#ae882b153eb1e1db91709144736bc41a1">   79</a></span><span class="keywordtype">void</span> <a class="code hl_function" href="namespaceseams_1_1product.html#ae882b153eb1e1db91709144736bc41a1">twoProd</a>(<span class="keywordtype">double</span> a, <span class="keywordtype">double</span> b, <span class="keywordtype">double</span> &amp;hi, <span class="keywordtype">double</span> &amp;lo);</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#a2fc3521f88d306430aa6aa8976b1a346">   81</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="namespaceseams_1_1product.html#a2fc3521f88d306430aa6aa8976b1a346">pairwiseSum</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *x, <span class="keywordtype">int</span> n);</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#a95ff5708558ec68212ebdad8fd50f591">   82</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="namespaceseams_1_1product.html#a95ff5708558ec68212ebdad8fd50f591">neumaierSum</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *x, <span class="keywordtype">int</span> n);</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#a51d1f6b5e7fe1eb93e25fcd3d421c165">   83</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="namespaceseams_1_1product.html#a51d1f6b5e7fe1eb93e25fcd3d421c165">leftSum</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *x, <span class="keywordtype">int</span> n);</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#a5157a24dfffb0fe26e26eca4aa808028">   84</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="namespaceseams_1_1product.html#a5157a24dfffb0fe26e26eca4aa808028">reduce</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *x, <span class="keywordtype">int</span> n, <a class="code hl_enumeration" href="namespaceseams_1_1product.html#a41d6db9da7369504f08bf87d37ab354d">Reduction</a> r);</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span><span class="comment">// Absolute error bound for pairwise summation of n finite terms whose</span></div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span><span class="comment">// absolute values sum to absSum (Higham&#39;s gamma_ceil(log2 n) bound,</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span><span class="comment">// rounded upward).</span></div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#a3b7920afec76d1434e306d566a610dd4">   89</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="namespaceseams_1_1product.html#a3b7920afec76d1434e306d566a610dd4">pairwiseBound</a>(<span class="keywordtype">int</span> n, <span class="keywordtype">long</span> <span class="keywordtype">double</span> absSum);</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span> </div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#a16a59cd631b7750babd993434ab89743">   91</a></span><a class="code hl_struct" href="structseams_1_1product_1_1RealDot.html">RealDot</a> <a class="code hl_function" href="namespaceseams_1_1product.html#a16a59cd631b7750babd993434ab89743">realDot</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *x, <span class="keyword">const</span> <span class="keywordtype">double</span> *y, <span class="keywordtype">int</span> n, <a class="code hl_enumeration" href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69">Mode</a> m);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span> </div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#a0e177c92a7f7d2b6f64ab9ba3f430cd7">   93</a></span><a class="code hl_struct" href="structseams_1_1product_1_1ComplexDot.html">ComplexDot</a> <a class="code hl_function" href="namespaceseams_1_1product.html#a0e177c92a7f7d2b6f64ab9ba3f430cd7">complexDot</a>(<span class="keyword">const</span> std::complex&lt;double&gt; *a,</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>                      <span class="keyword">const</span> std::complex&lt;double&gt; *b, <span class="keywordtype">int</span> n, <a class="code hl_enumeration" href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69">Mode</a> m);</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span><span class="comment">// c = Re(a · conj(b)) / (|a| |b|), with an absolute certificate.</span></div>
+<div class="foldopen" id="foldopen00097" data-start="{" data-end="};">
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1Cij.html">   97</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structseams_1_1product_1_1Cij.html">Cij</a> {</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1Cij.html#a5c1650b776bcce83336af006b57d55f4">   98</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structseams_1_1product_1_1Cij.html#a5c1650b776bcce83336af006b57d55f4">value</a>;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1Cij.html#aca8e1f2b23615202c63ecc9aab8d01b3">   99</a></span>  <span class="keywordtype">double</span> <a class="code hl_variable" href="structseams_1_1product_1_1Cij.html#aca8e1f2b23615202c63ecc9aab8d01b3">bound</a>;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1Cij.html#a07e598238f2bb5b4ec6e245420276705">  100</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="structseams_1_1product_1_1Cij.html#a07e598238f2bb5b4ec6e245420276705">certified</a>;</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1Cij.html#a92b4a8a74a1a8248ae2777513887cd3e">  101</a></span>  <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_variable" href="structseams_1_1product_1_1Cij.html#a92b4a8a74a1a8248ae2777513887cd3e">backend</a>;</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>};</div>
+</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#aec3f1a01623db86baf55bd314a896104">  104</a></span><a class="code hl_struct" href="structseams_1_1product_1_1Cij.html">Cij</a> <a class="code hl_function" href="namespaceseams_1_1product.html#aec3f1a01623db86baf55bd314a896104">bondCorrelation</a>(<span class="keyword">const</span> std::complex&lt;double&gt; *a, <span class="keyword">const</span> std::complex&lt;double&gt; *b,</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>                    <span class="keywordtype">int</span> n, <a class="code hl_enumeration" href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69">Mode</a> m);</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span> </div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span><span class="comment">// Mean of the finite entries, in input order. Left matches a plain</span></div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span><span class="comment">// accumulator; pairwise and Neumaier do not depend on a chain of +=.</span></div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#a034897976e290392140be6ca3d054fb4">  109</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="namespaceseams_1_1product.html#a034897976e290392140be6ca3d054fb4">meanOfFinite</a>(<span class="keyword">const</span> <span class="keywordtype">double</span> *x, <span class="keywordtype">int</span> n, <a class="code hl_enumeration" href="namespaceseams_1_1product.html#a41d6db9da7369504f08bf87d37ab354d">Reduction</a> r);</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span><span class="comment">// Row-major C = A(m x k) * B(k x n). bounds may be null. On Ozaki-II each</span></div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span><span class="comment">// bounds[i*n+j] is an absolute certificate. Fp64 leaves bounds at 0 when</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="comment">// the pointer is non-null (no certificate for the rounded GEMM).</span></div>
+<div class="foldopen" id="foldopen00114" data-start="{" data-end="};">
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1GemmInfo.html">  114</a></span><span class="keyword">struct </span><a class="code hl_struct" href="structseams_1_1product_1_1GemmInfo.html">GemmInfo</a> {</div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1GemmInfo.html#a435ddeed7f50b239755c2ea58761810e">  115</a></span>  <span class="keywordtype">bool</span> <a class="code hl_variable" href="structseams_1_1product_1_1GemmInfo.html#a435ddeed7f50b239755c2ea58761810e">ok</a>;</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1GemmInfo.html#ade8e7ad79d1207d18bb8bafff93fd429">  116</a></span>  <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code hl_variable" href="structseams_1_1product_1_1GemmInfo.html#ade8e7ad79d1207d18bb8bafff93fd429">backend</a>;</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1GemmInfo.html#a73ec9de6167f3072dbfa4d830c61c072">  117</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structseams_1_1product_1_1GemmInfo.html#a73ec9de6167f3072dbfa4d830c61c072">moduli</a>;</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno"><a class="line" href="structseams_1_1product_1_1GemmInfo.html#a20d16a0ce6bc905549e8aa1bb8e637c9">  118</a></span>  <span class="keywordtype">int</span> <a class="code hl_variable" href="structseams_1_1product_1_1GemmInfo.html#a20d16a0ce6bc905549e8aa1bb8e637c9">sliceWidth</a>;</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>};</div>
+</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span> </div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#ae21f804c2a172386021c150f5bc0f1ff">  121</a></span><a class="code hl_struct" href="structseams_1_1product_1_1GemmInfo.html">GemmInfo</a> <a class="code hl_function" href="namespaceseams_1_1product.html#ae21f804c2a172386021c150f5bc0f1ff">gemm</a>(<span class="keywordtype">int</span> m, <span class="keywordtype">int</span> n, <span class="keywordtype">int</span> k, <span class="keyword">const</span> <span class="keywordtype">double</span> *A, <span class="keywordtype">int</span> lda, <span class="keyword">const</span> <span class="keywordtype">double</span> *B,</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>              <span class="keywordtype">int</span> ldb, <span class="keywordtype">double</span> *C, <span class="keywordtype">int</span> ldc, <a class="code hl_enumeration" href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69">Mode</a> <a class="code hl_function" href="namespaceseams_1_1product.html#a4f480de28c1ceac46c4297f4f6766650">mode</a>, <span class="keywordtype">double</span> *bounds,</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>              <a class="code hl_enumeration" href="namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8">Int8Backend</a> backend = <a class="code hl_enumvalue" href="namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8a06b9281e396db002010bde1de57262eb">Int8Backend::Auto</a>);</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span> </div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span><span class="comment">// INT8 C += A * B, row-major, int32 accumulator. Used to check the tiles.</span></div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span><span class="comment">// Returns false when the backend cannot run this shape.</span></div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno"><a class="line" href="namespaceseams_1_1product.html#a738385ecf7dcef405bbd4ab54d424212">  127</a></span><span class="keywordtype">bool</span> <a class="code hl_function" href="namespaceseams_1_1product.html#a738385ecf7dcef405bbd4ab54d424212">int8Gemm</a>(<span class="keywordtype">int</span> m, <span class="keywordtype">int</span> n, <span class="keywordtype">int</span> k, <span class="keyword">const</span> <span class="keywordtype">signed</span> <span class="keywordtype">char</span> *A, <span class="keywordtype">int</span> lda,</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>              <span class="keyword">const</span> <span class="keywordtype">signed</span> <span class="keywordtype">char</span> *B, <span class="keywordtype">int</span> ldb, <span class="keywordtype">int</span> *C, <span class="keywordtype">int</span> ldc,</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>              <a class="code hl_enumeration" href="namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8">Int8Backend</a> backend);</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span> </div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>} <span class="comment">// namespace seams::product</span></div>
+</div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span> </div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span><span class="preprocessor">#endif</span></div>
+<div class="ttc" id="anamespaceseams_1_1product_html"><div class="ttname"><a href="namespaceseams_1_1product.html">seams::product</a></div><div class="ttdef"><b>Definition</b> <a href="#l00024">ozaki.hpp:24</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_a034897976e290392140be6ca3d054fb4"><div class="ttname"><a href="namespaceseams_1_1product.html#a034897976e290392140be6ca3d054fb4">seams::product::meanOfFinite</a></div><div class="ttdeci">double meanOfFinite(const double *x, int n, Reduction r)</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_a0e177c92a7f7d2b6f64ab9ba3f430cd7"><div class="ttname"><a href="namespaceseams_1_1product.html#a0e177c92a7f7d2b6f64ab9ba3f430cd7">seams::product::complexDot</a></div><div class="ttdeci">ComplexDot complexDot(const std::complex&lt; double &gt; *a, const std::complex&lt; double &gt; *b, int n, Mode m)</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_a16a59cd631b7750babd993434ab89743"><div class="ttname"><a href="namespaceseams_1_1product.html#a16a59cd631b7750babd993434ab89743">seams::product::realDot</a></div><div class="ttdeci">RealDot realDot(const double *x, const double *y, int n, Mode m)</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_a2fc3521f88d306430aa6aa8976b1a346"><div class="ttname"><a href="namespaceseams_1_1product.html#a2fc3521f88d306430aa6aa8976b1a346">seams::product::pairwiseSum</a></div><div class="ttdeci">double pairwiseSum(const double *x, int n)</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_a3b3fc8031879e5515251ea7cb61d2522"><div class="ttname"><a href="namespaceseams_1_1product.html#a3b3fc8031879e5515251ea7cb61d2522">seams::product::setReduction</a></div><div class="ttdeci">void setReduction(Reduction r)</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_a3b7920afec76d1434e306d566a610dd4"><div class="ttname"><a href="namespaceseams_1_1product.html#a3b7920afec76d1434e306d566a610dd4">seams::product::pairwiseBound</a></div><div class="ttdeci">double pairwiseBound(int n, long double absSum)</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_a41d6db9da7369504f08bf87d37ab354d"><div class="ttname"><a href="namespaceseams_1_1product.html#a41d6db9da7369504f08bf87d37ab354d">seams::product::Reduction</a></div><div class="ttdeci">Reduction</div><div class="ttdef"><b>Definition</b> <a href="#l00033">ozaki.hpp:33</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_a41d6db9da7369504f08bf87d37ab354da327036a1ef7ccbd87697bb2a2197d9ae"><div class="ttname"><a href="namespaceseams_1_1product.html#a41d6db9da7369504f08bf87d37ab354da327036a1ef7ccbd87697bb2a2197d9ae">seams::product::Reduction::Pairwise</a></div><div class="ttdeci">@ Pairwise</div><div class="ttdef"><b>Definition</b> <a href="#l00035">ozaki.hpp:35</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_a41d6db9da7369504f08bf87d37ab354da5f9bd7eb1d224fad881861ca41579be0"><div class="ttname"><a href="namespaceseams_1_1product.html#a41d6db9da7369504f08bf87d37ab354da5f9bd7eb1d224fad881861ca41579be0">seams::product::Reduction::Neumaier</a></div><div class="ttdeci">@ Neumaier</div><div class="ttdef"><b>Definition</b> <a href="#l00036">ozaki.hpp:36</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_a41d6db9da7369504f08bf87d37ab354da945d5e233cf7d6240f6b783b36a374ff"><div class="ttname"><a href="namespaceseams_1_1product.html#a41d6db9da7369504f08bf87d37ab354da945d5e233cf7d6240f6b783b36a374ff">seams::product::Reduction::Left</a></div><div class="ttdeci">@ Left</div><div class="ttdef"><b>Definition</b> <a href="#l00034">ozaki.hpp:34</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_a4f480de28c1ceac46c4297f4f6766650"><div class="ttname"><a href="namespaceseams_1_1product.html#a4f480de28c1ceac46c4297f4f6766650">seams::product::mode</a></div><div class="ttdeci">Mode mode()</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_a5157a24dfffb0fe26e26eca4aa808028"><div class="ttname"><a href="namespaceseams_1_1product.html#a5157a24dfffb0fe26e26eca4aa808028">seams::product::reduce</a></div><div class="ttdeci">double reduce(const double *x, int n, Reduction r)</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_a51d1f6b5e7fe1eb93e25fcd3d421c165"><div class="ttname"><a href="namespaceseams_1_1product.html#a51d1f6b5e7fe1eb93e25fcd3d421c165">seams::product::leftSum</a></div><div class="ttdeci">double leftSum(const double *x, int n)</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_a695f556d936855ecae9952acc337ca28"><div class="ttname"><a href="namespaceseams_1_1product.html#a695f556d936855ecae9952acc337ca28">seams::product::amxAvailable</a></div><div class="ttdeci">bool amxAvailable()</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_a738385ecf7dcef405bbd4ab54d424212"><div class="ttname"><a href="namespaceseams_1_1product.html#a738385ecf7dcef405bbd4ab54d424212">seams::product::int8Gemm</a></div><div class="ttdeci">bool int8Gemm(int m, int n, int k, const signed char *A, int lda, const signed char *B, int ldb, int *C, int ldc, Int8Backend backend)</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_a7bd291c2c3f15b242c1406a3cf5fcc3c"><div class="ttname"><a href="namespaceseams_1_1product.html#a7bd291c2c3f15b242c1406a3cf5fcc3c">seams::product::reduction</a></div><div class="ttdeci">Reduction reduction()</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_a95ff5708558ec68212ebdad8fd50f591"><div class="ttname"><a href="namespaceseams_1_1product.html#a95ff5708558ec68212ebdad8fd50f591">seams::product::neumaierSum</a></div><div class="ttdeci">double neumaierSum(const double *x, int n)</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_a9d5ce001681251855a29c04303fbf402"><div class="ttname"><a href="namespaceseams_1_1product.html#a9d5ce001681251855a29c04303fbf402">seams::product::reductionName</a></div><div class="ttdeci">const char * reductionName(Reduction r)</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_aa8c61433638a1bffc43597870d7e6b69"><div class="ttname"><a href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69">seams::product::Mode</a></div><div class="ttdeci">Mode</div><div class="ttdef"><b>Definition</b> <a href="#l00026">ozaki.hpp:26</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_aa8c61433638a1bffc43597870d7e6b69a2a6a9dcb2d287b32ffa0c53d6637bc4b"><div class="ttname"><a href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69a2a6a9dcb2d287b32ffa0c53d6637bc4b">seams::product::Mode::Dot2</a></div><div class="ttdeci">@ Dot2</div><div class="ttdef"><b>Definition</b> <a href="#l00028">ozaki.hpp:28</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_aa8c61433638a1bffc43597870d7e6b69a7d2eb2a8d1989de6609b0a82c81a5bda"><div class="ttname"><a href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69a7d2eb2a8d1989de6609b0a82c81a5bda">seams::product::Mode::OzakiI</a></div><div class="ttdeci">@ OzakiI</div><div class="ttdef"><b>Definition</b> <a href="#l00029">ozaki.hpp:29</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_aa8c61433638a1bffc43597870d7e6b69a9827fcb63f1f5c7962e8056d676ede53"><div class="ttname"><a href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69a9827fcb63f1f5c7962e8056d676ede53">seams::product::Mode::Fp64</a></div><div class="ttdeci">@ Fp64</div><div class="ttdef"><b>Definition</b> <a href="#l00027">ozaki.hpp:27</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_aa8c61433638a1bffc43597870d7e6b69aa46279a71e0342c8fb462fe5276caafd"><div class="ttname"><a href="namespaceseams_1_1product.html#aa8c61433638a1bffc43597870d7e6b69aa46279a71e0342c8fb462fe5276caafd">seams::product::Mode::OzakiII</a></div><div class="ttdeci">@ OzakiII</div><div class="ttdef"><b>Definition</b> <a href="#l00030">ozaki.hpp:30</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_ab9db9fbc435ff6f8211bcfd3fd1c3ac7"><div class="ttname"><a href="namespaceseams_1_1product.html#ab9db9fbc435ff6f8211bcfd3fd1c3ac7">seams::product::twoSum</a></div><div class="ttdeci">void twoSum(double a, double b, double &amp;s, double &amp;e)</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_ac474bce9a90d2ddedbe613731fde239b"><div class="ttname"><a href="namespaceseams_1_1product.html#ac474bce9a90d2ddedbe613731fde239b">seams::product::modeName</a></div><div class="ttdeci">const char * modeName(Mode m)</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_acbca62f54637a86bcfc18f10fcdf5926"><div class="ttname"><a href="namespaceseams_1_1product.html#acbca62f54637a86bcfc18f10fcdf5926">seams::product::setMode</a></div><div class="ttdeci">void setMode(Mode m)</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_ae21f804c2a172386021c150f5bc0f1ff"><div class="ttname"><a href="namespaceseams_1_1product.html#ae21f804c2a172386021c150f5bc0f1ff">seams::product::gemm</a></div><div class="ttdeci">GemmInfo gemm(int m, int n, int k, const double *A, int lda, const double *B, int ldb, double *C, int ldc, Mode mode, double *bounds, Int8Backend backend=Int8Backend::Auto)</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_ae882b153eb1e1db91709144736bc41a1"><div class="ttname"><a href="namespaceseams_1_1product.html#ae882b153eb1e1db91709144736bc41a1">seams::product::twoProd</a></div><div class="ttdeci">void twoProd(double a, double b, double &amp;hi, double &amp;lo)</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_aec3f1a01623db86baf55bd314a896104"><div class="ttname"><a href="namespaceseams_1_1product.html#aec3f1a01623db86baf55bd314a896104">seams::product::bondCorrelation</a></div><div class="ttdeci">Cij bondCorrelation(const std::complex&lt; double &gt; *a, const std::complex&lt; double &gt; *b, int n, Mode m)</div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_af8206d12811cfa91ad26f3b6fdca4ac8"><div class="ttname"><a href="namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8">seams::product::Int8Backend</a></div><div class="ttdeci">Int8Backend</div><div class="ttdef"><b>Definition</b> <a href="#l00039">ozaki.hpp:39</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_af8206d12811cfa91ad26f3b6fdca4ac8a06b9281e396db002010bde1de57262eb"><div class="ttname"><a href="namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8a06b9281e396db002010bde1de57262eb">seams::product::Int8Backend::Auto</a></div><div class="ttdeci">@ Auto</div><div class="ttdef"><b>Definition</b> <a href="#l00040">ozaki.hpp:40</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_af8206d12811cfa91ad26f3b6fdca4ac8a60784d4c7f952be5623c33b16173682d"><div class="ttname"><a href="namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8a60784d4c7f952be5623c33b16173682d">seams::product::Int8Backend::Vnni</a></div><div class="ttdeci">@ Vnni</div><div class="ttdef"><b>Definition</b> <a href="#l00042">ozaki.hpp:42</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_af8206d12811cfa91ad26f3b6fdca4ac8ae0af394473a027ea1fe1d8ad86af15ea"><div class="ttname"><a href="namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8ae0af394473a027ea1fe1d8ad86af15ea">seams::product::Int8Backend::Amx</a></div><div class="ttdeci">@ Amx</div><div class="ttdef"><b>Definition</b> <a href="#l00043">ozaki.hpp:43</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_af8206d12811cfa91ad26f3b6fdca4ac8af60357a8d17e45793298323f1b372a74"><div class="ttname"><a href="namespaceseams_1_1product.html#af8206d12811cfa91ad26f3b6fdca4ac8af60357a8d17e45793298323f1b372a74">seams::product::Int8Backend::Scalar</a></div><div class="ttdeci">@ Scalar</div><div class="ttdef"><b>Definition</b> <a href="#l00041">ozaki.hpp:41</a></div></div>
+<div class="ttc" id="anamespaceseams_1_1product_html_aff92d3adb921e5b30fd79cf9c129d287"><div class="ttname"><a href="namespaceseams_1_1product.html#aff92d3adb921e5b30fd79cf9c129d287">seams::product::vnniAvailable</a></div><div class="ttdeci">bool vnniAvailable()</div></div>
+<div class="ttc" id="astructseams_1_1product_1_1Cij_html"><div class="ttname"><a href="structseams_1_1product_1_1Cij.html">seams::product::Cij</a></div><div class="ttdef"><b>Definition</b> <a href="#l00097">ozaki.hpp:97</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1Cij_html_a07e598238f2bb5b4ec6e245420276705"><div class="ttname"><a href="structseams_1_1product_1_1Cij.html#a07e598238f2bb5b4ec6e245420276705">seams::product::Cij::certified</a></div><div class="ttdeci">bool certified</div><div class="ttdef"><b>Definition</b> <a href="#l00100">ozaki.hpp:100</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1Cij_html_a5c1650b776bcce83336af006b57d55f4"><div class="ttname"><a href="structseams_1_1product_1_1Cij.html#a5c1650b776bcce83336af006b57d55f4">seams::product::Cij::value</a></div><div class="ttdeci">double value</div><div class="ttdef"><b>Definition</b> <a href="#l00098">ozaki.hpp:98</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1Cij_html_a92b4a8a74a1a8248ae2777513887cd3e"><div class="ttname"><a href="structseams_1_1product_1_1Cij.html#a92b4a8a74a1a8248ae2777513887cd3e">seams::product::Cij::backend</a></div><div class="ttdeci">const char * backend</div><div class="ttdef"><b>Definition</b> <a href="#l00101">ozaki.hpp:101</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1Cij_html_aca8e1f2b23615202c63ecc9aab8d01b3"><div class="ttname"><a href="structseams_1_1product_1_1Cij.html#aca8e1f2b23615202c63ecc9aab8d01b3">seams::product::Cij::bound</a></div><div class="ttdeci">double bound</div><div class="ttdef"><b>Definition</b> <a href="#l00099">ozaki.hpp:99</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1ComplexDot_html"><div class="ttname"><a href="structseams_1_1product_1_1ComplexDot.html">seams::product::ComplexDot</a></div><div class="ttdef"><b>Definition</b> <a href="#l00054">ozaki.hpp:54</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1ComplexDot_html_a3f8e15c6ade5c30543120c318f55ef37"><div class="ttname"><a href="structseams_1_1product_1_1ComplexDot.html#a3f8e15c6ade5c30543120c318f55ef37">seams::product::ComplexDot::normA</a></div><div class="ttdeci">double normA</div><div class="ttdef"><b>Definition</b> <a href="#l00057">ozaki.hpp:57</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1ComplexDot_html_a4c2b801829172633d09aed85d9a0a410"><div class="ttname"><a href="structseams_1_1product_1_1ComplexDot.html#a4c2b801829172633d09aed85d9a0a410">seams::product::ComplexDot::boundNormA</a></div><div class="ttdeci">double boundNormA</div><div class="ttdef"><b>Definition</b> <a href="#l00061">ozaki.hpp:61</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1ComplexDot_html_a4ebaee7a2a9057b39371151637ff3001"><div class="ttname"><a href="structseams_1_1product_1_1ComplexDot.html#a4ebaee7a2a9057b39371151637ff3001">seams::product::ComplexDot::certified</a></div><div class="ttdeci">bool certified</div><div class="ttdef"><b>Definition</b> <a href="#l00063">ozaki.hpp:63</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1ComplexDot_html_a8000531988969be701ea4e1eaa84c39f"><div class="ttname"><a href="structseams_1_1product_1_1ComplexDot.html#a8000531988969be701ea4e1eaa84c39f">seams::product::ComplexDot::re</a></div><div class="ttdeci">double re</div><div class="ttdef"><b>Definition</b> <a href="#l00055">ozaki.hpp:55</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1ComplexDot_html_ab478be72937fcfa2e2eaee31e68b2a2c"><div class="ttname"><a href="structseams_1_1product_1_1ComplexDot.html#ab478be72937fcfa2e2eaee31e68b2a2c">seams::product::ComplexDot::normB</a></div><div class="ttdeci">double normB</div><div class="ttdef"><b>Definition</b> <a href="#l00058">ozaki.hpp:58</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1ComplexDot_html_aba2931a5cf0edce218d4058e56ad263b"><div class="ttname"><a href="structseams_1_1product_1_1ComplexDot.html#aba2931a5cf0edce218d4058e56ad263b">seams::product::ComplexDot::im</a></div><div class="ttdeci">double im</div><div class="ttdef"><b>Definition</b> <a href="#l00056">ozaki.hpp:56</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1ComplexDot_html_ad5559f7c7ad30016d9bfbc6e4493f044"><div class="ttname"><a href="structseams_1_1product_1_1ComplexDot.html#ad5559f7c7ad30016d9bfbc6e4493f044">seams::product::ComplexDot::backend</a></div><div class="ttdeci">const char * backend</div><div class="ttdef"><b>Definition</b> <a href="#l00064">ozaki.hpp:64</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1ComplexDot_html_aecde2d704d34f2a08fd6bc7ed77cc1db"><div class="ttname"><a href="structseams_1_1product_1_1ComplexDot.html#aecde2d704d34f2a08fd6bc7ed77cc1db">seams::product::ComplexDot::boundNormB</a></div><div class="ttdeci">double boundNormB</div><div class="ttdef"><b>Definition</b> <a href="#l00062">ozaki.hpp:62</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1ComplexDot_html_af7901f655269bf275eb43163c548ab1e"><div class="ttname"><a href="structseams_1_1product_1_1ComplexDot.html#af7901f655269bf275eb43163c548ab1e">seams::product::ComplexDot::boundIm</a></div><div class="ttdeci">double boundIm</div><div class="ttdef"><b>Definition</b> <a href="#l00060">ozaki.hpp:60</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1ComplexDot_html_afb8296f5d023bd70cc99fed67d6477e7"><div class="ttname"><a href="structseams_1_1product_1_1ComplexDot.html#afb8296f5d023bd70cc99fed67d6477e7">seams::product::ComplexDot::boundRe</a></div><div class="ttdeci">double boundRe</div><div class="ttdef"><b>Definition</b> <a href="#l00059">ozaki.hpp:59</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1GemmInfo_html"><div class="ttname"><a href="structseams_1_1product_1_1GemmInfo.html">seams::product::GemmInfo</a></div><div class="ttdef"><b>Definition</b> <a href="#l00114">ozaki.hpp:114</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1GemmInfo_html_a20d16a0ce6bc905549e8aa1bb8e637c9"><div class="ttname"><a href="structseams_1_1product_1_1GemmInfo.html#a20d16a0ce6bc905549e8aa1bb8e637c9">seams::product::GemmInfo::sliceWidth</a></div><div class="ttdeci">int sliceWidth</div><div class="ttdef"><b>Definition</b> <a href="#l00118">ozaki.hpp:118</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1GemmInfo_html_a435ddeed7f50b239755c2ea58761810e"><div class="ttname"><a href="structseams_1_1product_1_1GemmInfo.html#a435ddeed7f50b239755c2ea58761810e">seams::product::GemmInfo::ok</a></div><div class="ttdeci">bool ok</div><div class="ttdef"><b>Definition</b> <a href="#l00115">ozaki.hpp:115</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1GemmInfo_html_a73ec9de6167f3072dbfa4d830c61c072"><div class="ttname"><a href="structseams_1_1product_1_1GemmInfo.html#a73ec9de6167f3072dbfa4d830c61c072">seams::product::GemmInfo::moduli</a></div><div class="ttdeci">int moduli</div><div class="ttdef"><b>Definition</b> <a href="#l00117">ozaki.hpp:117</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1GemmInfo_html_ade8e7ad79d1207d18bb8bafff93fd429"><div class="ttname"><a href="structseams_1_1product_1_1GemmInfo.html#ade8e7ad79d1207d18bb8bafff93fd429">seams::product::GemmInfo::backend</a></div><div class="ttdeci">const char * backend</div><div class="ttdef"><b>Definition</b> <a href="#l00116">ozaki.hpp:116</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1RealDot_html"><div class="ttname"><a href="structseams_1_1product_1_1RealDot.html">seams::product::RealDot</a></div><div class="ttdef"><b>Definition</b> <a href="#l00046">ozaki.hpp:46</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1RealDot_html_a10ab65138796b89008f65a28ce04180b"><div class="ttname"><a href="structseams_1_1product_1_1RealDot.html#a10ab65138796b89008f65a28ce04180b">seams::product::RealDot::certified</a></div><div class="ttdeci">bool certified</div><div class="ttdef"><b>Definition</b> <a href="#l00049">ozaki.hpp:49</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1RealDot_html_a370538360b39ac1bd03fac89cbc922cb"><div class="ttname"><a href="structseams_1_1product_1_1RealDot.html#a370538360b39ac1bd03fac89cbc922cb">seams::product::RealDot::backend</a></div><div class="ttdeci">const char * backend</div><div class="ttdef"><b>Definition</b> <a href="#l00051">ozaki.hpp:51</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1RealDot_html_a54d2cb040fb9812f13ea6743ba36a3e6"><div class="ttname"><a href="structseams_1_1product_1_1RealDot.html#a54d2cb040fb9812f13ea6743ba36a3e6">seams::product::RealDot::bound</a></div><div class="ttdeci">double bound</div><div class="ttdef"><b>Definition</b> <a href="#l00048">ozaki.hpp:48</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1RealDot_html_a8e418852023347c545edab43a3bc8ec2"><div class="ttname"><a href="structseams_1_1product_1_1RealDot.html#a8e418852023347c545edab43a3bc8ec2">seams::product::RealDot::work</a></div><div class="ttdeci">int work</div><div class="ttdef"><b>Definition</b> <a href="#l00050">ozaki.hpp:50</a></div></div>
+<div class="ttc" id="astructseams_1_1product_1_1RealDot_html_aefef1ba97a24b2676b5455b4c747ba73"><div class="ttname"><a href="structseams_1_1product_1_1RealDot.html#aefef1ba97a24b2676b5455b4c747ba73">seams::product::RealDot::value</a></div><div class="ttdeci">double value</div><div class="ttdef"><b>Definition</b> <a href="#l00047">ozaki.hpp:47</a></div></div>
+</div><!-- fragment --></div><!-- contents -->
+</div><!-- doc-content -->
+</div><!-- container -->
+<!-- Copyright 2020–2026 Rohit Goswami <rog32@hi.is>
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+     http://www.apache.org/licenses/LICENSE-2.0
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License. -->
+<!-- HTML footer for doxygen >= 1.17 (tested with 1.17.0 and 1.18.0) -->
+<!-- Doxygen already closed #doc-content and #container before this template. -->
+<!-- start footer part -->
+<div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
+  <ul>
+    <li class="navelem"><a href="dir_68267d1309a1af8e8297ef4c3efbcdba.html">src</a></li><li class="navelem"><a href="dir_b0856f6b0d80ccb263b2f415c91f9e17.html">include</a></li><li class="navelem"><a href="dir_37a9b835d5ced2a8f90c237a2ad84fdf.html">internal</a></li><li class="navelem"><a href="ozaki_8hpp.html">ozaki.hpp</a></li>
+    <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.17.0 </li>
+  </ul>
+</div>
+<div class="doxyyoda-attrib" role="contentinfo">
+  <span class="doxyyoda-attrib__item">
+    <span>Generated by <a href="https://www.doxygen.org/index.html">Doxygen 1.17.0</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z"/></svg>
+    <span>Analytics by <a href="https://antics.turtletech.us/" target="_blank" rel="noopener noreferrer">Antics</a></span>
+  </span>
+  <span class="doxyyoda-attrib__item">
+    <span>provided by</span>
+    <span class="doxyyoda-attrib__brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="1.4em" height="1.4em" viewBox="0 0 64 64" aria-hidden="true"><g fill-rule="evenodd"><ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9"/><path fill="#80D25B" d="M20.3,46c0,0-3.2,9.9.3,13.8c3.5,3.9 6.1,3.4 6.1-6C26.8,44.3 20.3,46 20.3,46Z"/><path fill="#80D25B" d="M38.3,46c0,0-3.2,9.9.4,13.8c3.5,3.9 6.1,3.4 6.1-6C44.8,44.3 38.3,46 38.3,46Z" transform="matrix(-1 0 0 1 81.8 0)"/><path fill="#80D25B" d="M20.6,21.2c0,0-6.7-5.8-10.5-5.2C6.2,16.7 6,22.2 6,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L20.6,21.2Z"/><path fill="#80D25B" d="M57.6,21.2c0,0-6.6-5.8-10.5-5.2C43.2,16.7 43,22.2 43,24c0,1.8 1.8,13.3 3.8,12.5c2-0.8 4-8.5 4-8.5c1.9,2.3 4.8,2.5 4.8,2.5L57.6,21.2Z" transform="matrix(-1 0 0 1 100.623 0)"/><path fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32,53C40.8,53 48,44.5 48,34C48,23.5 46.7,17 32,17C17.3,17 16,23.5 16,34C16,44.5 23.2,53 32,53Z"/><polygon fill="#BD7575" stroke="#595959" stroke-linecap="round" stroke-width="2" points="32 22 38.9 26 38.9 34 32 38 25.1 34 25.1 26"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M30,8C28.9,8 28,8.9 28,10"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M36,8C34.9,8 34,8.9 34,10" transform="matrix(-1 0 0 1 70 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M32.1,38.2L32.1,52.4M32,21.7L32,17M25.2,26L17.7,23.1M25.1,34.2L16.8,38.9"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M46.2,26L38.7,23.1" transform="matrix(-1 0 0 1 84.951 0)"/><path stroke="#595959" stroke-linecap="round" stroke-width="2" d="M47.1,34.2L38.8,38.9" transform="matrix(-1 0 0 1 85.891 0)"/></g></svg>
+      <a href="https://turtletech.us/" target="_blank" rel="noopener noreferrer">TurtleTech ehf</a>
+    </span>
+  </span>
+</div>
+</div><!-- close .grid-contents (opened in header.html) -->
+</body>
+</html>

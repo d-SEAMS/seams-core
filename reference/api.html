@@ -92,11 +92,19 @@ data-aria-dark="Switch to auto color mode">
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/ice-and-clathrate.html">Ice and clathrate labels</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/rings.html">Primitive rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/order-parameters.html">Bond-orientational order parameters</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/confined-water.html">Confined water</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-figures.html">Paper figures</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">How-to</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/bindings.html">Build the language fronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/versions.html">Version pins</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/openmp-offload.html">OpenMP target offload</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/sheared-cells.html">Sheared cells</a></li>
@@ -113,6 +121,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Repositories</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/ring-completion.html">Ring-adjacent completion</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/topological-network.html">Topological network criteria</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
@@ -127,6 +136,7 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../api/index.html">API Reference</a></li>
 <li class="toctree-l2"><a class="reference internal" href="nix.html">Nix flake</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cross-language.html">One task, four fronts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="glossary.html">Glossary</a></li>
 </ul>
 </li>
@@ -134,6 +144,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="data-formats.html">Data Formats</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="walk-compare.html">walk_compare</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="nix.html">Nix flake</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="cross-language.html">One task, four fronts</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API map</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../api/index.html">API Reference</a></li>
 </ul>
@@ -141,6 +152,13 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/index.html">API Reference</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="glossary.html">Glossary</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">d-SEAMS 2.0 paper</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/index.html">d-SEAMS 2.0 paper</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/versions.html">Versions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/reproduce.html">Reproduce</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
 <ul>
@@ -358,7 +376,7 @@ API; the header table below is only a map onto those pages.</p>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">topo_bulk.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">ring</span></code>, <code class="docutils literal notranslate"><span class="pre">prism3</span></code></p></td>
-<td><p>HC / DDC search, bulk polygons</p></td>
+<td><p>HC / DDC search, bulk polygons; <code class="docutils literal notranslate"><span class="pre">contractibleRings</span></code> drops rings that wind the periodic cell</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">topo_one_dim.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">ring</span></code></p></td>
@@ -382,7 +400,7 @@ API; the header table below is only a map onto those pages.</p>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">cage_enum.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">cage</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">findBySignature</span></code>, closed polyhedra from a ring-size census; <code class="docutils literal notranslate"><span class="pre">findIncompleteBySignature</span></code>, cups and incomplete cages on the same ring adjacency</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">findBySignature</span></code>, closed polyhedra from a ring-size census whose faces tile a sphere; <code class="docutils literal notranslate"><span class="pre">findBySignatures</span></code>, several signatures in one search; <code class="docutils literal notranslate"><span class="pre">EdgeWindow</span></code> / <code class="docutils literal notranslate"><span class="pre">parseEdgeWindow</span></code>, the optional face-edge window (default <code class="docutils literal notranslate"><span class="pre">2.65,3.15</span></code>, <code class="docutils literal notranslate"><span class="pre">none</span></code> leaves the cage bound to the face census); <code class="docutils literal notranslate"><span class="pre">isSpherePolyhedron</span></code>; <code class="docutils literal notranslate"><span class="pre">findIncompleteBySignature</span></code>, cups and incomplete cages on the same ring adjacency</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bulkTUM.hpp</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">tum3</span></code></p></td>
@@ -465,6 +483,13 @@ API; the header table below is only a map onto those pages.</p>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">pydseams.yoda</span></code> and <code class="docutils literal notranslate"><span class="pre">dseams.core</span></code> register the C++ spellings from
 these headers. The generated pages are <code class="docutils literal notranslate"><span class="pre">api/index</span></code>.</p>
+<p>The face-edge window is the same string on every front.
+Python is <code class="docutils literal notranslate"><span class="pre">frame.cages_by_signature(&quot;512&quot;,</span> <span class="pre">edge=&quot;none&quot;)</span></code>.
+Lua (<code class="docutils literal notranslate"><span class="pre">require(&quot;dseams&quot;)</span></code>) is <code class="docutils literal notranslate"><span class="pre">dseams.cages_by_signature(frame,</span> <span class="pre">&quot;512&quot;,</span> <span class="pre">{edge</span> <span class="pre">=</span> <span class="pre">&quot;none&quot;})</span></code>.
+The C entry those packages call is <code class="docutils literal notranslate"><span class="pre">seams_frame_signature_edge</span></code>; a null edge string is the default <code class="docutils literal notranslate"><span class="pre">2.65,3.15</span></code> in the coordinate units of the file.
+<code class="docutils literal notranslate"><span class="pre">none</span></code> leaves the cage bound to the face census.
+Choose the window as the heavy-atom contact range of the model, and widen it for a compressed cell or a guest that stretches a cage.
+A nanometre file uses <code class="docutils literal notranslate"><span class="pre">0.265,0.315</span></code>.</p>
 </section>
 </section>
 

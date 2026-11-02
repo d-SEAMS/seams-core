@@ -16,12 +16,14 @@ Inverted index from an atom to the rings that contain it. :ref:`More...<details-
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <topo_bulk.hpp>
+	#include <src/include/internal/topo_bulk.hpp>
 	
 	struct RingSearchIndex {
 		// fields
 	
 		std::vector<std::vector<int>> :target:`ringsContainingAtom<doxid-structring_1_1_ring_search_index_1a8e4433086bf9bec113ee61bc3c17b8bb>`;
+		std::vector<int> :target:`atomRank<doxid-structring_1_1_ring_search_index_1a891fe48d2dccc51ea7f043b562a42cbd>`;
+		std::vector<std::array<int, 3>> :ref:`ringShift<doxid-structring_1_1_ring_search_index_1a756c5dfcd0a8e96744dfff6775c1e31b>`;
 	};
 .. _details-structring_1_1_ring_search_index:
 
@@ -31,4 +33,19 @@ Detailed Documentation
 Inverted index from an atom to the rings that contain it.
 
 The cage searches repeatedly ask which rings a given atom belongs to. Answering that by scanning every ring makes the searches quadratic in the ring count. One pass over the ring network answers it in constant time thereafter, and the ring indices in each row stay ascending, which is the order the searches previously visited them in.
+
+findHC visits rings in the order of a key that does not use absolute coordinates: the sorted atom indices, then the unwrapped shift of the cycle. findDDC reports a maximum set of cages under the same key, so the cage count is independent of the order in which rings are claimed and does not change when the frame is translated.
+
+Fields
+------
+
+.. index:: pair: variable; ringShift
+.. _doxid-structring_1_1_ring_search_index_1a756c5dfcd0a8e96744dfff6775c1e31b:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::array<int, 3>> ringShift
+
+Integer minimum-image winding of each ring. Empty if no box was supplied.
 

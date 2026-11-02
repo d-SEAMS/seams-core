@@ -16,7 +16,7 @@ Overview
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <density.hpp>
+	#include <src/include/internal/density.hpp>
 	
 	struct DensityZ {
 		// fields

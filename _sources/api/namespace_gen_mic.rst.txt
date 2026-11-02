@@ -1,0 +1,23 @@
+.. index:: pair: namespace; gen::mic
+.. _doxid-namespacegen_1_1mic:
+
+namespace gen::mic
+==================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace mic {
+
+	// global functions
+
+	std::array<double, 3> :target:`euclideanIfShorter<doxid-namespacegen_1_1mic_1a1a29504e3d6fb23c397d8523474955ce>`(double lx, double ly, double lz, double xy, double xz, double yz, const std::array<double, 3>& raw, const std::array<double, 3>& wrapped);
+
+	} // namespace mic

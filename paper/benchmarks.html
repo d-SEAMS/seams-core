@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="teal" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Benchmarks - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Reproduce" href="reproduce.html" /><link rel="prev" title="Versions" href="versions.html" />
+      <link rel="canonical" href="https://docs.dseams.info/paper/benchmarks.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-pygments.css?v=ff3f4257" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=9d7eab11" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://docs.dseams.info/paper/benchmarks.html"/>
+  <meta property="og:title" content="Benchmarks"/>
+    <meta name="twitter:card" content="summary"/>
+  <!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script></head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      <img class="light-logo" src="../_static/dSeamsLogo.png" alt="d-SEAMS" height="28" loading="lazy" />
+      <img class="dark-logo" src="../_static/dSeamsLogo.png" alt="d-SEAMS" height="28" loading="lazy" />
+      <strong>d-SEAMS</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link"><a href="/api-cpp/index.html">C++ API</a></li>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-2" aria-controls="nav-children-2">
+            <span>Ecosystem</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-2" aria-labelledby="nav-trigger-2"><li><a href="https://docs.dseams.info">
+                <span>d-SEAMS engine</span>
+                <small>libyodaLib and the seams CLI</small>
+              </a></li><li><a href="https://d-seams.github.io/PydSEAMSlib/">
+                <span>pydseams</span>
+                <small>Python Frame API on yoda</small>
+              </a></li><li><a href="https://d-seams.github.io/yodaStruct/">
+                <span>dseams (Lua)</span>
+                <small>require("dseams") and Fennel</small>
+              </a></li><li><a href="https://github.com/d-SEAMS/linkcell">
+                <span>linkcell</span>
+                <small>Periodic linked-cell k-nearest neighbours</small>
+              </a></li></ul>
+      </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+  <a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/ice-and-clathrate.html">Ice and clathrate labels</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/rings.html">Primitive rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/order-parameters.html">Bond-orientational order parameters</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/confined-water.html">Confined water</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-figures.html">Paper figures</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">How-to</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/bindings.html">Build the language fronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/versions.html">Version pins</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/openmp-offload.html">OpenMP target offload</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/sheared-cells.html">Sheared cells</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ionic-liquid.html">Ionic-liquid dumps</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/ase-integration.html">ASE integration</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/solvis.html">View a classified frame</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/confined-ice.html">Confined ice</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/faq.html">FAQ</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/index.html">Explanation</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Repositories</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/ring-completion.html">Ring-adjacent completion</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/topological-network.html">Topological network criteria</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/index.html">Reference</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cli.html">seams CLI</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/walk-compare.html">walk_compare</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cross-language.html">One task, four fronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API map</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../api/index.html">API Reference</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">d-SEAMS 2.0 paper</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">d-SEAMS 2.0 paper</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="versions.html">Versions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Benchmarks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reproduce.html">Reproduce</a></li>
+</ul>
+</li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="versions.html">Versions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Benchmarks</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="reproduce.html">Reproduce</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/lean.html">Lean proofs</a></li>
+</ul>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#records">Records</a></li>
+<li><a class="reference internal" href="#one-frame-against-d-seams-1">One frame against d-SEAMS 1</a></li>
+<li><a class="reference internal" href="#neighbour-lists-chill-and-rings-against-system-size">Neighbour lists, CHILL+ and rings against system size</a></li>
+<li><a class="reference internal" href="#openmp-strong-scaling">OpenMP strong scaling</a></li>
+<li><a class="reference internal" href="#second-architecture">Second architecture</a></li>
+<li><a class="reference internal" href="#incremental-updates">Incremental updates</a><ul>
+<li><a class="reference internal" href="#churn-sweep">Churn sweep</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#carried-command-line">Carried command line</a></li>
+<li><a class="reference internal" href="#comparison-with-other-codes">Comparison with other codes</a></li>
+<li><a class="reference internal" href="#steinhardt-parameters-across-codes">Steinhardt parameters across codes</a></li>
+<li><a class="reference internal" href="#device-resident-batch">Device-resident batch</a></li>
+</ul>
+</div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
+  data-type="github" data-user="d-SEAMS" data-repo="seams-core">
+  <span class="w-8 flex items-center justify-around shrink-0 text-3xl">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </span>
+  <span class="flex-grow px-2 break-all">
+    
+    
+      <span>seams-core</span>
+    
+    <span class="flex text-sm repo-stats-count">
+      <span class="flex items-center pr-3">
+        <iconify-icon icon="lucide:star"></iconify-icon>
+        <strong class="js-repo-stars ml-1">0</strong>
+      </span>
+      <span class="flex items-center">
+        <iconify-icon icon="lucide:git-fork"></iconify-icon>
+        <strong class="js-repo-forks ml-1">0</strong>
+      </span>
+    </span>
+  </span>
+</a><div class="edit-this-page">
+  <a href="https://github.com/d-SEAMS/seams-core/blob/main/docs/source/paper/benchmarks.rst">Edit this page</a>
+</div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">d-SEAMS</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">d-SEAMS 2.0 paper</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Benchmarks</strong>
+        <meta itemprop="position" content="3" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <div class="copy-page-wrapper relative pb-4 lg:absolute lg:top-8 lg:right-6 xl:right-12">
+  <div id="copy-page-trigger">
+    <button
+      type="button"
+      class="js-copy px-3 py-1 inline-flex items-center gap-1"
+      data-url="https://docs.dseams.info/_sources/paper/benchmarks.rst.txt"
+    >
+      <i class="i-lucide" data-icon="copy"></i>
+      <span>Copy page</span>
+    </button>
+    <button class="js-menu px-2 py-1" type="button" aria-label="More actions"
+      aria-haspopup="menu" aria-expanded="false" aria-controls="copy-page-content">
+      <i class="i-lucide chevron-down"></i>
+    </button>
+  </div>
+  <div id="copy-page-content" role="menu" aria-orientation="vertical" aria-hidden="true">
+    <div role="presentation">
+      <div class="flex flex-col" role="group">
+        <button class="js-copy" type="button" role="menuitem"
+          data-url="https://docs.dseams.info/_sources/paper/benchmarks.rst.txt">
+          <span class="iconify-icon">
+            <i class="i-lucide" data-icon="copy"></i>
+          </span>
+          <span>Copy page</span>
+        </button>
+        <a role="menuitem" href="https://docs.dseams.info/_sources/paper/benchmarks.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
+            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20https%3A//docs.dseams.info/_sources/paper/benchmarks.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+          <iconify-icon icon="bi:openai"></iconify-icon>
+          <span>Open in ChatGPT</span>
+        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20https%3A//docs.dseams.info/_sources/paper/benchmarks.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+          <iconify-icon icon="bi:claude"></iconify-icon>
+          <span>Open in Claude</span>
+        </a></div>
+    </div>
+  </div>
+</div><article class="yue dark-code" role="main">
+          <section id="benchmarks">
+<h1>Benchmarks<a class="headerlink" href="#benchmarks" title="Link to this heading">¶</a></h1>
+<p>Timing tables of the d-SEAMS 2.0 paper and its supplement. Each table
+names its record, a directory or file under <code class="docutils literal notranslate"><span class="pre">results/reference/</span></code> of
+<a class="reference external" href="https://github.com/d-SEAMS/dseams2_repro">dseams2_repro</a>. The
+values below are those of seams-core v2.12.0, the release the paper
+describes. A rerun at a later release adds its own table under the
+same heading and names its record, so the paper’s values stay
+readable next to the current ones. <a class="reference external" href="reproduce.rst">Reproduce</a>
+gives the commands, and <a class="reference external" href="versions.rst">Versions</a> gives the
+machines and the codes.</p>
+<section id="records">
+<h2>Records<a class="headerlink" href="#records" title="Link to this heading">¶</a></h2>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>record</p></th>
+<th class="head"><p>processor</p></th>
+<th class="head"><p>allocation</p></th>
+<th class="head"><p>engine</p></th>
+<th class="head"><p>read by</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">elja-1788072</span></code></p></td>
+<td><p>2 x Xeon Platinum 8358</p></td>
+<td><p>exclusive <code class="docutils literal notranslate"><span class="pre">64cpu_256mem</span></code>, load 0.95</p></td>
+<td><p>v2.6.0 sources</p></td>
+<td><p>neighbour-list and ring scaling, cage stages</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">paper_manifest-elja-1785712.json</span></code></p></td>
+<td><p>2 x Xeon Platinum 8358</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">64cpu_256mem</span></code>, load 4.96</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">13c95cec</span></code></p></td>
+<td><p>one frame against d-SEAMS 1</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">elja-1798666</span></code></p></td>
+<td><p>2 x AMD EPYC 7713</p></td>
+<td><p>exclusive <code class="docutils literal notranslate"><span class="pre">128cpu_256mem</span></code>, load 0.24</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">e7856408</span></code></p></td>
+<td><p>second architecture, <span class="math notranslate nohighlight">\(q_l\)</span> check, walk control</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">terra-2026-09-01</span></code></p></td>
+<td><p>Ryzen 9 9950X</p></td>
+<td><p>shared workstation, load 4.32</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">770accf9</span></code></p></td>
+<td><p>walk and PTM controls</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">sota-heldout-2026-10-31</span></code></p></td>
+<td><p>Xeon, 8-vCPU cloud VM</p></td>
+<td><p>labels only, no timing</p></td>
+<td><p>v2.12.0</p></td>
+<td><p>lattice-label retention</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">md-heldout-2026-10-31</span></code></p></td>
+<td><p>Xeon, 8-vCPU cloud VM</p></td>
+<td><p>labels only, no timing</p></td>
+<td><p>v2.12.0</p></td>
+<td><p>held-out mW trajectories</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">h2h-2026-10-31</span></code></p></td>
+<td><p>Xeon, 8-vCPU cloud VM</p></td>
+<td><p>pinned core 3, load 0.33</p></td>
+<td><p>v2.12.0</p></td>
+<td><p>head-to-head table</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bench-2026-10-31</span></code></p></td>
+<td><p>Xeon, 8-vCPU cloud VM</p></td>
+<td><p>pinned core 3 and cores 0-7, load 0.20</p></td>
+<td><p>v2.12.0</p></td>
+<td><p>cage drivers, incremental and churn timings</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">cli-carry-2026-10-31</span></code></p></td>
+<td><p>Xeon, 8-vCPU cloud VM</p></td>
+<td><p>pinned core 3</p></td>
+<td><p>v2.12.0</p></td>
+<td><p>carried command line</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">hydrate-inside-2026-10-31</span></code></p></td>
+<td><p>Xeon, 8-vCPU cloud VM</p></td>
+<td><p>labels only</p></td>
+<td><p>v2.12.0</p></td>
+<td><p>ray-parity hydrate occupancy</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">walks-2026-10-31</span></code></p></td>
+<td><p>Xeon, 8-vCPU cloud VM</p></td>
+<td><p>labels only</p></td>
+<td><p>v2.12.0</p></td>
+<td><p>label walks of the applications</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">terra-2026-09-02</span></code></p></td>
+<td><p>Ryzen 9 9950X</p></td>
+<td><p>shared workstation</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">0a7fc546</span></code></p></td>
+<td><p>OpenMP strong scaling, GenIce atlas and ions, hydrate occupancy</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">tip-gpu-batch-elja-1787449.txt</span></code></p></td>
+<td><p>2 x A100-PCIE-40GB</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gpu-2xA100</span></code>, load 0.00</p></td>
+<td><p>not named in the record</p></td>
+<td><p>device-resident batch</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">elja-production</span></code></p></td>
+<td><p>2 x Xeon Platinum 8358</p></td>
+<td><p>exclusive <code class="docutils literal notranslate"><span class="pre">64cpu_256mem</span></code>, one job per temperature</p></td>
+<td><p>v2.9.2 (<code class="docutils literal notranslate"><span class="pre">d1983d53</span></code>)</p></td>
+<td><p>seeding and brine campaigns</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Every Elja CPU timing record built the d-SEAMS 1 baseline, seams-core
+commit <code class="docutils literal notranslate"><span class="pre">1c8efa38</span></code>, next to the engine commit listed. The GPU job built
+only the engine. Load is the one-minute load average when the record
+started, and <code class="docutils literal notranslate"><span class="pre">elja-1788072</span></code> gives it before the workflow.</p>
+</section>
+<section id="one-frame-against-d-seams-1">
+<h2>One frame against d-SEAMS 1<a class="headerlink" href="#one-frame-against-d-seams-1" title="Link to this heading">¶</a></h2>
+<p>The 4096-molecule mW cubic frame has 8192 six-rings. Both versions
+assign none of them to a hexagonal cage (HC) and every one to a
+double-diamond cage (DDC). One core, best of five calls per stage,
+record <code class="docutils literal notranslate"><span class="pre">paper_manifest-elja-1785712.json</span></code>.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>stage</p></th>
+<th class="head"><p>d-SEAMS 1 baseline</p></th>
+<th class="head"><p>d-SEAMS 2.0</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ring detection</p></td>
+<td><p>101 ms</p></td>
+<td><p>14 ms</p></td>
+</tr>
+<tr class="row-odd"><td><p>HC search</p></td>
+<td><p>3.6 s</p></td>
+<td><p>45 ms</p></td>
+</tr>
+<tr class="row-even"><td><p>HC and DDC searches in one call</p></td>
+<td><p>3.9 s</p></td>
+<td><p>48.6 ms</p></td>
+</tr>
+<tr class="row-odd"><td><p>DDC, the combined minimum less the HC minimum</p></td>
+<td><p>0.30 s</p></td>
+<td><p>3.5 ms</p></td>
+</tr>
+<tr class="row-even"><td><p>ring detection plus the combined call</p></td>
+<td><p>4.0 s</p></td>
+<td><p>63 ms</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The path is 63.6 times faster. The drivers of this record time the HC
+call and the combined call, which builds its local ring-type and cage
+vectors inside the timer.</p>
+<p>On pinned core 3 of the cloud VM, record <code class="docutils literal notranslate"><span class="pre">bench-2026-10-31</span></code>, the
+drivers time <code class="docutils literal notranslate"><span class="pre">findDDC</span></code> alone. The ring types and cages that <code class="docutils literal notranslate"><span class="pre">findHC</span></code>
+leaves are computed once and restored outside the timer before each
+call. Values are medians over three sessions.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>stage</p></th>
+<th class="head"><p>d-SEAMS 1 baseline</p></th>
+<th class="head"><p>d-SEAMS 2.0</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ring detection</p></td>
+<td><p>89 ms</p></td>
+<td><p>3.9 ms</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">findHC</span></code></p></td>
+<td><p>2.73 s</p></td>
+<td><p>47.5 ms</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">findDDC</span></code></p></td>
+<td><p>255 ms</p></td>
+<td><p>3.06 ms</p></td>
+</tr>
+<tr class="row-odd"><td><p>sum of the three stages</p></td>
+<td><p>3.0 s</p></td>
+<td><p>54 ms</p></td>
+</tr>
+<tr class="row-even"><td><p>combined HC and DDC call</p></td>
+<td><p></p></td>
+<td><p>50.3 ms</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The sum is 56 times faster. Built with the <code class="docutils literal notranslate"><span class="pre">-O3</span> <span class="pre">-funroll-loops</span></code> of the
+engine’s drivers instead of <code class="docutils literal notranslate"><span class="pre">-O2</span></code>, the baseline drivers time each
+stage within 1.5% of the <code class="docutils literal notranslate"><span class="pre">-O2</span></code> build, and the three cage-driver stages
+within 0.2%.</p>
+</section>
+<section id="neighbour-lists-chill-and-rings-against-system-size">
+<h2>Neighbour lists, CHILL+ and rings against system size<a class="headerlink" href="#neighbour-lists-chill-and-rings-against-system-size" title="Link to this heading">¶</a></h2>
+<p>Single core of exclusive Elja <code class="docutils literal notranslate"><span class="pre">64cpu_256mem</span></code>, record <code class="docutils literal notranslate"><span class="pre">elja-1788072</span></code>,
+milliseconds. “base” columns are baseline commit <code class="docutils literal notranslate"><span class="pre">1c8efa38</span></code>, the
+others engine v2.6.0. Cutoff list and index-ordered builder at
+<span class="math notranslate nohighlight">\(r_c=3.5\)</span> Å; CHILL+ bond correlations (<code class="docutils literal notranslate"><span class="pre">getCorrelPlus</span></code>) on the
+cutoff list; primitive rings with <span class="math notranslate nohighlight">\(D=6\)</span> on the index-ordered list.
+The cells are synthetic cubic cells at the mW number density of
+0.0332 Å^-3 with a deterministic jitter.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>n</p></th>
+<th class="head"><p>cutoff, base</p></th>
+<th class="head"><p>cutoff</p></th>
+<th class="head"><p>index, base</p></th>
+<th class="head"><p>index</p></th>
+<th class="head"><p>CHILL+, base</p></th>
+<th class="head"><p>CHILL+</p></th>
+<th class="head"><p>rings, base</p></th>
+<th class="head"><p>rings</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>1000</p></td>
+<td><p>1.975</p></td>
+<td><p>1.461</p></td>
+<td><p>6.794</p></td>
+<td><p>1.443</p></td>
+<td><p>3.446</p></td>
+<td><p>1.404</p></td>
+<td><p>116.282</p></td>
+<td><p>8.064</p></td>
+</tr>
+<tr class="row-odd"><td><p>2000</p></td>
+<td><p>5.650</p></td>
+<td><p>2.781</p></td>
+<td><p>22.015</p></td>
+<td><p>2.738</p></td>
+<td><p>7.274</p></td>
+<td><p>2.865</p></td>
+<td><p>406.376</p></td>
+<td><p>19.870</p></td>
+</tr>
+<tr class="row-even"><td><p>4000</p></td>
+<td><p>17.793</p></td>
+<td><p>5.305</p></td>
+<td><p>99.424</p></td>
+<td><p>5.291</p></td>
+<td><p>13.915</p></td>
+<td><p>5.648</p></td>
+<td><p>576.520</p></td>
+<td><p>37.208</p></td>
+</tr>
+<tr class="row-odd"><td><p>8000</p></td>
+<td><p>61.986</p></td>
+<td><p>11.030</p></td>
+<td><p>387.840</p></td>
+<td><p>10.796</p></td>
+<td><p>27.182</p></td>
+<td><p>11.401</p></td>
+<td><p>965.459</p></td>
+<td><p>78.731</p></td>
+</tr>
+<tr class="row-even"><td><p>16000</p></td>
+<td><p>225.734</p></td>
+<td><p>22.712</p></td>
+<td><p>1516.346</p></td>
+<td><p>22.345</p></td>
+<td><p>59.033</p></td>
+<td><p>23.363</p></td>
+<td><p>3626.729</p></td>
+<td><p>226.554</p></td>
+</tr>
+<tr class="row-odd"><td><p>32000</p></td>
+<td><p>859.556</p></td>
+<td><p>43.663</p></td>
+<td><p>5975.106</p></td>
+<td><p>42.700</p></td>
+<td><p>110.161</p></td>
+<td><p>45.881</p></td>
+<td><p>4486.953</p></td>
+<td><p>528.897</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>From 1000 to 32000 atoms the 2.0 cutoff list grows by a factor of 30,
+and the baseline list by a factor of 435. At 32000 atoms the
+index-ordered builder falls from 6.0 s to 43 ms, and the two builders
+together from 6.8 s to 86 ms.</p>
+</section>
+<section id="openmp-strong-scaling">
+<h2>OpenMP strong scaling<a class="headerlink" href="#openmp-strong-scaling" title="Link to this heading">¶</a></h2>
+<p>A fixed 65536-molecule cell, every host stage of the pipeline, best of
+seven runs per thread count, one thread per physical core
+(<code class="docutils literal notranslate"><span class="pre">OMP_PLACES=cores</span></code>, <code class="docutils literal notranslate"><span class="pre">OMP_PROC_BIND=close</span></code>). The machine is the
+16-core Ryzen 9 9950X workstation, not reserved for the run, record
+<code class="docutils literal notranslate"><span class="pre">terra-2026-09-02</span></code>, engine <code class="docutils literal notranslate"><span class="pre">0a7fc546</span></code> with OpenMP and without vesin.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>stage</p></th>
+<th class="head"><p>1 thread</p></th>
+<th class="head"><p>16 threads</p></th>
+<th class="head"><p>speed-up</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>whole pipeline</p></td>
+<td><p>906 ms</p></td>
+<td><p>99 ms</p></td>
+<td><p>9.1</p></td>
+</tr>
+<tr class="row-odd"><td><p>primitive rings</p></td>
+<td><p>802 ms</p></td>
+<td><p>76 ms</p></td>
+<td><p>10.6</p></td>
+</tr>
+<tr class="row-even"><td><p>Steinhardt kernel</p></td>
+<td><p>12.6 ms</p></td>
+<td><p>4.8 ms</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>cutoff neighbour list</p></td>
+<td><p>46 ms</p></td>
+<td><p>11 ms</p></td>
+<td><p>4.3</p></td>
+</tr>
+<tr class="row-even"><td><p>index-ordered neighbour list</p></td>
+<td><p>45 ms</p></td>
+<td><p>8 ms</p></td>
+<td><p>5.8</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>At sixteen threads the pipeline is 43 ms above the ideal line. The
+rings account for 26 ms of that and the two neighbour lists for 13 ms.</p>
+</section>
+<section id="second-architecture">
+<h2>Second architecture<a class="headerlink" href="#second-architecture" title="Link to this heading">¶</a></h2>
+<p>One core of an AMD EPYC 7713 (Elja <code class="docutils literal notranslate"><span class="pre">128cpu_256mem</span></code>, load 0.2 at
+start), record <code class="docutils literal notranslate"><span class="pre">elja-1798666</span></code>, engine commit <code class="docutils literal notranslate"><span class="pre">e7856408</span></code>. The reference
+column is baseline commit <code class="docutils literal notranslate"><span class="pre">1c8efa38</span></code> in the first six rows, the full
+rebuild of the same engine in the two incremental rows, and one thread
+against 32 in the last row. Milliseconds.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>stage</p></th>
+<th class="head"><p>reference</p></th>
+<th class="head"><p>2.0</p></th>
+<th class="head"><p>factor</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>index-ordered neighbours, 32000</p></td>
+<td><p>8689.6</p></td>
+<td><p>59.3</p></td>
+<td><p>147</p></td>
+</tr>
+<tr class="row-odd"><td><p>cell-list neighbours, 32000</p></td>
+<td><p>862.8</p></td>
+<td><p>61.0</p></td>
+<td><p>14</p></td>
+</tr>
+<tr class="row-even"><td><p>CHILL+, 32000</p></td>
+<td><p>128.6</p></td>
+<td><p>66.6</p></td>
+<td><p>1.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>primitive rings, 32000</p></td>
+<td><p>5111.5</p></td>
+<td><p>752.9</p></td>
+<td><p>6.8</p></td>
+</tr>
+<tr class="row-even"><td><p>hexagonal-cage search, mW 4096</p></td>
+<td><p>4926.9</p></td>
+<td><p>68.7</p></td>
+<td><p>72</p></td>
+</tr>
+<tr class="row-odd"><td><p>ring-and-cage path, mW 4096</p></td>
+<td><p>5255.8</p></td>
+<td><p>93.0</p></td>
+<td><p>57</p></td>
+</tr>
+<tr class="row-even"><td><p>incremental rings, steady frame</p></td>
+<td><p>20.5</p></td>
+<td><p>1.0</p></td>
+<td><p>20</p></td>
+</tr>
+<tr class="row-odd"><td><p>incremental affiliation, steady frame</p></td>
+<td><p>97.3</p></td>
+<td><p>11.3</p></td>
+<td><p>8.6</p></td>
+</tr>
+<tr class="row-even"><td><p>ring construction, 65536 atoms, 1 to 32 threads</p></td>
+<td><p>1893.9</p></td>
+<td><p>119.2</p></td>
+<td><p>16</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="incremental-updates">
+<h2>Incremental updates<a class="headerlink" href="#incremental-updates" title="Link to this heading">¶</a></h2>
+<p>Record <code class="docutils literal notranslate"><span class="pre">bench-2026-10-31</span></code>, pinned core 3 of the cloud VM unless noted.
+Every updated ring set and every updated cage flag equals the rebuild.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>case</p></th>
+<th class="head"><p>update</p></th>
+<th class="head"><p>rebuild</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>jittered 8000-molecule cell, three perturbed sites per frame, smallest over five frames</p></td>
+<td><p>4.4 ms</p></td>
+<td><p>32 ms</p></td>
+</tr>
+<tr class="row-odd"><td><p>mW cubic trajectory, mutual four-nearest graph, frames 2-11 means, rings</p></td>
+<td><p>0.21 ms</p></td>
+<td><p>3.7 ms</p></td>
+</tr>
+<tr class="row-even"><td><p>mW cubic trajectory, mutual four-nearest graph, frames 2-11 means, affiliation</p></td>
+<td><p>0.25 ms</p></td>
+<td><p>48.6 ms</p></td>
+</tr>
+<tr class="row-odd"><td><p>nucleation excerpt, cutoff graph, rings, one thread</p></td>
+<td><p>14.9 ms</p></td>
+<td><p>14.3 ms</p></td>
+</tr>
+<tr class="row-even"><td><p>nucleation excerpt, cutoff graph, affiliation, one thread</p></td>
+<td><p>18.0 ms</p></td>
+<td><p>17.5 ms</p></td>
+</tr>
+<tr class="row-odd"><td><p>nucleation excerpt, cutoff graph, rings, eight threads (cores 0-7)</p></td>
+<td><p>3.07 ms</p></td>
+<td><p>2.65 ms</p></td>
+</tr>
+<tr class="row-even"><td><p>nucleation excerpt, cutoff graph, affiliation, eight threads (cores 0-7)</p></td>
+<td><p>4.26 ms</p></td>
+<td><p>4.18 ms</p></td>
+</tr>
+<tr class="row-odd"><td><p>Niu trajectory 3, cutoff graph, rings, one thread</p></td>
+<td><p>11.9 ms</p></td>
+<td><p>11.2 ms</p></td>
+</tr>
+<tr class="row-even"><td><p>Niu trajectory 3, cutoff graph, affiliation, one thread</p></td>
+<td><p>11.1 ms</p></td>
+<td><p>10.3 ms</p></td>
+</tr>
+<tr class="row-odd"><td><p>Niu trajectory 3, cutoff graph, rings, eight threads (cores 0-7)</p></td>
+<td><p>2.244 ms</p></td>
+<td><p>2.184 ms</p></td>
+</tr>
+<tr class="row-even"><td><p>Niu trajectory 3, cutoff graph, affiliation, eight threads (cores 0-7)</p></td>
+<td><p>2.725 ms</p></td>
+<td><p>2.622 ms</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>On the last frame of the 8000-molecule cell the ring update enumerates
+794 of the 8000 sources again. The 8000-molecule and mW cubic values
+are medians over three sessions, and the nucleation and Niu values,
+frames 2-11 means, come from one session. On frames 2-11 of the nucleation excerpt 2845 bonds
+change per frame on average, and 1948 on frames 2-11 of Niu trajectory
+3 (2880 molecules), so both updaters take the batch pass there.</p>
+<section id="churn-sweep">
+<h3>Churn sweep<a class="headerlink" href="#churn-sweep" title="Link to this heading">¶</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">tests/bench_churn_sweep.cpp</span></code> starts from frame 147 of the figshare mW
+nucleation excerpt (4096 molecules, cutoff graph) and moves the
+molecules within a radius of the box centre to their frame-148
+positions. Median of seven repetitions, one thread, one session.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>changed bonds</p></th>
+<th class="head"><p>ring update</p></th>
+<th class="head"><p>ring rebuild</p></th>
+<th class="head"><p>affiliation update</p></th>
+<th class="head"><p>affiliation rebuild</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0.21 ms</p></td>
+<td><p></p></td>
+<td><p>0.26 ms</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>1.52 ms</p></td>
+<td><p>14.6 ms</p></td>
+<td><p>8.0 ms</p></td>
+<td><p>22.5 ms</p></td>
+</tr>
+<tr class="row-even"><td><p>17</p></td>
+<td><p>2.70 ms</p></td>
+<td><p>17.8 ms</p></td>
+<td><p>11.3 ms</p></td>
+<td><p>25.2 ms</p></td>
+</tr>
+<tr class="row-odd"><td><p>340</p></td>
+<td><p>8.1 ms</p></td>
+<td><p>13.1 to 19.0 ms over the sweep</p></td>
+<td><p>batch pass</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>From 57 changed bonds the affiliation update runs the batch pass.</p>
+</section>
+</section>
+<section id="carried-command-line">
+<h2>Carried command line<a class="headerlink" href="#carried-command-line" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">cages</span></code> over a frame range on pinned core 3 of the cloud VM,
+<code class="docutils literal notranslate"><span class="pre">OMP_NUM_THREADS=1</span></code>, record <code class="docutils literal notranslate"><span class="pre">cli-carry-2026-10-31</span></code>. Milliseconds per
+frame, whole process. The ratio is rebuild over carry, so a value
+above 1 means the carried walk is faster. The last column is the same
+ratio for the build without the back-off. The carried and rebuilt
+JSON outputs are identical byte for byte in every case.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>trajectory</p></th>
+<th class="head"><p>graph</p></th>
+<th class="head"><p>frames</p></th>
+<th class="head"><p>rebuild</p></th>
+<th class="head"><p>carried</p></th>
+<th class="head"><p>ratio</p></th>
+<th class="head"><p>no back-off</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>mW cubic, 4096</p></td>
+<td><p>seeded</p></td>
+<td><p>11</p></td>
+<td><p>127.13</p></td>
+<td><p>20.60</p></td>
+<td><p>6.171</p></td>
+<td><p>6.281</p></td>
+</tr>
+<tr class="row-odd"><td><p>mW cubic, 4096</p></td>
+<td><p>cutoff</p></td>
+<td><p>11</p></td>
+<td><p>48.90</p></td>
+<td><p>9.10</p></td>
+<td><p>5.374</p></td>
+<td><p>5.453</p></td>
+</tr>
+<tr class="row-even"><td><p>nucleation excerpt, 4096</p></td>
+<td><p>seeded</p></td>
+<td><p>148</p></td>
+<td><p>51.50</p></td>
+<td><p>51.98</p></td>
+<td><p>0.991</p></td>
+<td><p>0.961</p></td>
+</tr>
+<tr class="row-odd"><td><p>nucleation excerpt, 4096</p></td>
+<td><p>cutoff</p></td>
+<td><p>148</p></td>
+<td><p>35.19</p></td>
+<td><p>34.54</p></td>
+<td><p>1.019</p></td>
+<td><p>0.954</p></td>
+</tr>
+<tr class="row-even"><td><p>Niu trajectory 3, 2880</p></td>
+<td><p>seeded</p></td>
+<td><p>148</p></td>
+<td><p>32.51</p></td>
+<td><p>32.94</p></td>
+<td><p>0.987</p></td>
+<td><p>0.961</p></td>
+</tr>
+<tr class="row-odd"><td><p>Niu trajectory 3, 2880</p></td>
+<td><p>cutoff</p></td>
+<td><p>148</p></td>
+<td><p>20.13</p></td>
+<td><p>20.54</p></td>
+<td><p>0.980</p></td>
+<td><p>0.958</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>These values are medians over three alternating sessions of the
+record’s <code class="docutils literal notranslate"><span class="pre">run.sh</span></code>. The record itself runs five.</p>
+</section>
+<section id="comparison-with-other-codes">
+<h2>Comparison with other codes<a class="headerlink" href="#comparison-with-other-codes" title="Link to this heading">¶</a></h2>
+<p>Single-core timings in milliseconds on the same frames, record
+<code class="docutils literal notranslate"><span class="pre">h2h-2026-10-31</span></code>. Outside the R.I.N.G.S. rows each entry times the
+analysis call with the frame in memory, as the best of seven runs
+after one warm-up, and each timer holds the neighbour search of its
+code. The R.I.N.G.S. rows time one whole process on each side, input
+included, and their d-SEAMS side is <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">fingerprint</span></code>, which also
+finds the seven-rings, so the rings of size six and below are
+compared. The mW R.I.N.G.S. entry is one timed run after one warm-up.
+The last row times the completed seeded cage rule against PTM on the
+512-molecule jittered lattice at <span class="math notranslate nohighlight">\(\sigma=0.3\)</span> Å, generator seed 5;
+PTM has no d-SEAMS counterpart, so that row is not the same
+computation.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>computation</p></th>
+<th class="head"><p>frame</p></th>
+<th class="head"><p>other code</p></th>
+<th class="head"><p>d-SEAMS 2.0</p></th>
+<th class="head"><p>other</p></th>
+<th class="head"><p>agreement</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>CHILL+ labels</p></td>
+<td><p>mW cubic, 4096</p></td>
+<td><p>OVITO</p></td>
+<td><p>6.09</p></td>
+<td><p>22.7</p></td>
+<td><p>4096 of 4096</p></td>
+</tr>
+<tr class="row-odd"><td><p>CHILL+ labels</p></td>
+<td><p>Niu final frame, 2880</p></td>
+<td><p>OVITO</p></td>
+<td><p>5.28</p></td>
+<td><p>21.3</p></td>
+<td><p>2610 of 2880</p></td>
+</tr>
+<tr class="row-even"><td><p><span class="math notranslate nohighlight">\(q_6\)</span>, <span class="math notranslate nohighlight">\(\bar q_6\)</span>, four nearest</p></td>
+<td><p>mW cubic, 4096</p></td>
+<td><p>freud</p></td>
+<td><p>3.50</p></td>
+<td><p>31.9</p></td>
+<td><p>2.2e-7</p></td>
+</tr>
+<tr class="row-odd"><td><p><span class="math notranslate nohighlight">\(q_6\)</span>, <span class="math notranslate nohighlight">\(\bar q_6\)</span>, four nearest</p></td>
+<td><p>Niu final frame, 2880</p></td>
+<td><p>freud</p></td>
+<td><p>2.58</p></td>
+<td><p>26.4</p></td>
+<td><p>0.32; 3.0e-5 on one graph</p></td>
+</tr>
+<tr class="row-even"><td><p>primitive rings, <span class="math notranslate nohighlight">\(D=6\)</span>, whole workflow</p></td>
+<td><p>mW cubic, 4096</p></td>
+<td><p>R.I.N.G.S.</p></td>
+<td><p>31.0</p></td>
+<td><p>2070379</p></td>
+<td><p>same census, 8192 rings</p></td>
+</tr>
+<tr class="row-odd"><td><p>primitive rings, <span class="math notranslate nohighlight">\(D=6\)</span>, whole workflow</p></td>
+<td><p>CRN1, 1000</p></td>
+<td><p>R.I.N.G.S.</p></td>
+<td><p>13.5</p></td>
+<td><p>137797</p></td>
+<td><p>same census, 1238 rings</p></td>
+</tr>
+<tr class="row-even"><td><p>shortcut-free rings, <span class="math notranslate nohighlight">\(D=6\)</span></p></td>
+<td><p>mW cubic, 4096</p></td>
+<td><p>GenIce2</p></td>
+<td><p>6.44</p></td>
+<td><p>10666</p></td>
+<td><p>same 8192 rings</p></td>
+</tr>
+<tr class="row-odd"><td><p>shortcut-free rings, <span class="math notranslate nohighlight">\(D=6\)</span></p></td>
+<td><p>CRN1, 1000</p></td>
+<td><p>GenIce2</p></td>
+<td><p>2.64</p></td>
+<td><p>1773</p></td>
+<td><p>same 1238 rings</p></td>
+</tr>
+<tr class="row-even"><td><p>5^12 and 5^12 6^2 cages</p></td>
+<td><p>sI, 368</p></td>
+<td><p>GenIce2</p></td>
+<td><p>28.1</p></td>
+<td><p>436</p></td>
+<td><p>16 and 48 in both</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ic/Ih labels</p></td>
+<td><p>jittered Ic, 512</p></td>
+<td><p>OVITO PTM</p></td>
+<td><p>15.6</p></td>
+<td><p>16.4</p></td>
+<td><p>512 and 502 Ic</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The frames are the 4096-molecule mW cubic frame, the final frame of
+the 2880-water Niu dump, the 1000-molecule continuous random network
+CRN1 and the 2 x 2 x 2 GenIce sI framework of 368 waters. Every code
+gets the same oxygen coordinates and orthorhombic cell, and every
+library runs on one thread.</p>
+<p>OVITO CHILL+ and the d-SEAMS CHILL+:math:<cite>(r_c)</cite> both run at
+<span class="math notranslate nohighlight">\(r_c=3.5\)</span> Å. d-SEAMS clathrate, interfacial clathrate and water
+match OVITO hydrate, interfacial hydrate and other. The CHILL+ labels
+agree on every mW molecule and differ at 270 Niu molecules, 109 of
+which d-SEAMS labels interfacial clathrate and OVITO other. freud’s
+timer holds two neighbour searches, since the plain and averaged
+parameters are two objects, and freud stores coordinates in single
+precision. d-SEAMS evaluates <span class="math notranslate nohighlight">\(q_6\)</span> on the mutual four-nearest graph
+and freud on the four nearest neighbours; the two graphs differ at 175
+of the 2880 Niu molecules. Given freud’s neighbour rows, the engine
+returns freud’s values to 3.0e-5. R.I.N.G.S. puts 97% of each run in
+the distance matrix of the 5 x 5 x 5 superlattice it builds for a
+periodic cell.</p>
+<p>The calls on each side are these.</p>
+<ul class="simple">
+<li><p>d-SEAMS CHILL+:math:<cite>(r_c)</cite>: <code class="docutils literal notranslate"><span class="pre">neighListO</span></code>, <code class="docutils literal notranslate"><span class="pre">getCorrelPlus</span></code> and
+<code class="docutils literal notranslate"><span class="pre">getIceTypePlusNoPrint</span></code> through PydSEAMSlib on the 3.5 Å cutoff list</p></li>
+<li><p>d-SEAMS <span class="math notranslate nohighlight">\(q_6\)</span> and <span class="math notranslate nohighlight">\(\bar q_6\)</span>: <code class="docutils literal notranslate"><span class="pre">kNearestNeighbourList</span></code> and
+<code class="docutils literal notranslate"><span class="pre">steinhardtQl</span></code></p></li>
+<li><p>d-SEAMS rings: <code class="docutils literal notranslate"><span class="pre">neighListO</span></code>, <code class="docutils literal notranslate"><span class="pre">neighbourListByIndex</span></code> and
+<code class="docutils literal notranslate"><span class="pre">ringNetwork</span></code>, with <code class="docutils literal notranslate"><span class="pre">findBySignature</span></code> added for the sI cages</p></li>
+<li><p>d-SEAMS against PTM: the completed seeded rule of
+<code class="docutils literal notranslate"><span class="pre">scripts/sota_compare.py</span></code></p></li>
+<li><p>d-SEAMS against R.I.N.G.S.: <code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">fingerprint</span> <span class="pre">crn.lammpstrj</span> <span class="pre">--cutoff</span> <span class="pre">3.5</span> <span class="pre">--type</span> <span class="pre">1</span></code></p></li>
+<li><p>OVITO CHILL+: <code class="docutils literal notranslate"><span class="pre">ChillPlusModifier(cutoff=3.5)</span></code> on a <code class="docutils literal notranslate"><span class="pre">DataCollection</span></code></p></li>
+<li><p>OVITO PTM: <code class="docutils literal notranslate"><span class="pre">PolyhedralTemplateMatchingModifier</span></code></p></li>
+<li><p>freud: <code class="docutils literal notranslate"><span class="pre">freud.order.Steinhardt(l=6)</span></code> with <code class="docutils literal notranslate"><span class="pre">average=False</span></code> and with
+<code class="docutils literal notranslate"><span class="pre">average=True</span></code>, each over four nearest neighbours</p></li>
+<li><p>GenIce2 rings: <code class="docutils literal notranslate"><span class="pre">pairlist.pairs_iter</span></code> at 3.5 Å into a networkx
+graph, then <code class="docutils literal notranslate"><span class="pre">cycles_iter(graph,</span> <span class="pre">6,</span> <span class="pre">pos)</span></code> of <code class="docutils literal notranslate"><span class="pre">cycless.cycles</span></code></p></li>
+<li><p>GenIce2 cages: those rings, then <code class="docutils literal notranslate"><span class="pre">polyhedra_iter(rings,</span> <span class="pre">14)</span></code> of
+<code class="docutils literal notranslate"><span class="pre">cycless.polyhed</span></code>, keeping the cages of 12 and 14 five- and
+six-rings, as the genice2-cage formatter does</p></li>
+<li><p>R.I.N.G.S.: <code class="docutils literal notranslate"><span class="pre">rings</span> <span class="pre">input</span></code> on the same coordinates with one species,
+periodic boundaries, primitive rings only, search depth 3 (rings of
+up to six members) and the O-O bond at 3.5 Å</p></li>
+</ul>
+<p>The genice2-cage formatter run from the command line first replicates
+the sI unit cell and builds a hydrogen-bond graph, so the record runs
+it once, untimed, and it returns the same 16 and 48 cages.</p>
+</section>
+<section id="steinhardt-parameters-across-codes">
+<h2>Steinhardt parameters across codes<a class="headerlink" href="#steinhardt-parameters-across-codes" title="Link to this heading">¶</a></h2>
+<p>The rules <code class="docutils literal notranslate"><span class="pre">ql_compare_dseams</span></code> and <code class="docutils literal notranslate"><span class="pre">ql_compare_python</span></code> evaluate
+Steinhardt <span class="math notranslate nohighlight">\(q_4\)</span>, <span class="math notranslate nohighlight">\(q_6\)</span> and <span class="math notranslate nohighlight">\(q_8\)</span> with the engine, freud and
+pyscal3 on an ideal fcc cell (108 atoms in a 12 Å box, cutoff 3.2 Å)
+and an ideal bcc cell (54 atoms, same box, cutoff 4.0 Å). Record
+<code class="docutils literal notranslate"><span class="pre">elja-1798666</span></code>, files <code class="docutils literal notranslate"><span class="pre">ql-dseams.txt</span></code> and <code class="docutils literal notranslate"><span class="pre">ql-python.txt</span></code>.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>cell</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(q_4\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(q_6\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(q_8\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>fcc</p></td>
+<td><p>0.190941</p></td>
+<td><p>0.574524</p></td>
+<td><p>0.403915</p></td>
+</tr>
+<tr class="row-odd"><td><p>bcc</p></td>
+<td><p>0.509175</p></td>
+<td><p>0.628539</p></td>
+<td><p>0.212762</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The three codes print the same six decimals.</p>
+</section>
+<section id="device-resident-batch">
+<h2>Device-resident batch<a class="headerlink" href="#device-resident-batch" title="Link to this heading">¶</a></h2>
+<p>One process of <code class="docutils literal notranslate"><span class="pre">bench_gpu_batch</span></code> under <code class="docutils literal notranslate"><span class="pre">nsys</span></code> on the eleven stored
+frames of the 4096-molecule mW cubic dump, one NVIDIA
+A100-PCIE-40GB of an Elja <code class="docutils literal notranslate"><span class="pre">gpu-2xA100</span></code> node, CUDA 12.2, record
+<code class="docutils literal notranslate"><span class="pre">tip-gpu-batch-elja-1787449.txt</span></code>.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>quantity</p></th>
+<th class="head"><p>value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>working set of one frame <span class="math notranslate nohighlight">\(W\)</span></p></td>
+<td><p>2867712 bytes</p></td>
+</tr>
+<tr class="row-odd"><td><p>frames that fit, <span class="math notranslate nohighlight">\(\lfloor A/W\rfloor\)</span></p></td>
+<td><p>11672</p></td>
+</tr>
+<tr class="row-even"><td><p>cold call, compute, NVRTC compile included</p></td>
+<td><p>6394 ms</p></td>
+</tr>
+<tr class="row-odd"><td><p>best of five warm calls, compute, eleven frames</p></td>
+<td><p>21.986 ms</p></td>
+</tr>
+<tr class="row-even"><td><p>upload</p></td>
+<td><p>0.120 ms</p></td>
+</tr>
+<tr class="row-odd"><td><p>download</p></td>
+<td><p>0.176 ms</p></td>
+</tr>
+<tr class="row-even"><td><p>molecules labelled Ic</p></td>
+<td><p>45056 of 45056</p></td>
+</tr>
+<tr class="row-odd"><td><p>six-rings</p></td>
+<td><p>90112</p></td>
+</tr>
+<tr class="row-even"><td><p>kernel time in the <span class="math notranslate nohighlight">\(k\)</span>-nearest walk</p></td>
+<td><p>69.9%</p></td>
+</tr>
+<tr class="row-odd"><td><p>kernel time in primitive hexagons</p></td>
+<td><p>17.9%</p></td>
+</tr>
+<tr class="row-even"><td><p>kernel time in basal emission</p></td>
+<td><p>7.2%</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="versions.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Versions</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="reproduce.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Reproduce</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--sy-c-text-weak);
+        font-size: 0.9em;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 1rem;
+          align-items: center;
+        "
+      >
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z" />
+          </svg>
+          <span
+            >Analytics by
+            <a
+              href="https://antics.turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >Antics</a
+            ></span
+          >
+        </span>
+
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <span>provided by</span>
+          <span style="display: inline-flex; align-items: center; gap: 0.3em">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1.2em"
+              height="1.2em"
+              viewBox="0 0 64 64"
+              aria-hidden="true"
+            >
+              <g fill-rule="evenodd">
+                <ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9" />
+                <path
+                  fill="#80D25B"
+                  d="M20.302104,46 C20.302104,46 17.1330329,55.8812548 20.6828149,59.7817355 C24.232597,63.6822162 26.8008673,63.215359 26.8008673,53.7414927 C26.8008673,44.2676263 20.302104,46 20.302104,46 Z"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M38.302104,46 C38.302104,46 35.1330329,55.8812548 38.6828149,59.7817355 C42.232597,63.6822162 44.8008673,63.215359 44.8008673,53.7414927 C44.8008673,44.2676263 38.302104,46 38.302104,46 Z"
+                  transform="matrix(-1 0 0 1 81.8 0)"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M20.6227767,21.2218684 C20.6227767,21.2218684 13.956214,15.3844007 10.091955,16.0534044 C6.22769598,16.722408 6,22.2124633 6,23.9992899 C6,25.7861165 7.78917398,37.3159836 9.78726488,36.4967476 C11.7853558,35.6775115 13.7411938,27.959322 13.7411938,27.959322 15.6510232,30.2287702 18.609193,30.4630388"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M57.6227767,21.2218684 C57.6227767,21.2218684 50.956214,15.3844007 47.091955,16.0534044 C43.227696,16.722408 43,22.2124633 43,23.9992899 C43,25.7861165 44.789174,37.3159836 46.7872649,36.4967476 C48.7853558,35.6775115 50.7411938,27.959322 50.7411938,27.959322 52.6510232,30.2287702 55.609193,30.4630388"
+                  transform="matrix(-1 0 0 1 100.623 0)"
+                />
+                <path
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32,53 C40.836556,53 48,44.4934102 48,34 C48,23.5065898 46.6814044,17 32,17 C17.3185956,17 16,23.5065898 16,34 C16,44.4934102 23.163444,53 32,53 Z"
+                />
+                <polygon
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  points="32 22 38.928 26 38.928 34 32 38 25.072 34 25.072 26"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M30,8 C28.8954305,8 28,8.8954305 28,10"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M36,8 C34.8954305,8 34,8.8954305 34,10"
+                  transform="matrix(-1 0 0 1 70 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32.1194396 38.1881507L32.1194396 52.4125899M32.0164956 21.7467197L32.0164956 17M25.2141026 26.0041506L17.737148 23.0721126M25.1254173 34.1534318L16.7659494 38.8876521"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M46.2141026,26.0041506 L38.737148,23.0721126"
+                  transform="matrix(-1 0 0 1 84.951 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M47.1254173,34.1534318 L38.7659494,38.8876521"
+                  transform="matrix(-1 0 0 1 85.891 0)"
+                />
+              </g>
+            </svg>
+            <a
+              href="https://turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >TurtleTech ehf</a
+            >
+          </span>
+        </span>
+      </div>
+    </div>
+
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2019-2026, d-SEAMS core team</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div> <div class="sy-foot-socials">
+<a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+  <iconify-icon icon="simple-icons:github"></iconify-icon>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/target-highlight.js?v=df7d332b"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=cac61aee"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script></body>
+</html>

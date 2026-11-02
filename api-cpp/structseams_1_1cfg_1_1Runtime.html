@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('structseams_1_
 </div><!--header-->
 <div class="contents">
 
-<p><code>#include &lt;<a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="seams__config_8hpp_source.html">src/include/internal/seams_config.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -247,6 +247,7 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:ac1465acdd497f03a97764f2febe033a2" id="r_ac1465acdd497f03a97764f2febe033a2"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ac1465acdd497f03a97764f2febe033a2">jobs</a> = 1</td></tr>
 <tr class="memitem:ade67224f3460b14be18195bbd8499527" id="r_ade67224f3460b14be18195bbd8499527"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ade67224f3460b14be18195bbd8499527">type</a> = 0</td></tr>
 <tr class="memitem:a6c22ad1c8eae1acfba7a026c38391863" id="r_a6c22ad1c8eae1acfba7a026c38391863"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a6c22ad1c8eae1acfba7a026c38391863">cutoff</a> = 3.5</td></tr>
+<tr class="memitem:ae1ba53dc26a5a02b08a65b75674e023a" id="r_ae1ba53dc26a5a02b08a65b75674e023a"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#ae1ba53dc26a5a02b08a65b75674e023a">cageEdge</a> = &quot;2.65,3.15&quot;</td></tr>
 <tr class="memitem:aa9d9b9bfa55fc30cecd034759b5c48c1" id="r_aa9d9b9bfa55fc30cecd034759b5c48c1"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aa9d9b9bfa55fc30cecd034759b5c48c1">k</a> = 4</td></tr>
 <tr class="memitem:a79be330a6b6d208c056daaf5f40682d1" id="r_a79be330a6b6d208c056daaf5f40682d1"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#a79be330a6b6d208c056daaf5f40682d1">graph</a> = &quot;seeded&quot;</td></tr>
 <tr class="memitem:ab7e771317b68e4aafa46cac28b25a526" id="r_ab7e771317b68e4aafa46cac28b25a526"><td class="memItemLeft"><a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3">site::Family</a>&#160;</td><td class="memItemRight"><a class="el" href="#ab7e771317b68e4aafa46cac28b25a526">family</a> = <a class="el" href="namespacesite.html#aa3661d15289b4b8576f48217ed337ca3a36e282e712f203caa8cfeea7569bf5bd">site::Family::waterIce</a></td></tr>
@@ -255,6 +256,7 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:aba36d153b85a4c2d1f8c34ea40dddd18" id="r_aba36d153b85a4c2d1f8c34ea40dddd18"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aba36d153b85a4c2d1f8c34ea40dddd18">tpp</a> = 0</td></tr>
 <tr class="memitem:ad58d311025cf510daab7bf4f45e94bcf" id="r_ad58d311025cf510daab7bf4f45e94bcf"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ad58d311025cf510daab7bf4f45e94bcf">block</a> = 0</td></tr>
 <tr class="memitem:a0cab36848dbe3e0803a0c44d9a6ea14b" id="r_a0cab36848dbe3e0803a0c44d9a6ea14b"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a0cab36848dbe3e0803a0c44d9a6ea14b">offload</a> = false</td></tr>
+<tr class="memitem:ae583a58a6f7351fd2c375045501a866d" id="r_ae583a58a6f7351fd2c375045501a866d"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ae583a58a6f7351fd2c375045501a866d">carry</a> = true</td></tr>
 <tr class="memitem:ad8b5f283520f2569e2b88a6425217e03" id="r_ad8b5f283520f2569e2b88a6425217e03"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#ad8b5f283520f2569e2b88a6425217e03">fennel</a></td></tr>
 <tr class="memitem:af6e3d385e1bb24dd9e50157d792a0b03" id="r_af6e3d385e1bb24dd9e50157d792a0b03"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#af6e3d385e1bb24dd9e50157d792a0b03">luaPath</a></td></tr>
 <tr class="memitem:a05a989351227a5a0ab8dacb165e6d894" id="r_a05a989351227a5a0ab8dacb165e6d894"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#a05a989351227a5a0ab8dacb165e6d894">source</a></td></tr>
@@ -275,7 +277,39 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00041">41</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00042">42</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ae1ba53dc26a5a02b08a65b75674e023a" name="ae1ba53dc26a5a02b08a65b75674e023a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae1ba53dc26a5a02b08a65b75674e023a">&#9670;&#160;</a></span>cageEdge</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string seams::cfg::Runtime::cageEdge = &quot;2.65,3.15&quot;</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00035">35</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ae583a58a6f7351fd2c375045501a866d" name="ae583a58a6f7351fd2c375045501a866d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae583a58a6f7351fd2c375045501a866d">&#9670;&#160;</a></span>carry</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool seams::cfg::Runtime::carry = true</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00044">44</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
 
 </div>
 </div>
@@ -291,7 +325,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00039">39</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00040">40</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
 
 </div>
 </div>
@@ -323,7 +357,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00037">37</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00038">38</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
 
 </div>
 </div>
@@ -339,7 +373,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00043">43</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00045">45</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
 
 </div>
 </div>
@@ -371,7 +405,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00036">36</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00037">37</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
 
 </div>
 </div>
@@ -403,7 +437,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00035">35</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00036">36</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
 
 </div>
 </div>
@@ -435,7 +469,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00044">44</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00046">46</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
 
 </div>
 </div>
@@ -451,7 +485,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00042">42</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00043">43</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
 
 </div>
 </div>
@@ -467,7 +501,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00038">38</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00039">39</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
 
 </div>
 </div>
@@ -483,7 +517,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00045">45</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00047">47</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
 
 </div>
 </div>
@@ -499,7 +533,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00040">40</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="seams__config_8hpp_source.html#l00041">41</a> of file <a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a>.</p>
 
 </div>
 </div>
@@ -520,7 +554,7 @@ Public Attributes</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>/home/runner/work/seams-core/seams-core/src/include/internal/<a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a></li>
+<li>src/include/internal/<a class="el" href="seams__config_8hpp_source.html">seams_config.hpp</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

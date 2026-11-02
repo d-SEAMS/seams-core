@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -245,6 +245,7 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Guests read against enumerated cages.  <a href="structsite_1_1GuestOccupancy.html#details">More...</a><br /></td></tr>
 <tr class="memitem:IceClusterIons" id="r_IceClusterIons"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1IceClusterIons.html">IceClusterIons</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Connected components of ice atoms on the water graph, and the ion count per component: each ion is assigned to the cluster of the nearest ice atom within <span class="tt">cutoff</span>.  <a href="structsite_1_1IceClusterIons.html#details">More...</a><br /></td></tr>
+<tr class="memitem:InsideTrace" id="r_InsideTrace"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1InsideTrace.html">InsideTrace</a></td></tr>
 <tr class="memitem:IonEnvironment" id="r_IonEnvironment"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1IonEnvironment.html">IonEnvironment</a></td></tr>
 <tr class="memitem:Table" id="r_Table"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structsite_1_1Table.html">Table</a></td></tr>
 </table><table class="memberdecls">
@@ -302,13 +303,27 @@ Functions</h2></td></tr>
 <tr class="memdesc:a59c0f056c026caebb259d8c8e0d032e1"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt">iceFlag</span> is indexed like <span class="tt">yCloud.pts</span>; <span class="tt">waterType</span> selects the water oxygens (0 accepts every atom that is not an ion); <span class="tt">cutoff</span> is the first shell radius in the cloud's length unit.  <br /></td></tr>
 <tr class="memitem:a3327b0f82b57a80d113b241dec0eb711" id="r_a3327b0f82b57a80d113b241dec0eb711"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a3327b0f82b57a80d113b241dec0eb711">shellRingCensus</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; int &gt; &amp;shell, int maxRingSize)</td></tr>
 <tr class="memdesc:a3327b0f82b57a80d113b241dec0eb711"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rings of the water network that pass through a first shell: the census by size of every ring with at least one vertex in <span class="tt">shell</span>.  <br /></td></tr>
+<tr class="memitem:a99a4e8b8fb177f7fea900ac24f145d45" id="r_a99a4e8b8fb177f7fea900ac24f145d45"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a99a4e8b8fb177f7fea900ac24f145d45">cappedRings</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; int &gt; &amp;shell, int maxRingSize)</td></tr>
+<tr class="memdesc:a99a4e8b8fb177f7fea900ac24f145d45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Capped rings: the water-only primitive rings of <span class="tt">rings</span> (the ring network of the water graph, ions not vertices) of at most <span class="tt">maxRingSize</span> members, every member of which lies in <span class="tt">shell</span>.  <br /></td></tr>
+<tr class="memitem:a1e366213de1b2f4f04c86f8364b609f6" id="r_a1e366213de1b2f4f04c86f8364b609f6"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a1e366213de1b2f4f04c86f8364b609f6">brokenRings</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; int &gt; &amp;shell, int maxRingSize)</td></tr>
+<tr class="memdesc:a1e366213de1b2f4f04c86f8364b609f6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Broken rings: the primitive rings, of at most <span class="tt">maxRingSize</span> members, of the water graph <span class="tt">nList</span> (by index, leading self entry, ions not bonded) plus one virtual ion vertex bonded to every water of <span class="tt">shell</span>, that contain the ion.  <br /></td></tr>
 <tr class="memitem:adf97b42407e86bc9d067855b19397ac8" id="r_adf97b42407e86bc9d067855b19397ac8"><td class="memItemLeft"><a class="el" href="structsite_1_1GuestOccupancy.html">GuestOccupancy</a>&#160;</td><td class="memItemRight"><a class="el" href="#adf97b42407e86bc9d067855b19397ac8">guestOccupancy</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;cages, const std::vector&lt; int &gt; &amp;guestIndices, double radius)</td></tr>
 <tr class="memdesc:adf97b42407e86bc9d067855b19397ac8"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt">cages</span> are vertex index lists into <span class="tt">yCloud.pts</span>; <span class="tt">radius</span> in the cloud's length unit (half the cage diameter, about 4 A for a 5^12 cage).  <br /></td></tr>
 <tr class="memitem:a208c6e1f8e6106530d6c75bb16dccaad" id="r_a208c6e1f8e6106530d6c75bb16dccaad"><td class="memItemLeft">std::array&lt; double, 3 &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a208c6e1f8e6106530d6c75bb16dccaad">periodicCentroid</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;atoms)</td></tr>
 <tr class="memdesc:a208c6e1f8e6106530d6c75bb16dccaad"><td class="mdescLeft">&#160;</td><td class="mdescRight">Periodic centroid of a set of atoms: every atom is unwrapped to its minimum image about the first, and the mean is taken there.  <br /></td></tr>
+<tr class="memitem:a9231f841816296c279bcf08186f332de" id="r_a9231f841816296c279bcf08186f332de"><td class="memItemLeft">const std::vector&lt; std::array&lt; double, 3 &gt; &gt; &amp;&#160;</td><td class="memItemRight"><a class="el" href="#a9231f841816296c279bcf08186f332de">insideRayDirections</a> ()</td></tr>
+<tr class="memdesc:a9231f841816296c279bcf08186f332de"><td class="mdescLeft">&#160;</td><td class="mdescRight">The fixed, ordered unit directions the inside test casts rays along.  <br /></td></tr>
+<tr class="memitem:afc9315591f9625e0013b8ed56887297f" id="r_afc9315591f9625e0013b8ed56887297f"><td class="memItemLeft"><a class="el" href="structsite_1_1InsideTrace.html">InsideTrace</a>&#160;</td><td class="memItemRight"><a class="el" href="#afc9315591f9625e0013b8ed56887297f">pointInFacesTrace</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; int &gt; &amp;faces, const std::array&lt; double, 3 &gt; &amp;guest, const std::array&lt; double, 3 &gt; *centre=nullptr)</td></tr>
+<tr class="memdesc:afc9315591f9625e0013b8ed56887297f"><td class="mdescLeft">&#160;</td><td class="mdescRight">The inside predicate for one cage.  <br /></td></tr>
+<tr class="memitem:a040c7a9f8809cf0b1fb82b9294df197c" id="r_a040c7a9f8809cf0b1fb82b9294df197c"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a040c7a9f8809cf0b1fb82b9294df197c">pointInFaces</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; int &gt; &amp;faces, const std::array&lt; double, 3 &gt; &amp;guest, const std::array&lt; double, 3 &gt; *centre=nullptr)</td></tr>
 <tr class="memitem:a84113178c851924869bd3fee27af749b" id="r_a84113178c851924869bd3fee27af749b"><td class="memItemLeft"><a class="el" href="structsite_1_1GuestOccupancy.html">GuestOccupancy</a>&#160;</td><td class="memItemRight"><a class="el" href="#a84113178c851924869bd3fee27af749b">guestOccupancyInside</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;cageFaces, const std::vector&lt; int &gt; &amp;guestIndices)</td></tr>
-<tr class="memdesc:a84113178c851924869bd3fee27af749b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Occupancy by ray-parity: a guest sits in a cage when a ray from the guest, in the frame that unwraps the cage about its periodic centroid, crosses an odd number of fan-triangulated faces.  <br /></td></tr>
+<tr class="memdesc:a84113178c851924869bd3fee27af749b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Occupancy by the inside predicate (<span class="tt"><a class="el" href="#a040c7a9f8809cf0b1fb82b9294df197c">pointInFaces</a></span>) on every cage.  <br /></td></tr>
 <tr class="memitem:a2c1ad7bff89d54bbb4c2a22f93e3eeaf" id="r_a2c1ad7bff89d54bbb4c2a22f93e3eeaf"><td class="memItemLeft"><a class="el" href="structsite_1_1IceClusterIons.html">IceClusterIons</a>&#160;</td><td class="memItemRight"><a class="el" href="#a2c1ad7bff89d54bbb4c2a22f93e3eeaf">iceClusterIonCensus</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; bool &gt; &amp;ice, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nListByIndex, const std::vector&lt; int &gt; &amp;ionIndices, double cutoff)</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a17c7ad054eafa92f5e5238e14109b97a" id="r_a17c7ad054eafa92f5e5238e14109b97a"><td class="memItemLeft">constexpr double&#160;</td><td class="memItemRight"><a class="el" href="#a17c7ad054eafa92f5e5238e14109b97a">kInsideRelTol</a> = 1e-9</td></tr>
+<tr class="memdesc:a17c7ad054eafa92f5e5238e14109b97a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Relative tolerance of the inside test, in units of the largest distance from c_F to a cage vertex.  <br /></td></tr>
 </table>
 <a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
 <a id="aa3661d15289b4b8576f48217ed337ca3" name="aa3661d15289b4b8576f48217ed337ca3"></a>
@@ -461,6 +476,64 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a1e366213de1b2f4f04c86f8364b609f6" name="a1e366213de1b2f4f04c86f8364b609f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1e366213de1b2f4f04c86f8364b609f6">&#9670;&#160;</a></span>brokenRings()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; site::brokenRings </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>shell</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxRingSize</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Broken rings: the primitive rings, of at most <span class="tt">maxRingSize</span> members, of the water graph <span class="tt">nList</span> (by index, leading self entry, ions not bonded) plus one virtual ion vertex bonded to every water of <span class="tt">shell</span>, that contain the ion. </p>
+<p>These are the rings the water-only network lost. Each ring is in ring order and writes the virtual ion as <span class="tt">static_cast&lt;int&gt;(nList.size())</span>. </p>
+
+</div>
+</div>
+<a id="a99a4e8b8fb177f7fea900ac24f145d45" name="a99a4e8b8fb177f7fea900ac24f145d45"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a99a4e8b8fb177f7fea900ac24f145d45">&#9670;&#160;</a></span>cappedRings()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; site::cappedRings </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>shell</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxRingSize</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Capped rings: the water-only primitive rings of <span class="tt">rings</span> (the ring network of the water graph, ions not vertices) of at most <span class="tt">maxRingSize</span> members, every member of which lies in <span class="tt">shell</span>. </p>
+<p>The ion sits above a complete water ring. </p>
+
+</div>
+</div>
 <a id="a0e086c58b6a8de67c895bd1e034f58e6" name="a0e086c58b6a8de67c895bd1e034f58e6"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0e086c58b6a8de67c895bd1e034f58e6">&#9670;&#160;</a></span>densityZ() <span class="overload">[1/2]</span></h2>
 
@@ -611,7 +684,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Occupancy by ray-parity: a guest sits in a cage when a ray from the guest, in the frame that unwraps the cage about its periodic centroid, crosses an odd number of fan-triangulated faces. </p>
+<p>Occupancy by the inside predicate (<span class="tt"><a class="el" href="#a040c7a9f8809cf0b1fb82b9294df197c">pointInFaces</a></span>) on every cage. </p>
 <p>Among cages that contain the guest the nearest centroid wins. <span class="tt">rings</span> is the ring list the cage faces index; <span class="tt">cageFaces[c]</span> is the face indices of cage c. </p>
 
 </div>
@@ -692,6 +765,25 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="a9231f841816296c279bcf08186f332de" name="a9231f841816296c279bcf08186f332de"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9231f841816296c279bcf08186f332de">&#9670;&#160;</a></span>insideRayDirections()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; std::array&lt; double, 3 &gt; &gt; &amp; site::insideRayDirections </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The fixed, ordered unit directions the inside test casts rays along. </p>
 
 </div>
 </div>
@@ -832,6 +924,81 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="a040c7a9f8809cf0b1fb82b9294df197c" name="a040c7a9f8809cf0b1fb82b9294df197c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a040c7a9f8809cf0b1fb82b9294df197c">&#9670;&#160;</a></span>pointInFaces()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool site::pointInFaces </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>faces</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::array&lt; double, 3 &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>guest</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::array&lt; double, 3 &gt; *</td>          <td class="paramname"><span class="paramname"><em>centre</em></span><span class="paramdefsep"> = </span><span class="paramdefval">nullptr</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="afc9315591f9625e0013b8ed56887297f" name="afc9315591f9625e0013b8ed56887297f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afc9315591f9625e0013b8ed56887297f">&#9670;&#160;</a></span>pointInFacesTrace()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structsite_1_1InsideTrace.html">InsideTrace</a> site::pointInFacesTrace </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>faces</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::array&lt; double, 3 &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>guest</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::array&lt; double, 3 &gt; *</td>          <td class="paramname"><span class="paramname"><em>centre</em></span><span class="paramdefsep"> = </span><span class="paramdefval">nullptr</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>The inside predicate for one cage. </p>
+<p>The face vertices and the guest are unwrapped about c_F (<span class="tt">centre</span>, or the periodic centroid of the distinct face vertices when null) and each face is fan-triangulated from its own centroid. The guest is inside when it lies on a triangle within <span class="tt"><a class="el" href="#a17c7ad054eafa92f5e5238e14109b97a" title="Relative tolerance of the inside test, in units of the largest distance from c_F to a cage vertex.">kInsideRelTol</a></span>; otherwise a ray is cast along the first direction of <span class="tt"><a class="el" href="#a9231f841816296c279bcf08186f332de" title="The fixed, ordered unit directions the inside test casts rays along.">insideRayDirections()</a></span> that passes no triangle edge or vertex within that tolerance, and the guest is inside when the ray meets an odd number of triangles. When every direction grazes, the one with the widest clearance decides. </p>
+
+</div>
+</div>
 <a id="a3043411870d52f19774d045fa21dfc09" name="a3043411870d52f19774d045fa21dfc09"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a3043411870d52f19774d045fa21dfc09">&#9670;&#160;</a></span>refuseIceScore()</h2>
 
@@ -875,6 +1042,33 @@ Functions</h2></td></tr>
 
 <p>Rings of the water network that pass through a first shell: the census by size of every ring with at least one vertex in <span class="tt">shell</span>. </p>
 <p>An ion is not a vertex of the network, so the rings it would have closed are gone and the rings its shell still carries measure how far the network survives around it (the hydration-shell ring census of a brine or an ionic solution). <span class="tt">census[s]</span> counts rings of size s up to <span class="tt">maxRingSize</span>. </p>
+
+</div>
+</div>
+<a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="a17c7ad054eafa92f5e5238e14109b97a" name="a17c7ad054eafa92f5e5238e14109b97a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a17c7ad054eafa92f5e5238e14109b97a">&#9670;&#160;</a></span>kInsideRelTol</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double site::kInsideRelTol = 1e-9</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel constexpr">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Relative tolerance of the inside test, in units of the largest distance from c_F to a cage vertex. </p>
+
+<p class="definition">Definition at line <a class="el" href="site_8hpp_source.html#l00163">163</a> of file <a class="el" href="site_8hpp_source.html">site.hpp</a>.</p>
 
 </div>
 </div>

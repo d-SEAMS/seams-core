@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -270,6 +270,10 @@ Functions</h2></td></tr>
 <tr class="memitem:gad17e972366865905372aa796e946a351" id="r_gad17e972366865905372aa796e946a351"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="group__nneigh.html#gad17e972366865905372aa796e946a351">dumpVolume</a> (const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</td></tr>
 <tr class="memdesc:gad17e972366865905372aa796e946a351"><td class="mdescLeft">&#160;</td><td class="mdescRight">Triclinic dump-cell volume |det(H)| from dumpBoundsToH.  <br /></td></tr>
 <tr class="memitem:ga786c8abbd20d2751403eb4f2c603cd95" id="r_ga786c8abbd20d2751403eb4f2c603cd95"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="group__nneigh.html#ga786c8abbd20d2751403eb4f2c603cd95">dumpVolume</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:gad960860059d8e9d9fdee48c679e1c446" id="r_gad960860059d8e9d9fdee48c679e1c446"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="group__nneigh.html#gad960860059d8e9d9fdee48c679e1c446">setBoxFromLammpsEdges</a> (std::vector&lt; double &gt; &amp;box, std::vector&lt; double &gt; &amp;boxLow, double xlo, double ylo, double zlo, double lx, double ly, double lz, double xy, double xz, double yz)</td></tr>
+<tr class="memdesc:gad960860059d8e9d9fdee48c679e1c446"><td class="mdescLeft">&#160;</td><td class="mdescRight">LAMMPS edge origin and edge lengths, plus tilt, as a dump box.  <br /></td></tr>
+<tr class="memitem:ga77b70b894f0e7a72a980001e076f2a73" id="r_ga77b70b894f0e7a72a980001e076f2a73"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="group__nneigh.html#ga77b70b894f0e7a72a980001e076f2a73">setBoxFromLengthsAngles</a> (std::vector&lt; double &gt; &amp;box, std::vector&lt; double &gt; &amp;boxLow, double a, double b, double c, double alphaDeg, double betaDeg, double gammaDeg)</td></tr>
+<tr class="memdesc:ga77b70b894f0e7a72a980001e076f2a73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Crystallographic lengths and angles in degrees, stored as a dump box.  <br /></td></tr>
 <tr class="memitem:ga9566a384474993ea7356e7abc414e40e" id="r_ga9566a384474993ea7356e7abc414e40e"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__nneigh.html#ga9566a384474993ea7356e7abc414e40e">neighList</a> (double rcutoff, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</td></tr>
 <tr class="memdesc:ga9566a384474993ea7356e7abc414e40e"><td class="mdescLeft">&#160;</td><td class="mdescRight">All these functions use atom IDs and not indices.  <br /></td></tr>
 <tr class="memitem:gadd6ed18f0c7e2e5fbd10d7cdbf6af429" id="r_gadd6ed18f0c7e2e5fbd10d7cdbf6af429"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__nneigh.html#gadd6ed18f0c7e2e5fbd10d7cdbf6af429">neighListPair</a> (double rcutoff, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</td></tr>

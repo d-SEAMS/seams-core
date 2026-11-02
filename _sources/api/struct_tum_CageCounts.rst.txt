@@ -13,7 +13,7 @@ struct tum::CageCounts
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <tum_offload.hpp>
+	#include <src/include/internal/tum_offload.hpp>
 	
 	struct CageCounts {
 		// fields
@@ -23,8 +23,10 @@ struct tum::CageCounts
 		int :target:`nDdcRings<doxid-structtum_1_1_cage_counts_1a9c557c74c32c82309dfa739906810042>` = 0;
 		int :target:`nHcAtoms<doxid-structtum_1_1_cage_counts_1a72b7d09cb1577e8fb3d0bef3da85e962>` = 0;
 		int :target:`nDdcAtoms<doxid-structtum_1_1_cage_counts_1aab9b1b63e36af777deba13568cd12c76>` = 0;
-		int :target:`ringsDropped<doxid-structtum_1_1_cage_counts_1a8ba2a68345d60657b3fcf399a54ded38>` = 0;
+		int :target:`retries<doxid-structtum_1_1_cage_counts_1a92aeb2a59de2e8e6c7839bd7432a3d67>` = 0;
+		bool :target:`hostFallback<doxid-structtum_1_1_cage_counts_1a9aa2d80332251af401e40a51317aed68>` = false;
 		bool :target:`usedDevice<doxid-structtum_1_1_cage_counts_1a7e7282c1f800764983b24c4b9ce20738>` = false;
+		std::vector<int> :target:`atomSix<doxid-structtum_1_1_cage_counts_1a70b060af0dfd2bbe49b2ecef399965c9>`;
 		std::vector<int> :target:`atomHc<doxid-structtum_1_1_cage_counts_1a1a15e0ef307c7b4998dfdd35cfce0933>`;
 		std::vector<int> :target:`atomDdc<doxid-structtum_1_1_cage_counts_1af6c75cf2229b391d64049656ead9fbee>`;
 	};

@@ -13,7 +13,7 @@ struct gpu::Footprint
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <gpu_residency.hpp>
+	#include <src/include/internal/gpu_residency.hpp>
 	
 	struct Footprint {
 		// fields

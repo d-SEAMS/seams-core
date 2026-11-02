@@ -16,7 +16,7 @@ Connected components of ice atoms on the water graph, and the ion count per comp
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <site.hpp>
+	#include <src/include/internal/site.hpp>
 	
 	struct IceClusterIons {
 		// fields

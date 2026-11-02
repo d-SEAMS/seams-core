@@ -7,5 +7,6 @@ var classring_1_1AffiliationUpdater =
     [ "lastReclassified", "classring_1_1AffiliationUpdater.html#a41f180d179f3702cb423c6d87a110ddd", null ],
     [ "operator=", "classring_1_1AffiliationUpdater.html#a98bb2d078981e70d618bff065d9da032", null ],
     [ "operator=", "classring_1_1AffiliationUpdater.html#ac47012ce53ab8f6c62f8c869b3a0ac62", null ],
+    [ "setBatchFraction", "classring_1_1AffiliationUpdater.html#ab5599551dae9aa4986772d45bd3e8bc3", null ],
     [ "update", "classring_1_1AffiliationUpdater.html#a36779e1a3a2a86b85d51e8f7c6e2939c", null ]
 ];

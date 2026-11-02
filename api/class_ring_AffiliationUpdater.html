@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>class ring::AffiliationUpdater - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="namespace tum3" href="namespace_tum3.html" /><link rel="prev" title="struct ring::StackingPlanes" href="struct_ring_StackingPlanes.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>class ring::AffiliationUpdater - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="class ring::NeighBond" href="class_ring_NeighBond.html" /><link rel="prev" title="struct ring::StackingPlanes" href="struct_ring_StackingPlanes.html" />
       <link rel="canonical" href="https://docs.dseams.info/api/class_ring_AffiliationUpdater.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -92,11 +92,19 @@ data-aria-dark="Switch to auto color mode">
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/ice-and-clathrate.html">Ice and clathrate labels</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/rings.html">Primitive rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/order-parameters.html">Bond-orientational order parameters</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/confined-water.html">Confined water</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-figures.html">Paper figures</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">How-to</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/bindings.html">Build the language fronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/versions.html">Version pins</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/openmp-offload.html">OpenMP target offload</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/sheared-cells.html">Sheared cells</a></li>
@@ -113,6 +121,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Repositories</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/ring-completion.html">Ring-adjacent completion</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/topological-network.html">Topological network criteria</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
@@ -123,6 +132,21 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../reference/walk-compare.html">walk_compare</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/api.html">API map</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html">Generated anchors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#cage-cagetype">cage::cageType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#cage-icetype">cage::iceType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#sph-spheriharmo">sph::spheriHarmo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#gen-periodicdist">gen::periodicDist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#molsys-atom-state-type">molSys::atom_state_type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#molsys-bond-type">molSys::bond_type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#nneigh-neighbourlistbyindex">nneigh::neighbourListByIndex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#nneigh-dumpvolume">nneigh::dumpVolume</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#primitive-removenonsprings">primitive::removeNonSPrings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#primitive-ringnetwork">primitive::ringNetwork</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#primitive-countallringsfromindex">primitive::countAllRingsFromIndex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#rdf2-normalizerdf">rdf2::normalizeRDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#ring-structype">ring::strucType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#ring-assignpolygontype">ring::assignPolygonType</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_bond.html">Bond</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_prism3.html">Bulk prisms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_cage.html">Cage</a></li>
@@ -139,6 +163,7 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/cross-language.html">One task, four fronts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
 </ul>
 </li>
@@ -146,8 +171,24 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/walk-compare.html">walk_compare</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cross-language.html">One task, four fronts</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API map</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html">Generated anchors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#cage-cagetype">cage::cageType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#cage-icetype">cage::iceType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#sph-spheriharmo">sph::spheriHarmo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#gen-periodicdist">gen::periodicDist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#molsys-atom-state-type">molSys::atom_state_type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#molsys-bond-type">molSys::bond_type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#nneigh-neighbourlistbyindex">nneigh::neighbourListByIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#nneigh-dumpvolume">nneigh::dumpVolume</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#primitive-removenonsprings">primitive::removeNonSPrings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#primitive-ringnetwork">primitive::ringNetwork</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#primitive-countallringsfromindex">primitive::countAllRingsFromIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#rdf2-normalizerdf">rdf2::normalizeRDF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#ring-structype">ring::strucType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#ring-assignpolygontype">ring::assignPolygonType</a></li>
 <li class="toctree-l2"><a class="reference internal" href="group_bond.html">Bond</a></li>
 <li class="toctree-l2"><a class="reference internal" href="group_prism3.html">Bulk prisms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="group_cage.html">Cage</a></li>
@@ -170,6 +211,13 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">d-SEAMS 2.0 paper</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/index.html">d-SEAMS 2.0 paper</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/versions.html">Versions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/reproduce.html">Reproduce</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
 <ul>
@@ -311,7 +359,7 @@ data-aria-dark="Switch to auto color mode">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
 <p>Exact incremental affiliation across frames. <a class="reference internal" href="#details-classring-1-1-affiliation-updater"><span class="std std-ref">More…</span></a></p>
 <div class="doxyrest-overview-code-block highlight">
-<pre><span data-line="1"><span class="cp">#include</span> <span class="cpf">&lt;cage_affiliation.hpp&gt;</span></span>
+<pre><span data-line="1"><span class="cp">#include</span> <span class="cpf">&lt;src/include/internal/cage_affiliation.hpp&gt;</span></span>
 <span data-line="2"> </span>
 <span data-line="3"><span class="k">class</span> <span class="n">AffiliationUpdater</span> <span class="p">{</span></span>
 <span data-line="4"><span class="k">public</span><span class="o">:</span></span>
@@ -328,13 +376,14 @@ data-aria-dark="Switch to auto color mode">
 <span data-line="15">    <a class="doxyrest-code-link reference internal" href="#doxid-classring_1_1_affiliation_updater_1a63d046f94a4fd81428dd7d0f163bcd28"><span class="std std-ref">AffiliationUpdater</span></a><span class="o">&amp;</span> <span class="doxyrest-code-target target" id="doxid-classring_1_1_affiliation_updater_1ac47012ce53ab8f6c62f8c869b3a0ac62"></span><span class="k">operator</span><span class="o">=</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="#doxid-classring_1_1_affiliation_updater_1a63d046f94a4fd81428dd7d0f163bcd28"><span class="std std-ref">AffiliationUpdater</span></a><span class="o">&amp;</span><span class="p">);</span></span>
 <span data-line="16">    <span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_ring_CageAffiliation.html#doxid-structring-1-1-cage-affiliation"><span class="std std-ref">CageAffiliation</span></a><span class="o">&amp;</span> <a class="doxyrest-code-link reference internal" href="#doxid-classring-1-1-affiliation-updater-1a36779e1a3a2a86b85d51e8f7c6e2939c"><span class="std std-ref">update</span></a><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">rings</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">nList</span><span class="p">);</span></span>
 <span data-line="17">    <span class="kt">int</span> <a class="doxyrest-code-link reference internal" href="#doxid-classring-1-1-affiliation-updater-1a41f180d179f3702cb423c6d87a110ddd"><span class="std std-ref">lastReclassified</span></a><span class="p">()</span> <span class="k">const</span><span class="p">;</span></span>
-<span data-line="18"><span class="p">};</span></span>
+<span data-line="18">    <span class="kt">void</span> <a class="doxyrest-code-link reference internal" href="#doxid-classring-1-1-affiliation-updater-1ab5599551dae9aa4986772d45bd3e8bc3"><span class="std std-ref">setBatchFraction</span></a><span class="p">(</span><span class="kt">double</span> <span class="n">fraction</span><span class="p">);</span></span>
+<span data-line="19"><span class="p">};</span></span>
 </pre></div>
 </section>
 <section id="detailed-documentation">
 <span id="details-classring-1-1-affiliation-updater"></span><h2>Detailed Documentation<a class="headerlink" href="#detailed-documentation" title="Link to this heading">¶</a></h2>
 <p>Exact incremental affiliation across frames.</p>
-<p>Diffs the six-ring set (by canonical ring key) and the neighbour rows against the previous frame, recomputes affiliation inside the locality closure of the changes, and carries stored answers elsewhere. The result is identical to cageAffiliation on the new frame. The neighbour graph should come from SkinNeighborList (default: mutual four-nearest, the TUM v2 graph).</p>
+<p>Stores, per six-ring, its passing basal pairs with their prismatic rings and its equatorial result. On a new frame it matches the rings to the previous frame’s and evaluates again only the pairs of rings that are new, hold an atom whose neighbour row changed, or hold or bond an atom of an added or removed ring, and the equatorial test of rings that are new or hold an atom of an added or removed ring. The flags are the unions over the stored answers, identical to cageAffiliation on the new frame.</p>
 <section id="methods">
 <h3>Methods<a class="headerlink" href="#methods" title="Link to this heading">¶</a></h3>
 <div class="doxyrest-title-code-block highlight" id="doxid-classring-1-1-affiliation-updater-1a36779e1a3a2a86b85d51e8f7c6e2939c">
@@ -344,7 +393,11 @@ data-aria-dark="Switch to auto color mode">
 <div class="doxyrest-title-code-block highlight" id="doxid-classring-1-1-affiliation-updater-1a41f180d179f3702cb423c6d87a110ddd">
 <span id="index-2"></span><pre><span data-line="1"><span class="kt">int</span> <span class="n">lastReclassified</span><span class="p">()</span> <span class="k">const</span></span>
 </pre></div>
-<p>Rings reclassified by the last update (the dirty closure); the first call reports every ring.</p>
+<p>Rings whose pairs or equatorial test the last update evaluated again; the first call reports every ring.</p>
+<div class="doxyrest-title-code-block highlight" id="doxid-classring-1-1-affiliation-updater-1ab5599551dae9aa4986772d45bd3e8bc3">
+<span id="index-3"></span><pre><span data-line="1"><span class="kt">void</span> <span class="n">setBatchFraction</span><span class="p">(</span><span class="kt">double</span> <span class="n">fraction</span><span class="p">)</span></span>
+</pre></div>
+<p>Above this fraction of dirty rings, update runs the batch sweep instead (default 0.25; 1 never falls back). After such a frame the next 1, 2, 4, then at most 8 frames run the batch sweep without the diff, while frames keep falling back</p>
 </section>
 </section>
 </section>
@@ -361,10 +414,10 @@ data-aria-dark="Switch to auto color mode">
         <span>Previous</span><div class="title">struct ring::StackingPlanes</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="namespace_tum3.html">
+    <a href="class_ring_NeighBond.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">namespace tum3</div>
+        <div class="title">class ring::NeighBond</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

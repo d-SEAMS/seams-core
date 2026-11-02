@@ -16,7 +16,7 @@ IRA/SOFI result for one cage. :ref:`More...<details-structcage_1_1_cage_shape>`
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <cage_enum.hpp>
+	#include <src/include/internal/cage_enum.hpp>
 	
 	struct CageShape {
 		// fields

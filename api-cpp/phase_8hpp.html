@@ -15,7 +15,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
-<title>seams-core: /home/runner/work/seams-core/seams-core/src/include/internal/phase.hpp File Reference</title>
+<title>seams-core: src/include/internal/phase.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="dynsections.js"></script>
 <script type="text/javascript" src="codefolding.js"></script>
@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -276,8 +276,9 @@ Functions</h2></td></tr>
 <tr class="memitem:aabcf1d0b33a4557dbe42262621400d5f" id="r_aabcf1d0b33a4557dbe42262621400d5f"><td class="memItemLeft"><a class="el" href="structphase_1_1IceXXIHit.html">IceXXIHit</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacephase.html#aabcf1d0b33a4557dbe42262621400d5f">phase::iceXXILibrary</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
 <tr class="memitem:a51566a8a99570b9169d7046326bc9544" id="r_a51566a8a99570b9169d7046326bc9544"><td class="memItemLeft">std::vector&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacephase.html#a51566a8a99570b9169d7046326bc9544">phase::localDensity</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double rcut)</td></tr>
 <tr class="memdesc:a51566a8a99570b9169d7046326bc9544"><td class="mdescLeft">&#160;</td><td class="mdescRight">Local number density (1/A^3) in a sphere of radius rcut.  <br /></td></tr>
+<tr class="memitem:a84767cd8f9f4d99ea98a21b748583172" id="r_a84767cd8f9f4d99ea98a21b748583172"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="namespacephase.html#a84767cd8f9f4d99ea98a21b748583172">phase::frameDensity</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double molarMass)</td></tr>
 <tr class="memitem:a548c3829160adf36ec9d7ba7dbb065a1" id="r_a548c3829160adf36ec9d7ba7dbb065a1"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="namespacephase.html#a548c3829160adf36ec9d7ba7dbb065a1">phase::frameDensity</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
-<tr class="memdesc:a548c3829160adf36ec9d7ba7dbb065a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bulk mass density in g/cm^3 from nop and the box (18.015 g/mol).  <br /></td></tr>
+<tr class="memdesc:a548c3829160adf36ec9d7ba7dbb065a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Water, 18.015 g/mol.  <br /></td></tr>
 <tr class="memitem:a201ed8bb3cd747bc5663cce11a23c2fa" id="r_a201ed8bb3cd747bc5663cce11a23c2fa"><td class="memItemLeft"><a class="el" href="namespacephase.html#a45206ea8c1350d175974e9a54cde9c71">GlassKind</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacephase.html#a201ed8bb3cd747bc5663cce11a23c2fa">phase::glassFromDensity</a> (double rho, double iceMax, double ldaMax, double mdaMin)</td></tr>
 <tr class="memitem:a31b88f162592c1601d40e4363cb87898" id="r_a31b88f162592c1601d40e4363cb87898"><td class="memItemLeft"><a class="el" href="namespacephase.html#a45206ea8c1350d175974e9a54cde9c71">GlassKind</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacephase.html#a31b88f162592c1601d40e4363cb87898">phase::glassFromDensity</a> (double rho, double iceMax, double mdaMin)</td></tr>
 <tr class="memdesc:a31b88f162592c1601d40e4363cb87898"><td class="mdescLeft">&#160;</td><td class="mdescRight">Three-argument form: LDA/MDA split at the midpoint of iceMax and mdaMin.  <br /></td></tr>

@@ -1,0 +1,36 @@
+.. index:: pair: struct; cage::EdgeWindow
+.. _doxid-structcage_1_1_edge_window:
+
+struct cage::EdgeWindow
+=======================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Inclusive length window on each face edge, in the coordinate units of the frame. :ref:`More...<details-structcage_1_1_edge_window>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/cage_enum.hpp>
+	
+	struct EdgeWindow {
+		// fields
+	
+		bool :target:`enabled<doxid-structcage_1_1_edge_window_1a9464193ecc98f5488873959ab686df1a>` = true;
+		double :target:`lo<doxid-structcage_1_1_edge_window_1acbce95454956ba5122627fef14cf050a>` = 2.65;
+		double :target:`hi<doxid-structcage_1_1_edge_window_1a23e4b113c169441d9436e1712b6f6416>` = 3.15;
+	};
+.. _details-structcage_1_1_edge_window:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Inclusive length window on each face edge, in the coordinate units of the frame.
+
+The default covers the oxygen-oxygen contacts of the reference water cells when those units are angstroms. ``:ref:`enabled <doxid-structcage_1_1_edge_window_1a9464193ecc98f5488873959ab686df1a>` == false`` leaves the cage bound to the face census. A null coordinate pointer skips the test as well.
+

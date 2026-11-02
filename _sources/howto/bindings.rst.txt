@@ -1,0 +1,59 @@
+=========================
+Build the language fronts
+=========================
+
+
+Python is not built in this repository.
+R and Julia call ``libseams_lang``, which is built with the engine and does not reimplement the classifiers.
+
+Python
+------
+
+.. code:: bash
+
+    pip install pydseamslib
+    pip install 'pydseamslib[ase]'
+    python -c 'import pydseams as ds; print(ds.__version__)'
+
+The package is `PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_.
+The compiled module is ``pydseams.yoda``.
+``import pydseamslib`` is an alias.
+Do not add a second Python extension to seams-core.
+
+R
+-
+
+.. code:: bash
+
+    export SEAMS_INCLUDE="$PWD/bindings/cxx"
+    export SEAMS_LIBDIR="$PWD/bbdir/bindings"
+    export LD_LIBRARY_PATH="$SEAMS_LIBDIR:$PWD/bbdir/src${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    R CMD INSTALL bindings/r/dseams
+
+The package needs ``cpp11``.
+``configure`` refuses to run without the two paths.
+The engine is not a CRAN system library, so this is a source package you build against a seams-core checkout.
+
+Julia
+-----
+
+CxxWrap is not linked.
+``libcxxwrap_julia`` is not in the pixi or Nix closure, and building it pulls a Julia sysimage into the link.
+The front that ships is ``ccall``:
+
+.. code:: bash
+
+    export SEAMS_LANG_LIB="$PWD/bbdir/bindings/libseams_lang.so"
+    export DSEAMS_ROOT="$PWD"
+    julia --project=bindings/julia/Dseams -e 'using Pkg; Pkg.instantiate()'
+    julia --project=bindings/julia/Dseams bindings/julia/Dseams/test/runtests.jl
+
+Tests
+-----
+
+.. code:: bash
+
+    meson test -C bbdir seams_lang_fixtures
+
+The Python checks live in PydSEAMSlib.
+``docs/tutorials`` reruns one cubic-ice count against an installed ``pydseamslib``.

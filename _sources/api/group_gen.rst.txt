@@ -24,6 +24,7 @@ Gen
 	// namespaces
 
 	namespace :ref:`gen<doxid-namespacegen>`;
+		namespace :ref:`gen::mic<doxid-namespacegen_1_1mic>`;
 
 	// structs
 

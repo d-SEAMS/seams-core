@@ -13,7 +13,7 @@ struct chill::ChillPlusResult
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <chill_offload.hpp>
+	#include <src/include/internal/chill_offload.hpp>
 	
 	struct ChillPlusResult {
 		// fields

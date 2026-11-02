@@ -13,7 +13,7 @@ One-versus-rest ridge classifier on a dense feature matrix.
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <structure_desc.hpp>
+	#include <src/include/internal/structure_desc.hpp>
 	
 	struct LinearClassifier {
 		// fields

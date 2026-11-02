@@ -33,7 +33,7 @@ var group__ring =
     [ "ring::getEdgeMoleculesInRings", "group__ring.html#gaf72db90faa20a1dfdfaf8c0e868b305d", null ],
     [ "gen::getPointCloudOneAtomType", "group__ring.html#gae72039bf692acc3dd1e1a0e9cdddb8c6", null ],
     [ "ring::getSingleRingSize", "group__ring.html#ga227e0ad81cfe6be9ddc09588f0663713", null ],
-    [ "ring::hasCommonElements", "group__ring.html#gac30855d0daa2b20c29e4dee39f5cd92f", null ],
+    [ "ring::hasCommonElements", "group__ring.html#ga8d0ecad7aad1a98640a4a7278913057d", null ],
     [ "ring::keepAxialRingsOnly", "group__ring.html#ga704b7395dba29f2b2734a7745d4e590e", null ],
     [ "gen::moleculesInSingleSlice", "group__ring.html#gaa6a3bfc360df06a888d89bbd1496f4c7", null ],
     [ "ring::polygonRingAnalysis", "group__ring.html#ga346b2c43ca9cf794e95cb70f0dd5c642", null ],

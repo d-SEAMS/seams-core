@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('classprimitive
 <p>Exact frame-to-frame maintenance of the primitive ring network.  
  <a href="#details">More...</a></p>
 
-<p><code>#include &lt;<a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="franzblau_8hpp_source.html">src/include/internal/franzblau.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
@@ -255,14 +255,21 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ga084d21f04e9aa5ef91faf6e536fb2412" id="r_ga084d21f04e9aa5ef91faf6e536fb2412"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__primitive.html#ga084d21f04e9aa5ef91faf6e536fb2412">lastRecomputedSources</a> () const</td></tr>
 <tr class="memitem:gadb46ee075b664d8ec659250008d13c94" id="r_gadb46ee075b664d8ec659250008d13c94"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__primitive.html#gadb46ee075b664d8ec659250008d13c94">lastBallsRefreshed</a> () const</td></tr>
 <tr class="memdesc:gadb46ee075b664d8ec659250008d13c94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Vertices whose bounded balls were rebuilt on the last update.  <br /></td></tr>
+<tr class="memitem:ga6ab3da57a3352a9a79fe93c814970923" id="r_ga6ab3da57a3352a9a79fe93c814970923"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__primitive.html#ga6ab3da57a3352a9a79fe93c814970923">lastChangedBonds</a> () const</td></tr>
+<tr class="memitem:gac1d82c61f12cb666700e6b97bd12641c" id="r_gac1d82c61f12cb666700e6b97bd12641c"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="group__primitive.html#gac1d82c61f12cb666700e6b97bd12641c">lastChangedBondFraction</a> () const</td></tr>
+<tr class="memdesc:gac1d82c61f12cb666700e6b97bd12641c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Changed bonds per molecule on the last update.  <br /></td></tr>
+<tr class="memitem:ga53a273ea8d071c67a311fc29dd88ee2d" id="r_ga53a273ea8d071c67a311fc29dd88ee2d"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__primitive.html#ga53a273ea8d071c67a311fc29dd88ee2d">setFullPassFraction</a> (double fraction)</td></tr>
+<tr class="memitem:gaf2cd5037b3a1e2c67f84bf482ab8c6eb" id="r_gaf2cd5037b3a1e2c67f84bf482ab8c6eb"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__primitive.html#gaf2cd5037b3a1e2c67f84bf482ab8c6eb">setBondCrossover</a> (double changedBondsPerMolecule)</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Exact frame-to-frame maintenance of the primitive ring network. </p>
-<p>Consecutive trajectory frames share almost all of their bond topology. Rings are stored partitioned by their lowest-indexed member, and on a new frame only sources within a proven locality radius of a changed edge are re-enumerated: a ring's members and every path that can decide its primitivity lie within a bounded neighbourhood of its source, so a source far enough from every change keeps its rings unchanged. The output equals a full recomputation exactly, at a cost that scales with the edge churn between frames rather than with system size. </p>
+<p>Consecutive trajectory frames share almost all of their bond topology. A ring of at most maxDepth members can appear or vanish between frames only if it passes within (maxDepth/2 - 2)/2 bonds of a vertex whose neighbour row changed, which is on the ring itself up to maxDepth</p><ol type="1">
+<li>On a new frame the stored rings that meet that set are dropped and the rings through it are enumerated afresh. The output equals ringNetwork element by element, at a cost that scales with the number of changed rows rather than with system size. </li>
+</ol>
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00175">175</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00176">176</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
 </div><hr/>The documentation for this class was generated from the following file:<ul>
-<li>/home/runner/work/seams-core/seams-core/src/include/internal/<a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a></li>
+<li>src/include/internal/<a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

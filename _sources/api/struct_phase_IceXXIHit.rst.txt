@@ -13,7 +13,7 @@ Ice XXI library: Lee et al., Nat. Mater. 25, 302 (2026), I-4 2d, Z=152, a=b=20.1
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <phase.hpp>
+	#include <src/include/internal/phase.hpp>
 	
 	struct IceXXIHit {
 		// fields

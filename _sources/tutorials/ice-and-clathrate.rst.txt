@@ -1,0 +1,63 @@
+========================
+Ice and clathrate labels
+========================
+
+
+You label one frame two ways.
+CHILL+ reads a staggered or eclipsed star.
+A cage signature counts closed polyhedra of a given ring census.
+The runnable copy is ``docs/tutorials/test_ice_and_clathrate.py``.
+Python is ``pip install pydseamslib``.
+The import is ``pydseams``.
+
+The mixed TIP4P frame
+---------------------
+
+``input/traj/exampleTraj.lammpstrj`` has 750 atoms and 250 oxygens (LAMMPS type 2).
+
+.. code:: python
+
+    import pydseams as ds
+
+    frame = ds.read("input/traj/exampleTraj.lammpstrj", atom_type=2)
+    print(frame.chill_plus())
+    print(frame.cages())
+
+``Frame.chill_plus`` uses the cutoff neighbour list.
+``IceCounts(interClathrate=12, water=238)``.
+``CageScore(n_ih=0, n_ic=0, n_water=250)``.
+
+``seams chill-plus`` on the same file uses the mutual four-neighbour list and prints ``clathrate 1 interClathrate 7 water 242``.
+The cage score matches the CLI.
+The CHILL+ histogram does not match the CLI.
+
+Cubic ice and an sI cage
+------------------------
+
+``input/traj/mW_cubic.lammpstrj`` frame 1 is 4096 mW sites.
+Both the cutoff list and the mutual four-neighbour list label every site cubic, and every site sits in a double-diamond cage.
+
+``input/traj/genice_sI.lammpstrj`` with ``cages_by_signature("512")`` returns 2 cages and 40 vertices.
+
+The default face-edge window is ``2.65,3.15`` in the coordinate units of the file.
+These dumps are angstroms, and that window covers the oxygen-oxygen contacts of the reference cells.
+Set ``edge`` to the heavy-atom contact range of the model, and widen it for a compressed cell or a guest that stretches a cage.
+A nanometre file uses ``0.265,0.315``.
+``none`` turns the window off: every ring the neighbour list already accepted can be a face, and the cage bound is the face census alone.
+On sI, sII, the sI 2×2×2 cell and the sII 10×10×10 cell the default and ``none`` return the same cages.
+
+.. code:: python
+
+    found = frame.cages_by_signature("512")
+    found = frame.cages_by_signature("512", edge="none")
+    found = frame.cages_by_signature("512", edge="2.4,3.4")
+
+.. code:: lua
+
+    local dseams = require("dseams")
+    local found = dseams.cages_by_signature(frame, "512")
+    found = dseams.cages_by_signature(frame, "512", {edge = "none"})
+    found = dseams.cages_by_signature(frame, "512", {edge = "2.4,3.4"})
+
+The CLI spelling is ``--cage-edge`` and ``SEAMS_CAGE_EDGE``.
+The C spelling is ``seams_frame_signature_edge``; a null edge string keeps the default.

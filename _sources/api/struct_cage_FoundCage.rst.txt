@@ -16,7 +16,7 @@ One cage matching a signature, closed or incomplete. :ref:`More...<details-struc
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <cage_enum.hpp>
+	#include <src/include/internal/cage_enum.hpp>
 	
 	struct FoundCage {
 		// fields
@@ -76,7 +76,7 @@ nauty hex, empty when nauty is off
 
 	bool closed = true
 
-every face edge used twice
+faces tile a sphere
 
 .. index:: pair: variable; danglingEdges
 .. _doxid-structcage_1_1_found_cage_1a9ef2755df5d9fa2bb11e5543b0f02004:

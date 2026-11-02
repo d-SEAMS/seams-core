@@ -1,0 +1,44 @@
+.. index:: pair: struct; ring::PackingCertificate
+.. _doxid-structring_1_1_packing_certificate:
+
+struct ring::PackingCertificate
+===============================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+Proof that the reported number of equatorial rings is maximum. :ref:`More...<details-structring_1_1_packing_certificate>`
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/topo_bulk.hpp>
+	
+	struct PackingCertificate {
+		// fields
+	
+		int :target:`cages<doxid-structring_1_1_packing_certificate_1afc56b3e0d1e930ae377136450861e784>` = 0;
+		int :target:`upper<doxid-structring_1_1_packing_certificate_1a3c8919476309e146efc52597b040d85b>` = -1;
+		int :target:`matching<doxid-structring_1_1_packing_certificate_1ab3cbb3ce409a45e7993ef3f3e3a84ea9>` = 0;
+		int :target:`cover<doxid-structring_1_1_packing_certificate_1a471aee5b4e6b862bd5f0566672a7ca04>` = 0;
+		int :target:`isolates<doxid-structring_1_1_packing_certificate_1a844abd7b84996099ed002777525cd0c5>` = 0;
+		int :target:`vertices<doxid-structring_1_1_packing_certificate_1a11e76b07b9438cb43062376306aa18cf>` = 0;
+		int :target:`edges<doxid-structring_1_1_packing_certificate_1abbf443bef13f22d686775e4dfb466017>` = 0;
+		int :target:`components<doxid-structring_1_1_packing_certificate_1a2a752e3f4b9325cc4abc66dced3635df>` = 0;
+		int :target:`method<doxid-structring_1_1_packing_certificate_1a0559d109273cc42d5552b3b401ab516a>` = 0;
+		bool :target:`tight<doxid-structring_1_1_packing_certificate_1a00bbe1dcc9a09aac1fadc53835c566d6>` = false;
+		double :target:`milliseconds<doxid-structring_1_1_packing_certificate_1a5f6246660f18db3ebb2806d3ff4e34fa>` = 0;
+	};
+.. _details-structring_1_1_packing_certificate:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+Proof that the reported number of equatorial rings is maximum.
+
+method 1: the mutual-conflict graph is the line graph of a bipartite graph, and a matching equals a König cover. method 2: each connected component was solved by branch-and-bound. The cover is a clique partition (an upper bound). When it equals the set, that partition is the certificate; otherwise the exhausted search is.
+

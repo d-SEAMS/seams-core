@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -247,6 +247,10 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exact incremental affiliation across frames.  <a href="classring_1_1AffiliationUpdater.html#details">More...</a><br /></td></tr>
 <tr class="memitem:CageAffiliation" id="r_CageAffiliation"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structring_1_1CageAffiliation.html">CageAffiliation</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Per-ring affiliation flags, indexed like the input ring vector.  <a href="structring_1_1CageAffiliation.html#details">More...</a><br /></td></tr>
+<tr class="memitem:EquatorChoice" id="r_EquatorChoice"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structring_1_1EquatorChoice.html">EquatorChoice</a></td></tr>
+<tr class="memitem:NeighBond" id="r_NeighBond"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classring_1_1NeighBond.html">NeighBond</a></td></tr>
+<tr class="memitem:PackingCertificate" id="r_PackingCertificate"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structring_1_1PackingCertificate.html">PackingCertificate</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Proof that the reported number of equatorial rings is maximum.  <a href="structring_1_1PackingCertificate.html#details">More...</a><br /></td></tr>
 <tr class="memitem:RingSearchIndex" id="r_RingSearchIndex"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inverted index from an atom to the rings that contain it.  <a href="structring_1_1RingSearchIndex.html#details">More...</a><br /></td></tr>
 <tr class="memitem:SeededAtomLabels" id="r_SeededAtomLabels"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structring_1_1SeededAtomLabels.html">SeededAtomLabels</a></td></tr>
@@ -277,11 +281,13 @@ Functions</h2></td></tr>
 <tr class="memitem:a6a455f7a0da97df613534671c9377a45" id="r_a6a455f7a0da97df613534671c9377a45"><td class="memItemLeft"><a class="el" href="structring_1_1CageAffiliation.html">CageAffiliation</a>&#160;</td><td class="memItemRight"><a class="el" href="#a6a455f7a0da97df613534671c9377a45">cageAffiliation</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</td></tr>
 <tr class="memitem:a1f59a70140bd3498eb53e448f916229f" id="r_a1f59a70140bd3498eb53e448f916229f"><td class="memItemLeft"><a class="el" href="structring_1_1SeededAtomLabels.html">SeededAtomLabels</a>&#160;</td><td class="memItemRight"><a class="el" href="#a1f59a70140bd3498eb53e448f916229f">seededCageAffiliation</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;strictRings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;strictNList, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;permissiveRings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;permissiveNList, bool ringAdjacentCompletion=false)</td></tr>
 <tr class="memdesc:a1f59a70140bd3498eb53e448f916229f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Seeded affiliation over two graphs on the same atoms: the strict graph (typically the mutual k-nearest bonds) supplies seeds, the permissive supergraph (typically the union bonds) supplies completions, and a permissively affiliated atom is accepted only when its bonded component of affiliated atoms contains a seed.  <br /></td></tr>
+<tr class="memitem:a290b0bdf3ad66912c9bb5ed421062006" id="r_a290b0bdf3ad66912c9bb5ed421062006"><td class="memItemLeft"><a class="el" href="structring_1_1SeededAtomLabels.html">SeededAtomLabels</a>&#160;</td><td class="memItemRight"><a class="el" href="#a290b0bdf3ad66912c9bb5ed421062006">seededCageAffiliation</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;strictRings, const <a class="el" href="structring_1_1CageAffiliation.html">CageAffiliation</a> &amp;strictAffiliation, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;permissiveRings, const <a class="el" href="structring_1_1CageAffiliation.html">CageAffiliation</a> &amp;permissiveAffiliation, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;permissiveNList, bool ringAdjacentCompletion=false)</td></tr>
+<tr class="memdesc:a290b0bdf3ad66912c9bb5ed421062006"><td class="mdescLeft">&#160;</td><td class="mdescRight">The same labels from the affiliation of each graph's six-rings, computed by the caller.  <br /></td></tr>
 <tr class="memitem:a52d5bc312612884ce62bd430d94fdb17" id="r_a52d5bc312612884ce62bd430d94fdb17"><td class="memItemLeft"><a class="el" href="structring_1_1SeededAtomLabels.html">SeededAtomLabels</a>&#160;</td><td class="memItemRight"><a class="el" href="#a52d5bc312612884ce62bd430d94fdb17">ringAdjacentCompletion</a> (const <a class="el" href="structring_1_1SeededAtomLabels.html">SeededAtomLabels</a> &amp;labels, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;permissiveRings)</td></tr>
 <tr class="memdesc:a52d5bc312612884ce62bd430d94fdb17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ring completion of seeded labels.  <br /></td></tr>
 <tr class="memitem:ga227e0ad81cfe6be9ddc09588f0663713" id="r_ga227e0ad81cfe6be9ddc09588f0663713"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__ring.html#ga227e0ad81cfe6be9ddc09588f0663713">getSingleRingSize</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, int ringSize)</td></tr>
 <tr class="memdesc:ga227e0ad81cfe6be9ddc09588f0663713"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a vector of vectors of rings of a single size.  <br /></td></tr>
-<tr class="memitem:gac30855d0daa2b20c29e4dee39f5cd92f" id="r_gac30855d0daa2b20c29e4dee39f5cd92f"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="group__ring.html#gac30855d0daa2b20c29e4dee39f5cd92f">hasCommonElements</a> (std::vector&lt; int &gt; ring1, std::vector&lt; int &gt; ring2)</td></tr>
+<tr class="memitem:ga8d0ecad7aad1a98640a4a7278913057d" id="r_ga8d0ecad7aad1a98640a4a7278913057d"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="group__ring.html#ga8d0ecad7aad1a98640a4a7278913057d">hasCommonElements</a> (const std::vector&lt; int &gt; &amp;ring1, const std::vector&lt; int &gt; &amp;ring2)</td></tr>
 <tr class="memitem:gaf9c0101aa7e09f97cbcf46a4ab83e0c6" id="r_gaf9c0101aa7e09f97cbcf46a4ab83e0c6"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="group__ring.html#gaf9c0101aa7e09f97cbcf46a4ab83e0c6">compareRings</a> (std::vector&lt; int &gt; ring1, std::vector&lt; int &gt; ring2)</td></tr>
 <tr class="memitem:gaec269dc10849e9e9fdb979fceb52edd3" id="r_gaec269dc10849e9e9fdb979fceb52edd3"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="group__ring.html#gaec269dc10849e9e9fdb979fceb52edd3">findTripletInRing</a> (const std::vector&lt; int &gt; &amp;ring, const std::vector&lt; int &gt; &amp;triplet)</td></tr>
 <tr class="memdesc:gaec269dc10849e9e9fdb979fceb52edd3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Searches a particular ring for a triplet.  <br /></td></tr>
@@ -298,9 +304,14 @@ Functions</h2></td></tr>
 <tr class="memitem:ada5f6a19834edc41365e7f85d92e4b76" id="r_ada5f6a19834edc41365e7f85d92e4b76"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ada5f6a19834edc41365e7f85d92e4b76">topoBulkAnalysis</a> (std::string path, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int firstFrame, bool onlyTetrahedral=true)</td></tr>
 <tr class="memitem:a2314146c9c30c45799ab5217b8b69e61" id="r_a2314146c9c30c45799ab5217b8b69e61"><td class="memItemLeft"><a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a>&#160;</td><td class="memItemRight"><a class="el" href="#a2314146c9c30c45799ab5217b8b69e61">buildRingSearchIndex</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, int numAtoms)</td></tr>
 <tr class="memdesc:a2314146c9c30c45799ab5217b8b69e61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Builds the inverted atom-to-rings index used by the cage searches.  <br /></td></tr>
+<tr class="memitem:ae6af6b848c82b3f5bca8514ae6a31473" id="r_ae6af6b848c82b3f5bca8514ae6a31473"><td class="memItemLeft"><a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a>&#160;</td><td class="memItemRight"><a class="el" href="#ae6af6b848c82b3f5bca8514ae6a31473">buildRingSearchIndex</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memdesc:ae6af6b848c82b3f5bca8514ae6a31473"><td class="mdescLeft">&#160;</td><td class="mdescRight">As buildRingSearchIndex, ranking the atoms by position (<a class="el" href="#a51764966eab7aea2d90649bb6cc607ea">ring::positionRank</a>).  <br /></td></tr>
+<tr class="memitem:a51764966eab7aea2d90649bb6cc607ea" id="r_a51764966eab7aea2d90649bb6cc607ea"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a51764966eab7aea2d90649bb6cc607ea">positionRank</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:a2f56d182514c3a74d223a92c22136017" id="r_a2f56d182514c3a74d223a92c22136017"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a2f56d182514c3a74d223a92c22136017">contractibleRings</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:a9d784052b67c693381315d0947be0881" id="r_a9d784052b67c693381315d0947be0881"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a9d784052b67c693381315d0947be0881">cageRings</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double cutoff)</td></tr>
 <tr class="memitem:a503bfa2deec404d907645e16ed236c28" id="r_a503bfa2deec404d907645e16ed236c28"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a503bfa2deec404d907645e16ed236c28">findDDC</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; <a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; &amp;ringType, const std::vector&lt; int &gt; &amp;listHC, std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList)</td></tr>
-<tr class="memitem:a13d4db1147bed179fe5c59afe3bb90f7" id="r_a13d4db1147bed179fe5c59afe3bb90f7"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a13d4db1147bed179fe5c59afe3bb90f7">findDDC</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; <a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; &amp;ringType, const std::vector&lt; int &gt; &amp;listHC, std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList, const <a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index)</td></tr>
-<tr class="memdesc:a13d4db1147bed179fe5c59afe3bb90f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">As findDDC, reusing an index the caller has already built.  <br /></td></tr>
+<tr class="memitem:ae219003bad567e0125990284302d2029" id="r_ae219003bad567e0125990284302d2029"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ae219003bad567e0125990284302d2029">maximumEquators</a> (const std::vector&lt; <a class="el" href="structring_1_1EquatorChoice.html">EquatorChoice</a> &gt; &amp;periph, const std::vector&lt; int &gt; &amp;order, <a class="el" href="structring_1_1PackingCertificate.html">PackingCertificate</a> *certificate)</td></tr>
+<tr class="memitem:a73600fc304e8be5145df330f5f9552fe" id="r_a73600fc304e8be5145df330f5f9552fe"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a73600fc304e8be5145df330f5f9552fe">findDDC</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; <a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; &amp;ringType, const std::vector&lt; int &gt; &amp;listHC, std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList, const <a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index, <a class="el" href="structring_1_1PackingCertificate.html">PackingCertificate</a> *certificate=nullptr)</td></tr>
 <tr class="memitem:a5e65636a113b8a778541f437f00c0f97" id="r_a5e65636a113b8a778541f437f00c0f97"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a5e65636a113b8a778541f437f00c0f97">findMixedRings</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; <a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; &amp;ringType, std::vector&lt; int &gt; &amp;listDDC, std::vector&lt; int &gt; &amp;listHC)</td></tr>
 <tr class="memitem:af2bab9ed638ed3e3a1ed3392d7e4a576" id="r_af2bab9ed638ed3e3a1ed3392d7e4a576"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#af2bab9ed638ed3e3a1ed3392d7e4a576">findHC</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; <a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; &amp;ringType, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList)</td></tr>
 <tr class="memitem:a1dfa48bf23ffaf39fee585ac7634231a" id="r_a1dfa48bf23ffaf39fee585ac7634231a"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a1dfa48bf23ffaf39fee585ac7634231a">findHC</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; <a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; &amp;ringType, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; <a class="el" href="structcage_1_1Cage.html">cage::Cage</a> &gt; &amp;cageList, const <a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index)</td></tr>
@@ -308,12 +319,10 @@ Functions</h2></td></tr>
 <tr class="memitem:a7cc755c188267af7b9ff9ae73ca77579" id="r_a7cc755c188267af7b9ff9ae73ca77579"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a7cc755c188267af7b9ff9ae73ca77579">conditionOneDDC</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;peripheralRings, int iring)</td></tr>
 <tr class="memitem:a75c45309352d085d18f89f370dd42ab2" id="r_a75c45309352d085d18f89f370dd42ab2"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a75c45309352d085d18f89f370dd42ab2">conditionOneDDC</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;peripheralRings, int iring, const <a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index)</td></tr>
 <tr class="memdesc:a75c45309352d085d18f89f370dd42ab2"><td class="mdescLeft">&#160;</td><td class="mdescRight">As conditionOneDDC, reusing an index the caller has already built.  <br /></td></tr>
-<tr class="memitem:a5bc5928258e125e0d9e52314221974b9" id="r_a5bc5928258e125e0d9e52314221974b9"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a5bc5928258e125e0d9e52314221974b9">conditionTwoDDC</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;peripheralRings, int iring)</td></tr>
-<tr class="memitem:ac90a6cf68afb185f82a5b1d064a1f80f" id="r_ac90a6cf68afb185f82a5b1d064a1f80f"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ac90a6cf68afb185f82a5b1d064a1f80f">conditionTwoDDC</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;peripheralRings, int iring, const <a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index)</td></tr>
-<tr class="memdesc:ac90a6cf68afb185f82a5b1d064a1f80f"><td class="mdescLeft">&#160;</td><td class="mdescRight">As conditionTwoDDC, answering each triplet from the inverted index.  <br /></td></tr>
-<tr class="memitem:abf88eff5d04ebb4bfad69693edaaa432" id="r_abf88eff5d04ebb4bfad69693edaaa432"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#abf88eff5d04ebb4bfad69693edaaa432">conditionThreeDDC</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;peripheralRings)</td></tr>
+<tr class="memitem:a01243f4581fb55b417184d98f9ac70aa" id="r_a01243f4581fb55b417184d98f9ac70aa"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a01243f4581fb55b417184d98f9ac70aa">equatorialConditions</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, int iring, const <a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;index, std::vector&lt; int &gt; *peripheralUnion, std::vector&lt; int &gt; *chosen=nullptr, const std::vector&lt; int &gt; *rank=nullptr, <a class="el" href="structring_1_1EquatorChoice.html">EquatorChoice</a> *raw=nullptr)</td></tr>
 <tr class="memitem:a199fe38d3152cc04d18109ddb868ab34" id="r_a199fe38d3152cc04d18109ddb868ab34"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a199fe38d3152cc04d18109ddb868ab34">basalConditions</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; int &gt; &amp;basal1, const std::vector&lt; int &gt; &amp;basal2)</td></tr>
-<tr class="memdesc:a199fe38d3152cc04d18109ddb868ab34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Tests whether two rings are basal rings (true) or not (false).  <br /></td></tr>
+<tr class="memitem:a0d5ffbd5b49f72d57d0e3e00a78ca512" id="r_a0d5ffbd5b49f72d57d0e3e00a78ca512"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a0d5ffbd5b49f72d57d0e3e00a78ca512">basalConditions</a> (const <a class="el" href="classring_1_1NeighBond.html">NeighBond</a> &amp;bonds, const std::vector&lt; int &gt; &amp;basal1, const std::vector&lt; int &gt; &amp;basal2)</td></tr>
+<tr class="memdesc:a0d5ffbd5b49f72d57d0e3e00a78ca512"><td class="mdescLeft">&#160;</td><td class="mdescRight">As basalConditions, answering bonds from a prebuilt <a class="el" href="classring_1_1NeighBond.html">NeighBond</a>.  <br /></td></tr>
 <tr class="memitem:a350f1fa3c3d5807fb720444054d6e340" id="r_a350f1fa3c3d5807fb720444054d6e340"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a350f1fa3c3d5807fb720444054d6e340">basalNeighbours</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;triplet, int atomOne, int atomTwo)</td></tr>
 <tr class="memitem:a5db4898b22ebb13511cc37fae6674e5c" id="r_a5db4898b22ebb13511cc37fae6674e5c"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a5db4898b22ebb13511cc37fae6674e5c">notNeighboursOfRing</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::vector&lt; int &gt; &amp;triplet, const std::vector&lt; int &gt; &amp;ring)</td></tr>
 <tr class="memitem:a56c3c2a30736d27d9eaf3e3759e630e9" id="r_a56c3c2a30736d27d9eaf3e3759e630e9"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a56c3c2a30736d27d9eaf3e3759e630e9">findPrismatic</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, std::vector&lt; int &gt; &amp;listHC, std::vector&lt; <a class="el" href="group__ring.html#ga301cfdc88452cfe51bd4f745d223a7e1">strucType</a> &gt; &amp;ringType, int iring, int jring, std::vector&lt; int &gt; &amp;prismaticRings)</td></tr>
@@ -349,8 +358,36 @@ Changelog</h3>
 <li>Rohit Goswami [<a href="#" onclick="location.href='mai'+'lto:'+'rog'+'32'+'@hi'+'.i'+'s'; return false;">rog32<span class="obfuscator">.nosp@m.</span>@hi.<span class="obfuscator">.nosp@m.</span>is</a>]; date modified: Mar 20, 2021 </li>
 </ul>
 </div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="a0d5ffbd5b49f72d57d0e3e00a78ca512" name="a0d5ffbd5b49f72d57d0e3e00a78ca512"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0d5ffbd5b49f72d57d0e3e00a78ca512">&#9670;&#160;</a></span>basalConditions() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool ring::basalConditions </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="classring_1_1NeighBond.html">NeighBond</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>bonds</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>basal1</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>basal2</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>As basalConditions, answering bonds from a prebuilt <a class="el" href="classring_1_1NeighBond.html">NeighBond</a>. </p>
+
+</div>
+</div>
 <a id="a199fe38d3152cc04d18109ddb868ab34" name="a199fe38d3152cc04d18109ddb868ab34"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a199fe38d3152cc04d18109ddb868ab34">&#9670;&#160;</a></span>basalConditions()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a199fe38d3152cc04d18109ddb868ab34">&#9670;&#160;</a></span>basalConditions() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -372,8 +409,7 @@ Changelog</h3>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>Tests whether two rings are basal rings (true) or not (false). </p>
+<p>Tests whether two rings are basal rings (true) or not (false): some alternate triplet of basal1, starting at its first or second atom, is bonded one-to-one to an alternate triplet of basal2, and no atom of the other triplet of basal2 is bonded to basal1 </p>
 
 </div>
 </div>
@@ -409,8 +445,39 @@ Changelog</h3>
 
 </div>
 </div>
+<a id="ae6af6b848c82b3f5bca8514ae6a31473" name="ae6af6b848c82b3f5bca8514ae6a31473"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6af6b848c82b3f5bca8514ae6a31473">&#9670;&#160;</a></span>buildRingSearchIndex() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> ring::buildRingSearchIndex </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>As buildRingSearchIndex, ranking the atoms by position (<a class="el" href="#a51764966eab7aea2d90649bb6cc607ea">ring::positionRank</a>). </p>
+
+</div>
+</div>
 <a id="a2314146c9c30c45799ab5217b8b69e61" name="a2314146c9c30c45799ab5217b8b69e61"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a2314146c9c30c45799ab5217b8b69e61">&#9670;&#160;</a></span>buildRingSearchIndex()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a2314146c9c30c45799ab5217b8b69e61">&#9670;&#160;</a></span>buildRingSearchIndex() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -520,6 +587,41 @@ Changelog</h3>
 
 </div>
 </div>
+<a id="a9d784052b67c693381315d0947be0881" name="a9d784052b67c693381315d0947be0881"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9d784052b67c693381315d0947be0881">&#9670;&#160;</a></span>cageRings()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; ring::cageRings </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Faces for a cage search: contractibleRings, after refusing a cutoff that can contain more than one periodic image of a pair. The narrowest face separation must be longer than twice <em class="arg">cutoff</em>. A cloud without a box keeps every ring. Throws std::invalid_argument when the cell is too thin for <em class="arg">cutoff</em> </p>
+
+</div>
+</div>
 <a id="a7cc755c188267af7b9ff9ae73ca77579" name="a7cc755c188267af7b9ff9ae73ca77579"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7cc755c188267af7b9ff9ae73ca77579">&#9670;&#160;</a></span>conditionOneDDC() <span class="overload">[1/2]</span></h2>
 
@@ -580,70 +682,46 @@ Changelog</h3>
 
 </div>
 </div>
-<a id="abf88eff5d04ebb4bfad69693edaaa432" name="abf88eff5d04ebb4bfad69693edaaa432"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#abf88eff5d04ebb4bfad69693edaaa432">&#9670;&#160;</a></span>conditionThreeDDC()</h2>
+<a id="a2f56d182514c3a74d223a92c22136017" name="a2f56d182514c3a74d223a92c22136017"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2f56d182514c3a74d223a92c22136017">&#9670;&#160;</a></span>contractibleRings()</h2>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool ring::conditionThreeDDC </td>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; ring::contractibleRings </td>
           <td>(</td>
           <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>peripheralRings</em></span>&#160;)</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>&#160;)</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
-<p>Third condition for the DDC: Even (by vector index) numbered index triplets and odd triplets must have at least one element in common </p>
+<p>The rings of <em class="arg">rings</em> whose minimum-image bonds have integer lattice images summing to zero. Any other ring winds through the periodic cell and bounds no face. A cell narrower than a ring's span has such rings. Without a box every ring is kept </p>
 
 </div>
 </div>
-<a id="a5bc5928258e125e0d9e52314221974b9" name="a5bc5928258e125e0d9e52314221974b9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5bc5928258e125e0d9e52314221974b9">&#9670;&#160;</a></span>conditionTwoDDC() <span class="overload">[1/2]</span></h2>
+<a id="a01243f4581fb55b417184d98f9ac70aa" name="a01243f4581fb55b417184d98f9ac70aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a01243f4581fb55b417184d98f9ac70aa">&#9670;&#160;</a></span>equatorialConditions()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">bool ring::conditionTwoDDC </td>
+          <td class="memname">bool ring::equatorialConditions </td>
           <td>(</td>
           <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>peripheralRings</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>iring</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<p>Second condition for the DDC: There must be at least 1 other ring for every triplet in the equatorial ring </p>
-
-</div>
-</div>
-<a id="ac90a6cf68afb185f82a5b1d064a1f80f" name="ac90a6cf68afb185f82a5b1d064a1f80f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac90a6cf68afb185f82a5b1d064a1f80f">&#9670;&#160;</a></span>conditionTwoDDC() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool ring::conditionTwoDDC </td>
-          <td>(</td>
-          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rings</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>peripheralRings</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -653,12 +731,31 @@ Changelog</h3>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>index</em></span>&#160;)</td>
+          <td class="paramtype">const <a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>index</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; int &gt; *</td>          <td class="paramname"><span class="paramname"><em>peripheralUnion</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; int &gt; *</td>          <td class="paramname"><span class="paramname"><em>chosen</em></span><span class="paramdefsep"> = </span><span class="paramdefval">nullptr</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; *</td>          <td class="paramname"><span class="paramname"><em>rank</em></span><span class="paramdefsep"> = </span><span class="paramdefval">nullptr</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structring_1_1EquatorChoice.html">EquatorChoice</a> *</td>          <td class="paramname"><span class="paramname"><em>raw</em></span><span class="paramdefsep"> = </span><span class="paramdefval">nullptr</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>As conditionTwoDDC, answering each triplet from the inverted index. </p>
+<p>Equatorial test of a DDC. Holds when every atom of ring iring lies in at least three other rings and, for some starting atom and direction of iring, six distinct rings P_k through its consecutive triplets satisfy the even/odd common-atom and alternate-pair conditions. When <em class="arg">peripheralUnion</em> is given it receives every ring that serves as a P_k in some valid assignment, sorted. When <em class="arg">chosen</em> and <em class="arg">rank</em> are given, <em class="arg">chosen</em> receives the six rings of the valid assignment whose ranks, sorted, are lexicographically least, in ascending rank. </p>
 
 </div>
 </div>
@@ -694,8 +791,8 @@ Changelog</h3>
 
 </div>
 </div>
-<a id="a13d4db1147bed179fe5c59afe3bb90f7" name="a13d4db1147bed179fe5c59afe3bb90f7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a13d4db1147bed179fe5c59afe3bb90f7">&#9670;&#160;</a></span>findDDC() <span class="overload">[2/2]</span></h2>
+<a id="a73600fc304e8be5145df330f5f9552fe" name="a73600fc304e8be5145df330f5f9552fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a73600fc304e8be5145df330f5f9552fe">&#9670;&#160;</a></span>findDDC() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -723,12 +820,16 @@ Changelog</h3>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>index</em></span>&#160;)</td>
+          <td class="paramtype">const <a class="el" href="structring_1_1RingSearchIndex.html">RingSearchIndex</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>index</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structring_1_1PackingCertificate.html">PackingCertificate</a> *</td>          <td class="paramname"><span class="paramname"><em>certificate</em></span><span class="paramdefsep"> = </span><span class="paramdefval">nullptr</span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">
-
-<p>As findDDC, reusing an index the caller has already built. </p>
+<p>As findDDC, reusing an index the caller has already built. When <em class="arg">certificate</em> is given it receives the matching or search bound. </p>
 
 </div>
 </div>
@@ -1032,6 +1133,41 @@ Changelog</h3>
 
 </div>
 </div>
+<a id="ae219003bad567e0125990284302d2029" name="ae219003bad567e0125990284302d2029"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae219003bad567e0125990284302d2029">&#9670;&#160;</a></span>maximumEquators()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; int &gt; ring::maximumEquators </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; <a class="el" href="structring_1_1EquatorChoice.html">EquatorChoice</a> &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>periph</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>order</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structring_1_1PackingCertificate.html">PackingCertificate</a> *</td>          <td class="paramname"><span class="paramname"><em>certificate</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Maximum set of mutually non-conflicting equatorial rings. <em class="arg">periph</em>[i].n is 0 when ring i is not a candidate. The returned ids are a maximum packing; <em class="arg">certificate</em> is filled when non-null. </p>
+
+</div>
+</div>
 <a id="a5db4898b22ebb13511cc37fae6674e5c" name="a5db4898b22ebb13511cc37fae6674e5c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a5db4898b22ebb13511cc37fae6674e5c">&#9670;&#160;</a></span>notNeighboursOfRing()</h2>
 
@@ -1056,6 +1192,32 @@ Changelog</h3>
       </table>
 </div><div class="memdoc">
 <p>Tests to check that elements of a triplet are not neighbours of a ring (vector) passed </p>
+
+</div>
+</div>
+<a id="a51764966eab7aea2d90649bb6cc607ea" name="a51764966eab7aea2d90649bb6cc607ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a51764966eab7aea2d90649bb6cc607ea">&#9670;&#160;</a></span>positionRank()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; int &gt; ring::positionRank </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Rank of every atom of <em class="arg">yCloud</em> when the atoms are sorted by position wrapped into the box, compared by x, then y, then z. Throws std::invalid_argument when two atoms share a wrapped position </p>
 
 </div>
 </div>
@@ -1099,8 +1261,70 @@ Changelog</h3>
 
 </div>
 </div>
+<a id="a290b0bdf3ad66912c9bb5ed421062006" name="a290b0bdf3ad66912c9bb5ed421062006"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a290b0bdf3ad66912c9bb5ed421062006">&#9670;&#160;</a></span>seededCageAffiliation() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structring_1_1SeededAtomLabels.html">SeededAtomLabels</a> ring::seededCageAffiliation </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>strictRings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structring_1_1CageAffiliation.html">CageAffiliation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>strictAffiliation</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>permissiveRings</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structring_1_1CageAffiliation.html">CageAffiliation</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>permissiveAffiliation</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>permissiveNList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>ringAdjacentCompletion</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>The same labels from the affiliation of each graph's six-rings, computed by the caller. </p>
+<p>A frame walk passes <a class="el" href="classring_1_1AffiliationUpdater.html" title="Exact incremental affiliation across frames.">AffiliationUpdater</a> results here, so both graphs carry their per-ring answers across frames. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">strictRings</td><td>Six-membered rings of the strict graph. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">strictAffiliation</td><td>cageAffiliation of strictRings. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">permissiveRings</td><td>Six-membered rings of the permissive graph. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">permissiveAffiliation</td><td>cageAffiliation of permissiveRings. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">permissiveNList</td><td>Permissive graph, by index with leading self entries. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">ringAdjacentCompletion</td><td>As in the overload above. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a1f59a70140bd3498eb53e448f916229f" name="a1f59a70140bd3498eb53e448f916229f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1f59a70140bd3498eb53e448f916229f">&#9670;&#160;</a></span>seededCageAffiliation()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f59a70140bd3498eb53e448f916229f">&#9670;&#160;</a></span>seededCageAffiliation() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">

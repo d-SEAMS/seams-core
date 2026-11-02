@@ -6,6 +6,7 @@ var cage__affiliation_8hpp =
     [ "ring::SeededAtomLabels", "structring_1_1SeededAtomLabels.html", "structring_1_1SeededAtomLabels" ],
     [ "ring::cageAffiliation", "namespacering.html#a6a455f7a0da97df613534671c9377a45", null ],
     [ "ring::ringAdjacentCompletion", "namespacering.html#a52d5bc312612884ce62bd430d94fdb17", null ],
+    [ "ring::seededCageAffiliation", "namespacering.html#a290b0bdf3ad66912c9bb5ed421062006", null ],
     [ "ring::seededCageAffiliation", "namespacering.html#a1f59a70140bd3498eb53e448f916229f", null ],
     [ "ring::stackingPlanes", "namespacering.html#aac3cc296115f9c2beabbd4bb01c30002", null ]
 ];

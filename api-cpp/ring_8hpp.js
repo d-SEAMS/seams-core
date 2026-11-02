@@ -18,5 +18,5 @@ var ring_8hpp =
     [ "ring::findsCommonElements", "group__ring.html#ga81b58f4aa6e50f1ad000b4b3fe36349f", null ],
     [ "ring::findTripletInRing", "group__ring.html#gaec269dc10849e9e9fdb979fceb52edd3", null ],
     [ "ring::getSingleRingSize", "group__ring.html#ga227e0ad81cfe6be9ddc09588f0663713", null ],
-    [ "ring::hasCommonElements", "group__ring.html#gac30855d0daa2b20c29e4dee39f5cd92f", null ]
+    [ "ring::hasCommonElements", "group__ring.html#ga8d0ecad7aad1a98640a4a7278913057d", null ]
 ];

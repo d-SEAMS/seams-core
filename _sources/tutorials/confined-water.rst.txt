@@ -1,0 +1,29 @@
+==============
+Confined water
+==============
+
+
+Quasi-one-dimensional ice is a stack of prism blocks (``Frame.find_prisms``).
+Quasi-two-dimensional ice is a sheet of primitive rings (``Frame.monolayer_rings``) plus an in-plane radial distribution (``Frame.rdf_2d``).
+The ``seams`` CLI does not grow a command for the prisms or the sheet.
+``seams rdf`` is the three-dimensional partial RDF, not the in-plane histogram.
+
+The 2020 nanotube and monolayer dumps are figshare project 73545.
+They are not in this repository, and this page does not invent their counts.
+
+The in-tree confined frame is ``input/traj/exampleTraj.lammpstrj``.
+The runnable copy is ``docs/tutorials/test_confined.py``.
+Install Python with ``pip install pydseamslib``.
+
+.. code:: python
+
+    import pydseams as ds
+
+    frame = ds.read("input/traj/exampleTraj.lammpstrj", atom_type=2)
+    r, g = frame.rdf_2d("output", cutoff=6.0, binwidth=0.5)
+    frame.monolayer_rings("output", sheet_area=1.0, max_depth=6)
+    frame.find_prisms(output_dir="output", max_depth=4)
+
+``sheet_area`` is the area the coverage fraction divides by.
+Use the area of the sheet you loaded.
+The ring counts themselves do not use it.

@@ -19,5 +19,7 @@ Detailed Documentation
 
 Exact frame-to-frame maintenance of the primitive ring network.
 
-Consecutive trajectory frames share almost all of their bond topology. Rings are stored partitioned by their lowest-indexed member, and on a new frame only sources within a proven locality radius of a changed edge are re-enumerated: a ring's members and every path that can decide its primitivity lie within a bounded neighbourhood of its source, so a source far enough from every change keeps its rings unchanged. The output equals a full recomputation exactly, at a cost that scales with the edge churn between frames rather than with system size.
+Consecutive trajectory frames share almost all of their bond topology. A ring of at most maxDepth members can appear or vanish between frames only if it passes within (maxDepth/2 - 2)/2 bonds of a vertex whose neighbour row changed, which is on the ring itself up to maxDepth
+
+#. On a new frame the stored rings that meet that set are dropped and the rings through it are enumerated afresh. The output equals ringNetwork element by element, at a cost that scales with the number of changed rows rather than with system size.
 

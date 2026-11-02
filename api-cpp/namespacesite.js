@@ -3,6 +3,7 @@ var namespacesite =
     [ "DensityZ", "structsite_1_1DensityZ.html", "structsite_1_1DensityZ" ],
     [ "GuestOccupancy", "structsite_1_1GuestOccupancy.html", "structsite_1_1GuestOccupancy" ],
     [ "IceClusterIons", "structsite_1_1IceClusterIons.html", "structsite_1_1IceClusterIons" ],
+    [ "InsideTrace", "structsite_1_1InsideTrace.html", "structsite_1_1InsideTrace" ],
     [ "IonEnvironment", "structsite_1_1IonEnvironment.html", "structsite_1_1IonEnvironment" ],
     [ "Table", "structsite_1_1Table.html", "structsite_1_1Table" ],
     [ "Family", "namespacesite.html#aa3661d15289b4b8576f48217ed337ca3", [
@@ -33,6 +34,8 @@ var namespacesite =
       [ "waterH", "namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90a26dca521e814fabf8fe99711c652d2ab", null ],
       [ "solvent", "namespacesite.html#adda3a91ca98e5b5e1ffb889ae6440c90acb536c8fd095555b861ed4eb1d313e7f", null ]
     ] ],
+    [ "brokenRings", "namespacesite.html#a1e366213de1b2f4f04c86f8364b609f6", null ],
+    [ "cappedRings", "namespacesite.html#a99a4e8b8fb177f7fea900ac24f145d45", null ],
     [ "densityZ", "namespacesite.html#a0e086c58b6a8de67c895bd1e034f58e6", null ],
     [ "densityZ", "namespacesite.html#a75c8588cd72dda60fecb01240009ca6c", null ],
     [ "familyName", "namespacesite.html#a1dacaa43f0631e0bc75cc37531b89ce7", null ],
@@ -41,12 +44,16 @@ var namespacesite =
     [ "iceClusterIonCensus", "namespacesite.html#a2c1ad7bff89d54bbb4c2a22f93e3eeaf", null ],
     [ "iceScoreAllowed", "namespacesite.html#a05342583b5b8258d5347b3f18983d4b2", null ],
     [ "indicesOf", "namespacesite.html#a651f87e7aaca786cffd536a4d2b286c4", null ],
+    [ "insideRayDirections", "namespacesite.html#a9231f841816296c279bcf08186f332de", null ],
     [ "ionCloud", "namespacesite.html#a55a0dd31fcceddabfa6cda601eeb807c", null ],
     [ "ionEnvironment", "namespacesite.html#a59c0f056c026caebb259d8c8e0d032e1", null ],
     [ "lammpsTypeOfKind", "namespacesite.html#a1dd96ee4ccc36bc86f348ec029859b53", null ],
     [ "parseFamily", "namespacesite.html#a44e7fbcc66c892d4e98d896e5041cf4c", null ],
     [ "parseSiteSpec", "namespacesite.html#ab556d24c5f6d7d7be9ba2e4d975259be", null ],
     [ "periodicCentroid", "namespacesite.html#a208c6e1f8e6106530d6c75bb16dccaad", null ],
+    [ "pointInFaces", "namespacesite.html#a040c7a9f8809cf0b1fb82b9294df197c", null ],
+    [ "pointInFacesTrace", "namespacesite.html#afc9315591f9625e0013b8ed56887297f", null ],
     [ "refuseIceScore", "namespacesite.html#a3043411870d52f19774d045fa21dfc09", null ],
-    [ "shellRingCensus", "namespacesite.html#a3327b0f82b57a80d113b241dec0eb711", null ]
+    [ "shellRingCensus", "namespacesite.html#a3327b0f82b57a80d113b241dec0eb711", null ],
+    [ "kInsideRelTol", "namespacesite.html#a17c7ad054eafa92f5e5238e14109b97a", null ]
 ];

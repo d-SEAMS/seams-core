@@ -3,6 +3,7 @@ var annotated_dup =
     [ "cage", "namespacecage.html", [
       [ "Cage", "structcage_1_1Cage.html", "structcage_1_1Cage" ],
       [ "CageShape", "structcage_1_1CageShape.html", "structcage_1_1CageShape" ],
+      [ "EdgeWindow", "structcage_1_1EdgeWindow.html", "structcage_1_1EdgeWindow" ],
       [ "FormerRow", "structcage_1_1FormerRow.html", "structcage_1_1FormerRow" ],
       [ "FoundCage", "structcage_1_1FoundCage.html", "structcage_1_1FoundCage" ],
       [ "Signature", "structcage_1_1Signature.html", "structcage_1_1Signature" ]
@@ -55,6 +56,9 @@ var annotated_dup =
     [ "ring", "namespacering.html", [
       [ "AffiliationUpdater", "classring_1_1AffiliationUpdater.html", "classring_1_1AffiliationUpdater" ],
       [ "CageAffiliation", "structring_1_1CageAffiliation.html", "structring_1_1CageAffiliation" ],
+      [ "EquatorChoice", "structring_1_1EquatorChoice.html", "structring_1_1EquatorChoice" ],
+      [ "NeighBond", "classring_1_1NeighBond.html", "classring_1_1NeighBond" ],
+      [ "PackingCertificate", "structring_1_1PackingCertificate.html", "structring_1_1PackingCertificate" ],
       [ "RingSearchIndex", "structring_1_1RingSearchIndex.html", "structring_1_1RingSearchIndex" ],
       [ "SeededAtomLabels", "structring_1_1SeededAtomLabels.html", "structring_1_1SeededAtomLabels" ],
       [ "StackingPlanes", "structring_1_1StackingPlanes.html", "structring_1_1StackingPlanes" ]
@@ -66,12 +70,19 @@ var annotated_dup =
       [ "domain", "namespaceseams_1_1domain.html", [
         [ "Share", "structseams_1_1domain_1_1Share.html", "structseams_1_1domain_1_1Share" ],
         [ "RingSummary", "structseams_1_1domain_1_1RingSummary.html", "structseams_1_1domain_1_1RingSummary" ]
+      ] ],
+      [ "product", "namespaceseams_1_1product.html", [
+        [ "RealDot", "structseams_1_1product_1_1RealDot.html", "structseams_1_1product_1_1RealDot" ],
+        [ "ComplexDot", "structseams_1_1product_1_1ComplexDot.html", "structseams_1_1product_1_1ComplexDot" ],
+        [ "Cij", "structseams_1_1product_1_1Cij.html", "structseams_1_1product_1_1Cij" ],
+        [ "GemmInfo", "structseams_1_1product_1_1GemmInfo.html", "structseams_1_1product_1_1GemmInfo" ]
       ] ]
     ] ],
     [ "site", "namespacesite.html", [
       [ "DensityZ", "structsite_1_1DensityZ.html", "structsite_1_1DensityZ" ],
       [ "GuestOccupancy", "structsite_1_1GuestOccupancy.html", "structsite_1_1GuestOccupancy" ],
       [ "IceClusterIons", "structsite_1_1IceClusterIons.html", "structsite_1_1IceClusterIons" ],
+      [ "InsideTrace", "structsite_1_1InsideTrace.html", "structsite_1_1InsideTrace" ],
       [ "IonEnvironment", "structsite_1_1IonEnvironment.html", "structsite_1_1IonEnvironment" ],
       [ "Table", "structsite_1_1Table.html", "structsite_1_1Table" ]
     ] ],
@@ -85,6 +96,7 @@ var annotated_dup =
       [ "LayerStack", "structtopoparam_1_1LayerStack.html", "structtopoparam_1_1LayerStack" ]
     ] ],
     [ "tum", "namespacetum.html", [
-      [ "CageCounts", "structtum_1_1CageCounts.html", "structtum_1_1CageCounts" ]
+      [ "CageCounts", "structtum_1_1CageCounts.html", "structtum_1_1CageCounts" ],
+      [ "SpecializedCaps", "structtum_1_1SpecializedCaps.html", "structtum_1_1SpecializedCaps" ]
     ] ]
 ];

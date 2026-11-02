@@ -9,6 +9,7 @@ namespace seams
 
 	namespace_seams_cfg.rst
 	namespace_seams_domain.rst
+	namespace_seams_product.rst
 	namespace_seams_sphericart_ylm.rst
 	namespace_seams_steinhardt.rst
 
@@ -25,6 +26,7 @@ namespace seams
 
 	namespace :ref:`seams::cfg<doxid-namespaceseams_1_1cfg>`;
 	namespace :ref:`seams::domain<doxid-namespaceseams_1_1domain>`;
+	namespace :ref:`seams::product<doxid-namespaceseams_1_1product>`;
 	namespace :ref:`seams::sphericart_ylm<doxid-namespaceseams_1_1sphericart__ylm>`;
 	namespace :ref:`seams::steinhardt<doxid-namespaceseams_1_1steinhardt>`;
 

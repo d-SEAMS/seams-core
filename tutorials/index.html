@@ -92,14 +92,28 @@ data-aria-dark="Switch to auto color mode">
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorials</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ice-and-clathrate.html">Ice and clathrate labels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rings.html">Primitive rings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="order-parameters.html">Bond-orientational order parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="confined-water.html">Confined water</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nanotube.html">Quasi-one-dimensional ice</a></li>
+<li class="toctree-l2"><a class="reference internal" href="paper-figures.html">Paper figures</a></li>
 </ul>
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="ice-and-clathrate.html">Ice and clathrate labels</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="rings.html">Primitive rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="order-parameters.html">Bond-orientational order parameters</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="confined-water.html">Confined water</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="paper-figures.html">Paper figures</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">How-to</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/bindings.html">Build the language fronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/versions.html">Version pins</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/openmp-offload.html">OpenMP target offload</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/sheared-cells.html">Sheared cells</a></li>
@@ -116,6 +130,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Repositories</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/ring-completion.html">Ring-adjacent completion</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/topological-network.html">Topological network criteria</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
@@ -125,10 +140,18 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/walk-compare.html">walk_compare</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cross-language.html">One task, four fronts</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API map</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/index.html">API Reference</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">d-SEAMS 2.0 paper</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/index.html">d-SEAMS 2.0 paper</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/versions.html">Versions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/reproduce.html">Reproduce</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
 <ul>
@@ -247,14 +270,41 @@ in-tree mixed TIP4P dump two ways.</p>
 <tr class="row-even"><td><p><a class="reference external" href="bulk-ice.rst">Classify ice on the mixed TIP4P example</a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">read</span></code>, CHILL+, cages, and why the scores disagree</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference external" href="ice-and-clathrate.rst">Ice and clathrate labels</a></p></td>
+<td><p>CHILL+ and cage signatures from Python</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="rings.rst">Primitive rings</a></p></td>
+<td><p>Franzblau census on one frame</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="order-parameters.rst">Bond-orientational order</a></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">q_l</span></code> and the Lechner-Dellago average</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="confined-water.rst">Confined water</a></p></td>
+<td><p>in-plane RDF, sheet rings, prisms</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="nanotube.rst">Quasi-one-dimensional ice</a></p></td>
+<td><p>where the nanotube and monolayer examples live</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="paper-figures.rst">Paper figures</a></p></td>
+<td><p>the in-tree numbers behind the 2020 figures</p></td>
+</tr>
 </tbody>
 </table>
 </div>
 <p>How-tos solve a goal you already have. Reference names flags and
 headers. Explanation is why the two classifiers exist.</p>
+<p>The Python files under <code class="docutils literal notranslate"><span class="pre">docs/tutorials</span></code> are the runs. CI executes
+them. The pages here say what you are doing and what number you
+should see.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ice-and-clathrate.html">Ice and clathrate labels</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rings.html">Primitive rings</a></li>
+<li class="toctree-l1"><a class="reference internal" href="order-parameters.html">Bond-orientational order parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="confined-water.html">Confined water</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nanotube.html">Quasi-one-dimensional ice</a></li>
+<li class="toctree-l1"><a class="reference internal" href="paper-figures.html">Paper figures</a></li>
 </ul>
 </div>
 </section>

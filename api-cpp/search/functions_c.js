@@ -8,10 +8,14 @@ var searchData=
   ['matchprism_5',['matchPrism',['../namespacematch.html#af3c2ebe9ccd146ee0ce293609fef7761',1,'match']]],
   ['matchprismblock_6',['matchPrismBlock',['../namespacematch.html#a61062b67c8fd77b122c581135548a29c',1,'match']]],
   ['matchuntetheredprism_7',['matchUntetheredPrism',['../namespacematch.html#a0cbe20cb5b3bebd6d5275f69498057d5',1,'match']]],
-  ['maxresidentframes_8',['maxResidentFrames',['../namespacegpu.html#a423e858b483752f380c8f4939a899e78',1,'gpu']]],
-  ['maxringsize_9',['maxRingSize',['../group__cage.html#gad5104ccecc1bdc8180c016d00d8f4f55',1,'cage::Signature']]],
-  ['meanfinite_10',['meanFinite',['../namespacetopoparam.html#ab7cd3df2fabd16fcadfc571348e90cdf',1,'topoparam']]],
-  ['minimage_11',['minImage',['../namespaceseams_1_1steinhardt.html#a43d8f8936120055114714e6beff49149',1,'seams::steinhardt']]],
-  ['moleculesinsingleslice_12',['moleculesInSingleSlice',['../group__ring.html#gaa6a3bfc360df06a888d89bbd1496f4c7',1,'gen']]],
-  ['mutualnearestunlike_13',['mutualNearestUnlike',['../group__nneigh.html#ga68ba6195c59b7a1b7c8bb17ec31314a3',1,'nneigh']]]
+  ['maximumequators_8',['maximumEquators',['../namespacering.html#ae219003bad567e0125990284302d2029',1,'ring']]],
+  ['maxresidentframes_9',['maxResidentFrames',['../namespacegpu.html#a423e858b483752f380c8f4939a899e78',1,'gpu']]],
+  ['maxringsize_10',['maxRingSize',['../group__cage.html#gad5104ccecc1bdc8180c016d00d8f4f55',1,'cage::Signature']]],
+  ['meanfinite_11',['meanFinite',['../namespacetopoparam.html#ab7cd3df2fabd16fcadfc571348e90cdf',1,'topoparam']]],
+  ['meanoffinite_12',['meanOfFinite',['../namespaceseams_1_1product.html#a034897976e290392140be6ca3d054fb4',1,'seams::product']]],
+  ['minimage_13',['minImage',['../namespaceseams_1_1steinhardt.html#a43d8f8936120055114714e6beff49149',1,'seams::steinhardt']]],
+  ['mode_14',['mode',['../namespaceseams_1_1product.html#a4f480de28c1ceac46c4297f4f6766650',1,'seams::product']]],
+  ['modename_15',['modeName',['../namespaceseams_1_1product.html#ac474bce9a90d2ddedbe613731fde239b',1,'seams::product']]],
+  ['moleculesinsingleslice_16',['moleculesInSingleSlice',['../group__ring.html#gaa6a3bfc360df06a888d89bbd1496f4c7',1,'gen']]],
+  ['mutualnearestunlike_17',['mutualNearestUnlike',['../group__nneigh.html#ga68ba6195c59b7a1b7c8bb17ec31314a3',1,'nneigh']]]
 ];

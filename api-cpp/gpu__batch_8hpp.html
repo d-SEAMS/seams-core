@@ -15,7 +15,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
-<title>seams-core: /home/runner/work/seams-core/seams-core/src/include/internal/gpu_batch.hpp File Reference</title>
+<title>seams-core: src/include/internal/gpu_batch.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="dynsections.js"></script>
 <script type="text/javascript" src="codefolding.js"></script>
@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -261,7 +261,8 @@ Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Run the analysis of a resident frame batch on the device. </p>
-<p>Coordinates for every accepted frame are uploaded once. The device path is the TUM ice score: linkcell (k)-nearest, the mutual four-nearest graph, primitive six-rings, and the HC/DDC affiliation predicates. CHILL and (q_{lm}) stay on the host. Only cage labels come back. </p>
+<p>Coordinates for every accepted frame are uploaded once. The device path is the TUM ice score: linkcell (k)-nearest, the mutual four-nearest graph, primitive six-rings, and the HC/DDC affiliation predicates. CHILL and (q_{lm}) stay on the host. Only cage labels come back.</p>
+<p>Every device counter is incremented before its bound check. A frame whose rings, atom rows or basal pairs overflow the planned buffers reruns with those buffers grown to the counted sizes. A frame with an atom row longer than the kernels' 32 entries, or whose grown buffers cannot be allocated after a completed pass, is evaluated on the host from its mutual graph. A batch the planner rejects, or whose first allocation fails, returns BatchResult::error. </p>
 
 <p class="definition">Definition in file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
 </div></div><!-- contents -->

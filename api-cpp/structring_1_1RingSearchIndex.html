@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -241,18 +241,38 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('structring_1_1
 <p>Inverted index from an atom to the rings that contain it.  
  <a href="#details">More...</a></p>
 
-<p><code>#include &lt;<a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="topo__bulk_8hpp_source.html">src/include/internal/topo_bulk.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:a8e4433086bf9bec113ee61bc3c17b8bb" id="r_a8e4433086bf9bec113ee61bc3c17b8bb"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a8e4433086bf9bec113ee61bc3c17b8bb">ringsContainingAtom</a></td></tr>
+<tr class="memitem:a891fe48d2dccc51ea7f043b562a42cbd" id="r_a891fe48d2dccc51ea7f043b562a42cbd"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a891fe48d2dccc51ea7f043b562a42cbd">atomRank</a></td></tr>
+<tr class="memitem:a756c5dfcd0a8e96744dfff6775c1e31b" id="r_a756c5dfcd0a8e96744dfff6775c1e31b"><td class="memItemLeft">std::vector&lt; std::array&lt; int, 3 &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a756c5dfcd0a8e96744dfff6775c1e31b">ringShift</a></td></tr>
+<tr class="memdesc:a756c5dfcd0a8e96744dfff6775c1e31b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integer minimum-image winding of each ring. Empty if no box was supplied.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Inverted index from an atom to the rings that contain it. </p>
-<p>The cage searches repeatedly ask which rings a given atom belongs to. Answering that by scanning every ring makes the searches quadratic in the ring count. One pass over the ring network answers it in constant time thereafter, and the ring indices in each row stay ascending, which is the order the searches previously visited them in. </p>
+<p>The cage searches repeatedly ask which rings a given atom belongs to. Answering that by scanning every ring makes the searches quadratic in the ring count. One pass over the ring network answers it in constant time thereafter, and the ring indices in each row stay ascending, which is the order the searches previously visited them in.</p>
+<p>findHC visits rings in the order of a key that does not use absolute coordinates: the sorted atom indices, then the unwrapped shift of the cycle. findDDC reports a maximum set of cages under the same key, so the cage count is independent of the order in which rings are claimed and does not change when the frame is translated. </p>
 
-<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00075">75</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00082">82</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<a id="a891fe48d2dccc51ea7f043b562a42cbd" name="a891fe48d2dccc51ea7f043b562a42cbd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a891fe48d2dccc51ea7f043b562a42cbd">&#9670;&#160;</a></span>atomRank</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;int&gt; ring::RingSearchIndex::atomRank</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00084">84</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
+
+</div>
+</div>
 <a id="a8e4433086bf9bec113ee61bc3c17b8bb" name="a8e4433086bf9bec113ee61bc3c17b8bb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8e4433086bf9bec113ee61bc3c17b8bb">&#9670;&#160;</a></span>ringsContainingAtom</h2>
 
@@ -265,12 +285,30 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00076">76</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00083">83</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a756c5dfcd0a8e96744dfff6775c1e31b" name="a756c5dfcd0a8e96744dfff6775c1e31b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a756c5dfcd0a8e96744dfff6775c1e31b">&#9670;&#160;</a></span>ringShift</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;std::array&lt;int, 3&gt; &gt; ring::RingSearchIndex::ringShift</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Integer minimum-image winding of each ring. Empty if no box was supplied. </p>
+
+<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00086">86</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>/home/runner/work/seams-core/seams-core/src/include/internal/<a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a></li>
+<li>src/include/internal/<a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

@@ -15,7 +15,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
-<title>seams-core: /home/runner/work/seams-core/seams-core/src/include/internal/seams_c_api.h File Reference</title>
+<title>seams-core: src/include/internal/seams_c_api.h File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="dynsections.js"></script>
 <script type="text/javascript" src="codefolding.js"></script>
@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -243,6 +243,8 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('seams__c__api_
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a4aa681772840118e245156666761a0ac" id="r_a4aa681772840118e245156666761a0ac"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a4aa681772840118e245156666761a0ac">seams_chill_plus</a> (const double *xyz, int n, const double *box, int *labels)</td></tr>
+<tr class="memitem:a3cdbb04d3443c73b4f3067360bea8bf7" id="r_a3cdbb04d3443c73b4f3067360bea8bf7"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a3cdbb04d3443c73b4f3067360bea8bf7">seams_chill_plus_graph</a> (const double *xyz, int n, const double *box, double cutoff, const char *graph, int *labels)</td></tr>
+<tr class="memitem:a905d0436a8fd534e4177ff7627143e04" id="r_a905d0436a8fd534e4177ff7627143e04"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a905d0436a8fd534e4177ff7627143e04">seams_chill_plus_graph_lammps</a> (const double *xyz, int n, const double *box9, double cutoff, const char *graph, int *labels)</td></tr>
 </table>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
 <a id="a4aa681772840118e245156666761a0ac" name="a4aa681772840118e245156666761a0ac"></a>
@@ -265,6 +267,88 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>box</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>labels</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a3cdbb04d3443c73b4f3067360bea8bf7" name="a3cdbb04d3443c73b4f3067360bea8bf7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3cdbb04d3443c73b4f3067360bea8bf7">&#9670;&#160;</a></span>seams_chill_plus_graph()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_chill_plus_graph </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>box</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>graph</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>labels</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a905d0436a8fd534e4177ff7627143e04" name="a905d0436a8fd534e4177ff7627143e04"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a905d0436a8fd534e4177ff7627143e04">&#9670;&#160;</a></span>seams_chill_plus_graph_lammps()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_chill_plus_graph_lammps </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>box9</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>graph</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>

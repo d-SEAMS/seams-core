@@ -16,7 +16,7 @@ A dictionary from local keys to labels: the keys of reference structures (a poly
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <topo_fingerprint.hpp>
+	#include <src/include/internal/topo_fingerprint.hpp>
 	
 	struct KeyLibrary {
 		// fields

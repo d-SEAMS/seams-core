@@ -8,6 +8,8 @@ var searchData=
   ['atomindex_5',['atomIndex',['../group__primitive.html#gaead86b6d47e9f9a77949fef59b8de27f',1,'primitive::Vertex']]],
   ['atomkeys_6',['atomKeys',['../structtopo_1_1FrameFingerprint.html#a7552450f798d8591d7580e8d9422bcb6',1,'topo::FrameFingerprint']]],
   ['atomoverride_7',['atomOverride',['../structsite_1_1Table.html#ae4fef91b396372693e47e15c4aaf149c',1,'site::Table']]],
-  ['atomtype_8',['atomType',['../structseams_1_1domain_1_1RingSummary.html#acc99d07f5a72f9395e2c9555e9b37520',1,'seams::domain::RingSummary']]],
-  ['available_9',['available',['../structgpu_1_1DeviceInfo.html#aa906d2f24ad5737eb03a4766f5866f24',1,'gpu::DeviceInfo']]]
+  ['atomrank_8',['atomRank',['../structring_1_1RingSearchIndex.html#a891fe48d2dccc51ea7f043b562a42cbd',1,'ring::RingSearchIndex']]],
+  ['atomsix_9',['atomSix',['../structtum_1_1CageCounts.html#a70b060af0dfd2bbe49b2ecef399965c9',1,'tum::CageCounts']]],
+  ['atomtype_10',['atomType',['../structseams_1_1domain_1_1RingSummary.html#acc99d07f5a72f9395e2c9555e9b37520',1,'seams::domain::RingSummary']]],
+  ['available_11',['available',['../structgpu_1_1DeviceInfo.html#aa906d2f24ad5737eb03a4766f5866f24',1,'gpu::DeviceInfo']]]
 ];

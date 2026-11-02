@@ -1,0 +1,104 @@
+============================
+Topological network criteria
+============================
+
+
+This page is the definitions.
+The runnable checks that the implementations still return the documented counts live under Tutorials.
+
+Bond correlation
+----------------
+
+CHILL and CHILL+ look at :math:`l = 3`.
+With :math:`N_b(i)` neighbours,
+
+
+
+.. math::
+
+    q_{3m}(i) = \frac{1}{N_b(i)} \sum_{j \in N(i)} Y_{3m}(\hat r_{ij})
+
+
+
+.. math::
+
+    c_{ij} = \mathrm{Re}
+    \frac{\sum_m q_{3m}(i)\, q_{3m}(j)^{*}}
+    {\sqrt{\sum_m |q_{3m}(i)|^2 \sum_m |q_{3m}(j)|^2}}
+
+A bond is staggered when :math:`c_{ij} \le -0.8`.
+The eclipsed window is the part that differs:
+
+.. table::
+
+    +--------+-----------------------------------+-------------------------+------------+
+    | rule   | eclipsed                          | staggered               | neighbours |
+    +========+===================================+=========================+============+
+    | CHILL  | :math:`-0.2 \le c_{ij} \le -0.05` | :math:`c_{ij} \le -0.8` |          4 |
+    +--------+-----------------------------------+-------------------------+------------+
+    | CHILL+ | :math:`-0.35 \le c_{ij} \le 0.25` | :math:`c_{ij} \le -0.8` |          4 |
+    +--------+-----------------------------------+-------------------------+------------+
+
+The code stores those edges as ``chill::chillRule`` ``(-0.8, -0.2, -0.05, 4)`` and ``chill::chillPlusRule`` ``(-0.8, -0.35, 0.25, 4)``.
+Boundaries are inclusive.
+
+The four-bond star is the phase.
+Cubic is four staggered bonds.
+Hexagonal is three staggered and one eclipsed.
+CHILL+ adds clathrate (four eclipsed) and interfacial clathrate (three eclipsed).
+Water is what remains.
+The full star table is in ``bop.hpp``.
+
+Primitive rings
+---------------
+
+A cycle is primitive, in the Franzblau sense, when for every pair of its vertices a shortest path in the bond graph lies along the cycle.
+``primitive::ringNetwork`` enumerates cycles up to ``max_depth`` and drops the ones that fail that test.
+The bond graph is an argument.
+Mutual four-nearest, the union of those nominations, and a distance cutoff are three different graphs.
+Quote the graph with the census.
+
+Cages
+-----
+
+A hexagonal cage is two basal six-rings joined by prismatic six-rings.
+A double-diamond cage is an equatorial six-ring and its peripheral rings.
+``ring::cageAffiliation`` evaluates those conditions for every six-ring, without the claim order of the older ``findHC`` / ``findDDC`` walk.
+The seeded variant takes a strict graph for the seeds and a permissive graph for the completions.
+An atom on the permissive graph is kept only when its component contains a seed.
+``--complete`` then fills a six-ring that is missing one labelled vertex.
+That walk is the least fixed point of the all-but-one rule; see the ring-completion page.
+
+Confined ice
+------------
+
+A prism block is two rings of the same size that satisfy the basal conditions in ``ring::basalPrismConditions`` (or the relaxed form).
+``ring::findPrisms`` returns which rings are blocks, split into perfect and imperfect.
+A monolayer analysis keeps primitive rings of each size and, when you ask for the files, writes the coverage of the sheet.
+The in-plane :math:`g(r)` normalises the pair histogram by the slab factor
+
+\\[
+f(r) =
+
+\begin{cases}
+1 - r / (2h) & r \le h \\
+h / (2r) & r > h
+\end{cases}
+
+\\]
+
+where :math:`h` is the confined height.
+That is ``rdf2::normalizeRDF``.
+
+Order parameters
+----------------
+
+
+
+.. math::
+
+    q_l(i) = \sqrt{\frac{4\pi}{2l+1} \sum_{m=-l}^{l} |q_{lm}(i)|^2}
+
+:math:`\bar q_l(i)` replaces :math:`q_{lm}(i)` with the average of :math:`q_{lm}` over :math:`i` and its neighbours before the same sum.
+That is the Lechner-Dellago form.
+The implementation is ``chill::steinhardtQl``.

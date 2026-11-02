@@ -16,7 +16,7 @@ What the ring analyses read off a frame's primitive rings. :ref:`More...<details
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <domain.hpp>
+	#include <src/include/internal/domain.hpp>
 	
 	struct RingSummary {
 		// fields

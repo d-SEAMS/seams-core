@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('structgpu_1_1B
 </div><!--header-->
 <div class="contents">
 
-<p><code>#include &lt;<a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="gpu__batch_8hpp_source.html">src/include/internal/gpu_batch.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -247,15 +247,17 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:af4536b2e33674151f4082c28f6fa752e" id="r_af4536b2e33674151f4082c28f6fa752e"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#af4536b2e33674151f4082c28f6fa752e">atomHc</a></td></tr>
 <tr class="memitem:af9aeedd1d67929018064906cb44cfb4c" id="r_af9aeedd1d67929018064906cb44cfb4c"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#af9aeedd1d67929018064906cb44cfb4c">atomDdc</a></td></tr>
 <tr class="memitem:ab851d787241b52d9210cd08b9dc3c361" id="r_ab851d787241b52d9210cd08b9dc3c361"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ab851d787241b52d9210cd08b9dc3c361">nRings</a></td></tr>
-<tr class="memitem:aa2bf91a0e7f7a2dccfc3c4139e54f6fa" id="r_aa2bf91a0e7f7a2dccfc3c4139e54f6fa"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aa2bf91a0e7f7a2dccfc3c4139e54f6fa">ringsDropped</a> = 0</td></tr>
+<tr class="memitem:a9be91fc2bac49ce311c095595f221d67" id="r_a9be91fc2bac49ce311c095595f221d67"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a9be91fc2bac49ce311c095595f221d67">retries</a> = 0</td></tr>
+<tr class="memitem:a5bfea6578666f0382569e98184ea88b5" id="r_a5bfea6578666f0382569e98184ea88b5"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a5bfea6578666f0382569e98184ea88b5">hostFrames</a></td></tr>
 <tr class="memitem:a32c3a277a79bbc9a6c0fa6901117cac2" id="r_a32c3a277a79bbc9a6c0fa6901117cac2"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a32c3a277a79bbc9a6c0fa6901117cac2">uploadMs</a> = 0.0</td></tr>
 <tr class="memitem:a7db619777f01296286cb224c04ff6ba7" id="r_a7db619777f01296286cb224c04ff6ba7"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a7db619777f01296286cb224c04ff6ba7">computeMs</a> = 0.0</td></tr>
 <tr class="memitem:ad4ba81e3f6d6bb265a5e689aee0de4fc" id="r_ad4ba81e3f6d6bb265a5e689aee0de4fc"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ad4ba81e3f6d6bb265a5e689aee0de4fc">downloadMs</a> = 0.0</td></tr>
+<tr class="memitem:a1025c4648874d3af7c9d6c4529a68fd3" id="r_a1025c4648874d3af7c9d6c4529a68fd3"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#a1025c4648874d3af7c9d6c4529a68fd3">hostMs</a> = 0.0</td></tr>
 <tr class="memitem:a9b8289baca55bd98812d4e30239ac4c9" id="r_a9b8289baca55bd98812d4e30239ac4c9"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="#a9b8289baca55bd98812d4e30239ac4c9">error</a></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00021">21</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00029">29</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
 <a id="af9aeedd1d67929018064906cb44cfb4c" name="af9aeedd1d67929018064906cb44cfb4c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af9aeedd1d67929018064906cb44cfb4c">&#9670;&#160;</a></span>atomDdc</h2>
@@ -269,7 +271,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00025">25</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00033">33</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
 
 </div>
 </div>
@@ -285,7 +287,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00024">24</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00032">32</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
 
 </div>
 </div>
@@ -301,7 +303,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00029">29</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00038">38</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
 
 </div>
 </div>
@@ -317,7 +319,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00030">30</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00039">39</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
 
 </div>
 </div>
@@ -333,7 +335,39 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00031">31</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00041">41</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a5bfea6578666f0382569e98184ea88b5" name="a5bfea6578666f0382569e98184ea88b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5bfea6578666f0382569e98184ea88b5">&#9670;&#160;</a></span>hostFrames</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;int&gt; gpu::BatchResult::hostFrames</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00036">36</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a1025c4648874d3af7c9d6c4529a68fd3" name="a1025c4648874d3af7c9d6c4529a68fd3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1025c4648874d3af7c9d6c4529a68fd3">&#9670;&#160;</a></span>hostMs</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double gpu::BatchResult::hostMs = 0.0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00040">40</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
 
 </div>
 </div>
@@ -349,7 +383,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00026">26</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00034">34</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
 
 </div>
 </div>
@@ -365,23 +399,23 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00022">22</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00030">30</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
 
 </div>
 </div>
-<a id="aa2bf91a0e7f7a2dccfc3c4139e54f6fa" name="aa2bf91a0e7f7a2dccfc3c4139e54f6fa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa2bf91a0e7f7a2dccfc3c4139e54f6fa">&#9670;&#160;</a></span>ringsDropped</h2>
+<a id="a9be91fc2bac49ce311c095595f221d67" name="a9be91fc2bac49ce311c095595f221d67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9be91fc2bac49ce311c095595f221d67">&#9670;&#160;</a></span>retries</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int gpu::BatchResult::ringsDropped = 0</td>
+          <td class="memname">int gpu::BatchResult::retries = 0</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00027">27</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00035">35</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
 
 </div>
 </div>
@@ -397,7 +431,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00023">23</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00031">31</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
 
 </div>
 </div>
@@ -413,12 +447,12 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00028">28</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="gpu__batch_8hpp_source.html#l00037">37</a> of file <a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>/home/runner/work/seams-core/seams-core/src/include/internal/<a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a></li>
+<li>src/include/internal/<a class="el" href="gpu__batch_8hpp_source.html">gpu_batch.hpp</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

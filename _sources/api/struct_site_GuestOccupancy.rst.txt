@@ -16,7 +16,7 @@ Guests read against enumerated cages. :ref:`More...<details-structsite_1_1_guest
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <site.hpp>
+	#include <src/include/internal/site.hpp>
 	
 	struct GuestOccupancy {
 		// fields

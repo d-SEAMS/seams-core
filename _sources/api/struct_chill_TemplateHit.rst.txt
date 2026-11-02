@@ -13,7 +13,7 @@ struct chill::TemplateHit
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <structure_desc.hpp>
+	#include <src/include/internal/structure_desc.hpp>
 	
 	struct TemplateHit {
 		// fields

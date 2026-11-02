@@ -13,7 +13,7 @@ struct ira::Match
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <ira_sofi.hpp>
+	#include <src/include/internal/ira_sofi.hpp>
 	
 	struct Match {
 		// fields

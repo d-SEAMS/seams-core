@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -279,6 +279,11 @@ Functions</h2></td></tr>
 <tr class="memitem:ga084d21f04e9aa5ef91faf6e536fb2412" id="r_ga084d21f04e9aa5ef91faf6e536fb2412"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ga084d21f04e9aa5ef91faf6e536fb2412">primitive::RingUpdater::lastRecomputedSources</a> () const</td></tr>
 <tr class="memitem:gadb46ee075b664d8ec659250008d13c94" id="r_gadb46ee075b664d8ec659250008d13c94"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#gadb46ee075b664d8ec659250008d13c94">primitive::RingUpdater::lastBallsRefreshed</a> () const</td></tr>
 <tr class="memdesc:gadb46ee075b664d8ec659250008d13c94"><td class="mdescLeft">&#160;</td><td class="mdescRight">Vertices whose bounded balls were rebuilt on the last update.  <br /></td></tr>
+<tr class="memitem:ga6ab3da57a3352a9a79fe93c814970923" id="r_ga6ab3da57a3352a9a79fe93c814970923"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ga6ab3da57a3352a9a79fe93c814970923">primitive::RingUpdater::lastChangedBonds</a> () const</td></tr>
+<tr class="memitem:gac1d82c61f12cb666700e6b97bd12641c" id="r_gac1d82c61f12cb666700e6b97bd12641c"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gac1d82c61f12cb666700e6b97bd12641c">primitive::RingUpdater::lastChangedBondFraction</a> () const</td></tr>
+<tr class="memdesc:gac1d82c61f12cb666700e6b97bd12641c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Changed bonds per molecule on the last update.  <br /></td></tr>
+<tr class="memitem:ga53a273ea8d071c67a311fc29dd88ee2d" id="r_ga53a273ea8d071c67a311fc29dd88ee2d"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ga53a273ea8d071c67a311fc29dd88ee2d">primitive::RingUpdater::setFullPassFraction</a> (double fraction)</td></tr>
+<tr class="memitem:gaf2cd5037b3a1e2c67f84bf482ab8c6eb" id="r_gaf2cd5037b3a1e2c67f84bf482ab8c6eb"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#gaf2cd5037b3a1e2c67f84bf482ab8c6eb">primitive::RingUpdater::setBondCrossover</a> (double changedBondsPerMolecule)</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -411,6 +416,59 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="gac1d82c61f12cb666700e6b97bd12641c" name="gac1d82c61f12cb666700e6b97bd12641c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac1d82c61f12cb666700e6b97bd12641c">&#9670;&#160;</a></span>lastChangedBondFraction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">double primitive::RingUpdater::lastChangedBondFraction </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Changed bonds per molecule on the last update. </p>
+
+</div>
+</div>
+<a id="ga6ab3da57a3352a9a79fe93c814970923" name="ga6ab3da57a3352a9a79fe93c814970923"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga6ab3da57a3352a9a79fe93c814970923">&#9670;&#160;</a></span>lastChangedBonds()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int primitive::RingUpdater::lastChangedBonds </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Undirected bonds whose endpoints differ from the previous frame. Zero on the first frame and when the bond set is unchanged. The fraction below is this count divided by the molecule count, maintained while the rows are compared and readable in constant time afterwards. </p>
+
+</div>
+</div>
 <a id="ga084d21f04e9aa5ef91faf6e536fb2412" name="ga084d21f04e9aa5ef91faf6e536fb2412"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga084d21f04e9aa5ef91faf6e536fb2412">&#9670;&#160;</a></span>lastRecomputedSources()</h2>
 
@@ -433,7 +491,7 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<p>Sources re-enumerated by the last update; the full vertex count on the first frame, zero when nothing changed </p>
+<p>Vertices the last update enumerated rings through; the full vertex count on a whole-frame pass, zero when nothing changed </p>
 
 </div>
 </div>
@@ -586,7 +644,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Returns a vector of vectors containing the rings (of all sizes), by atom index, given the neighbour list also by index (preferably the hydrogen-bonded neighbour list). Internally uses the <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> and <a class="el" href="structprimitive_1_1Vertex.html" title="This is a collection of elements, for each point, required for graph traversal.">Vertex</a> objects. </p>
+<p>Returns a vector of vectors containing the rings (of all sizes), by atom index, given the neighbour list also by index (preferably the hydrogen-bonded neighbour list). Each ring starts at its lowest-indexed member and runs toward the lesser of that member's ring neighbours, and the rings are sorted lexicographically. </p>
 
 </div>
 </div>
@@ -689,6 +747,42 @@ Variables</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
+
+</div>
+</div>
+<a id="gaf2cd5037b3a1e2c67f84bf482ab8c6eb" name="gaf2cd5037b3a1e2c67f84bf482ab8c6eb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaf2cd5037b3a1e2c67f84bf482ab8c6eb">&#9670;&#160;</a></span>setBondCrossover()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void primitive::RingUpdater::setBondCrossover </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>changedBondsPerMolecule</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Above this many changed bonds per molecule, update takes the same whole-frame pass (default 0.15). A negative value disables the test. Ignored when the vertex fraction is at least 1. </p>
+
+</div>
+</div>
+<a id="ga53a273ea8d071c67a311fc29dd88ee2d" name="ga53a273ea8d071c67a311fc29dd88ee2d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga53a273ea8d071c67a311fc29dd88ee2d">&#9670;&#160;</a></span>setFullPassFraction()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void primitive::RingUpdater::setFullPassFraction </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>fraction</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Above this fraction of vertices with a changed row, update recomputes the whole frame in one pass instead (default 0.2; 1 never falls back; 0 always does). The pass reuses its balls and ring buffers. With more than one thread, later frames of a run that has already crossed this line skip the bond diff and search from the unsorted neighbour rows. </p>
 
 </div>
 </div>

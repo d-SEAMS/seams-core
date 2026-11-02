@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('structtum_1_1C
 </div><!--header-->
 <div class="contents">
 
-<p><code>#include &lt;<a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="tum__offload_8hpp_source.html">src/include/internal/tum_offload.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -247,14 +247,16 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a9c557c74c32c82309dfa739906810042" id="r_a9c557c74c32c82309dfa739906810042"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a9c557c74c32c82309dfa739906810042">nDdcRings</a> = 0</td></tr>
 <tr class="memitem:a72b7d09cb1577e8fb3d0bef3da85e962" id="r_a72b7d09cb1577e8fb3d0bef3da85e962"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a72b7d09cb1577e8fb3d0bef3da85e962">nHcAtoms</a> = 0</td></tr>
 <tr class="memitem:aab9b1b63e36af777deba13568cd12c76" id="r_aab9b1b63e36af777deba13568cd12c76"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#aab9b1b63e36af777deba13568cd12c76">nDdcAtoms</a> = 0</td></tr>
-<tr class="memitem:a8ba2a68345d60657b3fcf399a54ded38" id="r_a8ba2a68345d60657b3fcf399a54ded38"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a8ba2a68345d60657b3fcf399a54ded38">ringsDropped</a> = 0</td></tr>
+<tr class="memitem:a92aeb2a59de2e8e6c7839bd7432a3d67" id="r_a92aeb2a59de2e8e6c7839bd7432a3d67"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a92aeb2a59de2e8e6c7839bd7432a3d67">retries</a> = 0</td></tr>
+<tr class="memitem:a9aa2d80332251af401e40a51317aed68" id="r_a9aa2d80332251af401e40a51317aed68"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a9aa2d80332251af401e40a51317aed68">hostFallback</a> = false</td></tr>
 <tr class="memitem:a7e7282c1f800764983b24c4b9ce20738" id="r_a7e7282c1f800764983b24c4b9ce20738"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#a7e7282c1f800764983b24c4b9ce20738">usedDevice</a> = false</td></tr>
+<tr class="memitem:a70b060af0dfd2bbe49b2ecef399965c9" id="r_a70b060af0dfd2bbe49b2ecef399965c9"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a70b060af0dfd2bbe49b2ecef399965c9">atomSix</a></td></tr>
 <tr class="memitem:a1a15e0ef307c7b4998dfdd35cfce0933" id="r_a1a15e0ef307c7b4998dfdd35cfce0933"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a1a15e0ef307c7b4998dfdd35cfce0933">atomHc</a></td></tr>
 <tr class="memitem:af6c75cf2229b391d64049656ead9fbee" id="r_af6c75cf2229b391d64049656ead9fbee"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#af6c75cf2229b391d64049656ead9fbee">atomDdc</a></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00028">28</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00036">36</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
 </div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
 <a id="af6c75cf2229b391d64049656ead9fbee" name="af6c75cf2229b391d64049656ead9fbee"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af6c75cf2229b391d64049656ead9fbee">&#9670;&#160;</a></span>atomDdc</h2>
@@ -268,7 +270,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00037">37</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00047">47</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
 
 </div>
 </div>
@@ -284,7 +286,39 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00036">36</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00046">46</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a70b060af0dfd2bbe49b2ecef399965c9" name="a70b060af0dfd2bbe49b2ecef399965c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a70b060af0dfd2bbe49b2ecef399965c9">&#9670;&#160;</a></span>atomSix</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;int&gt; tum::CageCounts::atomSix</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00045">45</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a9aa2d80332251af401e40a51317aed68" name="a9aa2d80332251af401e40a51317aed68"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9aa2d80332251af401e40a51317aed68">&#9670;&#160;</a></span>hostFallback</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool tum::CageCounts::hostFallback = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00043">43</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
 
 </div>
 </div>
@@ -300,7 +334,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00033">33</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00041">41</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
 
 </div>
 </div>
@@ -316,7 +350,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00031">31</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00039">39</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
 
 </div>
 </div>
@@ -332,7 +366,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00032">32</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00040">40</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
 
 </div>
 </div>
@@ -348,7 +382,7 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00030">30</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00038">38</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
 
 </div>
 </div>
@@ -364,23 +398,23 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00029">29</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00037">37</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
 
 </div>
 </div>
-<a id="a8ba2a68345d60657b3fcf399a54ded38" name="a8ba2a68345d60657b3fcf399a54ded38"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8ba2a68345d60657b3fcf399a54ded38">&#9670;&#160;</a></span>ringsDropped</h2>
+<a id="a92aeb2a59de2e8e6c7839bd7432a3d67" name="a92aeb2a59de2e8e6c7839bd7432a3d67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92aeb2a59de2e8e6c7839bd7432a3d67">&#9670;&#160;</a></span>retries</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int tum::CageCounts::ringsDropped = 0</td>
+          <td class="memname">int tum::CageCounts::retries = 0</td>
         </tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00034">34</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00042">42</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
 
 </div>
 </div>
@@ -396,12 +430,12 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00035">35</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tum__offload_8hpp_source.html#l00044">44</a> of file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
-<li>/home/runner/work/seams-core/seams-core/src/include/internal/<a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a></li>
+<li>src/include/internal/<a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a></li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->

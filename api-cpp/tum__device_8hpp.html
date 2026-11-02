@@ -15,7 +15,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
-<title>seams-core: /home/runner/work/seams-core/seams-core/src/include/internal/tum_device.hpp File Reference</title>
+<title>seams-core: src/include/internal/tum_device.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="dynsections.js"></script>
 <script type="text/javascript" src="codefolding.js"></script>
@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -260,20 +260,29 @@ Functions</h2></td></tr>
 <tr class="memdesc:ae9a6f5c08baa53d7971e42539faeb3f1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Graph distance from a to b when it is at most cap, else -1.  <br /></td></tr>
 <tr class="memitem:adb611a8926577921d4770b84aacc5902" id="r_adb611a8926577921d4770b84aacc5902"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacetum_1_1device.html#adb611a8926577921d4770b84aacc5902">tum::device::hopBoundPrimitiveSix</a> (const int *r, const int *deg, const int *cols, int nAtoms, int kMax)</td></tr>
 <tr class="memdesc:adb611a8926577921d4770b84aacc5902"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hop-bounded Franzblau SP test on a six-cycle of the bond graph.  <br /></td></tr>
-<tr class="memitem:a487f570c01a950bf28365b6d07850b07" id="r_a487f570c01a950bf28365b6d07850b07"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacetum_1_1device.html#a487f570c01a950bf28365b6d07850b07">tum::device::basalNeighbours</a> (const int *deg, const int *cols, int nAtoms, int kMax, int n1, int n2, int atomOne, int atomTwo)</td></tr>
 <tr class="memitem:a86a03666098ac7a14626540315097b6c" id="r_a86a03666098ac7a14626540315097b6c"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacetum_1_1device.html#a86a03666098ac7a14626540315097b6c">tum::device::notNeighboursOfRing</a> (const int *deg, const int *cols, int nAtoms, int kMax, const int *trip, const int *ring)</td></tr>
 <tr class="memitem:adb708068694dc11d88417382669ee78e" id="r_adb708068694dc11d88417382669ee78e"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacetum_1_1device.html#adb708068694dc11d88417382669ee78e">tum::device::basalConditions</a> (const int *deg, const int *cols, int nAtoms, int kMax, const int *b1, const int *b2)</td></tr>
-<tr class="memitem:a1e28269a0e7df30aede0377144f889f8" id="r_a1e28269a0e7df30aede0377144f889f8"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacetum_1_1device.html#a1e28269a0e7df30aede0377144f889f8">tum::device::firstRingThrough</a> (const int *A, int nA, const int *B, int nB, const int *C, int nC, int skipA, int skipB)</td></tr>
+<tr class="memdesc:adb708068694dc11d88417382669ee78e"><td class="mdescLeft">&#160;</td><td class="mdescRight">beta(b1, b2) for rings sharing no atom: some alternating triplet {l_p, l_p+2, l_p+4} of b1 bonds one-to-one onto an alternating triplet {m_q, m_q+2, m_q+4} of b2, and no other atom of b2 is bonded to b1.  <br /></td></tr>
 <tr class="memitem:a65530a55ba9f0502f557be5cc08974ca" id="r_a65530a55ba9f0502f557be5cc08974ca"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacetum_1_1device.html#a65530a55ba9f0502f557be5cc08974ca">tum::device::ringsThrough</a> (const int *A, int nA, const int *B, int nB, const int *C, int nC, int skipA, int skipB, int *out, int cap)</td></tr>
 <tr class="memitem:a19baaa6f3828a39fc70ec4bbfa5c6159" id="r_a19baaa6f3828a39fc70ec4bbfa5c6159"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="namespacetum_1_1device.html#a19baaa6f3828a39fc70ec4bbfa5c6159">tum::device::fetchAdd</a> (int *p)</td></tr>
-<tr class="memitem:a306c6a414e63cd34a04365f1e2b03d93" id="r_a306c6a414e63cd34a04365f1e2b03d93"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacetum_1_1device.html#a306c6a414e63cd34a04365f1e2b03d93">tum::device::enumSixFrom</a> (int i, const int *deg, const int *cols, int nAtoms, int kMax, int maxRings, int *nRings, int *ringAtoms, int *dropped)</td></tr>
-<tr class="memdesc:a306c6a414e63cd34a04365f1e2b03d93"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumerate hop-bound primitive six-rings whose lowest vertex is i.  <br /></td></tr>
+<tr class="memitem:ad44cea6e9cbb611c9cbb4b3ce1308be1" id="r_ad44cea6e9cbb611c9cbb4b3ce1308be1"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacetum_1_1device.html#ad44cea6e9cbb611c9cbb4b3ce1308be1">tum::device::enumSixFrom</a> (int i, const int *deg, const int *cols, int nAtoms, int kMax, int maxRings, int *nRings, int *ringAtoms)</td></tr>
+<tr class="memdesc:ad44cea6e9cbb611c9cbb4b3ce1308be1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enumerate hop-bound primitive six-rings whose lowest vertex is i.  <br /></td></tr>
 <tr class="memitem:a436c92ddb65af7ea004651faae730d7d" id="r_a436c92ddb65af7ea004651faae730d7d"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacetum_1_1device.html#a436c92ddb65af7ea004651faae730d7d">tum::device::invertOneRing</a> (int r, const int *nRings, const int *ringAtoms, int nAtoms, int maxPer, int *throughCount, int *through)</td></tr>
+<tr class="memdesc:a436c92ddb65af7ea004651faae730d7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">throughCount counts every stored ring through the atom; only the first maxPer ids are kept.  <br /></td></tr>
 <tr class="memitem:a8d76398842299f9311380465bdbf82be" id="r_a8d76398842299f9311380465bdbf82be"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacetum_1_1device.html#a8d76398842299f9311380465bdbf82be">tum::device::sortThroughRow</a> (int *row, int n)</td></tr>
+<tr class="memitem:a312e034f7e6d7804abedaf6be93e688d" id="r_a312e034f7e6d7804abedaf6be93e688d"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacetum_1_1device.html#a312e034f7e6d7804abedaf6be93e688d">tum::device::seenEarlier</a> (const int *bi, const int *deg, const int *cols, const int *throughCount, const int *through, int nAtoms, int kMax, int maxPer, int slot, int n, int j)</td></tr>
+<tr class="memdesc:a312e034f7e6d7804abedaf6be93e688d"><td class="mdescLeft">&#160;</td><td class="mdescRight">True when ring j is in the through row of a bond neighbour of bi[0] or bi[1] visited before (slot, n), so each candidate is tested once.  <br /></td></tr>
 <tr class="memitem:a33474d52479649f2f0198231001716a5" id="r_a33474d52479649f2f0198231001716a5"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacetum_1_1device.html#a33474d52479649f2f0198231001716a5">tum::device::emitBasalFrom</a> (int i, const int *nRings, const int *ringAtoms, const int *deg, const int *cols, const int *throughCount, const int *through, int nAtoms, int kMax, int maxPer, int maxPairs, int *nPairs, int *pairs)</td></tr>
+<tr class="memdesc:a33474d52479649f2f0198231001716a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ordered basal pairs (i, j).  <br /></td></tr>
 <tr class="memitem:a41c542baa7e9bc8746f60ce93aad60dd" id="r_a41c542baa7e9bc8746f60ce93aad60dd"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacetum_1_1device.html#a41c542baa7e9bc8746f60ce93aad60dd">tum::device::applyHcPair</a> (int p, const int *nPairs, const int *pairs, const int *ringAtoms, const int *throughCount, const int *through, int nAtoms, int maxPer, int *hc)</td></tr>
 <tr class="memitem:a96b35dc94857641cfc85cdb983e3f2e7" id="r_a96b35dc94857641cfc85cdb983e3f2e7"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacetum_1_1device.html#a96b35dc94857641cfc85cdb983e3f2e7">tum::device::ddcFrom</a> (int i, const int *nRings, const int *ringAtoms, const int *throughCount, const int *through, const int *hc, int nAtoms, int maxPer, int *ddc)</td></tr>
+<tr class="memdesc:a96b35dc94857641cfc85cdb983e3f2e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">epsilon(i) for a ring that is not HC, as <a class="el" href="namespacering.html#a01243f4581fb55b417184d98f9ac70aa">ring::equatorialConditions</a>: every atom in 3 other rings, and pairwise distinct P_k in T_k with P_0, P_2, P_4 sharing an atom, P_1, P_3, P_5 sharing an atom and, for some starting atom and direction of i, the alternate pairs sharing 3 atoms.  <br /></td></tr>
 <tr class="memitem:ac99948f997289c69b78611f94bc3e61b" id="r_ac99948f997289c69b78611f94bc3e61b"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="namespacetum_1_1device.html#ac99948f997289c69b78611f94bc3e61b">tum::device::atomIceFrom</a> (int r, const int *nRings, const int *ringAtoms, const int *hc, const int *ddc, int nAtoms, int *atomHc, int *atomDdc)</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a71db2a90acf5a50f7cf5f807269ff022" id="r_a71db2a90acf5a50f7cf5f807269ff022"><td class="memItemLeft">constexpr int&#160;</td><td class="memItemRight"><a class="el" href="namespacetum_1_1device.html#a71db2a90acf5a50f7cf5f807269ff022">tum::device::kRowCap</a> = 32</td></tr>
+<tr class="memdesc:a71db2a90acf5a50f7cf5f807269ff022"><td class="mdescLeft">&#160;</td><td class="mdescRight">Longest atom row the kernels accept.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Device-safe TUM ice-score pieces: hop-bound primitive six-rings and claim-free HC/DDC affiliation. </p>

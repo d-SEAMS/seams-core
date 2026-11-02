@@ -15,7 +15,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
-<title>seams-core: /home/runner/work/seams-core/seams-core/src/include/internal/cage_enum.hpp File Reference</title>
+<title>seams-core: src/include/internal/cage_enum.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="dynsections.js"></script>
 <script type="text/javascript" src="codefolding.js"></script>
@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -244,6 +244,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('cage__enum_8hp
 <code>#include &lt;array&gt;</code><br />
 <code>#include &lt;map&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
+<code>#include &lt;string_view&gt;</code><br />
 <code>#include &lt;vector&gt;</code><br />
 </div>
 <p><a href="cage__enum_8hpp_source.html">Go to the source code of this file.</a></p>
@@ -252,6 +253,8 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('cage__enum_8hp
 Classes</h2></td></tr>
 <tr class="memitem:cage_3A_3AFoundCage" id="r_cage_3A_3AFoundCage"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcage_1_1FoundCage.html">cage::FoundCage</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One cage matching a signature, closed or incomplete.  <a href="structcage_1_1FoundCage.html#details">More...</a><br /></td></tr>
+<tr class="memitem:cage_3A_3AEdgeWindow" id="r_cage_3A_3AEdgeWindow"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcage_1_1EdgeWindow.html">cage::EdgeWindow</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inclusive length window on each face edge, in the coordinate units of the frame.  <a href="structcage_1_1EdgeWindow.html#details">More...</a><br /></td></tr>
 <tr class="memitem:cage_3A_3ACageShape" id="r_cage_3A_3ACageShape"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcage_1_1CageShape.html">cage::CageShape</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">IRA/SOFI result for one cage.  <a href="structcage_1_1CageShape.html#details">More...</a><br /></td></tr>
 <tr class="memitem:cage_3A_3AFormerRow" id="r_cage_3A_3AFormerRow"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structcage_1_1FormerRow.html">cage::FormerRow</a></td></tr>
@@ -266,6 +269,8 @@ Namespaces</h2></td></tr>
 Functions</h2></td></tr>
 <tr class="memitem:a40b05518af3bbd5128f459d056b85ac9" id="r_a40b05518af3bbd5128f459d056b85ac9"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacecage.html#a40b05518af3bbd5128f459d056b85ac9">cage::isClosedPolyhedron</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; int &gt; &amp;faces)</td></tr>
 <tr class="memdesc:a40b05518af3bbd5128f459d056b85ac9"><td class="mdescLeft">&#160;</td><td class="mdescRight">True when every edge of the listed faces is used by exactly two of those faces.  <br /></td></tr>
+<tr class="memitem:acee187b82b04d69ebaa0d645cb418434" id="r_acee187b82b04d69ebaa0d645cb418434"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacecage.html#acee187b82b04d69ebaa0d645cb418434">cage::isSpherePolyhedron</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; int &gt; &amp;faces)</td></tr>
+<tr class="memdesc:acee187b82b04d69ebaa0d645cb418434"><td class="mdescLeft">&#160;</td><td class="mdescRight">True when the listed faces are closed (isClosedPolyhedron), at least three faces around each of their vertices form a single cycle, and V - E + F = 2.  <br /></td></tr>
 <tr class="memitem:abe73ca6723c92832e5295714c07133c0" id="r_abe73ca6723c92832e5295714c07133c0"><td class="memItemLeft">std::vector&lt; <a class="el" href="structcage_1_1FoundCage.html">FoundCage</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacecage.html#abe73ca6723c92832e5295714c07133c0">cage::findBySignature</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;signature)</td></tr>
 <tr class="memdesc:abe73ca6723c92832e5295714c07133c0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Face-sharing rings whose size census equals <span class="tt">signature</span> and whose edges close.  <br /></td></tr>
 <tr class="memitem:ac88ef3281ac1ce4742f88829eedfc183" id="r_ac88ef3281ac1ce4742f88829eedfc183"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="namespacecage.html#ac88ef3281ac1ce4742f88829eedfc183">cage::speciesCycleMatches</a> (const std::vector&lt; int &gt; &amp;cycle, const std::vector&lt; int &gt; &amp;pattern)</td></tr>
@@ -274,6 +279,14 @@ Functions</h2></td></tr>
 <tr class="memdesc:a8d763ec0049239c7f6c0a4deb207121b"><td class="mdescLeft">&#160;</td><td class="mdescRight">As findBySignature.  <br /></td></tr>
 <tr class="memitem:ac2f1937ffc84b09b4b552f39a4fbd62f" id="r_ac2f1937ffc84b09b4b552f39a4fbd62f"><td class="memItemLeft">std::vector&lt; <a class="el" href="structcage_1_1FoundCage.html">FoundCage</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacecage.html#ac2f1937ffc84b09b4b552f39a4fbd62f">cage::findBySignature</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;signature)</td></tr>
 <tr class="memdesc:ac2f1937ffc84b09b4b552f39a4fbd62f"><td class="mdescLeft">&#160;</td><td class="mdescRight">As above.  <br /></td></tr>
+<tr class="memitem:a3be534fc27cdb016c731053d03738074" id="r_a3be534fc27cdb016c731053d03738074"><td class="memItemLeft">std::vector&lt; <a class="el" href="structcage_1_1FoundCage.html">FoundCage</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacecage.html#a3be534fc27cdb016c731053d03738074">cage::findBySignature</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;signature, const std::vector&lt; int &gt; &amp;atomRank)</td></tr>
+<tr class="memdesc:a3be534fc27cdb016c731053d03738074"><td class="mdescLeft">&#160;</td><td class="mdescRight">As above, with findHC / findDDC claiming rings in the order of <span class="tt">atomRank</span> (<a class="el" href="namespacering.html#a51764966eab7aea2d90649bb6cc607ea">ring::positionRank</a> of the frame), so the <span class="tt">hc</span> and <span class="tt">ddc</span> cages do not depend on the atom labels.  <br /></td></tr>
+<tr class="memitem:ab1268183070c7d8469fd3abf89e570ab" id="r_ab1268183070c7d8469fd3abf89e570ab"><td class="memItemLeft"><a class="el" href="structcage_1_1EdgeWindow.html">EdgeWindow</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacecage.html#ab1268183070c7d8469fd3abf89e570ab">cage::parseEdgeWindow</a> (std::string_view spec)</td></tr>
+<tr class="memdesc:ab1268183070c7d8469fd3abf89e570ab"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt">none</span>, <span class="tt">off</span>, or <span class="tt">false</span> disables the window.  <br /></td></tr>
+<tr class="memitem:a32dfe047879b1eee4a9e261f1a3b85df" id="r_a32dfe047879b1eee4a9e261f1a3b85df"><td class="memItemLeft">std::string&#160;</td><td class="memItemRight"><a class="el" href="namespacecage.html#a32dfe047879b1eee4a9e261f1a3b85df">cage::edgeWindowSpec</a> (const <a class="el" href="structcage_1_1EdgeWindow.html">EdgeWindow</a> &amp;window)</td></tr>
+<tr class="memdesc:a32dfe047879b1eee4a9e261f1a3b85df"><td class="mdescLeft">&#160;</td><td class="mdescRight"><span class="tt">none</span> when the window is off, otherwise <span class="tt">lo,hi</span>.  <br /></td></tr>
+<tr class="memitem:a0dc224b72071f97e545ee00d7422aefd" id="r_a0dc224b72071f97e545ee00d7422aefd"><td class="memItemLeft">std::vector&lt; std::vector&lt; <a class="el" href="structcage_1_1FoundCage.html">FoundCage</a> &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacecage.html#a0dc224b72071f97e545ee00d7422aefd">cage::findBySignatures</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const std::vector&lt; <a class="el" href="structcage_1_1Signature.html">Signature</a> &gt; &amp;signatures, const std::vector&lt; int &gt; &amp;atomRank, const std::vector&lt; std::array&lt; double, 3 &gt; &gt; *xyz=nullptr, const std::vector&lt; double &gt; *box=nullptr, const <a class="el" href="structcage_1_1EdgeWindow.html">EdgeWindow</a> &amp;window={})</td></tr>
+<tr class="memdesc:a0dc224b72071f97e545ee00d7422aefd"><td class="mdescLeft">&#160;</td><td class="mdescRight">findBySignature for each of <span class="tt">signatures</span>, one list per entry.  <br /></td></tr>
 <tr class="memitem:a04500ad966b000abb178562e6df327b6" id="r_a04500ad966b000abb178562e6df327b6"><td class="memItemLeft">std::vector&lt; <a class="el" href="structcage_1_1FoundCage.html">FoundCage</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacecage.html#a04500ad966b000abb178562e6df327b6">cage::findIncompleteBySignature</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rings, const <a class="el" href="structcage_1_1Signature.html">Signature</a> &amp;signature, int minFaces)</td></tr>
 <tr class="memdesc:a04500ad966b000abb178562e6df327b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Connected face sets that stay inside the signature budget, have at least <span class="tt">minFaces</span> faces, and are not closed.  <br /></td></tr>
 <tr class="memitem:abd559edfed90ce42a4b9e65e0470c186" id="r_abd559edfed90ce42a4b9e65e0470c186"><td class="memItemLeft">std::vector&lt; std::array&lt; double, 3 &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="namespacecage.html#abd559edfed90ce42a4b9e65e0470c186">cage::coordsOfVertices</a> (const std::vector&lt; std::array&lt; double, 3 &gt; &gt; &amp;all, const std::vector&lt; int &gt; &amp;vertices)</td></tr>
@@ -289,7 +302,7 @@ Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Signature-guided enumeration of polyhedral cages. </p>
-<p>A cage is a connected set of primitive rings (faces) whose size census matches a Signature and whose edges form a closed polyhedron: every edge of every face is shared by exactly two faces of the set. Growth walks the ring adjacency graph (two rings are adjacent when they share an edge) and stays inside the signature budget. Distinct cages are the distinct sorted vertex sets; the nauty certificate, when linked, names the isomorphism class of each cage. </p>
+<p>A cage is a connected set of primitive rings (faces) whose size census matches a Signature and whose edges form a closed polyhedron: every edge of every face is shared by exactly two faces of the set, at least three faces around each vertex form one cycle, and V - E + F = 2, so the faces tile a sphere. Production entry points pass rings through <a class="el" href="namespacering.html#a9d784052b67c693381315d0947be0881">ring::cageRings</a> first: a ring whose minimum-image lattice shifts sum to a nonzero winding is not a face, and a cutoff that can see two images of one pair is refused. Growth walks the ring adjacency graph (two rings are adjacent when they share an edge) and stays inside the signature budget. Distinct cages are the distinct sorted vertex sets, listed by their sorted faces; the nauty certificate, when linked, names the isomorphism class of each cage. </p>
 
 <p class="definition">Definition in file <a class="el" href="cage__enum_8hpp_source.html">cage_enum.hpp</a>.</p>
 </div></div><!-- contents -->

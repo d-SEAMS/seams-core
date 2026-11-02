@@ -92,11 +92,19 @@ data-aria-dark="Switch to auto color mode">
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/ice-and-clathrate.html">Ice and clathrate labels</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/rings.html">Primitive rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/order-parameters.html">Bond-orientational order parameters</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/confined-water.html">Confined water</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-figures.html">Paper figures</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">How-to</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/bindings.html">Build the language fronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/versions.html">Version pins</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/openmp-offload.html">OpenMP target offload</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/sheared-cells.html">Sheared cells</a></li>
@@ -113,6 +121,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Repositories</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/ring-completion.html">Ring-adjacent completion</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/topological-network.html">Topological network criteria</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
@@ -123,6 +132,21 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../reference/walk-compare.html">walk_compare</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/api.html">API map</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html">Generated anchors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#cage-cagetype">cage::cageType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#cage-icetype">cage::iceType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#sph-spheriharmo">sph::spheriHarmo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#gen-periodicdist">gen::periodicDist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#molsys-atom-state-type">molSys::atom_state_type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#molsys-bond-type">molSys::bond_type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#nneigh-neighbourlistbyindex">nneigh::neighbourListByIndex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#nneigh-dumpvolume">nneigh::dumpVolume</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#primitive-removenonsprings">primitive::removeNonSPrings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#primitive-ringnetwork">primitive::ringNetwork</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#primitive-countallringsfromindex">primitive::countAllRingsFromIndex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#rdf2-normalizerdf">rdf2::normalizeRDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#ring-structype">ring::strucType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#ring-assignpolygontype">ring::assignPolygonType</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_bond.html">Bond</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_prism3.html">Bulk prisms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_cage.html">Cage</a></li>
@@ -139,6 +163,7 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/cross-language.html">One task, four fronts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
 </ul>
 </li>
@@ -146,8 +171,24 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/walk-compare.html">walk_compare</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cross-language.html">One task, four fronts</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API map</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html">Generated anchors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#cage-cagetype">cage::cageType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#cage-icetype">cage::iceType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#sph-spheriharmo">sph::spheriHarmo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#gen-periodicdist">gen::periodicDist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#molsys-atom-state-type">molSys::atom_state_type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#molsys-bond-type">molSys::bond_type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#nneigh-neighbourlistbyindex">nneigh::neighbourListByIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#nneigh-dumpvolume">nneigh::dumpVolume</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#primitive-removenonsprings">primitive::removeNonSPrings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#primitive-ringnetwork">primitive::ringNetwork</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#primitive-countallringsfromindex">primitive::countAllRingsFromIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#rdf2-normalizerdf">rdf2::normalizeRDF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#ring-structype">ring::strucType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#ring-assignpolygontype">ring::assignPolygonType</a></li>
 <li class="toctree-l2"><a class="reference internal" href="group_bond.html">Bond</a></li>
 <li class="toctree-l2"><a class="reference internal" href="group_prism3.html">Bulk prisms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="group_cage.html">Cage</a></li>
@@ -180,6 +221,13 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">d-SEAMS 2.0 paper</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/index.html">d-SEAMS 2.0 paper</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/versions.html">Versions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/reproduce.html">Reproduce</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
 <ul>
@@ -324,7 +372,7 @@ data-aria-dark="Switch to auto color mode">
 <span data-line="10"><span class="kt">int</span> <a class="doxyrest-code-link reference internal" href="#doxid-namespacepnt-to-pnt-1ad35ccbeea04f34625242accc1af6d6f8"><span class="std std-ref">relOrderPrismBlock</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basal1</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basal2</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">outBasal1</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">outBasal2</span><span class="p">);</span></span>
 <span data-line="11"><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <a class="doxyrest-code-link reference internal" href="#doxid-namespacepnt-to-pnt-1add7f31e0a4e17beae5c3ded8752e9259"><span class="std std-ref">fillPointSetPrismRing</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basalRing</span><span class="p">,</span> <span class="kt">int</span> <span class="n">startingIndex</span><span class="p">);</span></span>
 <span data-line="12"><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <a class="doxyrest-code-link reference internal" href="#doxid-namespacepnt-to-pnt-1ad9d450912979a4c05acb3e1f7829a55f"><span class="std std-ref">fillPointSetPrismBlock</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basal1</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basal2</span><span class="p">,</span> <span class="kt">int</span> <span class="n">startingIndex</span><span class="p">);</span></span>
-<span data-line="13"><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <a class="doxyrest-code-link reference internal" href="#doxid-namespacepnt-to-pnt-1a332141ec965df89d231a1def4dc3f5d7"><span class="std std-ref">getPointSetCage</span></a><span class="p">(</span><span class="n">ring</span><span class="o">::</span><span class="n">strucType</span> <span class="n">type</span><span class="p">);</span></span>
+<span data-line="13"><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <a class="doxyrest-code-link reference internal" href="#doxid-namespacepnt-to-pnt-1a332141ec965df89d231a1def4dc3f5d7"><span class="std std-ref">getPointSetCage</span></a><span class="p">(</span><a class="doxyrest-code-link reference internal" href="generated_targets.html#doxid-group-ring-1ga301cfdc88452cfe51bd4f745d223a7e1"><span class="std std-ref">ring::strucType</span></a> <span class="n">type</span><span class="p">);</span></span>
 <span data-line="14"><span class="kt">int</span> <a class="doxyrest-code-link reference internal" href="#doxid-namespacepnt-to-pnt-1ae91f374f024840f0e75795a5b6c5f2ee"><span class="std std-ref">relOrderHC</span></a><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basal1</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">basal2</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">nList</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">matchedBasal1</span><span class="p">,</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">matchedBasal2</span><span class="p">);</span></span>
 <span data-line="15"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-namespacepnt-to-pnt-1afa4d01264e49ab06b2828332e961c8f4"><span class="std std-ref">relOrderDDC</span></a><span class="p">(</span><span class="kt">int</span> <span class="n">index</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">rings</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_cage_Cage.html#doxid-structcage-1-1-cage"><span class="std std-ref">cage::Cage</span></a><span class="o">&gt;&amp;</span> <span class="n">cageList</span><span class="p">);</span></span>
 <span data-line="16"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-namespacepnt-to-pnt-1a104a9978a1cec40aeb76f2dbb5afa277"><span class="std std-ref">relOrderDDC</span></a><span class="p">(</span><span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span> <span class="n">equatorial</span><span class="p">,</span> <span class="kt">int</span> <span class="n">index</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&amp;</span> <span class="n">rings</span><span class="p">,</span> <span class="k">const</span> <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_cage_Cage.html#doxid-structcage-1-1-cage"><span class="std std-ref">cage::Cage</span></a><span class="o">&gt;&amp;</span> <span class="n">cageList</span><span class="p">);</span></span>
@@ -371,7 +419,7 @@ data-aria-dark="Switch to auto color mode">
 </pre></div>
 <p>Fill up an Eigen matrix of a prism block (two basal rings) from input vectors for the basal rings</p>
 <div class="doxyrest-title-code-block highlight" id="doxid-namespacepnt-to-pnt-1a332141ec965df89d231a1def4dc3f5d7">
-<span id="index-9"></span><pre><span data-line="1"><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">getPointSetCage</span><span class="p">(</span><span class="n">ring</span><span class="o">::</span><span class="n">strucType</span> <span class="n">type</span><span class="p">)</span></span>
+<span id="index-9"></span><pre><span data-line="1"><span class="n">Eigen</span><span class="o">::</span><span class="n">MatrixXd</span> <span class="n">getPointSetCage</span><span class="p">(</span><a class="doxyrest-code-link reference internal" href="generated_targets.html#doxid-group-ring-1ga301cfdc88452cfe51bd4f745d223a7e1"><span class="std std-ref">ring::strucType</span></a> <span class="n">type</span><span class="p">)</span></span>
 </pre></div>
 <p>Fills up an eigen matrix point set a reference ring, which is a regular n-gonal polygon, constructed with radius 1 by default; where n is the number of nodes in the ring</p>
 <div class="doxyrest-title-code-block highlight" id="doxid-namespacepnt-to-pnt-1ae91f374f024840f0e75795a5b6c5f2ee">

@@ -34,8 +34,7 @@ The code essentially bins distances between pairs of particles, and normalizes t
 
 #. **Normalization:** Every bin of the :math:`g(r)` array is normalized by the product of the number of ideal gas particles in that bin, and the number of particles and number of frames.
 
-To account for the geometry of the slab-like quasi-two-dimensional system, the RDF must be additionally normalized by a form factor :math:`f` such that :math:`f = \frac{h}{2r}` for :math:`r>h` and :math:`f = \frac{h}{2r}` for :math:`r \le
-h`; where :math:`h` is the height of the quasi-two-dimensional system.
+To account for the geometry of the slab-like quasi-two-dimensional system, the RDF must be additionally normalized by a form factor :math:`f` such that :math:`f = 1 - \frac{r}{2h}` for :math:`r \le h` and :math:`f = \frac{h}{2r}` for :math:`r > h`; where :math:`h` is the height of the quasi-two-dimensional system. That is what ``:ref:`rdf2::normalizeRDF <doxid-group__rdf2_1ga7f3e0b969a3ad28ce57dc8e7e74b6b98>``` implements.
 
 
 

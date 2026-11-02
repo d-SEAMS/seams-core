@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -245,6 +245,8 @@ Namespaces</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:CageCounts" id="r_CageCounts"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structtum_1_1CageCounts.html">CageCounts</a></td></tr>
+<tr class="memitem:SpecializedCaps" id="r_SpecializedCaps"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structtum_1_1SpecializedCaps.html">SpecializedCaps</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initial buffer sizes of the hop-bound path.  <a href="structtum_1_1SpecializedCaps.html#details">More...</a><br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
@@ -254,6 +256,8 @@ Functions</h2></td></tr>
 <tr class="memdesc:a5b6f992c67dea89064fe1bbe224f7533"><td class="mdescLeft">&#160;</td><td class="mdescRight">Host Franzblau six-rings plus cageAffiliation on an index nList (leading self entry, as neighbourListByIndex produces).  <br /></td></tr>
 <tr class="memitem:a50a0ddf8a6606b733a73b4689bda3efa" id="r_a50a0ddf8a6606b733a73b4689bda3efa"><td class="memItemLeft"><a class="el" href="structtum_1_1CageCounts.html">CageCounts</a>&#160;</td><td class="memItemRight"><a class="el" href="#a50a0ddf8a6606b733a73b4689bda3efa">specializedCageCounts</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</td></tr>
 <tr class="memdesc:a50a0ddf8a6606b733a73b4689bda3efa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hop-bound six-ring enumerator plus affiliation predicates.  <br /></td></tr>
+<tr class="memitem:aec9875e12aa5941e584bd0150771f9bf" id="r_aec9875e12aa5941e584bd0150771f9bf"><td class="memItemLeft"><a class="el" href="structtum_1_1CageCounts.html">CageCounts</a>&#160;</td><td class="memItemRight"><a class="el" href="#aec9875e12aa5941e584bd0150771f9bf">specializedCageCounts</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structtum_1_1SpecializedCaps.html">SpecializedCaps</a> &amp;caps)</td></tr>
+<tr class="memdesc:aec9875e12aa5941e584bd0150771f9bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">As above, starting from the given buffer sizes.  <br /></td></tr>
 <tr class="memitem:a5db91702c7f7d13a3878708e01999945" id="r_a5db91702c7f7d13a3878708e01999945"><td class="memItemLeft"><a class="el" href="structtum_1_1CageCounts.html">CageCounts</a>&#160;</td><td class="memItemRight"><a class="el" href="#a5db91702c7f7d13a3878708e01999945">cageCounts</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</td></tr>
 <tr class="memdesc:a5db91702c7f7d13a3878708e01999945"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="#a9dc1d26c60d5f757e66305b65b42aed0" title="True when SEAMS_OFFLOAD is set and is not &quot;0&quot;.">preferOffload()</a> selects specializedCageCounts, otherwise hostCageCounts.  <br /></td></tr>
 </table>
@@ -340,7 +344,7 @@ Functions</h2></td></tr>
 </div>
 </div>
 <a id="a50a0ddf8a6606b733a73b4689bda3efa" name="a50a0ddf8a6606b733a73b4689bda3efa"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a50a0ddf8a6606b733a73b4689bda3efa">&#9670;&#160;</a></span>specializedCageCounts()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a50a0ddf8a6606b733a73b4689bda3efa">&#9670;&#160;</a></span>specializedCageCounts() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -364,6 +368,37 @@ Functions</h2></td></tr>
 
 <p>Hop-bound six-ring enumerator plus affiliation predicates. </p>
 <p>Uses the OpenMP target device when offload is compiled and a device exists. </p>
+
+</div>
+</div>
+<a id="aec9875e12aa5941e584bd0150771f9bf" name="aec9875e12aa5941e584bd0150771f9bf"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aec9875e12aa5941e584bd0150771f9bf">&#9670;&#160;</a></span>specializedCageCounts() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structtum_1_1CageCounts.html">CageCounts</a> tum::specializedCageCounts </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structtum_1_1SpecializedCaps.html">SpecializedCaps</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>caps</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>As above, starting from the given buffer sizes. </p>
 
 </div>
 </div>

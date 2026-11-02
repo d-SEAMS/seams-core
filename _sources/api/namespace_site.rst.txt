@@ -13,6 +13,7 @@ namespace site
 	struct_site_DensityZ.rst
 	struct_site_GuestOccupancy.rst
 	struct_site_IceClusterIons.rst
+	struct_site_InsideTrace.rst
 	struct_site_IonEnvironment.rst
 	struct_site_Table.rst
 
@@ -39,8 +40,13 @@ Overview
 	struct :ref:`DensityZ<doxid-structsite_1_1_density_z>`;
 	struct :ref:`GuestOccupancy<doxid-structsite_1_1_guest_occupancy>`;
 	struct :ref:`IceClusterIons<doxid-structsite_1_1_ice_cluster_ions>`;
+	struct :ref:`InsideTrace<doxid-structsite_1_1_inside_trace>`;
 	struct :ref:`IonEnvironment<doxid-structsite_1_1_ion_environment>`;
 	struct :ref:`Table<doxid-structsite_1_1_table>`;
+
+	// global variables
+
+	double :ref:`kInsideRelTol<doxid-namespacesite_1a17c7ad054eafa92f5e5238e14109b97a>` = 1e-9;
 
 	// global functions
 
@@ -56,8 +62,13 @@ Overview
 	:ref:`Table<doxid-structsite_1_1_table>` :target:`parseSiteSpec<doxid-namespacesite_1ab556d24c5f6d7d7be9ba2e4d975259be>`(std::string_view spec);
 	:ref:`IonEnvironment<doxid-structsite_1_1_ion_environment>` :ref:`ionEnvironment<doxid-namespacesite_1a59c0f056c026caebb259d8c8e0d032e1>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<bool>& iceFlag, const std::vector<int>& ionIndices, int waterType, double cutoff);
 	std::vector<int> :ref:`shellRingCensus<doxid-namespacesite_1a3327b0f82b57a80d113b241dec0eb711>`(const std::vector<std::vector<int>>& rings, const std::vector<int>& shell, int maxRingSize);
+	std::vector<std::vector<int>> :ref:`cappedRings<doxid-namespacesite_1a99a4e8b8fb177f7fea900ac24f145d45>`(const std::vector<std::vector<int>>& rings, const std::vector<int>& shell, int maxRingSize);
+	std::vector<std::vector<int>> :ref:`brokenRings<doxid-namespacesite_1a1e366213de1b2f4f04c86f8364b609f6>`(const std::vector<std::vector<int>>& nList, const std::vector<int>& shell, int maxRingSize);
 	:ref:`GuestOccupancy<doxid-structsite_1_1_guest_occupancy>` :ref:`guestOccupancy<doxid-namespacesite_1adf97b42407e86bc9d067855b19397ac8>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& cages, const std::vector<int>& guestIndices, double radius);
 	std::array<double, 3> :ref:`periodicCentroid<doxid-namespacesite_1a208c6e1f8e6106530d6c75bb16dccaad>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& atoms);
+	const std::vector<std::array<double, 3>>& :ref:`insideRayDirections<doxid-namespacesite_1a9231f841816296c279bcf08186f332de>`();
+	:ref:`InsideTrace<doxid-structsite_1_1_inside_trace>` :ref:`pointInFacesTrace<doxid-namespacesite_1afc9315591f9625e0013b8ed56887297f>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, const std::vector<int>& faces, const std::array<double, 3>& guest, const std::array<double, 3>* centre = nullptr);
+	bool :target:`pointInFaces<doxid-namespacesite_1a040c7a9f8809cf0b1fb82b9294df197c>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, const std::vector<int>& faces, const std::array<double, 3>& guest, const std::array<double, 3>* centre = nullptr);
 	:ref:`GuestOccupancy<doxid-structsite_1_1_guest_occupancy>` :ref:`guestOccupancyInside<doxid-namespacesite_1a84113178c851924869bd3fee27af749b>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& cageFaces, const std::vector<int>& guestIndices);
 	:ref:`IceClusterIons<doxid-structsite_1_1_ice_cluster_ions>` :target:`iceClusterIonCensus<doxid-namespacesite_1a2c1ad7bff89d54bbb4c2a22f93e3eeaf>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<bool>& ice, const std::vector<std::vector<int>>& nListByIndex, const std::vector<int>& ionIndices, double cutoff);
 
@@ -68,6 +79,19 @@ Detailed Documentation
 ~~~~~~~~~~~~~~~~~~~~~~
 
 
+
+Global Variables
+----------------
+
+.. index:: pair: variable; kInsideRelTol
+.. _doxid-namespacesite_1a17c7ad054eafa92f5e5238e14109b97a:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double kInsideRelTol = 1e-9
+
+Relative tolerance of the inside test, in units of the largest distance from c_F to a cage vertex.
 
 Global Functions
 ----------------
@@ -114,6 +138,30 @@ Rings of the water network that pass through a first shell: the census by size o
 
 An ion is not a vertex of the network, so the rings it would have closed are gone and the rings its shell still carries measure how far the network survives around it (the hydration-shell ring census of a brine or an ionic solution). ``census[s]`` counts rings of size s up to ``maxRingSize``.
 
+.. index:: pair: function; cappedRings
+.. _doxid-namespacesite_1a99a4e8b8fb177f7fea900ac24f145d45:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> cappedRings(const std::vector<std::vector<int>>& rings, const std::vector<int>& shell, int maxRingSize)
+
+Capped rings: the water-only primitive rings of ``rings`` (the ring network of the water graph, ions not vertices) of at most ``maxRingSize`` members, every member of which lies in ``shell``.
+
+The ion sits above a complete water ring.
+
+.. index:: pair: function; brokenRings
+.. _doxid-namespacesite_1a1e366213de1b2f4f04c86f8364b609f6:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> brokenRings(const std::vector<std::vector<int>>& nList, const std::vector<int>& shell, int maxRingSize)
+
+Broken rings: the primitive rings, of at most ``maxRingSize`` members, of the water graph ``nList`` (by index, leading self entry, ions not bonded) plus one virtual ion vertex bonded to every water of ``shell``, that contain the ion.
+
+These are the rings the water-only network lost. Each ring is in ring order and writes the virtual ion as ``static_cast<int>(nList.size())``.
+
 .. index:: pair: function; guestOccupancy
 .. _doxid-namespacesite_1adf97b42407e86bc9d067855b19397ac8:
 
@@ -134,6 +182,28 @@ An ion is not a vertex of the network, so the rings it would have closed are gon
 
 Periodic centroid of a set of atoms: every atom is unwrapped to its minimum image about the first, and the mean is taken there.
 
+.. index:: pair: function; insideRayDirections
+.. _doxid-namespacesite_1a9231f841816296c279bcf08186f332de:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	const std::vector<std::array<double, 3>>& insideRayDirections()
+
+The fixed, ordered unit directions the inside test casts rays along.
+
+.. index:: pair: function; pointInFacesTrace
+.. _doxid-namespacesite_1afc9315591f9625e0013b8ed56887297f:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`InsideTrace<doxid-structsite_1_1_inside_trace>` pointInFacesTrace(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, const std::vector<int>& faces, const std::array<double, 3>& guest, const std::array<double, 3>* centre = nullptr)
+
+The inside predicate for one cage.
+
+The face vertices and the guest are unwrapped about c_F (``centre``, or the periodic centroid of the distinct face vertices when null) and each face is fan-triangulated from its own centroid. The guest is inside when it lies on a triangle within ``:ref:`kInsideRelTol <doxid-namespacesite_1a17c7ad054eafa92f5e5238e14109b97a>```; otherwise a ray is cast along the first direction of ``:ref:`insideRayDirections() <doxid-namespacesite_1a9231f841816296c279bcf08186f332de>``` that passes no triangle edge or vertex within that tolerance, and the guest is inside when the ray meets an odd number of triangles. When every direction grazes, the one with the widest clearance decides.
+
 .. index:: pair: function; guestOccupancyInside
 .. _doxid-namespacesite_1a84113178c851924869bd3fee27af749b:
 
@@ -142,7 +212,7 @@ Periodic centroid of a set of atoms: every atom is unwrapped to its minimum imag
 
 	:ref:`GuestOccupancy<doxid-structsite_1_1_guest_occupancy>` guestOccupancyInside(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& rings, const std::vector<std::vector<int>>& cageFaces, const std::vector<int>& guestIndices)
 
-Occupancy by ray-parity: a guest sits in a cage when a ray from the guest, in the frame that unwraps the cage about its periodic centroid, crosses an odd number of fan-triangulated faces.
+Occupancy by the inside predicate (``:ref:`pointInFaces <doxid-namespacesite_1a040c7a9f8809cf0b1fb82b9294df197c>```) on every cage.
 
 Among cages that contain the guest the nearest centroid wins. ``rings`` is the ring list the cage faces index; ``cageFaces[c]`` is the face indices of cage c.
 

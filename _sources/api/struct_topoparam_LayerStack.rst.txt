@@ -13,7 +13,7 @@ CHILL+ cubic/hexagonal molecules binned into basal layers along ``axis`` (0=x, 1
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <order_parameter.hpp>
+	#include <src/include/internal/order_parameter.hpp>
 	
 	struct LayerStack {
 		// fields

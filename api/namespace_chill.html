@@ -92,11 +92,19 @@ data-aria-dark="Switch to auto color mode">
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/ice-and-clathrate.html">Ice and clathrate labels</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/rings.html">Primitive rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/order-parameters.html">Bond-orientational order parameters</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/confined-water.html">Confined water</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-figures.html">Paper figures</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">How-to</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/bindings.html">Build the language fronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/versions.html">Version pins</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/openmp-offload.html">OpenMP target offload</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/sheared-cells.html">Sheared cells</a></li>
@@ -113,6 +121,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Repositories</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/ring-completion.html">Ring-adjacent completion</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/topological-network.html">Topological network criteria</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
@@ -123,6 +132,21 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../reference/walk-compare.html">walk_compare</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/api.html">API map</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html">Generated anchors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#cage-cagetype">cage::cageType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#cage-icetype">cage::iceType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#sph-spheriharmo">sph::spheriHarmo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#gen-periodicdist">gen::periodicDist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#molsys-atom-state-type">molSys::atom_state_type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#molsys-bond-type">molSys::bond_type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#nneigh-neighbourlistbyindex">nneigh::neighbourListByIndex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#nneigh-dumpvolume">nneigh::dumpVolume</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#primitive-removenonsprings">primitive::removeNonSPrings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#primitive-ringnetwork">primitive::ringNetwork</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#primitive-countallringsfromindex">primitive::countAllRingsFromIndex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#rdf2-normalizerdf">rdf2::normalizeRDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#ring-structype">ring::strucType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#ring-assignpolygontype">ring::assignPolygonType</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_bond.html">Bond</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_prism3.html">Bulk prisms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_cage.html">Cage</a></li>
@@ -139,6 +163,7 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/cross-language.html">One task, four fronts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
 </ul>
 </li>
@@ -146,8 +171,24 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/walk-compare.html">walk_compare</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cross-language.html">One task, four fronts</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API map</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html">Generated anchors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#cage-cagetype">cage::cageType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#cage-icetype">cage::iceType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#sph-spheriharmo">sph::spheriHarmo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#gen-periodicdist">gen::periodicDist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#molsys-atom-state-type">molSys::atom_state_type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#molsys-bond-type">molSys::bond_type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#nneigh-neighbourlistbyindex">nneigh::neighbourListByIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#nneigh-dumpvolume">nneigh::dumpVolume</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#primitive-removenonsprings">primitive::removeNonSPrings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#primitive-ringnetwork">primitive::ringNetwork</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#primitive-countallringsfromindex">primitive::countAllRingsFromIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#rdf2-normalizerdf">rdf2::normalizeRDF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#ring-structype">ring::strucType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#ring-assignpolygontype">ring::assignPolygonType</a></li>
 <li class="toctree-l2"><a class="reference internal" href="group_bond.html">Bond</a></li>
 <li class="toctree-l2"><a class="reference internal" href="group_prism3.html">Bulk prisms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="group_cage.html">Cage</a></li>
@@ -173,6 +214,13 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">d-SEAMS 2.0 paper</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/index.html">d-SEAMS 2.0 paper</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/versions.html">Versions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/reproduce.html">Reproduce</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
 <ul>
@@ -363,54 +411,33 @@ data-aria-dark="Switch to auto color mode">
 </div>
 <p>where, <span class="math notranslate nohighlight">\(q_{lm}^*\)</span> is the complex conjugate of <span class="math notranslate nohighlight">\(q_{lm}\)</span>.</p>
 <p>Depending on the values of <span class="math notranslate nohighlight">\(a(i,j)\)</span>, the bond between each pair of molecules <span class="math notranslate nohighlight">\(i\)</span> and <span class="math notranslate nohighlight">\(j\)</span> is classified as being either staggered or eclipsed.</p>
-<div class="table-wrapper docutils container">
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Algorithm</p></th>
-<th class="head"><p>Eclipsed Bonds</p></th>
-<th class="head"><p>Staggered Bonds</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>CHILL</p></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p>CHILL+</p></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-</div>
+<div class="highlight">
+<pre><span data-line="1"><span class="n">Algorithm</span>   <span class="n">Eclipsed</span> <span class="n">bonds</span>              <span class="n">Staggered</span> <span class="n">bonds</span></span>
+<span data-line="2"><span class="n">CHILL</span>       <span class="o">-</span><span class="mf">0.05</span> <span class="o">&gt;=</span> <span class="n">a</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mf">0.2</span>     <span class="n">a</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mf">0.8</span></span>
+<span data-line="3"><span class="n">CHILL</span><span class="o">+</span>      <span class="mf">0.25</span> <span class="o">&gt;=</span> <span class="n">a</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mf">0.35</span>     <span class="n">a</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mf">0.8</span></span>
+</pre></div>
 <p>Since each molecule <span class="math notranslate nohighlight">\(i\)</span> in deeply supercooled water has four nearest neighbours, the type of the resultant four bonds is used to identify phases according to the CHILL and CHILL+ algorithms.</p>
 <p>The CHILL algorithm can classify water molecules as belonging to the cubic, hexagonal, interfacial or liquid (amorphous) phase:</p>
-<div class="line-block">
-<div class="line">Phase | E | S | Neighbours | Description | <a href="#id1"><span class="problematic" id="id2">|</span></a>———- <a href="#id3"><span class="problematic" id="id4">|</span></a>– <a href="#id5"><span class="problematic" id="id6">|</span></a>– <a href="#id7"><span class="problematic" id="id8">|</span></a>——— <a href="#id9"><span class="problematic" id="id10">|</span></a>—————————————————— | | Cubic | 0 | 4 | 4 | All 4 neighbours are staggered. | | Hexagonal | 1 | 3 | 4 | 3 staggered and 1 eclipsed bond. | | Interfacial | any | 2 | 4 | Belongs to the ice phase, but does not satisfy strict criteria of cubic and hexagonal | | | 0 | 3 | 4 | | | Liquid | N/A | N/A | any | Classification by exclusion. |</div>
-</div>
+<div class="highlight">
+<pre><span data-line="1"><span class="n">Phase</span>        <span class="n">E</span>    <span class="n">S</span>    <span class="n">Neighbours</span>  <span class="n">Description</span></span>
+<span data-line="2"><span class="n">Cubic</span>        <span class="mi">0</span>    <span class="mi">4</span>    <span class="mi">4</span>           <span class="n">All</span> <span class="mi">4</span> <span class="n">neighbours</span> <span class="n">are</span> <span class="n">staggered</span><span class="p">.</span></span>
+<span data-line="3"><span class="n">Hexagonal</span>    <span class="mi">1</span>    <span class="mi">3</span>    <span class="mi">4</span>           <span class="mi">3</span> <span class="n">staggered</span> <span class="n">and</span> <span class="mi">1</span> <span class="n">eclipsed</span> <a class="doxyrest-code-link reference internal" href="namespace_bond.html#doxid-namespacebond"><span class="std std-ref">bond</span></a><span class="p">.</span></span>
+<span data-line="4"><span class="n">Interfacial</span>  <span class="n">any</span>  <span class="mi">2</span>    <span class="mi">4</span>           <span class="n">Belongs</span> <span class="n">to</span> <span class="n">the</span> <span class="n">ice</span> <a class="doxyrest-code-link reference internal" href="namespace_phase.html#doxid-namespacephase"><span class="std std-ref">phase</span></a><span class="p">,</span> <span class="n">but</span> <span class="n">does</span> <span class="n">not</span> <span class="n">satisfy</span> <span class="n">strict</span> <span class="n">criteria</span> <span class="n">of</span> <span class="n">cubic</span> <span class="n">and</span> <span class="n">hexagonal</span><span class="p">.</span></span>
+<span data-line="5">             <span class="mi">0</span>    <span class="mi">3</span>    <span class="mi">4</span></span>
+<span data-line="6"><span class="n">Liquid</span>       <span class="n">N</span><span class="o">/</span><span class="n">A</span>  <span class="n">N</span><span class="o">/</span><span class="n">A</span>  <span class="n">any</span>         <span class="n">Classification</span> <span class="n">by</span> <span class="n">exclusion</span><span class="p">.</span></span>
+</pre></div>
 <p>Here, E and S refer to eclipsed and staggered bonds. The neighbours column contains the number of nearest neighbours.</p>
 <p>The CHILL+ algorithm, which is a modified version of CHILL, additionally identifies clathrate and interfacial clathrate phases. The criteria are enumerated in the table below:</p>
-<div class="table-wrapper docutils container">
-<table class="docutils align-default">
-<thead>
-<tr class="row-odd"><th class="head"><p>Phase</p></th>
-<th class="head"><p>E</p></th>
-<th class="head"><p>S</p></th>
-<th class="head"><p>Neighbours</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>Cubic</p></td>
-<td><p>0</p></td>
-<td><p>4</p></td>
-<td><p>4</p></td>
-<td><p>no change was made to</p></td>
-</tr>
-</tbody>
-</table>
-</div>
-<p>staggered bond criterion from CHILL | | Hexagonal | 1 | 3 | 4 | wider eclipsed range compared to CHILL; identifies 99% hexagonal ice up to 270 K | | Interfacial | any | 2 | 4 | must have at least one first neighbor water with more than two staggered bonds | | | 0 | 3 | 4 | must have at least one first neighbor water with more than one staggered bond | | Clathrate | 4 | 0 | 4 | bulk clathrate and part of the interface of clathrates can be identified with four eclipsed bonds | | Interfacial clathrate | 3 | any | 4 | partial clathrate cages and threads of clathrate-like order | | Liquid | N/A | N/A | any | classifies as liquid if none of the above criteria are fulfilled |</p>
+<div class="highlight">
+<pre><span data-line="1"><span class="n">Phase</span>                  <span class="n">E</span>    <span class="n">S</span>    <span class="n">Neighbours</span>  <span class="n">Description</span></span>
+<span data-line="2"><span class="n">Cubic</span>                  <span class="mi">0</span>    <span class="mi">4</span>    <span class="mi">4</span>           <span class="n">no</span> <span class="n">change</span> <span class="n">was</span> <span class="n">made</span> <span class="n">to</span> <span class="n">the</span> <span class="n">staggered</span> <a class="doxyrest-code-link reference internal" href="namespace_bond.html#doxid-namespacebond"><span class="std std-ref">bond</span></a> <span class="n">criterion</span> <span class="n">from</span> <span class="n">CHILL</span></span>
+<span data-line="3"><span class="n">Hexagonal</span>              <span class="mi">1</span>    <span class="mi">3</span>    <span class="mi">4</span>           <span class="n">wider</span> <span class="n">eclipsed</span> <span class="n">range</span> <span class="n">compared</span> <span class="n">to</span> <span class="n">CHILL</span><span class="p">;</span> <span class="n">identifies</span> <span class="mi">99</span><span class="o">%</span> <span class="n">hexagonal</span> <span class="n">ice</span> <span class="n">up</span> <span class="n">to</span> <span class="mi">270</span> <span class="n">K</span></span>
+<span data-line="4"><span class="n">Interfacial</span>            <span class="n">any</span>  <span class="mi">2</span>    <span class="mi">4</span>           <span class="n">must</span> <span class="n">have</span> <span class="n">at</span> <span class="n">least</span> <span class="n">one</span> <span class="n">first</span> <span class="n">neighbor</span> <span class="n">water</span> <span class="n">with</span> <span class="n">more</span> <span class="n">than</span> <span class="n">two</span> <span class="n">staggered</span> <span class="n">bonds</span></span>
+<span data-line="5">                       <span class="mi">0</span>    <span class="mi">3</span>    <span class="mi">4</span>           <span class="n">must</span> <span class="n">have</span> <span class="n">at</span> <span class="n">least</span> <span class="n">one</span> <span class="n">first</span> <span class="n">neighbor</span> <span class="n">water</span> <span class="n">with</span> <span class="n">more</span> <span class="n">than</span> <span class="n">one</span> <span class="n">staggered</span> <a class="doxyrest-code-link reference internal" href="namespace_bond.html#doxid-namespacebond"><span class="std std-ref">bond</span></a></span>
+<span data-line="6"><span class="n">Clathrate</span>              <span class="mi">4</span>    <span class="mi">0</span>    <span class="mi">4</span>           <span class="n">bulk</span> <span class="n">clathrate</span> <span class="n">and</span> <span class="n">part</span> <span class="n">of</span> <span class="n">the</span> <span class="n">interface</span> <span class="n">of</span> <span class="n">clathrates</span> <span class="n">can</span> <span class="n">be</span> <span class="n">identified</span> <span class="n">with</span> <span class="n">four</span> <span class="n">eclipsed</span> <span class="n">bonds</span></span>
+<span data-line="7"><span class="n">Interfacial</span> <span class="n">clathrate</span>  <span class="mi">3</span>    <span class="n">any</span>  <span class="mi">4</span>           <span class="n">partial</span> <span class="n">clathrate</span> <span class="n">cages</span> <span class="n">and</span> <span class="n">threads</span> <span class="n">of</span> <span class="n">clathrate</span><span class="o">-</span><span class="n">like</span> <span class="n">order</span></span>
+<span data-line="8"><span class="n">Liquid</span>                 <span class="n">N</span><span class="o">/</span><span class="n">A</span>  <span class="n">N</span><span class="o">/</span><span class="n">A</span>  <span class="n">any</span>         <span class="n">classifies</span> <span class="n">as</span> <span class="n">liquid</span> <span class="k">if</span> <span class="n">none</span> <span class="n">of</span> <span class="n">the</span> <span class="n">above</span> <span class="n">criteria</span> <span class="n">are</span> <span class="n">fulfilled</span></span>
+</pre></div>
 <p>Although both the CHILL and CHILL+ classification schemes take into account the local order of the environment of each particle, both schemes output a per-particle classification.</p>
 <section id="changelog">
 <span id="doxid-namespacechill-1autotoc-md1"></span><span id="doxid-namespacechill-1autotoc-md1-1s2"></span><span id="doxid-namespacechill-1autotoc-md1-1s1"></span><h3>Changelog<a class="headerlink" href="#changelog" title="Link to this heading">¶</a></h3>
@@ -453,7 +480,7 @@ data-aria-dark="Switch to auto color mode">
 </pre></div>
 <p>Facet neighbours and area weights for every particle, with an a posteriori exactness certificate.</p>
 <p>candidateCutoff seeds the bisector search; the cutoff is enlarged automatically until the certificate holds or the growth cap is reached.</p>
-<p>Certificate. The cell of particle i clipped against every candidate within cutoff c is the true Voronoi cell whenever every vertex of the clipped cell lies within c/2 of i: a particle k beyond the cutoff has <a href="#id11"><span class="problematic" id="id12">|d_k|</span></a> &gt; c, its bisector plane sits at distance <a href="#id13"><span class="problematic" id="id14">|d_k|</span></a>/2 &gt; c/2 from i, and a half-space whose boundary is farther than c/2 cannot cut a region contained in the ball of radius c/2. An open or under-clipped cell keeps vertices on the seeding square at distance ~c and fails the certificate, which is exactly the failure the enlargement retries.</p>
+<p>Certificate. The cell of particle i clipped against every candidate within cutoff c is the true Voronoi cell whenever every vertex of the clipped cell lies within c/2 of i: a particle k beyond the cutoff has abs(d_k) &gt; c, its bisector plane sits at distance abs(d_k)/2 &gt; c/2 from i, and a half-space whose boundary is farther than c/2 cannot cut a region contained in the ball of radius c/2. An open or under-clipped cell keeps vertices on the seeding square at distance ~c and fails the certificate, which is exactly the failure the enlargement retries.</p>
 <div class="doxyrest-title-code-block highlight" id="doxid-namespacechill-1ac42b78e61e685301c32b8bc54d344ec1">
 <span id="index-9"></span><pre><span data-line="1"><a class="doxyrest-code-link reference internal" href="struct_chill_SteinhardtQl.html#doxid-structchill-1-1-steinhardt-ql"><span class="std std-ref">SteinhardtQl</span></a> <span class="n">steinhardtQlVoronoi</span><span class="p">(</span><span class="k">const</span> <a class="doxyrest-code-link reference internal" href="struct_molSys_PointCloud.html#doxid-structmol-sys-1-1-point-cloud"><span class="std std-ref">molSys::PointCloud</span></a><span class="o">&lt;</span><a class="doxyrest-code-link reference internal" href="struct_molSys_Point.html#doxid-structmol-sys-1-1-point"><span class="std std-ref">molSys::Point</span></a><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">,</span> <span class="kt">double</span><span class="o">&gt;&amp;</span> <span class="n">yCloud</span><span class="p">,</span> <span class="kt">double</span> <span class="n">candidateCutoff</span><span class="p">,</span> <span class="kt">int</span> <span class="n">orderL</span><span class="p">)</span></span>
 </pre></div>

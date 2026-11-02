@@ -14,11 +14,33 @@ in-tree mixed TIP4P dump two ways.
     +===========================================================+============================================================+
     | `Classify ice on the mixed TIP4P example <bulk-ice.rst>`_ | ``seams read``, CHILL+, cages, and why the scores disagree |
     +-----------------------------------------------------------+------------------------------------------------------------+
+    | `Ice and clathrate labels <ice-and-clathrate.rst>`_       | CHILL+ and cage signatures from Python                     |
+    +-----------------------------------------------------------+------------------------------------------------------------+
+    | `Primitive rings <rings.rst>`_                            | Franzblau census on one frame                              |
+    +-----------------------------------------------------------+------------------------------------------------------------+
+    | `Bond-orientational order <order-parameters.rst>`_        | ``q_l`` and the Lechner-Dellago average                    |
+    +-----------------------------------------------------------+------------------------------------------------------------+
+    | `Confined water <confined-water.rst>`_                    | in-plane RDF, sheet rings, prisms                          |
+    +-----------------------------------------------------------+------------------------------------------------------------+
+    | `Quasi-one-dimensional ice <nanotube.rst>`_               | where the nanotube and monolayer examples live             |
+    +-----------------------------------------------------------+------------------------------------------------------------+
+    | `Paper figures <paper-figures.rst>`_                      | the in-tree numbers behind the 2020 figures                |
+    +-----------------------------------------------------------+------------------------------------------------------------+
 
 How-tos solve a goal you already have. Reference names flags and
 headers. Explanation is why the two classifiers exist.
+
+The Python files under ``docs/tutorials`` are the runs. CI executes
+them. The pages here say what you are doing and what number you
+should see.
 
 .. toctree::
    :maxdepth: 1
 
    bulk-ice
+   ice-and-clathrate
+   rings
+   order-parameters
+   confined-water
+   nanotube
+   paper-figures

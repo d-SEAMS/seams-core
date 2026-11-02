@@ -5,8 +5,7 @@ Quickstart
 
 Build the engine, read a frame, and print what this binary linked.
 
-The in-tree mixed TIP4P dump is ``input/traj/exampleTraj.lammpstrj``
-(750 atoms, 250 waters; type 2 is oxygen).
+The in-tree mixed TIP4P dump is ``input/traj/exampleTraj.lammpstrj`` (750 atoms, 250 waters; type 2 is oxygen).
 
 Install the engine
 ------------------
@@ -27,8 +26,8 @@ pixi:
     pixi run build
     ./bbdir/seams --help
 
-Either path produces ``libyodaLib`` and the ``seams`` CLI. This repository
-does not install Python or Lua.
+Either path produces ``libyodaLib`` and the ``seams`` CLI.
+This repository does not install Python or Lua.
 
 Read a frame
 ------------
@@ -37,8 +36,8 @@ Read a frame
 
     seams read input/traj/exampleTraj.lammpstrj
 
-The line is ``nop 250 frame 1 box ...`` after the oxygen guess (type 2,
-then type 1). Pass ``--type 2`` to skip the guess.
+The line is ``nop 250 frame 1 box ...`` after the oxygen guess (type 2, then type 1).
+Pass ``--type 2`` to skip the guess.
 
 Features of this build
 ----------------------
@@ -47,21 +46,19 @@ Features of this build
 
     seams --features
 
-Each line is a compile-time backend: OpenMP, MPI, Highway SIMD, vesin,
-chemfiles, readcon-core, IRA/SOFI, sphericart, nauty. The Nix flake
-turns Eigen, BLAS/LAPACK, Catch2 and Highway on when nixpkgs provides
-them. Optional wrap-git backends stay off unless a package is already
-in the closure. ``pixi`` enables what conda-forge put in the environment
-(Highway and chemfiles are in the default pixi lock).
+Each line is a compile-time backend: OpenMP, MPI, Highway SIMD, vesin, chemfiles, readcon-core, IRA/SOFI, sphericart, nauty. The Nix flake turns Eigen, BLAS/LAPACK, Catch2 and Highway on when nixpkgs provides them.
+Optional wrap-git backends stay off unless a package is already in the closure.
+``pixi`` enables what conda-forge put in the environment (Highway and chemfiles are in the default pixi lock).
 
 Runtime knobs
 -------------
 
-Knobs that change between machines and jobs are twelve-factor. They
-are not compiled in and they are not ``conf.yaml``. Defaults live in
-the binary. An optional dotenv file (``SEAMS_CONFIG`` or
-``./seams.env``) fills unset variables. The process environment wins
-over the file. CLI flags win over the environment.
+Knobs that change between machines and jobs are twelve-factor.
+They are not compiled in and they are not ``conf.yaml``.
+Defaults live in the binary.
+An optional dotenv file (``SEAMS_CONFIG`` or ``./seams.env``) fills unset variables.
+The process environment wins over the file.
+CLI flags win over the environment.
 
 .. code:: bash
 
@@ -70,13 +67,10 @@ over the file. CLI flags win over the environment.
     seams --frame 1 --last 100 --jobs 8 --type 2 --graph seeded \
       cages input/traj/exampleTraj.lammpstrj
 
-The same values can be ``SEAMS_FRAME``, ``SEAMS_LAST``, ``SEAMS_JOBS``,
-``SEAMS_TYPE``, ``SEAMS_CUTOFF``, ``SEAMS_K``, ``SEAMS_GRAPH``, plus
-``SEAMS_RESIDENT``, ``SEAMS_CELL``, ``SEAMS_OFFLOAD``, ``LINKCELL_TPP``,
-``LINKCELL_BLOCK``. ``OMP_NUM_THREADS`` and ``CUDA_VISIBLE_DEVICES`` keep
-their usual meaning. Analysis choice (which ``seams`` command, which
-``pydseams`` call, which ``require("dseams")`` script) is not this
-table.
+The same values can be ``SEAMS_FRAME``, ``SEAMS_LAST``, ``SEAMS_JOBS``, ``SEAMS_TYPE``, ``SEAMS_CUTOFF``, ``SEAMS_CAGE_EDGE``, ``SEAMS_K``, ``SEAMS_GRAPH``, plus ``SEAMS_RESIDENT``, ``SEAMS_CELL``, ``SEAMS_OFFLOAD``, ``LINKCELL_TPP``, ``LINKCELL_BLOCK``.
+``SEAMS_CAGE_EDGE`` defaults to ``2.65,3.15`` (coordinate units of the file). ``none`` leaves a signature cage bound to the face census.
+``OMP_NUM_THREADS`` and ``CUDA_VISIBLE_DEVICES`` keep their usual meaning.
+Analysis choice (which ``seams`` command, which ``pydseams`` call, which ``require("dseams")`` script) is not this table.
 
 CHILL+ and cages
 ----------------
@@ -86,23 +80,23 @@ CHILL+ and cages
     seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
     seams cages input/traj/exampleTraj.lammpstrj --type 2
 
-On this fixture the four-neighbour labels are 12 interfacial
-clathrate and 238 water. The default bond graph is ``--graph seeded``
-(mutual four-nearest seeds, union completions). This mixed frame has
-no complete HC or DDC: cage membership is not the CHILL+ star.
+On this fixture ``seams chill-plus`` uses the cutoff neighbour list (the default on every front) and prints 12 interfacial clathrate and 238 water.
+``--graph mutual`` uses the mutual four-neighbour list and prints 1 clathrate, 7 interfacial clathrate, and 242 water.
+The default cage graph is ``--graph seeded`` (mutual four-nearest seeds, union completions).
+This mixed frame has no complete HC or DDC.
+Cage membership is not the CHILL+ star.
 
 Python and Lua
 --------------
 
-The engine CLI is not a scripting host. Install
-`pydseams <https://github.com/d-SEAMS/PydSEAMSlib>`_ (``pip install pydseamslib``, compiled module ``yoda``) or
+The engine CLI is not a scripting host.
+Install `pydseams <https://github.com/d-SEAMS/PydSEAMSlib>`_ (``pip install pydseamslib``, compiled module ``yoda``) or
 `yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_
-(``require("dseams")``). ``import pydseamslib`` is an alias of ``pydseams``.
+(``require("dseams")``).
+``import pydseamslib`` is an alias of ``pydseams``.
 
-The Frame tutorial is
-`pydseams docs <https://d-seams.github.io/PydSEAMSlib/>`_.
+The Frame tutorial is `pydseams docs <https://d-seams.github.io/PydSEAMSlib/>`_.
 Lua is `dseams docs <https://d-seams.github.io/yodaStruct/>`_.
 
 The full install matrix is `Install <howto/install.rst>`_.
-The mixed-frame walkthrough is
-`Classify ice on the mixed TIP4P example <tutorials/bulk-ice.rst>`_.
+The mixed-frame walkthrough is `Classify ice on the mixed TIP4P example <tutorials/bulk-ice.rst>`_.

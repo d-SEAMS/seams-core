@@ -92,11 +92,19 @@ data-aria-dark="Switch to auto color mode">
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/ice-and-clathrate.html">Ice and clathrate labels</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/rings.html">Primitive rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/order-parameters.html">Bond-orientational order parameters</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/confined-water.html">Confined water</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-figures.html">Paper figures</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">How-to</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/install.html">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/bindings.html">Build the language fronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/versions.html">Version pins</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/openmp-offload.html">OpenMP target offload</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../howto/sheared-cells.html">Sheared cells</a></li>
@@ -113,6 +121,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Repositories</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/ring-completion.html">Ring-adjacent completion</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/topological-network.html">Topological network criteria</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
@@ -123,6 +132,21 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l2"><a class="reference internal" href="../reference/walk-compare.html">walk_compare</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/api.html">API map</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html">Generated anchors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#cage-cagetype">cage::cageType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#cage-icetype">cage::iceType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#sph-spheriharmo">sph::spheriHarmo</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#gen-periodicdist">gen::periodicDist</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#molsys-atom-state-type">molSys::atom_state_type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#molsys-bond-type">molSys::bond_type</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#nneigh-neighbourlistbyindex">nneigh::neighbourListByIndex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#nneigh-dumpvolume">nneigh::dumpVolume</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#primitive-removenonsprings">primitive::removeNonSPrings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#primitive-ringnetwork">primitive::ringNetwork</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#primitive-countallringsfromindex">primitive::countAllRingsFromIndex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#rdf2-normalizerdf">rdf2::normalizeRDF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#ring-structype">ring::strucType</a></li>
+<li class="toctree-l3"><a class="reference internal" href="generated_targets.html#ring-assignpolygontype">ring::assignPolygonType</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_bond.html">Bond</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_prism3.html">Bulk prisms</a></li>
 <li class="toctree-l3"><a class="reference internal" href="group_cage.html">Cage</a></li>
@@ -139,6 +163,7 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reference/cross-language.html">One task, four fronts</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
 </ul>
 </li>
@@ -146,8 +171,24 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/walk-compare.html">walk_compare</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cross-language.html">One task, four fronts</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API map</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html">Generated anchors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#cage-cagetype">cage::cageType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#cage-icetype">cage::iceType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#sph-spheriharmo">sph::spheriHarmo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#gen-periodicdist">gen::periodicDist</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#molsys-atom-state-type">molSys::atom_state_type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#molsys-bond-type">molSys::bond_type</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#nneigh-neighbourlistbyindex">nneigh::neighbourListByIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#nneigh-dumpvolume">nneigh::dumpVolume</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#primitive-removenonsprings">primitive::removeNonSPrings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#primitive-ringnetwork">primitive::ringNetwork</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#primitive-countallringsfromindex">primitive::countAllRingsFromIndex</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#rdf2-normalizerdf">rdf2::normalizeRDF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#ring-structype">ring::strucType</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated_targets.html#ring-assignpolygontype">ring::assignPolygonType</a></li>
 <li class="toctree-l2"><a class="reference internal" href="group_bond.html">Bond</a></li>
 <li class="toctree-l2"><a class="reference internal" href="group_prism3.html">Bulk prisms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="group_cage.html">Cage</a></li>
@@ -180,6 +221,13 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">d-SEAMS 2.0 paper</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/index.html">d-SEAMS 2.0 paper</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/versions.html">Versions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/reproduce.html">Reproduce</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
 <ul>
@@ -307,37 +355,41 @@ data-aria-dark="Switch to auto color mode">
 <span data-line="6"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_chill.html#doxid-namespacechill"><span class="std std-ref">chill</span></a><span class="p">;</span></span>
 <span data-line="7"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_clump.html#doxid-namespaceclump"><span class="std std-ref">clump</span></a><span class="p">;</span></span>
 <span data-line="8"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_gen.html#doxid-namespacegen"><span class="std std-ref">gen</span></a><span class="p">;</span></span>
-<span data-line="9"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_gpu.html#doxid-namespacegpu"><span class="std std-ref">gpu</span></a><span class="p">;</span></span>
-<span data-line="10"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_ira.html#doxid-namespaceira"><span class="std std-ref">ira</span></a><span class="p">;</span></span>
-<span data-line="11"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_match.html#doxid-namespacematch"><span class="std std-ref">match</span></a><span class="p">;</span></span>
-<span data-line="12"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_molSys.html#doxid-namespacemol-sys"><span class="std std-ref">molSys</span></a><span class="p">;</span></span>
-<span data-line="13"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_nneigh.html#doxid-namespacenneigh"><span class="std std-ref">nneigh</span></a><span class="p">;</span></span>
-<span data-line="14"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_phase.html#doxid-namespacephase"><span class="std std-ref">phase</span></a><span class="p">;</span></span>
-<span data-line="15"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_pntToPnt.html#doxid-namespacepnt-to-pnt"><span class="std std-ref">pntToPnt</span></a><span class="p">;</span></span>
-<span data-line="16"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_primitive.html#doxid-namespaceprimitive"><span class="std std-ref">primitive</span></a><span class="p">;</span></span>
-<span data-line="17"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_prism3.html#doxid-namespaceprism3"><span class="std std-ref">prism3</span></a><span class="p">;</span></span>
-<span data-line="18"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_rdf.html#doxid-namespacerdf"><span class="std std-ref">rdf</span></a><span class="p">;</span></span>
-<span data-line="19"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_rdf2.html#doxid-namespacerdf2"><span class="std std-ref">rdf2</span></a><span class="p">;</span></span>
-<span data-line="20"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_ring.html#doxid-namespacering"><span class="std std-ref">ring</span></a><span class="p">;</span></span>
-<span data-line="21"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_seams.html#doxid-namespaceseams"><span class="std std-ref">seams</span></a><span class="p">;</span></span>
-<span data-line="22">    <span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_seams_cfg.html#doxid-namespaceseams-1-1cfg"><span class="std std-ref">seams::cfg</span></a><span class="p">;</span></span>
-<span data-line="23">    <span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_seams_domain.html#doxid-namespaceseams-1-1domain"><span class="std std-ref">seams::domain</span></a><span class="p">;</span></span>
-<span data-line="24">    <span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_seams_sphericart_ylm.html#doxid-namespaceseams-1-1sphericart-ylm"><span class="std std-ref">seams::sphericart_ylm</span></a><span class="p">;</span></span>
-<span data-line="25">    <span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_seams_steinhardt.html#doxid-namespaceseams-1-1steinhardt"><span class="std std-ref">seams::steinhardt</span></a><span class="p">;</span></span>
-<span data-line="26"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_sinp.html#doxid-namespacesinp"><span class="std std-ref">sinp</span></a><span class="p">;</span></span>
-<span data-line="27"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_site.html#doxid-namespacesite"><span class="std std-ref">site</span></a><span class="p">;</span></span>
-<span data-line="28"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_sout.html#doxid-namespacesout"><span class="std std-ref">sout</span></a><span class="p">;</span></span>
-<span data-line="29"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_sph.html#doxid-namespacesph"><span class="std std-ref">sph</span></a><span class="p">;</span></span>
-<span data-line="30"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_std.html#doxid-namespacestd"><span class="std std-ref">std</span></a><span class="p">;</span></span>
-<span data-line="31"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_topo.html#doxid-namespacetopo"><span class="std std-ref">topo</span></a><span class="p">;</span></span>
-<span data-line="32"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_topoparam.html#doxid-namespacetopoparam"><span class="std std-ref">topoparam</span></a><span class="p">;</span></span>
-<span data-line="33"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_tum.html#doxid-namespacetum"><span class="std std-ref">tum</span></a><span class="p">;</span></span>
-<span data-line="34">    <span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_tum_device.html#doxid-namespacetum-1-1device"><span class="std std-ref">tum::device</span></a><span class="p">;</span></span>
-<span data-line="35"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_tum3.html#doxid-namespacetum3"><span class="std std-ref">tum3</span></a><span class="p">;</span></span>
-<span data-line="36"> </span>
-<span data-line="37"><span class="c1">// global functions</span></span>
+<span data-line="9">    <span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_gen_mic.html#doxid-namespacegen-1-1mic"><span class="std std-ref">gen::mic</span></a><span class="p">;</span></span>
+<span data-line="10"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_gpu.html#doxid-namespacegpu"><span class="std std-ref">gpu</span></a><span class="p">;</span></span>
+<span data-line="11"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_ira.html#doxid-namespaceira"><span class="std std-ref">ira</span></a><span class="p">;</span></span>
+<span data-line="12"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_match.html#doxid-namespacematch"><span class="std std-ref">match</span></a><span class="p">;</span></span>
+<span data-line="13"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_molSys.html#doxid-namespacemol-sys"><span class="std std-ref">molSys</span></a><span class="p">;</span></span>
+<span data-line="14"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_nneigh.html#doxid-namespacenneigh"><span class="std std-ref">nneigh</span></a><span class="p">;</span></span>
+<span data-line="15"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_phase.html#doxid-namespacephase"><span class="std std-ref">phase</span></a><span class="p">;</span></span>
+<span data-line="16"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_pntToPnt.html#doxid-namespacepnt-to-pnt"><span class="std std-ref">pntToPnt</span></a><span class="p">;</span></span>
+<span data-line="17"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_primitive.html#doxid-namespaceprimitive"><span class="std std-ref">primitive</span></a><span class="p">;</span></span>
+<span data-line="18"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_prism3.html#doxid-namespaceprism3"><span class="std std-ref">prism3</span></a><span class="p">;</span></span>
+<span data-line="19"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_rdf.html#doxid-namespacerdf"><span class="std std-ref">rdf</span></a><span class="p">;</span></span>
+<span data-line="20"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_rdf2.html#doxid-namespacerdf2"><span class="std std-ref">rdf2</span></a><span class="p">;</span></span>
+<span data-line="21"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_ring.html#doxid-namespacering"><span class="std std-ref">ring</span></a><span class="p">;</span></span>
+<span data-line="22"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_seams.html#doxid-namespaceseams"><span class="std std-ref">seams</span></a><span class="p">;</span></span>
+<span data-line="23">    <span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_seams_cfg.html#doxid-namespaceseams-1-1cfg"><span class="std std-ref">seams::cfg</span></a><span class="p">;</span></span>
+<span data-line="24">    <span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_seams_domain.html#doxid-namespaceseams-1-1domain"><span class="std std-ref">seams::domain</span></a><span class="p">;</span></span>
+<span data-line="25">    <span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_seams_product.html#doxid-namespaceseams-1-1product"><span class="std std-ref">seams::product</span></a><span class="p">;</span></span>
+<span data-line="26">    <span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_seams_sphericart_ylm.html#doxid-namespaceseams-1-1sphericart-ylm"><span class="std std-ref">seams::sphericart_ylm</span></a><span class="p">;</span></span>
+<span data-line="27">    <span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_seams_steinhardt.html#doxid-namespaceseams-1-1steinhardt"><span class="std std-ref">seams::steinhardt</span></a><span class="p">;</span></span>
+<span data-line="28"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_sinp.html#doxid-namespacesinp"><span class="std std-ref">sinp</span></a><span class="p">;</span></span>
+<span data-line="29"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_site.html#doxid-namespacesite"><span class="std std-ref">site</span></a><span class="p">;</span></span>
+<span data-line="30"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_sout.html#doxid-namespacesout"><span class="std std-ref">sout</span></a><span class="p">;</span></span>
+<span data-line="31"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_sph.html#doxid-namespacesph"><span class="std std-ref">sph</span></a><span class="p">;</span></span>
+<span data-line="32"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_std.html#doxid-namespacestd"><span class="std std-ref">std</span></a><span class="p">;</span></span>
+<span data-line="33"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_topo.html#doxid-namespacetopo"><span class="std std-ref">topo</span></a><span class="p">;</span></span>
+<span data-line="34"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_topoparam.html#doxid-namespacetopoparam"><span class="std std-ref">topoparam</span></a><span class="p">;</span></span>
+<span data-line="35"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_tum.html#doxid-namespacetum"><span class="std std-ref">tum</span></a><span class="p">;</span></span>
+<span data-line="36">    <span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_tum_device.html#doxid-namespacetum-1-1device"><span class="std std-ref">tum::device</span></a><span class="p">;</span></span>
+<span data-line="37"><span class="k">namespace</span> <a class="doxyrest-code-link reference internal" href="namespace_tum3.html#doxid-namespacetum3"><span class="std std-ref">tum3</span></a><span class="p">;</span></span>
 <span data-line="38"> </span>
-<span data-line="39"><span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-seams__c__api_8h_1a4aa681772840118e245156666761a0ac"></span><span class="n">seams_chill_plus</span><span class="p">(</span><span class="k">const</span> <span class="kt">double</span><span class="o">*</span> <span class="n">xyz</span><span class="p">,</span> <span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="k">const</span> <span class="kt">double</span><span class="o">*</span> <span class="n">box</span><span class="p">,</span> <span class="kt">int</span><span class="o">*</span> <span class="n">labels</span><span class="p">);</span></span>
+<span data-line="39"><span class="c1">// global functions</span></span>
+<span data-line="40"> </span>
+<span data-line="41"><span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-seams__c__api_8h_1a4aa681772840118e245156666761a0ac"></span><span class="n">seams_chill_plus</span><span class="p">(</span><span class="k">const</span> <span class="kt">double</span><span class="o">*</span> <span class="n">xyz</span><span class="p">,</span> <span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="k">const</span> <span class="kt">double</span><span class="o">*</span> <span class="n">box</span><span class="p">,</span> <span class="kt">int</span><span class="o">*</span> <span class="n">labels</span><span class="p">);</span></span>
+<span data-line="42"><span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-seams__c__api_8h_1a3cdbb04d3443c73b4f3067360bea8bf7"></span><span class="n">seams_chill_plus_graph</span><span class="p">(</span><span class="k">const</span> <span class="kt">double</span><span class="o">*</span> <span class="n">xyz</span><span class="p">,</span> <span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="k">const</span> <span class="kt">double</span><span class="o">*</span> <span class="n">box</span><span class="p">,</span> <span class="kt">double</span> <span class="n">cutoff</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">graph</span><span class="p">,</span> <span class="kt">int</span><span class="o">*</span> <span class="n">labels</span><span class="p">);</span></span>
+<span data-line="43"><span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-seams__c__api_8h_1a905d0436a8fd534e4177ff7627143e04"></span><span class="n">seams_chill_plus_graph_lammps</span><span class="p">(</span><span class="k">const</span> <span class="kt">double</span><span class="o">*</span> <span class="n">xyz</span><span class="p">,</span> <span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="k">const</span> <span class="kt">double</span><span class="o">*</span> <span class="n">box9</span><span class="p">,</span> <span class="kt">double</span> <span class="n">cutoff</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span><span class="o">*</span> <span class="n">graph</span><span class="p">,</span> <span class="kt">int</span><span class="o">*</span> <span class="n">labels</span><span class="p">);</span></span>
 </pre></div>
 </section>
 

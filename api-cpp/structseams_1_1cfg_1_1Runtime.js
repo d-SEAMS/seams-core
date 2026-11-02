@@ -1,6 +1,8 @@
 var structseams_1_1cfg_1_1Runtime =
 [
     [ "block", "structseams_1_1cfg_1_1Runtime.html#ad58d311025cf510daab7bf4f45e94bcf", null ],
+    [ "cageEdge", "structseams_1_1cfg_1_1Runtime.html#ae1ba53dc26a5a02b08a65b75674e023a", null ],
+    [ "carry", "structseams_1_1cfg_1_1Runtime.html#ae583a58a6f7351fd2c375045501a866d", null ],
     [ "cell", "structseams_1_1cfg_1_1Runtime.html#a435f96bf622cece732267afe1daddc4d", null ],
     [ "cutoff", "structseams_1_1cfg_1_1Runtime.html#a6c22ad1c8eae1acfba7a026c38391863", null ],
     [ "family", "structseams_1_1cfg_1_1Runtime.html#ab7e771317b68e4aafa46cac28b25a526", null ],

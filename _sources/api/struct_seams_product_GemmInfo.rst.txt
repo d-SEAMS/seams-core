@@ -1,0 +1,25 @@
+.. index:: pair: struct; seams::product::GemmInfo
+.. _doxid-structseams_1_1product_1_1_gemm_info:
+
+struct seams::product::GemmInfo
+===============================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/ozaki.hpp>
+	
+	struct GemmInfo {
+		// fields
+	
+		bool :target:`ok<doxid-structseams_1_1product_1_1_gemm_info_1a435ddeed7f50b239755c2ea58761810e>`;
+		const char* :target:`backend<doxid-structseams_1_1product_1_1_gemm_info_1ade8e7ad79d1207d18bb8bafff93fd429>`;
+		int :target:`moduli<doxid-structseams_1_1product_1_1_gemm_info_1a73ec9de6167f3072dbfa4d830c61c072>`;
+		int :target:`sliceWidth<doxid-structseams_1_1product_1_1_gemm_info_1a20d16a0ce6bc905549e8aa1bb8e637c9>`;
+	};

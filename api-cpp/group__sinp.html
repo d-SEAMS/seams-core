@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -306,29 +306,29 @@ Functions</h2></td></tr>
 <p>True when each component lies in [lo, hi], or that axis has lo == hi (unconstrained). ([0,0,0], [50,0,0]) is x in [0, 50], y and z open. </p>
 <p>If this is 3 then the particle is inside the volume slice</p>
 
-<p class="definition">Definition at line <a class="el" href="seams__input_8hpp_source.html#l00153">153</a> of file <a class="el" href="seams__input_8hpp_source.html">seams_input.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  155</span>                                                       {</div>
-<div class="line"><span class="lineno">  156</span>  <span class="keywordtype">int</span> flag = 0; </div>
-<div class="line"><span class="lineno">  157</span> </div>
-<div class="line"><span class="lineno">  158</span>  <span class="keywordflow">if</span> (((x &gt;= coordLow[0]) &amp;&amp; (x &lt;= coordHigh[0])) ||</div>
-<div class="line"><span class="lineno">  159</span>      coordLow[0] == coordHigh[0]) {</div>
-<div class="line"><span class="lineno">  160</span>    flag++;</div>
-<div class="line"><span class="lineno">  161</span>  }</div>
-<div class="line"><span class="lineno">  162</span>  <span class="keywordflow">if</span> (((y &gt;= coordLow[1]) &amp;&amp; (y &lt;= coordHigh[1])) ||</div>
-<div class="line"><span class="lineno">  163</span>      coordLow[1] == coordHigh[1]) {</div>
-<div class="line"><span class="lineno">  164</span>    flag++;</div>
-<div class="line"><span class="lineno">  165</span>  }</div>
-<div class="line"><span class="lineno">  166</span>  <span class="keywordflow">if</span> (((z &gt;= coordLow[2]) &amp;&amp; (z &lt;= coordHigh[2])) ||</div>
-<div class="line"><span class="lineno">  167</span>      coordLow[2] == coordHigh[2]) {</div>
-<div class="line"><span class="lineno">  168</span>    flag++;</div>
-<div class="line"><span class="lineno">  169</span>  }</div>
-<div class="line"><span class="lineno">  170</span> </div>
-<div class="line"><span class="lineno">  171</span>  <span class="keywordflow">if</span> (flag == 3) {</div>
-<div class="line"><span class="lineno">  172</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  173</span>  } <span class="keywordflow">else</span> {</div>
-<div class="line"><span class="lineno">  174</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  175</span>  }</div>
-<div class="line"><span class="lineno">  176</span>}</div>
+<p class="definition">Definition at line <a class="el" href="seams__input_8hpp_source.html#l00155">155</a> of file <a class="el" href="seams__input_8hpp_source.html">seams_input.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  157</span>                                                       {</div>
+<div class="line"><span class="lineno">  158</span>  <span class="keywordtype">int</span> flag = 0; </div>
+<div class="line"><span class="lineno">  159</span> </div>
+<div class="line"><span class="lineno">  160</span>  <span class="keywordflow">if</span> (((x &gt;= coordLow[0]) &amp;&amp; (x &lt;= coordHigh[0])) ||</div>
+<div class="line"><span class="lineno">  161</span>      coordLow[0] == coordHigh[0]) {</div>
+<div class="line"><span class="lineno">  162</span>    flag++;</div>
+<div class="line"><span class="lineno">  163</span>  }</div>
+<div class="line"><span class="lineno">  164</span>  <span class="keywordflow">if</span> (((y &gt;= coordLow[1]) &amp;&amp; (y &lt;= coordHigh[1])) ||</div>
+<div class="line"><span class="lineno">  165</span>      coordLow[1] == coordHigh[1]) {</div>
+<div class="line"><span class="lineno">  166</span>    flag++;</div>
+<div class="line"><span class="lineno">  167</span>  }</div>
+<div class="line"><span class="lineno">  168</span>  <span class="keywordflow">if</span> (((z &gt;= coordLow[2]) &amp;&amp; (z &lt;= coordHigh[2])) ||</div>
+<div class="line"><span class="lineno">  169</span>      coordLow[2] == coordHigh[2]) {</div>
+<div class="line"><span class="lineno">  170</span>    flag++;</div>
+<div class="line"><span class="lineno">  171</span>  }</div>
+<div class="line"><span class="lineno">  172</span> </div>
+<div class="line"><span class="lineno">  173</span>  <span class="keywordflow">if</span> (flag == 3) {</div>
+<div class="line"><span class="lineno">  174</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  175</span>  } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  176</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  177</span>  }</div>
+<div class="line"><span class="lineno">  178</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -399,7 +399,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Call fn(frame, cloud) for each frame from max(first, 1) to last (1-based, inclusive) that falls to part of parts. last &lt;= 0 means every ITEM: TIMESTEP. Frames are dealt in rounds of parts, in serpentine order (part p takes slot p of even rounds and slot parts - 1 - p of odd ones), so a cost that drifts or alternates along the run reaches every part. typeFilter &lt;= 0 keeps every atom. nThreads &lt;= 0 uses the OpenMP default; 1 is serial. Each worker opens its own handle and seeks the shared offset table. Incremental RingUpdater / AffiliationUpdater state cannot be shared across workers: use the batch classifiers. </p>
+<p>Call fn(frame, cloud) for each frame from max(first, 1) to last (1-based, inclusive) that falls to part of parts. last &lt;= 0 means every ITEM: TIMESTEP. Frames are dealt in rounds of parts, in serpentine order (part p takes slot p of even rounds and slot parts - 1 - p of odd ones), so a cost that drifts or alternates along the run reaches every part. typeFilter &lt;= 0 keeps every atom. nThreads &lt;= 0 uses the OpenMP default; 1 is serial. Each worker opens its own handle and seeks the shared offset table. Incremental RingUpdater / AffiliationUpdater state cannot be shared across workers: with nThreads 1 the frames arrive in order on one thread and may carry it, otherwise use the batch classifiers. </p>
 
 </div>
 </div>
@@ -436,7 +436,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Number of ITEM: TIMESTEP frames in a LAMMPS dump, or 0 if the file cannot be read. The first full count per path walks the file once and later reads seek, matching chemfiles Trajectory::nsteps and readcon's frame-offset table. Sequential load_frame walks reuse a live cursor the way LAMMPS ReaderNative does on rerun. </p>
+<p>Number of ITEM: TIMESTEP frames in a LAMMPS dump, or 0 if the file cannot be read. The first full count per path walks the file once and later reads seek, matching chemfiles Trajectory::nsteps and readcon's frame-offset table. Sequential load_frame walks reuse a live read position the way LAMMPS ReaderNative does on rerun. </p>
 
 </div>
 </div>

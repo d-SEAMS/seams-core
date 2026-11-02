@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['qlmatom_0',['QlmAtom',['../structchill_1_1QlmAtom.html',1,'chill']]]
+  ['neighbond_0',['NeighBond',['../classring_1_1NeighBond.html',1,'ring']]]
 ];

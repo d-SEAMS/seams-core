@@ -1,5 +1,8 @@
 var namespacegen =
 [
+    [ "mic", "namespacegen_1_1mic.html", [
+      [ "euclideanIfShorter", "namespacegen_1_1mic.html#a1a29504e3d6fb23c397d8523474955ce", null ]
+    ] ],
     [ "FracBox", "structgen_1_1FracBox.html", "structgen_1_1FracBox" ],
     [ "angDistDegQuaternions", "group__gen.html#gac7f742de2fac11d3b249c63bf4f4e126", null ],
     [ "atomsInSingleSlice", "group__ring.html#ga14c78fad4483668aa3d053ec7d335c79", null ],

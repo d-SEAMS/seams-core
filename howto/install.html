@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Install the engine - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="OpenMP target offload" href="openmp-offload.html" /><link rel="prev" title="How-to" href="index.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Install the engine - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Build the language fronts" href="bindings.html" /><link rel="prev" title="How-to" href="index.html" />
       <link rel="canonical" href="https://docs.dseams.info/howto/install.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -92,11 +92,19 @@ data-aria-dark="Switch to auto color mode">
 <ul>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/bulk-ice.html">Classify ice on the mixed TIP4P example</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/ice-and-clathrate.html">Ice and clathrate labels</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/rings.html">Primitive rings</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/order-parameters.html">Bond-orientational order parameters</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/confined-water.html">Confined water</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/paper-figures.html">Paper figures</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
 <ul class="current">
 <li class="toctree-l1 _expand"><a class="reference internal" href="index.html">How-to</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Install the engine</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="bindings.html">Build the language fronts</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="versions.html">Version pins</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="benchmarks.html">Benchmarks</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="openmp-offload.html">OpenMP target offload</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="classify-cli.html">Classify a dump</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="sheared-cells.html">Sheared cells</a></li>
@@ -113,6 +121,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/architecture.html">Repositories</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/ring-completion.html">Ring-adjacent completion</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/topological-network.html">Topological network criteria</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../explanation/citation.html">Citation</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
@@ -122,10 +131,18 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/data-formats.html">Data Formats</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/walk-compare.html">walk_compare</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/nix.html">Nix flake</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/cross-language.html">One task, four fronts</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/api.html">API map</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../api/index.html">API Reference</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../reference/glossary.html">Glossary</a></li>
 <li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">d-SEAMS 2.0 paper</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/index.html">d-SEAMS 2.0 paper</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/versions.html">Versions</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/benchmarks.html">Benchmarks</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/reproduce.html">Reproduce</a></li>
 </ul>
 <p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
 <ul>
@@ -146,6 +163,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#nix-flake">Nix flake</a></li>
 <li><a class="reference internal" href="#openmp-target-offload">OpenMP target offload</a></li>
 <li><a class="reference internal" href="#verify">Verify</a></li>
+<li><a class="reference internal" href="#front-ends-and-simulation-interfaces">Front ends and simulation interfaces</a></li>
 </ul>
 </div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
   data-type="github" data-user="d-SEAMS" data-repo="seams-core">
@@ -286,6 +304,12 @@ the Meson line, is <a class="reference external" href="openmp-offload.rst">OpenM
 name <a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib">PydSEAMSlib</a> and
 <a class="reference external" href="https://github.com/d-SEAMS/yodaStruct">yodaStruct</a>.</p>
 </section>
+<section id="front-ends-and-simulation-interfaces">
+<h2>Front ends and simulation interfaces<a class="headerlink" href="#front-ends-and-simulation-interfaces" title="Link to this heading">¶</a></h2>
+<p>The Python and Lua front ends, the LAMMPS compute and the PLUMED
+module install as in <a class="reference external" href="../paper/reproduce.rst">Reproduce</a>, which
+also pins the release of the d-SEAMS 2.0 paper.</p>
+</section>
 </section>
 
         </article><button class="back-to-top" type="button">
@@ -300,10 +324,10 @@ name <a class="reference external" href="https://github.com/d-SEAMS/PydSEAMSlib"
         <span>Previous</span><div class="title">How-to</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="openmp-offload.html">
+    <a href="bindings.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">OpenMP target offload</div>
+        <div class="title">Build the language fronts</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

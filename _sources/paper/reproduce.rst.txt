@@ -1,0 +1,148 @@
+=========
+Reproduce
+=========
+
+
+Install the release that the d-SEAMS 2.0 paper describes, rerun its
+records and check its Lean development. `Versions <versions.rst>`_
+lists what each step pins, and `Benchmarks <benchmarks.rst>`_
+lists what each record measured.
+
+Install the release
+-------------------
+
+The engine builds with pixi and Meson, or with the Nix flake.
+
+.. code:: bash
+
+    git clone https://github.com/d-SEAMS/seams-core
+    cd seams-core && git checkout v2.12.0
+    pixi run setup && pixi run build && pixi run test
+    ./bbdir/seams read input/traj/exampleTraj.lammpstrj
+    nix build        # ./result/bin/seams; runs the Catch2 suite
+
+`Install the engine <../howto/install.rst>`_ covers the pixi
+environments and the flake in full.
+
+PydSEAMSlib installs from PyPI and loads with ``import pydseamslib``. It
+needs Python 3.11 or later.
+
+.. code:: bash
+
+    pip install pydseamslib
+
+The Lua library builds from the
+`yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_ repository with
+Meson.
+
+.. code:: bash
+
+    meson setup bbdir --wrap-mode=nofallback && meson compile -C bbdir
+    LUA_PATH="$PWD/lua/?.lua;;" LUA_CPATH="$PWD/bbdir/?.so;;" lua script.lua
+
+The device-resident batch is the Meson feature ``with_gpulite``, built
+when CUDA and NVRTC are found.
+
+The LAMMPS compute is the two sources
+``extras/lammps/compute_dseams.cpp`` and ``compute_dseams.h``, which call
+only the C header ``seams_c_api.h``. After ``pixi run install``, copy them
+into the ``src`` directory of LAMMPS, put ``$CONDA_PREFIX/include/seams``
+on its include path and link it to ``libyodaLib`` in
+``$CONDA_PREFIX/lib``.
+
+The PLUMED module builds with ``pixi run build`` in the
+`dseams-plumed <https://github.com/d-SEAMS/dseams-plumed>`_
+repository. Its ``tests/driver_check.py`` runs ``plumed driver`` with
+``DSEAMS_CAGES`` over a LAMMPS dump and compares the per-frame counts
+with a ``walk_compare`` table.
+
+Rerun the records
+-----------------
+
+The reproducibility package pins OVITO, freud, GenIce2 and cycless in
+its pixi lock next to the engine. genice2-cage is installed with pip.
+R.I.N.G.S. is built from the SourceForge archive of rings-code 1.3.5.
+
+.. code:: bash
+
+    pip install genice2-cage==2.5.2
+    tar xzf rings-code-v1.3.5.tar.gz && cd rings-code-v1.3.5
+    ./configure FC=gfortran && make
+
+The whole campaign runs from one Snakemake workflow, on an exclusive
+Slurm node or on any machine.
+
+.. code:: bash
+
+    git clone https://github.com/d-SEAMS/dseams2_repro
+    cd dseams2_repro
+    pixi run prep && pixi run submit   # exclusive Slurm node
+    pixi run run-local                 # any machine
+
+The three cloud-VM timing records each have a ``run.sh``.
+
+.. code:: bash
+
+    R=results/reference
+    bash $R/bench-2026-10-31/run.sh SRC BUILD BASE_TREE BASE_BUILD 3 ARCHIVE
+    BEFORE=1 bash $R/cli-carry-2026-10-31/run.sh SRC BUILD 3 ARCHIVE
+    bash $R/h2h-2026-10-31/run.sh
+
+Here ``SRC`` is the unpacked program-files archive ``ARCHIVE`` and ``BUILD``
+its Meson release build, and ``BASE_TREE`` and ``BASE_BUILD`` are the
+baseline commit ``1c8efa38`` and its build. The ``3`` is the pinned core.
+Each ``run.sh`` refuses a source tree that differs from the archive.
+The carry record takes the session count as a fifth argument, five by
+default, and with ``BEFORE=1`` it also times the build without the
+back-off by reversing its ``backoff.patch``.
+
+The head-to-head ``run.sh`` reads ``ARCHIVE``, ``H2H_SEAMS`` (the ``seams``
+binary of that archive) and ``PYDSEAMS`` (a PydSEAMSlib built on the same
+archive). It and ``rings_mw.sh``, which runs the mW R.I.N.G.S. row,
+call ``h2h.py``, and ``compare_table.py`` prints the rows of the table.
+Each record writes ``raw/`` and a ``provenance.txt`` with the archive
+checksum and the machine.
+
+Check the carried walk
+----------------------
+
+The Meson test compares the JSON output of a carried range with
+``--rebuild``, ``SEAMS_CARRY=0`` and ``--jobs 2``. By hand, the two runs
+below print the same lines.
+
+.. code:: bash
+
+    meson test -C build seams_carried_frames_match_rebuild
+    seams --frame 1 --last 148 cages --graph seeded nucleation.lammpstrj
+    seams --rebuild --frame 1 --last 148 cages --graph seeded nucleation.lammpstrj
+
+`seams CLI <../reference/cli.rst>`_ lists when the command line
+carries and when it rebuilds.
+
+Run the tests
+-------------
+
+``meson test`` and ``nix build`` run the Catch2 suite together with
+``check_device_host``, ``check_invariance`` and ``gpu_kernels_host``. The
+property tests use Hypothesis and run in the
+`PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_ repository.
+
+.. code:: bash
+
+    meson test -C bbdir
+    pip install ".[test,ase]"
+    python -m pytest tests
+
+Check the Lean development
+--------------------------
+
+The ``lean/`` folder of the supplementary archive (``lean.zip``) holds the
+library ``DSeams``, thirteen files in ``lean/DSeams/``, with no other
+library. From that folder the two commands below check every
+declaration. ``lean/README.md`` lists each theorem's supplement number,
+Lean name and file.
+
+.. code:: bash
+
+    elan toolchain install leanprover/lean4:v4.15.0
+    lake build

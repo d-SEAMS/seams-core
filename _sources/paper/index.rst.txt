@@ -1,0 +1,35 @@
+=================
+d-SEAMS 2.0 paper
+=================
+
+
+The paper "d-SEAMS 2.0: Incremental ring and cage algorithms for ice
+structure analysis" describes seams-core v2.12.0. Its tables and
+figures are frozen at that release, and each names the record it was
+read from. The pages below hold what changes between releases: the
+versions of every component, the benchmark tables of the latest rerun,
+and the steps that install the release and rerun the records.
+
+.. table::
+
+    +--------------------------------+---------------------------------------------------------------------+
+    | page                           | what it holds                                                       |
+    +================================+=====================================================================+
+    | `Versions <versions.rst>`_     | engine, front ends, dependency pins, comparison codes, machines     |
+    +--------------------------------+---------------------------------------------------------------------+
+    | `Benchmarks <benchmarks.rst>`_ | every timing table of the paper and its supplement, with its record |
+    +--------------------------------+---------------------------------------------------------------------+
+    | `Reproduce <reproduce.rst>`_   | install the release, rerun each record, check the Lean development  |
+    +--------------------------------+---------------------------------------------------------------------+
+
+The records live under ``results/reference/`` of the reproducibility
+package, `dseams2\_repro <https://github.com/d-SEAMS/dseams2_repro>`_.
+Each record holds its ``run.sh``, its raw output and a ``provenance.txt``
+with the archive checksum and the machine.
+
+.. toctree::
+   :maxdepth: 1
+
+   versions
+   benchmarks
+   reproduce

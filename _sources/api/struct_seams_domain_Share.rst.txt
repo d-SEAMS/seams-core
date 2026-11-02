@@ -16,7 +16,7 @@ One rank's share of a frame. :ref:`More...<details-structseams_1_1domain_1_1_sha
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <domain.hpp>
+	#include <src/include/internal/domain.hpp>
 	
 	struct Share {
 		// fields

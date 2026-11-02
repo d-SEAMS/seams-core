@@ -7,6 +7,8 @@ namespace gen
 .. toctree::
 	:hidden:
 
+	namespace_gen_mic.rst
+
 Overview
 ~~~~~~~~
 
@@ -18,6 +20,10 @@ Small generic functions that are shared by all namespaces. :ref:`More...<details
 
 	
 	namespace gen {
+
+	// namespaces
+
+	namespace :ref:`gen::mic<doxid-namespacegen_1_1mic>`;
 
 	// structs
 

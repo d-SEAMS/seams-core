@@ -12,6 +12,12 @@ A how-to solves a goal you already have. It is not a learning path.
     +===============================================+===================================================================================================+
     | `Install the engine <install.rst>`_           | Get a ``seams`` binary                                                                            |
     +-----------------------------------------------+---------------------------------------------------------------------------------------------------+
+    | `Language fronts <bindings.rst>`_             | Python, R, and Julia against ``libseams_lang``                                                    |
+    +-----------------------------------------------+---------------------------------------------------------------------------------------------------+
+    | `Version pins <versions.rst>`_                | The five files that must agree                                                                    |
+    +-----------------------------------------------+---------------------------------------------------------------------------------------------------+
+    | `Benchmarks <benchmarks.rst>`_                | Which driver to time, and what to record                                                          |
+    +-----------------------------------------------+---------------------------------------------------------------------------------------------------+
     | `OpenMP target offload <openmp-offload.rst>`_ | Build the Steinhardt kernel for an NVIDIA GPU                                                     |
     +-----------------------------------------------+---------------------------------------------------------------------------------------------------+
     | `Classify a dump <classify-cli.rst>`_         | Run ``read`` / ``chill-plus`` / ``cages`` on a file you have                                      |
@@ -35,6 +41,9 @@ A how-to solves a goal you already have. It is not a learning path.
    :maxdepth: 1
 
    install
+   bindings
+   versions
+   benchmarks
    openmp-offload
    classify-cli
    sheared-cells

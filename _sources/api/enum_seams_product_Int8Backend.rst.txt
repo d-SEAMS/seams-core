@@ -1,0 +1,20 @@
+.. index:: pair: enum; Int8Backend
+.. _doxid-namespaceseams_1_1product_1af8206d12811cfa91ad26f3b6fdca4ac8:
+
+enum seams::product::Int8Backend
+================================
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <ozaki.hpp>
+
+	enum Int8Backend {
+	    :target:`Auto<doxid-namespaceseams_1_1product_1af8206d12811cfa91ad26f3b6fdca4ac8a06b9281e396db002010bde1de57262eb>`   = 0,
+	    :target:`Scalar<doxid-namespaceseams_1_1product_1af8206d12811cfa91ad26f3b6fdca4ac8af60357a8d17e45793298323f1b372a74>` = 1,
+	    :target:`Vnni<doxid-namespaceseams_1_1product_1af8206d12811cfa91ad26f3b6fdca4ac8a60784d4c7f952be5623c33b16173682d>`   = 2,
+	    :target:`Amx<doxid-namespaceseams_1_1product_1af8206d12811cfa91ad26f3b6fdca4ac8ae0af394473a027ea1fe1d8ad86af15ea>`    = 3,
+	};
+

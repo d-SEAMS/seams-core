@@ -15,7 +15,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
-<title>seams-core: /home/runner/work/seams-core/seams-core/src/include/internal/phase.hpp Source File</title>
+<title>seams-core: src/include/internal/phase.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="dynsections.js"></script>
 <script type="text/javascript" src="codefolding.js"></script>
@@ -61,7 +61,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -276,20 +276,24 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('phase_8hpp_sou
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordtype">double</span> rcut);</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno"><a class="line" href="namespacephase.html#a548c3829160adf36ec9d7ba7dbb065a1">   57</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="namespacephase.html#a548c3829160adf36ec9d7ba7dbb065a1">frameDensity</a>(</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud);</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span></div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="namespacephase.html#a201ed8bb3cd747bc5663cce11a23c2fa">   63</a></span><a class="code hl_enumeration" href="namespacephase.html#a45206ea8c1350d175974e9a54cde9c71">GlassKind</a> <a class="code hl_function" href="namespacephase.html#a201ed8bb3cd747bc5663cce11a23c2fa">glassFromDensity</a>(<span class="keywordtype">double</span> rho, <span class="keywordtype">double</span> iceMax, <span class="keywordtype">double</span> ldaMax,</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>                           <span class="keywordtype">double</span> mdaMin);</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno"><a class="line" href="namespacephase.html#a84767cd8f9f4d99ea98a21b748583172">   58</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="namespacephase.html#a84767cd8f9f4d99ea98a21b748583172">frameDensity</a>(</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keywordtype">double</span> molarMass);</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span></div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno"><a class="line" href="namespacephase.html#a548c3829160adf36ec9d7ba7dbb065a1">   63</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="namespacephase.html#a84767cd8f9f4d99ea98a21b748583172">frameDensity</a>(</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud);</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno"><a class="line" href="namespacephase.html#a31b88f162592c1601d40e4363cb87898">   67</a></span><a class="code hl_enumeration" href="namespacephase.html#a45206ea8c1350d175974e9a54cde9c71">GlassKind</a> <a class="code hl_function" href="namespacephase.html#a201ed8bb3cd747bc5663cce11a23c2fa">glassFromDensity</a>(<span class="keywordtype">double</span> rho, <span class="keywordtype">double</span> iceMax, <span class="keywordtype">double</span> mdaMin);</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span></div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno"><a class="line" href="namespacephase.html#a8eaa4d3fda3aef905fddd4f5e9bc502c">   71</a></span><a class="code hl_enumeration" href="namespacephase.html#a45206ea8c1350d175974e9a54cde9c71">GlassKind</a> <a class="code hl_function" href="namespacephase.html#a201ed8bb3cd747bc5663cce11a23c2fa">glassFromDensity</a>(<span class="keywordtype">double</span> rho);</div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>} <span class="comment">// namespace phase</span></div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno"><a class="line" href="namespacephase.html#a201ed8bb3cd747bc5663cce11a23c2fa">   69</a></span><a class="code hl_enumeration" href="namespacephase.html#a45206ea8c1350d175974e9a54cde9c71">GlassKind</a> <a class="code hl_function" href="namespacephase.html#a201ed8bb3cd747bc5663cce11a23c2fa">glassFromDensity</a>(<span class="keywordtype">double</span> rho, <span class="keywordtype">double</span> iceMax, <span class="keywordtype">double</span> ldaMax,</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>                           <span class="keywordtype">double</span> mdaMin);</div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno"><a class="line" href="namespacephase.html#a31b88f162592c1601d40e4363cb87898">   73</a></span><a class="code hl_enumeration" href="namespacephase.html#a45206ea8c1350d175974e9a54cde9c71">GlassKind</a> <a class="code hl_function" href="namespacephase.html#a201ed8bb3cd747bc5663cce11a23c2fa">glassFromDensity</a>(<span class="keywordtype">double</span> rho, <span class="keywordtype">double</span> iceMax, <span class="keywordtype">double</span> mdaMin);</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span></div>
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="namespacephase.html#a8eaa4d3fda3aef905fddd4f5e9bc502c">   77</a></span><a class="code hl_enumeration" href="namespacephase.html#a45206ea8c1350d175974e9a54cde9c71">GlassKind</a> <a class="code hl_function" href="namespacephase.html#a201ed8bb3cd747bc5663cce11a23c2fa">glassFromDensity</a>(<span class="keywordtype">double</span> rho);</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span> </div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>} <span class="comment">// namespace phase</span></div>
 </div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span> </div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="amol__sys_8hpp_html"><div class="ttname"><a href="mol__sys_8hpp.html">mol_sys.hpp</a></div><div class="ttdoc">The main molecular system handler.</div></div>
 <div class="ttc" id="anamespacematch_html"><div class="ttname"><a href="namespacematch.html">match</a></div><div class="ttdef"><b>Definition</b> <a href="shapeMatch_8hpp_source.html#l00036">shapeMatch.hpp:36</a></div></div>
 <div class="ttc" id="anamespacephase_html"><div class="ttname"><a href="namespacephase.html">phase</a></div><div class="ttdef"><b>Definition</b> <a href="#l00011">phase.hpp:11</a></div></div>
@@ -302,7 +306,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('phase_8hpp_sou
 <div class="ttc" id="anamespacephase_html_a45206ea8c1350d175974e9a54cde9c71ac112c8b88569f1cb2d8f22eca738a4b7"><div class="ttname"><a href="namespacephase.html#a45206ea8c1350d175974e9a54cde9c71ac112c8b88569f1cb2d8f22eca738a4b7">phase::GlassKind::mda</a></div><div class="ttdeci">@ mda</div><div class="ttdef"><b>Definition</b> <a href="#l00013">phase.hpp:13</a></div></div>
 <div class="ttc" id="anamespacephase_html_a45206ea8c1350d175974e9a54cde9c71ad4f501681f5aef29d242c2b6e4d988f4"><div class="ttname"><a href="namespacephase.html#a45206ea8c1350d175974e9a54cde9c71ad4f501681f5aef29d242c2b6e4d988f4">phase::GlassKind::lda</a></div><div class="ttdeci">@ lda</div><div class="ttdef"><b>Definition</b> <a href="#l00013">phase.hpp:13</a></div></div>
 <div class="ttc" id="anamespacephase_html_a51566a8a99570b9169d7046326bc9544"><div class="ttname"><a href="namespacephase.html#a51566a8a99570b9169d7046326bc9544">phase::localDensity</a></div><div class="ttdeci">std::vector&lt; double &gt; localDensity(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, double rcut)</div><div class="ttdoc">Local number density (1/A^3) in a sphere of radius rcut.</div></div>
-<div class="ttc" id="anamespacephase_html_a548c3829160adf36ec9d7ba7dbb065a1"><div class="ttname"><a href="namespacephase.html#a548c3829160adf36ec9d7ba7dbb065a1">phase::frameDensity</a></div><div class="ttdeci">double frameDensity(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud)</div><div class="ttdoc">Bulk mass density in g/cm^3 from nop and the box (18.015 g/mol).</div></div>
+<div class="ttc" id="anamespacephase_html_a84767cd8f9f4d99ea98a21b748583172"><div class="ttname"><a href="namespacephase.html#a84767cd8f9f4d99ea98a21b748583172">phase::frameDensity</a></div><div class="ttdeci">double frameDensity(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, double molarMass)</div></div>
 <div class="ttc" id="anamespacephase_html_a896a28798e9ac2e9e32e8807ca720cc1"><div class="ttname"><a href="namespacephase.html#a896a28798e9ac2e9e32e8807ca720cc1">phase::openChannelCount</a></div><div class="ttdeci">int openChannelCount(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</div><div class="ttdoc">Open hexagonal channel along z: six-rings stacked, not a closed 512.</div></div>
 <div class="ttc" id="anamespacephase_html_aabcf1d0b33a4557dbe42262621400d5f"><div class="ttname"><a href="namespacephase.html#aabcf1d0b33a4557dbe42262621400d5f">phase::iceXXILibrary</a></div><div class="ttdeci">IceXXIHit iceXXILibrary(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud)</div></div>
 <div class="ttc" id="anamespacephase_html_ac8231bd6a050a06d0f6c90f15aafb0fb"><div class="ttname"><a href="namespacephase.html#ac8231bd6a050a06d0f6c90f15aafb0fb">phase::hydrogenMSD</a></div><div class="ttdeci">double hydrogenMSD(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;frame0, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;frame1, int hydrogenType)</div><div class="ttdoc">Mean squared displacement of hydrogenType between two frames.</div></div>

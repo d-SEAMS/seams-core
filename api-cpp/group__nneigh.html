@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -272,6 +272,10 @@ Functions</h2></td></tr>
 <tr class="memitem:gad17e972366865905372aa796e946a351" id="r_gad17e972366865905372aa796e946a351"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gad17e972366865905372aa796e946a351">nneigh::dumpVolume</a> (const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</td></tr>
 <tr class="memdesc:gad17e972366865905372aa796e946a351"><td class="mdescLeft">&#160;</td><td class="mdescRight">Triclinic dump-cell volume |det(H)| from dumpBoundsToH.  <br /></td></tr>
 <tr class="memitem:ga786c8abbd20d2751403eb4f2c603cd95" id="r_ga786c8abbd20d2751403eb4f2c603cd95"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga786c8abbd20d2751403eb4f2c603cd95">nneigh::dumpVolume</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud)</td></tr>
+<tr class="memitem:gad960860059d8e9d9fdee48c679e1c446" id="r_gad960860059d8e9d9fdee48c679e1c446"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#gad960860059d8e9d9fdee48c679e1c446">nneigh::setBoxFromLammpsEdges</a> (std::vector&lt; double &gt; &amp;box, std::vector&lt; double &gt; &amp;boxLow, double xlo, double ylo, double zlo, double lx, double ly, double lz, double xy, double xz, double yz)</td></tr>
+<tr class="memdesc:gad960860059d8e9d9fdee48c679e1c446"><td class="mdescLeft">&#160;</td><td class="mdescRight">LAMMPS edge origin and edge lengths, plus tilt, as a dump box.  <br /></td></tr>
+<tr class="memitem:ga77b70b894f0e7a72a980001e076f2a73" id="r_ga77b70b894f0e7a72a980001e076f2a73"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ga77b70b894f0e7a72a980001e076f2a73">nneigh::setBoxFromLengthsAngles</a> (std::vector&lt; double &gt; &amp;box, std::vector&lt; double &gt; &amp;boxLow, double a, double b, double c, double alphaDeg, double betaDeg, double gammaDeg)</td></tr>
+<tr class="memdesc:ga77b70b894f0e7a72a980001e076f2a73"><td class="mdescLeft">&#160;</td><td class="mdescRight">Crystallographic lengths and angles in degrees, stored as a dump box.  <br /></td></tr>
 <tr class="memitem:ga9566a384474993ea7356e7abc414e40e" id="r_ga9566a384474993ea7356e7abc414e40e"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga9566a384474993ea7356e7abc414e40e">nneigh::neighList</a> (double rcutoff, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</td></tr>
 <tr class="memdesc:ga9566a384474993ea7356e7abc414e40e"><td class="mdescLeft">&#160;</td><td class="mdescRight">All these functions use atom IDs and not indices.  <br /></td></tr>
 <tr class="memitem:gadd6ed18f0c7e2e5fbd10d7cdbf6af429" id="r_gadd6ed18f0c7e2e5fbd10d7cdbf6af429"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gadd6ed18f0c7e2e5fbd10d7cdbf6af429">nneigh::neighListPair</a> (double rcutoff, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</td></tr>
@@ -335,11 +339,11 @@ Functions</h2></td></tr>
 <tr><td class="fieldname"><a id="ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706" name="ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706"></a>KnnUnion&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00383">383</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  383</span>{ <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">Cutoff</a>, <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">KnnMutual</a>, <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">KnnUnion</a> };</div>
-<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">nneigh::BondGraph::KnnUnion</a></div><div class="ttdeci">@ KnnUnion</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00383">neighbours.hpp:383</a></div></div>
-<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">nneigh::BondGraph::KnnMutual</a></div><div class="ttdeci">@ KnnMutual</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00383">neighbours.hpp:383</a></div></div>
-<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">nneigh::BondGraph::Cutoff</a></div><div class="ttdeci">@ Cutoff</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00383">neighbours.hpp:383</a></div></div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00462">462</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  462</span>{ <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">Cutoff</a>, <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">KnnMutual</a>, <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">KnnUnion</a> };</div>
+<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">nneigh::BondGraph::KnnUnion</a></div><div class="ttdeci">@ KnnUnion</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00462">neighbours.hpp:462</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">nneigh::BondGraph::KnnMutual</a></div><div class="ttdeci">@ KnnMutual</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00462">neighbours.hpp:462</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">nneigh::BondGraph::Cutoff</a></div><div class="ttdeci">@ Cutoff</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00462">neighbours.hpp:462</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -401,10 +405,10 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00413">413</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  413</span>                                                               {</div>
-<div class="line"><span class="lineno">  414</span>    <span class="keywordflow">return</span> nList_;</div>
-<div class="line"><span class="lineno">  415</span>  }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00492">492</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  492</span>                                                               {</div>
+<div class="line"><span class="lineno">  493</span>    <span class="keywordflow">return</span> nList_;</div>
+<div class="line"><span class="lineno">  494</span>  }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -490,13 +494,13 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00131">131</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  132</span>                                                                 {</div>
-<div class="line"><span class="lineno">  133</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#ga87d0da315b8e67fc843f91099dceb349">dumpAxialDim</a>(yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>, yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>);</div>
-<div class="line"><span class="lineno">  134</span>}</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00132">132</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  133</span>                                                                 {</div>
+<div class="line"><span class="lineno">  134</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#ga87d0da315b8e67fc843f91099dceb349">dumpAxialDim</a>(yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>, yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>);</div>
+<div class="line"><span class="lineno">  135</span>}</div>
 <div class="ttc" id="agroup__molSys_html_gaa7d9b8543780baf4a495c7acdb1f87d8"><div class="ttname"><a href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">molSys::PointCloud::box</a></div><div class="ttdeci">std::vector&lt; T &gt; box</div><div class="ttdoc">Number of atoms.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00177">mol_sys.hpp:177</a></div></div>
 <div class="ttc" id="agroup__molSys_html_gac861daaeb2b1e75a6ac9eb3390bc6105"><div class="ttname"><a href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">molSys::PointCloud::boxLow</a></div><div class="ttdeci">std::vector&lt; T &gt; boxLow</div><div class="ttdoc">Periodic box lengths.</div><div class="ttdef"><b>Definition</b> <a href="mol__sys_8hpp_source.html#l00178">mol_sys.hpp:178</a></div></div>
-<div class="ttc" id="agroup__nneigh_html_ga87d0da315b8e67fc843f91099dceb349"><div class="ttname"><a href="#ga87d0da315b8e67fc843f91099dceb349">nneigh::dumpAxialDim</a></div><div class="ttdeci">int dumpAxialDim(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</div><div class="ttdoc">Longest recovered length: 0 = x, 1 = y, 2 = z.</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00117">neighbours.hpp:117</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ga87d0da315b8e67fc843f91099dceb349"><div class="ttname"><a href="#ga87d0da315b8e67fc843f91099dceb349">nneigh::dumpAxialDim</a></div><div class="ttdeci">int dumpAxialDim(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</div><div class="ttdoc">Longest recovered length: 0 = x, 1 = y, 2 = z.</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00118">neighbours.hpp:118</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -529,20 +533,20 @@ Functions</h2></td></tr>
 
 <p>Longest recovered length: 0 = x, 1 = y, 2 = z. </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00117">117</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  118</span>                                                         {</div>
-<div class="line"><span class="lineno">  119</span>  <span class="keywordtype">double</span> lengths[3];</div>
-<div class="line"><span class="lineno">  120</span>  <a class="code hl_function" href="#ga4b7e08068d9fba7d981793100b62de6c">dumpCellLengths</a>(box, boxLow, lengths);</div>
-<div class="line"><span class="lineno">  121</span>  <span class="keywordtype">int</span> axial = 0;</div>
-<div class="line"><span class="lineno">  122</span>  <span class="keywordflow">if</span> (lengths[1] &gt; lengths[axial]) {</div>
-<div class="line"><span class="lineno">  123</span>    axial = 1;</div>
-<div class="line"><span class="lineno">  124</span>  }</div>
-<div class="line"><span class="lineno">  125</span>  <span class="keywordflow">if</span> (lengths[2] &gt; lengths[axial]) {</div>
-<div class="line"><span class="lineno">  126</span>    axial = 2;</div>
-<div class="line"><span class="lineno">  127</span>  }</div>
-<div class="line"><span class="lineno">  128</span>  <span class="keywordflow">return</span> axial;</div>
-<div class="line"><span class="lineno">  129</span>}</div>
-<div class="ttc" id="agroup__nneigh_html_ga4b7e08068d9fba7d981793100b62de6c"><div class="ttname"><a href="#ga4b7e08068d9fba7d981793100b62de6c">nneigh::dumpCellLengths</a></div><div class="ttdeci">void dumpCellLengths(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow, double lengths[3])</div><div class="ttdoc">Recovered restricted-triclinic lengths lx, ly, lz (H diagonal).</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00105">neighbours.hpp:105</a></div></div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00118">118</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  119</span>                                                         {</div>
+<div class="line"><span class="lineno">  120</span>  <span class="keywordtype">double</span> lengths[3];</div>
+<div class="line"><span class="lineno">  121</span>  <a class="code hl_function" href="#ga4b7e08068d9fba7d981793100b62de6c">dumpCellLengths</a>(box, boxLow, lengths);</div>
+<div class="line"><span class="lineno">  122</span>  <span class="keywordtype">int</span> axial = 0;</div>
+<div class="line"><span class="lineno">  123</span>  <span class="keywordflow">if</span> (lengths[1] &gt; lengths[axial]) {</div>
+<div class="line"><span class="lineno">  124</span>    axial = 1;</div>
+<div class="line"><span class="lineno">  125</span>  }</div>
+<div class="line"><span class="lineno">  126</span>  <span class="keywordflow">if</span> (lengths[2] &gt; lengths[axial]) {</div>
+<div class="line"><span class="lineno">  127</span>    axial = 2;</div>
+<div class="line"><span class="lineno">  128</span>  }</div>
+<div class="line"><span class="lineno">  129</span>  <span class="keywordflow">return</span> axial;</div>
+<div class="line"><span class="lineno">  130</span>}</div>
+<div class="ttc" id="agroup__nneigh_html_ga4b7e08068d9fba7d981793100b62de6c"><div class="ttname"><a href="#ga4b7e08068d9fba7d981793100b62de6c">nneigh::dumpCellLengths</a></div><div class="ttdeci">void dumpCellLengths(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow, double lengths[3])</div><div class="ttdoc">Recovered restricted-triclinic lengths lx, ly, lz (H diagonal).</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00106">neighbours.hpp:106</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -586,34 +590,34 @@ Functions</h2></td></tr>
 <p>LAMMPS dump bound spans to restricted triclinic H (rows a, b, c). </p>
 <p><span class="tt">box[0..2]</span> are <span class="tt">xhi_bound - xlo_bound</span> etc. Optional <span class="tt">box[3..5]</span> are tilt <span class="tt">xy, xz, yz</span>. <span class="tt">boxLow</span> is the bound lo. Inverse of <span class="tt">xlo_bound = xlo + min(0, xy, xz, xy+xz)</span>. </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00074">74</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   76</span>                                            {</div>
-<div class="line"><span class="lineno">   77</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xspan = box.size() &gt; 0 ? box[0] : 0.0;</div>
-<div class="line"><span class="lineno">   78</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yspan = box.size() &gt; 1 ? box[1] : 0.0;</div>
-<div class="line"><span class="lineno">   79</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zspan = box.size() &gt; 2 ? box[2] : 0.0;</div>
-<div class="line"><span class="lineno">   80</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xlo_b = boxLow.size() &gt; 0 ? boxLow[0] : 0.0;</div>
-<div class="line"><span class="lineno">   81</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ylo_b = boxLow.size() &gt; 1 ? boxLow[1] : 0.0;</div>
-<div class="line"><span class="lineno">   82</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zlo_b = boxLow.size() &gt; 2 ? boxLow[2] : 0.0;</div>
-<div class="line"><span class="lineno">   83</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xy = box.size() &gt;= 6 ? box[3] : 0.0;</div>
-<div class="line"><span class="lineno">   84</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xz = box.size() &gt;= 6 ? box[4] : 0.0;</div>
-<div class="line"><span class="lineno">   85</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yz = box.size() &gt;= 6 ? box[5] : 0.0;</div>
-<div class="line"><span class="lineno">   86</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));</div>
-<div class="line"><span class="lineno">   87</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));</div>
-<div class="line"><span class="lineno">   88</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymin = std::min(0.0, yz);</div>
-<div class="line"><span class="lineno">   89</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymax = std::max(0.0, yz);</div>
-<div class="line"><span class="lineno">   90</span>  H[0][0] = xspan - xmax + xmin;</div>
-<div class="line"><span class="lineno">   91</span>  H[0][1] = 0.0;</div>
-<div class="line"><span class="lineno">   92</span>  H[0][2] = 0.0;</div>
-<div class="line"><span class="lineno">   93</span>  H[1][0] = xy;</div>
-<div class="line"><span class="lineno">   94</span>  H[1][1] = yspan - ymax + ymin;</div>
-<div class="line"><span class="lineno">   95</span>  H[1][2] = 0.0;</div>
-<div class="line"><span class="lineno">   96</span>  H[2][0] = xz;</div>
-<div class="line"><span class="lineno">   97</span>  H[2][1] = yz;</div>
-<div class="line"><span class="lineno">   98</span>  H[2][2] = zspan;</div>
-<div class="line"><span class="lineno">   99</span>  origin[0] = xlo_b - xmin;</div>
-<div class="line"><span class="lineno">  100</span>  origin[1] = ylo_b - ymin;</div>
-<div class="line"><span class="lineno">  101</span>  origin[2] = zlo_b;</div>
-<div class="line"><span class="lineno">  102</span>}</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00075">75</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   77</span>                                            {</div>
+<div class="line"><span class="lineno">   78</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xspan = box.size() &gt; 0 ? box[0] : 0.0;</div>
+<div class="line"><span class="lineno">   79</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yspan = box.size() &gt; 1 ? box[1] : 0.0;</div>
+<div class="line"><span class="lineno">   80</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zspan = box.size() &gt; 2 ? box[2] : 0.0;</div>
+<div class="line"><span class="lineno">   81</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xlo_b = boxLow.size() &gt; 0 ? boxLow[0] : 0.0;</div>
+<div class="line"><span class="lineno">   82</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ylo_b = boxLow.size() &gt; 1 ? boxLow[1] : 0.0;</div>
+<div class="line"><span class="lineno">   83</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> zlo_b = boxLow.size() &gt; 2 ? boxLow[2] : 0.0;</div>
+<div class="line"><span class="lineno">   84</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xy = box.size() &gt;= 6 ? box[3] : 0.0;</div>
+<div class="line"><span class="lineno">   85</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xz = box.size() &gt;= 6 ? box[4] : 0.0;</div>
+<div class="line"><span class="lineno">   86</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yz = box.size() &gt;= 6 ? box[5] : 0.0;</div>
+<div class="line"><span class="lineno">   87</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));</div>
+<div class="line"><span class="lineno">   88</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));</div>
+<div class="line"><span class="lineno">   89</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymin = std::min(0.0, yz);</div>
+<div class="line"><span class="lineno">   90</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymax = std::max(0.0, yz);</div>
+<div class="line"><span class="lineno">   91</span>  H[0][0] = xspan - xmax + xmin;</div>
+<div class="line"><span class="lineno">   92</span>  H[0][1] = 0.0;</div>
+<div class="line"><span class="lineno">   93</span>  H[0][2] = 0.0;</div>
+<div class="line"><span class="lineno">   94</span>  H[1][0] = xy;</div>
+<div class="line"><span class="lineno">   95</span>  H[1][1] = yspan - ymax + ymin;</div>
+<div class="line"><span class="lineno">   96</span>  H[1][2] = 0.0;</div>
+<div class="line"><span class="lineno">   97</span>  H[2][0] = xz;</div>
+<div class="line"><span class="lineno">   98</span>  H[2][1] = yz;</div>
+<div class="line"><span class="lineno">   99</span>  H[2][2] = zspan;</div>
+<div class="line"><span class="lineno">  100</span>  origin[0] = xlo_b - xmin;</div>
+<div class="line"><span class="lineno">  101</span>  origin[1] = ylo_b - ymin;</div>
+<div class="line"><span class="lineno">  102</span>  origin[2] = zlo_b;</div>
+<div class="line"><span class="lineno">  103</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -651,16 +655,16 @@ Functions</h2></td></tr>
 
 <p>Recovered restricted-triclinic lengths lx, ly, lz (H diagonal). </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00105">105</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  107</span>                                               {</div>
-<div class="line"><span class="lineno">  108</span>  <span class="keywordtype">double</span> H[3][3];</div>
-<div class="line"><span class="lineno">  109</span>  <span class="keywordtype">double</span> origin[3];</div>
-<div class="line"><span class="lineno">  110</span>  <a class="code hl_function" href="#ga342ae6a7675f0a32caf8087f43d679d8">dumpBoundsToH</a>(box, boxLow, H, origin);</div>
-<div class="line"><span class="lineno">  111</span>  lengths[0] = H[0][0];</div>
-<div class="line"><span class="lineno">  112</span>  lengths[1] = H[1][1];</div>
-<div class="line"><span class="lineno">  113</span>  lengths[2] = H[2][2];</div>
-<div class="line"><span class="lineno">  114</span>}</div>
-<div class="ttc" id="agroup__nneigh_html_ga342ae6a7675f0a32caf8087f43d679d8"><div class="ttname"><a href="#ga342ae6a7675f0a32caf8087f43d679d8">nneigh::dumpBoundsToH</a></div><div class="ttdeci">void dumpBoundsToH(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow, double H[3][3], double origin[3])</div><div class="ttdoc">LAMMPS dump bound spans to restricted triclinic H (rows a, b, c).</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00074">neighbours.hpp:74</a></div></div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00106">106</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  108</span>                                               {</div>
+<div class="line"><span class="lineno">  109</span>  <span class="keywordtype">double</span> H[3][3];</div>
+<div class="line"><span class="lineno">  110</span>  <span class="keywordtype">double</span> origin[3];</div>
+<div class="line"><span class="lineno">  111</span>  <a class="code hl_function" href="#ga342ae6a7675f0a32caf8087f43d679d8">dumpBoundsToH</a>(box, boxLow, H, origin);</div>
+<div class="line"><span class="lineno">  112</span>  lengths[0] = H[0][0];</div>
+<div class="line"><span class="lineno">  113</span>  lengths[1] = H[1][1];</div>
+<div class="line"><span class="lineno">  114</span>  lengths[2] = H[2][2];</div>
+<div class="line"><span class="lineno">  115</span>}</div>
+<div class="ttc" id="agroup__nneigh_html_ga342ae6a7675f0a32caf8087f43d679d8"><div class="ttname"><a href="#ga342ae6a7675f0a32caf8087f43d679d8">nneigh::dumpBoundsToH</a></div><div class="ttdeci">void dumpBoundsToH(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow, double H[3][3], double origin[3])</div><div class="ttdoc">LAMMPS dump bound spans to restricted triclinic H (rows a, b, c).</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00075">neighbours.hpp:75</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -703,12 +707,12 @@ Functions</h2></td></tr>
 
 <p>Fractional to cartesian coordinates via dump H. </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00151">151</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  152</span>                                                         {</div>
-<div class="line"><span class="lineno">  153</span>  r[0] = origin[0] + H[0][0] * s[0] + H[1][0] * s[1] + H[2][0] * s[2];</div>
-<div class="line"><span class="lineno">  154</span>  r[1] = origin[1] + H[1][1] * s[1] + H[2][1] * s[2];</div>
-<div class="line"><span class="lineno">  155</span>  r[2] = origin[2] + H[2][2] * s[2];</div>
-<div class="line"><span class="lineno">  156</span>}</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00152">152</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  153</span>                                                         {</div>
+<div class="line"><span class="lineno">  154</span>  r[0] = origin[0] + H[0][0] * s[0] + H[1][0] * s[1] + H[2][0] * s[2];</div>
+<div class="line"><span class="lineno">  155</span>  r[1] = origin[1] + H[1][1] * s[1] + H[2][1] * s[2];</div>
+<div class="line"><span class="lineno">  156</span>  r[2] = origin[2] + H[2][2] * s[2];</div>
+<div class="line"><span class="lineno">  157</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -761,18 +765,18 @@ Functions</h2></td></tr>
 
 <p>Cartesian to fractional coordinates via dump H. </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00137">137</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  138</span>                                                        {</div>
-<div class="line"><span class="lineno">  139</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lx = H[0][0];</div>
-<div class="line"><span class="lineno">  140</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ly = H[1][1];</div>
-<div class="line"><span class="lineno">  141</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lz = H[2][2];</div>
-<div class="line"><span class="lineno">  142</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xy = H[1][0];</div>
-<div class="line"><span class="lineno">  143</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xz = H[2][0];</div>
-<div class="line"><span class="lineno">  144</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yz = H[2][1];</div>
-<div class="line"><span class="lineno">  145</span>  s[2] = (z - origin[2]) / lz;</div>
-<div class="line"><span class="lineno">  146</span>  s[1] = (y - origin[1] - yz * s[2]) / ly;</div>
-<div class="line"><span class="lineno">  147</span>  s[0] = (x - origin[0] - xy * s[1] - xz * s[2]) / lx;</div>
-<div class="line"><span class="lineno">  148</span>}</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00138">138</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  139</span>                                                        {</div>
+<div class="line"><span class="lineno">  140</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lx = H[0][0];</div>
+<div class="line"><span class="lineno">  141</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ly = H[1][1];</div>
+<div class="line"><span class="lineno">  142</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lz = H[2][2];</div>
+<div class="line"><span class="lineno">  143</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xy = H[1][0];</div>
+<div class="line"><span class="lineno">  144</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xz = H[2][0];</div>
+<div class="line"><span class="lineno">  145</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> yz = H[2][1];</div>
+<div class="line"><span class="lineno">  146</span>  s[2] = (z - origin[2]) / lz;</div>
+<div class="line"><span class="lineno">  147</span>  s[1] = (y - origin[1] - yz * s[2]) / ly;</div>
+<div class="line"><span class="lineno">  148</span>  s[0] = (x - origin[0] - xy * s[1] - xz * s[2]) / lx;</div>
+<div class="line"><span class="lineno">  149</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -799,11 +803,11 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00169">169</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  170</span>                                                                 {</div>
-<div class="line"><span class="lineno">  171</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#gad17e972366865905372aa796e946a351">dumpVolume</a>(yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>, yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>);</div>
-<div class="line"><span class="lineno">  172</span>}</div>
-<div class="ttc" id="agroup__nneigh_html_gad17e972366865905372aa796e946a351"><div class="ttname"><a href="#gad17e972366865905372aa796e946a351">nneigh::dumpVolume</a></div><div class="ttdeci">double dumpVolume(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</div><div class="ttdoc">Triclinic dump-cell volume |det(H)| from dumpBoundsToH.</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00160">neighbours.hpp:160</a></div></div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00170">170</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  171</span>                                                                 {</div>
+<div class="line"><span class="lineno">  172</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#gad17e972366865905372aa796e946a351">dumpVolume</a>(yCloud.<a class="code hl_variable" href="group__molSys.html#gaa7d9b8543780baf4a495c7acdb1f87d8">box</a>, yCloud.<a class="code hl_variable" href="group__molSys.html#gac861daaeb2b1e75a6ac9eb3390bc6105">boxLow</a>);</div>
+<div class="line"><span class="lineno">  173</span>}</div>
+<div class="ttc" id="agroup__nneigh_html_gad17e972366865905372aa796e946a351"><div class="ttname"><a href="#gad17e972366865905372aa796e946a351">nneigh::dumpVolume</a></div><div class="ttdeci">double dumpVolume(const std::vector&lt; double &gt; &amp;box, const std::vector&lt; double &gt; &amp;boxLow)</div><div class="ttdoc">Triclinic dump-cell volume |det(H)| from dumpBoundsToH.</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00161">neighbours.hpp:161</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -837,14 +841,14 @@ Functions</h2></td></tr>
 <p>Triclinic dump-cell volume |det(H)| from dumpBoundsToH. </p>
 <p>Bound spans Lx*Ly*Lz are not the cell volume when tilt is present. </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00160">160</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  161</span>                                                          {</div>
-<div class="line"><span class="lineno">  162</span>  <span class="keywordtype">double</span> H[3][3];</div>
-<div class="line"><span class="lineno">  163</span>  <span class="keywordtype">double</span> origin[3];</div>
-<div class="line"><span class="lineno">  164</span>  <a class="code hl_function" href="#ga342ae6a7675f0a32caf8087f43d679d8">dumpBoundsToH</a>(box, boxLow, H, origin);</div>
-<div class="line"><span class="lineno">  165</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> vol = H[0][0] * H[1][1] * H[2][2];</div>
-<div class="line"><span class="lineno">  166</span>  <span class="keywordflow">return</span> vol &lt; 0.0 ? -vol : vol;</div>
-<div class="line"><span class="lineno">  167</span>}</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00161">161</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  162</span>                                                          {</div>
+<div class="line"><span class="lineno">  163</span>  <span class="keywordtype">double</span> H[3][3];</div>
+<div class="line"><span class="lineno">  164</span>  <span class="keywordtype">double</span> origin[3];</div>
+<div class="line"><span class="lineno">  165</span>  <a class="code hl_function" href="#ga342ae6a7675f0a32caf8087f43d679d8">dumpBoundsToH</a>(box, boxLow, H, origin);</div>
+<div class="line"><span class="lineno">  166</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> vol = H[0][0] * H[1][1] * H[2][2];</div>
+<div class="line"><span class="lineno">  167</span>  <span class="keywordflow">return</span> vol &lt; 0.0 ? -vol : vol;</div>
+<div class="line"><span class="lineno">  168</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -893,8 +897,8 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00403">403</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  403</span>{ <span class="keywordflow">return</span> graph_; }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00482">482</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  482</span>{ <span class="keywordflow">return</span> graph_; }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1093,8 +1097,8 @@ Functions</h2></td></tr>
 
 <p>Atoms whose cutoff bond set changed on the last update. </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00412">412</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  412</span>{ <span class="keywordflow">return</span> changedAtoms_; }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00491">491</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  491</span>{ <span class="keywordflow">return</span> changedAtoms_; }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1121,8 +1125,8 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00410">410</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  410</span>{ <span class="keywordflow">return</span> rebuilt_; }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00489">489</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  489</span>{ <span class="keywordflow">return</span> rebuilt_; }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1298,6 +1302,210 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>I-J neighbour list (I==J is like-type and reuses neighListO). Unlike-type pairs use the same dump MIC as neighListO. </p>
 
+</div>
+</div>
+<a id="gad960860059d8e9d9fdee48c679e1c446" name="gad960860059d8e9d9fdee48c679e1c446"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad960860059d8e9d9fdee48c679e1c446">&#9670;&#160;</a></span>setBoxFromLammpsEdges()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool nneigh::setBoxFromLammpsEdges </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>box</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>boxLow</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xlo</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>ylo</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>zlo</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>lx</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>ly</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>lz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xy</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>xz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>yz</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>LAMMPS edge origin and edge lengths, plus tilt, as a dump box. </p>
+<p><span class="tt">lx, ly, lz</span> are <span class="tt">xhi - xlo</span> and not the bound spans. A zero tilt stays three spans so the orthorhombic pair loop is unchanged. Returns false when an edge is not positive. </p>
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00180">180</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  183</span>                                                                             {</div>
+<div class="line"><span class="lineno">  184</span>  <span class="keywordflow">if</span> (!(lx &gt; 0.0 &amp;&amp; ly &gt; 0.0 &amp;&amp; lz &gt; 0.0)) {</div>
+<div class="line"><span class="lineno">  185</span>    box.clear();</div>
+<div class="line"><span class="lineno">  186</span>    boxLow.clear();</div>
+<div class="line"><span class="lineno">  187</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  188</span>  }</div>
+<div class="line"><span class="lineno">  189</span>  <span class="keyword">const</span> <span class="keywordtype">bool</span> tilt =</div>
+<div class="line"><span class="lineno">  190</span>      std::abs(xy) &gt; 0.0 || std::abs(xz) &gt; 0.0 || std::abs(yz) &gt; 0.0;</div>
+<div class="line"><span class="lineno">  191</span>  <span class="keywordflow">if</span> (!tilt) {</div>
+<div class="line"><span class="lineno">  192</span>    box = {lx, ly, lz};</div>
+<div class="line"><span class="lineno">  193</span>    boxLow = {xlo, ylo, zlo};</div>
+<div class="line"><span class="lineno">  194</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  195</span>  }</div>
+<div class="line"><span class="lineno">  196</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));</div>
+<div class="line"><span class="lineno">  197</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));</div>
+<div class="line"><span class="lineno">  198</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymin = std::min(0.0, yz);</div>
+<div class="line"><span class="lineno">  199</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ymax = std::max(0.0, yz);</div>
+<div class="line"><span class="lineno">  200</span>  box = {lx + xmax - xmin, ly + ymax - ymin, lz, xy, xz, yz};</div>
+<div class="line"><span class="lineno">  201</span>  boxLow = {xlo + xmin, ylo + ymin, zlo};</div>
+<div class="line"><span class="lineno">  202</span>  <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  203</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga77b70b894f0e7a72a980001e076f2a73" name="ga77b70b894f0e7a72a980001e076f2a73"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga77b70b894f0e7a72a980001e076f2a73">&#9670;&#160;</a></span>setBoxFromLengthsAngles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool nneigh::setBoxFromLengthsAngles </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>box</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>boxLow</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>b</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>c</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>alphaDeg</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>betaDeg</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>gammaDeg</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Crystallographic lengths and angles in degrees, stored as a dump box. </p>
+<p><span class="tt">alpha</span> is between b and c, <span class="tt">beta</span> between a and c, <span class="tt">gamma</span> between a and b. The basis is the reduced triclinic frame: a along x, b in the xy plane. Returns false when the cell is not a positive volume. </p>
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00210">210</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  213</span>                                                                    {</div>
+<div class="line"><span class="lineno">  214</span>  <span class="keyword">constexpr</span> <span class="keywordtype">double</span> kDeg = 3.14159265358979323846 / 180.0;</div>
+<div class="line"><span class="lineno">  215</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> alpha = alphaDeg * kDeg;</div>
+<div class="line"><span class="lineno">  216</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> beta = betaDeg * kDeg;</div>
+<div class="line"><span class="lineno">  217</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> gamma = gammaDeg * kDeg;</div>
+<div class="line"><span class="lineno">  218</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> cosA = std::cos(alpha);</div>
+<div class="line"><span class="lineno">  219</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> cosB = std::cos(beta);</div>
+<div class="line"><span class="lineno">  220</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> cosG = std::cos(gamma);</div>
+<div class="line"><span class="lineno">  221</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> sinG = std::sin(gamma);</div>
+<div class="line"><span class="lineno">  222</span>  <span class="keywordflow">if</span> (!(a &gt; 0.0 &amp;&amp; b &gt; 0.0 &amp;&amp; c &gt; 0.0) || std::abs(sinG) &lt; 1e-18) {</div>
+<div class="line"><span class="lineno">  223</span>    box.clear();</div>
+<div class="line"><span class="lineno">  224</span>    boxLow.clear();</div>
+<div class="line"><span class="lineno">  225</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  226</span>  }</div>
+<div class="line"><span class="lineno">  227</span>  <span class="keywordtype">double</span> xy = b * cosG;</div>
+<div class="line"><span class="lineno">  228</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> ly = b * sinG;</div>
+<div class="line"><span class="lineno">  229</span>  <span class="keywordtype">double</span> xz = c * cosB;</div>
+<div class="line"><span class="lineno">  230</span>  <span class="keywordtype">double</span> yz = c * (cosA - cosB * cosG) / sinG;</div>
+<div class="line"><span class="lineno">  231</span>  <span class="comment">// cos(90 deg) is a few ulps, not zero. A right angle must stay</span></div>
+<div class="line"><span class="lineno">  232</span>  <span class="comment">// orthorhombic, or the pair loop takes the triclinic path.</span></div>
+<div class="line"><span class="lineno">  233</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> tol = 1e-10 * std::max(a, std::max(b, c));</div>
+<div class="line"><span class="lineno">  234</span>  <span class="keywordflow">if</span> (std::abs(xy) &lt; tol) {</div>
+<div class="line"><span class="lineno">  235</span>    xy = 0.0;</div>
+<div class="line"><span class="lineno">  236</span>  }</div>
+<div class="line"><span class="lineno">  237</span>  <span class="keywordflow">if</span> (std::abs(xz) &lt; tol) {</div>
+<div class="line"><span class="lineno">  238</span>    xz = 0.0;</div>
+<div class="line"><span class="lineno">  239</span>  }</div>
+<div class="line"><span class="lineno">  240</span>  <span class="keywordflow">if</span> (std::abs(yz) &lt; tol) {</div>
+<div class="line"><span class="lineno">  241</span>    yz = 0.0;</div>
+<div class="line"><span class="lineno">  242</span>  }</div>
+<div class="line"><span class="lineno">  243</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> lz2 = c * c - xz * xz - yz * yz;</div>
+<div class="line"><span class="lineno">  244</span>  <span class="keywordflow">if</span> (!(ly &gt; 0.0) || !(lz2 &gt; 0.0)) {</div>
+<div class="line"><span class="lineno">  245</span>    box.clear();</div>
+<div class="line"><span class="lineno">  246</span>    boxLow.clear();</div>
+<div class="line"><span class="lineno">  247</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  248</span>  }</div>
+<div class="line"><span class="lineno">  249</span>  <span class="keywordflow">return</span> <a class="code hl_function" href="#gad960860059d8e9d9fdee48c679e1c446">setBoxFromLammpsEdges</a>(box, boxLow, 0.0, 0.0, 0.0, a, ly, std::sqrt(lz2),</div>
+<div class="line"><span class="lineno">  250</span>                              xy, xz, yz);</div>
+<div class="line"><span class="lineno">  251</span>}</div>
+<div class="ttc" id="agroup__nneigh_html_gad960860059d8e9d9fdee48c679e1c446"><div class="ttname"><a href="#gad960860059d8e9d9fdee48c679e1c446">nneigh::setBoxFromLammpsEdges</a></div><div class="ttdeci">bool setBoxFromLammpsEdges(std::vector&lt; double &gt; &amp;box, std::vector&lt; double &gt; &amp;boxLow, double xlo, double ylo, double zlo, double lx, double ly, double lz, double xy, double xz, double yz)</div><div class="ttdoc">LAMMPS edge origin and edge lengths, plus tilt, as a dump box.</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00180">neighbours.hpp:180</a></div></div>
+</div><!-- fragment -->
 </div>
 </div>
 <a id="ga139165088e10b53a5efa6034434c9423" name="ga139165088e10b53a5efa6034434c9423"></a>

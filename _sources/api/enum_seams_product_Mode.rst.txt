@@ -1,0 +1,20 @@
+.. index:: pair: enum; Mode
+.. _doxid-namespaceseams_1_1product_1aa8c61433638a1bffc43597870d7e6b69:
+
+enum seams::product::Mode
+=========================
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <ozaki.hpp>
+
+	enum Mode {
+	    :target:`Fp64<doxid-namespaceseams_1_1product_1aa8c61433638a1bffc43597870d7e6b69a9827fcb63f1f5c7962e8056d676ede53>`    = 0,
+	    :target:`Dot2<doxid-namespaceseams_1_1product_1aa8c61433638a1bffc43597870d7e6b69a2a6a9dcb2d287b32ffa0c53d6637bc4b>`    = 1,
+	    :target:`OzakiI<doxid-namespaceseams_1_1product_1aa8c61433638a1bffc43597870d7e6b69a7d2eb2a8d1989de6609b0a82c81a5bda>`  = 2,
+	    :target:`OzakiII<doxid-namespaceseams_1_1product_1aa8c61433638a1bffc43597870d7e6b69aa46279a71e0342c8fb462fe5276caafd>` = 3,
+	};
+

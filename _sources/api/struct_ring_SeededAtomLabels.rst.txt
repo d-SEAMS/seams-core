@@ -16,7 +16,7 @@ Per-atom cage flags from seeded (hysteresis) affiliation. :ref:`More...<details-
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <cage_affiliation.hpp>
+	#include <src/include/internal/cage_affiliation.hpp>
 	
 	struct SeededAtomLabels {
 		// fields

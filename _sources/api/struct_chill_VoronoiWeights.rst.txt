@@ -16,7 +16,7 @@ The Voronoi facet neighbours of one particle and their area weights. :ref:`More.
 .. ref-code-block:: cpp
 	:class: doxyrest-overview-code-block
 
-	#include <voronoi_qlm.hpp>
+	#include <src/include/internal/voronoi_qlm.hpp>
 	
 	struct VoronoiWeights {
 		// fields

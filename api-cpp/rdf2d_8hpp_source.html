@@ -15,7 +15,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
-<title>seams-core: /home/runner/work/seams-core/seams-core/src/include/internal/rdf2d.hpp Source File</title>
+<title>seams-core: src/include/internal/rdf2d.hpp Source File</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="dynsections.js"></script>
 <script type="text/javascript" src="codefolding.js"></script>
@@ -61,7 +61,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -264,39 +264,39 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('rdf2d_8hpp_sou
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span></div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span></div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span></div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
-<div class="foldopen" id="foldopen00083" data-start="{" data-end="}">
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno"><a class="line" href="namespacerdf2.html">   83</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacerdf2.html">rdf2</a> {</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span></div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno"><a class="line" href="group__rdf2.html#gaa861f048b84783c91eb1fb21f5c827cd">   87</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="group__rdf2.html#gaa861f048b84783c91eb1fb21f5c827cd">rdf2Danalysis_AA</a>(std::string path, std::vector&lt;double&gt; &amp;rdfValues,</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>                     <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>                     <span class="keywordtype">double</span> cutoff, <span class="keywordtype">double</span> binwidth, <span class="keywordtype">int</span> firstFrame,</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>                     <span class="keywordtype">int</span> finalFrame);</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span></div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>std::vector&lt;int&gt;</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="group__rdf2.html#gae37c30b0c6e6c8d63f2471450b9b26ef">   94</a></span><a class="code hl_function" href="group__rdf2.html#gae37c30b0c6e6c8d63f2471450b9b26ef">sampleRDF_AA</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>             <span class="keywordtype">double</span> cutoff, <span class="keywordtype">double</span> binwidth, <span class="keywordtype">int</span> nbin);</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span></div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno"><a class="line" href="group__rdf2.html#ga7f3e0b969a3ad28ce57dc8e7e74b6b98">   98</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="group__rdf2.html#ga7f3e0b969a3ad28ce57dc8e7e74b6b98">normalizeRDF</a>(<span class="keywordtype">int</span> nopA, std::vector&lt;double&gt; &amp;rdfValues,</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>                 std::vector&lt;int&gt; histogram, <span class="keywordtype">double</span> binwidth, <span class="keywordtype">int</span> nbin,</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>                 std::vector&lt;double&gt; volumeLengths, <span class="keywordtype">int</span> nIter);</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span></div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>std::vector&lt;double&gt;</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno"><a class="line" href="group__rdf2.html#gadeebcb414f512ab8d99db14addb4506c">  106</a></span><a class="code hl_function" href="group__rdf2.html#gadeebcb414f512ab8d99db14addb4506c">getSystemLengths</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud);</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span></div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno"><a class="line" href="group__rdf2.html#ga309f282dffeee8083437a95aab29f51b">  109</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="group__rdf2.html#ga309f282dffeee8083437a95aab29f51b">getPlaneArea</a>(std::vector&lt;double&gt; volumeLengths);</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span> </div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>} <span class="comment">// namespace rdf2</span></div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> </div>
+<div class="foldopen" id="foldopen00084" data-start="{" data-end="}">
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno"><a class="line" href="namespacerdf2.html">   84</a></span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespacerdf2.html">rdf2</a> {</div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span></div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno"><a class="line" href="group__rdf2.html#gaa861f048b84783c91eb1fb21f5c827cd">   88</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="group__rdf2.html#gaa861f048b84783c91eb1fb21f5c827cd">rdf2Danalysis_AA</a>(std::string path, std::vector&lt;double&gt; &amp;rdfValues,</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>                     <span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>                     <span class="keywordtype">double</span> cutoff, <span class="keywordtype">double</span> binwidth, <span class="keywordtype">int</span> firstFrame,</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>                     <span class="keywordtype">int</span> finalFrame);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span></div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>std::vector&lt;int&gt;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="group__rdf2.html#gae37c30b0c6e6c8d63f2471450b9b26ef">   95</a></span><a class="code hl_function" href="group__rdf2.html#gae37c30b0c6e6c8d63f2471450b9b26ef">sampleRDF_AA</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud,</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>             <span class="keywordtype">double</span> cutoff, <span class="keywordtype">double</span> binwidth, <span class="keywordtype">int</span> nbin);</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span></div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno"><a class="line" href="group__rdf2.html#ga7f3e0b969a3ad28ce57dc8e7e74b6b98">   99</a></span>[[nodiscard]] <span class="keywordtype">int</span> <a class="code hl_function" href="group__rdf2.html#ga7f3e0b969a3ad28ce57dc8e7e74b6b98">normalizeRDF</a>(<span class="keywordtype">int</span> nopA, std::vector&lt;double&gt; &amp;rdfValues,</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>                 std::vector&lt;int&gt; histogram, <span class="keywordtype">double</span> binwidth, <span class="keywordtype">int</span> nbin,</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>                 std::vector&lt;double&gt; volumeLengths, <span class="keywordtype">int</span> nIter);</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span></div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>std::vector&lt;double&gt;</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno"><a class="line" href="group__rdf2.html#gadeebcb414f512ab8d99db14addb4506c">  107</a></span><a class="code hl_function" href="group__rdf2.html#gadeebcb414f512ab8d99db14addb4506c">getSystemLengths</a>(<span class="keyword">const</span> <a class="code hl_struct" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt;<a class="code hl_struct" href="structmolSys_1_1Point.html">molSys::Point&lt;double&gt;</a>, <span class="keywordtype">double</span>&gt; &amp;yCloud);</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span></div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno"><a class="line" href="group__rdf2.html#ga309f282dffeee8083437a95aab29f51b">  110</a></span><span class="keywordtype">double</span> <a class="code hl_function" href="group__rdf2.html#ga309f282dffeee8083437a95aab29f51b">getPlaneArea</a>(std::vector&lt;double&gt; volumeLengths);</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>} <span class="comment">// namespace rdf2</span></div>
 </div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span><span class="preprocessor">#endif </span><span class="comment">// SEAMS_RDF2D_H_</span></div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span><span class="preprocessor">#endif </span><span class="comment">// SEAMS_RDF2D_H_</span></div>
 <div class="ttc" id="agroup__rdf2_html_ga309f282dffeee8083437a95aab29f51b"><div class="ttname"><a href="group__rdf2.html#ga309f282dffeee8083437a95aab29f51b">rdf2::getPlaneArea</a></div><div class="ttdeci">double getPlaneArea(std::vector&lt; double &gt; volumeLengths)</div><div class="ttdoc">Gets the plane area from the volume lengths vector.</div></div>
 <div class="ttc" id="agroup__rdf2_html_ga7f3e0b969a3ad28ce57dc8e7e74b6b98"><div class="ttname"><a href="group__rdf2.html#ga7f3e0b969a3ad28ce57dc8e7e74b6b98">rdf2::normalizeRDF</a></div><div class="ttdeci">int normalizeRDF(int nopA, std::vector&lt; double &gt; &amp;rdfValues, std::vector&lt; int &gt; histogram, double binwidth, int nbin, std::vector&lt; double &gt; volumeLengths, int nIter)</div><div class="ttdoc">Normalize the histogram.</div></div>
 <div class="ttc" id="agroup__rdf2_html_gaa861f048b84783c91eb1fb21f5c827cd"><div class="ttname"><a href="group__rdf2.html#gaa861f048b84783c91eb1fb21f5c827cd">rdf2::rdf2Danalysis_AA</a></div><div class="ttdeci">int rdf2Danalysis_AA(std::string path, std::vector&lt; double &gt; &amp;rdfValues, const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, double cutoff, double binwidth, int firstFrame, int finalFrame)</div></div>
 <div class="ttc" id="agroup__rdf2_html_gadeebcb414f512ab8d99db14addb4506c"><div class="ttname"><a href="group__rdf2.html#gadeebcb414f512ab8d99db14addb4506c">rdf2::getSystemLengths</a></div><div class="ttdeci">std::vector&lt; double &gt; getSystemLengths(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud)</div></div>
 <div class="ttc" id="agroup__rdf2_html_gae37c30b0c6e6c8d63f2471450b9b26ef"><div class="ttname"><a href="group__rdf2.html#gae37c30b0c6e6c8d63f2471450b9b26ef">rdf2::sampleRDF_AA</a></div><div class="ttdeci">std::vector&lt; int &gt; sampleRDF_AA(const molSys::PointCloud&lt; molSys::Point&lt; double &gt;, double &gt; &amp;yCloud, double cutoff, double binwidth, int nbin)</div><div class="ttdoc">Samples the RDF histogram at every step.</div></div>
 <div class="ttc" id="amol__sys_8hpp_html"><div class="ttname"><a href="mol__sys_8hpp.html">mol_sys.hpp</a></div><div class="ttdoc">The main molecular system handler.</div></div>
-<div class="ttc" id="anamespacerdf2_html"><div class="ttname"><a href="namespacerdf2.html">rdf2</a></div><div class="ttdoc">Defines RDF-specific functions.</div><div class="ttdef"><b>Definition</b> <a href="#l00083">rdf2d.hpp:83</a></div></div>
+<div class="ttc" id="anamespacerdf2_html"><div class="ttname"><a href="namespacerdf2.html">rdf2</a></div><div class="ttdoc">Defines RDF-specific functions.</div><div class="ttdef"><b>Definition</b> <a href="#l00084">rdf2d.hpp:84</a></div></div>
 <div class="ttc" id="aorder__parameter_8hpp_html"><div class="ttname"><a href="order__parameter_8hpp.html">order_parameter.hpp</a></div></div>
 <div class="ttc" id="aring_8hpp_html"><div class="ttname"><a href="ring_8hpp.html">ring.hpp</a></div><div class="ttdoc">File containing common functions used by bulk and confined topological network critera.</div></div>
 <div class="ttc" id="aseams__input_8hpp_html"><div class="ttname"><a href="seams__input_8hpp.html">seams_input.hpp</a></div><div class="ttdoc">File for functions that read in files).</div></div>

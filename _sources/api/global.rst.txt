@@ -36,6 +36,7 @@ Global Namespace
 	namespace :ref:`chill<doxid-namespacechill>`;
 	namespace :ref:`clump<doxid-namespaceclump>`;
 	namespace :ref:`gen<doxid-namespacegen>`;
+		namespace :ref:`gen::mic<doxid-namespacegen_1_1mic>`;
 	namespace :ref:`gpu<doxid-namespacegpu>`;
 	namespace :ref:`ira<doxid-namespaceira>`;
 	namespace :ref:`match<doxid-namespacematch>`;
@@ -51,6 +52,7 @@ Global Namespace
 	namespace :ref:`seams<doxid-namespaceseams>`;
 		namespace :ref:`seams::cfg<doxid-namespaceseams_1_1cfg>`;
 		namespace :ref:`seams::domain<doxid-namespaceseams_1_1domain>`;
+		namespace :ref:`seams::product<doxid-namespaceseams_1_1product>`;
 		namespace :ref:`seams::sphericart_ylm<doxid-namespaceseams_1_1sphericart__ylm>`;
 		namespace :ref:`seams::steinhardt<doxid-namespaceseams_1_1steinhardt>`;
 	namespace :ref:`sinp<doxid-namespacesinp>`;
@@ -67,4 +69,6 @@ Global Namespace
 	// global functions
 
 	int :target:`seams_chill_plus<doxid-seams__c__api_8h_1a4aa681772840118e245156666761a0ac>`(const double* xyz, int n, const double* box, int* labels);
+	int :target:`seams_chill_plus_graph<doxid-seams__c__api_8h_1a3cdbb04d3443c73b4f3067360bea8bf7>`(const double* xyz, int n, const double* box, double cutoff, const char* graph, int* labels);
+	int :target:`seams_chill_plus_graph_lammps<doxid-seams__c__api_8h_1a905d0436a8fd534e4177ff7627143e04>`(const double* xyz, int n, const double* box9, double cutoff, const char* graph, int* labels);
 

@@ -15,7 +15,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="generator" content="Doxygen 1.17.0"/>
-<title>seams-core: /home/runner/work/seams-core/seams-core/src/include/internal/tum_offload.hpp File Reference</title>
+<title>seams-core: src/include/internal/tum_offload.hpp File Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="dynsections.js"></script>
 <script type="text/javascript" src="codefolding.js"></script>
@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -247,6 +247,8 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('tum__offload_8
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:tum_3A_3ACageCounts" id="r_tum_3A_3ACageCounts"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structtum_1_1CageCounts.html">tum::CageCounts</a></td></tr>
+<tr class="memitem:tum_3A_3ASpecializedCaps" id="r_tum_3A_3ASpecializedCaps"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structtum_1_1SpecializedCaps.html">tum::SpecializedCaps</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initial buffer sizes of the hop-bound path.  <a href="structtum_1_1SpecializedCaps.html#details">More...</a><br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
@@ -260,12 +262,15 @@ Functions</h2></td></tr>
 <tr class="memdesc:a5b6f992c67dea89064fe1bbe224f7533"><td class="mdescLeft">&#160;</td><td class="mdescRight">Host Franzblau six-rings plus cageAffiliation on an index nList (leading self entry, as neighbourListByIndex produces).  <br /></td></tr>
 <tr class="memitem:a50a0ddf8a6606b733a73b4689bda3efa" id="r_a50a0ddf8a6606b733a73b4689bda3efa"><td class="memItemLeft"><a class="el" href="structtum_1_1CageCounts.html">CageCounts</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacetum.html#a50a0ddf8a6606b733a73b4689bda3efa">tum::specializedCageCounts</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</td></tr>
 <tr class="memdesc:a50a0ddf8a6606b733a73b4689bda3efa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hop-bound six-ring enumerator plus affiliation predicates.  <br /></td></tr>
+<tr class="memitem:aec9875e12aa5941e584bd0150771f9bf" id="r_aec9875e12aa5941e584bd0150771f9bf"><td class="memItemLeft"><a class="el" href="structtum_1_1CageCounts.html">CageCounts</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacetum.html#aec9875e12aa5941e584bd0150771f9bf">tum::specializedCageCounts</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structtum_1_1SpecializedCaps.html">SpecializedCaps</a> &amp;caps)</td></tr>
+<tr class="memdesc:aec9875e12aa5941e584bd0150771f9bf"><td class="mdescLeft">&#160;</td><td class="mdescRight">As above, starting from the given buffer sizes.  <br /></td></tr>
 <tr class="memitem:a5db91702c7f7d13a3878708e01999945" id="r_a5db91702c7f7d13a3878708e01999945"><td class="memItemLeft"><a class="el" href="structtum_1_1CageCounts.html">CageCounts</a>&#160;</td><td class="memItemRight"><a class="el" href="namespacetum.html#a5db91702c7f7d13a3878708e01999945">tum::cageCounts</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</td></tr>
 <tr class="memdesc:a5db91702c7f7d13a3878708e01999945"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="namespacetum.html#a9dc1d26c60d5f757e66305b65b42aed0" title="True when SEAMS_OFFLOAD is set and is not &quot;0&quot;.">preferOffload()</a> selects specializedCageCounts, otherwise hostCageCounts.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>TUM ice score: hop-bound six-rings and cage affiliation. </p>
-<p>SEAMS_OFFLOAD=0 (or unset when no device) uses host Franzblau ringNetwork plus cageAffiliation. Any other SEAMS_OFFLOAD value selects the hop-bound six-ring enumerator and the same affiliation predicates, on the OpenMP target device when the build provides one and omp_get_num_devices() &gt; 0, otherwise on the host. The seeded CLI path uses that enumerator on the union four-nearest graph. CHILL+ stays on the host. Steinhardt offload is unchanged. </p>
+<p>SEAMS_OFFLOAD=0 (or unset when no device) uses host Franzblau ringNetwork plus cageAffiliation. Any other SEAMS_OFFLOAD value selects the hop-bound six-ring enumerator and the same affiliation predicates, on the OpenMP target device when the build provides one and omp_get_num_devices() &gt; 0, otherwise on the host. The seeded CLI path uses that enumerator on the union four-nearest graph. CHILL+ stays on the host. Steinhardt offload is unchanged.</p>
+<p>The enumerator writes into fixed buffers: a row of ring ids per atom, a ring table and a basal-pair table. Every counter is incremented before the bound check, so a pass reports the size it needed. A pass that overflowed any buffer is discarded and rerun with that buffer grown to the reported size. A row longer than <a class="el" href="namespacetum_1_1device.html#a71db2a90acf5a50f7cf5f807269ff022" title="Longest atom row the kernels accept.">tum::device::kRowCap</a> does not fit the kernels' local arrays, and that graph is evaluated by hostCageCounts instead. </p>
 
 <p class="definition">Definition in file <a class="el" href="tum__offload_8hpp_source.html">tum_offload.hpp</a>.</p>
 </div></div><!-- contents -->

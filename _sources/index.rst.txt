@@ -1,7 +1,7 @@
 
-=========
+===========
 ``d-SEAMS``
-=========
+===========
 
 :Author: `d-SEAMS core team <https://dseams.info>`_
 
@@ -63,11 +63,11 @@ repository is the C++ engine (``libyodaLib``) and the ``seams`` CLI.
 
 Scripting front ends are separate packages:
 
-- Python: ``pydseams`` (`docs <https://d-seams.github.io/PydSEAMSlib/>`_,
+- Python: ``pydseams`` (`Python docs <https://d-seams.github.io/PydSEAMSlib/>`_,
   `PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_), compiled
   module ``yoda``
 
-- Lua/Fennel: ``dseams`` (`docs <https://d-seams.github.io/yodaStruct/>`_,
+- Lua/Fennel: ``dseams`` (`Lua docs <https://d-seams.github.io/yodaStruct/>`_,
   `yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_),
   ``require("dseams")``
 
@@ -118,6 +118,11 @@ framework.
 
    tutorials/index
    tutorials/bulk-ice
+   tutorials/ice-and-clathrate
+   tutorials/rings
+   tutorials/order-parameters
+   tutorials/confined-water
+   tutorials/paper-figures
 
 .. toctree::
    :maxdepth: 1
@@ -125,6 +130,9 @@ framework.
 
    howto/index
    howto/install
+   howto/bindings
+   howto/versions
+   howto/benchmarks
    howto/openmp-offload
    howto/classify-cli
    howto/sheared-cells
@@ -143,6 +151,7 @@ framework.
    explanation/architecture
    explanation/chill-plus-vs-cages
    explanation/ring-completion
+   explanation/topological-network
    explanation/citation
 
 .. toctree::
@@ -154,10 +163,20 @@ framework.
    reference/data-formats
    reference/walk-compare
    reference/nix
+   reference/cross-language
    reference/api
    api/index
    reference/glossary
    changelog
+
+.. toctree::
+   :maxdepth: 1
+   :caption: d-SEAMS 2.0 paper
+
+   paper/index
+   paper/versions
+   paper/benchmarks
+   paper/reproduce
 
 .. toctree::
    :maxdepth: 1
@@ -170,6 +189,13 @@ The in-book C++ pages under ``api/`` are Doxygen via doxyrest. A sibling
 doxyYoda HTML tree (inline source, treeview) is at
 `*api-cpp* <https://docs.dseams.info/api-cpp/>`_ after
 ``pixi run -e docs docbld``.
+
+d-SEAMS 2.0 paper
+-----------------
+
+The paper describes seams-core v2.12.0. Its component versions,
+current benchmark tables and rerun steps are under
+`d-SEAMS 2.0 paper <paper/index.rst>`_.
 
 Related projects
 ----------------

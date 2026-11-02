@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.6.0</span>
+<span class="project_info">seams-core v2.12.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -265,8 +265,7 @@ Functions</h2></td></tr>
 <li><b>Sampling:</b> The histogram is added to for a particular bin, if the distance of a pair of atoms falls within the \(r\) associated with the bin.</li>
 <li><b>Normalization:</b> Every bin of the \(g(r)\) array is normalized by the product of the number of ideal gas particles in that bin, and the number of particles and number of frames.</li>
 </ol>
-<p>To account for the geometry of the slab-like quasi-two-dimensional system, the RDF must be additionally normalized by a form factor \(f\) such that \(f = \frac{h}{2r}\) for \(r&gt;h\) and \(f = \frac{h}{2r}\) for  \(r \le
-h\); where \(h\) is the height of the quasi-two-dimensional system.</p>
+<p>To account for the geometry of the slab-like quasi-two-dimensional system, the RDF must be additionally normalized by a form factor \(f\) such that \(f = 1 - \frac{r}{2h}\) for \(r \le h\) and \(f = \frac{h}{2r}\) for \(r &gt; h\); where \(h\) is the height of the quasi-two-dimensional system. That is what <code><a class="el" href="group__rdf2.html#ga7f3e0b969a3ad28ce57dc8e7e74b6b98" title="Normalize the histogram.">rdf2::normalizeRDF</a></code> implements.</p>
 <h3 class="doxsection"><a class="anchor" id="autotoc_md9"></a>
 Changelog</h3>
 <ul>

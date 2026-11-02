@@ -42,6 +42,8 @@ var group__nneigh =
     [ "nneigh::neighList", "group__nneigh.html#ga9566a384474993ea7356e7abc414e40e", null ],
     [ "nneigh::neighListO", "group__nneigh.html#gafaf0f0ff09cef581076f99a68018b023", null ],
     [ "nneigh::neighListPair", "group__nneigh.html#gadd6ed18f0c7e2e5fbd10d7cdbf6af429", null ],
+    [ "nneigh::setBoxFromLammpsEdges", "group__nneigh.html#gad960860059d8e9d9fdee48c679e1c446", null ],
+    [ "nneigh::setBoxFromLengthsAngles", "group__nneigh.html#ga77b70b894f0e7a72a980001e076f2a73", null ],
     [ "nneigh::shellSeparation", "group__nneigh.html#ga139165088e10b53a5efa6034434c9423", null ],
     [ "nneigh::SkinNeighborList::SkinNeighborList", "group__nneigh.html#ga80f555acadad22b5edcc4af8285006ed", null ],
     [ "nneigh::SkinNeighborList::update", "group__nneigh.html#ga81af9074f6b9311b1cba1321b64f21d7", null ]

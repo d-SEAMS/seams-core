@@ -1,0 +1,35 @@
+============
+Version pins
+============
+
+
+The version of a checkout is one string, written in five places.
+They move together.
+``seams --version`` prints the meson value.
+
+.. table::
+
+    +------------------------------------+------------------------------+
+    | file                               | field                        |
+    +====================================+==============================+
+    | ``meson.build``                    | ``version:`` of ``project(`` |
+    +------------------------------------+------------------------------+
+    | ``pixi.toml``                      | ``[workspace] version``      |
+    +------------------------------------+------------------------------+
+    | ``CITATION.cff``                   | ``version``                  |
+    +------------------------------------+------------------------------+
+    | ``nix/package.nix``                | ``version``                  |
+    +------------------------------------+------------------------------+
+    | ``docs/source/Doxyfile_seams.cfg`` | ``PROJECT_NUMBER``           |
+    +------------------------------------+------------------------------+
+
+On this tree that string is 2.11.0.
+A release that bumps one of them and leaves the others is a broken pin.
+The docs site should show the string from the commit it was built from, not a number copied into a paragraph that will go stale.
+
+``libseams_lang`` reports the meson version from ``seams_lang_version``.
+The Python, R, and Julia packages carry the same number in their own metadata.
+If you cut a release, change those too.
+
+Unreleased notes are files under ``changelog.d/``.
+The cut is ``towncrier build --version X.Y.Z``.

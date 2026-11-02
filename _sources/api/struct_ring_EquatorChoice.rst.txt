@@ -1,0 +1,23 @@
+.. index:: pair: struct; ring::EquatorChoice
+.. _doxid-structring_1_1_equator_choice:
+
+struct ring::EquatorChoice
+==========================
+
+.. toctree::
+	:hidden:
+
+Six peripheral rings of one equatorial candidate. n == 0 when the ring is not a candidate. The rings are stored in ascending canonical rank.
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/topo_bulk.hpp>
+	
+	struct EquatorChoice {
+		// fields
+	
+		int :target:`ring<doxid-structring_1_1_equator_choice_1ab89f64fa075b360c70306c6b46747d34>`[6] {};
+		int :target:`n<doxid-structring_1_1_equator_choice_1a51db6155bcb66059917161200ed20b2c>` = 0;
+	};

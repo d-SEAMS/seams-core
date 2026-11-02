@@ -37,6 +37,7 @@ Overview
 	double :ref:`hydrogenMSD<doxid-namespacephase_1ac8231bd6a050a06d0f6c90f15aafb0fb>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& frame0, const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& frame1, int hydrogenType);
 	:ref:`IceXXIHit<doxid-structphase_1_1_ice_x_x_i_hit>` :target:`iceXXILibrary<doxid-namespacephase_1aabcf1d0b33a4557dbe42262621400d5f>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud);
 	std::vector<double> :ref:`localDensity<doxid-namespacephase_1a51566a8a99570b9169d7046326bc9544>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double rcut);
+	double :ref:`frameDensity<doxid-namespacephase_1a84767cd8f9f4d99ea98a21b748583172>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double molarMass);
 	double :ref:`frameDensity<doxid-namespacephase_1a548c3829160adf36ec9d7ba7dbb065a1>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud);
 	:ref:`GlassKind<doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71>` :ref:`glassFromDensity<doxid-namespacephase_1a201ed8bb3cd747bc5663cce11a23c2fa>`(double rho, double iceMax, double ldaMax, double mdaMin);
 	:ref:`GlassKind<doxid-namespacephase_1a45206ea8c1350d175974e9a54cde9c71>` :ref:`glassFromDensity<doxid-namespacephase_1a31b88f162592c1601d40e4363cb87898>`(double rho, double iceMax, double mdaMin);
@@ -94,6 +95,16 @@ Mean squared displacement of hydrogenType between two frames.
 Local number density (1/A^3) in a sphere of radius rcut.
 
 .. index:: pair: function; frameDensity
+.. _doxid-namespacephase_1a84767cd8f9f4d99ea98a21b748583172:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	double frameDensity(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, double molarMass)
+
+Bulk mass density in g/cm^3. The volume is the triclinic cell volume, not the product of the bound spans. molarMass is g/mol.
+
+.. index:: pair: function; frameDensity
 .. _doxid-namespacephase_1a548c3829160adf36ec9d7ba7dbb065a1:
 
 .. ref-code-block:: cpp
@@ -101,7 +112,7 @@ Local number density (1/A^3) in a sphere of radius rcut.
 
 	double frameDensity(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud)
 
-Bulk mass density in g/cm^3 from nop and the box (18.015 g/mol).
+Water, 18.015 g/mol.
 
 .. index:: pair: function; glassFromDensity
 .. _doxid-namespacephase_1a201ed8bb3cd747bc5663cce11a23c2fa:
