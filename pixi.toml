@@ -24,6 +24,9 @@ pytest = ">=8.0"
 lcov = ">=1.16"
 libhwy = ">=1.3.0"
 chemfiles = ">=0.10"
+# Ozaki tests link libgmp and libmpfr.
+gmp = ">=6.3.0,<7"
+mpfr = ">=4.2.2,<5"
 
 [tasks]
 setup = "meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=false --wipe 2>/dev/null; meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=false"
