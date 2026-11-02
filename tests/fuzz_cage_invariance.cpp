@@ -34,6 +34,7 @@
 #include <atomic>
 #include <cmath>
 #include <cstdint>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -272,7 +273,16 @@ int main(int argc, char **argv) {
 #ifdef SEAMS_HAS_OPENMP
   omp_set_num_threads(1);
 #endif
-  const unsigned nThreads = std::max(1u, std::thread::hardware_concurrency());
+  // OMP_NUM_THREADS, when set, is the worker count. Coverage sets it
+  // to one so arc counters are not bounced across cores.
+  unsigned nThreads = std::max(1u, std::thread::hardware_concurrency());
+  if (const char *env = std::getenv("OMP_NUM_THREADS")) {
+    char *end = nullptr;
+    const long requested = std::strtol(env, &end, 10);
+    if (end != env && requested > 0) {
+      nThreads = static_cast<unsigned>(requested);
+    }
+  }
 
   int failures = 0;
   int frames = 0;

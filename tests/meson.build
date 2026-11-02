@@ -60,6 +60,12 @@ endif
 #   3. Setting build_rpath so the binary also works when run outside meson test.
 _test_env = environment()
 _test_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+# Coverage arc counters share a cache line. Several cores bounce that
+# line and the timed tests exceed their limit. One thread keeps the
+# counters and the tests inside the limit.
+if get_option('b_coverage')
+  _test_env.set('OMP_NUM_THREADS', '1')
+endif
 
 # --enable-new-dtags is Linux-only (macOS ld does not support it)
 _test_rpath = '$ORIGIN/../src'
