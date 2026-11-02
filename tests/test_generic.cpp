@@ -167,7 +167,7 @@ TEST_CASE("file_exists returns true for existing file", "[generic]") {
 }
 
 TEST_CASE("file_exists returns false for nonexistent file", "[generic]") {
-  REQUIRE_FALSE(gen::file_exists("/tmp/this_file_should_not_exist_12345.xyz"));
+  REQUIRE_FALSE(gen::file_exists("missing/this_file_should_not_exist_12345.xyz"));
 }
 
 // -- radDeg tests --

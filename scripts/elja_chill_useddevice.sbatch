@@ -45,12 +45,12 @@ export OMP_NUM_THREADS=1
 
 if [[ ${SEAMS_IN_SYSROOT:-0} != 1 ]]; then
   export SEAMS_IN_SYSROOT=1
-  OVL=${SEAMS_OVL:-${TMPDIR:-/tmp}/seams-ovl-${SLURM_JOB_ID:-$$}}
+  OVL=${SEAMS_OVL:-${TMPDIR:-.}/seams-ovl-${SLURM_JOB_ID:-$$}}
   mkdir -p "$OVL/lib64-upper" "$OVL/lib64-work" "$OVL/lib64-merged"
   export SEAMS_OVL=$OVL
   exec unshare --user --map-root-user --mount bash "$0" "$@"
 fi
-OVL=${SEAMS_OVL:-${TMPDIR:-/tmp}/seams-ovl-${SLURM_JOB_ID:-$$}}
+OVL=${SEAMS_OVL:-${TMPDIR:-.}/seams-ovl-${SLURM_JOB_ID:-$$}}
 if ! grep -q ' /usr/lib64 ' /proc/mounts; then
   mount -t overlay overlay \
     -o "lowerdir=/usr/lib64,upperdir=$OVL/lib64-upper,workdir=$OVL/lib64-work" \

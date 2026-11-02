@@ -45,8 +45,8 @@ jobs:
           Rscript -e 'testthat::test_file("bindings/r/dseams/tests/testthat/test-ice.R", stop_on_failure=TRUE)'
       - name: Install Julia
         run: |
-          curl -fsSL -o /tmp/julia.tar.gz https://julialang-s3.julialang.org/bin/linux/x86_64/1.11/julia-1.11.6-linux-x86_64.tar.gz
-          sudo tar -xzf /tmp/julia.tar.gz -C /opt
+          curl -fsSL -o "$RUNNER_TEMP/julia.tar.gz" https://julialang-s3.julialang.org/bin/linux/x86_64/1.11/julia-1.11.6-linux-x86_64.tar.gz
+          sudo tar -xzf "$RUNNER_TEMP/julia.tar.gz" -C /opt
           echo /opt/julia-1.11.6/bin >> "$GITHUB_PATH"
       - name: Test Julia
         run: |

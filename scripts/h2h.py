@@ -26,7 +26,7 @@ from collections import Counter
 import numpy as np
 
 # Every directory is relative to this repository, or set by an environment
-# variable. Nothing is pinned to /tmp or a home directory.
+# variable. Nothing is pinned to a temporary directory or a home directory.
 _ROOT = pathlib.Path(__file__).resolve().parents[1]
 _H2H = pathlib.Path(os.environ.get("H2H_ROOT", str(_ROOT / "h2h")))
 H = _H2H

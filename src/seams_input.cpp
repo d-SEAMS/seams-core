@@ -114,7 +114,7 @@ bool parseDumpInt(std::string_view line, int &out) {
   return parsed.ec == std::errc{};
 }
 
-// Live dump cursor, matching LAMMPS ReaderNative (rerun keeps FILE* at
+// Live dump position, matching LAMMPS ReaderNative (rerun keeps FILE* at
 // the next snapshot) and chemfiles LAMMPSTrajectory::read_next. Random
 // access seeks a cached ITEM: TIMESTEP offset table.
 struct LammpsDumpSession {
@@ -635,7 +635,7 @@ namespace {
 enum class LammpsKeep { All, Type, TypeInSlice };
 
 // Parse one snapshot. The session has already consumed ITEM: TIMESTEP.
-// Stop at the next ITEM: TIMESTEP and seek back so the live cursor sits
+// Stop at the next ITEM: TIMESTEP and seek back so the live position sits
 // on that line, matching LAMMPS ReaderNative::read_time.
 void parseLammpsFrameBody(
     std::ifstream &file,

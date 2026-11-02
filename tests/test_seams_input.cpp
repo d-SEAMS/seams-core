@@ -16,7 +16,7 @@ namespace fs = std::filesystem;
 // -- readXYZ tests --
 
 TEST_CASE("readXYZ throws for nonexistent file", "[seams_input]") {
-  REQUIRE_THROWS_AS(sinp::readXYZ("/tmp/nonexistent_12345.xyz"),
+  REQUIRE_THROWS_AS(sinp::readXYZ("missing/nonexistent_12345.xyz"),
                     std::runtime_error);
 }
 
@@ -86,7 +86,7 @@ TEST_CASE("readLammpsTrj handles nonexistent file gracefully",
           "[seams_input]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
 
-  auto cloud = sinp::readLammpsTrj("/tmp/nonexistent.lammpstrj", 1, yCloud);
+  auto cloud = sinp::readLammpsTrj("missing/nonexistent.lammpstrj", 1, yCloud);
 
   // Should return an empty cloud (no crash)
   REQUIRE(cloud.pts.empty());
@@ -141,7 +141,7 @@ TEST_CASE("readLammpsTrjO handles nonexistent file", "[seams_input]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
 
   auto cloud =
-      sinp::readLammpsTrjO("/tmp/nonexistent.lammpstrj", 1, yCloud, 1);
+      sinp::readLammpsTrjO("missing/nonexistent.lammpstrj", 1, yCloud, 1);
 
   REQUIRE(cloud.pts.empty());
 }
@@ -174,7 +174,7 @@ TEST_CASE("readLammpsTrjreduced with slice and type filter", "[seams_input]") {
   }
 }
 
-// -- LAMMPS dump live session (ReaderNative cursor + offset table) --
+// -- LAMMPS dump live session (ReaderNative position + offset table) --
 
 namespace {
 std::string writeTinyDump() {
@@ -222,7 +222,7 @@ std::string writeEmptyMiddleDump() {
 } // namespace
 
 TEST_CASE("nLammpsFrames counts ITEM: TIMESTEP markers", "[seams_input]") {
-  REQUIRE(sinp::nLammpsFrames("/tmp/nonexistent.lammpstrj") == 0);
+  REQUIRE(sinp::nLammpsFrames("missing/nonexistent.lammpstrj") == 0);
   REQUIRE(sinp::nLammpsFrames("traj/mW_cubic.lammpstrj") == 11);
   const auto tiny = writeTinyDump();
   sinp::dropLammpsDumpIndex(tiny);
@@ -249,7 +249,7 @@ TEST_CASE("readLammpsTrjreduced seeks the last frame by index",
   sinp::dropLammpsDumpIndex(tiny);
 }
 
-TEST_CASE("sequential load_frame walks keep the live dump cursor",
+TEST_CASE("sequential load_frame walks keep the live dump position",
           "[seams_input]") {
   const auto tiny = writeTinyDump();
   sinp::dropLammpsDumpIndex(tiny);
@@ -410,7 +410,7 @@ TEST_CASE("readLammpsTrjO parses scientific-notation dump coordinates",
 // -- readBonds tests --
 
 TEST_CASE("readBonds returns empty for nonexistent file", "[seams_input]") {
-  auto bonds = sinp::readBonds("/tmp/nonexistent_bonds.dat");
+  auto bonds = sinp::readBonds("missing/nonexistent_bonds.dat");
   REQUIRE(bonds.empty());
 }
 

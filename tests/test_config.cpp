@@ -189,10 +189,10 @@ TEST_CASE("refuseIceScore names the family") {
 TEST_CASE("pathFromArgv reads --config") {
   char a[] = "seams";
   char b[] = "--config";
-  char c[] = "/tmp/x.env";
+  char c[] = "missing/x.env";
   char *argv[] = {a, b, c};
-  REQUIRE(seams::cfg::pathFromArgv(3, argv) == "/tmp/x.env");
-  char d[] = "--config=/tmp/y.env";
+  REQUIRE(seams::cfg::pathFromArgv(3, argv) == "missing/x.env");
+  char d[] = "--config=missing/y.env";
   char *argv2[] = {a, d};
-  REQUIRE(seams::cfg::pathFromArgv(2, argv2) == "/tmp/y.env");
+  REQUIRE(seams::cfg::pathFromArgv(2, argv2) == "missing/y.env");
 }

@@ -56,7 +56,7 @@ std::vector<std::string> getInpFileList(std::string inputFolder);
 //! cannot be read. The first full count per path walks the file once
 //! and later reads seek, matching chemfiles Trajectory::nsteps and
 //! readcon's frame-offset table. Sequential load_frame walks reuse a
-//! live cursor the way LAMMPS ReaderNative does on rerun.
+//! live read position the way LAMMPS ReaderNative does on rerun.
 int nLammpsFrames(const std::string &filename);
 
 //! Drop a cached dump session (tests that rewrite a path in place).

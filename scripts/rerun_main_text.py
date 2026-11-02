@@ -11,7 +11,7 @@ Usage:
   python3 scripts/rerun_main_text.py \\
       --seams build/seams --input input/traj \\
       --archive program-files/seams-core-v2.12.0.tar.gz \\
-      --out /tmp/rerun-main
+      --out rerun-main
 """
 
 from __future__ import annotations

@@ -1685,10 +1685,10 @@ std::vector<int> canonicalRingOrderByAtoms(
     bucket[static_cast<size_t>(b + 1)] += bucket[static_cast<size_t>(b)];
   }
   std::vector<int> order(static_cast<size_t>(n));
-  std::vector<int> cursor = bucket;
+  std::vector<int> place = bucket;
   for (int i = 0; i < n; i++) {
     const int b = keys[static_cast<size_t>(i)].len > 0 ? keys[static_cast<size_t>(i)].id[0] + 1 : 0;
-    order[static_cast<size_t>(cursor[static_cast<size_t>(b)]++)] = i;
+    order[static_cast<size_t>(place[static_cast<size_t>(b)]++)] = i;
   }
   auto before = [&](int a, int b) {
     const Key &ka = keys[static_cast<size_t>(a)];
