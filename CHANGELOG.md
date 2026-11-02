@@ -10,6 +10,59 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## [2.12.0] - 2026-11-01
+
+### Added
+
+- R (`bindings/r/dseams`) and Julia (`bindings/julia/Dseams`) call
+  `libseams_lang`. Python stays `pydseamslib`. The executable tutorials
+  under `docs/tutorials` import `pydseams`.
+
+### Changed
+
+- On the all-site niu2f1 frame, one thread, one run of `findHC`, `findDDC` and `findBySignatures` together takes 176.4 s. TRACE on that frame takes 1762.064 s.
+
+Eleven release runs of `bench_cage_h2h` on this tree. The median is the 6th value. The bracket is the 3rd and the 9th.
+
+| input | threads | d-SEAMS ms |
+|---|---:|---|
+| mw | 1 | 10.3280 [10.2437, 10.3495] |
+| mw | 4 | 5.5119 [5.4837, 5.5352] |
+| mw | 8 | 4.4688 [4.4375, 4.6620] |
+| nuc148 | 1 | 8.0242 [7.9408, 8.2184] |
+| nuc148 | 4 | 6.8144 [6.7103, 11.7749] |
+| nuc148 | 8 | 6.6439 [6.1703, 8.3874] |
+| sI | 1 | 0.2594 [0.2529, 0.2704] |
+| sI | 4 | 0.2598 [0.2536, 0.2672] |
+| sI | 8 | 0.2561 [0.2527, 0.2626] |
+| sII | 1 | 0.5353 [0.5289, 0.5387] |
+| sII | 4 | 0.5142 [0.4980, 0.5397] |
+| sII | 8 | 0.4501 [0.4470, 0.4767] |
+| niu3f148 | 1 | 5.1293 [5.0907, 5.1779] |
+| niu3f148 | 4 | 5.7654 [5.6536, 5.9289] |
+| niu3f148 | 8 | 5.4389 [5.2918, 5.6989] |
+| sI222 | 1 | 1.3841 [1.3803, 1.3991] |
+| sI222 | 4 | 1.1323 [1.0926, 1.1809] |
+| sI222 | 8 | 0.9988 [0.9697, 1.0333] |
+- findDDC on the mixed-site frame returns 0, not 605243. A double-diamond cage is kept only when its seven rings span 14 molecules and each peripheral shares three equatorial atoms, and every hexagon of that frame fails the test. Clathrate faces are rings whose edges all lie between 2.65 and 3.15 angstroms, so the closure search stays inside one cage instead of the whole ring complex.
+- The clathrate face-edge window is `SEAMS_CAGE_EDGE` and `--cage-edge`, default `2.65,3.15` in the coordinate units of the file. `none` turns the window off, and the cage bound is then the face census alone. `seams_frame_signature_edge` takes the same string. Python is `frame.cages_by_signature("512", edge="none")` and Lua is `dseams.cages_by_signature(frame, "512", {edge = "none"})`.
+- A peripheral set is kept only when the seven rings span 14 molecules and each peripheral shares exactly three atoms with the equator. On a 5508-frame census the seeded partition changes on 498 frames, all from this rule. The deposited main-text seeded counts do not move.
+- CHILL and CHILL+ use one default neighbour list on every front: the cutoff list (pairs closer than `cutoff`, 3.5 Å by default). The mutual four-nearest list is `graph = "mutual"` under that name everywhere: `seams chill` and `seams chill-plus --graph mutual`, R `chill_plus(graph = "mutual")`, Julia `chill_plus(; graph = "mutual")`, pydseamslib `Frame.chill_plus(graph="mutual")`, the C ABI `seams_chill_plus_graph`, and the LAMMPS `compute dseams ... graph mutual`. `seams chill`, R, Julia, `seams_chill_plus`, and `compute dseams` used the mutual list by default before. `tests/chill_plus_fronts.py` checks that the CLI, Python, R, and Julia agree on `exampleTraj.lammpstrj` with both lists.
+- Release builds define NDEBUG, so the libstdc++ assertions that meson adds when b_ndebug is false no longer run in them. The closed-cage search keeps the same output.
+- The closed-cage search skips a ring that shares two consecutive edges with a chosen face or passes through a vertex whose faces already close, and keeps the vertex and edge counts inside V - E + F = 2. No cage is lost. The search runs on dense edge ids, adds the forced faces and picks the open edge with the fewest rings in one pass, and lists the cages of a signature by their sorted faces.
+- The orthorhombic cutoff list folds coordinates into the cell, bins them one cutoff wide, and shares the 27-cell stencil across the atoms in a cell. Interior cells skip the periodic wrap. A squared distance within 1e-8 of the cutoff squared falls through to the existing list. The walk is used when the box is orthogonal, the subset has at least 2048 atoms, and every edge is at least three cutoffs. CHILL and CHILL+ on the default left-to-right fp64 path evaluate the l=3 harmonics as real and imaginary parts under OpenMP. On all 5508 frames the neighbour rows match the pre-patch rows and the CHILL+ ice labels match.
+- When the product of rings through the even or odd triplets exceeds 256, `equatorialConditions` builds the chains from edges that share at least three atoms and keeps the lexicographically least assignment that spans 14 molecules and gives each peripheral three equatorial atoms. Smaller products stay on the triple loop. Cubic mW stays at 2048 double-diamond cages, certificate method 1. Nucleation frame 148 stays at 102 hexagonal cages, 121 double-diamond cages, and 223 cages in total, with seeded counts 255, 363, and 377.
+- `findDDC` keeps a maximum non-conflicting set and certifies it. The mutual-conflict graph is built once. A one-cage component is kept. A component whose neighbourhoods are the two cliques of a bipartite line graph is a maximum matching, certified by a König cover. Any other component is a branch-and-bound maximum independent set, certified by a clique partition. On cubic mW the certificate is method 1 and the double-diamond count is 2048; the unpatched library reported 2040. On nucleation frame 148 the double-diamond count is 121 and the hexagonal count stays 102; the unpatched library reported 122 double-diamond cages. Seeded labels on that frame stay 255 hexagonal, 363 cubic, and 377 both, and the deposited mW seeded row stays 0 / 4096 / 0 / 0.
+
+### Fixed
+
+- Cage object counts no longer follow the wrapped coordinates. `findDDC` reports a maximum set of non-conflicting double-diamond cages, and both searches order rings by sorted atom indices plus the unwrapped shift of the cycle. A periodic translation or a permutation of the atoms leaves the count unchanged.
+- Cage search drops rings whose minimum-image lattice shifts wind through the periodic cell, and refuses a cutoff that can see two images of one pair. The R, Julia and C fronts keep the seeded label on the host rule when offload is requested. `seams cages` and the language fronts report disjoint hexagonal, cubic, both and water counts. `scripts/rerun_main_text.py` reruns the engine counts behind the main-text cage numbers and writes the archive hash.
+- `cages --signature` counts a face set as a cage only when its faces tile a sphere: every vertex lies on at least three faces that close around it, and V - E + F = 2. Rings whose minimum-image bonds add up to a lattice vector wind through the periodic cell, bound no face, and are dropped first (`ring::contractibleRings`). On frame 1 of the figshare mW nucleation run (4096 molecules, 3.5 Å cutoff) the search found 3 5¹²6², 20 5¹²6⁴, 270 5¹²6⁸ and 143 4³5⁶6³ cages in the liquid; it now finds none. On the GenIce sI unit cell it found 90 5¹²6², 4248 5¹²6⁴ and 218305 5¹²6⁸; it now finds 2 5¹² and 6 5¹²6².
+- `tests/check_invariance` exits 2 when the trajectory cannot be read, the frame holds no atom of the requested type, or the graph has no six-ring. It used to compare empty results, print PASS and exit 0. The meson tests `invariance_missing_input` and `invariance_empty_frame` expect that failure.
+- The Sphinx book builds with no warnings. The CHILL tables are verbatim, the book title underline matches the title, the nanotube page is in the tutorial contents, and each generated API link has a target.
+
+
 ## [2.11.0] - 2026-10-09
 
 ### Added

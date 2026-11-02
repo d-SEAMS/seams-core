@@ -43,7 +43,7 @@ struct VoronoiWeights {
  *  Certificate. The cell of particle i clipped against every candidate
  *  within cutoff c is the true Voronoi cell whenever every vertex of the
  *  clipped cell lies within c/2 of i: a particle k beyond the cutoff has
- *  |d_k| > c, its bisector plane sits at distance |d_k|/2 > c/2 from i, and
+ *  abs(d_k) > c, its bisector plane sits at distance abs(d_k)/2 > c/2 from i, and
  *  a half-space whose boundary is farther than c/2 cannot cut a region
  *  contained in the ball of radius c/2. An open or under-clipped cell keeps
  *  vertices on the seeding square at distance ~c and fails the certificate,

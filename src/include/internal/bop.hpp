@@ -80,10 +80,11 @@ by:
 molecules @f$i@f$ and @f$j@f$ is classified as being either staggered or
 eclipsed.
 
-  | Algorithm | Eclipsed Bonds                | Staggered Bonds       |
-  | :----:    | :----:                        | :----:                |
-  | CHILL     | @f$-0.05 >= a(i,j) >= -0.2@f$ | @f$a(i,j) <= -0.8@f$  |
-  | CHILL+    | @f$0.25 >= a(i,j) >= -0.35@f$ | @f$a(i,j) <= -0.8@f$  |
+  @code
+  Algorithm   Eclipsed bonds              Staggered bonds
+  CHILL       -0.05 >= a(i,j) >= -0.2     a(i,j) <= -0.8
+  CHILL+      0.25 >= a(i,j) >= -0.35     a(i,j) <= -0.8
+  @endcode
 
   Since each molecule @f$i@f$ in deeply supercooled water has four nearest
 neighbours, the type of the resultant four bonds is used to identify phases
@@ -92,14 +93,14 @@ according to the CHILL and CHILL+ algorithms.
   The CHILL algorithm can classify water molecules as belonging to the cubic,
 hexagonal, interfacial or liquid (amorphous) phase:
 
-  | Phase       | E   | S   | Neighbours | Description |
-  |-------------|-----|-----|------------|---------------------------------------------------------|
-  | Cubic       | 0   | 4   | 4          | All 4 neighbours are staggered. | |
-Hexagonal   | 1   | 3   | 4          | 3 staggered and 1 eclipsed bond. | |
-Interfacial | any | 2   | 4          | Belongs to the ice phase, but does not
-satisfy strict criteria of cubic and hexagonal | |             | 0   | 3   | 4
-|                                                         | | Liquid      | N/A
-| N/A | any        | Classification by exclusion.                            |
+  @code
+  Phase        E    S    Neighbours  Description
+  Cubic        0    4    4           All 4 neighbours are staggered.
+  Hexagonal    1    3    4           3 staggered and 1 eclipsed bond.
+  Interfacial  any  2    4           Belongs to the ice phase, but does not satisfy strict criteria of cubic and hexagonal.
+               0    3    4
+  Liquid       N/A  N/A  any         Classification by exclusion.
+  @endcode
 
   Here, E and S refer to eclipsed and staggered bonds. The neighbours column
 contains the number of nearest neighbours.
@@ -108,21 +109,16 @@ contains the number of nearest neighbours.
 identifies clathrate and interfacial clathrate phases. The criteria are
   enumerated in the table below:
 
-  | Phase                 | E   | S   | Neighbours | Description |
-  |-----------------------|-----|-----|------------|---------------------------------------------------------------------------------------------------|
-  | Cubic                 | 0   | 4   | 4          | no change was made to
-staggered bond criterion from CHILL                                         | |
-Hexagonal             | 1   | 3   | 4          | wider eclipsed range compared
-to CHILL; identifies 99% hexagonal ice up to 270 K                  | |
-Interfacial           | any | 2   | 4          | must have at least one first
-neighbor water with more than two staggered bonds                    | | | 0   |
-3   | 4          | must have at least one first neighbor water with more than
-one staggered bond                     | | Clathrate             | 4   | 0   | 4
-| bulk clathrate and part of the interface of clathrates can be identified with
-four eclipsed bonds | | Interfacial clathrate | 3   | any | 4          | partial
-clathrate cages and threads of clathrate-like order | | Liquid                |
-N/A | N/A | any        | classifies as liquid if none of the above criteria are
-fulfilled                                  |
+  @code
+  Phase                  E    S    Neighbours  Description
+  Cubic                  0    4    4           no change was made to the staggered bond criterion from CHILL
+  Hexagonal              1    3    4           wider eclipsed range compared to CHILL; identifies 99% hexagonal ice up to 270 K
+  Interfacial            any  2    4           must have at least one first neighbor water with more than two staggered bonds
+                         0    3    4           must have at least one first neighbor water with more than one staggered bond
+  Clathrate              4    0    4           bulk clathrate and part of the interface of clathrates can be identified with four eclipsed bonds
+  Interfacial clathrate  3    any  4           partial clathrate cages and threads of clathrate-like order
+  Liquid                 N/A  N/A  any         classifies as liquid if none of the above criteria are fulfilled
+  @endcode
 
   Although both the CHILL and CHILL+ classification schemes take into account
 the local order of the environment of each particle, both schemes output a

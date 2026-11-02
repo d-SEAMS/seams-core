@@ -9,6 +9,8 @@
   lapack,
   catch2_3,
   libhwy,
+  gmp,
+  mpfr,
   llvmPackages,
 }:
 
@@ -23,6 +25,7 @@ stdenv.mkDerivation (finalAttrs: {
       ../meson_options.txt
       ../src
       ../tests
+      ../bindings
       ../input
       ../templates
       ../subprojects/readcon-core.wrap
@@ -47,6 +50,8 @@ stdenv.mkDerivation (finalAttrs: {
     lapack
     catch2_3
     libhwy
+    gmp
+    mpfr
   ]
   ++ lib.optionals stdenv.cc.isClang [ llvmPackages.openmp ];
 

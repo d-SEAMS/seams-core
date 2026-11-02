@@ -3,9 +3,9 @@
 #+OPTIONS: toc:nil todo:nil num:nil author:nil title:nil ^:nil
 
 #+begin_export rst
-=========
+===========
 ``d-SEAMS``
-=========
+===========
 
 :Author: `d-SEAMS core team <https://dseams.info>`_
 
@@ -67,10 +67,10 @@ seams cages water.lammpstrj
 
 Scripting front ends are separate packages:
 
-- Python: ~pydseams~ ([[https://d-seams.github.io/PydSEAMSlib/][docs]],
+- Python: ~pydseams~ ([[https://d-seams.github.io/PydSEAMSlib/][Python docs]],
   [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]), compiled
   module ~yoda~
-- Lua/Fennel: ~dseams~ ([[https://d-seams.github.io/yodaStruct/][docs]],
+- Lua/Fennel: ~dseams~ ([[https://d-seams.github.io/yodaStruct/][Lua docs]],
   [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]),
   ~require("dseams")~
 

@@ -12,4 +12,18 @@ jobs:
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" --repo "${{ github.repository }}" --title "${{ github.ref_name }}" --generate-notes
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          python3 - << 'PY'
+          import pathlib, os
+          tag = os.environ["TAG_NAME"]
+          ver = tag[1:] if tag.startswith("v") else tag
+          text = pathlib.Path("CHANGELOG.md").read_text()
+          marker = f"## [{ver}]"
+          start = text.index(marker)
+          rest = text[start + 1:]
+          nxt = rest.find("\n## [")
+          body = text[start:] if nxt < 0 else text[start:start + 1 + nxt]
+          pathlib.Path("release-notes.md").write_text(body.strip() + "\n")
+          PY
+          gh release create "$TAG_NAME" --repo "${{ github.repository }}" --title "$TAG_NAME" --notes-file release-notes.md

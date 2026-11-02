@@ -12,6 +12,7 @@ in-tree mixed TIP4P dump two ways.
 | [[file:rings.org][Primitive rings]] | Franzblau census on one frame |
 | [[file:order-parameters.org][Bond-orientational order]] | ~q_l~ and the Lechner-Dellago average |
 | [[file:confined-water.org][Confined water]] | in-plane RDF, sheet rings, prisms |
+| [[file:nanotube.org][Quasi-one-dimensional ice]] | where the nanotube and monolayer examples live |
 | [[file:paper-figures.org][Paper figures]] | the in-tree numbers behind the 2020 figures |
 
 How-tos solve a goal you already have. Reference names flags and
@@ -30,5 +31,6 @@ should see.
    rings
    order-parameters
    confined-water
+   nanotube
    paper-figures
 #+end_export

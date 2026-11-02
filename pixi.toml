@@ -134,11 +134,11 @@ cmd = "emacs --batch --load export.el"
 description = "Generates XML via Doxygen and converts it to RST via Doxyrest"
 cwd = "docs/source"
 depends-on = ["patch-doxyrest"]
-cmd = "doxygen Doxyfile_seams.cfg && doxyrest -c doxyrest-config.lua"
+cmd = "doxygen Doxyfile_seams.cfg && doxyrest -c doxyrest-config.lua && python3 ../../scripts/doxyrest_targets.py ."
 
 [feature.docs.tasks.sphinxbld]
 depends-on = ["mkrst", "doxybuild"]
-cmd = "sphinx-build -d docs/doctrees docs/source/ docs/build"
+cmd = "sphinx-build -W --keep-going -d docs/doctrees docs/source/ docs/build"
 
 [feature.docs.tasks.fetch-doxyyoda]
 description = "Download the doxyYoda 0.2.2 HTML theme"
