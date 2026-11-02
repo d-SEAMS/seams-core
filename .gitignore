@@ -5,7 +5,7 @@
 shellBuild/
 doxyYoda
 doxyYoda_*
-run*
+/run*
 bbdir/
 bbdir-cov/
 /.snakemake/
