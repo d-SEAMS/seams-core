@@ -901,3 +901,97 @@ TEST_CASE("positionRank rejects two atoms at one wrapped position",
   cloud.pts[2].x = 12.0;
   REQUIRE_THROWS_AS(ring::positionRank(cloud), std::invalid_argument);
 }
+
+namespace {
+
+std::vector<ring::EquatorChoice>
+conflictChoices(int n, const std::vector<std::pair<int, int>> &edges) {
+  std::vector<std::vector<int>> adj(static_cast<size_t>(n));
+  for (const auto &e : edges) {
+    adj[static_cast<size_t>(e.first)].push_back(e.second);
+    adj[static_cast<size_t>(e.second)].push_back(e.first);
+  }
+  std::vector<ring::EquatorChoice> periph(static_cast<size_t>(n));
+  for (int i = 0; i < n; i++) {
+    auto &row = periph[static_cast<size_t>(i)];
+    if (adj[static_cast<size_t>(i)].empty()) {
+      row.n = 1;
+      row.ring[0] = -1;
+      continue;
+    }
+    row.n = static_cast<int>(adj[static_cast<size_t>(i)].size());
+    for (int k = 0; k < row.n; k++) {
+      row.ring[k] = adj[static_cast<size_t>(i)][static_cast<size_t>(k)];
+    }
+  }
+  return periph;
+}
+
+int bruteIndependent(int n, const std::vector<std::pair<int, int>> &edges) {
+  int best = 0;
+  const int limit = 1 << n;
+  for (int mask = 0; mask < limit; mask++) {
+    bool ok = true;
+    for (const auto &e : edges) {
+      if ((mask & (1 << e.first)) && (mask & (1 << e.second))) {
+        ok = false;
+        break;
+      }
+    }
+    if (ok) {
+      best = std::max(best, __builtin_popcount(mask));
+    }
+  }
+  return best;
+}
+
+} // namespace
+
+TEST_CASE("equatorial search is exact on K4 minus an edge", "[topo_bulk]") {
+  for (int a = 0; a < 4; a++) {
+    for (int b = a + 1; b < 4; b++) {
+      std::vector<std::pair<int, int>> edges;
+      for (int u = 0; u < 4; u++) {
+        for (int v = u + 1; v < 4; v++) {
+          if (u == a && v == b) {
+            continue;
+          }
+          edges.push_back({u, v});
+        }
+      }
+      const std::vector<int> order{0, 1, 2, 3};
+      ring::PackingCertificate cert;
+      const auto kept = ring::maximumEquators(conflictChoices(4, edges), order, &cert);
+      REQUIRE(static_cast<int>(kept.size()) == 2);
+      REQUIRE(cert.method == 2);
+    }
+  }
+}
+
+TEST_CASE("equatorial search matches brute force on random graphs", "[topo_bulk]") {
+  std::mt19937 rng(20261102);
+  std::uniform_real_distribution<double> coin(0.0, 1.0);
+  int checked = 0;
+  for (int n = 4; n <= 8; n++) {
+    for (int sample = 0; sample < 20; sample++) {
+      std::vector<std::pair<int, int>> edges;
+      std::vector<int> deg(static_cast<size_t>(n), 0);
+      for (int u = 0; u < n; u++) {
+        for (int v = u + 1; v < n; v++) {
+          if (coin(rng) < 0.45 && deg[static_cast<size_t>(u)] < 6 &&
+              deg[static_cast<size_t>(v)] < 6) {
+            edges.push_back({u, v});
+            deg[static_cast<size_t>(u)]++;
+            deg[static_cast<size_t>(v)]++;
+          }
+        }
+      }
+      std::vector<int> order(static_cast<size_t>(n));
+      std::iota(order.begin(), order.end(), 0);
+      const auto kept = ring::maximumEquators(conflictChoices(n, edges), order, nullptr);
+      REQUIRE(static_cast<int>(kept.size()) == bruteIndependent(n, edges));
+      checked++;
+    }
+  }
+  REQUIRE(checked == 100);
+}

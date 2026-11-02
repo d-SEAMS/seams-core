@@ -14,7 +14,8 @@ narrative cut used in the book.
 Double-diamond cages are a maximum non-conflicting set. A component
 whose neighbourhoods are the two cliques of a bipartite line graph is
 a König matching; every other component is a branch-and-bound
-independent set certified by a clique partition. A peripheral set is
+independent set certified by a clique partition. A degree-one vertex is
+kept and only its neighbour is dropped. A peripheral set is
 kept only when the seven rings span 14 molecules and each peripheral
 shares three atoms with the equator. When the product of those
 triplets exceeds 256, the same test is built from the share graph.

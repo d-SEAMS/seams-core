@@ -87,6 +87,8 @@ The bracket is the 3rd and the 9th.
 
 ### Fixed
 
+- The equatorial search keeps a degree-one candidate and drops only that one conflict.
+  K4 minus an edge keeps two vertices.
 - Cage object counts no longer follow the wrapped coordinates.
   `findDDC` reports a maximum set of non-conflicting double-diamond cages, and both searches order rings by sorted atom indices plus the unwrapped shift of the cycle.
   A periodic translation or a permutation of the atoms leaves the count unchanged.

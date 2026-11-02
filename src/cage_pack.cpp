@@ -233,7 +233,6 @@ MisOut exactMis(const std::vector<Row> &conf, const std::vector<int> &mem) {
         avail.reset(leafN);
         path.push_back(leaf);
         taken++;
-        avail = avail - nbr[static_cast<size_t>(leafN)];
         continue;
       }
       break;
