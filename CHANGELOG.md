@@ -25,7 +25,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 Eleven release runs of `bench_cage_h2h` on this tree. The median is the 6th value. The bracket is the 3rd and the 9th.
 
 | input | threads | d-SEAMS ms |
-|---|---:|---|
+|---|---|---|
 | mw | 1 | 10.3280 [10.2437, 10.3495] |
 | mw | 4 | 5.5119 [5.4837, 5.5352] |
 | mw | 8 | 4.4688 [4.4375, 4.6620] |
