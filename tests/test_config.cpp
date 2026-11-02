@@ -1,5 +1,6 @@
 #include <catch2/catch_test_macros.hpp>
 
+#include <cage_enum.hpp>
 #include <seams_config.hpp>
 
 #include <cstdlib>
@@ -14,7 +15,7 @@ namespace {
 
 const char *kKeys[] = {
     "SEAMS_CONFIG",  "SEAMS_FRAME",    "SEAMS_LAST",     "SEAMS_JOBS",
-    "SEAMS_TYPE",    "SEAMS_CUTOFF",   "SEAMS_K",        "SEAMS_GRAPH",
+    "SEAMS_TYPE",    "SEAMS_CUTOFF",   "SEAMS_CAGE_EDGE", "SEAMS_K",       "SEAMS_GRAPH",
     "SEAMS_FAMILY",  "SEAMS_RESIDENT", "SEAMS_CELL",    "SEAMS_TPP",
     "SEAMS_BLOCK",   "SEAMS_OFFLOAD", "SEAMS_CARRY",   "LINKCELL_TPP",
     "LINKCELL_BLOCK",
@@ -61,6 +62,7 @@ TEST_CASE("defaults when the environment is empty") {
   REQUIRE(cfg.last == 0);
   REQUIRE(cfg.jobs == 1);
   REQUIRE(cfg.cutoff == 3.5);
+  REQUIRE(cfg.cageEdge == "2.65,3.15");
   REQUIRE(cfg.k == 4);
   REQUIRE(cfg.graph == "seeded");
   REQUIRE(cfg.family == site::Family::waterIce);
@@ -126,6 +128,19 @@ TEST_CASE("dump lists resolved keys") {
   const auto text = os.str();
   REQUIRE(text.find("SEAMS_JOBS=4") != std::string::npos);
   REQUIRE(text.find("SEAMS_GRAPH=seeded") != std::string::npos);
+}
+
+TEST_CASE("SEAMS_CAGE_EDGE fills the runtime table") {
+  EnvGuard g;
+  setenv("SEAMS_CAGE_EDGE", "None", 1);
+  REQUIRE(seams::cfg::load().cageEdge == "none");
+  setenv("SEAMS_CAGE_EDGE", "2.4,3.4", 1);
+  const auto wide = cage::parseEdgeWindow(seams::cfg::load().cageEdge);
+  REQUIRE(wide.enabled);
+  REQUIRE(wide.lo == 2.4);
+  REQUIRE(wide.hi == 3.4);
+  setenv("SEAMS_CAGE_EDGE", "2.65-3.15", 1);
+  REQUIRE_THROWS_AS(seams::cfg::load(), std::invalid_argument);
 }
 
 TEST_CASE("SEAMS_FAMILY fills the runtime table") {

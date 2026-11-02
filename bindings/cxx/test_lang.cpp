@@ -178,6 +178,18 @@ int main(int argc, char **argv) {
               << " atoms " << n_atoms << "\n";
     return fail("sI 512 census");
   }
+  if (seams_frame_signature_edge(guest, 3.5, 1, "cutoff", "512", "none",
+                                 &n_cages, &n_atoms) != 0 ||
+      n_cages != 2 || n_atoms != 40) {
+    std::cerr << "sI none cages " << n_cages << " atoms " << n_atoms << "\n";
+    return fail("sI 512 none");
+  }
+  if (seams_frame_signature_edge(guest, 3.5, 1, "cutoff", "512", "1,2",
+                                 &n_cages, &n_atoms) != 0 ||
+      n_cages != 0) {
+    std::cerr << "sI tight cages " << n_cages << "\n";
+    return fail("sI 512 tight window");
+  }
   if (seams_frame_signature(guest, 3.5, 1, "cutoff", "51268", &n_cages,
                             &n_atoms) != 0) {
     return fail("sI 51268");

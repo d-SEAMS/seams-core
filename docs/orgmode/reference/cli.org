@@ -142,6 +142,7 @@ initializers (Argum does not write defaults into the help).
 | ~--site SPEC~ | | Type-to-kind map for ~ionCloud~ (~1=cationHead,2=anion~) |
 | ~--ions~ | | ~cn~ on ~ionCloud~ cage degree (needs ~--site~) |
 | ~-c~, ~--cutoff ANGSTROM~ | ~3.5~ | ~Neighbour cutoff (rdf/cn rmax; hbonds heavy-atom nList)~ |
+| ~--cage-edge SPEC~ | ~2.65,3.15~ | ~cages --signature: keep a face only when every edge lies in LO,HI, in the coordinate units of the file. ~none~ leaves the cage bound to the face census (~SEAMS_CAGE_EDGE~) |
 | ~--bins N~ | ~rmax / 0.1~ or ~L / 0.1~ | ~Histogram bins (rdf: rmax/0.1; density-z: bound span / 0.1)~ |
 | ~--axis XYZ~ | ~z~ | ~Histogram axis for density-z (x, y, or z)~ |
 | ~-k N~ | ~4~ | ~k for knn / seeded cages~ |
@@ -257,6 +258,32 @@ knn, knn-union)~) and ~cages~ exits 2.
 
 Candidate cutoff for the knn graphs is ~--cutoff + 1.5~.
 
+* ~--cage-edge~
+
+Used by ~cages --signature~.
+Each face is kept when every minimum-image edge lies in the window.
+The default is ~2.65,3.15~.
+~none~ (also ~off~ or ~false~) leaves that test out, and the cage bound is the face census alone, which is the search from before the window existed.
+~hc~ and ~ddc~ keep their geometric finders. The window applies to the ring-census search.
+
+The numbers are in the coordinate units of the file.
+The LAMMPS dumps in this tree are angstroms, and the default covers the oxygen-oxygen contacts of the reference cells (about 2.74 to 2.81).
+Set the window to the heavy-atom contact range of the model.
+Widen it for a compressed cell or a guest that stretches a cage.
+A file in nanometres uses ~0.265,0.315~, or ~none~ when the contact range is unknown.
+Use a comma, a colon, or a slash. ~2.65-3.15~ is rejected.
+
+#+begin_src bash
+seams cages FILE --graph cutoff --signature 512
+seams cages FILE --graph cutoff --signature 512 --cage-edge none
+seams cages FILE --graph cutoff --signature 512 --cage-edge 2.4,3.4
+#+end_src
+
+The same string is ~SEAMS_CAGE_EDGE~.
+Python passes it as ~frame.cages_by_signature("512", edge="none")~.
+Lua passes it as ~dseams.cages_by_signature(frame, "512", {edge = "none"})~ with ~require("dseams")~.
+The C entry is ~seams_frame_signature_edge~; a null edge string is the default window.
+
 * Runtime knobs
 
 Defaults live in the binary. An optional dotenv (~SEAMS_CONFIG~ or
@@ -271,6 +298,7 @@ the table.
 | ~SEAMS_CARRY~ | ~1~ (~0~ is ~--rebuild~) |
 | ~SEAMS_TYPE~ | ~0~ |
 | ~SEAMS_CUTOFF~ | ~3.5~ |
+| ~SEAMS_CAGE_EDGE~ | ~2.65,3.15~ (~none~ turns the window off) |
 | ~SEAMS_K~ | ~4~ |
 | ~SEAMS_GRAPH~ | ~seeded~ |
 | ~SEAMS_FAMILY~ | ~waterIce~ |

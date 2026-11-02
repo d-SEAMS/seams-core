@@ -61,7 +61,8 @@ seams --frame 1 --last 100 --jobs 8 --type 2 --graph seeded \
   cages input/traj/exampleTraj.lammpstrj
 #+end_src
 
-The same values can be ~SEAMS_FRAME~, ~SEAMS_LAST~, ~SEAMS_JOBS~, ~SEAMS_TYPE~, ~SEAMS_CUTOFF~, ~SEAMS_K~, ~SEAMS_GRAPH~, plus ~SEAMS_RESIDENT~, ~SEAMS_CELL~, ~SEAMS_OFFLOAD~, ~LINKCELL_TPP~, ~LINKCELL_BLOCK~.
+The same values can be ~SEAMS_FRAME~, ~SEAMS_LAST~, ~SEAMS_JOBS~, ~SEAMS_TYPE~, ~SEAMS_CUTOFF~, ~SEAMS_CAGE_EDGE~, ~SEAMS_K~, ~SEAMS_GRAPH~, plus ~SEAMS_RESIDENT~, ~SEAMS_CELL~, ~SEAMS_OFFLOAD~, ~LINKCELL_TPP~, ~LINKCELL_BLOCK~.
+~SEAMS_CAGE_EDGE~ defaults to ~2.65,3.15~ (coordinate units of the file). ~none~ leaves a signature cage bound to the face census.
 ~OMP_NUM_THREADS~ and ~CUDA_VISIBLE_DEVICES~ keep their usual meaning.
 Analysis choice (which ~seams~ command, which ~pydseams~ call, which ~require("dseams")~ script) is not this table.
 

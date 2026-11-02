@@ -17,6 +17,7 @@
 #include <tum_offload.hpp>
 
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstring>
 #include <exception>
@@ -575,6 +576,13 @@ int seams_frame_cages(seams_frame *frame, double cutoff, int type, int k,
 int seams_frame_signature(seams_frame *frame, double cutoff, int type,
                           const char *graph, const char *spec, int *n_cages,
                           int *n_atoms) {
+  return seams_frame_signature_edge(frame, cutoff, type, graph, spec, nullptr,
+                                    n_cages, n_atoms);
+}
+
+int seams_frame_signature_edge(seams_frame *frame, double cutoff, int type,
+                               const char *graph, const char *spec,
+                               const char *edge, int *n_cages, int *n_atoms) {
   clear_error();
   if (frame == nullptr || spec == nullptr || n_cages == nullptr ||
       n_atoms == nullptr) {
@@ -590,7 +598,23 @@ int seams_frame_signature(seams_frame *frame, double cutoff, int type,
     const int depth = std::max(signature.maxRingSize(), 3);
     const auto rings = ring::cageRings(primitive::ringNetwork(idx, depth),
                                        frame->cloud, cutoff);
-    const auto found = cage::findBySignature(rings, idx, signature);
+    const auto window = cage::parseEdgeWindow(edge == nullptr ? "" : edge);
+    std::vector<std::array<double, 3>> xyz;
+    const std::vector<std::array<double, 3>> *xyzPtr = nullptr;
+    const std::vector<double> *boxPtr = nullptr;
+    if (window.enabled) {
+      xyz.resize(static_cast<std::size_t>(frame->cloud.nop));
+      for (int i = 0; i < frame->cloud.nop; ++i) {
+        const auto &p = frame->cloud.pts[static_cast<std::size_t>(i)];
+        xyz[static_cast<std::size_t>(i)] = {p.x, p.y, p.z};
+      }
+      xyzPtr = &xyz;
+      boxPtr = &frame->cloud.box;
+    }
+    const auto foundOf = cage::findBySignatures(
+        rings, idx, std::vector<cage::Signature>{signature}, {}, xyzPtr,
+        boxPtr, window);
+    const auto &found = foundOf.at(0);
     std::set<int> atoms;
     for (const auto &cage_i : found) {
       atoms.insert(cage_i.vertices.begin(), cage_i.vertices.end());

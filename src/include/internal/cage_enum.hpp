@@ -10,6 +10,7 @@
 #include <array>
 #include <map>
 #include <string>
+#include <string_view>
 #include <vector>
 
 /** @file cage_enum.hpp
@@ -92,17 +93,40 @@ findBySignature(const std::vector<std::vector<int>> &rings,
                 const std::vector<std::vector<int>> &nList,
                 const Signature &signature, const std::vector<int> &atomRank);
 
+/** Inclusive length window on each face edge, in the coordinate units
+ *  of the frame. The default covers the oxygen-oxygen contacts of the
+ *  reference water cells when those units are angstroms. `enabled ==
+ *  false` leaves the cage bound to the face census. A null coordinate
+ *  pointer skips the test as well. */
+struct EdgeWindow {
+  bool enabled = true;
+  double lo = 2.65;
+  double hi = 3.15;
+};
+
+/** `none`, `off`, or `false` disables the window. `LO,HI`, `LO:HI`,
+ *  or `LO/HI` sets the inclusive bounds. An empty string is the
+ *  default window. `lo` is >= 0 and strictly less than `hi`. */
+EdgeWindow parseEdgeWindow(std::string_view spec);
+
+/** `none` when the window is off, otherwise `lo,hi`. */
+std::string edgeWindowSpec(const EdgeWindow &window);
+
 /** findBySignature for each of `signatures`, one list per entry. The
  *  ring-size censuses share one search, so a face set that fits several
  *  of them is grown once; `hc` and `ddc` go to findHC / findDDC as in
- *  findBySignature. Each list equals findBySignature on its entry. */
+ *  findBySignature. Each list equals findBySignature on its entry.
+ *  `window` keeps a face only when every minimum-image edge lies in
+ *  [lo, hi]. A disabled window, or a null `xyz`, leaves that test out
+ *  and the cage bound is the face census. */
 std::vector<std::vector<FoundCage>>
 findBySignatures(const std::vector<std::vector<int>> &rings,
                  const std::vector<std::vector<int>> &nList,
                  const std::vector<Signature> &signatures,
                  const std::vector<int> &atomRank,
                  const std::vector<std::array<double, 3>> *xyz = nullptr,
-                 const std::vector<double> *box = nullptr);
+                 const std::vector<double> *box = nullptr,
+                 const EdgeWindow &window = {});
 
 /** Connected face sets that stay inside the signature budget, have at
  *  least `minFaces` faces, and are not closed. Cups and incomplete

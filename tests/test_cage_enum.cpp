@@ -9,6 +9,8 @@
 #include <topo_bulk.hpp>
 
 #include <algorithm>
+#include <array>
+#include <cmath>
 #include <map>
 #include <set>
 #include <stdexcept>
@@ -759,4 +761,140 @@ TEST_CASE("signatures searched together give the cages of each alone",
       }
     }
   }
+}
+
+TEST_CASE("cage edge window parses none and a range", "[cage_enum]") {
+  const auto fallback = cage::parseEdgeWindow("");
+  REQUIRE(fallback.enabled);
+  REQUIRE(fallback.lo == 2.65);
+  REQUIRE(fallback.hi == 3.15);
+  REQUIRE(cage::edgeWindowSpec(fallback) == "2.65,3.15");
+  REQUIRE_FALSE(cage::parseEdgeWindow("none").enabled);
+  REQUIRE_FALSE(cage::parseEdgeWindow("OFF").enabled);
+  REQUIRE_FALSE(cage::parseEdgeWindow("false").enabled);
+  REQUIRE(cage::edgeWindowSpec(cage::parseEdgeWindow("none")) == "none");
+  const auto colon = cage::parseEdgeWindow("2.40:3.40");
+  REQUIRE(colon.enabled);
+  REQUIRE(colon.lo == 2.4);
+  REQUIRE(colon.hi == 3.4);
+  const auto slash = cage::parseEdgeWindow(" 0.265/0.315 ");
+  REQUIRE(std::abs(slash.lo - 0.265) < 1e-12);
+  REQUIRE(std::abs(slash.hi - 0.315) < 1e-12);
+  REQUIRE_THROWS_AS(cage::parseEdgeWindow("2.65-3.15"), std::invalid_argument);
+  REQUIRE_THROWS_AS(cage::parseEdgeWindow("3,2"), std::invalid_argument);
+  REQUIRE_THROWS_AS(cage::parseEdgeWindow("-1,3"), std::invalid_argument);
+}
+
+namespace {
+
+using CageCloud = molSys::PointCloud<molSys::Point<double>, double>;
+
+CageCloud replicateCloud(const CageCloud &unit, int nx, int ny, int nz) {
+  REQUIRE(unit.box.size() >= 3);
+  const double lx = unit.box[0];
+  const double ly = unit.box[1];
+  const double lz = unit.box[2];
+  CageCloud super;
+  super.box = {static_cast<double>(nx) * lx, static_cast<double>(ny) * ly,
+               static_cast<double>(nz) * lz};
+  super.boxLow = unit.boxLow;
+  super.currentFrame = 1;
+  int id = 1;
+  for (int ix = 0; ix < nx; ++ix) {
+    for (int iy = 0; iy < ny; ++iy) {
+      for (int iz = 0; iz < nz; ++iz) {
+        for (const auto &src : unit.pts) {
+          auto p = src;
+          p.x += ix * lx;
+          p.y += iy * ly;
+          p.z += iz * lz;
+          p.atomID = id;
+          super.idIndexMap[id] = super.nop;
+          super.pts.push_back(p);
+          ++super.nop;
+          ++id;
+        }
+      }
+    }
+  }
+  return super;
+}
+
+std::vector<std::vector<std::vector<int>>>
+cagesForWindow(const CageCloud &cloud,
+               const std::vector<std::vector<int>> &rings,
+               const std::vector<std::vector<int>> &nList,
+               const cage::EdgeWindow &window) {
+  std::vector<std::array<double, 3>> xyz(static_cast<std::size_t>(cloud.nop));
+  for (int i = 0; i < cloud.nop; ++i) {
+    const auto &p = cloud.pts[static_cast<std::size_t>(i)];
+    xyz[static_cast<std::size_t>(i)] = {p.x, p.y, p.z};
+  }
+  const std::vector<cage::Signature> sigs = {
+      cage::Signature::parse("512"),
+      cage::Signature::parse("51262"),
+      cage::Signature::parse("51264"),
+  };
+  const auto found = cage::findBySignatures(rings, nList, sigs, {}, &xyz,
+                                            &cloud.box, window);
+  std::vector<std::vector<std::vector<int>>> vertices(found.size());
+  for (std::size_t i = 0; i < found.size(); ++i) {
+    vertices[i].reserve(found[i].size());
+    for (const auto &cage : found[i]) {
+      vertices[i].push_back(cage.vertices);
+    }
+  }
+  return vertices;
+}
+
+void expectWindowAgrees(const CageCloud &cloud, std::size_t n512,
+                        std::size_t n51262, std::size_t n51264) {
+  auto nList = nneigh::neighListO(3.5, cloud, 1);
+  nList = nneigh::neighbourListByIndex(cloud, nList);
+  const auto rings =
+      ring::cageRings(primitive::ringNetwork(nList, 6), cloud, 3.5);
+  const auto on = cagesForWindow(cloud, rings, nList, {});
+  const auto off = cagesForWindow(cloud, rings, nList, cage::parseEdgeWindow("none"));
+  REQUIRE(on.size() == 3);
+  REQUIRE(off.size() == 3);
+  const std::size_t want[] = {n512, n51262, n51264};
+  for (std::size_t i = 0; i < 3; ++i) {
+    REQUIRE(on[i].size() == want[i]);
+    REQUIRE(off[i].size() == want[i]);
+    REQUIRE(on[i] == off[i]);
+  }
+}
+
+} // namespace
+
+TEST_CASE("default and disabled edge windows agree on the reference clathrates",
+          "[cage_enum]") {
+  CageCloud si;
+  si = sinp::readLammpsTrjO("traj/genice_sI.lammpstrj", 1, si, 1);
+  REQUIRE(si.nop == 46);
+  expectWindowAgrees(si, 2, 6, 0);
+  {
+    auto nList = nneigh::neighListO(3.5, si, 1);
+    nList = nneigh::neighbourListByIndex(si, nList);
+    const auto rings =
+        ring::cageRings(primitive::ringNetwork(nList, 6), si, 3.5);
+    const auto tight =
+        cagesForWindow(si, rings, nList, cage::parseEdgeWindow("1,2"));
+    REQUIRE(tight[0].empty());
+    REQUIRE(tight[1].empty());
+    REQUIRE(tight[2].empty());
+  }
+
+  CageCloud sii;
+  sii = sinp::readLammpsTrjO("traj/genice_sII.lammpstrj", 1, sii, 1);
+  REQUIRE(sii.nop == 136);
+  expectWindowAgrees(sii, 16, 0, 8);
+
+  const auto si222 = replicateCloud(si, 2, 2, 2);
+  REQUIRE(si222.nop == 8 * si.nop);
+  expectWindowAgrees(si222, 16, 48, 0);
+
+  const auto sii10 = replicateCloud(sii, 10, 10, 10);
+  REQUIRE(sii10.nop == 1000 * sii.nop);
+  expectWindowAgrees(sii10, 16000, 0, 8000);
 }

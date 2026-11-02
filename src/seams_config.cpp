@@ -1,3 +1,4 @@
+#include <cage_enum.hpp>
 #include <seams_config.hpp>
 
 #include <cctype>
@@ -283,6 +284,9 @@ Runtime load(std::string_view explicitFile) {
   r.jobs = envInt("SEAMS_JOBS", r.jobs);
   r.type = envInt("SEAMS_TYPE", r.type);
   r.cutoff = envDouble("SEAMS_CUTOFF", r.cutoff);
+  if (const char *edge = env("SEAMS_CAGE_EDGE")) {
+    r.cageEdge = cage::edgeWindowSpec(cage::parseEdgeWindow(edge));
+  }
   r.k = envInt("SEAMS_K", r.k);
   if (const char *g = env("SEAMS_GRAPH")) {
     r.graph = g;
@@ -309,6 +313,7 @@ void exportEnviron(const Runtime &cfg) {
   putEnv("SEAMS_JOBS", std::to_string(cfg.jobs), true);
   putEnv("SEAMS_TYPE", std::to_string(cfg.type), true);
   putEnv("SEAMS_CUTOFF", std::to_string(cfg.cutoff), true);
+  putEnv("SEAMS_CAGE_EDGE", cfg.cageEdge, true);
   putEnv("SEAMS_K", std::to_string(cfg.k), true);
   putEnv("SEAMS_GRAPH", cfg.graph, true);
   putEnv("SEAMS_FAMILY", site::familyName(cfg.family), true);
@@ -338,6 +343,7 @@ void dump(const Runtime &cfg, std::ostream &os) {
   os << "SEAMS_JOBS=" << cfg.jobs << "\n";
   os << "SEAMS_TYPE=" << cfg.type << "\n";
   os << "SEAMS_CUTOFF=" << cfg.cutoff << "\n";
+  os << "SEAMS_CAGE_EDGE=" << cfg.cageEdge << "\n";
   os << "SEAMS_K=" << cfg.k << "\n";
   os << "SEAMS_GRAPH=" << cfg.graph << "\n";
   os << "SEAMS_FAMILY=" << site::familyName(cfg.family) << "\n";

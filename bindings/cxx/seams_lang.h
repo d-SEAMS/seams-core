@@ -61,10 +61,17 @@ int seams_frame_cages(seams_frame *frame, double cutoff, int type, int k,
                       const char *graph, int complete, int *per_atom,
                       int *n_hex, int *n_cubic, int *n_water, int *n_both);
 
-/* Ring-size census. spec is "512" or "5:12,6:2". graph is not seeded. */
+/* Ring-size census. spec is "512" or "5:12,6:2". graph is not seeded.
+ * The default face-edge window is 2.65,3.15 in the file's coordinate
+ * units. seams_frame_signature_edge takes the same string as
+ * --cage-edge: NULL or "" keeps that default, and "none" leaves the
+ * cage bound to the face census. */
 int seams_frame_signature(seams_frame *frame, double cutoff, int type,
                           const char *graph, const char *spec, int *n_cages,
                           int *n_atoms);
+int seams_frame_signature_edge(seams_frame *frame, double cutoff, int type,
+                               const char *graph, const char *spec,
+                               const char *edge, int *n_cages, int *n_atoms);
 
 int seams_frame_rdf_nbins(double rmax, int nbins);
 int seams_frame_rdf(const seams_frame *frame, double rmax, int nbins,

@@ -1256,7 +1256,7 @@ int cmdCages(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
              const std::vector<int> &guestTypes = {}, double guestRadius = 4.0,
              const std::string &perAtomPath = {}, bool inside = false,
              bool incomplete = false, const std::vector<int> &waterTypes = {},
-             bool shape = false) {
+             bool shape = false, const std::string &cageEdge = "2.65,3.15") {
   if (cloud.nop == 0) {
     if (!signatureSpec.empty()) {
       for (const auto &sig : parseSignatures(signatureSpec)) {
@@ -1298,7 +1298,21 @@ int cmdCages(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
       const auto rings = ring::cageRings(
           carry.rings(GraphSlot::single, idx, depth), cloud, cutoff);
       const auto rank = ring::positionRank(cloud);
-      const auto foundOf = cage::findBySignatures(rings, idx, sigs, rank);
+      const auto window = cage::parseEdgeWindow(cageEdge);
+      std::vector<std::array<double, 3>> xyz;
+      const std::vector<std::array<double, 3>> *xyzPtr = nullptr;
+      const std::vector<double> *boxPtr = nullptr;
+      if (window.enabled) {
+        xyz.resize(static_cast<std::size_t>(cloud.nop));
+        for (int i = 0; i < cloud.nop; ++i) {
+          const auto &p = cloud.pts[static_cast<std::size_t>(i)];
+          xyz[static_cast<std::size_t>(i)] = {p.x, p.y, p.z};
+        }
+        xyzPtr = &xyz;
+        boxPtr = &cloud.box;
+      }
+      const auto foundOf =
+          cage::findBySignatures(rings, idx, sigs, rank, xyzPtr, boxPtr, window);
       for (size_t si = 0; si < sigs.size(); ++si) {
         const auto &sig = sigs[si];
         const auto &found = foundOf[si];
@@ -1540,6 +1554,7 @@ int main(int argc, char *argv[]) {
   bool carryFrames = cfg.carry;
   int typeI = cfg.type;
   double cutoff = cfg.cutoff;
+  std::string cageEdge = cfg.cageEdge;
   int k = cfg.k;
   std::string graph = cfg.graph;
   site::Family family = cfg.family;
@@ -1669,6 +1684,16 @@ int main(int argc, char *argv[]) {
                  .help("Neighbour cutoff (rdf/cn rmax; hbonds heavy-atom nList)")
                  .handler([&](std::string_view value) {
                    cutoff = parseFloatingPoint<double>(value);
+                 }));
+
+  parser.add(Option("--cage-edge")
+                 .argName("SPEC")
+                 .help("cages --signature: keep a face only when every edge "
+                       "lies in LO,HI (coordinate units of the file; default "
+                       "2.65,3.15). none uses the face census alone "
+                       "(SEAMS_CAGE_EDGE)")
+                 .handler([&](std::string_view value) {
+                   cageEdge = std::string(value);
                  }));
 
   parser.add(Option("--types")
@@ -1969,6 +1994,14 @@ int main(int argc, char *argv[]) {
   cfg.carry = carryFrames;
   cfg.type = typeI;
   cfg.cutoff = cutoff;
+  try {
+    cfg.cageEdge = cage::edgeWindowSpec(cage::parseEdgeWindow(cageEdge));
+  } catch (const std::invalid_argument &e) {
+    std::cerr << colorizer.error(e.what()) << "\n";
+    std::cerr << colorizer.warning(parser.formatUsage(progname, colorizer))
+              << "\n";
+    return 2;
+  }
   cfg.k = k;
   cfg.graph = graph;
   if (familyFlag) {
@@ -2129,7 +2162,8 @@ int main(int argc, char *argv[]) {
         }
         return cmdCages(os, carry, cloud, cutoff, typeI, k, graph, completeFlag,
                         signatureSpec, guestTypes, guestRadius, perAtomPath,
-                        insideFlag, incompleteFlag, waterTypes, shapeFlag);
+                        insideFlag, incompleteFlag, waterTypes, shapeFlag,
+                        cfg.cageEdge);
       } catch (const std::exception &e) {
         os << colorizer.error(e.what()) << "\n";
         return 2;

@@ -34,3 +34,26 @@ The CHILL+ histogram does not match the CLI.
 Both the cutoff list and the mutual four-neighbour list label every site cubic, and every site sits in a double-diamond cage.
 
 =input/traj/genice_sI.lammpstrj= with ~cages_by_signature("512")~ returns 2 cages and 40 vertices.
+
+The default face-edge window is ~2.65,3.15~ in the coordinate units of the file.
+These dumps are angstroms, and that window covers the oxygen-oxygen contacts of the reference cells.
+Set ~edge~ to the heavy-atom contact range of the model, and widen it for a compressed cell or a guest that stretches a cage.
+A nanometre file uses ~0.265,0.315~.
+~none~ turns the window off: every ring the neighbour list already accepted can be a face, and the cage bound is the face census alone.
+On sI, sII, the sI 2×2×2 cell and the sII 10×10×10 cell the default and ~none~ return the same cages.
+
+#+begin_src python
+found = frame.cages_by_signature("512")
+found = frame.cages_by_signature("512", edge="none")
+found = frame.cages_by_signature("512", edge="2.4,3.4")
+#+end_src
+
+#+begin_src lua
+local dseams = require("dseams")
+local found = dseams.cages_by_signature(frame, "512")
+found = dseams.cages_by_signature(frame, "512", {edge = "none"})
+found = dseams.cages_by_signature(frame, "512", {edge = "2.4,3.4"})
+#+end_src
+
+The CLI spelling is ~--cage-edge~ and ~SEAMS_CAGE_EDGE~.
+The C spelling is ~seams_frame_signature_edge~; a null edge string keeps the default.

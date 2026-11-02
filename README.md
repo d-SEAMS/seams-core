@@ -55,6 +55,7 @@ environment. `seams --print-config` prints the resolved table.
 | `SEAMS_JOBS` | OpenMP frame workers | `1` |
 | `SEAMS_TYPE` | Atom type (`0` guesses) | `0` |
 | `SEAMS_CUTOFF` | Neighbour cutoff (Å) | `3.5` |
+| `SEAMS_CAGE_EDGE` | Face-edge window for a cage signature, in the file's coordinate units. `none` leaves the bound to the face census | `2.65,3.15` |
 | `SEAMS_K` | *k* for k-NN / seeded cages | `4` |
 | `SEAMS_GRAPH` | `cutoff` / `knn` / `knn-union` / `seeded` | `seeded` |
 | `SEAMS_RESIDENT` | Fraction of free GPU memory for a TUM batch | `0.80` |

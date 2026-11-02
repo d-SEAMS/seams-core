@@ -32,6 +32,7 @@ struct Runtime {
   int jobs = 1;
   int type = 0;
   double cutoff = 3.5;
+  std::string cageEdge = "2.65,3.15";
   int k = 4;
   std::string graph = "seeded";
   site::Family family = site::Family::waterIce;

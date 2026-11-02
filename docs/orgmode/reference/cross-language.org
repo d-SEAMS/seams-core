@@ -34,6 +34,22 @@ On the mixed TIP4P dump (=input/traj/exampleTraj.lammpstrj=, type 2) they do not
 The cutoff list gives 12 interClathrate and 238 water.
 The mutual list gives 1 clathrate, 7 interClathrate, and 242 water.
 
+A cage signature takes the same face-edge window on every front.
+The default is ~2.65,3.15~ in the coordinate units of the file.
+~none~ leaves the cage bound to the face census.
+
+| front | call |
+|-------+------|
+| CLI | =seams cages FILE --signature 512 --cage-edge none= |
+| Python | =frame.cages_by_signature("512", edge="none")= |
+| Lua | =dseams.cages_by_signature(frame, "512", {edge = "none"})= |
+| C | =seams_frame_signature_edge(frame, 3.5, 1, "cutoff", "512", "none", &n_cages, &n_atoms)= |
+
+A null C edge string keeps the default.
+Set the window to the heavy-atom contact range of the model.
+Widen it for a compressed cell or a guest that stretches a cage.
+A nanometre file uses ~0.265,0.315~.
+
 =tests/chill_plus_fronts.py= (Meson test ~chill_plus_fronts_agree~) runs all four fronts on that dump with both lists.
 It checks the histograms on all four and the per-atom labels on Python, R, and Julia.
 The Python front needs a pydseamslib whose ~chill_plus~ takes ~graph~.

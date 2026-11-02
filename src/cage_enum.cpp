@@ -12,6 +12,7 @@
 #include <array>
 #include <bit>
 #include <cctype>
+#include <charconv>
 #include <cmath>
 #include <cstdint>
 #include <map>
@@ -31,12 +32,12 @@
 
 namespace {
 
-// Oxygen-oxygen contacts of the reference cells sit in this window
-// (mW 2.757 Å, sI 2.771–2.805 Å, sII 2.737–2.771 Å). A shorter edge is an
-// intramolecular contact and is not a face of these cages.
+// `lo` and `hi` are inclusive and use the coordinate units of `xyz`.
+// The reference oxygen-oxygen contacts sit near 2.74–2.81 when those
+// units are angstroms (mW 2.757, sI 2.771–2.805, sII 2.737–2.771).
 bool waterFace(const std::vector<int> &ring,
                const std::vector<std::array<double, 3>> &xyz,
-               const std::vector<double> *box) {
+               const std::vector<double> *box, double lo, double hi) {
   const int n = static_cast<int>(ring.size());
   double len[3] = {0, 0, 0};
   const bool ortho = box != nullptr && box->size() >= 3;
@@ -61,7 +62,7 @@ bool waterFace(const std::vector<int> &ring,
       }
     }
     const double r = std::sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
-    if (r < 2.65 || r > 3.15) {
+    if (r < lo || r > hi) {
       return false;
     }
   }
@@ -571,7 +572,8 @@ struct ClosedSearch {
                const std::vector<cage::Signature> &signatures,
                const std::vector<char> *admit = nullptr,
                const std::vector<std::array<double, 3>> *xyz = nullptr,
-               const std::vector<double> *box = nullptr)
+               const std::vector<double> *box = nullptr,
+               const cage::EdgeWindow &window = {})
       : rings(allRings), sigs(signatures) {
     const size_t nSig = sigs.size();
     int maxSize = 0;
@@ -628,7 +630,8 @@ struct ClosedSearch {
       if (sz < 3 || sz > maxSize || inSome[static_cast<size_t>(sz)] == 0) {
         continue;
       }
-      if (xyz != nullptr && !waterFace(ring, *xyz, box)) {
+      if (window.enabled && xyz != nullptr &&
+          !waterFace(ring, *xyz, box, window.lo, window.hi)) {
         continue;
       }
       std::set<int> distinct(ring.begin(), ring.end());
@@ -1192,6 +1195,64 @@ struct ClosedSearch {
 
 namespace cage {
 
+namespace {
+
+bool parseBound(std::string_view text, double &out) {
+  while (!text.empty() &&
+         std::isspace(static_cast<unsigned char>(text.front()))) {
+    text.remove_prefix(1);
+  }
+  while (!text.empty() &&
+         std::isspace(static_cast<unsigned char>(text.back()))) {
+    text.remove_suffix(1);
+  }
+  if (text.empty()) {
+    return false;
+  }
+  const char *begin = text.data();
+  const char *end = begin + text.size();
+  const auto parsed = std::from_chars(begin, end, out);
+  return parsed.ec == std::errc{} && parsed.ptr == end && std::isfinite(out);
+}
+
+} // namespace
+
+EdgeWindow parseEdgeWindow(std::string_view spec) {
+  const std::string key = lowerCopy(trimmed(spec));
+  if (key.empty()) {
+    return {};
+  }
+  if (key == "none" || key == "off" || key == "false") {
+    EdgeWindow window;
+    window.enabled = false;
+    return window;
+  }
+  const auto sep = key.find_first_of(",:/");
+  if (sep == std::string::npos || sep == 0 || sep + 1 >= key.size() ||
+      key.find_first_of(",:/", sep + 1) != std::string::npos) {
+    throw std::invalid_argument(
+        "bad cage edge window (want LO,HI or none)");
+  }
+  EdgeWindow window;
+  if (!parseBound(key.substr(0, sep), window.lo) ||
+      !parseBound(key.substr(sep + 1), window.hi) || !(window.lo >= 0.0) ||
+      !(window.hi > window.lo)) {
+    throw std::invalid_argument(
+        "bad cage edge window (want 0 <= lo < hi, or none)");
+  }
+  window.enabled = true;
+  return window;
+}
+
+std::string edgeWindowSpec(const EdgeWindow &window) {
+  if (!window.enabled) {
+    return "none";
+  }
+  std::ostringstream os;
+  os << window.lo << "," << window.hi;
+  return os.str();
+}
+
 Signature Signature::parse(std::string_view spec) {
   const std::string raw = trimmed(spec);
   if (raw.empty()) {
@@ -1626,7 +1687,7 @@ findBySignatures(const std::vector<std::vector<int>> &rings,
                  const std::vector<Signature> &signatures,
                  const std::vector<int> &atomRank,
                  const std::vector<std::array<double, 3>> *xyz,
-                 const std::vector<double> *box) {
+                 const std::vector<double> *box, const EdgeWindow &window) {
   std::vector<std::vector<FoundCage>> out(signatures.size());
   std::vector<Signature> census;
   std::vector<std::vector<size_t>> askedAt;
@@ -1676,7 +1737,7 @@ findBySignatures(const std::vector<std::vector<int>> &rings,
     if (!any) {
       continue;
     }
-    ClosedSearch search(rings, chunk, nullptr, xyz, box);
+    ClosedSearch search(rings, chunk, nullptr, xyz, box, window);
     search.run();
     for (size_t j = 0; j < chunk.size(); ++j) {
       for (const size_t i : askedAt[from + j]) {
