@@ -30,16 +30,21 @@ jobs:
       - name: Install R
         run: |
           sudo apt-get update
-          sudo apt-get install -y r-base-dev
-          sudo Rscript -e 'install.packages(c("cpp11", "testthat"), repos="https://cloud.r-project.org")'
+          sudo apt-get install -y r-base-dev libuv1-dev
+          export R_LIBS_USER="$HOME/R/library"
+          mkdir -p "$R_LIBS_USER"
+          echo "R_LIBS_USER=$R_LIBS_USER" >> "$GITHUB_ENV"
+          Rscript -e 'lib <- Sys.getenv("R_LIBS_USER"); dir.create(lib, recursive = TRUE, showWarnings = FALSE); install.packages(c("cpp11", "testthat"), lib = lib, repos = "https://cloud.r-project.org"); for (p in c("cpp11", "testthat")) if (!requireNamespace(p, lib.loc = lib, quietly = TRUE)) quit(status = 1)'
       - name: Install the R package
         run: |
+          export R_LIBS_USER="${R_LIBS_USER:-$HOME/R/library}"
           export SEAMS_INCLUDE="$PWD/bindings/cxx"
           export SEAMS_LIBDIR="$PWD/bbdir-py/bindings"
           export LD_LIBRARY_PATH="$SEAMS_LIBDIR:$PWD/bbdir-py/src:${LD_LIBRARY_PATH:-}"
-          sudo -E R CMD INSTALL bindings/r/dseams
+          R CMD INSTALL -l "$R_LIBS_USER" bindings/r/dseams
       - name: Test R
         run: |
+          export R_LIBS_USER="${R_LIBS_USER:-$HOME/R/library}"
           export DSEAMS_ROOT="$PWD"
           export LD_LIBRARY_PATH="$PWD/bbdir-py/bindings:$PWD/bbdir-py/src:${LD_LIBRARY_PATH:-}"
           Rscript -e 'testthat::test_file("bindings/r/dseams/tests/testthat/test-ice.R", stop_on_failure=TRUE)'
@@ -59,6 +64,7 @@ jobs:
         run: pixi run python -m pip install "pydseamslib @ git+https://github.com/d-SEAMS/PydSEAMSlib@${PYDSEAMSLIB_REF:-main}"
       - name: CHILL+ agrees across the CLI, Python, R, and Julia
         run: |
+          export R_LIBS_USER="${R_LIBS_USER:-$HOME/R/library}"
           export DSEAMS_ROOT="$PWD"
           export LD_LIBRARY_PATH="$PWD/bbdir-py/bindings:$PWD/bbdir-py/src:${LD_LIBRARY_PATH:-}"
           pixi run ninja -C bbdir-py seams
