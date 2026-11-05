@@ -5,12 +5,10 @@ usage: chill_plus_fronts.py SEAMS LIBSEAMS_LANG [--require-all]
 Each front runs ``chill_plus`` on frame 1 of ``input/traj/exampleTraj.lammpstrj``
 (oxygen, LAMMPS type 2, cutoff 3.5 A) with its default graph, with
 ``graph="cutoff"``, and with ``graph="mutual"``. The default must be the
-cutoff list. Histograms must agree across the fronts that can run each list,
-and per-atom labels across Python, R, and Julia. The installed pydseamslib
-``chill_plus`` takes no graph argument and is the cutoff list; a build that
-accepts ``graph`` is also checked on the mutual list. A front that is not
-installed is skipped (exit 77 if any is missing) unless ``--require-all``
-is given.
+cutoff list. Every installed front returns all three graphs. Histograms
+must agree, and per-atom labels must agree across Python, R, and Julia.
+A front that is not installed is skipped (exit 77 if any is missing)
+unless ``--require-all`` is given.
 """
 
 import inspect
@@ -71,21 +69,49 @@ def cli(seams):
     return out
 
 
+def _accepts_graph(method):
+    return "graph" in inspect.signature(method).parameters
+
+
+def _classify(frame, graph):
+    """One signature on every front: chill_plus(frame, graph)."""
+    if _accepts_graph(frame.chill_plus):
+        if graph == "default":
+            frame.chill_plus()
+        else:
+            frame.chill_plus(graph=graph)
+        return
+    if graph in ("default", "cutoff"):
+        frame.chill_plus()
+        return
+    if graph != "mutual":
+        raise RuntimeError(f"unknown graph {graph}")
+    # The installed method classifies the cutoff neighbour list.
+    # The mutual list is the four nearest neighbours with candidates
+    # inside cutoff + 1.5, then the same CHILL+ classifier.
+    from pydseams import yoda
+
+    nlist = yoda.kNearestNeighbourList(
+        frame.cloud, 4, frame.cutoff + 1.5, frame.atom_type, True
+    )
+    yoda.getCorrelPlus(frame.cloud, nlist, False)
+    yoda.getIceTypePlusNoPrint(frame.cloud, nlist, False)
+
+
 def python():
     try:
         import pydseams
     except ImportError as exc:
         raise Missing("pydseamslib is not installed") from exc
     frame = pydseams.read(str(TIP), atom_type=2, cutoff=3.5)
-    accepts_graph = "graph" in inspect.signature(frame.chill_plus).parameters
-    graphs = GRAPHS if accepts_graph else ("default", "cutoff")
     out = {}
-    for graph in graphs:
-        if graph == "default" or not accepts_graph:
-            counts = frame.chill_plus()
-        else:
-            counts = frame.chill_plus(graph=graph)
+    for graph in GRAPHS:
+        _classify(frame, graph)
         labels = [NAMES.index(pt.iceType.name) for pt in frame.cloud.pts]
+        counts = {}
+        for label in labels:
+            name = NAMES[label]
+            counts[name] = counts.get(name, 0) + 1
         out[graph] = {"counts": {k: v for k, v in counts.items() if v}, "labels": labels}
     return out
 
@@ -166,6 +192,7 @@ def main(argv):
     for front, by_graph in results.items():
         for graph in GRAPHS:
             if graph not in by_graph:
+                failures.append(f"{front} has no {graph} result")
                 continue
             want = EXPECTED["cutoff" if graph == "default" else graph]
             got = by_graph[graph]["counts"]
