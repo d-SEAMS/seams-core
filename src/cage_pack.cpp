@@ -1,3 +1,4 @@
+#include <par_team.hpp>
 #include <topo_bulk.hpp>
 
 #include <algorithm>
@@ -7,27 +8,38 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <numeric>
 #include <vector>
+
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
 
 namespace {
 
+// One conflict row per candidate. The storage grows with the neighbours
+// that are actually present, and a push never drops one.
 struct Row {
-  int v[8]{};
+  std::vector<int> v;
   int n = 0;
   bool push(int x) {
-    if (n >= 8) {
-      return false;
+    if (n == static_cast<int>(v.size())) {
+      v.push_back(x);
+    } else {
+      v[static_cast<std::size_t>(n)] = x;
     }
-    v[n++] = x;
+    ++n;
     return true;
   }
   void sortUnique() {
-    std::sort(v, v + n);
-    n = static_cast<int>(std::unique(v, v + n) - v);
+    const auto begin = v.begin();
+    const auto end = begin + n;
+    std::sort(begin, end);
+    n = static_cast<int>(std::unique(begin, end) - begin);
   }
   [[nodiscard]] bool has(int x) const {
     for (int i = 0; i < n; i++) {
-      if (v[i] == x) {
+      if (v[static_cast<std::size_t>(i)] == x) {
         return true;
       }
     }
@@ -35,24 +47,33 @@ struct Row {
   }
 };
 
+// One bit per vertex of the component under search. The word count is
+// the component order, so a larger crystal is not discarded.
 struct Bits {
-  static constexpr int kWords = 4;
-  static constexpr int kCap = 256;
-  std::uint64_t w[kWords]{};
+  std::vector<std::uint64_t> w;
 
-  void set(int i) { w[i >> 6] |= 1ULL << (i & 63); }
-  void reset(int i) { w[i >> 6] &= ~(1ULL << (i & 63)); }
-  [[nodiscard]] bool test(int i) const { return (w[i >> 6] >> (i & 63)) & 1ULL; }
+  Bits() = default;
+  explicit Bits(int nbits) {
+    if (nbits > 0) {
+      w.assign(static_cast<std::size_t>((nbits + 63) >> 6), 0);
+    }
+  }
+
+  void set(int i) { w[static_cast<std::size_t>(i >> 6)] |= 1ULL << (i & 63); }
+  void reset(int i) { w[static_cast<std::size_t>(i >> 6)] &= ~(1ULL << (i & 63)); }
+  [[nodiscard]] bool test(int i) const {
+    return (w[static_cast<std::size_t>(i >> 6)] >> (i & 63)) & 1ULL;
+  }
   [[nodiscard]] int count() const {
     int n = 0;
-    for (int i = 0; i < kWords; i++) {
-      n += __builtin_popcountll(w[i]);
+    for (const std::uint64_t word : w) {
+      n += __builtin_popcountll(word);
     }
     return n;
   }
   [[nodiscard]] bool empty() const {
-    for (int i = 0; i < kWords; i++) {
-      if (w[i]) {
+    for (const std::uint64_t word : w) {
+      if (word) {
         return false;
       }
     }
@@ -60,22 +81,24 @@ struct Bits {
   }
   Bits operator&(const Bits &o) const {
     Bits r;
-    for (int i = 0; i < kWords; i++) {
+    r.w.resize(w.size());
+    for (std::size_t i = 0; i < w.size(); i++) {
       r.w[i] = w[i] & o.w[i];
     }
     return r;
   }
   Bits operator-(const Bits &o) const {
     Bits r;
-    for (int i = 0; i < kWords; i++) {
+    r.w.resize(w.size());
+    for (std::size_t i = 0; i < w.size(); i++) {
       r.w[i] = w[i] & ~o.w[i];
     }
     return r;
   }
   [[nodiscard]] int first() const {
-    for (int i = 0; i < kWords; i++) {
+    for (std::size_t i = 0; i < w.size(); i++) {
       if (w[i]) {
-        return i * 64 + __builtin_ctzll(w[i]);
+        return static_cast<int>(i) * 64 + __builtin_ctzll(w[i]);
       }
     }
     return -1;
@@ -98,14 +121,11 @@ MisOut exactMis(const std::vector<Row> &conf, const std::vector<int> &mem) {
     out.solved = true;
     return out;
   }
-  if (n > Bits::kCap) {
-    return out;
-  }
   std::vector<int> at(conf.size(), -1);
   for (int i = 0; i < n; i++) {
     at[static_cast<size_t>(mem[static_cast<size_t>(i)])] = i;
   }
-  std::vector<Bits> nbr(static_cast<size_t>(n));
+  std::vector<Bits> nbr(static_cast<size_t>(n), Bits(n));
   for (int i = 0; i < n; i++) {
     nbr[static_cast<size_t>(i)].set(i);
     const int g = mem[static_cast<size_t>(i)];
@@ -182,7 +202,7 @@ MisOut exactMis(const std::vector<Row> &conf, const std::vector<int> &mem) {
     }
     return b;
   };
-  Bits all;
+  Bits all(n);
   for (int i = 0; i < n; i++) {
     all.set(i);
   }
@@ -279,21 +299,51 @@ MisOut exactMis(const std::vector<Row> &conf, const std::vector<int> &mem) {
   return out;
 }
 
+// Sorted canonical ranks of one clique. The integers are the ranks
+// themselves, so a frame with more than 2^16 rings still names its cliques.
+struct RankKey {
+  int id[4]{};
+  int n = 0;
+  bool ok = false;
+
+  [[nodiscard]] bool operator==(const RankKey &o) const {
+    if (!ok || !o.ok || n != o.n) {
+      return false;
+    }
+    for (int i = 0; i < n; i++) {
+      if (id[i] != o.id[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+  [[nodiscard]] bool operator<(const RankKey &o) const {
+    const int m = n < o.n ? n : o.n;
+    for (int i = 0; i < m; i++) {
+      if (id[i] != o.id[i]) {
+        return id[i] < o.id[i];
+      }
+    }
+    return n < o.n;
+  }
+};
+
 struct PKey {
-  std::uint64_t k;
+  RankKey k;
   int ring;
   int slot;
 };
 
-std::uint64_t packRanks(const int *id, int n, const std::vector<int> &rankOf) {
+RankKey packRanks(const int *id, int n, const std::vector<int> &rankOf) {
+  RankKey key;
   if (n <= 0 || n > 4) {
-    return ~0ULL;
+    return key;
   }
   int mem[4];
   for (int i = 0; i < n; i++) {
     mem[i] = rankOf[static_cast<size_t>(id[i])];
-    if (mem[i] < 0 || mem[i] >= 65536) {
-      return ~0ULL;
+    if (mem[i] < 0) {
+      return key;
     }
   }
   for (int i = 1; i < n; i++) {
@@ -305,17 +355,252 @@ std::uint64_t packRanks(const int *id, int n, const std::vector<int> &rankOf) {
     }
     mem[j] = x;
   }
-  std::uint64_t k = 0;
+  key.n = n;
   for (int i = 0; i < n; i++) {
-    k |= static_cast<std::uint64_t>(mem[i]) << (16 * i);
+    key.id[i] = mem[i];
   }
-  return k;
+  key.ok = true;
+  return key;
 }
 
 struct AdjE {
   int right;
   int ring;
 };
+
+struct HalfEdge {
+  int left;
+  int right;
+  int ring;
+};
+
+// Pair the edges at each vertex, then alternate along the cycles by pointer
+// jumping. Each split halves a positive even degree. The last split is a
+// perfect matching, and the representative of a cycle is its lowest arc, so
+// the kept edges do not depend on the thread count.
+bool parallelEulerMatch(int nL, int nR, const std::vector<int> &off, const std::vector<AdjE> &adj,
+                        std::vector<int> &matchL, std::vector<int> &matchR,
+                        std::vector<int> &matchRing) {
+  const int m0 = static_cast<int>(adj.size());
+  if (nL <= 0 || nL != nR || m0 <= 0) {
+    return false;
+  }
+  std::vector<HalfEdge> edges(static_cast<std::size_t>(m0));
+  for (int u = 0; u < nL; u++) {
+    for (int e = off[static_cast<std::size_t>(u)]; e < off[static_cast<std::size_t>(u + 1)]; e++) {
+      edges[static_cast<std::size_t>(e)] = {u, adj[static_cast<std::size_t>(e)].right,
+                                            adj[static_cast<std::size_t>(e)].ring};
+    }
+  }
+  int degree = off[1] - off[0];
+  while (degree > 1) {
+    if (degree <= 0 || (degree % 2) != 0) {
+      return false;
+    }
+    const int m = static_cast<int>(edges.size());
+    std::vector<int> leftCount(static_cast<std::size_t>(nL), 0);
+    std::vector<int> rightCount(static_cast<std::size_t>(nR), 0);
+    for (const HalfEdge &edge : edges) {
+      if (edge.left < 0 || edge.left >= nL || edge.right < 0 || edge.right >= nR) {
+        return false;
+      }
+      leftCount[static_cast<std::size_t>(edge.left)]++;
+      rightCount[static_cast<std::size_t>(edge.right)]++;
+    }
+    for (int u = 0; u < nL; u++) {
+      if (leftCount[static_cast<std::size_t>(u)] != degree) {
+        return false;
+      }
+    }
+    for (int r = 0; r < nR; r++) {
+      if (rightCount[static_cast<std::size_t>(r)] != degree) {
+        return false;
+      }
+    }
+    std::vector<int> leftOff(static_cast<std::size_t>(nL + 1), 0);
+    std::vector<int> rightOff(static_cast<std::size_t>(nR + 1), 0);
+    for (int u = 0; u < nL; u++) {
+      leftOff[static_cast<std::size_t>(u + 1)] =
+          leftOff[static_cast<std::size_t>(u)] + leftCount[static_cast<std::size_t>(u)];
+    }
+    for (int r = 0; r < nR; r++) {
+      rightOff[static_cast<std::size_t>(r + 1)] =
+          rightOff[static_cast<std::size_t>(r)] + rightCount[static_cast<std::size_t>(r)];
+    }
+    std::vector<int> leftAt(static_cast<std::size_t>(m));
+    std::vector<int> rightAt(static_cast<std::size_t>(m));
+    std::vector<int> leftPut = leftOff;
+    std::vector<int> rightPut = rightOff;
+    for (int e = 0; e < m; e++) {
+      leftAt[static_cast<std::size_t>(leftPut[static_cast<std::size_t>(edges[static_cast<std::size_t>(e)].left)]++)] = e;
+      rightAt[static_cast<std::size_t>(rightPut[static_cast<std::size_t>(edges[static_cast<std::size_t>(e)].right)]++)] = e;
+    }
+    auto byRing = [&](int a, int b) {
+      const int ra = edges[static_cast<std::size_t>(a)].ring;
+      const int rb = edges[static_cast<std::size_t>(b)].ring;
+      if (ra != rb) {
+        return ra < rb;
+      }
+      return a < b;
+    };
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (!omp_in_parallel())
+#endif
+    for (int u = 0; u < nL; u++) {
+      std::sort(leftAt.begin() + leftOff[static_cast<std::size_t>(u)],
+                leftAt.begin() + leftOff[static_cast<std::size_t>(u + 1)], byRing);
+    }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (!omp_in_parallel())
+#endif
+    for (int r = 0; r < nR; r++) {
+      std::sort(rightAt.begin() + rightOff[static_cast<std::size_t>(r)],
+                rightAt.begin() + rightOff[static_cast<std::size_t>(r + 1)], byRing);
+    }
+    std::vector<int> partnerL(static_cast<std::size_t>(m), -1);
+    std::vector<int> partnerR(static_cast<std::size_t>(m), -1);
+    auto pairShore = [&](int nShore, const std::vector<int> &shoreOff, const std::vector<int> &shoreAt,
+                         std::vector<int> &partner) {
+      for (int u = 0; u < nShore; u++) {
+        const int lo = shoreOff[static_cast<std::size_t>(u)];
+        const int hi = shoreOff[static_cast<std::size_t>(u + 1)];
+        if (((hi - lo) % 2) != 0) {
+          return false;
+        }
+        for (int p = lo; p < hi; p += 2) {
+          const int a = shoreAt[static_cast<std::size_t>(p)];
+          const int b = shoreAt[static_cast<std::size_t>(p + 1)];
+          partner[static_cast<std::size_t>(a)] = b;
+          partner[static_cast<std::size_t>(b)] = a;
+        }
+      }
+      return true;
+    };
+    if (!pairShore(nL, leftOff, leftAt, partnerL) || !pairShore(nR, rightOff, rightAt, partnerR)) {
+      return false;
+    }
+    const int narcs = m * 2;
+    std::vector<int> succ(static_cast<std::size_t>(narcs));
+    for (int e = 0; e < m; e++) {
+      const int goRight = partnerR[static_cast<std::size_t>(e)];
+      const int goLeft = partnerL[static_cast<std::size_t>(e)];
+      if (goRight < 0 || goLeft < 0) {
+        return false;
+      }
+      succ[static_cast<std::size_t>(2 * e)] = 2 * goRight + 1;
+      succ[static_cast<std::size_t>(2 * e + 1)] = 2 * goLeft;
+    }
+    int hops = 1;
+    while ((1LL << hops) < narcs && hops < 30) {
+      ++hops;
+    }
+    std::vector<int> rep(static_cast<std::size_t>(narcs));
+    std::vector<int> jump(succ);
+    std::vector<int> nextRep(static_cast<std::size_t>(narcs));
+    std::vector<int> nextJump(static_cast<std::size_t>(narcs));
+    for (int a = 0; a < narcs; a++) {
+      rep[static_cast<std::size_t>(a)] = a;
+    }
+    for (int step = 0; step < hops; step++) {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (!omp_in_parallel())
+#endif
+      for (int a = 0; a < narcs; a++) {
+        const int p = jump[static_cast<std::size_t>(a)];
+        const int mine = rep[static_cast<std::size_t>(a)];
+        const int other = rep[static_cast<std::size_t>(p)];
+        nextRep[static_cast<std::size_t>(a)] = mine < other ? mine : other;
+        nextJump[static_cast<std::size_t>(a)] = jump[static_cast<std::size_t>(p)];
+      }
+      rep.swap(nextRep);
+      jump.swap(nextJump);
+    }
+    std::vector<int> dist(static_cast<std::size_t>(narcs), 1);
+    std::vector<int> cursor(static_cast<std::size_t>(narcs), -1);
+    for (int a = 0; a < narcs; a++) {
+      if (succ[static_cast<std::size_t>(a)] == rep[static_cast<std::size_t>(a)]) {
+        dist[static_cast<std::size_t>(a)] = 0;
+        cursor[static_cast<std::size_t>(a)] = -1;
+      } else {
+        cursor[static_cast<std::size_t>(a)] = succ[static_cast<std::size_t>(a)];
+      }
+    }
+    std::vector<int> nextDist(static_cast<std::size_t>(narcs));
+    std::vector<int> nextCursor(static_cast<std::size_t>(narcs));
+    for (int step = 0; step < hops; step++) {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (!omp_in_parallel())
+#endif
+      for (int a = 0; a < narcs; a++) {
+        const int p = cursor[static_cast<std::size_t>(a)];
+        if (p < 0) {
+          nextDist[static_cast<std::size_t>(a)] = dist[static_cast<std::size_t>(a)];
+          nextCursor[static_cast<std::size_t>(a)] = -1;
+        } else {
+          nextDist[static_cast<std::size_t>(a)] =
+              dist[static_cast<std::size_t>(a)] + dist[static_cast<std::size_t>(p)];
+          nextCursor[static_cast<std::size_t>(a)] = cursor[static_cast<std::size_t>(p)];
+        }
+      }
+      dist.swap(nextDist);
+      cursor.swap(nextCursor);
+    }
+    std::vector<char> keep(static_cast<std::size_t>(m), 0);
+    std::vector<int> keptAt(static_cast<std::size_t>(nL), 0);
+    std::vector<int> keptRight(static_cast<std::size_t>(nR), 0);
+    for (int e = 0; e < m; e++) {
+      const int a0 = 2 * e;
+      const int a1 = 2 * e + 1;
+      const int chosen = rep[static_cast<std::size_t>(a0)] <= rep[static_cast<std::size_t>(a1)] ? a0 : a1;
+      const int head = rep[static_cast<std::size_t>(chosen)];
+      const int rank = dist[static_cast<std::size_t>(head)] - dist[static_cast<std::size_t>(chosen)];
+      if ((rank % 2) == 0) {
+        keep[static_cast<std::size_t>(e)] = 1;
+        keptAt[static_cast<std::size_t>(edges[static_cast<std::size_t>(e)].left)]++;
+        keptRight[static_cast<std::size_t>(edges[static_cast<std::size_t>(e)].right)]++;
+      }
+    }
+    const int half = degree / 2;
+    for (int u = 0; u < nL; u++) {
+      if (keptAt[static_cast<std::size_t>(u)] != half) {
+        return false;
+      }
+    }
+    for (int r = 0; r < nR; r++) {
+      if (keptRight[static_cast<std::size_t>(r)] != half) {
+        return false;
+      }
+    }
+    std::vector<HalfEdge> nextEdges;
+    nextEdges.reserve(static_cast<std::size_t>(m / 2));
+    for (int e = 0; e < m; e++) {
+      if (keep[static_cast<std::size_t>(e)]) {
+        nextEdges.push_back(edges[static_cast<std::size_t>(e)]);
+      }
+    }
+    edges.swap(nextEdges);
+    degree = half;
+  }
+  if (static_cast<int>(edges.size()) != nL) {
+    return false;
+  }
+  std::vector<int> gotL(static_cast<std::size_t>(nL), -1);
+  std::vector<int> gotR(static_cast<std::size_t>(nR), -1);
+  std::vector<int> gotRing(static_cast<std::size_t>(nL), -1);
+  for (const HalfEdge &edge : edges) {
+    if (gotL[static_cast<std::size_t>(edge.left)] >= 0 ||
+        gotR[static_cast<std::size_t>(edge.right)] >= 0) {
+      return false;
+    }
+    gotL[static_cast<std::size_t>(edge.left)] = edge.right;
+    gotR[static_cast<std::size_t>(edge.right)] = edge.left;
+    gotRing[static_cast<std::size_t>(edge.left)] = edge.ring;
+  }
+  matchL.swap(gotL);
+  matchR.swap(gotR);
+  matchRing.swap(gotRing);
+  return true;
+}
 
 // Every other edge of an Euler tour of a 2k-regular bipartite graph is a
 // k-factor. One more pass on the resulting 2-factor is a perfect matching.
@@ -352,6 +637,9 @@ bool eulerPerfect(int nL, int nR, const std::vector<int> &off, const std::vector
     if (rCount[static_cast<size_t>(r)] != d0) {
       return false;
     }
+  }
+  if (parallelEulerMatch(nL, nR, off, adj, matchL, matchR, matchRing)) {
+    return true;
   }
   fit(rOff, nR + 1);
   rOff[0] = 0;
@@ -523,11 +811,16 @@ bool eulerPerfect(int nL, int nR, const std::vector<int> &off, const std::vector
   return got == nL;
 }
 
+ring::PackParts gPackParts;
+
+void resetPackParts() { gPackParts = {}; }
+
 // Line graph of a bipartite graph on this component. Neighbourhoods split
 // into the two endpoint cliques; a maximum set of rings is a maximum matching.
 bool linePack(const std::vector<Row> &conf, const std::vector<int> &mem,
               const std::vector<int> &rankOf, std::vector<int> &out, int &matched,
               int &cover) {
+  const auto splitStart = std::chrono::steady_clock::now();
   const int nAll = static_cast<int>(conf.size());
   const int m = static_cast<int>(mem.size());
   if (m == 0) {
@@ -560,7 +853,7 @@ bool linePack(const std::vector<Row> &conf, const std::vector<int> &mem,
     keys.resize(static_cast<size_t>(m) * 2);
     std::vector<char> bad(static_cast<size_t>(m), 0);
 #if defined(SEAMS_HAS_OPENMP)
-#pragma omp parallel for schedule(static) if (m >= 256)
+#pragma omp parallel for schedule(static) if (!omp_in_parallel())
 #endif
     for (int i = 0; i < m; i++) {
       const int v = mem[static_cast<size_t>(i)];
@@ -613,15 +906,15 @@ bool linePack(const std::vector<Row> &conf, const std::vector<int> &mem,
       }
       const int left[4] = {v, A[0], A[1], A[2]};
       const int right[4] = {v, B[0], B[1], B[2]};
-      std::uint64_t k0 = packRanks(left, 4, rankOf);
-      std::uint64_t k1 = packRanks(right, 4, rankOf);
-      if (k0 == ~0ULL || k1 == ~0ULL || k0 == k1) {
+      RankKey k0 = packRanks(left, 4, rankOf);
+      RankKey k1 = packRanks(right, 4, rankOf);
+      if (!k0.ok || !k1.ok || k0 == k1) {
         bad[static_cast<size_t>(i)] = 1;
         continue;
       }
       // Smaller key first, so clique ids follow ranks rather than storage order.
-      if (k0 > k1) {
-        const std::uint64_t tmp = k0;
+      if (k1 < k0) {
+        const RankKey tmp = k0;
         k0 = k1;
         k1 = tmp;
       }
@@ -782,14 +1075,14 @@ bool linePack(const std::vector<Row> &conf, const std::vector<int> &mem,
     if (!packed) {
       break;
     }
-    std::uint64_t k0 = packRanks(left, nL, rankOf);
-    std::uint64_t k1 = packRanks(right, nR, rankOf);
-    if (k0 == ~0ULL || k1 == ~0ULL || k0 == k1) {
+    RankKey k0 = packRanks(left, nL, rankOf);
+    RankKey k1 = packRanks(right, nR, rankOf);
+    if (!k0.ok || !k1.ok || k0 == k1) {
       packed = false;
       break;
     }
-    if (k0 > k1) {
-      const std::uint64_t tmp = k0;
+    if (k1 < k0) {
+      const RankKey tmp = k0;
       k0 = k1;
       k1 = tmp;
     }
@@ -801,29 +1094,79 @@ bool linePack(const std::vector<Row> &conf, const std::vector<int> &mem,
     return false;
   }
   mark("split");
-  // Clique ids follow the first time each key appears in canonical ring order,
-  // so the numbering does not depend on a sort of the keys.
+  gPackParts.split_ms += std::chrono::duration<double, std::milli>(
+                             std::chrono::steady_clock::now() - splitStart)
+                             .count();
+  const auto cliqueStart = std::chrono::steady_clock::now();
+  // Clique ids are the run index of the rank keys in sorted order. A prefix
+  // sum of the run starts assigns those ids, and equal keys keep one id.
   std::vector<std::array<int, 2>> ends(static_cast<size_t>(nAll), std::array<int, 2>{-1, -1});
-  const size_t nTab = 1u << 14;
-  struct Ent {
-    std::uint64_t k;
-    int id;
-  };
-  std::vector<Ent> tab(nTab, Ent{0, -1});
-  std::vector<int> cliqueCount;
-  int nC = 0;
-  for (const PKey &key : keys) {
-    size_t h = static_cast<size_t>(key.k * 0x9E3779B185EBCA87ULL) & (nTab - 1);
-    while (tab[h].id >= 0 && tab[h].k != key.k) {
-      h = (h + 1) & (nTab - 1);
+  const int nKeys = static_cast<int>(keys.size());
+  std::vector<int> ord(static_cast<std::size_t>(nKeys));
+  std::iota(ord.begin(), ord.end(), 0);
+  seams::parallelStableSort(ord, [&](int a, int b) {
+    const PKey &ka = keys[static_cast<std::size_t>(a)];
+    const PKey &kb = keys[static_cast<std::size_t>(b)];
+    if (ka.k < kb.k) {
+      return true;
     }
-    if (tab[h].id < 0) {
-      tab[h] = Ent{key.k, nC++};
-      cliqueCount.push_back(0);
+    if (kb.k < ka.k) {
+      return false;
     }
-    cliqueCount[static_cast<size_t>(tab[h].id)]++;
-    ends[static_cast<size_t>(key.ring)][static_cast<size_t>(key.slot)] = tab[h].id;
+    if (ka.ring != kb.ring) {
+      return ka.ring < kb.ring;
+    }
+    return ka.slot < kb.slot;
+  });
+  std::vector<int> fresh(static_cast<std::size_t>(std::max(nKeys, 1)), 0);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (!omp_in_parallel())
+#endif
+  for (int i = 1; i < nKeys; i++) {
+    const RankKey &prev = keys[static_cast<std::size_t>(ord[static_cast<std::size_t>(i - 1)])].k;
+    const RankKey &cur = keys[static_cast<std::size_t>(ord[static_cast<std::size_t>(i)])].k;
+    fresh[static_cast<std::size_t>(i)] = cur == prev ? 0 : 1;
   }
+  std::vector<int> runId = fresh;
+  seams::exclusiveScan(runId);
+  for (int i = 0; i < nKeys; i++) {
+    runId[static_cast<std::size_t>(i)] += fresh[static_cast<std::size_t>(i)];
+  }
+  const int nC = nKeys == 0 ? 0 : runId[static_cast<std::size_t>(nKeys - 1)] + 1;
+  std::vector<int> cliqueCount(static_cast<std::size_t>(std::max(nC, 1)), 0);
+  for (int i = 0; i < nKeys; i++) {
+    const PKey &key = keys[static_cast<std::size_t>(ord[static_cast<std::size_t>(i)])];
+    const int id = runId[static_cast<std::size_t>(i)];
+    cliqueCount[static_cast<std::size_t>(id)]++;
+    ends[static_cast<std::size_t>(key.ring)][static_cast<std::size_t>(key.slot)] = id;
+  }
+  gPackParts.clique_ms += std::chrono::duration<double, std::milli>(
+                              std::chrono::steady_clock::now() - cliqueStart)
+                              .count();
+  struct MatchClock {
+    std::chrono::steady_clock::time_point t0 = std::chrono::steady_clock::now();
+    ~MatchClock() {
+      gPackParts.match_ms += std::chrono::duration<double, std::milli>(
+                                 std::chrono::steady_clock::now() - t0)
+                                 .count();
+    }
+  } matchClock;
+  struct FreeKeys {
+    std::vector<PKey> &keys;
+    std::vector<std::array<int, 2>> &ends;
+    std::vector<int> &ord;
+    std::vector<int> &fresh;
+    std::vector<int> &runId;
+    std::vector<int> &cliqueCount;
+    ~FreeKeys() {
+      std::vector<PKey>().swap(keys);
+      std::vector<std::array<int, 2>>().swap(ends);
+      std::vector<int>().swap(ord);
+      std::vector<int>().swap(fresh);
+      std::vector<int>().swap(runId);
+      std::vector<int>().swap(cliqueCount);
+    }
+  } freeKeys{keys, ends, ord, fresh, runId, cliqueCount};
   bool groupsOk = all6;
   if (all6) {
     for (const int c : cliqueCount) {
@@ -978,6 +1321,71 @@ bool linePack(const std::vector<Row> &conf, const std::vector<int> &mem,
   const bool usedEuler = eulerPerfect(nL, nR, off, adj, matchL, matchR, matchRing);
   mark("euler");
   if (!usedEuler) {
+  // Each free left vertex proposes its lowest-rank free neighbour. Each right
+  // vertex accepts the lowest-rank proposal. The rounds are a maximal
+  // matching, and the augmenting search below grows it to a maximum one.
+  bool grew = true;
+  int guard = 0;
+  while (grew && guard++ <= nL) {
+    grew = false;
+    std::vector<int> offerR(static_cast<std::size_t>(nL), -1);
+    std::vector<int> offerRing(static_cast<std::size_t>(nL), -1);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (!omp_in_parallel())
+#endif
+    for (int u = 0; u < nL; u++) {
+      if (matchL[static_cast<std::size_t>(u)] >= 0) {
+        continue;
+      }
+      int bestR = -1;
+      int bestRing = -1;
+      int bestRank = 0;
+      for (int e = off[static_cast<std::size_t>(u)]; e < off[static_cast<std::size_t>(u + 1)]; e++) {
+        const int r = adj[static_cast<std::size_t>(e)].right;
+        const int ring = adj[static_cast<std::size_t>(e)].ring;
+        if (matchR[static_cast<std::size_t>(r)] >= 0) {
+          continue;
+        }
+        const int rank = rankOf[static_cast<std::size_t>(ring)];
+        if (bestR < 0 || rank < bestRank || (rank == bestRank && ring < bestRing)) {
+          bestR = r;
+          bestRing = ring;
+          bestRank = rank;
+        }
+      }
+      offerR[static_cast<std::size_t>(u)] = bestR;
+      offerRing[static_cast<std::size_t>(u)] = bestRing;
+    }
+    std::vector<int> bestL(static_cast<std::size_t>(nR), -1);
+    std::vector<int> bestRank(static_cast<std::size_t>(nR), 0);
+    std::vector<int> bestRing(static_cast<std::size_t>(nR), -1);
+    for (int u = 0; u < nL; u++) {
+      const int r = offerR[static_cast<std::size_t>(u)];
+      if (r < 0 || matchR[static_cast<std::size_t>(r)] >= 0 ||
+          matchL[static_cast<std::size_t>(u)] >= 0) {
+        continue;
+      }
+      const int ring = offerRing[static_cast<std::size_t>(u)];
+      const int rank = rankOf[static_cast<std::size_t>(ring)];
+      const int held = bestL[static_cast<std::size_t>(r)];
+      if (held < 0 || rank < bestRank[static_cast<std::size_t>(r)] ||
+          (rank == bestRank[static_cast<std::size_t>(r)] && u < held)) {
+        bestL[static_cast<std::size_t>(r)] = u;
+        bestRank[static_cast<std::size_t>(r)] = rank;
+        bestRing[static_cast<std::size_t>(r)] = ring;
+      }
+    }
+    for (int r = 0; r < nR; r++) {
+      const int u = bestL[static_cast<std::size_t>(r)];
+      if (u < 0) {
+        continue;
+      }
+      matchL[static_cast<std::size_t>(u)] = r;
+      matchR[static_cast<std::size_t>(r)] = u;
+      matchRing[static_cast<std::size_t>(u)] = bestRing[static_cast<std::size_t>(r)];
+      grew = true;
+    }
+  }
   std::vector<int> byRank = mem;
   std::sort(byRank.begin(), byRank.end(), [&](int a, int b) {
     return rankOf[static_cast<size_t>(a)] < rankOf[static_cast<size_t>(b)];
@@ -1182,6 +1590,25 @@ void misSelfTest() {
   check({{0, 1}, {1, 2}, {2, 0}}, 3, 1);
   check({{0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 0}}, 5, 2);
   check({{0, 1}, {2, 3}, {4, 5}}, 6, 3);
+  // A component past the old fixed word count must still be solved.
+  {
+    constexpr int wide = 300;
+    std::vector<Row> conf(static_cast<size_t>(wide));
+    std::vector<int> mem(static_cast<size_t>(wide));
+    for (int i = 0; i < wide; i++) {
+      mem[static_cast<size_t>(i)] = i;
+      if (i + 1 < wide) {
+        conf[static_cast<size_t>(i)].push(i + 1);
+        conf[static_cast<size_t>(i + 1)].push(i);
+      }
+    }
+    const MisOut path = exactMis(conf, mem);
+    if (!path.solved || static_cast<int>(path.ids.size()) != wide / 2) {
+      std::fprintf(stderr, "mis-selftest FAIL path %d solved %d got %zu\n", wide,
+                   path.solved ? 1 : 0, path.ids.size());
+      std::exit(1);
+    }
+  }
   std::fprintf(stderr, "mis-selftest ok\n");
 }
 
@@ -1194,12 +1621,13 @@ std::vector<int> ring::maximumEquators(const std::vector<ring::EquatorChoice> &p
     misSelfTest();
   }
   const auto t0 = std::chrono::steady_clock::now();
+  resetPackParts();
   const int n = static_cast<int>(periph.size());
   std::vector<Row> conf(static_cast<size_t>(n));
   int nEdges = 0;
   int nCand = 0;
 #if defined(SEAMS_HAS_OPENMP)
-#pragma omp parallel for schedule(static) reduction(+ : nEdges, nCand) if (n >= 256)
+#pragma omp parallel for schedule(static) reduction(+ : nEdges, nCand) if (!omp_in_parallel())
 #endif
   for (int i = 0; i < n; i++) {
     if (periph[static_cast<size_t>(i)].n == 0) {
@@ -1208,14 +1636,14 @@ std::vector<int> ring::maximumEquators(const std::vector<ring::EquatorChoice> &p
     nCand++;
     const ring::EquatorChoice &row = periph[static_cast<size_t>(i)];
     for (int k = 0; k < row.n; k++) {
-      const int f = row.ring[k];
+      const int f = row.idAt(k);
       if (f < 0 || f >= n || f == i || periph[static_cast<size_t>(f)].n == 0) {
         continue;
       }
       bool back = false;
       const ring::EquatorChoice &other = periph[static_cast<size_t>(f)];
       for (int t = 0; t < other.n; t++) {
-        if (other.ring[t] == i) {
+        if (other.idAt(t) == i) {
           back = true;
           break;
         }
@@ -1244,6 +1672,7 @@ std::vector<int> ring::maximumEquators(const std::vector<ring::EquatorChoice> &p
   int coverSum = 0;
   bool anySearch = false;
   bool allSolved = true;
+  int nDropped = 0;
   struct Comp {
     int minRank;
     std::vector<int> mem;
@@ -1289,29 +1718,45 @@ std::vector<int> ring::maximumEquators(const std::vector<ring::EquatorChoice> &p
     }
     return a.mem[0] < b.mem[0];
   });
+  gPackParts.conf_ms =
+      std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
   for (Comp &comp : comps) {
+    const auto orderStart = std::chrono::steady_clock::now();
     std::sort(comp.mem.begin(), comp.mem.end(), [&](int a, int b) {
       return rankOf[static_cast<size_t>(a)] < rankOf[static_cast<size_t>(b)];
     });
+    gPackParts.conf_ms += std::chrono::duration<double, std::milli>(
+                              std::chrono::steady_clock::now() - orderStart)
+                              .count();
     std::vector<int> picked;
     int partMatch = 0;
     int partCover = 0;
     if (linePack(conf, comp.mem, rankOf, picked, partMatch, partCover)) {
+      const auto keepStart = std::chrono::steady_clock::now();
       take.insert(take.end(), picked.begin(), picked.end());
+      gPackParts.conf_ms += std::chrono::duration<double, std::milli>(
+                                std::chrono::steady_clock::now() - keepStart)
+                                .count();
       matchSum += partMatch;
       coverSum += partCover;
       continue;
     }
     anySearch = true;
+    const auto searchStart = std::chrono::steady_clock::now();
     const MisOut solved = exactMis(conf, comp.mem);
+    gPackParts.search_ms += std::chrono::duration<double, std::milli>(
+                                std::chrono::steady_clock::now() - searchStart)
+                                .count();
     if (!solved.solved) {
       allSolved = false;
+      nDropped++;
       continue;
     }
     take.insert(take.end(), solved.ids.begin(), solved.ids.end());
     matchSum += static_cast<int>(solved.ids.size());
     coverSum += solved.cover;
   }
+  const auto tailStart = std::chrono::steady_clock::now();
   std::sort(take.begin(), take.end(), [&](int a, int b) {
     return rankOf[static_cast<size_t>(a)] < rankOf[static_cast<size_t>(b)];
   });
@@ -1325,10 +1770,28 @@ std::vector<int> ring::maximumEquators(const std::vector<ring::EquatorChoice> &p
     certificate->vertices = nCand;
     certificate->edges = nEdges;
     certificate->components = nComp;
+    certificate->dropped = nDropped;
     certificate->method = anySearch ? 2 : 1;
     certificate->tight = allSolved && coverSum == cages;
     certificate->milliseconds =
         std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+  }
+  gPackParts.conf_ms +=
+      std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - tailStart)
+          .count();
+  // The named blocks are the clique split, the id assignment, the matching
+  // and the search. The conflict block is the rest of this call: the row
+  // build, the component walk and the bookkeeping between those blocks.
+  std::vector<Row>().swap(conf);
+  std::vector<Comp>().swap(comps);
+  std::vector<int>().swap(seen);
+  std::vector<int>().swap(rankOf);
+  const double packWall =
+      std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+  const double named = gPackParts.split_ms + gPackParts.clique_ms + gPackParts.match_ms +
+                       gPackParts.search_ms;
+  if (packWall > named) {
+    gPackParts.conf_ms = packWall - named;
   }
   if (std::getenv("DSEAMS_CAGE_TIME")) {
     const auto now = std::chrono::steady_clock::now();
@@ -1339,3 +1802,5 @@ std::vector<int> ring::maximumEquators(const std::vector<ring::EquatorChoice> &p
   }
   return take;
 }
+
+ring::PackParts ring::lastPackParts() { return gPackParts; }

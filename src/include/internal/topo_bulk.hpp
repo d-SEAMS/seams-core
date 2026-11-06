@@ -81,6 +81,10 @@ namespace ring {
  */
 struct RingSearchIndex {
   std::vector<std::vector<int>> ringsContainingAtom;
+  //! Same rows as ringsContainingAtom, packed. ringCol[ringOff[a] .. ringOff[a+1])
+  //! is the ascending ring list of atom a. Empty when the index was not built.
+  std::vector<int> ringOff;
+  std::vector<int> ringCol;
   std::vector<int> atomRank;
   //! Integer minimum-image winding of each ring. Empty if no box was supplied.
   std::vector<std::array<int, 3>> ringShift;
@@ -142,16 +146,35 @@ struct PackingCertificate {
   int vertices = 0;
   int edges = 0;
   int components = 0;
+  int dropped = 0;
   int method = 0;
   bool tight = false;
   double milliseconds = 0;
 };
 
-//! Six peripheral rings of one equatorial candidate. n == 0 when the ring
-//! is not a candidate. The rings are stored in ascending canonical rank.
+//! Peripheral rings of one equatorial candidate. n == 0 when the ring is
+//! not a candidate. The first six sit inline. A defect that names more
+//! conflicts stores the rest in past, so none are dropped.
 struct EquatorChoice {
   int ring[6]{};
   int n = 0;
+  std::vector<int> past;
+
+  [[nodiscard]] int idAt(int k) const {
+    return k < 6 ? ring[k] : past[static_cast<std::size_t>(k - 6)];
+  }
+
+  void put(int k, int value) {
+    if (k < 6) {
+      ring[k] = value;
+      return;
+    }
+    const std::size_t at = static_cast<std::size_t>(k - 6);
+    if (past.size() <= at) {
+      past.resize(at + 1);
+    }
+    past[at] = value;
+  }
 };
 
 //! Maximum set of mutually non-conflicting equatorial rings. @a periph[i].n
@@ -218,16 +241,17 @@ bool equatorialConditions(const std::vector<std::vector<int>> &rings,
                           EquatorChoice *raw = nullptr);
 
 //! Membership of the neighbour rows after the leading self entry.
-//! Built once per frame so the basal test does not scan those rows.
+//! Stored as compressed sparse rows so memory is O(atoms + bonds).
 class NeighBond {
 public:
   void build(const std::vector<std::vector<int>> &nList);
   [[nodiscard]] bool operator()(int i, int j) const;
+  [[nodiscard]] std::size_t storageSize() const { return neighbours_.size(); }
 
 private:
   int n_ = 0;
-  int words_ = 0;
-  std::vector<std::uint64_t> bits_;
+  std::vector<std::size_t> offsets_;
+  std::vector<int> neighbours_;
 };
 
 //! Tests whether two rings are basal rings (true) or not (false): some
@@ -275,6 +299,32 @@ bool notNeighboursOfRing(const std::vector<std::vector<int>> &nList,
 [[nodiscard]] int getStrucNumbers(const std::vector<ring::strucType> &ringType,
                     const std::vector<cage::Cage> &cageList, int &numHC, int &numDDC,
                     int &mixedRings, int &prismaticRings, int &basalRings);
+
+struct DdcSplit {
+  double order_ms = 0;
+  double equator_ms = 0;
+  double pack_ms = 0;
+  double conf_ms = 0;
+  double split_ms = 0;
+  double clique_ms = 0;
+  double match_ms = 0;
+  double search_ms = 0;
+  double write_ms = 0;
+};
+
+struct PackParts {
+  double conf_ms = 0;
+  double split_ms = 0;
+  double clique_ms = 0;
+  double match_ms = 0;
+  double search_ms = 0;
+};
+
+//! Conflict build, clique ids, matching and branch-and-bound from the last pack.
+[[nodiscard]] PackParts lastPackParts();
+
+//! Order, equatorial test and packing from the last findDDC call.
+[[nodiscard]] DdcSplit lastDdcSplit();
 
 } // namespace ring
 /** @} */

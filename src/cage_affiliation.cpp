@@ -81,6 +81,10 @@ struct FrameContext {
   // vector neither of which affiliation reads
   std::vector<int> scratchListHC;
   std::vector<ring::strucType> scratchType;
+  // Ring atoms in one block, six per ring, when every ring has length 6.
+  // The basal search reads these atoms for every candidate.
+  std::vector<int> flat6;
+  bool allHex = false;
 
   FrameContext() = default;
 
@@ -114,12 +118,28 @@ struct FrameContext {
     }
     scratchType.assign(static_cast<std::size_t>(nR),
                        ring::strucType::unclassified);
+    allHex = true;
+    for (int i = 0; i < nR; i++) {
+      if (rings_[static_cast<std::size_t>(i)].size() != 6) {
+        allHex = false;
+        break;
+      }
+    }
+    flat6.clear();
+    if (allHex) {
+      flat6.resize(static_cast<std::size_t>(nR) * 6);
+      for (int i = 0; i < nR; i++) {
+        const auto &ring = rings_[static_cast<std::size_t>(i)];
+        std::copy(ring.begin(), ring.end(),
+                  flat6.begin() + static_cast<std::ptrdiff_t>(i) * 6);
+      }
+    }
     basalCand.resize(static_cast<std::size_t>(nR));
     adjRings.resize(static_cast<std::size_t>(nR));
     adjReady.assign(static_cast<std::size_t>(nR), 0);
     basalReady.assign(static_cast<std::size_t>(nR), 0);
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-#pragma omp parallel if (nR >= 256 && !omp_in_parallel())
+#pragma omp parallel if (!omp_in_parallel())
 #endif
     {
       BasalScratch scratch;
@@ -145,6 +165,21 @@ struct FrameContext {
       (a[p] < b[q]) ? p++ : q++;
     }
     return false;
+  }
+
+  struct RingRow {
+    const int *p = nullptr;
+    int n = 0;
+  };
+
+  [[nodiscard]] RingRow ringsOf(int atom) const {
+    if (atom < 0 || index.ringOff.empty() ||
+        static_cast<std::size_t>(atom) + 1 >= index.ringOff.size()) {
+      return {};
+    }
+    const int begin = index.ringOff[static_cast<std::size_t>(atom)];
+    const int end = index.ringOff[static_cast<std::size_t>(atom) + 1];
+    return {index.ringCol.data() + begin, end - begin};
   }
 
   [[nodiscard]] const std::vector<int> &ringsThroughAtom(int atom) const {
@@ -259,7 +294,7 @@ struct FrameContext {
             scratch.onRing[static_cast<size_t>(nb)] == on) {
           continue;
         }
-        span += static_cast<int>(ringsThroughAtom(nb).size());
+        span += ringsOf(nb).n;
       }
       return span;
     };
@@ -305,7 +340,9 @@ struct FrameContext {
             scratch.onRing[static_cast<size_t>(nb)] == on) {
           continue;
         }
-        for (const int candidate : ringsThroughAtom(nb)) {
+        const RingRow through = ringsOf(nb);
+        for (int c = 0; c < through.n; c++) {
+          const int candidate = through.p[c];
           if (scratch.seen[static_cast<size_t>(candidate)] == seenTick ||
               candidate == i) {
             continue;
@@ -314,18 +351,31 @@ struct FrameContext {
           bool share = false;
           bool hit1 = false;
           bool hit2 = false;
-          for (const int atom : (*rings)[static_cast<size_t>(candidate)]) {
-            if (atom < 0 || atom >= nAtoms) {
-              continue;
+          if (allHex) {
+            const int *atoms = flat6.data() + static_cast<std::ptrdiff_t>(candidate) * 6;
+            for (int t = 0; t < 6; t++) {
+              const int atom = atoms[t];
+              if (static_cast<unsigned>(atom) >= static_cast<unsigned>(nAtoms)) {
+                continue;
+              }
+              if (scratch.onRing[static_cast<size_t>(atom)] == on) {
+                share = true;
+                break;
+              }
+              hit1 = hit1 || scratch.arm1[static_cast<size_t>(atom)] == tick1;
+              hit2 = hit2 || scratch.arm2[static_cast<size_t>(atom)] == tick2;
             }
-            if (scratch.onRing[static_cast<size_t>(atom)] == on) {
-              share = true;
-            }
-            if (scratch.arm1[static_cast<size_t>(atom)] == tick1) {
-              hit1 = true;
-            }
-            if (scratch.arm2[static_cast<size_t>(atom)] == tick2) {
-              hit2 = true;
+          } else {
+            for (const int atom : (*rings)[static_cast<size_t>(candidate)]) {
+              if (atom < 0 || atom >= nAtoms) {
+                continue;
+              }
+              if (scratch.onRing[static_cast<size_t>(atom)] == on) {
+                share = true;
+                break;
+              }
+              hit1 = hit1 || scratch.arm1[static_cast<size_t>(atom)] == tick1;
+              hit2 = hit2 || scratch.arm2[static_cast<size_t>(atom)] == tick2;
             }
           }
           if (!share && hit1 && hit2) {
@@ -633,7 +683,7 @@ struct ring::AffiliationUpdater::Impl {
     const int n = static_cast<int>(which.size());
     std::vector<std::vector<int>> out(which.size());
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-#pragma omp parallel if (n >= 256 && !omp_in_parallel())
+#pragma omp parallel if (!omp_in_parallel())
 #endif
     {
       std::vector<int> listHC;
@@ -682,7 +732,7 @@ struct ring::AffiliationUpdater::Impl {
     std::vector<std::vector<int>> found(pending.size());
     std::vector<signed char> pass(pending.size(), 0);
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-#pragma omp parallel for schedule(dynamic, 64) if (n >= 256 && !omp_in_parallel())
+#pragma omp parallel for schedule(guided) if (!omp_in_parallel())
 #endif
     for (int k = 0; k < n; k++) {
       pass[static_cast<std::size_t>(k)] =

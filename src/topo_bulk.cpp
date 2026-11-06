@@ -13,14 +13,17 @@
 //-----------------------------------------------------------------------------------
 
 #include <generic.hpp>
+#include <par_team.hpp>
 #include <topo_bulk.hpp>
 
 #include <algorithm>
 #include <array>
+#include <span>
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
 #include <limits>
+#include <numeric>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -62,7 +65,7 @@ struct CycleKey {
   }
 };
 
-CycleKey bestCycle(const std::vector<int> &ringAtoms) {
+CycleKey bestCycle(std::span<const int> ringAtoms) {
   CycleKey best;
   const int k = static_cast<int>(ringAtoms.size());
   best.n = k;
@@ -89,33 +92,72 @@ CycleKey bestCycle(const std::vector<int> &ringAtoms) {
   return best;
 }
 
+struct AtomKey {
+  int n = 0;
+  std::array<int, 16> id{};
+
+  bool operator<(const AtomKey &other) const {
+    if (n != other.n) {
+      return n < other.n;
+    }
+    for (int i = 0; i < n; i++) {
+      if (id[static_cast<size_t>(i)] != other.id[static_cast<size_t>(i)]) {
+        return id[static_cast<size_t>(i)] < other.id[static_cast<size_t>(i)];
+      }
+    }
+    return false;
+  }
+};
+
 std::vector<int> canonicalRingOrder(const std::vector<std::vector<int>> &rings,
                                     const std::vector<int> &atomRank) {
   const int ranked = static_cast<int>(atomRank.size());
   const int n = static_cast<int>(rings.size());
-  std::vector<std::vector<int>> keys(static_cast<size_t>(n));
+  // Stack keys: one heap vector per ring was the serial cost of this order.
+  std::vector<AtomKey> keys(static_cast<size_t>(n));
   std::vector<CycleKey> cycles(static_cast<size_t>(n));
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static)
+#endif
   for (int i = 0; i < n; i++) {
-    std::vector<int> mapped = rings[static_cast<size_t>(i)];
-    for (int &atom : mapped) {
+    const auto &ring = rings[static_cast<size_t>(i)];
+    const int len = static_cast<int>(std::min(ring.size(), std::size_t{16}));
+    std::array<int, 16> mapped{};
+    for (int a = 0; a < len; a++) {
+      int atom = ring[static_cast<size_t>(a)];
       if (atom >= 0 && atom < ranked) {
         atom = atomRank[static_cast<size_t>(atom)];
       }
+      mapped[static_cast<size_t>(a)] = atom;
     }
-    cycles[static_cast<size_t>(i)] = bestCycle(mapped);
-    std::sort(mapped.begin(), mapped.end());
-    keys[static_cast<size_t>(i)] = std::move(mapped);
+    cycles[static_cast<size_t>(i)] =
+        bestCycle(std::span<const int>(mapped.data(), static_cast<size_t>(len)));
+    AtomKey key;
+    key.n = len;
+    std::copy_n(mapped.begin(), len, key.id.begin());
+    std::sort(key.id.begin(), key.id.begin() + len);
+    keys[static_cast<size_t>(i)] = key;
   }
   std::vector<int> order(static_cast<size_t>(n));
   for (int i = 0; i < n; i++) {
     order[static_cast<size_t>(i)] = i;
   }
-  // Two rings over the same atoms differ in their cycle
-  std::stable_sort(order.begin(), order.end(), [&](int a, int b) {
-    if (keys[static_cast<size_t>(a)] != keys[static_cast<size_t>(b)]) {
-      return keys[static_cast<size_t>(a)] < keys[static_cast<size_t>(b)];
+  // Two rings over the same atoms differ in their cycle. A stable sort
+  // keeps the earlier index when the keys and the cycles agree.
+  seams::parallelStableSort(order, [&](int a, int b) {
+    if (keys[static_cast<size_t>(a)] < keys[static_cast<size_t>(b)]) {
+      return true;
     }
-    return cycles[static_cast<size_t>(a)] < cycles[static_cast<size_t>(b)];
+    if (keys[static_cast<size_t>(b)] < keys[static_cast<size_t>(a)]) {
+      return false;
+    }
+    if (cycles[static_cast<size_t>(a)] < cycles[static_cast<size_t>(b)]) {
+      return true;
+    }
+    if (cycles[static_cast<size_t>(b)] < cycles[static_cast<size_t>(a)]) {
+      return false;
+    }
+    return a < b;
   });
   return order;
 }
@@ -184,12 +226,25 @@ bool commonAtom(const std::vector<int> &a, const std::vector<int> &b,
   return false;
 }
 
-const std::vector<int> &atomRow(const ring::RingSearchIndex &index, int atom) {
-  if (atom < 0 ||
-      static_cast<size_t>(atom) >= index.ringsContainingAtom.size()) {
-    return kEmptyRings;
+struct RingRow {
+  const int *p = nullptr;
+  int n = 0;
+  [[nodiscard]] int size() const { return n; }
+  [[nodiscard]] bool empty() const { return n == 0; }
+  [[nodiscard]] int operator[](int i) const { return p[i]; }
+  [[nodiscard]] int operator[](std::size_t i) const { return p[static_cast<int>(i)]; }
+  [[nodiscard]] const int *begin() const { return p; }
+  [[nodiscard]] const int *end() const { return p + n; }
+};
+
+RingRow atomRow(const ring::RingSearchIndex &index, int atom) {
+  if (atom < 0 || index.ringOff.empty() ||
+      static_cast<std::size_t>(atom) + 1 >= index.ringOff.size()) {
+    return {};
   }
-  return index.ringsContainingAtom[atom];
+  const int begin = index.ringOff[static_cast<std::size_t>(atom)];
+  const int end = index.ringOff[static_cast<std::size_t>(atom) + 1];
+  return {index.ringCol.data() + begin, end - begin};
 }
 
 // Six triplet lists per ring stay on the stack. Ice puts one ring in each.
@@ -1415,16 +1470,127 @@ ring::RingSearchIndex
 ring::buildRingSearchIndex(const std::vector<std::vector<int>> &rings,
                            int numAtoms) {
   ring::RingSearchIndex index;
-  index.ringsContainingAtom.resize(numAtoms);
+  if (numAtoms <= 0) {
+    return index;
+  }
+  index.ringsContainingAtom.resize(static_cast<std::size_t>(numAtoms));
+  const int nRings = static_cast<int>(rings.size());
+  int nThreads = 1;
+#ifdef SEAMS_HAS_OPENMP
+  if (!omp_in_parallel()) {
+    nThreads = std::max(1, omp_get_max_threads());
+  }
+#endif
+  if (nThreads <= 1) {
+    std::vector<int> count(static_cast<std::size_t>(numAtoms), 0);
+    for (int iring = 0; iring < nRings; iring++) {
+      for (const int atom : rings[static_cast<std::size_t>(iring)]) {
+        if (atom >= 0 && atom < numAtoms) {
+          ++count[static_cast<std::size_t>(atom)];
+        }
+      }
+    }
+    index.ringOff.assign(static_cast<std::size_t>(numAtoms) + 1, 0);
+    for (int atom = 0; atom < numAtoms; atom++) {
+      index.ringOff[static_cast<std::size_t>(atom) + 1] =
+          index.ringOff[static_cast<std::size_t>(atom)] + count[static_cast<std::size_t>(atom)];
+    }
+    index.ringCol.assign(static_cast<std::size_t>(index.ringOff[static_cast<std::size_t>(numAtoms)]),
+                         0);
+    std::vector<int> cursor(index.ringOff.begin(), index.ringOff.end() - 1);
+    for (int iring = 0; iring < nRings; iring++) {
+      for (const int atom : rings[static_cast<std::size_t>(iring)]) {
+        if (atom >= 0 && atom < numAtoms) {
+          index.ringCol[static_cast<std::size_t>(cursor[static_cast<std::size_t>(atom)]++)] =
+              iring;
+        }
+      }
+    }
+    for (int atom = 0; atom < numAtoms; atom++) {
+      const int begin = index.ringOff[static_cast<std::size_t>(atom)];
+      const int end = index.ringOff[static_cast<std::size_t>(atom) + 1];
+      auto &row = index.ringsContainingAtom[static_cast<std::size_t>(atom)];
+      row.assign(index.ringCol.begin() + begin, index.ringCol.begin() + end);
+    }
+    return index;
+  }
 
-  for (int iring = 0; iring < static_cast<int>(rings.size()); iring++) {
-    for (const int atom : rings[iring]) {
-      if (atom >= 0 && atom < numAtoms) {
-        index.ringsContainingAtom[atom].push_back(iring);
+  // Each thread counts, then writes, its own ring block. Concatenating those
+  // blocks keeps every atom's row in ascending ring order.
+  std::vector<std::vector<int>> counts(static_cast<std::size_t>(nThreads));
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel
+#endif
+  {
+    const int tid = omp_get_thread_num();
+    counts[static_cast<std::size_t>(tid)].assign(static_cast<std::size_t>(numAtoms), 0);
+    auto &count = counts[static_cast<std::size_t>(tid)];
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (int iring = 0; iring < nRings; iring++) {
+      for (const int atom : rings[static_cast<std::size_t>(iring)]) {
+        if (atom >= 0 && atom < numAtoms) {
+          count[static_cast<std::size_t>(atom)]++;
+        }
       }
     }
   }
-
+  std::vector<int> base(static_cast<std::size_t>(numAtoms), 0);
+  int total = 0;
+  for (int atom = 0; atom < numAtoms; atom++) {
+    base[static_cast<std::size_t>(atom)] = total;
+    for (int t = 0; t < nThreads; t++) {
+      total += counts[static_cast<std::size_t>(t)][static_cast<std::size_t>(atom)];
+    }
+  }
+  std::vector<int> flat(static_cast<std::size_t>(total));
+  std::vector<std::vector<int>> head(static_cast<std::size_t>(nThreads));
+  for (int t = 0; t < nThreads; t++) {
+    head[static_cast<std::size_t>(t)].resize(static_cast<std::size_t>(numAtoms));
+  }
+  for (int atom = 0; atom < numAtoms; atom++) {
+    int cursor = base[static_cast<std::size_t>(atom)];
+    for (int t = 0; t < nThreads; t++) {
+      head[static_cast<std::size_t>(t)][static_cast<std::size_t>(atom)] = cursor;
+      cursor += counts[static_cast<std::size_t>(t)][static_cast<std::size_t>(atom)];
+    }
+  }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel
+#endif
+  {
+    const int tid = omp_get_thread_num();
+    auto &cursor = head[static_cast<std::size_t>(tid)];
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (int iring = 0; iring < nRings; iring++) {
+      for (const int atom : rings[static_cast<std::size_t>(iring)]) {
+        if (atom >= 0 && atom < numAtoms) {
+          flat[static_cast<std::size_t>(cursor[static_cast<std::size_t>(atom)]++)] = iring;
+        }
+      }
+    }
+  }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+  for (int atom = 0; atom < numAtoms; atom++) {
+    int n = 0;
+    for (int t = 0; t < nThreads; t++) {
+      n += counts[static_cast<std::size_t>(t)][static_cast<std::size_t>(atom)];
+    }
+    auto &row = index.ringsContainingAtom[static_cast<std::size_t>(atom)];
+    const int begin = base[static_cast<std::size_t>(atom)];
+    row.assign(flat.begin() + begin, flat.begin() + begin + n);
+  }
+  index.ringOff.assign(static_cast<std::size_t>(numAtoms) + 1, 0);
+  for (int atom = 0; atom < numAtoms; atom++) {
+    index.ringOff[static_cast<std::size_t>(atom)] = base[static_cast<std::size_t>(atom)];
+  }
+  index.ringOff[static_cast<std::size_t>(numAtoms)] = total;
+  index.ringCol = std::move(flat);
   return index;
 }
 
@@ -1440,7 +1606,11 @@ ring::RingSearchIndex ring::buildRingSearchIndex(
   index.ringShift.assign(rings.size(), {0, 0, 0});
   if (box.ok) {
     const int nAtoms = static_cast<int>(yCloud.pts.size());
-    for (size_t r = 0; r < rings.size(); r++) {
+    const int nRings = static_cast<int>(rings.size());
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+    for (int r = 0; r < nRings; r++) {
       const auto &ring = rings[r];
       std::array<int, 3> wind{0, 0, 0};
       bool inFrame = true;
@@ -1647,6 +1817,28 @@ std::vector<int> ring::findDDC(const std::vector<std::vector<int>> &rings,
  *  unwrapped winding of each ring and is part of the ring key.
  * @return A vector of all the ring indices which constitute DDCs.
  */
+namespace {
+struct DdcSplitTimes {
+  double order_ms = 0;
+  double equator_ms = 0;
+  double pack_ms = 0;
+  double conf_ms = 0;
+  double split_ms = 0;
+  double clique_ms = 0;
+  double match_ms = 0;
+  double search_ms = 0;
+  double write_ms = 0;
+};
+DdcSplitTimes gDdcSplit;
+} // namespace
+
+// Cubic mW has parity product 1. Frame 148 has parity product at most 16.
+// The triple loop costs the product, so it stays in use through the square
+// of that frame product. The guided team starts at the same count: a shorter
+// ring list is no larger than one such loop.
+constexpr int kSmallParityProduct = 16;
+constexpr int kTripleLoopProduct = kSmallParityProduct * kSmallParityProduct;
+
 std::vector<int> canonicalRingOrderByAtoms(
     const std::vector<std::vector<int>> &rings, const ring::RingSearchIndex &index) {
   const int n = static_cast<int>(rings.size());
@@ -1658,6 +1850,10 @@ std::vector<int> canonicalRingOrderByAtoms(
     bool cycleReady = false;
   };
   std::vector<Key> keys(static_cast<size_t>(n));
+  const int nShift = static_cast<int>(index.ringShift.size());
+#if defined(SEAMS_HAS_OPENMP)
+#pragma omp parallel for schedule(static)
+#endif
   for (int i = 0; i < n; i++) {
     const auto &ring = rings[static_cast<size_t>(i)];
     Key &k = keys[static_cast<size_t>(i)];
@@ -1666,9 +1862,11 @@ std::vector<int> canonicalRingOrderByAtoms(
       k.id[static_cast<size_t>(j)] = ring[static_cast<size_t>(j)];
     }
     std::sort(k.id.begin(), k.id.begin() + k.len);
-    if (static_cast<size_t>(i) < index.ringShift.size()) {
+    if (i < nShift) {
       k.shift = index.ringShift[static_cast<size_t>(i)];
     }
+    k.cycle = bestCycle(std::span<const int>(ring.data(), ring.size()));
+    k.cycleReady = true;
   }
   int maxAtom = 0;
   for (int i = 0; i < n; i++) {
@@ -1676,14 +1874,13 @@ std::vector<int> canonicalRingOrderByAtoms(
       maxAtom = std::max(maxAtom, keys[static_cast<size_t>(i)].id[0]);
     }
   }
+  // Histogram of the first atom, then an exclusive scan gives each bucket start.
   std::vector<int> bucket(static_cast<size_t>(maxAtom + 3), 0);
   for (int i = 0; i < n; i++) {
     const int b = keys[static_cast<size_t>(i)].len > 0 ? keys[static_cast<size_t>(i)].id[0] + 1 : 0;
-    bucket[static_cast<size_t>(b + 1)]++;
+    bucket[static_cast<size_t>(b)]++;
   }
-  for (int b = 0; b <= maxAtom + 1; b++) {
-    bucket[static_cast<size_t>(b + 1)] += bucket[static_cast<size_t>(b)];
-  }
+  seams::exclusiveScan(bucket);
   std::vector<int> order(static_cast<size_t>(n));
   std::vector<int> place = bucket;
   for (int i = 0; i < n; i++) {
@@ -1705,19 +1902,22 @@ std::vector<int> canonicalRingOrderByAtoms(
     if (ka.shift != kb.shift) {
       return ka.shift < kb.shift;
     }
-    if (!keys[static_cast<size_t>(a)].cycleReady) {
-      keys[static_cast<size_t>(a)].cycle = bestCycle(rings[static_cast<size_t>(a)]);
-      keys[static_cast<size_t>(a)].cycleReady = true;
+    if (ka.cycle < kb.cycle) {
+      return true;
     }
-    if (!keys[static_cast<size_t>(b)].cycleReady) {
-      keys[static_cast<size_t>(b)].cycle = bestCycle(rings[static_cast<size_t>(b)]);
-      keys[static_cast<size_t>(b)].cycleReady = true;
+    if (kb.cycle < ka.cycle) {
+      return false;
     }
-    return keys[static_cast<size_t>(a)].cycle < keys[static_cast<size_t>(b)].cycle;
+    return a < b;
   };
-  for (int b = 0; b <= maxAtom + 1; b++) {
+  const int nBuckets = maxAtom + 2;
+#if defined(SEAMS_HAS_OPENMP)
+#pragma omp parallel for schedule(dynamic)
+#endif
+  for (int b = 0; b < nBuckets; b++) {
     const int lo = bucket[static_cast<size_t>(b)];
-    const int hi = bucket[static_cast<size_t>(b + 1)];
+    const int hi = b + 1 < static_cast<int>(bucket.size()) ? bucket[static_cast<size_t>(b + 1)]
+                                                           : n;
     if (hi - lo > 1) {
       std::sort(order.begin() + lo, order.begin() + hi, before);
     }
@@ -1753,7 +1953,7 @@ std::vector<int> ring::findDDC(const std::vector<std::vector<int>> &rings,
   }
   std::vector<ring::EquatorChoice> chosenPeriph(static_cast<size_t>(totalRingNum));
 #if defined(SEAMS_HAS_OPENMP)
-#pragma omp parallel for schedule(static, 64) if (totalRingNum >= 256)
+#pragma omp parallel for schedule(guided)
 #endif
   for (int iring = 0; iring < totalRingNum; iring++) {
     if (notEquatorial[static_cast<size_t>(iring)]) {
@@ -1768,18 +1968,26 @@ std::vector<int> ring::findDDC(const std::vector<std::vector<int>> &rings,
   const auto td2 = std::chrono::steady_clock::now();
   const std::vector<int> equators =
       ring::maximumEquators(chosenPeriph, visitOrder, certificate);
-  if (const char *st = std::getenv("DSEAMS_CAGE_TIME")) {
-    (void)st;
-    std::fprintf(stderr, "ddc order %.3f eq %.3f pack %.3f kept %zu\n",
-                 std::chrono::duration<double, std::milli>(td1 - td0).count(),
-                 std::chrono::duration<double, std::milli>(td2 - td1).count(),
-                 std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - td2)
-                     .count(),
-                 equators.size());
+  const auto td3 = std::chrono::steady_clock::now();
+  const ring::PackParts parts = ring::lastPackParts();
+  gDdcSplit.order_ms = std::chrono::duration<double, std::milli>(td1 - td0).count();
+  gDdcSplit.equator_ms = std::chrono::duration<double, std::milli>(td2 - td1).count();
+  gDdcSplit.pack_ms = std::chrono::duration<double, std::milli>(td3 - td2).count();
+  gDdcSplit.conf_ms = parts.conf_ms;
+  gDdcSplit.split_ms = parts.split_ms;
+  gDdcSplit.clique_ms = parts.clique_ms;
+  gDdcSplit.match_ms = parts.match_ms;
+  gDdcSplit.search_ms = parts.search_ms;
+  if (std::getenv("DSEAMS_CAGE_TIME") != nullptr) {
+    std::fprintf(stderr, "ddc order %.3f eq %.3f pack %.3f kept %zu\n", gDdcSplit.order_ms,
+                 gDdcSplit.equator_ms, gDdcSplit.pack_ms, equators.size());
   }
   for (const int iring : equators) {
     const ring::EquatorChoice &choice = chosenPeriph[static_cast<size_t>(iring)];
-    peripheralRings.assign(choice.ring, choice.ring + choice.n);
+    peripheralRings.resize(static_cast<std::size_t>(choice.n));
+    for (int k = 0; k < choice.n; k++) {
+      peripheralRings[static_cast<std::size_t>(k)] = choice.idAt(k);
+    }
     if (ringType[iring] == ring::strucType::unclassified) {
       ringType[iring] = ring::strucType::DDC;
       listDDC.push_back(iring);
@@ -1802,8 +2010,17 @@ std::vector<int> ring::findDDC(const std::vector<std::vector<int>> &rings,
                     peripheralRings.end());
     cageList.push_back({cage::cageType::DoubleDiaC, DDCRings});
   }
+  std::vector<ring::EquatorChoice>().swap(chosenPeriph);
+  gDdcSplit.write_ms =
+      std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - td3).count();
 
   return listDDC;
+}
+
+ring::DdcSplit ring::lastDdcSplit() {
+  return {gDdcSplit.order_ms,     gDdcSplit.equator_ms, gDdcSplit.pack_ms,
+          gDdcSplit.conf_ms,      gDdcSplit.split_ms,   gDdcSplit.clique_ms,
+          gDdcSplit.match_ms,     gDdcSplit.search_ms,  gDdcSplit.write_ms};
 }
 
 /**
@@ -1836,7 +2053,7 @@ bool ring::equatorialConditions(const std::vector<std::vector<int>> &rings,
     return false;
   }
   for (const int atom : R) {
-    const std::vector<int> &row = atomRow(index, atom);
+    const auto row = atomRow(index, atom);
     int others = 0;
     for (const int r : row) {
       others += static_cast<int>(r != iring);
@@ -1957,10 +2174,10 @@ bool ring::equatorialConditions(const std::vector<std::vector<int>> &rings,
   const std::int64_t prodOdd = static_cast<std::int64_t>(T[1].size()) *
                                static_cast<std::int64_t>(T[3].size()) *
                                static_cast<std::int64_t>(T[5].size());
-  // Products at or below 256, including cubic mW (1) and frame 148 (at most
-  // 16), stay on the triple loop. Above that the share graph enumerates the
-  // same chains, and a pair is kept only when the seven rings span 14 molecules.
-  if (prodEven > 256 || prodOdd > 256) {
+  // Products at or below kTripleLoopProduct stay on the triple loop. Above
+  // that the share graph enumerates the same chains, and a pair is kept only
+  // when the seven rings span 14 molecules.
+  if (prodEven > kTripleLoopProduct || prodOdd > kTripleLoopProduct) {
     return equatorialLarge(rings, R, T,
                            static_cast<int>(index.ringsContainingAtom.size()),
                            peripheralUnion, chosen, rank, raw);
@@ -2512,22 +2729,35 @@ std::vector<int> ring::findHC(const std::vector<std::vector<int>> &rings,
 #else
       1;
 #endif
-  const bool parallel = nThreads > 1 && totalRingNum >= 256;
+  const bool parallel = nThreads > 1;
   if (parallel) {
-    std::vector<std::vector<Passing>> passing(static_cast<size_t>(totalRingNum));
+    // Hits stay on the thread that found them. A vector per ring shares
+    // cache lines between threads and is built before any search starts.
+    struct Hit {
+      int iring;
+      int jring;
+      bool cond2;
+      bool reverse;
+    };
+    std::vector<std::vector<Hit>> perThread(static_cast<std::size_t>(nThreads));
 #if defined(SEAMS_HAS_OPENMP)
 #pragma omp parallel
 #endif
     {
+#ifdef SEAMS_HAS_OPENMP
+      const int tid = omp_get_thread_num();
+#else
+      const int tid = 0;
+#endif
+      auto &local = perThread[static_cast<std::size_t>(tid)];
       std::vector<int> candidates;
       GatherScratch scratch;
 #if defined(SEAMS_HAS_OPENMP)
-#pragma omp for schedule(static)
+#pragma omp for schedule(guided)
 #endif
       for (int t = 0; t < totalRingNum; t++) {
         const int iring = visitOrder[static_cast<size_t>(t)];
         gatherCandidates(iring, candidates, scratch);
-        auto &row = passing[static_cast<size_t>(iring)];
         for (const int jring : candidates) {
           const std::vector<int> &basal1 = rings[static_cast<size_t>(iring)];
           const std::vector<int> &basal2 = rings[static_cast<size_t>(jring)];
@@ -2537,21 +2767,29 @@ std::vector<int> ring::findHC(const std::vector<std::vector<int>> &rings,
           const bool cond2 = ring::basalConditions(bonds, basal1, basal2);
           const bool reverse = ring::basalConditions(bonds, basal2, basal1);
           if (cond2 || reverse) {
-            row.push_back({jring, cond2, reverse});
+            local.push_back({iring, jring, cond2, reverse});
           }
         }
       }
     }
-    for (const int iring : visitOrder) {
-      if (isPrismatic[static_cast<size_t>(iring)]) {
+    std::vector<Hit> hits;
+    for (auto &local : perThread) {
+      hits.insert(hits.end(), local.begin(), local.end());
+    }
+    std::sort(hits.begin(), hits.end(), [&](const Hit &a, const Hit &b) {
+      const int ra = rank[static_cast<size_t>(a.iring)];
+      const int rb = rank[static_cast<size_t>(b.iring)];
+      if (ra != rb) {
+        return ra < rb;
+      }
+      return rank[static_cast<size_t>(a.jring)] < rank[static_cast<size_t>(b.jring)];
+    });
+    for (const Hit &hit : hits) {
+      if (isPrismatic[static_cast<size_t>(hit.iring)] ||
+          isPrismatic[static_cast<size_t>(hit.jring)]) {
         continue;
       }
-      for (const Passing &hit : passing[static_cast<size_t>(iring)]) {
-        if (isPrismatic[static_cast<size_t>(hit.jring)]) {
-          continue;
-        }
-        claimPair(iring, hit.jring, hit.cond2, hit.reverse);
-      }
+      claimPair(hit.iring, hit.jring, hit.cond2, hit.reverse);
     }
   } else {
     std::vector<int> candidates;
@@ -2609,30 +2847,45 @@ std::vector<int> ring::findHC(const std::vector<std::vector<int>> &rings,
  */
 void ring::NeighBond::build(const std::vector<std::vector<int>> &nList) {
   n_ = static_cast<int>(nList.size());
-  words_ = (n_ + 63) >> 6;
-  bits_.assign(static_cast<size_t>(n_) * static_cast<size_t>(words_), 0);
+  offsets_.assign(static_cast<std::size_t>(n_) + 1, 0);
   for (int i = 0; i < n_; i++) {
-    std::uint64_t *row =
-        bits_.data() + static_cast<size_t>(i) * static_cast<size_t>(words_);
     const auto &nbrs = nList[static_cast<size_t>(i)];
     for (size_t k = 1; k < nbrs.size(); k++) {
       const int j = nbrs[k];
       if (j >= 0 && j < n_) {
-        row[static_cast<size_t>(j >> 6)] |=
-            std::uint64_t{1} << (j & 63);
+        offsets_[static_cast<std::size_t>(i) + 1]++;
       }
     }
+  }
+  std::partial_sum(offsets_.begin(), offsets_.end(), offsets_.begin());
+  neighbours_.assign(offsets_.back(), 0);
+  for (int i = 0; i < n_; i++) {
+    std::size_t out = offsets_[static_cast<std::size_t>(i)];
+    const auto &nbrs = nList[static_cast<std::size_t>(i)];
+    for (std::size_t k = 1; k < nbrs.size(); k++) {
+      const int j = nbrs[k];
+      if (j >= 0 && j < n_) {
+        neighbours_[out++] = j;
+      }
+    }
+    std::sort(neighbours_.begin() +
+                  static_cast<std::ptrdiff_t>(
+                      offsets_[static_cast<std::size_t>(i)]),
+              neighbours_.begin() + static_cast<std::ptrdiff_t>(out));
   }
 }
 
 bool ring::NeighBond::operator()(int i, int j) const {
-  if (i < 0 || j < 0 || i >= n_ || j >= n_ || words_ == 0) {
+  if (i < 0 || j < 0 || i >= n_ || j >= n_ || offsets_.empty()) {
     return false;
   }
-  const std::uint64_t word =
-      bits_[static_cast<size_t>(i) * static_cast<size_t>(words_) +
-            static_cast<size_t>(j >> 6)];
-  return (word >> (j & 63)) & 1u;
+  const auto first =
+      neighbours_.begin() + static_cast<std::ptrdiff_t>(
+                                offsets_[static_cast<std::size_t>(i)]);
+  const auto last =
+      neighbours_.begin() + static_cast<std::ptrdiff_t>(
+                                offsets_[static_cast<std::size_t>(i) + 1]);
+  return std::binary_search(first, last, j);
 }
 
 bool ring::basalConditions(const std::vector<std::vector<int>> &nList,

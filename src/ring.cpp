@@ -181,20 +181,24 @@ bool ring::findTripletInRing(const std::vector<int> &ring, const std::vector<int
  */
 std::vector<std::vector<int>>
 ring::getSingleRingSize(const std::vector<std::vector<int>> &rings, int ringSize) {
-  //
-  std::vector<std::vector<int>> ringSingleSize; // rings of one size
-
-  // rings contains primitive rings of all sizes
-  // Only save rings of a given size (ringSize) to the new
-  // vector of vectors, ringSingleSize
-  for (int iring = 0; iring < rings.size(); iring++) {
-    // Check the size of the current ring
-    // If it is the correct size, save it in ringSingleSize
-    if (rings[iring].size() == ringSize) {
-      ringSingleSize.push_back(rings[iring]);
-    } // End of check of the size of iring
-  }   // end of loop through all rings in rings
-
+  // Count first so the result vector is allocated once, in input order.
+  const int nRings = static_cast<int>(rings.size());
+  std::vector<int> keep;
+  keep.reserve(static_cast<std::size_t>(nRings));
+  for (int iring = 0; iring < nRings; iring++) {
+    if (rings[static_cast<std::size_t>(iring)].size() ==
+        static_cast<std::size_t>(ringSize)) {
+      keep.push_back(iring);
+    }
+  }
+  std::vector<std::vector<int>> ringSingleSize(keep.size());
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+  for (int k = 0; k < static_cast<int>(keep.size()); k++) {
+    ringSingleSize[static_cast<std::size_t>(k)] =
+        rings[static_cast<std::size_t>(keep[static_cast<std::size_t>(k)])];
+  }
   return ringSingleSize;
 }
 
