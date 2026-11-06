@@ -2847,45 +2847,36 @@ std::vector<int> ring::findHC(const std::vector<std::vector<int>> &rings,
  */
 void ring::NeighBond::build(const std::vector<std::vector<int>> &nList) {
   n_ = static_cast<int>(nList.size());
-  offsets_.assign(static_cast<std::size_t>(n_) + 1, 0);
+  off_.assign(static_cast<size_t>(n_) + 1, 0);
+  cols_.clear();
+  std::vector<int> row;
   for (int i = 0; i < n_; i++) {
-    const auto &nbrs = nList[static_cast<size_t>(i)];
-    for (size_t k = 1; k < nbrs.size(); k++) {
-      const int j = nbrs[k];
-      if (j >= 0 && j < n_) {
-        offsets_[static_cast<std::size_t>(i) + 1]++;
+    row.clear();
+    if (static_cast<size_t>(i) < nList.size()) {
+      const auto &nbrs = nList[static_cast<size_t>(i)];
+      row.reserve(nbrs.size());
+      for (size_t k = 1; k < nbrs.size(); k++) {
+        const int j = nbrs[k];
+        if (j >= 0 && j < n_) {
+          row.push_back(j);
+        }
       }
     }
+    std::sort(row.begin(), row.end());
+    row.erase(std::unique(row.begin(), row.end()), row.end());
+    off_[static_cast<size_t>(i)] = static_cast<int>(cols_.size());
+    cols_.insert(cols_.end(), row.begin(), row.end());
   }
-  std::partial_sum(offsets_.begin(), offsets_.end(), offsets_.begin());
-  neighbours_.assign(offsets_.back(), 0);
-  for (int i = 0; i < n_; i++) {
-    std::size_t out = offsets_[static_cast<std::size_t>(i)];
-    const auto &nbrs = nList[static_cast<std::size_t>(i)];
-    for (std::size_t k = 1; k < nbrs.size(); k++) {
-      const int j = nbrs[k];
-      if (j >= 0 && j < n_) {
-        neighbours_[out++] = j;
-      }
-    }
-    std::sort(neighbours_.begin() +
-                  static_cast<std::ptrdiff_t>(
-                      offsets_[static_cast<std::size_t>(i)]),
-              neighbours_.begin() + static_cast<std::ptrdiff_t>(out));
-  }
+  off_[static_cast<size_t>(n_)] = static_cast<int>(cols_.size());
 }
 
 bool ring::NeighBond::operator()(int i, int j) const {
-  if (i < 0 || j < 0 || i >= n_ || j >= n_ || offsets_.empty()) {
+  if (i < 0 || j < 0 || i >= n_ || off_.empty()) {
     return false;
   }
-  const auto first =
-      neighbours_.begin() + static_cast<std::ptrdiff_t>(
-                                offsets_[static_cast<std::size_t>(i)]);
-  const auto last =
-      neighbours_.begin() + static_cast<std::ptrdiff_t>(
-                                offsets_[static_cast<std::size_t>(i) + 1]);
-  return std::binary_search(first, last, j);
+  const auto b = cols_.begin() + off_[static_cast<size_t>(i)];
+  const auto e = cols_.begin() + off_[static_cast<size_t>(i + 1)];
+  return std::binary_search(b, e, j);
 }
 
 bool ring::basalConditions(const std::vector<std::vector<int>> &nList,
