@@ -1,0 +1,2266 @@
+{
+  "git_sha": "fbdfd1f38ece4f4024924378ce598514b4866be4",
+  "git_dirty": "clean",
+  "seed": 7,
+  "cutoff": 3.5,
+  "k": 4,
+  "k_candidate": 5.36,
+  "k_candidate_reference": {
+    "name": "mW radial distribution second-shell window midpoint",
+    "source_file": "input/traj/mW_cubic.lammpstrj",
+    "source_script": "tests/derive_mw_gr_window_midpoint.py",
+    "source_frame": 1,
+    "source_atom_type": 1,
+    "method": "midpoint between the two largest pair-distance shell breaks above 3.5 A (scan radius 7.0 A)",
+    "window_left_angstrom": 4.8934999999999995,
+    "window_right_angstrom": 5.8255,
+    "window_midpoint_angstrom": 5.36
+  },
+  "machine": {
+    "uname_m": "x86_64",
+    "nproc": 8,
+    "cpu_model": "Intel Xeon Processor"
+  },
+  "protocol": {
+    "confidence_target": 0.95,
+    "repeat_lower_bound": "n >= ceil(1 - log2(1 - confidence_target))",
+    "median_rule": "type 7 median and quartiles",
+    "repeats": 12,
+    "warmup_runs": 0,
+    "warmup_rule": "fixed 2 calls (one cold-start sink plus one stabilization call)",
+    "fresh_process_per_sample": true,
+    "interleaving": "per repetition, rotate tool order",
+    "first_call_reported_separately": true
+  },
+  "thread_policy": {
+    "dseams_threads_reported": [
+      1,
+      1
+    ],
+    "freud_threads": 1,
+    "ovito_threads": 1,
+    "scipy_threads": 1
+  },
+  "linkcell_policy": {
+    "cell_width": "r_max",
+    "projection_trigger_rule": "project when n_atoms exceeds the largest fitted n_atoms for each geometry/stage pair",
+    "fit_selection_rule": "fit each geometry/stage on the largest three measured sizes; treat smaller sizes as overhead-dominated",
+    "minimum_fit_points": 3,
+    "fits": {
+      "orthorhombic/cutoff": {
+        "slope_alpha": 2.0681533002707893,
+        "intercept_logC": -11.606660786269861,
+        "r2": 0.9997998767277934,
+        "rmse_ms": 1594.9965629496553,
+        "datasets": [
+          "orth-4k",
+          "orth-32k",
+          "orth-1e5"
+        ],
+        "projection_trigger_n_atoms": 110592,
+        "residuals": [
+          {
+            "dataset": "orth-4k",
+            "n_atoms": 4096,
+            "observed_median_ms": 271.0336210002424,
+            "fitted_median_ms": 269.2808164229126,
+            "residual_ms": 1.7528045773298118,
+            "residual_percent": 0.6467111241996962
+          },
+          {
+            "dataset": "orth-32k",
+            "n_atoms": 32768,
+            "observed_median_ms": 19511.884732999988,
+            "fitted_median_ms": 19857.928945487587,
+            "residual_ms": -346.044212487599,
+            "residual_percent": -1.7735048009090717
+          },
+          {
+            "dataset": "orth-1e5",
+            "n_atoms": 110592,
+            "observed_median_ms": 248486.0925500002,
+            "fitted_median_ms": 245745.23639942543,
+            "residual_ms": 2740.8561505747784,
+            "residual_percent": 1.1030219528375678
+          }
+        ]
+      },
+      "orthorhombic/knn": {
+        "slope_alpha": 2.0480557128691528,
+        "intercept_logC": -11.334665966353038,
+        "r2": 0.9993375632786278,
+        "rmse_ms": 3043.6733916511607,
+        "datasets": [
+          "orth-4k",
+          "orth-32k",
+          "orth-1e5"
+        ],
+        "projection_trigger_n_atoms": 110592,
+        "residuals": [
+          {
+            "dataset": "orth-4k",
+            "n_atoms": 4096,
+            "observed_median_ms": 302.60788599980515,
+            "fitted_median_ms": 299.04155680599786,
+            "residual_ms": 3.5663291938072916,
+            "residual_percent": 1.1785314787895476
+          },
+          {
+            "dataset": "orth-32k",
+            "n_atoms": 32768,
+            "observed_median_ms": 20481.402877500386,
+            "fitted_median_ms": 21149.98930331978,
+            "residual_ms": -668.5864258193942,
+            "residual_percent": -3.264358549159063
+          },
+          {
+            "dataset": "orth-1e5",
+            "n_atoms": 110592,
+            "observed_median_ms": 260642.9811905,
+            "fitted_median_ms": 255413.7534638044,
+            "residual_ms": 5229.227726695593,
+            "residual_percent": 2.006279893980199
+          }
+        ]
+      },
+      "triclinic/cutoff": {
+        "slope_alpha": 1.7678069510312044,
+        "intercept_logC": -8.825327749063021,
+        "r2": 0.9600065057067757,
+        "rmse_ms": 497.1220492717722,
+        "datasets": [
+          "tri-136",
+          "tri-1088",
+          "tri-17k"
+        ],
+        "projection_trigger_n_atoms": 17000,
+        "residuals": [
+          {
+            "dataset": "tri-136",
+            "n_atoms": 136,
+            "observed_median_ms": 1.0989544998665224,
+            "fitted_median_ms": 0.8687479046311412,
+            "residual_ms": 0.23020659523538123,
+            "residual_percent": 20.94778221148754
+          },
+          {
+            "dataset": "tri-1088",
+            "n_atoms": 1088,
+            "observed_median_ms": 22.70238849996531,
+            "fitted_median_ms": 34.306982936406186,
+            "residual_ms": -11.604594436440877,
+            "residual_percent": -51.1161829358114
+          },
+          {
+            "dataset": "tri-17k",
+            "n_atoms": 17000,
+            "observed_median_ms": 5285.071904999313,
+            "fitted_median_ms": 4424.109492341601,
+            "residual_ms": 860.9624126577119,
+            "residual_percent": 16.290457880871987
+          }
+        ]
+      },
+      "triclinic/knn": {
+        "slope_alpha": 1.6776503561371394,
+        "intercept_logC": -7.920587018916624,
+        "r2": 0.9495013607711823,
+        "rmse_ms": 587.4460506996486,
+        "datasets": [
+          "tri-136",
+          "tri-1088",
+          "tri-17k"
+        ],
+        "projection_trigger_n_atoms": 17000,
+        "residuals": [
+          {
+            "dataset": "tri-136",
+            "n_atoms": 136,
+            "observed_median_ms": 1.8008404995271121,
+            "fitted_median_ms": 1.3786850736154097,
+            "residual_ms": 0.4221554259117024,
+            "residual_percent": 23.442133049681935
+          },
+          {
+            "dataset": "tri-1088",
+            "n_atoms": 1088,
+            "observed_median_ms": 28.23357199849852,
+            "fitted_median_ms": 45.1371685149959,
+            "residual_ms": -16.90359651649738,
+            "residual_percent": -59.8705559374362
+          },
+          {
+            "dataset": "tri-17k",
+            "n_atoms": 17000,
+            "observed_median_ms": 5560.389488498913,
+            "fitted_median_ms": 4543.043589771521,
+            "residual_ms": 1017.3458987273925,
+            "residual_percent": 18.29630641579455
+          }
+        ]
+      }
+    },
+    "projections": {
+      "tri-46k/cutoff": {
+        "fit_key": "triclinic/cutoff",
+        "n_atoms": 46648,
+        "projection_trigger_n_atoms": 17000,
+        "projected_sample_ms": 26351.439137579666,
+        "projected_calls": 13,
+        "projected_campaign_hours": 0.09515797466348214,
+        "fit_datasets": [
+          "tri-136",
+          "tri-1088",
+          "tri-17k"
+        ],
+        "fit": {
+          "slope_alpha": 1.7678069510312044,
+          "intercept_logC": -8.825327749063021,
+          "r2": 0.9600065057067757,
+          "rmse_ms": 497.1220492717722
+        }
+      },
+      "tri-46k/knn": {
+        "fit_key": "triclinic/knn",
+        "n_atoms": 46648,
+        "projection_trigger_n_atoms": 17000,
+        "projected_sample_ms": 24705.984073062937,
+        "projected_calls": 13,
+        "projected_campaign_hours": 0.08921605359717172,
+        "fit_datasets": [
+          "tri-136",
+          "tri-1088",
+          "tri-17k"
+        ],
+        "fit": {
+          "slope_alpha": 1.6776503561371394,
+          "intercept_logC": -7.920587018916624,
+          "r2": 0.9495013607711823,
+          "rmse_ms": 587.4460506996486
+        }
+      }
+    }
+  },
+  "datasets": {
+    "orth-4k": {
+      "source": "input/traj/mW_cubic.lammpstrj@1",
+      "replication": {
+        "nx": 1,
+        "ny": 1,
+        "nz": 1
+      },
+      "n_atoms": 4096,
+      "triclinic": false,
+      "count_semantics": {
+        "cutoff_directed_edges": "unique directed pairs inside the cutoff, one minimum image each",
+        "knn_directed_edges": "directed edges of the mutual k-nearest graph"
+      },
+      "cutoff_stage": {
+        "dseams_omp1": {
+          "first_call_ms": 1.428249,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            1.536874,
+            1.462083,
+            1.47121,
+            1.467392,
+            1.473099,
+            1.460034,
+            1.486615,
+            1.480361,
+            1.473983,
+            1.478496,
+            1.469604,
+            1.503209
+          ],
+          "count": 16384,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=fbdfd1f38ece4f4024924378ce598514b4866be4 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_neigh_only --traj input/traj/mW_cubic.lammpstrj --frame 1 --type 1 --reps 1 --warmup 0 --cutoff 3.50000000 --k 4 --k-cand 5.36000000 --nx 1 --ny 1 --nz 1 --threads 1",
+          "median_ms": 1.473541,
+          "q1_ms": 1.4690509999999999,
+          "q3_ms": 1.4819244999999999,
+          "iqr_ms": 0.012873499999999982
+        },
+        "freud_aabb_cutoff": {
+          "first_call_ms": 3.8129920003484585,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            3.7012030006735586,
+            3.7209849997452693,
+            3.77916900015407,
+            3.711364999617217,
+            3.690389000439609,
+            3.704853999806801,
+            3.7458970000443514,
+            3.705843999341596,
+            3.777313000682625,
+            3.853090999655251,
+            3.8215320000745123,
+            3.7551920004261774
+          ],
+          "count": 16384,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-4k.npz --tool freud_aabb_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 3.7334409998948104,
+          "q1_ms": 3.705596499457897,
+          "q3_ms": 3.7777770005504863,
+          "iqr_ms": 0.07218050109258911
+        },
+        "freud_linkcell_cutoff": {
+          "first_call_ms": 274.8756430000867,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            270.80857700002525,
+            267.30835499984096,
+            271.7927880003117,
+            265.66034899951774,
+            270.41411599930143,
+            271.2586650004596,
+            273.0535359996793,
+            265.3354690000924,
+            264.6291569999448,
+            274.8536740000418,
+            276.73275000051945,
+            271.87758299987763
+          ],
+          "count": 16384,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-4k.npz --tool freud_linkcell_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 271.0336210002424,
+          "q1_ms": 266.89635349976015,
+          "q3_ms": 272.17157124982805,
+          "iqr_ms": 5.275217750067895
+        },
+        "ovito_cutoff": {
+          "first_call_ms": 9.899885999402613,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            9.879492999971262,
+            9.849759000644553,
+            9.878079000372963,
+            9.888612999930046,
+            9.955032000107167,
+            9.835881000071822,
+            9.907528999974602,
+            9.885501999633561,
+            9.924883999701706,
+            10.152118999940285,
+            9.982784999920113,
+            10.015939999902912
+          ],
+          "count": 16384,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-4k.npz --tool ovito_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 9.898070999952324,
+          "q1_ms": 9.879139500071688,
+          "q3_ms": 9.961970250060403,
+          "iqr_ms": 0.08283074998871598
+        },
+        "scipy_ckdtree_cutoff": {
+          "first_call_ms": 4.940460999932839,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            4.955094999786525,
+            4.997848000130034,
+            4.9629610002739355,
+            4.90938599978108,
+            4.934613999466819,
+            4.97497500055033,
+            4.914658999950916,
+            4.954793999786489,
+            4.9985840005319915,
+            4.913448000479548,
+            5.03545099945768,
+            4.967048999787949
+          ],
+          "count": 16384,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-4k.npz --tool scipy_ckdtree_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 4.95902800003023,
+          "q1_ms": 4.929625249587843,
+          "q3_ms": 4.980693250445256,
+          "iqr_ms": 0.0510680008574127
+        }
+      },
+      "knn_stage": {
+        "dseams_omp1": {
+          "first_call_ms": 1.952434,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            1.792637,
+            1.789905,
+            1.794061,
+            1.787011,
+            1.809128,
+            1.80177,
+            1.792987,
+            1.783283,
+            1.834436,
+            1.840639,
+            1.901686,
+            1.820874
+          ],
+          "count": 16384,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=fbdfd1f38ece4f4024924378ce598514b4866be4 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_neigh_only --traj input/traj/mW_cubic.lammpstrj --frame 1 --type 1 --reps 1 --warmup 0 --cutoff 3.50000000 --k 4 --k-cand 5.36000000 --nx 1 --ny 1 --nz 1 --threads 1",
+          "path_samples": [
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest"
+          ],
+          "path_first": "k-nearest",
+          "median_ms": 1.7979155,
+          "q1_ms": 1.791954,
+          "q3_ms": 1.8242645000000002,
+          "iqr_ms": 0.03231050000000013,
+          "path_counts": {
+            "k-nearest": 12
+          }
+        },
+        "freud_aabb_knn": {
+          "first_call_ms": 9.786039999198692,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            9.62947600055486,
+            9.604576000128873,
+            9.69217599958938,
+            9.95204399987415,
+            9.802063999813981,
+            9.616169999389967,
+            9.828893999838328,
+            9.758817999681924,
+            9.79371099947457,
+            9.881899999527377,
+            9.704138999950374,
+            9.670336000453972
+          ],
+          "count": 16384,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-4k.npz --tool freud_aabb_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 9.731478499816149,
+          "q1_ms": 9.660121000479194,
+          "q3_ms": 9.808771499820068,
+          "iqr_ms": 0.14865049934087438
+        },
+        "freud_linkcell_knn": {
+          "first_call_ms": 302.4756750000961,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            298.9057289996708,
+            305.141396000181,
+            299.51644799984933,
+            299.39592700065987,
+            301.908882999669,
+            303.96544499944866,
+            303.0947739998737,
+            303.1529670006421,
+            302.1209979997366,
+            303.4015120001641,
+            307.4119670000073,
+            299.4789669992315
+          ],
+          "count": 16384,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-4k.npz --tool freud_linkcell_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 302.60788599980515,
+          "q1_ms": 299.5070777496949,
+          "q3_ms": 303.5424952499852,
+          "iqr_ms": 4.03541750029035
+        },
+        "ovito_knn": {
+          "first_call_ms": 10.37057299981825,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            10.1615519997722,
+            10.2354849996118,
+            10.230505000436096,
+            10.200310000072932,
+            10.479400999429345,
+            10.353687000133505,
+            10.5112810006176,
+            10.355450000133715,
+            10.348551999413758,
+            10.537236000345729,
+            10.532271000556648,
+            10.38534500003152
+          ],
+          "count": 16384,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-4k.npz --tool ovito_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 10.35456850013361,
+          "q1_ms": 10.234239999817873,
+          "q3_ms": 10.487370999726409,
+          "iqr_ms": 0.25313099990853516
+        },
+        "scipy_ckdtree_knn": {
+          "first_call_ms": 12.585231999764801,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            12.653631999455683,
+            12.569356000312837,
+            12.601670000549348,
+            12.53160200030834,
+            12.688385000728886,
+            12.778116999470512,
+            12.623466000150074,
+            12.637265999728697,
+            12.680648999776167,
+            12.650110999857134,
+            12.717990000055579,
+            12.585516999934043
+          ],
+          "count": 16384,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-4k.npz --tool scipy_ckdtree_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 12.643688499792916,
+          "q1_ms": 12.597631750395522,
+          "q3_ms": 12.682583000014347,
+          "iqr_ms": 0.08495124961882539
+        }
+      },
+      "knn_count_explanation": {
+        "definition": "directed edges of the mutual k-nearest graph",
+        "dseams_mutual_directed_edges": 16384,
+        "freud_mutual_directed_edges": 16384
+      }
+    },
+    "orth-32k": {
+      "source": "input/traj/mW_cubic.lammpstrj@1 rep=2x2x2",
+      "replication": {
+        "nx": 2,
+        "ny": 2,
+        "nz": 2
+      },
+      "n_atoms": 32768,
+      "triclinic": false,
+      "count_semantics": {
+        "cutoff_directed_edges": "unique directed pairs inside the cutoff, one minimum image each",
+        "knn_directed_edges": "directed edges of the mutual k-nearest graph"
+      },
+      "cutoff_stage": {
+        "dseams_omp1": {
+          "first_call_ms": 9.61286,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            9.917875,
+            9.892453,
+            9.923747,
+            9.862594,
+            9.847154,
+            9.964006,
+            9.946899,
+            9.901477,
+            9.837304,
+            9.824699,
+            9.833098,
+            9.983018
+          ],
+          "count": 131072,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=fbdfd1f38ece4f4024924378ce598514b4866be4 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_neigh_only --traj input/traj/mW_cubic.lammpstrj --frame 1 --type 1 --reps 1 --warmup 0 --cutoff 3.50000000 --k 4 --k-cand 5.36000000 --nx 2 --ny 2 --nz 2 --threads 1",
+          "median_ms": 9.896965,
+          "q1_ms": 9.8446915,
+          "q3_ms": 9.929535000000001,
+          "iqr_ms": 0.08484350000000163
+        },
+        "freud_aabb_cutoff": {
+          "first_call_ms": 32.957389000330295,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            33.182793999912974,
+            32.8951319997941,
+            32.614605000162555,
+            32.08469600031094,
+            33.006002000547596,
+            32.499995999387465,
+            32.14841000044544,
+            32.571947000178625,
+            32.394145000580465,
+            32.13689600033831,
+            31.71378699971683,
+            33.16106000056607
+          ],
+          "count": 131072,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-32k.npz --tool freud_aabb_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 32.535971499783045,
+          "q1_ms": 32.145531500418656,
+          "q3_ms": 32.922849499982476,
+          "iqr_ms": 0.7773179995638202
+        },
+        "freud_linkcell_cutoff": {
+          "first_call_ms": 19605.44929200023,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            19760.97758100059,
+            19539.073988999917,
+            19401.56229999957,
+            19848.190214999704,
+            19458.948847999636,
+            19381.9378649996,
+            19424.178117000338,
+            19506.78955300009,
+            19516.979912999886,
+            19499.20467099946,
+            19531.23744200002,
+            19797.65282199969
+          ],
+          "count": 131072,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-32k.npz --tool freud_linkcell_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 19511.884732999988,
+          "q1_ms": 19450.25616524981,
+          "q3_ms": 19594.549887000085,
+          "iqr_ms": 144.2937217502731
+        },
+        "ovito_cutoff": {
+          "first_call_ms": 90.02396300002147,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            90.48346200052038,
+            89.46680899953208,
+            90.04766599991854,
+            88.46083500066015,
+            89.18792799977382,
+            89.71358800044982,
+            89.44098399933864,
+            89.71919799932948,
+            88.88940999986517,
+            89.40529800020158,
+            104.41249100040295,
+            90.02511000016966
+          ],
+          "count": 131072,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-32k.npz --tool ovito_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 89.59019849999095,
+          "q1_ms": 89.35095550009464,
+          "q3_ms": 90.03074900010688,
+          "iqr_ms": 0.6797935000122379
+        },
+        "scipy_ckdtree_cutoff": {
+          "first_call_ms": 38.64497700033098,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            38.74722799992014,
+            38.55941599977086,
+            38.29476299961243,
+            38.389806999475695,
+            38.55574599947431,
+            38.59636800007138,
+            38.75469099966722,
+            38.75798099943495,
+            38.52358299991465,
+            38.39627300021675,
+            38.651016000585514,
+            38.729822000277636
+          ],
+          "count": 131072,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-32k.npz --tool scipy_ckdtree_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 38.57789199992112,
+          "q1_ms": 38.49175549999018,
+          "q3_ms": 38.73417350018826,
+          "iqr_ms": 0.2424180001980858
+        }
+      },
+      "knn_stage": {
+        "dseams_omp1": {
+          "first_call_ms": 14.41036,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            14.916187,
+            14.618059,
+            14.350129,
+            14.473585,
+            14.519208,
+            14.56226,
+            14.487403,
+            14.814667,
+            14.77887,
+            14.710507,
+            15.064495,
+            14.592557
+          ],
+          "count": 131072,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=fbdfd1f38ece4f4024924378ce598514b4866be4 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_neigh_only --traj input/traj/mW_cubic.lammpstrj --frame 1 --type 1 --reps 1 --warmup 0 --cutoff 3.50000000 --k 4 --k-cand 5.36000000 --nx 2 --ny 2 --nz 2 --threads 1",
+          "path_samples": [
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest"
+          ],
+          "path_first": "k-nearest",
+          "median_ms": 14.605308,
+          "q1_ms": 14.511256750000001,
+          "q3_ms": 14.78781925,
+          "iqr_ms": 0.27656249999999893,
+          "path_counts": {
+            "k-nearest": 12
+          }
+        },
+        "freud_aabb_knn": {
+          "first_call_ms": 81.5387960001317,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            81.10938300069392,
+            80.12806500028091,
+            79.45441199990455,
+            79.52847999968071,
+            79.39802999953827,
+            80.00524400085851,
+            80.47049199922185,
+            82.58850899983372,
+            82.47199699962948,
+            81.7699299996093,
+            83.17199500015704,
+            81.27669099940249
+          ],
+          "count": 131072,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-32k.npz --tool freud_aabb_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 80.78993749995789,
+          "q1_ms": 79.88605300056406,
+          "q3_ms": 81.94544674961435,
+          "iqr_ms": 2.0593937490502867
+        },
+        "freud_linkcell_knn": {
+          "first_call_ms": 20644.70265700038,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            20496.22916000044,
+            20377.60964300014,
+            20360.493567999583,
+            20457.84765299959,
+            20395.227222999893,
+            20416.19868199996,
+            20466.576595000333,
+            20623.69719599974,
+            20858.727695000198,
+            20540.109667999786,
+            20636.535657000422,
+            20502.764244999526
+          ],
+          "count": 131072,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-32k.npz --tool freud_linkcell_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 20481.402877500386,
+          "q1_ms": 20410.955817249942,
+          "q3_ms": 20561.006549999773,
+          "iqr_ms": 150.0507327498308
+        },
+        "ovito_knn": {
+          "first_call_ms": 88.43633499964199,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            85.53512500020588,
+            85.00596299927565,
+            84.69366300050751,
+            84.81384300011996,
+            84.84196299923497,
+            84.54792400061706,
+            84.56480899985763,
+            87.21738399981405,
+            87.62769599979947,
+            87.27279100003216,
+            86.04498800013971,
+            85.85016500001075
+          ],
+          "count": 131072,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-32k.npz --tool ovito_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 85.27054399974077,
+          "q1_ms": 84.78379800021685,
+          "q3_ms": 86.3380870000583,
+          "iqr_ms": 1.5542889998414466
+        },
+        "scipy_ckdtree_knn": {
+          "first_call_ms": 105.4226699998253,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            101.6951080000581,
+            102.32429499956197,
+            101.48822300016036,
+            101.5426630001457,
+            102.53148400079226,
+            102.37470900028711,
+            101.99319799994555,
+            105.56910000013886,
+            105.99203200035845,
+            104.53940899969894,
+            103.7524929997744,
+            103.47632399953
+          ],
+          "count": 131072,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-32k.npz --tool scipy_ckdtree_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 102.45309650053969,
+          "q1_ms": 101.91867549997369,
+          "q3_ms": 103.94922199975554,
+          "iqr_ms": 2.030546499781849
+        }
+      },
+      "knn_count_explanation": {
+        "definition": "directed edges of the mutual k-nearest graph",
+        "dseams_mutual_directed_edges": 131072,
+        "freud_mutual_directed_edges": 131072
+      }
+    },
+    "orth-1e5": {
+      "source": "input/traj/mW_cubic.lammpstrj@1 rep=3x3x3",
+      "replication": {
+        "nx": 3,
+        "ny": 3,
+        "nz": 3
+      },
+      "n_atoms": 110592,
+      "triclinic": false,
+      "count_semantics": {
+        "cutoff_directed_edges": "unique directed pairs inside the cutoff, one minimum image each",
+        "knn_directed_edges": "directed edges of the mutual k-nearest graph"
+      },
+      "cutoff_stage": {
+        "dseams_omp1": {
+          "first_call_ms": 29.378364,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            30.981494,
+            30.868986,
+            31.022946,
+            31.008982,
+            30.945696,
+            30.422138,
+            30.292209,
+            30.099793,
+            30.397589,
+            37.12741,
+            32.32235,
+            36.06408
+          ],
+          "count": 442368,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=fbdfd1f38ece4f4024924378ce598514b4866be4 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_neigh_only --traj input/traj/mW_cubic.lammpstrj --frame 1 --type 1 --reps 1 --warmup 0 --cutoff 3.50000000 --k 4 --k-cand 5.36000000 --nx 3 --ny 3 --nz 3 --threads 1",
+          "median_ms": 30.963595,
+          "q1_ms": 30.41600075,
+          "q3_ms": 31.347797,
+          "iqr_ms": 0.9317962500000014
+        },
+        "freud_aabb_cutoff": {
+          "first_call_ms": 123.17293800060725,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            125.68741099948966,
+            123.9224569999351,
+            124.98825500006205,
+            138.50991700019222,
+            124.71824299973377,
+            121.99496000084764,
+            123.0771629998344,
+            122.36487100017257,
+            121.89908700020169,
+            152.870678999534,
+            129.01224800043565,
+            143.8438640016102
+          ],
+          "count": 442368,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-1e5.npz --tool freud_aabb_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 124.85324899989791,
+          "q1_ms": 122.89908999991894,
+          "q3_ms": 131.3866652503748,
+          "iqr_ms": 8.487575250455848
+        },
+        "freud_linkcell_cutoff": {
+          "first_call_ms": 244885.34118300048,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            248896.55292299995,
+            246577.8868439993,
+            248075.63217700046,
+            249218.1984939998,
+            242478.13797900017,
+            241311.9687110002,
+            241084.854103,
+            244583.8286320013,
+            282740.65063300077,
+            267028.62698099855,
+            255549.1546230005,
+            258946.50301799993
+          ],
+          "count": 442368,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-1e5.npz --tool freud_linkcell_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 248486.0925500002,
+          "q1_ms": 244057.405968751,
+          "q3_ms": 256398.49172175035,
+          "iqr_ms": 12341.085752999352
+        },
+        "ovito_cutoff": {
+          "first_call_ms": 333.10387100027583,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            355.29992600004334,
+            333.0706240003565,
+            337.7321170000869,
+            327.91009199991095,
+            324.0419589992598,
+            327.80888799970853,
+            325.6293890008237,
+            320.74015800026245,
+            321.0101940003369,
+            357.7139270000771,
+            365.73840900018695,
+            363.8803079993522
+          ],
+          "count": 442368,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-1e5.npz --tool ovito_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 330.4903580001337,
+          "q1_ms": 325.23253150043274,
+          "q3_ms": 355.9034262500518,
+          "iqr_ms": 30.670894749619038
+        },
+        "scipy_ckdtree_cutoff": {
+          "first_call_ms": 130.20375599990075,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            134.39273099993443,
+            129.97408299997915,
+            129.89872699927218,
+            130.4680040002495,
+            129.88213200060272,
+            128.93717599945376,
+            128.62657599907834,
+            128.14855100077693,
+            128.77649599977303,
+            152.84337200137088,
+            142.42155800093315,
+            137.0937439987756
+          ],
+          "count": 442368,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-1e5.npz --tool scipy_ckdtree_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 129.93640499962567,
+          "q1_ms": 128.89700599953358,
+          "q3_ms": 135.06798424964472,
+          "iqr_ms": 6.170978250111148
+        }
+      },
+      "knn_stage": {
+        "dseams_omp1": {
+          "first_call_ms": 51.673405,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            64.961225,
+            51.88167,
+            52.942656,
+            50.363835,
+            49.308628,
+            48.715608,
+            53.278404,
+            47.714977,
+            46.917503,
+            48.229825,
+            47.061751,
+            47.378048
+          ],
+          "count": 442368,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=fbdfd1f38ece4f4024924378ce598514b4866be4 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_neigh_only --traj input/traj/mW_cubic.lammpstrj --frame 1 --type 1 --reps 1 --warmup 0 --cutoff 3.50000000 --k 4 --k-cand 5.36000000 --nx 3 --ny 3 --nz 3 --threads 1",
+          "path_samples": [
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest"
+          ],
+          "path_first": "k-nearest",
+          "median_ms": 49.012118,
+          "q1_ms": 47.63074475,
+          "q3_ms": 52.1469165,
+          "iqr_ms": 4.516171750000005,
+          "path_counts": {
+            "k-nearest": 12
+          }
+        },
+        "freud_aabb_knn": {
+          "first_call_ms": 362.34754999895813,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            620.6907690011576,
+            371.539579000455,
+            349.5424649991037,
+            348.63993899853085,
+            340.4971519994433,
+            336.43355700041866,
+            328.4301130006497,
+            328.994938001415,
+            317.12139599949296,
+            327.581741999893,
+            339.51773700027843,
+            325.53721600015706
+          ],
+          "count": 442368,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-1e5.npz --tool freud_aabb_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 337.97564700034854,
+          "q1_ms": 328.21802025046054,
+          "q3_ms": 348.86557049867406,
+          "iqr_ms": 20.64755024821352
+        },
+        "freud_linkcell_knn": {
+          "first_call_ms": 300468.4616499999,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            297373.841867,
+            283610.04448099993,
+            267490.1408559999,
+            272682.3662580009,
+            267052.8249899999,
+            255702.37494899993,
+            258112.7137399999,
+            260117.62641099995,
+            261168.33597000004,
+            257061.21156399968,
+            255411.5867649998,
+            254675.07288699926
+          ],
+          "count": 442368,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-1e5.npz --tool freud_linkcell_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 260642.9811905,
+          "q1_ms": 256721.50241024976,
+          "q3_ms": 268788.19720650016,
+          "iqr_ms": 12066.694796250405
+        },
+        "ovito_knn": {
+          "first_call_ms": 377.1046749989182,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            354.62818199994217,
+            319.1453300005378,
+            328.52077999996254,
+            323.6605519996374,
+            309.6462670000619,
+            309.60680300086096,
+            315.71431799966376,
+            309.7646440000972,
+            305.58233100055077,
+            303.9619199989829,
+            305.0091559998691,
+            301.94137599937676
+          ],
+          "count": 442368,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-1e5.npz --tool ovito_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 309.70545550007955,
+          "q1_ms": 305.43903725038035,
+          "q3_ms": 320.2741355003127,
+          "iqr_ms": 14.835098249932344
+        },
+        "scipy_ckdtree_knn": {
+          "first_call_ms": 464.16089500053204,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            424.12922000039543,
+            382.1317280016956,
+            384.5844269999361,
+            381.8841430002067,
+            369.7783999996318,
+            364.8219030001201,
+            403.15842000018165,
+            366.1223829985829,
+            362.0976790007262,
+            373.324133001006,
+            360.3646530009428,
+            358.52925700055494
+          ],
+          "count": 442368,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/orth-1e5.npz --tool scipy_ckdtree_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 371.5512665003189,
+          "q1_ms": 364.1408470002716,
+          "q3_ms": 382.7449027512557,
+          "iqr_ms": 18.604055750984116
+        }
+      },
+      "knn_count_explanation": {
+        "definition": "directed edges of the mutual k-nearest graph",
+        "dseams_mutual_directed_edges": 442368,
+        "freud_mutual_directed_edges": 442368
+      }
+    },
+    "tri-136": {
+      "source": "input/traj/genice_sH.lammpstrj@1",
+      "replication": {
+        "nx": 1,
+        "ny": 1,
+        "nz": 1
+      },
+      "n_atoms": 136,
+      "triclinic": true,
+      "count_semantics": {
+        "cutoff_directed_edges": "unique directed pairs inside the cutoff, one minimum image each",
+        "knn_directed_edges": "directed edges of the mutual k-nearest graph"
+      },
+      "cutoff_stage": {
+        "dseams_omp1": {
+          "first_call_ms": 0.256545,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            0.046452,
+            0.072866,
+            0.048804,
+            0.051293,
+            0.050233,
+            0.051044,
+            0.044833,
+            0.047396,
+            0.049933,
+            0.050402,
+            0.052456,
+            0.051373
+          ],
+          "count": 544,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=fbdfd1f38ece4f4024924378ce598514b4866be4 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_neigh_only --traj input/traj/genice_sH.lammpstrj --frame 1 --type 1 --reps 1 --warmup 0 --cutoff 3.50000000 --k 4 --k-cand 5.36000000 --nx 1 --ny 1 --nz 1 --threads 1",
+          "median_ms": 0.0503175,
+          "q1_ms": 0.048451999999999995,
+          "q3_ms": 0.051313,
+          "iqr_ms": 0.0028610000000000024
+        },
+        "freud_aabb_cutoff": {
+          "first_call_ms": 0.219608000406879,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            0.2220940004917793,
+            0.25060500047402456,
+            0.2303300007042708,
+            0.25265499971283134,
+            0.21623300017381553,
+            0.2208540008723503,
+            0.2181170002586441,
+            0.22190200070326682,
+            0.2133269990736153,
+            0.22996400002739392,
+            0.2277590010635322,
+            0.22138399981486145
+          ],
+          "count": 544,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-136.npz --tool freud_aabb_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 0.22199800059752306,
+          "q1_ms": 0.22016975071892375,
+          "q3_ms": 0.23005550019661314,
+          "iqr_ms": 0.009885749477689387
+        },
+        "freud_linkcell_cutoff": {
+          "first_call_ms": 1.1711789993569255,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            1.2641480007005157,
+            1.1076450009568362,
+            1.1086270005762344,
+            1.0831399995367974,
+            1.0937120005110046,
+            1.0620819994073827,
+            1.1030829991796054,
+            1.102600999729475,
+            1.0953080000035698,
+            1.0487999988981755,
+            1.070607999281492,
+            1.203320998683921
+          ],
+          "count": 544,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-136.npz --tool freud_linkcell_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 1.0989544998665224,
+          "q1_ms": 1.080006999472971,
+          "q3_ms": 1.1078905008616857,
+          "iqr_ms": 0.02788350138871465
+        },
+        "ovito_cutoff": {
+          "first_call_ms": 0.8145310002873885,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            0.8025480001379037,
+            0.8182410001609242,
+            0.7910849999461789,
+            0.8099290007521631,
+            0.8224399989558151,
+            0.821546000224771,
+            0.802537999334163,
+            0.8211960011976771,
+            0.848924999445444,
+            0.8217630002036458,
+            0.8334230005857535,
+            0.8260150007117772
+          ],
+          "count": 544,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-136.npz --tool ovito_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 0.821371000711224,
+          "q1_ms": 0.8080837505985983,
+          "q3_ms": 0.8233337493948056,
+          "iqr_ms": 0.015249998796207365
+        },
+        "unsupported": {
+          "scipy_ckdtree_cutoff": "triclinic periodic cutoff unsupported in scipy cKDTree boxsize; fractional workaround undercounts tri-skew-512"
+        }
+      },
+      "knn_stage": {
+        "dseams_omp1": {
+          "first_call_ms": 0.184761,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            0.164063,
+            0.152407,
+            0.156713,
+            0.152105,
+            0.150184,
+            0.15077,
+            0.151945,
+            0.15099,
+            0.154456,
+            0.150011,
+            0.148197,
+            0.15394
+          ],
+          "count": 544,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=fbdfd1f38ece4f4024924378ce598514b4866be4 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_neigh_only --traj input/traj/genice_sH.lammpstrj --frame 1 --type 1 --reps 1 --warmup 0 --cutoff 3.50000000 --k 4 --k-cand 5.36000000 --nx 1 --ny 1 --nz 1 --threads 1",
+          "path_samples": [
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest"
+          ],
+          "path_first": "k-nearest",
+          "median_ms": 0.152025,
+          "q1_ms": 0.1506235,
+          "q3_ms": 0.154069,
+          "iqr_ms": 0.003445500000000018,
+          "path_counts": {
+            "k-nearest": 12
+          }
+        },
+        "freud_aabb_knn": {
+          "first_call_ms": 0.4272170008334797,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            0.52115899961791,
+            0.4423610007506795,
+            0.4394269999465905,
+            0.43701499998860527,
+            0.44527099998958874,
+            0.4205550012557069,
+            0.4157879993726965,
+            0.48524299927521497,
+            0.4172219996689819,
+            0.4253490005794447,
+            0.42982599916285835,
+            0.42526499964878894
+          ],
+          "count": 544,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-136.npz --tool freud_aabb_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 0.4334204995757318,
+          "q1_ms": 0.42408750005051843,
+          "q3_ms": 0.44308850056040683,
+          "iqr_ms": 0.0190010005098884
+        },
+        "freud_linkcell_knn": {
+          "first_call_ms": 1.7920379996212432,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            1.8811200006894069,
+            1.7933300005097408,
+            1.8029769998975098,
+            1.7789749999792548,
+            1.7691399989416823,
+            1.7987039991567144,
+            1.8699579995882232,
+            1.7893479998747353,
+            1.8125870010408107,
+            1.865060001364327,
+            1.9509989997459343,
+            1.7663590006122831
+          ],
+          "count": 544,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-136.npz --tool freud_linkcell_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 1.8008404995271121,
+          "q1_ms": 1.7867547499008651,
+          "q3_ms": 1.866284500920301,
+          "iqr_ms": 0.07952975101943593
+        },
+        "ovito_knn": {
+          "first_call_ms": 0.570100999539136,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            0.5645159999403404,
+            0.5630329997075023,
+            0.5666580000251997,
+            0.5790590003016405,
+            0.5806270000903169,
+            0.5633100008708425,
+            0.56140500055335,
+            0.561972001378308,
+            0.56878599934862,
+            0.5750050004280638,
+            0.5596730006800499,
+            0.5765990008512745
+          ],
+          "count": 544,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-136.npz --tool ovito_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 0.5655869999827701,
+          "q1_ms": 0.5627677501252037,
+          "q3_ms": 0.5754035005338665,
+          "iqr_ms": 0.012635750408662716
+        },
+        "unsupported": {
+          "scipy_ckdtree_knn": "triclinic exact kNN with scipy cKDTree boxsize"
+        }
+      },
+      "knn_count_explanation": {
+        "definition": "directed edges of the mutual k-nearest graph",
+        "dseams_mutual_directed_edges": 544,
+        "freud_mutual_directed_edges": 544
+      },
+      "ckdtree_cutoff_set_equality": {
+        "asserted": true,
+        "equal": true,
+        "edge_count_directed": 544,
+        "dseams_only_edges": 0,
+        "scipy_only_edges": 0,
+        "dseams_dump_command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=fbdfd1f38ece4f4024924378ce598514b4866be4 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_neigh_only --traj input/traj/genice_sH.lammpstrj --frame 1 --type 1 --reps 1 --warmup 0 --cutoff 3.50000000 --k 4 --k-cand 5.36000000 --nx 1 --ny 1 --nz 1 --threads 1 --dump-cutoff-edges input/tri-136-dseams-cutoff-edges.txt"
+      },
+      "ovito_cutoff_edge_accounting": {
+        "directed_edges": 544,
+        "unique_directed_edges": 544,
+        "duplicate_image_edges": 0
+      }
+    },
+    "tri-1088": {
+      "source": "input/traj/genice_sH.lammpstrj@1 rep=2x2x2",
+      "replication": {
+        "nx": 2,
+        "ny": 2,
+        "nz": 2
+      },
+      "n_atoms": 1088,
+      "triclinic": true,
+      "count_semantics": {
+        "cutoff_directed_edges": "unique directed pairs inside the cutoff, one minimum image each",
+        "knn_directed_edges": "directed edges of the mutual k-nearest graph"
+      },
+      "cutoff_stage": {
+        "dseams_omp1": {
+          "first_call_ms": 0.523161,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            0.225395,
+            0.231164,
+            0.215485,
+            0.216913,
+            0.222825,
+            0.223654,
+            0.260759,
+            0.231562,
+            0.249466,
+            0.243907,
+            0.21887,
+            0.233212
+          ],
+          "count": 4352,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=fbdfd1f38ece4f4024924378ce598514b4866be4 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_neigh_only --traj input/traj/genice_sH.lammpstrj --frame 1 --type 1 --reps 1 --warmup 0 --cutoff 3.50000000 --k 4 --k-cand 5.36000000 --nx 2 --ny 2 --nz 2 --threads 1",
+          "median_ms": 0.22827950000000002,
+          "q1_ms": 0.22183624999999998,
+          "q3_ms": 0.23588575,
+          "iqr_ms": 0.01404950000000002
+        },
+        "freud_aabb_cutoff": {
+          "first_call_ms": 1.2417310008459026,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            1.1889099987456575,
+            1.1655889993562596,
+            1.1859299993375316,
+            1.152606999312411,
+            1.1604290011746343,
+            1.2042759990436025,
+            1.229767000040738,
+            1.2164250001660548,
+            1.144748001024709,
+            1.1608539989538258,
+            1.1608759996306617,
+            1.1827720009023324
+          ],
+          "count": 4352,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-1088.npz --tool freud_aabb_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 1.174180500129296,
+          "q1_ms": 1.160747749509028,
+          "q3_ms": 1.1927514988201438,
+          "iqr_ms": 0.032003749311115826
+        },
+        "freud_linkcell_cutoff": {
+          "first_call_ms": 22.814060001110192,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            22.61544000066351,
+            22.48173400039377,
+            22.992988999249064,
+            22.799342999860528,
+            22.74754700010817,
+            22.527057999468525,
+            22.769903000153136,
+            22.704044000420254,
+            22.700732999510365,
+            22.77235699875746,
+            22.601462000238826,
+            22.47360199908144
+          ],
+          "count": 4352,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-1088.npz --tool freud_linkcell_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 22.70238849996531,
+          "q1_ms": 22.58286100004625,
+          "q3_ms": 22.770516499804216,
+          "iqr_ms": 0.18765549975796603
+        },
+        "ovito_cutoff": {
+          "first_call_ms": 3.175941001245519,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            3.133829000944388,
+            3.2477999993716367,
+            3.3139939987449907,
+            3.367822999280179,
+            3.3204760002263356,
+            3.1543269997200696,
+            3.2225929990090663,
+            3.1272070009435993,
+            3.167787999700522,
+            3.1788550004421268,
+            3.124974999082042,
+            3.097093998803757
+          ],
+          "count": 4352,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-1088.npz --tool ovito_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 3.1733215000713244,
+          "q1_ms": 3.132173500944191,
+          "q3_ms": 3.264348499214975,
+          "iqr_ms": 0.13217499827078427
+        },
+        "unsupported": {
+          "scipy_ckdtree_cutoff": "triclinic periodic cutoff unsupported in scipy cKDTree boxsize; fractional workaround undercounts tri-skew-512"
+        }
+      },
+      "knn_stage": {
+        "dseams_omp1": {
+          "first_call_ms": 0.560846,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            0.508069,
+            0.510406,
+            0.503627,
+            0.502819,
+            0.509148,
+            0.495696,
+            0.523674,
+            0.503187,
+            0.509175,
+            0.50267,
+            0.487746,
+            0.482046
+          ],
+          "count": 4352,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=fbdfd1f38ece4f4024924378ce598514b4866be4 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_neigh_only --traj input/traj/genice_sH.lammpstrj --frame 1 --type 1 --reps 1 --warmup 0 --cutoff 3.50000000 --k 4 --k-cand 5.36000000 --nx 2 --ny 2 --nz 2 --threads 1",
+          "path_samples": [
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest"
+          ],
+          "path_first": "k-nearest",
+          "median_ms": 0.503407,
+          "q1_ms": 0.5009264999999999,
+          "q3_ms": 0.50915475,
+          "iqr_ms": 0.008228250000000048,
+          "path_counts": {
+            "k-nearest": 12
+          }
+        },
+        "freud_aabb_knn": {
+          "first_call_ms": 2.9258599988679634,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            2.93619299918646,
+            2.9397190010058694,
+            2.971123998577241,
+            2.9270199993334245,
+            2.978450998853077,
+            2.922573999967426,
+            2.9411719988274854,
+            2.902449999965029,
+            2.9052520003460813,
+            3.05173500055389,
+            2.921305998825119,
+            2.940184000181034
+          ],
+          "count": 4352,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-1088.npz --tool freud_aabb_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 2.9379560000961646,
+          "q1_ms": 2.9222569996818493,
+          "q3_ms": 2.9486599987649242,
+          "iqr_ms": 0.026402999083074974
+        },
+        "freud_linkcell_knn": {
+          "first_call_ms": 28.102360000048066,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            28.136904998973478,
+            27.724386000045342,
+            28.265556000405923,
+            28.286679000302684,
+            28.540879999127355,
+            28.174553999633645,
+            28.59049899961974,
+            28.22859999832872,
+            27.891735999219236,
+            28.258856998945703,
+            28.23854399866832,
+            28.169803001219407
+          ],
+          "count": 4352,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-1088.npz --tool freud_linkcell_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 28.23357199849852,
+          "q1_ms": 28.161578500657924,
+          "q3_ms": 28.270836750380113,
+          "iqr_ms": 0.10925824972218834
+        },
+        "ovito_knn": {
+          "first_call_ms": 3.744956000446109,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            3.5555169997678604,
+            3.5490390000632033,
+            3.5584100005507935,
+            3.5600270002760226,
+            3.592429000491393,
+            3.5944490009569563,
+            3.6130939988652244,
+            3.567186000509537,
+            3.5415660004218807,
+            3.6017679994984064,
+            3.6862550005025696,
+            3.5859319996234262
+          ],
+          "count": 4352,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-1088.npz --tool ovito_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 3.5765590000664815,
+          "q1_ms": 3.55768675035506,
+          "q3_ms": 3.596278750592319,
+          "iqr_ms": 0.03859200023725862
+        },
+        "unsupported": {
+          "scipy_ckdtree_knn": "triclinic exact kNN with scipy cKDTree boxsize"
+        }
+      },
+      "knn_count_explanation": {
+        "definition": "directed edges of the mutual k-nearest graph",
+        "dseams_mutual_directed_edges": 4352,
+        "freud_mutual_directed_edges": 4352
+      }
+    },
+    "tri-17k": {
+      "source": "input/traj/genice_sH.lammpstrj@1 rep=5x5x5",
+      "replication": {
+        "nx": 5,
+        "ny": 5,
+        "nz": 5
+      },
+      "n_atoms": 17000,
+      "triclinic": true,
+      "count_semantics": {
+        "cutoff_directed_edges": "unique directed pairs inside the cutoff, one minimum image each",
+        "knn_directed_edges": "directed edges of the mutual k-nearest graph"
+      },
+      "cutoff_stage": {
+        "dseams_omp1": {
+          "first_call_ms": 5.160874,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            4.029165,
+            4.166384,
+            4.113354,
+            3.992686,
+            4.007186,
+            4.004167,
+            3.971416,
+            3.901433,
+            4.008481,
+            3.920478,
+            3.995268,
+            3.982011
+          ],
+          "count": 68000,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=fbdfd1f38ece4f4024924378ce598514b4866be4 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_neigh_only --traj input/traj/genice_sH.lammpstrj --frame 1 --type 1 --reps 1 --warmup 0 --cutoff 3.50000000 --k 4 --k-cand 5.36000000 --nx 5 --ny 5 --nz 5 --threads 1",
+          "median_ms": 3.9997175,
+          "q1_ms": 3.97936225,
+          "q3_ms": 4.0136519999999996,
+          "iqr_ms": 0.034289749999999675
+        },
+        "freud_aabb_cutoff": {
+          "first_call_ms": 18.34524500009138,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            18.472404999556602,
+            18.234598999697482,
+            18.819290000465116,
+            18.594690998725127,
+            18.119419999493402,
+            18.480140000974643,
+            18.143917999623227,
+            18.393144999208744,
+            18.418457999359816,
+            18.3900519987219,
+            18.29808500042418,
+            18.535477000114042
+          ],
+          "count": 68000,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-17k.npz --tool freud_aabb_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 18.40580149928428,
+          "q1_ms": 18.282213500242506,
+          "q3_ms": 18.493974250759493,
+          "iqr_ms": 0.21176075051698717
+        },
+        "freud_linkcell_cutoff": {
+          "first_call_ms": 5856.119592999676,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            5290.494727998521,
+            5324.592424000002,
+            5344.909002998975,
+            5623.931879999873,
+            5263.655775001098,
+            5279.649082000105,
+            5276.792994000061,
+            5323.634854999909,
+            5245.560178998858,
+            5275.3073510011745,
+            5254.7272329993575,
+            5294.925974001671
+          ],
+          "count": 68000,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-17k.npz --tool freud_linkcell_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 5285.071904999313,
+          "q1_ms": 5272.394457001155,
+          "q3_ms": 5323.8742472499325,
+          "iqr_ms": 51.479790248777135
+        },
+        "ovito_cutoff": {
+          "first_call_ms": 46.01163299957989,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            45.554960999652394,
+            45.580707001136034,
+            45.2502549997007,
+            45.60271899936197,
+            45.52793099901464,
+            45.56340899944189,
+            45.37403299946163,
+            44.91404000145849,
+            45.27768499974627,
+            45.25884300164762,
+            45.05060399969807,
+            44.884928000101354
+          ],
+          "count": 68000,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-17k.npz --tool ovito_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 45.32585899960395,
+          "q1_ms": 45.20034224970004,
+          "q3_ms": 45.55707299959977,
+          "iqr_ms": 0.3567307498997252
+        },
+        "unsupported": {
+          "scipy_ckdtree_cutoff": "triclinic periodic cutoff unsupported in scipy cKDTree boxsize; fractional workaround undercounts tri-skew-512"
+        }
+      },
+      "knn_stage": {
+        "dseams_omp1": {
+          "first_call_ms": 6.468772,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            6.699284,
+            6.575174,
+            6.676672,
+            6.744682,
+            6.635432,
+            6.772725,
+            6.694184,
+            6.641107,
+            6.60349,
+            6.620953,
+            6.656982,
+            6.653568
+          ],
+          "count": 68000,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=fbdfd1f38ece4f4024924378ce598514b4866be4 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_neigh_only --traj input/traj/genice_sH.lammpstrj --frame 1 --type 1 --reps 1 --warmup 0 --cutoff 3.50000000 --k 4 --k-cand 5.36000000 --nx 5 --ny 5 --nz 5 --threads 1",
+          "path_samples": [
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest"
+          ],
+          "path_first": "k-nearest",
+          "median_ms": 6.655275,
+          "q1_ms": 6.631812249999999,
+          "q3_ms": 6.695459,
+          "iqr_ms": 0.0636467500000002,
+          "path_counts": {
+            "k-nearest": 12
+          }
+        },
+        "freud_aabb_knn": {
+          "first_call_ms": 44.535172999530914,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            45.130569000320975,
+            44.8363839986996,
+            45.256697998411255,
+            45.34007999973255,
+            44.852326000182074,
+            44.92627400031779,
+            44.710247000693926,
+            44.88714000035543,
+            44.93051099962031,
+            44.846246999441064,
+            44.81512299935275,
+            44.480092999947374
+          ],
+          "count": 68000,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-17k.npz --tool freud_aabb_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 44.86973300026875,
+          "q1_ms": 44.83106874886289,
+          "q3_ms": 44.980525499795476,
+          "iqr_ms": 0.14945675093258615
+        },
+        "freud_linkcell_knn": {
+          "first_call_ms": 5568.167628000083,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            5574.338243999591,
+            5547.708191999845,
+            5568.578893000449,
+            5539.281077000851,
+            5593.360913000652,
+            5580.309494000176,
+            5551.565036001193,
+            5556.256586998643,
+            5529.823115999534,
+            5564.522389999183,
+            5533.741168999768,
+            5571.169255999848
+          ],
+          "count": 68000,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-17k.npz --tool freud_linkcell_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 5560.389488498913,
+          "q1_ms": 5545.601413250097,
+          "q3_ms": 5571.961502999784,
+          "iqr_ms": 26.360089749687177
+        },
+        "ovito_knn": {
+          "first_call_ms": 54.18964399905235,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            54.25029499929224,
+            53.9561040004628,
+            55.18046599900117,
+            53.922691999105155,
+            53.900491000604234,
+            54.94336399897293,
+            53.18246300157625,
+            53.146440999626066,
+            53.48436599888373,
+            53.51267299920437,
+            53.764004000186105,
+            53.19661900102801
+          ],
+          "count": 68000,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-17k.npz --tool ovito_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 53.83224750039517,
+          "q1_ms": 53.4124292494198,
+          "q3_ms": 54.02965175017016,
+          "iqr_ms": 0.6172225007503584
+        },
+        "unsupported": {
+          "scipy_ckdtree_knn": "triclinic exact kNN with scipy cKDTree boxsize"
+        }
+      },
+      "knn_count_explanation": {
+        "definition": "directed edges of the mutual k-nearest graph",
+        "dseams_mutual_directed_edges": 68000,
+        "freud_mutual_directed_edges": 68000
+      }
+    },
+    "tri-46k": {
+      "source": "input/traj/genice_sH.lammpstrj@1 rep=7x7x7",
+      "replication": {
+        "nx": 7,
+        "ny": 7,
+        "nz": 7
+      },
+      "n_atoms": 46648,
+      "triclinic": true,
+      "count_semantics": {
+        "cutoff_directed_edges": "unique directed pairs inside the cutoff, one minimum image each",
+        "knn_directed_edges": "directed edges of the mutual k-nearest graph"
+      },
+      "cutoff_stage": {
+        "dseams_omp1": {
+          "first_call_ms": 15.446334,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            11.680814,
+            12.523379,
+            12.068562,
+            11.920026,
+            12.711995,
+            12.138823,
+            11.893849,
+            11.642299,
+            11.881159,
+            11.90236,
+            12.433818,
+            12.726469
+          ],
+          "count": 186592,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=fbdfd1f38ece4f4024924378ce598514b4866be4 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_neigh_only --traj input/traj/genice_sH.lammpstrj --frame 1 --type 1 --reps 1 --warmup 0 --cutoff 3.50000000 --k 4 --k-cand 5.36000000 --nx 7 --ny 7 --nz 7 --threads 1",
+          "median_ms": 11.994294,
+          "q1_ms": 11.890676499999998,
+          "q3_ms": 12.45620825,
+          "iqr_ms": 0.5655317500000017
+        },
+        "freud_aabb_cutoff": {
+          "first_call_ms": 49.48564599908423,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            49.66372700073407,
+            48.55694700017921,
+            50.16727600013837,
+            50.56097200031218,
+            50.25355899852002,
+            50.73369800084038,
+            50.227895999341854,
+            49.65492399969662,
+            50.00655799995002,
+            49.91711099864915,
+            52.18148700078018,
+            51.4295309985755
+          ],
+          "count": 186592,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-46k.npz --tool freud_aabb_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 50.19758599974011,
+          "q1_ms": 49.85376499917038,
+          "q3_ms": 50.60415350044423,
+          "iqr_ms": 0.7503885012738465
+        },
+        "ovito_cutoff": {
+          "first_call_ms": 130.3611830007867,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            129.36889400043583,
+            130.35771700015175,
+            132.17109499964863,
+            139.67054999920947,
+            130.88517899996077,
+            130.79362999997102,
+            158.18772000056924,
+            130.83086900041963,
+            130.1768869998341,
+            132.319684000322,
+            138.1952249994356,
+            132.7101879996917
+          ],
+          "count": 186592,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-46k.npz --tool ovito_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 131.5281369998047,
+          "q1_ms": 130.6846517500162,
+          "q3_ms": 134.08144724962767,
+          "iqr_ms": 3.3967954996114713
+        },
+        "unsupported": {
+          "freud_linkcell_cutoff": "not run (projected 26351.439 ms/sample, 0.095 h for 13 calls)",
+          "scipy_ckdtree_cutoff": "triclinic periodic cutoff unsupported in scipy cKDTree boxsize; fractional workaround undercounts tri-skew-512"
+        }
+      },
+      "knn_stage": {
+        "dseams_omp1": {
+          "first_call_ms": 17.135737,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            17.998538,
+            17.957341,
+            18.007483,
+            17.403704,
+            17.787946,
+            17.691292,
+            17.605023,
+            17.866358,
+            17.729857,
+            17.52679,
+            17.804689,
+            17.734832
+          ],
+          "count": 186592,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=fbdfd1f38ece4f4024924378ce598514b4866be4 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_neigh_only --traj input/traj/genice_sH.lammpstrj --frame 1 --type 1 --reps 1 --warmup 0 --cutoff 3.50000000 --k 4 --k-cand 5.36000000 --nx 7 --ny 7 --nz 7 --threads 1",
+          "path_samples": [
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest"
+          ],
+          "path_first": "k-nearest",
+          "median_ms": 17.761389,
+          "q1_ms": 17.66972475,
+          "q3_ms": 17.88910375,
+          "iqr_ms": 0.219379,
+          "path_counts": {
+            "k-nearest": 12
+          }
+        },
+        "freud_aabb_knn": {
+          "first_call_ms": 129.93507900137047,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            130.0791339999705,
+            131.1098910009605,
+            125.96158899941656,
+            127.41427599939925,
+            125.95486800091749,
+            125.75642299998435,
+            129.533507000815,
+            158.7670650005748,
+            127.18786900040868,
+            126.87888099935662,
+            126.18020900117699,
+            127.28274499932013
+          ],
+          "count": 186592,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-46k.npz --tool freud_aabb_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 127.2353069998644,
+          "q1_ms": 126.12555400073688,
+          "q3_ms": 129.66991375060388,
+          "iqr_ms": 3.5443597498669988
+        },
+        "ovito_knn": {
+          "first_call_ms": 155.7107389999146,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            154.61066799980472,
+            155.00816500025394,
+            154.24572700067074,
+            150.9205499987729,
+            152.00280499993823,
+            151.79447300033644,
+            154.30415100126993,
+            154.57932399840502,
+            157.6982679998764,
+            151.84493600099813,
+            151.74069900058385,
+            152.21270999973058
+          ],
+          "count": 186592,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-46k.npz --tool ovito_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 153.22921850020066,
+          "q1_ms": 151.8323202508327,
+          "q3_ms": 154.58715999875494,
+          "iqr_ms": 2.754839747922233
+        },
+        "unsupported": {
+          "freud_linkcell_knn": "not run (projected 24705.984 ms/sample, 0.089 h for 13 calls)",
+          "scipy_ckdtree_knn": "triclinic exact kNN with scipy cKDTree boxsize"
+        }
+      },
+      "knn_count_explanation": {
+        "definition": "directed edges of the mutual k-nearest graph",
+        "dseams_mutual_directed_edges": 186592,
+        "freud_mutual_directed_edges": 186592
+      }
+    },
+    "tri-skew-512": {
+      "source": "input/traj/skew_triclinic_width_lt_cutoff.lammpstrj@1",
+      "replication": {
+        "nx": 1,
+        "ny": 1,
+        "nz": 1
+      },
+      "n_atoms": 512,
+      "triclinic": true,
+      "count_semantics": {
+        "cutoff_directed_edges": "unique directed pairs inside the cutoff, one minimum image each",
+        "knn_directed_edges": "directed edges of the mutual k-nearest graph"
+      },
+      "cutoff_stage": {
+        "dseams_omp1": {
+          "first_call_ms": 1.957017,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            1.215274,
+            1.27701,
+            1.222259,
+            1.206846,
+            1.208962,
+            1.303695,
+            1.204449,
+            1.271576,
+            1.224126,
+            1.289697,
+            1.216775,
+            1.304145
+          ],
+          "count": 25648,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=fbdfd1f38ece4f4024924378ce598514b4866be4 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_neigh_only --traj input/traj/skew_triclinic_width_lt_cutoff.lammpstrj --frame 1 --type 1 --reps 1 --warmup 0 --cutoff 3.50000000 --k 4 --k-cand 5.36000000 --nx 1 --ny 1 --nz 1 --threads 1",
+          "median_ms": 1.2231925000000001,
+          "q1_ms": 1.213696,
+          "q3_ms": 1.2801817500000001,
+          "iqr_ms": 0.06648575000000001
+        },
+        "ovito_cutoff": {
+          "first_call_ms": 18.28944399858301,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            18.244601000333205,
+            18.129260999558028,
+            18.436035999911837,
+            18.209743000625167,
+            18.295345000296948,
+            18.304310000530677,
+            18.44293099929928,
+            18.360498999754782,
+            18.445745999997598,
+            18.281397000464494,
+            18.322587999136886,
+            18.351247999817133
+          ],
+          "count": 25648,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-skew-512.npz --tool ovito_cutoff --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 18.31344899983378,
+          "q1_ms": 18.272198000431672,
+          "q3_ms": 18.379383249794046,
+          "iqr_ms": 0.10718524936237372
+        },
+        "unsupported": {
+          "freud_aabb_cutoff": "The AABBQuery r_max is too large for this box.",
+          "freud_linkcell_cutoff": "Cannot generate a cell list where cell_width is larger than half the box.",
+          "scipy_ckdtree_cutoff": "triclinic periodic cutoff unsupported in scipy cKDTree boxsize; fractional workaround undercounts tri-skew-512"
+        }
+      },
+      "knn_stage": {
+        "dseams_omp1": {
+          "first_call_ms": 1.070826,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            1.002911,
+            1.002373,
+            0.977989,
+            0.987183,
+            1.035507,
+            0.972021,
+            0.975909,
+            1.048813,
+            0.980831,
+            0.987756,
+            0.993876,
+            0.998524
+          ],
+          "count": 2016,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=fbdfd1f38ece4f4024924378ce598514b4866be4 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_neigh_only --traj input/traj/skew_triclinic_width_lt_cutoff.lammpstrj --frame 1 --type 1 --reps 1 --warmup 0 --cutoff 3.50000000 --k 4 --k-cand 5.36000000 --nx 1 --ny 1 --nz 1 --threads 1",
+          "path_samples": [
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest",
+            "k-nearest"
+          ],
+          "path_first": "k-nearest",
+          "median_ms": 0.9908159999999999,
+          "q1_ms": 0.9801205,
+          "q3_ms": 1.0025075,
+          "iqr_ms": 0.022387000000000157,
+          "path_counts": {
+            "k-nearest": 12
+          }
+        },
+        "freud_aabb_knn": {
+          "first_call_ms": 1.750366000123904,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            1.7620049984543584,
+            1.7084769988287007,
+            1.7655379997449927,
+            1.777610999852186,
+            1.7646899996179854,
+            1.8330380007682834,
+            1.7552359986439114,
+            1.7566529986652313,
+            1.755400999172707,
+            1.7457129997637821,
+            1.8313050004508113,
+            1.8121299999620533
+          ],
+          "count": 2016,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-skew-512.npz --tool freud_aabb_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 1.763347499036172,
+          "q1_ms": 1.7553597490405082,
+          "q3_ms": 1.7862407498796529,
+          "iqr_ms": 0.03088100083914469
+        },
+        "ovito_knn": {
+          "first_call_ms": 1.8623549985932186,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            1.8595059991639573,
+            1.8478479996701935,
+            2.0426650007721037,
+            1.9250259992986685,
+            1.9614489992818562,
+            1.9176290006726049,
+            1.935408001372707,
+            1.8984379985340638,
+            1.8876670001191087,
+            1.8552480014477624,
+            2.220083000793238,
+            1.8630890008353163
+          ],
+          "count": 2016,
+          "command": "taskset -c 0 python3 tests/bench_h2h_neighbours.py --worker-external --frame-npz input/.bench_frames/tri-skew-512.npz --tool ovito_knn --cutoff 3.50000000 --k 4 --freud-threads 1 --ovito-threads 1 --scipy-threads 1",
+          "median_ms": 1.9080334996033343,
+          "q1_ms": 1.8621932504174765,
+          "q3_ms": 1.9419182508499944,
+          "iqr_ms": 0.07972500043251785
+        },
+        "unsupported": {
+          "freud_linkcell_knn": "Cannot generate a cell list where cell_width is larger than half the box.",
+          "scipy_ckdtree_knn": "triclinic exact kNN with scipy cKDTree boxsize"
+        }
+      },
+      "knn_count_explanation": {
+        "definition": "directed edges of the mutual k-nearest graph",
+        "dseams_mutual_directed_edges": 2016,
+        "freud_mutual_directed_edges": 2016
+      },
+      "ckdtree_cutoff_set_equality": {
+        "asserted": true,
+        "equal": true,
+        "edge_count_directed": 25648,
+        "dseams_only_edges": 0,
+        "scipy_only_edges": 0,
+        "dseams_dump_command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=fbdfd1f38ece4f4024924378ce598514b4866be4 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_neigh_only --traj input/traj/skew_triclinic_width_lt_cutoff.lammpstrj --frame 1 --type 1 --reps 1 --warmup 0 --cutoff 3.50000000 --k 4 --k-cand 5.36000000 --nx 1 --ny 1 --nz 1 --threads 1 --dump-cutoff-edges input/tri-skew-512-dseams-cutoff-edges.txt"
+      },
+      "ovito_cutoff_edge_accounting": {
+        "directed_edges": 26328,
+        "unique_directed_edges": 25648,
+        "duplicate_image_edges": 680
+      }
+    }
+  },
+  "fallback_scaling": {
+    "skipped": true
+  },
+  "fallback_scaling_fit": {
+    "skipped": true
+  }
+}

@@ -1,0 +1,59 @@
+% Okabe-Ito palette (Wong, Nat. Methods 8 (2011) 441).
+% Shared by every generated figure.
+% Names are colours, not series.
+% snapper:off
+\definecolor{oiBlack}{HTML}{000000}
+\definecolor{oiOrange}{HTML}{E69F00}
+\definecolor{oiSky}{HTML}{56B4E9}
+\definecolor{oiGreen}{HTML}{009E73}
+\definecolor{oiYellow}{HTML}{F0E442}
+\definecolor{oiBlue}{HTML}{0072B2}
+\definecolor{oiVerm}{HTML}{D55E00}
+\definecolor{oiPurple}{HTML}{CC79A7}
+% snapper:on
+% Every figure sets its text in Atkinson Hyperlegible, from the OpenType files of the TeX bundle.
+% The faces are declared for the TU encoding alone, so the body fonts of the paper stay as they are.
+% \figurefont selects them and typesets units in text mode without resetting the family, so that units take the figure font too.
+% snapper:off
+\DeclareFontFamily{TU}{atkinson}{}
+\DeclareFontShape{TU}{atkinson}{m}{n}{<->\UnicodeFontFile{Atkinson-Hyperlegible-Regular-102.otf}{\UnicodeFontTeXLigatures}}{}
+\DeclareFontShape{TU}{atkinson}{m}{it}{<->\UnicodeFontFile{Atkinson-Hyperlegible-Italic-102.otf}{\UnicodeFontTeXLigatures}}{}
+\DeclareFontShape{TU}{atkinson}{b}{n}{<->\UnicodeFontFile{Atkinson-Hyperlegible-Bold-102.otf}{\UnicodeFontTeXLigatures}}{}
+\DeclareFontShape{TU}{atkinson}{b}{it}{<->\UnicodeFontFile{Atkinson-Hyperlegible-BoldItalic-102.otf}{\UnicodeFontTeXLigatures}}{}
+\DeclareFontShape{TU}{atkinson}{bx}{n}{<->ssub*atkinson/b/n}{}
+\DeclareFontShape{TU}{atkinson}{bx}{it}{<->ssub*atkinson/b/it}{}
+\newcommand{\figurefont}{\fontfamily{atkinson}\selectfont\sisetup{mode=text, reset-text-family=false}}
+% snapper:on
+% Tick labels are typeset in text mode, so that their digits take the figure font.
+% A log tick is the base with the exponent raised, and a negative exponent takes a true minus sign.
+% snapper:off
+\pgfplotsset{
+  compat=1.17,
+  dseams/.style={
+    tick label style={font=\figurefont\footnotesize},
+    label style={font=\figurefont\footnotesize},
+    title style={font=\figurefont\footnotesize},
+    legend style={
+      font=\figurefont\scriptsize,
+      draw=none,
+      fill=white,
+      fill opacity=0.94,
+      text opacity=1,
+      legend cell align=left
+    },
+    legend cell align=left,
+    /pgf/number format/assume math mode=true,
+    log number format basis/.code 2 args={%
+      ##1\textsuperscript{\ifdim ##2pt<0pt\textminus\fi
+        \pgfmathparse{abs(##2)}\pgfmathprintnumber{\pgfmathresult}}%
+    },
+    grid=none,
+    tick style={black, thin},
+    axis line style={black, thin},
+    axis lines=left,
+    line width=0.9pt,
+    clip=false,
+    scale only axis
+  }
+}
+% snapper:on

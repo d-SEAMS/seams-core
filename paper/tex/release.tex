@@ -1,0 +1,58 @@
+% The seams-core release that the paper cites and that the program files hold: the main-branch commit it is built on, its source tree and program-files archive, and the Zenodo concept DOI of the seams-core GitHub releases with its latest version.
+% No commit holds the tree of the release; it is the base commit with the ten patches of the program files.
+% Set the version DOI in \seamscoredoi once a release with that tree is archived.
+% The reproducibility package is cited at its commit (\reprocommit, tag v2.7.0).
+% The 31 October records used the first revision of the package patch, sha256 0e53bc8e, tree 5dde84a5.
+% The revision cited here, sha256 f1721ac7, tree 5722048b, adds the PTM cutoff 0.1 and scripts/ptm_cutoff_sweep.py, fits q6 at the mW coexistence point, reads the dump column header, and writes the freud means with scripts/sota_freud.py.
+% It rewrites the Lechner-Dellago curves of Figure sota with scripts/regen_ld_figure.py.
+% That script takes its sigmas and seeds from the command line.
+% Set \reprodoi once that tree is archived.
+% snapper:off
+\RequirePackage{seqsplit}
+\newcommand*{\seamscoretag}{v2.12.0}
+\newcommand*{\seamscoretree}{598e964e}
+\newcommand*{\seamscorebase}{305fb3c67c395303df6d9171a0c1af3520061625}
+\newcommand*{\seamscoresha}{1f5b88b4956c9a7c46bceab0150650f5b9ca6b469b5641e774a52a06b93b7352}
+\newcommand*{\seamscoredoi}{}
+\newcommand*{\seamscoreconceptdoi}{10.5281/zenodo.3874291}
+\newcommand*{\seamscoreconceptlatest}{v2.11.0}
+\newcommand*{\reprocommit}{f625883238bf0fb3b5b56b61a48994e4cb12e43e}
+\newcommand*{\reprobase}{f625883}
+\newcommand*{\reprotree}{5722048b}
+\newcommand*{\repropatch}{dseams2\_repro-v2.7.0-fixes.patch}
+\newcommand*{\repropatchsha}{f1721ac779fe171705156c8845ed8d971bf89812eec64db053deead80b76d57a}
+\newcommand*{\reprodoi}{}
+\makeatletter
+\edef\repro@doiurl{https://doi.org/\reprodoi}
+\newcommand{\reproarchive}{%
+  \ifx\reprodoi\@empty
+    commit \texttt{\expandafter\seqsplit\expandafter{\reprocommit}} (tag v2.7.0)
+    with the package patch \texttt{\repropatch} of the supplementary data,
+    sha256 \texttt{\expandafter\seqsplit\expandafter{\repropatchsha}}, which gives git tree \texttt{\reprotree}%
+  \else Zenodo, \expandafter\url\expandafter{\repro@doiurl}\fi}
+\newcommand{\reproid}{%
+  \ifx\reprodoi\@empty commit \texttt{\reprobase} (tag v2.7.0) with the package patch of the supplementary data, git tree \texttt{\reprotree}%
+  \else \expandafter\url\expandafter{\repro@doiurl}\fi}
+\edef\core@doiurl{https://doi.org/\seamscoredoi}
+\edef\core@concepturl{https://doi.org/\seamscoreconceptdoi}
+\newcommand{\coretag}{\seamscoretag}
+\newcommand{\coretree}{\texttt{\seamscoretree}}
+\newcommand{\corehowpublished}{%
+  \url{https://github.com/d-SEAMS/seams-core}, commit
+  \texttt{\expandafter\seqsplit\expandafter{\seamscorebase}} with the ten
+  release patches of the program files, tree \coretree}
+\newcommand{\corearchive}{%
+  \ifx\seamscoredoi\@empty
+    Program files archive \texttt{seams-core-\seamscoretag.tar.gz},
+    sha256 \texttt{\expandafter\seqsplit\expandafter{\seamscoresha}}.
+    Zenodo concept DOI \expandafter\url\expandafter{\core@concepturl},
+    latest version \seamscoreconceptlatest%
+  \else Zenodo, \expandafter\url\expandafter{\core@doiurl}\fi}
+\makeatother
+% snapper:on
+% The tag of the seams-core release that contains the measured fix to the cage labels.
+% Set it once that release is made; until then both documents print the placeholder.
+% snapper:off
+\newcommand*{\releasetag}{[to be added]}
+\newcommand{\DOIPENDING}{pending}
+% snapper:on

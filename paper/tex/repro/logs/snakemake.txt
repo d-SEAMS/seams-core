@@ -1,0 +1,75 @@
+Assuming unrestricted shared filesystem usage.
+
+SNAKEMAKE
+=========
+  Date: 2026-11-06 02:04:40
+  Workflow ID: 02803137-a98e-4507-bd42-248c5f652859
+  Platform: Linux-6.12.94+-x86_64-Intel-R-_Xeon-R-_Processor-with-glibc2.43
+  Host: cursor
+  User: ubuntu
+  Snakemake version: 9.27.1
+  Python version: 3.13.14 (main, Aug  1 2026, 08:27:52) [GCC 14.3.1 20260604]
+  Command: /tmp/ovito-venv/bin/snakemake -c1 --printshellcmds shipped_campaign
+  Snakefile: /tmp/seams-v40-tip/Snakefile
+  Base directory: /tmp/seams-v40-tip
+  Run directory: /tmp/seams-v40-tip
+  Working directory: /tmp/seams-v40-tip
+  Config file(s): []
+  Config MD5: 99914b932bd37a50b983c5e7c90ae93b
+
+Building DAG of jobs...
+Using shell: /usr/local/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job                 count
+----------------  -------
+shipped_campaign        1
+total                   1
+
+Select jobs to execute...
+Execute 1 jobs...
+
+[Fri Nov  6 02:04:40 2026]
+localrule shipped_campaign:
+    input: paper/tex/repro/shipped_campaign.py, paper/tex/repro/shipped.sh, benchmarks/shipped.py, tests/bench_h2h_rings.py
+    output: paper/tex/figures/data/shipped-campaign.json, paper/tex/figures/data/shipped_macros.tex, paper/tex/figures/data/tab-shipped.tex
+    jobid: 0
+    reason: Missing output files: paper/tex/figures/data/shipped_macros.tex, paper/tex/figures/data/shipped-campaign.json, paper/tex/figures/data/tab-shipped.tex
+    resources: tmpdir=/tmp
+Shell command: bash paper/tex/repro/shipped.sh
+sampling stages
+sampling ovito orth
+sampling cages orth
+base cutoff
+base seeded
+tip cutoff
+tip seeded
+sampling 1e6
+1e6 base cutoff
+1e6 base seeded
+1e6 tip cutoff
+1e6 tip seeded
+wrote /tmp/seams-v40-tip/paper/tex/figures/data/shipped-campaign.json
+rings_base 104.894 (104.593, 105.222, 0.630)
+rings_tip 72.314 (72.187, 72.417, 0.230)
+rings_ovito 511.300 (507.949, 514.282, 6.334)
+neigh_rings_base 141.851 (141.141, 142.357, 1.217)
+neigh_rings_tip 107.769 (107.688, 107.881, 0.194)
+neigh_rings_ovito 562.972 (561.849, 577.872, 16.024)
+cutoff_base 1325.413 (1323.198, 1335.400, 12.202)
+cutoff_tip 489.146 (488.734, 492.859, 4.125)
+seeded_base 2678.958 (2671.499, 2690.472, 18.973)
+seeded_tip 620.520 (620.050, 622.123, 2.073)
+rss_cutoff_base 1614218.000 (1614144.000, 1614224.000, 80.000)
+rss_cutoff_tip 132546.000 (132510.000, 132592.000, 82.000)
+rss_seeded_base 1648530.000 (1648444.000, 1648540.000, 96.000)
+rss_seeded_tip 142118.000 (142043.000, 142247.000, 204.000)
+base_1e6_oom True matrix_GiB 115.330078125
+traced 154 numbers
+host Intel Xeon Processor
+[Fri Nov  6 02:10:49 2026]
+Finished jobid: 0 (Rule: shipped_campaign)
+1 of 1 steps (100%) done
+Complete log(s): /tmp/seams-v40-tip/.snakemake/log/2026-11-06T020440.105625.snakemake.log
+Elapsed time: 0:06:09.063820

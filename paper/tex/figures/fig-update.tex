@@ -1,0 +1,36 @@
+% Unrolled wall of the hexagonal ice nanotube of Section 3, around the bond that the update example deletes.
+% Columns are sites 4, 5, 0, 1, 2, 3 of a layer, rows are layers 11, 0, 1, 2.
+% Needs style.tex and tikz.
+\begin{tikzpicture}[x=1.05cm, y=0.95cm,
+    mol/.style={circle, fill=oiBlack, inner sep=0pt, minimum size=4.6pt},
+    hot/.style={circle, fill=oiOrange, draw=oiBlack, inner sep=0pt, minimum size=6.4pt},
+    bond/.style={line width=0.7pt, oiBlack!70},
+    lab/.style={font=\figurefont\scriptsize}]
+  \fill[oiGreen, opacity=0.28] (1,1) -- (2,1) -- (3,1) -- (3,2) -- (2,2) -- (1,2) -- cycle;
+  \foreach \y in {0,...,3} {
+    \draw[bond, dotted] (-0.45,\y) -- (0,\y);
+    \draw[bond, dotted] (5,\y) -- (5.45,\y);
+    \foreach \x [evaluate=\x as \n using {int(\x+1)}] in {0,...,4} {
+      \draw[bond] (\x,\y) -- (\n,\y);
+    }
+  }
+  \foreach \x in {0,...,5} {
+    \draw[bond, dotted] (\x,-0.45) -- (\x,0);
+    \draw[bond, dotted] (\x,3) -- (\x,3.45);
+    \draw[bond] (\x,0) -- (\x,1);
+    \draw[bond] (\x,2) -- (\x,3);
+    \ifnum\x=2\else\draw[bond] (\x,1) -- (\x,2);\fi
+  }
+  \draw[line width=1.0pt, oiVerm, dashed] (2,1) -- (2,2);
+  \foreach \y in {1,2} { \draw[line width=1.9pt, oiBlack] (0,\y) -- (5,\y); }
+  \foreach \a/\b in {1/0, 2/0, 1/2, 2/2} {
+    \draw[line width=1.5pt, oiBlue] (\a,\b) rectangle ++(1,1);
+  }
+  \foreach \x in {0,...,5} { \foreach \y in {0,...,3} { \node[mol] at (\x,\y) {}; } }
+  \node[hot] at (2,1) {};
+  \node[hot] at (2,2) {};
+  \foreach \s [count=\x from 0] in {4,5,0,1,2,3} { \node[lab] at (\x-1+1, -0.75) {\s}; }
+  \foreach \l [count=\y from 0] in {11,0,1,2} { \node[lab, anchor=east] at (-0.55, \y-1+1) {\l}; }
+  \node[lab] at (2.5, -1.2) {site in layer};
+  \node[lab, rotate=90] at (-1.15, 1.5) {layer};
+\end{tikzpicture}

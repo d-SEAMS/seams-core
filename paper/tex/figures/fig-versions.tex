@@ -1,0 +1,26 @@
+% Stage timings of d-SEAMS 1 and 2.0 on ideal ice Ic (Section 5.2).
+\begin{tikzpicture}
+  \begin{groupplot}[
+      group style={group size=3 by 1, horizontal sep=1.25cm},
+      dseams, width=3.15cm, height=3.4cm,
+      xmode=log, ymode=log, xmin=150, xmax=6000,
+      ymin=0.2, ymax=5e5,
+      xlabel={Molecules},
+      ytickten={0,2,4},
+      every axis plot/.append style={mark size=1.8pt}]
+    \nextgroupplot[ylabel={Time (\unit{\ms})}, title={(a) Primitive rings},
+      legend style={at={(0.03,0.97)}, anchor=north west}]
+      \addplot[oiVerm, mark=square*] table[x=sites, y=median] {figures/data/plot-versions-one-ring.dat};
+      \addlegendentry{d-SEAMS 1}
+      \addplot[oiBlue, mark=*] table[x=sites, y=median] {figures/data/plot-versions-two-ring.dat};
+      \addlegendentry{d-SEAMS}
+    \nextgroupplot[title={(b) Cages}]
+      \addplot[oiVerm, mark=square*] table[x=sites, y=median] {figures/data/plot-versions-one-hc.dat};
+      \addplot[oiVerm, mark=square, densely dashed] table[x=sites, y=median] {figures/data/plot-versions-one-ddc.dat};
+      \addplot[oiBlue, mark=*] table[x=sites, y=median] {figures/data/plot-versions-two-hc.dat};
+      \addplot[oiBlue, mark=o, densely dashed] table[x=sites, y=median] {figures/data/plot-versions-two-ddc.dat};
+    \nextgroupplot[title={(c) Whole path}]
+      \addplot[oiVerm, mark=square*] table[x=sites, y=median] {figures/data/plot-versions-one-path.dat};
+      \addplot[oiBlue, mark=*] table[x=sites, y=median] {figures/data/plot-versions-two-path.dat};
+  \end{groupplot}
+\end{tikzpicture}

@@ -1,0 +1,461 @@
+{
+  "git_sha": "c5da2d9f8f9066fccfcb0ae929b75a0e2ee770d1",
+  "git_dirty": "clean",
+  "seed": 7,
+  "cutoff": 3.5,
+  "max_ring_size": 6,
+  "machine": {
+    "uname_m": "x86_64",
+    "nproc": 8,
+    "cpu_model": "Intel Xeon Processor"
+  },
+  "protocol": {
+    "confidence_target": 0.95,
+    "repeat_lower_bound": "n >= ceil(1 - log2(1 - confidence_target))",
+    "median_rule": "type 7 median and quartiles",
+    "repeats": 12,
+    "warmup_runs": 0,
+    "warmup_rule": "fixed 2 calls (one cold-start sink plus one stabilization call)",
+    "fresh_process_per_sample": true,
+    "interleaving": "per repetition, rotate tool order",
+    "first_call_reported_separately": true
+  },
+  "thread_policy": {
+    "dseams_threads_reported": [
+      1,
+      1
+    ],
+    "ovito_threads": 1
+  },
+  "datasets": {
+    "orth-4k": {
+      "source": "input/traj/mW_cubic.lammpstrj@1",
+      "n_atoms": 4096,
+      "triclinic": false,
+      "rings_total": 8192,
+      "rings_size6": 8192,
+      "setup_ms": {
+        "dseams_cold": 5.335,
+        "ovito_cold": 13.44434099883074,
+        "dseams_samples": [
+          2.853,
+          2.816,
+          2.786,
+          2.81,
+          2.809,
+          2.794,
+          2.825,
+          2.809,
+          2.813,
+          2.778,
+          2.791
+        ],
+        "ovito_samples": [
+          7.4578359999577515,
+          7.388661999357282,
+          7.389717000478413,
+          7.389708000118844,
+          7.3349810008949134,
+          7.4628870006563375,
+          7.475141999748303,
+          7.394956001007813,
+          7.393551999484771,
+          7.364975999735179,
+          7.3510919992259005
+        ],
+        "dseams": 2.809,
+        "ovito": 7.389717000478413
+      },
+      "ring_stage_ms": {
+        "dseams_omp1": {
+          "first_call_ms": 31.711,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            31.644,
+            31.756,
+            31.658,
+            31.655,
+            31.63,
+            31.546,
+            31.556,
+            31.62,
+            31.575,
+            31.613,
+            31.612,
+            31.605
+          ],
+          "count": 8192,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=c5da2d9f8f9066fccfcb0ae929b75a0e2ee770d1 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_stages input/traj/mW_cubic.lammpstrj 1 1 1",
+          "median_ms": 31.616500000000002,
+          "q1_ms": 31.5975,
+          "q3_ms": 31.646749999999997,
+          "iqr_ms": 0.04924999999999713
+        },
+        "ovito": {
+          "first_call_ms": 17.990569000176038,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            15.707408998423489,
+            15.888030000496656,
+            16.10418599921104,
+            15.690260999690508,
+            15.907172000879655,
+            15.584413000397035,
+            16.389443999287323,
+            15.743416999612236,
+            15.774238001540652,
+            15.697449000072083,
+            16.38109799932863,
+            16.284885999994003
+          ],
+          "count": 8192,
+          "command": "taskset -c 0 /tmp/ovito-venv/bin/python3 tests/bench_h2h_rings.py --worker-ovito --frame-npz input/.bench_frames/ring-orth-4k.npz --cutoff 3.50000000 --max-ring-size 6 --ovito-threads 1 --ovito-stage rings",
+          "median_ms": 15.831134001018654,
+          "q1_ms": 15.704918998835637,
+          "q3_ms": 16.14936099940678,
+          "iqr_ms": 0.4444420005711436
+        }
+      },
+      "bonds_and_rings_ms": {
+        "dseams_omp1": {
+          "first_call_ms": 38.451,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            38.435,
+            38.443,
+            38.442,
+            38.623,
+            38.489000000000004,
+            38.47,
+            38.42,
+            38.619,
+            38.516999999999996,
+            38.480000000000004,
+            38.458,
+            38.486
+          ],
+          "count": 8192,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=c5da2d9f8f9066fccfcb0ae929b75a0e2ee770d1 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_stages input/traj/mW_cubic.lammpstrj 1 1 1",
+          "median_ms": 38.475,
+          "q1_ms": 38.44275,
+          "q3_ms": 38.496,
+          "iqr_ms": 0.05325000000000557
+        },
+        "ovito": {
+          "first_call_ms": 17.513647999294335,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            17.43068699943251,
+            17.423900999347097,
+            17.580981000719476,
+            17.175895998661872,
+            17.16950599984557,
+            17.271194999921136,
+            18.480011000065133,
+            17.922453000210226,
+            19.031506000828813,
+            16.961340999841923,
+            18.500254998798482,
+            17.047163999450277
+          ],
+          "count": 8192,
+          "command": "taskset -c 0 /tmp/ovito-venv/bin/python3 tests/bench_h2h_rings.py --worker-ovito --frame-npz input/.bench_frames/ring-orth-4k.npz --cutoff 3.50000000 --max-ring-size 6 --ovito-threads 1 --ovito-stage bonds",
+          "median_ms": 17.427293999389804,
+          "q1_ms": 17.174298498957796,
+          "q3_ms": 18.061842500173952,
+          "iqr_ms": 0.8875440012161562
+        }
+      }
+    },
+    "tri-136": {
+      "source": "input/traj/genice_sH.lammpstrj@1",
+      "n_atoms": 136,
+      "triclinic": true,
+      "rings_total": 200,
+      "rings_size6": 68,
+      "setup_ms": {
+        "dseams_cold": 2.425,
+        "ovito_cold": 1.562448000186123,
+        "dseams_samples": [
+          0.339,
+          0.337,
+          0.316,
+          0.316,
+          0.327,
+          0.332,
+          0.321,
+          0.323,
+          0.323,
+          0.318,
+          0.318
+        ],
+        "ovito_samples": [
+          1.145281001299736,
+          1.0782869994727662,
+          1.0881420002988307,
+          1.088724999135593,
+          1.0990320006385446,
+          1.0564420008449815,
+          1.0594600007607369,
+          1.0545369987084996,
+          1.048260000970913,
+          1.0627289993863087,
+          1.0605259994918015
+        ],
+        "dseams": 0.323,
+        "ovito": 1.0627289993863087
+      },
+      "ring_stage_ms": {
+        "dseams_omp1": {
+          "first_call_ms": 1.143,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            1.088,
+            1.074,
+            1.078,
+            1.092,
+            1.125,
+            1.072,
+            1.093,
+            1.071,
+            1.069,
+            1.074,
+            1.077,
+            1.08
+          ],
+          "count": 200,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=c5da2d9f8f9066fccfcb0ae929b75a0e2ee770d1 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_stages input/traj/genice_sH.lammpstrj 1 1 1",
+          "median_ms": 1.0775000000000001,
+          "q1_ms": 1.0735000000000001,
+          "q3_ms": 1.089,
+          "iqr_ms": 0.015499999999999847
+        },
+        "ovito": {
+          "first_call_ms": 0.7616080001753289,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            0.6848999983048998,
+            0.6903899993631057,
+            0.7050179992802441,
+            0.7343870001932373,
+            0.712930001100176,
+            0.6889879987284075,
+            0.7506260008085519,
+            0.6972869996388908,
+            0.689767999574542,
+            0.6879740012664115,
+            0.7459089993062662,
+            0.695716000336688
+          ],
+          "count": 200,
+          "command": "taskset -c 0 /tmp/ovito-venv/bin/python3 tests/bench_h2h_rings.py --worker-ovito --frame-npz input/.bench_frames/ring-tri-136.npz --cutoff 3.50000000 --max-ring-size 6 --ovito-threads 1 --ovito-stage rings",
+          "median_ms": 0.6965014999877894,
+          "q1_ms": 0.6895729993630084,
+          "q3_ms": 0.7182942508734413,
+          "iqr_ms": 0.02872125151043292
+        }
+      },
+      "bonds_and_rings_ms": {
+        "dseams_omp1": {
+          "first_call_ms": 1.531,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            1.553,
+            1.531,
+            1.546,
+            1.533,
+            1.556,
+            1.532,
+            1.582,
+            1.5470000000000002,
+            1.5750000000000002,
+            1.546,
+            1.542,
+            1.542
+          ],
+          "count": 200,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=c5da2d9f8f9066fccfcb0ae929b75a0e2ee770d1 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_stages input/traj/genice_sH.lammpstrj 1 1 1",
+          "median_ms": 1.546,
+          "q1_ms": 1.5397500000000002,
+          "q3_ms": 1.55375,
+          "iqr_ms": 0.01399999999999979
+        },
+        "ovito": {
+          "first_call_ms": 1.2221289998706197,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            1.1535320008988492,
+            1.1726920001819963,
+            1.1596640015341109,
+            1.1290519996691728,
+            1.1353459995007142,
+            1.1498669991851784,
+            1.1519580002641305,
+            1.1287069992249599,
+            1.1363799985701917,
+            1.178306998554035,
+            1.1421389990573516,
+            1.1580339996726252
+          ],
+          "count": 200,
+          "command": "taskset -c 0 /tmp/ovito-venv/bin/python3 tests/bench_h2h_rings.py --worker-ovito --frame-npz input/.bench_frames/ring-tri-136.npz --cutoff 3.50000000 --max-ring-size 6 --ovito-threads 1 --ovito-stage bonds",
+          "median_ms": 1.1509124997246545,
+          "q1_ms": 1.1361214988028223,
+          "q3_ms": 1.1584415001379966,
+          "iqr_ms": 0.02232000133517431
+        }
+      }
+    },
+    "orth-1e5": {
+      "source": "input/traj/orth-1e5-ring-scale.lammpstrj@1",
+      "n_atoms": 110592,
+      "triclinic": true,
+      "rings_total": 221184,
+      "rings_size6": 221184,
+      "setup_ms": {
+        "dseams_cold": 81.013,
+        "ovito_cold": 52.47217699979956,
+        "dseams_samples": [
+          77.782,
+          77.575,
+          77.589,
+          77.387,
+          77.666,
+          77.749,
+          77.558,
+          77.451,
+          77.503,
+          77.824,
+          77.819
+        ],
+        "ovito_samples": [
+          49.99065999982122,
+          49.54848599845718,
+          49.749359999623266,
+          49.354421000316506,
+          49.85798200141289,
+          49.60701400159451,
+          49.85529999976279,
+          50.19228700075473,
+          49.78860000119312,
+          50.24668400074006,
+          49.81706800026586
+        ],
+        "dseams": 77.589,
+        "ovito": 49.81706800026586
+      },
+      "ring_stage_ms": {
+        "dseams_omp1": {
+          "first_call_ms": 866.713,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            864.994,
+            865.847,
+            863.167,
+            864.821,
+            864.747,
+            865.137,
+            864.655,
+            867.953,
+            864.441,
+            864.59,
+            863.699,
+            863.966
+          ],
+          "count": 221184,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=c5da2d9f8f9066fccfcb0ae929b75a0e2ee770d1 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_stages input/traj/orth-1e5-ring-scale.lammpstrj 1 1 1",
+          "median_ms": 864.701,
+          "q1_ms": 864.32225,
+          "q3_ms": 865.0297499999999,
+          "iqr_ms": 0.7074999999998681
+        },
+        "ovito": {
+          "first_call_ms": 519.5066760006739,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            520.1225649998378,
+            498.61104800038447,
+            514.9340580010175,
+            515.884456999629,
+            520.1022750006814,
+            511.8354609985545,
+            528.6310470000899,
+            498.5353930005658,
+            510.21278200096276,
+            504.37844900079654,
+            509.6442489993933,
+            502.4810940012685
+          ],
+          "count": 221184,
+          "command": "taskset -c 0 /tmp/ovito-venv/bin/python3 tests/bench_h2h_rings.py --worker-ovito --frame-npz input/.bench_frames/ring-orth-1e5.npz --cutoff 3.50000000 --max-ring-size 6 --ovito-threads 1 --ovito-stage rings",
+          "median_ms": 511.0241214997586,
+          "q1_ms": 503.9041102509145,
+          "q3_ms": 516.9389114998921,
+          "iqr_ms": 13.034801248977601
+        }
+      },
+      "bonds_and_rings_ms": {
+        "dseams_omp1": {
+          "first_call_ms": 1036.955,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            1037.71,
+            1038.209,
+            1041.807,
+            1038.549,
+            1036.832,
+            1037.5430000000001,
+            1037.799,
+            1038.595,
+            1038.569,
+            1037.856,
+            1036.308,
+            1039.337
+          ],
+          "count": 221184,
+          "command": "OMP_NUM_THREADS=1 OMP_DYNAMIC=FALSE SEAMS_GIT_SHA=c5da2d9f8f9066fccfcb0ae929b75a0e2ee770d1 SEAMS_GIT_DIRTY=clean taskset -c 0 bbdir-eessi/tests/bench_stages input/traj/orth-1e5-ring-scale.lammpstrj 1 1 1",
+          "median_ms": 1038.0325,
+          "q1_ms": 1037.6682500000002,
+          "q3_ms": 1038.5755,
+          "iqr_ms": 0.907249999999749
+        },
+        "ovito": {
+          "first_call_ms": 561.8110790001083,
+          "warmup_runs": 0,
+          "repeats": 12,
+          "samples_ms": [
+            564.9701060010557,
+            563.3772769997449,
+            558.463887000471,
+            538.7872970004537,
+            569.1926299987244,
+            550.4584280006384,
+            563.6494369991851,
+            554.2740910004795,
+            563.8957979990664,
+            544.9693629998364,
+            561.3236849985697,
+            549.3866729993897
+          ],
+          "count": 221184,
+          "command": "taskset -c 0 /tmp/ovito-venv/bin/python3 tests/bench_h2h_rings.py --worker-ovito --frame-npz input/.bench_frames/ring-orth-1e5.npz --cutoff 3.50000000 --max-ring-size 6 --ovito-threads 1 --ovito-stage bonds",
+          "median_ms": 559.8937859995203,
+          "q1_ms": 550.1904892503262,
+          "q3_ms": 563.7110272491554,
+          "iqr_ms": 13.52053799882924
+        }
+      }
+    }
+  }
+}

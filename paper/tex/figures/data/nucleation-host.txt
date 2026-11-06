@@ -1,0 +1,5 @@
+b41a6a061de80e941562fda8e4a18483395f72f646e799608a66689b88e1b02c  build/seams
+c3c75050bb7762cf0d3417e2fbab326422f23ea04a64b6f69eaf33334e4d1403  nucleation.lammpstrj
+cutoff identical yes
+seeded identical yes
+MEASURE2_EXIT=0

@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "project": "d-seams",
+  "project_url": "https://github.com/d-SEAMS/seams-core",
+  "repo": ".",
+  "branches": ["scaling"],
+  "environment_type": "existing",
+  "env_dir": ".asv/env",
+  "results_dir": ".asv/results",
+  "html_dir": ".asv/html",
+  "benchmark_dir": "benchmarks",
+  "build_command": [],
+  "install_command": [],
+  "uninstall_command": []
+}

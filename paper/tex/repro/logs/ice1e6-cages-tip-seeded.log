@@ -1,0 +1,58 @@
+HOSTNAME cursor
+nproc 1
+nproc_all 8
+affinity pid 391313's current affinity list: 0
+pin taskset -c 0
+COMMAND taskset -c 0 seams cages /tmp/v37-frames/ice-1e6.lammpstrj
+lscpu <<LSC
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           46 bits physical, 57 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  8
+On-line CPU(s) list:                     0-7
+Vendor ID:                               GenuineIntel
+Model name:                              Intel(R) Xeon(R) Processor
+CPU family:                              6
+Model:                                   207
+Thread(s) per core:                      1
+Core(s) per socket:                      8
+Socket(s):                               1
+Stepping:                                2
+Microcode version:                       0x1
+BogoMIPS:                                4800.00
+Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc pebs bts rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq dtes64 vmx ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch cpuid_fault ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid avx512f avx512dq rdseed adx smap avx512ifma clflushopt clwb avx512cd sha_ni avx512bw avx512vl xsaveopt xsavec xgetbv1 xsaves avx_vnni avx512_bf16 wbnoinvd arat vnmi avx512vbmi umip pku ospke avx512_vbmi2 gfni vaes vpclmulqdq avx512_vnni avx512_bitalg avx512_vpopcntdq rdpid bus_lock_detect cldemote movdiri movdir64b fsrm md_clear serialize tsxldtrk amx_bf16 avx512_fp16 amx_tile amx_int8 flush_l1d arch_capabilities
+Virtualization:                          VT-x
+Hypervisor vendor:                       KVM
+Virtualization type:                     full
+L1d cache:                               384 KiB (8 instances)
+L1i cache:                               256 KiB (8 instances)
+L2 cache:                                16 MiB (8 instances)
+L3 cache:                                320 MiB (1 instance)
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-7
+Vulnerability Gather data sampling:      Not affected
+Vulnerability Indirect target selection: Not affected
+Vulnerability Itlb multihit:             Not affected
+Vulnerability L1tf:                      Not affected
+Vulnerability Mds:                       Not affected
+Vulnerability Meltdown:                  Not affected
+Vulnerability Mmio stale data:           Not affected
+Vulnerability Reg file data sampling:    Not affected
+Vulnerability Retbleed:                  Not affected
+Vulnerability Spec rstack overflow:      Not affected
+Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl
+Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:                Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI BHI_DIS_S
+Vulnerability Srbds:                     Not affected
+Vulnerability Tsa:                       Not affected
+Vulnerability Tsx async abort:           Mitigation; TSX disabled
+Vulnerability Vmscape:                   Not affected
+LSC
+SAMPLE wall_ms 5961.890815 rss_kb 1173436 rc 0 oom 0 nop 995328 graph seeded hexagonal 0 cubic 995328 both 0 water 0
+SAMPLE wall_ms 6005.427774 rss_kb 1173436 rc 0 oom 0 nop 995328 graph seeded hexagonal 0 cubic 995328 both 0 water 0
+SAMPLE wall_ms 5935.128474 rss_kb 1173324 rc 0 oom 0 nop 995328 graph seeded hexagonal 0 cubic 995328 both 0 water 0
+SAMPLE wall_ms 5987.197026 rss_kb 1173364 rc 0 oom 0 nop 995328 graph seeded hexagonal 0 cubic 995328 both 0 water 0
+SAMPLE wall_ms 5931.427479 rss_kb 1173252 rc 0 oom 0 nop 995328 graph seeded hexagonal 0 cubic 995328 both 0 water 0
+SAMPLE wall_ms 5929.678205 rss_kb 1173432 rc 0 oom 0 nop 995328 graph seeded hexagonal 0 cubic 995328 both 0 water 0
+SUMMARY ShipBigSeedTip n=6 5948.510 (5932.353, 5980.870, 48.518)

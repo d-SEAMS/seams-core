@@ -1,0 +1,63 @@
+% Schematic of the two cage types of Section 2.4.
+% Needs style.tex and tikz.
+\begin{tikzpicture}[
+    mol/.style={circle, fill=oiBlack, inner sep=0pt, minimum size=4.2pt},
+    bond/.style={line width=0.8pt, oiBlack},
+    axial/.style={line width=1.6pt, oiOrange},
+    lab/.style={font=\figurefont\scriptsize}]
+  % (a) Hexagonal cage: basal rings l (lower) and m (upper).
+  \begin{scope}[xshift=-2.6cm]
+    \foreach \k in {0,...,5} {
+      \pgfmathsetmacro{\px}{1.15*cos(60*\k)}
+      \pgfmathsetmacro{\py}{0.42*sin(60*\k) + (-1)^\k*0.11}
+      \coordinate (l\k) at (\px, \py);
+      \coordinate (m\k) at (\px, \py + 1.75);
+    }
+    \fill[oiSky, opacity=0.35] (l0) -- (l1) -- (l2) -- (m2) -- (m1) -- (m0) -- cycle;
+    \foreach \k [evaluate=\k as \j using {int(mod(\k+1,6))}] in {0,...,5} {
+      \draw[bond] (l\k) -- (l\j);
+      \draw[bond] (m\k) -- (m\j);
+    }
+    \foreach \k in {0,2,4} { \draw[axial] (l\k) -- (m\k); }
+    \foreach \k in {0,...,5} { \node[mol] at (l\k) {}; \node[mol] at (m\k) {}; }
+    \node[lab, right] at (l0) {\textit{l}\textsubscript{0}};
+    \node[lab, right] at (m0) {\textit{m}\textsubscript{0}};
+    \node[lab, left] at (l3) {\textit{l}};
+    \node[lab, left] at (m3) {\textit{m}};
+    \node[font=\figurefont\footnotesize] at (0, -1.5) {(a)};
+  \end{scope}
+  % (b) Double-diamond cage: equator e, upper apex A with bridges b, lower apex B with bridges c.
+  \begin{scope}[xshift=2.6cm, yshift=0.85cm]
+    \foreach \k in {0,...,5} {
+      \pgfmathsetmacro{\px}{1.2*cos(60*\k)}
+      \pgfmathsetmacro{\py}{0.42*sin(60*\k) + (-1)^\k*0.1}
+      \coordinate (e\k) at (\px, \py);
+    }
+    \coordinate (A) at (0, 1.75);
+    \coordinate (B) at (0, -1.75);
+    \foreach \i in {0,1,2} {
+      \pgfmathsetmacro{\bx}{0.62*1.2*cos(120*\i)}
+      \pgfmathsetmacro{\by}{1.02 + 0.5*0.42*sin(120*\i)}
+      \coordinate (b\i) at (\bx, \by);
+      \pgfmathsetmacro{\cx}{0.62*1.2*cos(120*\i + 60)}
+      \pgfmathsetmacro{\cy}{-1.02 + 0.5*0.42*sin(120*\i + 60)}
+      \coordinate (c\i) at (\cx, \cy);
+    }
+    \fill[oiSky, opacity=0.35] (e0) -- (e1) -- (e2) -- (b1) -- (A) -- (b0) -- cycle;
+    \foreach \k [evaluate=\k as \j using {int(mod(\k+1,6))}] in {0,...,5} {
+      \draw[line width=1.6pt, oiOrange] (e\k) -- (e\j);
+    }
+    \foreach \i [evaluate=\i as \e using {int(2*\i)}, evaluate=\i as \o using {int(2*\i+1)}] in {0,1,2} {
+      \draw[bond] (e\e) -- (b\i) -- (A);
+      \draw[bond] (e\o) -- (c\i) -- (B);
+    }
+    \foreach \k in {0,...,5} { \node[mol] at (e\k) {}; }
+    \foreach \i in {0,1,2} { \node[mol] at (b\i) {}; \node[mol] at (c\i) {}; }
+    \node[mol] at (A) {};
+    \node[mol] at (B) {};
+    \node[lab, right] at (e0) {\textit{e}\textsubscript{0}};
+    \node[lab, above] at (A) {\textit{a}};
+    \node[lab, below] at (B) {\textit{a\textquotesingle}};
+    \node[font=\figurefont\footnotesize] at (0, -2.35) {(b)};
+  \end{scope}
+\end{tikzpicture}

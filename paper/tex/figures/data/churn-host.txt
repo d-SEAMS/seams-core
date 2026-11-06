@@ -1,0 +1,6 @@
+uname -m: x86_64
+nproc: 8
+model name	: Intel Xeon Processor
+cpu family	: 6
+model		: 207
+c++ (GCC) 15.2.0

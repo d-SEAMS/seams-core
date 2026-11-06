@@ -1,0 +1,21 @@
+% Update against full search for spliced frames of growing change (sec:churn).
+% Dotted lines mark the first fallback of each update.
+\begin{tikzpicture}
+  \begin{axis}[
+      dseams, width=7.4cm, height=4.6cm,
+      xmode=log, ymode=log, xmin=2, xmax=6000, ymin=0.1, ymax=30,
+      xlabel={Changed bonds}, ylabel={Time (\unit{\ms})},
+      every axis plot/.append style={mark size=7.2pt},
+      legend style={at={(1.04,0.5)}, anchor=west}]
+    \draw[oiBlue, dotted, line width=0.9pt] (axis cs:\dsv{c@ringfall@churn},0.1) -- (axis cs:\dsv{c@ringfall@churn},30);
+    \draw[oiVerm, dotted, line width=0.9pt] (axis cs:\dsv{c@afffall@churn},0.1) -- (axis cs:\dsv{c@afffall@churn},30);
+    \addplot[oiBlue, mark=o, densely dashed] table[x=churn, y=ring_batch] {figures/data/plot-churn.dat};
+    \addlegendentry{rings, full}
+    \addplot[oiBlue, mark=*] table[x=churn, y=ring_inc] {figures/data/plot-churn.dat};
+    \addlegendentry{rings, update}
+    \addplot[oiVerm, mark=square, densely dashed] table[x=churn, y=affil_batch] {figures/data/plot-churn.dat};
+    \addlegendentry{cage labels, full}
+    \addplot[oiVerm, mark=square*] table[x=churn, y=affil_inc] {figures/data/plot-churn.dat};
+    \addlegendentry{cage labels, update}
+  \end{axis}
+\end{tikzpicture}

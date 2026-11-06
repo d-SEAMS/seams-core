@@ -1,0 +1,16 @@
+% References between the manuscript and the supplement.
+% \sref{label} in rg_main.tex prints the number of a label of rg_supplement.tex, and \mref{label} in rg_supplement.tex the number of a label of rg_main.tex.
+% scripts/mkxref.py writes supp_xref.tex and main_xref.tex from the .aux of each document, so each compiles alone; scripts/build_pdfs.sh fails when either file is stale.
+% A missing label prints ?? and warns like \ref.
+% snapper:off
+\makeatletter
+\newcommand{\xr@def}[3]{\expandafter\def\csname xr@#1@#2\endcsname{#3}}
+\newcommand{\xr@get}[2]{%
+  \ifcsname xr@#1@#2\endcsname\csname xr@#1@#2\endcsname
+  \else\textbf{??}\PackageWarning{xrefs}{Reference `#2' on page \thepage\space undefined}\fi}
+\newcommand{\sref}[1]{\xr@get{s}{#1}}
+\newcommand{\mref}[1]{\xr@get{m}{#1}}
+\makeatother
+\InputIfFileExists{supp_xref}{}{}
+\InputIfFileExists{main_xref}{}{}
+% snapper:on

@@ -1,0 +1,30 @@
+perf record -F 999 -g --call-graph dwarf, one thread, core 0
+binary ring search only, before the packed-ball change
+4096 molecules, 272 samples
+4k 17.65% void (anonymous namespace)::shortestPathsFrom<(anonymous namespace)::PackedRows>((anonymous namespace)::PackedRows const&, int, (anonymous namespace)::RingScratch&)
+4k 16.54% void (anonymous namespace)::BoundedBalls::fillVertex<(anonymous namespace)::PackedRows>(int, (anonymous namespace)::PackedRows const&, int, std::vector<int, std::allocator<int> >&, std::vector<int, std::allocator<int> >&, std::vector<int, std::allocator<int> >&, std::vector<int, std::allocator<int> >&)
+4k 15.44% (anonymous namespace)::ringIsPrimitive((anonymous namespace)::BoundedBalls const&, std::vector<int, std::allocator<int> > const&)
+4k 15.07% void (anonymous namespace)::enumerateFromSource<(anonymous namespace)::PackedRows, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >((anonymous namespace)::PackedRows const&, (anonymous namespace)::BoundedBalls const&, int, int, int, (anonymous namespace)::RingScratch&, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > >&, std::vector<char, std::allocator<char> > const*)
+4k 11.40% void (anonymous namespace)::levelsFrom<(anonymous namespace)::PackedRows>((anonymous namespace)::PackedRows const&, int, int, std::vector<int, std::allocator<int> >&, std::vector<int, std::allocator<int> >&, std::vector<int, std::allocator<int> >&, std::vector<int, std::allocator<int> >&)
+4k 4.04% (anonymous namespace)::PackedRows::operator[](unsigned long) const
+4k 2.57% _int_free
+4k 2.57% std::vector<int, std::allocator<int> >::operator[](unsigned long) [clone .isra.0]
+4k 2.21% void std::__insertion_sort<__gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> >*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >, __gnu_cxx::__ops::_Iter_less_iter>(__gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> >*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >, __gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> >*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >, __gnu_cxx::__ops::_Iter_less_iter) [clone .isra.0]
+4k 1.84% _int_malloc
+110592 molecules, 445 samples
+110k 15.06% (anonymous namespace)::ringIsPrimitive((anonymous namespace)::BoundedBalls const&, std::vector<int, std::allocator<int> > const&)
+110k 15.06% void (anonymous namespace)::shortestPathsFrom<(anonymous namespace)::PackedRows>((anonymous namespace)::PackedRows const&, int, (anonymous namespace)::RingScratch&)
+110k 13.48% void (anonymous namespace)::levelsFrom<(anonymous namespace)::PackedRows>((anonymous namespace)::PackedRows const&, int, int, std::vector<int, std::allocator<int> >&, std::vector<int, std::allocator<int> >&, std::vector<int, std::allocator<int> >&, std::vector<int, std::allocator<int> >&)
+110k 11.24% void (anonymous namespace)::BoundedBalls::fillVertex<(anonymous namespace)::PackedRows>(int, (anonymous namespace)::PackedRows const&, int, std::vector<int, std::allocator<int> >&, std::vector<int, std::allocator<int> >&, std::vector<int, std::allocator<int> >&, std::vector<int, std::allocator<int> >&)
+110k 10.34% void (anonymous namespace)::enumerateFromSource<(anonymous namespace)::PackedRows, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >((anonymous namespace)::PackedRows const&, (anonymous namespace)::BoundedBalls const&, int, int, int, (anonymous namespace)::RingScratch&, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > >&, std::vector<char, std::allocator<char> > const*)
+110k 5.84% malloc
+110k 3.82% _int_free
+110k 3.82% (anonymous namespace)::PackedRows::operator[](unsigned long) const
+110k 2.02% std::vector<int, std::allocator<int> >::operator[](unsigned long) [clone .isra.0]
+110k 1.80% (anonymous namespace)::enumerateFromSource<(anonymous namespace)::PackedRows, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >((anonymous namespace)::PackedRows const&, (anonymous namespace)::BoundedBalls const&, int, int, int, (anonymous namespace)::RingScratch&, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > >&, std::vector<char, std::allocator<char> > const*)::{lambda(std::vector<int, std::allocator<int> >&)#1}::operator()(std::vector<int, std::allocator<int> >&) const
+110k 1.80% void std::__insertion_sort<__gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> >*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >, __gnu_cxx::__ops::_Iter_less_iter>(__gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> >*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >, __gnu_cxx::__normal_iterator<std::vector<int, std::allocator<int> >*, std::vector<std::vector<int, std::allocator<int> >, std::allocator<std::vector<int, std::allocator<int> > > > >, __gnu_cxx::__ops::_Iter_less_iter) [clone .isra.0]
+110k 1.57% __GI_____strtod_l_internal
+callgrind 4096 one call, Ir 118886245, top function orthoFullList 9.48 percent of the whole process including the neighbour list
+after the change, ring hashes unchanged
+4096 2.984 ms, 136 0.187 ms, 110592 84.872 ms, 136000 114.560 ms on one repeated call
+serial n=6 type 7 medians are in ring-head2head.json

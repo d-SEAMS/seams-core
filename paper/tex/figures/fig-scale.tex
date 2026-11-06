@@ -1,0 +1,23 @@
+% Strong-scaling speedup and weak-scaling efficiency.
+\begin{tikzpicture}
+  \begin{groupplot}[
+      group style={group size=2 by 1, horizontal sep=1.4cm},
+      dseams, width=5.4cm, height=4.2cm,
+      xtick=data,
+      legend style={at={(0.03,0.97)}, anchor=north west}]
+    \nextgroupplot[ylabel={Full-run speedup}, xlabel={Physical cores}, ymin=0]
+      \addplot[oiBlue, mark=*] table[x=threads, y=mw_rings] {figures/data/scale-strong.dat};
+      \addlegendentry{mW rings}
+      \addplot[oiVerm, mark=square*] table[x=threads, y=mw_clusters] {figures/data/scale-strong.dat};
+      \addlegendentry{mW clusters}
+      \addplot[oiGreen, mark=triangle*] table[x=threads, y=tip4p_rings] {figures/data/scale-strong.dat};
+      \addlegendentry{TIP4P/2005 rings}
+      \addplot[oiPurple, mark=diamond*] table[x=threads, y=tip4p_clusters] {figures/data/scale-strong.dat};
+      \addlegendentry{TIP4P/2005 clusters}
+    \nextgroupplot[ylabel={Full-run efficiency (\%)}, xlabel={Threads}, ymin=0, ymax=110]
+      \addplot[oiBlue, mark=*] table[x=threads, y=mw_rings] {figures/data/scale-weak.dat};
+      \addplot[oiVerm, mark=square*] table[x=threads, y=mw_clusters] {figures/data/scale-weak.dat};
+      \addplot[oiGreen, mark=triangle*] table[x=threads, y=tip4p_rings] {figures/data/scale-weak.dat};
+      \addplot[oiPurple, mark=diamond*] table[x=threads, y=tip4p_clusters] {figures/data/scale-weak.dat};
+  \end{groupplot}
+\end{tikzpicture}

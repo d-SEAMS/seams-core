@@ -1,0 +1,42 @@
+% Head-to-head timings of Section 5.3: medians of single-core calls.
+% The y ranges leave room above the data for the legends.
+\begin{tikzpicture}
+  \begin{groupplot}[
+      group style={group size=2 by 2, horizontal sep=1.6cm, vertical sep=2.0cm},
+      dseams, width=4.9cm, height=4.2cm,
+      xmode=log, ymode=log, xmin=700, xmax=1.4e6,
+      xlabel={Molecules}, ylabel={Time (\unit{\ms})},
+      every axis plot/.append style={mark size=1.8pt},
+      legend style={at={(0.03,0.97)}, anchor=north west}]
+    \nextgroupplot[title={(a) CHILL+, ice Ic}, ymin=0.3, ymax=1e7, legend columns=2]
+      \addplot[oiBlack, mark=*] table[x=sites, y=median] {figures/data/plot-chill-dseams-chill.dat};
+      \addlegendentry{d-SEAMS}
+      \addplot[oiBlue, mark=square*] table[x=sites, y=median] {figures/data/plot-chill-ovito-chill.dat};
+      \addlegendentry{OVITO}
+      \addplot[oiOrange, mark=triangle*] table[x=sites, y=median] {figures/data/plot-chill-palmer-chill.dat};
+      \addlegendentry{CHILL+ library}
+    \nextgroupplot[title={(b) \textit{q}\textsubscript{6}, ice Ic}, ymin=0.5, ymax=1e5]
+      \addplot[oiBlack, mark=*] table[x=sites, y=median] {figures/data/plot-q6-dseams-q6.dat};
+      \addlegendentry{d-SEAMS}
+      \addplot[oiGreen, mark=diamond*] table[x=sites, y=median] {figures/data/plot-q6-freud-q6.dat};
+      \addlegendentry{freud}
+      \addplot[oiPurple, mark=pentagon*] table[x=sites, y=median] {figures/data/plot-q6-pyscal-q6.dat};
+      \addlegendentry{pyscal}
+    \nextgroupplot[title={(c) Primitive rings, liquid}, xmin=3000, ymin=10, ymax=1e5]
+      \addplot[oiBlack, mark=*] table[x=sites, y=median] {figures/data/plot-ovrings-liquid-dseams-rings.dat};
+      \addlegendentry{d-SEAMS}
+      \addplot[oiBlue, mark=square*] table[x=sites, y=median] {figures/data/plot-ovrings-liquid-ovito-rings.dat};
+      \addlegendentry{OVITO}
+    \nextgroupplot[title={(d) Cage labels, ice Ic}, ymin=1, ymax=1e7, legend columns=2]
+      \addplot[oiBlack, mark=*] table[x=sites, y=median] {figures/data/plot-seeded-dseams-seeded.dat};
+      \addlegendentry{d-SEAMS}
+      \addplot[oiBlue, mark=square*] table[x=sites, y=median] {figures/data/plot-seeded-ovito-ptm.dat};
+      \addlegendentry{PTM}
+      \addplot[oiSky, mark=diamond*] table[x=sites, y=median] {figures/data/plot-seeded-ovito-diamond.dat};
+      \addlegendentry{OVITO diamond}
+      \addplot[oiBlue, mark=triangle, densely dashed] table[x=sites, y=median] {figures/data/plot-seeded-ovito-cna.dat};
+      \addlegendentry{CNA}
+      \addplot[oiPurple, mark=pentagon*] table[x=sites, y=median] {figures/data/plot-seeded-pyscal-diamond.dat};
+      \addlegendentry{pyscal diamond}
+  \end{groupplot}
+\end{tikzpicture}

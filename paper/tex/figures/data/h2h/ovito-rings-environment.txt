@@ -1,0 +1,4 @@
+numpy==2.5.4
+ovito==3.17.2
+PySide6_Essentials==6.12.0
+Python 3.12.3

@@ -1,0 +1,870 @@
+\documentclass[preprint,12pt]{elsarticle}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{rotating}
+\usepackage{pdflscape}
+\usepackage{fancyvrb}
+\usepackage[final]{microtype}
+\usepackage{xurl}
+\usepackage{xcolor}
+\usepackage{siunitx}
+\sisetup{exponent-product=\times, group-minimum-digits=4, range-phrase=\textendash}
+\usepackage[hypertexnames=false]{hyperref}
+\usepackage{orcidlink}
+\input{figures/data/macros}
+\input{figures/data/scale_macros}
+\input{figures/data/shipped_macros}
+\input{xrefs}
+\input{release}
+\newtheorem{proposition}{Proposition}
+\renewcommand{\theproposition}{S\arabic{proposition}}
+\newproof{pf}{\proofname}
+\renewcommand{\thesection}{S\arabic{section}}
+\renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thepage}{S\arabic{page}}
+\setlength{\LTcapwidth}{\textwidth}
+\setlength{\emergencystretch}{2em}
+\setlength{\abovetopsep}{4pt}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{topnumber}{2}
+\setcounter{totalnumber}{4}
+\newcommand{\rel}[1]{\qty{\dsv{#1@rel}}{\percent}}
+\newcommand{\rtwo}[1]{\ifcsname dsv@#1@sig2\endcsname\num{\dsv{#1@sig2}}\else\num[round-mode=figures,round-precision=2]{\dsv{#1}}\fi}
+\newcommand{\rthree}[1]{\ifcsname dsv@#1@sig3\endcsname\num{\dsv{#1@sig3}}\else\num[round-mode=figures,round-precision=3]{\dsv{#1}}\fi}
+\newcommand{\ovrow}[3]{#3 & \dsv{o@#1@#2@sites} & \num{\dsv{o@#1@#2@dseams-rings}} & [\num{\dsv{o@#1@#2@dseams-rings@lo}}, \num{\dsv{o@#1@#2@dseams-rings@hi}}] & \iqr{\dsv{o@#1@#2@dseams-rings@q1}}{\dsv{o@#1@#2@dseams-rings@q3}} & \num{\dsv{o@#1@#2@ovito-rings}} & [\num{\dsv{o@#1@#2@ovito-rings@lo}}, \num{\dsv{o@#1@#2@ovito-rings@hi}}] & \iqr{\dsv{o@#1@#2@ovito-rings@q1}}{\dsv{o@#1@#2@ovito-rings@q3}} & \num{\dsv{o@#1@#2@ratio}} & [\num{\dsv{o@#1@#2@ratio@lo}}, \num{\dsv{o@#1@#2@ratio@hi}}]\\}
+\makeatletter
+% The primitive \input keeps a table body expandable inside an alignment.
+\newcommand{\tabbody}[1]{\@@input #1 }
+\newcommand{\iqr}[2]{\numrange{#1}{#2}}
+\def\sp@four#1, #2, #3, #4\@nil{#1 & #2 & #3 & #4}
+\newcommand{\kfour}[1]{\expandafter\expandafter\expandafter\sp@four\csname dsv@k@#1\endcsname\@nil}
+\def\ps@pprintTitle{\let\@oddhead\@empty\let\@evenhead\@empty\let\@oddfoot\@empty\let\@evenfoot\@oddfoot}
+\makeatother
+\journal{Computer Physics Communications}
+\biboptions{sort&compress}
+\hypersetup{
+  pdfauthor={Rohit Goswami, Amrita Goswami, Ruhila Goswami, Jayant K. Singh},
+  pdftitle={Supplementary material for d-SEAMS 2.0: Incremental ring and cage algorithms for ice structure analysis},
+  pdflang={English}}
+\setlength{\emergencystretch}{2em}
+
+\begin{document}
+
+\begin{frontmatter}
+\title{Supplementary material for ``d-SEAMS 2.0: Incremental ring and cage algorithms for ice structure analysis''}
+
+% snapper:off
+\author[iitk]{Rohit Goswami\fnref{rg-now}\orcidlink{0000-0002-2393-8056}}
+\ead{rgoswami@ieee.org}
+\author[iitk]{Amrita Goswami\corref{cor1}\fnref{ag-now}\orcidlink{0000-0001-8706-2383}}
+\ead{amrita@hi.is}
+\author[hi-life]{Ruhila Goswami\orcidlink{0000-0002-5443-9356}}
+\ead{rug17@hi.is}
+\author[iitk]{Jayant K. Singh\corref{cor2}\orcidlink{0000-0001-8056-2115}}
+\ead{jayantks@iitk.ac.in}
+\cortext[cor1]{Corresponding author}
+\cortext[cor2]{Co-corresponding author}
+\fntext[rg-now]{Present address: SURF BV, Amsterdam, The Netherlands, and TurtleTech ehf., Reykjavik, Iceland.}
+\fntext[ag-now]{Present address: Universidad Complutense de Madrid, Madrid, Spain.}
+\address[iitk]{Department of Chemical Engineering, Indian Institute of Technology Kanpur, Kanpur 208016, Uttar Pradesh, India}
+\address[hi-life]{Faculty of Life and Environmental Sciences, University of Iceland, Reykjavik, Iceland}
+% snapper:on
+\end{frontmatter}
+
+The supplement gives the correctness arguments and the cost of the algorithms of the main text in Section~\ref{sec:s-algorithms}.
+Section~\ref{sec:s-protocol} states how every measurement was taken, and Section~\ref{sec:s-tables} lists the measured tables.
+Section~\ref{sec:s-labels} compares the labels and ring counts of the codes, and Section~\ref{sec:s-repro} gives the commands that reproduce every number.
+Numbers without the prefix S refer to the main text.
+
+\section{Algorithms and their correctness}
+\label{sec:s-algorithms}
+
+The bond graph $G=(V,E)$ of Section~\mref{sec:graphs} has the vertices $0,\dots,n-1$ in the order of the frame and the largest degree $\Delta$.
+The ring search runs up to the largest ring size $D$, and $\ell_{\max}=\lfloor D/2\rfloor$ is the depth of its breadth-first trees.
+For a vertex $v$ and a set $Y$ of vertices, $d_G(v,Y)$ is the distance from $v$ to the nearest member of $Y$, and $B_r(Y)$ is the set of vertices within $r$ bonds of $Y$.
+On a ring of $k$ members $v_0,\dots,v_{k-1}$, the ring distance of Eq.~(\mref{eq:primitive}) is
+\begin{equation}
+  d_R(v_i,v_j)=\min\bigl(|i-j|,\,k-|i-j|\bigr)\le\lfloor k/2\rfloor\le\ell_{\max},
+  \label{eq:s-arc}
+\end{equation}
+so a shortcut between two members of a ring of at most $D$ members has at most $\ell_{\max}-1$ bonds.
+Every arc of a ring is a path of $G$, so $d_G(u,v)\le d_R(u,v)$ for every pair of members, and a ring is primitive when no pair of members has $d_G(u,v)<d_R(u,v)$.
+
+\subsection{Primitive rings}
+\label{sec:s-rings}
+
+Algorithm~\mref{alg:rings} runs one breadth-first search from each vertex $s$ over the subgraph $G_{>s}$ induced by $s$ and the vertices above it.
+Each vertex on level $\ell\ge 1$ of the search keeps every neighbour on level $\ell-1$ as a parent, so the parent lists encode every shortest path from $s$ in $G_{>s}$.
+An even candidate of $2\ell$ members, with $\ell\ge 2$ and $2\ell\le D$, closes two parent paths from $s$ to a vertex $p$ on level $\ell$ that share only $s$ and $p$.
+An odd candidate of $2\ell+1\le D$ members closes the parent paths from $s$ to the two ends of a bond that both lie on level $\ell$, when the two paths share only $s$.
+The search forms each unordered pair of paths once and each bond once.
+A candidate is stored from its lowest member, in the direction of the lower of the two ring neighbours of that member, so every ring has one stored form.
+The test of Eq.~(\mref{eq:primitive}) reads, for each member, the row of vertices within $\rho=\max(\ell_{\max}-1,1)$ bonds of it in $G$ with their distances, and by Eq.~(\ref{eq:s-arc}) these rows decide Eq.~(\mref{eq:primitive}) exactly.
+
+\begin{proposition}
+\label{prop:s-rings} For every $D\ge 3$, Algorithm~\mref{alg:rings} returns each primitive ring of $G$ with at most $D$ members exactly once and returns no other cycle.
+\end{proposition}
+
+\begin{pf}
+Let $R$ be a primitive ring of $k\le D$ members with lowest member $s$.
+Every arc of $R$ from $s$ runs through members above $s$, so it is a path of $G_{>s}$.
+For every member $v$, Eq.~(\mref{eq:primitive}) and the inclusion of $G_{>s}$ in $G$ give
+\begin{equation*}
+  d_R(s,v)=d_G(s,v)\le d_{G_{>s}}(s,v)\le d_R(s,v),
+\end{equation*}
+so the shorter arc from $s$ to $v$ is a shortest path of $G_{>s}$, and $v$ lies on level $d_R(s,v)$ of the search from $s$.
+For $k=2\ell$, the two arcs from $s$ to the opposite member $p$ are shortest paths of $G_{>s}$ that share only $s$ and $p$, so the search from $s$ closes $R$ as an even candidate.
+For $k=2\ell+1$, the ends of the bond opposite $s$ both lie on level $\ell$, and the arcs from $s$ to them share only $s$, so the search closes $R$ as an odd candidate.
+The candidate passes the test because $R$ is primitive.
+A search from a vertex $t$ visits only vertices at or above $t$ and closes only cycles through $t$, so only the search from $s$ closes $R$, and it forms the pair of arcs of $R$ once.
+Every returned candidate is a cycle of distinct vertices, since its two paths share only their ends, and it satisfies Eq.~(\mref{eq:primitive}), so it is a primitive ring.
+\end{pf}
+
+A breadth-first tree of depth $r$ in a graph of largest degree $\Delta$ reaches at most
+\begin{equation}
+  b_\Delta(r)=1+\Delta\sum_{i=0}^{r-1}(\Delta-1)^{i}
+  \label{eq:s-ball}
+\end{equation}
+vertices, a number independent of $n$.
+For a function $f$ of the degree and the ring size alone, the search therefore costs $O\bigl(n\,f(\Delta,D)\bigr)$, and the rows of the test cost $O\bigl(n\,b_\Delta(\rho)\bigr)$.
+For $\Delta=4$ and $D=7$, the backtracking of d-SEAMS~1 follows up to $\Delta(\Delta-1)^{D-2}=972$ paths of $D-1$ bonds from each vertex~\cite{goswami2020dseams}, while a tree of depth $\ell_{\max}=3$ has at most $b_4(3)=53$ vertices.
+On ideal ice~Ic, the ring search of d-SEAMS is \rthree{v@1000@ring@ratio} times faster than that of d-SEAMS~1 at \dsv{hl@n} molecules and \rthree{v@top@ring@ratio} times faster at \dsv{v@largest} (Table~\ref{tab:s-stages}).
+
+\subsection{Locality of a change of status}
+\label{sec:s-locality}
+
+Let $G'$ be the bond graph of the next frame and $X$ the set of ends of the bonds that lie in exactly one of $E$ and $E'$.
+Proposition~\mref{prop:local} carries every ring that avoids $X$ when $D\le 7$, and for larger $D$ the carried rings have to avoid a margin around $X$.
+Let
+\begin{equation}
+  r=\max\Bigl(\Bigl\lfloor\frac{\ell_{\max}-2}{2}\Bigr\rfloor,0\Bigr)
+  \label{eq:s-radius}
+\end{equation}
+and let $T=B_r(X)$, with distances taken in the union graph $G\cup G'$.
+
+\begin{proposition}
+\label{prop:s-locality} Let $R$ be a ring of at most $D$ members with $R\cap T=\emptyset$.
+Then $R$ is a primitive ring of $G$ if and only if it is a primitive ring of $G'$.
+\end{proposition}
+
+\begin{pf}
+The members of $R$ lie outside $X$, so every bond of $R$ is present in both graphs and $R$ is a cycle of both.
+Suppose that $R$ is primitive in $G$ and that $G'$ has a shortcut $P$ of $L$ bonds between members $u$ and $v$, with $L<d_R(u,v)\le\ell_{\max}$.
+The path $P$ is not a path of $G$, so it has a changed bond.
+Let the first changed bond along $P$ be its $i$-th bond from $u$ and the last its $j$-th bond from $v$, so that $i+j\le L+1$.
+Both ends of a changed bond lie in $X$, so along $P$, a path of $G\cup G'$, a member of $X$ lies within $i-1$ bonds of $u$ and within $j-1$ bonds of $v$, and
+\begin{equation*}
+  \begin{aligned}
+    \min\bigl(d(u,X),d(v,X)\bigr)&\le\min(i,j)-1\le\Bigl\lfloor\frac{L+1}{2}\Bigr\rfloor-1\\
+    &=\Bigl\lfloor\frac{L-1}{2}\Bigr\rfloor\le\Bigl\lfloor\frac{\ell_{\max}-2}{2}\Bigr\rfloor,
+  \end{aligned}
+\end{equation*}
+where $d$ is the distance in $G\cup G'$.
+Then $u$ or $v$ lies in $T$, a contradiction, and exchanging $G$ and $G'$ gives the converse.
+\end{pf}
+
+For $D\le 7$, Eq.~(\ref{eq:s-radius}) gives $r=0$ and $T=X$, which is Proposition~\mref{prop:local}, and it gives $r=1$ for $8\le D\le 11$ and $r=2$ for $12\le D\le 15$.
+The margin is needed from $D=8$ on.
+Take an eight-ring whose opposite members $u$ and $v$ are also joined by a path $u,a,b,v$ through two molecules off the ring, and delete the bond $ab$.
+The ring avoids $X=\{a,b\}$, yet it becomes primitive, because its only shortcut, of three bonds against an arc of four, is gone.
+With $r=1$, the set $T$ contains $u$ and $v$, and the update searches the ring again.
+The program computes $r$ from $D$ and builds $T$ by a breadth-first search of depth $r$ from $X$ over the rows of both graphs.
+
+\subsection{The ring update}
+\label{sec:s-update}
+
+The update keeps the rings of the previous frame in their stored form, sorted, together with the neighbour rows and the distance rows of that frame.
+For the next frame it takes seven steps.
+\begin{enumerate}
+\item Compare the neighbour rows of $G$ and $G'$, and collect the changed bonds and the set $X$ of their ends.
+\item Run the full search of Algorithm~\mref{alg:rings} on $G'$ when the number of molecules differs between the frames.
+\item Otherwise build $T=B_r(X)$ in $G\cup G'$, with $r$ from Eq.~(\ref{eq:s-radius}).
+      A full search also runs when $T$ is the whole vertex set.
+\item Refresh the distance rows of the vertices within $\rho$ bonds of $X$ in $G\cup G'$.
+      Every other row is the same in both graphs, since a path of at most $\rho$ bonds uses a changed bond only if it reaches an end of that bond within $\rho-1$ bonds.
+\item Remove every stored ring that meets $T$.
+\item From each $s\in T$, run the search of Algorithm~\mref{alg:rings} over all of $G'$, and keep a candidate only if no member of the candidate in $T$ lies below $s$.
+\item Merge the kept candidates, in their stored form, into the stored rings.
+\end{enumerate}
+
+\begin{proposition}
+\label{prop:s-update} If the stored rings are the primitive rings of $G$ with at most $D$ members, the update returns the primitive rings of $G'$ with at most $D$ members, each once.
+\end{proposition}
+
+\begin{pf}
+After a full search the claim is Proposition~\ref{prop:s-rings}.
+Otherwise, the carried rings are the stored rings that avoid $T$, and each of them is a primitive ring of $G'$ by Proposition~\ref{prop:s-locality}.
+A primitive ring of $G'$ that avoids $T$ is a primitive ring of $G$ by the same proposition, so it is stored and carried.
+Let $R$ be a primitive ring of $G'$ that meets $T$, and let $s$ be its lowest member in $T$.
+By Eq.~(\mref{eq:primitive}) in $G'$, the arcs of $R$ from $s$ are shortest paths of $G'$, so the search from $s$ over $G'$ closes $R$ as in the argument for Proposition~\ref{prop:s-rings} and keeps it.
+The search from another member of $R$ in $T$ rejects $R$, since $s$ lies below that member, and the search from a vertex of $T$ outside $R$ cannot close $R$, since every cycle that it closes passes through its start.
+The refreshed rows are the rows of $G'$, so every kept candidate satisfies Eq.~(\mref{eq:primitive}) in $G'$.
+The found rings meet $T$ and the carried rings avoid it, so the two sets are disjoint, and the update returns each primitive ring of $G'$ once.
+\end{pf}
+
+By induction from a full search on the first frame, the update gives every frame of a trajectory the rings of a full search.
+The comparison of the rows and the merge cost $O(n\Delta)$ per frame, and the searches cost as much as Algorithm~\mref{alg:rings} on $|T|$ start vertices, with trees over all of $G'$.
+On the spliced frames of Section~\ref{sec:s-updates}, the ring update takes \qty{\dsv{c@ringlast@inc}}{\milli\second} at \dsv{c@ringlast@churn} changed bonds, against \qty{\dsv{c@ringlast@batch}}{\milli\second} for the full search (Table~\ref{tab:s-churn}).
+The ring update enumerates the sources in $T$ and no others.
+A full pass runs only when $T$ is the whole vertex set.
+Every timing of this paper uses one thread.
+
+\subsection{The cage-label update}
+\label{sec:s-dirty}
+
+The cage labels of Section~\mref{sec:cages} are unions over the results of two tests on each six-ring.
+The pair test of a six-ring $i$ returns its basal partners with their prismatic rings.
+It reads the rings of each pair, the neighbour rows of the members of $i$ and the six-rings that share a member with $i$, since every partner has a member bonded to a member of $i$.
+The equator test of $i$ reads the six-rings that share a member with $i$, and the double-diamond search runs it only on rings without a hexagonal-cage label.
+Let $M$ be the set of molecules on six-rings that appeared or vanished between the frames.
+A six-ring is dirty for the pair test when it is new, when one of its members lies in $M$ or has a changed neighbour row, or when the row of one of its members in $G'$ contains a molecule of $M$.
+A six-ring is dirty for the equator test when it is new or when one of its members lies in $M$.
+
+\begin{proposition}
+\label{prop:s-dirty} A six-ring that is not dirty for a test has the same result of that test in both frames, up to the numbering of the rings.
+\end{proposition}
+
+\begin{pf}
+A six-ring $i$ that is not new has the same members in both frames.
+If $i$ is not dirty for the equator test, every six-ring that shares a member with $i$ in either frame has that member outside $M$, so it is present in both frames, and the test reads the same rings.
+If $i$ is not dirty for the pair test, the members of $i$ keep their neighbour rows.
+A six-ring through a member of $i$ that appeared or vanished would put a molecule of $M$ on $i$.
+A partner of $i$ that appeared or vanished would put a molecule of $M$ in the row of a member of $i$ in $G'$, or change that row.
+The test therefore reads the same rings and rows in both frames and returns the same partners and prismatic rings.
+\end{pf}
+
+The update carries the stored results of every other ring and maps their ring indices to the numbering of the next frame.
+It tests a ring again when one of its carried partners or prismatic rings has no image in that numbering.
+A ring is hexagonal when it belongs to a passing pair.
+The equator test runs on every ring without that flag whose result is unknown, and each passing equator gives the double-diamond flag to itself and to its six peripheral rings.
+The flags are the same unions as those of the full pass, so by Proposition~\ref{prop:s-dirty} the update returns the labels of the full pass.
+The row comparison and the renumbering visit every molecule and every six-ring, so the update costs $O(n)$ per frame even for one changed bond.
+With three changed bonds it gains only a factor of \dsv{c@small@affgain} over the full pass (Table~\ref{tab:s-churn}).
+It runs the full pass when more than \qty{\dsv{thr@cagerows@pct}}{\percent} of the molecules have a changed row or when more than \qty{\dsv{thr@cagerows@pct}}{\percent} of the six-rings pass through such a molecule.
+It does the same when more than \qty{\dsv{thr@cagerows@pct}}{\percent} of the six-rings are dirty for the pair test.
+After a fallback it runs the full pass on every later frame, without the row comparison, until the number of molecules changes or a frame has no six-ring.
+
+Seeded labels run one update on the mutual graph and one on the union graph.
+For each cage type, they start from the molecules that carry the type on the mutual graph.
+They grow over the bonds of the union graph through the molecules that carry the type on either graph and give the type to every molecule they reach.
+A cluster without a seed of a cage type keeps no label of that type.
+Ring completion, an option of the command-line program, then gives a cage type to the one unlabelled member of a six-ring of the union graph whose other five members carry it.
+It repeats until no label changes, so it adds no label of a type without seeds.
+The cage labels of the comparator campaign use ring completion, and the nucleation runs of Section~\mref{sec:nucleation} use the seeded labels without it.
+
+\subsection{Packing the double-diamond cages}
+\label{sec:s-packing}
+
+Each equator with its six peripheral rings is a candidate cage of two adamantane units.
+Two candidates conflict when they share an adamantane unit, and since a unit has four faces and lies in at most four candidates, a candidate has at most six conflicts.
+The packing splits the graph of conflicts into connected components, takes every candidate without a conflict and treats the components in the order of their lowest candidate.
+A component is the line graph of a bipartite graph $H$ when its conflicts split into one clique per adamantane unit and the units can be coloured with two colours so that the two units of each candidate differ.
+The cages of such a component are a matching in $H$, whose vertices are the units and whose edges are the candidates.
+For a four-regular $H$, an Euler split gives a perfect matching~\cite{gabow1976euler}.
+For any other bipartite $H$, augmenting paths grow a greedy matching, taken in the order of the candidates, into a maximum matching~\cite{kuhn1955hungarian}.
+An alternating breadth-first search from the unmatched units of one colour then gives a vertex cover of the same size, made of the units of that colour that the search does not reach and the units of the other colour that it reaches.
+By K\"onig's theorem, the cover certifies that the matching is maximum~\cite{konig1931graphs}.
+A component that is not such a line graph is solved by a branch and bound for the largest set of candidates without conflicts, bounded by a greedy partition of the candidates into cliques~\cite{tomita2003maxclique}.
+The search keeps one bit per candidate, so the set grows with the component and no component is dropped.
+
+On the ice~Ic frame of \dsv{w@ice-Ic@sites} molecules, the \dsv{v@1000@count@two@ddc_rings} equators are the edges of a four-regular bipartite $H$ with one vertex per adamantane unit, and the Euler split gives \dsv{v@1000@count@two@ddc_cages} cages that cover every unit and every molecule.
+d-SEAMS~1 reports one cage per equator, \dsv{v@1000@count@one@ddc_cages} on the same frame, and each adamantane unit lies in four of them.
+The number reported for this paper is the packed matching, $N/2$ cages on perfect ice~Ic.
+The 2020 candidate count is one cage per equator.
+On that lattice the candidate count is $2N$.
+Those six-rings are the edges of a four-regular graph on $N$ units.
+A perfect matching has one edge for every two units, which is $N/2$ packed cages.
+
+\subsection{Cost of the stages}
+\label{sec:s-cost}
+
+Table~\ref{tab:s-cost} gives the cost of each stage in both versions, with $N_6$ the number of six-rings, and the exponents of power laws fitted to the medians of the version comparison.
+The ring stages of both versions grow linearly with the number of molecules, and the cage stages of d-SEAMS~1 grow with the square and the cube of the number of molecules, as their pair loops predict~\cite{goswami2020dseams}.
+Only the packing of d-SEAMS depends on the structure of the conflicts, and on every frame of this paper it uses the Euler split or the matching.
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{The cage stages of d-SEAMS grow with fitted exponents below one, and those of d-SEAMS~1 with exponents near two and three.}
+Cost for a network of largest degree $\Delta$ with $N_6$ six-rings, and exponents of power laws fitted to the medians on ideal ice~Ic from \dsv{v@smallest} to \dsv{v@largest} molecules for d-SEAMS~1 and to \dsv{v@largest@two} molecules for d-SEAMS.
+The double-diamond stage of d-SEAMS adds the packing of Section~\mref{sec:cages} to its search.}
+\label{tab:s-cost}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lllrr@{}}
+\toprule
+ & \multicolumn{2}{c}{Cost} & \multicolumn{2}{c}{Fitted exponent} \\
+\cmidrule(lr){2-3}\cmidrule(l){4-5}
+Stage & d-SEAMS~1 & d-SEAMS & d-SEAMS~1 & d-SEAMS \\
+\midrule
+Primitive rings & $O\bigl(n\Delta(\Delta-1)^{D-2}\bigr)$ & $O\bigl(n\,f(\Delta,D)\bigr)$ & \dsv{v@slope@one@ring} & \dsv{v@slope@two@ring} \\
+Hexagonal cages & $O(N_6^2\,n)$ & $O(N_6)$ & \dsv{v@slope@one@hc} & \dsv{v@slope@two@hc} \\
+Double-diamond cages & $O(N_6^2)$ & $O(N_6)$ & \dsv{v@slope@one@ddc} & \dsv{v@slope@two@ddc} \\
+Whole path & & & \dsv{v@slope@one@path} & \dsv{v@slope@two@path} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Measurement protocol}
+\label{sec:s-protocol}
+
+\subsection{Machines and builds}
+\label{sec:s-machines}
+
+The hardware line is \texttt{uname -m} \texttt{\dsv{hw@arch}}, \texttt{nproc} \dsv{hw@nproc}, CPU model \texttt{\dsv{hw@model}}.
+We ran the version comparison, the update measurements, the nucleation runs, the ring samples, the neighbour samples and the comparator campaign on one machine.
+We stopped the statistics script when the architecture, the output of \texttt{nproc} or the CPU model differed.
+We pinned every timed process with \texttt{taskset}, and we set the thread counts of OpenMP, OpenBLAS, MKL, Rayon and OVITO to one.
+We left the clock frequency at the setting of the machine.
+
+We built seams-core with Meson and GCC~\dsv{hw@gcc} in release mode with the options of Section~\ref{sec:s-repro}.
+We measured commit \texttt{\seqsplit{66617588258baf1f41895676966fae94a9075c08}} of version 2.12.0.
+The version DOI for that release is \DOIPENDING.
+We stored the neighbour membership of the affiliation pass as compressed sparse rows instead of a bit matrix over all pairs of molecules, so that a frame of \num{e6} molecules fits in memory.
+We used the library and the command-line program of the git tree \texttt{cb10f6d6} of the directory \texttt{src}.
+That is the tree \texttt{git rev-parse HEAD:src} prints in a checkout of that commit.
+We ran the workflow of Section~\ref{sec:s-repro} from the repository root.
+We took the drivers of the version comparison and of the update sweep from that commit.
+The update driver is the blob \texttt{c08b154df0a480bd1f1903fb98eef05ee13ccca4} of \texttt{tests/bench\_churn\_sweep.cpp}.
+We stored the SHA-256 sums of all binaries with the records.
+We recorded the commit and the tree of the comparator campaign, whose \texttt{src} tree is the same.
+Its benchmark driver has every mode that the campaign calls, and its build files carry the version string 2.12.0.
+We built d-SEAMS~1.0.1 from the tag v1.0.1, commit 6e51956f, with the same compiler in C++17 at optimization level 2, against Boost and GSL~2.8~\cite{dseams101}.
+We called the ring and cage functions of that release on the same graph as the benchmark driver of d-SEAMS.
+We used Python~3.12.13, Meson~1.10.2 and GNU Fortran~15.2.0 in the comparator campaign, and Python~3.12.3 in the OVITO ring campaign.
+Table~\ref{tab:s-settings} lists the versions of the codes.
+
+\subsection{Frames}
+\label{sec:s-frames}
+
+The frames of the version comparison are ideal ice~Ic of $\dsv{set@cellsites}m^3$ molecules for $m=\dsv{set@cells@first},\dots,\dsv{set@cells@last}$, from \num{\dsv{set@ladder@first}} to \num{\dsv{set@ladder@last}} molecules, with an oxygen distance of \qty{\dsv{set@bond}}{\angstrom} in a periodic cubic cell.
+The mW crystal is the thermalized ice~Ic frame of \num{4096} molecules in the test data of the program.
+The comparator campaign builds ideal ice~Ic and ice~Ih of \num{1000}, \num{10648}, \num{97336} and \num{1000000} molecules with the same oxygen distance.
+Its liquid frame would be the first frame of a LAMMPS dump of \num{4096} molecules, replicated to \num{32768}, \num{110592} and \num{884736} molecules.
+That dump is not in this checkout, so this rerun has no liquid column.
+Its confined frame is the \num{250} oxygen atoms of the first frame of the deposited square-tube trajectory~\cite{goswami2019nanotubedata}, replicated to \num{1000}, \num{10000}, \num{100000} and \num{1000000} molecules.
+The nucleation trajectory is the deposited run of d-SEAMS~1, \dsv{n@frames} frames of \dsv{n@sites} molecules of mW water~\cite{goswami2019nucleationdata,molinero2009mw}.
+The SHA-256 sums of all input frames are stored with the records (Section~\ref{sec:s-repro}).
+
+\subsection{Version comparison}
+\label{sec:s-versions}
+
+Both versions read the frame, build the cutoff graph of \qty{\dsv{set@cutoff}}{\angstrom} once outside the timers and time three stages on that graph.
+The ring stage searches the primitive rings of up to seven members and extracts the six-rings, the hexagonal-cage stage runs the hexagonal-cage search and the double-diamond stage runs the double-diamond search.
+The whole path is the sum of the three.
+In d-SEAMS, the hexagonal-cage stage includes the construction of the index and the double-diamond stage the packing.
+d-SEAMS ran \dsv{set@v@warmup} warm-up calls and \dsv{set@v@repeats} timed calls on every frame.
+d-SEAMS~1 ran \dsv{set@v1@216@warmup} and \dsv{set@v1@216@repeats} calls at \num{216} molecules, \dsv{set@v1@512@warmup} and \dsv{set@v1@512@repeats} at \num{512} and \dsv{set@v1@1728@warmup} and \dsv{set@v1@1728@repeats} at \num{1000} and \num{1728}, since one call at \num{1728} molecules takes \qty{\dsv{v@top@path@one@s}}{\second}.
+
+\subsection{Comparator campaign}
+\label{sec:s-campaign}
+
+The campaign runs each case, one code on one frame, in a worker process pinned to core~\dsv{set@core} with an address-space limit of \qty{\dsv{set@memory}}{\gibi\byte}.
+The worker builds the input objects of the code outside the timer, and the timer covers the neighbour search of the code and its operation.
+Each case runs \dsv{set@warmup} warm-up calls and \dsv{set@repeats} timed calls up to \num{e5} molecules and \dsv{set@repeats@largest} timed calls at \num{e6}.
+The calls of matscipy, cycless and the CHILL+ library take longer, so these codes run one warm-up call and then as many timed calls as fit in \qty{\dsv{set@target}}{\second}, between \dsv{set@minrepeats} and \dsv{set@repeats}.
+A case of the CHILL+ library or of a classifier stops after \qty{\dsv{set@timeout}}{\second}, and a ring case after \qty{\dsv{set@ringtimeout}}{\second}.
+The whole-process ring lane times \dsv{set@warmup} warm-up and \dsv{set@repeats} timed runs of the benchmark driver of d-SEAMS, each a separate process that reads the frame.
+RINGS gets \dsv{set@rings@warmup} warm-up and \dsv{set@rings@repeats} timed runs, with a limit of \qty{\dsv{set@runtimeout}}{\second} per run.
+
+The matched pairs are the CHILL+ labels of d-SEAMS with OVITO and with the CHILL+ library, $q_6$ of d-SEAMS with freud and with pyscal, the primitive rings of d-SEAMS with both interfaces of matscipy, and the whole-process ring lane of d-SEAMS with RINGS.
+The local structure classifiers of OVITO and pyscal are timed against the cage labels of d-SEAMS and reported apart from the matched pairs.
+We call the pair-list and cycle functions that GenIce uses through the packages pairlist and cycless.
+Their ring counts differ from those of d-SEAMS and matscipy on the confined frames (Section~\ref{sec:s-labels}), so their timings are reported apart as well.
+A molecule is ice for $q_6$ when its $q_6$ exceeds \num{\dsv{set@q6}}, in every code.
+The CHILL+ classes of d-SEAMS and OVITO map to cubic, hexagonal, interfacial, hydrate, interfacial hydrate and other, with the reclassified cubic and hexagonal classes of d-SEAMS merged into cubic and hexagonal and its water class into other.
+The seven classes of the CHILL+ library map to the same classes, with its classes 0 and 4 merged into other.
+Polyhedral template matching maps its cubic and hexagonal diamond to cubic and hexagonal.
+The diamond classifiers of OVITO and pyscal map their types 1 to 3 to cubic and 4 to 6 to hexagonal, and every other type maps to other.
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{Every code of the comparison builds its own neighbours from the oxygen positions inside the timer, with the settings below.}
+The identifiers are the method names in the records; the cutoff is \qty{\dsv{set@cutoff}}{\angstrom} wherever a code takes one.}
+\label{tab:s-settings}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}p{2.9cm}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Identifier & Code & Settings \\
+\midrule
+\texttt{dseams-chill} & d-SEAMS 2.12.0 & CHILL+ bond correlations of order 3 on the four nearest neighbours within the cutoff~\cite{nguyen2015identification} \\
+\texttt{dseams-q6} & d-SEAMS & $q_6$ on the mutual graph of the four nearest neighbours~\cite{steinhardt1983bond} \\
+\texttt{dseams-seeded} & d-SEAMS & seeded cage labels with rings of up to seven members and ring completion \\
+\texttt{dseams-rings} & d-SEAMS & primitive rings of up to \dsv{set@maxring@word} members on the cutoff graph \\
+\texttt{dseams-rings-process} & d-SEAMS & the same rings, one process per call, file reading included \\
+\texttt{ovito-chill} & OVITO 3.17.2~\cite{ovito3172} & CHILL+ modifier with the cutoff \\
+\texttt{ovito-ptm} & OVITO & polyhedral template matching~\cite{larsen2016robust} with cubic and hexagonal diamond, RMSD cutoff \num{\dsv{set@ptm}} \\
+\texttt{ovito-diamond} & OVITO & diamond structure identification~\cite{maras2016global} \\
+\texttt{ovito-cna} & OVITO & adaptive common neighbour analysis~\cite{stukowski2012structure} \\
+\texttt{ovito-rings} & OVITO & bonds within the cutoff and the ring finder for rings of \dsv{set@minring@word} to \dsv{set@maxring@word} members~\cite{ovitofindrings} \\
+\texttt{palmer-chill} & CHILL+ library, commit ee8a3cb0~\cite{palmer2026orderparams} & CHILL+ of order 3 on the four nearest of at most \dsv{set@palmer} neighbours within the cutoff, built with GNU Fortran \\
+\texttt{freud-q6} & freud 3.6.1~\cite{ramasubramani2020freud} & $q_6$ without averaging on the four nearest neighbours, one thread \\
+\texttt{pyscal-q6} & pyscal 4.1.0~\cite{menon2019pyscal} & $q_6$ without averaging on the four nearest neighbours \\
+\texttt{pyscal-diamond} & pyscal & diamond structure identification with its default neighbours \\
+\texttt{matscipy-rings-public} & matscipy 1.3.1~\cite{grigorev2024matscipy} & ring statistics with the cutoff and a maximum length of \dsv{set@maxlength}, which counts rings of up to \dsv{set@maxring@word} members \\
+\texttt{matscipy-rings-kernel} & matscipy & its compiled neighbour list, graph distances and shortest-path ring search, up to \dsv{set@maxring@word} members \\
+\texttt{genice-rings} & GenIce 2.2.13.3, cycless 0.7~\cite{matsumoto2018genice,matsumoto2026cycless} & pair list within the cutoff and the cycles of up to \dsv{set@maxring@word} members of cycless \\
+\texttt{rings-1.3.5} & RINGS 1.3.5~\cite{leroux2010rings} & primitive rings of up to \dsv{set@maxring@word} members with periodic boundaries, one process per run \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{OVITO ring campaign}
+\label{sec:s-ovito}
+
+We timed the ring finder of OVITO in a campaign of its own on the frames of the comparator campaign, with each code in a child process of its own.
+In the OVITO process, a fresh data collection is built outside the timer, and the timer covers the bond creation within \qty{\dsv{set@cutoff}}{\angstrom} and the ring finder for rings of \dsv{set@minring@word} to \dsv{set@maxring@word} members.
+d-SEAMS ran its in-memory ring search through the benchmark driver.
+Each code ran \dsv{set@o@warmup} warm-up calls and \dsv{set@o@repeats} timed calls up to \num{e5} molecules and \dsv{set@o@warmup@largest} warm-up call and \dsv{set@o@repeats@largest} timed calls at \num{e6}.
+The tables use the third run of this campaign.
+The first run shared the machine with another job and gave bimodal times on the confined frame of \num{1000} molecules, and the second ran OVITO inside the driver process instead of a child process.
+
+\subsection{Updates and the nucleation trajectory}
+\label{sec:s-updates}
+
+We took frames \dsv{set@sweep@a} and \dsv{set@sweep@b} of the nucleation trajectory, both of \dsv{c@nop} molecules, and replaced the positions of frame \dsv{set@sweep@a} within a sphere at the centre of the cell by those of frame \dsv{set@sweep@b}.
+The radius of the sphere runs over \dsv{set@radii}, and a last frame replaces every position.
+The updates of the rings of up to six members and of their cage labels on the cutoff graph alternate between frame \dsv{set@sweep@a} and the spliced frame, so every call carries them across the same changed bonds.
+The full searches run from the start on the spliced frame.
+Each timing is the median of \dsv{c@reps} calls, and every update is compared with the full search after each call.
+
+The nucleation runs time the command-line program over all \dsv{n@frames} frames, with the rings and labels carried between frames and with every frame rebuilt from the start, on the cutoff graph and on the seeded graph.
+The program searches the rings of up to six members on each graph and keeps those that do not wind through the periodic cell.
+Each of the four runs was repeated \dsv{set@n@warmup@word} times as warm-up and \dsv{set@n@runs@word} times with the wall-clock time of the process, file reading included.
+The carried and rebuilt runs wrote identical output files on both graphs.
+
+\subsection{Statistics}
+\label{sec:s-stats}
+
+Every timing is the median of its calls, with the exact \dsv{set@coverage@pct}\% interval of the median from the binomial distribution of the order statistics~\cite{hollander2014nonparametric}; for six calls this interval is the range of the calls.
+Its relative error is the larger distance from the median to an end of the interval, in percent of the median.
+The quartiles $Q_1$ and $Q_3$ of the calls interpolate linearly between their order statistics, which is definition~7 of Hyndman and Fan~\cite{hyndman1996sample} and the default of numpy.
+A ratio of two medians carries a percentile interval from \num{\dsv{set@draws}} bootstrap resamples of the calls of both codes with the seed \dsv{set@seed}~\cite{efron1993bootstrap}.
+Two codes count as separated when a two-sided Mann-Whitney test rejects equal distributions of their calls at the \dsv{set@significance@pct}\% level after Holm's correction over all \dsv{h@comparisons} comparisons of the campaign~\cite{holm1979simple}.
+The largest corrected $p$ of a matched comparison is \num{\dsv{h@equivalent@maxp}}, and the largest relative error of a ratio in Table~\ref{tab:s-h2h} is \qty{\dsv{t@maxrel}}{\percent}.
+In the OVITO ring campaign, Table~\ref{tab:s-ring-perf} lists the medians of the file read, the ring search, and the bond step plus the ring search.
+The script \texttt{paper/tex/figures/stats.py} computes every interval, test, table and number of the paper from the records with the Python standard library.
+
+\section{Measured tables}
+\label{sec:s-tables}
+
+Tables~\ref{tab:s-versions} and \ref{tab:s-stages} give the version comparison of Section~\mref{sec:versions}, and Tables~\ref{tab:s-h2h} to \ref{tab:s-censored} the comparison with other codes of Section~\mref{sec:codes}.
+Table~\ref{tab:s-churn} gives the update measurements of Section~\mref{sec:churn}, Table~\ref{tab:s-nucleation} the nucleation runs and Table~\ref{tab:s-ladder} every completed timing of the comparator campaign.
+
+% snapper:off
+\begin{sidewaystable}
+\centering
+\caption{\textbf{On ideal ice~Ic, the whole path of d-SEAMS takes less time than that of d-SEAMS~1 at every size, and the ratio grows with the size.}
+Rings of up to seven members and both cage searches on the cutoff graph, on frames on which both versions find two six-rings per molecule.
+Calls are the timed calls after the warm-up, the medians and quartiles are in milliseconds with exact \dsv{set@coverage@pct}\% intervals, and the ratio of d-SEAMS~1 to d-SEAMS carries its bootstrap interval.
+\textsuperscript{a}Not run, and no time is projected for these cells: d-SEAMS~1 ran up to \dsv{v@largest} molecules of ideal ice~Ic, where one call takes \qty{\dsv{v@top@path@one@s}}{\second}, and not on the mW crystal.
+\textsuperscript{b}The thermalized mW ice~Ic crystal in the test data of the program.}
+\label{tab:s-versions}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}rrrccrrccrc@{}}
+\toprule
+ & \multicolumn{4}{c}{d-SEAMS~1} & \multicolumn{4}{c}{d-SEAMS} & \multicolumn{2}{c}{Ratio} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}\cmidrule(l){10-11}
+Molecules & Calls & Median & Interval & Quartiles & Calls & Median & Interval & Quartiles & Median & Interval \\
+\midrule
+\tabbody{figures/data/tab-versions}
+\bottomrule
+\end{tabular}
+
+\bigskip
+\caption{\textbf{At \dsv{v@largest} molecules of ice~Ic, the hexagonal-cage search takes \qty{\dsv{v@top@hc@one@s}}{\second} of the \qty{\dsv{v@top@path@one@s}}{\second} of d-SEAMS~1, and \qty{\dsv{v@top@hc@two}}{\milli\second} in d-SEAMS.}
+Medians and quartiles in milliseconds with exact \dsv{set@coverage@pct}\% intervals over \dsv{v@top@path@one@n} calls of d-SEAMS~1 and \dsv{v@top@path@two@n} calls of d-SEAMS, and the ratio of d-SEAMS~1 to d-SEAMS with its bootstrap interval, for the rings of up to seven members and the hexagonal (HC) and double-diamond (DDC) cage searches.}
+\label{tab:s-stages}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrccrccrc@{}}
+\toprule
+ & \multicolumn{3}{c}{d-SEAMS~1} & \multicolumn{3}{c}{d-SEAMS} & \multicolumn{2}{c}{Ratio} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(l){8-9}
+Stage & Median & Interval & Quartiles & Median & Interval & Quartiles & Median & Interval \\
+\midrule
+\tabbody{figures/data/tab-stages}
+\bottomrule
+\end{tabular}
+\end{sidewaystable}
+% snapper:on
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{Near \num{e5} molecules, every matched code that completes takes longer than d-SEAMS, and three of the four local classifiers take less time than its cage labels.}
+The d-SEAMS rows give median times in milliseconds with their quartiles, and the other rows the ratio of the median time of the code to that of d-SEAMS on the same frame, so a code with a ratio below one is faster than d-SEAMS.
+The frames have \dsv{o@ic@1e5@sites} molecules of ice~Ic and of ice~Ih and \dsv{o@confined@1e5@sites} of the confined ice.
+The liquid column of the comparator rows was not rerun.
+The ring rows still include the liquid frame of the OVITO ring campaign.
+The cage-label rows time the cage labels of d-SEAMS against the local structure classifiers, and the d-SEAMS and OVITO ring rows come from the OVITO ring campaign (Table~\ref{tab:s-ovito}).
+The largest relative error of a ratio in the table is \qty{\dsv{t@maxrel}}{\percent}.
+\textsuperscript{a}Segmentation fault of both interfaces of matscipy.
+\textsuperscript{b}A run of the CHILL+ library that ended without output.
+\textsuperscript{c}No call finished within the time limit of Section~\ref{sec:s-campaign}.}
+\label{tab:s-h2h}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+Operation & Code & Ice~Ic & Ice~Ih & Liquid & Confined \\
+\midrule
+\tabbody{figures/data/tab-h2h}
+\bottomrule
+\end{tabular}
+\end{table}
+
+% snapper:off
+\begin{sidewaystable}
+\centering
+\caption{\textbf{OVITO takes \rthree{o@ratio@min} to \rtwo{o@ratio@max} times as long as d-SEAMS for the primitive rings of up to \dsv{set@maxring@word} members, and the two codes find the same number of rings of each size on all \dsv{o@frames} frames.}
+Each code ran in a child process of its own, with \dsv{set@o@repeats} timed calls up to \num{e5} molecules and \dsv{set@o@repeats@largest} at \num{e6}.
+The medians and quartiles are in milliseconds with exact \dsv{set@coverage@pct}\% intervals, and the ratio of OVITO to d-SEAMS carries its bootstrap interval.}
+\label{tab:s-ovito}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrrccrccrc@{}}
+\toprule
+ & & \multicolumn{3}{c}{d-SEAMS} & \multicolumn{3}{c}{OVITO} & \multicolumn{2}{c}{Ratio} \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-8}\cmidrule(l){9-10}
+System & Molecules & Median & Interval & Quartiles & Median & Interval & Quartiles & Median & Interval \\
+\midrule
+\ovrow{ic}{1e3}{Ice~Ic}
+\ovrow{ic}{1e4}{}
+\ovrow{ic}{1e5}{}
+\ovrow{ic}{1e6}{}
+\addlinespace
+\ovrow{ih}{1e3}{Ice~Ih}
+\ovrow{ih}{1e4}{}
+\ovrow{ih}{1e5}{}
+\ovrow{ih}{1e6}{}
+\addlinespace
+\ovrow{liquid}{1e3}{Liquid}
+\ovrow{liquid}{1e4}{}
+\ovrow{liquid}{1e5}{}
+\ovrow{liquid}{1e6}{}
+\addlinespace
+\ovrow{confined}{1e3}{Confined}
+\ovrow{confined}{1e4}{}
+\ovrow{confined}{1e5}{}
+\ovrow{confined}{1e6}{}
+\bottomrule
+\end{tabular}
+\end{sidewaystable}
+% snapper:on
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{\dsv{h@errors} cases of the comparator campaign ended without a timing, all of them for comparator codes.}
+Signal 11 is a segmentation fault, timeout is the limit of Section~\ref{sec:s-campaign} and error is a run that ended with an exception or without output; each frame is named by its system and its size.}
+\label{tab:s-censored}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\linewidth}{@{}llr>{\raggedright\arraybackslash}X@{}}
+\toprule
+Method & Kind & Cases & Frames \\
+\midrule
+\tabbody{figures/data/tab-censored}
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% snapper:off
+\begin{sidewaystable}
+\centering
+\caption{\textbf{On frames of \dsv{c@nop} molecules, the ring update carries the rings up to \dsv{c@ringlast@churn} changed bonds and the cage-label update carries the labels up to \dsv{c@afflast@churn}, and both return the rings and labels of the full search.}
+Each frame splices a sphere of frame \dsv{set@sweep@b} of the nucleation trajectory into frame \dsv{set@sweep@a}; the radius is in \unit{\angstrom}, and the last row replaces every position.
+The changed molecules are the ends of the changed bonds, the times are medians and quartiles of \dsv{c@reps} calls in milliseconds, and a dagger is a recorded call that searched every source.
+The last column states whether the rings and the labels equal those of the full search.}
+\label{tab:s-churn}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}rrrrcrcrcrcc@{}}
+\toprule
+ & \multicolumn{2}{c}{Changed} & \multicolumn{4}{c}{Rings} & \multicolumn{4}{c}{Cage labels} & \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-7}\cmidrule(lr){8-11}
+ & & & \multicolumn{2}{c}{Update} & \multicolumn{2}{c}{Full} & \multicolumn{2}{c}{Update} & \multicolumn{2}{c}{Full} & \\
+\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}\cmidrule(lr){10-11}
+Radius & Molecules & Bonds & Median & Quartiles & Median & Quartiles & Median & Quartiles & Median & Quartiles & Equal \\
+\midrule
+\tabbody{figures/data/tab-churn}
+\bottomrule
+\end{tabular}
+
+\bigskip
+\caption{\textbf{On the \dsv{n@frames} frames of the nucleation trajectory, rebuilding every frame takes \dsv{n@cutoff@ratio} times as long as carrying on the cutoff graph and \dsv{n@seeded@ratio} times as long on the seeded graph, with identical output.}
+Each run times the command-line program over all frames, file reading included.
+The medians and quartiles of the timed runs are in milliseconds with exact \dsv{set@coverage@pct}\% intervals, the times per frame are the median and the quartiles divided by the number of frames, and the ratio of the rebuilt to the carried run comes with its bootstrap interval.}
+\label{tab:s-nucleation}
+\begin{tabular}{@{}llrrccrcrc@{}}
+\toprule
+ & & & \multicolumn{3}{c}{Whole run} & \multicolumn{2}{c}{Per frame} & \multicolumn{2}{c}{Ratio} \\
+\cmidrule(lr){4-6}\cmidrule(lr){7-8}\cmidrule(l){9-10}
+Graph & Mode & Runs & Median & Interval & Quartiles & Median & Quartiles & Median & Interval \\
+\midrule
+Cutoff & carried & \dsv{n@cutoff@carry@n} & \num{\dsv{n@cutoff@carry}} & [\num{\dsv{n@cutoff@carry@lo}}, \num{\dsv{n@cutoff@carry@hi}}] & \iqr{\dsv{n@cutoff@carry@q1}}{\dsv{n@cutoff@carry@q3}} & \num{\dsv{n@cutoff@carry@frame}} & \iqr{\dsv{n@cutoff@carry@frame@q1}}{\dsv{n@cutoff@carry@frame@q3}} & & \\
+ & rebuilt & \dsv{n@cutoff@rebuild@n} & \num{\dsv{n@cutoff@rebuild}} & [\num{\dsv{n@cutoff@rebuild@lo}}, \num{\dsv{n@cutoff@rebuild@hi}}] & \iqr{\dsv{n@cutoff@rebuild@q1}}{\dsv{n@cutoff@rebuild@q3}} & \num{\dsv{n@cutoff@rebuild@frame}} & \iqr{\dsv{n@cutoff@rebuild@frame@q1}}{\dsv{n@cutoff@rebuild@frame@q3}} & \num{\dsv{n@cutoff@ratio}} & [\num{\dsv{n@cutoff@ratio@lo}}, \num{\dsv{n@cutoff@ratio@hi}}] \\
+\addlinespace
+Seeded & carried & \dsv{n@seeded@carry@n} & \num{\dsv{n@seeded@carry}} & [\num{\dsv{n@seeded@carry@lo}}, \num{\dsv{n@seeded@carry@hi}}] & \iqr{\dsv{n@seeded@carry@q1}}{\dsv{n@seeded@carry@q3}} & \num{\dsv{n@seeded@carry@frame}} & \iqr{\dsv{n@seeded@carry@frame@q1}}{\dsv{n@seeded@carry@frame@q3}} & & \\
+ & rebuilt & \dsv{n@seeded@rebuild@n} & \num{\dsv{n@seeded@rebuild}} & [\num{\dsv{n@seeded@rebuild@lo}}, \num{\dsv{n@seeded@rebuild@hi}}] & \iqr{\dsv{n@seeded@rebuild@q1}}{\dsv{n@seeded@rebuild@q3}} & \num{\dsv{n@seeded@rebuild@frame}} & \iqr{\dsv{n@seeded@rebuild@frame@q1}}{\dsv{n@seeded@rebuild@frame@q3}} & \num{\dsv{n@seeded@ratio}} & [\num{\dsv{n@seeded@ratio@lo}}, \num{\dsv{n@seeded@ratio@hi}}] \\
+\bottomrule
+\end{tabular}
+\end{sidewaystable}
+% snapper:on
+
+% snapper:off
+\begin{landscape}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\setlength{\LTcapwidth}{\linewidth}
+\begin{longtable}{@{}lrlrrccr@{}}
+\caption{\textbf{Median single-core times of all \dsv{h@records} completed cases of the comparator campaign on ice~Ic, ice~Ih and the confined ice.}
+On each frame the rows run through CHILL+, $q_6$, the rings, the cage labels with the classifiers and the whole-process rings, and the methods are the identifiers of Table~\ref{tab:s-settings}.
+The medians and quartiles are in milliseconds with exact \dsv{set@coverage@pct}\% intervals, and the ratio is that of the code to d-SEAMS for the same operation on the same frame.}
+\label{tab:s-ladder}\\
+\toprule
+System & Molecules & Method & Calls & Median & Interval & Quartiles & Ratio\\
+\midrule
+\endfirsthead
+\toprule
+System & Molecules & Method & Calls & Median & Interval & Quartiles & Ratio\\
+\midrule
+\endhead
+\tabbody{figures/data/tab-ladder}
+\bottomrule
+\end{longtable}
+\end{landscape}
+% snapper:on
+
+\section{Labels and ring counts}
+\label{sec:s-labels}
+
+Table~\ref{tab:s-agree} gives the share of molecules to which d-SEAMS and each other code give the same class.
+On ice~Ic and ice~Ih every matched pair agrees on every molecule.
+Polyhedral template matching and the diamond classifiers of OVITO and pyscal also give the cage labels of d-SEAMS to every molecule of every frame.
+Adaptive common neighbour analysis has no diamond structure type and gives the class other to every molecule.
+On the confined frames no molecule carries a cage label of d-SEAMS, and the four classifiers agree with that on every molecule of those frames.
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{On ice~Ic and ice~Ih, d-SEAMS and the matched codes give the same class to every molecule.}
+Percent of the molecules with the same class on the smallest frame of each system; every larger frame, a replica of the smallest, gives the same percentage wherever both codes completed.
+The liquid column was not rerun.}
+\label{tab:s-agree}
+\small
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+d-SEAMS & Other code & Ice~Ic & Ice~Ih & Liquid & Confined \\
+\midrule
+CHILL+ & OVITO CHILL+ & \dsv{a@ic@1e3@dseams-chill@ovito-chill@pct} & \dsv{a@ih@1e3@dseams-chill@ovito-chill@pct} & not rerun & \dsv{a@confined@1e3@dseams-chill@ovito-chill@pct} \\
+ & CHILL+ library & \dsv{a@ic@1e3@dseams-chill@palmer-chill@pct} & \dsv{a@ih@1e3@dseams-chill@palmer-chill@pct} & & \\
+\addlinespace
+$q_6$ & freud & \dsv{a@ic@1e3@dseams-q6@freud-q6@pct} & \dsv{a@ih@1e3@dseams-q6@freud-q6@pct} & not rerun & \dsv{a@confined@1e3@dseams-q6@freud-q6@pct} \\
+ & pyscal & \dsv{a@ic@1e3@dseams-q6@pyscal-q6@pct} & \dsv{a@ih@1e3@dseams-q6@pyscal-q6@pct} & not rerun & \dsv{a@confined@1e3@dseams-q6@pyscal-q6@pct} \\
+\addlinespace
+Cage labels & OVITO PTM & \dsv{a@ic@1e3@dseams-seeded@ovito-ptm@pct} & \dsv{a@ih@1e3@dseams-seeded@ovito-ptm@pct} & not rerun & \dsv{a@confined@1e3@dseams-seeded@ovito-ptm@pct} \\
+ & OVITO diamond & \dsv{a@ic@1e3@dseams-seeded@ovito-diamond@pct} & \dsv{a@ih@1e3@dseams-seeded@ovito-diamond@pct} & not rerun & \dsv{a@confined@1e3@dseams-seeded@ovito-diamond@pct} \\
+ & OVITO CNA & \dsv{a@ic@1e3@dseams-seeded@ovito-cna@pct} & \dsv{a@ih@1e3@dseams-seeded@ovito-cna@pct} & not rerun & \dsv{a@confined@1e3@dseams-seeded@ovito-cna@pct} \\
+ & pyscal diamond & \dsv{a@ic@1e3@dseams-seeded@pyscal-diamond@pct} & \dsv{a@ih@1e3@dseams-seeded@pyscal-diamond@pct} & not rerun & \dsv{a@confined@1e3@dseams-seeded@pyscal-diamond@pct} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The coordination split of the liquid frame was not rerun, because that dump is not in this checkout.
+For $q_6$, the mutual graph of d-SEAMS and the four nearest neighbours of freud and pyscal give the same label to \qty{\dsv{a@confined@1e3@dseams-q6@freud-q6@pct}}{\percent} of the confined molecules.
+
+Table~\ref{tab:s-rings} lists the rings of \dsv{set@minring@word} to \dsv{set@maxring@word} members on the frames where a ring code of the comparator campaign completed.
+d-SEAMS and both interfaces of matscipy find the same number of rings of each size on all of them.
+On the confined frames, cycless finds the same three-, four- and five-rings as d-SEAMS, but \dsv{k@confined@1e3@genice-rings@six} six-rings instead of \dsv{k@confined@1e3@dseams-rings@six} on the frame of \num{1000} molecules and \dsv{k@confined@1e4@genice-rings@six} instead of \dsv{k@confined@1e4@dseams-rings@six} on the frame of \num{10000}.
+On all \dsv{o@frames} frames, OVITO finds the same number of rings of each size as d-SEAMS, and the whole-process runs of d-SEAMS find the same rings as its in-memory runs.
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{Where the ring codes of the comparator campaign complete, d-SEAMS and matscipy find the same number of rings of each size, and cycless finds fewer six-rings on the confined frames.}
+Rings of \dsv{set@minring@word} to \dsv{set@maxring@word} members on the cutoff graph of \qty{\dsv{set@cutoff}}{\angstrom}; matscipy through its public function and through its compiled routines, and cycless through the functions that GenIce calls.}
+\label{tab:s-rings}
+\small
+\begin{tabular}{@{}lrlrrrr@{}}
+\toprule
+System & Molecules & Code & 3-rings & 4-rings & 5-rings & 6-rings \\
+\midrule
+Ice~Ic & \num{1000} & d-SEAMS & \kfour{ic@1e3@dseams-rings} \\
+ & & matscipy, public & \kfour{ic@1e3@matscipy-rings-public} \\
+ & & matscipy, compiled & \kfour{ic@1e3@matscipy-rings-kernel} \\
+ & & cycless & \kfour{ic@1e3@genice-rings} \\
+\addlinespace
+Ice~Ih & \num{1000} & d-SEAMS & \kfour{ih@1e3@dseams-rings} \\
+ & & matscipy, public & \kfour{ih@1e3@matscipy-rings-public} \\
+ & & matscipy, compiled & \kfour{ih@1e3@matscipy-rings-kernel} \\
+ & & cycless & \kfour{ih@1e3@genice-rings} \\
+\addlinespace
+Confined & \num{1000} & d-SEAMS & \kfour{confined@1e3@dseams-rings} \\
+ & & matscipy, public & \kfour{confined@1e3@matscipy-rings-public} \\
+ & & matscipy, compiled & \kfour{confined@1e3@matscipy-rings-kernel} \\
+ & & cycless & \kfour{confined@1e3@genice-rings} \\
+\addlinespace
+Confined & \num{10000} & d-SEAMS & \kfour{confined@1e4@dseams-rings} \\
+ & & matscipy, public & \kfour{confined@1e4@matscipy-rings-public} \\
+ & & matscipy, compiled & \kfour{confined@1e4@matscipy-rings-kernel} \\
+ & & cycless & \kfour{confined@1e4@genice-rings} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{One-thread ring and neighbour records}
+\label{sec:s-ring-perf}
+
+The ring record \texttt{ring-head2head.json} is one thread on one core, twelve timed calls, and none are dropped.
+Each printed median is the type 7 median, and each bracket is the type 7 first and third quartiles, from \texttt{paper/tex/figures/ring\_perf\_type7.py}.
+The hardware line of that record is \texttt{uname -m} \texttt{x86\_64}, \texttt{nproc} 8, CPU model \texttt{Intel Xeon Processor}.
+The logs \texttt{bbdir/ring-h2h.log} and \texttt{bbdir/neigh-h2h.log} name the commit of the samples.
+On the skewed cell of \num{512} molecules the mutual four-neighbour list takes \qty{\dsv{neigh@skew@dseams}}{\milli\second} for d-SEAMS, \qty{\dsv{neigh@skew@freud}}{\milli\second} for freud and \qty{\dsv{neigh@skew@ovito}}{\milli\second} for OVITO, and each code returns \num{\dsv{neigh@skew@count}} directed edges.
+On every measured neighbour row the d-SEAMS quartile bracket lies below the other codes.
+The ring rows of Table~\ref{tab:s-ring-perf} are the medians of the campaign named above.
+On the \num{\ShipNop}-molecule frame the release ring clock is \ShipRingsBaseQ~ms at the public base and \ShipRingsTipQ~ms for this build, and OVITO's in-process ring stage is \ShipRingsOvitoQ~ms (Table~\mref{tab:shipped}).
+The OVITO worker process includes Python and Qt startup and has no cage stage.
+IdentifyDiamond gives a structure label to each point and does not return cages.
+The script \texttt{paper/tex/repro/ring-perf.sh} regenerates both JSON files and both tables.
+A superscript p is a projected link-cell value.
+That cell was not timed.
+A blank cell was not part of the measured record.
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{One-thread ring comparisons, twelve calls, type 7 median and quartiles, in milliseconds.}
+Rings alone gives OVITO bonds built before the timer.
+Bonds and rings times both steps on each code.
+Setup, cold, is the first read of the file after a request to drop it from the page cache.
+Setup, amortized, is the type 7 median of the next eleven reads.
+Each read is a fresh process, and both codes read the same file.
+Frames larger than the \num{110592}-molecule replica are not in this table.}
+\label{tab:s-ring-perf}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}lrlll@{}}
+\toprule
+Frame & Molecules & Work & d-SEAMS & OVITO \\
+\midrule
+\tabbody{figures/data/tab-ring-perf}
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{One-thread cutoff neighbour list, twelve calls, type 7 median and quartiles, in milliseconds.}
+A superscript p is a projected link-cell value.
+That cell was not timed.}
+\label{tab:s-neigh-perf}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}lrl@{\hspace{0.8em}}l@{\hspace{0.8em}}l@{\hspace{0.8em}}l@{\hspace{0.8em}}l@{}}
+\toprule
+Frame & Molecules & d-SEAMS & freud AABB & freud link cell & OVITO & scipy \\
+\midrule
+\tabbody{figures/data/tab-neigh-perf}
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\section{Scaling}
+\label{sec:s-scaling}
+
+Every row is one type 7 median of \num{\dsv{sc@calls}} calls on the machine of Table~\mref{tab:hardware}.
+Full-run time is milliseconds and includes the dump read and the neighbour list.
+The interquartile range (IQR) is the type 7 interquartile range of that time, in milliseconds.
+Speedup divides the one-thread median by the median at the listed thread count.
+Efficiency is that speedup divided by the thread count, in percent.
+The kernel columns omit the read and the neighbour list.
+Strong rows hold the molecule count fixed.
+Weak rows grow it with the threads.
+The phase table is the largest strong-scaling frame.
+Its last column is the serial fraction $(N T(N) - T(1)) / (T(1) (N - 1))$.
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{Phase times on the largest strong-scaling frame.}
+Times are type 7 medians in milliseconds.
+The serial fraction is dimensionless.}
+\label{tab:s-phase}
+\scriptsize
+\begin{tabular}{llrrrr}
+\toprule
+Frame & Analysis & Phase & One thread & All cores & Serial fraction \\
+\midrule
+\tabbody{figures/data/tab-phase}
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{Every strong-scaling and weak-scaling point.}
+The raw call times are the logs under \texttt{bbdir/scale/logs}.}
+\label{tab:s-scale}
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lllrrrrrrrrr}
+\toprule
+Frame & Analysis & Scaling & Molecules & Threads & Full run & IQR & Speedup & Eff. & Kernel & K.\ speedup & K.\ eff. \\
+\midrule
+\tabbody{figures/data/tab-scale-full}
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\VerbatimInput[fontsize=\footnotesize]{repro/scaling.sh}
+
+\section{Reproduction}
+\label{sec:s-repro}
+
+The listings of this section are the files of \texttt{paper/tex/repro}, which run in order in one shell from the root of a clone of the repository.
+The first builds the program with the options of every measurement, fixes the thread counts to one, and sets \texttt{CORE} to the core of every timed process and \texttt{D} to the directory of the records.
+Its test suite runs 93 tests, of which 90 pass, 2 are expected failures and 1 is skipped, with 544 Catch2 test cases in 43 binaries.
+\VerbatimInput[fontsize=\footnotesize]{repro/build.sh}
+
+The external inputs are the nucleation trajectory and the square-tube trajectory of the figshare deposits~\cite{goswami2019nucleationdata,goswami2019nanotubedata} and the liquid frame, with the SHA-256 sums below.
+\VerbatimInput[fontsize=\scriptsize]{repro/inputs.sha256}
+
+The worked example of Section~\mref{sec:example} comes from the C interface, a brute-force enumeration of the rings of the tube and the cage search of the command-line program.
+\VerbatimInput[fontsize=\footnotesize]{repro/worked.sh}
+
+The version comparison times d-SEAMS on the ladder of ideal ice~Ic and on the mW crystal, and d-SEAMS~1.0.1 through its driver.
+The script \texttt{scripts/baseline\_dseams1.sh} builds that driver from the tag v1.0.1 against Boost and GSL~2.8, whose library directory is \texttt{GSL\_LIB}.
+\VerbatimInput[fontsize=\footnotesize]{repro/versions.sh}
+
+The update measurements and the nucleation runs use the nucleation trajectory.
+\VerbatimInput[fontsize=\footnotesize]{repro/updates.sh}
+
+The comparator campaign needs the Python packages of Table~\ref{tab:s-settings}, the CHILL+ library at commit ee8a3cb05e3dcbc975cca1ad8820570871973d12 and the source archive of RINGS 1.3.5.
+The SHA-256 sum of that archive is in the environment record of the campaign.
+A patch, stored with the records, lets GNU Fortran build the CHILL+ library.
+It replaces the module-directory flag of the Intel compiler in the build files and calls the cluster routines by the names that the library defines.
+It also fills the histogram of bond correlations from every bond, with each bin index inside the histogram.
+\VerbatimInput[fontsize=\footnotesize]{repro/campaign.sh}
+
+The summary and environment steps write the timings, comparisons, agreements, ring counts, errors and provenance of the campaign, which are stored in \texttt{paper/tex/figures/data/h2h} together with the input manifest of the prepare step.
+The OVITO ring campaign and the split of the CHILL+ labels by coordination ran with Python~3.12.3, numpy~2.5.4 and OVITO~3.17.2.
+\VerbatimInput[fontsize=\footnotesize]{repro/ovito.sh}
+
+The statistics script then writes the macros, tables and plot data, and the build script compiles both documents with tectonic and checks that the numbers of the cross-references between them are current.
+\VerbatimInput[fontsize=\footnotesize]{repro/stats.sh}
+
+The one-thread ring and neighbour samples, and the type 7 tables, come from the listing below.
+\VerbatimInput[fontsize=\footnotesize]{repro/ring-perf.sh}
+
+The release comparison of the public base, this build and OVITO is the next listing.
+It writes \texttt{paper/tex/figures/data/shipped-campaign.json}, \texttt{shipped\_macros.tex} and \texttt{tab-shipped.tex}.
+Snakemake runs the same script with \texttt{snakemake -c1 shipped\_campaign}.
+\texttt{benchmarks/shipped.py} is the Airspeed Velocity form of the shipped commands and their resident sets.
+\VerbatimInput[fontsize=\footnotesize]{repro/shipped.sh}
+
+\bibliographystyle{elsarticle-num-names} \bibliography{dseams2}
+
+\end{document}

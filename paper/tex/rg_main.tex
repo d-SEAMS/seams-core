@@ -1,0 +1,904 @@
+\documentclass[preprint,12pt]{elsarticle}
+
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage[final]{microtype}
+\usepackage{xurl}
+\usepackage{xcolor}
+\usepackage{siunitx}
+\sisetup{exponent-product=\times, group-minimum-digits=4, range-phrase=\textendash}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,calc}
+\usepackage{pgfplots}
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{compat=1.17}
+\usepackage[hypertexnames=false]{hyperref}
+\usepackage{orcidlink}
+\input{figures/style}
+\input{figures/data/macros}
+\input{figures/data/shipped_macros}
+\input{figures/data/scale_macros}
+\input{xrefs}
+\input{release}
+\newtheorem{proposition}{Proposition}
+\newproof{pf}{\proofname}
+\newcommand{\rel}[1]{\qty{\dsv{#1@rel}}{\percent}}
+\newcommand{\rtwo}[1]{\ifcsname dsv@#1@sig2\endcsname\num{\dsv{#1@sig2}}\else\num[round-mode=figures,round-precision=2]{\dsv{#1}}\fi}
+\newcommand{\rthree}[1]{\ifcsname dsv@#1@sig3\endcsname\num{\dsv{#1@sig3}}\else\num[round-mode=figures,round-precision=3]{\dsv{#1}}\fi}
+\newcounter{bla}
+\newenvironment{refnummer}{%
+  \list{[\arabic{bla}]}%
+  {\usecounter{bla}%
+   \setlength{\itemindent}{0pt}%
+   \setlength{\topsep}{0pt}%
+   \setlength{\itemsep}{0pt}%
+   \setlength{\labelsep}{2pt}%
+   \setlength{\listparindent}{0pt}%
+   \settowidth{\labelwidth}{[9]}%
+   \setlength{\leftmargin}{\labelwidth}%
+   \addtolength{\leftmargin}{\labelsep}%
+   \setlength{\rightmargin}{0pt}}}
+  {\endlist}
+\makeatletter
+% The primitive \input keeps a table body expandable inside an alignment.
+\newcommand{\tabbody}[1]{\@@input #1 }
+\newcommand{\iqr}[2]{\numrange{#1}{#2}}
+\@ifundefined{highlights}{%
+  \newenvironment{highlights}{\par\noindent\textbf{Highlights}\begin{itemize}}{\end{itemize}}}{}
+\def\ps@pprintTitle{\let\@oddhead\@empty\let\@evenhead\@empty\let\@oddfoot\@empty\let\@evenfoot\@oddfoot}
+\makeatother
+\journal{Computer Physics Communications}
+\biboptions{sort&compress}
+\hypersetup{
+  pdfauthor={Rohit Goswami, Amrita Goswami, Ruhila Goswami, Jayant K. Singh},
+  pdftitle={d-SEAMS 2.0: Incremental ring and cage algorithms for ice structure analysis},
+  pdfkeywords={ice nucleation, primitive rings, topological cages, incremental graph algorithms},
+  pdflang={English}}
+\setlength{\emergencystretch}{2em}
+\setlength{\abovetopsep}{4pt}
+\renewcommand{\topfraction}{0.9}
+\renewcommand{\bottomfraction}{0.8}
+\renewcommand{\textfraction}{0.07}
+\renewcommand{\floatpagefraction}{0.75}
+\setcounter{topnumber}{2}
+\setcounter{totalnumber}{4}
+
+\begin{document}
+
+\begin{frontmatter}
+\title{d-SEAMS 2.0: Incremental ring and cage algorithms for ice structure analysis}
+
+% snapper:off
+\author[iitk]{Rohit Goswami\fnref{rg-now}\orcidlink{0000-0002-2393-8056}}
+\ead{rgoswami@ieee.org}
+\author[iitk]{Amrita Goswami\corref{cor1}\fnref{ag-now}\orcidlink{0000-0001-8706-2383}}
+\ead{amrita@hi.is}
+\author[hi-life]{Ruhila Goswami\orcidlink{0000-0002-5443-9356}}
+\ead{rug17@hi.is}
+\author[iitk]{Jayant K. Singh\corref{cor2}\orcidlink{0000-0001-8056-2115}}
+\ead{jayantks@iitk.ac.in}
+\cortext[cor1]{Corresponding author}
+\cortext[cor2]{Co-corresponding author}
+\fntext[rg-now]{Present address: SURF BV, Amsterdam, The Netherlands, and TurtleTech ehf., Reykjavik, Iceland.}
+\fntext[ag-now]{Present address: Universidad Complutense de Madrid, Madrid, Spain.}
+\address[iitk]{Department of Chemical Engineering, Indian Institute of Technology Kanpur, Kanpur 208016, Uttar Pradesh, India}
+\address[hi-life]{Faculty of Life and Environmental Sciences, University of Iceland, Reykjavik, Iceland}
+% snapper:on
+
+\begin{abstract}
+Ice nucleation is read from primitive rings, which form the hexagonal cages of ice~Ih and the double-diamond cages of ice~Ic.
+d-SEAMS~2.0 is the first code to return a full ring search from a local update, and on one thread a \dsv{hl@n} molecule ice~Ic frame takes \qty{\dsv{hl@two@ms}}{\milli\second} against \qty{\dsv{hl@one@s}}{\second} for d-SEAMS~1.
+Rings are pairs of shortest paths, indexed from each molecule.
+A ring of at most seven members changes only at an end of a changed bond, so the carried rings match a full search.
+Three changed bonds make the update \dsv{hl@ringgain} times faster than a full search.
+In all \dsv{hl@matched} matched comparisons of the main campaign, d-SEAMS~2.0 is faster than the Open Visualization Tool (OVITO), freud, pyscal, matscipy and a cubic hexagonal interfacial liquid (CHILL) library.
+On a deposited mW run, most new ice is cubic or shared by both cage types.
+\end{abstract}
+
+\begin{highlights}
+\item Primitive rings from pairs of shortest paths, each ring found once
+\item A frame-to-frame ring update that returns the rings of a full search
+\item Rings and both ice cage searches on \dsv{hl@n} molecules: \qty{\dsv{hl@two@ms}}{\milli\second} against \qty{\dsv{hl@one@s}}{\second}
+\item Faster than five other codes in all \dsv{hl@matched} matched comparisons of the main campaign
+\item Cubic and mixed molecules make up most of the ice grown in an mW nucleation run
+\end{highlights}
+
+\begin{keyword}
+Ice nucleation \sep Primitive rings \sep Topological cages \sep Incremental graph algorithms \sep Molecular dynamics
+\end{keyword}
+\end{frontmatter}
+
+\noindent\textbf{PROGRAM SUMMARY}
+
+% snapper:off
+\begin{small}
+\noindent
+{\em Program title:} d-SEAMS 2.0 (seams-core)\\
+{\em CPC Library link to program files:} (to be added by Technical Editor)\\
+{\em Developer's repository link:} \url{https://github.com/d-SEAMS/seams-core}\\
+{\em Licensing provisions:} MIT\\
+{\em Programming language:} C++20, with a C interface and Python, R, Julia and Lua front ends\\
+{\em Supplementary material:} Correctness arguments, comparator settings, full benchmark tables and reproduction commands\\
+{\em Nature of problem:}
+Ice nucleation and growth in molecular dynamics are read from the hydrogen-bond network of the water molecules.
+Its primitive rings form the hexagonal and double-diamond cages of ice Ih and ice Ic, the prism blocks of ice in nanotubes and the polyhedral cages of clathrate hydrates.
+The search for these structures is repeated on every saved frame of a trajectory, so its cost per frame limits the length and the size of the runs that can be analysed.
+The cage searches of d-SEAMS 1 [1] grow with the cube and the square of the number of molecules.\\
+{\em Solution method:}
+Primitive rings are built from pairs of shortest paths in the bond graph [2,3], so each ring is found once, from its lowest-numbered member, and tested for shortcuts against distance rows of bounded radius.
+An index from each molecule to the six-membered rings through it turns the searches for hexagonal and double-diamond cages [1,4] into passes that are linear in the number of rings.
+The double-diamond cages are packed as a maximum matching with a certificate of optimality.
+Between frames, the program carries every ring of up to seven members whose molecules keep all their bonds and searches again only from the molecules whose bonds changed, which gives the rings of a full search.
+The cage labels are updated in the same way, from the rings near a changed bond or a changed ring.
+The ring update takes a full pass only when every molecule is within reach of a changed row.
+The cage-label update returns to the full search once the changed share of the molecules passes a fixed threshold.
+The program also finds the prism blocks of ice in nanotubes from pairs of stacked rings and the clathrate cages from their face signatures.\\
+{\em Additional comments including restrictions and unusual features:}
+The program reads LAMMPS dump, XYZ and CON files, and it runs as a command-line program, as a C++ library and through its C interface.
+A LAMMPS compute assigns CHILL+ labels during a run.
+Rings of more than seven members are carried only when they also avoid a margin around the molecules whose bonds changed.
+The margin is one bond for rings of eight to eleven members and one more bond for every four further members.
+After a fallback on a trajectory of fixed size, the cage-label update runs the full pass on every later frame.
+A component whose conflicts are not those of a bipartite graph is solved by branch and bound on a bit set with one bit per candidate, so the set grows with the component and no component is dropped.
+
+\input{summary_refs}
+\end{small}
+% snapper:on
+
+\section{Introduction}
+\label{sec:intro}
+
+Molecular dynamics follows the freezing of water through the positions of its molecules, so the structure of a growing ice nucleus has to be read from each saved frame of a trajectory~\cite{matsumoto2002molecular,moore2011structural}.
+Nucleation rates and critical nucleus sizes come from long runs or from forward-flux and seeding calculations that analyse many frames~\cite{li2011homogeneous,haji2015nucleation,espinosa2016seeding}.
+The polytype of the nucleus is part of the answer, since stacking-disordered ice, built from cubic and hexagonal layers, gives a nucleus that is more stable than either pure polytype in the mW model~\cite{lupi2017stacking}.
+Every such study assigns a structure to every molecule of every frame, and the cost of that assignment multiplies with the length and the number of the runs.
+
+Most analysis codes classify molecules by local order parameters.
+These include the bond-orientational averages of Steinhardt and of Lechner and Dellago~\cite{steinhardt1983bond,lechner2008averaged,lechner2008accurate}, the CHILL and CHILL+ bond correlations~\cite{moore2010chill,nguyen2015identification} and the template and neighbour analyses of crystal structures~\cite{larsen2016robust,stukowski2012structure,maras2016global}.
+The Open Visualization Tool OVITO, freud and pyscal implement them for any particle system~\cite{stukowski2010visualization,ramasubramani2020freud,menon2019pyscal}.
+Their labels depend on the neighbour list that defines the local environment, and ice in nanotubes has no structure class among them~\cite{koga2001nanotube,goswami2020dseams}.
+
+Topological criteria read the structure from the rings of the hydrogen-bond network instead~\cite{king1967ring,guttman1990ring,franzblau1993computation}.
+Ice~Ih is built from hexagonal cages and ice~Ic from double-diamond cages, both made of six-membered rings~\cite{haji2015nucleation}, ice in a nanotube from stacked prism blocks~\cite{koga2001nanotube,goswami2020dseams} and clathrate hydrates from polyhedral cages of five- and six-membered rings~\cite{jacobson2010amorphous,matsumoto2007topological}.
+Ring statistics codes for network solids count these rings, among them RINGS, ISAACS, atomes and matscipy~\cite{leroux2010rings,leroux2010isaacs,leroux2025atomes,grigorev2024matscipy}, the cycless package that GenIce uses~\cite{matsumoto2026cycless,matsumoto2018genice} and the ring finder of OVITO~\cite{ovitofindrings}.
+Each of them searches every frame from the start and stops at the ring counts.
+
+d-SEAMS~1~\cite{goswami2020dseams} brought the topological criteria for bulk and confined ice together in one program.
+It finds rings by backtracking over every path up to the largest ring size and then removes the rings with shortcuts.
+It tests every pair of six-membered rings for a hexagonal cage and every ring against every other for a double-diamond cage.
+Its cage searches therefore grow with the cube and the square of the number of molecules, and one frame of \dsv{hl@n} molecules of ice~Ic takes \qty{\dsv{hl@one@s}}{\second} on one core (Section~\ref{sec:versions}).
+Two frames saved a few steps apart share most of their bonds, yet each frame is searched from the start.
+
+Dynamic graph algorithms update shortest paths after a change of edges instead of recomputing them~\cite{demetrescu2004new}.
+For primitive rings the question is local, because a ring gains or loses its status only through a shortcut, and a short ring admits only short shortcuts.
+We make this locality exact: a ring of at most seven members changes its status only if one of its molecules is an end of a changed bond, so every other ring can be carried to the next frame.
+
+Here, we describe d-SEAMS~2.0, called d-SEAMS below, which keeps the topological definitions of d-SEAMS~1 and replaces its algorithms.
+d-SEAMS is the first code in this comparison to return the primitive rings of a full search from a local update, and the rings and both cage searches of a \dsv{hl@n}-molecule ice~Ic frame take \qty{\dsv{hl@two@ms}}{\milli\second} against \qty{\dsv{hl@one@s}}{\second} for d-SEAMS~1.
+It constructs primitive rings from pairs of shortest paths~\cite{yuan2002rings}, so that each ring is found once.
+It finds both cage types through an index from molecules to rings, packs the double-diamond cages as a maximum matching and carries rings from the molecules within reach of a changed row.
+The cage labels are carried in the same way, and that update returns to the full search at a fixed share of changed rows.
+We compare it with its predecessor and with seven other codes on machines of one type.
+On a nucleation trajectory of mW water, it finds the growing ice to be built mostly from cubic and mixed molecules.
+Unlike the ring statistics codes, d-SEAMS assembles the rings into cages, and unlike the local classifiers, it takes its labels from the topology of the network.
+
+\section{Definitions and algorithms}
+\label{sec:defs}
+
+\subsection{Bond graphs}
+\label{sec:graphs}
+
+A frame gives the positions of $n$ water molecules in a periodic cell, each represented by its oxygen atom.
+The bond graph $G=(V,E)$ has one vertex per molecule and an edge, called a bond, between two molecules whose oxygen atoms lie within the cutoff $r_c=\qty{\dsv{set@cutoff}}{\angstrom}$ under the minimum image convention, as in earlier topological analyses~\cite{goswami2020dseams,moore2010chill}.
+A cutoff graph admits interstitial molecules and misses stretched bonds, so we also build two graphs from the four nearest neighbours of each molecule.
+The mutual graph joins two molecules when each is among the four nearest neighbours of the other, and the union graph joins them when either is.
+Seeded labels take the cage labels of the mutual graph as seeds and accept a cage label of the union graph only when its cluster of labelled molecules contains a seed.
+The extra bonds of the union graph then count only where they extend a structure of the mutual graph.
+We call this pair of graphs the seeded graph, the default of the cage labels, and every result below names its graph.
+
+\subsection{Primitive rings}
+\label{sec:rings}
+
+A ring $R=(v_0,\dots,v_{k-1})$ is a cycle of $k$ distinct vertices of $G$, and $d_R(u,v)$ is the number of bonds between its members $u$ and $v$ along the shorter arc of the ring.
+Following the shortest-path criterion of King and Franzblau~\cite{king1967ring,franzblau1993computation,goswami2020dseams}, we call $R$ primitive when no path through the network joins two of its members in fewer bonds than the ring does,
+\begin{equation}
+  d_G(u,v)=d_R(u,v)\quad\text{for all } u,v\in R,
+  \label{eq:primitive}
+\end{equation}
+where $d_G$ is the distance in $G$.
+A path that is shorter than the ring arc is a shortcut, and a ring with a shortcut is the sum of two smaller rings, so it is not counted.
+On the wall of a hexagonal ice nanotube, the six-cycle around two neighbouring squares has a shortcut along the bond the squares share, so Eq.~\eqref{eq:primitive} keeps the squares and rejects the six-cycle (Section~\ref{sec:example}).
+
+Algorithm~\ref{alg:rings} enumerates the primitive rings of up to $D$ members with the construction of Yuan and Cormack~\cite{yuan2002rings}, and we write the size of a ring as $k=2\ell$ or $k=2\ell+1$.
+For a primitive ring with lowest member $s$ and even size $k=2\ell$, both arcs from $s$ to the opposite member $p$ are shortest paths of $G$.
+For odd $k=2\ell+1$, the arcs from $s$ to the two ends $p$ and $q$ of the opposite bond are shortest paths.
+The algorithm therefore grows a breadth-first tree from each vertex $s$ over the vertices above $s$, closes pairs of disjoint shortest paths into candidate rings and keeps a candidate that satisfies Eq.~\eqref{eq:primitive}.
+Because the tree contains only $s$ and vertices above $s$, the vertex $s$ is the lowest member of every ring it closes, and each ring is found once.
+The test of Eq.~\eqref{eq:primitive} needs distances only up to $\max(\ell-1,1)$ from each member, since a shortcut is shorter than an arc of at most $\ell$ bonds.
+In a network of bounded degree, the work per vertex depends only on the degree and on $D$, so the search is linear in $n$.
+Section~\sref{sec:s-rings} shows that it finds every primitive ring of up to $D$ members exactly once.
+The search of d-SEAMS~1 instead follows every path of up to $D-1$ bonds from each vertex by backtracking and removes the rings with shortcuts afterwards~\cite{goswami2020dseams}, while the trees of Algorithm~\ref{alg:rings} stop at depth $\lfloor D/2\rfloor$.
+
+\begin{algorithm}[tbp]
+\caption{Primitive rings of a bond graph $G$ up to size $D$.}
+\label{alg:rings}
+% snapper:off
+\begin{algorithmic}[1]
+\For{each vertex $s$ of $G$}
+\State Grow a breadth-first tree from $s$ over the vertices above $s$ to depth $\lfloor D/2\rfloor$, keeping every shortest-path parent.
+\For{each vertex $p$ at depth $\ell$ and each pair of disjoint shortest paths from $s$ to $p$}
+\State Close the two paths into a candidate ring of $2\ell$ members.
+\EndFor
+\For{each bond $pq$ between two vertices at depth $\ell$ and each pair of disjoint shortest paths from $s$ to $p$ and to $q$}
+\State Close the two paths and the bond into a candidate ring of $2\ell+1$ members.
+\EndFor
+\State Keep each candidate of at most $D$ members that satisfies Eq.~\eqref{eq:primitive}, testing distances up to $\max(\ell-1,1)$.
+\EndFor
+\end{algorithmic}
+% snapper:on
+\end{algorithm}
+
+\subsection{Prism blocks in nanotubes}
+\label{sec:prisms}
+
+Ice in a nanotube of small diameter forms stacked prisms whose bases are $j$-membered rings~\cite{koga2001nanotube,goswami2020dseams}.
+Two disjoint primitive $j$-rings form a prism block when each member of one ring is bonded to a member of the other in ring order.
+For $j=4$ the two rings must also be stacked along the tube, since the side faces of a square tube are squares as well.
+The share of the tube filled with $j$-gonal blocks, in percent of its length, is the height
+\begin{equation}
+  h_j=\frac{100\,N_j\,\bar h}{L},
+  \label{eq:height}
+\end{equation}
+where $N_j$ is the number of blocks, $\bar h=\qty{\dsv{set@height}}{\angstrom}$ is the height of one block and $L$ is the longest cell length, which runs along the tube.
+A tube filled with one block type over its whole length has $h_j=100$.
+
+\subsection{Hexagonal and double-diamond cages}
+\label{sec:cages}
+
+Two disjoint six-rings $l=(l_0,\dots,l_5)$ and $m=(m_0,\dots,m_5)$ are the basal rings of a hexagonal cage (HC) when three bonds join them at alternate positions,
+\begin{equation}
+  \{l_p,m_q\},\ \{l_{p+2},m_{q\pm 2}\},\ \{l_{p+4},m_{q\pm 4}\}\in E,
+  \label{eq:basal}
+\end{equation}
+for some $p$ and $q$ and one choice of sign, with indices taken modulo six, and when the three six-cycles that these bonds close with the arcs of $l$ and $m$ are primitive rings~\cite{goswami2020dseams}.
+The cage has twelve molecules on five six-rings, two basal and three prismatic (Figure~\ref{fig:cages}a).
+A double-diamond cage (DDC) is two adamantane units of ten molecules that share one six-ring, the equator~\cite{haji2015nucleation}.
+A six-ring $e=(e_0,\dots,e_5)$ outside every hexagonal cage is an equator when six distinct six-rings, one through each triple $(e_i,e_{i+1},e_{i+2})$, share exactly that triple with $e$.
+The three rings through the triples with even $i$ must also close over $e$ into one adamantane unit, and the three with odd $i$ into the other.
+The cage then has fourteen molecules on seven six-rings (Figure~\ref{fig:cages}b).
+
+\begin{figure}[tbp]
+\centering
+\input{figures/fig-cages}
+\caption{\textbf{A hexagonal cage joins two basal six-rings by three bonds, and a double-diamond cage joins two adamantane units through a shared equator.}
+(a) A hexagonal cage, whose basal rings $l$ and $m$ are joined by the three bonds of Eq.~\eqref{eq:basal} (orange), and each pair of neighbouring bonds closes a prismatic six-ring, one of which is shaded.
+(b) A double-diamond cage, whose equator (orange) is shared by an adamantane unit above it, closed at the molecule $a$, and one below it, closed at $a'$, with one of the six peripheral rings shaded.}
+\label{fig:cages}
+\end{figure}
+
+d-SEAMS~1 finds the partners of a ring by comparing it with every other six-ring and copies the neighbour list for each comparison.
+Its hexagonal-cage search therefore grows with the cube of the number of molecules and its double-diamond search with the square.
+We replace the comparisons by an inverted index $I(v)$, the list of six-rings through each molecule $v$.
+Every basal partner $m$ of $l$ contains a neighbour of $l_0$ or of $l_1$, so the candidates for $m$ are the rings in $I(w)$ for the neighbours $w$ of these two members, and every peripheral ring of an equator lies in $I(e_i)$ for one of its members.
+In a network of bounded degree each list of the index has a bounded length, so both searches visit each six-ring a bounded number of times and are linear in the number $N_6$ of six-rings.
+Each six-ring carries the cage types it belongs to, and a molecule is hexagonal when its rings belong only to hexagonal cages, cubic when they belong only to double-diamond cages and mixed when they belong to both.
+
+The double-diamond candidates overlap, because every face of an adamantane unit can be an equator.
+Two candidates conflict when they share an adamantane unit, so a set of cages without conflicts is a matching in the graph $H$ whose vertices are the adamantane units and whose edges are the candidates~\cite{schrijver2003combinatorial}.
+For ideal ice~Ic, $H$ is bipartite and four-regular, and an Euler split gives a perfect matching~\cite{gabow1976euler}.
+For any other bipartite $H$, augmenting paths give a maximum matching~\cite{kuhn1955hungarian}, and a vertex cover of the same size certifies it by K\"onig's theorem~\cite{konig1931graphs}.
+For a component of other conflicts within the size limit of Table~\ref{tab:thresholds}, a branch and bound with a clique-partition bound finds the largest set of cages~\cite{tomita2003maxclique}.
+A larger component of this kind marks the packing of its frame as not tight (Section~\sref{sec:s-packing}).
+On a frame of \dsv{w@ice-Ic@sites} molecules of ice~Ic, the packing turns \dsv{v@1000@count@two@ddc_rings} equators into \dsv{v@1000@count@two@ddc_cages} cages that cover every molecule.
+On the same frame, the search of d-SEAMS~1 reports one cage per equator.
+The count in this paper is the packed matching.
+On perfect ice~Ic that packed count is $N/2$ cages.
+The 2020 search reports one cage for every equatorial candidate, and on perfect ice~Ic that candidate count is $2N$.
+Every molecule has four neighbours, and the primitive rings are the $2N$ six-rings of the lattice.
+Each six-ring is one equatorial candidate.
+Each adamantane unit has four faces, and each face is shared by two units, so the units and the candidates are the vertices and the edges of a four-regular graph $H$.
+A four-regular graph on $U$ vertices has $2U$ edges.
+The lattice has $2N$ candidates, so $2U=2N$ and $U=N$.
+A perfect matching has $U/2$ edges, and each edge is one packed cage, so the packed count is $N/2$.
+
+\subsection{Clathrate cages}
+\label{sec:clathrates}
+
+The cages of clathrate hydrates are closed polyhedra whose faces are primitive rings~\cite{jacobson2010amorphous,matsumoto2007topological}.
+A set of faces forms a closed cage when every edge lies on two faces, the faces around each vertex form one cycle and the numbers $V$, $E$ and $F$ of its vertices, edges and faces satisfy Euler's relation,
+\begin{equation}
+  V-E+F=2,
+  \label{eq:euler}
+\end{equation}
+which the cage of twelve pentagons meets with $V=20$, $E=30$ and $F=12$.
+A cage is named by its face signature, such as $5^{12}6^{2}$ for the large cage of structure~I and $5^{12}6^{4}$ for that of structure~II, and only faces whose edges lie in the length window of Table~\ref{tab:thresholds} enter the search.
+
+\subsection{Carrying rings and cage labels between frames}
+\label{sec:update}
+
+Let $G$ and $G'$ be the bond graphs of two consecutive frames, and let $X$ be the set of molecules that are ends of a bond present in one graph and absent from the other.
+
+\begin{proposition}
+\label{prop:local} Let $R$ be a ring of at most seven members with $R\cap X=\emptyset$.
+Then $R$ is a primitive ring of $G$ if and only if it is a primitive ring of $G'$.
+\end{proposition}
+
+\begin{pf}
+Every bond between two members of $R$ has both ends outside $X$, so it is present in both graphs, and $R$ is a cycle of $G$ exactly when it is a cycle of $G'$.
+For $|R|\le 7$ the ring distance is $d_R(u,v)\le 3$, so a shortcut between two members has at most two bonds.
+Suppose that $R$ is primitive in one graph and has a shortcut $P$ in the other.
+Then $P$ is not a path of the first graph, so it contains a changed bond, and both ends of that bond lie in $X$.
+Each bond of a path of one or two bonds between members of $R$ has a member of $R$ as an end, so $R$ meets $X$, a contradiction.
+\end{pf}
+
+When the search runs to a largest ring size $D\ge 8$, a shortcut can contain a changed bond in its middle while the ring avoids $X$.
+The program then replaces $X$ by the molecules within $\lfloor(\lfloor D/2\rfloor-2)/2\rfloor$ bonds of $X$ in the union of the two graphs, which is one bond for $8\le D\le 11$ (Section~\sref{sec:s-locality}).
+Algorithm~\ref{alg:update} uses Proposition~\ref{prop:local} for rings of up to seven members.
+Every primitive ring of $G$ that avoids $X$ is carried, and every primitive ring of $G'$ that meets $X$ is found by the search from its lowest member in $X$.
+That search runs over all of $G'$ and keeps only the rings whose lowest member in $X$ is its start.
+The carried rings and the found rings are therefore the primitive rings of $G'$, each once, and the update returns the ring set of a full search on every frame (Section~\sref{sec:s-update}).
+The search from $T$ costs as much as Algorithm~\ref{alg:rings} on $|T|$ vertices, but the bond difference and the carried set cost a pass over the neighbour rows of all $n$ molecules.
+The update runs that full search when the frames differ in size or when $T$ is the whole vertex set.
+
+\begin{algorithm}[tbp]
+\caption{Update of the primitive rings of up to seven members from $G$ to $G'$.}
+\label{alg:update}
+% snapper:off
+\begin{algorithmic}[1]
+\State Compare the neighbour rows of $G$ and $G'$ and collect the changed bonds and the set $X$ of their ends.
+\If{the frames differ in size}
+\State Run Algorithm~\ref{alg:rings} on $G'$ and return its rings.
+\EndIf
+\State Build $T$, the vertices within reach of a changed row in either frame.
+\If{$T$ is the whole vertex set}
+\State Run Algorithm~\ref{alg:rings} on $G'$ and return its rings.
+\EndIf
+\State Remove every ring of $G$ that has a member in $T$, and keep the others.
+\For{each $s\in T$}
+\State Run the search of Algorithm~\ref{alg:rings} from $s$ over all of $G'$, and keep the rings whose lowest member in $T$ is $s$.
+\EndFor
+\State Return the kept rings together with the rings found.
+\end{algorithmic}
+% snapper:on
+\end{algorithm}
+
+The cage labels are carried in the same way.
+A six-ring is evaluated again when it is new or when one of its molecules has a changed neighbour row.
+It is also evaluated again when one of its molecules lies on, or is bonded to a molecule of, a six-ring that appeared or vanished.
+Every other ring keeps its cage partners, with their ring indices renumbered (Section~\sref{sec:s-dirty}).
+This update still compares every neighbour row and renumbers the partner lists of all rings, so its cost stays linear in $n$ even for a single changed bond.
+It falls back to the full pass when the share of the molecules with a changed row, or of the six-rings that pass through such a molecule or have to be evaluated again, passes the limit of Table~\ref{tab:thresholds}.
+After a fallback, it runs the full pass on every later frame until the number of molecules changes or a frame has no six-ring.
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{The cage-label update returns to the full search at a fixed share, and the packing and the clathrate search stop at fixed limits.}
+The ring update takes a full pass only when $T$ is the whole vertex set.
+The limits are the defaults in the sources of the program, from which the script that writes the numbers of this paper reads them.}
+\label{tab:thresholds}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}Xr@{}}
+\toprule
+Stage & The stage falls back or stops when & Limit \\
+\midrule
+Cage-label update & more molecules than this share have a changed neighbour row, or more six-rings than this share pass through such a molecule or have to be evaluated again & \qty{\dsv{thr@cagerows@pct}}{\percent} \\
+Double-diamond packing & a component of conflicts that is not the line graph of a bipartite graph & one bit per candidate \\
+Clathrate cages & an edge of a face lies outside this length window & \qtyrange{\dsv{thr@edgelo}}{\dsv{thr@edgehi}}{\angstrom} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{A worked example}
+\label{sec:example}
+
+Table~\ref{tab:worked} applies the definitions to ideal crystals, to ice in square, pentagonal and hexagonal nanotubes and to the unit cells of the two common clathrate structures.
+In ice~Ih every molecule sits on hexagonal cages and in ice~Ic on double-diamond cages, and both crystals have two six-rings per molecule, as their networks require.
+The square tube is twelve layers of four molecules, and its twelve prism blocks fill the length of the tube, so Eq.~\eqref{eq:height} gives $h_4=\rthree{w@tube-4@height4}$.
+Its six-rings wind around the tube, each along two sides of the square in one layer and the other two sides in the next, and no path between two of their members is shorter than the ring.
+On the hexagonal tube a six-cycle that crosses two layers can only run around two neighbouring squares of the wall, the bond between those squares is its shortcut, and only the layer hexagons and the squares are primitive.
+The clathrate cells give the cage counts of their structures, two $5^{12}$ and six $5^{12}6^{2}$ cages in structure~I and sixteen $5^{12}$ and eight $5^{12}6^{4}$ cages in structure~II~\cite{jacobson2010amorphous}.
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{Every molecule of ideal ice~Ih lies on hexagonal cages and every molecule of ideal ice~Ic on double-diamond cages, and each ideal tube is filled with one type of prism block.}
+On the ideal crystals the cutoff graph and both nearest-neighbour graphs coincide.
+The tubes are twelve layers of four, five and six molecules, the clathrate rows give only the cages of one unit cell and the heights follow Eq.~\eqref{eq:height}.}
+\label{tab:worked}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrrrrl@{}}
+\toprule
+Structure & Molecules & 4-rings & 5-rings & 6-rings & Cages or prism blocks \\
+\midrule
+Ice~Ih & \dsv{w@ice-Ih@sites} & \dsv{w@ice-Ih@ring4} & \dsv{w@ice-Ih@ring5} & \dsv{w@ice-Ih@ring6} & \dsv{w@ice-Ih@cages@hc} HC \\
+Ice~Ic & \dsv{w@ice-Ic@sites} & \dsv{w@ice-Ic@ring4} & \dsv{w@ice-Ic@ring5} & \dsv{w@ice-Ic@ring6} & \dsv{w@ice-Ic@cages@ddc} DDC \\
+Square tube & \dsv{w@tube-4@sites} & \dsv{w@tube-4@ring4} & \dsv{w@tube-4@ring5} & \dsv{w@tube-4@ring6} & \dsv{w@tube-4@prism4} square, $h_4=\rthree{w@tube-4@height4}$ \\
+Pentagonal tube & \dsv{w@tube-5@sites} & \dsv{w@tube-5@ring4} & \dsv{w@tube-5@ring5} & \dsv{w@tube-5@ring6} & \dsv{w@tube-5@prism5} pentagonal, $h_5=\rthree{w@tube-5@height5}$ \\
+Hexagonal tube & \dsv{w@tube-6@sites} & \dsv{w@tube-6@ring4} & \dsv{w@tube-6@ring5} & \dsv{w@tube-6@ring6} & \dsv{w@tube-6@prism6} hexagonal, $h_6=\rthree{w@tube-6@height6}$ \\
+Structure~I & \dsv{w@sI@sites} & & & & \dsv{w@sI@cages@512} $5^{12}$, \dsv{w@sI@cages@51262} $5^{12}6^{2}$ \\
+Structure~II & \dsv{w@sII@sites} & & & & \dsv{w@sII@cages@512} $5^{12}$, \dsv{w@sII@cages@51264} $5^{12}6^{4}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Figure~\ref{fig:update} follows Algorithm~\ref{alg:update} through one change on the hexagonal tube.
+Deleting one bond along the tube, between two neighbouring layers, puts its two ends in $X$.
+The rings through $X$, six squares and the two layer hexagons, are removed, and every other ring is carried without a test.
+The searches from the two molecules of $X$ find seven rings: the four squares through $X$ that do not use the deleted bond, the two layer hexagons and the hexagon that the two squares on the deleted bond merge into.
+The update thus ends with the ring set of a full search on the changed graph.
+
+\begin{figure}[tbp]
+\centering
+\input{figures/fig-update}
+\caption{\textbf{Deleting one bond of a hexagonal ice nanotube merges two of its squares into a hexagon, and the ring update searches again only from the two ends of that bond.}
+The wall of the tube is unrolled around site~0, with the layers as rows, and dotted stubs continue the wall around the tube and along its length.
+Deleting the dashed bond, between site~0 of layer~0 and site~0 of layer~1, puts its two ends (orange) in $X$.
+Of the \dsv{u@rings_before} rings, \dsv{u@rings_before_3_to_6@4} squares and \dsv{u@rings_before_3_to_6@6} hexagons, the \dsv{u@rings_through_changed} through $X$ are removed and the other \dsv{u@rings_carried} are carried.
+The searches from $X$ find again the four outlined squares and the two thick layer hexagons and find the new hexagon (shaded) that replaces the two squares on the deleted bond, which leaves \dsv{u@rings_after_3_to_6@4} squares and \dsv{u@rings_after_3_to_6@6} hexagons.}
+\label{fig:update}
+\end{figure}
+
+\section{Implementation}
+\label{sec:impl}
+
+d-SEAMS is a C++20 library with a command-line program, built with Meson~\cite{meson} and tested with Catch2~\cite{catch2}.
+The program reads LAMMPS dump, XYZ and CON frames~\cite{thompson2022lammps}, builds the bond graphs with cell lists and the minimum image convention~\cite{goswami2026linkcell,goswami2026minimage} and writes per-molecule labels and per-frame counts for each analysis.
+Its commands cover the rings and cages of Section~\ref{sec:defs}, the CHILL and CHILL+ labels, Steinhardt parameters, the $F_4$ order parameter, radial distribution functions, coordination numbers, hydrogen bonds and density profiles~\cite{steinhardt1983bond,moore2010chill,nguyen2015identification,rodger1996f4}.
+A C interface carries the same analyses to the Python bindings of PydSEAMSlib~\cite{pydseamslib2026}, to R and Julia packages and to the Lua library yodaStruct~\cite{yodastruct2026}.
+A LAMMPS compute calls this interface to assign CHILL+ labels during a run.
+
+The carried rings and cage labels of Section~\ref{sec:update} are the default for a trajectory, and an option rebuilds every frame from the start.
+Both modes write identical output files on the nucleation trajectory of Section~\ref{sec:nucleation}, and the test suite compares each update with the full search on perturbed frames and on a short trajectory of mW ice.
+A randomized test shifts every frame of its test data by half a cell and by random vectors, which must leave the cages unchanged.
+It also permutes the molecules, which must leave the number of cages unchanged.
+The program installs through pixi or Nix~\cite{pixi,dolstra2004nix}, and Section~\sref{sec:s-repro} lists the commands that produce every figure and table of this paper.
+
+\section{Results}
+\label{sec:results}
+
+\subsection{Protocol}
+\label{sec:protocol}
+
+The hardware line is \texttt{uname -m} \texttt{\dsv{hw@arch}}, \texttt{nproc} \dsv{hw@nproc}, CPU model \texttt{\dsv{hw@model}}.
+The codes of each comparison ran on the same machine, every timed process used one thread and was pinned with \texttt{taskset}, and d-SEAMS and d-SEAMS~1.0.1 were release builds with GCC~\dsv{hw@gcc}~\cite{dseams101}.
+The version comparison builds the cutoff graph once outside the timers and times the rings of up to seven members and both cage searches.
+In the comparison with other codes, each code runs in a worker process of its own, and its timer includes its own neighbour search, so every timing covers the same path from positions to labels.
+The frames are ideal ice~Ic and ice~Ih and the square-tube ice of a deposited trajectory~\cite{goswami2019nanotubedata}, each replicated from about a thousand to about a million molecules.
+The liquid dump is not in this checkout, so the comparator campaign has no liquid column.
+Table~\ref{tab:codes} lists the codes and operations, and Section~\sref{sec:s-protocol} gives the frames, the call counts, the time limits and the settings of each code.
+
+We report the median of the calls with an exact binomial \dsv{set@coverage@pct}\% interval~\cite{hollander2014nonparametric} and the quartiles $Q_1$ and $Q_3$ of the calls~\cite{hyndman1996sample}.
+The relative error of a median is the larger distance from the median to an end of its interval, in percent of the median.
+Ratios of medians carry bootstrap intervals~\cite{efron1993bootstrap}, and two codes count as separated when a two-sided Mann-Whitney test with Holm's correction~\cite{holm1979simple} rejects equal timings at the \dsv{set@significance@pct}\% level.
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{Every code of the comparison builds its own neighbours from the oxygen positions, with the cutoff of \qty{\dsv{set@cutoff}}{\angstrom} unless the last column names another rule.}
+The matched pairs time the same operation on the same frame, and the local structure classifiers are timed against the cage labels of d-SEAMS and reported apart from the matched pairs.}
+\label{tab:codes}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\linewidth}{@{}ll>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X@{}}
+\toprule
+Code & Version & Operations & Neighbours \\
+\midrule
+d-SEAMS & 2.12.0 & CHILL+, $q_6$, primitive rings, cage labels & four nearest within cutoff for CHILL+, mutual graph for $q_6$, seeded graph for cage labels \\
+d-SEAMS~1 & 1.0.1 & primitive rings, HC and DDC & cutoff \\
+OVITO~\cite{ovito3172} & 3.17.2 & CHILL+, primitive rings, polyhedral template matching, diamond structure and adaptive common neighbour analysis & CHILL+ only for molecules with four neighbours within cutoff, and the rules of each structure type \\
+CHILL+ library~\cite{palmer2026orderparams} & 2026 & CHILL+ & four nearest within cutoff \\
+freud~\cite{ramasubramani2020freud} & 3.6.1 & $q_6$ & four nearest \\
+pyscal~\cite{menon2019pyscal} & 4.1.0 & $q_6$, diamond structure & four nearest for $q_6$, its own rule for the diamond structure \\
+matscipy~\cite{grigorev2024matscipy} & 1.3.1 & primitive rings & cutoff \\
+GenIce, cycless~\cite{matsumoto2018genice,matsumoto2026cycless} & 2.2.13.3, 0.7 & rings & cutoff \\
+RINGS~\cite{leroux2010rings} & 1.3.5 & primitive rings & cutoff \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{d-SEAMS against d-SEAMS 1}
+\label{sec:versions}
+
+Both versions find the same rings on the ideal ice~Ic frames of Figure~\ref{fig:versions}, and both label every six-ring as a ring of a double-diamond cage.
+On one core, the rings and both cage searches of a \dsv{hl@n}-molecule ice~Ic frame take \qty{\dsv{hl@two@ms}}{\milli\second}, against \qty{\dsv{hl@one@s}}{\second} for d-SEAMS~1 (Table~\ref{tab:cost}).
+Most of the old cost is the hexagonal-cage search, which gains the most from the index, while the ring search gains the least.
+The fitted exponents of Table~\ref{tab:cost} show the old hexagonal-cage search growing with the cube of the number of molecules and the old double-diamond search close to the square, as Section~\ref{sec:cages} predicts, and every stage of d-SEAMS growing at most linearly.
+On the thermalized mW ice~Ic crystal in the test data of the program, the whole path of d-SEAMS takes \qty{\dsv{v@mw@path@two}}{\milli\second}, with quartiles of \qtyrange{\dsv{v@mw@path@two@q1}}{\dsv{v@mw@path@two@q3}}{\milli\second} (Table~\sref{tab:s-versions}).
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{On a frame of \dsv{hl@n} molecules of ice~Ic, the hexagonal-cage search of d-SEAMS~1 takes almost all of its time, and the index makes that search \rthree{v@1000@hc@ratio} times faster.}
+Medians in milliseconds of \dsv{v@1000@path@one@n} calls of d-SEAMS~1 and \dsv{v@1000@path@two@n} calls of d-SEAMS on the cutoff graph, with exact \dsv{set@coverage@pct}\% intervals, relative errors and quartiles, the ratio of the medians with its bootstrap interval, and the exponents of power laws fitted to the medians of Figure~\ref{fig:versions}.
+The double-diamond stage of d-SEAMS includes the packing.}
+\label{tab:cost}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+ & & Rings & HC & DDC & Whole path \\
+\midrule
+\tabbody{figures/data/tab-cost}
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[tbp]
+\centering
+\input{figures/fig-versions}
+\caption{\textbf{On ideal ice~Ic, the hexagonal-cage search of d-SEAMS~1 grows with the cube of the number of molecules, and every stage of d-SEAMS grows at most linearly.}
+(a) Primitive rings, (b) hexagonal (filled marks) and double-diamond (open marks, dashed) cage searches and (c) the whole path, with d-SEAMS~1 in vermilion and d-SEAMS in blue.
+Marks are medians of at least \dsv{fig@versions@calls} calls, and both the \dsv{set@coverage@pct}\% intervals and the quartiles lie inside the marks (Table~\sref{tab:s-versions}).
+Ice~Ic has no hexagonal cage, so panel (b) shows the full cost of testing for one.}
+\label{fig:versions}
+\end{figure}
+
+\subsection{Comparison with other codes}
+\label{sec:codes}
+
+In all \dsv{hl@matched} matched comparisons that completed, d-SEAMS is the faster code (Figure~\ref{fig:codes} and Table~\ref{tab:ranges}).
+Table~\ref{tab:ranges} gives the smallest and the largest ratio of each code to d-SEAMS, and the supplement gives every timing with its interval and quartiles.
+Table~\sref{tab:s-h2h} compares all codes head to head on frames of one size, Table~\sref{tab:s-ovito} gives the ring timings of d-SEAMS and OVITO on every frame and Table~\sref{tab:s-ladder} lists every completed case.
+The release comparison is one thread on one core of an Intel Xeon Processor, twelve calls, type 7 median, quartiles and interquartile range (Table~\ref{tab:shipped}).
+The machine line from \texttt{lscpu} is \ShipHost.
+On the \num{\ShipNop}-molecule frame the ring clock is \ShipRingsBaseQ~ms for the public base and \ShipRingsTipQ~ms for this build.
+OVITO's in-process ring stage, bonds built before the timer, is \ShipRingsOvitoQ~ms.
+Neighbours and rings together are \ShipNeighBaseQ~ms, \ShipNeighTipQ~ms and \ShipNeighOvitoQ~ms.
+The OVITO worker process includes Python and Qt startup and has no cage stage.
+IdentifyDiamond gives a structure label to each point and does not return cages.
+\texttt{seams cages --graph cutoff} is \ShipCutBaseQ~ms at the base and \ShipCutTipQ~ms here, and the default \texttt{seams cages} is \ShipSeedBaseQ~ms and \ShipSeedTipQ~ms.
+The default command reuses one ring search when the undirected edge sets compare equal.
+The base cutoff resident set is \ShipRssCutBase~kB and the tip is \ShipRssCutTip~kB.
+On the \num{\ShipBigNop}-molecule frame the base command exits with \texttt{std::bad\_alloc}.
+The dense neighbour matrix at that count is \ShipMatrixGib~GiB.
+The tip cutoff command is \ShipBigCutTipQ~ms and the default command is \ShipBigSeedTipQ~ms.
+OVITO's in-process ring stage on that frame is \ShipBigRingsOvitoQ~ms and its bonds-and-rings stage is \ShipBigBondsOvitoQ~ms.
+\texttt{paper/tex/repro/shipped.sh} and \texttt{snakemake -c1 shipped\_campaign} write these medians.
+\texttt{benchmarks/shipped.py} times the same commands.
+Two further rows of Table~\sref{tab:s-ring-perf} time the read of the same file from disk, one cold and one amortized, each from a fresh process, and those rows are not inside the ring rows.
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{Release build on an Intel Xeon Processor, one thread, type 7 median with quartiles and interquartile range.}
+Rings and neighbours-and-rings for OVITO are the in-process modifier stages.
+The cage commands are the shipped process.
+The resident set is the peak reported by \texttt{/usr/bin/time -v}, in kB.
+A dash is a stage OVITO does not run.}
+\label{tab:shipped}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Work & Base & Tip & OVITO stage \\
+\midrule
+\tabbody{figures/data/tab-shipped}
+\bottomrule
+\end{tabular}}
+\end{table}
+
+On that core the cutoff neighbour list is faster than freud, OVITO and scipy on every frame those codes timed.
+The mutual four-neighbour list is faster on every measured frame, including the skewed cell of \num{512} molecules, where d-SEAMS takes \qty{\dsv{neigh@skew@dseams}}{\milli\second}, freud \qty{\dsv{neigh@skew@freud}}{\milli\second} and OVITO \qty{\dsv{neigh@skew@ovito}}{\milli\second}.
+The three codes return \num{\dsv{neigh@skew@count}} directed edges on that frame.
+Every matched median ratio is at least \dsv{h@equivalent@minratio}, and its bootstrap interval lies above one.
+Holm's correction over the family leaves the largest $p$ at \num{\dsv{h@equivalent@maxp}}.
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{Every matched code takes longer than d-SEAMS on every frame on which both complete, and three of the four local classifiers take less time than its cage labels.}
+Smallest and largest ratio of the median time of each code to that of d-SEAMS over the frames on which both completed, with the number of frames and the largest $p$ of a Mann-Whitney test after Holm's correction; a ratio below one means that the code is faster.
+The local classifiers are timed against the cage labels, and cycless, whose six-rings differ on a confined frame, is reported apart as well.
+\textsuperscript{a}Timed in a campaign of its own. Table~\sref{tab:s-ring-perf} lists those medians.}
+\label{tab:ranges}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+Code & Operation & Frames & Smallest & Largest & Largest $p$ \\
+\midrule
+\tabbody{figures/data/tab-ranges}
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[tbp]
+\centering
+\input{figures/fig-codes}
+\caption{\textbf{d-SEAMS takes less time than every matched code for CHILL+, $q_6$ and primitive rings at every size shown, and three of the four local classifiers take less time than its cage labels.}
+(a) CHILL+ and (b) $q_6$ on ice~Ic, (c) primitive rings of up to \dsv{set@maxring@word} members on the liquid and (d) the cage labels of d-SEAMS on ice~Ic against four local structure classifiers, which are timed but not matched.
+Marks are medians of at least \dsv{fig@codes@calls} calls, and both the \dsv{set@coverage@pct}\% intervals and the quartiles lie inside the marks (Tables~\sref{tab:s-ovito} and~\sref{tab:s-ladder}); PTM is polyhedral template matching and CNA is adaptive common neighbour analysis.
+In (c), d-SEAMS and OVITO come from the campaign in which each code ran in its own process (Table~\sref{tab:s-ovito}).}
+\label{fig:codes}
+\end{figure}
+
+Every case that ended without a timing belongs to a comparator code (Table~\sref{tab:s-censored}).
+Both interfaces of matscipy end with a segmentation fault on the larger frames.
+The liquid dump is not in this checkout, so the liquid column of the comparator campaign was not rerun.
+The source archive of RINGS 1.3.5 is not in this checkout, so that lane was not rerun.
+We call cycless through the pair-list and cycle functions that GenIce uses.
+On the confined frame of \num{1000} molecules it returns \dsv{hl@cycless@six} six-rings where d-SEAMS and matscipy find \dsv{hl@dseams@six}, so its completed calls are reported apart.
+
+The labels of the matched codes agree molecule by molecule on ice~Ic and ice~Ih (Table~\sref{tab:s-agree}).
+On the confined frame, d-SEAMS gives the same $q_6$ label as freud to \qty{\dsv{a@confined@1e3@dseams-q6@freud-q6@pct}}{\percent} of the molecules.
+For $q_6$, d-SEAMS uses the mutual graph, and freud and pyscal use the four nearest neighbours of each molecule.
+
+Three of the four local structure classifiers take less time than the cage labels of d-SEAMS (Table~\ref{tab:ranges}).
+The diamond classifiers and polyhedral template matching give the cage labels of d-SEAMS to every molecule of every frame, and common neighbour analysis, which has no diamond structure type, labels none of the crystalline ice.
+These classifiers read the first and second neighbour shells of each molecule, while the cage labels follow the rings of the network.
+The same rings build the prism blocks of confined ice and the clathrate cages (Section~\ref{sec:example}).
+
+\subsection{Cost of the update}
+\label{sec:churn}
+
+To control the number of changed bonds, we took two consecutive frames of the nucleation trajectory of Section~\ref{sec:nucleation} and replaced the positions of the earlier frame inside a sphere at the centre of the cell with those of the later one (Section~\sref{sec:s-updates}).
+Growing the sphere raises the number of changed bonds, and Figure~\ref{fig:churn} times both updates against their full searches.
+With three changed bonds on a frame of a nucleation run, the ring update is \dsv{hl@ringgain} times faster than a full search (Table~\ref{tab:update}).
+The cage-label update, which compares every neighbour row, gains less than a factor of two at any change.
+Every update returns the rings and labels of the full search.
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{With three changed bonds, the ring update is \dsv{hl@ringgain} times faster than the full search, and the cage-label update gains a factor of \dsv{c@small@affgain}.}
+Medians and quartiles of \dsv{c@reps} calls in milliseconds on frames of \dsv{c@nop} molecules, and the gain as the ratio of the medians (Table~\sref{tab:s-churn}).}
+\label{tab:update}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+ & \multicolumn{2}{c}{Full search} & \multicolumn{2}{c}{Update} & \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Update & Median & Quartiles & Median & Quartiles & Gain \\
+\midrule
+\tabbody{figures/data/tab-update}
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[tbp]
+\centering
+\input{figures/fig-churn}
+\caption{\textbf{On frames of \dsv{c@nop} molecules, the ring update takes less time than the full search up to \dsv{c@ringlast@churn} changed bonds, and the cage-label update gains at most a factor of \dsv{c@small@affgain}.}
+Each frame splices a sphere of a later frame into an earlier one, and marks are medians of \dsv{c@reps} calls, whose quartiles lie inside the marks.
+The cage-label update returns to the full search at the share in Table~\ref{tab:thresholds}.}
+\label{fig:churn}
+\end{figure}
+
+The saved frames of that trajectory are further apart.
+Consecutive frames change a median of \rthree{m@median@bonds} bonds per molecule, with quartiles of \rthree{m@q1@bonds} and \rthree{m@q3@bonds}, and all \dsv{m@transitions} transitions fall back.
+Over the whole trajectory, file reading included, rebuilding every frame from the start takes \dsv{n@cutoff@ratio} times as long as carrying the rings and labels on the cutoff graph (Table~\sref{tab:s-nucleation}).
+On the seeded graph it takes \dsv{n@seeded@ratio} times as long.
+Both modes write identical output files.
+The ring update searches the molecules in $T$ and takes a full pass only when $T$ is every molecule.
+
+\subsection{Cages in a nucleation trajectory}
+\label{sec:nucleation}
+
+We applied the cage labels to the deposited nucleation trajectory of d-SEAMS~1~\cite{goswami2020dseams,goswami2019nucleationdata}, \dsv{n@frames} frames of \dsv{n@sites} molecules of mW water~\cite{molinero2009mw}, on the cutoff graph and on the seeded graph (Figure~\ref{fig:nucleation} and Table~\ref{tab:nucleation}).
+On the cutoff graph, the ice grows from \dsv{n@cutoff@first@ice} molecules in the initial frame to \dsv{n@cutoff@last@ice} in the last.
+Of the \dsv{n@cutoff@gain@ice} molecules that it gains, \qty{\dsv{n@cutoff@gain@cubic@pct}}{\percent} are cubic, \qty{\dsv{n@cutoff@gain@both@pct}}{\percent} are mixed and \qty{\dsv{n@cutoff@gain@hexagonal@pct}}{\percent} are hexagonal.
+The growing ice is thus built mostly from double-diamond cages and from molecules that both cage types share.
+A mixed molecule lies on rings of both cage types, and the share of mixed molecules in the ice rises over the run on both graphs.
+The seeded graph labels fewer molecules than the cutoff graph in the initial frame and about as many in the last, and its shares of the gain differ from those of the cutoff graph by at most \num{\dsv{n@gain@maxdiff@pct}} percentage points.
+This stacking-disordered growth agrees with the mixed cubic and hexagonal nuclei found for mW water and for TIP4P/Ice~\cite{moore2011structural,lupi2017stacking,haji2015nucleation}.
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{On both bond graphs, most of the ice gained along the nucleation trajectory is cubic or mixed.}
+Hexagonal, cubic and mixed molecules in the initial and the last frame, in the frame with the most ice and in the gain from the initial to the last frame.
+The ratio is that of cubic to hexagonal molecules, and the last column gives the share of mixed molecules in the ice.}
+\label{tab:nucleation}
+\small
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}llrrrrrr@{}}
+\toprule
+Graph & Frame & Hexagonal & Cubic & Mixed & Ice & Ratio & Mixed share \\
+\midrule
+\tabbody{figures/data/tab-nucleation-cages}
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[tbp]
+\centering
+\input{figures/fig-nucleation}
+\caption{\textbf{Along a nucleation trajectory of mW water, cubic and mixed molecules make up most of the ice that grows, on both bond graphs.}
+Hexagonal, cubic and mixed molecules in each of the \dsv{n@frames} frames of \dsv{n@sites} molecules, on (a) the cutoff graph and (b) the seeded graph of Section~\ref{sec:graphs}.}
+\label{fig:nucleation}
+\end{figure}
+
+The benchmark systems are the cages, the ice lattices, a nucleation seed, a brine slab and the two clathrate hydrates (Figures~\ref{fig:renders-cages}, \ref{fig:renders-ice}, \ref{fig:renders-seed} and~\ref{fig:renders-hydrate}).
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/hc_cage_solvis_trim}\hfill
+\includegraphics[width=0.48\textwidth]{figures/ddc_cage_solvis_trim}
+\caption{\textbf{One hexagonal cage and one double-diamond cage, the two units the ice labels read.}
+The thick bonds are the cage.}
+\label{fig:renders-cages}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/ih_lattice_solvis_trim}\hfill
+\includegraphics[width=0.48\textwidth]{figures/ic_lattice_solvis_trim}
+\caption{\textbf{Oxygen lattices of ice Ih and ice Ic.}
+Every molecule of the hexagonal lattice lies on hexagonal cages, and every molecule of the cubic lattice lies on double-diamond cages.}
+\label{fig:renders-ice}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.72\textwidth]{figures/seed_solvis_trim}
+\caption{\textbf{The nucleation seed is the thick-bonded cluster, and the thin bonds are the water outside it.}}
+\label{fig:renders-seed}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.32\textwidth]{figures/brine_slab_xyzrender}\hfill
+\includegraphics[width=0.32\textwidth]{figures/si_hydrate_xyzrender}\hfill
+\includegraphics[width=0.32\textwidth]{figures/sii_hydrate_xyzrender}
+\caption{\textbf{The brine slab and the two methane hydrates.}
+In the brine drawing the ice is the connected slab and the ions sit in the liquid half.
+Every drawn hydrate cage contains one methane.}
+\label{fig:renders-hydrate}
+\end{figure}
+
+\subsection{Strong and weak scaling}
+\label{sec:scaling}
+
+The comparisons above pin every process to one thread.
+This section raises the Open Multi-Processing (OpenMP) thread count through the powers of two up to the physical cores of the machine in Table~\ref{tab:hardware}, on one release build.
+A simultaneous multithreading point is measured only when the hardware-thread count exceeds the physical core count.
+Each point is the type 7 median of \num{\dsv{sc@calls}} calls, and the interquartile range (IQR) is the type 7 third quartile minus the first.
+No call is dropped.
+The full run reads the dump, builds the cutoff neighbour list and runs the analysis.
+The kernel time is that analysis without the read and without the neighbour list.
+Ring analysis is the primitive-ring search and the bulk cage classification.
+Cluster analysis is the cubic hexagonal interfacial liquid classifier (CHILL), in the extended CHILL+ form, and the largest ice-like cluster.
+The frames are replicas of the mW crystal and of a bulk TIP4P/2005 ice cell.
+That cell contains oxygen, hydrogen, hydrogen and the M site, and each replica fills the periodic box.
+The confined water column in the repository is a separate case and is not this ladder.
+One replica of each crystal has at least \num{110000} molecules: \num{\dsv{sc@mw@n}} mW molecules and \num{\dsv{sc@tip4p@n}} TIP4P/2005 molecules.
+Weak scaling keeps the molecules per thread equal to that replica, so the mW series reaches \num{\dsv{sc@weak@mw@rings@n}} molecules and the TIP4P/2005 series reaches \num{\dsv{sc@weak@tip4p@rings@n}} molecules.
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{The scaling runs used one processor and no graphics processor.}
+Memory is the \texttt{MemTotal} line.}
+\label{tab:hardware}
+\begin{tabular}{ll}
+\toprule
+Processor & \dsv{sc@cpu} \\
+Sockets & \dsv{sc@sockets} \\
+Cores per socket & \dsv{sc@cps} \\
+Threads per core & \dsv{sc@tpc} \\
+Physical cores & \dsv{sc@physical} \\
+Hardware threads & \dsv{sc@threads} \\
+Memory & \qty{\dsv{sc@memgib}}{\gibi\byte} \\
+Graphics processor & none \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+On the \num{\dsv{sc@mw@n}}-molecule mW replica the primitive-ring search returns \num{\dsv{sc@mw@rings}} rings and the bulk packing keeps \num{\dsv{sc@mw@ddc}} double-diamond cages.
+Threads per core is \num{\dsv{sc@tpc}}, so the hardware-thread count equals the \dsv{sc@physical} physical cores and the last mark is the full core count.
+The full ring median falls from \qty{\dsv{sc@strong@mw@rings@e2e1}}{\milli\second} on one thread to \qty{\dsv{sc@strong@mw@rings@e2e}}{\milli\second} on \dsv{sc@physical} physical cores, a speedup of \num{\dsv{sc@strong@mw@rings@speedup}} and a parallel efficiency of \qty{\dsv{sc@strong@mw@rings@eff}}{\percent}.
+The kernel speedup on that frame is \num{\dsv{sc@strong@mw@rings@kspeed}}, and the kernel efficiency is \qty{\dsv{sc@strong@mw@rings@keff}}{\percent}.
+The largest ice-like cluster on that frame contains \num{\dsv{sc@mw@largest}} molecules.
+The cluster analysis speeds up by \num{\dsv{sc@strong@mw@clusters@speedup}} over the full run and by \num{\dsv{sc@strong@mw@clusters@kspeed}} in the kernel.
+On the TIP4P/2005 replica the full-run speedups are \num{\dsv{sc@strong@tip4p@rings@speedup}} for rings and \num{\dsv{sc@strong@tip4p@clusters@speedup}} for clusters.
+With the molecule count proportional to the thread count, the full-run efficiency at \dsv{sc@physical} physical cores is \qty{\dsv{sc@weak@mw@rings@eff}}{\percent} for mW rings, \qty{\dsv{sc@weak@mw@clusters@eff}}{\percent} for mW clusters, \qty{\dsv{sc@weak@tip4p@rings@eff}}{\percent} for TIP4P/2005 rings and \qty{\dsv{sc@weak@tip4p@clusters@eff}}{\percent} for TIP4P/2005 clusters.
+Figure~\ref{fig:scale} draws the curves, and Table~\ref{tab:scale} lists the largest strong-scaling frame at one thread and at every core together with every weak-scaling point.
+The supplement lists every measured size.
+Before this measurement the full-run efficiency of the mW ring analysis on the same frame was \qty{\dsv{sc@before@strong@mw@rings@eff}}{\percent}, and the cluster analysis was \qty{\dsv{sc@before@strong@mw@clusters@eff}}{\percent}.
+The serial fraction from Amdahl's relation, $(N T(N) - T(1)) / (T(1) (N - 1))$, is \num{\dsv{sc@strong@mw@rings@s}} for that ring run and \num{\dsv{sc@strong@mw@clusters@s}} for the cluster run.
+On the ring run the parse fraction is \num{\dsv{sc@strong@mw@rings@parse@s}}, the neighbour-list fraction is \num{\dsv{sc@strong@mw@rings@neigh@s}}, the ring-search fraction is \num{\dsv{sc@strong@mw@rings@ring@s}} and the classification fraction is \num{\dsv{sc@strong@mw@rings@class@s}}.
+The classification limiter is the cage packing.
+It takes \qty{\dsv{sc@strong@mw@rings@ddc_pack@1}}{\milli\second} on one thread and \qty{\dsv{sc@strong@mw@rings@ddc_pack}}{\milli\second} on eight, serial fraction \num{\dsv{sc@strong@mw@rings@ddc_pack@s}}.
+Inside that block the alternating match takes \qty{\dsv{sc@strong@mw@rings@ddc_match}}{\milli\second} at eight threads, serial fraction \num{\dsv{sc@strong@mw@rings@ddc_match@s}}, and the conflict rows take \qty{\dsv{sc@strong@mw@rings@ddc_conf}}{\milli\second}, serial fraction \num{\dsv{sc@strong@mw@rings@ddc_conf@s}}.
+The clique ids, from a sort of the rank keys and a prefix sum, have serial fraction \num{\dsv{sc@strong@mw@rings@ddc_clique@s}}.
+The ring-search serial fraction is \num{\dsv{sc@strong@mw@rings@ring@s}}.
+Its longest block at eight threads is the source enumeration, serial fraction \num{\dsv{sc@strong@mw@rings@enum@s}}.
+The neighbour balls, filled by a count, a scan, and a write, have serial fraction \num{\dsv{sc@strong@mw@rings@ball@s}}.
+The adjacency build has serial fraction \num{\dsv{sc@strong@mw@rings@adj@s}}.
+A triad on this host moves \qty{13.0}{\giga\byte\per\second}.
+The weak ring run takes \qty{\dsv{sc@weak@mw@rings@e2e}}{\milli\second}, and the cage packing inside it is the long block, so the run is not limited by that triad.
+Phase timers cover at least \qty{\dsv{sc@cover@min}}{\percent} of the full run at every point.
+This machine has no graphics processor.
+GPU scaling is an open item for the GPU host.
+The device neighbour list has not been compiled on this machine and it has not been run.
+A timed total on a device would include the copies both ways and the synchronisation.
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{Full-run time includes the dump read and the neighbour list. The kernel does not.}
+Efficiency is the speedup divided by the thread count, in percent.
+The strong rows are the replica of at least \num{110000} molecules.}
+\label{tab:scale}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{lllrrrrrrrrr}
+\toprule
+Frame & Analysis & Scaling & Molecules & Threads & Full run & IQR & Speedup & Eff. & Kernel & K.\ speedup & K.\ eff. \\
+\midrule
+\tabbody{figures/data/tab-scale}
+\bottomrule
+\end{tabular}}
+\end{table}
+
+\begin{figure}[tbp]
+\centering
+\input{figures/fig-scale}
+\caption{\textbf{Strong scaling is the speedup at fixed size, and weak scaling is the efficiency when the molecule count grows with the threads.}
+(a) Full-run speedup on the replica of at least \num{110000} molecules.
+The horizontal coordinate is the physical cores in use, one thread on each.
+(b) Full-run parallel efficiency of the weak series.
+Threads per core is \num{\dsv{sc@tpc}}, so the hardware-thread count is \dsv{sc@threads} and no mark sits past the physical cores.
+Marks are type 7 medians of \num{\dsv{sc@calls}} calls.}
+\label{fig:scale}
+\end{figure}
+
+The measured runs leave the device neighbour list off.
+GPU scaling is an open item for the GPU host.
+The ring search stays on the CPU.
+A primitive ring is a pair of vertex-disjoint shortest paths whose depth is at most half the ring size, on a bond graph of small coordination, and the paths and the rings they close are ragged lists.
+The parallel work is the loop over source vertices.
+The same rings and the same largest cluster are returned at one thread and at several threads, and the host cell list returns the same neighbour rows as the pair loop.
+
+The scaling rule runs one job at a time.
+Section~\sref{sec:s-repro} lists the shell wrapper.
+
+\section{Conclusions}
+\label{sec:conclusions}
+
+On one core, d-SEAMS assigns the topological ice structures of a \dsv{hl@n}-molecule ice~Ic frame in \qty{\dsv{hl@two@ms}}{\milli\second}, against \qty{\dsv{hl@one@s}}{\second} for d-SEAMS~1, at a cost that grows linearly with the number of molecules in a network of bounded degree.
+On \dsv{sc@physical} physical cores the full ring analysis of \num{\dsv{sc@mw@n}} mW molecules speeds up by \num{\dsv{sc@strong@mw@rings@speedup}}, a parallel efficiency of \qty{\dsv{sc@strong@mw@rings@eff}}{\percent} (Section~\ref{sec:scaling}).
+The gain grows with the size of the frame because most of it comes from the index from molecules to rings, which turns the cubic pair loop of the hexagonal-cage search into a linear pass.
+
+For any ring size, the rings carried between frames equal those of a full search, and for rings of up to seven members only the ends of changed bonds are searched again.
+With three changed bonds on a frame of a nucleation run, the ring update is \dsv{hl@ringgain} times faster than a full search.
+The ring update searches the molecules in $T$ and takes a full pass only when $T$ is every molecule.
+The cage-label update stays linear in the number of molecules because it compares every neighbour row.
+
+In all \dsv{hl@matched} completed matched comparisons with OVITO, freud, pyscal, matscipy and the CHILL+ library, d-SEAMS is the faster code, while local diamond-structure classifiers run up to \dsv{hl@local@max} times faster than its cage labels.
+Applied to a nucleation run of mW water, the cage labels show the ice growing mostly from cubic and mixed molecules on both bond graphs.
+
+The next step is a cage-label update that reads only the changed bonds, without a pass over every neighbour row.
+With such an update, the LAMMPS compute that assigns CHILL+ labels during a run can also assign cage labels on every step.
+
+\section*{CRediT authorship contribution statement}
+
+\textbf{Rohit Goswami:} Conceptualization, Methodology, Software, Formal analysis, Writing (original draft), Writing (review and editing).
+\textbf{Amrita Goswami:} Conceptualization (the original cage-membership assignment, the topological criteria for confined ice, and the matching of seeded clusters and topological units), Methodology, Software, Writing (review and editing).
+\textbf{Ruhila Goswami:} Software (PydSEAMSlib, the Python bindings), Visualization (colour palette), Writing (review and editing).
+\textbf{Jayant K. Singh:} Writing (review and editing).
+
+\section*{Declaration of competing interest}
+
+The authors declare no competing financial interests or personal relationships that influenced the work reported in this paper.
+
+\section*{Acknowledgments}
+
+We thank our families, pets and plants for their patience and support throughout this work.
+
+\section*{Data and code availability}
+
+The program is seams-core under the MIT licence at \url{https://github.com/d-SEAMS/seams-core}, and its releases are archived on Zenodo under the concept DOI \href{https://doi.org/10.5281/zenodo.3874291}{10.5281/zenodo.3874291}~\cite{seamscore2026}.
+The version comparison, the update measurements and the main comparator campaign are the records stored at commit \texttt{\seqsplit{66617588258baf1f41895676966fae94a9075c08}}, whose \texttt{src} tree is \texttt{cb10f6d6} (Section~\sref{sec:s-machines}).
+The one-thread neighbour samples were measured on commit \texttt{\seqsplit{140a557e7c9b619a668343ac118bc4dff50c38bd}}.
+The version DOI for 2.12.0 is \DOIPENDING.
+The Python bindings are PydSEAMSlib~\cite{pydseamslib2026} and the Lua library is yodaStruct~\cite{yodastruct2026}.
+The nucleation and nanotube trajectories are deposited on figshare with the identifiers \href{https://doi.org/10.6084/m9.figshare.11448702.v1}{10.6084/m9.figshare.11448702.v1} and \href{https://doi.org/10.6084/m9.figshare.11448768.v1}{10.6084/m9.figshare.11448768.v1}~\cite{goswami2019nucleationdata,goswami2019nanotubedata}.
+The measured records, the scripts that turn them into the figures, tables and numbers of this paper and the comparison scripts are in the repository, and Section~\sref{sec:s-repro} gives the commands that reproduce every measurement.
+
+\section*{Declaration of generative AI and AI-assisted technologies in the writing process}
+
+Chatbots were used to refine certain turns of phrase and to speed through some implementation details; all the work is the authors' own.
+
+\bibliographystyle{elsarticle-num-names} \bibliography{dseams2}
+
+\end{document}

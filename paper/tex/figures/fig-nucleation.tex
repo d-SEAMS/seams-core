@@ -1,0 +1,21 @@
+% Cage labels along the mW nucleation trajectory (Section 5.5).
+\begin{tikzpicture}
+  \begin{groupplot}[
+      group style={group size=2 by 1, horizontal sep=1.2cm},
+      dseams, width=5.0cm, height=3.6cm,
+      xmin=0, xmax=150, ymin=0, ymax=480,
+      xlabel={Frame},
+      every axis plot/.append style={line width=1.0pt}]
+    \nextgroupplot[ylabel={Molecules}, title={(a) Cutoff graph}]
+      \addplot[oiBlue, no marks] table[x=frame, y=cut_hex] {figures/data/plot-nucleation.dat};
+      \addplot[oiVerm, no marks] table[x=frame, y=cut_cubic] {figures/data/plot-nucleation.dat};
+      \addplot[oiGreen, no marks] table[x=frame, y=cut_both] {figures/data/plot-nucleation.dat};
+    \nextgroupplot[title={(b) Seeded graph}, legend style={at={(0.03,0.97)}, anchor=north west}]
+      \addplot[oiBlue, no marks] table[x=frame, y=seed_hex] {figures/data/plot-nucleation.dat};
+      \addlegendentry{hexagonal}
+      \addplot[oiVerm, no marks] table[x=frame, y=seed_cubic] {figures/data/plot-nucleation.dat};
+      \addlegendentry{cubic}
+      \addplot[oiGreen, no marks] table[x=frame, y=seed_both] {figures/data/plot-nucleation.dat};
+      \addlegendentry{mixed}
+  \end{groupplot}
+\end{tikzpicture}
