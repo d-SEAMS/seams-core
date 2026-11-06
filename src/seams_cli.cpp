@@ -15,6 +15,7 @@
 #include <order_parameter.hpp>
 #include <cluster.hpp>
 #include <density.hpp>
+#include <edge_set.hpp>
 #include <rdf.hpp>
 #include <seams_config.hpp>
 #include <seams_input.hpp>
@@ -1452,14 +1453,25 @@ int cmdCages(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
     auto idxU = nneigh::neighbourListByIndex(cloud, uni);
     // tum::cageCounts reads one graph and has no ring completion, so the
     // seeded assignment stays on the host whatever SEAMS_OFFLOAD says.
-    const auto sixS = ring::contractibleRings(
-        sixRings(carry.rings(GraphSlot::strict, idxS, 6)), cloud);
-    const auto sixU = ring::contractibleRings(
-        sixRings(carry.rings(GraphSlot::permissive, idxU, 6)), cloud);
-    const auto aff = ring::seededCageAffiliation(
-        sixS, carry.affiliation(GraphSlot::strict, sixS, idxS), sixU,
-        carry.affiliation(GraphSlot::permissive, sixU, idxU), idxU, complete);
-    tallyAtoms(aff.hc, aff.ddc);
+    // Hash first. A match is checked again by comparing every edge.
+    if (seams::provenEqual(seams::edgeSetOf(idxS), seams::edgeSetOf(idxU))) {
+      const auto six = ring::contractibleRings(
+          sixRings(carry.rings(GraphSlot::strict, idxS, 6)), cloud);
+      const auto &once = carry.affiliation(GraphSlot::strict, six, idxS);
+      const auto aff =
+          ring::seededCageAffiliation(six, once, six, once, idxS, complete);
+      tallyAtoms(aff.hc, aff.ddc);
+    } else {
+      const auto sixS = ring::contractibleRings(
+          sixRings(carry.rings(GraphSlot::strict, idxS, 6)), cloud);
+      const auto sixU = ring::contractibleRings(
+          sixRings(carry.rings(GraphSlot::permissive, idxU, 6)), cloud);
+      const auto aff = ring::seededCageAffiliation(
+          sixS, carry.affiliation(GraphSlot::strict, sixS, idxS), sixU,
+          carry.affiliation(GraphSlot::permissive, sixU, idxU), idxU,
+          complete);
+      tallyAtoms(aff.hc, aff.ddc);
+    }
   } else {
     const auto graph = nneigh::bondGraphFromName(graphName);
     std::vector<std::vector<int>> nList;
