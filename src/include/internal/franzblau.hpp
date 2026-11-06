@@ -204,21 +204,35 @@ public:
   [[nodiscard]] double lastChangedBondFraction() const;
 
   //! Above this fraction of vertices with a changed row, update recomputes
-  //! the whole frame in one pass instead (default 0.2; 1 never falls back;
-  //! 0 always does). The pass reuses its balls and ring buffers. With more
-  //! than one thread, later frames of a run that has already crossed this
-  //! line skip the bond diff and search from the unsorted neighbour rows.
+  //! the whole frame in one pass instead. The default does not use a
+  //! fraction. The update enumerates the sources in T and no others, so
+  //! it takes a full pass only when T is the whole vertex set.
+  //! One never falls back; zero always does. The result equals a rebuild
+  //! at every fraction.
   void setFullPassFraction(double fraction);
 
   //! Above this many changed bonds per molecule, update takes the same
-  //! whole-frame pass (default 0.15). A negative value disables the test.
-  //! Ignored when the vertex fraction is at least 1.
+  //! whole-frame pass. The default is negative, which disables the test.
+  //! The vertex fraction is then the only switch. Ignored when the
+  //! vertex fraction is at least 1.
   void setBondCrossover(double changedBondsPerMolecule);
 
 private:
   struct Impl;
   std::unique_ptr<Impl> impl_;
 };
+
+struct RingSearchSplit {
+  double balls_ms = 0;
+  double enumerate_ms = 0;
+  double merge_ms = 0;
+  double adj_ms = 0;
+  double ball_count_ms = 0;
+  double ball_fill_ms = 0;
+};
+
+//! Balls, source enumeration and the gather from the last ringNetwork call.
+[[nodiscard]] RingSearchSplit lastRingSearchSplit();
 
 } // namespace primitive
 
