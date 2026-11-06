@@ -2,7 +2,7 @@
 <html lang="en" data-accent-color="teal" data-content_root="../">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>struct ring::EquatorChoice - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="struct ring::PackingCertificate" href="struct_ring_PackingCertificate.html" /><link rel="prev" title="struct ring::CageAffiliation" href="struct_ring_CageAffiliation.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>struct ring::EquatorChoice - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="struct ring::PackParts" href="struct_ring_PackParts.html" /><link rel="prev" title="struct ring::DdcSplit" href="struct_ring_DdcSplit.html" />
       <link rel="canonical" href="https://docs.dseams.info/api/struct_ring_EquatorChoice.html" /><script>
     function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
     setColorMode(localStorage._theme||"auto");
@@ -348,7 +348,7 @@ data-aria-dark="Switch to auto color mode">
 <span id="doxid-structring-1-1-equator-choice"></span><span id="index-0"></span><h1>struct ring::EquatorChoice<a class="headerlink" href="#struct-ring-equatorchoice" title="Link to this heading">¶</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<p>Six peripheral rings of one equatorial candidate. n == 0 when the ring is not a candidate. The rings are stored in ascending canonical rank.</p>
+<p>Peripheral rings of one equatorial candidate. n == 0 when the ring is not a candidate. The first six sit inline. A defect that names more conflicts stores the rest in past, so none are dropped.</p>
 <div class="doxyrest-overview-code-block highlight">
 <pre><span data-line="1"><span class="cp">#include</span> <span class="cpf">&lt;src/include/internal/topo_bulk.hpp&gt;</span></span>
 <span data-line="2"> </span>
@@ -357,7 +357,13 @@ data-aria-dark="Switch to auto color mode">
 <span data-line="5"> </span>
 <span data-line="6">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structring_1_1_equator_choice_1ab89f64fa075b360c70306c6b46747d34"></span><span class="n">ring</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="p">{};</span></span>
 <span data-line="7">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structring_1_1_equator_choice_1a51db6155bcb66059917161200ed20b2c"></span><span class="n">n</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span></span>
-<span data-line="8"><span class="p">};</span></span>
+<span data-line="8">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="doxyrest-code-target target" id="doxid-structring_1_1_equator_choice_1a22171c9308e8f837f34d7f63ccf09130"></span><span class="n">past</span><span class="p">;</span></span>
+<span data-line="9"> </span>
+<span data-line="10">    <span class="c1">// methods</span></span>
+<span data-line="11"> </span>
+<span data-line="12">    <span class="kt">int</span> <span class="doxyrest-code-target target" id="doxid-structring_1_1_equator_choice_1a419dd14bc198b919ca7e93522faf39b5"></span><span class="n">idAt</span><span class="p">(</span><span class="kt">int</span> <span class="n">k</span><span class="p">)</span> <span class="k">const</span><span class="p">;</span></span>
+<span data-line="13">    <span class="kt">void</span> <span class="doxyrest-code-target target" id="doxid-structring_1_1_equator_choice_1ad5fea7aca33bd26edb46c5ba9600db21"></span><span class="n">put</span><span class="p">(</span><span class="kt">int</span> <span class="n">k</span><span class="p">,</span> <span class="kt">int</span> <span class="n">value</span><span class="p">);</span></span>
+<span data-line="14"><span class="p">};</span></span>
 </pre></div>
 </section>
 
@@ -367,16 +373,16 @@ data-aria-dark="Switch to auto color mode">
   </svg>
   <span>Back to top</span>
 </button><div class="navigation flex print:hidden"><div class="navigation-prev">
-    <a href="struct_ring_CageAffiliation.html">
+    <a href="struct_ring_DdcSplit.html">
       <i class="i-lucide chevron-left"></i>
       <div class="page-info">
-        <span>Previous</span><div class="title">struct ring::CageAffiliation</div></div>
+        <span>Previous</span><div class="title">struct ring::DdcSplit</div></div>
     </a>
   </div><div class="navigation-next">
-    <a href="struct_ring_PackingCertificate.html">
+    <a href="struct_ring_PackParts.html">
       <div class="page-info">
         <span>Next</span>
-        <div class="title">struct ring::PackingCertificate</div>
+        <div class="title">struct ring::PackParts</div>
       </div>
       <i class="i-lucide chevron-right"></i>
     </a>

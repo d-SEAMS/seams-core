@@ -7,7 +7,7 @@ struct ring::EquatorChoice
 .. toctree::
 	:hidden:
 
-Six peripheral rings of one equatorial candidate. n == 0 when the ring is not a candidate. The rings are stored in ascending canonical rank.
+Peripheral rings of one equatorial candidate. n == 0 when the ring is not a candidate. The first six sit inline. A defect that names more conflicts stores the rest in past, so none are dropped.
 
 
 .. ref-code-block:: cpp
@@ -20,4 +20,10 @@ Six peripheral rings of one equatorial candidate. n == 0 when the ring is not a 
 	
 		int :target:`ring<doxid-structring_1_1_equator_choice_1ab89f64fa075b360c70306c6b46747d34>`[6] {};
 		int :target:`n<doxid-structring_1_1_equator_choice_1a51db6155bcb66059917161200ed20b2c>` = 0;
+		std::vector<int> :target:`past<doxid-structring_1_1_equator_choice_1a22171c9308e8f837f34d7f63ccf09130>`;
+
+		// methods
+	
+		int :target:`idAt<doxid-structring_1_1_equator_choice_1a419dd14bc198b919ca7e93522faf39b5>`(int k) const;
+		void :target:`put<doxid-structring_1_1_equator_choice_1ad5fea7aca33bd26edb46c5ba9600db21>`(int k, int value);
 	};

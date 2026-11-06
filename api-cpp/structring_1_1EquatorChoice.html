@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.12.0</span>
+<span class="project_info">seams-core v2.13.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -240,16 +240,97 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('structring_1_1
 
 <p><code>#include &lt;<a class="el" href="topo__bulk_8hpp_source.html">src/include/internal/topo_bulk.hpp</a>&gt;</code></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-pub-methods" class="groupheader"><a id="pub-methods" name="pub-methods"></a>
+Public Member Functions</h2></td></tr>
+<tr class="memitem:a419dd14bc198b919ca7e93522faf39b5" id="r_a419dd14bc198b919ca7e93522faf39b5"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a419dd14bc198b919ca7e93522faf39b5">idAt</a> (int k) const</td></tr>
+<tr class="memitem:ad5fea7aca33bd26edb46c5ba9600db21" id="r_ad5fea7aca33bd26edb46c5ba9600db21"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ad5fea7aca33bd26edb46c5ba9600db21">put</a> (int k, int value)</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-pub-attribs" class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:ab89f64fa075b360c70306c6b46747d34" id="r_ab89f64fa075b360c70306c6b46747d34"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ab89f64fa075b360c70306c6b46747d34">ring</a> [6] {}</td></tr>
 <tr class="memitem:a51db6155bcb66059917161200ed20b2c" id="r_a51db6155bcb66059917161200ed20b2c"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a51db6155bcb66059917161200ed20b2c">n</a> = 0</td></tr>
+<tr class="memitem:a22171c9308e8f837f34d7f63ccf09130" id="r_a22171c9308e8f837f34d7f63ccf09130"><td class="memItemLeft">std::vector&lt; int &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a22171c9308e8f837f34d7f63ccf09130">past</a></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Six peripheral rings of one equatorial candidate. n == 0 when the ring is not a candidate. The rings are stored in ascending canonical rank. </p>
+<div class="textblock"><p>Peripheral rings of one equatorial candidate. n == 0 when the ring is not a candidate. The first six sit inline. A defect that names more conflicts stores the rest in past, so none are dropped. </p>
 
-<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00152">152</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
-</div><a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
+<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00158">158</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Member Function Documentation</h2>
+<a id="a419dd14bc198b919ca7e93522faf39b5" name="a419dd14bc198b919ca7e93522faf39b5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a419dd14bc198b919ca7e93522faf39b5">&#9670;&#160;</a></span>idAt()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int ring::EquatorChoice::idAt </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>k</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00163">163</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  163</span>                                      {</div>
+<div class="line"><span class="lineno">  164</span>    <span class="keywordflow">return</span> k &lt; 6 ? ring[k] : past[static_cast&lt;std::size_t&gt;(k - 6)];</div>
+<div class="line"><span class="lineno">  165</span>  }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ad5fea7aca33bd26edb46c5ba9600db21" name="ad5fea7aca33bd26edb46c5ba9600db21"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad5fea7aca33bd26edb46c5ba9600db21">&#9670;&#160;</a></span>put()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ring::EquatorChoice::put </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>k</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>value</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00167">167</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  167</span>                             {</div>
+<div class="line"><span class="lineno">  168</span>    <span class="keywordflow">if</span> (k &lt; 6) {</div>
+<div class="line"><span class="lineno">  169</span>      <a class="code hl_variable" href="#ab89f64fa075b360c70306c6b46747d34">ring</a>[k] = value;</div>
+<div class="line"><span class="lineno">  170</span>      <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  171</span>    }</div>
+<div class="line"><span class="lineno">  172</span>    <span class="keyword">const</span> std::size_t at = <span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(k - 6);</div>
+<div class="line"><span class="lineno">  173</span>    <span class="keywordflow">if</span> (<a class="code hl_variable" href="#a22171c9308e8f837f34d7f63ccf09130">past</a>.size() &lt;= at) {</div>
+<div class="line"><span class="lineno">  174</span>      <a class="code hl_variable" href="#a22171c9308e8f837f34d7f63ccf09130">past</a>.resize(at + 1);</div>
+<div class="line"><span class="lineno">  175</span>    }</div>
+<div class="line"><span class="lineno">  176</span>    <a class="code hl_variable" href="#a22171c9308e8f837f34d7f63ccf09130">past</a>[at] = value;</div>
+<div class="line"><span class="lineno">  177</span>  }</div>
+<div class="ttc" id="astructring_1_1EquatorChoice_html_a22171c9308e8f837f34d7f63ccf09130"><div class="ttname"><a href="#a22171c9308e8f837f34d7f63ccf09130">ring::EquatorChoice::past</a></div><div class="ttdeci">std::vector&lt; int &gt; past</div><div class="ttdef"><b>Definition</b> <a href="topo__bulk_8hpp_source.html#l00161">topo_bulk.hpp:161</a></div></div>
+<div class="ttc" id="astructring_1_1EquatorChoice_html_ab89f64fa075b360c70306c6b46747d34"><div class="ttname"><a href="#ab89f64fa075b360c70306c6b46747d34">ring::EquatorChoice::ring</a></div><div class="ttdeci">int ring[6]</div><div class="ttdef"><b>Definition</b> <a href="topo__bulk_8hpp_source.html#l00159">topo_bulk.hpp:159</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a name="doc-variable-members" id="doc-variable-members"></a><h2 id="header-doc-variable-members" class="groupheader">Member Data Documentation</h2>
 <a id="a51db6155bcb66059917161200ed20b2c" name="a51db6155bcb66059917161200ed20b2c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a51db6155bcb66059917161200ed20b2c">&#9670;&#160;</a></span>n</h2>
 
@@ -262,7 +343,23 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00154">154</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00160">160</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
+
+</div>
+</div>
+<a id="a22171c9308e8f837f34d7f63ccf09130" name="a22171c9308e8f837f34d7f63ccf09130"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a22171c9308e8f837f34d7f63ccf09130">&#9670;&#160;</a></span>past</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt;int&gt; ring::EquatorChoice::past</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00161">161</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
 
 </div>
 </div>
@@ -278,8 +375,8 @@ Public Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00153">153</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  153</span>{};</div>
+<p class="definition">Definition at line <a class="el" href="topo__bulk_8hpp_source.html#l00159">159</a> of file <a class="el" href="topo__bulk_8hpp_source.html">topo_bulk.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  159</span>{};</div>
 </div><!-- fragment -->
 </div>
 </div>

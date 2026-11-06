@@ -8,7 +8,9 @@ namespace ring
 	:hidden:
 
 	struct_ring_CageAffiliation.rst
+	struct_ring_DdcSplit.rst
 	struct_ring_EquatorChoice.rst
+	struct_ring_PackParts.rst
 	struct_ring_PackingCertificate.rst
 	struct_ring_RingSearchIndex.rst
 	struct_ring_SeededAtomLabels.rst
@@ -31,7 +33,9 @@ Topological network criteria functions. :ref:`More...<details-namespacering>`
 	// structs
 
 	struct :ref:`CageAffiliation<doxid-structring_1_1_cage_affiliation>`;
+	struct :ref:`DdcSplit<doxid-structring_1_1_ddc_split>`;
 	struct :ref:`EquatorChoice<doxid-structring_1_1_equator_choice>`;
+	struct :ref:`PackParts<doxid-structring_1_1_pack_parts>`;
 	struct :ref:`PackingCertificate<doxid-structring_1_1_packing_certificate>`;
 	struct :ref:`RingSearchIndex<doxid-structring_1_1_ring_search_index>`;
 	struct :ref:`SeededAtomLabels<doxid-structring_1_1_seeded_atom_labels>`;
@@ -73,6 +77,8 @@ Topological network criteria functions. :ref:`More...<details-namespacering>`
 	int :ref:`findPrismatic<doxid-namespacering_1aaf26a6612dd314b36db80820289ab68b>`(const std::vector<std::vector<int>>& rings, std::vector<int>& listHC, std::vector<:ref:`strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, int iring, int jring, std::vector<int>& prismaticRings, const :ref:`RingSearchIndex<doxid-structring_1_1_ring_search_index>`& index);
 	int :ref:`getAtomTypesTopoBulk<doxid-namespacering_1a45c216fc97f12e29f117bbc1f6d3c7f3>`(const std::vector<std::vector<int>>& rings, const std::vector<:ref:`ring::strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, std::vector<:ref:`cage::iceType<doxid-group__cage_1gaaac41828990e32b9d6e7db4426b61529>`>& atomTypes);
 	int :ref:`getStrucNumbers<doxid-namespacering_1aac3a6fdc27f05a7ded468e955983f270>`(const std::vector<:ref:`ring::strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, const std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, int& numHC, int& numDDC, int& mixedRings, int& prismaticRings, int& basalRings);
+	:ref:`PackParts<doxid-structring_1_1_pack_parts>` :ref:`lastPackParts<doxid-namespacering_1acaf1ee3249ecc074f8b8bf9761569fea>`();
+	:ref:`DdcSplit<doxid-structring_1_1_ddc_split>` :ref:`lastDdcSplit<doxid-namespacering_1a67343815b56a7bf3c4fcc6109270cf53>`();
 
 	} // namespace ring
 .. _details-namespacering:
@@ -491,4 +497,24 @@ Assigns a type of enum class iceType, to every atom, using information from ring
 	int getStrucNumbers(const std::vector<:ref:`ring::strucType<doxid-group__ring_1ga301cfdc88452cfe51bd4f745d223a7e1>`>& ringType, const std::vector<:ref:`cage::Cage<doxid-structcage_1_1_cage>`>& cageList, int& numHC, int& numDDC, int& mixedRings, int& prismaticRings, int& basalRings)
 
 Determines the number of HCs, DDCs, Mixed rings, prismatic and basal rings.
+
+.. index:: pair: function; lastPackParts
+.. _doxid-namespacering_1acaf1ee3249ecc074f8b8bf9761569fea:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`PackParts<doxid-structring_1_1_pack_parts>` lastPackParts()
+
+Conflict build, clique ids, matching and branch-and-bound from the last pack.
+
+.. index:: pair: function; lastDdcSplit
+.. _doxid-namespacering_1a67343815b56a7bf3c4fcc6109270cf53:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`DdcSplit<doxid-structring_1_1_ddc_split>` lastDdcSplit()
+
+Order, equatorial test and packing from the last findDDC call.
 

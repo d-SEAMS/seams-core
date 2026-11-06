@@ -365,9 +365,11 @@ data-aria-dark="Switch to auto color mode">
 <span data-line="4">    <span class="c1">// fields</span></span>
 <span data-line="5"> </span>
 <span data-line="6">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span> <span class="doxyrest-code-target target" id="doxid-structring_1_1_ring_search_index_1a8e4433086bf9bec113ee61bc3c17b8bb"></span><span class="n">ringsContainingAtom</span><span class="p">;</span></span>
-<span data-line="7">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="doxyrest-code-target target" id="doxid-structring_1_1_ring_search_index_1a891fe48d2dccc51ea7f043b562a42cbd"></span><span class="n">atomRank</span><span class="p">;</span></span>
-<span data-line="8">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="mi">3</span><span class="o">&gt;&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-structring-1-1-ring-search-index-1a756c5dfcd0a8e96744dfff6775c1e31b"><span class="std std-ref">ringShift</span></a><span class="p">;</span></span>
-<span data-line="9"><span class="p">};</span></span>
+<span data-line="7">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-structring-1-1-ring-search-index-1a1f81de9808108ab22e07eaf9cacb72e4"><span class="std std-ref">ringOff</span></a><span class="p">;</span></span>
+<span data-line="8">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="doxyrest-code-target target" id="doxid-structring_1_1_ring_search_index_1aeee9bc69a4e56681fe9eba8bed57a400"></span><span class="n">ringCol</span><span class="p">;</span></span>
+<span data-line="9">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="doxyrest-code-target target" id="doxid-structring_1_1_ring_search_index_1a891fe48d2dccc51ea7f043b562a42cbd"></span><span class="n">atomRank</span><span class="p">;</span></span>
+<span data-line="10">    <span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="mi">3</span><span class="o">&gt;&gt;</span> <a class="doxyrest-code-link reference internal" href="#doxid-structring-1-1-ring-search-index-1a756c5dfcd0a8e96744dfff6775c1e31b"><span class="std std-ref">ringShift</span></a><span class="p">;</span></span>
+<span data-line="11"><span class="p">};</span></span>
 </pre></div>
 </section>
 <section id="detailed-documentation">
@@ -377,8 +379,12 @@ data-aria-dark="Switch to auto color mode">
 <p>findHC visits rings in the order of a key that does not use absolute coordinates: the sorted atom indices, then the unwrapped shift of the cycle. findDDC reports a maximum set of cages under the same key, so the cage count is independent of the order in which rings are claimed and does not change when the frame is translated.</p>
 <section id="fields">
 <h3>Fields<a class="headerlink" href="#fields" title="Link to this heading">¶</a></h3>
+<div class="doxyrest-title-code-block highlight" id="doxid-structring-1-1-ring-search-index-1a1f81de9808108ab22e07eaf9cacb72e4">
+<span id="index-1"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">ringOff</span></span>
+</pre></div>
+<p>Same rows as ringsContainingAtom, packed. ringCol[ringOff[a] .. ringOff[a+1]) is the ascending ring list of atom a. Empty when the index was not built.</p>
 <div class="doxyrest-title-code-block highlight" id="doxid-structring-1-1-ring-search-index-1a756c5dfcd0a8e96744dfff6775c1e31b">
-<span id="index-1"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="mi">3</span><span class="o">&gt;&gt;</span> <span class="n">ringShift</span></span>
+<span id="index-2"></span><pre><span data-line="1"><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">array</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="mi">3</span><span class="o">&gt;&gt;</span> <span class="n">ringShift</span></span>
 </pre></div>
 <p>Integer minimum-image winding of each ring. Empty if no box was supplied.</p>
 </section>

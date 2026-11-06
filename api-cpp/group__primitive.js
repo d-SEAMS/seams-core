@@ -25,6 +25,14 @@ var group__primitive =
       [ "setFullPassFraction", "group__primitive.html#ga53a273ea8d071c67a311fc29dd88ee2d", null ],
       [ "update", "group__primitive.html#ga7684b53e6a0fe8a5ca2e327536c67536", null ]
     ] ],
+    [ "primitive::RingSearchSplit", "structprimitive_1_1RingSearchSplit.html", [
+      [ "adj_ms", "group__primitive.html#gaeabfd49266f3f2249efdba794ffe6f9d", null ],
+      [ "ball_count_ms", "group__primitive.html#ga96c5404f51682855bd20f1caccb4a6c9", null ],
+      [ "ball_fill_ms", "group__primitive.html#ga554a37fa145adbd506dab889e438be7f", null ],
+      [ "balls_ms", "group__primitive.html#ga0e6ab106bff4d946013fa746d558ea1d", null ],
+      [ "enumerate_ms", "group__primitive.html#gae3b07f71cb0775b885fc67b91fef9f42", null ],
+      [ "merge_ms", "group__primitive.html#ga4466d57ddb02055de9c3ebb2aa5cf274", null ]
+    ] ],
     [ "primitive::clearGraph", "group__primitive.html#gae21524f817bf459110f97aa639eea703", null ],
     [ "primitive::countAllRingsFromIndex", "group__primitive.html#gac81b1dd4b67e8200de61e52c498c1b2f", null ],
     [ "primitive::findRings", "group__primitive.html#ga277552db62f5d020b0f33ad23b79f8eb", null ],
@@ -32,6 +40,7 @@ var group__primitive =
     [ "primitive::RingUpdater::lastChangedBondFraction", "group__primitive.html#gac1d82c61f12cb666700e6b97bd12641c", null ],
     [ "primitive::RingUpdater::lastChangedBonds", "group__primitive.html#ga6ab3da57a3352a9a79fe93c814970923", null ],
     [ "primitive::RingUpdater::lastRecomputedSources", "group__primitive.html#ga084d21f04e9aa5ef91faf6e536fb2412", null ],
+    [ "primitive::lastRingSearchSplit", "group__primitive.html#ga84c628db439f4e376250d4e7d89e7484", null ],
     [ "primitive::RingUpdater::operator=", "group__primitive.html#ga55d76a1a5bff46d8f3f42e0116e3c783", null ],
     [ "primitive::RingUpdater::operator=", "group__primitive.html#ga04ae3941d0bac6c89d5b44ea525a52c6", null ],
     [ "primitive::populateGraphFromIndices", "group__primitive.html#ga3f096393efc02530aeaa0945e24c0f76", null ],
@@ -48,8 +57,14 @@ var group__primitive =
     [ "primitive::shortestPath", "group__primitive.html#ga6031dcefe2fd5432b7d26cb6c9f38f47", null ],
     [ "primitive::RingUpdater::update", "group__primitive.html#ga7684b53e6a0fe8a5ca2e327536c67536", null ],
     [ "primitive::RingUpdater::~RingUpdater", "group__primitive.html#ga59677a1b2d3083f426396eeb218012f1", null ],
+    [ "primitive::RingSearchSplit::adj_ms", "group__primitive.html#gaeabfd49266f3f2249efdba794ffe6f9d", null ],
     [ "primitive::Vertex::atomIndex", "group__primitive.html#gaead86b6d47e9f9a77949fef59b8de27f", null ],
+    [ "primitive::RingSearchSplit::ball_count_ms", "group__primitive.html#ga96c5404f51682855bd20f1caccb4a6c9", null ],
+    [ "primitive::RingSearchSplit::ball_fill_ms", "group__primitive.html#ga554a37fa145adbd506dab889e438be7f", null ],
+    [ "primitive::RingSearchSplit::balls_ms", "group__primitive.html#ga0e6ab106bff4d946013fa746d558ea1d", null ],
+    [ "primitive::RingSearchSplit::enumerate_ms", "group__primitive.html#gae3b07f71cb0775b885fc67b91fef9f42", null ],
     [ "primitive::Vertex::inGraph", "group__primitive.html#ga932b6ae4efc838d407deed5ee11b8afe", null ],
+    [ "primitive::RingSearchSplit::merge_ms", "group__primitive.html#ga4466d57ddb02055de9c3ebb2aa5cf274", null ],
     [ "primitive::Vertex::neighListIndex", "group__primitive.html#gabbf40e41b84205035d4053be2180f6b2", null ],
     [ "primitive::Graph::pts", "group__primitive.html#gaf6aaf0f3cc1ab4d32e6095ff38398df9", null ],
     [ "primitive::Graph::rings", "group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3", null ]

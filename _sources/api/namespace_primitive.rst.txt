@@ -22,6 +22,7 @@ Functions for generating primitive rings. :ref:`More...<details-namespaceprimiti
 	// structs
 
 	struct :ref:`Graph<doxid-structprimitive_1_1_graph>`;
+	struct :ref:`RingSearchSplit<doxid-structprimitive_1_1_ring_search_split>`;
 	struct :ref:`Vertex<doxid-structprimitive_1_1_vertex>`;
 
 	// classes

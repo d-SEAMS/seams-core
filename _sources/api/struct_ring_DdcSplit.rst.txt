@@ -1,0 +1,30 @@
+.. index:: pair: struct; ring::DdcSplit
+.. _doxid-structring_1_1_ddc_split:
+
+struct ring::DdcSplit
+=====================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/topo_bulk.hpp>
+	
+	struct DdcSplit {
+		// fields
+	
+		double :target:`order_ms<doxid-structring_1_1_ddc_split_1a530a3a77e57577975fb234a434f8e0a0>` = 0;
+		double :target:`equator_ms<doxid-structring_1_1_ddc_split_1a31133496ae68fe985806fe457db2da5c>` = 0;
+		double :target:`pack_ms<doxid-structring_1_1_ddc_split_1a3f74ded6b1b79617901c8d15a58fb6da>` = 0;
+		double :target:`conf_ms<doxid-structring_1_1_ddc_split_1a244492ecca2113edb275d44be1020b60>` = 0;
+		double :target:`split_ms<doxid-structring_1_1_ddc_split_1aa72c211b9d8dfb4e5518bd5400d7fea2>` = 0;
+		double :target:`clique_ms<doxid-structring_1_1_ddc_split_1a3d994ad1b24334e2dc09d671b9710592>` = 0;
+		double :target:`match_ms<doxid-structring_1_1_ddc_split_1a4079d61ecb002863dfa8ec6c0c17acb4>` = 0;
+		double :target:`search_ms<doxid-structring_1_1_ddc_split_1afc2418f108d7222363633cdf3b53033c>` = 0;
+		double :target:`write_ms<doxid-structring_1_1_ddc_split_1ad79d964f4d1aabb7349c4d4c012e15e0>` = 0;
+	};

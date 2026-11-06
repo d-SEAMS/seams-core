@@ -1,0 +1,11 @@
+.. index:: pair: struct; primitive::RingSearchSplit
+.. _doxid-structprimitive_1_1_ring_search_split:
+
+struct primitive::RingSearchSplit
+=================================
+
+.. toctree::
+	:hidden:
+
+
+

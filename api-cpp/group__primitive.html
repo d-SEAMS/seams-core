@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.12.0</span>
+<span class="project_info">seams-core v2.13.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -251,6 +251,7 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is a per-frame object, containing all the vertices for the particular frame, along with the vector of rings generated.  <a href="structprimitive_1_1Graph.html#details">More...</a><br /></td></tr>
 <tr class="memitem:primitive_3A_3ARingUpdater" id="r_primitive_3A_3ARingUpdater"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classprimitive_1_1RingUpdater.html">primitive::RingUpdater</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exact frame-to-frame maintenance of the primitive ring network.  <a href="classprimitive_1_1RingUpdater.html#details">More...</a><br /></td></tr>
+<tr class="memitem:primitive_3A_3ARingSearchSplit" id="r_primitive_3A_3ARingSearchSplit"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structprimitive_1_1RingSearchSplit.html">primitive::RingSearchSplit</a></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
@@ -284,6 +285,8 @@ Functions</h2></td></tr>
 <tr class="memdesc:gac1d82c61f12cb666700e6b97bd12641c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Changed bonds per molecule on the last update.  <br /></td></tr>
 <tr class="memitem:ga53a273ea8d071c67a311fc29dd88ee2d" id="r_ga53a273ea8d071c67a311fc29dd88ee2d"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ga53a273ea8d071c67a311fc29dd88ee2d">primitive::RingUpdater::setFullPassFraction</a> (double fraction)</td></tr>
 <tr class="memitem:gaf2cd5037b3a1e2c67f84bf482ab8c6eb" id="r_gaf2cd5037b3a1e2c67f84bf482ab8c6eb"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#gaf2cd5037b3a1e2c67f84bf482ab8c6eb">primitive::RingUpdater::setBondCrossover</a> (double changedBondsPerMolecule)</td></tr>
+<tr class="memitem:ga84c628db439f4e376250d4e7d89e7484" id="r_ga84c628db439f4e376250d4e7d89e7484"><td class="memItemLeft"><a class="el" href="structprimitive_1_1RingSearchSplit.html">RingSearchSplit</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga84c628db439f4e376250d4e7d89e7484">primitive::lastRingSearchSplit</a> ()</td></tr>
+<tr class="memdesc:ga84c628db439f4e376250d4e7d89e7484"><td class="mdescLeft">&#160;</td><td class="mdescRight">Balls, source enumeration and the gather from the last ringNetwork call.  <br /></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-var-members" class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -293,6 +296,12 @@ Variables</h2></td></tr>
 <tr class="memitem:ga932b6ae4efc838d407deed5ee11b8afe" id="r_ga932b6ae4efc838d407deed5ee11b8afe"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ga932b6ae4efc838d407deed5ee11b8afe">primitive::Vertex::inGraph</a></td></tr>
 <tr class="memitem:gaf6aaf0f3cc1ab4d32e6095ff38398df9" id="r_gaf6aaf0f3cc1ab4d32e6095ff38398df9"><td class="memItemLeft">std::vector&lt; <a class="el" href="structprimitive_1_1Vertex.html">Vertex</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gaf6aaf0f3cc1ab4d32e6095ff38398df9">primitive::Graph::pts</a></td></tr>
 <tr class="memitem:gac591e6693cef9a022fdbc24b8596bfd3" id="r_gac591e6693cef9a022fdbc24b8596bfd3"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gac591e6693cef9a022fdbc24b8596bfd3">primitive::Graph::rings</a></td></tr>
+<tr class="memitem:ga0e6ab106bff4d946013fa746d558ea1d" id="r_ga0e6ab106bff4d946013fa746d558ea1d"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga0e6ab106bff4d946013fa746d558ea1d">primitive::RingSearchSplit::balls_ms</a> = 0</td></tr>
+<tr class="memitem:gae3b07f71cb0775b885fc67b91fef9f42" id="r_gae3b07f71cb0775b885fc67b91fef9f42"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gae3b07f71cb0775b885fc67b91fef9f42">primitive::RingSearchSplit::enumerate_ms</a> = 0</td></tr>
+<tr class="memitem:ga4466d57ddb02055de9c3ebb2aa5cf274" id="r_ga4466d57ddb02055de9c3ebb2aa5cf274"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga4466d57ddb02055de9c3ebb2aa5cf274">primitive::RingSearchSplit::merge_ms</a> = 0</td></tr>
+<tr class="memitem:gaeabfd49266f3f2249efdba794ffe6f9d" id="r_gaeabfd49266f3f2249efdba794ffe6f9d"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#gaeabfd49266f3f2249efdba794ffe6f9d">primitive::RingSearchSplit::adj_ms</a> = 0</td></tr>
+<tr class="memitem:ga96c5404f51682855bd20f1caccb4a6c9" id="r_ga96c5404f51682855bd20f1caccb4a6c9"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga96c5404f51682855bd20f1caccb4a6c9">primitive::RingSearchSplit::ball_count_ms</a> = 0</td></tr>
+<tr class="memitem:ga554a37fa145adbd506dab889e438be7f" id="r_ga554a37fa145adbd506dab889e438be7f"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="#ga554a37fa145adbd506dab889e438be7f">primitive::RingSearchSplit::ball_fill_ms</a> = 0</td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"></div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
@@ -492,6 +501,33 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 <p>Vertices the last update enumerated rings through; the full vertex count on a whole-frame pass, zero when nothing changed </p>
+
+</div>
+</div>
+<a id="ga84c628db439f4e376250d4e7d89e7484" name="ga84c628db439f4e376250d4e7d89e7484"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga84c628db439f4e376250d4e7d89e7484">&#9670;&#160;</a></span>lastRingSearchSplit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structprimitive_1_1RingSearchSplit.html">RingSearchSplit</a> primitive::lastRingSearchSplit </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Balls, source enumeration and the gather from the last ringNetwork call. </p>
 
 </div>
 </div>
@@ -764,7 +800,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Above this many changed bonds per molecule, update takes the same whole-frame pass (default 0.15). A negative value disables the test. Ignored when the vertex fraction is at least 1. </p>
+<p>Above this many changed bonds per molecule, update takes the same whole-frame pass. The default is negative, which disables the test. The vertex fraction is then the only switch. Ignored when the vertex fraction is at least 1. </p>
 
 </div>
 </div>
@@ -782,7 +818,7 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Above this fraction of vertices with a changed row, update recomputes the whole frame in one pass instead (default 0.2; 1 never falls back; 0 always does). The pass reuses its balls and ring buffers. With more than one thread, later frames of a run that has already crossed this line skip the bond diff and search from the unsorted neighbour rows. </p>
+<p>Above this fraction of vertices with a changed row, update recomputes the whole frame in one pass instead. The default does not use a fraction. The update enumerates the sources in T and no others, so it takes a full pass only when T is the whole vertex set. One never falls back; zero always does. The result equals a rebuild at every fraction. </p>
 
 </div>
 </div>
@@ -878,6 +914,22 @@ Variables</h2></td></tr>
 </div>
 </div>
 <a name="doc-var-members" id="doc-var-members"></a><h2 id="header-doc-var-members" class="groupheader">Variable Documentation</h2>
+<a id="gaeabfd49266f3f2249efdba794ffe6f9d" name="gaeabfd49266f3f2249efdba794ffe6f9d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaeabfd49266f3f2249efdba794ffe6f9d">&#9670;&#160;</a></span>adj_ms</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double primitive::RingSearchSplit::adj_ms = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00229">229</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
+
+</div>
+</div>
 <a id="gaead86b6d47e9f9a77949fef59b8de27f" name="gaead86b6d47e9f9a77949fef59b8de27f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gaead86b6d47e9f9a77949fef59b8de27f">&#9670;&#160;</a></span>atomIndex</h2>
 
@@ -891,6 +943,70 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00090">90</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga96c5404f51682855bd20f1caccb4a6c9" name="ga96c5404f51682855bd20f1caccb4a6c9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga96c5404f51682855bd20f1caccb4a6c9">&#9670;&#160;</a></span>ball_count_ms</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double primitive::RingSearchSplit::ball_count_ms = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00230">230</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga554a37fa145adbd506dab889e438be7f" name="ga554a37fa145adbd506dab889e438be7f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga554a37fa145adbd506dab889e438be7f">&#9670;&#160;</a></span>ball_fill_ms</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double primitive::RingSearchSplit::ball_fill_ms = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00231">231</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga0e6ab106bff4d946013fa746d558ea1d" name="ga0e6ab106bff4d946013fa746d558ea1d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga0e6ab106bff4d946013fa746d558ea1d">&#9670;&#160;</a></span>balls_ms</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double primitive::RingSearchSplit::balls_ms = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00226">226</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
+
+</div>
+</div>
+<a id="gae3b07f71cb0775b885fc67b91fef9f42" name="gae3b07f71cb0775b885fc67b91fef9f42"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae3b07f71cb0775b885fc67b91fef9f42">&#9670;&#160;</a></span>enumerate_ms</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double primitive::RingSearchSplit::enumerate_ms = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00227">227</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
 
 </div>
 </div>
@@ -910,6 +1026,22 @@ Variables</h2></td></tr>
 </div><!-- fragment --><p>Contains the INDICES (not the atomIDs) of the neighbouring vertices </p>
 
 <p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00093">93</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
+
+</div>
+</div>
+<a id="ga4466d57ddb02055de9c3ebb2aa5cf274" name="ga4466d57ddb02055de9c3ebb2aa5cf274"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4466d57ddb02055de9c3ebb2aa5cf274">&#9670;&#160;</a></span>merge_ms</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">double primitive::RingSearchSplit::merge_ms = 0</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00228">228</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
 
 </div>
 </div>

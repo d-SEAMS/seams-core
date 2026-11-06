@@ -12,6 +12,7 @@ namespace seams
 	namespace_seams_product.rst
 	namespace_seams_sphericart_ylm.rst
 	namespace_seams_steinhardt.rst
+	struct_seams_EdgeSet.rst
 
 
 
@@ -30,7 +31,22 @@ namespace seams
 	namespace :ref:`seams::sphericart_ylm<doxid-namespaceseams_1_1sphericart__ylm>`;
 	namespace :ref:`seams::steinhardt<doxid-namespaceseams_1_1steinhardt>`;
 
+	// structs
+
+	struct :ref:`EdgeSet<doxid-structseams_1_1_edge_set>`;
+
 	// global functions
+
+	:ref:`EdgeSet<doxid-structseams_1_1_edge_set>` :target:`edgeSetOf<doxid-namespaceseams_1a18253b5fae99ed10e40bde67a6ccd3ce>`(const std::vector<std::vector<int>>& rows);
+	bool :target:`provenEqual<doxid-namespaceseams_1aeac06060e7e630f44e6ba07eb3c481bb>`(const :ref:`EdgeSet<doxid-structseams_1_1_edge_set>`& a, const :ref:`EdgeSet<doxid-structseams_1_1_edge_set>`& b);
+	bool :target:`parseExactDouble<doxid-namespaceseams_1ae8356c14dff3260b771759a58fb18246>`(std::string_view text, double& out);
+	int :target:`teamThreads<doxid-namespaceseams_1ab6823a52a8fc7a28ba1de174caa5190f>`();
+
+	template <class T>
+	void :target:`exclusiveScan<doxid-namespaceseams_1ade36ab0f3594a27f4b1d229706d9443b>`(std::vector<T>& values);
+
+	template <class T, class Less>
+	void :target:`parallelStableSort<doxid-namespaceseams_1ae8cf4ad5f2bb66332e94fb7f531c3194>`(std::vector<T>& values, Less less);
 
 	void :target:`BatchPeriodicDistSq<doxid-namespaceseams_1a7b2dc4f3d8257cc99b099ffbebd1a5ab>`(const double* dx, const double* dy, const double* dz, double bx, double by, double bz, double* out, size_t n);
 

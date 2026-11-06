@@ -120,6 +120,7 @@ var menudata={children:[
 {text:"c",url:"functions_func.html#index_c"},
 {text:"f",url:"functions_func.html#index_f"},
 {text:"g",url:"functions_func.html#index_g"},
+{text:"i",url:"functions_func.html#index_i"},
 {text:"l",url:"functions_func.html#index_l"},
 {text:"m",url:"functions_func.html#index_m"},
 {text:"o",url:"functions_func.html#index_o"},

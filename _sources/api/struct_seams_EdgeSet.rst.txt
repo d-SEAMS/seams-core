@@ -1,0 +1,23 @@
+.. index:: pair: struct; seams::EdgeSet
+.. _doxid-structseams_1_1_edge_set:
+
+struct seams::EdgeSet
+=====================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/edge_set.hpp>
+	
+	struct EdgeSet {
+		// fields
+	
+		std::uint64_t :target:`hash<doxid-structseams_1_1_edge_set_1ab49b943304fb15c277ae6487f06fbc9f>` = 1469598103934665603ull;
+		std::vector<std::pair<int, int>> :target:`edges<doxid-structseams_1_1_edge_set_1a7f7ec68e4f44a4d26c1332653e184a44>`;
+	};

@@ -3,6 +3,7 @@ var structring_1_1PackingCertificate =
     [ "cages", "structring_1_1PackingCertificate.html#afc56b3e0d1e930ae377136450861e784", null ],
     [ "components", "structring_1_1PackingCertificate.html#a2a752e3f4b9325cc4abc66dced3635df", null ],
     [ "cover", "structring_1_1PackingCertificate.html#a471aee5b4e6b862bd5f0566672a7ca04", null ],
+    [ "dropped", "structring_1_1PackingCertificate.html#ac3e6f1ef04d0a930e45f12a6b155f77f", null ],
     [ "edges", "structring_1_1PackingCertificate.html#abbf443bef13f22d686775e4dfb466017", null ],
     [ "isolates", "structring_1_1PackingCertificate.html#a844abd7b84996099ed002777525cd0c5", null ],
     [ "matching", "structring_1_1PackingCertificate.html#ab3cbb3ce409a45e7993ef3f3e3a84ea9", null ],

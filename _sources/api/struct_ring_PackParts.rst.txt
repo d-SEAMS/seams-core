@@ -1,0 +1,26 @@
+.. index:: pair: struct; ring::PackParts
+.. _doxid-structring_1_1_pack_parts:
+
+struct ring::PackParts
+======================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/topo_bulk.hpp>
+	
+	struct PackParts {
+		// fields
+	
+		double :target:`conf_ms<doxid-structring_1_1_pack_parts_1ab7573b7f86568905338ee347724a7b7f>` = 0;
+		double :target:`split_ms<doxid-structring_1_1_pack_parts_1a9762ed8bcde4ef1c244c9ce6fa101b3d>` = 0;
+		double :target:`clique_ms<doxid-structring_1_1_pack_parts_1a894d7dbd8a29c7aefa18e3d49b5068b6>` = 0;
+		double :target:`match_ms<doxid-structring_1_1_pack_parts_1a175ad5f05d9e2a7d003a49079e3a0868>` = 0;
+		double :target:`search_ms<doxid-structring_1_1_pack_parts_1a2c4e6c49daf51840c7e8945373209968>` = 0;
+	};

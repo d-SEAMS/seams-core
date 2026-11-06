@@ -7,7 +7,7 @@ class ring::NeighBond
 .. toctree::
 	:hidden:
 
-Membership of the neighbour rows after the leading self entry. Built once per frame so the basal test does not scan those rows.
+Membership of the neighbour rows after the leading self entry.
 
 
 .. ref-code-block:: cpp

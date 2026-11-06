@@ -18,5 +18,12 @@ var namespaceseams =
       [ "ylmAll", "namespaceseams_1_1steinhardt.html#adf41cecc177768d88e4c00b88bef06d6", null ],
       [ "ylmAllTrig", "namespaceseams_1_1steinhardt.html#afc83186a4ec1a9286658962d8325e363", null ]
     ] ],
-    [ "BatchPeriodicDistSq", "namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab", null ]
+    [ "EdgeSet", "structseams_1_1EdgeSet.html", "structseams_1_1EdgeSet" ],
+    [ "BatchPeriodicDistSq", "namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab", null ],
+    [ "edgeSetOf", "namespaceseams.html#a18253b5fae99ed10e40bde67a6ccd3ce", null ],
+    [ "exclusiveScan", "namespaceseams.html#ade36ab0f3594a27f4b1d229706d9443b", null ],
+    [ "parallelStableSort", "namespaceseams.html#ae8cf4ad5f2bb66332e94fb7f531c3194", null ],
+    [ "parseExactDouble", "namespaceseams.html#ae8356c14dff3260b771759a58fb18246", null ],
+    [ "provenEqual", "namespaceseams.html#aeac06060e7e630f44e6ba07eb3c481bb", null ],
+    [ "teamThreads", "namespaceseams.html#ab6823a52a8fc7a28ba1de174caa5190f", null ]
 ];

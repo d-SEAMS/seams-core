@@ -29,6 +29,7 @@ Proof that the reported number of equatorial rings is maximum. :ref:`More...<det
 		int :target:`vertices<doxid-structring_1_1_packing_certificate_1a11e76b07b9438cb43062376306aa18cf>` = 0;
 		int :target:`edges<doxid-structring_1_1_packing_certificate_1abbf443bef13f22d686775e4dfb466017>` = 0;
 		int :target:`components<doxid-structring_1_1_packing_certificate_1a2a752e3f4b9325cc4abc66dced3635df>` = 0;
+		int :target:`dropped<doxid-structring_1_1_packing_certificate_1ac3e6f1ef04d0a930e45f12a6b155f77f>` = 0;
 		int :target:`method<doxid-structring_1_1_packing_certificate_1a0559d109273cc42d5552b3b401ab516a>` = 0;
 		bool :target:`tight<doxid-structring_1_1_packing_certificate_1a00bbe1dcc9a09aac1fadc53835c566d6>` = false;
 		double :target:`milliseconds<doxid-structring_1_1_packing_certificate_1a5f6246660f18db3ebb2806d3ff4e34fa>` = 0;

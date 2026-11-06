@@ -5,5 +5,6 @@ var searchData=
   ['density_2',['density',['../structphase_1_1IceXXIHit.html#ad68eea6102729132f408bea7bb70585e',1,'phase::IceXXIHit']]],
   ['depth_3',['depth',['../structtopo_1_1LibraryMatch.html#ade4b4a551af0a37500a5f67bd6452e1c',1,'topo::LibraryMatch']]],
   ['device_4',['device',['../structgpu_1_1Plan.html#a51255a1bbc92f0f62657f764bd44fe29',1,'gpu::Plan']]],
-  ['downloadms_5',['downloadMs',['../structgpu_1_1BatchResult.html#ad4ba81e3f6d6bb265a5e689aee0de4fc',1,'gpu::BatchResult']]]
+  ['downloadms_5',['downloadMs',['../structgpu_1_1BatchResult.html#ad4ba81e3f6d6bb265a5e689aee0de4fc',1,'gpu::BatchResult']]],
+  ['dropped_6',['dropped',['../structring_1_1PackingCertificate.html#ac3e6f1ef04d0a930e45f12a6b155f77f',1,'ring::PackingCertificate']]]
 ];

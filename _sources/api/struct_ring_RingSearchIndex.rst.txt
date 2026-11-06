@@ -22,6 +22,8 @@ Inverted index from an atom to the rings that contain it. :ref:`More...<details-
 		// fields
 	
 		std::vector<std::vector<int>> :target:`ringsContainingAtom<doxid-structring_1_1_ring_search_index_1a8e4433086bf9bec113ee61bc3c17b8bb>`;
+		std::vector<int> :ref:`ringOff<doxid-structring_1_1_ring_search_index_1a1f81de9808108ab22e07eaf9cacb72e4>`;
+		std::vector<int> :target:`ringCol<doxid-structring_1_1_ring_search_index_1aeee9bc69a4e56681fe9eba8bed57a400>`;
 		std::vector<int> :target:`atomRank<doxid-structring_1_1_ring_search_index_1a891fe48d2dccc51ea7f043b562a42cbd>`;
 		std::vector<std::array<int, 3>> :ref:`ringShift<doxid-structring_1_1_ring_search_index_1a756c5dfcd0a8e96744dfff6775c1e31b>`;
 	};
@@ -38,6 +40,16 @@ findHC visits rings in the order of a key that does not use absolute coordinates
 
 Fields
 ------
+
+.. index:: pair: variable; ringOff
+.. _doxid-structring_1_1_ring_search_index_1a1f81de9808108ab22e07eaf9cacb72e4:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> ringOff
+
+Same rows as ringsContainingAtom, packed. ringCol[ringOff[a] .. ringOff[a+1]) is the ascending ring list of atom a. Empty when the index was not built.
 
 .. index:: pair: variable; ringShift
 .. _doxid-structring_1_1_ring_search_index_1a756c5dfcd0a8e96744dfff6775c1e31b:

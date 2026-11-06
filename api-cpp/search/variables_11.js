@@ -11,12 +11,14 @@ var searchData=
   ['ring_8',['ring',['../structring_1_1EquatorChoice.html#ab89f64fa075b360c70306c6b46747d34',1,'ring::EquatorChoice']]],
   ['ringcap_9',['ringCap',['../structtum_1_1SpecializedCaps.html#a768c638cf855580623bed1de3ec23d8c',1,'tum::SpecializedCaps']]],
   ['ringcensus_10',['ringCensus',['../structtopo_1_1FrameFingerprint.html#af25731956ad220bebec8965a6e8432bc',1,'topo::FrameFingerprint']]],
-  ['rings_11',['rings',['../group__cage.html#ga5b4c006e8de944ce67f924190123f178',1,'cage::Cage::rings'],['../structcage_1_1FormerRow.html#ae427133e1513cfea1afae90af6039689',1,'cage::FormerRow::rings'],['../group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3',1,'primitive::Graph::rings']]],
-  ['ringsbytes_12',['ringsBytes',['../structgpu_1_1Footprint.html#a0c4b0995a0210b0def820bd933d79d9b',1,'gpu::Footprint']]],
-  ['ringscontainingatom_13',['ringsContainingAtom',['../structring_1_1RingSearchIndex.html#a8e4433086bf9bec113ee61bc3c17b8bb',1,'ring::RingSearchIndex']]],
-  ['ringshift_14',['ringShift',['../structring_1_1RingSearchIndex.html#a756c5dfcd0a8e96744dfff6775c1e31b',1,'ring::RingSearchIndex']]],
-  ['rmax_15',['rmax',['../group__rdf.html#gaf633cbb773b23a72ae1e070d691c76ec',1,'rdf::PartialRdf']]],
-  ['rmsd_16',['rmsd',['../structcage_1_1CageShape.html#aff481658b1a1979a566dfc1667b36a9d',1,'cage::CageShape::rmsd'],['../structira_1_1Match.html#ab14b20ac985fe3c9fb6359973da2b5c9',1,'ira::Match::rmsd'],['../structchill_1_1TemplateHit.html#ab9b9bdbf34e6272e29ab3bdcf2c9e1c2',1,'chill::TemplateHit::rmsd']]],
-  ['rotation_17',['rotation',['../structira_1_1Match.html#a4a98f0d5bfd17ab0b1aa668dbf72c415',1,'ira::Match']]],
-  ['rowcap_18',['rowCap',['../structtum_1_1SpecializedCaps.html#ad8955b2eea49812c13dd01b5c29c93a1',1,'tum::SpecializedCaps']]]
+  ['ringcol_11',['ringCol',['../structring_1_1RingSearchIndex.html#aeee9bc69a4e56681fe9eba8bed57a400',1,'ring::RingSearchIndex']]],
+  ['ringoff_12',['ringOff',['../structring_1_1RingSearchIndex.html#a1f81de9808108ab22e07eaf9cacb72e4',1,'ring::RingSearchIndex']]],
+  ['rings_13',['rings',['../group__cage.html#ga5b4c006e8de944ce67f924190123f178',1,'cage::Cage::rings'],['../structcage_1_1FormerRow.html#ae427133e1513cfea1afae90af6039689',1,'cage::FormerRow::rings'],['../group__primitive.html#gac591e6693cef9a022fdbc24b8596bfd3',1,'primitive::Graph::rings']]],
+  ['ringsbytes_14',['ringsBytes',['../structgpu_1_1Footprint.html#a0c4b0995a0210b0def820bd933d79d9b',1,'gpu::Footprint']]],
+  ['ringscontainingatom_15',['ringsContainingAtom',['../structring_1_1RingSearchIndex.html#a8e4433086bf9bec113ee61bc3c17b8bb',1,'ring::RingSearchIndex']]],
+  ['ringshift_16',['ringShift',['../structring_1_1RingSearchIndex.html#a756c5dfcd0a8e96744dfff6775c1e31b',1,'ring::RingSearchIndex']]],
+  ['rmax_17',['rmax',['../group__rdf.html#gaf633cbb773b23a72ae1e070d691c76ec',1,'rdf::PartialRdf']]],
+  ['rmsd_18',['rmsd',['../structcage_1_1CageShape.html#aff481658b1a1979a566dfc1667b36a9d',1,'cage::CageShape::rmsd'],['../structira_1_1Match.html#ab14b20ac985fe3c9fb6359973da2b5c9',1,'ira::Match::rmsd'],['../structchill_1_1TemplateHit.html#ab9b9bdbf34e6272e29ab3bdcf2c9e1c2',1,'chill::TemplateHit::rmsd']]],
+  ['rotation_19',['rotation',['../structira_1_1Match.html#a4a98f0d5bfd17ab0b1aa668dbf72c415',1,'ira::Match']]],
+  ['rowcap_20',['rowCap',['../structtum_1_1SpecializedCaps.html#ad8955b2eea49812c13dd01b5c29c93a1',1,'tum::SpecializedCaps']]]
 ];

@@ -11,6 +11,23 @@ The release history is `CHANGELOG.md <../../CHANGELOG.md>`_
 (Keep a Changelog, assembled by towncrier). This page is the
 narrative cut used in the book.
 
+2.13.0
+------
+
+v2.12.0 was tagged on a tree whose CI was red.
+The pixi environment provides mpfr and gmp for the Ozaki tests.
+Decimal options parse without std\:\:from\_chars.
+Julia is fetched from the published archive, and its test file is run.
+The Python test checks the cutoff list and builds the mutual list.
+Coverage counters stay on one thread, inside the existing time limit.
+R installs into the user library, where the engine paths are visible.
+The ring search reads one offset and column table.
+One thread writes that output list.
+The rings of one atom are one block of a single list.
+A cage search is reused only when the undirected edge sets match.
+Bond rows are the sorted neighbour ids.
+The paper records the one-core comparison of that tree.
+
 2.12.0
 ------
 

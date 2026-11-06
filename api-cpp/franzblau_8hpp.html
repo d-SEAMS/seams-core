@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.12.0</span>
+<span class="project_info">seams-core v2.13.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -265,6 +265,7 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This is a per-frame object, containing all the vertices for the particular frame, along with the vector of rings generated.  <a href="structprimitive_1_1Graph.html#details">More...</a><br /></td></tr>
 <tr class="memitem:primitive_3A_3ARingUpdater" id="r_primitive_3A_3ARingUpdater"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classprimitive_1_1RingUpdater.html">primitive::RingUpdater</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Exact frame-to-frame maintenance of the primitive ring network.  <a href="classprimitive_1_1RingUpdater.html#details">More...</a><br /></td></tr>
+<tr class="memitem:primitive_3A_3ARingSearchSplit" id="r_primitive_3A_3ARingSearchSplit"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structprimitive_1_1RingSearchSplit.html">primitive::RingSearchSplit</a></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-namespaces" class="groupheader"><a id="namespaces" name="namespaces"></a>
 Namespaces</h2></td></tr>
@@ -288,6 +289,8 @@ Functions</h2></td></tr>
 <tr class="memdesc:ga6031dcefe2fd5432b7d26cb6c9f38f47"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates the shortest path.  <br /></td></tr>
 <tr class="memitem:gae21524f817bf459110f97aa639eea703" id="r_gae21524f817bf459110f97aa639eea703"><td class="memItemLeft"><a class="el" href="structprimitive_1_1Graph.html">Graph</a>&#160;</td><td class="memItemRight"><a class="el" href="group__primitive.html#gae21524f817bf459110f97aa639eea703">primitive::clearGraph</a> (<a class="el" href="structprimitive_1_1Graph.html">Graph</a> &amp;currentGraph)</td></tr>
 <tr class="memdesc:gae21524f817bf459110f97aa639eea703"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for clearing vectors in <a class="el" href="structprimitive_1_1Graph.html" title="This is a per-frame object, containing all the vertices for the particular frame, along with the vect...">Graph</a> after multiple usage.  <br /></td></tr>
+<tr class="memitem:ga84c628db439f4e376250d4e7d89e7484" id="r_ga84c628db439f4e376250d4e7d89e7484"><td class="memItemLeft"><a class="el" href="structprimitive_1_1RingSearchSplit.html">RingSearchSplit</a>&#160;</td><td class="memItemRight"><a class="el" href="group__primitive.html#ga84c628db439f4e376250d4e7d89e7484">primitive::lastRingSearchSplit</a> ()</td></tr>
+<tr class="memdesc:ga84c628db439f4e376250d4e7d89e7484"><td class="mdescLeft">&#160;</td><td class="mdescRight">Balls, source enumeration and the gather from the last ringNetwork call.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>File for generating shortest-path rings according to the Franzblau algorithm. </p>

@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.12.0</span>
+<span class="project_info">seams-core v2.13.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -246,8 +246,20 @@ Namespaces</h2></td></tr>
 <tr class="memitem:sphericart_5Fylm" id="r_sphericart_5Fylm"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1sphericart__ylm.html">sphericart_ylm</a></td></tr>
 <tr class="memitem:steinhardt" id="r_steinhardt"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1steinhardt.html">steinhardt</a></td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:EdgeSet" id="r_EdgeSet"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structseams_1_1EdgeSet.html">EdgeSet</a></td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a18253b5fae99ed10e40bde67a6ccd3ce" id="r_a18253b5fae99ed10e40bde67a6ccd3ce"><td class="memItemLeft"><a class="el" href="structseams_1_1EdgeSet.html">EdgeSet</a>&#160;</td><td class="memItemRight"><a class="el" href="#a18253b5fae99ed10e40bde67a6ccd3ce">edgeSetOf</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rows)</td></tr>
+<tr class="memitem:aeac06060e7e630f44e6ba07eb3c481bb" id="r_aeac06060e7e630f44e6ba07eb3c481bb"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#aeac06060e7e630f44e6ba07eb3c481bb">provenEqual</a> (const <a class="el" href="structseams_1_1EdgeSet.html">EdgeSet</a> &amp;a, const <a class="el" href="structseams_1_1EdgeSet.html">EdgeSet</a> &amp;b)</td></tr>
+<tr class="memitem:ae8356c14dff3260b771759a58fb18246" id="r_ae8356c14dff3260b771759a58fb18246"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ae8356c14dff3260b771759a58fb18246">parseExactDouble</a> (std::string_view text, double &amp;out)</td></tr>
+<tr class="memitem:ab6823a52a8fc7a28ba1de174caa5190f" id="r_ab6823a52a8fc7a28ba1de174caa5190f"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ab6823a52a8fc7a28ba1de174caa5190f">teamThreads</a> ()</td></tr>
+<tr class="memitem:ade36ab0f3594a27f4b1d229706d9443b" id="r_ade36ab0f3594a27f4b1d229706d9443b"><td class="memTemplParams" colspan="2">template&lt;class T&gt; </td></tr>
+<tr class="memitem:ade36ab0f3594a27f4b1d229706d9443b template"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ade36ab0f3594a27f4b1d229706d9443b">exclusiveScan</a> (std::vector&lt; T &gt; &amp;values)</td></tr>
+<tr class="memitem:ae8cf4ad5f2bb66332e94fb7f531c3194" id="r_ae8cf4ad5f2bb66332e94fb7f531c3194"><td class="memTemplParams" colspan="2">template&lt;class T, class Less&gt; </td></tr>
+<tr class="memitem:ae8cf4ad5f2bb66332e94fb7f531c3194 template"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ae8cf4ad5f2bb66332e94fb7f531c3194">parallelStableSort</a> (std::vector&lt; T &gt; &amp;values, Less less)</td></tr>
 <tr class="memitem:a7b2dc4f3d8257cc99b099ffbebd1a5ab" id="r_a7b2dc4f3d8257cc99b099ffbebd1a5ab"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a7b2dc4f3d8257cc99b099ffbebd1a5ab">BatchPeriodicDistSq</a> (const double *dx, const double *dy, const double *dz, double bx, double by, double bz, double *out, size_t n)</td></tr>
 </table>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
@@ -329,6 +341,352 @@ Functions</h2></td></tr>
 <div class="line"><span class="lineno">  121</span>    out[i] = ddx * ddx + ddy * ddy + ddz * ddz;</div>
 <div class="line"><span class="lineno">  122</span>  }</div>
 <div class="line"><span class="lineno">  123</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="a18253b5fae99ed10e40bde67a6ccd3ce" name="a18253b5fae99ed10e40bde67a6ccd3ce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a18253b5fae99ed10e40bde67a6ccd3ce">&#9670;&#160;</a></span>edgeSetOf()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="structseams_1_1EdgeSet.html">EdgeSet</a> seams::edgeSetOf </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rows</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="edge__set_8hpp_source.html#l00020">20</a> of file <a class="el" href="edge__set_8hpp_source.html">edge_set.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   20</span>                                                                {</div>
+<div class="line"><span class="lineno">   21</span>  <a class="code hl_struct" href="structseams_1_1EdgeSet.html">EdgeSet</a> out;</div>
+<div class="line"><span class="lineno">   22</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; static_cast&lt;int&gt;(rows.size()); ++i) {</div>
+<div class="line"><span class="lineno">   23</span>    <span class="keyword">const</span> <span class="keyword">auto</span> &amp;row = rows[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(i)];</div>
+<div class="line"><span class="lineno">   24</span>    <span class="keywordflow">for</span> (std::size_t k = 1; k &lt; row.size(); ++k) {</div>
+<div class="line"><span class="lineno">   25</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> j = row[k];</div>
+<div class="line"><span class="lineno">   26</span>      <span class="keywordflow">if</span> (j &lt; 0 || j == i) {</div>
+<div class="line"><span class="lineno">   27</span>        <span class="keywordflow">continue</span>;</div>
+<div class="line"><span class="lineno">   28</span>      }</div>
+<div class="line"><span class="lineno">   29</span>      out.<a class="code hl_variable" href="structseams_1_1EdgeSet.html#a7f7ec68e4f44a4d26c1332653e184a44">edges</a>.emplace_back(std::min(i, j), std::max(i, j));</div>
+<div class="line"><span class="lineno">   30</span>    }</div>
+<div class="line"><span class="lineno">   31</span>  }</div>
+<div class="line"><span class="lineno">   32</span>  std::sort(out.<a class="code hl_variable" href="structseams_1_1EdgeSet.html#a7f7ec68e4f44a4d26c1332653e184a44">edges</a>.begin(), out.<a class="code hl_variable" href="structseams_1_1EdgeSet.html#a7f7ec68e4f44a4d26c1332653e184a44">edges</a>.end());</div>
+<div class="line"><span class="lineno">   33</span>  out.<a class="code hl_variable" href="structseams_1_1EdgeSet.html#a7f7ec68e4f44a4d26c1332653e184a44">edges</a>.erase(std::unique(out.<a class="code hl_variable" href="structseams_1_1EdgeSet.html#a7f7ec68e4f44a4d26c1332653e184a44">edges</a>.begin(), out.<a class="code hl_variable" href="structseams_1_1EdgeSet.html#a7f7ec68e4f44a4d26c1332653e184a44">edges</a>.end()),</div>
+<div class="line"><span class="lineno">   34</span>                  out.<a class="code hl_variable" href="structseams_1_1EdgeSet.html#a7f7ec68e4f44a4d26c1332653e184a44">edges</a>.end());</div>
+<div class="line"><span class="lineno">   35</span>  std::uint64_t h = 1469598103934665603ull;</div>
+<div class="line"><span class="lineno">   36</span>  <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> &amp;e : out.<a class="code hl_variable" href="structseams_1_1EdgeSet.html#a7f7ec68e4f44a4d26c1332653e184a44">edges</a>) {</div>
+<div class="line"><span class="lineno">   37</span>    h ^= <span class="keyword">static_cast&lt;</span>std::uint64_t<span class="keyword">&gt;</span>(<span class="keyword">static_cast&lt;</span>std::uint32_t<span class="keyword">&gt;</span>(e.first));</div>
+<div class="line"><span class="lineno">   38</span>    h *= 1099511628211ull;</div>
+<div class="line"><span class="lineno">   39</span>    h ^= <span class="keyword">static_cast&lt;</span>std::uint64_t<span class="keyword">&gt;</span>(<span class="keyword">static_cast&lt;</span>std::uint32_t<span class="keyword">&gt;</span>(e.second));</div>
+<div class="line"><span class="lineno">   40</span>    h *= 1099511628211ull;</div>
+<div class="line"><span class="lineno">   41</span>  }</div>
+<div class="line"><span class="lineno">   42</span>  out.<a class="code hl_variable" href="structseams_1_1EdgeSet.html#ab49b943304fb15c277ae6487f06fbc9f">hash</a> = h;</div>
+<div class="line"><span class="lineno">   43</span>  <span class="keywordflow">return</span> out;</div>
+<div class="line"><span class="lineno">   44</span>}</div>
+<div class="ttc" id="astructseams_1_1EdgeSet_html"><div class="ttname"><a href="structseams_1_1EdgeSet.html">seams::EdgeSet</a></div><div class="ttdef"><b>Definition</b> <a href="edge__set_8hpp_source.html#l00015">edge_set.hpp:15</a></div></div>
+<div class="ttc" id="astructseams_1_1EdgeSet_html_a7f7ec68e4f44a4d26c1332653e184a44"><div class="ttname"><a href="structseams_1_1EdgeSet.html#a7f7ec68e4f44a4d26c1332653e184a44">seams::EdgeSet::edges</a></div><div class="ttdeci">std::vector&lt; std::pair&lt; int, int &gt; &gt; edges</div><div class="ttdef"><b>Definition</b> <a href="edge__set_8hpp_source.html#l00017">edge_set.hpp:17</a></div></div>
+<div class="ttc" id="astructseams_1_1EdgeSet_html_ab49b943304fb15c277ae6487f06fbc9f"><div class="ttname"><a href="structseams_1_1EdgeSet.html#ab49b943304fb15c277ae6487f06fbc9f">seams::EdgeSet::hash</a></div><div class="ttdeci">std::uint64_t hash</div><div class="ttdef"><b>Definition</b> <a href="edge__set_8hpp_source.html#l00016">edge_set.hpp:16</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ade36ab0f3594a27f4b1d229706d9443b" name="ade36ab0f3594a27f4b1d229706d9443b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ade36ab0f3594a27f4b1d229706d9443b">&#9670;&#160;</a></span>exclusiveScan()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void seams::exclusiveScan </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; T &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>values</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="par__team_8hpp_source.html#l00028">28</a> of file <a class="el" href="par__team_8hpp_source.html">par_team.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   28</span>                                                            {</div>
+<div class="line"><span class="lineno">   29</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> n = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(values.size());</div>
+<div class="line"><span class="lineno">   30</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> threads = <a class="code hl_function" href="#ab6823a52a8fc7a28ba1de174caa5190f">teamThreads</a>();</div>
+<div class="line"><span class="lineno">   31</span>  <span class="keywordflow">if</span> (threads &lt;= 1 || n &lt; threads * 2) {</div>
+<div class="line"><span class="lineno">   32</span>    T sum = 0;</div>
+<div class="line"><span class="lineno">   33</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; n; i++) {</div>
+<div class="line"><span class="lineno">   34</span>      <span class="keyword">const</span> T current = values[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(i)];</div>
+<div class="line"><span class="lineno">   35</span>      values[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(i)] = sum;</div>
+<div class="line"><span class="lineno">   36</span>      sum += current;</div>
+<div class="line"><span class="lineno">   37</span>    }</div>
+<div class="line"><span class="lineno">   38</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">   39</span>  }</div>
+<div class="line"><span class="lineno">   40</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> chunk = (n + threads - 1) / threads;</div>
+<div class="line"><span class="lineno">   41</span>  std::vector&lt;T&gt; block(<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(threads), 0);</div>
+<div class="line"><span class="lineno">   42</span><span class="preprocessor">#ifdef SEAMS_HAS_OPENMP</span></div>
+<div class="line"><span class="lineno">   43</span><span class="preprocessor">#pragma omp parallel</span></div>
+<div class="line"><span class="lineno">   44</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   45</span>  {</div>
+<div class="line"><span class="lineno">   46</span><span class="preprocessor">#ifdef SEAMS_HAS_OPENMP</span></div>
+<div class="line"><span class="lineno">   47</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> tid = omp_get_thread_num();</div>
+<div class="line"><span class="lineno">   48</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">   49</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> tid = 0;</div>
+<div class="line"><span class="lineno">   50</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   51</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> lo = tid * chunk;</div>
+<div class="line"><span class="lineno">   52</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> hi = std::min(n, lo + chunk);</div>
+<div class="line"><span class="lineno">   53</span>    T sum = 0;</div>
+<div class="line"><span class="lineno">   54</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = lo; i &lt; hi; i++) {</div>
+<div class="line"><span class="lineno">   55</span>      sum += values[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(i)];</div>
+<div class="line"><span class="lineno">   56</span>    }</div>
+<div class="line"><span class="lineno">   57</span>    <span class="keywordflow">if</span> (tid &lt; threads) {</div>
+<div class="line"><span class="lineno">   58</span>      block[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(tid)] = sum;</div>
+<div class="line"><span class="lineno">   59</span>    }</div>
+<div class="line"><span class="lineno">   60</span>  }</div>
+<div class="line"><span class="lineno">   61</span>  T carried = 0;</div>
+<div class="line"><span class="lineno">   62</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> tid = 0; tid &lt; threads; tid++) {</div>
+<div class="line"><span class="lineno">   63</span>    <span class="keyword">const</span> T sum = block[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(tid)];</div>
+<div class="line"><span class="lineno">   64</span>    block[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(tid)] = carried;</div>
+<div class="line"><span class="lineno">   65</span>    carried += sum;</div>
+<div class="line"><span class="lineno">   66</span>  }</div>
+<div class="line"><span class="lineno">   67</span><span class="preprocessor">#ifdef SEAMS_HAS_OPENMP</span></div>
+<div class="line"><span class="lineno">   68</span><span class="preprocessor">#pragma omp parallel</span></div>
+<div class="line"><span class="lineno">   69</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   70</span>  {</div>
+<div class="line"><span class="lineno">   71</span><span class="preprocessor">#ifdef SEAMS_HAS_OPENMP</span></div>
+<div class="line"><span class="lineno">   72</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> tid = omp_get_thread_num();</div>
+<div class="line"><span class="lineno">   73</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">   74</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> tid = 0;</div>
+<div class="line"><span class="lineno">   75</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   76</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> lo = tid * chunk;</div>
+<div class="line"><span class="lineno">   77</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> hi = std::min(n, lo + chunk);</div>
+<div class="line"><span class="lineno">   78</span>    T sum = block[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(tid)];</div>
+<div class="line"><span class="lineno">   79</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = lo; i &lt; hi; i++) {</div>
+<div class="line"><span class="lineno">   80</span>      <span class="keyword">const</span> T current = values[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(i)];</div>
+<div class="line"><span class="lineno">   81</span>      values[<span class="keyword">static_cast&lt;</span>std::size_t<span class="keyword">&gt;</span>(i)] = sum;</div>
+<div class="line"><span class="lineno">   82</span>      sum += current;</div>
+<div class="line"><span class="lineno">   83</span>    }</div>
+<div class="line"><span class="lineno">   84</span>  }</div>
+<div class="line"><span class="lineno">   85</span>}</div>
+<div class="ttc" id="anamespaceseams_html_ab6823a52a8fc7a28ba1de174caa5190f"><div class="ttname"><a href="#ab6823a52a8fc7a28ba1de174caa5190f">seams::teamThreads</a></div><div class="ttdeci">int teamThreads()</div><div class="ttdef"><b>Definition</b> <a href="par__team_8hpp_source.html#l00015">par_team.hpp:15</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ae8cf4ad5f2bb66332e94fb7f531c3194" name="ae8cf4ad5f2bb66332e94fb7f531c3194"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae8cf4ad5f2bb66332e94fb7f531c3194">&#9670;&#160;</a></span>parallelStableSort()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T, class Less&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void seams::parallelStableSort </td>
+          <td>(</td>
+          <td class="paramtype">std::vector&lt; T &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>values</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">Less</td>          <td class="paramname"><span class="paramname"><em>less</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="par__team_8hpp_source.html#l00090">90</a> of file <a class="el" href="par__team_8hpp_source.html">par_team.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   90</span>                                                         {</div>
+<div class="line"><span class="lineno">   91</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> n = <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(values.size());</div>
+<div class="line"><span class="lineno">   92</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> threads = <a class="code hl_function" href="#ab6823a52a8fc7a28ba1de174caa5190f">teamThreads</a>();</div>
+<div class="line"><span class="lineno">   93</span>  <span class="keywordflow">if</span> (threads &lt;= 1 || n &lt; threads * 2) {</div>
+<div class="line"><span class="lineno">   94</span>    std::stable_sort(values.begin(), values.end(), less);</div>
+<div class="line"><span class="lineno">   95</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">   96</span>  }</div>
+<div class="line"><span class="lineno">   97</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> chunk = (n + threads - 1) / threads;</div>
+<div class="line"><span class="lineno">   98</span><span class="preprocessor">#ifdef SEAMS_HAS_OPENMP</span></div>
+<div class="line"><span class="lineno">   99</span><span class="preprocessor">#pragma omp parallel for schedule(static)</span></div>
+<div class="line"><span class="lineno">  100</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  101</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> tid = 0; tid &lt; threads; tid++) {</div>
+<div class="line"><span class="lineno">  102</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> lo = tid * chunk;</div>
+<div class="line"><span class="lineno">  103</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> hi = std::min(n, lo + chunk);</div>
+<div class="line"><span class="lineno">  104</span>    <span class="keywordflow">if</span> (hi - lo &gt; 1) {</div>
+<div class="line"><span class="lineno">  105</span>      std::stable_sort(values.begin() + lo, values.begin() + hi, less);</div>
+<div class="line"><span class="lineno">  106</span>    }</div>
+<div class="line"><span class="lineno">  107</span>  }</div>
+<div class="line"><span class="lineno">  108</span>  std::vector&lt;T&gt; buffer(values.size());</div>
+<div class="line"><span class="lineno">  109</span>  T *src = values.data();</div>
+<div class="line"><span class="lineno">  110</span>  T *dst = buffer.data();</div>
+<div class="line"><span class="lineno">  111</span>  <span class="keywordflow">for</span> (<span class="keywordtype">int</span> width = chunk; width &lt; n; width *= 2) {</div>
+<div class="line"><span class="lineno">  112</span><span class="preprocessor">#ifdef SEAMS_HAS_OPENMP</span></div>
+<div class="line"><span class="lineno">  113</span><span class="preprocessor">#pragma omp parallel for schedule(static)</span></div>
+<div class="line"><span class="lineno">  114</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">  115</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> start = 0; start &lt; n; start += width * 2) {</div>
+<div class="line"><span class="lineno">  116</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> mid = std::min(n, start + width);</div>
+<div class="line"><span class="lineno">  117</span>      <span class="keyword">const</span> <span class="keywordtype">int</span> stop = std::min(n, start + width * 2);</div>
+<div class="line"><span class="lineno">  118</span>      <span class="keywordtype">int</span> i = start;</div>
+<div class="line"><span class="lineno">  119</span>      <span class="keywordtype">int</span> j = mid;</div>
+<div class="line"><span class="lineno">  120</span>      <span class="keywordtype">int</span> k = start;</div>
+<div class="line"><span class="lineno">  121</span>      <span class="keywordflow">while</span> (i &lt; mid &amp;&amp; j &lt; stop) {</div>
+<div class="line"><span class="lineno">  122</span>        <span class="keywordflow">if</span> (less(src[j], src[i])) {</div>
+<div class="line"><span class="lineno">  123</span>          dst[k++] = src[j++];</div>
+<div class="line"><span class="lineno">  124</span>        } <span class="keywordflow">else</span> {</div>
+<div class="line"><span class="lineno">  125</span>          dst[k++] = src[i++];</div>
+<div class="line"><span class="lineno">  126</span>        }</div>
+<div class="line"><span class="lineno">  127</span>      }</div>
+<div class="line"><span class="lineno">  128</span>      <span class="keywordflow">while</span> (i &lt; mid) {</div>
+<div class="line"><span class="lineno">  129</span>        dst[k++] = src[i++];</div>
+<div class="line"><span class="lineno">  130</span>      }</div>
+<div class="line"><span class="lineno">  131</span>      <span class="keywordflow">while</span> (j &lt; stop) {</div>
+<div class="line"><span class="lineno">  132</span>        dst[k++] = src[j++];</div>
+<div class="line"><span class="lineno">  133</span>      }</div>
+<div class="line"><span class="lineno">  134</span>    }</div>
+<div class="line"><span class="lineno">  135</span>    std::swap(src, dst);</div>
+<div class="line"><span class="lineno">  136</span>  }</div>
+<div class="line"><span class="lineno">  137</span>  <span class="keywordflow">if</span> (src != values.data()) {</div>
+<div class="line"><span class="lineno">  138</span>    std::copy(src, src + n, values.begin());</div>
+<div class="line"><span class="lineno">  139</span>  }</div>
+<div class="line"><span class="lineno">  140</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ae8356c14dff3260b771759a58fb18246" name="ae8356c14dff3260b771759a58fb18246"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae8356c14dff3260b771759a58fb18246">&#9670;&#160;</a></span>parseExactDouble()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool seams::parseExactDouble </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view</td>          <td class="paramname"><span class="paramname"><em>text</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double &amp;</td>          <td class="paramname"><span class="paramname"><em>out</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="number__parse_8hpp_source.html#l00018">18</a> of file <a class="el" href="number__parse_8hpp_source.html">number_parse.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   18</span>                                                               {</div>
+<div class="line"><span class="lineno">   19</span>  <span class="keywordflow">if</span> (text.empty() || text.front() == <span class="charliteral">&#39;+&#39;</span>) {</div>
+<div class="line"><span class="lineno">   20</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   21</span>  }</div>
+<div class="line"><span class="lineno">   22</span>  <span class="keywordflow">for</span> (<span class="keywordtype">char</span> raw : text) {</div>
+<div class="line"><span class="lineno">   23</span>    <span class="keyword">const</span> <span class="keyword">auto</span> c = <span class="keyword">static_cast&lt;</span><span class="keywordtype">unsigned</span> <span class="keywordtype">char</span><span class="keyword">&gt;</span>(raw);</div>
+<div class="line"><span class="lineno">   24</span>    <span class="keywordflow">if</span> (raw == <span class="charliteral">&#39;x&#39;</span> || raw == <span class="charliteral">&#39;X&#39;</span> || c == <span class="charliteral">&#39; &#39;</span> || c == <span class="charliteral">&#39;\t&#39;</span> || c == <span class="charliteral">&#39;\n&#39;</span> ||</div>
+<div class="line"><span class="lineno">   25</span>        c == <span class="charliteral">&#39;\v&#39;</span> || c == <span class="charliteral">&#39;\f&#39;</span> || c == <span class="charliteral">&#39;\r&#39;</span>) {</div>
+<div class="line"><span class="lineno">   26</span>      <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   27</span>    }</div>
+<div class="line"><span class="lineno">   28</span>  }</div>
+<div class="line"><span class="lineno">   29</span>  <span class="keyword">static</span> <span class="keyword">const</span> locale_t loc =</div>
+<div class="line"><span class="lineno">   30</span>      newlocale(LC_ALL_MASK, <span class="stringliteral">&quot;C&quot;</span>, <span class="keyword">static_cast&lt;</span>locale_t<span class="keyword">&gt;</span>(<span class="keyword">nullptr</span>));</div>
+<div class="line"><span class="lineno">   31</span>  <span class="keywordflow">if</span> (loc == <span class="keyword">static_cast&lt;</span>locale_t<span class="keyword">&gt;</span>(<span class="keyword">nullptr</span>)) {</div>
+<div class="line"><span class="lineno">   32</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   33</span>  }</div>
+<div class="line"><span class="lineno">   34</span>  <span class="keyword">const</span> std::string token(text);</div>
+<div class="line"><span class="lineno">   35</span>  <span class="keywordtype">char</span> *end = <span class="keyword">nullptr</span>;</div>
+<div class="line"><span class="lineno">   36</span>  errno = 0;</div>
+<div class="line"><span class="lineno">   37</span>  <span class="keyword">const</span> <span class="keywordtype">double</span> value = strtod_l(token.c_str(), &amp;end, loc);</div>
+<div class="line"><span class="lineno">   38</span>  <span class="keywordflow">if</span> (end != token.c_str() + token.size()) {</div>
+<div class="line"><span class="lineno">   39</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   40</span>  }</div>
+<div class="line"><span class="lineno">   41</span>  <span class="keywordflow">if</span> (errno == ERANGE &amp;&amp; (value == 0.0 || !std::isfinite(value))) {</div>
+<div class="line"><span class="lineno">   42</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   43</span>  }</div>
+<div class="line"><span class="lineno">   44</span>  out = value;</div>
+<div class="line"><span class="lineno">   45</span>  <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">   46</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="aeac06060e7e630f44e6ba07eb3c481bb" name="aeac06060e7e630f44e6ba07eb3c481bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aeac06060e7e630f44e6ba07eb3c481bb">&#9670;&#160;</a></span>provenEqual()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool seams::provenEqual </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structseams_1_1EdgeSet.html">EdgeSet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structseams_1_1EdgeSet.html">EdgeSet</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>b</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="edge__set_8hpp_source.html#l00046">46</a> of file <a class="el" href="edge__set_8hpp_source.html">edge_set.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   46</span>                                                            {</div>
+<div class="line"><span class="lineno">   47</span>  <span class="keywordflow">if</span> (a.<a class="code hl_variable" href="structseams_1_1EdgeSet.html#ab49b943304fb15c277ae6487f06fbc9f">hash</a> != b.<a class="code hl_variable" href="structseams_1_1EdgeSet.html#ab49b943304fb15c277ae6487f06fbc9f">hash</a>) {</div>
+<div class="line"><span class="lineno">   48</span>    <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">   49</span>  }</div>
+<div class="line"><span class="lineno">   50</span>  <span class="keywordflow">return</span> a.<a class="code hl_variable" href="structseams_1_1EdgeSet.html#a7f7ec68e4f44a4d26c1332653e184a44">edges</a> == b.<a class="code hl_variable" href="structseams_1_1EdgeSet.html#a7f7ec68e4f44a4d26c1332653e184a44">edges</a>;</div>
+<div class="line"><span class="lineno">   51</span>}</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ab6823a52a8fc7a28ba1de174caa5190f" name="ab6823a52a8fc7a28ba1de174caa5190f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab6823a52a8fc7a28ba1de174caa5190f">&#9670;&#160;</a></span>teamThreads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams::teamThreads </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="par__team_8hpp_source.html#l00015">15</a> of file <a class="el" href="par__team_8hpp_source.html">par_team.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   15</span>                         {</div>
+<div class="line"><span class="lineno">   16</span><span class="preprocessor">#ifdef SEAMS_HAS_OPENMP</span></div>
+<div class="line"><span class="lineno">   17</span>  <span class="keywordflow">if</span> (omp_in_parallel()) {</div>
+<div class="line"><span class="lineno">   18</span>    <span class="keywordflow">return</span> 1;</div>
+<div class="line"><span class="lineno">   19</span>  }</div>
+<div class="line"><span class="lineno">   20</span>  <span class="keyword">const</span> <span class="keywordtype">int</span> n = omp_get_max_threads();</div>
+<div class="line"><span class="lineno">   21</span>  <span class="keywordflow">return</span> n &gt; 0 ? n : 1;</div>
+<div class="line"><span class="lineno">   22</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">   23</span>  <span class="keywordflow">return</span> 1;</div>
+<div class="line"><span class="lineno">   24</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   25</span>}</div>
 </div><!-- fragment -->
 </div>
 </div>

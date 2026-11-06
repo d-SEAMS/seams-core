@@ -9,6 +9,7 @@ Primitive
 
 	namespace_primitive.rst
 	struct_primitive_Graph.rst
+	struct_primitive_RingSearchSplit.rst
 	struct_primitive_Vertex.rst
 	class_primitive_RingUpdater.rst
 
@@ -26,6 +27,7 @@ Primitive
 	// structs
 
 	struct :ref:`primitive::Graph<doxid-structprimitive_1_1_graph>`;
+	struct :ref:`primitive::RingSearchSplit<doxid-structprimitive_1_1_ring_search_split>`;
 	struct :ref:`primitive::Vertex<doxid-structprimitive_1_1_vertex>`;
 
 	// classes

@@ -48,7 +48,8 @@ var annotated_dup =
     [ "primitive", "namespaceprimitive.html", [
       [ "Vertex", "structprimitive_1_1Vertex.html", "structprimitive_1_1Vertex" ],
       [ "Graph", "structprimitive_1_1Graph.html", "structprimitive_1_1Graph" ],
-      [ "RingUpdater", "classprimitive_1_1RingUpdater.html", "classprimitive_1_1RingUpdater" ]
+      [ "RingUpdater", "classprimitive_1_1RingUpdater.html", "classprimitive_1_1RingUpdater" ],
+      [ "RingSearchSplit", "structprimitive_1_1RingSearchSplit.html", "structprimitive_1_1RingSearchSplit" ]
     ] ],
     [ "rdf", "namespacerdf.html", [
       [ "PartialRdf", "structrdf_1_1PartialRdf.html", "structrdf_1_1PartialRdf" ]
@@ -56,9 +57,11 @@ var annotated_dup =
     [ "ring", "namespacering.html", [
       [ "AffiliationUpdater", "classring_1_1AffiliationUpdater.html", "classring_1_1AffiliationUpdater" ],
       [ "CageAffiliation", "structring_1_1CageAffiliation.html", "structring_1_1CageAffiliation" ],
+      [ "DdcSplit", "structring_1_1DdcSplit.html", "structring_1_1DdcSplit" ],
       [ "EquatorChoice", "structring_1_1EquatorChoice.html", "structring_1_1EquatorChoice" ],
       [ "NeighBond", "classring_1_1NeighBond.html", "classring_1_1NeighBond" ],
       [ "PackingCertificate", "structring_1_1PackingCertificate.html", "structring_1_1PackingCertificate" ],
+      [ "PackParts", "structring_1_1PackParts.html", "structring_1_1PackParts" ],
       [ "RingSearchIndex", "structring_1_1RingSearchIndex.html", "structring_1_1RingSearchIndex" ],
       [ "SeededAtomLabels", "structring_1_1SeededAtomLabels.html", "structring_1_1SeededAtomLabels" ],
       [ "StackingPlanes", "structring_1_1StackingPlanes.html", "structring_1_1StackingPlanes" ]
@@ -76,7 +79,8 @@ var annotated_dup =
         [ "ComplexDot", "structseams_1_1product_1_1ComplexDot.html", "structseams_1_1product_1_1ComplexDot" ],
         [ "Cij", "structseams_1_1product_1_1Cij.html", "structseams_1_1product_1_1Cij" ],
         [ "GemmInfo", "structseams_1_1product_1_1GemmInfo.html", "structseams_1_1product_1_1GemmInfo" ]
-      ] ]
+      ] ],
+      [ "EdgeSet", "structseams_1_1EdgeSet.html", "structseams_1_1EdgeSet" ]
     ] ],
     [ "site", "namespacesite.html", [
       [ "DensityZ", "structsite_1_1DensityZ.html", "structsite_1_1DensityZ" ],
