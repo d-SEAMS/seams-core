@@ -10,6 +10,54 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## [2.13.0] - 2026-11-06
+
+### Changed
+
+- The bond test used a dense bit for every atom pair.
+  Each row is now the sorted neighbour ids.
+- The cage search hashes the sorted undirected edges and compares the lists.
+  One search is reused only when the edge sets match.
+  Each graph is searched on its own when the lists differ.
+  The default cages command uses that check.
+- The paper records the release comparison on one core.
+  The build rule writes the ring times and the neighbour times.
+  It writes the two commands, the resident set, and the abort.
+  The Open Visualization Tool call includes startup and draws no cages.
+  The diamond finder gives one label to each point.
+- The ring search reads one offset and column table.
+  A single thread writes one output list.
+  The scan of those rows is the parallel prefix in par_team.hpp.
+- The rings of one atom are one block of a single list.
+  The search stops when a candidate shares an atom with the ring.
+  A clash is stored in a row that grows as further clashes are found.
+- v2.12.0 was tagged on a tree whose CI was red.
+
+### Fixed
+
+- The Ozaki tests link libmpfr and libgmp.
+  Linux pixi environments did not install either library.
+  The pixi environment installs both, so the test build file finds them.
+- The bindings job fetches Julia 1.11.6 from the published x64 archive.
+- The conda libc++ for macOS 11 deletes floating std::from_chars.
+  Cage edge windows and runtime double options call that function.
+  A C locale conversion accepts the same decimal text on every toolchain.
+- The coverage build updates arc counters, and 8 cores bounce them.
+  The bulk and cage tests then exceed the existing time limit.
+  One thread and a non-atomic update keep those counters and those tests.
+  The cage fuzz pool follows that same one-thread request.
+- The ignore pattern run* matched runtests.jl in every directory.
+  The pattern is anchored at the repository root, and the bindings job runs that file.
+- The runner ignores sudo -E, so a root install cannot see the engine paths.
+  cpp11, testthat, and dseams install into the user library, and the configure script sees those paths.
+  testthat's fs package builds against libuv headers.
+- The version pin howto names the version written in the other version sources.
+- pydseamslib chill_plus takes no graph argument.
+  That call labels the cutoff neighbour list.
+  The agreement test builds the mutual list itself and checks the cutoff counts.
+  No graph argument is added to the Python package.
+
+
 ## [2.12.0] - 2026-11-01
 
 ### Added
