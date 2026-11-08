@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <limits>
 #include <map>
 #include <set>
 #include <stdexcept>
@@ -268,6 +269,9 @@ TEST_CASE("findBySignature(hc) matches findHC vertices on the twelve-atom HC",
           vertexSetsOf(cageList, cage::cageType::HexC, six));
   REQUIRE(found.size() == 1);
   REQUIRE(found[0].vertices.size() == 12);
+  const auto ddcOnHc =
+      cage::findBySignature(rings, nList, cage::Signature::parse("ddc"));
+  REQUIRE(ddcOnHc.empty());
 }
 
 TEST_CASE("findBySignature(hc) and findBySignature(ddc) match findHC/findDDC "
@@ -1022,4 +1026,113 @@ TEST_CASE("tilted sH edge window keeps every hexagonal hydrate cage",
   REQUIRE(on[1].size() == 4);
   REQUIRE(off[0].size() == on[0].size());
   REQUIRE(off[1].size() == on[1].size());
+TEST_CASE("edge bounds and signature edges cover the parser", "[cage_enum]") {
+  const auto spaced = cage::parseEdgeWindow("0.5 , 2");
+  REQUIRE(spaced.enabled);
+  REQUIRE(spaced.lo > 0.4);
+  REQUIRE(spaced.lo < 0.6);
+  REQUIRE(spaced.hi > 1.9);
+  REQUIRE(spaced.hi < 2.1);
+  REQUIRE_THROWS_AS(cage::Signature::parse(","), std::invalid_argument);
+  REQUIRE_THROWS_AS(cage::Signature::parse(" , "), std::invalid_argument);
+
+  const std::vector<std::vector<int>> rings{{0, 1, 2}, {0}};
+  REQUIRE_FALSE(cage::isClosedPolyhedron(rings, {}));
+  REQUIRE_FALSE(cage::isClosedPolyhedron(rings, {9}));
+  REQUIRE_FALSE(cage::isClosedPolyhedron(rings, {1}));
+  REQUIRE(cage::findBySignature(rings, cage::Signature{}).empty());
+  const auto one = cage::Signature::parse("3:1");
+  (void)cage::findBySignature(rings, one, std::vector<int>{}, {});
+  REQUIRE(cage::findBySignature(rings, cage::Signature{}, std::vector<int>{0},
+                                std::vector<std::vector<int>>{{1, 1, 1}})
+              .empty());
+  REQUIRE(cage::findBySignature(rings, one, std::vector<int>{0},
+                                std::vector<std::vector<int>>{{9, 9, 9}})
+              .empty());
+
+  const std::vector<std::array<double, 3>> all{{{0.0, 0.0, 0.0}}};
+  const auto coords = cage::coordsOfVertices(all, {-1, 0});
+  REQUIRE(coords.size() == 1);
+  const std::vector<std::vector<int>> nList{{0, 1}, {1}};
+  const auto rows = cage::formerRows(nList, rings, std::vector<int>{1}, 2);
+  REQUIRE(rows.empty());
+  const auto self = cage::formerRows(nList, rings, std::vector<int>{1, 1}, 1);
+  REQUIRE_FALSE(self.empty());
+  REQUIRE_FALSE(cage::sameNetwork(rows, self));
+  REQUIRE(cage::findIncompleteBySignature(rings, cage::Signature{}, 1).empty());
+  const auto tooMany = cage::Signature::parse("6:40");
+  const std::vector<std::vector<int>> nListWide{{0, 1, 2}, {0, 1, 2}, {0}};
+  const std::vector<int> rank{0, 1, 2};
+  const auto lists =
+      cage::findBySignatures(rings, nListWide, {tooMany, one}, rank);
+  REQUIRE(lists.size() == 2);
+  REQUIRE_FALSE(cage::speciesCycleMatches({}, {1}));
+  REQUIRE(cage::speciesCycleMatches({1, 2, 1}, {1, 2, 1}));
+
+  const std::vector<std::vector<int>> repeated{{0, 1, 0}};
+  REQUIRE(cage::findBySignature(repeated, cage::Signature::parse("3:4")).empty());
+  const std::vector<std::vector<int>> farNeighbour{{5}};
+  REQUIRE(cage::formerRows(farNeighbour, rings, std::vector<int>{1}, -1).size() ==
+          1);
+  const auto missing = cage::Signature::parse("9:40");
+  const auto none =
+      cage::findBySignatures(rings, nListWide, {missing}, rank);
+  REQUIRE(none.size() == 1);
+  REQUIRE(none[0].empty());
+  const std::vector<std::vector<int>> openRing{{0, 1, 2, 3}};
+  const auto open =
+      cage::findIncompleteBySignature(openRing, cage::Signature::parse("4:2"), 1);
+  (void)open;
+  REQUIRE_FALSE(cage::isSpherePolyhedron(rings, {0}));
+  const std::vector<std::vector<int>> twin{{0, 1, 2}, {0, 2, 1}, {0, 1, 2}};
+  (void)cage::findBySignature(twin, cage::Signature::parse("3:2"));
+  const std::vector<std::vector<int>> splitLink = {
+      {0, 1, 2}, {0, 1, 3}, {0, 1, 4}, {0, 2, 3},
+      {0, 2, 4}, {0, 3, 4}, {1, 2, 3}};
+  REQUIRE_FALSE(cage::isSpherePolyhedron(splitLink, {0, 1, 2, 3, 4, 5, 6}));
+  const std::vector<std::vector<int>> tet = {
+      {0, 1, 2}, {0, 2, 3}, {0, 3, 1}, {1, 3, 2}};
+  std::vector<std::vector<int>> doubled = tet;
+  doubled.insert(doubled.end(), tet.begin(), tet.end());
+  const auto two =
+      cage::findBySignature(doubled, cage::Signature::parse("3:4"));
+  REQUIRE_FALSE(two.empty());
+  REQUIRE_THROWS_AS(cage::Signature::parse("4:zz"), std::invalid_argument);
+  REQUIRE_THROWS_AS(cage::isClosedPolyhedron({{1, 1, 1}}, {0}),
+                    std::invalid_argument);
+  REQUIRE_THROWS_AS(
+      cage::findBySignature({{0, 1, 2}}, cage::Signature::parse("3:1"),
+                            std::vector<int>{1, 1, 1},
+                            std::vector<std::vector<int>>{{}}),
+      std::invalid_argument);
+  REQUIRE_THROWS_AS(
+      cage::coordsOfVertices(all, {std::numeric_limits<int>::min()}),
+      std::invalid_argument);
+  std::vector<std::vector<int>> many;
+  many.reserve(100);
+  for (int i = 0; i < 100; ++i) {
+    many.push_back({i * 3, i * 3 + 1, i * 3 + 2});
+  }
+  REQUIRE(cage::findBySignature(many, cage::Signature::parse("3:4")).empty());
+  REQUIRE(cage::findBySignature({{0, 1, 2}, {3, 4, 5}, {0, 1, 4, 3}},
+                                cage::Signature::parse("3:2,4:1"))
+              .empty());
+  REQUIRE(cage::findBySignature({{0, 1, 2, 3, 4, 5, 6, 7}, {0, 7, 6, 5, 4, 3, 2, 1}},
+                                cage::Signature::parse("8:2"))
+              .empty());
+  REQUIRE_FALSE(cage::isClosedPolyhedron(rings, {-1}));
+  const std::vector<std::vector<int>> squares = {
+      {0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}, {0, 1, 5, 4}};
+  REQUIRE(cage::findBySignature(squares, cage::Signature::parse("4:6")).empty());
+  std::vector<std::vector<int>> twinTet = tet;
+  twinTet.insert(twinTet.end(), tet.begin(), tet.end());
+  REQUIRE_FALSE(
+      cage::findBySignature(twinTet, cage::Signature::parse("3:4")).empty());
+  REQUIRE(cage::exerciseClosedSeedFilter({{0, 1, 2}}, cage::Signature::parse("3:1")) ==
+          0);
+  const std::vector<std::vector<int>> tetFaces = {
+      {0, 1, 2}, {0, 2, 3}, {0, 3, 1}, {1, 3, 2}};
+  const std::size_t closed =
+      cage::exerciseClosedSeedFilter(tetFaces, cage::Signature::parse("3:4"));
+  REQUIRE(closed < 10);
 }

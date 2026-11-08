@@ -141,6 +141,11 @@ std::vector<FoundCage>
 findIncompleteBySignature(const std::vector<std::vector<int>> &rings,
                           const Signature &signature, int minFaces);
 
+/** Runs Search with the closed seed filter left on.
+ *  A ring whose edge sits in fewer than two rings is skipped. */
+std::size_t exerciseClosedSeedFilter(const std::vector<std::vector<int>> &rings,
+                                     const Signature &signature);
+
 /** IRA/SOFI result for one cage. status 0 means the library ran on
  *  these vertices. status 1 means it is absent or the cloud is empty.
  *  nVertices is the cage, not the frame. */

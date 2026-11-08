@@ -18,6 +18,7 @@
 #include <cctype>
 #include <cmath>
 #include <cstdint>
+#include <limits>
 #include <map>
 #include <memory>
 #include <set>
@@ -210,6 +211,9 @@ std::vector<Edge> edgesOfRing(const std::vector<int> &ring) {
   }
   std::sort(edges.begin(), edges.end());
   edges.erase(std::unique(edges.begin(), edges.end()), edges.end());
+  if (edges.empty()) {
+    throw std::invalid_argument("ring has no edge");
+  }
   return edges;
 }
 
@@ -1926,6 +1930,9 @@ std::vector<char> admitBySpecies(const std::vector<std::vector<int>> &rings,
       continue;
     }
     for (const auto &pattern : patterns) {
+      if (pattern.empty()) {
+        throw std::invalid_argument("empty species pattern");
+      }
       if (speciesCycleMatches(cycle, pattern)) {
         admit[i] = 1;
         break;
@@ -1965,7 +1972,7 @@ bool isClosedPolyhedron(const std::vector<std::vector<int>> &rings,
 
 bool isSpherePolyhedron(const std::vector<std::vector<int>> &rings,
                         const std::vector<int> &faces) {
-  return isClosedPolyhedron(rings, faces) && facesTileSphere(rings, faces);
+  return facesTileSphere(rings, faces) && isClosedPolyhedron(rings, faces);
 }
 
 std::vector<FoundCage> findBySignature(const std::vector<std::vector<int>> &rings,
@@ -2016,6 +2023,9 @@ coordsOfVertices(const std::vector<std::array<double, 3>> &all,
   std::vector<std::array<double, 3>> out;
   out.reserve(vertices.size());
   for (const int v : vertices) {
+    if (v == std::numeric_limits<int>::min()) {
+      throw std::invalid_argument("vertex index");
+    }
     if (v < 0 || static_cast<size_t>(v) >= all.size()) {
       continue;
     }
@@ -2111,6 +2121,13 @@ CageShape overlayVertices(const std::vector<std::array<double, 3>> &ref,
     shape.rmsd = hit.rmsd;
   }
   return shape;
+}
+
+std::size_t exerciseClosedSeedFilter(const std::vector<std::vector<int>> &rings,
+                                     const Signature &signature) {
+  Search search(rings, signature);
+  search.run();
+  return search.found.size();
 }
 
 std::vector<FoundCage>
