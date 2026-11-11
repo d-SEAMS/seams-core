@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <cmath>
 #include <complex>
+#include <immintrin.h>
 #include <iostream>
 #include <numbers>
 #include <unordered_map>
@@ -231,6 +232,169 @@ harmonicPair(int orderL, int absM, const AngularTerms &terms) {
       ((absM % 2 == 0) ? amplitude : -amplitude) * terms.phase[absM];
 
   return {negative, positive};
+}
+
+// Real l = 3 harmonics, one row per bond. Channels are
+// (Y_30, A_1 cos phi, A_1 sin phi, A_2 cos 2phi, A_2 sin 2phi,
+//  A_3 cos 3phi, A_3 sin 3phi), with A_m the normalised associated
+//  Legendre value. The correlation multiplies every |m| > 0 channel
+//  by two, which is the complex inner product of the conjugate pair.
+//  Bonds are evaluated in structure-of-arrays groups so the polynomial
+//  is independent across the group and contracts with fma.
+constexpr int kRealL3 = 7;
+
+void addRealYlm3Scalar(double x, double y, double z, const std::array<double, 4> &norm, double *acc) {
+  const double rho2 = x * x + y * y;
+  const double r2 = rho2 + z * z;
+  const double r = std::sqrt(r2);
+  double ct = 1.0;
+  double st = 0.0;
+  double cp = 1.0;
+  double sp = 0.0;
+  if (r > 0.0) {
+    const double invR = 1.0 / r;
+    ct = z * invR;
+    const double rho = std::sqrt(rho2);
+    st = rho * invR;
+    if (rho > 0.0) {
+      const double invRho = 1.0 / rho;
+      cp = y * invRho;
+      sp = x * invRho;
+    }
+  }
+  const double ct2 = ct * ct;
+  const double p0 = 5.0 * ct2 * ct - 3.0 * ct;
+  const double p1 = st * (5.0 * ct2 - 1.0);
+  const double st2 = st * st;
+  const double a0 = norm[0] * p0;
+  const double a1 = norm[1] * p1;
+  const double a2 = norm[2] * (st2 * ct);
+  const double a3 = norm[3] * (st2 * st);
+  const double c2 = cp * cp - sp * sp;
+  const double s2 = 2.0 * cp * sp;
+  const double c3 = c2 * cp - s2 * sp;
+  const double s3 = s2 * cp + c2 * sp;
+  acc[0] += a0;
+  acc[1] += a1 * cp;
+  acc[2] += a1 * sp;
+  acc[3] += a2 * c2;
+  acc[4] += a2 * s2;
+  acc[5] += a3 * c3;
+  acc[6] += a3 * s3;
+}
+
+// Four bonds side by side. Hardware fma is a per-lane instruction; the
+// channels are then added in bond order so the sum matches the scalar loop.
+__attribute__((target("avx2,fma"))) void realYlm3Accumulate(const double *x, const double *y,
+                                                           const double *z, int nBond, double *acc) {
+  const auto &norm = normQ3();
+  int bond = 0;
+  const __m256d zero = _mm256_setzero_pd();
+  const __m256d one = _mm256_set1_pd(1.0);
+  const __m256d five = _mm256_set1_pd(5.0);
+  const __m256d n0 = _mm256_set1_pd(norm[0]);
+  const __m256d n1 = _mm256_set1_pd(norm[1]);
+  const __m256d n2 = _mm256_set1_pd(norm[2]);
+  const __m256d n3 = _mm256_set1_pd(norm[3]);
+  for (; bond + 4 <= nBond; bond += 4) {
+    const __m256d X = _mm256_loadu_pd(x + bond);
+    const __m256d Y = _mm256_loadu_pd(y + bond);
+    const __m256d Z = _mm256_loadu_pd(z + bond);
+    const __m256d rho2 = _mm256_fmadd_pd(Y, Y, _mm256_mul_pd(X, X));
+    const __m256d r2 = _mm256_fmadd_pd(Z, Z, rho2);
+    const __m256d r = _mm256_sqrt_pd(r2);
+    const __m256d rho = _mm256_sqrt_pd(rho2);
+    const __m256d rOk = _mm256_cmp_pd(r, zero, _CMP_GT_OQ);
+    const __m256d rhoOk = _mm256_cmp_pd(rho, zero, _CMP_GT_OQ);
+    const __m256d invR = _mm256_blendv_pd(zero, _mm256_div_pd(one, r), rOk);
+    const __m256d invRho = _mm256_blendv_pd(zero, _mm256_div_pd(one, rho), rhoOk);
+    const __m256d ct = _mm256_blendv_pd(one, _mm256_mul_pd(Z, invR), rOk);
+    const __m256d st = _mm256_blendv_pd(zero, _mm256_mul_pd(rho, invR), rOk);
+    const __m256d cp = _mm256_blendv_pd(one, _mm256_mul_pd(Y, invRho), rhoOk);
+    const __m256d sp = _mm256_blendv_pd(zero, _mm256_mul_pd(X, invRho), rhoOk);
+    const __m256d ct2 = _mm256_mul_pd(ct, ct);
+    const __m256d p0 = _mm256_fmadd_pd(five, _mm256_mul_pd(ct2, ct), _mm256_mul_pd(_mm256_set1_pd(-3.0), ct));
+    const __m256d p1 = _mm256_mul_pd(st, _mm256_fmadd_pd(five, ct2, _mm256_set1_pd(-1.0)));
+    const __m256d st2 = _mm256_mul_pd(st, st);
+    const __m256d a0 = _mm256_mul_pd(n0, p0);
+    const __m256d a1 = _mm256_mul_pd(n1, p1);
+    const __m256d a2 = _mm256_mul_pd(n2, _mm256_mul_pd(st2, ct));
+    const __m256d a3 = _mm256_mul_pd(n3, _mm256_mul_pd(st2, st));
+    const __m256d c2 = _mm256_fmsub_pd(cp, cp, _mm256_mul_pd(sp, sp));
+    const __m256d s2 = _mm256_mul_pd(_mm256_set1_pd(2.0), _mm256_mul_pd(cp, sp));
+    const __m256d c3 = _mm256_fmsub_pd(c2, cp, _mm256_mul_pd(s2, sp));
+    const __m256d s3 = _mm256_fmadd_pd(s2, cp, _mm256_mul_pd(c2, sp));
+    const __m256d channel[kRealL3] = {a0,
+                                     _mm256_mul_pd(a1, cp),
+                                     _mm256_mul_pd(a1, sp),
+                                     _mm256_mul_pd(a2, c2),
+                                     _mm256_mul_pd(a2, s2),
+                                     _mm256_mul_pd(a3, c3),
+                                     _mm256_mul_pd(a3, s3)};
+    for (int k = 0; k < kRealL3; ++k) {
+      alignas(32) double lane[4];
+      _mm256_store_pd(lane, channel[k]);
+      acc[k] += lane[0];
+      acc[k] += lane[1];
+      acc[k] += lane[2];
+      acc[k] += lane[3];
+    }
+  }
+  for (; bond < nBond; ++bond) {
+    const double rho2 = __builtin_fma(y[bond], y[bond], x[bond] * x[bond]);
+    const double r2 = __builtin_fma(z[bond], z[bond], rho2);
+    const double r = std::sqrt(r2);
+    double ct = 1.0;
+    double st = 0.0;
+    double cp = 1.0;
+    double sp = 0.0;
+    if (r > 0.0) {
+      const double invR = 1.0 / r;
+      ct = z[bond] * invR;
+      const double rho = std::sqrt(rho2);
+      st = rho * invR;
+      if (rho > 0.0) {
+        const double invRho = 1.0 / rho;
+        cp = y[bond] * invRho;
+        sp = x[bond] * invRho;
+      }
+    }
+    const double ct2 = ct * ct;
+    const double p0 = __builtin_fma(5.0, ct2 * ct, -3.0 * ct);
+    const double p1 = st * __builtin_fma(5.0, ct2, -1.0);
+    const double st2 = st * st;
+    const double a0 = norm[0] * p0;
+    const double a1 = norm[1] * p1;
+    const double a2 = norm[2] * (st2 * ct);
+    const double a3 = norm[3] * (st2 * st);
+    const double c2 = __builtin_fma(cp, cp, -(sp * sp));
+    const double s2 = 2.0 * cp * sp;
+    const double c3 = __builtin_fma(c2, cp, -(s2 * sp));
+    const double s3 = __builtin_fma(s2, cp, c2 * sp);
+    acc[0] += a0;
+    acc[1] += a1 * cp;
+    acc[2] += a1 * sp;
+    acc[3] += a2 * c2;
+    acc[4] += a2 * s2;
+    acc[5] += a3 * c3;
+    acc[6] += a3 * s3;
+  }
+}
+
+__attribute__((target("fma"))) double realL3Dot(const double *a, const double *b) {
+  double dot = a[0] * b[0];
+  for (int channel = 1; channel < kRealL3; ++channel) {
+    dot = __builtin_fma(2.0 * a[channel], b[channel], dot);
+  }
+  return dot;
+}
+
+double realL3DotScalar(const double *a, const double *b) {
+  double dot = a[0] * b[0];
+  for (int channel = 1; channel < kRealL3; ++channel) {
+    dot += (2.0 * a[channel]) * b[channel];
+  }
+  return dot;
 }
 
 /**
@@ -571,7 +735,7 @@ static void classifyBondsLeftFp64(
     const std::vector<std::vector<int>> &nList, const chill::BondClassifier &rule,
     bool isSlice) {
   constexpr int l = 3;
-  constexpr int nComp = 2 * l + 1;
+  static_assert(l == 3, "the closed form below is the l = 3 polynomial");
   const int nop = yCloud.nop;
   const int keepMax = rule.coordinationNumber;
   const gen::FracBox frame = gen::makeFracBox(yCloud);
@@ -599,10 +763,10 @@ static void classifyBondsLeftFp64(
     return it == yCloud.idIndexMap.end() ? -1 : it->second;
   };
 
-  // Real and imaginary parts of q_lm, m = -l..l. Dividing by the neighbour
-  // count cancels in c_ij, so the sum is stored unnormalised.
-  // Coordinates are copied first so the parallel loop does not read a Point
-  // while another thread clears that Point's bond list.
+  // Real l = 3 coefficients, unnormalised by the neighbour count: that
+  // factor cancels in c_ij. Coordinates are copied first so the parallel
+  // loop does not read a Point while another thread clears that Point's
+  // bond list.
   struct Xyz {
     double x, y, z;
   };
@@ -612,8 +776,8 @@ static void classifyBondsLeftFp64(
     xyz[static_cast<std::size_t>(i)] = {p.x, p.y, p.z};
     p.c_ij.clear();
   }
-  std::vector<double> qReal(static_cast<std::size_t>(nop) * nComp, 0.0);
-  std::vector<double> qImag(static_cast<std::size_t>(nop) * nComp, 0.0);
+  std::vector<double> qAtom(static_cast<std::size_t>(nop) * kRealL3, 0.0);
+  std::vector<double> qNorm(static_cast<std::size_t>(nop), 0.0);
   const bool fixedKeep = keepMax > 0;
   // One thread walks atoms in order, so a whole cutoff shell is one
   // buffer instead of a vector per atom.
@@ -638,6 +802,7 @@ static void classifyBondsLeftFp64(
     flat.reserve(static_cast<std::size_t>(nop) * 8);
   }
 
+  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1)
 #endif
@@ -689,38 +854,39 @@ static void classifyBondsLeftFp64(
     }
     std::partial_sort(candidates, candidates + keep, candidates + nCand);
     nkeep[static_cast<std::size_t>(iatom)] = keep;
-    std::array<double, nComp> accRe{};
-    std::array<double, nComp> accIm{};
-    for (int j = 0; j < keep; j++) {
-      const int jatom = candidates[j].jatom;
-      if (fixedKeep) {
-        chosen[static_cast<std::size_t>(iatom) * static_cast<std::size_t>(keepMax) +
-               static_cast<std::size_t>(j)] = jatom;
-      } else if (serialShell) {
-        flat.push_back(jatom);
-      } else {
-        ragged[static_cast<std::size_t>(iatom)].push_back(jatom);
-      }
-      const std::array<double, 3> dr = {candidates[j].x, candidates[j].y, candidates[j].z};
-      const std::array<double, 2> angles = sph::radialCoord(dr);
-      const AngularTerms terms(angles[1], angles[0], l);
-      for (int m = 0; m <= l; m++) {
-        const auto harm = harmonicPair(l, m, terms);
-        accRe[l - m] += harm.first.real();
-        accIm[l - m] += harm.first.imag();
-        if (m == 0) {
-          continue;
+    double acc[kRealL3] = {};
+    for (int j = 0; j < keep;) {
+      double xs[4];
+      double ys[4];
+      double zs[4];
+      int batch = 0;
+      for (; batch < 4 && j < keep; ++j, ++batch) {
+        const int jatom = candidates[j].jatom;
+        if (fixedKeep) {
+          chosen[static_cast<std::size_t>(iatom) * static_cast<std::size_t>(keepMax) +
+                 static_cast<std::size_t>(j)] = jatom;
+        } else if (serialShell) {
+          flat.push_back(jatom);
+        } else {
+          ragged[static_cast<std::size_t>(iatom)].push_back(jatom);
         }
-        accRe[l + m] += harm.second.real();
-        accIm[l + m] += harm.second.imag();
+        xs[batch] = candidates[j].x;
+        ys[batch] = candidates[j].y;
+        zs[batch] = candidates[j].z;
+      }
+      if (useAvx) {
+        realYlm3Accumulate(xs, ys, zs, batch, acc);
+      } else {
+        for (int item = 0; item < batch; ++item) {
+          addRealYlm3Scalar(xs[item], ys[item], zs[item], normQ3(), acc);
+        }
       }
     }
-    double *re = qReal.data() + static_cast<std::size_t>(iatom) * nComp;
-    double *im = qImag.data() + static_cast<std::size_t>(iatom) * nComp;
-    for (int m = 0; m < nComp; m++) {
-      re[m] = accRe[m];
-      im[m] = accIm[m];
+    double *dst = qAtom.data() + static_cast<std::size_t>(iatom) * kRealL3;
+    for (int channel = 0; channel < kRealL3; ++channel) {
+      dst[channel] = acc[channel];
     }
+    qNorm[static_cast<std::size_t>(iatom)] = useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
   }
   if (serialShell) {
     for (int i = 0; i < nop; i++) {
@@ -728,9 +894,18 @@ static void classifyBondsLeftFp64(
           flatAt[static_cast<std::size_t>(i)] + nkeep[static_cast<std::size_t>(i)];
     }
   }
+  const auto neighbourAt = [&](int atom, int slot) {
+    if (fixedKeep) {
+      return chosen[static_cast<std::size_t>(atom) * static_cast<std::size_t>(keepMax) +
+                    static_cast<std::size_t>(slot)];
+    }
+    if (serialShell) {
+      return flat[static_cast<std::size_t>(flatAt[static_cast<std::size_t>(atom)] + slot)];
+    }
+    return ragged[static_cast<std::size_t>(atom)][static_cast<std::size_t>(slot)];
+  };
 
-  // c_ij from the real part of the complex inner product. The neighbour
-  // count cancels between the averaged harmonics and the norms.
+  // c_ij from the real l = 3 inner product. Norms were formed once per atom.
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1)
 #endif
@@ -742,35 +917,24 @@ static void classifyBondsLeftFp64(
     if (keep <= 0) {
       continue;
     }
-    const double *reI = qReal.data() + static_cast<std::size_t>(iatom) * nComp;
-    const double *imI = qImag.data() + static_cast<std::size_t>(iatom) * nComp;
-    double normI = 0.0;
-    for (int m = 0; m < nComp; m++) {
-      normI += reI[m] * reI[m] + imI[m] * imI[m];
-    }
+    const double *qI = qAtom.data() + static_cast<std::size_t>(iatom) * kRealL3;
+    const double normI = qNorm[static_cast<std::size_t>(iatom)];
     auto &bonds = yCloud.pts[static_cast<std::size_t>(iatom)].c_ij;
     bonds.reserve(static_cast<std::size_t>(keep));
-    for (int j = 0; j < keep; j++) {
-      const int jatom =
-          fixedKeep ? chosen[static_cast<std::size_t>(iatom) * static_cast<std::size_t>(keepMax) +
-                             static_cast<std::size_t>(j)]
-          : serialShell ? flat[static_cast<std::size_t>(flatAt[static_cast<std::size_t>(iatom)] + j)]
-                        : ragged[static_cast<std::size_t>(iatom)][static_cast<std::size_t>(j)];
+    for (int slot = 0; slot < keep; ++slot) {
+      const int jatom = neighbourAt(iatom, slot);
       if (jatom < 0) {
         continue;
       }
-      const double *reJ = qReal.data() + static_cast<std::size_t>(jatom) * nComp;
-      const double *imJ = qImag.data() + static_cast<std::size_t>(jatom) * nComp;
-      double dot = 0.0;
-      double normJ = 0.0;
-      for (int m = 0; m < nComp; m++) {
-        dot += reI[m] * reJ[m] + imI[m] * imJ[m];
-        normJ += reJ[m] * reJ[m] + imJ[m] * imJ[m];
-      }
-      const double cij_real = dot / std::sqrt(normI * normJ);
+      const double *qJ = qAtom.data() + static_cast<std::size_t>(jatom) * kRealL3;
+      const double dot = useAvx ? realL3Dot(qI, qJ) : realL3DotScalar(qI, qJ);
+      const double denom = std::sqrt(normI * qNorm[static_cast<std::size_t>(jatom)]);
+      // A centrosymmetric shell cancels an odd harmonic exactly. The
+      // correlation is then undefined; 0 keeps the value inside [-1, 1].
+      const double cij = denom > 0.0 ? dot / denom : 0.0;
       molSys::Result temp_cij;
-      temp_cij.c_value = cij_real;
-      temp_cij.classifier = chill::classifyBond(cij_real, rule);
+      temp_cij.c_value = cij;
+      temp_cij.classifier = chill::classifyBond(cij, rule);
       bonds.push_back(temp_cij);
     }
   }
