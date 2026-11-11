@@ -21,7 +21,7 @@ The ice score (~seams cages~, ~ring::seededCageAffiliation~ by default) is cage 
 A molecule in a hexagonal cage (HC) is ice Ih.
 A molecule in a double-diamond cage (DDC) is ice Ic.
 A molecule in neither is water.
-The cages are assembled from six-membered primitive rings on a chosen bond graph, not from the four-neighbour star.
+The cages are assembled from six-membered primitive rings on a chosen bond graph.
 
 This is topological unit matching (TUM).
 The methods paper is the 2020 JCIM article (see [[file:citation.org][Citation]]).
@@ -38,7 +38,7 @@ The Catch2 suite encodes that fact: cage membership is not a function of the fou
 On the in-tree mixed TIP4P dump (~input/traj/exampleTraj.lammpstrj~), ~seams chill-plus~ uses the cutoff list by default and prints 9 interfacial clathrate and 241 water; ~--graph mutual~ prints 1 clathrate, 7 interfacial clathrate, and 242 water.
 Seeded cages report zero HC and zero DDC.
 A three-eclipsed star is not cage membership.
-Walk through the commands in [[file:../tutorials/bulk-ice.org][the mixed TIP4P tutorial]].
+The commands are in [[file:../tutorials/bulk-ice.org][the mixed TIP4P tutorial]].
 
 * Bond graph
 
