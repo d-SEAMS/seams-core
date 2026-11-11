@@ -34,6 +34,7 @@ seams_lang_test = executable(
   files('cxx/test_lang.cpp'),
   dependencies: [seams_lang_dep],
   include_directories: include_directories('cxx'),
+  link_args: ['-ldl'],
 )
 
 test(
@@ -58,6 +59,18 @@ if get_option('with_cli') and get_option('with_tests')
     env: {'DSEAMS_ROOT': meson.project_source_root()},
     depends: [seams_exe, seams_lang],
     timeout: 600,
+  )
+  test(
+    'chill_plus_ctypes',
+    find_program('python3', required: true),
+    args: [meson.project_source_root() / 'tests' / 'test_chill_plus_ctypes.py'],
+    env: {'SEAMS_LANG_LIB': seams_lang.full_path()},
+    depends: [seams_lang],
+    timeout: 120,
+  )
+  install_data(
+    'python/chill_plus.py',
+    install_dir: get_option('datadir') / 'seams' / 'python',
   )
 endif
 

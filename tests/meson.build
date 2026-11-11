@@ -41,6 +41,7 @@ test_sources = {
   'cage_enum': 'test_cage_enum.cpp',
   'c_api': 'test_c_api.cpp',
   'chill_offload': 'test_chill_offload.cpp',
+  'chill_plus_rule': 'test_chill_plus_rule.cpp',
   'gpu_residency': 'test_gpu_residency.cpp',
   'config': 'test_config.cpp',
   'site': 'test_site.cpp',
@@ -418,3 +419,8 @@ test('fuzz_cage_shift_permute', _fuzz_cage,
   args: [meson.project_source_root() / 'input' / 'traj', '1000'],
   env: _test_env,
   timeout: 0)
+test('cli_surface', find_program('python3'),
+  args: [files('cli_surface.py'), meson.project_build_root() / 'seams'],
+  workdir: meson.project_source_root(),
+  env: {'SEAMS_HAS_CHEMFILES': chemfiles_dep.found() ? '1' : '0'},
+  timeout: 600)

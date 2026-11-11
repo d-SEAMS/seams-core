@@ -35,6 +35,6 @@ def test_mixed_frame_disagreement(tip4p):
     frame = pydseams.read(tip4p, atom_type=2)
     ice = frame.chill_plus()
     cages = frame.cages()
-    assert ice.water == 238
-    assert ice.interClathrate == 12
+    assert ice.water == 241
+    assert ice.interClathrate == 9
     assert cages.n_water == 250

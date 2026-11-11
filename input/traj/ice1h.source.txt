@@ -1,0 +1,9 @@
+Oxygen sites of a 2x2x2 ice Ih cell from GenIce 2.2.13.
+The generator is scripts/gen_ice1h.py.
+It runs `genice2 ice1h --rep 2 2 2`.
+It keeps one oxygen per water and converts nanometres to angstroms.
+The replicated cell is 15.6456775 by 14.7071453 by 18.073037 angstrom.
+The dump has 128 oxygens.
+We keep the oxygen coordinates in angstroms.
+The dump header names id, type, x, y and z.
+Every site has type 1.

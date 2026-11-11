@@ -3,12 +3,32 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <dlfcn.h>
 #include <vector>
 
 namespace {
+
+using ArmFn = void (*)(int, int);
+using LiveFn = long (*)();
+using ResetFn = void (*)();
+
+ArmFn fault_arm() {
+  return reinterpret_cast<ArmFn>(dlsym(RTLD_DEFAULT, "seams_test_arm"));
+}
+LiveFn fault_live() {
+  return reinterpret_cast<LiveFn>(dlsym(RTLD_DEFAULT, "seams_test_live"));
+}
+LiveFn fault_peak() {
+  return reinterpret_cast<LiveFn>(dlsym(RTLD_DEFAULT, "seams_test_peak"));
+}
+ResetFn fault_reset() {
+  return reinterpret_cast<ResetFn>(dlsym(RTLD_DEFAULT, "seams_test_reset_peak"));
+}
 
 int fail(const std::string &message) {
   std::cerr << message;
@@ -275,6 +295,753 @@ int main(int argc, char **argv) {
       return fail("abi disagrees with the cli");
     }
   }
+
+  double box9[9] = {};
+  seams_frame_box(tip, box9);
+  if (!(box9[3] > 0.0)) {
+    return fail("box");
+  }
+  if (seams_frame_index(tip) < 1) {
+    return fail("index");
+  }
+  if (seams_frame_types(tip) == nullptr || seams_frame_ids(tip) == nullptr) {
+    return fail("arrays");
+  }
+  if (seams_frame_positions(nullptr) != nullptr) {
+    return fail("null positions");
+  }
+  if (seams_frame_chill(tip, 3.5, 2, "cutoff", labels.data(), counts) != 0) {
+    return fail("plain chill");
+  }
+  if (seams_frame_chill_plus_rule(tip, 3.5, 2, "cutoff", "ovito-chill+", labels.data(), counts) != 0) {
+    return fail("ovito rule");
+  }
+  if (seams_frame_chill_plus_rule(tip, 3.5, 2, "cutoff", "not-a-rule", labels.data(), counts) == 0) {
+    return fail("bad rule accepted");
+  }
+  if (seams_frame_from_arrays(nullptr, 1, box9, nullptr, nullptr) != nullptr) {
+    return fail("null xyz");
+  }
+  seams_frame *built = seams_frame_from_arrays(xyz, 4, box9, nullptr, nullptr);
+  if (built == nullptr || seams_frame_nop(built) != 4) {
+    return fail("from arrays");
+  }
+  seams_frame_free(built);
+  if (seams_frame_prisms(nullptr, 3.5, 2, 6, nullptr, nullptr, nullptr) == 0) {
+    return fail("null prisms");
+  }
+  int n_rows = 0;
+  if (seams_frame_prisms(tip, 3.5, 2, 6, nullptr, nullptr, &n_rows) != 0 ||
+      n_rows != 4) return fail("prism count");
+  std::vector<seams_prism_row> prism_rows(static_cast<std::size_t>(n_rows));
+  if (seams_frame_prisms(tip, 3.5, 2, 6, nullptr, prism_rows.data(), &n_rows) != 0) {
+    return fail("prisms");
+  }
+  const int nbin = seams_frame_rdf2d_nbin(3.5, 0.0);
+  std::vector<double> r2(static_cast<std::size_t>(nbin));
+  std::vector<double> g2(static_cast<std::size_t>(nbin));
+  if (seams_frame_rdf2d(nullptr, 3.5, 0.5, nullptr, r2.data(), g2.data()) == 0) {
+    return fail("null rdf2d");
+  }
+  if (seams_frame_rdf2d(tip, 3.5, 0.5, nullptr, r2.data(), g2.data()) != 0) {
+    return fail("rdf2d");
+  }
+  int sheet[8] = {};
+  if (seams_frame_monolayer(tip, 3.5, 2, 6, 1.0, nullptr, sheet, 8) != 0) {
+    return fail("monolayer");
+  }
+  if (seams_frame_chill(nullptr, 3.5, 2, "cutoff", labels.data(), counts) == 0) {
+    return fail("null chill");
+  }
+  if (seams_last_error() == nullptr) {
+    return fail("error string");
+  }
+
+  if (seams_path_nframes(nullptr) != -1) {
+    return fail("null path");
+  }
+  if (seams_path_nframes("missing.xyz") != -1) {
+    return fail("xyz frames");
+  }
+  if (std::string(seams_last_error()).find("cannot read") == std::string::npos) {
+    return fail("xyz text");
+  }
+  if (seams_frame_read(nullptr, 1, 1) != nullptr) {
+    return fail("null read");
+  }
+  seams_frame *missing = seams_frame_read("missing-lang.xyz", 1, 1);
+  if (missing != nullptr) {
+    return fail("missing xyz opened");
+  }
+  missing = seams_frame_read("missing-lang.pdb", 1, 1);
+  if (missing != nullptr) {
+    seams_frame_free(missing);
+  }
+  missing = seams_frame_read("missing-lang.gro", 1, 0);
+  if (missing != nullptr) {
+    seams_frame_free(missing);
+  }
+  missing = seams_frame_read("missing-lang.dcd", 1, -1);
+  if (missing != nullptr) {
+    seams_frame_free(missing);
+  }
+  missing = seams_frame_read("missing-lang.con", 1, 1);
+  if (missing != nullptr) {
+    seams_frame_free(missing);
+  }
+  seams_frame *allTypes = seams_frame_read(tip4p.c_str(), 1, -1);
+  if (allTypes == nullptr) {
+    return fail("type filter");
+  }
+  seams_frame_free(allTypes);
+  seams_frame *guess = seams_frame_read(tip4p.c_str(), 1, 0);
+  if (guess == nullptr) {
+    return fail("type guess");
+  }
+  seams_frame_free(guess);
+
+  int types4[4] = {2, 2, 1, 1};
+  int ids4[4] = {10, 11, 12, 13};
+  double sheared[9] = {0, 0, 0, 10, 10, 10, 1.5, 0, 0};
+  if (seams_frame_from_arrays(xyz, 0, box9, nullptr, nullptr) != nullptr) {
+    return fail("zero count");
+  }
+  if (seams_frame_from_arrays(xyz, 4, nullptr, nullptr, nullptr) != nullptr) {
+    return fail("null box");
+  }
+  seams_frame *typed = seams_frame_from_arrays(xyz, 4, sheared, types4, ids4);
+  if (typed == nullptr || seams_frame_nop(typed) != 4) {
+    return fail("typed arrays");
+  }
+  double filled[9] = {};
+  seams_frame_box(typed, filled);
+  if (!(filled[6] != 0.0)) {
+    return fail("shear");
+  }
+  seams_frame_free(typed);
+  seams_frame_free(nullptr);
+  if (seams_frame_nop(nullptr) != 0) {
+    return fail("null nop");
+  }
+  if (seams_frame_index(nullptr) != 0) {
+    return fail("null index");
+  }
+  seams_frame_box(nullptr, box9);
+  if (seams_frame_types(nullptr) != nullptr) {
+    return fail("null types");
+  }
+  if (seams_frame_ids(nullptr) != nullptr) {
+    return fail("null ids");
+  }
+
+  if (seams_frame_chill_plus(tip, 3.5, 2, "", labels.data(), counts) != 0) {
+    return fail("empty graph");
+  }
+  if (seams_frame_chill_plus(tip, 3.5, 2, "cutoff", labels.data(), nullptr) != 0) {
+    return fail("null counts");
+  }
+  if (seams_frame_chill_plus(tip, 3.5, 2, "knn", labels.data(), counts) == 0) {
+    return fail("knn accepted");
+  }
+  std::string longRule(300, 'q');
+  if (seams_frame_chill_plus_rule(tip, 3.5, 2, "cutoff", longRule.c_str(), labels.data(), counts) == 0) {
+    return fail("long rule accepted");
+  }
+  if (seams_frame_rings(tip, 3.5, 2, "cutoff", 6, rings.data(), 9) != 0) {
+    return fail("cutoff rings");
+  }
+  if (seams_frame_rings(tip, 3.5, 2, "knn-union", 6, rings.data(), 9) != 0) {
+    return fail("union rings");
+  }
+  if (seams_frame_rings(nullptr, 3.5, 2, "mutual", 6, rings.data(), 9) == 0) {
+    return fail("null rings");
+  }
+  if (seams_frame_rings(tip, 3.5, 2, "mutual", 2, rings.data(), 9) == 0) {
+    return fail("shallow rings");
+  }
+
+  int cageHex = 0;
+  if (seams_frame_cages(tip, 3.5, 2, 4, "cutoff", 0, nullptr, &cageHex, nullptr, nullptr, nullptr) != 0) {
+    return fail("cutoff cages");
+  }
+  if (seams_frame_cages(nullptr, 3.5, 2, 4, "cutoff", 0, nullptr, &cageHex, nullptr, nullptr, nullptr) == 0) {
+    return fail("null cages");
+  }
+  if (seams_frame_cages(tip, 3.5, 2, 4, "banana", 0, nullptr, &cageHex, nullptr, nullptr, nullptr) == 0) {
+    return fail("banana cages");
+  }
+  if (seams_frame_cages(tip, 3.5, 2, 0, "seeded", 0, nullptr, &cageHex, nullptr, nullptr, nullptr) != 0) {
+    return fail("k zero");
+  }
+  setenv("SEAMS_OFFLOAD", "1", 1);
+  if (seams_frame_cages(tip, 3.5, 2, 4, "mutual", 0, nullptr, &cageHex, &cageHex, &cageHex, &cageHex) != 0) {
+    return fail("offload cages");
+  }
+  unsetenv("SEAMS_OFFLOAD");
+  if (seams_frame_steinhardt(nullptr, 3.5, 2, 4, ql.data(), qlbar.data()) == 0) {
+    return fail("null steinhardt");
+  }
+  if (seams_frame_steinhardt(tip, 3.5, 2, 4, nullptr, nullptr) != 0) {
+    return fail("steinhardt counts");
+  }
+  if (seams_frame_signature(nullptr, 3.5, 1, "cutoff", "512", &n_cages, &n_atoms) == 0) {
+    return fail("null signature");
+  }
+  if (seams_frame_signature(guest, 3.5, 1, nullptr, "512", &n_cages, &n_atoms) != 0) {
+    return fail("default signature graph");
+  }
+  if (seams_frame_rdf_nbins(6.0, 0) < 1) {
+    return fail("default bins");
+  }
+  if (seams_frame_rdf(nullptr, 6.0, 4, 2, 2, r.data(), g.data(), hist.data(), &volume) == 0) {
+    return fail("null rdf");
+  }
+  if (seams_frame_rdf(tip, 6.0, 4, 2, 0, r.data(), g.data(), hist.data(), nullptr) != 0) {
+    return fail("rdf no volume");
+  }
+
+  const auto out = std::filesystem::temp_directory_path() / "dseams-lang-out";
+  std::filesystem::create_directories(out);
+  const std::string outDir = out.string();
+  if (seams_frame_rdf2d(tip, 3.5, 0.5, outDir.c_str(), r2.data(), g2.data()) != 0) {
+    return fail("rdf2d file");
+  }
+  if (seams_frame_rdf2d_nbin(3.5, -1.0) < 1) {
+    return fail("rdf2d width");
+  }
+  if (seams_frame_prisms(tip, 3.5, 2, 6, outDir.c_str(), prism_rows.data(), &n_rows) != 0) {
+    return fail("prism file");
+  }
+  if (seams_frame_prisms(tip, 3.5, 2, 6, nullptr, prism_rows.data(), nullptr) == 0) {
+    return fail("short prism buffer");
+  }
+  int sheetWide[12] = {};
+  if (seams_frame_monolayer(tip, 3.5, 2, 6, 1.0, outDir.c_str(), sheetWide, 12) != 0) {
+    return fail("monolayer file");
+  }
+  if (seams_frame_monolayer(nullptr, 3.5, 2, 6, 1.0, nullptr, sheetWide, 12) == 0) {
+    return fail("null monolayer");
+  }
+  if (seams_frame_monolayer(tip, 3.5, 2, 6, 1.0, nullptr, sheetWide, 2) == 0) {
+    return fail("short monolayer");
+  }
+  const std::string ice1h = root + "/input/traj/ice1h.lammpstrj";
+  seams_frame *none = seams_frame_read(ice1h.c_str(), 1, 9);
+  if (none != nullptr) {
+    if (seams_frame_nop(none) == 0 && seams_frame_chill_plus(none, 3.5, 0, "cutoff", nullptr, nullptr) != 0) {
+      return fail("filtered empty");
+    }
+    seams_frame_free(none);
+  }
+  if (seams_frame_chill_plus(tip, 3.5, 1, "cutoff", labels.data(), counts) != 0) {
+    return fail("other type");
+  }
+  seams_frame *guessed = seams_frame_read(ice1h.c_str(), 1, 0);
+  if (guessed == nullptr || seams_frame_nop(guessed) == 0) {
+    return fail("ice guess");
+  }
+  seams_frame_free(guessed);
+  const auto emptyPath = out / "empty.lammpstrj";
+  {
+    std::ofstream empty(emptyPath);
+    empty << "ITEM: TIMESTEP\n0\nITEM: NUMBER OF ATOMS\n0\n"
+             "ITEM: BOX BOUNDS pp pp pp\n0 10\n0 10\n0 10\n"
+             "ITEM: ATOMS id type x y z\n";
+  }
+  seams_frame *blank = seams_frame_read(emptyPath.c_str(), 1, 0);
+  if (blank == nullptr) {
+    return fail("empty frame");
+  }
+  if (seams_frame_chill_plus(blank, 3.5, 0, "cutoff", nullptr, nullptr) != 0) {
+    return fail("empty chill");
+  }
+  if (seams_frame_cages(blank, 3.5, 0, 4, "cutoff", 0, nullptr, &cageHex, nullptr, nullptr, nullptr) != 0) {
+    return fail("empty cages");
+  }
+  seams_frame_free(blank);
+  if (seams_frame_rings(tip, 3.5, 2, "", 6, rings.data(), 9) != 0) {
+    return fail("empty-name rings");
+  }
+  if (seams_frame_rings(tip, 3.5, 2, "banana", 6, rings.data(), 9) == 0) {
+    return fail("banana rings");
+  }
+  if (seams_frame_rings(tip, 3.5, 2, "seeded", 6, rings.data(), 9) == 0) {
+    return fail("seeded rings");
+  }
+  if (seams_frame_signature(guest, 3.5, 1, "cutoff", "not-a-signature", &n_cages, &n_atoms) == 0) {
+    return fail("bad signature");
+  }
+  const auto corrupt = out / "corrupt.lammpstrj";
+  {
+    std::ofstream bad(corrupt);
+    bad << "not a lammpstrj\n";
+  }
+  if (seams_path_nframes(corrupt.c_str()) > 0) {
+    return fail("corrupt frames");
+  }
+  if (seams_path_nframes("no-extension") > 0) {
+    return fail("bare frames");
+  }
+  const std::string xyzPath = root + "/input/xyz/configuration.xyz";
+  if (seams_path_nframes(xyzPath.c_str()) != 1) {
+    return fail("xyz frames");
+  }
+  seams_frame *xyzFrame = seams_frame_read(xyzPath.c_str(), 1, 1);
+  if (xyzFrame != nullptr) {
+    double xyzBox[9] = {};
+    seams_frame_box(xyzFrame, xyzBox);
+    seams_frame_free(xyzFrame);
+  }
+  if (seams_frame_rings(tip, 3.5, 2, "knn-mutual", 6, rings.data(), 9) != 0) {
+    return fail("knn rings");
+  }
+  if (seams_frame_rings(tip, 3.5, 2, "union", 6, rings.data(), 9) != 0) {
+    return fail("union name");
+  }
+  if (seams_frame_rings(tip, 3.5, 2, nullptr, 6, rings.data(), 9) != 0) {
+    return fail("null graph rings");
+  }
+  double shearY[9] = {0, 0, 0, 10, 10, 10, 0, 1.0, 0};
+  double shearZ[9] = {0, 0, 0, 10, 10, 10, 0, 0, 1.0};
+  seams_frame *sy = seams_frame_from_arrays(xyz, 4, shearY, types4, ids4);
+  seams_frame *sz = seams_frame_from_arrays(xyz, 4, shearZ, nullptr, nullptr);
+  if (sy == nullptr || sz == nullptr) {
+    return fail("shear axes");
+  }
+  seams_frame_free(sy);
+  seams_frame_free(sz);
+  std::vector<int> per(static_cast<std::size_t>(seams_frame_nop(tip)));
+  if (seams_frame_cages(tip, 3.5, 2, 4, nullptr, 1, per.data(), nullptr, nullptr, nullptr, nullptr) != 0) {
+    return fail("null graph cages");
+  }
+  if (seams_frame_signature(guest, 3.5, 1, "", "512", &n_cages, nullptr) == 0) {
+    return fail("null atom count");
+  }
+  if (seams_frame_rdf(tip, 6.0, 4, 2, 2, nullptr, g.data(), hist.data(), &volume) == 0) {
+    return fail("null rdf r");
+  }
+  const std::string dir = (out / "sub").string();
+  std::filesystem::create_directories(dir);
+  if (seams_frame_rdf2d(tip, 3.5, 0.5, dir.c_str(), r2.data(), g2.data()) != 0) {
+    return fail("rdf2d slash");
+  }
+  if (seams_frame_prisms(tip, 3.5, 2, 4, dir.c_str(), nullptr, &n_rows) != 0) {
+    return fail("prism dir");
+  }
+  if (seams_frame_monolayer(tip, 3.5, 2, 4, 1.0, dir.c_str(), sheetWide, 12) != 0) {
+    return fail("sheet dir");
+  }
+
+  seams_frame *oxygen = seams_frame_read(ice1h.c_str(), 1, 0);
+  if (oxygen == nullptr || seams_frame_nop(oxygen) == 0) {
+    return fail("oxygen guess");
+  }
+  if (seams_frame_chill(oxygen, 3.5, 0, "cutoff", labels.data(), counts) != 0) {
+    return fail("chill type 0");
+  }
+  if (seams_frame_chill(oxygen, 3.5, 1, nullptr, nullptr, nullptr) != 0) {
+    return fail("chill null graph");
+  }
+  if (seams_frame_chill(nullptr, 3.5, 1, "cutoff", nullptr, nullptr) == 0) {
+    return fail("chill null frame");
+  }
+  if (seams_frame_chill_plus(oxygen, 3.5, 2, "mutual", labels.data(), counts) != 0) {
+    return fail("skip chill");
+  }
+  if (seams_frame_positions(nullptr) != nullptr) {
+    return fail("null positions");
+  }
+  if (seams_frame_types(nullptr) != nullptr) {
+    return fail("null types");
+  }
+  if (seams_frame_ids(nullptr) != nullptr) {
+    return fail("null ids");
+  }
+  if (seams_frame_positions(oxygen) == nullptr) {
+    return fail("oxygen positions");
+  }
+  if (seams_frame_types(oxygen) == nullptr) {
+    return fail("oxygen types");
+  }
+  if (seams_frame_ids(oxygen) == nullptr) {
+    return fail("oxygen ids");
+  }
+  double ignoredBox[9] = {};
+  seams_frame_box(nullptr, ignoredBox);
+  seams_frame_box(oxygen, nullptr);
+  seams_frame *blank2 = seams_frame_read(emptyPath.c_str(), 1, -1);
+  if (blank2 == nullptr) {
+    return fail("blank again");
+  }
+  if (seams_frame_positions(blank2) != nullptr) {
+    return fail("empty positions");
+  }
+  if (seams_frame_types(blank2) != nullptr) {
+    return fail("empty types");
+  }
+  if (seams_frame_ids(blank2) != nullptr) {
+    return fail("empty ids");
+  }
+  int emptyLabels[1] = {};
+  if (seams_frame_chill_plus(blank2, 3.5, 0, "cutoff", emptyLabels, counts) != 0) {
+    return fail("empty labels");
+  }
+  int perEmpty[1] = {};
+  if (seams_frame_cages(blank2, 3.5, 0, 4, "cutoff", 0, perEmpty, &cageHex, nullptr, nullptr, nullptr) != 0) {
+    return fail("empty per atom");
+  }
+  if (seams_frame_cages(oxygen, 3.5, 2, 4, "cutoff", 0, nullptr, &cageHex, nullptr, nullptr, nullptr) != 0) {
+    return fail("skip type");
+  }
+  int wide[16] = {};
+  if (seams_frame_rings(oxygen, 3.5, 1, "knn", 6, wide, 16) != 0) {
+    return fail("knn rings");
+  }
+  int ncages = 0;
+  int natoms = 0;
+  if (seams_frame_signature(oxygen, 3.5, 1, "", "512", &ncages, &natoms) != 0) {
+    return fail("empty graph signature");
+  }
+  if (seams_frame_signature_edge(oxygen, 3.5, 1, "cutoff", "512", "none", &ncages, &natoms) != 0) {
+    return fail("edge none");
+  }
+  if (seams_frame_signature(oxygen, 3.5, 1, "mutual", "512", &ncages, &natoms) != 0) {
+    return fail("mutual signature");
+  }
+  if (seams_frame_signature(nullptr, 3.5, 1, "cutoff", "512", &ncages, &natoms) == 0) {
+    return fail("null signature frame");
+  }
+  if (seams_frame_signature(oxygen, 3.5, 1, "cutoff", nullptr, &ncages, &natoms) == 0) {
+    return fail("null census");
+  }
+  double rr[8] = {};
+  double gg[8] = {};
+  int cc[8] = {};
+  double vol = 0.0;
+  if (seams_frame_rdf(oxygen, 6.0, 4, 0, 0, rr, gg, cc, &vol) != 0) {
+    return fail("rdf type 0");
+  }
+  if (seams_frame_rdf(oxygen, 6.0, 4, 1, -1, rr, gg, cc, nullptr) != 0) {
+    return fail("rdf type j");
+  }
+  if (seams_frame_rdf(oxygen, 6.0, 4, 1, 1, rr, nullptr, cc, &vol) == 0) {
+    return fail("rdf null g");
+  }
+  if (seams_frame_rdf(oxygen, 6.0, 4, 1, 1, rr, gg, nullptr, &vol) == 0) {
+    return fail("rdf null count");
+  }
+  if (seams_frame_rdf(blank2, 6.0, 0, 0, 0, rr, gg, cc, &vol) == 0) {
+    return fail("rdf zero bins");
+  }
+  if (std::string(seams_last_error()).find("positive bin count") ==
+      std::string::npos) {
+    return fail("rdf zero bins");
+  }
+  if (seams_frame_rdf_nbins(6.0, 12) != 12) {
+    return fail("rdf bin query");
+  }
+  const int autoBins = seams_frame_rdf_nbins(6.0, 0);
+  std::vector<double> sizedR(static_cast<std::size_t>(autoBins));
+  std::vector<double> sizedG(static_cast<std::size_t>(autoBins));
+  std::vector<int> sizedC(static_cast<std::size_t>(autoBins));
+  if (seams_frame_rdf(blank2, 6.0, autoBins, 0, 0, sizedR.data(), sizedG.data(),
+                     sizedC.data(), &vol) != 0) {
+    return fail("rdf sized bins");
+  }
+  constexpr int wideBins = 64;
+  std::vector<double> wideR(wideBins);
+  std::vector<double> wideG(wideBins);
+  std::vector<int> wideC(wideBins);
+  if (seams_frame_rdf(blank2, 6.0, wideBins, 0, 0, wideR.data(), wideG.data(),
+                     wideC.data(), &vol) != 0) {
+    return fail("rdf wide bins");
+  }
+  if (seams_frame_rdf2d(oxygen, 3.5, 0.5, nullptr, rr, gg) != 0) {
+    return fail("rdf2d memory");
+  }
+  if (seams_frame_rdf2d(oxygen, 3.5, 0.5, "", rr, gg) != 0) {
+    return fail("rdf2d empty dir");
+  }
+  const std::string slash = outDir + "/";
+  if (seams_frame_rdf2d(oxygen, 3.5, 0.5, slash.c_str(), rr, gg) != 0) {
+    return fail("rdf2d slash");
+  }
+  if (seams_frame_rdf2d(nullptr, 3.5, 0.5, nullptr, rr, gg) == 0) {
+    return fail("rdf2d null frame");
+  }
+  if (seams_frame_rdf2d(oxygen, 3.5, 0.5, nullptr, nullptr, gg) == 0) {
+    return fail("rdf2d null r");
+  }
+  if (seams_frame_rdf2d(oxygen, 3.5, 0.5, nullptr, rr, nullptr) == 0) {
+    return fail("rdf2d null g");
+  }
+  int sheetCounts[16] = {};
+  if (seams_frame_monolayer(oxygen, 3.5, 1, 6, 1.0, nullptr, sheetCounts, 16) != 0) {
+    return fail("sheet memory");
+  }
+  if (seams_frame_monolayer(oxygen, 3.5, 1, 6, 1.0, "", sheetCounts, 16) != 0) {
+    return fail("sheet empty dir");
+  }
+  if (seams_frame_monolayer(oxygen, 3.5, 1, 6, 1.0, slash.c_str(), sheetCounts, 16) != 0) {
+    return fail("sheet slash");
+  }
+  std::vector<double> qlOxygen(static_cast<std::size_t>(seams_frame_nop(oxygen)));
+  std::vector<double> qbarOxygen(qlOxygen.size());
+  if (seams_frame_steinhardt(oxygen, 3.5, 0, 4, qlOxygen.data(), qbarOxygen.data()) != 0) {
+    return fail("steinhardt type 0");
+  }
+  if (seams_frame_steinhardt(oxygen, 3.5, 1, 4, nullptr, qbarOxygen.data()) != 0) {
+    return fail("steinhardt null ql");
+  }
+  if (seams_frame_steinhardt(oxygen, 3.5, 1, 4, qlOxygen.data(), nullptr) != 0) {
+    return fail("steinhardt null bar");
+  }
+  if (seams_frame_steinhardt(oxygen, 3.5, 1, -1, qlOxygen.data(), qbarOxygen.data()) != 0 && seams_last_error()[0] == '\0') {
+    return fail("silent bad order");
+  }
+  if (seams_frame_steinhardt(blank2, 3.5, 0, 4, qlOxygen.data(), qbarOxygen.data()) != 0) {
+    return fail("empty steinhardt");
+  }
+  const std::string missingDir = (out / "no-such" / "dir").string();
+  if (seams_frame_rdf2d(oxygen, 3.5, 0.5, missingDir.c_str(), rr, gg) == 0 && seams_last_error()[0] != '\0') {
+    return fail("rdf2d error with success");
+  }
+  int prismCount = 8;
+  std::vector<seams_prism_row> prismWide(8);
+  if (seams_frame_prisms(oxygen, 3.5, 1, 4, missingDir.c_str(), prismWide.data(), &prismCount) == 0 && seams_last_error()[0] != '\0') {
+    return fail("prism error with success");
+  }
+  if (seams_frame_monolayer(oxygen, 3.5, 1, 4, 1.0, missingDir.c_str(), sheetCounts, 16) == 0 && seams_last_error()[0] != '\0') {
+    return fail("sheet error with success");
+  }
+  prismCount = 8;
+  if (seams_frame_prisms(oxygen, 3.5, 1, 6, nullptr, prismWide.data(), &prismCount) != 0) {
+    return fail("prism memory");
+  }
+  int shortRows = 0;
+  if (seams_frame_prisms(oxygen, 3.5, 1, 6, nullptr, prismWide.data(), &shortRows) == 0) {
+    return fail("prism short rows");
+  }
+  if (seams_frame_prisms(oxygen, 3.5, 1, 4, nullptr, prismWide.data(), nullptr) == 0) {
+    return fail("prism null count");
+  }
+  if (seams_frame_prisms(oxygen, 3.5, 1, 4, slash.c_str(), nullptr, &prismCount) != 0) {
+    return fail("prism slash");
+  }
+  if (seams_path_nframes("missing-frames.lammpstrj") > 0) {
+    return fail("missing frames");
+  }
+  if (seams_path_nframes("missing-frames.xyz") != -1) {
+    return fail("xyz frames");
+  }
+  if (std::string(seams_last_error()).find("cannot read") == std::string::npos) {
+    return fail("xyz error");
+  }
+  if (seams_frame_read("missing-frames.xyz", 1, 1) != nullptr) {
+    return fail("missing xyz read");
+  }
+  if (seams_frame_read("missing-frames.con", 1, 1) != nullptr) {
+    return fail("missing con read");
+  }
+  if (seams_last_error() == nullptr || seams_last_error()[0] == '\0') {
+    return fail("missing con error");
+  }
+  double pairXyz[6] = {0, 0, 0, 1, 0, 0};
+  double pairBox[9] = {0, 0, 0, 5, 5, 5, 0, 0, 0};
+  int pairTypes[2] = {1, 2};
+  seams_frame *pair = seams_frame_from_arrays(pairXyz, 2, pairBox, pairTypes, nullptr);
+  if (pair == nullptr) {
+    return fail("pair");
+  }
+  int pairRings[8] = {};
+  if (seams_frame_rings(pair, 3.5, 0, "mutual", 6, pairRings, 8) != 0) {
+    return fail("pair rings");
+  }
+  int pairPrismN = 8;
+  std::vector<seams_prism_row> pairPrism(8);
+  if (seams_frame_prisms(pair, 3.5, 0, 6, nullptr, pairPrism.data(), &pairPrismN) != 0) {
+    return fail("pair prisms");
+  }
+  if (seams_frame_cages(pair, 3.5, 1, 4, "seeded", 1, nullptr, &cageHex, &cageHex, &cageHex, &cageHex) != 0) {
+    return fail("pair seeded");
+  }
+  if (seams_frame_cages(pair, 3.5, 0, 4, "cutoff", 0, nullptr, &cageHex, nullptr, nullptr, nullptr) != 0) {
+    return fail("pair cutoff cages");
+  }
+  if (seams_frame_monolayer(pair, 3.5, 0, 6, 1.0, nullptr, sheetCounts, 16) != 0) {
+    return fail("pair sheet");
+  }
+  if (seams_frame_cages(oxygen, 3.5, 1, 4, "cutoff", 0, nullptr, &cageHex, &cageHex, &cageHex, &cageHex) != 0) {
+    return fail("hex cages");
+  }
+  const std::string cubicPath = root + "/input/traj/mW_cubic.lammpstrj";
+  seams_frame *cubicFrame = seams_frame_read(cubicPath.c_str(), 1, 1);
+  if (cubicFrame == nullptr) {
+    return fail("cubic read");
+  }
+  if (seams_frame_cages(cubicFrame, 3.5, 1, 4, "cutoff", 0, nullptr, &cageHex, &cageHex, &cageHex, &cageHex) != 0) {
+    return fail("cubic cages");
+  }
+  seams_frame_free(cubicFrame);
+  double faultXyz[3] = {0, 0, 0};
+  double faultBox[9] = {0, 0, 0, 10, 10, 10, 0, 0, 0};
+  int faultRings[8] = {};
+  double faultR[4] = {};
+  double faultG[4] = {};
+  int faultC[4] = {};
+  int faultSheet[8] = {};
+  seams_prism_row faultPrism[4] = {};
+  int faultPrismN = 4;
+  int faultCages = 0;
+  int faultAtoms = 0;
+  // A sanitizer build does not preload this allocator. The checks
+  // below need it. The ordinary build does preload it.
+  if (fault_arm() != nullptr && fault_live() != nullptr) {
+  auto caught = [](const char *label, auto &&call) -> int {
+    const long before = fault_live()();
+    fault_reset()();
+    fault_arm()(1, 1);
+    const int code = call();
+    fault_arm()(0, 0);
+    if (code == 0) {
+      return fail(label);
+    }
+    if (std::string(seams_last_error()).find("bad_alloc") == std::string::npos) {
+      return fail(label);
+    }
+    if (fault_live()() != before) {
+      return fail(label);
+    }
+    if (fault_peak()() <= before) {
+      return fail(label);
+    }
+    return 0;
+  };
+  const std::string longMissing(80, 'q');
+  if (caught("fault frames", [&] {
+        return seams_path_nframes((longMissing + ".lammpstrj").c_str()) == -1
+                   ? 1
+                   : 0;
+      })) {
+    return 1;
+  }
+  if (caught("fault read", [&] {
+        return seams_frame_read(ice1h.c_str(), 1, 1) == nullptr ? 1 : 0;
+      })) {
+    return 1;
+  }
+  if (caught("fault arrays", [&] {
+        return seams_frame_from_arrays(faultXyz, 1, faultBox, nullptr,
+                                       nullptr) == nullptr
+                   ? 1
+                   : 0;
+      })) {
+    return 1;
+  }
+  if (caught("fault chill", [&] {
+        return seams_frame_chill(oxygen, 3.5, 1, "cutoff", nullptr, nullptr) !=
+                       0
+                   ? 1
+                   : 0;
+      })) {
+    return 1;
+  }
+  if (caught("fault rings", [&] {
+        return seams_frame_rings(oxygen, 3.5, 1, "mutual", 6, faultRings, 8) !=
+                       0
+                   ? 1
+                   : 0;
+      })) {
+    return 1;
+  }
+  if (caught("fault steinhardt", [&] {
+        return seams_frame_steinhardt(oxygen, 3.5, 1, 4, faultR, faultG) != 0
+                   ? 1
+                   : 0;
+      })) {
+    return 1;
+  }
+  if (caught("fault cages", [&] {
+        return seams_frame_cages(oxygen, 3.5, 1, 4, "cutoff", 0, nullptr,
+                                 &cageHex, nullptr, nullptr, nullptr) != 0
+                   ? 1
+                   : 0;
+      })) {
+    return 1;
+  }
+  if (caught("fault signature", [&] {
+        return seams_frame_signature(oxygen, 3.5, 1, "cutoff", "512",
+                                     &faultCages, &faultAtoms) != 0
+                   ? 1
+                   : 0;
+      })) {
+    return 1;
+  }
+  if (caught("fault rdf", [&] {
+        return seams_frame_rdf(oxygen, 6.0, 4, 1, 1, faultR, faultG, faultC,
+                               nullptr) != 0
+                   ? 1
+                   : 0;
+      })) {
+    return 1;
+  }
+  if (caught("fault rdf2d", [&] {
+        return seams_frame_rdf2d(oxygen, 3.5, 0.5, nullptr, faultR, faultG) !=
+                       0
+                   ? 1
+                   : 0;
+      })) {
+    return 1;
+  }
+  if (caught("fault prisms", [&] {
+        return seams_frame_prisms(oxygen, 3.5, 1, 4, nullptr, faultPrism,
+                                  &faultPrismN) != 0
+                   ? 1
+                   : 0;
+      })) {
+    return 1;
+  }
+  if (caught("fault sheet", [&] {
+        return seams_frame_monolayer(oxygen, 3.5, 1, 4, 1.0, nullptr,
+                                     faultSheet, 8) != 0
+                   ? 1
+                   : 0;
+      })) {
+    return 1;
+  }
+  const long beforeUnknown = fault_live()();
+  fault_arm()(1, 2);
+  if (seams_frame_chill(oxygen, 3.5, 1, "cutoff", nullptr, nullptr) == 0) {
+    return fail("unknown chill");
+  }
+  fault_arm()(0, 0);
+  if (std::string(seams_last_error()) != "unknown error") {
+    return fail("unknown text");
+  }
+  if (fault_live()() != beforeUnknown) {
+    return fail("unknown leak");
+  }
+  }
+  if (seams_frame_prisms(oxygen, 3.5, 1, 4, nullptr, nullptr, nullptr) != 0) {
+    return fail("prism both null");
+  }
+  const std::string withSlash = outDir + "/";
+  if (seams_frame_rdf2d(oxygen, 3.5, 0.5, withSlash.c_str(), rr, gg) != 0) {
+    return fail("rdf2d slash again");
+  }
+  if (seams_frame_rdf2d(oxygen, 3.5, 0.5, "", rr, gg) != 0) {
+    return fail("rdf2d blank dir");
+  }
+  if (seams_frame_prisms(oxygen, 3.5, 1, 4, withSlash.c_str(), prismWide.data(), &prismCount) != 0) {
+    return fail("prism slash again");
+  }
+  if (seams_frame_prisms(oxygen, 3.5, 1, 4, "", prismWide.data(), &prismCount) != 0) {
+    return fail("prism blank dir");
+  }
+  seams_frame_free(pair);
+  seams_frame_free(blank2);
+  seams_frame_free(oxygen);
+  std::filesystem::remove_all(out);
 
   seams_frame_free(molten);
   seams_frame_free(tip);

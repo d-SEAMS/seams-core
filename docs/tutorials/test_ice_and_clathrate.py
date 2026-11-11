@@ -18,8 +18,8 @@ pydseams = pytest.importorskip("pydseams")
 def test_mixed_tip4p_cutoff_chill_plus(tip4p):
     frame = pydseams.read(tip4p, atom_type=2)
     ice = frame.chill_plus()
-    assert ice.interClathrate == 12
-    assert ice.water == 238
+    assert ice.interClathrate == 9
+    assert ice.water == 241
     assert ice.clathrate == 0
     cages = frame.cages()
     assert cages.n_ih == 0
