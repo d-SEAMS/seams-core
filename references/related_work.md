@@ -133,6 +133,47 @@ Hydrate cages. The following sentence currently says d-SEAMS is the code that as
 
 > Unlike the ring-count codes, d-SEAMS assembles the hexagonal and double-diamond cages of ice, while TRACE assembles hydrate cages, including incomplete cages and cages coordinated to one additive.
 
-A further scope line, from the v2 ring timings:
+A further scope line, from the release ring timings below:
 
-> That speed sentence is the main campaign: on a later one-core watch, OVITO 3.17.2 Find rings is faster than d-SEAMS at 1 000, 10 648 and 110 592 molecules, with the same six-ring census.
+> That speed sentence is the main campaign. On this tree's release build, OVITO 3.17.2 Find rings is faster than d-SEAMS at 110 592 molecules and tied at 10 648, with the same six-ring census; d-SEAMS is faster at 1 000.
+
+## Release rebuild
+
+The d-SEAMS columns in the earlier tables are a debug build (`buildtype=debug`). The watch binary is now `bbdir-release/tests/bench_watch`, compiled with meson `-Dbuildtype=release` (`-O3`, `SEAMS_WATCH_RELEASE`). It refuses to build otherwise. CHILL+ is `seams_chill_plus` (four mutual neighbours; on this crystal that is the 3.5 Å shell). Rings are cutoff primitive rings of at most six. One core, one warm-up, six calls. Raw lines are `benchmarks/h2h-watch-v3.log`. Agreement is 1 wherever both codes returned a result.
+
+This base is `f3e9e394`, not the later main whose release CHILL+ is about 45 ms at 110 592 molecules. The measured release median here is 147 ms, about three times the debug 482 ms on the previous tree, not ten.
+
+| Molecules | Operation | d-SEAMS median (IQR) ms | Other median (IQR) ms |
+| --- | --- | --- | --- |
+| 1000 | CHILL+ | 1.344 (0.070) | OVITO 6.145 (0.055) |
+| 1000 | CHILL+ | 1.344 (0.070) | mdapy 0.914 (0.036) |
+| 1000 | rings | 3.044 (0.059) | OVITO 4.586 (0.223) |
+| 1000 | rings | 3.044 (0.059) | matscipy 16.260 (0.669) |
+| 1000 | rings | 3.044 (0.059) | cycless 3295.845 (162.218) |
+| 10648 | CHILL+ | 13.561 (0.112) | OVITO 70.920 (13.741) |
+| 10648 | CHILL+ | 13.561 (0.112) | mdapy 7.613 (0.686) |
+| 10648 | rings | 45.673 (2.337) | OVITO 44.577 (0.025) |
+| 10648 | rings | 45.673 (2.337) | matscipy 1309.019 (20.284) |
+| 10648 | rings | 45.673 (2.337) | cycless 35583.400 (233.363) |
+| 110592 | CHILL+ | 146.964 (4.363) | OVITO 635.465 (12.525) |
+| 110592 | CHILL+ | 146.964 (4.363) | mdapy 63.639 (1.843) |
+| 110592 | rings | 2206.976 (5.026) | OVITO 553.569 (1.689) |
+| 110592 | rings | 2206.976 (5.026) | matscipy signal 11 |
+| 110592 | rings | 2206.976 (5.026) | cycless 385129.916 (3580.078) |
+
+mdapy's cutoff CHILL+ stays faster at every size, with the same cubic label, so the speed-sentence caveat stands on the release build. d-SEAMS CHILL+ is faster than OVITO. Primitive rings are faster than matscipy and cycless where those finish, and the census matches. OVITO Find rings is faster at 110 592 molecules. matscipy still dies with signal 11 at that size.
+
+## Symmetry and brine, 2025–2026
+
+IRA ([Software Impacts 2022](https://doi.org/10.1016/j.simpa.2022.100264)) and SOFI ([JCP 2024](https://doi.org/10.1063/5.0215689)) match a finite cluster to a reference. This tree can link them (`with_ira`) for point-group labels of a cage. They do not classify a thermal ice trajectory. spglib ([Togo, Shinohara and Tanaka, 2024](https://doi.org/10.1080/27660400.2024.2384822)) and [moyo](https://github.com/spglib/moyo) find the space group of a periodic crystal. That complements a bulk ice phase call and does not replace CHILL+ or a ring update. No 2025–2026 journal DOI for moyo turned up.
+
+Brine and electrolyte models, not per-molecule classifiers:
+
+- Blazquez, Sedano and Vega, [JCP 2024](https://doi.org/10.1063/5.0241233). Madrid-2019 ions with TIP4P/Ice. Freezing temperatures of salt solutions, not an order parameter.
+- Blazquez, de Lucas, Vega and Gámez, [JCP 2025](https://doi.org/10.1063/5.0267223). A rigid H3O+ added to Madrid-2019.
+- Cruz-Sánchez, Blazquez, Vega and Trejos, [Condensed Matter Physics 2026](https://doi.org/10.5488/cmp.29.13601). Perchloric acid on the extended Madrid-2019 field.
+- Sedano, Espinosa, Tejedor, Vega and Noya, [JCP 2026](https://doi.org/10.1063/5.0314384). Ice III–water interfacial free energy with TIP4P/Ice. Espinosa and Vega. Not a brine classifier and not an in-run CV.
+- Romero-Guzmán, Algaba, Vega and Blas, [JCP 2026](https://doi.org/10.1063/5.0326799). Melting points of TIP4P/2005 and TIP4P/Ice when dispersion uses particle-mesh Ewald.
+- Sedano, Vega, Noya and Sanz, [JCP 2025](https://doi.org/10.1063/5.0247832). A two-state water model, TIP4P/2005-Ice.
+
+None of these assign CHILL+, rings or cages during a PLUMED, LAMMPS or OpenMM step. The in-situ claim is unchanged.
