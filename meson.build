@@ -390,16 +390,52 @@ endif
 # needs OpenBabel. It is not linked into libyodaLib. The in-tree measure
 # is the published formula on the fixed shells. This build uses IRA under
 # the Apache-2.0 option of its dual licence.
+csm_shape_bin = ''
 csm_opt = get_option('with_csm')
 if not csm_opt.disabled()
-  openbabel_dep = dependency('openbabel-2.0', required: false)
+  openbabel_dep = dependency('openbabel-3', required: false)
+  if not openbabel_dep.found()
+    openbabel_dep = dependency('openbabel-2.0', required: false)
+  endif
+  # A module pkg-config can miss the system OpenBabel. The shape program
+  # is built by the system compiler against that OpenBabel, and is not
+  # linked into libyodaLib.
+  if not openbabel_dep.found()
+    system_pkg = find_program('/usr/bin/pkg-config', required: false)
+    if system_pkg.found()
+      foreach ob_name : ['openbabel-3', 'openbabel-2.0']
+        ob_probe = run_command(system_pkg, '--exists', ob_name, check: false)
+        if ob_probe.returncode() == 0
+          openbabel_dep = declare_dependency()
+          break
+        endif
+      endforeach
+    endif
+  endif
   if not openbabel_dep.found()
     if csm_opt.enabled()
       error('with_csm=enabled but OpenBabel was not found')
     endif
     message('CSM program left off (OpenBabel absent)')
   else
-    message('OpenBabel found; the CSM program is not wired into this tree')
+    csm_shape = custom_target(
+      'csm_shape',
+      input: files(
+        'third_party/csm/build.sh',
+        'third_party/csm/src/shape.cpp',
+        'third_party/csm/src/babelAdapter.cpp',
+        'third_party/csm/src/matrix.c',
+        'third_party/csm/src/Molecule.c',
+        'third_party/csm/src/svdcmp.c',
+        'third_party/csm/src/parseFunctions.c',
+        'third_party/csm/src/permuter.c',
+      ),
+      output: 'csm_shape',
+      command: [find_program('sh'), files('third_party/csm/build.sh'), '@OUTPUT@', meson.current_source_dir()],
+      build_by_default: true,
+    )
+    csm_shape_bin = csm_shape.full_path()
+    message('CSM shape program will be built (not linked into libyodaLib)')
   endif
 endif
 
