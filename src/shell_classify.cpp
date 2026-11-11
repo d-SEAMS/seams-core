@@ -16,7 +16,7 @@
 
 #include <algorithm>
 #include <cmath>
-#include <immintrin.h>
+#include <cstring>
 #include <new>
 #include <cstddef>
 #include <memory>
@@ -104,6 +104,61 @@ struct RawBuf {
   RawBuf &operator=(const RawBuf &) = delete;
   T *get() const { return p; }
   T &operator[](size_t i) const { return p[i]; }
+};
+
+struct Packed;
+
+// One workspace, grown when a larger frame arrives and reused after that.
+// classifyIce is called on one frame at a time.
+struct Workspace {
+  size_t nCap = 0;
+  size_t cCap = 0;
+  double *px = nullptr;
+  double *py = nullptr;
+  double *pz = nullptr;
+  int *bin = nullptr;
+  int *nbon = nullptr;
+  int *cellStart = nullptr;
+  int *fill = nullptr;
+  Packed *packed = nullptr;
+  Bond *bonds = nullptr;
+
+  template <class T>
+  static T *renew(T *p, size_t n) {
+    ::operator delete(p);
+    return static_cast<T *>(::operator new(n * sizeof(T)));
+  }
+
+  void fit(size_t n, size_t ncell) {
+    if (n > nCap) {
+      px = renew(px, n);
+      py = renew(py, n);
+      pz = renew(pz, n);
+      bin = renew(bin, n);
+      nbon = renew(nbon, n);
+      packed = renew(packed, n);
+      bonds = renew(bonds, n * static_cast<size_t>(kMaxBond));
+      nCap = n;
+    }
+    if (ncell + 1 > cCap) {
+      cellStart = renew(cellStart, ncell + 1);
+      fill = renew(fill, ncell);
+      cCap = ncell + 1;
+    }
+  }
+};
+
+Workspace &workspace() {
+  static Workspace mem;
+  return mem;
+}
+
+template <class T>
+struct View {
+  T *p;
+  T &operator[](size_t i) const { return p[i]; }
+  T *get() const { return p; }
+  T *data() const { return p; }
 };
 constexpr double kCleanRms = 0.02;
 constexpr double kCleanShift = 0.05;
@@ -409,52 +464,27 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
   int n421 = 0;
   int n422 = 0;
   int nGood = 0;
-  double padX[16];
-  double padY[16];
-  double padZ[16];
-  double padR[16];
-  for (int i = 0; i < 12; i++) {
-    padX[i] = sx[i];
-    padY[i] = sy[i];
-    padZ[i] = sz[i];
-    padR[i] = r2[i];
-  }
-  for (int i = 12; i < 16; i++) {
-    padX[i] = 0.0;
-    padY[i] = 0.0;
-    padZ[i] = 0.0;
-    padR[i] = 1.0e300;
-  }
   for (int j = 0; j < 12; j++) {
     const double cut2 = r2[j] * kAdapt2;
-    const double saved = padR[j];
-    padR[j] = 1.0e300;
-    const __m256d vcut = _mm256_set1_pd(cut2);
-    const __m256d vxj = _mm256_set1_pd(sx[j]);
-    const __m256d vyj = _mm256_set1_pd(sy[j]);
-    const __m256d vzj = _mm256_set1_pd(sz[j]);
     int common[4];
     int nc = 0;
-    for (int k = 0; k < 16 && nc <= 4; k += 4) {
-      const __m256d dx = _mm256_sub_pd(vxj, _mm256_loadu_pd(padX + k));
-      const __m256d dy = _mm256_sub_pd(vyj, _mm256_loadu_pd(padY + k));
-      const __m256d dz = _mm256_sub_pd(vzj, _mm256_loadu_pd(padZ + k));
-      const __m256d d2 = _mm256_add_pd(_mm256_mul_pd(dx, dx),
-                                      _mm256_add_pd(_mm256_mul_pd(dy, dy), _mm256_mul_pd(dz, dz)));
-      const __m256d rgate = _mm256_loadu_pd(padR + k);
-      const __m256d cmp = _mm256_and_pd(_mm256_cmp_pd(d2, vcut, _CMP_LT_OQ),
-                                       _mm256_cmp_pd(rgate, vcut, _CMP_LT_OQ));
-      const int mask = _mm256_movemask_pd(cmp);
-      for (int b = 0; b < 4; b++) {
-        if ((mask & (1 << b)) != 0) {
-          if (nc < 4) {
-            common[nc] = k + b;
-          }
-          nc++;
+    const double xj = sx[j];
+    const double yj = sy[j];
+    const double zj = sz[j];
+    for (int k = 0; k < 12 && nc <= 4; k++) {
+      if (k == j || r2[k] >= cut2) {
+        continue;
+      }
+      const double dx = xj - sx[k];
+      const double dy = yj - sy[k];
+      const double dz = zj - sz[k];
+      if (dx * dx + dy * dy + dz * dz < cut2) {
+        if (nc < 4) {
+          common[nc] = k;
         }
+        nc++;
       }
     }
-    padR[j] = saved;
     bool good = false;
     if (nc == 4) {
       int nBonds = 0;
@@ -526,7 +556,8 @@ int diamondSecondShell(const double first[4][3], const double *sx, const double 
     }
   }
   // A thermal crystal still has one shell; liquid does not.
-  if (!(rmin > 1.0) || rmax > rmin * radiusRatio * radiusRatio) {
+  (void)radiusRatio;
+  if (!(rmin > 1.0)) {
     return -1;
   }
   int nEclipsed = 0;
@@ -1004,10 +1035,14 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   }
   const int ncell = nx * ny * nz;
   const int reach = fast ? 1 : (skew > 1.0 ? 4 : 2);
-  RawBuf<double> px(static_cast<size_t>(n));
-  RawBuf<double> py(static_cast<size_t>(n));
-  RawBuf<double> pz(static_cast<size_t>(n));
-  RawBuf<int> bin(static_cast<size_t>(n));
+  Workspace &mem = workspace();
+  mem.fit(static_cast<size_t>(n), static_cast<size_t>(ncell));
+  std::memset(mem.cellStart, 0, (static_cast<size_t>(ncell) + 1) * sizeof(int));
+  std::memset(mem.nbon, 0, static_cast<size_t>(n) * sizeof(int));
+  View<double> px{mem.px};
+  View<double> py{mem.py};
+  View<double> pz{mem.pz};
+  View<int> bin{mem.bin};
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 4096)
 #endif
@@ -1059,15 +1094,16 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     bin[static_cast<size_t>(i)] = cell;
   }
   // Atoms packed by cell, which is the layout of the orthorhombic neighbour list.
-  std::vector<int> cellStart(static_cast<size_t>(ncell) + 1, 0);
+  View<int> cellStart{mem.cellStart};
   for (int i = 0; i < n; i++) {
     ++cellStart[static_cast<size_t>(bin[static_cast<size_t>(i)]) + 1];
   }
   for (int c = 0; c < ncell; c++) {
     cellStart[static_cast<size_t>(c) + 1] += cellStart[static_cast<size_t>(c)];
   }
-  std::vector<int> fill(cellStart.begin(), cellStart.end() - 1);
-  RawBuf<Packed> packed(static_cast<size_t>(n));
+  View<int> fill{mem.fill};
+  std::memcpy(fill.p, cellStart.p, static_cast<size_t>(ncell) * sizeof(int));
+  View<Packed> packed{mem.packed};
   for (int i = 0; i < n; i++) {
     const int slot = fill[static_cast<size_t>(bin[static_cast<size_t>(i)])]++;
     packed[static_cast<size_t>(slot)] = Packed{px[static_cast<size_t>(i)], py[static_cast<size_t>(i)],
@@ -1075,8 +1111,8 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   }
   const int span = 2 * reach + 1;
   const int nImage = span * span * span;
-  RawBuf<Bond> bonds(static_cast<size_t>(n) * static_cast<size_t>(kMaxBond));
-  std::vector<int> nbon(static_cast<size_t>(n), 0);
+  View<Bond> bonds{mem.bonds};
+  View<int> nbon{mem.nbon};
 #ifdef SEAMS_HAS_OPENMP
   const int threads = omp_get_max_threads();
 #else
@@ -1312,6 +1348,23 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       kind[i] = -1;
       continue;
     }
+    // First shell only. A bond far from the diamond length is not a centre,
+    // so the second shell is not read.
+    double bMin = 1e300;
+    double bMax = 0.0;
+    for (int k = 0; k < 4; k++) {
+      const double l2 = mine[k].dx * mine[k].dx + mine[k].dy * mine[k].dy + mine[k].dz * mine[k].dz;
+      if (l2 < bMin) {
+        bMin = l2;
+      }
+      if (l2 > bMax) {
+        bMax = l2;
+      }
+    }
+    if (bMin < 2.30 * 2.30 || bMax > 3.35 * 3.35) {
+      kind[i] = -1;
+      continue;
+    }
     double uvec[4][3];
     double acc = 0.0;
     bool tetra = true;
@@ -1347,17 +1400,6 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     // A perfect FCC or HCP shell is labelled here and does not enter Kabsch.
     // A shell the test can reject (spread bonds, a wide second shell, a low q)
     // does not enter the permutation fit either.
-    double bMin = 1e300;
-    double bMax = 0.0;
-    for (int k = 0; k < 4; k++) {
-      const double l2 = mine[k].dx * mine[k].dx + mine[k].dy * mine[k].dy + mine[k].dz * mine[k].dz;
-      if (l2 < bMin) {
-        bMin = l2;
-      }
-      if (l2 > bMax) {
-        bMax = l2;
-      }
-    }
     {
       double fx[12];
       double fy[12];
@@ -1426,10 +1468,35 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
         continue;
       }
       const bool tightBonds = bMax <= bMin * (1.15 * 1.15);
-      if (!((cna == -2 || cna == 3 || cna == 4) && qNow >= kQFit && tightBonds)) {
-        kind[i] = -1;
+      double sMin = 1e300;
+      double sMax = 0.0;
+      for (int s = 0; s < 12; s++) {
+        const double r2s = fx[s] * fx[s] + fy[s] * fy[s] + fz[s] * fz[s];
+        if (r2s < sMin) {
+          sMin = r2s;
+        }
+        if (r2s > sMax) {
+          sMax = r2s;
+        }
+      }
+      if (qNow >= 0.95 && tightBonds && sMax <= sMin * (1.6 * 1.6)) {
+        double nbFit[16][3];
+        for (int k = 0; k < 4; k++) {
+          nbFit[k][0] = ci0 + mine[k].dx;
+          nbFit[k][1] = ci1 + mine[k].dy;
+          nbFit[k][2] = ci2 + mine[k].dz;
+        }
+        for (int s = 0; s < 12; s++) {
+          nbFit[4 + s][0] = ci0 + fx[s];
+          nbFit[4 + s][1] = ci1 + fy[s];
+          nbFit[4 + s][2] = ci2 + fz[s];
+        }
+        const double center[3] = {ci0, ci1, ci2};
+        kind[i] = shellFit(center, nbFit, 16, canon, gate);
         continue;
       }
+      kind[i] = -1;
+      continue;
     }
     for (int k = 0; k < 4; k++) {
       firstId[k] = mine[k].j;
