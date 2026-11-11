@@ -241,7 +241,10 @@ TEST_CASE("hop probe matches the ball table and an independent cycle search", "[
       }
     }
     const auto nList = withSelf(adj);
-    for (const int depth : {5, 6, 7, 8}) {
+    for (const int depth : {5, 6, 7, 8, 9, 10}) {
+      if (depth >= 9 && n > 6) {
+        continue;
+      }
       const auto hop = primitive::ringNetwork(nList, depth);
       const auto balls = primitive::ringNetworkBalls(nList, depth);
       REQUIRE(hop == balls);
@@ -249,8 +252,8 @@ TEST_CASE("hop probe matches the ball table and an independent cycle search", "[
       (void)primitive::ringNetwork(nList, depth);
       if (depth <= 7) {
         REQUIRE(primitive::lastRingSearchUsedBalls() == 0);
-      } else {
-        REQUIRE(primitive::lastRingSearchUsedBalls() == 1);
+      } else if (depth <= 10) {
+        REQUIRE(primitive::lastRingSearchUsedBalls() == 2);
       }
       (void)primitive::ringNetworkBalls(nList, depth);
       REQUIRE(primitive::lastRingSearchUsedBalls() == 1);

@@ -132,8 +132,10 @@ std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &n
 std::vector<std::vector<int>>
 ringNetworkBalls(const std::vector<std::vector<int>> &nList, int maxDepth);
 
-//! 1 when the last ringNetwork or ringNetworkBalls call filled bounded
-//! balls, 0 when the hop probe answered every primitivity query.
+//! 0 when the last ringNetwork call answered every primitivity query from
+//! the adjacency rows, 1 when it filled the sorted pair table, 2 when it
+//! filled the occupancy bitset of the ball (rings of size 8 to 10).
+//! ringNetworkBalls always reports 1.
 [[nodiscard]] int lastRingSearchUsedBalls();
 
 //! Creates a graph object and fills it with the information from a neighbour

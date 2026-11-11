@@ -154,12 +154,18 @@ double millis(std::chrono::steady_clock::time_point t0) {
 } // namespace
 
 int main(int argc, char **argv) {
-  std::vector<int> reps = {11, 24};
-  if (argc > 1) {
-    reps.clear();
-    for (int i = 1; i < argc; i++) {
+  std::vector<int> reps;
+  int maxDepth = kMaxDepth;
+  for (int i = 1; i < argc; i++) {
+    const std::string arg = argv[i];
+    if (arg == "--depth" && i + 1 < argc) {
+      maxDepth = std::atoi(argv[++i]);
+    } else {
       reps.push_back(std::atoi(argv[i]));
     }
+  }
+  if (reps.empty()) {
+    reps = {11, 24};
   }
   const int threads[] = {1, 8};
   constexpr int kWarm = 1;
@@ -179,7 +185,8 @@ int main(int argc, char **argv) {
       minDegree = std::min(minDegree, d);
       edges += d;
     }
-    std::cout << "frame molecules " << n << " side " << cloud.side << " min_degree "
+    std::cout << "frame molecules " << n << " depth " << maxDepth << " side " << cloud.side
+              << " min_degree "
               << minDegree << " max_degree " << degree << " edges " << edges / 2 << "\n";
     for (const int thr : threads) {
       setThreads(thr);
@@ -189,10 +196,10 @@ int main(int argc, char **argv) {
       std::vector<std::vector<int>> hopRings;
       for (int sample = 0; sample < kWarm + kRepeat; sample++) {
         const auto t0 = std::chrono::steady_clock::now();
-        legacyRings = primitive::ringNetworkBalls(nList, kMaxDepth);
+        legacyRings = primitive::ringNetworkBalls(nList, maxDepth);
         const double legacy = millis(t0);
         const auto t1 = std::chrono::steady_clock::now();
-        hopRings = primitive::ringNetwork(nList, kMaxDepth);
+        hopRings = primitive::ringNetwork(nList, maxDepth);
         const double hop = millis(t1);
         if (sample >= kWarm) {
           legacyMs.push_back(legacy);

@@ -368,44 +368,244 @@ void levelsFrom(const Graph &adjacency, int src, int maxLvl, int minVertex,
 }
 
 /**
+ * @brief Open-addressed ball of radius at most 4, with an occupancy bitset.
+ * @details A primitive test on a cycle of length at most 10 asks only
+ *  whether the distance is strictly less than the ring distance, and that
+ *  distance is at most floor(k/2)-1. Pairs closer than 4 are still answered
+ *  from the adjacency rows. Farther pairs probe this table. The occupancy
+ *  word is tested before the key, so a miss does not read the slot.
+ */
+struct BitBalls {
+  int radius = 1;
+  std::vector<uint32_t> off;
+  std::vector<uint32_t> mask;
+  std::vector<int> keys;
+  std::vector<uint8_t> dists;
+  std::vector<uint64_t> occ;
+  // Four occupancy words per vertex. A miss is one bit test.
+  std::vector<uint64_t> bloom;
+
+  void clear() {
+    off.clear();
+    mask.clear();
+    keys.clear();
+    dists.clear();
+    occ.clear();
+    bloom.clear();
+  }
+
+  bool maybe(int u, int v) const {
+    const uint32_t h1 = static_cast<uint32_t>(v) * 0x9E3779B1u;
+    const uint32_t h2 = static_cast<uint32_t>(v) * 0x85EBCA77u;
+    const uint64_t *w = bloom.data() + static_cast<std::size_t>(u) * 4u;
+    const bool a = ((w[(h1 >> 6) & 3u] >> (h1 & 63u)) & 1ull) != 0ull;
+    const bool b = ((w[(h2 >> 6) & 3u] >> (h2 & 63u)) & 1ull) != 0ull;
+    return a && b;
+  }
+
+  int lookup(int u, int v) const {
+    if (off.empty() || u < 0 || u + 1 >= static_cast<int>(off.size())) {
+      return 1 << 20;
+    }
+    const uint32_t begin = off[static_cast<std::size_t>(u)];
+    const uint32_t end = off[static_cast<std::size_t>(u) + 1];
+    if (begin == end || !maybe(u, v)) {
+      return radius + 1;
+    }
+    const uint32_t m = mask[static_cast<std::size_t>(u)];
+    uint32_t slot = (static_cast<uint32_t>(v) * 0x9E3779B1u) & m;
+    for (uint32_t nprobe = 0; nprobe <= m; ++nprobe) {
+      const uint32_t at = begin + slot;
+      const uint32_t bit = at & 63u;
+      if (((occ[at >> 6] >> bit) & 1ull) == 0ull) {
+        return radius + 1;
+      }
+      if (keys[at] == v) {
+        return dists[at];
+      }
+      slot = (slot + 1u) & m;
+    }
+    return radius + 1;
+  }
+
+  template <typename Graph>
+  void fill(const Graph &adjacency, int rad, const std::vector<int> &which) {
+    radius = rad;
+    const int nVertices = static_cast<int>(adjacency.size());
+    off.assign(static_cast<std::size_t>(nVertices) + 1, 0);
+    mask.assign(static_cast<std::size_t>(nVertices), 0);
+    bloom.assign(static_cast<std::size_t>(nVertices) * 4u, 0ull);
+    std::vector<uint32_t> slots(static_cast<std::size_t>(nVertices), 0);
+    std::vector<char> wanted(static_cast<std::size_t>(nVertices), 0);
+    for (const int v : which) {
+      if (v >= 0 && v < nVertices) {
+        wanted[static_cast<std::size_t>(v)] = 1;
+      }
+    }
+#ifdef SEAMS_HAS_OPENMP
+    const bool parallel = !omp_in_parallel() && omp_get_max_threads() > 1;
+#pragma omp parallel if (parallel)
+#endif
+    {
+      std::vector<int> dist(static_cast<std::size_t>(nVertices), -1);
+      std::vector<int> touched, frontier, next;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
+      for (int v = 0; v < nVertices; v++) {
+        if (!wanted[static_cast<std::size_t>(v)]) {
+          continue;
+        }
+        for (const int w : touched) {
+          dist[static_cast<std::size_t>(w)] = -1;
+        }
+        touched.clear();
+        dist[static_cast<std::size_t>(v)] = 0;
+        touched.push_back(v);
+        frontier.assign(1, v);
+        for (int depth = 1; depth <= rad && !frontier.empty(); depth++) {
+          next.clear();
+          for (const int u : frontier) {
+            for (const int w : adjacency[u]) {
+              if (w >= 0 && w < nVertices && dist[static_cast<std::size_t>(w)] == -1) {
+                dist[static_cast<std::size_t>(w)] = depth;
+                touched.push_back(w);
+                next.push_back(w);
+              }
+            }
+          }
+          frontier.swap(next);
+        }
+        const auto n = static_cast<uint32_t>(touched.size() - 1);
+        uint32_t size = 0;
+        if (n != 0) {
+          size = 64;
+          while (size < n * 2u) {
+            size <<= 1u;
+          }
+        }
+        slots[static_cast<std::size_t>(v)] = size;
+      }
+    }
+    off[0] = 0;
+    for (int v = 0; v < nVertices; v++) {
+      mask[static_cast<std::size_t>(v)] =
+          slots[static_cast<std::size_t>(v)] == 0 ? 0u : slots[static_cast<std::size_t>(v)] - 1u;
+      off[static_cast<std::size_t>(v) + 1] = off[static_cast<std::size_t>(v)] + slots[static_cast<std::size_t>(v)];
+    }
+    const uint32_t total = off[static_cast<std::size_t>(nVertices)];
+    keys.assign(total, -1);
+    dists.assign(total, 0);
+    occ.assign((static_cast<std::size_t>(total) + 63u) / 64u, 0ull);
+    // Each table length is a multiple of 64 and the tables are packed, so
+    // occupancy words do not overlap and the inserts run side by side.
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (parallel)
+#endif
+    {
+      std::vector<int> dist(static_cast<std::size_t>(nVertices), -1);
+      std::vector<int> touched, frontier, next;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
+      for (int v = 0; v < nVertices; v++) {
+        if (!wanted[static_cast<std::size_t>(v)]) {
+          continue;
+        }
+        const uint32_t begin = off[static_cast<std::size_t>(v)];
+        const uint32_t m = mask[static_cast<std::size_t>(v)];
+        if (off[static_cast<std::size_t>(v) + 1] == begin) {
+          continue;
+        }
+        for (const int w : touched) {
+          dist[static_cast<std::size_t>(w)] = -1;
+        }
+        touched.clear();
+        dist[static_cast<std::size_t>(v)] = 0;
+        touched.push_back(v);
+        frontier.assign(1, v);
+        for (int depth = 1; depth <= rad && !frontier.empty(); depth++) {
+          next.clear();
+          for (const int u : frontier) {
+            for (const int w : adjacency[u]) {
+              if (w >= 0 && w < nVertices && dist[static_cast<std::size_t>(w)] == -1) {
+                dist[static_cast<std::size_t>(w)] = depth;
+                touched.push_back(w);
+                next.push_back(w);
+              }
+            }
+          }
+          frontier.swap(next);
+        }
+        uint64_t *bloomv = bloom.data() + static_cast<std::size_t>(v) * 4u;
+        for (const int w : touched) {
+          if (w == v) {
+            continue;
+          }
+          const uint32_t h1 = static_cast<uint32_t>(w) * 0x9E3779B1u;
+          const uint32_t h2 = static_cast<uint32_t>(w) * 0x85EBCA77u;
+          bloomv[(h1 >> 6) & 3u] |= 1ull << (h1 & 63u);
+          bloomv[(h2 >> 6) & 3u] |= 1ull << (h2 & 63u);
+          uint32_t slot = h1 & m;
+          for (;;) {
+            const uint32_t at = begin + slot;
+            if (keys[at] < 0) {
+              keys[at] = w;
+              dists[at] = static_cast<uint8_t>(dist[static_cast<std::size_t>(w)]);
+              occ[at >> 6] |= 1ull << (at & 63u);
+              break;
+            }
+            slot = (slot + 1u) & m;
+          }
+        }
+      }
+    }
+  }
+};
+
+/**
  * @brief Distance questions the primitivity test actually asks.
- * @details A candidate of size at most 7 has ring distance at most 3, so
- *  "strictly shorter than the ring" is a walk of one or two edges. That
- *  question is the adjacency row, and the bounded-ball table is not
- *  consulted. Larger rings keep the table and use it only when the ring
- *  distance exceeds 3. Pairs incident to the source, and on an even ring
- *  the antipode, are shortest by the way the candidate was built; the
- *  caller passes those indices and they are not tested again.
+ * @details The antipodal arcs are shortest, so a failing pair has ring
+ *  distance at least 2 and at most floor(k/2). A strict shortcut is then a
+ *  walk of length at most floor(k/2)-1. Up to length 2 the adjacency rows
+ *  answer it. Up to length 4, which covers rings of size 8, 9 and 10, the
+ *  occupancy bitset of the ball answers it. The sorted pair table remains
+ *  for larger rings and for the baseline. Pairs incident to the source, and
+ *  on an even ring the antipode, are not tested again.
  */
 struct DistOracle {
   const PackedRows *adj = nullptr;
   const BoundedBalls *balls = nullptr;
-  bool hopOnly = false;
+  const BitBalls *bits = nullptr;
+  bool hop2 = false;
 
   bool shorter(int u, int v, int ringDist) const {
     if (ringDist <= 1) {
       return false;
     }
-    if (!hopOnly) {
-      return balls->dist(u, v) < ringDist;
-    }
-    const auto row = (*adj)[static_cast<std::size_t>(u)];
-    for (const int w : row) {
-      if (w == v) {
-        return true;
-      }
-    }
-    if (ringDist <= 2) {
-      return false;
-    }
-    for (const int w : row) {
-      for (const int x : (*adj)[static_cast<std::size_t>(w)]) {
-        if (x == v) {
+    if (hop2 && ringDist <= 3) {
+      const auto row = (*adj)[static_cast<std::size_t>(u)];
+      for (const int w : row) {
+        if (w == v) {
           return true;
         }
       }
+      if (ringDist <= 2) {
+        return false;
+      }
+      for (const int w : row) {
+        for (const int x : (*adj)[static_cast<std::size_t>(w)]) {
+          if (x == v) {
+            return true;
+          }
+        }
+      }
+      return false;
     }
-    return false;
+    if (bits != nullptr) {
+      return bits->lookup(u, v) < ringDist;
+    }
+    return balls->dist(u, v) < ringDist;
   }
 };
 
@@ -763,6 +963,10 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
   // bound is 2 (maxDepth <= 7), adjacency answers every query the
   // primitivity test asks, and the ball table is dead work.
   const bool hopOnly = !legacy && maxLvl <= 3;
+  // Rings of size 8, 9 and 10 need distances up to 3 or 4. The occupancy
+  // bitset of that ball replaces the sorted pair table. Larger rings keep
+  // the table.
+  const bool bitBall = !legacy && maxLvl > 3 && maxLvl <= 5;
   std::vector<int> from;
   for (int v = 0; v < nVertices; v++) {
     if (sources.empty() || (v < static_cast<int>(sources.size()) && sources[v])) {
@@ -770,6 +974,7 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
     }
   }
   BoundedBalls balls;
+  BitBalls bits;
   gRingSplit.adj_ms = millisSince(adjStart);
   const auto ballStart = std::chrono::steady_clock::now();
   if (hopOnly) {
@@ -777,6 +982,31 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
     gRingSplit.ball_count_ms = 0;
     gRingSplit.ball_fill_ms = 0;
     gRingSplit.balls_ms = 0;
+  } else if (bitBall) {
+    gUsedBalls = 2;
+    std::vector<int> reach = from;
+    if (static_cast<int>(from.size()) != nVertices) {
+      std::vector<int> lvl(nVertices, -1);
+      for (const int v : from) {
+        lvl[v] = 0;
+      }
+      for (std::size_t k = 0; k < reach.size(); k++) {
+        const int u = reach[k];
+        if (lvl[u] == maxLvl) {
+          continue;
+        }
+        for (const int w : adjacency[u]) {
+          if (w >= 0 && w < nVertices && lvl[w] == -1) {
+            lvl[w] = lvl[u] + 1;
+            reach.push_back(w);
+          }
+        }
+      }
+    }
+    bits.fill(adjacency, radius, reach);
+    gRingSplit.ball_count_ms = 0;
+    gRingSplit.ball_fill_ms = millisSince(ballStart);
+    gRingSplit.balls_ms = gRingSplit.ball_fill_ms;
   } else {
     gUsedBalls = 1;
     if (static_cast<int>(from.size()) == nVertices) {
@@ -805,8 +1035,9 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
   }
   DistOracle oracle;
   oracle.adj = &adjacency;
-  oracle.balls = hopOnly ? nullptr : &balls;
-  oracle.hopOnly = hopOnly;
+  oracle.balls = (hopOnly || bitBall) ? nullptr : &balls;
+  oracle.bits = bitBall ? &bits : nullptr;
+  oracle.hop2 = hopOnly || bitBall;
   const int nFrom = static_cast<int>(from.size());
 
 #ifdef SEAMS_HAS_OPENMP
@@ -1504,7 +1735,7 @@ struct primitive::RingUpdater::Impl {
     DistOracle oracle;
     oracle.adj = &adj;
     oracle.balls = hopOnly ? nullptr : &balls;
-    oracle.hopOnly = hopOnly;
+    oracle.hop2 = hopOnly;
     if (static_cast<int>(bySource.size()) != nVertices) {
       bySource.assign(static_cast<std::size_t>(nVertices), {});
     }
@@ -1587,7 +1818,7 @@ struct primitive::RingUpdater::Impl {
       DistOracle oracle;
       oracle.adj = &adj;
       oracle.balls = hopOnly ? nullptr : &balls;
-      oracle.hopOnly = hopOnly;
+      oracle.hop2 = hopOnly;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp for schedule(guided)
 #endif

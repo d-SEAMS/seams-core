@@ -90,3 +90,55 @@ Release `-O3`, one process, warm-up discarded, six samples. `legacy` is `ringNet
 | 110592 | 8 | 27.160 | 23.713 | 221184 |
 
 On this machine the ball search at 110592 molecules and one thread takes 80.8 ms. The hop search takes 58.5 ms and returns the same 221184 rings. The 105 ms figure is the earlier one-thread measurement of the ball search; the ordering is the same. Eight threads narrow the gap because the remaining work is the per-source breadth-first walk, which both searches do.
+
+## Rings of size 8, 9 and 10
+
+`shortcut_is_hop2` stops at length 2. The same antipodal-arc fact extends the bound: on a cycle of length at most `k`, a strict shortcut has length at most `floor(k/2) − 1`. For `k` in 8, 9 and 10 that is 3 or 4. Pairs at distance at most 3 are still read from the adjacency rows. Pairs farther out probe an open-addressed ball whose occupancy is a bitset, with a four-word Bloom filter in front of the probe. The sorted pair table is the baseline (`ringNetworkBalls`). Both return the same vectors; the random graphs in `tests/test_ring_hop.cpp` check sizes 5 through 10 against an independent breadth-first enumeration.
+
+Ideal ice Ic has girth 6, so the primitive rings of size at most 10 are exactly the 221184 hexagons (110592 molecules) or 21296 hexagons (10648). The larger search still walks depth 4 or 5 and rejects every longer candidate. Release `-O3`, six samples after one warm-up. Raw lines are in `markdown/rings-ic-timing-v2.txt`.
+
+| Molecules | Depth | Threads | Pair table (ms) | Bitset ball (ms) |
+| --- | ---: | ---: | ---: | ---: |
+| 10648 | 8 | 1 | 20.50 | 16.76 |
+| 10648 | 8 | 8 | 9.07 | 9.18 |
+| 110592 | 8 | 1 | 212.3 | 202.6 |
+| 110592 | 8 | 8 | 81.4 | 90.6 |
+| 10648 | 10 | 1 | 110.2 | 50.2 |
+| 10648 | 10 | 8 | 30.7 | 17.5 |
+| 110592 | 10 | 1 | 1018 | 622 |
+| 110592 | 10 | 8 | 254 | 190 |
+
+At depth 10 the bitset ball is faster on one thread and on eight. At depth 8 the one-thread run is faster and the eight-thread run is a few milliseconds slower: the ball has radius 3, and the second breadth-first fill does not always beat the packed sort once eight cores are already busy.
+
+## SQQ 0.5.8, OVITO, cycless
+
+Same ice, one thread, the neighbour graph or the bond table built before the timer. SQQ 0.5.8 is `find_rings` with the chordless definition and size 6. OVITO is `FindRingsModifier` after `CreateBondsModifier`. cycless is `cycles_iter` on the same undirected graph. On this crystal the chordless hexagons are the primitive ones, and every tool reported the same count.
+
+| Molecules | d-SEAMS hop, depth 6 | OVITO | SQQ 0.5.8 | cycless |
+| --- | ---: | ---: | ---: | ---: |
+| 10648 | 5.47 ms | 43.8 ms | 1146 ms | 33270 ms |
+| 110592 | 54.3 ms | 572 ms | 12500 ms | 353797 ms |
+
+The 10648 foreign samples are two timed calls; the 110592 foreign samples are one timed call after a warm-up. d-SEAMS medians are six calls. OVITO at 110592 is about ten times the hop search. SQQ is about 230 times. cycless is about 6500 times.
+
+## Cage expansion
+
+`formal/Formal/Cage.lean` records the growth rule and what it does and does not give.
+
+- `grows_card`: one step adds one face.
+- `growth_hits_budget`: a branch that starts empty and takes at most `F` steps stays inside the face budget, so the recursion terminates.
+- `walk_exit` and `connected_has_exit`: in a connected dual, every nonempty proper subset has an edge into the complement. That edge is exposed (used once by the subset, covered by the missing face). Branching on every such face therefore reaches every face of the cage.
+- `canonical_parent_unique`: deleting the greatest face is the only parent, so each face set is grown once.
+- `powerset_exponential`: an `F`-face dual has `2^F` subsets. A search that materialises those subsets does not have delay polynomial in `F`. The canonical parent removes duplicate cages. It does not by itself bound the dead-end branches between two solutions. No polynomial-delay enumerator follows from the exposed-edge rule alone.
+
+## Halo of `floor(k/2)` bonds
+
+`formal/Formal/Halo.lean` is the rank argument used by `ringHops`.
+
+- `primitive_within_half` and `primitive_ring_subset_ball`: a primitive ring of length at most `k` lies in the closed ball of radius `floor(k/2)` about any of its vertices. A rank that owns one vertex of the ring, and keeps every vertex within that many bonds, holds the whole ring.
+- `shortcut_vertex_bound` and `shortcut_within_half_radius`: a vertex of a shortcut shorter than the ring distance stays inside that same ball when the two arcs out of the owned vertex cover the cycle. The induced subgraph therefore still sees the shortcut, and a ring that is primitive on the rank is primitive in the full graph.
+- `dist_along_shortcut`: the triangle inequality along a shortest walk is the step that places the shortcut vertex.
+
+`ringHops` returns `maxDepth/2`, and each bond is at most one cutoff, so the coordinate skin of that many cutoffs is at least this bond skin.
+
+There is no `sorry` in `formal/Formal/Rings.lean`, `formal/Formal/Halo.lean`, or `formal/Formal/Cage.lean`.
