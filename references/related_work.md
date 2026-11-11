@@ -78,3 +78,61 @@ CHILL+ is the cutoff graph. `q_6` for d-SEAMS is the mutual four-neighbour list;
 | 110592 | rings | 1132.576 (6.633) | fastatomstruct 464469.420 (57784.377) | 1; both 221184 six-rings |
 
 The samples are `benchmarks/h2h-watch.csv`. `snakemake related_watch` regenerates that file. `benchmarks/h2h_watch.py` is the one-call Airspeed Velocity arm of the same commands.
+
+## Matched cases added in v2
+
+pyscal3 4.1.0 exports `steinhardt_parameter` and `diamond_structure`. It has no CHILL+ and no ring census, so those two operations are not a matched case. The Palmer library at commit `ee8a3cb` does not link: `CHILL_mod` imports `gen_cluster_nb_list`, `gen_cluster_ID_list`, `get_largest_cluster` and `single_linkage_cluster_by_Jeremy`, and none of those symbols is in `single_linkage_cluster.f90`. OVITO 3.17.2 from PyPI ran `ChillPlusModifier` and `FindRingsModifier` with no licence prompt once `libGL` was on the loader path.
+
+Same protocol, ideal ice Ic, cutoff 3.5 Å, rings of at most six. OVITO's ring timer includes `CreateBondsModifier`. matscipy uses `ring_statistics(..., maxlength=7)`, which counts rings of size at most six. cycless is `pairlist.pairs_iter` plus `cycles_iter`. Agreement is 1 wherever both codes returned a result: every CHILL+ label is cubic, and both ring censuses are two six-rings per molecule.
+
+| Molecules | Operation | d-SEAMS median (IQR) ms | Other median (IQR) ms |
+| --- | --- | --- | --- |
+| 1000 | CHILL+ | 4.140 (0.066) | OVITO 6.137 (0.165) |
+| 1000 | rings | 10.199 (0.090) | OVITO 4.760 (0.193) |
+| 1000 | rings | 10.199 (0.090) | matscipy 15.359 (0.138) |
+| 1000 | rings | 10.199 (0.090) | cycless 3366.593 (153.502) |
+| 10648 | CHILL+ | 46.009 (0.136) | OVITO 64.663 (0.763) |
+| 10648 | rings | 111.588 (1.962) | OVITO 48.489 (9.627) |
+| 10648 | rings | 111.588 (1.962) | matscipy 2642.873 (581.054) |
+| 10648 | rings | 111.588 (1.962) | cycless 36801.907 (634.919) |
+| 110592 | CHILL+ | 481.726 (3.800) | OVITO 629.005 (3.107) |
+| 110592 | rings | 1132.111 (11.657) | OVITO 564.356 (3.353) |
+| 110592 | rings | 1132.111 (11.657) | matscipy signal 11 |
+| 110592 | rings | 1132.111 (11.657) | cycless 398433.762 (3764.967) |
+
+OVITO Find rings is about twice as fast as d-SEAMS at every size, with the same census. OVITO CHILL+ is slower, and the labels match. matscipy agrees at 1 000 and 10 648 molecules and is slower; at 110 592 molecules the worker dies with signal 11, the same abort the paper already records for large frames. cycless agrees on this crystal and is slower by about 330 times at 1 000 molecules and about 350 times at 110 592. Samples are `benchmarks/h2h-watch-v2.csv`. `snakemake related_watch_v2` regenerates them.
+
+The abstract's speed sentence is scoped to the main campaign. It must not be read as every later OVITO ring timing: on this watch, Find rings is the faster code.
+
+## 2025–2026
+
+No new code in this window assigns CHILL+ or cages from inside a PLUMED, LAMMPS or OpenMM step. LAMMPS `fix plumed` and [openmm-plumed](https://github.com/openmm/openmm-plumed) still pass collective variables. The manuscript's in-situ claim remains the LAMMPS compute.
+
+Order parameters and phase tags, none of which return hexagonal or double-diamond cages:
+
+- Sinaeian and Haji-Akbari, [JCP 2025](https://doi.org/10.1063/5.0263587). For Steinhardt coordinates of homogeneous and heterogeneous ice nucleation, the distance cutoff and the \(q_6\) cutoff dominate. Chain exclusion and a hydration shell are not uniformly helpful. This does not touch the speed sentence. It does warn against treating one \(q_6\) threshold as the reaction coordinate.
+- Kadre, Ghoshdastidar, Dhankar and Punnathanam, [JCP 2025](https://doi.org/10.1063/5.0273484). XGBoost labels of gas-hydrate polymorphs from a learned set of generic order parameters. A phase tag, not a cage finder.
+- Harless, Sindelar and Gezelter, [JCP 2025](https://doi.org/10.1063/5.0282695). Ice-active solutes at the ice–water interface. Complements salt and solute work. No CHILL+ replacement.
+- Wu and others, [JFM 2025](https://doi.org/10.1017/jfm.2025.10633). Salt exclusion during directional freezing of brine. Not a per-molecule order parameter.
+- Wang, Du, Xie, Calzavarini and Sun, [Phys. Rev. Fluids 2026](https://doi.org/10.1103/8ghn-yrlr). Freezing and aging of saline water under convection. Same limitation.
+- Zhu and others, [JPCB 2025](https://doi.org/10.1021/acs.jpcb.5c01346). Phase change of a confined bilayer of ice. Not a nanotube prism label.
+- Zhu, Zhang, Wang and Su, [Mod. Phys. Lett. B 2025](https://doi.org/10.1142/s0217984925502690). Terahertz driving of water inside a carbon nanotube. Not a classifier.
+- Torres-Arenas, Fernández-Fernández, Pérez-Rodríguez and Piñeiro, [arXiv:2605.14533](https://arxiv.org/abs/2605.14533) (2026). Methane hydrate between silica slits. F3 and F4 show in-plane order where a three-dimensional hydrate does not form. Preprint; Crossref has no DOI for it. Complements confined-hydrate analysis. No cage code.
+
+## Proposed one-line fixes
+
+Introduction, the ring-code sentence. Name fastatomstruct and TRACE:
+
+> Ring statistics codes for network solids count these rings, among them RINGS, ISAACS, atomes, matscipy and fastatomstruct, the cycless package that GenIce uses, the ring finder of OVITO, and TRACE.
+
+Speed sentence. Keep the five named codes, and do not let mdapy be swept into them:
+
+> In all matched comparisons of the main campaign, d-SEAMS 2.0 is faster than OVITO, freud, pyscal, matscipy and a CHILL library; mdapy 2.0 is outside that list, and its cutoff CHILL+ is faster on ideal ice Ic.
+
+Hydrate cages. The following sentence currently says d-SEAMS is the code that assembles rings into cages:
+
+> Unlike the ring-count codes, d-SEAMS assembles the hexagonal and double-diamond cages of ice, while TRACE assembles hydrate cages, including incomplete cages and cages coordinated to one additive.
+
+A further scope line, from the v2 ring timings:
+
+> That speed sentence is the main campaign: on a later one-core watch, OVITO 3.17.2 Find rings is faster than d-SEAMS at 1 000, 10 648 and 110 592 molecules, with the same six-ring census.
