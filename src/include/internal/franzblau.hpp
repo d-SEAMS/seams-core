@@ -125,6 +125,17 @@ std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &n
                                           int maxDepth,
                                           const std::vector<char> &sources);
 
+//! The same ring set, built with a bounded ball at every vertex and a
+//! primitivity test of every pair. ringNetwork leaves that table out when
+//! the largest ring is at most 7, because a strict shortcut is then a walk
+//! of at most two edges. The timing harness compares the two.
+std::vector<std::vector<int>>
+ringNetworkBalls(const std::vector<std::vector<int>> &nList, int maxDepth);
+
+//! 1 when the last ringNetwork or ringNetworkBalls call filled bounded
+//! balls, 0 when the hop probe answered every primitivity query.
+[[nodiscard]] int lastRingSearchUsedBalls();
+
 //! Creates a graph object and fills it with the information from a neighbour
 //! list and pointCloud created before. NOTE: the neighbourListIndex contains
 //! the indices and NOT the atom IDs as in the neighbour list

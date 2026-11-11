@@ -35,6 +35,7 @@ test_sources = {
   'ion_env': 'test_ion_env.cpp',
   'guest_occupancy': 'test_guest_occupancy.cpp',
   'shell_rings': 'test_shell_rings.cpp',
+  'ring_hop': 'test_ring_hop.cpp',
   'voronoi': 'test_voronoi.cpp',
   'structure_desc': 'test_structure_desc.cpp',
   'cage_affiliation': 'test_cage_affiliation.cpp',
@@ -249,6 +250,13 @@ executable('bench_strong', 'bench_strong.cpp',
   build_rpath: '$ORIGIN/../src')
 
 executable('bench_rings_incremental', 'bench_rings_incremental.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_ring_ic', 'bench_ring_ic.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
   link_args: _test_link_args,

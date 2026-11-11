@@ -38,6 +38,7 @@ struct RingSplitTimes {
 };
 
 RingSplitTimes gRingSplit;
+int gUsedBalls = 0;
 
 double millisSince(std::chrono::steady_clock::time_point start) {
   return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start)
@@ -366,17 +367,65 @@ void levelsFrom(const Graph &adjacency, int src, int maxLvl, int minVertex,
   }
 }
 
-//! Shortest-path criterion over every pair of members, by ball lookup
-bool ringIsPrimitive(const BoundedBalls &balls, const std::vector<int> &ring) {
+/**
+ * @brief Distance questions the primitivity test actually asks.
+ * @details A candidate of size at most 7 has ring distance at most 3, so
+ *  "strictly shorter than the ring" is a walk of one or two edges. That
+ *  question is the adjacency row, and the bounded-ball table is not
+ *  consulted. Larger rings keep the table and use it only when the ring
+ *  distance exceeds 3. Pairs incident to the source, and on an even ring
+ *  the antipode, are shortest by the way the candidate was built; the
+ *  caller passes those indices and they are not tested again.
+ */
+struct DistOracle {
+  const PackedRows *adj = nullptr;
+  const BoundedBalls *balls = nullptr;
+  bool hopOnly = false;
+
+  bool shorter(int u, int v, int ringDist) const {
+    if (ringDist <= 1) {
+      return false;
+    }
+    if (!hopOnly) {
+      return balls->dist(u, v) < ringDist;
+    }
+    const auto row = (*adj)[static_cast<std::size_t>(u)];
+    for (const int w : row) {
+      if (w == v) {
+        return true;
+      }
+    }
+    if (ringDist <= 2) {
+      return false;
+    }
+    for (const int w : row) {
+      for (const int x : (*adj)[static_cast<std::size_t>(w)]) {
+        if (x == v) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+};
+
+bool ringIsPrimitive(const DistOracle &oracle, const std::vector<int> &ring,
+                     int skipA, int skipB) {
   const int k = static_cast<int>(ring.size());
   for (int i = 0; i < k; i++) {
+    if (i == skipA || i == skipB) {
+      continue;
+    }
     for (int j = i + 2; j < k; j++) {
+      if (j == skipA || j == skipB) {
+        continue;
+      }
       const int sep = j - i;
       const int ringDist = std::min(sep, k - sep);
       if (ringDist <= 1) {
         continue;
       }
-      if (balls.dist(ring[i], ring[j]) < ringDist) {
+      if (oracle.shorter(ring[i], ring[j], ringDist)) {
         return false;
       }
     }
@@ -421,7 +470,7 @@ void shortestPathsFrom(const Graph &adjacency, int src, RingScratch &scr) {
     scr.pathCount.assign(nVertices, 0);
   }
   scr.pathBuf.clear();
-  scr.pathFirst[src] = 0;
+    scr.pathFirst[src] = 0;
   scr.pathCount[src] = 1;
   for (const int v : scr.touched) {
     const int lv = scr.lvl[v];
@@ -493,9 +542,10 @@ struct alignas(64) RingPool {
 };
 
 template <typename Graph, typename Out>
-void enumerateFromSource(const Graph &adjacency, const BoundedBalls &balls,
+void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
                          int src, int maxDepth, int maxLvl, RingScratch &scr,
-                         Out &out, const std::vector<char> *through = nullptr) {
+                         Out &out, const std::vector<char> *through = nullptr,
+                         bool legacyPairs = false) {
   const int nVertices = static_cast<int>(adjacency.size());
   if (static_cast<int>(scr.lvl.size()) != nVertices) {
     scr.lvl.assign(nVertices, -1);
@@ -555,7 +605,8 @@ void enumerateFromSource(const Graph &adjacency, const BoundedBalls &balls,
           for (int i = lp - 2; i >= 0 && ok; i--) {
             ok = pushUniqueMember(ring, pb[i]);
           }
-          if (ok && ringIsPrimitive(balls, ring)) {
+          if (ok && ringIsPrimitive(oracle, ring, legacyPairs ? -1 : 0,
+                                    legacyPairs ? -1 : lp)) {
             keep(ring);
           }
         }
@@ -580,7 +631,7 @@ void enumerateFromSource(const Graph &adjacency, const BoundedBalls &balls,
             for (int i = lp - 1; i >= 0 && ok; i--) {
               ok = pushUniqueMember(ring, pb[i]);
             }
-            if (ok && ringIsPrimitive(balls, ring)) {
+            if (ok && ringIsPrimitive(oracle, ring, legacyPairs ? -1 : 0, -1)) {
               keep(ring);
             }
           }
@@ -612,9 +663,11 @@ void enumerateFromSource(const Graph &adjacency, const BoundedBalls &balls,
  *
  *  Candidates are then kept or dropped by the same criterion Franzblau's
  *  filter applied: no pair of members may be joined through the graph by
- *  fewer edges than around the ring. Each such question is answered by a
- *  lookup into per-vertex bounded neighbourhoods computed once for the whole
- *  search.
+ *  fewer edges than around the ring. On a cycle of length at most 7 that
+ *  question is a walk of one or two edges, read from the adjacency rows.
+ *  Longer cycles use one bounded neighbourhood per vertex. Pairs that sit
+ *  on a shortest path out of the source, and on an even cycle the antipode,
+ *  are not tested again.
  *
  *  Each ring starts at its lowest-indexed member and runs toward the lesser
  *  of that member's two ring neighbours, and the rings are sorted
@@ -629,9 +682,18 @@ void enumerateFromSource(const Graph &adjacency, const BoundedBalls &balls,
  * @return A vector of vectors of the rings; each ring contains the atom
  *  indices of the ring members.
  */
+static std::vector<std::vector<int>>
+searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
+            const std::vector<char> &sources, bool legacy);
+
 std::vector<std::vector<int>>
 primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth) {
-  return ringNetwork(nList, maxDepth, std::vector<char>());
+  return searchRings(nList, maxDepth, std::vector<char>(), false);
+}
+
+std::vector<std::vector<int>>
+primitive::ringNetworkBalls(const std::vector<std::vector<int>> &nList, int maxDepth) {
+  return searchRings(nList, maxDepth, std::vector<char>(), true);
 }
 
 /**
@@ -640,9 +702,9 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth)
  *  vertex. Balls are filled only within maxDepth/2 hops of a flagged
  *  vertex, where the members of its rings lie.
  */
-std::vector<std::vector<int>>
-primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth,
-                       const std::vector<char> &sources) {
+static std::vector<std::vector<int>>
+searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
+            const std::vector<char> &sources, bool legacy) {
   seams::adoptThreads();
   std::vector<std::vector<int>> rings;
   if (maxDepth < 3 || nList.empty()) {
@@ -696,6 +758,11 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth,
 
   const int maxLvl = maxDepth / 2;
   const int radius = std::max(maxLvl - 1, 1);
+  // Ring distance on a cycle of length <= maxDepth is at most maxLvl.
+  // A strict shortcut is then a walk of length <= maxLvl - 1. When that
+  // bound is 2 (maxDepth <= 7), adjacency answers every query the
+  // primitivity test asks, and the ball table is dead work.
+  const bool hopOnly = !legacy && maxLvl <= 3;
   std::vector<int> from;
   for (int v = 0; v < nVertices; v++) {
     if (sources.empty() || (v < static_cast<int>(sources.size()) && sources[v])) {
@@ -705,29 +772,41 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth,
   BoundedBalls balls;
   gRingSplit.adj_ms = millisSince(adjStart);
   const auto ballStart = std::chrono::steady_clock::now();
-  if (static_cast<int>(from.size()) == nVertices) {
-    balls.fillList(adjacency, radius, from);
+  if (hopOnly) {
+    gUsedBalls = 0;
+    gRingSplit.ball_count_ms = 0;
+    gRingSplit.ball_fill_ms = 0;
+    gRingSplit.balls_ms = 0;
   } else {
-    std::vector<int> lvl(nVertices, -1);
-    std::vector<int> reached = from;
-    for (const int v : from) {
-      lvl[v] = 0;
-    }
-    for (std::size_t k = 0; k < reached.size(); k++) {
-      const int u = reached[k];
-      if (lvl[u] == maxLvl) {
-        continue;
+    gUsedBalls = 1;
+    if (static_cast<int>(from.size()) == nVertices) {
+      balls.fillList(adjacency, radius, from);
+    } else {
+      std::vector<int> lvl(nVertices, -1);
+      std::vector<int> reached = from;
+      for (const int v : from) {
+        lvl[v] = 0;
       }
-      for (const int w : adjacency[u]) {
-        if (w >= 0 && w < nVertices && lvl[w] == -1) {
-          lvl[w] = lvl[u] + 1;
-          reached.push_back(w);
+      for (std::size_t k = 0; k < reached.size(); k++) {
+        const int u = reached[k];
+        if (lvl[u] == maxLvl) {
+          continue;
+        }
+        for (const int w : adjacency[u]) {
+          if (w >= 0 && w < nVertices && lvl[w] == -1) {
+            lvl[w] = lvl[u] + 1;
+            reached.push_back(w);
+          }
         }
       }
+      balls.fillList(adjacency, radius, reached);
     }
-    balls.fillList(adjacency, radius, reached);
+    gRingSplit.balls_ms = millisSince(ballStart);
   }
-  gRingSplit.balls_ms = millisSince(ballStart);
+  DistOracle oracle;
+  oracle.adj = &adjacency;
+  oracle.balls = hopOnly ? nullptr : &balls;
+  oracle.hopOnly = hopOnly;
   const int nFrom = static_cast<int>(from.size());
 
 #ifdef SEAMS_HAS_OPENMP
@@ -752,8 +831,9 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth,
       RingScratch scratch;
 #pragma omp for schedule(guided)
       for (int k = 0; k < nFrom; k++) {
-        enumerateFromSource(adjacency, balls, from[k], maxDepth, maxLvl,
-                            scratch,         perSource[static_cast<std::size_t>(k)]);
+        enumerateFromSource(adjacency, oracle, from[k], maxDepth, maxLvl,
+                            scratch, perSource[static_cast<std::size_t>(k)],
+                            nullptr, legacy);
       }
     }
     gRingSplit.enumerate_ms = millisSince(enumStart);
@@ -791,8 +871,8 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth,
   const auto enumStart = std::chrono::steady_clock::now();
   RingScratch scratch;
   for (const int src : from) {
-    enumerateFromSource(adjacency, balls, src, maxDepth, maxLvl, scratch,
-                        rings);
+    enumerateFromSource(adjacency, oracle, src, maxDepth, maxLvl, scratch,
+                        rings, nullptr, legacy);
   }
   gRingSplit.enumerate_ms = millisSince(enumStart);
   const auto mergeStart = std::chrono::steady_clock::now();
@@ -805,10 +885,18 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth,
   return rings;
 }
 
+std::vector<std::vector<int>>
+primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth,
+                       const std::vector<char> &sources) {
+  return searchRings(nList, maxDepth, sources, false);
+}
+
 primitive::RingSearchSplit primitive::lastRingSearchSplit() {
   return {gRingSplit.balls_ms, gRingSplit.enumerate_ms, gRingSplit.merge_ms,
           gRingSplit.adj_ms, gRingSplit.ball_count_ms, gRingSplit.ball_fill_ms};
 }
+
+int primitive::lastRingSearchUsedBalls() { return gUsedBalls; }
 
 /**
  *  @details Get all possible rings (only atom indices, not IDs). The input
@@ -1300,6 +1388,7 @@ struct primitive::RingUpdater::Impl {
   int pendingOld = 0;
   bool slotSorted[2] = {false, false};
   bool hot = false;
+  bool hopOnly = false;
   // The default does not use a fraction. After T is built, a full pass
   // runs only when T is the whole vertex set.
   double fullPassFraction = 1.0;
@@ -1404,9 +1493,18 @@ struct primitive::RingUpdater::Impl {
   // into the flattened buffer that keeps each ring's allocation.
   template <typename Graph> void fastEnumerate(const Graph &adj) {
     const int nVertices = static_cast<int>(adj.size());
-    balls.refillAll(adj, ballRadius);
-    ballsStale = false;
-    ballsRefreshed = nVertices;
+    if (hopOnly) {
+      ballsRefreshed = 0;
+      ballsStale = false;
+    } else {
+      balls.refillAll(adj, ballRadius);
+      ballsStale = false;
+      ballsRefreshed = nVertices;
+    }
+    DistOracle oracle;
+    oracle.adj = &adj;
+    oracle.balls = hopOnly ? nullptr : &balls;
+    oracle.hopOnly = hopOnly;
     if (static_cast<int>(bySource.size()) != nVertices) {
       bySource.assign(static_cast<std::size_t>(nVertices), {});
     }
@@ -1430,7 +1528,7 @@ struct primitive::RingUpdater::Impl {
 #pragma omp for schedule(guided)
         for (int src = 0; src < nVertices; src++) {
           bySource[static_cast<std::size_t>(src)].reset();
-          enumerateFromSource(adj, balls, src, maxDepth, maxLvl, scratch,
+          enumerateFromSource(adj, oracle, src, maxDepth, maxLvl, scratch,
                               bySource[static_cast<std::size_t>(src)]);
         }
       }
@@ -1442,7 +1540,7 @@ struct primitive::RingUpdater::Impl {
       }
       for (int src = 0; src < nVertices; src++) {
         bySource[static_cast<std::size_t>(src)].reset();
-        enumerateFromSource(adj, balls, src, maxDepth, maxLvl, scratches[0],
+        enumerateFromSource(adj, oracle, src, maxDepth, maxLvl, scratches[0],
                             bySource[static_cast<std::size_t>(src)]);
       }
     }
@@ -1486,11 +1584,15 @@ struct primitive::RingUpdater::Impl {
 #endif
     {
       RingScratch scratch;
+      DistOracle oracle;
+      oracle.adj = &adj;
+      oracle.balls = hopOnly ? nullptr : &balls;
+      oracle.hopOnly = hopOnly;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp for schedule(guided)
 #endif
       for (int k = 0; k < n; k++) {
-        enumerateFromSource(adj, balls, T[static_cast<std::size_t>(k)],
+        enumerateFromSource(adj, oracle, T[static_cast<std::size_t>(k)],
                             maxDepth, maxLvl, scratch,
                             fresh[static_cast<std::size_t>(k)], &inT);
       }
@@ -1543,6 +1645,7 @@ primitive::RingUpdater::RingUpdater(int maxDepth) : impl_(new Impl) {
   impl_->maxLvl = maxDepth / 2;
   impl_->ballRadius = std::max(impl_->maxLvl - 1, 1);
   impl_->reach = std::max((impl_->maxLvl - 2) / 2, 0);
+  impl_->hopOnly = impl_->maxLvl <= 3;
 }
 
 primitive::RingUpdater::~RingUpdater() = default;
@@ -1729,7 +1832,9 @@ primitive::RingUpdater::update(const std::vector<std::vector<int>> &nList) {
     return st.flattened;
   }
 
-  if (st.ballsStale) {
+  if (st.hopOnly) {
+    st.ballsRefreshed = 0;
+  } else if (st.ballsStale) {
     st.balls.refillAll(next, st.ballRadius);
     st.ballsStale = false;
     st.ballsRefreshed = nVertices;
