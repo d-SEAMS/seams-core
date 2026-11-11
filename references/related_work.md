@@ -125,17 +125,17 @@ Introduction, the ring-code sentence. Name fastatomstruct and TRACE:
 
 > Ring statistics codes for network solids count these rings, among them RINGS, ISAACS, atomes, matscipy and fastatomstruct, the cycless package that GenIce uses, the ring finder of OVITO, and TRACE.
 
-Speed sentence. Keep the five named codes, and do not let mdapy be swept into them:
+Speed sentence. Keep the five named codes. The mdapy caveat below was the slow tree (`f3e9e394`). On the fast tree, cutoff CHILL+ is faster than mdapy 2.0 as well:
 
-> In all matched comparisons of the main campaign, d-SEAMS 2.0 is faster than OVITO, freud, pyscal, matscipy and a CHILL library; mdapy 2.0 is outside that list, and its cutoff CHILL+ is faster on ideal ice Ic.
+> In all matched comparisons of the main campaign, d-SEAMS 2.0 is faster than OVITO, freud, pyscal, matscipy and a CHILL library. On the fast tree it is also faster than mdapy 2.0 cutoff CHILL+ on ideal ice Ic, at one core and at eight.
 
 Hydrate cages. The following sentence currently says d-SEAMS is the code that assembles rings into cages:
 
 > Unlike the ring-count codes, d-SEAMS assembles the hexagonal and double-diamond cages of ice, while TRACE assembles hydrate cages, including incomplete cages and cages coordinated to one additive.
 
-A further scope line, from the release ring timings below:
+A further scope line. The slow-tree release build lost the 110 592 ring row to OVITO Find rings. The fast tree does not:
 
-> That speed sentence is the main campaign. On this tree's release build, OVITO 3.17.2 Find rings is faster than d-SEAMS at 110 592 molecules and tied at 10 648, with the same six-ring census; d-SEAMS is faster at 1 000.
+> That speed sentence is the main campaign. On the fast tree, cutoff primitive rings of size at most six are faster than OVITO 3.17.2 Find rings at 1 000, 10 648 and 110 592 molecules, on one core and on eight, with the same census of two six-rings per molecule.
 
 ## Release rebuild
 
@@ -177,3 +177,56 @@ Brine and electrolyte models, not per-molecule classifiers:
 - Sedano, Vega, Noya and Sanz, [JCP 2025](https://doi.org/10.1063/5.0247832). A two-state water model, TIP4P/2005-Ice.
 
 None of these assign CHILL+, rings or cages during a PLUMED, LAMMPS or OpenMM step. The in-situ claim is unchanged.
+
+## Fast tree, one core and eight
+
+The head-to-head above is `f3e9e394`, where `seams_chill_plus` is the mutual four-neighbour path and the ring driver is `bench_watch`. This section is `perf/chillplus-fast` (`cf8bcc3d`; the requested `a0cc5e6f` is not an object on that branch). CHILL+ is `seams_frame_chill_plus` with the cutoff graph. Rings are `seams_frame_rings` with the same cutoff and a maximum depth of six. The release library is meson `-Dbuildtype=release -Doptimization=3`. One warm-up, six calls, median and type-7 IQR. One core is `taskset -c 0` with one OpenMP thread and one Rayon thread. Eight cores are `taskset -c 0-7`. d-SEAMS reads `OMP_NUM_THREADS` and `RAYON_NUM_THREADS`. mdapy uses `set_num_threads`. OVITO reads `OVITO_THREAD_COUNT` before import. matscipy and cycless have no parallel ring API; they run at the same OpenMP width. Agreement is 1 wherever both codes returned a result: every CHILL+ label is cubic, and the ring census is two six-rings per molecule (2 000, 21 296, 221 184).
+
+| Threads | Molecules | Operation | d-SEAMS median (IQR) ms | Other median (IQR) ms |
+| --- | --- | --- | --- | --- |
+| 1 | 1000 | CHILL+ | 0.447 (0.037) | mdapy 0.985 (0.028) |
+| 1 | 1000 | CHILL+ | 0.447 (0.037) | OVITO 6.122 (0.070) |
+| 1 | 1000 | rings | 1.181 (0.075) | mdapy 27.622 (0.473) |
+| 1 | 1000 | rings | 1.181 (0.075) | OVITO 4.616 (0.079) |
+| 1 | 1000 | rings | 1.181 (0.075) | matscipy 15.734 (0.929) |
+| 1 | 1000 | rings | 1.181 (0.075) | cycless 3226.987 (31.319) |
+| 1 | 10648 | CHILL+ | 4.918 (0.132) | mdapy 7.652 (0.014) |
+| 1 | 10648 | CHILL+ | 4.918 (0.132) | OVITO 64.190 (0.928) |
+| 1 | 10648 | rings | 10.563 (0.061) | mdapy 265.497 (4.453) |
+| 1 | 10648 | rings | 10.563 (0.061) | OVITO 44.160 (5.085) |
+| 1 | 10648 | rings | 10.563 (0.061) | matscipy 1280.353 (16.751) |
+| 1 | 10648 | rings | 10.563 (0.061) | cycless 35693.574 (239.725) |
+| 1 | 110592 | CHILL+ | 50.614 (1.184) | mdapy 67.816 (0.833) |
+| 1 | 110592 | CHILL+ | 50.614 (1.184) | OVITO 626.181 (3.018) |
+| 1 | 110592 | rings | 105.412 (0.584) | mdapy 2243.860 (6.125) |
+| 1 | 110592 | rings | 105.412 (0.584) | OVITO 596.963 (6.928) |
+| 1 | 110592 | rings | 105.412 (0.584) | matscipy signal 11 |
+| 1 | 110592 | rings | 105.412 (0.584) | cycless 382279.618 (2827.667) |
+| 8 | 1000 | CHILL+ | 0.430 (0.049) | mdapy 23.682 (0.051) |
+| 8 | 1000 | CHILL+ | 0.430 (0.049) | OVITO 6.577 (0.067) |
+| 8 | 1000 | rings | 0.934 (0.068) | mdapy 46.017 (0.587) |
+| 8 | 1000 | rings | 0.934 (0.068) | OVITO 4.937 (0.357) |
+| 8 | 1000 | rings | 0.934 (0.068) | matscipy 18.160 (0.800) |
+| 8 | 1000 | rings | 0.934 (0.068) | cycless 3224.250 (31.427) |
+| 8 | 10648 | CHILL+ | 4.278 (0.088) | mdapy 30.087 (0.174) |
+| 8 | 10648 | CHILL+ | 4.278 (0.088) | OVITO 14.656 (0.258) |
+| 8 | 10648 | rings | 5.673 (0.407) | mdapy 292.194 (0.419) |
+| 8 | 10648 | rings | 5.673 (0.407) | OVITO 40.472 (1.161) |
+| 8 | 10648 | rings | 5.673 (0.407) | matscipy 1259.609 (20.215) |
+| 8 | 10648 | rings | 5.673 (0.407) | cycless 35561.341 (178.566) |
+| 8 | 110592 | CHILL+ | 35.188 (1.966) | mdapy 89.400 (0.604) |
+| 8 | 110592 | CHILL+ | 35.188 (1.966) | OVITO 93.037 (2.953) |
+| 8 | 110592 | rings | 52.740 (2.533) | mdapy 2624.489 (7.136) |
+| 8 | 110592 | rings | 52.740 (2.533) | OVITO 353.332 (20.949) |
+| 8 | 110592 | rings | 52.740 (2.533) | matscipy signal 11 |
+| 8 | 110592 | rings | 52.740 (2.533) | cycless 383652.478 (7729.991) |
+
+d-SEAMS is the fastest code in every row that both sides finished, including cycless. The 110 592 ring census is the fast-tree one (105.412 ms on one core), not the slow-tree `bench_watch` census (about 2 207 ms). OVITO Find rings at that size is 596.963 ms. mdapy `RingStatistics` (Franzblau shortest-path rings, maximum size 6, cutoff 3.5 Å) agrees and is slower at every size. matscipy still dies with signal 11 at 110 592 molecules. cycless agrees and is about 3 600 times slower at that size. Raw lines are `benchmarks/h2h-watch-v4.csv`. `snakemake related_watch_v4` regenerates them.
+
+## Rings, cages and in-situ, 2026
+
+- Maharjan, Williamson and Fennell, [JPCB 2026](https://doi.org/10.1021/acs.jpcb.5c08791). A ring summation factor on common-angle-pruned hydrogen-bond rings, for liquid, supercooled and crystalline water. No public code turned up, so it is not in the table. It is a ring metric, not a CHILL+ label and not a hexagonal or double-diamond cage.
+- [CageIdentification](https://github.com/UnconvRS/CageIdentification) (Adibifard, 2024) counts 5^12, 5^12 6^2, 5^12 6^3 and 5^12 6^4 cages from a GROMACS trajectory. That is a hydrate-cage frequency, not the ice Ic primitive-ring census, so it is not timed.
+- [vmd-hydrate-mcp](https://github.com/wjgoarxiv/vmd-hydrate-mcp) (2026) counts clathrate cages and F3/F4 through a local VMD session. VMD is not installed here, so it is not timed.
+
+No 2025–2026 PLUMED, LAMMPS or OpenMM plugin turned up that assigns CHILL+ or cages during the MD step. The in-situ claim remains the LAMMPS compute.
