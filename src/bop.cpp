@@ -749,7 +749,8 @@ std::complex<double> sph::lookupTableQ6(int m, std::array<double, 2> angles) {
 static void classifyBondsLeftFp64(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, const chill::BondClassifier &rule,
-    bool isSlice) {
+    bool isSlice, const std::vector<int> *csrOff = nullptr,
+    const std::vector<int> *csrCols = nullptr) {
   seams::adoptThreads();
   constexpr int l = 3;
   static_assert(l == 3, "the closed form below is the l = 3 polynomial");
@@ -824,7 +825,7 @@ static void classifyBondsLeftFp64(
 #pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1)
 #endif
   for (int iatom = 0; iatom < nop; iatom++) {
-    if (static_cast<std::size_t>(iatom) >= nList.size()) {
+    if (csrOff == nullptr && static_cast<std::size_t>(iatom) >= nList.size()) {
       continue;
     }
     // The distance and the minimum-image delta are one evaluation. A short
@@ -842,11 +843,9 @@ static void classifyBondsLeftFp64(
     Near *candidates = stackNear;
     int nCand = 0;
     const Xyz pi = xyz[static_cast<std::size_t>(iatom)];
-    const auto &row = nList[static_cast<std::size_t>(iatom)];
-    for (std::size_t j = 1; j < row.size(); j++) {
-      const int jatom = resolve(row[j]);
-      if (jatom < 0) {
-        continue;
+    const auto consider = [&](int jatom) {
+      if (jatom < 0 || jatom >= nop || jatom == iatom) {
+        return;
       }
       const Xyz pj = xyz[static_cast<std::size_t>(jatom)];
       const auto dr = gen::fracDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
@@ -863,6 +862,19 @@ static void classifyBondsLeftFp64(
         candidates = heapNear.data();
       }
       ++nCand;
+    };
+    if (csrOff != nullptr && csrCols != nullptr &&
+        static_cast<int>(csrOff->size()) > iatom) {
+      const int a = (*csrOff)[static_cast<std::size_t>(iatom)];
+      const int b = (*csrOff)[static_cast<std::size_t>(iatom) + 1];
+      for (int k = a; k < b; ++k) {
+        consider((*csrCols)[static_cast<std::size_t>(k)]);
+      }
+    } else if (static_cast<std::size_t>(iatom) < nList.size()) {
+      const auto &row = nList[static_cast<std::size_t>(iatom)];
+      for (std::size_t j = 1; j < row.size(); ++j) {
+        consider(resolve(static_cast<int>(row[j])));
+      }
     }
     const int keep =
         (keepMax > 0) ? std::min(keepMax, nCand) : nCand;
@@ -1293,6 +1305,70 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
  *  @param[in] nList Row-ordered neighbour list by atom ID
  *  @param[in] isSlice This decides whether there is a slice or not
  */
+void chill::classifyBondsCsr(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &offsets, const std::vector<int> &cols,
+    const chill::BondClassifier &rule, bool isSlice) {
+  const std::vector<std::vector<int>> none;
+  if (seams::product::reduction() == seams::product::Reduction::Left &&
+      seams::product::mode() == seams::product::Mode::Fp64) {
+    classifyBondsLeftFp64(yCloud, none, rule, isSlice, &offsets, &cols);
+    return;
+  }
+  std::vector<std::vector<int>> rows(static_cast<std::size_t>(yCloud.nop));
+  for (int i = 0; i < yCloud.nop && i + 1 < static_cast<int>(offsets.size()); ++i) {
+    rows[static_cast<std::size_t>(i)].push_back(
+        yCloud.pts[static_cast<std::size_t>(i)].atomID);
+    for (int k = offsets[static_cast<std::size_t>(i)];
+         k < offsets[static_cast<std::size_t>(i) + 1]; ++k) {
+      const int j = cols[static_cast<std::size_t>(k)];
+      if (j >= 0 && j < yCloud.nop) {
+        rows[static_cast<std::size_t>(i)].push_back(
+            yCloud.pts[static_cast<std::size_t>(j)].atomID);
+      }
+    }
+  }
+  classifyBonds(yCloud, rows, rule, isSlice);
+}
+
+int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                            const std::vector<int> &offsets, const std::vector<int> &cols) {
+  classifyBondsCsr(yCloud, offsets, cols, chill::chillPlusRule(), false);
+  int cubic = 0;
+  for (int i = 0; i < yCloud.nop; ++i) {
+    const int degree = (i + 1 < static_cast<int>(offsets.size()))
+                           ? offsets[static_cast<std::size_t>(i) + 1] -
+                                 offsets[static_cast<std::size_t>(i)]
+                           : 0;
+    int staggered = 0;
+    int eclipsed = 0;
+    for (const auto &bond : yCloud.pts[static_cast<std::size_t>(i)].c_ij) {
+      if (bond.classifier == molSys::bond_type::staggered) {
+        ++staggered;
+      } else if (bond.classifier == molSys::bond_type::eclipsed) {
+        ++eclipsed;
+      }
+    }
+    auto &ice = yCloud.pts[static_cast<std::size_t>(i)].iceType;
+    ice = molSys::atom_state_type::water;
+    if (degree == 4 && static_cast<int>(yCloud.pts[static_cast<std::size_t>(i)].c_ij.size()) == 4) {
+      if (eclipsed == 0 && staggered == 4) {
+        ice = molSys::atom_state_type::cubic;
+        ++cubic;
+      } else if (eclipsed == 1 && staggered == 3) {
+        ice = molSys::atom_state_type::hexagonal;
+      } else if (eclipsed == 4 && staggered == 0) {
+        ice = molSys::atom_state_type::clathrate;
+      } else if (eclipsed == 3) {
+        ice = molSys::atom_state_type::interClathrate;
+      } else if (staggered == 2 || (staggered == 3 && eclipsed == 0)) {
+        ice = molSys::atom_state_type::interfacial;
+      }
+    }
+  }
+  return cubic;
+}
+
 void
 chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      const std::vector<std::vector<int>> &nList, bool isSlice,

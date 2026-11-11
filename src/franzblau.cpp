@@ -634,6 +634,27 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth)
   return ringNetwork(nList, maxDepth, std::vector<char>());
 }
 
+std::vector<std::vector<int>>
+primitive::ringNetwork(const std::vector<int> &offsets, const std::vector<int> &cols,
+                       int maxDepth) {
+  const int n = offsets.empty() ? 0 : static_cast<int>(offsets.size()) - 1;
+  std::vector<std::vector<int>> rows(static_cast<std::size_t>(std::max(n, 0)));
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (n >= 256)
+#endif
+  for (int i = 0; i < n; ++i) {
+    const int a = offsets[static_cast<std::size_t>(i)];
+    const int b = offsets[static_cast<std::size_t>(i) + 1];
+    auto &row = rows[static_cast<std::size_t>(i)];
+    row.resize(static_cast<std::size_t>(1 + b - a));
+    row[0] = i;
+    for (int k = a; k < b; ++k) {
+      row[static_cast<std::size_t>(1 + k - a)] = cols[static_cast<std::size_t>(k)];
+    }
+  }
+  return ringNetwork(rows, maxDepth, std::vector<char>());
+}
+
 /**
  * @details The rings of the whole search whose lowest-indexed member is
  *  flagged in @a sources, in the same order; an empty mask flags every

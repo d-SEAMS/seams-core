@@ -117,7 +117,11 @@ struct Graph {
 //! member and runs toward the lesser of that member's ring neighbours, and
 //! the rings are sorted lexicographically.
 std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,
-                                          int maxDepth);
+                                           int maxDepth);
+
+//! Rings on a CSR of cloud indices (no self entry, one edge each).
+std::vector<std::vector<int>> ringNetwork(const std::vector<int> &offsets,
+                                           const std::vector<int> &cols, int maxDepth);
 
 //! The rings ringNetwork returns whose lowest-indexed member is flagged in
 //! @a sources (by index; empty flags every vertex), in the same order
