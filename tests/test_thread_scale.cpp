@@ -3,11 +3,13 @@
 
 #include <bop.hpp>
 #include <chill_plus_scheme.hpp>
+#include <domain.hpp>
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <thread_team.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <vector>
 
@@ -60,6 +62,7 @@ molSys::PointCloud<molSys::Point<double>, double> jitteredIce(int cells) {
 }
 
 struct Snapshot {
+  std::vector<std::vector<int>> neighbours;
   std::vector<int> published;
   std::vector<int> ovito;
   std::vector<double> q6;
@@ -107,6 +110,7 @@ Snapshot runOnce(const molSys::PointCloud<molSys::Point<double>, double> &base, 
   auto cloud = base;
   const auto nList = nneigh::neighListO(3.5, cloud, 1);
   Snapshot snap;
+  snap.neighbours = nList;
   snap.published.resize(static_cast<std::size_t>(cloud.nop));
   snap.ovito.resize(static_cast<std::size_t>(cloud.nop));
   {
@@ -137,12 +141,15 @@ Snapshot runOnce(const molSys::PointCloud<molSys::Point<double>, double> &base, 
 
 TEST_CASE("one, two and four threads match the serial CHILL+, q6 and rings",
           "[thread]") {
-  const auto base = jitteredIce(4);
+  // Above the threaded cell-list threshold, so two and four threads take
+  // that walk and must still match the one-thread linkcell rows.
+  const auto base = jitteredIce(8);
   const Snapshot serial = runOnce(base, 1);
   REQUIRE(lc_num_threads() == 1);
   for (const int threads : {2, 4}) {
     const Snapshot got = runOnce(base, threads);
     REQUIRE(lc_num_threads() == threads);
+    REQUIRE(got.neighbours == serial.neighbours);
     REQUIRE(got.published == serial.published);
     REQUIRE(got.ovito == serial.ovito);
     REQUIRE(got.rings == serial.rings);
@@ -152,5 +159,31 @@ TEST_CASE("one, two and four threads match the serial CHILL+, q6 and rings",
       REQUIRE_THAT(got.q6[i], Catch::Matchers::WithinAbs(serial.q6[i], 1e-15));
       REQUIRE_THAT(got.q6bar[i], Catch::Matchers::WithinAbs(serial.q6bar[i], 1e-15));
     }
+  }
+}
+
+TEST_CASE("one, two and four ranks list the same rings as one rank", "[thread]") {
+  const auto base = jitteredIce(8);
+  const auto whole = nneigh::getNewNeighbourListByIndex(base, 3.5);
+  const auto serial = primitive::ringNetwork(whole, 6);
+  for (const int nRanks : {1, 2, 4}) {
+    std::vector<std::vector<int>> joined;
+    for (int rank = 0; rank < nRanks; rank++) {
+      const auto share = seams::domain::decompose(base, rank, nRanks, 3.5 * 4);
+      const auto nbrs = seams::domain::haloRanks(share);
+      for (const int other : nbrs) {
+        REQUIRE(other != rank);
+        REQUIRE(other >= 0);
+        REQUIRE(other < nRanks);
+      }
+      const auto mine = seams::domain::rings(base, 3.5, 6, rank, nRanks);
+      joined.insert(joined.end(), mine.begin(), mine.end());
+    }
+    std::stable_sort(joined.begin(), joined.end(),
+                     [](const auto &a, const auto &b) { return a[0] < b[0]; });
+    auto expect = serial;
+    std::stable_sort(expect.begin(), expect.end(),
+                     [](const auto &a, const auto &b) { return a[0] < b[0]; });
+    REQUIRE(joined == expect);
   }
 }

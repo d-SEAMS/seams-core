@@ -209,6 +209,19 @@ Share decompose(const Cloud &cloud, int rank, int nRanks, double halo) {
   return share;
 }
 
+std::vector<int> haloRanks(const Share &share) {
+  std::vector<int> ranks;
+  ranks.reserve(share.local.size());
+  for (std::size_t k = 0; k < share.local.size(); k++) {
+    if (!share.owned.empty() && !share.owned[k]) {
+      ranks.push_back(share.owner[k]);
+    }
+  }
+  std::sort(ranks.begin(), ranks.end());
+  ranks.erase(std::unique(ranks.begin(), ranks.end()), ranks.end());
+  return ranks;
+}
+
 Cloud subCloud(const Cloud &cloud, const std::vector<int> &atoms) {
   Cloud out;
   out.currentFrame = cloud.currentFrame;
@@ -381,32 +394,96 @@ RingSummary reduceRings(const Cloud &cloud, double cutoff, int maxDepth,
   // its owner's after one exchange of (frame index, type) pairs
   std::vector<int> type(nLocal, 1);
   localTypes(mine, type);
-  std::vector<int> sendCount(static_cast<std::size_t>(nRanks), 0);
+  // Halo owners are the edges of the distributed graph. A rank that
+  // lists us is added if our own halo missed it, so every edge has
+  // both directions before MPI_Dist_graph_create_adjacent.
+  std::vector<int> nbrs = haloRanks(share);
+  {
+    const int mine = static_cast<int>(nbrs.size());
+    std::vector<int> degs(static_cast<std::size_t>(nRanks), 0);
+    MPI_Allgather(&mine, 1, MPI_INT, degs.data(), 1, MPI_INT, comm);
+    std::vector<int> off(static_cast<std::size_t>(nRanks), 0);
+    std::exclusive_scan(degs.begin(), degs.end(), off.begin(), 0);
+    const int total = off.back() + degs.back();
+    std::vector<int> listed(static_cast<std::size_t>(total));
+    MPI_Allgatherv(nbrs.data(), mine, MPI_INT, listed.data(), degs.data(),
+                   off.data(), MPI_INT, comm);
+    std::vector<char> seen(static_cast<std::size_t>(nRanks), 0);
+    for (const int n : nbrs) {
+      if (n >= 0 && n < nRanks) {
+        seen[static_cast<std::size_t>(n)] = 1;
+      }
+    }
+    for (int other = 0; other < nRanks; other++) {
+      if (other == rank) {
+        continue;
+      }
+      const int base = off[static_cast<std::size_t>(other)];
+      const int nEdge = degs[static_cast<std::size_t>(other)];
+      for (int e = 0; e < nEdge; e++) {
+        if (listed[static_cast<std::size_t>(base + e)] == rank &&
+            !seen[static_cast<std::size_t>(other)]) {
+          nbrs.push_back(other);
+          seen[static_cast<std::size_t>(other)] = 1;
+        }
+      }
+    }
+    std::sort(nbrs.begin(), nbrs.end());
+  }
+  const int degree = static_cast<int>(nbrs.size());
+  MPI_Comm graph = MPI_COMM_NULL;
+  MPI_Dist_graph_create_adjacent(
+      comm, degree, nbrs.data(), MPI_UNWEIGHTED, degree, nbrs.data(),
+      MPI_UNWEIGHTED, MPI_INFO_NULL, 0, &graph);
+  std::vector<int> slot(static_cast<std::size_t>(nRanks), -1);
+  for (int s = 0; s < degree; s++) {
+    slot[static_cast<std::size_t>(nbrs[static_cast<std::size_t>(s)])] = s;
+  }
+  std::vector<int> sendCount(static_cast<std::size_t>(degree), 0);
   for (std::size_t k = 0; k < nLocal; k++) {
     if (!share.owned[k] && type[k] > 1) {
-      sendCount[static_cast<std::size_t>(share.owner[k])] += 2;
+      const int s = slot[static_cast<std::size_t>(share.owner[k])];
+      if (s >= 0) {
+        sendCount[static_cast<std::size_t>(s)] += 2;
+      }
     }
   }
-  std::vector<int> sendDispl(static_cast<std::size_t>(nRanks), 0);
+  std::vector<int> sendDispl(static_cast<std::size_t>(degree), 0);
   std::exclusive_scan(sendCount.begin(), sendCount.end(), sendDispl.begin(), 0);
-  std::vector<int> send(static_cast<std::size_t>(sendDispl.back() + sendCount.back()));
+  const int sendN = degree == 0 ? 0 : sendDispl.back() + sendCount.back();
+  std::vector<int> send(static_cast<std::size_t>(sendN));
   {
     std::vector<int> at = sendDispl;
     for (std::size_t k = 0; k < nLocal; k++) {
       if (!share.owned[k] && type[k] > 1) {
-        int &pos = at[static_cast<std::size_t>(share.owner[k])];
+        const int s = slot[static_cast<std::size_t>(share.owner[k])];
+        if (s < 0) {
+          continue;
+        }
+        int &pos = at[static_cast<std::size_t>(s)];
         send[static_cast<std::size_t>(pos++)] = share.local[k];
         send[static_cast<std::size_t>(pos++)] = type[k];
       }
     }
   }
-  std::vector<int> recvCount(static_cast<std::size_t>(nRanks), 0);
-  MPI_Alltoall(sendCount.data(), 1, MPI_INT, recvCount.data(), 1, MPI_INT, comm);
-  std::vector<int> recvDispl(static_cast<std::size_t>(nRanks), 0);
-  std::exclusive_scan(recvCount.begin(), recvCount.end(), recvDispl.begin(), 0);
-  std::vector<int> recv(static_cast<std::size_t>(recvDispl.back() + recvCount.back()));
-  MPI_Alltoallv(send.data(), sendCount.data(), sendDispl.data(), MPI_INT,
-                recv.data(), recvCount.data(), recvDispl.data(), MPI_INT, comm);
+  std::vector<int> recvCount(static_cast<std::size_t>(std::max(degree, 1)), 0);
+  std::vector<int> recvDispl(static_cast<std::size_t>(std::max(degree, 1)), 0);
+  int sink = 0;
+  const int *sendPtr = degree == 0 ? &sink : send.data();
+  const int *sendCountPtr = degree == 0 ? &sink : sendCount.data();
+  const int *sendDisplPtr = degree == 0 ? &sink : sendDispl.data();
+  MPI_Neighbor_alltoall(sendCountPtr, 1, MPI_INT, recvCount.data(), 1, MPI_INT,
+                        graph);
+  std::exclusive_scan(recvCount.begin(),
+                      recvCount.begin() + std::max(degree, 0), recvDispl.begin(),
+                      0);
+  const int recvN = degree == 0 ? 0 : recvDispl[static_cast<std::size_t>(degree - 1)] +
+                                          recvCount[static_cast<std::size_t>(degree - 1)];
+  std::vector<int> recv(static_cast<std::size_t>(std::max(recvN, 1)));
+  MPI_Neighbor_alltoallv(sendPtr, sendCountPtr, sendDisplPtr, MPI_INT, recv.data(),
+                         recvCount.data(), recvDispl.data(), MPI_INT, graph);
+  recv.resize(static_cast<std::size_t>(recvN));
+  MPI_Comm_free(&graph);
   for (std::size_t j = 0; j + 1 < recv.size(); j += 2) {
     // share.local is ascending, and an owner holds every atom it owns
     const auto it = std::lower_bound(share.local.begin(), share.local.end(), recv[j]);

@@ -54,6 +54,11 @@ std::uint64_t hilbertKey(std::uint32_t x, std::uint32_t y, std::uint32_t z,
 //! of one of them. Without a periodic box rank 0 owns every atom.
 Share decompose(const Cloud &cloud, int rank, int nRanks, double halo);
 
+//! Ranks that own a halo atom of @a share, sorted, without this rank.
+//! The relation is symmetric: a cell within @a halo of both sides is
+//! listed by each owner.
+std::vector<int> haloRanks(const Share &share);
+
 //! The listed atoms of @a cloud, in that order, in the same box
 Cloud subCloud(const Cloud &cloud, const std::vector<int> &atoms);
 

@@ -28,6 +28,7 @@
 #include <utility>
 
 #include <neighbours.hpp>
+#include <par_team.hpp>
 #include <simd_distance.hpp>
 #include <thread_team.hpp>
 
@@ -213,61 +214,31 @@ void binCutoffRows(std::size_t count, const Ends &ends,
     place(cloudPair, 0, rows, 0, count, next);
     return;
   }
+  // One record per pair, then a stable sort on (row, partner). The sorted
+  // rows are the serial placement's rows: each row was sorted there too.
+  std::vector<std::pair<int, int>> pairs(count);
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-  const std::size_t width = static_cast<std::size_t>(threads);
-  const std::size_t blocks = 4 * width;
-  const std::size_t span = (rows + blocks - 1) / blocks;
-  // Each thread's share of each block: its count, then where it starts
-  std::vector<std::size_t> where(blocks * width, 0);
-  std::vector<std::size_t> blockStart(blocks + 1, 0);
-  std::unique_ptr<std::array<int, 2>[]> staged(new std::array<int, 2>[count]);
-#pragma omp parallel num_threads(threads)
-  {
-    const auto t = static_cast<std::size_t>(omp_get_thread_num());
-    const auto nt = static_cast<std::size_t>(omp_get_num_threads());
-    const std::size_t lo = count * t / nt;
-    const std::size_t hi = count * (t + 1) / nt;
-    std::vector<std::size_t> mine(blocks, 0);
-    for (std::size_t k = lo; k < hi; k++) {
-      mine[static_cast<std::size_t>(cloudPair(k).first) / span]++;
-    }
-    for (std::size_t b = 0; b < blocks; b++) {
-      where[b * width + t] = mine[b];
-    }
-#pragma omp barrier
-#pragma omp single
-    {
-      std::size_t run = 0;
-      for (std::size_t b = 0; b < blocks; b++) {
-        blockStart[b] = run;
-        for (std::size_t s = 0; s < nt; s++) {
-          const std::size_t n = where[b * width + s];
-          where[b * width + s] = run;
-          run += n;
-        }
-      }
-      blockStart[blocks] = run;
-    }
-    for (std::size_t b = 0; b < blocks; b++) {
-      mine[b] = where[b * width + t];
-    }
-    for (std::size_t k = lo; k < hi; k++) {
-      const auto [r, j] = cloudPair(k);
-      staged[mine[static_cast<std::size_t>(r) / span]++] = {r, j};
-    }
-#pragma omp barrier
-    std::vector<std::size_t> next;
-#pragma omp for schedule(dynamic, 1)
-    for (std::int64_t b = 0; b < static_cast<std::int64_t>(blocks); b++) {
-      const std::size_t r0 = std::min(rows, static_cast<std::size_t>(b) * span);
-      place([&staged](std::size_t k) {
-              return std::pair<int, int>{staged[k][0], staged[k][1]};
-            },
-            r0, std::min(rows, r0 + span), blockStart[b], blockStart[b + 1],
-            next);
-    }
-  }
+#pragma omp parallel for schedule(static) num_threads(threads)
 #endif
+  for (std::int64_t k = 0; k < static_cast<std::int64_t>(count); k++) {
+    pairs[static_cast<std::size_t>(k)] = cloudPair(static_cast<std::size_t>(k));
+  }
+  seams::parallelStableSort(pairs, [](const std::pair<int, int> &a,
+                                      const std::pair<int, int> &b) {
+    return a.first < b.first || (a.first == b.first && a.second < b.second);
+  });
+  out.first.assign(rows + 1, 0);
+  out.partner.resize(count);
+  for (const auto &pair : pairs) {
+    out.first[static_cast<std::size_t>(pair.first) + 1]++;
+  }
+  for (std::size_t r = 0; r < rows; r++) {
+    out.first[r + 1] += out.first[r];
+  }
+  std::vector<std::size_t> at(out.first.begin(), out.first.end() - 1);
+  for (const auto &pair : pairs) {
+    out.partner[at[static_cast<std::size_t>(pair.first)]++] = pair.second;
+  }
 }
 
 /**
@@ -287,6 +258,7 @@ void binCutoffRows(std::size_t count, const Ends &ends,
 bool cutoffRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                 const std::vector<int> &subset, double rcutoff,
                 CutoffRows &out) {
+  seams::adoptThreads();
   const size_t nSubset = subset.size();
   if (nSubset == 0) {
     out.first.assign(static_cast<std::size_t>(yCloud.nop) + 1, 0);
@@ -632,6 +604,9 @@ bool nneigh::cellListRowsThreaded(
     }
   }
   rows.assign(n, {});
+  for (auto &row : rows) {
+    row.reserve(16);
+  }
   const double rc2 = rcutoff * rcutoff;
   const gen::FracBox frame = gen::makeFracBox(yCloud);
 #ifdef SEAMS_HAS_MINIMAGE
@@ -655,7 +630,7 @@ bool nneigh::cellListRowsThreaded(
     std::vector<double> d2;
 #ifdef SEAMS_HAS_OPENMP
 #if !defined(SEAMS_HAS_OFFLOAD)
-#pragma omp for schedule(dynamic, 256)
+#pragma omp for schedule(static)
 #endif
 #endif
     for (std::int64_t kk = 0; kk < static_cast<std::int64_t>(n); kk++) {
@@ -907,6 +882,25 @@ nneigh::neighListO(double rcutoff,
       typeIIndices.push_back(i);
     }
   }
+
+#ifdef SEAMS_HAS_OPENMP
+  // On one thread linkcell's fused kernel is the fastest builder. With
+  // a team, the cell walk over atoms scales and each row is sorted, so
+  // it matches that kernel's rows.
+  if (!omp_in_parallel() && omp_get_max_threads() > 1 &&
+      typeIIndices.size() >= static_cast<std::size_t>(kThreadedCellRowsMinAtoms)) {
+    std::vector<std::vector<int>> rows;
+    if (cellListRowsThreaded(yCloud, typeIIndices, rcutoff, rows)) {
+      nList = seedWithSelfIDs(indexToID, yCloud.nop);
+      for (std::size_t k = 0; k < rows.size(); k++) {
+        for (const int j : rows[k]) {
+          appendNeighbourID(nList, indexToID, typeIIndices[k], j);
+        }
+      }
+      return nList;
+    }
+  }
+#endif
 
 #ifdef SEAMS_HAS_CUTOFF_LIST
   // linkcell (or vesin) is the same cutoff set as the orthorhombic cell
@@ -1169,6 +1163,24 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
   }
 
   std::vector<std::vector<int>> nList(yCloud.nop);
+
+#ifdef SEAMS_HAS_OPENMP
+  if (!omp_in_parallel() && omp_get_max_threads() > 1 &&
+      yCloud.nop >= kThreadedCellRowsMinAtoms) {
+    std::vector<int> allIndices(static_cast<std::size_t>(yCloud.nop));
+    std::iota(allIndices.begin(), allIndices.end(), 0);
+    std::vector<std::vector<int>> rows;
+    if (cellListRowsThreaded(yCloud, allIndices, cutoff, rows)) {
+      for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+        nList[static_cast<std::size_t>(iatom)].push_back(iatom);
+        auto &row = rows[static_cast<std::size_t>(iatom)];
+        nList[static_cast<std::size_t>(iatom)].insert(nList[static_cast<std::size_t>(iatom)].end(),
+                                                     row.begin(), row.end());
+      }
+      return nList;
+    }
+  }
+#endif
 
   // -------------------------------------------------------
 #ifdef SEAMS_HAS_CUTOFF_LIST

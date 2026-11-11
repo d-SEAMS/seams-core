@@ -19,10 +19,10 @@ index 95ddad7..5cd3508 100644
  }  // extern "C"
  #endif  // __cplusplus
 diff --git a/meson.build b/meson.build
-index fb60afe..98c938f 100644
+index fb60afe..ceadbc4 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -65,6 +65,7 @@ linkcell_cargo = custom_target(
+@@ -65,9 +65,11 @@ linkcell_cargo = custom_target(
      'Cargo.lock',
      'src/lib.rs',
      'src/knearest.rs',
@@ -30,6 +30,10 @@ index fb60afe..98c938f 100644
      'src/cell.rs',
      'src/error.rs',
      'src/capi.rs',
++    'src/pairs.rs',
+     'scripts/copy-cargo-artifacts.py',
+   ),
+   output: _cargo_outputs,
 diff --git a/src/bins.rs b/src/bins.rs
 index 0aa9468..db4631b 100644
 --- a/src/bins.rs
@@ -44,7 +48,7 @@ index 0aa9468..db4631b 100644
          let parallel = false;
          if buf.offsets.len() != ncell + 1 {
 diff --git a/src/capi.rs b/src/capi.rs
-index 64a4cc2..597aadc 100644
+index 64a4cc2..9e9ad73 100644
 --- a/src/capi.rs
 +++ b/src/capi.rs
 @@ -5,9 +5,63 @@
@@ -130,7 +134,124 @@ index 64a4cc2..597aadc 100644
      if let Err(e) = err {
          set_error(&e.to_string());
          return 1;
-@@ -466,8 +522,10 @@ unsafe fn pairs_call<'a>(
+@@ -386,33 +442,106 @@ pub unsafe extern "C" fn lc_pairs_within_rows(
+     if out_count.is_null() {
+         return fail_msg("null pointer");
+     }
+-    let (key, found) = match unsafe { pairs_call(xyz, n, simbox, cutoff, mask, cell_hint, half) } {
++    // The fused tile kernel writes each bin range at a fixed offset, so the
++    // row order matches the one-thread walk. A query keeps that vector for
++    // the fill on this thread.
++    let (key, pairs) = match unsafe { fused_rows(xyz, n, simbox, cutoff, mask, cell_hint, half) } {
+         Ok(v) => v,
+         Err(code) => return code,
+     };
+-    let rows = found.rows();
++    let rows = pairs.len();
+     unsafe {
+         *out_count = rows;
+     }
+     if out.is_null() {
+-        park(&key, found);
++        park_rows(&key, pairs);
+         clear_error();
+         return 0;
+     }
+     if cap < rows {
+-        park(&key, found);
++        park_rows(&key, pairs);
+         return fail_msg("pair buffer is shorter than the pair count");
+     }
+-    // Safety: the caller gave `cap >= rows` rows.
+-    let rows_out = RowOut(out);
+-    crate::pairs::in_pool(found.rows(), move || {
+-        let out = rows_out.get();
+-        unsafe { found.write_rows(out, |i, j, shift, dist2| lc_pair { i, j, shift, dist2 }) }
+-    });
++    for (t, pair) in pairs.iter().enumerate() {
++        if pair.i > c_int::MAX as usize || pair.j > c_int::MAX as usize {
++            return fail(Error::Overflow);
++        }
++        unsafe {
++            *out.add(t) = lc_pair {
++                i: pair.i as c_int,
++                j: pair.j as c_int,
++                shift: pair.shift,
++                dist2: pair.dist2,
++            };
++        }
++    }
+     clear_error();
+     0
+ }
+ 
++/// [`pairs_within`]: one thread uses the fused kernel, several threads
++/// count each bin range and write it in place.
++unsafe fn fused_rows<'a>(
++    xyz: *const f64,
++    n: usize,
++    simbox: *const lc_cell,
++    cutoff: f64,
++    mask: *const c_int,
++    cell_hint: f64,
++    half: c_int,
++) -> Result<(PairKey<'a>, Vec<crate::pairs::Pair>), c_int> {
++    if n == 0 {
++        return Err(fail(Error::Empty));
++    }
++    if xyz.is_null() || simbox.is_null() {
++        return Err(fail_msg("null pointer"));
++    }
++    if n > c_int::MAX as usize || n > (isize::MAX as usize) / 3 {
++        return Err(fail(Error::Overflow));
++    }
++    let box_c = unsafe { *simbox };
++    let sim = Cell::from_vectors(
++        [box_c.ax, box_c.ay, box_c.az],
++        [box_c.bx, box_c.by, box_c.bz],
++        [box_c.cx, box_c.cy, box_c.cz],
++        [box_c.ox, box_c.oy, box_c.oz],
++    )
++    .map_err(|e| {
++        set_error(&e.to_string());
++        1
++    })?;
++    let pts: &'a [[f64; 3]] = unsafe { std::slice::from_raw_parts(xyz.cast::<[f64; 3]>(), n) };
++    let mask_raw: Option<&'a [c_int]> = if mask.is_null() {
++        None
++    } else {
++        Some(unsafe { std::slice::from_raw_parts(mask, n) })
++    };
++    let hint = if cell_hint > 0.0 {
++        Some(cell_hint)
++    } else {
++        None
++    };
++    let key = PairKey {
++        xyz: pts,
++        simbox: box_c,
++        cutoff,
++        mask: mask_raw,
++        cell_hint: hint,
++        half: half != 0,
++    };
++    if let Some(pairs) = take_parked_rows(&key) {
++        return Ok((key, pairs));
++    }
++    let mask_vec: Option<Vec<bool>> = mask_raw.map(|m| m.iter().map(|&v| v != 0).collect());
++    let pairs = with_threads(|| {
++        crate::pairs::pairs_within(pts, &sim, cutoff, mask_vec.as_deref(), hint, half != 0)
++    });
++    match pairs {
++        Ok(pairs) => Ok((key, pairs)),
++        Err(e) => Err(fail(e)),
++    }
++}
++
+ /// Check the inputs, then take the parked search or run a new one.
+ unsafe fn pairs_call<'a>(
+     xyz: *const f64,
+@@ -466,8 +595,10 @@ unsafe fn pairs_call<'a>(
          return Ok((key, found));
      }
      let mask_vec: Option<Vec<bool>> = mask_raw.map(|m| m.iter().map(|&v| v != 0).collect());
@@ -143,8 +264,63 @@ index 64a4cc2..597aadc 100644
      });
      match found {
          Ok(found) => Ok((key, found)),
+@@ -570,6 +701,54 @@ fn take_parked(key: &PairKey<'_>) -> Option<crate::pairs::Found> {
+     }
+ }
+ 
++struct ParkedRows {
++    xyz: Vec<[f64; 3]>,
++    simbox: [u64; 12],
++    cutoff: u64,
++    mask: Option<Vec<bool>>,
++    cell_hint: Option<u64>,
++    half: bool,
++    pairs: Vec<crate::pairs::Pair>,
++}
++
++thread_local! {
++    #[allow(clippy::missing_const_for_thread_local)]
++    static PARKED_ROWS: RefCell<Option<ParkedRows>> = RefCell::new(None);
++}
++
++fn take_parked_rows(key: &PairKey<'_>) -> Option<Vec<crate::pairs::Pair>> {
++    let parked = PARKED_ROWS.with(|slot| slot.borrow_mut().take())?;
++    let mask_same = match (&parked.mask, key.mask) {
++        (None, None) => true,
++        (Some(a), Some(b)) => a.len() == b.len() && a.iter().zip(b).all(|(&x, &y)| x == (y != 0)),
++        _ => false,
++    };
++    let same = parked.half == key.half
++        && parked.cutoff == key.cutoff.to_bits()
++        && parked.cell_hint == key.cell_hint.map(f64::to_bits)
++        && parked.simbox == box_bits(&key.simbox)
++        && mask_same
++        && same_bits(&parked.xyz, key.xyz);
++    if same {
++        Some(parked.pairs)
++    } else {
++        None
++    }
++}
++
++fn park_rows(key: &PairKey<'_>, pairs: Vec<crate::pairs::Pair>) {
++    let parked = ParkedRows {
++        xyz: key.xyz.to_vec(),
++        simbox: box_bits(&key.simbox),
++        cutoff: key.cutoff.to_bits(),
++        mask: key.mask.map(|m| m.iter().map(|&v| v != 0).collect()),
++        cell_hint: key.cell_hint.map(f64::to_bits),
++        half: key.half,
++        pairs,
++    };
++    PARKED_ROWS.with(|slot| *slot.borrow_mut() = Some(parked));
++}
++
+ fn park(key: &PairKey<'_>, found: crate::pairs::Found) {
+     let parked = ParkedPairs {
+         xyz: key.xyz.to_vec(),
 diff --git a/src/knearest.rs b/src/knearest.rs
-index 3a864f4..d77c7b4 100644
+index 3a864f4..e46c222 100644
 --- a/src/knearest.rs
 +++ b/src/knearest.rs
 @@ -13,9 +13,11 @@
@@ -162,10 +338,11 @@ index 3a864f4..d77c7b4 100644
  //! on the stack for `k <= 16`.
  
  use crate::bins::{self, axis_gap, for_new_layer, slab_dist2, Mesh};
-@@ -559,10 +561,20 @@ fn dispatch<const MODE: u8>(
+@@ -558,11 +560,28 @@ fn dispatch<const MODE: u8>(
+     let ncell = mesh.offsets.len() - 1;
      #[cfg(feature = "parallel")]
      {
-         use rayon::prelude::*;
+-        use rayon::prelude::*;
 -        (0..ncell)
 -            .into_par_iter()
 -            .with_min_len(64)
@@ -179,18 +356,27 @@ index 3a864f4..d77c7b4 100644
 +                job(c);
 +            }
 +        } else {
-+            (0..ncell)
-+                .into_par_iter()
-+                .with_min_len(64)
-+                .for_each_init(crate::pop::JobTimer::new, |_timer, c| job(c));
++            // A fixed share of the cells. Work stealing was moving the
++            // last cells between threads and the wall time jumped from
++            // run to run once the pool was wider than two.
++            rayon::broadcast(|ctx| {
++                let threads = ctx.num_threads().max(1);
++                let lo = ncell * ctx.index() / threads;
++                let hi = ncell * (ctx.index() + 1) / threads;
++                let _timer = crate::pop::JobTimer::new();
++                for c in lo..hi {
++                    job(c);
++                }
++            });
 +        }
      }
      #[cfg(not(feature = "parallel"))]
      {
-@@ -725,16 +737,25 @@ fn dispatch_blocks<const MODE: u8>(
+@@ -724,17 +743,26 @@ fn dispatch_blocks<const MODE: u8>(
+     };
      #[cfg(feature = "parallel")]
      {
-         use rayon::prelude::*;
+-        use rayon::prelude::*;
 -        (0..nblock).into_par_iter().with_min_len(8).for_each_init(
 -            || {
 -                (
@@ -209,16 +395,17 @@ index 3a864f4..d77c7b4 100644
 +                job(&mut cand, &mut heap, blk);
 +            }
 +        } else {
-+            (0..nblock).into_par_iter().with_min_len(8).for_each_init(
-+                || {
-+                    (
-+                        crate::pop::JobTimer::new(),
-+                        Candidates::default(),
-+                        KHeap::new(k),
-+                    )
-+                },
-+                |(_timer, cand, heap), blk| job(cand, heap, blk),
-+            );
++            rayon::broadcast(|ctx| {
++                let threads = ctx.num_threads().max(1);
++                let lo = nblock * ctx.index() / threads;
++                let hi = nblock * (ctx.index() + 1) / threads;
++                let _timer = crate::pop::JobTimer::new();
++                let mut cand = Candidates::default();
++                let mut heap = KHeap::new(k);
++                for blk in lo..hi {
++                    job(&mut cand, &mut heap, blk);
++                }
++            });
 +        }
      }
      #[cfg(not(feature = "parallel"))]
