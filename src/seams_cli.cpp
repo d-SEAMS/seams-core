@@ -1947,7 +1947,7 @@ int main(int argc, char *argv[]) {
                  }));
 
   parser.add(Positional("command")
-                 .help("read | chill | chill-plus | cages | "
+                 .help("read | chill | chill-plus | ovito-chill+ | cages | "
                        "fingerprint | ions | "
                        "f4 | steinhardt | rdf | cn | hbonds | pairs | density-z | "
                        "domains")
@@ -2072,6 +2072,12 @@ int main(int argc, char *argv[]) {
     return 2;
   }
 
+  if (cmd == "ovito-chill+" || cmd == "ovito_chill_plus") {
+    if (!chillRuleSet) {
+      chillRule = "ovito-chill+";
+    }
+    cmd = "chill-plus";
+  }
   if (!chillRuleSet && chillRule.empty()) {
     if (const char *fromEnv = std::getenv("CHILL_PLUS_RULE")) {
       chillRule = fromEnv;

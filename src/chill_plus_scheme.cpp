@@ -58,6 +58,9 @@ ChillPlusRule namedRule(std::string name) {
   if (name == "chill+" || name == "chill-plus" || name == "published") {
     return ChillPlusRule::Published;
   }
+  if (name == "ovito-chill+" || name == "ovito-chill-plus") {
+    return ChillPlusRule::Ovito;
+  }
   throw std::invalid_argument(
       "unknown CHILL+ rule '" + name +
       "' (use chill+ or ovito-chill+)");
@@ -209,6 +212,14 @@ void applyChillPlus(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, ChillPlusRule rule,
     bool isSlice) {
+  if (rule == ChillPlusRule::Ovito) {
+    // Whole cutoff row: q3 and c_ij both see the shell. Crystal rows
+    // still require that row to hold four neighbours. OVITO's c_ij
+    // edges are open.
+    getCorrelPlus(yCloud, nList, isSlice, 0, false);
+    getIceTypePlusNoPrint(yCloud, nList, isSlice, false);
+    return;
+  }
   getCorrelPlus(yCloud, nList, isSlice, 4);
   getIceTypePlusNoPrint(yCloud, nList, isSlice, true);
 }

@@ -1,0 +1,4 @@
+# Copyright (c) d-SEAMS developers
+# OVITO 3.17.2 Chill+: four neighbours inside the cutoff, q3 over
+# the whole cutoff shell, Table 1 neighbour test off.
+rule: ovito-chill+
