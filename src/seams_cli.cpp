@@ -613,21 +613,23 @@ int cmdSymmetry(std::ostream &os, Cloud &cloud) {
   std::map<std::string, int> tally;
   int unmatched = 0;
   bool wroteShell = false;
+  std::vector<int> kind;
+  symm::classifyIce(xyz, vectors, kind);
   for (int i = 0; i < cloud.nop; i++) {
-    const Eigen::MatrixXd shell = symm::iceShell(xyz, vectors, i);
-    if (shell.rows() != 17) {
+    if (kind[static_cast<size_t>(i)] < 0) {
       unmatched++;
       continue;
     }
-    const symm::Overlay hit = symm::best(shell);
-    if (hit.status != 0) {
-      unmatched++;
-      continue;
-    }
-    tally[hit.name] += 1;
+    const char *label =
+        symm::name(static_cast<symm::Kind>(kind[static_cast<size_t>(i)]));
+    tally[label] += 1;
     if (!wroteShell) {
-      writeOverlay(os, "shell", hit);
-      wroteShell = true;
+      const Eigen::MatrixXd shell = symm::iceShell(xyz, vectors, i);
+      const symm::Overlay hit = symm::best(shell);
+      if (hit.status == 0) {
+        writeOverlay(os, "shell", hit);
+        wroteShell = true;
+      }
     }
   }
   os << "shells";

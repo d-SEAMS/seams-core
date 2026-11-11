@@ -57,6 +57,19 @@ std::vector<Overlay> score(const Eigen::MatrixXd &environment,
                            const char *backend = nullptr);
 Overlay best(const Eigen::MatrixXd &environment, const char *backend = nullptr);
 
+// In-tree matcher (quaternion Kabsch, fixed permutations). backend "kernel".
+Overlay matchKernel(const Eigen::MatrixXd &environment);
+
+// Per-atom ice label for a periodic cell. kind[i] is iceIh, iceIc, iceIsd,
+// or -1 when the oxygen is not a bulk ice shell. Labels match matchKernel
+// on the shells the test cells produce. Parallel over atoms.
+void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vectors,
+                 std::vector<int> &kind);
+
+// Alvarez continuous shape measure of environment against its best template.
+// 0 is a perfect match. Scale, rotation and translation are free.
+double shapeMeasure(const Eigen::MatrixXd &environment);
+
 struct Group {
   int status = 1;
   std::string symbol;

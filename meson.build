@@ -386,6 +386,23 @@ if not spglib_opt.disabled()
   endif
 endif
 
+# GPL-2 continuous shape measure (Pinsky, Avnir, Alvarez). The program
+# needs OpenBabel. It is not linked into libyodaLib. The in-tree measure
+# is the published formula on the fixed shells. This build uses IRA under
+# the Apache-2.0 option of its dual licence.
+csm_opt = get_option('with_csm')
+if not csm_opt.disabled()
+  openbabel_dep = dependency('openbabel-2.0', required: false)
+  if not openbabel_dep.found()
+    if csm_opt.enabled()
+      error('with_csm=enabled but OpenBabel was not found')
+    endif
+    message('CSM program left off (OpenBabel absent)')
+  else
+    message('OpenBabel found; the CSM program is not wired into this tree')
+  endif
+endif
+
 sphericart_opt = get_option('with_sphericart')
 sphericart_found = false
 if not sphericart_opt.disabled()

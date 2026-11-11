@@ -534,6 +534,10 @@ std::vector<Overlay> score(const Eigen::MatrixXd &environment, const char *backe
 }
 
 Overlay best(const Eigen::MatrixXd &environment, const char *backend) {
+  if (backend == nullptr || (std::strcmp(backend, "ira") != 0 &&
+                             std::strcmp(backend, "kabsch") != 0)) {
+    return matchKernel(environment);
+  }
   const auto hits = score(environment, backend);
   if (hits.empty()) {
     return {};
@@ -850,4 +854,29 @@ int seams_symmetry_crystal(int which, double *lattice9, double *xyz, int cap, in
 int seams_symmetry_backend(char *name, int name_len) {
   copySymbol(symm::matcher(), name, name_len);
   return symm::iraLinked() ? 0 : 0;
+}
+
+int seams_symmetry_classify(const double *xyz, int n, const double *lattice9,
+                            int *labels) {
+  if (xyz == nullptr || lattice9 == nullptr || labels == nullptr || n < 1) {
+    return 1;
+  }
+  Eigen::Matrix3d vectors;
+  for (int vec = 0; vec < 3; vec++) {
+    for (int comp = 0; comp < 3; comp++) {
+      vectors(vec, comp) = lattice9[3 * vec + comp];
+    }
+  }
+  Eigen::MatrixXd cart(n, 3);
+  for (int i = 0; i < n; i++) {
+    cart(i, 0) = xyz[3 * i];
+    cart(i, 1) = xyz[3 * i + 1];
+    cart(i, 2) = xyz[3 * i + 2];
+  }
+  std::vector<int> kind;
+  symm::classifyIce(cart, vectors, kind);
+  for (int i = 0; i < n; i++) {
+    labels[i] = kind[static_cast<size_t>(i)];
+  }
+  return 0;
 }

@@ -16,6 +16,7 @@ ydslib_sources = files(
   'generic.cpp',
   'ira_sofi.cpp',
   'local_symmetry.cpp',
+  'shell_kernel.cpp',
   'cage_canon.cpp',
   'chill_offload.cpp',
   'chill_plus_scheme.cpp',

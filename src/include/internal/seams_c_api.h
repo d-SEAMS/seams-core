@@ -52,6 +52,10 @@ int seams_symmetry_template(int id, double *points, int cap, int *n_out);
 int seams_symmetry_crystal(int which, double *lattice9, double *xyz, int cap,
                            int *n_out);
 int seams_symmetry_backend(char *name, int name_len);
+/* Per-atom ice label. lattice9 is three row vectors. labels[i] is
+ * 0 ice-Ih, 1 ice-Ic, 2 ice-Isd, or -1. */
+int seams_symmetry_classify(const double *xyz, int n, const double *lattice9,
+                            int *labels);
 
 #ifdef __cplusplus
 }
