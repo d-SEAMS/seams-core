@@ -22,18 +22,20 @@
 
 namespace {
 
-molSys::PointCloud<molSys::Point<double>, double> ice(int cells) {
+molSys::PointCloud<molSys::Point<double>, double> ice(int mx, int my, int mz) {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   const double bond = 2.75;
   const double lattice = 4.0 * bond / std::sqrt(3.0);
-  const double side = cells * lattice;
+  const double sideX = mx * lattice;
+  const double sideY = my * lattice;
+  const double sideZ = mz * lattice;
   const double basis[8][3] = {{0, 0, 0},         {0.5, 0.5, 0},     {0.5, 0, 0.5},
                               {0, 0.5, 0.5},     {0.25, 0.25, 0.25}, {0.75, 0.75, 0.25},
                               {0.75, 0.25, 0.75}, {0.25, 0.75, 0.75}};
   int id = 1;
-  for (int i = 0; i < cells; i++) {
-    for (int j = 0; j < cells; j++) {
-      for (int k = 0; k < cells; k++) {
+  for (int i = 0; i < mx; i++) {
+    for (int j = 0; j < my; j++) {
+      for (int k = 0; k < mz; k++) {
         for (const auto &b : basis) {
           molSys::Point<double> p;
           p.type = 1;
@@ -51,7 +53,7 @@ molSys::PointCloud<molSys::Point<double>, double> ice(int cells) {
   }
   cloud.nop = static_cast<int>(cloud.pts.size());
   cloud.currentFrame = 1;
-  cloud.box = {side, side, side};
+  cloud.box = {sideX, sideY, sideZ};
   cloud.boxLow = {0.0, 0.0, 0.0};
   return cloud;
 }
@@ -67,31 +69,43 @@ double haloOf(const std::string &op, double cutoff) {
   return cutoff;
 }
 
-void compute(const std::string &op, seams::domain::Work &work, double cutoff) {
-  if (op == "neigh") {
-    auto rows = nneigh::neighListO(cutoff, work.cloud, 1);
-    if (rows.size() != work.share.local.size()) {
-      std::fprintf(stderr, "neighbour rows %zu\n", rows.size());
-    }
-    return;
-  }
+void finish(const std::string &op, seams::domain::Work &work,
+            const std::vector<std::vector<int>> &rows) {
   if (op == "chill") {
-    auto rows = nneigh::neighListO(cutoff, work.cloud, 1);
     chill::applyChillPlus(work.cloud, rows, chill::ChillPlusRule::Published);
-    return;
-  }
-  if (op == "q6") {
-    auto rows = nneigh::neighListO(cutoff, work.cloud, 1);
+  } else if (op == "q6") {
     auto q = chill::steinhardtQl(work.cloud, rows, 6);
     if (q.ql.empty() && work.cloud.nop > 0) {
       std::fprintf(stderr, "empty q6\n");
     }
+  }
+}
+
+void compute(const std::string &op, seams::domain::Work &work, double cutoff) {
+  if (op == "rings") {
+    auto rings = seams::domain::ownedRings(work.cloud, cutoff, 6, work.share.owned);
+    if (rings.empty() && work.share.owned.size() > 1000) {
+      std::fprintf(stderr, "no rings\n");
+    }
     return;
   }
-  auto rings = seams::domain::ownedRings(work.cloud, cutoff, 6, work.share.owned);
-  if (rings.empty() && work.share.owned.size() > 1000) {
-    std::fprintf(stderr, "no rings\n");
+  // Several ranks only fill rows for the owned shell. The cell grid is
+  // the one reusedShellList keeps. One rank stays on the fused list.
+  bool single = true;
+  for (const char owned : work.share.owned) {
+    if (!owned) {
+      single = false;
+      break;
+    }
   }
+  if (single || work.cloud.nop < 40000) {
+    finish(op, work, nneigh::neighListO(cutoff, work.cloud, 1));
+    return;
+  }
+  std::vector<char> source;
+  seams::domain::markSources(work.cloud, work.share, op == "neigh" ? -1.0 : cutoff,
+                             source);
+  finish(op, work, nneigh::reusedShellList(cutoff, work.cloud, &source));
 }
 
 } // namespace
@@ -108,12 +122,25 @@ int main(int argc, char **argv) {
     }
   }
 #endif
-  const int cells = argc > 1 ? std::atoi(argv[1]) : 24;
-  const int reps = argc > 2 ? std::atoi(argv[2]) : 6;
-  const std::string op = argc > 3 ? argv[3] : "rings";
+  int mx = 24, my = 24, mz = 24, reps = 6;
+  std::string op = "rings";
+  if (argc >= 6) {
+    mx = std::atoi(argv[1]);
+    my = std::atoi(argv[2]);
+    mz = std::atoi(argv[3]);
+    reps = std::atoi(argv[4]);
+    op = argv[5];
+  } else {
+    const int cells = argc > 1 ? std::atoi(argv[1]) : 24;
+    mx = my = mz = cells;
+    reps = argc > 2 ? std::atoi(argv[2]) : 6;
+    if (argc > 3) {
+      op = argv[3];
+    }
+  }
   const double cutoff = 3.5;
   const double halo = haloOf(op, cutoff);
-  const auto cloud = ice(cells);
+  const auto cloud = ice(mx, my, mz);
   for (int n = 0; n < reps + 1; n++) {
     MPI_Barrier(MPI_COMM_WORLD);
     const auto wall0 = std::chrono::steady_clock::now();
