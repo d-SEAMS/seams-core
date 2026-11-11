@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <immintrin.h>
 #include <new>
 #include <cstddef>
 #include <memory>
@@ -455,8 +456,33 @@ bool __attribute__((noinline, cold)) hasStaggeredBond(const double envF[4][3], c
 // least `ambiguous` of those signatures is worth the full fit; the rest are not.
 int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguous) {
   double r2[12];
+  double pair[12][12];
+  alignas(32) double px[16];
+  alignas(32) double py[16];
+  alignas(32) double pz[16];
   for (int i = 0; i < 12; i++) {
+    px[i] = sx[i];
+    py[i] = sy[i];
+    pz[i] = sz[i];
     r2[i] = sx[i] * sx[i] + sy[i] * sy[i] + sz[i] * sz[i];
+  }
+  for (int i = 12; i < 16; i++) {
+    px[i] = 1.0e6;
+    py[i] = 1.0e6;
+    pz[i] = 1.0e6;
+  }
+  for (int a = 0; a < 12; a++) {
+    const __m256d xa = _mm256_set1_pd(px[a]);
+    const __m256d ya = _mm256_set1_pd(py[a]);
+    const __m256d za = _mm256_set1_pd(pz[a]);
+    for (int b = 0; b < 12; b += 4) {
+      const __m256d dx = _mm256_sub_pd(xa, _mm256_load_pd(px + b));
+      const __m256d dy = _mm256_sub_pd(ya, _mm256_load_pd(py + b));
+      const __m256d dz = _mm256_sub_pd(za, _mm256_load_pd(pz + b));
+      const __m256d d2 = _mm256_add_pd(_mm256_mul_pd(dx, dx),
+                                      _mm256_add_pd(_mm256_mul_pd(dy, dy), _mm256_mul_pd(dz, dz)));
+      _mm256_storeu_pd(&pair[a][b], d2);
+    }
   }
   // (1 + sqrt(2)) / 2, the adaptive common-neighbour cutoff. It lies between
   // the first and second shells of the FCC/HCP cluster.
@@ -468,17 +494,8 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
     const double cut2 = r2[j] * kAdapt2;
     int common[4];
     int nc = 0;
-    const double xj = sx[j];
-    const double yj = sy[j];
-    const double zj = sz[j];
     for (int k = 0; k < 12 && nc <= 4; k++) {
-      if (k == j || r2[k] >= cut2) {
-        continue;
-      }
-      const double dx = xj - sx[k];
-      const double dy = yj - sy[k];
-      const double dz = zj - sz[k];
-      if (dx * dx + dy * dy + dz * dz < cut2) {
+      if (k != j && r2[k] < cut2 && pair[j][k] < cut2) {
         if (nc < 4) {
           common[nc] = k;
         }
@@ -496,7 +513,7 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
           const double dx = sx[ia] - sx[ib];
           const double dy = sy[ia] - sy[ib];
           const double dz = sz[ia] - sz[ib];
-          if (dx * dx + dy * dy + dz * dz < cut2) {
+          if (pair[ia][ib] < cut2) {
             nBonds++;
             deg[a]++;
             deg[b]++;
@@ -1365,36 +1382,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       kind[i] = -1;
       continue;
     }
-    double uvec[4][3];
-    double acc = 0.0;
-    bool tetra = true;
-    for (int k = 0; k < 4; k++) {
-      const double nrm = std::sqrt(mine[k].dx * mine[k].dx + mine[k].dy * mine[k].dy +
-                                   mine[k].dz * mine[k].dz);
-      if (!(nrm > 1e-8)) {
-        tetra = false;
-        break;
-      }
-      uvec[k][0] = mine[k].dx / nrm;
-      uvec[k][1] = mine[k].dy / nrm;
-      uvec[k][2] = mine[k].dz / nrm;
-    }
-    if (tetra) {
-      for (int a = 0; a < 4; a++) {
-        for (int b = a + 1; b < 4; b++) {
-          const double c = uvec[a][0] * uvec[b][0] + uvec[a][1] * uvec[b][1] + uvec[a][2] * uvec[b][2];
-          const double d = c + (1.0 / 3.0);
-          acc += d * d;
-        }
-      }
-    }
-    // A non-tetrahedron has no diamond centre. The fingerprint itself is not
-    // gated on the spread of the second-shell radius.
-    const double qNow = tetra ? (1.0 - 0.375 * acc) : 0.0;
-    if (!tetra || qNow < 0.88) {
-      kind[i] = -1;
-      continue;
-    }
+    // The fingerprint runs before q. An exact FCC or HCP shell does not need it.
     // Cheap diamond test, before the full shell fit. The twelve second
     // neighbours are the three outward bonds of each of the four neighbours.
     // A perfect FCC or HCP shell is labelled here and does not enter Kabsch.
@@ -1458,9 +1446,65 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
         kind[i] = -1;
         continue;
       }
+      if (bMax <= bMin * 1.00001) {
+        double sLo = 1e300;
+        double sHi = 0.0;
+        for (int s = 0; s < 12; s++) {
+          const double r2s = fx[s] * fx[s] + fy[s] * fy[s] + fz[s] * fz[s];
+          if (r2s < sLo) {
+            sLo = r2s;
+          }
+          if (r2s > sHi) {
+            sHi = r2s;
+          }
+        }
+        if (sHi > sLo * 1.00001) {
+          // not an ideal shell; the fingerprint decides
+        } else {
+        double first[4][3];
+        for (int k = 0; k < 4; k++) {
+          first[k][0] = mine[k].dx;
+          first[k][1] = mine[k].dy;
+          first[k][2] = mine[k].dz;
+        }
+        const int even = diamondSecondShell(first, fx, fy, fz, 1.0, 0.90, 0.75);
+        if (even >= 0) {
+          kind[i] = even;
+          continue;
+        }
+        }
+      }
       const int cna = diamondCna(fx, fy, fz, kAmbiguous);
       if (cna == 0 || cna == 1) {
         kind[i] = cna;
+        continue;
+      }
+      double acc = 0.0;
+      bool tetra = true;
+      double uvec[4][3];
+      for (int k = 0; k < 4; k++) {
+        const double nrm = std::sqrt(mine[k].dx * mine[k].dx + mine[k].dy * mine[k].dy +
+                                     mine[k].dz * mine[k].dz);
+        if (!(nrm > 1e-8)) {
+          tetra = false;
+          break;
+        }
+        uvec[k][0] = mine[k].dx / nrm;
+        uvec[k][1] = mine[k].dy / nrm;
+        uvec[k][2] = mine[k].dz / nrm;
+      }
+      if (tetra) {
+        for (int a = 0; a < 4; a++) {
+          for (int b = a + 1; b < 4; b++) {
+            const double c = uvec[a][0] * uvec[b][0] + uvec[a][1] * uvec[b][1] + uvec[a][2] * uvec[b][2];
+            const double d = c + (1.0 / 3.0);
+            acc += d * d;
+          }
+        }
+      }
+      const double qNow = tetra ? (1.0 - 0.375 * acc) : 0.0;
+      if (!tetra || qNow < 0.88) {
+        kind[i] = -1;
         continue;
       }
       if ((cna == 3 || cna == 4) && qNow >= 0.97) {
