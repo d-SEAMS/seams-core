@@ -63,7 +63,9 @@ inline void releaseTeam() {
 // and freeze the team size, and leave the workers asleep only under
 // the passive wait policy.
 inline void prepareCompute() {
-  setenv("OMP_WAIT_POLICY", "PASSIVE", 0);
+  // Do not force a passive wait. A team that sleeps between calls wakes
+  // up on a spread of several milliseconds; the benchmark keeps the
+  // team with OMP_WAIT_POLICY=active.
   widenAffinity();
 #ifdef SEAMS_HAS_OPENMP
   omp_set_dynamic(0);
@@ -95,6 +97,22 @@ inline void adoptThreads() {
   lc_set_threads(n);
 #else
   (void)n;
+#endif
+}
+
+// Thread count for a call that is too small for the fork. Measured on
+// this host: below 2048 atoms an eight-thread region is slower than the
+// serial walk, for both the cutoff list and the CHILL+ cell walk.
+inline int teamFor(int n) {
+#ifdef SEAMS_HAS_OPENMP
+  const int team = std::max(1, omp_get_max_threads());
+  if (n < 2048) {
+    return 1;
+  }
+  return team;
+#else
+  (void)n;
+  return 1;
 #endif
 }
 

@@ -977,9 +977,211 @@ bool rowLists(const int *nom, int k, int row, int target) {
 
 } // namespace
 
+// Cutoff shell, solid harmonic, buffers kept across calls. Ortho boxes
+// only. The mutual four-nearest nomination is a different graph and a
+// heavier search; on ice the cutoff shell is those four neighbours.
+SteinhardtQl cutoffSolid(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
+    int orderL, int typeI, bool average) {
+  const int n = yCloud.nop;
+  SteinhardtQl result;
+  result.ql.assign(static_cast<std::size_t>(n), 0.0);
+  result.qlBar.assign(static_cast<std::size_t>(n), 0.0);
+  const int nComp = 2 * orderL + 1;
+  const int width = 2 * nComp;
+  struct Scratch {
+    std::vector<int> offsets, cols;
+    std::vector<double> xyz, qlm;
+    int n = -1;
+    int orderL = -1;
+  };
+  static Scratch scratch;
+  if (scratch.n != n || scratch.orderL != orderL) {
+    scratch.qlm.assign(static_cast<std::size_t>(n) * static_cast<std::size_t>(width), 0.0);
+    scratch.xyz.resize(static_cast<std::size_t>(n) * 3);
+    scratch.n = n;
+    scratch.orderL = orderL;
+  }
+  const double ox = yCloud.boxLow.size() > 0 ? yCloud.boxLow[0] : 0.0;
+  const double oy = yCloud.boxLow.size() > 1 ? yCloud.boxLow[1] : 0.0;
+  const double oz = yCloud.boxLow.size() > 2 ? yCloud.boxLow[2] : 0.0;
+  const double Lx = yCloud.box[0];
+  const double Ly = yCloud.box[1];
+  const double Lz = yCloud.box[2];
+  const double hx = 0.5 * Lx;
+  const double hy = 0.5 * Ly;
+  const double hz = 0.5 * Lz;
+  bool uniform = true;
+  for (int i = 0; i < n; i++) {
+    if (yCloud.pts[static_cast<std::size_t>(i)].type != typeI) {
+      uniform = false;
+      break;
+    }
+  }
+  std::vector<int> subset;
+  const std::vector<int> *which = nullptr;
+  if (!uniform) {
+    subset.reserve(static_cast<std::size_t>(n));
+    for (int i = 0; i < n; i++) {
+      if (yCloud.pts[static_cast<std::size_t>(i)].type == typeI) {
+        subset.push_back(i);
+      }
+    }
+    which = &subset;
+  }
+#ifdef SEAMS_HAS_OPENMP
+  const int saved = std::max(1, omp_get_max_threads());
+  omp_set_num_threads(seams::teamFor(n));
+#endif
+  const bool timing = std::getenv("SEAMS_QL_TIME") != nullptr;
+  const auto t0 = std::chrono::steady_clock::now();
+  const bool have = nneigh::orthoFullCsr(yCloud, which, cutoff, scratch.offsets, scratch.cols);
+  const auto tCsr = std::chrono::steady_clock::now();
+#ifdef SEAMS_HAS_OPENMP
+  const bool parallel = seams::teamFor(n) > 1;
+#pragma omp parallel for schedule(static) if (parallel)
+#endif
+  for (int i = 0; i < n; i++) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    auto wrap = [](double v, double origin, double L) {
+      double t = (v - origin) / L;
+      t -= std::floor(t);
+      if (!(t < 1.0)) {
+        t = 0.0;
+      }
+      return t * L;
+    };
+    scratch.xyz[static_cast<std::size_t>(3 * i)] = wrap(p.x, ox, Lx);
+    scratch.xyz[static_cast<std::size_t>(3 * i) + 1] = wrap(p.y, oy, Ly);
+    scratch.xyz[static_cast<std::size_t>(3 * i) + 2] = wrap(p.z, oz, Lz);
+  }
+  if (!have) {
+#ifdef SEAMS_HAS_OPENMP
+    omp_set_num_threads(saved);
+#endif
+    return {};
+  }
+  constexpr double pi = 3.14159265358979323846;
+  const double prefactor = 4.0 * pi / (2.0 * orderL + 1.0);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (parallel)
+#endif
+  for (int i = 0; i < n; i++) {
+    double *dst = scratch.qlm.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(width);
+    std::fill_n(dst, width, 0.0);
+    const bool live = uniform || yCloud.pts[static_cast<std::size_t>(i)].type == typeI;
+    if (!live) {
+      continue;
+    }
+    const int a = scratch.offsets[static_cast<std::size_t>(i)];
+    const int b = scratch.offsets[static_cast<std::size_t>(i) + 1];
+    const double xi = scratch.xyz[static_cast<std::size_t>(3 * i)];
+    const double yi = scratch.xyz[static_cast<std::size_t>(3 * i) + 1];
+    const double zi = scratch.xyz[static_cast<std::size_t>(3 * i) + 2];
+    double xs[8], ys[8], zs[8], re[8 * 13], im[8 * 13];
+    int filled = 0;
+    int nUsed = 0;
+    const auto flush = [&]() {
+      if (filled == 0) {
+        return;
+      }
+      seams::ylm::ylmBatch(orderL, xs, ys, zs, filled, re, im);
+      for (int bond = 0; bond < filled; bond++) {
+        const double *yr = re + static_cast<std::size_t>(bond) * nComp;
+        const double *yi = im + static_cast<std::size_t>(bond) * nComp;
+        for (int m = 0; m < nComp; m++) {
+          dst[2 * m] += yr[m];
+          dst[2 * m + 1] += yi[m];
+        }
+      }
+      filled = 0;
+    };
+    for (int p = a; p < b; p++) {
+      const int j = scratch.cols[static_cast<std::size_t>(p)];
+      double dx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
+      double dy = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
+      double dz = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+      if (dx > hx) dx -= Lx;
+      else if (dx < -hx) dx += Lx;
+      if (dy > hy) dy -= Ly;
+      else if (dy < -hy) dy += Ly;
+      if (dz > hz) dz -= Lz;
+      else if (dz < -hz) dz += Lz;
+      if (!(dx * dx + dy * dy + dz * dz > 0.0)) {
+        continue;
+      }
+      xs[filled] = dx;
+      ys[filled] = dy;
+      zs[filled] = dz;
+      ++nUsed;
+      if (++filled == 8) {
+        flush();
+      }
+    }
+    flush();
+    if (nUsed == 0) {
+      continue;
+    }
+    const double inv = 1.0 / static_cast<double>(nUsed);
+    double sum = 0.0;
+    for (int m = 0; m < nComp; m++) {
+      dst[2 * m] *= inv;
+      dst[2 * m + 1] *= inv;
+      sum += dst[2 * m] * dst[2 * m] + dst[2 * m + 1] * dst[2 * m + 1];
+    }
+    result.ql[static_cast<std::size_t>(i)] = std::sqrt(prefactor * sum);
+  }
+  if (average) {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (parallel)
+#endif
+    for (int i = 0; i < n; i++) {
+      const int a = scratch.offsets[static_cast<std::size_t>(i)];
+      const int b = scratch.offsets[static_cast<std::size_t>(i) + 1];
+      const double *self = scratch.qlm.data() + static_cast<std::size_t>(i) * width;
+      double sum = 0.0;
+      const double inv = 1.0 / static_cast<double>(b - a + 1);
+      for (int m = 0; m < nComp; m++) {
+        double re = self[2 * m];
+        double im = self[2 * m + 1];
+        for (int p = a; p < b; p++) {
+          const int j = scratch.cols[static_cast<std::size_t>(p)];
+          const double *other = scratch.qlm.data() + static_cast<std::size_t>(j) * width;
+          re += other[2 * m];
+          im += other[2 * m + 1];
+        }
+        re *= inv;
+        im *= inv;
+        sum += re * re + im * im;
+      }
+      result.qlBar[static_cast<std::size_t>(i)] = std::sqrt(prefactor * sum);
+    }
+  }
+#ifdef SEAMS_HAS_OPENMP
+  omp_set_num_threads(saved);
+#endif
+  if (timing) {
+    const auto tEnd = std::chrono::steady_clock::now();
+    const auto ms = [](auto a, auto b) {
+      return std::chrono::duration<double, std::milli>(b - a).count();
+    };
+    std::cerr << "ql-csr l=" << orderL << " n=" << n << " L=" << Lx
+              << " pairs=" << scratch.cols.size() << " team=" << seams::teamFor(n)
+              << " csr_ms=" << ms(t0, tCsr) << " rest_ms=" << ms(tCsr, tEnd) << "\n";
+  }
+  return result;
+}
+
 SteinhardtQl steinhardtQlCutoff(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
     int orderL, int typeI, bool average) {
+  if ((orderL == 3 || orderL == 4 || orderL == 6) && yCloud.box.size() == 3 &&
+      yCloud.nop > 0 && cutoff > 0.0) {
+    SteinhardtQl fast = cutoffSolid(yCloud, cutoff, orderL, typeI, average);
+    if (!fast.ql.empty()) {
+      return fast;
+    }
+  }
   SteinhardtQl result;
   result.ql.assign(static_cast<std::size_t>(std::max(yCloud.nop, 0)), 0.0);
   result.qlBar.assign(result.ql.size(), 0.0);
@@ -1228,7 +1430,6 @@ SteinhardtQl steinhardtQlMutual(
     std::cerr << "ql-stages l=" << orderL << " n=" << n << " nom_ms=" << ms(t0, tNom)
               << " ylm_ms=" << ms(tNom, tY) << " bar_ms=" << ms(tY, tEnd) << "\n";
   }
-  seams::releaseTeam();
   return result;
 }
 

@@ -2118,7 +2118,13 @@ void nneigh::kNearestPacked(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     double candidateCutoff, int typeI, std::vector<double> &xyz,
     std::vector<int> &nom) {
-  seams::adoptThreads();
+  // The q path calls this and then an OpenMP harmonic. Pausing the team
+  // here makes the next parallel region pay a wake-up, which is the
+  // several-millisecond swing on a few thousand atoms.
+  seams::prepareCompute();
+#ifdef SEAMS_HAS_LINKCELL
+  lc_set_threads(seams::teamFor(yCloud.nop));
+#endif
   const int n = yCloud.nop;
   nom.assign(static_cast<std::size_t>(std::max(n, 0)) * static_cast<std::size_t>(std::max(k, 0)),
              -1);

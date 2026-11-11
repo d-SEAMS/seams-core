@@ -1252,6 +1252,7 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
   struct Scratch {
     std::vector<double> xyz;
     std::vector<int> head, next;
+    std::vector<int> offsets, cols;
     std::vector<int> nkeep, chosen;
     std::vector<double> q, qn;
     int n = -1;
@@ -1301,9 +1302,31 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
   if (certify && !uniform) {
     return false;
   }
+#ifdef SEAMS_HAS_OPENMP
+  const int savedThreads = std::max(1, omp_get_max_threads());
+  omp_set_num_threads(seams::teamFor(n));
+  struct RestoreThreads {
+    int saved;
+    ~RestoreThreads() { omp_set_num_threads(saved); }
+  } restoreThreads{savedThreads};
+#endif
+  std::vector<int> subset;
+  const std::vector<int> *which = nullptr;
+  if (!uniform) {
+    subset.reserve(static_cast<std::size_t>(n));
+    for (int i = 0; i < n; i++) {
+      if (yCloud.pts[static_cast<std::size_t>(i)].type == typeI) {
+        subset.push_back(i);
+      }
+    }
+    which = &subset;
+  }
+  const bool csrOk =
+      nneigh::orthoFullCsr(yCloud, which, cutoff, scratch.offsets, scratch.cols);
   const double invx = static_cast<double>(nx) / Lx;
   const double invy = static_cast<double>(ny) / Ly;
   const double invz = static_cast<double>(nz) / Lz;
+  if (!csrOk) {
   for (int i = 0; i < n; i++) {
     if (!uniform && yCloud.pts[static_cast<std::size_t>(i)].type != typeI) {
       scratch.next[static_cast<std::size_t>(i)] = -1;
@@ -1315,6 +1338,7 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
     const int c = (iz * ny + iy) * nx + ix;
     scratch.next[static_cast<std::size_t>(i)] = scratch.head[static_cast<std::size_t>(c)];
     scratch.head[static_cast<std::size_t>(c)] = i;
+  }
   }
   const double cut2 = cutoff * cutoff;
   const double hx = 0.5 * Lx;
@@ -1342,7 +1366,37 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
     const double yi = scratch.xyz[static_cast<std::size_t>(3 * i) + 1];
     const double zi = scratch.xyz[static_cast<std::size_t>(3 * i) + 2];
     const bool live = uniform || yCloud.pts[static_cast<std::size_t>(i)].type == typeI;
-    if (live) {
+    if (csrOk && live) {
+      const int a = scratch.offsets[static_cast<std::size_t>(i)];
+      const int b = scratch.offsets[static_cast<std::size_t>(i) + 1];
+      for (int p = a; p < b; p++) {
+        const int j = scratch.cols[static_cast<std::size_t>(p)];
+        if (j == i) {
+          continue;
+        }
+        double rx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
+        double ry = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
+        double rz = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+        if (rx > hx) rx -= Lx; else if (rx < -hx) rx += Lx;
+        if (ry > hy) ry -= Ly; else if (ry < -hy) ry += Ly;
+        if (rz > hz) rz -= Lz; else if (rz < -hz) rz += Lz;
+        const double d2 = rx * rx + ry * ry + rz * rz;
+        if (!(d2 > 0.0)) {
+          continue;
+        }
+        Near item{d2, j, rx, ry, rz};
+        ++shell;
+        if (keep < 4) {
+          best[keep++] = item;
+          if (keep == 4) {
+            std::sort(best, best + 4);
+          }
+        } else if (item < best[3]) {
+          best[3] = item;
+          std::sort(best, best + 4);
+        }
+      }
+    } else if (live) {
       const int ix = std::min(nx - 1, static_cast<int>(xi * invx));
       const int iy = std::min(ny - 1, static_cast<int>(yi * invy));
       const int iz = std::min(nz - 1, static_cast<int>(zi * invz));
