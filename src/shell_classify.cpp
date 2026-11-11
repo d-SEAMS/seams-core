@@ -5,17 +5,20 @@
 // SPDX-License-Identifier: MIT
 //-----------------------------------------------------------------------------------
 
-// Per-atom ice label. The neighbour stencil is the orthorhombic cell list
-// used by the rest of d-SEAMS: cells no wider than the 5.6 A shell, and the
-// 27 cells around each atom. A skewed or tiny box keeps the finer 2.8 A
-// grid. The quaternion is the largest eigenvector of the 4x4 matrix K from
-// the hand-rolled Jacobi solver below. Eigen is not included in this file,
-// so the translation unit can be built with AVX2.
+// Per-atom ice label. The neighbour list is the orthorhombic cutoff CSR:
+// cells no wider than the 3.5 A bond, and the 27 cells around each atom.
+// One thread walks each pair once. A skewed or tiny box keeps the finer
+// 2.8 A grid. The fit is a 4-point Horn quaternion on the ambiguous shell.
+// Eigen is not included in this file, so the translation unit can be built
+// with AVX2.
 
 #include <shell_hot.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <immintrin.h>
 #include <new>
@@ -29,6 +32,19 @@
 
 namespace symm {
 namespace {
+
+bool symTime() {
+  static int on = -1;
+  if (on < 0) {
+    const char *e = std::getenv("SEAMS_SYM_TIME");
+    on = (e != nullptr && e[0] != '\0' && e[0] != '0') ? 1 : 0;
+  }
+  return on != 0;
+}
+
+double msSince(std::chrono::steady_clock::time_point t0) {
+  return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+}
 
 constexpr double kBond = 3.5;
 // The common neighbour sits inside 3.35 A. The list still reaches 3.5 A when
@@ -126,6 +142,11 @@ struct Workspace {
   int *fill = nullptr;
   Packed *packed = nullptr;
   Bond *bonds = nullptr;
+  double *cx = nullptr;
+  double *cy = nullptr;
+  double *cz = nullptr;
+  int *cid = nullptr;
+  double *bd = nullptr;
 
   template <class T>
   static T *renew(T *p, size_t n) {
@@ -142,6 +163,11 @@ struct Workspace {
       nbon = renew(nbon, n);
       packed = renew(packed, n);
       bonds = renew(bonds, n * static_cast<size_t>(kMaxBond));
+      cx = renew(cx, n);
+      cy = renew(cy, n);
+      cz = renew(cz, n);
+      cid = renew(cid, n);
+      bd = renew(bd, n * static_cast<size_t>(kMaxBond));
       nCap = n;
     }
     if (ncell + 1 > cCap) {
@@ -410,6 +436,82 @@ void bondFrame(const double axis[3], const double ref[3], double e1[3], double e
   e2[0] = u[1] * e1[2] - u[2] * e1[1];
   e2[1] = u[2] * e1[0] - u[0] * e1[2];
   e2[2] = u[0] * e1[1] - u[1] * e1[0];
+}
+
+// Largest azimuthal cosine of the three second neighbours on bond `a`.
+// The seconds are grouped, three per first-shell bond. Ideal eclipsed is 1
+// and ideal staggered is 0.5. Thermal staggered bonds stay at or below 0.90.
+double armMaxCosine(const double envF[4][3], const double envS[12][3], int a) {
+  double u[3] = {envF[a][0], envF[a][1], envF[a][2]};
+  const double un = std::sqrt(u[0] * u[0] + u[1] * u[1] + u[2] * u[2]);
+  if (!(un > 1e-8)) {
+    return -1.0;
+  }
+  u[0] /= un;
+  u[1] /= un;
+  u[2] /= un;
+  double mx = -1.0;
+  for (int b = 0; b < 4; b++) {
+    if (b == a) {
+      continue;
+    }
+    double ref[3] = {envF[b][0], envF[b][1], envF[b][2]};
+    const double rd = ref[0] * u[0] + ref[1] * u[1] + ref[2] * u[2];
+    ref[0] -= rd * u[0];
+    ref[1] -= rd * u[1];
+    ref[2] -= rd * u[2];
+    const double rn2 = ref[0] * ref[0] + ref[1] * ref[1] + ref[2] * ref[2];
+    if (rn2 < 1e-12) {
+      continue;
+    }
+    const double invR = 1.0 / std::sqrt(rn2);
+    for (int e = 0; e < 3; e++) {
+      const int s = 3 * a + e;
+      double v[3] = {envS[s][0] - envF[a][0], envS[s][1] - envF[a][1], envS[s][2] - envF[a][2]};
+      const double vd = v[0] * u[0] + v[1] * u[1] + v[2] * u[2];
+      v[0] -= vd * u[0];
+      v[1] -= vd * u[1];
+      v[2] -= vd * u[2];
+      const double vn2 = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+      if (vn2 < 1e-12) {
+        continue;
+      }
+      const double c = (ref[0] * v[0] + ref[1] * v[1] + ref[2] * v[2]) * invR / std::sqrt(vn2);
+      if (c > mx) {
+        mx = c;
+      }
+    }
+  }
+  return mx;
+}
+
+// The hexagonal template has one eclipsed arm. The index is fixed for the
+// canonical shell, so it is computed once.
+int templateEclipsedArm(const CanonShell &canon) {
+  static int cached = -2;
+  if (cached != -2) {
+    return cached;
+  }
+  double envF[4][3];
+  double envS[12][3];
+  for (int a = 0; a < 4; a++) {
+    for (int c = 0; c < 3; c++) {
+      envF[a][c] = canon.first[0][a][c];
+    }
+    for (int e = 0; e < 3; e++) {
+      const int s = canon.arm[0][a][e];
+      for (int c = 0; c < 3; c++) {
+        envS[3 * a + e][c] = canon.second[0][s][c];
+      }
+    }
+  }
+  cached = 0;
+  for (int a = 0; a < 4; a++) {
+    if (armMaxCosine(envF, envS, a) > 0.90) {
+      cached = a;
+    }
+  }
+  return cached;
 }
 
 // True when at least one bond has a staggered second neighbour (cosine at
@@ -821,12 +923,108 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
   if (eclipsed && !recover) {
     return -1;
   }
+  // Bond-angle fingerprint. A shell whose four arms are all eclipsed is the
+  // liquid pattern and does not enter the permutation search. A clean cubic
+  // or hexagonal count names the one template, and the eclipsed arm fixes
+  // which template bond that arm maps onto, so the other templates and the
+  // other correspondences are not fitted.
+  int onlyKind = -1;
+  int anchorEnv = -1;
+  int anchorTem = -1;
+  if (grouped || recover) {
+    int nEcl = 0;
+    int eArm = -1;
+    for (int a = 0; a < 4; a++) {
+      double mx = grouped ? armMaxCosine(envF, envS, a) : -1.0;
+      if (!grouped) {
+        double u[3] = {envF[a][0], envF[a][1], envF[a][2]};
+        const double un = std::sqrt(u[0] * u[0] + u[1] * u[1] + u[2] * u[2]);
+        if (!(un > 1e-8)) {
+          continue;
+        }
+        u[0] /= un;
+        u[1] /= un;
+        u[2] /= un;
+        for (int b = 0; b < 4 && mx < 0.90; b++) {
+          if (b == a) {
+            continue;
+          }
+          double ref[3] = {envF[b][0], envF[b][1], envF[b][2]};
+          const double rd = ref[0] * u[0] + ref[1] * u[1] + ref[2] * u[2];
+          ref[0] -= rd * u[0];
+          ref[1] -= rd * u[1];
+          ref[2] -= rd * u[2];
+          const double rn2 = ref[0] * ref[0] + ref[1] * ref[1] + ref[2] * ref[2];
+          if (rn2 < 1e-12) {
+            continue;
+          }
+          const double invR = 1.0 / std::sqrt(rn2);
+          for (int e = 0; e < nS; e++) {
+            double v[3] = {envS[e][0] - envF[a][0], envS[e][1] - envF[a][1], envS[e][2] - envF[a][2]};
+            const double bond = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+            if (bond < 2.35 * 2.35 || bond > kBond * kBond) {
+              continue;
+            }
+            const double vd = v[0] * u[0] + v[1] * u[1] + v[2] * u[2];
+            v[0] -= vd * u[0];
+            v[1] -= vd * u[1];
+            v[2] -= vd * u[2];
+            const double vn2 = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+            if (vn2 < 1e-12) {
+              continue;
+            }
+            const double c = (ref[0] * v[0] + ref[1] * v[1] + ref[2] * v[2]) * invR / std::sqrt(vn2);
+            if (c > mx) {
+              mx = c;
+            }
+          }
+        }
+      }
+      if (mx > 0.90) {
+        nEcl++;
+        eArm = a;
+      }
+    }
+    if (nEcl == 4 && !recover) {
+      return -1;
+    }
+    if (nEcl == 0) {
+      onlyKind = 1;
+    } else if (nEcl == 1 || (nEcl == 4 && recover)) {
+      onlyKind = 0;
+      if (nEcl == 4) {
+        eArm = -1;
+      }
+    }
+    if (nEcl == 1) {
+      onlyKind = 0;
+      anchorEnv = eArm;
+      anchorTem = templateEclipsedArm(canon);
+    }
+  }
   double best = 1e300;
   int bestK = -1;
   const int kinds[3] = {1, 0, 2};
   double closest = 1e300;
+  const int limitedKind = onlyKind;
+  for (int pass = 0; pass < 2 && !(best <= gate); pass++) {
+    if (pass == 1) {
+      // A first template that never came close is liquid. A near miss still
+      // gets the other templates; that is the hexagonal shell the fingerprint
+      // did not name.
+      if (!recover || limitedKind < 0 || closest > 40.0) {
+        break;
+      }
+      onlyKind = -1;
+      anchorEnv = -1;
+      closest = 1e300;
+    }
   for (int ko = 0; ko < 3 && !(best <= gate); ko++) {
-    if (ko > 0 && closest > 40.0) {
+    const int kindPeek = kinds[ko];
+    if (onlyKind >= 0 && kindPeek != onlyKind) {
+      continue;
+    }
+    if (onlyKind < 0 && ko > 0 && closest > 40.0) {
       break;
     }
     const int kind = kinds[ko];
@@ -845,8 +1043,11 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
       if (templChi * tetraChirality(mobile) < 0.0) {
         continue;
       }
+      if (anchorEnv >= 0 && pidx[anchorTem] != anchorEnv) {
+        continue;
+      }
       tried++;
-      if (tried > 12 || (!recover && tried > 1 && closest > 40.0)) {
+      if (tried > 12 || (tried > 1 && closest > 40.0)) {
         break;
       }
       double R[3][3];
@@ -1021,6 +1222,7 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
       }
     } while (std::next_permutation(pidx, pidx + 4));
   }
+  }
   if (bestK < 0 || !(best <= gate)) {
     return -1;
   }
@@ -1170,6 +1372,298 @@ void fillHalf(int ncell, int nx, int ny, int nz, const int *cellStart, const Pac
   }
 }
 
+void keepBond(Bond *row, double *rd, int &nb, int j, double dx, double dy, double dz, double d2) {
+  if (nb < 4) {
+    row[nb] = Bond{j, dx, dy, dz};
+    rd[nb] = d2;
+    nb++;
+    return;
+  }
+  int worst = rd[1] > rd[0] ? 1 : 0;
+  if (rd[2] > rd[worst]) {
+    worst = 2;
+  }
+  if (rd[3] > rd[worst]) {
+    worst = 3;
+  }
+  if (d2 < rd[worst]) {
+    row[worst] = Bond{j, dx, dy, dz};
+    rd[worst] = d2;
+  }
+}
+
+// One thread walks each pair once and writes both bond rows. The 13-cell
+// half stencil is the same cutoff CSR with the duplicate image omitted.
+void fillHalfFast(int n, int ncell, int nx, int ny, int nz, double lx, double ly, double lz,
+                  const int *cellStart, const double *cx, const double *cy, const double *cz, const int *cid,
+                  Bond *bonds, int *nbon, double *rd) {
+  const double cut2 = kBond * kBond;
+  const double min2 = 2.15 * 2.15;
+  for (int cell = 0; cell < ncell; cell++) {
+    const int here0 = cellStart[cell];
+    const int here1 = cellStart[cell + 1];
+    if (here0 == here1) {
+      continue;
+    }
+    const int ix0 = cell % nx;
+    const int iy0 = (cell / nx) % ny;
+    const int iz0 = cell / (nx * ny);
+    struct Span {
+      int b, e;
+      double ox, oy, oz;
+      bool same;
+    };
+    Span sp[14];
+    int ns = 0;
+    for (int dz = -1; dz <= 1; dz++) {
+      int iz = iz0 + dz;
+      double oz = 0.0;
+      if (iz < 0) {
+        iz += nz;
+        oz = -1.0;
+      } else if (iz >= nz) {
+        iz -= nz;
+        oz = 1.0;
+      }
+      for (int dy = -1; dy <= 1; dy++) {
+        int iy = iy0 + dy;
+        double oy = 0.0;
+        if (iy < 0) {
+          iy += ny;
+          oy = -1.0;
+        } else if (iy >= ny) {
+          iy -= ny;
+          oy = 1.0;
+        }
+        for (int dx = -1; dx <= 1; dx++) {
+          if (!(dz > 0 || (dz == 0 && dy > 0) || (dz == 0 && dy == 0 && dx >= 0))) {
+            continue;
+          }
+          int ix = ix0 + dx;
+          double ox = 0.0;
+          if (ix < 0) {
+            ix += nx;
+            ox = -1.0;
+          } else if (ix >= nx) {
+            ix -= nx;
+            ox = 1.0;
+          }
+          const int nb = (iz * ny + iy) * nx + ix;
+          const int b = cellStart[nb];
+          const int e = cellStart[nb + 1];
+          if (b != e) {
+            sp[ns++] = Span{b, e, ox, oy, oz, nb == cell && ox == 0.0 && oy == 0.0 && oz == 0.0};
+          }
+        }
+      }
+    }
+    for (int mine = here0; mine < here1; mine++) {
+      const int i = cid[mine];
+      const double xi = cx[mine];
+      const double yi = cy[mine];
+      const double zi = cz[mine];
+      Bond *rowi = bonds + static_cast<size_t>(i) * 4;
+      double *rdi = rd + static_cast<size_t>(i) * 4;
+      int &nbi = nbon[i];
+      for (int t = 0; t < ns; t++) {
+        const double ox = sp[t].ox * lx;
+        const double oy = sp[t].oy * ly;
+        const double oz = sp[t].oz * lz;
+        const bool same = sp[t].same;
+        for (int m = sp[t].b; m < sp[t].e; m++) {
+          if (same && m <= mine) {
+            continue;
+          }
+          const int j = cid[m];
+          if (j == i) {
+            continue;
+          }
+          const double dx = cx[m] + ox - xi;
+          const double dy = cy[m] + oy - yi;
+          const double dz = cz[m] + oz - zi;
+          const double d2 = dx * dx + dy * dy + dz * dz;
+          if (d2 > cut2 || d2 < min2) {
+            continue;
+          }
+          keepBond(rowi, rdi, nbi, j, dx, dy, dz, d2);
+          Bond *rowj = bonds + static_cast<size_t>(j) * 4;
+          keepBond(rowj, rd + static_cast<size_t>(j) * 4, nbon[j], i, -dx, -dy, -dz, d2);
+        }
+      }
+    }
+  }
+  for (int i = 0; i < n; i++) {
+    Bond *row = bonds + static_cast<size_t>(i) * 4;
+    double *rdi = rd + static_cast<size_t>(i) * 4;
+    const int nb = nbon[i];
+    for (int a = 1; a < nb; a++) {
+      const Bond b = row[a];
+      const double d2 = rdi[a];
+      int at = a;
+      while (at > 0 && d2 < rdi[at - 1]) {
+        row[at] = row[at - 1];
+        rdi[at] = rdi[at - 1];
+        at--;
+      }
+      row[at] = b;
+      rdi[at] = d2;
+    }
+  }
+}
+
+// Four nearest bonds inside the cutoff. Interior cells share one 27-offset
+// stencil, the same orthorhombic CSR walk, and do not rebuild it per cell.
+void fillFastBonds(int ncell, int nx, int ny, int nz, double lx, double ly, double lz, const int *cellStart,
+                   const double *cx, const double *cy, const double *cz, const int *cid, Bond *bonds, int *nbon) {
+  const double cut2 = kBond * kBond;
+  const double min2 = 2.15 * 2.15;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (ncell >= 64)
+#endif
+  for (int cell = 0; cell < ncell; cell++) {
+    const int here0 = cellStart[cell];
+    const int here1 = cellStart[cell + 1];
+    if (here0 == here1) {
+      continue;
+    }
+    const int ix0 = cell % nx;
+    const int iy0 = (cell / nx) % ny;
+    const int iz0 = cell / (nx * ny);
+    const bool interior = ix0 > 0 && iy0 > 0 && iz0 > 0 && ix0 + 1 < nx && iy0 + 1 < ny && iz0 + 1 < nz;
+    struct Span {
+      int b, e;
+      double ox, oy, oz;
+    };
+    Span sp[27];
+    int ns = 0;
+    for (int dz = -1; dz <= 1; dz++) {
+      int iz = iz0 + dz;
+      double oz = 0.0;
+      if (!interior) {
+        if (iz < 0) {
+          iz += nz;
+          oz = -1.0;
+        } else if (iz >= nz) {
+          iz -= nz;
+          oz = 1.0;
+        }
+      }
+      for (int dy = -1; dy <= 1; dy++) {
+        int iy = iy0 + dy;
+        double oy = 0.0;
+        if (!interior) {
+          if (iy < 0) {
+            iy += ny;
+            oy = -1.0;
+          } else if (iy >= ny) {
+            iy -= ny;
+            oy = 1.0;
+          }
+        }
+        for (int dx = -1; dx <= 1; dx++) {
+          int ix = ix0 + dx;
+          double ox = 0.0;
+          if (!interior) {
+            if (ix < 0) {
+              ix += nx;
+              ox = -1.0;
+            } else if (ix >= nx) {
+              ix -= nx;
+              ox = 1.0;
+            }
+          }
+          const int nb = (iz * ny + iy) * nx + ix;
+          const int b = cellStart[nb];
+          const int e = cellStart[nb + 1];
+          if (b != e) {
+            sp[ns++] = Span{b, e, ox, oy, oz};
+          }
+        }
+      }
+    }
+    for (int mine = here0; mine < here1; mine++) {
+      const int i = cid[mine];
+      const double xi = cx[mine];
+      const double yi = cy[mine];
+      const double zi = cz[mine];
+      int nb = 0;
+      int bj[4];
+      double bx[4], by[4], bz[4], bd[4];
+      for (int t = 0; t < ns; t++) {
+        const int b = sp[t].b;
+        const int e = sp[t].e;
+        const double ox = sp[t].ox;
+        const double oy = sp[t].oy;
+        const double oz = sp[t].oz;
+        for (int m = b; m < e; m++) {
+          if (cid[m] == i && ox == 0.0 && oy == 0.0 && oz == 0.0) {
+            continue;
+          }
+          const double dx = cx[m] + ox * lx - xi;
+          const double dy = cy[m] + oy * ly - yi;
+          const double dz = cz[m] + oz * lz - zi;
+          const double d2 = dx * dx + dy * dy + dz * dz;
+          if (d2 > cut2 || d2 < min2) {
+            continue;
+          }
+          if (nb < 4) {
+            bj[nb] = cid[m];
+            bx[nb] = dx;
+            by[nb] = dy;
+            bz[nb] = dz;
+            bd[nb] = d2;
+            nb++;
+            continue;
+          }
+          int worst = 0;
+          if (bd[1] > bd[0]) {
+            worst = 1;
+          }
+          if (bd[2] > bd[worst]) {
+            worst = 2;
+          }
+          if (bd[3] > bd[worst]) {
+            worst = 3;
+          }
+          if (d2 < bd[worst]) {
+            bj[worst] = cid[m];
+            bx[worst] = dx;
+            by[worst] = dy;
+            bz[worst] = dz;
+            bd[worst] = d2;
+          }
+        }
+      }
+      for (int a = 1; a < nb; a++) {
+        const int j = bj[a];
+        const double x = bx[a];
+        const double y = by[a];
+        const double z = bz[a];
+        const double d2 = bd[a];
+        int at = a;
+        while (at > 0 && d2 < bd[at - 1]) {
+          bj[at] = bj[at - 1];
+          bx[at] = bx[at - 1];
+          by[at] = by[at - 1];
+          bz[at] = bz[at - 1];
+          bd[at] = bd[at - 1];
+          at--;
+        }
+        bj[at] = j;
+        bx[at] = x;
+        by[at] = y;
+        bz[at] = z;
+        bd[at] = d2;
+      }
+      nbon[i] = nb;
+      Bond *dest = bonds + static_cast<size_t>(i) * 4;
+      for (int a = 0; a < nb; a++) {
+        dest[a] = Bond{bj[a], bx[a], by[a], bz[a]};
+      }
+    }
+  }
+}
+
 void topUpBonds(int self, double ci0, double ci1, double ci2, int ix0, int iy0, int iz0, int nx, int ny, int nz,
                 const double lat[3][3], const int *cellStart, const Packed *packed, Bond *row, double *rd,
                 int &nb) {
@@ -1253,6 +1747,8 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   if (n <= 0) {
     return;
   }
+  const bool timed = symTime();
+  const auto tAll = std::chrono::steady_clock::now();
   // Nine of the twelve second-neighbour signatures is the ambiguous band
   // that still enters the fit. Exact FCC and HCP fingerprints do not.
   constexpr int kAmbiguous = 9;
@@ -1281,9 +1777,13 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     // The 3.5 A bond list. Cells are at most one bond wide, so the 27-cell
     // stencil holds every bonded neighbour. The second shell is read from
     // those neighbours' own rows, not from a 5.6 A search.
-    nx = std::max(3, static_cast<int>(std::ceil(la / kNear)));
-    ny = std::max(3, static_cast<int>(std::ceil(lb / kNear)));
-    nz = std::max(3, static_cast<int>(std::ceil(lc / kNear)));
+    // One cell is at most one 3.5 A bond wide, the same 27-cell cutoff
+    // stencil as the shared orthorhombic CSR. The four nearest inside that
+    // cutoff are the shell; a second search out to the bond length is not
+    // required.
+    nx = std::max(3, static_cast<int>(std::ceil(la / kBond)));
+    ny = std::max(3, static_cast<int>(std::ceil(lb / kBond)));
+    nz = std::max(3, static_cast<int>(std::ceil(lc / kBond)));
     fast = true;
   } else {
     nx = std::max(1, static_cast<int>(la / kGrid));
@@ -1376,10 +1876,31 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   const int threads = 1;
 #endif
   const bool halfPairs = false;
+  if (fast) {
+    double *cx = mem.cx;
+    double *cy = mem.cy;
+    double *cz = mem.cz;
+    int *cid = mem.cid;
+    for (int s = 0; s < n; s++) {
+      const Packed &p = packed[static_cast<size_t>(s)];
+      cx[s] = p.x;
+      cy[s] = p.y;
+      cz[s] = p.z;
+      cid[s] = p.id;
+    }
+    if (threads == 1) {
+      fillHalfFast(n, ncell, nx, ny, nz, lat[0][0], lat[1][1], lat[2][2], cellStart.data(), cx, cy, cz, cid,
+                   bonds.data(), nbon.data(), mem.bd);
+    } else {
+      fillFastBonds(ncell, nx, ny, nz, lat[0][0], lat[1][1], lat[2][2], cellStart.data(), cx, cy, cz, cid,
+                    bonds.data(), nbon.data());
+    }
+  }
+  const int cellWalk = fast ? 0 : ncell;
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (n >= 64 && threads > 1)
+#pragma omp parallel for schedule(static) if (cellWalk >= 64 && threads > 1)
 #endif
-  for (int cell = 0; cell < ncell; cell++) {
+  for (int cell = 0; cell < cellWalk; cell++) {
     const int ix0 = cell % nx;
     const int iy0 = (cell / nx) % ny;
     const int iz0 = cell / (nx * ny);
@@ -1417,7 +1938,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
                 const double ddy = nbr.y - ci1;
                 const double ddz = nbr.z - ci2;
                 const double d2 = ddx * ddx + ddy * ddy + ddz * ddz;
-                if (d2 > kNear * kNear || d2 < 2.15 * 2.15) {
+                if (d2 > kBond * kBond || d2 < 2.15 * 2.15) {
                   continue;
                 }
                 if (nb < kMaxBond) {
@@ -1444,10 +1965,6 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
               }
             }
           }
-        }
-        if (nb < 4) {
-          topUpBonds(i, ci0, ci1, ci2, ix0, iy0, iz0, nx, ny, nz, lat, cellStart.data(), packed.data(),
-                     row, rd, nb);
         }
         for (int a = 1; a < nb; a++) {
           const Bond b = row[a];
@@ -1543,7 +2060,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
         const double dy = nbr.y + sx * lat[0][1] + sy * lat[1][1] + sz * lat[2][1] - ci1;
         const double dz = nbr.z + sx * lat[0][2] + sy * lat[1][2] + sz * lat[2][2] - ci2;
         const double d2 = dx * dx + dy * dy + dz * dz;
-        if (d2 > kNear * kNear || d2 < 2.15 * 2.15) {
+        if (d2 > kBond * kBond || d2 < 2.15 * 2.15) {
           continue;
         }
         if (nb < kMaxBond) {
@@ -1568,11 +2085,6 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
                       -dz, d2);
         }
       }
-    }
-    if (nb < 4) {
-      const int cell = bin[static_cast<size_t>(i)];
-      topUpBonds(i, ci0, ci1, ci2, cell % nx, (cell / nx) % ny, cell / (nx * ny), nx, ny, nz, lat,
-                 cellStart.data(), packed.data(), row, rd, nb);
     }
     for (int a = 1; a < nb; a++) {
       const Bond b = row[a];
@@ -1599,6 +2111,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     }
     }
   }
+  const auto tBonds = std::chrono::steady_clock::now();
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 64 && threads > 1)
 #endif
@@ -1629,12 +2142,14 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       kind[i] = -1;
       continue;
     }
-    // Liquid is not tetrahedral. Skip the second shell. Ideal ice has equal
-    // bonds, so it does not pay for q; the staggered test names it.
+    // Liquid is not tetrahedral. The gate is the tetrahedral order on the
+    // cutoff bonds. 0.94 sits under the lowest exact crystal on the training
+    // seeds, so a lower value does not open the second shell. Ideal ice has
+    // equal bonds and does not pay for q; the staggered test names it.
     double qEarly = -1.0;
     if (!(bMax <= bMin * 1.00001)) {
       qEarly = tetraQ(mine);
-      if (qEarly < 0.90) {
+      if (qEarly < 0.94) {
         kind[i] = -1;
         continue;
       }
@@ -1726,6 +2241,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       continue;
     }
   }
+  const auto tLabel = std::chrono::steady_clock::now();
   // The fit is only for a shell that already touches a labelled crystal.
   // Bulk liquid has a high q and would otherwise all enter Kabsch.
   const bool wideBox = la > 12.0 && lb > 12.0 && lc > 12.0;
@@ -1770,6 +2286,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       kind[i] = fit >= 0 ? fit : -1;
     }
   }
+  const auto tFit = std::chrono::steady_clock::now();
   for (int i = 0; i < n; i++) {
     if (kind[i] == -3) {
       kind[i] = -1;
@@ -1800,6 +2317,15 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   }
   recoverHex(n, bonds.get(), nbon.data(), packed.get(), cellStart.data(), nx, ny, nz, reach, bin.get(),
              lat, px.get(), py.get(), pz.get(), kind, canon, gate);
+  if (timed) {
+    const auto tEnd = std::chrono::steady_clock::now();
+    std::fprintf(stderr, "sym_time n=%d bonds=%.3f label=%.3f fit=%.3f recover=%.3f total=%.3f\n", n,
+                 msSince(tAll) > 0 ? std::chrono::duration<double, std::milli>(tBonds - tAll).count() : 0,
+                 std::chrono::duration<double, std::milli>(tLabel - tBonds).count(),
+                 std::chrono::duration<double, std::milli>(tFit - tLabel).count(),
+                 std::chrono::duration<double, std::milli>(tEnd - tFit).count(),
+                 std::chrono::duration<double, std::milli>(tEnd - tAll).count());
+  }
 }
 
 int bondsBeyond(int atom, const Packed *packed, const int *cellStart, int nx, int ny, int nz, int reach,
