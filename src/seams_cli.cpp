@@ -1212,10 +1212,8 @@ int cmdSteinhardt(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
     return 0;
   }
   const int typ = typeOf(cloud, typeI);
-  const double cand = cutoff + 1.5;
-  auto nList = nneigh::kNearestNeighbourList(cloud, 4, cand, typ, true);
-  const auto q3 = chill::steinhardtQl(cloud, nList, 3);
-  const auto q12 = chill::steinhardtQl(cloud, nList, 12);
+  const auto q3 = chill::steinhardtQlCutoff(cloud, cutoff, 3, typ, true);
+  const auto q12 = chill::steinhardtQlCutoff(cloud, cutoff, 12, typ, true);
   os << colorizer.heading("nop") << " " << cloud.nop << " "
      << colorizer.longOption("q3") << " " << topoparam::meanFinite(q3.ql) << " "
      << colorizer.longOption("q3bar") << " " << topoparam::meanFinite(q3.qlBar)

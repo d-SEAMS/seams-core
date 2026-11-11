@@ -1874,3 +1874,29 @@ TEST_CASE("steinhardtQl offload matches serial and threaded bit for bit",
   }
 }
 #endif
+
+TEST_CASE("cutoff q_l skips the Lechner-Dellago average", "[bop]") {
+  const double lattice = 6.35;
+  auto cloud = fccCloud(3, lattice);
+  for (auto &p : cloud.pts) {
+    p.type = 1;
+  }
+  const double cutoff = 0.8 * lattice;
+  const auto rows = nneigh::neighListO(cutoff, cloud, 1);
+  const auto full = chill::steinhardtQl(cloud, rows, 6);
+  const auto both = chill::steinhardtQlCutoff(cloud, cutoff, 6, 1, true);
+  const auto local = chill::steinhardtQlCutoff(cloud, cutoff, 6, 1, false);
+  REQUIRE(both.ql.size() == full.ql.size());
+  for (std::size_t i = 0; i < full.ql.size(); ++i) {
+    REQUIRE_THAT(both.ql[i], Catch::Matchers::WithinAbs(full.ql[i], 1e-8));
+    REQUIRE_THAT(both.qlBar[i], Catch::Matchers::WithinAbs(full.qlBar[i], 1e-8));
+    REQUIRE_THAT(local.ql[i], Catch::Matchers::WithinAbs(full.ql[i], 1e-8));
+    REQUIRE(local.qlBar[i] == 0.0);
+  }
+  const auto q3 = chill::steinhardtQlCutoff(cloud, cutoff, 3, 1, true);
+  const auto q3rows = chill::steinhardtQl(cloud, rows, 3);
+  for (std::size_t i = 0; i < q3.ql.size(); ++i) {
+    REQUIRE_THAT(q3.ql[i], Catch::Matchers::WithinAbs(q3rows.ql[i], 1e-8));
+    REQUIRE_THAT(q3.qlBar[i], Catch::Matchers::WithinAbs(q3rows.qlBar[i], 1e-8));
+  }
+}

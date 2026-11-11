@@ -939,6 +939,107 @@ SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double
   return result;
 }
 
+namespace {
+
+void localQlOnly(const NeighbourCSR &g, int orderL, const std::vector<double> &qlm,
+                 std::vector<double> &ql) {
+  const int nComp = 2 * orderL + 1;
+  constexpr double pi = 3.14159265358979323846;
+  const double prefactor = 4.0 * pi / (2.0 * orderL + 1.0);
+#ifdef SEAMS_HAS_OPENMP
+  const bool useThreads = g.nop >= kParallelThreshold && !omp_in_parallel();
+#pragma omp parallel for schedule(static) if (useThreads)
+#endif
+  for (int i = 0; i < g.nop; ++i) {
+    const int row = i * nComp;
+    double sum = 0.0;
+    for (int m = 0; m < nComp; ++m) {
+      const double re = qlm[static_cast<std::size_t>(2 * (row + m))];
+      const double im = qlm[static_cast<std::size_t>(2 * (row + m) + 1)];
+      sum += re * re + im * im;
+    }
+    ql[static_cast<std::size_t>(i)] = std::sqrt(prefactor * sum);
+  }
+}
+
+} // namespace
+
+SteinhardtQl steinhardtQlCutoff(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
+    int orderL, int typeI, bool average) {
+  SteinhardtQl result;
+  result.ql.assign(static_cast<std::size_t>(std::max(yCloud.nop, 0)), 0.0);
+  result.qlBar.assign(result.ql.size(), 0.0);
+  if (orderL != 3 && orderL != 4 && orderL != 6 && orderL != 8 && orderL != 12) {
+    return result;
+  }
+  if (yCloud.nop <= 0 || !(cutoff > 0.0)) {
+    return result;
+  }
+
+  std::vector<int> subset;
+  subset.reserve(static_cast<std::size_t>(yCloud.nop));
+  for (int i = 0; i < yCloud.nop; ++i) {
+    if (yCloud.pts[static_cast<std::size_t>(i)].type == typeI) {
+      subset.push_back(i);
+    }
+  }
+  std::vector<int> offsets;
+  std::vector<int> cols;
+  const bool have = nneigh::orthoFullCsr(yCloud, &subset, cutoff, offsets, cols);
+  if (!have) {
+    const auto rows = nneigh::neighListO(cutoff, yCloud, typeI);
+    result = steinhardtQl(yCloud, rows, orderL);
+    if (!average) {
+      std::fill(result.qlBar.begin(), result.qlBar.end(), 0.0);
+    }
+    return result;
+  }
+
+  NeighbourCSR g;
+  g.nop = yCloud.nop;
+  g.offsets = std::move(offsets);
+  g.cols = std::move(cols);
+  g.dr.assign(g.cols.size() * 3, 0.0);
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (g.nop >= kParallelThreshold && !omp_in_parallel())
+#endif
+  for (int i = 0; i < g.nop; ++i) {
+    const int a = g.offsets[static_cast<std::size_t>(i)];
+    const int b = g.offsets[static_cast<std::size_t>(i) + 1];
+    for (int k = a; k < b; ++k) {
+      const int j = g.cols[static_cast<std::size_t>(k)];
+      const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
+      const auto d = gen::relDistFromPoint(frame, yCloud, i, pj.x, pj.y, pj.z);
+      g.dr[static_cast<std::size_t>(3 * k)] = d[0];
+      g.dr[static_cast<std::size_t>(3 * k + 1)] = d[1];
+      g.dr[static_cast<std::size_t>(3 * k + 2)] = d[2];
+    }
+  }
+
+  const int nComp = 2 * orderL + 1;
+  std::vector<double> qlm(static_cast<std::size_t>(g.nop) * static_cast<std::size_t>(nComp) * 2,
+                          0.0);
+#ifdef SEAMS_HAS_OFFLOAD
+  if (average && orderL != 12 && wantOffload()) {
+    runOffload(g, orderL, qlm, result.ql, result.qlBar);
+    return result;
+  }
+#endif
+  runPass1(g, orderL, 0, g.nop, qlm);
+  if (!average) {
+    localQlOnly(g, orderL, qlm, result.ql);
+    return result;
+  }
+  if (orderL == 12) {
+    runPass2Host(g, orderL, 0, g.nop, qlm, result.ql, result.qlBar);
+  } else {
+    runPass2(g, orderL, 0, g.nop, qlm, result.ql, result.qlBar);
+  }
+  return result;
+}
+
 void writeSteinhardtQlm(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                         const std::vector<std::vector<int>> &nList, int orderL,
                         std::vector<double> &qlm, const std::vector<char> *which) {

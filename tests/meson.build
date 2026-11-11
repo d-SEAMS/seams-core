@@ -119,6 +119,12 @@ test('ozaki',
   workdir: meson.project_source_root() / 'input',
   env: _test_env,
   timeout: 180)
+executable('bench_cutoff_list', 'bench_cutoff_list.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
 executable('bench_ozaki', 'bench_ozaki.cpp',
   dependencies: [yds_dep, mpfr_dep, gmp_dep],
   cpp_args: _args,

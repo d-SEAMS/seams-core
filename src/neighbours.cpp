@@ -1295,6 +1295,14 @@ nneigh::neighListO(double rcutoff,
     }
   }
 
+  if (yCloud.box.size() == 3) {
+    std::vector<int> offsets;
+    std::vector<int> cols;
+    if (orthoFullCsr(yCloud, &typeIIndices, rcutoff, offsets, cols)) {
+      return idRowsFromCsr(yCloud, indexToID, offsets, cols);
+    }
+  }
+
 #ifdef SEAMS_HAS_OPENMP
   // On one thread linkcell's fused kernel is the fastest builder. With
   // a team, the cell walk over atoms scales and each row is sorted, so
@@ -1507,6 +1515,20 @@ nneigh::halfNeighList(double rcutoff,
   const std::vector<int> indexToID = indexToIDTable(yCloud);
   std::vector<std::vector<int>> nList = seedWithSelfIDs(indexToID, yCloud.nop);
 
+  if (yCloud.box.size() == 3) {
+    std::vector<int> typeIIndices;
+    for (int i = 0; i < yCloud.nop; i++) {
+      if (yCloud.pts[i].type == typeI) {
+        typeIIndices.push_back(i);
+      }
+    }
+    std::vector<int> offsets;
+    std::vector<int> cols;
+    if (orthoFullCsr(yCloud, &typeIIndices, rcutoff, offsets, cols)) {
+      return halfIdRowsFromCsr(yCloud, indexToID, offsets, cols);
+    }
+  }
+
 #ifdef SEAMS_HAS_CUTOFF_LIST
   {
     std::vector<int> typeIIndices;
@@ -1575,6 +1597,14 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
   }
 
   std::vector<std::vector<int>> nList(yCloud.nop);
+
+  if (yCloud.box.size() == 3) {
+    std::vector<int> offsets;
+    std::vector<int> cols;
+    if (orthoFullCsr(yCloud, nullptr, cutoff, offsets, cols)) {
+      return indexRowsFromCsr(yCloud.nop, offsets, cols);
+    }
+  }
 
 #ifdef SEAMS_HAS_OPENMP
   if (!omp_in_parallel() && omp_get_max_threads() > 1 &&

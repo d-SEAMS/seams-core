@@ -403,6 +403,15 @@ struct SteinhardtQl {
 steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
              const std::vector<std::vector<int>> &nList, int orderL);
 
+//! Local @f$q_l@f$ on the cutoff list.
+//!
+//! Neighbours are orthoFullCsr, not a four-nearest rebuild, and the
+//! kernel reads that CSR directly. Lechner-Dellago @f$\bar{q}_l@f$ is
+//! filled only when @a average is true. Otherwise `qlBar` stays zero.
+[[nodiscard]] SteinhardtQl steinhardtQlCutoff(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    double cutoff, int orderL, int typeI, bool average);
+
 //! Whether steinhardtQl splits atoms over the ranks of an initialised
 //! MPI_COMM_WORLD (true unless set). A driver that gives each rank whole
 //! frames of its own turns it off.

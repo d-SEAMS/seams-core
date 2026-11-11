@@ -379,6 +379,35 @@ bool cellListRowsThreaded(
     const std::vector<int> &subset, double rcutoff,
     std::vector<std::vector<int>> &rows);
 
+/// Full orthorhombic cutoff list as CSR of cloud indices.
+///
+/// A null @a subset is every atom. `cols[offsets[i] .. offsets[i + 1]]`
+/// is sorted, has no self entry, and keeps a neighbour when the squared
+/// minimum image is strictly below the cutoff squared. The pair set does
+/// not depend on the thread count. Scratch buffers stay allocated and are
+/// refilled on the next call. Returns false when the box is not
+/// orthorhombic, so the caller takes another builder.
+bool orthoFullCsr(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> *subset, double rcutoff, std::vector<int> &offsets,
+    std::vector<int> &cols);
+
+/// Atom-ID rows, self first, from a CSR of cloud indices.
+std::vector<std::vector<int>> idRowsFromCsr(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &indexToID, const std::vector<int> &offsets,
+    const std::vector<int> &cols);
+
+/// Index rows, self first, from a CSR of cloud indices.
+std::vector<std::vector<int>> indexRowsFromCsr(
+    int nop, const std::vector<int> &offsets, const std::vector<int> &cols);
+
+/// Half list by atom ID. The lower cloud index owns the pair.
+std::vector<std::vector<int>> halfIdRowsFromCsr(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &indexToID, const std::vector<int> &offsets,
+    const std::vector<int> &cols);
+
 //! Full neighbour list for one type (threaded cell list from 2048 atoms
 //! when OpenMP is compiled, vesin cell list, brute-force fallback)
 //! You can only use this for neighbour lists with one type
