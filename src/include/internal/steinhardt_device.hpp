@@ -15,6 +15,8 @@
 #pragma omp declare target
 #endif
 
+#include <ylm_cartesian.hpp>
+
 namespace seams {
 namespace steinhardt {
 
@@ -252,6 +254,19 @@ inline void ylmAll(int orderL, double theta, double phi, double *out) {
 inline void qlmAddBond(int orderL, double dx, double dy, double dz,
                        double *qlmInterleaved, int row, int nComp,
                        int &nUsed) {
+  if (orderL == 3 || orderL == 6) {
+    double re[13];
+    double im[13];
+    if (!seams::ylm::ylmReal(orderL, dx, dy, dz, re, im)) {
+      return;
+    }
+    for (int m = 0; m < nComp; m++) {
+      qlmInterleaved[2 * (row + m)] += re[m];
+      qlmInterleaved[2 * (row + m) + 1] += im[m];
+    }
+    nUsed++;
+    return;
+  }
   const double r2 = dx * dx + dy * dy + dz * dz;
   if (r2 == 0.0) {
     return;

@@ -1330,27 +1330,41 @@ bool nominateByLinkcell(
     return true;
   }
   std::vector<double> xyz(static_cast<std::size_t>(n) * 3);
-  std::vector<int> mask(static_cast<std::size_t>(n), 0);
   int nSrc = 0;
+  bool uniform = true;
   for (int i = 0; i < n; i++) {
     const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
     xyz[static_cast<std::size_t>(i) * 3 + 0] = p.x;
     xyz[static_cast<std::size_t>(i) * 3 + 1] = p.y;
     xyz[static_cast<std::size_t>(i) * 3 + 2] = p.z;
     if (typeAllowed(p.type, typeI, types)) {
-      mask[static_cast<std::size_t>(i)] = 1;
       ++nSrc;
+    } else {
+      uniform = false;
     }
   }
   if (nSrc == 0) {
     return true;
+  }
+  // An all-true mask takes the filtered walk. The unmasked walk is the
+  // same set when every atom is a source.
+  std::vector<int> mask;
+  const int *maskPtr = nullptr;
+  if (!uniform) {
+    mask.assign(static_cast<std::size_t>(n), 0);
+    for (int i = 0; i < n; i++) {
+      if (typeAllowed(yCloud.pts[static_cast<std::size_t>(i)].type, typeI, types)) {
+        mask[static_cast<std::size_t>(i)] = 1;
+      }
+    }
+    maskPtr = mask.data();
   }
   const linkcell::Cell cell =
       nneigh::lammpsBoxToLinkcell(yCloud.box, yCloud.boxLow);
   try {
     linkcell::knearest_into(xyz.data(), static_cast<std::size_t>(n), cell,
                             static_cast<std::size_t>(k), nom.data(),
-                            nom.size(), mask.data(), cellHint);
+                            nom.size(), maskPtr, cellHint);
   } catch (const linkcell::Error &e) {
     std::cerr << "linkcell failed: " << e.what()
               << "; falling back to the in-tree cell list.\n";

@@ -22,6 +22,7 @@ ydslib_sources = files(
   'tum_offload.cpp',
   'mol_sys.cpp',
   'sphericart_ylm.cpp',
+  'ylm_cartesian.cpp',
   'neighbours.cpp',
   'order_parameter.cpp',
   'ozaki.cpp',
@@ -55,10 +56,21 @@ if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
   _lib_link_args += ['-Wl,-soname,libyodaLib.so']
 endif
 
+_ylm_link = []
+if cpp_id == 'gcc' or cpp_id == 'clang'
+  _ylm_avx = static_library('ylm_avx512', 'ylm_cartesian_avx512.cpp',
+    cpp_args: _args + ['-mavx512f', '-mavx512dq', '-mfma'],
+    include_directories: _incdirs,
+    dependencies: _deps)
+  _ylm_link += _ylm_avx
+  _args += ['-DSEAMS_YLM_AVX512=1']
+endif
+
 ydslib = library('yodaLib',
   ydslib_sources,
   dependencies: _deps,
   cpp_args: _args,
+  link_with: _ylm_link,
   link_args: _lib_link_args,
   include_directories: _incdirs,
   build_rpath: _readcondb_rpath != '' ? _readcondb_rpath : meson.current_build_dir(),

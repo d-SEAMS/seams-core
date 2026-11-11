@@ -8,6 +8,7 @@
 #include <order_parameter.hpp>
 #include <seams_input.hpp>
 #include <steinhardt_device.hpp>
+#include <ylm_batch.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -898,6 +899,62 @@ TEST_CASE("device Ylm matches spheriHarmo for l=3,4,6", "[bop]") {
       REQUIRE_THAT(dev[2 * m + 1],
                    Catch::Matchers::WithinAbs(host[m].imag(), 1e-12));
     }
+  }
+}
+
+TEST_CASE("Cartesian Ylm matches spheriHarmo for l=3 and l=6", "[bop]") {
+  const std::vector<std::array<double, 3>> dirs = {
+      {1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0},
+      {0.0, 0.0, -1.0}, {0.2, -0.4, 0.7}, {-0.9, 0.1, 0.3},
+      {0.3, 0.4, 0.0}, {0.05, -0.02, 0.9}};
+  for (int orderL : {3, 6}) {
+    for (const auto &d : dirs) {
+      const std::array<double, 2> angles = sph::radialCoord(d);
+      const auto host = sph::spheriHarmo(orderL, angles);
+      double re[13];
+      double im[13];
+      REQUIRE(seams::ylm::ylmReal(orderL, d[0], d[1], d[2], re, im));
+      const int nComp = 2 * orderL + 1;
+      for (int m = 0; m < nComp; m++) {
+        REQUIRE_THAT(re[m], Catch::Matchers::WithinAbs(host[m].real(), 1e-12));
+        REQUIRE_THAT(im[m], Catch::Matchers::WithinAbs(host[m].imag(), 1e-12));
+      }
+    }
+  }
+}
+
+TEST_CASE("a centrosymmetric shell stores a cancelled l=3 correlation as zero",
+          "[bop]") {
+  // Six neighbours in exact opposite pairs. The odd l=3 sum is zero, so
+  // the correlation quotient is 0/0. Without a finite stand-in the value
+  // is NaN and this assertion fails.
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {10.0, 10.0, 10.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  const double coords[7][3] = {
+      {5, 5, 5}, {6, 5, 5}, {4, 5, 5}, {5, 6, 5},
+      {5, 4, 5}, {5, 5, 6}, {5, 5, 4}};
+  for (int i = 0; i < 7; i++) {
+    molSys::Point<double> p;
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = p.atomID;
+    p.x = coords[i][0];
+    p.y = coords[i][1];
+    p.z = coords[i][2];
+    cloud.pts.push_back(p);
+    cloud.idIndexMap[p.atomID] = i;
+  }
+  cloud.nop = 7;
+  std::vector<std::vector<int>> nList = {
+      {1, 2, 3, 4, 5, 6, 7},
+      {2, 1}, {3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1}};
+  chill::getCorrel(cloud, nList, false, 6);
+  REQUIRE(cloud.pts[0].c_ij.size() == 6);
+  for (const auto &cij : cloud.pts[0].c_ij) {
+    REQUIRE(std::isfinite(cij.c_value));
+    REQUIRE(cij.c_value == 0.0);
   }
 }
 
