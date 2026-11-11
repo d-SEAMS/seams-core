@@ -245,6 +245,19 @@ harmonicPair(int orderL, int absM, const AngularTerms &terms) {
 //  Bonds are evaluated in structure-of-arrays groups so the polynomial
 //  is independent across the group and contracts with fma.
 constexpr int kRealL3 = 7;
+// An odd harmonic of a centrosymmetric shell cancels. The leftover is
+// roundoff, and its correlation is not a bond angle. Exact cancellation
+// already returns 0; this floor does the same for a shell that only
+// cancels to machine noise, so a translation cannot change the label.
+constexpr double kCancelledShell = 1e-12;
+
+double correlationOf(double dot, double normI, double normJ) {
+  if (!(normI > kCancelledShell && normJ > kCancelledShell)) {
+    return 0.0;
+  }
+  const double denom = std::sqrt(normI * normJ);
+  return denom > 0.0 ? dot / denom : 0.0;
+}
 
 void addRealYlm3Scalar(double x, double y, double z, const std::array<double, 4> &norm, double *acc) {
   const double rho2 = x * x + y * y;
@@ -932,10 +945,7 @@ static void classifyBondsLeftFp64(
       }
       const double *qJ = qAtom.data() + static_cast<std::size_t>(jatom) * kRealL3;
       const double dot = useAvx ? realL3Dot(qI, qJ) : realL3DotScalar(qI, qJ);
-      const double denom = std::sqrt(normI * qNorm[static_cast<std::size_t>(jatom)]);
-      // A centrosymmetric shell cancels an odd harmonic exactly. The
-      // correlation is then undefined; 0 keeps the value inside [-1, 1].
-      const double cij = denom > 0.0 ? dot / denom : 0.0;
+      const double cij = correlationOf(dot, normI, qNorm[static_cast<std::size_t>(jatom)]);
       molSys::Result temp_cij;
       temp_cij.c_value = cij;
       temp_cij.classifier = chill::classifyBond(cij, rule);
@@ -1059,10 +1069,9 @@ void chill::classifyBonds(
         Inorm = {got.normA, 0.0};
         Jnorm = {got.normB, 0.0};
       }
-      const std::complex<double> complexCij =
-          dot_product / std::sqrt(Inorm * Jnorm);
+      const double cij_real =
+          correlationOf(dot_product.real(), Inorm.real(), Jnorm.real());
       molSys::Result temp_cij;
-      const double cij_real = complexCij.real();
       temp_cij.c_value = cij_real;
       temp_cij.classifier = chill::classifyBond(cij_real, rule);
       yCloud.pts[iatom].c_ij.push_back(temp_cij);
@@ -1940,8 +1949,8 @@ void chill::correlFromOrder(molSys::PointCloud<molSys::Point<double>, double> &y
       }
       const double *qJ = order.q.data() + static_cast<std::size_t>(jatom) * kRealL3;
       const double dot = useAvx ? realL3Dot(qI, qJ) : realL3DotScalar(qI, qJ);
-      const double denom = std::sqrt(normI * order.norm[static_cast<std::size_t>(jatom)]);
-      const double cij = denom > 0.0 ? dot / denom : 0.0;
+      const double cij =
+          correlationOf(dot, normI, order.norm[static_cast<std::size_t>(jatom)]);
       molSys::Result temp;
       temp.c_value = cij;
       temp.classifier = chill::classifyBond(cij, rule);
@@ -2049,7 +2058,33 @@ void chill::distributedChillPlus(molSys::PointCloud<molSys::Point<double>, doubl
     order.norm[static_cast<std::size_t>(i)] = src[kRealL3];
   }
   correlFromOrder(work.cloud, order, rule, false, &boundary);
+  // The neighbour test reads a neighbour's staggered count. Cubic and
+  // hexagonal rows never ask, so a crystal skips the second exchange.
+  // Every rank must agree or the exchange deadlocks.
+  int localNeed = 0;
   if (neighbourTest) {
+    for (int i = 0; i < nop; i++) {
+      if (!work.share.owned[static_cast<std::size_t>(i)]) {
+        continue;
+      }
+      int stag = 0;
+      int ecl = 0;
+      for (const auto &bond : work.cloud.pts[static_cast<std::size_t>(i)].c_ij) {
+        if (bond.classifier == molSys::bond_type::staggered) {
+          ++stag;
+        } else if (bond.classifier == molSys::bond_type::eclipsed) {
+          ++ecl;
+        }
+      }
+      if (stag == 2 || (stag == 3 && ecl == 0)) {
+        localNeed = 1;
+        break;
+      }
+    }
+  }
+  int anyNeed = localNeed;
+  MPI_Allreduce(&localNeed, &anyNeed, 1, MPI_INT, MPI_MAX, comm);
+  if (anyNeed) {
     std::vector<double> stag(static_cast<std::size_t>(nop), 0.0);
     for (int i = 0; i < nop; i++) {
       if (!work.share.owned[static_cast<std::size_t>(i)]) {

@@ -792,3 +792,61 @@ TEST_CASE("CHILL and CHILL+ cover the bond, harmonic and offload arms",
   const auto mixed = chill::specializedChillPlus(mix, mixRows);
   REQUIRE(mixed.iceType.size() == static_cast<std::size_t>(mix.nop));
 }
+
+// A flat sheet of spacing 2.8 has opposite bonds. The l = 3 sum cancels
+// and the leftover correlation is roundoff. A fractional shift must not
+// move an atom across a CHILL+ class.
+TEST_CASE("cancelled shells keep CHILL+ labels when the cloud is shifted", "[chill]") {
+  auto sheet = [](int n) {
+    Cloud cloud;
+    const double spacing = 2.8;
+    const double box = spacing * 8.0 + 10.0;
+    cloud.box = {box, box, box};
+    cloud.boxLow = {0.0, 0.0, 0.0};
+    const int side = 4;
+    for (int i = 0; i < n; i++) {
+      molSys::Point<double> pt;
+      pt.type = 1;
+      pt.atomID = i + 1;
+      pt.x = spacing * static_cast<double>(i % side) + 0.001 * (i + 1);
+      pt.y = spacing * static_cast<double>((i / side) % side) + 0.0007 * (i + 1);
+      pt.z = spacing * static_cast<double>(i / (side * side)) + 0.0005 * (i + 1);
+      cloud.pts.push_back(pt);
+      cloud.idIndexMap[pt.atomID] = i;
+    }
+    cloud.nop = n;
+    return cloud;
+  };
+  auto labels = [](Cloud cloud) {
+    const auto rows = nneigh::neighListO(3.5, cloud, 1);
+    chill::applyChillPlus(cloud, rows, chill::ChillPlusRule::Published, false);
+    std::vector<int> out;
+    out.reserve(cloud.pts.size());
+    for (const auto &pt : cloud.pts) {
+      out.push_back(static_cast<int>(pt.iceType));
+    }
+    return out;
+  };
+  auto shift = [](Cloud cloud) {
+    const double lx = cloud.box[0];
+    const double ly = cloud.box[1];
+    const double lz = cloud.box[2];
+    const double add[3] = {0.02 * lx, 0.01 * ly, 0.015 * lz};
+    for (auto &pt : cloud.pts) {
+      double x = pt.x + add[0];
+      double y = pt.y + add[1];
+      double z = pt.z + add[2];
+      x -= lx * std::floor(x / lx);
+      y -= ly * std::floor(y / ly);
+      z -= lz * std::floor(z / lz);
+      pt.x = x;
+      pt.y = y;
+      pt.z = z;
+    }
+    return cloud;
+  };
+  for (const int n : {16, 24}) {
+    const Cloud cloud = sheet(n);
+    REQUIRE(labels(cloud) == labels(shift(cloud)));
+  }
+}

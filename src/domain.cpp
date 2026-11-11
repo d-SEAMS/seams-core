@@ -267,17 +267,36 @@ std::vector<std::vector<int>> ringsOf(const Cloud &local, double cutoff,
   if (local.nop == 0) {
     return {};
   }
-  std::vector<std::vector<int>> nList;
+  static std::vector<std::vector<int>> nList;
   static std::vector<std::vector<int>> idRows;
+  static std::vector<int> idToIndex;
   if (nneigh::blockWindowRows(local, cutoff, nullptr, idRows)) {
-    nList.assign(static_cast<std::size_t>(local.nop), {});
+    if (static_cast<int>(nList.size()) != local.nop) {
+      nList.assign(static_cast<std::size_t>(local.nop), {});
+    } else {
+      for (auto &row : nList) {
+        row.clear();
+      }
+    }
+    int maxId = 0;
+    for (int k = 0; k < local.nop; k++) {
+      maxId = std::max(maxId, local.pts[static_cast<std::size_t>(k)].atomID);
+    }
+    idToIndex.assign(static_cast<std::size_t>(maxId) + 1, -1);
+    for (int k = 0; k < local.nop; k++) {
+      const int id = local.pts[static_cast<std::size_t>(k)].atomID;
+      if (id >= 0) {
+        idToIndex[static_cast<std::size_t>(id)] = k;
+      }
+    }
     for (int k = 0; k < local.nop; k++) {
       auto &row = nList[static_cast<std::size_t>(k)];
       row.push_back(k);
       for (std::size_t j = 1; j < idRows[static_cast<std::size_t>(k)].size(); j++) {
-        const auto it = local.idIndexMap.find(idRows[static_cast<std::size_t>(k)][j]);
-        if (it != local.idIndexMap.end()) {
-          row.push_back(it->second);
+        const int id = idRows[static_cast<std::size_t>(k)][j];
+        const int idx = (id >= 0 && id <= maxId) ? idToIndex[static_cast<std::size_t>(id)] : -1;
+        if (idx >= 0) {
+          row.push_back(idx);
         }
       }
     }
