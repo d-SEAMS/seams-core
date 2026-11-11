@@ -2058,13 +2058,15 @@ void chill::distributedChillPlus(molSys::PointCloud<molSys::Point<double>, doubl
     order.norm[static_cast<std::size_t>(i)] = src[kRealL3];
   }
   correlFromOrder(work.cloud, order, rule, false, &boundary);
-  // The neighbour test reads a neighbour's staggered count. Cubic and
-  // hexagonal rows never ask, so a crystal skips the second exchange.
+  // isInterfacial reads the four nearest neighbours' staggered counts.
+  // An owned neighbour already has its bonds. A ghost count is needed
+  // only when a boundary atom, this frame, is in one of those two rows.
   // Every rank must agree or the exchange deadlocks.
   int localNeed = 0;
   if (neighbourTest) {
     for (int i = 0; i < nop; i++) {
-      if (!work.share.owned[static_cast<std::size_t>(i)]) {
+      if (!work.share.owned[static_cast<std::size_t>(i)] ||
+          !boundary[static_cast<std::size_t>(i)]) {
         continue;
       }
       int stag = 0;

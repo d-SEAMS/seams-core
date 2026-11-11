@@ -7,11 +7,17 @@
 #include <bop.hpp>
 #include <domain.hpp>
 #include <neighbours.hpp>
+#include <seams_input.hpp>
 
 #include <mpi.h>
 
+#include <algorithm>
+#include <chrono>
 #include <cmath>
+#include <cstdint>
 #include <cstdio>
+#include <filesystem>
+#include <string>
 #include <vector>
 
 molSys::PointCloud<molSys::Point<double>, double> iceCube(int cells) {
@@ -132,6 +138,149 @@ int main(int argc, char **argv) {
         bad++;
         break;
       }
+    }
+  }
+  auto trajOf = [](const std::string &name) {
+    namespace fs = std::filesystem;
+    fs::path dir = fs::current_path();
+    for (int up = 0; up < 6; up++) {
+      if (fs::exists(dir / "traj" / name)) {
+        return (dir / "traj" / name).string();
+      }
+      if (fs::exists(dir / "input" / "traj" / name)) {
+        return (dir / "input" / "traj" / name).string();
+      }
+      if (!dir.has_parent_path() || dir == dir.parent_path()) {
+        break;
+      }
+      dir = dir.parent_path();
+    }
+    return std::string();
+  };
+  auto checkLabels = [&](molSys::PointCloud<molSys::Point<double>, double> base,
+                         const char *name) {
+    if (base.nop <= 0) {
+      if (rank == 0) {
+        std::fprintf(stderr, "%s: empty frame\n", name);
+      }
+      bad++;
+      return;
+    }
+    const double cut = 3.5;
+    const auto rows = nneigh::neighListO(cut, base, 1);
+    auto serial = base;
+    chill::classifyBonds(serial, rows, chill::chillPlusRule(), false);
+    chill::getIceTypePlusNoPrint(serial, rows, false, true);
+    auto got = base;
+    chill::distributedChillPlus(got, cut, chill::chillPlusRule(), true, MPI_COMM_WORLD);
+    const auto share = seams::domain::decompose(base, rank, nRanks, cut);
+    for (std::size_t k = 0; k < share.local.size(); k++) {
+      if (!share.owned[k]) {
+        continue;
+      }
+      const int frame = share.local[k];
+      if (got.pts[static_cast<std::size_t>(frame)].iceType !=
+          serial.pts[static_cast<std::size_t>(frame)].iceType) {
+        std::fprintf(stderr, "rank %d: %s label %d got %d serial %d\n", rank, name, frame,
+                     static_cast<int>(got.pts[static_cast<std::size_t>(frame)].iceType),
+                     static_cast<int>(serial.pts[static_cast<std::size_t>(frame)].iceType));
+        bad++;
+        break;
+      }
+    }
+    MPI_Barrier(MPI_COMM_WORLD);
+    chill::distributedChillPlus(got, cut, chill::chillPlusRule(), true, MPI_COMM_WORLD);
+    double sample[6];
+    for (int n = 0; n < 6; n++) {
+      MPI_Barrier(MPI_COMM_WORLD);
+      const auto t0 = std::chrono::steady_clock::now();
+      chill::distributedChillPlus(got, cut, chill::chillPlusRule(), true, MPI_COMM_WORLD);
+      MPI_Barrier(MPI_COMM_WORLD);
+      sample[n] = std::chrono::duration<double, std::milli>(
+                      std::chrono::steady_clock::now() - t0)
+                      .count();
+    }
+    if (rank == 0) {
+      std::sort(sample, sample + 6);
+      const double median = 0.5 * (sample[2] + sample[3]);
+      const auto work = seams::domain::gatheredWork();
+      std::printf("%s nop %d median %.3f ms halo %.3f\n", name, base.nop, median,
+                  work.haloFraction);
+    }
+  };
+  {
+    const std::string liquid = trajOf("dump-l.lammpstrj");
+    const std::string slab = trajOf("interface_f0.lammpstrj");
+    const std::string cell = trajOf("genice_sI.lammpstrj");
+    molSys::PointCloud<molSys::Point<double>, double> cloud;
+    if (!liquid.empty()) {
+      cloud = sinp::readLammpsTrjO(liquid, 1, cloud, 1);
+      checkLabels(cloud, "liquid");
+    } else {
+      bad++;
+    }
+    if (!slab.empty()) {
+      cloud = {};
+      cloud = sinp::readLammpsTrjO(slab, 1, cloud, 1);
+      checkLabels(cloud, "ice-water");
+    } else {
+      bad++;
+    }
+    if (!cell.empty()) {
+      cloud = {};
+      cloud = sinp::readLammpsTrjO(cell, 1, cloud, 1);
+      const double lx = cloud.box.size() > 0 ? cloud.box[0] : 1.0;
+      const double ly = cloud.box.size() > 1 ? cloud.box[1] : 1.0;
+      const double lz = cloud.box.size() > 2 ? cloud.box[2] : 1.0;
+      const int tile = 3;
+      molSys::PointCloud<molSys::Point<double>, double> hydrate;
+      hydrate.box = {lx * tile, ly * tile, lz * tile};
+      hydrate.boxLow = cloud.boxLow;
+      int id = 1;
+      for (int ix = 0; ix < tile; ix++) {
+        for (int iy = 0; iy < tile; iy++) {
+          for (int iz = 0; iz < tile; iz++) {
+            for (const auto &src : cloud.pts) {
+              molSys::Point<double> p = src;
+              p.atomID = id;
+              p.molID = id;
+              p.type = 1;
+              p.x = src.x + ix * lx;
+              p.y = src.y + iy * ly;
+              p.z = src.z + iz * lz;
+              const double mid = hydrate.box[2] * 0.5;
+              if (p.z >= mid) {
+                std::uint32_t s = static_cast<std::uint32_t>(id) * 1664525u + 1013904223u;
+                p.x += (static_cast<int>(s % 1000) / 1000.0 - 0.5) * 3.5;
+                s = s * 1664525u + 1013904223u;
+                p.y += (static_cast<int>(s % 1000) / 1000.0 - 0.5) * 3.5;
+                s = s * 1664525u + 1013904223u;
+                p.z += (static_cast<int>(s % 1000) / 1000.0 - 0.5) * 2.0;
+                auto wrap = [](double v, double L) {
+                  v -= L * std::floor(v / L);
+                  return v < 0.0 ? v + L : v;
+                };
+                p.x = wrap(p.x, hydrate.box[0]);
+                p.y = wrap(p.y, hydrate.box[1]);
+                p.z = wrap(p.z, hydrate.box[2]);
+                if (p.z < mid) {
+                  p.z += mid;
+                  if (p.z >= hydrate.box[2]) {
+                    p.z = hydrate.box[2] * 0.5 + 0.1;
+                  }
+                }
+              }
+              hydrate.pts.push_back(p);
+              hydrate.idIndexMap[id] = id - 1;
+              id++;
+            }
+          }
+        }
+      }
+      hydrate.nop = static_cast<int>(hydrate.pts.size());
+      checkLabels(hydrate, "hydrate-interface");
+    } else {
+      bad++;
     }
   }
   int anyBad = 0;
