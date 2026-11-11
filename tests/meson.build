@@ -69,6 +69,9 @@ _test_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
 if get_option('b_coverage')
   _test_env.set('OMP_NUM_THREADS', '1')
 endif
+if csm_shape_bin != ''
+  _test_env.set('CSM_SHAPE', csm_shape_bin)
+endif
 
 # --enable-new-dtags is Linux-only (macOS ld does not support it)
 _test_rpath = '$ORIGIN/../src'
@@ -128,6 +131,20 @@ executable('report_symmetry_cases', 'report_symmetry_cases.cpp',
   build_rpath: _test_rpath)
 
 executable('bench_shell_scale', 'bench_shell_scale.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
+
+executable('bench_naming', 'bench_naming.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
+
+executable('report_thermal', 'report_thermal.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
   link_args: _test_link_args,
