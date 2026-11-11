@@ -268,3 +268,54 @@ The same fill completes at 44064 molecules (18 by 18 by 17 cells, 7.77 GB) and t
 
 - Pang and Sun, [JPCA 2026](https://doi.org/10.1021/acs.jpca.6c05769). SQQ implements the graph-guided ring overlap workflow: an oxygen or hydrogen-bond graph, chordless rings as faces, and cages grown along exposed edges. It partitions hydrate domains from shared faces. The code is [pimooni/sqq](https://github.com/pimooni/sqq). It names cages and phases, not a PTM or CHILL+ label, so it is not in the symmetry table.
 - Chen, Huang, Xu, Li, Song, Wang, Tang, Liu and Deng, [arXiv:2609.37036](https://arxiv.org/abs/2609.37036) (2026). HyTopo classifies water as liquid-like, precursor-like, hydrate-like or ice-like, then searches rings and cages and builds a cage-transition network. Preprint; Crossref has no DOI. No public source turned up, so it is not timed.
+
+## Kernel 59d85155
+
+`59d85155` is on `feat/symmetry`. The call is still `symm::classifyIce`, now with the production ceiling 0.12, the tetrahedral q gate, and the all-eclipsed reject. Release `-O3`. Ideal ice Ic, 110592 molecules, one warm-up, six calls. Every oxygen is ice Ic. pyscal3 diamond structure remains the fastest matched label. The kernel is faster than both PTM settings and, at eight threads, level with OVITO identify diamond.
+
+| Threads | Code | Operation | Median (IQR) ms | Cubic ice |
+| --- | --- | --- | --- | --- |
+| 1 | d-SEAMS 59d85155 | classifyIce | 166.575 (0.911) | 1.000000 |
+| 1 | OVITO 3.17.2 | PTM, diamond templates | 2711.014 (35.722) | 1.000000 |
+| 1 | OVITO 3.17.2 | PTM, every template | 3953.667 (6.929) | 1.000000 |
+| 1 | OVITO 3.17.2 | identify diamond | 134.629 (1.275) | 1.000000 |
+| 1 | OVITO 3.17.2 | adaptive CNA | 272.391 (0.352) | 0.000000 |
+| 1 | pyscal3 4.1.0 | diamond structure | 96.051 (0.362) | 1.000000 |
+| 1 | pyscal3 4.1.0 | adaptive CNA | 358.423 (4.680) | 0.000000 |
+| 1 | pyscal3 4.1.0 | Ackland–Jones | 529.562 (5.703) | 0.000000 |
+| 8 | d-SEAMS 59d85155 | classifyIce | 32.868 (0.382) | 1.000000 |
+| 8 | OVITO 3.17.2 | PTM, diamond templates | 379.501 (46.228) | 1.000000 |
+| 8 | OVITO 3.17.2 | PTM, every template | 593.633 (14.970) | 1.000000 |
+| 8 | OVITO 3.17.2 | identify diamond | 36.833 (3.302) | 1.000000 |
+| 8 | OVITO 3.17.2 | adaptive CNA | 51.414 (2.428) | 0.000000 |
+| 8 | pyscal3 4.1.0 | diamond structure | 25.946 (0.724) | 1.000000 |
+| 8 | pyscal3 4.1.0 | adaptive CNA | 71.561 (0.668) | 0.000000 |
+| 8 | pyscal3 4.1.0 | Ackland–Jones | 153.488 (0.775) | 0.000000 |
+
+Raw lines are `benchmarks/h2h-watch-v6-ideal.csv`.
+
+The 200 ps frames are not in the tree. `scripts/nucleation_200ps.py` rebuilds them: 12×12×12 ice Ic, 40 ps at 500 K, the 300 central molecules put back, liquid inside 2.4 Å of that core dropped (13553 atoms remain), core fixed, the rest at 220 K for 200 ps. Velocity seeds 91001, 92002, 93003. LAMMPS 22 Jul 2025, `pair_style sw`, timestep 5 fs. Counts below are Ih / Ic / Isd for the kernel, cubic diamond / hexagonal diamond for PTM, and the same two bulk labels for identify diamond and pyscal3. Neighbour shells of the diamond identifiers are in the csv.
+
+| Seed | Threads | Kernel ms (Ih, Ic, Isd) | PTM ms (cubic, hex) | Identify diamond ms (cubic, hex) | pyscal3 diamond ms (cubic, hex) |
+| --- | --- | --- | --- | --- | --- |
+| 91001 | 1 | 84.099 (57, 275, 1) | 378.401 (288, 39) | 18.721 (247, 37) | 96.381 (247, 37) |
+| 91001 | 8 | 12.742 (57, 275, 1) | 60.352 (288, 39) | 6.255 (247, 37) | 20.789 (247, 37) |
+| 92002 | 1 | 83.266 (33, 261, 0) | 378.093 (267, 19) | 18.762 (225, 25) | 98.157 (225, 25) |
+| 92002 | 8 | 14.584 (33, 261, 0) | 63.615 (267, 19) | 6.531 (225, 25) | 22.274 (225, 25) |
+| 93003 | 1 | 84.842 (28, 237, 0) | 379.238 (255, 19) | 18.659 (216, 20) | 96.333 (216, 20) |
+| 93003 | 8 | 12.660 (28, 237, 0) | 60.298 (255, 19) | 5.938 (216, 20) | 18.681 (216, 20) |
+
+On these frames the kernel is faster than PTM and slower than OVITO identify diamond. pyscal3's bulk diamond count matches OVITO's. Raw lines are `benchmarks/h2h-watch-v6-frames.csv`.
+
+## SQQ on the 110592 ring row
+
+SQQ 0.5.8 is public ([pimooni/sqq](https://github.com/pimooni/sqq), PyPI). The row is the Python engine, O–O cutoff 0.35 nm, `ring.definition=shortest_path`, sizes 4–6. Cages and order parameters are off. SQQ does not search three-rings. The census is 0, 0, 221184, the same two six-rings per molecule. One frame does not split across `parallel.workers`, so eight cores do not change the time.
+
+| Threads | d-SEAMS rings ms | SQQ median (IQR) ms |
+| --- | --- | --- |
+| 1 | 105.412 | 18234.926 (590.433) |
+| 8 | 52.740 | 17907.744 (430.095) |
+
+The d-SEAMS times are the fast-tree ring row. Raw SQQ lines are `benchmarks/h2h-watch-v6-sqq.csv`.
+
+All 42 DOIs in `references/related_work.bib` match Crossref. HyTopo remains a preprint without a Crossref DOI.
