@@ -92,6 +92,11 @@ Cloud load(const std::string &path, int frame, int typeI) {
   }
   if (ext == "con") {
 #ifdef SEAMS_HAS_READCON
+    // readCon prints an open error and returns an empty cloud. A missing
+    // path has to fail the command, or the CLI reports success.
+    if (!gen::file_exists(path)) {
+      throw std::runtime_error("cannot read " + path);
+    }
     return sinp::readCon(path, frame, cloud);
 #else
     throw std::runtime_error("readcon-core is not in this build; CON input needs it");
