@@ -5,7 +5,6 @@ SNAKEMAKE
   Date: 2026-11-06 02:04:40
   Workflow ID: 02803137-a98e-4507-bd42-248c5f652859
   Platform: Linux-6.12.94+-x86_64-Intel-R-_Xeon-R-_Processor-with-glibc2.43
-  Host: cursor
   User: ubuntu
   Snakemake version: 9.27.1
   Python version: 3.13.14 (main, Aug  1 2026, 08:27:52) [GCC 14.3.1 20260604]
