@@ -308,7 +308,7 @@ void kabsch17(const Shell17 &fixed, const Shell17 &mobile, int n, double R[3][3]
   K[3][1] = K[1][3];
   K[3][2] = K[2][3];
   double Q[4][4];
-  jacobi4(K, Q, n <= 4 ? 2 : 4);
+  jacobi4(K, Q, n <= 4 ? 1 : 3);
   int best = 0;
   for (int i = 1; i < 4; i++) {
     if (K[i][i] > K[best][best]) {
@@ -1696,7 +1696,13 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
         continue;
       }
       if ((cna == 3 || cna == 4) && qNow >= 0.97) {
-        kind[i] = cna == 3 ? 1 : 0;
+        // Six cubic signatures are the liquid false positives on the training
+        // seeds. Those shells still go to the fit; eight or more are labelled here.
+        if (cna == 3 && n421 < 8) {
+          kind[i] = -3;
+        } else {
+          kind[i] = cna == 3 ? 1 : 0;
+        }
         continue;
       }
       const bool tightBonds = bMax <= bMin * (1.15 * 1.15);
@@ -1897,7 +1903,7 @@ int bondsBeyond(int atom, const Packed *packed, const int *cellStart, int nx, in
 
 void recoverHex(int n, const Bond *bonds, const int *nbon, const Packed *packed, const int *cellStart,
                 int nx, int ny, int nz, int reach, const int *bin, const double lat[3][3], const double *px,
-                const double *py, const double *pz, int *kind, const CanonShell &canon, double gate) {
+                const double *py,                 const double *pz, int *kind, const CanonShell &canon, double gate) {
   int unlabeled = 0;
   for (int i = 0; i < n; i++) {
     if (kind[i] < 0) {
