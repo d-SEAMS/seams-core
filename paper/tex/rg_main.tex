@@ -932,7 +932,7 @@ Marks are type 7 medians of \num{\dsv{sc@calls}} calls.}
 
 The ladder above is one process. The spatial split gives each MPI rank the owned block plus its halo, and the cell grid of that rank covers only that window. Bins the atoms do not occupy are not walked. CHILL+ and $q_6$ keep a one-cutoff coordinate halo and exchange the computed values. Rings keep a three-cutoff halo. The host is one Intel Xeon socket in a KVM guest: 8 cores, 1 thread per core, AVX-512, 320 MiB of L3, and \texttt{MemTotal} 49342816 kB.
 
-Each point is the type 7 median of six calls after one warm-up. Efficiency is the one-rank, one-thread time divided by the eight-rank time and by eight. Table~\ref{tab:rank-strong} is the strong scaling. At 110592 molecules the neighbour efficiency on eight ranks is 0.734, against 0.437 when every rank binned the full box. Figure~\ref{fig:rank-strong} draws the speedup.
+Each point is the type 7 median of six calls after one warm-up. Efficiency is the one-rank, one-thread time divided by the eight-rank time and by eight. Table~\ref{tab:rank-strong} is the strong scaling. On eight ranks at 110592 molecules the neighbour list, the bond-order pass, the interior correlation, the value exchange, the boundary correlation and the label pass take about 4.5, 2.4, 0.5, 0.2, 0.1 and 0.4 ms. A crystal has no atom with two staggered bonds, or three staggered bonds and no eclipsed bond, so the staggered-count exchange is not posted. The CHILL+ wall is then 8.620 ms and the $q_6$ wall is 8.553 ms. Figure~\ref{fig:rank-strong} draws the speedup.
 
 \begin{table}[tbp]
 \centering
@@ -943,14 +943,14 @@ The one-rank column is the median wall time. Efficiency is that time divided by 
 \toprule
 Molecules & Operation & 1 rank (\unit{\ms}) & 8 ranks (\unit{\ms}) & Efficiency & Halo \\
 \midrule
-110592 & neighbours & 27.352 & 4.661 & 0.734 & 0.247 \\
-110592 & CHILL+ & 47.151 & 12.198 & 0.483 & 0.247 \\
-110592 & $q_6$ & 52.795 & 8.981 & 0.735 & 0.247 \\
-110592 & rings & 100.736 & 21.525 & 0.585 & 0.482 \\
-884736 & neighbours & 298.523 & 37.880 & 0.985 & 0.138 \\
-884736 & CHILL+ & 452.530 & 72.243 & 0.783 & 0.138 \\
-884736 & $q_6$ & 563.695 & 80.979 & 0.870 & 0.138 \\
-884736 & rings & 1005.158 & 174.847 & 0.719 & 0.304 \\
+110592 & neighbours & 28.217 & 6.489 & 0.544 & 0.247 \\
+110592 & CHILL+ & 57.343 & 8.620 & 0.832 & 0.247 \\
+110592 & $q_6$ & 64.051 & 8.553 & 0.936 & 0.247 \\
+110592 & rings & 100.573 & 22.362 & 0.562 & 0.482 \\
+884736 & neighbours & 312.547 & 41.701 & 0.937 & 0.138 \\
+884736 & CHILL+ & 493.879 & 70.912 & 0.871 & 0.138 \\
+884736 & $q_6$ & 564.262 & 83.961 & 0.840 & 0.138 \\
+884736 & rings & 939.703 & 179.079 & 0.656 & 0.304 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -963,7 +963,7 @@ The dashed line is ideal speedup. Marks are the type 7 medians of six calls.}
 \label{fig:rank-strong}
 \end{figure}
 
-Weak scaling keeps 110592 atoms on each rank. Table~\ref{tab:rank-weak} is the efficiency at eight ranks before and after the local grid. Neighbours move from 0.530 to 0.733, CHILL+ from 0.518 to 0.592, and $q_6$ from 0.432 to 0.470. Rings move from 0.591 to 0.519. The ring search is not bound by the cell list, and the eight-rank ring median has an interquartile range of 50.5 ms.
+Weak scaling keeps 110592 atoms on each rank. Table~\ref{tab:rank-weak} is the efficiency at eight ranks before the local grid and after this measurement. A per-rank histogram of the ring search, at equal owned counts of 110592, shows ring counts from 209855 to 232752 because each ring is emitted by the rank that holds its lowest index. Enumeration itself stays inside 50.4 to 54.5 ms. The 50 ms interquartile range was the fresh allocation of every neighbour row on the first calls. Those rows are now cleared and refilled, and the eight-rank ring interquartile range is 6.0 ms.
 
 \begin{table}[tbp]
 \centering
@@ -974,10 +974,10 @@ Before is the full-box cell grid. After is the grid on the owned block plus its 
 \toprule
 Operation & Before (ms) & Before eff. & After (ms) & After eff. \\
 \midrule
-neighbours & 49.362 & 0.530 & 36.390 & 0.733 \\
-CHILL+ & 92.799 & 0.518 & 75.412 & 0.592 \\
-$q_6$ & 124.624 & 0.432 & 113.132 & 0.470 \\
-rings & 173.848 & 0.591 & 203.798 & 0.519 \\
+neighbours & 49.362 & 0.530 & 37.636 & 0.736 \\
+CHILL+ & 92.799 & 0.518 & 72.505 & 0.665 \\
+$q_6$ & 124.624 & 0.432 & 80.730 & 0.675 \\
+rings & 173.848 & 0.591 & 170.674 & 0.610 \\
 \bottomrule
 \end{tabular}
 \end{table}
