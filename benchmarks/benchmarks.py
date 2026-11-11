@@ -154,8 +154,11 @@ class ChillPlusIce:
 
 
 def _scale_plan():
+    """The twelve-call campaign script is not part of this tree."""
     import importlib.util
     path = ROOT / "scripts" / "scale_campaign.py"
+    if not path.is_file():
+        return None
     spec = importlib.util.spec_from_file_location("scale_campaign", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -165,7 +168,110 @@ def _scale_plan():
 _SCALE = _scale_plan()
 
 
-class ScaleProtocol:
+class CutoffIce:
+    """Published CHILL+, q6, primitive rings and the cutoff neighbour list.
+
+    Sizes are 1000, 10648 and 110592 molecules of ideal ice Ic. One
+    thread. The library must be a meson release -O3 build; a debug
+    library is refused before any timed call.
+    """
+
+    params = [1000, 10648, 110592]
+    param_names = ["molecules"]
+
+    def setup(self, molecules):
+        import ctypes
+        import math
+        import sys
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import release_build
+        lib_path, self.build = release_build.ensure_release(
+            os.environ.get("SEAMS_LANG_LIB"))
+        cells = {1000: 5, 10648: 11, 110592: 24}
+        if molecules not in cells:
+            raise ValueError(molecules)
+        m = cells[molecules]
+        lib = ctypes.CDLL(lib_path)
+        lib.seams_frame_from_arrays.restype = ctypes.c_void_p
+        lib.seams_frame_from_arrays.argtypes = [
+            ctypes.POINTER(ctypes.c_double), ctypes.c_int,
+            ctypes.POINTER(ctypes.c_double),
+            ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int)]
+        lib.seams_frame_free.argtypes = [ctypes.c_void_p]
+        lib.seams_frame_chill_plus.argtypes = [
+            ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_char_p,
+            ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int)]
+        lib.seams_frame_steinhardt.argtypes = [
+            ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_int,
+            ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double)]
+        lib.seams_frame_rings.argtypes = [
+            ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_char_p,
+            ctypes.c_int, ctypes.POINTER(ctypes.c_int), ctypes.c_int]
+        lib.seams_frame_neighbours.argtypes = [
+            ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_char_p]
+        bond = 2.75
+        lattice = 4.0 * bond / math.sqrt(3.0)
+        side = m * lattice
+        fcc = ((0.0, 0.0, 0.0), (0.5, 0.5, 0.0), (0.5, 0.0, 0.5), (0.0, 0.5, 0.5))
+        xyz = []
+        for i in range(m):
+            for j in range(m):
+                for k in range(m):
+                    for b in range(8):
+                        f = b % 4
+                        shift = 0.0 if b < 4 else 0.25
+                        xyz.append(((i + fcc[f][0] + shift) * lattice) % side)
+                        xyz.append(((j + fcc[f][1] + shift) * lattice) % side)
+                        xyz.append(((k + fcc[f][2] + shift) * lattice) % side)
+        n = len(xyz) // 3
+        arr = (ctypes.c_double * len(xyz))(*xyz)
+        box = (ctypes.c_double * 9)(0, 0, 0, side, side, side, 0, 0, 0)
+        types = (ctypes.c_int * n)(*([1] * n))
+        ids = (ctypes.c_int * n)(*range(1, n + 1))
+        frame = lib.seams_frame_from_arrays(arr, n, box, types, ids)
+        if not frame:
+            raise RuntimeError("could not build the ice frame")
+        self._lib = lib
+        self._frame = frame
+        self._n = n
+        self._labels = (ctypes.c_int * n)()
+        self._counts9 = (ctypes.c_int * 9)()
+        self._ql = (ctypes.c_double * n)()
+        self._qlbar = (ctypes.c_double * n)()
+        self._rings = (ctypes.c_int * 7)()
+
+    def time_published_chill_plus(self, molecules):
+        status = self._lib.seams_frame_chill_plus(
+            self._frame, 3.5, 1, b"cutoff", self._labels, self._counts9)
+        if status != 0:
+            raise RuntimeError("chill+ failed")
+
+    def time_q6(self, molecules):
+        status = self._lib.seams_frame_steinhardt(
+            self._frame, 3.5, 1, 6, self._ql, self._qlbar)
+        if status != 0:
+            raise RuntimeError("q6 failed")
+
+    def time_rings(self, molecules):
+        status = self._lib.seams_frame_rings(
+            self._frame, 3.5, 1, b"cutoff", 6, self._rings, 7)
+        if status != 0:
+            raise RuntimeError("rings failed")
+
+    def time_neighbours(self, molecules):
+        status = self._lib.seams_frame_neighbours(
+            self._frame, 3.5, 1, b"cutoff")
+        if status != 0:
+            raise RuntimeError("neighbours failed")
+
+    def teardown(self, molecules):
+        if getattr(self, "_frame", None):
+            self._lib.seams_frame_free(self._frame)
+            self._frame = None
+
+
+if _SCALE is not None:
+  class ScaleProtocol:
     """Twelve-call strong and weak points. Airspeed Velocity runs each once."""
 
     # One axis. A list of points is not a Cartesian product of those points.
@@ -225,7 +331,6 @@ class ScaleProtocol:
         if done.returncode != 0:
             raise subprocess.CalledProcessError(done.returncode, self.cmd, done.stdout)
 
-
-ScaleProtocol.time_twelve_calls.repeat = 1
-ScaleProtocol.time_twelve_calls.number = 1
-ScaleProtocol.time_twelve_calls.warmup_time = 0
+  ScaleProtocol.time_twelve_calls.repeat = 1
+  ScaleProtocol.time_twelve_calls.number = 1
+  ScaleProtocol.time_twelve_calls.warmup_time = 0

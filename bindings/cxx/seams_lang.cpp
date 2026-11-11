@@ -438,6 +438,26 @@ int seams_frame_rings(seams_frame *frame, double cutoff, int type,
   }
 }
 
+int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
+                            const char *graph) {
+  clear_error();
+  if (frame == nullptr || !(cutoff > 0.0)) {
+    set_error("neighbours need a frame and a positive cutoff");
+    return 1;
+  }
+  try {
+    const int typ = resolve_type(frame->cloud, type);
+    const std::string which = graph == nullptr ? "cutoff" : graph;
+    auto rows = bond_list(frame->cloud, cutoff, typ, which, 4);
+    return rows.size() == static_cast<std::size_t>(std::max(frame->cloud.nop, 0))
+               ? 0
+               : 1;
+  } catch (...) {
+    remember_exception();
+    return 1;
+  }
+}
+
 int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
                            int order_l, double *ql, double *qlbar) {
   clear_error();

@@ -62,6 +62,10 @@ int seams_frame_rings(seams_frame *frame, double cutoff, int type,
                       const char *graph, int max_depth, int *counts,
                       int counts_len);
 
+/* Build the cutoff neighbour list and discard it. graph NULL means cutoff. */
+int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
+                           const char *graph);
+
 int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
                            int order_l, double *ql, double *qlbar);
 

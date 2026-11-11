@@ -9,7 +9,7 @@
   "results_dir": ".asv/results",
   "html_dir": ".asv/html",
   "benchmark_dir": "benchmarks",
-  "build_command": [],
+  "build_command": ["python3", "scripts/release_build.py"],
   "install_command": [],
   "uninstall_command": []
 }
