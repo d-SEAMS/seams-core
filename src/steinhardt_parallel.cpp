@@ -13,6 +13,8 @@
 #include <ozaki.hpp>
 #include <sphericart_ylm.hpp>
 #include <steinhardt_device.hpp>
+#include <thread_team.hpp>
+#include <ylm_batch.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -436,6 +438,67 @@ void qlmOneAtomDrPairwise(int iatom, int orderL, const double *dr,
   }
 }
 
+// Sum l = 6 over one atom's bonds. Groups of eight go through the
+// Cartesian batch; the sum is still in neighbour-list order.
+void qlmOneAtomL6Batch(int iatom, const double *dr, const int *offsets, double *qlm) {
+  constexpr int orderL = 6;
+  constexpr int nComp = 13;
+  const int row = iatom * nComp;
+  for (int m = 0; m < nComp; m++) {
+    qlm[2 * (row + m)] = 0.0;
+    qlm[2 * (row + m) + 1] = 0.0;
+  }
+  const int j0 = offsets[iatom];
+  const int j1 = offsets[iatom + 1];
+  double xs[8];
+  double ys[8];
+  double zs[8];
+  double re[8 * nComp];
+  double im[8 * nComp];
+  int filled = 0;
+  int nUsed = 0;
+  const auto flush = [&]() {
+    if (filled == 0) {
+      return;
+    }
+    seams::ylm::ylmBatch(orderL, xs, ys, zs, filled, re, im);
+    for (int b = 0; b < filled; b++) {
+      const double *yr = re + static_cast<std::size_t>(b) * nComp;
+      const double *yi = im + static_cast<std::size_t>(b) * nComp;
+      for (int m = 0; m < nComp; m++) {
+        qlm[2 * (row + m)] += yr[m];
+        qlm[2 * (row + m) + 1] += yi[m];
+      }
+    }
+    filled = 0;
+  };
+  for (int p = j0; p < j1; p++) {
+    const double dx = dr[3 * p];
+    const double dy = dr[3 * p + 1];
+    const double dz = dr[3 * p + 2];
+    if (dx * dx + dy * dy + dz * dz == 0.0) {
+      continue;
+    }
+    xs[filled] = dx;
+    ys[filled] = dy;
+    zs[filled] = dz;
+    ++filled;
+    ++nUsed;
+    if (filled == 8) {
+      flush();
+    }
+  }
+  flush();
+  if (nUsed == 0) {
+    return;
+  }
+  const double inv = 1.0 / static_cast<double>(nUsed);
+  for (int m = 0; m < nComp; m++) {
+    qlm[2 * (row + m)] *= inv;
+    qlm[2 * (row + m) + 1] *= inv;
+  }
+}
+
 void runPass1(const NeighbourCSR &g, int orderL, int begin, int end,
               std::vector<double> &qlm) {
   // l=12 is host-only. Prefer sphericart; otherwise associated Legendre.
@@ -458,13 +521,19 @@ void runPass1(const NeighbourCSR &g, int orderL, int begin, int end,
 #endif
   const bool pairwise =
       seams::product::reduction() != seams::product::Reduction::Left && orderL <= 8;
+  // l = 6 batches the Cartesian harmonic eight bonds at a time. Each
+  // atom still sums its own bonds in list order, so the value matches
+  // the one-bond kernel and does not depend on the thread count.
+  const bool batchL6 = orderL == 6 && !pairwise;
 #ifdef SEAMS_HAS_OPENMP
-  const bool useThreads = g.nop >= kParallelThreshold;
+  const bool useThreads = g.nop >= kParallelThreshold && omp_get_max_threads() > 1;
 #pragma omp parallel for schedule(static) if (useThreads)
 #endif
   for (int i = begin; i < end; i++) {
     if (pairwise) {
       qlmOneAtomDrPairwise(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
+    } else if (batchL6) {
+      qlmOneAtomL6Batch(i, g.dr.data(), g.offsets.data(), qlm.data());
     } else {
       seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
                                       g.cols.data(), qlm.data());
@@ -757,6 +826,7 @@ void setSteinhardtAtomSplit([[maybe_unused]] bool split) {
 
 SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                           const std::vector<std::vector<int>> &nList, int orderL) {
+  seams::adoptThreads();
   SteinhardtQl result;
   result.ql.assign(yCloud.nop, 0.0);
   result.qlBar.assign(yCloud.nop, 0.0);

@@ -20,6 +20,7 @@
 
 #include <franzblau.hpp>
 #include <par_team.hpp>
+#include <thread_team.hpp>
 
 #ifdef SEAMS_HAS_OPENMP
 #include <omp.h>
@@ -642,6 +643,7 @@ primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth)
 std::vector<std::vector<int>>
 primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth,
                        const std::vector<char> &sources) {
+  seams::adoptThreads();
   std::vector<std::vector<int>> rings;
   if (maxDepth < 3 || nList.empty()) {
     return rings;

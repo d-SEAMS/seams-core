@@ -14,6 +14,7 @@
 
 #include <bop.hpp>
 #include <chill_plus_scheme.hpp>
+#include <thread_team.hpp>
 #include <ozaki.hpp>
 #include <algorithm>
 #include <cmath>
@@ -734,6 +735,7 @@ static void classifyBondsLeftFp64(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, const chill::BondClassifier &rule,
     bool isSlice) {
+  seams::adoptThreads();
   constexpr int l = 3;
   static_assert(l == 3, "the closed form below is the l = 3 polynomial");
   const int nop = yCloud.nop;

@@ -1,3 +1,23 @@
+diff --git a/include/linkcell.h b/include/linkcell.h
+index 95ddad7..5cd3508 100644
+--- a/include/linkcell.h
++++ b/include/linkcell.h
+@@ -286,6 +286,15 @@ int lc_pairs_within_rows(const double *xyz,
+  */
+ const char *lc_version(void);
+ 
++/**
++ * Use `n` Rayon threads for later searches. `n <= 0` means one thread.
++ * Safe to call again with a different `n`.
++ */
++void lc_set_threads(int n);
++
++/** Width last passed to `lc_set_threads`, or the global pool when unset. */
++int lc_num_threads(void);
++
+ #ifdef __cplusplus
+ }  // extern "C"
+ #endif  // __cplusplus
 diff --git a/meson.build b/meson.build
 index fb60afe..98c938f 100644
 --- a/meson.build
@@ -23,6 +43,106 @@ index 0aa9468..db4631b 100644
          #[cfg(not(feature = "parallel"))]
          let parallel = false;
          if buf.offsets.len() != ncell + 1 {
+diff --git a/src/capi.rs b/src/capi.rs
+index 64a4cc2..597aadc 100644
+--- a/src/capi.rs
++++ b/src/capi.rs
+@@ -5,9 +5,63 @@
+ use std::cell::RefCell;
+ use std::ffi::{c_char, c_int, CString};
+ use std::ptr;
++use std::sync::atomic::{AtomicUsize, Ordering};
++use std::sync::Mutex;
+ 
+ use crate::{Cell, Error};
+ 
++/// How many Rayon threads the next search should use. Zero means the
++/// process-wide pool, which is what `RAYON_NUM_THREADS` built.
++static WANTED_THREADS: AtomicUsize = AtomicUsize::new(0);
++
++fn pool_of(n: usize) -> &'static rayon::ThreadPool {
++    static CACHE: Mutex<Vec<(usize, &'static rayon::ThreadPool)>> = Mutex::new(Vec::new());
++    let mut guard = CACHE.lock().unwrap_or_else(|e| e.into_inner());
++    if let Some((_, pool)) = guard.iter().find(|(k, _)| *k == n) {
++        return *pool;
++    }
++    let pool = Box::leak(Box::new(
++        rayon::ThreadPoolBuilder::new()
++            .num_threads(n)
++            .build()
++            .unwrap_or_else(|_| rayon::ThreadPoolBuilder::new().num_threads(1).build().unwrap()),
++    ));
++    guard.push((n, pool));
++    pool
++}
++
++/// Run `work` on a pool of the requested width so `current_num_threads`
++/// inside linkcell matches that width. A width of one is the serial walk.
++fn with_threads<R: Send>(work: impl FnOnce() -> R + Send) -> R {
++    let n = WANTED_THREADS.load(Ordering::Relaxed);
++    if n == 0 {
++        return work();
++    }
++    if rayon::current_thread_index().is_some() && rayon::current_num_threads() == n {
++        return work();
++    }
++    pool_of(n).install(work)
++}
++
++/// Choose the Rayon width for later `lc_pairs_*` and `lc_knearest_*` calls.
++/// `n <= 0` selects one thread.
++#[no_mangle]
++pub extern "C" fn lc_set_threads(n: c_int) {
++    let n = if n < 1 { 1 } else { n as usize };
++    WANTED_THREADS.store(n, Ordering::Relaxed);
++}
++
++/// Width selected by [`lc_set_threads`], or the global pool when unset.
++#[no_mangle]
++pub extern "C" fn lc_num_threads() -> c_int {
++    let n = WANTED_THREADS.load(Ordering::Relaxed);
++    if n == 0 {
++        rayon::current_num_threads() as c_int
++    } else {
++        n as c_int
++    }
++}
++
+ /// Periodic parallelepiped. Lattice vectors are a, b, c (same as vesin rows).
+ #[repr(C)]
+ #[derive(Clone, Copy, Debug)]
+@@ -245,11 +299,13 @@ pub unsafe extern "C" fn lc_knearest_many(
+         d2_store = unsafe { std::slice::from_raw_parts_mut(out_d2, need) };
+         Some(&mut d2_store[..])
+     };
+-    let err = if n_frames == 1 {
+-        crate::knearest_into_d2(pts, &sim, k, mask_vec.as_deref(), hint, nn, d2)
+-    } else {
+-        crate::knearest_into_many(pts, n, n_frames, &sim, k, mask_vec.as_deref(), hint, nn, d2)
+-    };
++    let err = with_threads(|| {
++        if n_frames == 1 {
++            crate::knearest_into_d2(pts, &sim, k, mask_vec.as_deref(), hint, nn, d2)
++        } else {
++            crate::knearest_into_many(pts, n, n_frames, &sim, k, mask_vec.as_deref(), hint, nn, d2)
++        }
++    });
+     if let Err(e) = err {
+         set_error(&e.to_string());
+         return 1;
+@@ -466,8 +522,10 @@ unsafe fn pairs_call<'a>(
+         return Ok((key, found));
+     }
+     let mask_vec: Option<Vec<bool>> = mask_raw.map(|m| m.iter().map(|&v| v != 0).collect());
+-    let found = crate::pairs::in_pool(crate::pairs::hit_estimate(n, &sim, cutoff), || {
+-        crate::pairs::search(pts, &sim, cutoff, mask_vec.as_deref(), hint, half != 0)
++    let found = with_threads(|| {
++        crate::pairs::in_pool(crate::pairs::hit_estimate(n, &sim, cutoff), || {
++            crate::pairs::search(pts, &sim, cutoff, mask_vec.as_deref(), hint, half != 0)
++        })
+     });
+     match found {
+         Ok(found) => Ok((key, found)),
 diff --git a/src/knearest.rs b/src/knearest.rs
 index 3a864f4..d77c7b4 100644
 --- a/src/knearest.rs

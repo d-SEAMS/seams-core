@@ -29,6 +29,7 @@
 
 #include <neighbours.hpp>
 #include <simd_distance.hpp>
+#include <thread_team.hpp>
 
 #ifdef SEAMS_HAS_OPENMP
 #include <omp.h>
@@ -888,6 +889,7 @@ std::vector<std::vector<int>>
 nneigh::neighListO(double rcutoff,
                    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    int typeI) {
+  seams::adoptThreads();
   if (!hasPeriodicBox(yCloud)) {
     return {};
   }
@@ -1642,6 +1644,7 @@ std::vector<std::vector<int>>
 nneigh::kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     double candidateCutoff, int typeI, bool mutual) {
+  seams::adoptThreads();
   if (yCloud.nop <= 0 || k <= 0) {
     return {};
   }
@@ -1671,6 +1674,7 @@ std::vector<std::vector<int>>
 nneigh::kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     double candidateCutoff, const std::vector<int> &types, bool mutual) {
+  seams::adoptThreads();
   if (yCloud.nop <= 0 || k <= 0 || types.empty()) {
     return {};
   }
