@@ -69,8 +69,16 @@ if get_option('with_cli') and get_option('with_tests')
     timeout: 120,
   )
   install_data(
-    'python/chill_plus.py',
+    ['python/chill_plus.py', 'python/symmetry.py'],
     install_dir: get_option('datadir') / 'seams' / 'python',
+  )
+  test(
+    'symmetry_ctypes',
+    find_program('python3', required: true),
+    args: [meson.project_source_root() / 'tests' / 'test_symmetry_ctypes.py'],
+    env: {'SEAMS_CORE_LIB': ydslib.full_path()},
+    depends: [ydslib],
+    timeout: 120,
   )
 endif
 

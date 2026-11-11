@@ -29,6 +29,7 @@ test_sources = {
   'pntCorrespondence': 'test_pntCorrespondence.cpp',
   'franzblau_extra': 'test_franzblau_extra.cpp',
   'ira_sofi': 'test_ira_sofi.cpp',
+  'local_symmetry': 'test_local_symmetry.cpp',
   'sphericart': 'test_sphericart.cpp',
   'cage_canon': 'test_cage_canon.cpp',
   'topo_fingerprint': 'test_topo_fingerprint.cpp',
@@ -119,6 +120,13 @@ test('ozaki',
   workdir: meson.project_source_root() / 'input',
   env: _test_env,
   timeout: 180)
+executable('bench_symmetry', 'bench_symmetry.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
+
 executable('bench_ozaki', 'bench_ozaki.cpp',
   dependencies: [yds_dep, mpfr_dep, gmp_dep],
   cpp_args: _args,
