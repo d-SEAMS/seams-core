@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <immintrin.h>
 #include <new>
 #include <cstddef>
 #include <memory>
@@ -33,7 +34,7 @@ constexpr double kWide = 4.05;
 constexpr double kCentre = 5.6;
 constexpr double kCentreHex = 6.2;
 constexpr double kGrid = 2.8;
-constexpr int kMaxBond = 16;
+constexpr int kMaxBond = 4;
 constexpr int kMaxWide = 4;
 
 struct Bond {
@@ -42,6 +43,55 @@ struct Bond {
   double dy;
   double dz;
 };
+
+double bondLength2(const Bond &b) {
+  return b.dx * b.dx + b.dy * b.dy + b.dz * b.dz;
+}
+
+// Keep the closest bonds. Used when one atom records a pair for both ends.
+void keepClosest(Bond *dest, int &nb, const Bond *extra, int nExtra) {
+  Bond tmp[32];
+  int nt = 0;
+  for (int a = 0; a < nb && nt < 32; a++) {
+    tmp[nt++] = dest[a];
+  }
+  for (int a = 0; a < nExtra && nt < 32; a++) {
+    tmp[nt++] = extra[a];
+  }
+  for (int a = 1; a < nt; a++) {
+    const Bond b = tmp[a];
+    const double d2 = bondLength2(b);
+    int at = a;
+    while (at > 0 && d2 < bondLength2(tmp[at - 1])) {
+      tmp[at] = tmp[at - 1];
+      at--;
+    }
+    tmp[at] = b;
+  }
+  nb = nt < kMaxBond ? nt : kMaxBond;
+  for (int a = 0; a < nb; a++) {
+    dest[a] = tmp[a];
+  }
+}
+
+void pushClosest(Bond *row, int &nb, int other, double dx, double dy, double dz, double d2) {
+  if (nb < kMaxBond) {
+    row[nb++] = Bond{other, dx, dy, dz};
+    return;
+  }
+  int worst = 0;
+  double wd = bondLength2(row[0]);
+  for (int c = 1; c < kMaxBond; c++) {
+    const double d = bondLength2(row[c]);
+    if (d > wd) {
+      wd = d;
+      worst = c;
+    }
+  }
+  if (d2 < wd) {
+    row[worst] = Bond{other, dx, dy, dz};
+  }
+}
 
 // Uninitialized storage. new T[] value-initializes and the serial zero of the
 // bond table is larger than the parallel fill that overwrites it.
@@ -341,69 +391,106 @@ bool __attribute__((noinline, cold)) hasStaggeredBond(const double envF[4][3], c
 // diamond are an FCC shell (every bond staggered) and those of a hexagonal
 // diamond are an HCP shell (one bond eclipsed). A clean shell is a single
 // radius. Anything wider falls through to the full fit.
-// 12 x (4,2,1) is cubic diamond, 6 x (4,2,1) + 6 x (4,2,2) is hexagonal.
-// Returns the label, or -2 when the shell is close enough to be worth the fit.
-int diamondCna(const double *sx, const double *sy, const double *sz) {
-  double rsum = 0.0;
+// Maras, Trushin, Stukowski, Albe and Nordlund, Comput. Phys. Commun. 205, 13 (2016),
+// Appendix A. The centre and its twelve second neighbours are tested as an FCC
+// cluster (cubic diamond, ice Ic) or an HCP cluster (hexagonal diamond, ice Ih).
+// Each pair uses the adaptive cutoff (1 + sqrt(2)) / 2 times that pair's length.
+// A shell is not rejected because its radius varies. Twelve (4,2,1) signatures
+// are cubic. Six (4,2,1) and six (4,2,2) are hexagonal. Anything else with at
+// least `ambiguous` of those signatures is worth the full fit; the rest are not.
+int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguous) {
+  double r2[12];
   for (int i = 0; i < 12; i++) {
-    rsum += std::sqrt(sx[i] * sx[i] + sy[i] * sy[i] + sz[i] * sz[i]);
+    r2[i] = sx[i] * sx[i] + sy[i] * sy[i] + sz[i] * sz[i];
   }
-  const double cut = (rsum / 12.0) * 1.30;
-  const double cut2 = cut * cut;
+  // (1 + sqrt(2)) / 2, the adaptive common-neighbour cutoff. It lies between
+  // the first and second shells of the FCC/HCP cluster.
+  constexpr double kAdapt2 = 1.2071067811865475 * 1.2071067811865475;
   int n421 = 0;
   int n422 = 0;
-  int nBad = 0;
+  int nGood = 0;
+  double padX[16];
+  double padY[16];
+  double padZ[16];
+  double padR[16];
+  for (int i = 0; i < 12; i++) {
+    padX[i] = sx[i];
+    padY[i] = sy[i];
+    padZ[i] = sz[i];
+    padR[i] = r2[i];
+  }
+  for (int i = 12; i < 16; i++) {
+    padX[i] = 0.0;
+    padY[i] = 0.0;
+    padZ[i] = 0.0;
+    padR[i] = 1.0e300;
+  }
   for (int j = 0; j < 12; j++) {
-    int common[12];
+    const double cut2 = r2[j] * kAdapt2;
+    const double saved = padR[j];
+    padR[j] = 1.0e300;
+    const __m256d vcut = _mm256_set1_pd(cut2);
+    const __m256d vxj = _mm256_set1_pd(sx[j]);
+    const __m256d vyj = _mm256_set1_pd(sy[j]);
+    const __m256d vzj = _mm256_set1_pd(sz[j]);
+    int common[4];
     int nc = 0;
-    for (int k = 0; k < 12; k++) {
-      if (k == j) {
-        continue;
-      }
-      const double dx = sx[j] - sx[k];
-      const double dy = sy[j] - sy[k];
-      const double dz = sz[j] - sz[k];
-      if (dx * dx + dy * dy + dz * dz < cut2) {
-        if (nc < 12) {
-          common[nc] = k;
-        }
-        nc++;
-      }
-    }
-    if (nc != 4) {
-      nBad++;
-      continue;
-    }
-    int nBonds = 0;
-    int deg[4] = {};
-    for (int a = 0; a < 4; a++) {
-      for (int b = a + 1; b < 4; b++) {
-        const int ia = common[a];
-        const int ib = common[b];
-        const double dx = sx[ia] - sx[ib];
-        const double dy = sy[ia] - sy[ib];
-        const double dz = sz[ia] - sz[ib];
-        if (dx * dx + dy * dy + dz * dz < cut2) {
-          nBonds++;
-          deg[a]++;
-          deg[b]++;
+    for (int k = 0; k < 16 && nc <= 4; k += 4) {
+      const __m256d dx = _mm256_sub_pd(vxj, _mm256_loadu_pd(padX + k));
+      const __m256d dy = _mm256_sub_pd(vyj, _mm256_loadu_pd(padY + k));
+      const __m256d dz = _mm256_sub_pd(vzj, _mm256_loadu_pd(padZ + k));
+      const __m256d d2 = _mm256_add_pd(_mm256_mul_pd(dx, dx),
+                                      _mm256_add_pd(_mm256_mul_pd(dy, dy), _mm256_mul_pd(dz, dz)));
+      const __m256d rgate = _mm256_loadu_pd(padR + k);
+      const __m256d cmp = _mm256_and_pd(_mm256_cmp_pd(d2, vcut, _CMP_LT_OQ),
+                                       _mm256_cmp_pd(rgate, vcut, _CMP_LT_OQ));
+      const int mask = _mm256_movemask_pd(cmp);
+      for (int b = 0; b < 4; b++) {
+        if ((mask & (1 << b)) != 0) {
+          if (nc < 4) {
+            common[nc] = k + b;
+          }
+          nc++;
         }
       }
     }
-    if (nBonds != 2) {
-      nBad++;
-      continue;
-    }
-    int chain = 1;
-    for (int a = 0; a < 4; a++) {
-      if (deg[a] >= 2) {
-        chain = 2;
+    padR[j] = saved;
+    bool good = false;
+    if (nc == 4) {
+      int nBonds = 0;
+      int deg[4] = {};
+      for (int a = 0; a < 4; a++) {
+        for (int b = a + 1; b < 4; b++) {
+          const int ia = common[a];
+          const int ib = common[b];
+          const double dx = sx[ia] - sx[ib];
+          const double dy = sy[ia] - sy[ib];
+          const double dz = sz[ia] - sz[ib];
+          if (dx * dx + dy * dy + dz * dz < cut2) {
+            nBonds++;
+            deg[a]++;
+            deg[b]++;
+          }
+        }
+      }
+      if (nBonds == 2) {
+        int chain = 1;
+        for (int a = 0; a < 4; a++) {
+          if (deg[a] >= 2) {
+            chain = 2;
+          }
+        }
+        good = true;
+        nGood++;
+        if (chain == 1) {
+          n421++;
+        } else {
+          n422++;
+        }
       }
     }
-    if (chain == 1) {
-      n421++;
-    } else {
-      n422++;
+    if (!good && nGood + (11 - j) < ambiguous) {
+      return -1;
     }
   }
   if (n421 == 12) {
@@ -412,7 +499,14 @@ int diamondCna(const double *sx, const double *sy, const double *sz) {
   if (n421 == 6 && n422 == 6) {
     return 0;
   }
-  if (n421 + n422 >= 4 && nBad <= 6) {
+  // Mostly one signature. The caller accepts it only for a sharp tetrahedron.
+  if (nGood >= 8 && n421 >= 6 && n421 >= n422) {
+    return 3;
+  }
+  if (nGood >= 8 && n422 >= 4 && n422 > n421) {
+    return 4;
+  }
+  if (nGood >= ambiguous) {
     return -2;
   }
   return -1;
@@ -785,20 +879,96 @@ void recoverHex(int n, const Bond *bonds, const int *nbon, const Packed *packed,
                 int nx, int ny, int nz, int reach, const int *bin, const double lat[3][3], const double *px,
                 const double *py, const double *pz, int *kind, const CanonShell &canon, double gate);
 
+void fillHalf(int ncell, int nx, int ny, int nz, const int *cellStart, const Packed *packed,
+              const double lat[3][3], Bond *bonds, int *nbon) {
+  const double boxX = lat[0][0];
+  const double boxY = lat[1][1];
+  const double boxZ = lat[2][2];
+  const double cut2 = kBond * kBond;
+  const double min2 = 2.15 * 2.15;
+  for (int cell = 0; cell < ncell; cell++) {
+    const int ix0 = cell % nx;
+    const int iy0 = (cell / nx) % ny;
+    const int iz0 = cell / (nx * ny);
+    const int here0 = cellStart[cell];
+    const int here1 = cellStart[cell + 1];
+    for (int mine = here0; mine < here1; mine++) {
+      const int i = packed[mine].id;
+      const double ci0 = packed[mine].x;
+      const double ci1 = packed[mine].y;
+      const double ci2 = packed[mine].z;
+      for (int dz = -1; dz <= 1; dz++) {
+        int iz = iz0 + dz;
+        int sz = 0;
+        if (iz < 0) {
+          iz += nz;
+          sz = -1;
+        } else if (iz >= nz) {
+          iz -= nz;
+          sz = 1;
+        }
+        for (int dy = -1; dy <= 1; dy++) {
+          int iy = iy0 + dy;
+          int sy = 0;
+          if (iy < 0) {
+            iy += ny;
+            sy = -1;
+          } else if (iy >= ny) {
+            iy -= ny;
+            sy = 1;
+          }
+          for (int dx = -1; dx <= 1; dx++) {
+            int ix = ix0 + dx;
+            int sx = 0;
+            if (ix < 0) {
+              ix += nx;
+              sx = -1;
+            } else if (ix >= nx) {
+              ix -= nx;
+              sx = 1;
+            }
+            const int nbcell = (iz * ny + iy) * nx + ix;
+            const int begin = cellStart[nbcell];
+            const int end = cellStart[nbcell + 1];
+            const double ox = sx * boxX;
+            const double oy = sy * boxY;
+            const double oz = sz * boxZ;
+            for (int m = begin; m < end; m++) {
+              const int j = packed[m].id;
+              if (j < i) {
+                continue;
+              }
+              if (j == i && sx == 0 && sy == 0 && sz == 0) {
+                continue;
+              }
+              const double ddx = packed[m].x + ox - ci0;
+              const double ddy = packed[m].y + oy - ci1;
+              const double ddz = packed[m].z + oz - ci2;
+              const double d2 = ddx * ddx + ddy * ddy + ddz * ddz;
+              if (d2 > cut2 || d2 < min2) {
+                continue;
+              }
+              pushClosest(bonds + static_cast<size_t>(i) * kMaxBond, nbon[i], j, ddx, ddy, ddz, d2);
+              if (j != i) {
+                pushClosest(bonds + static_cast<size_t>(j) * kMaxBond, nbon[j], i, -ddx, -ddy, -ddz, d2);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 void classifyPrepared(const double *x, const double *y, const double *z, int n,
                       const double lat[3][3], const CanonShell &canon, double gate, int *kind) {
   if (n <= 0) {
     return;
   }
-  // A clean second shell is labelled by the common-neighbour test. The
-  // permutation fit runs only when that test is close and the tetrahedron
-  // is still tight: q at least 0.90, bond lengths within 15%, second-shell
-  // radius within 40%.
-  constexpr double kFastRadius = 1.15;
+  // Nine of the twelve second-neighbour signatures is the ambiguous band
+  // that still enters the fit. Exact FCC and HCP fingerprints do not.
+  constexpr int kAmbiguous = 9;
   constexpr double kQFit = 0.90;
-  constexpr double kShellRadius = 1.40;
-  constexpr double kEclipsed = 0.90;
-  constexpr double kStaggered = 0.75;
   double invT[3][3];
   double M[3][3];
   for (int i = 0; i < 3; i++) {
@@ -909,6 +1079,11 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   std::vector<int> nbon(static_cast<size_t>(n), 0);
 #ifdef SEAMS_HAS_OPENMP
   const int threads = omp_get_max_threads();
+#else
+  const int threads = 1;
+#endif
+  const bool halfPairs = false;
+#ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 64 && threads > 1)
 #endif
   for (int cell = 0; cell < ncell; cell++) {
@@ -942,6 +1117,9 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
                 if (nbr.id == i && dx == 0 && dy == 0 && dz == 0) {
                   continue;
                 }
+                if (halfPairs && nbr.id < i) {
+                  continue;
+                }
                 const double ddx = nbr.x - ci0;
                 const double ddy = nbr.y - ci1;
                 const double ddz = nbr.z - ci2;
@@ -965,6 +1143,11 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
                     rd[worst] = d2;
                   }
                 }
+                if (halfPairs && nbr.id != i) {
+                  int &onb = nbon[static_cast<size_t>(nbr.id)];
+                  pushClosest(&bonds[static_cast<size_t>(nbr.id) * static_cast<size_t>(kMaxBond)], onb, i,
+                              -ddx, -ddy, -ddz, d2);
+                }
               }
             }
           }
@@ -981,10 +1164,16 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
           row[at] = b;
           rd[at] = d2;
         }
-        nbon[static_cast<size_t>(i)] = nb;
         Bond *dest = &bonds[static_cast<size_t>(i) * static_cast<size_t>(kMaxBond)];
-        for (int a = 0; a < nb; a++) {
-          dest[a] = row[a];
+        if (halfPairs) {
+          int kept = nbon[static_cast<size_t>(i)];
+          keepClosest(dest, kept, row, nb);
+          nbon[static_cast<size_t>(i)] = kept;
+        } else {
+          nbon[static_cast<size_t>(i)] = nb;
+          for (int a = 0; a < nb; a++) {
+            dest[a] = row[a];
+          }
         }
       }
       continue;
@@ -1050,6 +1239,9 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
         if (nbr.id == i && sx == 0 && sy == 0 && sz == 0) {
           continue;
         }
+        if (halfPairs && nbr.id < i) {
+          continue;
+        }
         const double dx = nbr.x + sx * lat[0][0] + sy * lat[1][0] + sz * lat[2][0] - ci0;
         const double dy = nbr.y + sx * lat[0][1] + sy * lat[1][1] + sz * lat[2][1] - ci1;
         const double dz = nbr.z + sx * lat[0][2] + sy * lat[1][2] + sz * lat[2][2] - ci2;
@@ -1073,6 +1265,11 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
             rd[worst] = d2;
           }
         }
+        if (halfPairs && nbr.id != i) {
+          int &onb = nbon[static_cast<size_t>(nbr.id)];
+          pushClosest(&bonds[static_cast<size_t>(nbr.id) * static_cast<size_t>(kMaxBond)], onb, i, -dx, -dy,
+                      -dz, d2);
+        }
       }
     }
     for (int a = 1; a < nb; a++) {
@@ -1087,10 +1284,16 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       row[at] = b;
       rd[at] = d2;
     }
-    nbon[static_cast<size_t>(i)] = nb;
     Bond *dest = &bonds[static_cast<size_t>(i) * static_cast<size_t>(kMaxBond)];
-    for (int a = 0; a < nb; a++) {
-      dest[a] = row[a];
+    if (halfPairs) {
+      int kept = nbon[static_cast<size_t>(i)];
+      keepClosest(dest, kept, row, nb);
+      nbon[static_cast<size_t>(i)] = kept;
+    } else {
+      nbon[static_cast<size_t>(i)] = nb;
+      for (int a = 0; a < nb; a++) {
+        dest[a] = row[a];
+      }
     }
     }
   }
@@ -1132,9 +1335,10 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
         }
       }
     }
-    // q = 1 - (3/8) sum (cos + 1/3)^2. Below 0.88 the four neighbours are not
-    // a template tetrahedron, so the second shell is not walked.
-    if (!tetra || (1.0 - 0.375 * acc) < 0.88) {
+    // A non-tetrahedron has no diamond centre. The fingerprint itself is not
+    // gated on the spread of the second-shell radius.
+    const double qNow = tetra ? (1.0 - 0.375 * acc) : 0.0;
+    if (!tetra || qNow < 0.88) {
       kind[i] = -1;
       continue;
     }
@@ -1155,12 +1359,6 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       }
     }
     {
-      double first[4][3];
-      for (int k = 0; k < 4; k++) {
-        first[k][0] = mine[k].dx;
-        first[k][1] = mine[k].dy;
-        first[k][2] = mine[k].dz;
-      }
       double fx[12];
       double fy[12];
       double fz[12];
@@ -1214,39 +1412,21 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
           closed = false;
         }
       }
-      double rMin = 1e300;
-      double rMax = 0.0;
-      if (closed && nf == 12) {
-        for (int s = 0; s < 12; s++) {
-          const double r2 = fx[s] * fx[s] + fy[s] * fy[s] + fz[s] * fz[s];
-          if (r2 < rMin) {
-            rMin = r2;
-          }
-          if (r2 > rMax) {
-            rMax = r2;
-          }
-        }
-        const int cna = diamondCna(fx, fy, fz);
-        if (cna >= 0) {
-          kind[i] = cna;
-          continue;
-        }
-        const int fast = diamondSecondShell(first, fx, fy, fz, kFastRadius, kEclipsed, kStaggered);
-        if (fast >= 0) {
-          kind[i] = fast;
-          continue;
-        }
-        if (cna != -2) {
-          kind[i] = -1;
-          continue;
-        }
+      if (!(closed && nf == 12)) {
+        kind[i] = -1;
+        continue;
       }
-      // Bond lengths in squared ratio. 1.15^2 is a tetrahedron; liquid spreads more.
-      // A second shell wider than about 20% is not one diamond radius.
-      const double qNow = 1.0 - 0.375 * acc;
+      const int cna = diamondCna(fx, fy, fz, kAmbiguous);
+      if (cna == 0 || cna == 1) {
+        kind[i] = cna;
+        continue;
+      }
+      if ((cna == 3 || cna == 4) && qNow >= 0.97) {
+        kind[i] = cna == 3 ? 1 : 0;
+        continue;
+      }
       const bool tightBonds = bMax <= bMin * (1.15 * 1.15);
-      const bool tightShell = closed && nf == 12 && rMax <= rMin * (kShellRadius * kShellRadius);
-      if (!(qNow >= kQFit && tightBonds && tightShell)) {
+      if (!((cna == -2 || cna == 3 || cna == 4) && qNow >= kQFit && tightBonds)) {
         kind[i] = -1;
         continue;
       }
