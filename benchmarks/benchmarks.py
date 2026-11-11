@@ -90,6 +90,69 @@ class CampaignArms:
         _run(self.commands["rings"])
 
 
+class ChillPlusIce:
+    """Cutoff CHILL+ on 1000-molecule ideal ice. One thread, one call.
+
+    The neighbour rows come from the linked-cell list. q3 is still the
+    published left-to-right sum, so the labels do not move.
+    """
+
+    def setup(self):
+        import ctypes
+        import math
+        lib_path = os.environ.get("SEAMS_LANG_LIB")
+        if not lib_path:
+            raise NotImplementedError("SEAMS_LANG_LIB is not set")
+        lib = ctypes.CDLL(lib_path)
+        lib.seams_frame_from_arrays.restype = ctypes.c_void_p
+        lib.seams_frame_from_arrays.argtypes = [
+            ctypes.POINTER(ctypes.c_double), ctypes.c_int,
+            ctypes.POINTER(ctypes.c_double),
+            ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int)]
+        lib.seams_frame_free.argtypes = [ctypes.c_void_p]
+        lib.seams_frame_chill_plus.argtypes = [
+            ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_char_p,
+            ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int)]
+        bond = 2.75
+        lattice = 4.0 * bond / math.sqrt(3.0)
+        side = 5 * lattice
+        fcc = ((0.0, 0.0, 0.0), (0.5, 0.5, 0.0), (0.5, 0.0, 0.5), (0.0, 0.5, 0.5))
+        xyz = []
+        for i in range(5):
+            for j in range(5):
+                for k in range(5):
+                    for b in range(8):
+                        f = b % 4
+                        shift = 0.0 if b < 4 else 0.25
+                        xyz.append(((i + fcc[f][0] + shift) * lattice) % side)
+                        xyz.append(((j + fcc[f][1] + shift) * lattice) % side)
+                        xyz.append(((k + fcc[f][2] + shift) * lattice) % side)
+        n = len(xyz) // 3
+        arr = (ctypes.c_double * len(xyz))(*xyz)
+        box = (ctypes.c_double * 9)(0, 0, 0, side, side, side, 0, 0, 0)
+        types = (ctypes.c_int * n)(*([1] * n))
+        ids = (ctypes.c_int * n)(*range(1, n + 1))
+        frame = lib.seams_frame_from_arrays(arr, n, box, types, ids)
+        if not frame:
+            raise RuntimeError("could not build the ice frame")
+        labels = (ctypes.c_int * n)()
+        counts = (ctypes.c_int * 9)()
+        self._lib = lib
+        self._frame = frame
+        self._labels = labels
+        self._counts = counts
+
+    def time_published_chill_plus(self):
+        status = self._lib.seams_frame_chill_plus(
+            self._frame, 3.5, 1, b"cutoff", self._labels, self._counts)
+        if status != 0:
+            raise RuntimeError("chill+ failed")
+
+    def teardown(self):
+        if getattr(self, "_frame", None):
+            self._lib.seams_frame_free(self._frame)
+
+
 def _scale_plan():
     import importlib.util
     path = ROOT / "scripts" / "scale_campaign.py"

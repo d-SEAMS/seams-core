@@ -14,8 +14,10 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <cstdio>
 #include <iostream>
 #include <limits>
 #include <memory>
@@ -200,7 +202,8 @@ void binCutoffRows(std::size_t count, const Ends &ends,
   int threads = 1;
   // nvc++ -mp=gpu SIGSEGVs host parallel regions in libnvomp
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-  if (nop >= kParallelRowsMinAtoms && !omp_in_parallel()) {
+  if (nop >= kParallelRowsMinAtoms && !omp_in_parallel() &&
+      omp_get_max_threads() > 1) {
     threads = omp_get_max_threads();
   }
 #endif
@@ -494,7 +497,7 @@ std::vector<std::vector<int>> rowsByID(const CutoffRows &rows,
   std::vector<std::vector<int>> nList(static_cast<std::size_t>(nop));
   // nvc++ -mp=gpu SIGSEGVs host parallel-fors in libnvomp
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-#pragma omp parallel for schedule(static) if (nop >= kParallelRowsMinAtoms && !omp_in_parallel())
+#pragma omp parallel for schedule(static) if (nop >= kParallelRowsMinAtoms && !omp_in_parallel() && omp_get_max_threads() > 1)
 #endif
   for (int iatom = 0; iatom < nop; iatom++) {
     if (indexToID[iatom] == -1) {
@@ -903,6 +906,18 @@ nneigh::neighListO(double rcutoff,
     }
   }
 
+#ifdef SEAMS_HAS_CUTOFF_LIST
+  // linkcell (or vesin) is the same cutoff set as the orthorhombic cell
+  // list and spends less time building the rows. The cell list remains
+  // the fallback when this call fails.
+  {
+    CutoffRows rows;
+    if (cutoffRows(yCloud, typeIIndices, rcutoff, rows)) {
+      return rowsByID(rows, indexToID, yCloud.nop);
+    }
+  }
+#endif
+
   if (orthoFullList(yCloud, typeIIndices, rcutoff, indexToID, nList)) {
     return nList;
   }
@@ -923,18 +938,6 @@ nneigh::neighListO(double rcutoff,
     }
     return true;
   };
-#endif
-
-#ifdef SEAMS_HAS_CUTOFF_LIST
-  // Cutoff list: linkcell pairs_within, or vesin when that library is absent.
-  {
-    CutoffRows rows;
-    if (cutoffRows(yCloud, typeIIndices, rcutoff, rows)) {
-      // Every atom gets a row, not just typeI
-      return rowsByID(rows, indexToID, yCloud.nop);
-    }
-    // If the cutoff list failed, fall through.
-  }
 #endif
 
 #ifdef SEAMS_HAS_OPENMP

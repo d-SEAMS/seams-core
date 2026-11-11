@@ -41,7 +41,10 @@ struct AngularTerms {
   std::array<double, 9> cosPow;             //! cosPow[k] = cos(theta)^k
   std::array<std::complex<double>, 9> phase; //! phase[k] = exp(i k phi)
 
-  AngularTerms(double theta, double phi) {
+  // maxPow is the highest power a caller reads. l = 3 reads 3, l = 6
+  // reads 6, l = 8 reads 8. Stopping there leaves the lower powers
+  // identical to filling the whole table.
+  AngularTerms(double theta, double phi, int maxPow = 8) {
     const double sinTheta = std::sin(theta);
     const double cosTheta = std::cos(theta);
     const std::complex<double> unitPhase(std::cos(phi), std::sin(phi));
@@ -49,10 +52,14 @@ struct AngularTerms {
     sinPow[0] = 1.0;
     cosPow[0] = 1.0;
     phase[0] = {1.0, 0.0};
-    for (std::size_t k = 1; k < sinPow.size(); k++) {
-      sinPow[k] = sinPow[k - 1] * sinTheta;
-      cosPow[k] = cosPow[k - 1] * cosTheta;
-      phase[k] = phase[k - 1] * unitPhase;
+    const int last = std::min(maxPow, static_cast<int>(sinPow.size()) - 1);
+    for (int k = 1; k <= last; k++) {
+      sinPow[static_cast<std::size_t>(k)] =
+          sinPow[static_cast<std::size_t>(k - 1)] * sinTheta;
+      cosPow[static_cast<std::size_t>(k)] =
+          cosPow[static_cast<std::size_t>(k - 1)] * cosTheta;
+      phase[static_cast<std::size_t>(k)] =
+          phase[static_cast<std::size_t>(k - 1)] * unitPhase;
     }
   }
 };
@@ -608,57 +615,95 @@ static void classifyBondsLeftFp64(
   std::vector<double> qReal(static_cast<std::size_t>(nop) * nComp, 0.0);
   std::vector<double> qImag(static_cast<std::size_t>(nop) * nComp, 0.0);
   const bool fixedKeep = keepMax > 0;
+  // One thread walks atoms in order, so a whole cutoff shell is one
+  // buffer instead of a vector per atom.
+  const bool serialShell =
+      !fixedKeep &&
+#ifdef SEAMS_HAS_OPENMP
+      omp_get_max_threads() <= 1
+#else
+      true
+#endif
+      ;
   std::vector<int> chosen;
   std::vector<std::vector<int>> ragged;
+  std::vector<int> flat;
+  std::vector<int> flatAt(static_cast<std::size_t>(nop) + 1, 0);
   std::vector<int> nkeep(static_cast<std::size_t>(nop), 0);
   if (fixedKeep) {
     chosen.assign(static_cast<std::size_t>(nop) * static_cast<std::size_t>(keepMax), -1);
-  } else {
+  } else if (!serialShell) {
     ragged.resize(static_cast<std::size_t>(nop));
+  } else {
+    flat.reserve(static_cast<std::size_t>(nop) * 8);
   }
 
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1)
 #endif
   for (int iatom = 0; iatom < nop; iatom++) {
     if (static_cast<std::size_t>(iatom) >= nList.size()) {
       continue;
     }
-    std::vector<std::pair<double, int>> candidates;
-    candidates.reserve(nList[static_cast<std::size_t>(iatom)].size());
+    // The distance and the minimum-image delta are one evaluation. A short
+    // shell stays on the stack; a wider cutoff row spills, in the same order.
+    struct Near {
+      double d2;
+      int jatom;
+      double x, y, z;
+      bool operator<(const Near &o) const {
+        return d2 < o.d2 || (d2 == o.d2 && jatom < o.jatom);
+      }
+    };
+    Near stackNear[32];
+    std::vector<Near> heapNear;
+    Near *candidates = stackNear;
+    int nCand = 0;
     const Xyz pi = xyz[static_cast<std::size_t>(iatom)];
-    for (std::size_t j = 1; j < nList[static_cast<std::size_t>(iatom)].size(); j++) {
-      const int jatom = resolve(nList[static_cast<std::size_t>(iatom)][j]);
+    const auto &row = nList[static_cast<std::size_t>(iatom)];
+    for (std::size_t j = 1; j < row.size(); j++) {
+      const int jatom = resolve(row[j]);
       if (jatom < 0) {
         continue;
       }
       const Xyz pj = xyz[static_cast<std::size_t>(jatom)];
       const auto dr = gen::fracDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
-      const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
-      candidates.emplace_back(d2, jatom);
+      if (nCand == 32 && candidates == stackNear) {
+        heapNear.assign(stackNear, stackNear + 32);
+        candidates = heapNear.data();
+      }
+      if (candidates == stackNear) {
+        candidates[nCand] = {dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2], jatom, dr[0],
+                             dr[1], dr[2]};
+      } else {
+        heapNear.push_back(
+            {dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2], jatom, dr[0], dr[1], dr[2]});
+        candidates = heapNear.data();
+      }
+      ++nCand;
     }
-    const std::size_t keep =
-        (keepMax > 0) ? std::min(static_cast<std::size_t>(keepMax), candidates.size())
-                      : candidates.size();
+    const int keep =
+        (keepMax > 0) ? std::min(keepMax, nCand) : nCand;
     if (keep == 0) {
       continue;
     }
-    std::partial_sort(candidates.begin(), candidates.begin() + static_cast<std::ptrdiff_t>(keep),
-                      candidates.end());
-    nkeep[static_cast<std::size_t>(iatom)] = static_cast<int>(keep);
+    std::partial_sort(candidates, candidates + keep, candidates + nCand);
+    nkeep[static_cast<std::size_t>(iatom)] = keep;
     std::array<double, nComp> accRe{};
     std::array<double, nComp> accIm{};
-    for (std::size_t j = 0; j < keep; j++) {
-      const int jatom = candidates[j].second;
+    for (int j = 0; j < keep; j++) {
+      const int jatom = candidates[j].jatom;
       if (fixedKeep) {
-        chosen[static_cast<std::size_t>(iatom) * static_cast<std::size_t>(keepMax) + j] = jatom;
+        chosen[static_cast<std::size_t>(iatom) * static_cast<std::size_t>(keepMax) +
+               static_cast<std::size_t>(j)] = jatom;
+      } else if (serialShell) {
+        flat.push_back(jatom);
       } else {
         ragged[static_cast<std::size_t>(iatom)].push_back(jatom);
       }
-      const Xyz pj = xyz[static_cast<std::size_t>(jatom)];
-      const auto dr = gen::fracDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+      const std::array<double, 3> dr = {candidates[j].x, candidates[j].y, candidates[j].z};
       const std::array<double, 2> angles = sph::radialCoord(dr);
-      const AngularTerms terms(angles[1], angles[0]);
+      const AngularTerms terms(angles[1], angles[0], l);
       for (int m = 0; m <= l; m++) {
         const auto harm = harmonicPair(l, m, terms);
         accRe[l - m] += harm.first.real();
@@ -677,11 +722,17 @@ static void classifyBondsLeftFp64(
       im[m] = accIm[m];
     }
   }
+  if (serialShell) {
+    for (int i = 0; i < nop; i++) {
+      flatAt[static_cast<std::size_t>(i + 1)] =
+          flatAt[static_cast<std::size_t>(i)] + nkeep[static_cast<std::size_t>(i)];
+    }
+  }
 
   // c_ij from the real part of the complex inner product. The neighbour
   // count cancels between the averaged harmonics and the norms.
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1)
 #endif
   for (int iatom = 0; iatom < nop; iatom++) {
     if (isSlice && !yCloud.pts[static_cast<std::size_t>(iatom)].inSlice) {
@@ -703,7 +754,8 @@ static void classifyBondsLeftFp64(
       const int jatom =
           fixedKeep ? chosen[static_cast<std::size_t>(iatom) * static_cast<std::size_t>(keepMax) +
                              static_cast<std::size_t>(j)]
-                    : ragged[static_cast<std::size_t>(iatom)][static_cast<std::size_t>(j)];
+          : serialShell ? flat[static_cast<std::size_t>(flatAt[static_cast<std::size_t>(iatom)] + j)]
+                        : ragged[static_cast<std::size_t>(iatom)][static_cast<std::size_t>(j)];
       if (jatom < 0) {
         continue;
       }
