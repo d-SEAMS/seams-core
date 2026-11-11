@@ -188,6 +188,48 @@ Share decompose(const Cloud &cloud, int rank, int nRanks, double halo) {
   return share;
 }
 
+void markSources(const Cloud &cloud, const Share &share, double inner,
+                 std::vector<char> &source) {
+  source.assign(share.local.size(), 0);
+  if (share.local.empty()) {
+    return;
+  }
+  if (inner < 0.0) {
+    for (std::size_t k = 0; k < share.local.size(); k++) {
+      source[k] = share.owned[k];
+    }
+    return;
+  }
+  int rank = 0;
+  int nRanks = 1;
+  for (std::size_t k = 0; k < share.local.size(); k++) {
+    nRanks = std::max(nRanks, share.owner[k] + 1);
+    if (share.owned[k]) {
+      rank = share.owner[k];
+    }
+  }
+  const gen::FracBox box = gen::makeFracBox(cloud);
+  const double w[3] = {box.wx, box.wy, box.wz};
+  const BlockGrid grid = chooseGrid(nRanks, w, inner);
+  int blk[3];
+  blockAt(rank, grid.n, blk);
+  const double inner2 = inner * inner;
+  for (std::size_t k = 0; k < share.local.size(); k++) {
+    if (share.owned[k]) {
+      source[k] = 1;
+      continue;
+    }
+    const auto &p = cloud.pts[k];
+    const double sz = (p.z - box.oz) / box.lz;
+    const double sy = (p.y - box.oy - box.yz * sz) / box.ly;
+    const double sx = (p.x - box.ox - box.xy * sy - box.xz * sz) / box.lx;
+    const double s[3] = {sx, sy, sz};
+    if (blockDist2(s, blk, grid.n, w) <= inner2) {
+      source[k] = 1;
+    }
+  }
+}
+
 std::vector<int> haloRanks(const Share &share) {
   std::vector<int> ranks;
   ranks.reserve(share.local.size());
@@ -349,15 +391,23 @@ std::vector<int> symmetricNeighbors(std::vector<int> nbrs, int rank, int nRanks,
 }
 } // namespace
 
-Work gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
-  Work work;
+Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
+  static Work work;
   int rank = 0;
   int nRanks = 1;
   MPI_Comm_rank(comm, &rank);
   MPI_Comm_size(comm, &nRanks);
   if (nRanks <= 1) {
-    work.share = decompose(cloud, rank, nRanks, halo);
-    work.cloud = subCloud(cloud, work.share.local);
+    if (work.cloud.nop != cloud.nop || work.share.local.size() != cloud.pts.size()) {
+      work.share = decompose(cloud, rank, nRanks, halo);
+      work.cloud = subCloud(cloud, work.share.local);
+    } else {
+      for (int i = 0; i < cloud.nop; i++) {
+        work.cloud.pts[static_cast<std::size_t>(i)].x = cloud.pts[static_cast<std::size_t>(i)].x;
+        work.cloud.pts[static_cast<std::size_t>(i)].y = cloud.pts[static_cast<std::size_t>(i)].y;
+        work.cloud.pts[static_cast<std::size_t>(i)].z = cloud.pts[static_cast<std::size_t>(i)].z;
+      }
+    }
     return work;
   }
 
@@ -488,38 +538,66 @@ Work gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
                     .count();
   (void)graph;
 
-  std::unordered_map<int, GhostAtom> got;
-  got.reserve(static_cast<std::size_t>(recvN / std::max(atomBytes, 1)));
+  // Place ghosts by frame index. The local list is sorted, so each
+  // received atom is a binary search, and the point is rewritten in place.
+  const bool fresh = work.cloud.pts.size() != work.share.local.size();
+  if (fresh) {
+    work.cloud.currentFrame = cloud.currentFrame;
+    work.cloud.box = cloud.box;
+    work.cloud.boxLow = cloud.boxLow;
+    work.cloud.pts.assign(work.share.local.size(), {});
+    work.cloud.idIndexMap.clear();
+    work.cloud.idIndexMap.reserve(work.share.local.size());
+  }
+  int misses = 0;
+  for (std::size_t k = 0; k < work.share.local.size(); k++) {
+    if (!work.share.owned[k]) {
+      continue;
+    }
+    const auto &src = cloud.pts[static_cast<std::size_t>(work.share.local[k])];
+    auto &dst = work.cloud.pts[k];
+    dst.x = src.x;
+    dst.y = src.y;
+    dst.z = src.z;
+    if (fresh) {
+      dst.atomID = src.atomID;
+      dst.molID = src.molID;
+      dst.type = src.type;
+      work.cloud.idIndexMap[dst.atomID] = static_cast<int>(k);
+    }
+  }
   for (int at = 0; at + atomBytes <= recvN; at += atomBytes) {
     GhostAtom atom;
     std::memcpy(&atom, recv.data() + at, sizeof(GhostAtom));
-    got.emplace(atom.index, atom);
-  }
-  work.cloud.currentFrame = cloud.currentFrame;
-  work.cloud.box = cloud.box;
-  work.cloud.boxLow = cloud.boxLow;
-  work.cloud.pts.resize(work.share.local.size());
-  int misses = 0;
-  for (std::size_t k = 0; k < work.share.local.size(); k++) {
-    molSys::Point<double> point;
-    if (work.share.owned[k]) {
-      point = cloud.pts[static_cast<std::size_t>(work.share.local[k])];
-    } else {
-      const auto it = got.find(work.share.local[k]);
-      if (it == got.end()) {
-        misses++;
-        point = cloud.pts[static_cast<std::size_t>(work.share.local[k])];
-      } else {
-        point.atomID = it->second.atomID;
-        point.molID = it->second.molID;
-        point.type = it->second.type;
-        point.x = it->second.x;
-        point.y = it->second.y;
-        point.z = it->second.z;
-      }
+    const auto it = std::lower_bound(work.share.local.begin(), work.share.local.end(),
+                                     atom.index);
+    if (it == work.share.local.end() || *it != atom.index) {
+      misses++;
+      continue;
     }
-    work.cloud.idIndexMap[point.atomID] = static_cast<int>(k);
-    work.cloud.pts[k] = point;
+    const std::size_t k = static_cast<std::size_t>(it - work.share.local.begin());
+    auto &dst = work.cloud.pts[k];
+    dst.x = atom.x;
+    dst.y = atom.y;
+    dst.z = atom.z;
+    if (fresh) {
+      dst.atomID = atom.atomID;
+      dst.molID = atom.molID;
+      dst.type = atom.type;
+      work.cloud.idIndexMap[dst.atomID] = static_cast<int>(k);
+    }
+  }
+  if (fresh) {
+    for (std::size_t k = 0; k < work.share.local.size(); k++) {
+      if (work.share.owned[k] || work.cloud.pts[k].atomID != 0) {
+        continue;
+      }
+      misses++;
+      const auto &src = cloud.pts[static_cast<std::size_t>(work.share.local[k])];
+      auto &dst = work.cloud.pts[k];
+      dst = src;
+      work.cloud.idIndexMap[dst.atomID] = static_cast<int>(k);
+    }
   }
   work.cloud.nop = static_cast<int>(work.cloud.pts.size());
   int missed = 0;
@@ -588,7 +666,7 @@ RingSummary reduceRings(const Cloud &cloud, double cutoff, int maxDepth,
   MPI_Comm_rank(comm, &rank);
   MPI_Comm_size(comm, &nRanks);
   const int nAtoms = static_cast<int>(cloud.pts.size());
-  const Work work = gatherWork(cloud, ringHops(maxDepth) * cutoff, comm);
+  const Work &work = gatherWork(cloud, ringHops(maxDepth) * cutoff, comm);
   const Share &share = work.share;
   const auto mine = ringsOf(work.cloud, cutoff, maxDepth, share.owned);
   const std::size_t nLocal = share.local.size();

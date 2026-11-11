@@ -68,6 +68,11 @@ Share decompose(const Cloud &cloud, int rank, int nRanks, double halo);
 //! listed by each owner.
 std::vector<int> haloRanks(const Share &share);
 
+//! One where a local atom is owned or lies within @a inner of the owned
+//! block. @a inner below zero marks only the owned atoms.
+void markSources(const Cloud &cloud, const Share &share, double inner,
+                 std::vector<char> &source);
+
 //! The listed atoms of @a cloud, in that order, in the same box
 Cloud subCloud(const Cloud &cloud, const std::vector<int> &atoms);
 
@@ -94,8 +99,10 @@ struct Work {
 };
 
 //! Build @a rank's working cloud. Ghost coordinates arrive from the owners
-//! over the distributed graph; the owned coordinates stay local.
-Work gatherWork(const Cloud &cloud, double halo, MPI_Comm comm);
+//! over the distributed graph; the owned coordinates stay local. The cloud
+//! and the exchange plan are kept and rewritten in place on the next call
+//! with the same frame size and halo.
+Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm);
 
 //! Every rank's rings on every rank of @a comm, in the order rings() lists
 //! them for a single rank. Collective over @a comm. Each rank builds the

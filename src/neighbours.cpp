@@ -683,6 +683,137 @@ bool nneigh::cellListRowsThreaded(
   return true;
 }
 
+const std::vector<std::vector<int>> &nneigh::reusedShellList(
+    double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<char> *source) {
+  static std::vector<std::vector<int>> rows;
+  static std::vector<int> cellOf, cellStart, cellAtoms, fill;
+  const int n = yCloud.nop;
+  if (n <= 0 || rcutoff <= 0.0) {
+    rows.clear();
+    return rows;
+  }
+  double H[3][3];
+  double origin[3];
+  dumpBoundsToH(yCloud.box, yCloud.boxLow, H, origin);
+  const double lx = H[0][0], ly = H[1][1], lz = H[2][2];
+  const double xy = H[1][0], xz = H[2][0], yz = H[2][1];
+  const double volume = lx * ly * lz;
+  const auto norm3 = [](double x, double y, double z) {
+    return std::sqrt(x * x + y * y + z * z);
+  };
+  const double width[3] = {
+      volume / norm3(ly * lz, -xy * lz, xy * yz - ly * xz),
+      volume / norm3(0.0, lz * lx, -yz * lx),
+      volume / norm3(0.0, 0.0, lx * ly)};
+  int ncell[3];
+  bool gridOk = lx > 0.0 && ly > 0.0 && lz > 0.0;
+  for (int d = 0; d < 3 && gridOk; d++) {
+    ncell[d] = static_cast<int>(std::floor(width[d] / rcutoff));
+    gridOk = ncell[d] >= 3;
+  }
+  if (!gridOk) {
+    rows = neighListO(rcutoff, yCloud, 1);
+    return rows;
+  }
+  const int nCells = ncell[0] * ncell[1] * ncell[2];
+  cellOf.resize(static_cast<std::size_t>(n));
+  cellStart.assign(static_cast<std::size_t>(nCells) + 1, 0);
+  cellAtoms.resize(static_cast<std::size_t>(n));
+  const auto wrap = [](double f) {
+    f -= std::floor(f);
+    return f >= 1.0 ? 0.0 : f;
+  };
+  for (int k = 0; k < n; k++) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(k)];
+    const double fc = (p.z - origin[2]) / lz;
+    const double fb = (p.y - origin[1] - fc * yz) / ly;
+    const double fa = (p.x - origin[0] - fb * xy - fc * xz) / lx;
+    const double f[3] = {wrap(fa), wrap(fb), wrap(fc)};
+    int c[3];
+    for (int d = 0; d < 3; d++) {
+      c[d] = std::min(ncell[d] - 1, static_cast<int>(f[d] * ncell[d]));
+    }
+    const int cid = (c[0] * ncell[1] + c[1]) * ncell[2] + c[2];
+    cellOf[static_cast<std::size_t>(k)] = cid;
+    ++cellStart[static_cast<std::size_t>(cid) + 1];
+  }
+  for (int cidx = 0; cidx < nCells; cidx++) {
+    cellStart[static_cast<std::size_t>(cidx) + 1] += cellStart[static_cast<std::size_t>(cidx)];
+  }
+  fill.assign(cellStart.begin(), cellStart.end() - 1);
+  for (int k = 0; k < n; k++) {
+    cellAtoms[static_cast<std::size_t>(fill[static_cast<std::size_t>(cellOf[k])]++)] = k;
+  }
+  if (static_cast<int>(rows.size()) != n) {
+    rows.assign(static_cast<std::size_t>(n), {});
+    for (auto &row : rows) {
+      row.reserve(16);
+    }
+  }
+  const double rc2 = rcutoff * rcutoff;
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
+#ifdef SEAMS_HAS_MINIMAGE
+  const gen::CellFrame cells = gen::makeCellFrame(yCloud);
+#endif
+  std::vector<int> cand;
+  std::vector<double> qs;
+  std::vector<double> d2;
+  cand.reserve(128);
+  for (int k = 0; k < n; k++) {
+    auto &row = rows[static_cast<std::size_t>(k)];
+    row.clear();
+    row.push_back(yCloud.pts[static_cast<std::size_t>(k)].atomID);
+    if (source != nullptr && (static_cast<int>(source->size()) <= k ||
+                              (*source)[static_cast<std::size_t>(k)] == 0)) {
+      continue;
+    }
+    const int cid = cellOf[static_cast<std::size_t>(k)];
+    const int cz = cid % ncell[2];
+    const int cy = (cid / ncell[2]) % ncell[1];
+    const int cx = cid / (ncell[1] * ncell[2]);
+    cand.clear();
+    for (int dx = -1; dx <= 1; dx++) {
+      const int nx = (cx + dx + ncell[0]) % ncell[0];
+      for (int dy = -1; dy <= 1; dy++) {
+        const int ny = (cy + dy + ncell[1]) % ncell[1];
+        for (int dz = -1; dz <= 1; dz++) {
+          const int nz = (cz + dz + ncell[2]) % ncell[2];
+          const int ncid = (nx * ncell[1] + ny) * ncell[2] + nz;
+          for (int m = cellStart[static_cast<std::size_t>(ncid)];
+               m < cellStart[static_cast<std::size_t>(ncid) + 1]; m++) {
+            const int j = cellAtoms[static_cast<std::size_t>(m)];
+            if (j != k) {
+              cand.push_back(j);
+            }
+          }
+        }
+      }
+    }
+    bool batched = false;
+#ifdef SEAMS_HAS_MINIMAGE
+    if (cells.ok && !cand.empty()) {
+      qs.resize(3 * cand.size());
+      d2.resize(cand.size());
+      for (std::size_t t = 0; t < cand.size(); t++) {
+        std::copy_n(&cells.xyz[3 * static_cast<std::size_t>(cand[t])], 3, &qs[3 * t]);
+      }
+      batched = mi_dist2_many(&cells.cell, &cells.xyz[3 * static_cast<std::size_t>(k)],
+                              qs.data(), cand.size(), d2.data()) == 0;
+    }
+#endif
+    for (std::size_t t = 0; t < cand.size(); t++) {
+      const double r2 =
+          batched ? d2[t] : gen::periodicDistSq(frame, yCloud, k, cand[t]);
+      if (r2 <= rc2) {
+        row.push_back(yCloud.pts[static_cast<std::size_t>(cand[t])].atomID);
+      }
+    }
+    std::sort(row.begin() + 1, row.end());
+  }
+  return rows;
+}
+
 namespace {
 
 // Orthorhombic cutoff list. One pass, OpenMP over cells, one stencil shared

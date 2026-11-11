@@ -353,6 +353,14 @@ std::vector<std::vector<int>> neighListPair(
 //! neighbour sits in one of the 27 surrounding cells. Returns false, with
 //! `rows` untouched, when the cell is too small for that, and the caller
 //! takes the vesin or brute-force path. Each row is built by one thread.
+//! Cutoff rows by atom ID, self first, for every atom or only the atoms
+//! marked in @a source. The cell counts and the row storage stay allocated
+//! and are refilled in place. Same partners as neighListO for the rows that
+//! are filled.
+const std::vector<std::vector<int>> &reusedShellList(
+    double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<char> *source);
+
 bool cellListRowsThreaded(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &subset, double rcutoff,
