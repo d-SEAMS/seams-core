@@ -166,7 +166,7 @@ TEST_CASE("one, two and four ranks list the same rings as one rank", "[thread]")
   const auto base = jitteredIce(8);
   const auto whole = nneigh::getNewNeighbourListByIndex(base, 3.5);
   const auto serial = primitive::ringNetwork(whole, 6);
-  for (const int nRanks : {1, 2, 4}) {
+  for (const int nRanks : {1, 2, 4, 8}) {
     std::vector<std::vector<int>> joined;
     for (int rank = 0; rank < nRanks; rank++) {
       const auto share = seams::domain::decompose(base, rank, nRanks, 3.5 * 4);
@@ -185,5 +185,60 @@ TEST_CASE("one, two and four ranks list the same rings as one rank", "[thread]")
     std::stable_sort(expect.begin(), expect.end(),
                      [](const auto &a, const auto &b) { return a[0] < b[0]; });
     REQUIRE(joined == expect);
+  }
+}
+
+TEST_CASE("spatial ranks match the serial neighbour list, CHILL+ labels and q6",
+          "[thread]") {
+  const auto base = jitteredIce(8);
+  const double cutoff = 3.5;
+  const auto serialRows = nneigh::neighListO(cutoff, base, 1);
+  auto serialCloud = base;
+  chill::applyChillPlus(serialCloud, serialRows, chill::ChillPlusRule::Published);
+  auto serialOvito = base;
+  chill::applyChillPlus(serialOvito, serialRows, chill::ChillPlusRule::Ovito);
+  const auto serialQ = chill::steinhardtQl(base, serialRows, 6);
+  for (const int nRanks : {1, 2, 4, 8}) {
+    for (const double halo : {cutoff, 2.0 * cutoff}) {
+      for (int rank = 0; rank < nRanks; rank++) {
+        const auto share = seams::domain::decompose(base, rank, nRanks, halo);
+        const auto local = seams::domain::subCloud(base, share.local);
+        const auto rows = nneigh::neighListO(cutoff, local, 1);
+        for (std::size_t k = 0; k < share.local.size(); k++) {
+          if (!share.owned[k]) {
+            continue;
+          }
+          const int frame = share.local[k];
+          if (halo == cutoff) {
+            REQUIRE(rows[k] == serialRows[static_cast<std::size_t>(frame)]);
+          }
+        }
+        // q and c_ij at a neighbour need that neighbour's shell, one
+        // cutoff further out. One cutoff is not enough; two is.
+        if (halo != 2.0 * cutoff) {
+          continue;
+        }
+        auto published = local;
+        chill::applyChillPlus(published, rows, chill::ChillPlusRule::Published);
+        auto ovito = local;
+        chill::applyChillPlus(ovito, rows, chill::ChillPlusRule::Ovito);
+        const auto q = chill::steinhardtQl(local, rows, 6);
+        for (std::size_t k = 0; k < share.local.size(); k++) {
+          if (!share.owned[k]) {
+            continue;
+          }
+          const int frame = share.local[k];
+          REQUIRE(published.pts[k].iceType ==
+                  serialCloud.pts[static_cast<std::size_t>(frame)].iceType);
+          REQUIRE(ovito.pts[k].iceType ==
+                  serialOvito.pts[static_cast<std::size_t>(frame)].iceType);
+          REQUIRE_THAT(q.ql[k], Catch::Matchers::WithinAbs(
+                                    serialQ.ql[static_cast<std::size_t>(frame)], 1e-15));
+          REQUIRE_THAT(q.qlBar[k],
+                       Catch::Matchers::WithinAbs(
+                           serialQ.qlBar[static_cast<std::size_t>(frame)], 1e-15));
+        }
+      }
+    }
   }
 }

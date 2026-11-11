@@ -13,13 +13,12 @@
 /** @file domain.hpp
  *  @brief Spatial domain decomposition of one periodic frame across ranks.
  *
- *  Cells of the frame are ordered along a Hilbert curve and cut into one
- *  contiguous run per rank of near equal atom count, as Gadget splits its
- *  Peano-Hilbert keys (Springel, MNRAS 364, 1105, 2005). A rank's halo is
- *  every cell within a given distance of the cells it owns. A kernel whose
- *  answer for an atom depends only on atoms within that distance can run on
- *  the owned and halo atoms alone and agree with the whole frame on the
- *  owned ones.
+ *  The box is cut into slabs, pencils, or blocks, whichever keeps the most
+ *  owned volume for a halo of the given width. A rank owns one block. Its
+ *  halo is every atom within that width of the block, periodic boundaries
+ *  included, and nothing further. A kernel whose answer for an atom depends
+ *  only on atoms within that width can run on the owned and halo atoms alone
+ *  and agree with the whole frame on the owned ones.
  */
 
 namespace seams::domain {
@@ -50,8 +49,18 @@ RingSummary summarize(const std::vector<std::vector<int>> &ringList,
 std::uint64_t hilbertKey(std::uint32_t x, std::uint32_t y, std::uint32_t z,
                          int bits);
 
+//! Graph hops a primitive ring of @a maxDepth members can reach. A hop is
+//! at most one cutoff, so the halo is this times the cutoff.
+inline int ringHops(int maxDepth) {
+  const int maxLvl = maxDepth > 0 ? maxDepth / 2 : 0;
+  if (maxLvl <= 0) {
+    return 0;
+  }
+  return maxLvl + (maxLvl - 1) / 2;
+}
+
 //! The atoms rank @a rank of @a nRanks owns, and every atom within @a halo
-//! of one of them. Without a periodic box rank 0 owns every atom.
+//! of its block. Without a periodic box rank 0 owns every atom.
 Share decompose(const Cloud &cloud, int rank, int nRanks, double halo);
 
 //! Ranks that own a halo atom of @a share, sorted, without this rank.
@@ -69,7 +78,25 @@ Cloud subCloud(const Cloud &cloud, const std::vector<int> &atoms);
 std::vector<std::vector<int>> rings(const Cloud &cloud, double cutoff,
                                     int maxDepth, int rank, int nRanks);
 
+//! Rings of a cloud that is already one share, in share order. @a owned
+//! selects the sources. Member indices are local.
+std::vector<std::vector<int>> ownedRings(const Cloud &local, double cutoff,
+                                         int maxDepth,
+                                         const std::vector<char> &owned);
+
 #ifdef SEAMS_HAS_MPI
+//! Owned atoms plus the halo received from the neighbouring blocks.
+struct Work {
+  Cloud cloud;          //!< share.local order: index k is share.local[k]
+  Share share;
+  double commMs = 0;    //!< ghost exchange, after a barrier
+  double haloFraction = 0; //!< halo atoms / local atoms, on this rank
+};
+
+//! Build @a rank's working cloud. Ghost coordinates arrive from the owners
+//! over the distributed graph; the owned coordinates stay local.
+Work gatherWork(const Cloud &cloud, double halo, MPI_Comm comm);
+
 //! Every rank's rings on every rank of @a comm, in the order rings() lists
 //! them for a single rank. Collective over @a comm. Each rank builds the
 //! whole list, so this costs every rank the size of the result, which must

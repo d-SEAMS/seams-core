@@ -1,8 +1,12 @@
 #include <domain.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
+#include <cstdio>
+#include <cstring>
 #include <numeric>
+#include <unordered_map>
 
 #include <franzblau.hpp>
 #include <generic.hpp>
@@ -15,14 +19,6 @@
 namespace seams::domain {
 namespace {
 
-// Ownership: a cube of 2^bits cells per axis in fractional coordinates, at
-// least kCellsPerRank per rank so a cut falls within a small share, at most
-// 2^kMaxBits per axis. Halo: cells at most halo / kHaloCells wide, so the
-// halo overshoots by less than a cell, at most kMaxHaloCells per axis.
-constexpr long long kCellsPerRank = 64;
-constexpr int kMaxBits = 7;
-constexpr double kHaloCells = 4.0;
-constexpr int kMaxHaloCells = 128;
 // Fewer rows or rings than this are not worth waking a team for
 constexpr int kParallelMin = 4096;
 
@@ -33,42 +29,6 @@ int cellAlong(double s, int n) {
     f = 0.0;
   }
   return std::min(n - 1, static_cast<int>(f * n));
-}
-
-//! Set every cell within @a reach cells of a set one along @a axis,
-//! wrapping periodically
-void dilate(std::vector<char> &mask, const int n[3], int axis, int reach) {
-  const int len = n[axis];
-  if (reach <= 0 || len <= 1) {
-    return;
-  }
-  const int stride[3] = {1, n[0], n[0] * n[1]};
-  const int u = (axis + 1) % 3;
-  const int v = (axis + 2) % 3;
-  const bool whole = 2 * reach + 1 >= len;
-  std::vector<char> line(static_cast<std::size_t>(len));
-  for (int a = 0; a < n[u]; a++) {
-    for (int b = 0; b < n[v]; b++) {
-      const int base = a * stride[u] + b * stride[v];
-      bool any = false;
-      for (int i = 0; i < len; i++) {
-        line[i] = mask[base + i * stride[axis]];
-        any = any || line[i];
-      }
-      if (!any) {
-        continue;
-      }
-      for (int i = 0; i < len; i++) {
-        if (whole) {
-          mask[base + i * stride[axis]] = 1;
-        } else if (line[i]) {
-          for (int d = -reach; d <= reach; d++) {
-            mask[base + ((i + d + len) % len) * stride[axis]] = 1;
-          }
-        }
-      }
-    }
-  }
 }
 
 } // namespace
@@ -110,6 +70,81 @@ std::uint64_t hilbertKey(std::uint32_t x, std::uint32_t y, std::uint32_t z,
   return key;
 }
 
+// Factor nRanks into (nx, ny, nz). The product of owned/covered along each
+// axis is the owned fraction of a uniform box; the most compact block wins
+// a tie, which is the cut with the least surface.
+struct BlockGrid {
+  int n[3];
+};
+
+BlockGrid chooseGrid(int nRanks, const double w[3], double halo) {
+  BlockGrid best{{nRanks, 1, 1}};
+  double bestScore = -1.0;
+  double bestMin = -1.0;
+  for (int nx = 1; nx <= nRanks; nx++) {
+    if (nRanks % nx != 0) {
+      continue;
+    }
+    const int nyz = nRanks / nx;
+    for (int ny = 1; ny <= nyz; ny++) {
+      if (nyz % ny != 0) {
+        continue;
+      }
+      const int nz = nyz / ny;
+      const int n[3] = {nx, ny, nz};
+      double score = 1.0;
+      double minEdge = 1.0e300;
+      for (int k = 0; k < 3; k++) {
+        const double edge = w[k] > 0.0 ? w[k] : 1.0;
+        const double thick = edge / n[k];
+        minEdge = std::min(minEdge, thick);
+        const double covered = std::min(edge, thick + 2.0 * std::max(halo, 0.0));
+        score *= thick / covered;
+      }
+      if (score > bestScore + 1.0e-12 ||
+          (std::abs(score - bestScore) <= 1.0e-12 && minEdge > bestMin)) {
+        bestScore = score;
+        bestMin = minEdge;
+        best = {{nx, ny, nz}};
+      }
+    }
+  }
+  return best;
+}
+
+void blockAt(int rank, const int n[3], int out[3]) {
+  out[0] = rank % n[0];
+  out[1] = (rank / n[0]) % n[1];
+  out[2] = rank / (n[0] * n[1]);
+}
+
+// Periodic gap from fractional coordinate @a f to the half-open interval
+// [a, b) on the unit circle.
+double fracGap(double f, double a, double b) {
+  const double width = b - a;
+  if (width >= 1.0 - 1.0e-15) {
+    return 0.0;
+  }
+  double x = f - a;
+  x -= std::floor(x);
+  if (x <= width) {
+    return 0.0;
+  }
+  return std::min(x - width, 1.0 - x);
+}
+
+double blockDist2(const double s[3], const int blk[3], const int n[3],
+                  const double w[3]) {
+  double sum = 0.0;
+  for (int k = 0; k < 3; k++) {
+    const double a = static_cast<double>(blk[k]) / n[k];
+    const double b = static_cast<double>(blk[k] + 1) / n[k];
+    const double gap = fracGap(s[k], a, b) * w[k];
+    sum += gap * gap;
+  }
+  return sum;
+}
+
 Share decompose(const Cloud &cloud, int rank, int nRanks, double halo) {
   Share share;
   const int nAtoms = static_cast<int>(cloud.pts.size());
@@ -127,83 +162,27 @@ Share decompose(const Cloud &cloud, int rank, int nRanks, double halo) {
     return share;
   }
 
-  int bits = 1;
-  while (bits < kMaxBits && (1LL << (3 * bits)) < kCellsPerRank * nRanks) {
-    bits++;
-  }
-  const int np = 1 << bits;
   const double w[3] = {b.wx, b.wy, b.wz};
-  int n[3] = {1, 1, 1};
-  int reach[3] = {0, 0, 0};
-  for (int k = 0; k < 3; k++) {
-    if (halo > 0.0) {
-      n[k] = static_cast<int>(std::clamp(w[k] * kHaloCells / halo, 1.0,
-                                         static_cast<double>(kMaxHaloCells)));
-      reach[k] = static_cast<int>(
-          std::min(std::ceil(halo * n[k] / w[k]), static_cast<double>(n[k])));
-    }
-  }
+  const BlockGrid grid = chooseGrid(nRanks, w, halo);
+  int mineBlk[3];
+  blockAt(rank, grid.n, mineBlk);
+  const double halo2 = halo > 0.0 ? halo * halo : -1.0;
 
-  // Ownership and halo cell of every atom, by fractional coordinate
-  std::vector<int> partOf(static_cast<std::size_t>(nAtoms));
-  std::vector<int> haloOf(static_cast<std::size_t>(nAtoms));
-  std::vector<int> count(static_cast<std::size_t>(np) * np * np, 0);
   for (int i = 0; i < nAtoms; i++) {
     const auto &p = cloud.pts[static_cast<std::size_t>(i)];
     const double sz = (p.z - b.oz) / b.lz;
     const double sy = (p.y - b.oy - b.yz * sz) / b.ly;
     const double sx = (p.x - b.ox - b.xy * sy - b.xz * sz) / b.lx;
-    const int c = (cellAlong(sz, np) * np + cellAlong(sy, np)) * np +
-                  cellAlong(sx, np);
-    partOf[static_cast<std::size_t>(i)] = c;
-    haloOf[static_cast<std::size_t>(i)] =
-        (cellAlong(sz, n[2]) * n[1] + cellAlong(sy, n[1])) * n[0] +
-        cellAlong(sx, n[0]);
-    count[static_cast<std::size_t>(c)]++;
-  }
-
-  // The keys of a cube are a permutation, so placing each cell at its key
-  // orders them along the curve; cut where the running count crosses each
-  // rank's equal share
-  std::vector<int> along(count.size());
-  for (int c = 0; c < static_cast<int>(count.size()); c++) {
-    along[hilbertKey(static_cast<std::uint32_t>(c % np),
-                     static_cast<std::uint32_t>((c / np) % np),
-                     static_cast<std::uint32_t>(c / (np * np)), bits)] = c;
-  }
-  std::vector<int> ownerOf(count.size(), 0);
-  std::vector<char> owned(count.size(), 0);
-  long long before = 0;
-  for (const int c : along) {
-    const long long here = count[static_cast<std::size_t>(c)];
-    const long long owner =
-        std::min<long long>(nRanks - 1, (2 * before + here) * nRanks /
-                                            (2 * static_cast<long long>(nAtoms)));
-    ownerOf[static_cast<std::size_t>(c)] = static_cast<int>(owner);
-    owned[static_cast<std::size_t>(c)] = owner == rank;
-    before += here;
-  }
-
-  // A point within halo of an atom lies within halo/w[k] of it in fractional
-  // coordinate k, which is reach[k] halo cells
-  std::vector<char> near(static_cast<std::size_t>(n[0]) * n[1] * n[2], 0);
-  for (int i = 0; i < nAtoms; i++) {
-    if (owned[static_cast<std::size_t>(partOf[static_cast<std::size_t>(i)])]) {
-      near[static_cast<std::size_t>(haloOf[static_cast<std::size_t>(i)])] = 1;
-    }
-  }
-  for (int k = 0; k < 3; k++) {
-    dilate(near, n, k, reach[k]);
-  }
-  for (int i = 0; i < nAtoms; i++) {
-    const char mine =
-        owned[static_cast<std::size_t>(partOf[static_cast<std::size_t>(i)])];
-    if (mine || (halo > 0.0 &&
-                 near[static_cast<std::size_t>(haloOf[static_cast<std::size_t>(i)])])) {
+    const double s[3] = {sx, sy, sz};
+    const int ix = cellAlong(sx, grid.n[0]);
+    const int iy = cellAlong(sy, grid.n[1]);
+    const int iz = cellAlong(sz, grid.n[2]);
+    const int owner = ix + grid.n[0] * (iy + grid.n[1] * iz);
+    const bool owns = owner == rank;
+    if (owns || (halo2 >= 0.0 && blockDist2(s, mineBlk, grid.n, w) <= halo2)) {
       share.local.push_back(i);
-      share.owned.push_back(mine);
-      share.owner.push_back(
-          ownerOf[static_cast<std::size_t>(partOf[static_cast<std::size_t>(i)])]);
+      share.owned.push_back(owns ? 1 : 0);
+      share.owner.push_back(owner);
     }
   }
   return share;
@@ -240,26 +219,13 @@ Cloud subCloud(const Cloud &cloud, const std::vector<int> &atoms) {
 }
 
 namespace {
-//! Rings whose lowest-indexed member the share owns, by local index
-std::vector<std::vector<int>> shareRings(const Cloud &cloud, double cutoff,
-                                         int maxDepth, int rank, int nRanks,
-                                         Share &share) {
-  // Members of a ring lie within maxLvl hops of its source, and the search
-  // reads adjacency no further out. A ball is consulted only on whether two
-  // members are joined by a path shorter than their separation around the
-  // ring, at most maxLvl - 1 edges, and every vertex of such a path lies
-  // within half its length of one end. So no atom further than the sum of
-  // the two from an owned atom bears on an owned ring. A hop spans at most
-  // the cutoff.
-  const int maxLvl = maxDepth / 2;
-  const int hops = maxLvl + (maxLvl - 1) / 2;
-  share = decompose(cloud, rank, nRanks, hops * cutoff);
-  if (share.local.empty()) {
+//! Rings on a cloud already limited to one share, by local index.
+std::vector<std::vector<int>> ringsOf(const Cloud &local, double cutoff,
+                                      int maxDepth, const std::vector<char> &owned) {
+  if (local.nop == 0) {
     return {};
   }
-  // Ascending rows: the local and the frame index orders then agree on every
-  // row, and so on the order each ring is listed in
-  auto nList = nneigh::getNewNeighbourListByIndex(subCloud(cloud, share.local), cutoff);
+  auto nList = nneigh::getNewNeighbourListByIndex(local, cutoff);
   const int nLocal = static_cast<int>(nList.size());
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (nLocal >= kParallelMin && !omp_in_parallel())
@@ -269,7 +235,20 @@ std::vector<std::vector<int>> shareRings(const Cloud &cloud, double cutoff,
       std::sort(nList[k].begin() + 1, nList[k].end());
     }
   }
-  return primitive::ringNetwork(nList, maxDepth, share.owned);
+  return primitive::ringNetwork(nList, maxDepth, owned);
+}
+
+//! Rings whose lowest-indexed member the share owns, by local index.
+std::vector<std::vector<int>> shareRings(const Cloud &cloud, double cutoff,
+                                         int maxDepth, int rank, int nRanks,
+                                         Share &share) {
+  // Members of a ring lie within ringHops of its source. A hop spans at
+  // most the cutoff, so the block halo is that many cutoffs and no more.
+  share = decompose(cloud, rank, nRanks, ringHops(maxDepth) * cutoff);
+  if (share.local.empty()) {
+    return {};
+  }
+  return ringsOf(subCloud(cloud, share.local), cutoff, maxDepth, share.owned);
 }
 
 //! Largest ring size through each local atom, 1 through none
@@ -284,6 +263,12 @@ void localTypes(const std::vector<std::vector<int>> &ringList,
   }
 }
 } // namespace
+
+std::vector<std::vector<int>> ownedRings(const Cloud &local, double cutoff,
+                                         int maxDepth,
+                                         const std::vector<char> &owned) {
+  return ringsOf(local, cutoff, maxDepth, owned);
+}
 
 std::vector<std::vector<int>> rings(const Cloud &cloud, double cutoff,
                                     int maxDepth, int rank, int nRanks) {
@@ -316,6 +301,235 @@ RingSummary summarize(const std::vector<std::vector<int>> &ringList,
 }
 
 #ifdef SEAMS_HAS_MPI
+namespace {
+struct GhostAtom {
+  int index = 0;
+  int atomID = 0;
+  int type = 0;
+  int molID = 0;
+  double x = 0.0;
+  double y = 0.0;
+  double z = 0.0;
+};
+
+std::vector<int> symmetricNeighbors(std::vector<int> nbrs, int rank, int nRanks,
+                                   MPI_Comm comm) {
+  const int mine = static_cast<int>(nbrs.size());
+  std::vector<int> degs(static_cast<std::size_t>(nRanks), 0);
+  MPI_Allgather(&mine, 1, MPI_INT, degs.data(), 1, MPI_INT, comm);
+  std::vector<int> off(static_cast<std::size_t>(nRanks), 0);
+  std::exclusive_scan(degs.begin(), degs.end(), off.begin(), 0);
+  const int total = nRanks == 0 ? 0 : off.back() + degs.back();
+  std::vector<int> listed(static_cast<std::size_t>(std::max(total, 0)));
+  MPI_Allgatherv(nbrs.empty() ? nullptr : nbrs.data(), mine, MPI_INT, listed.data(),
+                 degs.data(), off.data(), MPI_INT, comm);
+  std::vector<char> seen(static_cast<std::size_t>(nRanks), 0);
+  for (const int n : nbrs) {
+    if (n >= 0 && n < nRanks) {
+      seen[static_cast<std::size_t>(n)] = 1;
+    }
+  }
+  for (int other = 0; other < nRanks; other++) {
+    if (other == rank) {
+      continue;
+    }
+    const int base = off[static_cast<std::size_t>(other)];
+    const int nEdge = degs[static_cast<std::size_t>(other)];
+    for (int e = 0; e < nEdge; e++) {
+      if (listed[static_cast<std::size_t>(base + e)] == rank &&
+          !seen[static_cast<std::size_t>(other)]) {
+        nbrs.push_back(other);
+        seen[static_cast<std::size_t>(other)] = 1;
+      }
+    }
+  }
+  std::sort(nbrs.begin(), nbrs.end());
+  nbrs.erase(std::unique(nbrs.begin(), nbrs.end()), nbrs.end());
+  return nbrs;
+}
+} // namespace
+
+Work gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
+  Work work;
+  int rank = 0;
+  int nRanks = 1;
+  MPI_Comm_rank(comm, &rank);
+  MPI_Comm_size(comm, &nRanks);
+  if (nRanks <= 1) {
+    work.share = decompose(cloud, rank, nRanks, halo);
+    work.cloud = subCloud(cloud, work.share.local);
+    return work;
+  }
+
+  // The neighbour relation depends only on the blocks and the halo, so the
+  // graph is built once per process and reused for later frames.
+  struct GraphCache {
+    int nRanks = -1;
+    int rank = -1;
+    int nop = -1;
+    double halo = -1.0;
+    double haloFraction = 0.0;
+    Share share;
+    std::vector<int> nbrs;
+    std::vector<std::vector<int>> sendAt;
+    MPI_Comm graph = MPI_COMM_NULL;
+  };
+  static GraphCache cache;
+  const bool reuse = cache.nop == cloud.nop && cache.nRanks == nRanks &&
+                     cache.rank == rank && cache.halo == halo;
+  if (!reuse) {
+    work.share = decompose(cloud, rank, nRanks, halo);
+    int nOwned = 0;
+    for (const char flag : work.share.owned) {
+      nOwned += flag ? 1 : 0;
+    }
+    const int nLocal = static_cast<int>(work.share.local.size());
+    work.haloFraction =
+        nLocal > 0 ? static_cast<double>(nLocal - nOwned) / nLocal : 0.0;
+    if (cache.graph != MPI_COMM_NULL) {
+      MPI_Comm_free(&cache.graph);
+    }
+    cache.nRanks = nRanks;
+    cache.rank = rank;
+    cache.nop = cloud.nop;
+    cache.halo = halo;
+    cache.share = work.share;
+    cache.haloFraction = work.haloFraction;
+    cache.nbrs = symmetricNeighbors(haloRanks(work.share), rank, nRanks, comm);
+    const int cachedDegree = static_cast<int>(cache.nbrs.size());
+    MPI_Dist_graph_create_adjacent(
+        comm, cachedDegree, cache.nbrs.empty() ? nullptr : cache.nbrs.data(),
+        MPI_UNWEIGHTED, cachedDegree,
+        cache.nbrs.empty() ? nullptr : cache.nbrs.data(), MPI_UNWEIGHTED,
+        MPI_INFO_NULL, 0, &cache.graph);
+    const gen::FracBox box = gen::makeFracBox(cloud);
+    const double w[3] = {box.wx, box.wy, box.wz};
+    const BlockGrid grid = chooseGrid(nRanks, w, halo);
+    const double halo2 = halo > 0.0 ? halo * halo : -1.0;
+    cache.sendAt.assign(static_cast<std::size_t>(cachedDegree), {});
+    for (std::size_t k = 0; k < work.share.local.size(); k++) {
+      if (!work.share.owned[k]) {
+        continue;
+      }
+      const auto &p = cloud.pts[static_cast<std::size_t>(work.share.local[k])];
+      const double sz = (p.z - box.oz) / box.lz;
+      const double sy = (p.y - box.oy - box.yz * sz) / box.ly;
+      const double sx = (p.x - box.ox - box.xy * sy - box.xz * sz) / box.lx;
+      const double s[3] = {sx, sy, sz};
+      for (int sidx = 0; sidx < cachedDegree; sidx++) {
+        int blk[3];
+        blockAt(cache.nbrs[static_cast<std::size_t>(sidx)], grid.n, blk);
+        if (halo2 >= 0.0 && blockDist2(s, blk, grid.n, w) <= halo2) {
+          cache.sendAt[static_cast<std::size_t>(sidx)].push_back(static_cast<int>(k));
+        }
+      }
+    }
+  } else {
+    work.share = cache.share;
+    work.haloFraction = cache.haloFraction;
+  }
+  const std::vector<int> &nbrs = cache.nbrs;
+  const int degree = static_cast<int>(nbrs.size());
+  MPI_Comm graph = cache.graph;
+  std::vector<std::vector<GhostAtom>> bags(static_cast<std::size_t>(degree));
+  for (int sidx = 0; sidx < degree; sidx++) {
+    auto &bag = bags[static_cast<std::size_t>(sidx)];
+    bag.reserve(cache.sendAt[static_cast<std::size_t>(sidx)].size());
+    for (const int k : cache.sendAt[static_cast<std::size_t>(sidx)]) {
+      const int frame = work.share.local[static_cast<std::size_t>(k)];
+      const auto &p = cloud.pts[static_cast<std::size_t>(frame)];
+      bag.push_back(GhostAtom{frame, p.atomID, p.type, p.molID, p.x, p.y, p.z});
+    }
+  }
+  std::vector<int> sendCount(static_cast<std::size_t>(std::max(degree, 1)), 0);
+  std::vector<int> sendDispl(sendCount.size(), 0);
+  int sendN = 0;
+  for (int sidx = 0; sidx < degree; sidx++) {
+    sendCount[static_cast<std::size_t>(sidx)] =
+        static_cast<int>(bags[static_cast<std::size_t>(sidx)].size());
+    sendDispl[static_cast<std::size_t>(sidx)] = sendN;
+    sendN += sendCount[static_cast<std::size_t>(sidx)];
+  }
+  std::vector<GhostAtom> send(static_cast<std::size_t>(std::max(sendN, 1)));
+  for (int sidx = 0; sidx < degree; sidx++) {
+    std::copy(bags[static_cast<std::size_t>(sidx)].begin(),
+              bags[static_cast<std::size_t>(sidx)].end(),
+              send.begin() + sendDispl[static_cast<std::size_t>(sidx)]);
+  }
+  const int atomBytes = static_cast<int>(sizeof(GhostAtom));
+  std::vector<int> sendBytes(sendCount.size(), 0);
+  std::vector<int> sendByteDispl(sendCount.size(), 0);
+  for (int sidx = 0; sidx < degree; sidx++) {
+    sendBytes[static_cast<std::size_t>(sidx)] =
+        sendCount[static_cast<std::size_t>(sidx)] * atomBytes;
+    sendByteDispl[static_cast<std::size_t>(sidx)] =
+        sendDispl[static_cast<std::size_t>(sidx)] * atomBytes;
+  }
+  std::vector<int> recvBytes(sendCount.size(), 0);
+  std::vector<int> recvByteDispl(sendCount.size(), 0);
+  int sink = 0;
+  const int *sendBytesPtr = degree == 0 ? &sink : sendBytes.data();
+  const int *sendByteDisplPtr = degree == 0 ? &sink : sendByteDispl.data();
+  MPI_Barrier(comm);
+  const auto t0 = std::chrono::steady_clock::now();
+  MPI_Neighbor_alltoall(sendBytesPtr, 1, MPI_INT, recvBytes.data(), 1, MPI_INT, graph);
+  int recvN = 0;
+  for (int sidx = 0; sidx < degree; sidx++) {
+    recvByteDispl[static_cast<std::size_t>(sidx)] = recvN;
+    recvN += recvBytes[static_cast<std::size_t>(sidx)];
+  }
+  std::vector<char> recv(static_cast<std::size_t>(std::max(recvN, 1)));
+  MPI_Neighbor_alltoallv(send.data(), sendBytesPtr, sendByteDisplPtr, MPI_BYTE,
+                         recv.data(), recvBytes.data(), recvByteDispl.data(), MPI_BYTE,
+                         graph);
+  MPI_Barrier(comm);
+  work.commMs = std::chrono::duration<double, std::milli>(
+                    std::chrono::steady_clock::now() - t0)
+                    .count();
+  (void)graph;
+
+  std::unordered_map<int, GhostAtom> got;
+  got.reserve(static_cast<std::size_t>(recvN / std::max(atomBytes, 1)));
+  for (int at = 0; at + atomBytes <= recvN; at += atomBytes) {
+    GhostAtom atom;
+    std::memcpy(&atom, recv.data() + at, sizeof(GhostAtom));
+    got.emplace(atom.index, atom);
+  }
+  work.cloud.currentFrame = cloud.currentFrame;
+  work.cloud.box = cloud.box;
+  work.cloud.boxLow = cloud.boxLow;
+  work.cloud.pts.resize(work.share.local.size());
+  int misses = 0;
+  for (std::size_t k = 0; k < work.share.local.size(); k++) {
+    molSys::Point<double> point;
+    if (work.share.owned[k]) {
+      point = cloud.pts[static_cast<std::size_t>(work.share.local[k])];
+    } else {
+      const auto it = got.find(work.share.local[k]);
+      if (it == got.end()) {
+        misses++;
+        point = cloud.pts[static_cast<std::size_t>(work.share.local[k])];
+      } else {
+        point.atomID = it->second.atomID;
+        point.molID = it->second.molID;
+        point.type = it->second.type;
+        point.x = it->second.x;
+        point.y = it->second.y;
+        point.z = it->second.z;
+      }
+    }
+    work.cloud.idIndexMap[point.atomID] = static_cast<int>(k);
+    work.cloud.pts[k] = point;
+  }
+  work.cloud.nop = static_cast<int>(work.cloud.pts.size());
+  int missed = 0;
+  MPI_Allreduce(&misses, &missed, 1, MPI_INT, MPI_SUM, comm);
+  if (rank == 0 && missed != 0) {
+    std::fprintf(stderr, "ghost exchange missed %d atoms\n", missed);
+  }
+  return work;
+}
+
 std::vector<std::vector<int>> gatherRings(const Cloud &cloud, double cutoff,
                                           int maxDepth, MPI_Comm comm) {
   int rank = 0;
@@ -374,8 +588,9 @@ RingSummary reduceRings(const Cloud &cloud, double cutoff, int maxDepth,
   MPI_Comm_rank(comm, &rank);
   MPI_Comm_size(comm, &nRanks);
   const int nAtoms = static_cast<int>(cloud.pts.size());
-  Share share;
-  const auto mine = shareRings(cloud, cutoff, maxDepth, rank, nRanks, share);
+  const Work work = gatherWork(cloud, ringHops(maxDepth) * cutoff, comm);
+  const Share &share = work.share;
+  const auto mine = ringsOf(work.cloud, cutoff, maxDepth, share.owned);
   const std::size_t nLocal = share.local.size();
 
   // Counts: every ring is listed by exactly one rank, its source's owner
