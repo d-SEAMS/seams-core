@@ -219,6 +219,19 @@ def main():
             jobs.append(("mdapy", threads, m, molecules, "mdapy", "chill+"))
             jobs.append(("ovito", threads, m, molecules, "ovito", "chill+"))
             jobs.append(("freud", threads, m, molecules, "freud", "neighbours"))
+    for threads in (1, 8):
+        molecules = 8 * 48 ** 3
+        for mode, op in (
+            ("chill", "published"),
+            ("ovito", "ovito-chill+"),
+            ("q6", "q6"),
+            ("rings", "rings"),
+            ("neigh", "neighbours"),
+        ):
+            jobs.append(("dseams", threads, 48, molecules, mode, op))
+        jobs.append(("mdapy", threads, 48, molecules, "mdapy", "chill+"))
+        jobs.append(("ovito", threads, 48, molecules, "ovito", "chill+"))
+        jobs.append(("freud", threads, 48, molecules, "freud", "neighbours"))
     with out.open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()

@@ -135,6 +135,12 @@ if mpi_found
       link_args: _test_link_args,
       include_directories: _incdirs,
       build_rpath: _test_rpath)
+    executable('rank_bench', 'rank_bench.cpp',
+      dependencies: [yds_dep],
+      cpp_args: _args,
+      link_args: _test_link_args,
+      include_directories: _incdirs,
+      build_rpath: _test_rpath)
     _mpi_env = environment({'RAYON_NUM_THREADS': '1', 'OMP_NUM_THREADS': '1'})
     _mpi_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
     # CI asks for domain_mpi. Meson treats that as a whole-name pattern, so
