@@ -856,8 +856,8 @@ int seams_symmetry_backend(char *name, int name_len) {
   return symm::iraLinked() ? 0 : 0;
 }
 
-int seams_symmetry_classify(const double *xyz, int n, const double *lattice9,
-                            int *labels) {
+int seams_symmetry_classify_tol(const double *xyz, int n, const double *lattice9,
+                                double eclipsed_cosine, int *labels) {
   if (xyz == nullptr || lattice9 == nullptr || labels == nullptr || n < 1) {
     return 1;
   }
@@ -874,9 +874,14 @@ int seams_symmetry_classify(const double *xyz, int n, const double *lattice9,
     cart(i, 2) = xyz[3 * i + 2];
   }
   std::vector<int> kind;
-  symm::classifyIce(cart, vectors, kind);
+  symm::classifyIce(cart, vectors, kind, eclipsed_cosine);
   for (int i = 0; i < n; i++) {
     labels[i] = kind[static_cast<size_t>(i)];
   }
   return 0;
+}
+
+int seams_symmetry_classify(const double *xyz, int n, const double *lattice9,
+                            int *labels) {
+  return seams_symmetry_classify_tol(xyz, n, lattice9, symm::kEclipsedCosine, labels);
 }

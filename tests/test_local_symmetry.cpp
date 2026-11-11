@@ -7,6 +7,9 @@
 #include <Eigen/Geometry>
 
 #include <cmath>
+#include <cstdlib>
+#include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -354,4 +357,145 @@ TEST_CASE("the C API returns the template, the rotation and the space group",
   int count = 0;
   REQUIRE(seams_symmetry_template(3, nullptr, 0, &count) == 0);
   REQUIRE(count == 20);
+}
+
+TEST_CASE("the eclipsed cutoff sits between the staggered and eclipsed cosines",
+          "[symmetry]") {
+  const auto ic = symm::crystal(symm::Crystal::iceIc);
+  const auto ih = symm::crystal(symm::Crystal::iceIh);
+  std::vector<int> kind;
+  symm::classifyIce(ic.cartesian, ic.vectors, kind);
+  REQUIRE(static_cast<int>(kind.size()) == ic.cartesian.rows());
+  for (int label : kind) {
+    REQUIRE(label == static_cast<int>(symm::Kind::iceIc));
+  }
+  // 0.4 is below cos 60 degrees, so every staggered bond counts as eclipsed.
+  symm::classifyIce(ic.cartesian, ic.vectors, kind, 0.4);
+  for (int label : kind) {
+    REQUIRE(label == -1);
+  }
+  symm::classifyIce(ic.cartesian, ic.vectors, kind, symm::kEclipsedCosine);
+  for (int label : kind) {
+    REQUIRE(label == static_cast<int>(symm::Kind::iceIc));
+  }
+
+  symm::classifyIce(ih.cartesian, ih.vectors, kind);
+  for (int label : kind) {
+    REQUIRE(label == static_cast<int>(symm::Kind::iceIh));
+  }
+  // A cutoff above the ideal eclipsed cosine drops the hexagonal bond.
+  symm::classifyIce(ih.cartesian, ih.vectors, kind, 1.1);
+  for (int label : kind) {
+    REQUIRE(label == static_cast<int>(symm::Kind::iceIc));
+  }
+
+  std::vector<double> raw(static_cast<size_t>(3 * ih.cartesian.rows()));
+  double lattice[9];
+  for (int i = 0; i < ih.cartesian.rows(); i++) {
+    raw[static_cast<size_t>(3 * i)] = ih.cartesian(i, 0);
+    raw[static_cast<size_t>(3 * i + 1)] = ih.cartesian(i, 1);
+    raw[static_cast<size_t>(3 * i + 2)] = ih.cartesian(i, 2);
+  }
+  for (int vec = 0; vec < 3; vec++) {
+    for (int comp = 0; comp < 3; comp++) {
+      lattice[3 * vec + comp] = ih.vectors(vec, comp);
+    }
+  }
+  std::vector<int> labels(static_cast<size_t>(ih.cartesian.rows()), 9);
+  REQUIRE(seams_symmetry_classify_tol(raw.data(), static_cast<int>(ih.cartesian.rows()),
+                                      lattice, 1.1, labels.data()) == 0);
+  for (int label : labels) {
+    REQUIRE(label == static_cast<int>(symm::Kind::iceIc));
+  }
+  REQUIRE(seams_symmetry_classify(raw.data(), static_cast<int>(ih.cartesian.rows()), lattice,
+                                  labels.data()) == 0);
+  for (int label : labels) {
+    REQUIRE(label == static_cast<int>(symm::Kind::iceIh));
+  }
+
+  const Eigen::MatrixXd icShell = symm::iceShell(ic.cartesian, ic.vectors, 0);
+  REQUIRE(symm::iceTemplateRmsd(icShell, symm::Kind::iceIc) < 1e-6);
+  REQUIRE(symm::iceTemplateRmsd(icShell, symm::Kind::iceIh) > 0.05);
+  REQUIRE(symm::iceTemplateRmsd(icShell, symm::Kind::iceIsd) > 0.05);
+  double cosine[4];
+  REQUIRE(symm::bondCosines(icShell, cosine) == 4);
+  REQUIRE(cosine[0] < 0.6);
+  REQUIRE(cosine[3] > 0.4);
+  const Eigen::MatrixXd ihShell = symm::iceShell(ih.cartesian, ih.vectors, 0);
+  REQUIRE(symm::bondCosines(ihShell, cosine) == 4);
+  REQUIRE(cosine[0] > 0.95);
+  REQUIRE(cosine[1] < 0.6);
+}
+
+TEST_CASE("parallel naming matches the serial shell, cage and ring results", "[symmetry]") {
+  const symm::Kind kinds[] = {symm::Kind::iceIc,  symm::Kind::iceIh, symm::Kind::iceIsd,
+                              symm::Kind::cage512, symm::Kind::cage51262,
+                              symm::Kind::cage51264, symm::Kind::ring5, symm::Kind::ring6};
+  std::vector<Eigen::MatrixXd> envs;
+  for (int copy = 0; copy < 4; copy++) {
+    for (symm::Kind kind : kinds) {
+      envs.push_back(symm::points(kind));
+    }
+  }
+  REQUIRE(envs.size() >= 32);
+  std::vector<symm::Overlay> named;
+  symm::matchAll(envs, named);
+  REQUIRE(named.size() == envs.size());
+  for (size_t i = 0; i < envs.size(); i++) {
+    const symm::Overlay one = symm::matchKernel(envs[i]);
+    REQUIRE(named[i].status == 0);
+    REQUIRE(one.status == 0);
+    REQUIRE(named[i].name == one.name);
+    REQUIRE(std::abs(named[i].rmsd - one.rmsd) < 1e-9);
+  }
+}
+
+void writeXyz(const std::string &path, const Eigen::MatrixXd &xyz) {
+  std::ofstream out(path);
+  out << xyz.rows() << "\n\n";
+  for (Eigen::Index i = 0; i < xyz.rows(); i++) {
+    out << "O " << xyz(i, 0) << " " << xyz(i, 1) << " " << xyz(i, 2) << "\n";
+  }
+}
+
+double shapeProgram(const std::string &bin, const std::string &studied,
+                    const std::string &reference) {
+  const std::string cmd = bin + " " + studied + " 0 " + reference + " 1 1 > /tmp/csm-shape-out.txt";
+  REQUIRE(std::system(cmd.c_str()) == 0);
+  std::ifstream in("/tmp/csm-shape-out.txt");
+  std::string line;
+  double value = -1.0;
+  while (std::getline(in, line)) {
+    if (line.rfind("SHAPE", 0) == 0) {
+      std::istringstream row(line);
+      std::string word;
+      row >> word >> word >> value;
+    }
+  }
+  REQUIRE(value >= 0.0);
+  return value;
+}
+
+TEST_CASE("the in-tree shape measure matches the shape program", "[symmetry]") {
+  const char *bin = std::getenv("CSM_SHAPE");
+  if (bin == nullptr || bin[0] == '\0') {
+    SKIP("shape program was not built");
+  }
+  const Eigen::MatrixXd ref = symm::points(symm::Kind::iceIc);
+  Eigen::MatrixXd moved = ref;
+  moved(7, 0) += 0.35;
+  moved(7, 1) -= 0.12;
+  moved(7, 2) += 0.08;
+  const symm::Overlay hit = symm::matchKernel(moved);
+  REQUIRE(hit.status == 0);
+  REQUIRE(hit.kind == symm::Kind::iceIc);
+  Eigen::MatrixXd paired(moved.rows(), 3);
+  for (Eigen::Index i = 0; i < moved.rows(); i++) {
+    paired.row(i) = moved.row(hit.permutation[static_cast<size_t>(i)]);
+  }
+  writeXyz("/tmp/csm-shell-ref.xyz", ref);
+  writeXyz("/tmp/csm-shell-moved.xyz", paired);
+  const double theirs = shapeProgram(bin, "/tmp/csm-shell-moved.xyz", "/tmp/csm-shell-ref.xyz");
+  const double ours = symm::shapeMeasure(moved);
+  REQUIRE(std::abs(ours - theirs) < 0.05);
 }

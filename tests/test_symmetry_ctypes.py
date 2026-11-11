@@ -30,6 +30,12 @@ def main():
         if group is None or group[0] != "D6h":
             raise SystemExit(f"point group {group}")
     lattice, xyz = symmetry.crystal("ic")
+    labels = symmetry.classify(xyz, lattice)
+    if not (labels == 1).all():
+        raise SystemExit(f"ice Ic labels {labels}")
+    loose = symmetry.classify(xyz, lattice, eclipsed_cosine=0.4)
+    if (loose == 1).any():
+        raise SystemExit("cutoff 0.4 still called a cubic shell ice Ic")
     space = symmetry.space_group(lattice, xyz)
     if space is not None and space[0] != 227:
         raise SystemExit(f"space group {space}")

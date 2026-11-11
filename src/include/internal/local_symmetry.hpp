@@ -57,14 +57,34 @@ std::vector<Overlay> score(const Eigen::MatrixXd &environment,
                            const char *backend = nullptr);
 Overlay best(const Eigen::MatrixXd &environment, const char *backend = nullptr);
 
-// In-tree matcher (quaternion Kabsch, fixed permutations). backend "kernel".
+// In-tree matcher (3x3 SVD Kabsch, bond-graph permutations). backend "kernel".
 Overlay matchKernel(const Eigen::MatrixXd &environment);
 
+// Same matcher on many environments. Independent shells run in parallel.
+void matchAll(const std::vector<Eigen::MatrixXd> &environments, std::vector<Overlay> &out);
+
+// Azimuthal cutoff between an eclipsed bond (ideal cosine 1) and a
+// staggered bond (ideal cosine 0.5).
+inline constexpr double kEclipsedCosine = 0.75;
+
 // Per-atom ice label for a periodic cell. kind[i] is iceIh, iceIc, iceIsd,
-// or -1 when the oxygen is not a bulk ice shell. Labels match matchKernel
-// on the shells the test cells produce. Parallel over atoms.
+// or -1 when the oxygen is not a bulk ice shell. eclipsedCosine is the
+// cutoff above: the default sits between 0.5 and 1. A cutoff above 1
+// counts no bond as eclipsed, so an ideal hexagonal shell is labelled
+// ice Ic. A cutoff below 0.5 counts staggered bonds as eclipsed.
 void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vectors,
-                 std::vector<int> &kind);
+                 std::vector<int> &kind, double eclipsedCosine = kEclipsedCosine);
+
+// Azimuthal cosine of each tetrahedral bond, largest first. The value is
+// the best alignment of an outer neighbour with one of the other three
+// bonds. Ideal eclipsed is 1 and ideal staggered is 0.5. Returns how many
+// of the four bonds were measured, or -1 when the environment is not a shell.
+int bondCosines(const Eigen::MatrixXd &environment, double out[4]);
+
+// Bond-graph RMSD of a 17-atom shell against one ice template. Negative
+// when the shell cannot be aligned. This does not consult the eclipsed count,
+// so a hexagonal shell can be scored against the cubic template.
+double iceTemplateRmsd(const Eigen::MatrixXd &environment, Kind kind);
 
 // Alvarez continuous shape measure of environment against its best template.
 // 0 is a perfect match. Scale, rotation and translation are free.

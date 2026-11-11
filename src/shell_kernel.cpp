@@ -259,7 +259,8 @@ void nearest4(const double p[][3], int n, int hub, int out[4]) {
   }
 }
 
-int eclipsedCountPts(const double p[][3], int n, int hub, const int first[4]) {
+int eclipsedCountPts(const double p[][3], int n, int hub, const int first[4],
+                     double cosine, double *stored) {
   int count = 0;
   for (int a = 0; a < 4; a++) {
     const int ia = first[a];
@@ -326,7 +327,10 @@ int eclipsedCountPts(const double p[][3], int n, int hub, const int first[4]) {
         }
       }
     }
-    if (mx > kEclipsed) {
+    if (stored != nullptr) {
+      stored[a] = mx;
+    }
+    if (mx > cosine) {
       count++;
     }
   }
@@ -529,15 +533,17 @@ bool matchRing(const double env[][3], int n, const double templ[][3], int perm[k
 }
 
 bool matchIce(const double env[][3], int n, const double templ[][3], int perm[kMaxN], double R[3][3],
-              double t[3], double &rmsd, symm::Kind &kind) {
+              double t[3], double &rmsd, symm::Kind &kind, bool gateEclipsed = true) {
   const int hub = hubOf(env, n);
   int first[4];
   nearest4(env, n, hub, first);
-  const int nEcl = eclipsedCountPts(env, n, hub, first);
-  if (nEcl < 0 || nEcl > 2) {
+  const int nEcl = eclipsedCountPts(env, n, hub, first, kEclipsed, nullptr);
+  if (gateEclipsed && (nEcl < 0 || nEcl > 2)) {
     return false;
   }
-  kind = iceKindFromEclipsed(nEcl);
+  if (nEcl >= 0 && nEcl <= 2) {
+    kind = iceKindFromEclipsed(nEcl);
+  }
   int tf[4];
   nearest4(templ, n, 0, tf);
   // Template atom 0 is the centre by construction. tf should be 1..4.
@@ -664,6 +670,7 @@ bool matchIce(const double env[][3], int n, const double templ[][3], int perm[kM
     }
   } while (std::next_permutation(order, order + 4));
   (void)best5;
+  rmsd = best;
   if (!(best < 1.0)) {
     return false;
   }
@@ -986,7 +993,7 @@ void invert3(const double M[3][3], double inv[3][3]) {
   inv[2][2] = s * (a * e - b * d);
 }
 
-int eclipsedStored(const double c[3], const double nb[][3], int nNb) {
+int eclipsedStored(const double c[3], const double nb[][3], int nNb, double cosine) {
   int first[4];
   int nFirst = 0;
   int order[48];
@@ -1027,7 +1034,7 @@ int eclipsedStored(const double c[3], const double nb[][3], int nNb) {
   // nearest4 on this compact cloud.
   int firstPts[4];
   nearest4(pts, 1 + keep, 0, firstPts);
-  return eclipsedCountPts(pts, 1 + keep, 0, firstPts);
+  return eclipsedCountPts(pts, 1 + keep, 0, firstPts, cosine, nullptr);
 }
 
 } // namespace
@@ -1062,7 +1069,7 @@ Overlay matchKernel(const Eigen::MatrixXd &environment) {
     const int hub = hubOf(env, n);
     int first[4];
     nearest4(env, n, hub, first);
-    const int nEcl = eclipsedCountPts(env, n, hub, first);
+    const int nEcl = eclipsedCountPts(env, n, hub, first, kEclipsed, nullptr);
     if (nEcl >= 0 && nEcl <= 2) {
       chosen = iceKindFromEclipsed(nEcl);
     }
@@ -1101,6 +1108,53 @@ Overlay matchKernel(const Eigen::MatrixXd &environment) {
   return out;
 }
 
+int bondCosines(const Eigen::MatrixXd &environment, double out[4]) {
+  double env[kMaxN][3];
+  int n = 0;
+  if (!loadPoints(environment, env, n)) {
+    return -1;
+  }
+  const int hub = hubOf(env, n);
+  int first[4];
+  nearest4(env, n, hub, first);
+  for (int k = 0; k < 4; k++) {
+    out[k] = -2.0;
+  }
+  const int nBond = eclipsedCountPts(env, n, hub, first, 2.0, out);
+  (void)nBond;
+  int nFound = 0;
+  for (int k = 0; k < 4; k++) {
+    if (out[k] > -1.5) {
+      nFound++;
+    }
+  }
+  std::sort(out, out + 4, [](double a, double b) { return a > b; });
+  return nFound;
+}
+
+double iceTemplateRmsd(const Eigen::MatrixXd &environment, Kind kind) {
+  if (kind != Kind::iceIh && kind != Kind::iceIc && kind != Kind::iceIsd) {
+    return -1.0;
+  }
+  double env[kMaxN][3];
+  int n = 0;
+  if (!loadPoints(environment, env, n) || n != 17) {
+    return -1.0;
+  }
+  double templ[kMaxN][3];
+  loadEigen(points(kind), templ);
+  int perm[kMaxN];
+  double R[3][3];
+  double t[3];
+  double rmsd = 1e300;
+  Kind named = kind;
+  (void)matchIce(env, n, templ, perm, R, t, rmsd, named, false);
+  if (!(rmsd < 10.0)) {
+    return -1.0;
+  }
+  return rmsd;
+}
+
 double shapeMeasure(const Eigen::MatrixXd &environment) {
   const Overlay hit = matchKernel(environment);
   if (hit.status != 0) {
@@ -1137,7 +1191,8 @@ double shapeMeasure(const Eigen::MatrixXd &environment) {
 }
 
 void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vectors,
-                 std::vector<int> &kind) {
+                 std::vector<int> &kind, double eclipsedCosine) {
+  const double cosine = std::isfinite(eclipsedCosine) ? eclipsedCosine : kEclipsed;
   const int n = static_cast<int>(cartesian.rows());
   kind.assign(static_cast<size_t>(std::max(n, 0)), -1);
   if (n <= 0 || cartesian.cols() != 3) {
@@ -1316,12 +1371,27 @@ void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vector
       nb[k][1] = ky[k];
       nb[k][2] = kz[k];
     }
-    const int nEcl = eclipsedStored(ci, nb, 16);
+    const int nEcl = eclipsedStored(ci, nb, 16, cosine);
     if (nEcl < 0 || nEcl > 2) {
       kind[static_cast<size_t>(i)] = -1;
     } else {
       kind[static_cast<size_t>(i)] = static_cast<int>(iceKindFromEclipsed(nEcl));
     }
+  }
+}
+
+void matchAll(const std::vector<Eigen::MatrixXd> &environments, std::vector<Overlay> &out) {
+  const int n = static_cast<int>(environments.size());
+  out.resize(static_cast<size_t>(std::max(n, 0)));
+#ifdef SEAMS_HAS_OPENMP
+  int threads = 1;
+  if (!omp_in_parallel()) {
+    threads = omp_get_max_threads();
+  }
+#pragma omp parallel for schedule(static) if (n >= 32 && threads > 1)
+#endif
+  for (int i = 0; i < n; i++) {
+    out[static_cast<size_t>(i)] = matchKernel(environments[static_cast<size_t>(i)]);
   }
 }
 

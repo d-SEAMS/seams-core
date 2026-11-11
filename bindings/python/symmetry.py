@@ -75,6 +75,14 @@ def _library():
     lib.seams_symmetry_crystal.restype = ctypes.c_int
     lib.seams_symmetry_backend.argtypes = [ctypes.c_char_p, ctypes.c_int]
     lib.seams_symmetry_backend.restype = ctypes.c_int
+    lib.seams_symmetry_classify_tol.argtypes = [
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.c_double,
+        ctypes.POINTER(ctypes.c_int),
+    ]
+    lib.seams_symmetry_classify_tol.restype = ctypes.c_int
     return lib
 
 
@@ -185,6 +193,28 @@ def template(ident):
     if code != 0:
         raise RuntimeError("template copy failed")
     return buf
+
+
+def classify(cartesian, lattice, eclipsed_cosine=0.75):
+    """Per-atom ice label. 0 ice Ih, 1 ice Ic, 2 ice Isd, -1 otherwise.
+
+    ``eclipsed_cosine`` is the azimuthal cutoff. The ideal staggered bond
+    has cosine 0.5 and the ideal eclipsed bond has cosine 1. The default
+    0.75 sits between them.
+    """
+    xyz = np.ascontiguousarray(cartesian, dtype=np.float64)
+    vec = np.ascontiguousarray(lattice, dtype=np.float64).reshape(9)
+    labels = np.empty(xyz.shape[0], dtype=np.int32)
+    code = _library().seams_symmetry_classify_tol(
+        xyz.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+        ctypes.c_int(xyz.shape[0]),
+        vec.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+        ctypes.c_double(eclipsed_cosine),
+        labels.ctypes.data_as(ctypes.POINTER(ctypes.c_int)),
+    )
+    if code != 0:
+        raise RuntimeError("classify failed")
+    return labels
 
 
 def crystal(which):
