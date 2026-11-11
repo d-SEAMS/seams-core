@@ -330,11 +330,59 @@ if not ira_opt.disabled()
   if ira_dep.found() and cppc.links(ira_probe, dependencies: [ira_dep],
                                     args: ['-I' + ira_inc],
                                     name: 'libira C API')
+    if ira_dep.type_name() == 'pkgconfig'
+      ira_libdir = ira_dep.get_variable('libdir', default_value: '')
+      if ira_libdir != ''
+        ira_dep = declare_dependency(dependencies: [ira_dep],
+                                     link_args: ['-Wl,-rpath,' + ira_libdir])
+      endif
+    endif
     _deps += [ira_dep]
     _args += ['-DSEAMS_HAS_IRA=1']
     ira_found = true
   elif ira_opt.enabled()
     error('with_ira=enabled but libira does not link')
+  endif
+endif
+
+# spglib (Togo, Shinohara, Tanaka). Optional space groups. The probe
+# must run spg_get_dataset, not only find the shared library.
+spglib_opt = get_option('with_spglib')
+spglib_found = false
+if not spglib_opt.disabled()
+  spglib_dep = dependency('spglib', required: false)
+  if not spglib_dep.found()
+    spglib_lib = cppc.find_library('symspg', required: false)
+    if spglib_lib.found()
+      spglib_dep = declare_dependency(dependencies: [spglib_lib])
+    endif
+  endif
+  spglib_probe = '''
+    #include <spglib.h>
+    int main() {
+      double lattice[3][3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+      double position[1][3] = {{0, 0, 0}};
+      int types[1] = {1};
+      SpglibDataset *data = spg_get_dataset(lattice, position, types, 1, 1e-4);
+      int number = data ? data->spacegroup_number : 0;
+      if (data) spg_free_dataset(data);
+      return number > 0 ? 0 : 1;
+    }
+  '''
+  if spglib_dep.found() and cppc.links(spglib_probe, dependencies: [spglib_dep],
+                                       name: 'spglib dataset')
+    if spglib_dep.type_name() == 'pkgconfig'
+      spglib_libdir = spglib_dep.get_variable('libdir', default_value: '')
+      if spglib_libdir != ''
+        spglib_dep = declare_dependency(dependencies: [spglib_dep],
+                                        link_args: ['-Wl,-rpath,' + spglib_libdir])
+      endif
+    endif
+    _deps += [spglib_dep]
+    _args += ['-DSEAMS_HAS_SPGLIB=1']
+    spglib_found = true
+  elif spglib_opt.enabled()
+    error('with_spglib=enabled but libsymspg does not link')
   endif
 endif
 

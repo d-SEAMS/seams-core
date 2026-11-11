@@ -29,6 +29,30 @@ int seams_chill_plus_graph_lammps(const double *xyz, int n,
                                   const double *box9, double cutoff,
                                   const char *graph, int *labels);
 
+/* Local symmetry. points is n*3. Template ids:
+ * 0 ice-Ih, 1 ice-Ic, 2 ice-Isd, 3 5^12, 4 5^12 6^2, 5 5^12 6^4,
+ * 6 ring-5, 7 ring-6.
+ * permutation[i] is the environment index matched to template atom i.
+ * rotation9 is row-major and, with translation3, takes that environment
+ * atom onto the template. Returns 0 on success. */
+int seams_symmetry_match(const double *points, int n, int *template_id,
+                         double *rmsd, double *hausdorff, double *rotation9,
+                         double *translation3, int *permutation);
+/* Returns 2 when SOFI is not linked. */
+int seams_symmetry_point_group(const double *points, int n, double sym_thr,
+                               char *symbol, int symbol_len, int *n_operations);
+/* lattice9 is three row vectors (ax,ay,az, bx,by,bz, cx,cy,cz).
+ * Returns 2 when spglib is not linked. */
+int seams_symmetry_space_group(const double *lattice9, const double *cartesian,
+                               int n, double symprec, int *number, char *symbol,
+                               int symbol_len);
+/* Writes the ideal template. points may be null to query *n_out. */
+int seams_symmetry_template(int id, double *points, int cap, int *n_out);
+/* which: 0 ice Ih, 1 ice Ic, 2 stacking-fault cell. */
+int seams_symmetry_crystal(int which, double *lattice9, double *xyz, int cap,
+                           int *n_out);
+int seams_symmetry_backend(char *name, int name_len);
+
 #ifdef __cplusplus
 }
 #endif

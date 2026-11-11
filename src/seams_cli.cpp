@@ -10,6 +10,7 @@
 #include <cage_affiliation.hpp>
 #include <cage_enum.hpp>
 #include <franzblau.hpp>
+#include <local_symmetry.hpp>
 #include <mol_sys.hpp>
 #include <generic.hpp>
 #include <neighbours.hpp>
@@ -535,6 +536,11 @@ void printFeatures(std::ostream &os) {
 #else
   line("IRA/SOFI", false);
 #endif
+#ifdef SEAMS_HAS_SPGLIB
+  line("spglib", true);
+#else
+  line("spglib", false);
+#endif
 #ifdef SEAMS_HAS_SPHERICART
   line("sphericart", true);
 #else
@@ -552,6 +558,83 @@ int cmdRead(std::ostream &os, Cloud &cloud) {
      << colorizer.longOption("frame") << " " << cloud.currentFrame << " "
      << colorizer.shortOption("box") << " " << gen::formatDumpBox(cloud.box)
      << "\n";
+  return 0;
+}
+
+void writeOverlay(std::ostream &os, const char *label, const symm::Overlay &hit) {
+  os << label << " " << hit.name << " rmsd " << hit.rmsd << " hausdorff "
+     << hit.hausdorff << " backend " << hit.backend << "\n";
+  os << "rotation";
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+      os << " " << hit.rotation(i, j);
+    }
+  }
+  os << "\ntranslation " << hit.translation[0] << " " << hit.translation[1]
+     << " " << hit.translation[2] << "\nperm";
+  for (int p : hit.permutation) {
+    os << " " << p;
+  }
+  os << "\n";
+}
+
+int cmdSymmetry(std::ostream &os, Cloud &cloud) {
+  if (cloud.nop < 1 || cloud.box.size() < 3) {
+    os << "symmetry needs a frame and a box\n";
+    return 2;
+  }
+  Eigen::MatrixXd xyz(cloud.nop, 3);
+  for (int i = 0; i < cloud.nop; i++) {
+    const auto &p = cloud.pts[static_cast<size_t>(i)];
+    xyz(i, 0) = p.x;
+    xyz(i, 1) = p.y;
+    xyz(i, 2) = p.z;
+  }
+  Eigen::Matrix3d vectors = Eigen::Matrix3d::Zero();
+  vectors(0, 0) = cloud.box[0];
+  vectors(1, 1) = cloud.box[1];
+  vectors(2, 2) = cloud.box[2];
+  os << "symmetry backend " << symm::matcher() << "\n";
+  const symm::Space space = symm::spaceGroup(vectors, xyz, 1e-3);
+  if (space.status == 0) {
+    os << "space-group " << space.number << " " << space.symbol << "\n";
+  } else if (space.status == 2) {
+    os << "space-group off\n";
+  } else {
+    os << "space-group none\n";
+  }
+  const symm::Overlay whole = symm::best(xyz);
+  if (whole.status == 0) {
+    writeOverlay(os, "whole", whole);
+    const symm::Group group = symm::pointGroup(xyz, 0.05);
+    os << "point-group " << (group.status == 0 ? group.symbol : "off") << " "
+       << group.nOperations << "\n";
+  }
+  std::map<std::string, int> tally;
+  int unmatched = 0;
+  bool wroteShell = false;
+  for (int i = 0; i < cloud.nop; i++) {
+    const Eigen::MatrixXd shell = symm::iceShell(xyz, vectors, i);
+    if (shell.rows() != 17) {
+      unmatched++;
+      continue;
+    }
+    const symm::Overlay hit = symm::best(shell);
+    if (hit.status != 0) {
+      unmatched++;
+      continue;
+    }
+    tally[hit.name] += 1;
+    if (!wroteShell) {
+      writeOverlay(os, "shell", hit);
+      wroteShell = true;
+    }
+  }
+  os << "shells";
+  for (const auto &item : tally) {
+    os << " " << item.first << " " << item.second;
+  }
+  os << " unmatched " << unmatched << "\n";
   return 0;
 }
 
@@ -1953,7 +2036,7 @@ int main(int argc, char *argv[]) {
 
   parser.add(Positional("command")
                  .help("read | chill | chill-plus | ovito-chill+ | cages | "
-                       "fingerprint | ions | "
+                       "symmetry | fingerprint | ions | "
                        "f4 | steinhardt | rdf | cn | hbonds | pairs | density-z | "
                        "domains")
                  .occurs(zeroOrOneTime)
@@ -2158,6 +2241,14 @@ int main(int argc, char *argv[]) {
     }
     if (cmd == "read") {
       return cmdRead(os, cloud);
+    }
+    if (cmd == "symmetry") {
+      try {
+        return cmdSymmetry(os, cloud);
+      } catch (...) {
+        os << colorizer.error(exceptionText()) << "\n";
+        return 2;
+      }
     }
     if (cmd == "chill-plus" || cmd == "chill_plus") {
       try {

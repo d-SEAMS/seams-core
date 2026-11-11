@@ -15,6 +15,7 @@ ydslib_sources = files(
   'gpu_batch.cpp',
   'generic.cpp',
   'ira_sofi.cpp',
+  'local_symmetry.cpp',
   'cage_canon.cpp',
   'chill_offload.cpp',
   'chill_plus_scheme.cpp',
