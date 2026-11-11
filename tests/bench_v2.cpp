@@ -9,9 +9,9 @@
 //-----------------------------------------------------------------------------------
 
 #include <bop.hpp>
+#include <diamond_cna.hpp>
 #include <franzblau.hpp>
 #include <neighbours.hpp>
-#include <structure_desc.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -123,7 +123,7 @@ int main(int argc, char **argv) {
 #endif
   const bool tilt = mode == "tilt";
   auto cloud = ice(n, tilt);
-  const double cutoff = mode == "symmetry" ? 6.0 : 3.5;
+  const double cutoff = 3.5;
   std::vector<double> samples(static_cast<std::size_t>(reps));
   int pairs = 0;
   int sink = 0;
@@ -138,15 +138,18 @@ int main(int argc, char **argv) {
     pairs = offsets.back();
     sum = checksum(offsets, cols);
     if (mode == "chill") {
-      sink += chill::chillPlusFromCsr(cloud, offsets, cols);
+      sink = chill::chillPlusFromCsr(cloud, offsets, cols);
     } else if (mode == "rings") {
       const auto rings = primitive::ringNetwork(offsets, cols, 6);
-      sink += static_cast<int>(rings.size());
+      sink = static_cast<int>(rings.size());
     } else if (mode == "symmetry") {
-      const auto hit = chill::classifyTemplates(cloud, offsets, cols, 12);
-      for (const auto &h : hit) {
-        sink += static_cast<int>(h.kind);
+      std::vector<int> kind;
+      symm::diamondFromCsr(cloud, offsets, cols, kind);
+      int labeled = 0;
+      for (int v : kind) {
+        labeled += v > 0 ? 1 : 0;
       }
+      sink = labeled;
     }
     auto t1 = std::chrono::steady_clock::now();
     if (r == 0) {

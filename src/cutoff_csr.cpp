@@ -152,11 +152,27 @@ int reachOf(double length, int ncell, double cutoff) {
   return r;
 }
 
-template <bool Write>
+// shx/shy/shz hold the cartesian image of fractional shift (ix,iy,iz),
+// indexed by (ix+1)*9 + (iy+1)*3 + (iz+1), ix,iy,iz in {-1,0,1}.
+void fillOrthoShift(double lx, double ly, double lz, double *shx, double *shy,
+                   double *shz) {
+  for (int ix = -1; ix <= 1; ++ix) {
+    for (int iy = -1; iy <= 1; ++iy) {
+      for (int iz = -1; iz <= 1; ++iz) {
+        const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
+        shx[k] = lx * static_cast<double>(ix);
+        shy[k] = ly * static_cast<double>(iy);
+        shz[k] = lz * static_cast<double>(iz);
+      }
+    }
+  }
+}
+
+template <bool Write, bool Half>
 void passFast(const double *xs, const double *ys, const double *zs,
               const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
-              double lx, double ly, double lz, double rc2, int *counts,
-              int *offsets, int *cols, bool half) {
+              const double *shx, const double *shy, const double *shz, double rc2,
+              int *counts, int *offsets, int *cols) {
   const int nCells = ncx * ncy * ncz;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (nCells >= 64)
@@ -179,34 +195,34 @@ void passFast(const double *xs, const double *ys, const double *zs,
     int nn = 0;
     for (int ox = -1; ox <= 1; ++ox) {
       int nx = cx + ox;
-      double sx = 0.0;
+      int ix = 0;
       if (nx >= ncx) {
         nx -= ncx;
-        sx = lx;
+        ix = 1;
       } else if (nx < 0) {
         nx += ncx;
-        sx = -lx;
+        ix = -1;
       }
       for (int oy = -1; oy <= 1; ++oy) {
         int ny = cy + oy;
-        double sy = 0.0;
+        int iy = 0;
         if (ny >= ncy) {
           ny -= ncy;
-          sy = ly;
+          iy = 1;
         } else if (ny < 0) {
           ny += ncy;
-          sy = -ly;
+          iy = -1;
         }
         const int row = nx * ncy + ny;
         for (int oz = -1; oz <= 1; ++oz) {
           int nz = cz + oz;
-          double sz = 0.0;
+          int iz = 0;
           if (nz >= ncz) {
             nz -= ncz;
-            sz = lz;
+            iz = 1;
           } else if (nz < 0) {
             nz += ncz;
-            sz = -lz;
+            iz = -1;
           }
           const int ncid = row * ncz + nz;
           const int jb = cellStart[ncid];
@@ -214,7 +230,8 @@ void passFast(const double *xs, const double *ys, const double *zs,
           if (jb == je) {
             continue;
           }
-          nbr[nn++] = {jb, je, sx, sy, sz};
+          const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
+          nbr[nn++] = {jb, je, shx[k], shy[k], shz[k]};
         }
       }
     }
@@ -227,9 +244,11 @@ void passFast(const double *xs, const double *ys, const double *zs,
       int n = 0;
       for (int t = 0; t < nn; ++t) {
         const Nbr nb = nbr[t];
+#pragma GCC unroll 1
         for (int j = nb.begin; j < nb.end; ++j) {
-          const int jj = ids[j];
-          if (jj == ii || (half && jj < ii)) {
+          // Slot identity: each atom is stored once, so j == i is the self pair.
+          // The full-list count then does not touch the id stream.
+          if (j == i || (Half && ids[j] < ii)) {
             continue;
           }
           const double dx = xi - xs[j] - nb.sx;
@@ -237,7 +256,7 @@ void passFast(const double *xs, const double *ys, const double *zs,
           const double dz = zi - zs[j] - nb.sz;
           if (dx * dx + dy * dy + dz * dz < rc2) {
             if (Write) {
-              cols[base + n] = jj;
+              cols[base + n] = ids[j];
             }
             ++n;
           }
@@ -359,104 +378,6 @@ void fracOf(const Tilt &h, double x, double y, double z, double s[3]) {
     s[d] -= std::floor(s[d]);
     if (!(s[d] < 1.0)) {
       s[d] = 0.0;
-    }
-  }
-}
-
-template <bool Write>
-void passTiltFast(const double *xs, const double *ys, const double *zs, const int *ids,
-                  const int *cellStart, int ncx, int ncy, int ncz, const Tilt &h,
-                  double rc2, bool half, int *counts, int *offsets, int *cols) {
-  const int nCells = ncx * ncy * ncz;
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (nCells >= 64)
-#endif
-  for (int c = 0; c < nCells; ++c) {
-    const int b = cellStart[c];
-    const int e = cellStart[c + 1];
-    if (b == e) {
-      continue;
-    }
-    const int cz = c % ncz;
-    const int cy = (c / ncz) % ncy;
-    const int cx = c / (ncy * ncz);
-    struct Nbr {
-      int begin, end;
-      double sx, sy, sz;
-    };
-    Nbr nbr[27];
-    int nn = 0;
-    for (int ox = -1; ox <= 1; ++ox) {
-      int nx = cx + ox;
-      double sx = 0.0;
-      if (nx >= ncx) {
-        nx -= ncx;
-        sx = 1.0;
-      } else if (nx < 0) {
-        nx += ncx;
-        sx = -1.0;
-      }
-      for (int oy = -1; oy <= 1; ++oy) {
-        int ny = cy + oy;
-        double sy = 0.0;
-        if (ny >= ncy) {
-          ny -= ncy;
-          sy = 1.0;
-        } else if (ny < 0) {
-          ny += ncy;
-          sy = -1.0;
-        }
-        const int row = nx * ncy + ny;
-        for (int oz = -1; oz <= 1; ++oz) {
-          int nz = cz + oz;
-          double sz = 0.0;
-          if (nz >= ncz) {
-            nz -= ncz;
-            sz = 1.0;
-          } else if (nz < 0) {
-            nz += ncz;
-            sz = -1.0;
-          }
-          const int ncid = row * ncz + nz;
-          const int jb = cellStart[ncid];
-          const int je = cellStart[ncid + 1];
-          if (jb == je) {
-            continue;
-          }
-          nbr[nn++] = {jb, je, sx, sy, sz};
-        }
-      }
-    }
-    for (int i = b; i < e; ++i) {
-      const int ii = ids[i];
-      const double xi = xs[i];
-      const double yi = ys[i];
-      const double zi = zs[i];
-      const int base = Write ? offsets[ii] : 0;
-      int n = 0;
-      for (int t = 0; t < nn; ++t) {
-        const Nbr nb = nbr[t];
-        for (int j = nb.begin; j < nb.end; ++j) {
-          const int jj = ids[j];
-          if (jj == ii || (half && jj < ii)) {
-            continue;
-          }
-          const double dsx = xi - xs[j] - nb.sx;
-          const double dsy = yi - ys[j] - nb.sy;
-          const double dsz = zi - zs[j] - nb.sz;
-          if (tilt2(dsx, dsy, dsz, h) < rc2) {
-            if (Write) {
-              cols[base + n] = jj;
-            }
-            ++n;
-          }
-        }
-      }
-      if (Write) {
-        sortRow(cols + base, n);
-      } else {
-        counts[ii] = n;
-      }
     }
   }
 }
@@ -650,6 +571,7 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
   sc.cellStart.assign(static_cast<std::size_t>(nCells) + 1, 0);
   sc.hist.assign(static_cast<std::size_t>(maxThreads) * static_cast<std::size_t>(nCells), 0);
   sc.counts.assign(static_cast<std::size_t>(nop), 0);
+  const auto tBin = Clock::now();
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (!nested && nSubset >= 256)
 #endif
@@ -717,22 +639,54 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
       const int slot = hist[cid]++;
       const int id = subset == nullptr ? k : (*subset)[static_cast<std::size_t>(k)];
       sc.ids[static_cast<std::size_t>(slot)] = id;
-      sc.xs[static_cast<std::size_t>(slot)].v = sc.px[static_cast<std::size_t>(k)].v;
-      sc.ys[static_cast<std::size_t>(slot)].v = sc.py[static_cast<std::size_t>(k)].v;
-      sc.zs[static_cast<std::size_t>(slot)].v = sc.pz[static_cast<std::size_t>(k)].v;
+      const double s0 = sc.px[static_cast<std::size_t>(k)].v;
+      const double s1 = sc.py[static_cast<std::size_t>(k)].v;
+      const double s2 = sc.pz[static_cast<std::size_t>(k)].v;
+      if (shifted) {
+        sc.xs[static_cast<std::size_t>(slot)].v = h.ox + h.lx * s0 + h.xy * s1 + h.xz * s2;
+        sc.ys[static_cast<std::size_t>(slot)].v = h.oy + h.ly * s1 + h.yz * s2;
+        sc.zs[static_cast<std::size_t>(slot)].v = h.oz + h.lz * s2;
+      } else {
+        // The wide-reach walk still takes the fractional minimum image.
+        sc.xs[static_cast<std::size_t>(slot)].v = s0;
+        sc.ys[static_cast<std::size_t>(slot)].v = s1;
+        sc.zs[static_cast<std::size_t>(slot)].v = s2;
+      }
     }
   }
+  phase().bin = msSince(tBin);
+  phase().n = nSubset;
   const double *x = &sc.xs[0].v;
   const double *y = &sc.ys[0].v;
   const double *z = &sc.zs[0].v;
+  double shx[27], shy[27], shz[27];
+  for (int ix = -1; ix <= 1; ++ix) {
+    for (int iy = -1; iy <= 1; ++iy) {
+      for (int iz = -1; iz <= 1; ++iz) {
+        const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
+        shx[k] = h.lx * static_cast<double>(ix) + h.xy * static_cast<double>(iy) +
+                 h.xz * static_cast<double>(iz);
+        shy[k] = h.ly * static_cast<double>(iy) + h.yz * static_cast<double>(iz);
+        shz[k] = h.lz * static_cast<double>(iz);
+      }
+    }
+  }
+  const auto tCount = Clock::now();
   if (shifted) {
-    passTiltFast<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                        ncell[2], h, rc2, half, sc.counts.data(), nullptr, nullptr);
+    if (half) {
+      passFast<false, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                            ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr);
+    } else {
+      passFast<false, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                             ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr);
+    }
   } else {
     passTilt<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
                     reach[0], reach[1], reach[2], h, rc2, half, false, sc.counts.data(),
                     nullptr, nullptr);
   }
+  phase().count = msSince(tCount);
+  const auto tPrefix = Clock::now();
   offsets[0] = 0;
   for (int i = 0; i < nop; ++i) {
     offsets[static_cast<std::size_t>(i) + 1] =
@@ -740,15 +694,29 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
   }
   const int nnz = offsets[static_cast<std::size_t>(nop)];
   cols.resize(static_cast<std::size_t>(nnz));
+  phase().prefix = msSince(tPrefix);
+  const auto tFill = Clock::now();
   if (nnz > 0) {
     if (shifted) {
-      passTiltFast<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                         ncell[2], h, rc2, half, nullptr, offsets.data(), cols.data());
+      if (half) {
+        passFast<true, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                             ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data());
+      } else {
+        passFast<true, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                              ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data());
+      }
     } else {
       passTilt<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
                      reach[0], reach[1], reach[2], h, rc2, half, false, nullptr, offsets.data(),
                      cols.data());
     }
+  }
+  phase().fill = msSince(tFill);
+  phase().pairs = nnz;
+  if (profileOn()) {
+    std::fprintf(stderr, "tilt shifted=%d ncell=%d %d %d reach=%d %d %d\n", int(shifted),
+                 ncell[0], ncell[1], ncell[2], reach[0], reach[1], reach[2]);
+    publishProfile();
   }
   return true;
 }
@@ -936,12 +904,18 @@ bool orthoFullCsr(
   const double *x = &sc.xs[0].v;
   const double *y = &sc.ys[0].v;
   const double *z = &sc.zs[0].v;
+  double shx[27], shy[27], shz[27];
+  fillOrthoShift(len[0], len[1], len[2], shx, shy, shz);
 
   const auto tCount = Clock::now();
   if (fast) {
-    passFast<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                    ncell[2], len[0], len[1], len[2], rc2, sc.counts.data(), nullptr,
-                    nullptr, half);
+    if (half) {
+      passFast<false, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                            ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr);
+    } else {
+      passFast<false, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                             ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr);
+    }
   } else {
     passSafe<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                     ncell[2], reach[0], reach[1], reach[2], len[0], len[1], len[2], rc2,
@@ -963,9 +937,13 @@ bool orthoFullCsr(
   const auto tFill = Clock::now();
   if (nnz > 0) {
     if (fast) {
-      passFast<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                     ncell[2], len[0], len[1], len[2], rc2, nullptr, offsets.data(),
-                     cols.data(), half);
+      if (half) {
+        passFast<true, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                             ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data());
+      } else {
+        passFast<true, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                              ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data());
+      }
     } else {
       passSafe<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                      ncell[2], reach[0], reach[1], reach[2], len[0], len[1], len[2], rc2,

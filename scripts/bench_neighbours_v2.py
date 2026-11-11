@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # Copyright (c) d-SEAMS developers
-"""Triclinic neighbour list and end-to-end CHILL+, rings, symmetry.
+"""Triclinic neighbour list and end-to-end CHILL+, rings, diamond CNA.
 
 Ice Ic, a = 6.35 A. The triclinic cell has xy = 0.25 L, xz = 0.05 L,
-yz = 0.12 L. CHILL+ and rings use a 3.5 A cutoff. The symmetry overlay
-uses 6.0 A so a 12-neighbour shell exists. Eight timed calls after one
-warmup, pinned to cores 0..T-1.
+yz = 0.12 L. Every cutoff neighbour list uses 3.5 A. Symmetry is the
+diamond/CNA kernel on that list, timed against PTM and identify-diamond.
+Eight timed calls after one warmup, pinned to cores 0..T-1.
 """
 
 import os
@@ -49,7 +49,7 @@ pts = np.column_stack([
 ])
 # Row vectors a, b, c matching the positions above.
 box = np.array([[L, 0.0, 0.0], [xy, L, 0.0], [xz, yz, L]], float)
-cutoff = 6.0 if kind.endswith("symmetry") else 3.5
+cutoff = 3.5
 
 def time_calls(fn):
     fn()
@@ -97,19 +97,25 @@ elif kind.startswith("mdapy-"):
         def once():
             result = tool.compute(system)
             return int(np.sum(result.counts)) if hasattr(result, "counts") else 0
+    elif op == "diamond":
+        from mdapy.identify import DiamondStructure
+        tool = DiamondStructure()
+        def once():
+            result = tool.compute(system)
+            return int(np.sum(np.asarray(result.structure) > 0))
     else:
         from mdapy.identify import PolyhedralTemplateMatching
         tool = PolyhedralTemplateMatching()
         def once():
             result = tool.compute(system)
-            return int(result.structure.shape[0])
+            return int(np.sum(np.asarray(result.structure) > 0))
     time_calls(once)
 elif kind.startswith("ovito-"):
     from ovito.data import DataCollection, Particles, SimulationCell
     from ovito.pipeline import Pipeline, StaticSource
     from ovito.modifiers import (
         ChillPlusModifier, CreateBondsModifier, FindRingsModifier,
-        PolyhedralTemplateMatchingModifier)
+        IdentifyDiamondModifier, PolyhedralTemplateMatchingModifier)
     op = kind.split("-", 1)[1]
     def once():
         # A pipeline caches its output. Build a new one so each sample
@@ -132,9 +138,13 @@ elif kind.startswith("ovito-"):
             pipe.modifiers.append(CreateBondsModifier(cutoff=cutoff))
             pipe.modifiers.append(
                 FindRingsModifier(minimum_ring_size=3, maximum_ring_size=6))
+        elif op == "diamond":
+            pipe.modifiers.append(IdentifyDiamondModifier())
         else:
             pipe.modifiers.append(PolyhedralTemplateMatchingModifier())
         out = pipe.compute()
+        if op in ("symmetry", "diamond", "chill") and "Structure Type" in out.particles:
+            return int(np.sum(np.asarray(out.particles["Structure Type"]) > 0))
         return int(out.particles.count)
     time_calls(once)
 elif kind == "freud-none":
@@ -192,6 +202,9 @@ def main():
                 jobs.append(("py", f"ovito-{mode}", molecules, threads))
                 if mode == "chill":
                     jobs.append(("py", "freud-none", molecules, threads))
+                if mode == "symmetry":
+                    jobs.append(("py", "mdapy-diamond", molecules, threads))
+                    jobs.append(("py", "ovito-diamond", molecules, threads))
     for who, kind, molecules, threads in jobs:
         cores = "0" if threads == 1 else f"0-{threads - 1}"
         if who == "dseams":
