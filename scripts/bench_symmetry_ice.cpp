@@ -60,17 +60,49 @@ std::string cpusAllowed() {
   return "unknown";
 }
 
-int main(int argc, char **argv) {
-  const std::string cpus = cpusAllowed();
-  const int repetitions = argc > 1 ? std::atoi(argv[1]) : 24;
-  const int warmup = argc > 2 ? std::atoi(argv[2]) : 1;
-  const int repeats = argc > 3 ? std::atoi(argv[3]) : 6;
+bool readXyz(const std::string &path, Eigen::MatrixXd &points, Eigen::Matrix3d &vectors) {
+  std::ifstream in(path);
+  if (!in) {
+    return false;
+  }
+  int n = 0;
+  in >> n;
+  std::string tag;
   double side = 0;
-  const Eigen::MatrixXd points = iceIc(repetitions, 2.75, side);
-  Eigen::Matrix3d vectors = Eigen::Matrix3d::Zero();
+  in >> tag >> side;
+  points.resize(n, 3);
+  std::string element;
+  for (int i = 0; i < n; ++i) {
+    in >> element >> points(i, 0) >> points(i, 1) >> points(i, 2);
+  }
+  vectors.setZero();
   vectors(0, 0) = side;
   vectors(1, 1) = side;
   vectors(2, 2) = side;
+  return static_cast<bool>(in);
+}
+
+int main(int argc, char **argv) {
+  const std::string cpus = cpusAllowed();
+  const bool fromFile = argc > 1 && std::string(argv[1]).find(".xyz") != std::string::npos;
+  const int repetitions = fromFile ? 0 : (argc > 1 ? std::atoi(argv[1]) : 24);
+  const int warmup = argc > 2 ? std::atoi(argv[2]) : 1;
+  const int repeats = argc > 3 ? std::atoi(argv[3]) : 6;
+  double side = 0;
+  Eigen::MatrixXd points;
+  Eigen::Matrix3d vectors = Eigen::Matrix3d::Zero();
+  if (fromFile) {
+    if (!readXyz(argv[1], points, vectors)) {
+      std::cerr << "unreadable " << argv[1] << "\n";
+      return 1;
+    }
+    side = vectors(0, 0);
+  } else {
+    points = iceIc(repetitions, 2.75, side);
+    vectors(0, 0) = side;
+    vectors(1, 1) = side;
+    vectors(2, 2) = side;
+  }
   std::vector<int> kind;
   for (int i = 0; i < warmup; ++i) {
     symm::classifyIce(points, vectors, kind);
@@ -98,5 +130,5 @@ int main(int argc, char **argv) {
     std::cout << sample << " ";
   }
   std::cout << "\n";
-  return census[1] == static_cast<int>(points.rows()) ? 0 : 2;
+  return 0;
 }

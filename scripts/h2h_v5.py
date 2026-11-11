@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 HERE = Path(__file__).resolve()
 HOST_LIB = "/usr/lib/x86_64-linux-gnu"
 # Tip of haozeke/feat/symmetry. 59d85155 is not an object on that branch.
-KERNEL_SHA = "071489584c70e3bfdf224012c53476547175b5df"
+KERNEL_SHA = "59d85155350cfa3c53da3df11d6ddf45b6b31ede"
 
 FIELDS = [
     "threads", "code", "version", "operation", "molecules",
