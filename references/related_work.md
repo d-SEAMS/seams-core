@@ -318,4 +318,58 @@ SQQ 0.5.8 is public ([pimooni/sqq](https://github.com/pimooni/sqq), PyPI). The r
 
 The d-SEAMS times are the fast-tree ring row. Raw SQQ lines are `benchmarks/h2h-watch-v6-sqq.csv`.
 
-All 42 DOIs in `references/related_work.bib` match Crossref. HyTopo remains a preprint without a Crossref DOI.
+All 42 journal DOIs in `references/related_work.bib` match Crossref. HyTopo and the metatensor preprint remain without a Crossref DOI.
+
+## Kernel b0aeaf41
+
+`b0aeaf41` adds a clean-diamond path: a second shell on one radius with four staggered bonds is ice Ic, and one eclipsed bond is ice Ih, before the permutation fit. Ideal ice Ic, 110592 molecules, is still entirely ice Ic.
+
+| Threads | Code | Operation | Median (IQR) ms | Cubic ice |
+| --- | --- | --- | --- | --- |
+| 1 | d-SEAMS b0aeaf41 | classifyIce | 102.752 (7.446) | 1.000000 |
+| 1 | OVITO 3.17.2 | PTM, diamond templates | 2721.777 (31.526) | 1.000000 |
+| 1 | OVITO 3.17.2 | identify diamond | 135.320 (1.283) | 1.000000 |
+| 1 | pyscal3 4.1.0 | diamond structure | 96.876 (1.059) | 1.000000 |
+| 8 | d-SEAMS b0aeaf41 | classifyIce | 21.687 (0.386) | 1.000000 |
+| 8 | OVITO 3.17.2 | PTM, diamond templates | 371.530 (4.535) | 1.000000 |
+| 8 | OVITO 3.17.2 | identify diamond | 40.453 (1.648) | 1.000000 |
+| 8 | pyscal3 4.1.0 | diamond structure | 24.472 (1.750) | 1.000000 |
+
+At one thread pyscal3 is ahead of the kernel. At eight threads the kernel is ahead of pyscal3 and of OVITO identify diamond. Adaptive CNA and Ackland–Jones still label every oxygen other. Raw lines are `benchmarks/h2h-watch-v7-ideal.csv`.
+
+The same three 200 ps frames, 13553 atoms. Counts are Ih, Ic, Isd for the kernel and cubic, hexagonal diamond for the others.
+
+| Seed | Threads | Kernel ms (Ih, Ic, Isd) | PTM ms (cubic, hex) | Identify diamond ms (cubic, hex) | pyscal3 ms (cubic, hex) |
+| --- | --- | --- | --- | --- | --- |
+| 91001 | 1 | 79.158 (57, 278, 1) | 375.379 (288, 39) | 18.717 (247, 37) | 96.228 (247, 37) |
+| 91001 | 8 | 12.768 (57, 278, 1) | 57.719 (288, 39) | 5.963 (247, 37) | 21.558 (247, 37) |
+| 92002 | 1 | 79.782 (33, 262, 0) | 382.575 (267, 19) | 18.757 (225, 25) | 96.465 (225, 25) |
+| 92002 | 8 | 12.409 (33, 262, 0) | 57.607 (267, 19) | 5.851 (225, 25) | 19.323 (225, 25) |
+| 93003 | 1 | 81.514 (29, 237, 0) | 375.969 (255, 19) | 18.647 (216, 20) | 96.059 (216, 20) |
+| 93003 | 8 | 13.147 (29, 237, 0) | 57.492 (255, 19) | 5.817 (216, 20) | 19.232 (216, 20) |
+
+Raw lines are `benchmarks/h2h-watch-v7-frames.csv`.
+
+## q4, q6 and neighbour lists
+
+Ideal ice Ic. d-SEAMS `seams_frame_steinhardt` uses the four nearest neighbours inside a 5 Å window. On this crystal that shell is the 3.5 Å cutoff shell. Freud, pyscal3 and OVITO use the cutoff directly. OVITO's modifier fills every order from 2 through `max_l` in the timed call. q4 mean is 0.509175 and q6 mean is 0.628539.
+
+| Threads | Order | d-SEAMS ms | freud 3.6.1 ms | pyscal3 4.1.0 ms | OVITO 3.17.2 ms | max abs vs d-SEAMS |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | q4 | 66.990 (0.298) | 263.283 (1.454) | 96.236 (2.077) | 49.989 (1.078) | 7.464e-08, 3.331e-16, 3.331e-16 |
+| 1 | q6 | 72.020 (0.621) | 349.392 (0.491) | 108.280 (3.691) | 58.710 (1.554) | 1.416e-07, 7.772e-16, 8.882e-16 |
+| 8 | q4 | 27.273 (4.288) | 52.032 (1.747) | 18.128 (1.515) | 11.354 (0.336) | 7.464e-08, 3.331e-16, 3.331e-16 |
+| 8 | q6 | 29.327 (7.914) | 61.005 (1.846) | 22.435 (1.489) | 13.113 (0.388) | 1.416e-07, 7.772e-16, 8.882e-16 |
+
+Neighbour lists are the 3.5 Å periodic shell, self excluded. Every code returns 4N directed pairs (42592 and 442368).
+
+| Threads | Molecules | d-SEAMS ms | freud AABBQuery ms | matscipy ms | ASE ms | MDAnalysis ms |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | 10648 | 2.469 (0.033) | 9.618 (0.117) | 8.465 (0.028) | 112.474 (3.253) | 60.567 (0.333) |
+| 1 | 110592 | 25.778 (0.390) | 111.369 (2.834) | 75.898 (0.129) | 1604.503 (191.021) | 616.682 (1.798) |
+| 8 | 10648 | 2.804 (0.050) | 3.604 (0.162) | 8.446 (0.090) | 111.092 (4.157) | 60.761 (0.533) |
+| 8 | 110592 | 23.709 (0.190) | 35.486 (1.534) | 76.010 (0.570) | 1555.691 (218.647) | 640.507 (14.143) |
+
+d-SEAMS is the fastest neighbour list in every row. OVITO's Steinhardt modifier is the fastest q4 and q6. Raw lines are `benchmarks/h2h-watch-v7.csv`.
+
+Bigi and others, [arXiv:2508.15704](https://arxiv.org/abs/2508.15704) (2025), present vesin, a cutoff neighbour list used by metatensor. Crossref has no record for that preprint. It is not in the timed neighbour table.
