@@ -1,0 +1,20 @@
+We keep the 215 K mW liquid frames in a Hugging Face dataset repository.
+DVC is the other home for those frames, once a remote is configured.
+A dataset repository of that kind is the destination for the dumps.
+Zenodo by itself is not that home.
+
+The deck in input/mw215 melts an mW lattice at 500 K for 30 ps.
+The velocity seed in that deck is 215.
+The same run then stays at 215 K for 50 ps.
+The number density is 0.033 molecules per cubic angstrom.
+One edge of eight cells gives 512 molecules.
+An edge of sixteen cells gives 4096 molecules.
+An edge of thirty-two cells gives 32768 molecules.
+
+input/mw215/regenerate.py writes those dumps under data/mw215.
+The script sets one OpenMP thread so the seed stays fixed.
+It then compares the published CHILL+ rule and ovito-chill+ with OVITO.
+We can add a fetch script when the Hugging Face dataset repository exists.
+Until then the regenerate script is the way to obtain the frames.
+Git keeps the deck and the script.
+Git leaves the dumps themselves out of the history.

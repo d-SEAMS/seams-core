@@ -424,3 +424,11 @@ test('cli_surface', find_program('python3'),
   workdir: meson.project_source_root(),
   env: {'SEAMS_HAS_CHEMFILES': chemfiles_dep.found() ? '1' : '0'},
   timeout: 600)
+test('mw215_deck', find_program('python3'),
+  args: [files('test_mw215_deck.py')],
+  workdir: meson.project_source_root(),
+  timeout: 30)
+test('mw215_frame', find_program('python3'),
+  args: [files('test_mw215_deck.py'), 'frame'],
+  workdir: meson.project_source_root(),
+  timeout: 30)
