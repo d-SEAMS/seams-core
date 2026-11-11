@@ -215,6 +215,20 @@ rule figure_pngs:
         "python3 paper/tex/figures/render_finish.py && python3 paper/tex/figures/rasterize_tikz.py"
 
 
+rule related_watch_v4:
+    input:
+        "scripts/h2h_protocol.py",
+        "scripts/h2h_v4.py",
+        "scripts/release_build.py",
+    output:
+        "benchmarks/h2h-watch-v4.csv",
+    shell:
+        "PY=\"${{H2H_PYTHON:-python3}}\"; "
+        "\"$PY\" scripts/h2h_v4.py "
+        "--python \"$PY\" "
+        "--out benchmarks/h2h-watch-v4.csv"
+
+
 rule related_watch:
     input:
         "scripts/h2h_protocol.py",
