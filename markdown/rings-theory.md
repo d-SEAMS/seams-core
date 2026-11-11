@@ -141,4 +141,41 @@ The 10648 foreign samples are two timed calls; the 110592 foreign samples are on
 
 `ringHops` returns `maxDepth/2`, and each bond is at most one cutoff, so the coordinate skin of that many cutoffs is at least this bond skin.
 
+`seams::domain::ringHaloBonds` is that bound, `kRingHaloHalf` is 2, and `ringHops` is `ringHaloBonds`. `distributedRings` passes `ringHaloBonds(maxDepth)` cutoffs to the rank partition. `tests/test_domain.cpp` checks the value for every size through 12.
+
 There is no `sorry` in `formal/Formal/Rings.lean`, `formal/Formal/Halo.lean`, or `formal/Formal/Cage.lean`.
+
+## The cutoff CSR
+
+`nneigh::orthoFullCsr` writes the orthorhombic neighbour list as offsets and columns. `primitive::ringNetwork` reads that CSR. `ringsOf` uses it for an orthorhombic cloud and does not expand the rows into a vector of vectors first. A skewed cell still takes the older builder.
+
+## Which ball, by measurement
+
+On 110592 molecules of ice Ic the occupancy bitset lost to the sorted pair table at radius 3, which is rings of size 8 and 9: 247 ms against 205 ms on one thread, and 80 ms against 62 ms on eight, before this choice. Radius 4, rings of size 10, stayed faster as the bitset. The search now keeps the pair table for sizes 8 and 9 and the bitset for size 10. Pairs at ring distance at most 3 are still read from the adjacency rows. After that choice, size 8 on the same crystal takes 430 ms against 461 ms for the pair table alone on one thread, and 89.7 ms against 92.8 ms on eight. The ring vectors are equal.
+
+## A shortcut through a lower index
+
+The breadth-first walk used to ignore every vertex whose index was below the source. The comment said a shorter path through such a vertex would put the vertex on the ring. That is false: the path can be a shortcut and never a member. On the first liquid frame, 62 of the reported hexagons had graph distance 2 between an antipodal pair and ring distance 3, the length-2 path going through a lower index. The walk now uses the full graph. A ring that actually contains a vertex below the source is still dropped, because that source is not its lowest member.
+
+With the full graph, the primitive counts are the OVITO counts. SQQ's chordless count is larger, and the extra rings are not primitive.
+
+## Ice Ic, neighbours and rings together
+
+Release `-O3`, one process. The d-SEAMS timer is `orthoFullCsr` plus `ringNetwork`. The OVITO timer is `CreateBondsModifier` plus `FindRingsModifier`. The SQQ timer is the cell-list graph plus `find_rings` at size 6. One warm-up, then six d-SEAMS samples and one foreign sample. Every tool returned the same ring count. Raw lines are in `markdown/rings-ic-timing-v3.txt`.
+
+| Molecules | Threads | d-SEAMS depth 6 | d-SEAMS depth 8 | d-SEAMS depth 10 | OVITO depth 6 | SQQ depth 6 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| 10648 | 1 | 31.8 ms | 45.4 ms | 161 ms | 53.8 ms | 1.30 s |
+| 10648 | 8 | 3.83 ms | 7.92 ms | 23.9 ms | 51.6 ms | 1.30 s |
+| 110592 | 1 | 152 ms | 452 ms | 1.88 s | 629 ms | 14.2 s |
+| 110592 | 8 | 32.2 ms | 82.4 ms | 312 ms | 638 ms | 13.7 s |
+| 884736 | 1 | 1.31 s | 3.61 s | 15.1 s | 5.15 s | 119 s |
+| 884736 | 8 | 408 ms | 731 ms | 2.66 s | 5.05 s | 115 s |
+
+Ring counts: 21296, 221184 and 1769472. SQQ and OVITO do not go faster from one thread to eight on this run. At 884736 molecules and eight threads OVITO takes 5.05 s and SQQ takes 115 s, against 408 ms for the depth-6 search.
+
+## Liquid and the nucleation trajectory
+
+The liquid is the 4096-molecule frame whose SHA-256 is `d02023892336c43cf409da8ee4b7dee2b8f30f94ee9e76a1c1d1ae99e646ea2b`, five frames. The nucleation file is figshare 11448702, 148 frames of 4096 molecules. That deposit does not contain a 13553-molecule frame, and neither does figshare project 73545. Frames 1, 50, 100 and 148 were compared, with all five liquid frames.
+
+On every one of those frames, at depths 6 and 10, the d-SEAMS count of each size from 4 through 10 equals the OVITO histogram. Depth 8 is the same sizes, since the depth-10 histogram includes them. Sizes 3, 4 and 5 on liquid frame 1 also equal SQQ. SQQ's hexagons do not: the same frame has 5156 chordless hexagons and 2911 primitive ones. The other 2245 have no chord and fail the shortest-path test. One of them is vertices `0, 140, 2573, 426, 1756, 3818`. Vertices 0 and 426 sit three steps apart around the ring and two steps apart in the graph, and the ring has no chord. The primitive set is the one OVITO and d-SEAMS both report.

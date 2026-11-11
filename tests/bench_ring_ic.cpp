@@ -14,15 +14,19 @@
 // drops the second shell. Nothing is written except this log.
 
 #include <franzblau.hpp>
+#include <mol_sys.hpp>
+#include <neighbours.hpp>
 
 #include <algorithm>
 #include <array>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <cstdlib>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -153,13 +157,47 @@ double millis(std::chrono::steady_clock::time_point t0) {
 
 } // namespace
 
+molSys::PointCloud<molSys::Point<double>, double> asCloud(const Cloud &ice) {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {ice.side, ice.side, ice.side};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.nop = static_cast<int>(ice.xyz.size());
+  cloud.pts.resize(static_cast<std::size_t>(cloud.nop));
+  for (int i = 0; i < cloud.nop; i++) {
+    auto &p = cloud.pts[static_cast<std::size_t>(i)];
+    p.x = ice.xyz[static_cast<std::size_t>(i)][0];
+    p.y = ice.xyz[static_cast<std::size_t>(i)][1];
+    p.z = ice.xyz[static_cast<std::size_t>(i)][2];
+    p.type = 1;
+    p.atomID = i;
+    p.molID = i;
+    cloud.idIndexMap[i] = i;
+  }
+  return cloud;
+}
+
 int main(int argc, char **argv) {
   std::vector<int> reps;
   int maxDepth = kMaxDepth;
+  bool e2e = false;
+  std::string dumpPath;
+  std::vector<int> frames;
+  bool listRings = false;
+  bool listEdges = false;
   for (int i = 1; i < argc; i++) {
     const std::string arg = argv[i];
     if (arg == "--depth" && i + 1 < argc) {
       maxDepth = std::atoi(argv[++i]);
+    } else if (arg == "--e2e") {
+      e2e = true;
+    } else if (arg == "--dump" && i + 1 < argc) {
+      dumpPath = argv[++i];
+    } else if (arg == "--frame" && i + 1 < argc) {
+      frames.push_back(std::atoi(argv[++i]));
+    } else if (arg == "--list") {
+      listRings = true;
+    } else if (arg == "--edges") {
+      listEdges = true;
     } else {
       reps.push_back(std::atoi(argv[i]));
     }
@@ -172,6 +210,194 @@ int main(int argc, char **argv) {
   constexpr int kRepeat = 6;
   std::cout << std::setprecision(6) << std::fixed;
   bool allEqual = true;
+  if (!dumpPath.empty()) {
+    std::ifstream in(dumpPath);
+    if (!in) {
+      std::cerr << "cannot read " << dumpPath << "\n";
+      return 1;
+    }
+    std::string line;
+    int frame = 0;
+    while (std::getline(in, line)) {
+      if (line.find("NUMBER OF ATOMS") == std::string::npos) {
+        continue;
+      }
+      int n = 0;
+      in >> n;
+      std::getline(in, line);
+      frame++;
+      const bool wanted = frames.empty() ||
+                          std::find(frames.begin(), frames.end(), frame) != frames.end();
+      double lo[3] = {}, hi[3] = {};
+      for (int axis = 0; axis < 3; axis++) {
+        std::getline(in, line);
+        if (line.find("ITEM:") != std::string::npos) {
+          axis--;
+          continue;
+        }
+        std::istringstream box(line);
+        box >> lo[axis] >> hi[axis];
+      }
+      std::getline(in, line); // ITEM: ATOMS ...
+      std::vector<std::string> columns;
+      {
+        std::istringstream hdr(line);
+        std::string word;
+        hdr >> word;
+        hdr >> word;
+        while (hdr >> word) {
+          columns.push_back(word);
+        }
+      }
+      const auto column = [&](const char *name) {
+        for (int c = 0; c < static_cast<int>(columns.size()); c++) {
+          if (columns[static_cast<std::size_t>(c)] == name) {
+            return c;
+          }
+        }
+        return -1;
+      };
+      const int cx = column("x");
+      const int cy = column("y");
+      const int cz = column("z");
+      const int cid = column("id");
+      molSys::PointCloud<molSys::Point<double>, double> cloud;
+      cloud.box = {hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2]};
+      cloud.boxLow = {lo[0], lo[1], lo[2]};
+      cloud.nop = n;
+      cloud.pts.resize(static_cast<std::size_t>(n));
+      for (int i = 0; i < n; i++) {
+        std::getline(in, line);
+        if (!wanted) {
+          continue;
+        }
+        std::istringstream row(line);
+        std::vector<std::string> tok;
+        std::string word;
+        while (row >> word) {
+          tok.push_back(word);
+        }
+        int id = i + 1;
+        double x = 0, y = 0, z = 0;
+        if (cx >= 0 && cy >= 0 && cz >= 0 &&
+            cz < static_cast<int>(tok.size())) {
+          x = std::atof(tok[static_cast<std::size_t>(cx)].c_str());
+          y = std::atof(tok[static_cast<std::size_t>(cy)].c_str());
+          z = std::atof(tok[static_cast<std::size_t>(cz)].c_str());
+          if (cid >= 0) {
+            id = std::atoi(tok[static_cast<std::size_t>(cid)].c_str());
+          }
+        } else if (tok.size() >= 4) {
+          id = std::atoi(tok[0].c_str());
+          x = std::atof(tok[tok.size() - 3].c_str());
+          y = std::atof(tok[tok.size() - 2].c_str());
+          z = std::atof(tok.back().c_str());
+        } else if (tok.size() == 3) {
+          x = std::atof(tok[0].c_str());
+          y = std::atof(tok[1].c_str());
+          z = std::atof(tok[2].c_str());
+        }
+        auto &p = cloud.pts[static_cast<std::size_t>(i)];
+        p.atomID = id;
+        p.molID = id;
+        p.type = 1;
+        p.x = x;
+        p.y = y;
+        p.z = z;
+        cloud.idIndexMap[id] = i;
+      }
+      if (!wanted) {
+        continue;
+      }
+      setThreads(1);
+      std::vector<int> offsets, cols;
+      const bool ok = nneigh::orthoFullCsr(cloud, nullptr, kCutoff, offsets, cols);
+      const auto rings = primitive::ringNetwork(offsets, cols, maxDepth);
+      std::vector<int> bySize(static_cast<std::size_t>(maxDepth) + 1, 0);
+      for (const auto &ring : rings) {
+        if (ring.size() < bySize.size()) {
+          bySize[ring.size()]++;
+        }
+      }
+      std::cout << "dump frame " << frame << " molecules " << n << " depth " << maxDepth
+                << " csr " << (ok ? 1 : 0) << " rings " << rings.size();
+      for (int s = 3; s <= maxDepth; s++) {
+        std::cout << " n" << s << " " << bySize[static_cast<std::size_t>(s)];
+      }
+      long edges = 0;
+      if (offsets.size() >= 2) {
+        edges = offsets.back() / 2;
+      }
+      std::cout << " edges " << edges << "\n";
+      if (listEdges) {
+        const int n = static_cast<int>(offsets.size()) - 1;
+        for (int i = 0; i < n; i++) {
+          for (int k = offsets[static_cast<std::size_t>(i)];
+               k < offsets[static_cast<std::size_t>(i) + 1]; k++) {
+            const int j = cols[static_cast<std::size_t>(k)];
+            if (i < j) {
+              std::cout << i << " " << j << "\n";
+            }
+          }
+        }
+      }
+      if (listRings) {
+        for (const auto &ring : rings) {
+          for (std::size_t k = 0; k < ring.size(); k++) {
+            if (k) {
+              std::cout << " ";
+            }
+            std::cout << ring[k];
+          }
+          std::cout << "\n";
+        }
+      }
+    }
+    return 0;
+  }
+  if (e2e) {
+    for (const int rep : reps) {
+      const Cloud ice = iceIc(rep);
+      auto cloud = asCloud(ice);
+      const auto nList = bondsOf(ice);
+      const auto reference = primitive::ringNetwork(nList, maxDepth);
+      const int n = cloud.nop;
+      const int threads[] = {1, 8};
+      for (const int thr : threads) {
+        setThreads(thr);
+        std::vector<double> totalMs;
+        std::vector<std::vector<int>> rings;
+        for (int sample = 0; sample < kWarm + kRepeat; sample++) {
+          const auto t0 = std::chrono::steady_clock::now();
+          std::vector<int> offsets;
+          std::vector<int> cols;
+          const bool ok = nneigh::orthoFullCsr(cloud, nullptr, kCutoff, offsets, cols);
+          const auto t1 = std::chrono::steady_clock::now();
+          rings = ok ? primitive::ringNetwork(offsets, cols, maxDepth)
+                     : primitive::ringNetwork(nList, maxDepth);
+          const auto t2 = std::chrono::steady_clock::now();
+          if (sample >= kWarm) {
+            const double neigh = std::chrono::duration<double, std::milli>(t1 - t0).count();
+            const double ring = std::chrono::duration<double, std::milli>(t2 - t1).count();
+            totalMs.push_back(neigh + ring);
+            std::cout << "sample e2e threads " << threadCount() << " molecules " << n
+                      << " depth " << maxDepth << " neigh_ms " << neigh << " ring_ms " << ring
+                      << " total_ms " << neigh + ring << " rings " << rings.size()
+                      << " csr " << (ok ? 1 : 0) << "\n";
+          }
+        }
+        const bool equal = rings == reference;
+        allEqual = allEqual && equal;
+        std::sort(totalMs.begin(), totalMs.end());
+        const double med = totalMs[totalMs.size() / 2];
+        std::cout << "summary e2e threads " << threadCount() << " molecules " << n
+                  << " depth " << maxDepth << " total_median_ms " << med << " rings "
+                  << rings.size() << " equal " << (equal ? 1 : 0) << " used_balls "
+                  << primitive::lastRingSearchUsedBalls() << "\n";
+      }
+    }
+    return allEqual ? 0 : 1;
+  }
   for (const int rep : reps) {
     const Cloud cloud = iceIc(rep);
     const auto nList = bondsOf(cloud);

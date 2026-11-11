@@ -108,6 +108,21 @@ TEST_CASE("Shares partition the frame and hold every atom near an owned one",
   }
 }
 
+TEST_CASE("The partition halo is floor(k/2) bonds", "[domain]") {
+  // formal/Formal/Halo.lean, primitive_ring_subset_ball.
+  REQUIRE(seams::domain::kRingHaloHalf == 2);
+  for (int k = 0; k <= 12; k++) {
+    REQUIRE(seams::domain::ringHaloBonds(k) == k / 2);
+    REQUIRE(seams::domain::ringHops(k) == seams::domain::ringHaloBonds(k));
+    REQUIRE(seams::domain::ringRowHops(k) == seams::domain::ringHaloBonds(k));
+  }
+  // gatherWork takes this many cutoffs. 6 -> 3 bonds, 10 -> 5 bonds.
+  REQUIRE(seams::domain::ringHaloBonds(6) == 3);
+  REQUIRE(seams::domain::ringHaloBonds(7) == 3);
+  REQUIRE(seams::domain::ringHaloBonds(8) == 4);
+  REQUIRE(seams::domain::ringHaloBonds(10) == 5);
+}
+
 TEST_CASE("An empty frame splits into empty shares", "[domain]") {
   const auto empty = tiltedFrame(0, 20.0, 0.0, 0.0, 0.0, 6);
   for (int rank = 0; rank < 4; rank++) {

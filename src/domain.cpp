@@ -267,6 +267,16 @@ std::vector<std::vector<int>> ringsOf(const Cloud &local, double cutoff,
   if (local.nop == 0) {
     return {};
   }
+  // Orthorhombic frames take the cutoff CSR directly. The ring search
+  // reads those offsets and columns; it does not expand them into a
+  // vector of rows first.
+  {
+    std::vector<int> offsets;
+    std::vector<int> cols;
+    if (nneigh::orthoFullCsr(local, nullptr, cutoff, offsets, cols)) {
+      return primitive::ringNetwork(offsets, cols, maxDepth, owned);
+    }
+  }
   static std::vector<std::vector<int>> nList;
   static std::vector<std::vector<int>> idRows;
   static std::vector<int> idToIndex;
@@ -957,10 +967,10 @@ std::vector<std::vector<int>> distributedRings(const Cloud &cloud, double cutoff
     // already holds the frame, so it reads those rows directly.
     return rings(cloud, cutoff, maxDepth, rank, nRanks);
   }
-  // ringHops is the coordinate width that reproduces the serial census,
-  // one hop inside the previous surface term. Owned sources are searched
-  // on that halo and mapped back to the frame.
-  const Work &work = gatherWork(cloud, ringHops(maxDepth) * cutoff, comm);
+  // ringHaloBonds(maxDepth) is floor(maxDepth/2). The coordinate skin is
+  // that many cutoffs: every primitive ring through an owned atom, and
+  // every shortcut of it, stays inside the skin.
+  const Work &work = gatherWork(cloud, ringHaloBonds(maxDepth) * cutoff, comm);
   auto local = ownedRings(work.cloud, cutoff, maxDepth, work.share.owned);
   for (auto &ring : local) {
     for (int &v : ring) {

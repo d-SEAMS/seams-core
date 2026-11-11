@@ -354,8 +354,10 @@ void levelsFrom(const Graph &adjacency, int src, int maxLvl, int minVertex,
     next.clear();
     for (const int u : frontier) {
       for (const int w : adjacency[u]) {
-        // A ring whose lowest member is src never uses a shorter path
-        // through a lower index: that vertex would sit on the ring.
+        // A shortcut may pass through a vertex that is not on the ring,
+        // including one whose index is below the source. The walk has to
+        // see it. A ring that actually contains such a vertex is dropped
+        // later, because its lowest member is not this source.
         if (w >= minVertex && w < static_cast<int>(lvl.size()) && lvl[w] == -1) {
           lvl[w] = depth;
           touched.push_back(w);
@@ -442,11 +444,31 @@ struct BitBalls {
         wanted[static_cast<std::size_t>(v)] = 1;
       }
     }
+    // One breadth-first walk records every pair. A second walk was the
+    // cost that lost to the sorted table at eight threads and depth 8.
+    struct Rec {
+      int v;
+      int w;
+      uint8_t d;
+    };
 #ifdef SEAMS_HAS_OPENMP
     const bool parallel = !omp_in_parallel() && omp_get_max_threads() > 1;
+    const int nthreads = parallel ? omp_get_max_threads() : 1;
+#else
+    const bool parallel = false;
+    const int nthreads = 1;
+#endif
+    std::vector<std::vector<Rec>> bags(static_cast<std::size_t>(nthreads));
+#ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (parallel)
 #endif
     {
+#ifdef SEAMS_HAS_OPENMP
+      const int tid = parallel ? omp_get_thread_num() : 0;
+#else
+      const int tid = 0;
+#endif
+      auto &bag = bags[static_cast<std::size_t>(tid)];
       std::vector<int> dist(static_cast<std::size_t>(nVertices), -1);
       std::vector<int> touched, frontier, next;
 #ifdef SEAMS_HAS_OPENMP
@@ -476,7 +498,7 @@ struct BitBalls {
           }
           frontier.swap(next);
         }
-        const auto n = static_cast<uint32_t>(touched.size() - 1);
+        const auto n = static_cast<uint32_t>(touched.size() > 0 ? touched.size() - 1 : 0);
         uint32_t size = 0;
         if (n != 0) {
           size = 64;
@@ -485,6 +507,11 @@ struct BitBalls {
           }
         }
         slots[static_cast<std::size_t>(v)] = size;
+        for (const int w : touched) {
+          if (w != v) {
+            bag.push_back(Rec{v, w, static_cast<uint8_t>(dist[static_cast<std::size_t>(w)])});
+          }
+        }
       }
     }
     off[0] = 0;
@@ -497,66 +524,30 @@ struct BitBalls {
     keys.assign(total, -1);
     dists.assign(total, 0);
     occ.assign((static_cast<std::size_t>(total) + 63u) / 64u, 0ull);
-    // Each table length is a multiple of 64 and the tables are packed, so
-    // occupancy words do not overlap and the inserts run side by side.
+    // Static slices own disjoint vertices, and each table length is a
+    // multiple of 64, so occupancy words do not overlap.
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel if (parallel)
+#pragma omp parallel for schedule(static) if (parallel)
 #endif
-    {
-      std::vector<int> dist(static_cast<std::size_t>(nVertices), -1);
-      std::vector<int> touched, frontier, next;
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp for schedule(static)
-#endif
-      for (int v = 0; v < nVertices; v++) {
-        if (!wanted[static_cast<std::size_t>(v)]) {
-          continue;
-        }
-        const uint32_t begin = off[static_cast<std::size_t>(v)];
-        const uint32_t m = mask[static_cast<std::size_t>(v)];
-        if (off[static_cast<std::size_t>(v) + 1] == begin) {
-          continue;
-        }
-        for (const int w : touched) {
-          dist[static_cast<std::size_t>(w)] = -1;
-        }
-        touched.clear();
-        dist[static_cast<std::size_t>(v)] = 0;
-        touched.push_back(v);
-        frontier.assign(1, v);
-        for (int depth = 1; depth <= rad && !frontier.empty(); depth++) {
-          next.clear();
-          for (const int u : frontier) {
-            for (const int w : adjacency[u]) {
-              if (w >= 0 && w < nVertices && dist[static_cast<std::size_t>(w)] == -1) {
-                dist[static_cast<std::size_t>(w)] = depth;
-                touched.push_back(w);
-                next.push_back(w);
-              }
-            }
+    for (int t = 0; t < nthreads; t++) {
+      for (const Rec &rec : bags[static_cast<std::size_t>(t)]) {
+        const uint32_t begin = off[static_cast<std::size_t>(rec.v)];
+        const uint32_t m = mask[static_cast<std::size_t>(rec.v)];
+        uint64_t *bloomv = bloom.data() + static_cast<std::size_t>(rec.v) * 4u;
+        const uint32_t h1 = static_cast<uint32_t>(rec.w) * 0x9E3779B1u;
+        const uint32_t h2 = static_cast<uint32_t>(rec.w) * 0x85EBCA77u;
+        bloomv[(h1 >> 6) & 3u] |= 1ull << (h1 & 63u);
+        bloomv[(h2 >> 6) & 3u] |= 1ull << (h2 & 63u);
+        uint32_t slot = h1 & m;
+        for (;;) {
+          const uint32_t at = begin + slot;
+          if (keys[at] < 0) {
+            keys[at] = rec.w;
+            dists[at] = rec.d;
+            occ[at >> 6] |= 1ull << (at & 63u);
+            break;
           }
-          frontier.swap(next);
-        }
-        uint64_t *bloomv = bloom.data() + static_cast<std::size_t>(v) * 4u;
-        for (const int w : touched) {
-          if (w == v) {
-            continue;
-          }
-          const uint32_t h1 = static_cast<uint32_t>(w) * 0x9E3779B1u;
-          const uint32_t h2 = static_cast<uint32_t>(w) * 0x85EBCA77u;
-          bloomv[(h1 >> 6) & 3u] |= 1ull << (h1 & 63u);
-          bloomv[(h2 >> 6) & 3u] |= 1ull << (h2 & 63u);
-          uint32_t slot = h1 & m;
-          for (;;) {
-            const uint32_t at = begin + slot;
-            if (keys[at] < 0) {
-              keys[at] = w;
-              dists[at] = static_cast<uint8_t>(dist[static_cast<std::size_t>(w)]);
-              occ[at >> 6] |= 1ull << (at & 63u);
-              break;
-            }
-            slot = (slot + 1u) & m;
-          }
+          slot = (slot + 1u) & m;
         }
       }
     }
@@ -741,6 +732,21 @@ struct alignas(64) RingPool {
   iterator end() { return storage.begin() + static_cast<std::ptrdiff_t>(n); }
 };
 
+//! A full-graph search can walk through a vertex below src. That vertex is
+//! not a member of a ring this source is allowed to emit.
+bool ringOwnedBySource(const std::vector<int> &ring, int src,
+                       const std::vector<char> *through) {
+  if (through != nullptr) {
+    return true;
+  }
+  for (const int v : ring) {
+    if (v < src) {
+      return false;
+    }
+  }
+  return true;
+}
+
 template <typename Graph, typename Out>
 void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
                          int src, int maxDepth, int maxLvl, RingScratch &scr,
@@ -754,19 +760,11 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
   // Full search enumerates each ring from its lowest member, so the
   // breadth-first walk stays at indices >= src. The updater passes a
   // through-mask and must still see every neighbour.
-  const int minVertex = through == nullptr ? src : 0;
-  levelsFrom(adjacency, src, maxLvl, minVertex, scr.lvl, scr.touched,
-             scr.frontier, scr.next);
-  // Directing: only the lowest-indexed member of a ring enumerates it, so
-  // vertices below the source leave the level field entirely. Only touched
-  // vertices hold a level.
-  if (through == nullptr) {
-    for (const int v : scr.touched) {
-      if (v < src) {
-        scr.lvl[v] = -1;
-      }
-    }
-  }
+  // Distances are in the full graph. Restricting the walk to indices at
+  // or above src hides a shortcut through a lower index and keeps a ring
+  // that is not primitive.
+  levelsFrom(adjacency, src, maxLvl, 0, scr.lvl, scr.touched, scr.frontier,
+             scr.next);
   shortestPathsFrom(adjacency, src, scr);
   const std::size_t first = out.size();
   auto keep = [&](std::vector<int> &r) {
@@ -805,8 +803,9 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
           for (int i = lp - 2; i >= 0 && ok; i--) {
             ok = pushUniqueMember(ring, pb[i]);
           }
-          if (ok && ringIsPrimitive(oracle, ring, legacyPairs ? -1 : 0,
-                                    legacyPairs ? -1 : lp)) {
+          if (ok && ringOwnedBySource(ring, src, through) &&
+              ringIsPrimitive(oracle, ring, legacyPairs ? -1 : 0,
+                              legacyPairs ? -1 : lp)) {
             keep(ring);
           }
         }
@@ -831,7 +830,8 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
             for (int i = lp - 1; i >= 0 && ok; i--) {
               ok = pushUniqueMember(ring, pb[i]);
             }
-            if (ok && ringIsPrimitive(oracle, ring, legacyPairs ? -1 : 0, -1)) {
+            if (ok && ringOwnedBySource(ring, src, through) &&
+                ringIsPrimitive(oracle, ring, legacyPairs ? -1 : 0, -1)) {
               keep(ring);
             }
           }
@@ -883,38 +883,10 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
  *  indices of the ring members.
  */
 static std::vector<std::vector<int>>
-searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
-            const std::vector<char> &sources, bool legacy);
+searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &sources,
+             bool legacy);
 
-std::vector<std::vector<int>>
-primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth) {
-  return searchRings(nList, maxDepth, std::vector<char>(), false);
-}
-
-std::vector<std::vector<int>>
-primitive::ringNetworkBalls(const std::vector<std::vector<int>> &nList, int maxDepth) {
-  return searchRings(nList, maxDepth, std::vector<char>(), true);
-}
-
-/**
- * @details The rings of the whole search whose lowest-indexed member is
- *  flagged in @a sources, in the same order; an empty mask flags every
- *  vertex. Balls are filled only within maxDepth/2 hops of a flagged
- *  vertex, where the members of its rings lie.
- */
-static std::vector<std::vector<int>>
-searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
-            const std::vector<char> &sources, bool legacy) {
-  seams::adoptThreads();
-  std::vector<std::vector<int>> rings;
-  if (maxDepth < 3 || nList.empty()) {
-    return rings;
-  }
-
-  // Adjacency by index; the first element of each nList row is the vertex
-  // itself, so it is skipped. A repeated neighbour is one edge. A self
-  // entry and an index outside the cloud are not edges.
-  const auto adjStart = std::chrono::steady_clock::now();
+static PackedRows packRows(const std::vector<std::vector<int>> &nList) {
   const int nVertices = static_cast<int>(nList.size());
   std::vector<std::vector<int>> uniq(static_cast<std::size_t>(nVertices));
 #ifdef SEAMS_HAS_OPENMP
@@ -937,13 +909,12 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
     }
   }
   PackedRows adjacency;
-  adjacency.first.assign(nVertices + 1, 0);
+  adjacency.first.assign(static_cast<std::size_t>(nVertices) + 1, 0);
   for (int i = 0; i < nVertices; i++) {
-    adjacency.first[i + 1] =
-        adjacency.first[i] +
-        static_cast<int>(uniq[static_cast<std::size_t>(i)].size());
+    adjacency.first[static_cast<std::size_t>(i) + 1] =
+        adjacency.first[static_cast<std::size_t>(i)] + uniq[static_cast<std::size_t>(i)].size();
   }
-  adjacency.cols.resize(adjacency.first[nVertices]);
+  adjacency.cols.resize(adjacency.first[static_cast<std::size_t>(nVertices)]);
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (!omp_in_parallel())
 #endif
@@ -952,8 +923,62 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
     if (!row.empty()) {
       std::copy(row.begin(), row.end(),
                 adjacency.cols.begin() +
-                    static_cast<std::ptrdiff_t>(adjacency.first[i]));
+                    static_cast<std::ptrdiff_t>(adjacency.first[static_cast<std::size_t>(i)]));
     }
+  }
+  return adjacency;
+}
+
+static std::vector<std::vector<int>>
+searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
+            const std::vector<char> &sources, bool legacy) {
+  const auto adjStart = std::chrono::steady_clock::now();
+  PackedRows adjacency = packRows(nList);
+  gRingSplit.adj_ms = millisSince(adjStart);
+  return searchPacked(std::move(adjacency), maxDepth, sources, legacy);
+}
+
+std::vector<std::vector<int>>
+primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth) {
+  return searchRings(nList, maxDepth, std::vector<char>(), false);
+}
+
+std::vector<std::vector<int>>
+primitive::ringNetworkBalls(const std::vector<std::vector<int>> &nList, int maxDepth) {
+  return searchRings(nList, maxDepth, std::vector<char>(), true);
+}
+
+std::vector<std::vector<int>>
+primitive::ringNetwork(const std::vector<int> &offsets, const std::vector<int> &cols,
+                       int maxDepth, const std::vector<char> &sources) {
+  seams::adoptThreads();
+  PackedRows adjacency;
+  if (offsets.size() < 2) {
+    return {};
+  }
+  adjacency.first.resize(offsets.size());
+  for (std::size_t i = 0; i < offsets.size(); i++) {
+    adjacency.first[i] = static_cast<std::size_t>(offsets[i]);
+  }
+  adjacency.cols = cols;
+  gRingSplit.adj_ms = 0;
+  return searchPacked(std::move(adjacency), maxDepth, sources, false);
+}
+
+/**
+ * @details The rings of the whole search whose lowest-indexed member is
+ *  flagged in @a sources, in the same order; an empty mask flags every
+ *  vertex. Balls are filled only within maxDepth/2 hops of a flagged
+ *  vertex, where the members of its rings lie.
+ */
+static std::vector<std::vector<int>>
+searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &sources,
+             bool legacy) {
+  seams::adoptThreads();
+  std::vector<std::vector<int>> rings;
+  const int nVertices = static_cast<int>(adjacency.size());
+  if (maxDepth < 3 || nVertices == 0) {
+    return rings;
   }
 
   const int maxLvl = maxDepth / 2;
@@ -963,10 +988,11 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
   // bound is 2 (maxDepth <= 7), adjacency answers every query the
   // primitivity test asks, and the ball table is dead work.
   const bool hopOnly = !legacy && maxLvl <= 3;
-  // Rings of size 8, 9 and 10 need distances up to 3 or 4. The occupancy
-  // bitset of that ball replaces the sorted pair table. Larger rings keep
-  // the table.
-  const bool bitBall = !legacy && maxLvl > 3 && maxLvl <= 5;
+  // Radius 3 (rings of size 8 and 9) was slower as a bitset than as the
+  // sorted pair table, on one thread and on eight, at 110592 molecules of
+  // ice Ic. Radius 4 (rings of size 10) is faster as the bitset. Pairs at
+  // ring distance at most 3 still read the adjacency rows in both cases.
+  const bool bitBall = !legacy && maxLvl == 5;
   std::vector<int> from;
   for (int v = 0; v < nVertices; v++) {
     if (sources.empty() || (v < static_cast<int>(sources.size()) && sources[v])) {
@@ -975,7 +1001,6 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
   }
   BoundedBalls balls;
   BitBalls bits;
-  gRingSplit.adj_ms = millisSince(adjStart);
   const auto ballStart = std::chrono::steady_clock::now();
   if (hopOnly) {
     gUsedBalls = 0;
@@ -1037,7 +1062,7 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
   oracle.adj = &adjacency;
   oracle.balls = (hopOnly || bitBall) ? nullptr : &balls;
   oracle.bits = bitBall ? &bits : nullptr;
-  oracle.hop2 = hopOnly || bitBall;
+  oracle.hop2 = !legacy && maxLvl <= 5;
   const int nFrom = static_cast<int>(from.size());
 
 #ifdef SEAMS_HAS_OPENMP
@@ -1090,7 +1115,6 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
       }
     }
     balls.clear();
-    std::vector<std::vector<int>>().swap(uniq);
     std::vector<int>().swap(adjacency.cols);
     std::vector<std::size_t>().swap(adjacency.first);
     std::vector<RingPool>().swap(perSource);
@@ -1108,7 +1132,6 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
   gRingSplit.enumerate_ms = millisSince(enumStart);
   const auto mergeStart = std::chrono::steady_clock::now();
   balls.clear();
-  std::vector<std::vector<int>>().swap(uniq);
   std::vector<int>().swap(adjacency.cols);
   std::vector<std::size_t>().swap(adjacency.first);
   gRingSplit.merge_ms = millisSince(mergeStart);

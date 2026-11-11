@@ -201,6 +201,36 @@ TEST_CASE("length-2 shortcut is not a chord and is not a primitive ring", "[ring
   // The two pentagons through the spur are primitive. A chord-only search
   // would have kept the hexagon as well, and that set is strictly larger.
   REQUIRE(chordless.size() == asSet(hop).size() + 1);
+
+  std::vector<int> offsets(adj.size() + 1, 0);
+  std::vector<int> cols;
+  for (std::size_t i = 0; i < adj.size(); i++) {
+    offsets[i + 1] = offsets[i] + static_cast<int>(adj[i].size());
+    cols.insert(cols.end(), adj[i].begin(), adj[i].end());
+  }
+  const auto fromCsr = primitive::ringNetwork(offsets, cols, 6);
+  REQUIRE(fromCsr == hop);
+}
+
+TEST_CASE("a shortcut through a lower index rejects the ring", "[ring]") {
+  // Hexagon 1-2-3-4-5-6, and vertex 0 joined to the antipodes 1 and 4.
+  // The search that starts at 1 must still see the length-2 path through 0.
+  std::vector<std::vector<int>> adj(7);
+  const int hex[6] = {1, 2, 3, 4, 5, 6};
+  for (int i = 0; i < 6; i++) {
+    adj[hex[i]].push_back(hex[(i + 1) % 6]);
+    adj[hex[(i + 1) % 6]].push_back(hex[i]);
+  }
+  adj[0].push_back(1);
+  adj[1].push_back(0);
+  adj[0].push_back(4);
+  adj[4].push_back(0);
+  const auto nList = withSelf(adj);
+  const auto hop = primitive::ringNetwork(nList, 6);
+  const std::vector<int> hexagon = {1, 2, 3, 4, 5, 6};
+  REQUIRE(asSet(hop).count(hexagon) == 0);
+  REQUIRE(asSet(hop) == brutePrimitive(adj, 6));
+  REQUIRE(asSet(hop) == asSet(primitive::ringNetworkBalls(nList, 6)));
 }
 
 TEST_CASE("a chorded square is rejected by both searches", "[ring]") {
@@ -252,7 +282,10 @@ TEST_CASE("hop probe matches the ball table and an independent cycle search", "[
       (void)primitive::ringNetwork(nList, depth);
       if (depth <= 7) {
         REQUIRE(primitive::lastRingSearchUsedBalls() == 0);
-      } else if (depth <= 10) {
+      } else if (depth <= 9) {
+        // Radius 3 stays on the sorted pair table.
+        REQUIRE(primitive::lastRingSearchUsedBalls() == 1);
+      } else if (depth == 10) {
         REQUIRE(primitive::lastRingSearchUsedBalls() == 2);
       }
       (void)primitive::ringNetworkBalls(nList, depth);
