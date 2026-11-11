@@ -31,6 +31,9 @@ namespace symm {
 namespace {
 
 constexpr double kBond = 3.5;
+// The common neighbour sits inside 3.35 A. The list still reaches 3.5 A when
+// the four nearest are not all inside that, so a stretched crystal bond is kept.
+constexpr double kNear = 3.35;
 constexpr double kWide = 4.05;
 constexpr double kCentre = 5.6;
 constexpr double kCentreHex = 6.2;
@@ -364,6 +367,28 @@ double tetraChirality(const double v[4][3]) {
   return a[0] * cx + a[1] * cy + a[2] * cz;
 }
 
+double tetraQ(const Bond *mine) {
+  double u[4][3];
+  for (int k = 0; k < 4; k++) {
+    const double nrm = std::sqrt(mine[k].dx * mine[k].dx + mine[k].dy * mine[k].dy + mine[k].dz * mine[k].dz);
+    if (!(nrm > 1e-8)) {
+      return -1.0;
+    }
+    u[k][0] = mine[k].dx / nrm;
+    u[k][1] = mine[k].dy / nrm;
+    u[k][2] = mine[k].dz / nrm;
+  }
+  double acc = 0.0;
+  for (int a = 0; a < 4; a++) {
+    for (int b = a + 1; b < 4; b++) {
+      const double c = u[a][0] * u[b][0] + u[a][1] * u[b][1] + u[a][2] * u[b][2];
+      const double d = c + (1.0 / 3.0);
+      acc += d * d;
+    }
+  }
+  return 1.0 - 0.375 * acc;
+}
+
 double bondAngle(const double v[3], const double e1[3], const double e2[3]) {
   return std::atan2(v[0] * e2[0] + v[1] * e2[1] + v[2] * e2[2],
                     v[0] * e1[0] + v[1] * e1[1] + v[2] * e1[2]);
@@ -454,7 +479,8 @@ bool __attribute__((noinline, cold)) hasStaggeredBond(const double envF[4][3], c
 // A shell is not rejected because its radius varies. Twelve (4,2,1) signatures
 // are cubic. Six (4,2,1) and six (4,2,2) are hexagonal. Anything else with at
 // least `ambiguous` of those signatures is worth the full fit; the rest are not.
-int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguous) {
+int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguous, int *n421o = nullptr,
+               int *n422o = nullptr, int *nGoodo = nullptr) {
   double r2[12];
   double pair[12][12];
   alignas(32) double px[16];
@@ -539,6 +565,15 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
     if (!good && nGood + (11 - j) < ambiguous) {
       return -1;
     }
+  }
+  if (n421o) {
+    *n421o = n421;
+  }
+  if (n422o) {
+    *n422o = n422;
+  }
+  if (nGoodo) {
+    *nGoodo = nGood;
   }
   if (n421 == 12) {
     return 1;
@@ -658,8 +693,62 @@ int diamondSecondShell(const double first[4][3], const double *sx, const double 
   return -1;
 }
 
+// Ideal ice has equal bonds and one second-shell radius. The raw cosine of a
+// second-shell bond with the other first-shell bonds is 1/3 when the arm is
+// staggered and about 0.78 when it is eclipsed, so the projection is unnecessary.
+__attribute__((always_inline)) inline int idealKind(const double first[4][3], const double *sx,
+                                                            const double *sy, const double *sz) {
+  // Staggered raw cosine is 1/3; eclipsed is about 0.78. Compare squared
+  // cosines so the ideal cell does not take a square root.
+  constexpr double kEcl2 = 0.36;
+  constexpr double kStg2 = 0.25;
+  double b2[4];
+  for (int k = 0; k < 4; k++) {
+    b2[k] = first[k][0] * first[k][0] + first[k][1] * first[k][1] + first[k][2] * first[k][2];
+  }
+  int nEclipsed = 0;
+  int nStaggered = 0;
+  for (int a = 0; a < 4; a++) {
+    double best = 0.0;
+    for (int e = 0; e < 3; e++) {
+      const int s = 3 * a + e;
+      const double vx = sx[s] - first[a][0];
+      const double vy = sy[s] - first[a][1];
+      const double vz = sz[s] - first[a][2];
+      const double vn2 = vx * vx + vy * vy + vz * vz;
+      for (int b = 0; b < 4; b++) {
+        if (b == a) {
+          continue;
+        }
+        const double dot = vx * first[b][0] + vy * first[b][1] + vz * first[b][2];
+        if (dot <= 0.0) {
+          continue;
+        }
+        const double ratio = (dot * dot) / (vn2 * b2[b]);
+        if (ratio > best) {
+          best = ratio;
+        }
+      }
+    }
+    if (best >= kEcl2) {
+      nEclipsed++;
+    } else if (best <= kStg2) {
+      nStaggered++;
+    } else {
+      return -1;
+    }
+  }
+  if (nEclipsed == 0 && nStaggered == 4) {
+    return 1;
+  }
+  if (nEclipsed == 1 && nStaggered == 3) {
+    return 0;
+  }
+  return -1;
+}
+
 int shellFit(const double center[3], const double nb[][3], int nNb, const CanonShell &canon, double gate,
-             bool recover = false) {
+             bool recover = false, bool grouped = false) {
   const int m = std::min(nNb, 16);
   int order[16];
   double dd[16];
@@ -667,15 +756,18 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
     order[i] = i;
     dd[i] = dist2(center, nb[i]);
   }
-  for (int a = 0; a < 4 && a < m; a++) {
-    int best = a;
-    for (int b = a + 1; b < m; b++) {
-      if (dd[b] < dd[best]) {
-        best = b;
+  // Grouped input is already the four bonds, then three seconds of each.
+  if (!grouped) {
+    for (int a = 0; a < 4 && a < m; a++) {
+      int best = a;
+      for (int b = a + 1; b < m; b++) {
+        if (dd[b] < dd[best]) {
+          best = b;
+        }
       }
+      std::swap(dd[a], dd[best]);
+      std::swap(order[a], order[best]);
     }
-    std::swap(dd[a], dd[best]);
-    std::swap(order[a], order[best]);
   }
   int nFirst = 0;
   int first[4];
@@ -754,7 +846,7 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
         continue;
       }
       tried++;
-      if (tried > 12 || (!recover && tried > 3 && closest > 40.0 && closest < 1.0e200)) {
+      if (tried > 12 || (!recover && tried > 1 && closest > 40.0)) {
         break;
       }
       double R[3][3];
@@ -787,30 +879,37 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
       for (int a = 0; a < 4 && paired; a++) {
         const int envArm = pidx[a];
         int cand[3];
-        double candD[3];
         int nC = 0;
-        for (int e = 0; e < nS; e++) {
-          if (taken[e]) {
-            continue;
-          }
-          const double dx = envS[e][0] - envF[envArm][0];
-          const double dy = envS[e][1] - envF[envArm][1];
-          const double dz = envS[e][2] - envF[envArm][2];
-          const double d2 = dx * dx + dy * dy + dz * dz;
-          if (nC < 3) {
-            cand[nC] = e;
-            candD[nC] = d2;
-            nC++;
-          } else {
-            int worst = 0;
-            for (int c = 1; c < 3; c++) {
-              if (candD[c] > candD[worst]) {
-                worst = c;
-              }
+        if (grouped) {
+          cand[0] = 3 * envArm;
+          cand[1] = 3 * envArm + 1;
+          cand[2] = 3 * envArm + 2;
+          nC = 3;
+        } else {
+          double candD[3];
+          for (int e = 0; e < nS; e++) {
+            if (taken[e]) {
+              continue;
             }
-            if (d2 < candD[worst]) {
-              cand[worst] = e;
-              candD[worst] = d2;
+            const double dx = envS[e][0] - envF[envArm][0];
+            const double dy = envS[e][1] - envF[envArm][1];
+            const double dz = envS[e][2] - envF[envArm][2];
+            const double d2 = dx * dx + dy * dy + dz * dz;
+            if (nC < 3) {
+              cand[nC] = e;
+              candD[nC] = d2;
+              nC++;
+            } else {
+              int worst = 0;
+              for (int c = 1; c < 3; c++) {
+                if (candD[c] > candD[worst]) {
+                  worst = c;
+                }
+              }
+              if (d2 < candD[worst]) {
+                cand[worst] = e;
+                candD[worst] = d2;
+              }
             }
           }
         }
@@ -821,17 +920,23 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
         double e1[3];
         double e2[3];
         bondFrame(envF[envArm], envF[pidx[(a + 1) % 4]], e1, e2);
-        double ang[3];
+        double ax[3];
+        double ay[3];
         for (int i = 0; i < 3; i++) {
-          const double outer[3] = {envS[cand[i]][0] - envF[envArm][0],
-                                   envS[cand[i]][1] - envF[envArm][1],
-                                   envS[cand[i]][2] - envF[envArm][2]};
-          ang[i] = bondAngle(outer, e1, e2);
+          const double ox = envS[cand[i]][0] - envF[envArm][0];
+          const double oy = envS[cand[i]][1] - envF[envArm][1];
+          const double oz = envS[cand[i]][2] - envF[envArm][2];
+          ax[i] = ox * e1[0] + oy * e1[1] + oz * e1[2];
+          ay[i] = ox * e2[0] + oy * e2[1] + oz * e2[2];
         }
         for (int i = 0; i < 3; i++) {
           for (int j = i + 1; j < 3; j++) {
-            if (ang[j] < ang[i]) {
-              std::swap(ang[i], ang[j]);
+            const bool negi = ay[i] < 0.0 || (ay[i] == 0.0 && ax[i] < 0.0);
+            const bool negj = ay[j] < 0.0 || (ay[j] == 0.0 && ax[j] < 0.0);
+            const bool less = negi != negj ? negi : (ax[i] * ay[j] - ay[i] * ax[j]) > 0.0;
+            if (!less) {
+              std::swap(ax[i], ax[j]);
+              std::swap(ay[i], ay[j]);
               std::swap(cand[i], cand[j]);
             }
           }
@@ -883,6 +988,11 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
           slot++;
         }
         shiftSum += bestShiftErr;
+        // A crystal's first arm already sits on the template. Liquid does not,
+        // and the other three arms are not paired.
+        if (!recover && a == 0 && bestShiftErr > 30.0) {
+          paired = false;
+        }
       }
       if (paired && slot == 17 && shiftSum < closest) {
         closest = shiftSum;
@@ -915,6 +1025,58 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
     return -1;
   }
   return bestK;
+}
+
+bool gatherTwelve(int self, const Bond *mine, const Bond *bonds, const int *nbon, bool wide, double *fx,
+                  double *fy, double *fz) {
+  int nf = 0;
+  for (int k = 0; k < 4; k++) {
+    const int f = mine[k].j;
+    const int na = nbon[static_cast<size_t>(f)];
+    const Bond *arm = bonds + static_cast<size_t>(f) * static_cast<size_t>(kMaxBond);
+    int taken = 0;
+    for (int t = 0; t < na && taken < 3; t++) {
+      if (wide) {
+        const int j = arm[t].j;
+        if (j == self || j == mine[0].j || j == mine[1].j || j == mine[2].j || j == mine[3].j) {
+          continue;
+        }
+      }
+      const double x = mine[k].dx + arm[t].dx;
+      const double y = mine[k].dy + arm[t].dy;
+      const double z = mine[k].dz + arm[t].dz;
+      if (!wide) {
+        const double origin = x * x + y * y + z * z;
+        if (origin < 0.25) {
+          continue;
+        }
+        bool isFirst = false;
+        for (int q = 0; q < 4; q++) {
+          const double dx = x - mine[q].dx;
+          const double dy = y - mine[q].dy;
+          const double dz = z - mine[q].dz;
+          if (dx * dx + dy * dy + dz * dz < 0.25) {
+            isFirst = true;
+          }
+        }
+        if (isFirst) {
+          continue;
+        }
+      }
+      if (nf >= 12) {
+        return false;
+      }
+      fx[nf] = x;
+      fy[nf] = y;
+      fz[nf] = z;
+      nf++;
+      taken++;
+    }
+    if (taken < 3) {
+      return false;
+    }
+  }
+  return nf == 12;
 }
 
 } // namespace
@@ -1008,6 +1170,84 @@ void fillHalf(int ncell, int nx, int ny, int nz, const int *cellStart, const Pac
   }
 }
 
+void topUpBonds(int self, double ci0, double ci1, double ci2, int ix0, int iy0, int iz0, int nx, int ny, int nz,
+                const double lat[3][3], const int *cellStart, const Packed *packed, Bond *row, double *rd,
+                int &nb) {
+  const double near2 = kNear * kNear;
+  const double cut2 = kBond * kBond;
+  for (int dz = -2; dz <= 2; dz++) {
+    int iz = iz0 + dz;
+    int sz = 0;
+    while (iz < 0) {
+      iz += nz;
+      sz--;
+    }
+    while (iz >= nz) {
+      iz -= nz;
+      sz++;
+    }
+    for (int dy = -2; dy <= 2; dy++) {
+      int iy = iy0 + dy;
+      int sy = 0;
+      while (iy < 0) {
+        iy += ny;
+        sy--;
+      }
+      while (iy >= ny) {
+        iy -= ny;
+        sy++;
+      }
+      for (int dx = -2; dx <= 2; dx++) {
+        int ix = ix0 + dx;
+        int sx = 0;
+        while (ix < 0) {
+          ix += nx;
+          sx--;
+        }
+        while (ix >= nx) {
+          ix -= nx;
+          sx++;
+        }
+        const int nbcell = (iz * ny + iy) * nx + ix;
+        const int begin = cellStart[nbcell];
+        const int end = cellStart[nbcell + 1];
+        const double ox = sx * lat[0][0] + sy * lat[1][0] + sz * lat[2][0];
+        const double oy = sx * lat[0][1] + sy * lat[1][1] + sz * lat[2][1];
+        const double oz = sx * lat[0][2] + sy * lat[1][2] + sz * lat[2][2];
+        for (int m = begin; m < end; m++) {
+          const Packed &nbr = packed[m];
+          if (nbr.id == self && sx == 0 && sy == 0 && sz == 0) {
+            continue;
+          }
+          const double ddx = nbr.x + ox - ci0;
+          const double ddy = nbr.y + oy - ci1;
+          const double ddz = nbr.z + oz - ci2;
+          const double d2 = ddx * ddx + ddy * ddy + ddz * ddz;
+          if (d2 <= near2 || d2 > cut2 || d2 < 2.15 * 2.15) {
+            continue;
+          }
+          if (nb < kMaxBond) {
+            row[nb] = Bond{nbr.id, ddx, ddy, ddz};
+            rd[nb] = d2;
+            nb++;
+          } else {
+            int worst = 0;
+            for (int c = 1; c < kMaxBond; c++) {
+              if (rd[c] > rd[worst]) {
+                worst = c;
+              }
+            }
+            if (d2 < rd[worst]) {
+              row[worst] = Bond{nbr.id, ddx, ddy, ddz};
+              rd[worst] = d2;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 void classifyPrepared(const double *x, const double *y, const double *z, int n,
                       const double lat[3][3], const CanonShell &canon, double gate, int *kind) {
   if (n <= 0) {
@@ -1041,9 +1281,9 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     // The 3.5 A bond list. Cells are at most one bond wide, so the 27-cell
     // stencil holds every bonded neighbour. The second shell is read from
     // those neighbours' own rows, not from a 5.6 A search.
-    nx = std::max(3, static_cast<int>(std::ceil(la / kBond)));
-    ny = std::max(3, static_cast<int>(std::ceil(lb / kBond)));
-    nz = std::max(3, static_cast<int>(std::ceil(lc / kBond)));
+    nx = std::max(3, static_cast<int>(std::ceil(la / kNear)));
+    ny = std::max(3, static_cast<int>(std::ceil(lb / kNear)));
+    nz = std::max(3, static_cast<int>(std::ceil(lc / kNear)));
     fast = true;
   } else {
     nx = std::max(1, static_cast<int>(la / kGrid));
@@ -1177,7 +1417,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
                 const double ddy = nbr.y - ci1;
                 const double ddz = nbr.z - ci2;
                 const double d2 = ddx * ddx + ddy * ddy + ddz * ddz;
-                if (d2 > kBond * kBond || d2 < 2.15 * 2.15) {
+                if (d2 > kNear * kNear || d2 < 2.15 * 2.15) {
                   continue;
                 }
                 if (nb < kMaxBond) {
@@ -1204,6 +1444,10 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
               }
             }
           }
+        }
+        if (nb < 4) {
+          topUpBonds(i, ci0, ci1, ci2, ix0, iy0, iz0, nx, ny, nz, lat, cellStart.data(), packed.data(),
+                     row, rd, nb);
         }
         for (int a = 1; a < nb; a++) {
           const Bond b = row[a];
@@ -1299,7 +1543,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
         const double dy = nbr.y + sx * lat[0][1] + sy * lat[1][1] + sz * lat[2][1] - ci1;
         const double dz = nbr.z + sx * lat[0][2] + sy * lat[1][2] + sz * lat[2][2] - ci2;
         const double d2 = dx * dx + dy * dy + dz * dz;
-        if (d2 > kBond * kBond || d2 < 2.15 * 2.15) {
+        if (d2 > kNear * kNear || d2 < 2.15 * 2.15) {
           continue;
         }
         if (nb < kMaxBond) {
@@ -1324,6 +1568,11 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
                       -dz, d2);
         }
       }
+    }
+    if (nb < 4) {
+      const int cell = bin[static_cast<size_t>(i)];
+      topUpBonds(i, ci0, ci1, ci2, cell % nx, (cell / nx) % ny, cell / (nx * ny), nx, ny, nz, lat,
+                 cellStart.data(), packed.data(), row, rd, nb);
     }
     for (int a = 1; a < nb; a++) {
       const Bond b = row[a];
@@ -1356,8 +1605,6 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   for (int i = 0; i < n; i++) {
     const int nb = nbon[static_cast<size_t>(i)];
     const Bond *mine = &bonds[static_cast<size_t>(i) * static_cast<size_t>(kMaxBond)];
-    int firstId[4];
-    double nbxyz[16][3];
     const double ci0 = px[static_cast<size_t>(i)];
     const double ci1 = py[static_cast<size_t>(i)];
     const double ci2 = pz[static_cast<size_t>(i)];
@@ -1382,128 +1629,69 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       kind[i] = -1;
       continue;
     }
-    // The fingerprint runs before q. An exact FCC or HCP shell does not need it.
-    // Cheap diamond test, before the full shell fit. The twelve second
-    // neighbours are the three outward bonds of each of the four neighbours.
-    // A perfect FCC or HCP shell is labelled here and does not enter Kabsch.
-    // A shell the test can reject (spread bonds, a wide second shell, a low q)
-    // does not enter the permutation fit either.
+    // Liquid is not tetrahedral. Skip the second shell. Ideal ice has equal
+    // bonds, so it does not pay for q; the staggered test names it.
+    double qEarly = -1.0;
+    if (!(bMax <= bMin * 1.00001)) {
+      qEarly = tetraQ(mine);
+      if (qEarly < 0.90) {
+        kind[i] = -1;
+        continue;
+      }
+    }
     {
       double fx[12];
       double fy[12];
       double fz[12];
-      int nf = 0;
       const bool wide = la > 12.0 && lb > 12.0 && lc > 12.0;
-      bool closed = true;
-      for (int k = 0; k < 4 && closed; k++) {
-        const int f = mine[k].j;
-        const int na = nbon[static_cast<size_t>(f)];
-        const Bond *arm = &bonds[static_cast<size_t>(f) * static_cast<size_t>(kMaxBond)];
-        int taken = 0;
-        for (int t = 0; t < na && taken < 3; t++) {
-          if (wide) {
-            const int j = arm[t].j;
-            if (j == i || j == mine[0].j || j == mine[1].j || j == mine[2].j || j == mine[3].j) {
-              continue;
-            }
-          }
-          const double x = mine[k].dx + arm[t].dx;
-          const double y = mine[k].dy + arm[t].dy;
-          const double z = mine[k].dz + arm[t].dz;
-          if (!wide) {
-            const double origin = x * x + y * y + z * z;
-            if (origin < 0.25) {
-              continue;
-            }
-            bool isFirst = false;
-            for (int q = 0; q < 4; q++) {
-              const double dx = x - mine[q].dx;
-              const double dy = y - mine[q].dy;
-              const double dz = z - mine[q].dz;
-              if (dx * dx + dy * dy + dz * dz < 0.25) {
-                isFirst = true;
-              }
-            }
-            if (isFirst) {
-              continue;
-            }
-          }
-          if (nf >= 12) {
-            closed = false;
-            break;
-          }
-          fx[nf] = x;
-          fy[nf] = y;
-          fz[nf] = z;
-          nf++;
-          taken++;
-        }
-        if (taken < 3) {
-          closed = false;
-        }
-      }
-      if (!(closed && nf == 12)) {
+      if (!gatherTwelve(i, mine, bonds.get(), nbon.data(), wide, fx, fy, fz)) {
         kind[i] = -1;
         continue;
       }
-      if (bMax <= bMin * 1.00001) {
-        double sLo = 1e300;
-        double sHi = 0.0;
-        for (int s = 0; s < 12; s++) {
-          const double r2s = fx[s] * fx[s] + fy[s] * fy[s] + fz[s] * fz[s];
-          if (r2s < sLo) {
-            sLo = r2s;
-          }
-          if (r2s > sHi) {
-            sHi = r2s;
-          }
+      double sLo = 1e300;
+      double sHi = 0.0;
+      for (int s = 0; s < 12; s++) {
+        const double r2s = fx[s] * fx[s] + fy[s] * fy[s] + fz[s] * fz[s];
+        if (r2s < sLo) {
+          sLo = r2s;
         }
-        if (sHi > sLo * 1.00001) {
-          // not an ideal shell; the fingerprint decides
-        } else {
+        if (r2s > sHi) {
+          sHi = r2s;
+        }
+      }
+      if (bMax <= bMin * 1.00001 && sHi <= sLo * 1.00001) {
         double first[4][3];
         for (int k = 0; k < 4; k++) {
           first[k][0] = mine[k].dx;
           first[k][1] = mine[k].dy;
           first[k][2] = mine[k].dz;
         }
-        const int even = diamondSecondShell(first, fx, fy, fz, 1.0, 0.90, 0.75);
+        const int even = idealKind(first, fx, fy, fz);
         if (even >= 0) {
           kind[i] = even;
           continue;
         }
-        }
       }
-      const int cna = diamondCna(fx, fy, fz, kAmbiguous);
+      // A wide second shell is not an FCC or HCP fingerprint. The fit still
+      // sees a shell whose radius varies by less than 1.6.
+      if (sHi > sLo * (1.45 * 1.45)) {
+        if (qEarly >= 0.95 && bMax <= bMin * (1.15 * 1.15) && sHi <= sLo * (1.6 * 1.6)) {
+          kind[i] = -3;
+        } else {
+          kind[i] = -1;
+        }
+        continue;
+      }
+      int n421 = 0;
+      int n422 = 0;
+      int nGood = 0;
+      const int cna = diamondCna(fx, fy, fz, kAmbiguous, &n421, &n422, &nGood);
       if (cna == 0 || cna == 1) {
         kind[i] = cna;
         continue;
       }
-      double acc = 0.0;
-      bool tetra = true;
-      double uvec[4][3];
-      for (int k = 0; k < 4; k++) {
-        const double nrm = std::sqrt(mine[k].dx * mine[k].dx + mine[k].dy * mine[k].dy +
-                                     mine[k].dz * mine[k].dz);
-        if (!(nrm > 1e-8)) {
-          tetra = false;
-          break;
-        }
-        uvec[k][0] = mine[k].dx / nrm;
-        uvec[k][1] = mine[k].dy / nrm;
-        uvec[k][2] = mine[k].dz / nrm;
-      }
-      if (tetra) {
-        for (int a = 0; a < 4; a++) {
-          for (int b = a + 1; b < 4; b++) {
-            const double c = uvec[a][0] * uvec[b][0] + uvec[a][1] * uvec[b][1] + uvec[a][2] * uvec[b][2];
-            const double d = c + (1.0 / 3.0);
-            acc += d * d;
-          }
-        }
-      }
-      const double qNow = tetra ? (1.0 - 0.375 * acc) : 0.0;
-      if (!tetra || qNow < 0.88) {
+      const double qNow = qEarly >= 0.0 ? qEarly : tetraQ(mine);
+      if (qNow < 0.88) {
         kind[i] = -1;
         continue;
       }
@@ -1523,114 +1711,63 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
           sMax = r2s;
         }
       }
+      // -3: worth a fit, but only once a crystal neighbour is known.
       if (qNow >= 0.95 && tightBonds && sMax <= sMin * (1.6 * 1.6)) {
-        double nbFit[16][3];
-        for (int k = 0; k < 4; k++) {
-          nbFit[k][0] = ci0 + mine[k].dx;
-          nbFit[k][1] = ci1 + mine[k].dy;
-          nbFit[k][2] = ci2 + mine[k].dz;
-        }
-        for (int s = 0; s < 12; s++) {
-          nbFit[4 + s][0] = ci0 + fx[s];
-          nbFit[4 + s][1] = ci1 + fy[s];
-          nbFit[4 + s][2] = ci2 + fz[s];
-        }
-        const double center[3] = {ci0, ci1, ci2};
-        kind[i] = shellFit(center, nbFit, 16, canon, gate);
+        kind[i] = -3;
         continue;
       }
       kind[i] = -1;
       continue;
     }
-    for (int k = 0; k < 4; k++) {
-      firstId[k] = mine[k].j;
-      nbxyz[k][0] = ci0 + mine[k].dx;
-      nbxyz[k][1] = ci1 + mine[k].dy;
-      nbxyz[k][2] = ci2 + mine[k].dz;
-    }
-    double sx[48];
-    double sy[48];
-    double sz[48];
-    double sb[48];
-    int ns = 0;
-    for (int k = 0; k < 4 && nb >= 4; k++) {
-      const int f = firstId[k];
-      const int na = nbon[static_cast<size_t>(f)];
-      const Bond *arm = &bonds[static_cast<size_t>(f) * static_cast<size_t>(kMaxBond)];
-      for (int t = 0; t < na; t++) {
-        const double x = mine[k].dx + arm[t].dx;
-        const double y = mine[k].dy + arm[t].dy;
-        const double z = mine[k].dz + arm[t].dz;
-        // A periodic image is a different shell site. Reject the centre and
-        // the four first-shell positions, not every copy of their atom id.
-        const double origin = x * x + y * y + z * z;
-        if (origin < 0.25 || origin > kCentre * kCentre) {
-          continue;
-        }
-        bool isFirst = false;
-        for (int q = 0; q < 4; q++) {
-          const double dx = x - mine[q].dx;
-          const double dy = y - mine[q].dy;
-          const double dz = z - mine[q].dz;
-          if (dx * dx + dy * dy + dz * dz < 0.25) {
-            isFirst = true;
-          }
-        }
-        if (isFirst) {
-          continue;
-        }
-        const double bond = arm[t].dx * arm[t].dx + arm[t].dy * arm[t].dy + arm[t].dz * arm[t].dz;
-        int found = -1;
-        for (int s = 0; s < ns; s++) {
-          const double dx = x - sx[s];
-          const double dy = y - sy[s];
-          const double dz = z - sz[s];
-          if (dx * dx + dy * dy + dz * dz < 0.25) {
-            found = s;
-          }
-        }
-        if (found >= 0) {
-          if (bond < sb[found]) {
-            sx[found] = x;
-            sy[found] = y;
-            sz[found] = z;
-            sb[found] = bond;
-          }
-          continue;
-        }
-        if (ns < 48) {
-          sx[ns] = x;
-          sy[ns] = y;
-          sz[ns] = z;
-          sb[ns] = bond;
-          ns++;
+  }
+  // The fit is only for a shell that already touches a labelled crystal.
+  // Bulk liquid has a high q and would otherwise all enter Kabsch.
+  const bool wideBox = la > 12.0 && lb > 12.0 && lc > 12.0;
+  for (int round = 0; round < 4; round++) {
+    for (int i = 0; i < n; i++) {
+      if (kind[i] != -3) {
+        continue;
+      }
+      const Bond *mine = &bonds[static_cast<size_t>(i) * static_cast<size_t>(kMaxBond)];
+      int nCrystal = 0;
+      for (int k = 0; k < 4; k++) {
+        if (kind[mine[k].j] >= 0) {
+          nCrystal++;
         }
       }
+      if (nCrystal < 1) {
+        continue;
+      }
+      double fx[12];
+      double fy[12];
+      double fz[12];
+      if (!gatherTwelve(i, mine, bonds.get(), nbon.data(), wideBox, fx, fy, fz)) {
+        kind[i] = -1;
+        continue;
+      }
+      double nbFit[16][3];
+      const double c0 = px[static_cast<size_t>(i)];
+      const double c1 = py[static_cast<size_t>(i)];
+      const double c2 = pz[static_cast<size_t>(i)];
+      for (int k = 0; k < 4; k++) {
+        nbFit[k][0] = c0 + mine[k].dx;
+        nbFit[k][1] = c1 + mine[k].dy;
+        nbFit[k][2] = c2 + mine[k].dz;
+      }
+      for (int s = 0; s < 12; s++) {
+        nbFit[4 + s][0] = c0 + fx[s];
+        nbFit[4 + s][1] = c1 + fy[s];
+        nbFit[4 + s][2] = c2 + fz[s];
+      }
+      const double center[3] = {c0, c1, c2};
+      const int fit = shellFit(center, nbFit, 16, canon, gate, false, true);
+      kind[i] = fit >= 0 ? fit : -1;
     }
-    // An incomplete 3.5 A shell is not ice. Widening the bond pulled every
-    // liquid atom into a second search.
-    if (ns < 12 || nb < 4) {
+  }
+  for (int i = 0; i < n; i++) {
+    if (kind[i] == -3) {
       kind[i] = -1;
-      continue;
     }
-
-    for (int a = 0; a < 12; a++) {
-      int best = a;
-      for (int b = a + 1; b < ns; b++) {
-        if (sb[b] < sb[best]) {
-          best = b;
-        }
-      }
-      std::swap(sb[a], sb[best]);
-      std::swap(sx[a], sx[best]);
-      std::swap(sy[a], sy[best]);
-      std::swap(sz[a], sz[best]);
-      nbxyz[4 + a][0] = ci0 + sx[a];
-      nbxyz[4 + a][1] = ci1 + sy[a];
-      nbxyz[4 + a][2] = ci2 + sz[a];
-    }
-    const double ci[3] = {ci0, ci1, ci2};
-    kind[i] = shellFit(ci, nbxyz, 16, canon, gate);
   }
   // One crystal neighbour among the four bonds. Isolated liquid labels go.
   // The test reads the labels from the fit, not the filtered ones.
