@@ -68,24 +68,28 @@ end
 nop(frame::Frame) = Int(ccall((:seams_frame_nop, _lib()), Cint, (Ptr{Cvoid},), frame.ptr))
 
 """
-    chill_plus(frame; cutoff = 3.5, type = 0, graph = "cutoff")
+    chill_plus(frame; cutoff = 3.5, type = 0, graph = "cutoff", rule = "chill+")
 
-CHILL+ labels. `graph = "cutoff"` (the default) bonds every pair closer
+CHILL+ labels. `rule = "chill+"` is the published shell gate, four-nearest
+q3, and the Table 1 neighbour test. `rule = "ovito-chill+"` averages q3
+over the cutoff shell and skips the neighbour test.
+`graph = "cutoff"` (the default) bonds every pair closer
 than `cutoff`. `graph = "mutual"` keeps the mutual four nearest
 neighbours inside `cutoff + 1.5`.
 """
-function chill_plus(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, graph::AbstractString = "cutoff")
+function chill_plus(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, graph::AbstractString = "cutoff", rule::AbstractString = "chill+")
     n = nop(frame)
     labels = Vector{Cint}(undef, n)
     counts = Vector{Cint}(undef, 9)
     code = ccall(
-        (:seams_frame_chill_plus, _lib()),
+        (:seams_frame_chill_plus_rule, _lib()),
         Cint,
-        (Ptr{Cvoid}, Cdouble, Cint, Cstring, Ptr{Cint}, Ptr{Cint}),
+        (Ptr{Cvoid}, Cdouble, Cint, Cstring, Cstring, Ptr{Cint}, Ptr{Cint}),
         frame.ptr,
         cutoff,
         type,
         graph,
+        rule,
         labels,
         counts,
     )

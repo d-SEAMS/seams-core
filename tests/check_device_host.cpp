@@ -61,7 +61,8 @@ public:
   Labels run() const {
     const int nR = static_cast<int>(rings_.size());
     std::vector<char> hc(nR, 0);
-    for (int i = 0; i < nR; ++i) {
+    int left = nR;
+    for (int i = 0; i < nR && left > 0; ++i) {
       std::vector<int> cand;
       for (const int a : rings_[i]) {
         for (std::size_t n = 1; n < nList_[a].size(); ++n) {
@@ -72,13 +73,24 @@ public:
       }
       std::sort(cand.begin(), cand.end());
       cand.erase(std::unique(cand.begin(), cand.end()), cand.end());
+      auto mark = [&](int m) {
+        if (m < 0 || m >= nR || hc[m]) {
+          return;
+        }
+        hc[m] = 1;
+        --left;
+      };
       for (const int j : cand) {
+        if (left == 0) {
+          break;
+        }
         if (j == i || !beta(rings_[i], rings_[j])) {
           continue;
         }
-        hc[i] = hc[j] = 1;
+        mark(i);
+        mark(j);
         for (const int k : prismatic(i, j)) {
-          hc[k] = 1;
+          mark(k);
         }
       }
     }

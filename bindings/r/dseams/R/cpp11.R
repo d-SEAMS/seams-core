@@ -17,8 +17,8 @@ positions_ <- function(ptr) {
   .Call(`_dseams_positions_`, ptr)
 }
 
-chill_plus_ <- function(ptr, cutoff, type, graph) {
-  .Call(`_dseams_chill_plus_`, ptr, cutoff, type, graph)
+chill_plus_ <- function(ptr, cutoff, type, graph, rule) {
+  .Call(`_dseams_chill_plus_`, ptr, cutoff, type, graph, rule)
 }
 
 rings_ <- function(ptr, cutoff, type, graph, max_depth) {

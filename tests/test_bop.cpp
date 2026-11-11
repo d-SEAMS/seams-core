@@ -21,6 +21,7 @@
 #include <numeric>
 #include <random>
 #include <sstream>
+#include <vector>
 
 #ifdef SEAMS_HAS_OPENMP
 #include <omp.h>
@@ -355,7 +356,7 @@ TEST_CASE("numStaggered counts staggered bonds for an atom", "[bop]") {
   REQUIRE(nStag <= 4);
 }
 
-TEST_CASE("CHILL+ on the mixed TIP4P example is twelve interClathrate",
+TEST_CASE("CHILL+ on the mixed TIP4P example keeps the four-neighbour shell",
           "[bop][fixture]") {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud = sinp::readLammpsTrjO("traj/exampleTraj.lammpstrj", 1, cloud, 2);
@@ -375,9 +376,82 @@ TEST_CASE("CHILL+ on the mixed TIP4P example is twelve interClathrate",
       other++;
     }
   }
-  REQUIRE(interClath == 12);
-  REQUIRE(water == 238);
+  REQUIRE(interClath == 9);
+  REQUIRE(water == 241);
   REQUIRE(other == 0);
+}
+
+TEST_CASE("a fifth neighbour inside the cutoff is not cubic ice", "[bop]") {
+  // Ideal ice Ic, then one extra atom 3.3 Å from molecule 0, opposite a
+  // lattice neighbour. The four nearest stay at 2.75 Å. The cutoff shell
+  // grows to five. The old bond count, taken after the list was cut to
+  // four, labelled molecule 0 cubic. OVITO 3.17.2 labels that shell other.
+  const double bond = 2.75;
+  const double cell = bond * 4.0 / std::sqrt(3.0);
+  const int nrep = 2;
+  const double basis[2][3] = {{0, 0, 0}, {0.25, 0.25, 0.25}};
+  const double fcc[4][3] = {{0, 0, 0}, {0.5, 0.5, 0}, {0.5, 0, 0.5}, {0, 0.5, 0.5}};
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {nrep * cell, nrep * cell, nrep * cell};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  for (int i = 0; i < nrep; ++i) {
+    for (int j = 0; j < nrep; ++j) {
+      for (int k = 0; k < nrep; ++k) {
+        for (const auto &shift : fcc) {
+          for (const auto &site : basis) {
+            molSys::Point<double> p;
+            p.x = (i + shift[0] + site[0]) * cell;
+            p.y = (j + shift[1] + site[1]) * cell;
+            p.z = (k + shift[2] + site[2]) * cell;
+            p.type = 1;
+            p.atomID = cloud.nop + 1;
+            p.molID = p.atomID;
+            cloud.idIndexMap[p.atomID] = cloud.nop;
+            cloud.pts.push_back(p);
+            cloud.nop += 1;
+          }
+        }
+      }
+    }
+  }
+  const double nx = 0.25 * cell;
+  const double ny = 0.25 * cell;
+  const double nz = 0.25 * cell;
+  const double norm = std::sqrt(nx * nx + ny * ny + nz * nz);
+  const double length = cloud.box[0];
+  auto wrap = [length](double v) {
+    while (v < 0.0) {
+      v += length;
+    }
+    while (v >= length) {
+      v -= length;
+    }
+    return v;
+  };
+  molSys::Point<double> guest;
+  guest.x = wrap(-3.3 * nx / norm);
+  guest.y = wrap(-3.3 * ny / norm);
+  guest.z = wrap(-3.3 * nz / norm);
+  guest.type = 1;
+  guest.atomID = cloud.nop + 1;
+  guest.molID = guest.atomID;
+  cloud.idIndexMap[guest.atomID] = cloud.nop;
+  cloud.pts.push_back(guest);
+  cloud.nop += 1;
+
+  auto rows = nneigh::neighListO(3.5, cloud, 1);
+  int shell = 0;
+  for (std::size_t j = 1; j < rows[0].size(); ++j) {
+    if (cloud.idIndexMap.find(rows[0][j]) != cloud.idIndexMap.end()) {
+      shell += 1;
+    }
+  }
+  REQUIRE(shell == 5);
+  chill::getCorrelPlus(cloud, rows, false);
+  REQUIRE(cloud.pts[0].c_ij.size() == 4);
+  chill::getIceTypePlusNoPrint(cloud, rows, false);
+  REQUIRE(cloud.pts[0].iceType == molSys::atom_state_type::water);
+  REQUIRE(cloud.pts[0].iceType != molSys::atom_state_type::cubic);
 }
 
 TEST_CASE("masked 4-NN never scores Ag as ice", "[bop][neighbours]") {
@@ -651,6 +725,30 @@ TEST_CASE("spherical harmonics obey the Condon-Shortley relation", "[bop]") {
   }
 }
 
+TEST_CASE("an index outside a lookup table is zero", "[bop]") {
+  const std::array<double, 2> angles = {0.4, 1.1};
+  for (const int m : {-1, 7}) {
+    const auto y = sph::lookupTableQ3(m, angles);
+    REQUIRE(y.real() == 0.0);
+    REQUIRE(y.imag() == 0.0);
+  }
+  for (const int m : {-1, 9}) {
+    const auto y = sph::lookupTableQ4(m, angles);
+    REQUIRE(y.real() == 0.0);
+    REQUIRE(y.imag() == 0.0);
+  }
+  for (const int m : {-1, 13}) {
+    const auto y = sph::lookupTableQ6(m, angles);
+    REQUIRE(y.real() == 0.0);
+    REQUIRE(y.imag() == 0.0);
+  }
+  for (const int m : {-1, 17}) {
+    const auto y = sph::lookupTableQ8(m, angles);
+    REQUIRE(y.real() == 0.0);
+    REQUIRE(y.imag() == 0.0);
+  }
+}
+
 TEST_CASE("per-order lookup agrees with the vector form", "[bop]") {
   const std::vector<std::pair<double, double>> directions = {
       {0.7, 1.2}, {2.31, 5.02}};
@@ -883,6 +981,12 @@ TEST_CASE("classifyBonds under registered rules reproduces CHILL/CHILL+",
           names.end());
   REQUIRE(std::find(names.begin(), names.end(), "CHILL") != names.end());
   REQUIRE(std::find(names.begin(), names.end(), "CHILL+") != names.end());
+  chill::registerBondClassifier("CHILL", {0.0, 0.0, 0.0, 8});
+  REQUIRE(chill::bondClassifier("CHILL").coordinationNumber == 8);
+  auto replaced = chill::bondClassifierNames();
+  REQUIRE(std::count(replaced.begin(), replaced.end(), "CHILL") == 1);
+  chill::registerBondClassifier("CHILL", chill::chillRule());
+  REQUIRE(chill::bondClassifier("CHILL").coordinationNumber == 4);
 
   auto custom = makeTetraCloud();
   chill::classifyBonds(custom, nList,

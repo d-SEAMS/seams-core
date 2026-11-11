@@ -63,7 +63,7 @@ int main(int argc, char **argv) {
       0) {
     return fail("chill+ cutoff");
   }
-  if (count_of(counts, 5) != 12 || count_of(counts, 2) != 238 ||
+  if (count_of(counts, 5) != 9 || count_of(counts, 2) != 241 ||
       count_of(counts, 4) != 0) {
     std::cerr << "cutoff chill+ clathrate " << counts[4] << " inter "
               << counts[5] << " water " << counts[2] << "\n";

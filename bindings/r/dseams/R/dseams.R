@@ -51,22 +51,30 @@ positions.dseams_frame <- function(frame) {
 #' `graph = "mutual"` keeps the mutual four nearest neighbours inside
 #' `cutoff + 1.5`.
 #'
+#' `rule = "chill+"` is the published rule: the cutoff shell must hold
+#' exactly four neighbours, q3 is averaged over the four nearest, and the
+#' Table 1 interfacial-neighbour test is on. `rule = "ovito-chill+"`
+#' averages q3 over the whole shell and skips that test.
+#'
 #' @param frame A `dseams_frame`.
 #' @param cutoff Neighbour cutoff in angstrom. For the mutual graph this is
 #'   only the cell-size hint (`cutoff + 1.5`).
 #' @param type LAMMPS type. 0 uses the first atom's type.
 #' @param graph `"cutoff"` or `"mutual"`.
+#' @param rule `"chill+"` or `"ovito-chill+"`. A YAML or Lua snippet with
+#'   a `rule` field is accepted.
 #' @return A data.frame with columns `atom`, `type`, `label`, `name`.
 #'   The `counts` attribute is the nine-label histogram.
 #' @export
-chill_plus <- function(frame, cutoff = 3.5, type = 0L, graph = "cutoff") {
+chill_plus <- function(frame, cutoff = 3.5, type = 0L, graph = "cutoff",
+                       rule = "chill+") {
   UseMethod("chill_plus")
 }
 
 #' @export
 chill_plus.dseams_frame <- function(frame, cutoff = 3.5, type = 0L,
-                                    graph = "cutoff") {
-  out <- chill_plus_(frame$ptr, cutoff, as.integer(type), graph)
+                                    graph = "cutoff", rule = "chill+") {
+  out <- chill_plus_(frame$ptr, cutoff, as.integer(type), graph, rule)
   class(out) <- c("dseams_ice", "data.frame")
   out
 }

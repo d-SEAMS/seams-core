@@ -33,7 +33,7 @@ NAMES = (
     "reHex",
 )
 EXPECTED = {
-    "cutoff": {"interClathrate": 12, "water": 238},
+    "cutoff": {"interClathrate": 9, "water": 241},
     "mutual": {"clathrate": 1, "interClathrate": 7, "water": 242},
 }
 GRAPHS = ("default", "cutoff", "mutual")
@@ -98,22 +98,49 @@ def _classify(frame, graph):
     yoda.getIceTypePlusNoPrint(frame.cloud, nlist, False)
 
 
-def python():
+def python(lib):
+    """Python front of this tree: ctypes against libseams_lang.
+
+    pydseamslib on PyPI stops at 2.11 and does not carry the 2015 rule.
+    """
+    import ctypes
+
+    so = ctypes.CDLL(lib)
+    so.seams_frame_read.restype = ctypes.c_void_p
+    so.seams_frame_read.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.c_int]
+    so.seams_frame_free.argtypes = [ctypes.c_void_p]
+    so.seams_frame_nop.restype = ctypes.c_int
+    so.seams_frame_nop.argtypes = [ctypes.c_void_p]
+    so.seams_frame_chill_plus_rule.restype = ctypes.c_int
+    so.seams_frame_chill_plus_rule.argtypes = [
+        ctypes.c_void_p, ctypes.c_double, ctypes.c_int,
+        ctypes.c_char_p, ctypes.c_char_p,
+        ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int),
+    ]
+    so.seams_last_error.restype = ctypes.c_char_p
+    frame = so.seams_frame_read(str(TIP).encode(), 1, 2)
+    if not frame:
+        err = so.seams_last_error()
+        raise RuntimeError(err.decode() if err else "seams_frame_read failed")
     try:
-        import pydseams
-    except ImportError as exc:
-        raise Missing("pydseamslib is not installed") from exc
-    frame = pydseams.read(str(TIP), atom_type=2, cutoff=3.5)
-    out = {}
-    for graph in GRAPHS:
-        _classify(frame, graph)
-        labels = [NAMES.index(pt.iceType.name) for pt in frame.cloud.pts]
-        counts = {}
-        for label in labels:
-            name = NAMES[label]
-            counts[name] = counts.get(name, 0) + 1
-        out[graph] = {"counts": {k: v for k, v in counts.items() if v}, "labels": labels}
-    return out
+        n = so.seams_frame_nop(frame)
+        out = {}
+        for graph in GRAPHS:
+            labels = (ctypes.c_int * n)()
+            counts = (ctypes.c_int * 9)()
+            rule = b"chill+"
+            graph_arg = b"cutoff" if graph == "default" else graph.encode()
+            code = so.seams_frame_chill_plus_rule(
+                frame, 3.5, 0, graph_arg, rule, labels, counts
+            )
+            if code != 0:
+                err = so.seams_last_error()
+                raise RuntimeError(err.decode() if err else "chill_plus failed")
+            got = [labels[i] for i in range(n)]
+            out[graph] = {"counts": histogram(got), "labels": got}
+        return out
+    finally:
+        so.seams_frame_free(frame)
 
 
 def r_front(env):
@@ -175,13 +202,18 @@ def main(argv):
     require_all = "--require-all" in argv[3:]
     env = os.environ.copy()
     env["SEAMS_LANG_LIB"] = lib
+    lib_dir = str(Path(lib).parent)
+    src_dir = str(Path(lib).resolve().parents[1] / "src")
     env["LD_LIBRARY_PATH"] = os.pathsep.join(
-        p for p in (str(Path(lib).parent), env.get("LD_LIBRARY_PATH", "")) if p
+        p for p in (lib_dir, src_dir, env.get("LD_LIBRARY_PATH", "")) if p
+    )
+    env["PATH"] = os.pathsep.join(
+        p for p in (os.path.expanduser("~/.juliaup/bin"), env.get("PATH", "")) if p
     )
 
     results = {"cli": cli(seams)}
     missing = []
-    for name, run in (("python", python), ("r", lambda: r_front(env)),
+    for name, run in (("python", lambda: python(lib)), ("r", lambda: r_front(env)),
                       ("julia", lambda: julia_front(env))):
         try:
             results[name] = run()

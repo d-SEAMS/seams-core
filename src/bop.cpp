@@ -13,6 +13,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <bop.hpp>
+#include <chill_plus_scheme.hpp>
 #include <ozaki.hpp>
 #include <algorithm>
 #include <cmath>
@@ -121,84 +122,82 @@ double legendreAmplitude(int orderL, int absM, const AngularTerms &terms) {
   const auto &c = terms.cosPow;
 
   if (orderL == 3) {
-    switch (absM) {
-    case 0:
+    if (absM <= 0) {
       return 5.0 * c[3] - 3.0 * c[1];
-    case 1:
-      return s[1] * (5.0 * c[2] - 1.0);
-    case 2:
-      return s[2] * c[1];
-    case 3:
-      return s[3];
-    default:
-      return 0.0;
     }
+    if (absM == 1) {
+      return s[1] * (5.0 * c[2] - 1.0);
+    }
+    if (absM == 2) {
+      return s[2] * c[1];
+    }
+    // Callers pass absM from 0 through orderL, so 3 is the remaining value.
+    return s[3];
   }
 
   if (orderL == 4) {
-    switch (absM) {
-    case 0:
+    if (absM <= 0) {
       return 35.0 * c[4] - 30.0 * c[2] + 3.0;
-    case 1:
-      return s[1] * (7.0 * c[3] - 3.0 * c[1]);
-    case 2:
-      return s[2] * (7.0 * c[2] - 1.0);
-    case 3:
-      return s[3] * c[1];
-    case 4:
-      return s[4];
-    default:
-      return 0.0;
     }
+    if (absM == 1) {
+      return s[1] * (7.0 * c[3] - 3.0 * c[1]);
+    }
+    if (absM == 2) {
+      return s[2] * (7.0 * c[2] - 1.0);
+    }
+    if (absM == 3) {
+      return s[3] * c[1];
+    }
+    return s[4];
   }
 
   if (orderL == 6) {
-    switch (absM) {
-    case 0:
+    if (absM <= 0) {
       return 231.0 * c[6] - 315.0 * c[4] + 105.0 * c[2] - 5.0;
-    case 1:
+    }
+    if (absM == 1) {
       return s[1] * (33.0 * c[5] - 30.0 * c[3] + 5.0 * c[1]);
-    case 2:
+    }
+    if (absM == 2) {
       return s[2] * (33.0 * c[4] - 18.0 * c[2] + 1.0);
-    case 3:
+    }
+    if (absM == 3) {
       return s[3] * (11.0 * c[3] - 3.0 * c[1]);
-    case 4:
+    }
+    if (absM == 4) {
       return s[4] * (11.0 * c[2] - 1.0);
-    case 5:
+    }
+    if (absM == 5) {
       return s[5] * c[1];
-    case 6:
-      return s[6];
-    default:
-      return 0.0;
     }
+    return s[6];
   }
 
-  if (orderL == 8) {
-    switch (absM) {
-    case 0:
-      return (35.0 + c[2] * (-1260.0 + c[2] * (6930.0 + c[2] * (-12012.0 + c[2] * 6435.0)))) / 128.0;
-    case 1:
-      return s[1] * c[1] * (-315.0 + c[2] * (3465.0 + c[2] * (-9009.0 + c[2] * 6435.0))) / 16.0;
-    case 2:
-      return s[2] * (-315.0 + c[2] * (10395.0 + c[2] * (-45045.0 + c[2] * 45045.0))) / 16.0;
-    case 3:
-      return s[3] * c[1] * (10395.0 + c[2] * (-90090.0 + c[2] * 135135.0)) / 8.0;
-    case 4:
-      return s[4] * (10395.0 + c[2] * (-270270.0 + c[2] * 675675.0)) / 8.0;
-    case 5:
-      return s[5] * c[1] * (-135135.0 + c[2] * 675675.0) / 2.0;
-    case 6:
-      return s[6] * (-135135.0 + c[2] * 2027025.0) / 2.0;
-    case 7:
-      return s[7] * c[1] * 2027025.0;
-    case 8:
-      return s[8] * 2027025.0;
-    default:
-      return 0.0;
-    }
+  if (absM <= 0) {
+    return (35.0 + c[2] * (-1260.0 + c[2] * (6930.0 + c[2] * (-12012.0 + c[2] * 6435.0)))) / 128.0;
   }
-
-  return 0.0;
+  if (absM == 1) {
+    return s[1] * c[1] * (-315.0 + c[2] * (3465.0 + c[2] * (-9009.0 + c[2] * 6435.0))) / 16.0;
+  }
+  if (absM == 2) {
+    return s[2] * (-315.0 + c[2] * (10395.0 + c[2] * (-45045.0 + c[2] * 45045.0))) / 16.0;
+  }
+  if (absM == 3) {
+    return s[3] * c[1] * (10395.0 + c[2] * (-90090.0 + c[2] * 135135.0)) / 8.0;
+  }
+  if (absM == 4) {
+    return s[4] * (10395.0 + c[2] * (-270270.0 + c[2] * 675675.0)) / 8.0;
+  }
+  if (absM == 5) {
+    return s[5] * c[1] * (-135135.0 + c[2] * 675675.0) / 2.0;
+  }
+  if (absM == 6) {
+    return s[6] * (-135135.0 + c[2] * 2027025.0) / 2.0;
+  }
+  if (absM == 7) {
+    return s[7] * c[1] * 2027025.0;
+  }
+  return s[8] * 2027025.0;
 }
 
 /**
@@ -282,9 +281,6 @@ std::vector<int> nearestNeighbourIndices(
 
 void associatedP(int L, double x, std::vector<double> &p) {
   p.assign(static_cast<std::size_t>(L) + 1, 0.0);
-  if (L < 0) {
-    return;
-  }
   const double s = std::sqrt(std::max(0.0, 1.0 - x * x));
   double pmm = 1.0;
   for (int m = 0; m <= L; m++) {
@@ -293,8 +289,7 @@ void associatedP(int L, double x, std::vector<double> &p) {
     }
     if (m == L) {
       p[static_cast<std::size_t>(m)] = pmm;
-      break;
-    }
+    } else {
     double pll2 = pmm;
     double pll1 = x * (2.0 * m + 1.0) * pmm;
     if (L == m + 1) {
@@ -309,6 +304,7 @@ void associatedP(int L, double x, std::vector<double> &p) {
       pll1 = pll;
     }
     p[static_cast<std::size_t>(m)] = pll;
+    }
   }
 }
 
@@ -324,9 +320,6 @@ double nlmNorm(int l, int m) {
 void spheriHarmoGeneral(int orderL, std::array<double, 2> angles,
                         std::vector<std::complex<double>> &out) {
   out.assign(static_cast<std::size_t>(2 * orderL + 1), {0.0, 0.0});
-  if (orderL < 0) {
-    return;
-  }
   std::vector<double> p;
   associatedP(orderL, std::cos(angles[1]), p);
   const double phi = angles[0];
@@ -725,13 +718,7 @@ static void classifyBondsLeftFp64(
       const double cij_real = dot / std::sqrt(normI * normJ);
       molSys::Result temp_cij;
       temp_cij.c_value = cij_real;
-      if (cij_real <= rule.staggeredMax) {
-        temp_cij.classifier = molSys::bond_type::staggered;
-      } else if (cij_real >= rule.eclipsedMin && cij_real <= rule.eclipsedMax) {
-        temp_cij.classifier = molSys::bond_type::eclipsed;
-      } else {
-        temp_cij.classifier = molSys::bond_type::out_of_range;
-      }
+      temp_cij.classifier = chill::classifyBond(cij_real, rule);
       bonds.push_back(temp_cij);
     }
   }
@@ -857,14 +844,7 @@ void chill::classifyBonds(
       molSys::Result temp_cij;
       const double cij_real = complexCij.real();
       temp_cij.c_value = cij_real;
-      if (cij_real <= rule.staggeredMax) {
-        temp_cij.classifier = molSys::bond_type::staggered;
-      } else if (cij_real >= rule.eclipsedMin &&
-                 cij_real <= rule.eclipsedMax) {
-        temp_cij.classifier = molSys::bond_type::eclipsed;
-      } else {
-        temp_cij.classifier = molSys::bond_type::out_of_range;
-      }
+      temp_cij.classifier = chill::classifyBond(cij_real, rule);
       yCloud.pts[iatom].c_ij.push_back(temp_cij);
     } // end loop over nearest neighbours
   }
@@ -875,29 +855,43 @@ chill::BondClassifier chill::chillRule() { return {-0.8, -0.2, -0.05, 4}; }
 chill::BondClassifier chill::chillPlusRule() { return {-0.8, -0.35, 0.25, 4}; }
 
 namespace {
-std::unordered_map<std::string, chill::BondClassifier> &bondRuleRegistry() {
-  static std::unordered_map<std::string, chill::BondClassifier> registry = {
-      {"CHILL", chill::chillRule()}, {"CHILL+", chill::chillPlusRule()}};
-  return registry;
+std::unordered_map<std::string, chill::BondClassifier> g_custom_rules;
+std::unordered_map<std::string, chill::BondClassifier> &customRules() {
+  return g_custom_rules;
 }
 } // namespace
 
 chill::BondClassifier chill::bondClassifier(const std::string &name) {
-  return bondRuleRegistry().at(name);
+  const auto &custom = customRules();
+  const auto found = custom.find(name);
+  if (found != custom.end()) {
+    return found->second;
+  }
+  if (name == "CHILL") {
+    return chillRule();
+  }
+  if (name == "CHILL+") {
+    return chillPlusRule();
+  }
+  throw std::out_of_range("bond classifier " + name);
 }
 
 void chill::registerBondClassifier(const std::string &name,
                                    const chill::BondClassifier &rule) {
-  bondRuleRegistry()[name] = rule;
+  customRules()[name] = rule;
 }
 
 std::vector<std::string> chill::bondClassifierNames() {
   std::vector<std::string> names;
-  names.reserve(bondRuleRegistry().size());
-  for (const auto &entry : bondRuleRegistry()) {
+  const auto &custom = customRules();
+  names.reserve(custom.size() + 2);
+  names.push_back("CHILL");
+  names.push_back("CHILL+");
+  for (const auto &entry : custom) {
     names.push_back(entry.first);
   }
   std::sort(names.begin(), names.end());
+  names.erase(std::unique(names.begin(), names.end()), names.end());
   return names;
 }
 
@@ -1073,9 +1067,10 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 void
 chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      const std::vector<std::vector<int>> &nList, bool isSlice,
-                     int coordinationNumber) {
+                     int coordinationNumber, bool closedBounds) {
   chill::BondClassifier rule = chill::chillPlusRule();
   rule.coordinationNumber = coordinationNumber;
+  rule.closed = closedBounds;
   chill::classifyBonds(yCloud, nList, rule, isSlice);
 }
 
@@ -1095,8 +1090,9 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 namespace {
 void assignIceTypePlus(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-    const std::vector<std::vector<int>> &nList, bool isSlice, int &ih, int &ic,
-    int &interIce, int &water, int &clath, int &interClath, int &total) {
+    const std::vector<std::vector<int>> &nList, bool isSlice, bool neighbourTest,
+    int &ih, int &ic, int &interIce, int &water, int &clath, int &interClath,
+    int &total) {
   ih = ic = water = interIce = total = 0;
   clath = interClath = 0;
   int num_staggrd, num_eclipsd, na;
@@ -1114,7 +1110,8 @@ void assignIceTypePlus(
     }
     total++; // Update the total number of atoms considered. Change this to a
              // check for slices
-    // Bound on the bonds that were recorded, not on the neighbour list
+    // c_ij is the bond list after the nearest-neighbour cut. The crystal
+    // test below counts the cutoff row itself, before that cut.
     nnumNeighbours = yCloud.pts[iatom].c_ij.size();
     num_staggrd = num_eclipsd = na =
         0; // init to zero before loop through neighbours
@@ -1132,7 +1129,13 @@ void assignIceTypePlus(
 
     // Add more tests later
     yCloud.pts[iatom].iceType = molSys::atom_state_type::unclassified; // default
-    if (nnumNeighbours == 4) {
+    // Table 1 footnote a: a crystal row needs exactly four neighbours in
+    // the cutoff shell. Four nearest bonds are not enough when a fifth
+    // oxygen also sits inside the shell.
+    const bool fourShell =
+        chill::cutoffShellCount(yCloud, nList, iatom) == 4 &&
+        nnumNeighbours == 4;
+    if (fourShell) {
       // Cubic ice
       if (num_eclipsd == 0 && num_staggrd == 4) {
         yCloud.pts[iatom].iceType = molSys::atom_state_type::cubic;
@@ -1143,9 +1146,14 @@ void assignIceTypePlus(
         yCloud.pts[iatom].iceType = molSys::atom_state_type::hexagonal;
         ih++;
       }
-      // Interfacial
-      else if (chill::isInterfacial(yCloud, nList, iatom, num_staggrd, num_eclipsd,
-                             true)) {
+      // Interfacial. The published rule applies Table 1's neighbour
+      // test. ovito-chill+ labels two staggered bonds, or three
+      // staggered and no eclipsed bond, with no look at the neighbour.
+      else if (neighbourTest
+                   ? chill::isInterfacial(yCloud, nList, iatom, num_staggrd,
+                                          num_eclipsd, true)
+                   : (num_staggrd == 2 ||
+                      (num_staggrd == 3 && num_eclipsd == 0))) {
         yCloud.pts[iatom].iceType = molSys::atom_state_type::interfacial;
         interIce++;
       }
@@ -1176,10 +1184,11 @@ void assignIceTypePlus(
 void
 chill::getIceTypePlusNoPrint(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-    const std::vector<std::vector<int>> &nList, bool isSlice) {
+    const std::vector<std::vector<int>> &nList, bool isSlice,
+    bool neighbourTest) {
   int ih, ic, interIce, water, clath, interClath, total;
-  assignIceTypePlus(yCloud, nList, isSlice, ih, ic, interIce, water, clath,
-                    interClath, total);
+  assignIceTypePlus(yCloud, nList, isSlice, neighbourTest, ih, ic, interIce,
+                    water, clath, interClath, total);
 }
 
 void chill::clearIceTypesExcept(
@@ -1201,10 +1210,10 @@ void
 chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                       const std::vector<std::vector<int>> &nList, std::string path,
                       int firstFrame, bool isSlice,
-                      std::string outputFileName) {
+                      std::string outputFileName, bool neighbourTest) {
   int ih, ic, interIce, water, clath, interClath, total;
-  assignIceTypePlus(yCloud, nList, isSlice, ih, ic, interIce, water, clath,
-                    interClath, total);
+  assignIceTypePlus(yCloud, nList, isSlice, neighbourTest, ih, ic, interIce,
+                    water, clath, interClath, total);
 
   sout::makePath(path);
   std::string outputDirName = path + "bop";
@@ -1473,9 +1482,6 @@ bool chill::isInterfacial(
   if (num_staggrd == 2) {
     // Loop over the four nearest neighbours, the same star as c_ij
     for (int jatomIndex : nearest) {
-      if (jatomIndex < 0 || jatomIndex >= yCloud.nop) {
-        continue;
-      }
       neighStaggered = chill::numStaggered(yCloud, nList, jatomIndex);
       if (neighStaggered > 2) {
         return true;
@@ -1486,9 +1492,6 @@ bool chill::isInterfacial(
   // and at least one neighbor with two staggered bonds
   if (num_staggrd == 3 && num_eclipsd == 0) {
     for (int jatomIndex : nearest) {
-      if (jatomIndex < 0 || jatomIndex >= yCloud.nop) {
-        continue;
-      }
       neighStaggered = chill::numStaggered(yCloud, nList, jatomIndex);
       if (chillPlus) {
         if (neighStaggered > 1) {

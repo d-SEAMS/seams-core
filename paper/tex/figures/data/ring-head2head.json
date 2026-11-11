@@ -111,7 +111,7 @@
             16.284885999994003
           ],
           "count": 8192,
-          "command": "taskset -c 0 /tmp/ovito-venv/bin/python3 tests/bench_h2h_rings.py --worker-ovito --frame-npz input/.bench_frames/ring-orth-4k.npz --cutoff 3.50000000 --max-ring-size 6 --ovito-threads 1 --ovito-stage rings",
+          "command": "taskset -c 0 ovito-venv/bin/python3 tests/bench_h2h_rings.py --worker-ovito --frame-npz input/.bench_frames/ring-orth-4k.npz --cutoff 3.50000000 --max-ring-size 6 --ovito-threads 1 --ovito-stage rings",
           "median_ms": 15.831134001018654,
           "q1_ms": 15.704918998835637,
           "q3_ms": 16.14936099940678,
@@ -163,7 +163,7 @@
             17.047163999450277
           ],
           "count": 8192,
-          "command": "taskset -c 0 /tmp/ovito-venv/bin/python3 tests/bench_h2h_rings.py --worker-ovito --frame-npz input/.bench_frames/ring-orth-4k.npz --cutoff 3.50000000 --max-ring-size 6 --ovito-threads 1 --ovito-stage bonds",
+          "command": "taskset -c 0 ovito-venv/bin/python3 tests/bench_h2h_rings.py --worker-ovito --frame-npz input/.bench_frames/ring-orth-4k.npz --cutoff 3.50000000 --max-ring-size 6 --ovito-threads 1 --ovito-stage bonds",
           "median_ms": 17.427293999389804,
           "q1_ms": 17.174298498957796,
           "q3_ms": 18.061842500173952,
@@ -254,7 +254,7 @@
             0.695716000336688
           ],
           "count": 200,
-          "command": "taskset -c 0 /tmp/ovito-venv/bin/python3 tests/bench_h2h_rings.py --worker-ovito --frame-npz input/.bench_frames/ring-tri-136.npz --cutoff 3.50000000 --max-ring-size 6 --ovito-threads 1 --ovito-stage rings",
+          "command": "taskset -c 0 ovito-venv/bin/python3 tests/bench_h2h_rings.py --worker-ovito --frame-npz input/.bench_frames/ring-tri-136.npz --cutoff 3.50000000 --max-ring-size 6 --ovito-threads 1 --ovito-stage rings",
           "median_ms": 0.6965014999877894,
           "q1_ms": 0.6895729993630084,
           "q3_ms": 0.7182942508734413,
@@ -306,7 +306,7 @@
             1.1580339996726252
           ],
           "count": 200,
-          "command": "taskset -c 0 /tmp/ovito-venv/bin/python3 tests/bench_h2h_rings.py --worker-ovito --frame-npz input/.bench_frames/ring-tri-136.npz --cutoff 3.50000000 --max-ring-size 6 --ovito-threads 1 --ovito-stage bonds",
+          "command": "taskset -c 0 ovito-venv/bin/python3 tests/bench_h2h_rings.py --worker-ovito --frame-npz input/.bench_frames/ring-tri-136.npz --cutoff 3.50000000 --max-ring-size 6 --ovito-threads 1 --ovito-stage bonds",
           "median_ms": 1.1509124997246545,
           "q1_ms": 1.1361214988028223,
           "q3_ms": 1.1584415001379966,
@@ -397,7 +397,7 @@
             502.4810940012685
           ],
           "count": 221184,
-          "command": "taskset -c 0 /tmp/ovito-venv/bin/python3 tests/bench_h2h_rings.py --worker-ovito --frame-npz input/.bench_frames/ring-orth-1e5.npz --cutoff 3.50000000 --max-ring-size 6 --ovito-threads 1 --ovito-stage rings",
+          "command": "taskset -c 0 ovito-venv/bin/python3 tests/bench_h2h_rings.py --worker-ovito --frame-npz input/.bench_frames/ring-orth-1e5.npz --cutoff 3.50000000 --max-ring-size 6 --ovito-threads 1 --ovito-stage rings",
           "median_ms": 511.0241214997586,
           "q1_ms": 503.9041102509145,
           "q3_ms": 516.9389114998921,
@@ -449,7 +449,7 @@
             549.3866729993897
           ],
           "count": 221184,
-          "command": "taskset -c 0 /tmp/ovito-venv/bin/python3 tests/bench_h2h_rings.py --worker-ovito --frame-npz input/.bench_frames/ring-orth-1e5.npz --cutoff 3.50000000 --max-ring-size 6 --ovito-threads 1 --ovito-stage bonds",
+          "command": "taskset -c 0 ovito-venv/bin/python3 tests/bench_h2h_rings.py --worker-ovito --frame-npz input/.bench_frames/ring-orth-1e5.npz --cutoff 3.50000000 --max-ring-size 6 --ovito-threads 1 --ovito-stage bonds",
           "median_ms": 559.8937859995203,
           "q1_ms": 550.1904892503262,
           "q3_ms": 563.7110272491554,

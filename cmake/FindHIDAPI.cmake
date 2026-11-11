@@ -19,7 +19,6 @@ find_library(HIDAPI_LIBRARIES
 	/usr/lib64
 	/usr/local/lib64
 	/sw/lib64
-	/opt/loca/lib64
 	/usr/lib
 	/usr/local/lib
 	/sw/lib

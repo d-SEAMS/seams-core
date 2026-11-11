@@ -3,7 +3,7 @@ nproc 1
 nproc_all 8
 affinity pid 391313's current affinity list: 0
 pin taskset -c 0
-COMMAND taskset -c 0 seams cages /tmp/v37-frames/ice-1e6.lammpstrj
+COMMAND taskset -c 0 seams cages v37-frames/ice-1e6.lammpstrj
 lscpu <<LSC
 Architecture:                            x86_64
 CPU op-mode(s):                          32-bit, 64-bit

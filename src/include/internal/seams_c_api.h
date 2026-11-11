@@ -16,6 +16,11 @@ extern "C" {
 int seams_chill_plus(const double *xyz, int n, const double *box, int *labels);
 int seams_chill_plus_graph(const double *xyz, int n, const double *box,
                            double cutoff, const char *graph, int *labels);
+/* rule is "chill+" (NULL or "") or "ovito-chill+". A YAML or Lua
+ * document with a rule field is accepted. Returns 1 on a bad rule. */
+int seams_chill_plus_rule(const double *xyz, int n, const double *box,
+                          double cutoff, const char *graph, const char *rule,
+                          int *labels);
 
 /* box9 is xlo, ylo, zlo, lx, ly, lz, xy, xz, yz. lx, ly, lz are the
  * edge lengths xhi-xlo, not the bound spans, and xlo, ylo, zlo are the

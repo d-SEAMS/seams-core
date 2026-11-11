@@ -66,7 +66,7 @@ class ShippedMillion:
     param_names = ["graph"]
 
     def setup(self, graph):
-        frame = os.environ.get("SEAMS_1E6", "/tmp/v37-frames/ice-1e6.lammpstrj")
+        frame = os.environ.get("SEAMS_1E6", "v37-frames/ice-1e6.lammpstrj")
         seams = ROOT / "bbdir-release" / "seams"
         args = ["cages"] if graph == "seeded" else ["cages", "--graph", "cutoff"]
         self.cmd = ["taskset", "-c", "0", str(seams), *args, frame]

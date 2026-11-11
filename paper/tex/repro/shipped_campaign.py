@@ -28,12 +28,12 @@ from bench_h2h_rings import (  # noqa: E402
 
 OUT = Path(os.environ.get("SEAMS_OUT", ROOT / "paper/tex/figures/data"))
 H2H = ROOT / "tests/bench_h2h_rings.py"
-BASE = Path(os.environ.get("SEAMS_BASE", "/tmp/seams-base/bbdir-release"))
+BASE = Path(os.environ.get("SEAMS_BASE", "seams-base/bbdir-release"))
 TIP = Path(os.environ.get("SEAMS_TIP", str(ROOT / "bbdir-release")))
 CORE = os.environ.get("SEAMS_CORE", "0")
 ORTH = Path(os.environ.get(
     "SEAMS_ORTH", ROOT / "input/traj/orth-1e5-ring-scale.lammpstrj"))
-MILLION = Path(os.environ.get("SEAMS_1E6", "/tmp/v37-frames/ice-1e6.lammpstrj"))
+MILLION = Path(os.environ.get("SEAMS_1E6", "v37-frames/ice-1e6.lammpstrj"))
 N_ORTH = 12
 N_BIG = 6
 STAGES = ("io_ms", "neigh_ms", "knn_ms", "knn_pair_ms", "rings_ms", "affil_ms", "seeded_ms")
@@ -366,10 +366,10 @@ def main() -> None:
     host = subprocess.check_output(["lscpu"], text=True)
     model = next(ln.split(":", 1)[1].strip() for ln in host.splitlines() if ln.startswith("Model name"))
     orth = read_lammps_frame(str(ORTH), 1)
-    npz = Path("/tmp/v40-orth.npz")
+    npz = Path("v40-orth.npz")
     save_frame_npz(orth, str(npz))
     big = read_lammps_frame(str(MILLION), 1)
-    npz_big = Path("/tmp/v40-1e6.npz")
+    npz_big = Path("v40-1e6.npz")
     save_frame_npz(big, str(npz_big))
 
     base_stages = Path(BASE / "tests/bench_stages")

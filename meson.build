@@ -38,11 +38,10 @@ if cpp_id == 'gcc' or cpp_id == 'clang'
   _args += ['-Wno-unused-result']
 endif
 
-# --coverage switches arc updates to atomics once the link includes
-# threads. The bulk and cage tests then exceed their time limit.
-# Non-atomic updates keep the same counters and the same tests.
+# A non-atomic arc update races when a test uses more than one thread.
+# The counter goes negative, and the report then drops the line.
 if get_option('b_coverage') and (cpp_id == 'gcc' or cpp_id == 'clang')
-  _args += ['-fprofile-update=single']
+  _args += ['-fprofile-update=atomic']
 endif
 
 # Platform conditionals
@@ -649,7 +648,7 @@ if get_option('with_cli')
     python3,
     args: [
       '-c',
-      'import subprocess,sys; run=lambda *a: subprocess.run([sys.argv[1],"chill-plus",sys.argv[2],"--cutoff","3.5",*a],capture_output=True,text=True); d=run(); m=run("--graph","mutual"); ok=d.returncode==0 and m.returncode==0 and "interClathrate 12 water 238" in d.stdout and "clathrate 1 interClathrate 7 water 242" in m.stdout; sys.exit(0 if ok else 1)',
+      'import subprocess,sys; run=lambda *a: subprocess.run([sys.argv[1],"chill-plus",sys.argv[2],"--cutoff","3.5",*a],capture_output=True,text=True); d=run(); m=run("--graph","mutual"); ok=d.returncode==0 and m.returncode==0 and "interClathrate 9 water 241" in d.stdout and "clathrate 1 interClathrate 7 water 242" in m.stdout; sys.exit(0 if ok else 1)',
       seams_exe.full_path(),
       meson.project_source_root() / 'input' / 'traj' / 'exampleTraj.lammpstrj',
     ],

@@ -172,12 +172,31 @@ struct QlmAtom {
  *  or tetrahedral materials register their own thresholds and coordination.
  */
 struct BondClassifier {
-  double staggeredMax;    //! c_ij at or below this is staggered
+  double staggeredMax;    //! Staggered edge. Inclusive when closed is true
   double eclipsedMin;     //! Lower edge of the eclipsed band
   double eclipsedMax;     //! Upper edge of the eclipsed band
   int coordinationNumber; //! Nearest neighbours in the bond sum; <= 0 keeps
                           //! each atom's whole neighbour row
+  bool closed = true;     //! Inclusive edges. OVITO Chill+ uses exclusive edges
 };
+
+//! Staggered, eclipsed, or out of range. Closed edges match Nguyen and
+//! Molinero (c <= staggeredMax, eclipsedMin <= c <= eclipsedMax). Open
+//! edges match OVITO 3.17.2 (c < staggeredMax, eclipsedMin < c < eclipsedMax).
+inline molSys::bond_type classifyBond(double cij, const BondClassifier &rule) {
+  const bool staggered =
+      rule.closed ? cij <= rule.staggeredMax : cij < rule.staggeredMax;
+  if (staggered) {
+    return molSys::bond_type::staggered;
+  }
+  const bool eclipsed =
+      rule.closed ? (cij >= rule.eclipsedMin && cij <= rule.eclipsedMax)
+                  : (cij > rule.eclipsedMin && cij < rule.eclipsedMax);
+  if (eclipsed) {
+    return molSys::bond_type::eclipsed;
+  }
+  return molSys::bond_type::out_of_range;
+}
 
 //! The CHILL rule set (Moore et al., PCCP 12, 4124, 2010): strict staggered
 //! bound, narrow eclipsed band, four nearest neighbours
@@ -263,20 +282,25 @@ getIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 void
 getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
               const std::vector<std::vector<int>> &nList, bool isSlice = false,
-              int coordinationNumber = 4);
+              int coordinationNumber = 4, bool closedBounds = true);
 
 //! Classifies each atom according to the CHILL+ algorithm
 void
 getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                const std::vector<std::vector<int>> &nList, std::string path,
                int firstFrame, bool isSlice = false,
-               std::string outputFileName = "chillPlus.txt");
+               std::string outputFileName = "chillPlus.txt",
+               bool neighbourTest = true);
 
 //! CHILL+ ice types on the cloud. Does not write a file.
+//! neighbourTest false is the OVITO interfacial rule (two staggered
+//! bonds, or three staggered and no eclipsed bond, with no neighbour
+//! lookup). Either rule still requires a cutoff shell of four.
 void
 getIceTypePlusNoPrint(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-    const std::vector<std::vector<int>> &nList, bool isSlice = false);
+    const std::vector<std::vector<int>> &nList, bool isSlice = false,
+    bool neighbourTest = true);
 
 //! Set iceType to unclassified for atoms whose LAMMPS type is not in types.
 //! Empty types leaves the cloud unchanged. Used after a water-type k-NN so

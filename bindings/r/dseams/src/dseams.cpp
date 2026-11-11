@@ -70,13 +70,13 @@ cpp11::doubles positions_(SEXP ptr) {
 
 [[cpp11::register]]
 cpp11::data_frame chill_plus_(SEXP ptr, double cutoff, int type,
-                              std::string graph) {
+                              std::string graph, std::string rule) {
   seams_frame *frame = need(ptr);
   const int n = seams_frame_nop(frame);
   std::vector<int> labels(static_cast<std::size_t>(n));
   int counts[9] = {};
-  if (seams_frame_chill_plus(frame, cutoff, type, graph.c_str(), labels.data(),
-                             counts) != 0) {
+  if (seams_frame_chill_plus_rule(frame, cutoff, type, graph.c_str(),
+                                  rule.c_str(), labels.data(), counts) != 0) {
     cpp11::stop("%s", seams_last_error());
   }
   const int *types = seams_frame_types(frame);

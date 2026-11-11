@@ -1,3 +1,17 @@
+//-----------------------------------------------------------------------------------
+// d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations
+//
+// Copyright (c) d-SEAMS developers
+//
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the MIT License as published by
+// the Open Source Initiative.
+//
+// A copy of the MIT License is included in the LICENSE file of this repository.
+// You should have received a copy of the MIT License along with this program.
+// If not, see <https://opensource.org/licenses/MIT>.
+//-----------------------------------------------------------------------------------
+
 #include <chill_offload.hpp>
 
 #include <bop.hpp>
@@ -85,9 +99,11 @@ void y3(double dx, double dy, double dz, double *re, double *im) {
 #pragma omp end declare target
 #endif
 
-int classifyAtom(int nstag, int neclip, int nb, const int *neigh,
+int classifyAtom(int nstag, int neclip, int shell, const int *neigh,
                  const int *nstagN) {
-  if (nb != 4) {
+  // The four bond counts were taken on the four nearest. The shell
+  // count is every neighbour the caller put in the row.
+  if (shell != 4) {
     return static_cast<int>(molSys::atom_state_type::water);
   }
   if (neclip == 0 && nstag == 4) {
@@ -100,15 +116,19 @@ int classifyAtom(int nstag, int neclip, int nb, const int *neigh,
   if (nstag == 2) {
     for (int t = 0; t < 4; t++) {
       const int j = neigh[t];
-      if (j >= 0 && nstagN[j] > 2) {
+      // A shell of four has already filled every slot with a cloud index.
+      if (nstagN[j] > 2) {
         inter = true;
       }
     }
   }
-  if (nstag == 3 && neclip == 0) {
+  // One eclipsed bond and three staggered already returned as
+  // hexagonal. The two counts come from one pass over four bonds, so
+  // three staggered bonds that remain have no eclipsed bond.
+  if (nstag == 3) {
     for (int t = 0; t < 4; t++) {
       const int j = neigh[t];
-      if (j >= 0 && nstagN[j] > 1) {
+      if (nstagN[j] > 1) {
         inter = true;
       }
     }
@@ -116,7 +136,8 @@ int classifyAtom(int nstag, int neclip, int nb, const int *neigh,
   if (inter) {
     return static_cast<int>(molSys::atom_state_type::interfacial);
   }
-  if (neclip == 4 && nstag == 0) {
+  // Four eclipsed bonds fill every slot, so none of them is staggered.
+  if (neclip == 4) {
     return static_cast<int>(molSys::atom_state_type::clathrate);
   }
   if (neclip == 3) {
@@ -156,6 +177,7 @@ chill::ChillPlusResult chill::specializedChillPlus(
   }
   std::vector<int> neigh(static_cast<std::size_t>(n * kNb), -1);
   std::vector<int> nb(static_cast<std::size_t>(n), 0);
+  std::vector<int> shell(static_cast<std::size_t>(n), 0);
   std::vector<double> xyz(static_cast<std::size_t>(n * 3));
   for (int i = 0; i < n; i++) {
     xyz[static_cast<std::size_t>(3 * i)] = yCloud.pts[static_cast<std::size_t>(i)].x;
@@ -174,11 +196,13 @@ chill::ChillPlusResult chill::specializedChillPlus(
       }
     }
     const std::size_t keep = std::min(static_cast<std::size_t>(kNb), cand.size());
-    std::partial_sort(cand.begin(), cand.begin() + keep, cand.end());
+    std::partial_sort(cand.begin(), cand.begin() + static_cast<std::ptrdiff_t>(keep),
+                      cand.end());
     for (std::size_t t = 0; t < keep; t++) {
       neigh[static_cast<std::size_t>(i * kNb + t)] = cand[t].second;
     }
     nb[static_cast<std::size_t>(i)] = static_cast<int>(keep);
+    shell[static_cast<std::size_t>(i)] = static_cast<int>(cand.size());
   }
   const double box[3] = {yCloud.box.empty() ? 0.0 : yCloud.box[0],
                          yCloud.box.size() > 1 ? yCloud.box[1] : 0.0,
@@ -285,7 +309,7 @@ chill::ChillPlusResult chill::specializedChillPlus(
   for (int i = 0; i < n; i++) {
     out.iceType[static_cast<std::size_t>(i)] = classifyAtom(
         nstag[static_cast<std::size_t>(i)], neclip[static_cast<std::size_t>(i)],
-        nb[static_cast<std::size_t>(i)],
+        shell[static_cast<std::size_t>(i)],
         neigh.data() + static_cast<std::size_t>(i * kNb), nstag.data());
     yCloud.pts[static_cast<std::size_t>(i)].iceType =
         static_cast<molSys::atom_state_type>(

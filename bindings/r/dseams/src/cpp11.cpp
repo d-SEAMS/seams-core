@@ -34,10 +34,10 @@ extern "C" SEXP _dseams_positions_(SEXP ptr) {
   END_CPP11
 }
 // dseams.cpp
-cpp11::data_frame chill_plus_(SEXP ptr, double cutoff, int type, std::string graph);
-extern "C" SEXP _dseams_chill_plus_(SEXP ptr, SEXP cutoff, SEXP type, SEXP graph) {
+cpp11::data_frame chill_plus_(SEXP ptr, double cutoff, int type, std::string graph, std::string rule);
+extern "C" SEXP _dseams_chill_plus_(SEXP ptr, SEXP cutoff, SEXP type, SEXP graph, SEXP rule) {
   BEGIN_CPP11
-    return cpp11::as_sexp(chill_plus_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(ptr), cpp11::as_cpp<cpp11::decay_t<double>>(cutoff), cpp11::as_cpp<cpp11::decay_t<int>>(type), cpp11::as_cpp<cpp11::decay_t<std::string>>(graph)));
+    return cpp11::as_sexp(chill_plus_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(ptr), cpp11::as_cpp<cpp11::decay_t<double>>(cutoff), cpp11::as_cpp<cpp11::decay_t<int>>(type), cpp11::as_cpp<cpp11::decay_t<std::string>>(graph), cpp11::as_cpp<cpp11::decay_t<std::string>>(rule)));
   END_CPP11
 }
 // dseams.cpp
@@ -65,7 +65,7 @@ extern "C" SEXP _dseams_cages_(SEXP ptr, SEXP cutoff, SEXP type, SEXP k, SEXP gr
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
     {"_dseams_cages_",      (DL_FUNC) &_dseams_cages_,      5},
-    {"_dseams_chill_plus_", (DL_FUNC) &_dseams_chill_plus_, 4},
+    {"_dseams_chill_plus_", (DL_FUNC) &_dseams_chill_plus_, 5},
     {"_dseams_nframes_",    (DL_FUNC) &_dseams_nframes_,    1},
     {"_dseams_nop_",        (DL_FUNC) &_dseams_nop_,        1},
     {"_dseams_positions_",  (DL_FUNC) &_dseams_positions_,  1},

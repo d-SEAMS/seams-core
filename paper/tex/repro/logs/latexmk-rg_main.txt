@@ -953,7 +953,7 @@ ern, 3 glyph, 61 glue_spec, 2 write, 1 pdf_action nodes
 80
 {/usr/share/texmf/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/share/texmf/fonts/enc/dvi
 ps/lm/lm-rmtt.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-rmsc.enc}{/usr/share/
-texmf/fonts/enc/dvips/lm/lm-rm.enc}<</tmp/proseguard/.texlive2023/texmf-var/fon
+texmf/fonts/enc/dvips/lm/lm-rm.enc}<<proseguard/.texlive2023/texmf-var/fon
 ts/pk/ljfour/jknappen/ec/tcrm0800.600pk>></usr/share/texlive/texmf-dist/fonts/t
 ype1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
 ublic/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
@@ -1749,7 +1749,7 @@ ern, 3 glyph, 61 glue_spec, 2 write, 23 pdf_action nodes
 68
 {/usr/share/texmf/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/share/texmf/fonts/enc/dvi
 ps/lm/lm-rmtt.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-rmsc.enc}{/usr/share/
-texmf/fonts/enc/dvips/lm/lm-rm.enc}<</tmp/proseguard/.texlive2023/texmf-var/fon
+texmf/fonts/enc/dvips/lm/lm-rm.enc}<<proseguard/.texlive2023/texmf-var/fon
 ts/pk/ljfour/jknappen/ec/tcrm0800.600pk>></usr/share/texlive/texmf-dist/fonts/t
 ype1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
 ublic/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
@@ -2148,7 +2148,7 @@ ern, 3 glyph, 61 glue_spec, 2 write, 23 pdf_action nodes
 68
 {/usr/share/texmf/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/share/texmf/fonts/enc/dvi
 ps/lm/lm-rmtt.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-rmsc.enc}{/usr/share/
-texmf/fonts/enc/dvips/lm/lm-rm.enc}<</tmp/proseguard/.texlive2023/texmf-var/fon
+texmf/fonts/enc/dvips/lm/lm-rm.enc}<<proseguard/.texlive2023/texmf-var/fon
 ts/pk/ljfour/jknappen/ec/tcrm0800.600pk>></usr/share/texlive/texmf-dist/fonts/t
 ype1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
 ublic/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/
@@ -2543,7 +2543,7 @@ ern, 3 glyph, 61 glue_spec, 2 write, 23 pdf_action nodes
 68
 {/usr/share/texmf/fonts/enc/dvips/lm/lm-ts1.enc}{/usr/share/texmf/fonts/enc/dvi
 ps/lm/lm-rmtt.enc}{/usr/share/texmf/fonts/enc/dvips/lm/lm-rmsc.enc}{/usr/share/
-texmf/fonts/enc/dvips/lm/lm-rm.enc}<</tmp/proseguard/.texlive2023/texmf-var/fon
+texmf/fonts/enc/dvips/lm/lm-rm.enc}<<proseguard/.texlive2023/texmf-var/fon
 ts/pk/ljfour/jknappen/ec/tcrm0800.600pk>></usr/share/texlive/texmf-dist/fonts/t
 ype1/public/amsfonts/cm/cmmi10.pfb></usr/share/texlive/texmf-dist/fonts/type1/p
 ublic/amsfonts/cm/cmmi12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/

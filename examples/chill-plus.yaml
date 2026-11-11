@@ -1,0 +1,3 @@
+# Copyright (c) d-SEAMS developers
+# Published CHILL+ is the default. The other value is ovito-chill+.
+rule: chill+

@@ -16,8 +16,8 @@ const nucleation = joinpath(root, "input", "traj", "nucleation_f1.lammpstrj")
     @test nop(frame) == 250
     ice = chill_plus(frame)
     @test get(ice.counts, "clathrate", 0) == 0
-    @test ice.counts["interClathrate"] == 12
-    @test ice.counts["water"] == 238
+    @test ice.counts["interClathrate"] == 9
+    @test ice.counts["water"] == 241
     cutoff = chill_plus(frame; graph = "cutoff")
     @test ice.labels == cutoff.labels
     mutual = chill_plus(frame; graph = "mutual")
