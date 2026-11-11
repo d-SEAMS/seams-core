@@ -19,6 +19,11 @@
 #include <cmath>
 #include <complex>
 #include <string>
+#include <vector>
+
+#ifdef SEAMS_HAS_MPI
+#include <mpi.h>
+#endif
 #include <generic.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
@@ -226,6 +231,40 @@ void classifyBonds(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    const std::vector<std::vector<int>> &nList,
                    const BondClassifier &rule, bool isSlice = false);
 
+//! Unnormalised real l = 3 bond-order vector of the atoms @a which selects.
+//! @a which null computes every atom. Ghost slots stay zero so a neighbour
+//! rank can write the vector it computed for that atom.
+struct BondOrder {
+  int keepMax = 0;
+  std::vector<double> q;    //! atom-major, 7 channels
+  std::vector<double> norm; //! squared norm of q, with the m != 0 factor
+  std::vector<int> nkeep;
+  std::vector<int> chosen;             //! keepMax > 0, local indices, -1 empty
+  std::vector<std::vector<int>> rows;  //! keepMax <= 0, local indices
+};
+
+void bondOrder(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+               const std::vector<std::vector<int>> &nList, const BondClassifier &rule,
+               BondOrder &order, const std::vector<char> *which);
+
+//! c_ij for atoms @a which selects, from a bond-order vector that already
+//! holds every neighbour the bond reads. Atoms outside @a which are left
+//! untouched, including a ghost's bond list.
+void correlFromOrder(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                     const BondOrder &order, const BondClassifier &rule, bool isSlice,
+                     const std::vector<char> *which);
+
+#ifdef SEAMS_HAS_MPI
+//! Published or OVITO CHILL+ on the owned atoms. Coordinates move one
+//! cutoff; the bond-order vector of the boundary moves in one exchange,
+//! overlapped with the interior correlations. The published neighbour test
+//! then exchanges the staggered count of that same boundary. iceType is
+//! written back onto the owned atoms of @a full.
+void distributedChillPlus(molSys::PointCloud<molSys::Point<double>, double> &full,
+                          double cutoff, BondClassifier rule, bool neighbourTest,
+                          MPI_Comm comm);
+#endif
+
 /**
  *  Function for getting the bond order correlations @f$c_{ij}@f$  (or
  @f$a_{ij}@f$ in some treatments) according to the CHILL algorithm.
@@ -368,6 +407,28 @@ steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 //! MPI_COMM_WORLD (true unless set). A driver that gives each rank whole
 //! frames of its own turns it off.
 void setSteinhardtAtomSplit(bool split);
+
+//! Width of one atom's interleaved q_lm: real, imaginary, m = -l..l.
+inline int steinhardtQlmWidth(int orderL) { return 2 * (2 * orderL + 1); }
+
+//! q_lm for atoms @a which selects. Other atoms are left zero.
+void writeSteinhardtQlm(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                        const std::vector<std::vector<int>> &nList, int orderL,
+                        std::vector<double> &qlm, const std::vector<char> *which);
+
+//! ql and qlBar for atoms @a which selects, reading q_lm of their neighbours.
+void readSteinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                      const std::vector<std::vector<int>> &nList, int orderL,
+                      const std::vector<double> &qlm, std::vector<double> &ql,
+                      std::vector<double> &qlBar, const std::vector<char> *which);
+
+#ifdef SEAMS_HAS_MPI
+//! q_l and q_l bar of the owned atoms, frame-indexed. One cutoff of
+//! coordinates and one exchange of q_lm.
+SteinhardtQl distributedSteinhardt(
+    const molSys::PointCloud<molSys::Point<double>, double> &full, double cutoff,
+    int orderL, MPI_Comm comm);
+#endif
 
 } // namespace chill
 

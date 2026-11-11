@@ -14,6 +14,8 @@
 
 #include <bop.hpp>
 #include <chill_plus_scheme.hpp>
+#include <domain.hpp>
+#include <neighbours.hpp>
 #include <thread_team.hpp>
 #include <ozaki.hpp>
 #include <algorithm>
@@ -1753,3 +1755,324 @@ int chill::numStaggered(
 
   return num_staggrd;
 }
+
+namespace {
+
+int resolveId(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+              const std::vector<int> &idToIndex, int maxId, bool dense, int id) {
+  if (dense) {
+    return (id >= 0 && id <= maxId) ? idToIndex[static_cast<std::size_t>(id)] : -1;
+  }
+  const auto it = yCloud.idIndexMap.find(id);
+  return it == yCloud.idIndexMap.end() ? -1 : it->second;
+}
+
+} // namespace
+
+void chill::bondOrder(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                      const std::vector<std::vector<int>> &nList,
+                      const BondClassifier &rule, BondOrder &order,
+                      const std::vector<char> *which) {
+  seams::adoptThreads();
+  const int nop = yCloud.nop;
+  const int keepMax = rule.coordinationNumber;
+  order.keepMax = keepMax;
+  order.q.assign(static_cast<std::size_t>(std::max(nop, 0)) * kRealL3, 0.0);
+  order.norm.assign(static_cast<std::size_t>(std::max(nop, 0)), 0.0);
+  order.nkeep.assign(static_cast<std::size_t>(std::max(nop, 0)), 0);
+  order.chosen.clear();
+  order.rows.clear();
+  if (nop <= 0) {
+    return;
+  }
+  if (keepMax > 0) {
+    order.chosen.assign(static_cast<std::size_t>(nop) * static_cast<std::size_t>(keepMax), -1);
+  } else {
+    order.rows.assign(static_cast<std::size_t>(nop), {});
+  }
+  int maxId = 0;
+  for (int i = 0; i < nop; i++) {
+    maxId = std::max(maxId, yCloud.pts[static_cast<std::size_t>(i)].atomID);
+  }
+  const bool dense = maxId > 0 && maxId < nop * 4;
+  std::vector<int> idToIndex;
+  if (dense) {
+    idToIndex.assign(static_cast<std::size_t>(maxId) + 1, -1);
+    for (int i = 0; i < nop; i++) {
+      const int id = yCloud.pts[static_cast<std::size_t>(i)].atomID;
+      if (id >= 0) {
+        idToIndex[static_cast<std::size_t>(id)] = i;
+      }
+    }
+  }
+  struct Xyz {
+    double x, y, z;
+  };
+  std::vector<Xyz> xyz(static_cast<std::size_t>(nop));
+  for (int i = 0; i < nop; i++) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    xyz[static_cast<std::size_t>(i)] = {p.x, p.y, p.z};
+  }
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
+  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
+  const bool fixedKeep = keepMax > 0;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1)
+#endif
+  for (int iatom = 0; iatom < nop; iatom++) {
+    if (which != nullptr &&
+        (static_cast<int>(which->size()) <= iatom || (*which)[static_cast<std::size_t>(iatom)] == 0)) {
+      continue;
+    }
+    if (static_cast<std::size_t>(iatom) >= nList.size()) {
+      continue;
+    }
+    struct Near {
+      double d2;
+      int jatom;
+      double x, y, z;
+      bool operator<(const Near &o) const {
+        return d2 < o.d2 || (d2 == o.d2 && jatom < o.jatom);
+      }
+    };
+    Near stackNear[32];
+    std::vector<Near> heapNear;
+    Near *candidates = stackNear;
+    int nCand = 0;
+    const Xyz pi = xyz[static_cast<std::size_t>(iatom)];
+    const auto &row = nList[static_cast<std::size_t>(iatom)];
+    for (std::size_t j = 1; j < row.size(); j++) {
+      const int jatom = resolveId(yCloud, idToIndex, maxId, dense, row[j]);
+      if (jatom < 0) {
+        continue;
+      }
+      const Xyz pj = xyz[static_cast<std::size_t>(jatom)];
+      const auto dr = gen::fracDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+      if (nCand == 32 && candidates == stackNear) {
+        heapNear.assign(stackNear, stackNear + 32);
+        candidates = heapNear.data();
+      }
+      const Near item{dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2], jatom, dr[0], dr[1],
+                      dr[2]};
+      if (candidates == stackNear) {
+        candidates[nCand] = item;
+      } else {
+        heapNear.push_back(item);
+        candidates = heapNear.data();
+      }
+      ++nCand;
+    }
+    const int keep = fixedKeep ? std::min(keepMax, nCand) : nCand;
+    if (keep == 0) {
+      continue;
+    }
+    std::partial_sort(candidates, candidates + keep, candidates + nCand);
+    order.nkeep[static_cast<std::size_t>(iatom)] = keep;
+    double acc[kRealL3] = {};
+    for (int j = 0; j < keep;) {
+      double xs[4], ys[4], zs[4];
+      int batch = 0;
+      for (; batch < 4 && j < keep; ++j, ++batch) {
+        if (fixedKeep) {
+          order.chosen[static_cast<std::size_t>(iatom) * static_cast<std::size_t>(keepMax) +
+                       static_cast<std::size_t>(j)] = candidates[j].jatom;
+        } else {
+          order.rows[static_cast<std::size_t>(iatom)].push_back(candidates[j].jatom);
+        }
+        xs[batch] = candidates[j].x;
+        ys[batch] = candidates[j].y;
+        zs[batch] = candidates[j].z;
+      }
+      if (useAvx) {
+        realYlm3Accumulate(xs, ys, zs, batch, acc);
+      } else {
+        for (int item = 0; item < batch; ++item) {
+          addRealYlm3Scalar(xs[item], ys[item], zs[item], normQ3(), acc);
+        }
+      }
+    }
+    double *dst = order.q.data() + static_cast<std::size_t>(iatom) * kRealL3;
+    for (int channel = 0; channel < kRealL3; ++channel) {
+      dst[channel] = acc[channel];
+    }
+    order.norm[static_cast<std::size_t>(iatom)] =
+        useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
+  }
+}
+
+void chill::correlFromOrder(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                            const BondOrder &order, const BondClassifier &rule, bool isSlice,
+                            const std::vector<char> *which) {
+  const int nop = yCloud.nop;
+  const int keepMax = order.keepMax;
+  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
+  const auto neighbourAt = [&](int atom, int slot) {
+    if (keepMax > 0) {
+      return order.chosen[static_cast<std::size_t>(atom) * static_cast<std::size_t>(keepMax) +
+                          static_cast<std::size_t>(slot)];
+    }
+    return order.rows[static_cast<std::size_t>(atom)][static_cast<std::size_t>(slot)];
+  };
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1)
+#endif
+  for (int iatom = 0; iatom < nop; iatom++) {
+    if (which != nullptr &&
+        (static_cast<int>(which->size()) <= iatom || (*which)[static_cast<std::size_t>(iatom)] == 0)) {
+      continue;
+    }
+    if (isSlice && !yCloud.pts[static_cast<std::size_t>(iatom)].inSlice) {
+      continue;
+    }
+    const int keep = order.nkeep[static_cast<std::size_t>(iatom)];
+    auto &bonds = yCloud.pts[static_cast<std::size_t>(iatom)].c_ij;
+    bonds.clear();
+    if (keep <= 0) {
+      continue;
+    }
+    const double *qI = order.q.data() + static_cast<std::size_t>(iatom) * kRealL3;
+    const double normI = order.norm[static_cast<std::size_t>(iatom)];
+    bonds.reserve(static_cast<std::size_t>(keep));
+    for (int slot = 0; slot < keep; ++slot) {
+      const int jatom = neighbourAt(iatom, slot);
+      if (jatom < 0) {
+        continue;
+      }
+      const double *qJ = order.q.data() + static_cast<std::size_t>(jatom) * kRealL3;
+      const double dot = useAvx ? realL3Dot(qI, qJ) : realL3DotScalar(qI, qJ);
+      const double denom = std::sqrt(normI * order.norm[static_cast<std::size_t>(jatom)]);
+      const double cij = denom > 0.0 ? dot / denom : 0.0;
+      molSys::Result temp;
+      temp.c_value = cij;
+      temp.classifier = chill::classifyBond(cij, rule);
+      bonds.push_back(temp);
+    }
+  }
+}
+
+#ifdef SEAMS_HAS_MPI
+namespace {
+
+std::vector<std::vector<int>> shellRows(
+    const molSys::PointCloud<molSys::Point<double>, double> &cloud, double cutoff,
+    const std::vector<char> &owned) {
+  bool single = true;
+  for (const char flag : owned) {
+    if (!flag) {
+      single = false;
+      break;
+    }
+  }
+  if (single || cloud.nop < 40000) {
+    return nneigh::neighListO(cutoff, cloud, 1);
+  }
+  return nneigh::reusedShellList(cutoff, cloud, &owned);
+}
+
+void writeStaggered(molSys::PointCloud<molSys::Point<double>, double> &cloud, int atom,
+                    int count) {
+  auto &bonds = cloud.pts[static_cast<std::size_t>(atom)].c_ij;
+  bonds.clear();
+  molSys::Result bond;
+  bond.c_value = -1.0;
+  bond.classifier = molSys::bond_type::staggered;
+  bonds.assign(static_cast<std::size_t>(std::max(count, 0)), bond);
+}
+
+} // namespace
+
+void chill::distributedChillPlus(molSys::PointCloud<molSys::Point<double>, double> &full,
+                                 double cutoff, BondClassifier rule, bool neighbourTest,
+                                 MPI_Comm comm) {
+  int rank = 0;
+  int nRanks = 1;
+  MPI_Comm_rank(comm, &rank);
+  MPI_Comm_size(comm, &nRanks);
+  if (nRanks <= 1) {
+    const auto rows = nneigh::neighListO(cutoff, full, 1);
+    classifyBonds(full, rows, rule, false);
+    getIceTypePlusNoPrint(full, rows, false, neighbourTest);
+    return;
+  }
+  auto &work = seams::domain::gatherWork(full, cutoff, comm);
+  const auto rows = shellRows(work.cloud, cutoff, work.share.owned);
+  BondOrder order;
+  bondOrder(work.cloud, rows, rule, order, &work.share.owned);
+  const int nop = work.cloud.nop;
+  constexpr int stride = kRealL3 + 1;
+  std::vector<double> packed(static_cast<std::size_t>(nop) * stride, 0.0);
+  for (int i = 0; i < nop; i++) {
+    if (!work.share.owned[static_cast<std::size_t>(i)]) {
+      continue;
+    }
+    double *dst = packed.data() + static_cast<std::size_t>(i) * stride;
+    const double *src = order.q.data() + static_cast<std::size_t>(i) * kRealL3;
+    std::copy_n(src, kRealL3, dst);
+    dst[kRealL3] = order.norm[static_cast<std::size_t>(i)];
+  }
+  seams::domain::postBoundaryValues(packed.data(), stride, comm);
+  std::vector<char> interior(static_cast<std::size_t>(nop), 0);
+  std::vector<char> boundary(static_cast<std::size_t>(nop), 0);
+  for (int i = 0; i < nop; i++) {
+    if (!work.share.owned[static_cast<std::size_t>(i)]) {
+      continue;
+    }
+    const int keep = order.nkeep[static_cast<std::size_t>(i)];
+    bool inside = true;
+    for (int slot = 0; slot < keep; ++slot) {
+      const int j = rule.coordinationNumber > 0
+                        ? order.chosen[static_cast<std::size_t>(i) *
+                                           static_cast<std::size_t>(rule.coordinationNumber) +
+                                       static_cast<std::size_t>(slot)]
+                        : order.rows[static_cast<std::size_t>(i)][static_cast<std::size_t>(slot)];
+      if (j < 0 || !work.share.owned[static_cast<std::size_t>(j)]) {
+        inside = false;
+        break;
+      }
+    }
+    (inside ? interior : boundary)[static_cast<std::size_t>(i)] = 1;
+  }
+  correlFromOrder(work.cloud, order, rule, false, &interior);
+  seams::domain::waitBoundaryValues();
+  for (int i = 0; i < nop; i++) {
+    if (work.share.owned[static_cast<std::size_t>(i)]) {
+      continue;
+    }
+    const double *src = packed.data() + static_cast<std::size_t>(i) * stride;
+    std::copy_n(src, kRealL3, order.q.data() + static_cast<std::size_t>(i) * kRealL3);
+    order.norm[static_cast<std::size_t>(i)] = src[kRealL3];
+  }
+  correlFromOrder(work.cloud, order, rule, false, &boundary);
+  if (neighbourTest) {
+    std::vector<double> stag(static_cast<std::size_t>(nop), 0.0);
+    for (int i = 0; i < nop; i++) {
+      if (!work.share.owned[static_cast<std::size_t>(i)]) {
+        continue;
+      }
+      int n = 0;
+      for (const auto &bond : work.cloud.pts[static_cast<std::size_t>(i)].c_ij) {
+        if (bond.classifier == molSys::bond_type::staggered) {
+          ++n;
+        }
+      }
+      stag[static_cast<std::size_t>(i)] = static_cast<double>(n);
+    }
+    seams::domain::postBoundaryValues(stag.data(), 1, comm);
+    seams::domain::waitBoundaryValues();
+    for (int i = 0; i < nop; i++) {
+      if (work.share.owned[static_cast<std::size_t>(i)]) {
+        continue;
+      }
+      writeStaggered(work.cloud, i, static_cast<int>(std::lround(stag[static_cast<std::size_t>(i)])));
+    }
+  }
+  getIceTypePlusNoPrint(work.cloud, rows, false, neighbourTest);
+  for (std::size_t k = 0; k < work.share.local.size(); k++) {
+    if (!work.share.owned[k]) {
+      continue;
+    }
+    full.pts[static_cast<std::size_t>(work.share.local[k])].iceType =
+        work.cloud.pts[k].iceType;
+  }
+}
+#endif

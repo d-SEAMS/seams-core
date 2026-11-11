@@ -49,15 +49,20 @@ RingSummary summarize(const std::vector<std::vector<int>> &ringList,
 std::uint64_t hilbertKey(std::uint32_t x, std::uint32_t y, std::uint32_t z,
                          int bits);
 
-//! Graph hops a primitive ring of @a maxDepth members can reach. A hop is
-//! at most one cutoff, so the halo is this times the cutoff.
+//! Cutoffs of coordinates a rank needs when it builds every neighbour row
+//! itself. A primitive ring of @a maxDepth members stays inside this many
+//! hops, and one hop is at most one cutoff.
 inline int ringHops(int maxDepth) {
   const int maxLvl = maxDepth > 0 ? maxDepth / 2 : 0;
-  if (maxLvl <= 0) {
-    return 0;
-  }
-  return maxLvl + (maxLvl - 1) / 2;
+  return maxLvl > 0 ? maxLvl : 0;
 }
+
+//! Cutoffs of neighbour rows the ring search reads past the owned block.
+//! The coordinate halo on the distributed path is one cutoff; rows out to
+//! this reach are computed by their owners and exchanged. Edges that leave
+//! the reach are dropped, which is the graph a coordinate halo of this many
+//! cutoffs would have built.
+inline int ringRowHops(int maxDepth) { return ringHops(maxDepth); }
 
 //! The atoms rank @a rank of @a nRanks owns, and every atom within @a halo
 //! of its block. Without a periodic box rank 0 owns every atom.
@@ -89,6 +94,16 @@ std::vector<std::vector<int>> ownedRings(const Cloud &local, double cutoff,
                                          int maxDepth,
                                          const std::vector<char> &owned);
 
+//! Primitive rings from neighbour rows already in hand. @a frame[i] is the
+//! frame index of a vertex whose neighbours are @a neigh[i], also frame
+//! indices. A neighbour that is not one of @a frame is dropped. @a sources
+//! lists the frames that may enumerate a ring. Members in the result are
+//! frame indices.
+std::vector<std::vector<int>>
+ringsFromRows(const std::vector<int> &frame,
+              const std::vector<std::vector<int>> &neigh,
+              const std::vector<int> &sources, int maxDepth);
+
 #ifdef SEAMS_HAS_MPI
 //! Owned atoms plus the halo received from the neighbouring blocks.
 struct Work {
@@ -103,6 +118,9 @@ struct Work {
 //! and the exchange plan are kept and rewritten in place on the next call
 //! with the same frame size and halo.
 Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm);
+
+//! The cloud and timers from the latest gatherWork on this rank.
+Work &gatheredWork();
 
 //! Every rank's rings on every rank of @a comm, in the order rings() lists
 //! them for a single rank. Collective over @a comm. Each rank builds the
@@ -121,6 +139,24 @@ std::vector<std::vector<int>> gatherRings(const Cloud &cloud, double cutoff,
 //! over @a comm.
 RingSummary reduceRings(const Cloud &cloud, double cutoff, int maxDepth,
                         MPI_Comm comm, int root = 0);
+
+//! Rings whose lowest member this rank owns. An orthorhombic cell uses a
+//! coordinate halo of ringHops() cutoffs, one hop inside the previous
+//! surface term. A skewed cell reads rows from the frame the rank holds.
+//! Members are frame indices. Collective over @a comm.
+std::vector<std::vector<int>> distributedRings(const Cloud &cloud, double cutoff,
+                                               int maxDepth, MPI_Comm comm);
+
+//! Exchange @a stride doubles for every atom in the boundary of the last
+//! gatherWork. @a values is indexed by that cloud's local atom. post returns
+//! before ghost slots are valid; wait writes them from the owner and leaves
+//! owned slots alone. The blocking part of wait is added to the value-exchange
+//! time. One rank, and a rank with no neighbour, does nothing.
+void postBoundaryValues(double *values, int stride, MPI_Comm comm);
+void waitBoundaryValues();
+
+//! Milliseconds the value exchanges blocked for since the previous call.
+double takeValueCommMs();
 #endif
 
 } // namespace seams::domain

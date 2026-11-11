@@ -280,19 +280,45 @@ std::vector<std::vector<int>> ringsOf(const Cloud &local, double cutoff,
   return primitive::ringNetwork(nList, maxDepth, owned);
 }
 
-//! Rings whose lowest-indexed member the share owns, by local index.
-std::vector<std::vector<int>> shareRings(const Cloud &cloud, double cutoff,
-                                         int maxDepth, int rank, int nRanks,
-                                         Share &share) {
-  // Members of a ring lie within ringHops of its source. A hop spans at
-  // most the cutoff, so the block halo is that many cutoffs and no more.
-  share = decompose(cloud, rank, nRanks, ringHops(maxDepth) * cutoff);
-  if (share.local.empty()) {
-    return {};
+} // namespace
+
+Share shareWithin(const Cloud &cloud, int rank, int nRanks, double gridHalo,
+                  double reach) {
+  Share share;
+  const int nAtoms = static_cast<int>(cloud.pts.size());
+  if (rank < 0 || rank >= std::max(nRanks, 1) || nAtoms == 0) {
+    return share;
   }
-  return ringsOf(subCloud(cloud, share.local), cutoff, maxDepth, share.owned);
+  const gen::FracBox b = gen::makeFracBox(cloud);
+  if (!b.ok) {
+    return share;
+  }
+  const double w[3] = {b.wx, b.wy, b.wz};
+  const BlockGrid grid = chooseGrid(nRanks, w, gridHalo);
+  int mineBlk[3];
+  blockAt(rank, grid.n, mineBlk);
+  const double reach2 = reach > 0.0 ? reach * reach : -1.0;
+  for (int i = 0; i < nAtoms; i++) {
+    const auto &p = cloud.pts[static_cast<std::size_t>(i)];
+    const double sz = (p.z - b.oz) / b.lz;
+    const double sy = (p.y - b.oy - b.yz * sz) / b.ly;
+    const double sx = (p.x - b.ox - b.xy * sy - b.xz * sz) / b.lx;
+    const double s[3] = {sx, sy, sz};
+    const int ix = cellAlong(sx, grid.n[0]);
+    const int iy = cellAlong(sy, grid.n[1]);
+    const int iz = cellAlong(sz, grid.n[2]);
+    const int owner = ix + grid.n[0] * (iy + grid.n[1] * iz);
+    const bool owns = owner == rank;
+    if (owns || (reach2 >= 0.0 && blockDist2(s, mineBlk, grid.n, w) <= reach2)) {
+      share.local.push_back(i);
+      share.owned.push_back(owns ? 1 : 0);
+      share.owner.push_back(owner);
+    }
+  }
+  return share;
 }
 
+namespace {
 //! Largest ring size through each local atom, 1 through none
 void localTypes(const std::vector<std::vector<int>> &ringList,
                 std::vector<int> &type) {
@@ -312,20 +338,98 @@ std::vector<std::vector<int>> ownedRings(const Cloud &local, double cutoff,
   return ringsOf(local, cutoff, maxDepth, owned);
 }
 
-std::vector<std::vector<int>> rings(const Cloud &cloud, double cutoff,
-                                    int maxDepth, int rank, int nRanks) {
-  Share share;
-  auto out = shareRings(cloud, cutoff, maxDepth, rank, nRanks, share);
-  const int nRings = static_cast<int>(out.size());
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (nRings >= kParallelMin && !omp_in_parallel())
-#endif
-  for (int r = 0; r < nRings; r++) {
-    for (int &v : out[r]) {
-      v = share.local[static_cast<std::size_t>(v)];
+std::vector<std::vector<int>>
+ringsFromRows(const std::vector<int> &frame,
+              const std::vector<std::vector<int>> &neigh,
+              const std::vector<int> &sources, int maxDepth) {
+  std::unordered_map<int, int> rowAt;
+  rowAt.reserve(frame.size() * 2 + 1);
+  const int nRows = std::min(static_cast<int>(frame.size()),
+                             static_cast<int>(neigh.size()));
+  for (int i = 0; i < nRows; i++) {
+    rowAt[frame[static_cast<std::size_t>(i)]] = i;
+  }
+  // Vertices are the frames whose rows were supplied. A neighbour past
+  // that set is an edge the coordinate halo would not have contained.
+  std::vector<int> verts = frame;
+  verts.insert(verts.end(), sources.begin(), sources.end());
+  std::sort(verts.begin(), verts.end());
+  verts.erase(std::unique(verts.begin(), verts.end()), verts.end());
+  std::unordered_map<int, int> localOf;
+  localOf.reserve(verts.size() * 2 + 1);
+  for (int i = 0; i < static_cast<int>(verts.size()); i++) {
+    localOf[verts[static_cast<std::size_t>(i)]] = i;
+  }
+  const int n = static_cast<int>(verts.size());
+  std::vector<std::vector<int>> nList(static_cast<std::size_t>(n));
+  for (int i = 0; i < n; i++) {
+    auto &dst = nList[static_cast<std::size_t>(i)];
+    dst.push_back(i);
+    const auto it = rowAt.find(verts[static_cast<std::size_t>(i)]);
+    if (it == rowAt.end()) {
+      continue;
+    }
+    for (const int f : neigh[static_cast<std::size_t>(it->second)]) {
+      const auto jt = localOf.find(f);
+      if (jt == localOf.end() || jt->second == i) {
+        continue;
+      }
+      dst.push_back(jt->second);
+    }
+    if (dst.size() > 2) {
+      std::sort(dst.begin() + 1, dst.end());
     }
   }
-  return out;
+  std::vector<char> mask(static_cast<std::size_t>(n), 0);
+  for (const int s : sources) {
+    const auto it = localOf.find(s);
+    if (it != localOf.end()) {
+      mask[static_cast<std::size_t>(it->second)] = 1;
+    }
+  }
+  auto rings = primitive::ringNetwork(nList, maxDepth, mask);
+  for (auto &ring : rings) {
+    for (int &v : ring) {
+      v = verts[static_cast<std::size_t>(v)];
+    }
+  }
+  return rings;
+}
+
+std::vector<std::vector<int>> rings(const Cloud &cloud, double cutoff,
+                                    int maxDepth, int rank, int nRanks) {
+  if (nRanks <= 1 || cloud.nop == 0) {
+    std::vector<char> all(static_cast<std::size_t>(std::max(cloud.nop, 0)), 1);
+    return ringsOf(cloud, cutoff, maxDepth, all);
+  }
+  // Rows out to ringRowHops are what the owners exchange. Building them
+  // from the whole frame here is the same list an owner computes inside
+  // its own one-cutoff halo.
+  const Share near =
+      shareWithin(cloud, rank, nRanks, cutoff, ringRowHops(maxDepth) * cutoff);
+  if (near.local.empty()) {
+    return {};
+  }
+  const auto full = nneigh::getNewNeighbourListByIndex(cloud, cutoff);
+  std::vector<int> frame;
+  std::vector<std::vector<int>> neigh;
+  std::vector<int> sources;
+  frame.reserve(near.local.size());
+  neigh.reserve(near.local.size());
+  for (std::size_t k = 0; k < near.local.size(); k++) {
+    const int f = near.local[k];
+    frame.push_back(f);
+    std::vector<int> row;
+    if (f >= 0 && static_cast<std::size_t>(f) < full.size() && !full[f].empty()) {
+      row.assign(full[static_cast<std::size_t>(f)].begin() + 1,
+                 full[static_cast<std::size_t>(f)].end());
+    }
+    neigh.push_back(std::move(row));
+    if (near.owned[k]) {
+      sources.push_back(f);
+    }
+  }
+  return ringsFromRows(frame, neigh, sources, maxDepth);
 }
 
 RingSummary summarize(const std::vector<std::vector<int>> &ringList,
@@ -391,13 +495,43 @@ std::vector<int> symmetricNeighbors(std::vector<int> nbrs, int rank, int nRanks,
 }
 } // namespace
 
-Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
+struct BoundaryPlan {
+  int nRanks = 0;
+  int degree = 0;
+  MPI_Comm graph = MPI_COMM_NULL;
+  std::vector<int> sendCount;
+  std::vector<int> sendLocal;
+  std::vector<int> recvCount;
+  std::vector<int> recvLocal;
+};
+
+BoundaryPlan gPlan;
+double gValueCommMs = 0.0;
+bool gInflight = false;
+double *gValues = nullptr;
+int gStride = 0;
+std::vector<double> gSendPack;
+std::vector<double> gRecvPack;
+std::vector<int> gSendDoubles;
+std::vector<int> gSendDoubleDispl;
+std::vector<int> gRecvDoubles;
+std::vector<int> gRecvDoubleDispl;
+MPI_Request gValueReq = MPI_REQUEST_NULL;
+
+Work &gatheredWork() {
   static Work work;
+  return work;
+}
+
+Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
+  Work &work = gatheredWork();
   int rank = 0;
   int nRanks = 1;
   MPI_Comm_rank(comm, &rank);
   MPI_Comm_size(comm, &nRanks);
   if (nRanks <= 1) {
+    gPlan.degree = 0;
+    gPlan.nRanks = nRanks;
     if (work.cloud.nop != cloud.nop || work.share.local.size() != cloud.pts.size()) {
       work.share = decompose(cloud, rank, nRanks, halo);
       work.cloud = subCloud(cloud, work.share.local);
@@ -474,6 +608,19 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
         }
       }
     }
+    gPlan.nRanks = nRanks;
+    gPlan.degree = cachedDegree;
+    gPlan.graph = cache.graph;
+    gPlan.sendCount.resize(static_cast<std::size_t>(cachedDegree));
+    gPlan.sendLocal.clear();
+    gPlan.recvLocal.clear();
+    gPlan.recvCount.clear();
+    for (int sidx = 0; sidx < cachedDegree; sidx++) {
+      gPlan.sendCount[static_cast<std::size_t>(sidx)] =
+          static_cast<int>(cache.sendAt[static_cast<std::size_t>(sidx)].size());
+      const auto &at = cache.sendAt[static_cast<std::size_t>(sidx)];
+      gPlan.sendLocal.insert(gPlan.sendLocal.end(), at.begin(), at.end());
+    }
   } else {
     work.share = cache.share;
     work.haloFraction = cache.haloFraction;
@@ -549,6 +696,18 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
     work.cloud.idIndexMap.clear();
     work.cloud.idIndexMap.reserve(work.share.local.size());
   }
+  gPlan.recvCount.resize(static_cast<std::size_t>(std::max(degree, 0)));
+  int recvAtoms = 0;
+  for (int sidx = 0; sidx < degree; sidx++) {
+    gPlan.recvCount[static_cast<std::size_t>(sidx)] =
+        recvBytes[static_cast<std::size_t>(sidx)] / std::max(atomBytes, 1);
+    recvAtoms += gPlan.recvCount[static_cast<std::size_t>(sidx)];
+  }
+  const bool recordRecv = static_cast<int>(gPlan.recvLocal.size()) != recvAtoms;
+  if (recordRecv) {
+    gPlan.recvLocal.clear();
+    gPlan.recvLocal.reserve(static_cast<std::size_t>(std::max(recvAtoms, 0)));
+  }
   int misses = 0;
   for (std::size_t k = 0; k < work.share.local.size(); k++) {
     if (!work.share.owned[k]) {
@@ -585,6 +744,9 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
       dst.molID = atom.molID;
       dst.type = atom.type;
       work.cloud.idIndexMap[dst.atomID] = static_cast<int>(k);
+    }
+    if (recordRecv) {
+      gPlan.recvLocal.push_back(static_cast<int>(k));
     }
   }
   if (fresh) {
@@ -659,6 +821,121 @@ std::vector<std::vector<int>> gatherRings(const Cloud &cloud, double cutoff,
   return out;
 }
 
+void postBoundaryValues(double *values, int stride, MPI_Comm comm) {
+  (void)comm;
+  gValues = values;
+  gStride = stride;
+  gInflight = false;
+  if (values == nullptr || stride <= 0 || gPlan.degree <= 0 ||
+      gPlan.graph == MPI_COMM_NULL) {
+    return;
+  }
+  const int nSend = static_cast<int>(gPlan.sendLocal.size());
+  gSendPack.resize(static_cast<std::size_t>(std::max(nSend, 1) * stride));
+  for (int i = 0; i < nSend; i++) {
+    const int local = gPlan.sendLocal[static_cast<std::size_t>(i)];
+    std::copy_n(values + static_cast<std::ptrdiff_t>(local * stride), stride,
+                gSendPack.begin() + static_cast<std::ptrdiff_t>(i * stride));
+  }
+  gSendDoubles.resize(static_cast<std::size_t>(gPlan.degree));
+  gSendDoubleDispl.resize(gSendDoubles.size());
+  gRecvDoubles.resize(gSendDoubles.size());
+  gRecvDoubleDispl.resize(gSendDoubles.size());
+  int sendD = 0;
+  int recvD = 0;
+  for (int s = 0; s < gPlan.degree; s++) {
+    gSendDoubles[static_cast<std::size_t>(s)] =
+        gPlan.sendCount[static_cast<std::size_t>(s)] * stride;
+    gSendDoubleDispl[static_cast<std::size_t>(s)] = sendD;
+    sendD += gSendDoubles[static_cast<std::size_t>(s)];
+    const int atoms = s < static_cast<int>(gPlan.recvCount.size())
+                          ? gPlan.recvCount[static_cast<std::size_t>(s)]
+                          : 0;
+    gRecvDoubles[static_cast<std::size_t>(s)] = atoms * stride;
+    gRecvDoubleDispl[static_cast<std::size_t>(s)] = recvD;
+    recvD += gRecvDoubles[static_cast<std::size_t>(s)];
+  }
+  gRecvPack.resize(static_cast<std::size_t>(std::max(recvD, stride)));
+  MPI_Ineighbor_alltoallv(gSendPack.data(), gSendDoubles.data(), gSendDoubleDispl.data(),
+                          MPI_DOUBLE, gRecvPack.data(), gRecvDoubles.data(),
+                          gRecvDoubleDispl.data(), MPI_DOUBLE, gPlan.graph, &gValueReq);
+  gInflight = true;
+}
+
+void waitBoundaryValues() {
+  if (!gInflight) {
+    return;
+  }
+  const auto t0 = std::chrono::steady_clock::now();
+  MPI_Wait(&gValueReq, MPI_STATUS_IGNORE);
+  gValueCommMs += std::chrono::duration<double, std::milli>(
+                      std::chrono::steady_clock::now() - t0)
+                      .count();
+  gInflight = false;
+  const int stride = gStride;
+  const int nRecv = static_cast<int>(gPlan.recvLocal.size());
+  if (gValues == nullptr || stride <= 0) {
+    return;
+  }
+  for (int i = 0; i < nRecv; i++) {
+    std::copy_n(gRecvPack.begin() + static_cast<std::ptrdiff_t>(i * stride), stride,
+                gValues + static_cast<std::ptrdiff_t>(gPlan.recvLocal[static_cast<std::size_t>(i)] *
+                                                      stride));
+  }
+}
+
+double takeValueCommMs() {
+  const double ms = gValueCommMs;
+  gValueCommMs = 0.0;
+  return ms;
+}
+
+namespace {
+
+int ownerOfFrame(const Cloud &cloud, int frame, const BlockGrid &grid) {
+  const gen::FracBox b = gen::makeFracBox(cloud);
+  const auto &p = cloud.pts[static_cast<std::size_t>(frame)];
+  const double sz = (p.z - b.oz) / b.lz;
+  const double sy = (p.y - b.oy - b.yz * sz) / b.ly;
+  const double sx = (p.x - b.ox - b.xy * sy - b.xz * sz) / b.lx;
+  const int ix = cellAlong(sx, grid.n[0]);
+  const int iy = cellAlong(sy, grid.n[1]);
+  const int iz = cellAlong(sz, grid.n[2]);
+  return ix + grid.n[0] * (iy + grid.n[1] * iz);
+}
+
+} // namespace
+
+std::vector<std::vector<int>> distributedRings(const Cloud &cloud, double cutoff,
+                                               int maxDepth, MPI_Comm comm) {
+  int rank = 0;
+  int nRanks = 1;
+  MPI_Comm_rank(comm, &rank);
+  MPI_Comm_size(comm, &nRanks);
+  if (nRanks <= 1 || cloud.nop == 0) {
+    std::vector<char> all(static_cast<std::size_t>(std::max(cloud.nop, 0)), 1);
+    return ringsOf(cloud, cutoff, maxDepth, all);
+  }
+  const gen::FracBox cell = gen::makeFracBox(cloud);
+  if (std::fabs(cell.xy) + std::fabs(cell.xz) + std::fabs(cell.yz) > 1.0e-8) {
+    // A skewed shell does not fit in the block-distance halo. The rank
+    // already holds the frame, so it reads those rows directly.
+    return rings(cloud, cutoff, maxDepth, rank, nRanks);
+  }
+  // ringHops is the coordinate width that reproduces the serial census,
+  // one hop inside the previous surface term. Owned sources are searched
+  // on that halo and mapped back to the frame.
+  const Work &work = gatherWork(cloud, ringHops(maxDepth) * cutoff, comm);
+  auto local = ownedRings(work.cloud, cutoff, maxDepth, work.share.owned);
+  for (auto &ring : local) {
+    for (int &v : ring) {
+      v = work.share.local[static_cast<std::size_t>(v)];
+    }
+  }
+  return local;
+}
+
+
 RingSummary reduceRings(const Cloud &cloud, double cutoff, int maxDepth,
                         MPI_Comm comm, int root) {
   int rank = 0;
@@ -666,12 +943,8 @@ RingSummary reduceRings(const Cloud &cloud, double cutoff, int maxDepth,
   MPI_Comm_rank(comm, &rank);
   MPI_Comm_size(comm, &nRanks);
   const int nAtoms = static_cast<int>(cloud.pts.size());
-  const Work &work = gatherWork(cloud, ringHops(maxDepth) * cutoff, comm);
-  const Share &share = work.share;
-  const auto mine = ringsOf(work.cloud, cutoff, maxDepth, share.owned);
-  const std::size_t nLocal = share.local.size();
+  const auto mine = distributedRings(cloud, cutoff, maxDepth, comm);
 
-  // Counts: every ring is listed by exactly one rank, its source's owner
   RingSummary s;
   std::vector<long long> count(static_cast<std::size_t>(std::max(maxDepth, 0)) + 1, 0);
   for (const auto &ring : mine) {
@@ -683,113 +956,68 @@ RingSummary reduceRings(const Cloud &cloud, double cutoff, int maxDepth,
   MPI_Allreduce(count.data(), s.sizeCount.data(), static_cast<int>(count.size()),
                 MPI_LONG_LONG, MPI_SUM, comm);
 
-  // Types: the maximum is order free, so a halo atom's local type folds into
-  // its owner's after one exchange of (frame index, type) pairs
-  std::vector<int> type(nLocal, 1);
-  localTypes(mine, type);
-  // Halo owners are the edges of the distributed graph. A rank that
-  // lists us is added if our own halo missed it, so every edge has
-  // both directions before MPI_Dist_graph_create_adjacent.
-  std::vector<int> nbrs = haloRanks(share);
-  {
-    const int mine = static_cast<int>(nbrs.size());
-    std::vector<int> degs(static_cast<std::size_t>(nRanks), 0);
-    MPI_Allgather(&mine, 1, MPI_INT, degs.data(), 1, MPI_INT, comm);
-    std::vector<int> off(static_cast<std::size_t>(nRanks), 0);
-    std::exclusive_scan(degs.begin(), degs.end(), off.begin(), 0);
-    const int total = off.back() + degs.back();
-    std::vector<int> listed(static_cast<std::size_t>(total));
-    MPI_Allgatherv(nbrs.data(), mine, MPI_INT, listed.data(), degs.data(),
-                   off.data(), MPI_INT, comm);
-    std::vector<char> seen(static_cast<std::size_t>(nRanks), 0);
-    for (const int n : nbrs) {
-      if (n >= 0 && n < nRanks) {
-        seen[static_cast<std::size_t>(n)] = 1;
-      }
-    }
-    for (int other = 0; other < nRanks; other++) {
-      if (other == rank) {
-        continue;
-      }
-      const int base = off[static_cast<std::size_t>(other)];
-      const int nEdge = degs[static_cast<std::size_t>(other)];
-      for (int e = 0; e < nEdge; e++) {
-        if (listed[static_cast<std::size_t>(base + e)] == rank &&
-            !seen[static_cast<std::size_t>(other)]) {
-          nbrs.push_back(other);
-          seen[static_cast<std::size_t>(other)] = 1;
-        }
-      }
-    }
-    std::sort(nbrs.begin(), nbrs.end());
-  }
-  const int degree = static_cast<int>(nbrs.size());
-  MPI_Comm graph = MPI_COMM_NULL;
-  MPI_Dist_graph_create_adjacent(
-      comm, degree, nbrs.data(), MPI_UNWEIGHTED, degree, nbrs.data(),
-      MPI_UNWEIGHTED, MPI_INFO_NULL, 0, &graph);
-  std::vector<int> slot(static_cast<std::size_t>(nRanks), -1);
-  for (int s = 0; s < degree; s++) {
-    slot[static_cast<std::size_t>(nbrs[static_cast<std::size_t>(s)])] = s;
-  }
-  std::vector<int> sendCount(static_cast<std::size_t>(degree), 0);
-  for (std::size_t k = 0; k < nLocal; k++) {
-    if (!share.owned[k] && type[k] > 1) {
-      const int s = slot[static_cast<std::size_t>(share.owner[k])];
-      if (s >= 0) {
-        sendCount[static_cast<std::size_t>(s)] += 2;
+  std::vector<int> type(static_cast<std::size_t>(std::max(nAtoms, 0)), 1);
+  for (const auto &ring : mine) {
+    const int size = static_cast<int>(ring.size());
+    for (const int v : ring) {
+      if (v >= 0 && v < nAtoms) {
+        type[static_cast<std::size_t>(v)] =
+            std::max(type[static_cast<std::size_t>(v)], size);
       }
     }
   }
-  std::vector<int> sendDispl(static_cast<std::size_t>(degree), 0);
+  const gen::FracBox box = gen::makeFracBox(cloud);
+  const double w[3] = {box.wx, box.wy, box.wz};
+  const BlockGrid grid = chooseGrid(nRanks, w, cutoff);
+  std::vector<int> owner(static_cast<std::size_t>(std::max(nAtoms, 0)), 0);
+  if (nRanks > 1 && box.ok) {
+    for (int i = 0; i < nAtoms; i++) {
+      owner[static_cast<std::size_t>(i)] = ownerOfFrame(cloud, i, grid);
+    }
+  }
+  std::vector<int> sendCount(static_cast<std::size_t>(std::max(nRanks, 1)), 0);
+  for (int i = 0; i < nAtoms; i++) {
+    const int o = owner[static_cast<std::size_t>(i)];
+    if (type[static_cast<std::size_t>(i)] > 1 && o != rank && o >= 0 && o < nRanks) {
+      sendCount[static_cast<std::size_t>(o)] += 2;
+    }
+  }
+  std::vector<int> sendDispl(static_cast<std::size_t>(nRanks), 0);
   std::exclusive_scan(sendCount.begin(), sendCount.end(), sendDispl.begin(), 0);
-  const int sendN = degree == 0 ? 0 : sendDispl.back() + sendCount.back();
-  std::vector<int> send(static_cast<std::size_t>(sendN));
+  const int sendN = nRanks == 0 ? 0 : sendDispl.back() + sendCount.back();
+  std::vector<int> send(static_cast<std::size_t>(std::max(sendN, 1)));
   {
     std::vector<int> at = sendDispl;
-    for (std::size_t k = 0; k < nLocal; k++) {
-      if (!share.owned[k] && type[k] > 1) {
-        const int s = slot[static_cast<std::size_t>(share.owner[k])];
-        if (s < 0) {
-          continue;
-        }
-        int &pos = at[static_cast<std::size_t>(s)];
-        send[static_cast<std::size_t>(pos++)] = share.local[k];
-        send[static_cast<std::size_t>(pos++)] = type[k];
+    for (int i = 0; i < nAtoms; i++) {
+      const int o = owner[static_cast<std::size_t>(i)];
+      if (type[static_cast<std::size_t>(i)] > 1 && o != rank && o >= 0 && o < nRanks) {
+        int &pos = at[static_cast<std::size_t>(o)];
+        send[static_cast<std::size_t>(pos++)] = i;
+        send[static_cast<std::size_t>(pos++)] = type[static_cast<std::size_t>(i)];
       }
     }
   }
-  std::vector<int> recvCount(static_cast<std::size_t>(std::max(degree, 1)), 0);
-  std::vector<int> recvDispl(static_cast<std::size_t>(std::max(degree, 1)), 0);
-  int sink = 0;
-  const int *sendPtr = degree == 0 ? &sink : send.data();
-  const int *sendCountPtr = degree == 0 ? &sink : sendCount.data();
-  const int *sendDisplPtr = degree == 0 ? &sink : sendDispl.data();
-  MPI_Neighbor_alltoall(sendCountPtr, 1, MPI_INT, recvCount.data(), 1, MPI_INT,
-                        graph);
-  std::exclusive_scan(recvCount.begin(),
-                      recvCount.begin() + std::max(degree, 0), recvDispl.begin(),
-                      0);
-  const int recvN = degree == 0 ? 0 : recvDispl[static_cast<std::size_t>(degree - 1)] +
-                                          recvCount[static_cast<std::size_t>(degree - 1)];
+  std::vector<int> recvCount(static_cast<std::size_t>(std::max(nRanks, 1)), 0);
+  MPI_Alltoall(sendCount.data(), 1, MPI_INT, recvCount.data(), 1, MPI_INT, comm);
+  std::vector<int> recvDispl(static_cast<std::size_t>(nRanks), 0);
+  std::exclusive_scan(recvCount.begin(), recvCount.end(), recvDispl.begin(), 0);
+  const int recvN = nRanks == 0 ? 0 : recvDispl.back() + recvCount.back();
   std::vector<int> recv(static_cast<std::size_t>(std::max(recvN, 1)));
-  MPI_Neighbor_alltoallv(sendPtr, sendCountPtr, sendDisplPtr, MPI_INT, recv.data(),
-                         recvCount.data(), recvDispl.data(), MPI_INT, graph);
-  recv.resize(static_cast<std::size_t>(recvN));
-  MPI_Comm_free(&graph);
-  for (std::size_t j = 0; j + 1 < recv.size(); j += 2) {
-    // share.local is ascending, and an owner holds every atom it owns
-    const auto it = std::lower_bound(share.local.begin(), share.local.end(), recv[j]);
-    const auto k = static_cast<std::size_t>(it - share.local.begin());
-    type[k] = std::max(type[k], recv[j + 1]);
+  MPI_Alltoallv(send.data(), sendCount.data(), sendDispl.data(), MPI_INT, recv.data(),
+                recvCount.data(), recvDispl.data(), MPI_INT, comm);
+  for (int j = 0; j + 1 < recvN; j += 2) {
+    const int frame = recv[static_cast<std::size_t>(j)];
+    if (frame >= 0 && frame < nAtoms) {
+      type[static_cast<std::size_t>(frame)] =
+          std::max(type[static_cast<std::size_t>(frame)], recv[static_cast<std::size_t>(j + 1)]);
+    }
   }
 
-  // Only owned atoms in some ring go to the root
   std::vector<int> owned;
-  for (std::size_t k = 0; k < nLocal; k++) {
-    if (share.owned[k] && type[k] > 1) {
-      owned.push_back(share.local[k]);
-      owned.push_back(type[k]);
+  for (int i = 0; i < nAtoms; i++) {
+    if (owner[static_cast<std::size_t>(i)] == rank && type[static_cast<std::size_t>(i)] > 1) {
+      owned.push_back(i);
+      owned.push_back(type[static_cast<std::size_t>(i)]);
     }
   }
   const int ownedCount = static_cast<int>(owned.size());

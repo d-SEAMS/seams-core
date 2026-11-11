@@ -58,39 +58,31 @@ molSys::PointCloud<molSys::Point<double>, double> ice(int mx, int my, int mz) {
   return cloud;
 }
 
-double haloOf(const std::string &op, double cutoff) {
+void compute(const std::string &op,
+             molSys::PointCloud<molSys::Point<double>, double> &full, double cutoff) {
   if (op == "rings") {
-    return seams::domain::ringHops(6) * cutoff;
-  }
-  if (op == "chill" || op == "q6") {
-    // The value at a neighbour needs that neighbour's own shell.
-    return 2.0 * cutoff;
-  }
-  return cutoff;
-}
-
-void finish(const std::string &op, seams::domain::Work &work,
-            const std::vector<std::vector<int>> &rows) {
-  if (op == "chill") {
-    chill::applyChillPlus(work.cloud, rows, chill::ChillPlusRule::Published);
-  } else if (op == "q6") {
-    auto q = chill::steinhardtQl(work.cloud, rows, 6);
-    if (q.ql.empty() && work.cloud.nop > 0) {
-      std::fprintf(stderr, "empty q6\n");
-    }
-  }
-}
-
-void compute(const std::string &op, seams::domain::Work &work, double cutoff) {
-  if (op == "rings") {
-    auto rings = seams::domain::ownedRings(work.cloud, cutoff, 6, work.share.owned);
-    if (rings.empty() && work.share.owned.size() > 1000) {
-      std::fprintf(stderr, "no rings\n");
+    auto rings = seams::domain::distributedRings(full, cutoff, 6, MPI_COMM_WORLD);
+    if (rings.empty() && full.nop > 1000) {
+      int rank = 0;
+      MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+      if (rank == 0) {
+        std::fprintf(stderr, "no rings\n");
+      }
     }
     return;
   }
-  // Several ranks only fill rows for the owned shell. The cell grid is
-  // the one reusedShellList keeps. One rank stays on the fused list.
+  if (op == "chill") {
+    chill::distributedChillPlus(full, cutoff, chill::chillPlusRule(), true, MPI_COMM_WORLD);
+    return;
+  }
+  if (op == "q6") {
+    auto q = chill::distributedSteinhardt(full, cutoff, 6, MPI_COMM_WORLD);
+    if (q.ql.empty() && full.nop > 0) {
+      std::fprintf(stderr, "empty q6\n");
+    }
+    return;
+  }
+  auto &work = seams::domain::gatherWork(full, cutoff, MPI_COMM_WORLD);
   bool single = true;
   for (const char owned : work.share.owned) {
     if (!owned) {
@@ -98,14 +90,17 @@ void compute(const std::string &op, seams::domain::Work &work, double cutoff) {
       break;
     }
   }
+  const std::vector<std::vector<int>> *rows = nullptr;
+  std::vector<std::vector<int>> ownedRows;
   if (single || work.cloud.nop < 40000) {
-    finish(op, work, nneigh::neighListO(cutoff, work.cloud, 1));
-    return;
+    ownedRows = nneigh::neighListO(cutoff, work.cloud, 1);
+    rows = &ownedRows;
+  } else {
+    rows = &nneigh::reusedShellList(cutoff, work.cloud, &work.share.owned);
   }
-  std::vector<char> source;
-  seams::domain::markSources(work.cloud, work.share, op == "neigh" ? -1.0 : cutoff,
-                             source);
-  finish(op, work, nneigh::reusedShellList(cutoff, work.cloud, &source));
+  if (rows->size() != work.share.local.size() && work.cloud.nop > 0) {
+    std::fprintf(stderr, "neighbour rows %zu\n", rows->size());
+  }
 }
 
 } // namespace
@@ -139,14 +134,12 @@ int main(int argc, char **argv) {
     }
   }
   const double cutoff = 3.5;
-  const double halo = haloOf(op, cutoff);
-  const auto cloud = ice(mx, my, mz);
+  auto cloud = ice(mx, my, mz);
   for (int n = 0; n < reps + 1; n++) {
     MPI_Barrier(MPI_COMM_WORLD);
     const auto wall0 = std::chrono::steady_clock::now();
-    auto work = seams::domain::gatherWork(cloud, halo, MPI_COMM_WORLD);
     const auto compute0 = std::chrono::steady_clock::now();
-    compute(op, work, cutoff);
+    compute(op, cloud, cutoff);
     const auto compute1 = std::chrono::steady_clock::now();
     MPI_Barrier(MPI_COMM_WORLD);
     const double wall = std::chrono::duration<double, std::milli>(
@@ -154,7 +147,8 @@ int main(int argc, char **argv) {
                             .count();
     const double computeMs =
         std::chrono::duration<double, std::milli>(compute1 - compute0).count();
-    double comm = work.commMs;
+    const auto &work = seams::domain::gatheredWork();
+    double comm = work.commMs + seams::domain::takeValueCommMs();
     double haloFrac = work.haloFraction;
     double computeMax = 0.0;
     MPI_Allreduce(&comm, &comm, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);

@@ -9,7 +9,9 @@
 //-----------------------------------------------------------------------------------
 
 #include <bop.hpp>
+#include <domain.hpp>
 #include <generic.hpp>
+#include <neighbours.hpp>
 #include <ozaki.hpp>
 #include <sphericart_ylm.hpp>
 #include <steinhardt_device.hpp>
@@ -541,6 +543,48 @@ void runPass1(const NeighbourCSR &g, int orderL, int begin, int end,
   }
 }
 
+void runPass1Mask(const NeighbourCSR &g, int orderL, std::vector<double> &qlm,
+                  const std::vector<char> *which) {
+  const bool pairwise =
+      seams::product::reduction() != seams::product::Reduction::Left && orderL <= 8;
+  const bool batchL6 = orderL == 6 && !pairwise;
+#ifdef SEAMS_HAS_OPENMP
+  const bool useThreads = g.nop >= kParallelThreshold && omp_get_max_threads() > 1;
+#pragma omp parallel for schedule(static) if (useThreads)
+#endif
+  for (int i = 0; i < g.nop; i++) {
+    if (which != nullptr &&
+        (static_cast<int>(which->size()) <= i || (*which)[static_cast<std::size_t>(i)] == 0)) {
+      continue;
+    }
+    if (pairwise) {
+      qlmOneAtomDrPairwise(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
+    } else if (batchL6) {
+      qlmOneAtomL6Batch(i, g.dr.data(), g.offsets.data(), qlm.data());
+    } else {
+      seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
+                                      g.cols.data(), qlm.data());
+    }
+  }
+}
+
+void runPass2Mask(const NeighbourCSR &g, int orderL, const std::vector<double> &qlm,
+                  std::vector<double> &ql, std::vector<double> &qlBar,
+                  const std::vector<char> *which) {
+#ifdef SEAMS_HAS_OPENMP
+  const bool useThreads = g.nop >= kParallelThreshold && omp_get_max_threads() > 1;
+#pragma omp parallel for schedule(static) if (useThreads)
+#endif
+  for (int i = 0; i < g.nop; i++) {
+    if (which != nullptr &&
+        (static_cast<int>(which->size()) <= i || (*which)[static_cast<std::size_t>(i)] == 0)) {
+      continue;
+    }
+    seams::steinhardt::qlOneAtom(i, orderL, qlm.data(), g.offsets.data(), g.cols.data(),
+                                 ql.data(), qlBar.data());
+  }
+}
+
 // qlOneAtom keeps barRe[17] for the device l<=8 path. l=12 uses
 // heap buffers on the host.
 void runPass2Host(const NeighbourCSR &g, int orderL, int begin, int end,
@@ -894,5 +938,123 @@ SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double
 
   return result;
 }
+
+void writeSteinhardtQlm(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                        const std::vector<std::vector<int>> &nList, int orderL,
+                        std::vector<double> &qlm, const std::vector<char> *which) {
+  const int width = steinhardtQlmWidth(orderL);
+  qlm.assign(static_cast<std::size_t>(std::max(yCloud.nop, 0)) * static_cast<std::size_t>(width),
+             0.0);
+  if (yCloud.nop <= 0 || (orderL != 3 && orderL != 4 && orderL != 6 && orderL != 8 &&
+                          orderL != 12)) {
+    return;
+  }
+  const NeighbourCSR graph = flatten(yCloud, nList);
+  if (orderL == 12) {
+    runPass1(graph, orderL, 0, graph.nop, qlm);
+    if (which != nullptr) {
+      for (int i = 0; i < graph.nop; i++) {
+        if (static_cast<int>(which->size()) <= i || (*which)[static_cast<std::size_t>(i)] == 0) {
+          std::fill_n(qlm.begin() + static_cast<std::ptrdiff_t>(i * width), width, 0.0);
+        }
+      }
+    }
+    return;
+  }
+  runPass1Mask(graph, orderL, qlm, which);
+}
+
+void readSteinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                      const std::vector<std::vector<int>> &nList, int orderL,
+                      const std::vector<double> &qlm, std::vector<double> &ql,
+                      std::vector<double> &qlBar, const std::vector<char> *which) {
+  if (static_cast<int>(ql.size()) != yCloud.nop ||
+      static_cast<int>(qlBar.size()) != yCloud.nop) {
+    ql.assign(static_cast<std::size_t>(std::max(yCloud.nop, 0)), 0.0);
+    qlBar.assign(ql.size(), 0.0);
+  }
+  if (yCloud.nop <= 0) {
+    return;
+  }
+  const NeighbourCSR graph = flatten(yCloud, nList);
+  runPass2Mask(graph, orderL, qlm, ql, qlBar, which);
+}
+
+#ifdef SEAMS_HAS_MPI
+namespace {
+
+std::vector<std::vector<int>> qRows(
+    const molSys::PointCloud<molSys::Point<double>, double> &cloud, double cutoff,
+    const std::vector<char> &owned) {
+  bool single = true;
+  for (const char flag : owned) {
+    if (!flag) {
+      single = false;
+      break;
+    }
+  }
+  if (single || cloud.nop < 40000) {
+    return nneigh::neighListO(cutoff, cloud, 1);
+  }
+  return nneigh::reusedShellList(cutoff, cloud, &owned);
+}
+
+} // namespace
+
+SteinhardtQl distributedSteinhardt(
+    const molSys::PointCloud<molSys::Point<double>, double> &full, double cutoff, int orderL,
+    MPI_Comm comm) {
+  setSteinhardtAtomSplit(false);
+  SteinhardtQl result;
+  result.ql.assign(static_cast<std::size_t>(std::max(full.nop, 0)), 0.0);
+  result.qlBar.assign(result.ql.size(), 0.0);
+  int nRanks = 1;
+  MPI_Comm_size(comm, &nRanks);
+  if (nRanks <= 1) {
+    const auto rows = nneigh::neighListO(cutoff, full, 1);
+    return steinhardtQl(full, rows, orderL);
+  }
+  auto &work = seams::domain::gatherWork(full, cutoff, comm);
+  const auto rows = qRows(work.cloud, cutoff, work.share.owned);
+  const int width = steinhardtQlmWidth(orderL);
+  const NeighbourCSR graph = flatten(work.cloud, rows);
+  std::vector<double> qlm(static_cast<std::size_t>(graph.nop) * static_cast<std::size_t>(width),
+                          0.0);
+  runPass1Mask(graph, orderL, qlm, &work.share.owned);
+  seams::domain::postBoundaryValues(qlm.data(), width, comm);
+  std::vector<char> interior(static_cast<std::size_t>(work.cloud.nop), 0);
+  std::vector<char> boundary(interior.size(), 0);
+  for (int i = 0; i < work.cloud.nop; i++) {
+    if (!work.share.owned[static_cast<std::size_t>(i)] ||
+        static_cast<std::size_t>(i) >= rows.size()) {
+      continue;
+    }
+    bool inside = true;
+    for (std::size_t j = 1; j < rows[static_cast<std::size_t>(i)].size(); j++) {
+      const auto it = work.cloud.idIndexMap.find(rows[static_cast<std::size_t>(i)][j]);
+      if (it == work.cloud.idIndexMap.end() ||
+          !work.share.owned[static_cast<std::size_t>(it->second)]) {
+        inside = false;
+        break;
+      }
+    }
+    (inside ? interior : boundary)[static_cast<std::size_t>(i)] = 1;
+  }
+  std::vector<double> ql(static_cast<std::size_t>(graph.nop), 0.0);
+  std::vector<double> qlBar(ql.size(), 0.0);
+  runPass2Mask(graph, orderL, qlm, ql, qlBar, &interior);
+  seams::domain::waitBoundaryValues();
+  runPass2Mask(graph, orderL, qlm, ql, qlBar, &boundary);
+  for (std::size_t k = 0; k < work.share.local.size(); k++) {
+    if (!work.share.owned[k]) {
+      continue;
+    }
+    const int frame = work.share.local[k];
+    result.ql[static_cast<std::size_t>(frame)] = ql[k];
+    result.qlBar[static_cast<std::size_t>(frame)] = qlBar[k];
+  }
+  return result;
+}
+#endif
 
 } // namespace chill
