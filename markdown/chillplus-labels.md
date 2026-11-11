@@ -26,3 +26,10 @@ frame):
 | interclathrate / interfacial hydrate | 138 | 135 |
 
 The gap is mostly water that OVITO calls interfacial.
+
+The same split is in `discovery/v5-session.txt`. On step 15677000,
+`ovito-chill+` matches mdapy and OVITO on all 4096 atoms and the
+published rule differs on 397. On `input/traj/interface_f0.lammpstrj`
+the match is 864/864 and the published rule differs on 46. q6 on both
+frames agrees with mdapy and OVITO to 1e-14. The triclinic 110592
+crystal is cubic on every atom under both rules.

@@ -474,11 +474,11 @@ int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
   }
   try {
     const int typ = resolve_type(frame->cloud, type);
-    // Ortho frames use the cutoff shell, the same neighbours OVITO's
-    // cutoff Steinhardt reads, built by the shared CSR. A sheared box
-    // keeps the mutual four-nearest graph.
+    // Orthorhombic and restricted-triclinic frames use the cutoff shell,
+    // the same neighbours OVITO's cutoff Steinhardt reads, built by the
+    // shared CSR. Anything else keeps the mutual four-nearest graph.
     chill::SteinhardtQl result;
-    if (frame->cloud.box.size() == 3) {
+    if (frame->cloud.box.size() == 3 || frame->cloud.box.size() >= 6) {
       result = chill::steinhardtQlCutoff(frame->cloud, cutoff, order_l, typ, true);
     } else {
       const double cand = cutoff + 1.5;

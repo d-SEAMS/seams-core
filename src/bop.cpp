@@ -1238,9 +1238,11 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
   const double ox = yCloud.boxLow.size() > 0 ? yCloud.boxLow[0] : 0.0;
   const double oy = yCloud.boxLow.size() > 1 ? yCloud.boxLow[1] : 0.0;
   const double oz = yCloud.boxLow.size() > 2 ? yCloud.boxLow[2] : 0.0;
-  const double Lx = yCloud.box[0];
-  const double Ly = yCloud.box[1];
-  const double Lz = yCloud.box[2];
+  const bool tiltBox = yCloud.box.size() >= 6;
+  const gen::FracBox fracBox = gen::makeFracBox(yCloud);
+  const double Lx = tiltBox ? fracBox.lx : yCloud.box[0];
+  const double Ly = tiltBox ? fracBox.ly : yCloud.box[1];
+  const double Lz = tiltBox ? fracBox.lz : yCloud.box[2];
   if (!(Lx > 0.0 && Ly > 0.0 && Lz > 0.0)) {
     return false;
   }
@@ -1289,9 +1291,15 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
       }
       return t * L;
     };
-    scratch.xyz[static_cast<std::size_t>(3 * i)] = wrap(p.x, ox, Lx);
-    scratch.xyz[static_cast<std::size_t>(3 * i) + 1] = wrap(p.y, oy, Ly);
-    scratch.xyz[static_cast<std::size_t>(3 * i) + 2] = wrap(p.z, oz, Lz);
+    if (tiltBox) {
+      scratch.xyz[static_cast<std::size_t>(3 * i)] = p.x;
+      scratch.xyz[static_cast<std::size_t>(3 * i) + 1] = p.y;
+      scratch.xyz[static_cast<std::size_t>(3 * i) + 2] = p.z;
+    } else {
+      scratch.xyz[static_cast<std::size_t>(3 * i)] = wrap(p.x, ox, Lx);
+      scratch.xyz[static_cast<std::size_t>(3 * i) + 1] = wrap(p.y, oy, Ly);
+      scratch.xyz[static_cast<std::size_t>(3 * i) + 2] = wrap(p.z, oz, Lz);
+    }
     if (p.type != typeI) {
       uniform = false;
     }
@@ -1323,6 +1331,9 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
   }
   const bool csrOk =
       nneigh::orthoFullCsr(yCloud, which, cutoff, scratch.offsets, scratch.cols);
+  if (tiltBox && !csrOk) {
+    return false;
+  }
   const double invx = static_cast<double>(nx) / Lx;
   const double invy = static_cast<double>(ny) / Ly;
   const double invz = static_cast<double>(nz) / Lz;
@@ -1374,12 +1385,23 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
         if (j == i) {
           continue;
         }
-        double rx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
-        double ry = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
-        double rz = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
-        if (rx > hx) rx -= Lx; else if (rx < -hx) rx += Lx;
-        if (ry > hy) ry -= Ly; else if (ry < -hy) ry += Ly;
-        if (rz > hz) rz -= Lz; else if (rz < -hz) rz += Lz;
+        double rx, ry, rz;
+        if (tiltBox) {
+          const auto image = gen::fracDelta(
+              fracBox, xi, yi, zi, scratch.xyz[static_cast<std::size_t>(3 * j)],
+              scratch.xyz[static_cast<std::size_t>(3 * j) + 1],
+              scratch.xyz[static_cast<std::size_t>(3 * j) + 2]);
+          rx = image[0];
+          ry = image[1];
+          rz = image[2];
+        } else {
+          rx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
+          ry = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
+          rz = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+          if (rx > hx) rx -= Lx; else if (rx < -hx) rx += Lx;
+          if (ry > hy) ry -= Ly; else if (ry < -hy) ry += Ly;
+          if (rz > hz) rz -= Lz; else if (rz < -hz) rz += Lz;
+        }
         const double d2 = rx * rx + ry * ry + rz * rz;
         if (!(d2 > 0.0)) {
           continue;
@@ -1589,8 +1611,8 @@ bool chill::chillPlusSymbolicPrefilter(
 bool chill::chillPlusPublishedCutoff(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
     int typeI) {
-  if (yCloud.nop > 0 && cutoff > 0.0 && yCloud.box.size() >= 3 &&
-      yCloud.box.size() < 6) {
+  if (yCloud.nop > 0 && cutoff > 0.0 &&
+      (yCloud.box.size() == 3 || yCloud.box.size() >= 6)) {
     return orthoChill(yCloud, cutoff, typeI, false);
   }
 #ifndef SEAMS_HAS_LINKCELL

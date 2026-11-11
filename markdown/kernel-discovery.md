@@ -234,3 +234,35 @@ the closed edges c_ij <= -0.8 and -0.35 <= c_ij <= 0.25 and the
 neighbour test for interfacial ice. Those two frames then disagree with
 OVITO on the water/interfacial boundary. The thresholds are not moved
 to close that gap.
+
+## Triclinic cutoff
+
+A restricted triclinic cell is stored as the bound spans plus xy, xz,
+yz. The cutoff CSR bins the reduced coordinates and walks the same
+27-cell stencil as the orthorhombic list, at a search radius that
+covers the Cartesian ball, then keeps the pairs whose Cartesian image
+is inside the cutoff. q4, q6 and published CHILL+ use that list. On
+one thread and 110592 molecules the orthorhombic build is 25.12 ms.
+The same ice, deformed with the cell (xy = 4, xz = 1.5, yz = 0.8), is
+25.68 ms. A Cartesian point set dropped into that tilted cell, which
+is not the crystal of the cell, stays at 43.49 ms. Raw samples are
+`discovery/v5-session.txt`.
+
+Against OVITO 3.17.2 and mdapy 2.0.0 on that deformed crystal, one
+thread, medians in ms:
+
+| call | seams | OVITO | mdapy |
+| --- | ---: | ---: | ---: |
+| q4 | 45.14 | 49.84 | 64.75 |
+| q6 | 48.49 | 58.00 | 78.66 |
+| CHILL+ | 41.47 | 614.98 | 62.27 |
+
+Eight threads: q4 12.79 / 12.03 / 13.45, q6 11.35 / 10.91 / 15.12,
+CHILL+ 8.71 / 86.77 / 14.33. q4 and q6 agree with both codes to 1e-15,
+and every atom is cubic under the published rule and under
+`ovito-chill+`.
+
+Ideal ice of 4096 molecules, CHILL+, seams against mdapy: 1.54 ms
+against 3.04 ms on one thread, and 0.39 ms against 0.74 ms on eight.
+The host has 8 cores (`nproc` 8, one thread per core, cpuset 0-7, no
+`cpu.max`, `nr_periods` 0). Thread counts above are inside that set.

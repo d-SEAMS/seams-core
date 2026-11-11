@@ -1011,6 +1011,8 @@ SteinhardtQl cutoffSolid(
   const double hx = 0.5 * Lx;
   const double hy = 0.5 * Ly;
   const double hz = 0.5 * Lz;
+  const bool tilt = yCloud.box.size() >= 6;
+  const gen::FracBox frac = gen::makeFracBox(yCloud);
   bool uniform = true;
   for (int i = 0; i < n; i++) {
     if (yCloud.pts[static_cast<std::size_t>(i)].type != typeI) {
@@ -1043,17 +1045,23 @@ SteinhardtQl cutoffSolid(
 #endif
   for (int i = 0; i < n; i++) {
     const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
-    auto wrap = [](double v, double origin, double L) {
-      double t = (v - origin) / L;
-      t -= std::floor(t);
-      if (!(t < 1.0)) {
-        t = 0.0;
-      }
-      return t * L;
-    };
-    scratch.xyz[static_cast<std::size_t>(3 * i)] = wrap(p.x, ox, Lx);
-    scratch.xyz[static_cast<std::size_t>(3 * i) + 1] = wrap(p.y, oy, Ly);
-    scratch.xyz[static_cast<std::size_t>(3 * i) + 2] = wrap(p.z, oz, Lz);
+    if (tilt) {
+      scratch.xyz[static_cast<std::size_t>(3 * i)] = p.x;
+      scratch.xyz[static_cast<std::size_t>(3 * i) + 1] = p.y;
+      scratch.xyz[static_cast<std::size_t>(3 * i) + 2] = p.z;
+    } else {
+      auto wrap = [](double v, double origin, double L) {
+        double t = (v - origin) / L;
+        t -= std::floor(t);
+        if (!(t < 1.0)) {
+          t = 0.0;
+        }
+        return t * L;
+      };
+      scratch.xyz[static_cast<std::size_t>(3 * i)] = wrap(p.x, ox, Lx);
+      scratch.xyz[static_cast<std::size_t>(3 * i) + 1] = wrap(p.y, oy, Ly);
+      scratch.xyz[static_cast<std::size_t>(3 * i) + 2] = wrap(p.z, oz, Lz);
+    }
   }
   if (!have) {
 #ifdef SEAMS_HAS_OPENMP
@@ -1098,15 +1106,26 @@ SteinhardtQl cutoffSolid(
     };
     for (int p = a; p < b; p++) {
       const int j = scratch.cols[static_cast<std::size_t>(p)];
-      double dx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
-      double dy = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
-      double dz = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
-      if (dx > hx) dx -= Lx;
-      else if (dx < -hx) dx += Lx;
-      if (dy > hy) dy -= Ly;
-      else if (dy < -hy) dy += Ly;
-      if (dz > hz) dz -= Lz;
-      else if (dz < -hz) dz += Lz;
+      double dx, dy, dz;
+      if (tilt) {
+        const auto image = gen::fracDelta(
+            frac, xi, yi, zi, scratch.xyz[static_cast<std::size_t>(3 * j)],
+            scratch.xyz[static_cast<std::size_t>(3 * j) + 1],
+            scratch.xyz[static_cast<std::size_t>(3 * j) + 2]);
+        dx = image[0];
+        dy = image[1];
+        dz = image[2];
+      } else {
+        dx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
+        dy = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
+        dz = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+        if (dx > hx) dx -= Lx;
+        else if (dx < -hx) dx += Lx;
+        if (dy > hy) dy -= Ly;
+        else if (dy < -hy) dy += Ly;
+        if (dz > hz) dz -= Lz;
+        else if (dz < -hz) dz += Lz;
+      }
       if (!(dx * dx + dy * dy + dz * dz > 0.0)) {
         continue;
       }
@@ -1175,8 +1194,9 @@ SteinhardtQl cutoffSolid(
 SteinhardtQl steinhardtQlCutoff(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
     int orderL, int typeI, bool average) {
-  if ((orderL == 3 || orderL == 4 || orderL == 6) && yCloud.box.size() == 3 &&
-      yCloud.nop > 0 && cutoff > 0.0) {
+  if ((orderL == 3 || orderL == 4 || orderL == 6) &&
+      (yCloud.box.size() == 3 || yCloud.box.size() >= 6) && yCloud.nop > 0 &&
+      cutoff > 0.0) {
     SteinhardtQl fast = cutoffSolid(yCloud, cutoff, orderL, typeI, average);
     if (!fast.ql.empty()) {
       return fast;
