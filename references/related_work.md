@@ -230,3 +230,41 @@ d-SEAMS is the fastest code in every row that both sides finished, including cyc
 - [vmd-hydrate-mcp](https://github.com/wjgoarxiv/vmd-hydrate-mcp) (2026) counts clathrate cages and F3/F4 through a local VMD session. VMD is not installed here, so it is not timed.
 
 No 2025–2026 PLUMED, LAMMPS or OpenMM plugin turned up that assigns CHILL+ or cages during the MD step. The in-situ claim remains the LAMMPS compute.
+
+## Symmetry head-to-head, 110592
+
+`59d85155` is not an object on `feat/symmetry`. The kernel timed here is the branch tip `071489584c70e3bfdf224012c53476547175b5df`. The call is `symm::classifyIce` (scale-free 17-atom shell, ceiling 0.18) from a release `-O3` build of that tree. Ideal ice Ic, 110592 molecules. One warm-up, six calls, median and type-7 IQR. One core is `taskset -c 0`. Eight cores are `taskset -c 0-7`. The kernel reads `OMP_NUM_THREADS`. OVITO reads `OVITO_THREAD_COUNT` before import. pyscal3 uses `set_num_threads`.
+
+Every oxygen is ice Ic under the kernel. OVITO PTM with cubic and hexagonal diamond enabled (the default build leaves both off) labels every oxygen cubic diamond, type 6. Turning every PTM template on does the same and costs more. OVITO Identify diamond structure, the extended common-neighbour analysis, labels every oxygen cubic diamond, type 1. pyscal3 `diamond_structure` does the same under the name "cubic diamond". Adaptive common-neighbour analysis, in OVITO and in pyscal3, labels every oxygen other: the first-shell CNA signatures are fcc, hcp, bcc and icosahedral, and a diamond lattice is none of those. Ackland–Jones does the same. pyscal3 `ace` is the Drautz atomic-cluster-expansion descriptor, not a structure label, so it is not a row. freud 3.6.1 has environment motif matching and bond-order parameters and no polyhedral template matching class.
+
+| Threads | Code | Operation | Median (IQR) ms | Cubic ice |
+| --- | --- | --- | --- | --- |
+| 1 | d-SEAMS | classifyIce | 189.056 (1.380) | 1.000000 |
+| 1 | OVITO 3.17.2 | PTM, diamond templates | 2801.560 (61.830) | 1.000000 |
+| 1 | OVITO 3.17.2 | PTM, every template | 4012.979 (33.409) | 1.000000 |
+| 1 | OVITO 3.17.2 | identify diamond | 136.690 (0.901) | 1.000000 |
+| 1 | OVITO 3.17.2 | adaptive CNA | 275.435 (0.918) | 0.000000 |
+| 1 | pyscal3 4.1.0 | diamond structure | 99.743 (1.685) | 1.000000 |
+| 1 | pyscal3 4.1.0 | adaptive CNA | 382.516 (2.195) | 0.000000 |
+| 1 | pyscal3 4.1.0 | Ackland–Jones | 561.481 (3.372) | 0.000000 |
+| 8 | d-SEAMS | classifyIce | 35.520 (1.460) | 1.000000 |
+| 8 | OVITO 3.17.2 | PTM, diamond templates | 388.972 (5.139) | 1.000000 |
+| 8 | OVITO 3.17.2 | PTM, every template | 533.050 (5.525) | 1.000000 |
+| 8 | OVITO 3.17.2 | identify diamond | 35.660 (3.581) | 1.000000 |
+| 8 | OVITO 3.17.2 | adaptive CNA | 51.267 (1.626) | 0.000000 |
+| 8 | pyscal3 4.1.0 | diamond structure | 22.760 (0.132) | 1.000000 |
+| 8 | pyscal3 4.1.0 | adaptive CNA | 73.227 (1.323) | 0.000000 |
+| 8 | pyscal3 4.1.0 | Ackland–Jones | 165.939 (4.557) | 0.000000 |
+
+On the matched diamond labels, pyscal3 is faster than the kernel at both widths, and OVITO's diamond identifier is faster at one thread. The kernel is faster than both PTM settings at both widths. Raw lines are `benchmarks/h2h-watch-v5.csv`. The first `ptm` lines in `benchmarks/h2h-watch-v5.log` are every template; the `ptm-diamond` lines are cubic and hexagonal diamond only.
+
+## matscipy rings at 110592
+
+matscipy 1.3.1 `ring_statistics` dies with signal 11 at 110592 molecules. The fault is in `py_distances_on_graph` (`c/ring_statistics.cpp`). That wrapper builds an n by n int32 distance map and `std::fill` writes every entry. At 110592 molecules the map is 48.92 GB. The store is a `vmovdqu64` in libc, called from `py_distances_on_graph`, and the process receives SIGSEGV. A NumPy allocation of the same shape returns without touching the pages, so the failure is the fill, not a Python `MemoryError`.
+
+The same fill completes at 44064 molecules (18 by 18 by 17 cells, 7.77 GB) and the full call with `maxlength=7` returns 88128 six-rings, two per molecule, in 34.8 s. The next cell tried, 46512 molecules (19 by 18 by 17, 8.65 GB), dies in the same fill. 39304 molecules (17 cubed cells) also completes, with 78608 six-rings.
+
+## Graph-partitioned cages, 2026
+
+- Pang and Sun, [JPCA 2026](https://doi.org/10.1021/acs.jpca.6c05769). SQQ implements the graph-guided ring overlap workflow: an oxygen or hydrogen-bond graph, chordless rings as faces, and cages grown along exposed edges. It partitions hydrate domains from shared faces. The code is [pimooni/sqq](https://github.com/pimooni/sqq). It names cages and phases, not a PTM or CHILL+ label, so it is not in the symmetry table.
+- Chen, Huang, Xu, Li, Song, Wang, Tang, Liu and Deng, [arXiv:2609.37036](https://arxiv.org/abs/2609.37036) (2026). HyTopo classifies water as liquid-like, precursor-like, hydrate-like or ice-like, then searches rings and cages and builds a cage-transition network. Preprint; Crossref has no DOI. No public source turned up, so it is not timed.
