@@ -11,7 +11,7 @@ Python is ~pip install pydseamslib~.
 | cubic ice, CHILL+ | =mW_cubic.lammpstrj= frame 1, type 1 | ~chill_plus()~ | 4096 cubic |
 | cubic ice, cages | the same frame | ~cages()~ | ~n_ic~ 4096 |
 | sI 5^12 cages | =genice_sI.lammpstrj=, type 1 | ~cages_by_signature("512")~ | 2 cages, 40 atoms |
-| mixed frame | =exampleTraj.lammpstrj=, type 2 | cutoff CHILL+ versus cages | 12 interfacial clathrate, no complete cage |
+| mixed frame | =exampleTraj.lammpstrj=, type 2 | cutoff CHILL+ versus cages | 9 interfacial clathrate, no complete cage |
 
 The R and Julia fronts also report 4096 cubic on the first row.
 They call ~libseams_lang~ with the mutual four-neighbour list.

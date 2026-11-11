@@ -31,7 +31,7 @@ On the mixed TIP4P dump (=input/traj/exampleTraj.lammpstrj=, type 2) they do not
 | R | =chill_plus(frame, graph = "mutual")= |
 | Julia | =chill_plus(frame; graph = "mutual")= |
 
-The cutoff list gives 12 interClathrate and 238 water.
+The cutoff list gives 9 interClathrate and 241 water.
 The mutual list gives 1 clathrate, 7 interClathrate, and 242 water.
 
 A cage signature takes the same face-edge window on every front.

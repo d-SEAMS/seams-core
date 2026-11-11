@@ -42,7 +42,8 @@ pairs | density-z | domains~. ~chill_plus~ is an accepted alias of
 |---------+--------+--------|
 | ~read~ | print the loaded cloud | ~nop N frame F box Lx Ly Lz~ and, when ~box.size() >= 6~, ~xy xz yz~ |
 | ~chill~ | CHILL labels | ~nop N~ then ~name count~ for each ice type present |
-| ~chill-plus~ | CHILL+ labels | same as ~chill~ |
+| ~chill-plus~ | published CHILL+ (shell of 4, four-nearest q3, neighbour test) | same as ~chill~, plus ~--rule~ |
+| ~ovito-chill+~ | OVITO 3.17.2 CHILL+ (shell of 4, full-shell q3, no neighbour test) | same as ~chill-plus~ |
 | ~cages~ | ice score on six-membered rings | ~nop N graph KIND hexagonal IH cubic IC water W~ |
 | ~cages --signature SPEC~ | closed polyhedra whose ring-size census matches ~SPEC~; each vertex lies on at least three faces that close around it, V - E + F = 2, and rings that wind the periodic cell are left out | one line per signature, ~nop N graph KIND signature S cages C atoms A~ and, with ~--incomplete~, ~incomplete K~ cups on the ring graph; with ~--guest-types~, ~guests G occupied O multiple M free F~ |
 | ~fingerprint~ | topology keys of the bonded graph | ~nop N graph KIND hops H method M key K classes C rings 3:a 4:b ... top key=count ...~ |

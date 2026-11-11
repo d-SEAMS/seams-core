@@ -37,6 +37,20 @@ CHILL+ adds clathrate (four eclipsed) and interfacial clathrate (three eclipsed)
 Water is what remains.
 The full star table is in =bop.hpp=.
 
+The default =chill+= rule follows Nguyen and Molinero.
+Table 1 footnote a says "Number of water neighbors within 3.5 Å (first coordination shell)."
+A crystal row requires that count to be 4, so a fifth oxygen inside the cutoff is water even when four nearer bonds would have been ice-like.
+Equation 1 is still the average over the four nearest neighbours,
+
+\[
+q_{lm}(i) = \frac{1}{4} \sum_{j=1}^{4} Y_{lm}(\hat r_{ij}).
+\]
+
+The interfacial rows keep the neighbour test in the comment column of Table 1.
+=ovito-chill+= (=--rule ovito-chill+=, or the =ovito-chill+= command) still requires exactly four neighbours inside the cutoff, averages =q_3= over every neighbour inside the cutoff, and does not apply the neighbour test.
+That is the OVITO 3.17.2 Chill+ modifier.
+Plain CHILL is still the four closest neighbours and Moore's neighbour test, and it does not require the cutoff shell to hold exactly four neighbours.
+
 * Primitive rings
 
 A cycle is primitive, in the Franzblau sense, when for every pair of its vertices a shortest path in the bond graph lies along the cycle.

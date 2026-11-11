@@ -73,7 +73,7 @@ seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
 seams cages input/traj/exampleTraj.lammpstrj --type 2
 #+end_src
 
-On this fixture ~seams chill-plus~ uses the cutoff neighbour list (the default on every front) and prints 12 interfacial clathrate and 238 water.
+On this fixture ~seams chill-plus~ uses the cutoff neighbour list (the default on every front) and prints 9 interfacial clathrate and 241 water.
 ~--graph mutual~ uses the mutual four-neighbour list and prints 1 clathrate, 7 interfacial clathrate, and 242 water.
 The default cage graph is ~--graph seeded~ (mutual four-nearest seeds, union completions).
 This mixed frame has no complete HC or DDC.

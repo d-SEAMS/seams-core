@@ -8,7 +8,7 @@ They answer different questions and they do not imply each other.
 
 CHILL (~seams chill~, ~chill::getCorrel~ / ~getIceTypeNoPrint~) and CHILL+ (~seams chill-plus~, ~chill::getCorrelPlus~ / ~getIceTypePlusNoPrint~) look at the four-neighbour star.
 Both stay on the host.
-They compute bond-order correlations ~c_ij~ on the four nearest neighbours of each oxygen (or each mW site) and label the atom cubic, hexagonal, interfacial, clathrate, or water from the staggered and eclipsed pattern of that star.
+A crystal label needs exactly four neighbours inside the cutoff. That shell count is taken before the bond list is cut to four. The old count after the cut was a bug: a shell of five or more neighbours could still receive an ice label. q3 is then the average over the four nearest neighbours of a four-neighbour shell. The staggered and eclipsed pattern of that star labels the atom cubic, hexagonal, interfacial, clathrate, or water.
 
 A molecule is cubic or hexagonal when its four bonds look like ice, even if those neighbours do not close a cage.
 
@@ -35,7 +35,7 @@ Only cage labels come back.
 A configuration can agree exactly on the closed star of a vertex (same induced graph, same coordinates on those five atoms) and still disagree on that vertex's cage label, because the cage predicates read a larger neighbourhood of six-rings.
 The Catch2 suite encodes that fact: cage membership is not a function of the four-neighbour star.
 
-On the in-tree mixed TIP4P dump (~input/traj/exampleTraj.lammpstrj~), ~seams chill-plus~ uses the cutoff list by default and prints 12 interfacial clathrate and 238 water; ~--graph mutual~ prints 1 clathrate, 7 interfacial clathrate, and 242 water.
+On the in-tree mixed TIP4P dump (~input/traj/exampleTraj.lammpstrj~), ~seams chill-plus~ uses the cutoff list by default and prints 9 interfacial clathrate and 241 water; ~--graph mutual~ prints 1 clathrate, 7 interfacial clathrate, and 242 water.
 Seeded cages report zero HC and zero DDC.
 A three-eclipsed star is not cage membership.
 Walk through the commands in [[file:../tutorials/bulk-ice.org][the mixed TIP4P tutorial]].

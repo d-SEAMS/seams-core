@@ -1,48 +1,61 @@
 # CHILL+ on a cubic lattice
 
-The Lua scripts live in [yodaStruct](https://github.com/d-SEAMS/yodaStruct).
-This repository is the C++ engine.
+The Lua module lives in yodaStruct.
+This repository is the C++ engine, and it does not include that module.
 
-Figshare:
-[CHILL LAMMPS Trajectory](https://figshare.com/articles/CHILL_LAMMPS_Trajectory/11448720)
-(`mW_cubic.lammpstrj`, 4096 type-1 mW sites of ice Ic). CHILL+
-labels every site cubic on that lattice. `nucleation.lammpstrj` is
-a different figshare deposit.
+Figshare stores the CHILL LAMMPS trajectory of 4096 type-1 mW sites.
+The lattice is ice Ic.
+CHILL+ labels every site cubic on that lattice.
+`nucleation.lammpstrj` is a different figshare deposit.
 
-The 1.x driver (`yodaStruct -c`, `conf.yaml`, `lua_inputs/`) is gone.
-Use `seams`, `pydseams`, or `require("dseams")`.
+The 1.x driver is gone.
+We use the `seams` command.
 
 ## CLI
 
 ```bash
 seams chill-plus mW_cubic.lammpstrj --cutoff 3.5 --type 1
+seams ovito-chill+ mW_cubic.lammpstrj --cutoff 3.5 --type 1
+seams chill-plus mW_cubic.lammpstrj --rule examples/ovito-chill-plus.yaml
+seams chill-plus mW_cubic.lammpstrj --rule examples/chill-plus.lua
 ```
 
-Counts print to stdout (`cubic`, `hexagonal`, `water`,
-`interfacial`, `clathrate`, `interClathrate`, `reCubic`, `reHex`,
-`unclassified`).
+`--rule FILE` reads the file as text and takes the first `rule` or
+`chill-plus` key.
+Comments are skipped.
+The file is not executed as Lua or YAML.
+A bare `chill+` or `ovito-chill+` is also a `--rule` value.
+`ovito-chill+` keeps a shell of four neighbours.
+It averages q3 over that whole shell.
+It uses open correlation edges and skips the neighbour test.
+The default shell count is a bug fix.
+The cutoff row is counted before the bond list is cut to four.
+Default q3 uses the four nearest neighbours of that four-neighbour shell.
+
+Counts print to stdout.
 
 ## Python
 
+`bindings/python/chill_plus.py` is a ctypes wrapper around `libseams_lang`.
+It is installed under the data directory `seams/python`.
+Set `SEAMS_LANG_LIB` to the built library.
+`rule` is a name or the document text.
+It does not open a filesystem path, and it is not `pydseams`.
+
 ```python
-import pydseams as ds
+from chill_plus import chill_plus
 
-frame = ds.read("mW_cubic.lammpstrj")
-print(frame.chill_plus())
+labels, counts = chill_plus(positions, (lx, ly, lz), rule="chill+")
+labels, counts = chill_plus(positions, (lx, ly, lz), rule="ovito-chill+")
 ```
 
-## Lua
-
-```lua
-local dseams = require("dseams")
-local cloud = dseams.read("mW_cubic.lammpstrj", {type = 1})
-print(dseams.chill_plus(cloud, {cutoff = 3.5}))
-```
-
-Books: [seams CLI](https://docs.dseams.info),
-[pydseams](https://d-seams.github.io/PydSEAMSlib/),
-[dseams](https://d-seams.github.io/yodaStruct/).
+See the seams CLI manual.
+pydseams and yodaStruct are separate pages.
 
 ## References
 
-1. Nguyen, A. H., & Molinero, V. (2014). Identification of Clathrate Hydrates, Hexagonal Ice, Cubic Ice, and Liquid Water in Simulations: the CHILL+ Algorithm. The Journal of Physical Chemistry B, 119(29), 9369-9376. doi:10.1021/jp510289t
+1. Nguyen, A. H., and Molinero, V. (2015).
+   Identification of Clathrate Hydrates, Hexagonal Ice, Cubic Ice, and
+   Liquid Water in Simulations: the CHILL+ Algorithm.
+   The Journal of Physical Chemistry B, 119(29), 9369-9376.
+   doi:10.1021/jp510289t

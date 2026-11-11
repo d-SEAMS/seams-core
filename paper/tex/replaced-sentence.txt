@@ -1,0 +1,2 @@
+The liquid dump is not in this checkout, so the comparator campaign has no liquid column.
+The liquid dump is not in this checkout, so the liquid column of the comparator campaign was not rerun.

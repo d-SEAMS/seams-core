@@ -470,7 +470,79 @@ The codes of each comparison ran on the same machine, every timed process used o
 The version comparison builds the cutoff graph once outside the timers and times the rings of up to seven members and both cage searches.
 In the comparison with other codes, each code runs in a worker process of its own, and its timer includes its own neighbour search, so every timing covers the same path from positions to labels.
 The frames are ideal ice~Ic and ice~Ih and the square-tube ice of a deposited trajectory~\cite{goswami2019nanotubedata}, each replicated from about a thousand to about a million molecules.
-The liquid dump is not in this checkout, so the comparator campaign has no liquid column.
+The 4096-molecule liquid agreement was recounted with the Nguyen and
+Molinero 2015 rule as the default.
+That rule gives an ice or clathrate label only when a molecule has
+exactly four neighbours inside 3.5~\AA.
+It averages $q_3$ over those four nearest neighbours.
+It also applies the interfacial neighbour test in Table~1 of that paper.
+We read the shell count from Table~1 of that paper.
+A molecule with fewer than four neighbours inside the cutoff is liquid.
+A molecule with more than four neighbours inside the cutoff is liquid.
+The published rule stops at that shell test.
+The four nearest neighbours are then the only bonds that enter $q_3$.
+Each of those four bonds is staggered or eclipsed or neither.
+A staggered bond has a correlation of at most $-0.8$.
+An eclipsed bond has a correlation from $-0.35$ to $0.25$, with both
+ends included.
+The interfacial row of Table~1 looks at the neighbours after the bond
+counts.
+That row does not relabel a molecule whose shell length is not four.
+The ovito-chill+ option keeps a shell of four neighbours inside 3.5~\AA.
+Under that option the average for $q_3$ runs over every neighbour in the
+shell.
+Under that option the neighbour test is off.
+Under that option a correlation equal to $-0.8$ is not staggered.
+Under that option a correlation equal to $-0.35$ is not eclipsed.
+Under that option a correlation equal to $0.25$ is not eclipsed.
+Plain CHILL is a separate classifier.
+Its thresholds are the ones already in the code.
+The recount uses the first frame of the TIP4P dump.
+The selected atoms have LAMMPS type 2.
+That frame contains 250 such molecules.
+The cutoff in the recount is 3.5~\AA.
+The earlier shell rule scored the four nearest neighbours even when a
+fifth neighbour lay inside the cutoff.
+That earlier rule reported 12 interclathrate molecules.
+It also reported 238 liquid molecules.
+The published rule reports 9 interclathrate molecules.
+It also reports 241 liquid molecules.
+Three molecules change class, and each of them moves from interclathrate
+to liquid.
+Their LAMMPS ids are 85 and 664.
+The remaining id is 679.
+Molecule 85 is index 28 in the type 2 list.
+Molecule 664 is index 221.
+Molecule 679 is index 226.
+Each of those molecules has five neighbours inside 3.5~\AA.
+The other interclathrate molecules from the earlier rule have four
+neighbours inside the cutoff.
+Those molecules stay interclathrate.
+No molecule leaves the liquid class.
+The arithmetic from the earlier interclathrate count is 12 minus 3,
+which is 9.
+The liquid count is 238 plus 3, which is 241.
+For molecule 85 the four nearest correlations include 0.582, which lies
+above the eclipsed window.
+The other three correlations of molecule 85 lie inside that window.
+For molecule 664 the four nearest correlations include 0.317, which lies
+above the eclipsed window.
+The other three correlations of molecule 664 lie inside that window.
+For molecule 679 the four nearest correlations include $-0.788$, which
+lies between the staggered bound and the eclipsed window.
+The other three correlations of molecule 679 lie inside the eclipsed
+window.
+None of the three molecules has a staggered bond among those four.
+The neighbour test looks for staggered bonds, so it does not fire for
+them.
+Their earlier interclathrate label came from three eclipsed bonds.
+The published rule writes liquid as soon as the shell length is not
+four.
+The fifth neighbour is enough to end the ice decision.
+The ovito-chill+ option keeps the requirement of four neighbours inside
+3.5~\AA.
+Under that option, $q_3$ is averaged over every neighbour inside the
+cutoff, and the neighbour test is left off.
 Table~\ref{tab:codes} lists the codes and operations, and Section~\sref{sec:s-protocol} gives the frames, the call counts, the time limits and the settings of each code.
 
 We report the median of the calls with an exact binomial \dsv{set@coverage@pct}\% interval~\cite{hollander2014nonparametric} and the quartiles $Q_1$ and $Q_3$ of the calls~\cite{hyndman1996sample}.
@@ -488,10 +560,21 @@ The matched pairs time the same operation on the same frame, and the local struc
 \toprule
 Code & Version & Operations & Neighbours \\
 \midrule
-d-SEAMS & 2.12.0 & CHILL+, $q_6$, primitive rings, cage labels & four nearest within cutoff for CHILL+, mutual graph for $q_6$, seeded graph for cage labels \\
+d-SEAMS & 2.13.0 & CHILL+, $q_6$, primitive rings, cage labels &
+published Nguyen and Molinero 2015 rule.
+Exactly four neighbours lie inside 3.5~\AA.
+$q_3$ is averaged over those four nearest neighbours.
+The interfacial neighbour test is Table~1 of that paper.
+The ovito-chill+ option averages $q_3$ over the whole 3.5~\AA\ shell and
+leaves the neighbour test off.
+Mutual graph for $q_6$.
+Seeded graph for cage labels \\
 d-SEAMS~1 & 1.0.1 & primitive rings, HC and DDC & cutoff \\
 OVITO~\cite{ovito3172} & 3.17.2 & CHILL+, primitive rings, polyhedral template matching, diamond structure and adaptive common neighbour analysis & CHILL+ only for molecules with four neighbours within cutoff, and the rules of each structure type \\
-CHILL+ library~\cite{palmer2026orderparams} & 2026 & CHILL+ & four nearest within cutoff \\
+CHILL+ library~\cite{palmer2026orderparams} & 2026 & CHILL+ &
+four nearest within cutoff.
+The 2015 default and the ovito-chill+ option are named in the d-SEAMS
+row \\
 freud~\cite{ramasubramani2020freud} & 3.6.1 & $q_6$ & four nearest \\
 pyscal~\cite{menon2019pyscal} & 4.1.0 & $q_6$, diamond structure & four nearest for $q_6$, its own rule for the diamond structure \\
 matscipy~\cite{grigorev2024matscipy} & 1.3.1 & primitive rings & cutoff \\
@@ -615,7 +698,9 @@ In (c), d-SEAMS and OVITO come from the campaign in which each code ran in its o
 
 Every case that ended without a timing belongs to a comparator code (Table~\sref{tab:s-censored}).
 Both interfaces of matscipy end with a segmentation fault on the larger frames.
-The liquid dump is not in this checkout, so the liquid column of the comparator campaign was not rerun.
+The 4096-molecule liquid agreement in the macros is that recount under
+the 2015 default.
+The ovito-chill+ option is reported apart from those macros.
 The source archive of RINGS 1.3.5 is not in this checkout, so that lane was not rerun.
 We call cycless through the pair-list and cycle functions that GenIce uses.
 On the confined frame of \num{1000} molecules it returns \dsv{hl@cycless@six} six-rings where d-SEAMS and matscipy find \dsv{hl@dseams@six}, so its completed calls are reported apart.

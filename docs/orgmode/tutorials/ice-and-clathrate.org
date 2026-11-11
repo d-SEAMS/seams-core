@@ -21,7 +21,7 @@ print(frame.cages())
 #+end_src
 
 ~Frame.chill_plus~ uses the cutoff neighbour list.
-~IceCounts(interClathrate=12, water=238)~.
+~IceCounts(interClathrate=9, water=241)~.
 ~CageScore(n_ih=0, n_ic=0, n_water=250)~.
 
 ~seams chill-plus~ on the same file uses the mutual four-neighbour list and prints ~clathrate 1 interClathrate 7 water 242~.

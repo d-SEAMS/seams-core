@@ -58,7 +58,7 @@ seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
 Expected output:
 
 #+begin_example
-nop 250 interClathrate 12 water 238
+nop 250 interClathrate 9 water 241
 #+end_example
 
 #+begin_src bash
@@ -150,7 +150,7 @@ print(frame.cages())
 On this dump the default prints:
 
 #+begin_example
-IceCounts(interClathrate=12, water=238)
+IceCounts(interClathrate=9, water=241)
 CageScore(n_ih=0, n_ic=0, n_water=250)
 #+end_example
 

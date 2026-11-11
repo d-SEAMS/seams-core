@@ -15,8 +15,11 @@ seams cages FILE --type 2
 seams rdf FILE --type 2 --cutoff 10
 #+end_src
 
-~chill~ is the original CHILL rule. ~chill-plus~ is CHILL+.
+~chill~ is the original CHILL rule. ~chill-plus~ is the published CHILL+ rule: exactly four neighbours inside the cutoff, q3 over the four nearest, and the Table 1 neighbour test.
 ~chill_plus~ is a CLI alias of ~chill-plus~.
+~ovito-chill+~ is the OVITO 3.17.2 rule (exactly four neighbours inside the cutoff, q3 over the whole shell, neighbour test off).
+~--rule ovito-chill+~ selects it on ~chill-plus~, and a YAML or Lua file with ~rule:~ or ~rule =~ is a ~--rule~ value.
+~CHILL_PLUS_RULE~ in the environment or in ~seams.env~ is the same string when ~--rule~ is absent.
 Both bond every pair closer than ~--cutoff~ (~--graph cutoff~, the default).
 ~--graph mutual~ uses the mutual four nearest neighbours instead.
 
