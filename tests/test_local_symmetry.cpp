@@ -206,6 +206,84 @@ TEST_CASE("template names add what CHILL+ does not say", "[symmetry]") {
   REQUIRE(centreIsd != 0);
 }
 
+TEST_CASE("the cell list labels every crystal oxygen the way the shell match does",
+          "[symmetry]") {
+  if (!symm::iraLinked()) {
+    SKIP("libira is not linked");
+  }
+  const symm::Crystal cells[] = {symm::Crystal::iceIh, symm::Crystal::iceIc};
+  for (symm::Crystal which : cells) {
+    const auto cell = symm::crystal(which);
+    std::vector<int> kind;
+    symm::classifyIce(cell.cartesian, cell.vectors, kind);
+    REQUIRE(static_cast<int>(kind.size()) == cell.cartesian.rows());
+    for (int i = 0; i < cell.cartesian.rows(); i++) {
+      const auto shell = symm::iceShell(cell.cartesian, cell.vectors, i);
+      INFO(symm::name(which == symm::Crystal::fault ? symm::Kind::iceIsd
+                                                     : symm::Kind::iceIh)
+           << " atom " << i);
+      if (shell.rows() != 17) {
+        REQUIRE(kind[static_cast<size_t>(i)] == -1);
+        continue;
+      }
+      const auto ref = symm::best(shell, "ira");
+      REQUIRE(ref.status == 0);
+      REQUIRE(kind[static_cast<size_t>(i)] == static_cast<int>(ref.kind));
+    }
+  }
+}
+
+TEST_CASE("the stacking-fault cell is ice Ic and ice Isd under the reference match",
+          "[symmetry]") {
+  if (!symm::iraLinked()) {
+    SKIP("libira is not linked");
+  }
+  const auto cell = symm::crystal(symm::Crystal::fault);
+  int nIc = 0;
+  int nIsd = 0;
+  for (int i = 0; i < cell.cartesian.rows(); i++) {
+    const auto shell = symm::iceShell(cell.cartesian, cell.vectors, i);
+    REQUIRE(shell.rows() == 17);
+    const auto ref = symm::best(shell, "ira");
+    if (ref.kind == symm::Kind::iceIc) {
+      nIc++;
+    }
+    if (ref.kind == symm::Kind::iceIsd) {
+      nIsd++;
+    }
+  }
+  REQUIRE(nIc == 4);
+  REQUIRE(nIsd == 4);
+}
+
+TEST_CASE("an ice Ic supercell is cubic at every oxygen", "[symmetry]") {
+  const auto cell = symm::crystal(symm::Crystal::iceIc);
+  const int nrep = 3;
+  const int base = static_cast<int>(cell.cartesian.rows());
+  Eigen::MatrixXd big(base * nrep * nrep * nrep, 3);
+  int row = 0;
+  for (int ix = 0; ix < nrep; ix++) {
+    for (int iy = 0; iy < nrep; iy++) {
+      for (int iz = 0; iz < nrep; iz++) {
+        const Eigen::Vector3d shift =
+            static_cast<double>(ix) * cell.vectors.row(0).transpose() +
+            static_cast<double>(iy) * cell.vectors.row(1).transpose() +
+            static_cast<double>(iz) * cell.vectors.row(2).transpose();
+        for (int i = 0; i < base; i++) {
+          big.row(row++) = cell.cartesian.row(i) + shift.transpose();
+        }
+      }
+    }
+  }
+  Eigen::Matrix3d box = cell.vectors * static_cast<double>(nrep);
+  std::vector<int> kind;
+  symm::classifyIce(big, box, kind);
+  REQUIRE(static_cast<int>(kind.size()) == big.rows());
+  for (int label : kind) {
+    REQUIRE(label == static_cast<int>(symm::Kind::iceIc));
+  }
+}
+
 TEST_CASE("a periodic ice shell matches the same template as the ideal", "[symmetry]") {
   const auto ic = symm::crystal(symm::Crystal::iceIc);
   const auto ih = symm::crystal(symm::Crystal::iceIh);

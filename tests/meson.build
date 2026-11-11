@@ -120,6 +120,20 @@ test('ozaki',
   workdir: meson.project_source_root() / 'input',
   env: _test_env,
   timeout: 180)
+executable('report_symmetry_cases', 'report_symmetry_cases.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
+
+executable('bench_shell_scale', 'bench_shell_scale.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
+
 executable('bench_symmetry', 'bench_symmetry.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
