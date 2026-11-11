@@ -204,6 +204,12 @@ TEST_CASE("spatial ranks match the serial neighbour list, CHILL+ labels and q6",
         const auto share = seams::domain::decompose(base, rank, nRanks, halo);
         const auto local = seams::domain::subCloud(base, share.local);
         const auto rows = nneigh::neighListO(cutoff, local, 1);
+        std::vector<std::vector<int>> window;
+        const bool blocked =
+            nneigh::blockWindowRows(local, cutoff, &share.owned, window);
+        if (nRanks > 1) {
+          REQUIRE(blocked);
+        }
         for (std::size_t k = 0; k < share.local.size(); k++) {
           if (!share.owned[k]) {
             continue;
@@ -211,6 +217,9 @@ TEST_CASE("spatial ranks match the serial neighbour list, CHILL+ labels and q6",
           const int frame = share.local[k];
           if (halo == cutoff) {
             REQUIRE(rows[k] == serialRows[static_cast<std::size_t>(frame)]);
+            if (blocked) {
+              REQUIRE(window[k] == serialRows[static_cast<std::size_t>(frame)]);
+            }
           }
         }
         // q and c_ij at a neighbour need that neighbour's shell, one

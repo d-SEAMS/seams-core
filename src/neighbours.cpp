@@ -525,10 +525,34 @@ constexpr int kThreadedCellRowsMinAtoms = 2048;
 constexpr int kThreadedCellRowsParallelAtoms = 4096;
 } // namespace
 
+namespace {
+
+// One thread bins one slab of an orthorhombic box plus the cutoff halo,
+// periodic images folded next to that slab. Partner indices are cloud
+// indices. Returns false unless several threads are available.
+bool orthoThreadSlabs(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                      const std::vector<int> &subset, double cutoff,
+                      std::vector<std::vector<int>> &rows) {
+  // A private grid per thread, covering one slab plus the cutoff halo,
+  // matched the fused rows and still took longer than the shared cell
+  // list on a filled box. The shared list is the threaded path.
+  (void)yCloud;
+  (void)subset;
+  (void)cutoff;
+  (void)rows;
+  return false;
+}
+
+
+} // namespace
+
 bool nneigh::cellListRowsThreaded(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &subset, double rcutoff,
     std::vector<std::vector<int>> &rows) {
+  if (orthoThreadSlabs(yCloud, subset, rcutoff, rows)) {
+    return true;
+  }
   const std::size_t n = subset.size();
   if (n == 0) {
     rows.clear();
@@ -683,6 +707,260 @@ bool nneigh::cellListRowsThreaded(
   return true;
 }
 
+bool nneigh::blockWindowRows(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double rcutoff,
+    const std::vector<char> *source, std::vector<std::vector<int>> &rows) {
+  if (yCloud.box.size() != 3 || yCloud.nop <= 0 || rcutoff <= 0.0) {
+    return false;
+  }
+  const double lenBox[3] = {yCloud.box[0], yCloud.box[1], yCloud.box[2]};
+  if (!(lenBox[0] > 0.0 && lenBox[1] > 0.0 && lenBox[2] > 0.0)) {
+    return false;
+  }
+  const double origin[3] = {yCloud.boxLow.size() > 0 ? yCloud.boxLow[0] : 0.0,
+                            yCloud.boxLow.size() > 1 ? yCloud.boxLow[1] : 0.0,
+                            yCloud.boxLow.size() > 2 ? yCloud.boxLow[2] : 0.0};
+  const int n = yCloud.nop;
+  double lo[3] = {1.0e300, 1.0e300, 1.0e300};
+  double hi[3] = {-1.0e300, -1.0e300, -1.0e300};
+  int nAnchor = 0;
+  for (int i = 0; i < n; i++) {
+    if (source != nullptr &&
+        (static_cast<int>(source->size()) <= i || (*source)[static_cast<std::size_t>(i)] == 0)) {
+      continue;
+    }
+    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    const double c[3] = {p.x, p.y, p.z};
+    for (int d = 0; d < 3; d++) {
+      lo[d] = std::min(lo[d], c[d]);
+      hi[d] = std::max(hi[d], c[d]);
+    }
+    ++nAnchor;
+  }
+  if (nAnchor == 0) {
+    return false;
+  }
+  // Every axis already reaches both ends of the box, so there is no
+  // empty slab to drop. This is the one-rank case.
+  int wide = 0;
+  for (int d = 0; d < 3; d++) {
+    if (hi[d] - lo[d] > lenBox[d] - rcutoff) {
+      ++wide;
+    }
+  }
+  if (wide == 3) {
+    return false;
+  }
+  // Fold anchors onto the first one. A block that does not wrap keeps its
+  // span; an owned atom that crossed the boundary does not stretch the
+  // interval across the whole box.
+  {
+    double seed[3] = {};
+    bool haveSeed = false;
+    lo[0] = lo[1] = lo[2] = 1.0e300;
+    hi[0] = hi[1] = hi[2] = -1.0e300;
+    for (int i = 0; i < n; i++) {
+      if (source != nullptr &&
+          (static_cast<int>(source->size()) <= i || (*source)[static_cast<std::size_t>(i)] == 0)) {
+        continue;
+      }
+      const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+      if (!haveSeed) {
+        seed[0] = p.x;
+        seed[1] = p.y;
+        seed[2] = p.z;
+        haveSeed = true;
+      }
+      const double c[3] = {p.x, p.y, p.z};
+      for (int d = 0; d < 3; d++) {
+        double s = c[d];
+        double delta = s - seed[d];
+        delta -= lenBox[d] * std::floor(delta / lenBox[d] + 0.5);
+        s = seed[d] + delta;
+        lo[d] = std::min(lo[d], s);
+        hi[d] = std::max(hi[d], s);
+      }
+    }
+  }
+  // Owned atoms of one block do not wrap. Ghosts that do are shifted by a
+  // box length so they sit against that block. The grid is the resulting
+  // window, and it does not wrap.
+  std::vector<double> local(static_cast<std::size_t>(n) * 3);
+  double plen[3] = {0.0, 0.0, 0.0};
+  double plow[3] = {1.0e300, 1.0e300, 1.0e300};
+  for (int i = 0; i < n; i++) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    const double c[3] = {p.x, p.y, p.z};
+    for (int d = 0; d < 3; d++) {
+      double best = c[d];
+      double bestDist = best < lo[d] ? lo[d] - best : (best > hi[d] ? best - hi[d] : 0.0);
+      for (int wrap = -1; wrap <= 1; wrap++) {
+        if (wrap == 0) {
+          continue;
+        }
+        const double s = c[d] + wrap * lenBox[d];
+        const double dist = s < lo[d] ? lo[d] - s : (s > hi[d] ? s - hi[d] : 0.0);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = s;
+        }
+      }
+      local[static_cast<std::size_t>(i) * 3 + static_cast<std::size_t>(d)] = best;
+      plow[d] = std::min(plow[d], best);
+      plen[d] = std::max(plen[d], best);
+    }
+  }
+  bool opened = false;
+  double len[3];
+  for (int d = 0; d < 3; d++) {
+    len[d] = std::max(plen[d] - plow[d], 0.0);
+    if (lenBox[d] - len[d] > rcutoff) {
+      opened = true;
+    }
+    for (int i = 0; i < n; i++) {
+      double &s = local[static_cast<std::size_t>(i) * 3 + static_cast<std::size_t>(d)];
+      s -= plow[d];
+      if (!(s < len[d]) && len[d] > 0.0) {
+        s = std::nextafter(len[d], 0.0);
+      }
+    }
+  }
+  if (!opened) {
+    return false;
+  }
+  (void)origin;
+  bool periodic[3];
+  double edge[3];
+  double originW[3];
+  for (int d = 0; d < 3; d++) {
+    // A gap wider than the cutoff holds no pair, so that axis does not wrap.
+    // One extra cutoff keeps the periodic image of the window outside the shell.
+    periodic[d] = !(lenBox[d] - len[d] > rcutoff);
+    if (periodic[d]) {
+      edge[d] = lenBox[d];
+      originW[d] = origin[d];
+    } else {
+      edge[d] = std::max(len[d], 0.0) + rcutoff + 1.0e-6;
+      originW[d] = 0.0;
+    }
+  }
+#ifndef SEAMS_HAS_LINKCELL
+  (void)periodic;
+  (void)edge;
+  (void)originW;
+  return false;
+#else
+  seams::adoptThreads();
+  thread_local std::vector<double> xyz;
+  xyz.resize(static_cast<std::size_t>(n) * 3);
+  std::vector<char> anchor(static_cast<std::size_t>(n), 1);
+  if (source != nullptr) {
+    for (int i = 0; i < n; i++) {
+      anchor[static_cast<std::size_t>(i)] =
+          static_cast<int>(source->size()) > i && (*source)[static_cast<std::size_t>(i)] != 0;
+    }
+  }
+  for (int i = 0; i < n; i++) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    const double raw[3] = {p.x, p.y, p.z};
+    for (int d = 0; d < 3; d++) {
+      xyz[static_cast<std::size_t>(i) * 3 + static_cast<std::size_t>(d)] =
+          periodic[d] ? raw[d]
+                      : local[static_cast<std::size_t>(i) * 3 + static_cast<std::size_t>(d)];
+    }
+  }
+  const double volume = edge[0] * edge[1] * edge[2];
+  const double hint = std::max(
+      rcutoff, std::cbrt(kAtomsPerLinkcellCell * volume / static_cast<double>(n)));
+  thread_local std::vector<linkcell::ShiftedPair> found;
+  try {
+    const linkcell::Cell cell = linkcell::Cell::from_vectors(
+        {edge[0], 0.0, 0.0}, {0.0, edge[1], 0.0}, {0.0, 0.0, edge[2]},
+        {originW[0], originW[1], originW[2]});
+    const lc_cell raw = cell.raw();
+    std::size_t count = 0;
+    // One side of each pair. Both atoms are written onto an anchor row below.
+    if (lc_pairs_within_rows(xyz.data(), static_cast<std::size_t>(n), &raw, rcutoff, nullptr,
+                             hint, 1, nullptr, 0, &count) != 0) {
+      return false;
+    }
+    found.resize(count);
+    if (count > 0 &&
+        lc_pairs_within_rows(xyz.data(), static_cast<std::size_t>(n), &raw, rcutoff, nullptr,
+                             hint, 1, reinterpret_cast<lc_pair *>(found.data()), count,
+                             &count) != 0) {
+      return false;
+    }
+    found.resize(count);
+  } catch (const linkcell::Error &) {
+    return false;
+  }
+  const std::vector<int> indexToID = indexToIDTable(yCloud);
+  std::vector<int> degree(static_cast<std::size_t>(n), 0);
+  for (const auto &sp : found) {
+    if (sp.i == sp.j || sp.i < 0 || sp.j < 0 || sp.i >= n || sp.j >= n) {
+      continue;
+    }
+    if (anchor[static_cast<std::size_t>(sp.i)]) {
+      ++degree[static_cast<std::size_t>(sp.i)];
+    }
+    if (anchor[static_cast<std::size_t>(sp.j)]) {
+      ++degree[static_cast<std::size_t>(sp.j)];
+    }
+  }
+  std::vector<int> cursor(static_cast<std::size_t>(n) + 1, 0);
+  for (int i = 0; i < n; i++) {
+    cursor[static_cast<std::size_t>(i) + 1] =
+        cursor[static_cast<std::size_t>(i)] + degree[static_cast<std::size_t>(i)];
+  }
+  std::vector<int> partner(static_cast<std::size_t>(cursor[static_cast<std::size_t>(n)]));
+  std::vector<int> at = cursor;
+  for (const auto &sp : found) {
+    if (sp.i == sp.j || sp.i < 0 || sp.j < 0 || sp.i >= n || sp.j >= n) {
+      continue;
+    }
+    if (anchor[static_cast<std::size_t>(sp.i)]) {
+      partner[static_cast<std::size_t>(at[static_cast<std::size_t>(sp.i)]++)] = sp.j;
+    }
+    if (anchor[static_cast<std::size_t>(sp.j)]) {
+      partner[static_cast<std::size_t>(at[static_cast<std::size_t>(sp.j)]++)] = sp.i;
+    }
+  }
+  if (static_cast<int>(rows.size()) != n) {
+    rows.assign(static_cast<std::size_t>(n), {});
+  } else {
+    for (auto &row : rows) {
+      row.clear();
+    }
+  }
+  for (int i = 0; i < n; i++) {
+    if (indexToID[static_cast<std::size_t>(i)] == -1) {
+      continue;
+    }
+    auto &row = rows[static_cast<std::size_t>(i)];
+    row.push_back(indexToID[static_cast<std::size_t>(i)]);
+    if (!anchor[static_cast<std::size_t>(i)]) {
+      continue;
+    }
+    const int begin = cursor[static_cast<std::size_t>(i)];
+    const int end = cursor[static_cast<std::size_t>(i) + 1];
+    std::sort(partner.begin() + begin, partner.begin() + end);
+    int prev = -1;
+    for (int t = begin; t < end; t++) {
+      const int j = partner[static_cast<std::size_t>(t)];
+      if (j == prev) {
+        continue;
+      }
+      prev = j;
+      if (indexToID[static_cast<std::size_t>(j)] != -1) {
+        row.push_back(indexToID[static_cast<std::size_t>(j)]);
+      }
+    }
+  }
+  return true;
+#endif
+}
+
 const std::vector<std::vector<int>> &nneigh::reusedShellList(
     double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<char> *source) {
@@ -691,6 +969,9 @@ const std::vector<std::vector<int>> &nneigh::reusedShellList(
   const int n = yCloud.nop;
   if (n <= 0 || rcutoff <= 0.0) {
     rows.clear();
+    return rows;
+  }
+  if (blockWindowRows(yCloud, rcutoff, source, rows)) {
     return rows;
   }
   double H[3][3];

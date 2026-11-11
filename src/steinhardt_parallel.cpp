@@ -983,7 +983,7 @@ void readSteinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &y
 #ifdef SEAMS_HAS_MPI
 namespace {
 
-std::vector<std::vector<int>> qRows(
+const std::vector<std::vector<int>> &qRows(
     const molSys::PointCloud<molSys::Point<double>, double> &cloud, double cutoff,
     const std::vector<char> &owned) {
   bool single = true;
@@ -993,10 +993,16 @@ std::vector<std::vector<int>> qRows(
       break;
     }
   }
-  if (single || cloud.nop < 40000) {
-    return nneigh::neighListO(cutoff, cloud, 1);
+  static std::vector<std::vector<int>> window;
+  if (nneigh::blockWindowRows(cloud, cutoff, single ? nullptr : &owned, window)) {
+    return window;
   }
-  return nneigh::reusedShellList(cutoff, cloud, &owned);
+  if (single || cloud.nop < 40000) {
+    window = nneigh::neighListO(cutoff, cloud, 1);
+  } else {
+    window = nneigh::reusedShellList(cutoff, cloud, &owned);
+  }
+  return window;
 }
 
 } // namespace
@@ -1015,7 +1021,7 @@ SteinhardtQl distributedSteinhardt(
     return steinhardtQl(full, rows, orderL);
   }
   auto &work = seams::domain::gatherWork(full, cutoff, comm);
-  const auto rows = qRows(work.cloud, cutoff, work.share.owned);
+  const auto &rows = qRows(work.cloud, cutoff, work.share.owned);
   const int width = steinhardtQlmWidth(orderL);
   const NeighbourCSR graph = flatten(work.cloud, rows);
   std::vector<double> qlm(static_cast<std::size_t>(graph.nop) * static_cast<std::size_t>(width),

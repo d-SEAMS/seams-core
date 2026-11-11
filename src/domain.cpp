@@ -267,7 +267,23 @@ std::vector<std::vector<int>> ringsOf(const Cloud &local, double cutoff,
   if (local.nop == 0) {
     return {};
   }
-  auto nList = nneigh::getNewNeighbourListByIndex(local, cutoff);
+  std::vector<std::vector<int>> nList;
+  static std::vector<std::vector<int>> idRows;
+  if (nneigh::blockWindowRows(local, cutoff, nullptr, idRows)) {
+    nList.assign(static_cast<std::size_t>(local.nop), {});
+    for (int k = 0; k < local.nop; k++) {
+      auto &row = nList[static_cast<std::size_t>(k)];
+      row.push_back(k);
+      for (std::size_t j = 1; j < idRows[static_cast<std::size_t>(k)].size(); j++) {
+        const auto it = local.idIndexMap.find(idRows[static_cast<std::size_t>(k)][j]);
+        if (it != local.idIndexMap.end()) {
+          row.push_back(it->second);
+        }
+      }
+    }
+  } else {
+    nList = nneigh::getNewNeighbourListByIndex(local, cutoff);
+  }
   const int nLocal = static_cast<int>(nList.size());
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (nLocal >= kParallelMin && !omp_in_parallel())

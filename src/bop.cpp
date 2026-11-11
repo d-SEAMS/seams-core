@@ -1953,7 +1953,7 @@ void chill::correlFromOrder(molSys::PointCloud<molSys::Point<double>, double> &y
 #ifdef SEAMS_HAS_MPI
 namespace {
 
-std::vector<std::vector<int>> shellRows(
+const std::vector<std::vector<int>> &shellRows(
     const molSys::PointCloud<molSys::Point<double>, double> &cloud, double cutoff,
     const std::vector<char> &owned) {
   bool single = true;
@@ -1963,10 +1963,16 @@ std::vector<std::vector<int>> shellRows(
       break;
     }
   }
-  if (single || cloud.nop < 40000) {
-    return nneigh::neighListO(cutoff, cloud, 1);
+  static std::vector<std::vector<int>> window;
+  if (nneigh::blockWindowRows(cloud, cutoff, single ? nullptr : &owned, window)) {
+    return window;
   }
-  return nneigh::reusedShellList(cutoff, cloud, &owned);
+  if (single || cloud.nop < 40000) {
+    window = nneigh::neighListO(cutoff, cloud, 1);
+  } else {
+    window = nneigh::reusedShellList(cutoff, cloud, &owned);
+  }
+  return window;
 }
 
 void writeStaggered(molSys::PointCloud<molSys::Point<double>, double> &cloud, int atom,
@@ -1995,7 +2001,7 @@ void chill::distributedChillPlus(molSys::PointCloud<molSys::Point<double>, doubl
     return;
   }
   auto &work = seams::domain::gatherWork(full, cutoff, comm);
-  const auto rows = shellRows(work.cloud, cutoff, work.share.owned);
+  const auto &rows = shellRows(work.cloud, cutoff, work.share.owned);
   BondOrder order;
   bondOrder(work.cloud, rows, rule, order, &work.share.owned);
   const int nop = work.cloud.nop;

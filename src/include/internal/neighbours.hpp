@@ -361,6 +361,19 @@ const std::vector<std::vector<int>> &reusedShellList(
     double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<char> *source);
 
+//! Neighbour rows on a cell grid that covers the owned block plus its halo.
+//! Anchors are folded onto the first owned atom. Every atom, ghosts
+//! included, is shifted by a box length so it sits against that block. An
+//! axis whose empty gap is wider than the cutoff does not wrap, and the
+//! fused cutoff list runs on that window rather than on the periodic box.
+//! Returns false when the atoms fill the box or the box is not orthorhombic.
+//! Rows are atom IDs, self first, in the same order as neighListO. A null
+//! source marks every atom as an anchor; otherwise only marked atoms
+//! receive partners.
+bool blockWindowRows(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double rcutoff,
+    const std::vector<char> *source, std::vector<std::vector<int>> &rows);
+
 bool cellListRowsThreaded(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &subset, double rcutoff,
