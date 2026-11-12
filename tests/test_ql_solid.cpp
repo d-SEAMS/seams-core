@@ -200,3 +200,43 @@ TEST_CASE("Cartesian l=4 matches the trigonometric harmonic", "[ql][solid]") {
     }
   }
 }
+
+TEST_CASE("fused q4 q6 and q-bar match the cutoff Steinhardt", "[ql][chill]") {
+  auto check = [](molSys::PointCloud<molSys::Point<double>, double> cloud) {
+    auto labeled = cloud;
+    const auto q4 = chill::steinhardtQlCutoff(cloud, 3.5, 4, 1, true);
+    const auto q6 = chill::steinhardtQlCutoff(cloud, 3.5, 6, 1, true);
+    REQUIRE(chill::chillPlusPublishedCutoff(labeled, 3.5, 1));
+    std::vector<double> fq4, fq6, fq4bar, fq6bar;
+    auto fused = cloud;
+    REQUIRE(chill::q4q6ChillPlus(fused, 3.5, 1, fq4, fq6, fq4bar, fq6bar));
+    REQUIRE(maxAbs(q4.ql, fq4) < 1e-12);
+    REQUIRE(maxAbs(q6.ql, fq6) < 1e-12);
+    REQUIRE(maxAbs(q4.qlBar, fq4bar) < 1e-12);
+    REQUIRE(maxAbs(q6.qlBar, fq6bar) < 1e-12);
+    for (int i = 0; i < cloud.nop; i++) {
+      REQUIRE(fused.pts[static_cast<std::size_t>(i)].iceType ==
+              labeled.pts[static_cast<std::size_t>(i)].iceType);
+    }
+  };
+  check(iceIc(2));
+  molSys::PointCloud<molSys::Point<double>, double> liquid;
+  liquid.box = {20.0, 20.0, 20.0};
+  liquid.boxLow = {0.0, 0.0, 0.0};
+  liquid.currentFrame = 1;
+  std::mt19937 rng(91001);
+  std::uniform_real_distribution<double> u(0.0, 20.0);
+  for (int i = 0; i < 70; i++) {
+    molSys::Point<double> p;
+    p.x = u(rng);
+    p.y = u(rng);
+    p.z = u(rng);
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = p.atomID;
+    liquid.idIndexMap[p.atomID] = liquid.nop;
+    liquid.pts.push_back(p);
+    ++liquid.nop;
+  }
+  check(liquid);
+}

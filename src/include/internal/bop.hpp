@@ -330,14 +330,15 @@ bool chillPlusPublishedCutoff(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
     int typeI);
 
-//! One cutoff list and one bond pass for local q4, local q6 and the
-//! published CHILL+ labels. q4 and q6 are the same values as
-//! steinhardtQlCutoff with average left off. Returns false when the
-//! atoms are not one type or the cutoff list is not available, and
-//! then writes nothing.
+//! One cutoff list and one bond pass for local q4, local q6, their
+//! Lechner-Dellago averages, and the published CHILL+ labels. The four
+//! q arrays match steinhardtQlCutoff with averaging on. Returns false
+//! when the atoms are not one type or the cutoff list is not available,
+//! and then writes nothing.
 bool q4q6ChillPlus(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
-    int typeI, std::vector<double> &q4, std::vector<double> &q6);
+    int typeI, std::vector<double> &q4, std::vector<double> &q6,
+    std::vector<double> &q4bar, std::vector<double> &q6bar);
 
 //! Cubic pre-filter from discovery/pysr_prefilter.py. The selected
 //! expression is cmean^4. It writes cubic and returns true only when

@@ -1601,7 +1601,8 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
 
 bool chill::q4q6ChillPlus(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
-    int typeI, std::vector<double> &q4, std::vector<double> &q6) {
+    int typeI, std::vector<double> &q4, std::vector<double> &q6,
+    std::vector<double> &q4bar, std::vector<double> &q6bar) {
   const int n = yCloud.nop;
   if (n <= 0 || !(cutoff > 0.0) ||
       !(yCloud.box.size() == 3 || yCloud.box.size() >= 6)) {
@@ -1614,6 +1615,8 @@ bool chill::q4q6ChillPlus(
   }
   q4.assign(static_cast<std::size_t>(n), 0.0);
   q6.assign(static_cast<std::size_t>(n), 0.0);
+  q4bar.assign(static_cast<std::size_t>(n), 0.0);
+  q6bar.assign(static_cast<std::size_t>(n), 0.0);
   seams::prepareCompute();
   const bool tilt = yCloud.box.size() >= 6;
   const gen::FracBox frac = gen::makeFracBox(yCloud);
@@ -1639,6 +1642,8 @@ bool chill::q4q6ChillPlus(
     return false;
   }
   std::vector<double> xyz(static_cast<std::size_t>(n) * 3);
+  std::vector<double> qlm4(static_cast<std::size_t>(n) * 18, 0.0);
+  std::vector<double> qlm6(static_cast<std::size_t>(n) * 26, 0.0);
   std::vector<double> q3(static_cast<std::size_t>(n) * kRealL3, 0.0);
   std::vector<double> qn(static_cast<std::size_t>(n), 0.0);
   std::vector<int> chosen(static_cast<std::size_t>(n) * 4, -1);
@@ -1792,6 +1797,8 @@ bool chill::q4q6ChillPlus(
       }
       q4[static_cast<std::size_t>(i)] = std::sqrt(pre4 * sum4);
       q6[static_cast<std::size_t>(i)] = std::sqrt(pre6 * sum6);
+      std::copy_n(acc4, 18, qlm4.data() + static_cast<std::size_t>(i) * 18);
+      std::copy_n(acc6, 26, qlm6.data() + static_cast<std::size_t>(i) * 26);
     }
     double bx[4], by[4], bz[4];
     for (int s = 0; s < keep; ++s) {
@@ -1810,6 +1817,33 @@ bool chill::q4q6ChillPlus(
     double *dst = q3.data() + static_cast<std::size_t>(i) * kRealL3;
     for (int c = 0; c < kRealL3; ++c) dst[c] = acc[c];
     qn[static_cast<std::size_t>(i)] = useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
+  }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (parallel)
+#endif
+  for (int i = 0; i < n; ++i) {
+    const int a = offsets[static_cast<std::size_t>(i)];
+    const int b = offsets[static_cast<std::size_t>(i) + 1];
+    const double inv = 1.0 / static_cast<double>(b - a + 1);
+    auto average = [&](const std::vector<double> &qlm, int width, double pre,
+                       std::vector<double> &out) {
+      double acc[26];
+      const double *self = qlm.data() + static_cast<std::size_t>(i) * width;
+      for (int c = 0; c < width; ++c) acc[c] = self[c];
+      for (int p = a; p < b; ++p) {
+        const int j = cols[static_cast<std::size_t>(p)];
+        const double *other = qlm.data() + static_cast<std::size_t>(j) * width;
+        for (int c = 0; c < width; ++c) acc[c] += other[c];
+      }
+      double sum = 0.0;
+      for (int c = 0; c < width; ++c) {
+        acc[c] *= inv;
+        sum += acc[c] * acc[c];
+      }
+      out[static_cast<std::size_t>(i)] = std::sqrt(pre * sum);
+    };
+    average(qlm4, 18, pre4, q4bar);
+    average(qlm6, 26, pre6, q6bar);
   }
   const chill::BondClassifier rule = chill::chillPlusRule();
 #ifdef SEAMS_HAS_OPENMP

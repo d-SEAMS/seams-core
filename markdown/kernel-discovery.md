@@ -294,3 +294,14 @@ OVITO 19.28 and mdapy 4.26 at 10648 molecules, 8.48 against 105.61
 and 39.37 at 110592, and 91.91 against 827.34 and 370.05 at 884736.
 One thread: 6.04 / 79.69 / 21.57, 51.62 / 734.37 / 205.83, and
 483.40 / 5859.74 / 2275.57.
+
+~seams_frame_q4_q6_chill~ also writes the Lechner-Dellago
+\(\bar q_4\) and \(\bar q_6\). On ideal ice they match the local
+parameters. The Python wrapper is ~q4_q6_chill~ in
+=bindings/python/chill_plus.py=.
+
+One thread, q6, 884736 molecules, cutoff 3.5
+(`discovery/v7-session.txt`): seams median 469.7 ms, OVITO 489.1 ms.
+The median margin is 19.4 ms. The eight seams samples run from 437 ms
+to 529 ms and the eight OVITO samples from 479 ms to 492 ms, so the
+sets overlap.

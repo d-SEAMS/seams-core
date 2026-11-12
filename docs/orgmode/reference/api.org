@@ -91,6 +91,12 @@ The face-edge window is the same string on every front.
 Python is ~frame.cages_by_signature("512", edge="none")~.
 Lua (~require("dseams")~) is ~dseams.cages_by_signature(frame, "512", {edge = "none"})~.
 The C entry those packages call is ~seams_frame_signature_edge~; a null edge string is the default ~2.65,3.15~ in the coordinate units of the file.
+
+* Fused q4, q6 and CHILL+
+
+~seams_frame_q4_q6_chill~ in =bindings/cxx/seams_lang.h= builds one cutoff list and, on that pass, the local Steinhardt \(q_4\) and \(q_6\), the Lechner-Dellago averages \(\bar q_4\) and \(\bar q_6\), and the published CHILL+ labels. The averages are the same neighbour mean of \(q_{lm}\) as ~steinhardtQlCutoff~ with averaging on. ~q4bar~ and ~q6bar~ may be null. Labels use the published closed edges, not ~ovito-chill+~.
+
+The Python wrapper is ~q4_q6_chill~ in =bindings/python/chill_plus.py=. It returns ~q4~, ~q6~, ~q4bar~, ~q6bar~, ~labels~ and ~counts~. ~SEAMS_LANG_LIB~ selects ~libseams_lang~. Nucleation analysis reads ~q6bar~.
 ~none~ leaves the cage bound to the face census.
 Choose the window as the heavy-atom contact range of the model, and widen it for a compressed cell or a guest that stretches a cage.
 A nanometre file uses ~0.265,0.315~.

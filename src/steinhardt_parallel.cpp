@@ -1082,6 +1082,9 @@ SteinhardtQl cutoffSolid(
   }
   constexpr double pi = 3.14159265358979323846;
   const double prefactor = 4.0 * pi / (2.0 * orderL + 1.0);
+  const double axy = tilt ? frac.xy / frac.ly : 0.0;
+  const double axz = tilt ? frac.xz / frac.lz : 0.0;
+  const double ayz = tilt ? frac.yz / frac.lz : 0.0;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (parallel)
 #endif
@@ -1125,9 +1128,6 @@ SteinhardtQl cutoffSolid(
         dX -= frac.lx * std::round(dX / frac.lx);
         dY -= frac.ly * std::round(dY / frac.ly);
         dZ -= frac.lz * std::round(dZ / frac.lz);
-        const double axy = frac.xy / frac.ly;
-        const double axz = frac.xz / frac.lz;
-        const double ayz = frac.yz / frac.lz;
         dx = dX + axy * dY + axz * dZ;
         dy = dY + ayz * dZ;
         dz = dZ;

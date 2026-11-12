@@ -503,8 +503,8 @@ int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
 }
 
 int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
-                            double *q4, double *q6, int *labels,
-                            int counts9[9]) {
+                            double *q4, double *q6, double *q4bar,
+                            double *q6bar, int *labels, int counts9[9]) {
   clear_error();
   if (frame == nullptr || q4 == nullptr || q6 == nullptr) {
     set_error("q4, q6 and a frame are required");
@@ -514,7 +514,9 @@ int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
     const int typ = resolve_type(frame->cloud, type);
     std::vector<double> out4;
     std::vector<double> out6;
-    if (!chill::q4q6ChillPlus(frame->cloud, cutoff, typ, out4, out6)) {
+    std::vector<double> bar4;
+    std::vector<double> bar6;
+    if (!chill::q4q6ChillPlus(frame->cloud, cutoff, typ, out4, out6, bar4, bar6)) {
       set_error("fused q4 q6 CHILL+ is not available for this frame");
       return 1;
     }
@@ -522,7 +524,15 @@ int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
     if (n > 0) {
       std::memcpy(q4, out4.data(), static_cast<std::size_t>(n) * sizeof(double));
       std::memcpy(q6, out6.data(), static_cast<std::size_t>(n) * sizeof(double));
+      if (q4bar != nullptr) {
+        std::memcpy(q4bar, bar4.data(), static_cast<std::size_t>(n) * sizeof(double));
+      }
+      if (q6bar != nullptr) {
+        std::memcpy(q6bar, bar6.data(), static_cast<std::size_t>(n) * sizeof(double));
+      }
     }
+    frame->ql = std::move(out6);
+    frame->qlbar = std::move(bar6);
     frame->labels.assign(static_cast<std::size_t>(std::max(n, 0)), 6);
     int counts[9] = {};
     for (int i = 0; i < n; ++i) {
