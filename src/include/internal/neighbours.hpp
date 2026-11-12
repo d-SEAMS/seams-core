@@ -454,6 +454,14 @@ std::vector<std::vector<int>> kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     double candidateCutoff, int typeI, bool mutual = true);
 
+//! Packed nominations from the same search as kNearestNeighbourList.
+//! `xyz` is n by 3 and `nom` is n by k cloud indices, nearest first,
+//! with unused slots set to -1. The rows are not symmetrized.
+void kNearestPacked(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, int typeI, std::vector<double> &xyz,
+    std::vector<int> &nom);
+
 /** k-nearest graph on a type set (water oxygens). Substrate, ions and
  *  other species never appear as neighbours. An empty set is no atoms. */
 std::vector<std::vector<int>> kNearestNeighbourList(

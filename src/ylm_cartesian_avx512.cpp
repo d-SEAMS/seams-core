@@ -45,6 +45,31 @@ void storeLanes(const V *reV, const V *imV, int nComp, int b, int lanes,
 
 } // namespace
 
+void evalSolidLanes(int orderL, __m512d x0, __m512d y0, __m512d z0, __mmask8 live,
+                    V *reV, V *imV) {
+  const __m512d r2 = _mm512_add_pd(
+      _mm512_add_pd(_mm512_mul_pd(x0, x0), _mm512_mul_pd(y0, y0)),
+      _mm512_mul_pd(z0, z0));
+  const __m512d zero = _mm512_setzero_pd();
+  const __m512d one = _mm512_set1_pd(1.0);
+  __m512d inv;
+  if (orderL == 6) {
+    const __m512d r4 = _mm512_mul_pd(r2, r2);
+    inv = _mm512_mask_div_pd(zero, live, one, _mm512_mul_pd(r4, r2));
+  } else if (orderL == 4) {
+    inv = _mm512_mask_div_pd(zero, live, one, _mm512_mul_pd(r2, r2));
+  } else {
+    inv = _mm512_mask_div_pd(zero, live, one, _mm512_mul_pd(r2, _mm512_sqrt_pd(r2)));
+  }
+  const double *norm = (orderL == 3) ? N3 : (orderL == 4) ? N4 : N6;
+  solid::eval(orderL, V(x0), V(y0), V(z0), V(r2), V(inv), norm, reV, imV);
+  const int nComp = 2 * orderL + 1;
+  for (int m = 0; m < nComp; ++m) {
+    reV[m].v = _mm512_mask_blend_pd(live, zero, reV[m].v);
+    imV[m].v = _mm512_mask_blend_pd(live, zero, imV[m].v);
+  }
+}
+
 void ylmBatchAvx512(int orderL, const double *dx, const double *dy,
                     const double *dz, int n, double *re, double *im) {
   const int nComp = 2 * orderL + 1;
@@ -57,25 +82,25 @@ void ylmBatchAvx512(int orderL, const double *dx, const double *dy,
         _mm512_add_pd(_mm512_mul_pd(x0, x0), _mm512_mul_pd(y0, y0)),
         _mm512_mul_pd(z0, z0));
     const __mmask8 live = _mm512_cmp_pd_mask(r2, _mm512_setzero_pd(), _CMP_GT_OQ);
-    const __m512d inv = _mm512_mask_div_pd(_mm512_setzero_pd(), live, _mm512_set1_pd(1.0),
-                                           _mm512_sqrt_pd(r2));
-    V x(_mm512_mul_pd(x0, inv));
-    V y(_mm512_mul_pd(y0, inv));
-    V z(_mm512_mul_pd(z0, inv));
     V reV[13];
     V imV[13];
-    evalUnit(orderL, x, y, z, reV, imV);
-    // Dead lanes (zero displacement) stay zero, matching ylmReal.
-    for (int m = 0; m < nComp; ++m) {
-      reV[m].v = _mm512_mask_blend_pd(live, _mm512_setzero_pd(), reV[m].v);
-      imV[m].v = _mm512_mask_blend_pd(live, _mm512_setzero_pd(), imV[m].v);
-    }
+    evalSolidLanes(orderL, x0, y0, z0, live, reV, imV);
     storeLanes(reV, imV, nComp, b, 8, re, im);
   }
-  for (; b < n; ++b) {
-    ylmReal(orderL, dx[b], dy[b], dz[b],
-            re + static_cast<std::size_t>(b) * static_cast<std::size_t>(nComp),
-            im + static_cast<std::size_t>(b) * static_cast<std::size_t>(nComp));
+  if (b < n) {
+    const int tail = n - b;
+    const __mmask8 live = static_cast<__mmask8>((1u << tail) - 1u);
+    const __m512d x0 = _mm512_maskz_loadu_pd(live, dx + b);
+    const __m512d y0 = _mm512_maskz_loadu_pd(live, dy + b);
+    const __m512d z0 = _mm512_maskz_loadu_pd(live, dz + b);
+    const __m512d r2 = _mm512_add_pd(
+        _mm512_add_pd(_mm512_mul_pd(x0, x0), _mm512_mul_pd(y0, y0)),
+        _mm512_mul_pd(z0, z0));
+    const __mmask8 ok = _mm512_mask_cmp_pd_mask(live, r2, _mm512_setzero_pd(), _CMP_GT_OQ);
+    V reV[13];
+    V imV[13];
+    evalSolidLanes(orderL, x0, y0, z0, ok, reV, imV);
+    storeLanes(reV, imV, nComp, b, tail, re, im);
   }
 }
 

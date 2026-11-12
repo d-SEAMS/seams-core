@@ -412,6 +412,14 @@ steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     double cutoff, int orderL, int typeI, bool average);
 
+//! Mutual k-nearest Steinhardt parameters. The coordinate buffer built
+//! for the nomination is the one the harmonics read, and the neighbour
+//! rows stay in one packed array. l is 3, 4 or 6; other degrees return
+//! the result of building the mutual graph and calling steinhardtQl.
+[[nodiscard]] SteinhardtQl steinhardtQlMutual(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, int typeI, int orderL);
+
 //! Whether steinhardtQl splits atoms over the ranks of an initialised
 //! MPI_COMM_WORLD (true unless set). A driver that gives each rank whole
 //! frames of its own turns it off.

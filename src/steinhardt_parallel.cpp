@@ -19,9 +19,11 @@
 #include <ylm_batch.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <cstdlib>
+#include <iostream>
 #include <numeric>
 #include <vector>
 
@@ -440,11 +442,11 @@ void qlmOneAtomDrPairwise(int iatom, int orderL, const double *dr,
   }
 }
 
-// Sum l = 6 over one atom's bonds. Groups of eight go through the
-// Cartesian batch; the sum is still in neighbour-list order.
-void qlmOneAtomL6Batch(int iatom, const double *dr, const int *offsets, double *qlm) {
-  constexpr int orderL = 6;
-  constexpr int nComp = 13;
+// Sum one atom's bonds. Groups of eight go through the Cartesian batch;
+// the sum is still in neighbour-list order. l is 3, 4 or 6.
+void qlmOneAtomBatch(int iatom, int orderL, const double *dr, const int *offsets,
+                     double *qlm) {
+  const int nComp = 2 * orderL + 1;
   const int row = iatom * nComp;
   for (int m = 0; m < nComp; m++) {
     qlm[2 * (row + m)] = 0.0;
@@ -455,8 +457,9 @@ void qlmOneAtomL6Batch(int iatom, const double *dr, const int *offsets, double *
   double xs[8];
   double ys[8];
   double zs[8];
-  double re[8 * nComp];
-  double im[8 * nComp];
+  // l <= 6, so one batch holds at most 8 * 13 components.
+  double re[8 * 13];
+  double im[8 * 13];
   int filled = 0;
   int nUsed = 0;
   const auto flush = [&]() {
@@ -526,7 +529,7 @@ void runPass1(const NeighbourCSR &g, int orderL, int begin, int end,
   // l = 6 batches the Cartesian harmonic eight bonds at a time. Each
   // atom still sums its own bonds in list order, so the value matches
   // the one-bond kernel and does not depend on the thread count.
-  const bool batchL6 = orderL == 6 && !pairwise;
+  const bool batchSolid = (orderL == 3 || orderL == 4 || orderL == 6) && !pairwise;
 #ifdef SEAMS_HAS_OPENMP
   const bool useThreads = g.nop >= kParallelThreshold && omp_get_max_threads() > 1;
 #pragma omp parallel for schedule(static) if (useThreads)
@@ -534,8 +537,8 @@ void runPass1(const NeighbourCSR &g, int orderL, int begin, int end,
   for (int i = begin; i < end; i++) {
     if (pairwise) {
       qlmOneAtomDrPairwise(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
-    } else if (batchL6) {
-      qlmOneAtomL6Batch(i, g.dr.data(), g.offsets.data(), qlm.data());
+    } else if (batchSolid) {
+      qlmOneAtomBatch(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
     } else {
       seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
                                       g.cols.data(), qlm.data());
@@ -547,7 +550,7 @@ void runPass1Mask(const NeighbourCSR &g, int orderL, std::vector<double> &qlm,
                   const std::vector<char> *which) {
   const bool pairwise =
       seams::product::reduction() != seams::product::Reduction::Left && orderL <= 8;
-  const bool batchL6 = orderL == 6 && !pairwise;
+  const bool batchSolid = (orderL == 3 || orderL == 4 || orderL == 6) && !pairwise;
 #ifdef SEAMS_HAS_OPENMP
   const bool useThreads = g.nop >= kParallelThreshold && omp_get_max_threads() > 1;
 #pragma omp parallel for schedule(static) if (useThreads)
@@ -559,8 +562,8 @@ void runPass1Mask(const NeighbourCSR &g, int orderL, std::vector<double> &qlm,
     }
     if (pairwise) {
       qlmOneAtomDrPairwise(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
-    } else if (batchL6) {
-      qlmOneAtomL6Batch(i, g.dr.data(), g.offsets.data(), qlm.data());
+    } else if (batchSolid) {
+      qlmOneAtomBatch(i, orderL, g.dr.data(), g.offsets.data(), qlm.data());
     } else {
       seams::steinhardt::qlmOneAtomDr(i, orderL, g.dr.data(), g.offsets.data(),
                                       g.cols.data(), qlm.data());
@@ -962,6 +965,16 @@ void localQlOnly(const NeighbourCSR &g, int orderL, const std::vector<double> &q
   }
 }
 
+bool rowLists(const int *nom, int k, int row, int target) {
+  const int *base = nom + static_cast<std::size_t>(row) * static_cast<std::size_t>(k);
+  for (int t = 0; t < k; ++t) {
+    if (base[t] == target) {
+      return true;
+    }
+  }
+  return false;
+}
+
 } // namespace
 
 SteinhardtQl steinhardtQlCutoff(
@@ -1037,6 +1050,182 @@ SteinhardtQl steinhardtQlCutoff(
   } else {
     runPass2(g, orderL, 0, g.nop, qlm, result.ql, result.qlBar);
   }
+  return result;
+}
+
+SteinhardtQl steinhardtQlMutual(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, int typeI, int orderL) {
+  const int n = yCloud.nop;
+  if (n <= 0 || k <= 0 || k > 32 ||
+      (orderL != 3 && orderL != 4 && orderL != 6)) {
+    const auto rows =
+        nneigh::kNearestNeighbourList(yCloud, std::max(k, 0), candidateCutoff, typeI, true);
+    return steinhardtQl(yCloud, rows, orderL);
+  }
+
+  const bool timing = std::getenv("SEAMS_QL_TIME") != nullptr;
+  const auto t0 = std::chrono::steady_clock::now();
+  // Repeated frames of one size reuse the buffers. The benchmark calls
+  // this once per sample; allocating the q_lm row every time was visible.
+  struct Scratch {
+    std::vector<double> xyz;
+    std::vector<int> nom;
+    std::vector<int> nkeep;
+    std::vector<int> neigh;
+    std::vector<double> qlm;
+    int n = -1;
+    int k = -1;
+    int orderL = -1;
+  };
+  static Scratch scratch;
+  if (scratch.n != n || scratch.k != k || scratch.orderL != orderL) {
+    scratch.nkeep.assign(static_cast<std::size_t>(n), 0);
+    scratch.neigh.assign(static_cast<std::size_t>(n) * static_cast<std::size_t>(k), -1);
+    scratch.qlm.assign(static_cast<std::size_t>(n) * static_cast<std::size_t>(2 * (2 * orderL + 1)),
+                       0.0);
+    scratch.n = n;
+    scratch.k = k;
+    scratch.orderL = orderL;
+  }
+  nneigh::kNearestPacked(yCloud, k, candidateCutoff, typeI, scratch.xyz, scratch.nom);
+  std::vector<double> &xyz = scratch.xyz;
+  std::vector<int> &nom = scratch.nom;
+  std::vector<int> &nkeep = scratch.nkeep;
+  std::vector<int> &neigh = scratch.neigh;
+  std::vector<double> &qlm = scratch.qlm;
+  const auto tNom = std::chrono::steady_clock::now();
+
+  const int nComp = 2 * orderL + 1;
+  const int width = 2 * nComp;
+  constexpr double pi = 3.14159265358979323846;
+  const double prefactor = 4.0 * pi / (2.0 * orderL + 1.0);
+  SteinhardtQl result;
+  result.ql.assign(static_cast<std::size_t>(n), 0.0);
+  result.qlBar.assign(static_cast<std::size_t>(n), 0.0);
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
+  const bool ortho = frame.ok && !frame.triclinic;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (n >= kParallelThreshold)
+#endif
+  for (int i = 0; i < n; i++) {
+    int seen[32];
+    int count = 0;
+    const int *row = nom.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(k);
+    const double xi = xyz[static_cast<std::size_t>(3 * i)];
+    const double yi = xyz[static_cast<std::size_t>(3 * i) + 1];
+    const double zi = xyz[static_cast<std::size_t>(3 * i) + 2];
+    double dxs[32];
+    double dys[32];
+    double dzs[32];
+    for (int t = 0; t < k; t++) {
+      const int j = row[t];
+      if (j < 0 || j >= n || j == i || !rowLists(nom.data(), k, j, i)) {
+        continue;
+      }
+      bool dup = false;
+      for (int s = 0; s < count; s++) {
+        if (seen[s] == j) {
+          dup = true;
+          break;
+        }
+      }
+      if (dup) {
+        continue;
+      }
+      const double xj = xyz[static_cast<std::size_t>(3 * j)];
+      const double yj = xyz[static_cast<std::size_t>(3 * j) + 1];
+      const double zj = xyz[static_cast<std::size_t>(3 * j) + 2];
+      double dx, dy, dz;
+      if (ortho) {
+        dx = xi - xj;
+        dy = yi - yj;
+        dz = zi - zj;
+        dx -= frame.lx * std::floor(dx / frame.lx + 0.5);
+        dy -= frame.ly * std::floor(dy / frame.ly + 0.5);
+        dz -= frame.lz * std::floor(dz / frame.lz + 0.5);
+      } else {
+        const auto image = gen::fracDelta(frame, xi, yi, zi, xj, yj, zj);
+        dx = image[0];
+        dy = image[1];
+        dz = image[2];
+      }
+      if (!(dx * dx + dy * dy + dz * dz > 0.0)) {
+        continue;
+      }
+      seen[count] = j;
+      dxs[count] = dx;
+      dys[count] = dy;
+      dzs[count] = dz;
+      ++count;
+    }
+    nkeep[static_cast<std::size_t>(i)] = count;
+    int *dstN = neigh.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(k);
+    for (int s = 0; s < count; s++) {
+      dstN[s] = seen[s];
+    }
+    double *dst = qlm.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(width);
+    if (count == 0) {
+      continue;
+    }
+    double re[32 * 13];
+    double im[32 * 13];
+    seams::ylm::ylmBatch(orderL, dxs, dys, dzs, count, re, im);
+    for (int b = 0; b < count; b++) {
+      const double *yr = re + static_cast<std::size_t>(b) * static_cast<std::size_t>(nComp);
+      const double *yi = im + static_cast<std::size_t>(b) * static_cast<std::size_t>(nComp);
+      for (int m = 0; m < nComp; m++) {
+        dst[2 * m] += yr[m];
+        dst[2 * m + 1] += yi[m];
+      }
+    }
+    const double inv = 1.0 / static_cast<double>(count);
+    double sum = 0.0;
+    for (int m = 0; m < nComp; m++) {
+      dst[2 * m] *= inv;
+      dst[2 * m + 1] *= inv;
+      sum += dst[2 * m] * dst[2 * m] + dst[2 * m + 1] * dst[2 * m + 1];
+    }
+    result.ql[static_cast<std::size_t>(i)] = std::sqrt(prefactor * sum);
+  }
+  const auto tY = std::chrono::steady_clock::now();
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (n >= kParallelThreshold)
+#endif
+  for (int i = 0; i < n; i++) {
+    const int count = nkeep[static_cast<std::size_t>(i)];
+    if (count == 0) {
+      result.qlBar[static_cast<std::size_t>(i)] = result.ql[static_cast<std::size_t>(i)];
+      continue;
+    }
+    const double *self = qlm.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(width);
+    const int *nb = neigh.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(k);
+    double sum = 0.0;
+    const double inv = 1.0 / static_cast<double>(count + 1);
+    for (int m = 0; m < nComp; m++) {
+      double re = self[2 * m];
+      double im = self[2 * m + 1];
+      for (int s = 0; s < count; s++) {
+        const double *other =
+            qlm.data() + static_cast<std::size_t>(nb[s]) * static_cast<std::size_t>(width);
+        re += other[2 * m];
+        im += other[2 * m + 1];
+      }
+      re *= inv;
+      im *= inv;
+      sum += re * re + im * im;
+    }
+    result.qlBar[static_cast<std::size_t>(i)] = std::sqrt(prefactor * sum);
+  }
+  if (timing) {
+    const auto ms = [](auto a, auto b) {
+      return std::chrono::duration<double, std::milli>(b - a).count();
+    };
+    const auto tEnd = std::chrono::steady_clock::now();
+    std::cerr << "ql-stages l=" << orderL << " n=" << n << " nom_ms=" << ms(t0, tNom)
+              << " ylm_ms=" << ms(tNom, tY) << " bar_ms=" << ms(tY, tEnd) << "\n";
+  }
+  seams::releaseTeam();
   return result;
 }
 

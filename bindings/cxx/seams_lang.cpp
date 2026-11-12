@@ -468,9 +468,11 @@ int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
   try {
     const int typ = resolve_type(frame->cloud, type);
     const double cand = cutoff + 1.5;
-    auto nList =
-        nneigh::kNearestNeighbourList(frame->cloud, 4, cand, typ, true);
-    const auto result = chill::steinhardtQl(frame->cloud, nList, order_l);
+    // Mutual four-nearest, same graph as before. The nomination's
+    // coordinate buffer is reused for the harmonics, so the atom-id
+    // rows are not built.
+    const auto result =
+        chill::steinhardtQlMutual(frame->cloud, 4, cand, typ, order_l);
     const int n = frame->cloud.nop;
     frame->ql = result.ql;
     frame->qlbar = result.qlBar;

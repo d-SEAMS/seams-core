@@ -1774,7 +1774,8 @@ bool typeAllowed(int type, int typeI, const std::vector<int> *types) {
 bool nominateByLinkcell(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     int typeI, double cellHint, std::vector<int> &nom,
-    const std::vector<int> *types = nullptr) {
+    const std::vector<int> *types = nullptr,
+    std::vector<double> *keepXyz = nullptr) {
   const int n = yCloud.nop;
   if (n <= 0 || k <= 0 || yCloud.box.size() < 3) {
     return true;
@@ -1785,7 +1786,11 @@ bool nominateByLinkcell(
   if (!(bx > 0.0 && by > 0.0 && bz > 0.0)) {
     return true;
   }
-  std::vector<double> xyz(static_cast<std::size_t>(n) * 3);
+  std::vector<double> localXyz;
+  std::vector<double> &xyz = keepXyz != nullptr ? *keepXyz : localXyz;
+  if (static_cast<int>(xyz.size()) != n * 3) {
+    xyz.resize(static_cast<std::size_t>(n) * 3);
+  }
   int nSrc = 0;
   bool uniform = true;
   for (int i = 0; i < n; i++) {
@@ -2107,6 +2112,37 @@ nneigh::kNearestNeighbourList(
   std::vector<std::vector<int>> out;
   fillGraphFromNom(yCloud, nom, k, mutual, out);
   return out;
+}
+
+void nneigh::kNearestPacked(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, int typeI, std::vector<double> &xyz,
+    std::vector<int> &nom) {
+  seams::adoptThreads();
+  const int n = yCloud.nop;
+  nom.assign(static_cast<std::size_t>(std::max(n, 0)) * static_cast<std::size_t>(std::max(k, 0)),
+             -1);
+  if (n <= 0 || k <= 0) {
+    return;
+  }
+  const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
+#ifdef SEAMS_HAS_LINKCELL
+  if (nominateByLinkcell(yCloud, k, typeI, hint, nom, nullptr, &xyz) &&
+      static_cast<int>(xyz.size()) == n * 3) {
+    return;
+  }
+#endif
+  if (nom.size() != static_cast<std::size_t>(n) * static_cast<std::size_t>(k) ||
+      std::all_of(nom.begin(), nom.end(), [](int v) { return v < 0; })) {
+    nom = nominatePacked(yCloud, k, typeI, hint);
+  }
+  xyz.resize(static_cast<std::size_t>(n) * 3);
+  for (int i = 0; i < n; i++) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    xyz[static_cast<std::size_t>(3 * i)] = p.x;
+    xyz[static_cast<std::size_t>(3 * i + 1)] = p.y;
+    xyz[static_cast<std::size_t>(3 * i + 2)] = p.z;
+  }
 }
 
 std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>

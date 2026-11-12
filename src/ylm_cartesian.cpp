@@ -30,7 +30,7 @@ void ylmBatchAvx512(int orderL, const double *dx, const double *dy,
 
 void ylmBatch(int orderL, const double *dx, const double *dy, const double *dz,
               int n, double *re, double *im) {
-  if (n <= 0 || (orderL != 3 && orderL != 6)) {
+  if (n <= 0 || (orderL != 3 && orderL != 4 && orderL != 6)) {
     return;
   }
 #if defined(SEAMS_YLM_AVX512)
