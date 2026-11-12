@@ -42,6 +42,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 - CHILL and CHILL+ default to `seeded` (the cutoff list). A build that treated the default as the mutual four-nearest graph now sees the cutoff shell. On the mixed TIP4P fixture, interClathrate moves from 12 to 9 and water moves from 238 to 241.
 - A reader error, including an XYZ coordinate that is not a number or a short XYZ frame, returns exit code 2 instead of skipping the atom or aborting.
+- `seams steinhardt` prints q4 and q6 next to q3 and q12. The cutoff shell is the default neighbour list for that command.
 
 ### Changed
 

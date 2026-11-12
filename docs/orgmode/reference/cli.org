@@ -47,7 +47,7 @@ pairs | density-z | domains~. ~chill_plus~ is an accepted alias of
 | ~chill-plus~ | published CHILL+ (shell of 4, four-nearest q3, neighbour test) | same as ~chill~, plus ~--rule~ |
 | ~ovito-chill+~ | OVITO 3.17.2 CHILL+ (shell of 4, full-shell q3, no neighbour test) | same as ~chill-plus~ |
 | ~symmetry~ | space group, one shell overlay, and the ice-label tally | the shell kernel; IRA and SOFI are used only when that build linked them |
-| ~rings~ | primitive rings up to size 6 on the cutoff list | ~nop N rings R~ then one ~size count~ row |
+| ~rings~ | primitive rings on the cutoff list. ~--max-ring N~ is the largest size (default 6) | ~nop N rings R~ then one ~size count~ row |
 | ~prisms~ | perfect and imperfect prisms of size 3 to 6 on the mutual four-nearest graph | ~nop N~ then ~size S perfect P imperfect I~ and a total line |
 | ~cluster~ | largest connected component of the loaded atoms | ~nop N largest L subset S percolation P~ |
 | ~cages~ | ice score on six-membered rings | ~nop N graph KIND hexagonal IH cubic IC water W~ |
@@ -57,7 +57,7 @@ pairs | density-z | domains~. ~chill_plus~ is an accepted alias of
 | ~fingerprint --library FILE[,FILE...]~ | atoms named by key libraries | ~nop N graph KIND hops H method M matched X label=count ... unmatched=U~ and, with several libraries, ~depth H1=n1 H2=n2~ |
 | ~ions~ | ions classed by their first water shell against the seeded cages | ~nop N ice A ions I in-ice X front Y liquid Z shell S shell-ice F~ |
 | ~f4~ | Rodger F4 on H-O...O-H pairs | ~nop N f4 MEAN n M~ |
-| ~steinhardt~ | host \(q_3\), \(\bar q_3\), \(q_{12}\), \(\bar q_{12}\) | ~nop N q3 A q3bar B q12 C q12bar D~ |
+| ~steinhardt~ | host \(q_3\), \(q_4\), \(q_6\), \(q_{12}\) and each neighbour average, on the cutoff list | ~nop N q3 A q3bar B q4 C q4bar D q6 E q6bar F q12 G q12bar H~ |
 | ~rdf~ | partial site-site \(g_{IJ}(r)\) | ~# r g count~ then ~# types I J rmax R bins N volume V~ then one ~r g count~ row per bin |
 | ~cn~ | site-site coordination number | ~# site-site~ then ~# types I J cutoff R cn X nI N nJ M volume V~ |
 | ~cn --ions --site~ | cage degree on ~ionCloud~ | ~cage ionCloud types 1 2 cutoff R degree D nCation N nAnion M~ |
