@@ -1,0 +1,25 @@
+seed-91001-200ps 1 kernel 84.09885
+seed-91001-200ps 1 ptm 378.4012354990409 {'0': 13226, '6': 288, '7': 39}
+seed-91001-200ps 1 diamond-cna 18.721436499617994 {'0': 12752, '1': 247, '2': 166, '3': 182, '4': 37, '5': 60, '6': 109}
+seed-91001-200ps 1 diamond-cna 96.38108449871652 {'others': 12744, 'cubic diamond': 247, 'cubic diamond 1NN': 171, 'cubic diamond 2NN': 185, 'hex diamond': 37, 'hex diamond 1NN': 61, 'hex diamond 2NN': 108}
+seed-91001-200ps 8 kernel 12.74155
+seed-91001-200ps 8 ptm 60.35189999965951 {'0': 13226, '6': 288, '7': 39}
+seed-91001-200ps 8 diamond-cna 6.2548185014748015 {'0': 12752, '1': 247, '2': 166, '3': 182, '4': 37, '5': 60, '6': 109}
+seed-91001-200ps 8 diamond-cna 20.78854899991711 {'others': 12744, 'cubic diamond': 247, 'cubic diamond 1NN': 171, 'cubic diamond 2NN': 185, 'hex diamond': 37, 'hex diamond 1NN': 61, 'hex diamond 2NN': 108}
+seed-92002-200ps 1 kernel 83.2657
+seed-92002-200ps 1 ptm 378.0929019994801 {'0': 13267, '6': 267, '7': 19}
+seed-92002-200ps 1 diamond-cna 18.762087498544133 {'0': 12810, '1': 225, '2': 161, '3': 200, '4': 25, '5': 45, '6': 87}
+seed-92002-200ps 1 diamond-cna 98.15747050197388 {'others': 12801, 'cubic diamond': 225, 'cubic diamond 1NN': 169, 'cubic diamond 2NN': 213, 'hex diamond': 25, 'hex diamond 1NN': 44, 'hex diamond 2NN': 76}
+seed-92002-200ps 8 kernel 14.584499999999998
+seed-92002-200ps 8 ptm 63.61493400072504 {'0': 13267, '6': 267, '7': 19}
+seed-92002-200ps 8 diamond-cna 6.53087300088373 {'0': 12810, '1': 225, '2': 161, '3': 200, '4': 25, '5': 45, '6': 87}
+seed-92002-200ps 8 diamond-cna 22.274166001807316 {'others': 12801, 'cubic diamond': 225, 'cubic diamond 1NN': 169, 'cubic diamond 2NN': 213, 'hex diamond': 25, 'hex diamond 1NN': 44, 'hex diamond 2NN': 76}
+seed-93003-200ps 1 kernel 84.84165
+seed-93003-200ps 1 ptm 379.2376070014143 {'0': 13279, '6': 255, '7': 19}
+seed-93003-200ps 1 diamond-cna 18.65884050130262 {'0': 12807, '1': 216, '2': 181, '3': 238, '4': 20, '5': 33, '6': 58}
+seed-93003-200ps 1 diamond-cna 96.33273999861558 {'others': 12800, 'cubic diamond': 216, 'cubic diamond 1NN': 188, 'cubic diamond 2NN': 236, 'hex diamond': 20, 'hex diamond 1NN': 34, 'hex diamond 2NN': 59}
+seed-93003-200ps 8 kernel 12.66
+seed-93003-200ps 8 ptm 60.2981305000867 {'0': 13279, '6': 255, '7': 19}
+seed-93003-200ps 8 diamond-cna 5.938140500802547 {'0': 12807, '1': 216, '2': 181, '3': 238, '4': 20, '5': 33, '6': 58}
+seed-93003-200ps 8 diamond-cna 18.680948500332306 {'others': 12800, 'cubic diamond': 216, 'cubic diamond 1NN': 188, 'cubic diamond 2NN': 236, 'hex diamond': 20, 'hex diamond 1NN': 34, 'hex diamond 2NN': 59}
+FR:0

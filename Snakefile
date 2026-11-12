@@ -215,6 +215,62 @@ rule figure_pngs:
         "python3 paper/tex/figures/render_finish.py && python3 paper/tex/figures/rasterize_tikz.py"
 
 
+rule related_watch_v11:
+    input:
+        "scripts/h2h_protocol.py",
+        "scripts/h2h_v11_clavis.py",
+        "scripts/release_build.py",
+    output:
+        "benchmarks/h2h-watch-v11.csv",
+    shell:
+        "PY=\"${{H2H_PYTHON:-python3}}\"; "
+        "\"$PY\" scripts/h2h_v11_clavis.py "
+        "--python \"$PY\" "
+        "--out benchmarks/h2h-watch-v11.csv"
+
+
+rule related_watch_v12:
+    input:
+        "scripts/h2h_protocol.py",
+        "scripts/h2h_v12_rings.py",
+        "scripts/release_build.py",
+    output:
+        "benchmarks/h2h-watch-v12.csv",
+    shell:
+        "PY=\"${{H2H_PYTHON:-python3}}\"; "
+        "\"$PY\" scripts/h2h_v12_rings.py "
+        "--python \"$PY\" "
+        "--out benchmarks/h2h-watch-v12.csv"
+
+
+rule related_watch_v5:
+    input:
+        "scripts/h2h_protocol.py",
+        "scripts/h2h_v5.py",
+        "scripts/bench_symmetry_ice.cpp",
+    output:
+        "benchmarks/h2h-watch-v5.csv",
+    shell:
+        "PY=\"${{H2H_PYTHON:-python3}}\"; "
+        "\"$PY\" scripts/h2h_v5.py "
+        "--python \"$PY\" "
+        "--out benchmarks/h2h-watch-v5.csv"
+
+
+rule related_watch_v4:
+    input:
+        "scripts/h2h_protocol.py",
+        "scripts/h2h_v4.py",
+        "scripts/release_build.py",
+    output:
+        "benchmarks/h2h-watch-v4.csv",
+    shell:
+        "PY=\"${{H2H_PYTHON:-python3}}\"; "
+        "\"$PY\" scripts/h2h_v4.py "
+        "--python \"$PY\" "
+        "--out benchmarks/h2h-watch-v4.csv"
+
+
 rule related_watch:
     input:
         "scripts/h2h_protocol.py",

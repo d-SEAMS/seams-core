@@ -1,0 +1,21 @@
+bench bbdir-release/tests/bench_watch build release
+frame molecules=1000
+  chill+ OVITO d-SEAMS 1.344 iqr 0.070 other 6.145 iqr 0.055 agreement 1.000000 matched=1000/1000
+  chill+ mdapy d-SEAMS 1.344 iqr 0.070 other 0.914 iqr 0.036 agreement 1.000000 matched=1000/1000
+  rings OVITO d-SEAMS 3.044 iqr 0.059 other 4.586 iqr 0.223 agreement 1.000000 dseams=[0, 0, 0, 2000];other=[0, 0, 0, 2000]
+  rings matscipy d-SEAMS 3.044 iqr 0.059 other 16.260 iqr 0.669 agreement 1.000000 dseams=[0, 0, 0, 2000];other=[0, 0, 0, 2000]
+  rings cycless d-SEAMS 3.044 iqr 0.059 other 3295.845 iqr 162.218 agreement 1.000000 dseams=[0, 0, 0, 2000];other=[0, 0, 0, 2000]
+bench bbdir-release/tests/bench_watch build release
+frame molecules=10648
+  chill+ OVITO d-SEAMS 13.561 iqr 0.112 other 70.920 iqr 13.741 agreement 1.000000 matched=10648/10648
+  chill+ mdapy d-SEAMS 13.561 iqr 0.112 other 7.613 iqr 0.686 agreement 1.000000 matched=10648/10648
+  rings OVITO d-SEAMS 45.673 iqr 2.337 other 44.577 iqr 0.025 agreement 1.000000 dseams=[0, 0, 0, 21296];other=[0, 0, 0, 21296]
+  rings matscipy d-SEAMS 45.673 iqr 2.337 other 1309.019 iqr 20.284 agreement 1.000000 dseams=[0, 0, 0, 21296];other=[0, 0, 0, 21296]
+  rings cycless d-SEAMS 45.673 iqr 2.337 other 35583.400 iqr 233.363 agreement 1.000000 dseams=[0, 0, 0, 21296];other=[0, 0, 0, 21296]
+frame molecules=110592
+  chill+ OVITO d-SEAMS 146.964 iqr 4.363 other 635.465 iqr 12.525 agreement 1.000000 matched=110592/110592
+  chill+ mdapy d-SEAMS 146.964 iqr 4.363 other 63.639 iqr 1.843 agreement 1.000000 matched=110592/110592
+  rings OVITO d-SEAMS 2206.976 iqr 5.026 other 553.569 iqr 1.689 agreement 1.000000 dseams=[0, 0, 0, 221184];other=[0, 0, 0, 221184]
+  rings matscipy FAILED exit -11
+  rings cycless d-SEAMS 2206.976 iqr 5.026 other 385129.916 iqr 3580.078 agreement 1.000000 dseams=[0, 0, 0, 221184];other=[0, 0, 0, 221184]
+EXIT:0
