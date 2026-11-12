@@ -49,7 +49,7 @@ void jacobi4(double A[4][4], double Q[4][4]) {
       Q[i][j] = i == j ? 1.0 : 0.0;
     }
   }
-  for (int sweep = 0; sweep < 6; sweep++) {
+  for (int sweep = 0; sweep < 4; sweep++) {
     for (int p = 0; p < 3; p++) {
       for (int q = p + 1; q < 4; q++) {
         const double apq = A[p][q];
@@ -163,7 +163,21 @@ bool kabschQuat(const double fixed[][3], const double mobile[][3], int n, double
     }
   }
   quatToR(q, R);
-  rmsd = rmsdOf(fixed, mobile, n, R);
+  // Theobald: λ_max of K is the maximum of sum p·(R q). With both clouds
+  // centered, N * RMSD^2 = |p|^2 + |q|^2 - 2 λ_max.
+  double gp = 0.0;
+  double gq = 0.0;
+  for (int i = 0; i < n; i++) {
+    for (int k = 0; k < 3; k++) {
+      const double dp = fixed[i][k] - cf[k];
+      const double dq = mobile[i][k] - cm[k];
+      gp += dp * dp;
+      gq += dq * dq;
+    }
+  }
+  const double lam = K[best][best];
+  const double acc = gp + gq - 2.0 * lam;
+  rmsd = std::sqrt(std::max(0.0, acc) / static_cast<double>(n));
   return true;
 }
 
@@ -1266,6 +1280,11 @@ struct CanonShell {
   double first[3][4][3];
   double second[3][12][3];
   int parent[3][12];
+  // Three second-shell atoms on each first-shell bond, ordered by azimuth
+  // around that bond. That order is the graph automorphism once the
+  // tetrahedron is fixed (Larsen, Schmidt, Schiotz 2016).
+  int arm[3][4][3];
+  int nArm[3][4];
   double pts[3][17][3];
 };
 
@@ -1307,6 +1326,39 @@ void loadOneShell(symm::Kind kind, double first[4][3], double second[12][3], int
   }
 }
 
+void bondFrame(const double axis[3], const double ref[3], double e1[3], double e2[3]) {
+  double an = std::sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
+  double u[3] = {axis[0] / an, axis[1] / an, axis[2] / an};
+  const double dot = ref[0] * u[0] + ref[1] * u[1] + ref[2] * u[2];
+  e1[0] = ref[0] - dot * u[0];
+  e1[1] = ref[1] - dot * u[1];
+  e1[2] = ref[2] - dot * u[2];
+  const double e1n = std::sqrt(e1[0] * e1[0] + e1[1] * e1[1] + e1[2] * e1[2]);
+  if (e1n > 1e-8) {
+    e1[0] /= e1n;
+    e1[1] /= e1n;
+    e1[2] /= e1n;
+  }
+  e2[0] = u[1] * e1[2] - u[2] * e1[1];
+  e2[1] = u[2] * e1[0] - u[0] * e1[2];
+  e2[2] = u[0] * e1[1] - u[1] * e1[0];
+}
+
+double tetraChirality(const double v[4][3]) {
+  const double a[3] = {v[1][0] - v[0][0], v[1][1] - v[0][1], v[1][2] - v[0][2]};
+  const double b[3] = {v[2][0] - v[0][0], v[2][1] - v[0][1], v[2][2] - v[0][2]};
+  const double c[3] = {v[3][0] - v[0][0], v[3][1] - v[0][1], v[3][2] - v[0][2]};
+  const double cx = b[1] * c[2] - b[2] * c[1];
+  const double cy = b[2] * c[0] - b[0] * c[2];
+  const double cz = b[0] * c[1] - b[1] * c[0];
+  return a[0] * cx + a[1] * cy + a[2] * cz;
+}
+
+double bondAngle(const double v[3], const double e1[3], const double e2[3]) {
+  return std::atan2(v[0] * e2[0] + v[1] * e2[1] + v[2] * e2[2],
+                    v[0] * e1[0] + v[1] * e1[1] + v[2] * e1[2]);
+}
+
 void prepareCanon(CanonShell &out) {
   const symm::Kind kinds[3] = {symm::Kind::iceIh, symm::Kind::iceIc, symm::Kind::iceIsd};
   for (int k = 0; k < 3; k++) {
@@ -1316,6 +1368,39 @@ void prepareCanon(CanonShell &out) {
     for (int i = 0; i < 17; i++) {
       for (int c = 0; c < 3; c++) {
         out.pts[k][i][c] = raw[i][c];
+      }
+    }
+    for (int a = 0; a < 4; a++) {
+      out.nArm[k][a] = 0;
+    }
+    for (int s = 0; s < 12; s++) {
+      const int a = out.parent[k][s];
+      if (out.nArm[k][a] < 3) {
+        out.arm[k][a][out.nArm[k][a]++] = s;
+      }
+    }
+    for (int a = 0; a < 4; a++) {
+      double e1[3];
+      double e2[3];
+      bondFrame(out.first[k][a], out.first[k][(a + 1) % 4], e1, e2);
+      const int nA = out.nArm[k][a];
+      for (int i = 0; i < nA; i++) {
+        for (int j = i + 1; j < nA; j++) {
+          const int si = out.arm[k][a][i];
+          const int sj = out.arm[k][a][j];
+          const double vi[3] = {out.second[k][si][0] - out.first[k][a][0],
+                                out.second[k][si][1] - out.first[k][a][1],
+                                out.second[k][si][2] - out.first[k][a][2]};
+          const double vj[3] = {out.second[k][sj][0] - out.first[k][a][0],
+                                out.second[k][sj][1] - out.first[k][a][1],
+                                out.second[k][sj][2] - out.first[k][a][2]};
+          const double ai = bondAngle(vi, e1, e2);
+          const double aj = bondAngle(vj, e1, e2);
+          if (aj < ai) {
+            out.arm[k][a][i] = sj;
+            out.arm[k][a][j] = si;
+          }
+        }
       }
     }
   }
@@ -1378,11 +1463,47 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
   }
   double best = 1e300;
   int bestK = -1;
-  const int kindOrder[3] = {1, 0, 2};
-  for (int ko = 0; ko < 3 && !(best < 0.05); ko++) {
-    const int kind = kindOrder[ko];
-  int pidx[4] = {0, 1, 2, 3};
-  do {
+  int scored = 0;
+  int rejected = 0;
+  int unpaired = 0;
+  // A thermal bond can sit past the 3.25 A neighbour window and still
+  // belong to the arm. Keep the nearest candidates inside 3.9 A.
+  int bonded[4][8];
+  double bondD[4][8];
+  int nBonded[4] = {};
+  for (int e = 0; e < nS; e++) {
+    for (int k = 0; k < 4; k++) {
+      const double dx = envS[e][0] - envF[k][0];
+      const double dy = envS[e][1] - envF[k][1];
+      const double dz = envS[e][2] - envF[k][2];
+      const double d2 = dx * dx + dy * dy + dz * dz;
+      if (d2 >= 3.9 * 3.9) {
+        continue;
+      }
+      if (nBonded[k] < 8) {
+        bonded[k][nBonded[k]] = e;
+        bondD[k][nBonded[k]] = d2;
+        nBonded[k]++;
+      } else {
+        int worst = 0;
+        for (int c = 1; c < 8; c++) {
+          if (bondD[k][c] > bondD[k][worst]) {
+            worst = c;
+          }
+        }
+        if (d2 < bondD[k][worst]) {
+          bonded[k][worst] = e;
+          bondD[k][worst] = d2;
+        }
+      }
+    }
+  }
+  const int kinds[3] = {1, 0, 2};
+  for (int ko = 0; ko < 3 && !(best <= gate); ko++) {
+    const int kind = kinds[ko];
+    const double templChi = tetraChirality(canon.first[kind]);
+    int pidx[4] = {0, 1, 2, 3};
+    do {
     double fixed[4][3];
     double mobile[4][3];
     for (int k = 0; k < 4; k++) {
@@ -1391,76 +1512,89 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
         mobile[k][c] = envF[pidx[k]][c];
       }
     }
-    double R[3][3];
-    double rms = 0.0;
-    kabschQuat(fixed, mobile, 4, R, rms);
-    if (rms > 0.8) {
+    // A proper rotation preserves the triple product. The opposite sign is
+    // a mirror; the proper quaternion fit cannot land it under the gate.
+    if (templChi * tetraChirality(mobile) < 0.0) {
       continue;
     }
-    {
-      int bonded[4][6];
-      int nBonded[4] = {};
-      for (int e = 0; e < nS; e++) {
-        for (int k = 0; k < 4; k++) {
-          const double dx = envS[e][0] - envF[k][0];
-          const double dy = envS[e][1] - envF[k][1];
-          const double dz = envS[e][2] - envF[k][2];
-          const double d2 = dx * dx + dy * dy + dz * dz;
-          if (d2 < kBondHi * kBondHi && nBonded[k] < 6) {
-            bonded[k][nBonded[k]++] = e;
-          }
-        }
-      }
-      double fixed17[17][3] = {};
-      double mobile17[17][3] = {};
-      for (int k = 0; k < 4; k++) {
-        for (int c = 0; c < 3; c++) {
-          fixed17[k + 1][c] = canon.first[kind][k][c];
-          mobile17[k + 1][c] = envF[pidx[k]][c];
-        }
-      }
-      for (int s = 0; s < 12; s++) {
-        const double q0 = canon.second[kind][s][0];
-        const double q1 = canon.second[kind][s][1];
-        const double q2 = canon.second[kind][s][2];
-        fixed17[5 + s][0] = q0;
-        fixed17[5 + s][1] = q1;
-        fixed17[5 + s][2] = q2;
-        const double pred[3] = {R[0][0] * q0 + R[1][0] * q1 + R[2][0] * q2,
-                                R[0][1] * q0 + R[1][1] * q1 + R[2][1] * q2,
-                                R[0][2] * q0 + R[1][2] * q1 + R[2][2] * q2};
-        const int envFirst = pidx[canon.parent[kind][s]];
-        double md = 1e300;
-        int me = 0;
-        for (int c = 0; c < nBonded[envFirst]; c++) {
-          const int e = bonded[envFirst][c];
-          const double dx = pred[0] - envS[e][0];
-          const double dy = pred[1] - envS[e][1];
-          const double dz = pred[2] - envS[e][2];
-          const double d2 = dx * dx + dy * dy + dz * dz;
-          if (d2 < md) {
-            md = d2;
-            me = e;
-          }
-        }
-        mobile17[5 + s][0] = envS[me][0];
-        mobile17[5 + s][1] = envS[me][1];
-        mobile17[5 + s][2] = envS[me][2];
-      }
-      double R17[3][3];
-      double rms17 = 0.0;
-      kabschQuat(fixed17, mobile17, 17, R17, rms17);
-      if (rms17 < best) {
-        best = rms17;
-        bestK = kind;
+    double R[3][3];
+    double rms = 0.0;
+    if (!kabschQuat(fixed, mobile, 4, R, rms) || rms > 0.8) {
+      rejected++;
+      continue;
+    }
+    double fixed17[17][3] = {};
+    double mobile17[17][3] = {};
+    for (int k = 0; k < 4; k++) {
+      for (int c = 0; c < 3; c++) {
+        fixed17[k + 1][c] = canon.first[kind][k][c];
+        mobile17[k + 1][c] = envF[pidx[k]][c];
       }
     }
-    if (best < 0.2) {
+    bool taken[16] = {};
+    bool paired = true;
+    double predErr = 0.0;
+    for (int s = 0; s < 12; s++) {
+      const double q0 = canon.second[kind][s][0];
+      const double q1 = canon.second[kind][s][1];
+      const double q2 = canon.second[kind][s][2];
+      fixed17[5 + s][0] = q0;
+      fixed17[5 + s][1] = q1;
+      fixed17[5 + s][2] = q2;
+      const double pred[3] = {R[0][0] * q0 + R[1][0] * q1 + R[2][0] * q2,
+                              R[0][1] * q0 + R[1][1] * q1 + R[2][1] * q2,
+                              R[0][2] * q0 + R[1][2] * q1 + R[2][2] * q2};
+      const int envFirst = pidx[canon.parent[kind][s]];
+      double md = 1e300;
+      int me = -1;
+      for (int c = 0; c < nBonded[envFirst]; c++) {
+        const int e = bonded[envFirst][c];
+        if (taken[e]) {
+          continue;
+        }
+        const double dx = pred[0] - envS[e][0];
+        const double dy = pred[1] - envS[e][1];
+        const double dz = pred[2] - envS[e][2];
+        const double d2 = dx * dx + dy * dy + dz * dz;
+        if (d2 < md) {
+          md = d2;
+          me = e;
+        }
+      }
+      if (me < 0) {
+        paired = false;
+        break;
+      }
+      predErr += md;
+      taken[me] = true;
+      mobile17[5 + s][0] = envS[me][0];
+      mobile17[5 + s][1] = envS[me][1];
+      mobile17[5 + s][2] = envS[me][2];
+    }
+    if (!paired) {
+      unpaired++;
+      continue;
+    }
+    if (predErr > 18.0) {
+      continue;
+    }
+    scored++;
+    double R17[3][3];
+    double rms17 = 0.0;
+    kabschQuat(fixed17, mobile17, 17, R17, rms17);
+    if (rms17 < best) {
+      best = rms17;
+      bestK = kind;
+    }
+    if (best <= gate) {
       break;
     }
   } while (std::next_permutation(pidx, pidx + 4));
   }
-  if (!(best <= gate)) {
+  (void)scored;
+  // The oriented fit is conclusive outside a narrow band. Inside it, the
+  // bond-graph search still recovers a few distorted shells.
+  if (best > gate && best < gate + 0.35) {
     double env[17][3];
     env[0][0] = center[0];
     env[0][1] = center[1];
@@ -1471,8 +1605,8 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
       env[i + 1][2] = nb[i][2];
     }
     const int nEnv = 1 + m;
-    best = 1e300;
-    bestK = -1;
+    double full = 1e300;
+    int fullK = -1;
     for (int kind = 0; kind < 3; kind++) {
       int perm[kMaxN];
       double R[3][3];
@@ -1482,16 +1616,20 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
       if (!matchIce(env, nEnv, canon.pts[kind], perm, R, t, rms, named, false)) {
         continue;
       }
-      if (rms < best) {
-        best = rms;
-        bestK = kind;
+      if (rms < full) {
+        full = rms;
+        fullK = kind;
       }
+    }
+    if (full < best) {
+      best = full;
+      bestK = fullK;
     }
   }
   if (bestK < 0 || !(best <= gate)) {
     return -1;
   }
-  return bestK;
+    return bestK;
 }
 
 void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vectors,
@@ -1582,11 +1720,18 @@ void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vector
     int bx = std::min(nx - 1, std::max(0, static_cast<int>(f[0] * nx)));
     int by = std::min(ny - 1, std::max(0, static_cast<int>(f[1] * ny)));
     int bz = std::min(nz - 1, std::max(0, static_cast<int>(f[2] * nz)));
-    double kd[16];
-    double kx[16];
-    double ky[16];
-    double kz[16];
-    int nkeep = 0;
+    // Four bonded neighbours, then twelve beyond the bond window. An
+    // interstitial in that window must not take a second-shell slot.
+    double fd[4];
+    double fx[4];
+    double fy[4];
+    double fz[4];
+    int nFirstKeep = 0;
+    double od[12];
+    double oxp[12];
+    double oyp[12];
+    double ozp[12];
+    int nSecond = 0;
     const double skew = std::abs(lat[1][0]) + std::abs(lat[2][0]) + std::abs(lat[2][1]);
     const int reach = skew > 0.5 * kShell ? 4 : 1;
     for (int dz = -reach; dz <= reach; dz++) {
@@ -1637,50 +1782,62 @@ void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vector
             const double ddy = y - ci[1];
             const double ddz = z - ci[2];
             const double d2 = ddx * ddx + ddy * ddy + ddz * ddz;
-            if (d2 > kShell * kShell) {
+            if (d2 > kShell * kShell || d2 < kBondLo * kBondLo) {
               continue;
             }
-            if (nkeep < 16) {
-              int at = nkeep;
-              while (at > 0 && d2 < kd[at - 1]) {
-                kd[at] = kd[at - 1];
-                kx[at] = kx[at - 1];
-                ky[at] = ky[at - 1];
-                kz[at] = kz[at - 1];
+            const bool inner = d2 <= kBondHi * kBondHi;
+            double *dd = inner ? fd : od;
+            double *xx = inner ? fx : oxp;
+            double *yy = inner ? fy : oyp;
+            double *zz = inner ? fz : ozp;
+            int *kept = inner ? &nFirstKeep : &nSecond;
+            const int cap = inner ? 4 : 12;
+            if (*kept < cap) {
+              int at = *kept;
+              while (at > 0 && d2 < dd[at - 1]) {
+                dd[at] = dd[at - 1];
+                xx[at] = xx[at - 1];
+                yy[at] = yy[at - 1];
+                zz[at] = zz[at - 1];
                 at--;
               }
-              kd[at] = d2;
-              kx[at] = x;
-              ky[at] = y;
-              kz[at] = z;
-              nkeep++;
-            } else if (d2 < kd[15]) {
-              int at = 15;
-              while (at > 0 && d2 < kd[at - 1]) {
-                kd[at] = kd[at - 1];
-                kx[at] = kx[at - 1];
-                ky[at] = ky[at - 1];
-                kz[at] = kz[at - 1];
+              dd[at] = d2;
+              xx[at] = x;
+              yy[at] = y;
+              zz[at] = z;
+              (*kept)++;
+            } else if (d2 < dd[cap - 1]) {
+              int at = cap - 1;
+              while (at > 0 && d2 < dd[at - 1]) {
+                dd[at] = dd[at - 1];
+                xx[at] = xx[at - 1];
+                yy[at] = yy[at - 1];
+                zz[at] = zz[at - 1];
                 at--;
               }
-              kd[at] = d2;
-              kx[at] = x;
-              ky[at] = y;
-              kz[at] = z;
+              dd[at] = d2;
+              xx[at] = x;
+              yy[at] = y;
+              zz[at] = z;
             }
           }
         }
       }
     }
-    if (nkeep < 16 || kd[15] > kShell * kShell) {
+    if (nFirstKeep < 4 || nSecond < 12) {
       kind[static_cast<size_t>(i)] = -1;
       continue;
     }
     double nb[16][3];
-    for (int k = 0; k < 16; k++) {
-      nb[k][0] = kx[k];
-      nb[k][1] = ky[k];
-      nb[k][2] = kz[k];
+    for (int k = 0; k < 4; k++) {
+      nb[k][0] = fx[k];
+      nb[k][1] = fy[k];
+      nb[k][2] = fz[k];
+    }
+    for (int k = 0; k < 12; k++) {
+      nb[4 + k][0] = oxp[k];
+      nb[4 + k][1] = oyp[k];
+      nb[4 + k][2] = ozp[k];
     }
     kind[static_cast<size_t>(i)] = shellFit(ci, nb, 16, canon, gate);
   }
