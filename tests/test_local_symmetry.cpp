@@ -13,6 +13,11 @@
 #include <string>
 #include <vector>
 
+namespace symm {
+int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguous, int *n421 = nullptr,
+               int *n422 = nullptr, int *nGood = nullptr);
+}
+
 namespace {
 
 Eigen::MatrixXd rotatePermute(const Eigen::MatrixXd &src, double degrees, bool swap) {
@@ -496,4 +501,41 @@ TEST_CASE("the in-tree shape measure matches the shape program", "[symmetry]") {
   const double theirs = shapeProgram(bin, "/tmp/csm-shell-moved.xyz", "/tmp/csm-shell-ref.xyz");
   const double ours = symm::shapeMeasure(moved);
   REQUIRE(std::abs(ours - theirs) < 0.05);
+}
+
+// FCC second shell, nearest-neighbour length sqrt(2). The first four sites
+// are pushed out by 1.2. Each of those four loses the (4,2,1) pattern, and
+// the other eight keep it. The production ambiguous count is 9, so an early
+// exit on "cannot reach 9" returns before those eight are counted.
+TEST_CASE("eight good diamond signatures stay a partial cubic label", "[symmetry]") {
+  const double ideal[12][3] = {
+      {-1, -1, 0}, {-1, 1, 0}, {1, -1, 0}, {1, 1, 0}, {-1, 0, -1}, {-1, 0, 1},
+      {1, 0, -1},  {1, 0, 1},  {0, -1, -1}, {0, -1, 1}, {0, 1, -1}, {0, 1, 1},
+  };
+  double sx[12], sy[12], sz[12];
+  for (int i = 0; i < 12; i++) {
+    const double scale = i < 4 ? 1.2 : 1.0;
+    sx[i] = ideal[i][0] * scale;
+    sy[i] = ideal[i][1] * scale;
+    sz[i] = ideal[i][2] * scale;
+  }
+  int n421 = -1;
+  int n422 = -1;
+  int nGood = -1;
+  const int partial = symm::diamondCna(sx, sy, sz, 9, &n421, &n422, &nGood);
+  REQUIRE(nGood == 8);
+  REQUIRE(n421 == 8);
+  REQUIRE(n422 == 0);
+  REQUIRE(partial == 3);
+
+  for (int i = 0; i < 12; i++) {
+    sx[i] = ideal[i][0];
+    sy[i] = ideal[i][1];
+    sz[i] = ideal[i][2];
+  }
+  n421 = n422 = nGood = -1;
+  const int cubic = symm::diamondCna(sx, sy, sz, 9, &n421, &n422, &nGood);
+  REQUIRE(nGood == 12);
+  REQUIRE(n421 == 12);
+  REQUIRE(cubic == 1);
 }

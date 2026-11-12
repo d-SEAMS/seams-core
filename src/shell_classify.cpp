@@ -642,6 +642,8 @@ bool __attribute__((noinline, cold)) hasStaggeredBond(const double envF[4][3], c
   return false;
 }
 
+} // namespace
+
 // Second-shell diamond test on the four neighbours, the same split OVITO's
 // identifier and pyscal3 use: the twelve second neighbours of a cubic
 // diamond are an FCC shell (every bond staggered) and those of a hexagonal
@@ -652,8 +654,10 @@ bool __attribute__((noinline, cold)) hasStaggeredBond(const double envF[4][3], c
 // cluster (cubic diamond, ice Ic) or an HCP cluster (hexagonal diamond, ice Ih).
 // Each pair uses the adaptive cutoff (1 + sqrt(2)) / 2 times that pair's length.
 // A shell is not rejected because its radius varies. Twelve (4,2,1) signatures
-// are cubic. Six (4,2,1) and six (4,2,2) are hexagonal. Anything else with at
-// least `ambiguous` of those signatures is worth the full fit; the rest are not.
+// are cubic. Six (4,2,1) and six (4,2,2) are hexagonal. Eight (4,2,1), or
+// eight with the hexagonal mix, is the partial label. Anything else with at
+// least `ambiguous` of those signatures is worth the full fit.
+
 int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguous, int *n421o = nullptr,
                int *n422o = nullptr, int *nGoodo = nullptr) {
   alignas(32) double r2[16];
@@ -746,7 +750,10 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
         }
       }
     }
-    if (!good && nGood + (11 - j) < ambiguous) {
+    // Eight good signatures can still be a partial label. `ambiguous` is the
+    // higher count that only earns a fit. Stop once neither is reachable.
+    const int keep = ambiguous < 8 ? ambiguous : 8;
+    if (!good && nGood + (11 - j) < keep) {
       return -1;
     }
   }
@@ -777,6 +784,8 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
   }
   return -1;
 }
+
+namespace {
 
 int diamondSecondShell(const double first[4][3], const double *sx, const double *sy, const double *sz,
                       double radiusRatio, double eclipsedCos, double staggeredCos) {
