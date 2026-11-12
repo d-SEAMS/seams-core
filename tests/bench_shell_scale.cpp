@@ -6,7 +6,7 @@
 //-----------------------------------------------------------------------------------
 
 // Raw samples for the in-tree ice kernel. Release -O3. One warm-up, then
-// at least six calls. Threads come from argv (default 1).
+// eight calls. Threads come from argv (default 1).
 
 #include <local_symmetry.hpp>
 
@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
 #endif
   const int reps[] = {3, 11, 24};
   constexpr int kWarm = 1;
-  constexpr int kN = 6;
+  constexpr int kN = 8;
   std::cout << "build release -O3 kernel threads_requested=" << threads << "\n";
   for (int rep : reps) {
     Eigen::Matrix3d box;
