@@ -373,8 +373,10 @@ void kabsch17(const Shell17 &fixed, const Shell17 &mobile, int n, double R[3][3]
 }
 
 void kabsch4(const double fixed[][3], const double mobile[][3], double R[3][3], double &rmsd) {
-  Shell17 a{};
-  Shell17 b{};
+  // Only the four points are read. Zeroing the other thirteen used to sit on
+  // every correspondence.
+  Shell17 a;
+  Shell17 b;
   for (int i = 0; i < 4; i++) {
     for (int k = 0; k < 3; k++) {
       a.p[i][k] = fixed[i][k];
@@ -585,7 +587,7 @@ bool __attribute__((noinline, cold)) hasStaggeredBond(const double envF[4][3], c
 // least `ambiguous` of those signatures is worth the full fit; the rest are not.
 int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguous, int *n421o = nullptr,
                int *n422o = nullptr, int *nGoodo = nullptr) {
-  double r2[12];
+  alignas(32) double r2[16];
   double pair[12][12];
   alignas(32) double px[16];
   alignas(32) double py[16];
@@ -600,6 +602,7 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
     px[i] = 1.0e6;
     py[i] = 1.0e6;
     pz[i] = 1.0e6;
+    r2[i] = 1.0e300;
   }
   for (int a = 0; a < 12; a++) {
     const __m256d xa = _mm256_set1_pd(px[a]);
@@ -622,14 +625,24 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
   int nGood = 0;
   for (int j = 0; j < 12; j++) {
     const double cut2 = r2[j] * kAdapt2;
+    const __m256d cut = _mm256_set1_pd(cut2);
+    int mask = 0;
+    for (int b = 0; b < 12; b += 4) {
+      const __m256d pk = _mm256_loadu_pd(&pair[j][b]);
+      const __m256d rk = _mm256_load_pd(r2 + b);
+      const __m256d ok = _mm256_and_pd(_mm256_cmp_pd(pk, cut, _CMP_LT_OQ),
+                                      _mm256_cmp_pd(rk, cut, _CMP_LT_OQ));
+      mask |= _mm256_movemask_pd(ok) << b;
+    }
+    mask &= ~(1 << j);
+    const int nc = __builtin_popcount(static_cast<unsigned>(mask));
     int common[4];
-    int nc = 0;
-    for (int k = 0; k < 12 && nc <= 4; k++) {
-      if (k != j && r2[k] < cut2 && pair[j][k] < cut2) {
-        if (nc < 4) {
-          common[nc] = k;
+    if (nc == 4) {
+      int slot = 0;
+      for (int k = 0; k < 12; k++) {
+        if (mask & (1 << k)) {
+          common[slot++] = k;
         }
-        nc++;
       }
     }
     bool good = false;
@@ -1079,8 +1092,12 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
         }
       }
       const double shellScale = gT > 1e-18 ? std::sqrt(gE / gT) : 1.0;
-      Shell17 fixed17{};
-      Shell17 mobile17{};
+      Shell17 fixed17;
+      Shell17 mobile17;
+      for (int c = 0; c < 3; c++) {
+        fixed17.p[0][c] = 0.0;
+        mobile17.p[0][c] = 0.0;
+      }
       for (int k = 0; k < 4; k++) {
         for (int c = 0; c < 3; c++) {
           fixed17.p[k + 1][c] = canon.first[kind][k][c];
@@ -1406,71 +1423,153 @@ __attribute__((always_inline)) inline void keepId(Bond *row, double *rd, int &nb
   }
 }
 
-// One thread walks each pair once and writes both bond rows. The 13-cell
-// half stencil is the same cutoff CSR with the duplicate image omitted.
+// One thread walks each pair once and writes both bond rows. Interior cells
+// use one fixed half of the cutoff CSR, so the 13 neighbour cells are not
+// rebuilt per cell. Border cells keep a single stencil of that same CSR.
+// Bond vectors are the minimum image of the two wrapped coordinates, after
+// the four nearest ids are known.
 void fillHalfFast(int n, int ncell, int nx, int ny, int nz, double lx, double ly, double lz,
                   const int *cellStart, const double *cx, const double *cy, const double *cz, const int *cid,
                   const double *px, const double *py, const double *pz, Bond *bonds, int *nbon, double *rd) {
   const double cut2 = kBond * kBond;
   const double min2 = 2.15 * 2.15;
+  const int nxy = nx * ny;
+  const int off[13] = {1,
+                       nx - 1, nx, nx + 1,
+                       nxy - nx - 1, nxy - nx, nxy - nx + 1,
+                       nxy - 1, nxy, nxy + 1,
+                       nxy + nx - 1, nxy + nx, nxy + nx + 1};
+  struct Nb {
+    int b;
+    int e;
+    float ox;
+    float oy;
+    float oz;
+    int same;
+  };
+  static std::vector<Nb> stencil;
+  static std::vector<int> nsten;
+  if (static_cast<int>(nsten.size()) < ncell) {
+    nsten.resize(static_cast<size_t>(ncell));
+    stencil.resize(static_cast<size_t>(ncell) * 14);
+  }
   for (int cell = 0; cell < ncell; cell++) {
-    const int here0 = cellStart[cell];
-    const int here1 = cellStart[cell + 1];
-    if (here0 == here1) {
-      continue;
-    }
     const int ix0 = cell % nx;
     const int iy0 = (cell / nx) % ny;
-    const int iz0 = cell / (nx * ny);
-    struct Span {
-      int b, e;
-      double ox, oy, oz;
-      bool same;
-    };
-    Span sp[14];
+    const int iz0 = cell / nxy;
+    if (ix0 > 0 && iy0 > 0 && iz0 > 0 && ix0 + 1 < nx && iy0 + 1 < ny && iz0 + 1 < nz) {
+      nsten[static_cast<size_t>(cell)] = -1;
+      continue;
+    }
     int ns = 0;
     for (int dz = -1; dz <= 1; dz++) {
       int iz = iz0 + dz;
-      double oz = 0.0;
+      float oz = 0.f;
       if (iz < 0) {
         iz += nz;
-        oz = -1.0;
+        oz = static_cast<float>(-lz);
       } else if (iz >= nz) {
         iz -= nz;
-        oz = 1.0;
+        oz = static_cast<float>(lz);
       }
       for (int dy = -1; dy <= 1; dy++) {
         int iy = iy0 + dy;
-        double oy = 0.0;
+        float oy = 0.f;
         if (iy < 0) {
           iy += ny;
-          oy = -1.0;
+          oy = static_cast<float>(-ly);
         } else if (iy >= ny) {
           iy -= ny;
-          oy = 1.0;
+          oy = static_cast<float>(ly);
         }
         for (int dx = -1; dx <= 1; dx++) {
           if (!(dz > 0 || (dz == 0 && dy > 0) || (dz == 0 && dy == 0 && dx >= 0))) {
             continue;
           }
           int ix = ix0 + dx;
-          double ox = 0.0;
+          float ox = 0.f;
           if (ix < 0) {
             ix += nx;
-            ox = -1.0;
+            ox = static_cast<float>(-lx);
           } else if (ix >= nx) {
             ix -= nx;
-            ox = 1.0;
+            ox = static_cast<float>(lx);
           }
           const int nb = (iz * ny + iy) * nx + ix;
           const int b = cellStart[nb];
           const int e = cellStart[nb + 1];
-          if (b != e) {
-            sp[ns++] = Span{b, e, ox, oy, oz, nb == cell && ox == 0.0 && oy == 0.0 && oz == 0.0};
+          if (b == e) {
+            continue;
+          }
+          stencil[static_cast<size_t>(cell) * 14 + ns] =
+              Nb{b, e, ox, oy, oz, nb == cell && ox == 0.f && oy == 0.f && oz == 0.f};
+          ns++;
+        }
+      }
+    }
+    nsten[static_cast<size_t>(cell)] = ns;
+  }
+  for (int iz0 = 1; iz0 < nz - 1; iz0++) {
+    for (int iy0 = 1; iy0 < ny - 1; iy0++) {
+      for (int ix0 = 1; ix0 < nx - 1; ix0++) {
+        const int cell = (iz0 * ny + iy0) * nx + ix0;
+        const int here0 = cellStart[cell];
+        const int here1 = cellStart[cell + 1];
+        if (here0 == here1) {
+          continue;
+        }
+        for (int mine = here0; mine < here1; mine++) {
+          const int i = cid[mine];
+          const double xi = cx[mine];
+          const double yi = cy[mine];
+          const double zi = cz[mine];
+          Bond *rowi = bonds + static_cast<size_t>(i) * 4;
+          double *rdi = rd + static_cast<size_t>(i) * 4;
+          int &nbi = nbon[i];
+          for (int m = mine + 1; m < here1; m++) {
+            const double dx = cx[m] - xi;
+            const double dy = cy[m] - yi;
+            const double dz = cz[m] - zi;
+            const double d2 = dx * dx + dy * dy + dz * dz;
+            if (d2 > cut2 || d2 < min2) {
+              continue;
+            }
+            const int j = cid[m];
+            keepId(rowi, rdi, nbi, j, d2);
+            keepId(bonds + static_cast<size_t>(j) * 4, rd + static_cast<size_t>(j) * 4, nbon[j], i, d2);
+          }
+          for (int t = 0; t < 13; t++) {
+            const int nb = cell + off[t];
+            const int b = cellStart[nb];
+            const int e = cellStart[nb + 1];
+            for (int m = b; m < e; m++) {
+              const double dx = cx[m] - xi;
+              const double dy = cy[m] - yi;
+              const double dz = cz[m] - zi;
+              const double d2 = dx * dx + dy * dy + dz * dz;
+              if (d2 > cut2 || d2 < min2) {
+                continue;
+              }
+              const int j = cid[m];
+              keepId(rowi, rdi, nbi, j, d2);
+              keepId(bonds + static_cast<size_t>(j) * 4, rd + static_cast<size_t>(j) * 4, nbon[j], i, d2);
+            }
           }
         }
       }
     }
+  }
+  for (int cell = 0; cell < ncell; cell++) {
+    const int ns = nsten[static_cast<size_t>(cell)];
+    if (ns < 0) {
+      continue;
+    }
+    const int here0 = cellStart[cell];
+    const int here1 = cellStart[cell + 1];
+    if (here0 == here1) {
+      continue;
+    }
+    const Nb *sp = stencil.data() + static_cast<size_t>(cell) * 14;
     for (int mine = here0; mine < here1; mine++) {
       const int i = cid[mine];
       const double xi = cx[mine];
@@ -1480,10 +1579,10 @@ void fillHalfFast(int n, int ncell, int nx, int ny, int nz, double lx, double ly
       double *rdi = rd + static_cast<size_t>(i) * 4;
       int &nbi = nbon[i];
       for (int t = 0; t < ns; t++) {
-        const double ox = sp[t].ox * lx;
-        const double oy = sp[t].oy * ly;
-        const double oz = sp[t].oz * lz;
-        const bool same = sp[t].same;
+        const double ox = sp[t].ox;
+        const double oy = sp[t].oy;
+        const double oz = sp[t].oz;
+        const int same = sp[t].same;
         for (int m = sp[t].b; m < sp[t].e; m++) {
           if (same && m <= mine) {
             continue;
@@ -1505,6 +1604,9 @@ void fillHalfFast(int n, int ncell, int nx, int ny, int nz, double lx, double ly
       }
     }
   }
+  const double hx = 0.5 * lx;
+  const double hy = 0.5 * ly;
+  const double hz = 0.5 * lz;
   for (int i = 0; i < n; i++) {
     Bond *row = bonds + static_cast<size_t>(i) * 4;
     double *rdi = rd + static_cast<size_t>(i) * 4;
@@ -1521,9 +1623,6 @@ void fillHalfFast(int n, int ncell, int nx, int ny, int nz, double lx, double ly
       row[at] = b;
       rdi[at] = d2;
     }
-    const double hx = 0.5 * lx;
-    const double hy = 0.5 * ly;
-    const double hz = 0.5 * lz;
     const double xi = px[i];
     const double yi = py[i];
     const double zi = pz[i];
