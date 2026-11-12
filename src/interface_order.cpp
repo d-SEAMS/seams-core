@@ -1217,6 +1217,129 @@ std::string formatGrowth(const Growth &growth) {
   return os.str();
 }
 
+std::string formatQ6Growth(const std::string &path, double dumpEveryPs, double cutoff) {
+  const int nFrames = countFrames(path);
+  const int nBins = 50;
+  std::vector<double> thresholds;
+  for (int i = 0; i <= 40; ++i) {
+    thresholds.push_back(0.20 + 0.01 * static_cast<double>(i));
+  }
+  std::ostringstream os;
+  os.setf(std::ios::fixed);
+  os.precision(6);
+  os << "# iface q6\n";
+  os << "cutoff " << cutoff << "\n";
+  os << "nframes " << nFrames << "\n";
+  os << "thresholds";
+  for (double t : thresholds) {
+    os << " " << t;
+  }
+  os << "\n";
+  os << "# frame t_ps n axis length n_ice n_liq bar <counts> local <counts>\n";
+  os << "# hist_ice and hist_liq are frame 1, bins of width 0.02 from 0 to 1,\n";
+  os << "# ice core is the central fifth of the long axis; liquid core is the outer tenths.\n";
+  bool wroteHist = false;
+  for (int frame = 1; frame <= nFrames; ++frame) {
+    Cloud cloud;
+    cloud = sinp::readLammpsTrjO(path, frame, cloud, 1);
+    if (cloud.nop <= 0) {
+      break;
+    }
+    const auto q6 = chill::steinhardtQlCutoff(cloud, cutoff, 6, 1, true);
+    int axis = 0;
+    double length = lengthOf(cloud, 0);
+    for (int a = 1; a < 3; ++a) {
+      const double edge = lengthOf(cloud, a);
+      if (edge > length) {
+        length = edge;
+        axis = a;
+      }
+    }
+    const double origin = originOf(cloud, axis);
+    std::vector<int> iceHist(static_cast<std::size_t>(nBins), 0);
+    std::vector<int> liqHist(static_cast<std::size_t>(nBins), 0);
+    int nIce = 0;
+    int nLiq = 0;
+    std::vector<int> barCount(thresholds.size(), 0);
+    std::vector<int> localCount(thresholds.size(), 0);
+    for (int i = 0; i < cloud.nop; ++i) {
+      double q = axisCoord(cloud.pts[static_cast<std::size_t>(i)], axis) - origin;
+      q = std::fmod(q, length);
+      if (q < 0.0) {
+        q += length;
+      }
+      const double frac = length > 0.0 ? q / length : 0.0;
+      const bool ice = frac >= 0.40 && frac < 0.60;
+      const bool liq = frac < 0.10 || frac >= 0.90;
+      const double bar = i < static_cast<int>(q6.qlBar.size()) ? q6.qlBar[static_cast<std::size_t>(i)] : 0.0;
+      const double local = i < static_cast<int>(q6.ql.size()) ? q6.ql[static_cast<std::size_t>(i)] : 0.0;
+      if (ice) {
+        ++nIce;
+      }
+      if (liq) {
+        ++nLiq;
+      }
+      if (frame == 1 && (ice || liq) && std::isfinite(bar)) {
+        int bin = static_cast<int>(bar / 0.02);
+        if (bin < 0) {
+          bin = 0;
+        }
+        if (bin >= nBins) {
+          bin = nBins - 1;
+        }
+        if (ice) {
+          ++iceHist[static_cast<std::size_t>(bin)];
+        }
+        if (liq) {
+          ++liqHist[static_cast<std::size_t>(bin)];
+        }
+      }
+      for (std::size_t k = 0; k < thresholds.size(); ++k) {
+        if (std::isfinite(bar) && bar >= thresholds[k]) {
+          ++barCount[k];
+        }
+        if (std::isfinite(local) && local >= thresholds[k]) {
+          ++localCount[k];
+        }
+      }
+    }
+    os << "frame " << frame << " " << static_cast<double>(frame - 1) * dumpEveryPs << " " << cloud.nop
+       << " " << axis << " " << length << " " << nIce << " " << nLiq << " bar";
+    for (int c : barCount) {
+      os << " " << c;
+    }
+    os << " local";
+    for (int c : localCount) {
+      os << " " << c;
+    }
+    os << "\n";
+    if (frame == 1) {
+      os << "hist_ice";
+      for (int c : iceHist) {
+        os << " " << c;
+      }
+      os << "\nhist_liq";
+      for (int c : liqHist) {
+        os << " " << c;
+      }
+      os << "\n";
+      wroteHist = true;
+    }
+  }
+  if (!wroteHist) {
+    os << "hist_ice";
+    for (int i = 0; i < nBins; ++i) {
+      os << " 0";
+    }
+    os << "\nhist_liq";
+    for (int i = 0; i < nBins; ++i) {
+      os << " 0";
+    }
+    os << "\n";
+  }
+  return os.str();
+}
+
 Cloud nanotube(int ring, int stacks, double bond) {
   Cloud cloud;
   const double pi = std::acos(-1.0);

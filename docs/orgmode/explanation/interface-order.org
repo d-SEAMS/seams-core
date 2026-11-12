@@ -434,6 +434,139 @@ not the count of solid molecules is used. That is the speed this
 model produces with equation 2. It is 0.24 times the printed table
 and 2.4 times the table divided by ten, at both 240 K and 260 K.
 
+* Where the factor of four sits
+
+The protocol keeps equation 2. A second campaign,
+~input/interface/espinosa_faces.py~, repeats the 4000-molecule
+secondary prism and adds the basal face, the primary prism, and one
+secondary-prism seed at a 5 fs step. The melt, the 2 ps Nose-Hoover
+periods, and the 10 fs step are the ones above. Production is 600 ps
+at 240 K and 1000 ps at 260 K, with frames every 5 ps. This session
+had 8 cores, one thread per run. Seventeen jobs took 1548 s of wall
+time. The 240 K runs took 359 to 365 s, the 260 K runs took 567 to
+586 s, and the 5 fs seed took 622 s. Scoring took 33 s.
+
+The one-front speed is the slope of the solid count,
+u = (dN/dt) L / (2 N), on solid fraction 0.55 to 0.90.
+On the secondary prism that slope is
+116.9 [107.9, 125.9] Å/ns at 240 K and
+64.1 [62.0, 67.4] Å/ns at 260 K.
+Four times those intervals is [432, 504] and [248, 270].
+Table I, 490 and 266, lies inside both.
+The ratio of the slope to the printed table is 0.239 at 240 K and
+0.241 at 260 K.
+The ratio to the table divided by ten is 2.39 and 2.41.
+
+| reading, secondary prism | 240 K (Å/ns) | 260 K (Å/ns) |
+|--------------------------+--------------+--------------|
+| L_liquid/(2τ) at 0.95 | 142.6 [133.5, 151.6] | 84.8 [77.9, 93.9] |
+| L_liquid/(2τ) at 0.99 | 131.4 | 72.9 |
+| L_liquid/(2τ) at 0.70 | 277.0 | 167.4 |
+| solid-count slope | 116.9 [107.9, 125.9] | 64.1 [62.0, 67.4] |
+| thickness slope / 2 | 117.7 [100.0, 147.4] | 56.1 [36.9, 71.0] |
+| Lechner-Dellago q6bar slope | 118.3 [107.3, 129.4] | 64.8 [62.2, 67.4] |
+| q6bar slope at 0.358 | 117.5 [108.1, 126.8] | 64.1 [61.9, 67.2] |
+| potential-energy clock | 135.4 [127.3, 143.5] | 80.6 [74.5, 88.6] |
+| L_box/(2τ) at 0.95 | 283.1 | 165.8 |
+| L_box/τ at 0.95 | 566 [540, 593] | 332 [304, 368] |
+| initial slab length / (2τ) | 140.5 | 81.0 |
+| one interface's travel, divided by 2 again | 71.3 | 42.4 |
+| Table I | 490 | 266 |
+| Table I / 4 | 122.5 | 66.5 |
+| Table I / 10 | 49 | 26.6 |
+
+L_liquid is the liquid length in the first production frame, about
+half the long edge.
+The 0.70 clock uses that whole liquid length for a shorter time, so
+the speed rises to 277 Å/ns at 240 K and 167 Å/ns at 260 K, about
+half the printed table.
+The time at which the solid fraction first reaches 0.995 is noisier,
+105.6 [71.8, 128.0] at 240 K and 58.8 [44.5, 71.5] at 260 K,
+because the last percent flickers.
+The potential energy falls by about 2100 kcal on the 4000-molecule
+cell, about 1.05 kcal/mol for the 2000 molecules that freeze.
+The energy clock uses that drop in place of an order parameter and
+lands on the same side of both published columns.
+
+Page 211922-3 identifies solid molecules with the Lechner-Dellago
+q6 on a 3.5 Å shell. The threshold is the point where the fraction
+of bulk ice labeled liquid equals the fraction of bulk liquid
+labeled ice, about half a percent.
+On these trajectories that cut is 0.38 to 0.40.
+The slope of that count is the CHILL+ count slope.
+The constant 0.358 quoted for the earlier seeding work gives the
+same slope.
+The local, unaveraged q6 at 0.5 is lower, 76.5 Å/ns at 240 K and
+43.6 Å/ns at 260 K on the secondary prism, and it is still a quarter
+of the printed table or less.
+The 2015 CHILL+ thresholds are unchanged.
+
+The primary prism, two seeds, has a count slope of
+101.3 [87.5, 115.0] at 240 K and 51.3 [49.4, 53.2] at 260 K.
+The basal face has 61.1 [60.0, 62.3] and 36.4 [34.1, 38.8].
+Basal over secondary prism is 0.52 at 240 K and 0.57 at 260 K.
+Page 211922-4 says the basal rate of TIP4P/ICE is within five
+percent of 0.6 times the secondary prism, and that the two prismatic
+planes are similar.
+The mW cell here has that same ordering.
+A wrong face does not supply the missing factor of four.
+
+One secondary-prism seed at 240 K with a 5 fs step, frames still
+5 ps apart, has a count slope of 96.0 Å/ns and an equation-2 speed
+of 132.6 Å/ns.
+The four 10 fs seeds at that temperature span 106 to 127 Å/ns on
+the count slope and 131 to 154 Å/ns on equation 2.
+The shorter step does not move the speed by a factor of four.
+
+116.9 Å/ns is 11.7 m/s and 1169 cm/s.
+Dividing by σ = 2.3925 Å gives 48.9 σ/ns at 240 K and 26.8 σ/ns at
+260 K, which is the table divided by ten (49 and 26.6).
+The long edge of the cell is 90.37 Å.
+Page 211922-2 describes that cell as about 9 nm, so the length used
+here is already in angstroms.
+Table II fits ln(u/(Å/ns)) for mW with C1 = 4.1711, C2 = 0.096266 K^−1
+and C3 = −0.001148 K^−2.
+At 240 K, ΔT = 34.6 K, the fit returns 458 Å/ns, next to the printed
+490.
+The fit is the printed column, in the unit the table names.
+
+Shi, Fulford, Salvalaglio and Molteni, J. Chem. Phys. 162, 054714
+(2025), Figure 3, plots mW growth on the primary prism and the basal
+face.
+The markers, read from the figure coordinates, are
+98.3 Å/ns at 240 K and 62.1 Å/ns at 260 K on the primary prism,
+with the error bars running 85.2 to 111.4 and 51.6 to 72.7.
+The basal markers are 88.1 and 39.5.
+The primary-prism equation-2 speeds here are 115.2 at 240 K and
+63.2 at 260 K, and the energy clocks are 108.7 and 62.1.
+The basal equation-2 speeds are 84.0 and 44.1.
+Those sit with Figure 3.
+Rozmanov and Kusalik, Phys. Chem. Chem. Phys. 13, 15501 (2011),
+report basal speeds of 0.7, 0.9 and 1.1 Å/ns at 10 K of supercooling
+for their large, medium and small cells, as quoted by Shi et al.
+Table I for TIP4P/ICE at 260 K is 0.933 Å/ns, on that atomistic scale.
+Moore and Molinero's minimum crystallization time is about ten
+nanoseconds, as cited on page 211922-7.
+Avrami time scales as u to the power −3/4, so a factor of four in u
+moves that time by 4^0.75 = 2.8, inside the order of magnitude the
+2016 paper claims for the comparison.
+The ten-nanosecond minimum does not separate Table I from a quarter
+of Table I.
+
+The steady one-front speed, times four, is the printed mW column.
+That factor is what you get by taking L as the whole box and dropping
+the two in equation 2, since the liquid is half the box:
+L_box / τ = 4 L_liquid / (2 τ).
+On the 0.95 clock this reading is 566 and 332 Å/ns, above the table.
+On the count slope it is 468 and 256 Å/ns, and the printed 490 and
+266 fall inside the seed intervals.
+The private correction of ten, applied to a column that already
+carries this factor of four, leaves a residual 10/4 = 2.5, which is
+the stable 2.4 measured here.
+Equation 2 is the speed the trajectories produce, and it is the
+speed in Figure 3 of Shi et al.
+The deck is unchanged.
+
 * Sources checked
 
 Nguyen and Molinero, J. Phys. Chem. B 2015, 119, 9369–9376.
@@ -448,12 +581,20 @@ The direct-coexistence cell of 4000 molecules, about 3 × 3 × 9 nm
 with an ice slice of about 4.5 nm, and the anisotropic barostat, are
 on page 211922-2.
 Equation 2, u = L / (2 τ), is on page 211922-4.
-Shi, Fulford, Salvalaglio and Molteni, arXiv:2410.07050.
-The abstract page dated 24 August 2026 names those four authors.
-Its text gives TIP4P/Ice maxima of 0.621 ± 0.104 Å/ns on the basal
-face and 0.840 ± 0.033 Å/ns on prism1 at 260 K, and says the mW
-rates are two orders of magnitude larger.
-It does not print an mW number.
+Shi, Fulford, Salvalaglio and Molteni, J. Chem. Phys. 162, 054714
+(2025), also arXiv:2410.07050.
+The text gives TIP4P/Ice maxima of 0.621 ± 0.104 Å/ns on the basal
+face and 0.840 ± 0.033 Å/ns on prism1 at 260 K.
+Figure 3 plots the mW basal and primary-prism rates.
+The markers read from that figure are 98.3 and 62.1 Å/ns on the
+primary prism at 240 and 260 K, and 88.1 and 39.5 Å/ns on the basal
+face.
+Rozmanov and Kusalik, Phys. Chem. Chem. Phys. 13, 15501 (2011).
+Shi et al. quote their TIP4P/2005 basal speeds as 0.7 to 1.1 Å/ns
+at 10 K of supercooling.
+Moore and Molinero, Nature 479, 506 (2011).
+Page 211922-7 of Espinosa et al. quotes their minimum crystallization
+time as about ten nanoseconds.
 Montero de Hijes, Romano, Gorfer and Dellago, J. Chem. Phys. 158,
 204706 (2023).
 The article HTML states the factor-of-ten correction in the caption
@@ -471,6 +612,8 @@ python3 input/interface/npt_growth.py
 python3 scripts/npt_rates.py --bin bbdir-eessi/tests/interface_order
 python3 input/interface/espinosa_protocol.py
 python3 scripts/espinosa_rates.py --bin bbdir-eessi/tests/interface_order
+python3 input/interface/espinosa_faces.py
+python3 scripts/espinosa_candidates.py --bin bbdir/tests/interface_order
 interface_order wc input/traj/nucleation_f1.lammpstrj
 python3 scripts/figures_interface_order.py \
   --bin bbdir-eessi/tests/interface_order \

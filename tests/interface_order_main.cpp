@@ -16,12 +16,14 @@
 
 // interface_order study <dump> [frame]
 // interface_order growth <dump> <picoseconds between frames>
+// interface_order q6 <dump> <picoseconds between frames>
 // interface_order confined
 
 int main(int argc, char **argv) {
   if (argc < 2) {
     std::cerr << "usage: interface_order study <dump> [frame]\n"
                  "       interface_order growth <dump> <ps>\n"
+                 "       interface_order q6 <dump> <ps>\n"
                  "       interface_order confined\n"
                  "       interface_order wc <dump> [frame]\n";
     return 2;
@@ -37,6 +39,11 @@ int main(int argc, char **argv) {
     const auto growth = iface::studyTrajectory(argv[2], std::stod(argv[3]));
     std::cout << iface::formatGrowth(growth);
     return growth.frames.empty() ? 1 : 0;
+  }
+  if (cmd == "q6" && argc >= 4) {
+    const auto text = iface::formatQ6Growth(argv[2], std::stod(argv[3]));
+    std::cout << text;
+    return text.find("frame ") == std::string::npos ? 1 : 0;
   }
   if (cmd == "wc" && argc >= 3) {
     const int frame = argc >= 4 ? std::stoi(argv[3]) : 1;

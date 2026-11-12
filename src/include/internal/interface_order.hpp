@@ -147,6 +147,14 @@ struct Growth {
 
 [[nodiscard]] std::string formatGrowth(const Growth &growth);
 
+//! Lechner-Dellago q6 on the 3.5 A shell, the counting rule in Espinosa,
+//! Navarro, Sanz, Valeriani and Vega, J. Chem. Phys. 145, 211922 (2016),
+//! page 211922-3. The threshold is not fitted. The report is the fraction
+//! of molecules at or above each listed q6bar and local q6, plus the
+//! frame-1 histogram of the ice core and the liquid core.
+[[nodiscard]] std::string formatQ6Growth(const std::string &path, double dumpEveryPs,
+                                         double cutoff = 3.5);
+
 //! Ideal oxygen frameworks at a nearest-neighbour distance of `bond`.
 //! The box is orthorhombic and large enough that a 3.5 A shell does not
 //! see a lateral image.
