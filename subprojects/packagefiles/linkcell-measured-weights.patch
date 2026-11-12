@@ -1,0 +1,769 @@
+diff --git a/include/linkcell.h b/include/linkcell.h
+index 1e4fc2b..0c880fa 100644
+--- a/include/linkcell.h
++++ b/include/linkcell.h
+@@ -405,6 +405,88 @@ int lc_halo(const int *nxyz,
+             size_t cap,
+             size_t *out_count);
+ 
++/**
++ * Domain of each cell and the bin of each point, from one mesh cut.
++ *
++ * `method` and `balance` follow `lc_partition`. A null `out_domain`
++ * queries `*out_ncell`. On a fill, `out_nxyz` is three ints,
++ * `out_width` is three bin widths, `out_domain` is one domain per
++ * cell, and `out_point_cell` is one bin per point.
++ */
++int lc_mesh_cut(const double *xyz,
++                size_t n,
++                const struct lc_cell *simbox,
++                double cutoff,
++                const int *mask,
++                double cell_hint,
++                size_t parts,
++                uint8_t method,
++                double balance,
++                int device,
++                int *out_nxyz,
++                double *out_width,
++                int *out_domain,
++                int *out_point_cell,
++                size_t cap_cell,
++                size_t cap_point,
++                size_t *out_ncell);
++
++/**
++ * Domain of each cell from caller-supplied weights.
++ *
++ * `nxyz` is `nx, ny, nz`. `weight` has one count per cell, in the
++ * order `((iz * ny) + iy) * nx + ix`. `method` and `balance` follow
++ * `lc_partition`. A plain bisection reads these weights and not the
++ * pair arcs. `out_domain` receives one domain per cell.
++ */
++int lc_partition_weights(const int *nxyz,
++                         const uint64_t *weight,
++                         size_t ncell,
++                         size_t parts,
++                         uint8_t method,
++                         double balance,
++                         int *out_domain);
++
++/**
++ * Owned points of `domain` are 2. Points within `reach` of one of
++ * those atoms are 1. Other points are 0. `hwidth` is the cell stencil
++ * from `lc_halo_width`; it limits the search, it does not keep a cell.
++ */
++int lc_within_reach(const double *xyz,
++                    size_t n,
++                    const double *lengths,
++                    const int *nxyz,
++                    const int *assign,
++                    size_t ncell,
++                    const int *point_cell,
++                    const uint32_t *hwidth,
++                    int domain,
++                    double reach,
++                    int *out_hit);
++
++/**
++ * Owned points of `domain` are 2. Points in a cell painted while
++ * walking that domain's cells are 1. Other points are 0. `width` is
++ * the stencil from `lc_halo_width`. The paint is `rank_mask`.
++ */
++int lc_owned_mask(const int *nxyz,
++                  const int *assign,
++                  size_t ncell,
++                  const int *point_cell,
++                  size_t n,
++                  int domain,
++                  const uint32_t *width,
++                  int *out_hit);
++
++/**
++ * Use `n` Rayon threads for later searches. `n <= 0` means one thread.
++ * Safe to call again with a different `n`.
++ */
++void lc_set_threads(int n);
++
++/** Width last passed to `lc_set_threads`, or the global pool when unset. */
++int lc_num_threads(void);
++
+ /**
+  * Library version string. Process-static, NUL-terminated. Do not free.
+  */
+diff --git a/meson.build b/meson.build
+index 6ab0b86..d77aeab 100644
+--- a/meson.build
++++ b/meson.build
+@@ -65,9 +65,12 @@ linkcell_cargo = custom_target(
+     'Cargo.lock',
+     'src/lib.rs',
+     'src/knearest.rs',
++    'src/bins.rs',
+     'src/cell.rs',
+     'src/error.rs',
+     'src/capi.rs',
++    'src/pairs.rs',
++    'src/partition.rs',
+     'scripts/copy-cargo-artifacts.py',
+   ),
+   output: _cargo_outputs,
+diff --git a/src/bins.rs b/src/bins.rs
+index b6f3b1b..007adcf 100644
+--- a/src/bins.rs
++++ b/src/bins.rs
+@@ -138,7 +138,7 @@ impl Mesh {
+         }
+ 
+         #[cfg(feature = "parallel")]
+-        let parallel = n_active >= PARALLEL_MESH;
++        let parallel = n_active >= PARALLEL_MESH && rayon::current_num_threads() > 1;
+         #[cfg(not(feature = "parallel"))]
+         let parallel = false;
+         if buf.offsets.len() != ncell + 1 {
+diff --git a/src/capi.rs b/src/capi.rs
+index 7989fd4..8190597 100644
+--- a/src/capi.rs
++++ b/src/capi.rs
+@@ -5,9 +5,62 @@
+ use std::cell::RefCell;
+ use std::ffi::{c_char, c_int, CString};
+ use std::ptr;
++use std::sync::atomic::{AtomicUsize, Ordering};
++use std::sync::Mutex;
+ 
+ use crate::{Cell, Error};
+ 
++/// How many Rayon threads the next search should use. Zero means the
++/// process-wide pool, which is what `RAYON_NUM_THREADS` built.
++static WANTED_THREADS: AtomicUsize = AtomicUsize::new(0);
++
++fn pool_of(n: usize) -> &'static rayon::ThreadPool {
++    static CACHE: Mutex<Vec<(usize, &'static rayon::ThreadPool)>> = Mutex::new(Vec::new());
++    let mut guard = CACHE.lock().unwrap_or_else(|e| e.into_inner());
++    if let Some((_, pool)) = guard.iter().find(|(k, _)| *k == n) {
++        return *pool;
++    }
++    let pool = Box::leak(Box::new(
++        rayon::ThreadPoolBuilder::new()
++            .num_threads(n)
++            .build()
++            .unwrap_or_else(|_| rayon::ThreadPoolBuilder::new().num_threads(1).build().unwrap()),
++    ));
++    guard.push((n, pool));
++    pool
++}
++
++/// Run `work` on a pool of the requested width so `current_num_threads`
++/// inside linkcell matches that width. A width of one is the serial walk.
++fn with_threads<R: Send>(work: impl FnOnce() -> R + Send) -> R {
++    let n = WANTED_THREADS.load(Ordering::Relaxed);
++    if n == 0 {
++        return work();
++    }
++    if rayon::current_thread_index().is_some() && rayon::current_num_threads() == n {
++        return work();
++    }
++    pool_of(n).install(work)
++}
++
++/// Choose the Rayon width for later searches. `n <= 0` selects one thread.
++#[no_mangle]
++pub extern "C" fn lc_set_threads(n: c_int) {
++    let n = if n < 1 { 1 } else { n as usize };
++    WANTED_THREADS.store(n, Ordering::Relaxed);
++}
++
++/// Width selected by [`lc_set_threads`], or the global pool when unset.
++#[no_mangle]
++pub extern "C" fn lc_num_threads() -> c_int {
++    let n = WANTED_THREADS.load(Ordering::Relaxed);
++    if n == 0 {
++        rayon::current_num_threads() as c_int
++    } else {
++        n as c_int
++    }
++}
++
+ /// Periodic parallelepiped. Lattice vectors are a, b, c (same as vesin rows).
+ #[repr(C)]
+ #[derive(Clone, Copy, Debug)]
+@@ -245,11 +298,13 @@ pub unsafe extern "C" fn lc_knearest_many(
+         d2_store = unsafe { std::slice::from_raw_parts_mut(out_d2, need) };
+         Some(&mut d2_store[..])
+     };
+-    let err = if n_frames == 1 {
+-        crate::knearest_into_d2(pts, &sim, k, mask_vec.as_deref(), hint, nn, d2)
+-    } else {
+-        crate::knearest_into_many(pts, n, n_frames, &sim, k, mask_vec.as_deref(), hint, nn, d2)
+-    };
++    let err = with_threads(|| {
++        if n_frames == 1 {
++            crate::knearest_into_d2(pts, &sim, k, mask_vec.as_deref(), hint, nn, d2)
++        } else {
++            crate::knearest_into_many(pts, n, n_frames, &sim, k, mask_vec.as_deref(), hint, nn, d2)
++        }
++    });
+     if let Err(e) = err {
+         set_error(&e.to_string());
+         return 1;
+@@ -466,8 +521,10 @@ unsafe fn pairs_call<'a>(
+         return Ok((key, found));
+     }
+     let mask_vec: Option<Vec<bool>> = mask_raw.map(|m| m.iter().map(|&v| v != 0).collect());
+-    let found = crate::pairs::in_pool(crate::pairs::hit_estimate(n, &sim, cutoff), || {
+-        crate::pairs::search(pts, &sim, cutoff, mask_vec.as_deref(), hint, half != 0)
++    let found = with_threads(|| {
++        crate::pairs::in_pool(crate::pairs::hit_estimate(n, &sim, cutoff), || {
++            crate::pairs::search(pts, &sim, cutoff, mask_vec.as_deref(), hint, half != 0)
++        })
+     });
+     match found {
+         Ok(found) => Ok((key, found)),
+@@ -942,3 +999,333 @@ pub unsafe extern "C" fn lc_halo(
+     clear_error();
+     0
+ }
++
++/// Domain of each cell and the bin of each point, from one mesh cut.
++///
++/// `method` and `balance` follow [`lc_partition`]. A null `out_domain`
++/// queries `*out_ncell` and does not write. On a fill, `out_nxyz` is
++/// three ints, `out_width` is three bin widths, `out_domain` is one
++/// domain per cell, and `out_point_cell` is one bin per point.
++///
++/// # Safety
++///
++/// Same point contract as [`lc_cell_grid`]. On a fill, `out_domain` is
++/// writable for `*out_ncell` ints and `out_point_cell` for `n` ints.
++#[no_mangle]
++pub unsafe extern "C" fn lc_mesh_cut(
++    xyz: *const f64,
++    n: usize,
++    simbox: *const lc_cell,
++    cutoff: f64,
++    mask: *const c_int,
++    cell_hint: f64,
++    parts: usize,
++    method: u8,
++    balance: f64,
++    device: c_int,
++    out_nxyz: *mut c_int,
++    out_width: *mut f64,
++    out_domain: *mut c_int,
++    out_point_cell: *mut c_int,
++    cap_cell: usize,
++    cap_point: usize,
++    out_ncell: *mut usize,
++) -> c_int {
++    if out_ncell.is_null() {
++        return fail_msg("null pointer");
++    }
++    if parts == 0 || parts > u32::MAX as usize {
++        return fail(Error::BadPartition);
++    }
++    let (pts, sim, mask_vec, hint) =
++        match unsafe { load_frame(xyz, n, simbox, mask, cell_hint) } {
++            Ok(v) => v,
++            Err(rc) => return rc,
++        };
++    let method = match crate::partition::method_from_c(method) {
++        Ok(method) => method,
++        Err(err) => return fail(err),
++    };
++    let request = crate::PartRequest {
++        parts: parts as u32,
++        method,
++        balance: if balance <= 0.0 { None } else { Some(balance) },
++        device: device != 0,
++    };
++    let cut = match with_threads(|| {
++        crate::mesh_cut(pts, &sim, cutoff, mask_vec.as_deref(), hint, request)
++    }) {
++        Ok(cut) => cut,
++        Err(err) => return fail(err),
++    };
++    let ncell = cut.assign.len();
++    unsafe { *out_ncell = ncell };
++    if out_domain.is_null() {
++        clear_error();
++        return 0;
++    }
++    if out_nxyz.is_null()
++        || out_width.is_null()
++        || out_point_cell.is_null()
++        || cap_cell < ncell
++        || cap_point < n
++    {
++        return fail_msg("mesh cut buffer is shorter than the cell count");
++    }
++    write_grid_head(&cut.grid, out_nxyz, out_width);
++    for (i, &domain) in cut.assign.iter().enumerate() {
++        if domain > c_int::MAX as u32 {
++            return fail(Error::Overflow);
++        }
++        unsafe { *out_domain.add(i) = domain as c_int };
++    }
++    for (i, &cell) in cut.point_cell.iter().enumerate() {
++        if cell > c_int::MAX as u32 {
++            return fail(Error::Overflow);
++        }
++        unsafe { *out_point_cell.add(i) = cell as c_int };
++    }
++    clear_error();
++    0
++}
++
++/// Domain of each cell from caller-supplied weights.
++///
++/// `nxyz` is `nx, ny, nz`. `weight` has one count per cell, in the
++/// order `((iz * ny) + iy) * nx + ix`. `method` and `balance` follow
++/// [`lc_partition`]. A plain bisection reads the weights and not the
++/// pair arcs. `out_domain` receives one domain per cell.
++///
++/// # Safety
++///
++/// `nxyz` is readable for 3 ints. `weight` is readable for `ncell`
++/// counts. `out_domain` is writable for `ncell` ints.
++#[no_mangle]
++pub unsafe extern "C" fn lc_partition_weights(
++    nxyz: *const c_int,
++    weight: *const u64,
++    ncell: usize,
++    parts: usize,
++    method: u8,
++    balance: f64,
++    out_domain: *mut c_int,
++) -> c_int {
++    if nxyz.is_null() || weight.is_null() || out_domain.is_null() {
++        return fail_msg("null pointer");
++    }
++    if parts == 0 || parts > u32::MAX as usize {
++        return fail(Error::BadPartition);
++    }
++    let nxyz = unsafe { [*nxyz, *nxyz.add(1), *nxyz.add(2)] };
++    if nxyz[0] <= 0 || nxyz[1] <= 0 || nxyz[2] <= 0 {
++        return fail(Error::BadGraph);
++    }
++    let expect = (nxyz[0] as usize)
++        .saturating_mul(nxyz[1] as usize)
++        .saturating_mul(nxyz[2] as usize);
++    if expect != ncell {
++        return fail(Error::BadGraph);
++    }
++    let method = match crate::partition::method_from_c(method) {
++        Ok(method) => method,
++        Err(err) => return fail(err),
++    };
++    let raw = unsafe { std::slice::from_raw_parts(weight, ncell) };
++    let graph = crate::CellGraph {
++        grid: crate::CellGrid {
++            nx: nxyz[0],
++            ny: nxyz[1],
++            nz: nxyz[2],
++            bin_width: [1.0; 3],
++            weight: raw.to_vec(),
++        },
++        offsets: vec![0u32; ncell + 1],
++        neighbor: Vec::new(),
++        edge_weight: Vec::new(),
++    };
++    let request = crate::PartRequest {
++        parts: parts as u32,
++        method,
++        balance: if balance <= 0.0 { None } else { Some(balance) },
++        device: false,
++    };
++    let assign = match with_threads(|| crate::partition_graph(&graph, request)) {
++        Ok(assign) => assign,
++        Err(err) => return fail(err),
++    };
++    for (i, &domain) in assign.iter().enumerate() {
++        if domain > c_int::MAX as u32 {
++            return fail(Error::Overflow);
++        }
++        unsafe { *out_domain.add(i) = domain as c_int };
++    }
++    clear_error();
++    0
++}
++
++/// Owned points are 2. Ghosts within `reach` of an owned atom are 1.
++///
++/// # Safety
++///
++/// `xyz` is readable for `n * 3` doubles. `lengths` and `nxyz` are
++/// readable for 3 entries. `assign` is readable for `ncell` ints.
++/// `point_cell` is readable for `n` ints. `hwidth` is readable for 3
++/// counts. `out_hit` is writable for `n` ints.
++#[no_mangle]
++pub unsafe extern "C" fn lc_within_reach(
++    xyz: *const f64,
++    n: usize,
++    lengths: *const f64,
++    nxyz: *const c_int,
++    assign: *const c_int,
++    ncell: usize,
++    point_cell: *const c_int,
++    hwidth: *const u32,
++    domain: c_int,
++    reach: f64,
++    out_hit: *mut c_int,
++) -> c_int {
++    if xyz.is_null()
++        || lengths.is_null()
++        || nxyz.is_null()
++        || assign.is_null()
++        || point_cell.is_null()
++        || hwidth.is_null()
++        || out_hit.is_null()
++        || domain < 0
++    {
++        return fail_msg("null pointer");
++    }
++    let pts: Vec<[f64; 3]> =
++        unsafe { std::slice::from_raw_parts(xyz.cast::<[f64; 3]>(), n) }.to_vec();
++    let lengths = unsafe { [*lengths, *lengths.add(1), *lengths.add(2)] };
++    let nxyz = unsafe { [*nxyz, *nxyz.add(1), *nxyz.add(2)] };
++    let hwidth = unsafe { [*hwidth, *hwidth.add(1), *hwidth.add(2)] };
++    let assign_raw = unsafe { std::slice::from_raw_parts(assign, ncell) };
++    let mut owned = Vec::with_capacity(ncell);
++    for &v in assign_raw {
++        if v < 0 {
++            return fail(Error::BadPartition);
++        }
++        owned.push(v as u32);
++    }
++    let cells_raw = unsafe { std::slice::from_raw_parts(point_cell, n) };
++    let mut cells = Vec::with_capacity(n);
++    for &v in cells_raw {
++        if v < 0 {
++            return fail(Error::BadPartition);
++        }
++        cells.push(v as u32);
++    }
++    let hit = match with_threads(|| {
++        crate::mark_reached(
++            &pts,
++            lengths,
++            nxyz,
++            &owned,
++            &cells,
++            hwidth,
++            domain as u32,
++            reach,
++        )
++    }) {
++        Ok(hit) => hit,
++        Err(err) => return fail(err),
++    };
++    for (i, &flag) in hit.iter().enumerate() {
++        unsafe { *out_hit.add(i) = flag as c_int };
++    }
++    clear_error();
++    0
++}
++
++/// Owned points are 2. Points in a cell painted from the owned walk are 1.
++///
++/// The stencil is the one [`crate::rank_mask`] paints while it visits the
++/// cells of `domain`. `width` is three bin radii.
++///
++/// # Safety
++///
++/// `nxyz` is readable for 3 ints. `assign` is readable for `ncell` ints.
++/// `point_cell` is readable for `n` ints. `width` is readable for 3
++/// counts. `out_hit` is writable for `n` ints.
++#[no_mangle]
++pub unsafe extern "C" fn lc_owned_mask(
++    nxyz: *const c_int,
++    assign: *const c_int,
++    ncell: usize,
++    point_cell: *const c_int,
++    n: usize,
++    domain: c_int,
++    width: *const u32,
++    out_hit: *mut c_int,
++) -> c_int {
++    if nxyz.is_null()
++        || assign.is_null()
++        || point_cell.is_null()
++        || width.is_null()
++        || out_hit.is_null()
++        || domain < 0
++    {
++        return fail_msg("null pointer");
++    }
++    let nxyz = unsafe { [*nxyz, *nxyz.add(1), *nxyz.add(2)] };
++    if nxyz[0] <= 0 || nxyz[1] <= 0 || nxyz[2] <= 0 {
++        return fail(Error::BadGraph);
++    }
++    let expect = (nxyz[0] as usize)
++        .saturating_mul(nxyz[1] as usize)
++        .saturating_mul(nxyz[2] as usize);
++    if expect != ncell {
++        return fail(Error::BadGraph);
++    }
++    let assign_raw = unsafe { std::slice::from_raw_parts(assign, ncell) };
++    let mut owned_assign = Vec::with_capacity(ncell);
++    let mut owned_cells = Vec::new();
++    for (cell, &v) in assign_raw.iter().enumerate() {
++        if v < 0 {
++            return fail(Error::BadPartition);
++        }
++        let domain_id = v as u32;
++        if domain_id == domain as u32 {
++            owned_cells.push(cell as u32);
++        }
++        owned_assign.push(domain_id);
++    }
++    let cells_raw = unsafe { std::slice::from_raw_parts(point_cell, n) };
++    let mut point_bins = Vec::with_capacity(n);
++    for &v in cells_raw {
++        if v < 0 || v as usize >= ncell {
++            return fail(Error::BadPartition);
++        }
++        point_bins.push(v as u32);
++    }
++    let width = unsafe { [*width, *width.add(1), *width.add(2)] };
++    let grid = crate::CellGrid {
++        nx: nxyz[0],
++        ny: nxyz[1],
++        nz: nxyz[2],
++        bin_width: [1.0; 3],
++        weight: vec![0; ncell],
++    };
++    let view = crate::rank_mask(
++        &grid,
++        &owned_assign,
++        &point_bins,
++        &owned_cells,
++        domain as u32,
++        width,
++    );
++    for (i, &painted) in view.mask.iter().enumerate() {
++        let flag = if !painted {
++            0
++        } else if owned_assign[point_bins[i] as usize] == domain as u32 {
++            2
++        } else {
++            1
++        };
++        unsafe { *out_hit.add(i) = flag };
++    }
++    clear_error();
++    0
++}
+diff --git a/src/lib.rs b/src/lib.rs
+index b6da1ce..af330d5 100644
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -164,7 +164,8 @@ pub use pairs::{
+ };
+ pub use partition::{
+     cell_graph, cell_grid, curve_split_device, derived_balance, derived_balance_f64, edge_cut,
+-    exclusive_prefix, fused_masks, halo, halo_width, hilbert_key, histogram, mesh_cut, morton_cmp,
++    exclusive_prefix, fused_masks, halo, halo_width, hilbert_key, histogram, mark_reached, mesh_cut,
++    morton_cmp,
+     morton_key, owned_cells, partition, partition_graph, prefix_assign, profile_ns, profile_reset,
+     rank_mask, replicate_graph, score, timer_resolution_ns, CellGraph, CellGrid, MeshCut, Method,
+     PartRequest, PartScore, RankMask, DEFAULT_METHOD,
+diff --git a/src/partition.rs b/src/partition.rs
+index adbfa94..72743bd 100644
+--- a/src/partition.rs
++++ b/src/partition.rs
+@@ -364,6 +364,104 @@ pub fn halo(
+     Ok(ghosts)
+ }
+ 
++/// Mark points owned by `domain` or within `reach` of one of its atoms.
++///
++/// The cell stencil from `hwidth` is only the candidate list. A point in
++/// a painted cell is kept when its minimum image to an owned atom is at
++/// most `reach`. Owned points are `2`. Reached ghosts are `1`.
++pub fn mark_reached(
++    xyz: &[[f64; 3]],
++    lengths: [f64; 3],
++    nxyz: [i32; 3],
++    assign: &[u32],
++    point_cell: &[u32],
++    hwidth: [u32; 3],
++    domain: u32,
++    reach: f64,
++) -> Result<Vec<u8>, Error> {
++    if xyz.len() != point_cell.len() || !(reach.is_finite() && reach >= 0.0) {
++        return Err(Error::BadGraph);
++    }
++    if nxyz[0] <= 0 || nxyz[1] <= 0 || nxyz[2] <= 0 {
++        return Err(Error::BadGraph);
++    }
++    let nx = nxyz[0] as usize;
++    let ny = nxyz[1] as usize;
++    let nz = nxyz[2] as usize;
++    let ncell = nx
++        .checked_mul(ny)
++        .and_then(|v| v.checked_mul(nz))
++        .ok_or(Error::BadGraph)?;
++    if assign.len() != ncell {
++        return Err(Error::BadGraph);
++    }
++    let mut start = vec![0usize; ncell + 1];
++    for &cell in point_cell {
++        let c = cell as usize;
++        if c < ncell {
++            start[c + 1] += 1;
++        }
++    }
++    for c in 0..ncell {
++        start[c + 1] += start[c];
++    }
++    let mut cursor = start.clone();
++    let mut atoms = vec![0usize; xyz.len()];
++    for (i, &cell) in point_cell.iter().enumerate() {
++        let c = cell as usize;
++        if c < ncell {
++            atoms[cursor[c]] = i;
++            cursor[c] += 1;
++        }
++    }
++    let reach2 = reach * reach;
++    let rad = [hwidth[0] as i32, hwidth[1] as i32, hwidth[2] as i32];
++    let mut hit = vec![0u8; xyz.len()];
++    for (i, &cell) in point_cell.iter().enumerate() {
++        let c = cell as usize;
++        if c >= ncell {
++            continue;
++        }
++        if assign[c] == domain {
++            hit[i] = 2;
++            continue;
++        }
++        let ix = (c % nx) as i32;
++        let iy = ((c / nx) % ny) as i32;
++        let iz = (c / (nx * ny)) as i32;
++        let mut found = false;
++        'search: for dz in -rad[2]..=rad[2] {
++            for dy in -rad[1]..=rad[1] {
++                for dx in -rad[0]..=rad[0] {
++                    let jx = (ix + dx).rem_euclid(nxyz[0]) as usize;
++                    let jy = (iy + dy).rem_euclid(nxyz[1]) as usize;
++                    let jz = (iz + dz).rem_euclid(nxyz[2]) as usize;
++                    let other = (jz * ny + jy) * nx + jx;
++                    if assign[other] != domain {
++                        continue;
++                    }
++                    for &j in &atoms[start[other]..start[other + 1]] {
++                        let mut sum = 0.0;
++                        for d in 0..3 {
++                            let mut delta = xyz[i][d] - xyz[j][d];
++                            delta -= lengths[d] * (delta / lengths[d] + 0.5).floor();
++                            sum += delta * delta;
++                        }
++                        if sum <= reach2 {
++                            found = true;
++                            break 'search;
++                        }
++                    }
++                }
++            }
++        }
++        if found {
++            hit[i] = 1;
++        }
++    }
++    Ok(hit)
++}
++
+ /// Point counts on the mesh `pairs_within` would use.
+ pub fn cell_grid(
+     xyz: &[[f64; 3]],
+diff --git a/tests/partition.rs b/tests/partition.rs
+index dda5aa2..b877010 100644
+--- a/tests/partition.rs
++++ b/tests/partition.rs
+@@ -362,3 +362,85 @@ fn fused_halo_matches_the_cell_halo() {
+         assert_eq!(view.owned, owned);
+     }
+ }
++
++#[test]
++fn caller_weights_move_the_bisection() {
++    let nx = 8i32;
++    let ny = 4i32;
++    let nz = 4i32;
++    let ncell = (nx * ny * nz) as usize;
++    let mut weight = vec![1u64; ncell];
++    // The low-x slab is the expensive one.
++    for iz in 0..nz {
++        for iy in 0..ny {
++            for ix in 0..2 {
++                let cell = ((iz * ny + iy) * nx + ix) as usize;
++                weight[cell] = 40;
++            }
++        }
++    }
++    let graph = CellGraph {
++        grid: CellGrid {
++            nx,
++            ny,
++            nz,
++            bin_width: [1.0; 3],
++            weight: weight.clone(),
++        },
++        offsets: vec![0; ncell + 1],
++        neighbor: Vec::new(),
++        edge_weight: Vec::new(),
++    };
++    let assign = linkcell::partition_graph(
++        &graph,
++        PartRequest {
++            parts: 2,
++            method: Method::Rcb,
++            balance: None,
++            device: false,
++        },
++    )
++    .unwrap();
++    assert_partition(&assign, ncell, 2);
++    let mut load = [0u64; 2];
++    for (cell, &domain) in assign.iter().enumerate() {
++        load[domain as usize] += weight[cell];
++    }
++    let mean = (load[0] + load[1]) as f64 / 2.0;
++    let imbalance = (load[0].max(load[1]) as f64) / mean;
++    let (bound_num, bound_den) = derived_balance(&weight, 2);
++    let bound = bound_num as f64 / bound_den as f64;
++    assert!(imbalance <= bound + 1e-9, "{imbalance} > {bound}");
++    let heavy = assign[0];
++    let mut heavy_cells = 0usize;
++    let mut light_cells = 0usize;
++    for &domain in &assign {
++        if domain == heavy {
++            heavy_cells += 1;
++        } else {
++            light_cells += 1;
++        }
++    }
++    assert!(heavy_cells < light_cells);
++}
++
++#[test]
++fn reach_keeps_the_neighbour_and_drops_the_next_cell() {
++    let xyz = vec![[0.2, 0.2, 0.2], [1.2, 0.2, 0.2], [3.2, 0.2, 0.2]];
++    let assign = vec![0u32, 1, 1];
++    let point_cell = vec![0u32, 1, 2];
++    let hit = linkcell::mark_reached(
++        &xyz,
++        [6.0, 4.0, 4.0],
++        [3, 1, 1],
++        &assign,
++        &point_cell,
++        [1, 0, 0],
++        0,
++        1.5,
++    )
++    .unwrap();
++    assert_eq!(hit[0], 2);
++    assert_eq!(hit[1], 1);
++    assert_eq!(hit[2], 0);
++}

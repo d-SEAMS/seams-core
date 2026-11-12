@@ -1,0 +1,41 @@
+#+TITLE: Primitive rings and the full graph
+#+OPTIONS: toc:nil num:nil
+
+A ring is primitive when the graph distance between every pair of its
+vertices equals the shorter distance along the ring. That is Franzblau's
+shortest-path test. A chordless ring can fail it: the missing shortcut
+need not be an edge of the ring.
+
+* Distances, then the source
+
+The search builds a ring from one source, the lowest-indexed member of
+that ring. Two facts have to hold at once.
+
+Distances are taken on the whole graph. A shortcut may pass through a
+vertex whose index is below the source. Hiding that vertex makes the
+opposite vertex look farther away than it is, and a ring that is not
+primitive is kept.
+
+After those distances are known, every vertex below the source loses
+its level. No path is extended through that vertex, so it is not
+written onto a ring this source emits. The ring is still reported once,
+from its lowest member.
+
+* Worked example
+
+Number the vertices of a hexagon ~1-2-3-4-5-6~, and join a new vertex
+~0~ to the opposite vertices ~1~ and ~4~.
+
+A walk that refuses to enter vertex ~0~ reports distance 3 between 1
+and 4. The hexagon then looks primitive, because each pair appears to
+sit at its ring distance.
+
+The full graph has the path ~1-0-4~, so the distance is 2. The ring
+distance is 3, and the hexagon is not primitive. The two pentagons
+~0-1-2-3-4~ and ~0-1-6-5-4~ are primitive. A chordless search keeps the
+hexagon as well, because no edge joins two non-consecutive vertices of
+the hexagon. The primitive search, and OVITO FindRings on this bond
+list, both reject the hexagon and keep the pentagons.
+
+~tests/test_ring_hop.cpp~ is that fixture. The same rule is what the
+depth-10 census matches against OVITO at ring sizes 4 through 10.

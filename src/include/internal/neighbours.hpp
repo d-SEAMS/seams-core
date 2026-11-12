@@ -369,12 +369,15 @@ const std::vector<std::vector<int>> &reusedShellList(
 //! axis whose empty gap is wider than the cutoff does not wrap, and the
 //! fused cutoff list runs on that window rather than on the periodic box.
 //! Returns false when the atoms fill the box or the box is not orthorhombic.
-//! Rows are atom IDs, self first, in the same order as neighListO. A null
-//! source marks every atom as an anchor; otherwise only marked atoms
-//! receive partners.
+//! Rows are atom IDs when @a byId is set, and cloud indices otherwise.
+//! Self is first, then partners in ascending order, matching neighListO.
+//! A null source marks every atom as an anchor; otherwise only marked
+//! atoms receive partners. With @a everyRow the source still places the
+//! window, and every atom in it receives partners.
 bool blockWindowRows(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double rcutoff,
-    const std::vector<char> *source, std::vector<std::vector<int>> &rows);
+    const std::vector<char> *source, std::vector<std::vector<int>> &rows,
+    bool byId = true, bool everyRow = false);
 
 bool cellListRowsThreaded(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
@@ -399,7 +402,19 @@ void preferSerialCutoff(bool on);
 bool orthoFullCsr(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> *subset, double rcutoff, std::vector<int> &offsets,
-    std::vector<int> &cols, bool half = false);
+    std::vector<int> &cols, bool half = false,
+    std::vector<std::vector<int>> *directRows = nullptr, const int *indexToID = nullptr,
+    bool *wroteRows = nullptr);
+
+//! Same rows as neighListO, written into @a rows. A row keeps the capacity
+//! of the previous call, so a repeated frame does not allocate per atom.
+bool refillNeighListO(double rcutoff,
+                      const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                      int typeI, std::vector<std::vector<int>> &rows);
+
+//! Same rows as getNewNeighbourListByIndex, written into @a rows.
+bool refillIndexRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                     double cutoff, std::vector<std::vector<int>> &rows);
 
 /// In-situ cutoff list. Candidates are built at `cutoff + skin` and
 /// reused while every atom and the box have moved by at most `skin/2`.

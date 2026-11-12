@@ -1,0 +1,30 @@
+cores 8
+repeats 8, one process per layout, cell and block alternating
+type-7 median and IQR of the cell cut, 884736 molecules
+
+strong n=1 t=1 rings 701.975 iqr 23.242
+strong n=8 t=1 rings 91.706 iqr 5.143 eff 0.957 halo 0.294 imb 1.040
+strong n=1 t=1 chill 545.960 iqr 31.144
+strong n=8 t=1 chill 61.144 iqr 1.847 eff 1.116 halo 0.060 imb 1.004
+strong n=1 t=1 neigh 322.979 iqr 12.385
+strong n=8 t=1 neigh 25.811 iqr 1.431 eff 1.564 halo 0.060 imb 1.022
+hybrid n=4 t=2 chill 82.930 iqr 1.870
+hybrid n=2 t=4 chill 111.893 iqr 4.800
+
+Eight-rank ring samples, wall and imbalance:
+92.531 1.049
+90.428 1.025
+95.558 1.057
+106.533 1.147
+90.881 1.020
+89.478 1.022
+96.157 1.064
+90.611 1.030
+
+The previous eight-rank ring imbalance median was 1.024. This median is 1.040.
+Seven of the eight samples sit between 1.020 and 1.064. One sample is 1.147.
+The ghost fraction is still 0.294.
+
+Repeated cuts reuse the cutoff rows and the trimmed bond ball.
+The one-rank ring time fell from 1040 ms to 702 ms for the same reason.
+Distributed counts matched the one-rank census at depths 4, 6, 8 and 10.

@@ -1,0 +1,19 @@
+\begin{table}[tbp]
+\centering
+\caption{\textbf{884736 molecules on eight cores.} Pure MPI is one thread on each rank. A repeated ring cut reuses the cutoff rows and the trimmed bond ball. A moved frame rebuilds the rows of its own share. On eight thermal frames the distinct-frame ring efficiency is 0.794. CHILL+ and $q_6$ on the same frames are 0.905 and 0.903. Hybrid uses the same eight cores and is slower: the eight-rank window is 117645 atoms, about 2.8 MiB, next to a 2 MiB L2, while the two-rank window is 451584 atoms and 340605 cells, about 11 MiB. The ring skin stays at floor(6/2) cutoffs. Efficiency divides the one-rank, one-thread time by the wall and by the workers. Eight repeats, type-7 median and IQR.}
+\label{tab:partition-v17}
+\begin{tabular}{llrrrrrr}
+\toprule
+Layout & Operation & Block & IQR & Cell & IQR & Cell eff. & Rule \\
+\midrule
+8$\times$1 & neighbours & 32.036 & 2.973 & 25.811 & 1.431 & 1.564 & cell \\
+ & CHILL+ & 67.523 & 2.192 & 61.144 & 1.847 & 1.116 & cell \\
+ & $q_6$ & 91.789 & 6.815 & 79.954 & 3.554 & 0.975 & cell \\
+ & rings & 92.075 & 5.910 & 91.706 & 5.143 & 0.957 & cell \\
+4$\times$2 & CHILL+ & 90.233 & 5.191 & 82.930 & 1.870 & 0.823 & cell \\
+ & $q_6$ & 146.065 & 7.349 & 139.324 & 6.807 & 0.559 & cell \\
+2$\times$4 & CHILL+ & 115.661 & 2.638 & 111.893 & 4.800 & 0.610 & cell \\
+ & $q_6$ & 246.320 & 9.174 & 239.149 & 20.610 & 0.326 & cell \\
+\bottomrule
+\end{tabular}
+\end{table}

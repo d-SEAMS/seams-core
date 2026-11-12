@@ -13,12 +13,15 @@
 /** @file domain.hpp
  *  @brief Spatial domain decomposition of one periodic frame across ranks.
  *
- *  The box is cut into slabs, pencils, or blocks, whichever keeps the most
- *  owned volume for a halo of the given width. A rank owns one block. Its
- *  halo is every atom within that width of the block, periodic boundaries
- *  included, and nothing further. A kernel whose answer for an atom depends
- *  only on atoms within that width can run on the owned and halo atoms alone
- *  and agree with the whole frame on the owned ones.
+ *  An orthorhombic frame is cut by linkcell's recursive coordinate
+ *  bisection of the periodic cell grid. The bound is the tightest a
+ *  cell-aligned cut can promise. The first call of an analysis weights
+ *  cells by how many points they hold. Later calls of that analysis
+ *  weight them by the work measured on the first call. A painted cell
+ *  only contributes a point that lies within the cutoff of an owned
+ *  atom. The cut whose heaviest rank load plus thickest ghost fraction
+ *  is smaller is the one that runs. A skewed frame keeps the slab,
+ *  pencil, or block cut.
  */
 
 namespace seams::domain {
@@ -64,9 +67,16 @@ inline int ringHops(int maxDepth) {
 //! cutoffs would have built.
 inline int ringRowHops(int maxDepth) { return ringHops(maxDepth); }
 
-//! The atoms rank @a rank of @a nRanks owns, and every atom within @a halo
-//! of its block. Without a periodic box rank 0 owns every atom.
+//! The atoms rank @a rank of @a nRanks owns, and every atom in a cell
+//! painted within @a halo of an owned cell. Without a periodic box rank 0
+//! owns every atom.
 Share decompose(const Cloud &cloud, int rank, int nRanks, double halo);
+
+//! Tags for the measured cell weights. Zero keeps the point-count cut.
+constexpr int kWorkNeigh = 1;
+constexpr int kWorkChill = 2;
+constexpr int kWorkQ6 = 3;
+constexpr int kWorkRings = 4;
 
 //! Ranks that own a halo atom of @a share, sorted, without this rank.
 //! The relation is symmetric: a cell within @a halo of both sides is
@@ -90,9 +100,9 @@ std::vector<std::vector<int>> rings(const Cloud &cloud, double cutoff,
 
 //! Rings of a cloud that is already one share, in share order. @a owned
 //! selects the sources. Member indices are local.
-std::vector<std::vector<int>> ownedRings(const Cloud &local, double cutoff,
-                                         int maxDepth,
-                                         const std::vector<char> &owned);
+const std::vector<std::vector<int>> &ownedRings(const Cloud &local, double cutoff,
+                                                 int maxDepth,
+                                                 const std::vector<char> &owned);
 
 //! Primitive rings from neighbour rows already in hand. @a frame[i] is the
 //! frame index of a vertex whose neighbours are @a neigh[i], also frame
@@ -117,8 +127,27 @@ struct Work {
 //! over the distributed graph; the owned coordinates stay local. The cloud
 //! and the exchange plan are kept and rewritten in place on the next call
 //! with the same frame size and halo. The cached rank blocks assume atoms
-//! stay in their block for an unchanged nop.
-Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm);
+//! stay in their block for an unchanged nop. @a workTag selects the measured
+//! cell weights of one analysis; zero keeps the point-count cut.
+Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm, int workTag = 0);
+
+//! Bin @a perLocal, one value per atom of the latest share, into cells
+//! and keep the resulting cut for the next gather of @a workTag.
+//! Later calls with the same tag are ignored.
+void captureLocalWork(int workTag, const double *perLocal, int nLocal, MPI_Comm comm);
+
+//! 0 chooses the cheaper of the block and cell cuts, 1 forces the block cut, 2 the cell cut.
+//! The choice adds the thickest ghost fraction to the heaviest-rank load.
+void setCutMode(int mode);
+
+//! Called from gatherWork after owned coordinates are in place and the ghost
+//! exchange has been posted, before those ghost coordinates are written.
+//! The hook reads owned atoms and must not touch the exchange.
+void setHaloHook(void (*fn)(void *), void *ctx);
+
+//! Owned atoms whose every neighbour within @a cutoff is also owned.
+//! A boundary atom is left clear. Indices are the latest share.
+void markInterior(const Work &work, double cutoff, std::vector<char> &interior);
 
 //! The cloud and timers from the latest gatherWork on this rank.
 Work &gatheredWork();
@@ -145,8 +174,8 @@ RingSummary reduceRings(const Cloud &cloud, double cutoff, int maxDepth,
 //! coordinate halo of ringHops() cutoffs, one hop inside the previous
 //! surface term. A skewed cell reads rows from the frame the rank holds.
 //! Members are frame indices. Collective over @a comm.
-std::vector<std::vector<int>> distributedRings(const Cloud &cloud, double cutoff,
-                                               int maxDepth, MPI_Comm comm);
+const std::vector<std::vector<int>> &distributedRings(const Cloud &cloud, double cutoff,
+                                                       int maxDepth, MPI_Comm comm);
 
 //! Exchange @a stride doubles for every atom in the boundary of the last
 //! gatherWork. @a values is indexed by that cloud's local atom. post returns
@@ -159,6 +188,18 @@ void waitBoundaryValues();
 //! Milliseconds the value exchanges blocked for since the previous call.
 double takeValueCommMs();
 #endif
+
+//! Phases of the last ringsOf on this rank. Rebuild is the neighbour
+//! rows of this rank's share. Search is the path enumeration. Primitive
+//! is the shortest-path test. Reduce is the local index map.
+struct RingPhases {
+  double rebuildMs = 0;
+  double searchMs = 0;
+  double primitiveMs = 0;
+  double reduceMs = 0;
+};
+
+RingPhases lastRingPhases();
 
 } // namespace seams::domain
 

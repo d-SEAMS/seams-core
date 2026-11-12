@@ -300,6 +300,15 @@ rule related_watch:
         "--out benchmarks/h2h-watch.csv"
 
 
+rule linkcell_scale:
+    input:
+        "scripts/rank_scale.py",
+    output:
+        "benchmarks/rank-scale.csv",
+    shell:
+        "python3 scripts/rank_scale.py"
+
+
 rule shipped_campaign:
     input:
         "paper/tex/repro/shipped_campaign.py",

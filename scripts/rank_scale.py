@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Strong scaling of the spatial-domain split.
+"""Strong scaling of the linkcell cell-grid cut.
 
 Ranks and threads are each 1, 2, 4 or 8, and their product is at most 8.
-One warm-up, six timed calls. Speedup and efficiency are against one rank
-and one thread. Each sample line from the benchmark is
-wall, ghost-exchange, compute, halo fraction.
+One warm-up, then eight timed calls of the cell cut. Speedup is against
+one rank and one thread. host_cores is nproc. No host name is written.
 """
 
 from __future__ import annotations
@@ -13,29 +12,32 @@ import csv
 import os
 import statistics
 import subprocess
-import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-_TMP = Path(tempfile.gettempdir())
-BENCH = str(_TMP / "rank_bench")
-_CHILL = _TMP / "builds" / "chill-mpi"
+BENCH = os.environ.get("SEAMS_RANK_BENCH", str(ROOT / "build-mpi" / "tests" / "rank_bench"))
+_MPI = Path(
+    "/cvmfs/software.eessi.io/versions/2026.06/software/linux/x86_64/intel/"
+    "sapphirerapids/software/OpenMPI/5.0.10-GCC-15.2.0"
+)
+_BUILD = ROOT / "build-mpi"
 LIBS = ":".join(
     [
-        str(_CHILL / "src"),
-        str(_CHILL / "subprojects" / "readcon-core"),
-        str(_CHILL / "subprojects" / "readcon-db"),
-        str(_CHILL / "subprojects" / "linkcell"),
-        str(_CHILL / "subprojects" / "vesin"),
-        str(_CHILL / "subprojects" / "minimage"),
-        "/usr/lib/x86_64-linux-gnu/openmpi/lib",
+        str(_BUILD / "src"),
+        str(_BUILD / "subprojects" / "readcon-core"),
+        str(_BUILD / "subprojects" / "readcon-db"),
+        str(_BUILD / "subprojects" / "linkcell"),
+        str(_BUILD / "subprojects" / "vesin"),
+        str(_BUILD / "subprojects" / "minimage"),
+        str(_MPI / "lib"),
         "/cvmfs/software.eessi.io/versions/2026.06/software/linux/x86_64/intel/"
         "sapphirerapids/software/FlexiBLAS/3.5.0-GCC-15.2.0/lib",
     ]
 )
+MPIRUN = os.environ.get("SEAMS_MPIRUN", str(_MPI / "bin" / "mpirun"))
 OPS = ("neigh", "chill", "q6", "rings")
 SIZES = (24, 48)
-REPS = 6
+REPS = 8
 
 
 def configs():
@@ -55,9 +57,10 @@ def run(cells, ranks, threads, op):
     env["OMP_DYNAMIC"] = "FALSE"
     env["OMPI_MCA_btl"] = "^openib"
     env["OMPI_MCA_pml"] = "ob1"
+    env["SEAMS_SCALE"] = "1"
     mapping = ["--bind-to", "core", "--map-by", f"node:PE={threads}"]
     cmd = [
-        "mpirun",
+        MPIRUN,
         *mapping,
         "-n",
         str(ranks),
@@ -72,8 +75,9 @@ def run(cells, ranks, threads, op):
     rows = []
     for line in done.stdout.splitlines():
         parts = line.split()
-        if len(parts) == 4:
-            rows.append(tuple(float(v) for v in parts))
+        # cell wall comm compute halo imbalance
+        if len(parts) == 6 and parts[0] == "cell":
+            rows.append(tuple(float(v) for v in parts[1:5]))
     if len(rows) < REPS:
         raise RuntimeError(f"short {op} {cells} {ranks}x{threads}: {done.stdout} {done.stderr}")
     return rows[:REPS]
@@ -83,9 +87,11 @@ def main():
     out = ROOT / "benchmarks" / "rank-scale.csv"
     fields = [
         "molecules", "operation", "ranks", "threads_per_rank", "cores",
+        "host_cores",
         "median_ms", "q1_ms", "q3_ms", "iqr_ms", "speedup", "efficiency",
         "halo_fraction", "comm_ms", "compute_ms", "samples_ms",
     ]
+    host_cores = os.cpu_count() or 0
     measured = []
     for cells in SIZES:
         for op in OPS:
@@ -114,6 +120,7 @@ def main():
                 "ranks": ranks,
                 "threads_per_rank": threads,
                 "cores": cores,
+                "host_cores": host_cores,
                 "median_ms": f"{med:.6f}",
                 "q1_ms": f"{q1:.6f}",
                 "q3_ms": f"{q3:.6f}",

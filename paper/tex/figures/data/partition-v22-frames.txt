@@ -1,0 +1,33 @@
+cores 8
+884736 molecules, ice Ic, gaussian displacement 0.12 A
+one session, cell cut, eight frames, type-7 median and IQR
+
+rings, same frame, rows reused
+1 rank 678.910 ms iqr 9.744
+8 rank 115.435 ms iqr 2.404 halo 0.308 imbalance 1.026
+
+rings, distinct frames, each rank rebuilds its own rows
+1 rank 999.346 ms iqr 18.219
+  rebuild 324.33 search 565.95 primitive 104.32 reduce 0.00
+8 rank 157.393 ms iqr 7.393 halo 0.308 imbalance 1.053
+  rebuild 44.59 search 92.10 primitive 13.70 reduce 1.15
+efficiency 0.794
+six-ring counts matched on every frame
+
+Before this change the eight-rank rebuild was the 96 ms gap
+between the 195 ms distinct wall and the 98.5 ms cached wall,
+against a one-rank rebuild of about 338 ms. The share crossed
+the periodic boundary, so the neighbour window never opened and
+every rank fell back to a full-box search of its atoms.
+
+neighbours, distinct frames
+1 rank 308.304 ms iqr 14.992
+8 rank 36.598 ms iqr 2.778 halo 0.073
+
+CHILL+, distinct frames
+1 rank 492.295 ms iqr 5.581
+8 rank 84.067 ms iqr 6.305 halo 0.073
+
+q6, distinct frames
+1 rank 568.169 ms iqr 8.770
+8 rank 104.407 ms iqr 6.575 halo 0.073

@@ -437,3 +437,33 @@ if _SCALE is not None:
   ScaleProtocol.time_twelve_calls.repeat = 1
   ScaleProtocol.time_twelve_calls.number = 1
   ScaleProtocol.time_twelve_calls.warmup_time = 0
+
+
+class LinkcellPartition:
+    """One rank of the linkcell bisection, neighbours on the 24-cell ice."""
+
+    params = [1, 2, 4, 8]
+    param_names = ["threads"]
+
+    def setup(self, threads):
+        bench = ROOT / "build-mpi" / "tests" / "rank_bench"
+        if not bench.is_file():
+            raise NotImplementedError("build-mpi/tests/rank_bench is not built")
+        self.bench = bench
+        self.threads = threads
+
+    def time_neighbours(self, threads):
+        env = os.environ.copy()
+        env.update({
+            "OMP_NUM_THREADS": str(threads),
+            "OMP_DYNAMIC": "FALSE",
+            "OMP_PROC_BIND": "close",
+            "RAYON_NUM_THREADS": "1",
+            "SEAMS_SCALE": "1",
+        })
+        subprocess.run(
+            ["mpirun", "--bind-to", "core", "--map-by", f"node:PE={threads}",
+             "-n", "1", str(self.bench), "24", "2", "neigh"],
+            cwd=ROOT, env=env, check=True,
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        )

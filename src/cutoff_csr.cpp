@@ -18,10 +18,15 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <mutex>
 #include <vector>
 
 #ifdef SEAMS_HAS_OPENMP
 #include <omp.h>
+#endif
+
+#ifdef SEAMS_HAS_LINKCELL
+#include <linkcell.h>
 #endif
 
 // The linked cell this tree was built against does not always export
@@ -966,10 +971,480 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
 
 namespace nneigh {
 
+struct PairDir {
+  int a;
+  int b;
+};
+
+#ifdef SEAMS_HAS_LINKCELL
+int ourToLc(int cid, int ncx, int ncy, int ncz) {
+  const int nyz = ncy * ncz;
+  const int cx = cid / nyz;
+  const int cy = (cid / ncz) % ncy;
+  const int cz = cid % ncz;
+  return (cz * ncy + cy) * ncx + cx;
+}
+
+// Each thread owns one part of the linkcell bisection and keeps a private
+// copy of the atoms in the cells it owns or paints. The search never walks
+// another thread's interior.
+bool ownedBlockPairs(const double *x, const double *y, const double *z, const int *ids,
+                     const int *cellStart, const int *cellOfSubset, const std::vector<int> *subset,
+                     int ncx, int ncy, int ncz, int nop, int nSubset, double cutoff, double rc2,
+                     const double len[3], int team, std::vector<std::vector<PairDir>> &bags,
+                     std::vector<int> &deg, std::vector<std::vector<int>> *directRows,
+                     const int *indexToID) {
+  const int nCells = ncx * ncy * ncz;
+  if (nCells <= 0 || team < 2 || nSubset <= 0) {
+    return false;
+  }
+  const int nxyz[3] = {ncx, ncy, ncz};
+  const double bw[3] = {len[0] / static_cast<double>(ncx), len[1] / static_cast<double>(ncy),
+                        len[2] / static_cast<double>(ncz)};
+  std::uint32_t hw[3] = {1, 1, 1};
+  if (lc_halo_width(cutoff, 1, bw, hw) != 0) {
+    return false;
+  }
+  struct CachedCut {
+    int ncx = 0;
+    int ncy = 0;
+    int ncz = 0;
+    int team = 0;
+    double lx = 0;
+    double ly = 0;
+    double lz = 0;
+    double cutoff = 0;
+    std::vector<int> assign;
+  };
+  static CachedCut cached;
+  static std::mutex cutMu;
+  std::vector<int> assign(static_cast<std::size_t>(nCells), 0);
+  {
+    std::lock_guard<std::mutex> lock(cutMu);
+    const bool same = cached.ncx == ncx && cached.ncy == ncy && cached.ncz == ncz &&
+                      cached.team == team && cached.lx == len[0] && cached.ly == len[1] &&
+                      cached.lz == len[2] && cached.cutoff == cutoff &&
+                      static_cast<int>(cached.assign.size()) == nCells;
+    if (same) {
+      assign = cached.assign;
+    } else {
+      std::vector<std::uint64_t> weight(static_cast<std::size_t>(nCells), 0);
+      for (int c = 0; c < nCells; ++c) {
+        const int n = cellStart[c + 1] - cellStart[c];
+        if (n > 0) {
+          weight[static_cast<std::size_t>(ourToLc(c, ncx, ncy, ncz))] =
+              static_cast<std::uint64_t>(n);
+        }
+      }
+      const auto cut0 = Clock::now();
+      if (lc_partition_weights(nxyz, weight.data(), static_cast<std::size_t>(nCells),
+                               static_cast<std::size_t>(team), 2, 0.0, assign.data()) != 0) {
+        return false;
+      }
+      if (profileOn()) {
+        std::fprintf(stderr, "rcb_ms %.3f cells %d\n", msSince(cut0), nCells);
+      }
+      cached.ncx = ncx;
+      cached.ncy = ncy;
+      cached.ncz = ncz;
+      cached.team = team;
+      cached.lx = len[0];
+      cached.ly = len[1];
+      cached.lz = len[2];
+      cached.cutoff = cutoff;
+      cached.assign = assign;
+    }
+  }
+  (void)cellOfSubset;
+  (void)subset;
+  bags.assign(static_cast<std::size_t>(team), {});
+  if (directRows == nullptr) {
+    const std::size_t guess =
+        static_cast<std::size_t>(nSubset) * 8 / static_cast<std::size_t>(team) + 64;
+    for (auto &bag : bags) {
+      bag.reserve(guess);
+    }
+  }
+  if (directRows == nullptr) {
+    deg.assign(static_cast<std::size_t>(team) * static_cast<std::size_t>(nop), 0);
+  } else {
+    deg.clear();
+    if (static_cast<int>(directRows->size()) != nop) {
+      directRows->assign(static_cast<std::size_t>(nop), {});
+      for (auto &row : *directRows) {
+        row.reserve(8);
+      }
+    }
+  }
+  const int rx = static_cast<int>(hw[0]);
+  const int ry = static_cast<int>(hw[1]);
+  const int rz = static_cast<int>(hw[2]);
+  const bool near = rx == 1 && ry == 1 && rz == 1;
+  double shx[27], shy[27], shz[27];
+  fillOrthoShift(len[0], len[1], len[2], shx, shy, shz);
+  int badTeam = 0;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel num_threads(team)
+#endif
+  {
+    int tid = 0;
+    int nt = 1;
+#ifdef SEAMS_HAS_OPENMP
+    tid = omp_get_thread_num();
+    nt = omp_get_num_threads();
+#endif
+    if (nt != team) {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp atomic write
+#endif
+      badTeam = 1;
+    } else {
+      const int nyz = ncy * ncz;
+      const auto block0 = Clock::now();
+      std::vector<int> owned;
+      owned.reserve(static_cast<std::size_t>(nCells) / static_cast<std::size_t>(team) + 16);
+      for (int c = 0; c < nCells; ++c) {
+        if (cellStart[c] == cellStart[c + 1]) {
+          continue;
+        }
+        if (assign[static_cast<std::size_t>(ourToLc(c, ncx, ncy, ncz))] == tid) {
+          owned.push_back(c);
+        }
+      }
+      // 2 = owned, 1 = halo painted while walking the owned stencil, 0 = outside.
+      std::vector<char> mark(static_cast<std::size_t>(nCells), 0);
+      for (int c : owned) {
+        mark[static_cast<std::size_t>(c)] = 2;
+      }
+      std::vector<int> halo;
+      halo.reserve(owned.size());
+      auto paint = [&](int nc) {
+        if (mark[static_cast<std::size_t>(nc)] != 0) {
+          return;
+        }
+        mark[static_cast<std::size_t>(nc)] = 1;
+        if (cellStart[nc] != cellStart[nc + 1]) {
+          halo.push_back(nc);
+        }
+      };
+      for (int c : owned) {
+        const int cz = c % ncz;
+        const int cy = (c / ncz) % ncy;
+        const int cx = c / nyz;
+        for (int ox = -rx; ox <= rx; ++ox) {
+          int nx = cx + ox;
+          while (nx < 0) {
+            nx += ncx;
+          }
+          while (nx >= ncx) {
+            nx -= ncx;
+          }
+          for (int oy = -ry; oy <= ry; ++oy) {
+            int ny = cy + oy;
+            while (ny < 0) {
+              ny += ncy;
+            }
+            while (ny >= ncy) {
+              ny -= ncy;
+            }
+            const int row = nx * ncy + ny;
+            for (int oz = -rz; oz <= rz; ++oz) {
+              if (ox == 0 && oy == 0 && oz == 0) {
+                continue;
+              }
+              int nz = cz + oz;
+              while (nz < 0) {
+                nz += ncz;
+              }
+              while (nz >= ncz) {
+                nz -= ncz;
+              }
+              paint(row * ncz + nz);
+            }
+          }
+        }
+      }
+      std::vector<int> begin(static_cast<std::size_t>(nCells), 0);
+      std::vector<int> end(static_cast<std::size_t>(nCells), 0);
+      int total = 0;
+      auto take = [&](int c) {
+        const int n = cellStart[c + 1] - cellStart[c];
+        begin[static_cast<std::size_t>(c)] = total;
+        total += n;
+        end[static_cast<std::size_t>(c)] = total;
+      };
+      for (int c : owned) {
+        take(c);
+      }
+      for (int c : halo) {
+        take(c);
+      }
+      std::vector<double> lx(static_cast<std::size_t>(total));
+      std::vector<double> ly(static_cast<std::size_t>(total));
+      std::vector<double> lz(static_cast<std::size_t>(total));
+      std::vector<int> lid(static_cast<std::size_t>(total));
+      int cursor = 0;
+      auto copyCell = [&](int c) {
+        for (int s = cellStart[c]; s < cellStart[c + 1]; ++s, ++cursor) {
+          const std::size_t u = static_cast<std::size_t>(cursor);
+          lx[u] = x[s];
+          ly[u] = y[s];
+          lz[u] = z[s];
+          lid[u] = ids[s];
+        }
+      };
+      for (int c : owned) {
+        copyCell(c);
+      }
+      for (int c : halo) {
+        copyCell(c);
+      }
+      const double *xs = lx.data();
+      const double *ys = ly.data();
+      const double *zs = lz.data();
+      const int *id = lid.data();
+      thread_local std::vector<PairDir> tlsBag;
+      auto &bag = directRows == nullptr ? bags[static_cast<std::size_t>(tid)] : tlsBag;
+      bag.clear();
+      if (bag.capacity() < static_cast<std::size_t>(std::max(total, 1)) * 4) {
+        bag.reserve(static_cast<std::size_t>(std::max(total, 1)) * 4);
+      }
+      int *mine = directRows == nullptr
+                      ? deg.data() + static_cast<std::size_t>(tid) * static_cast<std::size_t>(nop)
+                      : nullptr;
+      const auto search0 = Clock::now();
+      struct Nbr {
+        int begin;
+        int end;
+        double sx, sy, sz;
+        // 0 same cell (larger local slot writes both rows), 1 owned forward
+        // cell (this side writes both rows), 2 ghost (this side writes its row).
+        char rel;
+      };
+      std::vector<Nbr> wide;
+      for (int c : owned) {
+        const int b = begin[static_cast<std::size_t>(c)];
+        const int e = end[static_cast<std::size_t>(c)];
+        const int cz = c % ncz;
+        const int cy = (c / ncz) % ncy;
+        const int cx = c / nyz;
+        Nbr nbr[27];
+        int nn = 0;
+        if (near) {
+          for (int ox = -1; ox <= 1; ++ox) {
+            int nx = cx + ox;
+            int ix = 0;
+            if (nx >= ncx) {
+              nx -= ncx;
+              ix = 1;
+            } else if (nx < 0) {
+              nx += ncx;
+              ix = -1;
+            }
+            for (int oy = -1; oy <= 1; ++oy) {
+              int ny = cy + oy;
+              int iy = 0;
+              if (ny >= ncy) {
+                ny -= ncy;
+                iy = 1;
+              } else if (ny < 0) {
+                ny += ncy;
+                iy = -1;
+              }
+              const int row = nx * ncy + ny;
+              for (int oz = -1; oz <= 1; ++oz) {
+                int nz = cz + oz;
+                int iz = 0;
+                if (nz >= ncz) {
+                  nz -= ncz;
+                  iz = 1;
+                } else if (nz < 0) {
+                  nz += ncz;
+                  iz = -1;
+                }
+                const int nc = row * ncz + nz;
+                const int nb = begin[static_cast<std::size_t>(nc)];
+                const int ne = end[static_cast<std::size_t>(nc)];
+                if (nb == ne) {
+                  continue;
+                }
+                const bool ownedNbr = mark[static_cast<std::size_t>(nc)] == 2;
+                const bool backward = oz < 0 || (oz == 0 && oy < 0) || (oz == 0 && oy == 0 && ox < 0);
+                if (ownedNbr && backward) {
+                  continue;
+                }
+                const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
+                char rel = 2;
+                if (ownedNbr) {
+                  rel = (ox == 0 && oy == 0 && oz == 0) ? 0 : 1;
+                }
+                nbr[nn++] = {nb, ne, shx[k], shy[k], shz[k], rel};
+              }
+            }
+          }
+        } else {
+          wide.clear();
+          for (int ox = -rx; ox <= rx; ++ox) {
+            int nx = cx + ox;
+            int ix = 0;
+            while (nx < 0) {
+              nx += ncx;
+              --ix;
+            }
+            while (nx >= ncx) {
+              nx -= ncx;
+              ++ix;
+            }
+            for (int oy = -ry; oy <= ry; ++oy) {
+              int ny = cy + oy;
+              int iy = 0;
+              while (ny < 0) {
+                ny += ncy;
+                --iy;
+              }
+              while (ny >= ncy) {
+                ny -= ncy;
+                ++iy;
+              }
+              for (int oz = -rz; oz <= rz; ++oz) {
+                int nz = cz + oz;
+                int iz = 0;
+                while (nz < 0) {
+                  nz += ncz;
+                  --iz;
+                }
+                while (nz >= ncz) {
+                  nz -= ncz;
+                  ++iz;
+                }
+                const int nc = (nx * ncy + ny) * ncz + nz;
+                const int nb = begin[static_cast<std::size_t>(nc)];
+                const int ne = end[static_cast<std::size_t>(nc)];
+                if (nb == ne) {
+                  continue;
+                }
+                wide.push_back({nb, ne, static_cast<double>(ix) * len[0],
+                                static_cast<double>(iy) * len[1], static_cast<double>(iz) * len[2],
+                                2});
+                nn = static_cast<int>(wide.size());
+              }
+            }
+          }
+        }
+        for (int i = b; i < e; ++i) {
+          const int ii = id[static_cast<std::size_t>(i)];
+          const double xi = xs[static_cast<std::size_t>(i)];
+          const double yi = ys[static_cast<std::size_t>(i)];
+          const double zi = zs[static_cast<std::size_t>(i)];
+          const Nbr *span = near ? nbr : wide.data();
+          const int nspan = near ? nn : static_cast<int>(wide.size());
+          for (int t = 0; t < nspan; ++t) {
+            const Nbr nb = span[t];
+            for (int j = nb.begin; j < nb.end; ++j) {
+              if (nb.rel == 0 && j <= i) {
+                continue;
+              }
+              const double dxv = xi - xs[static_cast<std::size_t>(j)] - nb.sx;
+              const double dyv = yi - ys[static_cast<std::size_t>(j)] - nb.sy;
+              const double dzv = zi - zs[static_cast<std::size_t>(j)] - nb.sz;
+              if (dxv * dxv + dyv * dyv + dzv * dzv >= rc2) {
+                continue;
+              }
+              const int jj = id[static_cast<std::size_t>(j)];
+              if (jj == ii) {
+                continue;
+              }
+              if (nb.rel == 2) {
+                bag.push_back({ii, jj});
+                if (mine != nullptr) {
+                  mine[ii]++;
+                }
+              } else {
+                bag.push_back({ii, jj});
+                bag.push_back({jj, ii});
+                if (mine != nullptr) {
+                  mine[ii]++;
+                  mine[jj]++;
+                }
+              }
+            }
+          }
+        }
+      }
+      if (directRows != nullptr) {
+        const auto commit0 = Clock::now();
+        std::vector<int> start(static_cast<std::size_t>(nop) + 1, 0);
+        for (const PairDir &p : bag) {
+          start[static_cast<std::size_t>(p.a) + 1]++;
+        }
+        for (int i = 0; i < nop; ++i) {
+          start[static_cast<std::size_t>(i) + 1] += start[static_cast<std::size_t>(i)];
+        }
+        std::vector<int> neigh(bag.size());
+        std::vector<int> cursor = start;
+        for (const PairDir &p : bag) {
+          neigh[static_cast<std::size_t>(cursor[static_cast<std::size_t>(p.a)]++)] = p.b;
+        }
+        for (int c : owned) {
+          for (int s = begin[static_cast<std::size_t>(c)]; s < end[static_cast<std::size_t>(c)]; ++s) {
+            const int ii = id[static_cast<std::size_t>(s)];
+            auto &row = (*directRows)[static_cast<std::size_t>(ii)];
+            if (indexToID != nullptr && indexToID[static_cast<std::size_t>(ii)] == -1) {
+              row.clear();
+              continue;
+            }
+            const int a = start[static_cast<std::size_t>(ii)];
+            const int b = start[static_cast<std::size_t>(ii) + 1];
+            if (b - a > 1) {
+              sortRow(neigh.data() + a, b - a);
+            }
+            thread_local std::vector<int> tmp;
+            tmp.clear();
+            int prev = -1;
+            for (int k = a; k < b; ++k) {
+              const int jj = neigh[static_cast<std::size_t>(k)];
+              if (jj == prev) {
+                continue;
+              }
+              prev = jj;
+              if (indexToID != nullptr && indexToID[static_cast<std::size_t>(jj)] == -1) {
+                continue;
+              }
+              tmp.push_back(indexToID != nullptr ? indexToID[static_cast<std::size_t>(jj)] : jj);
+            }
+            const int nwrite = static_cast<int>(tmp.size()) + 1;
+            if (static_cast<int>(row.capacity()) < nwrite) {
+              row.reserve(static_cast<std::size_t>(nwrite));
+            }
+            row.resize(static_cast<std::size_t>(nwrite));
+            row[0] = indexToID != nullptr ? indexToID[static_cast<std::size_t>(ii)] : ii;
+            for (int k = 0; k < static_cast<int>(tmp.size()); ++k) {
+              row[static_cast<std::size_t>(k + 1)] = tmp[static_cast<std::size_t>(k)];
+            }
+          }
+        }
+        if (profileOn() && tid == 0) {
+          std::fprintf(stderr, "commit_ms %.3f\n", msSince(commit0));
+        }
+        bag.clear();
+      }
+      if (profileOn() && tid == 0) {
+        std::fprintf(stderr,
+                     "block_ms %.3f search_ms %.3f owned_cells %zu halo_cells %zu local %d\n",
+                     msSince(block0) - msSince(search0), msSince(search0), owned.size(), halo.size(),
+                     total);
+      }
+    }
+  }
+  return badTeam == 0;
+}
+#endif
+
 bool orthoFullCsr(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> *subset, double rcutoff, std::vector<int> &offsets,
-    std::vector<int> &cols, bool half) {
+    std::vector<int> &cols, bool half, std::vector<std::vector<int>> *directRows,
+    const int *indexToID, bool *wroteRows) {
   const int nop = yCloud.nop;
   if (nop < 0 || !(rcutoff > 0.0)) {
     return false;
@@ -1180,7 +1655,166 @@ bool orthoFullCsr(
       sc.stash.size() < static_cast<std::size_t>(nop) * static_cast<std::size_t>(kStashCap)) {
     sc.stash.resize(static_cast<std::size_t>(nop) * static_cast<std::size_t>(kStashCap));
   }
-  if (fast) {
+  // One half-stencil walk. Each unordered pair is tested once and written
+  // into both rows. Private degree rows keep the threads off one counts line.
+  bool paired = false;
+  bool directed = false;
+  std::vector<std::vector<PairDir>> bags;
+  std::vector<int> deg;
+  int team = 1;
+  if (fast && !half && maxThreads > 1) {
+#ifdef SEAMS_HAS_OPENMP
+    team = std::max(1, omp_get_max_threads());
+#else
+    team = 1;
+#endif
+    bags.resize(static_cast<std::size_t>(team));
+#ifdef SEAMS_HAS_LINKCELL
+    std::vector<std::vector<int>> *rowsOut = nullptr;
+    if (directRows != nullptr && (subset == nullptr || nSubset == nop)) {
+      rowsOut = directRows;
+    }
+    if (team > 1 && !nested &&
+        ownedBlockPairs(x, y, z, sc.ids.data(), sc.cellStart.data(), sc.cellOf.data(), subset,
+                        ncell[0], ncell[1], ncell[2], nop, nSubset, rcutoff, rc2, len, team, bags,
+                        deg, rowsOut, indexToID)) {
+      directed = true;
+      if (rowsOut != nullptr) {
+        phase().count = msSince(tCount);
+        phase().prefix = 0;
+        phase().fill = 0;
+        publishProfile();
+        if (wroteRows != nullptr) {
+          *wroteRows = true;
+        }
+        return true;
+      }
+    } else
+#endif
+    {
+    deg.assign(static_cast<std::size_t>(team) * static_cast<std::size_t>(nop), 0);
+    const int ncx = ncell[0], ncy = ncell[1], ncz = ncell[2];
+    const int *cellStart = sc.cellStart.data();
+    const int *ids = sc.ids.data();
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel num_threads(team)
+#endif
+    {
+      int tid = 0;
+#ifdef SEAMS_HAS_OPENMP
+      tid = omp_get_thread_num();
+#endif
+      auto &bag = bags[static_cast<std::size_t>(tid)];
+      bag.clear();
+      bag.reserve(static_cast<std::size_t>(nSubset) * 8 / static_cast<std::size_t>(team) + 16);
+      const int nCells = ncx * ncy * ncz;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
+      for (int home = 0; home < nCells; ++home) {
+        const int slot0 = cellStart[home];
+        const int slot1 = cellStart[home + 1];
+        if (slot0 == slot1) {
+          continue;
+        }
+        const int cz = home % ncz;
+        const int cy = (home / ncz) % ncy;
+        const int cx = home / (ncy * ncz);
+        for (int slot = slot0; slot < slot1; ++slot) {
+        const int ii = ids[slot];
+        const double xi = x[slot];
+        const double yi = y[slot];
+        const double zi = z[slot];
+        for (int dz = 0; dz <= 1; ++dz) {
+          int nz = cz + dz;
+          int iz = 0;
+          if (nz >= ncz) {
+            nz -= ncz;
+            iz = 1;
+          } else if (nz < 0) {
+            nz += ncz;
+            iz = -1;
+          }
+          const int dy0 = dz == 0 ? 0 : -1;
+          for (int dy = dy0; dy <= 1; ++dy) {
+            int ny = cy + dy;
+            int iy = 0;
+            if (ny >= ncy) {
+              ny -= ncy;
+              iy = 1;
+            } else if (ny < 0) {
+              ny += ncy;
+              iy = -1;
+            }
+            const int dx0 = (dz == 0 && dy == 0) ? 0 : -1;
+            for (int dx = dx0; dx <= 1; ++dx) {
+              int nx = cx + dx;
+              int ix = 0;
+              if (nx >= ncx) {
+                nx -= ncx;
+                ix = 1;
+              } else if (nx < 0) {
+                nx += ncx;
+                ix = -1;
+              }
+              const int ncid = (nx * ncy + ny) * ncz + nz;
+              const int jb = cellStart[ncid];
+              const int je = cellStart[ncid + 1];
+              const int sk = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
+              const double sx = shx[sk];
+              const double sy = shy[sk];
+              const double sz = shz[sk];
+              const bool same = dx == 0 && dy == 0 && dz == 0;
+              for (int j = jb; j < je; ++j) {
+                if (same && j <= slot) {
+                  continue;
+                }
+                const double dxv = xi - x[j] - sx;
+                const double dyv = yi - y[j] - sy;
+                const double dzv = zi - z[j] - sz;
+                if (dxv * dxv + dyv * dyv + dzv * dzv < rc2) {
+                  const int jj = ids[j];
+                  if (jj == ii) {
+                    continue;
+                  }
+                  bag.push_back({ii, jj});
+                }
+              }
+            }
+          }
+        }
+        }
+      }
+    }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel num_threads(team)
+#endif
+    {
+      int tid = 0;
+#ifdef SEAMS_HAS_OPENMP
+      tid = omp_get_thread_num();
+#endif
+      int *mine = deg.data() + static_cast<std::size_t>(tid) * static_cast<std::size_t>(nop);
+      for (const PairDir &p : bags[static_cast<std::size_t>(tid)]) {
+        mine[p.a]++;
+        mine[p.b]++;
+      }
+    }
+    }
+    std::fill(sc.counts.begin(), sc.counts.end(), 0);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) num_threads(team) if (nop >= 256)
+#endif
+    for (int i = 0; i < nop; ++i) {
+      int sum = 0;
+      for (int t = 0; t < team; ++t) {
+        sum += deg[static_cast<std::size_t>(t) * static_cast<std::size_t>(nop) +
+                   static_cast<std::size_t>(i)];
+      }
+      sc.counts[static_cast<std::size_t>(i)] = sum;
+    }
+    paired = true;
+  } else if (fast) {
     if (half) {
       passFast<false, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                             ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr);
@@ -1211,7 +1845,47 @@ bool orthoFullCsr(
   phase().pairs = nnz;
 
   const auto tFill = Clock::now();
-  if (nnz > 0) {
+  if (nnz > 0 && paired) {
+    std::vector<int> cursor(static_cast<std::size_t>(team) * static_cast<std::size_t>(nop), 0);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) num_threads(team) if (nop >= 256)
+#endif
+    for (int i = 0; i < nop; ++i) {
+      int at = offsets[static_cast<std::size_t>(i)];
+      for (int t = 0; t < team; ++t) {
+        cursor[static_cast<std::size_t>(t) * static_cast<std::size_t>(nop) +
+               static_cast<std::size_t>(i)] = at;
+        at += deg[static_cast<std::size_t>(t) * static_cast<std::size_t>(nop) +
+                  static_cast<std::size_t>(i)];
+      }
+    }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel num_threads(team)
+#endif
+    {
+      int tid = 0;
+#ifdef SEAMS_HAS_OPENMP
+      tid = omp_get_thread_num();
+#endif
+      int *at = cursor.data() + static_cast<std::size_t>(tid) * static_cast<std::size_t>(nop);
+      for (const PairDir &p : bags[static_cast<std::size_t>(tid)]) {
+        cols[static_cast<std::size_t>(at[p.a]++)] = p.b;
+        if (!directed) {
+          cols[static_cast<std::size_t>(at[p.b]++)] = p.a;
+        }
+      }
+    }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) num_threads(team) if (nop >= 256)
+#endif
+    for (int i = 0; i < nop; ++i) {
+      const int a = offsets[static_cast<std::size_t>(i)];
+      const int b = offsets[static_cast<std::size_t>(i) + 1];
+      if (b - a > 1) {
+        sortRow(cols.data() + a, b - a);
+      }
+    }
+  } else if (nnz > 0) {
     if (stashOk && sc.overflowed == 0) {
       scatterStash(sc.stash.data(), sc.counts.data(), offsets.data(), cols.data(), nop);
     } else if (fast) {

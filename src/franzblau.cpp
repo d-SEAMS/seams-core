@@ -13,6 +13,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cstdint>
 #include <numeric>
@@ -28,6 +29,17 @@
 
 namespace {
 
+std::atomic<std::uint64_t> gPrimCycles{0};
+bool gTimePrimitive = false;
+double gTscPerMs = 0;
+
+std::uint64_t readTsc() {
+  unsigned lo = 0;
+  unsigned hi = 0;
+  __asm__ volatile("rdtsc" : "=a"(lo), "=d"(hi));
+  return (static_cast<std::uint64_t>(hi) << 32) | lo;
+}
+
 struct RingSplitTimes {
   double balls_ms = 0;
   double enumerate_ms = 0;
@@ -39,6 +51,7 @@ struct RingSplitTimes {
 
 RingSplitTimes gRingSplit;
 int gUsedBalls = 0;
+double *gSourceWorkPtr = nullptr;
 
 double millisSince(std::chrono::steady_clock::time_point start) {
   return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start)
@@ -165,11 +178,30 @@ struct BoundedBalls {
       }
     }
     const int nCells = (nWhich + cell - 1) / cell;
-    std::vector<int> width(static_cast<std::size_t>(nVertices), 0);
+    // One breadth-first walk per source. The previous count pass repeated
+    // that walk so the table could be sized, and on one thread per rank
+    // the second walk was pure overhead.
+    struct Bag {
+      std::vector<int> vert;
+      std::vector<int> span;
+      std::vector<std::pair<int, int>> items;
+    };
+    int nThreads = 1;
+#ifdef SEAMS_HAS_OPENMP
+    if (parallel) {
+      nThreads = std::max(1, omp_get_max_threads());
+    }
+#endif
+    std::vector<Bag> bags(static_cast<std::size_t>(nThreads));
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (parallel)
 #endif
     {
+      int tid = 0;
+#ifdef SEAMS_HAS_OPENMP
+      tid = omp_get_thread_num();
+#endif
+      auto &bag = bags[static_cast<std::size_t>(tid)];
       std::vector<int> dist(nVertices, -1);
       std::vector<int> touched;
       std::vector<int> frontier;
@@ -182,28 +214,20 @@ struct BoundedBalls {
         const int hi = std::min(nWhich, lo + cell);
         for (int k = lo; k < hi; k++) {
           const int v = which[static_cast<std::size_t>(k)];
-          for (const int w : touched) {
-            dist[w] = -1;
-          }
-          touched.clear();
-          dist[v] = 0;
-          touched.push_back(v);
-          frontier.assign(1, v);
-          for (int depth = 1; depth <= radius && !frontier.empty(); depth++) {
-            next.clear();
-            for (const int u : frontier) {
-              for (const int w : adjacency[u]) {
-                if (w >= 0 && w < nVertices && dist[w] == -1) {
-                  dist[w] = depth;
-                  touched.push_back(w);
-                  next.push_back(w);
-                }
-              }
-            }
-            frontier.swap(next);
-          }
-          width[static_cast<std::size_t>(v)] = static_cast<int>(touched.size()) - 1;
+          bag.span.push_back(static_cast<int>(bag.items.size()));
+          appendBall(v, adjacency, radius, dist, touched, frontier, next, bag.items);
+          bag.vert.push_back(v);
         }
+      }
+      bag.span.push_back(static_cast<int>(bag.items.size()));
+    }
+    std::vector<int> width(static_cast<std::size_t>(nVertices), 0);
+    int total = 0;
+    for (const auto &bag : bags) {
+      for (std::size_t k = 0; k < bag.vert.size(); k++) {
+        const int nItem = bag.span[k + 1] - bag.span[k];
+        width[static_cast<std::size_t>(bag.vert[k])] = nItem;
+        total += nItem;
       }
     }
     gRingSplit.ball_count_ms = millisSince(countStart);
@@ -213,35 +237,20 @@ struct BoundedBalls {
       scan[static_cast<std::size_t>(v)] = width[static_cast<std::size_t>(v)];
     }
     seams::exclusiveScan(scan);
-    int total = 0;
     for (int v = 0; v < nVertices; v++) {
       off[static_cast<std::size_t>(v)] = scan[static_cast<std::size_t>(v)];
-      total += width[static_cast<std::size_t>(v)];
     }
     off[static_cast<std::size_t>(nVertices)] = total;
     cols.resize(static_cast<std::size_t>(total));
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel if (parallel)
-#endif
-    {
-      std::vector<int> dist(nVertices, -1);
-      std::vector<int> touched;
-      std::vector<int> frontier;
-      std::vector<int> next;
-      std::vector<std::pair<int, int>> local;
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp for schedule(static)
-#endif
-      for (int c = 0; c < nCells; c++) {
-        const int lo = c * cell;
-        const int hi = std::min(nWhich, lo + cell);
-        for (int k = lo; k < hi; k++) {
-          const int v = which[static_cast<std::size_t>(k)];
-          local.clear();
-          appendBall(v, adjacency, radius, dist, touched, frontier, next, local);
-          std::copy(local.begin(), local.end(),
-                    cols.begin() + static_cast<std::ptrdiff_t>(off[static_cast<std::size_t>(v)]));
+    for (const auto &bag : bags) {
+      for (std::size_t k = 0; k < bag.vert.size(); k++) {
+        const int v = bag.vert[k];
+        const int nItem = bag.span[k + 1] - bag.span[k];
+        if (nItem <= 0) {
+          continue;
         }
+        std::copy(bag.items.begin() + bag.span[k], bag.items.begin() + bag.span[k] + nItem,
+                  cols.begin() + static_cast<std::ptrdiff_t>(off[static_cast<std::size_t>(v)]));
       }
     }
     gRingSplit.ball_fill_ms = millisSince(fillStart);
@@ -627,8 +636,10 @@ struct DistOracle {
 
 bool ringIsPrimitive(const DistOracle &oracle, const std::vector<int> &ring,
                      int skipA, int skipB) {
+  const std::uint64_t t0 = gTimePrimitive ? readTsc() : 0;
   const int k = static_cast<int>(ring.size());
-  for (int i = 0; i < k; i++) {
+  bool ok = true;
+  for (int i = 0; i < k && ok; i++) {
     if (i == skipA || i == skipB) {
       continue;
     }
@@ -642,11 +653,15 @@ bool ringIsPrimitive(const DistOracle &oracle, const std::vector<int> &ring,
         continue;
       }
       if (oracle.shorter(ring[i], ring[j], ringDist)) {
-        return false;
+        ok = false;
+        break;
       }
     }
   }
-  return true;
+  if (gTimePrimitive) {
+    gPrimCycles.fetch_add(readTsc() - t0, std::memory_order_relaxed);
+  }
+  return ok;
 }
 
 //! Append v if absent; ring sizes are tiny, so a scan beats a set
@@ -897,16 +912,16 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
  * @return A vector of vectors of the rings; each ring contains the atom
  *  indices of the ring members.
  */
-static std::vector<std::vector<int>>
+static const std::vector<std::vector<int>> &
 searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
             const std::vector<char> &sources, bool legacy);
 
-std::vector<std::vector<int>>
+const std::vector<std::vector<int>> &
 primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth) {
   return searchRings(nList, maxDepth, std::vector<char>(), false);
 }
 
-std::vector<std::vector<int>>
+const std::vector<std::vector<int>> &
 primitive::ringNetwork(const std::vector<int> &offsets, const std::vector<int> &cols,
                        int maxDepth) {
   const int n = offsets.empty() ? 0 : static_cast<int>(offsets.size()) - 1;
@@ -927,7 +942,7 @@ primitive::ringNetwork(const std::vector<int> &offsets, const std::vector<int> &
   return searchRings(rows, maxDepth, std::vector<char>(), false);
 }
 
-std::vector<std::vector<int>>
+const std::vector<std::vector<int>> &
 primitive::ringNetworkBalls(const std::vector<std::vector<int>> &nList, int maxDepth) {
   return searchRings(nList, maxDepth, std::vector<char>(), true);
 }
@@ -938,12 +953,40 @@ primitive::ringNetworkBalls(const std::vector<std::vector<int>> &nList, int maxD
  *  vertex. Balls are filled only within maxDepth/2 hops of a flagged
  *  vertex, where the members of its rings lie.
  */
-static std::vector<std::vector<int>>
+struct ReuseRings {
+  std::vector<std::vector<int>> store;
+  std::size_t n = 0;
+  void reset() { n = 0; }
+  std::size_t size() const { return n; }
+  std::vector<std::vector<int>>::iterator begin() { return store.begin(); }
+  std::vector<std::vector<int>>::iterator end() {
+    return store.begin() + static_cast<std::ptrdiff_t>(n);
+  }
+  void push_back(const std::vector<int> &ring) {
+    if (n == store.size()) {
+      store.emplace_back();
+    }
+    auto &dst = store[n++];
+    if (dst.size() != ring.size()) {
+      dst.resize(ring.size());
+    }
+    std::copy(ring.begin(), ring.end(), dst.begin());
+  }
+  const std::vector<std::vector<int>> &finish() {
+    if (store.size() != n) {
+      store.resize(n);
+    }
+    return store;
+  }
+};
+
+static const std::vector<std::vector<int>> &
 searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
             const std::vector<char> &sources, bool legacy) {
-  std::vector<std::vector<int>> rings;
+  thread_local ReuseRings rings;
+  rings.reset();
   if (maxDepth < 3 || nList.empty()) {
-    return rings;
+    return rings.finish();
   }
   const int nVertices = static_cast<int>(nList.size());
   // The fork, the per-source pools, and pausing the team are slower than
@@ -952,6 +995,18 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
   if (!serial) {
     seams::adoptThreads();
   }
+  const auto phaseWall0 = std::chrono::steady_clock::now();
+  const std::uint64_t phaseTsc0 = gTimePrimitive ? readTsc() : 0;
+  const auto noteRate = [&]() {
+    if (!gTimePrimitive) {
+      return;
+    }
+    const double ms = millisSince(phaseWall0);
+    const std::uint64_t cycles = readTsc() - phaseTsc0;
+    if (ms > 0.0) {
+      gTscPerMs = static_cast<double>(cycles) / ms;
+    }
+  };
 
   // Adjacency by index; the first element of each nList row is the vertex
   // itself, so it is skipped. A repeated neighbour is one edge. A self
@@ -1098,54 +1153,80 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
     // size updates. A static share of the sources is even on a crystal
     // and keeps each thread on its own lines.
     const auto enumStart = std::chrono::steady_clock::now();
-    std::vector<RingPool> perSource(static_cast<std::size_t>(nFrom));
+    // One pool per source, kept for the next frame of the same size.
+    // Releasing it put a malloc on the search that did not scale.
+    // The calling thread owns the pools. Workers write disjoint slots
+    // through this pointer; a thread_local inside the team would be a
+    // different vector on every worker.
+    thread_local std::vector<RingPool> perSource;
+    if (static_cast<int>(perSource.size()) < nFrom) {
+      perSource.resize(static_cast<std::size_t>(nFrom));
+    }
+    for (int k = 0; k < nFrom; k++) {
+      perSource[static_cast<std::size_t>(k)].reset();
+    }
+    auto *pools = &perSource;
 #pragma omp parallel
     {
       RingScratch scratch;
 #pragma omp for schedule(guided)
       for (int k = 0; k < nFrom; k++) {
-        enumerateFromSource(adjacency, oracle, from[k], maxDepth, maxLvl,
-                            scratch, perSource[static_cast<std::size_t>(k)],
-                            nullptr, legacy);
+        if (gSourceWorkPtr == nullptr) {
+          enumerateFromSource(adjacency, oracle, from[k], maxDepth, maxLvl,
+                              scratch, (*pools)[static_cast<std::size_t>(k)],
+                              nullptr, legacy);
+        } else {
+          const auto srcStart = std::chrono::steady_clock::now();
+          enumerateFromSource(adjacency, oracle, from[k], maxDepth, maxLvl,
+                              scratch, (*pools)[static_cast<std::size_t>(k)],
+                              nullptr, legacy);
+          const int src = from[static_cast<std::size_t>(k)];
+          if (src >= 0 && src < nVertices) {
+            gSourceWorkPtr[src] +=
+                std::chrono::duration<double, std::micro>(
+                    std::chrono::steady_clock::now() - srcStart)
+                    .count();
+          }
+        }
       }
     }
     gRingSplit.enumerate_ms = millisSince(enumStart);
     const auto mergeStart = std::chrono::steady_clock::now();
     // Every ring, source list and ball is a heap block of its own; moving
     // and freeing them on one thread is a sizeable share of a threaded search
-    std::vector<std::size_t> offset(static_cast<std::size_t>(nFrom) + 1, 0);
     for (int k = 0; k < nFrom; k++) {
-      offset[static_cast<std::size_t>(k + 1)] =
-          offset[static_cast<std::size_t>(k)] +
-          perSource[static_cast<std::size_t>(k)].size();
-    }
-    rings.resize(offset[static_cast<std::size_t>(nFrom)]);
-#pragma omp parallel
-    {
-#pragma omp for schedule(static) nowait
-      for (int k = 0; k < nFrom; k++) {
-        auto &pool = perSource[static_cast<std::size_t>(k)];
-        std::move(pool.begin(), pool.end(),
-                  rings.begin() +
-                      static_cast<std::ptrdiff_t>(offset[static_cast<std::size_t>(k)]));
-        pool.release();
+      for (const auto &ring : perSource[static_cast<std::size_t>(k)]) {
+        rings.push_back(ring);
       }
     }
     balls.clear();
     std::vector<std::vector<int>>().swap(uniq);
     std::vector<int>().swap(adjacency.cols);
     std::vector<std::size_t>().swap(adjacency.first);
-    std::vector<RingPool>().swap(perSource);
     gRingSplit.merge_ms = millisSince(mergeStart);
-    return rings;
+    noteRate();
+    return rings.finish();
   }
 #endif
 
   const auto enumStart = std::chrono::steady_clock::now();
   RingScratch scratch;
-  for (const int src : from) {
-    enumerateFromSource(adjacency, oracle, src, maxDepth, maxLvl, scratch,
-                        rings, nullptr, legacy);
+  if (gSourceWorkPtr == nullptr) {
+    for (const int src : from) {
+      enumerateFromSource(adjacency, oracle, src, maxDepth, maxLvl, scratch,
+                          rings, nullptr, legacy);
+    }
+  } else {
+    for (const int src : from) {
+      const auto srcStart = std::chrono::steady_clock::now();
+      enumerateFromSource(adjacency, oracle, src, maxDepth, maxLvl, scratch,
+                          rings, nullptr, legacy);
+      if (src >= 0 && src < nVertices) {
+        gSourceWorkPtr[src] += std::chrono::duration<double, std::micro>(
+                                   std::chrono::steady_clock::now() - srcStart)
+                                   .count();
+      }
+    }
   }
   gRingSplit.enumerate_ms = millisSince(enumStart);
   const auto mergeStart = std::chrono::steady_clock::now();
@@ -1154,14 +1235,30 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
   std::vector<int>().swap(adjacency.cols);
   std::vector<std::size_t>().swap(adjacency.first);
   gRingSplit.merge_ms = millisSince(mergeStart);
+  noteRate();
 
-  return rings;
+  return rings.finish();
 }
 
-std::vector<std::vector<int>>
+const std::vector<std::vector<int>> &
 primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth,
                        const std::vector<char> &sources) {
   return searchRings(nList, maxDepth, sources, false);
+}
+
+void primitive::setSourceWork(double *microseconds) { gSourceWorkPtr = microseconds; }
+
+void primitive::setPhaseTiming(bool on) {
+  gTimePrimitive = on;
+  gPrimCycles.store(0, std::memory_order_relaxed);
+}
+
+double primitive::takePrimitiveMs() {
+  const std::uint64_t cycles = gPrimCycles.exchange(0, std::memory_order_relaxed);
+  if (!(gTscPerMs > 0.0) || cycles == 0) {
+    return 0.0;
+  }
+  return static_cast<double>(cycles) / gTscPerMs;
 }
 
 primitive::RingSearchSplit primitive::lastRingSearchSplit() {

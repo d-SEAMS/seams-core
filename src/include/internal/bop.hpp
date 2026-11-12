@@ -263,7 +263,7 @@ struct BondOrder {
 
 void bondOrder(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                const std::vector<std::vector<int>> &nList, const BondClassifier &rule,
-               BondOrder &order, const std::vector<char> *which);
+               BondOrder &order, const std::vector<char> *which, bool fresh = true);
 
 //! c_ij for atoms @a which selects, from a bond-order vector that already
 //! holds every neighbour the bond reads. Atoms outside @a which are left
@@ -494,6 +494,17 @@ steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 //! MPI_COMM_WORLD (true unless set). A driver that gives each rank whole
 //! frames of its own turns it off.
 void setSteinhardtAtomSplit(bool split);
+
+//! Rebuild, local kernel, halo exchange, and the write-back to the frame.
+struct AnalysisPhases {
+  double rebuildMs = 0;
+  double computeMs = 0;
+  double exchangeMs = 0;
+  double reduceMs = 0;
+};
+
+AnalysisPhases lastChillPhases();
+AnalysisPhases lastSteinhardtPhases();
 
 //! Width of one atom's interleaved q_lm: real, imaginary, m = -l..l.
 inline int steinhardtQlmWidth(int orderL) { return 2 * (2 * orderL + 1); }

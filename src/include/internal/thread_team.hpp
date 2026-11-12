@@ -94,6 +94,8 @@ inline void adoptThreads() {
     n = 1;
   }
 #ifdef SEAMS_HAS_LINKCELL
+  // The next linkcell search uses this width. OpenMP is the team that
+  // walks the cutoff rows; an idle Rayon pool waits passively.
   lc_set_threads(n);
 #else
   (void)n;

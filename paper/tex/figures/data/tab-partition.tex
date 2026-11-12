@@ -1,0 +1,40 @@
+\begin{table}[tbp]
+\centering
+\caption{\textbf{Strong scaling of the block cut and the cell-grid cut.}
+Block and cell alternate in one loop, twelve times, ranks bound to cores.
+Efficiency is the one-rank time divided by the eight-rank time and by eight.
+IQR is the type-7 interquartile range of the eight-rank walls.
+A gap smaller than the two ranges is not a difference.}
+\label{tab:partition-strong}
+\begin{tabular}{llrrrrrrr}
+\toprule
+Molecules & Operation & Block 8 & Block IQR & Cell 8 & Cell IQR & Cell eff. & Imbalance & Halo \\
+\midrule
+110592 & neighbours & 8.741 & 0.726 & 7.652 & 0.291 & 0.559 & 1.027 & 0.115 \\
+ & CHILL+ & 14.959 & 2.842 & 11.681 & 1.407 & 0.495 & 1.003 & 0.115 \\
+ & $q_6$ & 13.350 & 1.022 & 11.394 & 0.744 & 0.577 & 1.004 & 0.115 \\
+ & rings & 22.433 & 1.911 & 21.447 & 0.190 & 0.636 & 1.055 & 0.481 \\
+884736 & neighbours & 75.131 & 4.664 & 60.643 & 1.448 & 0.750 & 1.006 & 0.060 \\
+ & CHILL+ & 120.526 & 8.356 & 95.862 & 3.242 & 0.621 & 1.003 & 0.060 \\
+ & $q_6$ & 130.905 & 4.779 & 107.800 & 4.475 & 0.656 & 1.002 & 0.060 \\
+ & rings & 183.325 & 11.405 & 159.544 & 1.829 & 0.782 & 1.027 & 0.293 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[tbp]
+\centering
+\caption{\textbf{Weak scaling at 110592 molecules per rank.}
+Block and cell alternate in one loop. IQR is the type-7 range of the eight-rank walls.}
+\label{tab:partition-weak}
+\begin{tabular}{lrrrrrr}
+\toprule
+Operation & Block 8 & Block IQR & Cell 8 & Cell IQR & Cell eff. & Imbalance \\
+\midrule
+neighbours & 76.038 & 1.271 & 60.532 & 3.698 & 0.606 & 1.022 \\
+CHILL+ & 111.517 & 12.625 & 88.623 & 18.288 & 0.527 & 1.003 \\
+$q_6$ & 129.733 & 16.065 & 107.652 & 4.068 & 0.505 & 1.003 \\
+rings & 186.355 & 5.998 & 159.727 & 7.257 & 0.732 & 1.064 \\
+\bottomrule
+\end{tabular}
+\end{table}

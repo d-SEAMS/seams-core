@@ -8,6 +8,8 @@
 // the Open Source Initiative.
 //-----------------------------------------------------------------------------------
 
+#include <chrono>
+
 #include <bop.hpp>
 #include <domain.hpp>
 #include <generic.hpp>
@@ -59,7 +61,8 @@ NeighbourCSR flatten(const molSys::PointCloud<molSys::Point<double>, double> &yC
       maxId = yCloud.pts[static_cast<size_t>(i)].atomID;
     }
   }
-  const bool dense = maxId > 0 && maxId < g.nop * 8 + 8;
+  // Frame IDs stay large on a rank that holds only its block.
+  const bool dense = maxId > 0 && maxId < 4000000;
   std::vector<int> idToIdx;
   if (dense) {
     idToIdx.assign(static_cast<size_t>(maxId) + 1, -1);
@@ -1877,6 +1880,8 @@ void readSteinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &y
 }
 
 #ifdef SEAMS_HAS_MPI
+AnalysisPhases gQ6Phases;
+
 namespace {
 
 const std::vector<std::vector<int>> &qRows(
@@ -1894,11 +1899,51 @@ const std::vector<std::vector<int>> &qRows(
     return window;
   }
   if (single || cloud.nop < 40000) {
-    window = nneigh::neighListO(cutoff, cloud, 1);
+    if (!nneigh::refillNeighListO(cutoff, cloud, 1, window)) {
+      window = nneigh::neighListO(cutoff, cloud, 1);
+    }
   } else {
     window = nneigh::reusedShellList(cutoff, cloud, &owned);
   }
   return window;
+}
+
+struct Q6During {
+  double cutoff = 3.5;
+  int orderL = 6;
+  std::vector<char> interior;
+  std::vector<double> qlm;
+  std::vector<std::vector<int>> rows;
+  NeighbourCSR graph;
+  bool ran = false;
+};
+
+Q6During gQ6;
+
+void duringQ6Halo(void *) {
+  const auto t0 = std::chrono::steady_clock::now();
+  auto &work = seams::domain::gatheredWork();
+  bool single = true;
+  for (const char flag : work.share.owned) {
+    if (!flag) {
+      single = false;
+      break;
+    }
+  }
+  if (!nneigh::blockWindowRows(work.cloud, gQ6.cutoff, single ? nullptr : &work.share.owned,
+                               gQ6.rows)) {
+    gQ6.rows = qRows(work.cloud, gQ6.cutoff, work.share.owned);
+  }
+  gQ6Phases.rebuildMs =
+      std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+  const auto pass0 = std::chrono::steady_clock::now();
+  gQ6.graph = flatten(work.cloud, gQ6.rows);
+  const int width = steinhardtQlmWidth(gQ6.orderL);
+  gQ6.qlm.assign(static_cast<std::size_t>(gQ6.graph.nop) * static_cast<std::size_t>(width), 0.0);
+  runPass1Mask(gQ6.graph, gQ6.orderL, gQ6.qlm, &work.share.owned);
+  gQ6Phases.computeMs =
+      std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - pass0).count();
+  gQ6.ran = true;
 }
 
 } // namespace
@@ -1913,29 +1958,65 @@ SteinhardtQl distributedSteinhardt(
   int nRanks = 1;
   MPI_Comm_size(comm, &nRanks);
   if (nRanks <= 1) {
-    const auto rows = nneigh::neighListO(cutoff, full, 1);
-    return steinhardtQl(full, rows, orderL);
+    const auto t0 = std::chrono::steady_clock::now();
+    thread_local std::vector<std::vector<int>> held;
+    if (!nneigh::refillNeighListO(cutoff, full, 1, held)) {
+      held = nneigh::neighListO(cutoff, full, 1);
+    }
+    const auto &rows = held;
+    const auto t1 = std::chrono::steady_clock::now();
+    auto out = steinhardtQl(full, rows, orderL);
+    const auto t2 = std::chrono::steady_clock::now();
+    gQ6Phases.rebuildMs = std::chrono::duration<double, std::milli>(t1 - t0).count();
+    gQ6Phases.computeMs = std::chrono::duration<double, std::milli>(t2 - t1).count();
+    gQ6Phases.exchangeMs = 0;
+    gQ6Phases.reduceMs = 0;
+    return out;
   }
-  auto &work = seams::domain::gatherWork(full, cutoff, comm);
-  const auto &rows = qRows(work.cloud, cutoff, work.share.owned);
+  gQ6Phases = {};
+  gQ6.cutoff = cutoff;
+  gQ6.orderL = orderL;
+  gQ6.ran = false;
+  seams::domain::setHaloHook(duringQ6Halo, nullptr);
+  auto &work = seams::domain::gatherWork(full, cutoff, comm, seams::domain::kWorkQ6);
+  seams::domain::setHaloHook(nullptr, nullptr);
   const int width = steinhardtQlmWidth(orderL);
-  const NeighbourCSR graph = flatten(work.cloud, rows);
-  std::vector<double> qlm(static_cast<std::size_t>(graph.nop) * static_cast<std::size_t>(width),
-                          0.0);
-  runPass1Mask(graph, orderL, qlm, &work.share.owned);
+  const std::vector<std::vector<int>> &rows =
+      gQ6.ran ? gQ6.rows : qRows(work.cloud, cutoff, work.share.owned);
+  if (!gQ6.ran) {
+    const auto t0 = std::chrono::steady_clock::now();
+    gQ6.graph = flatten(work.cloud, rows);
+    gQ6Phases.rebuildMs =
+        std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - t0).count();
+  }
+  const NeighbourCSR &graph = gQ6.graph;
+  std::vector<double> qlm;
+  if (gQ6.ran && static_cast<int>(gQ6.qlm.size()) == graph.nop * width) {
+    qlm = std::move(gQ6.qlm);
+  } else {
+    const auto pass0 = std::chrono::steady_clock::now();
+    qlm.assign(static_cast<std::size_t>(graph.nop) * static_cast<std::size_t>(width), 0.0);
+    runPass1Mask(graph, orderL, qlm, &work.share.owned);
+    gQ6Phases.computeMs =
+        std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - pass0).count();
+  }
+  const auto exchange0 = std::chrono::steady_clock::now();
   seams::domain::postBoundaryValues(qlm.data(), width, comm);
   std::vector<char> interior(static_cast<std::size_t>(work.cloud.nop), 0);
   std::vector<char> boundary(interior.size(), 0);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1)
+#endif
   for (int i = 0; i < work.cloud.nop; i++) {
-    if (!work.share.owned[static_cast<std::size_t>(i)] ||
-        static_cast<std::size_t>(i) >= rows.size()) {
+    if (!work.share.owned[static_cast<std::size_t>(i)]) {
       continue;
     }
     bool inside = true;
-    for (std::size_t j = 1; j < rows[static_cast<std::size_t>(i)].size(); j++) {
-      const auto it = work.cloud.idIndexMap.find(rows[static_cast<std::size_t>(i)][j]);
-      if (it == work.cloud.idIndexMap.end() ||
-          !work.share.owned[static_cast<std::size_t>(it->second)]) {
+    const int begin = graph.offsets[static_cast<std::size_t>(i)];
+    const int end = graph.offsets[static_cast<std::size_t>(i) + 1];
+    for (int t = begin; t < end; t++) {
+      const int j = graph.cols[static_cast<std::size_t>(t)];
+      if (j < 0 || j >= work.cloud.nop || !work.share.owned[static_cast<std::size_t>(j)]) {
         inside = false;
         break;
       }
@@ -1944,9 +2025,25 @@ SteinhardtQl distributedSteinhardt(
   }
   std::vector<double> ql(static_cast<std::size_t>(graph.nop), 0.0);
   std::vector<double> qlBar(ql.size(), 0.0);
+  const auto pass0 = std::chrono::steady_clock::now();
   runPass2Mask(graph, orderL, qlm, ql, qlBar, &interior);
   seams::domain::waitBoundaryValues();
+  gQ6Phases.exchangeMs = seams::domain::takeValueCommMs();
   runPass2Mask(graph, orderL, qlm, ql, qlBar, &boundary);
+  gQ6Phases.computeMs +=
+      std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - pass0)
+          .count();
+  if (!rows.empty()) {
+    std::vector<double> effort(rows.size(), 0.0);
+    for (std::size_t k = 0; k < rows.size() && k < work.share.owned.size(); k++) {
+      if (work.share.owned[k]) {
+        effort[k] = static_cast<double>(rows[k].size());
+      }
+    }
+    seams::domain::captureLocalWork(seams::domain::kWorkQ6, effort.data(),
+                                    static_cast<int>(effort.size()), comm);
+  }
+  const auto red0 = std::chrono::steady_clock::now();
   for (std::size_t k = 0; k < work.share.local.size(); k++) {
     if (!work.share.owned[k]) {
       continue;
@@ -1955,8 +2052,12 @@ SteinhardtQl distributedSteinhardt(
     result.ql[static_cast<std::size_t>(frame)] = ql[k];
     result.qlBar[static_cast<std::size_t>(frame)] = qlBar[k];
   }
+  gQ6Phases.reduceMs =
+      std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - red0).count();
   return result;
 }
+
+AnalysisPhases lastSteinhardtPhases() { return gQ6Phases; }
 #endif
 
 } // namespace chill

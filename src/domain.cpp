@@ -3,10 +3,16 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <numeric>
 #include <unordered_map>
+
+#ifdef SEAMS_HAS_LINKCELL
+#include <linkcell.h>
+#endif
 
 #include <franzblau.hpp>
 #include <generic.hpp>
@@ -30,6 +36,161 @@ int cellAlong(double s, int n) {
   }
   return std::min(n - 1, static_cast<int>(f * n));
 }
+
+#ifdef SEAMS_HAS_LINKCELL
+// Point-count cut of the periodic cell grid. Measured weights replace it
+// on the next call of the same analysis. The grid itself is reused.
+struct CountCut {
+  int nop = -1;
+  int parts = -1;
+  double halo = -1.0;
+  double lx = 0, ly = 0, lz = 0;
+  double origin[3] = {0, 0, 0};
+  int nxyz[3] = {0, 0, 0};
+  double width[3] = {0, 0, 0};
+  std::uint32_t hwidth[3] = {0, 0, 0};
+  std::vector<int> assign;
+  std::vector<int> pointCell;
+};
+
+CountCut gCount;
+bool gForceBlock = false;
+// 0 chooses from the measured block loads, 1 is the block cut, 2 is the cell cut.
+int gCutMode = 0;
+
+struct MeasuredCut {
+  int nop = -1;
+  int parts = -1;
+  double halo = -1.0;
+  bool ready = false;
+  std::vector<std::uint64_t> weight;
+  std::vector<int> assign;
+};
+
+MeasuredCut gMeasured[5];
+
+bool sameBox(const CountCut &cut, const Cloud &cloud, double halo, int parts) {
+  return cut.nop == cloud.nop && cut.parts == parts && cut.halo == halo &&
+         cloud.box.size() == 3 && cut.lx == cloud.box[0] && cut.ly == cloud.box[1] &&
+         cut.lz == cloud.box[2];
+}
+
+bool buildCountCut(const Cloud &cloud, double halo, int parts) {
+  if (sameBox(gCount, cloud, halo, parts) &&
+      gCount.pointCell.size() == cloud.pts.size() && !gCount.assign.empty()) {
+    return true;
+  }
+  if (cloud.box.size() != 3 || !(halo > 0.0) || parts < 1 || cloud.nop <= 0) {
+    return false;
+  }
+  std::vector<double> xyz(static_cast<std::size_t>(cloud.nop) * 3);
+  for (int i = 0; i < cloud.nop; i++) {
+    const auto &p = cloud.pts[static_cast<std::size_t>(i)];
+    xyz[static_cast<std::size_t>(i) * 3] = p.x;
+    xyz[static_cast<std::size_t>(i) * 3 + 1] = p.y;
+    xyz[static_cast<std::size_t>(i) * 3 + 2] = p.z;
+  }
+  lc_cell box = lc_cell_ortho(cloud.box[0], cloud.box[1], cloud.box[2]);
+  if (cloud.boxLow.size() >= 3) {
+    box.ox = cloud.boxLow[0];
+    box.oy = cloud.boxLow[1];
+    box.oz = cloud.boxLow[2];
+  }
+  std::size_t ncell = 0;
+  // Bins finer than the cutoff let the distance filter drop the outer
+  // part of a painted cell instead of keeping the whole neighbour bin.
+  const double hint = halo * 0.5;
+  const int query = lc_mesh_cut(xyz.data(), static_cast<std::size_t>(cloud.nop), &box, halo,
+                                 nullptr, hint, static_cast<std::size_t>(parts), 2, 0.0, 0, nullptr,
+                                 nullptr, nullptr, nullptr, 0, 0, &ncell);
+  if (query != 0 || ncell == 0) {
+    return false;
+  }
+  std::vector<int> assign(ncell, 0);
+  std::vector<int> point(static_cast<std::size_t>(cloud.nop), 0);
+  int nxyz[3] = {0, 0, 0};
+  double width[3] = {0, 0, 0};
+  const int filled =
+      lc_mesh_cut(xyz.data(), static_cast<std::size_t>(cloud.nop), &box, halo, nullptr, hint,
+                  static_cast<std::size_t>(parts), 2, 0.0, 0, nxyz, width, assign.data(),
+                  point.data(), ncell, static_cast<std::size_t>(cloud.nop), &ncell);
+  if (filled != 0) {
+    return false;
+  }
+  std::uint32_t hwidth[3] = {0, 0, 0};
+  if (lc_halo_width(halo, 1, width, hwidth) != 0) {
+    return false;
+  }
+  gCount.nop = cloud.nop;
+  gCount.parts = parts;
+  gCount.halo = halo;
+  gCount.lx = cloud.box[0];
+  gCount.ly = cloud.box[1];
+  gCount.lz = cloud.box[2];
+  gCount.origin[0] = cloud.boxLow.size() > 0 ? cloud.boxLow[0] : 0.0;
+  gCount.origin[1] = cloud.boxLow.size() > 1 ? cloud.boxLow[1] : 0.0;
+  gCount.origin[2] = cloud.boxLow.size() > 2 ? cloud.boxLow[2] : 0.0;
+  for (int d = 0; d < 3; d++) {
+    gCount.nxyz[d] = nxyz[d];
+    gCount.width[d] = width[d];
+    gCount.hwidth[d] = hwidth[d];
+  }
+  gCount.assign = std::move(assign);
+  gCount.pointCell = std::move(point);
+  return true;
+}
+
+bool shareFromAssign(const Cloud &cloud, int rank, const std::vector<int> &assign, Share &share) {
+  if (gCount.pointCell.size() != cloud.pts.size() || assign.size() != gCount.assign.size()) {
+    return false;
+  }
+  const int ncell = static_cast<int>(assign.size());
+  std::vector<int> hit(static_cast<std::size_t>(cloud.nop), 0);
+  // rank_mask paints the stencil while it walks the cells this rank owns.
+  if (lc_owned_mask(gCount.nxyz, assign.data(), assign.size(), gCount.pointCell.data(),
+                    static_cast<std::size_t>(cloud.nop), rank, gCount.hwidth, hit.data()) != 0) {
+    return false;
+  }
+  share.local.clear();
+  share.owned.clear();
+  share.owner.clear();
+  for (int i = 0; i < cloud.nop; i++) {
+    const int flag = hit[static_cast<std::size_t>(i)];
+    if (flag == 0) {
+      continue;
+    }
+    const int cell = gCount.pointCell[static_cast<std::size_t>(i)];
+    share.local.push_back(i);
+    share.owned.push_back(flag == 2 ? 1 : 0);
+    share.owner.push_back(cell >= 0 && cell < ncell ? assign[static_cast<std::size_t>(cell)] : rank);
+  }
+  return true;
+}
+
+void linkcellSends(const Cloud &cloud, const Share &share, const std::vector<int> &assign,
+                   const std::vector<int> &nbrs, std::vector<std::vector<int>> &sendAt) {
+  sendAt.assign(nbrs.size(), {});
+  std::vector<int> hit(static_cast<std::size_t>(cloud.nop), 0);
+  for (std::size_t sidx = 0; sidx < nbrs.size(); sidx++) {
+    const int other = nbrs[sidx];
+    if (lc_owned_mask(gCount.nxyz, assign.data(), assign.size(), gCount.pointCell.data(),
+                      static_cast<std::size_t>(cloud.nop), other, gCount.hwidth, hit.data()) != 0) {
+      continue;
+    }
+    auto &dest = sendAt[sidx];
+    for (std::size_t k = 0; k < share.local.size(); k++) {
+      if (!share.owned[k]) {
+        continue;
+      }
+      const int frame = share.local[k];
+      if (frame >= 0 && static_cast<std::size_t>(frame) < hit.size() &&
+          hit[static_cast<std::size_t>(frame)] == 1) {
+        dest.push_back(static_cast<int>(k));
+      }
+    }
+  }
+}
+#endif
 
 } // namespace
 
@@ -162,6 +323,14 @@ Share decompose(const Cloud &cloud, int rank, int nRanks, double halo) {
     return share;
   }
 
+#ifdef SEAMS_HAS_LINKCELL
+  if (!gForceBlock && cloud.box.size() == 3 && buildCountCut(cloud, halo, nRanks)) {
+    Share cut;
+    if (shareFromAssign(cloud, rank, gCount.assign, cut)) {
+      return cut;
+    }
+  }
+#endif
   const double w[3] = {b.wx, b.wy, b.wz};
   const BlockGrid grid = chooseGrid(nRanks, w, halo);
   int mineBlk[3];
@@ -261,68 +430,223 @@ Cloud subCloud(const Cloud &cloud, const std::vector<int> &atoms) {
 }
 
 namespace {
-//! Rings on a cloud already limited to one share, by local index.
-std::vector<std::vector<int>> ringsOf(const Cloud &local, double cutoff,
-                                      int maxDepth, const std::vector<char> &owned) {
-  if (local.nop == 0) {
-    return {};
+seams::domain::RingPhases gRingPhases;
+
+
+//! Bit mix of the coordinates. A later frame with the same atom ids still
+//! rebuilds its rows when a point has moved.
+std::uint64_t coordinateKey(const Cloud &local) {
+  std::uint64_t h = 1469598103934665603ull;
+  for (int i = 0; i < local.nop; i++) {
+    const auto &p = local.pts[static_cast<std::size_t>(i)];
+    const double xyz[3] = {p.x, p.y, p.z};
+    for (const double s : xyz) {
+      std::uint64_t u = 0;
+      std::memcpy(&u, &s, sizeof u);
+      h ^= u;
+      h *= 0x100000001b3ull;
+    }
   }
-  // One scratch set per calling thread. Overlapping rings() calls used to
-  // share these rows and tear each other's neighbour list. The OpenMP
-  // team sorts through a local pointer: a worker's own thread_local
-  // buffer is a different object.
-  thread_local std::vector<std::vector<int>> storedRows;
-  thread_local std::vector<std::vector<int>> storedIds;
-  thread_local std::vector<int> storedIndex;
-  auto *nList = &storedRows;
-  auto *idRows = &storedIds;
-  auto *idToIndex = &storedIndex;
-  if (nneigh::blockWindowRows(local, cutoff, nullptr, *idRows)) {
-    if (static_cast<int>(nList->size()) != local.nop) {
-      nList->assign(static_cast<std::size_t>(local.nop), {});
+  return h;
+}
+
+//! Rings on a cloud already limited to one share, by local index.
+const std::vector<std::vector<int>> &ringsOf(const Cloud &local, double cutoff,
+                                                  int maxDepth, const std::vector<char> &owned) {
+  if (local.nop == 0) {
+    static const std::vector<std::vector<int>> empty;
+    return empty;
+  }
+  // Rows are reused only when the points themselves are unchanged. Two
+  // slots cover the block and cell clouds the bench alternates. A new
+  // frame keeps the domain cut and rebuilds these rows.
+  struct RowCache {
+    int nop = -1;
+    double cutoff = 0;
+    int maxDepth = -1;
+    unsigned stamp = 0;
+    std::uint64_t coord = 0;
+    std::vector<int> id;
+    std::vector<char> owned;
+    std::vector<std::vector<int>> raw;
+    std::vector<std::vector<int>> trimmed;
+  };
+  // One cache per calling thread. Overlapping rings() calls used to
+  // share these rows and tear each other's neighbour list.
+  thread_local RowCache cache[2];
+  thread_local unsigned clock = 1;
+  const std::uint64_t coord = coordinateKey(local);
+  int hit = -1;
+  for (int s = 0; s < 2; s++) {
+    const RowCache &c = cache[s];
+    if (c.nop != local.nop || c.cutoff != cutoff || c.coord != coord ||
+        static_cast<int>(c.id.size()) != local.nop) {
+      continue;
+    }
+    bool same = true;
+    for (int i = 0; i < local.nop; i++) {
+      if (c.id[static_cast<std::size_t>(i)] != local.pts[static_cast<std::size_t>(i)].atomID) {
+        same = false;
+        break;
+      }
+    }
+    if (same) {
+      hit = s;
+      break;
+    }
+  }
+  if (hit >= 0 && cache[hit].maxDepth != -1 && cache[hit].maxDepth != maxDepth) {
+    cache[hit].nop = -1;
+    hit = -1;
+  }
+  double rebuildMs = 0;
+  if (hit < 0) {
+    const auto rebuild0 = std::chrono::steady_clock::now();
+    if (cache[0].nop < 0) {
+      hit = 0;
+    } else if (cache[1].nop < 0) {
+      hit = 1;
     } else {
-      for (auto &row : *nList) {
-        row.clear();
+      hit = cache[0].stamp <= cache[1].stamp ? 0 : 1;
+    }
+    RowCache &c = cache[hit];
+    // A partial share is the linkcell cut. Fold the window onto the owned
+    // atoms and give every atom in that window its partners. One rank
+    // owns the frame, so it keeps the full-box list.
+    int nMarked = 0;
+    for (const char bit : owned) {
+      nMarked += bit != 0;
+    }
+    const bool partial = !owned.empty() && nMarked > 0 && nMarked < local.nop;
+    bool built = false;
+    if (partial) {
+      built = nneigh::blockWindowRows(local, cutoff, &owned, c.raw, false, true);
+    }
+    if (!built && !nneigh::blockWindowRows(local, cutoff, nullptr, c.raw, false)) {
+      if (!nneigh::refillIndexRows(local, cutoff, c.raw)) {
+        c.raw = nneigh::getNewNeighbourListByIndex(local, cutoff);
+      }
+      built = false;
+    }
+    if (built) {
+      const int nBuilt = static_cast<int>(c.raw.size());
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nBuilt >= kParallelMin && !omp_in_parallel())
+#endif
+      for (int k = 0; k < nBuilt; k++) {
+        auto &row = c.raw[static_cast<std::size_t>(k)];
+        if (row.size() < 3) {
+          continue;
+        }
+        std::size_t w = 2;
+        for (std::size_t j = 2; j < row.size(); j++) {
+          if (row[j] != row[w - 1]) {
+            row[w++] = row[j];
+          }
+        }
+        row.resize(w);
       }
     }
-    int maxId = 0;
-    for (int k = 0; k < local.nop; k++) {
-      maxId = std::max(maxId, local.pts[static_cast<std::size_t>(k)].atomID);
-    }
-    idToIndex->assign(static_cast<std::size_t>(maxId) + 1, -1);
-    for (int k = 0; k < local.nop; k++) {
-      const int id = local.pts[static_cast<std::size_t>(k)].atomID;
-      if (id >= 0) {
-        (*idToIndex)[static_cast<std::size_t>(id)] = k;
-      }
-    }
-    for (int k = 0; k < local.nop; k++) {
-      auto &row = (*nList)[static_cast<std::size_t>(k)];
-      row.push_back(k);
-      for (std::size_t j = 1; j < (*idRows)[static_cast<std::size_t>(k)].size(); j++) {
-        const int id = (*idRows)[static_cast<std::size_t>(k)][j];
-        const int idx = (id >= 0 && id <= maxId) ? (*idToIndex)[static_cast<std::size_t>(id)] : -1;
-        if (idx >= 0) {
-          row.push_back(idx);
+    if (!built) {
+      const int nBuilt = static_cast<int>(c.raw.size());
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nBuilt >= kParallelMin && !omp_in_parallel())
+#endif
+      for (int k = 0; k < nBuilt; k++) {
+        if (c.raw[static_cast<std::size_t>(k)].size() > 2) {
+          std::sort(c.raw[static_cast<std::size_t>(k)].begin() + 1,
+                    c.raw[static_cast<std::size_t>(k)].end());
         }
       }
     }
-  } else {
-    *nList = nneigh::getNewNeighbourListByIndex(local, cutoff);
+    c.nop = local.nop;
+    c.cutoff = cutoff;
+    c.coord = coord;
+    c.maxDepth = -1;
+    c.id.resize(static_cast<std::size_t>(local.nop));
+    for (int i = 0; i < local.nop; i++) {
+      c.id[static_cast<std::size_t>(i)] = local.pts[static_cast<std::size_t>(i)].atomID;
+    }
+    rebuildMs += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() -
+                                                           rebuild0)
+                     .count();
   }
-  const int nLocal = static_cast<int>(nList->size());
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (nLocal >= kParallelMin && !omp_in_parallel())
-#endif
-  for (int k = 0; k < nLocal; k++) {
-    if ((*nList)[k].size() > 2) {
-      std::sort((*nList)[k].begin() + 1, (*nList)[k].end());
+  cache[hit].stamp = clock++;
+  const bool sameTrim = cache[hit].maxDepth == maxDepth && cache[hit].owned == owned;
+  const auto trim0 = std::chrono::steady_clock::now();
+  auto &nList = cache[hit].raw;
+  if (!sameTrim) {
+    cache[hit].owned = owned;
+    cache[hit].maxDepth = maxDepth;
+  }
+  const int nLocal = static_cast<int>(nList.size());
+  // Halo.lean: a primitive ring of length at most k lies in the closed
+  // bond ball of radius floor(k/2) about an owned vertex. Vertices past
+  // that ball are not members and are not shortcuts.
+  if (!sameTrim && !owned.empty() && nLocal > 0) {
+    const int radius = ringHops(maxDepth);
+    std::vector<int> dist(static_cast<std::size_t>(nLocal), -1);
+    std::vector<int> queue;
+    queue.reserve(static_cast<std::size_t>(nLocal));
+    const int nOwned = std::min(nLocal, static_cast<int>(owned.size()));
+    for (int i = 0; i < nOwned; i++) {
+      if (!owned[static_cast<std::size_t>(i)]) {
+        continue;
+      }
+      dist[static_cast<std::size_t>(i)] = 0;
+      queue.push_back(i);
+    }
+    for (std::size_t head = 0; head < queue.size(); head++) {
+      const int u = queue[head];
+      if (dist[static_cast<std::size_t>(u)] >= radius) {
+        continue;
+      }
+      const auto &row = nList[static_cast<std::size_t>(u)];
+      for (std::size_t j = 1; j < row.size(); j++) {
+        const int v = row[j];
+        if (v < 0 || v >= nLocal || dist[static_cast<std::size_t>(v)] >= 0) {
+          continue;
+        }
+        dist[static_cast<std::size_t>(v)] = dist[static_cast<std::size_t>(u)] + 1;
+        queue.push_back(v);
+      }
+    }
+    for (int i = 0; i < nLocal; i++) {
+      auto &row = nList[static_cast<std::size_t>(i)];
+      if (dist[static_cast<std::size_t>(i)] < 0) {
+        row.resize(std::min<std::size_t>(row.size(), 1));
+        continue;
+      }
+      std::size_t w = 1;
+      for (std::size_t j = 1; j < row.size(); j++) {
+        const int v = row[j];
+        if (v >= 0 && v < nLocal && dist[static_cast<std::size_t>(v)] >= 0) {
+          row[w++] = v;
+        }
+      }
+      row.resize(w);
     }
   }
-  return primitive::ringNetwork(*nList, maxDepth, owned);
+  if (!sameTrim) {
+    rebuildMs += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - trim0)
+                     .count();
+  }
+  const std::vector<std::vector<int>> &graph = nList;
+  const std::vector<char> &sources = cache[hit].owned.empty() ? owned : cache[hit].owned;
+  const auto search0 = std::chrono::steady_clock::now();
+  const auto &found = primitive::ringNetwork(graph, maxDepth, sources);
+  const double searchAll =
+      std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - search0).count();
+  gRingPhases.primitiveMs = primitive::takePrimitiveMs();
+  gRingPhases.searchMs = std::max(0.0, searchAll - gRingPhases.primitiveMs);
+  gRingPhases.rebuildMs = rebuildMs;
+  gRingPhases.reduceMs = 0;
+  return found;
 }
 
 } // namespace
+
+RingPhases lastRingPhases() { return gRingPhases; }
 
 Share shareWithin(const Cloud &cloud, int rank, int nRanks, double gridHalo,
                   double reach) {
@@ -374,9 +698,9 @@ void localTypes(const std::vector<std::vector<int>> &ringList,
 }
 } // namespace
 
-std::vector<std::vector<int>> ownedRings(const Cloud &local, double cutoff,
-                                         int maxDepth,
-                                         const std::vector<char> &owned) {
+const std::vector<std::vector<int>> &ownedRings(const Cloud &local, double cutoff,
+                                                 int maxDepth,
+                                                 const std::vector<char> &owned) {
   return ringsOf(local, cutoff, maxDepth, owned);
 }
 
@@ -565,7 +889,234 @@ Work &gatheredWork() {
   return work;
 }
 
-Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
+void setCutMode(int mode) {
+#ifdef SEAMS_HAS_LINKCELL
+  gCutMode = mode;
+#else
+  (void)mode;
+#endif
+}
+
+namespace {
+void (*gHaloHook)(void *) = nullptr;
+void *gHaloHookCtx = nullptr;
+} // namespace
+
+void setHaloHook(void (*fn)(void *), void *ctx) {
+  gHaloHook = fn;
+  gHaloHookCtx = ctx;
+}
+
+void markInterior(const Work &work, double cutoff, std::vector<char> &interior) {
+  interior.assign(work.cloud.pts.size(), 0);
+  const gen::FracBox box = gen::makeFracBox(work.cloud);
+  if (!box.ok || !(cutoff > 0.0) || work.share.owned.empty()) {
+    return;
+  }
+  const double len[3] = {box.lx, box.ly, box.lz};
+  double axis[3][2] = {{1.0e300, -1.0e300}, {1.0e300, -1.0e300}, {1.0e300, -1.0e300}};
+  std::vector<double> coord;
+  coord.reserve(work.share.owned.size());
+  for (int d = 0; d < 3; d++) {
+    coord.clear();
+    for (std::size_t k = 0; k < work.share.owned.size(); k++) {
+      if (!work.share.owned[k] || k >= work.cloud.pts.size()) {
+        continue;
+      }
+      const auto &p = work.cloud.pts[k];
+      const double c[3] = {p.x, p.y, p.z};
+      coord.push_back(c[d]);
+    }
+    if (coord.empty()) {
+      return;
+    }
+    std::sort(coord.begin(), coord.end());
+    const double length = len[d];
+    double bestGap = coord.front() + length - coord.back();
+    int after = static_cast<int>(coord.size()) - 1;
+    for (int i = 0; i + 1 < static_cast<int>(coord.size()); i++) {
+      const double gap = coord[static_cast<std::size_t>(i + 1)] - coord[static_cast<std::size_t>(i)];
+      if (gap > bestGap) {
+        bestGap = gap;
+        after = i;
+      }
+    }
+    const double start =
+        after + 1 == static_cast<int>(coord.size()) ? coord.front() : coord[static_cast<std::size_t>(after + 1)];
+    axis[d][0] = start;
+    axis[d][1] = start + std::max(length - bestGap, 0.0);
+  }
+  for (std::size_t k = 0; k < work.share.owned.size() && k < work.cloud.pts.size(); k++) {
+    if (!work.share.owned[k]) {
+      continue;
+    }
+    const auto &p = work.cloud.pts[k];
+    const double c[3] = {p.x, p.y, p.z};
+    bool inside = true;
+    for (int d = 0; d < 3 && inside; d++) {
+      double s = c[d];
+      if (s < axis[d][0]) {
+        s += len[d];
+      }
+      if (s > axis[d][1]) {
+        s -= len[d];
+      }
+      if (!(s > axis[d][0] + cutoff && s < axis[d][1] - cutoff)) {
+        inside = false;
+      }
+    }
+    if (inside) {
+      interior[k] = 1;
+    }
+  }
+}
+
+namespace {
+#ifdef SEAMS_HAS_LINKCELL
+// Heaviest block rank divided by the mean. The caller keeps the block
+// cut while this stays under 1.025.
+double blockLoadRatio(const std::vector<std::uint64_t> &weight, int nRanks, double halo) {
+  if (weight.empty() || nRanks <= 1 || gCount.nxyz[0] <= 0) {
+    return 1.0;
+  }
+  const double wlen[3] = {gCount.lx, gCount.ly, gCount.lz};
+  const BlockGrid grid = chooseGrid(nRanks, wlen, halo);
+  std::vector<double> load(static_cast<std::size_t>(nRanks), 0.0);
+  const int nx = gCount.nxyz[0];
+  const int ny = gCount.nxyz[1];
+  const int nz = gCount.nxyz[2];
+  double total = 0.0;
+  for (std::size_t c = 0; c < weight.size(); c++) {
+    if (weight[c] == 0) {
+      continue;
+    }
+    const int ix = static_cast<int>(c) % nx;
+    const int iy = (static_cast<int>(c) / nx) % ny;
+    const int iz = static_cast<int>(c) / (nx * ny);
+    const double s[3] = {(ix + 0.5) / nx, (iy + 0.5) / ny, (iz + 0.5) / nz};
+    const int blk = cellAlong(s[0], grid.n[0]) +
+                    grid.n[0] * (cellAlong(s[1], grid.n[1]) + grid.n[1] * cellAlong(s[2], grid.n[2]));
+    if (blk >= 0 && blk < nRanks) {
+      load[static_cast<std::size_t>(blk)] += static_cast<double>(weight[c]);
+    }
+    total += static_cast<double>(weight[c]);
+  }
+  if (!(total > 0.0)) {
+    return 1.0;
+  }
+  double most = 0.0;
+  for (const double v : load) {
+    most = std::max(most, v);
+  }
+  return most / (total / nRanks);
+}
+
+double assignmentLoad(const std::vector<std::uint64_t> &weight, const std::vector<int> &assign,
+                      int nRanks) {
+  if (weight.size() != assign.size() || nRanks <= 1) {
+    return 1.0;
+  }
+  std::vector<double> load(static_cast<std::size_t>(nRanks), 0.0);
+  double total = 0.0;
+  for (std::size_t c = 0; c < weight.size(); c++) {
+    const int owner = assign[c];
+    if (owner < 0 || owner >= nRanks || weight[c] == 0) {
+      continue;
+    }
+    load[static_cast<std::size_t>(owner)] += static_cast<double>(weight[c]);
+    total += static_cast<double>(weight[c]);
+  }
+  if (!(total > 0.0)) {
+    return 1.0;
+  }
+  double most = 0.0;
+  for (const double v : load) {
+    most = std::max(most, v);
+  }
+  return most / (total / nRanks);
+}
+
+// ghosts/local on the rank with the thickest skin. The same count the
+// bench reports as the halo fraction.
+double blockGhostFraction(const Cloud &cloud, int nRanks, double halo) {
+  const gen::FracBox box = gen::makeFracBox(cloud);
+  if (!box.ok || nRanks <= 1 || !(halo > 0.0)) {
+    return 0.0;
+  }
+  const double wlen[3] = {box.wx, box.wy, box.wz};
+  const BlockGrid grid = chooseGrid(nRanks, wlen, halo);
+  const double halo2 = halo * halo;
+  std::vector<int> blocks(static_cast<std::size_t>(nRanks) * 3, 0);
+  for (int rank = 0; rank < nRanks; rank++) {
+    blockAt(rank, grid.n, blocks.data() + static_cast<std::ptrdiff_t>(rank * 3));
+  }
+  std::vector<int> owned(static_cast<std::size_t>(nRanks), 0);
+  std::vector<int> ghost(static_cast<std::size_t>(nRanks), 0);
+  for (int i = 0; i < cloud.nop; i++) {
+    const auto &p = cloud.pts[static_cast<std::size_t>(i)];
+    const double sz = (p.z - box.oz) / box.lz;
+    const double sy = (p.y - box.oy - box.yz * sz) / box.ly;
+    const double sx = (p.x - box.ox - box.xy * sy - box.xz * sz) / box.lx;
+    const double s[3] = {sx, sy, sz};
+    const int owner = cellAlong(sx, grid.n[0]) +
+                      grid.n[0] * (cellAlong(sy, grid.n[1]) + grid.n[1] * cellAlong(sz, grid.n[2]));
+    if (owner < 0 || owner >= nRanks) {
+      continue;
+    }
+    owned[static_cast<std::size_t>(owner)]++;
+    for (int rank = 0; rank < nRanks; rank++) {
+      if (rank == owner) {
+        continue;
+      }
+      if (blockDist2(s, blocks.data() + static_cast<std::ptrdiff_t>(rank * 3), grid.n, wlen) <=
+          halo2) {
+        ghost[static_cast<std::size_t>(rank)]++;
+      }
+    }
+  }
+  double worst = 0.0;
+  for (int rank = 0; rank < nRanks; rank++) {
+    const int local = owned[static_cast<std::size_t>(rank)] + ghost[static_cast<std::size_t>(rank)];
+    if (local > 0) {
+      worst = std::max(worst, static_cast<double>(ghost[static_cast<std::size_t>(rank)]) / local);
+    }
+  }
+  return worst;
+}
+
+double cellGhostFraction(const Cloud &cloud, const std::vector<int> &assign, int nRanks,
+                         double halo) {
+  if (assign.size() != gCount.assign.size() || cloud.pts.size() != gCount.pointCell.size() ||
+      nRanks <= 1) {
+    return 0.0;
+  }
+  std::vector<int> hit(static_cast<std::size_t>(cloud.nop), 0);
+  double worst = 0.0;
+  for (int rank = 0; rank < nRanks; rank++) {
+    if (lc_owned_mask(gCount.nxyz, assign.data(), assign.size(), gCount.pointCell.data(),
+                      static_cast<std::size_t>(cloud.nop), rank, gCount.hwidth, hit.data()) != 0) {
+      return 0.0;
+    }
+    int owned = 0;
+    int ghost = 0;
+    for (const int flag : hit) {
+      if (flag == 2) {
+        owned++;
+      } else if (flag == 1) {
+        ghost++;
+      }
+    }
+    const int local = owned + ghost;
+    if (local > 0) {
+      worst = std::max(worst, static_cast<double>(ghost) / local);
+    }
+  }
+  return worst;
+}
+#endif
+} // namespace
+
+Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm, int workTag) {
   Work &work = gatheredWork();
   int rank = 0;
   int nRanks = 1;
@@ -593,6 +1144,8 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
     int nRanks = -1;
     int rank = -1;
     int nop = -1;
+    int tag = -1;
+    int epoch = -1;
     double halo = -1.0;
     double haloFraction = 0.0;
     Share share;
@@ -600,11 +1153,108 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
     std::vector<std::vector<int>> sendAt;
     MPI_Comm graph = MPI_COMM_NULL;
   };
-  static GraphCache cache;
-  const bool reuse = cache.nop == cloud.nop && cache.nRanks == nRanks &&
-                     cache.rank == rank && cache.halo == halo;
+  static GraphCache byMode[2];
+#ifdef SEAMS_HAS_LINKCELL
+  if (const char *forced = std::getenv("SEAMS_FORCE_CUT")) {
+    if (std::strcmp(forced, "cell") == 0) {
+      gCutMode = 2;
+    } else if (std::strcmp(forced, "block") == 0) {
+      gCutMode = 1;
+    }
+  }
+  const bool weighted = workTag > 0 && workTag < 5 && gMeasured[workTag].ready &&
+                        gMeasured[workTag].nop == cloud.nop && gMeasured[workTag].parts == nRanks &&
+                        gMeasured[workTag].halo == halo;
+  const int epoch = weighted ? 1 : 0;
+  double ratio = 1.0;
+  double blockCost = 1.0;
+  double cellCost = 1.0;
+  bool autoCell = false;
+  // An orthorhombic frame runs on the linkcell bisection. The geometric
+  // blocks remain the fallback when that mesh cannot be built, and when a
+  // caller forces them.
+  bool useCell = gCutMode != 1 && cloud.box.size() == 3 && buildCountCut(cloud, halo, nRanks);
+  if (useCell && std::getenv("SEAMS_CUT_LOG") != nullptr) {
+    struct CostKey {
+      int nop = -1;
+      int parts = -1;
+      int tag = -1;
+      int epoch = -1;
+      double halo = -1.0;
+      bool autoCell = false;
+      double ratio = 1.0;
+      double blockCost = 1.0;
+      double cellCost = 1.0;
+      double blockGhost = 0.0;
+      double cellGhost = 0.0;
+    };
+    static CostKey cached;
+    if (cached.nop == cloud.nop && cached.parts == nRanks && cached.tag == workTag &&
+        cached.epoch == epoch && cached.halo == halo) {
+      ratio = cached.ratio;
+      blockCost = cached.blockCost;
+      cellCost = cached.cellCost;
+      autoCell = cached.autoCell;
+    } else {
+      const std::vector<std::uint64_t> *weight = nullptr;
+      std::vector<std::uint64_t> counts;
+      const std::vector<int> *cellAssign = &gCount.assign;
+      if (weighted) {
+        weight = &gMeasured[workTag].weight;
+        if (gMeasured[workTag].assign.size() == gCount.assign.size()) {
+          cellAssign = &gMeasured[workTag].assign;
+        }
+      } else {
+        counts.assign(gCount.assign.size(), 0);
+        for (const int cell : gCount.pointCell) {
+          if (cell >= 0 && static_cast<std::size_t>(cell) < counts.size()) {
+            counts[static_cast<std::size_t>(cell)]++;
+          }
+        }
+        weight = &counts;
+      }
+      ratio = blockLoadRatio(*weight, nRanks, halo);
+      const double blockGhost = blockGhostFraction(cloud, nRanks, halo);
+      const double cellLoad = assignmentLoad(*weight, *cellAssign, nRanks);
+      const double cellGhost = cellGhostFraction(cloud, *cellAssign, nRanks, halo);
+      // Load is the heaviest rank over the mean. Ghost fraction is the
+      // thickest skin. Their sum is the cost the bench's wall follows:
+      // a balanced block cut with a thick skin loses to a thin cell skin.
+      blockCost = ratio + blockGhost;
+      cellCost = cellLoad + cellGhost;
+      autoCell = cellCost < blockCost;
+      cached = CostKey{cloud.nop, nRanks, workTag, epoch, halo, autoCell, ratio, blockCost,
+                       cellCost, blockGhost, cellGhost};
+    }
+  }
+  if (rank == 0 && std::getenv("SEAMS_CUT_LOG") != nullptr) {
+    std::fprintf(stderr, "cut %s ratio %.3f rule %s costb %.3f costc %.3f\n",
+                 useCell ? "cell" : "block", ratio, autoCell ? "cell" : "block", blockCost,
+                 cellCost);
+  }
+#else
+  const bool weighted = false;
+  const int epoch = 0;
+  const bool useCell = false;
+#endif
+  GraphCache &cache = byMode[useCell ? 1 : 0];
+  const bool reuse = cache.nop == cloud.nop && cache.nRanks == nRanks && cache.rank == rank &&
+                     cache.halo == halo && cache.tag == workTag && cache.epoch == epoch;
+  bool usedCut = false;
   if (!reuse) {
+#ifdef SEAMS_HAS_LINKCELL
+    if (useCell) {
+      const std::vector<int> &assign = weighted ? gMeasured[workTag].assign : gCount.assign;
+      usedCut = shareFromAssign(cloud, rank, assign, work.share);
+    }
+    if (!usedCut) {
+      gForceBlock = true;
+      work.share = decompose(cloud, rank, nRanks, halo);
+      gForceBlock = false;
+    }
+#else
     work.share = decompose(cloud, rank, nRanks, halo);
+#endif
     int nOwned = 0;
     for (const char flag : work.share.owned) {
       nOwned += flag ? 1 : 0;
@@ -618,6 +1268,8 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
     cache.nRanks = nRanks;
     cache.rank = rank;
     cache.nop = cloud.nop;
+    cache.tag = workTag;
+    cache.epoch = epoch;
     cache.halo = halo;
     cache.share = work.share;
     cache.haloFraction = work.haloFraction;
@@ -628,6 +1280,14 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
         MPI_UNWEIGHTED, cachedDegree,
         cache.nbrs.empty() ? nullptr : cache.nbrs.data(), MPI_UNWEIGHTED,
         MPI_INFO_NULL, 0, &cache.graph);
+#ifdef SEAMS_HAS_LINKCELL
+    if (usedCut) {
+      const std::vector<int> &assign =
+          weighted ? gMeasured[workTag].assign : gCount.assign;
+      linkcellSends(cloud, work.share, assign, cache.nbrs, cache.sendAt);
+    } else
+#endif
+    {
     const gen::FracBox box = gen::makeFracBox(cloud);
     const double w[3] = {box.wx, box.wy, box.wz};
     const BlockGrid grid = chooseGrid(nRanks, w, halo);
@@ -650,6 +1310,7 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
         }
       }
     }
+    }
     gPlan.nRanks = nRanks;
     gPlan.degree = cachedDegree;
     gPlan.graph = cache.graph;
@@ -666,18 +1327,85 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
   } else {
     work.share = cache.share;
     work.haloFraction = cache.haloFraction;
+    // Rings never post boundary values, so the plan stays where the first
+    // call of this cut left it. Restoring it on every reuse copied the
+    // send lists and then exchanged coordinates the rank already holds.
+    if (workTag == kWorkRings) {
+      // Filled below from the local frame.
+    } else {
+    // The value exchange reads one plan. Restoring it here keeps a block
+    // call from posting the cell cut's graph, which truncated the message.
+    const int cachedDegree = static_cast<int>(cache.nbrs.size());
+    gPlan.nRanks = nRanks;
+    gPlan.degree = cachedDegree;
+    gPlan.graph = cache.graph;
+    gPlan.sendCount.resize(static_cast<std::size_t>(cachedDegree));
+    gPlan.sendLocal.clear();
+    gPlan.recvLocal.clear();
+    gPlan.recvCount.clear();
+    for (int sidx = 0; sidx < cachedDegree; sidx++) {
+      gPlan.sendCount[static_cast<std::size_t>(sidx)] =
+          static_cast<int>(cache.sendAt[static_cast<std::size_t>(sidx)].size());
+      const auto &at = cache.sendAt[static_cast<std::size_t>(sidx)];
+      gPlan.sendLocal.insert(gPlan.sendLocal.end(), at.begin(), at.end());
+    }
+    }
+  }
+  // Rings read coordinates the rank already holds. The ghost skin is the
+  // extra atoms in the neighbour list, not a second copy of those coordinates
+  // sent across the distributed graph. Boundary values are a later exchange
+  // and rings do not post one.
+  if (workTag == kWorkRings) {
+    // One filled cloud per cut. Alternating cuts would otherwise default-
+    // construct the point vector on every call.
+    static Cloud kept[2];
+    static std::vector<int> placedRings[2];
+    static int resident = -1;
+    const int slot = useCell ? 1 : 0;
+    if (resident != slot) {
+      if (resident >= 0) {
+        kept[resident] = std::move(work.cloud);
+      }
+      work.cloud = std::move(kept[slot]);
+      resident = slot;
+    }
+    const bool fresh = placedRings[slot] != work.share.local ||
+                       work.cloud.pts.size() != work.share.local.size();
+    if (fresh) {
+      placedRings[slot] = work.share.local;
+      work.cloud.currentFrame = cloud.currentFrame;
+      work.cloud.box = cloud.box;
+      work.cloud.boxLow = cloud.boxLow;
+      work.cloud.pts.assign(work.share.local.size(), {});
+      work.cloud.idIndexMap.clear();
+    }
+    for (std::size_t k = 0; k < work.share.local.size(); k++) {
+      const auto &src = cloud.pts[static_cast<std::size_t>(work.share.local[k])];
+      auto &dst = work.cloud.pts[k];
+      dst.x = src.x;
+      dst.y = src.y;
+      dst.z = src.z;
+      if (fresh) {
+        dst.atomID = src.atomID;
+        dst.molID = src.molID;
+        dst.type = src.type;
+      }
+    }
+    work.cloud.nop = static_cast<int>(work.cloud.pts.size());
+    work.commMs = 0.0;
+    return work;
   }
   const std::vector<int> &nbrs = cache.nbrs;
   const int degree = static_cast<int>(nbrs.size());
   MPI_Comm graph = cache.graph;
-  std::vector<std::vector<GhostAtom>> bags(static_cast<std::size_t>(degree));
+  // Every rank already holds this frame, so the halo exchange carries the
+  // frame index. Coordinates are copied from the local cloud below.
+  std::vector<std::vector<int>> bags(static_cast<std::size_t>(degree));
   for (int sidx = 0; sidx < degree; sidx++) {
     auto &bag = bags[static_cast<std::size_t>(sidx)];
     bag.reserve(cache.sendAt[static_cast<std::size_t>(sidx)].size());
     for (const int k : cache.sendAt[static_cast<std::size_t>(sidx)]) {
-      const int frame = work.share.local[static_cast<std::size_t>(k)];
-      const auto &p = cloud.pts[static_cast<std::size_t>(frame)];
-      bag.push_back(GhostAtom{frame, p.atomID, p.type, p.molID, p.x, p.y, p.z});
+      bag.push_back(work.share.local[static_cast<std::size_t>(k)]);
     }
   }
   std::vector<int> sendCount(static_cast<std::size_t>(std::max(degree, 1)), 0);
@@ -689,13 +1417,13 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
     sendDispl[static_cast<std::size_t>(sidx)] = sendN;
     sendN += sendCount[static_cast<std::size_t>(sidx)];
   }
-  std::vector<GhostAtom> send(static_cast<std::size_t>(std::max(sendN, 1)));
+  std::vector<int> send(static_cast<std::size_t>(std::max(sendN, 1)));
   for (int sidx = 0; sidx < degree; sidx++) {
     std::copy(bags[static_cast<std::size_t>(sidx)].begin(),
               bags[static_cast<std::size_t>(sidx)].end(),
               send.begin() + sendDispl[static_cast<std::size_t>(sidx)]);
   }
-  const int atomBytes = static_cast<int>(sizeof(GhostAtom));
+  const int atomBytes = static_cast<int>(sizeof(int));
   std::vector<int> sendBytes(sendCount.size(), 0);
   std::vector<int> sendByteDispl(sendCount.size(), 0);
   for (int sidx = 0; sidx < degree; sidx++) {
@@ -709,6 +1437,11 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
   int sink = 0;
   const int *sendBytesPtr = degree == 0 ? &sink : sendBytes.data();
   const int *sendByteDisplPtr = degree == 0 ? &sink : sendByteDispl.data();
+  if (const char *split = std::getenv("SEAMS_SPLIT")) {
+    if (split[0] == '1' && rank == 0) {
+      std::fprintf(stderr, "send atoms %d degree %d\n", sendN, degree);
+    }
+  }
   MPI_Barrier(comm);
   const auto t0 = std::chrono::steady_clock::now();
   MPI_Neighbor_alltoall(sendBytesPtr, 1, MPI_INT, recvBytes.data(), 1, MPI_INT, graph);
@@ -718,9 +1451,62 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
     recvN += recvBytes[static_cast<std::size_t>(sidx)];
   }
   std::vector<char> recv(static_cast<std::size_t>(std::max(recvN, 1)));
-  MPI_Neighbor_alltoallv(send.data(), sendBytesPtr, sendByteDisplPtr, MPI_BYTE,
-                         recv.data(), recvBytes.data(), recvByteDispl.data(), MPI_BYTE,
-                         graph);
+  // One cloud per cut. Alternating block and cell would otherwise
+  // default-construct every point, including its bond vector, on each call.
+  static Cloud keptCloud[2];
+  static std::vector<int> placedCut[2];
+  static int residentCut = -1;
+  const int cutSlot = useCell ? 1 : 0;
+  if (residentCut != cutSlot) {
+    if (residentCut >= 0) {
+      keptCloud[residentCut] = std::move(work.cloud);
+    }
+    work.cloud = std::move(keptCloud[cutSlot]);
+    residentCut = cutSlot;
+  }
+  work.cloud.currentFrame = cloud.currentFrame;
+  work.cloud.box = cloud.box;
+  work.cloud.boxLow = cloud.boxLow;
+  if (work.cloud.pts.size() != work.share.local.size()) {
+    work.cloud.pts.assign(work.share.local.size(), {});
+    work.cloud.idIndexMap.clear();
+  }
+  const auto copyT0 = std::chrono::steady_clock::now();
+  const int nLocalCopy = static_cast<int>(work.share.local.size());
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1)
+#endif
+  for (int k = 0; k < nLocalCopy; k++) {
+    const int frame = work.share.local[k];
+    if (frame < 0 || frame >= cloud.nop) {
+      continue;
+    }
+    const auto &src = cloud.pts[static_cast<std::size_t>(frame)];
+    auto &dst = work.cloud.pts[k];
+    dst.x = src.x;
+    dst.y = src.y;
+    dst.z = src.z;
+    dst.atomID = src.atomID;
+    dst.molID = src.molID;
+    dst.type = src.type;
+  }
+  if (const char *split = std::getenv("SEAMS_SPLIT")) {
+    if (split[0] == '1' && rank == 0) {
+      std::fprintf(stderr, "copy ms %.3f\n",
+                   std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - copyT0)
+                       .count());
+    }
+  }
+  work.cloud.nop = static_cast<int>(work.cloud.pts.size());
+  MPI_Request payload = MPI_REQUEST_NULL;
+  MPI_Ineighbor_alltoallv(send.data(), sendBytesPtr, sendByteDisplPtr, MPI_BYTE, recv.data(),
+                          recvBytes.data(), recvByteDispl.data(), MPI_BYTE, graph, &payload);
+  // Owned coordinates are already on this rank. Ghost coordinates are the
+  // bytes in flight, so a hook can run the owned kernel against that wait.
+  if (gHaloHook != nullptr) {
+    gHaloHook(gHaloHookCtx);
+  }
+  MPI_Wait(&payload, MPI_STATUS_IGNORE);
   MPI_Barrier(comm);
   work.commMs = std::chrono::duration<double, std::milli>(
                     std::chrono::steady_clock::now() - t0)
@@ -729,7 +1515,12 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
 
   // Place ghosts by frame index. The local list is sorted, so each
   // received atom is a binary search, and the point is rewritten in place.
-  const bool fresh = work.cloud.pts.size() != work.share.local.size();
+  // Two cuts can hold the same number of atoms and still own different ones.
+  const bool fresh = placedCut[cutSlot] != work.share.local ||
+                     work.cloud.pts.size() != work.share.local.size();
+  if (fresh) {
+    placedCut[cutSlot] = work.share.local;
+  }
   if (fresh) {
     work.cloud.currentFrame = cloud.currentFrame;
     work.cloud.box = cloud.box;
@@ -768,23 +1559,23 @@ Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm) {
     }
   }
   for (int at = 0; at + atomBytes <= recvN; at += atomBytes) {
-    GhostAtom atom;
-    std::memcpy(&atom, recv.data() + at, sizeof(GhostAtom));
-    const auto it = std::lower_bound(work.share.local.begin(), work.share.local.end(),
-                                     atom.index);
-    if (it == work.share.local.end() || *it != atom.index) {
+    int frame = 0;
+    std::memcpy(&frame, recv.data() + at, sizeof(int));
+    const auto it = std::lower_bound(work.share.local.begin(), work.share.local.end(), frame);
+    if (it == work.share.local.end() || *it != frame) {
       misses++;
       continue;
     }
     const std::size_t k = static_cast<std::size_t>(it - work.share.local.begin());
-    auto &dst = work.cloud.pts[k];
-    dst.x = atom.x;
-    dst.y = atom.y;
-    dst.z = atom.z;
     if (fresh) {
-      dst.atomID = atom.atomID;
-      dst.molID = atom.molID;
-      dst.type = atom.type;
+      const auto &src = cloud.pts[static_cast<std::size_t>(frame)];
+      auto &dst = work.cloud.pts[k];
+      dst.x = src.x;
+      dst.y = src.y;
+      dst.z = src.z;
+      dst.atomID = src.atomID;
+      dst.molID = src.molID;
+      dst.type = src.type;
       work.cloud.idIndexMap[dst.atomID] = static_cast<int>(k);
     }
     if (recordRecv) {
@@ -948,8 +1739,65 @@ int ownerOfFrame(const Cloud &cloud, int frame, const BlockGrid &grid) {
 
 } // namespace
 
-std::vector<std::vector<int>> distributedRings(const Cloud &cloud, double cutoff,
-                                               int maxDepth, MPI_Comm comm) {
+void captureLocalWork(int workTag, const double *perLocal, int nLocal, MPI_Comm comm) {
+#ifdef SEAMS_HAS_LINKCELL
+  if (workTag <= 0 || workTag >= 5 || perLocal == nullptr || comm == MPI_COMM_NULL) {
+    return;
+  }
+  MeasuredCut &slot = gMeasured[workTag];
+  if (slot.ready || gCount.assign.empty() || gCount.pointCell.empty()) {
+    return;
+  }
+  const Share &share = gatheredWork().share;
+  const int ncell = static_cast<int>(gCount.assign.size());
+  const int n = std::min(nLocal, static_cast<int>(share.local.size()));
+  std::vector<std::uint64_t> mine(static_cast<std::size_t>(ncell), 0);
+  for (int k = 0; k < n; k++) {
+    if (!share.owned[static_cast<std::size_t>(k)] || !(perLocal[k] > 0.0)) {
+      continue;
+    }
+    const int frame = share.local[static_cast<std::size_t>(k)];
+    if (frame < 0 || static_cast<std::size_t>(frame) >= gCount.pointCell.size()) {
+      continue;
+    }
+    const int cell = gCount.pointCell[static_cast<std::size_t>(frame)];
+    if (cell < 0 || cell >= ncell) {
+      continue;
+    }
+    const auto quantum = static_cast<std::uint64_t>(perLocal[k] + 0.5);
+    mine[static_cast<std::size_t>(cell)] += quantum > 0 ? quantum : 1;
+  }
+  std::vector<std::uint64_t> sum(mine.size(), 0);
+  MPI_Allreduce(mine.data(), sum.data(), ncell, MPI_UINT64_T, MPI_SUM, comm);
+  std::uint64_t total = 0;
+  for (const auto w : sum) {
+    total += w;
+  }
+  if (total == 0 || gCount.parts < 1) {
+    return;
+  }
+  std::vector<int> assign(static_cast<std::size_t>(ncell), 0);
+  if (lc_partition_weights(gCount.nxyz, sum.data(), static_cast<std::size_t>(ncell),
+                           static_cast<std::size_t>(gCount.parts), 2, 0.0,
+                           assign.data()) != 0) {
+    return;
+  }
+  slot.weight = std::move(sum);
+  slot.assign = std::move(assign);
+  slot.nop = gCount.nop;
+  slot.parts = gCount.parts;
+  slot.halo = gCount.halo;
+  slot.ready = true;
+#else
+  (void)workTag;
+  (void)perLocal;
+  (void)nLocal;
+  (void)comm;
+#endif
+}
+
+const std::vector<std::vector<int>> &distributedRings(const Cloud &cloud, double cutoff,
+                                                       int maxDepth, MPI_Comm comm) {
   int rank = 0;
   int nRanks = 1;
   MPI_Comm_rank(comm, &rank);
@@ -962,19 +1810,48 @@ std::vector<std::vector<int>> distributedRings(const Cloud &cloud, double cutoff
   if (std::fabs(cell.xy) + std::fabs(cell.xz) + std::fabs(cell.yz) > 1.0e-8) {
     // A skewed shell does not fit in the block-distance halo. The rank
     // already holds the frame, so it reads those rows directly.
-    return rings(cloud, cutoff, maxDepth, rank, nRanks);
+    static thread_local std::vector<std::vector<int>> skewed;
+    skewed = rings(cloud, cutoff, maxDepth, rank, nRanks);
+    return skewed;
   }
   // ringHops is the coordinate width that reproduces the serial census,
   // one hop inside the previous surface term. Owned sources are searched
-  // on that halo and mapped back to the frame.
-  const Work &work = gatherWork(cloud, ringHops(maxDepth) * cutoff, comm);
-  auto local = ownedRings(work.cloud, cutoff, maxDepth, work.share.owned);
-  for (auto &ring : local) {
-    for (int &v : ring) {
-      v = work.share.local[static_cast<std::size_t>(v)];
+  // on that halo and mapped back to the frame. The bond ball itself ends
+  // near 7.8 A on this crystal, but a skin of that radius made the wall
+  // longer, so the gather stays at ringHops cutoffs.
+  const Work &work = gatherWork(cloud, ringHops(maxDepth) * cutoff, comm, kWorkRings);
+  const bool measure = !gMeasured[kWorkRings].ready;
+  std::vector<double> sourceUs;
+  if (measure) {
+    sourceUs.assign(static_cast<std::size_t>(std::max(work.cloud.nop, 0)), 0.0);
+    primitive::setSourceWork(sourceUs.empty() ? nullptr : sourceUs.data());
+  }
+  const auto &local = ownedRings(work.cloud, cutoff, maxDepth, work.share.owned);
+  if (measure) {
+    primitive::setSourceWork(nullptr);
+    captureLocalWork(kWorkRings, sourceUs.data(), static_cast<int>(sourceUs.size()), comm);
+  }
+  const auto reduce0 = std::chrono::steady_clock::now();
+  thread_local std::vector<std::vector<int>> mapped;
+  if (mapped.size() < local.size()) {
+    mapped.resize(local.size());
+  }
+  for (std::size_t r = 0; r < local.size(); r++) {
+    auto &dst = mapped[r];
+    const auto &src = local[r];
+    if (dst.size() != src.size()) {
+      dst.resize(src.size());
+    }
+    for (std::size_t i = 0; i < src.size(); i++) {
+      dst[i] = work.share.local[static_cast<std::size_t>(src[i])];
     }
   }
-  return local;
+  if (mapped.size() != local.size()) {
+    mapped.resize(local.size());
+  }
+  gRingPhases.reduceMs +=
+      std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - reduce0).count();
+  return mapped;
 }
 
 

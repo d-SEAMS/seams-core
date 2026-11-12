@@ -1,0 +1,24 @@
+cores 8
+884736 molecules, ice Ic, gaussian displacement 0.12 A, eight frames
+one process per rank count, cell cut, type-7 median and IQR
+the cut is kept, each distinct frame rebuilds its neighbour rows
+
+same-frame cache
+1 rank 668.913 ms iqr 76.767
+8 rank 98.514 ms iqr 0.939 halo 0.306 imbalance 1.023
+efficiency 0.849
+
+distinct frames
+1 rank 1007.486 ms iqr 21.653
+8 rank 194.902 ms iqr 2.504 halo 0.306 imbalance 1.021
+efficiency 0.646
+
+six-ring counts matched at 1 and 8 ranks on every frame
+
+The bond ball of a depth-6 ring ends near 7.8 A. A skin of that
+radius plus 1 A cut the ghost fraction from 0.306 to 0.258 and
+raised the eight-rank wall, so the gather stays at 3 cutoffs.
+Sharing balls or leaving a primitive test early speeds the one-rank
+search by the same fraction, and the ring-work weight is already
+the cut after the first call. Neither moves the distinct-frame
+efficiency to 0.8.

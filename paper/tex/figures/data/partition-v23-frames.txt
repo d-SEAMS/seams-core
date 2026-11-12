@@ -1,0 +1,25 @@
+cores 8
+884736 molecules, ice Ic, gaussian displacement 0.12 A
+one session, cell cut, eight frames, type-7 median and IQR
+
+The eight-rank CHILL+ kernel was on the hash map because atom IDs
+are frame-wide. One rank already used a dense table. q6 built the
+neighbour graph twice. Both stay on the dense table, and q6 keeps
+the graph from the halo hook.
+
+CHILL+
+1 rank 551.111 ms iqr 50.251
+  rebuild 301.84 compute 222.96 exchange 0 reduce 0
+8 rank 76.150 ms iqr 4.399 halo 0.073
+  rebuild 35.96 compute 30.65 exchange 0.74 reduce 1.23
+efficiency 0.905
+
+q6
+1 rank 603.876 ms iqr 22.694
+  rebuild 290.30 compute 292.09 exchange 0 reduce 0
+8 rank 83.558 ms iqr 7.269 halo 0.073
+  rebuild 34.30 compute 40.84 exchange 1.02 reduce 0.46
+efficiency 0.903
+
+Against the previous session's one-rank times, 492 ms and 568 ms,
+the same eight-rank walls are still efficiency 0.808 and 0.850.

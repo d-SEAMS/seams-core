@@ -116,18 +116,18 @@ struct Graph {
 //! hydrogen-bonded neighbour list). Each ring starts at its lowest-indexed
 //! member and runs toward the lesser of that member's ring neighbours, and
 //! the rings are sorted lexicographically.
-std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,
-                                           int maxDepth);
+const std::vector<std::vector<int>> &ringNetwork(const std::vector<std::vector<int>> &nList,
+                                                 int maxDepth);
 
 //! Rings on a CSR of cloud indices (no self entry, one edge each).
-std::vector<std::vector<int>> ringNetwork(const std::vector<int> &offsets,
-                                           const std::vector<int> &cols, int maxDepth);
+const std::vector<std::vector<int>> &ringNetwork(const std::vector<int> &offsets,
+                                                 const std::vector<int> &cols, int maxDepth);
 
 //! The same ring set, built with a bounded ball at every vertex and a
 //! primitivity test of every pair. ringNetwork leaves that table out when
 //! the largest ring is at most 7, because a strict shortcut is then a walk
 //! of at most two edges.
-std::vector<std::vector<int>>
+const std::vector<std::vector<int>> &
 ringNetworkBalls(const std::vector<std::vector<int>> &nList, int maxDepth);
 
 //! 0 when the last ringNetwork call answered every primitivity query from
@@ -137,9 +137,9 @@ ringNetworkBalls(const std::vector<std::vector<int>> &nList, int maxDepth);
 
 //! The rings ringNetwork returns whose lowest-indexed member is flagged in
 //! @a sources (by index; empty flags every vertex), in the same order
-std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,
-                                          int maxDepth,
-                                          const std::vector<char> &sources);
+const std::vector<std::vector<int>> &ringNetwork(const std::vector<std::vector<int>> &nList,
+                                                int maxDepth,
+                                                const std::vector<char> &sources);
 
 //! Creates a graph object and fills it with the information from a neighbour
 //! list and pointCloud created before. NOTE: the neighbourListIndex contains
@@ -249,6 +249,17 @@ struct RingSearchSplit {
 
 //! Balls, source enumeration and the gather from the last ringNetwork call.
 [[nodiscard]] RingSearchSplit lastRingSearchSplit();
+
+//! When set, ringNetwork records the primitive-test time in the split.
+void setPhaseTiming(bool on);
+
+//! Primitive-test milliseconds from the last timed ringNetwork, then zero.
+double takePrimitiveMs();
+
+//! When non-null, ringNetwork adds each source's enumeration time, in
+//! microseconds, at that source's index. The buffer must hold one entry
+//! per neighbour-list row. A null buffer skips the clock.
+void setSourceWork(double *microseconds);
 
 } // namespace primitive
 
