@@ -65,7 +65,7 @@ def write_gro(path, points, length):
 
 
 def write_xyz(path, points, length):
-    # plumed driver reads xyz as nm and hands the CV Angstrom under UNITS LENGTH=A.
+    # plumed driver reads xyz as nm. The collective variable scales to angstrom.
     rows = [str(len(points)),
             f"{length / 10:.8f} 0 0 0 {length / 10:.8f} 0 0 0 {length / 10:.8f}"]
     for x, y, z in points:

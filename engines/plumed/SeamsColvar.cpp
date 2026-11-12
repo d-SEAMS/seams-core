@@ -1,11 +1,13 @@
 // Copyright (c) d-SEAMS developers
+// SPDX-License-Identifier: MIT
 // PLUMED collective variable. q6 carries finite-difference derivatives so a
-// RESTRAINT can bias it. ice is the CHILL+ cubic fraction. ring is the
-// fraction of atoms on a primitive six-ring.
+// RESTRAINT can bias it. ice is the CHILL+ cubic fraction and ring is the
+// fraction of atoms on a primitive six-ring. Both are discrete, so they are
+// registered without derivatives and cannot be biased.
 
-#include "core/ActionAtomistic.h"
-#include "core/ActionRegister.h"
-#include "core/Colvar.h"
+#include "plumed/core/ActionAtomistic.h"
+#include "plumed/core/ActionRegister.h"
+#include "plumed/core/Colvar.h"
 #include "seams.h"
 #include "../triclinic_box.hpp"
 
@@ -29,10 +31,10 @@ class SeamsCV : public Colvar {
 void SeamsCV::registerKeywords(Keywords &keys) {
   Colvar::registerKeywords(keys);
   keys.add("atoms", "ATOMS", "atoms of the cell");
-  keys.add("compulsory", "CUTOFF", "3.5", "neighbour cutoff in the current length unit");
+  keys.add("compulsory", "CUTOFF", "3.5", "neighbour cutoff in angstrom");
   keys.addOutputComponent("q6", "default", "mean local q6, the continuous bias component");
-  keys.addOutputComponent("ice", "default", "fraction of atoms labelled cubic by published CHILL+");
-  keys.addOutputComponent("ring", "default", "fraction of atoms on a primitive six-ring");
+  keys.addOutputComponent("ice", "default", "CHILL+ cubic fraction; not biasable, no derivatives");
+  keys.addOutputComponent("ring", "default", "primitive six-ring fraction; not biasable, no derivatives");
 }
 
 SeamsCV::SeamsCV(const ActionOptions &ao) : PLUMED_COLVAR_INIT(ao), cutoff_(3.5) {
@@ -43,9 +45,9 @@ SeamsCV::SeamsCV(const ActionOptions &ao) : PLUMED_COLVAR_INIT(ao), cutoff_(3.5)
   requestAtoms(atoms);
   addComponentWithDerivatives("q6");
   componentIsNotPeriodic("q6");
-  addComponentWithDerivatives("ice");
+  addComponent("ice");
   componentIsNotPeriodic("ice");
-  addComponentWithDerivatives("ring");
+  addComponent("ring");
   componentIsNotPeriodic("ring");
 }
 
@@ -86,21 +88,22 @@ bool SeamsCV::score(const std::vector<double> &xyz, const double box9[9], double
 }
 
 void SeamsCV::calculate() {
-  // With UNITS LENGTH=A, getPosition and getBox are already Angstrom.
-  // The driver still reads an xyz file as nm, so that deck is written in nm.
+  // getPosition and getBox are PLUMED's internal nanometres. d-SEAMS
+  // expects angstroms, and CUTOFF is parsed as a bare number in angstroms.
+  const double to_angstrom = 10.0;
   const unsigned n = getNumberOfAtoms();
   std::vector<double> xyz(3 * n);
   for (unsigned i = 0; i < n; ++i) {
     const Vector p = getPosition(i);
-    xyz[3 * i] = p[0];
-    xyz[3 * i + 1] = p[1];
-    xyz[3 * i + 2] = p[2];
+    xyz[3 * i] = p[0] * to_angstrom;
+    xyz[3 * i + 1] = p[1] * to_angstrom;
+    xyz[3 * i + 2] = p[2] * to_angstrom;
   }
   const Tensor box = getBox();
   double raw[3][3];
   for (int a = 0; a < 3; ++a) {
     for (int b = 0; b < 3; ++b) {
-      raw[a][b] = box(a, b);
+      raw[a][b] = box(a, b) * to_angstrom;
     }
   }
   double box9[9];
@@ -109,7 +112,7 @@ void SeamsCV::calculate() {
   if (!score(xyz, box9, q6, ice, ring)) {
     error("d-SEAMS rejected this frame");
   }
-  // Central difference on q6 only. ice and ring stay finite but are not biased.
+  // Central difference on q6 only. ice and ring have no derivatives.
   const double eps = 1.0e-3;
   std::vector<Vector> dq(n);
   for (unsigned i = 0; i < n; ++i) {
@@ -134,15 +137,10 @@ void SeamsCV::calculate() {
   vq->set(q6);
   vi->set(ice);
   vr->set(ring);
-  const Vector zero;
   for (unsigned i = 0; i < n; ++i) {
     setAtomsDerivatives(vq, static_cast<int>(i), dq[i]);
-    setAtomsDerivatives(vi, static_cast<int>(i), zero);
-    setAtomsDerivatives(vr, static_cast<int>(i), zero);
   }
   setBoxDerivativesNoPbc(vq);
-  setBoxDerivativesNoPbc(vi);
-  setBoxDerivativesNoPbc(vr);
 }
 
 PLUMED_REGISTER_ACTION(SeamsCV, "SEAMS")
