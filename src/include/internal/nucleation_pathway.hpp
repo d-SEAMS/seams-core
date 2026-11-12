@@ -27,9 +27,11 @@
  *  edges and with the ovito-chill+ rule. Neither call changes those
  *  edges. Rings are the Franzblau primitive rings of the cutoff graph.
  *  q6-bar is the Lechner-Dellago average from chill::steinhardtQlCutoff
- *  on that same cutoff. The fused q4/q6/CHILL+ entry point on later
- *  neighbour work returns the local parameters and does not fill
- *  q-bar, so this census keeps the averaged call.
+ *  on that same cutoff, with the average filled. chill::q4q6ChillPlus
+ *  at 29b3c2b2 returns that average as well, with q4, q6 and the
+ *  published CHILL+ labels. The call is built on a passFast rewrite
+ *  that conflicts with the shared orthorhombic stencil, so this census
+ *  keeps steinhardtQlCutoff.
  *  Symmetry labels are the diamond common-neighbour test: 1 is cubic
  *  diamond (ice Ic) and 0 is hexagonal diamond (ice Ih).
  *

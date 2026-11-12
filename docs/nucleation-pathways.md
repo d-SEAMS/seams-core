@@ -12,8 +12,14 @@ Nguyen and Molinero rule (`chill+`, closed edges, four-neighbour
 shell, interfacial neighbour test) and the OVITO rule
 (`ovito-chill+`, open edges, q3 on the whole shell, no neighbour
 test). q6-bar is the Lechner–Dellago average from
-`chill::steinhardtQlCutoff` on the same cutoff list. A molecule is
-counted as q6-bar ice when q6-bar is greater than 0.36. Diamond
+`chill::steinhardtQlCutoff` on the same cutoff list.
+`chill::q4q6ChillPlus` at 29b3c2b2 returns that same average, along
+with q4, q6 and the published labels. Its cutoff walk rewrites
+`passFast` against the shared orthorhombic stencil from 2f96e7bd.
+Those signatures conflict in `cutoff_csr.cpp`, `neighbours.cpp` and
+`neighbours.hpp`, so the census keeps the averaged Steinhardt call.
+A molecule is counted as q6-bar ice when q6-bar is greater than 0.36.
+Diamond
 symmetry labels come from `symm::diamondFromCsr`: 1 is cubic diamond
 and 0 is hexagonal diamond.
 
