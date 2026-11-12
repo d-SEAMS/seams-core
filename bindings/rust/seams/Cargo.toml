@@ -1,0 +1,9 @@
+[package]
+name = "seams"
+version = "2.14.0"
+edition = "2021"
+description = "Safe wrapper for the d-SEAMS C API"
+license = "MIT"
+
+[dependencies]
+seams-sys = { path = "../seams-sys" }

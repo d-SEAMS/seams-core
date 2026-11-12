@@ -1,0 +1,16 @@
+#ifndef SEAMS_VERSION_H_
+#define SEAMS_VERSION_H_
+
+/*
+ * Copyright (c) d-SEAMS developers
+ *
+ * Written by the build from the project version. seams.h includes this
+ * header. Do not put a version literal next to it.
+ */
+
+#define SEAMS_VERSION_MAJOR @MAJOR@
+#define SEAMS_VERSION_MINOR @MINOR@
+#define SEAMS_VERSION_PATCH @PATCH@
+#define SEAMS_VERSION_STRING "@STRING@"
+
+#endif

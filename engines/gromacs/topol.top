@@ -1,0 +1,20 @@
+; Copyright (c) d-SEAMS developers
+; One atom type, no bonds. Enough for a short mdrun of the cubic cell.
+
+[ defaults ]
+1 2 yes 0.5 0.8333
+
+[ atomtypes ]
+O 8 16.00 0.0 A 0.30 0.50
+
+[ moleculetype ]
+ICE 1
+
+[ atoms ]
+1 O 1 ICE O 1 0 16.00
+
+[ system ]
+cubic ice
+
+[ molecules ]
+ICE 64

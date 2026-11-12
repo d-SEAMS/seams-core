@@ -97,6 +97,14 @@ foreach name, src : test_sources
     _timeout = 300
   elif name == 'bulkTUM'
     _timeout = 300
+  elif name == 'domain'
+    # 16000-atom rings finish in about 15s alone. A parallel run on this
+    # machine reached 97547 of 97582 assertions before the 120s limit.
+    _timeout = 300
+  elif name == 'cage_affiliation'
+    # The seeded case passes. A parallel run was killed at 120s on the
+    # last assertion.
+    _timeout = 300
   elif name == 'bop' and offload_enabled
     _timeout = 600
   endif

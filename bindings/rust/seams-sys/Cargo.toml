@@ -1,0 +1,9 @@
+[package]
+name = "seams-sys"
+version = "2.14.0"
+edition = "2021"
+description = "Raw FFI for the d-SEAMS C API"
+license = "MIT"
+links = "seams"
+
+[dependencies]

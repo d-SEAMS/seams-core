@@ -1,0 +1,13 @@
+[build-system]
+requires = ["nanobind>=2.0", "numpy"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dseams"
+version = "2.14.0"
+description = "d-SEAMS stable C API for Python"
+requires-python = ">=3.10"
+dependencies = ["numpy"]
+
+[tool.setuptools]
+packages = ["dseams"]
