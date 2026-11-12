@@ -4,7 +4,7 @@
 
 The velocity seed is 215 in in.equilibrate. One OpenMP thread keeps
 the trajectory fixed. Frames land outside the tree, under MW215_DIR
-or /var/tmp/dseams/mw215.
+or `mw215-frames`.
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 DECK = Path(__file__).resolve().parent
-OUT = Path(os.environ.get("MW215_DIR", "/var/tmp/dseams/mw215"))
+OUT = Path(os.environ.get("MW215_DIR", "mw215-frames"))
 CELLS = (8, 16, 32)
 CUTOFF = 3.5
 RUNS = 7

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Copy coexistence frames off /tmp every 0.25 ns.
+"""Copy coexistence frames out of the run directory every 0.25 ns.
 
 Dumps and restart files land in data/brine-front/, which is gitignored.
 A VM restart can resume from the newest dump: positions and velocities
@@ -9,6 +9,7 @@ are in the file. This script does not upload anywhere.
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import time
 from pathlib import Path
@@ -39,7 +40,7 @@ def snapshot(work: Path, dest: Path, count: int) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--src", type=Path, default=Path("/tmp/brine-science-v2"))
+    parser.add_argument("--src", type=Path, default=Path(os.environ.get("BRINE_DIR", "brine-runs")))
     parser.add_argument("--poll", type=float, default=30.0)
     args = parser.parse_args()
     seen: dict[str, int] = {}

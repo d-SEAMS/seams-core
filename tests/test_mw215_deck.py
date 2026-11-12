@@ -9,7 +9,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 DECK = ROOT / "input" / "mw215" / "in.equilibrate"
 FETCH = ROOT / "input" / "mw215" / "fetch.py"
-FRAME = pathlib.Path(os.environ.get("MW215_DIR", "/var/tmp/dseams/mw215")) / "mw-liquid-512.lammpstrj"
+FRAME = pathlib.Path(os.environ.get("MW215_DIR", "mw215-frames")) / "mw-liquid-512.lammpstrj"
 
 
 def main() -> int:

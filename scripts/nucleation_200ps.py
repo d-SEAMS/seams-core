@@ -16,7 +16,7 @@ import os
 import subprocess
 import sys
 
-LMP = "/tmp/h2h-watch-venv/lib/python3.13/site-packages/lammps/lmp"
+LMP = os.environ.get("LAMMPS_BIN", "lmp")
 D = 2.75
 MW_SW = """\
 # DATE: 2009-03-01 UNITS: real CONTRIBUTOR: Molinero and Moore, J. Phys. Chem. B 113, 4008 (2009)
@@ -67,11 +67,10 @@ def run(workdir, text):
     with open(path, "w", encoding="utf-8") as out:
         out.write(text)
     env = os.environ.copy()
-    env["LD_LIBRARY_PATH"] = "/tmp/h2h-watch-venv/lib"
     env["OMP_NUM_THREADS"] = "1"
     log = os.path.join(workdir, "log.lammps")
     cmd = [
-        "/tmp/h2h-watch-venv/bin/mpirun", "-np", "8",
+        os.environ.get("MPIRUN", "mpirun"), "-np", "8",
         LMP, "-in", "in.mw",
     ]
     with open(log, "w", encoding="utf-8") as err:

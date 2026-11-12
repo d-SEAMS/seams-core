@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Madrid-2019 ice/brine trajectories. Frames stay under /tmp.
+"""Madrid-2019 ice/brine trajectories. Frames stay in the run directory.
 
 The deck is TIP4P/2005 plus the Madrid-2019 NaCl parameters
 (Zeron, Abascal and Vega, J. Chem. Phys. 151, 134504 (2019),
@@ -16,6 +16,7 @@ at 298.15 K and 1 bar, published density 2.050 g/cm^3.
 from __future__ import annotations
 
 import argparse
+import os
 import math
 import random
 import shutil
@@ -26,7 +27,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import regenerate as regen
 
-OUT = Path("/tmp/brine-science")
+OUT = Path(os.environ.get("BRINE_DIR", "brine-runs"))
 KCAL_PER_KJ = 1.0 / 4.184
 OH = regen.OH
 HOH = regen.HOH
@@ -521,7 +522,7 @@ def main():
     parser.add_argument("--ice-check", action="store_true")
     parser.add_argument("--crystal", action="store_true")
     parser.add_argument("--grow", action="store_true")
-    parser.add_argument("--lmp", default="/tmp/lammps/build/lmp")
+    parser.add_argument("--lmp", default=os.environ.get("LAMMPS_BIN", "lmp"))
     parser.add_argument("--brine-front", default="")
     parser.add_argument("--crystal-steps", type=int, default=40000)
     parser.add_argument("--prod-ps", type=float, default=400)

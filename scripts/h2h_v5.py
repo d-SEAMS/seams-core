@@ -37,7 +37,7 @@ def parse_args(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument("--out", default="benchmarks/h2h-watch-v5.csv")
     parser.add_argument("--python")
-    parser.add_argument("--kernel-bin", default=os.environ.get("SYMMETRY_BENCH", "/tmp/bench_symmetry_ice"))
+    parser.add_argument("--kernel-bin", default=os.environ.get("SYMMETRY_BENCH", "bench_symmetry_ice"))
     parser.add_argument("--kernel-sha", default=os.environ.get("SYMMETRY_SHA", KERNEL_SHA))
     parser.add_argument("--threads", type=int, default=1)
     parser.add_argument("--worker", choices=(

@@ -4,7 +4,7 @@
 The geometry follows Lamas, Vega and Noya, J. Chem. Phys. 156, 134503
 (2022): an ice Ih block in contact with a liquid, cross section at
 least 30 A, at least 2000 waters, cutoff 10 A, 2 fs, 1 bar. Frames
-are written only under /tmp.
+stay in the run directory, outside the source tree.
 
     python3 input/brine/coexist.py --bench --threads 8
     python3 input/brine/coexist.py --run --tag pure-245 --temp 245 --molality 0 \
@@ -14,6 +14,7 @@ are written only under /tmp.
 from __future__ import annotations
 
 import argparse
+import os
 import random
 import shutil
 import subprocess
@@ -25,8 +26,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import grow
 import regenerate as regen
 
-OUT = Path("/tmp/brine-science-v2")
-LMP = "/tmp/lammps/build-omp/lmp"
+OUT = Path(os.environ.get("BRINE_DIR", "brine-runs"))
+LMP = os.environ.get("LAMMPS_BIN", "lmp")
 
 
 def build_slab(nx, ny, nz, n_liquid, molality, seed, gap=3.0):

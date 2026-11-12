@@ -1,6 +1,6 @@
 # DVC-style outs for the 4096-molecule seeded quenches.
 # The lammpstrj files are not in git. They are written under
-# ${DSEAMS_NUCLEATION_DIR:-/tmp/dseams-nucleation}/mw-4096.
+# ${DSEAMS_NUCLEATION_DIR:-nucleation-frames}/mw-4096.
 # python3 input/nucleation/regenerate.py --lmp lmp --n 16 \
 #   --seeds 20261111-20261130 --melt 10000 --quench 1000000 \
 #   --dump-every 100 --nskip 0 --temperature 180 --threads 1 --jobs 8

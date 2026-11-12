@@ -21,7 +21,7 @@ import h2h_protocol as proto
 ROOT = Path(__file__).resolve().parents[1]
 HERE = Path(__file__).resolve()
 HOST_LIB = "/usr/lib/x86_64-linux-gnu"
-KERNEL = os.environ.get("SYMMETRY_BENCH", "/tmp/bench_symmetry_ice")
+KERNEL = os.environ.get("SYMMETRY_BENCH", "bench_symmetry_ice")
 SHA = os.environ.get("SYMMETRY_SHA", "59d85155350cfa3c53da3df11d6ddf45b6b31ede")
 
 
@@ -145,7 +145,7 @@ def main():
         writer.writeheader()
         for path in frames:
             pos, side = read_xyz(path)
-            npz = Path("/tmp") / (Path(path).stem + ".npz")
+            npz = Path(path).with_suffix(".npz")
             np.savez(npz, positions=pos, side=side)
             name = Path(path).stem
             for threads in (1, 8):

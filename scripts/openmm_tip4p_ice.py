@@ -51,7 +51,7 @@ LARGE_REPEATS = int(os.environ.get("OPENMM_TIP4P_LARGE_REPEATS", "6"))
 LARGE_INTERVAL = int(os.environ.get("OPENMM_TIP4P_LARGE_INTERVAL", "100"))
 DT_NS = 2.0e-6
 CUTOFF = 3.5
-OUT = Path(os.environ.get("OPENMM_TIP4P_DIR", "/var/tmp/dseams/openmm-tip4p"))
+OUT = Path(os.environ.get("OPENMM_TIP4P_DIR", "openmm-tip4p"))
 
 
 def water_box(n_mol, threads):

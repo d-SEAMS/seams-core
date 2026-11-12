@@ -3,10 +3,11 @@
 `bindings/fortran/seams.f90` binds every C symbol with `iso_c_binding`. `test_seams.f90` is the program you compile.
 
 ```bash
-gfortran -J/tmp/fmod -c bindings/fortran/seams.f90 -o /tmp/fmod/seams.o
-gfortran -I/tmp/fmod bindings/fortran/test_seams.f90 /tmp/fmod/seams.o \
-  -o /tmp/test_seams -Lbuild/src -lseams -Wl,-rpath,build/src
-/tmp/test_seams
+mkdir -p build/fmod
+gfortran -Jbuild/fmod -c bindings/fortran/seams.f90 -o build/fmod/seams.o
+gfortran -Ibuild/fmod bindings/fortran/test_seams.f90 build/fmod/seams.o \
+  -o build/test_seams -Lbuild/src -lseams -Wl,-rpath,build/src
+build/test_seams
 ```
 
 It prints `fortran ok` after the 64-atom cell is entirely cubic under both CHILL+ rules, q6 is above 0.3, and the six-ring fraction is above one half.

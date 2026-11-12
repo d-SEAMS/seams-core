@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """After the 245/255 K pair exits, write their CSVs and start the next pass.
 
-Next pass: 235 K, 250 K, and a second 245 K seed. Frames stay under /tmp.
+Next pass: 235 K, 250 K, and a second 245 K seed. Frames stay in the run directory.
 The CSV is the only file this script writes into the source tree.
 """
 
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import sys
 import time
@@ -15,7 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
-RUNS = Path("/tmp/brine-science-v2")
+RUNS = Path(os.environ.get("BRINE_DIR", "brine-runs"))
 CSV_DIR = ROOT / "paper" / "tex" / "figures" / "data" / "gate"
 
 

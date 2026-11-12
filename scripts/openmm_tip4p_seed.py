@@ -15,7 +15,7 @@ The science trajectory is one nanosecond (500000 steps of 2 fs) on the
 requested thread count. A separate pair of bare and reporter runs, on
 1 and 8 threads, records ns/day and the reporter overhead. Set
 OPENMM_SEED_DIR to choose the frame directory. The default is
-/var/tmp/dseams/openmm-tip4p-seed.
+`openmm-tip4p-seed`.
 """
 
 from __future__ import annotations
@@ -55,7 +55,7 @@ TIME_THREADS = tuple(
     if item
 )
 DT_NS = 2.0e-6
-OUT = Path(os.environ.get("OPENMM_SEED_DIR", "/var/tmp/dseams/openmm-tip4p-seed"))
+OUT = Path(os.environ.get("OPENMM_SEED_DIR", "openmm-tip4p-seed"))
 
 
 def set_classifier_threads(n):

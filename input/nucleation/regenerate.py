@@ -201,7 +201,7 @@ def main() -> int:
     parser.add_argument("--seeds", default="")
     parser.add_argument(
         "--dest",
-        default=os.environ.get("DSEAMS_NUCLEATION_DIR", "/tmp/dseams-nucleation"),
+        default=os.environ.get("DSEAMS_NUCLEATION_DIR", "nucleation-frames"),
     )
     parser.add_argument("--seams", default=os.environ.get("NUCLEATION_PATHWAY", ""))
     parser.add_argument("--threads", type=int, default=1)

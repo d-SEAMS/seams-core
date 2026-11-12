@@ -97,7 +97,7 @@ simulation.reporters.append(DseamsReporter(engine, "unused", interval=6, types=o
 the labels, the label counts, and the ring counts.
 
 The 215 K mW frames are not part of the tree. `input/mw215/fetch.py`
-writes them under `/var/tmp/dseams/mw215`, or under `MW215_DIR`.
+writes them under `mw215-frames`, or under `MW215_DIR`.
 A failed download is replaced by `regenerate.py`, which needs `lmp`
 and writes the same directory. The deck is `in.equilibrate` with
 velocity seed 215.
@@ -119,7 +119,7 @@ are the ones already in the library.
 
 ```bash
 export OMP_NUM_THREADS=1
-export OPENMM_SEED_DIR=/var/tmp/dseams/openmm-tip4p-seed
+export OPENMM_SEED_DIR=openmm-tip4p-seed
 python3 scripts/openmm_tip4p_seed.py "$LIBSEAMS_LANG" "$SEAMS" seed.log
 ```
 
