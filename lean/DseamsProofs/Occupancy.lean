@@ -29,7 +29,7 @@ theorem on_face_inside (n : Nat) : insideParity True n :=
 
 theorem odd_inside (n : Nat) : insideParity False (2 * n + 1) := by
   refine Or.inr ?_
-  simp
+  omega
 
 def capped (shell : Nat → Prop) (ring : List Nat) : Prop :=
   ring ≠ [] ∧ ∀ v ∈ ring, shell v
