@@ -41,6 +41,7 @@ test_sources = {
   'structure_desc': 'test_structure_desc.cpp',
   'cage_affiliation': 'test_cage_affiliation.cpp',
   'cage_enum': 'test_cage_enum.cpp',
+  'ddc_regression': 'test_ddc_regression.cpp',
   'c_api': 'test_c_api.cpp',
   'chill_offload': 'test_chill_offload.cpp',
   'chill_plus_rule': 'test_chill_plus_rule.cpp',
@@ -305,6 +306,13 @@ executable('bench_pipeline', 'bench_pipeline.cpp',
   build_rpath: '$ORIGIN/../src')
 
 executable('bench_cages', 'bench_cages.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_ddc_ladder', 'bench_ddc_ladder.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
   link_args: _test_link_args,

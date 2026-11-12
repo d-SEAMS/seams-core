@@ -154,14 +154,17 @@ struct PackingCertificate {
 
 //! Peripheral rings of one equatorial candidate. n == 0 when the ring is
 //! not a candidate. The first six sit inline. A defect that names more
-//! conflicts stores the rest in past, so none are dropped.
+//! conflicts stores the rest beside the row, so a crystal of candidates
+//! stays a plain block of integers.
+int equatorChoiceOverflow(const struct EquatorChoice *self, int at);
+void equatorChoiceOverflowPut(struct EquatorChoice *self, int at, int value);
+
 struct EquatorChoice {
   int ring[6]{};
   int n = 0;
-  std::vector<int> past;
 
   [[nodiscard]] int idAt(int k) const {
-    return k < 6 ? ring[k] : past[static_cast<std::size_t>(k - 6)];
+    return k < 6 ? ring[k] : equatorChoiceOverflow(this, k - 6);
   }
 
   void put(int k, int value) {
@@ -169,13 +172,11 @@ struct EquatorChoice {
       ring[k] = value;
       return;
     }
-    const std::size_t at = static_cast<std::size_t>(k - 6);
-    if (past.size() <= at) {
-      past.resize(at + 1);
-    }
-    past[at] = value;
+    equatorChoiceOverflowPut(this, k - 6, value);
   }
 };
+
+void releaseEquatorOverflow();
 
 //! Maximum set of mutually non-conflicting equatorial rings. @a periph[i].n
 //! is 0 when ring i is not a candidate. The returned ids are a maximum

@@ -1,0 +1,672 @@
+BEGIN v2.12.0 n=216 round=1
+atoms 216
+six 432
+1.25248
+1.2112
+1.16191
+1.19703
+1.0895
+1.05574
+1.02713
+1.13836
+ddc_rings 432
+ddc_cages 108
+END v2.12.0 n=216 round=1
+BEGIN baf703f1 n=216 round=1
+atoms 216
+six 432
+0.818522
+0.79383
+0.784727
+0.799316
+0.795519
+0.794652
+0.781374
+0.784854
+ddc_rings 432
+ddc_cages 108
+END baf703f1 n=216 round=1
+BEGIN fcacabfe n=216 round=1
+atoms 216
+six 432
+1.02487
+0.787466
+0.86733
+0.788005
+0.792696
+0.856529
+0.772011
+0.777854
+ddc_rings 432
+ddc_cages 108
+END fcacabfe n=216 round=1
+BEGIN v2.12.0 n=216 round=2
+atoms 216
+six 432
+0.92793
+0.822393
+0.830145
+0.873945
+0.891737
+0.867468
+1.00379
+0.858768
+ddc_rings 432
+ddc_cages 108
+END v2.12.0 n=216 round=2
+BEGIN baf703f1 n=216 round=2
+atoms 216
+six 432
+0.836983
+0.790116
+0.780572
+0.787854
+0.832503
+0.783805
+0.781697
+0.842923
+ddc_rings 432
+ddc_cages 108
+END baf703f1 n=216 round=2
+BEGIN fcacabfe n=216 round=2
+atoms 216
+six 432
+0.807178
+0.942559
+0.892489
+1.04216
+0.835388
+0.852305
+0.85787
+0.837441
+ddc_rings 432
+ddc_cages 108
+END fcacabfe n=216 round=2
+BEGIN v2.12.0 n=512 round=1
+atoms 512
+six 1024
+1.68758
+1.59744
+1.77041
+1.59623
+1.56184
+1.59206
+1.58297
+1.5984
+ddc_rings 1024
+ddc_cages 256
+END v2.12.0 n=512 round=1
+BEGIN baf703f1 n=512 round=1
+atoms 512
+six 1024
+1.76616
+1.56634
+1.70861
+1.58425
+1.66518
+1.67156
+1.80904
+1.6446
+ddc_rings 1024
+ddc_cages 256
+END baf703f1 n=512 round=1
+BEGIN fcacabfe n=512 round=1
+atoms 512
+six 1024
+1.56525
+1.65312
+1.71444
+1.59472
+1.53517
+1.51849
+1.52775
+1.54522
+ddc_rings 1024
+ddc_cages 256
+END fcacabfe n=512 round=1
+BEGIN v2.12.0 n=512 round=2
+atoms 512
+six 1024
+1.65771
+1.57178
+1.60654
+1.58506
+1.67524
+1.65476
+1.59439
+1.64869
+ddc_rings 1024
+ddc_cages 256
+END v2.12.0 n=512 round=2
+BEGIN baf703f1 n=512 round=2
+atoms 512
+six 1024
+1.62692
+1.59083
+1.77924
+1.5596
+1.56135
+1.57991
+1.55774
+1.60211
+ddc_rings 1024
+ddc_cages 256
+END baf703f1 n=512 round=2
+BEGIN fcacabfe n=512 round=2
+atoms 512
+six 1024
+1.66475
+1.51096
+1.59935
+1.59586
+1.51219
+1.6084
+1.60718
+1.58303
+ddc_rings 1024
+ddc_cages 256
+END fcacabfe n=512 round=2
+BEGIN v2.12.0 n=1000 round=1
+atoms 1000
+six 2000
+2.792
+2.65168
+2.60202
+2.59313
+2.7392
+2.57391
+2.64013
+2.67446
+ddc_rings 2000
+ddc_cages 500
+END v2.12.0 n=1000 round=1
+BEGIN baf703f1 n=1000 round=1
+atoms 1000
+six 2000
+2.63769
+2.64072
+2.76534
+2.69719
+2.62833
+2.75286
+2.66669
+2.63736
+ddc_rings 2000
+ddc_cages 500
+END baf703f1 n=1000 round=1
+BEGIN fcacabfe n=1000 round=1
+atoms 1000
+six 2000
+2.80524
+2.58745
+2.58403
+2.63324
+2.75249
+2.55068
+2.55703
+2.73676
+ddc_rings 2000
+ddc_cages 500
+END fcacabfe n=1000 round=1
+BEGIN v2.12.0 n=1000 round=2
+atoms 1000
+six 2000
+2.65068
+2.72633
+2.60398
+2.64892
+2.66282
+2.77761
+2.59794
+2.68239
+ddc_rings 2000
+ddc_cages 500
+END v2.12.0 n=1000 round=2
+BEGIN baf703f1 n=1000 round=2
+atoms 1000
+six 2000
+2.68396
+2.68573
+2.69992
+2.69465
+2.77646
+2.71556
+2.84091
+2.72573
+ddc_rings 2000
+ddc_cages 500
+END baf703f1 n=1000 round=2
+BEGIN fcacabfe n=1000 round=2
+atoms 1000
+six 2000
+2.89886
+2.61244
+2.64881
+2.70021
+2.59527
+2.56602
+2.59538
+2.84134
+ddc_rings 2000
+ddc_cages 500
+END fcacabfe n=1000 round=2
+BEGIN v2.12.0 n=1728 round=1
+atoms 1728
+six 3456
+4.04931
+4.01869
+4.13037
+3.87704
+4.11421
+3.8889
+4.03825
+4.03247
+ddc_rings 3456
+ddc_cages 864
+END v2.12.0 n=1728 round=1
+BEGIN baf703f1 n=1728 round=1
+atoms 1728
+six 3456
+4.15453
+4.16711
+4.21689
+4.14005
+4.26543
+4.10598
+4.24611
+4.05703
+ddc_rings 3456
+ddc_cages 864
+END baf703f1 n=1728 round=1
+BEGIN fcacabfe n=1728 round=1
+atoms 1728
+six 3456
+4.02671
+4.06265
+4.09034
+4.07084
+3.96951
+4.04188
+4.11941
+3.95296
+ddc_rings 3456
+ddc_cages 864
+END fcacabfe n=1728 round=1
+BEGIN v2.12.0 n=1728 round=2
+atoms 1728
+six 3456
+4.10915
+3.86003
+3.98251
+4.06216
+3.9178
+4.0118
+3.84558
+3.90921
+ddc_rings 3456
+ddc_cages 864
+END v2.12.0 n=1728 round=2
+BEGIN baf703f1 n=1728 round=2
+atoms 1728
+six 3456
+4.24777
+4.08892
+4.17661
+4.03385
+4.05516
+4.20653
+4.04828
+4.22711
+ddc_rings 3456
+ddc_cages 864
+END baf703f1 n=1728 round=2
+BEGIN fcacabfe n=1728 round=2
+atoms 1728
+six 3456
+4.15828
+4.17342
+3.91563
+3.93516
+4.03836
+3.9763
+4.05295
+3.98395
+ddc_rings 3456
+ddc_cages 864
+END fcacabfe n=1728 round=2
+BEGIN v2.12.0 n=2744 round=1
+atoms 2744
+six 5488
+5.73636
+5.86532
+5.75
+5.7481
+5.78613
+5.56837
+5.81677
+5.62836
+ddc_rings 5488
+ddc_cages 1372
+END v2.12.0 n=2744 round=1
+BEGIN baf703f1 n=2744 round=1
+atoms 2744
+six 5488
+6.11353
+5.98355
+6.07585
+5.87766
+6.03927
+5.91427
+6.00224
+6.03848
+ddc_rings 5488
+ddc_cages 1372
+END baf703f1 n=2744 round=1
+BEGIN fcacabfe n=2744 round=1
+atoms 2744
+six 5488
+6.11424
+5.85637
+5.69303
+5.84721
+5.66866
+5.91322
+5.78357
+5.83765
+ddc_rings 5488
+ddc_cages 1372
+END fcacabfe n=2744 round=1
+BEGIN v2.12.0 n=2744 round=2
+atoms 2744
+six 5488
+5.68025
+5.70396
+5.69143
+6.90181
+6.81846
+6.15942
+6.06599
+5.88043
+ddc_rings 5488
+ddc_cages 1372
+END v2.12.0 n=2744 round=2
+BEGIN baf703f1 n=2744 round=2
+atoms 2744
+six 5488
+6.13752
+5.90957
+6.08194
+6.10982
+6.08464
+6.42081
+5.88666
+6.3696
+ddc_rings 5488
+ddc_cages 1372
+END baf703f1 n=2744 round=2
+BEGIN fcacabfe n=2744 round=2
+atoms 2744
+six 5488
+6.10053
+6.06775
+5.70674
+5.85534
+5.97658
+5.82209
+6.00405
+5.7386
+ddc_rings 5488
+ddc_cages 1372
+END fcacabfe n=2744 round=2
+BEGIN v2.12.0 n=4096 round=1
+atoms 4096
+six 8192
+8.18778
+8.00288
+8.02982
+8.19281
+8.05274
+7.7092
+7.96387
+7.94071
+ddc_rings 8192
+ddc_cages 2048
+END v2.12.0 n=4096 round=1
+BEGIN baf703f1 n=4096 round=1
+atoms 4096
+six 8192
+8.58799
+8.43597
+8.41805
+8.34454
+8.30877
+8.4476
+8.47291
+8.42941
+ddc_rings 8192
+ddc_cages 2048
+END baf703f1 n=4096 round=1
+BEGIN fcacabfe n=4096 round=1
+atoms 4096
+six 8192
+11.1873
+8.30095
+8.07633
+8.26841
+8.22593
+8.05318
+8.05437
+8.48576
+ddc_rings 8192
+ddc_cages 2048
+END fcacabfe n=4096 round=1
+BEGIN v2.12.0 n=4096 round=2
+atoms 4096
+six 8192
+8.0814
+7.83103
+7.88535
+7.76292
+7.91294
+8.00687
+7.81075
+8.18098
+ddc_rings 8192
+ddc_cages 2048
+END v2.12.0 n=4096 round=2
+BEGIN baf703f1 n=4096 round=2
+atoms 4096
+six 8192
+8.82059
+8.57469
+8.57542
+8.61765
+8.50981
+8.55036
+8.53337
+8.48258
+ddc_rings 8192
+ddc_cages 2048
+END baf703f1 n=4096 round=2
+BEGIN fcacabfe n=4096 round=2
+atoms 4096
+six 8192
+8.49451
+8.60726
+8.1501
+8.1802
+7.91238
+8.00094
+8.15911
+8.12262
+ddc_rings 8192
+ddc_cages 2048
+END fcacabfe n=4096 round=2
+BEGIN v2.12.0 n=5832 round=1
+atoms 5832
+six 11664
+10.8528
+10.8399
+10.4766
+10.6708
+10.4902
+10.698
+10.842
+10.8085
+ddc_rings 11664
+ddc_cages 2916
+END v2.12.0 n=5832 round=1
+BEGIN baf703f1 n=5832 round=1
+atoms 5832
+six 11664
+11.8681
+11.7421
+11.8803
+11.4235
+11.5295
+11.3221
+11.4514
+11.3657
+ddc_rings 11664
+ddc_cages 2916
+END baf703f1 n=5832 round=1
+BEGIN fcacabfe n=5832 round=1
+atoms 5832
+six 11664
+11.7388
+11.1188
+10.7998
+11.0236
+10.8691
+11.0086
+11.135
+10.9585
+ddc_rings 11664
+ddc_cages 2916
+END fcacabfe n=5832 round=1
+BEGIN v2.12.0 n=5832 round=2
+atoms 5832
+six 11664
+10.8572
+10.4522
+10.6385
+10.5978
+10.5939
+10.5757
+10.6995
+10.6612
+ddc_rings 11664
+ddc_cages 2916
+END v2.12.0 n=5832 round=2
+BEGIN baf703f1 n=5832 round=2
+atoms 5832
+six 11664
+11.607
+11.5322
+11.4413
+11.407
+11.3286
+11.3174
+13.0596
+11.3503
+ddc_rings 11664
+ddc_cages 2916
+END baf703f1 n=5832 round=2
+BEGIN fcacabfe n=5832 round=2
+atoms 5832
+six 11664
+11.6371
+10.7984
+10.8381
+10.7534
+10.7854
+10.9194
+10.989
+11.0425
+ddc_rings 11664
+ddc_cages 2916
+END fcacabfe n=5832 round=2
+BEGIN v2.12.0 n=8000 round=1
+atoms 8000
+six 16000
+14.4612
+14.0337
+17.886
+13.913
+13.8878
+13.8185
+13.7192
+13.8674
+ddc_rings 16000
+ddc_cages 4000
+END v2.12.0 n=8000 round=1
+BEGIN baf703f1 n=8000 round=1
+atoms 8000
+six 16000
+15.3292
+15.0731
+15.1723
+14.9909
+15.0387
+15.115
+15.0784
+15.0441
+ddc_rings 16000
+ddc_cages 4000
+END baf703f1 n=8000 round=1
+BEGIN fcacabfe n=8000 round=1
+atoms 8000
+six 16000
+15.2512
+14.4634
+15.3464
+15.9944
+14.8631
+14.5321
+14.3009
+14.2631
+ddc_rings 16000
+ddc_cages 4000
+END fcacabfe n=8000 round=1
+BEGIN v2.12.0 n=8000 round=2
+atoms 8000
+six 16000
+14.4134
+14.3135
+14.1183
+14.0951
+13.8371
+13.6585
+13.8677
+13.734
+ddc_rings 16000
+ddc_cages 4000
+END v2.12.0 n=8000 round=2
+BEGIN baf703f1 n=8000 round=2
+atoms 8000
+six 16000
+15.5583
+15.7644
+15.3282
+15.2628
+15.7789
+15.7748
+15.6291
+15.4457
+ddc_rings 16000
+ddc_cages 4000
+END baf703f1 n=8000 round=2
+BEGIN fcacabfe n=8000 round=2
+atoms 8000
+six 16000
+15.3921
+14.1723
+14.2309
+14.318
+14.4168
+14.2148
+14.2943
+14.1683
+ddc_rings 16000
+ddc_cages 4000
+END fcacabfe n=8000 round=2

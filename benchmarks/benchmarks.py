@@ -48,6 +48,27 @@ class NeighbourArm:
         _run(self.cmd)
 
 
+class DdcArm:
+    """findDDC on 1,000-molecule ideal ice Ic. One warm-up, one timed call."""
+
+    def setup(self):
+        frame = ROOT / "bbdir" / "ddc-regression" / "frames" / "ic-1000.lammpstrj"
+        if not frame.is_file():
+            subprocess.run(
+                ["python3", "paper/tex/figures/ladder_frames.py",
+                 str(frame.parent), "5"],
+                cwd=ROOT, check=True)
+        self.cmd = CORE + [
+            str(ROOT / "bbdir/tests/bench_ddc_ladder"),
+            str(frame),
+            "1",
+            "1",
+        ]
+
+    def time_find_ddc(self):
+        _run(self.cmd)
+
+
 class RingArm:
     def setup(self):
         self.cmd = CORE + [

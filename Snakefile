@@ -301,3 +301,20 @@ rule shipped_campaign:
         "paper/tex/figures/data/tab-shipped.tex",
     shell:
         "bash paper/tex/repro/shipped.sh"
+
+
+rule ddc_regression:
+    input:
+        "bbdir/tests/bench_ddc_ladder",
+        "scripts/ddc_ladder.sh",
+        "paper/tex/figures/ladder_frames.py",
+        "paper/tex/figures/worked_example.py",
+    output:
+        "bbdir/ddc-regression/ic-216.log",
+        "bbdir/ddc-regression/ic-512.log",
+        "bbdir/ddc-regression/ic-1000.log",
+        "bbdir/ddc-regression/ic-1728.log",
+        "bbdir/ddc-regression/ic-2744.log",
+        "bbdir/ddc-regression/ic-4096.log",
+    shell:
+        "bash scripts/ddc_ladder.sh bbdir/tests/bench_ddc_ladder bbdir/ddc-regression"

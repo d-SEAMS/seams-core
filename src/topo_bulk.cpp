@@ -18,11 +18,13 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <span>
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
 #include <limits>
+#include <mutex>
 #include <numeric>
 #include <stdexcept>
 #include <string>
@@ -1894,7 +1896,43 @@ struct DdcSplitTimes {
   double write_ms = 0;
 };
 DdcSplitTimes gDdcSplit;
+// Cycle keys built by the last findDDC order. Ideal ice distinguishes rings
+// by their atoms, so this stays zero when the comparator can stop early.
+std::atomic<std::uint64_t> gDdcCycleEvals{0};
 } // namespace
+
+namespace {
+std::mutex gEquatorOverflowMu;
+std::unordered_map<const ring::EquatorChoice *, std::vector<int>> gEquatorOverflow;
+} // namespace
+
+int ring::equatorChoiceOverflow(const ring::EquatorChoice *self, int at) {
+  std::lock_guard<std::mutex> lock(gEquatorOverflowMu);
+  const auto it = gEquatorOverflow.find(self);
+  if (it == gEquatorOverflow.end() || at < 0 ||
+      at >= static_cast<int>(it->second.size())) {
+    return 0;
+  }
+  return it->second[static_cast<std::size_t>(at)];
+}
+
+void ring::equatorChoiceOverflowPut(ring::EquatorChoice *self, int at, int value) {
+  std::lock_guard<std::mutex> lock(gEquatorOverflowMu);
+  auto &past = gEquatorOverflow[self];
+  if (at >= static_cast<int>(past.size())) {
+    past.resize(static_cast<std::size_t>(at) + 1);
+  }
+  past[static_cast<std::size_t>(at)] = value;
+}
+
+void ring::releaseEquatorOverflow() {
+  std::lock_guard<std::mutex> lock(gEquatorOverflowMu);
+  gEquatorOverflow.clear();
+}
+
+extern "C" __attribute__((visibility("default"), used)) std::uint64_t seams_ddc_cycle_evals() {
+  return gDdcCycleEvals.load(std::memory_order_relaxed);
+}
 
 // Cubic mW has parity product 1. Frame 148 has parity product at most 16.
 // The triple loop costs the product, so it stays in use through the square
@@ -1906,17 +1944,20 @@ constexpr int kTripleLoopProduct = kSmallParityProduct * kSmallParityProduct;
 std::vector<int> canonicalRingOrderByAtoms(
     const std::vector<std::vector<int>> &rings, const ring::RingSearchIndex &index) {
   const int n = static_cast<int>(rings.size());
+  // The rotation key is needed only when two rings share atom ids and a
+  // shift. Ideal ice never ties, so that key stays off this record.
   struct Key {
     std::array<int, 6> id{};
     int len = 0;
     std::array<int, 3> shift{};
-    CycleKey cycle{};
-    bool cycleReady = false;
   };
   std::vector<Key> keys(static_cast<size_t>(n));
+  std::vector<CycleKey> cycles;
+  std::vector<char> cycleReady;
+  std::mutex cycleMu;
   const int nShift = static_cast<int>(index.ringShift.size());
 #if defined(SEAMS_HAS_OPENMP)
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1)
 #endif
   for (int i = 0; i < n; i++) {
     const auto &ring = rings[static_cast<size_t>(i)];
@@ -1929,8 +1970,6 @@ std::vector<int> canonicalRingOrderByAtoms(
     if (i < nShift) {
       k.shift = index.ringShift[static_cast<size_t>(i)];
     }
-    k.cycle = bestCycle(std::span<const int>(ring.data(), ring.size()));
-    k.cycleReady = true;
   }
   int maxAtom = 0;
   for (int i = 0; i < n; i++) {
@@ -1966,17 +2005,39 @@ std::vector<int> canonicalRingOrderByAtoms(
     if (ka.shift != kb.shift) {
       return ka.shift < kb.shift;
     }
-    if (ka.cycle < kb.cycle) {
+    // The atom ids already separate almost every pair. The rotation key is
+    // built only for a tie, which is the comparison the eager pass used to
+    // skip.
+    auto ensureCycle = [&](int id) {
+      std::lock_guard<std::mutex> lock(cycleMu);
+      if (cycles.empty()) {
+        cycles.resize(static_cast<std::size_t>(n));
+        cycleReady.assign(static_cast<std::size_t>(n), 0);
+      }
+      if (cycleReady[static_cast<std::size_t>(id)]) {
+        return;
+      }
+      const auto &ring = rings[static_cast<std::size_t>(id)];
+      cycles[static_cast<std::size_t>(id)] =
+          bestCycle(std::span<const int>(ring.data(), ring.size()));
+      cycleReady[static_cast<std::size_t>(id)] = 1;
+      gDdcCycleEvals.fetch_add(1, std::memory_order_relaxed);
+    };
+    ensureCycle(a);
+    ensureCycle(b);
+    const CycleKey &ca = cycles[static_cast<std::size_t>(a)];
+    const CycleKey &cb = cycles[static_cast<std::size_t>(b)];
+    if (ca < cb) {
       return true;
     }
-    if (kb.cycle < ka.cycle) {
+    if (cb < ca) {
       return false;
     }
     return a < b;
   };
   const int nBuckets = maxAtom + 2;
 #if defined(SEAMS_HAS_OPENMP)
-#pragma omp parallel for schedule(dynamic)
+#pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1)
 #endif
   for (int b = 0; b < nBuckets; b++) {
     const int lo = bucket[static_cast<size_t>(b)];
@@ -2008,6 +2069,7 @@ std::vector<int> ring::findDDC(const std::vector<std::vector<int>> &rings,
   // The peripheral tie-break and the emitted order use the ring key
   // (sorted atom ids, unwrapped shift). Which equators are kept is a
   // maximum non-conflicting set, so the count does not follow a claim order.
+  gDdcCycleEvals.store(0, std::memory_order_relaxed);
   const auto td0 = std::chrono::steady_clock::now();
   const std::vector<int> visitOrder = canonicalRingOrderByAtoms(rings, index);
   const auto td1 = std::chrono::steady_clock::now();
@@ -2017,17 +2079,16 @@ std::vector<int> ring::findDDC(const std::vector<std::vector<int>> &rings,
   }
   std::vector<ring::EquatorChoice> chosenPeriph(static_cast<size_t>(totalRingNum));
 #if defined(SEAMS_HAS_OPENMP)
-#pragma omp parallel for schedule(guided)
+#pragma omp parallel for schedule(static, 64) if (totalRingNum >= 256 && omp_get_max_threads() > 1)
 #endif
   for (int iring = 0; iring < totalRingNum; iring++) {
+    ring::EquatorChoice &local = chosenPeriph[static_cast<size_t>(iring)];
     if (notEquatorial[static_cast<size_t>(iring)]) {
       continue;
     }
-    ring::EquatorChoice local;
     if (!ring::equatorialConditions(rings, iring, index, nullptr, nullptr, &rank, &local)) {
       continue;
     }
-    chosenPeriph[static_cast<size_t>(iring)] = local;
   }
   const auto td2 = std::chrono::steady_clock::now();
   const std::vector<int> equators =
@@ -2074,6 +2135,7 @@ std::vector<int> ring::findDDC(const std::vector<std::vector<int>> &rings,
                     peripheralRings.end());
     cageList.push_back({cage::cageType::DoubleDiaC, DDCRings});
   }
+  ring::releaseEquatorOverflow();
   std::vector<ring::EquatorChoice>().swap(chosenPeriph);
   gDdcSplit.write_ms =
       std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - td3).count();
@@ -2202,7 +2264,40 @@ bool ring::equatorialConditions(const std::vector<std::vector<int>> &rings,
     for (int k = 0; k < 6; k++) {
       take(rings[static_cast<size_t>(r[k])]);
     }
-    const int nUnique = countDistinct(atoms, nAtomsHere);
+    // Only the number of distinct molecules matters. A stamp over the frame
+    // counts them without sorting the forty-two ids. A wide or negative id
+    // falls back to the same count sort+unique would return.
+    const int nAtoms = static_cast<int>(index.ringsContainingAtom.size());
+    int nUnique = 0;
+    bool counted = nAtoms > 0;
+    if (counted) {
+      thread_local std::vector<int> stampStore;
+      thread_local int era = 0;
+      std::vector<int> *stamp = &stampStore;
+      asm volatile("" : "+r"(stamp));
+      if (static_cast<int>(stamp->size()) < nAtoms) {
+        stamp->assign(static_cast<std::size_t>(nAtoms), 0);
+      }
+      if (++era == 0) {
+        std::fill(stamp->begin(), stamp->end(), 0);
+        era = 1;
+      }
+      int *seen = stamp->data();
+      for (int i = 0; i < nAtomsHere; i++) {
+        const int atom = atoms[i];
+        if (atom < 0 || atom >= nAtoms) {
+          counted = false;
+          break;
+        }
+        if (seen[atom] != era) {
+          seen[atom] = era;
+          nUnique++;
+        }
+      }
+    }
+    if (!counted) {
+      nUnique = countDistinct(atoms, nAtomsHere);
+    }
     bool folded = nUnique != 14;
     for (int k = 0; k < 6 && !folded; k++) {
       folded = share6(rings[static_cast<size_t>(r[k])], R) != 3;
