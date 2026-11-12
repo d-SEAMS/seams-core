@@ -123,7 +123,8 @@ SEAMS_API seams_status seams_chill_plus(seams_system *sys, double cutoff, int ty
                                         int graph, int rule, int *labels,
                                         int counts9[9]);
 
-/* Either array may be NULL. Length is the frame count. Local Steinhardt q_l. */
+/* Either array may be NULL. Length is the frame count.
+ * Cutoff-shell q4 and q6. Degrees 4 and 6 use the solid-harmonic kernel. */
 SEAMS_API seams_status seams_q4q6(seams_system *sys, double cutoff, int type,
                                   double *q4, double *q6);
 

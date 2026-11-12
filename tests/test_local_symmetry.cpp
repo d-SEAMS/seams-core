@@ -83,7 +83,7 @@ std::vector<int> chillLabels(const Eigen::MatrixXd &m) {
   }
   const double box[6] = {0, 0, 0, 50, 50, 50};
   std::vector<int> labels(static_cast<size_t>(n), -1);
-  REQUIRE(seams_chill_plus(xyz.data(), n, box, labels.data()) == 0);
+  REQUIRE(seams_chill_plus_flat(xyz.data(), n, box, labels.data()) == 0);
   return labels;
 }
 

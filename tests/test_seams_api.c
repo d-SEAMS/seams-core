@@ -46,10 +46,13 @@ int main(void) {
   expect(seams_version_minor() == SEAMS_VERSION_MINOR, "minor");
   expect(seams_version_patch() == SEAMS_VERSION_PATCH, "patch");
   expect(strcmp(seams_version_string(), SEAMS_VERSION_STRING) == 0, "version string");
+  const int original_threads = seams_get_num_threads();
   expect(seams_set_num_threads(2) == SEAMS_OK, "set threads");
   expect(seams_get_num_threads() == 2, "get threads");
   expect(seams_set_num_threads(-1) == SEAMS_ERR_RANGE, "negative threads");
   expect(seams_set_num_threads(1) == SEAMS_OK, "one thread");
+  expect(seams_set_num_threads(0) == SEAMS_OK, "restore threads");
+  expect(seams_get_num_threads() == original_threads, "restored omp max");
 
   const int nrep = 2;
   const int cap = nrep * nrep * nrep * 8;
@@ -155,6 +158,22 @@ int main(void) {
   expect(fraction > 0.5, "most atoms sit on a six-ring");
 
   seams_rings_destroy(rings);
+
+  {
+    double pair[9] = {0, 0, 0, 2.0, 0, 0, 12.0, 0, 0};
+    int types[3] = {2, 2, 1};
+    double wide[9] = {0, 0, 0, 30, 30, 30, 0, 0, 0};
+    expect(seams_system_set_frame(sys, pair, 3, wide, types, NULL) == SEAMS_OK,
+           "two-type frame");
+    double qa[3], qb[3];
+    expect(seams_q4q6(sys, 3.5, 0, qa, qb) == SEAMS_OK, "type<=0 uses a copy");
+    double q2[3] = {0, 0, 0};
+    double q6b[3] = {0, 0, 0};
+    expect(seams_q4q6(sys, 3.5, 2, q2, q6b) == SEAMS_OK, "type 2 after unify");
+    expect(q2[0] > 0.2 && q2[1] > 0.2, "type 2 pair was not rewritten");
+    expect(!(q2[2] > 0.2), "the other type stays out of the type 2 shell");
+  }
+
   seams_system_destroy(sys);
   free(xyz);
   free(labels);

@@ -1102,6 +1102,12 @@ SteinhardtQl cutoffSolid(
   bool wroteLocal = false;
   if (!average && !invariants && uniform && (orderL == 4 || orderL == 6)) {
     wroteLocal = true;
+    // The eight-wide sum declines a tile the CPU cannot take. The scalar
+    // fallback writes q_lm, so that row exists even when the average does not.
+    if (scratch.qlm.size() !=
+        static_cast<std::size_t>(n) * static_cast<std::size_t>(width)) {
+      scratch.qlm.assign(static_cast<std::size_t>(n) * static_cast<std::size_t>(width), 0.0);
+    }
     const int nTiles = (n + 7) / 8;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (parallel)

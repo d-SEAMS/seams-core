@@ -28,7 +28,7 @@
 #include <string>
 #include <vector>
 
-int seams_chill_plus(const double *xyz, int n, const double *box, int *labels) {
+int seams_chill_plus_flat(const double *xyz, int n, const double *box, int *labels) {
   return seams_chill_plus_graph(xyz, n, box, 3.5, nullptr, labels);
 }
 

@@ -4,6 +4,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <diamond_cna.hpp>
+#include <generic.hpp>
 #include <local_symmetry.hpp>
 
 #include <vector>
@@ -33,15 +34,17 @@ void diamondFromCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCl
     y[static_cast<std::size_t>(i)] = p.y;
     z[static_cast<std::size_t>(i)] = p.z;
   }
-  double lat[3][3] = {};
-  lat[0][0] = yCloud.box[0];
-  lat[1][1] = yCloud.box[1];
-  lat[2][2] = yCloud.box[2];
-  if (yCloud.box.size() >= 6) {
-    lat[1][0] = yCloud.box[3];
-    lat[2][0] = yCloud.box[4];
-    lat[2][1] = yCloud.box[5];
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
+  if (!frame.ok) {
+    return;
   }
+  double lat[3][3] = {};
+  lat[0][0] = frame.lx;
+  lat[1][1] = frame.ly;
+  lat[2][2] = frame.lz;
+  lat[1][0] = frame.xy;
+  lat[2][0] = frame.xz;
+  lat[2][1] = frame.yz;
   classifyIceArrays(x.data(), y.data(), z.data(), n, lat, kind.data());
 }
 

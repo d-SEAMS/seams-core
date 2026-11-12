@@ -13,7 +13,7 @@ TEST_CASE("seams_chill_plus labels a four-atom tetrahedron without crashing",
   const double xyz[12] = {0, 0, 0, 2.7, 0, 0, 1.35, 2.34, 0, 1.35, 0.78, 2.21};
   const double box[6] = {0, 0, 0, 20, 20, 20};
   int labels[4] = {-1, -1, -1, -1};
-  REQUIRE(seams_chill_plus(xyz, 4, box, labels) == 0);
+  REQUIRE(seams_chill_plus_flat(xyz, 4, box, labels) == 0);
   for (int i = 0; i < 4; i++) {
     REQUIRE(labels[i] >= 0);
     REQUIRE(labels[i] <= 8);
@@ -28,7 +28,7 @@ TEST_CASE("seams_chill_plus is seams_chill_plus_graph on the 3.5 A cutoff list",
   int byCutoff[4] = {-2, -2, -2, -2};
   int byNull[4] = {-3, -3, -3, -3};
   int byMutual[4] = {-4, -4, -4, -4};
-  REQUIRE(seams_chill_plus(xyz, 4, box, byDefault) == 0);
+  REQUIRE(seams_chill_plus_flat(xyz, 4, box, byDefault) == 0);
   REQUIRE(seams_chill_plus_graph(xyz, 4, box, 3.5, "cutoff", byCutoff) == 0);
   REQUIRE(seams_chill_plus_graph(xyz, 4, box, 3.5, nullptr, byNull) == 0);
   REQUIRE(seams_chill_plus_graph(xyz, 4, box, 3.5, "mutual", byMutual) == 0);

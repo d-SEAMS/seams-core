@@ -71,7 +71,7 @@ molSys::PointCloud<molSys::Point<double>, double> cloudOf(const Frame &frame) {
 
 std::vector<int> chill(const Frame &frame) {
   std::vector<int> labels(static_cast<std::size_t>(frame.n), -1);
-  if (seams_chill_plus(frame.xyz.data(), frame.n, frame.box, labels.data()) != 0) {
+  if (seams_chill_plus_flat(frame.xyz.data(), frame.n, frame.box, labels.data()) != 0) {
     throw std::runtime_error("seams_chill_plus failed");
   }
   return labels;

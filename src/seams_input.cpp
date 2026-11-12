@@ -1079,7 +1079,7 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
     return false;
   }
   struct stat st {};
-  if (::fstat(fd, &st) != 0 || st.st_size <= 0) {
+  if (::stat(filename.c_str(), &st) != 0 || st.st_size <= 0) {
     ::close(fd);
     return false;
   }
@@ -1088,13 +1088,31 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
     ::close(fd);
     return false;
   }
-  void *map = ::mmap(nullptr, nbytes, PROT_READ, MAP_PRIVATE, fd, 0);
+  // pread, not mmap: a writer that truncates the dump faults an mmap with SIGBUS.
+  std::vector<char> bytes(nbytes);
+  std::size_t got = 0;
+  while (got < nbytes) {
+    const ssize_t nread = ::pread(fd, bytes.data() + got, nbytes - got,
+                                  static_cast<off_t>(got));
+    if (nread < 0) {
+      if (errno == EINTR) {
+        continue;
+      }
+      ::close(fd);
+      return false;
+    }
+    if (nread == 0) {
+      break;
+    }
+    got += static_cast<std::size_t>(nread);
+  }
   ::close(fd);
-  if (map == MAP_FAILED) {
+  if (got <= frameAt) {
     return false;
   }
-  const char *const begin = static_cast<const char *>(map);
-  const char *const end = begin + nbytes;
+  bytes.resize(got);
+  const char *const begin = bytes.data();
+  const char *const end = begin + bytes.size();
   const char *p = begin + frameAt;
   auto nextLine = [&](const char *&s, const char *&e) {
     s = p;
@@ -1117,27 +1135,23 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
   };
   nextLine(s, e);
   if (!startsWith(s, e, "ITEM: TIMESTEP")) {
-    ::munmap(map, nbytes);
     return false;
   }
   nextLine(s, e);
   nextLine(s, e);
   if (!startsWith(s, e, "ITEM: NUMBER")) {
-    ::munmap(map, nbytes);
     return false;
   }
   nextLine(s, e);
   int nop = 0;
   const char *np = s;
   if (!parseLooseInt(np, e, nop) || nop < 0) {
-    ::munmap(map, nbytes);
     return false;
   }
   nextLine(s, e);
   if (!startsWith(s, e, "ITEM: BOX") ||
       std::string_view(s, static_cast<std::size_t>(e - s)).find("xy") !=
           std::string_view::npos) {
-    ::munmap(map, nbytes);
     return false;
   }
   double span[3];
@@ -1148,7 +1162,6 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
     double lo = 0;
     double hi = 0;
     if (!parseLooseDouble(bp, e, lo) || !parseLooseDouble(bp, e, hi)) {
-      ::munmap(map, nbytes);
       return false;
     }
     low[axis] = lo;
@@ -1160,7 +1173,6 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
   }
   if (std::string_view(s, static_cast<std::size_t>(e - s)) !=
       "ITEM: ATOMS id type x y z") {
-    ::munmap(map, nbytes);
     return false;
   }
   yCloud.pts.clear();
@@ -1214,7 +1226,6 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
     ++kept;
   }
   if (failed) {
-    ::munmap(map, nbytes);
     yCloud.pts.clear();
     yCloud.idIndexMap.clear();
     yCloud.box.clear();
@@ -1226,7 +1237,6 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
   }
   yCloud.nop = kept;
   nextAt = static_cast<std::uint64_t>(p - begin);
-  ::munmap(map, nbytes);
   return true;
 }
 

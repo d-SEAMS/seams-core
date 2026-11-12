@@ -342,8 +342,8 @@ TEST_CASE("the C API rejects an unknown CHILL+ rule and keeps the published defa
   std::vector<int> labels(static_cast<std::size_t>(cloud.nop), -1);
   REQUIRE(seams_chill_plus_rule(xyz.data(), cloud.nop, box, 3.5, "cutoff",
                                 "not-a-rule", labels.data()) == 1);
-  REQUIRE(seams_chill_plus(nullptr, 0, nullptr, nullptr) == 1);
-  REQUIRE(seams_chill_plus(xyz.data(), cloud.nop, box, labels.data()) == 0);
+  REQUIRE(seams_chill_plus_flat(nullptr, 0, nullptr, nullptr) == 1);
+  REQUIRE(seams_chill_plus_flat(xyz.data(), cloud.nop, box, labels.data()) == 0);
   for (int label : labels) {
     REQUIRE(label == static_cast<int>(molSys::atom_state_type::cubic));
   }

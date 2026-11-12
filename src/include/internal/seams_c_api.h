@@ -13,7 +13,7 @@ extern "C" {
  * seams_chill_plus bonds every pair closer than 3.5 A (the cutoff list).
  * seams_chill_plus_graph takes the cutoff and graph: "cutoff" (also NULL
  * or "") or "mutual", the mutual four nearest inside cutoff + 1.5. */
-int seams_chill_plus(const double *xyz, int n, const double *box, int *labels);
+int seams_chill_plus_flat(const double *xyz, int n, const double *box, int *labels);
 int seams_chill_plus_graph(const double *xyz, int n, const double *box,
                            double cutoff, const char *graph, int *labels);
 /* rule is "chill+" (NULL or "") or "ovito-chill+". A YAML or Lua

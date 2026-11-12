@@ -117,11 +117,24 @@ void transpose8(__m512d in[8], __m512d out[8]) {
   for (int atom = 0; atom < 8; ++atom) {
     const int odd = atom & 1;
     const int lane = atom >> 1;
+    // The extract immediate is a compile-time lane index.
+    const auto laneOf = [](__m512d v, int which) {
+      switch (which) {
+      case 0:
+        return _mm512_extractf64x2_pd(v, 0);
+      case 1:
+        return _mm512_extractf64x2_pd(v, 1);
+      case 2:
+        return _mm512_extractf64x2_pd(v, 2);
+      default:
+        return _mm512_extractf64x2_pd(v, 3);
+      }
+    };
     __m512d row = _mm512_setzero_pd();
-    row = _mm512_insertf64x2(row, _mm512_extractf64x2_pd(pair[odd], lane), 0);
-    row = _mm512_insertf64x2(row, _mm512_extractf64x2_pd(pair[2 + odd], lane), 1);
-    row = _mm512_insertf64x2(row, _mm512_extractf64x2_pd(pair[4 + odd], lane), 2);
-    row = _mm512_insertf64x2(row, _mm512_extractf64x2_pd(pair[6 + odd], lane), 3);
+    row = _mm512_insertf64x2(row, laneOf(pair[odd], lane), 0);
+    row = _mm512_insertf64x2(row, laneOf(pair[2 + odd], lane), 1);
+    row = _mm512_insertf64x2(row, laneOf(pair[4 + odd], lane), 2);
+    row = _mm512_insertf64x2(row, laneOf(pair[6 + odd], lane), 3);
     out[atom] = row;
   }
 }

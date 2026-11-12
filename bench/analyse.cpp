@@ -294,11 +294,9 @@ int main(int argc, char **argv) {
 
 #ifdef SEAMS_HAS_OPENMP
   omp_set_dynamic(0);
-  int threads = 1;
   if (const char *env = std::getenv("SEAMS_BENCH_THREADS")) {
-    threads = std::max(1, std::atoi(env));
+    omp_set_num_threads(std::max(1, std::atoi(env)));
   }
-  omp_set_num_threads(threads);
 #endif
 
   Cloud cloud;

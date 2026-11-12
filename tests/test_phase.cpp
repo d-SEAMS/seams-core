@@ -318,7 +318,7 @@ TEST_CASE("LAMMPS compute dump column is seams_chill_plus", "[phase][lammps]") {
   const double xyz[] = {0, 0, 0, 2.75, 0, 0, 1.375, 2.38, 0, 1.375, 0.79, 2.25};
   const double box[] = {0, 0, 0, 10, 10, 10};
   int labels[4] = {-1, -1, -1, -1};
-  REQUIRE(seams_chill_plus(xyz, 4, box, labels) == 0);
+  REQUIRE(seams_chill_plus_flat(xyz, 4, box, labels) == 0);
   for (int i = 0; i < 4; i++) {
     REQUIRE(labels[i] >= 0);
   }

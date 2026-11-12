@@ -18,6 +18,7 @@
 #include <cage_affiliation.hpp>
 #include <chill_plus_scheme.hpp>
 #include <franzblau.hpp>
+#include <topo_one_dim.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <thread_team.hpp>
@@ -41,6 +42,19 @@ using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
 
 thread_local std::string g_error;
 int g_threads = 0;
+
+#ifdef SEAMS_HAS_OPENMP
+int saved_omp_threads() {
+  static int saved = -1;
+  if (saved < 0) {
+    saved = omp_get_max_threads();
+    if (saved < 1) {
+      saved = 1;
+    }
+  }
+  return saved;
+}
+#endif
 
 void clear_error() { g_error.clear(); }
 
@@ -79,28 +93,41 @@ bool finite_box(const double *box9) {
   return true;
 }
 
-int unify_type(Cloud &cloud, int type) {
+Cloud unified_copy(const Cloud &cloud, int type, int &typ) {
+  Cloud work = cloud;
   if (type > 0) {
-    return type;
+    typ = type;
+    return work;
   }
-  if (cloud.nop <= 0) {
-    return 1;
+  if (work.nop <= 0) {
+    typ = 1;
+    return work;
   }
-  const int first = cloud.pts[0].type;
-  for (int i = 1; i < cloud.nop; ++i) {
-    if (cloud.pts[static_cast<std::size_t>(i)].type != first) {
-      for (auto &point : cloud.pts) {
-        point.type = 1;
-      }
-      return 1;
+  const int first = work.pts[0].type;
+  bool mixed = first <= 0;
+  for (int i = 1; i < work.nop && !mixed; ++i) {
+    if (work.pts[static_cast<std::size_t>(i)].type != first) {
+      mixed = true;
     }
   }
-  return first > 0 ? first : 1;
+  if (mixed) {
+    for (auto &point : work.pts) {
+      point.type = 1;
+    }
+    typ = 1;
+    return work;
+  }
+  typ = first > 0 ? first : 1;
+  if (typ != first) {
+    for (auto &point : work.pts) {
+      point.type = typ;
+    }
+  }
+  return work;
 }
 
-std::vector<std::vector<int>> bond_rows(Cloud &cloud, double cutoff, int type,
+std::vector<std::vector<int>> bond_rows(const Cloud &cloud, double cutoff, int typ,
                                         int graph) {
-  const int typ = unify_type(cloud, type);
   if (graph == SEAMS_GRAPH_MUTUAL) {
     return nneigh::kNearestNeighbourList(cloud, 4, cutoff + 1.5, typ, true);
   }
@@ -223,9 +250,8 @@ seams_status seams_set_num_threads(int n) {
   }
   g_threads = n;
 #ifdef SEAMS_HAS_OPENMP
-  if (n > 0) {
-    omp_set_num_threads(n);
-  }
+  const int saved = saved_omp_threads();
+  omp_set_num_threads(n > 0 ? n : saved);
 #endif
 #ifdef SEAMS_HAS_LINKCELL
   int width = n;
@@ -357,8 +383,9 @@ seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type,
   }
   try {
     use_threads();
-    Cloud work = sys->cloud;
-    auto rows = bond_rows(work, cutoff, type, graph);
+    int typ = 1;
+    Cloud work = unified_copy(sys->cloud, type, typ);
+    auto rows = bond_rows(work, cutoff, typ, graph);
     auto idx = nneigh::neighbourListByIndex(work, rows);
     auto nb = std::make_unique<seams_neighbours>();
     const int n = work.nop;
@@ -438,8 +465,8 @@ seams_status seams_chill_plus(seams_system *sys, double cutoff, int type, int gr
   }
   try {
     use_threads();
-    Cloud &work = sys->cloud;
-    const int typ = unify_type(work, type);
+    int typ = 1;
+    Cloud work = unified_copy(sys->cloud, type, typ);
     if (rule == SEAMS_CHILL_PUBLISHED && graph == SEAMS_GRAPH_CUTOFF) {
       std::vector<int> subset;
       const std::vector<int> *sub = nullptr;
@@ -476,7 +503,7 @@ seams_status seams_chill_plus(seams_system *sys, double cutoff, int type, int gr
         return SEAMS_OK;
       }
     }
-    auto rows = bond_rows(work, cutoff, type, graph);
+    auto rows = bond_rows(work, cutoff, typ, graph);
     const char *spec = rule == SEAMS_CHILL_OVITO ? "ovito-chill+" : "chill+";
     chill::applyChillPlus(work, rows, chill::chillPlusRule(spec), false);
     const int n = work.nop;
@@ -524,8 +551,8 @@ seams_status seams_q4q6(seams_system *sys, double cutoff, int type, double *q4,
   }
   try {
     use_threads();
-    Cloud &work = sys->cloud;
-    const int typ = unify_type(work, type);
+    int typ = 1;
+    Cloud work = unified_copy(sys->cloud, type, typ);
     const int n = work.nop;
     if (q4 != nullptr) {
       const auto result = chill::steinhardtQlCutoff(work, cutoff, 4, typ, false);
@@ -573,11 +600,11 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
   }
   try {
     use_threads();
-    Cloud &work = sys->cloud;
+    int typ = 1;
+    Cloud work = unified_copy(sys->cloud, type, typ);
     std::vector<std::vector<int>> idx;
     std::vector<std::vector<int>> found;
     if (graph == SEAMS_GRAPH_CUTOFF) {
-      const int typ = unify_type(work, type);
       std::vector<int> subset;
       const std::vector<int> *sub = nullptr;
       if (type > 0) {
@@ -606,7 +633,7 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
       }
     }
     if (found.empty() && idx.empty()) {
-      auto rows = bond_rows(work, cutoff, type, graph);
+      auto rows = bond_rows(work, cutoff, typ, graph);
       idx = nneigh::neighbourListByIndex(work, rows);
       if (static_cast<int>(idx.size()) < work.nop) {
         idx.resize(static_cast<std::size_t>(work.nop));
@@ -660,6 +687,48 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
       } catch (const std::exception &) {
         /* Size labels stay. A cage pass that rejects the graph is not a failed find. */
       }
+    }
+    try {
+      std::vector<std::vector<int>> bySize[7];
+      std::vector<int> at[7];
+      for (std::size_t i = 0; i < rings->rings.size(); ++i) {
+        const int size = static_cast<int>(rings->rings[i].size());
+        if (size >= 3 && size <= 6) {
+          bySize[size].push_back(rings->rings[i]);
+          at[size].push_back(static_cast<int>(i));
+        }
+      }
+      for (int size = 3; size <= 6; ++size) {
+        if (bySize[size].empty()) {
+          continue;
+        }
+        std::vector<ring::strucType> kind(bySize[size].size(), ring::strucType::unclassified);
+        std::vector<double> rmsd(static_cast<std::size_t>(std::max(work.nop, 0)), -1.0);
+        int perfect = 0;
+        int imperfect = 0;
+        ring::findPrisms(bySize[size], kind, perfect, imperfect, idx, work, rmsd, false);
+        for (std::size_t k = 0; k < kind.size(); ++k) {
+          int code = -1;
+          if (kind[k] == ring::strucType::Prism) {
+            code = SEAMS_RING_PRISM;
+          } else if (kind[k] == ring::strucType::deformedPrism) {
+            code = SEAMS_RING_DEFORMED_PRISM;
+          } else if (kind[k] == ring::strucType::mixedPrismRing) {
+            code = SEAMS_RING_MIXED_PRISM;
+          }
+          if (code < 0) {
+            continue;
+          }
+          const int slot = at[size][k];
+          const int now = rings->symmetry[static_cast<std::size_t>(slot)];
+          if (now == SEAMS_RING_OTHER || now == SEAMS_RING_PENTAGON ||
+              now == SEAMS_RING_HEXAGON) {
+            rings->symmetry[static_cast<std::size_t>(slot)] = code;
+          }
+        }
+      }
+    } catch (const std::exception &) {
+      /* Prism labels stay at the size or cage code already written. */
     }
     *out = rings.release();
     return SEAMS_OK;
