@@ -1417,16 +1417,11 @@ void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vector
   if (n <= 0 || cartesian.cols() != 3) {
     return;
   }
-  std::vector<double> xyz(static_cast<size_t>(n) * 3);
-  for (int i = 0; i < n; i++) {
-    xyz[static_cast<size_t>(3 * i)] = cartesian(i, 0);
-    xyz[static_cast<size_t>(3 * i + 1)] = cartesian(i, 1);
-    xyz[static_cast<size_t>(3 * i + 2)] = cartesian(i, 2);
-  }
   const double lat[3][3] = {{vectors(0, 0), vectors(0, 1), vectors(0, 2)},
                             {vectors(1, 0), vectors(1, 1), vectors(1, 2)},
                             {vectors(2, 0), vectors(2, 1), vectors(2, 2)}};
-  classifyPrepared(xyz.data(), n, lat, canon, gate, kind.data());
+  classifyPrepared(cartesian.col(0).data(), cartesian.col(1).data(), cartesian.col(2).data(), n,
+                   lat, canon, gate, kind.data());
 }
 
 void matchAll(const std::vector<Eigen::MatrixXd> &environments, std::vector<Overlay> &out) {

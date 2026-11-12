@@ -28,7 +28,6 @@ namespace symm {
 namespace {
 
 constexpr double kBond = 3.5;
-constexpr double kWide = 4.2;
 constexpr double kCentre = 5.6;
 constexpr double kGrid = 2.8;
 constexpr int kMaxBond = 16;
@@ -76,13 +75,13 @@ void invert3(const double M[3][3], double inv[3][3]) {
 // Largest eigenvector of a 4x4 symmetric matrix. One Jacobi sweep is a
 // closed rotation; a handful of sweeps is the quaternion form of Kabsch
 // (Coutsias, Seok, Dill 2004; Theobald 2005) without a 3x3 SVD.
-void jacobi4(double A[4][4], double Q[4][4]) {
+void jacobi4(double A[4][4], double Q[4][4], int sweeps) {
   for (int i = 0; i < 4; i++) {
     for (int j = 0; j < 4; j++) {
       Q[i][j] = i == j ? 1.0 : 0.0;
     }
   }
-  for (int sweep = 0; sweep < 4; sweep++) {
+  for (int sweep = 0; sweep < sweeps; sweep++) {
     for (int p = 0; p < 3; p++) {
       for (int q = p + 1; q < 4; q++) {
         const double apq = A[p][q];
@@ -178,7 +177,7 @@ void kabsch17(const Shell17 &fixed, const Shell17 &mobile, int n, double R[3][3]
   K[3][1] = K[1][3];
   K[3][2] = K[2][3];
   double Q[4][4];
-  jacobi4(K, Q);
+  jacobi4(K, Q, n <= 4 ? 2 : 4);
   int best = 0;
   for (int i = 1; i < 4; i++) {
     if (K[i][i] > K[best][best]) {
@@ -310,6 +309,66 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
   }
   if (nS < 12) {
     return -1;
+  }
+  // Reject a shell whose bonds are all eclipsed. Ice keeps a staggered bond,
+  // cosine at or below 0.85 on the thermal crystals, so the permutation
+  // search is not run.
+  {
+    bool staggered = false;
+    for (int a = 0; a < 4 && !staggered; a++) {
+      double u[3] = {envF[a][0], envF[a][1], envF[a][2]};
+      const double un = std::sqrt(u[0] * u[0] + u[1] * u[1] + u[2] * u[2]);
+      if (!(un > 1e-8)) {
+        return -1;
+      }
+      u[0] /= un;
+      u[1] /= un;
+      u[2] /= un;
+      double mx = -1.0;
+      for (int b = 0; b < 4; b++) {
+        if (b == a) {
+          continue;
+        }
+        double ref[3] = {envF[b][0], envF[b][1], envF[b][2]};
+        const double rd = ref[0] * u[0] + ref[1] * u[1] + ref[2] * u[2];
+        ref[0] -= rd * u[0];
+        ref[1] -= rd * u[1];
+        ref[2] -= rd * u[2];
+        const double rn = std::sqrt(ref[0] * ref[0] + ref[1] * ref[1] + ref[2] * ref[2]);
+        if (rn < 1e-8) {
+          continue;
+        }
+        ref[0] /= rn;
+        ref[1] /= rn;
+        ref[2] /= rn;
+        for (int e = 0; e < nS; e++) {
+          double v[3] = {envS[e][0] - envF[a][0], envS[e][1] - envF[a][1],
+                         envS[e][2] - envF[a][2]};
+          const double bond = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+          if (bond < 2.35 * 2.35 || bond > kBond * kBond) {
+            continue;
+          }
+          const double vd = v[0] * u[0] + v[1] * u[1] + v[2] * u[2];
+          v[0] -= vd * u[0];
+          v[1] -= vd * u[1];
+          v[2] -= vd * u[2];
+          const double vn = std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+          if (vn < 1e-8) {
+            continue;
+          }
+          const double c = (ref[0] * v[0] + ref[1] * v[1] + ref[2] * v[2]) / vn;
+          if (c > mx) {
+            mx = c;
+          }
+        }
+      }
+      if (mx <= 0.85) {
+        staggered = true;
+      }
+    }
+    if (!staggered) {
+      return -1;
+    }
   }
   double best = 1e300;
   int bestK = -1;
@@ -501,8 +560,8 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
 
 } // namespace
 
-void classifyPrepared(const double *xyz, int n, const double lat[3][3], const CanonShell &canon,
-                      double gate, int *kind) {
+void classifyPrepared(const double *x, const double *y, const double *z, int n,
+                      const double lat[3][3], const CanonShell &canon, double gate, int *kind) {
   if (n <= 0) {
     return;
   }
@@ -549,9 +608,9 @@ void classifyPrepared(const double *xyz, int n, const double lat[3][3], const Ca
 #pragma omp parallel for schedule(static) if (n >= 4096)
 #endif
   for (int i = 0; i < n; i++) {
-    const double c0 = xyz[3 * i];
-    const double c1 = xyz[3 * i + 1];
-    const double c2 = xyz[3 * i + 2];
+    const double c0 = x[i];
+    const double c1 = y[i];
+    const double c2 = z[i];
     double f[3] = {0, 0, 0};
     f[0] = invT[0][0] * c0 + invT[0][1] * c1 + invT[0][2] * c2;
     f[1] = invT[1][0] * c0 + invT[1][1] * c1 + invT[1][2] * c2;
@@ -729,102 +788,6 @@ void classifyPrepared(const double *xyz, int n, const double lat[3][3], const Ca
     }
   }
 
-  // A few thermal bonds sit past 3.5 A. The wide scan runs only for those
-  // atoms, on the same cell list, and still rejects anything farther than
-  // 5.6 A from the centre.
-  auto fillWide = [&](int atom, Bond *row, int cap) -> int {
-    const double c0 = px[static_cast<size_t>(atom)];
-    const double c1 = py[static_cast<size_t>(atom)];
-    const double c2 = pz[static_cast<size_t>(atom)];
-    const int cell = bin[static_cast<size_t>(atom)];
-    const int ix0 = cell % nx;
-    const int iy0 = (cell / nx) % ny;
-    const int iz0 = cell / (nx * ny);
-    double rd[24];
-    int nb = 0;
-    for (int dz = -2; dz <= 2; dz++) {
-      int iz = iz0 + dz;
-      int sz = 0;
-      while (iz < 0) {
-        iz += nz;
-        sz--;
-      }
-      while (iz >= nz) {
-        iz -= nz;
-        sz++;
-      }
-      for (int dy = -2; dy <= 2; dy++) {
-        int iy = iy0 + dy;
-        int sy = 0;
-        while (iy < 0) {
-          iy += ny;
-          sy--;
-        }
-        while (iy >= ny) {
-          iy -= ny;
-          sy++;
-        }
-        for (int dx = -2; dx <= 2; dx++) {
-          int ix = ix0 + dx;
-          int sx = 0;
-          while (ix < 0) {
-            ix += nx;
-            sx--;
-          }
-          while (ix >= nx) {
-            ix -= nx;
-            sx++;
-          }
-          const int ncellId = (iz * ny + iy) * nx + ix;
-          const int begin = cellStart[static_cast<size_t>(ncellId)];
-          const int end = cellStart[static_cast<size_t>(ncellId) + 1];
-          for (int m = begin; m < end; m++) {
-            const Packed &nbr = packed[static_cast<size_t>(m)];
-            if (nbr.id == atom && sx == 0 && sy == 0 && sz == 0) {
-              continue;
-            }
-            const double ddx = nbr.x + sx * lat[0][0] + sy * lat[1][0] + sz * lat[2][0] - c0;
-            const double ddy = nbr.y + sx * lat[0][1] + sy * lat[1][1] + sz * lat[2][1] - c1;
-            const double ddz = nbr.z + sx * lat[0][2] + sy * lat[1][2] + sz * lat[2][2] - c2;
-            const double d2 = ddx * ddx + ddy * ddy + ddz * ddz;
-            if (d2 > kWide * kWide || d2 < 2.15 * 2.15) {
-              continue;
-            }
-            if (nb < cap) {
-              row[nb] = Bond{nbr.id, ddx, ddy, ddz};
-              rd[nb] = d2;
-              nb++;
-            } else {
-              int worst = 0;
-              for (int c = 1; c < cap; c++) {
-                if (rd[c] > rd[worst]) {
-                  worst = c;
-                }
-              }
-              if (d2 < rd[worst]) {
-                row[worst] = Bond{nbr.id, ddx, ddy, ddz};
-                rd[worst] = d2;
-              }
-            }
-          }
-        }
-      }
-    }
-    for (int a = 1; a < nb; a++) {
-      const Bond b = row[a];
-      const double d2 = rd[a];
-      int at = a;
-      while (at > 0 && d2 < rd[at - 1]) {
-        row[at] = row[at - 1];
-        rd[at] = rd[at - 1];
-        at--;
-      }
-      row[at] = b;
-      rd[at] = d2;
-    }
-    return nb;
-  };
-
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 64 && threads > 1)
 #endif
@@ -903,75 +866,13 @@ void classifyPrepared(const double *xyz, int n, const double lat[3][3], const Ca
         }
       }
     }
-    if (ns < 12) {
-      Bond selfW[24];
-      const int nw = fillWide(i, selfW, 24);
-      ns = 0;
-      if (nw >= 4) {
-        for (int k = 0; k < 4; k++) {
-          firstId[k] = selfW[k].j;
-          nbxyz[k][0] = ci0 + selfW[k].dx;
-          nbxyz[k][1] = ci1 + selfW[k].dy;
-          nbxyz[k][2] = ci2 + selfW[k].dz;
-        }
-        for (int k = 0; k < 4; k++) {
-          Bond armW[24];
-          const int na = fillWide(firstId[k], armW, 24);
-          for (int t = 0; t < na; t++) {
-            const double x = selfW[k].dx + armW[t].dx;
-            const double y = selfW[k].dy + armW[t].dy;
-            const double z = selfW[k].dz + armW[t].dz;
-            const double origin = x * x + y * y + z * z;
-            if (origin < 0.25 || origin > kCentre * kCentre) {
-              continue;
-            }
-            bool isFirst = false;
-            for (int q = 0; q < 4; q++) {
-              const double dx = x - selfW[q].dx;
-              const double dy = y - selfW[q].dy;
-              const double dz = z - selfW[q].dz;
-              if (dx * dx + dy * dy + dz * dz < 0.25) {
-                isFirst = true;
-              }
-            }
-            if (isFirst) {
-              continue;
-            }
-            const double bond =
-                armW[t].dx * armW[t].dx + armW[t].dy * armW[t].dy + armW[t].dz * armW[t].dz;
-            int found = -1;
-            for (int s = 0; s < ns; s++) {
-              const double dx = x - sx[s];
-              const double dy = y - sy[s];
-              const double dz = z - sz[s];
-              if (dx * dx + dy * dy + dz * dz < 0.25) {
-                found = s;
-              }
-            }
-            if (found >= 0) {
-              if (bond < sb[found]) {
-                sx[found] = x;
-                sy[found] = y;
-                sz[found] = z;
-                sb[found] = bond;
-              }
-              continue;
-            }
-            if (ns < 48) {
-              sx[ns] = x;
-              sy[ns] = y;
-              sz[ns] = z;
-              sb[ns] = bond;
-              ns++;
-            }
-          }
-        }
-      }
-    }
-    if (ns < 12) {
+    // An incomplete 3.5 A shell is not ice. Widening the bond pulled every
+    // liquid atom into a second search.
+    if (ns < 12 || nb < 4) {
       kind[i] = -1;
       continue;
     }
+
     for (int a = 0; a < 12; a++) {
       int best = a;
       for (int b = a + 1; b < ns; b++) {
