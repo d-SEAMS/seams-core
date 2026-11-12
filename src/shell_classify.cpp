@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <memory>
 #include <vector>
 
 #ifdef SEAMS_HAS_OPENMP
@@ -26,8 +27,18 @@
 namespace symm {
 namespace {
 
-constexpr double kShell = 5.6;
+constexpr double kBond = 3.5;
+constexpr double kWide = 4.2;
+constexpr double kCentre = 5.6;
 constexpr double kGrid = 2.8;
+constexpr int kMaxBond = 16;
+
+struct Bond {
+  int j;
+  double dx;
+  double dy;
+  double dz;
+};
 constexpr double kCleanRms = 0.02;
 constexpr double kCleanShift = 0.05;
 
@@ -247,179 +258,6 @@ void bondFrame(const double axis[3], const double ref[3], double e1[3], double e
   e2[0] = u[1] * e1[2] - u[2] * e1[1];
   e2[1] = u[2] * e1[0] - u[0] * e1[2];
   e2[2] = u[0] * e1[1] - u[1] * e1[0];
-}
-
-void frameOf(const double a[3], const double b[3], double e[3][3]) {
-  double an = std::sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
-  e[0][0] = a[0] / an;
-  e[0][1] = a[1] / an;
-  e[0][2] = a[2] / an;
-  const double dot = b[0] * e[0][0] + b[1] * e[0][1] + b[2] * e[0][2];
-  e[1][0] = b[0] - dot * e[0][0];
-  e[1][1] = b[1] - dot * e[0][1];
-  e[1][2] = b[2] - dot * e[0][2];
-  double bn = std::sqrt(e[1][0] * e[1][0] + e[1][1] * e[1][1] + e[1][2] * e[1][2]);
-  if (bn < 1e-12) {
-    bn = 1.0;
-  }
-  e[1][0] /= bn;
-  e[1][1] /= bn;
-  e[1][2] /= bn;
-  e[2][0] = e[0][1] * e[1][2] - e[0][2] * e[1][1];
-  e[2][1] = e[0][2] * e[1][0] - e[0][0] * e[1][2];
-  e[2][2] = e[0][0] * e[1][1] - e[0][1] * e[1][0];
-}
-
-// Identity pairing of a gapped tetrahedron. The rotation is the bond frame,
-// not the 4x4 eigenproblem. Returns -2 when the shell is not that clean, so
-// the caller keeps the full fit and the label does not change.
-int cleanLabel(const double center[3], const double nb[][3], const CanonShell &canon) {
-  double r[5];
-  for (int k = 0; k < 5; k++) {
-    r[k] = std::sqrt(dist2(center, nb[k]));
-  }
-  if (!(r[3] - r[0] < 0.2 && r[4] - r[3] > 0.8)) {
-    return -2;
-  }
-  double env[4][3];
-  for (int k = 0; k < 4; k++) {
-    for (int c = 0; c < 3; c++) {
-      env[k][c] = nb[k][c] - center[c];
-    }
-  }
-  double envS[12][3];
-  for (int s = 0; s < 12; s++) {
-    for (int c = 0; c < 3; c++) {
-      envS[s][c] = nb[4 + s][c] - center[c];
-    }
-  }
-  const int kinds[3] = {1, 0, 2};
-  for (int ko = 0; ko < 3; ko++) {
-    const int kind = kinds[ko];
-    if (tetraChirality(canon.first[kind]) * tetraChirality(env) < 0.0) {
-      continue;
-    }
-    double eF[3][3];
-    double tF[3][3];
-    frameOf(env[0], env[1], eF);
-    frameOf(canon.first[kind][0], canon.first[kind][1], tF);
-    // R maps the environment frame onto the template frame.
-    double R[3][3];
-    for (int row = 0; row < 3; row++) {
-      for (int col = 0; col < 3; col++) {
-        R[row][col] = tF[0][row] * eF[0][col] + tF[1][row] * eF[1][col] + tF[2][row] * eF[2][col];
-      }
-    }
-    double gT = 0.0;
-    double gE = 0.0;
-    for (int k = 0; k < 4; k++) {
-      for (int c = 0; c < 3; c++) {
-        gT += canon.first[kind][k][c] * canon.first[kind][k][c];
-        gE += env[k][c] * env[k][c];
-      }
-    }
-    const double shellScale = gT > 1e-18 ? std::sqrt(gE / gT) : 1.0;
-    bool taken[12] = {};
-    double shiftSum = 0.0;
-    bool paired = true;
-    for (int a = 0; a < 4 && paired; a++) {
-      int cand[3];
-      double candD[3];
-      int nC = 0;
-      for (int e = 0; e < 12; e++) {
-        if (taken[e]) {
-          continue;
-        }
-        const double dx = envS[e][0] - env[a][0];
-        const double dy = envS[e][1] - env[a][1];
-        const double dz = envS[e][2] - env[a][2];
-        const double d2 = dx * dx + dy * dy + dz * dz;
-        if (nC < 3) {
-          cand[nC] = e;
-          candD[nC] = d2;
-          nC++;
-        } else {
-          int worst = 0;
-          for (int c = 1; c < 3; c++) {
-            if (candD[c] > candD[worst]) {
-              worst = c;
-            }
-          }
-          if (d2 < candD[worst]) {
-            cand[worst] = e;
-            candD[worst] = d2;
-          }
-        }
-      }
-      if (nC < 3) {
-        paired = false;
-        break;
-      }
-      double pred[3][3];
-      for (int i = 0; i < 3; i++) {
-        const int s = canon.arm[kind][a][i];
-        const double q0 = canon.second[kind][s][0];
-        const double q1 = canon.second[kind][s][1];
-        const double q2 = canon.second[kind][s][2];
-        pred[i][0] = shellScale * (R[0][0] * q0 + R[1][0] * q1 + R[2][0] * q2);
-        pred[i][1] = shellScale * (R[0][1] * q0 + R[1][1] * q1 + R[2][1] * q2);
-        pred[i][2] = shellScale * (R[0][2] * q0 + R[1][2] * q1 + R[2][2] * q2);
-      }
-      double bestShiftErr = 1e300;
-      int bestShift = 0;
-      int bestDir = 0;
-      int seq[2][3];
-      // Order candidates by azimuth so the shift matches the eigenproblem path.
-      double e1[3];
-      double e2[3];
-      bondFrame(env[a], env[(a + 1) % 4], e1, e2);
-      double ang[3];
-      for (int i = 0; i < 3; i++) {
-        const double outer[3] = {envS[cand[i]][0] - env[a][0], envS[cand[i]][1] - env[a][1],
-                                 envS[cand[i]][2] - env[a][2]};
-        ang[i] = bondAngle(outer, e1, e2);
-      }
-      for (int i = 0; i < 3; i++) {
-        for (int j = i + 1; j < 3; j++) {
-          if (ang[j] < ang[i]) {
-            std::swap(ang[i], ang[j]);
-            std::swap(cand[i], cand[j]);
-          }
-        }
-      }
-      for (int i = 0; i < 3; i++) {
-        seq[0][i] = cand[i];
-        seq[1][i] = cand[2 - i];
-      }
-      for (int dir = 0; dir < 2; dir++) {
-        for (int shift = 0; shift < 3; shift++) {
-          double err = 0.0;
-          for (int i = 0; i < 3; i++) {
-            const int e = seq[dir][i];
-            const double dx = pred[(i + shift) % 3][0] - envS[e][0];
-            const double dy = pred[(i + shift) % 3][1] - envS[e][1];
-            const double dz = pred[(i + shift) % 3][2] - envS[e][2];
-            err += dx * dx + dy * dy + dz * dz;
-          }
-          if (err < bestShiftErr) {
-            bestShiftErr = err;
-            bestShift = shift;
-            bestDir = dir;
-          }
-        }
-      }
-      (void)bestDir;
-      (void)bestShift;
-      for (int i = 0; i < 3; i++) {
-        taken[seq[bestDir][i]] = true;
-      }
-      shiftSum += bestShiftErr;
-    }
-    if (paired && shiftSum <= kCleanShift) {
-      return kind;
-    }
-  }
-  return -2;
 }
 
 int shellFit(const double center[3], const double nb[][3], int nNb, const CanonShell &canon,
@@ -688,12 +526,13 @@ void classifyPrepared(const double *xyz, int n, const double lat[3][3], const Ca
   int ny = 0;
   int nz = 0;
   bool fast = false;
-  if (ortho && la >= 3.0 * kShell && lb >= 3.0 * kShell && lc >= 3.0 * kShell) {
-    // Cutoff-sized cells, the orthorhombic neighbour list. The 27-cell stencil
-    // is complete because each cell is at most the shell cutoff wide.
-    nx = std::max(3, static_cast<int>(std::ceil(la / kShell)));
-    ny = std::max(3, static_cast<int>(std::ceil(lb / kShell)));
-    nz = std::max(3, static_cast<int>(std::ceil(lc / kShell)));
+  if (ortho && la >= 3.0 * kBond && lb >= 3.0 * kBond && lc >= 3.0 * kBond) {
+    // The 3.5 A bond list. Cells are at most one bond wide, so the 27-cell
+    // stencil holds every bonded neighbour. The second shell is read from
+    // those neighbours' own rows, not from a 5.6 A search.
+    nx = std::max(3, static_cast<int>(std::ceil(la / kBond)));
+    ny = std::max(3, static_cast<int>(std::ceil(lb / kBond)));
+    nz = std::max(3, static_cast<int>(std::ceil(lc / kBond)));
     fast = true;
   } else {
     nx = std::max(1, static_cast<int>(la / kGrid));
@@ -701,11 +540,14 @@ void classifyPrepared(const double *xyz, int n, const double lat[3][3], const Ca
     nz = std::max(1, static_cast<int>(lc / kGrid));
   }
   const int ncell = nx * ny * nz;
-  const int reach = fast ? 1 : (skew > 0.5 * kShell ? 4 : 2);
+  const int reach = fast ? 1 : (skew > 1.0 ? 4 : 2);
   std::vector<double> px(static_cast<size_t>(n));
   std::vector<double> py(static_cast<size_t>(n));
   std::vector<double> pz(static_cast<size_t>(n));
   std::vector<int> bin(static_cast<size_t>(n));
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (n >= 4096)
+#endif
   for (int i = 0; i < n; i++) {
     const double c0 = xyz[3 * i];
     const double c1 = xyz[3 * i + 1];
@@ -762,7 +604,10 @@ void classifyPrepared(const double *xyz, int n, const double lat[3][3], const Ca
   }
   const int span = 2 * reach + 1;
   const int nImage = span * span * span;
-  std::vector<Image> images(static_cast<size_t>(ncell) * static_cast<size_t>(nImage));
+  std::unique_ptr<Image[]> images(new Image[static_cast<size_t>(ncell) * static_cast<size_t>(nImage)]);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (ncell >= 256)
+#endif
   for (int cell = 0; cell < ncell; cell++) {
     const int ix0 = cell % nx;
     const int iy0 = (cell / nx) % ny;
@@ -809,20 +654,25 @@ void classifyPrepared(const double *xyz, int n, const double lat[3][3], const Ca
     }
   }
 
+  std::unique_ptr<Bond[]> bonds(new Bond[static_cast<size_t>(n) * static_cast<size_t>(kMaxBond)]);
+  std::vector<int> nbon(static_cast<size_t>(n), 0);
 #ifdef SEAMS_HAS_OPENMP
   const int threads = omp_get_max_threads();
 #pragma omp parallel for schedule(static) if (n >= 64 && threads > 1)
 #endif
-  for (int i = 0; i < n; i++) {
-    const double ci[3] = {px[static_cast<size_t>(i)], py[static_cast<size_t>(i)],
-                          pz[static_cast<size_t>(i)]};
-    double kd[48];
-    double kx[48];
-    double ky[48];
-    double kz[48];
-    int nkeep = 0;
+  for (int cell = 0; cell < ncell; cell++) {
     const Image *im =
-        &images[static_cast<size_t>(bin[static_cast<size_t>(i)]) * static_cast<size_t>(nImage)];
+        &images[static_cast<size_t>(cell) * static_cast<size_t>(nImage)];
+    const int here0 = cellStart[static_cast<size_t>(cell)];
+    const int here1 = cellStart[static_cast<size_t>(cell) + 1];
+    for (int mine = here0; mine < here1; mine++) {
+    const int i = packed[static_cast<size_t>(mine)].id;
+    const double ci0 = packed[static_cast<size_t>(mine)].x;
+    const double ci1 = packed[static_cast<size_t>(mine)].y;
+    const double ci2 = packed[static_cast<size_t>(mine)].z;
+    Bond row[kMaxBond];
+    double rd[kMaxBond];
+    int nb = 0;
     for (int t = 0; t < nImage; t++) {
       const int sx = im[t].sx;
       const int sy = im[t].sy;
@@ -834,165 +684,311 @@ void classifyPrepared(const double *xyz, int n, const double lat[3][3], const Ca
         if (nbr.id == i && sx == 0 && sy == 0 && sz == 0) {
           continue;
         }
-        const double x = nbr.x + sx * lat[0][0] + sy * lat[1][0] + sz * lat[2][0];
-        const double y = nbr.y + sx * lat[0][1] + sy * lat[1][1] + sz * lat[2][1];
-        const double z = nbr.z + sx * lat[0][2] + sy * lat[1][2] + sz * lat[2][2];
-        const double ddx = x - ci[0];
-        const double ddy = y - ci[1];
-        const double ddz = z - ci[2];
-        const double d2 = ddx * ddx + ddy * ddy + ddz * ddz;
-        if (d2 > kShell * kShell || d2 < 2.15 * 2.15) {
+        const double dx = nbr.x + sx * lat[0][0] + sy * lat[1][0] + sz * lat[2][0] - ci0;
+        const double dy = nbr.y + sx * lat[0][1] + sy * lat[1][1] + sz * lat[2][1] - ci1;
+        const double dz = nbr.z + sx * lat[0][2] + sy * lat[1][2] + sz * lat[2][2] - ci2;
+        const double d2 = dx * dx + dy * dy + dz * dz;
+        if (d2 > kBond * kBond || d2 < 2.15 * 2.15) {
           continue;
         }
-        if (nkeep < 48) {
-          kd[nkeep] = d2;
-          kx[nkeep] = x;
-          ky[nkeep] = y;
-          kz[nkeep] = z;
-          nkeep++;
+        if (nb < kMaxBond) {
+          row[nb] = Bond{nbr.id, dx, dy, dz};
+          rd[nb] = d2;
+          nb++;
+        } else {
+          int worst = 0;
+          for (int c = 1; c < kMaxBond; c++) {
+            if (rd[c] > rd[worst]) {
+              worst = c;
+            }
+          }
+          if (d2 < rd[worst]) {
+            row[worst] = Bond{nbr.id, dx, dy, dz};
+            rd[worst] = d2;
+          }
         }
       }
     }
-    for (int a = 1; a < nkeep; a++) {
-      const double d2 = kd[a];
-      const double x = kx[a];
-      const double y = ky[a];
-      const double z = kz[a];
+    for (int a = 1; a < nb; a++) {
+      const Bond b = row[a];
+      const double d2 = rd[a];
       int at = a;
-      while (at > 0 && d2 < kd[at - 1]) {
-        kd[at] = kd[at - 1];
-        kx[at] = kx[at - 1];
-        ky[at] = ky[at - 1];
-        kz[at] = kz[at - 1];
+      while (at > 0 && d2 < rd[at - 1]) {
+        row[at] = row[at - 1];
+        rd[at] = rd[at - 1];
         at--;
       }
-      kd[at] = d2;
-      kx[at] = x;
-      ky[at] = y;
-      kz[at] = z;
+      row[at] = b;
+      rd[at] = d2;
     }
-    if (nkeep < 4) {
-      kind[i] = -1;
-      continue;
+    nbon[static_cast<size_t>(i)] = nb;
+    Bond *dest = &bonds[static_cast<size_t>(i) * static_cast<size_t>(kMaxBond)];
+    for (int a = 0; a < nb; a++) {
+      dest[a] = row[a];
     }
-    const int pool = std::min(nkeep, 8);
-    int pick[4] = {0, 1, 2, 3};
-    double pickScore = 0.0;
-    const bool outlier = std::sqrt(kd[std::min(3, nkeep - 1)]) - std::sqrt(kd[0]) > 0.45;
-    if (outlier) {
-      pickScore = 1e300;
     }
-    for (int a = 0; a < pool && outlier; a++) {
-      for (int b = a + 1; b < pool; b++) {
-        for (int c = b + 1; c < pool; c++) {
-          for (int d = c + 1; d < pool; d++) {
-            const int s[4] = {a, b, c, d};
-            double rad[4];
-            double rsum = 0.0;
-            for (int t = 0; t < 4; t++) {
-              rad[t] = std::sqrt(kd[s[t]]);
-              rsum += rad[t];
-            }
-            const double rmean = rsum / 4.0;
-            if (rmean < 2.3 || rmean > 3.5) {
+  }
+
+  // A few thermal bonds sit past 3.5 A. The wide scan runs only for those
+  // atoms, on the same cell list, and still rejects anything farther than
+  // 5.6 A from the centre.
+  auto fillWide = [&](int atom, Bond *row, int cap) -> int {
+    const double c0 = px[static_cast<size_t>(atom)];
+    const double c1 = py[static_cast<size_t>(atom)];
+    const double c2 = pz[static_cast<size_t>(atom)];
+    const int cell = bin[static_cast<size_t>(atom)];
+    const int ix0 = cell % nx;
+    const int iy0 = (cell / nx) % ny;
+    const int iz0 = cell / (nx * ny);
+    double rd[24];
+    int nb = 0;
+    for (int dz = -2; dz <= 2; dz++) {
+      int iz = iz0 + dz;
+      int sz = 0;
+      while (iz < 0) {
+        iz += nz;
+        sz--;
+      }
+      while (iz >= nz) {
+        iz -= nz;
+        sz++;
+      }
+      for (int dy = -2; dy <= 2; dy++) {
+        int iy = iy0 + dy;
+        int sy = 0;
+        while (iy < 0) {
+          iy += ny;
+          sy--;
+        }
+        while (iy >= ny) {
+          iy -= ny;
+          sy++;
+        }
+        for (int dx = -2; dx <= 2; dx++) {
+          int ix = ix0 + dx;
+          int sx = 0;
+          while (ix < 0) {
+            ix += nx;
+            sx--;
+          }
+          while (ix >= nx) {
+            ix -= nx;
+            sx++;
+          }
+          const int ncellId = (iz * ny + iy) * nx + ix;
+          const int begin = cellStart[static_cast<size_t>(ncellId)];
+          const int end = cellStart[static_cast<size_t>(ncellId) + 1];
+          for (int m = begin; m < end; m++) {
+            const Packed &nbr = packed[static_cast<size_t>(m)];
+            if (nbr.id == atom && sx == 0 && sy == 0 && sz == 0) {
               continue;
             }
-            double rvar = 0.0;
-            for (int t = 0; t < 4; t++) {
-              const double dr = rad[t] - rmean;
-              rvar += dr * dr;
+            const double ddx = nbr.x + sx * lat[0][0] + sy * lat[1][0] + sz * lat[2][0] - c0;
+            const double ddy = nbr.y + sx * lat[0][1] + sy * lat[1][1] + sz * lat[2][1] - c1;
+            const double ddz = nbr.z + sx * lat[0][2] + sy * lat[1][2] + sz * lat[2][2] - c2;
+            const double d2 = ddx * ddx + ddy * ddy + ddz * ddz;
+            if (d2 > kWide * kWide || d2 < 2.15 * 2.15) {
+              continue;
             }
-            double edges[6];
-            int ne = 0;
-            double esum = 0.0;
-            for (int t = 0; t < 4; t++) {
-              for (int u = t + 1; u < 4; u++) {
-                const double dx = kx[s[t]] - kx[s[u]];
-                const double dy = ky[s[t]] - ky[s[u]];
-                const double dz = kz[s[t]] - kz[s[u]];
-                edges[ne] = std::sqrt(dx * dx + dy * dy + dz * dz);
-                esum += edges[ne];
-                ne++;
+            if (nb < cap) {
+              row[nb] = Bond{nbr.id, ddx, ddy, ddz};
+              rd[nb] = d2;
+              nb++;
+            } else {
+              int worst = 0;
+              for (int c = 1; c < cap; c++) {
+                if (rd[c] > rd[worst]) {
+                  worst = c;
+                }
               }
-            }
-            const double emean = esum / 6.0;
-            double evar = 0.0;
-            for (int t = 0; t < 6; t++) {
-              const double de = edges[t] - emean;
-              evar += de * de;
-            }
-            const double score = rvar + 0.25 * evar;
-            if (score < pickScore) {
-              pickScore = score;
-              for (int t = 0; t < 4; t++) {
-                pick[t] = s[t];
+              if (d2 < rd[worst]) {
+                row[worst] = Bond{nbr.id, ddx, ddy, ddz};
+                rd[worst] = d2;
               }
             }
           }
         }
       }
     }
-    if (!(pickScore < 1.0e200)) {
-      kind[i] = -1;
-      continue;
+    for (int a = 1; a < nb; a++) {
+      const Bond b = row[a];
+      const double d2 = rd[a];
+      int at = a;
+      while (at > 0 && d2 < rd[at - 1]) {
+        row[at] = row[at - 1];
+        rd[at] = rd[at - 1];
+        at--;
+      }
+      row[at] = b;
+      rd[at] = d2;
     }
-    double nb[16][3];
+    return nb;
+  };
+
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (n >= 64 && threads > 1)
+#endif
+  for (int i = 0; i < n; i++) {
+    const int nb = nbon[static_cast<size_t>(i)];
+    const Bond *mine = &bonds[static_cast<size_t>(i) * static_cast<size_t>(kMaxBond)];
+    int firstId[4];
+    double nbxyz[16][3];
+    const double ci0 = px[static_cast<size_t>(i)];
+    const double ci1 = py[static_cast<size_t>(i)];
+    const double ci2 = pz[static_cast<size_t>(i)];
+    if (nb >= 4) {
     for (int k = 0; k < 4; k++) {
-      nb[k][0] = kx[pick[k]];
-      nb[k][1] = ky[pick[k]];
-      nb[k][2] = kz[pick[k]];
+      firstId[k] = mine[k].j;
+      nbxyz[k][0] = ci0 + mine[k].dx;
+      nbxyz[k][1] = ci1 + mine[k].dy;
+      nbxyz[k][2] = ci2 + mine[k].dz;
     }
-    int bondAt[48];
-    double bondTo[48];
-    int nBond = 0;
-    for (int k = 0; k < nkeep; k++) {
-      bool taken = false;
-      for (int f = 0; f < 4; f++) {
-        if (k == pick[f]) {
-          taken = true;
+    }
+    double sx[48];
+    double sy[48];
+    double sz[48];
+    double sb[48];
+    int ns = 0;
+    for (int k = 0; k < 4 && nb >= 4; k++) {
+      const int f = firstId[k];
+      const int na = nbon[static_cast<size_t>(f)];
+      const Bond *arm = &bonds[static_cast<size_t>(f) * static_cast<size_t>(kMaxBond)];
+      for (int t = 0; t < na; t++) {
+        const double x = mine[k].dx + arm[t].dx;
+        const double y = mine[k].dy + arm[t].dy;
+        const double z = mine[k].dz + arm[t].dz;
+        // A periodic image is a different shell site. Reject the centre and
+        // the four first-shell positions, not every copy of their atom id.
+        const double origin = x * x + y * y + z * z;
+        if (origin < 0.25 || origin > kCentre * kCentre) {
+          continue;
+        }
+        bool isFirst = false;
+        for (int q = 0; q < 4; q++) {
+          const double dx = x - mine[q].dx;
+          const double dy = y - mine[q].dy;
+          const double dz = z - mine[q].dz;
+          if (dx * dx + dy * dy + dz * dz < 0.25) {
+            isFirst = true;
+          }
+        }
+        if (isFirst) {
+          continue;
+        }
+        const double bond = arm[t].dx * arm[t].dx + arm[t].dy * arm[t].dy + arm[t].dz * arm[t].dz;
+        int found = -1;
+        for (int s = 0; s < ns; s++) {
+          const double dx = x - sx[s];
+          const double dy = y - sy[s];
+          const double dz = z - sz[s];
+          if (dx * dx + dy * dy + dz * dz < 0.25) {
+            found = s;
+          }
+        }
+        if (found >= 0) {
+          if (bond < sb[found]) {
+            sx[found] = x;
+            sy[found] = y;
+            sz[found] = z;
+            sb[found] = bond;
+          }
+          continue;
+        }
+        if (ns < 48) {
+          sx[ns] = x;
+          sy[ns] = y;
+          sz[ns] = z;
+          sb[ns] = bond;
+          ns++;
         }
       }
-      if (taken) {
-        continue;
-      }
-      double best = 1e300;
-      for (int f = 0; f < 4; f++) {
-        const double dx = kx[k] - nb[f][0];
-        const double dy = ky[k] - nb[f][1];
-        const double dz = kz[k] - nb[f][2];
-        const double d2 = dx * dx + dy * dy + dz * dz;
-        if (d2 < best) {
-          best = d2;
+    }
+    if (ns < 12) {
+      Bond selfW[24];
+      const int nw = fillWide(i, selfW, 24);
+      ns = 0;
+      if (nw >= 4) {
+        for (int k = 0; k < 4; k++) {
+          firstId[k] = selfW[k].j;
+          nbxyz[k][0] = ci0 + selfW[k].dx;
+          nbxyz[k][1] = ci1 + selfW[k].dy;
+          nbxyz[k][2] = ci2 + selfW[k].dz;
+        }
+        for (int k = 0; k < 4; k++) {
+          Bond armW[24];
+          const int na = fillWide(firstId[k], armW, 24);
+          for (int t = 0; t < na; t++) {
+            const double x = selfW[k].dx + armW[t].dx;
+            const double y = selfW[k].dy + armW[t].dy;
+            const double z = selfW[k].dz + armW[t].dz;
+            const double origin = x * x + y * y + z * z;
+            if (origin < 0.25 || origin > kCentre * kCentre) {
+              continue;
+            }
+            bool isFirst = false;
+            for (int q = 0; q < 4; q++) {
+              const double dx = x - selfW[q].dx;
+              const double dy = y - selfW[q].dy;
+              const double dz = z - selfW[q].dz;
+              if (dx * dx + dy * dy + dz * dz < 0.25) {
+                isFirst = true;
+              }
+            }
+            if (isFirst) {
+              continue;
+            }
+            const double bond =
+                armW[t].dx * armW[t].dx + armW[t].dy * armW[t].dy + armW[t].dz * armW[t].dz;
+            int found = -1;
+            for (int s = 0; s < ns; s++) {
+              const double dx = x - sx[s];
+              const double dy = y - sy[s];
+              const double dz = z - sz[s];
+              if (dx * dx + dy * dy + dz * dz < 0.25) {
+                found = s;
+              }
+            }
+            if (found >= 0) {
+              if (bond < sb[found]) {
+                sx[found] = x;
+                sy[found] = y;
+                sz[found] = z;
+                sb[found] = bond;
+              }
+              continue;
+            }
+            if (ns < 48) {
+              sx[ns] = x;
+              sy[ns] = y;
+              sz[ns] = z;
+              sb[ns] = bond;
+              ns++;
+            }
+          }
         }
       }
-      if (best < 4.2 * 4.2 && nBond < 48) {
-        bondAt[nBond] = k;
-        bondTo[nBond] = best;
-        nBond++;
-      }
     }
-    for (int a = 0; a < nBond; a++) {
-      for (int b = a + 1; b < nBond; b++) {
-        if (bondTo[b] < bondTo[a]) {
-          std::swap(bondTo[a], bondTo[b]);
-          std::swap(bondAt[a], bondAt[b]);
-        }
-      }
-    }
-    int nSecond = 0;
-    for (int a = 0; a < nBond && nSecond < 12; a++) {
-      const int k = bondAt[a];
-      nb[4 + nSecond][0] = kx[k];
-      nb[4 + nSecond][1] = ky[k];
-      nb[4 + nSecond][2] = kz[k];
-      nSecond++;
-    }
-    if (nSecond < 12) {
+    if (ns < 12) {
       kind[i] = -1;
       continue;
     }
-    const int quick = cleanLabel(ci, nb, canon);
-    kind[i] = quick == -2 ? shellFit(ci, nb, 16, canon, gate) : quick;
+    for (int a = 0; a < 12; a++) {
+      int best = a;
+      for (int b = a + 1; b < ns; b++) {
+        if (sb[b] < sb[best]) {
+          best = b;
+        }
+      }
+      std::swap(sb[a], sb[best]);
+      std::swap(sx[a], sx[best]);
+      std::swap(sy[a], sy[best]);
+      std::swap(sz[a], sz[best]);
+      nbxyz[4 + a][0] = ci0 + sx[a];
+      nbxyz[4 + a][1] = ci1 + sy[a];
+      nbxyz[4 + a][2] = ci2 + sz[a];
+    }
+    const double ci[3] = {ci0, ci1, ci2};
+    kind[i] = shellFit(ci, nbxyz, 16, canon, gate);
   }
 }
 
