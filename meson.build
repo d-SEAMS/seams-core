@@ -473,6 +473,20 @@ _incdirs += include_directories([
 # Library
 subdir('src')
 
+nucleation_link = _link_args
+if host_system == 'linux'
+  nucleation_link += ['-Wl,--enable-new-dtags']
+endif
+nucleation_pathway_exe = executable(
+  'nucleation-pathway',
+  files('scripts/nucleation_pathway.cpp'),
+  dependencies: [yds_dep],
+  include_directories: _incdirs,
+  cpp_args: _args,
+  link_args: nucleation_link,
+  build_rpath: meson.current_build_dir() / 'src',
+  install: true)
+
 # Tests
 if get_option('with_tests')
   subdir('tests')
