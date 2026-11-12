@@ -414,6 +414,21 @@ Eight threads, 884736 molecules:
 | mdapy | 113.71 | 121.66 | - | - |
 | pyscal3 | 178.38 | 224.55 | 185.65 | 234.16 |
 
+The v9 eight-thread plain q4 median at 884736 molecules was 73.8 ms.
+The v10 averaged q4 median was 165 ms. Those two numbers are not noise
+and they are not a change of thread count. In one later session
+(`discovery/v11-session.txt`) the same ice, the same cutoff and
+`max_l = 4` were timed both ways. With `OVITO_THREAD_COUNT` 8 the
+process held 17 threads and was pinned to cpus 0–7 for both calls.
+Plain q4 was 77.2–90.3 ms (median 82.0). Averaged q4 was 172.7–212.2 ms
+(median 193.4). The ranges do not overlap, and the ratio is 2.36. With
+one thread requested the process held 3 threads for both calls, plain
+median 416.8 ms and averaged median 645.5 ms, ratio 1.55. The gap is
+the Lechner–Dellago pass. It is wider at eight threads because that
+pass scales less well than the plain modifier. The v9 73.8 ms and this
+session's 82.0 ms are the plain call. The v10 165 ms is the averaged
+call, the same side of the split as this session's 193 ms.
+
 `tests/test_wl_ice.py` repeats the check on ideal ice Ic, ideal ice Ih
 and a 200-molecule liquid against pyscal3 4.1.0. Local q, q-bar and
 \(\hat w\) at \(l = 4\) and \(l = 6\) agree to \(1 \times 10^{-6}\)
@@ -422,3 +437,28 @@ entirely cubic under the published CHILL+ rule and ice Ih is entirely
 hexagonal. On ice Ih the local parameters stay at the tetrahedral
 values above, while the averages move to \(\bar q_4 = 0.36925759\)
 and \(\bar q_6 = 0.56765069\).
+
+The single-trajectory inflections 739 and 186 are not two readings of
+one nucleus. Twenty seeded mW quenches separate them
+(`discovery/v11-session.txt`). LAMMPS (22 Jul 2025) with the
+Molinero and Moore mW Stillinger–Weber parameters, 8 MPI ranks, 4096
+molecules in a 49.606 Å cube. An ice Ic core was held fixed while the
+rest of a perfect crystal melted at 480 K. The released core is 84
+CHILL+ molecules (cubic or hexagonal) and a q6-bar cluster of 147.
+Each quench is 80 ps at 200 K with its own velocities, timestep 5 fs.
+All 20 cores grew. At 80 ps the CHILL+ cluster averages 131 (88–205)
+and the q6-bar>0.3 cluster averages 396 (262–587). The same core fell
+from 84 crystalline molecules to 1 within 40 ps at 250 K, so at 200 K
+the seed is already past the size that commits.
+
+The Wedekind, Strey and Reguera sigmoid, fit to the sizes every run
+reaches and resampled 800 times, gives a CHILL+ inflection of 85
+(95% interval 85–88) and a q6-bar inflection of 219 (208–257). The
+CHILL+ value sits on the seed, which every trajectory already occupies
+at the first frame. The q6-bar value is the halfway size of that larger
+graph over the 80 ps of growth. The q6-bar cluster is 1.75 times the
+CHILL+ cluster at release and 3.0 times it at 80 ps, because the 0.3
+threshold also links a halo and liquid molecules. The figshare ratio
+739/186 is about 4, the same split read further along one growing
+trajectory. The crystal size is the CHILL+ cluster. The larger number
+is the other graph.
