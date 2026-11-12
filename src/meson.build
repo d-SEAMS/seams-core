@@ -26,6 +26,7 @@ ydslib_sources = files(
   'sphericart_ylm.cpp',
   'ylm_cartesian.cpp',
   'neighbours.cpp',
+  'nucleation_pathway.cpp',
   'cutoff_csr.cpp',
   'diamond_cna.cpp',
   'order_parameter.cpp',
