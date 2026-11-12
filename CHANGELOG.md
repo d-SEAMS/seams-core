@@ -68,6 +68,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Load oxygen and hydrogen together for `seams f4` so Rodger F4 is finite when mol IDs exist.
 - Require readcon-db 0.1.7 so static consumers receive only the archive and shared consumers receive the runtime search path.
 - Read a halo source from the frame index in share.local. The old index walked the local list as if it were the frame.
+- Keep the cutoff shell list and the per-share ring scratch on the calling thread. Overlapping calls no longer share those buffers.
 
 
 ## [2.13.0] - 2026-11-06

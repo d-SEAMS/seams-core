@@ -267,14 +267,21 @@ std::vector<std::vector<int>> ringsOf(const Cloud &local, double cutoff,
   if (local.nop == 0) {
     return {};
   }
-  static std::vector<std::vector<int>> nList;
-  static std::vector<std::vector<int>> idRows;
-  static std::vector<int> idToIndex;
-  if (nneigh::blockWindowRows(local, cutoff, nullptr, idRows)) {
-    if (static_cast<int>(nList.size()) != local.nop) {
-      nList.assign(static_cast<std::size_t>(local.nop), {});
+  // One scratch set per calling thread. Overlapping rings() calls used to
+  // share these rows and tear each other's neighbour list. The OpenMP
+  // team sorts through a local pointer: a worker's own thread_local
+  // buffer is a different object.
+  thread_local std::vector<std::vector<int>> storedRows;
+  thread_local std::vector<std::vector<int>> storedIds;
+  thread_local std::vector<int> storedIndex;
+  auto *nList = &storedRows;
+  auto *idRows = &storedIds;
+  auto *idToIndex = &storedIndex;
+  if (nneigh::blockWindowRows(local, cutoff, nullptr, *idRows)) {
+    if (static_cast<int>(nList->size()) != local.nop) {
+      nList->assign(static_cast<std::size_t>(local.nop), {});
     } else {
-      for (auto &row : nList) {
+      for (auto &row : *nList) {
         row.clear();
       }
     }
@@ -282,37 +289,37 @@ std::vector<std::vector<int>> ringsOf(const Cloud &local, double cutoff,
     for (int k = 0; k < local.nop; k++) {
       maxId = std::max(maxId, local.pts[static_cast<std::size_t>(k)].atomID);
     }
-    idToIndex.assign(static_cast<std::size_t>(maxId) + 1, -1);
+    idToIndex->assign(static_cast<std::size_t>(maxId) + 1, -1);
     for (int k = 0; k < local.nop; k++) {
       const int id = local.pts[static_cast<std::size_t>(k)].atomID;
       if (id >= 0) {
-        idToIndex[static_cast<std::size_t>(id)] = k;
+        (*idToIndex)[static_cast<std::size_t>(id)] = k;
       }
     }
     for (int k = 0; k < local.nop; k++) {
-      auto &row = nList[static_cast<std::size_t>(k)];
+      auto &row = (*nList)[static_cast<std::size_t>(k)];
       row.push_back(k);
-      for (std::size_t j = 1; j < idRows[static_cast<std::size_t>(k)].size(); j++) {
-        const int id = idRows[static_cast<std::size_t>(k)][j];
-        const int idx = (id >= 0 && id <= maxId) ? idToIndex[static_cast<std::size_t>(id)] : -1;
+      for (std::size_t j = 1; j < (*idRows)[static_cast<std::size_t>(k)].size(); j++) {
+        const int id = (*idRows)[static_cast<std::size_t>(k)][j];
+        const int idx = (id >= 0 && id <= maxId) ? (*idToIndex)[static_cast<std::size_t>(id)] : -1;
         if (idx >= 0) {
           row.push_back(idx);
         }
       }
     }
   } else {
-    nList = nneigh::getNewNeighbourListByIndex(local, cutoff);
+    *nList = nneigh::getNewNeighbourListByIndex(local, cutoff);
   }
-  const int nLocal = static_cast<int>(nList.size());
+  const int nLocal = static_cast<int>(nList->size());
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (nLocal >= kParallelMin && !omp_in_parallel())
 #endif
   for (int k = 0; k < nLocal; k++) {
-    if (nList[k].size() > 2) {
-      std::sort(nList[k].begin() + 1, nList[k].end());
+    if ((*nList)[k].size() > 2) {
+      std::sort((*nList)[k].begin() + 1, (*nList)[k].end());
     }
   }
-  return primitive::ringNetwork(nList, maxDepth, owned);
+  return primitive::ringNetwork(*nList, maxDepth, owned);
 }
 
 } // namespace

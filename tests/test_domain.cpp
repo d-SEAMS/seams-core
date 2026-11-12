@@ -10,8 +10,11 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cstdint>
 #include <cstdlib>
+#include <functional>
+#include <thread>
 #include <vector>
 
 using Cloud = seams::domain::Cloud;
@@ -216,3 +219,67 @@ TEST_CASE("a halo source is the atom share.local names", "[domain]") {
   REQUIRE(source[2] == 0);
 }
 
+namespace {
+
+Cloud lattice(int n, double a) {
+  Cloud cloud;
+  const double L = n * a;
+  cloud.box = {L, L, L};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  for (int ix = 0; ix < n; ix++) {
+    for (int iy = 0; iy < n; iy++) {
+      for (int iz = 0; iz < n; iz++) {
+        molSys::Point<double> p;
+        p.x = (ix + 0.5) * a;
+        p.y = (iy + 0.5) * a;
+        p.z = (iz + 0.5) * a;
+        p.type = 1;
+        p.atomID = cloud.nop + 1;
+        p.molID = p.atomID;
+        cloud.idIndexMap[p.atomID] = cloud.nop;
+        cloud.pts.push_back(p);
+        cloud.nop += 1;
+      }
+    }
+  }
+  return cloud;
+}
+
+} // namespace
+
+TEST_CASE("overlapping shell and ring calls keep their own scratch", "[domain][threads]") {
+  const auto cloudA = lattice(6, 3.2);
+  const auto cloudB = lattice(6, 4.8);
+  const double cutoff = 3.5;
+  const std::vector<std::vector<int>> shellA =
+      nneigh::reusedShellList(cutoff, cloudA, nullptr);
+  const std::vector<std::vector<int>> shellB =
+      nneigh::reusedShellList(cutoff, cloudB, nullptr);
+  REQUIRE(shellA != shellB);
+  const auto ringsA = seams::domain::rings(cloudA, cutoff, 4, 0, 1);
+  const auto ringsB = seams::domain::rings(cloudB, cutoff, 4, 0, 1);
+  REQUIRE(ringsA != ringsB);
+  std::atomic<int> ready{0};
+  std::atomic<int> bad{0};
+  auto run = [&](const Cloud &cloud, const std::vector<std::vector<int>> &shell,
+                 const std::vector<std::vector<int>> &rings) {
+    ready.fetch_add(1);
+    while (ready.load() < 2) {
+    }
+    for (int n = 0; n < 24; n++) {
+      const auto &got = nneigh::reusedShellList(cutoff, cloud, nullptr);
+      if (got != shell) {
+        bad.fetch_add(1);
+      }
+      if (seams::domain::rings(cloud, cutoff, 4, 0, 1) != rings) {
+        bad.fetch_add(1);
+      }
+    }
+  };
+  std::thread first(run, std::cref(cloudA), std::cref(shellA), std::cref(ringsA));
+  std::thread second(run, std::cref(cloudB), std::cref(shellB), std::cref(ringsB));
+  first.join();
+  second.join();
+  REQUIRE(bad.load() == 0);
+}

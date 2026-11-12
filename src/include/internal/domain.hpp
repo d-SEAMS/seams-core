@@ -116,7 +116,8 @@ struct Work {
 //! Build @a rank's working cloud. Ghost coordinates arrive from the owners
 //! over the distributed graph; the owned coordinates stay local. The cloud
 //! and the exchange plan are kept and rewritten in place on the next call
-//! with the same frame size and halo.
+//! with the same frame size and halo. The cached rank blocks assume atoms
+//! stay in their block for an unchanged nop.
 Work &gatherWork(const Cloud &cloud, double halo, MPI_Comm comm);
 
 //! The cloud and timers from the latest gatherWork on this rank.

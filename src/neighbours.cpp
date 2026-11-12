@@ -964,8 +964,10 @@ bool nneigh::blockWindowRows(
 const std::vector<std::vector<int>> &nneigh::reusedShellList(
     double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<char> *source) {
-  static std::vector<std::vector<int>> rows;
-  static std::vector<int> cellOf, cellStart, cellAtoms, fill;
+  // One scratch set per calling thread, as orthoFullCsr does. Two
+  // overlapping calls used to refill the same rows.
+  thread_local std::vector<std::vector<int>> rows;
+  thread_local std::vector<int> cellOf, cellStart, cellAtoms, fill;
   const int n = yCloud.nop;
   if (n <= 0 || rcutoff <= 0.0) {
     rows.clear();
