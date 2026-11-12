@@ -561,10 +561,6 @@ endif
 # uses the in-tree cell list, and without a reader the corresponding
 # formats are simply absent from the library, with nothing at run time
 # to say so.
-if get_option('openmm').enabled()
-  message('OpenMM reporter requested. It is the Python file adapters/python/dseams_insitu/openmm.py')
-endif
-
 summary({
   'BLAS/LAPACK': blas_backend,
   'SIMD distance kernel (hwy)': hwy_dep.found(),
@@ -572,8 +568,8 @@ summary({
   'MPI atom split (Steinhardt)': mpi_found,
   'OpenMP target offload': offload_enabled,
   'Device-resident batches (gpulite)': gpulite_dep.found() and not gpulite_opt.disabled(),
-  'Cell-list neighbours (vesin)': vesin_dep.found(),
-  'Periodic k-nearest (linkcell)': linkcell_dep.found(),
+  'Cutoff fallback (vesin)': vesin_dep.found(),
+  'Cutoff list (linkcell pairs_within)': linkcell_dep.found(),
   'Minimum-image wrap (minimage)': minimage_dep.found(),
   'PDB/GRO/DCD readers (chemfiles)': chemfiles_dep.found(),
   '.con reader (readcon-core)': readcon_dep.found(),
@@ -628,7 +624,7 @@ endif
 # Nanobind module over libseams. A missing nanobind skips the import test.
 if get_option('with_python')
   py_mod = import('python').find_installation(pure: false, required: false)
-  nanobind_dep = dependency('nanobind', required: false)
+  nanobind_dep = dependency('nanobind', required: false, allow_fallback: true)
   python_deps = []
   if py_mod.found() and nanobind_dep.found()
     dseams_core = py_mod.extension_module(
@@ -639,6 +635,14 @@ if get_option('with_python')
       include_directories: include_directories('include', 'src'),
       install: true,
       subdir: 'dseams')
+    py_mod.install_sources(
+      files(
+        'bindings/python/dseams/__init__.py',
+        'bindings/python/dseams/__main__.py',
+        'bindings/python/frames.py',
+      ),
+      subdir: 'dseams',
+      pure: true)
     python_deps += dseams_core
   endif
   python3_dseams = find_program('python3', required: true)

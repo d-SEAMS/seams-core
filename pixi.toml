@@ -29,7 +29,7 @@ gmp = ">=6.3.0,<7"
 mpfr = ">=4.2.2,<5"
 
 [tasks]
-setup = "meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=false --wipe 2>/dev/null; meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=false"
+setup = "meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true --wipe 2>/dev/null; meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true"
 build = { cmd = "ninja -j4 -C bbdir", depends-on = ["setup"] }
 test = { cmd = "meson test -C bbdir -v", depends-on = ["build"] }
 install = { cmd = "meson install -C bbdir", depends-on = ["build"] }

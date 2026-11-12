@@ -9,5 +9,5 @@ description = "d-SEAMS stable C API for Python"
 requires-python = ">=3.10"
 dependencies = ["numpy"]
 
-[tool.setuptools]
-packages = ["dseams"]
+[tool.meson-python.args]
+setup = ["-Dwith_python=true", "-Dwith_tests=false", "-Dwith_cli=false"]

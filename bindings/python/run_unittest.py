@@ -28,9 +28,13 @@ for name in ("__init__.py", "__main__.py"):
 shutil.copy(root / "frames.py", pkg / "frames.py")
 for so in cores:
     dest = pkg / so.name
-    if so.resolve() == dest.resolve():
-        continue
-    shutil.copy(so, dest)
+    if so.resolve() != dest.resolve():
+        shutil.copy(so, dest)
+    # The unittest loader puts bindings/python on sys.path ahead of the
+    # staged tree. The extension has to sit next to that package too.
+    sibling = root / "dseams" / so.name
+    if so.resolve() != sibling.resolve():
+        shutil.copy(so, sibling)
 
 if os.environ.get("DSEAMS_PY_READY") != "1":
     env = os.environ.copy()
@@ -42,6 +46,12 @@ if os.environ.get("DSEAMS_PY_READY") != "1":
 
 import unittest
 
-suite = unittest.defaultTestLoader.discover(str(root / "tests"), pattern="test_*.py")
-result = unittest.TextTestRunner(verbosity=1).run(suite)
-sys.exit(0 if result.wasSuccessful() else 1)
+try:
+    suite = unittest.defaultTestLoader.discover(str(root / "tests"), pattern="test_*.py")
+    result = unittest.TextTestRunner(verbosity=1).run(suite)
+    sys.exit(0 if result.wasSuccessful() else 1)
+finally:
+    for so in cores:
+        sibling = root / "dseams" / so.name
+        if sibling.is_file() and so.resolve() != sibling.resolve():
+            sibling.unlink()

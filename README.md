@@ -342,11 +342,11 @@ The libraries used are:
 
 # Language fronts
 
-Python is [pydseamslib](https://github.com/d-SEAMS/PydSEAMSlib)
-(`pip install pydseamslib`, `import pydseamslib`). Do not build a second
-Python module in this repository.
+The nanobind module `dseams._core` is built from the in-tree `libseams`
+when nanobind is found (`-Dwith_python=true`, the default). A missing
+nanobind uses `subprojects/nanobind.wrap`.
 
 `libseams_lang` is built with the engine for the R package
 (`bindings/r/dseams`) and the Julia package
-(`bindings/julia/Dseams`). It calls the same classifiers as the CLI.
-The how-to is `docs/orgmode/howto/bindings.org`.
+(`bindings/julia/Dseams`). `bindings/julia/Seams` is the thin `libseams`
+example. The how-to is `docs/orgmode/howto/bindings.org`.
