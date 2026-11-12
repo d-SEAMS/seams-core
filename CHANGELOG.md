@@ -66,7 +66,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Evaluate Steinhardt l=12 qlBar on the host so the 25-component average does not overflow the device barRe[17] buffer.
 - Keep spherical-harmonic scratch local to each call so concurrent frames and changing thread counts do not share buffers.
 - Load oxygen and hydrogen together for `seams f4` so Rodger F4 is finite when mol IDs exist.
-- Require readcon-db 0.1.7 so static consumers receive only the archive and shared consumers receive the runtime search path.
+- Require readcon-db 0.1.8 so static consumers receive only the archive and shared consumers receive the runtime search path.
 - Read a halo source from the frame index in share.local. The old index walked the local list as if it were the frame.
 - Keep the cutoff shell list and the per-share ring scratch on the calling thread. Overlapping calls no longer share those buffers.
 - Keep BondClassifier at the 2.13 layout, three doubles and one int. Open edges are an argument of classifyBond, so a caller that passes the struct by value is unchanged.
