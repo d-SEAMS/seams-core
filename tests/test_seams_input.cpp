@@ -11,6 +11,10 @@
 #include <string>
 #include <vector>
 
+#include <fcntl.h>
+#include <sys/resource.h>
+#include <unistd.h>
+
 namespace fs = std::filesystem;
 
 // -- readXYZ tests --
@@ -637,3 +641,73 @@ TEST_CASE("readChemfiles reports unreadable files without terminating",
   REQUIRE(cloud.nop == 0);
 }
 #endif // SEAMS_HAS_CHEMFILES
+
+namespace {
+
+void writeDumpLines(const fs::path &path, int declared, int lines) {
+  std::ofstream out(path);
+  out << "ITEM: TIMESTEP\n0\nITEM: NUMBER OF ATOMS\n" << declared
+      << "\nITEM: BOX BOUNDS pp pp pp\n0 10\n0 10\n0 10\n"
+      << "ITEM: ATOMS id type x y z\n";
+  for (int i = 0; i < lines; ++i) {
+    out << i << " 1 0 0 0\n";
+  }
+}
+
+} // namespace
+
+// The session from the first read keeps its descriptor. Drop it before
+// the limit, so the next read has to open and that open fails.
+TEST_CASE("a second open fails when the process is out of descriptors",
+          "[seams_input]") {
+  const auto dir = fs::temp_directory_path() / "dseams_nofile_descriptor";
+  fs::remove_all(dir);
+  fs::create_directories(dir);
+  const auto dump = dir / "nofile.lammpstrj";
+  writeDumpLines(dump, 220000, 220000);
+  const auto path = dump.string();
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud = sinp::readLammpsTrj(path, 1, cloud);
+  REQUIRE(cloud.nop == 220000);
+  sinp::dropLammpsDumpIndex(path);
+  struct rlimit saved {};
+  REQUIRE(::getrlimit(RLIMIT_NOFILE, &saved) == 0);
+  std::vector<int> held;
+  int maxfd = 0;
+  while (held.size() < 128) {
+    const int fd = ::open("/dev/null", O_RDONLY);
+    if (fd < 0) {
+      break;
+    }
+    if (fd > maxfd) {
+      maxfd = fd;
+    }
+    held.push_back(fd);
+  }
+  {
+    struct Restore {
+      struct rlimit saved;
+      std::vector<int> *held;
+      bool armed = false;
+      ~Restore() {
+        if (armed) {
+          ::setrlimit(RLIMIT_NOFILE, &saved);
+        }
+        if (held != nullptr) {
+          for (const int fd : *held) {
+            ::close(fd);
+          }
+        }
+      }
+    } restore{saved, &held, false};
+    REQUIRE(!held.empty());
+    struct rlimit tight = saved;
+    tight.rlim_cur = static_cast<rlim_t>(maxfd + 1);
+    REQUIRE(::setrlimit(RLIMIT_NOFILE, &tight) == 0);
+    restore.armed = true;
+    cloud = sinp::readLammpsTrj(path, 1, cloud);
+    REQUIRE(cloud.nop == 0);
+    sinp::dropLammpsDumpIndex(path);
+  }
+  fs::remove_all(dir);
+}

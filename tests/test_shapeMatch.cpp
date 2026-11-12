@@ -258,9 +258,13 @@ TEST_CASE("matchUntetheredPrism does not crash on degenerate geometry",
   std::vector<int> basal2 = {4, 5, 6, 7};
   std::vector<double> rmsdPerAtom(8, -1.0);
 
-  // Coplanar rings cannot be a prism; shape matching should fail
+  // Two coplanar squares. The reference prism is built from this
+  // pair, and an RMSD of 6 used to accept it. A prism is stacked, so
+  // the match is false and no per-atom RMSD is written.
   bool isMatch = match::matchUntetheredPrism(cloud, nList, refPoints, basal1,
                                               basal2, rmsdPerAtom);
-  // Coplanar rings should not form a valid prism; just verify no crash
-  (void)isMatch;
+  REQUIRE_FALSE(isMatch);
+  for (double r : rmsdPerAtom) {
+    REQUIRE(r == -1.0);
+  }
 }
