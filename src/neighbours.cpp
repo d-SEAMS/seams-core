@@ -1824,10 +1824,20 @@ std::vector<std::vector<int>>
 nneigh::neighListO(double rcutoff,
                    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    int typeI) {
-  seams::adoptThreads();
-  if (gSerialCutoff) {
-    lc_set_threads(1);
-  }
+  // The cutoff rows are an OpenMP walk. Pausing that team here makes the
+  // next region pay a wake-up, and an unsized Rayon pool would spin beside
+  // it. Record the OpenMP width for linkcell and leave the team running.
+  seams::prepareCompute();
+#ifdef SEAMS_HAS_OPENMP
+  const int pool = (gSerialCutoff || omp_in_parallel()) ? 1 : std::max(1, omp_get_max_threads());
+#else
+  const int pool = 1;
+#endif
+#ifdef SEAMS_HAS_LINKCELL
+  lc_set_threads(pool);
+#else
+  (void)pool;
+#endif
   if (!hasPeriodicBox(yCloud)) {
     return {};
   }

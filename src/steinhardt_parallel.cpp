@@ -986,7 +986,8 @@ bool rowLists(const int *nom, int k, int row, int target) {
 // heavier search; on ice the cutoff shell is those four neighbours.
 SteinhardtQl cutoffSolid(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
-    int orderL, int typeI, bool average, bool invariants) {
+    int orderL, int typeI, bool average, bool invariants,
+    std::vector<double> *q6out = nullptr) {
   const int n = yCloud.nop;
   SteinhardtQl result;
   result.ql.assign(static_cast<std::size_t>(n), 0.0);
@@ -1089,6 +1090,9 @@ SteinhardtQl cutoffSolid(
 #ifdef SEAMS_HAS_OPENMP
     omp_set_num_threads(saved);
 #endif
+    if (q6out != nullptr) {
+      q6out->clear();
+    }
     return {};
   }
   constexpr double pi = 3.14159265358979323846;
@@ -1188,12 +1192,23 @@ SteinhardtQl cutoffSolid(
         nUsed[a] = 0;
       }
       double tileQl[8] = {};
+      double tileQ6[8] = {};
+      // q4 and q6 share this shell. A second call would rebuild the cutoff.
+      const bool also6 = q6out != nullptr && orderL == 4;
+      const double pre6 = 4.0 * pi / 13.0;
       if (maxB > 0) {
         seams::ylm::ylmLocalQl(orderL, dxs.data(), dys.data(), dzs.data(), maxB, nUsed,
                                prefactor, tileQl);
+        if (also6) {
+          seams::ylm::ylmLocalQl(6, dxs.data(), dys.data(), dzs.data(), maxB, nUsed, pre6,
+                                 tileQ6);
+        }
       }
       for (int a = 0; a < alive; ++a) {
         result.ql[static_cast<std::size_t>(begin + a)] = tileQl[a];
+        if (also6) {
+          (*q6out)[static_cast<std::size_t>(begin + a)] = tileQ6[a];
+        }
       }
     }
   }
@@ -1569,6 +1584,9 @@ SteinhardtQl cutoffSolid(
 #ifdef SEAMS_HAS_OPENMP
   omp_set_num_threads(saved);
 #endif
+  if (q6out != nullptr && !wroteLocal) {
+    q6out->clear();
+  }
   if (timing) {
     const auto tEnd = std::chrono::steady_clock::now();
     const auto ms = [](auto a, auto b) {
@@ -1580,6 +1598,18 @@ SteinhardtQl cutoffSolid(
               << " bar_ms=" << ms(tYlm, tEnd) << "\n";
   }
   return result;
+}
+
+bool localCutoffQ4Q6(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
+    int typeI, std::vector<double> &q4, std::vector<double> &q6) {
+  q6.assign(static_cast<std::size_t>(std::max(yCloud.nop, 0)), 0.0);
+  SteinhardtQl got = cutoffSolid(yCloud, cutoff, 4, typeI, false, false, &q6);
+  if (got.ql.empty() || q6.size() != got.ql.size()) {
+    return false;
+  }
+  q4 = std::move(got.ql);
+  return true;
 }
 
 SteinhardtQl steinhardtQlCutoff(

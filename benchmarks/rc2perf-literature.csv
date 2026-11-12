@@ -1,0 +1,129 @@
+threads,cores,cpus,phase,molecules,operation,code,version,warmup,n,median_ms,q1_ms,q3_ms,iqr_ms,agreement,detail,samples_ms
+1,1,0,Ic,110592,neighbours,d-SEAMS,2.14.0,1,8,12.958,12.838,12.989,0.151,1.000000,reference cutoff list,12.973 12.977 12.831 12.781 12.942 13.101 12.841 13.027
+1,1,0,Ic,110592,neighbours,mdapy,2.0.0,1,8,42.080,41.377,44.607,3.230,1.000000,atoms 0 differ,42.541 40.960 44.519 41.620 45.146 41.040 44.870 41.489
+1,1,0,Ic,110592,neighbours,pyscal3,4.1.0,1,8,175.153,172.227,176.516,4.289,1.000000,atoms 0 differ,177.616 173.978 177.067 172.321 176.332 171.944 176.328 171.208
+1,1,0,Ic,110592,neighbours,vesin,0.6.2,1,8,48.884,48.787,49.050,0.262,1.000000,atoms 0 differ,50.381 48.822 48.665 49.352 48.803 48.949 48.947 48.741
+1,1,0,Ic,110592,q4,d-SEAMS,2.14.0,1,8,17.536,17.340,17.648,0.308,1.000000,reference local ql on the cutoff list,17.703 17.573 17.368 17.255 17.888 17.630 17.126 17.500
+1,1,0,Ic,110592,q4,mdapy,2.0.0,1,8,59.907,59.853,60.060,0.207,1.000000,max_abs=4.441e-16 within_1e-6=1.000000,60.791 59.764 59.870 60.070 59.905 59.801 60.056 59.908
+1,1,0,Ic,110592,q4,pyscal3,4.1.0,1,8,86.938,86.694,88.075,1.381,1.000000,max_abs=4.441e-16 within_1e-6=1.000000,93.539 86.395 88.005 86.826 87.050 88.283 86.441 86.779
+1,1,0,Ic,110592,q4,PLUMED,,1,0,,,,,,"
+Action ""Q4"" is not known.
+An Action named ""Q4"" is available in module ""symfunc"".
+Please consider installing PLUMED with that module enabled.",
+1,1,0,Ic,110592,q6,d-SEAMS,2.14.0,1,8,18.196,18.075,18.425,0.349,1.000000,reference local ql on the cutoff list,18.010 18.302 18.522 18.394 18.088 18.516 18.036 18.090
+1,1,0,Ic,110592,q6,mdapy,2.0.0,1,8,73.259,73.146,73.426,0.281,1.000000,max_abs=7.772e-16 within_1e-6=1.000000,73.197 73.389 73.630 73.538 73.079 73.127 73.321 73.152
+1,1,0,Ic,110592,q6,pyscal3,4.1.0,1,8,97.298,96.858,99.123,2.265,1.000000,max_abs=5.551e-16 within_1e-6=1.000000,104.178 96.913 98.881 96.563 97.598 99.849 96.694 96.997
+1,1,0,Ic,110592,q6,PLUMED,,1,0,,,,,,"
+Action ""Q6"" is not known.
+An Action named ""Q6"" is available in module ""symfunc"".
+Please consider installing PLUMED with that module enabled.",
+1,1,0,Ic,110592,diamond,d-SEAMS,2.14.0,1,8,36.200,36.014,36.550,0.536,1.000000,reference diamond common-neighbour labels,36.332 35.851 36.630 35.873 36.657 36.062 36.068 36.524
+1,1,0,Ic,110592,diamond,mdapy,2.0.0,1,8,132.839,132.673,132.959,0.286,1.000000,cubic/cubic:110592,132.929 133.093 132.646 132.654 132.679 133.048 132.752 132.926
+1,1,0,Ic,110592,diamond,pyscal3,4.1.0,1,8,98.248,98.014,98.396,0.382,1.000000,cubic/cubic:110592,98.962 97.946 98.257 98.260 97.809 98.036 98.801 98.240
+1,1,0,Ic,110592,cna,mdapy,2.0.0,1,8,25.977,25.878,26.127,0.250,0.000000,metal CNA versus diamond labels; fcc/hcp/bcc/ico are not ice classes. cubic/other:110592,25.860 25.868 25.908 25.881 26.121 26.146 26.165 26.046
+1,1,0,Ic,110592,cna,pyscal3,4.1.0,1,8,335.192,333.599,337.184,3.585,0.000000,metal CNA versus diamond labels; fcc/hcp/bcc/ico are not ice classes. cubic/other:110592,350.331 337.828 334.135 335.459 334.925 336.969 331.991 331.098
+1,1,0,Ic,110592,rings,d-SEAMS,2.14.0,1,8,91.763,91.509,91.963,0.454,1.000000,"reference primitive sizes 3-6 [0, 0, 0, 221184]",93.223 91.053 92.163 91.645 91.881 91.563 91.896 91.344
+1,1,0,Ic,110592,rings,mdapy,2.0.0,1,8,2187.852,2184.765,2333.600,148.834,1.000000,"shortest-path sizes 3-6 [0, 0, 0, 221184]",2189.800 2182.619 2184.996 2185.903 2184.073 2352.852 2331.242 2340.673
+1,1,0,Ic,110592,rings,SQQ,0.5.8,1,8,15248.409,14125.922,16741.508,2615.587,1.000000,"shortest-path chordless 4-6 [0, 0, 221184]; d-SEAMS [0, 0, 221184]; SQQ does not search 3-rings",16979.027 17346.155 16662.336 15509.828 14986.991 13861.947 14151.561 14049.004
+1,1,0,Ic,110592,coordination,d-SEAMS,2.14.0,1,8,12.781,12.681,13.033,0.352,1.000000,sharp 3.5 A neighbour count,12.671 12.878 13.344 12.685 12.617 12.684 13.495 12.930
+1,1,0,Ic,110592,coordination,PLUMED,,1,0,,,,,,"
+Action ""COORDINATIONNUMBER"" is not known.
+An Action named ""COORDINATIONNUMBER"" is available in module ""symfunc"".
+Please consider installing PLUMED with that module enabled.",
+1,1,0,Ic,110592,cages,d-SEAMS,2.14.0,1,8,59.557,59.478,59.805,0.327,1.000000,5^12 timed; 51262=0 51264=0 read once on the cutoff graph. TRACE cutoff 0.35 nm and angle 35 degrees. Hydrogens sit 0.96 A along the two nearest oxygen-oxygen bonds,60.133 59.608 59.411 59.318 59.767 59.500 59.507 59.919
+1,1,0,Ic,110592,cages,ClavisCage,0.3.18,1,8,368.404,367.882,368.823,0.941,1.000000,"TRACE 512/51262/51264 (0, 0, 0); d-SEAMS (0, 0, 0). TRACE cutoff 0.35 nm and angle 35 degrees. Hydrogens sit 0.96 A along the two nearest oxygen-oxygen bonds",367.523 368.747 368.061 367.867 368.825 367.887 368.823 369.037
+1,1,0,Ic,110592,symmetry,d-SEAMS,2.14.0/kabsch,1,8,24.319,24.156,24.377,0.221,1.000000,reference local symmetry classify,24.470 24.415 24.142 24.340 24.161 24.364 24.297 24.059
+1,1,0,Ic,110592,symmetry,IRA,2.2.0,1,8,26568.831,26542.166,26601.002,58.836,1.000000,best ice template by Hausdorff; reject above 0.2 A; median_hausdorff=0.0000,26629.499 26978.173 26563.137 26536.861 26532.499 26591.503 26543.934 26574.524
+1,1,0,Ih,110592,neighbours,d-SEAMS,2.14.0,1,8,11.104,10.968,11.167,0.199,1.000000,reference cutoff list,11.012 11.174 11.171 10.835 11.081 10.698 11.128 11.165
+1,1,0,Ih,110592,neighbours,mdapy,2.0.0,1,8,40.669,40.610,40.915,0.304,1.000000,atoms 0 differ,41.296 40.704 40.619 41.862 40.634 40.575 40.788 40.586
+1,1,0,Ih,110592,neighbours,pyscal3,4.1.0,1,8,163.995,163.547,164.557,1.010,1.000000,atoms 0 differ,167.514 163.493 165.234 162.412 163.565 163.868 164.122 164.331
+1,1,0,Ih,110592,neighbours,vesin,0.6.2,1,8,46.531,46.490,46.570,0.080,1.000000,atoms 0 differ,46.759 46.530 46.640 46.497 46.380 46.547 46.531 46.471
+1,1,0,Ih,110592,q4,d-SEAMS,2.14.0,1,8,15.904,15.780,16.044,0.264,1.000000,reference local ql on the cutoff list,16.399 15.670 15.783 15.768 16.014 16.134 15.865 15.943
+1,1,0,Ih,110592,q4,mdapy,2.0.0,1,8,60.572,60.464,60.620,0.156,1.000000,max_abs=4.441e-16 within_1e-6=1.000000,60.904 60.584 60.560 60.430 60.611 60.475 60.645 60.189
+1,1,0,Ih,110592,q4,pyscal3,4.1.0,1,8,76.829,76.713,77.245,0.532,1.000000,max_abs=3.331e-16 within_1e-6=1.000000,78.019 76.887 76.430 77.305 76.573 77.225 76.771 76.759
+1,1,0,Ih,110592,q4,PLUMED,,1,0,,,,,,"
+Action ""Q4"" is not known.
+An Action named ""Q4"" is available in module ""symfunc"".
+Please consider installing PLUMED with that module enabled.",
+1,1,0,Ih,110592,q6,d-SEAMS,2.14.0,1,8,16.513,16.391,16.653,0.262,1.000000,reference local ql on the cutoff list,17.042 16.540 16.884 16.486 16.141 16.430 16.275 16.576
+1,1,0,Ih,110592,q6,mdapy,2.0.0,1,8,74.098,74.011,74.367,0.356,1.000000,max_abs=7.772e-16 within_1e-6=1.000000,73.926 74.118 74.371 74.039 74.365 74.425 74.078 73.556
+1,1,0,Ih,110592,q6,pyscal3,4.1.0,1,8,87.489,87.151,87.774,0.622,1.000000,max_abs=6.661e-16 within_1e-6=1.000000,87.306 88.156 86.616 86.689 87.648 87.330 88.048 87.682
+1,1,0,Ih,110592,q6,PLUMED,,1,0,,,,,,"
+Action ""Q6"" is not known.
+An Action named ""Q6"" is available in module ""symfunc"".
+Please consider installing PLUMED with that module enabled.",
+1,1,0,Ih,110592,diamond,d-SEAMS,2.14.0,1,8,31.643,31.483,31.827,0.344,1.000000,reference diamond common-neighbour labels,31.551 31.913 31.497 31.443 31.358 31.735 31.798 32.019
+1,1,0,Ih,110592,diamond,mdapy,2.0.0,1,8,145.303,145.082,145.430,0.348,1.000000,hexagonal/hexagonal:110592,145.369 144.818 145.243 145.612 145.102 145.754 145.363 145.022
+1,1,0,Ih,110592,diamond,pyscal3,4.1.0,1,8,93.303,93.009,93.672,0.663,1.000000,hexagonal/hexagonal:110592,92.861 93.781 94.041 93.030 92.945 93.350 93.255 93.635
+1,1,0,Ih,110592,cna,mdapy,2.0.0,1,8,25.870,25.775,26.044,0.269,0.000000,metal CNA versus diamond labels; fcc/hcp/bcc/ico are not ice classes. hexagonal/other:110592,26.348 25.847 25.737 26.103 25.763 25.892 26.025 25.779
+1,1,0,Ih,110592,cna,pyscal3,4.1.0,1,8,247.296,246.191,249.452,3.260,0.000000,metal CNA versus diamond labels; fcc/hcp/bcc/ico are not ice classes. hexagonal/other:110592,246.360 245.687 244.301 246.974 247.619 249.675 249.882 249.377
+1,1,0,Ih,110592,rings,d-SEAMS,2.14.0,1,8,93.249,92.989,93.520,0.531,1.000000,"reference primitive sizes 3-6 [0, 0, 0, 221184]",93.150 94.392 93.720 93.148 93.454 92.511 92.311 93.347
+1,1,0,Ih,110592,rings,mdapy,2.0.0,1,8,2480.431,2480.232,2480.707,0.475,1.000000,"shortest-path sizes 3-6 [0, 0, 0, 221184]",2484.762 2480.754 2479.384 2480.421 2480.380 2480.441 2479.786 2480.691
+1,1,0,Ih,110592,rings,SQQ,0.5.8,1,8,15078.363,14924.850,15106.081,181.231,1.000000,"shortest-path chordless 4-6 [0, 0, 221184]; d-SEAMS [0, 0, 221184]; SQQ does not search 3-rings",14788.705 14943.495 15104.257 14868.915 15111.554 15195.438 15067.309 15089.417
+1,1,0,Ih,110592,coordination,d-SEAMS,2.14.0,1,8,11.106,11.079,11.250,0.171,1.000000,sharp 3.5 A neighbour count,11.108 11.090 11.104 11.017 11.232 11.357 11.302 11.045
+1,1,0,Ih,110592,coordination,PLUMED,,1,0,,,,,,"
+Action ""COORDINATIONNUMBER"" is not known.
+An Action named ""COORDINATIONNUMBER"" is available in module ""symfunc"".
+Please consider installing PLUMED with that module enabled.",
+1,1,0,Ih,110592,cages,d-SEAMS,2.14.0,1,8,56.502,56.415,56.602,0.187,1.000000,5^12 timed; 51262=0 51264=0 read once on the cutoff graph. TRACE cutoff 0.35 nm and angle 35 degrees. Hydrogens sit 0.96 A along the two nearest oxygen-oxygen bonds,57.302 56.334 56.509 56.495 56.780 56.259 56.442 56.543
+1,1,0,Ih,110592,cages,ClavisCage,0.3.18,1,8,259.302,258.953,259.675,0.721,1.000000,"TRACE 512/51262/51264 (0, 0, 0); d-SEAMS (0, 0, 0). TRACE cutoff 0.35 nm and angle 35 degrees. Hydrogens sit 0.96 A along the two nearest oxygen-oxygen bonds",259.566 258.719 257.794 259.999 260.241 259.511 259.092 259.031
+1,1,0,Ih,110592,symmetry,d-SEAMS,2.14.0/kabsch,1,8,20.501,20.453,20.525,0.071,1.000000,reference local symmetry classify,20.688 20.462 20.283 20.506 20.427 20.579 20.501 20.501
+1,1,0,Ih,110592,symmetry,IRA,2.2.0,1,8,26709.655,26626.080,26823.054,196.974,1.000000,best ice template by Hausdorff; reject above 0.2 A; median_hausdorff=0.0000,26615.033 26586.539 26726.783 26776.612 27037.136 26692.526 26962.381 26629.762
+1,1,0,liquid-mw,512,neighbours,d-SEAMS,2.14.0,1,8,1.405,1.399,1.418,0.019,1.000000,reference cutoff list,1.413 1.397 1.402 1.395 1.408 1.435 1.468 1.400
+1,1,0,liquid-mw,512,neighbours,mdapy,2.0.0,1,8,1.603,1.598,1.624,0.026,1.000000,atoms 0 differ,1.632 1.622 1.604 1.600 1.592 1.590 1.630 1.602
+1,1,0,liquid-mw,512,neighbours,pyscal3,4.1.0,1,8,12.884,12.815,13.016,0.200,1.000000,atoms 0 differ,13.167 12.828 12.906 13.037 12.779 12.722 12.861 13.009
+1,1,0,liquid-mw,512,neighbours,vesin,0.6.2,1,8,1.938,1.934,2.019,0.085,1.000000,atoms 0 differ,2.014 2.034 1.935 1.933 1.940 1.935 2.035 1.925
+1,1,0,liquid-mw,512,q4,d-SEAMS,2.14.0,1,8,1.706,1.693,1.713,0.020,1.000000,reference local ql on the cutoff list,1.709 1.695 1.687 1.679 1.759 1.722 1.707 1.705
+1,1,0,liquid-mw,512,q4,mdapy,2.0.0,1,8,2.757,2.750,2.774,0.024,1.000000,max_abs=2.082e-16 within_1e-6=1.000000,2.935 2.740 2.756 2.790 2.757 2.735 2.754 2.769
+1,1,0,liquid-mw,512,q4,pyscal3,4.1.0,1,8,11.517,11.437,11.621,0.185,1.000000,max_abs=2.082e-16 within_1e-6=1.000000,11.768 11.680 11.422 11.441 11.354 11.584 11.602 11.450
+1,1,0,liquid-mw,512,q4,PLUMED,,1,0,,,,,,"
+Action ""Q4"" is not known.
+An Action named ""Q4"" is available in module ""symfunc"".
+Please consider installing PLUMED with that module enabled.",
+1,1,0,liquid-mw,512,q6,d-SEAMS,2.14.0,1,8,1.745,1.717,1.871,0.154,1.000000,reference local ql on the cutoff list,1.868 1.709 2.047 1.768 1.719 1.882 1.712 1.723
+1,1,0,liquid-mw,512,q6,mdapy,2.0.0,1,8,3.669,3.654,3.675,0.022,1.000000,max_abs=2.359e-16 within_1e-6=1.000000,3.668 3.671 3.819 3.647 3.671 3.656 3.642 3.688
+1,1,0,liquid-mw,512,q6,pyscal3,4.1.0,1,8,17.578,17.194,17.787,0.593,1.000000,max_abs=2.220e-16 within_1e-6=1.000000,17.123 17.196 17.187 17.628 17.786 17.528 18.011 17.789
+1,1,0,liquid-mw,512,q6,PLUMED,,1,0,,,,,,"
+Action ""Q6"" is not known.
+An Action named ""Q6"" is available in module ""symfunc"".
+Please consider installing PLUMED with that module enabled.",
+1,1,0,liquid-mw,512,diamond,d-SEAMS,2.14.0,1,8,0.779,0.776,0.790,0.014,1.000000,reference diamond common-neighbour labels; a crowded shell uses the four nearest neighbours,0.812 0.775 0.777 0.776 0.776 0.781 0.792 0.789
+1,1,0,liquid-mw,512,diamond,mdapy,2.0.0,1,8,0.570,0.554,0.576,0.021,1.000000,other/other:512,0.652 0.567 0.550 0.574 0.556 0.545 0.573 0.580
+1,1,0,liquid-mw,512,diamond,pyscal3,4.1.0,1,8,5.196,5.169,5.272,0.103,1.000000,other/other:512,5.281 5.179 5.205 5.187 5.138 5.269 5.101 5.335
+1,1,0,liquid-mw,512,cna,mdapy,2.0.0,1,8,0.881,0.872,0.893,0.021,1.000000,metal CNA versus diamond labels; fcc/hcp/bcc/ico are not ice classes. other/other:512,0.891 0.881 0.870 0.896 0.882 0.871 0.872 0.987
+1,1,0,liquid-mw,512,cna,pyscal3,4.1.0,1,8,5.009,4.984,5.042,0.057,1.000000,metal CNA versus diamond labels; fcc/hcp/bcc/ico are not ice classes. other/other:512,5.035 4.974 5.012 5.064 5.061 5.006 4.985 4.981
+8,8,0-7,Ic,110592,neighbours,d-SEAMS,2.14.0,1,8,4.287,4.217,4.917,0.699,1.000000,reference cutoff list,4.412 4.227 10.884 6.431 4.189 4.262 4.177 4.311
+8,8,0-7,Ic,110592,neighbours,mdapy,2.0.0,1,8,62.605,60.708,64.508,3.801,1.000000,atoms 0 differ,65.256 60.428 67.030 61.638 64.259 59.094 63.573 60.801
+8,8,0-7,Ic,110592,neighbours,pyscal3,4.1.0,1,8,185.708,184.344,186.781,2.437,1.000000,atoms 0 differ,206.256 185.634 188.025 186.366 185.188 181.812 185.782 180.609
+8,8,0-7,Ic,110592,neighbours,vesin,0.6.2,1,8,50.681,50.570,50.754,0.185,1.000000,atoms 0 differ,52.604 50.654 50.748 50.578 50.773 50.514 50.543 50.707
+8,8,0-7,Ic,110592,q4,d-SEAMS,2.14.0,1,8,5.049,5.000,5.086,0.086,1.000000,reference local ql on the cutoff list,5.217 5.063 5.093 5.034 5.084 4.986 5.005 4.973
+8,8,0-7,Ic,110592,q4,mdapy,2.0.0,1,8,80.176,79.934,80.528,0.595,1.000000,max_abs=4.441e-16 within_1e-6=1.000000,80.740 80.077 80.458 79.885 79.950 79.798 80.276 81.166
+8,8,0-7,Ic,110592,q4,pyscal3,4.1.0,1,8,90.943,90.423,98.787,8.364,1.000000,max_abs=4.441e-16 within_1e-6=1.000000,176.523 110.277 91.261 90.626 89.720 94.957 90.229 90.488
+8,8,0-7,Ic,110592,q4,PLUMED,,1,0,,,,,,"
+Action ""Q4"" is not known.
+An Action named ""Q4"" is available in module ""symfunc"".
+Please consider installing PLUMED with that module enabled.",
+8,8,0-7,Ic,110592,q6,d-SEAMS,2.14.0,1,8,5.240,5.213,5.259,0.046,1.000000,reference local ql on the cutoff list,5.348 5.238 5.224 5.241 5.180 5.264 5.156 5.257
+8,8,0-7,Ic,110592,q6,mdapy,2.0.0,1,8,94.818,94.700,95.132,0.432,1.000000,max_abs=7.772e-16 within_1e-6=1.000000,94.757 94.697 94.701 94.879 95.156 94.229 95.388 95.124
+8,8,0-7,Ic,110592,q6,pyscal3,4.1.0,1,8,101.745,101.114,105.338,4.223,1.000000,max_abs=5.551e-16 within_1e-6=1.000000,109.076 101.185 104.192 101.453 102.036 108.775 100.902 100.522
+8,8,0-7,Ic,110592,q6,PLUMED,,1,0,,,,,,"
+Action ""Q6"" is not known.
+An Action named ""Q6"" is available in module ""symfunc"".
+Please consider installing PLUMED with that module enabled.",
+8,8,0-7,Ic,110592,diamond,d-SEAMS,2.14.0,1,8,10.068,9.885,10.320,0.435,1.000000,reference diamond common-neighbour labels,9.977 9.894 9.822 10.344 10.312 10.158 9.856 13.026
+8,8,0-7,Ic,110592,diamond,mdapy,2.0.0,1,8,182.317,182.096,183.113,1.018,1.000000,cubic/cubic:110592,182.002 182.765 182.365 182.269 182.127 181.764 186.067 184.157
+8,8,0-7,Ic,110592,diamond,pyscal3,4.1.0,1,8,100.593,100.287,100.981,0.694,1.000000,cubic/cubic:110592,104.053 101.345 100.688 100.498 100.859 100.372 100.033 99.631
+8,8,0-7,Ic,110592,cna,mdapy,2.0.0,1,8,44.010,43.441,44.592,1.151,0.000000,metal CNA versus diamond labels; fcc/hcp/bcc/ico are not ice classes. cubic/other:110592,44.833 42.755 44.607 44.297 43.724 43.438 43.442 44.587
+8,8,0-7,Ic,110592,cna,pyscal3,4.1.0,1,8,348.357,338.581,374.853,36.272,0.000000,metal CNA versus diamond labels; fcc/hcp/bcc/ico are not ice classes. cubic/other:110592,385.392 413.412 371.340 337.407 345.059 338.417 351.656 338.635
+8,8,0-7,Ic,110592,rings,d-SEAMS,2.14.0,1,8,28.945,28.785,28.984,0.199,1.000000,"reference primitive sizes 3-6 [0, 0, 0, 221184]",29.171 28.965 28.723 28.925 28.982 28.991 28.688 28.805
+8,8,0-7,Ic,110592,rings,mdapy,2.0.0,1,8,1640.954,1621.690,1648.211,26.521,1.000000,"shortest-path sizes 3-6 [0, 0, 0, 221184]",1642.158 1642.131 1639.776 1628.452 1601.403 1599.492 1666.371 1667.198
+8,8,0-7,Ic,110592,rings,SQQ,0.5.8,1,8,13893.758,13821.643,13955.952,134.309,1.000000,"shortest-path chordless 4-6 [0, 0, 221184]; d-SEAMS [0, 0, 221184]; SQQ does not search 3-rings",13836.129 13777.088 13869.694 13778.182 13919.817 13917.823 14240.067 14064.358
+8,8,0-7,Ic,110592,coordination,d-SEAMS,2.14.0,1,8,4.241,4.215,4.267,0.053,1.000000,sharp 3.5 A neighbour count,4.256 4.294 4.219 4.358 4.226 4.204 4.259 4.189
+8,8,0-7,Ic,110592,coordination,PLUMED,,1,0,,,,,,"
+Action ""COORDINATIONNUMBER"" is not known.
+An Action named ""COORDINATIONNUMBER"" is available in module ""symfunc"".
+Please consider installing PLUMED with that module enabled.",
+8,8,0-7,Ic,110592,cages,d-SEAMS,2.14.0,1,8,15.924,15.796,15.975,0.179,1.000000,5^12 timed; 51262=0 51264=0 read once on the cutoff graph. TRACE cutoff 0.35 nm and angle 35 degrees. Hydrogens sit 0.96 A along the two nearest oxygen-oxygen bonds,16.457 15.975 15.901 15.748 15.948 15.721 15.811 15.975
+8,8,0-7,Ic,110592,cages,ClavisCage,0.3.18,1,8,367.804,367.513,368.545,1.032,1.000000,"TRACE 512/51262/51264 (0, 0, 0); d-SEAMS (0, 0, 0). TRACE cutoff 0.35 nm and angle 35 degrees. Hydrogens sit 0.96 A along the two nearest oxygen-oxygen bonds",369.456 368.029 367.078 367.579 367.418 368.766 367.544 368.471
+8,8,0-7,Ic,110592,symmetry,d-SEAMS,2.14.0/kabsch,1,8,6.075,5.664,6.157,0.492,1.000000,reference local symmetry classify,6.410 6.067 5.658 6.162 6.083 5.641 5.667 6.155
+8,8,0-7,Ic,110592,symmetry,IRA,2.2.0,1,8,29043.763,28955.011,29118.417,163.406,1.000000,best ice template by Hausdorff; reject above 0.2 A; median_hausdorff=0.0000,29065.591 29276.895 29566.130 28917.026 28942.981 28959.022 29053.246 29034.279

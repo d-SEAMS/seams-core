@@ -487,7 +487,7 @@ class RingsOneThread:
 
         bench = os.environ.get(
             "SEAMS_RING_BENCH",
-            str(ROOT / "build" / "tests" / "bench_rings_h2h"),
+            str(ROOT / "bbdir-release" / "tests" / "bench_rings_h2h"),
         )
         if not Path(bench).is_file():
             raise NotImplementedError("bench_rings_h2h is not built")

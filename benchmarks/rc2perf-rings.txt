@@ -1,0 +1,14 @@
+[rings] tri-136 threads 1
+[rings] tri-136 t1 dseams 0.1832 ovito 0.5339 census {'4': 12, '5': 120, '6': 68}
+[rings] orth-4k threads 1
+[rings] orth-4k t1 dseams 2.3629 ovito 13.3539 census {'6': 8192}
+[rings] orth-1e5 threads 1
+[rings] orth-1e5 t1 dseams 68.7725 ovito 415.5077 census {'6': 221184}
+[rings] tri-136 threads 8
+[rings] tri-136 t8 dseams 0.1866 ovito 0.5410 census {'4': 12, '5': 120, '6': 68}
+[rings] orth-4k threads 8
+[rings] orth-4k t8 dseams 3.6013 ovito 13.2303 census {'6': 8192}
+[rings] orth-1e5 threads 8
+[rings] orth-1e5 t8 dseams 19.8737 ovito 358.5809 census {'6': 221184}
+Wrote markdown/rings-one-thread.json
+RINGS_RULE_DONE

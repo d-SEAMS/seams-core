@@ -482,6 +482,13 @@ steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     double cutoff, int orderL, int typeI, bool average, bool invariants = false);
 
+//! Local q4 and q6 from one cutoff list. Same values as two
+//! steinhardtQlCutoff calls with averaging off. Returns false when the
+//! shared shell cannot be built.
+bool localCutoffQ4Q6(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
+    int typeI, std::vector<double> &q4, std::vector<double> &q6);
+
 //! Mutual k-nearest Steinhardt parameters. The coordinate buffer built
 //! for the nomination is the one the harmonics read, and the neighbour
 //! rows stay in one packed array. l is 3, 4 or 6; other degrees return
