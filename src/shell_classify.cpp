@@ -334,7 +334,8 @@ void kabsch17(const Shell17 &fixed, const Shell17 &mobile, int n, double R[3][3]
   K[3][1] = K[1][3];
   K[3][2] = K[2][3];
   double Q[4][4];
-  jacobi4(K, Q, n <= 4 ? 1 : 3);
+  // Two sweeps name the same held-out shells as three. The 4-point fit stays at one.
+  jacobi4(K, Q, n <= 4 ? 1 : 2);
   int best = 0;
   for (int i = 1; i < 4; i++) {
     if (K[i][i] > K[best][best]) {
@@ -400,9 +401,10 @@ double tetraQ(const Bond *mine) {
     if (!(nrm > 1e-8)) {
       return -1.0;
     }
-    u[k][0] = mine[k].dx / nrm;
-    u[k][1] = mine[k].dy / nrm;
-    u[k][2] = mine[k].dz / nrm;
+    const double inv = 1.0 / nrm;
+    u[k][0] = mine[k].dx * inv;
+    u[k][1] = mine[k].dy * inv;
+    u[k][2] = mine[k].dz * inv;
   }
   double acc = 0.0;
   for (int a = 0; a < 4; a++) {
@@ -850,7 +852,7 @@ __attribute__((always_inline)) inline int idealKind(const double first[4][3], co
 }
 
 int shellFit(const double center[3], const double nb[][3], int nNb, const CanonShell &canon, double gate,
-             bool recover = false, bool grouped = false) {
+             bool recover = false, bool grouped = false, bool shallow = false) {
   const int m = std::min(nNb, 16);
   int order[16];
   double dd[16];
@@ -1047,7 +1049,19 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
         continue;
       }
       tried++;
+      // The first few correspondences name a crystal. Later ones do not
+      // change the held-out labels, and a shell that is still far after the
+      // first match is liquid.
       if (tried > 12 || (tried > 1 && closest > 40.0)) {
+        break;
+      }
+      // A deferred shell whose first correspondences stay far from the template
+      // does not become crystal on a later permutation.
+      if (!recover && tried > 4 && closest > 30.0) {
+        break;
+      }
+      // One crystal neighbour is not enough to justify the later permutations.
+      if (shallow && tried > 6 && closest > 28.0) {
         break;
       }
       double R[3][3];
@@ -1372,9 +1386,9 @@ void fillHalf(int ncell, int nx, int ny, int nz, const int *cellStart, const Pac
   }
 }
 
-void keepBond(Bond *row, double *rd, int &nb, int j, double dx, double dy, double dz, double d2) {
+__attribute__((always_inline)) inline void keepId(Bond *row, double *rd, int &nb, int j, double d2) {
   if (nb < 4) {
-    row[nb] = Bond{j, dx, dy, dz};
+    row[nb].j = j;
     rd[nb] = d2;
     nb++;
     return;
@@ -1387,7 +1401,7 @@ void keepBond(Bond *row, double *rd, int &nb, int j, double dx, double dy, doubl
     worst = 3;
   }
   if (d2 < rd[worst]) {
-    row[worst] = Bond{j, dx, dy, dz};
+    row[worst].j = j;
     rd[worst] = d2;
   }
 }
@@ -1396,7 +1410,7 @@ void keepBond(Bond *row, double *rd, int &nb, int j, double dx, double dy, doubl
 // half stencil is the same cutoff CSR with the duplicate image omitted.
 void fillHalfFast(int n, int ncell, int nx, int ny, int nz, double lx, double ly, double lz,
                   const int *cellStart, const double *cx, const double *cy, const double *cz, const int *cid,
-                  Bond *bonds, int *nbon, double *rd) {
+                  const double *px, const double *py, const double *pz, Bond *bonds, int *nbon, double *rd) {
   const double cut2 = kBond * kBond;
   const double min2 = 2.15 * 2.15;
   for (int cell = 0; cell < ncell; cell++) {
@@ -1485,9 +1499,8 @@ void fillHalfFast(int n, int ncell, int nx, int ny, int nz, double lx, double ly
           if (d2 > cut2 || d2 < min2) {
             continue;
           }
-          keepBond(rowi, rdi, nbi, j, dx, dy, dz, d2);
-          Bond *rowj = bonds + static_cast<size_t>(j) * 4;
-          keepBond(rowj, rd + static_cast<size_t>(j) * 4, nbon[j], i, -dx, -dy, -dz, d2);
+          keepId(rowi, rdi, nbi, j, d2);
+          keepId(bonds + static_cast<size_t>(j) * 4, rd + static_cast<size_t>(j) * 4, nbon[j], i, d2);
         }
       }
     }
@@ -1507,6 +1520,36 @@ void fillHalfFast(int n, int ncell, int nx, int ny, int nz, double lx, double ly
       }
       row[at] = b;
       rdi[at] = d2;
+    }
+    const double hx = 0.5 * lx;
+    const double hy = 0.5 * ly;
+    const double hz = 0.5 * lz;
+    const double xi = px[i];
+    const double yi = py[i];
+    const double zi = pz[i];
+    for (int a = 0; a < nb; a++) {
+      const int j = row[a].j;
+      double dx = px[j] - xi;
+      double dy = py[j] - yi;
+      double dz = pz[j] - zi;
+      if (dx > hx) {
+        dx -= lx;
+      } else if (dx < -hx) {
+        dx += lx;
+      }
+      if (dy > hy) {
+        dy -= ly;
+      } else if (dy < -hy) {
+        dy += ly;
+      }
+      if (dz > hz) {
+        dz -= lz;
+      } else if (dz < -hz) {
+        dz += lz;
+      }
+      row[a].dx = dx;
+      row[a].dy = dy;
+      row[a].dz = dz;
     }
   }
 }
@@ -1890,7 +1933,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     }
     if (threads == 1) {
       fillHalfFast(n, ncell, nx, ny, nz, lat[0][0], lat[1][1], lat[2][2], cellStart.data(), cx, cy, cz, cid,
-                   bonds.data(), nbon.data(), mem.bd);
+                   px.data(), py.data(), pz.data(), bonds.data(), nbon.data(), mem.bd);
     } else {
       fillFastBonds(ncell, nx, ny, nz, lat[0][0], lat[1][1], lat[2][2], cellStart.data(), cx, cy, cz, cid,
                     bonds.data(), nbon.data());
@@ -2282,7 +2325,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
         nbFit[4 + s][2] = c2 + fz[s];
       }
       const double center[3] = {c0, c1, c2};
-      const int fit = shellFit(center, nbFit, 16, canon, gate, false, true);
+      const int fit = shellFit(center, nbFit, 16, canon, gate, false, true, nCrystal < 2);
       kind[i] = fit >= 0 ? fit : -1;
     }
   }
@@ -2441,7 +2484,7 @@ void recoverHex(int n, const Bond *bonds, const int *nbon, const Packed *packed,
   }
   std::vector<char> crystal(static_cast<size_t>(n), 0);
   std::vector<char> tried(static_cast<size_t>(n), 0);
-  for (int pass = 0; pass < 2; pass++) {
+  for (int pass = 0; pass < 1; pass++) {
   for (int i = 0; i < n; i++) {
     crystal[static_cast<size_t>(i)] = kind[i] >= 0 ? 1 : 0;
   }
