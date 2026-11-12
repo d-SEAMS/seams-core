@@ -5,10 +5,9 @@
 // SPDX-License-Identifier: MIT
 //-----------------------------------------------------------------------------------
 
-// Fixed-size shells. The ice label is the eclipsed-bond count of the
-// tetrahedral first shell (0 cubic, 1 hexagonal, 2 stacking fault), which
-// is the geometric content of the three templates. A full rotation search
-// runs only when that count is not decisive. The rotation itself is the
+// Fixed-size shells. The ice label is the scale-free residual of the
+// seventeen-atom shell after the optimal rotation and scale. The second
+// shell is the atoms bonded to the tetrahedron. The rotation is the
 // quaternion form of Kabsch used by polyhedral template matching
 // (Kabsch 1976; Theobald 2005; Larsen, Schmidt, Schiotz 2016). The
 // continuous shape measure is the scaled residual of Alvarez et al. 2005
