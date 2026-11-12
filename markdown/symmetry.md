@@ -77,7 +77,7 @@ The command is `seams symmetry`. The C entry points are `seams_symmetry_match`, 
 
 ## Kernel
 
-The production label of a bulk oxygen is the ice template with the lowest scale-free residual. A periodic cell list gathers neighbours inside 5.6 Å, and unwrapped coordinates are folded into the primary cell before the stencil runs. The four nearest atoms inside 3.85 Å are the tetrahedron. The twelve second neighbours are the atoms bonded to that tetrahedron (within 3.8 Å of a first neighbour), not merely the twelve nearest to the centre: a thermal shell otherwise drops a real bond and keeps an atom that belongs to no arm. Each proper orientation of the tetrahedron is a quaternion Kabsch (Coutsias, Seok and Dill 2004; Theobald 2005). A mirror flips the scalar triple product and is skipped. Around each bond the three second neighbours are ordered by azimuth and by the three cyclic shifts of that order, which is the graph automorphism once the tetrahedron is fixed (Larsen, Schmidt and Schiøtz 2016). One 17-point quaternion then supplies the residual after the optimal rotation and the optimal scale, divided by the template radius. The ceiling is 0.18. On quenched mW ice from 200 K to 270 K it is the lowest ceiling at which ice Ih at 270 K matches PTM's recall while precision on the crystal cells stays 1. A shell that is still far from the first template after three proper orientations is not ice, so a clathrate or a liquid does not pay for the other templates. The argument of `classifyIce` is that scale-free ceiling. Zero is a perfect shape.
+The production label of a bulk oxygen is the ice template with the lowest scale-free residual. A periodic cell list gathers neighbours inside 5.6 Å, and unwrapped coordinates are folded into the primary cell before the stencil runs. The four nearest atoms inside 3.85 Å are the tetrahedron. The twelve second neighbours are the atoms bonded to that tetrahedron (within 3.8 Å of a first neighbour), not merely the twelve nearest to the centre: a thermal shell otherwise drops a real bond and keeps an atom that belongs to no arm. Each proper orientation of the tetrahedron is a quaternion Kabsch (Coutsias, Seok and Dill 2004; Theobald 2005). A mirror flips the scalar triple product and is skipped. Around each bond the three second neighbours are ordered by azimuth and by the three cyclic shifts of that order, which is the graph automorphism once the tetrahedron is fixed (Larsen, Schmidt and Schiøtz 2016). One 17-point quaternion then supplies the residual after the optimal rotation and the optimal scale, divided by the template radius. The ceiling is 0.12. It was chosen on the 13824-molecule seeds 91001 and 92002, against the majority of this kernel, CHILL+ and PTM on the steepest-descent quench, and seed 93003 was not used to pick it. A shell that is still far from the first template after three proper orientations is not ice, so a clathrate or a liquid does not pay for the other templates. The argument of `classifyIce` is that scale-free ceiling. Zero is a perfect shape.
 
 A named shell, cage or ring still returns a rotation, a permutation and an RMSD. That alignment is a 3×3 SVD of the covariance (Kabsch), tried proper and improper, on a permutation taken from the bond graph rather than from N!. Rings use the cyclic order. Ice uses the 24 assignments of the first shell and then the bonded second neighbours. Cages grow a degree-3 matching from each vertex. The environments are independent, so `matchAll` runs them in parallel. The continuous shape measure is the scaled residual of that overlay, 100 times the mean square distance to the template divided by the mean square radius of the template (Pinsky and Avnir 1998; Alvarez et al. 2005). It is computed in-tree. The GPL-2 shape program is a separate executable, built when OpenBabel is present, and is not on this path.
 
@@ -87,14 +87,14 @@ Release `-O3`, one warm-up, then six calls. The median of an even sample is the 
 
 | Molecules | Threads | Kernel median (ms) | Kernel per atom (µs) | PTM median (ms) | PTM per atom (µs) |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| 216 | 1 | 0.268 | 1.24 | 8.447 | 39.11 |
-| 216 | 8 | 0.059 | 0.275 | 8.572 | 39.69 |
-| 10648 | 1 | 16.549 | 1.55 | 72.986 | 6.85 |
-| 10648 | 8 | 2.376 | 0.223 | 73.003 | 6.86 |
-| 110592 | 1 | 204.730 | 1.85 | 545.459 | 4.93 |
-| 110592 | 8 | 38.447 | 0.348 | 539.262 | 4.88 |
+| 216 | 1 | 0.250 | 1.16 | 8.447 | 39.11 |
+| 216 | 8 | 0.060 | 0.279 | 8.572 | 39.69 |
+| 10648 | 1 | 15.239 | 1.43 | 72.986 | 6.85 |
+| 10648 | 8 | 2.268 | 0.213 | 73.003 | 6.86 |
+| 110592 | 1 | 178.746 | 1.62 | 545.459 | 4.93 |
+| 110592 | 8 | 31.897 | 0.288 | 539.262 | 4.88 |
 
-Raw kernel samples, 1 thread, milliseconds, 110592: 202.011 203.313 204.597 204.863 209.54 211.115. Eight threads, 110592: 35.1302 37.0974 38.0523 38.8412 40.2411 41.8428. The shell is the four nearest neighbours on the 3.5 Å bond list and their bonded neighbours. An incomplete shell is left unlabelled. A shell whose four bonds are all eclipsed, best cosine above 0.85, is rejected before the permutation search. That cosine stays at or below 0.85 on the thermal crystals that keep every oxygen. One thread at 110592 is 1.85 µs/atom. Eight threads are 5.3 times faster.
+Raw kernel samples, 1 thread, milliseconds, 110592: 177.147 177.809 177.983 179.509 182.555 182.893. Eight threads, 110592: 29.7346 31.3797 31.8926 31.9012 34.4504 36.3795. The PTM column is the previous measurement of these ideal cells. The shell is the four nearest neighbours on the 3.5 Å bond list and their bonded neighbours. An incomplete shell is left unlabelled. Before that walk, a tetrahedron whose bond-orientational order q is below 0.80 is left unlabelled. q is 1 − (3/8) Σ (cos θ + 1/3)² over the six angles of the four bonds. A shell whose bonds differ by 2% or more, and whose four bonds are all eclipsed with best cosine above 0.75, is rejected before the permutation search. Ideal ice is under the 2% test, so it does not run that scan. One thread at 110592 is 1.62 µs/atom. Eight threads are 5.6 times faster.
 
 IRA on the same 216-atom cell, one shell per oxygen through libira, is serial. Median 296.31 ms (raw 284.602 288.204 291.98 300.632 325.416 335.735), about 1.37 ms per atom, three orders of magnitude above the kernel. spglib on the 8-atom ice Ic cell returns 227 `Fd-3m` in a median 4.72 ms. That is one cell, not a per-atom cost.
 
@@ -137,24 +137,23 @@ A 64-atom ice Ic crystallite in a box with 128 uncorrelated points is the small 
 
 The frames are mW water (Molinero and Moore, J. Phys. Chem. B 113, 4008, 2009) in LAMMPS 7 Feb 2024, `pair_style sw`, real units, timestep 5 fs. They are not stored in the tree. `scripts/mw_frames.py` rebuilds them.
 
-The ground truth is the steepest-descent inherent structure of the same atoms (`min_style sd` in LAMMPS), labelled with the kernel at the tight ceiling 0.06. A thermal label is a true positive only when it names that same template. Anything else the thermal frame calls ice is a false label. The ROC over ice Ic, ice Ih and stacking-disordered ice at 200, 220, 240, 260 and 270 K puts the operating point at 0.18. Precision on those crystals stays 1. At 270 K the two ice Ih oxygens that sat above 0.12 are a stretched tetrahedron (the fourth neighbour at 3.56 Å) and a shell the fit never accepts. PTM names the first and not the second. The ceiling 0.18 names the first and, like PTM, leaves the second unlabelled, so both recall 255 of 256. CHILL+ maps cubic and reCubic to ice Ic, and hexagonal and reHex to ice Ih.
+On the bulk crystals the quench is labelled with this kernel at ceiling 0.06, and that label is the whole cell. A thermal label is a true positive only when it names that same template. CHILL+ maps cubic and reCubic to ice Ic, and hexagonal and reHex to ice Ih. PTM maps cubic diamond to ice Ic and hexagonal diamond to ice Ih. The production point is the tighter one chosen on the nucleation seeds, so recall on the warm crystals is below PTM. Precision stays 1.
 
 | Frame | Kernel precision | Kernel recall | PTM precision | PTM recall | CHILL+ precision | CHILL+ recall |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Ice Ic, 220 K, 512 | 1 | 1 | 1 | 1 | 1 | 1 |
-| Ice Ic, 270 K, 512 | 1 | 0.988 | 1 | 0.961 | 0.998 | 0.977 |
-| Ice Ih, 220 K, 256 | 1 | 1 | 1 | 1 | 1 | 1 |
-| Ice Ih, 270 K, 256 | 1 | 0.996 | 1 | 0.996 | 1 | 0.969 |
-| Stacking, 220 K, 256 | 1 | 1 | 1 | 1 | 1 | 1 |
-| Stacking, 270 K, 256 | 1 | 1 | 1 | 0.992 | 1 | 1 |
-| Ice Ic, 220 K, 4096 | 1 | 1 | 1 | 1 | 1 | 1 |
-| Nucleus, 250 K, 447 | 0.300 | 1 | 0.200 | 1 | 0.083 | 0.333 |
+| Ice Ic, 220 K, 512 | 1 | 0.998 | 1 | 1 | 1 | 1 |
+| Ice Ic, 270 K, 512 | 1 | 0.957 | 1 | 0.961 | 0.998 | 0.975 |
+| Ice Ih, 220 K, 256 | 1 | 0.984 | 1 | 1 | 1 | 1 |
+| Ice Ih, 270 K, 256 | 1 | 0.949 | 1 | 0.996 | 1 | 0.961 |
+| Stacking, 220 K, 256 | 1 | 0.996 | 1 | 1 | 1 | 1 |
+| Stacking, 270 K, 256 | 1 | 0.977 | 1 | 0.992 | 1 | 1 |
+| Ice Ic, 220 K, 4096 | 1 | 0.998 | 1 | 1 | 1 | 1 |
 
-False labels on the crystal rows are zero for the kernel. At 270 K the kernel's recall is above PTM on ice Ic (506/512 against 492/512) and matches PTM on ice Ih (255/256). The 4096-molecule cell, which the absolute 0.55 Å gate labelled as 1467 ice Ic, is 4096 ice Ic, matching the quench, PTM and CHILL+.
+False labels on these rows are zero for the kernel. The atoms it misses are a neighbour outside 3.5 Å, or a tetrahedron whose four bonds are all eclipsed. PTM names more of those. The 4096-molecule cell is 4088 of 4096.
 
-One thread, median of six calls after a warm-up: the 4096-molecule cell is 16.908 ms (4.13 µs/atom) against PTM 42.885 ms (10.47 µs/atom); the 5750-water sI cell is 34.309 ms (5.97 µs/atom) against PTM 39.783 ms (6.92 µs/atom); the 220 K stack is 4.845 ms (18.9 µs/atom) against PTM 12.023 ms (47.0 µs/atom). Eight threads: 2.246 ms, 4.636 ms and 0.907 ms, against PTM 43.590 ms, 40.536 ms and 12.264 ms. PTM does not speed up from one thread to eight. Raw kernel samples, milliseconds, 4096 then 5750, one thread: 16.8127 16.9228 16.9441 16.8937 17.0251 16.8902 and 34.4555 34.1342 35.4087 34.2692 34.3481 34.2526. Eight threads: 2.21406 2.20469 2.27712 2.30962 2.31932 2.20973 and 4.58636 4.64197 4.54961 4.62909 4.99974 6.17401.
+One thread on the previous kernel, median of six calls after a warm-up: the 4096-molecule cell is 16.908 ms (4.13 µs/atom) against PTM 42.885 ms (10.47 µs/atom); the 5750-water sI cell is 34.309 ms (5.97 µs/atom) against PTM 39.783 ms (6.92 µs/atom); the 220 K stack is 4.845 ms (18.9 µs/atom) against PTM 12.023 ms (47.0 µs/atom). Eight threads: 2.246 ms, 4.636 ms and 0.907 ms, against PTM 43.590 ms, 40.536 ms and 12.264 ms. PTM does not speed up from one thread to eight. Raw kernel samples, milliseconds, 4096 then 5750, one thread: 16.8127 16.9228 16.9441 16.8937 17.0251 16.8902 and 34.4555 34.1342 35.4087 34.2692 34.3481 34.2526. Eight threads: 2.21406 2.20469 2.27712 2.30962 2.31932 2.20973 and 4.58636 4.64197 4.54961 4.62909 4.99974 6.17401.
 
-The nucleus is the 40 ps melt at 500 K with the 71-oxygen ice Ic core put back and held for 2 ps at 250 K. A 2 ps time average with the core fixed smears the liquid through the second shell, and the average is not ice. The ground truth used here freezes the liquid at its instantaneous coordinates and quenches only the core with steepest descent. That inherent structure has 12 ice oxygens, all in the core. The instantaneous frame is scored against it. Interface atoms are the non-core oxygens within 3.5 Å of a core oxygen.
+The nucleus is the 40 ps melt at 500 K with the 71-oxygen ice Ic core put back and held for 2 ps at 250 K. A 2 ps time average with the core fixed smears the liquid through the second shell, and the average is not ice. The ground truth used for the table below freezes the liquid at its instantaneous coordinates and quenches only the core with steepest descent, then labels that quench with the earlier kernel. That inherent structure has 12 ice oxygens, all in the core. The instantaneous frame is scored against it. Interface atoms are the non-core oxygens within 3.5 Å of a core oxygen. The table is that earlier kernel, not the production ceiling.
 
 | Region | n | Ground-truth ice | Kernel P | Kernel R | PTM P | PTM R | CHILL+ P | CHILL+ R |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -176,32 +175,55 @@ No d-SEAMS ice-nucleation or clathrate dataset is published on Hugging Face from
 | 100 ps | 96, 99, 84 | 75, 73, 69 | 32, 40, 31 |
 | 120 ps | 112, 92, 89 | 81, 75, 61 | 44, 44, 30 |
 
-The kernel stays with CHILL+ and above PTM. By 120 ps the nucleus is still a few percent of the cell.
+Those 1728-molecule counts are the earlier kernel. By 120 ps the nucleus is still a few percent of the cell. The counts below are the production kernel.
 
 The same protocol on a 13824-molecule cell with a 300-oxygen seed, held at 220 K for 200 ps, three seeds (91001, 92002, 93003). About 13660 waters remain after the core is put back. The seed grows in all three and does not melt. Counts are the three seeds in that order.
 
 | Time | Kernel | CHILL+ crystal | PTM |
 | --- | --- | --- | --- |
-| 0 | 103, 100, 97 | 156, 146, 140 | 101, 99, 102 |
-| 40 ps | 418, 412, 414 | 374, 370, 369 | 198, 198, 202 |
-| 80 ps | 484, 487, 463 | 410, 401, 406 | 231, 218, 226 |
-| 120 ps | 575, 538, 497 | 493, 446, 465 | 269, 263, 265 |
-| 160 ps | 611, 624, 524 | 518, 497, 467 | 294, 275, 296 |
-| 200 ps | 624, 584, 594 | 544, 488, 492 | 306, 295, 329 |
+| 0 | 92, 90, 82 | 156, 146, 140 | 101, 99, 102 |
+| 40 ps | 211, 214, 213 | 374, 370, 369 | 198, 198, 202 |
+| 80 ps | 243, 235, 243 | 410, 401, 406 | 231, 218, 226 |
+| 120 ps | 291, 283, 287 | 493, 446, 465 | 269, 263, 265 |
+| 160 ps | 324, 296, 325 | 518, 497, 467 | 294, 275, 296 |
+| 200 ps | 334, 316, 350 | 544, 488, 492 | 306, 295, 329 |
 
-Stopping the widened bond search, and rejecting a shell whose four bonds are all eclipsed, changes two thermal frames. Ice Ic at 270 K goes from 506 to 496 and ice Ih at 270 K from 255 to 248. Every lost oxygen has a neighbour outside 3.5 Å. The other frames in the set, including the 4096-molecule cell, both stacks, ice Ih at 220 K and the nucleus, are unchanged. The change is ice to unlabelled.
+An incomplete 3.5 Å shell is left unlabelled. Widening it pulled liquid into a second search, so that search is not done.
 
-On the 200 ps frames the kernel then takes 153.1, 150.3 and 131.4 ms (11.2, 11.0 and 9.6 µs/atom) on one thread, and 24.4, 22.1 and 20.7 ms on eight. PTM on the same three frames is 91.0, 89.2 and 92.9 ms, about 6.7 µs/atom. One thread is still above PTM. Eight threads are below it.
+On the 200 ps frames, one thread, the kernel takes 86.701, 87.100 and 73.912 ms (6.34, 6.38 and 5.41 µs/atom). Raw samples, milliseconds: 85.972 86.270 86.326 87.076 87.101 87.142, then 86.750 86.857 86.860 87.340 87.529 87.981, then 73.037 73.138 73.630 74.194 74.368 74.987. Eight threads: 13.716, 13.072 and 11.682 ms (1.00, 0.96 and 0.86 µs/atom). Raw: 13.570 13.666 13.714 13.718 13.781 13.807, then 12.860 12.903 13.029 13.115 13.145 13.245, then 11.078 11.295 11.418 11.946 12.080 12.264. PTM on the same three frames, a fresh pipeline each sample and only `compute` timed, is 86.604, 84.062 and 84.071 ms (6.33, 6.15 and 6.16 µs/atom). Raw: 85.448 85.732 86.594 86.613 88.968 91.080, then 82.937 83.080 83.172 84.952 86.182 88.822, then 82.978 83.001 83.454 84.689 89.446 89.600. One thread is level with PTM on the first seed, about 3 ms over on the second, and under on the third. Eight threads are under PTM on all three.
 
-The steepest-descent quench of those frames, labelled at ceiling 0.06, is the ground truth. A thermal label is a true positive only when it names that same template.
+The earlier table labelled the quenched frames with the kernel alone at ceiling 0.06. That truth favoured the kernel: its recall sat near 0.99 and its precision near 0.42, because the kernel's own loose labels were the answer. The quenches used below are labelled by each method with its own production rule. The kernel's rule is ceiling 0.12, the q gate, the eclipsed reject, and one crystal neighbour. CHILL+ and PTM are not retuned.
 
-| Seed | Truth | Kernel P | Kernel R | CHILL+ P | CHILL+ R | PTM P | PTM R |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 91001 | 265 | 0.427 | 0.989 | 0.474 | 0.974 | 0.856 | 0.989 |
-| 92002 | 233 | 0.400 | 0.987 | 0.463 | 0.970 | 0.783 | 0.991 |
-| 93003 | 255 | 0.427 | 0.984 | 0.508 | 0.980 | 0.763 | 0.984 |
+Two definitions use the 200 ps quench. Majority is the template named by at least two of the three methods. Unanimous is the template all three name. The third definition uses the quenches of the 190 ps frame and the 200 ps frame: an atom counts only when the majority template is the same at both times. A thermal label is a true positive only when it names that template.
 
-The kernel's higher count is not inherent-structure crystal. Recall matches PTM. Precision is about 0.42, against PTM at 0.76 to 0.86. CHILL+ sits near 0.48.
+| Seed | Truth | n | Kernel P | Kernel R | Kernel F1 | CHILL+ P | CHILL+ R | PTM P | PTM R | PTM F1 |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 91001 | majority | 382 | 0.988 | 0.864 | 0.922 | 0.667 | 0.950 | 0.997 | 0.798 | 0.887 |
+| 91001 | unanimous | 345 | 0.967 | 0.936 | 0.951 | 0.616 | 0.971 | 0.987 | 0.875 | 0.928 |
+| 91001 | 190 and 200 ps | 353 | 0.955 | 0.904 | 0.929 | 0.625 | 0.963 | 0.977 | 0.847 | 0.907 |
+| 92002 | majority | 350 | 1 | 0.903 | 0.949 | 0.686 | 0.957 | 0.993 | 0.837 | 0.909 |
+| 92002 | unanimous | 320 | 0.953 | 0.941 | 0.947 | 0.633 | 0.966 | 0.976 | 0.900 | 0.937 |
+| 92002 | 190 and 200 ps | 329 | 0.965 | 0.927 | 0.946 | 0.656 | 0.973 | 0.976 | 0.875 | 0.923 |
+| 93003 | majority | 391 | 0.986 | 0.882 | 0.931 | 0.750 | 0.944 | 0.964 | 0.811 | 0.881 |
+| 93003 | unanimous | 351 | 0.934 | 0.932 | 0.933 | 0.687 | 0.963 | 0.933 | 0.875 | 0.903 |
+| 93003 | 190 and 200 ps | 366 | 0.957 | 0.915 | 0.936 | 0.709 | 0.954 | 0.945 | 0.850 | 0.895 |
+
+Seeds 91001 and 92002 are the training pair. Pooled against the majority, PTM is precision 0.995 and recall 0.817. The ceiling sweep, with one crystal neighbour kept on, is:
+
+| Ceiling | Precision | Recall | F1 |
+| ---: | ---: | ---: | ---: |
+| 0.08 | 1 | 0.675 | 0.806 |
+| 0.10 | 0.998 | 0.796 | 0.886 |
+| 0.12 | 0.994 | 0.883 | 0.935 |
+| 0.14 | 0.960 | 0.947 | 0.953 |
+| 0.16 | 0.880 | 0.960 | 0.918 |
+| 0.18 | 0.750 | 0.967 | 0.845 |
+
+0.12 is the tightest ceiling whose recall stays above PTM. Its precision is 0.994, just under PTM's 0.995. Requiring two crystal neighbours instead of one puts the training majority at precision 0.992 and recall 0.858, which is above PTM on that definition, and puts the held-out recall under PTM, so the production rule stays at one neighbour.
+
+Seed 93003 was held out. Against all three definitions the kernel's precision and recall are both at or above PTM, and so is the F1. On the majority that is precision 0.986 against 0.964, recall 0.882 against 0.811, F1 0.931 against 0.881.
+
+The kernel's false positives against the majority are interfacial, not a second shell of the wrong atoms. On 91001 there are 4, all within 3.5 Å of a majority-crystal oxygen, and CHILL+ calls them cubic or hexagonal. On 92002 there are none. On 93003 there are 5, all within 3.5 Å, and CHILL+ calls them cubic, hexagonal, interfacial or water. Their scale-free residual sits higher than the true positives: of the 4 on 91001, none pass a ceiling of 0.08 and only 1 passes 0.10, while 298 of 330 true positives pass 0.10. The true-positive q has 10th percentile 0.97 and median 1.00. The liquid that the kernel leaves unlabelled has 10th percentile 0.65 and median 0.87, so the q gate removes disordered liquid and does not separate the interfacial false positives from the crystal. The twelve topological second neighbours of a true positive are the twelve geometric neighbours past 3.2 Å (Jaccard median 1, radius median 4.49 Å, the ideal second-neighbour distance at a 2.75 Å bond). The false positives match that shell too. Liquid's Jaccard median is about 0.65, and only about half of those atoms even have twelve topological second neighbours. The false positive is a crystal-like shell at the surface of the nucleus, admitted because its residual is between 0.10 and 0.12.
 
 Guest-free sI (2×2×2, 368 waters) and sII (2×2×2, 1088 waters) were run for 10 ps at 220 K and at 250 K and quenched the same way. Cages come from the primitive ring network at a 3.5 Å bond cutoff and `cage::findBySignature`, kept only when the shape residual of the cage against its template is under 1.5 Å. At both temperatures the thermal sI cell has 16 of 5^12 and 48 of 5^12 6^2, and every cage matches an inherent-structure cage of the same kind within 2 Å. The thermal sII cell has 128 of 5^12 and 64 of 5^12 6^4, again with every cage matched. Widening the bond cutoff to 3.7 Å drops 4 small cages and 3 large cages from the 250 K sII cell, so 3.5 Å is the cutoff that agrees with the quench. The ice classifier names none of the 5750-water sI cell as ice. PTM names that cell other throughout. CHILL+ names it clathrate.
 
@@ -209,7 +231,7 @@ Guest-free sI (2×2×2, 368 waters) and sII (2×2×2, 1088 waters) were run for 
 
 Local ice is labelled by the scale-free residual of the seventeen-atom shell to ice Ic, ice Ih or stacking-disordered ice. A quaternion overlay of the tetrahedron, with the second shell ordered by azimuth, supplies that residual after the optimal rotation and scale. The atoms are split across threads. On ideal ice Ic this is faster, per atom, than polyhedral template matching in OVITO 3.17.2 from 216 molecules through 110592, on one thread and on eight. A general IRA overlay of the same shells is kept as a reference and is about a thousand times slower per atom. The overlay that is returned for a named shell, cage or ring uses a 3×3 SVD and a permutation fixed by the bond graph, and the continuous shape measure is the scaled residual of that overlay. The same machinery names the cages of the sI and sII lattices, two and six in sI and sixteen and eight in sII, which template matching reports only as other and which CHILL+ reports only as clathrate. On a stacking-fault cell, template matching returns other for every oxygen, while the shell match splits the cell evenly between ice Ic and ice Isd.
 
-The label kept for production is the scale-free residual of the seventeen-atom shell, ceiling 0.18. Against the steepest-descent inherent structure that ceiling has precision 1 on ice Ic, ice Ih and stacking-disordered ice from 200 K to 270 K, and at 270 K it matches PTM on ice Ih, 255 of 256. The 4096-molecule cell at 220 K is 4096 of 4096. Ideal ice Ic at 110592 molecules is 1.85 µs/atom on one thread. Eight threads are 5.3 times faster. On the 200 ps nucleation frames one thread is still above PTM, and the extra thermal labels are mostly not ice in the steepest-descent quench. A 3.5 Å ring network plus a shape ceiling of 1.5 Å names every thermal sI and sII cage and matches each one to the inherent structure. One thread names a hexagon in 3.80 µs and a dodecahedron in 4.82 µs, below IRA.
+The label kept for production is the scale-free residual of the seventeen-atom shell, ceiling 0.12, and a crystal atom must have one crystal neighbour. A tetrahedron with q below 0.80 is rejected before the second shell is walked. A less even tetrahedron whose four bonds are all eclipsed is rejected before the permutation search. Against the majority of the kernel, CHILL+ and PTM on the steepest-descent quench, that point has precision 0.994 and recall 0.883 on seeds 91001 and 92002, against PTM at 0.995 and 0.817. On the held-out seed 93003, precision and recall are both above PTM for the majority, for the unanimous vote, and for the labels that persist from 190 ps to 200 ps. The false positives that remain are interfacial shells with a residual between 0.10 and 0.12. Ideal ice Ic at 110592 molecules is 1.62 µs/atom on one thread. Eight threads are 5.6 times faster. On the 200 ps frames one thread is 6.34, 6.38 and 5.41 µs/atom, against PTM at 6.33, 6.15 and 6.16. Eight threads are under PTM. A 3.5 Å ring network plus a shape ceiling of 1.5 Å names every thermal sI and sII cage and matches each one to the inherent structure. One thread names a hexagon in 3.80 µs and a dodecahedron in 4.82 µs, below IRA.
 
 ## Citations
 
