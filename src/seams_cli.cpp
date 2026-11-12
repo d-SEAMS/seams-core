@@ -23,6 +23,7 @@
 #include <seams_input.hpp>
 #include <site.hpp>
 #include <topo_bulk.hpp>
+#include <topo_one_dim.hpp>
 #include <water_select.hpp>
 #include <topo_fingerprint.hpp>
 #include <tum_offload.hpp>
@@ -1193,6 +1194,59 @@ int cmdCn(std::ostream &os, Cloud &cloud, double rmax, int bins, int typeI,
   return 0;
 }
 
+int cmdRings(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
+  const int typ = typeOf(cloud, typeI);
+  const auto ids = nneigh::neighListO(cutoff, cloud, typ);
+  const auto idx = nneigh::neighbourListByIndex(cloud, ids);
+  const auto rings = primitive::ringNetwork(idx, 6);
+  std::map<int, int> hist;
+  for (const auto &ring : rings) {
+    hist[static_cast<int>(ring.size())] += 1;
+  }
+  os << "nop " << cloud.nop << " rings " << rings.size() << "\n";
+  for (const auto &kv : hist) {
+    os << kv.first << " " << kv.second << "\n";
+  }
+  return 0;
+}
+
+int cmdPrisms(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
+  const int typ = typeOf(cloud, typeI);
+  const auto ids = nneigh::kNearestNeighbourList(cloud, 4, cutoff + 1.5, typ, true);
+  const auto idx = nneigh::neighbourListByIndex(cloud, ids);
+  const auto rings = primitive::ringNetwork(idx, 6);
+  os << "nop " << cloud.nop << "\n";
+  int perfectSum = 0;
+  int imperfectSum = 0;
+  for (int size = 3; size <= 6; ++size) {
+    const auto one = ring::getSingleRingSize(rings, size);
+    std::vector<ring::strucType> ringType(one.size());
+    std::vector<double> rmsd(static_cast<std::size_t>(std::max(cloud.nop, 0)), -1.0);
+    int perfect = 0;
+    int imperfect = 0;
+    if (!one.empty()) {
+      ring::findPrisms(one, ringType, perfect, imperfect, idx, cloud, rmsd, false);
+    }
+    perfectSum += perfect;
+    imperfectSum += imperfect;
+    os << "size " << size << " perfect " << perfect << " imperfect " << imperfect
+       << "\n";
+  }
+  os << "perfect " << perfectSum << " imperfect " << imperfectSum << "\n";
+  return 0;
+}
+
+int cmdCluster(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
+  const int typ = typeOf(cloud, typeI);
+  const auto ids = nneigh::neighListO(cutoff, cloud, typ);
+  const auto idx = nneigh::neighbourListByIndex(cloud, ids);
+  const std::vector<bool> mask(static_cast<std::size_t>(std::max(cloud.nop, 0)), true);
+  const auto domain = clump::largestDomain(cloud, idx, mask);
+  os << "nop " << cloud.nop << " largest " << domain.largest << " subset "
+     << domain.subset << " percolation " << domain.percolation << "\n";
+  return 0;
+}
+
 // CHILL and CHILL+ read one graph: cutoff (the default) or mutual. The
 // cages default (seeded) falls back to cutoff.
 std::vector<std::vector<int>>
@@ -2109,7 +2163,7 @@ int main(int argc, char *argv[]) {
 
   parser.add(Positional("command")
                  .help("read | chill | chill-plus | ovito-chill+ | cages | symmetry | "
-                       "fingerprint | ions | "
+                       "rings | prisms | cluster | fingerprint | ions | "
                        "f4 | steinhardt | rdf | cn | hbonds | pairs | density-z | "
                        "domains")
                  .occurs(zeroOrOneTime)
@@ -2498,6 +2552,15 @@ int main(int argc, char *argv[]) {
       Cloud hCloud = load(file, cloud.currentFrame, htype);
       return cmdHbonds(os, cloud, hCloud, cutoff, typeI, hdist, hangle,
                        allDonors);
+    }
+    if (cmd == "rings") {
+      return cmdRings(os, cloud, cutoff, typeI);
+    }
+    if (cmd == "prisms") {
+      return cmdPrisms(os, cloud, cutoff, typeI);
+    }
+    if (cmd == "cluster") {
+      return cmdCluster(os, cloud, cutoff, typeI);
     }
     os << colorizer.error("unknown command: ") << cmd << "\n";
     return 2;
