@@ -30,10 +30,10 @@ pass and 25 ms in the fill pass, against about 10 ms and 14 ms for the
 orthorhombic loop. The 27 cartesian images of a fractional shift
 `(sx, sy, sz)` are now filled once. Both boxes call that same loop.
 On this binary the orthorhombic list at 110592 molecules and 1 thread
-is 25.43 ms and the triclinic list is 30.57 ms. At 8 threads the pair
-is 4.88 ms and 5.95 ms.
+is 12.09 ms and the triclinic list is 32.99 ms. At 8 threads the pair
+is 4.00 ms and 6.58 ms.
 
-At 884736 molecules the triclinic list is 443 ms against 299 ms
+At 884736 molecules the triclinic list is 462 ms against 116 ms
 orthorhombic. The same stencil is in use. The working set of the three
 coordinate streams no longer fits in L2, and the sheared coordinates
 miss more often.
@@ -46,16 +46,16 @@ which molecules are neighbours.
 
 | molecules | threads | d-SEAMS | vesin | freud | orthorhombic |
 | ---: | ---: | ---: | ---: | ---: | ---: |
-| 10648 | 1 | 3.485 | 5.964 | 10.373 | 3.473 |
-| 10648 | 8 | 1.005 | 4.601 | 10.434 | 0.883 |
-| 110592 | 1 | 30.572 | 51.994 | 122.628 | 25.426 |
-| 110592 | 8 | 6.093 | 24.911 | 127.350 | 4.882 |
-| 884736 | 1 | 443.024 | 1141.327 | 1191.634 | 299.010 |
-| 884736 | 8 | 65.550 | 203.597 | 1153.981 | 45.357 |
+| 10648 | 1 | 3.614 | 6.909 | 13.563 | 1.591 |
+| 10648 | 8 | 0.905 | 6.497 | 3.878 | 0.500 |
+| 110592 | 1 | 32.986 | 58.369 | 176.267 | 12.089 |
+| 110592 | 8 | 6.580 | 61.736 | 49.393 | 4.002 |
+| 884736 | 1 | 461.745 | 1284.579 | 1425.870 | 115.950 |
+| 884736 | 8 | 75.689 | 1335.178 | 459.751 | 31.276 |
 
-The orthorhombic column is the same binary, run after the session below.
-The 110592 rows were measured back to back with a repeat of the
-triclinic list (30.57 ms and 5.95 ms).
+The orthorhombic column is the same binary, run after the triclinic
+session. At 110592 molecules and 8 threads the orthorhombic cutoff
+list is 4.00 ms and vesin on the same orthorhombic cell is 50.20 ms.
 
 ## CHILL+
 
@@ -67,10 +67,10 @@ has no CHILL+.
 
 | molecules | threads | d-SEAMS | mdapy | OVITO |
 | ---: | ---: | ---: | ---: | ---: |
-| 110592 | 1 | 40.862 | 65.618 | 628.011 |
-| 110592 | 8 | 9.070 | 88.058 | 92.206 |
-| 884736 | 1 | 508.358 | 758.383 | 4942.828 |
-| 884736 | 8 | 92.831 | 794.323 | 659.641 |
+| 110592 | 1 | 28.635 | 67.061 | 658.972 |
+| 110592 | 8 | 7.512 | 88.905 | 665.308 |
+| 884736 | 1 | 325.990 | 809.027 | 5371.775 |
+| 884736 | 8 | 100.510 | 895.189 | 5359.389 |
 
 ## Diamond common-neighbour test
 
@@ -83,10 +83,10 @@ OVITO, which is why those sinks are 0. Identify diamond and mdapy
 
 | molecules | threads | d-SEAMS | mdapy diamond | OVITO identify diamond | mdapy PTM | OVITO PTM |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 110592 | 1 | 79.765 | 147.656 | 148.962 | 1341.099 | 1548.133 |
-| 110592 | 8 | 19.395 | 188.508 | 37.889 | 1344.673 | 208.699 |
-| 884736 | 1 | 720.704 | 1190.894 | 1186.497 | 9953.016 | 11783.641 |
-| 884736 | 8 | 100.959 | 1295.796 | 290.571 | 10196.825 | 1620.720 |
+| 110592 | 1 | 39.342 | 137.849 | 143.585 | 1268.823 | 1500.891 |
+| 110592 | 8 | 11.491 | 186.123 | 151.964 | 1321.445 | 1489.324 |
+| 884736 | 1 | 378.629 | 1134.471 | 1155.594 | 9906.975 | 11728.495 |
+| 884736 | 8 | 95.424 | 1264.562 | 1184.624 | 10100.536 | 11854.570 |
 
 ## Rings
 
@@ -99,10 +99,10 @@ code. freud has no ring census.
 
 | molecules | threads | d-SEAMS | mdapy | OVITO |
 | ---: | ---: | ---: | ---: | ---: |
-| 110592 | 1 | 86.970 | 2330.859 | 560.793 |
-| 110592 | 8 | 32.497 | 2342.910 | 282.745 |
-| 884736 | 1 | 831.572 | 17972.932 | 4855.287 |
-| 884736 | 8 | 273.613 | 18066.436 | 2601.361 |
+| 110592 | 1 | 92.590 | 2764.487 | 562.649 |
+| 110592 | 8 | 37.075 | 2996.590 | 594.795 |
+| 884736 | 1 | 868.278 | 22539.341 | 4408.334 |
+| 884736 | 8 | 288.024 | 21541.297 | 4552.499 |
 
 ## How to rerun
 
@@ -111,7 +111,7 @@ environment on `PATH` via `NEIGH_PYTHON`:
 
 ```
 NEIGH_PYTHON="$TMPDIR/neigh-venv/bin/python" \
-NEIGH_BENCH=build-release/tests/bench_v2 \
+NEIGH_BENCH=bbdir-release/tests/bench_v2 \
 python scripts/bench_neighbours_v2.py
 ```
 
@@ -121,72 +121,78 @@ under the same pin.
 ## Raw log
 
 ```
-mode=tilt molecules=10648 threads=1 pairs=42592 checksum=13782790659416074331 sink=0 median_ms=3.4845 samples_ms=3.4845,3.5386,3.4384,3.4343,3.5647,3.3983,3.4383,3.5188
-kind=tilt-vesin molecules=10648 threads=1 sink=42592 median_ms=5.9642 samples_ms=5.8079,5.8388,5.8820,5.9372,5.9642,5.9650,6.0336,6.0468
-kind=tilt-freud molecules=10648 threads=1 sink=42592 median_ms=10.3732 samples_ms=10.3084,10.3655,10.3669,10.3693,10.3732,10.4011,10.4332,10.4731
-mode=tilt molecules=10648 threads=8 pairs=42592 checksum=13782790659416074331 sink=0 median_ms=1.0046 samples_ms=1.0062,0.9460,0.9495,1.0046,0.9722,1.0144,1.0139,0.9479
-kind=tilt-vesin molecules=10648 threads=8 sink=42592 median_ms=4.6014 samples_ms=3.0579,3.1368,3.5329,3.6727,4.6014,4.6093,4.6589,4.7537
-kind=tilt-freud molecules=10648 threads=8 sink=42592 median_ms=10.4342 samples_ms=10.3497,10.4138,10.4159,10.4184,10.4342,10.4482,10.5116,10.5148
-mode=tilt molecules=110592 threads=1 pairs=442368 checksum=8222705064348099955 sink=0 median_ms=30.5720 samples_ms=30.8342,30.3009,30.5775,30.5255,30.5955,30.5720,30.3354,30.4279
-kind=tilt-vesin molecules=110592 threads=1 sink=442368 median_ms=51.9942 samples_ms=51.6919,51.6956,51.7981,51.8662,51.9942,52.0650,52.0916,52.4943
-kind=tilt-freud molecules=110592 threads=1 sink=442368 median_ms=122.6279 samples_ms=120.5045,121.3189,121.3590,121.8853,122.6279,122.7369,122.7974,127.0188
-mode=tilt molecules=110592 threads=8 pairs=442368 checksum=8222705064348099955 sink=0 median_ms=6.0934 samples_ms=6.9065,6.2982,6.1149,5.9821,6.0174,6.0934,5.9758,6.0216
-kind=tilt-vesin molecules=110592 threads=8 sink=442368 median_ms=24.9108 samples_ms=24.6145,24.7194,24.7664,24.8324,24.9108,24.9483,25.1186,26.0167
-kind=tilt-freud molecules=110592 threads=8 sink=442368 median_ms=127.3502 samples_ms=126.4897,127.0935,127.1074,127.1738,127.3502,127.9802,128.4043,137.9679
-mode=tilt molecules=884736 threads=1 pairs=3538944 checksum=9316061812838145587 sink=0 median_ms=443.0236 samples_ms=446.1631,449.7723,439.4564,443.0236,438.4797,453.6831,437.5949,438.9384
-kind=tilt-vesin molecules=884736 threads=1 sink=3538944 median_ms=1141.3268 samples_ms=1118.4384,1124.0209,1129.3905,1134.7615,1141.3268,1141.7548,1147.7133,1191.9243
-kind=tilt-freud molecules=884736 threads=1 sink=3538944 median_ms=1191.6338 samples_ms=1156.5232,1159.8109,1183.4468,1190.8607,1191.6338,1193.9519,1202.9605,1222.5416
-mode=tilt molecules=884736 threads=8 pairs=3538944 checksum=9316061812838145587 sink=0 median_ms=65.5497 samples_ms=70.4154,65.5063,66.1948,65.5497,64.3381,64.5287,65.4321,85.5898
-kind=tilt-vesin molecules=884736 threads=8 sink=3538944 median_ms=203.5968 samples_ms=181.5102,185.9666,201.5857,203.2913,203.5968,219.4238,221.3960,221.9107
-kind=tilt-freud molecules=884736 threads=8 sink=3538944 median_ms=1153.9814 samples_ms=1137.9867,1142.0892,1142.1750,1148.5169,1153.9814,1157.1931,1157.7741,1165.3098
-mode=chill molecules=110592 threads=1 pairs=442368 checksum=8222705064348099955 sink=110592 median_ms=40.8617 samples_ms=47.7965,44.4743,41.1771,40.7971,40.8617,40.1922,39.9350,39.9228
-kind=mdapy-chill molecules=110592 threads=1 sink=110592 median_ms=65.6183 samples_ms=62.2688,62.3768,62.8975,63.2062,65.6183,66.0663,66.7361,68.0841
-kind=ovito-chill molecules=110592 threads=1 sink=110592 median_ms=628.0114 samples_ms=625.8838,626.1325,626.5083,627.8998,628.0114,632.9294,653.2898,694.5793
+mode=tilt molecules=10648 threads=1 pairs=42592 checksum=13782790659416074331 sink=0 median_ms=3.6136 samples_ms=3.5290,3.5116,3.6462,3.5746,3.6136,3.7374,3.6805,3.5818
+kind=tilt-vesin molecules=10648 threads=1 sink=42592 median_ms=6.9089 samples_ms=6.1481,6.3096,6.3132,6.5718,6.9089,6.9213,7.0270,7.2705
+kind=tilt-freud molecules=10648 threads=1 sink=42592 median_ms=13.5628 samples_ms=13.4089,13.4204,13.5068,13.5177,13.5628,13.5660,13.9384,15.0522
+mode=tilt molecules=10648 threads=8 pairs=42592 checksum=13782790659416074331 sink=0 median_ms=0.9050 samples_ms=1.0675,0.8831,0.9349,0.9165,0.8946,0.8785,0.8835,0.9050
+kind=tilt-vesin molecules=10648 threads=8 sink=42592 median_ms=6.4968 samples_ms=6.3332,6.4523,6.4796,6.4959,6.4968,6.5081,6.5400,6.5757
+kind=tilt-freud molecules=10648 threads=8 sink=42592 median_ms=3.8783 samples_ms=3.7471,3.7902,3.7990,3.8378,3.8783,3.9088,4.1633,4.1646
+mode=tilt molecules=110592 threads=1 pairs=442368 checksum=8222705064348099955 sink=0 median_ms=32.9859 samples_ms=33.6284,33.6802,32.9859,32.7138,32.1201,31.9763,32.8132,33.7346
+kind=tilt-vesin molecules=110592 threads=1 sink=442368 median_ms=58.3694 samples_ms=56.6844,57.0274,57.0646,57.5344,58.3694,59.3172,59.3271,60.0721
+kind=tilt-freud molecules=110592 threads=1 sink=442368 median_ms=176.2666 samples_ms=166.8276,169.7186,170.0775,171.6822,176.2666,176.9997,182.3942,182.9749
+mode=tilt molecules=110592 threads=8 pairs=442368 checksum=8222705064348099955 sink=0 median_ms=6.5796 samples_ms=7.2042,6.6091,6.5796,6.2714,6.2174,7.4520,6.1244,6.3126
+kind=tilt-vesin molecules=110592 threads=8 sink=442368 median_ms=61.7357 samples_ms=58.1809,58.8971,59.0076,61.1365,61.7357,63.5179,68.6842,75.1982
+kind=tilt-freud molecules=110592 threads=8 sink=442368 median_ms=49.3934 samples_ms=48.4543,48.6769,48.8791,49.2567,49.3934,49.4176,50.1489,50.2504
+mode=tilt molecules=884736 threads=1 pairs=3538944 checksum=9316061812838145587 sink=0 median_ms=461.7447 samples_ms=490.6386,467.6978,471.7271,461.7447,453.8932,447.8837,456.4112,458.8929
+kind=tilt-vesin molecules=884736 threads=1 sink=3538944 median_ms=1284.5788 samples_ms=1239.3421,1239.5664,1247.1746,1272.9547,1284.5788,1290.4438,1297.5934,1312.3276
+kind=tilt-freud molecules=884736 threads=1 sink=3538944 median_ms=1425.8696 samples_ms=1380.6571,1382.9046,1398.9587,1421.4590,1425.8696,1426.7651,1429.9934,1455.9621
+mode=tilt molecules=884736 threads=8 pairs=3538944 checksum=9316061812838145587 sink=0 median_ms=75.6887 samples_ms=82.9710,75.6887,73.3067,78.5547,71.9985,74.4027,71.1172,77.1862
+kind=tilt-vesin molecules=884736 threads=8 sink=3538944 median_ms=1335.1776 samples_ms=1283.1001,1304.3266,1308.8527,1324.4148,1335.1776,1347.1455,1357.0829,1453.4672
+kind=tilt-freud molecules=884736 threads=8 sink=3538944 median_ms=459.7513 samples_ms=452.9957,453.2066,454.1927,454.5660,459.7513,459.9613,473.1465,487.2203
+mode=chill molecules=110592 threads=1 pairs=442368 checksum=8222705064348099955 sink=110592 median_ms=28.6346 samples_ms=31.6623,28.6346,28.3681,27.9607,27.8725,27.7006,29.2106,28.6726
+kind=mdapy-chill molecules=110592 threads=1 sink=110592 median_ms=67.0605 samples_ms=65.6662,66.3215,66.3976,66.7692,67.0605,67.3278,67.4323,67.4897
+kind=ovito-chill molecules=110592 threads=1 sink=110592 median_ms=658.9716 samples_ms=645.9547,647.1954,652.1019,654.3331,658.9716,663.6213,681.9221,693.8544
 kind=freud-none molecules=110592 threads=1 sink=0 median_ms=nan samples_ms=no-chill-rings-or-ptm
-mode=chill molecules=110592 threads=8 pairs=442368 checksum=8222705064348099955 sink=110592 median_ms=9.0697 samples_ms=12.2989,10.0419,9.6273,8.8737,9.0697,8.9163,8.8115,8.8248
-kind=mdapy-chill molecules=110592 threads=8 sink=110592 median_ms=88.0583 samples_ms=85.3887,85.6530,86.9503,87.2410,88.0583,88.2143,96.7992,100.5640
-kind=ovito-chill molecules=110592 threads=8 sink=110592 median_ms=92.2060 samples_ms=89.5883,89.8483,91.9378,91.9847,92.2060,93.0686,96.6500,98.1130
+mode=chill molecules=110592 threads=8 pairs=442368 checksum=8222705064348099955 sink=110592 median_ms=7.5116 samples_ms=14.6228,9.8933,7.2321,7.3881,7.5116,8.2223,6.7308,6.4281
+kind=mdapy-chill molecules=110592 threads=8 sink=110592 median_ms=88.9052 samples_ms=87.1070,88.0382,88.1475,88.2820,88.9052,89.1076,89.9463,92.0046
+kind=ovito-chill molecules=110592 threads=8 sink=110592 median_ms=665.3082 samples_ms=656.8273,657.1579,662.1448,662.8558,665.3082,673.7192,675.3397,699.7180
 kind=freud-none molecules=110592 threads=8 sink=0 median_ms=nan samples_ms=no-chill-rings-or-ptm
-mode=chill molecules=884736 threads=1 pairs=3538944 checksum=9316061812838145587 sink=884736 median_ms=508.3578 samples_ms=484.4607,516.6233,525.1612,497.2228,490.2562,508.3578,528.8858,488.2780
-kind=mdapy-chill molecules=884736 threads=1 sink=884736 median_ms=758.3834 samples_ms=722.9076,731.4055,735.8126,748.7469,758.3834,764.2421,776.5018,816.5757
-kind=ovito-chill molecules=884736 threads=1 sink=884736 median_ms=4942.8283 samples_ms=4932.6113,4935.4970,4937.0440,4938.0039,4942.8283,4992.5839,5046.1470,5447.1433
+mode=chill molecules=884736 threads=1 pairs=3538944 checksum=9316061812838145587 sink=884736 median_ms=325.9905 samples_ms=325.9905,326.5068,325.5837,328.0363,323.2055,318.3777,318.1229,332.4789
+kind=mdapy-chill molecules=884736 threads=1 sink=884736 median_ms=809.0274 samples_ms=793.1692,793.7185,799.6084,807.9949,809.0274,813.6752,825.7008,833.6796
+kind=ovito-chill molecules=884736 threads=1 sink=884736 median_ms=5371.7746 samples_ms=5143.1507,5149.6017,5201.3209,5326.0036,5371.7746,5492.5485,5592.9248,5683.6245
 kind=freud-none molecules=884736 threads=1 sink=0 median_ms=nan samples_ms=no-chill-rings-or-ptm
-mode=chill molecules=884736 threads=8 pairs=3538944 checksum=9316061812838145587 sink=884736 median_ms=92.8312 samples_ms=99.8517,92.8312,91.6297,95.5418,91.6615,94.1322,91.5696,92.1825
-kind=mdapy-chill molecules=884736 threads=8 sink=884736 median_ms=794.3232 samples_ms=737.9534,748.0695,763.8569,773.6553,794.3232,795.0764,823.1204,1002.9260
-kind=ovito-chill molecules=884736 threads=8 sink=884736 median_ms=659.6414 samples_ms=649.9426,651.5619,652.0473,653.7416,659.6414,661.1631,661.5111,679.6672
+mode=chill molecules=884736 threads=8 pairs=3538944 checksum=9316061812838145587 sink=884736 median_ms=100.5104 samples_ms=108.0509,100.6428,99.3612,96.6862,96.4581,98.3457,100.5104,101.9906
+kind=mdapy-chill molecules=884736 threads=8 sink=884736 median_ms=895.1890 samples_ms=862.0503,879.1258,880.0615,882.4211,895.1890,898.4240,904.8394,950.4902
+kind=ovito-chill molecules=884736 threads=8 sink=884736 median_ms=5359.3892 samples_ms=5275.1901,5313.7701,5337.1574,5355.1598,5359.3892,5557.7074,5582.1964,5824.3119
 kind=freud-none molecules=884736 threads=8 sink=0 median_ms=nan samples_ms=no-chill-rings-or-ptm
-mode=rings molecules=110592 threads=1 pairs=442368 checksum=8222705064348099955 sink=221184 median_ms=86.9703 samples_ms=87.5309,86.9088,86.5027,86.9703,86.4979,86.8492,87.3591,87.1577
-kind=mdapy-rings molecules=110592 threads=1 sink=221184 median_ms=2330.8591 samples_ms=2318.7842,2319.6780,2323.2265,2324.9518,2330.8591,2338.2140,2351.8763,2358.0680
-kind=ovito-rings molecules=110592 threads=1 sink=110592 median_ms=560.7932 samples_ms=536.0512,537.1700,540.6751,553.8979,560.7932,564.6724,575.9788,614.6378
-mode=rings molecules=110592 threads=8 pairs=442368 checksum=8222705064348099955 sink=221184 median_ms=32.4965 samples_ms=33.3868,32.4965,32.5108,31.3206,35.8687,29.8305,29.7614,28.7368
-kind=mdapy-rings molecules=110592 threads=8 sink=221184 median_ms=2342.9103 samples_ms=2331.9907,2333.2140,2335.7342,2337.7846,2342.9103,2343.5751,2345.8716,2349.1580
-kind=ovito-rings molecules=110592 threads=8 sink=110592 median_ms=282.7452 samples_ms=257.5110,264.3925,273.1819,280.8424,282.7452,329.3495,329.6736,330.2904
-mode=rings molecules=884736 threads=1 pairs=3538944 checksum=9316061812838145587 sink=1769472 median_ms=831.5721 samples_ms=827.3854,824.1449,849.1644,832.0921,841.6491,830.8284,831.5721,825.6962
-kind=mdapy-rings molecules=884736 threads=1 sink=1769472 median_ms=17972.9315 samples_ms=17783.4366,17840.4640,17842.1896,17884.9131,17972.9315,18078.4878,18138.7402,18359.2966
-kind=ovito-rings molecules=884736 threads=1 sink=884736 median_ms=4855.2865 samples_ms=4740.1998,4804.8986,4810.2427,4834.6359,4855.2865,4884.2288,4917.7673,4943.5882
-mode=rings molecules=884736 threads=8 pairs=3538944 checksum=9316061812838145587 sink=1769472 median_ms=273.6129 samples_ms=274.8406,276.6449,269.1452,273.6886,267.8904,263.6135,273.6129,267.8700
-kind=mdapy-rings molecules=884736 threads=8 sink=1769472 median_ms=18066.4357 samples_ms=17981.4100,18032.5574,18035.3208,18038.2780,18066.4357,18341.2014,18440.5632,18662.7000
-kind=ovito-rings molecules=884736 threads=8 sink=884736 median_ms=2601.3606 samples_ms=2518.6888,2549.2956,2564.4558,2591.2438,2601.3606,2635.2182,2773.4944,2785.3184
-mode=symmetry molecules=110592 threads=1 pairs=442368 checksum=8222705064348099955 sink=110592 median_ms=79.7653 samples_ms=77.5893,77.2043,77.0657,81.1700,80.1033,79.7653,80.3813,78.8864
-kind=mdapy-symmetry molecules=110592 threads=1 sink=0 median_ms=1341.0993 samples_ms=1323.0447,1324.2901,1329.9375,1330.5075,1341.0993,1366.7108,1373.8571,1389.8981
-kind=ovito-symmetry molecules=110592 threads=1 sink=0 median_ms=1548.1332 samples_ms=1521.5844,1531.7906,1533.7089,1547.3274,1548.1332,1553.4330,1553.8319,1575.5963
-kind=mdapy-diamond molecules=110592 threads=1 sink=110592 median_ms=147.6562 samples_ms=145.4016,145.4931,146.4816,147.4334,147.6562,147.8950,149.5743,150.0196
-kind=ovito-diamond molecules=110592 threads=1 sink=110592 median_ms=148.9624 samples_ms=146.7945,146.9238,147.9757,148.2574,148.9624,149.4918,152.8464,154.1139
-mode=symmetry molecules=110592 threads=8 pairs=442368 checksum=8222705064348099955 sink=110592 median_ms=19.3948 samples_ms=19.4088,19.3604,19.3490,19.3948,18.8877,18.9297,19.4076,19.6276
-kind=mdapy-symmetry molecules=110592 threads=8 sink=0 median_ms=1344.6730 samples_ms=1336.2287,1338.0815,1339.0507,1342.4747,1344.6730,1348.4066,1350.0285,1354.9662
-kind=ovito-symmetry molecules=110592 threads=8 sink=0 median_ms=208.6991 samples_ms=206.5527,206.9600,207.4455,207.6940,208.6991,209.2907,210.8938,211.8429
-kind=mdapy-diamond molecules=110592 threads=8 sink=110592 median_ms=188.5075 samples_ms=187.1940,187.5423,187.9940,188.4358,188.5075,188.6299,188.9083,191.8159
-kind=ovito-diamond molecules=110592 threads=8 sink=110592 median_ms=37.8889 samples_ms=30.4845,30.9932,31.9385,32.0141,37.8889,43.2822,44.7059,45.1765
-mode=symmetry molecules=884736 threads=1 pairs=3538944 checksum=9316061812838145587 sink=884736 median_ms=720.7038 samples_ms=720.7038,724.1510,720.8560,715.9333,734.8162,716.4234,720.4348,720.3075
-kind=mdapy-symmetry molecules=884736 threads=1 sink=0 median_ms=9953.0155 samples_ms=9919.1566,9926.2854,9928.6786,9928.8757,9953.0155,9954.5970,9961.8055,9987.2578
-kind=ovito-symmetry molecules=884736 threads=1 sink=0 median_ms=11783.6407 samples_ms=11707.3837,11711.7610,11715.0135,11737.1384,11783.6407,11803.6552,11909.0205,11917.8488
-kind=mdapy-diamond molecules=884736 threads=1 sink=884736 median_ms=1190.8939 samples_ms=1182.7263,1187.0285,1188.4473,1189.6744,1190.8939,1192.0739,1192.8388,1194.7090
-kind=ovito-diamond molecules=884736 threads=1 sink=884736 median_ms=1186.4967 samples_ms=1178.6761,1180.9197,1183.4787,1185.7268,1186.4967,1189.3460,1199.3876,1203.6319
-mode=symmetry molecules=884736 threads=8 pairs=3538944 checksum=9316061812838145587 sink=884736 median_ms=100.9590 samples_ms=101.6876,97.3104,96.8658,101.2449,98.5655,103.9143,97.7471,100.9590
-kind=mdapy-symmetry molecules=884736 threads=8 sink=0 median_ms=10196.8250 samples_ms=10123.0603,10135.7217,10179.8746,10193.8160,10196.8250,10204.9248,10234.5713,10556.0501
-kind=ovito-symmetry molecules=884736 threads=8 sink=0 median_ms=1620.7203 samples_ms=1586.5863,1599.6344,1604.5385,1619.9022,1620.7203,1625.6959,1632.5223,1634.3473
-kind=mdapy-diamond molecules=884736 threads=8 sink=884736 median_ms=1295.7963 samples_ms=1264.7065,1289.5569,1292.5730,1295.6444,1295.7963,1298.8485,1304.4819,1315.7347
-kind=ovito-diamond molecules=884736 threads=8 sink=884736 median_ms=290.5705 samples_ms=270.2464,278.3434,282.0129,285.5709,290.5705,330.5988,342.5576,343.6381
+mode=rings molecules=110592 threads=1 pairs=442368 checksum=8222705064348099955 sink=221184 median_ms=92.5899 samples_ms=92.5899,93.3141,90.9893,89.9044,91.7381,91.8897,93.3897,92.8667
+kind=mdapy-rings molecules=110592 threads=1 sink=221184 median_ms=2764.4871 samples_ms=2707.5034,2733.1687,2742.4816,2759.1961,2764.4871,2806.3040,2812.8644,2813.4336
+kind=ovito-rings molecules=110592 threads=1 sink=110592 median_ms=562.6486 samples_ms=551.8617,554.5727,556.7448,558.4628,562.6486,572.7330,579.3828,611.7632
+mode=rings molecules=110592 threads=8 pairs=442368 checksum=8222705064348099955 sink=221184 median_ms=37.0745 samples_ms=39.0109,38.1296,37.2926,36.4884,35.9699,37.0745,36.1229,36.2109
+kind=mdapy-rings molecules=110592 threads=8 sink=221184 median_ms=2996.5902 samples_ms=2898.5053,2920.9022,2934.1534,2962.4218,2996.5902,3068.3538,3110.0272,3141.9184
+kind=ovito-rings molecules=110592 threads=8 sink=110592 median_ms=594.7947 samples_ms=574.2233,578.0247,580.0843,585.8687,594.7947,599.6228,601.2701,605.5221
+mode=rings molecules=884736 threads=1 pairs=3538944 checksum=9316061812838145587 sink=1769472 median_ms=868.2783 samples_ms=870.1243,868.2783,847.8250,888.6081,876.7560,828.6685,857.1269,850.7157
+kind=mdapy-rings molecules=884736 threads=1 sink=1769472 median_ms=22539.3410 samples_ms=21728.2251,22223.0674,22253.7336,22386.8878,22539.3410,22657.5039,23195.5240,23229.4331
+kind=ovito-rings molecules=884736 threads=1 sink=884736 median_ms=4408.3337 samples_ms=4291.5874,4324.2477,4329.1406,4366.5833,4408.3337,4425.7142,4586.1416,4652.5332
+mode=rings molecules=884736 threads=8 pairs=3538944 checksum=9316061812838145587 sink=1769472 median_ms=288.0241 samples_ms=281.1083,287.9801,285.7423,288.0241,289.6980,287.3453,294.1276,288.8472
+kind=mdapy-rings molecules=884736 threads=8 sink=1769472 median_ms=21541.2973 samples_ms=21404.8060,21405.5801,21455.0717,21537.3186,21541.2973,21563.3928,21577.5517,21735.2793
+kind=ovito-rings molecules=884736 threads=8 sink=884736 median_ms=4552.4987 samples_ms=4397.8127,4481.7712,4488.4843,4495.8304,4552.4987,4574.8770,4650.0623,4685.9715
+mode=symmetry molecules=110592 threads=1 pairs=442368 checksum=8222705064348099955 sink=110592 median_ms=39.3419 samples_ms=39.3419,39.2426,39.2951,38.7307,38.9384,39.3683,39.8771,39.5112
+kind=mdapy-symmetry molecules=110592 threads=1 sink=0 median_ms=1268.8226 samples_ms=1260.8496,1265.0466,1265.9495,1267.3792,1268.8226,1273.2153,1276.3912,1322.8777
+kind=ovito-symmetry molecules=110592 threads=1 sink=0 median_ms=1500.8914 samples_ms=1471.2850,1473.5622,1474.2113,1479.8385,1500.8914,1501.0793,1501.7458,1502.4293
+kind=mdapy-diamond molecules=110592 threads=1 sink=110592 median_ms=137.8485 samples_ms=137.4763,137.6174,137.6323,137.7066,137.8485,137.8677,137.9829,138.8264
+kind=ovito-diamond molecules=110592 threads=1 sink=110592 median_ms=143.5853 samples_ms=142.3339,142.9965,143.0891,143.1635,143.5853,143.6241,143.6911,143.7238
+mode=symmetry molecules=110592 threads=8 pairs=442368 checksum=8222705064348099955 sink=110592 median_ms=11.4913 samples_ms=11.6319,11.2097,11.4913,11.6499,11.4546,11.5239,11.4674,11.1924
+kind=mdapy-symmetry molecules=110592 threads=8 sink=0 median_ms=1321.4445 samples_ms=1316.3119,1318.7064,1319.2738,1319.3577,1321.4445,1321.9608,1322.8685,1324.7801
+kind=ovito-symmetry molecules=110592 threads=8 sink=0 median_ms=1489.3236 samples_ms=1481.4217,1486.6203,1488.0240,1489.2451,1489.3236,1490.2243,1496.5122,1503.4503
+kind=mdapy-diamond molecules=110592 threads=8 sink=110592 median_ms=186.1225 samples_ms=185.1389,185.3903,185.7019,186.0050,186.1225,186.2390,186.8598,187.5554
+kind=ovito-diamond molecules=110592 threads=8 sink=110592 median_ms=151.9645 samples_ms=143.9273,144.4579,145.2344,151.9187,151.9645,152.0143,152.0567,152.7948
+mode=symmetry molecules=884736 threads=1 pairs=3538944 checksum=9316061812838145587 sink=884736 median_ms=378.6286 samples_ms=372.1380,374.8579,596.4697,581.9226,378.6286,378.3131,379.9081,374.4870
+kind=mdapy-symmetry molecules=884736 threads=1 sink=0 median_ms=9906.9748 samples_ms=9890.7389,9893.5175,9898.6585,9901.6417,9906.9748,9907.7464,9916.7445,9917.9189
+kind=ovito-symmetry molecules=884736 threads=1 sink=0 median_ms=11728.4951 samples_ms=11701.2404,11707.4471,11707.4914,11716.6456,11728.4951,11731.2614,11733.3916,11748.2163
+kind=mdapy-diamond molecules=884736 threads=1 sink=884736 median_ms=1134.4712 samples_ms=1131.4855,1131.5384,1132.8975,1132.8991,1134.4712,1135.0274,1135.6548,1136.4672
+kind=ovito-diamond molecules=884736 threads=1 sink=884736 median_ms=1155.5936 samples_ms=1145.1700,1149.0310,1151.0698,1152.1847,1155.5936,1156.4332,1156.6671,1159.4389
+mode=symmetry molecules=884736 threads=8 pairs=3538944 checksum=9316061812838145587 sink=884736 median_ms=95.4243 samples_ms=96.4681,95.8060,91.9194,93.5268,94.1117,95.4243,92.7922,97.0989
+kind=mdapy-symmetry molecules=884736 threads=8 sink=0 median_ms=10100.5363 samples_ms=10062.3637,10065.3372,10071.5438,10078.8063,10100.5363,10100.7818,10132.3576,10166.5051
+kind=ovito-symmetry molecules=884736 threads=8 sink=0 median_ms=11854.5700 samples_ms=11781.5125,11803.5680,11832.3351,11845.5900,11854.5700,11858.3931,11961.7474,12075.3104
+kind=mdapy-diamond molecules=884736 threads=8 sink=884736 median_ms=1264.5616 samples_ms=1249.2075,1264.2742,1264.4386,1264.4511,1264.5616,1268.6039,1268.6147,1269.5840
+kind=ovito-diamond molecules=884736 threads=8 sink=884736 median_ms=1184.6236 samples_ms=1164.9931,1171.5005,1176.8059,1184.3809,1184.6236,1186.1084,1187.7768,1204.5497
+mode=ortho molecules=10648 threads=1 pairs=42592 checksum=13782790659416074331 sink=0 median_ms=1.5914 samples_ms=1.6117,1.5914,1.5154,1.5930,1.5746,1.5902,1.5726,1.6246
+mode=ortho molecules=10648 threads=8 pairs=42592 checksum=13782790659416074331 sink=0 median_ms=0.5004 samples_ms=0.6153,0.4965,0.5037,0.4854,0.4928,0.5013,0.4849,0.5004
+mode=ortho molecules=110592 threads=1 pairs=442368 checksum=8222705064348099955 sink=0 median_ms=12.0891 samples_ms=13.1306,11.7482,11.9661,12.0891,12.0511,12.1623,11.7855,12.3495
+mode=ortho molecules=110592 threads=8 pairs=442368 checksum=8222705064348099955 sink=0 median_ms=4.0022 samples_ms=4.6685,5.0282,3.9284,4.0329,4.0022,3.7875,3.8247,3.9604
+mode=ortho molecules=884736 threads=1 pairs=3538944 checksum=9316061812838145587 sink=0 median_ms=115.9495 samples_ms=123.1739,117.0919,115.7952,116.1937,115.9495,114.4051,114.5626,115.6036
+mode=ortho molecules=884736 threads=8 pairs=3538944 checksum=9316061812838145587 sink=0 median_ms=31.2759 samples_ms=35.4312,31.1635,30.8659,31.2759,32.1812,30.4012,31.5164,30.5219
 ```
 
 Orthorhombic list, same binary, after that session:

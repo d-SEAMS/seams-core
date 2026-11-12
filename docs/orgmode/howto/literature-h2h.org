@@ -60,9 +60,10 @@ at one thread and at eight.
 
 **Neighbours.** The cutoff list matches vesin, mdapy and pyscal3 on
 every frame (agreement 1). On ice Ic of 110592 molecules the medians
-are 31.603 ms for d-SEAMS, 51.939 ms for vesin, 45.102 ms for mdapy and
-225.169 ms for pyscal3, at one thread. At eight threads the same list
-is 10.358 ms against vesin at 52.525 ms. Ice Ih of the same size is
+are 12.958 ms for d-SEAMS, 48.884 ms for vesin, 42.080 ms for mdapy and
+175.153 ms for pyscal3, at one thread. At eight threads the same list
+is 4.287 ms against vesin at 50.681 ms, mdapy at 62.605 ms and pyscal3
+at 185.708 ms. Eight threads are under 20 ms and faster than one thread. Ice Ih of the same size is
 25.773 ms against vesin at 47.958 ms. The 128-molecule cells and the
 512-atom dense frame used to miss the one-cell stencil, because that
 stencil required four cells on every edge. Two cells are enough: the
@@ -76,10 +77,11 @@ and vesin at 1.992 ms, still with the same neighbour sets.
 On ideal ice the first shell is a perfect tetrahedron, so Ih and Ic
 share the same \(q_l\). Every compared value is within \(10^{-6}\); the
 largest absolute gap on the 110592-molecule cells is a few times
-\(10^{-16}\). At one thread on ice Ic of that size, \(q_4\) is 57.042 ms
-against mdapy 62.823 ms and pyscal3 90.901 ms, and \(q_6\) is 48.591 ms
-against mdapy 75.009 ms and pyscal3 102.943 ms. At eight threads
-\(q_6\) is 13.883 ms against mdapy 95.834 ms.
+\(10^{-16}\). At one thread on ice Ic of that size, \(q_4\) is 17.536 ms
+against mdapy 59.907 ms and pyscal3 86.938 ms, and \(q_6\) is 18.196 ms
+against mdapy 73.259 ms and pyscal3 97.298 ms. At eight threads
+\(q_4\) is 5.049 ms against mdapy 80.176 ms and pyscal3 90.943 ms, and
+\(q_6\) is 5.240 ms against mdapy 94.818 ms and pyscal3 101.745 ms.
 
 **Diamond and metal CNA.** Diamond labels agree on the ideal cells:
 every ice Ic molecule is cubic, every ice Ih molecule is hexagonal.
@@ -100,9 +102,9 @@ it is 0.310 ms against mdapy at 10.356 ms.
 **Rings.** Primitive rings of size at most 6. On ice Ic, and on ice Ih
 at 4096 and 110592 molecules, the census is two six-rings per molecule
 and no smaller ring. d-SEAMS, mdapy and SQQ agree. At 110592 molecules
-of ice Ic and one thread the medians are 116.834 ms, mdapy 2651.418 ms
-and SQQ 18672.033 ms. At eight threads d-SEAMS is 34.116 ms and mdapy
-is 2670.661 ms. SQQ does not search three-rings, and one frame does
+of ice Ic and one thread the medians are 91.763 ms, mdapy 2187.852 ms
+and SQQ 15248.409 ms. At eight threads d-SEAMS is 28.945 ms, mdapy
+is 1640.954 ms and SQQ is 13893.758 ms. The census is 221184 six-rings. SQQ does not search three-rings, and one frame does
 not split across its workers, so eight threads do not change its time.
 The 128-molecule ice Ih cell is the exception. d-SEAMS and SQQ both
 report 32 four-rings and 384 six-rings. mdapy reports 0 and 256.
@@ -121,8 +123,9 @@ itself, are matched to the ice Ih and ice Ic templates. The template
 with the smaller Hausdorff distance is the label, unless that distance
 exceeds 0.2 Å. On the ideal cells the chosen distance is 0 and every
 label matches =seams_symmetry_classify=. At 110592 molecules of ice Ic
-the classify median is 25.236 ms at one thread and 6.562 ms at eight.
-IRA is 26972 ms and 27687 ms. The eight-core IRA time does not fall,
+the classify median is 24.319 ms at one thread and 6.075 ms at eight.
+IRA is 26568.831 ms and 29043.763 ms. Eight threads do not make IRA
+faster. The eight-core IRA time does not fall,
 because the matcher is one permutation search per shell. Both answers
 are the same ice label. The d-SEAMS number is the bond-graph kernel,
 not a call into libira. IRA remains the right tool for a cluster that
@@ -139,11 +142,19 @@ Both codes then use the four nearest neighbours: the mutual graph, and
 a TRACE cutoff just past the fourth neighbour at 1.413 Å. Every frame
 reports no cage of any of the three kinds. Ice has no five-rings, so a
 dodecahedron is absent. At 110592 molecules of ice Ic the timed count
-is 64.292 ms at one thread and 29.859 ms at eight, against TRACE at
-372.549 ms and 379.091 ms. Ice Ih is 59.631 ms and 38.656 ms against
+is 59.557 ms at one thread and 15.924 ms at eight, against TRACE at
+368.404 ms and 367.804 ms. Both counts are zero cages. Eight threads
+do not make TRACE faster. Ice Ih is 59.631 ms and 38.656 ms against
 260.930 ms and 259.011 ms.
 
-**PLUMED.** Q4, Q6 and COORDINATIONNUMBER. The neighbour weight is a
+**PLUMED.** The rows in this section were not remeasured. conda-forge
+plumed 2.10.2, build nompi_hc139f64_100, installs and the Python module
+loads that kernel. Q4, Q6 and COORDINATIONNUMBER are not in the kernel:
+each =readInputLine= answers that the action is known only in the
+symfunc module, which this build does not enable. The numbers below are
+the previous sitting.
+
+Q4, Q6 and COORDINATIONNUMBER. The neighbour weight is a
 steep rational switch cut at 3.5 Å. PLUMED stores the norm of the
 averaged spherical-harmonic vector and omits \(\sqrt{4\pi/(2l+1)}\).
 Restoring that factor makes it the local Steinhardt parameter. On ideal

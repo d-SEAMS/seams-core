@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 PY = os.environ.get("NEIGH_PYTHON", sys.executable)
-BENCH = os.environ.get("NEIGH_BENCH", str(ROOT / "build-release/tests/bench_v2"))
+BENCH = os.environ.get("NEIGH_BENCH", str(ROOT / "bbdir-release/tests/bench_v2"))
 GL = "/lib/x86_64-linux-gnu:/usr/lib/x86_64-linux-gnu"
 
 
