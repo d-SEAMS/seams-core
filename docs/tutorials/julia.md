@@ -1,22 +1,23 @@
 # Julia tutorial
 
-`bindings/julia/Seams` calls `libseams` with `ccall`. Julia 1.11 needs `Test` listed under `[extras]`.
+`bindings/julia/Dseams` is the package CI tests. It calls `libseams_lang` and covers rings, cages, and the TIP4P counts. `bindings/julia/Seams` is the thin `libseams` example (`examples/ice.jl` builds an eight-atom diamond cell).
+
+The cubic mW dump is ice Ic. CHILL+ labels all 4096 oxygens cubic.
 
 ```julia
-using Seams
-a = 2.75 * 4 / sqrt(3)
-xyz = zeros(3, 8)
-sys = System()
-set_ortho!(sys, xyz, (a, a, a))
-labels, counts = chill_plus(sys)
-println(version(), " ", counts[1])
+using Dseams
+root = get(ENV, "DSEAMS_ROOT", pwd())
+frame = read_frame(joinpath(root, "input", "traj", "mW_cubic.lammpstrj"); type = 1)
+ice = chill_plus(frame)
+println(ice.counts["cubic"])
 ```
 
 ```bash
-export SEAMS_LIB=$PWD/build/src/libseams.so
-export LD_LIBRARY_PATH=$PWD/build/src
-julia --project=bindings/julia/Seams -e 'using Pkg; Pkg.test()'
-julia --project=bindings/julia/Seams bindings/julia/Seams/examples/ice.jl
+export DSEAMS_ROOT=$PWD
+export SEAMS_LANG_LIB=$PWD/build/bindings/libseams_lang.so
+export LD_LIBRARY_PATH=$PWD/build/bindings:$PWD/build/src
+julia --project=bindings/julia/Dseams -e 'using Pkg; Pkg.instantiate()'
+julia --project=bindings/julia/Dseams bindings/julia/Dseams/test/runtests.jl
 ```
 
-The suite is eight checks on a 64-atom cubic cell: both CHILL+ rules, q6, and the six-ring fraction.
+The suite checks the mixed TIP4P frame, seeded cages, and that cubic count of 4096.

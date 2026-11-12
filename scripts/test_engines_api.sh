@@ -1,8 +1,7 @@
 #!/bin/sh
 # Copyright (c) d-SEAMS developers
-# Build libseams and run the C API, the four language fronts, and the
-# engine decks. Engine binaries are linked with the system compiler so
-# they load the distribution LAMMPS and GROMACS.
+# Build libseams and run the C API and the language fronts.
+# LAMMPS, GROMACS, OpenMM, and PLUMED are the meson engine tests.
 set -e
 root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 build=$root/build
@@ -28,8 +27,11 @@ gfortran -I"$mod" "$root/bindings/fortran/test_seams.f90" "$mod/seams.o" \
 
 # Julia 1.11 ccall suite, when julia is on PATH.
 if command -v julia >/dev/null 2>&1; then
-  (cd "$root/bindings/julia/Seams" && SEAMS_LIB="$lib/libseams.so" LD_LIBRARY_PATH="$lib" \
-    julia --project=. -e 'using Pkg; Pkg.test()')
+  (cd "$root/bindings/julia/Dseams" && \
+    SEAMS_LANG_LIB="$root/build/bindings/libseams_lang.so" \
+    DSEAMS_ROOT="$root" \
+    LD_LIBRARY_PATH="$root/build/bindings:$lib" \
+    julia --project=. -e 'using Pkg; Pkg.instantiate(); include("test/runtests.jl")')
 fi
 
 # Rust
@@ -48,29 +50,12 @@ if [ -n "$SEAMS_PY" ]; then
     -o "$root/bindings/python/dseams/_core$suf"
   (cd "$root/bindings/python" && PYTHONPATH="$PWD" LD_LIBRARY_PATH="$eessi_lib:$lib" \
     "$SEAMS_PY" -m unittest -v tests/test_dseams.py)
-  (cd "$root/engines/openmm" && PYTHONPATH="$root/bindings/python" LD_LIBRARY_PATH="$eessi_lib:$lib" \
+  (cd "$root/engines/openmm" && \
+    PYTHONPATH="$root/bindings/python:$root/adapters/python" \
+    SEAMS_LANG_LIB="$root/build/bindings/libseams_lang.so" \
+    LD_LIBRARY_PATH="$eessi_lib:$lib:$root/build/bindings" \
     "$SEAMS_PY" test_reporter.py)
 fi
 
-# LAMMPS in-run hook and the compute object.
-"$root/engines/link_host.sh" -c -O2 -std=c++17 \
-  -I/usr/include/lammps -I/usr/lib/x86_64-linux-gnu/openmpi/include -I"$root/include" -I"$build/src" \
-  "$root/engines/lammps/compute_dseams.cpp" -o "$mod/compute_dseams.o"
-"$root/engines/link_host.sh" -O2 -std=c++17 \
-  -I/usr/include/lammps -I"$root/include" -I"$build/src" \
-  "$root/engines/lammps/run_hook.cpp" -o "$mod/run_hook" \
-  -L/usr/lib/x86_64-linux-gnu -Wl,--allow-shlib-undefined \
-  -Wl,-rpath,/usr/lib/x86_64-linux-gnu -Wl,-rpath,"$lib" \
-  -llammps /usr/lib/x86_64-linux-gnu/libcurl.so.4 -L"$lib" -lseams
-(cd "$root/engines/lammps" && env -u LIBRARY_PATH LD_LIBRARY_PATH="$lib" "$mod/run_hook" in.dseams)
-
-# GROMACS trajectory tool, then a real mdrun trajectory.
-"$root/engines/link_host.sh" -O2 -std=c++17 \
-  -I/usr/include -DGMX_DOUBLE=0 -fopenmp -I"$root/include" -I"$build/src" \
-  "$root/engines/gromacs/seams_ice.cpp" -o "$mod/seams_ice" \
-  -L/usr/lib/x86_64-linux-gnu -Wl,--allow-shlib-undefined \
-  -Wl,-rpath,/usr/lib/x86_64-linux-gnu -Wl,-rpath,"$lib" \
-  -lgromacs -lm -lfftw3f -L"$lib" -lseams
-"$root/engines/gromacs/run_mdrun.sh" "$mod/seams_ice" "$lib"
-
+rm -rf "$mod"
 echo "engines-api ok"

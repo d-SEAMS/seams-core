@@ -40,7 +40,7 @@ Then run one front:
 python -m dseams
 cargo run --manifest-path bindings/rust/Cargo.toml --example ice
 gfortran -Ibindings/fortran bindings/fortran/test_seams.f90 -L$SEAMS_LIB_DIR -lseams
-julia --project=bindings/julia/Seams bindings/julia/Seams/examples/ice.jl
+julia --project=bindings/julia/Dseams bindings/julia/Dseams/test/runtests.jl
 ```
 
 A frame is a coordinate array and a cell. Orthorhombic boxes pass three
