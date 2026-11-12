@@ -102,6 +102,110 @@ void ylmAdd8(int orderL, const double *dx, const double *dy, const double *dz,
   }
 }
 
+void transpose8(__m512d in[8], __m512d out[8]) {
+  // in[component] holds eight atoms. Unpack pairs of components, then
+  // gather the 128-bit lane that belongs to one atom.
+  __m512d pair[8];
+  pair[0] = _mm512_unpacklo_pd(in[0], in[1]);
+  pair[1] = _mm512_unpackhi_pd(in[0], in[1]);
+  pair[2] = _mm512_unpacklo_pd(in[2], in[3]);
+  pair[3] = _mm512_unpackhi_pd(in[2], in[3]);
+  pair[4] = _mm512_unpacklo_pd(in[4], in[5]);
+  pair[5] = _mm512_unpackhi_pd(in[4], in[5]);
+  pair[6] = _mm512_unpacklo_pd(in[6], in[7]);
+  pair[7] = _mm512_unpackhi_pd(in[6], in[7]);
+  for (int atom = 0; atom < 8; ++atom) {
+    const int odd = atom & 1;
+    const int lane = atom >> 1;
+    __m512d row = _mm512_setzero_pd();
+    row = _mm512_insertf64x2(row, _mm512_extractf64x2_pd(pair[odd], lane), 0);
+    row = _mm512_insertf64x2(row, _mm512_extractf64x2_pd(pair[2 + odd], lane), 1);
+    row = _mm512_insertf64x2(row, _mm512_extractf64x2_pd(pair[4 + odd], lane), 2);
+    row = _mm512_insertf64x2(row, _mm512_extractf64x2_pd(pair[6 + odd], lane), 3);
+    out[atom] = row;
+  }
+}
+
+void storePairs(double *dst, __m512d re, __m512d im, int nComp) {
+  const __m512d u0 = _mm512_unpacklo_pd(re, im);
+  const __m512d u1 = _mm512_unpackhi_pd(re, im);
+  const __m512i idx = _mm512_set_epi64(7, 6, 3, 2, 5, 4, 1, 0);
+  const __m512d low =
+      _mm512_permutexvar_pd(idx, _mm512_shuffle_f64x2(u0, u1, 0x44));
+  const __m512d high =
+      _mm512_permutexvar_pd(idx, _mm512_shuffle_f64x2(u0, u1, 0xEE));
+  const int lowN = std::min(8, nComp * 2);
+  if (lowN >= 8) {
+    _mm512_storeu_pd(dst, low);
+  } else if (lowN > 0) {
+    _mm512_mask_storeu_pd(dst, static_cast<__mmask8>((1u << lowN) - 1u), low);
+  }
+  if (nComp > 4) {
+    const int highN = (nComp - 4) * 2;
+    if (highN >= 8) {
+      _mm512_storeu_pd(dst + 8, high);
+    } else if (highN > 0) {
+      _mm512_mask_storeu_pd(dst + 8, static_cast<__mmask8>((1u << highN) - 1u),
+                            high);
+    }
+  }
+}
+
+bool ylmSumRows4(int orderL, const double *dx, const double *dy,
+                 const double *dz, double *rows, int stride) {
+  if ((orderL != 4 && orderL != 6) || stride < 2 * (2 * orderL + 1)) {
+    return false;
+  }
+  const int nComp = 2 * orderL + 1;
+  V accRe[13];
+  V accIm[13];
+  const V zero(0.0);
+  for (int m = 0; m < 13; ++m) {
+    accRe[m] = zero;
+    accIm[m] = zero;
+  }
+  for (int slot = 0; slot < 4; ++slot) {
+    const __m512d x0 = _mm512_loadu_pd(dx + slot * 8);
+    const __m512d y0 = _mm512_loadu_pd(dy + slot * 8);
+    const __m512d z0 = _mm512_loadu_pd(dz + slot * 8);
+    const __m512d r2 = _mm512_add_pd(
+        _mm512_add_pd(_mm512_mul_pd(x0, x0), _mm512_mul_pd(y0, y0)),
+        _mm512_mul_pd(z0, z0));
+    const __mmask8 live = _mm512_cmp_pd_mask(r2, _mm512_setzero_pd(), _CMP_GT_OQ);
+    if (live != static_cast<__mmask8>(0xff)) {
+      return false;
+    }
+    V reV[13];
+    V imV[13];
+    evalSolidLanes(orderL, x0, y0, z0, live, reV, imV);
+    for (int m = 0; m < nComp; ++m) {
+      accRe[m] = accRe[m] + reV[m];
+      accIm[m] = accIm[m] + imV[m];
+    }
+  }
+  const __m512d zreg = _mm512_setzero_pd();
+  for (int block = 0; block < nComp; block += 8) {
+    const int have = std::min(8, nComp - block);
+    __m512d reIn[8];
+    __m512d imIn[8];
+    __m512d reOut[8];
+    __m512d imOut[8];
+    for (int k = 0; k < 8; ++k) {
+      const int m = block + k;
+      reIn[k] = (m < nComp) ? accRe[m].v : zreg;
+      imIn[k] = (m < nComp) ? accIm[m].v : zreg;
+    }
+    transpose8(reIn, reOut);
+    transpose8(imIn, imOut);
+    for (int atom = 0; atom < 8; ++atom) {
+      storePairs(rows + static_cast<std::size_t>(atom) * static_cast<std::size_t>(stride) +
+                     static_cast<std::size_t>(2 * block),
+                 reOut[atom], imOut[atom], have);
+    }
+  }
+  return true;
+}
+
 void ylmBatchAvx512(int orderL, const double *dx, const double *dy,
                     const double *dz, int n, double *re, double *im) {
   const int nComp = 2 * orderL + 1;

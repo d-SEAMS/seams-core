@@ -1,0 +1,351 @@
+session v9
+date_utc 2026-11-12 00:31:24
+nproc 8
+CPU(s):                                  8
+On-line CPU(s) list:                     0-7
+Model name:                              Intel(R) Xeon(R) Processor
+Thread(s) per core:                      1
+Core(s) per socket:                      8
+Socket(s):                               1
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-7
+cpu.max absent
+nr_periods 0
+nr_throttled 0
+cpuset.cpus.effective 0-7
+usable_cores 8
+protocol OMP_PROC_BIND=close OMP_PLACES=cores OMP_WAIT_POLICY=ACTIVE for seams and ovito; mdapy unbound
+samples 8 after 2 warm-ups; neighbour build is inside every seams call
+ideal ice Ic, cutoff 3.5, local q
+BEGIN seams-1
+BEGIN seams threads=1 frame=ice884736 metric=q4
+warmup 0 450.8297 st=0 q0=0.50917508
+warmup 1 364.2446 st=0 q0=0.50917508
+sample 357.2011 st=0 q0=0.50917508
+sample 350.8610 st=0 q0=0.50917508
+sample 357.3863 st=0 q0=0.50917508
+sample 359.9186 st=0 q0=0.50917508
+sample 363.3891 st=0 q0=0.50917508
+sample 355.0282 st=0 q0=0.50917508
+sample 346.0284 st=0 q0=0.50917508
+sample 354.1926 st=0 q0=0.50917508
+summary n=8 min=346.0284 median=356.1146 max=363.3891
+seams1_exit 0
+BEGIN ovito-1
+BEGIN ovito threads=1 frame=ice884736 metric=q4
+warmup 0 415.5242 ok
+warmup 1 397.7435 ok
+sample 390.2349 ok
+sample 395.9617 ok
+sample 384.5290 ok
+sample 386.4735 ok
+sample 389.1778 ok
+sample 397.5853 ok
+sample 391.4269 ok
+sample 396.6864 ok
+summary n=8 min=384.5290 median=390.8309 max=397.5853
+ovito1_exit 0
+BEGIN seams-8
+BEGIN seams threads=8 frame=ice110592 metric=q4
+warmup 0 54.0694 st=0 q0=0.50917508
+warmup 1 7.9700 st=0 q0=0.50917508
+sample 8.0211 st=0 q0=0.50917508
+sample 7.4824 st=0 q0=0.50917508
+sample 7.3681 st=0 q0=0.50917508
+sample 7.9759 st=0 q0=0.50917508
+sample 7.7432 st=0 q0=0.50917508
+sample 7.0368 st=0 q0=0.50917508
+sample 5.8600 st=0 q0=0.50917508
+sample 5.8258 st=0 q0=0.50917508
+summary n=8 min=5.8258 median=7.4253 max=8.0211
+BEGIN seams threads=8 frame=ice110592 metric=q6
+warmup 0 15.5841 st=0 q0=0.62853936
+warmup 1 6.4053 st=0 q0=0.62853936
+sample 6.1375 st=0 q0=0.62853936
+sample 6.1330 st=0 q0=0.62853936
+sample 6.0834 st=0 q0=0.62853936
+sample 6.1590 st=0 q0=0.62853936
+sample 6.1900 st=0 q0=0.62853936
+sample 6.2457 st=0 q0=0.62853936
+sample 7.0057 st=0 q0=0.62853936
+sample 6.9320 st=0 q0=0.62853936
+summary n=8 min=6.0834 median=6.1745 max=7.0057
+BEGIN seams threads=8 frame=ice884736 metric=q4
+warmup 0 140.8216 st=0 q0=0.50917508
+warmup 1 53.3355 st=0 q0=0.50917508
+sample 51.1659 st=0 q0=0.50917508
+sample 50.5329 st=0 q0=0.50917508
+sample 50.4086 st=0 q0=0.50917508
+sample 52.7212 st=0 q0=0.50917508
+sample 54.3766 st=0 q0=0.50917508
+sample 50.2769 st=0 q0=0.50917508
+sample 51.5797 st=0 q0=0.50917508
+sample 52.4151 st=0 q0=0.50917508
+summary n=8 min=50.2769 median=51.3728 max=54.3766
+BEGIN seams threads=8 frame=ice884736 metric=q6
+warmup 0 166.1631 st=0 q0=0.62853936
+warmup 1 61.4860 st=0 q0=0.62853936
+sample 59.3307 st=0 q0=0.62853936
+sample 55.4475 st=0 q0=0.62853936
+sample 62.8205 st=0 q0=0.62853936
+sample 58.6405 st=0 q0=0.62853936
+sample 55.0248 st=0 q0=0.62853936
+sample 55.4211 st=0 q0=0.62853936
+sample 66.2597 st=0 q0=0.62853936
+sample 62.9192 st=0 q0=0.62853936
+summary n=8 min=55.0248 median=58.9856 max=66.2597
+seams8_exit 0
+BEGIN ovito-8
+BEGIN ovito threads=8 frame=ice110592 metric=q4
+warmup 0 12.5890 ok
+warmup 1 11.6178 ok
+sample 11.1728 ok
+sample 9.7001 ok
+sample 11.0001 ok
+sample 11.4090 ok
+sample 11.0879 ok
+sample 10.3949 ok
+sample 9.7640 ok
+sample 11.2305 ok
+summary n=8 min=9.7001 median=11.0440 max=11.4090
+BEGIN ovito threads=8 frame=ice110592 metric=q6
+warmup 0 11.6240 ok
+warmup 1 11.2574 ok
+sample 11.0164 ok
+sample 11.1983 ok
+sample 11.2818 ok
+sample 10.8464 ok
+sample 10.5005 ok
+sample 10.3311 ok
+sample 11.5321 ok
+sample 12.5834 ok
+summary n=8 min=10.3311 median=11.1074 max=12.5834
+BEGIN ovito threads=8 frame=ice884736 metric=q4
+warmup 0 74.6291 ok
+warmup 1 75.1485 ok
+sample 72.1146 ok
+sample 74.4623 ok
+sample 79.3618 ok
+sample 73.0505 ok
+sample 77.6344 ok
+sample 72.0068 ok
+sample 72.5901 ok
+sample 75.1346 ok
+summary n=8 min=72.0068 median=73.7564 max=79.3618
+BEGIN ovito threads=8 frame=ice884736 metric=q6
+warmup 0 83.1765 ok
+warmup 1 83.3493 ok
+sample 81.9762 ok
+sample 81.8356 ok
+sample 84.6869 ok
+sample 82.6708 ok
+sample 83.5198 ok
+sample 86.6805 ok
+sample 85.8324 ok
+sample 85.1013 ok
+summary n=8 min=81.8356 median=84.1033 max=86.6805
+ovito8_exit 0
+BEGIN mdapy-8
+BEGIN mdapy threads=8 frame=ice110592 metric=q4
+warmup 0 14.7209 ok
+warmup 1 12.2234 ok
+sample 12.1295 ok
+sample 12.2472 ok
+sample 12.4057 ok
+sample 12.9458 ok
+sample 12.3688 ok
+sample 12.5859 ok
+sample 12.6277 ok
+sample 12.4256 ok
+summary n=8 min=12.1295 median=12.4157 max=12.9458
+BEGIN mdapy threads=8 frame=ice110592 metric=q6
+warmup 0 15.5714 ok
+warmup 1 14.1554 ok
+sample 13.7367 ok
+sample 13.9482 ok
+sample 13.5918 ok
+sample 14.0599 ok
+sample 13.8127 ok
+sample 13.9528 ok
+sample 13.7472 ok
+sample 13.6887 ok
+summary n=8 min=13.5918 median=13.7800 max=14.0599
+BEGIN mdapy threads=8 frame=ice884736 metric=q4
+warmup 0 116.4916 ok
+warmup 1 112.2314 ok
+sample 113.8178 ok
+sample 110.9787 ok
+sample 109.7254 ok
+sample 116.6511 ok
+sample 110.4650 ok
+sample 109.8019 ok
+sample 107.5812 ok
+sample 106.9812 ok
+summary n=8 min=106.9812 median=110.1335 max=116.6511
+BEGIN mdapy threads=8 frame=ice884736 metric=q6
+warmup 0 125.1106 ok
+warmup 1 111.8273 ok
+sample 116.6201 ok
+sample 116.5120 ok
+sample 115.8460 ok
+sample 114.6832 ok
+sample 116.2931 ok
+sample 117.1136 ok
+sample 116.9207 ok
+sample 117.4615 ok
+summary n=8 min=114.6832 median=116.5661 max=117.4615
+mdapy8_exit 0
+BEGIN nucleation-run
+BEGIN nucleation frames=148 molecules=4096
+0 15677000 431 171 59 44 17 st=0 cubic=47 hex=62
+1 15678000 310 179 64 43 23 st=0 cubic=50 hex=60
+2 15679000 326 179 70 42 28 st=0 cubic=44 hex=69
+3 15680000 340 183 76 40 36 st=0 cubic=55 hex=65
+4 15681000 302 164 64 46 36 st=0 cubic=56 hex=62
+5 15682000 454 196 81 32 34 st=0 cubic=55 hex=61
+6 15683000 487 173 81 37 33 st=0 cubic=58 hex=65
+7 15684000 370 173 78 43 36 st=0 cubic=57 hex=65
+8 15685000 554 151 83 35 35 st=0 cubic=59 hex=58
+9 15686000 412 178 83 30 32 st=0 cubic=57 hex=57
+10 15687000 352 186 77 43 27 st=0 cubic=51 hex=72
+11 15688000 358 188 83 32 32 st=0 cubic=54 hex=64
+12 15689000 423 176 86 30 33 st=0 cubic=50 hex=67
+13 15690000 470 173 100 34 38 st=0 cubic=61 hex=75
+14 15691000 335 191 88 36 37 st=0 cubic=58 hex=70
+15 15692000 460 165 96 34 36 st=0 cubic=60 hex=72
+16 15693000 495 187 97 43 35 st=0 cubic=63 hex=78
+17 15694000 525 163 105 43 33 st=0 cubic=64 hex=89
+18 15695000 474 175 99 38 31 st=0 cubic=56 hex=81
+19 15696000 517 179 97 40 35 st=0 cubic=57 hex=92
+20 15697000 499 179 96 31 34 st=0 cubic=58 hex=75
+21 15698000 517 164 93 38 35 st=0 cubic=65 hex=78
+22 15699000 394 163 107 54 37 st=0 cubic=70 hex=102
+23 15700000 437 166 104 34 33 st=0 cubic=63 hex=87
+24 15701000 461 177 98 46 36 st=0 cubic=61 hex=93
+25 15702000 415 178 106 45 35 st=0 cubic=61 hex=93
+26 15703000 482 137 108 32 33 st=0 cubic=62 hex=85
+27 15704000 507 160 96 34 33 st=0 cubic=59 hex=76
+28 15705000 393 178 94 36 31 st=0 cubic=53 hex=79
+29 15706000 470 194 99 42 35 st=0 cubic=58 hex=90
+30 15707000 462 161 100 47 34 st=0 cubic=63 hex=93
+31 15708000 384 180 99 40 31 st=0 cubic=59 hex=85
+32 15709000 447 163 101 46 30 st=0 cubic=61 hex=93
+33 15710000 481 146 95 32 27 st=0 cubic=50 hex=78
+34 15711000 500 162 102 35 30 st=0 cubic=59 hex=84
+35 15712000 419 182 102 38 29 st=0 cubic=61 hex=86
+36 15713000 555 162 105 37 31 st=0 cubic=61 hex=87
+37 15714000 340 171 90 36 30 st=0 cubic=57 hex=76
+38 15715000 442 177 105 32 38 st=0 cubic=65 hex=75
+39 15716000 518 170 104 33 36 st=0 cubic=62 hex=79
+40 15717000 438 184 104 38 36 st=0 cubic=65 hex=79
+41 15718000 494 185 115 39 38 st=0 cubic=72 hex=83
+42 15719000 498 190 115 34 40 st=0 cubic=71 hex=84
+43 15720000 397 191 119 30 41 st=0 cubic=74 hex=76
+44 15721000 423 167 122 32 35 st=0 cubic=72 hex=87
+45 15722000 421 182 124 28 41 st=0 cubic=76 hex=83
+46 15723000 541 168 133 37 38 st=0 cubic=83 hex=88
+47 15724000 464 185 136 28 41 st=0 cubic=84 hex=82
+48 15725000 364 153 131 24 40 st=0 cubic=75 hex=82
+49 15726000 463 164 139 30 40 st=0 cubic=83 hex=86
+50 15727000 416 170 128 30 36 st=0 cubic=68 hex=95
+51 15728000 428 164 126 38 34 st=0 cubic=63 hex=102
+52 15729000 451 176 144 39 43 st=0 cubic=74 hex=113
+53 15730000 529 169 124 25 40 st=0 cubic=66 hex=84
+54 15731000 456 178 125 40 43 st=0 cubic=69 hex=101
+55 15732000 500 177 128 34 43 st=0 cubic=69 hex=99
+56 15733000 474 187 135 35 45 st=0 cubic=70 hex=100
+57 15734000 520 167 134 38 37 st=0 cubic=76 hex=101
+58 15735000 633 158 139 37 41 st=0 cubic=79 hex=103
+59 15736000 550 195 142 40 44 st=0 cubic=83 hex=104
+60 15737000 594 179 152 32 45 st=0 cubic=85 hex=108
+61 15738000 524 155 148 28 45 st=0 cubic=79 hex=98
+62 15739000 581 164 146 40 44 st=0 cubic=85 hex=108
+63 15740000 529 171 151 41 48 st=0 cubic=91 hex=101
+64 15741000 596 157 144 42 42 st=0 cubic=88 hex=106
+65 15742000 516 180 152 32 45 st=0 cubic=87 hex=105
+66 15743000 467 193 151 27 47 st=0 cubic=82 hex=106
+67 15744000 518 182 168 48 50 st=0 cubic=98 hex=122
+68 15745000 604 163 170 37 50 st=0 cubic=103 hex=112
+69 15746000 525 158 167 35 44 st=0 cubic=95 hex=119
+70 15747000 843 123 158 54 45 st=0 cubic=100 hex=118
+71 15748000 681 151 167 46 40 st=0 cubic=95 hex=123
+72 15749000 569 174 167 33 42 st=0 cubic=87 hex=117
+73 15750000 615 178 136 44 43 st=0 cubic=91 hex=114
+74 15751000 724 136 177 52 48 st=0 cubic=108 hex=128
+75 15752000 711 135 164 31 50 st=0 cubic=99 hex=113
+76 15753000 619 184 185 45 52 st=0 cubic=103 hex=132
+77 15754000 667 172 173 57 50 st=0 cubic=111 hex=126
+78 15755000 601 172 172 38 49 st=0 cubic=95 hex=122
+79 15756000 717 147 173 45 50 st=0 cubic=99 hex=129
+80 15757000 575 166 164 32 52 st=0 cubic=93 hex=119
+81 15758000 645 160 182 29 51 st=0 cubic=93 hex=123
+82 15759000 594 173 171 47 55 st=0 cubic=100 hex=120
+83 15760000 615 163 193 34 59 st=0 cubic=107 hex=122
+84 15761000 712 149 189 42 56 st=0 cubic=111 hex=125
+85 15762000 626 160 192 44 60 st=0 cubic=112 hex=130
+86 15763000 669 145 188 43 60 st=0 cubic=106 hex=135
+87 15764000 722 139 182 35 56 st=0 cubic=102 hex=126
+88 15765000 784 152 191 46 58 st=0 cubic=107 hex=133
+89 15766000 667 175 189 38 60 st=0 cubic=106 hex=134
+90 15767000 692 145 207 38 57 st=0 cubic=112 hex=139
+91 15768000 650 157 191 39 60 st=0 cubic=111 hex=131
+92 15769000 745 169 216 38 66 st=0 cubic=127 hex=140
+93 15770000 704 151 218 39 66 st=0 cubic=124 hex=135
+94 15771000 582 164 204 39 63 st=0 cubic=118 hex=129
+95 15772000 696 149 222 33 66 st=0 cubic=121 hex=141
+96 15773000 795 137 236 32 69 st=0 cubic=120 hex=156
+97 15774000 692 151 240 33 67 st=0 cubic=123 hex=150
+98 15775000 705 145 247 33 71 st=0 cubic=125 hex=155
+99 15776000 663 158 235 38 70 st=0 cubic=123 hex=156
+100 15777000 842 127 237 35 70 st=0 cubic=123 hex=150
+101 15778000 802 152 255 37 81 st=0 cubic=141 hex=161
+102 15779000 687 171 253 26 82 st=0 cubic=145 hex=146
+103 15780000 832 152 263 36 85 st=0 cubic=150 hex=154
+104 15781000 825 134 255 41 79 st=0 cubic=143 hex=162
+105 15782000 988 138 235 47 80 st=0 cubic=129 hex=158
+106 15783000 957 140 243 48 82 st=0 cubic=143 hex=152
+107 15784000 1011 149 254 49 85 st=0 cubic=151 hex=157
+108 15785000 889 149 288 47 82 st=0 cubic=168 hex=173
+109 15786000 906 142 262 37 76 st=0 cubic=150 hex=154
+110 15787000 905 141 275 35 83 st=0 cubic=159 hex=159
+111 15788000 804 151 271 44 80 st=0 cubic=162 hex=159
+112 15789000 884 154 276 40 81 st=0 cubic=161 hex=160
+113 15790000 772 154 282 47 78 st=0 cubic=160 hex=172
+114 15791000 860 154 286 49 72 st=0 cubic=158 hex=178
+115 15792000 808 166 297 41 84 st=0 cubic=184 hex=162
+116 15793000 781 144 289 32 82 st=0 cubic=169 hex=157
+117 15794000 927 136 283 50 80 st=0 cubic=186 hex=163
+118 15795000 946 127 310 51 81 st=0 cubic=196 hex=180
+119 15796000 920 130 318 33 78 st=0 cubic=199 hex=165
+120 15797000 1009 143 309 42 76 st=0 cubic=196 hex=166
+121 15798000 941 128 313 38 80 st=0 cubic=195 hex=167
+122 15799000 881 145 324 38 76 st=0 cubic=195 hex=176
+123 15800000 909 139 321 45 79 st=0 cubic=198 hex=179
+124 15801000 1002 134 342 45 80 st=0 cubic=193 hex=198
+125 15802000 1064 121 332 44 84 st=0 cubic=199 hex=184
+126 15803000 975 152 339 48 78 st=0 cubic=213 hex=182
+127 15804000 1089 131 363 47 83 st=0 cubic=226 hex=189
+128 15805000 1027 116 358 44 72 st=0 cubic=209 hex=194
+129 15806000 1077 134 373 42 77 st=0 cubic=229 hex=196
+130 15807000 1125 125 371 49 80 st=0 cubic=223 hex=206
+131 15808000 1144 126 366 39 81 st=0 cubic=214 hex=201
+132 15809000 1052 129 356 53 84 st=0 cubic=211 hex=208
+133 15810000 1141 105 382 53 85 st=0 cubic=232 hex=207
+134 15811000 1207 120 390 37 84 st=0 cubic=236 hex=203
+135 15812000 1143 120 402 41 83 st=0 cubic=243 hex=208
+136 15813000 1168 118 416 49 88 st=0 cubic=251 hex=217
+137 15814000 1202 106 408 46 88 st=0 cubic=250 hex=208
+138 15815000 1248 106 429 45 90 st=0 cubic=268 hex=213
+139 15816000 1243 126 421 43 85 st=0 cubic=260 hex=213
+140 15817000 1201 130 407 54 89 st=0 cubic=253 hex=215
+141 15818000 1170 116 435 49 82 st=0 cubic=262 hex=232
+142 15819000 1202 119 459 42 90 st=0 cubic=274 hex=232
+143 15820000 1094 134 425 42 87 st=0 cubic=252 hex=228
+144 15821000 1124 125 418 40 93 st=0 cubic=259 hex=206
+145 15822000 1056 124 437 33 90 st=0 cubic=262 hex=208
+146 15823000 1063 138 426 35 89 st=0 cubic=266 hex=200
+147 15824000 1097 130 443 34 94 st=0 cubic=269 hex=217
+MFPT q6bar n_star=739 half_n=634 c=0.002966 tau_j_steps=138000.0 rmse_steps=11380.93 n_min=302 n_max=1248
+MFPT chill n_star=186 half_n=171 c=0.006532 tau_j_steps=142000.0 rmse_steps=7813.38 n_min=59 n_max=459
+nucleation_exit 0
+session_done

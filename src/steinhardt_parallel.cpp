@@ -1247,10 +1247,98 @@ SteinhardtQl cutoffSolid(
     }
   }
   if (!simd8) {
+  const int nTiles = (n + 7) / 8;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (parallel)
 #endif
-  for (int i = 0; i < n; i++) {
+  for (int tile = 0; tile < nTiles; ++tile) {
+    const int begin = tile * 8;
+    const int end = std::min(begin + 8, n);
+    // Four bonds on eight atoms: the harmonics stay in SoA and one
+    // blocked transpose writes each atom row. A per-bond lane
+    // transpose was the cost this replaces.
+    bool rows = end - begin == 8 && (orderL == 4 || orderL == 6);
+#if !defined(SEAMS_YLM_AVX512)
+    rows = false;
+#endif
+    alignas(64) double dxs[32];
+    alignas(64) double dys[32];
+    alignas(64) double dzs[32];
+    for (int a = 0; rows && a < 8; ++a) {
+      const int i = begin + a;
+      if (!uniform && yCloud.pts[static_cast<std::size_t>(i)].type != typeI) {
+        rows = false;
+        break;
+      }
+      const int left = scratch.offsets[static_cast<std::size_t>(i)];
+      const int right = scratch.offsets[static_cast<std::size_t>(i) + 1];
+      if (right - left != 4) {
+        rows = false;
+        break;
+      }
+      const double xi = scratch.xyz[static_cast<std::size_t>(3 * i)];
+      const double yi = scratch.xyz[static_cast<std::size_t>(3 * i) + 1];
+      const double zi = scratch.xyz[static_cast<std::size_t>(3 * i) + 2];
+      for (int p = 0; p < 4; ++p) {
+        const int j = scratch.cols[static_cast<std::size_t>(left + p)];
+        double dx, dy, dz;
+        if (tilt) {
+          double dX = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
+          double dY = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
+          double dZ = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+          dX -= frac.lx * std::round(dX / frac.lx);
+          dY -= frac.ly * std::round(dY / frac.ly);
+          dZ -= frac.lz * std::round(dZ / frac.lz);
+          dx = dX + axy * dY + axz * dZ;
+          dy = dY + ayz * dZ;
+          dz = dZ;
+        } else {
+          dx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
+          dy = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
+          dz = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+          if (dx > hx) dx -= Lx;
+          else if (dx < -hx) dx += Lx;
+          if (dy > hy) dy -= Ly;
+          else if (dy < -hy) dy += Ly;
+          if (dz > hz) dz -= Lz;
+          else if (dz < -hz) dz += Lz;
+        }
+        if (!(dx * dx + dy * dy + dz * dz > 0.0)) {
+          rows = false;
+          break;
+        }
+        dxs[p * 8 + a] = dx;
+        dys[p * 8 + a] = dy;
+        dzs[p * 8 + a] = dz;
+      }
+    }
+#if defined(SEAMS_YLM_AVX512)
+    if (rows && !__builtin_cpu_supports("avx512f")) {
+      rows = false;
+    }
+    if (rows) {
+      double *row = scratch.qlm.data() +
+                    static_cast<std::size_t>(begin) * static_cast<std::size_t>(width);
+      rows = seams::ylm::ylmSumRows4(orderL, dxs, dys, dzs, row, width);
+      if (rows) {
+        constexpr double inv = 0.25;
+        for (int a = 0; a < 8; ++a) {
+          double *dst = row + static_cast<std::size_t>(a) * static_cast<std::size_t>(width);
+          double sum = 0.0;
+          for (int m = 0; m < nComp; ++m) {
+            dst[2 * m] *= inv;
+            dst[2 * m + 1] *= inv;
+            sum += dst[2 * m] * dst[2 * m] + dst[2 * m + 1] * dst[2 * m + 1];
+          }
+          result.ql[static_cast<std::size_t>(begin + a)] = std::sqrt(prefactor * sum);
+        }
+      }
+    }
+#endif
+    if (rows) {
+      continue;
+    }
+    for (int i = begin; i < end; ++i) {
     double *dst = scratch.qlm.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(width);
     std::fill_n(dst, width, 0.0);
     const bool live = uniform || yCloud.pts[static_cast<std::size_t>(i)].type == typeI;
@@ -1327,6 +1415,7 @@ SteinhardtQl cutoffSolid(
       sum += dst[2 * m] * dst[2 * m] + dst[2 * m + 1] * dst[2 * m + 1];
     }
     result.ql[static_cast<std::size_t>(i)] = std::sqrt(prefactor * sum);
+    }
   }
   }
   const auto tYlm = std::chrono::steady_clock::now();

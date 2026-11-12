@@ -320,3 +320,47 @@ step 15677000 to 0.291 at step 15818000, and the number of molecules
 with q6-bar above 0.3 moves from 1001 to 1471. The highest mean on
 the dump is 0.293 at step 15816000, with 1517 molecules above 0.3.
 `discovery/nucleation-q6bar.txt` has one row per frame.
+
+One thread, 884736 molecules, the q4 samples now sit clear of OVITO
+(`discovery/v9-session.txt`). seams 346.0–363.4 ms (median 356.1),
+OVITO 384.5–397.6 ms (median 390.8). The slowest seams sample is
+21.1 ms under the fastest OVITO sample. Eight atoms share one
+evaluation. Their four bonds are added in SoA, and one blocked
+transpose writes each atom's row. The per-bond lane transpose is no
+longer on that path. q4 of the first molecule stays 0.50917508.
+
+Eight threads, same ice, cutoff 3.5, neighbour build inside the seams
+call. Medians, milliseconds, seams / OVITO / mdapy:
+
+| molecules | q4 | q6 |
+| --- | --- | --- |
+| 110592 | 7.43 / 11.04 / 12.42 | 6.17 / 11.11 / 13.78 |
+| 884736 | 51.37 / 73.76 / 110.13 | 58.99 / 84.10 / 116.57 |
+
+The seams range at each of those four points sits under the OVITO
+range. mdapy is slower than OVITO at both sizes.
+
+On the 148-frame nucleation trajectory the largest cluster is the
+cutoff graph (3.5 Å) restricted to a label.
+`discovery/nucleation-clusters.txt` has one row per frame. Molecules
+with \(\bar q_6 > 0.3\) form a component that grows from 302 to 1248,
+with 110–190 such clusters still present, so it is not one nucleus.
+The crystalline CHILL+ cluster (cubic or hexagonal) grows from 59 to
+459. Cubic alone stays between 17 and 94, so that cluster is mixed.
+Both traces are close to a straight line (the crystalline size rises
+by about 2.4 molecules a frame).
+
+The critical size is the inflection of a first-passage sigmoid,
+Wedekind, Strey and Reguera, J. Chem. Phys. 126, 134103 (2007):
+
+\[
+\tau(n) = \frac{\tau_J}{2}\bigl(1 + \mathrm{erf}(c(n - n^\*))\bigr).
+\]
+
+This dump is one trajectory, so \(\tau(n)\) is a first passage, not an
+ensemble mean. \(\tau_J\) is the span of that passage. The q6-bar fit
+gives \(n^\* = 739\) (half-passage size 634, \(c = 0.003\)). The
+CHILL+ fit gives \(n^\* = 186\) (half-passage size 171, \(c = 0.007\)).
+The two estimates do not agree, and neither series waits and then
+runs away, so the inflection is the middle of the steady growth
+rather than a resolved barrier.

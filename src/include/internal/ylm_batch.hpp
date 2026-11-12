@@ -18,6 +18,14 @@ void ylmBatch(int orderL, const double *dx, const double *dy, const double *dz,
 void ylmAdd8(int orderL, const double *dx, const double *dy, const double *dz,
              double *accA, double *accB);
 
+// Eight atoms, four bonds each. dx, dy and dz are 4 * 8 values, bond
+// slot in the outer index, and each group of eight is 64-byte aligned.
+// The solid harmonics stay in SoA while the four bonds are added, then
+// one blocked transpose writes atom a at rows[a * stride + 2 * m].
+// l is 4 or 6. Returns false if any bond has zero length.
+bool ylmSumRows4(int orderL, const double *dx, const double *dy,
+                 const double *dz, double *rows, int stride);
+
 } // namespace ylm
 } // namespace seams
 
