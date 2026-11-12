@@ -214,6 +214,10 @@ if not offload_opt.disabled()
 endif
 
 hwy_dep = dependency('hwy', version: '>=1.3.0', required: false)
+if not hwy_dep.found()
+  # Distro packages publish the same library as libhwy.pc.
+  hwy_dep = dependency('libhwy', version: '>=1.3.0', required: false)
+endif
 if hwy_dep.found()
   _deps += [hwy_dep]
   _args += ['-DSEAMS_HAS_HWY=1']

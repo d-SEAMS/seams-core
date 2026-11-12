@@ -183,3 +183,34 @@ cpp11::data_frame cages_(SEXP ptr, double cutoff, int type, int k,
   out.attr("n_both") = n_both;
   return out;
 }
+
+[[cpp11::register]]
+cpp11::integers signature_cages_(SEXP ptr, double cutoff, int type,
+                                 std::string graph, std::string spec) {
+  seams_frame *frame = need(ptr);
+  int n_cages = 0;
+  int n_atoms = 0;
+  if (seams_frame_signature(frame, cutoff, type, graph.c_str(), spec.c_str(),
+                            &n_cages, &n_atoms) != 0) {
+    cpp11::stop("%s", seams_last_error());
+  }
+  cpp11::writable::integers out(2);
+  out[0] = n_cages;
+  out[1] = n_atoms;
+  return out;
+}
+
+[[cpp11::register]]
+cpp11::integers symmetry_(SEXP ptr, double shell_rmsd) {
+  seams_frame *frame = need(ptr);
+  const int n = seams_frame_nop(frame);
+  std::vector<int> raw(static_cast<std::size_t>(std::max(n, 0)));
+  if (n > 0 && seams_frame_symmetry(frame, shell_rmsd, raw.data()) != 0) {
+    cpp11::stop("%s", seams_last_error());
+  }
+  cpp11::writable::integers labels(n);
+  for (int i = 0; i < n; ++i) {
+    labels[i] = raw[static_cast<std::size_t>(i)];
+  }
+  return labels;
+}

@@ -107,6 +107,24 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
     install_dir: get_option('datadir') / 'seams' / 'python',
   )
   test(
+    'language_fronts',
+    find_program('sh', required: true),
+    args: [
+      meson.project_source_root() / 'tests' / 'run_language_fronts.sh',
+      meson.project_build_root(),
+    ],
+    depends: [seams_lang, ydslib],
+    timeout: 600,
+  )
+  test(
+    'frames_abi',
+    find_program('python3', required: true),
+    args: [meson.project_source_root() / 'tests' / 'test_frames_abi.py'],
+    env: {'SEAMS_LANG_LIB': seams_lang.full_path()},
+    depends: [seams_lang],
+    timeout: 120,
+  )
+  test(
     'symmetry_ctypes',
     find_program('python3', required: true),
     args: [meson.project_source_root() / 'tests' / 'test_symmetry_ctypes.py'],

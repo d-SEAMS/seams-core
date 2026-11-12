@@ -32,3 +32,11 @@ steinhardt_ <- function(ptr, cutoff, type, order_l) {
 cages_ <- function(ptr, cutoff, type, k, graph) {
   .Call(`_dseams_cages_`, ptr, cutoff, type, k, graph)
 }
+
+signature_cages_ <- function(ptr, cutoff, type, graph, spec) {
+  .Call(`_dseams_signature_cages_`, ptr, cutoff, type, graph, spec)
+}
+
+symmetry_ <- function(ptr, shell_rmsd) {
+  .Call(`_dseams_symmetry_`, ptr, shell_rmsd)
+}

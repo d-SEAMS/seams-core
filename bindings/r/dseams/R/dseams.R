@@ -117,6 +117,36 @@ primitive_rings <- function(frame, cutoff = 3.5, type = 0L, graph = "mutual",
   UseMethod("primitive_rings")
 }
 
+#' Closed cages for one ring census.
+#'
+#' @param frame A `dseams_frame`.
+#' @param spec Ring census such as `"512"` or `"5:12,6:2"`.
+#' @return An integer vector `c(n_cages, n_atoms)`.
+#' @export
+signature_cages <- function(frame, spec = "512", cutoff = 3.5, type = 0L,
+                            graph = "cutoff") {
+  UseMethod("signature_cages")
+}
+
+#' @export
+signature_cages.dseams_frame <- function(frame, spec = "512", cutoff = 3.5,
+                                         type = 0L, graph = "cutoff") {
+  signature_cages_(frame$ptr, cutoff, as.integer(type), graph, spec)
+}
+
+#' Shell symmetry label for every atom.
+#'
+#' @return Integer codes: 0 ice Ih, 1 ice Ic, 2 stacking-disordered, -1 otherwise.
+#' @export
+symmetry <- function(frame, shell_rmsd = 0.12) {
+  UseMethod("symmetry")
+}
+
+#' @export
+symmetry.dseams_frame <- function(frame, shell_rmsd = 0.12) {
+  symmetry_(frame$ptr, shell_rmsd)
+}
+
 #' @export
 primitive_rings.dseams_frame <- function(frame, cutoff = 3.5, type = 0L,
                                          graph = "mutual", max_depth = 6L) {

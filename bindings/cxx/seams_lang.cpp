@@ -12,6 +12,7 @@
 #include <rdf.hpp>
 #include <rdf2d.hpp>
 #include <ring.hpp>
+#include <seams_c_api.h>
 #include <seams_input.hpp>
 #include <topo_bulk.hpp>
 #include <topo_one_dim.hpp>
@@ -1366,4 +1367,41 @@ int seams_frame_monolayer(seams_frame *frame, double cutoff, int type,
     remember_exception();
     return 1;
   }
+}
+
+int seams_frame_symmetry(seams_frame *frame, double shell_rmsd, int *labels) {
+  clear_error();
+  if (frame == nullptr || labels == nullptr) {
+    set_error("symmetry needs a frame and a label buffer");
+    return 1;
+  }
+  const int n = frame->cloud.nop;
+  if (n <= 0) {
+    return 0;
+  }
+  std::vector<double> xyz(static_cast<std::size_t>(n) * 3);
+  for (int i = 0; i < n; ++i) {
+    const auto &point = frame->cloud.pts[static_cast<std::size_t>(i)];
+    xyz[static_cast<std::size_t>(3 * i)] = point.x;
+    xyz[static_cast<std::size_t>(3 * i + 1)] = point.y;
+    xyz[static_cast<std::size_t>(3 * i + 2)] = point.z;
+  }
+  double lattice[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
+  const auto &box = frame->cloud.box;
+  if (box.size() >= 3) {
+    lattice[0] = box[0];
+    lattice[4] = box[1];
+    lattice[8] = box[2];
+  }
+  if (box.size() >= 6) {
+    lattice[3] = box[3];
+    lattice[6] = box[4];
+    lattice[7] = box[5];
+  }
+  const int code =
+      seams_symmetry_classify_tol(xyz.data(), n, lattice, shell_rmsd, labels);
+  if (code != 0) {
+    set_error("symmetry classify failed");
+  }
+  return code;
 }

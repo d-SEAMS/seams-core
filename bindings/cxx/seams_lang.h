@@ -147,6 +147,11 @@ seams_frame *seams_frame_from_species(const double *xyz, int n,
                                      const double *box9, const int *types,
                                      const int *ids, const int *mols);
 
+/* Per-atom ice label from the shell kernel. labels[i] is 0 ice-Ih,
+ * 1 ice-Ic, 2 stacking-disordered, or -1. shell_rmsd is the scale-free
+ * residual ceiling (0.12 is the production default). */
+int seams_frame_symmetry(seams_frame *frame, double shell_rmsd, int *labels);
+
 #ifdef __cplusplus
 }
 #endif

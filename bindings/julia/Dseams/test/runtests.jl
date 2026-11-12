@@ -26,6 +26,10 @@ const nucleation = joinpath(root, "input", "traj", "nucleation_f1.lammpstrj")
     @test mutual.counts["water"] == 242
     rings = primitive_rings(frame; max_depth = 8)
     @test rings[6] == 224
+    sig = signature_cages(frame, "512")
+    @test sig.cages >= 0 && sig.atoms >= 0
+    labels = symmetry(frame)
+    @test length(labels) == nop(frame)
     q3 = steinhardt(frame, 3)
     finite = filter(isfinite, q3.ql)
     got = sum(finite) / length(finite)

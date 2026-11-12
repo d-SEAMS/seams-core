@@ -10,7 +10,7 @@ module Dseams
 
 using Libdl
 
-export Frame, nop, nframes, read_frame, chill_plus, cages, primitive_rings, steinhardt
+export Frame, nop, nframes, read_frame, chill_plus, cages, primitive_rings, steinhardt, signature_cages, symmetry
 
 const ICE_NAMES = (
     "cubic",
@@ -179,6 +179,40 @@ function steinhardt(frame::Frame, order_l::Integer; cutoff::Real = 3.5, type::In
     )
     _check(code)
     (ql = ql, qlbar = qlbar)
+end
+
+function signature_cages(frame::Frame, spec::AbstractString; cutoff::Real = 3.5, type::Integer = 0, graph::AbstractString = "cutoff")
+    n_cages = Ref{Cint}(0)
+    n_atoms = Ref{Cint}(0)
+    code = ccall(
+        dlsym(_so(), :seams_frame_signature),
+        Cint,
+        (Ptr{Cvoid}, Cdouble, Cint, Cstring, Cstring, Ptr{Cint}, Ptr{Cint}),
+        frame.ptr,
+        cutoff,
+        type,
+        graph,
+        spec,
+        n_cages,
+        n_atoms,
+    )
+    _check(code)
+    (cages = Int(n_cages[]), atoms = Int(n_atoms[]))
+end
+
+function symmetry(frame::Frame; shell_rmsd::Real = 0.12)
+    n = nop(frame)
+    labels = Vector{Cint}(undef, n)
+    code = ccall(
+        dlsym(_so(), :seams_frame_symmetry),
+        Cint,
+        (Ptr{Cvoid}, Cdouble, Ptr{Cint}),
+        frame.ptr,
+        shell_rmsd,
+        labels,
+    )
+    _check(code)
+    labels
 end
 
 end

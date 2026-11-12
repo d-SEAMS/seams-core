@@ -55,6 +55,18 @@ extern "C" SEXP _dseams_steinhardt_(SEXP ptr, SEXP cutoff, SEXP type, SEXP order
   END_CPP11
 }
 // dseams.cpp
+cpp11::integers signature_cages_(SEXP ptr, double cutoff, int type, std::string graph, std::string spec);
+extern "C" SEXP _dseams_signature_cages_(SEXP ptr, SEXP cutoff, SEXP type, SEXP graph, SEXP spec) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(signature_cages_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(ptr), cpp11::as_cpp<cpp11::decay_t<double>>(cutoff), cpp11::as_cpp<cpp11::decay_t<int>>(type), cpp11::as_cpp<cpp11::decay_t<std::string>>(graph), cpp11::as_cpp<cpp11::decay_t<std::string>>(spec)));
+  END_CPP11
+}
+cpp11::integers symmetry_(SEXP ptr, double shell_rmsd);
+extern "C" SEXP _dseams_symmetry_(SEXP ptr, SEXP shell_rmsd) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(symmetry_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(ptr), cpp11::as_cpp<cpp11::decay_t<double>>(shell_rmsd)));
+  END_CPP11
+}
 cpp11::data_frame cages_(SEXP ptr, double cutoff, int type, int k, std::string graph);
 extern "C" SEXP _dseams_cages_(SEXP ptr, SEXP cutoff, SEXP type, SEXP k, SEXP graph) {
   BEGIN_CPP11
@@ -71,7 +83,9 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dseams_positions_",  (DL_FUNC) &_dseams_positions_,  1},
     {"_dseams_read_frame_", (DL_FUNC) &_dseams_read_frame_, 3},
     {"_dseams_rings_",      (DL_FUNC) &_dseams_rings_,      5},
+    {"_dseams_signature_cages_", (DL_FUNC) &_dseams_signature_cages_, 5},
     {"_dseams_steinhardt_", (DL_FUNC) &_dseams_steinhardt_, 4},
+    {"_dseams_symmetry_",   (DL_FUNC) &_dseams_symmetry_,   2},
     {NULL, NULL, 0}
 };
 }
