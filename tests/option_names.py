@@ -112,7 +112,7 @@ def main() -> int:
     root = Path("subprojects")
     # nanobind and its header map are optional wraps. They are not seams
     # projects and do not carry this tree's option file.
-    third_party = {"nanobind", "robin-map"}
+    third_party = {"nanobind", "robin-map", "catch2"}
     for project, options in sorted(listed.items()):
         if project in third_party:
             continue

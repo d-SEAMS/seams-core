@@ -1,7 +1,14 @@
 # d-SEAMS tests (Catch2 v3)
 
-catch2_dep = dependency('catch2-with-main', required: true,
-  fallback: ['catch2', 'catch2_with_main_dep'])
+# Prefer an installed Catch2 that actually links. A copy built against a
+# newer libc, or without PIE, is replaced by the wrap.
+catch2_dep = dependency('catch2-with-main', required: false)
+if not catch2_dep.found() or not cppc.links(
+    '#include <catch2/catch_test_macros.hpp>\nTEST_CASE("link") {}\n',
+    dependencies: catch2_dep,
+    name: 'installed catch2 links')
+  catch2_dep = subproject('catch2').get_variable('catch2_with_main_dep')
+endif
 
 test_sources = {
   'franzblau': 'franzblau-test.cpp',
