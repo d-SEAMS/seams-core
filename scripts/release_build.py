@@ -82,7 +82,8 @@ def setup_release() -> Path:
             )
     ninja = shutil.which("ninja") or "ninja"
     subprocess.run(
-        [ninja, "-C", str(BUILD), "bindings/libseams_lang.so", "src/libyodaLib.so"],
+        [ninja, "-C", str(BUILD), "bindings/libseams_lang.so", "src/libyodaLib.so",
+         "tests/bench_rings_h2h"],
         check=True,
     )
     lib = BUILD / "bindings" / "libseams_lang.so"

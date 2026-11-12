@@ -72,11 +72,11 @@ against `ringNetwork`.
 ## Rerun
 
 ```
-meson setup build --buildtype=release -Dwith_tests=true \
-  -Dwith_mpi=disabled -Dwith_openmp_offload=disabled
-ninja -C build -j2 tests/bench_rings_h2h
+meson setup bbdir-release --buildtype=release -Doptimization=3 -Dwith_tests=true \
+  -Dwith_python=false
+ninja -C bbdir-release -j2 tests/bench_rings_h2h
 python3 scripts/rings_one_thread.py \
-  --bench build/tests/bench_rings_h2h \
+  --bench bbdir-release/tests/bench_rings_h2h \
   --json markdown/rings-one-thread.json
 ```
 
