@@ -489,6 +489,49 @@ TEST_CASE("AffiliationUpdater matches an unsorted ring list and an empty frame",
   REQUIRE(rebuilt.ddc == rebuiltBatch.ddc);
 }
 
+TEST_CASE("AffiliationUpdater falls back when the ring set churns",
+          "[cage_affiliation]") {
+  // The neighbour rows stay put, so the changed-row check does not return.
+  // Every new ring is dirty. Past the batch fraction that has to call
+  // fellBack before returning, or the following frames never store a diff.
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  auto idx = nneigh::neighbourListByIndex(yCloud, nList);
+  auto six = sixMembered(primitive::ringNetwork(idx, 7));
+  REQUIRE(six.size() >= 8);
+  REQUIRE(idx.size() >= 6);
+
+  ring::AffiliationUpdater churn;
+  churn.setBatchFraction(0.05);
+  const auto &primed = churn.update(six, idx);
+  REQUIRE(primed.hc == ring::cageAffiliation(six, idx).hc);
+
+  const int nAtoms = static_cast<int>(idx.size());
+  std::vector<std::vector<int>> fresh;
+  fresh.reserve(six.size());
+  for (int i = 0; i < static_cast<int>(six.size()); ++i) {
+    std::vector<int> ring(6);
+    for (int k = 0; k < 6; ++k) {
+      ring[static_cast<std::size_t>(k)] = (i * 6 + k) % nAtoms;
+    }
+    fresh.push_back(std::move(ring));
+  }
+  const auto expect = ring::cageAffiliation(fresh, idx);
+  const auto &swept = churn.update(fresh, idx);
+  REQUIRE(swept.hc == expect.hc);
+  REQUIRE(swept.ddc == expect.ddc);
+  REQUIRE(churn.lastReclassified() == static_cast<int>(fresh.size()));
+
+  // skip once, store the batch, then a repeated frame classifies nothing.
+  churn.update(fresh, idx);
+  REQUIRE(churn.lastReclassified() == static_cast<int>(fresh.size()));
+  churn.update(fresh, idx);
+  REQUIRE(churn.lastReclassified() == static_cast<int>(fresh.size()));
+  churn.update(fresh, idx);
+  REQUIRE(churn.lastReclassified() == 0);
+}
+
 TEST_CASE("cage membership is not a function of the four-neighbour star",
           "[cage_affiliation]") {
   // Two configurations that agree exactly on the closed star of a vertex --

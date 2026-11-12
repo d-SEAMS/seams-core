@@ -64,6 +64,10 @@ Quote the graph with the census.
 A hexagonal cage is two basal six-rings joined by prismatic six-rings.
 A double-diamond cage is an equatorial six-ring and its peripheral rings.
 =ring::cageAffiliation= evaluates those conditions for every six-ring, without the claim order of the older =findHC= / =findDDC= walk.
+The double-diamond packing (=src/cage_pack.cpp=) has no size limit.
+A rank that fits in 16 bits uses the packed radix, and a larger rank uses the same ordering by a comparison sort.
+A conflict row wider than the inline eight spills to the heap.
+A component the line packing does not cover is solved by the exact search.
 The seeded variant takes a strict graph for the seeds and a permissive graph for the completions.
 An atom on the permissive graph is kept only when its component contains a seed.
 =--complete= then fills a six-ring that is missing one labelled vertex.
