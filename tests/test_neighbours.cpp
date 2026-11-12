@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <limits>
 #include <numeric>
 #include <random>
@@ -1601,4 +1602,82 @@ TEST_CASE("a skin rebuild matches a fresh cutoff list", "[neighbours]") {
   REQUIRE(nneigh::orthoFullCsr(cloud, nullptr, 3.5, freshOff, freshCols, false));
   REQUIRE(skin.offsets() == freshOff);
   REQUIRE(skin.cols() == freshCols);
+}
+
+namespace {
+
+molSys::PointCloud<molSys::Point<double>, double> shearedIce(int cells) {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  const double bond = 2.75;
+  const double lattice = 4.0 * bond / std::sqrt(3.0);
+  const double side = cells * lattice;
+  const double xy = 4.0;
+  const double xz = 1.5;
+  const double yz = 0.8;
+  const double basis[8][3] = {
+      {0, 0, 0},          {0.5, 0.5, 0},         {0.5, 0, 0.5},         {0, 0.5, 0.5},
+      {0.25, 0.25, 0.25}, {0.75, 0.75, 0.25},    {0.75, 0.25, 0.75},    {0.25, 0.75, 0.75}};
+  int id = 1;
+  for (int i = 0; i < cells; ++i) {
+    for (int j = 0; j < cells; ++j) {
+      for (int k = 0; k < cells; ++k) {
+        for (const auto &b : basis) {
+          const double X = (i + b[0]) * lattice;
+          const double Y = (j + b[1]) * lattice;
+          const double Z = (k + b[2]) * lattice;
+          molSys::Point<double> p;
+          p.x = X + (xy / side) * Y + (xz / side) * Z;
+          p.y = Y + (yz / side) * Z;
+          p.z = Z;
+          p.type = 1;
+          p.atomID = id;
+          p.molID = id;
+          cloud.idIndexMap[id] = cloud.nop;
+          cloud.pts.push_back(p);
+          ++cloud.nop;
+          ++id;
+        }
+      }
+    }
+  }
+  const double xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));
+  const double xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));
+  const double ymin = std::min(0.0, yz);
+  const double ymax = std::max(0.0, yz);
+  cloud.box = {side + xmax - xmin, side + ymax - ymin, side, xy, xz, yz};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  return cloud;
+}
+
+std::uint64_t csrDigest(const std::vector<int> &offsets, const std::vector<int> &cols) {
+  std::uint64_t h = 1469598103934665603ull;
+  auto mix = [&](std::uint64_t v) {
+    h ^= v;
+    h *= 1099511628211ull;
+  };
+  mix(offsets.size());
+  for (int v : offsets) {
+    mix(static_cast<std::uint64_t>(v));
+  }
+  mix(cols.size());
+  for (int v : cols) {
+    mix(static_cast<std::uint64_t>(v));
+  }
+  return h;
+}
+
+} // namespace
+
+TEST_CASE("sheared ice keeps the shared shift-table pairs", "[neighbours][triclinic]") {
+  std::vector<int> offsets, cols;
+  auto small = shearedIce(24);
+  REQUIRE(nneigh::orthoFullCsr(small, nullptr, 3.5, offsets, cols));
+  REQUIRE(small.nop == 110592);
+  REQUIRE(cols.size() == 442368);
+  REQUIRE(csrDigest(offsets, cols) == 0x647177f805d1e1c6ull);
+  auto large = shearedIce(48);
+  REQUIRE(nneigh::orthoFullCsr(large, nullptr, 3.5, offsets, cols));
+  REQUIRE(large.nop == 884736);
+  REQUIRE(cols.size() == 3538944);
+  REQUIRE(csrDigest(offsets, cols) == 0xba88eb7da3372fc6ull);
 }
