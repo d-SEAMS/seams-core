@@ -1,7 +1,7 @@
 # Homogeneous mW nucleation at deep supercooling.
 # n^3 molecules, number density 0.033 /A^3.
-# The integrator step is 10 fs (units real). A short melt at 350 K
-# is quenched to Tq. The velocity seed is 20261111.
+# The integrator step is 10 fs (units real). A melt at 350 K
+# is quenched to Tq. The velocity seed defaults to 20261111.
 # Dump frames are not stored in git. regenerate.py writes them outside
 # the work tree and runs the census on the saved frames.
 
@@ -9,7 +9,9 @@ variable n index 46
 variable nmelt index 2000
 variable nquench index 8000
 variable ndump index 2000
+variable nskip index 0
 variable Tq index 180
+variable seed index 20261111
 
 units real
 atom_style atomic
@@ -33,10 +35,14 @@ neigh_modify every 1 delay 0 check yes
 
 timestep 10.0
 thermo 500
-velocity all create 350.0 20261111 mom yes rot yes dist gaussian
+velocity all create 350.0 ${seed} mom yes rot yes dist gaussian
 fix 1 all nvt temp 350.0 350.0 200.0
 run ${nmelt}
+write_dump all custom liquid.lammpstrj id type x y z modify sort id
 unfix 1
 fix 1 all nvt temp ${Tq} ${Tq} 200.0
+# nskip advances the quench without writing. The dump that follows
+# is the window kept at ndump. nskip 0 leaves the whole quench saved.
+run ${nskip}
 dump 1 all custom ${ndump} quench.lammpstrj id type x y z
 run ${nquench}

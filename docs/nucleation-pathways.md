@@ -1,8 +1,10 @@
 # Nucleation pathways
 
-One saved mW window and one short homogeneous quench, read with the
-same four labels on every frame. The CHILL+ staggered and eclipsed
-edges are the published edges. They are not adjusted.
+The figshare window is one growth segment. It already holds a nucleus
+at the first frame, so it does not time the appearance of ice. The
+liquid-start result is twenty independent 4096-molecule mW quenches.
+Both are read with the same four labels. The CHILL+ staggered and
+eclipsed edges are the published edges. They are not adjusted.
 
 ## What is computed
 
@@ -92,9 +94,9 @@ gives a 14-frame lead over the published extended population.
 
 The fresh 97336-molecule liquid below has a six-ring share of 0.442
 at 20 ps after the quench. The figshare window opens at 0.552, with a
-CHILL+ cluster already present. The ring lead measured here is the
-lead during growth, not a demonstration that rings appear before any
-ice-like molecule.
+CHILL+ cluster already present. The ring lead measured on that window
+is the lead during growth. The distribution from liquids is in the
+seeded 4096-molecule section.
 
 ## Largest cluster and stacking
 
@@ -230,6 +232,110 @@ The six-ring share is 0.456. The row is
 the same script with a larger step count. The coordinates are not
 committed.
 
+## Twenty liquids at 180 K
+
+`input/nucleation/in.homogeneous` builds an n³ simple-cubic cell at
+number density 0.033 Å⁻³, melts it at 350 K, and quenches it to Tq.
+Here n is 16, so the cell has 4096 molecules. The melt is 10000 steps
+(100 ps). The quench is 1000000 steps (10 ns) at 180 K. The integrator
+step is 10 fs and the quench is saved every 100 steps, which is 1 ps.
+The velocity seeds are 20261111 through 20261130. Each seed is an
+independent liquid. LAMMPS is the conda-forge build 2025.07.22
+(22 Jul 2025, Update 6), with `pair_style sw` and the mW file in
+`input/mw215/mW.sw`. Coordinate dumps stay outside the work tree.
+Their md5 sums are `input/nucleation/mw4096.dvc`.
+
+The machine has 8 cores. Eight jobs ran at once, each with one MPI
+rank and one OpenMP thread. The quench loop ran at 172 to 180
+timesteps/s (mean 177). The first eight seeds took 5884 s of wall
+time. The other twelve took 11294 s, in two waves of eight and four.
+The four-label census of all 200020 frames took 2557 s on 8 threads,
+one trajectory at a time, about 128 s for 10001 frames. The times are
+`docs/nucleation/mw4096-timing.tsv`.
+
+Every quench opens on a liquid. At the first saved frame the published
+core has 0 or 1 molecule, the published crystal population is 0 to 3,
+and the six-ring share is 0.437 to 0.466. The figshare window opens at
+0.552 with a core of 59.
+
+The ring-share lead is the same half-rise used above: the ice
+population reaches half of its rise from the first frame to its
+maximum, minus the frame where the six-ring share does. A positive
+number means the ring share moves first. The mean over seeds has a
+percentile bootstrap interval from 10000 resamples (generator seed
+20261111). The interval excludes zero when both ends lie on the same
+side of zero. A lead is kept when the liquid's ring share rises by at
+least 0.02 and that ice label gains at least 20 molecules. Diamond on
+seed 20261124 gains 18 labels, so that seed is left out of the diamond
+mean.
+
+| ice signal | n | mean / ps | median / ps | min / ps | max / ps | 95% CI / ps | excludes zero | positive |
+| --- | ---: | ---: | ---: | ---: | ---: | --- | --- | ---: |
+| published CHILL+ core | 20 | 1164 | 858 | 508 | 3044 | 898 to 1474 | yes | 20 |
+| published CHILL+ extended | 20 | 395 | 341 | 143 | 857 | 319 to 476 | yes | 20 |
+| q6-bar above 0.36 | 20 | 475 | 419 | 144 | 1057 | 375 to 585 | yes | 20 |
+| diamond cubic or hexagonal | 19 | 4064 | 4098 | 738 | 6022 | 3370 to 4684 | yes | 19 |
+
+Every retained lead is positive, and every interval excludes zero.
+The published core is the slowest of the CHILL+ masks: interfacial
+molecules move the extended population earlier, and q6-bar moves with
+them. Diamond labels stay rare until a compact interior exists, so its
+half-rise is nanoseconds later. The correlation of the frame-to-frame
+changes is weak. The median Pearson r is 0.084 for the published core,
+0.133 for the published extended population, and 0.165 for q6-bar, all
+at a lag of 0. Diamond's median r is 0.023. The lead is the separation
+of the two slow rises. The six-ring share climbs in the first few
+hundred picoseconds after the quench. The ice populations keep rising
+for nanoseconds.
+
+This is the lead of the ring share over those populations in liquids
+that were quenched to 180 K. It is not a committor and it is not a
+critical size. The per-seed lags are `docs/nucleation/mw4096-leads.tsv`
+and the command below draws the figure from them with `--figure`.
+
+No mean-first-passage fit is made here. A post-critical cluster, for
+this window only, is a published core that reaches 50 molecules. That
+mark is about fifty times the liquid core. It is not a fitted critical
+size. Eighteen seeds cross it inside 10 ns. Seeds 20261112 and
+20261125 reach 49 and 45 and are still short of the mark at 10 ns, so
+they have no stacking fraction below. The crossing times run from 705
+ps to 7526 ps.
+
+The stacking fraction is cubic / (cubic + hexagonal) inside the
+largest published core, at the first frame that core has at least 50
+molecules.
+
+| seed | time / ps | size | Ic fraction |
+| --- | ---: | ---: | ---: |
+| 20261111 | 4185 | 54 | 0.389 |
+| 20261113 | 4403 | 53 | 0.472 |
+| 20261114 | 5176 | 50 | 0.460 |
+| 20261115 | 7472 | 52 | 0.231 |
+| 20261116 | 7042 | 58 | 0.259 |
+| 20261117 | 2994 | 51 | 0.608 |
+| 20261118 | 705 | 50 | 0.500 |
+| 20261119 | 1564 | 52 | 0.404 |
+| 20261120 | 3600 | 50 | 0.440 |
+| 20261121 | 5064 | 52 | 0.327 |
+| 20261122 | 2731 | 50 | 0.360 |
+| 20261123 | 5040 | 50 | 0.140 |
+| 20261124 | 7526 | 52 | 0.288 |
+| 20261126 | 3236 | 60 | 0.417 |
+| 20261127 | 4461 | 52 | 0.365 |
+| 20261128 | 3621 | 50 | 0.560 |
+| 20261129 | 2439 | 50 | 0.560 |
+| 20261130 | 2486 | 51 | 0.412 |
+
+The eighteen fractions have mean 0.399 and median 0.408, and they run
+from 0.140 to 0.608. At a core of about 50 molecules the nucleus is
+mixed. Across these seeds it is slightly hexagonal. The half-rise of
+the same cluster series, which sits at a mean size of 62, has mean
+fraction 0.414. The maximum of that series has mean fraction 0.417.
+The per-frame largest-cluster columns, for every seed and every
+picosecond, are kept outside the work tree. Their md5 and size are
+`docs/nucleation/mw4096-clusters.dvc`. The table will be published as
+a dataset of the d-SEAMS organisation on Hugging Face.
+
 ## Files
 
 The per-frame table is `docs/nucleation/figshare-4096.tsv`. The
@@ -251,3 +357,25 @@ python3 scripts/nucleation_figures.py docs/nucleation/figshare-4096.tsv \
 
 The figshare dump is not in the repository. The first frame of it is
 `input/traj/nucleation_f1.lammpstrj`.
+
+The twenty liquids are regenerated with the same deck. The dumps are
+not committed.
+
+```bash
+python3 input/nucleation/regenerate.py --lmp lmp --n 16 \
+  --seeds 20261111-20261130 --melt 10000 --quench 1000000 \
+  --dump-every 100 --temperature 180 --threads 1 --jobs 8 \
+  --seams nucleation-pathway
+python3 scripts/nucleation_ensemble.py \
+  "$DSEAMS_NUCLEATION_DIR/mw-4096"/seed-* \
+  --out-dir "$DSEAMS_NUCLEATION_DIR/mw-4096/ensemble" \
+  --figure docs/nucleation/mw4096-leads.png
+```
+
+The summary tables kept in the repository are
+`docs/nucleation/mw4096-leads.tsv`,
+`docs/nucleation/mw4096-bootstrap.tsv` and
+`docs/nucleation/mw4096-stacking.tsv`. The per-frame cluster series
+is written next to the trajectories as `clusters.tsv`. Its checksum
+is `docs/nucleation/mw4096-clusters.dvc`. That table will be published
+as a dataset of the d-SEAMS organisation on Hugging Face.
