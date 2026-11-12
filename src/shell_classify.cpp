@@ -148,9 +148,9 @@ struct Workspace {
   int *cid = nullptr;
   double *bd = nullptr;
   int *js = nullptr;
-  int *hitI = nullptr;
-  int *hitJ = nullptr;
-  double *hitD = nullptr;
+  double *vx = nullptr;
+  double *vy = nullptr;
+  double *vz = nullptr;
   int *rawK = nullptr;
   char *crystal = nullptr;
   char *tried = nullptr;
@@ -176,11 +176,10 @@ struct Workspace {
       cid = renew(cid, n);
       bd = renew(bd, n * static_cast<size_t>(kMaxBond));
       js = renew(js, n * static_cast<size_t>(kMaxBond));
-      // One record per accepted pair. A 3.5 A cell holds a few atoms, and
-      // 16 slots per atom covers the half-stencil hits with room to spare.
-      hitI = renew(hitI, n * 16);
-      hitJ = renew(hitJ, n * 16);
-      hitD = renew(hitD, n * 16);
+      // The pair walk stores the minimum-image vector beside each kept neighbour.
+      vx = renew(vx, n * static_cast<size_t>(kMaxBond));
+      vy = renew(vy, n * static_cast<size_t>(kMaxBond));
+      vz = renew(vz, n * static_cast<size_t>(kMaxBond));
       rawK = renew(rawK, n);
       crystal = renew(crystal, n);
       tried = renew(tried, n);
@@ -440,22 +439,50 @@ double bondAngle(const double v[3], const double e1[3], const double e2[3]) {
                     v[0] * e1[0] + v[1] * e1[1] + v[2] * e1[2]);
 }
 
-void bondFrame(const double axis[3], const double ref[3], double e1[3], double e2[3]) {
-  double an = std::sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]);
-  double u[3] = {axis[0] / an, axis[1] / an, axis[2] / an};
-  const double dot = ref[0] * u[0] + ref[1] * u[1] + ref[2] * u[2];
-  e1[0] = ref[0] - dot * u[0];
-  e1[1] = ref[1] - dot * u[1];
-  e1[2] = ref[2] - dot * u[2];
-  const double e1n = std::sqrt(e1[0] * e1[0] + e1[1] * e1[1] + e1[2] * e1[2]);
-  if (e1n > 1e-8) {
-    e1[0] /= e1n;
-    e1[1] /= e1n;
-    e1[2] /= e1n;
+// True when one of the three grouped seconds on bond `a` is eclipsed.
+// The cosine is compared as a square, so the bond and the reference are not normalised.
+// Ideal eclipsed is 1 and ideal staggered is 0.5. Thermal staggered bonds stay at or below 0.90.
+bool armEclipsed(const double envF[4][3], const double envS[12][3], int a) {
+  const double ux = envF[a][0];
+  const double uy = envF[a][1];
+  const double uz = envF[a][2];
+  const double ul2 = ux * ux + uy * uy + uz * uz;
+  if (!(ul2 > 1e-16)) {
+    return false;
   }
-  e2[0] = u[1] * e1[2] - u[2] * e1[1];
-  e2[1] = u[2] * e1[0] - u[0] * e1[2];
-  e2[2] = u[0] * e1[1] - u[1] * e1[0];
+  constexpr double kEcl2 = 0.90 * 0.90;
+  for (int b = 0; b < 4; b++) {
+    if (b == a) {
+      continue;
+    }
+    const double rd = (envF[b][0] * ux + envF[b][1] * uy + envF[b][2] * uz) / ul2;
+    const double rx = envF[b][0] - rd * ux;
+    const double ry = envF[b][1] - rd * uy;
+    const double rz = envF[b][2] - rd * uz;
+    const double rl2 = rx * rx + ry * ry + rz * rz;
+    if (rl2 < 1e-12) {
+      continue;
+    }
+    for (int e = 0; e < 3; e++) {
+      const int s = 3 * a + e;
+      const double vx0 = envS[s][0] - ux;
+      const double vy0 = envS[s][1] - uy;
+      const double vz0 = envS[s][2] - uz;
+      const double vd = (vx0 * ux + vy0 * uy + vz0 * uz) / ul2;
+      const double vx = vx0 - vd * ux;
+      const double vy = vy0 - vd * uy;
+      const double vz = vz0 - vd * uz;
+      const double vl2 = vx * vx + vy * vy + vz * vz;
+      if (vl2 < 1e-12) {
+        continue;
+      }
+      const double dot = rx * vx + ry * vy + rz * vz;
+      if (dot > 0.0 && dot * dot > kEcl2 * rl2 * vl2) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 // Largest azimuthal cosine of the three second neighbours on bond `a`.
@@ -620,19 +647,6 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
     pz[i] = 1.0e6;
     r2[i] = 1.0e300;
   }
-  for (int a = 0; a < 12; a++) {
-    const __m256d xa = _mm256_set1_pd(px[a]);
-    const __m256d ya = _mm256_set1_pd(py[a]);
-    const __m256d za = _mm256_set1_pd(pz[a]);
-    for (int b = 0; b < 12; b += 4) {
-      const __m256d dx = _mm256_sub_pd(xa, _mm256_load_pd(px + b));
-      const __m256d dy = _mm256_sub_pd(ya, _mm256_load_pd(py + b));
-      const __m256d dz = _mm256_sub_pd(za, _mm256_load_pd(pz + b));
-      const __m256d d2 = _mm256_add_pd(_mm256_mul_pd(dx, dx),
-                                      _mm256_add_pd(_mm256_mul_pd(dy, dy), _mm256_mul_pd(dz, dz)));
-      _mm256_storeu_pd(&pair[a][b], d2);
-    }
-  }
   // (1 + sqrt(2)) / 2, the adaptive common-neighbour cutoff. It lies between
   // the first and second shells of the FCC/HCP cluster.
   constexpr double kAdapt2 = 1.2071067811865475 * 1.2071067811865475;
@@ -640,6 +654,17 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
   int n422 = 0;
   int nGood = 0;
   for (int j = 0; j < 12; j++) {
+    const __m256d xa = _mm256_set1_pd(px[j]);
+    const __m256d ya = _mm256_set1_pd(py[j]);
+    const __m256d za = _mm256_set1_pd(pz[j]);
+    for (int b = 0; b < 12; b += 4) {
+      const __m256d dx = _mm256_sub_pd(xa, _mm256_load_pd(px + b));
+      const __m256d dy = _mm256_sub_pd(ya, _mm256_load_pd(py + b));
+      const __m256d dz = _mm256_sub_pd(za, _mm256_load_pd(pz + b));
+      const __m256d d2 = _mm256_add_pd(_mm256_mul_pd(dx, dx),
+                                      _mm256_add_pd(_mm256_mul_pd(dy, dy), _mm256_mul_pd(dz, dz)));
+      _mm256_storeu_pd(&pair[j][b], d2);
+    }
     const double cut2 = r2[j] * kAdapt2;
     const __m256d cut = _mm256_set1_pd(cut2);
     int mask = 0;
@@ -672,7 +697,7 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
           const double dx = sx[ia] - sx[ib];
           const double dy = sy[ia] - sy[ib];
           const double dz = sz[ia] - sz[ib];
-          if (pair[ia][ib] < cut2) {
+          if (dx * dx + dy * dy + dz * dz < cut2) {
             nBonds++;
             deg[a]++;
             deg[b]++;
@@ -966,7 +991,10 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
     int nEcl = 0;
     int eArm = -1;
     for (int a = 0; a < 4; a++) {
-      double mx = grouped ? armMaxCosine(envF, envS, a) : -1.0;
+      double mx = -1.0;
+      if (grouped && armEclipsed(envF, envS, a)) {
+        mx = 1.0;
+      }
       if (!grouped) {
         double u[3] = {envF[a][0], envF[a][1], envF[a][2]};
         const double un = std::sqrt(u[0] * u[0] + u[1] * u[1] + u[2] * u[2]);
@@ -1165,17 +1193,26 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
           paired = false;
           break;
         }
-        double e1[3];
-        double e2[3];
-        bondFrame(envF[envArm], envF[pidx[(a + 1) % 4]], e1, e2);
+        // Azimuth around the bond. The unit frame is only a positive scale on
+        // both axes, and the sort reads signs, so the square roots drop out.
+        const double *axis = envF[envArm];
+        const double *refv = envF[pidx[(a + 1) % 4]];
+        const double al2 = axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2];
+        const double proj = al2 > 1e-18 ? (refv[0] * axis[0] + refv[1] * axis[1] + refv[2] * axis[2]) / al2 : 0.0;
+        const double rx = refv[0] - proj * axis[0];
+        const double ry = refv[1] - proj * axis[1];
+        const double rz = refv[2] - proj * axis[2];
+        const double wx = axis[1] * rz - axis[2] * ry;
+        const double wy = axis[2] * rx - axis[0] * rz;
+        const double wz = axis[0] * ry - axis[1] * rx;
         double ax[3];
         double ay[3];
         for (int i = 0; i < 3; i++) {
-          const double ox = envS[cand[i]][0] - envF[envArm][0];
-          const double oy = envS[cand[i]][1] - envF[envArm][1];
-          const double oz = envS[cand[i]][2] - envF[envArm][2];
-          ax[i] = ox * e1[0] + oy * e1[1] + oz * e1[2];
-          ay[i] = ox * e2[0] + oy * e2[1] + oz * e2[2];
+          const double ox = envS[cand[i]][0] - axis[0];
+          const double oy = envS[cand[i]][1] - axis[1];
+          const double oz = envS[cand[i]][2] - axis[2];
+          ax[i] = ox * rx + oy * ry + oz * rz;
+          ay[i] = ox * wx + oy * wy + oz * wz;
         }
         for (int i = 0; i < 3; i++) {
           for (int j = i + 1; j < 3; j++) {
@@ -1464,12 +1501,38 @@ __attribute__((always_inline)) inline void keepNear(int *js, double *rd, int &nb
   }
 }
 
+__attribute__((always_inline)) inline void keepVec(int *js, double *rd, double *vx, double *vy, double *vz, int &nb,
+                                                   int j, double d2, double dx, double dy, double dz) {
+  if (nb < 4) {
+    js[nb] = j;
+    rd[nb] = d2;
+    vx[nb] = dx;
+    vy[nb] = dy;
+    vz[nb] = dz;
+    nb++;
+    return;
+  }
+  int worst = rd[1] > rd[0] ? 1 : 0;
+  if (rd[2] > rd[worst]) {
+    worst = 2;
+  }
+  if (rd[3] > rd[worst]) {
+    worst = 3;
+  }
+  if (d2 < rd[worst]) {
+    js[worst] = j;
+    rd[worst] = d2;
+    vx[worst] = dx;
+    vy[worst] = dy;
+    vz[worst] = dz;
+  }
+}
+
 void fillHalfFast(int ncell, int nx, int ny, int nz, double lx, double ly, double lz, const int *cellStart,
                   const double *cx, const double *cy, const double *cz, const int *cid, int *js, int *nbon,
-                  double *rd, int *hitI, int *hitJ, double *hitD, int hcap) {
+                  double *rd, double *vx, double *vy, double *vz) {
   const double cut2 = kBond * kBond;
   const double min2 = 2.15 * 2.15;
-  int nh = 0;
   const int nxy = nx * ny;
   const int off[13] = {1,
                        nx - 1, nx, nx + 1,
@@ -1499,12 +1562,10 @@ void fillHalfFast(int ncell, int nx, int ny, int nz, double lx, double ly, doubl
               continue;
             }
             const int j = cid[m];
-            if (nh < hcap) {
-              hitI[nh] = i;
-              hitJ[nh] = j;
-              hitD[nh] = d2;
-              ++nh;
-            }
+            keepVec(js + static_cast<size_t>(i) * 4, rd + static_cast<size_t>(i) * 4, vx + static_cast<size_t>(i) * 4,
+                    vy + static_cast<size_t>(i) * 4, vz + static_cast<size_t>(i) * 4, nbon[i], j, d2, dx, dy, dz);
+            keepVec(js + static_cast<size_t>(j) * 4, rd + static_cast<size_t>(j) * 4, vx + static_cast<size_t>(j) * 4,
+                    vy + static_cast<size_t>(j) * 4, vz + static_cast<size_t>(j) * 4, nbon[j], i, d2, -dx, -dy, -dz);
           }
           for (int t = 0; t < 13; t++) {
             const int nb = cell + off[t];
@@ -1519,12 +1580,10 @@ void fillHalfFast(int ncell, int nx, int ny, int nz, double lx, double ly, doubl
                 continue;
               }
               const int j = cid[m];
-              if (nh < hcap) {
-                hitI[nh] = i;
-                hitJ[nh] = j;
-                hitD[nh] = d2;
-                ++nh;
-              }
+              keepVec(js + static_cast<size_t>(i) * 4, rd + static_cast<size_t>(i) * 4, vx + static_cast<size_t>(i) * 4,
+                      vy + static_cast<size_t>(i) * 4, vz + static_cast<size_t>(i) * 4, nbon[i], j, d2, dx, dy, dz);
+              keepVec(js + static_cast<size_t>(j) * 4, rd + static_cast<size_t>(j) * 4, vx + static_cast<size_t>(j) * 4,
+                      vy + static_cast<size_t>(j) * 4, vz + static_cast<size_t>(j) * 4, nbon[j], i, d2, -dx, -dy, -dz);
             }
           }
         }
@@ -1621,78 +1680,50 @@ void fillHalfFast(int ncell, int nx, int ny, int nz, double lx, double ly, doubl
           if (d2 > cut2 || d2 < min2) {
             continue;
           }
-          if (nh < hcap) {
-            hitI[nh] = i;
-            hitJ[nh] = j;
-            hitD[nh] = d2;
-            ++nh;
-          }
+          keepVec(js + static_cast<size_t>(i) * 4, rd + static_cast<size_t>(i) * 4, vx + static_cast<size_t>(i) * 4,
+                  vy + static_cast<size_t>(i) * 4, vz + static_cast<size_t>(i) * 4, nbon[i], j, d2, dx, dy, dz);
+          keepVec(js + static_cast<size_t>(j) * 4, rd + static_cast<size_t>(j) * 4, vx + static_cast<size_t>(j) * 4,
+                  vy + static_cast<size_t>(j) * 4, vz + static_cast<size_t>(j) * 4, nbon[j], i, d2, -dx, -dy, -dz);
         }
       }
     }
   }
-  // The distance loop only appends. Scattering into the four-neighbour rows
-  // afterwards keeps those random writes off the pair walk.
-  for (int h = 0; h < nh; h++) {
-    const int i = hitI[h];
-    const int j = hitJ[h];
-    const double d2 = hitD[h];
-    keepNear(js + static_cast<size_t>(i) * 4, rd + static_cast<size_t>(i) * 4, nbon[i], j, d2);
-    keepNear(js + static_cast<size_t>(j) * 4, rd + static_cast<size_t>(j) * 4, nbon[j], i, d2);
-  }
 }
 
-// Sort the four ids and write minimum-image vectors from the SoA coordinates.
-// The twelve-neighbour signature reads these rows next, with no second search.
-void materializeIds(int n, Bond *bonds, const int *nbon, int *js, double *rd, const double *px, const double *py,
-                    const double *pz, double lx, double ly, double lz) {
-  const double hx = 0.5 * lx;
-  const double hy = 0.5 * ly;
-  const double hz = 0.5 * lz;
+// The pair walk already stored the minimum-image vector with each kept neighbour.
+// Sorting those four rows replaces a second pass over every atom.
+void commitBonds(int n, Bond *bonds, const int *nbon, int *js, double *rd, double *vx, double *vy, double *vz) {
   for (int i = 0; i < n; i++) {
-    int *ji = js + static_cast<size_t>(i) * 4;
-    double *rdi = rd + static_cast<size_t>(i) * 4;
     const int nb = nbon[i];
+    int *J = js + static_cast<size_t>(i) * 4;
+    double *R = rd + static_cast<size_t>(i) * 4;
+    double *X = vx + static_cast<size_t>(i) * 4;
+    double *Y = vy + static_cast<size_t>(i) * 4;
+    double *Z = vz + static_cast<size_t>(i) * 4;
     for (int a = 1; a < nb; a++) {
-      const int j = ji[a];
-      const double d2 = rdi[a];
-      int at = a;
-      while (at > 0 && d2 < rdi[at - 1]) {
-        ji[at] = ji[at - 1];
-        rdi[at] = rdi[at - 1];
-        at--;
+      const int j = J[a];
+      const double d2 = R[a];
+      const double dx = X[a];
+      const double dy = Y[a];
+      const double dz = Z[a];
+      int b = a;
+      while (b > 0 && R[b - 1] > d2) {
+        J[b] = J[b - 1];
+        R[b] = R[b - 1];
+        X[b] = X[b - 1];
+        Y[b] = Y[b - 1];
+        Z[b] = Z[b - 1];
+        --b;
       }
-      ji[at] = j;
-      rdi[at] = d2;
+      J[b] = j;
+      R[b] = d2;
+      X[b] = dx;
+      Y[b] = dy;
+      Z[b] = dz;
     }
     Bond *row = bonds + static_cast<size_t>(i) * 4;
-    const double xi = px[i];
-    const double yi = py[i];
-    const double zi = pz[i];
     for (int a = 0; a < nb; a++) {
-      const int j = ji[a];
-      double dx = px[j] - xi;
-      double dy = py[j] - yi;
-      double dz = pz[j] - zi;
-      if (dx > hx) {
-        dx -= lx;
-      } else if (dx < -hx) {
-        dx += lx;
-      }
-      if (dy > hy) {
-        dy -= ly;
-      } else if (dy < -hy) {
-        dy += ly;
-      }
-      if (dz > hz) {
-        dz -= lz;
-      } else if (dz < -hz) {
-        dz += lz;
-      }
-      row[a].j = j;
-      row[a].dx = dx;
-      row[a].dy = dy;
-      row[a].dz = dz;
+      row[a] = Bond{J[a], X[a], Y[a], Z[a]};
     }
   }
 }
@@ -2076,9 +2107,8 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     }
     if (threads == 1) {
       fillHalfFast(ncell, nx, ny, nz, lat[0][0], lat[1][1], lat[2][2], cellStart.data(), cx, cy, cz, cid, mem.js,
-                   nbon.data(), mem.bd, mem.hitI, mem.hitJ, mem.hitD, n * 16);
-      materializeIds(n, bonds.data(), nbon.data(), mem.js, mem.bd, px.data(), py.data(), pz.data(), lat[0][0],
-                     lat[1][1], lat[2][2]);
+                   nbon.data(), mem.bd, mem.vx, mem.vy, mem.vz);
+      commitBonds(n, bonds.data(), nbon.data(), mem.js, mem.bd, mem.vx, mem.vy, mem.vz);
     } else {
       fillFastBonds(ncell, nx, ny, nz, lat[0][0], lat[1][1], lat[2][2], cellStart.data(), cx, cy, cz, cid,
                     bonds.data(), nbon.data());

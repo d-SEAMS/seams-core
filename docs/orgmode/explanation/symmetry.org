@@ -147,7 +147,7 @@ It was not pushed up by looking at seed 93003.
 
 * Timings
 
-One session, 11 November 2026, an Intel Xeon with 8 cores.
+One sitting, 11 November 2026, an Intel Xeon with 8 cores.
 ~nproc~ was read with ~OMP_NUM_THREADS~ unset and reported 8.
 The compiler is g++ 15.2.0.
 The library is a Meson release build, ~-O3~, with ~-mavx2 -mfma~ on the shell translation unit.
@@ -156,30 +156,52 @@ OVITO is 3.17.2.
 Identify diamond is ~IdentifyDiamondModifier~.
 Template matching is ~PolyhedralTemplateMatchingModifier~ with the RMSD cutoff 0.1 and only cubic diamond and hexagonal diamond enabled.
 
+The bond stage was the largest piece of a one-thread call, about 3 ms of 5.3 ms at 13553 molecules and almost the whole 24 ms call on the ideal 110592-molecule cell.
+The pair walk now keeps the minimum-image vector it has already computed, and the later pass that rebuilt those vectors from the coordinates is gone.
+Inside the template fit, the second-shell arms are ordered by the unnormalised cross product, and an eclipsed arm is a squared-cosine test.
+Common-neighbour rows are built one at a time, and a shell that can no longer reach the ambiguous band does not build the rest.
+
 The timed frames are the 13553-molecule cells, not the quenches.
-One thread, eight samples, milliseconds.
-The pair walk records hits and scatters them into the four-neighbour rows afterwards.
+One thread, eight samples, milliseconds, kernel then identify diamond in one process.
+The range is the slowest and fastest sample.
 
-| seed | kernel | identify diamond | template matching |
-|------+--------+------------------+-------------------|
-| 91001 | 5.333 (5.240–5.551) | 6.090 (5.083–6.955) | 57.730 (57.268–59.690) |
-| 92002 | 4.954 (4.881–5.072) | 6.034 (5.099–7.641) | 57.251 (56.766–59.176) |
-| 93003 | 5.145 (5.031–6.112) | 5.758 (5.512–6.652) | 58.347 (56.995–61.933) |
+| seed | kernel | identify diamond |
+|------+--------+------------------|
+| 91001 | 5.436 (5.325–5.485) | 6.618 (5.179–7.773) |
+| 92002 | 5.099 (4.987–5.281) | 5.939 (5.043–6.472) |
+| 93003 | 5.251 (5.163–5.342) | 6.176 (5.225–7.059) |
 
-The eight kernel samples are 5.551 5.240 5.540 5.248 5.477 5.292 5.363 5.302, then 5.008 5.026 4.909 4.925 4.881 5.072 4.982 4.897, then 5.181 6.112 5.463 5.156 5.044 5.133 5.031 5.123.
-Identify diamond on the same frames is 6.955 5.083 6.460 6.874 6.450 5.563 5.729 5.490, then 5.531 5.975 6.863 5.099 6.468 5.618 7.641 6.093, then 5.886 5.629 6.311 5.576 6.652 5.608 5.512 6.099.
-On 92002 every kernel sample is below every identify-diamond sample.
-On 91001 and 93003 the ranges still meet: the slowest kernel sample is above the fastest identify-diamond sample.
-Every kernel sample on all three seeds is below every template-matching sample.
-The quenched 93003 frame, 13653 atoms, is 4.841 ms (4.787–4.972) against template matching at 57.541 ms (56.745–59.540).
+The eight kernel samples are 5.429 5.485 5.392 5.484 5.364 5.442 5.325 5.463, then 5.092 5.281 5.016 5.106 4.987 5.172 5.071 5.144, then 5.298 5.166 5.341 5.219 5.342 5.163 5.283 5.200.
+Identify diamond on the same frames is 6.726 6.509 7.119 7.773 6.057 5.179 6.934 5.550, then 5.815 6.457 5.178 6.472 5.043 6.062 5.605 6.314, then 5.739 6.272 7.059 5.918 6.314 5.225 6.247 6.104.
+On every seed the kernel median is below the identify-diamond median, and the kernel's own spread is under 0.3 ms.
+The fastest identify-diamond sample on each seed is still below the slowest kernel sample, by 0.31 ms on 91001, 0.24 ms on 92002 and 0.12 ms on 93003.
 
-Eight threads, same cells:
+Eight threads, same cells, measured in the preceding minute:
 
-| seed | kernel | identify diamond | template matching |
-|------+--------+------------------+-------------------|
-| 91001 | 2.182 (2.113–2.291) | 6.268 (5.108–6.622) | 57.664 (57.343–58.400) |
-| 92002 | 1.934 (1.870–2.050) | 5.558 (5.006–6.290) | 58.340 (57.533–63.934) |
-| 93003 | 1.997 (1.967–2.271) | 5.348 (4.771–5.755) | 57.490 (57.057–58.150) |
+| seed | kernel | identify diamond |
+|------+--------+------------------|
+| 91001 | 2.222 (2.153–2.296) | 6.087 (5.590–13.502) |
+| 92002 | 1.940 (1.912–2.076) | 5.787 (4.925–6.548) |
+| 93003 | 2.009 (1.958–2.056) | 5.714 (5.075–6.425) |
 
-Template matching does not speed up at eight threads on this build of OVITO.
-The kernel's slowest eight-thread sample on each seed is under identify diamond's fastest sample, and under template matching on seed 93003.
+The kernel's slowest eight-thread sample on each seed is under identify diamond's fastest sample.
+
+Template matching was measured in that same preceding run, kernel and template matching in one process.
+It does not speed up at eight threads.
+Per-atom times are the median divided by the atom count.
+
+| frame | threads | kernel µs/atom | template matching µs/atom |
+|-------+---------+----------------+---------------------------|
+| 91001, 13553 | 1 | 0.406 | 4.953 |
+| 92002, 13553 | 1 | 0.380 | 4.655 |
+| 93003, 13553 | 1 | 0.399 | 4.698 |
+| ideal ice Ic, 110592 | 1 | 0.218 | 3.644 |
+| 91001, 13553 | 8 | 0.177 | 4.644 |
+| 92002, 13553 | 8 | 0.146 | 4.658 |
+| 93003, 13553 | 8 | 0.151 | 4.713 |
+| ideal ice Ic, 110592 | 8 | 0.054 | 3.620 |
+
+The one-thread template-matching samples, milliseconds, are 63.493 64.348 65.309 71.131 81.903 72.515 68.933 63.321, then 64.195 62.642 65.019 63.439 64.351 61.660 62.748 61.902, then 64.377 62.895 63.863 63.724 63.622 64.526 63.316 63.037, and on the ideal cell 411.364 406.241 396.372 399.726 407.844 396.695 399.634 415.364.
+The ideal cell is 24×24×24 ice Ic, 110592 molecules, and every atom is labelled cubic.
+The one-thread kernel on that cell is 24.262 24.381 23.859 24.137 24.262 24.060 24.121 24.174.
+At eight threads the ideal kernel is 6.128 6.061 5.874 5.996 5.862 5.967 6.052 6.039 and template matching is 399.618 397.096 401.174 399.717 401.193 397.934 401.039 406.331.
