@@ -325,6 +325,56 @@ rule literature_h2h:
         "--log benchmarks/h2h-literature.txt"
 
 
+rule hop_stride:
+    input:
+        expand("benchmarks/hop-stride-{stride}.txt", stride=[10, 100, 1000]),
+        "benchmarks/hop-stride-crossover.txt",
+
+
+rule hop_stride_generate:
+    input:
+        "input/hop/regenerate.py",
+        "input/hop/in.equilibrate",
+        "input/hop/in.stride",
+        "input/mw215/mW.sw",
+    output:
+        "data/hop/stride-10.lammpstrj",
+        "data/hop/stride-100.lammpstrj",
+        "data/hop/stride-1000.lammpstrj",
+        "data/hop/manifest.txt",
+    shell:
+        "python3 input/hop/regenerate.py --frame 104 "
+        "--strides 10,100,1000 --transitions 200 "
+        "--nequil 2000 --seed 15780000 --threads 8"
+
+
+rule hop_stride_time:
+    input:
+        "build/tests/bench_hop_stride",
+        "data/hop/manifest.txt",
+        "data/hop/stride-{stride}.lammpstrj",
+    output:
+        "benchmarks/hop-stride-{stride}.txt",
+    shell:
+        "cat data/hop/manifest.txt > {output}; "
+        "./build/tests/bench_hop_stride time "
+        "data/hop/stride-{stride}.lammpstrj "
+        "--graph both --reps 8 --warmup 1 --stride {stride} >> {output}"
+
+
+rule hop_stride_crossover:
+    input:
+        "build/tests/bench_hop_stride",
+        "data/hop/stride-1000.lammpstrj",
+    output:
+        "benchmarks/hop-stride-crossover.txt",
+    shell:
+        "./build/tests/bench_hop_stride crossover "
+        "data/hop/stride-1000.lammpstrj "
+        "--graph both --frame-a 1 --frame-b 2 "
+        "--reps 8 --warmup 1 > {output}"
+
+
 rule rings_one_thread:
     input:
         "build/tests/bench_rings_h2h",

@@ -1,0 +1,63 @@
+# cores 8
+# omp_threads 8
+# reps 8
+# warmup 1
+# quantile type-7
+# crossover frames 1 2
+sweep graph cutoff radius 0.000 changed_bonds 0 recomputed 0 nop 4096 carry_ms 0.021972 rebuild_ms 2.558075 speedup 116.421663 path ball identical yes
+sweep graph cutoff radius 2.000 changed_bonds 10 recomputed 11 nop 4096 carry_ms 0.143782 rebuild_ms 2.502216 speedup 17.402846 path ball identical yes
+sweep graph cutoff radius 3.000 changed_bonds 16 recomputed 15 nop 4096 carry_ms 0.138599 rebuild_ms 2.467736 speedup 17.804862 path ball identical yes
+sweep graph cutoff radius 4.000 changed_bonds 32 recomputed 28 nop 4096 carry_ms 0.158431 rebuild_ms 2.454287 speedup 15.491204 path ball identical yes
+sweep graph cutoff radius 5.000 changed_bonds 42 recomputed 37 nop 4096 carry_ms 0.179277 rebuild_ms 2.433630 speedup 13.574692 path ball identical yes
+sweep graph cutoff radius 6.000 changed_bonds 81 recomputed 61 nop 4096 carry_ms 0.195761 rebuild_ms 2.480762 speedup 12.672436 path ball identical yes
+sweep graph cutoff radius 8.000 changed_bonds 150 recomputed 120 nop 4096 carry_ms 0.261979 rebuild_ms 2.465544 speedup 9.411210 path ball identical yes
+sweep graph cutoff radius 10.000 changed_bonds 319 recomputed 218 nop 4096 carry_ms 0.387547 rebuild_ms 2.492158 speedup 6.430587 path ball identical yes
+sweep graph cutoff radius 12.000 changed_bonds 467 recomputed 301 nop 4096 carry_ms 0.486850 rebuild_ms 2.587895 speedup 5.315585 path ball identical yes
+sweep graph cutoff radius 14.000 changed_bonds 700 recomputed 458 nop 4096 carry_ms 0.650014 rebuild_ms 2.477469 speedup 3.811412 path ball identical yes
+sweep graph cutoff radius 16.000 changed_bonds 971 recomputed 645 nop 4096 carry_ms 0.843486 rebuild_ms 2.559261 speedup 3.034148 path ball identical yes
+sweep graph cutoff radius 18.000 changed_bonds 1363 recomputed 894 nop 4096 carry_ms 1.106039 rebuild_ms 2.625330 speedup 2.373632 path ball identical yes
+sweep graph cutoff radius 20.000 changed_bonds 1832 recomputed 1172 nop 4096 carry_ms 1.390845 rebuild_ms 2.628491 speedup 1.889852 path ball identical yes
+sweep graph cutoff radius 24.000 changed_bonds 2954 recomputed 1863 nop 4096 carry_ms 2.010384 rebuild_ms 2.572684 speedup 1.279697 path ball identical yes
+sweep graph cutoff radius 28.000 changed_bonds 4234 recomputed 2482 nop 4096 carry_ms 2.608821 rebuild_ms 2.687498 speedup 1.030158 path ball identical yes
+sweep graph cutoff radius 34.000 changed_bonds 5396 recomputed 3014 nop 4096 carry_ms 2.920170 rebuild_ms 2.699832 speedup 0.924546 path ball identical yes
+sweep graph cutoff radius 42.000 changed_bonds 5647 recomputed 3092 nop 4096 carry_ms 2.982758 rebuild_ms 2.574909 speedup 0.863264 path ball identical yes
+sweep graph cutoff radius -1.000 changed_bonds 5647 recomputed 3092 nop 4096 carry_ms 2.941985 rebuild_ms 2.582904 speedup 0.877946 path ball identical yes
+crossover graph cutoff still_wins 4234 loses 5396
+sweep graph seeded-strict radius 0.000 changed_bonds 0 recomputed 0 nop 4096 carry_ms 0.026388 rebuild_ms 1.455840 speedup 55.170551 path ball identical yes
+sweep graph seeded-strict radius 2.000 changed_bonds 11 recomputed 12 nop 4096 carry_ms 0.089538 rebuild_ms 1.424716 speedup 15.911775 path ball identical yes
+sweep graph seeded-strict radius 3.000 changed_bonds 19 recomputed 16 nop 4096 carry_ms 0.087658 rebuild_ms 1.440044 speedup 16.427976 path ball identical yes
+sweep graph seeded-strict radius 5.000 changed_bonds 30 recomputed 30 nop 4096 carry_ms 0.093444 rebuild_ms 1.433794 speedup 15.343803 path ball identical yes
+sweep graph seeded-strict radius 4.000 changed_bonds 32 recomputed 29 nop 4096 carry_ms 0.092646 rebuild_ms 1.430589 speedup 15.441371 path ball identical yes
+sweep graph seeded-strict radius 6.000 changed_bonds 69 recomputed 59 nop 4096 carry_ms 0.113259 rebuild_ms 1.445697 speedup 12.764522 path ball identical yes
+sweep graph seeded-strict radius 8.000 changed_bonds 120 recomputed 102 nop 4096 carry_ms 0.129684 rebuild_ms 1.441791 speedup 11.117678 path ball identical yes
+sweep graph seeded-strict radius 10.000 changed_bonds 267 recomputed 194 nop 4096 carry_ms 0.172959 rebuild_ms 1.436560 speedup 8.305759 path ball identical yes
+sweep graph seeded-strict radius 12.000 changed_bonds 396 recomputed 288 nop 4096 carry_ms 0.210029 rebuild_ms 1.452573 speedup 6.916062 path ball identical yes
+sweep graph seeded-strict radius 14.000 changed_bonds 591 recomputed 417 nop 4096 carry_ms 0.256988 rebuild_ms 1.445997 speedup 5.626719 path ball identical yes
+sweep graph seeded-strict radius 16.000 changed_bonds 844 recomputed 596 nop 4096 carry_ms 0.338407 rebuild_ms 1.437883 speedup 4.248983 path ball identical yes
+sweep graph seeded-strict radius 18.000 changed_bonds 1177 recomputed 813 nop 4096 carry_ms 0.424164 rebuild_ms 1.464057 speedup 3.451625 path ball identical yes
+sweep graph seeded-strict radius 20.000 changed_bonds 1539 recomputed 1064 nop 4096 carry_ms 0.525528 rebuild_ms 1.448034 speedup 2.755389 path ball identical yes
+sweep graph seeded-strict radius 24.000 changed_bonds 2554 recomputed 1711 nop 4096 carry_ms 0.763300 rebuild_ms 1.442301 speedup 1.889559 path ball identical yes
+sweep graph seeded-strict radius 28.000 changed_bonds 3673 recomputed 2327 nop 4096 carry_ms 1.018532 rebuild_ms 1.461113 speedup 1.434528 path ball identical yes
+sweep graph seeded-strict radius 34.000 changed_bonds 4619 recomputed 2788 nop 4096 carry_ms 1.217866 rebuild_ms 1.516099 speedup 1.244882 path ball identical yes
+sweep graph seeded-strict radius 42.000 changed_bonds 4873 recomputed 2886 nop 4096 carry_ms 1.248741 rebuild_ms 1.471210 speedup 1.178154 path ball identical yes
+sweep graph seeded-strict radius -1.000 changed_bonds 4873 recomputed 2886 nop 4096 carry_ms 1.274253 rebuild_ms 1.497198 speedup 1.174961 path ball identical yes
+crossover graph seeded-strict still_wins 4873 loses -1
+sweep graph seeded-union radius 0.000 changed_bonds 0 recomputed 0 nop 4096 carry_ms 0.027023 rebuild_ms 1.871644 speedup 69.261148 path ball identical yes
+sweep graph seeded-union radius 2.000 changed_bonds 11 recomputed 12 nop 4096 carry_ms 0.123142 rebuild_ms 1.920328 speedup 15.594483 path ball identical yes
+sweep graph seeded-union radius 3.000 changed_bonds 17 recomputed 14 nop 4096 carry_ms 0.119118 rebuild_ms 1.856333 speedup 15.584054 path ball identical yes
+sweep graph seeded-union radius 4.000 changed_bonds 30 recomputed 27 nop 4096 carry_ms 0.139952 rebuild_ms 1.914385 speedup 13.678872 path ball identical yes
+sweep graph seeded-union radius 5.000 changed_bonds 40 recomputed 32 nop 4096 carry_ms 0.142756 rebuild_ms 1.897085 speedup 13.289050 path ball identical yes
+sweep graph seeded-union radius 6.000 changed_bonds 79 recomputed 61 nop 4096 carry_ms 0.166456 rebuild_ms 1.944624 speedup 11.682543 path ball identical yes
+sweep graph seeded-union radius 8.000 changed_bonds 142 recomputed 111 nop 4096 carry_ms 0.212589 rebuild_ms 1.908416 speedup 8.977003 path ball identical yes
+sweep graph seeded-union radius 10.000 changed_bonds 291 recomputed 187 nop 4096 carry_ms 0.269633 rebuild_ms 1.926470 speedup 7.144786 path ball identical yes
+sweep graph seeded-union radius 12.000 changed_bonds 418 recomputed 281 nop 4096 carry_ms 0.351831 rebuild_ms 1.956034 speedup 5.559576 path ball identical yes
+sweep graph seeded-union radius 14.000 changed_bonds 653 recomputed 433 nop 4096 carry_ms 0.486739 rebuild_ms 1.931043 speedup 3.967303 path ball identical yes
+sweep graph seeded-union radius 16.000 changed_bonds 918 recomputed 601 nop 4096 carry_ms 0.627211 rebuild_ms 1.949399 speedup 3.108046 path ball identical yes
+sweep graph seeded-union radius 18.000 changed_bonds 1265 recomputed 831 nop 4096 carry_ms 0.760099 rebuild_ms 2.005110 speedup 2.637961 path ball identical yes
+sweep graph seeded-union radius 20.000 changed_bonds 1673 recomputed 1084 nop 4096 carry_ms 1.016583 rebuild_ms 2.052221 speedup 2.018744 path ball identical yes
+sweep graph seeded-union radius 24.000 changed_bonds 2748 recomputed 1747 nop 4096 carry_ms 1.422128 rebuild_ms 2.019856 speedup 1.420305 path ball identical yes
+sweep graph seeded-union radius 28.000 changed_bonds 3901 recomputed 2336 nop 4096 carry_ms 1.762050 rebuild_ms 2.018686 speedup 1.145646 path ball identical yes
+sweep graph seeded-union radius 34.000 changed_bonds 4897 recomputed 2802 nop 4096 carry_ms 2.021367 rebuild_ms 2.042219 speedup 1.010316 path ball identical yes
+sweep graph seeded-union radius 42.000 changed_bonds 5123 recomputed 2881 nop 4096 carry_ms 2.055158 rebuild_ms 1.982884 speedup 0.964833 path ball identical yes
+sweep graph seeded-union radius -1.000 changed_bonds 5123 recomputed 2881 nop 4096 carry_ms 2.055511 rebuild_ms 2.007546 speedup 0.976665 path ball identical yes
+crossover graph seeded-union still_wins 4897 loses 5123
