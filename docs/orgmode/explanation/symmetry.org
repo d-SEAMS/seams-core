@@ -306,7 +306,7 @@ Per-atom times are the median divided by the atom count.
 | 91001, 13553 | 8 | 0.177 | 4.644 |
 | 92002, 13553 | 8 | 0.146 | 4.658 |
 | 93003, 13553 | 8 | 0.151 | 4.713 |
-| ideal ice Ic, 110592 | 8 | 0.054 | 3.620 |
+| ideal ice Ic, 110592 | 8 | 0.071 | 3.536 |
 
 The classify workspace, the coordinate columns and the canonical shell are one copy per calling thread, so two frames can be labelled at once.
 A later sitting on the same eight cores timed the C call again, two warm-ups and then eight samples.
