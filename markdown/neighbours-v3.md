@@ -110,7 +110,7 @@ From the repository root, with the release build and the comparison
 environment on `PATH` via `NEIGH_PYTHON`:
 
 ```
-NEIGH_PYTHON=/tmp/neigh-venv/bin/python \
+NEIGH_PYTHON="$TMPDIR/neigh-venv/bin/python" \
 NEIGH_BENCH=build-release/tests/bench_v2 \
 python scripts/bench_neighbours_v2.py
 ```

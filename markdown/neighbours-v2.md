@@ -64,12 +64,12 @@ the table is the end-to-end cost of each code's own classifier.
 meson setup build-release --buildtype=release -Dwith_tests=true \
   -Dwith_cli=true -Dwith_mpi=disabled -Dwith_openmp_offload=disabled
 ninja -C build-release tests/bench_v2
-python3 -m venv /tmp/neigh-venv
-/tmp/neigh-venv/bin/pip install 'vesin==0.6.2' freud-analysis mdapy ovito
+python3 -m venv "$TMPDIR/neigh-venv"
+"$TMPDIR/neigh-venv/bin/pip" install 'vesin==0.6.2' freud-analysis mdapy ovito
 # OVITO needs libGL on the loader path inside that process only.
-NEIGH_PYTHON=/tmp/neigh-venv/bin/python \
+NEIGH_PYTHON="$TMPDIR/neigh-venv/bin/python" \
   NEIGH_BENCH=$PWD/build-release/tests/bench_v2 \
-  /tmp/neigh-venv/bin/python scripts/bench_neighbours_v2.py
+  "$TMPDIR/neigh-venv/bin/python" scripts/bench_neighbours_v2.py
 ```
 
 `bench_v2` arguments are `tilt|chill|rings|symmetry`, molecules, threads,

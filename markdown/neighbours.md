@@ -58,11 +58,11 @@ on the whole team. The prefix is one pass over the cell totals.
 meson setup build-release --buildtype=release -Dwith_tests=true \
   -Dwith_cli=true -Dwith_mpi=disabled -Dwith_openmp_offload=disabled
 ninja -C build-release tests/bench_cutoff_list
-python3 -m venv /tmp/neigh-venv
-/tmp/neigh-venv/bin/pip install 'vesin==0.6.2' freud-analysis matscipy ase numpy
-NEIGH_PYTHON=/tmp/neigh-venv/bin/python \
+python3 -m venv "$TMPDIR/neigh-venv"
+"$TMPDIR/neigh-venv/bin/pip" install 'vesin==0.6.2' freud-analysis matscipy ase numpy
+NEIGH_PYTHON="$TMPDIR/neigh-venv/bin/python" \
   NEIGH_BENCH=$PWD/build-release/tests/bench_cutoff_list \
-  /tmp/neigh-venv/bin/python scripts/bench_neighbours_threads.py --reps 8
+  "$TMPDIR/neigh-venv/bin/python" scripts/bench_neighbours_threads.py --reps 8
 ```
 
 Phase lines, same binary, cores 0–7:
