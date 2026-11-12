@@ -266,10 +266,34 @@ chemfiles_opt = get_option('with_chemfiles')
 if chemfiles_opt.disabled()
   chemfiles_dep = dependency('chemfiles-disabled-by-option', required: false)
 else
+  fs = import('fs')
   chemfiles_dep = dependency('chemfiles', required: false)
+  # conda-forge 0.10.4 writes an mmCIF atom with no residue as
+  # label_seq_id "." and omits label_entity_id. The reader dereferences
+  # that missing column. Reading the written file throws, and a write
+  # followed by a read in the same process segfaults inside
+  # mmCIFFormat::read. A library that cannot read
+  # cmake/mmcif_no_entity.mmcif is replaced by tag 0.10.4 plus
+  # cmake/patches/chemfiles-0.10.4-mmcif.patch.
+  _chemfiles_system_ok = false
+  if chemfiles_dep.found()
+    _mmcif_probe = meson.project_source_root() / 'cmake' / 'mmcif_no_entity.mmcif'
+    _mmcif_run = cppc.run(
+      fs.read(meson.project_source_root() / 'cmake' / 'chemfiles_mmcif_probe.cpp'),
+      args: ['-DSEAMS_MMCIF_PROBE="' + _mmcif_probe + '"'],
+      dependencies: chemfiles_dep,
+      name: 'chemfiles reads an mmCIF atom with no residue id')
+    _chemfiles_system_ok = _mmcif_run.compiled() and _mmcif_run.returncode() == 0
+    if not _chemfiles_system_ok
+      message('system chemfiles cannot read an mmCIF atom with no residue id; building patched 0.10.4')
+      # dependency() has no way to drop a found library. This name is
+      # not a package. It clears the rejected system copy so the fetch
+      # below is the one that gets linked.
+      chemfiles_dep = dependency('chemfiles-mmcif-rejected', required: false)
+    endif
+  endif
   if not chemfiles_dep.found()
     chem_prefix = meson.project_build_root() / 'chemfiles-prefix'
-    fs = import('fs')
     cmake_bin = find_program('cmake', required: chemfiles_opt)
     if cmake_bin.found() and not fs.exists(chem_prefix / 'lib' / 'libchemfiles.so')
       run_command(cmake_bin, '-S', meson.project_source_root() / 'cmake',
@@ -277,6 +301,7 @@ else
                   '-DCMAKE_BUILD_TYPE=Release',
                   '-DCMAKE_INSTALL_PREFIX=' + chem_prefix,
                   '-DCMAKE_POLICY_VERSION_MINIMUM=3.5',
+                  '-DSEAMS_CHEMFILES_FORCE_VENDORED=ON',
                   check: true)
       run_command(cmake_bin, '--build',
                   meson.project_build_root() / 'chemfiles-fetch',
@@ -284,6 +309,25 @@ else
       run_command(cmake_bin, '--install',
                   meson.project_build_root() / 'chemfiles-fetch',
                   check: true)
+    endif
+    # The conda driver puts its lib directory first on the RPATH, and
+    # that directory already contains libchemfiles.so.0.10. A later
+    # rpath entry is never consulted. Give the patched library its own
+    # soname so the loader cannot satisfy it with the unpatched copy.
+    _chem_real = chem_prefix / 'lib' / 'libchemfiles.so.0.10.4'
+    if fs.exists(_chem_real)
+      patchelf = find_program('patchelf', required: false)
+      if patchelf.found()
+        _chem_soname = run_command(patchelf, '--print-soname', _chem_real,
+                                   check: false).stdout().strip()
+        if _chem_soname != 'libseams-chemfiles.so.0.10'
+          run_command(patchelf, '--set-soname', 'libseams-chemfiles.so.0.10',
+                      _chem_real, check: true)
+        endif
+        run_command(find_program('ln'), '-sfn', 'libchemfiles.so.0.10.4',
+                    chem_prefix / 'lib' / 'libseams-chemfiles.so.0.10',
+                    check: true)
+      endif
     endif
     if fs.exists(chem_prefix / 'lib' / 'libchemfiles.so')
       chemfiles_dep = cppc.find_library('chemfiles',

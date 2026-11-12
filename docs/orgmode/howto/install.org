@@ -17,6 +17,26 @@ The default pixi lock includes Highway and chemfiles. Optional pixi
 environments: ~ira~, ~sphericart~, ~nauty~, ~mpi~, ~docs~,
 ~formalanalysis~, ~repro~.
 
+conda-forge chemfiles 0.10.4 writes an mmCIF atom with no residue as
+~label_seq_id~ ~.~ and does not write ~label_entity_id~. The reader
+treats ~.~ as an entity id and dereferences that missing column. A
+read of the written file fails, and a write followed by a read in the
+same process segfaults inside ~mmCIFFormat::read~. Meson compiles
+~cmake/chemfiles_mmcif_probe.cpp~ and reads
+~cmake/mmcif_no_entity.mmcif~, the one-oxygen file that release
+writes. A library that does not return the oxygen at (1, 2, 3) in a
+10 by 11 by 12 cell is left unused. The build then fetches tag 0.10.4
+and applies ~cmake/patches/chemfiles-0.10.4-mmcif.patch~. A library
+that reads the file is kept. ~cmake/ChemfilesDep.cmake~ runs the same
+probe before it accepts an installed copy.
+~SEAMS_CHEMFILES_FORCE_VENDORED~ skips the installed copy. The Meson
+fallback sets it after the probe has already failed. The conda
+compiler puts its own lib directory first on the RPATH, and that
+directory already has ~libchemfiles.so.0.10~. When ~patchelf~ is on
+~PATH~, the patched library is given the soname
+~libseams-chemfiles.so.0.10~ so the loader does not open the
+unpatched file.
+
 * Nix flake
 
 #+begin_src bash

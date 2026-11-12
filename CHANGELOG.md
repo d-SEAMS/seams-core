@@ -88,6 +88,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Name the site-site pair flag `--pair-types`. Give the gpulite and vesin wraps their own option files so `meson configure` does not copy the engine options onto them.
 - Build the Sphinx book with warnings as errors from the committed sources. Doxygen XML and the C++ pages are optional, and each page is listed in one toctree.
 - Keep a diamond shell while eight good (4,2,1) signatures, or the ambiguous band, are still reachable. The old count stopped once four bad rows made nine good signatures unreachable.
+- Read mmCIF through a chemfiles that can open an atom with no residue id. conda-forge 0.10.4 writes label_seq_id "." and omits label_entity_id. The reader dereferences that missing column: a later read throws, and a write followed by a read in the same process segfaults inside mmCIFFormat::read. Configure reads cmake/mmcif_no_entity.mmcif. A failure builds tag 0.10.4 with cmake/patches/chemfiles-0.10.4-mmcif.patch. The patched library gets the soname libseams-chemfiles.so.0.10 when patchelf is available, so a conda libchemfiles.so.0.10 earlier on the RPATH is not used. The CMake lookup does the same probe. The mmCIF round trip still runs.
 
 
 ## [2.13.0] - 2026-11-06
