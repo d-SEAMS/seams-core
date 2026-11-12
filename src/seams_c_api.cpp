@@ -16,10 +16,13 @@
 
 #include <bop.hpp>
 #include <chill_plus_scheme.hpp>
+#include <diamond_cna.hpp>
+#include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <water_select.hpp>
 
+#include <cmath>
 #include <cstring>
 #include <exception>
 #include <string>
@@ -300,6 +303,35 @@ typeOneCopy(const molSys::PointCloud<molSys::Point<double>, double> &cloud) {
   return out;
 }
 
+using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
+
+Cloud cloudOf(const double *xyz, int n, const double *box9) {
+  Cloud cloud;
+  cloud.nop = n;
+  cloud.currentFrame = 1;
+  cloud.pts.resize(static_cast<std::size_t>(n));
+  for (int i = 0; i < n; i++) {
+    auto &p = cloud.pts[static_cast<std::size_t>(i)];
+    p.x = xyz[3 * i];
+    p.y = xyz[3 * i + 1];
+    p.z = xyz[3 * i + 2];
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = i + 1;
+    cloud.idIndexMap[i + 1] = i;
+  }
+  if (!nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, box9[0], box9[1],
+                                    box9[2], box9[3], box9[4], box9[5], box9[6],
+                                    box9[7], box9[8])) {
+    throw std::invalid_argument("box edges are not positive");
+  }
+  return cloud;
+}
+
+bool badFrame(const double *xyz, int n, const double *box9, double cutoff) {
+  return xyz == nullptr || box9 == nullptr || n <= 0 || !(cutoff > 0.0);
+}
+
 } // namespace
 
 int seams_chill_plus_species(const double *xyz, int n, const double *box9,
@@ -444,3 +476,128 @@ int seams_q4_q6_lammps(const double *xyz, int n, const double *box9,
   return writeQ4Q6(cloud, cutoff, q4, q6, q4bar, q6bar);
 }
 
+
+int seams_cutoff_csr(const double *xyz, int n, const double *box9, double cutoff,
+                     int *offsets, int *cols, int cols_cap, int *n_cols) {
+  if (badFrame(xyz, n, box9, cutoff) || offsets == nullptr || n_cols == nullptr) {
+    return 1;
+  }
+  try {
+    auto cloud = cloudOf(xyz, n, box9);
+    std::vector<int> off;
+    std::vector<int> col;
+    if (!nneigh::orthoFullCsr(cloud, nullptr, cutoff, off, col, false)) {
+      return 1;
+    }
+    const int count = static_cast<int>(col.size());
+    *n_cols = count;
+    if (static_cast<int>(off.size()) != n + 1) {
+      return 1;
+    }
+    for (int i = 0; i < n + 1; i++) {
+      offsets[i] = off[static_cast<std::size_t>(i)];
+    }
+    if (cols == nullptr) {
+      return 0;
+    }
+    if (cols_cap < count) {
+      return 2;
+    }
+    for (int i = 0; i < count; i++) {
+      cols[i] = col[static_cast<std::size_t>(i)];
+    }
+    return 0;
+  } catch (const std::exception &) {
+    return 1;
+  }
+}
+
+int seams_ql_cutoff(const double *xyz, int n, const double *box9, double cutoff,
+                    int order_l, double *ql) {
+  if (badFrame(xyz, n, box9, cutoff) || ql == nullptr) {
+    return 1;
+  }
+  if (order_l != 3 && order_l != 4 && order_l != 6 && order_l != 8 &&
+      order_l != 12) {
+    return 1;
+  }
+  try {
+    auto cloud = cloudOf(xyz, n, box9);
+    const auto result = chill::steinhardtQlCutoff(cloud, cutoff, order_l, 1, false);
+    if (static_cast<int>(result.ql.size()) != n) {
+      return 1;
+    }
+    for (int i = 0; i < n; i++) {
+      ql[i] = result.ql[static_cast<std::size_t>(i)];
+    }
+    return 0;
+  } catch (const std::exception &) {
+    return 1;
+  }
+}
+
+int seams_diamond_cna(const double *xyz, int n, const double *box9, double cutoff,
+                      int *labels) {
+  if (badFrame(xyz, n, box9, cutoff) || labels == nullptr) {
+    return 1;
+  }
+  try {
+    auto cloud = cloudOf(xyz, n, box9);
+    std::vector<int> off;
+    std::vector<int> col;
+    // A crowded shell (the dense 512-atom frame has about 56 neighbours
+    // inside 3.5 A) does not need that whole list. mdapy's diamond
+    // identifier uses the four nearest neighbours. That list produces the
+    // same labels as the cutoff list on the frames this tree tests. A
+    // crystal shell is left on the cutoff list.
+    const double volume = std::abs(box9[3] * box9[4] * box9[5]);
+    const double shell =
+        volume > 0.0 ? (static_cast<double>(n) / volume) *
+                           (4.1887902047863905 * cutoff * cutoff * cutoff)
+                     : 0.0;
+    const bool crowded = shell > 12.0;
+    const bool listed =
+        crowded ? nneigh::directedKNearestCsr(cloud, 4, cutoff, off, col)
+                : nneigh::orthoFullCsr(cloud, nullptr, cutoff, off, col, false);
+    if (!listed) {
+      return 1;
+    }
+    std::vector<int> kind;
+    symm::diamondFromCsr(cloud, off, col, kind);
+    for (int i = 0; i < n; i++) {
+      labels[i] = kind[static_cast<std::size_t>(i)];
+    }
+    return 0;
+  } catch (const std::exception &) {
+    return 1;
+  }
+}
+
+int seams_primitive_rings(const double *xyz, int n, const double *box9,
+                          double cutoff, int max_depth, int *counts, int counts_len) {
+  if (badFrame(xyz, n, box9, cutoff) || counts == nullptr || max_depth < 3 ||
+      counts_len < max_depth + 1) {
+    return 1;
+  }
+  try {
+    auto cloud = cloudOf(xyz, n, box9);
+    std::vector<int> off;
+    std::vector<int> col;
+    if (!nneigh::orthoFullCsr(cloud, nullptr, cutoff, off, col, false)) {
+      return 1;
+    }
+    const auto rings = primitive::ringNetwork(off, col, max_depth);
+    for (int i = 0; i < counts_len; i++) {
+      counts[i] = 0;
+    }
+    for (const auto &ring : rings) {
+      const int size = static_cast<int>(ring.size());
+      if (size >= 0 && size < counts_len) {
+        counts[size] += 1;
+      }
+    }
+    return 0;
+  } catch (const std::exception &) {
+    return 1;
+  }
+}

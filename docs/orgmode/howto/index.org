@@ -9,6 +9,7 @@ A how-to solves a goal you already have. It is not a learning path.
 | [[file:bindings.org][Language fronts]] | Python, R, and Julia against ~libseams_lang~ |
 | [[file:versions.org][Version pins]] | The five files that must agree |
 | [[file:benchmarks.org][Benchmarks]] | Which driver to time, and what to record |
+| [[file:literature-h2h.org][Literature head-to-head]] | mdapy, pyscal3, vesin, IRA and SQQ on ideal ice |
 | [[file:neighbour-lists.org][Cutoff neighbour lists]] | Triclinic CSR, thread count, and the pinned session |
 | [[file:openmp-offload.org][OpenMP target offload]] | Build the Steinhardt kernel for an NVIDIA GPU |
 | [[file:classify-cli.org][Classify a dump]] | Run ~read~ / ~chill-plus~ / ~cages~ on a file you have |
@@ -28,6 +29,7 @@ A how-to solves a goal you already have. It is not a learning path.
    bindings
    versions
    benchmarks
+   literature-h2h
    neighbour-lists
    openmp-offload
    classify-cli

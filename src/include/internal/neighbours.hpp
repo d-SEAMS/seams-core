@@ -416,6 +416,13 @@ bool refillNeighListO(double rcutoff,
 bool refillIndexRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      double cutoff, std::vector<std::vector<int>> &rows);
 
+/// Directed k nearest neighbours as a CSR of cloud indices, no self entry.
+/// `candidateCutoff` is the cell-size hint used by the k-nearest search.
+/// Rows are nearest first. Returns false when the cloud has no box.
+bool directedKNearestCsr(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, std::vector<int> &offsets, std::vector<int> &cols);
+
 /// In-situ cutoff list. Candidates are built at `cutoff + skin` and
 /// reused while every atom and the box have moved by at most `skin/2`.
 /// The filtered list matches a fresh build at `cutoff`.

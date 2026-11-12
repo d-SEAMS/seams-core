@@ -99,6 +99,26 @@ int seams_q4_q6_lammps(const double *xyz, int n, const double *box9,
                        double cutoff, double *q4, double *q6, double *q4bar,
                        double *q6bar);
 
+/* box9 is xlo, ylo, zlo, lx, ly, lz, xy, xz, yz, the same edges as
+ * seams_chill_plus_graph_lammps. The cutoff list is orthoFullCsr: cloud
+ * indices, no self entry, both directions, squared distance strictly
+ * below cutoff squared.
+ * offsets has n + 1 entries. When cols is null, *n_cols receives the
+ * pair count and the call returns 0. When cols_cap is short, *n_cols is
+ * that count and the call returns 2. */
+int seams_cutoff_csr(const double *xyz, int n, const double *box9, double cutoff,
+                     int *offsets, int *cols, int cols_cap, int *n_cols);
+/* Local Steinhardt q_l on that cutoff list. order_l is 3, 4, 6, 8, or 12. */
+int seams_ql_cutoff(const double *xyz, int n, const double *box9, double cutoff,
+                    int order_l, double *ql);
+/* Diamond common-neighbour labels. 1 cubic, 0 hexagonal, -1 otherwise. */
+int seams_diamond_cna(const double *xyz, int n, const double *box9, double cutoff,
+                      int *labels);
+/* counts[k] is the number of primitive rings of size k.
+ * counts_len must be at least max_depth + 1. max_depth is at least 3. */
+int seams_primitive_rings(const double *xyz, int n, const double *box9,
+                          double cutoff, int max_depth, int *counts, int counts_len);
+
 #ifdef __cplusplus
 }
 #endif

@@ -1,5 +1,6 @@
 # Additions
 .pixi/
+benchmarks/*.png
 /result
 /.ccls-cache/
 shellBuild/

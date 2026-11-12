@@ -792,8 +792,12 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
       reach[d] = 1;
     }
   }
-  const bool shifted = reach[0] == 1 && reach[1] == 1 && reach[2] == 1 && ncell[0] >= 4 &&
-                       ncell[1] >= 4 && ncell[2] >= 4;
+  // Two cells along an edge are enough for the one-cell stencil. The
+  // other image of a neighbour then sits at least half an edge away, and
+  // half an edge is at least the cutoff, so the strict test keeps one
+  // image. One cell would list several images of the same atom.
+  const bool shifted = reach[0] == 1 && reach[1] == 1 && reach[2] == 1 && ncell[0] >= 2 &&
+                       ncell[1] >= 2 && ncell[2] >= 2;
   const int nCells = ncell[0] * ncell[1] * ncell[2];
   const double rc2 = rcutoff * rcutoff;
 #ifdef SEAMS_HAS_OPENMP
@@ -1522,8 +1526,9 @@ bool orthoFullCsr(
   const int reach[3] = {reachOf(len[0], ncell[0], rcutoff),
                         reachOf(len[1], ncell[1], rcutoff),
                         reachOf(len[2], ncell[2], rcutoff)};
+  // Same bound as the tilted list: two cells keep a single image.
   const bool fast = reach[0] == 1 && reach[1] == 1 && reach[2] == 1 &&
-                    ncell[0] >= 4 && ncell[1] >= 4 && ncell[2] >= 4;
+                    ncell[0] >= 2 && ncell[1] >= 2 && ncell[2] >= 2;
   const int nCells = ncell[0] * ncell[1] * ncell[2];
   const double rc2 = rcutoff * rcutoff;
 

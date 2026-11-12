@@ -2723,6 +2723,45 @@ void fillBothGraphsFromNom(
 
 } // namespace
 
+bool nneigh::directedKNearestCsr(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, std::vector<int> &offsets, std::vector<int> &cols) {
+  const int n = yCloud.nop;
+  offsets.assign(static_cast<std::size_t>(std::max(n, 0)) + 1, 0);
+  cols.clear();
+  if (n <= 0 || k <= 0 || yCloud.box.size() < 3) {
+    return false;
+  }
+  const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
+  const auto nom = nominatePacked(yCloud, k, 1, hint);
+  std::vector<int> counts(static_cast<std::size_t>(n), 0);
+  for (int i = 0; i < n; i++) {
+    for (int t = 0; t < k; t++) {
+      const int j = nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+                        static_cast<std::size_t>(t)];
+      if (j >= 0 && j < n && j != i) {
+        counts[static_cast<std::size_t>(i)]++;
+      }
+    }
+  }
+  for (int i = 0; i < n; i++) {
+    offsets[static_cast<std::size_t>(i + 1)] =
+        offsets[static_cast<std::size_t>(i)] + counts[static_cast<std::size_t>(i)];
+  }
+  cols.assign(static_cast<std::size_t>(offsets[static_cast<std::size_t>(n)]), 0);
+  std::vector<int> slot(offsets.begin(), offsets.end() - 1);
+  for (int i = 0; i < n; i++) {
+    for (int t = 0; t < k; t++) {
+      const int j = nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+                        static_cast<std::size_t>(t)];
+      if (j >= 0 && j < n && j != i) {
+        cols[static_cast<std::size_t>(slot[static_cast<std::size_t>(i)]++)] = j;
+      }
+    }
+  }
+  return true;
+}
+
 std::vector<std::vector<int>>
 nneigh::kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
