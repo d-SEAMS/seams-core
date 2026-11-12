@@ -343,18 +343,28 @@ struct FrameContext {
           bool hit2 = false;
           if (allHex) {
             const int *atoms = flat6.data() + static_cast<std::ptrdiff_t>(candidate) * 6;
-            for (int t = 0; t < 6; t++) {
-              const int atom = atoms[t];
+            // Six atoms, unrolled. The early exit on a shared atom is the
+            // same one the counted loop took.
+            auto consider = [&](int atom) {
+              if (share) {
+                return;
+              }
               if (static_cast<unsigned>(atom) >= static_cast<unsigned>(nAtoms)) {
-                continue;
+                return;
               }
               if (scratch.onRing[static_cast<size_t>(atom)] == on) {
                 share = true;
-                break;
+                return;
               }
               hit1 = hit1 || scratch.arm1[static_cast<size_t>(atom)] == tick1;
               hit2 = hit2 || scratch.arm2[static_cast<size_t>(atom)] == tick2;
-            }
+            };
+            consider(atoms[0]);
+            consider(atoms[1]);
+            consider(atoms[2]);
+            consider(atoms[3]);
+            consider(atoms[4]);
+            consider(atoms[5]);
           } else {
             for (const int atom : (*rings)[static_cast<size_t>(candidate)]) {
               if (atom < 0 || atom >= nAtoms) {

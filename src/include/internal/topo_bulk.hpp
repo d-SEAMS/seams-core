@@ -245,7 +245,27 @@ bool equatorialConditions(const std::vector<std::vector<int>> &rings,
 class NeighBond {
 public:
   void build(const std::vector<std::vector<int>> &nList);
-  [[nodiscard]] bool operator()(int i, int j) const;
+
+  // Row i, sorted and unique. Empty when i is outside the cloud.
+  void row(int i, const int *&begin, const int *&end) const {
+    if (static_cast<unsigned>(i) >= static_cast<unsigned>(n_) || off_.empty()) {
+      begin = nullptr;
+      end = nullptr;
+      return;
+    }
+    begin = cols_.data() + off_[static_cast<std::size_t>(i)];
+    end = cols_.data() + off_[static_cast<std::size_t>(i + 1)];
+  }
+
+  [[nodiscard]] bool operator()(int i, int j) const {
+    const int *begin = nullptr;
+    const int *end = nullptr;
+    row(i, begin, end);
+    if (begin == nullptr) {
+      return false;
+    }
+    return std::binary_search(begin, end, j);
+  }
 
 private:
   int n_ = 0;

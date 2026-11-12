@@ -228,20 +228,7 @@ std::vector<int> canonicalRingOrder(const std::vector<std::vector<int>> &rings,
   return order;
 }
 
-template <class Bonded>
-bool basalConditionsOf(Bonded &&bonded, const std::vector<int> &basal1,
-                       const std::vector<int> &basal2) {
-  if (basal1.size() != 6 || basal2.size() != 6) {
-    return false;
-  }
-  std::array<std::array<bool, 6>, 6> bond{};
-  for (int i = 0; i < 6; i++) {
-    const int left = basal1[static_cast<size_t>(i)];
-    for (int j = 0; j < 6; j++) {
-      bond[static_cast<size_t>(i)][static_cast<size_t>(j)] =
-          bonded(left, basal2[static_cast<size_t>(j)]);
-    }
-  }
+static bool basalFromMatrix(const bool bond[6][6]) {
   static constexpr int kPerm[6][3] = {{0, 1, 2}, {0, 2, 1}, {1, 0, 2},
                                       {1, 2, 0}, {2, 0, 1}, {2, 1, 0}};
   for (int q = 0; q < 2; q++) {
@@ -249,7 +236,7 @@ bool basalConditionsOf(Bonded &&bonded, const std::vector<int> &basal1,
     for (int t = 0; t < 3 && quiet; t++) {
       const int j = q + 1 + 2 * t;
       for (int i = 0; i < 6; i++) {
-        if (bond[static_cast<size_t>(i)][static_cast<size_t>(j % 6)]) {
+        if (bond[i][j % 6]) {
           quiet = false;
           break;
         }
@@ -260,11 +247,8 @@ bool basalConditionsOf(Bonded &&bonded, const std::vector<int> &basal1,
     }
     for (int p = 0; p < 2; p++) {
       for (const auto &s : kPerm) {
-        if (bond[static_cast<size_t>(p)][static_cast<size_t>(q + 2 * s[0])] &&
-            bond[static_cast<size_t>(p + 2)]
-                [static_cast<size_t>(q + 2 * s[1])] &&
-            bond[static_cast<size_t>(p + 4)]
-                [static_cast<size_t>(q + 2 * s[2])]) {
+        if (bond[p][q + 2 * s[0]] && bond[p + 2][q + 2 * s[1]] &&
+            bond[p + 4][q + 2 * s[2]]) {
           return true;
         }
       }
@@ -273,7 +257,36 @@ bool basalConditionsOf(Bonded &&bonded, const std::vector<int> &basal1,
   return false;
 }
 
+template <class Bonded>
+bool basalConditionsOf(Bonded &&bonded, const std::vector<int> &basal1,
+                       const std::vector<int> &basal2) {
+  if (basal1.size() != 6 || basal2.size() != 6) {
+    return false;
+  }
+  bool bond[6][6] = {};
+  for (int i = 0; i < 6; i++) {
+    const int left = basal1[static_cast<size_t>(i)];
+    for (int j = 0; j < 6; j++) {
+      bond[i][j] = bonded(left, basal2[static_cast<size_t>(j)]);
+    }
+  }
+  return basalFromMatrix(bond);
+}
+
+int sharedHex(const int *x, const int *y) {
+  int n = 0;
+  for (int i = 0; i < 6; i++) {
+    const int v = x[i];
+    n += (v == y[0]) + (v == y[1]) + (v == y[2]) + (v == y[3]) + (v == y[4]) +
+         (v == y[5]);
+  }
+  return n;
+}
+
 int sharedAtoms(const std::vector<int> &a, const std::vector<int> &b) {
+  if (a.size() == 6 && b.size() == 6) {
+    return sharedHex(a.data(), b.data());
+  }
   int n = 0;
   for (const int x : a) {
     n += static_cast<int>(std::find(b.begin(), b.end(), x) != b.end());
@@ -283,6 +296,24 @@ int sharedAtoms(const std::vector<int> &a, const std::vector<int> &b) {
 
 bool commonAtom(const std::vector<int> &a, const std::vector<int> &b,
                 const std::vector<int> &c) {
+  if (a.size() == 6 && b.size() == 6 && c.size() == 6) {
+    const int *x = a.data();
+    const int *y = b.data();
+    const int *z = c.data();
+    for (int i = 0; i < 6; i++) {
+      const int v = x[i];
+      const bool inB = v == y[0] || v == y[1] || v == y[2] || v == y[3] ||
+                       v == y[4] || v == y[5];
+      if (!inB) {
+        continue;
+      }
+      if (v == z[0] || v == z[1] || v == z[2] || v == z[3] || v == z[4] ||
+          v == z[5]) {
+        return true;
+      }
+    }
+    return false;
+  }
   for (const int x : a) {
     if (std::find(b.begin(), b.end(), x) != b.end() &&
         std::find(c.begin(), c.end(), x) != c.end()) {
@@ -2349,32 +2380,75 @@ bool ring::equatorialConditions(const std::vector<std::vector<int>> &rings,
     const IntBuf &Ta = T[static_cast<size_t>(parity)];
     const IntBuf &Tb = T[static_cast<size_t>(parity + 2)];
     const IntBuf &Tc = T[static_cast<size_t>(parity + 4)];
-    for (int ia = 0; ia < Ta.size(); ia++) {
+    const int na = Ta.size();
+    const int nb = Tb.size();
+    const int nc = Tc.size();
+    // An empty leg has no chain. The share of a pair does not depend on the
+    // third ring, and the product of the three lengths is what this loop
+    // used to pay for three share tests. The pair tables are at most the
+    // product, because this path is only taken when that product is small.
+    if (na == 0 || nb == 0 || nc == 0) {
+      return out;
+    }
+    std::vector<char> shareAB(static_cast<std::size_t>(na) * static_cast<std::size_t>(nb));
+    std::vector<char> shareBC(static_cast<std::size_t>(nb) * static_cast<std::size_t>(nc));
+    std::vector<char> shareCA(static_cast<std::size_t>(nc) * static_cast<std::size_t>(na));
+    for (int ia = 0; ia < na; ia++) {
       const int a = Ta[ia];
-      for (int ib = 0; ib < Tb.size(); ib++) {
+      const auto &A = rings[a];
+      for (int ib = 0; ib < nb; ib++) {
+        const int b = Tb[ib];
+        shareAB[static_cast<std::size_t>(ia) * static_cast<std::size_t>(nb) +
+                static_cast<std::size_t>(ib)] =
+            static_cast<char>(b != a && sharedAtoms(A, rings[b]) >= 3);
+      }
+      for (int ic = 0; ic < nc; ic++) {
+        const int c = Tc[ic];
+        shareCA[static_cast<std::size_t>(ic) * static_cast<std::size_t>(na) +
+                static_cast<std::size_t>(ia)] =
+            static_cast<char>(c != a && sharedAtoms(rings[c], A) >= 3);
+      }
+    }
+    for (int ib = 0; ib < nb; ib++) {
+      const int b = Tb[ib];
+      const auto &B = rings[b];
+      for (int ic = 0; ic < nc; ic++) {
+        const int c = Tc[ic];
+        shareBC[static_cast<std::size_t>(ib) * static_cast<std::size_t>(nc) +
+                static_cast<std::size_t>(ic)] =
+            static_cast<char>(c != b && sharedAtoms(B, rings[c]) >= 3);
+      }
+    }
+    for (int ia = 0; ia < na; ia++) {
+      const int a = Ta[ia];
+      for (int ib = 0; ib < nb; ib++) {
         const int b = Tb[ib];
         if (b == a) {
           continue;
         }
-        for (int ic = 0; ic < Tc.size(); ic++) {
+        const bool ab =
+            shareAB[static_cast<std::size_t>(ia) * static_cast<std::size_t>(nb) +
+                    static_cast<std::size_t>(ib)] != 0;
+        for (int ic = 0; ic < nc; ic++) {
           const int c = Tc[ic];
           if (c == a || c == b) {
             continue;
           }
-          const auto &A = rings[a];
-          const auto &B = rings[b];
-          const auto &C = rings[c];
-          if (!commonAtom(A, B, C)) {
-            continue;
-          }
-          const bool ab = sharedAtoms(A, B) >= 3;
-          const bool bc = sharedAtoms(B, C) >= 3;
-          const bool ca = sharedAtoms(C, A) >= 3;
+          const bool bc =
+              shareBC[static_cast<std::size_t>(ib) * static_cast<std::size_t>(nc) +
+                      static_cast<std::size_t>(ic)] != 0;
+          const bool ca =
+              shareCA[static_cast<std::size_t>(ic) * static_cast<std::size_t>(na) +
+                      static_cast<std::size_t>(ia)] != 0;
           const unsigned middles = (ca && ab ? 1U : 0U) |
                                    (ab && bc ? 2U : 0U) | (bc && ca ? 4U : 0U);
-          if (middles != 0U) {
-            out.push_back({{a, b, c}, middles});
+          if (middles == 0U) {
+            continue;
           }
+          if (!commonAtom(rings[a], rings[b], rings[c])) {
+            continue;
+          }
+          out.push_back({{a, b, c}, middles});
         }
       }
     }
@@ -3026,15 +3100,6 @@ void ring::NeighBond::build(const std::vector<std::vector<int>> &nList) {
   off_[static_cast<size_t>(n_)] = static_cast<int>(cols_.size());
 }
 
-bool ring::NeighBond::operator()(int i, int j) const {
-  if (i < 0 || j < 0 || i >= n_ || off_.empty()) {
-    return false;
-  }
-  const auto b = cols_.begin() + off_[static_cast<size_t>(i)];
-  const auto e = cols_.begin() + off_[static_cast<size_t>(i + 1)];
-  return std::binary_search(b, e, j);
-}
-
 bool ring::basalConditions(const std::vector<std::vector<int>> &nList,
                            const std::vector<int> &basal1,
                            const std::vector<int> &basal2) {
@@ -3054,8 +3119,54 @@ bool ring::basalConditions(const std::vector<std::vector<int>> &nList,
 bool ring::basalConditions(const ring::NeighBond &bonds,
                            const std::vector<int> &basal1,
                            const std::vector<int> &basal2) {
-  return basalConditionsOf(
-      [&](int left, int right) { return bonds(left, right); }, basal1, basal2);
+  if (basal1.size() != 6 || basal2.size() != 6) {
+    return false;
+  }
+  // One sequential pass of each neighbour row against the six atoms of
+  // basal2. Thirty-six binary searches asked the same question and jumped
+  // through the row each time.
+  int atom[6];
+  int pos[6];
+  for (int j = 0; j < 6; j++) {
+    atom[j] = basal2[static_cast<std::size_t>(j)];
+    pos[j] = j;
+  }
+  for (int a = 1; a < 6; a++) {
+    const int key = atom[a];
+    const int at = pos[a];
+    int b = a;
+    while (b > 0 && atom[b - 1] > key) {
+      atom[b] = atom[b - 1];
+      pos[b] = pos[b - 1];
+      b--;
+    }
+    atom[b] = key;
+    pos[b] = at;
+  }
+  bool bond[6][6] = {};
+  for (int i = 0; i < 6; i++) {
+    const int *p = nullptr;
+    const int *end = nullptr;
+    bonds.row(basal1[static_cast<std::size_t>(i)], p, end);
+    if (p == nullptr) {
+      continue;
+    }
+    int t = 0;
+    while (p != end && t < 6) {
+      if (*p == atom[t]) {
+        bond[i][pos[t]] = true;
+        ++t;
+        if (t >= 6 || atom[t] != *p) {
+          ++p;
+        }
+      } else if (*p < atom[t]) {
+        ++p;
+      } else {
+        ++t;
+      }
+    }
+  }
+  return basalFromMatrix(bond);
 }
 
 /**
