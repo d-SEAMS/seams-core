@@ -441,6 +441,20 @@ int waterNop(const Cloud &cloud, const std::vector<int> &waterTypes) {
 }
 
 std::vector<std::vector<int>>
+cutoffWater(Cloud cloud, double cutoff, int typ, const std::vector<int> &waterTypes) {
+  if (waterTypes.empty()) {
+    return nneigh::neighListO(cutoff, cloud, typ);
+  }
+  // One shared type on a copy, so pairs between every named type are kept
+  // and atoms outside the mask stay out of the list.
+  constexpr int mark = 1000003;
+  for (auto &pt : cloud.pts) {
+    pt.type = isWaterType(pt.type, waterTypes) ? mark : 0;
+  }
+  return nneigh::neighListO(cutoff, cloud, mark);
+}
+
+std::vector<std::vector<int>>
 waterGraph(Cloud &cloud, double cutoff, int typ,
            const std::vector<int> &waterTypes, int k = 4, bool mutual = true) {
   const double cand = cutoff + 1.5;
@@ -1201,31 +1215,38 @@ int cmdCn(std::ostream &os, Cloud &cloud, double rmax, int bins, int typeI,
   return 0;
 }
 
-int cmdRings(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int maxSize) {
+int cmdRings(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int maxSize,
+              const std::vector<int> &waterTypes = {}) {
   if (maxSize < 3) {
     maxSize = 6;
   }
   const int typ = typeOf(cloud, typeI);
-  std::vector<int> subset;
-  const std::vector<int> *sub = nullptr;
-  if (typ > 0) {
-    subset.reserve(static_cast<std::size_t>(cloud.nop));
-    for (int i = 0; i < cloud.nop; ++i) {
-      if (cloud.pts[static_cast<std::size_t>(i)].type == typ) {
-        subset.push_back(i);
-      }
-    }
-    sub = &subset;
-  }
-  std::vector<int> offsets;
-  std::vector<int> cols;
   std::vector<std::vector<int>> rings;
-  if (nneigh::orthoFullCsr(cloud, sub, cutoff, offsets, cols, false)) {
-    rings = primitive::ringNetwork(offsets, cols, maxSize);
-  } else {
-    const auto ids = nneigh::neighListO(cutoff, cloud, typ);
+  if (!waterTypes.empty()) {
+    const auto ids = cutoffWater(cloud, cutoff, typ, waterTypes);
     const auto idx = nneigh::neighbourListByIndex(cloud, ids);
     rings = primitive::ringNetwork(idx, maxSize);
+  } else {
+    std::vector<int> subset;
+    const std::vector<int> *sub = nullptr;
+    if (typ > 0) {
+      subset.reserve(static_cast<std::size_t>(cloud.nop));
+      for (int i = 0; i < cloud.nop; ++i) {
+        if (cloud.pts[static_cast<std::size_t>(i)].type == typ) {
+          subset.push_back(i);
+        }
+      }
+      sub = &subset;
+    }
+    std::vector<int> offsets;
+    std::vector<int> cols;
+    if (nneigh::orthoFullCsr(cloud, sub, cutoff, offsets, cols, false)) {
+      rings = primitive::ringNetwork(offsets, cols, maxSize);
+    } else {
+      const auto ids = nneigh::neighListO(cutoff, cloud, typ);
+      const auto idx = nneigh::neighbourListByIndex(cloud, ids);
+      rings = primitive::ringNetwork(idx, maxSize);
+    }
   }
   std::map<int, int> hist;
   for (const auto &ring : rings) {
@@ -1284,8 +1305,7 @@ chillGraph(Cloud &cloud, double cutoff, int typ, const std::string &graphName,
       (graphName.empty() || graphName == "seeded") ? std::string("cutoff") : graphName;
   const auto graph = nneigh::bondGraphFromName(name);
   if (graph == nneigh::BondGraph::Cutoff) {
-    return nneigh::neighListO(cutoff, cloud,
-                              waterTypes.empty() ? typ : waterTypes.front());
+    return cutoffWater(cloud, cutoff, typ, waterTypes);
   }
   if (graph != nneigh::BondGraph::KnnMutual) {
     throw std::invalid_argument("CHILL and CHILL+ take --graph cutoff or mutual");
@@ -1590,8 +1610,7 @@ int cmdCages(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
     const auto graph = nneigh::bondGraphFromName(graphName);
     std::vector<std::vector<int>> nList;
     if (graph == nneigh::BondGraph::Cutoff) {
-      nList = nneigh::neighListO(cutoff, cloud,
-                                waterTypes.empty() ? typ : waterTypes.front());
+      nList = cutoffWater(cloud, cutoff, typ, waterTypes);
     } else {
       const bool mutual = graph == nneigh::BondGraph::KnnMutual;
       nList = knnOf(mutual);
@@ -1701,8 +1720,7 @@ int cmdCages(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
     const auto graph = nneigh::bondGraphFromName(graphName);
     std::vector<std::vector<int>> nList;
     if (graph == nneigh::BondGraph::Cutoff) {
-      nList = nneigh::neighListO(cutoff, cloud,
-                                waterTypes.empty() ? typ : waterTypes.front());
+      nList = cutoffWater(cloud, cutoff, typ, waterTypes);
     } else {
       const bool mutual = graph == nneigh::BondGraph::KnnMutual;
       nList = knnOf(mutual);
@@ -1817,7 +1835,8 @@ bool parseMolList(std::string_view value, std::vector<int> &ids) {
 
 bool scoringCommand(std::string_view cmd) {
   return cmd == "chill" || cmd == "chill-plus" || cmd == "chill_plus" ||
-         cmd == "cages" || cmd == "fingerprint" || cmd == "steinhardt";
+         cmd == "cages" || cmd == "fingerprint" || cmd == "steinhardt" ||
+         cmd == "rings";
 }
 
 } // namespace
@@ -2073,8 +2092,9 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--graph")
                  .argName("KIND")
-                 .help("Bond graph for cages: cutoff | knn | knn-union | seeded; "
-                       "chill, chill-plus: cutoff (default) | mutual")
+                 .help(std::string("Bond graph. cages: cutoff | knn | knn-union | seeded. "
+                                 "chill and chill-plus: cutoff | mutual. The stored name is ") +
+                       graph)
                  .handler([&](std::string_view value) { graph = value; }));
 
   parser.add(Option("--complete")
@@ -2677,7 +2697,7 @@ int main(int argc, char *argv[]) {
                        allDonors);
     }
     if (cmd == "rings") {
-      return cmdRings(os, cloud, cutoff, typeI, ringMax);
+      return cmdRings(os, cloud, cutoff, typeI, ringMax, waterTypes);
     }
     if (cmd == "prisms") {
       return cmdPrisms(os, cloud, cutoff, typeI);
