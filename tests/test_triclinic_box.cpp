@@ -19,9 +19,9 @@ int main() {
   gromacs[0][0] = 10.0;
   gromacs[1][1] = 8.0;
   gromacs[2][2] = 9.0;
-  gromacs[0][1] = 1.5;
-  gromacs[0][2] = 0.4;
-  gromacs[1][2] = -0.2;
+  gromacs[1][0] = 1.5;
+  gromacs[2][0] = 0.4;
+  gromacs[2][1] = -0.2;
   double box[9];
   gromacs_box_to_lammps(gromacs, box, 10.0);
   fails += near(box[3], 100.0);

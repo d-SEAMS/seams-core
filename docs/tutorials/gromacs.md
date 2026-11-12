@@ -25,5 +25,6 @@ gromacs frames N ice I atoms A overhead_s S
 
 `analyzeFrame` is the trajectory-analysis callback. Coordinates in the
 trajectory are nanometres; the tool converts them to Angstrom before
-`seams_chill_plus`. The lower-triangular GROMACS box is stored with the
-tilts in `box[0][1]`, `box[0][2]` and `box[1][2]` (xy, xz, yz).
+`seams_chill_plus`. The lower-triangular GROMACS box stores its rows as the box vectors.
+The tilts are `box[1][0]`, `box[2][0]` and `box[2][1]` (xy, xz, yz).
+GROMACS keeps `box[0][1]`, `box[0][2]` and `box[1][2]` at zero.
