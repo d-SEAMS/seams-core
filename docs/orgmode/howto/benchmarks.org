@@ -2,7 +2,8 @@
 #+OPTIONS: toc:nil num:nil
 
 Timings belong on the docs site of the commit that produced them.
-This repository does not vendor a number from a laptop.
+The ice table below is one such session: eight cores, one thread per
+core, cpus 0–7. It names no machine.
 
 The drivers that exist today:
 
@@ -27,3 +28,45 @@ Say so.
 =pixi run -e repro= is the Snakemake campaign (freud, pyscal3, the paper benches).
 That environment is Linux only.
 It is not part of =pixi run test=.
+
+* Ice Ic, 884736 molecules
+
+Cutoff 3.5 Å. The neighbour build is inside every sample.
+Two warm-ups, then ten samples.
+The median is the linear percentile at one half, position =0.5 * (n - 1)=.
+The interquartile range is the same estimator at three quarters minus the one at one quarter.
+=discovery/v13-session.txt= is the raw log.
+OVITO's q6 call also builds degrees 2 through 5, because =max_l= is the highest degree.
+pyscal3 has no CHILL+ classifier.
+The published CHILL+ thresholds are unchanged.
+
+Medians, in milliseconds:
+
+| tool | threads | q4 | q6 | q4-bar | CHILL+ |
+|------+---------+------+------+--------+--------|
+| seams | 1 | 290.91 | 320.84 | 368.01 | 380.34 |
+| OVITO | 1 | 392.19 | 476.43 | 638.98 | 4886.17 |
+| mdapy | 1 | 787.12 | 811.65 | 702.33 | 781.80 |
+| pyscal3 | 1 | 854.84 | 958.98 | 908.17 | — |
+| seams | 8 | 44.69 | 45.64 | 48.41 | 56.90 |
+| OVITO | 8 | 79.35 | 85.78 | 170.10 | 658.49 |
+| mdapy | 8 | 105.01 | 117.08 | 113.28 | 123.03 |
+| pyscal3 | 8 | 173.51 | 178.83 | 166.76 | — |
+
+One q4 sample in an earlier eight-sample run took 523.6 ms.
+The first call of a degree is the one that faults.
+On this rerun that call took 508.1 ms and touched 57547 pages.
+Every later q4 call touched none.
+The ten steady samples are min 290.36, median 290.91, interquartile range 7.44, max 310.44.
+The =q_lm= scratch is kept and reused, so that cost stays on the first call, which the warm-ups drop.
+One q6 sample in the same session reached 462.98 ms and faulted no pages.
+Sixty further q6 calls, pinned the same way, stayed between 299.9 and 324.6 ms.
+Each of those ran on the CPU.
+The scheduler delay on every one of them was under 0.05 ms.
+=discovery/v13-q6-sched.txt= is that probe.
+The 523.6 ms point did not come back, and the one q6 outlier is not a page fault, not a fresh allocation, and not a repeatable first touch.
+
+The one-thread q4-bar median here is 368.01 (interquartile range 3.13, samples 356.35–387.92).
+The parent =e943930a=, in the same session, is 363.82 (interquartile range 12.51, samples 353.29–371.97).
+The medians differ by 4.2 ms, and each median sits inside the other build's sample range.
+An earlier gap of 369.8 against 354.0 is that spread. It is not a slower average.

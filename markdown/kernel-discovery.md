@@ -555,3 +555,37 @@ comes out of all three libraries, so the fixture now expects the
 cutoff mean. With NumPy on the path, the CHILL+ binding test, the fused
 q4/q6/CHILL+ test and `tests/test_wl_ice.py` pass. `sphinx-build -W`
 completes without warnings.
+
+The 523.6 ms one-thread q4 sample was one of eight. A rerun of q4, q6,
+q4-bar and CHILL+ at 884736 molecules, one and eight threads, ten
+samples after two warm-ups, is `discovery/v13-session.txt`. Eight
+cores, one thread per core, cpus 0–7. The median is the linear
+percentile at one half. The interquartile range is the three-quarter
+percentile minus the one-quarter percentile.
+
+The first q4 call took 508.1 ms and faulted 57547 pages. Every later
+q4 call faulted none. The ten steady samples are min 290.36, median
+290.91, interquartile range 7.44, max 310.44. The q_lm scratch is
+static, so that cost is the first call of a degree and the warm-ups
+drop it. The 523.6 ms sample did not recur. One q6 sample in the same
+session reached 462.98 ms with no new minor faults. Sixty further q6
+calls (`discovery/v13-q6-sched.txt`), pinned the same way, stayed
+between 299.9 and 324.6 ms, on the CPU, with scheduler delay under
+0.05 ms. That outlier is not a page fault and not an allocator miss.
+
+One-thread q4-bar in this session is median 368.01 (interquartile
+range 3.13, 356.35–387.92). `e943930a` in the same session is 363.82
+(interquartile range 12.51, 353.29–371.97). The medians differ by
+4.2 ms and each sits inside the other build's sample range. The
+earlier 369.8 against 354.0 is that spread.
+
+Medians at 884736, milliseconds. OVITO q6 also builds degrees 2
+through 5. pyscal3 has no CHILL+.
+
+| | q4 1t | q6 1t | q4-bar 1t | CHILL+ 1t | q4 8t | q6 8t | q4-bar 8t | CHILL+ 8t |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| seams | 290.91 | 320.84 | 368.01 | 380.34 | 44.69 | 45.64 | 48.41 | 56.90 |
+| e943930a | 297.88 | 318.09 | 363.82 | 353.57 | 41.96 | 44.23 | 48.76 | 57.65 |
+| OVITO | 392.19 | 476.43 | 638.98 | 4886.17 | 79.35 | 85.78 | 170.10 | 658.49 |
+| mdapy | 787.12 | 811.65 | 702.33 | 781.80 | 105.01 | 117.08 | 113.28 | 123.03 |
+| pyscal3 | 854.84 | 958.98 | 908.17 | — | 173.51 | 178.83 | 166.76 | — |
