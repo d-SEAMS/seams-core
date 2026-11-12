@@ -64,10 +64,15 @@ Overlay matchKernel(const Eigen::MatrixXd &environment);
 void matchAll(const std::vector<Eigen::MatrixXd> &environments, std::vector<Overlay> &out);
 
 // A bond is counted eclipsed when its azimuthal cosine exceeds this value.
-// The ideal eclipsed cosine is 1 and the ideal staggered cosine is 0.5.
-// At 220-270 K the staggered bonds of mW ice reach about 0.85 while the
-// eclipsed bonds stay at 1, so 0.90 is the gap the second-shell template
-// leaves between them. 0.75 counts those warmed staggered bonds as eclipsed.
+// Both bonds are projected onto the plane perpendicular to the central bond.
+// Ideal eclipsed is cos 0 = 1 and ideal staggered is cos 60 degrees = 0.5.
+// The ideal-cell fast path does not use this cosine. It uses the raw dot
+// product of the second-shell bond with another first-shell bond, which is
+// 1/3 staggered and 7/9 eclipsed, and it compares the square of that number.
+// At 220-270 K the staggered azimuthal cosines of mW ice reach about 0.85
+// while the eclipsed bonds stay at 1, so 0.90 is the gap the second-shell
+// template leaves between them. 0.75 counts those warmed staggered bonds
+// as eclipsed.
 inline constexpr double kEclipsedCosine = 0.90;
 
 // Scale-free ceiling on the second-shell residual. Both clouds are centred,

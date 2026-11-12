@@ -30,6 +30,7 @@ test_sources = {
   'franzblau_extra': 'test_franzblau_extra.cpp',
   'ira_sofi': 'test_ira_sofi.cpp',
   'local_symmetry': 'test_local_symmetry.cpp',
+  'classify_concurrent': 'test_classify_concurrent.cpp',
   'sphericart': 'test_sphericart.cpp',
   'cage_canon': 'test_cage_canon.cpp',
   'topo_fingerprint': 'test_topo_fingerprint.cpp',

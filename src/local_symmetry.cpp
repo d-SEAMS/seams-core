@@ -863,6 +863,12 @@ struct SoaCols {
   double *y = nullptr;
   double *z = nullptr;
 
+  ~SoaCols() {
+    ::operator delete(x);
+    ::operator delete(y);
+    ::operator delete(z);
+  }
+
   void fit(size_t n) {
     if (n <= cap) {
       return;
@@ -878,7 +884,7 @@ struct SoaCols {
 };
 
 SoaCols &soaCols() {
-  static SoaCols cols;
+  thread_local SoaCols cols;
   return cols;
 }
 

@@ -34,11 +34,11 @@ namespace symm {
 namespace {
 
 bool symTime() {
-  static int on = -1;
-  if (on < 0) {
+  // One initialization. Two classify calls must not race on the flag.
+  static const int on = [] {
     const char *e = std::getenv("SEAMS_SYM_TIME");
-    on = (e != nullptr && e[0] != '\0' && e[0] != '0') ? 1 : 0;
-  }
+    return (e != nullptr && e[0] != '\0' && e[0] != '0') ? 1 : 0;
+  }();
   return on != 0;
 }
 
@@ -128,8 +128,10 @@ struct RawBuf {
 
 struct Packed;
 
-// One workspace, grown when a larger frame arrives and reused after that.
-// classifyIce is called on one frame at a time.
+// One workspace per calling thread, grown when a larger frame arrives and
+// reused after that. Two classify calls may run at once. The OpenMP loops
+// inside one call write this thread's buffers; they do not take another
+// workspace.
 struct Workspace {
   size_t nCap = 0;
   size_t cCap = 0;
@@ -154,6 +156,30 @@ struct Workspace {
   int *rawK = nullptr;
   char *crystal = nullptr;
   char *tried = nullptr;
+
+  ~Workspace() {
+    ::operator delete(px);
+    ::operator delete(py);
+    ::operator delete(pz);
+    ::operator delete(bin);
+    ::operator delete(nbon);
+    ::operator delete(cellStart);
+    ::operator delete(fill);
+    ::operator delete(packed);
+    ::operator delete(bonds);
+    ::operator delete(cx);
+    ::operator delete(cy);
+    ::operator delete(cz);
+    ::operator delete(cid);
+    ::operator delete(bd);
+    ::operator delete(js);
+    ::operator delete(vx);
+    ::operator delete(vy);
+    ::operator delete(vz);
+    ::operator delete(rawK);
+    ::operator delete(crystal);
+    ::operator delete(tried);
+  }
 
   template <class T>
   static T *renew(T *p, size_t n) {
@@ -194,7 +220,7 @@ struct Workspace {
 };
 
 Workspace &workspace() {
-  static Workspace mem;
+  thread_local Workspace mem;
   return mem;
 }
 
@@ -533,31 +559,31 @@ double armMaxCosine(const double envF[4][3], const double envS[12][3], int a) {
 }
 
 // The hexagonal template has one eclipsed arm. The index is fixed for the
-// canonical shell, so it is computed once.
+// canonical shell, so it is computed once. The initializer runs on one
+// thread; a later call does not write it.
 int templateEclipsedArm(const CanonShell &canon) {
-  static int cached = -2;
-  if (cached != -2) {
-    return cached;
-  }
-  double envF[4][3];
-  double envS[12][3];
-  for (int a = 0; a < 4; a++) {
-    for (int c = 0; c < 3; c++) {
-      envF[a][c] = canon.first[0][a][c];
-    }
-    for (int e = 0; e < 3; e++) {
-      const int s = canon.arm[0][a][e];
+  static const int cached = [&canon] {
+    double envF[4][3];
+    double envS[12][3];
+    for (int a = 0; a < 4; a++) {
       for (int c = 0; c < 3; c++) {
-        envS[3 * a + e][c] = canon.second[0][s][c];
+        envF[a][c] = canon.first[0][a][c];
+      }
+      for (int e = 0; e < 3; e++) {
+        const int s = canon.arm[0][a][e];
+        for (int c = 0; c < 3; c++) {
+          envS[3 * a + e][c] = canon.second[0][s][c];
+        }
       }
     }
-  }
-  cached = 0;
-  for (int a = 0; a < 4; a++) {
-    if (armMaxCosine(envF, envS, a) > 0.90) {
-      cached = a;
+    int arm = 0;
+    for (int a = 0; a < 4; a++) {
+      if (armMaxCosine(envF, envS, a) > 0.90) {
+        arm = a;
+      }
     }
-  }
+    return arm;
+  }();
   return cached;
 }
 
@@ -851,13 +877,16 @@ int diamondSecondShell(const double first[4][3], const double *sx, const double 
   return -1;
 }
 
-// Ideal ice has equal bonds and one second-shell radius. The raw cosine of a
-// second-shell bond with the other first-shell bonds is 1/3 when the arm is
-// staggered and about 0.78 when it is eclipsed, so the projection is unnecessary.
+// Ideal ice has equal bonds and one second-shell radius. The cosine here is
+// the raw dot product of a second-shell bond with another first-shell bond.
+// The fit uses the azimuthal cosine instead (ideal staggered 1/2, ideal
+// eclipsed 1). Staggered raw cosine is 1/3 and eclipsed raw cosine is 7/9,
+// so the projection is unnecessary.
 __attribute__((always_inline)) inline int idealKind(const double first[4][3], const double *sx,
                                                             const double *sy, const double *sz) {
-  // Staggered raw cosine is 1/3; eclipsed is about 0.78. Compare squared
-  // cosines so the ideal cell does not take a square root.
+  // Squares of those raw cosines: eclipsed when the best square is at least
+  // 0.36 (|cos| >= 0.6), staggered when it is at most 0.25 (|cos| <= 0.5).
+  // 7/9 squared is 49/81 and 1/3 squared is 1/9. No square root on this path.
   constexpr double kEcl2 = 0.36;
   constexpr double kStg2 = 0.25;
   double b2[4];

@@ -1405,15 +1405,15 @@ void prepareCanon(CanonShell &out) {
   }
 }
 
-// The canon shell does not depend on the frame. Building it on every call
-// allocated and filled the same tables again.
+// The canon shell does not depend on the frame. Each calling thread keeps
+// its own copy. The first use on that thread fills it; a second thread does
+// not write the first thread's tables.
 CanonShell &canonShell() {
-  static CanonShell canon;
-  static int ready = 0;
-  if (!ready) {
-    prepareCanon(canon);
-    ready = 1;
-  }
+  thread_local CanonShell canon = [] {
+    CanonShell out{};
+    prepareCanon(out);
+    return out;
+  }();
   return canon;
 }
 
