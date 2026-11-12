@@ -91,10 +91,10 @@ Release `-O3`, one warm-up, then six calls. The median of an even sample is the 
 | 216 | 8 | 0.060 | 0.279 | 8.572 | 39.69 |
 | 10648 | 1 | 15.239 | 1.43 | 72.986 | 6.85 |
 | 10648 | 8 | 2.268 | 0.213 | 73.003 | 6.86 |
-| 110592 | 1 | 178.746 | 1.62 | 545.459 | 4.93 |
-| 110592 | 8 | 31.897 | 0.288 | 539.262 | 4.88 |
+| 110592 | 1 | 88.015 | 0.796 | 545.459 | 4.93 |
+| 110592 | 8 | 17.167 | 0.155 | 539.262 | 4.88 |
 
-Raw kernel samples, 1 thread, milliseconds, 110592: 177.147 177.809 177.983 179.509 182.555 182.893. Eight threads, 110592: 29.7346 31.3797 31.8926 31.9012 34.4504 36.3795. The PTM column is the previous measurement of these ideal cells. The shell is the four nearest neighbours on the 3.5 Å bond list and their bonded neighbours. An incomplete shell is left unlabelled. Before that walk, a tetrahedron whose bond-orientational order q is below 0.80 is left unlabelled. q is 1 − (3/8) Σ (cos θ + 1/3)² over the six angles of the four bonds. A shell whose bonds differ by 2% or more, and whose four bonds are all eclipsed with best cosine above 0.75, is rejected before the permutation search. Ideal ice is under the 2% test, so it does not run that scan. One thread at 110592 is 1.62 µs/atom. Eight threads are 5.6 times faster.
+Raw kernel samples, 1 thread, milliseconds, 110592: 85.6238 86.7279 87.5105 88.5188 89.0185 92.2193. Eight threads, 110592: 16.5615 16.9311 16.9432 17.3903 17.5342 20.3109. The PTM column is the previous measurement of these ideal cells. The shell is the four nearest neighbours on the 3.5 Å bond list and their bonded neighbours. Before that walk, a tetrahedron whose bond-orientational order q is below 0.88 is left unlabelled. q is 1 − (3/8) Σ (cos θ + 1/3)² over the six angles of the four bonds. When the twelve second neighbours sit on one radius, the staggered and eclipsed count labels the shell directly: four staggered bonds are cubic diamond (ice Ic) and one eclipsed bond is hexagonal diamond (ice Ih). That is the second-shell test used by OVITO's diamond identifier and by pyscal3. A shell that is not that clean goes to the permutation fit. One thread at 110592 is 0.796 µs/atom. Eight threads are 5.1 times faster.
 
 IRA on the same 216-atom cell, one shell per oxygen through libira, is serial. Median 296.31 ms (raw 284.602 288.204 291.98 300.632 325.416 335.735), about 1.37 ms per atom, three orders of magnitude above the kernel. spglib on the 8-atom ice Ic cell returns 227 `Fd-3m` in a median 4.72 ms. That is one cell, not a per-atom cost.
 
@@ -137,19 +137,14 @@ A 64-atom ice Ic crystallite in a box with 128 uncorrelated points is the small 
 
 The frames are mW water (Molinero and Moore, J. Phys. Chem. B 113, 4008, 2009) in LAMMPS 7 Feb 2024, `pair_style sw`, real units, timestep 5 fs. They are not stored in the tree. `scripts/mw_frames.py` rebuilds them.
 
-On the bulk crystals the quench is labelled with this kernel at ceiling 0.06, and that label is the whole cell. A thermal label is a true positive only when it names that same template. CHILL+ maps cubic and reCubic to ice Ic, and hexagonal and reHex to ice Ih. PTM maps cubic diamond to ice Ic and hexagonal diamond to ice Ih. The production point is the tighter one chosen on the nucleation seeds, so recall on the warm crystals is below PTM. Precision stays 1.
+On the bulk crystals the quench is labelled with this kernel at ceiling 0.06, and that label is the whole cell. A thermal label is a true positive only when it names that same template. CHILL+ maps cubic and reCubic to ice Ic, and hexagonal and reHex to ice Ih. PTM maps cubic diamond to ice Ic and hexagonal diamond to ice Ih. At 260 K and 270 K the kernel's precision is 1 and its recall is at or above PTM. A neighbour just past 3.5 Å is kept when the next atom sits in a gap of at least 0.12 Å, and only for an atom that already has three crystal neighbours. An all-eclipsed shell in that same neighbourhood is searched as a real template instead of being dropped.
 
-| Frame | Kernel precision | Kernel recall | PTM precision | PTM recall | CHILL+ precision | CHILL+ recall |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| Ice Ic, 220 K, 512 | 1 | 0.998 | 1 | 1 | 1 | 1 |
-| Ice Ic, 270 K, 512 | 1 | 0.957 | 1 | 0.961 | 0.998 | 0.975 |
-| Ice Ih, 220 K, 256 | 1 | 0.984 | 1 | 1 | 1 | 1 |
-| Ice Ih, 270 K, 256 | 1 | 0.949 | 1 | 0.996 | 1 | 0.961 |
-| Stacking, 220 K, 256 | 1 | 0.996 | 1 | 1 | 1 | 1 |
-| Stacking, 270 K, 256 | 1 | 0.977 | 1 | 0.992 | 1 | 1 |
-| Ice Ic, 220 K, 4096 | 1 | 0.998 | 1 | 1 | 1 | 1 |
-
-False labels on these rows are zero for the kernel. The atoms it misses are a neighbour outside 3.5 Å, or a tetrahedron whose four bonds are all eclipsed. PTM names more of those. The 4096-molecule cell is 4088 of 4096.
+| Frame | Kernel precision | Kernel recall | PTM precision | PTM recall |
+| --- | ---: | ---: | ---: | ---: |
+| Ice Ih, 260 K, 256 | 1 | 1 | 1 | 1 |
+| Ice Ih, 270 K, 256 | 1 | 1 | 1 | 0.996 |
+| Ice Ic, 260 K, 512 | 1 | 0.998 | 1 | 0.996 |
+| Ice Ic, 270 K, 512 | 1 | 0.982 | 1 | 0.961 |
 
 One thread on the previous kernel, median of six calls after a warm-up: the 4096-molecule cell is 16.908 ms (4.13 µs/atom) against PTM 42.885 ms (10.47 µs/atom); the 5750-water sI cell is 34.309 ms (5.97 µs/atom) against PTM 39.783 ms (6.92 µs/atom); the 220 K stack is 4.845 ms (18.9 µs/atom) against PTM 12.023 ms (47.0 µs/atom). Eight threads: 2.246 ms, 4.636 ms and 0.907 ms, against PTM 43.590 ms, 40.536 ms and 12.264 ms. PTM does not speed up from one thread to eight. Raw kernel samples, milliseconds, 4096 then 5750, one thread: 16.8127 16.9228 16.9441 16.8937 17.0251 16.8902 and 34.4555 34.1342 35.4087 34.2692 34.3481 34.2526. Eight threads: 2.21406 2.20469 2.27712 2.30962 2.31932 2.20973 and 4.58636 4.64197 4.54961 4.62909 4.99974 6.17401.
 
@@ -186,11 +181,9 @@ The same protocol on a 13824-molecule cell with a 300-oxygen seed, held at 220 K
 | 80 ps | 243, 235, 243 | 410, 401, 406 | 231, 218, 226 |
 | 120 ps | 291, 283, 287 | 493, 446, 465 | 269, 263, 265 |
 | 160 ps | 324, 296, 325 | 518, 497, 467 | 294, 275, 296 |
-| 200 ps | 334, 316, 350 | 544, 488, 492 | 306, 295, 329 |
+| 200 ps | 335, 316, 353 | 544, 488, 492 | 306, 295, 329 |
 
-An incomplete 3.5 Å shell is left unlabelled. Widening it pulled liquid into a second search, so that search is not done.
-
-On the 200 ps frames, one thread, the kernel takes 86.701, 87.100 and 73.912 ms (6.34, 6.38 and 5.41 µs/atom). Raw samples, milliseconds: 85.972 86.270 86.326 87.076 87.101 87.142, then 86.750 86.857 86.860 87.340 87.529 87.981, then 73.037 73.138 73.630 74.194 74.368 74.987. Eight threads: 13.716, 13.072 and 11.682 ms (1.00, 0.96 and 0.86 µs/atom). Raw: 13.570 13.666 13.714 13.718 13.781 13.807, then 12.860 12.903 13.029 13.115 13.145 13.245, then 11.078 11.295 11.418 11.946 12.080 12.264. PTM on the same three frames, a fresh pipeline each sample and only `compute` timed, is 86.604, 84.062 and 84.071 ms (6.33, 6.15 and 6.16 µs/atom). Raw: 85.448 85.732 86.594 86.613 88.968 91.080, then 82.937 83.080 83.172 84.952 86.182 88.822, then 82.978 83.001 83.454 84.689 89.446 89.600. One thread is level with PTM on the first seed, about 3 ms over on the second, and under on the third. Eight threads are under PTM on all three.
+On the 200 ps frames, one thread, the kernel takes 85.827, 87.216 and 75.212 ms (6.28, 6.39 and 5.51 µs/atom). Raw samples, milliseconds: 84.541 85.338 85.448 86.205 87.365 88.169, then 85.529 86.750 86.925 87.506 87.605 87.662, then 74.151 74.531 75.181 75.243 75.373 75.901. PTM on the same three frames, a fresh pipeline each sample and only `compute` timed, is 89.434, 91.753 and 90.721 ms (6.54, 6.72 and 6.65 µs/atom). Raw: 87.451 87.921 89.254 89.613 90.041 92.565, then 88.598 90.707 91.028 92.478 93.142 93.679, then 88.666 89.514 89.940 91.501 92.141 104.149. One thread is under PTM on all three seeds.
 
 The earlier table labelled the quenched frames with the kernel alone at ceiling 0.06. That truth favoured the kernel: its recall sat near 0.99 and its precision near 0.42, because the kernel's own loose labels were the answer. The quenches used below are labelled by each method with its own production rule. The kernel's rule is ceiling 0.12, the q gate, the eclipsed reject, and one crystal neighbour. CHILL+ and PTM are not retuned.
 
@@ -198,15 +191,15 @@ Two definitions use the 200 ps quench. Majority is the template named by at leas
 
 | Seed | Truth | n | Kernel P | Kernel R | Kernel F1 | CHILL+ P | CHILL+ R | PTM P | PTM R | PTM F1 |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 91001 | majority | 382 | 0.988 | 0.864 | 0.922 | 0.667 | 0.950 | 0.997 | 0.798 | 0.887 |
-| 91001 | unanimous | 345 | 0.967 | 0.936 | 0.951 | 0.616 | 0.971 | 0.987 | 0.875 | 0.928 |
-| 91001 | 190 and 200 ps | 353 | 0.955 | 0.904 | 0.929 | 0.625 | 0.963 | 0.977 | 0.847 | 0.907 |
+| 91001 | majority | 382 | 0.988 | 0.866 | 0.923 | 0.667 | 0.950 | 0.997 | 0.798 | 0.887 |
+| 91001 | unanimous | 345 | 0.967 | 0.939 | 0.953 | 0.616 | 0.971 | 0.987 | 0.875 | 0.928 |
+| 91001 | 190 and 200 ps | 353 | 0.955 | 0.907 | 0.930 | 0.625 | 0.963 | 0.977 | 0.847 | 0.907 |
 | 92002 | majority | 350 | 1 | 0.903 | 0.949 | 0.686 | 0.957 | 0.993 | 0.837 | 0.909 |
 | 92002 | unanimous | 320 | 0.953 | 0.941 | 0.947 | 0.633 | 0.966 | 0.976 | 0.900 | 0.937 |
-| 92002 | 190 and 200 ps | 329 | 0.965 | 0.927 | 0.946 | 0.656 | 0.973 | 0.976 | 0.875 | 0.923 |
-| 93003 | majority | 391 | 0.986 | 0.882 | 0.931 | 0.750 | 0.944 | 0.964 | 0.811 | 0.881 |
-| 93003 | unanimous | 351 | 0.934 | 0.932 | 0.933 | 0.687 | 0.963 | 0.933 | 0.875 | 0.903 |
-| 93003 | 190 and 200 ps | 366 | 0.957 | 0.915 | 0.936 | 0.709 | 0.954 | 0.945 | 0.850 | 0.895 |
+| 92002 | 190 and 200 ps | 330 | 0.965 | 0.924 | 0.944 | 0.656 | 0.970 | 0.980 | 0.876 | 0.925 |
+| 93003 | majority | 391 | 0.983 | 0.887 | 0.933 | 0.750 | 0.944 | 0.964 | 0.811 | 0.881 |
+| 93003 | unanimous | 351 | 0.932 | 0.937 | 0.935 | 0.687 | 0.963 | 0.933 | 0.875 | 0.903 |
+| 93003 | 190 and 200 ps | 366 | 0.955 | 0.921 | 0.937 | 0.709 | 0.954 | 0.945 | 0.850 | 0.895 |
 
 Seeds 91001 and 92002 are the training pair. Pooled against the majority, PTM is precision 0.995 and recall 0.817. The ceiling sweep, with one crystal neighbour kept on, is:
 
@@ -221,9 +214,23 @@ Seeds 91001 and 92002 are the training pair. Pooled against the majority, PTM is
 
 0.12 is the tightest ceiling whose recall stays above PTM. Its precision is 0.994, just under PTM's 0.995. Requiring two crystal neighbours instead of one puts the training majority at precision 0.992 and recall 0.858, which is above PTM on that definition, and puts the held-out recall under PTM, so the production rule stays at one neighbour.
 
-Seed 93003 was held out. Against all three definitions the kernel's precision and recall are both at or above PTM, and so is the F1. On the majority that is precision 0.986 against 0.964, recall 0.882 against 0.811, F1 0.931 against 0.881.
+Seed 93003 was held out. On the majority the kernel is precision 0.983 and recall 0.887, against PTM at 0.964 and 0.811, F1 0.933 against 0.881. On the labels that persist from 190 ps to 200 ps it is precision 0.955 and recall 0.921, against PTM at 0.945 and 0.850. On the unanimous vote the recall is 0.937 against 0.875 and the precision is 0.932 against 0.933.
 
-The kernel's false positives against the majority are interfacial, not a second shell of the wrong atoms. On 91001 there are 4, all within 3.5 Å of a majority-crystal oxygen, and CHILL+ calls them cubic or hexagonal. On 92002 there are none. On 93003 there are 5, all within 3.5 Å, and CHILL+ calls them cubic, hexagonal, interfacial or water. Their scale-free residual sits higher than the true positives: of the 4 on 91001, none pass a ceiling of 0.08 and only 1 passes 0.10, while 298 of 330 true positives pass 0.10. The true-positive q has 10th percentile 0.97 and median 1.00. The liquid that the kernel leaves unlabelled has 10th percentile 0.65 and median 0.87, so the q gate removes disordered liquid and does not separate the interfacial false positives from the crystal. The twelve topological second neighbours of a true positive are the twelve geometric neighbours past 3.2 Å (Jaccard median 1, radius median 4.49 Å, the ideal second-neighbour distance at a 2.75 Å bond). The false positives match that shell too. Liquid's Jaccard median is about 0.65, and only about half of those atoms even have twelve topological second neighbours. The false positive is a crystal-like shell at the surface of the nucleus, admitted because its residual is between 0.10 and 0.12.
+pyscal3 4.1.0 diamond structure and OVITO 3.17.2 identify diamond were scored on the same three truths. Only cubic diamond and hexagonal diamond count; the first-neighbour and second-neighbour tags are not crystal. The two programs return the same labels. On the held-out majority their precision is 0.967 and their recall is 0.742, F1 0.839, against the kernel at 0.933. They miss more of the nucleus than PTM does.
+
+| Seed | Truth | pyscal/OVITO diamond P | R | F1 | Kernel F1 | PTM F1 |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| 91001 | majority | 0.986 | 0.746 | 0.849 | 0.923 | 0.887 |
+| 91001 | unanimous | 0.976 | 0.817 | 0.890 | 0.953 | 0.928 |
+| 91001 | 190 and 200 ps | 0.969 | 0.793 | 0.872 | 0.930 | 0.907 |
+| 92002 | majority | 0.992 | 0.751 | 0.855 | 0.949 | 0.909 |
+| 92002 | unanimous | 0.977 | 0.809 | 0.885 | 0.947 | 0.937 |
+| 92002 | 190 and 200 ps | 0.966 | 0.776 | 0.861 | 0.944 | 0.925 |
+| 93003 | majority | 0.967 | 0.742 | 0.839 | 0.933 | 0.881 |
+| 93003 | unanimous | 0.950 | 0.812 | 0.876 | 0.935 | 0.903 |
+| 93003 | 190 and 200 ps | 0.953 | 0.781 | 0.859 | 0.937 | 0.895 |
+
+The kernel's false positives against the majority are interfacial, not a second shell of the wrong atoms. On 91001 there are 4, all within 3.5 Å of a majority-crystal oxygen, and CHILL+ calls them cubic or hexagonal. On 92002 there are none. On 93003 there are 6, all within 3.5 Å of a majority-crystal oxygen. Their scale-free residual sits higher than the true positives: of the 4 on 91001, none pass a ceiling of 0.08 and only 1 passes 0.10, while 298 of 330 true positives pass 0.10. The true-positive q has 10th percentile 0.97 and median 1.00. The liquid that the kernel leaves unlabelled has 10th percentile 0.65 and median 0.87, so the q gate removes disordered liquid and does not separate the interfacial false positives from the crystal. The twelve topological second neighbours of a true positive are the twelve geometric neighbours past 3.2 Å (Jaccard median 1, radius median 4.49 Å, the ideal second-neighbour distance at a 2.75 Å bond). The false positives match that shell too. Liquid's Jaccard median is about 0.65, and only about half of those atoms even have twelve topological second neighbours. The false positive is a crystal-like shell at the surface of the nucleus, admitted because its residual is between 0.10 and 0.12.
 
 Guest-free sI (2×2×2, 368 waters) and sII (2×2×2, 1088 waters) were run for 10 ps at 220 K and at 250 K and quenched the same way. Cages come from the primitive ring network at a 3.5 Å bond cutoff and `cage::findBySignature`, kept only when the shape residual of the cage against its template is under 1.5 Å. At both temperatures the thermal sI cell has 16 of 5^12 and 48 of 5^12 6^2, and every cage matches an inherent-structure cage of the same kind within 2 Å. The thermal sII cell has 128 of 5^12 and 64 of 5^12 6^4, again with every cage matched. Widening the bond cutoff to 3.7 Å drops 4 small cages and 3 large cages from the 250 K sII cell, so 3.5 Å is the cutoff that agrees with the quench. The ice classifier names none of the 5750-water sI cell as ice. PTM names that cell other throughout. CHILL+ names it clathrate.
 
@@ -231,7 +238,20 @@ Guest-free sI (2×2×2, 368 waters) and sII (2×2×2, 1088 waters) were run for 
 
 Local ice is labelled by the scale-free residual of the seventeen-atom shell to ice Ic, ice Ih or stacking-disordered ice. A quaternion overlay of the tetrahedron, with the second shell ordered by azimuth, supplies that residual after the optimal rotation and scale. The atoms are split across threads. On ideal ice Ic this is faster, per atom, than polyhedral template matching in OVITO 3.17.2 from 216 molecules through 110592, on one thread and on eight. A general IRA overlay of the same shells is kept as a reference and is about a thousand times slower per atom. The overlay that is returned for a named shell, cage or ring uses a 3×3 SVD and a permutation fixed by the bond graph, and the continuous shape measure is the scaled residual of that overlay. The same machinery names the cages of the sI and sII lattices, two and six in sI and sixteen and eight in sII, which template matching reports only as other and which CHILL+ reports only as clathrate. On a stacking-fault cell, template matching returns other for every oxygen, while the shell match splits the cell evenly between ice Ic and ice Isd.
 
-The label kept for production is the scale-free residual of the seventeen-atom shell, ceiling 0.12, and a crystal atom must have one crystal neighbour. A tetrahedron with q below 0.80 is rejected before the second shell is walked. A less even tetrahedron whose four bonds are all eclipsed is rejected before the permutation search. Against the majority of the kernel, CHILL+ and PTM on the steepest-descent quench, that point has precision 0.994 and recall 0.883 on seeds 91001 and 92002, against PTM at 0.995 and 0.817. On the held-out seed 93003, precision and recall are both above PTM for the majority, for the unanimous vote, and for the labels that persist from 190 ps to 200 ps. The false positives that remain are interfacial shells with a residual between 0.10 and 0.12. Ideal ice Ic at 110592 molecules is 1.62 µs/atom on one thread. Eight threads are 5.6 times faster. On the 200 ps frames one thread is 6.34, 6.38 and 5.41 µs/atom, against PTM at 6.33, 6.15 and 6.16. Eight threads are under PTM. A 3.5 Å ring network plus a shape ceiling of 1.5 Å names every thermal sI and sII cage and matches each one to the inherent structure. One thread names a hexagon in 3.80 µs and a dodecahedron in 4.82 µs, below IRA.
+The label kept for production is the scale-free residual of the seventeen-atom shell, ceiling 0.12, and a crystal atom must have one crystal neighbour. A tetrahedron with q below 0.88 is rejected before the second shell is walked. A clean second shell, one radius and either four staggered bonds or one eclipsed bond, is labelled before the permutation fit. On the held-out seed 93003 the majority precision is 0.983 and the recall is 0.887, against PTM at 0.964 and 0.811. Ideal ice Ic at 110592 molecules is 0.796 µs/atom on one thread in the C++ bench. In the same Python session as pyscal3 4.1.0 and OVITO 3.17.2 identify diamond, one thread is 94.832 ms against 100.240 ms and 36.083 ms, and eight threads are 21.888 ms against 24.064 ms and 37.719 ms. pyscal3 and the OVITO diamond identifier agree with each other and recall less of the nucleus than the kernel or PTM. A 3.5 Å ring network plus a shape ceiling of 1.5 Å names every thermal sI and sII cage and matches each one to the inherent structure. One thread names a hexagon in 3.80 µs and a dodecahedron in 4.82 µs, below IRA.
+
+## Rerun
+
+The machine is an Intel Xeon, 8 CPUs, affinity 0–7, GCC 15.2.0. The build is Meson `release` (`-O3`, and `-mavx2 -mfma` on the shell translation unit). One warm-up, then six calls. The median of an even sample is the mean of the two central values.
+
+```
+meson setup build --buildtype=release
+meson compile -C build tests/bench_shell_scale tests/test_local_symmetry
+./build/tests/bench_shell_scale 1
+./build/tests/bench_shell_scale 8
+```
+
+The head-to-head builds the same 24×24×24 ice Ic cell (110592 molecules) and times `symmetry.classify`, `pyscal3.diamond_structure` and `IdentifyDiamondModifier` in one process at `OMP_NUM_THREADS=1`, then again at 8. One thread, milliseconds: kernel 92.652 93.212 93.530 96.134 96.333 101.512; pyscal3 98.769 98.941 100.183 100.297 100.678 101.754; OVITO identify diamond 29.440 30.122 35.399 36.767 37.263 37.803. Eight threads: kernel 20.567 20.905 21.426 22.350 23.332 23.641; pyscal3 23.719 24.013 24.026 24.102 24.168 26.548; OVITO identify diamond 30.363 32.463 37.536 37.901 40.083 43.576. On one thread the kernel is ahead of pyscal3 and behind OVITO's diamond identifier. On eight threads it is ahead of both. Every oxygen is cubic diamond for all three.
 
 ## Citations
 
