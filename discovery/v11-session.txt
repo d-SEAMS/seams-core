@@ -1,0 +1,60 @@
+session v11
+date_utc 2026-11-12 01:18:12
+nproc 8
+nproc_all 8
+CPU(s): 8
+On-line CPU(s) list: 0-7
+Thread(s) per core: 1
+Core(s) per socket: 8
+Socket(s): 1
+NUMA node(s): 1
+NUMA node0 CPU(s): 0-7
+cpu.max absent
+nr_periods 0
+nr_throttled 0
+cpuset.cpus.effective 0-7
+usable_cores 8
+ice Ic 884736 molecules, cutoff 3.5, OVITO max_l 4
+eight samples after two warm-ups
+OVITO_THREAD_COUNT is the requested count. tasks is the process thread count during compute.
+
+BEGIN ovito requested=8 affinity=0-7 metric=q4
+tasks=17 on every sample
+warmup 99.1876 84.4254
+sample 84.8213 79.3516 77.2251 77.4855 84.2802 79.6363 90.2608 84.9601
+summary n=8 min=77.2251 median=81.9583 max=90.2608
+BEGIN ovito requested=8 affinity=0-7 metric=q4bar
+tasks=17 on every sample
+warmup 331.4021 203.5273
+sample 196.2565 212.2171 180.2118 202.6557 203.9494 190.5787 175.0519 172.6867
+summary n=8 min=172.6867 median=193.4176 max=212.2171
+ratio_bar_over_plain 2.360
+plain_max 90.2608 is under bar_min 172.6867
+
+BEGIN ovito requested=1 affinity=0 metric=q4
+tasks=3 on every sample
+warmup 434.1949 423.4738
+sample 415.8003 416.9087 416.7526 413.0413 412.2799 420.3922 420.3167 427.9010
+summary n=8 min=412.2799 median=416.8306 max=427.9010
+BEGIN ovito requested=1 affinity=0 metric=q4bar
+tasks=3 on every sample
+warmup 675.7721 662.8245
+sample 657.5532 645.7304 649.5792 639.3281 645.3256 646.3881 638.4690 640.4854
+summary n=8 min=638.4690 median=645.5280 max=657.5532
+ratio_bar_over_plain 1.549
+
+mW ensemble
+LAMMPS 22 Jul 2025 Update 6, 8 MPI ranks, 1 OpenMP thread per rank
+pair_style sw, Molinero and Moore 2009 mW parameters
+4096 molecules, cubic box 49.606 A, timestep 5 fs
+ice Ic core held fixed while the outside melted at 480 K
+released core: 84 CHILL+ molecules (cubic or hexagonal), q6-bar>0.3 cluster 147
+20 quenches at 200 K, 80 ps, velocity seeds 1001-1020, dump every 10 ps
+all 20 grew
+CHILL+ largest at 80 ps: mean 131.1 min 88 max 205
+q6-bar>0.3 largest at 80 ps: mean 395.5 min 262 max 587
+Wedekind, Strey and Reguera, J. Chem. Phys. 126, 134103 (2007)
+fit on sizes reached by all 20 runs, 800 bootstrap resamples
+CHILL+ n*=85 CI95=[85,88] c=0.889 tauJ=34.54 ps window=51-94 rmse=2.10 ps
+q6-bar n*=219 CI95=[208,257] c=0.0115 tauJ=51.49 ps window=135-330 rmse=1.87 ps
+same seed at 250 K: CHILL+ largest fell from 84 to 1 within 40 ps

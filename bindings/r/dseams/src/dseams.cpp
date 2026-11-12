@@ -155,6 +155,36 @@ cpp11::data_frame steinhardt_(SEXP ptr, double cutoff, int type, int order_l,
 }
 
 [[cpp11::register]]
+cpp11::data_frame q4_q6_(SEXP ptr, double cutoff, int type) {
+  seams_frame *frame = need(ptr);
+  const int n = seams_frame_nop(frame);
+  std::vector<double> q4(static_cast<std::size_t>(n));
+  std::vector<double> q6(static_cast<std::size_t>(n));
+  std::vector<double> q4bar(static_cast<std::size_t>(n));
+  std::vector<double> q6bar(static_cast<std::size_t>(n));
+  if (seams_frame_q4_q6(frame, cutoff, type, q4.data(), q6.data(), q4bar.data(),
+                       q6bar.data()) != 0) {
+    cpp11::stop("%s", seams_last_error());
+  }
+  const int *ids = seams_frame_ids(frame);
+  cpp11::writable::integers atom(n);
+  cpp11::writable::doubles q4_col(n);
+  cpp11::writable::doubles q6_col(n);
+  cpp11::writable::doubles q4bar_col(n);
+  cpp11::writable::doubles q6bar_col(n);
+  for (int i = 0; i < n; ++i) {
+    atom[i] = ids != nullptr ? ids[i] : i + 1;
+    q4_col[i] = q4[static_cast<std::size_t>(i)];
+    q6_col[i] = q6[static_cast<std::size_t>(i)];
+    q4bar_col[i] = q4bar[static_cast<std::size_t>(i)];
+    q6bar_col[i] = q6bar[static_cast<std::size_t>(i)];
+  }
+  return cpp11::writable::data_frame(
+      {"atom"_nm = atom, "q4"_nm = q4_col, "q6"_nm = q6_col,
+       "q4bar"_nm = q4bar_col, "q6bar"_nm = q6bar_col});
+}
+
+[[cpp11::register]]
 cpp11::data_frame cages_(SEXP ptr, double cutoff, int type, int k,
                          std::string graph) {
   seams_frame *frame = need(ptr);

@@ -33,6 +33,10 @@ jump_tau90_ <- function(first, second, dt, oxygen_type, hydrogen_type) {
   .Call(`_dseams_jump_tau90_`, first, second, dt, oxygen_type, hydrogen_type)
 }
 
+q4_q6_ <- function(ptr, cutoff, type) {
+  .Call(`_dseams_q4_q6_`, ptr, cutoff, type)
+}
+
 cages_ <- function(ptr, cutoff, type, k, graph) {
   .Call(`_dseams_cages_`, ptr, cutoff, type, k, graph)
 }

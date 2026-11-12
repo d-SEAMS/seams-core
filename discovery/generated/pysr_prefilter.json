@@ -1,0 +1,172 @@
+{
+  "formula": "cmean**4",
+  "variable_names": [
+    "qtet",
+    "r1",
+    "r4",
+    "r5",
+    "shell",
+    "cmin",
+    "cmax",
+    "cmean",
+    "q3",
+    "keep"
+  ],
+  "label_cubic": 0,
+  "held_out_seeds": [
+    91001,
+    92002,
+    93003
+  ],
+  "held_out_threshold_accuracy": 1.0,
+  "noncubic_score_ceiling": 0.8528497963226561,
+  "accept_if_score_above": 0.8528497963226561,
+  "false_accepts": 0,
+  "true_accepts": 1449,
+  "n_train": 1840,
+  "n_held": 456,
+  "class_counts": {
+    "ice2": {
+      "0": 64
+    },
+    "ice3": {
+      "0": 216
+    },
+    "ice4": {
+      "0": 512
+    },
+    "noise0.04-11": {
+      "0": 216
+    },
+    "noise0.12-12": {
+      "0": 216
+    },
+    "noise0.3-13": {
+      "0": 106,
+      "1": 2,
+      "2": 61,
+      "3": 46,
+      "5": 1
+    },
+    "noise0.12-93003": {
+      "0": 216
+    },
+    "liq1": {
+      "2": 79,
+      "5": 1
+    },
+    "liq7": {
+      "2": 76,
+      "5": 4
+    },
+    "liq42": {
+      "2": 78,
+      "4": 1,
+      "5": 1
+    },
+    "liq99": {
+      "2": 77,
+      "5": 3
+    },
+    "liq1234": {
+      "2": 78,
+      "4": 1,
+      "5": 1
+    },
+    "liq91001": {
+      "2": 77,
+      "4": 1,
+      "5": 2
+    },
+    "liq92002": {
+      "2": 77,
+      "5": 3
+    },
+    "liq93003": {
+      "2": 79,
+      "4": 1
+    }
+  },
+  "equations": {
+    "complexity": {
+      "0": "1",
+      "1": "2",
+      "2": "3",
+      "3": "4",
+      "4": "6",
+      "5": "8"
+    },
+    "loss": {
+      "0": "0.08222651",
+      "1": "0.02646732",
+      "2": "0.018574383",
+      "3": "0.016283277",
+      "4": "0.016100157",
+      "5": "0.015316256"
+    },
+    "equation": {
+      "0": "qtet",
+      "1": "square(cmax)",
+      "2": "square(square(cmean))",
+      "3": "square(cmax * cmean)",
+      "4": "square(cmean * cmax) / 0.9840904",
+      "5": "square(cmean * ((cmax / keep) * shell))"
+    },
+    "score": {
+      "0": "0.0",
+      "1": "1.133566991732105",
+      "2": "0.35412739105580826",
+      "3": "0.13164474311845312",
+      "4": "0.005654803374459412",
+      "5": "0.024957137736712813"
+    },
+    "sympy_format": {
+      "0": "qtet",
+      "1": "cmax**2",
+      "2": "cmean**4",
+      "3": "cmax**2*cmean**2",
+      "4": "(cmax**2*cmean**2)/0.9840904",
+      "5": "cmax**2*cmean**2*shell**2/keep**2"
+    },
+    "lambda_format": {
+      "0": "PySRFunction(X=>qtet)",
+      "1": "PySRFunction(X=>cmax**2)",
+      "2": "PySRFunction(X=>cmean**4)",
+      "3": "PySRFunction(X=>cmax**2*cmean**2)",
+      "4": "PySRFunction(X=>(cmax**2*cmean**2)/0.9840904)",
+      "5": "PySRFunction(X=>cmax**2*cmean**2*shell**2/keep**2)"
+    }
+  },
+  "pareto": [
+    {
+      "complexity": "1",
+      "loss": "0.08222651",
+      "equation": "qtet"
+    },
+    {
+      "complexity": "2",
+      "loss": "0.02646732",
+      "equation": "square(cmax)"
+    },
+    {
+      "complexity": "3",
+      "loss": "0.018574383",
+      "equation": "square(square(cmean))"
+    },
+    {
+      "complexity": "4",
+      "loss": "0.016283277",
+      "equation": "square(cmax * cmean)"
+    },
+    {
+      "complexity": "6",
+      "loss": "0.016100157",
+      "equation": "square(cmean * cmax) / 0.9840904"
+    },
+    {
+      "complexity": "8",
+      "loss": "0.015316256",
+      "equation": "square(cmean * ((cmax / keep) * shell))"
+    }
+  ]
+}

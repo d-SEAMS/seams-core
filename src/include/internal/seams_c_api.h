@@ -87,6 +87,18 @@ int seams_oxygen_cutoff_degree(const double *xyz, int n, const double *box9,
 
 const char *seams_c_error(void);
 
+/* Local q4 and q6 on the cutoff shell. Degrees 4 and 6 use the
+ * solid-harmonic kernel. xyz is n*3. box is ox,oy,oz,lx,ly,lz.
+ * q4 and q6 are n doubles. q4bar and q6bar may be null; a null pointer
+ * skips that Lechner-Dellago average. Returns 0 on success. */
+int seams_q4_q6(const double *xyz, int n, const double *box, double cutoff,
+                double *q4, double *q6, double *q4bar, double *q6bar);
+/* box9 is xlo,ylo,zlo,lx,ly,lz,xy,xz,yz, the same cell as
+ * seams_chill_plus_graph_lammps. */
+int seams_q4_q6_lammps(const double *xyz, int n, const double *box9,
+                       double cutoff, double *q4, double *q6, double *q4bar,
+                       double *q6bar);
+
 #ifdef __cplusplus
 }
 #endif

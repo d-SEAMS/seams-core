@@ -48,6 +48,13 @@ extern "C" SEXP _dseams_rings_(SEXP ptr, SEXP cutoff, SEXP type, SEXP graph, SEX
   END_CPP11
 }
 // dseams.cpp
+cpp11::data_frame q4_q6_(SEXP ptr, double cutoff, int type);
+extern "C" SEXP _dseams_q4_q6_(SEXP ptr, SEXP cutoff, SEXP type) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(q4_q6_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(ptr), cpp11::as_cpp<cpp11::decay_t<double>>(cutoff), cpp11::as_cpp<cpp11::decay_t<int>>(type)));
+  END_CPP11
+}
+// dseams.cpp
 cpp11::data_frame steinhardt_(SEXP ptr, double cutoff, int type, int order_l, std::string graph);
 extern "C" SEXP _dseams_steinhardt_(SEXP ptr, SEXP cutoff, SEXP type, SEXP order_l, SEXP graph) {
   BEGIN_CPP11
@@ -87,6 +94,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dseams_nframes_",    (DL_FUNC) &_dseams_nframes_,    1},
     {"_dseams_nop_",        (DL_FUNC) &_dseams_nop_,        1},
     {"_dseams_positions_",  (DL_FUNC) &_dseams_positions_,  1},
+    {"_dseams_q4_q6_",      (DL_FUNC) &_dseams_q4_q6_,      3},
     {"_dseams_read_frame_", (DL_FUNC) &_dseams_read_frame_, 3},
     {"_dseams_rings_",      (DL_FUNC) &_dseams_rings_,      5},
     {"_dseams_signature_cages_", (DL_FUNC) &_dseams_signature_cages_, 5},

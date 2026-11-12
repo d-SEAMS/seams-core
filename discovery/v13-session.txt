@@ -1,0 +1,556 @@
+date_utc 2026-11-12 01:51:08
+nproc 8
+nproc_all 8
+CPU(s)=8
+On-line CPU(s) list=0-7
+Thread(s) per core=1
+Core(s) per socket=8
+Socket(s)=1
+NUMA node(s)=1
+cpuset 0-7
+thp always [madvise] never
+frame ice884736 cutoff 3.5
+warm=2 samples=10
+percentile linear on sorted samples: position p*(n-1)
+median is that value at p=0.5, iqr is p=0.75 minus p=0.25
+seams faults are the minor-fault delta of that call
+seams and ovito: OMP_PROC_BIND=close OMP_PLACES=cores OMP_WAIT_POLICY=ACTIVE
+mdapy and pyscal3: library thread count, no OMP_PROC_BIND
+taskset 0 for 1 thread, 0-7 for 8 threads
+merge is ecf36df2, kd is e943930a
+BEGIN merge threads=1 frame=ice884736 metric=q4
+warmup 0 508.0687 faults=57547 v0=0.50917508
+warmup 1 294.8755 faults=0 v0=0.50917508
+sample 292.3066 faults=0 v0=0.50917508
+sample 290.3921 faults=0 v0=0.50917508
+sample 290.7863 faults=0 v0=0.50917508
+sample 290.6974 faults=0 v0=0.50917508
+sample 291.0252 faults=0 v0=0.50917508
+sample 290.6428 faults=0 v0=0.50917508
+sample 290.3594 faults=0 v0=0.50917508
+sample 300.0242 faults=0 v0=0.50917508
+sample 310.4385 faults=0 v0=0.50917508
+sample 304.1240 faults=0 v0=0.50917508
+summary n=10 min=290.3594 median=290.9058 q1=290.6564 q3=298.0948 iqr=7.4383 max=310.4385
+BEGIN merge threads=1 frame=ice884736 metric=q6
+warmup 0 459.9315 faults=46657 v0=0.62853936
+warmup 1 331.0194 faults=0 v0=0.62853936
+sample 321.2993 faults=0 v0=0.62853936
+sample 327.8668 faults=0 v0=0.62853936
+sample 320.3811 faults=0 v0=0.62853936
+sample 367.2203 faults=0 v0=0.62853936
+sample 462.9766 faults=0 v0=0.62853936
+sample 329.8384 faults=0 v0=0.62853936
+sample 315.8048 faults=0 v0=0.62853936
+sample 312.1122 faults=0 v0=0.62853936
+sample 320.3610 faults=0 v0=0.62853936
+sample 318.7914 faults=0 v0=0.62853936
+summary n=10 min=312.1122 median=320.8402 q1=319.1838 q3=329.3455 iqr=10.1617 max=462.9766
+BEGIN merge threads=1 frame=ice884736 metric=q4bar
+warmup 0 362.9079 faults=0 v0=0.50917508
+warmup 1 347.9893 faults=0 v0=0.50917508
+sample 387.9157 faults=0 v0=0.50917508
+sample 367.5862 faults=0 v0=0.50917508
+sample 367.6268 faults=0 v0=0.50917508
+sample 362.5338 faults=0 v0=0.50917508
+sample 375.5911 faults=0 v0=0.50917508
+sample 368.6066 faults=0 v0=0.50917508
+sample 369.6644 faults=0 v0=0.50917508
+sample 365.8321 faults=0 v0=0.50917508
+sample 368.3904 faults=0 v0=0.50917508
+sample 356.3526 faults=0 v0=0.50917508
+summary n=10 min=356.3526 median=368.0086 q1=366.2706 q3=369.4000 iqr=3.1294 max=387.9157
+BEGIN merge threads=1 frame=ice884736 metric=chill
+warmup 0 479.5395 faults=42098 v0=0.00000000
+warmup 1 414.8150 faults=0 v0=0.00000000
+sample 388.3618 faults=0 v0=0.00000000
+sample 398.6934 faults=0 v0=0.00000000
+sample 380.9674 faults=0 v0=0.00000000
+sample 396.5633 faults=0 v0=0.00000000
+sample 382.5779 faults=0 v0=0.00000000
+sample 369.5585 faults=0 v0=0.00000000
+sample 375.0636 faults=0 v0=0.00000000
+sample 379.7132 faults=0 v0=0.00000000
+sample 376.1931 faults=0 v0=0.00000000
+sample 368.7838 faults=0 v0=0.00000000
+summary n=10 min=368.7838 median=380.3403 q1=375.3460 q3=386.9158 iqr=11.5698 max=398.6934
+BEGIN kd threads=1 frame=ice884736 metric=q4
+warmup 0 423.8677 faults=57548 v0=0.50917508
+warmup 1 303.7418 faults=0 v0=0.50917508
+sample 306.1771 faults=0 v0=0.50917508
+sample 310.1072 faults=0 v0=0.50917508
+sample 299.1087 faults=0 v0=0.50917508
+sample 294.5957 faults=0 v0=0.50917508
+sample 300.3712 faults=0 v0=0.50917508
+sample 296.6543 faults=0 v0=0.50917508
+sample 293.6091 faults=0 v0=0.50917508
+sample 290.8697 faults=0 v0=0.50917508
+sample 300.5957 faults=0 v0=0.50917508
+sample 293.1334 faults=0 v0=0.50917508
+summary n=10 min=290.8697 median=297.8815 q1=293.8557 q3=300.5396 iqr=6.6838 max=310.1072
+BEGIN kd threads=1 frame=ice884736 metric=q6
+warmup 0 460.4653 faults=46657 v0=0.62853936
+warmup 1 309.2064 faults=0 v0=0.62853936
+sample 307.1126 faults=0 v0=0.62853936
+sample 318.7788 faults=0 v0=0.62853936
+sample 320.3467 faults=0 v0=0.62853936
+sample 314.3018 faults=0 v0=0.62853936
+sample 312.0199 faults=0 v0=0.62853936
+sample 317.3921 faults=0 v0=0.62853936
+sample 325.8195 faults=0 v0=0.62853936
+sample 323.6781 faults=0 v0=0.62853936
+sample 320.8740 faults=0 v0=0.62853936
+sample 317.0067 faults=0 v0=0.62853936
+summary n=10 min=307.1126 median=318.0855 q1=314.9780 q3=320.7422 iqr=5.7641 max=325.8195
+BEGIN kd threads=1 frame=ice884736 metric=q4bar
+warmup 0 374.9824 faults=0 v0=0.50917508
+warmup 1 360.7965 faults=0 v0=0.50917508
+sample 369.0265 faults=0 v0=0.50917508
+sample 371.3039 faults=0 v0=0.50917508
+sample 370.8092 faults=0 v0=0.50917508
+sample 371.9737 faults=0 v0=0.50917508
+sample 364.5868 faults=0 v0=0.50917508
+sample 357.1741 faults=0 v0=0.50917508
+sample 353.2867 faults=0 v0=0.50917508
+sample 363.0457 faults=0 v0=0.50917508
+sample 359.9119 faults=0 v0=0.50917508
+sample 355.5050 faults=0 v0=0.50917508
+summary n=10 min=353.2867 median=363.8162 q1=357.8585 q3=370.3635 iqr=12.5050 max=371.9737
+BEGIN kd threads=1 frame=ice884736 metric=chill
+warmup 0 450.2316 faults=42097 v0=0.00000000
+warmup 1 350.5296 faults=0 v0=0.00000000
+sample 353.2986 faults=0 v0=0.00000000
+sample 352.5696 faults=0 v0=0.00000000
+sample 363.6494 faults=0 v0=0.00000000
+sample 371.1816 faults=0 v0=0.00000000
+sample 364.6967 faults=0 v0=0.00000000
+sample 344.4096 faults=0 v0=0.00000000
+sample 347.4639 faults=0 v0=0.00000000
+sample 348.5474 faults=0 v0=0.00000000
+sample 356.4236 faults=0 v0=0.00000000
+sample 353.8443 faults=0 v0=0.00000000
+summary n=10 min=344.4096 median=353.5714 q1=349.5529 q3=361.8429 iqr=12.2900 max=371.1816
+BEGIN merge threads=8 frame=ice884736 metric=q4
+warmup 0 137.9384 faults=59407 v0=0.50917508
+warmup 1 49.8379 faults=0 v0=0.50917508
+sample 49.0388 faults=0 v0=0.50917508
+sample 46.7150 faults=0 v0=0.50917508
+sample 45.3725 faults=0 v0=0.50917508
+sample 44.0394 faults=0 v0=0.50917508
+sample 43.1696 faults=0 v0=0.50917508
+sample 42.0385 faults=0 v0=0.50917508
+sample 47.0330 faults=0 v0=0.50917508
+sample 45.2976 faults=0 v0=0.50917508
+sample 43.5113 faults=0 v0=0.50917508
+sample 44.0908 faults=0 v0=0.50917508
+summary n=10 min=42.0385 median=44.6942 q1=43.6433 q3=46.3794 iqr=2.7360 max=49.0388
+BEGIN merge threads=8 frame=ice884736 metric=q6
+warmup 0 196.2762 faults=46657 v0=0.62853936
+warmup 1 52.9888 faults=0 v0=0.62853936
+sample 53.6503 faults=0 v0=0.62853936
+sample 58.4078 faults=0 v0=0.62853936
+sample 48.4169 faults=0 v0=0.62853936
+sample 46.0011 faults=0 v0=0.62853936
+sample 44.0611 faults=0 v0=0.62853936
+sample 45.9685 faults=0 v0=0.62853936
+sample 44.9594 faults=0 v0=0.62853936
+sample 43.4298 faults=0 v0=0.62853936
+sample 45.3096 faults=0 v0=0.62853936
+sample 43.8324 faults=0 v0=0.62853936
+summary n=10 min=43.4298 median=45.6391 q1=44.2856 q3=47.8130 iqr=3.5273 max=58.4078
+BEGIN merge threads=8 frame=ice884736 metric=q4bar
+warmup 0 60.2555 faults=0 v0=0.50917508
+warmup 1 50.4300 faults=0 v0=0.50917508
+sample 50.6366 faults=0 v0=0.50917508
+sample 49.3752 faults=0 v0=0.50917508
+sample 48.5888 faults=0 v0=0.50917508
+sample 48.2238 faults=0 v0=0.50917508
+sample 50.2579 faults=0 v0=0.50917508
+sample 47.8651 faults=0 v0=0.50917508
+sample 48.6897 faults=0 v0=0.50917508
+sample 47.8889 faults=0 v0=0.50917508
+sample 47.8912 faults=0 v0=0.50917508
+sample 47.9464 faults=0 v0=0.50917508
+summary n=10 min=47.8651 median=48.4063 q1=47.9050 q3=49.2038 iqr=1.2988 max=50.6366
+BEGIN merge threads=8 frame=ice884736 metric=chill
+warmup 0 123.8507 faults=42113 v0=0.00000000
+warmup 1 59.2768 faults=0 v0=0.00000000
+sample 56.8096 faults=0 v0=0.00000000
+sample 56.8311 faults=0 v0=0.00000000
+sample 56.3142 faults=0 v0=0.00000000
+sample 58.0343 faults=0 v0=0.00000000
+sample 62.0237 faults=0 v0=0.00000000
+sample 56.9683 faults=0 v0=0.00000000
+sample 56.2181 faults=0 v0=0.00000000
+sample 57.2570 faults=0 v0=0.00000000
+sample 55.8575 faults=0 v0=0.00000000
+sample 57.6769 faults=0 v0=0.00000000
+summary n=10 min=55.8575 median=56.8997 q1=56.4381 q3=57.5719 iqr=1.1338 max=62.0237
+BEGIN kd threads=8 frame=ice884736 metric=q4
+warmup 0 131.8264 faults=59403 v0=0.50917508
+warmup 1 49.3688 faults=0 v0=0.50917508
+sample 43.8411 faults=0 v0=0.50917508
+sample 44.2812 faults=0 v0=0.50917508
+sample 41.8917 faults=0 v0=0.50917508
+sample 42.0250 faults=0 v0=0.50917508
+sample 41.6256 faults=0 v0=0.50917508
+sample 41.4294 faults=0 v0=0.50917508
+sample 41.6407 faults=0 v0=0.50917508
+sample 41.4165 faults=0 v0=0.50917508
+sample 44.5665 faults=0 v0=0.50917508
+sample 42.5081 faults=0 v0=0.50917508
+summary n=10 min=41.4165 median=41.9583 q1=41.6294 q3=43.5078 iqr=1.8784 max=44.5665
+BEGIN kd threads=8 frame=ice884736 metric=q6
+warmup 0 170.4190 faults=46657 v0=0.62853936
+warmup 1 47.9987 faults=0 v0=0.62853936
+sample 44.7658 faults=0 v0=0.62853936
+sample 43.8909 faults=0 v0=0.62853936
+sample 42.9194 faults=0 v0=0.62853936
+sample 43.3871 faults=0 v0=0.62853936
+sample 44.5375 faults=0 v0=0.62853936
+sample 49.0287 faults=0 v0=0.62853936
+sample 44.0335 faults=0 v0=0.62853936
+sample 46.7545 faults=0 v0=0.62853936
+sample 43.2762 faults=0 v0=0.62853936
+sample 44.4304 faults=0 v0=0.62853936
+summary n=10 min=42.9194 median=44.2320 q1=43.5130 q3=44.7087 iqr=1.1956 max=49.0287
+BEGIN kd threads=8 frame=ice884736 metric=q4bar
+warmup 0 63.1425 faults=0 v0=0.50917508
+warmup 1 51.7983 faults=0 v0=0.50917508
+sample 49.3596 faults=0 v0=0.50917508
+sample 48.7759 faults=0 v0=0.50917508
+sample 48.5593 faults=0 v0=0.50917508
+sample 51.0185 faults=0 v0=0.50917508
+sample 48.7606 faults=0 v0=0.50917508
+sample 48.7191 faults=0 v0=0.50917508
+sample 48.7559 faults=0 v0=0.50917508
+sample 48.4449 faults=0 v0=0.50917508
+sample 48.0849 faults=0 v0=0.50917508
+sample 48.8108 faults=0 v0=0.50917508
+summary n=10 min=48.0849 median=48.7583 q1=48.5993 q3=48.8021 iqr=0.2029 max=51.0185
+BEGIN kd threads=8 frame=ice884736 metric=chill
+warmup 0 125.8057 faults=42112 v0=0.00000000
+warmup 1 57.7265 faults=0 v0=0.00000000
+sample 57.8141 faults=0 v0=0.00000000
+sample 55.9496 faults=0 v0=0.00000000
+sample 56.1498 faults=0 v0=0.00000000
+sample 59.1931 faults=0 v0=0.00000000
+sample 55.5709 faults=0 v0=0.00000000
+sample 56.3662 faults=0 v0=0.00000000
+sample 58.2823 faults=0 v0=0.00000000
+sample 59.9990 faults=0 v0=0.00000000
+sample 57.4801 faults=0 v0=0.00000000
+sample 58.4623 faults=0 v0=0.00000000
+summary n=10 min=55.5709 median=57.6471 q1=56.2039 q3=58.4173 iqr=2.2134 max=59.9990
+BEGIN ovito threads=1 frame=ice884736 metric=q4
+warmup 0 426.8686 ok
+warmup 1 388.7949 ok
+sample 402.8383 ok
+sample 396.8005 ok
+sample 385.1096 ok
+sample 385.2439 ok
+sample 385.2894 ok
+sample 385.6905 ok
+sample 393.2205 ok
+sample 392.8761 ok
+sample 396.9996 ok
+sample 391.5135 ok
+summary n=10 min=385.1096 median=392.1948 q1=385.3897 q3=395.9055 iqr=10.5158 max=402.8383
+BEGIN ovito threads=1 frame=ice884736 metric=q6
+warmup 0 474.3851 ok
+warmup 1 475.6362 ok
+sample 476.0426 ok
+sample 475.6042 ok
+sample 470.7414 ok
+sample 470.9613 ok
+sample 481.5314 ok
+sample 487.0395 ok
+sample 601.1665 ok
+sample 472.9976 ok
+sample 476.8243 ok
+sample 477.0614 ok
+summary n=10 min=470.7414 median=476.4334 q1=473.6492 q3=480.4139 iqr=6.7647 max=601.1665
+BEGIN ovito threads=1 frame=ice884736 metric=q4bar
+warmup 0 655.0637 ok
+warmup 1 632.1725 ok
+sample 627.2993 ok
+sample 618.2738 ok
+sample 627.0072 ok
+sample 612.0338 ok
+sample 659.9001 ok
+sample 633.4233 ok
+sample 655.4221 ok
+sample 651.9708 ok
+sample 644.5291 ok
+sample 648.5776 ok
+summary n=10 min=612.0338 median=638.9762 q1=627.0802 q3=651.1225 iqr=24.0423 max=659.9001
+BEGIN ovito threads=1 frame=ice884736 metric=chill
+warmup 0 5094.8894 ok
+warmup 1 4865.1222 ok
+sample 4897.3246 ok
+sample 5112.9854 ok
+sample 4971.0462 ok
+sample 5006.1118 ok
+sample 4942.7070 ok
+sample 4842.8441 ok
+sample 4838.1801 ok
+sample 4875.0151 ok
+sample 4850.3468 ok
+sample 4862.9808 ok
+summary n=10 min=4838.1801 median=4886.1699 q1=4853.5053 q3=4963.9614 iqr=110.4561 max=5112.9854
+BEGIN mdapy threads=1 frame=ice884736 metric=q4
+warmup 0 810.5253 ok
+warmup 1 726.6942 ok
+sample 800.8048 ok
+sample 782.4694 ok
+sample 770.0943 ok
+sample 788.5321 ok
+sample 785.7138 ok
+sample 799.3567 ok
+sample 842.8572 ok
+sample 766.1324 ok
+sample 797.4695 ok
+sample 745.4566 ok
+summary n=10 min=745.4566 median=787.1230 q1=773.1881 q3=798.8849 iqr=25.6968 max=842.8572
+BEGIN mdapy threads=1 frame=ice884736 metric=q6
+warmup 0 837.3216 ok
+warmup 1 841.1220 ok
+sample 862.0263 ok
+sample 852.3291 ok
+sample 817.9144 ok
+sample 823.3893 ok
+sample 790.0259 ok
+sample 794.0373 ok
+sample 796.8663 ok
+sample 787.7831 ok
+sample 805.3940 ok
+sample 851.8315 ok
+summary n=10 min=787.7831 median=811.6542 q1=794.7445 q3=844.7210 iqr=49.9764 max=862.0263
+BEGIN mdapy threads=1 frame=ice884736 metric=q4bar
+warmup 0 743.6300 ok
+warmup 1 723.6618 ok
+sample 688.2938 ok
+sample 688.5994 ok
+sample 687.9681 ok
+sample 711.3716 ok
+sample 708.0531 ok
+sample 699.9635 ok
+sample 692.2690 ok
+sample 704.6960 ok
+sample 708.5195 ok
+sample 723.6155 ok
+summary n=10 min=687.9681 median=702.3298 q1=689.5168 q3=708.4029 iqr=18.8861 max=723.6155
+BEGIN mdapy threads=1 frame=ice884736 metric=chill
+warmup 0 766.1472 ok
+warmup 1 730.8505 ok
+sample 771.2818 ok
+sample 791.7207 ok
+sample 791.4773 ok
+sample 730.5058 ok
+sample 783.6885 ok
+sample 779.9185 ok
+sample 776.7778 ok
+sample 799.8922 ok
+sample 789.8001 ok
+sample 779.0929 ok
+summary n=10 min=730.5058 median=781.8035 q1=777.3566 q3=791.0580 iqr=13.7014 max=799.8922
+BEGIN pyscal3 threads=1 frame=ice884736 metric=q4
+warmup 0 1078.9042 v0=0.50917508
+warmup 1 928.8390 v0=0.50917508
+sample 868.1204 v0=0.50917508
+sample 834.4887 v0=0.50917508
+sample 870.2893 v0=0.50917508
+sample 851.4406 v0=0.50917508
+sample 851.2614 v0=0.50917508
+sample 874.2992 v0=0.50917508
+sample 834.6453 v0=0.50917508
+sample 858.2348 v0=0.50917508
+sample 826.8235 v0=0.50917508
+sample 864.8298 v0=0.50917508
+summary n=10 min=826.8235 median=854.8377 q1=838.7993 q3=867.2977 iqr=28.4984 max=874.2992
+BEGIN pyscal3 threads=1 frame=ice884736 metric=q6
+warmup 0 975.8273 v0=0.62853936
+warmup 1 1046.5041 v0=0.62853936
+sample 958.1274 v0=0.62853936
+sample 943.7051 v0=0.62853936
+sample 1016.1118 v0=0.62853936
+sample 979.0129 v0=0.62853936
+sample 956.7454 v0=0.62853936
+sample 959.1391 v0=0.62853936
+sample 945.8287 v0=0.62853936
+sample 972.1032 v0=0.62853936
+sample 958.8201 v0=0.62853936
+sample 965.7367 v0=0.62853936
+summary n=10 min=943.7051 median=958.9796 q1=957.0909 q3=970.5116 iqr=13.4207 max=1016.1118
+BEGIN pyscal3 threads=1 frame=ice884736 metric=q4bar
+warmup 0 932.1301 v0=0.50917508
+warmup 1 904.7250 v0=0.50917508
+sample 905.6619 v0=0.50917508
+sample 879.8987 v0=0.50917508
+sample 901.7789 v0=0.50917508
+sample 895.2724 v0=0.50917508
+sample 950.6675 v0=0.50917508
+sample 910.6729 v0=0.50917508
+sample 916.9857 v0=0.50917508
+sample 896.5309 v0=0.50917508
+sample 949.4712 v0=0.50917508
+sample 970.5538 v0=0.50917508
+summary n=10 min=879.8987 median=908.1674 q1=897.8429 q3=941.3499 iqr=43.5070 max=970.5538
+pyscal3 has no CHILL+ classifier
+BEGIN ovito threads=8 frame=ice884736 metric=q4
+warmup 0 83.6737 ok
+warmup 1 80.2574 ok
+sample 81.4680 ok
+sample 79.5895 ok
+sample 79.1099 ok
+sample 76.0801 ok
+sample 75.1495 ok
+sample 74.9130 ok
+sample 91.2731 ok
+sample 75.4201 ok
+sample 116.1954 ok
+sample 86.0638 ok
+summary n=10 min=74.9130 median=79.3497 q1=75.5851 q3=84.9148 iqr=9.3297 max=116.1954
+BEGIN ovito threads=8 frame=ice884736 metric=q6
+warmup 0 93.9983 ok
+warmup 1 94.9018 ok
+sample 88.7831 ok
+sample 86.0225 ok
+sample 88.5875 ok
+sample 84.9940 ok
+sample 85.5362 ok
+sample 83.9762 ok
+sample 88.7801 ok
+sample 89.2523 ok
+sample 83.9776 ok
+sample 85.3878 ok
+summary n=10 min=83.9762 median=85.7793 q1=85.0925 q3=88.7320 iqr=3.6395 max=89.2523
+BEGIN ovito threads=8 frame=ice884736 metric=q4bar
+warmup 0 215.8843 ok
+warmup 1 322.3534 ok
+sample 294.9889 ok
+sample 161.8470 ok
+sample 171.4073 ok
+sample 160.4417 ok
+sample 254.4627 ok
+sample 252.0566 ok
+sample 160.9764 ok
+sample 236.2892 ok
+sample 156.3025 ok
+sample 168.7966 ok
+summary n=10 min=156.3025 median=170.1019 q1=161.1941 q3=248.1147 iqr=86.9207 max=294.9889
+BEGIN ovito threads=8 frame=ice884736 metric=chill
+warmup 0 680.2717 ok
+warmup 1 639.2742 ok
+sample 685.0412 ok
+sample 682.7136 ok
+sample 634.6630 ok
+sample 656.6754 ok
+sample 681.3897 ok
+sample 646.0972 ok
+sample 640.1394 ok
+sample 675.5456 ok
+sample 642.1579 ok
+sample 660.3054 ok
+summary n=10 min=634.6630 median=658.4904 q1=643.1427 q3=679.9287 iqr=36.7860 max=685.0412
+BEGIN mdapy threads=8 frame=ice884736 metric=q4
+warmup 0 105.3073 ok
+warmup 1 100.1921 ok
+sample 108.5847 ok
+sample 109.8384 ok
+sample 109.4952 ok
+sample 104.9111 ok
+sample 105.1040 ok
+sample 104.1618 ok
+sample 101.6821 ok
+sample 102.3739 ok
+sample 104.3018 ok
+sample 106.4493 ok
+summary n=10 min=101.6821 median=105.0076 q1=104.1968 q3=108.0509 iqr=3.8540 max=109.8384
+BEGIN mdapy threads=8 frame=ice884736 metric=q6
+warmup 0 122.2360 ok
+warmup 1 117.6896 ok
+sample 118.4250 ok
+sample 116.7102 ok
+sample 117.4416 ok
+sample 118.7323 ok
+sample 124.0266 ok
+sample 119.8248 ok
+sample 115.4648 ok
+sample 114.4254 ok
+sample 114.6853 ok
+sample 114.3786 ok
+summary n=10 min=114.3786 median=117.0759 q1=114.8802 q3=118.6555 iqr=3.7753 max=124.0266
+BEGIN mdapy threads=8 frame=ice884736 metric=q4bar
+warmup 0 108.5651 ok
+warmup 1 106.7452 ok
+sample 106.3779 ok
+sample 105.8866 ok
+sample 108.9132 ok
+sample 117.8219 ok
+sample 110.1477 ok
+sample 110.4736 ok
+sample 116.0938 ok
+sample 117.2970 ok
+sample 116.0982 ok
+sample 118.2180 ok
+summary n=10 min=105.8866 median=113.2837 q1=109.2219 q3=116.9973 iqr=7.7754 max=118.2180
+BEGIN mdapy threads=8 frame=ice884736 metric=chill
+warmup 0 123.2318 ok
+warmup 1 121.4282 ok
+sample 120.4804 ok
+sample 123.9905 ok
+sample 121.8112 ok
+sample 122.0544 ok
+sample 123.2631 ok
+sample 123.9029 ok
+sample 123.5796 ok
+sample 123.4988 ok
+sample 122.2492 ok
+sample 122.7947 ok
+summary n=10 min=120.4804 median=123.0289 q1=122.1031 q3=123.5594 iqr=1.4563 max=123.9905
+BEGIN pyscal3 threads=8 frame=ice884736 metric=q4
+warmup 0 224.3454 v0=0.50917508
+warmup 1 231.3773 v0=0.50917508
+sample 170.2842 v0=0.50917508
+sample 153.1429 v0=0.50917508
+sample 161.9077 v0=0.50917508
+sample 181.5051 v0=0.50917508
+sample 196.2676 v0=0.50917508
+sample 206.5045 v0=0.50917508
+sample 308.8501 v0=0.50917508
+sample 176.7349 v0=0.50917508
+sample 155.4486 v0=0.50917508
+sample 161.8722 v0=0.50917508
+summary n=10 min=153.1429 median=173.5096 q1=161.8811 q3=192.5769 iqr=30.6959 max=308.8501
+BEGIN pyscal3 threads=8 frame=ice884736 metric=q6
+warmup 0 187.8807 v0=0.62853936
+warmup 1 218.1782 v0=0.62853936
+sample 223.0745 v0=0.62853936
+sample 217.6399 v0=0.62853936
+sample 222.7049 v0=0.62853936
+sample 199.7299 v0=0.62853936
+sample 175.4612 v0=0.62853936
+sample 176.4472 v0=0.62853936
+sample 181.2085 v0=0.62853936
+sample 171.4581 v0=0.62853936
+sample 173.5261 v0=0.62853936
+sample 171.5176 v0=0.62853936
+summary n=10 min=171.4581 median=178.8279 q1=174.0099 q3=213.1624 iqr=39.1525 max=223.0745
+BEGIN pyscal3 threads=8 frame=ice884736 metric=q4bar
+warmup 0 173.3905 v0=0.50917508
+warmup 1 176.4822 v0=0.50917508
+sample 175.5381 v0=0.50917508
+sample 164.3887 v0=0.50917508
+sample 163.4501 v0=0.50917508
+sample 161.7539 v0=0.50917508
+sample 158.6659 v0=0.50917508
+sample 167.2031 v0=0.50917508
+sample 175.6668 v0=0.50917508
+sample 166.3183 v0=0.50917508
+sample 180.8086 v0=0.50917508
+sample 172.9113 v0=0.50917508
+summary n=10 min=158.6659 median=166.7607 q1=163.6848 q3=174.8814 iqr=11.1966 max=180.8086
+pyscal3 has no CHILL+ classifier
+date_utc_end 2026-11-12 01:54:46
+DONE

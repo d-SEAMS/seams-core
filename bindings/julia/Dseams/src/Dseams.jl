@@ -10,7 +10,7 @@ module Dseams
 
 using Libdl
 
-export Frame, nop, nframes, read_frame, chill_plus, cages, primitive_rings, steinhardt, signature_cages, symmetry, jump_tau90
+export Frame, nop, nframes, read_frame, chill_plus, cages, primitive_rings, steinhardt, signature_cages, symmetry, jump_tau90, q4_q6
 
 const ICE_NAMES = (
     "cubic",
@@ -231,6 +231,28 @@ function symmetry(frame::Frame; shell_rmsd::Real = 0.12)
     )
     _check(code)
     labels
+end
+
+function q4_q6(frame::Frame; cutoff::Real = 3.5, type::Integer = 0)
+    n = nop(frame)
+    q4 = Vector{Cdouble}(undef, n)
+    q6 = Vector{Cdouble}(undef, n)
+    q4bar = Vector{Cdouble}(undef, n)
+    q6bar = Vector{Cdouble}(undef, n)
+    code = ccall(
+        dlsym(_so(), :seams_frame_q4_q6),
+        Cint,
+        (Ptr{Cvoid}, Cdouble, Cint, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cdouble}, Ptr{Cdouble}),
+        frame.ptr,
+        cutoff,
+        type,
+        q4,
+        q6,
+        q4bar,
+        q6bar,
+    )
+    _check(code)
+    (q4 = q4, q6 = q6, q4bar = q4bar, q6bar = q6bar)
 end
 
 end

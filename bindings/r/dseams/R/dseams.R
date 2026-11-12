@@ -172,8 +172,11 @@ primitive_rings.dseams_frame <- function(frame, cutoff = 3.5, type = 0L,
 #'
 #' @param frame A `dseams_frame`.
 #' @param order_l Spherical-harmonic degree. 3, 4, 6, 8, and 12 are computed.
-#' @param cutoff Neighbour cutoff in angstrom. The neighbour list is the
-#'   mutual four-nearest, with `cutoff + 1.5` as the cell hint.
+#'   Degrees 4 and 6 on an orthorhombic or restricted-triclinic cell use the
+#'   solid-harmonic kernel.
+#' @param cutoff Neighbour cutoff in angstrom. An orthorhombic or
+#'   restricted-triclinic cell uses the cutoff shell. Any other cell keeps
+#'   the mutual four nearest inside `cutoff + 1.5`.
 #' @param type LAMMPS type.
 #' @return A data.frame with columns `atom`, `ql`, `qlbar`.
 #' @export
@@ -187,5 +190,26 @@ steinhardt.dseams_frame <- function(frame, order_l = 6L, cutoff = 3.5, type = 0L
                                     graph = "mutual") {
   out <- steinhardt_(frame$ptr, cutoff, as.integer(type), as.integer(order_l), graph)
   class(out) <- c("dseams_steinhardt", "data.frame")
+  out
+}
+
+#' Local q4 and q6 on the cutoff shell.
+#'
+#' Both degrees use the solid-harmonic kernel. `q4bar` and `q6bar` are the
+#' Lechner-Dellago averages.
+#'
+#' @param frame A `dseams_frame`.
+#' @param cutoff Neighbour cutoff in angstrom.
+#' @param type LAMMPS type. 0 uses the first atom's type.
+#' @return A data.frame with columns `atom`, `q4`, `q6`, `q4bar`, `q6bar`.
+#' @export
+q4_q6 <- function(frame, cutoff = 3.5, type = 0L) {
+  UseMethod("q4_q6")
+}
+
+#' @export
+q4_q6.dseams_frame <- function(frame, cutoff = 3.5, type = 0L) {
+  out <- q4_q6_(frame$ptr, cutoff, as.integer(type))
+  class(out) <- c("dseams_q4_q6", "data.frame")
   out
 }

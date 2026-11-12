@@ -127,7 +127,9 @@ int main(int argc, char **argv) {
     }
   }
   mean = nfinite > 0 ? mean / static_cast<double>(nfinite) : 0.0;
-  if (std::abs(mean - 0.389362) > 1e-4) {
+  // Orthorhombic frames take the cutoff shell. 0.389362 is the
+  // four-nearest mean of the same oxygens.
+  if (std::abs(mean - 0.374897) > 1e-4) {
     std::cerr << "q3 mean " << mean << "\n";
     return fail("q3");
   }

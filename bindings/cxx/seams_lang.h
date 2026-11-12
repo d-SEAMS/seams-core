@@ -90,6 +90,8 @@ int seams_frame_chill_rings(seams_frame *frame, double cutoff, int type,
 int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
                            const char *graph);
 
+/* Local Steinhardt q_l on the cutoff shell. A null qlbar skips the
+ * Lechner-Dellago average; the local values do not use that pass. */
 int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
                            int order_l, double *ql, double *qlbar);
 /* graph is "mutual" (four nearest, the historical default) or "cutoff"
@@ -97,6 +99,24 @@ int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
 int seams_frame_steinhardt_graph(seams_frame *frame, double cutoff, int type,
                                  int order_l, const char *graph, double *ql,
                                  double *qlbar);
+
+/* Normalised Steinhardt hat{w}_l for l = 4 or 6 on the cutoff shell.
+ * Returns 1 on failure. */
+int seams_frame_wl(seams_frame *frame, double cutoff, int type, int order_l,
+                   double *wl);
+
+/* Local q4 and q6 on the cutoff shell. Degrees 4 and 6 use the
+ * solid-harmonic kernel. q4bar and q6bar may be null, and a null
+ * pointer skips that Lechner-Dellago average. Returns 1 on failure. */
+int seams_frame_q4_q6(seams_frame *frame, double cutoff, int type, double *q4,
+                      double *q6, double *q4bar, double *q6bar);
+
+/* One cutoff list. Local q4, local q6, Lechner-Dellago q4-bar and
+ * q6-bar, and published CHILL+ labels. q4bar and q6bar may be null.
+ * counts9 and labels may be null. Returns 1 on failure. */
+int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
+                            double *q4, double *q6, double *q4bar,
+                            double *q6bar, int *labels, int counts9[9]);
 
 int seams_frame_cages(seams_frame *frame, double cutoff, int type, int k,
                       const char *graph, int complete, int *per_atom,

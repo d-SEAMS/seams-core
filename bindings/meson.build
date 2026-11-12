@@ -102,6 +102,30 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
     depends: [seams_lang],
     timeout: 120,
   )
+  test(
+    'q4_q6_chill_ctypes',
+    find_program('python3', required: true),
+    args: [meson.project_source_root() / 'tests' / 'test_q4_q6_chill.py'],
+    env: {'SEAMS_LANG_LIB': seams_lang.full_path()},
+    depends: [seams_lang],
+    timeout: 120,
+  )
+  test(
+    'wl_ice',
+    find_program('python3', required: true),
+    args: [meson.project_source_root() / 'tests' / 'test_wl_ice.py'],
+    env: {'SEAMS_LANG_LIB': seams_lang.full_path()},
+    depends: [seams_lang],
+    timeout: 180,
+  )
+  test(
+    'q4_q6_equal',
+    find_program('python3', required: true),
+    args: [meson.project_source_root() / 'tests' / 'test_q4_q6_equal.py'],
+    env: {'SEAMS_LANG_LIB': seams_lang.full_path()},
+    depends: [seams_lang],
+    timeout: 180,
+  )
   install_data(
     'python/chill_plus.py',
     install_dir: get_option('datadir') / 'seams' / 'python',

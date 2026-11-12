@@ -112,7 +112,7 @@ A region that is already parallel does not fork again.
 | ~chill::classifyBondsCsr~ | ~void (PointCloud&, const vector<int>& offsets, const vector<int>& cols, const BondClassifier& rule, bool isSlice = false)~. Bond labels ~c_ij~ from the CSR. |
 | ~chill::chillPlusFromCsr~ | ~int (PointCloud&, const vector<int>& offsets, const vector<int>& cols)~. Four nearest of each row, real ~l = 3~ harmonics, CHILL+ labels. Returns the cubic count. |
 | ~symm::diamondFromCsr~ | ~void (const PointCloud&, const vector<int>& offsets, const vector<int>& cols, vector<int>& kind)~. Cubic shell is 1, hexagonal is 0, undecided is -1. |
-| ~chill::steinhardtQlCutoff~ | ~SteinhardtQl (const PointCloud&, double cutoff, int orderL, int typeI, bool average)~. ~orthoFullCsr~ for one type, then ~q_l~. ~qlBar~ is filled only when ~average~ is true. ~orderL~ is 3, 4, 6, 8, or 12. |
+| ~chill::steinhardtQlCutoff~ | ~SteinhardtQl (const PointCloud&, double cutoff, int orderL, int typeI, bool average, bool invariants = false)~. ~orthoFullCsr~ for one type, then ~q_l~. Degrees 4 and 6 on an orthorhombic or restricted-triclinic cell use the solid-harmonic kernel. ~qlBar~ is filled only when ~average~ is true. ~invariants~ fills ~wl~ for \(l = 4\) or \(6\). ~orderL~ is 3, 4, 6, 8, or 12. |
 
 The walk, the skin, and the session that timed them are in
 [[file:../howto/neighbour-lists.org][Cutoff neighbour lists]].
@@ -121,6 +121,27 @@ The face-edge window is the same string on every front.
 Python is ~frame.cages_by_signature("512", edge="none")~.
 Lua (~require("dseams")~) is ~dseams.cages_by_signature(frame, "512", {edge = "none"})~.
 The C entry those packages call is ~seams_frame_signature_edge~; a null edge string is the default ~2.65,3.15~ in the coordinate units of the file.
+
+* Fast q4 and q6
+
+Degrees 4 and 6 on an orthorhombic or restricted-triclinic cutoff shell use the solid-harmonic kernel inside ~chill::steinhardtQlCutoff~.
+~seams_frame_q4_q6~ in =bindings/cxx/seams_lang.h= returns both local values and, when the pointers are non-null, the Lechner-Dellago averages.
+~seams_q4_q6~ in =src/include/internal/seams_c_api.h= is the same pair for a native caller.
+Its box is ~ox, oy, oz, lx, ly, lz~, the six numbers ~seams_chill_plus~ already takes.
+~seams_q4_q6_lammps~ takes the nine-number LAMMPS cell.
+Both return 0 on success.
+~q4~ and ~q6~ are required.
+A null ~q4bar~ or ~q6bar~ skips that average.
+
+Python ~q4_q6~ in =bindings/python/chill_plus.py=, R ~q4_q6~, and Julia ~q4_q6~ call ~seams_frame_q4_q6~.
+~seams steinhardt~ prints the means of \(q_3\), \(q_4\), \(q_6\), and \(q_{12}\), and of each Lechner-Dellago average.
+The \(q_4\) and \(q_6\) means are this kernel.
+
+* Fused q4, q6 and CHILL+
+
+~seams_frame_q4_q6_chill~ in =bindings/cxx/seams_lang.h= builds one cutoff list and, on that pass, the local Steinhardt \(q_4\) and \(q_6\), the Lechner-Dellago averages \(\bar q_4\) and \(\bar q_6\), and the published CHILL+ labels. The averages are the same neighbour mean of \(q_{lm}\) as ~steinhardtQlCutoff~ with averaging on. ~q4bar~ and ~q6bar~ may be null. Labels use the published closed edges, not ~ovito-chill+~.
+
+The Python wrapper is ~q4_q6_chill~ in =bindings/python/chill_plus.py=. It returns ~q4~, ~q6~, ~q4bar~, ~q6bar~, ~labels~ and ~counts~. ~SEAMS_LANG_LIB~ selects ~libseams_lang~. Nucleation analysis reads ~q6bar~.
 ~none~ leaves the cage bound to the face census.
 Choose the window as the heavy-atom contact range of the model, and widen it for a compressed cell or a guest that stretches a cage.
 A nanometre file uses ~0.265,0.315~.

@@ -1,0 +1,187 @@
+session 2026-11-11T22:27:14Z
+host Linux 6.12.113+ gcc 15.2.0 n 110592 cutoff 3.5 ice Ic
+=== seams 1 ===
+warmup_ms 45.9479 cubic 110592 n 110592 detail [110592, 0, 0, 0, 0, 0, 0, 0, 0]
+34.8752
+34.6694
+34.9222
+34.7558
+37.1900
+34.7706
+35.0002
+34.7645
+=== seams 8 ===
+warmup_ms 45.5547 cubic 110592 n 110592 detail [110592, 0, 0, 0, 0, 0, 0, 0, 0]
+13.9513
+11.3033
+9.2318
+9.1785
+10.0170
+10.3988
+9.9108
+9.2034
+=== seams 8 stages ===
+chill-stages walk_ylm_ms=9.25731 label_ms=7.01177
+warmup_ms 22.2715 cubic 110592 n 110592 detail [110592, 0, 0, 0, 0, 0, 0, 0, 0]
+chill-stages walk_ylm_ms=24.7038 label_ms=1.54219
+28.0354
+chill-stages walk_ylm_ms=8.10097 label_ms=1.21222
+10.9434
+chill-stages walk_ylm_ms=4.34732 label_ms=0.471905
+7.4636
+chill-stages walk_ylm_ms=4.36636 label_ms=0.845371
+7.2813
+chill-stages walk_ylm_ms=7.58918 label_ms=0.57762
+9.6404
+chill-stages walk_ylm_ms=8.09828 label_ms=0.457798
+11.3265
+chill-stages walk_ylm_ms=4.3868 label_ms=0.447905
+7.3991
+chill-stages walk_ylm_ms=4.43506 label_ms=0.469603
+7.0482
+=== mdapy 1 ===
+Traceback (most recent call last):
+  File "session_chill.py", line 86, in <module>
+    from mdapy import ChillPlus, System
+ImportError: cannot import name 'ChillPlus' from 'mdapy' (${VENV}/lib/python3.13/site-packages/mdapy/__init__.py)
+=== mdapy 8 ===
+Traceback (most recent call last):
+  File "session_chill.py", line 86, in <module>
+    from mdapy import ChillPlus, System
+ImportError: cannot import name 'ChillPlus' from 'mdapy' (${VENV}/lib/python3.13/site-packages/mdapy/__init__.py)
+=== ovito 1 ===
+warmup_ms 638.2462 cubic 110592 n 110592 detail {2: 110592}
+0.0512
+0.0159
+0.0113
+0.0105
+0.0068
+0.0058
+0.0060
+0.0056
+=== ovito 8 ===
+warmup_ms 89.9168 cubic 110592 n 110592 detail {2: 110592}
+0.0291
+0.0088
+0.0068
+0.0062
+0.0054
+0.0048
+0.0052
+0.0047
+DONE
+=== mdapy 1 retry ===
+  File "session_chill.py", line 130
+    nonlocal generation
+    ^^^^^^^^^^^^^^^^^^^
+SyntaxError: no binding for nonlocal 'generation' found
+=== mdapy 8 retry ===
+  File "session_chill.py", line 130
+    nonlocal generation
+    ^^^^^^^^^^^^^^^^^^^
+SyntaxError: no binding for nonlocal 'generation' found
+=== ovito 8 retry ===
+  File "session_chill.py", line 130
+    nonlocal generation
+    ^^^^^^^^^^^^^^^^^^^
+SyntaxError: no binding for nonlocal 'generation' found
+=== ovito 1 retry ===
+  File "session_chill.py", line 130
+    nonlocal generation
+    ^^^^^^^^^^^^^^^^^^^
+SyntaxError: no binding for nonlocal 'generation' found
+DONE2
+=== mdapy 1 retry ===
+warmup_ms 76.1987 cubic 110592 n 110592 detail {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+63.8681
+68.2311
+63.1378
+62.7007
+68.5828
+64.5342
+62.6098
+64.1594
+=== mdapy 8 retry ===
+warmup_ms 16.7055 cubic 110592 n 110592 detail {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+14.8743
+14.1306
+13.0941
+12.0581
+12.6429
+12.1378
+12.1279
+14.1280
+=== ovito 8 retry ===
+warmup_ms 88.3578 cubic 110592 n 110592 detail {2: 110592}
+Traceback (most recent call last):
+  File "session_chill.py", line 148, in <module>
+    samples(once)
+    ~~~~~~~^^^^^^
+  File "session_chill.py", line 33, in samples
+    ms, _, _ = fn()
+               ~~^^
+  File "session_chill.py", line 133, in once
+    source.data.particles_.create_property("Position", data=nudged)
+    ^^^^^^^^^^^^^^^^^^^^^^
+  File "${VENV}/lib/python3.13/site-packages/ovito/_extensions/particles.py", line 224, in <lambda>
+    lambda self: self.make_mutable(self.particles), _DataCollection_set_particles
+                 ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+RuntimeError: make_mutable() is not possible because the parent DataCollection is shared by multiple owners. First, make sure the DataCollection object itself is mutable before trying to make its child Particles mutable.
+=== ovito 1 retry ===
+warmup_ms 637.6685 cubic 110592 n 110592 detail {2: 110592}
+Traceback (most recent call last):
+  File "session_chill.py", line 148, in <module>
+    samples(once)
+    ~~~~~~~^^^^^^
+  File "session_chill.py", line 33, in samples
+    ms, _, _ = fn()
+               ~~^^
+  File "session_chill.py", line 133, in once
+    source.data.particles_.create_property("Position", data=nudged)
+    ^^^^^^^^^^^^^^^^^^^^^^
+  File "${VENV}/lib/python3.13/site-packages/ovito/_extensions/particles.py", line 224, in <lambda>
+    lambda self: self.make_mutable(self.particles), _DataCollection_set_particles
+                 ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+RuntimeError: make_mutable() is not possible because the parent DataCollection is shared by multiple owners. First, make sure the DataCollection object itself is mutable before trying to make its child Particles mutable.
+DONE2
+=== ovito 8 fresh ===
+warmup_ms 89.5022 cubic 110592 n 110592 detail {2: 110592}
+86.2715
+87.3862
+86.7967
+87.1380
+87.1008
+86.0154
+88.3368
+87.0589
+=== ovito 1 fresh ===
+warmup_ms 626.0413 cubic 110592 n 110592 detail {2: 110592}
+619.6952
+616.3427
+622.8950
+615.9863
+617.4900
+619.0030
+617.7170
+615.0015
+DONE3
+=== seams 1 final ===
+warmup_ms 47.5461 cubic 110592 n 110592 detail [110592, 0, 0, 0, 0, 0, 0, 0, 0]
+36.0551
+34.5079
+34.4315
+34.2971
+34.5149
+34.0892
+34.2630
+34.3464
+=== seams 8 final ===
+warmup_ms 30.0674 cubic 110592 n 110592 detail [110592, 0, 0, 0, 0, 0, 0, 0, 0]
+12.1786
+11.5150
+12.0450
+8.3272
+11.7786
+8.3086
+10.3605
+10.3579

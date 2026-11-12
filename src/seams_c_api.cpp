@@ -20,6 +20,7 @@
 #include <neighbours.hpp>
 #include <water_select.hpp>
 
+#include <cstring>
 #include <exception>
 #include <string>
 #include <vector>
@@ -63,6 +64,34 @@ cloudFromXyz(const double *xyz, int n) {
     cloud.idIndexMap[i + 1] = i;
   }
   return cloud;
+}
+
+int writeQ4Q6(molSys::PointCloud<molSys::Point<double>, double> &cloud,
+              double cutoff, double *q4, double *q6, double *q4bar,
+              double *q6bar) {
+  const auto a4 =
+      chill::steinhardtQlCutoff(cloud, cutoff, 4, 1, q4bar != nullptr);
+  const auto a6 =
+      chill::steinhardtQlCutoff(cloud, cutoff, 6, 1, q6bar != nullptr);
+  if (static_cast<int>(a4.ql.size()) != cloud.nop ||
+      static_cast<int>(a6.ql.size()) != cloud.nop) {
+    return 1;
+  }
+  if (cloud.nop > 0) {
+    std::memcpy(q4, a4.ql.data(),
+                static_cast<std::size_t>(cloud.nop) * sizeof(double));
+    std::memcpy(q6, a6.ql.data(),
+                static_cast<std::size_t>(cloud.nop) * sizeof(double));
+    if (q4bar != nullptr) {
+      std::memcpy(q4bar, a4.qlBar.data(),
+                  static_cast<std::size_t>(cloud.nop) * sizeof(double));
+    }
+    if (q6bar != nullptr) {
+      std::memcpy(q6bar, a6.qlBar.data(),
+                  static_cast<std::size_t>(cloud.nop) * sizeof(double));
+    }
+  }
+  return 0;
 }
 
 } // namespace
@@ -383,3 +412,35 @@ int seams_oxygen_cutoff_degree(const double *xyz, int n, const double *box9,
   }
   return 0;
 }
+
+int seams_q4_q6(const double *xyz, int n, const double *box, double cutoff,
+                double *q4, double *q6, double *q4bar, double *q6bar) {
+  if (xyz == nullptr || box == nullptr || q4 == nullptr || q6 == nullptr ||
+      n <= 0 || !(cutoff > 0.0)) {
+    return 1;
+  }
+  if (!(box[3] > 0.0 && box[4] > 0.0 && box[5] > 0.0)) {
+    return 1;
+  }
+  auto cloud = cloudFromXyz(xyz, n);
+  cloud.box = {box[3], box[4], box[5]};
+  cloud.boxLow = {box[0], box[1], box[2]};
+  return writeQ4Q6(cloud, cutoff, q4, q6, q4bar, q6bar);
+}
+
+int seams_q4_q6_lammps(const double *xyz, int n, const double *box9,
+                       double cutoff, double *q4, double *q6, double *q4bar,
+                       double *q6bar) {
+  if (xyz == nullptr || box9 == nullptr || q4 == nullptr || q6 == nullptr ||
+      n <= 0 || !(cutoff > 0.0)) {
+    return 1;
+  }
+  auto cloud = cloudFromXyz(xyz, n);
+  if (!nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, box9[0], box9[1],
+                                    box9[2], box9[3], box9[4], box9[5],
+                                    box9[6], box9[7], box9[8])) {
+    return 1;
+  }
+  return writeQ4Q6(cloud, cutoff, q4, q6, q4bar, q6bar);
+}
+

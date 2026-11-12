@@ -1,0 +1,1530 @@
+session 2026-11-11T22:57:54Z
+protocol warmups=2 samples=8 cutoff=3.5 ice Ic bond=2.75 taskset no other load
+=== seams 1 ===
+BEGIN seams threads=1 n=10648 metric=chill
+warmup 0 5.5664 st=0 cubic=10648
+warmup 1 4.1053 st=0 cubic=10648
+sample 4.0189 st=0 cubic=10648
+sample 4.1878 st=0 cubic=10648
+sample 4.0543 st=0 cubic=10648
+sample 4.1442 st=0 cubic=10648
+sample 4.0599 st=0 cubic=10648
+sample 4.0484 st=0 cubic=10648
+sample 4.4321 st=0 cubic=10648
+sample 4.0003 st=0 cubic=10648
+BEGIN seams threads=1 n=10648 metric=q4
+warmup 0 7.5697 st=0 q0=0.509175
+warmup 1 5.5726 st=0 q0=0.636469
+sample 5.5016 st=0 q0=0.668292
+sample 5.7400 st=0 q0=0.676248
+sample 5.5264 st=0 q0=0.678237
+sample 5.6856 st=0 q0=0.678734
+sample 6.0532 st=0 q0=0.678859
+sample 5.6197 st=0 q0=0.678890
+sample 5.7750 st=0 q0=0.678898
+sample 5.3767 st=0 q0=0.678899
+BEGIN seams threads=1 n=10648 metric=q6
+warmup 0 7.3743 st=0 q0=0.628539
+warmup 1 5.9572 st=0 q0=0.785674
+sample 5.8440 st=0 q0=0.824958
+sample 5.9105 st=0 q0=0.834779
+sample 5.8114 st=0 q0=0.837234
+sample 6.1375 st=0 q0=0.837848
+sample 5.7444 st=0 q0=0.838001
+sample 5.8752 st=0 q0=0.838040
+sample 5.8116 st=0 q0=0.838049
+sample 5.7829 st=0 q0=0.838052
+BEGIN seams threads=1 n=110592 metric=chill
+warmup 0 47.7029 st=0 cubic=110592
+warmup 1 36.5743 st=0 cubic=110592
+sample 35.9236 st=0 cubic=110592
+sample 35.7548 st=0 cubic=110592
+sample 35.6378 st=0 cubic=110592
+sample 36.0127 st=0 cubic=110592
+sample 35.8011 st=0 cubic=110592
+sample 35.5895 st=0 cubic=110592
+sample 35.6705 st=0 cubic=110592
+sample 35.6051 st=0 cubic=110592
+BEGIN seams threads=1 n=110592 metric=q4
+warmup 0 77.7522 st=0 q0=0.509175
+warmup 1 55.3701 st=0 q0=0.636469
+sample 54.8020 st=0 q0=0.668292
+sample 54.6783 st=0 q0=0.676248
+sample 54.5069 st=0 q0=0.678237
+sample 52.6940 st=0 q0=0.678734
+sample 53.0125 st=0 q0=0.678859
+sample 53.2971 st=0 q0=0.678890
+sample 53.0319 st=0 q0=0.678898
+sample 53.0082 st=0 q0=0.678899
+BEGIN seams threads=1 n=110592 metric=q6
+warmup 0 70.5507 st=0 q0=0.628539
+warmup 1 60.4702 st=0 q0=0.785674
+sample 57.8990 st=0 q0=0.824958
+sample 56.6373 st=0 q0=0.834779
+sample 58.5514 st=0 q0=0.837234
+sample 58.8323 st=0 q0=0.837848
+sample 57.7905 st=0 q0=0.838001
+sample 60.6106 st=0 q0=0.838040
+sample 57.7603 st=0 q0=0.838049
+sample 58.8609 st=0 q0=0.838052
+BEGIN seams threads=1 n=884736 metric=chill
+warmup 0 383.4533 st=0 cubic=884736
+warmup 1 318.6224 st=0 cubic=884736
+sample 314.9258 st=0 cubic=884736
+sample 316.2749 st=0 cubic=884736
+sample 316.7603 st=0 cubic=884736
+sample 311.3869 st=0 cubic=884736
+sample 317.7174 st=0 cubic=884736
+sample 313.7647 st=0 cubic=884736
+sample 310.7064 st=0 cubic=884736
+sample 313.8091 st=0 cubic=884736
+BEGIN seams threads=1 n=884736 metric=q4
+warmup 0 604.7336 st=0 q0=0.509175
+warmup 1 461.1537 st=0 q0=0.636469
+sample 579.2520 st=0 q0=0.668292
+sample 453.9417 st=0 q0=0.676248
+sample 450.0720 st=0 q0=0.678237
+sample 445.6193 st=0 q0=0.678734
+sample 448.6755 st=0 q0=0.678859
+sample 445.3000 st=0 q0=0.678890
+sample 449.6533 st=0 q0=0.678898
+sample 452.4913 st=0 q0=0.678899
+BEGIN seams threads=1 n=884736 metric=q6
+warmup 0 629.7162 st=0 q0=0.628539
+warmup 1 647.5523 st=0 q0=0.785674
+sample 553.5907 st=0 q0=0.824958
+sample 486.0918 st=0 q0=0.834779
+sample 482.9139 st=0 q0=0.837234
+sample 485.8002 st=0 q0=0.837848
+sample 487.2962 st=0 q0=0.838001
+sample 484.5362 st=0 q0=0.838040
+sample 483.3673 st=0 q0=0.838049
+sample 492.8523 st=0 q0=0.838052
+=== seams 8 ===
+BEGIN seams threads=8 n=10648 metric=chill
+warmup 0 3.4063 st=0 cubic=10648
+warmup 1 1.8632 st=0 cubic=10648
+sample 1.7754 st=0 cubic=10648
+sample 1.9064 st=0 cubic=10648
+sample 1.9929 st=0 cubic=10648
+sample 1.7743 st=0 cubic=10648
+sample 1.8631 st=0 cubic=10648
+sample 1.7520 st=0 cubic=10648
+sample 1.9668 st=0 cubic=10648
+sample 2.4812 st=0 cubic=10648
+BEGIN seams threads=8 n=10648 metric=q4
+warmup 0 10.6746 st=0 q0=0.509175
+warmup 1 10.4519 st=0 q0=0.636469
+sample 7.7383 st=0 q0=0.668292
+sample 3.3925 st=0 q0=0.676248
+sample 3.3805 st=0 q0=0.678237
+sample 3.1290 st=0 q0=0.678734
+sample 3.1665 st=0 q0=0.678859
+sample 3.9087 st=0 q0=0.678890
+sample 2.7356 st=0 q0=0.678898
+sample 2.7022 st=0 q0=0.678899
+BEGIN seams threads=8 n=10648 metric=q6
+warmup 0 3.7587 st=0 q0=0.628539
+warmup 1 3.2267 st=0 q0=0.785674
+sample 2.3985 st=0 q0=0.824958
+sample 2.4382 st=0 q0=0.834779
+sample 3.5342 st=0 q0=0.837234
+sample 5.1163 st=0 q0=0.837848
+sample 2.5990 st=0 q0=0.838001
+sample 2.1357 st=0 q0=0.838040
+sample 1.7801 st=0 q0=0.838049
+sample 1.7224 st=0 q0=0.838052
+BEGIN seams threads=8 n=110592 metric=chill
+warmup 0 15.9507 st=0 cubic=110592
+warmup 1 7.8009 st=0 cubic=110592
+sample 8.4126 st=0 cubic=110592
+sample 9.2613 st=0 cubic=110592
+sample 7.1629 st=0 cubic=110592
+sample 10.0300 st=0 cubic=110592
+sample 9.2866 st=0 cubic=110592
+sample 8.6979 st=0 cubic=110592
+sample 7.3461 st=0 cubic=110592
+sample 7.6947 st=0 cubic=110592
+BEGIN seams threads=8 n=110592 metric=q4
+warmup 0 27.7117 st=0 q0=0.509175
+warmup 1 12.1729 st=0 q0=0.636469
+sample 10.7781 st=0 q0=0.668292
+sample 10.2345 st=0 q0=0.676248
+sample 10.3236 st=0 q0=0.678237
+sample 11.3365 st=0 q0=0.678734
+sample 18.8515 st=0 q0=0.678859
+sample 39.5738 st=0 q0=0.678890
+sample 19.4512 st=0 q0=0.678898
+sample 17.8818 st=0 q0=0.678899
+BEGIN seams threads=8 n=110592 metric=q6
+warmup 0 37.1178 st=0 q0=0.628539
+warmup 1 23.4311 st=0 q0=0.785674
+sample 31.7009 st=0 q0=0.824958
+sample 21.8872 st=0 q0=0.834779
+sample 26.6163 st=0 q0=0.837234
+sample 33.5136 st=0 q0=0.837848
+sample 58.3884 st=0 q0=0.838001
+sample 21.7058 st=0 q0=0.838040
+sample 15.5079 st=0 q0=0.838049
+sample 14.1476 st=0 q0=0.838052
+BEGIN seams threads=8 n=884736 metric=chill
+warmup 0 118.4761 st=0 cubic=884736
+warmup 1 57.6115 st=0 cubic=884736
+sample 53.1486 st=0 cubic=884736
+sample 51.9175 st=0 cubic=884736
+sample 61.1171 st=0 cubic=884736
+sample 54.4945 st=0 cubic=884736
+sample 54.2224 st=0 cubic=884736
+sample 50.9590 st=0 cubic=884736
+sample 50.4801 st=0 cubic=884736
+sample 50.5577 st=0 cubic=884736
+BEGIN seams threads=8 n=884736 metric=q4
+warmup 0 192.8172 st=0 q0=0.509175
+warmup 1 76.2193 st=0 q0=0.636469
+sample 82.0055 st=0 q0=0.668292
+sample 82.6418 st=0 q0=0.676248
+sample 105.3236 st=0 q0=0.678237
+sample 101.2820 st=0 q0=0.678734
+sample 100.5805 st=0 q0=0.678859
+sample 83.4413 st=0 q0=0.678890
+sample 81.8074 st=0 q0=0.678898
+sample 74.9154 st=0 q0=0.678899
+BEGIN seams threads=8 n=884736 metric=q6
+warmup 0 217.3963 st=0 q0=0.628539
+warmup 1 90.4313 st=0 q0=0.785674
+sample 87.2226 st=0 q0=0.824958
+sample 87.9814 st=0 q0=0.834779
+sample 82.6703 st=0 q0=0.837234
+sample 87.2060 st=0 q0=0.837848
+sample 85.2727 st=0 q0=0.838001
+sample 80.9062 st=0 q0=0.838040
+sample 85.3748 st=0 q0=0.838049
+sample 90.4756 st=0 q0=0.838052
+=== mdapy 1 ===
+BEGIN mdapy threads=1 n=10648 metric=chill
+warmup 0 8.3157 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+warmup 1 7.0391 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 6.9001 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 6.8766 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 6.8759 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 6.8407 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 6.7413 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 6.7807 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 6.8497 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 6.9245 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+BEGIN mdapy threads=1 n=10648 metric=q4
+warmup 0 7.2004 ok
+warmup 1 7.1131 ok
+sample 7.0632 ok
+sample 7.1239 ok
+sample 7.0848 ok
+sample 7.1835 ok
+sample 7.1152 ok
+sample 7.3143 ok
+sample 7.1511 ok
+sample 7.1317 ok
+BEGIN mdapy threads=1 n=10648 metric=q6
+warmup 0 8.4111 ok
+warmup 1 8.4166 ok
+sample 8.2930 ok
+sample 8.4314 ok
+sample 8.4962 ok
+sample 8.3681 ok
+sample 10.1334 ok
+sample 8.9188 ok
+sample 8.6325 ok
+sample 8.7282 ok
+BEGIN mdapy threads=1 n=110592 metric=chill
+warmup 0 83.6035 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+warmup 1 65.8653 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 68.5176 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 61.2667 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 70.5760 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 61.1872 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 61.1990 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 60.9180 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 61.2702 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 61.3181 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+BEGIN mdapy threads=1 n=110592 metric=q4
+warmup 0 63.9119 ok
+warmup 1 63.9251 ok
+sample 65.7897 ok
+sample 63.9853 ok
+sample 66.7848 ok
+sample 73.9634 ok
+sample 65.1715 ok
+sample 64.1476 ok
+sample 64.6870 ok
+sample 65.3939 ok
+BEGIN mdapy threads=1 n=110592 metric=q6
+warmup 0 80.6349 ok
+warmup 1 79.4716 ok
+sample 79.7430 ok
+sample 80.8117 ok
+sample 78.7485 ok
+sample 78.8560 ok
+sample 78.1342 ok
+sample 82.1984 ok
+sample 78.7847 ok
+sample 79.0046 ok
+BEGIN mdapy threads=1 n=884736 metric=chill
+warmup 0 902.6868 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+warmup 1 860.3365 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 890.6322 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 867.0224 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 878.4277 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 855.8088 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 845.7433 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 745.0230 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 859.0314 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 819.1686 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+BEGIN mdapy threads=1 n=884736 metric=q4
+warmup 0 802.1063 ok
+warmup 1 832.2181 ok
+sample 824.5918 ok
+sample 808.4542 ok
+sample 862.6012 ok
+sample 804.0621 ok
+sample 783.1115 ok
+sample 774.8895 ok
+sample 784.1618 ok
+sample 802.0889 ok
+BEGIN mdapy threads=1 n=884736 metric=q6
+warmup 0 926.3471 ok
+warmup 1 925.2241 ok
+sample 927.1579 ok
+sample 930.2460 ok
+sample 943.0507 ok
+sample 938.3390 ok
+sample 925.2393 ok
+sample 906.9814 ok
+sample 883.3525 ok
+sample 891.8650 ok
+=== mdapy 8 ===
+BEGIN mdapy threads=8 n=10648 metric=chill
+warmup 0 2.7893 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+warmup 1 2.6862 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 1.4610 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 1.3830 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 1.4836 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 5.9989 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 3.0908 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 1.9652 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 1.5117 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 1.4328 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 10648, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+BEGIN mdapy threads=8 n=10648 metric=q4
+warmup 0 1.4070 ok
+warmup 1 1.3974 ok
+sample 1.3835 ok
+sample 1.4304 ok
+sample 1.4032 ok
+sample 1.3695 ok
+sample 1.4090 ok
+sample 1.3399 ok
+sample 1.3783 ok
+sample 1.5192 ok
+BEGIN mdapy threads=8 n=10648 metric=q6
+warmup 0 1.7738 ok
+warmup 1 1.6039 ok
+sample 1.5570 ok
+sample 1.5448 ok
+sample 1.5761 ok
+sample 1.5602 ok
+sample 1.6958 ok
+sample 1.7399 ok
+sample 1.5811 ok
+sample 1.5444 ok
+BEGIN mdapy threads=8 n=110592 metric=chill
+warmup 0 15.7533 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+warmup 1 13.1035 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 11.9186 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 12.1696 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 11.9222 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 11.8258 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 11.7996 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 12.3347 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 12.4700 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 11.8085 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+BEGIN mdapy threads=8 n=110592 metric=q4
+warmup 0 11.1483 ok
+warmup 1 10.9570 ok
+sample 11.1882 ok
+sample 10.9103 ok
+sample 11.0082 ok
+sample 11.0409 ok
+sample 10.9303 ok
+sample 10.8887 ok
+sample 11.0150 ok
+sample 10.8342 ok
+BEGIN mdapy threads=8 n=110592 metric=q6
+warmup 0 12.6659 ok
+warmup 1 12.5789 ok
+sample 14.5398 ok
+sample 12.7611 ok
+sample 12.6265 ok
+sample 12.7670 ok
+sample 12.4665 ok
+sample 12.6819 ok
+sample 12.6198 ok
+sample 12.8796 ok
+BEGIN mdapy threads=8 n=884736 metric=chill
+warmup 0 126.6637 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+warmup 1 122.9199 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 122.7034 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 122.7939 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 122.1463 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 122.0282 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 121.5108 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 121.5892 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 134.5046 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 135.5268 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 884736, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+BEGIN mdapy threads=8 n=884736 metric=q4
+warmup 0 110.3072 ok
+warmup 1 112.1655 ok
+sample 114.0090 ok
+sample 113.6459 ok
+sample 109.5200 ok
+sample 110.2091 ok
+sample 112.2866 ok
+sample 110.5746 ok
+sample 108.5662 ok
+sample 109.3116 ok
+BEGIN mdapy threads=8 n=884736 metric=q6
+warmup 0 123.3705 ok
+warmup 1 125.5908 ok
+sample 123.8637 ok
+sample 123.2500 ok
+sample 124.3767 ok
+sample 123.3045 ok
+sample 123.8780 ok
+sample 124.0667 ok
+sample 123.8491 ok
+sample 127.1219 ok
+=== freud 1 ===
+BEGIN freud threads=1 n=10648 metric=q4
+warmup 0 27.5902 q0=0.509175
+warmup 1 25.2497 q0=0.509175
+sample 24.5891 q0=0.509175
+sample 24.6613 q0=0.509175
+sample 24.7535 q0=0.509175
+sample 24.5336 q0=0.509175
+sample 24.6381 q0=0.509175
+sample 24.5937 q0=0.509175
+sample 24.6078 q0=0.509175
+sample 24.4589 q0=0.509175
+BEGIN freud threads=1 n=10648 metric=q6
+warmup 0 33.3560 q0=0.628539
+warmup 1 32.9410 q0=0.628539
+sample 32.6868 q0=0.628539
+sample 32.4658 q0=0.628539
+sample 32.4595 q0=0.628539
+sample 32.1867 q0=0.628539
+sample 32.7992 q0=0.628539
+sample 32.5502 q0=0.628539
+sample 32.4062 q0=0.628539
+sample 32.5404 q0=0.628539
+BEGIN freud threads=1 n=110592 metric=q4
+warmup 0 281.8459 q0=0.509175
+warmup 1 290.8444 q0=0.509175
+sample 272.2385 q0=0.509175
+sample 286.6352 q0=0.509175
+sample 273.7205 q0=0.509175
+sample 266.0208 q0=0.509175
+sample 264.8832 q0=0.509175
+sample 265.8382 q0=0.509175
+sample 261.1934 q0=0.509175
+sample 264.3891 q0=0.509175
+BEGIN freud threads=1 n=110592 metric=q6
+warmup 0 358.8729 q0=0.628539
+warmup 1 357.8639 q0=0.628539
+sample 356.0584 q0=0.628539
+sample 353.9233 q0=0.628539
+sample 349.2561 q0=0.628539
+sample 347.6170 q0=0.628539
+sample 348.3113 q0=0.628539
+sample 351.8686 q0=0.628539
+sample 350.4094 q0=0.628539
+sample 346.6212 q0=0.628539
+BEGIN freud threads=1 n=884736 metric=q4
+warmup 0 2235.4954 q0=0.509175
+warmup 1 2229.7716 q0=0.509175
+sample 2226.3503 q0=0.509175
+sample 2201.0627 q0=0.509175
+sample 2192.3862 q0=0.509175
+sample 2203.4987 q0=0.509175
+sample 2211.8570 q0=0.509175
+sample 2203.5332 q0=0.509175
+sample 2197.6118 q0=0.509175
+sample 2199.4671 q0=0.509175
+BEGIN freud threads=1 n=884736 metric=q6
+warmup 0 2916.4515 q0=0.628539
+warmup 1 2897.0291 q0=0.628539
+sample 2890.8409 q0=0.628539
+sample 2919.5913 q0=0.628539
+sample 2922.4106 q0=0.628539
+sample 2949.2152 q0=0.628539
+sample 2912.8981 q0=0.628539
+sample 2940.4773 q0=0.628539
+sample 2908.7383 q0=0.628539
+sample 2872.3233 q0=0.628539
+=== freud 8 ===
+BEGIN freud threads=8 n=10648 metric=q4
+warmup 0 9.4118 q0=0.509175
+warmup 1 4.2283 q0=0.509175
+sample 4.0749 q0=0.509175
+sample 4.0779 q0=0.509175
+sample 4.2486 q0=0.509175
+sample 4.1203 q0=0.509175
+sample 3.8619 q0=0.509175
+sample 4.1369 q0=0.509175
+sample 3.8886 q0=0.509175
+sample 4.2430 q0=0.509175
+BEGIN freud threads=8 n=10648 metric=q6
+warmup 0 5.3269 q0=0.628539
+warmup 1 5.8389 q0=0.628539
+sample 5.3767 q0=0.628539
+sample 5.5814 q0=0.628539
+sample 5.2617 q0=0.628539
+sample 5.4690 q0=0.628539
+sample 5.2927 q0=0.628539
+sample 5.2608 q0=0.628539
+sample 5.3061 q0=0.628539
+sample 5.5019 q0=0.628539
+BEGIN freud threads=8 n=110592 metric=q4
+warmup 0 56.3392 q0=0.509175
+warmup 1 51.3525 q0=0.509175
+sample 50.7116 q0=0.509175
+sample 43.6928 q0=0.509175
+sample 44.3708 q0=0.509175
+sample 46.1848 q0=0.509175
+sample 45.7453 q0=0.509175
+sample 44.3155 q0=0.509175
+sample 44.3384 q0=0.509175
+sample 45.2678 q0=0.509175
+BEGIN freud threads=8 n=110592 metric=q6
+warmup 0 60.6382 q0=0.628539
+warmup 1 59.3603 q0=0.628539
+sample 60.6845 q0=0.628539
+sample 62.3918 q0=0.628539
+sample 62.9753 q0=0.628539
+sample 62.0154 q0=0.628539
+sample 60.9724 q0=0.628539
+sample 60.1274 q0=0.628539
+sample 63.2984 q0=0.628539
+sample 61.5276 q0=0.628539
+BEGIN freud threads=8 n=884736 metric=q4
+warmup 0 592.6381 q0=0.509175
+warmup 1 595.1267 q0=0.509175
+sample 624.9464 q0=0.509175
+sample 631.1076 q0=0.509175
+sample 609.2206 q0=0.509175
+sample 615.0269 q0=0.509175
+sample 600.0607 q0=0.509175
+sample 610.9391 q0=0.509175
+sample 573.5651 q0=0.509175
+sample 620.1041 q0=0.509175
+BEGIN freud threads=8 n=884736 metric=q6
+warmup 0 625.6284 q0=0.628539
+warmup 1 631.0947 q0=0.628539
+sample 626.8698 q0=0.628539
+sample 667.0094 q0=0.628539
+sample 660.4145 q0=0.628539
+sample 631.3847 q0=0.628539
+sample 631.7299 q0=0.628539
+sample 645.3995 q0=0.628539
+sample 657.6631 q0=0.628539
+sample 666.0673 q0=0.628539
+=== ovito 8 ===
+BEGIN ovito threads=8 n=10648 metric=chill
+warmup 0 15.6110 {2: 10648}
+warmup 1 14.2294 {2: 10648}
+sample 14.5663 {2: 10648}
+sample 15.2114 {2: 10648}
+sample 13.7744 {2: 10648}
+sample 13.6245 {2: 10648}
+sample 13.8003 {2: 10648}
+sample 13.8414 {2: 10648}
+sample 14.0874 {2: 10648}
+sample 14.3156 {2: 10648}
+BEGIN ovito threads=8 n=10648 metric=q4
+warmup 0 2.9429 ok
+warmup 1 2.9422 ok
+sample 2.2796 ok
+sample 2.8767 ok
+sample 2.9211 ok
+sample 3.0907 ok
+sample 3.3045 ok
+sample 2.8061 ok
+sample 2.8123 ok
+sample 2.7272 ok
+BEGIN ovito threads=8 n=10648 metric=q6
+warmup 0 3.5728 ok
+warmup 1 3.1012 ok
+sample 2.5823 ok
+sample 2.9153 ok
+sample 2.8381 ok
+sample 3.0854 ok
+sample 2.8537 ok
+sample 2.7732 ok
+sample 2.7353 ok
+sample 2.7843 ok
+BEGIN ovito threads=8 n=110592 metric=chill
+warmup 0 92.7012 {2: 110592}
+warmup 1 89.4134 {2: 110592}
+sample 91.2322 {2: 110592}
+sample 88.6972 {2: 110592}
+sample 91.1666 {2: 110592}
+sample 92.0933 {2: 110592}
+sample 87.5463 {2: 110592}
+sample 91.3261 {2: 110592}
+sample 93.4761 {2: 110592}
+sample 87.2446 {2: 110592}
+BEGIN ovito threads=8 n=110592 metric=q4
+warmup 0 9.6282 ok
+warmup 1 9.7718 ok
+sample 10.0733 ok
+sample 9.5722 ok
+sample 9.9317 ok
+sample 10.3010 ok
+sample 10.2507 ok
+sample 10.6029 ok
+sample 11.3625 ok
+sample 10.7838 ok
+BEGIN ovito threads=8 n=110592 metric=q6
+warmup 0 11.3030 ok
+warmup 1 10.5367 ok
+sample 10.7047 ok
+sample 10.8078 ok
+sample 11.0342 ok
+sample 13.1251 ok
+sample 10.9704 ok
+sample 10.8720 ok
+sample 11.2108 ok
+sample 10.9292 ok
+BEGIN ovito threads=8 n=884736 metric=chill
+warmup 0 694.6582 {2: 884736}
+warmup 1 684.9564 {2: 884736}
+sample 692.4050 {2: 884736}
+sample 689.8156 {2: 884736}
+sample 689.7817 {2: 884736}
+sample 679.3941 {2: 884736}
+sample 691.1334 {2: 884736}
+sample 682.8649 {2: 884736}
+sample 688.4930 {2: 884736}
+sample 666.7940 {2: 884736}
+BEGIN ovito threads=8 n=884736 metric=q4
+warmup 0 83.9933 ok
+warmup 1 97.6217 ok
+sample 84.9144 ok
+sample 80.6738 ok
+sample 83.5303 ok
+sample 78.2467 ok
+sample 80.0741 ok
+sample 80.3652 ok
+sample 78.6971 ok
+sample 83.0337 ok
+BEGIN ovito threads=8 n=884736 metric=q6
+warmup 0 93.6728 ok
+warmup 1 93.0582 ok
+sample 97.9637 ok
+sample 90.9602 ok
+sample 91.7287 ok
+sample 90.2611 ok
+sample 88.2661 ok
+sample 89.2850 ok
+sample 92.3445 ok
+sample 91.1144 ok
+=== ovito 1 ===
+BEGIN ovito threads=1 n=10648 metric=chill
+warmup 0 65.6895 {2: 10648}
+warmup 1 65.1791 {2: 10648}
+sample 64.6125 {2: 10648}
+sample 63.9684 {2: 10648}
+sample 64.7582 {2: 10648}
+sample 67.0456 {2: 10648}
+sample 64.2550 {2: 10648}
+sample 64.1883 {2: 10648}
+sample 65.5514 {2: 10648}
+sample 64.1924 {2: 10648}
+BEGIN ovito threads=1 n=10648 metric=q4
+warmup 0 5.7105 ok
+warmup 1 5.4571 ok
+sample 5.5413 ok
+sample 5.5719 ok
+sample 5.4215 ok
+sample 5.5478 ok
+sample 5.4397 ok
+sample 5.7677 ok
+sample 6.7342 ok
+sample 5.7731 ok
+BEGIN ovito threads=1 n=10648 metric=q6
+warmup 0 6.6404 ok
+warmup 1 6.4929 ok
+sample 6.3905 ok
+sample 6.3810 ok
+sample 6.2247 ok
+sample 6.4325 ok
+sample 6.5224 ok
+sample 6.3211 ok
+sample 6.4259 ok
+sample 6.4278 ok
+BEGIN ovito threads=1 n=110592 metric=chill
+warmup 0 640.0828 {2: 110592}
+warmup 1 671.5249 {2: 110592}
+sample 628.3969 {2: 110592}
+sample 640.1143 {2: 110592}
+sample 635.1016 {2: 110592}
+sample 625.8613 {2: 110592}
+sample 627.6787 {2: 110592}
+sample 628.2259 {2: 110592}
+sample 626.6648 {2: 110592}
+sample 644.6863 {2: 110592}
+BEGIN ovito threads=1 n=110592 metric=q4
+warmup 0 50.2638 ok
+warmup 1 49.8907 ok
+sample 49.7478 ok
+sample 50.3959 ok
+sample 50.1832 ok
+sample 50.6936 ok
+sample 50.9480 ok
+sample 51.0949 ok
+sample 50.2967 ok
+sample 50.9714 ok
+BEGIN ovito threads=1 n=110592 metric=q6
+warmup 0 59.3040 ok
+warmup 1 59.5489 ok
+sample 59.2834 ok
+sample 59.1067 ok
+sample 61.6622 ok
+sample 59.2054 ok
+sample 58.8082 ok
+sample 58.9991 ok
+sample 59.8627 ok
+sample 59.1257 ok
+BEGIN ovito threads=1 n=884736 metric=chill
+warmup 0 4942.1432 {2: 884736}
+warmup 1 4918.2742 {2: 884736}
+sample 4917.8374 {2: 884736}
+sample 4867.4195 {2: 884736}
+sample 4892.9077 {2: 884736}
+sample 4924.5252 {2: 884736}
+sample 5165.0617 {2: 884736}
+sample 4969.1450 {2: 884736}
+sample 4927.4936 {2: 884736}
+sample 4871.8425 {2: 884736}
+BEGIN ovito threads=1 n=884736 metric=q4
+warmup 0 398.7124 ok
+warmup 1 398.5005 ok
+sample 396.3192 ok
+sample 391.1038 ok
+sample 392.3915 ok
+sample 399.6399 ok
+sample 402.3964 ok
+sample 402.3566 ok
+sample 401.8846 ok
+sample 394.7535 ok
+BEGIN ovito threads=1 n=884736 metric=q6
+warmup 0 484.7583 ok
+warmup 1 485.8936 ok
+sample 479.9060 ok
+sample 480.6106 ok
+sample 481.1540 ok
+sample 483.8354 ok
+sample 475.1432 ok
+sample 480.0331 ok
+sample 477.4580 ok
+sample 479.0567 ok
+DONE
+=== seams q retimed after zeroing the reused harmonic row ===
+=== seams q threads 1 ===
+BEGIN seams threads=1 n=10648 metric=q4
+warmup 0 7.6987 st=0 q0=0.509175
+warmup 1 6.0699 st=0 q0=0.509175
+sample 5.3665 st=0 q0=0.509175
+sample 5.3837 st=0 q0=0.509175
+sample 5.3220 st=0 q0=0.509175
+sample 5.2803 st=0 q0=0.509175
+sample 5.3965 st=0 q0=0.509175
+sample 5.5180 st=0 q0=0.509175
+sample 5.4276 st=0 q0=0.509175
+sample 5.3656 st=0 q0=0.509175
+q0 span 0.50917508 0.50917508
+BEGIN seams threads=1 n=10648 metric=q6
+warmup 0 7.0777 st=0 q0=0.628539
+warmup 1 5.8219 st=0 q0=0.628539
+sample 5.5969 st=0 q0=0.628539
+sample 5.7461 st=0 q0=0.628539
+sample 5.5017 st=0 q0=0.628539
+sample 5.8483 st=0 q0=0.628539
+sample 5.6492 st=0 q0=0.628539
+sample 5.8490 st=0 q0=0.628539
+sample 5.6820 st=0 q0=0.628539
+sample 5.8328 st=0 q0=0.628539
+q0 span 0.62853936 0.62853936
+BEGIN seams threads=1 n=110592 metric=q4
+warmup 0 69.7568 st=0 q0=0.509175
+warmup 1 56.0544 st=0 q0=0.509175
+sample 54.1343 st=0 q0=0.509175
+sample 53.2317 st=0 q0=0.509175
+sample 56.6480 st=0 q0=0.509175
+sample 54.4000 st=0 q0=0.509175
+sample 53.1614 st=0 q0=0.509175
+sample 54.0579 st=0 q0=0.509175
+sample 54.4291 st=0 q0=0.509175
+sample 55.9595 st=0 q0=0.509175
+q0 span 0.50917508 0.50917508
+BEGIN seams threads=1 n=110592 metric=q6
+warmup 0 80.1236 st=0 q0=0.628539
+warmup 1 60.5316 st=0 q0=0.628539
+sample 56.6586 st=0 q0=0.628539
+sample 56.6641 st=0 q0=0.628539
+sample 56.7172 st=0 q0=0.628539
+sample 56.9343 st=0 q0=0.628539
+sample 59.6486 st=0 q0=0.628539
+sample 57.7866 st=0 q0=0.628539
+sample 57.3243 st=0 q0=0.628539
+sample 58.6786 st=0 q0=0.628539
+q0 span 0.62853936 0.62853936
+BEGIN seams threads=1 n=884736 metric=q4
+warmup 0 670.8331 st=0 q0=0.509175
+warmup 1 451.5510 st=0 q0=0.509175
+sample 452.1440 st=0 q0=0.509175
+sample 465.6637 st=0 q0=0.509175
+sample 453.6088 st=0 q0=0.509175
+sample 451.0750 st=0 q0=0.509175
+sample 453.5164 st=0 q0=0.509175
+sample 454.0668 st=0 q0=0.509175
+sample 466.1082 st=0 q0=0.509175
+sample 446.8557 st=0 q0=0.509175
+q0 span 0.50917508 0.50917508
+BEGIN seams threads=1 n=884736 metric=q6
+warmup 0 649.4127 st=0 q0=0.628539
+warmup 1 478.4831 st=0 q0=0.628539
+sample 481.7316 st=0 q0=0.628539
+sample 480.8212 st=0 q0=0.628539
+sample 483.7715 st=0 q0=0.628539
+sample 482.5152 st=0 q0=0.628539
+sample 483.4944 st=0 q0=0.628539
+sample 497.3003 st=0 q0=0.628539
+sample 499.6319 st=0 q0=0.628539
+sample 498.3792 st=0 q0=0.628539
+q0 span 0.62853936 0.62853936
+=== seams q threads 8 ===
+BEGIN seams threads=8 n=10648 metric=q4
+warmup 0 14.3456 st=0 q0=0.509175
+warmup 1 4.9633 st=0 q0=0.509175
+sample 6.2114 st=0 q0=0.509175
+sample 8.1054 st=0 q0=0.509175
+sample 7.8040 st=0 q0=0.509175
+sample 7.9068 st=0 q0=0.509175
+sample 11.7931 st=0 q0=0.509175
+sample 3.2999 st=0 q0=0.509175
+sample 3.6557 st=0 q0=0.509175
+sample 3.2836 st=0 q0=0.509175
+q0 span 0.50917508 0.50917508
+BEGIN seams threads=8 n=10648 metric=q6
+warmup 0 4.7235 st=0 q0=0.628539
+warmup 1 2.6875 st=0 q0=0.628539
+sample 2.1154 st=0 q0=0.628539
+sample 2.1656 st=0 q0=0.628539
+sample 1.8165 st=0 q0=0.628539
+sample 1.7796 st=0 q0=0.628539
+sample 1.7629 st=0 q0=0.628539
+sample 1.7466 st=0 q0=0.628539
+sample 2.2017 st=0 q0=0.628539
+sample 2.1512 st=0 q0=0.628539
+q0 span 0.62853936 0.62853936
+BEGIN seams threads=8 n=110592 metric=q4
+warmup 0 24.7939 st=0 q0=0.509175
+warmup 1 9.2524 st=0 q0=0.509175
+sample 8.7676 st=0 q0=0.509175
+sample 8.6507 st=0 q0=0.509175
+sample 8.6702 st=0 q0=0.509175
+sample 9.1624 st=0 q0=0.509175
+sample 8.9090 st=0 q0=0.509175
+sample 8.5296 st=0 q0=0.509175
+sample 8.5368 st=0 q0=0.509175
+sample 10.0471 st=0 q0=0.509175
+q0 span 0.50917508 0.50917508
+BEGIN seams threads=8 n=110592 metric=q6
+warmup 0 19.2807 st=0 q0=0.628539
+warmup 1 9.5228 st=0 q0=0.628539
+sample 9.0777 st=0 q0=0.628539
+sample 8.9316 st=0 q0=0.628539
+sample 9.1772 st=0 q0=0.628539
+sample 9.0611 st=0 q0=0.628539
+sample 13.1623 st=0 q0=0.628539
+sample 9.3455 st=0 q0=0.628539
+sample 9.2040 st=0 q0=0.628539
+sample 9.0963 st=0 q0=0.628539
+q0 span 0.62853936 0.62853936
+BEGIN seams threads=8 n=884736 metric=q4
+warmup 0 180.0629 st=0 q0=0.509175
+warmup 1 70.6173 st=0 q0=0.509175
+sample 69.8418 st=0 q0=0.509175
+sample 69.4182 st=0 q0=0.509175
+sample 69.4783 st=0 q0=0.509175
+sample 72.0955 st=0 q0=0.509175
+sample 77.3084 st=0 q0=0.509175
+sample 89.9236 st=0 q0=0.509175
+sample 73.6910 st=0 q0=0.509175
+sample 69.8522 st=0 q0=0.509175
+q0 span 0.50917508 0.50917508
+BEGIN seams threads=8 n=884736 metric=q6
+warmup 0 221.9924 st=0 q0=0.628539
+warmup 1 76.8708 st=0 q0=0.628539
+sample 97.9140 st=0 q0=0.628539
+sample 101.9813 st=0 q0=0.628539
+sample 98.5935 st=0 q0=0.628539
+sample 77.7784 st=0 q0=0.628539
+sample 79.7616 st=0 q0=0.628539
+sample 75.8302 st=0 q0=0.628539
+sample 85.4954 st=0 q0=0.628539
+sample 79.0570 st=0 q0=0.628539
+q0 span 0.62853936 0.62853936
+=== real frames ===
+=== labels ===
+ice216
+  seams {'cubic': 216}
+  mdapy {'cubic_ice': 216}
+  ovito {'Cubic ice': 216}
+  agree mdapy 216 / 216
+  agree ovito 216 / 216
+nucleation step 15677000 n=4096
+  seams {'water': 3589, 'interfacial': 240, 'hexagonal': 62, 'interclathrate': 138, 'cubic': 47, 'clathrate': 20}
+  mdapy {'other': 3360, 'interfacial_ice': 478, 'hexagonal_ice': 54, 'interfacial_hydrate': 135, 'cubic_ice': 48, 'hydrate': 21}
+  ovito {'Other': 3360, 'Interfacial ice': 478, 'Hexagonal ice': 54, 'Interfacial hydrate': 135, 'Cubic ice': 48, 'Hydrate': 21}
+  agree mdapy 3699 / 4096
+  agree ovito 3591 / 4096
+  ovito mismatches {'water->interfacial': 254, 'interclathrate->-1': 97, 'water->-1': 39, 'hexagonal->water': 2, 'hexagonal->interfacial': 12, 'interclathrate->water': 41, 'clathrate->-1': 20, 'interfacial->water': 27, 'interfacial->cubic': 4, 'water->hexagonal': 6, 'cubic->interfacial': 3}
+nucleation step 15717000 n=4096
+  seams {'interclathrate': 142, 'water': 3589, 'cubic': 65, 'hexagonal': 79, 'interfacial': 206, 'clathrate': 15}
+  mdapy {'other': 3357, 'interfacial_hydrate': 154, 'cubic_ice': 61, 'hexagonal_ice': 73, 'interfacial_ice': 432, 'hydrate': 19}
+  ovito {'Other': 3357, 'Interfacial hydrate': 154, 'Cubic ice': 61, 'Hexagonal ice': 73, 'Interfacial ice': 432, 'Hydrate': 19}
+  agree mdapy 3704 / 4096
+  agree ovito 3606 / 4096
+  ovito mismatches {'interclathrate->water': 43, 'water->-1': 61, 'hexagonal->interfacial': 13, 'water->interfacial': 229, 'interclathrate->-1': 99, 'interfacial->water': 17, 'clathrate->-1': 13, 'water->hexagonal': 5, 'cubic->interfacial': 4, 'hexagonal->water': 1, 'interfacial->hexagonal': 3, 'clathrate->water': 2}
+nucleation step 15777000 n=4096
+  seams {'water': 3332, 'cubic': 123, 'hexagonal': 150, 'interfacial': 284, 'interclathrate': 185, 'clathrate': 22}
+  mdapy {'other': 3126, 'interfacial_ice': 511, 'cubic_ice': 123, 'hexagonal_ice': 144, 'interfacial_hydrate': 175, 'hydrate': 17}
+  ovito {'Other': 3126, 'Interfacial ice': 511, 'Cubic ice': 123, 'Hexagonal ice': 144, 'Interfacial hydrate': 175, 'Hydrate': 17}
+  agree mdapy 3697 / 4096
+  agree ovito 3564 / 4096
+  ovito mismatches {'water->interfacial': 231, 'interclathrate->water': 61, 'interclathrate->-1': 124, 'water->-1': 48, 'clathrate->-1': 20, 'water->cubic': 1, 'water->hexagonal': 3, 'interfacial->water': 14, 'hexagonal->interfacial': 15, 'interfacial->cubic': 3, 'cubic->interfacial': 4, 'interfacial->hexagonal': 6, 'clathrate->water': 2}
+nucleation step 15824000 n=4096
+  seams {'water': 3117, 'interfacial': 353, 'cubic': 269, 'hexagonal': 217, 'interclathrate': 126, 'clathrate': 14}
+  mdapy {'other': 2959, 'interfacial_ice': 531, 'cubic_ice': 268, 'hexagonal_ice': 210, 'interfacial_hydrate': 116, 'hydrate': 12}
+  ovito {'Other': 2959, 'Interfacial ice': 531, 'Cubic ice': 268, 'Hexagonal ice': 210, 'Interfacial hydrate': 116, 'Hydrate': 12}
+  agree mdapy 3788 / 4096
+  agree ovito 3699 / 4096
+  ovito mismatches {'water->interfacial': 182, 'water->-1': 29, 'interclathrate->water': 41, 'interclathrate->-1': 85, 'cubic->interfacial': 5, 'interfacial->water': 12, 'hexagonal->interfacial': 16, 'clathrate->-1': 14, 'interfacial->hexagonal': 9, 'interfacial->cubic': 4}
+interface step 0 n=864
+  seams {'hexagonal': 352, 'interfacial': 49, 'water': 434, 'interclathrate': 25, 'clathrate': 3, 'cubic': 1}
+  mdapy {'hexagonal_ice': 346, 'interfacial_ice': 57, 'other': 437, 'interfacial_hydrate': 20, 'hydrate': 3, 'cubic_ice': 1}
+  ovito {'Hexagonal ice': 346, 'Interfacial ice': 57, 'Other': 437, 'Interfacial hydrate': 20, 'Hydrate': 3, 'Cubic ice': 1}
+  agree mdapy 818 / 864
+  agree ovito 804 / 864
+  ovito mismatches {'interfacial->hexagonal': 4, 'hexagonal->interfacial': 10, 'interfacial->water': 5, 'water->interfacial': 7, 'water->-1': 6, 'interclathrate->water': 10, 'clathrate->-1': 2, 'interclathrate->-1': 15, 'clathrate->water': 1}
+=== ovito-chill+ rule vs mdapy/ovito ===
+nuc0 n 4096 agree 4096 / 4096
+  seams {2: 3360, 3: 478, 1: 54, 5: 135, 0: 48, 4: 21}
+  mdapy {'other': 3360, 'hexagonal_ice': 54, 'cubic_ice': 48, 'interfacial_ice': 478, 'hydrate': 21, 'interfacial_hydrate': 135}
+iface n 864 agree 864 / 864
+  seams {1: 346, 3: 57, 2: 437, 5: 20, 4: 3, 0: 1}
+  mdapy {'other': 437, 'hexagonal_ice': 346, 'cubic_ice': 1, 'interfacial_ice': 57, 'hydrate': 3, 'interfacial_hydrate': 20}
+=== real-frame timings ===
+SEAMS real
+BEGIN seams n=4096 frame=nuc15677000 metric=chill
+warmup 0 1.8746
+warmup 1 0.4764
+sample 0.6389
+sample 0.4834
+sample 0.4828
+sample 0.4372
+sample 0.4352
+sample 0.4370
+sample 0.4361
+sample 0.4593
+BEGIN seams n=4096 frame=nuc15677000 metric=q4
+warmup 0 8.2971
+warmup 1 1.9858
+sample 1.0468
+sample 0.8864
+sample 1.0985
+sample 0.9296
+sample 0.9504
+sample 1.1101
+sample 0.9564
+sample 0.9424
+BEGIN seams n=4096 frame=nuc15677000 metric=q6
+warmup 0 0.8895
+warmup 1 0.8522
+sample 8.0162
+sample 0.9858
+sample 0.9796
+sample 0.9681
+sample 1.0138
+sample 0.9255
+sample 0.9630
+sample 0.9381
+BEGIN seams n=4096 frame=nuc15824000 metric=chill
+warmup 0 0.9581
+warmup 1 0.4991
+sample 0.4510
+sample 0.4471
+sample 0.4425
+sample 0.4685
+sample 0.4430
+sample 0.4481
+sample 0.4724
+sample 0.4339
+BEGIN seams n=4096 frame=nuc15824000 metric=q4
+warmup 0 1.3997
+warmup 1 0.9213
+sample 0.8378
+sample 0.9557
+sample 0.8425
+sample 0.8077
+sample 0.9225
+sample 0.9869
+sample 0.9197
+sample 0.8981
+BEGIN seams n=4096 frame=nuc15824000 metric=q6
+warmup 0 1.0989
+warmup 1 1.0438
+sample 0.9053
+sample 1.0226
+sample 1.0099
+sample 0.9644
+sample 0.9006
+sample 0.8315
+sample 0.8286
+sample 0.8806
+BEGIN seams n=864 frame=interface metric=chill
+warmup 0 0.2736
+warmup 1 0.1130
+sample 0.0956
+sample 0.1064
+sample 0.1023
+sample 0.1018
+sample 0.1021
+sample 0.1016
+sample 0.1014
+sample 0.1033
+BEGIN seams n=864 frame=interface metric=q4
+warmup 0 0.8745
+warmup 1 0.6323
+sample 0.4131
+sample 0.4552
+sample 0.3848
+sample 0.3842
+sample 0.4094
+sample 0.3811
+sample 0.4125
+sample 0.3867
+BEGIN seams n=864 frame=interface metric=q6
+warmup 0 0.4655
+warmup 1 0.4239
+sample 0.4210
+sample 0.4456
+sample 0.4922
+sample 0.4266
+sample 0.4202
+sample 0.4337
+sample 0.3858
+sample 0.5439
+SEAMS real done
+=== real frames explicit threads ===
+=== real T=1 ===
+BEGIN seams threads=1 n=4096 frame=nuc15677000 metric=chill
+warmup 0 2.9950
+warmup 1 2.3242
+sample 2.2783
+sample 2.2984
+sample 2.2711
+sample 2.2548
+sample 2.2652
+sample 2.3081
+sample 2.2519
+sample 2.2714
+BEGIN seams threads=1 n=864 frame=interface metric=chill
+warmup 0 0.4917
+warmup 1 0.4430
+sample 0.4217
+sample 0.4404
+sample 0.4187
+sample 0.4156
+sample 0.4352
+sample 0.4210
+sample 0.5020
+sample 0.4594
+setup ok 864
+=== real T=8 ===
+BEGIN seams threads=8 n=4096 frame=nuc15677000 metric=chill
+warmup 0 2.0250
+warmup 1 0.8479
+sample 0.6650
+sample 0.6188
+sample 0.9441
+sample 1.0247
+sample 0.9034
+sample 1.2399
+sample 1.2429
+sample 0.9126
+BEGIN seams threads=8 n=864 frame=interface metric=chill
+warmup 0 0.3318
+warmup 1 0.2366
+sample 0.2098
+sample 0.2210
+sample 0.2171
+sample 0.2315
+sample 0.1886
+sample 0.1857
+sample 0.2032
+sample 0.2176
+setup ok 864
+=== real frames q and competitors ===
+=== real extra T=1 ===
+BEGIN seams threads=1 n=4096 frame=nuc15677000 metric=q4
+warmup 0 3.4046
+warmup 1 2.2873
+sample 2.1016
+sample 2.1928
+sample 2.2134
+sample 2.1739
+sample 2.3537
+sample 2.1656
+sample 2.0691
+sample 2.2187
+BEGIN seams threads=1 n=4096 frame=nuc15677000 metric=q6
+warmup 0 3.0519
+warmup 1 2.2014
+sample 2.5663
+sample 2.1228
+sample 2.6106
+sample 2.3696
+sample 2.3318
+sample 2.4707
+sample 2.1276
+sample 2.5329
+BEGIN mdapy threads=1 n=4096 frame=nuc15677000 metric=chill
+warmup 0 4.8838
+warmup 1 4.7543
+sample 4.8047
+sample 4.7265
+sample 4.8128
+sample 4.7355
+sample 4.7196
+sample 4.7672
+sample 4.6148
+sample 4.7338
+BEGIN mdapy threads=1 n=4096 frame=nuc15677000 metric=q4
+warmup 0 4.8653
+warmup 1 4.6667
+sample 4.6056
+sample 4.6160
+sample 4.6251
+sample 4.5990
+sample 4.5902
+sample 4.5893
+sample 4.7197
+sample 4.6052
+BEGIN mdapy threads=1 n=4096 frame=nuc15677000 metric=q6
+warmup 0 5.1682
+warmup 1 5.2154
+sample 5.2876
+sample 5.2404
+sample 5.4942
+sample 5.1117
+sample 5.1773
+sample 5.3473
+sample 5.2004
+sample 5.2133
+BEGIN freud threads=1 n=4096 frame=nuc15677000 metric=q4
+warmup 0 5.6094
+warmup 1 2.0681
+sample 1.8490
+sample 1.9863
+sample 1.8700
+sample 1.7427
+sample 1.7829
+sample 1.8666
+sample 1.9677
+sample 1.8097
+BEGIN freud threads=1 n=4096 frame=nuc15677000 metric=q6
+warmup 0 2.2711
+warmup 1 2.2537
+sample 2.2258
+sample 2.3373
+sample 2.1997
+sample 2.2146
+sample 2.2192
+sample 2.3599
+sample 2.2001
+sample 2.2183
+BEGIN ovito threads=1 n=4096 frame=nuc15677000 metric=chill
+warmup 0 31.4655
+warmup 1 31.1677
+sample 31.0891
+sample 31.1092
+sample 31.4047
+sample 31.0309
+sample 31.0053
+sample 31.0598
+sample 31.0815
+sample 30.8294
+BEGIN ovito threads=1 n=4096 frame=nuc15677000 metric=q4
+warmup 0 3.2909
+warmup 1 3.0263
+sample 3.0105
+sample 3.0373
+sample 3.0203
+sample 3.0697
+sample 3.0400
+sample 3.2044
+sample 3.0200
+sample 3.1516
+BEGIN ovito threads=1 n=4096 frame=nuc15677000 metric=q6
+warmup 0 3.5091
+warmup 1 3.3704
+sample 3.3412
+sample 3.5698
+sample 3.3401
+sample 3.3638
+sample 3.4472
+sample 3.3464
+sample 3.3917
+sample 3.4158
+BEGIN seams threads=1 n=864 frame=interface metric=q4
+warmup 0 0.9127
+warmup 1 0.6740
+sample 0.7667
+sample 0.7958
+sample 0.7367
+sample 0.8011
+sample 0.6361
+sample 0.4641
+sample 0.6709
+sample 0.6783
+BEGIN seams threads=1 n=864 frame=interface metric=q6
+warmup 0 0.7968
+warmup 1 0.4764
+sample 0.4635
+sample 0.4489
+sample 0.4684
+sample 0.8577
+sample 0.4838
+sample 0.4582
+sample 0.4566
+sample 0.4404
+BEGIN mdapy threads=1 n=864 frame=interface metric=chill
+warmup 0 1.2552
+warmup 1 1.1725
+sample 1.2332
+sample 1.2249
+sample 1.1430
+sample 1.1283
+sample 1.1518
+sample 1.1577
+sample 1.1163
+sample 1.1716
+BEGIN mdapy threads=1 n=864 frame=interface metric=q4
+warmup 0 1.1912
+warmup 1 1.2932
+sample 1.1062
+sample 1.1022
+sample 1.1503
+sample 1.1251
+sample 1.0949
+sample 1.1513
+sample 1.1211
+sample 1.0926
+BEGIN mdapy threads=1 n=864 frame=interface metric=q6
+warmup 0 1.3566
+warmup 1 1.2517
+sample 1.2586
+sample 1.2151
+sample 1.2719
+sample 1.2753
+sample 1.2215
+sample 1.2930
+sample 1.3860
+sample 1.2256
+BEGIN freud threads=1 n=864 frame=interface metric=q4
+warmup 0 0.7792
+warmup 1 0.4505
+sample 0.4581
+sample 0.4391
+sample 0.3971
+sample 0.3947
+sample 0.3947
+sample 0.3963
+sample 0.3903
+sample 0.4010
+BEGIN freud threads=1 n=864 frame=interface metric=q6
+warmup 0 0.4878
+warmup 1 0.4642
+sample 0.4850
+sample 0.4761
+sample 0.5034
+sample 0.5380
+sample 0.5221
+sample 0.4814
+sample 0.4699
+sample 0.4709
+BEGIN ovito threads=1 n=864 frame=interface metric=chill
+warmup 0 6.5179
+warmup 1 6.6024
+sample 6.8116
+sample 6.5599
+sample 6.6290
+sample 6.9385
+sample 6.5132
+sample 6.6780
+sample 6.8858
+sample 7.4259
+BEGIN ovito threads=1 n=864 frame=interface metric=q4
+warmup 0 1.0844
+warmup 1 0.7705
+sample 0.6247
+sample 0.6248
+sample 0.6054
+sample 0.6058
+sample 0.8161
+sample 0.7068
+sample 0.6219
+sample 0.6054
+BEGIN ovito threads=1 n=864 frame=interface metric=q6
+warmup 0 0.7016
+warmup 1 0.6729
+sample 0.6888
+sample 0.7476
+sample 0.7486
+sample 0.6866
+sample 0.6816
+sample 0.6767
+sample 0.6755
+sample 0.6545
+extra done
+=== real extra T=8 ===
+BEGIN seams threads=8 n=4096 frame=nuc15677000 metric=q4
+warmup 0 3.4002
+warmup 1 0.9621
+sample 0.9650
+sample 1.2577
+sample 0.8323
+sample 0.8866
+sample 0.8125
+sample 0.8016
+sample 0.7918
+sample 0.7978
+BEGIN seams threads=8 n=4096 frame=nuc15677000 metric=q6
+warmup 0 1.1885
+warmup 1 0.9282
+sample 0.8844
+sample 0.9764
+sample 1.0642
+sample 0.7752
+sample 0.9435
+sample 0.8990
+sample 0.9198
+sample 0.8468
+BEGIN mdapy threads=8 n=4096 frame=nuc15677000 metric=chill
+warmup 0 1.3047
+warmup 1 0.8601
+sample 0.9236
+sample 0.8472
+sample 0.7977
+sample 0.7719
+sample 1.2430
+sample 1.0273
+sample 0.9487
+sample 0.9646
+BEGIN mdapy threads=8 n=4096 frame=nuc15677000 metric=q4
+warmup 0 2.8231
+warmup 1 0.8492
+sample 0.8762
+sample 0.8597
+sample 0.8701
+sample 0.8807
+sample 0.8575
+sample 1.0135
+sample 0.9072
+sample 0.9456
+BEGIN mdapy threads=8 n=4096 frame=nuc15677000 metric=q6
+warmup 0 1.3175
+warmup 1 0.9739
+sample 0.8357
+sample 0.7907
+sample 0.7997
+sample 1.1860
+sample 1.0199
+sample 0.9539
+sample 0.9263
+sample 0.9221
+BEGIN freud threads=8 n=4096 frame=nuc15677000 metric=q4
+warmup 0 4.1151
+warmup 1 1.9321
+sample 1.9012
+sample 2.1064
+sample 2.1907
+sample 1.9210
+sample 1.8181
+sample 2.0150
+sample 2.0115
+sample 1.9288
+BEGIN freud threads=8 n=4096 frame=nuc15677000 metric=q6
+warmup 0 2.3401
+warmup 1 2.3525
+sample 2.2689
+sample 2.2599
+sample 2.3068
+sample 2.2730
+sample 2.2116
+sample 2.3645
+sample 2.4259
+sample 2.2006
+BEGIN ovito threads=8 n=4096 frame=nuc15677000 metric=chill
+warmup 0 11.6758
+warmup 1 11.0503
+sample 11.4876
+sample 10.8866
+sample 10.9239
+sample 10.8880
+sample 11.0410
+sample 11.1663
+sample 11.1559
+sample 11.0902
+BEGIN ovito threads=8 n=4096 frame=nuc15677000 metric=q4
+warmup 0 3.3755
+warmup 1 3.3832
+sample 3.2572
+sample 3.2395
+sample 3.3724
+sample 3.1526
+sample 3.3375
+sample 3.7799
+sample 3.1786
+sample 3.6484
+BEGIN ovito threads=8 n=4096 frame=nuc15677000 metric=q6
+warmup 0 3.6948
+warmup 1 3.5758
+sample 3.9530
+sample 3.6192
+sample 4.1678
+sample 4.2448
+sample 3.6494
+sample 3.5251
+sample 3.5464
+sample 3.5732
+BEGIN seams threads=8 n=864 frame=interface metric=q4
+warmup 0 1.6745
+warmup 1 0.5467
+sample 0.5056
+sample 0.4363
+sample 0.3956
+sample 0.3721
+sample 0.3773
+sample 0.3446
+sample 0.3441
+sample 0.3409
+BEGIN seams threads=8 n=864 frame=interface metric=q6
+warmup 0 0.4212
+warmup 1 0.4607
+sample 0.4135
+sample 0.3924
+sample 0.3945
+sample 0.3791
+sample 0.3478
+sample 0.3216
+sample 0.3735
+sample 0.4116
+BEGIN mdapy threads=8 n=864 frame=interface metric=chill
+warmup 0 0.4717
+warmup 1 0.2740
+sample 0.2644
+sample 0.2544
+sample 0.2675
+sample 0.2575
+sample 0.2572
+sample 0.2624
+sample 0.2659
+sample 0.3731
+BEGIN mdapy threads=8 n=864 frame=interface metric=q4
+warmup 0 0.2927
+warmup 1 0.2569
+sample 0.2553
+sample 1.4187
+sample 3.4096
+sample 3.1665
+sample 3.1072
+sample 3.0874
+sample 0.6950
+sample 0.2568
+BEGIN mdapy threads=8 n=864 frame=interface metric=q6
+warmup 0 0.2650
+warmup 1 0.2539
+sample 0.2519
+sample 0.2686
+sample 0.2544
+sample 0.2504
+sample 0.2482
+sample 0.2516
+sample 0.2610
+sample 0.2893
+BEGIN freud threads=8 n=864 frame=interface metric=q4
+warmup 0 0.6094
+warmup 1 0.5134
+sample 1.6422
+sample 0.4877
+sample 0.4599
+sample 0.4685
+sample 0.4535
+sample 0.4415
+sample 0.4457
+sample 0.4329
+BEGIN freud threads=8 n=864 frame=interface metric=q6
+warmup 0 0.5457
+warmup 1 0.5323
+sample 0.5247
+sample 0.5213
+sample 0.5059
+sample 0.5103
+sample 0.5015
+sample 0.5075
+sample 0.5386
+sample 0.6312
+BEGIN ovito threads=8 n=864 frame=interface metric=chill
+warmup 0 6.9696
+warmup 1 7.0003
+sample 7.0576
+sample 6.9858
+sample 7.0954
+sample 7.1370
+sample 6.8037
+sample 7.0854
+sample 7.1993
+sample 6.8764
+BEGIN ovito threads=8 n=864 frame=interface metric=q4
+warmup 0 0.9248
+warmup 1 1.2131
+sample 0.8331
+sample 0.7833
+sample 0.9235
+sample 0.9418
+sample 1.2240
+sample 0.7700
+sample 0.8576
+sample 0.7772
+BEGIN ovito threads=8 n=864 frame=interface metric=q6
+warmup 0 1.0097
+warmup 1 1.1025
+sample 1.0117
+sample 1.0827
+sample 0.9550
+sample 0.7108
+sample 0.7730
+sample 0.8345
+sample 1.1020
+sample 0.8367
+extra done

@@ -1,0 +1,485 @@
+session v5
+date_utc 2026-11-11 23:38:04
+nproc 8
+CPU(s):8
+On-line CPU(s) list:0-7
+Model name:Intel(R) Xeon(R) Processor
+Thread(s) per core:1
+Core(s) per socket:8
+Socket(s):1
+NUMA node(s):1
+NUMA node0 CPU(s):0-7
+cpu.max absent
+nr_periods 0
+nr_throttled 0
+cpuset.cpus.effective 0-7
+usable_cores 8
+reported_thread_counts 1 8
+protocol OMP_PROC_BIND=close OMP_PLACES=cores OMP_WAIT_POLICY=ACTIVE taskset for seams; mdapy and ovito unpinned within the taskset mask
+samples 8 after 2 warm-ups; neighbour build is inside every q and CHILL+ call
+triclinic cell xy=4 xz=1.5 yz=0.8 on the 110592-molecule ice Ic crystal deformed with the cell
+BEGIN neigh csr molecules=110592 threads=1
+ortho rectangular cell
+warmup 0 mode=0 n=110592 ok=1 pairs=442368 ms=27.8954
+warmup 1 mode=0 n=110592 ok=1 pairs=442368 ms=25.0693
+sample 2 mode=0 n=110592 ok=1 pairs=442368 ms=25.0873
+sample 3 mode=0 n=110592 ok=1 pairs=442368 ms=25.1313
+sample 4 mode=0 n=110592 ok=1 pairs=442368 ms=25.1135
+sample 5 mode=0 n=110592 ok=1 pairs=442368 ms=25.0807
+sample 6 mode=0 n=110592 ok=1 pairs=442368 ms=25.1194
+sample 7 mode=0 n=110592 ok=1 pairs=442368 ms=24.9422
+sample 8 mode=0 n=110592 ok=1 pairs=442368 ms=25.1744
+sample 9 mode=0 n=110592 ok=1 pairs=442368 ms=25.2197
+triclinic crystal, positions deformed with the cell
+warmup 0 mode=2 n=110592 ok=1 pairs=442368 ms=29.4573
+warmup 1 mode=2 n=110592 ok=1 pairs=442368 ms=25.6113
+sample 2 mode=2 n=110592 ok=1 pairs=442368 ms=25.6762
+sample 3 mode=2 n=110592 ok=1 pairs=442368 ms=25.7250
+sample 4 mode=2 n=110592 ok=1 pairs=442368 ms=25.8246
+sample 5 mode=2 n=110592 ok=1 pairs=442368 ms=25.7938
+sample 6 mode=2 n=110592 ok=1 pairs=442368 ms=25.4331
+sample 7 mode=2 n=110592 ok=1 pairs=442368 ms=25.5643
+sample 8 mode=2 n=110592 ok=1 pairs=442368 ms=25.5413
+sample 9 mode=2 n=110592 ok=1 pairs=442368 ms=25.6821
+triclinic cell, undeformed cartesian point set
+warmup 0 mode=1 n=110592 ok=1 pairs=444672 ms=47.0293
+warmup 1 mode=1 n=110592 ok=1 pairs=444672 ms=44.8054
+sample 2 mode=1 n=110592 ok=1 pairs=444672 ms=45.0026
+sample 3 mode=1 n=110592 ok=1 pairs=444672 ms=43.8789
+sample 4 mode=1 n=110592 ok=1 pairs=444672 ms=43.9659
+sample 5 mode=1 n=110592 ok=1 pairs=444672 ms=43.3608
+sample 6 mode=1 n=110592 ok=1 pairs=444672 ms=43.2539
+sample 7 mode=1 n=110592 ok=1 pairs=444672 ms=43.3924
+sample 8 mode=1 n=110592 ok=1 pairs=444672 ms=43.5871
+sample 9 mode=1 n=110592 ok=1 pairs=444672 ms=43.3411
+BEGIN correctness cells=6
+miss=0 extra=0
+miss=0 extra=0
+miss=0 extra=0
+BEGIN seams threads=1
+BEGIN seams threads=1 frame=triclinic110592 metric=q4
+warmup 0 57.7646 st=0 q0=0.50919686
+warmup 1 45.5301 st=0 q0=0.50919686
+sample 45.9913 st=0 q0=0.50919686
+sample 44.7352 st=0 q0=0.50919686
+sample 45.0923 st=0 q0=0.50919686
+sample 45.1856 st=0 q0=0.50919686
+sample 46.3122 st=0 q0=0.50919686
+sample 45.7795 st=0 q0=0.50919686
+sample 44.8300 st=0 q0=0.50919686
+sample 44.9346 st=0 q0=0.50919686
+BEGIN seams threads=1 frame=triclinic110592 metric=q6
+warmup 0 58.4355 st=0 q0=0.62837074
+warmup 1 47.9046 st=0 q0=0.62837074
+sample 48.1982 st=0 q0=0.62837074
+sample 48.4984 st=0 q0=0.62837074
+sample 48.4785 st=0 q0=0.62837074
+sample 48.2488 st=0 q0=0.62837074
+sample 48.2499 st=0 q0=0.62837074
+sample 49.0408 st=0 q0=0.62837074
+sample 49.0477 st=0 q0=0.62837074
+sample 48.9808 st=0 q0=0.62837074
+BEGIN seams threads=1 frame=triclinic110592 metric=chill+
+warmup 0 50.5747 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+warmup 1 42.9229 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 41.5955 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 41.3912 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 41.2991 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 41.2108 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 41.8303 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 41.8987 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 41.2282 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 41.5391 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+saved seams_tilt c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+BEGIN seams threads=1 frame=ice4096 metric=chill+
+warmup 0 1.6472 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+warmup 1 1.5398 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 1.5290 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 1.5444 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 1.5275 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 1.6266 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 1.5373 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 1.5348 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 1.5500 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 1.5307 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+saved seams_ice4096 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+BEGIN seams threads=1 frame=nucleation15677000 metric=q6
+warmup 0 2.6857 st=0 q0=0.56860239
+warmup 1 2.7159 st=0 q0=0.56860239
+sample 2.5762 st=0 q0=0.56860239
+sample 2.5815 st=0 q0=0.56860239
+sample 2.5970 st=0 q0=0.56860239
+sample 2.5656 st=0 q0=0.56860239
+sample 2.5749 st=0 q0=0.56860239
+sample 2.5958 st=0 q0=0.56860239
+sample 2.5437 st=0 q0=0.56860239
+sample 2.5983 st=0 q0=0.56860239
+BEGIN seams threads=1 frame=nucleation15677000 metric=chill+
+warmup 0 2.6403 st=0 c0=47 c1=62 c2=3589 c3=240 c4=20 c5=138 c6=0
+warmup 1 2.6552 st=0 c0=47 c1=62 c2=3589 c3=240 c4=20 c5=138 c6=0
+sample 2.5691 st=0 c0=47 c1=62 c2=3589 c3=240 c4=20 c5=138 c6=0
+sample 2.5357 st=0 c0=47 c1=62 c2=3589 c3=240 c4=20 c5=138 c6=0
+sample 2.5410 st=0 c0=47 c1=62 c2=3589 c3=240 c4=20 c5=138 c6=0
+sample 2.6961 st=0 c0=47 c1=62 c2=3589 c3=240 c4=20 c5=138 c6=0
+sample 2.5284 st=0 c0=47 c1=62 c2=3589 c3=240 c4=20 c5=138 c6=0
+sample 2.5052 st=0 c0=47 c1=62 c2=3589 c3=240 c4=20 c5=138 c6=0
+sample 2.5487 st=0 c0=47 c1=62 c2=3589 c3=240 c4=20 c5=138 c6=0
+sample 2.5759 st=0 c0=47 c1=62 c2=3589 c3=240 c4=20 c5=138 c6=0
+saved seams_nuc c0=48 c1=54 c2=3360 c3=478 c4=21 c5=135 c6=0
+BEGIN seams threads=1 frame=interface0 metric=q6
+warmup 0 0.5410 st=0 q0=0.61179070
+warmup 1 0.5531 st=0 q0=0.61179070
+sample 0.4915 st=0 q0=0.61179070
+sample 0.4644 st=0 q0=0.61179070
+sample 0.4605 st=0 q0=0.61179070
+sample 0.4718 st=0 q0=0.61179070
+sample 0.4610 st=0 q0=0.61179070
+sample 0.4585 st=0 q0=0.61179070
+sample 0.4750 st=0 q0=0.61179070
+sample 0.4605 st=0 q0=0.61179070
+BEGIN seams threads=1 frame=interface0 metric=chill+
+warmup 0 0.4954 st=0 c0=1 c1=352 c2=434 c3=49 c4=3 c5=25 c6=0
+warmup 1 0.4566 st=0 c0=1 c1=352 c2=434 c3=49 c4=3 c5=25 c6=0
+sample 0.4495 st=0 c0=1 c1=352 c2=434 c3=49 c4=3 c5=25 c6=0
+sample 0.4465 st=0 c0=1 c1=352 c2=434 c3=49 c4=3 c5=25 c6=0
+sample 0.4458 st=0 c0=1 c1=352 c2=434 c3=49 c4=3 c5=25 c6=0
+sample 0.4453 st=0 c0=1 c1=352 c2=434 c3=49 c4=3 c5=25 c6=0
+sample 0.4447 st=0 c0=1 c1=352 c2=434 c3=49 c4=3 c5=25 c6=0
+sample 0.4535 st=0 c0=1 c1=352 c2=434 c3=49 c4=3 c5=25 c6=0
+sample 0.4465 st=0 c0=1 c1=352 c2=434 c3=49 c4=3 c5=25 c6=0
+sample 0.4440 st=0 c0=1 c1=352 c2=434 c3=49 c4=3 c5=25 c6=0
+saved seams_iface c0=1 c1=346 c2=437 c3=57 c4=3 c5=20 c6=0
+BEGIN seams threads=8
+BEGIN seams threads=8 frame=triclinic110592 metric=q4
+warmup 0 32.8130 st=0 q0=0.50919686
+warmup 1 13.7549 st=0 q0=0.50919686
+sample 13.0683 st=0 q0=0.50919686
+sample 12.7384 st=0 q0=0.50919686
+sample 12.9389 st=0 q0=0.50919686
+sample 12.5823 st=0 q0=0.50919686
+sample 12.9912 st=0 q0=0.50919686
+sample 12.6382 st=0 q0=0.50919686
+sample 12.7437 st=0 q0=0.50919686
+sample 12.8335 st=0 q0=0.50919686
+BEGIN seams threads=8 frame=triclinic110592 metric=q6
+warmup 0 24.3034 st=0 q0=0.62837074
+warmup 1 14.0858 st=0 q0=0.62837074
+sample 13.4782 st=0 q0=0.62837074
+sample 13.4340 st=0 q0=0.62837074
+sample 13.4635 st=0 q0=0.62837074
+sample 14.1435 st=0 q0=0.62837074
+sample 9.2742 st=0 q0=0.62837074
+sample 9.1875 st=0 q0=0.62837074
+sample 9.0576 st=0 q0=0.62837074
+sample 9.0920 st=0 q0=0.62837074
+BEGIN seams threads=8 frame=triclinic110592 metric=chill+
+warmup 0 15.5384 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+warmup 1 9.1363 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 8.7058 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 8.7701 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 8.6059 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 8.6685 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 8.7717 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 8.7067 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 8.6696 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 8.7479 st=0 c0=110592 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+BEGIN seams threads=8 frame=ice4096 metric=chill+
+warmup 0 0.4585 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+warmup 1 0.3839 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 0.4458 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 0.4087 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 0.3771 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 0.3730 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 0.3903 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 0.4058 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 0.3808 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+sample 0.3804 st=0 c0=4096 c1=0 c2=0 c3=0 c4=0 c5=0 c6=0
+BEGIN mdapy threads=1
+BEGIN mdapy threads=1 frame=triclinic110592 metric=q4
+warmup 0 76.6751 ok
+warmup 1 65.3457 ok
+sample 64.4524 ok
+sample 64.4756 ok
+sample 64.4768 ok
+sample 64.8143 ok
+sample 64.6895 ok
+sample 67.1649 ok
+sample 65.1001 ok
+sample 65.0707 ok
+BEGIN mdapy threads=1 frame=triclinic110592 metric=q6
+warmup 0 78.7948 ok
+warmup 1 78.1876 ok
+sample 78.4686 ok
+sample 78.8505 ok
+sample 78.7298 ok
+sample 78.3769 ok
+sample 79.0900 ok
+sample 78.5954 ok
+sample 78.9930 ok
+sample 78.3599 ok
+BEGIN mdapy threads=1 frame=triclinic110592 metric=chill+
+warmup 0 62.7144 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+warmup 1 62.2753 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 62.5831 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 62.0530 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 62.0710 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 62.2188 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 62.1447 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 62.3251 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 62.5007 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 62.6118 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+BEGIN mdapy threads=1 frame=ice4096 metric=chill+
+warmup 0 3.1894 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+warmup 1 2.9543 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 2.9519 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 3.1357 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 2.9887 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 3.0744 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 3.1335 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 3.0320 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 3.0542 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 2.8847 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+BEGIN mdapy threads=1 frame=nucleation15677000 metric=q6
+warmup 0 5.7283 ok
+warmup 1 5.5871 ok
+sample 5.7444 ok
+sample 5.5351 ok
+sample 5.4701 ok
+sample 5.8480 ok
+sample 5.5743 ok
+sample 5.5321 ok
+sample 5.5724 ok
+sample 5.5993 ok
+BEGIN mdapy threads=1 frame=nucleation15677000 metric=chill+
+warmup 0 5.2310 {'other': 3360, 'hexagonal_ice': 54, 'cubic_ice': 48, 'interfacial_ice': 478, 'hydrate': 21, 'interfacial_hydrate': 135}
+warmup 1 4.9814 {'other': 3360, 'hexagonal_ice': 54, 'cubic_ice': 48, 'interfacial_ice': 478, 'hydrate': 21, 'interfacial_hydrate': 135}
+sample 5.1309 {'other': 3360, 'hexagonal_ice': 54, 'cubic_ice': 48, 'interfacial_ice': 478, 'hydrate': 21, 'interfacial_hydrate': 135}
+sample 4.8789 {'other': 3360, 'hexagonal_ice': 54, 'cubic_ice': 48, 'interfacial_ice': 478, 'hydrate': 21, 'interfacial_hydrate': 135}
+sample 4.9289 {'other': 3360, 'hexagonal_ice': 54, 'cubic_ice': 48, 'interfacial_ice': 478, 'hydrate': 21, 'interfacial_hydrate': 135}
+sample 4.7286 {'other': 3360, 'hexagonal_ice': 54, 'cubic_ice': 48, 'interfacial_ice': 478, 'hydrate': 21, 'interfacial_hydrate': 135}
+sample 4.8311 {'other': 3360, 'hexagonal_ice': 54, 'cubic_ice': 48, 'interfacial_ice': 478, 'hydrate': 21, 'interfacial_hydrate': 135}
+sample 4.6330 {'other': 3360, 'hexagonal_ice': 54, 'cubic_ice': 48, 'interfacial_ice': 478, 'hydrate': 21, 'interfacial_hydrate': 135}
+sample 4.7253 {'other': 3360, 'hexagonal_ice': 54, 'cubic_ice': 48, 'interfacial_ice': 478, 'hydrate': 21, 'interfacial_hydrate': 135}
+sample 4.7340 {'other': 3360, 'hexagonal_ice': 54, 'cubic_ice': 48, 'interfacial_ice': 478, 'hydrate': 21, 'interfacial_hydrate': 135}
+BEGIN mdapy threads=1 frame=interface0 metric=q6
+warmup 0 1.3247 ok
+warmup 1 1.2218 ok
+sample 1.2325 ok
+sample 1.2578 ok
+sample 1.3335 ok
+sample 1.2569 ok
+sample 1.2379 ok
+sample 1.2302 ok
+sample 1.2370 ok
+sample 1.2094 ok
+BEGIN mdapy threads=1 frame=interface0 metric=chill+
+warmup 0 1.1348 {'other': 437, 'hexagonal_ice': 346, 'cubic_ice': 1, 'interfacial_ice': 57, 'hydrate': 3, 'interfacial_hydrate': 20}
+warmup 1 1.3004 {'other': 437, 'hexagonal_ice': 346, 'cubic_ice': 1, 'interfacial_ice': 57, 'hydrate': 3, 'interfacial_hydrate': 20}
+sample 1.1365 {'other': 437, 'hexagonal_ice': 346, 'cubic_ice': 1, 'interfacial_ice': 57, 'hydrate': 3, 'interfacial_hydrate': 20}
+sample 1.1491 {'other': 437, 'hexagonal_ice': 346, 'cubic_ice': 1, 'interfacial_ice': 57, 'hydrate': 3, 'interfacial_hydrate': 20}
+sample 1.1387 {'other': 437, 'hexagonal_ice': 346, 'cubic_ice': 1, 'interfacial_ice': 57, 'hydrate': 3, 'interfacial_hydrate': 20}
+sample 1.1619 {'other': 437, 'hexagonal_ice': 346, 'cubic_ice': 1, 'interfacial_ice': 57, 'hydrate': 3, 'interfacial_hydrate': 20}
+sample 1.1218 {'other': 437, 'hexagonal_ice': 346, 'cubic_ice': 1, 'interfacial_ice': 57, 'hydrate': 3, 'interfacial_hydrate': 20}
+sample 1.1775 {'other': 437, 'hexagonal_ice': 346, 'cubic_ice': 1, 'interfacial_ice': 57, 'hydrate': 3, 'interfacial_hydrate': 20}
+sample 1.1341 {'other': 437, 'hexagonal_ice': 346, 'cubic_ice': 1, 'interfacial_ice': 57, 'hydrate': 3, 'interfacial_hydrate': 20}
+sample 1.2452 {'other': 437, 'hexagonal_ice': 346, 'cubic_ice': 1, 'interfacial_ice': 57, 'hydrate': 3, 'interfacial_hydrate': 20}
+BEGIN mdapy threads=8
+BEGIN mdapy threads=8 frame=triclinic110592 metric=q4
+warmup 0 17.0498 ok
+warmup 1 14.0322 ok
+sample 15.0748 ok
+sample 13.0007 ok
+sample 13.5547 ok
+sample 13.1776 ok
+sample 13.8167 ok
+sample 13.3438 ok
+sample 13.0048 ok
+sample 13.8754 ok
+BEGIN mdapy threads=8 frame=triclinic110592 metric=q6
+warmup 0 15.1335 ok
+warmup 1 14.6851 ok
+sample 15.4488 ok
+sample 14.9285 ok
+sample 15.4825 ok
+sample 14.8776 ok
+sample 15.1954 ok
+sample 15.0346 ok
+sample 15.7265 ok
+sample 14.3739 ok
+BEGIN mdapy threads=8 frame=triclinic110592 metric=chill+
+warmup 0 13.8587 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+warmup 1 13.8617 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 13.9279 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 14.0017 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 15.1027 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 14.7883 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 14.3530 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 14.3126 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 14.2384 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 14.3722 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 110592, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+BEGIN mdapy threads=8 frame=ice4096 metric=chill+
+warmup 0 1.0331 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+warmup 1 0.7565 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 0.7196 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 0.7673 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 0.8265 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 0.7977 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 0.7527 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 0.7326 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 0.7030 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+sample 0.7173 {'other': 0, 'hexagonal_ice': 0, 'cubic_ice': 4096, 'interfacial_ice': 0, 'hydrate': 0, 'interfacial_hydrate': 0}
+BEGIN ovito threads=1
+BEGIN ovito threads=1 frame=triclinic110592 metric=q4
+warmup 0 53.9879 ok
+warmup 1 52.5193 ok
+sample 49.9782 ok
+sample 49.8410 ok
+sample 49.9235 ok
+sample 49.8473 ok
+sample 49.9070 ok
+sample 49.6654 ok
+sample 49.7462 ok
+sample 49.6569 ok
+BEGIN ovito threads=1 frame=triclinic110592 metric=q6
+warmup 0 58.6248 ok
+warmup 1 58.1813 ok
+sample 57.8791 ok
+sample 57.9914 ok
+sample 58.1974 ok
+sample 58.0139 ok
+sample 57.9445 ok
+sample 58.1589 ok
+sample 58.2128 ok
+sample 57.8554 ok
+BEGIN ovito threads=1 frame=triclinic110592 metric=chill+
+warmup 0 620.4661 {2: 110592}
+warmup 1 637.9000 {2: 110592}
+sample 613.5187 {2: 110592}
+sample 614.3615 {2: 110592}
+sample 615.0580 {2: 110592}
+sample 612.5454 {2: 110592}
+sample 614.8994 {2: 110592}
+sample 618.8532 {2: 110592}
+sample 617.8050 {2: 110592}
+sample 627.8744 {2: 110592}
+BEGIN ovito threads=1 frame=ice4096 metric=chill+
+warmup 0 24.1680 {2: 4096}
+warmup 1 24.2534 {2: 4096}
+sample 24.0131 {2: 4096}
+sample 24.0889 {2: 4096}
+sample 24.0986 {2: 4096}
+sample 24.4033 {2: 4096}
+sample 24.1715 {2: 4096}
+sample 24.0811 {2: 4096}
+sample 24.2388 {2: 4096}
+sample 24.0010 {2: 4096}
+BEGIN ovito threads=1 frame=nucleation15677000 metric=q6
+warmup 0 3.0665 ok
+warmup 1 3.1257 ok
+sample 3.0172 ok
+sample 3.0234 ok
+sample 3.0551 ok
+sample 3.0513 ok
+sample 3.0141 ok
+sample 3.0106 ok
+sample 3.1306 ok
+sample 3.0109 ok
+BEGIN ovito threads=1 frame=nucleation15677000 metric=chill+
+warmup 0 30.8297 {0: 3360, 1: 54, 2: 48, 3: 478, 4: 21, 5: 135}
+warmup 1 32.9041 {0: 3360, 1: 54, 2: 48, 3: 478, 4: 21, 5: 135}
+sample 30.7630 {0: 3360, 1: 54, 2: 48, 3: 478, 4: 21, 5: 135}
+sample 30.5210 {0: 3360, 1: 54, 2: 48, 3: 478, 4: 21, 5: 135}
+sample 30.4701 {0: 3360, 1: 54, 2: 48, 3: 478, 4: 21, 5: 135}
+sample 30.5512 {0: 3360, 1: 54, 2: 48, 3: 478, 4: 21, 5: 135}
+sample 30.5467 {0: 3360, 1: 54, 2: 48, 3: 478, 4: 21, 5: 135}
+sample 30.4811 {0: 3360, 1: 54, 2: 48, 3: 478, 4: 21, 5: 135}
+sample 31.7608 {0: 3360, 1: 54, 2: 48, 3: 478, 4: 21, 5: 135}
+sample 30.4166 {0: 3360, 1: 54, 2: 48, 3: 478, 4: 21, 5: 135}
+BEGIN ovito threads=1 frame=interface0 metric=q6
+warmup 0 0.7059 ok
+warmup 1 0.6261 ok
+sample 0.6276 ok
+sample 0.6116 ok
+sample 0.6234 ok
+sample 0.6080 ok
+sample 0.6392 ok
+sample 0.6359 ok
+sample 0.7032 ok
+sample 0.6361 ok
+BEGIN ovito threads=1 frame=interface0 metric=chill+
+warmup 0 6.1451 {0: 437, 1: 346, 2: 1, 3: 57, 4: 3, 5: 20}
+warmup 1 6.3523 {0: 437, 1: 346, 2: 1, 3: 57, 4: 3, 5: 20}
+sample 6.3446 {0: 437, 1: 346, 2: 1, 3: 57, 4: 3, 5: 20}
+sample 6.2137 {0: 437, 1: 346, 2: 1, 3: 57, 4: 3, 5: 20}
+sample 6.3379 {0: 437, 1: 346, 2: 1, 3: 57, 4: 3, 5: 20}
+sample 6.3056 {0: 437, 1: 346, 2: 1, 3: 57, 4: 3, 5: 20}
+sample 6.2072 {0: 437, 1: 346, 2: 1, 3: 57, 4: 3, 5: 20}
+sample 6.3420 {0: 437, 1: 346, 2: 1, 3: 57, 4: 3, 5: 20}
+sample 6.2209 {0: 437, 1: 346, 2: 1, 3: 57, 4: 3, 5: 20}
+sample 6.2419 {0: 437, 1: 346, 2: 1, 3: 57, 4: 3, 5: 20}
+BEGIN ovito threads=8
+BEGIN ovito threads=8 frame=triclinic110592 metric=q4
+warmup 0 12.9804 ok
+warmup 1 11.6432 ok
+sample 12.4196 ok
+sample 12.0935 ok
+sample 10.6605 ok
+sample 10.3454 ok
+sample 12.3079 ok
+sample 10.0426 ok
+sample 12.1809 ok
+sample 11.9701 ok
+BEGIN ovito threads=8 frame=triclinic110592 metric=q6
+warmup 0 11.4276 ok
+warmup 1 13.7791 ok
+sample 11.6330 ok
+sample 12.3505 ok
+sample 10.4213 ok
+sample 10.8973 ok
+sample 10.3276 ok
+sample 10.5315 ok
+sample 10.9186 ok
+sample 12.0084 ok
+BEGIN ovito threads=8 frame=triclinic110592 metric=chill+
+warmup 0 88.3222 {2: 110592}
+warmup 1 91.0849 {2: 110592}
+sample 86.7968 {2: 110592}
+sample 86.6396 {2: 110592}
+sample 86.2627 {2: 110592}
+sample 86.7361 {2: 110592}
+sample 88.5633 {2: 110592}
+sample 90.0527 {2: 110592}
+sample 91.5821 {2: 110592}
+sample 86.4595 {2: 110592}
+BEGIN ovito threads=8 frame=ice4096 metric=chill+
+warmup 0 8.8474 {2: 4096}
+warmup 1 8.8255 {2: 4096}
+sample 8.6654 {2: 4096}
+sample 8.8336 {2: 4096}
+sample 8.8142 {2: 4096}
+sample 8.7257 {2: 4096}
+sample 8.8934 {2: 4096}
+sample 8.9098 {2: 4096}
+sample 8.7982 {2: 4096}
+sample 8.8803 {2: 4096}
+BEGIN agreement
+q tilt_q4 n=110592 max|seams-mdapy|=4.441e-16 max|seams-ovito|=4.441e-16 max|mdapy-ovito|=3.331e-16
+q tilt_q6 n=110592 max|seams-mdapy|=7.772e-16 max|seams-ovito|=8.882e-16 max|mdapy-ovito|=6.661e-16
+q nuc_q6 n=4096 max|seams-mdapy|=2.054e-15 max|seams-ovito|=5.884e-15 max|mdapy-ovito|=6.106e-15
+q iface_q6 n=864 max|seams-mdapy|=1.332e-15 max|seams-ovito|=3.220e-15 max|mdapy-ovito|=2.998e-15
+labels tilt n=110592
+  published {0: 110592}
+  ovito-rule {0: 110592} mdapy {0: 110592} ovito {0: 110592}
+  published_vs_ovito 0 ovito_rule_vs_mdapy 0 ovito_rule_vs_ovito 0 mdapy_vs_ovito 0
+labels ice4096 n=4096
+  published {0: 4096}
+  ovito-rule {0: 4096} mdapy {0: 4096} ovito {0: 4096}
+  published_vs_ovito 0 ovito_rule_vs_mdapy 0 ovito_rule_vs_ovito 0 mdapy_vs_ovito 0
+labels nuc n=4096
+  published {0: 47, 1: 62, 2: 3589, 3: 240, 4: 20, 5: 138}
+  ovito-rule {0: 48, 1: 54, 2: 3360, 3: 478, 4: 21, 5: 135} mdapy {0: 48, 1: 54, 2: 3360, 3: 478, 4: 21, 5: 135} ovito {0: 48, 1: 54, 2: 3360, 3: 478, 4: 21, 5: 135}
+  published_vs_ovito 397 ovito_rule_vs_mdapy 0 ovito_rule_vs_ovito 0 mdapy_vs_ovito 0
+labels iface n=864
+  published {0: 1, 1: 352, 2: 434, 3: 49, 4: 3, 5: 25}
+  ovito-rule {0: 1, 1: 346, 2: 437, 3: 57, 4: 3, 5: 20} mdapy {0: 1, 1: 346, 2: 437, 3: 57, 4: 3, 5: 20} ovito {0: 1, 1: 346, 2: 437, 3: 57, 4: 3, 5: 20}
+  published_vs_ovito 46 ovito_rule_vs_mdapy 0 ovito_rule_vs_ovito 0 mdapy_vs_ovito 0

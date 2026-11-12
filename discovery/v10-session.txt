@@ -1,0 +1,618 @@
+session v10
+date_utc 2026-11-12 00:42:49
+nproc 8
+nproc_all 8
+CPU(s):                                  8
+On-line CPU(s) list:                     0-7
+Model name:                              Intel(R) Xeon(R) Processor
+Thread(s) per core:                      1
+Core(s) per socket:                      8
+Socket(s):                               1
+NUMA node(s):                            1
+NUMA node0 CPU(s):                       0-7
+cpu.max absent
+nr_periods 0
+nr_throttled 0
+cpuset.cpus.effective 0-7
+usable_cores 8
+protocol seams and ovito: OMP_PROC_BIND=close OMP_PLACES=cores OMP_WAIT_POLICY=ACTIVE
+protocol mdapy and pyscal3: threads set in the library, no proc bind
+samples 8 after 2 warm-ups; neighbour build is inside every timed call
+ideal ice Ic, cutoff 3.5
+qbar is the Lechner-Dellago average. w is the normalised hat w_l
+OVITO 3.17.2 Steinhardt modifier has averaged q and does not write w
+mdapy 2.0.0 SteinhardtParameters has averaged q and does not write w
+pyscal3 4.1.0 writes both
+BEGIN seams-1
+BEGIN seams threads=1 frame=ice110592 metric=qbar4
+warmup 0 50.1638 st=0 v0=0.50917508
+warmup 1 36.1280 st=0 v0=0.50917508
+sample 35.7342 st=0 v0=0.50917508
+sample 36.1624 st=0 v0=0.50917508
+sample 35.7455 st=0 v0=0.50917508
+sample 35.5850 st=0 v0=0.50917508
+sample 37.3904 st=0 v0=0.50917508
+sample 36.0580 st=0 v0=0.50917508
+sample 37.5181 st=0 v0=0.50917508
+sample 35.6706 st=0 v0=0.50917508
+summary n=8 min=35.5850 median=35.9017 max=37.5181
+BEGIN seams threads=1 frame=ice110592 metric=w4
+warmup 0 40.6082 st=0 v0=-0.15931737
+warmup 1 41.5287 st=0 v0=-0.15931737
+sample 44.9680 st=0 v0=-0.15931737
+sample 40.8160 st=0 v0=-0.15931737
+sample 40.6486 st=0 v0=-0.15931737
+sample 40.3945 st=0 v0=-0.15931737
+sample 40.4228 st=0 v0=-0.15931737
+sample 40.1499 st=0 v0=-0.15931737
+sample 40.8632 st=0 v0=-0.15931737
+sample 40.3715 st=0 v0=-0.15931737
+summary n=8 min=40.1499 median=40.5357 max=44.9680
+BEGIN seams threads=1 frame=ice110592 metric=qbar6
+warmup 0 49.4961 st=0 v0=0.62853936
+warmup 1 37.3040 st=0 v0=0.62853936
+sample 36.8768 st=0 v0=0.62853936
+sample 37.5339 st=0 v0=0.62853936
+sample 37.1161 st=0 v0=0.62853936
+sample 37.2365 st=0 v0=0.62853936
+sample 37.5317 st=0 v0=0.62853936
+sample 39.6749 st=0 v0=0.62853936
+sample 37.7846 st=0 v0=0.62853936
+sample 37.1758 st=0 v0=0.62853936
+summary n=8 min=36.8768 median=37.3841 max=39.6749
+BEGIN seams threads=1 frame=ice110592 metric=w6
+warmup 0 50.3088 st=0 v0=0.01316060
+warmup 1 51.2245 st=0 v0=0.01316060
+sample 50.6546 st=0 v0=0.01316060
+sample 50.5765 st=0 v0=0.01316060
+sample 50.3609 st=0 v0=0.01316060
+sample 50.0623 st=0 v0=0.01316060
+sample 51.7601 st=0 v0=0.01316060
+sample 50.5417 st=0 v0=0.01316060
+sample 53.0135 st=0 v0=0.01316060
+sample 50.6793 st=0 v0=0.01316060
+summary n=8 min=50.0623 median=50.6155 max=53.0135
+BEGIN seams threads=1 frame=ice884736 metric=qbar4
+warmup 0 470.3915 st=0 v0=0.50917508
+warmup 1 366.0693 st=0 v0=0.50917508
+sample 363.1379 st=0 v0=0.50917508
+sample 360.5684 st=0 v0=0.50917508
+sample 362.1027 st=0 v0=0.50917508
+sample 363.9855 st=0 v0=0.50917508
+sample 363.1516 st=0 v0=0.50917508
+sample 362.2035 st=0 v0=0.50917508
+sample 361.5415 st=0 v0=0.50917508
+sample 359.9161 st=0 v0=0.50917508
+summary n=8 min=359.9161 median=362.1531 max=363.9855
+BEGIN seams threads=1 frame=ice884736 metric=w4
+warmup 0 381.0945 st=0 v0=-0.15931737
+warmup 1 386.2986 st=0 v0=-0.15931737
+sample 390.6300 st=0 v0=-0.15931737
+sample 390.4441 st=0 v0=-0.15931737
+sample 408.8427 st=0 v0=-0.15931737
+sample 418.7789 st=0 v0=-0.15931737
+sample 395.1903 st=0 v0=-0.15931737
+sample 393.4004 st=0 v0=-0.15931737
+sample 396.9924 st=0 v0=-0.15931737
+sample 391.4716 st=0 v0=-0.15931737
+summary n=8 min=390.4441 median=394.2953 max=418.7789
+BEGIN seams threads=1 frame=ice884736 metric=qbar6
+warmup 0 606.4775 st=0 v0=0.62853936
+warmup 1 404.3834 st=0 v0=0.62853936
+sample 404.6640 st=0 v0=0.62853936
+sample 410.5406 st=0 v0=0.62853936
+sample 402.7947 st=0 v0=0.62853936
+sample 402.9708 st=0 v0=0.62853936
+sample 426.9343 st=0 v0=0.62853936
+sample 403.7432 st=0 v0=0.62853936
+sample 409.4399 st=0 v0=0.62853936
+sample 403.9003 st=0 v0=0.62853936
+summary n=8 min=402.7947 median=404.2822 max=426.9343
+BEGIN seams threads=1 frame=ice884736 metric=w6
+warmup 0 474.6926 st=0 v0=0.01316060
+warmup 1 476.1228 st=0 v0=0.01316060
+sample 482.5059 st=0 v0=0.01316060
+sample 473.9498 st=0 v0=0.01316060
+sample 474.0123 st=0 v0=0.01316060
+sample 474.1391 st=0 v0=0.01316060
+sample 474.8085 st=0 v0=0.01316060
+sample 477.8142 st=0 v0=0.01316060
+sample 475.1667 st=0 v0=0.01316060
+sample 474.8836 st=0 v0=0.01316060
+summary n=8 min=473.9498 median=474.8461 max=482.5059
+seams1_exit 0
+BEGIN ovito-1
+BEGIN ovito threads=1 frame=ice110592 metric=qbar4
+warmup 0 88.2761 ok
+warmup 1 71.5078 ok
+sample 65.7390 ok
+sample 67.2863 ok
+sample 70.6028 ok
+sample 67.4004 ok
+sample 64.4052 ok
+sample 65.3435 ok
+sample 67.3955 ok
+sample 63.5141 ok
+summary n=8 min=63.5141 median=66.5126 max=70.6028
+BEGIN ovito threads=1 frame=ice110592 metric=qbar6
+warmup 0 114.6603 ok
+warmup 1 94.7044 ok
+sample 92.8039 ok
+sample 91.7620 ok
+sample 95.5458 ok
+sample 89.4816 ok
+sample 95.3856 ok
+sample 90.6240 ok
+sample 92.6075 ok
+sample 93.1067 ok
+summary n=8 min=89.4816 median=92.7057 max=95.5458
+BEGIN ovito threads=1 frame=ice884736 metric=qbar4
+warmup 0 666.0881 ok
+warmup 1 666.0164 ok
+sample 661.6445 ok
+sample 681.0026 ok
+sample 636.9798 ok
+sample 656.8656 ok
+sample 642.3752 ok
+sample 649.8774 ok
+sample 657.0567 ok
+sample 647.6902 ok
+summary n=8 min=636.9798 median=653.3715 max=681.0026
+BEGIN ovito threads=1 frame=ice884736 metric=qbar6
+warmup 0 922.6859 ok
+warmup 1 972.5213 ok
+sample 868.2563 ok
+sample 836.8735 ok
+sample 830.0809 ok
+sample 829.0584 ok
+sample 824.3058 ok
+sample 826.4556 ok
+sample 836.9679 ok
+sample 818.2927 ok
+summary n=8 min=818.2927 median=829.5696 max=868.2563
+ovito1_exit 0
+BEGIN mdapy-1
+BEGIN mdapy threads=1 frame=ice110592 metric=qbar4
+warmup 0 81.6246 v0=0.50917508
+warmup 1 65.4893 v0=0.50917508
+sample 67.6479 v0=0.50917508
+sample 67.2670 v0=0.50917508
+sample 66.9805 v0=0.50917508
+sample 67.3047 v0=0.50917508
+sample 67.4957 v0=0.50917508
+sample 67.2931 v0=0.50917508
+sample 67.3894 v0=0.50917508
+sample 67.8682 v0=0.50917508
+summary n=8 min=66.9805 median=67.3471 max=67.8682
+BEGIN mdapy threads=1 frame=ice110592 metric=qbar6
+warmup 0 81.8257 v0=0.62853936
+warmup 1 84.0498 v0=0.62853936
+sample 82.0758 v0=0.62853936
+sample 82.3272 v0=0.62853936
+sample 81.9085 v0=0.62853936
+sample 82.5976 v0=0.62853936
+sample 82.7127 v0=0.62853936
+sample 84.5877 v0=0.62853936
+sample 82.9280 v0=0.62853936
+sample 83.0587 v0=0.62853936
+summary n=8 min=81.9085 median=82.6551 max=84.5877
+BEGIN mdapy threads=1 frame=ice884736 metric=qbar4
+warmup 0 876.6136 v0=0.50917508
+warmup 1 821.7863 v0=0.50917508
+sample 840.9621 v0=0.50917508
+sample 816.6407 v0=0.50917508
+sample 808.6955 v0=0.50917508
+sample 805.7807 v0=0.50917508
+sample 805.9151 v0=0.50917508
+sample 816.6043 v0=0.50917508
+sample 821.3296 v0=0.50917508
+sample 832.3161 v0=0.50917508
+summary n=8 min=805.7807 median=816.6225 max=840.9621
+BEGIN mdapy threads=1 frame=ice884736 metric=qbar6
+warmup 0 964.2899 v0=0.62853936
+warmup 1 937.7124 v0=0.62853936
+sample 943.1207 v0=0.62853936
+sample 917.0669 v0=0.62853936
+sample 939.1326 v0=0.62853936
+sample 936.3302 v0=0.62853936
+sample 937.3288 v0=0.62853936
+sample 937.3293 v0=0.62853936
+sample 933.6264 v0=0.62853936
+sample 905.4482 v0=0.62853936
+summary n=8 min=905.4482 median=936.8295 max=943.1207
+mdapy1_exit 0
+BEGIN pyscal3-1
+BEGIN pyscal3 threads=1 frame=ice110592 metric=qbar4
+warmup 0 122.6756 v0=0.50917508
+warmup 1 103.0469 v0=0.50917508
+sample 97.3242 v0=0.50917508
+sample 94.8828 v0=0.50917508
+sample 93.9130 v0=0.50917508
+sample 94.3545 v0=0.50917508
+sample 94.8127 v0=0.50917508
+sample 95.1185 v0=0.50917508
+sample 94.6845 v0=0.50917508
+sample 94.7120 v0=0.50917508
+summary n=8 min=93.9130 median=94.7623 max=97.3242
+BEGIN pyscal3 threads=1 frame=ice110592 metric=w4
+warmup 0 102.2043 v0=-0.15931737
+warmup 1 103.0941 v0=-0.15931737
+sample 105.0860 v0=-0.15931737
+sample 108.4837 v0=-0.15931737
+sample 105.3066 v0=-0.15931737
+sample 115.1975 v0=-0.15931737
+sample 111.6354 v0=-0.15931737
+sample 105.5968 v0=-0.15931737
+sample 107.1536 v0=-0.15931737
+sample 108.4608 v0=-0.15931737
+summary n=8 min=105.0860 median=107.8072 max=115.1975
+BEGIN pyscal3 threads=1 frame=ice110592 metric=qbar6
+warmup 0 120.3989 v0=0.62853936
+warmup 1 122.3623 v0=0.62853936
+sample 116.2694 v0=0.62853936
+sample 115.3249 v0=0.62853936
+sample 121.8856 v0=0.62853936
+sample 118.7192 v0=0.62853936
+sample 117.7548 v0=0.62853936
+sample 112.1368 v0=0.62853936
+sample 112.0622 v0=0.62853936
+sample 109.0163 v0=0.62853936
+summary n=8 min=109.0163 median=115.7971 max=121.8856
+BEGIN pyscal3 threads=1 frame=ice110592 metric=w6
+warmup 0 129.1459 v0=0.01316060
+warmup 1 131.8241 v0=0.01316060
+sample 132.2831 v0=0.01316060
+sample 129.9409 v0=0.01316060
+sample 137.9799 v0=0.01316060
+sample 131.7143 v0=0.01316060
+sample 138.4833 v0=0.01316060
+sample 133.8658 v0=0.01316060
+sample 134.9299 v0=0.01316060
+sample 133.4574 v0=0.01316060
+summary n=8 min=129.9409 median=133.6616 max=138.4833
+BEGIN pyscal3 threads=1 frame=ice884736 metric=qbar4
+warmup 0 1108.8684 v0=0.50917508
+warmup 1 1024.6140 v0=0.50917508
+sample 955.8039 v0=0.50917508
+sample 990.8751 v0=0.50917508
+sample 988.2555 v0=0.50917508
+sample 968.4573 v0=0.50917508
+sample 967.0374 v0=0.50917508
+sample 972.2257 v0=0.50917508
+sample 991.0737 v0=0.50917508
+sample 956.9899 v0=0.50917508
+summary n=8 min=955.8039 median=970.3415 max=991.0737
+BEGIN pyscal3 threads=1 frame=ice884736 metric=w4
+warmup 0 986.3911 v0=-0.15931737
+warmup 1 986.3240 v0=-0.15931737
+sample 981.1567 v0=-0.15931737
+sample 982.5280 v0=-0.15931737
+sample 983.9893 v0=-0.15931737
+sample 989.0989 v0=-0.15931737
+sample 990.8481 v0=-0.15931737
+sample 982.0658 v0=-0.15931737
+sample 975.6420 v0=-0.15931737
+sample 999.7051 v0=-0.15931737
+summary n=8 min=975.6420 median=983.2586 max=999.7051
+BEGIN pyscal3 threads=1 frame=ice884736 metric=qbar6
+warmup 0 1093.9526 v0=0.62853936
+warmup 1 1162.9256 v0=0.62853936
+sample 1069.2337 v0=0.62853936
+sample 1058.5352 v0=0.62853936
+sample 1059.3459 v0=0.62853936
+sample 1060.6180 v0=0.62853936
+sample 1067.0954 v0=0.62853936
+sample 1089.0796 v0=0.62853936
+sample 1102.1229 v0=0.62853936
+sample 1105.4063 v0=0.62853936
+summary n=8 min=1058.5352 median=1068.1646 max=1105.4063
+BEGIN pyscal3 threads=1 frame=ice884736 metric=w6
+warmup 0 1253.5791 v0=0.01316060
+warmup 1 1240.1035 v0=0.01316060
+sample 1182.8104 v0=0.01316060
+sample 1195.0199 v0=0.01316060
+sample 1166.0907 v0=0.01316060
+sample 1202.9962 v0=0.01316060
+sample 1171.6440 v0=0.01316060
+sample 1198.1743 v0=0.01316060
+sample 1206.7833 v0=0.01316060
+sample 1241.7818 v0=0.01316060
+summary n=8 min=1166.0907 median=1196.5971 max=1241.7818
+pyscal31_exit 0
+BEGIN seams-8
+BEGIN seams threads=8 frame=ice110592 metric=qbar4
+warmup 0 40.3989 st=0 v0=0.50917508
+warmup 1 8.7067 st=0 v0=0.50917508
+sample 6.9032 st=0 v0=0.50917508
+sample 7.5237 st=0 v0=0.50917508
+sample 7.3876 st=0 v0=0.50917508
+sample 7.5515 st=0 v0=0.50917508
+sample 6.9560 st=0 v0=0.50917508
+sample 7.4057 st=0 v0=0.50917508
+sample 7.3840 st=0 v0=0.50917508
+sample 7.4444 st=0 v0=0.50917508
+summary n=8 min=6.9032 median=7.3966 max=7.5515
+BEGIN seams threads=8 frame=ice110592 metric=w4
+warmup 0 9.0666 st=0 v0=-0.15931737
+warmup 1 8.0805 st=0 v0=-0.15931737
+sample 7.7716 st=0 v0=-0.15931737
+sample 7.7202 st=0 v0=-0.15931737
+sample 6.9656 st=0 v0=-0.15931737
+sample 6.4849 st=0 v0=-0.15931737
+sample 6.2938 st=0 v0=-0.15931737
+sample 6.5500 st=0 v0=-0.15931737
+sample 6.3041 st=0 v0=-0.15931737
+sample 6.2697 st=0 v0=-0.15931737
+summary n=8 min=6.2697 median=6.5175 max=7.7716
+BEGIN seams threads=8 frame=ice110592 metric=qbar6
+warmup 0 19.6082 st=0 v0=0.62853936
+warmup 1 6.9053 st=0 v0=0.62853936
+sample 6.7009 st=0 v0=0.62853936
+sample 6.8012 st=0 v0=0.62853936
+sample 6.7896 st=0 v0=0.62853936
+sample 6.9547 st=0 v0=0.62853936
+sample 7.6140 st=0 v0=0.62853936
+sample 7.4891 st=0 v0=0.62853936
+sample 8.2053 st=0 v0=0.62853936
+sample 7.8344 st=0 v0=0.62853936
+summary n=8 min=6.7009 median=7.2219 max=8.2053
+BEGIN seams threads=8 frame=ice110592 metric=w6
+warmup 0 9.0253 st=0 v0=0.01316060
+warmup 1 7.6900 st=0 v0=0.01316060
+sample 8.0354 st=0 v0=0.01316060
+sample 7.9663 st=0 v0=0.01316060
+sample 7.8115 st=0 v0=0.01316060
+sample 7.7537 st=0 v0=0.01316060
+sample 7.5713 st=0 v0=0.01316060
+sample 7.7143 st=0 v0=0.01316060
+sample 7.7663 st=0 v0=0.01316060
+sample 7.8576 st=0 v0=0.01316060
+summary n=8 min=7.5713 median=7.7889 max=8.0354
+BEGIN seams threads=8 frame=ice884736 metric=qbar4
+warmup 0 178.7917 st=0 v0=0.50917508
+warmup 1 55.0232 st=0 v0=0.50917508
+sample 53.7451 st=0 v0=0.50917508
+sample 53.0970 st=0 v0=0.50917508
+sample 56.4529 st=0 v0=0.50917508
+sample 52.5869 st=0 v0=0.50917508
+sample 53.9972 st=0 v0=0.50917508
+sample 51.4689 st=0 v0=0.50917508
+sample 64.1030 st=0 v0=0.50917508
+sample 52.8099 st=0 v0=0.50917508
+summary n=8 min=51.4689 median=53.4211 max=64.1030
+BEGIN seams threads=8 frame=ice884736 metric=w4
+warmup 0 65.4903 st=0 v0=-0.15931737
+warmup 1 56.6206 st=0 v0=-0.15931737
+sample 53.6376 st=0 v0=-0.15931737
+sample 52.0250 st=0 v0=-0.15931737
+sample 51.6922 st=0 v0=-0.15931737
+sample 56.9986 st=0 v0=-0.15931737
+sample 52.0564 st=0 v0=-0.15931737
+sample 51.4398 st=0 v0=-0.15931737
+sample 52.5772 st=0 v0=-0.15931737
+sample 61.7939 st=0 v0=-0.15931737
+summary n=8 min=51.4398 median=52.3168 max=61.7939
+BEGIN seams threads=8 frame=ice884736 metric=qbar6
+warmup 0 277.8949 st=0 v0=0.62853936
+warmup 1 58.7267 st=0 v0=0.62853936
+sample 61.3052 st=0 v0=0.62853936
+sample 55.8925 st=0 v0=0.62853936
+sample 54.8397 st=0 v0=0.62853936
+sample 62.6364 st=0 v0=0.62853936
+sample 62.0497 st=0 v0=0.62853936
+sample 55.0759 st=0 v0=0.62853936
+sample 60.9844 st=0 v0=0.62853936
+sample 87.7314 st=0 v0=0.62853936
+summary n=8 min=54.8397 median=61.1448 max=87.7314
+BEGIN seams threads=8 frame=ice884736 metric=w6
+warmup 0 68.6543 st=0 v0=0.01316060
+warmup 1 64.6898 st=0 v0=0.01316060
+sample 63.3660 st=0 v0=0.01316060
+sample 63.1255 st=0 v0=0.01316060
+sample 63.6583 st=0 v0=0.01316060
+sample 73.2835 st=0 v0=0.01316060
+sample 66.5857 st=0 v0=0.01316060
+sample 64.3479 st=0 v0=0.01316060
+sample 66.5294 st=0 v0=0.01316060
+sample 63.1163 st=0 v0=0.01316060
+summary n=8 min=63.1163 median=64.0031 max=73.2835
+seams8_exit 0
+BEGIN ovito-8
+BEGIN ovito threads=8 frame=ice110592 metric=qbar4
+warmup 0 35.1084 ok
+warmup 1 30.5256 ok
+sample 22.5412 ok
+sample 18.9726 ok
+sample 26.4192 ok
+sample 14.3913 ok
+sample 27.1022 ok
+sample 22.3757 ok
+sample 26.1571 ok
+sample 16.1210 ok
+summary n=8 min=14.3913 median=22.4585 max=27.1022
+BEGIN ovito threads=8 frame=ice110592 metric=qbar6
+warmup 0 33.7864 ok
+warmup 1 31.1328 ok
+sample 33.1821 ok
+sample 53.0303 ok
+sample 28.5666 ok
+sample 27.6720 ok
+sample 27.7899 ok
+sample 41.4816 ok
+sample 28.0106 ok
+sample 38.7965 ok
+summary n=8 min=27.6720 median=30.8743 max=53.0303
+BEGIN ovito threads=8 frame=ice884736 metric=qbar4
+warmup 0 255.1791 ok
+warmup 1 240.3668 ok
+sample 178.6314 ok
+sample 239.3224 ok
+sample 160.4943 ok
+sample 159.9303 ok
+sample 157.8397 ok
+sample 160.7130 ok
+sample 169.4081 ok
+sample 255.8822 ok
+summary n=8 min=157.8397 median=165.0605 max=255.8822
+BEGIN ovito threads=8 frame=ice884736 metric=qbar6
+warmup 0 300.8464 ok
+warmup 1 391.7009 ok
+sample 244.7920 ok
+sample 376.9822 ok
+sample 334.3050 ok
+sample 375.5702 ok
+sample 235.3048 ok
+sample 306.5439 ok
+sample 230.4946 ok
+sample 232.4808 ok
+summary n=8 min=230.4946 median=275.6679 max=376.9822
+ovito8_exit 0
+BEGIN mdapy-8
+BEGIN mdapy threads=8 frame=ice110592 metric=qbar4
+warmup 0 17.9409 v0=0.50917508
+warmup 1 14.2565 v0=0.50917508
+sample 14.8401 v0=0.50917508
+sample 15.3036 v0=0.50917508
+sample 15.2183 v0=0.50917508
+sample 14.9740 v0=0.50917508
+sample 14.9157 v0=0.50917508
+sample 14.6999 v0=0.50917508
+sample 14.7326 v0=0.50917508
+sample 17.3801 v0=0.50917508
+summary n=8 min=14.6999 median=14.9449 max=17.3801
+BEGIN mdapy threads=8 frame=ice110592 metric=qbar6
+warmup 0 13.9806 v0=0.62853936
+warmup 1 13.8371 v0=0.62853936
+sample 14.2908 v0=0.62853936
+sample 14.3041 v0=0.62853936
+sample 14.6458 v0=0.62853936
+sample 13.8375 v0=0.62853936
+sample 14.6785 v0=0.62853936
+sample 14.0649 v0=0.62853936
+sample 16.4020 v0=0.62853936
+sample 14.9040 v0=0.62853936
+summary n=8 min=13.8375 median=14.4749 max=16.4020
+BEGIN mdapy threads=8 frame=ice884736 metric=qbar4
+warmup 0 126.4635 v0=0.50917508
+warmup 1 115.8329 v0=0.50917508
+sample 124.7117 v0=0.50917508
+sample 117.9234 v0=0.50917508
+sample 114.3895 v0=0.50917508
+sample 112.5429 v0=0.50917508
+sample 112.8632 v0=0.50917508
+sample 114.9803 v0=0.50917508
+sample 113.0221 v0=0.50917508
+sample 112.8473 v0=0.50917508
+summary n=8 min=112.5429 median=113.7058 max=124.7117
+BEGIN mdapy threads=8 frame=ice884736 metric=qbar6
+warmup 0 123.9796 v0=0.62853936
+warmup 1 123.8367 v0=0.62853936
+sample 125.0934 v0=0.62853936
+sample 122.8895 v0=0.62853936
+sample 121.5440 v0=0.62853936
+sample 119.9901 v0=0.62853936
+sample 120.9772 v0=0.62853936
+sample 121.7666 v0=0.62853936
+sample 118.3600 v0=0.62853936
+sample 127.4417 v0=0.62853936
+summary n=8 min=118.3600 median=121.6553 max=127.4417
+mdapy8_exit 0
+BEGIN pyscal3-8
+BEGIN pyscal3 threads=8 frame=ice110592 metric=qbar4
+warmup 0 47.3568 v0=0.50917508
+warmup 1 23.8056 v0=0.50917508
+sample 20.8637 v0=0.50917508
+sample 19.2604 v0=0.50917508
+sample 18.8899 v0=0.50917508
+sample 18.8384 v0=0.50917508
+sample 19.0452 v0=0.50917508
+sample 19.2539 v0=0.50917508
+sample 19.1961 v0=0.50917508
+sample 18.7791 v0=0.50917508
+summary n=8 min=18.7791 median=19.1207 max=20.8637
+BEGIN pyscal3 threads=8 frame=ice110592 metric=w4
+warmup 0 20.0001 v0=-0.15931737
+warmup 1 22.0415 v0=-0.15931737
+sample 21.2030 v0=-0.15931737
+sample 20.7322 v0=-0.15931737
+sample 20.5876 v0=-0.15931737
+sample 22.8002 v0=-0.15931737
+sample 20.8716 v0=-0.15931737
+sample 19.3916 v0=-0.15931737
+sample 19.7122 v0=-0.15931737
+sample 19.6475 v0=-0.15931737
+summary n=8 min=19.3916 median=20.6599 max=22.8002
+BEGIN pyscal3 threads=8 frame=ice110592 metric=qbar6
+warmup 0 21.2716 v0=0.62853936
+warmup 1 21.4958 v0=0.62853936
+sample 21.6437 v0=0.62853936
+sample 21.5323 v0=0.62853936
+sample 22.1770 v0=0.62853936
+sample 20.5342 v0=0.62853936
+sample 21.5684 v0=0.62853936
+sample 20.7098 v0=0.62853936
+sample 20.7912 v0=0.62853936
+sample 21.3148 v0=0.62853936
+summary n=8 min=20.5342 median=21.4236 max=22.1770
+BEGIN pyscal3 threads=8 frame=ice110592 metric=w6
+warmup 0 23.3602 v0=0.01316060
+warmup 1 22.8554 v0=0.01316060
+sample 23.4161 v0=0.01316060
+sample 23.5774 v0=0.01316060
+sample 25.0984 v0=0.01316060
+sample 23.8777 v0=0.01316060
+sample 24.1176 v0=0.01316060
+sample 23.3280 v0=0.01316060
+sample 22.8021 v0=0.01316060
+sample 23.2627 v0=0.01316060
+summary n=8 min=22.8021 median=23.4968 max=25.0984
+BEGIN pyscal3 threads=8 frame=ice884736 metric=qbar4
+warmup 0 213.0229 v0=0.50917508
+warmup 1 183.6253 v0=0.50917508
+sample 178.1236 v0=0.50917508
+sample 178.5071 v0=0.50917508
+sample 177.3605 v0=0.50917508
+sample 180.8102 v0=0.50917508
+sample 179.5213 v0=0.50917508
+sample 183.4478 v0=0.50917508
+sample 178.0736 v0=0.50917508
+sample 178.2602 v0=0.50917508
+summary n=8 min=177.3605 median=178.3836 max=183.4478
+BEGIN pyscal3 threads=8 frame=ice884736 metric=w4
+warmup 0 184.2259 v0=-0.15931737
+warmup 1 186.2163 v0=-0.15931737
+sample 180.3566 v0=-0.15931737
+sample 184.3102 v0=-0.15931737
+sample 193.8829 v0=-0.15931737
+sample 184.1115 v0=-0.15931737
+sample 186.9802 v0=-0.15931737
+sample 183.4401 v0=-0.15931737
+sample 195.0386 v0=-0.15931737
+sample 194.1142 v0=-0.15931737
+summary n=8 min=180.3566 median=185.6452 max=195.0386
+BEGIN pyscal3 threads=8 frame=ice884736 metric=qbar6
+warmup 0 224.3581 v0=0.62853936
+warmup 1 220.8805 v0=0.62853936
+sample 202.8939 v0=0.62853936
+sample 211.4804 v0=0.62853936
+sample 221.5991 v0=0.62853936
+sample 221.7455 v0=0.62853936
+sample 227.3551 v0=0.62853936
+sample 233.7320 v0=0.62853936
+sample 232.2946 v0=0.62853936
+sample 228.6642 v0=0.62853936
+summary n=8 min=202.8939 median=224.5503 max=233.7320
+BEGIN pyscal3 threads=8 frame=ice884736 metric=w6
+warmup 0 245.7495 v0=0.01316060
+warmup 1 247.6393 v0=0.01316060
+sample 247.4229 v0=0.01316060
+sample 246.6344 v0=0.01316060
+sample 234.6903 v0=0.01316060
+sample 232.7184 v0=0.01316060
+sample 228.7580 v0=0.01316060
+sample 233.6291 v0=0.01316060
+sample 225.2396 v0=0.01316060
+sample 245.9996 v0=0.01316060
+summary n=8 min=225.2396 median=234.1597 max=247.4229
+pyscal38_exit 0
+session_done

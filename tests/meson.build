@@ -49,6 +49,7 @@ test_sources = {
   'chill_plus_rule': 'test_chill_plus_rule.cpp',
   'nucleation_pathway': 'test_nucleation_pathway.cpp',
   'interface_order': 'test_interface_order.cpp',
+  'ql_solid': 'test_ql_solid.cpp',
   'thread_scale': 'test_thread_scale.cpp',
   'gpu_residency': 'test_gpu_residency.cpp',
   'config': 'test_config.cpp',
@@ -167,6 +168,12 @@ executable('bench_cutoff_list', 'bench_cutoff_list.cpp',
   link_args: _test_link_args,
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
+executable('bench_ql', 'bench_ql.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
 
 executable('report_symmetry_cases', 'report_symmetry_cases.cpp',
   dependencies: [yds_dep],

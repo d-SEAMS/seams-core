@@ -43,6 +43,13 @@ julia --project=bindings/julia/Dseams -e 'using Pkg; Pkg.instantiate()'
 julia --project=bindings/julia/Dseams bindings/julia/Dseams/test/runtests.jl
 #+end_src
 
+* q4 and q6
+
+The cutoff-shell solid-harmonic kernel is ~seams_q4_q6~ in the C API and ~seams_frame_q4_q6~ in =libseams_lang=.
+Python is ~q4_q6~ in =bindings/python/chill_plus.py= (~SEAMS_LANG_LIB= selects the library).
+R and Julia export ~q4_q6~.
+The CLI command is ~seams steinhardt~, which also prints the \(q_3\) and \(q_{12}\) means.
+
 * Tests
 
 #+begin_src bash

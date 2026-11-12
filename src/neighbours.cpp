@@ -1306,15 +1306,17 @@ nneigh::neighListO(double rcutoff,
     }
   }
 
-  // Several threads use the persistent CSR, including triclinic cells.
-  // A report that wants the OpenMP team left for the ring search sets
-  // preferSerialCutoff and keeps the one-thread linkcell kernel.
+  // Several threads use the persistent CSR. That covers an orthorhombic
+  // cell and a restricted triclinic cell (xy, xz, yz). One thread stays
+  // on linkcell's fused kernel, which is the faster builder there. A
+  // report that wants the OpenMP team left for the ring search sets
+  // preferSerialCutoff and keeps that one-thread kernel as well.
 #ifdef SEAMS_HAS_OPENMP
   const bool csrTeam = !gSerialCutoff && !omp_in_parallel() && omp_get_max_threads() > 1;
 #else
   const bool csrTeam = false;
 #endif
-  if (csrTeam && yCloud.box.size() >= 3) {
+  if (csrTeam && (yCloud.box.size() == 3 || yCloud.box.size() >= 6)) {
     std::vector<int> offsets;
     std::vector<int> cols;
     if (orthoFullCsr(yCloud, &typeIIndices, rcutoff, offsets, cols, false)) {
@@ -1534,7 +1536,7 @@ nneigh::halfNeighList(double rcutoff,
   const std::vector<int> indexToID = indexToIDTable(yCloud);
   std::vector<std::vector<int>> nList = seedWithSelfIDs(indexToID, yCloud.nop);
 
-  if (yCloud.box.size() >= 3) {
+  if (yCloud.box.size() == 3 || yCloud.box.size() >= 6) {
     std::vector<int> typeIIndices;
     for (int i = 0; i < yCloud.nop; i++) {
       if (yCloud.pts[i].type == typeI) {
@@ -1617,7 +1619,7 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
 
   std::vector<std::vector<int>> nList(yCloud.nop);
 
-  if (yCloud.box.size() >= 3) {
+  if (yCloud.box.size() == 3 || yCloud.box.size() >= 6) {
     std::vector<int> offsets;
     std::vector<int> cols;
     if (orthoFullCsr(yCloud, nullptr, cutoff, offsets, cols, false)) {
@@ -1793,7 +1795,8 @@ bool typeAllowed(int type, int typeI, const std::vector<int> *types) {
 bool nominateByLinkcell(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     int typeI, double cellHint, std::vector<int> &nom,
-    const std::vector<int> *types = nullptr) {
+    const std::vector<int> *types = nullptr,
+    std::vector<double> *keepXyz = nullptr) {
   const int n = yCloud.nop;
   if (n <= 0 || k <= 0 || yCloud.box.size() < 3) {
     return true;
@@ -1804,7 +1807,11 @@ bool nominateByLinkcell(
   if (!(bx > 0.0 && by > 0.0 && bz > 0.0)) {
     return true;
   }
-  std::vector<double> xyz(static_cast<std::size_t>(n) * 3);
+  std::vector<double> localXyz;
+  std::vector<double> &xyz = keepXyz != nullptr ? *keepXyz : localXyz;
+  if (static_cast<int>(xyz.size()) != n * 3) {
+    xyz.resize(static_cast<std::size_t>(n) * 3);
+  }
   int nSrc = 0;
   bool uniform = true;
   for (int i = 0; i < n; i++) {
@@ -2126,6 +2133,43 @@ nneigh::kNearestNeighbourList(
   std::vector<std::vector<int>> out;
   fillGraphFromNom(yCloud, nom, k, mutual, out);
   return out;
+}
+
+void nneigh::kNearestPacked(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    double candidateCutoff, int typeI, std::vector<double> &xyz,
+    std::vector<int> &nom) {
+  // The q path calls this and then an OpenMP harmonic. Pausing the team
+  // here makes the next parallel region pay a wake-up, which is the
+  // several-millisecond swing on a few thousand atoms.
+  seams::prepareCompute();
+#ifdef SEAMS_HAS_LINKCELL
+  lc_set_threads(seams::teamFor(yCloud.nop));
+#endif
+  const int n = yCloud.nop;
+  nom.assign(static_cast<std::size_t>(std::max(n, 0)) * static_cast<std::size_t>(std::max(k, 0)),
+             -1);
+  if (n <= 0 || k <= 0) {
+    return;
+  }
+  const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
+#ifdef SEAMS_HAS_LINKCELL
+  if (nominateByLinkcell(yCloud, k, typeI, hint, nom, nullptr, &xyz) &&
+      static_cast<int>(xyz.size()) == n * 3) {
+    return;
+  }
+#endif
+  if (nom.size() != static_cast<std::size_t>(n) * static_cast<std::size_t>(k) ||
+      std::all_of(nom.begin(), nom.end(), [](int v) { return v < 0; })) {
+    nom = nominatePacked(yCloud, k, typeI, hint);
+  }
+  xyz.resize(static_cast<std::size_t>(n) * 3);
+  for (int i = 0; i < n; i++) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    xyz[static_cast<std::size_t>(3 * i)] = p.x;
+    xyz[static_cast<std::size_t>(3 * i + 1)] = p.y;
+    xyz[static_cast<std::size_t>(3 * i + 2)] = p.z;
+  }
 }
 
 std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>>

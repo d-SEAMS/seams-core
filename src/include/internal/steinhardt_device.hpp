@@ -254,7 +254,7 @@ inline void ylmAll(int orderL, double theta, double phi, double *out) {
 inline void qlmAddBond(int orderL, double dx, double dy, double dz,
                        double *qlmInterleaved, int row, int nComp,
                        int &nUsed) {
-  if (orderL == 3 || orderL == 6) {
+  if (orderL == 3 || orderL == 4 || orderL == 6) {
     double re[13];
     double im[13];
     if (!seams::ylm::ylmReal(orderL, dx, dy, dz, re, im)) {

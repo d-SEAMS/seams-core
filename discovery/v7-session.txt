@@ -1,0 +1,44 @@
+session v7
+date_utc 2026-11-12 00:07:13
+nproc 8
+CPU(s):8
+On-line CPU(s) list:0-7
+Model name:Intel(R) Xeon(R) Processor
+Thread(s) per core:1
+Core(s) per socket:8
+Socket(s):1
+NUMA node(s):1
+NUMA node0 CPU(s):0-7
+cpu.max absent
+nr_periods 0
+nr_throttled 0
+cpuset.cpus.effective 0-7
+usable_cores 8
+reported_thread_counts 1
+protocol OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores OMP_WAIT_POLICY=ACTIVE taskset cpu 0
+samples 8 after 2 warm-ups; neighbour build is inside every seams call
+q6 is local Steinhardt, cutoff 3.5, ideal ice Ic, 884736 molecules
+BEGIN seams
+BEGIN seams threads=1 frame=ice884736 metric=q6
+warmup 0 612.7972 st=0 q0=0.62853936 qbar0=0.62853936
+warmup 1 493.9145 st=0 q0=0.62853936 qbar0=0.62853936
+sample 483.2707 st=0 q0=0.62853936 qbar0=0.62853936
+sample 529.1062 st=0 q0=0.62853936 qbar0=0.62853936
+sample 501.1769 st=0 q0=0.62853936 qbar0=0.62853936
+sample 490.8224 st=0 q0=0.62853936 qbar0=0.62853936
+sample 442.9444 st=0 q0=0.62853936 qbar0=0.62853936
+sample 456.1703 st=0 q0=0.62853936 qbar0=0.62853936
+sample 437.3676 st=0 q0=0.62853936 qbar0=0.62853936
+sample 448.8480 st=0 q0=0.62853936 qbar0=0.62853936
+BEGIN ovito
+BEGIN ovito threads=1 frame=ice884736 metric=q6
+warmup 0 536.9048 ok
+warmup 1 551.4795 ok
+sample 489.6862 ok
+sample 491.4829 ok
+sample 479.6851 ok
+sample 490.5099 ok
+sample 492.3985 ok
+sample 479.0437 ok
+sample 484.0325 ok
+sample 488.5266 ok

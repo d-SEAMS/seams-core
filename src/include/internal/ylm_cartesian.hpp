@@ -7,6 +7,8 @@
 // sin(theta)^|m| e^{i m phi} = (y + i x)^|m| with no inverse sine or
 // cosine. Norms are the Condon-Shortley constants used by normQ3/normQ6.
 
+#include <solid_ylm.hpp>
+
 #include <cmath>
 
 namespace seams {
@@ -17,6 +19,14 @@ inline constexpr double N3[4] = {
     0x1.4aefbf05f1305p-2, // 0.125 * sqrt(21/pi)
     0x1.05a0d7164496dp+0, // 0.25 * sqrt(105/(2 pi))
     0x1.ab3cb8d675a30p-2  // 0.125 * sqrt(35/pi)
+};
+
+inline constexpr double N4[5] = {
+    0x1.b14c2f863e924p-4, // 0.1875 * sqrt(1/pi)
+    0x1.e471027d29b68p-2, // 0.375 * sqrt(5/pi)
+    0x1.568d44c02929cp-2, // 0.375 * sqrt(5/(2 pi))
+    0x1.406d8aa0d83a4p+0, // 0.375 * sqrt(35/pi)
+    0x1.c5274a45d91d8p-2  // 0.1875 * sqrt(35/(2 pi))
 };
 
 inline constexpr double N6[7] = {
@@ -99,15 +109,25 @@ inline bool ylmReal(int orderL, double dx, double dy, double dz, double *re,
                     double *im) {
   const int nComp = 2 * orderL + 1;
   const double r2 = dx * dx + dy * dy + dz * dz;
-  if (!(r2 > 0.0) || (orderL != 3 && orderL != 6)) {
+  if (!(r2 > 0.0) || (orderL != 3 && orderL != 4 && orderL != 6)) {
     for (int m = 0; m < nComp; ++m) {
       re[m] = 0.0;
       im[m] = 0.0;
     }
     return false;
   }
-  const double inv = 1.0 / std::sqrt(r2);
-  evalUnit(orderL, dx * inv, dy * inv, dz * inv, re, im);
+  // Even l: r^l is a power of r2. l = 3 keeps one square root.
+  double inv;
+  if (orderL == 6) {
+    const double r4 = r2 * r2;
+    inv = 1.0 / (r4 * r2);
+  } else if (orderL == 4) {
+    inv = 1.0 / (r2 * r2);
+  } else {
+    inv = 1.0 / (r2 * std::sqrt(r2));
+  }
+  const double *norm = (orderL == 3) ? N3 : (orderL == 4) ? N4 : N6;
+  solid::eval(orderL, dx, dy, dz, r2, inv, norm, re, im);
   return true;
 }
 

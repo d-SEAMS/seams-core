@@ -4,7 +4,7 @@
 ~Frame.steinhardt(l)~ returns the local ~q_l~ and the Lechner-Dellago average for every atom.
 The neighbour list is the cutoff list.
 Degrees 3, 4, 6, 8, and 12 are computed.
-~seams steinhardt~ uses the mutual four-nearest list, so its means on the mixed frame are not these means.
+~seams steinhardt~ reports the means of those cutoff-shell values, including \(q_4\) and \(q_6\) from the solid-harmonic kernel.
 
 The runnable copy is =docs/tutorials/test_order_parameters.py=.
 

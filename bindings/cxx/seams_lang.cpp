@@ -564,7 +564,15 @@ int classify_chill(seams_frame *frame, double cutoff, int type,
     const std::string ruleText = rule == nullptr ? "" : rule;
     const bool published =
         ruleText.empty() || ruleText == "chill+" || ruleText == "published";
-    if (plus && which == "cutoff" && published) {
+    // Published cutoff CHILL+ reads its own pair rows. The solid-harmonic
+    // kernel handles an orthorhombic cell and a restricted triclinic cell.
+    // The CSR route covers the same cells when that kernel declines, and
+    // every other graph keeps the neighbour list the caller asked for.
+    bool publishedCutoff = false;
+    if (plus && which == "cutoff" && published &&
+        chill::chillPlusPublishedCutoff(frame->cloud, cutoff, typ)) {
+      publishedCutoff = true;
+    } else if (plus && which == "cutoff" && published) {
       std::vector<int> subset;
       const std::vector<int> *sub = nullptr;
       if (typ > 0) {
@@ -584,13 +592,15 @@ int classify_chill(seams_frame *frame, double cutoff, int type,
         return 0;
       }
     }
-    auto nList = bond_list(frame->cloud, cutoff, typ, which, 4);
-    if (plus) {
-      chill::applyChillPlus(frame->cloud, nList, chill::chillPlusRule(ruleText),
-                            false);
-    } else {
-      chill::getCorrel(frame->cloud, nList, false);
-      chill::getIceTypeNoPrint(frame->cloud, nList, false);
+    if (!publishedCutoff) {
+      auto nList = bond_list(frame->cloud, cutoff, typ, which, 4);
+      if (plus) {
+        chill::applyChillPlus(frame->cloud, nList, chill::chillPlusRule(ruleText),
+                              false);
+      } else {
+        chill::getCorrel(frame->cloud, nList, false);
+        chill::getIceTypeNoPrint(frame->cloud, nList, false);
+      }
     }
     const int n = frame->cloud.nop;
     frame->labels.assign(static_cast<std::size_t>(std::max(n, 0)), 6);
@@ -990,7 +1000,20 @@ int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
 
 int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
                            int order_l, double *ql, double *qlbar) {
-  return seams_frame_steinhardt_graph(frame, cutoff, type, order_l, "mutual", ql,
+  clear_error();
+  if (frame == nullptr) {
+    set_error("frame is null");
+    return 1;
+  }
+  // Orthorhombic and restricted-triclinic frames use the cutoff shell,
+  // the same neighbours OVITO's cutoff Steinhardt reads. Anything else
+  // keeps the mutual four-nearest graph. seams_frame_steinhardt_graph
+  // still honours an explicit graph.
+  const char *which = "mutual";
+  if (frame->cloud.box.size() == 3 || frame->cloud.box.size() >= 6) {
+    which = "cutoff";
+  }
+  return seams_frame_steinhardt_graph(frame, cutoff, type, order_l, which, ql,
                                       qlbar);
 }
 
@@ -1035,14 +1058,22 @@ int seams_frame_steinhardt_graph(seams_frame *frame, double cutoff, int type,
     const int typ = resolve_type(frame->cloud, type);
     const std::string which =
         (graph == nullptr || graph[0] == '\0') ? "mutual" : graph;
+    // A null qlbar skips the Lechner-Dellago pass. Cutoff reads the
+    // shared CSR. Mutual uses the packed four-nearest kernel, and a box
+    // that kernel cannot take falls back to the explicit neighbour rows.
+    const bool average = qlbar != nullptr;
     chill::SteinhardtQl result;
     if (which == "cutoff") {
-      result = chill::steinhardtQlCutoff(frame->cloud, cutoff, order_l, typ, true);
+      result = chill::steinhardtQlCutoff(frame->cloud, cutoff, order_l, typ, average);
     } else if (which == "mutual" || which == "knn" || which == "knn-mutual") {
       const double cand = cutoff + 1.5;
-      auto nList =
-          nneigh::kNearestNeighbourList(frame->cloud, 4, cand, typ, true);
-      result = chill::steinhardtQl(frame->cloud, nList, order_l);
+      if (frame->cloud.box.size() == 3 || frame->cloud.box.size() >= 6) {
+        result = chill::steinhardtQlMutual(frame->cloud, 4, cand, typ, order_l);
+      } else {
+        auto nList =
+            nneigh::kNearestNeighbourList(frame->cloud, 4, cand, typ, true);
+        result = chill::steinhardtQl(frame->cloud, nList, order_l);
+      }
     } else {
       throw std::invalid_argument("steinhardt graph is cutoff or mutual");
     }
@@ -1057,6 +1088,135 @@ int seams_frame_steinhardt_graph(seams_frame *frame, double cutoff, int type,
       std::memcpy(qlbar, frame->qlbar.data(),
                   static_cast<std::size_t>(n) * sizeof(double));
     }
+    return 0;
+  } catch (...) {
+    remember_exception();
+    return 1;
+  }
+}
+
+int seams_frame_wl(seams_frame *frame, double cutoff, int type, int order_l,
+                   double *wl) {
+  clear_error();
+  if (frame == nullptr || wl == nullptr) {
+    set_error("wl needs a frame");
+    return 1;
+  }
+  if (order_l != 4 && order_l != 6) {
+    set_error("wl is defined here for l = 4 and l = 6");
+    return 1;
+  }
+  try {
+    const int typ = resolve_type(frame->cloud, type);
+    if (!(frame->cloud.box.size() == 3 || frame->cloud.box.size() >= 6)) {
+      set_error("wl needs an orthorhombic or restricted triclinic frame");
+      return 1;
+    }
+    const chill::SteinhardtQl result =
+        chill::steinhardtQlCutoff(frame->cloud, cutoff, order_l, typ, false, true);
+    if (result.wl.size() != static_cast<std::size_t>(std::max(frame->cloud.nop, 0))) {
+      set_error("wl was not computed");
+      return 1;
+    }
+    const int n = frame->cloud.nop;
+    if (n > 0) {
+      std::memcpy(wl, result.wl.data(), static_cast<std::size_t>(n) * sizeof(double));
+    }
+    return 0;
+  } catch (...) {
+    remember_exception();
+    return 1;
+  }
+}
+
+int seams_frame_q4_q6(seams_frame *frame, double cutoff, int type, double *q4,
+                      double *q6, double *q4bar, double *q6bar) {
+  clear_error();
+  if (frame == nullptr || q4 == nullptr || q6 == nullptr) {
+    set_error("q4, q6 and a frame are required");
+    return 1;
+  }
+  if (!(cutoff > 0.0)) {
+    set_error("q4 and q6 need a positive cutoff");
+    return 1;
+  }
+  try {
+    const int typ = resolve_type(frame->cloud, type);
+    const auto a4 =
+        chill::steinhardtQlCutoff(frame->cloud, cutoff, 4, typ, q4bar != nullptr);
+    const auto a6 =
+        chill::steinhardtQlCutoff(frame->cloud, cutoff, 6, typ, q6bar != nullptr);
+    const int n = frame->cloud.nop;
+    if (static_cast<int>(a4.ql.size()) != n || static_cast<int>(a6.ql.size()) != n) {
+      set_error("q4 and q6 were not computed");
+      return 1;
+    }
+    if (n > 0) {
+      std::memcpy(q4, a4.ql.data(), static_cast<std::size_t>(n) * sizeof(double));
+      std::memcpy(q6, a6.ql.data(), static_cast<std::size_t>(n) * sizeof(double));
+      if (q4bar != nullptr) {
+        std::memcpy(q4bar, a4.qlBar.data(), static_cast<std::size_t>(n) * sizeof(double));
+      }
+      if (q6bar != nullptr) {
+        std::memcpy(q6bar, a6.qlBar.data(), static_cast<std::size_t>(n) * sizeof(double));
+      }
+    }
+    frame->ql = a6.ql;
+    frame->qlbar = q6bar != nullptr ? a6.qlBar : std::vector<double>(static_cast<std::size_t>(std::max(n, 0)), 0.0);
+    return 0;
+  } catch (...) {
+    remember_exception();
+    return 1;
+  }
+}
+
+int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
+                            double *q4, double *q6, double *q4bar,
+                            double *q6bar, int *labels, int counts9[9]) {
+  clear_error();
+  if (frame == nullptr || q4 == nullptr || q6 == nullptr) {
+    set_error("q4, q6 and a frame are required");
+    return 1;
+  }
+  try {
+    const int typ = resolve_type(frame->cloud, type);
+    std::vector<double> out4;
+    std::vector<double> out6;
+    std::vector<double> bar4;
+    std::vector<double> bar6;
+    if (!chill::q4q6ChillPlus(frame->cloud, cutoff, typ, out4, out6, bar4, bar6)) {
+      set_error("fused q4 q6 CHILL+ is not available for this frame");
+      return 1;
+    }
+    const int n = frame->cloud.nop;
+    if (n > 0) {
+      std::memcpy(q4, out4.data(), static_cast<std::size_t>(n) * sizeof(double));
+      std::memcpy(q6, out6.data(), static_cast<std::size_t>(n) * sizeof(double));
+      if (q4bar != nullptr) {
+        std::memcpy(q4bar, bar4.data(), static_cast<std::size_t>(n) * sizeof(double));
+      }
+      if (q6bar != nullptr) {
+        std::memcpy(q6bar, bar6.data(), static_cast<std::size_t>(n) * sizeof(double));
+      }
+    }
+    frame->ql = std::move(out6);
+    frame->qlbar = std::move(bar6);
+    frame->labels.assign(static_cast<std::size_t>(std::max(n, 0)), 6);
+    int counts[9] = {};
+    for (int i = 0; i < n; ++i) {
+      const auto &point = frame->cloud.pts[static_cast<std::size_t>(i)];
+      int label = static_cast<int>(point.iceType);
+      if (!keep_atom(point.type, type)) {
+        label = static_cast<int>(molSys::atom_state_type::unclassified);
+      }
+      frame->labels[static_cast<std::size_t>(i)] = label;
+      if (keep_atom(point.type, type)) counts[label] += 1;
+    }
+    if (labels != nullptr && n > 0) {
+      std::memcpy(labels, frame->labels.data(),
+                  static_cast<std::size_t>(n) * sizeof(int));
+    }
+    if (counts9 != nullptr) std::memcpy(counts9, counts, sizeof(counts));
     return 0;
   } catch (...) {
     remember_exception();

@@ -1,0 +1,17 @@
+Local q4 and q6 on ideal ice Ic. Cutoff 3.5 angstrom. The neighbour
+build is inside every sample. One warm-up, then eight samples, one
+session. Median of an even count is the mean of the two central
+values. The parenthetical is the type-7 interquartile range.
+
+The machine has 8 cores. One thread is pinned to one core. Eight
+threads are pinned to eight cores, one thread per core.
+
+OVITO 3.17.2, cutoff neighbours, max_l equal to the requested degree.
+freud 3.6.1. Largest per-atom gap to OVITO: 7.8e-16.
+Largest per-atom gap to freud on these ice frames: 1.6e-7.
+
+molecules threads seams_q4 ovito_q4 freud_q4 seams_q6 ovito_q6 freud_q6
+110592 1 22.990 (0.252) 50.844 (1.662) 266.975 (1.272) 23.503 (0.469) 59.336 (1.308) 348.942 (0.853)
+110592 8 4.005 (0.198) 11.119 (0.587) 53.584 (6.095) 4.235 (0.141) 12.850 (0.584) 60.758 (1.661)
+884736 1 196.570 (4.052) 393.679 (3.895) 2165.338 (5.655) 199.710 (1.506) 483.699 (8.987) 2848.587 (9.968)
+884736 8 28.539 (0.404) 71.276 (2.213) 445.968 (27.198) 29.970 (1.524) 82.255 (3.036) 504.070 (12.638)

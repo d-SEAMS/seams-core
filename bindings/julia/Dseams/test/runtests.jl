@@ -33,7 +33,8 @@ const nucleation = joinpath(root, "input", "traj", "nucleation_f1.lammpstrj")
     q3 = steinhardt(frame, 3)
     finite = filter(isfinite, q3.ql)
     got = sum(finite) / length(finite)
-    @test isapprox(got, 0.389362; rtol = 1e-4)
+    # Orthorhombic frames use the cutoff shell. 0.389362 is the four-nearest mean.
+    @test isapprox(got, 0.374897; rtol = 1e-4)
 end
 
 @testset "seeded cages match with offload" begin

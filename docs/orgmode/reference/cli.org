@@ -57,7 +57,7 @@ pairs | density-z | domains~. ~chill_plus~ is an accepted alias of
 | ~fingerprint --library FILE[,FILE...]~ | atoms named by key libraries | ~nop N graph KIND hops H method M matched X label=count ... unmatched=U~ and, with several libraries, ~depth H1=n1 H2=n2~ |
 | ~ions~ | ions classed by their first water shell against the seeded cages | ~nop N ice A ions I in-ice X front Y liquid Z shell S shell-ice F~ |
 | ~f4~ | Rodger F4 on H-O...O-H pairs | ~nop N f4 MEAN n M~ |
-| ~steinhardt~ | host \(q_3\), \(q_4\), \(q_6\), \(q_{12}\) and each neighbour average, on the cutoff list | ~nop N q3 A q3bar B q4 C q4bar D q6 E q6bar F q12 G q12bar H~ |
+| ~steinhardt~ | cutoff-shell \(q_3\), \(q_4\), \(q_6\), \(q_{12}\) and each Lechner-Dellago average. Degrees 4 and 6 use the solid-harmonic kernel | ~nop N q3 A q3bar B q4 C q4bar D q6 E q6bar F q12 G q12bar H~ |
 | ~rdf~ | partial site-site \(g_{IJ}(r)\) | ~# r g count~ then ~# types I J rmax R bins N volume V~ then one ~r g count~ row per bin |
 | ~cn~ | site-site coordination number | ~# site-site~ then ~# types I J cutoff R cn X nI N nJ M volume V~ |
 | ~cn --ions --site~ | cage degree on ~ionCloud~ | ~cage ionCloud types 1 2 cutoff R degree D nCation N nAnion M~ |

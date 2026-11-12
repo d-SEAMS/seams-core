@@ -2,7 +2,8 @@
 #+OPTIONS: toc:nil num:nil
 
 Timings belong on the docs site of the commit that produced them.
-This repository does not vendor a number from a laptop.
+The ice table below is one such session: eight cores, one thread per
+core, cpus 0–7. It names no machine.
 
 The drivers that exist today:
 
@@ -15,6 +16,7 @@ The drivers that exist today:
 | =tests/bench_gpu_batch= | a device-resident batch, when the build has one |
 | =tests/bench_cutoff_list= | orthorhombic ~orthoFullCsr~ against vesin, freud, and matscipy. Driven by =scripts/bench_neighbours_threads.py= |
 | =tests/bench_v2= | triclinic list, CHILL+, diamond common-neighbour test, and the hop ring search. Driven by =scripts/bench_neighbours_v2.py= |
+| =tests/bench_ql= | local cutoff \(q_4\) and \(q_6\). Driven by =scripts/bench_ql_threads.py= |
 
 The neighbour session (host, pin, medians, rerun) is
 [[file:neighbour-lists.org][Cutoff neighbour lists]].
@@ -27,3 +29,71 @@ Say so.
 =pixi run -e repro= is the Snakemake campaign (freud, pyscal3, the paper benches).
 That environment is Linux only.
 It is not part of =pixi run test=.
+
+* Ice Ic, 884736 molecules
+
+Cutoff 3.5 Å. The neighbour build is inside every sample.
+Two warm-ups, then ten samples.
+The median is the linear percentile at one half, position =0.5 * (n - 1)=.
+The interquartile range is the same estimator at three quarters minus the one at one quarter.
+=discovery/v13-session.txt= is the raw log.
+OVITO's q6 call also builds degrees 2 through 5, because =max_l= is the highest degree.
+pyscal3 has no CHILL+ classifier.
+The published CHILL+ thresholds are unchanged.
+
+Medians, in milliseconds:
+
+| tool | threads | q4 | q6 | q4-bar | CHILL+ |
+|------+---------+------+------+--------+--------|
+| seams | 1 | 290.91 | 320.84 | 368.01 | 380.34 |
+| OVITO | 1 | 392.19 | 476.43 | 638.98 | 4886.17 |
+| mdapy | 1 | 787.12 | 811.65 | 702.33 | 781.80 |
+| pyscal3 | 1 | 854.84 | 958.98 | 908.17 | — |
+| seams | 8 | 44.69 | 45.64 | 48.41 | 56.90 |
+| OVITO | 8 | 79.35 | 85.78 | 170.10 | 658.49 |
+| mdapy | 8 | 105.01 | 117.08 | 113.28 | 123.03 |
+| pyscal3 | 8 | 173.51 | 178.83 | 166.76 | — |
+
+One q4 sample in an earlier eight-sample run took 523.6 ms.
+The first call of a degree is the one that faults.
+On this rerun that call took 508.1 ms and touched 57547 pages.
+Every later q4 call touched none.
+The ten steady samples are min 290.36, median 290.91, interquartile range 7.44, max 310.44.
+The =q_lm= scratch is kept and reused, so that cost stays on the first call, which the warm-ups drop.
+One q6 sample in the same session reached 462.98 ms and faulted no pages.
+Sixty further q6 calls, pinned the same way, stayed between 299.9 and 324.6 ms.
+Each of those ran on the CPU.
+The scheduler delay on every one of them was under 0.05 ms.
+=discovery/v13-q6-sched.txt= is that probe.
+The 523.6 ms point did not come back, and the one q6 outlier is not a page fault, not a fresh allocation, and not a repeatable first touch.
+
+The one-thread q4-bar median here is 368.01 (interquartile range 3.13, samples 356.35–387.92).
+The parent =e943930a=, in the same session, is 363.82 (interquartile range 12.51, samples 353.29–371.97).
+The medians differ by 4.2 ms, and each median sits inside the other build's sample range.
+An earlier gap of 369.8 against 354.0 is that spread. It is not a slower average.
+
+* Local q4 and q6 on this tip
+
+Ideal ice Ic, cutoff 3.5 Å, local \(q_l\) (the average is off).
+The neighbour build is inside every sample.
+One warm-up, then eight samples, in one session.
+The median of an even count is the mean of the two central values.
+The interquartile range, in parentheses, is the type-7 three-quarter percentile minus the one-quarter percentile.
+The machine has 8 cores.
+The one-thread runs are pinned to one core.
+The eight-thread runs are pinned to eight cores, one thread per core.
+The table names no machine.
+OVITO 3.17.2 builds only up to the requested degree here (~max_l~ is that degree) and uses the cutoff neighbour mode.
+freud 3.6.1 stores \(q_l\) as float32.
+The largest per-atom gap to OVITO on these frames is \(7.8 \times 10^{-16}\).
+The largest per-atom gap to freud on the ice frames is \(1.6 \times 10^{-7}\).
+=discovery/ql-integrate.txt= is the same table.
+
+Medians, in milliseconds:
+
+| molecules | threads | seams q4 | OVITO q4 | freud q4 | seams q6 | OVITO q6 | freud q6 |
+|-----------+---------+----------+----------+----------+----------+----------+----------|
+| 110592 | 1 | 22.990 (0.252) | 50.844 (1.662) | 266.975 (1.272) | 23.503 (0.469) | 59.336 (1.308) | 348.942 (0.853) |
+| 110592 | 8 | 4.005 (0.198) | 11.119 (0.587) | 53.584 (6.095) | 4.235 (0.141) | 12.850 (0.584) | 60.758 (1.661) |
+| 884736 | 1 | 196.570 (4.052) | 393.679 (3.895) | 2165.338 (5.655) | 199.710 (1.506) | 483.699 (8.987) | 2848.587 (9.968) |
+| 884736 | 8 | 28.539 (0.404) | 71.276 (2.213) | 445.968 (27.198) | 29.970 (1.524) | 82.255 (3.036) | 504.070 (12.638) |
