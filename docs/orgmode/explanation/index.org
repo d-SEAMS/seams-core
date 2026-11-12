@@ -7,6 +7,7 @@ These pages are for understanding. They are not recipes.
 |------+----------|
 | [[file:architecture.org][Three repositories]] | Why the engine, Python, and Lua are three packages |
 | [[file:chill-plus-vs-cages.org][CHILL+ versus cages]] | Why the two scores disagree |
+| [[file:interface-order.org][Interface and confined ice]] | Where the 2015 rule and the OVITO rule part |
 | [[file:ring-completion.org][Ring-adjacent completion]] | ~ringAdjacentCompletion~ and the seeded flag |
 | [[file:topological-network.org][Topological network criteria]] | The formulae the classifiers use |
 | [[file:symmetry.org][Local symmetry]] | The ice shell, the cages, and the held-out scores |
@@ -18,6 +19,7 @@ These pages are for understanding. They are not recipes.
 
    architecture
    chill-plus-vs-cages
+   interface-order
    ring-completion
    topological-network
    symmetry

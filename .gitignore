@@ -67,6 +67,10 @@ output/
 .gdb_history
 *.lammpstrj
 !input/traj/*.lammpstrj
+# Campaign frames, logs, and generated figures stay out of git.
+si4-data/
+si5-data/
+docs/orgmode/explanation/figures/*.png
 bin/
 build/
 # docs/source/*.rst is generated from orgmode, but track orgmode + conf.py
