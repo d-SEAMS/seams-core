@@ -245,3 +245,29 @@ rule shipped_campaign:
         "paper/tex/figures/data/tab-shipped.tex",
     shell:
         "bash paper/tex/repro/shipped.sh"
+
+
+# Basal, primary prism and secondary prism at 220 to 265 K.
+# Frames stay in $SI4_DATA (default si4-data/) and are not inputs here.
+rule growth_curve:
+    input:
+        "input/interface/growth_curve.py",
+        "input/interface/espinosa_faces.py",
+        "input/interface/espinosa_protocol.py",
+        "input/traj/ice1h.lammpstrj",
+        "input/mw215/mW.sw",
+        "scripts/growth_curve_rates.py",
+        "scripts/espinosa_candidates.py",
+        "scripts/q6bar_baseline.py",
+        "scripts/q6bar_timing.py",
+        "bbdir/tests/interface_order",
+    output:
+        "docs/orgmode/explanation/growth-curve.tsv",
+        "docs/orgmode/explanation/growth-curve-summary.csv",
+        "docs/orgmode/explanation/growth-curve-fit.csv",
+        "docs/orgmode/explanation/growth-curve-compare.csv",
+        "docs/orgmode/explanation/growth-curve-timing.csv",
+    shell:
+        "python3 input/interface/growth_curve.py && "
+        "python3 scripts/growth_curve_rates.py --bin bbdir/tests/interface_order && "
+        "python3 scripts/q6bar_timing.py --bin bbdir/tests/interface_order"
