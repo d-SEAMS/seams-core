@@ -80,6 +80,71 @@ On the held-out quench the kernel at ceiling 0.12 is:
 
 Polyhedral template matching on the same two truths is majority precision 0.9635 and recall 0.8107 (317 true positives, 12 false positives, 74 false negatives), and persistent precision 0.9453 and recall 0.8497. The kernel is ahead of template matching on both precision and recall. Raising the ceiling to 0.125 on the training pair adds false positives as well as true positives, and an embedded-only relaxation of the ceiling did the same, so the production ceiling stays 0.12. The held-out recall is the number above. It was not pushed up by looking at seed 93003.
 
+## Real frames
+
+The classifier rule is the one above. These frames were not used to choose it. An mW site is one molecule. Crystal for the kernel is ice Ih, ice Ic, or stacking-disordered ice. Crystal for polyhedral template matching and for identify diamond is cubic or hexagonal diamond only. The first-neighbour and second-neighbour tags from identify diamond are counted apart from crystal. CHILL+ is the 2015 rule in this tree, cutoff 3.5 Å: four nearest neighbours, the staggered and eclipsed windows of Nguyen and Molinero, and the neighbour test in footnote a of their Table 1. It is not the OVITO Chill+ modifier.
+
+The interface frame is `interface_f0.lammpstrj` from `science/interface-order` at `f5ca8ffc`, 864 mW molecules in a slab. The nucleation file is figshare [10.6084/m9.figshare.11448702.v1](https://doi.org/10.6084/m9.figshare.11448702.v1), md5 `c28fc209a2854d2ba49e8f9b55accbe8`, 148 frames of 4096 molecules, the trajectory read by `science/nucleation-pathways` at `170a6c18`. Its first frame is the shipped `input/traj/nucleation_f1.lammpstrj`.
+
+
+Interface slab, kernel against polyhedral template matching:
+
+| kernel | Ih | Ic | other |
+| --- | ---: | ---: | ---: |
+| Ih | 233 | 0 | 12 |
+| Ic | 0 | 0 | 0 |
+| Isd | 0 | 0 | 0 |
+| other | 66 | 0 | 553 |
+
+Interface slab, kernel against identify diamond:
+
+| kernel | Ih | Ic | Ih neighbour | Ic neighbour | Ih second | Ic second | other |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Ih | 232 | 0 | 13 | 0 | 0 | 0 | 0 |
+| other | 81 | 0 | 67 | 0 | 72 | 0 | 399 |
+
+Interface slab, kernel against CHILL+:
+
+| kernel | hexagonal | cubic | interfacial | clathrate | interfacial clathrate | water |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Ih | 245 | 0 | 0 | 0 | 0 | 0 |
+| other | 114 | 1 | 67 | 13 | 69 | 355 |
+
+Nucleation frame 1, kernel against polyhedral template matching:
+
+| kernel | Ih | Ic | other |
+| --- | ---: | ---: | ---: |
+| Ih | 7 | 0 | 1 |
+| Ic | 0 | 9 | 3 |
+| Isd | 0 | 0 | 1 |
+| other | 4 | 4 | 4067 |
+
+Nucleation frame 1, kernel against identify diamond:
+
+| kernel | Ih | Ic | Ih neighbour | Ic neighbour | Ih second | Ic second | other |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Ih | 7 | 0 | 0 | 1 | 0 | 0 | 0 |
+| Ic | 0 | 8 | 2 | 1 | 0 | 1 | 0 |
+| Isd | 0 | 0 | 0 | 1 | 0 | 0 | 0 |
+| other | 7 | 5 | 28 | 18 | 68 | 36 | 3913 |
+
+Nucleation frame 1, kernel against CHILL+:
+
+| kernel | hexagonal | cubic | interfacial | clathrate | interfacial clathrate | water |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Ih | 8 | 0 | 0 | 0 | 0 | 0 |
+| Ic | 0 | 12 | 0 | 0 | 0 | 0 |
+| Isd | 0 | 0 | 1 | 0 | 0 | 0 |
+| other | 59 | 36 | 272 | 49 | 305 | 3354 |
+
+The one stacking-disordered molecule on that frame is CHILL+ interfacial. Across all 148 frames the 1037 stacking-disordered molecule-frames are all template-matching liquid and all CHILL+ interfacial.
+
+Over the 148 frames, 606208 molecule-frames, the kernel calls 7342 hexagonal, 10020 cubic and 1037 stacking-disordered. Template matching calls 7838 hexagonal and 10771 cubic. Identify diamond calls 8423 hexagonal and 11336 cubic, and a further 19417 first-neighbour plus 27904 second-neighbour tags. CHILL+ calls 19760 hexagonal and 17869 cubic, plus 46992 interfacial, 6468 clathrate and 50164 interfacial clathrate. Kernel hexagonal is CHILL+ hexagonal on 7264 of 7342 molecule-frames, and kernel cubic is CHILL+ cubic on 9980 of 10020. The extra CHILL+ crystal, 12495 hexagonal and 7889 cubic, is kernel liquid.
+
+The disagreements follow from what each rule is allowed to name. CHILL+ cubic and hexagonal need four bond correlations in the staggered or eclipsed windows. A molecule can pass that table and still miss the kernel: the kernel also asks for a second-shell common-neighbour signature, a scale-free residual at most 0.12, and one crystal neighbour. On the slab, 114 of the 359 CHILL+ hexagonal molecules are kernel liquid. On the trajectory, the same gap is the 12495 hexagonal and 7889 cubic molecule-frames above. CHILL+ interfacial ice is two or three staggered bonds. The kernel has no interfacial label, so those molecules are liquid, except the stacking-disordered shells, which land in the interfacial row of CHILL+ because they are not four bonds of one kind. Template matching has cubic and hexagonal diamond templates and no stacking-disordered template, so every stacking-disordered label is template-matching liquid. The remaining template-matching mismatches are shells on opposite sides of the two cutoffs: an isolated template-matching diamond can fail the kernel's crystal-neighbour test, and a shell the kernel fits can sit outside the 0.1 RMSD cutoff. Identify diamond's neighbour tags are the molecules touching a diamond molecule. The kernel does not promote them to crystal, and that tag is most of the off-diagonal with identify diamond. Where both methods call the molecule itself crystal, hexagonal stays with hexagonal and cubic stays with cubic.
+
+IRA and SOFI are linked in this build. The matcher backend is IRA. SOFI is asked for the point group of the same 17-atom shell the ice templates use: the centre, its four neighbours between 2.15 Å and 3.5 Å, and three further neighbours of each of those four, in the minimum image. A shell that cannot be filled is left unmatched (68 molecules on the slab, 377 on nucleation frame 1). IRA returns a nearest ice template for every complete shell, because the only 17-atom templates are the three ice shells. On both frames every kernel crystal molecule is given that same template. The IRA RMSD, in ångströms, separates them from the liquid: on the slab the hexagonal median is 0.314 and the liquid median is 1.194; on frame 1 the hexagonal, cubic and stacking-disordered medians are 0.342, 0.377 and 0.458, and the liquid median is 1.112. The liquid still has a low tail, so the nearest-template name alone is not a crystal label. SOFI at its default threshold 0.05 returns C1 for every complete shell on both frames, crystal and liquid alike, so the point group does not separate ice Ih from ice Ic here.
+
 ## Timings
 
 One sitting, 11 November 2026, an Intel Xeon with 8 cores. `nproc` was read with `OMP_NUM_THREADS` unset and reported 8. The compiler is g++ 15.2.0. The library is a Meson release build, `-O3`, with `-mavx2 -mfma` on the shell translation unit. Eight samples, one warm-up discarded, and the median of an even count is the mean of the two central samples. OVITO is 3.17.2. Identify diamond is `IdentifyDiamondModifier`. Template matching is `PolyhedralTemplateMatchingModifier` with the RMSD cutoff 0.1 and only cubic diamond and hexagonal diamond enabled.
