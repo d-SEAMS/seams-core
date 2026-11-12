@@ -547,7 +547,7 @@ test('invariance_empty_frame', _check_invariance,
 test('fuzz_cage_shift_permute', _fuzz_cage,
   args: [meson.project_source_root() / 'input' / 'traj', '1000'],
   env: _test_env,
-  timeout: 0,
+  timeout: 10800,
   suite: 'heavy',
   is_parallel: false)
 test('neighbour_record', find_program('python3'),
