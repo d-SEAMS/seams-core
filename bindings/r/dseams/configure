@@ -1,8 +1,32 @@
 #!/bin/sh
 # Point the compile at a seams-core build. The engine is not a CRAN
 # system library, so the paths are explicit.
-if [ -z "$SEAMS_INCLUDE" ] || [ -z "$SEAMS_LIBDIR" ]; then
-  echo "Set SEAMS_INCLUDE (directory of seams_lang.h) and SEAMS_LIBDIR (directory of libseams_lang.so)." >&2
+# DSEAMS_ROOT=$PWD R CMD INSTALL bindings/r/dseams
+# finds seams_lang.h and libseams_lang.so from that checkout.
+if [ -n "${DSEAMS_ROOT:-}" ]; then
+  if [ -z "${SEAMS_INCLUDE:-}" ]; then
+    SEAMS_INCLUDE="${DSEAMS_ROOT}/bindings/cxx"
+  fi
+  if [ -z "${SEAMS_LIBDIR:-}" ]; then
+    for dir in \
+      "${DSEAMS_ROOT}/build/bindings" \
+      "${DSEAMS_ROOT}/bbdir/bindings" \
+      "${DSEAMS_ROOT}/bbdir-py/bindings" \
+      "${DSEAMS_ROOT}/build-eng/bindings"
+    do
+      if [ -f "${dir}/libseams_lang.so" ] || [ -f "${dir}/libseams_lang.dylib" ]; then
+        SEAMS_LIBDIR=$dir
+        break
+      fi
+    done
+  fi
+fi
+if [ -z "${SEAMS_INCLUDE:-}" ] || [ -z "${SEAMS_LIBDIR:-}" ]; then
+  echo "Set DSEAMS_ROOT to a seams-core checkout, or set SEAMS_INCLUDE (directory of seams_lang.h) and SEAMS_LIBDIR (directory of libseams_lang.so)." >&2
+  exit 1
+fi
+if [ ! -f "${SEAMS_INCLUDE}/seams_lang.h" ]; then
+  echo "seams_lang.h is not in ${SEAMS_INCLUDE}" >&2
   exit 1
 fi
 cat > src/Makevars << EOF
