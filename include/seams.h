@@ -4,6 +4,7 @@
 /*
  * d-SEAMS stable C API, ABI 1.
  *
+ * SPDX-License-Identifier: MIT
  * Copyright (c) d-SEAMS developers
  *
  * Opaque handles. A frame is n Cartesian points and a LAMMPS cell:

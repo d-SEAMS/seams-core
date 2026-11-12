@@ -1,4 +1,5 @@
 // Copyright (c) d-SEAMS developers
+// SPDX-License-Identifier: MIT
 #include "compute_dseams.h"
 
 #include "atom.h"

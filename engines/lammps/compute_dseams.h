@@ -1,4 +1,5 @@
 // Copyright (c) d-SEAMS developers
+// SPDX-License-Identifier: MIT
 #ifdef COMPUTE_CLASS
 ComputeStyle(dseams, ComputeDseams)
 #else

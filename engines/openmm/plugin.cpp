@@ -1,4 +1,5 @@
 // Copyright (c) d-SEAMS developers
+// SPDX-License-Identifier: MIT
 // C++ driver for the same step the OpenMM reporter takes.
 // It links libOpenMM when the headers are on the include path.
 // The Python reporter is the path exercised in the e2e script.

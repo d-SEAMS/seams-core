@@ -1,4 +1,5 @@
 // Copyright (c) d-SEAMS developers
+// SPDX-License-Identifier: MIT
 // Drives the installed LAMMPS library. fix external calls the C API each step.
 
 #include "library.h"

@@ -1,4 +1,5 @@
 // Copyright (c) d-SEAMS developers
+// SPDX-License-Identifier: MIT
 // Trajectory analysis tool. analyzeFrame is the per-frame hook.
 
 #include "gromacs/fileio/trxio.h"
