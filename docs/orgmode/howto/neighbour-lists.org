@@ -104,38 +104,54 @@ family 6 model 207 stepping 2, 8 cores, one thread per core, 2.4 GHz.
 Caches are L1d 384 KiB, L1i 256 KiB, L2 16 MiB, L3 320 MiB, with 47 GiB
 of RAM. The compiler is GCC 15.2.0, release ~-O3~.
 The guest does not expose hardware performance counters.
-Eight timed calls after one warmup. The median is the 5th of the 8
-sorted samples. Times are milliseconds.
+The comparison columns used eight timed calls after one warmup.
+The median is the 5th of the 8 sorted samples. Times are milliseconds.
+The d-SEAMS columns are the later session recorded under the table.
 vesin is 0.6.2, freud is 3.6.1, matscipy is 1.3.1 with ASE 3.29.0.
 Every code returned ~4N~ pairs.
 
 | molecules | threads | d-SEAMS CSR | d-SEAMS rows | vesin | freud | matscipy |
 |-----------+---------+-------------+--------------+-------+-------+----------|
-| 10648 | 1 | 3.531 | 3.859 | 5.674 | 9.508 | 8.458 |
-| 10648 | 8 | 0.737 | 0.889 | 2.375 | 9.575 | 9.215 |
-| 110592 | 1 | 25.150 | 29.865 | 52.801 | 104.725 | 76.528 |
-| 110592 | 8 | 5.128 | 6.547 | 18.159 | 37.994 | 79.412 |
-| 884736 | 1 | 236.403 | 289.309 | 1073.681 | 1067.929 | 585.680 |
-| 884736 | 8 | 33.579 | 48.668 | 176.231 | 1068.058 | 590.335 |
+| 10648 | 1 | 3.709 | 4.160 | 5.674 | 9.508 | 8.458 |
+| 10648 | 8 | 0.968 | 1.241 | 2.375 | 9.575 | 9.215 |
+| 110592 | 1 | 25.080 | 29.510 | 52.801 | 104.725 | 76.528 |
+| 110592 | 8 | 4.554 | 6.077 | 18.159 | 37.994 | 79.412 |
+| 884736 | 1 | 244.517 | 291.817 | 1073.681 | 1067.929 | 585.680 |
+| 884736 | 8 | 35.618 | 49.400 | 176.231 | 1068.058 | 590.335 |
 
-The 2-thread and 4-thread rows, and the phase split, are in
-=markdown/neighbours.md=.
-At 8 threads on 110592 molecules the CSR spent about 1.5 ms binning,
-2.2 ms counting, under 1 ms on the prefix, and 2.7 ms filling.
-The atom-ID rows added about 2.7 ms.
+The 2-thread and 4-thread rows are in =markdown/neighbours.md=.
+The d-SEAMS columns in this table, and the triclinic and orthorhombic
+columns of the shared-stencil table, were measured in one session on
+8 cores. Eight timed calls after one warmup. The process is pinned to
+cores 0 .. T-1, with OMP_NUM_THREADS=T, OMP_DYNAMIC=FALSE,
+OMP_PROC_BIND=close, OMP_PLACES=cores, and OMP_WAIT_POLICY=PASSIVE.
+=bench_cutoff_list= times this orthorhombic CSR and the atom-ID rows.
+=bench_v2= =tilt= and =ortho= time the shared-stencil CSR. The median
+is the 5th of the 8 sorted samples. The interquartile range (IQR) is
+the linear 75th percentile minus the linear 25th, with rank (n-1)p.
+No host name is part of the record. The vesin, freud, and matscipy
+columns are the earlier comparison, not this session.
+
+Orthorhombic CSR median (IQR) in milliseconds, 1 thread then 8:
+10648 is 3.709 (0.280) and 0.968 (0.040);
+110592 is 25.080 (0.222) and 4.554 (0.322);
+884736 is 244.517 (4.625) and 35.618 (1.582).
+The row medians (IQR) are 4.160 (0.179) and 1.241 (0.104);
+29.510 (0.500) and 6.077 (0.959);
+291.817 (12.147) and 49.400 (2.016).
 
 #+begin_src bash
 meson setup build-release --buildtype=release -Dwith_tests=true \
   -Dwith_cli=true -Dwith_mpi=disabled -Dwith_openmp_offload=disabled
 ninja -C build-release tests/bench_cutoff_list
-NEIGH_PYTHON=/tmp/neigh-venv/bin/python \
-  NEIGH_BENCH=$PWD/build-release/tests/bench_cutoff_list \
+NEIGH_BENCH=$PWD/build-release/tests/bench_cutoff_list \
   python3 scripts/bench_neighbours_threads.py
 #+end_src
 
 =bench_cutoff_list= is the d-SEAMS side of that driver.
 The comparison environment is vesin 0.6.2, freud-analysis, matscipy,
-and ASE. Do not install the unrelated PyPI package named freud.
+and ASE. NEIGH_PYTHON selects that interpreter. Do not install the
+unrelated PyPI package named freud.
 
 * Triclinic session, before the shared stencil
 
@@ -181,14 +197,22 @@ against 43 cubed for the cube. Both reaches are 1, so both lists use the
 27-cell stencil. The walks test 4,297,540 and 4,204,334 candidate pairs.
 The earlier 43 ms was the cell matrix, multiplied for every candidate.
 The 27 cartesian images are now filled once, and both boxes call that
-loop. Eight samples, median the 5th. Same pin, 8 cores.
+loop. The d-SEAMS columns are the same 8-core session as the
+orthorhombic table: eight samples, median the 5th, IQR defined there.
+vesin and freud are the earlier comparison.
 
 | molecules | threads | triclinic | orthorhombic | vesin | freud |
 |-----------+---------+-----------+--------------+-------+-------|
-| 110592 | 1 | 30.572 | 25.426 | 51.994 | 122.628 |
-| 110592 | 8 | 6.093 | 4.882 | 24.911 | 127.350 |
-| 884736 | 1 | 443.024 | 299.010 | 1141.327 | 1191.634 |
-| 884736 | 8 | 65.550 | 45.357 | 203.597 | 1153.981 |
+| 110592 | 1 | 31.594 | 26.408 | 51.994 | 122.628 |
+| 110592 | 8 | 6.879 | 5.136 | 24.911 | 127.350 |
+| 884736 | 1 | 448.170 | 305.342 | 1141.327 | 1191.634 |
+| 884736 | 8 | 69.177 | 51.959 | 203.597 | 1153.981 |
+
+Shared-stencil CSR median (IQR), triclinic then orthorhombic:
+110592 at 1 thread is 31.594 (0.576) and 26.408 (0.392);
+at 8 threads, 6.879 (1.388) and 5.136 (0.206);
+884736 at 1 thread is 448.170 (27.448) and 305.342 (0.788);
+at 8 threads, 69.177 (3.783) and 51.959 (18.696).
 
 CHILL+ on this CSR, diamond common-neighbour test, and the short-hop
 ring search:
@@ -216,8 +240,7 @@ template, so its structure code is 0 on this crystal. The raw lines are
 in =markdown/neighbours-v3.md=.
 
 #+begin_src bash
-NEIGH_PYTHON=/tmp/neigh-venv/bin/python \
-  NEIGH_BENCH=$PWD/build-release/tests/bench_v2 \
+NEIGH_BENCH=$PWD/build-release/tests/bench_v2 \
   python3 scripts/bench_neighbours_v2.py
 #+end_src
 
