@@ -739,8 +739,9 @@ void shortestPathsFrom(const Graph &adjacency, int src, RingScratch &scr, int mi
     const int first = static_cast<int>(scr.pathBuf.size());
     int count = 0;
     for (const int w : adjacency[v]) {
-      // A ring owned by src cannot use a vertex below src. Paths that
-      // dip below src are not shortest paths of any such ring.
+      // Levels below the source are cleared before this walk, so a parent
+      // there has level -1 and is not extended. minParent is the same gate
+      // for a caller that still passes a floor.
       if (w < minParent || w >= nVertices || scr.lvl[w] != lv - 1) {
         continue;
       }
@@ -827,21 +828,26 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
     scr.lvl.assign(nVertices, -1);
     scr.touched.clear();
   }
-  // Full search enumerates each ring from its lowest member, so the
-  // breadth-first walk stays at indices >= src. The updater passes a
-  // through-mask and must still see every neighbour.
-  // Distances are in the full graph. Restricting the walk to indices at
-  // or above src hides a shortcut through a lower index and keeps a ring
-  // that is not primitive.
+  // Distances use every vertex. A shortcut through an index below the
+  // source does not put that vertex on the ring, and hiding it made the
+  // antipode look farther than the graph distance. After the distances are
+  // known, vertices below the source lose their level, so no path is
+  // extended through them. Rings are still emitted only from their lowest
+  // member. The updater keeps those levels.
   const auto tLevels = std::chrono::steady_clock::now();
   levelsFrom(adjacency, src, maxLvl, 0, scr.lvl, scr.touched, scr.frontier,
              scr.next);
+  if (through == nullptr) {
+    for (const int v : scr.touched) {
+      if (v < src) {
+        scr.lvl[v] = -1;
+      }
+    }
+  }
   gProfLevels += millisSince(tLevels);
   const auto tPaths = std::chrono::steady_clock::now();
-  // Paths longer than 3 are paired only when their distance-2 keys are
-  // not already a shortcut. Storing every longer path dominated the search.
   const int store = legacyPairs ? 0 : maxLvl;
-  shortestPathsFrom(adjacency, src, scr, through == nullptr ? src : 0, store);
+  shortestPathsFrom(adjacency, src, scr, 0, store);
   gProfPaths += millisSince(tPaths);
   if (static_cast<int>(scr.slot.size()) != nVertices) {
     scr.slot.assign(static_cast<std::size_t>(nVertices), -1);
@@ -927,8 +933,10 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
         bool open = false;
         for (int a = 0; a < nP && !open; a++) {
           const int key = scr.id2[static_cast<std::size_t>((pathsP + a * lp)[1])];
+          // An unindexed distance-2 vertex can still close a primitive ring.
           if (key < 0) {
-            continue;
+            open = true;
+            break;
           }
           for (int s = 0; s < nKeys; s++) {
             const int other = seenKey[s];

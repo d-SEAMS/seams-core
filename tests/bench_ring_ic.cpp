@@ -312,7 +312,7 @@ int main(int argc, char **argv) {
       if (!wanted) {
         continue;
       }
-      setThreads(1);
+      setThreads(onlyThreads > 0 ? onlyThreads : 1);
       const auto t0 = std::chrono::steady_clock::now();
       std::vector<int> offsets, cols;
       const bool ok = nneigh::orthoFullCsr(cloud, nullptr, kCutoff, offsets, cols);

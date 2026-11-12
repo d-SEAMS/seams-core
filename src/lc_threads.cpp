@@ -10,6 +10,26 @@
 // the symbol existed still has to link. These definitions are weak, so a
 // strong copy in liblinkcell replaces them.
 
-extern "C" __attribute__((weak)) void lc_set_threads(int) {}
+#include <algorithm>
 
-extern "C" __attribute__((weak)) int lc_num_threads(void) { return 1; }
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
+
+extern "C" __attribute__((weak)) void lc_set_threads(int n) {
+#ifdef SEAMS_HAS_OPENMP
+  if (n > 0) {
+    omp_set_num_threads(n);
+  }
+#else
+  (void)n;
+#endif
+}
+
+extern "C" __attribute__((weak)) int lc_num_threads(void) {
+#ifdef SEAMS_HAS_OPENMP
+  return std::max(1, omp_get_max_threads());
+#else
+  return 1;
+#endif
+}

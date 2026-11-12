@@ -54,6 +54,34 @@ int bfsDist(const std::vector<std::vector<int>> &adj, int src, int dst) {
   return 1 << 20;
 }
 
+//! Breadth-first distance that refuses to enter a vertex below `floor`.
+//! This is the walk that kept the 62 non-primitive hexagons.
+int bfsDistAbove(const std::vector<std::vector<int>> &adj, int src, int dst, int floor) {
+  if (src == dst) {
+    return 0;
+  }
+  const int n = static_cast<int>(adj.size());
+  std::vector<int> dist(static_cast<std::size_t>(n), -1);
+  std::queue<int> q;
+  dist[static_cast<std::size_t>(src)] = 0;
+  q.push(src);
+  while (!q.empty()) {
+    const int u = q.front();
+    q.pop();
+    for (const int v : adj[static_cast<std::size_t>(u)]) {
+      if (v < floor || dist[static_cast<std::size_t>(v)] != -1) {
+        continue;
+      }
+      dist[static_cast<std::size_t>(v)] = dist[static_cast<std::size_t>(u)] + 1;
+      if (v == dst) {
+        return dist[static_cast<std::size_t>(v)];
+      }
+      q.push(v);
+    }
+  }
+  return 1 << 20;
+}
+
 std::vector<int> canonical(std::vector<int> ring) {
   auto it = std::min_element(ring.begin(), ring.end());
   std::rotate(ring.begin(), it, ring.end());
@@ -230,7 +258,13 @@ TEST_CASE("full-graph distance check, the 62-hexagon shape", "[ring]") {
   const auto nList = withSelf(adj);
   const auto hop = primitive::ringNetwork(nList, 6);
   const std::vector<int> hexagon = {1, 2, 3, 4, 5, 6};
+  // The walk that stays at indices >= 1 never sees vertex 0, so the
+  // antipodes look three apart. The full graph has a path of length 2.
+  REQUIRE(bfsDistAbove(adj, 1, 4, 1) == 3);
+  REQUIRE(bfsDist(adj, 1, 4) == 2);
+  REQUIRE(bruteChordless(adj, 6).count(hexagon) == 1);
   REQUIRE(asSet(hop).count(hexagon) == 0);
+  REQUIRE(brutePrimitive(adj, 6).count(hexagon) == 0);
   REQUIRE(asSet(hop) == brutePrimitive(adj, 6));
   REQUIRE(asSet(hop) == asSet(primitive::ringNetworkBalls(nList, 6)));
 }

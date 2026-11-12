@@ -31,3 +31,42 @@ sample tool sqq interface tile 1x1x1 molecules 864 depth 6 median_ms 145.366 n3 
 sample tool ovito interface tile 1x1x1 molecules 864 depth 6 median_ms 7.799 n4 188 n5 377 n6 1143
 sample tool dseams interface tile 16x8x8 molecules 884736 depth 6 median_ms 5913.740 n3 145408 n4 192512 n5 386048 n6 1170432 edges 1975296
 sample tool ovito interface tile 16x8x8 molecules 884736 depth 6 median_ms 8076.949 n4 192512 n5 386048 n6 1170432
+
+# depth 10, 8 threads, 8 samples, 8 online cores, serial
+# nucleation 6x6x6 tile and interface 16x8x8 tile
+sample tool dseams nucleation molecules 884736 depth 10 threads 8 total_ms 8665.254
+sample tool dseams nucleation molecules 884736 depth 10 threads 8 total_ms 8903.015
+sample tool dseams nucleation molecules 884736 depth 10 threads 8 total_ms 9210.927
+sample tool dseams nucleation molecules 884736 depth 10 threads 8 total_ms 7045.762
+sample tool dseams nucleation molecules 884736 depth 10 threads 8 total_ms 6940.697
+sample tool dseams nucleation molecules 884736 depth 10 threads 8 total_ms 7158.119
+sample tool dseams nucleation molecules 884736 depth 10 threads 8 total_ms 8503.137
+sample tool dseams nucleation molecules 884736 depth 10 threads 8 total_ms 9482.553
+summary tool dseams nucleation molecules 884736 depth 10 threads 8 median_ms 8665.254 rings 2201040 n4 193320 n5 606528 n6 736344 n7 426168 n8 77544 n9 14256 n10 432
+sample tool ovito nucleation molecules 884736 depth 10 threads 8 total_ms 20616.466
+sample tool ovito nucleation molecules 884736 depth 10 threads 8 total_ms 19970.698
+sample tool ovito nucleation molecules 884736 depth 10 threads 8 total_ms 20612.541
+sample tool ovito nucleation molecules 884736 depth 10 threads 8 total_ms 21298.136
+sample tool ovito nucleation molecules 884736 depth 10 threads 8 total_ms 21055.852
+sample tool ovito nucleation molecules 884736 depth 10 threads 8 total_ms 19610.629
+sample tool ovito nucleation molecules 884736 depth 10 threads 8 total_ms 21285.029
+sample tool ovito nucleation molecules 884736 depth 10 threads 8 total_ms 20548.634
+summary tool ovito nucleation molecules 884736 depth 10 threads 8 median_ms 20616.466 n4 193320 n5 606528 n6 736344 n7 426168 n8 77544 n9 14256 n10 432
+sample tool dseams interface molecules 884736 depth 10 threads 8 total_ms 6306.461
+sample tool dseams interface molecules 884736 depth 10 threads 8 total_ms 7895.520
+sample tool dseams interface molecules 884736 depth 10 threads 8 total_ms 8083.550
+sample tool dseams interface molecules 884736 depth 10 threads 8 total_ms 6361.450
+sample tool dseams interface molecules 884736 depth 10 threads 8 total_ms 6215.526
+sample tool dseams interface molecules 884736 depth 10 threads 8 total_ms 8383.155
+sample tool dseams interface molecules 884736 depth 10 threads 8 total_ms 9008.618
+sample tool dseams interface molecules 884736 depth 10 threads 8 total_ms 6873.734
+summary tool dseams interface molecules 884736 depth 10 threads 8 median_ms 7895.520 rings 2228224 n4 192512 n5 386048 n6 1170432 n7 263168 n8 52224 n9 18432 n10 0
+sample tool ovito interface molecules 884736 depth 10 threads 8 total_ms 18204.362
+sample tool ovito interface molecules 884736 depth 10 threads 8 total_ms 17931.776
+sample tool ovito interface molecules 884736 depth 10 threads 8 total_ms 18079.183
+sample tool ovito interface molecules 884736 depth 10 threads 8 total_ms 17863.427
+sample tool ovito interface molecules 884736 depth 10 threads 8 total_ms 17950.216
+sample tool ovito interface molecules 884736 depth 10 threads 8 total_ms 18167.914
+sample tool ovito interface molecules 884736 depth 10 threads 8 total_ms 18040.495
+sample tool ovito interface molecules 884736 depth 10 threads 8 total_ms 17986.341
+summary tool ovito interface molecules 884736 depth 10 threads 8 median_ms 18040.495 n4 192512 n5 386048 n6 1170432 n7 263168 n8 52224 n9 18432 n10 0

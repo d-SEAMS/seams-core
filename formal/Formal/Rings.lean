@@ -221,6 +221,15 @@ theorem shortcut_is_hop2 (C : GraphCycle G) (hk : C.k ≤ 7) {i j : Fin C.k}
   · exact Or.inl h
   · exact Or.inr h
 
+/-- On a cycle of length at most 10 the ring distance is at most 5, so a
+strict shortcut has length at most 4. -/
+theorem shortcut_length_le_four (C : GraphCycle G) (hk : C.k ≤ 10) {i j : Fin C.k}
+    (hlt : G.dist (C.vert i) (C.vert j) < C.ringDist i j) :
+    G.dist (C.vert i) (C.vert j) ≤ 4 := by
+  have hhalf := C.ringDist_le_half i j
+  have hk5 : C.k / 2 ≤ 5 := by omega
+  omega
+
 /-- The first `n` steps of a shortest walk are a shortest walk. Pairs that
 lie on the path out of the source are settled by the construction. -/
 theorem prefix_of_shortest {u v : V} (p : G.Walk u v) (hp : p.length = G.dist u v)
@@ -243,6 +252,49 @@ theorem suffix_of_shortest {u v : V} (p : G.Walk u v) (hp : p.length = G.dist u 
   have h := length_eq_dist_of_subwalk hp hsub
   rw [hlen] at h
   exact h.symm
+
+/-- Distance at most 4 is a vertex of the two radius-2 balls, counting an
+endpoint. That is the meet tested by the radius-2 pair table. -/
+theorem dist_le_four_iff_meet {u v : V} (hr : G.Reachable u v) :
+    G.dist u v ≤ 4 ↔ ∃ w, G.Reachable u w ∧ G.Reachable w v ∧
+      G.dist u w ≤ 2 ∧ G.dist w v ≤ 2 := by
+  constructor
+  · intro hle
+    obtain ⟨p, hp⟩ := hr.exists_walk_length_eq_dist
+    have hlen : p.length ≤ 4 := by simpa [hp] using hle
+    let n := min 2 p.length
+    have hn : n ≤ p.length := Nat.min_le_right _ _
+    refine ⟨p.getVert n, ⟨p.take n⟩, ⟨p.drop n⟩, ?_, ?_⟩
+    · have hpre := prefix_of_shortest p hp n hn
+      have : n ≤ 2 := Nat.min_le_left _ _
+      omega
+    · have hsuf := suffix_of_shortest p hp n hn
+      have : p.length - n ≤ 2 := by
+        by_cases h2 : p.length ≤ 2
+        · have hnlen : n = p.length := by simp [n, Nat.min_eq_right h2]
+          omega
+        · have hn2 : n = 2 := by
+            have hge : 2 ≤ p.length := by omega
+            simp [n, Nat.min_eq_left hge]
+          omega
+      omega
+  · intro ⟨w, huw, hwv, hu, hv⟩
+    obtain ⟨p, hp⟩ := huw.exists_walk_length_eq_dist
+    obtain ⟨q, hq⟩ := hwv.exists_walk_length_eq_dist
+    have happ := dist_le (p.append q)
+    rw [Walk.length_append, hp, hq] at happ
+    omega
+
+/-- A strict shortcut on a cycle of length at most 10 is witnessed by a
+vertex in both radius-2 balls. -/
+theorem shortcut_meets_radius_two (C : GraphCycle G) (hk : C.k ≤ 10) {i j : Fin C.k}
+    (hlt : G.dist (C.vert i) (C.vert j) < C.ringDist i j) :
+    ∃ w, G.dist (C.vert i) w ≤ 2 ∧ G.dist w (C.vert j) ≤ 2 := by
+  have hle := shortcut_length_le_four C hk hlt
+  have hreach : G.Reachable (C.vert i) (C.vert j) :=
+    ⟨(C.arcWalk (C.forward i j) i).copy rfl (C.forward_steps i j)⟩
+  obtain ⟨w, -, -, hu, hv⟩ := (dist_le_four_iff_meet hreach).mp hle
+  exact ⟨w, hu, hv⟩
 
 /-- Both arcs from any vertex to the opposite vertex of an even primitive
 ring are shortest paths, so the pair enumeration emits the ring. -/
