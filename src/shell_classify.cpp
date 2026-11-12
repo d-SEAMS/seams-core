@@ -259,6 +259,61 @@ void bondFrame(const double axis[3], const double ref[3], double e1[3], double e
   e2[2] = u[0] * e1[1] - u[1] * e1[0];
 }
 
+// True when at least one bond has a staggered second neighbour (cosine at
+// most 0.75). Out of line and cold so the ideal-ice fit keeps its layout.
+bool __attribute__((noinline, cold)) hasStaggeredBond(const double envF[4][3], const double envS[12][3],
+                                                      int nS) {
+  for (int a = 0; a < 4; a++) {
+    double u[3] = {envF[a][0], envF[a][1], envF[a][2]};
+    const double un = std::sqrt(u[0] * u[0] + u[1] * u[1] + u[2] * u[2]);
+    if (!(un > 1e-8)) {
+      return false;
+    }
+    u[0] /= un;
+    u[1] /= un;
+    u[2] /= un;
+    double mx = -1.0;
+    for (int b = 0; b < 4 && mx < 0.75; b++) {
+      if (b == a) {
+        continue;
+      }
+      double ref[3] = {envF[b][0], envF[b][1], envF[b][2]};
+      const double rd = ref[0] * u[0] + ref[1] * u[1] + ref[2] * u[2];
+      ref[0] -= rd * u[0];
+      ref[1] -= rd * u[1];
+      ref[2] -= rd * u[2];
+      const double rn2 = ref[0] * ref[0] + ref[1] * ref[1] + ref[2] * ref[2];
+      if (rn2 < 1e-12) {
+        continue;
+      }
+      const double invR = 1.0 / std::sqrt(rn2);
+      for (int e = 0; e < nS; e++) {
+        double v[3] = {envS[e][0] - envF[a][0], envS[e][1] - envF[a][1], envS[e][2] - envF[a][2]};
+        const double bond = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+        if (bond < 2.35 * 2.35 || bond > kBond * kBond) {
+          continue;
+        }
+        const double vd = v[0] * u[0] + v[1] * u[1] + v[2] * u[2];
+        v[0] -= vd * u[0];
+        v[1] -= vd * u[1];
+        v[2] -= vd * u[2];
+        const double vn2 = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+        if (vn2 < 1e-12) {
+          continue;
+        }
+        const double c = (ref[0] * v[0] + ref[1] * v[1] + ref[2] * v[2]) * invR / std::sqrt(vn2);
+        if (c > mx) {
+          mx = c;
+        }
+      }
+    }
+    if (mx <= 0.75) {
+      return true;
+    }
+  }
+  return false;
+}
+
 int shellFit(const double center[3], const double nb[][3], int nNb, const CanonShell &canon,
              double gate) {
   const int m = std::min(nNb, 16);
@@ -310,65 +365,23 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
   if (nS < 12) {
     return -1;
   }
-  // Reject a shell whose bonds are all eclipsed. Ice keeps a staggered bond,
-  // cosine at or below 0.85 on the thermal crystals, so the permutation
-  // search is not run.
-  {
-    bool staggered = false;
-    for (int a = 0; a < 4 && !staggered; a++) {
-      double u[3] = {envF[a][0], envF[a][1], envF[a][2]};
-      const double un = std::sqrt(u[0] * u[0] + u[1] * u[1] + u[2] * u[2]);
-      if (!(un > 1e-8)) {
-        return -1;
-      }
-      u[0] /= un;
-      u[1] /= un;
-      u[2] /= un;
-      double mx = -1.0;
-      for (int b = 0; b < 4; b++) {
-        if (b == a) {
-          continue;
-        }
-        double ref[3] = {envF[b][0], envF[b][1], envF[b][2]};
-        const double rd = ref[0] * u[0] + ref[1] * u[1] + ref[2] * u[2];
-        ref[0] -= rd * u[0];
-        ref[1] -= rd * u[1];
-        ref[2] -= rd * u[2];
-        const double rn = std::sqrt(ref[0] * ref[0] + ref[1] * ref[1] + ref[2] * ref[2]);
-        if (rn < 1e-8) {
-          continue;
-        }
-        ref[0] /= rn;
-        ref[1] /= rn;
-        ref[2] /= rn;
-        for (int e = 0; e < nS; e++) {
-          double v[3] = {envS[e][0] - envF[a][0], envS[e][1] - envF[a][1],
-                         envS[e][2] - envF[a][2]};
-          const double bond = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-          if (bond < 2.35 * 2.35 || bond > kBond * kBond) {
-            continue;
-          }
-          const double vd = v[0] * u[0] + v[1] * u[1] + v[2] * u[2];
-          v[0] -= vd * u[0];
-          v[1] -= vd * u[1];
-          v[2] -= vd * u[2];
-          const double vn = std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-          if (vn < 1e-8) {
-            continue;
-          }
-          const double c = (ref[0] * v[0] + ref[1] * v[1] + ref[2] * v[2]) / vn;
-          if (c > mx) {
-            mx = c;
-          }
-        }
-      }
-      if (mx <= 0.85) {
-        staggered = true;
-      }
+  // Ideal ice has four equal bonds and skips this. A tetrahedron whose four
+  // bonds are all eclipsed is the liquid pattern and does not enter the
+  // permutation search.
+  double lenMin = 1e300;
+  double lenMax = 0.0;
+  for (int k = 0; k < 4; k++) {
+    const double len2 = envF[k][0] * envF[k][0] + envF[k][1] * envF[k][1] + envF[k][2] * envF[k][2];
+    if (len2 < lenMin) {
+      lenMin = len2;
     }
-    if (!staggered) {
-      return -1;
+    if (len2 > lenMax) {
+      lenMax = len2;
     }
+  }
+  // 1.02 squared. Ideal ice is under it and does not call the eclipsed scan.
+  if (lenMax >= lenMin * 1.0404 && !hasStaggeredBond(envF, envS, nS)) {
+    return -1;
   }
   double best = 1e300;
   int bestK = -1;
@@ -799,13 +812,44 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     const double ci0 = px[static_cast<size_t>(i)];
     const double ci1 = py[static_cast<size_t>(i)];
     const double ci2 = pz[static_cast<size_t>(i)];
-    if (nb >= 4) {
+    if (nb < 4) {
+      kind[i] = -1;
+      continue;
+    }
+    double uvec[4][3];
+    double acc = 0.0;
+    bool tetra = true;
+    for (int k = 0; k < 4; k++) {
+      const double nrm = std::sqrt(mine[k].dx * mine[k].dx + mine[k].dy * mine[k].dy +
+                                   mine[k].dz * mine[k].dz);
+      if (!(nrm > 1e-8)) {
+        tetra = false;
+        break;
+      }
+      uvec[k][0] = mine[k].dx / nrm;
+      uvec[k][1] = mine[k].dy / nrm;
+      uvec[k][2] = mine[k].dz / nrm;
+    }
+    if (tetra) {
+      for (int a = 0; a < 4; a++) {
+        for (int b = a + 1; b < 4; b++) {
+          const double c = uvec[a][0] * uvec[b][0] + uvec[a][1] * uvec[b][1] + uvec[a][2] * uvec[b][2];
+          const double d = c + (1.0 / 3.0);
+          acc += d * d;
+        }
+      }
+    }
+    // q = 1 - (3/8) sum (cos + 1/3)^2. Below 0.80 the four neighbours are not
+    // a template tetrahedron, so the second shell is not walked.
+    if (!tetra || (1.0 - 0.375 * acc) < 0.80) {
+      kind[i] = -1;
+      continue;
+    }
     for (int k = 0; k < 4; k++) {
       firstId[k] = mine[k].j;
       nbxyz[k][0] = ci0 + mine[k].dx;
       nbxyz[k][1] = ci1 + mine[k].dy;
       nbxyz[k][2] = ci2 + mine[k].dz;
-    }
     }
     double sx[48];
     double sy[48];
@@ -890,6 +934,29 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     }
     const double ci[3] = {ci0, ci1, ci2};
     kind[i] = shellFit(ci, nbxyz, 16, canon, gate);
+  }
+  // One crystal neighbour among the four bonds. Isolated liquid labels go.
+  // The test reads the labels from the fit, not the filtered ones.
+  std::vector<int> raw(kind, kind + n);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (n >= 64 && threads > 1)
+#endif
+  for (int i = 0; i < n; i++) {
+    if (raw[static_cast<size_t>(i)] < 0) {
+      continue;
+    }
+    const int nb = nbon[static_cast<size_t>(i)];
+    const Bond *mine = &bonds[static_cast<size_t>(i) * static_cast<size_t>(kMaxBond)];
+    int nCrystal = 0;
+    const int lim = nb < 4 ? nb : 4;
+    for (int k = 0; k < lim; k++) {
+      if (raw[static_cast<size_t>(mine[k].j)] >= 0) {
+        nCrystal++;
+      }
+    }
+    if (nCrystal < 1) {
+      kind[i] = -1;
+    }
   }
 }
 

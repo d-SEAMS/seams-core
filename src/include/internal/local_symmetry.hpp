@@ -74,10 +74,12 @@ inline constexpr double kEclipsedCosine = 0.90;
 // then the RMSD is taken after the optimal rotation and the optimal scale
 // and divided by the template's root-mean-square radius (Horn 1987; Larsen,
 // Schmidt, Schiotz 2016). Zero is a perfect shape. The value is the operating
-// point of the ROC on quenched mW ice from 200 K to 270 K. 0.18 is the
-// lowest ceiling at which ice Ih at 270 K matches PTM's recall with
-// precision still 1.
-inline constexpr double kShellRmsd = 0.18;
+// point chosen on seeds 91001 and 92002. A thermal label is scored against the
+// majority of this kernel, CHILL+ and PTM on the steepest-descent quench.
+// 0.12 is the tightest ceiling whose recall on those two seeds stays above
+// PTM when a crystal atom must have one crystal neighbour. Precision on that
+// pair is 0.994, against PTM at 0.995. Seed 93003 was not used to choose it.
+inline constexpr double kShellRmsd = 0.12;
 
 // Per-atom ice label. kind[i] is iceIh, iceIc, iceIsd, or -1. shellRmsd is
 // the scale-free residual ceiling. The label is the template with the lowest
