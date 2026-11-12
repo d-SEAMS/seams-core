@@ -139,6 +139,7 @@ initializers (Argum does not write defaults into the help).
 | ~-t~, ~--type I~ | ~0~ | ~Atom type (0 guesses oxygen then type 1; density-z: 0 is every atom)~ |
 | ~--water-types T,U~ | unset | Neighbour graph on these LAMMPS types only (OW). Substrate and ions never enter the 4-NN list |
 | ~--pair-types I,J~ | ~I = J = --type~ | ~Pair types for site-site rdf/cn (default I=J=--type)~ |
+| ~--types I,J~ | | Deprecated exact alias of ~--pair-types~. Prints a warning |
 | ~--family NAME~ | ~waterIce~ | Material family. Ice scores refuse every value except ~waterIce~ |
 | ~--site SPEC~ | | Type-to-kind map for ~ionCloud~ (~1=cationHead,2=anion~) |
 | ~--ions~ | | ~cn~ on ~ionCloud~ cage degree (needs ~--site~) |
@@ -220,6 +221,12 @@ Used by ~rdf~ and ~cn~. The Argum form is ~I,J~ (one comma). A bad
 string exits 2 (~bad --pair-types (want I,J)~). Omit the flag to set both
 sides to ~--type~. These are LAMMPS type IDs on the original cloud
 (site-site). ~cn --ions~ is a different path (ionCloud cage degree).
+
+~--types~ is a deprecated exact alias of ~--pair-types~. It accepts
+the same ~I,J~ text and prints one warning on stderr. ~--type~ and
+~--types~ both bind, because an exact name is taken before a longer
+name that starts with the same characters. ~--ty~ matches both and
+is ambiguous.
 
 | ~--pair-types~ | single-frame load | ~--last~ range |
 |-----------+-------------------+----------------|

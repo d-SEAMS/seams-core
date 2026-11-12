@@ -1783,6 +1783,19 @@ int main(int argc, char *argv[]) {
                    typesFlag = std::string(value);
                  }));
 
+  // Exact alias. Argum returns an exact key before any longer name
+  // that starts with the same characters, so --type and --types both
+  // bind. A shorter token such as --ty matches both and is ambiguous.
+  parser.add(Option("--types")
+                 .argName("I,J")
+                 .help("Deprecated exact alias of --pair-types")
+                 .handler([&](std::string_view value) {
+                   std::cerr << colorizer.warning(
+                                    "--types is deprecated; use --pair-types")
+                             << "\n";
+                   typesFlag = std::string(value);
+                 }));
+
   parser.add(Option("--family")
                  .argName("NAME")
                  .help("Material family (default waterIce): waterIce, "

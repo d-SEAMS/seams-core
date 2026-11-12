@@ -91,6 +91,21 @@ def _write_ions(path):
 
 def main():
     seams = sys.argv[1]
+    ice = "input/traj/ice1h.lammpstrj"
+    aliased = run(seams, ["rdf", ice, "--types", "1,1", "--cutoff", "3.5"])
+    paired = run(seams, ["rdf", ice, "--pair-types", "1,1", "--cutoff", "3.5"])
+    if (aliased.returncode != 0 or paired.returncode != 0
+            or aliased.stdout != paired.stdout):
+        sys.stderr.write(
+            "types alias output\n" + aliased.stdout + paired.stdout
+            + aliased.stderr + paired.stderr)
+        return 1
+    if "--types is deprecated; use --pair-types" not in aliased.stderr:
+        sys.stderr.write("types alias warning\n" + aliased.stderr)
+        return 1
+    if "deprecated" in paired.stderr:
+        sys.stderr.write("pair-types warning\n" + paired.stderr)
+        return 1
     if os.environ.get("SEAMS_HAS_CHEMFILES", "0") != "1":
         for args in (
             ["read", "missing-cli.pdb"],
@@ -108,7 +123,6 @@ def main():
         # The rest of this surface reads pdb, gro, and dcd.
         return 77
     tip = "input/traj/exampleTraj.lammpstrj"
-    ice = "input/traj/ice1h.lammpstrj"
     cubic = "input/traj/mW_cubic.lammpstrj"
     guest = "input/traj/genice_sI.lammpstrj"
     work = tempfile.mkdtemp(prefix="dseams-cli-")

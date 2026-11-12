@@ -62,6 +62,19 @@ def configured_project_options(build_dir: str):
     return found
 
 
+def argum_ambiguous(names, token):
+    """True when Argum cannot bind token to one long option.
+
+    findMatchOrMatchingPrefixRange returns an exact key by itself, then
+    stops. A longer option that starts with that key is not a second
+    candidate. A token that is not itself an option is ambiguous when
+    two or more options start with it.
+    """
+    if token in names:
+        return False
+    return sum(name.startswith(token) for name in names) > 1
+
+
 def main() -> int:
     if len(sys.argv) != 3:
         sys.stderr.write("usage: option_names.py SEAMS BUILDDIR\n")
@@ -75,10 +88,19 @@ def main() -> int:
     if len(names) != len(set(names)):
         sys.stderr.write("duplicate long options in --help\n")
         return 1
+    # Exact --type and --types both bind. Only a non-option prefix such
+    # as --ty is ambiguous, and that token is not a registered name.
+    sample = {"--type", "--types", "--cutoff"}
+    if (argum_ambiguous(sample, "--type") or argum_ambiguous(sample, "--types")
+            or not argum_ambiguous(sample, "--ty")
+            or argum_ambiguous(sample, "--cu")):
+        sys.stderr.write("Argum prefix rule mismatch\n")
+        return 1
+    known = set(names)
     for left in names:
         for right in names:
-            if left != right and right.startswith(left):
-                sys.stderr.write(f"{left} is a prefix of {right}\n")
+            if left != right and right.startswith(left) and argum_ambiguous(known, left):
+                sys.stderr.write(f"{left} is ambiguous with {right}\n")
                 return 1
 
     for name in ("gpulite", "vesin"):
