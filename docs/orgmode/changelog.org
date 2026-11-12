@@ -11,11 +11,22 @@ narrative cut used in the book.
 
 * 2.14.0
 
+A versioned C API (~seams.h~, ~libseams~) and the Fortran, Python,
+Julia, and Rust fronts call it. LAMMPS, GROMACS, OpenMM, and PLUMED
+drivers call the same library. ~with_lammps~ and ~with_gromacs~
+default to auto. A found library whose plugin cannot be built is an
+error.
+~seams_set_num_threads(0)~ restores the saved OpenMP width.
+~--water-types~ keeps every named type on the cutoff list, cross pairs
+included, and ~seams ions~ counts each of those types in the shell.
+~linkcell::pairs_within~ owns the cutoff list. vesin is the fallback
+when linkcell is not built.
 The cutoff list covers restricted triclinic boxes, and the orthorhombic
 list is a parallel cell sort.
 CHILL+ on that list counts a crystal row with four neighbours inside
-the cutoff. On the mixed TIP4P fixture, interClathrate moves from 12
-to 9 and water from 238 to 241.
+the cutoff. On the mixed TIP4P fixture the tested counts are
+interClathrate 9 and water 241 for the default and the cutoff list.
+The mutual list is clathrate 1, interClathrate 7 and water 242.
 ~ovito-chill+~ averages q3 on the full shell.
 ~--pair-types~ names the site-site pair. ~--types~ remains a deprecated
 exact alias and prints a warning.
@@ -23,6 +34,8 @@ Local symmetry names an ice shell, a hydrate cage, or a ring, with an
 optional IRA, SOFI, or spglib report.
 A partial diamond signature keeps a shell that can still reach eight
 good (4,2,1) patterns.
+Python, R, and Julia wrap rings, cages, signature cages, and the shell
+symmetry label on ~libseams_lang~.
 The book builds from the committed Org sources.
 
 * 2.13.0

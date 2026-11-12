@@ -14,22 +14,12 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Added
 
-- Add Rodger F4 and host-only Steinhardt l=12 so the Zeron q3/q12 hydrate pair is a per-atom field.
-- Add TUM/rings stacking planes (HC-basal and DDC-equatorial) next to the CHILL+ I_sd molecule-bin reference.
-- Add a C ABI seams_chill_plus for native and emscripten builds.
-- Add channel, proton-key, hydrogen MSD, ice XXI library and HDA/MDA density labels.
-- Add extras/lammps compute dseams that writes seams_chill_plus per atom.
-- Assign guests by ray-parity inside fan-triangulated cage faces, and count ions per ice cluster on the oxygen graph.
-- Bin CHILL+ cubic and hexagonal molecules into basal layers and emit cubicity Phi_c plus the H/C stacking string.
-- Build CHILL+, cages, seeded ions and k-NN on an explicit water-type mask (`--water-types`) so substrate and ions never enter the four-neighbour list. The flag loads the mixed dump; ice and cage counts are the water types only.
-- Enumerate cups and incomplete cages on the ring graph; closed signature counts stay the closed path.
-- Name 51264, 51268 and sH cages, and report a per-cage occupancy histogram.
-- Update topology keys only on the hop-ball of atoms whose neighbourhood changed.
-- Add optional IRA, SOFI and spglib symmetry reports for ice shells, hydrate cages and rings.
-- The ice label takes an eclipsed-cosine cutoff, and cage, ring and shell naming runs in parallel.
 - `seams symmetry` prints the space group, one shell overlay, and the ice-label tally. IRA and SOFI stay optional and are used only when the build links them.
 - `topoparam::jumpRotorTau90` reports the time for a 90-degree hydrogen-hydrogen rotation and is NaN when the pair does not rotate.
 - A versioned C API (`seams.h`, `libseams`) and Fortran, Python, Julia, and Rust fronts call it. LAMMPS, GROMACS, OpenMM, and PLUMED drivers call the same library.
+- `seams_set_num_threads(0)` restores the OpenMP width saved before the last explicit width. A non-positive type is unified on a copy of the frame. The flat CHILL entry is `seams_chill_plus_flat`.
+- `--water-types` keeps every named type on the cutoff list, including pairs between those types. `seams ions` counts each of those types in the first shell. `--mol` applies to rings, so a frame with an ion can score water only.
+- LAMMPS, GROMACS, OpenMM, and PLUMED link only when their libraries are found. `with_lammps` and `with_gromacs` default to auto and use the Meson compiler. A found library whose plugin cannot be built is an error.
 - Python, R, and Julia wrap rings, cages, signature cages, and the shell symmetry label on `libseams_lang`.
 - `seams rings`, `seams prisms`, and `seams cluster` print the primitive-ring histogram, prism counts, and the largest connected component.
 - A nucleation census scores rings, CHILL+, q6-bar, and diamond on liquid mW quenches.
@@ -47,7 +37,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Changed
 
-- CHILL and CHILL+ default to the graph name `seeded`, which is the cutoff list. `mutual` is the four-nearest graph. vesin still owns cutoff pairs; linkcell still owns k-nearest.
+- CHILL and CHILL+ default to the graph name `seeded`, which is the cutoff list. `mutual` is the four-nearest graph. `linkcell::pairs_within` owns the cutoff list. vesin is the fallback when linkcell is not built.
 - MPI ring analyses can reduce ring counts and per-atom ring types with `seams::domain::reduceRings`, which keeps each rank on its own domain and sends only owned atoms to the root instead of gathering every ring on every rank.
 - Release builds define NDEBUG, so the libstdc++ assertions that meson adds when b_ndebug is false no longer run in them. The closed-cage search on the sI 2x2x2 crystal takes 13.2 ms instead of 16.0 ms, with the same output.
 - The cutoff list now covers restricted triclinic boxes.
