@@ -15,6 +15,8 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <cstdio>
+#include <cstdlib>
 #include <numeric>
 #include <vector>
 
@@ -39,6 +41,20 @@ struct RingSplitTimes {
 
 RingSplitTimes gRingSplit;
 int gUsedBalls = 0;
+double gProfLevels = 0;
+double gProfPaths = 0;
+double gProfPairs = 0;
+double gProfTestMs = 0;
+double gProfOdd = 0;
+bool gSkipOdd = false;
+long long gProfPathPairs = 0;
+long long gProfTestN = 0;
+long long gProfOddPairs = 0;
+long long gProfSumP = 0;
+int gProfMaxP = 0;
+long long gProfLp3 = 0;
+long long gProfLp4 = 0;
+long long gOpen2 = 0;
 
 double millisSince(std::chrono::steady_clock::time_point start) {
   return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start)
@@ -323,6 +339,29 @@ struct BoundedBalls {
     return static_cast<int>(affected.size());
   }
 
+  //! True when some vertex lies in both radius-2 balls, so dist(u, v) <= 4.
+  bool within4(int u, int v) const {
+    if (off.empty() || u < 0 || v < 0 || u + 1 >= static_cast<int>(off.size()) ||
+        v + 1 >= static_cast<int>(off.size())) {
+      return false;
+    }
+    auto a = cols.begin() + off[static_cast<std::size_t>(u)];
+    auto ae = cols.begin() + off[static_cast<std::size_t>(u) + 1];
+    auto b = cols.begin() + off[static_cast<std::size_t>(v)];
+    auto be = cols.begin() + off[static_cast<std::size_t>(v) + 1];
+    while (a != ae && b != be) {
+      if (a->first == b->first) {
+        return true;
+      }
+      if (a->first < b->first) {
+        ++a;
+      } else {
+        ++b;
+      }
+    }
+    return false;
+  }
+
   //! Graph distance from v to w when within the radius, else a large sentinel
   int dist(int v, int w) const {
     if (off.empty() || v < 0 || v + 1 >= static_cast<int>(off.size())) {
@@ -569,6 +608,10 @@ struct DistOracle {
   const BoundedBalls *balls = nullptr;
   const BitBalls *bits = nullptr;
   bool hop2 = false;
+  // Radius-2 pair table. dist <= 2 is a lookup, dist == 3 is a neighbour
+  // of one end sitting at distance 2 from the other, and dist <= 4 is a
+  // vertex in both balls.
+  bool meet4 = false;
 
   bool shorter(int u, int v, int ringDist) const {
     if (ringDist <= 1) {
@@ -592,6 +635,24 @@ struct DistOracle {
         }
       }
       return false;
+    }
+    if (meet4 && balls != nullptr) {
+      const int known = balls->dist(u, v);
+      if (known < ringDist) {
+        return true;
+      }
+      if (ringDist <= 3) {
+        return false;
+      }
+      if (ringDist == 4) {
+        for (const int w : (*adj)[static_cast<std::size_t>(v)]) {
+          if (w != u && balls->dist(u, w) == 2) {
+            return true;
+          }
+        }
+        return false;
+      }
+      return balls->within4(u, v);
     }
     if (bits != nullptr) {
       return bits->lookup(u, v) < ringDist;
@@ -647,6 +708,8 @@ struct alignas(64) RingScratch {
   std::vector<int> touched, frontier, next;
   std::vector<int> pathFirst, pathCount, pathBuf;
   std::vector<int> ring;
+  std::vector<int> slot;
+  std::vector<int> id2;
 };
 
 //! Shortest paths from src to every touched vertex, built in breadth-first
@@ -654,24 +717,31 @@ struct alignas(64) RingScratch {
 //! adjacency order, which lists the paths in the order a depth-first walk
 //! back along decreasing levels would.
 template <typename Graph>
-void shortestPathsFrom(const Graph &adjacency, int src, RingScratch &scr) {
+void shortestPathsFrom(const Graph &adjacency, int src, RingScratch &scr, int minParent,
+                       int maxStore) {
   const int nVertices = static_cast<int>(adjacency.size());
   if (static_cast<int>(scr.pathFirst.size()) != nVertices) {
     scr.pathFirst.assign(nVertices, 0);
     scr.pathCount.assign(nVertices, 0);
   }
   scr.pathBuf.clear();
-    scr.pathFirst[src] = 0;
+  scr.pathFirst[src] = 0;
   scr.pathCount[src] = 1;
   for (const int v : scr.touched) {
     const int lv = scr.lvl[v];
     if (lv < 1) {
       continue;
     }
+    if (maxStore > 0 && lv > maxStore) {
+      scr.pathCount[v] = 0;
+      continue;
+    }
     const int first = static_cast<int>(scr.pathBuf.size());
     int count = 0;
     for (const int w : adjacency[v]) {
-      if (w < 0 || w >= nVertices || scr.lvl[w] != lv - 1) {
+      // A ring owned by src cannot use a vertex below src. Paths that
+      // dip below src are not shortest paths of any such ring.
+      if (w < minParent || w >= nVertices || scr.lvl[w] != lv - 1) {
         continue;
       }
       const int plen = lv - 1;
@@ -763,9 +833,65 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
   // Distances are in the full graph. Restricting the walk to indices at
   // or above src hides a shortcut through a lower index and keeps a ring
   // that is not primitive.
+  const auto tLevels = std::chrono::steady_clock::now();
   levelsFrom(adjacency, src, maxLvl, 0, scr.lvl, scr.touched, scr.frontier,
              scr.next);
-  shortestPathsFrom(adjacency, src, scr);
+  gProfLevels += millisSince(tLevels);
+  const auto tPaths = std::chrono::steady_clock::now();
+  // Paths longer than 3 are paired only when their distance-2 keys are
+  // not already a shortcut. Storing every longer path dominated the search.
+  const int store = legacyPairs ? 0 : maxLvl;
+  shortestPathsFrom(adjacency, src, scr, through == nullptr ? src : 0, store);
+  gProfPaths += millisSince(tPaths);
+  if (static_cast<int>(scr.slot.size()) != nVertices) {
+    scr.slot.assign(static_cast<std::size_t>(nVertices), -1);
+  }
+  const bool maskDisjoint = scr.touched.size() <= 192;
+  if (static_cast<int>(scr.id2.size()) != nVertices) {
+    scr.id2.assign(static_cast<std::size_t>(nVertices), -1);
+  }
+  int at2[32];
+  unsigned close2[32] = {};
+  int n2 = 0;
+  for (const int v : scr.touched) {
+    if (scr.lvl[v] == 2 && n2 < 32) {
+      scr.id2[static_cast<std::size_t>(v)] = n2;
+      at2[n2++] = v;
+    }
+  }
+  auto within2 = [&](int x, int y) {
+    if (x == y) {
+      return true;
+    }
+    for (const int w : adjacency[x]) {
+      if (w == y) {
+        return true;
+      }
+    }
+    for (const int w : adjacency[x]) {
+      for (const int z : adjacency[w]) {
+        if (z == y) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+  for (int i = 0; i < n2; i++) {
+    for (int j = i + 1; j < n2; j++) {
+      if (within2(at2[i], at2[j])) {
+        close2[i] |= 1u << j;
+        close2[j] |= 1u << i;
+      } else {
+        gOpen2++;
+      }
+    }
+  }
+  if (maskDisjoint) {
+    for (int i = 0; i < static_cast<int>(scr.touched.size()); i++) {
+      scr.slot[static_cast<std::size_t>(scr.touched[static_cast<std::size_t>(i)])] = i;
+    }
+  }
   const std::size_t first = out.size();
   auto keep = [&](std::vector<int> &r) {
     if (through != nullptr) {
@@ -791,28 +917,114 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
     const int nP = scr.pathCount[p];
     // Even rings: two vertex-disjoint shortest paths to an antipodal vertex
     if (2 * lp >= 3 && 2 * lp <= maxDepth) {
+      gProfSumP += nP;
+      if (nP > gProfMaxP) {
+        gProfMaxP = nP;
+      }
+      if (lp >= 4 && n2 > 0) {
+        int seenKey[32];
+        int nKeys = 0;
+        bool open = false;
+        for (int a = 0; a < nP && !open; a++) {
+          const int key = scr.id2[static_cast<std::size_t>((pathsP + a * lp)[1])];
+          if (key < 0) {
+            continue;
+          }
+          for (int s = 0; s < nKeys; s++) {
+            const int other = seenKey[s];
+            if ((close2[key] & (1u << other)) == 0) {
+              open = true;
+              break;
+            }
+          }
+          if (!open && nKeys < 32) {
+            seenKey[nKeys++] = key;
+          }
+        }
+        if (!open) {
+          goto odd_part;
+        }
+      }
+      uint64_t m0[64], m1[64], m2[64];
+      int key2[64];
+      const bool useMask = maskDisjoint && nP <= 64;
+      if (useMask) {
+        for (int a = 0; a < nP; a++) {
+          const int *pa = pathsP + a * lp;
+          uint64_t a0 = 0, a1 = 0, a2 = 0;
+          for (int i = 0; i < lp - 1; i++) {
+            const int s = scr.slot[static_cast<std::size_t>(pa[i])];
+            const uint64_t bit = 1ull << (s & 63);
+            if (s < 64) {
+              a0 |= bit;
+            } else if (s < 128) {
+              a1 |= bit;
+            } else {
+              a2 |= bit;
+            }
+          }
+          m0[a] = a0;
+          m1[a] = a1;
+          m2[a] = a2;
+          key2[a] = lp >= 2 ? scr.id2[static_cast<std::size_t>(pa[1])] : -1;
+        }
+      }
       for (int a = 0; a < nP; a++) {
         for (int b = a + 1; b < nP; b++) {
+          gProfPathPairs++;
+          if (lp >= 4) {
+            gProfLp4++;
+          } else {
+            gProfLp3++;
+          }
+          bool disjoint = true;
+          if (useMask) {
+            disjoint = ((m0[a] & m0[b]) | (m1[a] & m1[b]) | (m2[a] & m2[b])) == 0;
+            if (disjoint && lp >= 4) {
+              const int ix = key2[a];
+              const int iy = key2[b];
+              if (ix >= 0 && iy >= 0 && (close2[ix] & (1u << iy)) != 0) {
+                continue;
+              }
+            }
+          }
           const int *pa = pathsP + a * lp;
           const int *pb = pathsP + b * lp;
+          if (!useMask) {
+            disjoint = pa[0] != pb[0];
+            for (int i = 0; disjoint && i < lp; i++) {
+              const int v = pa[i];
+              for (int j = 0; j < lp - 1; j++) {
+                if (pb[j] == v) {
+                  disjoint = false;
+                  break;
+                }
+              }
+            }
+          }
+          if (!disjoint) {
+            continue;
+          }
           ring.assign(1, src);
-          bool ok = true;
-          for (int i = 0; i < lp && ok; i++) {
-            ok = pushUniqueMember(ring, pa[i]);
+          for (int i = 0; i < lp; i++) {
+            ring.push_back(pa[i]);
           }
-          for (int i = lp - 2; i >= 0 && ok; i--) {
-            ok = pushUniqueMember(ring, pb[i]);
+          for (int i = lp - 2; i >= 0; i--) {
+            ring.push_back(pb[i]);
           }
-          if (ok && ringOwnedBySource(ring, src, through) &&
-              ringIsPrimitive(oracle, ring, legacyPairs ? -1 : 0,
-                              legacyPairs ? -1 : lp)) {
-            keep(ring);
+          if (ringOwnedBySource(ring, src, through)) {
+            gProfTestN++;
+            if (ringIsPrimitive(oracle, ring, legacyPairs ? -1 : 0,
+                                legacyPairs ? -1 : lp)) {
+              keep(ring);
+            }
           }
         }
       }
     }
+  odd_part:
     // Odd rings: an antipodal edge between two vertices at the same level
-    if (2 * lp + 1 <= maxDepth) {
+    if (!gSkipOdd && 2 * lp + 1 <= maxDepth) {
       for (const int q : adjacency[p]) {
         if (q <= p || q >= nVertices || scr.lvl[q] != lp) {
           continue;
@@ -820,17 +1032,30 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
         const int *pathsQ = scr.pathBuf.data() + scr.pathFirst[q];
         for (int a = 0; a < nP; a++) {
           for (int b = 0; b < scr.pathCount[q]; b++) {
+            gProfOddPairs++;
             const int *pa = pathsP + a * lp;
             const int *pb = pathsQ + b * lp;
+            bool disjoint = true;
+            for (int i = 0; disjoint && i < lp; i++) {
+              const int v = pa[i];
+              for (int j = 0; j < lp; j++) {
+                if (pb[j] == v) {
+                  disjoint = false;
+                  break;
+                }
+              }
+            }
+            if (!disjoint) {
+              continue;
+            }
             ring.assign(1, src);
-            bool ok = true;
-            for (int i = 0; i < lp && ok; i++) {
-              ok = pushUniqueMember(ring, pa[i]);
+            for (int i = 0; i < lp; i++) {
+              ring.push_back(pa[i]);
             }
-            for (int i = lp - 1; i >= 0 && ok; i--) {
-              ok = pushUniqueMember(ring, pb[i]);
+            for (int i = lp - 1; i >= 0; i--) {
+              ring.push_back(pb[i]);
             }
-            if (ok && ringOwnedBySource(ring, src, through) &&
+            if (ringOwnedBySource(ring, src, through) &&
                 ringIsPrimitive(oracle, ring, legacyPairs ? -1 : 0, -1)) {
               keep(ring);
             }
@@ -838,6 +1063,9 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
         }
       }
     }
+  }
+  for (int i = 0; i < n2; i++) {
+    scr.id2[static_cast<std::size_t>(at2[i])] = -1;
   }
   if (through == nullptr) {
     std::sort(out.begin() + static_cast<std::ptrdiff_t>(first), out.end());
@@ -975,6 +1203,9 @@ static std::vector<std::vector<int>>
 searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &sources,
              bool legacy) {
   seams::adoptThreads();
+  gProfLevels = gProfPaths = gProfPairs = gProfTestMs = gProfOdd = 0;
+  gProfPathPairs = gProfTestN = gProfOddPairs = gProfSumP = gProfLp3 = gProfLp4 = gOpen2 = 0;
+  gProfMaxP = 0;
   std::vector<std::vector<int>> rings;
   const int nVertices = static_cast<int>(adjacency.size());
   if (maxDepth < 3 || nVertices == 0) {
@@ -992,7 +1223,10 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
   // sorted pair table, on one thread and on eight, at 110592 molecules of
   // ice Ic. Radius 4 (rings of size 10) is faster as the bitset. Pairs at
   // ring distance at most 3 still read the adjacency rows in both cases.
-  const bool bitBall = !legacy && maxLvl == 5;
+  // Radius 4 was the expensive ball. A radius-2 pair table answers every
+  // shortcut of a ring of size 10: distance 3 is a neighbour at distance
+  // 2, and distance 4 is a vertex in both balls.
+  const bool meet = !legacy && maxLvl == 5;
   std::vector<int> from;
   for (int v = 0; v < nVertices; v++) {
     if (sources.empty() || (v < static_cast<int>(sources.size()) && sources[v])) {
@@ -1001,14 +1235,45 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
   }
   BoundedBalls balls;
   BitBalls bits;
+  gSkipOdd = false;
+  if (!legacy) {
+    std::vector<char> color(static_cast<std::size_t>(nVertices), -1);
+    std::vector<int> queue;
+    bool bipartite = true;
+    for (int s = 0; bipartite && s < nVertices; s++) {
+      if (color[static_cast<std::size_t>(s)] >= 0) {
+        continue;
+      }
+      color[static_cast<std::size_t>(s)] = 0;
+      queue.assign(1, s);
+      for (std::size_t q = 0; bipartite && q < queue.size(); q++) {
+        const int u = queue[q];
+        const char cu = color[static_cast<std::size_t>(u)];
+        for (const int w : adjacency[u]) {
+          if (w < 0 || w >= nVertices) {
+            continue;
+          }
+          char &cw = color[static_cast<std::size_t>(w)];
+          if (cw < 0) {
+            cw = static_cast<char>(1 - cu);
+            queue.push_back(w);
+          } else if (cw == cu) {
+            bipartite = false;
+            break;
+          }
+        }
+      }
+    }
+    gSkipOdd = bipartite;
+  }
   const auto ballStart = std::chrono::steady_clock::now();
   if (hopOnly) {
     gUsedBalls = 0;
     gRingSplit.ball_count_ms = 0;
     gRingSplit.ball_fill_ms = 0;
     gRingSplit.balls_ms = 0;
-  } else if (bitBall) {
-    gUsedBalls = 2;
+  } else if (meet) {
+    gUsedBalls = 3;
     std::vector<int> reach = from;
     if (static_cast<int>(from.size()) != nVertices) {
       std::vector<int> lvl(nVertices, -1);
@@ -1028,7 +1293,7 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
         }
       }
     }
-    bits.fill(adjacency, radius, reach);
+    balls.fillList(adjacency, 2, reach);
     gRingSplit.ball_count_ms = 0;
     gRingSplit.ball_fill_ms = millisSince(ballStart);
     gRingSplit.balls_ms = gRingSplit.ball_fill_ms;
@@ -1060,9 +1325,10 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
   }
   DistOracle oracle;
   oracle.adj = &adjacency;
-  oracle.balls = (hopOnly || bitBall) ? nullptr : &balls;
-  oracle.bits = bitBall ? &bits : nullptr;
+  oracle.balls = (hopOnly || meet) ? (meet ? &balls : nullptr) : &balls;
+  oracle.bits = nullptr;
   oracle.hop2 = !legacy && maxLvl <= 5;
+  oracle.meet4 = meet;
   const int nFrom = static_cast<int>(from.size());
 
 #ifdef SEAMS_HAS_OPENMP
@@ -1135,6 +1401,17 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
   std::vector<int>().swap(adjacency.cols);
   std::vector<std::size_t>().swap(adjacency.first);
   gRingSplit.merge_ms = millisSince(mergeStart);
+  if (const char *prof = std::getenv("SEAMS_RING_PROFILE")) {
+    if (prof[0] == '1') {
+      std::fprintf(stderr,
+                   "profile levels_ms %.3f paths_ms %.3f pairs_ms %.3f tests_ms %.3f "
+                   "path_pairs %lld tests %lld odd_ms %.3f odd_pairs %lld sum_p %lld max_p %d\n",
+                   gProfLevels, gProfPaths, gProfPairs - gProfTestMs, gProfTestMs,
+                   gProfPathPairs, gProfTestN, gProfOdd, gProfOddPairs, gProfSumP, gProfMaxP);
+      std::fprintf(stderr, "profile lp3 %lld lp4 %lld open2 %lld\n", gProfLp3, gProfLp4,
+                   gOpen2);
+    }
+  }
 
   return rings;
 }

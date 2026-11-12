@@ -142,8 +142,9 @@ ringNetworkBalls(const std::vector<std::vector<int>> &nList, int maxDepth);
 
 //! 0 when the last ringNetwork call answered every primitivity query from
 //! the adjacency rows, 1 when it filled the sorted pair table, 2 when it
-//! filled the occupancy bitset of the ball. Rings of size at most 7 report
-//! 0. Rings of size 8 and 9 report 1. Rings of size 10 report 2.
+//! filled the occupancy bitset of a radius-4 ball, 3 when a radius-2 pair
+//! table answers distance 4 by a meet in the middle. Rings of size at most
+//! 7 report 0. Rings of size 8 and 9 report 1. Rings of size 10 report 3.
 //! ringNetworkBalls always reports 1.
 [[nodiscard]] int lastRingSearchUsedBalls();
 

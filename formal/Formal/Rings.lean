@@ -321,6 +321,127 @@ theorem hex_chordless : hex.Chordless := by
   fin_cases i <;> fin_cases j <;>
     simp [GraphCycle.ringDist, GraphCycle.forward, hex, hexVert, Spur, spurRel] at hr hadj
 
+/-! ## The distance check has to see vertices below the source
+
+The 62 liquid hexagons had this shape. Vertices `1,2,3,4,5,6` are a hexagon.
+Vertex `0` is joined to the antipodes `1` and `4`. In the induced subgraph on
+vertices at least `1` the hexagon is primitive. In the full graph it is not.
+A search that refuses to walk through a lower index accepts the hexagon.
+-/
+
+def lowRel (a b : Fin 7) : Bool :=
+  (1 ≤ a.val && 1 ≤ b.val && (a.val + 1 == b.val || b.val + 1 == a.val)) ||
+  (a.val == 6 && b.val == 1) || (a.val == 1 && b.val == 6) ||
+  (a == 0 && (b == 1 || b == 4)) || (b == 0 && (a == 1 || a == 4))
+
+lemma lowRel_symm (a b : Fin 7) : lowRel a b = lowRel b a := by
+  fin_cases a <;> fin_cases b <;> decide
+
+lemma lowRel_irrefl (a : Fin 7) : lowRel a a = false := by
+  fin_cases a <;> decide
+
+def LowSpur : SimpleGraph (Fin 7) where
+  Adj a b := lowRel a b = true
+  symm := ⟨fun a b h => (lowRel_symm a b).symm.trans h⟩
+  loopless := ⟨fun a h => Bool.noConfusion ((lowRel_irrefl a).symm.trans h)⟩
+
+/-- The same edges with vertex 0 deleted from the relation. -/
+def highRel (a b : Fin 7) : Bool :=
+  (1 ≤ a.val && 1 ≤ b.val && (a.val + 1 == b.val || b.val + 1 == a.val)) ||
+  (a.val == 6 && b.val == 1) || (a.val == 1 && b.val == 6)
+
+lemma highRel_symm (a b : Fin 7) : highRel a b = highRel b a := by
+  fin_cases a <;> fin_cases b <;> decide
+
+lemma highRel_irrefl (a : Fin 7) : highRel a a = false := by
+  fin_cases a <;> decide
+
+def HighOnly : SimpleGraph (Fin 7) where
+  Adj a b := highRel a b = true
+  symm := ⟨fun a b h => (highRel_symm a b).symm.trans h⟩
+  loopless := ⟨fun a h => Bool.noConfusion ((highRel_irrefl a).symm.trans h)⟩
+
+def lowHexVert (i : Fin 6) : Fin 7 := ⟨i.val + 1, by omega⟩
+
+lemma lowHex_adj_low (i : Fin 6) :
+    LowSpur.Adj (lowHexVert i) (lowHexVert (finAdvance i 1)) := by
+  fin_cases i <;> simp [LowSpur, lowRel, lowHexVert, finAdvance]
+
+lemma lowHex_adj_high (i : Fin 6) :
+    HighOnly.Adj (lowHexVert i) (lowHexVert (finAdvance i 1)) := by
+  fin_cases i <;> simp [HighOnly, highRel, lowHexVert, finAdvance]
+
+def lowHex : GraphCycle LowSpur where
+  k := 6
+  k_ge := by decide
+  vert := lowHexVert
+  inj := by
+    intro i j h
+    apply Fin.ext
+    simpa [lowHexVert] using congrArg Fin.val h
+  adj_cyc := lowHex_adj_low
+
+def highHex : GraphCycle HighOnly where
+  k := 6
+  k_ge := by decide
+  vert := lowHexVert
+  inj := by
+    intro i j h
+    apply Fin.ext
+    simpa [lowHexVert] using congrArg Fin.val h
+  adj_cyc := lowHex_adj_high
+
+theorem lowHex_not_primitive : ¬ lowHex.Primitive := by
+  intro hP
+  have h01 : LowSpur.Adj 0 1 := by simp [LowSpur, lowRel]
+  have h04 : LowSpur.Adj 0 4 := by simp [LowSpur, lowRel]
+  let i0 : Fin 6 := ⟨0, by decide⟩
+  let i3 : Fin 6 := ⟨3, by decide⟩
+  have hle : LowSpur.dist (lowHex.vert i0) (lowHex.vert i3) ≤ 2 := by
+    have := dist_le (h01.symm.toWalk.append h04.toWalk)
+    simpa [Adj.length_toWalk, Walk.length_append, lowHex, lowHexVert, i0, i3] using this
+  have hrd : lowHex.ringDist i0 i3 = 3 := by
+    simp [GraphCycle.ringDist, GraphCycle.forward, lowHex, i0, i3]
+  have := hP i0 i3
+  simp [hrd] at this
+  omega
+
+theorem high_antipodes : HighOnly.dist 1 4 = 3 := by
+  have e12 : HighOnly.Adj 1 2 := by simp [HighOnly, highRel]
+  have e23 : HighOnly.Adj 2 3 := by simp [HighOnly, highRel]
+  have e34 : HighOnly.Adj 3 4 := by simp [HighOnly, highRel]
+  have hle : HighOnly.dist 1 4 ≤ 3 := by
+    have := dist_le ((e12.toWalk.append e23.toWalk).append e34.toWalk)
+    simpa [Adj.length_toWalk, Walk.length_append] using this
+  have hreach : HighOnly.Reachable 1 4 :=
+    ⟨(e12.toWalk.append e23.toWalk).append e34.toWalk⟩
+  have hnot1 : ¬ HighOnly.Adj 1 4 := by simp [HighOnly, highRel]
+  have hne : (1 : Fin 7) ≠ 4 := by decide
+  have hnot2 : (HighOnly.commonNeighbors 1 4) = ∅ := by
+    ext w
+    fin_cases w <;>
+      simp [HighOnly, highRel, SimpleGraph.commonNeighbors]
+  have hlt : ¬ HighOnly.dist 1 4 < 3 := by
+    intro hlt
+    rcases (dist_lt_three_iff hreach).mp hlt with h | h | h
+    · exact hne h
+    · exact hnot1 h
+    · simpa [hnot2] using h
+  omega
+
+theorem low_antipodes : LowSpur.dist 1 4 ≤ 2 := by
+  have h01 : LowSpur.Adj 0 1 := by simp [LowSpur, lowRel]
+  have h04 : LowSpur.Adj 0 4 := by simp [LowSpur, lowRel]
+  have := dist_le (h01.symm.toWalk.append h04.toWalk)
+  simpa [Adj.length_toWalk, Walk.length_append] using this
+
+/-- Deleting the lower vertex makes the antipodes distance 3. Keeping it
+makes the distance at most 2. The primitivity test has to walk the whole
+graph. -/
+theorem full_graph_check_necessary :
+    HighOnly.dist 1 4 = 3 ∧ LowSpur.dist 1 4 ≤ 2 :=
+  ⟨high_antipodes, low_antipodes⟩
+
 theorem hex_not_primitive : ¬ hex.Primitive := by
   intro hP
   have h06 : Spur.Adj 0 6 := by simp [Spur, spurRel]

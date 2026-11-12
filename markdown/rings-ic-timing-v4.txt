@@ -1,0 +1,33 @@
+cores 8
+threads 1
+samples 8
+serial 1
+# online processors from /proc/cpuinfo; one job at a time
+
+# ice Ic depth 10, neighbours plus rings
+sample e2e threads 1 molecules 110592 depth 10 neigh_ms 26.023901 ring_ms 563.191231 total_ms 589.215132 rings 221184 csr 1 balls_ms 15.277972 enum_ms 544.156989 merge_ms 0.001035
+sample e2e threads 1 molecules 110592 depth 10 neigh_ms 26.099570 ring_ms 559.132565 total_ms 585.232135 rings 221184 csr 1 balls_ms 15.040756 enum_ms 540.137996 merge_ms 0.000795
+sample e2e threads 1 molecules 110592 depth 10 neigh_ms 26.146215 ring_ms 558.581900 total_ms 584.728115 rings 221184 csr 1 balls_ms 14.982006 enum_ms 539.234795 merge_ms 0.001284
+sample e2e threads 1 molecules 110592 depth 10 neigh_ms 26.213282 ring_ms 569.702882 total_ms 595.916164 rings 221184 csr 1 balls_ms 15.964687 enum_ms 549.081303 merge_ms 0.001212
+sample e2e threads 1 molecules 110592 depth 10 neigh_ms 26.149842 ring_ms 558.547518 total_ms 584.697360 rings 221184 csr 1 balls_ms 15.139979 enum_ms 539.303580 merge_ms 0.000994
+sample e2e threads 1 molecules 110592 depth 10 neigh_ms 25.791778 ring_ms 558.853299 total_ms 584.645077 rings 221184 csr 1 balls_ms 14.460752 enum_ms 540.442853 merge_ms 0.006180
+sample e2e threads 1 molecules 110592 depth 10 neigh_ms 25.969557 ring_ms 552.528501 total_ms 578.498058 rings 221184 csr 1 balls_ms 15.156565 enum_ms 532.707912 merge_ms 0.001243
+sample e2e threads 1 molecules 110592 depth 10 neigh_ms 26.605290 ring_ms 557.341265 total_ms 583.946555 rings 221184 csr 1 balls_ms 15.530548 enum_ms 537.364299 merge_ms 0.000592
+summary e2e threads 1 molecules 110592 depth 10 total_median_ms 584.728115 rings 221184 equal 1 used_balls 3
+
+# nucleation frame 1 and its 6x6x6 tile, depth 6
+system nucleation tile 1x1x1 molecules 4096 depth 6
+sample tool dseams nucleation tile 1x1x1 molecules 4096 depth 6 median_ms 27.902 dump frame 1 molecules 4096 depth 6 csr 1 total_ms 27.874132 rings 7790 n3 678 n4 895 n5 2808 n6 3409 edges 9245
+sample tool sqq nucleation tile 1x1x1 molecules 4096 depth 6 median_ms 560.794 {3: 678, 4: 895, 5: 2808, 6: 4524}
+sample tool ovito nucleation tile 1x1x1 molecules 4096 depth 6 median_ms 33.941 {4: 895, 5: 2808, 6: 3409}
+system nucleation tile 6x6x6 molecules 884736 depth 6
+sample tool dseams nucleation tile 6x6x6 molecules 884736 depth 6 median_ms 6629.197 dump frame 1 molecules 884736 depth 6 csr 1 total_ms 6629.197008 rings 1682640 n3 146448 n4 193320 n5 606528 n6 736344 edges 1996920
+sample tool ovito nucleation tile 6x6x6 molecules 884736 depth 6 median_ms 9187.337 counts 4:193320 5:606528 6:736344
+note sqq nucleation 884736: one sample did not finish within 20 minutes
+
+# interface and its 16x8x8 tile, depth 6
+sample tool dseams interface tile 1x1x1 molecules 864 depth 6 median_ms 5.796 n3 142 n4 188 n5 377 n6 1143 edges 1929
+sample tool sqq interface tile 1x1x1 molecules 864 depth 6 median_ms 145.366 n3 142 n4 188 n5 377 n6 1325
+sample tool ovito interface tile 1x1x1 molecules 864 depth 6 median_ms 7.799 n4 188 n5 377 n6 1143
+sample tool dseams interface tile 16x8x8 molecules 884736 depth 6 median_ms 5913.740 n3 145408 n4 192512 n5 386048 n6 1170432 edges 1975296
+sample tool ovito interface tile 16x8x8 molecules 884736 depth 6 median_ms 8076.949 n4 192512 n5 386048 n6 1170432

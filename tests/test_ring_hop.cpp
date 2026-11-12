@@ -212,9 +212,11 @@ TEST_CASE("length-2 shortcut is not a chord and is not a primitive ring", "[ring
   REQUIRE(fromCsr == hop);
 }
 
-TEST_CASE("a shortcut through a lower index rejects the ring", "[ring]") {
+TEST_CASE("full-graph distance check, the 62-hexagon shape", "[ring]") {
   // Hexagon 1-2-3-4-5-6, and vertex 0 joined to the antipodes 1 and 4.
-  // The search that starts at 1 must still see the length-2 path through 0.
+  // On the first liquid frame, 62 hexagons had this shape: primitive in the
+  // subgraph of vertices at or above the source, and not primitive once the
+  // lower vertex is visible. The search that starts at 1 must see vertex 0.
   std::vector<std::vector<int>> adj(7);
   const int hex[6] = {1, 2, 3, 4, 5, 6};
   for (int i = 0; i < 6; i++) {
@@ -286,7 +288,8 @@ TEST_CASE("hop probe matches the ball table and an independent cycle search", "[
         // Radius 3 stays on the sorted pair table.
         REQUIRE(primitive::lastRingSearchUsedBalls() == 1);
       } else if (depth == 10) {
-        REQUIRE(primitive::lastRingSearchUsedBalls() == 2);
+        // Radius-2 pair table, meet in the middle for distance 4.
+        REQUIRE(primitive::lastRingSearchUsedBalls() == 3);
       }
       (void)primitive::ringNetworkBalls(nList, depth);
       REQUIRE(primitive::lastRingSearchUsedBalls() == 1);

@@ -179,3 +179,24 @@ Ring counts: 21296, 221184 and 1769472. SQQ and OVITO do not go faster from one 
 The liquid is the 4096-molecule frame whose SHA-256 is `d02023892336c43cf409da8ee4b7dee2b8f30f94ee9e76a1c1d1ae99e646ea2b`, five frames. The nucleation file is figshare 11448702, 148 frames of 4096 molecules. That deposit does not contain a 13553-molecule frame, and neither does figshare project 73545. Frames 1, 50, 100 and 148 were compared, with all five liquid frames.
 
 On every one of those frames, at depths 6 and 10, the d-SEAMS count of each size from 4 through 10 equals the OVITO histogram. Depth 8 is the same sizes, since the depth-10 histogram includes them. Sizes 3, 4 and 5 on liquid frame 1 also equal SQQ. SQQ's hexagons do not: the same frame has 5156 chordless hexagons and 2911 primitive ones. The other 2245 have no chord and fail the shortest-path test. One of them is vertices `0, 140, 2573, 426, 1756, 3818`. Vertices 0 and 426 sit three steps apart around the ring and two steps apart in the graph, and the ring has no chord. The primitive set is the one OVITO and d-SEAMS both report.
+
+## Depth 10 under a second
+
+On 110592 molecules the depth-10 search spent about 250 ms building a radius-4 ball and about 1.6 s pairing shortest paths. The pairing time was not the primitivity test. Most of the pairs are length 8 and 10, and on this crystal every one of them fails. A radius-2 pair table answers the questions those pairs ask: distance at most 2 is a lookup, distance 3 is a neighbour sitting at distance 2, and distance at most 4 is a vertex in both balls. Paths are kept only through vertices at or above the source, which is sound once distances are taken in the full graph. An antipode whose distance-2 keys are all within distance 2 of one another cannot close a primitive ring of size 8 or 10, so its path pairs are not built. A bipartite graph skips the odd search. The occupancy bitset of the radius-2 ball is the probe in front of that test.
+
+`full_graph_check_necessary` in `formal/Formal/Rings.lean` is the low-index fixture. On the hexagon `1-2-3-4-5-6`, `HighOnly.dist 1 4 = 3` after vertex 0 is deleted, and `LowSpur.dist 1 4 ≤ 2` when vertex 0 is joined to 1 and 4. That is the shape of the 62 liquid hexagons.
+
+Release build, one thread, eight samples after a warm-up, 8 online cores, neighbours and rings together. Median 584.7 ms, 221184 rings, the same vector as the pair-table search. The radius-2 table is 15 ms of that. Raw lines are in `markdown/rings-ic-timing-v4.txt`.
+
+## Interface and nucleation
+
+Serial, one thread, eight samples. The interface dump has 864 molecules. The nucleation frame has 4096. The 884736-molecule systems are a 6×6×6 tiling of the nucleation frame and a 16×8×8 tiling of the interface. Sizes 4, 5 and 6 match OVITO on every one of these. Sizes 3, 4 and 5 match SQQ on the untiled frames. SQQ's hexagons are the chordless count, which is larger. One SQQ sample on the 884736 nucleation tile did not finish within 20 minutes; the chordless search is the cost, not the neighbour build.
+
+| System | Molecules | d-SEAMS | OVITO | SQQ |
+| --- | ---: | ---: | ---: | ---: |
+| Nucleation | 4096 | 27.9 ms | 33.9 ms | 561 ms |
+| Nucleation tile | 884736 | 6.63 s | 9.19 s | — |
+| Interface | 864 | 5.80 ms | 7.80 ms | 145 ms |
+| Interface tile | 884736 | 5.91 s | 8.08 s | — |
+
+Nucleation hexagons: d-SEAMS and OVITO 3409, SQQ 4524. Interface hexagons: d-SEAMS and OVITO 1143, SQQ 1325. The tiled counts are those numbers times the number of copies.

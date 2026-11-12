@@ -180,6 +180,7 @@ int main(int argc, char **argv) {
   std::vector<int> reps;
   int maxDepth = kMaxDepth;
   bool e2e = false;
+  int onlyThreads = 0;
   std::string dumpPath;
   std::vector<int> frames;
   bool listRings = false;
@@ -190,6 +191,8 @@ int main(int argc, char **argv) {
       maxDepth = std::atoi(argv[++i]);
     } else if (arg == "--e2e") {
       e2e = true;
+    } else if (arg == "--threads" && i + 1 < argc) {
+      onlyThreads = std::atoi(argv[++i]);
     } else if (arg == "--dump" && i + 1 < argc) {
       dumpPath = argv[++i];
     } else if (arg == "--frame" && i + 1 < argc) {
@@ -207,7 +210,7 @@ int main(int argc, char **argv) {
   }
   const int threads[] = {1, 8};
   constexpr int kWarm = 1;
-  constexpr int kRepeat = 6;
+  constexpr int kRepeat = 8;
   std::cout << std::setprecision(6) << std::fixed;
   bool allEqual = true;
   if (!dumpPath.empty()) {
@@ -310,9 +313,11 @@ int main(int argc, char **argv) {
         continue;
       }
       setThreads(1);
+      const auto t0 = std::chrono::steady_clock::now();
       std::vector<int> offsets, cols;
       const bool ok = nneigh::orthoFullCsr(cloud, nullptr, kCutoff, offsets, cols);
       const auto rings = primitive::ringNetwork(offsets, cols, maxDepth);
+      const double total = millis(t0);
       std::vector<int> bySize(static_cast<std::size_t>(maxDepth) + 1, 0);
       for (const auto &ring : rings) {
         if (ring.size() < bySize.size()) {
@@ -320,7 +325,8 @@ int main(int argc, char **argv) {
         }
       }
       std::cout << "dump frame " << frame << " molecules " << n << " depth " << maxDepth
-                << " csr " << (ok ? 1 : 0) << " rings " << rings.size();
+                << " csr " << (ok ? 1 : 0) << " total_ms " << total << " rings "
+                << rings.size();
       for (int s = 3; s <= maxDepth; s++) {
         std::cout << " n" << s << " " << bySize[static_cast<std::size_t>(s)];
       }
@@ -364,6 +370,9 @@ int main(int argc, char **argv) {
       const int n = cloud.nop;
       const int threads[] = {1, 8};
       for (const int thr : threads) {
+        if (onlyThreads != 0 && thr != onlyThreads) {
+          continue;
+        }
         setThreads(thr);
         std::vector<double> totalMs;
         std::vector<std::vector<int>> rings;
@@ -380,10 +389,13 @@ int main(int argc, char **argv) {
             const double neigh = std::chrono::duration<double, std::milli>(t1 - t0).count();
             const double ring = std::chrono::duration<double, std::milli>(t2 - t1).count();
             totalMs.push_back(neigh + ring);
+            const auto split = primitive::lastRingSearchSplit();
             std::cout << "sample e2e threads " << threadCount() << " molecules " << n
                       << " depth " << maxDepth << " neigh_ms " << neigh << " ring_ms " << ring
                       << " total_ms " << neigh + ring << " rings " << rings.size()
-                      << " csr " << (ok ? 1 : 0) << "\n";
+                      << " csr " << (ok ? 1 : 0) << " balls_ms " << split.balls_ms
+                      << " enum_ms " << split.enumerate_ms << " merge_ms " << split.merge_ms
+                      << "\n";
           }
         }
         const bool equal = rings == reference;
