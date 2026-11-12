@@ -74,8 +74,10 @@ inline constexpr double kEclipsedCosine = 0.90;
 // then the RMSD is taken after the optimal rotation and the optimal scale
 // and divided by the template's root-mean-square radius (Horn 1987; Larsen,
 // Schmidt, Schiotz 2016). Zero is a perfect shape. The value is the operating
-// point of the ROC on quenched mW ice from 200 K to 270 K.
-inline constexpr double kShellRmsd = 0.12;
+// point of the ROC on quenched mW ice from 200 K to 270 K. 0.18 is the
+// lowest ceiling at which ice Ih at 270 K matches PTM's recall with
+// precision still 1.
+inline constexpr double kShellRmsd = 0.18;
 
 // Per-atom ice label. kind[i] is iceIh, iceIc, iceIsd, or -1. shellRmsd is
 // the scale-free residual ceiling. The label is the template with the lowest

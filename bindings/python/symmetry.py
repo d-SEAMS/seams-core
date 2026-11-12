@@ -195,7 +195,7 @@ def template(ident):
     return buf
 
 
-def classify(cartesian, lattice, shell_rmsd=0.12):
+def classify(cartesian, lattice, shell_rmsd=0.18):
     """Per-atom ice label. 0 ice Ih, 1 ice Ic, 2 ice Isd, -1 otherwise.
 
     ``shell_rmsd`` is the scale-free ceiling on the second-shell residual

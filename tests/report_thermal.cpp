@@ -141,7 +141,7 @@ void analyze(const Frame &frame, const std::string &path) {
   }
   // Production ceiling. The sweep above is only the sensitivity check.
   std::vector<int> kernel;
-  symm::classifyIce(frame.xyz, frame.box, kernel, 0.55);
+  symm::classifyIce(frame.xyz, frame.box, kernel, symm::kShellRmsd);
   std::vector<double> raw(static_cast<size_t>(3 * n));
   for (int i = 0; i < n; i++) {
     raw[static_cast<size_t>(3 * i)] = frame.xyz(i, 0);

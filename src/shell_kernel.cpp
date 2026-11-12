@@ -35,6 +35,7 @@ constexpr int kMaxN = 32;
 constexpr double kBondLo = 2.35;
 constexpr double kBondHi = 3.25;
 constexpr double kShell = 5.6;
+constexpr double kGrid = 2.8;
 constexpr double kEclipsed = 0.90;
 
 // Rotate mobile (env) onto fixed (template). Proper rotation.
@@ -1533,10 +1534,9 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
       continue;
     }
     tried++;
-    // A shell that is nowhere near the first template after four proper
-    // orientations is not ice. Ice Ih still matches the tetrahedron, so
-    // its search continues.
-    if ((tried > 3 && closest > 40.0) || tried > 12) {
+    // Give up only after a finished pairing has already shown the shell is
+    // far from this template. An unfinished pairing keeps searching.
+    if (tried > 12 || (tried > 3 && closest > 40.0 && closest < 1.0e200)) {
       break;
     }
     double R[3][3];
@@ -1722,9 +1722,9 @@ void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vector
   const double la = length(lat[0]);
   const double lb = length(lat[1]);
   const double lc = length(lat[2]);
-  const int nx = std::max(1, static_cast<int>(la / kShell));
-  const int ny = std::max(1, static_cast<int>(lb / kShell));
-  const int nz = std::max(1, static_cast<int>(lc / kShell));
+  const int nx = std::max(1, static_cast<int>(la / kGrid));
+  const int ny = std::max(1, static_cast<int>(lb / kGrid));
+  const int nz = std::max(1, static_cast<int>(lc / kGrid));
   const int ncell = nx * ny * nz;
   std::vector<double> px(static_cast<size_t>(n));
   std::vector<double> py(static_cast<size_t>(n));
@@ -1801,7 +1801,7 @@ void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vector
     double kz[40];
     int nkeep = 0;
     const double skew = std::abs(lat[1][0]) + std::abs(lat[2][0]) + std::abs(lat[2][1]);
-    const int reach = skew > 0.5 * kShell ? 4 : 1;
+    const int reach = skew > 0.5 * kShell ? 4 : 2;
     for (int dz = -reach; dz <= reach; dz++) {
       int iz = bz + dz;
       int sz = 0;
@@ -1854,64 +1854,133 @@ void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vector
               continue;
             }
             if (nkeep < 40) {
-              int at = nkeep;
-              while (at > 0 && d2 < kd[at - 1]) {
-                kd[at] = kd[at - 1];
-                kx[at] = kx[at - 1];
-                ky[at] = ky[at - 1];
-                kz[at] = kz[at - 1];
-                at--;
-              }
-              kd[at] = d2;
-              kx[at] = x;
-              ky[at] = y;
-              kz[at] = z;
+              kd[nkeep] = d2;
+              kx[nkeep] = x;
+              ky[nkeep] = y;
+              kz[nkeep] = z;
               nkeep++;
-            } else if (d2 < kd[39]) {
-              int at = 39;
-              while (at > 0 && d2 < kd[at - 1]) {
-                kd[at] = kd[at - 1];
-                kx[at] = kx[at - 1];
-                ky[at] = ky[at - 1];
-                kz[at] = kz[at - 1];
-                at--;
-              }
-              kd[at] = d2;
-              kx[at] = x;
-              ky[at] = y;
-              kz[at] = z;
             }
           }
         }
       }
     }
-    if (nkeep < 4 || kd[3] > 3.85 * 3.85) {
+    for (int a = 1; a < nkeep; a++) {
+      const double d2 = kd[a];
+      const double x = kx[a];
+      const double y = ky[a];
+      const double z = kz[a];
+      int at = a;
+      while (at > 0 && d2 < kd[at - 1]) {
+        kd[at] = kd[at - 1];
+        kx[at] = kx[at - 1];
+        ky[at] = ky[at - 1];
+        kz[at] = kz[at - 1];
+        at--;
+      }
+      kd[at] = d2;
+      kx[at] = x;
+      ky[at] = y;
+      kz[at] = z;
+    }
+    if (nkeep < 4) {
+      kind[static_cast<size_t>(i)] = -1;
+      continue;
+    }
+    // The four nearest are not always the tetrahedron: one bond can stretch
+    // past a compressed second neighbour. Pick the most regular quartet.
+    const int pool = std::min(nkeep, 8);
+    int pick[4] = {0, 1, 2, 3};
+    double pickScore = 0.0;
+    const bool outlier = std::sqrt(kd[std::min(3, nkeep - 1)]) - std::sqrt(kd[0]) > 0.45;
+    if (outlier) {
+      pickScore = 1e300;
+    }
+    for (int a = 0; a < pool && outlier; a++) {
+      for (int b = a + 1; b < pool; b++) {
+        for (int c = b + 1; c < pool; c++) {
+          for (int d = c + 1; d < pool; d++) {
+            const int s[4] = {a, b, c, d};
+            double rad[4];
+            double rsum = 0.0;
+            for (int t = 0; t < 4; t++) {
+              rad[t] = std::sqrt(kd[s[t]]);
+              rsum += rad[t];
+            }
+            const double rmean = rsum / 4.0;
+            if (rmean < 2.3 || rmean > 3.5) {
+              continue;
+            }
+            double rvar = 0.0;
+            for (int t = 0; t < 4; t++) {
+              const double dr = rad[t] - rmean;
+              rvar += dr * dr;
+            }
+            double edges[6];
+            int ne = 0;
+            double esum = 0.0;
+            for (int t = 0; t < 4; t++) {
+              for (int u = t + 1; u < 4; u++) {
+                const double dx = kx[s[t]] - kx[s[u]];
+                const double dy = ky[s[t]] - ky[s[u]];
+                const double dz = kz[s[t]] - kz[s[u]];
+                edges[ne] = std::sqrt(dx * dx + dy * dy + dz * dz);
+                esum += edges[ne];
+                ne++;
+              }
+            }
+            const double emean = esum / 6.0;
+            double evar = 0.0;
+            for (int t = 0; t < 6; t++) {
+              const double de = edges[t] - emean;
+              evar += de * de;
+            }
+            const double score = rvar + 0.25 * evar;
+            if (score < pickScore) {
+              pickScore = score;
+              for (int t = 0; t < 4; t++) {
+                pick[t] = s[t];
+              }
+            }
+          }
+        }
+      }
+    }
+    if (!(pickScore < 1.0e200)) {
       kind[static_cast<size_t>(i)] = -1;
       continue;
     }
     double nb[16][3];
     for (int k = 0; k < 4; k++) {
-      nb[k][0] = kx[k];
-      nb[k][1] = ky[k];
-      nb[k][2] = kz[k];
+      nb[k][0] = kx[pick[k]];
+      nb[k][1] = ky[pick[k]];
+      nb[k][2] = kz[pick[k]];
     }
     // A second neighbour is bonded to the tetrahedron. The twelve nearest
     // to the centre can include an atom that is not, and drop one that is.
     int bondAt[40];
     double bondTo[40];
     int nBond = 0;
-    for (int k = 4; k < nkeep; k++) {
+    for (int k = 0; k < nkeep; k++) {
+      bool used = false;
+      for (int f = 0; f < 4; f++) {
+        if (k == pick[f]) {
+          used = true;
+        }
+      }
+      if (used) {
+        continue;
+      }
       double best = 1e300;
       for (int f = 0; f < 4; f++) {
-        const double dx = kx[k] - kx[f];
-        const double dy = ky[k] - ky[f];
-        const double dz = kz[k] - kz[f];
+        const double dx = kx[k] - nb[f][0];
+        const double dy = ky[k] - nb[f][1];
+        const double dz = kz[k] - nb[f][2];
         const double d2 = dx * dx + dy * dy + dz * dz;
         if (d2 < best) {
           best = d2;
         }
       }
-      if (best < 3.8 * 3.8) {
+      if (best < 4.2 * 4.2) {
         bondAt[nBond] = k;
         bondTo[nBond] = best;
         nBond++;
