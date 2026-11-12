@@ -26,6 +26,7 @@ ydslib_sources = files(
   'ylm_cartesian.cpp',
   'neighbours.cpp',
   'cutoff_csr.cpp',
+  'diamond_cna.cpp',
   'order_parameter.cpp',
   'ozaki.cpp',
   'phase.cpp',

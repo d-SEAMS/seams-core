@@ -749,7 +749,8 @@ std::complex<double> sph::lookupTableQ6(int m, std::array<double, 2> angles) {
 static void classifyBondsLeftFp64(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, const chill::BondClassifier &rule,
-    bool isSlice) {
+    bool isSlice, const std::vector<int> *csrOff = nullptr,
+    const std::vector<int> *csrCols = nullptr) {
   seams::adoptThreads();
   constexpr int l = 3;
   static_assert(l == 3, "the closed form below is the l = 3 polynomial");
@@ -824,7 +825,7 @@ static void classifyBondsLeftFp64(
 #pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1)
 #endif
   for (int iatom = 0; iatom < nop; iatom++) {
-    if (static_cast<std::size_t>(iatom) >= nList.size()) {
+    if (csrOff == nullptr && static_cast<std::size_t>(iatom) >= nList.size()) {
       continue;
     }
     // The distance and the minimum-image delta are one evaluation. A short
@@ -842,11 +843,9 @@ static void classifyBondsLeftFp64(
     Near *candidates = stackNear;
     int nCand = 0;
     const Xyz pi = xyz[static_cast<std::size_t>(iatom)];
-    const auto &row = nList[static_cast<std::size_t>(iatom)];
-    for (std::size_t j = 1; j < row.size(); j++) {
-      const int jatom = resolve(row[j]);
-      if (jatom < 0) {
-        continue;
+    const auto consider = [&](int jatom) {
+      if (jatom < 0 || jatom >= nop || jatom == iatom) {
+        return;
       }
       const Xyz pj = xyz[static_cast<std::size_t>(jatom)];
       const auto dr = gen::fracDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
@@ -863,6 +862,19 @@ static void classifyBondsLeftFp64(
         candidates = heapNear.data();
       }
       ++nCand;
+    };
+    if (csrOff != nullptr && csrCols != nullptr &&
+        static_cast<int>(csrOff->size()) > iatom) {
+      const int a = (*csrOff)[static_cast<std::size_t>(iatom)];
+      const int b = (*csrOff)[static_cast<std::size_t>(iatom) + 1];
+      for (int k = a; k < b; ++k) {
+        consider((*csrCols)[static_cast<std::size_t>(k)]);
+      }
+    } else if (static_cast<std::size_t>(iatom) < nList.size()) {
+      const auto &row = nList[static_cast<std::size_t>(iatom)];
+      for (std::size_t j = 1; j < row.size(); ++j) {
+        consider(resolve(static_cast<int>(row[j])));
+      }
     }
     const int keep =
         (keepMax > 0) ? std::min(keepMax, nCand) : nCand;
@@ -1293,6 +1305,165 @@ chill::getIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
  *  @param[in] nList Row-ordered neighbour list by atom ID
  *  @param[in] isSlice This decides whether there is a slice or not
  */
+void chill::classifyBondsCsr(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &offsets, const std::vector<int> &cols,
+    const chill::BondClassifier &rule, bool isSlice) {
+  const std::vector<std::vector<int>> none;
+  if (seams::product::reduction() == seams::product::Reduction::Left &&
+      seams::product::mode() == seams::product::Mode::Fp64) {
+    classifyBondsLeftFp64(yCloud, none, rule, isSlice, &offsets, &cols);
+    return;
+  }
+  std::vector<std::vector<int>> rows(static_cast<std::size_t>(yCloud.nop));
+  for (int i = 0; i < yCloud.nop && i + 1 < static_cast<int>(offsets.size()); ++i) {
+    rows[static_cast<std::size_t>(i)].push_back(
+        yCloud.pts[static_cast<std::size_t>(i)].atomID);
+    for (int k = offsets[static_cast<std::size_t>(i)];
+         k < offsets[static_cast<std::size_t>(i) + 1]; ++k) {
+      const int j = cols[static_cast<std::size_t>(k)];
+      if (j >= 0 && j < yCloud.nop) {
+        rows[static_cast<std::size_t>(i)].push_back(
+            yCloud.pts[static_cast<std::size_t>(j)].atomID);
+      }
+    }
+  }
+  classifyBonds(yCloud, rows, rule, isSlice);
+}
+
+int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                            const std::vector<int> &offsets, const std::vector<int> &cols) {
+  const int n = yCloud.nop;
+  if (n <= 0 || static_cast<int>(offsets.size()) < n + 1) {
+    return 0;
+  }
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
+  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
+  const auto &norm = normQ3();
+  const chill::BondClassifier rule = chill::chillPlusRule();
+  std::vector<double> q(static_cast<std::size_t>(n) * kRealL3, 0.0);
+  std::vector<double> qn(static_cast<std::size_t>(n), 0.0);
+  std::vector<int> chosen(static_cast<std::size_t>(n) * 4, -1);
+  std::vector<int> nkeep(static_cast<std::size_t>(n), 0);
+  std::vector<int> shell(static_cast<std::size_t>(n), 0);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (n >= 256)
+#endif
+  for (int i = 0; i < n; ++i) {
+    struct Near {
+      double d2;
+      int j;
+      double x, y, z;
+      bool operator<(const Near &o) const { return d2 < o.d2 || (d2 == o.d2 && j < o.j); }
+    };
+    Near best[4];
+    int keep = 0;
+    int nShell = 0;
+    const auto &pi = yCloud.pts[static_cast<std::size_t>(i)];
+    const int a = offsets[static_cast<std::size_t>(i)];
+    const int b = offsets[static_cast<std::size_t>(i) + 1];
+    for (int k = a; k < b; ++k) {
+      const int j = cols[static_cast<std::size_t>(k)];
+      if (j < 0 || j >= n || j == i) {
+        continue;
+      }
+      const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
+      const auto dr = gen::fracDelta(frame, pi.x, pi.y, pi.z, pj.x, pj.y, pj.z);
+      const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
+      if (!(d2 > 0.0)) {
+        continue;
+      }
+      ++nShell;
+      Near item{d2, j, dr[0], dr[1], dr[2]};
+      if (keep < 4) {
+        best[keep++] = item;
+        if (keep == 4) {
+          std::sort(best, best + 4);
+        }
+      } else if (item < best[3]) {
+        best[3] = item;
+        std::sort(best, best + 4);
+      }
+    }
+    if (keep > 1 && keep < 4) {
+      std::sort(best, best + keep);
+    }
+    shell[static_cast<std::size_t>(i)] = nShell;
+    nkeep[static_cast<std::size_t>(i)] = keep;
+    double xs[4], ys[4], zs[4];
+    for (int s = 0; s < keep; ++s) {
+      chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)] = best[s].j;
+      xs[s] = best[s].x;
+      ys[s] = best[s].y;
+      zs[s] = best[s].z;
+    }
+    double acc[kRealL3] = {};
+    if (keep > 0) {
+      if (useAvx) {
+        realYlm3Accumulate(xs, ys, zs, keep, acc);
+      } else {
+        for (int s = 0; s < keep; ++s) {
+          addRealYlm3Scalar(xs[s], ys[s], zs[s], norm, acc);
+        }
+      }
+    }
+    double *dst = q.data() + static_cast<std::size_t>(i) * kRealL3;
+    for (int c = 0; c < kRealL3; ++c) {
+      dst[c] = acc[c];
+    }
+    qn[static_cast<std::size_t>(i)] = useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
+  }
+  int cubic = 0;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for reduction(+ : cubic) schedule(static) if (n >= 256)
+#endif
+  for (int i = 0; i < n; ++i) {
+    const int keep = nkeep[static_cast<std::size_t>(i)];
+    auto &bonds = yCloud.pts[static_cast<std::size_t>(i)].c_ij;
+    bonds.clear();
+    bonds.reserve(static_cast<std::size_t>(keep));
+    const double *qi = q.data() + static_cast<std::size_t>(i) * kRealL3;
+    const double ni = qn[static_cast<std::size_t>(i)];
+    for (int s = 0; s < keep; ++s) {
+      const int j = chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)];
+      const double *qj = q.data() + static_cast<std::size_t>(j) * kRealL3;
+      molSys::Result bond;
+      bond.c_value = correlationOf(useAvx ? realL3Dot(qi, qj) : realL3DotScalar(qi, qj), ni,
+                                   qn[static_cast<std::size_t>(j)]);
+      bond.classifier = chill::classifyBond(bond.c_value, rule);
+      bonds.push_back(bond);
+    }
+    int nstag = 0;
+    int neclip = 0;
+    for (const auto &bond : bonds) {
+      if (bond.classifier == molSys::bond_type::staggered) {
+        ++nstag;
+      } else if (bond.classifier == molSys::bond_type::eclipsed) {
+        ++neclip;
+      }
+    }
+    const bool four = shell[static_cast<std::size_t>(i)] == 4 && keep == 4;
+    auto &ice = yCloud.pts[static_cast<std::size_t>(i)].iceType;
+    if (!four) {
+      ice = molSys::atom_state_type::water;
+    } else if (neclip == 0 && nstag == 4) {
+      ice = molSys::atom_state_type::cubic;
+      ++cubic;
+    } else if (neclip == 1 && nstag == 3) {
+      ice = molSys::atom_state_type::hexagonal;
+    } else if (neclip == 4 && nstag == 0) {
+      ice = molSys::atom_state_type::clathrate;
+    } else if (neclip == 3) {
+      ice = molSys::atom_state_type::interClathrate;
+    } else if (nstag == 2 || (nstag == 3 && neclip == 0)) {
+      ice = molSys::atom_state_type::interfacial;
+    } else {
+      ice = molSys::atom_state_type::water;
+    }
+  }
+  return cubic;
+}
+
 void
 chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      const std::vector<std::vector<int>> &nList, bool isSlice,

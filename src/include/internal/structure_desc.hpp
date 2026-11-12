@@ -33,6 +33,11 @@ struct TemplateHit {
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, int kNeigh = 12);
 
+//! Same overlay, reading a CSR of cloud indices.
+[[nodiscard]] std::vector<TemplateHit> classifyTemplates(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> &offsets, const std::vector<int> &cols, int kNeigh = 12);
+
 //! Bartok SOAP power spectrum for one particle (nMax radial Gaussians,
 //! spherical harmonics through lMax). Length is nMax*nMax*(lMax+1).
 [[nodiscard]] std::vector<double> soapSpectrum(

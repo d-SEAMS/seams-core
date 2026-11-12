@@ -13,6 +13,11 @@ The drivers that exist today:
 | =tests/bench_churn_sweep= | incremental affiliation against a full pass |
 | =tests/bench_trajectory_incremental= | a trajectory update |
 | =tests/bench_gpu_batch= | a device-resident batch, when the build has one |
+| =tests/bench_cutoff_list= | orthorhombic ~orthoFullCsr~ against vesin, freud, and matscipy. Driven by =scripts/bench_neighbours_threads.py= |
+| =tests/bench_v2= | triclinic list, CHILL+, diamond common-neighbour test, and the hop ring search. Driven by =scripts/bench_neighbours_v2.py= |
+
+The neighbour session (host, pin, medians, rerun) is
+[[file:neighbour-lists.org][Cutoff neighbour lists]].
 
 Build with tests and run the binary.
 Record the host, the compiler, the commit, and whether =SEAMS_OFFLOAD= was set.

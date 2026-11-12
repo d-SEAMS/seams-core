@@ -231,6 +231,15 @@ void classifyBonds(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    const std::vector<std::vector<int>> &nList,
                    const BondClassifier &rule, bool isSlice = false);
 
+//! CHILL/CHILL+ bonds from a CSR of cloud indices.
+void classifyBondsCsr(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                      const std::vector<int> &offsets, const std::vector<int> &cols,
+                      const BondClassifier &rule, bool isSlice = false);
+
+//! Bonds and CHILL+ labels from a cutoff CSR. Returns the cubic count.
+int chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                     const std::vector<int> &offsets, const std::vector<int> &cols);
+
 //! Unnormalised real l = 3 bond-order vector of the atoms @a which selects.
 //! @a which null computes every atom. Ghost slots stay zero so a neighbour
 //! rank can write the vector it computed for that atom.
