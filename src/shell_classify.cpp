@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <new>
 #include <cstddef>
 #include <memory>
 #include <vector>
@@ -28,15 +29,31 @@ namespace symm {
 namespace {
 
 constexpr double kBond = 3.5;
+constexpr double kWide = 4.05;
 constexpr double kCentre = 5.6;
+constexpr double kCentreHex = 6.2;
 constexpr double kGrid = 2.8;
 constexpr int kMaxBond = 16;
+constexpr int kMaxWide = 4;
 
 struct Bond {
   int j;
   double dx;
   double dy;
   double dz;
+};
+
+// Uninitialized storage. new T[] value-initializes and the serial zero of the
+// bond table is larger than the parallel fill that overwrites it.
+template <class T>
+struct RawBuf {
+  T *p;
+  explicit RawBuf(size_t n) : p(static_cast<T *>(::operator new(n * sizeof(T)))) {}
+  ~RawBuf() { ::operator delete(p); }
+  RawBuf(const RawBuf &) = delete;
+  RawBuf &operator=(const RawBuf &) = delete;
+  T *get() const { return p; }
+  T &operator[](size_t i) const { return p[i]; }
 };
 constexpr double kCleanRms = 0.02;
 constexpr double kCleanShift = 0.05;
@@ -46,6 +63,11 @@ struct Image {
   int sx;
   int sy;
   int sz;
+};
+
+struct Packed {
+  double x, y, z;
+  int id;
 };
 
 double dist2(const double a[3], const double b[3]) {
@@ -314,8 +336,89 @@ bool __attribute__((noinline, cold)) hasStaggeredBond(const double envF[4][3], c
   return false;
 }
 
-int shellFit(const double center[3], const double nb[][3], int nNb, const CanonShell &canon,
-             double gate) {
+// Second-shell diamond test on the four neighbours, the same split OVITO's
+// identifier and pyscal3 use: the twelve second neighbours of a cubic
+// diamond are an FCC shell (every bond staggered) and those of a hexagonal
+// diamond are an HCP shell (one bond eclipsed). A clean shell is a single
+// radius. Anything wider falls through to the full fit.
+int diamondSecondShell(const double first[4][3], const double *sx, const double *sy, const double *sz) {
+  double rmin = 1e300;
+  double rmax = 0.0;
+  for (int i = 0; i < 12; i++) {
+    const double r2 = sx[i] * sx[i] + sy[i] * sy[i] + sz[i] * sz[i];
+    if (r2 < rmin) {
+      rmin = r2;
+    }
+    if (r2 > rmax) {
+      rmax = r2;
+    }
+  }
+  if (!(rmin > 1.0) || rmax > rmin * 1.0404) {
+    return -1;
+  }
+  int nEclipsed = 0;
+  int nStaggered = 0;
+  for (int a = 0; a < 4; a++) {
+    double u[3] = {first[a][0], first[a][1], first[a][2]};
+    const double un2 = u[0] * u[0] + u[1] * u[1] + u[2] * u[2];
+    if (!(un2 > 1e-8)) {
+      return -1;
+    }
+    const double un = std::sqrt(un2);
+    u[0] /= un;
+    u[1] /= un;
+    u[2] /= un;
+    double mx = -1.0;
+    for (int b = 0; b < 4; b++) {
+      if (b == a) {
+        continue;
+      }
+      double ref[3] = {first[b][0], first[b][1], first[b][2]};
+      const double rd = ref[0] * u[0] + ref[1] * u[1] + ref[2] * u[2];
+      ref[0] -= rd * u[0];
+      ref[1] -= rd * u[1];
+      ref[2] -= rd * u[2];
+      const double rn2 = ref[0] * ref[0] + ref[1] * ref[1] + ref[2] * ref[2];
+      if (rn2 < 1e-12) {
+        continue;
+      }
+      const double invR = 1.0 / std::sqrt(rn2);
+      for (int e = 0; e < 3; e++) {
+        const int s = 3 * a + e;
+        double v[3] = {sx[s] - first[a][0], sy[s] - first[a][1], sz[s] - first[a][2]};
+        const double vd = v[0] * u[0] + v[1] * u[1] + v[2] * u[2];
+        v[0] -= vd * u[0];
+        v[1] -= vd * u[1];
+        v[2] -= vd * u[2];
+        const double vn2 = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
+        if (vn2 < 1e-12) {
+          continue;
+        }
+        const double c = (ref[0] * v[0] + ref[1] * v[1] + ref[2] * v[2]) * invR / std::sqrt(vn2);
+        if (c > mx) {
+          mx = c;
+        }
+      }
+    }
+    if (mx >= 0.95) {
+      nEclipsed++;
+    } else if (mx <= 0.65) {
+      nStaggered++;
+    } else {
+      return -1;
+    }
+  }
+  if (nEclipsed == 0 && nStaggered == 4) {
+    return 1;
+  }
+  if (nEclipsed == 1 && nStaggered == 3) {
+    return 0;
+  }
+  return -1;
+}
+
+int shellFit(const double center[3], const double nb[][3], int nNb, const CanonShell &canon, double gate,
+             bool recover = false) {
   const int m = std::min(nNb, 16);
   int order[16];
   double dd[16];
@@ -380,7 +483,9 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
     }
   }
   // 1.02 squared. Ideal ice is under it and does not call the eclipsed scan.
-  if (lenMax >= lenMin * 1.0404 && !hasStaggeredBond(envF, envS, nS)) {
+  // An all-eclipsed shell next to a crystal is ice Ih, so that pass does not return here.
+  const bool eclipsed = lenMax >= lenMin * 1.0404 && !hasStaggeredBond(envF, envS, nS);
+  if (eclipsed && !recover) {
     return -1;
   }
   double best = 1e300;
@@ -408,7 +513,7 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
         continue;
       }
       tried++;
-      if (tried > 12 || (tried > 3 && closest > 40.0 && closest < 1.0e200)) {
+      if (tried > 12 || (!recover && tried > 3 && closest > 40.0 && closest < 1.0e200)) {
         break;
       }
       double R[3][3];
@@ -573,6 +678,14 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
 
 } // namespace
 
+int bondsBeyond(int atom, const Packed *packed, const int *cellStart, const Image *images, int nImage,
+               const int *bin, const double lat[3][3], const double *px, const double *py, const double *pz,
+               Bond *out);
+
+void recoverHex(int n, const Bond *bonds, const int *nbon, const Packed *packed, const int *cellStart,
+                const Image *images, int nImage, const int *bin, const double lat[3][3], const double *px,
+                const double *py, const double *pz, int *kind, const CanonShell &canon, double gate);
+
 void classifyPrepared(const double *x, const double *y, const double *z, int n,
                       const double lat[3][3], const CanonShell &canon, double gate, int *kind) {
   if (n <= 0) {
@@ -613,10 +726,10 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   }
   const int ncell = nx * ny * nz;
   const int reach = fast ? 1 : (skew > 1.0 ? 4 : 2);
-  std::vector<double> px(static_cast<size_t>(n));
-  std::vector<double> py(static_cast<size_t>(n));
-  std::vector<double> pz(static_cast<size_t>(n));
-  std::vector<int> bin(static_cast<size_t>(n));
+  RawBuf<double> px(static_cast<size_t>(n));
+  RawBuf<double> py(static_cast<size_t>(n));
+  RawBuf<double> pz(static_cast<size_t>(n));
+  RawBuf<int> bin(static_cast<size_t>(n));
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 4096)
 #endif
@@ -656,10 +769,6 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     bin[static_cast<size_t>(i)] = cell;
   }
   // Atoms packed by cell, which is the layout of the orthorhombic neighbour list.
-  struct Packed {
-    double x, y, z;
-    int id;
-  };
   std::vector<int> cellStart(static_cast<size_t>(ncell) + 1, 0);
   for (int i = 0; i < n; i++) {
     ++cellStart[static_cast<size_t>(bin[static_cast<size_t>(i)]) + 1];
@@ -668,7 +777,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     cellStart[static_cast<size_t>(c) + 1] += cellStart[static_cast<size_t>(c)];
   }
   std::vector<int> fill(cellStart.begin(), cellStart.end() - 1);
-  std::vector<Packed> packed(static_cast<size_t>(n));
+  RawBuf<Packed> packed(static_cast<size_t>(n));
   for (int i = 0; i < n; i++) {
     const int slot = fill[static_cast<size_t>(bin[static_cast<size_t>(i)])]++;
     packed[static_cast<size_t>(slot)] = Packed{px[static_cast<size_t>(i)], py[static_cast<size_t>(i)],
@@ -676,7 +785,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   }
   const int span = 2 * reach + 1;
   const int nImage = span * span * span;
-  std::unique_ptr<Image[]> images(new Image[static_cast<size_t>(ncell) * static_cast<size_t>(nImage)]);
+  RawBuf<Image> images(static_cast<size_t>(ncell) * static_cast<size_t>(nImage));
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (ncell >= 256)
 #endif
@@ -726,7 +835,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     }
   }
 
-  std::unique_ptr<Bond[]> bonds(new Bond[static_cast<size_t>(n) * static_cast<size_t>(kMaxBond)]);
+  RawBuf<Bond> bonds(static_cast<size_t>(n) * static_cast<size_t>(kMaxBond));
   std::vector<int> nbon(static_cast<size_t>(n), 0);
 #ifdef SEAMS_HAS_OPENMP
   const int threads = omp_get_max_threads();
@@ -839,11 +948,73 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
         }
       }
     }
-    // q = 1 - (3/8) sum (cos + 1/3)^2. Below 0.80 the four neighbours are not
+    // q = 1 - (3/8) sum (cos + 1/3)^2. Below 0.88 the four neighbours are not
     // a template tetrahedron, so the second shell is not walked.
-    if (!tetra || (1.0 - 0.375 * acc) < 0.80) {
+    if (!tetra || (1.0 - 0.375 * acc) < 0.88) {
       kind[i] = -1;
       continue;
+    }
+    // Cheap diamond test, before the full shell fit. The twelve second
+    // neighbours are the three outward bonds of each of the four neighbours.
+    // A perfect FCC or HCP shell is labelled here and does not enter Kabsch.
+    {
+      double first[4][3];
+      for (int k = 0; k < 4; k++) {
+        first[k][0] = mine[k].dx;
+        first[k][1] = mine[k].dy;
+        first[k][2] = mine[k].dz;
+      }
+      double fx[12];
+      double fy[12];
+      double fz[12];
+      int nf = 0;
+      bool closed = true;
+      for (int k = 0; k < 4 && closed; k++) {
+        const int f = mine[k].j;
+        const int na = nbon[static_cast<size_t>(f)];
+        const Bond *arm = &bonds[static_cast<size_t>(f) * static_cast<size_t>(kMaxBond)];
+        int taken = 0;
+        for (int t = 0; t < na && taken < 3; t++) {
+          const double x = mine[k].dx + arm[t].dx;
+          const double y = mine[k].dy + arm[t].dy;
+          const double z = mine[k].dz + arm[t].dz;
+          const double origin = x * x + y * y + z * z;
+          if (origin < 0.25) {
+            continue;
+          }
+          bool isFirst = false;
+          for (int q = 0; q < 4; q++) {
+            const double dx = x - mine[q].dx;
+            const double dy = y - mine[q].dy;
+            const double dz = z - mine[q].dz;
+            if (dx * dx + dy * dy + dz * dz < 0.25) {
+              isFirst = true;
+            }
+          }
+          if (isFirst) {
+            continue;
+          }
+          if (nf >= 12) {
+            closed = false;
+            break;
+          }
+          fx[nf] = x;
+          fy[nf] = y;
+          fz[nf] = z;
+          nf++;
+          taken++;
+        }
+        if (taken < 3) {
+          closed = false;
+        }
+      }
+      if (closed && nf == 12) {
+        const int fast = diamondSecondShell(first, fx, fy, fz);
+        if (fast >= 0) {
+          kind[i] = fast;
+          continue;
+        }
+      }
     }
     for (int k = 0; k < 4; k++) {
       firstId[k] = mine[k].j;
@@ -957,6 +1128,240 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     if (nCrystal < 1) {
       kind[i] = -1;
     }
+  }
+  recoverHex(n, bonds.get(), nbon.data(), packed.get(), cellStart.data(), images.get(), nImage, bin.get(),
+             lat, px.get(), py.get(), pz.get(), kind, canon, gate);
+}
+
+int bondsBeyond(int atom, const Packed *packed, const int *cellStart, const Image *images, int nImage,
+               const int *bin, const double lat[3][3], const double *px, const double *py, const double *pz,
+               Bond *out) {
+  Bond row[kMaxWide];
+  double rd[kMaxWide];
+  int nw = 0;
+  const int cell = bin[atom];
+  const Image *im = images + static_cast<size_t>(cell) * static_cast<size_t>(nImage);
+  const double ci0 = px[atom];
+  const double ci1 = py[atom];
+  const double ci2 = pz[atom];
+  for (int t = 0; t < nImage; t++) {
+    const int begin = cellStart[im[t].cell];
+    const int end = cellStart[im[t].cell + 1];
+    for (int m = begin; m < end; m++) {
+      const Packed &nbr = packed[m];
+      if (nbr.id == atom && im[t].sx == 0 && im[t].sy == 0 && im[t].sz == 0) {
+        continue;
+      }
+      const double dx = nbr.x + im[t].sx * lat[0][0] + im[t].sy * lat[1][0] + im[t].sz * lat[2][0] - ci0;
+      const double dy = nbr.y + im[t].sx * lat[0][1] + im[t].sy * lat[1][1] + im[t].sz * lat[2][1] - ci1;
+      const double dz = nbr.z + im[t].sx * lat[0][2] + im[t].sy * lat[1][2] + im[t].sz * lat[2][2] - ci2;
+      const double d2 = dx * dx + dy * dy + dz * dz;
+      if (d2 <= kBond * kBond || d2 > kWide * kWide) {
+        continue;
+      }
+      if (nw < kMaxWide) {
+        row[nw] = Bond{nbr.id, dx, dy, dz};
+        rd[nw] = d2;
+        nw++;
+      } else {
+        int worst = 0;
+        for (int c = 1; c < kMaxWide; c++) {
+          if (rd[c] > rd[worst]) {
+            worst = c;
+          }
+        }
+        if (d2 < rd[worst]) {
+          row[worst] = Bond{nbr.id, dx, dy, dz};
+          rd[worst] = d2;
+        }
+      }
+    }
+  }
+  for (int a = 1; a < nw; a++) {
+    const Bond b = row[a];
+    const double d2 = rd[a];
+    int at = a;
+    while (at > 0 && d2 < rd[at - 1]) {
+      row[at] = row[at - 1];
+      rd[at] = rd[at - 1];
+      at--;
+    }
+    row[at] = b;
+    rd[at] = d2;
+  }
+  for (int a = 0; a < nw; a++) {
+    out[a] = row[a];
+  }
+  return nw;
+}
+
+void recoverHex(int n, const Bond *bonds, const int *nbon, const Packed *packed, const int *cellStart,
+                const Image *images, int nImage, const int *bin, const double lat[3][3], const double *px,
+                const double *py, const double *pz, int *kind, const CanonShell &canon, double gate) {
+  int unlabeled = 0;
+  for (int i = 0; i < n; i++) {
+    if (kind[i] < 0) {
+      unlabeled++;
+    }
+  }
+  if (unlabeled == 0) {
+    return;
+  }
+  std::vector<char> crystal(static_cast<size_t>(n), 0);
+  std::vector<char> tried(static_cast<size_t>(n), 0);
+  for (int pass = 0; pass < 2; pass++) {
+  for (int i = 0; i < n; i++) {
+    crystal[static_cast<size_t>(i)] = kind[i] >= 0 ? 1 : 0;
+  }
+#ifdef SEAMS_HAS_OPENMP
+  const int threads = omp_get_max_threads();
+#pragma omp parallel for schedule(static) if (n >= 64 && threads > 1)
+#endif
+  for (int i = 0; i < n; i++) {
+    if (crystal[static_cast<size_t>(i)] || tried[static_cast<size_t>(i)]) {
+      continue;
+    }
+    const int nb = nbon[i];
+    const Bond *mine = bonds + static_cast<size_t>(i) * kMaxBond;
+    Bond mineWbuf[kMaxWide];
+    const int nw = bondsBeyond(i, packed, cellStart, images, nImage, bin, lat, px, py, pz, mineWbuf);
+    const Bond *mineW = mineWbuf;
+    if (nb + nw < 4) {
+      continue;
+    }
+    int nCrystal = 0;
+    const int lim = nb < 4 ? nb : 4;
+    for (int k = 0; k < lim; k++) {
+      if (crystal[static_cast<size_t>(mine[k].j)]) {
+        nCrystal++;
+      }
+    }
+    if (nCrystal < 1 && nw > 0 && nb >= 3) {
+      for (int k = 0; k < nb && k < 3; k++) {
+        if (crystal[static_cast<size_t>(mine[k].j)]) {
+          nCrystal++;
+        }
+      }
+    }
+    if (nCrystal < 3) {
+      continue;
+    }
+    tried[static_cast<size_t>(i)] = 1;
+    Bond first[4];
+    int nf = 0;
+    for (int k = 0; k < nb && nf < 4; k++) {
+      first[nf++] = mine[k];
+    }
+    if (nf < 4 && nw > 0) {
+      const double d4 = mineW[0].dx * mineW[0].dx + mineW[0].dy * mineW[0].dy + mineW[0].dz * mineW[0].dz;
+      double rNext = kWide;
+      if (nw >= 2) {
+        const double d5 = mineW[1].dx * mineW[1].dx + mineW[1].dy * mineW[1].dy + mineW[1].dz * mineW[1].dz;
+        rNext = std::sqrt(d5);
+      }
+      const double r4 = std::sqrt(d4);
+      if (rNext - r4 >= 0.12) {
+        first[nf++] = mineW[0];
+      }
+    }
+    if (nf < 4) {
+      continue;
+    }
+    const double ci0 = px[i];
+    const double ci1 = py[i];
+    const double ci2 = pz[i];
+    double nbxyz[16][3];
+    for (int k = 0; k < 4; k++) {
+      nbxyz[k][0] = ci0 + first[k].dx;
+      nbxyz[k][1] = ci1 + first[k].dy;
+      nbxyz[k][2] = ci2 + first[k].dz;
+    }
+    double sx[48], sy[48], sz[48], sb[48];
+    int ns = 0;
+    for (int k = 0; k < 4; k++) {
+      const int f = first[k].j;
+      const Bond *arm = bonds + static_cast<size_t>(f) * kMaxBond;
+      const int na = nbon[f];
+      Bond armWbuf[kMaxWide];
+      const int naw = bondsBeyond(f, packed, cellStart, images, nImage, bin, lat, px, py, pz, armWbuf);
+      const Bond *armW = armWbuf;
+      int seen = 0;
+      auto push = [&](const Bond &b) {
+        const double x = first[k].dx + b.dx;
+        const double y = first[k].dy + b.dy;
+        const double z = first[k].dz + b.dz;
+        const double origin = x * x + y * y + z * z;
+        if (origin < 0.25 || origin > kCentreHex * kCentreHex) {
+          return;
+        }
+        for (int q = 0; q < 4; q++) {
+          const double dx = x - first[q].dx;
+          const double dy = y - first[q].dy;
+          const double dz = z - first[q].dz;
+          if (dx * dx + dy * dy + dz * dz < 0.25) {
+            return;
+          }
+        }
+        const double bond = b.dx * b.dx + b.dy * b.dy + b.dz * b.dz;
+        for (int s = 0; s < ns; s++) {
+          const double dx = x - sx[s];
+          const double dy = y - sy[s];
+          const double dz = z - sz[s];
+          if (dx * dx + dy * dy + dz * dz < 0.25) {
+            if (bond < sb[s]) {
+              sx[s] = x;
+              sy[s] = y;
+              sz[s] = z;
+              sb[s] = bond;
+            }
+            return;
+          }
+        }
+        if (ns < 48) {
+          sx[ns] = x;
+          sy[ns] = y;
+          sz[ns] = z;
+          sb[ns] = bond;
+          ns++;
+        }
+      };
+      for (int t = 0; t < na && seen < 4; t++) {
+        seen++;
+        push(arm[t]);
+      }
+      if (seen < 4 && naw > 0) {
+        const double d4 = armW[0].dx * armW[0].dx + armW[0].dy * armW[0].dy + armW[0].dz * armW[0].dz;
+        double rNext = kWide;
+        if (naw >= 2) {
+          const double d5 = armW[1].dx * armW[1].dx + armW[1].dy * armW[1].dy + armW[1].dz * armW[1].dz;
+          rNext = std::sqrt(d5);
+        }
+        if (rNext - std::sqrt(d4) >= 0.12) {
+          push(armW[0]);
+        }
+      }
+    }
+    if (ns < 12) {
+      continue;
+    }
+    for (int a = 0; a < 12; a++) {
+      int best = a;
+      for (int b = a + 1; b < ns; b++) {
+        if (sb[b] < sb[best]) {
+          best = b;
+        }
+      }
+      std::swap(sb[a], sb[best]);
+      std::swap(sx[a], sx[best]);
+      std::swap(sy[a], sy[best]);
+      std::swap(sz[a], sz[best]);
+      nbxyz[4 + a][0] = ci0 + sx[a];
+      nbxyz[4 + a][1] = ci1 + sy[a];
+      nbxyz[4 + a][2] = ci2 + sz[a];
+    }
+    const double ci[3] = {ci0, ci1, ci2};
+    kind[i] = shellFit(ci, nbxyz, 16, canon, gate, true);
+  }
   }
 }
 
