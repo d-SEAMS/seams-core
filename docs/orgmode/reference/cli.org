@@ -34,9 +34,11 @@ frame has no atoms; without it, empty input retains the legacy text output.
 * Commands
 
 The ~command~ positional help string is ~read | chill | chill-plus |
-cages | fingerprint | ions | f4 | steinhardt | rdf | cn | hbonds |
+ovito-chill+ | cages | symmetry | rings | prisms | cluster |
+fingerprint | ions | f4 | steinhardt | rdf | cn | hbonds |
 pairs | density-z | domains~. ~chill_plus~ is an accepted alias of
-~chill-plus~ (not listed in that help string).
+~chill-plus~, and ~ovito_chill_plus~ is an accepted alias of
+~ovito-chill+~ (neither alias is listed in that help string).
 
 | command | action | stdout |
 |---------+--------+--------|
@@ -44,6 +46,10 @@ pairs | density-z | domains~. ~chill_plus~ is an accepted alias of
 | ~chill~ | CHILL labels | ~nop N~ then ~name count~ for each ice type present |
 | ~chill-plus~ | published CHILL+ (shell of 4, four-nearest q3, neighbour test) | same as ~chill~, plus ~--rule~ |
 | ~ovito-chill+~ | OVITO 3.17.2 CHILL+ (shell of 4, full-shell q3, no neighbour test) | same as ~chill-plus~ |
+| ~symmetry~ | space group, one shell overlay, and the ice-label tally | the shell kernel; IRA and SOFI are used only when that build linked them |
+| ~rings~ | primitive rings up to size 6 on the cutoff list | ~nop N rings R~ then one ~size count~ row |
+| ~prisms~ | perfect and imperfect prisms of size 3 to 6 on the mutual four-nearest graph | ~nop N~ then ~size S perfect P imperfect I~ and a total line |
+| ~cluster~ | largest connected component of the loaded atoms | ~nop N largest L subset S percolation P~ |
 | ~cages~ | ice score on six-membered rings | ~nop N graph KIND hexagonal IH cubic IC water W~ |
 | ~cages --signature SPEC~ | closed polyhedra whose ring-size census matches ~SPEC~; each vertex lies on at least three faces that close around it, V - E + F = 2, and rings that wind the periodic cell are left out | one line per signature, ~nop N graph KIND signature S cages C atoms A~ and, with ~--incomplete~, ~incomplete K~ cups on the ring graph; with ~--guest-types~, ~guests G occupied O multiple M free F~ |
 | ~fingerprint~ | topology keys of the bonded graph | ~nop N graph KIND hops H method M key K classes C rings 3:a 4:b ... top key=count ...~ |

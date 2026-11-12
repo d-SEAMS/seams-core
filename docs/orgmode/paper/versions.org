@@ -9,6 +9,7 @@ later release adds a row here and leaves the v2.12.0 rows in place.
 
 | component | version | notes |
 |-----------+---------+-------|
+| seams-core | v2.14.0 | this tree. linkcell is 0.3.11. The v2.12.0 row below is the paper build |
 | seams-core | v2.12.0 | v2.11.0 (~9f963b72~) with two patches; the first holds the ring, cage-affiliation, update, device and command-line changes with their tests, and the second sets the version to 2.12.0 |
 | d-SEAMS 1 baseline | seams-core commit ~1c8efa38~ (2026-05-28) | between v2.0.1 and v2.1.0; walk enumeration, the pair-scan HC search followed by the DDC search, and the all-pairs index-ordered neighbour builder |
 | PydSEAMSlib (Python, ~import pydseamslib~) | 2.11.1 on PyPI | the wheel wraps seams-core v2.11.0; the label tables and the head-to-head table use its sdist built with v2.12.0 as the seams-core subproject |

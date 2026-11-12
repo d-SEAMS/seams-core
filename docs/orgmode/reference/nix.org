@@ -35,7 +35,7 @@ The only flake input is ~nixpkgs~ (~github:NixOS/nixpkgs/nixos-unstable~).
 
 * What the package enables
 
-From =nix/package.nix= (~pname = "seams"~, ~version = "2.2.0"~):
+From =nix/package.nix= (~pname = "seams"~, ~version = "2.14.0"~):
 
 | on | Eigen, BLAS, LAPACK, Catch2 3, Highway (~libhwy~) |
 | OpenMP | ~dependency('openmp')~ probe; Clang also gets ~llvmPackages.openmp~ |
