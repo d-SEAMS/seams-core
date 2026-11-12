@@ -144,6 +144,20 @@ executable('bench_naming', 'bench_naming.cpp',
   include_directories: _incdirs,
   build_rpath: _test_rpath)
 
+executable('bench_roc', 'bench_roc.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
+
+executable('report_cages', 'report_cages.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
+
 executable('bench_robust', 'bench_robust.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,

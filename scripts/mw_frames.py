@@ -48,8 +48,8 @@ def cart(frac, vecs):
     return out
 
 
-def stacking(nx=4, ny=4):
-    n_bi = len(SEQUENCE)
+def stacking(nx=4, ny=4, sequence=SEQUENCE):
+    n_bi = len(sequence)
     height = n_bi * 0.5
     vecs = (
         (nx * A_HEX, 0.0, 0.0),
@@ -59,7 +59,7 @@ def stacking(nx=4, ny=4):
     atoms = []
     for ix in range(nx):
         for iy in range(ny):
-            for layer, site in enumerate(SEQUENCE):
+            for layer, site in enumerate(sequence):
                 sx, sy = SITES[site]
                 for z_unit, which in ((1.0 / 16.0, 0), (7.0 / 16.0, 1)):
                     frac = (
@@ -342,6 +342,174 @@ def hydrate_sI(nrep=5):
     return vecs, atoms
 
 
+def quench(workdir, vecs, atoms, steps=2000):
+    """Steepest-descent inherent structure of a thermal frame."""
+    os.makedirs(workdir, exist_ok=True)
+    write_sw(os.path.join(workdir, "mW.sw"))
+    write_data(os.path.join(workdir, "data.mw"), vecs, atoms)
+    script = "\n".join(
+        [
+            "units real",
+            "atom_style atomic",
+            "boundary p p p",
+            "read_data data.mw",
+            "pair_style sw",
+            "pair_coeff * * mW.sw mW",
+            "neighbor 2.0 bin",
+            "neigh_modify every 1 delay 0 check yes",
+            "min_style sd",
+            f"minimize 0.0 1.0e-4 {steps} {steps * 10}",
+            "write_dump all custom quench.lammpstrj id type xu yu zu",
+            "",
+        ]
+    )
+    run_lammps(workdir, script)
+    coords = read_dump(os.path.join(workdir, "quench.lammpstrj"))
+    if len(coords) != len(atoms):
+        raise SystemExit(f"quench atom count {len(coords)} != {len(atoms)}")
+    return [(coords[i], atoms[i][1], atoms[i][2]) for i in range(len(atoms))]
+
+
+def roc_frames(outdir):
+    """Thermal ensemble from 200 K to 270 K and its steepest-descent quench."""
+    systems = []
+    systems.append(("ic", ice_ic(4)))
+    systems.append(("ih", stacking(sequence="ABABABAB")))
+    systems.append(("stack", stacking()))
+    temps = (200.0, 220.0, 240.0, 260.0, 270.0)
+    for name, (vecs, atoms) in systems:
+        for temperature in temps:
+            tag = f"{name}-{int(temperature)}"
+            moved = thermal(
+                os.path.join(outdir, f"run-{tag}"),
+                tag,
+                temperature,
+                "crystal",
+                vecs,
+                atoms,
+                2000,
+                int(temperature) * 100 + len(name),
+            )
+            write_frame(
+                os.path.join(outdir, f"{tag}.frame"),
+                tag,
+                temperature,
+                "crystal",
+                vecs,
+                moved,
+            )
+            quenched = quench(os.path.join(outdir, f"run-{tag}-q"), vecs, moved)
+            write_frame(
+                os.path.join(outdir, f"{tag}-q.frame"),
+                f"{tag}-q",
+                0.0,
+                "quench",
+                vecs,
+                quenched,
+            )
+            print(f"wrote {tag} and quench", flush=True)
+    # The large cells already on disk, quenched the same way.
+    for path in (
+        "ice-4096-220.frame",
+        "stack-220.frame",
+        "stack-270.frame",
+        "nucleus-250.frame",
+    ):
+        full = os.path.join(outdir, path)
+        if not os.path.exists(full):
+            continue
+        lines = open(full, encoding="utf-8").read().splitlines()
+        n = int(lines[3].split()[1])
+        vecs = tuple(tuple(float(x) for x in lines[5 + i].split()) for i in range(3))
+        atoms = []
+        for line in lines[9 : 9 + n]:
+            parts = line.split()
+            atoms.append(
+                (
+                    (float(parts[0]), float(parts[1]), float(parts[2])),
+                    int(parts[3]),
+                    int(parts[4]),
+                )
+            )
+        tag = path.replace(".frame", "")
+        quenched = quench(os.path.join(outdir, f"run-{tag}-q"), vecs, atoms)
+        write_frame(
+            os.path.join(outdir, f"{tag}-q.frame"),
+            f"{tag}-q",
+            0.0,
+            "quench",
+            vecs,
+            quenched,
+        )
+        print(f"quenched {tag}", flush=True)
+
+
+def hydrate_sII(nrep=2):
+    here = os.path.dirname(os.path.abspath(__file__))
+    inc = os.path.join(here, "..", "tests", "hydrate_sites.inc")
+    text = open(inc, encoding="utf-8").read()
+    body = text.split("kSIIxyz")[1]
+    sites = []
+    for line in body.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("{"):
+            continue
+        parts = [float(x) for x in stripped.strip("{},").split(",") if x.strip()]
+        if len(parts) == 3:
+            sites.append(tuple(parts))
+    if len(sites) != 136:
+        raise SystemExit(f"sII site table has {len(sites)} rows")
+    cell = 6.20577 * 2.80
+    side = nrep * cell
+    vecs = ((side, 0.0, 0.0), (0.0, side, 0.0), (0.0, 0.0, side))
+    atoms = []
+    for ix in range(nrep):
+        for iy in range(nrep):
+            for iz in range(nrep):
+                for sx, sy, sz in sites:
+                    atoms.append(((ix * cell + sx, iy * cell + sy, iz * cell + sz), -1, 0))
+    return vecs, atoms
+
+
+def cage_frames(outdir):
+    """Thermal sI and sII, plus the steepest-descent inherent structure."""
+    for name, build, nrep, seed in (
+        ("sI", hydrate_sI, 2, 22071),
+        ("sII", hydrate_sII, 2, 22081),
+    ):
+        vecs, atoms = build(nrep)
+        for temperature in (220.0, 250.0):
+            tag = f"{name}-{int(temperature)}"
+            moved = thermal(
+                os.path.join(outdir, f"run-{tag}"),
+                tag,
+                temperature,
+                "hydrate",
+                vecs,
+                atoms,
+                2000,
+                seed + int(temperature),
+            )
+            write_frame(
+                os.path.join(outdir, f"{tag}.frame"),
+                tag,
+                temperature,
+                "hydrate",
+                vecs,
+                moved,
+            )
+            quenched = quench(os.path.join(outdir, f"run-{tag}-q"), vecs, moved)
+            write_frame(
+                os.path.join(outdir, f"{tag}-q.frame"),
+                f"{tag}-q",
+                0.0,
+                "quench",
+                vecs,
+                quenched,
+            )
+            print(f"wrote {tag} atoms={len(moved)} and quench", flush=True)
+
+
 def large_frames(outdir):
     """Thermal ice of at least 4096 molecules, and a thermal sI cell."""
     vecs, atoms = ice_ic(8)
@@ -391,6 +559,14 @@ def main():
     if "--large" in sys.argv:
         os.makedirs(outdir, exist_ok=True)
         large_frames(outdir)
+        return
+    if "--roc" in sys.argv:
+        os.makedirs(outdir, exist_ok=True)
+        roc_frames(outdir)
+        return
+    if "--cages" in sys.argv:
+        os.makedirs(outdir, exist_ok=True)
+        cage_frames(outdir)
         return
     ideal_only = "--ideal-only" in sys.argv
     os.makedirs(outdir, exist_ok=True)
