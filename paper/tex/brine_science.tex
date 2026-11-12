@@ -1,7 +1,8 @@
-% What this machine can defend. No front velocity is quoted.
-% One 3 ns seed at 245 K and one at 255 K. The warm slab melts.
-% The cold slab ends slightly thicker, and its half-nanosecond
-% rates are consistent with zero.
+% What this machine can defend.
+% Two 3 ns seeds at 245 K and one at 255 K.
+% The 245 K block mean across both seeds excludes zero, so the
+% crossing with the 255 K block mean is quoted.
+% 235 K seed 2351 and 250 K seed 2501 are not in this run.
 
 \section{Salt at a Madrid-2019 freezing front}
 \label{sec:brine-science}
@@ -24,22 +25,58 @@ Five hundred nanoseconds at that rate is $37\,\mathrm{days}$ of
 eight-core time, for one temperature and one seed.
 The salinity series is not reported.
 
-One pure-water trajectory at $245\,\mathrm{K}$ and one at
-$255\,\mathrm{K}$ were each run for $3\,\mathrm{ns}$ on this cell,
-one seed at each temperature.
-At $245\,\mathrm{K}$ the crystal count is $1222$ at the start of
-production, $1108$ at $0.5\,\mathrm{ns}$ and $1257$ at $3.0\,\mathrm{ns}$,
-and the ice thickness goes from $34.1\,\mathrm{\AA}$ to $36.0\,\mathrm{\AA}$.
+Two pure-water trajectories at $245\,\mathrm{K}$ and one at
+$255\,\mathrm{K}$ were each run for $3\,\mathrm{ns}$ on this cell.
+The second $245\,\mathrm{K}$ trajectory is seed 2452.
+Seeds 2351 at $235\,\mathrm{K}$ and 2501 at $250\,\mathrm{K}$ are
+not in this run.
+On the earlier $245\,\mathrm{K}$ seed the crystal count is $1222$
+at the start of production, $1108$ at $0.5\,\mathrm{ns}$ and $1257$
+at $3.0\,\mathrm{ns}$, and the ice thickness goes from
+$34.1\,\mathrm{\AA}$ to $36.0\,\mathrm{\AA}$.
+Seed 2452 goes from $1242$ to $1224$ to $1374$ crystals, and the
+thickness from $34.5\,\mathrm{\AA}$ to $39.2\,\mathrm{\AA}$.
 At $255\,\mathrm{K}$ the count falls from $1214$ to $518$ and the
 thickness from $33.7\,\mathrm{\AA}$ to $14.7\,\mathrm{\AA}$.
-The half-nanosecond front velocities at $245\,\mathrm{K}$ scatter
-through zero.
-The melting point stays unresolved, so this section quotes no front
-velocity.
+Table~\ref{tab:brine-front-v} gives the ordinary-least-squares
+velocity and the mean of the six $0.5\,\mathrm{ns}$ blocks.
+The block mean across the two $245\,\mathrm{K}$ seeds is
+$+0.65\pm 0.32\,\mathrm{\AA\,ns^{-1}}$.
+That interval excludes zero.
+The line through it and the $255\,\mathrm{K}$ block mean crosses
+zero at $247.0\pm 0.9\,\mathrm{K}$.
+That is the melting-point estimate from the trajectories that
+finished. It does not use $235\,\mathrm{K}$ or $250\,\mathrm{K}$.
+The production segment of seed 2452, $1.5\times 10^{6}$ steps on
+eight threads, ran at $15.1\,\mathrm{ns\,day^{-1}}$.
 
-What is reported is the analysis that would be applied to such a
-trajectory, timed on this cell, and a density check of the ion
-parameters.
+\begin{table}[t]
+\centering
+\caption{Pure-water front on the finished $3\,\mathrm{ns}$ trajectories.
+$v_{\mathrm{OLS}}$ is half the thickness slope after $0.06\,\mathrm{ns}$;
+its standard error treats frames as independent.
+The block velocity is the mean of six $0.5\,\mathrm{ns}$ windows,
+and its standard error is the scatter of those windows.
+$\mathrm{d}N/\mathrm{d}t$ counts crystal labels per nanosecond.
+Velocities are $\mathrm{\AA\,ns^{-1}}$.
+The $245\,\mathrm{K}$ block mean in the text is the mean of the two
+seed block velocities, and $0.32$ is the standard error of that mean.}
+\label{tab:brine-front-v}
+\begin{tabular}{llrrr}
+\hline
+$T$ (K) & seed & $v_{\mathrm{OLS}}$ & block & $\mathrm{d}N/\mathrm{d}t$ \\
+\hline
+245 & earlier & $+0.68\pm 0.05$ & $+0.33\pm 0.46$ & $+48.3\pm 3.7$ \\
+245 & 2452 & $+0.54\pm 0.04$ & $+0.97\pm 0.48$ & $+36.7\pm 2.9$ \\
+255 & earlier & $-3.12\pm 0.05$ & $-2.61\pm 0.69$ & $-216.4\pm 3.3$ \\
+235 & 2351 & \multicolumn{3}{c}{pending} \\
+250 & 2501 & \multicolumn{3}{c}{pending} \\
+\hline
+\end{tabular}
+\end{table}
+
+The same analysis, timed on this cell, and a density check of the
+ion parameters follow.
 
 The parameters are Madrid-2019, $q=\pm 0.85$, with the cross terms
 of Zeron, Abascal and Vega.\cite{zeron2019}
