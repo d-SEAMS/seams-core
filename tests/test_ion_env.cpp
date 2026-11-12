@@ -122,3 +122,15 @@ TEST_CASE("waterType zero accepts every non-ion atom", "[ions]") {
   REQUIRE(site::ionEnvironment(cloud, ice, {13}, 1, 3.5).shell[0] == 5);
   REQUIRE(site::ionEnvironment(cloud, ice, {13}, 0, 3.5).shell[0] == 6);
 }
+
+TEST_CASE("every named water type is in the ion shell", "[ions]") {
+  auto cloud = lattice({13});
+  cloud.pts[4].type = 2;
+  cloud.pts[22].type = 2;
+  std::vector<bool> ice(static_cast<std::size_t>(cloud.nop), true);
+  const std::vector<int> both{1, 2};
+  const auto env = site::ionEnvironment(cloud, ice, {13}, both, 3.5);
+  REQUIRE(env.shell[0] == 6);
+  REQUIRE(site::ionEnvironment(cloud, ice, {13}, std::vector<int>{1}, 3.5).shell[0] == 4);
+  REQUIRE(site::ionEnvironment(cloud, ice, {13}, std::vector<int>{2}, 3.5).shell[0] == 2);
+}

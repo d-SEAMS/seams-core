@@ -94,9 +94,16 @@ struct IonEnvironment {
   int nFront = 0;
   int nLiquid = 0;
 };
-/// `iceFlag` is indexed like `yCloud.pts`; `waterType` selects the water
-/// oxygens (0 accepts every atom that is not an ion); `cutoff` is the first
-/// shell radius in the cloud's length unit.
+/// `iceFlag` is indexed like `yCloud.pts`. An empty `waterTypes` accepts
+/// every atom that is not an ion. A non-empty list keeps every named type,
+/// the same union `cutoffWater` uses. `cutoff` is the first shell radius
+/// in the cloud's length unit.
+IonEnvironment
+ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+               const std::vector<bool> &iceFlag, const std::vector<int> &ionIndices,
+               const std::vector<int> &waterTypes, double cutoff);
+
+/// `waterType` 0 accepts every non-ion. Any other value is that one type.
 IonEnvironment
 ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                const std::vector<bool> &iceFlag, const std::vector<int> &ionIndices,

@@ -296,6 +296,16 @@ IonEnvironment
 ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                const std::vector<bool> &iceFlag, const std::vector<int> &ionIndices,
                int waterType, double cutoff) {
+  if (waterType == 0) {
+    return ionEnvironment(yCloud, iceFlag, ionIndices, std::vector<int>{}, cutoff);
+  }
+  return ionEnvironment(yCloud, iceFlag, ionIndices, std::vector<int>{waterType}, cutoff);
+}
+
+IonEnvironment
+ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+               const std::vector<bool> &iceFlag, const std::vector<int> &ionIndices,
+               const std::vector<int> &waterTypes, double cutoff) {
   IonEnvironment out;
   const int n = yCloud.nop;
   std::vector<char> isIon(static_cast<std::size_t>(std::max(n, 0)), 0);
@@ -317,7 +327,9 @@ ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
       if (j == i || isIon[static_cast<std::size_t>(j)]) {
         continue;
       }
-      if (waterType != 0 && yCloud.pts[static_cast<std::size_t>(j)].type != waterType) {
+      if (!waterTypes.empty() &&
+          std::find(waterTypes.begin(), waterTypes.end(),
+                    yCloud.pts[static_cast<std::size_t>(j)].type) == waterTypes.end()) {
         continue;
       }
       if (gen::periodicDistSq(frame, yCloud, i, j) >= cut2) {

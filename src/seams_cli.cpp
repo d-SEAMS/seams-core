@@ -524,14 +524,14 @@ void printFeatures(std::ostream &os) {
   line("Highway SIMD", false);
 #endif
 #ifdef SEAMS_HAS_VESIN
-  line("vesin neighbours", true);
+  line("vesin cutoff fallback", true);
 #else
-  line("vesin neighbours", false);
+  line("vesin cutoff fallback", false);
 #endif
 #ifdef SEAMS_HAS_LINKCELL
-  line("linkcell k-nearest", true);
+  line("linkcell pairs_within", true);
 #else
-  line("linkcell k-nearest", false);
+  line("linkcell pairs_within", false);
 #endif
 #ifdef SEAMS_HAS_CHEMFILES
   line("chemfiles", true);
@@ -1139,8 +1139,9 @@ int cmdIons(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
       ions.push_back(i);
     }
   }
-  const int waterTyp = waterTypes.empty() ? typ : waterTypes.front();
-  const auto env = site::ionEnvironment(cloud, ice, ions, waterTyp, ionCutoff);
+  const auto env = waterTypes.empty()
+                       ? site::ionEnvironment(cloud, ice, ions, typ, ionCutoff)
+                       : site::ionEnvironment(cloud, ice, ions, waterTypes, ionCutoff);
   if (!perAtomPath.empty()) {
     // water: 0 liquid, 1 ice; ions: 2 liquid, 3 front, 4 ice
     std::vector<int> values(static_cast<std::size_t>(cloud.nop), 0);
