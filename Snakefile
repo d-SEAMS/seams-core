@@ -325,6 +325,20 @@ rule literature_h2h:
         "--log benchmarks/h2h-literature.txt"
 
 
+rule rings_one_thread:
+    input:
+        "build/tests/bench_rings_h2h",
+        "scripts/rings_one_thread.py",
+        "input/traj/genice_sH.lammpstrj",
+        "input/traj/mW_cubic.lammpstrj",
+    output:
+        "markdown/rings-one-thread.json",
+    shell:
+        "PY=\"${{RINGS_PYTHON:-python3}}\"; "
+        "\"$PY\" scripts/rings_one_thread.py "
+        "--bench {input[0]} --python \"$PY\" --json {output}"
+
+
 rule shipped_campaign:
     input:
         "paper/tex/repro/shipped_campaign.py",

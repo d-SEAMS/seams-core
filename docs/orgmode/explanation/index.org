@@ -11,6 +11,7 @@ These pages are for understanding. They are not recipes.
 | [[file:ring-completion.org][Ring-adjacent completion]] | ~ringAdjacentCompletion~ and the seeded flag |
 | [[file:primitive-rings.org][Primitive rings and the full graph]] | Distances on the whole graph, then levels below the source |
 | [[file:linkcell-scaling.org][Linkcell strong scaling]] | The weighted cell bisection, its halo, and the measured speedups |
+| [[file:rings-one-thread.org][Rings on one thread]] | ~ringNetwork~ against OVITO FindRings |
 | [[file:topological-network.org][Topological network criteria]] | The formulae the classifiers use |
 | [[file:symmetry.org][Local symmetry]] | The ice shell, the cages, and the held-out scores |
 | [[file:citation.org][Citation]] | What to cite |
@@ -25,6 +26,7 @@ These pages are for understanding. They are not recipes.
    ring-completion
    primitive-rings
    linkcell-scaling
+   rings-one-thread
    topological-network
    symmetry
    citation

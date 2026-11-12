@@ -6,6 +6,7 @@ is one serial call of the arm on one core.
 
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -467,3 +468,63 @@ class LinkcellPartition:
             cwd=ROOT, env=env, check=True,
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         )
+
+
+class RingsOneThread:
+    """ringNetwork against OVITO FindRings. The cutoff graph is built in setup.
+
+    One thread. A missing bench binary or an interpreter without OVITO skips
+    the pair. Samples are one search each; the published medians are the
+    eight-call session in markdown/rings-one-thread.json.
+    """
+
+    params = ["tri-136", "orth-4k", "orth-1e5"]
+    param_names = ["frame"]
+
+    def setup(self, frame):
+        import importlib.util
+        import tempfile
+
+        bench = os.environ.get(
+            "SEAMS_RING_BENCH",
+            str(ROOT / "build" / "tests" / "bench_rings_h2h"),
+        )
+        if not Path(bench).is_file():
+            raise NotImplementedError("bench_rings_h2h is not built")
+        os.environ["OVITO_THREAD_COUNT"] = "1"
+        try:
+            import ovito  # noqa: F401
+        except Exception as exc:
+            raise NotImplementedError("OVITO is not importable") from exc
+        spec = importlib.util.spec_from_file_location(
+            "rings_one_thread", ROOT / "scripts" / "rings_one_thread.py")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self._module = module
+        self._work = tempfile.TemporaryDirectory(prefix="rings-h2h-")
+        frames = {
+            name: traj
+            for name, traj, _count in module.prepare_frames(
+                module.load_h2h(), Path(self._work.name))
+        }
+        self._dseams = module.DseamsRepl(bench, frames[frame], 1)
+        self._ovito = module.OvitoRepl(sys.executable, frames[frame], 1)
+        if self._dseams.hist != self._ovito.hist:
+            raise RuntimeError(
+                f"{frame} census d-SEAMS {self._dseams.hist} "
+                f"OVITO {self._ovito.hist}")
+
+    def time_dseams(self, frame):
+        self._dseams.sample()
+
+    def time_ovito_findrings(self, frame):
+        self._ovito.sample()
+
+    def teardown(self, frame):
+        for arm in ("_dseams", "_ovito"):
+            worker = getattr(self, arm, None)
+            if worker is not None:
+                worker.close()
+        work = getattr(self, "_work", None)
+        if work is not None:
+            work.cleanup()

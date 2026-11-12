@@ -17,6 +17,7 @@ The drivers that exist today:
 | =tests/bench_cutoff_list= | orthorhombic ~orthoFullCsr~ against vesin, freud, and matscipy. Driven by =scripts/bench_neighbours_threads.py= |
 | =tests/bench_v2= | triclinic list, CHILL+, diamond common-neighbour test, and the hop ring search. Driven by =scripts/bench_neighbours_v2.py= |
 | =tests/bench_ql= | local cutoff \(q_4\) and \(q_6\). Driven by =scripts/bench_ql_threads.py= |
+| =tests/bench_rings_h2h= | primitive rings against OVITO FindRings. Driven by =scripts/rings_one_thread.py= and the Snakemake rule =rings_one_thread= |
 
 The neighbour session (host, pin, medians, rerun) is
 [[file:neighbour-lists.org][Cutoff neighbour lists]].

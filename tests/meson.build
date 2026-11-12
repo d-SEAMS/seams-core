@@ -28,6 +28,7 @@ test_sources = {
   'bulkTUM': 'test_bulkTUM.cpp',
   'pntCorrespondence': 'test_pntCorrespondence.cpp',
   'franzblau_extra': 'test_franzblau_extra.cpp',
+  'ring_census': 'test_ring_census.cpp',
   'ira_sofi': 'test_ira_sofi.cpp',
   'local_symmetry': 'test_local_symmetry.cpp',
   'classify_concurrent': 'test_classify_concurrent.cpp',
@@ -405,6 +406,13 @@ executable('bench_lammps_io', 'bench_lammps_io.cpp',
   build_rpath: '$ORIGIN/../src')
 
 executable('bench_lammps_walk', 'bench_lammps_walk.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_rings_h2h', 'bench_rings_h2h.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
   link_args: _test_link_args,
