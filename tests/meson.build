@@ -29,6 +29,7 @@ test_sources = {
   'pntCorrespondence': 'test_pntCorrespondence.cpp',
   'franzblau_extra': 'test_franzblau_extra.cpp',
   'ira_sofi': 'test_ira_sofi.cpp',
+  'local_symmetry': 'test_local_symmetry.cpp',
   'sphericart': 'test_sphericart.cpp',
   'cage_canon': 'test_cage_canon.cpp',
   'topo_fingerprint': 'test_topo_fingerprint.cpp',
@@ -65,6 +66,9 @@ _test_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
 # counters and the tests inside the limit.
 if get_option('b_coverage')
   _test_env.set('OMP_NUM_THREADS', '1')
+endif
+if csm_shape_bin != ''
+  _test_env.set('CSM_SHAPE', csm_shape_bin)
 endif
 
 # --enable-new-dtags is Linux-only (macOS ld does not support it)
@@ -117,6 +121,62 @@ test('ozaki',
   workdir: meson.project_source_root() / 'input',
   env: _test_env,
   timeout: 180)
+executable('report_symmetry_cases', 'report_symmetry_cases.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
+
+executable('bench_shell_scale', 'bench_shell_scale.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
+
+executable('bench_naming', 'bench_naming.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
+
+executable('bench_roc', 'bench_roc.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
+
+executable('report_cages', 'report_cages.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
+
+executable('bench_robust', 'bench_robust.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
+
+executable('report_thermal', 'report_thermal.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
+
+executable('bench_symmetry', 'bench_symmetry.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
+
 executable('bench_ozaki', 'bench_ozaki.cpp',
   dependencies: [yds_dep, mpfr_dep, gmp_dep],
   cpp_args: _args,
