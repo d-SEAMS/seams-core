@@ -46,8 +46,9 @@ const std::vector<int> kEmptyRings;
  *  its index otherwise.
  */
 // Lexicographically least reading of a ring under rotation and reversal.
-// Rings in the cage search are at most a handful of atoms, so the key lives
-// on the stack and the sort comparator does not allocate.
+// A least reading starts on a minimum element, so only those starts are
+// built. Rings in the cage search are at most a handful of atoms, so the
+// key lives on the stack.
 struct CycleKey {
   int n = 0;
   std::array<int, 16> v{};
@@ -72,24 +73,87 @@ CycleKey bestCycle(std::span<const int> ringAtoms) {
   if (k <= 0 || k > static_cast<int>(best.v.size())) {
     return best;
   }
-  bool any = false;
-  CycleKey candidate;
-  candidate.n = k;
-  for (int dir = 0; dir < 2; dir++) {
-    for (int start = 0; start < k; start++) {
-      for (int m = 0; m < k; m++) {
-        const int at =
-            dir == 0 ? (start + m) % k : (start + k - m) % k;
-        candidate.v[static_cast<size_t>(m)] =
-            ringAtoms[static_cast<size_t>(at)];
-      }
-      if (!any || candidate < best) {
-        best = candidate;
-        any = true;
-      }
+  const int *atoms = ringAtoms.data();
+  int minv = atoms[0];
+  for (int i = 1; i < k; ++i) {
+    if (atoms[i] < minv) {
+      minv = atoms[i];
     }
   }
+  CycleKey candidate;
+  candidate.n = k;
+  bool any = false;
+  auto take = [&](int start, int step) {
+    int idx = start;
+    for (int m = 0; m < k; ++m) {
+      candidate.v[static_cast<std::size_t>(m)] = atoms[idx];
+      idx += step;
+      if (idx >= k) {
+        idx = 0;
+      } else if (idx < 0) {
+        idx = k - 1;
+      }
+    }
+    if (!any || candidate < best) {
+      best = candidate;
+      any = true;
+    }
+  };
+  for (int start = 0; start < k; ++start) {
+    if (atoms[start] != minv) {
+      continue;
+    }
+    take(start, 1);
+    take(start, -1);
+  }
   return best;
+}
+
+// Distinct values in xs[0, n). Callers only need the count sort+unique
+// would return. A stamp over the value span is linear in n; a wide or
+// negative span falls back to a sort of a copy.
+int countDistinct(const int *xs, int n) {
+  if (n <= 1) {
+    return n > 0 ? n : 0;
+  }
+  int lo = xs[0];
+  int hi = xs[0];
+  for (int i = 1; i < n; ++i) {
+    if (xs[i] < lo) {
+      lo = xs[i];
+    } else if (xs[i] > hi) {
+      hi = xs[i];
+    }
+  }
+  const int span = hi - lo + 1;
+  if (lo < 0 || span > 8192) {
+    std::vector<int> copy(xs, xs + n);
+    std::sort(copy.begin(), copy.end());
+    return static_cast<int>(std::unique(copy.begin(), copy.end()) -
+                            copy.begin());
+  }
+  struct Stamp {
+    std::vector<int> seen;
+    int tick = 0;
+  };
+  thread_local Stamp stamp;
+  if (static_cast<int>(stamp.seen.size()) < span) {
+    stamp.seen.assign(static_cast<std::size_t>(span), 0);
+  }
+  if (++stamp.tick <= 0) {
+    std::fill(stamp.seen.begin(), stamp.seen.end(), 0);
+    stamp.tick = 1;
+  }
+  const int mark = stamp.tick;
+  int uniq = 0;
+  for (int i = 0; i < n; ++i) {
+    int &slot = stamp.seen[static_cast<std::size_t>(xs[i] - lo)];
+    if (slot != mark) {
+      slot = mark;
+      ++uniq;
+    }
+  }
+  return uniq;
 }
 
 struct AtomKey {
@@ -2138,8 +2202,7 @@ bool ring::equatorialConditions(const std::vector<std::vector<int>> &rings,
     for (int k = 0; k < 6; k++) {
       take(rings[static_cast<size_t>(r[k])]);
     }
-    std::sort(atoms, atoms + nAtomsHere);
-    const auto nUnique = static_cast<int>(std::unique(atoms, atoms + nAtomsHere) - atoms);
+    const int nUnique = countDistinct(atoms, nAtomsHere);
     bool folded = nUnique != 14;
     for (int k = 0; k < 6 && !folded; k++) {
       folded = share6(rings[static_cast<size_t>(r[k])], R) != 3;
@@ -2281,8 +2344,7 @@ bool ring::equatorialConditions(const std::vector<std::vector<int>> &rings,
       if (!hexagons) {
         continue;
       }
-      std::sort(atoms, atoms + nAtomsHere);
-      const auto nUnique = std::unique(atoms, atoms + nAtomsHere) - atoms;
+      const int nUnique = countDistinct(atoms, nAtomsHere);
       bool folded = false;
       for (const int ri : e.r) {
         folded = folded || sharedAtoms(rings[static_cast<std::size_t>(ri)], R) != 3;
@@ -2578,11 +2640,10 @@ std::vector<int> ring::findHC(const std::vector<std::vector<int>> &rings,
       for (size_t n = 1; n < row.size(); n++) {
         const int nb = row[n];
         if (nb < 0 || nb >= nAtoms ||
-            scratch.onRing[static_cast<size_t>(nb)] == on ||
-            nb >= static_cast<int>(index.ringsContainingAtom.size())) {
+            scratch.onRing[static_cast<size_t>(nb)] == on) {
           continue;
         }
-        span += static_cast<int>(index.ringsContainingAtom[static_cast<size_t>(nb)].size());
+        span += atomRow(index, nb).size();
       }
       return span;
     };
@@ -2625,12 +2686,12 @@ std::vector<int> ring::findHC(const std::vector<std::vector<int>> &rings,
       for (size_t n = 1; n < row.size(); n++) {
         const int nb = row[n];
         if (nb < 0 || nb >= nAtoms ||
-            scratch.onRing[static_cast<size_t>(nb)] == on ||
-            nb >= static_cast<int>(index.ringsContainingAtom.size())) {
+            scratch.onRing[static_cast<size_t>(nb)] == on) {
           continue;
         }
-        for (const int candidate :
-             index.ringsContainingAtom[static_cast<size_t>(nb)]) {
+        const auto ringsOf = atomRow(index, nb);
+        for (int t = 0; t < ringsOf.size(); ++t) {
+          const int candidate = ringsOf[t];
           if (scratch.seen[static_cast<size_t>(candidate)] == seenTick) {
             continue;
           }

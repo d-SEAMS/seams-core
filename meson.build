@@ -553,6 +553,9 @@ nucleation_pathway_exe = executable(
   build_rpath: meson.current_build_dir() / 'src',
   install: true)
 
+# Timing driver (bench/analyse.cpp). Outputs stay out of the tree.
+subdir('bench')
+
 # Tests
 if get_option('with_tests')
   subdir('tests')

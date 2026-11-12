@@ -370,3 +370,9 @@ repro/zenodo/payload/
 .tip_sha
 /.lammps-src
 /docs/nucleation/mw4096-leads.png
+
+# Benchmark outputs
+bench/local/
+*.bench.csv
+*.bench.json
+*.bench.log

@@ -11,6 +11,7 @@
 // Standard
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <filesystem>
 #include <iostream>
 #include <numeric>
@@ -994,4 +995,94 @@ TEST_CASE("equatorial search matches brute force on random graphs", "[topo_bulk]
     }
   }
   REQUIRE(checked == 100);
+}
+
+namespace {
+
+void mixCage(std::uint64_t &h, std::uint64_t v) {
+  h ^= v;
+  h *= 0x100000001b3ULL;
+}
+
+void mixCageInt(std::uint64_t &h, int v) {
+  mixCage(h, static_cast<std::uint64_t>(static_cast<std::uint32_t>(v)));
+}
+
+// Same 8x8x8 ice Ic cell the bench driver times.
+molSys::PointCloud<molSys::Point<double>, double> diamondIce4096() {
+  constexpr double a = 6.37;
+  constexpr double basis[8][3] = {
+      {0.00, 0.00, 0.00}, {0.50, 0.50, 0.00}, {0.50, 0.00, 0.50},
+      {0.00, 0.50, 0.50}, {0.25, 0.25, 0.25}, {0.75, 0.75, 0.25},
+      {0.75, 0.25, 0.75}, {0.25, 0.75, 0.75},
+  };
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  constexpr int cells = 8;
+  const double L = a * static_cast<double>(cells);
+  cloud.box = {L, L, L};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  int id = 0;
+  for (int ix = 0; ix < cells; ++ix) {
+    for (int iy = 0; iy < cells; ++iy) {
+      for (int iz = 0; iz < cells; ++iz) {
+        for (const auto &b : basis) {
+          molSys::Point<double> pt;
+          pt.type = 1;
+          pt.molID = id;
+          pt.atomID = id;
+          pt.x = (static_cast<double>(ix) + b[0]) * a;
+          pt.y = (static_cast<double>(iy) + b[1]) * a;
+          pt.z = (static_cast<double>(iz) + b[2]) * a;
+          cloud.pts.push_back(pt);
+          cloud.idIndexMap[id] = id;
+          ++id;
+        }
+      }
+    }
+  }
+  cloud.nop = id;
+  return cloud;
+}
+
+} // namespace
+
+TEST_CASE("cubic ice cage census matches the pre-sort fingerprint",
+          "[topo_bulk]") {
+  auto cloud = diamondIce4096();
+  REQUIRE(cloud.nop == 4096);
+  const auto byId = nneigh::neighListO(3.5, cloud, 1);
+  const auto byIndex = nneigh::neighbourListByIndex(cloud, byId);
+  const auto rings = primitive::ringNetwork(byIndex, 6);
+  const auto six = ring::getSingleRingSize(rings, 6);
+  REQUIRE(six.size() == 8192);
+
+  std::vector<ring::strucType> ringType(six.size(), ring::strucType::unclassified);
+  std::vector<cage::Cage> cages;
+  const auto index = ring::buildRingSearchIndex(six, cloud);
+  const auto hc = ring::findHC(six, ringType, byIndex, cages, index);
+  const auto ddc = ring::findDDC(six, ringType, hc, cages, index);
+
+  std::uint64_t h = 0xcbf29ce484222325ULL;
+  mixCageInt(h, static_cast<int>(hc.size()));
+  for (const int id : hc) {
+    mixCageInt(h, id);
+  }
+  mixCageInt(h, static_cast<int>(ddc.size()));
+  for (const int id : ddc) {
+    mixCageInt(h, id);
+  }
+  mixCageInt(h, static_cast<int>(cages.size()));
+  for (const auto &cageUnit : cages) {
+    mixCageInt(h, static_cast<int>(cageUnit.type));
+    for (const int ringId : cageUnit.rings) {
+      mixCageInt(h, ringId);
+    }
+  }
+  for (const auto kind : ringType) {
+    mixCageInt(h, static_cast<int>(kind));
+  }
+  // Recorded from the cage search before the unique-count and cycle-key
+  // rewrite. A changed assignment fails this, a faster path does not.
+  REQUIRE(h == 0xd88fddd29c1c1fddULL);
 }
