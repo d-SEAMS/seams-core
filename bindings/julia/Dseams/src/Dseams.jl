@@ -162,22 +162,37 @@ function primitive_rings(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, gr
     Dict(size => Int(counts[size + 1]) for size in 3:max_depth if counts[size + 1] != 0)
 end
 
-function steinhardt(frame::Frame, order_l::Integer; cutoff::Real = 3.5, type::Integer = 0, graph::AbstractString = "mutual")
+function steinhardt(frame::Frame, order_l::Integer; cutoff::Real = 3.5, type::Integer = 0, graph::Union{Nothing,AbstractString} = nothing)
     n = nop(frame)
     ql = Vector{Cdouble}(undef, n)
     qlbar = Vector{Cdouble}(undef, n)
-    code = ccall(
-        dlsym(_so(), :seams_frame_steinhardt_graph),
-        Cint,
-        (Ptr{Cvoid}, Cdouble, Cint, Cint, Cstring, Ptr{Cdouble}, Ptr{Cdouble}),
-        frame.ptr,
-        cutoff,
-        type,
-        order_l,
-        graph,
-        ql,
-        qlbar,
-    )
+    # No graph argument is the cutoff shell. A name selects that graph.
+    code = if graph === nothing
+        ccall(
+            dlsym(_so(), :seams_frame_steinhardt),
+            Cint,
+            (Ptr{Cvoid}, Cdouble, Cint, Cint, Ptr{Cdouble}, Ptr{Cdouble}),
+            frame.ptr,
+            cutoff,
+            type,
+            order_l,
+            ql,
+            qlbar,
+        )
+    else
+        ccall(
+            dlsym(_so(), :seams_frame_steinhardt_graph),
+            Cint,
+            (Ptr{Cvoid}, Cdouble, Cint, Cint, Cstring, Ptr{Cdouble}, Ptr{Cdouble}),
+            frame.ptr,
+            cutoff,
+            type,
+            order_l,
+            graph,
+            ql,
+            qlbar,
+        )
+    end
     _check(code)
     (ql = ql, qlbar = qlbar)
 end

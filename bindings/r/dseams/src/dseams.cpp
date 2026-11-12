@@ -135,8 +135,12 @@ cpp11::data_frame steinhardt_(SEXP ptr, double cutoff, int type, int order_l,
   const int n = seams_frame_nop(frame);
   std::vector<double> ql(static_cast<std::size_t>(n));
   std::vector<double> qlbar(static_cast<std::size_t>(n));
-  if (seams_frame_steinhardt_graph(frame, cutoff, type, order_l, graph.c_str(),
-                                   ql.data(), qlbar.data()) != 0) {
+  const int rc = graph.empty()
+                     ? seams_frame_steinhardt(frame, cutoff, type, order_l, ql.data(),
+                                              qlbar.data())
+                     : seams_frame_steinhardt_graph(frame, cutoff, type, order_l,
+                                                    graph.c_str(), ql.data(), qlbar.data());
+  if (rc != 0) {
     cpp11::stop("%s", seams_last_error());
   }
   const int *ids = seams_frame_ids(frame);

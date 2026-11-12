@@ -174,21 +174,23 @@ primitive_rings.dseams_frame <- function(frame, cutoff = 3.5, type = 0L,
 #' @param order_l Spherical-harmonic degree. 3, 4, 6, 8, and 12 are computed.
 #'   Degrees 4 and 6 on an orthorhombic or restricted-triclinic cell use the
 #'   solid-harmonic kernel.
-#' @param cutoff Neighbour cutoff in angstrom. An orthorhombic or
-#'   restricted-triclinic cell uses the cutoff shell. Any other cell keeps
-#'   the mutual four nearest inside `cutoff + 1.5`.
+#' @param cutoff Neighbour cutoff in angstrom.
 #' @param type LAMMPS type.
+#' @param graph Neighbour graph. Omit it to call `seams_frame_steinhardt`,
+#'   the cutoff shell. `"mutual"` is the four nearest neighbours inside
+#'   `cutoff + 1.5`. `"cutoff"` asks for that shell by name.
 #' @return A data.frame with columns `atom`, `ql`, `qlbar`.
 #' @export
 steinhardt <- function(frame, order_l = 6L, cutoff = 3.5, type = 0L,
-                      graph = "mutual") {
+                      graph = NULL) {
   UseMethod("steinhardt")
 }
 
 #' @export
 steinhardt.dseams_frame <- function(frame, order_l = 6L, cutoff = 3.5, type = 0L,
-                                    graph = "mutual") {
-  out <- steinhardt_(frame$ptr, cutoff, as.integer(type), as.integer(order_l), graph)
+                                    graph = NULL) {
+  graph_arg <- if (is.null(graph)) "" else as.character(graph)
+  out <- steinhardt_(frame$ptr, cutoff, as.integer(type), as.integer(order_l), graph_arg)
   class(out) <- c("dseams_steinhardt", "data.frame")
   out
 }
