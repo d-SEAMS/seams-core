@@ -195,11 +195,11 @@ def template(ident):
     return buf
 
 
-def classify(cartesian, lattice, shell_rmsd=0.55):
+def classify(cartesian, lattice, shell_rmsd=0.12):
     """Per-atom ice label. 0 ice Ih, 1 ice Ic, 2 ice Isd, -1 otherwise.
 
-    ``shell_rmsd`` is the ceiling, in angstrom, on the second-shell
-    residual after the tetrahedron alignment.
+    ``shell_rmsd`` is the scale-free ceiling on the second-shell residual
+    after the optimal rotation and scale. Zero is a perfect shape.
     """
     xyz = np.ascontiguousarray(cartesian, dtype=np.float64)
     vec = np.ascontiguousarray(lattice, dtype=np.float64).reshape(9)

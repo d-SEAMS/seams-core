@@ -70,14 +70,16 @@ void matchAll(const std::vector<Eigen::MatrixXd> &environments, std::vector<Over
 // leaves between them. 0.75 counts those warmed staggered bonds as eclipsed.
 inline constexpr double kEclipsedCosine = 0.90;
 
-// Ceiling, in angstrom, on the root-mean-square distance of the second
-// shell to the winning ice template.
-inline constexpr double kShellRmsd = 0.55;
+// Scale-free ceiling on the second-shell residual. Both clouds are centred,
+// then the RMSD is taken after the optimal rotation and the optimal scale
+// and divided by the template's root-mean-square radius (Horn 1987; Larsen,
+// Schmidt, Schiotz 2016). Zero is a perfect shape. The value is the operating
+// point of the ROC on quenched mW ice from 200 K to 270 K.
+inline constexpr double kShellRmsd = 0.12;
 
 // Per-atom ice label. kind[i] is iceIh, iceIc, iceIsd, or -1. shellRmsd is
-// the second-shell residual ceiling. The label is the template with the
-// lowest quaternion-Kabsch residual after the bond-graph permutation of the
-// tetrahedron (Larsen, Schmidt, Schiotz 2016).
+// the scale-free residual ceiling. The label is the template with the lowest
+// residual after the bond-graph permutation of the tetrahedron.
 void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vectors,
                  std::vector<int> &kind, double shellRmsd = kShellRmsd);
 
