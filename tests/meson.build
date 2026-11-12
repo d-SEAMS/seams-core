@@ -42,6 +42,7 @@ test_sources = {
   'c_api': 'test_c_api.cpp',
   'chill_offload': 'test_chill_offload.cpp',
   'chill_plus_rule': 'test_chill_plus_rule.cpp',
+  'ql_solid': 'test_ql_solid.cpp',
   'thread_scale': 'test_thread_scale.cpp',
   'gpu_residency': 'test_gpu_residency.cpp',
   'config': 'test_config.cpp',
