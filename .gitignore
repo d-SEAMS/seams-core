@@ -385,3 +385,5 @@ bench/local/
 *.bench.csv
 *.bench.json
 *.bench.log
+
+docs/_build/

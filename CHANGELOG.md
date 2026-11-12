@@ -37,10 +37,11 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Interface growth measures mW on basal and prism faces, including the six-temperature campaign and Wilson-Frenkel speeds.
 - Brine scoring keeps water oxygens, leaves ions out, and measures a Madrid-2019 freezing front.
 - Cage identification and the DDC search are faster, and a coplanar pair is not a prism.
+- Local q4 and q6 on the cutoff shell use the solid-harmonic kernel. `seams steinhardt` computes the degrees named by `--l` (default `4,6`). Each OpenMP thread owns a block of the linkcell cell cut. Primitive rings are timed on one thread against OVITO FindRings, and the literature head-to-head covers neighbours, q4, q6, diamond, rings and local symmetry.
 
 ### Breaking
 
-- CHILL and CHILL+ default to `seeded` (the cutoff list). A build that treated the default as the mutual four-nearest graph now sees the cutoff shell. On the mixed TIP4P fixture, interClathrate moves from 12 to 9 and water moves from 238 to 241.
+- CHILL and CHILL+ default to `seeded` (the cutoff list). A build that treated the default as the mutual four-nearest graph now sees the cutoff shell. On the mixed TIP4P fixture the tested counts are: default and cutoff, interClathrate 9 and water 241; mutual, clathrate 1, interClathrate 7 and water 242. A multi-atom LAMMPS dump with no `--type` infers the water oxygen instead of preferring type 2.
 - A reader error, including an XYZ coordinate that is not a number or a short XYZ frame, returns exit code 2 instead of skipping the atom or aborting.
 - `seams steinhardt` prints q4 and q6 next to q3 and q12. The cutoff shell is the default neighbour list for that command.
 
@@ -66,8 +67,9 @@ by [towncrier](https://towncrier.readthedocs.io/).
   This is a bug fix in the shell count.
   The old code counted bonds after the list had been cut to four.
   A crystal row needs four neighbours inside the cutoff.
-  On the mixed TIP4P fixture, interClathrate moves from 12 to 9.
-  Water on that fixture moves from 238 to 241.
+  On the mixed TIP4P fixture the tested counts are interClathrate 9 and water 241 for the default and the cutoff list.
+  The mutual list on that fixture is clathrate 1, interClathrate 7 and water 242.
+  A multi-atom dump infers the oxygen when `--type` is unset.
   Default q3 uses up to four nearest neighbours in the cutoff.
   Interfacial rows keep the neighbour test from the published table.
   Users who want the OVITO labels use the ovito-chill+ command.

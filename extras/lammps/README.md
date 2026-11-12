@@ -1,6 +1,6 @@
 # compute dseams
 
-In-run CHILL+ labels from the `seams_chill_plus_graph` C ABI.
+In-run CHILL+ labels from `seams_chill_plus` in `seams.h`.
 
 ```
 compute ice all dseams
@@ -23,7 +23,7 @@ The dump column is the same integer table as `seams chill-plus`
 
 `in.dseams` reads `water.data` (four oxygen sites) with `pair_style zero`
 and writes `dump.chill`. The compute copies `nlocal` xyz and calls
-`seams_chill_plus_graph`; it does not take the LAMMPS neighbour list.
+`seams_chill_plus`; it does not take the LAMMPS neighbour list.
 
 `tests/test_phase.cpp` checks that the compute's label function is
 `seams_chill_plus`. `build_compute.sh PREFIX` clones LAMMPS

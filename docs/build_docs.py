@@ -30,22 +30,28 @@ def main():
     required = [
         DOCS / "quickstart.md",
         DOCS / "api" / "python.md",
+        DOCS / "api" / "cpp.md",
         DOCS / "api" / "julia.md",
         DOCS / "api" / "rust.md",
         DOCS / "api" / "fortran.md",
+        DOCS / "api" / "r.md",
         DOCS / "engines" / "lammps.md",
         DOCS / "engines" / "gromacs.md",
         DOCS / "engines" / "openmm.md",
         DOCS / "engines" / "plumed.md",
+        DOCS / "engines" / "insitu.md",
         DOCS / "tutorials" / "c.md",
+        DOCS / "tutorials" / "cpp.md",
         DOCS / "tutorials" / "python.md",
         DOCS / "tutorials" / "julia.md",
         DOCS / "tutorials" / "rust.md",
         DOCS / "tutorials" / "fortran.md",
+        DOCS / "tutorials" / "r.md",
         DOCS / "tutorials" / "lammps.md",
         DOCS / "tutorials" / "gromacs.md",
         DOCS / "tutorials" / "openmm.md",
         DOCS / "tutorials" / "plumed.md",
+        DOCS / "tutorials" / "insitu.md",
     ]
     OUT.mkdir(parents=True, exist_ok=True)
     parts = ["<html><body>"]

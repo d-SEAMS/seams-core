@@ -1,1 +1,0 @@
-`seams chill-plus` on a published cutoff classifies from the fused CSR kernel. `seams steinhardt` computes the degrees named by `--l` (default `4,6`). `seams symmetry` builds the reported shell from the cells inside 5 Å. Primitive rings and the orthorhombic cutoff list stay on one thread below 2048 atoms. The vendored vesin meson project reports 0.5.7.

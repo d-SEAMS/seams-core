@@ -1,9 +1,10 @@
 # GROMACS
 
-`engines/gromacs/seams_ice.cpp` is a `TrajectoryAnalysisModule`. `gmx-seams`
-reads a trajectory with the GROMACS reader. `analyzeFrame` converts nm to
-Angstrom, calls `seams_chill_plus`, and records the time. That method is the
-in-run hook: it is invoked once per frame by the analysis runner.
+`engines/gromacs/seams_ice.cpp` is a `TrajectoryAnalysisModule`. The binary
+is `gmx-seams`. It reads a trajectory with the GROMACS reader. `analyzeFrame`
+is the trajectory-analysis callback: it converts nm to Angstrom, calls
+`seams_chill_plus`, and records the time. The runner invokes that callback
+once per frame.
 
 ```bash
 gmx-seams -f engines/gromacs/ice.gro -cutoff 3.5

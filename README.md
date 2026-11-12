@@ -26,10 +26,12 @@ seams chill-plus water.lammpstrj --cutoff 3.5
 seams cages water.lammpstrj
 ```
 
-Scripting front ends are separate packages:
+Language and engine fronts are listed in [docs/quickstart.md](docs/quickstart.md):
 
-- Python: `pydseamslib` ([PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib))
-- Lua/Fennel: `dseams` ([yodaStruct](https://github.com/d-SEAMS/yodaStruct))
+- Languages: C, C++, Fortran, Rust, Python, Julia, R
+- Engines: GROMACS, LAMMPS, OpenMM, PLUMED, in-situ
+
+Lua/Fennel stays in [yodaStruct](https://github.com/d-SEAMS/yodaStruct).
 
 Periodic k-nearest neighbour search is
 [linkcell](https://github.com/d-SEAMS/linkcell).

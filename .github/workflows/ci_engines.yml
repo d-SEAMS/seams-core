@@ -1,0 +1,23 @@
+name: Engines
+on:
+  push:
+    branches: [main, modernize]
+  pull_request:
+    branches: [main]
+
+jobs:
+  openmm-plumed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-engines-
+      - name: Install conda-forge OpenMM and PLUMED into the pixi environment
+        run: pixi add openmm plumed numpy
+      - name: Build and run the engine tests
+        run: |
+          pixi run meson setup build-eng -Dwith_tests=true -Dwith_openmm=auto -Dwith_plumed=auto
+          pixi run ninja -C build-eng
+          pixi run meson test -C build-eng --print-errorlogs openmm_reporter plumed_driver insitu_observe

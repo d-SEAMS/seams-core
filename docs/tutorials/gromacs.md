@@ -1,16 +1,29 @@
 # GROMACS tutorial
 
-`seams_ice` is a trajectory analysis tool. `engines/gromacs/run_mdrun.sh` builds a `.tpr` from `topol.top` and `md.mdp`, runs four frozen steps with `gmx mdrun`, and classifies `ice.xtc`.
+d-SEAMS 2.14.0. `gmx-seams` is the trajectory-analysis tool. Build it when
+libgromacs is found:
 
 ```bash
-meson compile -C build seams_ice
-engines/gromacs/run_mdrun.sh build/engines/seams_ice build/src
+meson setup build -Dwith_gromacs=auto
+meson compile -C build gmx-seams
 ```
 
-The tool prints one line:
+`engines/gromacs/run_mdrun.sh` builds a `.tpr` from `topol.top` and `md.mdp`,
+runs four frozen steps with `gmx mdrun`, and classifies `ice.xtc`. CI runs
+that script as the `gromacs_mdrun` meson test when the tool was built:
+
+```bash
+engines/gromacs/run_mdrun.sh build/gmx-seams build/src
+meson test -C build gromacs_mdrun --print-errorlogs
+```
+
+The tool prints one line of the form:
 
 ```
-gromacs frames 5 ice 320 atoms 320 overhead_s ...
+gromacs frames N ice I atoms A overhead_s S
 ```
 
-Five frames, including the start, are entirely cubic. `analyzeFrame` is the per-frame hook. Coordinates in the trajectory are nanometres; the tool converts them to Angstrom before `seams_chill_plus`.
+`analyzeFrame` is the trajectory-analysis callback. Coordinates in the
+trajectory are nanometres; the tool converts them to Angstrom before
+`seams_chill_plus`. The lower-triangular GROMACS box is stored with the
+tilts in `box[0][1]`, `box[0][2]` and `box[1][2]` (xy, xz, yz).

@@ -30,7 +30,7 @@ head(steinhardt(frame, order_l = 3L))
 ```
 
 `graph = "cutoff"`, the default, is the distance list. `graph = "mutual"`
-is the mutual four-neighbour list. On this dump the cutoff list gives
-12 interClathrate and 238 water, and the mutual list gives 1 clathrate,
-7 interClathrate, and 242 water. The
+is the mutual four-neighbour list. On this dump the default and the cutoff
+list give 9 interClathrate and 241 water, and the mutual list gives
+1 clathrate, 7 interClathrate, and 242 water. The
 columns are a data.frame, so the usual subsetting works.
