@@ -413,3 +413,12 @@ Eight threads, 884736 molecules:
 | OVITO | 165.06 | 275.67 | - | - |
 | mdapy | 113.71 | 121.66 | - | - |
 | pyscal3 | 178.38 | 224.55 | 185.65 | 234.16 |
+
+`tests/test_wl_ice.py` repeats the check on ideal ice Ic, ideal ice Ih
+and a 200-molecule liquid against pyscal3 4.1.0. Local q, q-bar and
+\(\hat w\) at \(l = 4\) and \(l = 6\) agree to \(1 \times 10^{-6}\)
+(the largest liquid residual is \(2.4 \times 10^{-15}\)). Ice Ic is
+entirely cubic under the published CHILL+ rule and ice Ih is entirely
+hexagonal. On ice Ih the local parameters stay at the tetrahedral
+values above, while the averages move to \(\bar q_4 = 0.36925759\)
+and \(\bar q_6 = 0.56765069\).
