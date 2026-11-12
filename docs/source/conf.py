@@ -4,7 +4,22 @@ import os
 import sys
 
 # -- Path setup --------------------------------------------------------------
-sys.path.insert(0, os.path.abspath("../../subprojects/doxyrest/sphinx"))
+_source = os.path.dirname(os.path.abspath(__file__))
+_doxyrest = os.path.abspath(os.path.join(_source, "../../subprojects/doxyrest/sphinx"))
+_xml_index = os.path.join(_source, "xml", "index.xml")
+_api_index = os.path.join(_source, "api", "index.rst")
+# Doxygen output is not part of the tree. A missing C++ index must not
+# fail the book: write a short page so the Reference toctree resolves.
+if not os.path.isfile(_api_index):
+    os.makedirs(os.path.dirname(_api_index), exist_ok=True)
+    with open(_api_index, "w", encoding="utf-8") as _api_page:
+        _api_page.write(
+            "API Reference\n"
+            "=============\n"
+            "\n"
+            "These pages are filled by Doxygen and Doxyrest.\n"
+            "Until that step has run, the header map is the API page.\n"
+        )
 
 # -- Project information -----------------------------------------------------
 project = "d-SEAMS"
@@ -13,18 +28,19 @@ author = "Rohit Goswami, Amrita Goswami, Ruhila S"
 
 # -- General configuration ---------------------------------------------------
 extensions = [
-    "doxyrest",
-    "cpplexer",
-    "breathe",
     "myst_parser",
     "sphinx.ext.intersphinx",
     "sphinx_sitemap",
     "sphinx_design",
     "sphinxcontrib.mermaid",
 ]
-
-breathe_projects = {"seams": "xml"}
-breathe_default_project = "seams"
+# doxyrest and the XML tree are produced by the docs task. A build from
+# the committed sources does not require them to already exist.
+if os.path.isfile(_xml_index) and os.path.isdir(_doxyrest):
+    sys.path.insert(0, _doxyrest)
+    extensions = ["doxyrest", "cpplexer", "breathe", *extensions]
+    breathe_projects = {"seams": os.path.join(_source, "xml")}
+    breathe_default_project = "seams"
 
 templates_path = ["_templates"]
 exclude_patterns = []

@@ -438,6 +438,19 @@ test('fuzz_cage_shift_permute', _fuzz_cage,
   args: [meson.project_source_root() / 'input' / 'traj', '1000'],
   env: _test_env,
   timeout: 0)
+test('neighbour_record', find_program('python3'),
+  args: [files('neighbour_record.py')],
+  workdir: meson.project_source_root(),
+  timeout: 30)
+test('docs_sources', find_program('python3'),
+  args: [files('docs_sources.py')],
+  workdir: meson.project_source_root(),
+  timeout: 30)
+test('option_names', find_program('python3'),
+  args: [files('option_names.py'), meson.project_build_root() / 'seams',
+         meson.project_build_root()],
+  workdir: meson.project_source_root(),
+  timeout: 60)
 test('cli_surface', find_program('python3'),
   args: [files('cli_surface.py'), meson.project_build_root() / 'seams'],
   workdir: meson.project_source_root(),

@@ -35,14 +35,7 @@ API; the header table below is only a map onto those pages.
 
 A sibling doxyYoda HTML tree of the same headers is at =/api-cpp/=
 (~pixi run -e docs doxyhtml~). That landing page points back here.
-
-#+begin_export rst
-.. toctree::
-   :maxdepth: 2
-   :caption: C++ (doxygen)
-
-   ../api/index
-#+end_export
+The Reference toctree is the one place that lists =api/index=.
 
 * Headers
 

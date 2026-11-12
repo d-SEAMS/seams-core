@@ -12,12 +12,38 @@
 (require 'ox-rst)
 (require 'ox-publish)
 
-;; ox-rst 2025-04 needs org-element-type-p (Org 9.7+). Ubuntu emacs-nox is 29/9.6.
+;; ox-rst 2025-04 calls Org 9.7 element helpers. Emacs 29 ships Org 9.6.
 (require 'org-element)
 (unless (fboundp 'org-element-type-p)
   (defun org-element-type-p (node types)
     (memq (org-element-type node)
           (if (listp types) types (list types)))))
+(unless (fboundp 'org-element-parent)
+  (defun org-element-parent (node)
+    (org-element-property :parent node)))
+(unless (fboundp 'org-element-begin)
+  (defun org-element-begin (node)
+    (org-element-property :begin node)))
+(unless (fboundp 'org-element-parent-element)
+  (defun org-element-parent-element (node)
+    (let ((parent (org-element-parent node))
+          (objects '(bold italic code verbatim strike-through underline
+                     subscript superscript link radio-target target
+                     entity latex-fragment line-break statistics-cookie
+                     footnote-reference timestamp macro)))
+      (while (and parent (memq (org-element-type parent) objects))
+        (setq parent (org-element-parent parent)))
+      parent)))
+(unless (fboundp 'org-element-extract)
+  (defalias 'org-element-extract 'org-element-extract-element))
+;; Org 9.7 accepts a single type symbol. Org 9.6 requires a list.
+(when (version< (org-version) "9.7")
+  (advice-add
+   'org-element-lineage :around
+   (lambda (orig datum &optional types with-self)
+     (when (and types (symbolp types))
+       (setq types (list types)))
+     (funcall orig datum types with-self))))
 
 (setq org-export-with-section-numbers nil)
 (setq org-export-with-toc nil)
