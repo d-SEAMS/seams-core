@@ -10,7 +10,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
-## [2.14.0] - 2026-11-11
+## [2.14.0] - 2026-11-12
 
 ### Added
 
@@ -25,6 +25,8 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Enumerate cups and incomplete cages on the ring graph; closed signature counts stay the closed path.
 - Name 51264, 51268 and sH cages, and report a per-cage occupancy histogram.
 - Update topology keys only on the hop-ball of atoms whose neighbourhood changed.
+- Add optional IRA, SOFI and spglib symmetry reports for ice shells, hydrate cages and rings.
+- The ice label takes an eclipsed-cosine cutoff, and cage, ring and shell naming runs in parallel.
 
 ### Changed
 
@@ -60,6 +62,10 @@ by [towncrier](https://towncrier.readthedocs.io/).
   A path that ends in xyz and cannot be opened returns an error.
   An exception outside std::exception returns exit code 2.
 
+### Deprecated
+
+- `--types` is a deprecated exact alias of `--pair-types`. The exact names both bind, and using `--types` prints a one-line warning on stderr.
+
 ### Fixed
 
 - Accept a cup that fills the signature face count with dangling edges.
@@ -70,6 +76,10 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Read a halo source from the frame index in share.local. The old index walked the local list as if it were the frame.
 - Keep the cutoff shell list and the per-share ring scratch on the calling thread. Overlapping calls no longer share those buffers.
 - Keep BondClassifier at the 2.13 layout, three doubles and one int. Open edges are an argument of classifyBond, so a caller that passes the struct by value is unchanged.
+- Keep the 2.13 signatures of `getCorrelPlus`, `getIceTypePlus`, and `getIceTypePlusNoPrint` as overloads. The longer forms take the open-edge flag and the OVITO neighbour test.
+- Name the site-site pair flag `--pair-types`. Give the gpulite and vesin wraps their own option files so `meson configure` does not copy the engine options onto them.
+- Build the Sphinx book with warnings as errors from the committed sources. Doxygen XML and the C++ pages are optional, and each page is listed in one toctree.
+- Keep a diamond shell while eight good (4,2,1) signatures, or the ambiguous band, are still reachable. The old count stopped once four bad rows made nine good signatures unreachable.
 
 
 ## [2.13.0] - 2026-11-06
