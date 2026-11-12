@@ -18,6 +18,7 @@ ydslib_sources = files(
   'local_symmetry.cpp',
   'shell_kernel.cpp',
   'cage_canon.cpp',
+  'chemfiles_io.cpp',
   'chill_offload.cpp',
   'chill_plus_scheme.cpp',
   'topo_fingerprint.cpp',

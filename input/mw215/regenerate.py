@@ -3,7 +3,8 @@
 """Regenerate the 215 K mW liquids and compare CHILL+ with OVITO.
 
 The velocity seed is 215 in in.equilibrate. One OpenMP thread keeps
-the trajectory fixed. Frames land in data/mw215/.
+the trajectory fixed. Frames land outside the tree, under MW215_DIR
+or /var/tmp/dseams/mw215.
 """
 
 from __future__ import annotations
@@ -21,7 +22,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 DECK = Path(__file__).resolve().parent
-OUT = ROOT / "data" / "mw215"
+OUT = Path(os.environ.get("MW215_DIR", "/var/tmp/dseams/mw215"))
 CELLS = (8, 16, 32)
 CUTOFF = 3.5
 RUNS = 7
@@ -176,7 +177,11 @@ def main(argv: list[str]) -> int:
     if len(argv) > 1:
         cells = tuple(int(item) for item in argv[1:])
     for n in cells:
-        compare(generate(n))
+        path = generate(n)
+        try:
+            compare(path)
+        except ImportError as exc:
+            print(f"comparison skipped: {exc}", file=sys.stderr)
     return 0
 
 

@@ -381,6 +381,10 @@ bool cellListRowsThreaded(
     const std::vector<int> &subset, double rcutoff,
     std::vector<std::vector<int>> &rows);
 
+/// When set, neighListO stays on the one-thread builder even if the
+/// OpenMP team is wider. The team is left in place for the caller.
+void preferSerialCutoff(bool on);
+
 /// Full cutoff list as CSR of cloud indices.
 ///
 /// Orthorhombic boxes (`box.size() == 3`) and restricted triclinic dump

@@ -3,5 +3,9 @@ uuid = "b7e4c1a2-6d58-4f0e-9a31-2c8e5d4f7a10"
 version = "2.14.0"
 authors = ["Rohit Goswami <rgoswami@ieee.org>"]
 
+[deps]
+Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+
 [compat]
 julia = "1.10"
+Libdl = "1"

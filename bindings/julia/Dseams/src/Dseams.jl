@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 """
     Dseams
 
@@ -6,6 +7,8 @@ CxxWrap is not required. Set `SEAMS_LANG_LIB` to the shared library if it
 is not on the loader path.
 """
 module Dseams
+
+using Libdl
 
 export Frame, nop, nframes, read_frame, chill_plus, cages, primitive_rings, steinhardt
 
@@ -25,9 +28,20 @@ function _lib()
     get(ENV, "SEAMS_LANG_LIB", "libseams_lang")
 end
 
+# Julia 1.13 rejects a runtime library name inside ccall. The handle is
+# opened once and each call goes through the symbol pointer.
+const _dl = Ref{Ptr{Cvoid}}(C_NULL)
+
+function _so()
+    if _dl[] == C_NULL
+        _dl[] = dlopen(_lib())
+    end
+    _dl[]
+end
+
 function _check(code::Integer)
     code == 0 && return
-    err = unsafe_string(ccall((:seams_last_error, _lib()), Ptr{Cchar}, ()))
+    err = unsafe_string(ccall(dlsym(_so(), :seams_last_error), Ptr{Cchar}, ()))
     isempty(err) && (err = "dseams call failed")
     error(err)
 end
@@ -39,7 +53,7 @@ mutable struct Frame
         frame = new(ptr)
         finalizer(frame) do f
             f.ptr == C_NULL && return
-            ccall((:seams_frame_free, _lib()), Cvoid, (Ptr{Cvoid},), f.ptr)
+            ccall(dlsym(_so(), :seams_frame_free), Cvoid, (Ptr{Cvoid},), f.ptr)
             f.ptr = C_NULL
         end
         frame
@@ -47,14 +61,14 @@ mutable struct Frame
 end
 
 function nframes(path::AbstractString)
-    n = ccall((:seams_path_nframes, _lib()), Cint, (Cstring,), path)
+    n = ccall(dlsym(_so(), :seams_path_nframes), Cint, (Cstring,), path)
     n < 0 && _check(1)
     Int(n)
 end
 
 function read_frame(path::AbstractString; frame::Integer = 1, type::Integer = 0)
     ptr = ccall(
-        (:seams_frame_read, _lib()),
+        dlsym(_so(), :seams_frame_read),
         Ptr{Cvoid},
         (Cstring, Cint, Cint),
         path,
@@ -65,31 +79,27 @@ function read_frame(path::AbstractString; frame::Integer = 1, type::Integer = 0)
     Frame(ptr)
 end
 
-nop(frame::Frame) = Int(ccall((:seams_frame_nop, _lib()), Cint, (Ptr{Cvoid},), frame.ptr))
+nop(frame::Frame) = Int(ccall(dlsym(_so(), :seams_frame_nop), Cint, (Ptr{Cvoid},), frame.ptr))
 
 """
-    chill_plus(frame; cutoff = 3.5, type = 0, graph = "cutoff", rule = "chill+")
+    chill_plus(frame; cutoff = 3.5, type = 0, graph = "cutoff")
 
-CHILL+ labels. `rule = "chill+"` is the published shell gate, four-nearest
-q3, and the Table 1 neighbour test. `rule = "ovito-chill+"` averages q3
-over the cutoff shell and skips the neighbour test.
-`graph = "cutoff"` (the default) bonds every pair closer
+CHILL+ labels. `graph = "cutoff"` (the default) bonds every pair closer
 than `cutoff`. `graph = "mutual"` keeps the mutual four nearest
 neighbours inside `cutoff + 1.5`.
 """
-function chill_plus(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, graph::AbstractString = "cutoff", rule::AbstractString = "chill+")
+function chill_plus(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, graph::AbstractString = "cutoff")
     n = nop(frame)
     labels = Vector{Cint}(undef, n)
     counts = Vector{Cint}(undef, 9)
     code = ccall(
-        (:seams_frame_chill_plus_rule, _lib()),
+        dlsym(_so(), :seams_frame_chill_plus),
         Cint,
-        (Ptr{Cvoid}, Cdouble, Cint, Cstring, Cstring, Ptr{Cint}, Ptr{Cint}),
+        (Ptr{Cvoid}, Cdouble, Cint, Cstring, Ptr{Cint}, Ptr{Cint}),
         frame.ptr,
         cutoff,
         type,
         graph,
-        rule,
         labels,
         counts,
     )
@@ -107,7 +117,7 @@ function cages(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, k::Integer =
     n_water = Ref{Cint}(0)
     n_both = Ref{Cint}(0)
     code = ccall(
-        (:seams_frame_cages, _lib()),
+        dlsym(_so(), :seams_frame_cages),
         Cint,
         (Ptr{Cvoid}, Cdouble, Cint, Cint, Cstring, Cint, Ptr{Cint}, Ptr{Cint}, Ptr{Cint}, Ptr{Cint}, Ptr{Cint}),
         frame.ptr,
@@ -137,7 +147,7 @@ end
 function primitive_rings(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, graph::AbstractString = "mutual", max_depth::Integer = 6)
     counts = zeros(Cint, max_depth + 1)
     code = ccall(
-        (:seams_frame_rings, _lib()),
+        dlsym(_so(), :seams_frame_rings),
         Cint,
         (Ptr{Cvoid}, Cdouble, Cint, Cstring, Cint, Ptr{Cint}, Cint),
         frame.ptr,
@@ -157,7 +167,7 @@ function steinhardt(frame::Frame, order_l::Integer; cutoff::Real = 3.5, type::In
     ql = Vector{Cdouble}(undef, n)
     qlbar = Vector{Cdouble}(undef, n)
     code = ccall(
-        (:seams_frame_steinhardt, _lib()),
+        dlsym(_so(), :seams_frame_steinhardt),
         Cint,
         (Ptr{Cvoid}, Cdouble, Cint, Cint, Ptr{Cdouble}, Ptr{Cdouble}),
         frame.ptr,

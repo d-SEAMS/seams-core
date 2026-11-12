@@ -62,6 +62,30 @@ int seams_frame_rings(seams_frame *frame, double cutoff, int type,
                       const char *graph, int max_depth, int *counts,
                       int counts_len);
 
+/* Replace coordinates of a frame built by seams_frame_from_arrays.
+ * n must be the atom count already stored. The box is nine LAMMPS numbers. */
+int seams_frame_set_positions(seams_frame *frame, const double *xyz, int n,
+                             const double *box9);
+
+/* Phase times are seconds. reused is 1 when the wide neighbour list was
+ * kept from an earlier call. A null times pointer skips the record. */
+typedef struct seams_phase_times {
+  double neighbours;
+  double chill;
+  double rings;
+  int reused;
+} seams_phase_times;
+
+/* CHILL+ and primitive rings on one neighbour list.
+ * skin > 0 builds that list at cutoff+skin and keeps it while every atom's
+ * minimum-image displacement stays within skin/2. Bonds are the pairs
+ * still inside cutoff, so the labels match a fresh cutoff list.
+ * skin <= 0 builds a fresh cutoff list on every call. */
+int seams_frame_chill_rings(seams_frame *frame, double cutoff, int type,
+                           const char *graph, int max_ring, double skin,
+                           int *labels, int counts9[9], int *ring_counts,
+                           int ring_counts_len, seams_phase_times *times);
+
 /* Build the cutoff neighbour list and discard it. graph NULL means cutoff. */
 int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
                            const char *graph);

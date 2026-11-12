@@ -55,6 +55,9 @@ test_sources = {
 if readcon_dep.found()
   test_sources += {'readcon': 'test_readcon.cpp'}
 endif
+if chemfiles_dep.found()
+  test_sources += {'chemfiles_io': 'test_chemfiles_io.cpp'}
+endif
 
 # Ensure test binaries load the freshly-built libyodaLib.so instead of any
 # version installed in the conda env.  The conda toolchain injects
@@ -66,6 +69,9 @@ endif
 #   3. Setting build_rpath so the binary also works when run outside meson test.
 _test_env = environment()
 _test_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+if chemfiles_libdir != ''
+  _test_env.prepend('LD_LIBRARY_PATH', chemfiles_libdir)
+endif
 # Coverage arc counters share a cache line. Several cores bounce that
 # line and the timed tests exceed their limit. One thread keeps the
 # counters and the tests inside the limit.
@@ -81,6 +87,9 @@ _test_rpath = '$ORIGIN/../src'
 if _readcondb_rpath != ''
   _test_rpath = _test_rpath + ':' + _readcondb_rpath
 endif
+if chemfiles_libdir != ''
+  _test_rpath = _test_rpath + ':' + chemfiles_libdir
+endif
 _test_link_args = _link_args
 if host_machine.system() == 'linux'
   _test_link_args += ['-Wl,--enable-new-dtags']
@@ -95,14 +104,12 @@ endif
 foreach name, src : test_sources
   # meson allows no nested ternary; the long-running suites get more time
   _timeout = 120
-  if name == 'cage_enum'
-    _timeout = 300
+  if name == 'cage_enum' or name == 'domain' or name == 'franzblau_extra'
+    # domain: a parallel run reached the last assertions after 120s.
+    _timeout = 1800
   elif name == 'bulkTUM'
-    _timeout = 300
-  elif name == 'domain'
-    # 16000-atom rings finish in about 15s alone. A parallel run on this
-    # machine reached 97547 of 97582 assertions before the 120s limit.
-    _timeout = 300
+    # The last case is PG(2, 5). A solo coverage run is the bound.
+    _timeout = 2400
   elif name == 'cage_affiliation'
     # The seeded case passes. A parallel run was killed at 120s on the
     # last assertion.
@@ -119,7 +126,9 @@ foreach name, src : test_sources
       build_rpath: _test_rpath),
     workdir: meson.project_source_root() / 'input',
     env: _test_env,
-    timeout: _timeout)
+    timeout: _timeout,
+    is_parallel: name != 'franzblau_extra' and name != 'bulkTUM',
+    suite: (name == 'franzblau_extra' or name == 'bulkTUM') ? 'heavy' : [])
 endforeach
 
 mpfr_dep = cppc.find_library('mpfr', required: true)
@@ -467,11 +476,16 @@ _device_host_cases = {
   'levi5': ['levi:5', '1'],
 }
 foreach name, args : _device_host_cases
+  # levi:5 is PG(2, 5). Beside the dense-frame checks it finished in
+  # 5236 s. Those checks are now serial, and the limit is 6000 s.
+  _host_timeout = name == 'levi5' ? 6000 : 300
   test('device_host_' + name, _check_device_host,
     args: args,
     workdir: meson.project_source_root() / 'input',
     env: _test_env,
-    timeout: 300)
+    timeout: _host_timeout,
+    is_parallel: name != 'levi5',
+    suite: name == 'levi5' ? 'heavy' : [])
 endforeach
 
 # The CUDA batch kernels on the host, no device needed
@@ -511,12 +525,19 @@ test('invariance_empty_frame', _check_invariance,
   workdir: meson.project_source_root() / 'input',
   env: _test_env,
   should_fail: true)
-# 1000 translations and 1000 permutations on every deposited frame, plus
-# the eight half-box shifts. The cage stage is the cost.
+# 1000 translations and 1000 permutations on every ordinary frame, plus
+# the eight half-box shifts. A frame above 2048 atoms is checked at one
+# trial. Degree above 80 is every vertex at cap 4. Degree above 40 is
+# every vertex at cap 6. One optimized search of dump-l is 8.7 s and of
+# dump-bcc is 3.8 s. 201 frames, three searches, is 7493 s.
+# The limit is 10800 s. A skip fails the run. Heavy cases
+# are serial so they do not steal the Levi graph's core.
 test('fuzz_cage_shift_permute', _fuzz_cage,
   args: [meson.project_source_root() / 'input' / 'traj', '1000'],
   env: _test_env,
-  timeout: 0)
+  timeout: 0,
+  suite: 'heavy',
+  is_parallel: false)
 test('neighbour_record', find_program('python3'),
   args: [files('neighbour_record.py')],
   workdir: meson.project_source_root(),
@@ -543,3 +564,25 @@ test('mw215_frame', find_program('python3'),
   args: [files('test_mw215_deck.py'), 'frame'],
   workdir: meson.project_source_root(),
   timeout: 30)
+
+dump_faults = shared_module('dump_faults', 'dump_faults_preload.c', name_prefix: 'lib')
+dump_fault_driver = executable('dump_fault_driver', 'dump_fault_driver.cpp',
+  dependencies: [yds_dep],
+  include_directories: _incdirs,
+  link_args: _test_link_args,
+  build_rpath: _test_rpath)
+_fault_eintr = environment()
+_fault_eintr.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+_fault_eintr.prepend('LD_PRELOAD', dump_faults.full_path())
+_fault_eintr.set('DUMP_PREAD_EINTR', '1')
+_fault_eio = environment()
+_fault_eio.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+_fault_eio.prepend('LD_PRELOAD', dump_faults.full_path())
+_fault_eio.set('DUMP_PREAD_EIO', '1')
+_fault_fstat = environment()
+_fault_fstat.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+_fault_fstat.prepend('LD_PRELOAD', dump_faults.full_path())
+_fault_fstat.set('DUMP_FSTAT_EIO', '1')
+test('dump_index_eintr', dump_fault_driver, args: ['eintr'], env: _fault_eintr, depends: dump_faults)
+test('dump_index_eio', dump_fault_driver, args: ['eio'], env: _fault_eio, depends: dump_faults)
+test('dump_fstat_keeps_atoms', dump_fault_driver, args: ['fstat'], env: _fault_fstat, depends: dump_faults)

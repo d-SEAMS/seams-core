@@ -206,6 +206,10 @@ nix build
 To run the sample inputs, stay in the repository root so `input/` is a
 child directory.
 
+An OpenMM trajectory can call the same classifiers in process. The
+reporter, the TIP4P/Ice field, and the 4096-molecule driver are
+described in `docs/openmm.md`.
+
 ## Reproducing the paper
 
 The benchmark campaign, the public-trajectory walks and the tool comparison

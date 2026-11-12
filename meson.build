@@ -71,6 +71,16 @@ endif
 if flexiblas_dep.found()
   _deps += flexiblas_dep
   blas_backend = 'flexiblas'
+  # libflexiblas.so.3 is not on the default loader path. The link
+  # line is shared by every binary, so the directory is recorded here.
+  _fb_file = run_command(cppc, '-print-file-name=libflexiblas.so', check: false)
+  if _fb_file.returncode() == 0
+    _fb_path = _fb_file.stdout().strip()
+    if _fb_path != '' and _fb_path != 'libflexiblas.so'
+      _fb_dir = import('fs').parent(_fb_path)
+      _link_args += ['-Wl,-rpath,' + _fb_dir, '-Wl,-rpath-link,' + _fb_dir]
+    endif
+  endif
 else
   blas_dep = cppc.find_library('blas', required: true)
   lapack_dep = cppc.find_library('lapack', required: true)
@@ -245,10 +255,56 @@ if minimage_dep.found()
   _args += ['-DSEAMS_HAS_MINIMAGE=1']
 endif
 
-chemfiles_dep = dependency('chemfiles', required: false)
+chemfiles_libdir = ''
+chemfiles_opt = get_option('with_chemfiles')
+# A disabled option must win over a chemfiles.pc on PKG_CONFIG_PATH.
+# Otherwise the native frame counters never run.
+if chemfiles_opt.disabled()
+  chemfiles_dep = dependency('chemfiles-disabled-by-option', required: false)
+else
+  chemfiles_dep = dependency('chemfiles', required: false)
+  if not chemfiles_dep.found()
+    chem_prefix = meson.project_build_root() / 'chemfiles-prefix'
+    fs = import('fs')
+    cmake_bin = find_program('cmake', required: chemfiles_opt)
+    if cmake_bin.found() and not fs.exists(chem_prefix / 'lib' / 'libchemfiles.so')
+      run_command(cmake_bin, '-S', meson.project_source_root() / 'cmake',
+                  '-B', meson.project_build_root() / 'chemfiles-fetch',
+                  '-DCMAKE_BUILD_TYPE=Release',
+                  '-DCMAKE_INSTALL_PREFIX=' + chem_prefix,
+                  '-DCMAKE_POLICY_VERSION_MINIMUM=3.5',
+                  check: true)
+      run_command(cmake_bin, '--build',
+                  meson.project_build_root() / 'chemfiles-fetch',
+                  '--parallel', check: true)
+      run_command(cmake_bin, '--install',
+                  meson.project_build_root() / 'chemfiles-fetch',
+                  check: true)
+    endif
+    if fs.exists(chem_prefix / 'lib' / 'libchemfiles.so')
+      chemfiles_dep = cppc.find_library('chemfiles',
+                                        dirs: chem_prefix / 'lib',
+                                        required: chemfiles_opt)
+      if chemfiles_dep.found()
+        chemfiles_dep = declare_dependency(
+          compile_args: ['-I' + chem_prefix / 'include'],
+          dependencies: chemfiles_dep)
+        chemfiles_libdir = chem_prefix / 'lib'
+      endif
+    endif
+  endif
+endif
 if chemfiles_dep.found()
   _deps += [chemfiles_dep]
   _args += ['-DSEAMS_HAS_CHEMFILES=1']
+  probed_libdir = chemfiles_dep.get_variable(pkgconfig: 'libdir',
+                                             default_value: '')
+  if probed_libdir != ''
+    chemfiles_libdir = probed_libdir
+  endif
+  if chemfiles_libdir != ''
+    _link_args += ['-Wl,-rpath,' + chemfiles_libdir]
+  endif
 endif
 
 # The Rust reader follows the engine's library kind, so a static engine
@@ -501,6 +557,10 @@ endif
 # uses the in-tree cell list, and without a reader the corresponding
 # formats are simply absent from the library, with nothing at run time
 # to say so.
+if get_option('openmm').enabled()
+  message('OpenMM reporter requested. It is the Python file adapters/python/dseams_insitu/openmm.py')
+endif
+
 summary({
   'BLAS/LAPACK': blas_backend,
   'SIMD distance kernel (hwy)': hwy_dep.found(),

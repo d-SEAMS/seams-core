@@ -822,7 +822,7 @@ static void classifyBondsLeftFp64(
 
   const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1)
+#pragma omp parallel for schedule(static) if (nop >= 16384 && omp_get_max_threads() > 1)
 #endif
   for (int iatom = 0; iatom < nop; iatom++) {
     if (csrOff == nullptr && static_cast<std::size_t>(iatom) >= nList.size()) {
@@ -936,7 +936,7 @@ static void classifyBondsLeftFp64(
 
   // c_ij from the real l = 3 inner product. Norms were formed once per atom.
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1)
+#pragma omp parallel for schedule(static) if (nop >= 16384 && omp_get_max_threads() > 1)
 #endif
   for (int iatom = 0; iatom < nop; iatom++) {
     if (isSlice && !yCloud.pts[static_cast<std::size_t>(iatom)].inSlice) {
@@ -2025,7 +2025,7 @@ void chill::bondOrder(const molSys::PointCloud<molSys::Point<double>, double> &y
   const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
   const bool fixedKeep = keepMax > 0;
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1)
+#pragma omp parallel for schedule(static) if (nop >= 16384 && omp_get_max_threads() > 1)
 #endif
   for (int iatom = 0; iatom < nop; iatom++) {
     if (which != nullptr &&
@@ -2122,7 +2122,7 @@ void chill::correlFromOrder(molSys::PointCloud<molSys::Point<double>, double> &y
     return order.rows[static_cast<std::size_t>(atom)][static_cast<std::size_t>(slot)];
   };
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1)
+#pragma omp parallel for schedule(static) if (nop >= 16384 && omp_get_max_threads() > 1)
 #endif
   for (int iatom = 0; iatom < nop; iatom++) {
     if (which != nullptr &&

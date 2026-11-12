@@ -51,6 +51,10 @@
 
 namespace {
 
+// Set while a caller wants the one-thread cutoff list and the OpenMP
+// team left untouched for a later parallel region.
+thread_local bool gSerialCutoff = false;
+
 /**
  * @details Reports whether a point cloud carries the three box lengths that
  *  the minimum image convention needs. A cloud whose trajectory frame failed
@@ -204,7 +208,7 @@ void binCutoffRows(std::size_t count, const Ends &ends,
   int threads = 1;
   // nvc++ -mp=gpu SIGSEGVs host parallel regions in libnvomp
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-  if (nop >= kParallelRowsMinAtoms && !omp_in_parallel() &&
+  if (!gSerialCutoff && nop >= kParallelRowsMinAtoms && !omp_in_parallel() &&
       omp_get_max_threads() > 1) {
     threads = omp_get_max_threads();
   }
@@ -470,7 +474,7 @@ std::vector<std::vector<int>> rowsByID(const CutoffRows &rows,
   std::vector<std::vector<int>> nList(static_cast<std::size_t>(nop));
   // nvc++ -mp=gpu SIGSEGVs host parallel-fors in libnvomp
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-#pragma omp parallel for schedule(static) if (nop >= kParallelRowsMinAtoms && !omp_in_parallel() && omp_get_max_threads() > 1)
+#pragma omp parallel for schedule(static) if (!gSerialCutoff && nop >= kParallelRowsMinAtoms && !omp_in_parallel() && omp_get_max_threads() > 1)
 #endif
   for (int iatom = 0; iatom < nop; iatom++) {
     if (indexToID[iatom] == -1) {
@@ -1274,11 +1278,16 @@ bool orthoFullList(const molSys::PointCloud<molSys::Point<double>, double> &yClo
 
 }  // namespace
 
+void nneigh::preferSerialCutoff(bool on) { gSerialCutoff = on; }
+
 std::vector<std::vector<int>>
 nneigh::neighListO(double rcutoff,
                    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    int typeI) {
   seams::adoptThreads();
+  if (gSerialCutoff) {
+    lc_set_threads(1);
+  }
   if (!hasPeriodicBox(yCloud)) {
     return {};
   }
@@ -1297,7 +1306,15 @@ nneigh::neighListO(double rcutoff,
     }
   }
 
-  if (yCloud.box.size() >= 3) {
+  // Several threads use the persistent CSR, including triclinic cells.
+  // A report that wants the OpenMP team left for the ring search sets
+  // preferSerialCutoff and keeps the one-thread linkcell kernel.
+#ifdef SEAMS_HAS_OPENMP
+  const bool csrTeam = !gSerialCutoff && !omp_in_parallel() && omp_get_max_threads() > 1;
+#else
+  const bool csrTeam = false;
+#endif
+  if (csrTeam && yCloud.box.size() >= 3) {
     std::vector<int> offsets;
     std::vector<int> cols;
     if (orthoFullCsr(yCloud, &typeIIndices, rcutoff, offsets, cols, false)) {
@@ -1309,7 +1326,7 @@ nneigh::neighListO(double rcutoff,
   // On one thread linkcell's fused kernel is the fastest builder. With
   // a team, the cell walk over atoms scales and each row is sorted, so
   // it matches that kernel's rows.
-  if (!omp_in_parallel() && omp_get_max_threads() > 1 &&
+  if (!gSerialCutoff && !omp_in_parallel() && omp_get_max_threads() > 1 &&
       typeIIndices.size() >= static_cast<std::size_t>(kThreadedCellRowsMinAtoms)) {
     std::vector<std::vector<int>> rows;
     if (cellListRowsThreaded(yCloud, typeIIndices, rcutoff, rows)) {

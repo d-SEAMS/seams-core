@@ -1,0 +1,38 @@
+# Copyright (c) d-SEAMS developers
+diff --git a/src/formats/mmCIF.cpp b/src/formats/mmCIF.cpp
+index 41389ee..9f7d597 100644
+--- a/src/formats/mmCIF.cpp
++++ b/src/formats/mmCIF.cpp
+@@ -313,8 +313,15 @@ void mmCIFFormat::read(Frame& frame) {
+         auto resid_text = line_split[label_seq_id->second];
+ 
+         try {
+-            if (resid_text == ".") { // In this case, we need to use the entity id
+-                resid = parse<int64_t>(line_split[label_entity_id->second]);
++            // A missing residue id is 0. The 0.10.4 writer stored "." and
++            // then read group_PDB when label_entity_id was absent.
++            if (resid_text == "." || resid_text == "?") {
++                if (label_entity_id != atom_site_map_.end()) {
++                    auto entity = line_split[label_entity_id->second];
++                    resid = (entity == "." || entity == "?") ? 0 : parse<int64_t>(entity);
++                } else {
++                    resid = 0;
++                }
+             } else {
+                 resid = parse<int64_t>(line_split[label_seq_id->second]);
+             }
+@@ -426,6 +433,14 @@ void mmCIFFormat::write(const Frame& frame) {
+         }
+ 
+         const auto& atom = frame[i];
++        if (!residue) {
++            // An atom with no residue still needs a numeric seq id, or the
++            // reader tries to parse group_PDB.
++            seq_id = "1";
++            compid = atom.name().empty() ? "UNL" : atom.name();
++            asymid = "A";
++            auth_asymid = "A";
++        }
+ 
+         file_.print("{} {: <5} {: <2} {: <4} {} {: >3} {} {: >4} {:8.3f} {:8.3f} {:8.3f} {} {} {}\n",
+                 pdbgroup, atoms_, atom.type(), atom.name(), ".", compid,

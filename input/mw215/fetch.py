@@ -10,6 +10,7 @@ When a download fails, regenerate.py reruns the deck.
 from __future__ import annotations
 
 import lzma
+import os
 import shutil
 import subprocess
 import sys
@@ -17,7 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
-OUT = ROOT / "data" / "mw215"
+OUT = Path(os.environ.get("MW215_DIR", "/var/tmp/dseams/mw215"))
 REPO = "d-SEAMS/mw-liquid-215K"
 FRAMES = (512, 4096, 32768)
 CELLS = {512: 8, 4096: 16, 32768: 32}

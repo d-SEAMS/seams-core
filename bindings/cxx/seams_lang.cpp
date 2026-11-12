@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 #include "seams_lang.h"
 
 #include <bop.hpp>
@@ -19,10 +20,13 @@
 
 #include <algorithm>
 #include <array>
+#include <charconv>
+#include <chrono>
 #include <cmath>
 #include <cstring>
 #include <exception>
 #include <fstream>
+#include <generic.hpp>
 #include <memory>
 #include <set>
 #include <string>
@@ -54,6 +58,98 @@ void remember_exception() {
 
 void clear_error() { g_error.clear(); }
 
+// A gro frame is a title, an atom count, that many atom lines, and a box.
+// A missing file or a short frame is -1.
+int countGroFrames(const std::string &path) {
+  std::ifstream in(path);
+  if (!in) {
+    return -1;
+  }
+  int frames = 0;
+  std::string line;
+  while (std::getline(in, line)) {
+    if (!std::getline(in, line)) {
+      return -1;
+    }
+    const char *first = line.data();
+    const char *last = first + line.size();
+    while (first < last && (*first == ' ' || *first == '\t')) {
+      ++first;
+    }
+    int n = 0;
+    const auto parsed = std::from_chars(first, last, n);
+    if (parsed.ec != std::errc{} || n < 0) {
+      return -1;
+    }
+    for (int i = 0; i < n; ++i) {
+      if (!std::getline(in, line)) {
+        return -1;
+      }
+    }
+    if (!std::getline(in, line)) {
+      return -1;
+    }
+    frames += 1;
+  }
+  return frames > 0 ? frames : -1;
+}
+
+// MODEL records are one frame each. A file with atoms and no MODEL is
+// one frame. A missing file is -1.
+int countPdbFrames(const std::string &path) {
+  std::ifstream in(path);
+  if (!in) {
+    return -1;
+  }
+  int models = 0;
+  int atoms = 0;
+  std::string line;
+  while (std::getline(in, line)) {
+    if (line.rfind("MODEL", 0) == 0) {
+      models += 1;
+    } else if (line.rfind("ATOM", 0) == 0 || line.rfind("HETATM", 0) == 0) {
+      atoms += 1;
+    }
+  }
+  if (models > 0) {
+    return models;
+  }
+  return atoms > 0 ? 1 : -1;
+}
+
+// One xyz frame is a count, a comment, and that many atom lines.
+// A missing file, a non-numeric count, or a short frame is -1.
+int countXyzFrames(const std::string &path) {
+  std::ifstream in(path);
+  if (!in) {
+    return -1;
+  }
+  int frames = 0;
+  std::string line;
+  while (std::getline(in, line)) {
+    if (line.empty()) {
+      continue;
+    }
+    int n = 0;
+    const char *first = line.data();
+    const char *last = first + line.size();
+    const auto parsed = std::from_chars(first, last, n);
+    if (parsed.ec != std::errc{} || parsed.ptr != last || n < 0) {
+      return -1;
+    }
+    if (!std::getline(in, line)) {
+      return -1;
+    }
+    for (int i = 0; i < n; ++i) {
+      if (!std::getline(in, line)) {
+        return -1;
+      }
+    }
+    frames += 1;
+  }
+  return frames > 0 ? frames : -1;
+}
+
 std::string extension_of(const std::string &path) {
   const auto dot = path.find_last_of('.');
   if (dot == std::string::npos) {
@@ -63,45 +159,12 @@ std::string extension_of(const std::string &path) {
 }
 
 Cloud load_path(const std::string &path, int frame, int typeI) {
-  Cloud cloud;
-  const auto ext = extension_of(path);
-  if (ext == "xyz") {
-    return sinp::readXYZ(path);
+  // A missing CON path is an error. readCon clears the cloud and returns
+  // it, which would look like an empty frame.
+  if (extension_of(path) == "con" && !gen::file_exists(path)) {
+    throw std::runtime_error("cannot read " + path);
   }
-  if (ext == "con") {
-#ifdef SEAMS_HAS_READCON
-    // A missing path is an error. readCon clears the cloud and returns
-    // it, which would look like an empty frame.
-    if (!gen::file_exists(path)) {
-      throw std::runtime_error("cannot read " + path);
-    }
-    return sinp::readCon(path, frame, cloud);
-#else
-    throw std::runtime_error(
-        "readcon-core is not in this build; CON input needs it");
-#endif
-  }
-  if (ext == "pdb" || ext == "gro" || ext == "dcd") {
-#ifdef SEAMS_HAS_CHEMFILES
-    const int filter = typeI > 0 ? typeI : -1;
-    return sinp::readChemfiles(path, frame, cloud, filter);
-#else
-    throw std::runtime_error("chemfiles is not in this build; " + ext +
-                             " input needs it");
-#endif
-  }
-  if (typeI < 0) {
-    return sinp::readLammpsTrj(path, frame, cloud);
-  }
-  if (typeI > 0) {
-    return sinp::readLammpsTrjO(path, frame, cloud, typeI);
-  }
-  cloud = sinp::readLammpsTrjO(path, frame, cloud, 2);
-  if (cloud.nop > 0) {
-    return cloud;
-  }
-  Cloud again;
-  return sinp::readLammpsTrjO(path, frame, again, 1);
+  return sinp::openFrame(path, frame, typeI);
 }
 
 int resolve_type(const Cloud &cloud, int requested) {
@@ -188,6 +251,14 @@ struct seams_frame {
   std::vector<double> rdf_r;
   std::vector<double> rdf_g;
   std::vector<int> ring_counts;
+  std::vector<std::vector<int>> wide_list;
+  std::vector<double> wide_xyz;
+  double wide_box[9] = {};
+  double wide_cutoff = -1.0;
+  double wide_skin = -1.0;
+  int wide_type = 0;
+  std::string wide_graph;
+  bool wide_ready = false;
 
   void sync_arrays() {
     const int n = cloud.nop;
@@ -216,13 +287,56 @@ int seams_path_nframes(const char *path) {
     return -1;
   }
   try {
+    if (!gen::file_exists(path)) {
+      set_error("cannot read " + std::string(path));
+      return -1;
+    }
     const auto ext = extension_of(path);
+    if (ext == "lammpstrj" || ext == "dump") {
+      const int frames = sinp::nLammpsFrames(path);
+      if (frames <= 0) {
+        set_error("unreadable dump");
+        return -1;
+      }
+      return frames;
+    }
+    // Chemfiles first. A miss falls through to the native counters.
+    const int steps = sinp::chemfilesSteps(path);
+    if (steps >= 0) {
+      return steps;
+    }
+    if (ext == "gro") {
+      const int frames = countGroFrames(path);
+      if (frames < 0) {
+        set_error("unreadable trajectory");
+        return -1;
+      }
+      return frames;
+    }
+    if (ext == "pdb") {
+      const int frames = countPdbFrames(path);
+      if (frames < 0) {
+        set_error("unreadable trajectory");
+        return -1;
+      }
+      return frames;
+    }
+    if (ext == "dcd") {
+      set_error("unreadable trajectory");
+      return -1;
+    }
     if (ext == "xyz") {
       std::ifstream in(path);
       if (!in) {
         set_error("cannot read " + std::string(path));
         return -1;
       }
+      const int frames = countXyzFrames(path);
+      if (frames > 0) {
+        return frames;
+      }
+      // A readable file that is not a counted xyz block is still one
+      // native frame. configuration.xyz is a count, a box, and coordinates.
       return 1;
     }
     return sinp::nLammpsFrames(path);
@@ -392,7 +506,224 @@ std::vector<std::vector<int>> index_graph(seams_frame *frame, double cutoff,
   return nneigh::neighbourListByIndex(frame->cloud, ids);
 }
 
+// Pairs of a wide list whose current minimum-image distance is inside cutoff.
+// The same strict test as neighListO: a pair on the cutoff is not a neighbour.
+std::vector<std::vector<int>>
+pairs_within(const Cloud &cloud, const std::vector<std::vector<int>> &wide,
+             double cutoff) {
+  const double cut2 = cutoff * cutoff;
+  const gen::FracBox box = gen::makeFracBox(cloud);
+  std::vector<std::vector<int>> out(wide.size());
+  for (std::size_t row = 0; row < wide.size(); ++row) {
+    if (wide[row].empty()) {
+      continue;
+    }
+    auto &kept = out[row];
+    kept.push_back(wide[row][0]);
+    const auto self = cloud.idIndexMap.find(wide[row][0]);
+    if (self == cloud.idIndexMap.end()) {
+      continue;
+    }
+    const auto &here = cloud.pts[static_cast<std::size_t>(self->second)];
+    for (std::size_t j = 1; j < wide[row].size(); ++j) {
+      const auto other = cloud.idIndexMap.find(wide[row][j]);
+      if (other == cloud.idIndexMap.end()) {
+        continue;
+      }
+      const auto &there = cloud.pts[static_cast<std::size_t>(other->second)];
+      const double dist2 = gen::fracDistSq(box, here.x, here.y, here.z, there.x,
+                                           there.y, there.z);
+      if (dist2 < cut2) {
+        kept.push_back(wide[row][j]);
+      }
+    }
+  }
+  return out;
+}
+
+double max_drift(const Cloud &cloud, const std::vector<double> &previous) {
+  const gen::FracBox box = gen::makeFracBox(cloud);
+  double furthest = 0.0;
+  const int n = cloud.nop;
+  for (int i = 0; i < n; ++i) {
+    const auto &point = cloud.pts[static_cast<std::size_t>(i)];
+    const std::size_t base = static_cast<std::size_t>(3 * i);
+    const double dist2 =
+        gen::fracDistSq(box, point.x, point.y, point.z, previous[base],
+                        previous[base + 1], previous[base + 2]);
+    if (dist2 > furthest) {
+      furthest = dist2;
+    }
+  }
+  return std::sqrt(furthest);
+}
+
+bool wide_reusable(const seams_frame *frame, double cutoff, double skin, int typ,
+                   const std::string &graph, const double *box9) {
+  if (frame == nullptr || !frame->wide_ready || !(skin > 0.0) ||
+      frame->wide_graph != graph || frame->wide_type != typ ||
+      frame->wide_cutoff != cutoff || frame->wide_skin != skin) {
+    return false;
+  }
+  for (int k = 0; k < 9; ++k) {
+    if (frame->wide_box[k] != box9[k]) {
+      return false;
+    }
+  }
+  if (frame->wide_xyz.size() !=
+      static_cast<std::size_t>(std::max(frame->cloud.nop, 0)) * 3) {
+    return false;
+  }
+  return max_drift(frame->cloud, frame->wide_xyz) <= 0.5 * skin;
+}
+
+void remember_wide(seams_frame *frame, std::vector<std::vector<int>> wide,
+                   double cutoff, double skin, int typ, const std::string &graph,
+                   const double *box9) {
+  frame->wide_list = std::move(wide);
+  const int n = frame->cloud.nop;
+  frame->wide_xyz.resize(static_cast<std::size_t>(std::max(n, 0)) * 3);
+  for (int i = 0; i < n; ++i) {
+    const auto &point = frame->cloud.pts[static_cast<std::size_t>(i)];
+    const std::size_t base = static_cast<std::size_t>(3 * i);
+    frame->wide_xyz[base] = point.x;
+    frame->wide_xyz[base + 1] = point.y;
+    frame->wide_xyz[base + 2] = point.z;
+  }
+  std::memcpy(frame->wide_box, box9, sizeof(frame->wide_box));
+  frame->wide_cutoff = cutoff;
+  frame->wide_skin = skin;
+  frame->wide_type = typ;
+  frame->wide_graph = graph;
+  frame->wide_ready = true;
+}
+
+void write_ice_labels(seams_frame *frame, int type, int *labels, int counts9[9]) {
+  const int n = frame->cloud.nop;
+  frame->labels.assign(static_cast<std::size_t>(std::max(n, 0)), 6);
+  int counts[9] = {};
+  for (int i = 0; i < n; ++i) {
+    const auto &point = frame->cloud.pts[static_cast<std::size_t>(i)];
+    int label = static_cast<int>(point.iceType);
+    if (!keep_atom(point.type, type)) {
+      label = static_cast<int>(molSys::atom_state_type::unclassified);
+    }
+    frame->labels[static_cast<std::size_t>(i)] = label;
+    if (keep_atom(point.type, type)) {
+      counts[label] += 1;
+    }
+  }
+  if (labels != nullptr && n > 0) {
+    std::memcpy(labels, frame->labels.data(),
+                static_cast<std::size_t>(n) * sizeof(int));
+  }
+  if (counts9 != nullptr) {
+    std::memcpy(counts9, counts, sizeof(counts));
+  }
+}
+
 } // namespace
+
+int seams_frame_set_positions(seams_frame *frame, const double *xyz, int n,
+                             const double *box9) {
+  clear_error();
+  if (frame == nullptr || xyz == nullptr || box9 == nullptr || n <= 0) {
+    set_error("positions need a frame, a box, and a positive atom count");
+    return 1;
+  }
+  if (frame->cloud.nop != n ||
+      frame->cloud.pts.size() != static_cast<std::size_t>(n)) {
+    set_error("position update needs the same atom count");
+    return 1;
+  }
+  try {
+    apply_box(frame->cloud, box9);
+    frame->xyz.resize(static_cast<std::size_t>(n) * 3);
+    for (int i = 0; i < n; ++i) {
+      auto &point = frame->cloud.pts[static_cast<std::size_t>(i)];
+      const std::size_t base = static_cast<std::size_t>(3 * i);
+      point.x = xyz[base];
+      point.y = xyz[base + 1];
+      point.z = xyz[base + 2];
+      frame->xyz[base] = point.x;
+      frame->xyz[base + 1] = point.y;
+      frame->xyz[base + 2] = point.z;
+    }
+    return 0;
+  } catch (...) {
+    remember_exception();
+    return 1;
+  }
+}
+
+int seams_frame_chill_rings(seams_frame *frame, double cutoff, int type,
+                           const char *graph, int max_ring, double skin,
+                           int *labels, int counts9[9], int *ring_counts,
+                           int ring_counts_len, seams_phase_times *times) {
+  clear_error();
+  if (frame == nullptr || labels == nullptr || counts9 == nullptr ||
+      ring_counts == nullptr || max_ring < 3 ||
+      ring_counts_len < max_ring + 1 || !(cutoff > 0.0)) {
+    set_error("CHILL+ and rings need a frame, a cutoff, and count buffers");
+    return 1;
+  }
+  try {
+    using clock = std::chrono::steady_clock;
+    const int typ = resolve_type(frame->cloud, type);
+    const std::string which =
+        (graph == nullptr || graph[0] == '\0') ? std::string("cutoff") : graph;
+    double box9[9];
+    fill_box(frame->cloud, box9);
+    const auto t0 = clock::now();
+    int reused = 0;
+    std::vector<std::vector<int>> bonds;
+    if (which == "cutoff" && skin > 0.0 &&
+        wide_reusable(frame, cutoff, skin, typ, which, box9)) {
+      bonds = pairs_within(frame->cloud, frame->wide_list, cutoff);
+      reused = 1;
+    } else if (which == "cutoff" && skin > 0.0) {
+      // Leave the OpenMP team as it is. Changing its width sleeps the
+      // workers and the ring search pays to create them again.
+      nneigh::preferSerialCutoff(true);
+      auto wide = nneigh::neighListO(cutoff + skin, frame->cloud, typ);
+      nneigh::preferSerialCutoff(false);
+      remember_wide(frame, wide, cutoff, skin, typ, which, box9);
+      bonds = pairs_within(frame->cloud, frame->wide_list, cutoff);
+    } else {
+      frame->wide_ready = false;
+      nneigh::preferSerialCutoff(true);
+      bonds = bond_list(frame->cloud, cutoff, typ, which, 4);
+      nneigh::preferSerialCutoff(false);
+    }
+    const auto t1 = clock::now();
+    chill::applyChillPlus(frame->cloud, bonds, chill::chillPlusRule(""), false);
+    write_ice_labels(frame, type, labels, counts9);
+    const auto t2 = clock::now();
+    const auto indexed = nneigh::neighbourListByIndex(frame->cloud, bonds);
+    const auto rings = primitive::ringNetwork(indexed, max_ring);
+    std::fill(ring_counts, ring_counts + ring_counts_len, 0);
+    for (const auto &ring : rings) {
+      const int size = static_cast<int>(ring.size());
+      if (size >= 0 && size < ring_counts_len) {
+        ring_counts[size] += 1;
+      }
+    }
+    const auto t3 = clock::now();
+    if (times != nullptr) {
+      const auto seconds = [](clock::duration span) {
+        return std::chrono::duration<double>(span).count();
+      };
+      times->neighbours = seconds(t1 - t0);
+      times->chill = seconds(t2 - t1);
+      times->rings = seconds(t3 - t2);
+      times->reused = reused;
+    }
+    return 0;
+  } catch (...) {
+    remember_exception();
+    return 1;
+  }
+}
 
 int seams_frame_chill_plus(seams_frame *frame, double cutoff, int type,
                            const char *graph, int *labels, int counts9[9]) {
