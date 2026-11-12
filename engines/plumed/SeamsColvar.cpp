@@ -7,6 +7,7 @@
 #include "core/ActionRegister.h"
 #include "core/Colvar.h"
 #include "seams.h"
+#include "../triclinic_box.hpp"
 
 #include <cmath>
 #include <vector>
@@ -96,25 +97,35 @@ void SeamsCV::calculate() {
     xyz[3 * i + 2] = p[2];
   }
   const Tensor box = getBox();
-  const double box9[9] = {0.0,     0.0,     0.0,     box(0, 0), box(1, 1),
-                          box(2, 2), box(0, 1), box(0, 2), box(1, 2)};
+  double raw[3][3];
+  for (int a = 0; a < 3; ++a) {
+    for (int b = 0; b < 3; ++b) {
+      raw[a][b] = box(a, b);
+    }
+  }
+  double box9[9];
+  plumed_box_to_lammps(raw, box9);
   double q6 = 0, ice = 0, ring = 0;
   if (!score(xyz, box9, q6, ice, ring)) {
     error("d-SEAMS rejected this frame");
   }
+  // Central difference on q6 only. ice and ring stay finite but are not biased.
   const double eps = 1.0e-3;
-  std::vector<Vector> dq(n), di(n), dr(n);
+  std::vector<Vector> dq(n);
   for (unsigned i = 0; i < n; ++i) {
     for (unsigned d = 0; d < 3; ++d) {
       xyz[3 * i + d] += eps;
-      double q1 = 0, ice1 = 0, ring1 = 0;
-      if (!score(xyz, box9, q1, ice1, ring1)) {
+      double q_plus = 0, ice_plus = 0, ring_plus = 0;
+      if (!score(xyz, box9, q_plus, ice_plus, ring_plus)) {
         error("d-SEAMS rejected a displaced frame");
       }
-      xyz[3 * i + d] -= eps;
-      dq[i][d] = (q1 - q6) / eps;
-      di[i][d] = (ice1 - ice) / eps;
-      dr[i][d] = (ring1 - ring) / eps;
+      xyz[3 * i + d] -= 2.0 * eps;
+      double q_minus = 0, ice_minus = 0, ring_minus = 0;
+      if (!score(xyz, box9, q_minus, ice_minus, ring_minus)) {
+        error("d-SEAMS rejected a displaced frame");
+      }
+      xyz[3 * i + d] += eps;
+      dq[i][d] = (q_plus - q_minus) / (2.0 * eps);
     }
   }
   Value *vq = getPntrToComponent("q6");
@@ -123,10 +134,11 @@ void SeamsCV::calculate() {
   vq->set(q6);
   vi->set(ice);
   vr->set(ring);
+  const Vector zero;
   for (unsigned i = 0; i < n; ++i) {
     setAtomsDerivatives(vq, static_cast<int>(i), dq[i]);
-    setAtomsDerivatives(vi, static_cast<int>(i), di[i]);
-    setAtomsDerivatives(vr, static_cast<int>(i), dr[i]);
+    setAtomsDerivatives(vi, static_cast<int>(i), zero);
+    setAtomsDerivatives(vr, static_cast<int>(i), zero);
   }
   setBoxDerivativesNoPbc(vq);
   setBoxDerivativesNoPbc(vi);

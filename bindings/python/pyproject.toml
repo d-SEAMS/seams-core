@@ -1,6 +1,6 @@
 [build-system]
-requires = ["nanobind>=2.0", "numpy"]
-build-backend = "setuptools.build_meta"
+requires = ["meson-python>=0.16", "nanobind>=2.0", "numpy"]
+build-backend = "mesonpy"
 
 [project]
 name = "dseams"

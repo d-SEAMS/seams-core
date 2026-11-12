@@ -1,7 +1,15 @@
 option('with_tests', type: 'boolean', value: true,
   description: 'Build Catch2 C++ tests')
-option('with_python', type: 'boolean', value: false,
-  description: 'Unused. Python is pydseamslib: https://github.com/d-SEAMS/PydSEAMSlib')
+option('with_python', type: 'boolean', value: true,
+  description: 'Build the nanobind dseams module when Python and nanobind are found')
+option('with_lammps', type: 'feature', value: 'disabled',
+  description: 'Build the LAMMPS hook when liblammps is found')
+option('with_gromacs', type: 'feature', value: 'disabled',
+  description: 'Build the GROMACS analysis tool when libgromacs is found')
+option('with_openmm', type: 'feature', value: 'auto',
+  description: 'Build the OpenMM plugin when libOpenMM is found')
+option('with_plumed', type: 'feature', value: 'auto',
+  description: 'Build libSeamsPlumed.so when PLUMED is found')
 option('with_cli', type: 'boolean', value: true,
   description: 'Build the seams engine CLI')
 option('with_mpi', type: 'feature', value: 'disabled',

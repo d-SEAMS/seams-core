@@ -110,7 +110,12 @@ def main() -> int:
             return 1
     listed = configured_project_options(build_dir)
     root = Path("subprojects")
+    # nanobind and its header map are optional wraps. They are not seams
+    # projects and do not carry this tree's option file.
+    third_party = {"nanobind", "robin-map"}
     for project, options in sorted(listed.items()):
+        if project in third_party:
+            continue
         src = root / project / "meson_options.txt"
         if not src.is_file():
             sys.stderr.write(f"{project} has no meson_options.txt\n")

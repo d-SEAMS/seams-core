@@ -23,6 +23,28 @@ num_threads = _core.num_threads
 Frame = _core.Frame
 
 
+def _frame_api():
+    try:
+        from . import frames as frames_mod
+    except ImportError:
+        import importlib.util
+        from pathlib import Path
+
+        loc = Path(__file__).resolve().parents[1] / "frames.py"
+        spec = importlib.util.spec_from_file_location("dseams_frames", loc)
+        if spec is None or spec.loader is None:
+            raise ImportError("frames.py is not installed")
+        frames_mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(frames_mod)
+    return frames_mod
+
+
+_frames = _frame_api()
+cages = _frames.cages
+signature_cages = _frames.signature_cages
+symmetry = _frames.symmetry
+
+
 def _as_box(box):
     raw = np.ascontiguousarray(box, dtype=np.float64).reshape(-1)
     if raw.size not in (3, 9):

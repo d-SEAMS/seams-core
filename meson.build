@@ -625,10 +625,33 @@ if get_option('with_tests')
   subdir('tests')
 endif
 
-# Python is PydSEAMSlib (pip install pydseamslib). R and Julia call
-# libseams_lang. Do not build a second Python module here.
+# Nanobind module over libseams. A missing nanobind skips the import test.
 if get_option('with_python')
-  error('Python is pydseamslib: https://github.com/d-SEAMS/PydSEAMSlib')
+  py_mod = import('python').find_installation(pure: false, required: false)
+  nanobind_dep = dependency('nanobind', required: false)
+  python_deps = []
+  if py_mod.found() and nanobind_dep.found()
+    dseams_core = py_mod.extension_module(
+      '_core',
+      files('bindings/python/dseams/_core.cpp'),
+      dependencies: [nanobind_dep],
+      link_with: seams_api_lib,
+      include_directories: include_directories('include', 'src'),
+      install: true,
+      subdir: 'dseams')
+    python_deps += dseams_core
+  endif
+  python3_dseams = find_program('python3', required: true)
+  dseams_env = environment()
+  dseams_env.set('DSEAMS_BUILD', meson.project_build_root())
+  dseams_env.set('DSEAMS_SRC', meson.project_source_root())
+  test(
+    'python_dseams',
+    python3_dseams,
+    args: [meson.project_source_root() / 'bindings/python/run_unittest.py'],
+    env: dseams_env,
+    depends: python_deps,
+    timeout: 180)
 endif
 
 # Lua is a library in the yodaStruct / luadseams repo, not this one.
@@ -671,6 +694,25 @@ if get_option('with_cli')
   test('seams_print_config', seams_exe, args: ['--print-config'])
 
   python3 = find_program('python3', required: true)
+  test(
+    'seams_water_types_cutoff',
+    python3,
+    args: [
+      meson.project_source_root() / 'tests' / 'test_water_mask.py',
+      seams_exe.full_path(),
+    ],
+    depends: [seams_exe],
+    timeout: 60)
+  test(
+    'seams_mol_rings',
+    python3,
+    args: [
+      meson.project_source_root() / 'tests' / 'test_mol_rings.py',
+      seams_exe.full_path(),
+    ],
+    depends: [seams_exe],
+    timeout: 60)
+
   test(
     'check_option_names',
     python3,

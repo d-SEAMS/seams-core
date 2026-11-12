@@ -11,6 +11,7 @@
 #include "gromacs/trajectoryanalysis/topologyinformation.h"
 
 #include "seams.h"
+#include "../triclinic_box.hpp"
 
 #include <chrono>
 #include <cmath>
@@ -43,15 +44,14 @@ class SeamsIce : public gmx::TrajectoryAnalysisModule {
       xyz[static_cast<std::size_t>(3 * i + 1)] = static_cast<double>(fr.x[i][1]) * 10.0;
       xyz[static_cast<std::size_t>(3 * i + 2)] = static_cast<double>(fr.x[i][2]) * 10.0;
     }
-    const double box9[9] = {0.0,
-                            0.0,
-                            0.0,
-                            static_cast<double>(fr.box[0][0]) * 10.0,
-                            static_cast<double>(fr.box[1][1]) * 10.0,
-                            static_cast<double>(fr.box[2][2]) * 10.0,
-                            static_cast<double>(fr.box[1][0]) * 10.0,
-                            static_cast<double>(fr.box[2][0]) * 10.0,
-                            static_cast<double>(fr.box[2][1]) * 10.0};
+    double raw[3][3];
+    for (int a = 0; a < 3; ++a) {
+      for (int b = 0; b < 3; ++b) {
+        raw[a][b] = static_cast<double>(fr.box[a][b]);
+      }
+    }
+    double box9[9];
+    gromacs_box_to_lammps(raw, box9, 10.0);
     std::vector<int> labels(static_cast<std::size_t>(n));
     int counts[9] = {};
     const auto t0 = std::chrono::steady_clock::now();

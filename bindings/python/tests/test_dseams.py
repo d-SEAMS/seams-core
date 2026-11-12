@@ -5,7 +5,11 @@ import math
 import unittest
 
 import numpy as np
-from ase import Atoms
+
+try:
+    from ase import Atoms
+except ImportError:
+    Atoms = None
 
 import dseams
 from dseams import CUTOFF, OVITO, PUBLISHED
@@ -56,11 +60,16 @@ class ApiTest(unittest.TestCase):
 
     def test_ase_and_mdanalysis(self):
         pos, length = diamond()
+        if Atoms is None:
+            self.skipTest("ASE is not installed")
         atoms = Atoms(symbols=["O"] * len(pos), positions=pos, cell=[length, length, length], pbc=True)
         apos, box = dseams.from_ase(atoms)
         labels, _ = dseams.chill_plus(apos, box)
         self.assertTrue(np.all(labels == 0))
-        import MDAnalysis as mda
+        try:
+            import MDAnalysis as mda
+        except ImportError:
+            self.skipTest("MDAnalysis is not installed")
 
         u = mda.Universe.empty(len(pos), trajectory=True)
         u.atoms.positions = pos
