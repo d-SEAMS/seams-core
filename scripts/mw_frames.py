@@ -314,8 +314,84 @@ def nucleus_frame(outdir):
     print(f"wrote nucleus atoms={len(mixed)} core={len(core_ids)}", flush=True)
 
 
+def hydrate_sI(nrep=5):
+    """Guest-free sI oxygen lattice. Sites are the standard cell in tests/hydrate_sites.inc."""
+    here = os.path.dirname(os.path.abspath(__file__))
+    inc = os.path.join(here, "..", "tests", "hydrate_sites.inc")
+    text = open(inc, encoding="utf-8").read()
+    body = text.split("kSIxyz")[1].split("kSII")[0]
+    sites = []
+    for line in body.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("{"):
+            continue
+        parts = [float(x) for x in stripped.strip("{},").split(",") if x.strip()]
+        if len(parts) == 3:
+            sites.append(tuple(parts))
+    if len(sites) != 46:
+        raise SystemExit(f"sI site table has {len(sites)} rows")
+    cell = 12.238818320447
+    side = nrep * cell
+    vecs = ((side, 0.0, 0.0), (0.0, side, 0.0), (0.0, 0.0, side))
+    atoms = []
+    for ix in range(nrep):
+        for iy in range(nrep):
+            for iz in range(nrep):
+                for sx, sy, sz in sites:
+                    atoms.append(((ix * cell + sx, iy * cell + sy, iz * cell + sz), -1, 0))
+    return vecs, atoms
+
+
+def large_frames(outdir):
+    """Thermal ice of at least 4096 molecules, and a thermal sI cell."""
+    vecs, atoms = ice_ic(8)
+    moved = thermal(
+        os.path.join(outdir, "run-ice4096"),
+        "ice-4096-220",
+        220.0,
+        "crystal",
+        vecs,
+        atoms,
+        2000,
+        409611,
+    )
+    write_frame(
+        os.path.join(outdir, "ice-4096-220.frame"),
+        "ice-4096-220",
+        220.0,
+        "crystal",
+        vecs,
+        moved,
+    )
+    print(f"wrote ice-4096-220 atoms={len(moved)}", flush=True)
+    vecs, atoms = hydrate_sI(5)
+    moved = thermal(
+        os.path.join(outdir, "run-si5750"),
+        "sI-5750-220",
+        220.0,
+        "hydrate",
+        vecs,
+        atoms,
+        2000,
+        575011,
+    )
+    write_frame(
+        os.path.join(outdir, "sI-5750-220.frame"),
+        "sI-5750-220",
+        220.0,
+        "hydrate",
+        vecs,
+        moved,
+    )
+    print(f"wrote sI-5750-220 atoms={len(moved)}", flush=True)
+
+
 def main():
-    outdir = sys.argv[1] if len(sys.argv) > 1 else "/tmp/sym-v3"
+    outdir = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("--") else "/tmp/sym-v3"
+    if "--large" in sys.argv:
+        os.makedirs(outdir, exist_ok=True)
+        large_frames(outdir)
+        return
     ideal_only = "--ideal-only" in sys.argv
     os.makedirs(outdir, exist_ok=True)
     vecs, atoms = stacking()

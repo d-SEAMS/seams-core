@@ -13,6 +13,7 @@
 #include <seams_c_api.h>
 
 #include <array>
+#include <cmath>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -138,7 +139,9 @@ void analyze(const Frame &frame, const std::string &path) {
   for (int k = 0; k < 5; k++) {
     symm::classifyIce(frame.xyz, frame.box, byCut[static_cast<size_t>(k)], cutoffs[k]);
   }
-  const std::vector<int> &kernel = byCut[2];
+  // Production ceiling. The sweep above is only the sensitivity check.
+  std::vector<int> kernel;
+  symm::classifyIce(frame.xyz, frame.box, kernel, 0.55);
   std::vector<double> raw(static_cast<size_t>(3 * n));
   for (int i = 0; i < n; i++) {
     raw[static_cast<size_t>(3 * i)] = frame.xyz(i, 0);
@@ -272,6 +275,78 @@ void analyze(const Frame &frame, const std::string &path) {
   if (frame.role == "nucleus") {
     std::cout << "core_ice " << coreIce << " of " << coreN << " outer_ice " << outerIce << " of "
               << outerN << "\n";
+    const double lx = frame.box(0, 0);
+    const double ly = frame.box(1, 1);
+    const double lz = frame.box(2, 2);
+    std::vector<int> region(static_cast<size_t>(n), 2);
+    for (int i = 0; i < n; i++) {
+      if (frame.core[static_cast<size_t>(i)]) {
+        region[static_cast<size_t>(i)] = 0;
+      }
+    }
+    for (int i = 0; i < n; i++) {
+      if (region[static_cast<size_t>(i)] == 0) {
+        continue;
+      }
+      for (int j = 0; j < n; j++) {
+        if (!frame.core[static_cast<size_t>(j)]) {
+          continue;
+        }
+        double dx = frame.xyz(i, 0) - frame.xyz(j, 0);
+        double dy = frame.xyz(i, 1) - frame.xyz(j, 1);
+        double dz = frame.xyz(i, 2) - frame.xyz(j, 2);
+        dx -= lx * std::nearbyint(dx / lx);
+        dy -= ly * std::nearbyint(dy / ly);
+        dz -= lz * std::nearbyint(dz / lz);
+        if (dx * dx + dy * dy + dz * dz <= 3.5 * 3.5) {
+          region[static_cast<size_t>(i)] = 1;
+          break;
+        }
+      }
+    }
+    const char *regionName[] = {"core", "interface", "liquid"};
+    std::cout << "region kernel_Ic kernel_Ih kernel_Isd kernel_other chill_crystal chill_interfacial "
+                 "chill_water chill_other\n";
+    for (int r = 0; r < 3; r++) {
+      int kIc = 0;
+      int kIh = 0;
+      int kIsd = 0;
+      int kOther = 0;
+      int cCrystal = 0;
+      int cInter = 0;
+      int cWater = 0;
+      int cOther = 0;
+      int nR = 0;
+      for (int i = 0; i < n; i++) {
+        if (region[static_cast<size_t>(i)] != r) {
+          continue;
+        }
+        nR++;
+        const int kLab = kernel[static_cast<size_t>(i)];
+        if (kLab == 1) {
+          kIc++;
+        } else if (kLab == 0) {
+          kIh++;
+        } else if (kLab == 2) {
+          kIsd++;
+        } else {
+          kOther++;
+        }
+        const int cLab = chill[static_cast<size_t>(i)];
+        if (cLab == 0 || cLab == 1 || cLab == 7 || cLab == 8) {
+          cCrystal++;
+        } else if (cLab == 3 || cLab == 5) {
+          cInter++;
+        } else if (cLab == 2) {
+          cWater++;
+        } else {
+          cOther++;
+        }
+      }
+      std::cout << regionName[r] << " n=" << nR << " " << kIc << " " << kIh << " " << kIsd << " "
+                << kOther << " " << cCrystal << " " << cInter << " " << cWater << " " << cOther
+                << "\n";
+    }
   }
   std::cout << "kernel_chill_same_family " << agree << " contested " << contested
             << " kernel_matches_shell " << kernelRight << " chill_matches_shell " << chillRight
