@@ -6,11 +6,15 @@
 
 #include <Eigen/Geometry>
 
+#include <atomic>
 #include <cmath>
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <system_error>
+#include <unistd.h>
 #include <vector>
 
 namespace symm {
@@ -79,6 +83,30 @@ std::vector<int> chillLabels(const Eigen::MatrixXd &m) {
   REQUIRE(seams_chill_plus(xyz.data(), n, box, labels.data()) == 0);
   return labels;
 }
+
+// One file per call. Parallel meson test must not share a name, and the
+// file is removed when the owner goes out of scope, including on failure.
+struct ScratchFile {
+  std::filesystem::path path;
+
+  explicit ScratchFile(const char *tag) {
+    static std::atomic<unsigned> seq{0};
+    const unsigned id = seq.fetch_add(1, std::memory_order_relaxed);
+    path = std::filesystem::temp_directory_path() /
+           ("csm-" + std::to_string(getpid()) + "-" + std::to_string(id) +
+            "-" + tag);
+  }
+
+  ScratchFile(const ScratchFile &) = delete;
+  ScratchFile &operator=(const ScratchFile &) = delete;
+
+  ~ScratchFile() {
+    std::error_code ec;
+    std::filesystem::remove(path, ec);
+  }
+
+  std::string str() const { return path.string(); }
+};
 
 } // namespace
 
@@ -463,9 +491,10 @@ void writeXyz(const std::string &path, const Eigen::MatrixXd &xyz) {
 
 double shapeProgram(const std::string &bin, const std::string &studied,
                     const std::string &reference) {
-  const std::string cmd = bin + " " + studied + " 0 " + reference + " 1 1 > /tmp/csm-shape-out.txt";
+  const ScratchFile out("shape-out.txt");
+  const std::string cmd = bin + " " + studied + " 0 " + reference + " 1 1 > " + out.str();
   REQUIRE(std::system(cmd.c_str()) == 0);
-  std::ifstream in("/tmp/csm-shape-out.txt");
+  std::ifstream in(out.path);
   std::string line;
   double value = -1.0;
   while (std::getline(in, line)) {
@@ -496,9 +525,11 @@ TEST_CASE("the in-tree shape measure matches the shape program", "[symmetry]") {
   for (Eigen::Index i = 0; i < moved.rows(); i++) {
     paired.row(i) = moved.row(hit.permutation[static_cast<size_t>(i)]);
   }
-  writeXyz("/tmp/csm-shell-ref.xyz", ref);
-  writeXyz("/tmp/csm-shell-moved.xyz", paired);
-  const double theirs = shapeProgram(bin, "/tmp/csm-shell-moved.xyz", "/tmp/csm-shell-ref.xyz");
+  const ScratchFile refPath("shell-ref.xyz");
+  const ScratchFile movedPath("shell-moved.xyz");
+  writeXyz(refPath.str(), ref);
+  writeXyz(movedPath.str(), paired);
+  const double theirs = shapeProgram(bin, movedPath.str(), refPath.str());
   const double ours = symm::shapeMeasure(moved);
   REQUIRE(std::abs(ours - theirs) < 0.05);
 }
