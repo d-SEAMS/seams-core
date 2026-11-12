@@ -983,6 +983,8 @@ ring::AffiliationUpdater::update(const std::vector<std::vector<int>> &rings,
       throughChanged > batchLimit) {
     // The batch pass stores every pair. On a frame this large the stored
     // pairs are not reused, and building them is slower than cageAffiliation.
+    // The next frames skip the diff, the same back-off as a dirty-pair batch.
+    st.fellBack();
     st.fastAffiliation(rings, nList);
     st.prevSortedRows.swap(st.incoming);
     st.answersValid = false;
