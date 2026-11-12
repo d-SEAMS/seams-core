@@ -502,6 +502,50 @@ int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
   }
 }
 
+int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
+                            double *q4, double *q6, int *labels,
+                            int counts9[9]) {
+  clear_error();
+  if (frame == nullptr || q4 == nullptr || q6 == nullptr) {
+    set_error("q4, q6 and a frame are required");
+    return 1;
+  }
+  try {
+    const int typ = resolve_type(frame->cloud, type);
+    std::vector<double> out4;
+    std::vector<double> out6;
+    if (!chill::q4q6ChillPlus(frame->cloud, cutoff, typ, out4, out6)) {
+      set_error("fused q4 q6 CHILL+ is not available for this frame");
+      return 1;
+    }
+    const int n = frame->cloud.nop;
+    if (n > 0) {
+      std::memcpy(q4, out4.data(), static_cast<std::size_t>(n) * sizeof(double));
+      std::memcpy(q6, out6.data(), static_cast<std::size_t>(n) * sizeof(double));
+    }
+    frame->labels.assign(static_cast<std::size_t>(std::max(n, 0)), 6);
+    int counts[9] = {};
+    for (int i = 0; i < n; ++i) {
+      const auto &point = frame->cloud.pts[static_cast<std::size_t>(i)];
+      int label = static_cast<int>(point.iceType);
+      if (!keep_atom(point.type, type)) {
+        label = static_cast<int>(molSys::atom_state_type::unclassified);
+      }
+      frame->labels[static_cast<std::size_t>(i)] = label;
+      if (keep_atom(point.type, type)) counts[label] += 1;
+    }
+    if (labels != nullptr && n > 0) {
+      std::memcpy(labels, frame->labels.data(),
+                  static_cast<std::size_t>(n) * sizeof(int));
+    }
+    if (counts9 != nullptr) std::memcpy(counts9, counts, sizeof(counts));
+    return 0;
+  } catch (...) {
+    remember_exception();
+    return 1;
+  }
+}
+
 int seams_frame_cages(seams_frame *frame, double cutoff, int type, int k,
                       const char *graph, int complete, int *per_atom,
                       int *n_hex, int *n_cubic, int *n_water, int *n_both) {

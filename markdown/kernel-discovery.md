@@ -266,3 +266,31 @@ Ideal ice of 4096 molecules, CHILL+, seams against mdapy: 1.54 ms
 against 3.04 ms on one thread, and 0.39 ms against 0.74 ms on eight.
 The host has 8 cores (`nproc` 8, one thread per core, cpuset 0-7, no
 `cpu.max`, `nr_periods` 0). Thread counts above are inside that set.
+
+## Eight threads on the triclinic crystal
+
+The Cartesian filter of a tilted cell was one thread while the team
+waited, and the count vector was zeroed on the calling thread before
+the workers wrote it. The filter is now a static split over atoms, and
+a full neighbour set leaves the counts for the thread that owns the
+cell. q4 and q6 of one atom read each neighbour's harmonic row once.
+Bonds of a tilted cell are wrapped in reduced coordinates.
+
+On the 110592-molecule triclinic crystal, eight threads, medians in ms
+(`discovery/v6-session.txt`):
+
+| call | seams | OVITO | mdapy |
+| --- | ---: | ---: | ---: |
+| q4 | 7.22 | 11.39 | 12.78 |
+| q6 | 7.64 | 11.13 | 14.30 |
+
+One thread: q4 43.87 / 51.62 / 66.39, q6 46.51 / 58.73 / 79.47.
+
+`seams_frame_q4_q6_chill` builds one cutoff list and evaluates l = 3,
+4 and 6 on that pass. Local q4 and q6 match the separate calls, and
+the published CHILL+ labels match. Against the sum of the three
+separate calls, orthorhombic ice, eight threads: 1.05 ms against
+OVITO 19.28 and mdapy 4.26 at 10648 molecules, 8.48 against 105.61
+and 39.37 at 110592, and 91.91 against 827.34 and 370.05 at 884736.
+One thread: 6.04 / 79.69 / 21.57, 51.62 / 734.37 / 205.83, and
+483.40 / 5859.74 / 2275.57.

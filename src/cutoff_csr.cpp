@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <vector>
 
 #ifdef SEAMS_HAS_OPENMP
@@ -106,6 +107,7 @@ struct Phase {
   double count = 0;
   double prefix = 0;
   double fill = 0;
+  double filter = 0;
   double rows = 0;
   int threads = 1;
   int n = 0;
@@ -130,9 +132,10 @@ void publishProfile() {
   const Phase &p = phase();
   std::fprintf(stderr,
                "neigh_profile n=%d threads=%d pairs=%d bin_ms=%.4f "
-               "count_ms=%.4f prefix_ms=%.4f fill_ms=%.4f rows_ms=%.4f\n",
+               "count_ms=%.4f prefix_ms=%.4f fill_ms=%.4f filter_ms=%.4f "
+               "rows_ms=%.4f\n",
                p.n, p.threads, p.pairs, p.bin, p.count, p.prefix, p.fill,
-               p.rows);
+               p.filter, p.rows);
 }
 
 int chooseCount(double length, double cutoff) {
@@ -478,7 +481,13 @@ bool orthoFullCsr(
   sc.cellStart.assign(static_cast<std::size_t>(nCells) + 1, 0);
   sc.hist.assign(static_cast<std::size_t>(maxThreads) * static_cast<std::size_t>(nCells),
                  0);
-  sc.counts.assign(static_cast<std::size_t>(nop), 0);
+  // A full set writes every count from the thread that owns the cell.
+  // Zeroing here would fault those lines on this thread first.
+  if (sc.counts.size() != static_cast<std::size_t>(nop)) {
+    sc.counts.assign(static_cast<std::size_t>(nop), 0);
+  } else if (subset != nullptr) {
+    std::fill(sc.counts.begin(), sc.counts.end(), 0);
+  }
 
   const auto tBin = Clock::now();
   int threads = 1;
@@ -653,7 +662,8 @@ bool orthoFullCsr(
     }
   }
   phase().fill = msSince(tFill);
-  if (tilt && nnz > 0) {
+  const auto tFilter = Clock::now();
+  if (tilt && nnz > 0 && maxThreads <= 1) {
     std::vector<double> rx(static_cast<std::size_t>(nop));
     std::vector<double> ry(static_cast<std::size_t>(nop));
     std::vector<double> rz(static_cast<std::size_t>(nop));
@@ -692,7 +702,65 @@ bool orthoFullCsr(
     offsets[static_cast<std::size_t>(nop)] = w;
     cols.resize(static_cast<std::size_t>(w));
     phase().pairs = w;
+  } else if (tilt && nnz > 0) {
+    std::vector<double> rx(static_cast<std::size_t>(nop));
+    std::vector<double> ry(static_cast<std::size_t>(nop));
+    std::vector<double> rz(static_cast<std::size_t>(nop));
+    std::vector<int> kept(static_cast<std::size_t>(nop));
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nSubset >= 256)
+#endif
+    for (int slot = 0; slot < nSubset; ++slot) {
+      const int id = sc.ids[static_cast<std::size_t>(slot)];
+      rx[static_cast<std::size_t>(id)] = x[slot];
+      ry[static_cast<std::size_t>(id)] = y[slot];
+      rz[static_cast<std::size_t>(id)] = z[slot];
+    }
+    const double hx = 0.5 * len[0];
+    const double hy = 0.5 * len[1];
+    const double hz = 0.5 * len[2];
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nop >= 256)
+#endif
+    for (int i = 0; i < nop; ++i) {
+      const int a = offsets[static_cast<std::size_t>(i)];
+      const int b = a + sc.counts[static_cast<std::size_t>(i)];
+      int wrow = a;
+      for (int k = a; k < b; ++k) {
+        const int j = cols[static_cast<std::size_t>(k)];
+        double dX = rx[static_cast<std::size_t>(i)] - rx[static_cast<std::size_t>(j)];
+        double dY = ry[static_cast<std::size_t>(i)] - ry[static_cast<std::size_t>(j)];
+        double dZ = rz[static_cast<std::size_t>(i)] - rz[static_cast<std::size_t>(j)];
+        if (dX > hx) dX -= len[0];
+        else if (dX < -hx) dX += len[0];
+        if (dY > hy) dY -= len[1];
+        else if (dY < -hy) dY += len[1];
+        if (dZ > hz) dZ -= len[2];
+        else if (dZ < -hz) dZ += len[2];
+        const double dx = dX + axy * dY + axz * dZ;
+        const double dy = dY + ayz * dZ;
+        if (dx * dx + dy * dy + dZ * dZ < rc2) {
+          cols[static_cast<std::size_t>(wrow++)] = j;
+        }
+      }
+      kept[static_cast<std::size_t>(i)] = wrow - a;
+    }
+    int packed = 0;
+    for (int i = 0; i < nop; ++i) {
+      const int a = offsets[static_cast<std::size_t>(i)];
+      const int nkeep = kept[static_cast<std::size_t>(i)];
+      if (packed != a && nkeep > 0) {
+        std::memmove(cols.data() + packed, cols.data() + a,
+                     static_cast<std::size_t>(nkeep) * sizeof(int));
+      }
+      offsets[static_cast<std::size_t>(i)] = packed;
+      packed += nkeep;
+    }
+    offsets[static_cast<std::size_t>(nop)] = packed;
+    cols.resize(static_cast<std::size_t>(packed));
+    phase().pairs = packed;
   }
+  phase().filter = msSince(tFilter);
   publishProfile();
   return true;
 }

@@ -69,6 +69,12 @@ int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
 int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
                            int order_l, double *ql, double *qlbar);
 
+/* One cutoff list. Local q4, local q6 and published CHILL+ labels.
+ * ql bar is not filled. counts9 may be null. Returns 1 on failure. */
+int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
+                            double *q4, double *q6, int *labels,
+                            int counts9[9]);
+
 int seams_frame_cages(seams_frame *frame, double cutoff, int type, int k,
                       const char *graph, int complete, int *per_atom,
                       int *n_hex, int *n_cubic, int *n_water, int *n_both);

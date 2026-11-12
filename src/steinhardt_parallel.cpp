@@ -1046,9 +1046,20 @@ SteinhardtQl cutoffSolid(
   for (int i = 0; i < n; i++) {
     const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
     if (tilt) {
-      scratch.xyz[static_cast<std::size_t>(3 * i)] = p.x;
-      scratch.xyz[static_cast<std::size_t>(3 * i) + 1] = p.y;
-      scratch.xyz[static_cast<std::size_t>(3 * i) + 2] = p.z;
+      // Reduced coordinates. The bond loop then wraps those lengths
+      // instead of repeating the fractional conversion on every neighbour.
+      double sz = (p.z - frac.oz) / frac.lz;
+      sz -= std::floor(sz);
+      if (!(sz < 1.0)) sz = 0.0;
+      double sy = (p.y - frac.oy - frac.yz * sz) / frac.ly;
+      sy -= std::floor(sy);
+      if (!(sy < 1.0)) sy = 0.0;
+      double sx = (p.x - frac.ox - frac.xy * sy - frac.xz * sz) / frac.lx;
+      sx -= std::floor(sx);
+      if (!(sx < 1.0)) sx = 0.0;
+      scratch.xyz[static_cast<std::size_t>(3 * i)] = sx * frac.lx;
+      scratch.xyz[static_cast<std::size_t>(3 * i) + 1] = sy * frac.ly;
+      scratch.xyz[static_cast<std::size_t>(3 * i) + 2] = sz * frac.lz;
     } else {
       auto wrap = [](double v, double origin, double L) {
         double t = (v - origin) / L;
@@ -1108,13 +1119,18 @@ SteinhardtQl cutoffSolid(
       const int j = scratch.cols[static_cast<std::size_t>(p)];
       double dx, dy, dz;
       if (tilt) {
-        const auto image = gen::fracDelta(
-            frac, xi, yi, zi, scratch.xyz[static_cast<std::size_t>(3 * j)],
-            scratch.xyz[static_cast<std::size_t>(3 * j) + 1],
-            scratch.xyz[static_cast<std::size_t>(3 * j) + 2]);
-        dx = image[0];
-        dy = image[1];
-        dz = image[2];
+        double dX = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
+        double dY = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
+        double dZ = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+        dX -= frac.lx * std::round(dX / frac.lx);
+        dY -= frac.ly * std::round(dY / frac.ly);
+        dZ -= frac.lz * std::round(dZ / frac.lz);
+        const double axy = frac.xy / frac.ly;
+        const double axz = frac.xz / frac.lz;
+        const double ayz = frac.yz / frac.lz;
+        dx = dX + axy * dY + axz * dZ;
+        dy = dY + ayz * dZ;
+        dz = dZ;
       } else {
         dx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
         dy = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
@@ -1158,20 +1174,18 @@ SteinhardtQl cutoffSolid(
       const int a = scratch.offsets[static_cast<std::size_t>(i)];
       const int b = scratch.offsets[static_cast<std::size_t>(i) + 1];
       const double *self = scratch.qlm.data() + static_cast<std::size_t>(i) * width;
-      double sum = 0.0;
+      double acc[26];
+      for (int c = 0; c < width; ++c) acc[c] = self[c];
+      for (int p = a; p < b; p++) {
+        const int j = scratch.cols[static_cast<std::size_t>(p)];
+        const double *other = scratch.qlm.data() + static_cast<std::size_t>(j) * width;
+        for (int c = 0; c < width; ++c) acc[c] += other[c];
+      }
       const double inv = 1.0 / static_cast<double>(b - a + 1);
-      for (int m = 0; m < nComp; m++) {
-        double re = self[2 * m];
-        double im = self[2 * m + 1];
-        for (int p = a; p < b; p++) {
-          const int j = scratch.cols[static_cast<std::size_t>(p)];
-          const double *other = scratch.qlm.data() + static_cast<std::size_t>(j) * width;
-          re += other[2 * m];
-          im += other[2 * m + 1];
-        }
-        re *= inv;
-        im *= inv;
-        sum += re * re + im * im;
+      double sum = 0.0;
+      for (int c = 0; c < width; ++c) {
+        acc[c] *= inv;
+        sum += acc[c] * acc[c];
       }
       result.qlBar[static_cast<std::size_t>(i)] = std::sqrt(prefactor * sum);
     }
