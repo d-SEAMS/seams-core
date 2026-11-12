@@ -18,6 +18,44 @@ jobs:
         run: pixi add openmm plumed numpy
       - name: Build and run the engine tests
         run: |
+          set -euo pipefail
           pixi run meson setup build-eng -Dwith_tests=true -Dwith_openmm=auto -Dwith_plumed=auto
           pixi run ninja -C build-eng
-          pixi run meson test -C build-eng --print-errorlogs openmm_reporter plumed_driver insitu_observe
+          plugin=$(find build-eng -name seams_openmm -type f | head -n 1)
+          plumed_so=$(find build-eng -name 'libSeamsPlumed.so' -type f | head -n 1)
+          if [ -z "$plugin" ] || [ -z "$plumed_so" ]; then
+            echo "conda packages were installed but seams_openmm or libSeamsPlumed.so is missing" >&2
+            find build-eng -name 'seams_openmm' -o -name 'libSeamsPlumed.so' -o -name '*.so' | head
+            exit 1
+          fi
+          pixi run meson test -C build-eng --print-errorlogs \
+            openmm_reporter openmm_plugin plumed_driver insitu_observe | tee build-eng/engine-tests.txt
+          for name in openmm_reporter openmm_plugin plumed_driver insitu_observe; do
+            if ! grep -E "${name}[[:space:]]+OK" build-eng/engine-tests.txt >/dev/null; then
+              echo "${name} did not run" >&2
+              exit 1
+            fi
+          done
+
+  lammps-gromacs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-engines-md-
+      - name: Install conda-forge LAMMPS and GROMACS into the pixi environment
+        run: pixi add lammps gromacs
+      - name: Build and run the LAMMPS and GROMACS tests
+        run: |
+          set -euo pipefail
+          pixi run meson setup build-md -Dwith_tests=true -Dwith_lammps=auto -Dwith_gromacs=auto
+          pixi run ninja -C build-md
+          pixi run meson test -C build-md --print-errorlogs lammps_hook gromacs_mdrun | tee build-md/md-tests.txt
+          for name in lammps_hook gromacs_mdrun; do
+            if ! grep -E "${name}[[:space:]]+OK" build-md/md-tests.txt >/dev/null; then
+              echo "${name} did not run" >&2
+              exit 1
+            fi
+          done

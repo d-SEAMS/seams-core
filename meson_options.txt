@@ -2,9 +2,9 @@ option('with_tests', type: 'boolean', value: true,
   description: 'Build Catch2 C++ tests')
 option('with_python', type: 'boolean', value: true,
   description: 'Build the nanobind dseams module when Python and nanobind are found')
-option('with_lammps', type: 'feature', value: 'disabled',
+option('with_lammps', type: 'feature', value: 'auto',
   description: 'Build the LAMMPS hook when liblammps is found')
-option('with_gromacs', type: 'feature', value: 'disabled',
+option('with_gromacs', type: 'feature', value: 'auto',
   description: 'Build the GROMACS analysis tool when libgromacs is found')
 option('with_openmm', type: 'feature', value: 'auto',
   description: 'Build the OpenMM plugin when libOpenMM is found')
@@ -33,8 +33,6 @@ option('with_nauty', type: 'feature', value: 'auto',
 option('with_lua', type: 'feature', value: 'disabled',
   description: 'Unused. Lua is the dseams library in the yodaStruct repo')
 
-option('openmm', type: 'feature', value: 'auto',
-  description: 'Record an OpenMM request. The reporter is Python and is not compiled by Meson')
 option('with_chemfiles', type: 'feature', value: 'auto',
   description: 'Trajectory I/O via chemfiles (on when the library is found or can be fetched)')
 option('with_linkcell', type: 'feature', value: 'auto', description: 'Periodic linked-cell neighbour search')

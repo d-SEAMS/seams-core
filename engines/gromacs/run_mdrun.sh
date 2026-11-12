@@ -12,9 +12,9 @@ awk 'NR==1{print; next} NR==2{n=$1; print; left=n; next} left>0{print; left--; n
 cp "$root/topol.top" "$root/md.mdp" "$work/"
 (
   cd "$work"
-  env -u LD_LIBRARY_PATH -u LIBRARY_PATH PATH=/usr/bin:/bin \
+  env -u LD_LIBRARY_PATH -u LIBRARY_PATH \
     gmx grompp -f md.mdp -c ice.gro -p topol.top -o ice.tpr -maxwarn 2
-  env -u LD_LIBRARY_PATH -u LIBRARY_PATH PATH=/usr/bin:/bin \
+  env -u LD_LIBRARY_PATH -u LIBRARY_PATH \
     gmx mdrun -s ice.tpr -deffnm ice -nsteps 4
 )
 env -u LIBRARY_PATH LD_LIBRARY_PATH="$libdir" \
