@@ -180,3 +180,39 @@ TEST_CASE("A summary of the ranks' rings is the frame's summary", "[domain]") {
     }
   }
 }
+
+TEST_CASE("a halo source is the atom share.local names", "[domain]") {
+  Cloud cloud;
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  const double z[4] = {1.0, 15.0, 11.0, 15.0};
+  for (int i = 0; i < 4; i++) {
+    molSys::Point<double> p;
+    p.x = 10.0;
+    p.y = 10.0;
+    p.z = z[i];
+    p.atomID = i + 1;
+    p.molID = p.atomID;
+    p.type = 1;
+    cloud.pts.push_back(p);
+  }
+  cloud.nop = static_cast<int>(cloud.pts.size());
+  // local[k] is a frame index, and it is not k. Rank 0's block on this
+  // box is the low half of z. Atom 2 sits just outside that block. Atom
+  // 1 and atom 3 sit at the far side of the other block.
+  seams::domain::Share share;
+  share.local = {0, 2, 3};
+  share.owned = {1, 0, 0};
+  share.owner = {0, 1, 1};
+  REQUIRE(share.local[1] != 1);
+  REQUIRE(share.local[2] != 2);
+  std::vector<char> source;
+  const double inner = 3.0;
+  REQUIRE(inner >= 0.0);
+  seams::domain::markSources(cloud, share, inner, source);
+  REQUIRE(source.size() == 3);
+  REQUIRE(source[0] == 1);
+  REQUIRE(source[1] == 1);
+  REQUIRE(source[2] == 0);
+}
+

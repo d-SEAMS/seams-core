@@ -219,7 +219,7 @@ void markSources(const Cloud &cloud, const Share &share, double inner,
       source[k] = 1;
       continue;
     }
-    const auto &p = cloud.pts[k];
+    const auto &p = cloud.pts[static_cast<std::size_t>(share.local[k])];
     const double sz = (p.z - box.oz) / box.lz;
     const double sy = (p.y - box.oy - box.yz * sz) / box.ly;
     const double sx = (p.x - box.ox - box.xy * sy - box.xz * sz) / box.lx;

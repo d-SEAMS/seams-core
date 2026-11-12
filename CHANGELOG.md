@@ -67,6 +67,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Keep spherical-harmonic scratch local to each call so concurrent frames and changing thread counts do not share buffers.
 - Load oxygen and hydrogen together for `seams f4` so Rodger F4 is finite when mol IDs exist.
 - Require readcon-db 0.1.7 so static consumers receive only the archive and shared consumers receive the runtime search path.
+- Read a halo source from the frame index in share.local. The old index walked the local list as if it were the frame.
 
 
 ## [2.13.0] - 2026-11-06
