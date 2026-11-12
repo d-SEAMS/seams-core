@@ -87,14 +87,14 @@ Release `-O3`, one warm-up, then six calls. The median of an even sample is the 
 
 | Molecules | Threads | Kernel median (ms) | Kernel per atom (µs) | PTM median (ms) | PTM per atom (µs) |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| 216 | 1 | 0.483 | 2.23 | 8.447 | 39.11 |
-| 216 | 8 | 0.092 | 0.428 | 8.572 | 39.69 |
-| 10648 | 1 | 26.647 | 2.50 | 72.986 | 6.85 |
-| 10648 | 8 | 5.765 | 0.541 | 73.003 | 6.86 |
-| 110592 | 1 | 271.539 | 2.46 | 545.459 | 4.93 |
-| 110592 | 8 | 55.660 | 0.503 | 539.262 | 4.88 |
+| 216 | 1 | 0.237 | 1.10 | 8.447 | 39.11 |
+| 216 | 8 | 0.067 | 0.309 | 8.572 | 39.69 |
+| 10648 | 1 | 15.549 | 1.46 | 72.986 | 6.85 |
+| 10648 | 8 | 3.068 | 0.288 | 73.003 | 6.86 |
+| 110592 | 1 | 181.098 | 1.64 | 545.459 | 4.93 |
+| 110592 | 8 | 31.455 | 0.284 | 539.262 | 4.88 |
 
-Raw kernel samples, 1 thread, milliseconds: 216 is 0.451607 0.477603 0.477751 0.487726 0.496632 0.527623; 10648 is 26.0172 26.1514 26.5205 26.7743 26.8901 27.3843; 110592 is 271.031 271.344 271.397 271.681 272.013 274.186. Eight threads, 110592: 45.8531 46.9341 52.9163 58.4034 59.3667 60.2922. Orthorhombic boxes use the packed cell list from the neighbour builder, with cells no wider than the 5.6 Å shell and the 27 surrounding cells. The quaternion is a hand-rolled 4×4 Jacobi solve in a translation unit that does not include Eigen, built with AVX2. A clean first shell, residual under 0.02 and arm error under 0.05, skips the 17-point scale fit. On ideal ice that skip fires on the first even permutation. The walk over the shell is what remains, so 110592 molecules is 2.46 µs/atom rather than the 1.45 µs/atom of the absolute-residual kernel. A 5.0 Å shell is faster and loses the thermal recall, so the shell stays at 5.6 Å. It is still faster per atom than PTM.
+Raw kernel samples, 1 thread, milliseconds: 216 is 0.231745 0.233089 0.235761 0.238706 0.245573 0.300954; 10648 is 15.3462 15.4036 15.4909 15.6063 15.9375 17.44; 110592 is 178.587 180.783 180.876 181.32 185.024 191.42. Eight threads, 110592: 30.3151 30.5411 31.1766 31.7337 33.2016 33.6511. The seventeen-atom shell is built from the 3.5 Å bond list: the four nearest bonded neighbours, then each of those atoms' own bonded neighbours, excluding the centre. A bond past 3.5 Å but inside 4.2 Å, and still within 5.6 Å of the centre, is read from a wider stencil only when the 3.5 Å list is short. That is the set the scale-free fit was already scoring, so the thermal labels do not move. The quaternion fit is now the larger part of the time. One thread at 110592 is 1.64 µs/atom, and eight threads are 5.8 times faster. It is still faster per atom than PTM.
 
 IRA on the same 216-atom cell, one shell per oxygen through libira, is serial. Median 296.31 ms (raw 284.602 288.204 291.98 300.632 325.416 335.735), about 1.37 ms per atom, three orders of magnitude above the kernel. spglib on the 8-atom ice Ic cell returns 227 `Fd-3m` in a median 4.72 ms. That is one cell, not a per-atom cost.
 
@@ -178,13 +178,26 @@ No d-SEAMS ice-nucleation or clathrate dataset is published on Hugging Face from
 
 The kernel stays with CHILL+ and above PTM. By 120 ps the nucleus is still a few percent of the cell.
 
+The same protocol on a 13824-molecule cell with a 300-oxygen seed, held at 220 K for 200 ps, three seeds (91001, 92002, 93003). About 13660 waters remain after the core is put back. The seed grows in all three and does not melt. Counts are the three seeds in that order.
+
+| Time | Kernel | CHILL+ crystal | PTM |
+| --- | --- | --- | --- |
+| 0 | 103, 100, 97 | 156, 146, 140 | 101, 99, 102 |
+| 40 ps | 418, 412, 414 | 374, 370, 369 | 198, 198, 202 |
+| 80 ps | 484, 487, 463 | 410, 401, 406 | 231, 218, 226 |
+| 120 ps | 575, 538, 497 | 493, 446, 465 | 269, 263, 265 |
+| 160 ps | 611, 624, 524 | 518, 497, 467 | 294, 275, 296 |
+| 200 ps | 624, 584, 594 | 544, 488, 492 | 306, 295, 329 |
+
+On these frames the kernel takes 150 ms at the start and 230-270 ms once the seed has grown (11-20 µs/atom). Most atoms are not a complete 3.5 Å shell, so the bond is widened. CHILL+ takes about 11 ms (0.8 µs/atom) and PTM about 85 ms (6 µs/atom).
+
 Guest-free sI (2×2×2, 368 waters) and sII (2×2×2, 1088 waters) were run for 10 ps at 220 K and at 250 K and quenched the same way. Cages come from the primitive ring network at a 3.5 Å bond cutoff and `cage::findBySignature`, kept only when the shape residual of the cage against its template is under 1.5 Å. At both temperatures the thermal sI cell has 16 of 5^12 and 48 of 5^12 6^2, and every cage matches an inherent-structure cage of the same kind within 2 Å. The thermal sII cell has 128 of 5^12 and 64 of 5^12 6^4, again with every cage matched. Widening the bond cutoff to 3.7 Å drops 4 small cages and 3 large cages from the 250 K sII cell, so 3.5 Å is the cutoff that agrees with the quench. The ice classifier names none of the 5750-water sI cell as ice. PTM names that cell other throughout. CHILL+ names it clathrate.
 
 ## Paragraph
 
 Local ice is labelled by the scale-free residual of the seventeen-atom shell to ice Ic, ice Ih or stacking-disordered ice. A quaternion overlay of the tetrahedron, with the second shell ordered by azimuth, supplies that residual after the optimal rotation and scale. The atoms are split across threads. On ideal ice Ic this is faster, per atom, than polyhedral template matching in OVITO 3.17.2 from 216 molecules through 110592, on one thread and on eight. A general IRA overlay of the same shells is kept as a reference and is about a thousand times slower per atom. The overlay that is returned for a named shell, cage or ring uses a 3×3 SVD and a permutation fixed by the bond graph, and the continuous shape measure is the scaled residual of that overlay. The same machinery names the cages of the sI and sII lattices, two and six in sI and sixteen and eight in sII, which template matching reports only as other and which CHILL+ reports only as clathrate. On a stacking-fault cell, template matching returns other for every oxygen, while the shell match splits the cell evenly between ice Ic and ice Isd.
 
-The label kept for production is the scale-free residual of the seventeen-atom shell, ceiling 0.18. Against the steepest-descent inherent structure that ceiling has precision 1 on ice Ic, ice Ih and stacking-disordered ice from 200 K to 270 K, and at 270 K it matches PTM on ice Ih, 255 of 256. The 4096-molecule cell at 220 K is 4096 of 4096. Ideal ice Ic at 110592 molecules is 2.46 µs/atom on one thread, above the 1.45 µs/atom of the absolute-residual kernel and still under PTM at 4.93. A 3.5 Å ring network plus a shape ceiling of 1.5 Å names every thermal sI and sII cage and matches each one to the inherent structure. One thread names a hexagon in 3.80 µs and a dodecahedron in 4.82 µs, below IRA.
+The label kept for production is the scale-free residual of the seventeen-atom shell, ceiling 0.18. Against the steepest-descent inherent structure that ceiling has precision 1 on ice Ic, ice Ih and stacking-disordered ice from 200 K to 270 K, and at 270 K it matches PTM on ice Ih, 255 of 256. The 4096-molecule cell at 220 K is 4096 of 4096. Ideal ice Ic at 110592 molecules is 1.64 µs/atom on one thread, above the 1.45 µs/atom of the absolute-residual kernel and still under PTM at 4.93. Eight threads are 5.8 times faster. A 3.5 Å ring network plus a shape ceiling of 1.5 Å names every thermal sI and sII cage and matches each one to the inherent structure. One thread names a hexagon in 3.80 µs and a dodecahedron in 4.82 µs, below IRA.
 
 ## Citations
 
