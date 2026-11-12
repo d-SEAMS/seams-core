@@ -341,7 +341,85 @@ bool __attribute__((noinline, cold)) hasStaggeredBond(const double envF[4][3], c
 // diamond are an FCC shell (every bond staggered) and those of a hexagonal
 // diamond are an HCP shell (one bond eclipsed). A clean shell is a single
 // radius. Anything wider falls through to the full fit.
-int diamondSecondShell(const double first[4][3], const double *sx, const double *sy, const double *sz) {
+// 12 x (4,2,1) is cubic diamond, 6 x (4,2,1) + 6 x (4,2,2) is hexagonal.
+// Returns the label, or -2 when the shell is close enough to be worth the fit.
+int diamondCna(const double *sx, const double *sy, const double *sz) {
+  double rsum = 0.0;
+  for (int i = 0; i < 12; i++) {
+    rsum += std::sqrt(sx[i] * sx[i] + sy[i] * sy[i] + sz[i] * sz[i]);
+  }
+  const double cut = (rsum / 12.0) * 1.30;
+  const double cut2 = cut * cut;
+  int n421 = 0;
+  int n422 = 0;
+  int nBad = 0;
+  for (int j = 0; j < 12; j++) {
+    int common[12];
+    int nc = 0;
+    for (int k = 0; k < 12; k++) {
+      if (k == j) {
+        continue;
+      }
+      const double dx = sx[j] - sx[k];
+      const double dy = sy[j] - sy[k];
+      const double dz = sz[j] - sz[k];
+      if (dx * dx + dy * dy + dz * dz < cut2) {
+        if (nc < 12) {
+          common[nc] = k;
+        }
+        nc++;
+      }
+    }
+    if (nc != 4) {
+      nBad++;
+      continue;
+    }
+    int nBonds = 0;
+    int deg[4] = {};
+    for (int a = 0; a < 4; a++) {
+      for (int b = a + 1; b < 4; b++) {
+        const int ia = common[a];
+        const int ib = common[b];
+        const double dx = sx[ia] - sx[ib];
+        const double dy = sy[ia] - sy[ib];
+        const double dz = sz[ia] - sz[ib];
+        if (dx * dx + dy * dy + dz * dz < cut2) {
+          nBonds++;
+          deg[a]++;
+          deg[b]++;
+        }
+      }
+    }
+    if (nBonds != 2) {
+      nBad++;
+      continue;
+    }
+    int chain = 1;
+    for (int a = 0; a < 4; a++) {
+      if (deg[a] >= 2) {
+        chain = 2;
+      }
+    }
+    if (chain == 1) {
+      n421++;
+    } else {
+      n422++;
+    }
+  }
+  if (n421 == 12) {
+    return 1;
+  }
+  if (n421 == 6 && n422 == 6) {
+    return 0;
+  }
+  if (n421 + n422 >= 4 && nBad <= 6) {
+    return -2;
+  }
+  return -1;
+}
+
+int diamondSecondShell(const double first[4][3], const double *sx, const double *sy, const double *sz,
+                      double radiusRatio, double eclipsedCos, double staggeredCos) {
   double rmin = 1e300;
   double rmax = 0.0;
   for (int i = 0; i < 12; i++) {
@@ -353,56 +431,77 @@ int diamondSecondShell(const double first[4][3], const double *sx, const double 
       rmax = r2;
     }
   }
-  if (!(rmin > 1.0) || rmax > rmin * 1.0404) {
+  // A thermal crystal still has one shell; liquid does not.
+  if (!(rmin > 1.0) || rmax > rmin * radiusRatio * radiusRatio) {
     return -1;
   }
   int nEclipsed = 0;
   int nStaggered = 0;
+  // Project each arm's three second bonds once, then take the best cosine
+  // against the other three bonds. eclipsed: cos >= 0.95. staggered: best
+  // cos in (0.20, 0.65].
+  const double kEcl2 = eclipsedCos * eclipsedCos;
+  const double kStg2 = staggeredCos * staggeredCos;
+  constexpr double kLow2 = 0.20 * 0.20;
   for (int a = 0; a < 4; a++) {
-    double u[3] = {first[a][0], first[a][1], first[a][2]};
-    const double un2 = u[0] * u[0] + u[1] * u[1] + u[2] * u[2];
+    const double u0 = first[a][0];
+    const double u1 = first[a][1];
+    const double u2 = first[a][2];
+    const double un2 = u0 * u0 + u1 * u1 + u2 * u2;
     if (!(un2 > 1e-8)) {
       return -1;
     }
-    const double un = std::sqrt(un2);
-    u[0] /= un;
-    u[1] /= un;
-    u[2] /= un;
-    double mx = -1.0;
-    for (int b = 0; b < 4; b++) {
+    double px[3], py[3], pz[3], vn2[3];
+    for (int e = 0; e < 3; e++) {
+      const int s = 3 * a + e;
+      const double vx0 = sx[s] - u0;
+      const double vy0 = sy[s] - u1;
+      const double vz0 = sz[s] - u2;
+      const double vd = vx0 * u0 + vy0 * u1 + vz0 * u2;
+      px[e] = vx0 * un2 - vd * u0;
+      py[e] = vy0 * un2 - vd * u1;
+      pz[e] = vz0 * un2 - vd * u2;
+      vn2[e] = px[e] * px[e] + py[e] * py[e] + pz[e] * pz[e];
+    }
+    bool eclipsed = false;
+    bool low = true;
+    bool any = false;
+    for (int b = 0; b < 4 && !eclipsed; b++) {
       if (b == a) {
         continue;
       }
-      double ref[3] = {first[b][0], first[b][1], first[b][2]};
-      const double rd = ref[0] * u[0] + ref[1] * u[1] + ref[2] * u[2];
-      ref[0] -= rd * u[0];
-      ref[1] -= rd * u[1];
-      ref[2] -= rd * u[2];
-      const double rn2 = ref[0] * ref[0] + ref[1] * ref[1] + ref[2] * ref[2];
-      if (rn2 < 1e-12) {
+      const double rd = first[b][0] * u0 + first[b][1] * u1 + first[b][2] * u2;
+      const double rx = first[b][0] * un2 - rd * u0;
+      const double ry = first[b][1] * un2 - rd * u1;
+      const double rz = first[b][2] * un2 - rd * u2;
+      const double rn2 = rx * rx + ry * ry + rz * rz;
+      if (rn2 < 1e-18) {
         continue;
       }
-      const double invR = 1.0 / std::sqrt(rn2);
       for (int e = 0; e < 3; e++) {
-        const int s = 3 * a + e;
-        double v[3] = {sx[s] - first[a][0], sy[s] - first[a][1], sz[s] - first[a][2]};
-        const double vd = v[0] * u[0] + v[1] * u[1] + v[2] * u[2];
-        v[0] -= vd * u[0];
-        v[1] -= vd * u[1];
-        v[2] -= vd * u[2];
-        const double vn2 = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-        if (vn2 < 1e-12) {
+        if (vn2[e] < 1e-18) {
           continue;
         }
-        const double c = (ref[0] * v[0] + ref[1] * v[1] + ref[2] * v[2]) * invR / std::sqrt(vn2);
-        if (c > mx) {
-          mx = c;
+        const double dot = rx * px[e] + ry * py[e] + rz * pz[e];
+        if (dot <= 0.0) {
+          continue;
+        }
+        const double dot2 = dot * dot;
+        const double scale = rn2 * vn2[e];
+        if (dot2 >= kEcl2 * scale) {
+          eclipsed = true;
+          break;
+        }
+        if (dot2 > kStg2 * scale) {
+          low = false;
+        } else if (dot2 >= kLow2 * scale) {
+          any = true;
         }
       }
     }
-    if (mx >= 0.95) {
+    if (eclipsed) {
       nEclipsed++;
-    } else if (mx <= 0.65) {
+    } else if (low && any) {
       nStaggered++;
     } else {
       return -1;
@@ -678,12 +777,12 @@ int shellFit(const double center[3], const double nb[][3], int nNb, const CanonS
 
 } // namespace
 
-int bondsBeyond(int atom, const Packed *packed, const int *cellStart, const Image *images, int nImage,
+int bondsBeyond(int atom, const Packed *packed, const int *cellStart, int nx, int ny, int nz, int reach,
                const int *bin, const double lat[3][3], const double *px, const double *py, const double *pz,
                Bond *out);
 
 void recoverHex(int n, const Bond *bonds, const int *nbon, const Packed *packed, const int *cellStart,
-                const Image *images, int nImage, const int *bin, const double lat[3][3], const double *px,
+                int nx, int ny, int nz, int reach, const int *bin, const double lat[3][3], const double *px,
                 const double *py, const double *pz, int *kind, const CanonShell &canon, double gate);
 
 void classifyPrepared(const double *x, const double *y, const double *z, int n,
@@ -691,6 +790,15 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   if (n <= 0) {
     return;
   }
+  // A clean second shell is labelled by the common-neighbour test. The
+  // permutation fit runs only when that test is close and the tetrahedron
+  // is still tight: q at least 0.90, bond lengths within 15%, second-shell
+  // radius within 40%.
+  constexpr double kFastRadius = 1.15;
+  constexpr double kQFit = 0.90;
+  constexpr double kShellRadius = 1.40;
+  constexpr double kEclipsed = 0.90;
+  constexpr double kStaggered = 0.75;
   double invT[3][3];
   double M[3][3];
   for (int i = 0; i < 3; i++) {
@@ -738,16 +846,28 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     const double c1 = y[i];
     const double c2 = z[i];
     double f[3] = {0, 0, 0};
-    f[0] = invT[0][0] * c0 + invT[0][1] * c1 + invT[0][2] * c2;
-    f[1] = invT[1][0] * c0 + invT[1][1] * c1 + invT[1][2] * c2;
-    f[2] = invT[2][0] * c0 + invT[2][1] * c1 + invT[2][2] * c2;
-    for (int a = 0; a < 3; a++) {
-      f[a] -= std::floor(f[a]);
-    }
     double wrapped[3] = {0, 0, 0};
-    for (int c = 0; c < 3; c++) {
+    if (ortho) {
+      f[0] = c0 / lat[0][0];
+      f[1] = c1 / lat[1][1];
+      f[2] = c2 / lat[2][2];
       for (int a = 0; a < 3; a++) {
-        wrapped[c] += f[a] * lat[a][c];
+        f[a] -= std::floor(f[a]);
+      }
+      wrapped[0] = f[0] * lat[0][0];
+      wrapped[1] = f[1] * lat[1][1];
+      wrapped[2] = f[2] * lat[2][2];
+    } else {
+      f[0] = invT[0][0] * c0 + invT[0][1] * c1 + invT[0][2] * c2;
+      f[1] = invT[1][0] * c0 + invT[1][1] * c1 + invT[1][2] * c2;
+      f[2] = invT[2][0] * c0 + invT[2][1] * c1 + invT[2][2] * c2;
+      for (int a = 0; a < 3; a++) {
+        f[a] -= std::floor(f[a]);
+      }
+      for (int c = 0; c < 3; c++) {
+        for (int a = 0; a < 3; a++) {
+          wrapped[c] += f[a] * lat[a][c];
+        }
       }
     }
     px[static_cast<size_t>(i)] = wrapped[0];
@@ -785,14 +905,91 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   }
   const int span = 2 * reach + 1;
   const int nImage = span * span * span;
-  RawBuf<Image> images(static_cast<size_t>(ncell) * static_cast<size_t>(nImage));
+  RawBuf<Bond> bonds(static_cast<size_t>(n) * static_cast<size_t>(kMaxBond));
+  std::vector<int> nbon(static_cast<size_t>(n), 0);
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (ncell >= 256)
+  const int threads = omp_get_max_threads();
+#pragma omp parallel for schedule(static) if (n >= 64 && threads > 1)
 #endif
   for (int cell = 0; cell < ncell; cell++) {
     const int ix0 = cell % nx;
     const int iy0 = (cell / nx) % ny;
     const int iz0 = cell / (nx * ny);
+    const bool interior = fast && ix0 > 0 && iy0 > 0 && iz0 > 0 && ix0 + 1 < nx && iy0 + 1 < ny &&
+                          iz0 + 1 < nz;
+    if (interior) {
+      const int here0 = cellStart[static_cast<size_t>(cell)];
+      const int here1 = cellStart[static_cast<size_t>(cell) + 1];
+      for (int mine = here0; mine < here1; mine++) {
+        const int i = packed[static_cast<size_t>(mine)].id;
+        const double ci0 = packed[static_cast<size_t>(mine)].x;
+        const double ci1 = packed[static_cast<size_t>(mine)].y;
+        const double ci2 = packed[static_cast<size_t>(mine)].z;
+        Bond row[kMaxBond];
+        double rd[kMaxBond];
+        int nb = 0;
+        for (int dz = -1; dz <= 1; dz++) {
+          const int iz = iz0 + dz;
+          for (int dy = -1; dy <= 1; dy++) {
+            const int iy = iy0 + dy;
+            const int row0 = (iz * ny + iy) * nx + ix0;
+            for (int dx = -1; dx <= 1; dx++) {
+              const int nbcell = row0 + dx;
+              const int begin = cellStart[static_cast<size_t>(nbcell)];
+              const int end = cellStart[static_cast<size_t>(nbcell) + 1];
+              for (int m = begin; m < end; m++) {
+                const Packed &nbr = packed[static_cast<size_t>(m)];
+                if (nbr.id == i && dx == 0 && dy == 0 && dz == 0) {
+                  continue;
+                }
+                const double ddx = nbr.x - ci0;
+                const double ddy = nbr.y - ci1;
+                const double ddz = nbr.z - ci2;
+                const double d2 = ddx * ddx + ddy * ddy + ddz * ddz;
+                if (d2 > kBond * kBond || d2 < 2.15 * 2.15) {
+                  continue;
+                }
+                if (nb < kMaxBond) {
+                  row[nb] = Bond{nbr.id, ddx, ddy, ddz};
+                  rd[nb] = d2;
+                  nb++;
+                } else {
+                  int worst = 0;
+                  for (int c = 1; c < kMaxBond; c++) {
+                    if (rd[c] > rd[worst]) {
+                      worst = c;
+                    }
+                  }
+                  if (d2 < rd[worst]) {
+                    row[worst] = Bond{nbr.id, ddx, ddy, ddz};
+                    rd[worst] = d2;
+                  }
+                }
+              }
+            }
+          }
+        }
+        for (int a = 1; a < nb; a++) {
+          const Bond b = row[a];
+          const double d2 = rd[a];
+          int at = a;
+          while (at > 0 && d2 < rd[at - 1]) {
+            row[at] = row[at - 1];
+            rd[at] = rd[at - 1];
+            at--;
+          }
+          row[at] = b;
+          rd[at] = d2;
+        }
+        nbon[static_cast<size_t>(i)] = nb;
+        Bond *dest = &bonds[static_cast<size_t>(i) * static_cast<size_t>(kMaxBond)];
+        for (int a = 0; a < nb; a++) {
+          dest[a] = row[a];
+        }
+      }
+      continue;
+    }
+    Image local[729];
     int slot = 0;
     for (int dz = -reach; dz <= reach; dz++) {
       int iz = iz0 + dz;
@@ -827,23 +1024,11 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
             ix -= nx;
             sx++;
           }
-          images[static_cast<size_t>(cell) * static_cast<size_t>(nImage) + static_cast<size_t>(slot)] =
-              Image{(iz * ny + iy) * nx + ix, sx, sy, sz};
-          slot++;
+          local[slot++] = Image{(iz * ny + iy) * nx + ix, sx, sy, sz};
         }
       }
     }
-  }
-
-  RawBuf<Bond> bonds(static_cast<size_t>(n) * static_cast<size_t>(kMaxBond));
-  std::vector<int> nbon(static_cast<size_t>(n), 0);
-#ifdef SEAMS_HAS_OPENMP
-  const int threads = omp_get_max_threads();
-#pragma omp parallel for schedule(static) if (n >= 64 && threads > 1)
-#endif
-  for (int cell = 0; cell < ncell; cell++) {
-    const Image *im =
-        &images[static_cast<size_t>(cell) * static_cast<size_t>(nImage)];
+    const Image *im = local;
     const int here0 = cellStart[static_cast<size_t>(cell)];
     const int here1 = cellStart[static_cast<size_t>(cell) + 1];
     for (int mine = here0; mine < here1; mine++) {
@@ -909,7 +1094,6 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     }
     }
   }
-
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 64 && threads > 1)
 #endif
@@ -957,6 +1141,19 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     // Cheap diamond test, before the full shell fit. The twelve second
     // neighbours are the three outward bonds of each of the four neighbours.
     // A perfect FCC or HCP shell is labelled here and does not enter Kabsch.
+    // A shell the test can reject (spread bonds, a wide second shell, a low q)
+    // does not enter the permutation fit either.
+    double bMin = 1e300;
+    double bMax = 0.0;
+    for (int k = 0; k < 4; k++) {
+      const double l2 = mine[k].dx * mine[k].dx + mine[k].dy * mine[k].dy + mine[k].dz * mine[k].dz;
+      if (l2 < bMin) {
+        bMin = l2;
+      }
+      if (l2 > bMax) {
+        bMax = l2;
+      }
+    }
     {
       double first[4][3];
       for (int k = 0; k < 4; k++) {
@@ -968,6 +1165,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       double fy[12];
       double fz[12];
       int nf = 0;
+      const bool wide = la > 12.0 && lb > 12.0 && lc > 12.0;
       bool closed = true;
       for (int k = 0; k < 4 && closed; k++) {
         const int f = mine[k].j;
@@ -975,24 +1173,32 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
         const Bond *arm = &bonds[static_cast<size_t>(f) * static_cast<size_t>(kMaxBond)];
         int taken = 0;
         for (int t = 0; t < na && taken < 3; t++) {
+          if (wide) {
+            const int j = arm[t].j;
+            if (j == i || j == mine[0].j || j == mine[1].j || j == mine[2].j || j == mine[3].j) {
+              continue;
+            }
+          }
           const double x = mine[k].dx + arm[t].dx;
           const double y = mine[k].dy + arm[t].dy;
           const double z = mine[k].dz + arm[t].dz;
-          const double origin = x * x + y * y + z * z;
-          if (origin < 0.25) {
-            continue;
-          }
-          bool isFirst = false;
-          for (int q = 0; q < 4; q++) {
-            const double dx = x - mine[q].dx;
-            const double dy = y - mine[q].dy;
-            const double dz = z - mine[q].dz;
-            if (dx * dx + dy * dy + dz * dz < 0.25) {
-              isFirst = true;
+          if (!wide) {
+            const double origin = x * x + y * y + z * z;
+            if (origin < 0.25) {
+              continue;
             }
-          }
-          if (isFirst) {
-            continue;
+            bool isFirst = false;
+            for (int q = 0; q < 4; q++) {
+              const double dx = x - mine[q].dx;
+              const double dy = y - mine[q].dy;
+              const double dz = z - mine[q].dz;
+              if (dx * dx + dy * dy + dz * dz < 0.25) {
+                isFirst = true;
+              }
+            }
+            if (isFirst) {
+              continue;
+            }
           }
           if (nf >= 12) {
             closed = false;
@@ -1008,12 +1214,41 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
           closed = false;
         }
       }
+      double rMin = 1e300;
+      double rMax = 0.0;
       if (closed && nf == 12) {
-        const int fast = diamondSecondShell(first, fx, fy, fz);
+        for (int s = 0; s < 12; s++) {
+          const double r2 = fx[s] * fx[s] + fy[s] * fy[s] + fz[s] * fz[s];
+          if (r2 < rMin) {
+            rMin = r2;
+          }
+          if (r2 > rMax) {
+            rMax = r2;
+          }
+        }
+        const int cna = diamondCna(fx, fy, fz);
+        if (cna >= 0) {
+          kind[i] = cna;
+          continue;
+        }
+        const int fast = diamondSecondShell(first, fx, fy, fz, kFastRadius, kEclipsed, kStaggered);
         if (fast >= 0) {
           kind[i] = fast;
           continue;
         }
+        if (cna != -2) {
+          kind[i] = -1;
+          continue;
+        }
+      }
+      // Bond lengths in squared ratio. 1.15^2 is a tetrahedron; liquid spreads more.
+      // A second shell wider than about 20% is not one diamond radius.
+      const double qNow = 1.0 - 0.375 * acc;
+      const bool tightBonds = bMax <= bMin * (1.15 * 1.15);
+      const bool tightShell = closed && nf == 12 && rMax <= rMin * (kShellRadius * kShellRadius);
+      if (!(qNow >= kQFit && tightBonds && tightShell)) {
+        kind[i] = -1;
+        continue;
       }
     }
     for (int k = 0; k < 4; k++) {
@@ -1129,32 +1364,67 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       kind[i] = -1;
     }
   }
-  recoverHex(n, bonds.get(), nbon.data(), packed.get(), cellStart.data(), images.get(), nImage, bin.get(),
+  recoverHex(n, bonds.get(), nbon.data(), packed.get(), cellStart.data(), nx, ny, nz, reach, bin.get(),
              lat, px.get(), py.get(), pz.get(), kind, canon, gate);
 }
 
-int bondsBeyond(int atom, const Packed *packed, const int *cellStart, const Image *images, int nImage,
+int bondsBeyond(int atom, const Packed *packed, const int *cellStart, int nx, int ny, int nz, int reach,
                const int *bin, const double lat[3][3], const double *px, const double *py, const double *pz,
                Bond *out) {
   Bond row[kMaxWide];
   double rd[kMaxWide];
   int nw = 0;
   const int cell = bin[atom];
-  const Image *im = images + static_cast<size_t>(cell) * static_cast<size_t>(nImage);
+  const int ix0 = cell % nx;
+  const int iy0 = (cell / nx) % ny;
+  const int iz0 = cell / (nx * ny);
   const double ci0 = px[atom];
   const double ci1 = py[atom];
   const double ci2 = pz[atom];
-  for (int t = 0; t < nImage; t++) {
-    const int begin = cellStart[im[t].cell];
-    const int end = cellStart[im[t].cell + 1];
+  for (int dz = -reach; dz <= reach; dz++) {
+    int iz = iz0 + dz;
+    int sz = 0;
+    while (iz < 0) {
+      iz += nz;
+      sz--;
+    }
+    while (iz >= nz) {
+      iz -= nz;
+      sz++;
+    }
+    for (int dy = -reach; dy <= reach; dy++) {
+      int iy = iy0 + dy;
+      int sy = 0;
+      while (iy < 0) {
+        iy += ny;
+        sy--;
+      }
+      while (iy >= ny) {
+        iy -= ny;
+        sy++;
+      }
+      for (int dxs = -reach; dxs <= reach; dxs++) {
+        int ix = ix0 + dxs;
+        int sx = 0;
+        while (ix < 0) {
+          ix += nx;
+          sx--;
+        }
+        while (ix >= nx) {
+          ix -= nx;
+          sx++;
+        }
+        const int nbcell = (iz * ny + iy) * nx + ix;
+        const int begin = cellStart[nbcell];
+        const int end = cellStart[nbcell + 1];
     for (int m = begin; m < end; m++) {
       const Packed &nbr = packed[m];
-      if (nbr.id == atom && im[t].sx == 0 && im[t].sy == 0 && im[t].sz == 0) {
+      if (nbr.id == atom && sx == 0 && sy == 0 && sz == 0) {
         continue;
       }
-      const double dx = nbr.x + im[t].sx * lat[0][0] + im[t].sy * lat[1][0] + im[t].sz * lat[2][0] - ci0;
-      const double dy = nbr.y + im[t].sx * lat[0][1] + im[t].sy * lat[1][1] + im[t].sz * lat[2][1] - ci1;
-      const double dz = nbr.z + im[t].sx * lat[0][2] + im[t].sy * lat[1][2] + im[t].sz * lat[2][2] - ci2;
+      const double dx = nbr.x + sx * lat[0][0] + sy * lat[1][0] + sz * lat[2][0] - ci0;
+      const double dy = nbr.y + sx * lat[0][1] + sy * lat[1][1] + sz * lat[2][1] - ci1;
+      const double dz = nbr.z + sx * lat[0][2] + sy * lat[1][2] + sz * lat[2][2] - ci2;
       const double d2 = dx * dx + dy * dy + dz * dz;
       if (d2 <= kBond * kBond || d2 > kWide * kWide) {
         continue;
@@ -1174,6 +1444,8 @@ int bondsBeyond(int atom, const Packed *packed, const int *cellStart, const Imag
           row[worst] = Bond{nbr.id, dx, dy, dz};
           rd[worst] = d2;
         }
+      }
+    }
       }
     }
   }
@@ -1196,7 +1468,7 @@ int bondsBeyond(int atom, const Packed *packed, const int *cellStart, const Imag
 }
 
 void recoverHex(int n, const Bond *bonds, const int *nbon, const Packed *packed, const int *cellStart,
-                const Image *images, int nImage, const int *bin, const double lat[3][3], const double *px,
+                int nx, int ny, int nz, int reach, const int *bin, const double lat[3][3], const double *px,
                 const double *py, const double *pz, int *kind, const CanonShell &canon, double gate) {
   int unlabeled = 0;
   for (int i = 0; i < n; i++) {
@@ -1223,12 +1495,6 @@ void recoverHex(int n, const Bond *bonds, const int *nbon, const Packed *packed,
     }
     const int nb = nbon[i];
     const Bond *mine = bonds + static_cast<size_t>(i) * kMaxBond;
-    Bond mineWbuf[kMaxWide];
-    const int nw = bondsBeyond(i, packed, cellStart, images, nImage, bin, lat, px, py, pz, mineWbuf);
-    const Bond *mineW = mineWbuf;
-    if (nb + nw < 4) {
-      continue;
-    }
     int nCrystal = 0;
     const int lim = nb < 4 ? nb : 4;
     for (int k = 0; k < lim; k++) {
@@ -1236,14 +1502,15 @@ void recoverHex(int n, const Bond *bonds, const int *nbon, const Packed *packed,
         nCrystal++;
       }
     }
-    if (nCrystal < 1 && nw > 0 && nb >= 3) {
-      for (int k = 0; k < nb && k < 3; k++) {
-        if (crystal[static_cast<size_t>(mine[k].j)]) {
-          nCrystal++;
-        }
-      }
-    }
+    // The wide search is only for a stretched fourth bond next to a crystal.
+    // Liquid has fewer than three crystal neighbours and does not pay for it.
     if (nCrystal < 3) {
+      continue;
+    }
+    Bond mineWbuf[kMaxWide];
+    const int nw = bondsBeyond(i, packed, cellStart, nx, ny, nz, reach, bin, lat, px, py, pz, mineWbuf);
+    const Bond *mineW = mineWbuf;
+    if (nb + nw < 4) {
       continue;
     }
     tried[static_cast<size_t>(i)] = 1;
@@ -1283,7 +1550,7 @@ void recoverHex(int n, const Bond *bonds, const int *nbon, const Packed *packed,
       const Bond *arm = bonds + static_cast<size_t>(f) * kMaxBond;
       const int na = nbon[f];
       Bond armWbuf[kMaxWide];
-      const int naw = bondsBeyond(f, packed, cellStart, images, nImage, bin, lat, px, py, pz, armWbuf);
+      const int naw = bondsBeyond(f, packed, cellStart, nx, ny, nz, reach, bin, lat, px, py, pz, armWbuf);
       const Bond *armW = armWbuf;
       int seen = 0;
       auto push = [&](const Bond &b) {
