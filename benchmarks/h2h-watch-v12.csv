@@ -1,0 +1,17 @@
+threads,code,version,operation,molecules,repetitions,warmup,n,median_ms,q1_ms,q3_ms,iqr_ms,agreement,detail,samples_ms,cpus
+1,d-SEAMS,2.13.0,rings,1000,5,1,6,1.132,1.129,1.138,0.008,1.000000,"dseams=[0, 0, 0, 2000];rings-statistics-matter=[0, 0, 0, 2000];maxlvl=8",1.139 1.133 1.106 1.131 1.140 1.129,0
+1,rings-statistics-matter,0.2.0,rings,1000,5,1,6,12.034,11.993,12.131,0.138,1.000000,"dseams=[0, 0, 0, 2000];rings-statistics-matter=[0, 0, 0, 2000];maxlvl=8",12.158 12.051 12.223 11.985 12.017 11.889,0
+1,d-SEAMS,2.13.0,rings-default,1000,5,1,6,1.121,1.113,1.129,0.016,1.000000,"dseams=[0, 0, 0, 2000];rings-statistics-matter=[0, 0, 0, 2000];maxlvl=8;supercell=true",1.131 1.144 1.111 1.107 1.123 1.119,0
+1,rings-statistics-matter,0.2.0,rings-default,1000,5,1,6,88.356,87.351,89.398,2.047,1.000000,"dseams=[0, 0, 0, 2000];rings-statistics-matter=[0, 0, 0, 2000];maxlvl=8;supercell=true",89.437 89.279 87.324 87.433 87.102 89.544,0
+1,d-SEAMS,2.13.0,rings,10648,11,1,6,10.269,10.196,10.295,0.099,1.000000,"dseams=[0, 0, 0, 21296];rings-statistics-matter=[0, 0, 0, 21296];maxlvl=8",10.509 10.291 10.248 10.296 10.179 10.152,0
+1,rings-statistics-matter,0.2.0,rings,10648,11,1,6,123.192,123.168,123.401,0.233,1.000000,"dseams=[0, 0, 0, 21296];rings-statistics-matter=[0, 0, 0, 21296];maxlvl=8",123.160 123.470 123.722 123.191 122.992 123.193,0
+1,d-SEAMS,2.13.0,rings,110592,24,1,6,107.461,106.944,107.799,0.855,1.000000,"dseams=[0, 0, 0, 221184];rings-statistics-matter=[0, 0, 0, 221184];maxlvl=8",107.833 107.223 107.699 106.851 108.193 105.778,0
+1,rings-statistics-matter,0.2.0,rings,110592,24,1,6,1073.553,1072.112,1088.850,16.738,1.000000,"dseams=[0, 0, 0, 221184];rings-statistics-matter=[0, 0, 0, 221184];maxlvl=8",1108.846 1093.607 1071.973 1074.579 1072.527 1068.890,0
+8,d-SEAMS,2.13.0,rings,1000,5,1,6,4.017,3.040,4.093,1.053,1.000000,"dseams=[0, 0, 0, 2000];rings-statistics-matter=[0, 0, 0, 2000];maxlvl=8",4.104 3.970 4.063 4.242 0.771 2.730,0-7
+8,rings-statistics-matter,0.2.0,rings,1000,5,1,6,3.555,3.486,3.918,0.431,1.000000,"dseams=[0, 0, 0, 2000];rings-statistics-matter=[0, 0, 0, 2000];maxlvl=8",4.279 4.033 3.573 3.537 3.440 3.469,0-7
+8,d-SEAMS,2.13.0,rings-default,1000,5,1,6,0.753,0.702,0.899,0.197,1.000000,"dseams=[0, 0, 0, 2000];rings-statistics-matter=[0, 0, 0, 2000];maxlvl=8;supercell=true",0.804 0.691 0.702 0.702 1.761 0.931,0-7
+8,rings-statistics-matter,0.2.0,rings-default,1000,5,1,6,24.090,23.666,25.271,1.604,1.000000,"dseams=[0, 0, 0, 2000];rings-statistics-matter=[0, 0, 0, 2000];maxlvl=8;supercell=true",25.719 23.564 22.574 25.625 23.972 24.207,0-7
+8,d-SEAMS,2.13.0,rings,10648,11,1,6,5.498,5.429,5.599,0.171,1.000000,"dseams=[0, 0, 0, 21296];rings-statistics-matter=[0, 0, 0, 21296];maxlvl=8",6.074 5.512 5.396 5.410 5.483 5.629,0-7
+8,rings-statistics-matter,0.2.0,rings,10648,11,1,6,30.724,29.916,31.070,1.153,1.000000,"dseams=[0, 0, 0, 21296];rings-statistics-matter=[0, 0, 0, 21296];maxlvl=8",31.027 31.084 30.420 31.177 29.428 29.749,0-7
+8,d-SEAMS,2.13.0,rings,110592,24,1,6,56.196,53.545,58.150,4.606,1.000000,"dseams=[0, 0, 0, 221184];rings-statistics-matter=[0, 0, 0, 221184];maxlvl=8",59.527 54.663 52.594 57.728 58.291 53.172,0-7
+8,rings-statistics-matter,0.2.0,rings,110592,24,1,6,258.706,250.839,267.513,16.674,1.000000,"dseams=[0, 0, 0, 221184];rings-statistics-matter=[0, 0, 0, 221184];maxlvl=8",256.547 248.936 244.259 269.729 260.865 270.919,0-7
