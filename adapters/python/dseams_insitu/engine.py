@@ -145,11 +145,28 @@ class InSitu:
         for key in self.profile:
             self.profile[key] = 0
 
+    def _box9(self, box):
+        """Three edge lengths or the nine LAMMPS numbers.
+
+        A length-3 box is orthorhombic: slots 3-5 are lx, ly, lz and the
+        origin and tilts stay zero. Any other length is rejected.
+        """
+        lengths = np.asarray(box, dtype=np.float64).reshape(-1).copy()
+        raw = self._box
+        raw[:] = 0.0
+        if lengths.size == 3:
+            raw[3:6] = lengths
+        elif lengths.size == 9:
+            raw[:] = lengths
+        else:
+            raise ValueError("box must be 3 lengths or 9 LAMMPS cell numbers")
+        return raw
+
     def _hold(self, positions, box):
         """One frame object. Later reports write into its coordinate buffer."""
         pos = np.ascontiguousarray(positions, dtype=np.float64)
         n = int(pos.shape[0])
-        raw = np.ascontiguousarray(box, dtype=np.float64).reshape(9)
+        raw = self._box9(box)
         if self._frame is not None and n == self._frame_n:
             self._fail(
                 self.lib.seams_frame_set_positions(

@@ -39,6 +39,15 @@ box = np.array([a, a, a], dtype=np.float64)
 engine = InSitu()
 engine.observe(0, pos, box, ids=np.arange(8))
 labels = engine.frames[-1]["labels"]
-if labels.shape != (8,):
-    sys.exit("labels are not 8 long")
-print("insitu atoms", labels.shape[0])
+if labels.shape != (8,) or not np.all(labels == 0):
+    sys.exit(f"expected 8 cubic labels, got {labels}")
+held = engine.frames[-1]["box"]
+if held.shape != (9,) or not np.allclose(held[3:6], [a, a, a]) or np.any(held[:3]) or np.any(held[6:]):
+    sys.exit(f"expected orthorhombic edges in slots 3-5, got {held}")
+try:
+    engine._hold(pos, np.ones(4))
+except ValueError:
+    pass
+else:
+    sys.exit("a length-4 box was accepted")
+print("insitu atoms", labels.shape[0], "cubic", int(np.sum(labels == 0)))
