@@ -121,7 +121,9 @@ def fit_curve(temps: list[float], speeds: list[float]) -> tuple[float, float, fl
             barrier += db
         return best
 
-    best = search(200.0, 8000.0, 200.0, 0.2, 8.0, 0.2, None)
+    # B and C trade off. The box is wide enough that the least-squares
+    # cell is interior for the three faces measured here.
+    best = search(50.0, 8000.0, 200.0, 0.2, 16.0, 0.2, None)
     if best is None:
         return float("nan"), float("nan"), float("nan"), float("nan")
     _amp, barrier, drive, _rss = best

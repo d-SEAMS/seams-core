@@ -567,6 +567,203 @@ Equation 2 is the speed the trajectories produce, and it is the
 speed in Figure 3 of Shi et al.
 The deck is unchanged.
 
+* Growth-speed curve
+
+The curve uses the same 4000-molecule deck as
+~input/interface/espinosa_faces.py~.
+The melt, the 2 ps Nose-Hoover periods and the 10 fs step are
+unchanged.
+240 K keeps the 600 ps production of that file and 260 K keeps the
+1000 ps production.
+220 K and 230 K run for 800 ps, 250 K for 1200 ps and 265 K for
+2000 ps, so the basal face still crosses the fitting window.
+Basal, primary prism and secondary prism, four velocity seeds each,
+six temperatures, seventy-two trajectories.
+Every seed reached a solid fraction of at least 0.90.
+Frames stay out of the tree.
+This session had 8 cores, one OpenMP thread per LAMMPS run.
+The seventy-two runs finished in 5711 s of wall time.
+The 220 K runs took 443 to 449 s and the 230 K runs took 447 to
+454 s.
+The 240 K runs took 352 to 369 s, the 250 K runs took 659 to 666 s,
+the 260 K runs took 570 to 587 s, and the 265 K runs took 1068 to
+1105 s.
+Scoring all seventy-two files took 26.5 s, eight processes, one
+thread each.
+
+The speed is the count slope already used for the factor of four,
+
+u = (dN/dt) Lz / (2 N),
+
+on the 2015 CHILL+ solid fraction between 0.55 and 0.90.
+The thresholds are not changed.
+The same window is scored with Lechner-Dellago q6bar on the 3.5 Å
+shell, once at the mislabel cut and once at the constant 0.358.
+Neither cut is fitted to these rates.
+The mean of the four seeds is a percentile bootstrap, 10000 draws,
+Hyndman-Fan type 7, generator seed 270.
+The interval is the 2.5 and 97.5 percentiles.
+Speeds are angstroms per nanosecond.
+
+| face | T (K) | CHILL+ count (Å/ns) | q6bar (Å/ns) |
+|------+-------+---------------------+--------------|
+| basal | 220 | 57.7 [46.9, 67.6] | 63.1 [51.8, 74.4] |
+| basal | 230 | 71.1 [61.3, 80.9] | 80.6 [65.8, 89.1] |
+| basal | 240 | 65.8 [57.6, 73.2] | 68.5 [59.1, 76.3] |
+| basal | 250 | 47.9 [41.7, 54.1] | 49.6 [42.4, 56.8] |
+| basal | 260 | 41.9 [35.4, 46.8] | 42.8 [36.6, 47.1] |
+| basal | 265 | 19.5 [14.4, 24.6] | 20.4 [14.8, 25.9] |
+| primary prism | 220 | 101.2 [88.9, 112.8] | 107.3 [92.2, 120.2] |
+| primary prism | 230 | 112.4 [89.8, 140.1] | 114.9 [89.3, 143.7] |
+| primary prism | 240 | 104.7 [93.3, 120.0] | 108.0 [95.1, 123.4] |
+| primary prism | 250 | 87.5 [77.5, 97.8] | 89.8 [78.2, 102.5] |
+| primary prism | 260 | 57.7 [52.3, 61.6] | 60.1 [55.7, 64.0] |
+| primary prism | 265 | 30.0 [23.4, 34.8] | 31.0 [24.3, 36.1] |
+| secondary prism | 220 | 119.2 [115.6, 125.1] | 120.9 [115.7, 128.9] |
+| secondary prism | 230 | 117.1 [103.7, 133.2] | 117.8 [105.4, 133.7] |
+| secondary prism | 240 | 111.7 [105.7, 120.2] | 112.6 [106.9, 120.9] |
+| secondary prism | 250 | 87.0 [78.5, 96.2] | 88.1 [78.9, 97.3] |
+| secondary prism | 260 | 63.2 [58.1, 69.5] | 66.0 [58.2, 73.9] |
+| secondary prism | 265 | 50.4 [41.2, 57.0] | 51.7 [43.6, 58.6] |
+
+The constant 0.358 gives the CHILL+ count slope again.
+On the secondary prism it is 120.2, 118.0, 111.9, 88.2, 64.1 and
+52.0 Å/ns from 220 K to 265 K.
+The mislabel q6bar sits a few angstroms per nanosecond above the
+CHILL+ slope and does not move the ordering.
+The basal face is the slowest at each temperature.
+From 220 K to 260 K it is 0.48 to 0.66 of the secondary prism, around
+the 0.6 ratio Espinosa, Navarro, Sanz, Valeriani and Vega report for
+TIP4P/ICE.
+At 265 K the ratio is 0.39.
+The two prisms agree from 230 K to 260 K.
+At 220 K the secondary prism is faster than the primary, 119.2
+against 101.2, and the intervals do not overlap.
+At 265 K they do not overlap either, 50.4 against 30.0.
+One primary-prism seed at 230 K is 151 Å/ns.
+The other three are 84, 107 and 108, which is why that interval is
+the wide one.
+
+The curve on each face is a Wilson-Frenkel form with the melting
+point fixed at the Table II value, 274.6 K,
+
+u(T) = A exp(−B/T) [1 − exp(−C (Tm − T)/T)].
+
+A, B and C are the least-squares values on the six CHILL+ means.
+A large A with a small C can describe the same six means, so the
+separate parameters are not a measured activation energy.
+The maximum is read from the curve on a 0.05 K grid.
+The interval resamples the seeds inside each temperature, refits,
+and takes the 2.5 and 97.5 percentiles of 1000 maxima.
+
+| face | T of maximum (K) | maximum (Å/ns) | highest measured mean |
+|------+------------------+----------------+-----------------------|
+| basal | 228.7 [219.2, 234.9] | 64.9 [59.7, 71.6] | 71.1 at 230 K |
+| primary prism | 225.3 [217.4, 231.5] | 108.4 [98.3, 120.8] | 112.4 at 230 K |
+| secondary prism | 218.1 [200.0, 226.7] | 120.0 [115.4, 128.3] | 119.2 at 220 K |
+
+The basal and primary-prism maxima sit between the 220 K and 240 K
+measurements.
+The secondary-prism means at 220 K and 230 K agree, and the fitted
+maximum is at 218 K.
+The lower end of that interval is 200 K, the edge of the grid on
+which the maximum is sought, so the turnover has not been resolved
+below the coldest point that was run.
+By 240 K the secondary prism has already fallen, and it keeps
+falling through 265 K.
+
+Four times the secondary-prism count slope is the factor-of-four
+reading of Table I.
+At 240 K that is 447 [423, 481], and the printed 490 lies just above
+the interval.
+At 250 K it is 348 [314, 385], and the printed 375 lies inside.
+At 260 K it is 253 [232, 278], and the printed 266 lies inside.
+The ratios of the count slope to the printed column are 0.23, 0.23
+and 0.24.
+The ratios to the column divided by four are 0.91, 0.93 and 0.95.
+Table II, ln(u/(Å/ns)) = 4.1711 + 0.096266 ΔT − 0.001148 (ΔT)^2,
+peaks at 232.7 K.
+The printed peak is 487 Å/ns and the factor-of-four reading is
+121.9 Å/ns, next to the 120 Å/ns secondary-prism maximum here, at a
+warmer temperature.
+Dividing the Table II curve by four gives 101, 121, 115, 86, 52 and
+37 Å/ns at 220, 230, 240, 250, 260 and 265 K.
+The measured secondary prism sits on that curve at 230, 240 and
+250 K.
+It is faster at 220 K (119 against 101), at 260 K (63 against 52)
+and at 265 K (50 against 37).
+The quadratic has already turned down by 220 K and it falls faster
+than these seeds on the warm side.
+The text of the 2016 paper places the mW maximum around 40 K below
+274.6 K, which is 235 K.
+Shi, Fulford, Salvalaglio and Molteni describe that Espinosa
+secondary-prism maximum as about 234.6 K.
+
+Shi et al., Figure 3, is the basal face and the primary prism from
+200 K to 270 K, ten replicas, with the maximum at 240 K on both
+faces.
+The markers read from that figure are unchanged: primary prism 98.3
+[85.2, 111.4] at 240 K and 62.1 [51.6, 72.7] at 260 K, basal 88.1
+[76.4, 99.7] and 39.5 [27.2, 51.9].
+The primary-prism count slopes here, 104.7 [93.3, 120.0] and 57.7
+[52.3, 61.6], overlap those bars.
+The basal count slope at 260 K, 41.9 [35.4, 46.8], lies inside the
+basal bar.
+The basal count slope at 240 K, 65.8 [57.6, 73.2], lies below the
+basal bar.
+Their order parameter is the lq3 liquid count on a slab with a
+quasi-liquid layer, and the earlier equation-2 speeds on this deck
+were the ones that sat with the 240 K basal marker.
+The maxima of the curves fit here are 229 K on the basal face and
+225 K on the primary prism.
+Neither interval reaches their stated 240 K maximum.
+The count slopes at 240 K are still within a few angstroms per
+nanosecond of the 230 K means on both faces.
+
+Moore and Molinero, Nature 479, 506 (2011), do not tabulate a face
+growth speed in Å/ns.
+Espinosa et al. compare their brute-force crystallization times, for
+about 4000 molecules and a frozen fraction 0.7, with the Avrami
+estimate.
+The minimum of those brute-force times is about ten nanoseconds.
+The abstract places the mW minimum about 85 K below the melting
+point, near 190 K, colder than every temperature run here.
+At 220 K the one-front speeds are still at the top of the measured
+curve, 119 Å/ns on the secondary prism, 101 on the primary prism and
+58 on the basal face.
+That is the growth factor inside the crystallization time, not the
+crystallization time.
+
+On one frame from the 240 K secondary prism, during the growth, the
+pure-Python q6bar and ~interface_order q6~ counted the same molecules
+above 0.30, 0.36, 0.40, 0.50 and 0.56.
+The timing used eight frames from ~prism2-t240-s1~, spread through
+the trajectory, repeated eight times, in one session after the runs
+had finished.
+taskset pinned the process to one core and to eight cores.
+The affinity mask held 1 and 8 cores.
+No host name was recorded.
+The median and the interquartile range are over the eight repeats.
+The per-frame time divides each repeat by eight.
+At eight cores the Python baseline runs one process per frame.
+d-SEAMS uses OpenMP with that many threads.
+
+| tool | cores | per frame (ms) | IQR (ms) |
+|------+-------+----------------|----------|
+| d-SEAMS CHILL+ | 1 | 7.92 | 0.12 |
+| d-SEAMS q6bar | 1 | 4.99 | 0.08 |
+| Python q6bar | 1 | 134.9 | 1.41 |
+| d-SEAMS CHILL+ | 8 | 5.40 | 0.11 |
+| d-SEAMS q6bar | 8 | 3.69 | 0.22 |
+| Python q6bar | 8 | 32.9 | 2.57 |
+
+On one core the Python q6bar takes 17 times the CHILL+ frame and 27
+times the d-SEAMS q6bar frame.
+Eight cores shorten the CHILL+ frame by a factor of 1.5 and the
+d-SEAMS q6bar frame by a factor of 1.4.
+The Python frame shortens by a factor of 4.1.
+The rows are in ~growth-curve-timing.csv~.
+
 * Sources checked
 
 Nguyen and Molinero, J. Phys. Chem. B 2015, 119, 9369–9376.
@@ -614,6 +811,9 @@ python3 input/interface/espinosa_protocol.py
 python3 scripts/espinosa_rates.py --bin bbdir-eessi/tests/interface_order
 python3 input/interface/espinosa_faces.py
 python3 scripts/espinosa_candidates.py --bin bbdir/tests/interface_order
+python3 input/interface/growth_curve.py
+python3 scripts/growth_curve_rates.py --bin bbdir/tests/interface_order
+python3 scripts/q6bar_timing.py --bin bbdir/tests/interface_order
 interface_order wc input/traj/nucleation_f1.lammpstrj
 python3 scripts/figures_interface_order.py \
   --bin bbdir-eessi/tests/interface_order \
