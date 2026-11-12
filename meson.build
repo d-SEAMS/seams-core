@@ -579,7 +579,7 @@ if get_option('with_cli')
 
   python3 = find_program('python3', required: true)
   test(
-    'option_names',
+    'check_option_names',
     python3,
     args: [
       meson.project_source_root() / 'tests' / 'check_option_names.py',
