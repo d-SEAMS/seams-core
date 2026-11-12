@@ -1,6 +1,6 @@
 # compute dseams
 
-In-run CHILL+ labels from `seams_chill_plus` in `seams.h`.
+In-run CHILL+ labels from `seams_chill_plus_species` in `seams_c_api.h`.
 
 ```
 compute ice all dseams
