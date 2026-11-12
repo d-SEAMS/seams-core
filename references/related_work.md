@@ -17,7 +17,7 @@ Survey of ice and clathrate structure analysis from 2022 onward, plus the codes 
 | [GenIce](https://doi.org/10.1002/jcc.25077), [GenIce-core](https://doi.org/10.1063/5.0198056), [cycless](https://github.com/vitroid/cycless) | Builds hydrogen-disordered ice. cycless counts cycles | Generation complements d-SEAMS. cycless rings are already in the campaign and disagree on a confined frame. |
 | [matscipy](https://doi.org/10.21105/joss.05668) | Primitive rings | Already matched. |
 | [atomes](https://doi.org/10.1016/j.commatsci.2025.113805) | Ring statistics, editing and visualization | Competes on ring counts. A desktop program, not a library called from this harness. |
-| [RingsStatisticsMatter.jl](https://github.com/MorrowChem/RingsStatisticsMatter.jl) | Julia primitive-ring counts | Competes on the census. No Python or C++ API. |
+| [RingsStatisticsMatter](https://github.com/MorrowChem/RingsStatisticsMatter) ([0.2.0](https://pypi.org/project/rings-statistics-matter/0.2.0/), [Yuan and Cormack](https://doi.org/10.1016/s0927-0256(01)00256-7)) | Primitive rings. Rust kernel and a Python wrapper; Julia is optional | Competes on the census. Timed in the afternoon section. A full search each frame. |
 | [Palmer CHILL+ library](https://github.com/palmergroupUH/Order_Parameters_Library) | Fortran CHILL+ | Already matched. |
 | [mdevaluate `chill.py`](https://gitea.pkm.physik.tu-darmstadt.de/IPKM/mdevaluate) | Staggered and eclipsed bond counts | A non-periodic KDTree. Not the periodic cutoff list, so it was not timed. |
 | [ClavisCage 0.3.18](https://doi.org/10.5281/zenodo.24112918) | CHILL+, TRACE, HTR, GRADE, F3/F4, averaged Steinhardt, MCG-3, tetrahedral order. Browser and a Python wheel | Post-processing. CHILL+ is timed in the 12 November section. |
@@ -423,3 +423,54 @@ Papers in the window, none of which return hexagonal or double-diamond cages:
 6. **CHILL+ follows Nguyen and Molinero, with the OVITO modifier as a second option.** ClavisCage uses those cuts and the OVITO codes. On these frames the merged label agrees for every molecule, and the label is cubic. d-SEAMS is the faster of the two calls. The ClavisCage median includes the JSON parse inside `analyze_waters`.
 
 7. **Cage labels come from the topology of the network, and local classifiers answer a different question.** Stands. The five papers are interface adsorption, plane recognition, a hydrogen-bond population, a two-state glass scan, and a polarization theory. None returns the hexagonal-cage or double-diamond-cage count.
+
+## After 06:15 UTC, 12 November 2026
+
+The morning sweep closed at 00:15 CST. This section is what appeared after 2026-11-12T06:15:00Z.
+
+arXiv `submittedDate` from 2026-11-11 00:00 through 2026-11-12 23:59 returned no works. The newest records in `physics.chem-ph`, `cond-mat.soft`, `physics.comp-ph` and `cond-mat.mtrl-sci` are 10 November. Crossref titles created on 12 November contain no clathrate, Steinhardt or CHILL paper. The ice titles are geophysical, food or classroom notes. The hydrate titles after 06:15 UTC are a CO2 sequestration experiment, creep of hydrate-bearing sediment, calcium silicate hydrate, and a medicinal hydrate. None identifies ice or cages in a trajectory. No new citation.
+
+[rings-statistics-matter 0.2.0](https://pypi.org/project/rings-statistics-matter/0.2.0/) was uploaded at 2026-11-12T11:48:09Z. The repository is [MorrowChem/RingsStatisticsMatter](https://github.com/MorrowChem/RingsStatisticsMatter) (created 2023; the morning note said it had no Python library). The default backend is the Rust kernel. `ring_statistics` takes an ASE atoms object, a cutoff, and `maxlvl`. Neighbours come from vesin 0.6.2 inside the call. The kernel tries each node closer than `maxlvl / 2` as the midpoint of a ring, so a six-ring, whose midpoint sits at distance 3, needs `maxlvl` 8. `maxlvl` 7 returns no rings on this ice. The package text says rings of up to `maxlvl - 1`, which would have chosen 7. The algorithm is Yuan and Cormack, [Comput. Mater. Sci. 24, 343 (2002)](https://doi.org/10.1016/s0927-0256(01)00256-7). It searches the whole frame. It returns the count and the atom indices of each ring. It does not build a hexagonal or double-diamond cage.
+
+Ideal ice Ic, oxygen bond 2.75 Å, cutoff 3.5 Å, `maxlvl` 8, `supercell` off, deduplicated rings. d-SEAMS is `seams_frame_rings` on the cutoff graph, depth 6, release `-O3`, version 2.13.0. One warm-up, six calls, median and type-7 IQR. One core is `taskset -c 0`. Eight cores are `taskset -c 0-7`. The Rust call is given `num_threads` of that width. Raw lines are `benchmarks/h2h-watch-v12.csv`. `snakemake related_watch_v12` regenerates them. Agreement is 1 when the census of rings of size 3 through 6 matches. It matches in every row: 0, 0, 0, and two six-rings per molecule (2 000, 21 296, 221 184).
+
+| Threads | Molecules | d-SEAMS median (IQR) ms | rings-statistics-matter median (IQR) ms |
+| --- | --- | --- | --- |
+| 1 | 1000 | 1.132 (0.008) | 12.034 (0.138) |
+| 1 | 10648 | 10.269 (0.099) | 123.192 (0.233) |
+| 1 | 110592 | 107.461 (0.855) | 1073.553 (16.738) |
+| 8 | 1000 | 4.017 (1.053) | 3.555 (0.431) |
+| 8 | 10648 | 5.498 (0.171) | 30.724 (1.153) |
+| 8 | 110592 | 56.196 (4.606) | 258.706 (16.674) |
+
+At one core d-SEAMS is faster at every size, by a factor of ten to twelve. At eight cores it is faster at 10 648 and 110 592 molecules. At eight cores and 1 000 molecules the rival's median is lower. That d-SEAMS batch had not settled: the six samples run from 0.771 ms to 4.242 ms. The same d-SEAMS call, measured again in the next rows, has median 0.753 ms (IQR 0.197).
+
+The default `supercell=True` repeats a cell narrower than `2 * maxlvl * cutoff` = 56 Å. The 1 000-molecule side is 31.754 Å, and the repeat is 2×2×2. Counts are mapped back onto the original cell and still match. The 10 648-molecule and 110 592-molecule cells are wider than 56 Å, so the default does not repeat them.
+
+| Threads | d-SEAMS median (IQR) ms | default supercell median (IQR) ms |
+| --- | --- | --- |
+| 1 | 1.121 (0.016) | 88.356 (2.047) |
+| 8 | 0.753 (0.197) | 24.090 (1.604) |
+
+Other code, with no new timing:
+
+- mdapy 2.0.0 is still the release. After 06:15 UTC, master gained dislocation-analysis output, not a change to cutoff CHILL+: [pull 75](https://github.com/mushroomfire/mdapy/pull/75) writes an OVITO crystal-analysis file, [pull 76](https://github.com/mushroomfire/mdapy/pull/76) reads one back, [pull 77](https://github.com/mushroomfire/mdapy/pull/77) accepts hcp with a low c/a, and [pull 78](https://github.com/mushroomfire/mdapy/pull/78) adds line densities and a selected-atom system. The CHILL+ rows stand.
+- PLUMED 2.10.2 is still the release. [Pull 1599](https://github.com/plumed/plumed2/pull/1599), merged 09:56 UTC, gives `LOAD` an `INCLUDE_PATH`. It is not an ice collective variable.
+- fastatomstruct 2.2.0 is still the release. Two merges at 06:22 UTC add a test for `parse_composition` ([!277](https://zivgitlab.uni-muenster.de/ag-salinga/fastatomstruct/-/merge_requests/277)) and the missing autodoc entry for the existing `MACECalculatorASE` ([!276](https://zivgitlab.uni-muenster.de/ag-salinga/fastatomstruct/-/merge_requests/276)). The `q_6` and King-ring rows stand.
+- freud 3.6.1, OVITO 3.17.2, MDAnalysis 2.11.0, pyscal3 4.1.0, GenIce 2.2.13.3, vesin 0.6.2, SQQ 0.5.8, ClavisCage 0.3.18, matscipy 1.3.1 and cycless 0.7 have no commit after 06:15 UTC and no newer release. The `stuko/ovito` GitLab project path returns 404; the PyPI upload of OVITO 3.17.2 remains 2 November.
+
+## Claims after the afternoon sweep
+
+1. **First code to return a full ring search from a local update.** Stands. rings-statistics-matter 0.2.0 searches the whole frame. Nothing in this window keeps rings whose bonds did not change.
+
+2. **Faster than OVITO, freud, pyscal, matscipy and the CHILL library in every matched comparison.** Stands for that list. rings-statistics-matter is outside it. On the matched rows here, d-SEAMS 2.13.0 is faster except at eight cores and 1 000 molecules, where the first six-call median is slower than the rival and the repeated measurement of the same call is faster. The mdapy CHILL+ caveat is unchanged: the new mdapy commits are dislocation output.
+
+3. **Ring-statistics codes stop at counts, while d-SEAMS builds cages.** The new package returns the atom indices of each ring as well as the counts. It still does not assemble hexagonal or double-diamond cages. The morning sentence that it had no Python library is no longer true.
+
+4. **OVITO, freud and pyscal have no nanotube-ice class.** Stands.
+
+5. **A LAMMPS compute assigns CHILL+ during the run.** Stands. The PLUMED change is a `LOAD` search path. mdapy's new dislocation output is post-processing on master. fastatomstruct's merges are a test and a documentation entry. No surveyed source assigns CHILL+ or cages from inside a PLUMED, LAMMPS or OpenMM step.
+
+6. **CHILL+ follows Nguyen and Molinero, with the OVITO modifier as a second option.** Unchanged. No new CHILL+ implementation appeared after 06:15 UTC.
+
+7. **Cage labels come from the topology of the network, and local classifiers answer a different question.** Stands. No new classifier from this window returns the hexagonal-cage or double-diamond-cage count.
