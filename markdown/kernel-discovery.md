@@ -300,8 +300,23 @@ One thread: 6.04 / 79.69 / 21.57, 51.62 / 734.37 / 205.83, and
 parameters. The Python wrapper is ~q4_q6_chill~ in
 =bindings/python/chill_plus.py=.
 
-One thread, q6, 884736 molecules, cutoff 3.5
-(`discovery/v7-session.txt`): seams median 469.7 ms, OVITO 489.1 ms.
-The median margin is 19.4 ms. The eight seams samples run from 437 ms
-to 529 ms and the eight OVITO samples from 479 ms to 492 ms, so the
-sets overlap.
+One thread, 884736 molecules, cutoff 3.5
+(`discovery/v8-session.txt`). q6 samples do not overlap: seams
+416.8–424.4 ms (median 419.5), OVITO 475.5–505.5 ms (median 485.1).
+The median margin is 65.6 ms, and the slowest seams sample is 51.0 ms
+under the fastest OVITO sample. q4 medians are 391.8 ms against
+401.7 ms. Those ranges overlap (seams 384.9–407.5, OVITO 394.9–411.7).
+
+An eight-bond AVX-512 reduction of the harmonics was slower than the
+four-bond kernel, and a one-pass neighbour row with a wide stride was
+slower than the counted walk. The Cartesian recurrence was already the
+harmonic kernel. The q6 margin above is that kernel, timed on one
+thread with the neighbour build inside the call.
+
+The fused call reads a restricted triclinic cell. On the 148-frame
+nucleation trajectory (4096 molecules, figshare
+10.6084/m9.figshare.11448702) the mean q6-bar moves from 0.261 at
+step 15677000 to 0.291 at step 15818000, and the number of molecules
+with q6-bar above 0.3 moves from 1001 to 1471. The highest mean on
+the dump is 0.293 at step 15816000, with 1517 molecules above 0.3.
+`discovery/nucleation-q6bar.txt` has one row per frame.

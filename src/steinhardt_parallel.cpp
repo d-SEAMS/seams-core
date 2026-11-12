@@ -1085,6 +1085,168 @@ SteinhardtQl cutoffSolid(
   const double axy = tilt ? frac.xy / frac.ly : 0.0;
   const double axz = tilt ? frac.xz / frac.lz : 0.0;
   const double ayz = tilt ? frac.yz / frac.lz : 0.0;
+  // Pairing two atoms into one AVX-512 reduction was slower than the
+  // four-bond kernel. The horizontal sum cost more than the idle lanes.
+  bool quad = false && uniform && (orderL == 4 || orderL == 6);
+  for (int i = 0; quad && i < n; ++i) {
+    if (scratch.offsets[static_cast<std::size_t>(i) + 1] -
+            scratch.offsets[static_cast<std::size_t>(i)] !=
+        4) {
+      quad = false;
+    }
+  }
+#if defined(SEAMS_YLM_AVX512)
+  const bool simd8 = quad && __builtin_cpu_supports("avx512f") &&
+                     __builtin_cpu_supports("avx512dq");
+#else
+  const bool simd8 = false;
+  (void)quad;
+#endif
+  if (simd8) {
+    auto oneAtom = [&](int atom) {
+      const int a = scratch.offsets[static_cast<std::size_t>(atom)];
+      const double xi = scratch.xyz[static_cast<std::size_t>(3 * atom)];
+      const double yi = scratch.xyz[static_cast<std::size_t>(3 * atom) + 1];
+      const double zi = scratch.xyz[static_cast<std::size_t>(3 * atom) + 2];
+      double xs[4], ys[4], zs[4], re[4 * 13], im[4 * 13];
+      int nUsed = 0;
+      for (int p = 0; p < 4; ++p) {
+        const int j = scratch.cols[static_cast<std::size_t>(a + p)];
+        double dx, dy, dz;
+        if (tilt) {
+          double dX = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
+          double dY = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
+          double dZ = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+          dX -= frac.lx * std::round(dX / frac.lx);
+          dY -= frac.ly * std::round(dY / frac.ly);
+          dZ -= frac.lz * std::round(dZ / frac.lz);
+          dx = dX + axy * dY + axz * dZ;
+          dy = dY + ayz * dZ;
+          dz = dZ;
+        } else {
+          dx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
+          dy = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
+          dz = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+          if (dx > hx) dx -= Lx;
+          else if (dx < -hx) dx += Lx;
+          if (dy > hy) dy -= Ly;
+          else if (dy < -hy) dy += Ly;
+          if (dz > hz) dz -= Lz;
+          else if (dz < -hz) dz += Lz;
+        }
+        if (!(dx * dx + dy * dy + dz * dz > 0.0)) {
+          continue;
+        }
+        xs[nUsed] = dx;
+        ys[nUsed] = dy;
+        zs[nUsed] = dz;
+        ++nUsed;
+      }
+      double *dst = scratch.qlm.data() +
+                    static_cast<std::size_t>(atom) * static_cast<std::size_t>(width);
+      std::fill_n(dst, width, 0.0);
+      if (nUsed == 0) {
+        return;
+      }
+      seams::ylm::ylmBatch(orderL, xs, ys, zs, nUsed, re, im);
+      for (int bond = 0; bond < nUsed; ++bond) {
+        for (int m = 0; m < nComp; ++m) {
+          dst[2 * m] += re[bond * nComp + m];
+          dst[2 * m + 1] += im[bond * nComp + m];
+        }
+      }
+      const double inv = 1.0 / static_cast<double>(nUsed);
+      double sum = 0.0;
+      for (int m = 0; m < nComp; ++m) {
+        dst[2 * m] *= inv;
+        dst[2 * m + 1] *= inv;
+        sum += dst[2 * m] * dst[2 * m] + dst[2 * m + 1] * dst[2 * m + 1];
+      }
+      result.ql[static_cast<std::size_t>(atom)] = std::sqrt(prefactor * sum);
+    };
+    auto pairRange = [&](int begin, int end) {
+      for (int i = begin; i + 1 < end; i += 2) {
+        double xs[8], ys[8], zs[8];
+        int slot = 0;
+        for (int atom = i; atom < i + 2; ++atom) {
+          const int a = scratch.offsets[static_cast<std::size_t>(atom)];
+          const double xi = scratch.xyz[static_cast<std::size_t>(3 * atom)];
+          const double yi = scratch.xyz[static_cast<std::size_t>(3 * atom) + 1];
+          const double zi = scratch.xyz[static_cast<std::size_t>(3 * atom) + 2];
+          for (int p = 0; p < 4; ++p) {
+            const int j = scratch.cols[static_cast<std::size_t>(a + p)];
+            double dx, dy, dz;
+            if (tilt) {
+              double dX = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
+              double dY = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
+              double dZ = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+              dX -= frac.lx * std::round(dX / frac.lx);
+              dY -= frac.ly * std::round(dY / frac.ly);
+              dZ -= frac.lz * std::round(dZ / frac.lz);
+              dx = dX + axy * dY + axz * dZ;
+              dy = dY + ayz * dZ;
+              dz = dZ;
+            } else {
+              dx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
+              dy = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
+              dz = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+              if (dx > hx) dx -= Lx;
+              else if (dx < -hx) dx += Lx;
+              if (dy > hy) dy -= Ly;
+              else if (dy < -hy) dy += Ly;
+              if (dz > hz) dz -= Lz;
+              else if (dz < -hz) dz += Lz;
+            }
+            xs[slot] = dx;
+            ys[slot] = dy;
+            zs[slot] = dz;
+            ++slot;
+          }
+        }
+        double accA[26] = {};
+        double accB[26] = {};
+        seams::ylm::ylmAdd8(orderL, xs, ys, zs, accA, accB);
+        auto commit = [&](int atom, const double *acc) {
+          double *dst = scratch.qlm.data() +
+                        static_cast<std::size_t>(atom) * static_cast<std::size_t>(width);
+          constexpr double inv = 0.25;
+          double sum = 0.0;
+          for (int m = 0; m < nComp; ++m) {
+            dst[2 * m] = acc[2 * m] * inv;
+            dst[2 * m + 1] = acc[2 * m + 1] * inv;
+            sum += dst[2 * m] * dst[2 * m] + dst[2 * m + 1] * dst[2 * m + 1];
+          }
+          result.ql[static_cast<std::size_t>(atom)] = std::sqrt(prefactor * sum);
+        };
+        commit(i, accA);
+        commit(i + 1, accB);
+      }
+    };
+#ifdef SEAMS_HAS_OPENMP
+    if (parallel) {
+#pragma omp parallel
+      {
+        const int nt = std::max(1, omp_get_num_threads());
+        const int tid = omp_get_thread_num();
+        const int begin = static_cast<int>((static_cast<long long>(n) * tid) / nt);
+        const int end = static_cast<int>((static_cast<long long>(n) * (tid + 1)) / nt);
+        const int endEven = begin + ((end - begin) & ~1);
+        pairRange(begin, endEven);
+        if (endEven < end) {
+          oneAtom(endEven);
+        }
+      }
+    } else
+#endif
+    {
+      const int endEven = n & ~1;
+      pairRange(0, endEven);
+      if (endEven < n) {
+        oneAtom(endEven);
+      }
+    }
+  }
+  if (!simd8) {
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (parallel)
 #endif
@@ -1166,6 +1328,8 @@ SteinhardtQl cutoffSolid(
     }
     result.ql[static_cast<std::size_t>(i)] = std::sqrt(prefactor * sum);
   }
+  }
+  const auto tYlm = std::chrono::steady_clock::now();
   if (average) {
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (parallel)
@@ -1200,7 +1364,8 @@ SteinhardtQl cutoffSolid(
     };
     std::cerr << "ql-csr l=" << orderL << " n=" << n << " L=" << Lx
               << " pairs=" << scratch.cols.size() << " team=" << seams::teamFor(n)
-              << " csr_ms=" << ms(t0, tCsr) << " rest_ms=" << ms(tCsr, tEnd) << "\n";
+              << " csr_ms=" << ms(t0, tCsr) << " ylm_ms=" << ms(tCsr, tYlm)
+              << " bar_ms=" << ms(tYlm, tEnd) << "\n";
   }
   return result;
 }

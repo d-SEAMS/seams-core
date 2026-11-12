@@ -240,3 +240,37 @@ TEST_CASE("fused q4 q6 and q-bar match the cutoff Steinhardt", "[ql][chill]") {
   }
   check(liquid);
 }
+
+TEST_CASE("fused q6 on a triclinic cell matches the cutoff call", "[ql][chill]") {
+  auto cloud = iceIc(4);
+  const double side = cloud.box[0];
+  const double xy = 1.2;
+  const double xz = 0.4;
+  const double yz = 0.3;
+  const double xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));
+  const double xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));
+  const double ymin = std::min(0.0, yz);
+  const double ymax = std::max(0.0, yz);
+  for (auto &p : cloud.pts) {
+    const double px = p.x;
+    const double py = p.y;
+    const double pz = p.z;
+    p.x = px + (xy / side) * py + (xz / side) * pz;
+    p.y = py + (yz / side) * pz;
+  }
+  cloud.box = {side + xmax - xmin, side + ymax - ymin, side, xy, xz, yz};
+  auto labeled = cloud;
+  const auto q6 = chill::steinhardtQlCutoff(cloud, 3.5, 6, 1, true);
+  REQUIRE(chill::chillPlusPublishedCutoff(labeled, 3.5, 1));
+  std::vector<double> fq4, fq6, fq4bar, fq6bar;
+  auto fused = cloud;
+  REQUIRE(chill::q4q6ChillPlus(fused, 3.5, 1, fq4, fq6, fq4bar, fq6bar));
+  REQUIRE(maxAbs(q6.ql, fq6) < 1e-12);
+  REQUIRE(maxAbs(q6.qlBar, fq6bar) < 1e-12);
+  for (int i = 0; i < cloud.nop; i++) {
+    REQUIRE(fused.pts[static_cast<std::size_t>(i)].iceType ==
+            molSys::atom_state_type::cubic);
+    REQUIRE(labeled.pts[static_cast<std::size_t>(i)].iceType ==
+            molSys::atom_state_type::cubic);
+  }
+}

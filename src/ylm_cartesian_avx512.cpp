@@ -70,6 +70,38 @@ void evalSolidLanes(int orderL, __m512d x0, __m512d y0, __m512d z0, __mmask8 liv
   }
 }
 
+double hsum4(__m256d v) {
+  __m128d lo = _mm256_castpd256_pd128(v);
+  __m128d hi = _mm256_extractf128_pd(v, 1);
+  lo = _mm_add_pd(lo, hi);
+  lo = _mm_add_sd(lo, _mm_unpackhi_pd(lo, lo));
+  return _mm_cvtsd_f64(lo);
+}
+
+void ylmAdd8(int orderL, const double *dx, const double *dy, const double *dz,
+             double *accA, double *accB) {
+  if (orderL != 4 && orderL != 6) {
+    return;
+  }
+  const int nComp = 2 * orderL + 1;
+  const __m512d x0 = _mm512_loadu_pd(dx);
+  const __m512d y0 = _mm512_loadu_pd(dy);
+  const __m512d z0 = _mm512_loadu_pd(dz);
+  V reV[13];
+  V imV[13];
+  evalSolidLanes(orderL, x0, y0, z0, static_cast<__mmask8>(0xff), reV, imV);
+  for (int m = 0; m < nComp; ++m) {
+    const __m256d reLo = _mm512_castpd512_pd256(reV[m].v);
+    const __m256d reHi = _mm512_extractf64x4_pd(reV[m].v, 1);
+    const __m256d imLo = _mm512_castpd512_pd256(imV[m].v);
+    const __m256d imHi = _mm512_extractf64x4_pd(imV[m].v, 1);
+    accA[2 * m] += hsum4(reLo);
+    accA[2 * m + 1] += hsum4(imLo);
+    accB[2 * m] += hsum4(reHi);
+    accB[2 * m + 1] += hsum4(imHi);
+  }
+}
+
 void ylmBatchAvx512(int orderL, const double *dx, const double *dy,
                     const double *dz, int n, double *re, double *im) {
   const int nComp = 2 * orderL + 1;
