@@ -20,7 +20,7 @@ Survey of ice and clathrate structure analysis from 2022 onward, plus the codes 
 | [RingsStatisticsMatter.jl](https://github.com/MorrowChem/RingsStatisticsMatter.jl) | Julia primitive-ring counts | Competes on the census. No Python or C++ API. |
 | [Palmer CHILL+ library](https://github.com/palmergroupUH/Order_Parameters_Library) | Fortran CHILL+ | Already matched. |
 | [mdevaluate `chill.py`](https://gitea.pkm.physik.tu-darmstadt.de/IPKM/mdevaluate) | Staggered and eclipsed bond counts | A non-periodic KDTree. Not the periodic cutoff list, so it was not timed. |
-| [Clavis CHILL+](https://docs.claviscage.app/analysis/chill-plus) | CHILL+ on loaded GROMACS and LAMMPS frames | Post-processing. Complements the LAMMPS compute. |
+| [ClavisCage 0.3.18](https://doi.org/10.5281/zenodo.24112918) | CHILL+, TRACE, HTR, GRADE, F3/F4, averaged Steinhardt, MCG-3, tetrahedral order. Browser and a Python wheel | Post-processing. CHILL+ is timed in the 12 November section. |
 | [GRADE](https://doi.org/10.1016/j.cpc.2019.06.004) | Hydrate structure from cage composition | Earlier cage code. TRACE is the 2025 topological successor. |
 | [IceCoder](https://doi.org/10.1021/acs.jctc.4c01298), [repository](https://github.com/TeamSuman/IceCoder) | SOAP plus a variational autoencoder over many ice phases | Competes as a phase tag. Needs a trained model. Does not return cages. |
 | [IcePic](https://doi.org/10.1073/pnas.2205347119), [repository](https://github.com/mbdavies13/IcePic) | CNN for the heterogeneous nucleation temperature of a room-temperature contact layer | Complements. It does not label molecules in a trajectory. |
@@ -373,3 +373,53 @@ Neighbour lists are the 3.5 Å periodic shell, self excluded. Every code returns
 d-SEAMS is the fastest neighbour list in every row. OVITO's Steinhardt modifier is the fastest q4 and q6. Raw lines are `benchmarks/h2h-watch-v7.csv`.
 
 Bigi and others, [arXiv:2508.15704](https://arxiv.org/abs/2508.15704) (2025), present vesin, a cutoff neighbour list used by metatensor. Crossref has no record for that preprint. It is not in the timed neighbour table.
+
+## 12 November 2026
+
+Window 6–12 November. Journal DOIs below were read back from Crossref. The ClavisCage DOI resolves at DataCite; Crossref has no work record for it. An arXiv query for ice, clathrate or hydrate titles, and for CHILL, Steinhardt, ring statistics and bond-orientational order, in `physics.chem-ph`, `cond-mat.soft` and `physics.comp-ph`, submitted 8–12 November, returned no hits. Computer Physics Communications published no article in 8–13 November. The four JOSS papers in that window are Minion, VERNIER, LightCurveLynx and exoatlas.
+
+ClavisCage 0.3.18 ([Go, Mok and Seo](https://doi.org/10.5281/zenodo.24112918), 10 November) is a Rust engine, compiled to WebAssembly and to the Python module `clavis_engine`. One install runs TRACE, HTR, HTR+, GRADE, CHILL+, F3/F4, locally averaged Steinhardt q4/q6, MCG-3 and the tetrahedral order. HTR is [Liu and others, Nanotechnology Reviews 2022](https://doi.org/10.1515/ntrev-2022-0044). HTR+ is [Shi and others, Journal of Physics: Condensed Matter 2024](https://doi.org/10.1088/1361-648X/ad52df). The engine recomputes each frame.
+
+CHILL+ uses the Nguyen and Molinero cuts, staggered below -0.8 and eclipsed on (-0.35, 0.25), on oxygens inside 0.35 nm, and the OVITO class codes. Ideal ice Ic, oxygen bond 2.75 Å. Hydrogens sit on the oxygen, the placement in the engine's own tests; the classifier reads the oxygens. d-SEAMS is `seams_frame_chill_plus` on the cutoff graph, release `-O3`, version 2.13.0. ClavisCage is `analyze_waters`, which parses the JSON water list and then classifies. One warm-up, six calls, median and type-7 IQR. One core is `taskset -c 0`. Eight cores are `taskset -c 0-7`. Raw lines are `benchmarks/h2h-watch-v11.csv`. `snakemake related_watch_v11` regenerates them. Agreement is the fraction of molecules with the same merged class.
+
+| Threads | Molecules | d-SEAMS median (IQR) ms | ClavisCage median (IQR) ms | Cubic ice |
+| --- | --- | --- | --- | --- |
+| 1 | 1000 | 0.457 (0.052) | 1.471 (0.016) | 1 |
+| 1 | 10648 | 4.933 (0.141) | 16.787 (0.081) | 1 |
+| 1 | 110592 | 50.430 (0.603) | 176.836 (2.432) | 1 |
+| 8 | 1000 | 0.429 (0.042) | 1.476 (0.041) | 1 |
+| 8 | 10648 | 4.125 (0.552) | 16.829 (0.227) | 1 |
+| 8 | 110592 | 38.508 (3.858) | 175.856 (1.470) | 1 |
+
+Every oxygen is cubic in both codes. Eight cores leave the ClavisCage time where the one-core time is: `chill.rs` has no parallel loop. d-SEAMS is faster in every row.
+
+Other code movement, with no new timing:
+
+- freud's default branch, after 3.6.1, computes `Hexatic` and `StaticStructureFactorDirect` with Euler's formula where the real part of the exponent is zero. The change is not on the Steinhardt `q_l` path, and it is not in the 22 September release. The q4 and q6 rows stand as recorded.
+- vesin 0.6.2 is still the release. Commits on 9–10 November add CUDA streams in `vesin_neighbors` and a LAMMPS column in that project's benchmarks. The CPU neighbour table was left as recorded.
+- mdapy 2.0.0 was already timed. Commits on 12 November add phonon group velocities, thermal displacements and conductivity.
+- SQQ 0.5.8, OVITO 3.17.2, pyscal3 4.1.0, matscipy 1.3.1, fastatomstruct 2.2.0, cycless 0.7, GenIce 2.2.13.3 and PLUMED 2.10.2 have no newer release. PLUMED's commits since 8 November are documentation. No new ice collective variable turned up.
+
+Papers in the window, none of which return hexagonal or double-diamond cages:
+
+- Yerby, Chen, Bertho, Zhu, Francisco and Yang, [Science Advances 2026](https://doi.org/10.1126/sciadv.aej1123). Molecular simulations of trace gases at the ice interface. The gases adsorb, slow the ice front, and suppress ice-like ordering in the quasi-liquid layer.
+- Villacampa and others, [JACS 2026](https://doi.org/10.1021/jacs.6c14020). Antifreeze glycoproteins bind specific crystallographic planes. Synthesis, NMR, activity and molecular dynamics. A plane-recognition model.
+- Najm Alsayed, Pabst, Cassone, Hassanali and Novelli, [JCP 2026](https://doi.org/10.1063/5.0362915). The population of waters with unequal donated and accepted hydrogen bonds tracks a terahertz Drude–Smith weight.
+- Kocherbitov, [Scientific Reports 2026](https://doi.org/10.1038/s41598-026-79646-0). TIP4P/2005 cooling scans. The glass transition sits on the same temperature range as the high-density to low-density structural evolution.
+- Blossey, [JCP 2026](https://doi.org/10.1063/5.0358448). A short account of Onsager–Dupuis structural polarization in ice, and a fourth-order equation for the electrostatic potential.
+
+## Claims after 12 November
+
+1. **First code to return a full ring search from a local update.** Stands. ClavisCage, the freud hexatic change, and the papers above recompute a frame or do not search rings. None describes keeping rings whose bonds did not change.
+
+2. **Faster than OVITO, freud, pyscal, matscipy and the CHILL library in every matched comparison.** Stands for that list. ClavisCage is outside the list and is slower than d-SEAMS 2.13.0 cutoff CHILL+ at 1 000, 10 648 and 110 592 molecules, on one core and on eight. The mdapy caveat already recorded for cutoff CHILL+ is unchanged by this engine.
+
+3. **Ring-statistics codes stop at counts, while d-SEAMS builds cages.** Still false if read as "no other code builds cages." ClavisCage 0.3.18 now ships TRACE, HTR, HTR+ and GRADE together, plus CHILL+. A revision should name it next to TRACE. Cage counts were not timed: this crystal has no clathrate cages.
+
+4. **OVITO, freud and pyscal have no nanotube-ice class.** Stands. Nothing this week adds a prism-block label.
+
+5. **A LAMMPS compute assigns CHILL+ during the run.** Stands. ClavisCage runs in the browser and as a Python wheel after the trajectory exists. PLUMED's recent commits are documentation. No surveyed source assigns CHILL+ or cages from inside a PLUMED, LAMMPS or OpenMM step.
+
+6. **CHILL+ follows Nguyen and Molinero, with the OVITO modifier as a second option.** ClavisCage uses those cuts and the OVITO codes. On these frames the merged label agrees for every molecule, and the label is cubic. d-SEAMS is the faster of the two calls. The ClavisCage median includes the JSON parse inside `analyze_waters`.
+
+7. **Cage labels come from the topology of the network, and local classifiers answer a different question.** Stands. The five papers are interface adsorption, plane recognition, a hydrogen-bond population, a two-state glass scan, and a polarization theory. None returns the hexagonal-cage or double-diamond-cage count.
