@@ -345,7 +345,7 @@ rule hop_stride_generate:
     shell:
         "python3 input/hop/regenerate.py --frame 104 "
         "--strides 10,100,1000 --transitions 200 "
-        "--nequil 2000 --seed 15780000 --threads 8"
+        "--nequil 2000 --seed 15780000 --threads 4"
 
 
 rule hop_stride_time:
