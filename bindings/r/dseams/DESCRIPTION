@@ -1,7 +1,7 @@
 Package: dseams
 Type: Package
 Title: Ice Classification and Ring Statistics for Molecular Simulations
-Version: 2.13.0
+Version: 2.14.0
 Authors@R: person("Rohit", "Goswami", email = "rgoswami@ieee.org",
                   role = c("aut", "cre"),
                   comment = c(ORCID = "0000-0002-2393-6242"))

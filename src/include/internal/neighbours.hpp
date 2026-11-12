@@ -379,19 +379,54 @@ bool cellListRowsThreaded(
     const std::vector<int> &subset, double rcutoff,
     std::vector<std::vector<int>> &rows);
 
-/// Full cutoff list as CSR of cloud indices. Orthorhombic, or a
-/// restricted triclinic cell stored as bound spans plus xy, xz, yz.
+/// Full cutoff list as CSR of cloud indices.
 ///
-/// A null @a subset is every atom. `cols[offsets[i] .. offsets[i + 1]]`
-/// is sorted, has no self entry, and keeps a neighbour when the squared
-/// minimum image is strictly below the cutoff squared. The pair set does
-/// not depend on the thread count. Scratch buffers stay allocated and are
-/// refilled on the next call. Returns false when the box is not
-/// orthorhombic, so the caller takes another builder.
+/// Orthorhombic boxes (`box.size() == 3`) and restricted triclinic dump
+/// boxes (`box.size() >= 6`) both use the parallel cell sort. A null
+/// @a subset is every atom. `cols[offsets[i] .. offsets[i + 1]]` is
+/// sorted and has no self entry. A neighbour is kept when the squared
+/// minimum image is strictly below the cutoff squared. @a half keeps the
+/// pair only on the lower cloud index. The pair set does not depend on
+/// the thread count. Scratch buffers stay allocated and are refilled on
+/// the next call. Returns false when the box is not usable.
 bool orthoFullCsr(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> *subset, double rcutoff, std::vector<int> &offsets,
-    std::vector<int> &cols);
+    std::vector<int> &cols, bool half = false);
+
+/// In-situ cutoff list. Candidates are built at `cutoff + skin` and
+/// reused while every atom and the box have moved by at most `skin/2`.
+/// The filtered list matches a fresh build at `cutoff`.
+class CutoffSkin {
+public:
+  CutoffSkin(double cutoff, double skin);
+  bool update(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+              const std::vector<int> *subset = nullptr, bool half = false);
+  [[nodiscard]] bool lastReused() const { return reused_; }
+  [[nodiscard]] const std::vector<int> &offsets() const { return offsets_; }
+  [[nodiscard]] const std::vector<int> &cols() const { return cols_; }
+
+private:
+  double cutoff_;
+  double skin_;
+  bool half_{false};
+  bool reused_{false};
+  bool have_{false};
+  int nop_{0};
+  std::vector<double> x0_;
+  std::vector<double> y0_;
+  std::vector<double> z0_;
+  std::vector<double> box0_;
+  std::vector<double> boxLow0_;
+  std::vector<int> wideOff_;
+  std::vector<int> wideCols_;
+  std::vector<int> offsets_;
+  std::vector<int> cols_;
+  const std::vector<int> *subset_{nullptr};
+
+  bool moved(const molSys::PointCloud<molSys::Point<double>, double> &yCloud) const;
+  void filter(const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+};
 
 /// Atom-ID rows, self first, from a CSR of cloud indices.
 std::vector<std::vector<int>> idRowsFromCsr(

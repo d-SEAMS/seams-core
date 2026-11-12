@@ -117,7 +117,23 @@ struct Graph {
 //! member and runs toward the lesser of that member's ring neighbours, and
 //! the rings are sorted lexicographically.
 std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,
-                                          int maxDepth);
+                                           int maxDepth);
+
+//! Rings on a CSR of cloud indices (no self entry, one edge each).
+std::vector<std::vector<int>> ringNetwork(const std::vector<int> &offsets,
+                                           const std::vector<int> &cols, int maxDepth);
+
+//! The same ring set, built with a bounded ball at every vertex and a
+//! primitivity test of every pair. ringNetwork leaves that table out when
+//! the largest ring is at most 7, because a strict shortcut is then a walk
+//! of at most two edges.
+std::vector<std::vector<int>>
+ringNetworkBalls(const std::vector<std::vector<int>> &nList, int maxDepth);
+
+//! 0 when the last ringNetwork call answered every primitivity query from
+//! the adjacency rows, 1 when it filled the sorted pair table, 2 when it
+//! filled the occupancy bitset of the ball (rings of size 8 to 10).
+[[nodiscard]] int lastRingSearchUsedBalls();
 
 //! The rings ringNetwork returns whose lowest-indexed member is flagged in
 //! @a sources (by index; empty flags every vertex), in the same order

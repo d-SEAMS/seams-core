@@ -282,6 +282,25 @@ std::vector<double> soapOne(const Cloud &yCloud, const gen::FracBox &frame,
 } // namespace
 
 std::vector<chill::TemplateHit> chill::classifyTemplates(
+    const Cloud &yCloud, const std::vector<int> &offsets, const std::vector<int> &cols,
+    int kNeigh) {
+  std::vector<std::vector<int>> rows(static_cast<std::size_t>(yCloud.nop));
+  for (int i = 0; i < yCloud.nop && i + 1 < static_cast<int>(offsets.size()); ++i) {
+    rows[static_cast<std::size_t>(i)].push_back(yCloud.pts[static_cast<std::size_t>(i)].atomID);
+    const int a = offsets[static_cast<std::size_t>(i)];
+    const int b = offsets[static_cast<std::size_t>(i) + 1];
+    for (int k = a; k < b; ++k) {
+      const int j = cols[static_cast<std::size_t>(k)];
+      if (j >= 0 && j < yCloud.nop) {
+        rows[static_cast<std::size_t>(i)].push_back(
+            yCloud.pts[static_cast<std::size_t>(j)].atomID);
+      }
+    }
+  }
+  return classifyTemplates(yCloud, rows, kNeigh);
+}
+
+std::vector<chill::TemplateHit> chill::classifyTemplates(
     const Cloud &yCloud, const std::vector<std::vector<int>> &nList,
     int kNeigh) {
   std::vector<TemplateHit> out(yCloud.nop);

@@ -1298,7 +1298,7 @@ nneigh::neighListO(double rcutoff,
   if (yCloud.box.size() == 3 || yCloud.box.size() >= 6) {
     std::vector<int> offsets;
     std::vector<int> cols;
-    if (orthoFullCsr(yCloud, &typeIIndices, rcutoff, offsets, cols)) {
+    if (orthoFullCsr(yCloud, &typeIIndices, rcutoff, offsets, cols, false)) {
       return idRowsFromCsr(yCloud, indexToID, offsets, cols);
     }
   }
@@ -1524,7 +1524,7 @@ nneigh::halfNeighList(double rcutoff,
     }
     std::vector<int> offsets;
     std::vector<int> cols;
-    if (orthoFullCsr(yCloud, &typeIIndices, rcutoff, offsets, cols)) {
+    if (orthoFullCsr(yCloud, &typeIIndices, rcutoff, offsets, cols, true)) {
       return halfIdRowsFromCsr(yCloud, indexToID, offsets, cols);
     }
   }
@@ -1601,7 +1601,7 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
   if (yCloud.box.size() == 3 || yCloud.box.size() >= 6) {
     std::vector<int> offsets;
     std::vector<int> cols;
-    if (orthoFullCsr(yCloud, nullptr, cutoff, offsets, cols)) {
+    if (orthoFullCsr(yCloud, nullptr, cutoff, offsets, cols, false)) {
       return indexRowsFromCsr(yCloud.nop, offsets, cols);
     }
   }

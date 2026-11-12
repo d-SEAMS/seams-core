@@ -18,7 +18,6 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <vector>
 
 #ifdef SEAMS_HAS_OPENMP
@@ -93,7 +92,9 @@ struct Scratch {
 };
 
 Scratch &scratch() {
-  static Scratch s;
+  // One buffer per calling thread. A trial pool outside OpenMP used to
+  // share this scratch and tear the neighbour list.
+  thread_local Scratch s;
   return s;
 }
 
@@ -107,7 +108,6 @@ struct Phase {
   double count = 0;
   double prefix = 0;
   double fill = 0;
-  double filter = 0;
   double rows = 0;
   int threads = 1;
   int n = 0;
@@ -115,7 +115,7 @@ struct Phase {
 };
 
 Phase &phase() {
-  static Phase p;
+  thread_local Phase p;
   return p;
 }
 
@@ -132,10 +132,9 @@ void publishProfile() {
   const Phase &p = phase();
   std::fprintf(stderr,
                "neigh_profile n=%d threads=%d pairs=%d bin_ms=%.4f "
-               "count_ms=%.4f prefix_ms=%.4f fill_ms=%.4f filter_ms=%.4f "
-               "rows_ms=%.4f\n",
+               "count_ms=%.4f prefix_ms=%.4f fill_ms=%.4f rows_ms=%.4f\n",
                p.n, p.threads, p.pairs, p.bin, p.count, p.prefix, p.fill,
-               p.filter, p.rows);
+               p.rows);
 }
 
 int chooseCount(double length, double cutoff) {
@@ -155,12 +154,27 @@ int reachOf(double length, int ncell, double cutoff) {
   return r;
 }
 
-template <bool Write, bool Tilt = false, bool Dense = false>
+// shx/shy/shz hold the cartesian image of fractional shift (ix,iy,iz),
+// indexed by (ix+1)*9 + (iy+1)*3 + (iz+1), ix,iy,iz in {-1,0,1}.
+void fillOrthoShift(double lx, double ly, double lz, double *shx, double *shy,
+                   double *shz) {
+  for (int ix = -1; ix <= 1; ++ix) {
+    for (int iy = -1; iy <= 1; ++iy) {
+      for (int iz = -1; iz <= 1; ++iz) {
+        const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
+        shx[k] = lx * static_cast<double>(ix);
+        shy[k] = ly * static_cast<double>(iy);
+        shz[k] = lz * static_cast<double>(iz);
+      }
+    }
+  }
+}
+
+template <bool Write, bool Half>
 void passFast(const double *xs, const double *ys, const double *zs,
               const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
-              double lx, double ly, double lz, double rc2, int *counts,
-              int *offsets, int *cols, double axy = 0.0, double axz = 0.0,
-              double ayz = 0.0) {
+              const double *shx, const double *shy, const double *shz, double rc2,
+              int *counts, int *offsets, int *cols) {
   const int nCells = ncx * ncy * ncz;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (nCells >= 64)
@@ -183,34 +197,34 @@ void passFast(const double *xs, const double *ys, const double *zs,
     int nn = 0;
     for (int ox = -1; ox <= 1; ++ox) {
       int nx = cx + ox;
-      double sx = 0.0;
+      int ix = 0;
       if (nx >= ncx) {
         nx -= ncx;
-        sx = lx;
+        ix = 1;
       } else if (nx < 0) {
         nx += ncx;
-        sx = -lx;
+        ix = -1;
       }
       for (int oy = -1; oy <= 1; ++oy) {
         int ny = cy + oy;
-        double sy = 0.0;
+        int iy = 0;
         if (ny >= ncy) {
           ny -= ncy;
-          sy = ly;
+          iy = 1;
         } else if (ny < 0) {
           ny += ncy;
-          sy = -ly;
+          iy = -1;
         }
         const int row = nx * ncy + ny;
         for (int oz = -1; oz <= 1; ++oz) {
           int nz = cz + oz;
-          double sz = 0.0;
+          int iz = 0;
           if (nz >= ncz) {
             nz -= ncz;
-            sz = lz;
+            iz = 1;
           } else if (nz < 0) {
             nz += ncz;
-            sz = -lz;
+            iz = -1;
           }
           const int ncid = row * ncz + nz;
           const int jb = cellStart[ncid];
@@ -218,7 +232,8 @@ void passFast(const double *xs, const double *ys, const double *zs,
           if (jb == je) {
             continue;
           }
-          nbr[nn++] = {jb, je, sx, sy, sz};
+          const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
+          nbr[nn++] = {jb, je, shx[k], shy[k], shz[k]};
         }
       }
     }
@@ -231,33 +246,19 @@ void passFast(const double *xs, const double *ys, const double *zs,
       int n = 0;
       for (int t = 0; t < nn; ++t) {
         const Nbr nb = nbr[t];
+#pragma GCC unroll 1
         for (int j = nb.begin; j < nb.end; ++j) {
-          const int jj = ids[j];
-          const double dX = xi - xs[j] - nb.sx;
-          const double dY = yi - ys[j] - nb.sy;
-          const double dZ = zi - zs[j] - nb.sz;
-          double dx = dX;
-          double dy = dY;
-          double dz = dZ;
-          if constexpr (Tilt) {
-            dx = dX + axy * dY + axz * dZ;
-            dy = dY + ayz * dZ;
+          // Slot identity: each atom is stored once, so j == i is the self pair.
+          // The full-list count then does not touch the id stream.
+          if (j == i || (Half && ids[j] < ii)) {
+            continue;
           }
-          const double d2 = dx * dx + dy * dy + dz * dz;
-          if constexpr (Dense) {
-            // A skewed cell makes the accept/reject pattern unpredictable.
-            // The count is branchless. The store stays conditional so a
-            // rejected neighbour cannot spill into the next row.
-            const int take = static_cast<int>(d2 < rc2) & static_cast<int>(jj != ii);
-            if constexpr (Write) {
-              // The row has one spare slot, so a rejected store lands
-              // on that slot instead of the next atom.
-              cols[base + n] = jj;
-            }
-            n += take;
-          } else if (jj != ii && d2 < rc2) {
-            if constexpr (Write) {
-              cols[base + n] = jj;
+          const double dx = xi - xs[j] - nb.sx;
+          const double dy = yi - ys[j] - nb.sy;
+          const double dz = zi - zs[j] - nb.sz;
+          if (dx * dx + dy * dy + dz * dz < rc2) {
+            if (Write) {
+              cols[base + n] = ids[j];
             }
             ++n;
           }
@@ -276,7 +277,7 @@ template <bool Write>
 void passSafe(const double *xs, const double *ys, const double *zs,
               const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
               int rx, int ry, int rz, double lx, double ly, double lz,
-              double rc2, int *counts, int *offsets, int *cols) {
+              double rc2, int *counts, int *offsets, int *cols, bool half) {
   const int nCells = ncx * ncy * ncz;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (nCells >= 8)
@@ -333,7 +334,7 @@ void passSafe(const double *xs, const double *ys, const double *zs,
               const int je = cellStart[ncid + 1];
               for (int j = jb; j < je; ++j) {
                 const int jj = ids[j];
-                if (jj == ii) {
+                if (jj == ii || (half && jj < ii)) {
                   continue;
                 }
                 const double d2 = minImage2(xs[i] - xs[j], ys[i] - ys[j],
@@ -360,6 +361,374 @@ void passSafe(const double *xs, const double *ys, const double *zs,
   }
 }
 
+struct Tilt {
+  double lx, ly, lz, xy, xz, yz, ox, oy, oz;
+};
+
+double tilt2(double dsx, double dsy, double dsz, const Tilt &h) {
+  const double dx = h.lx * dsx + h.xy * dsy + h.xz * dsz;
+  const double dy = h.ly * dsy + h.yz * dsz;
+  const double dz = h.lz * dsz;
+  return dx * dx + dy * dy + dz * dz;
+}
+
+void fracOf(const Tilt &h, double x, double y, double z, double s[3]) {
+  s[2] = (z - h.oz) / h.lz;
+  s[1] = (y - h.oy - h.yz * s[2]) / h.ly;
+  s[0] = (x - h.ox - h.xy * s[1] - h.xz * s[2]) / h.lx;
+  for (int d = 0; d < 3; ++d) {
+    s[d] -= std::floor(s[d]);
+    if (!(s[d] < 1.0)) {
+      s[d] = 0.0;
+    }
+  }
+}
+
+template <bool Write>
+void passTilt(const double *xs, const double *ys, const double *zs, const int *ids,
+              const int *cellStart, int ncx, int ncy, int ncz, int rx, int ry, int rz,
+              const Tilt &h, double rc2, bool half, bool shifted, int *counts,
+              int *offsets, int *cols) {
+  const int nCells = ncx * ncy * ncz;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (nCells >= 8)
+#endif
+  {
+    std::vector<int> found;
+    std::vector<int> stamp(static_cast<std::size_t>(nCells), 0);
+    int gen = 0;
+    found.reserve(32);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (int c = 0; c < nCells; ++c) {
+      const int b = cellStart[c];
+      const int e = cellStart[c + 1];
+      if (b == e) {
+        continue;
+      }
+      const int cz = c % ncz;
+      const int cy = (c / ncz) % ncy;
+      const int cx = c / (ncy * ncz);
+      for (int i = b; i < e; ++i) {
+        const int ii = ids[i];
+        found.clear();
+        ++gen;
+        if (gen == 0) {
+          std::fill(stamp.begin(), stamp.end(), 0);
+          gen = 1;
+        }
+        for (int ox = -rx; ox <= rx; ++ox) {
+          int nx = cx + ox;
+          double ssx = 0.0;
+          while (nx >= ncx) {
+            nx -= ncx;
+            ssx += 1.0;
+          }
+          while (nx < 0) {
+            nx += ncx;
+            ssx -= 1.0;
+          }
+          for (int oy = -ry; oy <= ry; ++oy) {
+            int ny = cy + oy;
+            double ssy = 0.0;
+            while (ny >= ncy) {
+              ny -= ncy;
+              ssy += 1.0;
+            }
+            while (ny < 0) {
+              ny += ncy;
+              ssy -= 1.0;
+            }
+            for (int oz = -rz; oz <= rz; ++oz) {
+              int nz = cz + oz;
+              double ssz = 0.0;
+              while (nz >= ncz) {
+                nz -= ncz;
+                ssz += 1.0;
+              }
+              while (nz < 0) {
+                nz += ncz;
+                ssz -= 1.0;
+              }
+              const int ncid = (nx * ncy + ny) * ncz + nz;
+              if (stamp[static_cast<std::size_t>(ncid)] == gen) {
+                continue;
+              }
+              stamp[static_cast<std::size_t>(ncid)] = gen;
+              for (int j = cellStart[ncid]; j < cellStart[ncid + 1]; ++j) {
+                const int jj = ids[j];
+                if (jj == ii || (half && jj < ii)) {
+                  continue;
+                }
+                double dsx, dsy, dsz;
+                if (shifted) {
+                  dsx = xs[i] - xs[j] - ssx;
+                  dsy = ys[i] - ys[j] - ssy;
+                  dsz = zs[i] - zs[j] - ssz;
+                } else {
+                  dsx = xs[i] - xs[j];
+                  dsy = ys[i] - ys[j];
+                  dsz = zs[i] - zs[j];
+                  dsx -= std::floor(dsx + 0.5);
+                  dsy -= std::floor(dsy + 0.5);
+                  dsz -= std::floor(dsz + 0.5);
+                }
+                if (tilt2(dsx, dsy, dsz, h) < rc2) {
+                  found.push_back(jj);
+                }
+              }
+            }
+          }
+        }
+        std::sort(found.begin(), found.end());
+        found.erase(std::unique(found.begin(), found.end()), found.end());
+        if (Write) {
+          const int base = offsets[ii];
+          for (int k = 0; k < static_cast<int>(found.size()); ++k) {
+            cols[base + k] = found[static_cast<std::size_t>(k)];
+          }
+        } else {
+          counts[ii] = static_cast<int>(found.size());
+        }
+      }
+    }
+  }
+}
+
+bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                 const std::vector<int> *subset, double rcutoff,
+                 std::vector<int> &offsets, std::vector<int> &cols, bool half) {
+  const gen::FracBox box = gen::makeFracBox(yCloud);
+  if (!box.ok || !box.triclinic) {
+    return false;
+  }
+  const int nop = yCloud.nop;
+  const int nSubset = subset == nullptr ? nop : static_cast<int>(subset->size());
+  offsets.assign(static_cast<std::size_t>(nop) + 1, 0);
+  cols.clear();
+  if (nop == 0 || nSubset == 0) {
+    return true;
+  }
+  if (subset != nullptr) {
+    for (int k = 0; k < nSubset; ++k) {
+      const int id = (*subset)[static_cast<std::size_t>(k)];
+      if (id < 0 || id >= nop) {
+        return false;
+      }
+    }
+  }
+  const Tilt h{box.lx, box.ly, box.lz, box.xy, box.xz, box.yz, box.ox, box.oy, box.oz};
+  const double width[3] = {box.wx, box.wy, box.wz};
+  int ncell[3];
+  for (int d = 0; d < 3; ++d) {
+    ncell[d] = width[d] > 0.0 ? static_cast<int>(std::floor(width[d] / rcutoff)) : 1;
+    if (ncell[d] < 1) {
+      ncell[d] = 1;
+    }
+  }
+  while (static_cast<long>(ncell[0]) * ncell[1] * ncell[2] > kMaxCells) {
+    int *which = &ncell[0];
+    if (ncell[1] > *which) {
+      which = &ncell[1];
+    }
+    if (ncell[2] > *which) {
+      which = &ncell[2];
+    }
+    if (*which <= 1) {
+      break;
+    }
+    --(*which);
+  }
+  int reach[3];
+  for (int d = 0; d < 3; ++d) {
+    const double cellW = width[d] / static_cast<double>(ncell[d]);
+    reach[d] = cellW > 0.0 ? static_cast<int>(std::ceil(rcutoff / cellW - 1e-12)) : 1;
+    if (reach[d] < 1) {
+      reach[d] = 1;
+    }
+  }
+  const bool shifted = reach[0] == 1 && reach[1] == 1 && reach[2] == 1 && ncell[0] >= 4 &&
+                       ncell[1] >= 4 && ncell[2] >= 4;
+  const int nCells = ncell[0] * ncell[1] * ncell[2];
+  const double rc2 = rcutoff * rcutoff;
+#ifdef SEAMS_HAS_OPENMP
+  omp_set_dynamic(0);
+  const int maxThreads = std::max(1, omp_get_max_threads());
+  const bool nested = omp_in_parallel();
+#else
+  const int maxThreads = 1;
+  const bool nested = false;
+#endif
+  Scratch local;
+  Scratch &sc = nested ? local : scratch();
+  sc.px.resize(static_cast<std::size_t>(nSubset));
+  sc.py.resize(static_cast<std::size_t>(nSubset));
+  sc.pz.resize(static_cast<std::size_t>(nSubset));
+  sc.xs.resize(static_cast<std::size_t>(nSubset));
+  sc.ys.resize(static_cast<std::size_t>(nSubset));
+  sc.zs.resize(static_cast<std::size_t>(nSubset));
+  sc.cellOf.resize(static_cast<std::size_t>(nSubset));
+  sc.ids.resize(static_cast<std::size_t>(nSubset));
+  sc.cellStart.assign(static_cast<std::size_t>(nCells) + 1, 0);
+  sc.hist.assign(static_cast<std::size_t>(maxThreads) * static_cast<std::size_t>(nCells), 0);
+  // A full set writes every count from the cell that owns the atom.
+  // Zeroing those lines on this thread first only adds a fault.
+  if (sc.counts.size() != static_cast<std::size_t>(nop)) {
+    sc.counts.assign(static_cast<std::size_t>(nop), 0);
+  } else if (subset != nullptr) {
+    std::fill(sc.counts.begin(), sc.counts.end(), 0);
+  }
+  const auto tBin = Clock::now();
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (!nested && nSubset >= 256)
+#endif
+  {
+    const int tid = teamRank();
+    const int nt = teamSize();
+    int *hist = sc.hist.data() + static_cast<std::size_t>(tid) * static_cast<std::size_t>(nCells);
+    std::fill(hist, hist + nCells, 0);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (int k = 0; k < nSubset; ++k) {
+      const int id = subset == nullptr ? k : (*subset)[static_cast<std::size_t>(k)];
+      const auto &p = yCloud.pts[static_cast<std::size_t>(id)];
+      double s[3];
+      fracOf(h, p.x, p.y, p.z, s);
+      int cxyz[3];
+      for (int d = 0; d < 3; ++d) {
+        int c = static_cast<int>(s[d] * static_cast<double>(ncell[d]));
+        if (c >= ncell[d]) {
+          c = ncell[d] - 1;
+        }
+        if (c < 0) {
+          c = 0;
+        }
+        cxyz[d] = c;
+      }
+      const int cid = (cxyz[0] * ncell[1] + cxyz[1]) * ncell[2] + cxyz[2];
+      sc.cellOf[static_cast<std::size_t>(k)] = cid;
+      sc.px[static_cast<std::size_t>(k)].v = s[0];
+      sc.py[static_cast<std::size_t>(k)].v = s[1];
+      sc.pz[static_cast<std::size_t>(k)].v = s[2];
+      ++hist[cid];
+    }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp barrier
+#pragma omp single
+#endif
+    {
+      sc.cellStart[0] = 0;
+      for (int c = 0; c < nCells; ++c) {
+        int sum = 0;
+        for (int t = 0; t < nt; ++t) {
+          sum += sc.hist[static_cast<std::size_t>(t) * static_cast<std::size_t>(nCells) +
+                         static_cast<std::size_t>(c)];
+        }
+        sc.cellStart[static_cast<std::size_t>(c) + 1] =
+            sc.cellStart[static_cast<std::size_t>(c)] + sum;
+        int acc = sc.cellStart[static_cast<std::size_t>(c)];
+        for (int t = 0; t < nt; ++t) {
+          int &slot = sc.hist[static_cast<std::size_t>(t) * static_cast<std::size_t>(nCells) +
+                              static_cast<std::size_t>(c)];
+          const int take = slot;
+          slot = acc;
+          acc += take;
+        }
+      }
+    }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp barrier
+#pragma omp for schedule(static)
+#endif
+    for (int k = 0; k < nSubset; ++k) {
+      const int cid = sc.cellOf[static_cast<std::size_t>(k)];
+      const int slot = hist[cid]++;
+      const int id = subset == nullptr ? k : (*subset)[static_cast<std::size_t>(k)];
+      sc.ids[static_cast<std::size_t>(slot)] = id;
+      const double s0 = sc.px[static_cast<std::size_t>(k)].v;
+      const double s1 = sc.py[static_cast<std::size_t>(k)].v;
+      const double s2 = sc.pz[static_cast<std::size_t>(k)].v;
+      if (shifted) {
+        sc.xs[static_cast<std::size_t>(slot)].v = h.ox + h.lx * s0 + h.xy * s1 + h.xz * s2;
+        sc.ys[static_cast<std::size_t>(slot)].v = h.oy + h.ly * s1 + h.yz * s2;
+        sc.zs[static_cast<std::size_t>(slot)].v = h.oz + h.lz * s2;
+      } else {
+        // The wide-reach walk still takes the fractional minimum image.
+        sc.xs[static_cast<std::size_t>(slot)].v = s0;
+        sc.ys[static_cast<std::size_t>(slot)].v = s1;
+        sc.zs[static_cast<std::size_t>(slot)].v = s2;
+      }
+    }
+  }
+  phase().bin = msSince(tBin);
+  phase().n = nSubset;
+  const double *x = &sc.xs[0].v;
+  const double *y = &sc.ys[0].v;
+  const double *z = &sc.zs[0].v;
+  double shx[27], shy[27], shz[27];
+  for (int ix = -1; ix <= 1; ++ix) {
+    for (int iy = -1; iy <= 1; ++iy) {
+      for (int iz = -1; iz <= 1; ++iz) {
+        const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
+        shx[k] = h.lx * static_cast<double>(ix) + h.xy * static_cast<double>(iy) +
+                 h.xz * static_cast<double>(iz);
+        shy[k] = h.ly * static_cast<double>(iy) + h.yz * static_cast<double>(iz);
+        shz[k] = h.lz * static_cast<double>(iz);
+      }
+    }
+  }
+  const auto tCount = Clock::now();
+  if (shifted) {
+    if (half) {
+      passFast<false, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                            ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr);
+    } else {
+      passFast<false, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                             ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr);
+    }
+  } else {
+    passTilt<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
+                    reach[0], reach[1], reach[2], h, rc2, half, false, sc.counts.data(),
+                    nullptr, nullptr);
+  }
+  phase().count = msSince(tCount);
+  const auto tPrefix = Clock::now();
+  offsets[0] = 0;
+  for (int i = 0; i < nop; ++i) {
+    offsets[static_cast<std::size_t>(i) + 1] =
+        offsets[static_cast<std::size_t>(i)] + sc.counts[static_cast<std::size_t>(i)];
+  }
+  const int nnz = offsets[static_cast<std::size_t>(nop)];
+  cols.resize(static_cast<std::size_t>(nnz));
+  phase().prefix = msSince(tPrefix);
+  const auto tFill = Clock::now();
+  if (nnz > 0) {
+    if (shifted) {
+      if (half) {
+        passFast<true, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                             ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data());
+      } else {
+        passFast<true, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                              ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data());
+      }
+    } else {
+      passTilt<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
+                     reach[0], reach[1], reach[2], h, rc2, half, false, nullptr, offsets.data(),
+                     cols.data());
+    }
+  }
+  phase().fill = msSince(tFill);
+  phase().pairs = nnz;
+  if (profileOn()) {
+    std::fprintf(stderr, "tilt shifted=%d ncell=%d %d %d reach=%d %d %d\n", int(shifted),
+                 ncell[0], ncell[1], ncell[2], reach[0], reach[1], reach[2]);
+    publishProfile();
+  }
+  return true;
+}
+
 } // namespace
 
 namespace nneigh {
@@ -367,53 +736,25 @@ namespace nneigh {
 bool orthoFullCsr(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> *subset, double rcutoff, std::vector<int> &offsets,
-    std::vector<int> &cols) {
+    std::vector<int> &cols, bool half) {
   const int nop = yCloud.nop;
-  if (nop < 0 || yCloud.box.size() < 3 || (yCloud.box.size() > 3 && yCloud.box.size() < 6) ||
-      !(rcutoff > 0.0)) {
+  if (nop < 0 || !(rcutoff > 0.0)) {
     return false;
   }
-  const bool tilt = yCloud.box.size() >= 6;
-  double xy = 0.0, xz = 0.0, yz = 0.0;
-  double lenStore[3];
-  double originStore[3] = {
-      yCloud.boxLow.size() > 0 ? yCloud.boxLow[0] : 0.0,
-      yCloud.boxLow.size() > 1 ? yCloud.boxLow[1] : 0.0,
-      yCloud.boxLow.size() > 2 ? yCloud.boxLow[2] : 0.0};
-  if (!tilt) {
-    lenStore[0] = yCloud.box[0];
-    lenStore[1] = yCloud.box[1];
-    lenStore[2] = yCloud.box[2];
-  } else {
-    xy = yCloud.box[3];
-    xz = yCloud.box[4];
-    yz = yCloud.box[5];
-    const double xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));
-    const double xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));
-    const double ymin = std::min(0.0, yz);
-    const double ymax = std::max(0.0, yz);
-    lenStore[0] = yCloud.box[0] - xmax + xmin;
-    lenStore[1] = yCloud.box[1] - ymax + ymin;
-    lenStore[2] = yCloud.box[2];
-    originStore[0] -= xmin;
-    originStore[1] -= ymin;
+  if (yCloud.box.size() >= 6) {
+    return tiltFullCsr(yCloud, subset, rcutoff, offsets, cols, half);
   }
-  const double len[3] = {lenStore[0], lenStore[1], lenStore[2]};
-  const double origin[3] = {originStore[0], originStore[1], originStore[2]};
+  if (yCloud.box.size() != 3) {
+    return false;
+  }
+  const double len[3] = {yCloud.box[0], yCloud.box[1], yCloud.box[2]};
   if (!(len[0] > 0.0 && len[1] > 0.0 && len[2] > 0.0)) {
     return false;
   }
-  const double axy = tilt ? xy / len[1] : 0.0;
-  const double axz = tilt ? xz / len[2] : 0.0;
-  const double ayz = tilt ? yz / len[2] : 0.0;
-  // Largest reduced separation of a pair inside the Cartesian cutoff ball.
-  const double axzMix = axz - axy * ayz;
-  const double colSum = std::max(1.0, std::max(std::fabs(axy) + 1.0,
-                                               std::fabs(axzMix) + std::fabs(ayz) + 1.0));
-  const double rowSum =
-      std::max(1.0 + std::fabs(axy) + std::fabs(axzMix), 1.0 + std::fabs(ayz));
-  const double rcSearch = rcutoff * std::sqrt(colSum * rowSum) * (1.0 + 1e-9);
-  const double rcSearch2 = rcSearch * rcSearch;
+  const double origin[3] = {
+      yCloud.boxLow.size() > 0 ? yCloud.boxLow[0] : 0.0,
+      yCloud.boxLow.size() > 1 ? yCloud.boxLow[1] : 0.0,
+      yCloud.boxLow.size() > 2 ? yCloud.boxLow[2] : 0.0};
   const int nSubset = subset == nullptr ? nop : static_cast<int>(subset->size());
   offsets.assign(static_cast<std::size_t>(nop) + 1, 0);
   cols.clear();
@@ -429,10 +770,8 @@ bool orthoFullCsr(
     }
   }
 
-  const double binCut[3] = {tilt ? rcSearch : rcutoff, tilt ? rcSearch : rcutoff,
-                            tilt ? rcSearch : rcutoff};
-  int ncell[3] = {chooseCount(len[0], binCut[0]), chooseCount(len[1], binCut[1]),
-                  chooseCount(len[2], binCut[2])};
+  int ncell[3] = {chooseCount(len[0], rcutoff), chooseCount(len[1], rcutoff),
+                  chooseCount(len[2], rcutoff)};
   while (static_cast<long>(ncell[0]) * ncell[1] * ncell[2] > kMaxCells) {
     int *which = &ncell[0];
     if (ncell[1] > *which) {
@@ -446,14 +785,11 @@ bool orthoFullCsr(
     }
     --(*which);
   }
-  const int reach[3] = {reachOf(len[0], ncell[0], binCut[0]),
-                        reachOf(len[1], ncell[1], binCut[1]),
-                        reachOf(len[2], ncell[2], binCut[2])};
+  const int reach[3] = {reachOf(len[0], ncell[0], rcutoff),
+                        reachOf(len[1], ncell[1], rcutoff),
+                        reachOf(len[2], ncell[2], rcutoff)};
   const bool fast = reach[0] == 1 && reach[1] == 1 && reach[2] == 1 &&
                     ncell[0] >= 4 && ncell[1] >= 4 && ncell[2] >= 4;
-  if (tilt && !fast) {
-    return false;
-  }
   const int nCells = ncell[0] * ncell[1] * ncell[2];
   const double rc2 = rcutoff * rcutoff;
 
@@ -481,8 +817,8 @@ bool orthoFullCsr(
   sc.cellStart.assign(static_cast<std::size_t>(nCells) + 1, 0);
   sc.hist.assign(static_cast<std::size_t>(maxThreads) * static_cast<std::size_t>(nCells),
                  0);
-  // A full set writes every count from the thread that owns the cell.
-  // Zeroing here would fault those lines on this thread first.
+  // A full set writes every count from the cell that owns the atom.
+  // Zeroing those lines on this thread first only adds a fault.
   if (sc.counts.size() != static_cast<std::size_t>(nop)) {
     sc.counts.assign(static_cast<std::size_t>(nop), 0);
   } else if (subset != nullptr) {
@@ -511,54 +847,24 @@ bool orthoFullCsr(
     for (int k = 0; k < nSubset; ++k) {
       const int id = subset == nullptr ? k : (*subset)[static_cast<std::size_t>(k)];
       const auto &p = yCloud.pts[static_cast<std::size_t>(id)];
+      const double coord[3] = {p.x, p.y, p.z};
       int cxyz[3];
       double wrapped[3];
-      if (!tilt) {
-        const double coord[3] = {p.x, p.y, p.z};
-        for (int d = 0; d < 3; ++d) {
-          double f = (coord[d] - origin[d]) / len[d];
-          f -= std::floor(f);
-          if (!(f < 1.0)) {
-            f = 0.0;
-          }
-          int c = static_cast<int>(f * static_cast<double>(ncell[d]));
-          if (c >= ncell[d]) {
-            c = ncell[d] - 1;
-          }
-          if (c < 0) {
-            c = 0;
-          }
-          cxyz[d] = c;
-          wrapped[d] = f * len[d];
+      for (int d = 0; d < 3; ++d) {
+        double f = (coord[d] - origin[d]) / len[d];
+        f -= std::floor(f);
+        if (!(f < 1.0)) {
+          f = 0.0;
         }
-      } else {
-        double sz = (p.z - origin[2]) / len[2];
-        sz -= std::floor(sz);
-        if (!(sz < 1.0)) {
-          sz = 0.0;
+        int c = static_cast<int>(f * static_cast<double>(ncell[d]));
+        if (c >= ncell[d]) {
+          c = ncell[d] - 1;
         }
-        double sy = (p.y - origin[1] - yz * sz) / len[1];
-        sy -= std::floor(sy);
-        if (!(sy < 1.0)) {
-          sy = 0.0;
+        if (c < 0) {
+          c = 0;
         }
-        double sx = (p.x - origin[0] - xy * sy - xz * sz) / len[0];
-        sx -= std::floor(sx);
-        if (!(sx < 1.0)) {
-          sx = 0.0;
-        }
-        const double frac[3] = {sx, sy, sz};
-        for (int d = 0; d < 3; ++d) {
-          int c = static_cast<int>(frac[d] * static_cast<double>(ncell[d]));
-          if (c >= ncell[d]) {
-            c = ncell[d] - 1;
-          }
-          if (c < 0) {
-            c = 0;
-          }
-          cxyz[d] = c;
-          wrapped[d] = frac[d] * len[d];
-        }
+        cxyz[d] = c;
+        wrapped[d] = origin[d] + f * len[d];
       }
       const int cid = (cxyz[0] * ncell[1] + cxyz[1]) * ncell[2] + cxyz[2];
       sc.cellOf[static_cast<std::size_t>(k)] = cid;
@@ -612,31 +918,30 @@ bool orthoFullCsr(
   const double *x = &sc.xs[0].v;
   const double *y = &sc.ys[0].v;
   const double *z = &sc.zs[0].v;
+  double shx[27], shy[27], shz[27];
+  fillOrthoShift(len[0], len[1], len[2], shx, shy, shz);
 
   const auto tCount = Clock::now();
   if (fast) {
-    if (tilt) {
-      passFast<false, false, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0],
-                                   ncell[1], ncell[2], len[0], len[1], len[2], rcSearch2,
-                                   sc.counts.data(), nullptr, nullptr);
+    if (half) {
+      passFast<false, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                            ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr);
     } else {
-      passFast<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                      ncell[2], len[0], len[1], len[2], rc2, sc.counts.data(), nullptr,
-                      nullptr);
+      passFast<false, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                             ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr);
     }
   } else {
     passSafe<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                     ncell[2], reach[0], reach[1], reach[2], len[0], len[1], len[2], rc2,
-                    sc.counts.data(), nullptr, nullptr);
+                    sc.counts.data(), nullptr, nullptr, half);
   }
   phase().count = msSince(tCount);
 
   const auto tPrefix = Clock::now();
   offsets[0] = 0;
-  const int rowPad = tilt ? 1 : 0;
   for (int i = 0; i < nop; ++i) {
     offsets[static_cast<std::size_t>(i) + 1] =
-        offsets[static_cast<std::size_t>(i)] + sc.counts[static_cast<std::size_t>(i)] + rowPad;
+        offsets[static_cast<std::size_t>(i)] + sc.counts[static_cast<std::size_t>(i)];
   }
   const int nnz = offsets[static_cast<std::size_t>(nop)];
   cols.resize(static_cast<std::size_t>(nnz));
@@ -646,121 +951,20 @@ bool orthoFullCsr(
   const auto tFill = Clock::now();
   if (nnz > 0) {
     if (fast) {
-      if (tilt) {
-        passFast<true, false, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0],
-                                    ncell[1], ncell[2], len[0], len[1], len[2], rcSearch2,
-                                    nullptr, offsets.data(), cols.data());
+      if (half) {
+        passFast<true, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                             ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data());
       } else {
-        passFast<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                       ncell[2], len[0], len[1], len[2], rc2, nullptr, offsets.data(),
-                       cols.data());
+        passFast<true, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                              ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data());
       }
     } else {
       passSafe<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                      ncell[2], reach[0], reach[1], reach[2], len[0], len[1], len[2], rc2,
-                     nullptr, offsets.data(), cols.data());
+                     nullptr, offsets.data(), cols.data(), half);
     }
   }
   phase().fill = msSince(tFill);
-  const auto tFilter = Clock::now();
-  if (tilt && nnz > 0 && maxThreads <= 1) {
-    std::vector<double> rx(static_cast<std::size_t>(nop));
-    std::vector<double> ry(static_cast<std::size_t>(nop));
-    std::vector<double> rz(static_cast<std::size_t>(nop));
-    for (int slot = 0; slot < nSubset; ++slot) {
-      const int id = sc.ids[static_cast<std::size_t>(slot)];
-      rx[static_cast<std::size_t>(id)] = x[slot];
-      ry[static_cast<std::size_t>(id)] = y[slot];
-      rz[static_cast<std::size_t>(id)] = z[slot];
-    }
-    const double hx = 0.5 * len[0];
-    const double hy = 0.5 * len[1];
-    const double hz = 0.5 * len[2];
-    int w = 0;
-    for (int i = 0; i < nop; ++i) {
-      const int a = offsets[static_cast<std::size_t>(i)];
-      const int b = a + sc.counts[static_cast<std::size_t>(i)];
-      offsets[static_cast<std::size_t>(i)] = w;
-      for (int k = a; k < b; ++k) {
-        const int j = cols[static_cast<std::size_t>(k)];
-        double dX = rx[static_cast<std::size_t>(i)] - rx[static_cast<std::size_t>(j)];
-        double dY = ry[static_cast<std::size_t>(i)] - ry[static_cast<std::size_t>(j)];
-        double dZ = rz[static_cast<std::size_t>(i)] - rz[static_cast<std::size_t>(j)];
-        if (dX > hx) dX -= len[0];
-        else if (dX < -hx) dX += len[0];
-        if (dY > hy) dY -= len[1];
-        else if (dY < -hy) dY += len[1];
-        if (dZ > hz) dZ -= len[2];
-        else if (dZ < -hz) dZ += len[2];
-        const double dx = dX + axy * dY + axz * dZ;
-        const double dy = dY + ayz * dZ;
-        if (dx * dx + dy * dy + dZ * dZ < rc2) {
-          cols[static_cast<std::size_t>(w++)] = j;
-        }
-      }
-    }
-    offsets[static_cast<std::size_t>(nop)] = w;
-    cols.resize(static_cast<std::size_t>(w));
-    phase().pairs = w;
-  } else if (tilt && nnz > 0) {
-    std::vector<double> rx(static_cast<std::size_t>(nop));
-    std::vector<double> ry(static_cast<std::size_t>(nop));
-    std::vector<double> rz(static_cast<std::size_t>(nop));
-    std::vector<int> kept(static_cast<std::size_t>(nop));
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (nSubset >= 256)
-#endif
-    for (int slot = 0; slot < nSubset; ++slot) {
-      const int id = sc.ids[static_cast<std::size_t>(slot)];
-      rx[static_cast<std::size_t>(id)] = x[slot];
-      ry[static_cast<std::size_t>(id)] = y[slot];
-      rz[static_cast<std::size_t>(id)] = z[slot];
-    }
-    const double hx = 0.5 * len[0];
-    const double hy = 0.5 * len[1];
-    const double hz = 0.5 * len[2];
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (nop >= 256)
-#endif
-    for (int i = 0; i < nop; ++i) {
-      const int a = offsets[static_cast<std::size_t>(i)];
-      const int b = a + sc.counts[static_cast<std::size_t>(i)];
-      int wrow = a;
-      for (int k = a; k < b; ++k) {
-        const int j = cols[static_cast<std::size_t>(k)];
-        double dX = rx[static_cast<std::size_t>(i)] - rx[static_cast<std::size_t>(j)];
-        double dY = ry[static_cast<std::size_t>(i)] - ry[static_cast<std::size_t>(j)];
-        double dZ = rz[static_cast<std::size_t>(i)] - rz[static_cast<std::size_t>(j)];
-        if (dX > hx) dX -= len[0];
-        else if (dX < -hx) dX += len[0];
-        if (dY > hy) dY -= len[1];
-        else if (dY < -hy) dY += len[1];
-        if (dZ > hz) dZ -= len[2];
-        else if (dZ < -hz) dZ += len[2];
-        const double dx = dX + axy * dY + axz * dZ;
-        const double dy = dY + ayz * dZ;
-        if (dx * dx + dy * dy + dZ * dZ < rc2) {
-          cols[static_cast<std::size_t>(wrow++)] = j;
-        }
-      }
-      kept[static_cast<std::size_t>(i)] = wrow - a;
-    }
-    int packed = 0;
-    for (int i = 0; i < nop; ++i) {
-      const int a = offsets[static_cast<std::size_t>(i)];
-      const int nkeep = kept[static_cast<std::size_t>(i)];
-      if (packed != a && nkeep > 0) {
-        std::memmove(cols.data() + packed, cols.data() + a,
-                     static_cast<std::size_t>(nkeep) * sizeof(int));
-      }
-      offsets[static_cast<std::size_t>(i)] = packed;
-      packed += nkeep;
-    }
-    offsets[static_cast<std::size_t>(nop)] = packed;
-    cols.resize(static_cast<std::size_t>(packed));
-    phase().pairs = packed;
-  }
-  phase().filter = msSince(tFilter);
   publishProfile();
   return true;
 }
@@ -849,6 +1053,132 @@ std::vector<std::vector<int>> halfIdRowsFromCsr(
     }
   }
   return rows;
+}
+
+nneigh::CutoffSkin::CutoffSkin(double cutoff, double skin)
+    : cutoff_(cutoff), skin_(skin) {}
+
+bool nneigh::CutoffSkin::moved(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) const {
+  if (!have_ || nop_ != yCloud.nop || static_cast<int>(x0_.size()) != yCloud.nop) {
+    return true;
+  }
+  if (yCloud.box.size() != box0_.size() || yCloud.boxLow.size() != boxLow0_.size()) {
+    return true;
+  }
+  for (std::size_t k = 0; k < yCloud.boxLow.size(); ++k) {
+    if (std::fabs(yCloud.boxLow[k] - boxLow0_[k]) > 0.5 * skin_) {
+      return true;
+    }
+  }
+  const double trigger = 0.5 * skin_;
+  for (std::size_t k = 0; k < yCloud.box.size(); ++k) {
+    if (std::fabs(yCloud.box[k] - box0_[k]) > trigger) {
+      return true;
+    }
+  }
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
+  const double triggerSq = trigger * trigger;
+  for (int i = 0; i < yCloud.nop; ++i) {
+    if (subset_ != nullptr) {
+      // A subset change is handled by the caller comparing pointers.
+    }
+    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    const auto dr = gen::fracDelta(frame, p.x, p.y, p.z, x0_[static_cast<std::size_t>(i)],
+                                   y0_[static_cast<std::size_t>(i)],
+                                   z0_[static_cast<std::size_t>(i)]);
+    if (dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2] > triggerSq) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void nneigh::CutoffSkin::filter(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  const int nop = yCloud.nop;
+  const double rc2 = cutoff_ * cutoff_;
+  const gen::FracBox frame = gen::makeFracBox(yCloud);
+  std::vector<int> counts(static_cast<std::size_t>(nop), 0);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nop >= 256)
+#endif
+  for (int i = 0; i < nop; ++i) {
+    int n = 0;
+    const int a = wideOff_[static_cast<std::size_t>(i)];
+    const int b = wideOff_[static_cast<std::size_t>(i) + 1];
+    for (int k = a; k < b; ++k) {
+      const int j = wideCols_[static_cast<std::size_t>(k)];
+      if (j < 0 || j >= nop || j == i) {
+        continue;
+      }
+      if (half_ && j < i) {
+        continue;
+      }
+      if (gen::periodicDistSq(frame, yCloud, i, j) < rc2) {
+        ++n;
+      }
+    }
+    counts[static_cast<std::size_t>(i)] = n;
+  }
+  offsets_.assign(static_cast<std::size_t>(nop) + 1, 0);
+  for (int i = 0; i < nop; ++i) {
+    offsets_[static_cast<std::size_t>(i) + 1] =
+        offsets_[static_cast<std::size_t>(i)] + counts[static_cast<std::size_t>(i)];
+  }
+  cols_.resize(static_cast<std::size_t>(offsets_[static_cast<std::size_t>(nop)]));
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nop >= 256)
+#endif
+  for (int i = 0; i < nop; ++i) {
+    int slot = offsets_[static_cast<std::size_t>(i)];
+    const int a = wideOff_[static_cast<std::size_t>(i)];
+    const int b = wideOff_[static_cast<std::size_t>(i) + 1];
+    for (int k = a; k < b; ++k) {
+      const int j = wideCols_[static_cast<std::size_t>(k)];
+      if (j < 0 || j >= nop || j == i || (half_ && j < i)) {
+        continue;
+      }
+      if (gen::periodicDistSq(frame, yCloud, i, j) < rc2) {
+        cols_[static_cast<std::size_t>(slot++)] = j;
+      }
+    }
+    const int n = slot - offsets_[static_cast<std::size_t>(i)];
+    std::sort(cols_.begin() + offsets_[static_cast<std::size_t>(i)],
+              cols_.begin() + offsets_[static_cast<std::size_t>(i)] + n);
+  }
+}
+
+bool nneigh::CutoffSkin::update(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<int> *subset, bool half) {
+  const bool sameSubset = subset_ == subset;
+  const bool sameHalf = !have_ || half_ == half;
+  half_ = half;
+  reused_ = have_ && sameSubset && sameHalf && !moved(yCloud);
+  if (!reused_) {
+    if (!orthoFullCsr(yCloud, subset, cutoff_ + skin_, wideOff_, wideCols_, half_)) {
+      have_ = false;
+      offsets_.clear();
+      cols_.clear();
+      return false;
+    }
+    x0_.resize(static_cast<std::size_t>(yCloud.nop));
+    y0_.resize(static_cast<std::size_t>(yCloud.nop));
+    z0_.resize(static_cast<std::size_t>(yCloud.nop));
+    for (int i = 0; i < yCloud.nop; ++i) {
+      x0_[static_cast<std::size_t>(i)] = yCloud.pts[static_cast<std::size_t>(i)].x;
+      y0_[static_cast<std::size_t>(i)] = yCloud.pts[static_cast<std::size_t>(i)].y;
+      z0_[static_cast<std::size_t>(i)] = yCloud.pts[static_cast<std::size_t>(i)].z;
+    }
+    box0_ = yCloud.box;
+    boxLow0_ = yCloud.boxLow;
+    nop_ = yCloud.nop;
+    subset_ = subset;
+    have_ = true;
+  }
+  filter(yCloud);
+  return true;
 }
 
 } // namespace nneigh

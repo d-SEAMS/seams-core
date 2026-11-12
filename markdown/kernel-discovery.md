@@ -462,3 +462,96 @@ threshold also links a halo and liquid molecules. The figshare ratio
 739/186 is about 4, the same split read further along one growing
 trajectory. The crystal size is the CHILL+ cluster. The larger number
 is the other graph.
+
+The release candidate `245190a0` and this branch both build the cutoff
+shell, and they disagreed on the walk. On ice Ic, orthorhombic and
+sheared (`xy = 4`, `xz = 1.5`, `yz = 0.8`), the two walks write the
+same pairs. At 110592 molecules the digest is `647177f805d1e1c6`
+(442368 pairs). At 884736 it is `ba88eb7da3372fc6` (3538944 pairs),
+on one thread and on eight, for both cells. The shared shift table is
+the one that stays. It is the walk the release already uses for an
+orthorhombic cell and for a triclinic cell whose neighbour reach is
+one, including half lists. A full set no longer zeroes the count
+vector before the cell that owns each atom overwrites it. The
+sheared 884736 cell is where the two walks separate: 295.0 ms against
+242.8 ms on one thread, and 42.5 ms against 33.5 ms on eight. The
+orthorhombic cell stays within a millisecond at 884736 (230.1 ms
+against 231.2 ms on one thread, 31.4 ms against 32.2 ms on eight).
+`discovery/v12-walk.txt` is that comparison. One warmup, then the mean
+of four calls.
+
+q4, q6, q4-bar and the published CHILL+ were timed again in one
+session on the same eight cores (`discovery/v12-session.txt`,
+`nproc` 8, one thread per core, cpus 0–7). Two warm-ups, then eight
+samples. The median is the mean of the two central samples. The
+neighbour build is inside every sample. `merge` is this tree,
+`kd` is `e943930a`, `rel` is `245190a0`. All three call
+`steinhardtQlCutoff`. CHILL+ on `merge` and `kd` is
+`chillPlusPublishedCutoff`. On `rel` it is the cutoff CSR followed by
+`chillPlusFromCsr`. The published thresholds are unchanged. pyscal3
+4.1.0 has no CHILL+ classifier. OVITO's q6 call also builds
+\(l = 2 \ldots 5\), because `max_l` is the highest degree.
+
+One thread, 110592 molecules, median milliseconds:
+
+| | q4 | q6 | q4-bar | CHILL+ |
+| --- | --- | --- | --- | --- |
+| merge | 32.76 | 33.54 | 36.92 | 37.05 |
+| kd | 31.52 | 32.56 | 35.55 | 36.32 |
+| rel | 39.46 | 42.72 | 42.65 | 38.20 |
+| OVITO | 51.89 | 62.93 | 65.17 | 618.26 |
+| mdapy | 64.32 | 78.59 | 66.22 | 61.93 |
+| pyscal3 | 94.84 | 103.14 | 96.00 | — |
+
+One thread, 884736 molecules:
+
+| | q4 | q6 | q4-bar | CHILL+ |
+| --- | --- | --- | --- | --- |
+| merge | 314.94 | 325.81 | 369.76 | 352.32 |
+| kd | 306.97 | 329.05 | 354.00 | 345.53 |
+| rel | 463.87 | 538.93 | 497.75 | 398.59 |
+| OVITO | 391.41 | 478.37 | 648.75 | 4874.74 |
+| mdapy | 698.08 | 855.95 | 793.79 | 790.76 |
+| pyscal3 | 875.79 | 939.80 | 932.99 | — |
+
+Eight threads, 110592 molecules:
+
+| | q4 | q6 | q4-bar | CHILL+ |
+| --- | --- | --- | --- | --- |
+| merge | 5.32 | 5.43 | 6.17 | 6.72 |
+| kd | 5.44 | 5.47 | 6.32 | 7.06 |
+| rel | 8.39 | 9.16 | 9.21 | 7.30 |
+| OVITO | 11.64 | 11.99 | 18.89 | 85.26 |
+| mdapy | 14.56 | 16.65 | 15.79 | 15.72 |
+| pyscal3 | 33.09 | 25.60 | 25.38 | — |
+
+Eight threads, 884736 molecules:
+
+| | q4 | q6 | q4-bar | CHILL+ |
+| --- | --- | --- | --- | --- |
+| merge | 42.88 | 45.34 | 51.45 | 57.52 |
+| kd | 42.81 | 46.51 | 50.72 | 56.74 |
+| rel | 155.18 | 246.26 | 167.49 | 73.86 |
+| OVITO | 79.84 | 91.14 | 214.66 | 655.15 |
+| mdapy | 136.00 | 151.74 | 139.97 | 144.65 |
+| pyscal3 | 183.09 | 191.40 | 195.51 | — |
+
+Against `245190a0`, every q median is faster, and CHILL+ is faster at
+both sizes. Against `e943930a`, the eight-thread medians match. The
+two that sit a few tenths of a millisecond higher, q4-bar and CHILL+
+at 884736, lie inside the other build's sample range. On one thread
+the same frame's q4 median is 314.9 ms against 307.0 ms. Seven of the
+eight samples sit in 304.9–332.6 ms, below OVITO's minimum of 387.6 ms,
+and one sample stalled at 523.6 ms. q6 is faster than `e943930a`.
+q4-bar and CHILL+ overlap that build's range. The values on ideal ice
+are unchanged: q4 is 0.50917508 and q6 is 0.62853936, and every CHILL+
+label is cubic.
+
+The meson suite on this tree reported 93 passes, 2 expected failures
+and 6 skips. The one failure was the TIP4P q3 fixture, which still
+expected 0.389362, the four-nearest mean. The orthorhombic frame API
+reads the cutoff shell, and that mean is 0.374897. The same CSR digest
+comes out of all three libraries, so the fixture now expects the
+cutoff mean. With NumPy on the path, the CHILL+ binding test, the fused
+q4/q6/CHILL+ test and `tests/test_wl_ice.py` pass. `sphinx-build -W`
+completes without warnings.
