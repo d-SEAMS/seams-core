@@ -57,6 +57,19 @@ inline void releaseTeam() {
 #endif
 }
 
+// OpenMP work that does not hand the cores to Rayon. Pausing the team
+// here parks every worker and the next parallel region pays a wake-up
+// that moves by several milliseconds from call to call. Widen the mask
+// and freeze the team size, and leave the workers asleep only under
+// the passive wait policy.
+inline void prepareCompute() {
+  setenv("OMP_WAIT_POLICY", "PASSIVE", 0);
+  widenAffinity();
+#ifdef SEAMS_HAS_OPENMP
+  omp_set_dynamic(0);
+#endif
+}
+
 inline void adoptThreads() {
   // Idle OpenMP threads spin by default and take cores from Rayon.
   setenv("OMP_WAIT_POLICY", "PASSIVE", 0);

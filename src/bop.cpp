@@ -1235,13 +1235,20 @@ constexpr double kSymbolicCubicCut = 0.8528497963226561 + 1e-6;
 bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
                int typeI, bool certify = false) {
   const int n = yCloud.nop;
+  const double ox = yCloud.boxLow.size() > 0 ? yCloud.boxLow[0] : 0.0;
+  const double oy = yCloud.boxLow.size() > 1 ? yCloud.boxLow[1] : 0.0;
+  const double oz = yCloud.boxLow.size() > 2 ? yCloud.boxLow[2] : 0.0;
   const double Lx = yCloud.box[0];
   const double Ly = yCloud.box[1];
   const double Lz = yCloud.box[2];
   if (!(Lx > 0.0 && Ly > 0.0 && Lz > 0.0)) {
     return false;
   }
-  seams::adoptThreads();
+  // This walk is OpenMP only. adoptThreads pauses the team so a Rayon
+  // search can have the cores, and that pause is what split the
+  // eight-thread samples into a fast group near 8 ms and a slow group
+  // near 12 ms.
+  seams::prepareCompute();
   struct Scratch {
     std::vector<double> xyz;
     std::vector<int> head, next;
@@ -1273,14 +1280,17 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
   bool uniform = true;
   for (int i = 0; i < n; i++) {
     const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
-    auto wrap = [](double v, double L) {
-      double t = v / L;
+    auto wrap = [](double v, double origin, double L) {
+      double t = (v - origin) / L;
       t -= std::floor(t);
+      if (!(t < 1.0)) {
+        t = 0.0;
+      }
       return t * L;
     };
-    scratch.xyz[static_cast<std::size_t>(3 * i)] = wrap(p.x, Lx);
-    scratch.xyz[static_cast<std::size_t>(3 * i) + 1] = wrap(p.y, Ly);
-    scratch.xyz[static_cast<std::size_t>(3 * i) + 2] = wrap(p.z, Lz);
+    scratch.xyz[static_cast<std::size_t>(3 * i)] = wrap(p.x, ox, Lx);
+    scratch.xyz[static_cast<std::size_t>(3 * i) + 1] = wrap(p.y, oy, Ly);
+    scratch.xyz[static_cast<std::size_t>(3 * i) + 2] = wrap(p.z, oz, Lz);
     if (p.type != typeI) {
       uniform = false;
     }

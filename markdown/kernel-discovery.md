@@ -200,3 +200,37 @@ shell, or a score on the boundary returns false and leaves the cloud
 unchanged, so the caller runs the published rule. Ideal ice takes the
 fast label. A liquid seeded with 91001 does not. Thresholds are
 unchanged.
+
+## After the cutoff-list rebase
+
+`perf/kernel-discovery` is rebased onto `perf/neighbours-threads`
+(`064bfef7`). q4 and q6 below are the mutual four-nearest call, which
+builds that list inside the timed call. CHILL+ still walks its own
+orthogonal cells. The shared CSR is not copied.
+
+Eight-thread CHILL+ on 110592 molecules was bimodal, about 8 ms and
+about 12 ms, because every call paused the OpenMP team
+(`omp_pause_resource_all`) and the next parallel region paid a wake-up
+that moved by a few milliseconds. The orthogonal walk no longer pauses
+the team. It widens the affinity mask and leaves the workers under the
+passive wait. After two warm-ups the eight samples sit between 7.16 ms
+and 10.03 ms (median 8.56). mdapy on the same size and width has median
+11.92 ms.
+
+A reused q_lm row was also adding the previous frame onto the next, so
+a second call drifted off the ideal-ice value 0.509175 (l = 4) and
+0.628539 (l = 6). The row is cleared at the start of each atom. Both
+values are stable across eight samples. The raw transcript, including
+the drifted pass that was replaced, is `discovery/v3-session.txt`.
+
+The figshare nucleation deposit (doi:10.6084/m9.figshare.11448702) is
+148 frames of 4096 molecules, not 13553. Timings use step 15677000 of
+that file and `input/traj/interface_f0.lammpstrj` (864 atoms). On ideal
+ice every code's CHILL+ count is the full cubic population. On the
+nucleation frame and the interface, mdapy 2.0.0 and OVITO 3.17.2 agree
+with each other, and `ovito-chill+` agrees with mdapy on every atom
+(4096/4096 and 864/864). The default published rule does not: it keeps
+the closed edges c_ij <= -0.8 and -0.35 <= c_ij <= 0.25 and the
+neighbour test for interfacial ice. Those two frames then disagree with
+OVITO on the water/interfacial boundary. The thresholds are not moved
+to close that gap.

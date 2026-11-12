@@ -1165,6 +1165,9 @@ SteinhardtQl steinhardtQlMutual(
       dstN[s] = seen[s];
     }
     double *dst = qlm.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(width);
+    // The row is reused across calls. A leftover harmonic would be added
+    // to this frame.
+    std::fill_n(dst, width, 0.0);
     if (count == 0) {
       continue;
     }

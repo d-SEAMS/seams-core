@@ -92,8 +92,11 @@ TEST_CASE("solid q4 and q6 match on a disordered cloud", "[ql][solid]") {
   for (int order : {4, 6}) {
     const auto ref = chill::steinhardtQl(cloud, rows, order);
     const auto got = chill::steinhardtQlMutual(cloud, 4, 6.0, 1, order);
+    const auto again = chill::steinhardtQlMutual(cloud, 4, 6.0, 1, order);
     REQUIRE(maxAbs(ref.ql, got.ql) < 1e-12);
     REQUIRE(maxAbs(ref.qlBar, got.qlBar) < 1e-12);
+    REQUIRE(maxAbs(got.ql, again.ql) < 1e-12);
+    REQUIRE(maxAbs(got.qlBar, again.qlBar) < 1e-12);
   }
 }
 
