@@ -9,6 +9,7 @@ These pages are for understanding. They are not recipes.
 | [[file:chill-plus-vs-cages.org][CHILL+ versus cages]] | Why the two scores disagree |
 | [[file:ring-completion.org][Ring-adjacent completion]] | ~ringAdjacentCompletion~ and the seeded flag |
 | [[file:topological-network.org][Topological network criteria]] | The formulae the classifiers use |
+| [[file:symmetry.org][Local symmetry]] | The ice shell, the cages, and the held-out scores |
 | [[file:citation.org][Citation]] | What to cite |
 
 #+begin_export rst
@@ -19,5 +20,6 @@ These pages are for understanding. They are not recipes.
    chill-plus-vs-cages
    ring-completion
    topological-network
+   symmetry
    citation
 #+end_export
