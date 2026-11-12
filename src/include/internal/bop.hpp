@@ -335,29 +335,49 @@ getIceType(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 
 //! Gets c_ij and then classifies bond types according to the CHILL+
 //! algorithm. coordinationNumber as in getCorrel: four is the validated
-//! CHILL+ water scheme, non-positive keeps each atom's whole neighbour row
+//! CHILL+ water scheme, non-positive keeps each atom's whole neighbour row.
+//! This is the 2.13 symbol: inclusive edges (closedBounds true).
 void
 getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
               const std::vector<std::vector<int>> &nList, bool isSlice = false,
-              int coordinationNumber = 4, bool closedBounds = true);
+              int coordinationNumber = 4);
 
-//! Classifies each atom according to the CHILL+ algorithm
+//! Same classification. closedBounds false uses the open OVITO edges.
+void
+getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+              const std::vector<std::vector<int>> &nList, bool isSlice,
+              int coordinationNumber, bool closedBounds);
+
+//! Classifies each atom according to the CHILL+ algorithm.
+//! This is the 2.13 symbol: the published neighbour test stays on.
 void
 getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                const std::vector<std::vector<int>> &nList, std::string path,
                int firstFrame, bool isSlice = false,
-               std::string outputFileName = "chillPlus.txt",
-               bool neighbourTest = true);
+               std::string outputFileName = "chillPlus.txt");
+
+//! neighbourTest false is the OVITO interfacial rule.
+void
+getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+               const std::vector<std::vector<int>> &nList, std::string path,
+               int firstFrame, bool isSlice, std::string outputFileName,
+               bool neighbourTest);
 
 //! CHILL+ ice types on the cloud. Does not write a file.
+//! This is the 2.13 symbol: the published neighbour test stays on.
+void
+getIceTypePlusNoPrint(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<std::vector<int>> &nList, bool isSlice = false);
+
 //! neighbourTest false is the OVITO interfacial rule (two staggered
 //! bonds, or three staggered and no eclipsed bond, with no neighbour
 //! lookup). Either rule still requires a cutoff shell of four.
 void
 getIceTypePlusNoPrint(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-    const std::vector<std::vector<int>> &nList, bool isSlice = false,
-    bool neighbourTest = true);
+    const std::vector<std::vector<int>> &nList, bool isSlice,
+    bool neighbourTest);
 
 //! Set iceType to unclassified for atoms whose LAMMPS type is not in types.
 //! Empty types leaves the cloud unchanged. Used after a water-type k-NN so

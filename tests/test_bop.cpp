@@ -302,6 +302,32 @@ TEST_CASE("getIceType writes output and classifies atoms", "[bop]") {
   std::error_code _ec_; std::filesystem::remove_all(tmpPath, _ec_);
 }
 
+TEST_CASE("2.13 CHILL+ signatures still link", "[bop][abi]") {
+  using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
+  using Rows = std::vector<std::vector<int>>;
+  auto *correl = static_cast<void (*)(Cloud &, const Rows &, bool, int)>(
+      &chill::getCorrelPlus);
+  auto *printed = static_cast<void (*)(Cloud &, const Rows &, std::string, int,
+                                       bool, std::string)>(&chill::getIceTypePlus);
+  auto *silent = static_cast<void (*)(Cloud &, const Rows &, bool)>(
+      &chill::getIceTypePlusNoPrint);
+
+  auto cloud = makeTetraCloud();
+  auto nList = nneigh::neighListO(3.0, cloud, 1);
+  correl(cloud, nList, false, 4);
+  REQUIRE_FALSE(cloud.pts[0].c_ij.empty());
+  silent(cloud, nList, false);
+  REQUIRE(cloud.pts[0].iceType != molSys::atom_state_type::unclassified);
+
+  const auto dir = std::filesystem::temp_directory_path() / "dseams-abi-chill";
+  std::filesystem::create_directories(dir);
+  const auto path = (dir / "").string();
+  printed(cloud, nList, path, 1, false, "chillPlus.txt");
+  REQUIRE(std::filesystem::exists(dir / "bop" / "chillPlus.txt"));
+  std::error_code ec;
+  std::filesystem::remove_all(dir, ec);
+}
+
 TEST_CASE("getCorrelPlus uses CHILL+ algorithm", "[bop]") {
   auto cloud = makeTetraCloud();
   auto nList = nneigh::neighListO(3.0, cloud, 1);

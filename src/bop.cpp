@@ -1474,6 +1474,13 @@ int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &y
 void
 chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      const std::vector<std::vector<int>> &nList, bool isSlice,
+                     int coordinationNumber) {
+  chill::getCorrelPlus(yCloud, nList, isSlice, coordinationNumber, true);
+}
+
+void
+chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                     const std::vector<std::vector<int>> &nList, bool isSlice,
                      int coordinationNumber, bool closedBounds) {
   chill::BondClassifier rule = chill::chillPlusRule();
   rule.coordinationNumber = coordinationNumber;
@@ -1590,6 +1597,13 @@ void assignIceTypePlus(
 void
 chill::getIceTypePlusNoPrint(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<std::vector<int>> &nList, bool isSlice) {
+  chill::getIceTypePlusNoPrint(yCloud, nList, isSlice, true);
+}
+
+void
+chill::getIceTypePlusNoPrint(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, bool isSlice,
     bool neighbourTest) {
   int ih, ic, interIce, water, clath, interClath, total;
@@ -1610,6 +1624,14 @@ void chill::clearIceTypesExcept(
           molSys::atom_state_type::unclassified;
     }
   }
+}
+
+void
+chill::getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                      const std::vector<std::vector<int>> &nList, std::string path,
+                      int firstFrame, bool isSlice, std::string outputFileName) {
+  chill::getIceTypePlus(yCloud, nList, std::move(path), firstFrame, isSlice,
+                        std::move(outputFileName), true);
 }
 
 void
