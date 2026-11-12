@@ -580,6 +580,16 @@ if get_option('with_cli')
 
   python3 = find_program('python3', required: true)
   test(
+    'option_names',
+    python3,
+    args: [
+      meson.project_source_root() / 'tests' / 'check_option_names.py',
+      meson.project_source_root(),
+      seams_exe.full_path(),
+    ],
+    depends: [seams_exe],
+    timeout: 60)
+  test(
     'seams_frame_range_preserves_order',
     python3,
     args: [

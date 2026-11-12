@@ -1,0 +1,3 @@
+# Kept so `meson configure` does not copy the parent option list onto
+# this subproject. Without an options file the parent names are registered
+# again here, and the copies keep the file defaults.
