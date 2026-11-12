@@ -183,6 +183,8 @@ bool keep_atom(int atom_type, int requested) {
   return requested <= 0 || atom_type == requested;
 }
 
+void write_ice_labels(seams_frame *frame, int type, int *labels, int counts9[9]);
+
 std::vector<std::vector<int>> bond_list(Cloud &cloud, double cutoff, int typ,
                                         const std::string &graph, int k) {
   const double cand = cutoff + 1.5;
@@ -559,10 +561,32 @@ int classify_chill(seams_frame *frame, double cutoff, int type,
       throw std::invalid_argument("unknown CHILL graph '" + which +
                                   "' (use cutoff or mutual)");
     }
+    const std::string ruleText = rule == nullptr ? "" : rule;
+    const bool published =
+        ruleText.empty() || ruleText == "chill+" || ruleText == "published";
+    if (plus && which == "cutoff" && published) {
+      std::vector<int> subset;
+      const std::vector<int> *sub = nullptr;
+      if (typ > 0) {
+        subset.reserve(static_cast<std::size_t>(frame->cloud.nop));
+        for (int i = 0; i < frame->cloud.nop; ++i) {
+          if (frame->cloud.pts[static_cast<std::size_t>(i)].type == typ) {
+            subset.push_back(i);
+          }
+        }
+        sub = &subset;
+      }
+      std::vector<int> offsets;
+      std::vector<int> cols;
+      if (nneigh::orthoFullCsr(frame->cloud, sub, cutoff, offsets, cols, false)) {
+        chill::chillPlusFromCsr(frame->cloud, offsets, cols);
+        write_ice_labels(frame, type, labels, counts9);
+        return 0;
+      }
+    }
     auto nList = bond_list(frame->cloud, cutoff, typ, which, 4);
     if (plus) {
-      chill::applyChillPlus(frame->cloud, nList,
-                            chill::chillPlusRule(rule == nullptr ? "" : rule),
+      chill::applyChillPlus(frame->cloud, nList, chill::chillPlusRule(ruleText),
                             false);
     } else {
       chill::getCorrel(frame->cloud, nList, false);
@@ -791,6 +815,48 @@ int seams_frame_chill_rings(seams_frame *frame, double cutoff, int type,
       nneigh::preferSerialCutoff(false);
       remember_wide(frame, wide, cutoff, skin, typ, which, box9);
       bonds = pairs_within(frame->cloud, frame->wide_list, cutoff);
+    } else if (which == "cutoff") {
+      frame->wide_ready = false;
+      std::vector<int> subset;
+      const std::vector<int> *sub = nullptr;
+      if (typ > 0) {
+        subset.reserve(static_cast<std::size_t>(frame->cloud.nop));
+        for (int i = 0; i < frame->cloud.nop; ++i) {
+          if (frame->cloud.pts[static_cast<std::size_t>(i)].type == typ) {
+            subset.push_back(i);
+          }
+        }
+        sub = &subset;
+      }
+      std::vector<int> offsets;
+      std::vector<int> cols;
+      if (!nneigh::orthoFullCsr(frame->cloud, sub, cutoff, offsets, cols, false)) {
+        bonds = bond_list(frame->cloud, cutoff, typ, which, 4);
+      } else {
+        const auto t1 = clock::now();
+        chill::chillPlusFromCsr(frame->cloud, offsets, cols);
+        write_ice_labels(frame, type, labels, counts9);
+        const auto t2 = clock::now();
+        const auto rings = primitive::ringNetwork(offsets, cols, max_ring);
+        std::fill(ring_counts, ring_counts + ring_counts_len, 0);
+        for (const auto &ring : rings) {
+          const int size = static_cast<int>(ring.size());
+          if (size >= 0 && size < ring_counts_len) {
+            ring_counts[size] += 1;
+          }
+        }
+        const auto t3 = clock::now();
+        if (times != nullptr) {
+          const auto seconds = [](clock::duration span) {
+            return std::chrono::duration<double>(span).count();
+          };
+          times->neighbours = seconds(t1 - t0);
+          times->chill = seconds(t2 - t1);
+          times->rings = seconds(t3 - t2);
+          times->reused = 0;
+        }
+        return 0;
+      }
     } else {
       frame->wide_ready = false;
       nneigh::preferSerialCutoff(true);
@@ -863,6 +929,32 @@ int seams_frame_rings(seams_frame *frame, double cutoff, int type,
   try {
     const int typ = resolve_type(frame->cloud, type);
     const std::string which = graph == nullptr ? "mutual" : graph;
+    if (which == "cutoff") {
+      std::vector<int> subset;
+      const std::vector<int> *sub = nullptr;
+      if (typ > 0) {
+        subset.reserve(static_cast<std::size_t>(frame->cloud.nop));
+        for (int i = 0; i < frame->cloud.nop; ++i) {
+          if (frame->cloud.pts[static_cast<std::size_t>(i)].type == typ) {
+            subset.push_back(i);
+          }
+        }
+        sub = &subset;
+      }
+      std::vector<int> offsets;
+      std::vector<int> cols;
+      if (nneigh::orthoFullCsr(frame->cloud, sub, cutoff, offsets, cols, false)) {
+        const auto rings = primitive::ringNetwork(offsets, cols, max_depth);
+        std::fill(counts, counts + counts_len, 0);
+        for (const auto &ring : rings) {
+          const int size = static_cast<int>(ring.size());
+          if (size >= 0 && size < counts_len) {
+            counts[size] += 1;
+          }
+        }
+        return 0;
+      }
+    }
     auto idx = index_graph(frame, cutoff, typ, which, 4);
     const auto rings = primitive::ringNetwork(idx, max_depth);
     std::fill(counts, counts + counts_len, 0);
@@ -898,6 +990,13 @@ int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
 
 int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
                            int order_l, double *ql, double *qlbar) {
+  return seams_frame_steinhardt_graph(frame, cutoff, type, order_l, "mutual", ql,
+                                      qlbar);
+}
+
+int seams_frame_steinhardt_graph(seams_frame *frame, double cutoff, int type,
+                                 int order_l, const char *graph, double *ql,
+                                 double *qlbar) {
   clear_error();
   if (frame == nullptr) {
     set_error("frame is null");
@@ -907,8 +1006,8 @@ int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
     seams_frame sub = oxygen_subframe(frame);
     std::vector<double> subQl(static_cast<std::size_t>(std::max(sub.cloud.nop, 0)));
     std::vector<double> subBar(subQl.size());
-    const int rc = seams_frame_steinhardt(
-        &sub, cutoff, type, order_l, sub.cloud.nop > 0 ? subQl.data() : nullptr,
+    const int rc = seams_frame_steinhardt_graph(
+        &sub, cutoff, type, order_l, graph, sub.cloud.nop > 0 ? subQl.data() : nullptr,
         sub.cloud.nop > 0 ? subBar.data() : nullptr);
     if (rc != 0) {
       return rc;
@@ -934,10 +1033,19 @@ int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
   }
   try {
     const int typ = resolve_type(frame->cloud, type);
-    const double cand = cutoff + 1.5;
-    auto nList =
-        nneigh::kNearestNeighbourList(frame->cloud, 4, cand, typ, true);
-    const auto result = chill::steinhardtQl(frame->cloud, nList, order_l);
+    const std::string which =
+        (graph == nullptr || graph[0] == '\0') ? "mutual" : graph;
+    chill::SteinhardtQl result;
+    if (which == "cutoff") {
+      result = chill::steinhardtQlCutoff(frame->cloud, cutoff, order_l, typ, true);
+    } else if (which == "mutual" || which == "knn" || which == "knn-mutual") {
+      const double cand = cutoff + 1.5;
+      auto nList =
+          nneigh::kNearestNeighbourList(frame->cloud, 4, cand, typ, true);
+      result = chill::steinhardtQl(frame->cloud, nList, order_l);
+    } else {
+      throw std::invalid_argument("steinhardt graph is cutoff or mutual");
+    }
     const int n = frame->cloud.nop;
     frame->ql = result.ql;
     frame->qlbar = result.qlBar;
@@ -1404,4 +1512,17 @@ int seams_frame_symmetry(seams_frame *frame, double shell_rmsd, int *labels) {
     set_error("symmetry classify failed");
   }
   return code;
+}
+
+int seams_frames_jump_tau90(const seams_frame *first, const seams_frame *second,
+                            double dt, int oxygen_type, int hydrogen_type,
+                            double *tau) {
+  clear_error();
+  if (first == nullptr || second == nullptr || tau == nullptr) {
+    set_error("jump tau needs two frames and an output");
+    return 1;
+  }
+  *tau = topoparam::jumpRotorTau90(first->cloud, second->cloud, dt, oxygen_type,
+                                   hydrogen_type);
+  return 0;
 }

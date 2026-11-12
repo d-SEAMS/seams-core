@@ -1437,6 +1437,35 @@ void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vector
                    canonShell(), shellGate(shellRmsd), kind.data());
 }
 
+void classifyIceCloud(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                      std::vector<int> &kind) {
+  const int n = yCloud.nop;
+  kind.assign(static_cast<std::size_t>(std::max(n, 0)), -1);
+  if (n <= 0) {
+    return;
+  }
+  std::vector<double> x(static_cast<std::size_t>(n));
+  std::vector<double> y(x.size());
+  std::vector<double> z(x.size());
+  for (int i = 0; i < n; ++i) {
+    const auto &point = yCloud.pts[static_cast<std::size_t>(i)];
+    x[static_cast<std::size_t>(i)] = point.x;
+    y[static_cast<std::size_t>(i)] = point.y;
+    z[static_cast<std::size_t>(i)] = point.z;
+  }
+  double lat[3][3] = {};
+  const auto &box = yCloud.box;
+  lat[0][0] = box.size() > 0 ? box[0] : 1.0;
+  lat[1][1] = box.size() > 1 ? box[1] : lat[0][0];
+  lat[2][2] = box.size() > 2 ? box[2] : lat[0][0];
+  if (box.size() >= 6) {
+    lat[1][0] = box[3];
+    lat[2][0] = box[4];
+    lat[2][1] = box[5];
+  }
+  classifyIceArrays(x.data(), y.data(), z.data(), n, lat, kind.data());
+}
+
 void classifyIceArrays(const double *x, const double *y, const double *z, int n, const double lat[3][3],
                        int *kind, double shellRmsd) {
   if (n <= 0 || x == nullptr || y == nullptr || z == nullptr || kind == nullptr) {

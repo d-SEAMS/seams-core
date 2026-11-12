@@ -92,6 +92,11 @@ int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
 
 int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
                            int order_l, double *ql, double *qlbar);
+/* graph is "mutual" (four nearest, the historical default) or "cutoff"
+ * (the orthoFullCsr list, the same neighbours as `seams steinhardt`). */
+int seams_frame_steinhardt_graph(seams_frame *frame, double cutoff, int type,
+                                 int order_l, const char *graph, double *ql,
+                                 double *qlbar);
 
 int seams_frame_cages(seams_frame *frame, double cutoff, int type, int k,
                       const char *graph, int complete, int *per_atom,
@@ -151,6 +156,13 @@ seams_frame *seams_frame_from_species(const double *xyz, int n,
  * 1 ice-Ic, 2 stacking-disordered, or -1. shell_rmsd is the scale-free
  * residual ceiling (0.12 is the production default). */
 int seams_frame_symmetry(seams_frame *frame, double shell_rmsd, int *labels);
+
+/* tau_90 of the H-H vectors between two frames. Writes quiet NaN when no
+ * water rotates by 90 degrees. oxygen_type and hydrogen_type select the
+ * molecule. Returns 1 when a frame is missing. */
+int seams_frames_jump_tau90(const seams_frame *first, const seams_frame *second,
+                            double dt, int oxygen_type, int hydrogen_type,
+                            double *tau);
 
 #ifdef __cplusplus
 }

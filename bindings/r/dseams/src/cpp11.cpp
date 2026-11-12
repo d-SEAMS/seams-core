@@ -48,10 +48,16 @@ extern "C" SEXP _dseams_rings_(SEXP ptr, SEXP cutoff, SEXP type, SEXP graph, SEX
   END_CPP11
 }
 // dseams.cpp
-cpp11::data_frame steinhardt_(SEXP ptr, double cutoff, int type, int order_l);
-extern "C" SEXP _dseams_steinhardt_(SEXP ptr, SEXP cutoff, SEXP type, SEXP order_l) {
+cpp11::data_frame steinhardt_(SEXP ptr, double cutoff, int type, int order_l, std::string graph);
+extern "C" SEXP _dseams_steinhardt_(SEXP ptr, SEXP cutoff, SEXP type, SEXP order_l, SEXP graph) {
   BEGIN_CPP11
-    return cpp11::as_sexp(steinhardt_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(ptr), cpp11::as_cpp<cpp11::decay_t<double>>(cutoff), cpp11::as_cpp<cpp11::decay_t<int>>(type), cpp11::as_cpp<cpp11::decay_t<int>>(order_l)));
+    return cpp11::as_sexp(steinhardt_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(ptr), cpp11::as_cpp<cpp11::decay_t<double>>(cutoff), cpp11::as_cpp<cpp11::decay_t<int>>(type), cpp11::as_cpp<cpp11::decay_t<int>>(order_l), cpp11::as_cpp<cpp11::decay_t<std::string>>(graph)));
+  END_CPP11
+}
+double jump_tau90_(SEXP first, SEXP second, double dt, int oxygen_type, int hydrogen_type);
+extern "C" SEXP _dseams_jump_tau90_(SEXP first, SEXP second, SEXP dt, SEXP oxygen_type, SEXP hydrogen_type) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(jump_tau90_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(first), cpp11::as_cpp<cpp11::decay_t<SEXP>>(second), cpp11::as_cpp<cpp11::decay_t<double>>(dt), cpp11::as_cpp<cpp11::decay_t<int>>(oxygen_type), cpp11::as_cpp<cpp11::decay_t<int>>(hydrogen_type)));
   END_CPP11
 }
 // dseams.cpp
@@ -84,7 +90,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dseams_read_frame_", (DL_FUNC) &_dseams_read_frame_, 3},
     {"_dseams_rings_",      (DL_FUNC) &_dseams_rings_,      5},
     {"_dseams_signature_cages_", (DL_FUNC) &_dseams_signature_cages_, 5},
-    {"_dseams_steinhardt_", (DL_FUNC) &_dseams_steinhardt_, 4},
+    {"_dseams_jump_tau90_", (DL_FUNC) &_dseams_jump_tau90_, 5},
+    {"_dseams_steinhardt_", (DL_FUNC) &_dseams_steinhardt_, 5},
     {"_dseams_symmetry_",   (DL_FUNC) &_dseams_symmetry_,   2},
     {NULL, NULL, 0}
 };

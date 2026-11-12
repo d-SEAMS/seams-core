@@ -25,8 +25,12 @@ rings_ <- function(ptr, cutoff, type, graph, max_depth) {
   .Call(`_dseams_rings_`, ptr, cutoff, type, graph, max_depth)
 }
 
-steinhardt_ <- function(ptr, cutoff, type, order_l) {
-  .Call(`_dseams_steinhardt_`, ptr, cutoff, type, order_l)
+steinhardt_ <- function(ptr, cutoff, type, order_l, graph) {
+  .Call(`_dseams_steinhardt_`, ptr, cutoff, type, order_l, graph)
+}
+
+jump_tau90_ <- function(first, second, dt, oxygen_type, hydrogen_type) {
+  .Call(`_dseams_jump_tau90_`, first, second, dt, oxygen_type, hydrogen_type)
 }
 
 cages_ <- function(ptr, cutoff, type, k, graph) {

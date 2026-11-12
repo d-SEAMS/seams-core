@@ -16,7 +16,7 @@
 
 #include <bop.hpp>
 #include <chill_plus_scheme.hpp>
-#include <diamond_cna.hpp>
+#include <local_symmetry.hpp>
 #include <franzblau.hpp>
 #include <generic.hpp>
 #include <neighbours.hpp>
@@ -752,7 +752,7 @@ Study studyCloud(Cloud cloud, double cutoff, double binWidth, bool census) {
   std::vector<int> cols;
   nneigh::orthoFullCsr(cloud, nullptr, cutoff, offsets, cols, false);
   std::vector<int> diamond;
-  symm::diamondFromCsr(cloud, offsets, cols, diamond);
+  symm::classifyIceCloud(cloud, diamond);
   for (int kind : diamond) {
     if (kind == 1) {
       ++study.diamondCubic;

@@ -22,6 +22,7 @@
 #include <neighbours.hpp>
 #include <thread_team.hpp>
 
+#include <algorithm>
 #include <cmath>
 #include <cstring>
 #include <exception>
@@ -437,7 +438,44 @@ seams_status seams_chill_plus(seams_system *sys, double cutoff, int type, int gr
   }
   try {
     use_threads();
-    Cloud work = sys->cloud;
+    Cloud &work = sys->cloud;
+    const int typ = unify_type(work, type);
+    if (rule == SEAMS_CHILL_PUBLISHED && graph == SEAMS_GRAPH_CUTOFF) {
+      std::vector<int> subset;
+      const std::vector<int> *sub = nullptr;
+      if (type > 0) {
+        subset.reserve(static_cast<std::size_t>(work.nop));
+        for (int i = 0; i < work.nop; ++i) {
+          if (work.pts[static_cast<std::size_t>(i)].type == typ) {
+            subset.push_back(i);
+          }
+        }
+        sub = &subset;
+      }
+      std::vector<int> offsets;
+      std::vector<int> cols;
+      if (nneigh::orthoFullCsr(work, sub, cutoff, offsets, cols, false)) {
+        chill::chillPlusFromCsr(work, offsets, cols);
+        const int n = work.nop;
+        int counts[9] = {};
+        for (int i = 0; i < n; ++i) {
+          const auto &point = work.pts[static_cast<std::size_t>(i)];
+          int label = static_cast<int>(point.iceType);
+          if (type > 0 && point.type != type) {
+            label = SEAMS_LABEL_UNCLASSIFIED;
+          }
+          if (label < 0 || label > 8) {
+            label = SEAMS_LABEL_UNCLASSIFIED;
+          }
+          labels[i] = label;
+          counts[label] += 1;
+        }
+        if (counts9 != nullptr) {
+          std::memcpy(counts9, counts, sizeof(counts));
+        }
+        return SEAMS_OK;
+      }
+    }
     auto rows = bond_rows(work, cutoff, type, graph);
     const char *spec = rule == SEAMS_CHILL_OVITO ? "ovito-chill+" : "chill+";
     chill::applyChillPlus(work, rows, chill::chillPlusRule(spec), false);
@@ -486,18 +524,18 @@ seams_status seams_q4q6(seams_system *sys, double cutoff, int type, double *q4,
   }
   try {
     use_threads();
-    Cloud work = sys->cloud;
-    auto rows = bond_rows(work, cutoff, type, SEAMS_GRAPH_CUTOFF);
+    Cloud &work = sys->cloud;
+    const int typ = unify_type(work, type);
     const int n = work.nop;
     if (q4 != nullptr) {
-      const auto result = chill::steinhardtQl(work, rows, 4);
+      const auto result = chill::steinhardtQlCutoff(work, cutoff, 4, typ, false);
       if (static_cast<int>(result.ql.size()) < n) {
         return fail(SEAMS_ERR_INTERNAL, "q4 length is short");
       }
       std::memcpy(q4, result.ql.data(), static_cast<std::size_t>(n) * sizeof(double));
     }
     if (q6 != nullptr) {
-      const auto result = chill::steinhardtQl(work, rows, 6);
+      const auto result = chill::steinhardtQlCutoff(work, cutoff, 6, typ, false);
       if (static_cast<int>(result.ql.size()) < n) {
         return fail(SEAMS_ERR_INTERNAL, "q6 length is short");
       }
@@ -535,13 +573,49 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
   }
   try {
     use_threads();
-    Cloud work = sys->cloud;
-    auto rows = bond_rows(work, cutoff, type, graph);
-    auto idx = nneigh::neighbourListByIndex(work, rows);
+    Cloud &work = sys->cloud;
+    std::vector<std::vector<int>> idx;
+    std::vector<std::vector<int>> found;
+    if (graph == SEAMS_GRAPH_CUTOFF) {
+      const int typ = unify_type(work, type);
+      std::vector<int> subset;
+      const std::vector<int> *sub = nullptr;
+      if (type > 0) {
+        subset.reserve(static_cast<std::size_t>(work.nop));
+        for (int i = 0; i < work.nop; ++i) {
+          if (work.pts[static_cast<std::size_t>(i)].type == typ) {
+            subset.push_back(i);
+          }
+        }
+        sub = &subset;
+      }
+      std::vector<int> offsets;
+      std::vector<int> cols;
+      if (nneigh::orthoFullCsr(work, sub, cutoff, offsets, cols, false)) {
+        found = primitive::ringNetwork(offsets, cols, max_depth);
+        idx.assign(static_cast<std::size_t>(work.nop), {});
+        for (int i = 0; i < work.nop && i + 1 < static_cast<int>(offsets.size()); ++i) {
+          const int a = offsets[static_cast<std::size_t>(i)];
+          const int b = offsets[static_cast<std::size_t>(i) + 1];
+          auto &row = idx[static_cast<std::size_t>(i)];
+          row.reserve(static_cast<std::size_t>(std::max(0, b - a)));
+          for (int k = a; k < b; ++k) {
+            row.push_back(cols[static_cast<std::size_t>(k)]);
+          }
+        }
+      }
+    }
+    if (found.empty() && idx.empty()) {
+      auto rows = bond_rows(work, cutoff, type, graph);
+      idx = nneigh::neighbourListByIndex(work, rows);
+      if (static_cast<int>(idx.size()) < work.nop) {
+        idx.resize(static_cast<std::size_t>(work.nop));
+      }
+      found = primitive::ringNetwork(idx, max_depth);
+    }
     if (static_cast<int>(idx.size()) < work.nop) {
       idx.resize(static_cast<std::size_t>(work.nop));
     }
-    auto found = primitive::ringNetwork(idx, max_depth);
     auto rings = std::make_unique<seams_rings>();
     rings->n_atoms = work.nop;
     rings->rings = std::move(found);

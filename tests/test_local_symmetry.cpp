@@ -1,7 +1,10 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <diamond_cna.hpp>
 #include <local_symmetry.hpp>
+#include <mol_sys.hpp>
+#include <neighbours.hpp>
 #include <seams_c_api.h>
 
 #include <Eigen/Geometry>
@@ -569,4 +572,43 @@ TEST_CASE("eight good diamond signatures stay a partial cubic label", "[symmetry
   REQUIRE(nGood == 12);
   REQUIRE(n421 == 12);
   REQUIRE(cubic == 1);
+}
+
+TEST_CASE("shell kernel matches diamondFromCsr on ideal cubic ice", "[symmetry]") {
+  const double oo = 2.75;
+  const double a = oo * 4.0 / std::sqrt(3.0);
+  const int nrep = 2;
+  const double basis[2][3] = {{0, 0, 0}, {0.25, 0.25, 0.25}};
+  const double fcc[4][3] = {{0, 0, 0}, {0.5, 0.5, 0}, {0.5, 0, 0.5}, {0, 0.5, 0.5}};
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  const double length = nrep * a;
+  cloud.box = {length, length, length};
+  cloud.boxLow = {0, 0, 0};
+  for (int i = 0; i < nrep; ++i) {
+    for (int j = 0; j < nrep; ++j) {
+      for (int k = 0; k < nrep; ++k) {
+        for (const auto &shift : fcc) {
+          for (const auto &site : basis) {
+            molSys::Point<double> p;
+            p.x = (i + shift[0] + site[0]) * a;
+            p.y = (j + shift[1] + site[1]) * a;
+            p.z = (k + shift[2] + site[2]) * a;
+            p.type = 1;
+            p.atomID = cloud.nop + 1;
+            cloud.idIndexMap[p.atomID] = cloud.nop;
+            cloud.pts.push_back(p);
+            cloud.nop += 1;
+          }
+        }
+      }
+    }
+  }
+  std::vector<int> offsets;
+  std::vector<int> cols;
+  REQUIRE(nneigh::orthoFullCsr(cloud, nullptr, 3.5, offsets, cols, false));
+  std::vector<int> diamond;
+  symm::diamondFromCsr(cloud, offsets, cols, diamond);
+  std::vector<int> shell;
+  symm::classifyIceCloud(cloud, shell);
+  REQUIRE(shell == diamond);
 }

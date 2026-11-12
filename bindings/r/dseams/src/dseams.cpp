@@ -129,13 +129,14 @@ cpp11::data_frame rings_(SEXP ptr, double cutoff, int type, std::string graph,
 }
 
 [[cpp11::register]]
-cpp11::data_frame steinhardt_(SEXP ptr, double cutoff, int type, int order_l) {
+cpp11::data_frame steinhardt_(SEXP ptr, double cutoff, int type, int order_l,
+                                std::string graph) {
   seams_frame *frame = need(ptr);
   const int n = seams_frame_nop(frame);
   std::vector<double> ql(static_cast<std::size_t>(n));
   std::vector<double> qlbar(static_cast<std::size_t>(n));
-  if (seams_frame_steinhardt(frame, cutoff, type, order_l, ql.data(),
-                             qlbar.data()) != 0) {
+  if (seams_frame_steinhardt_graph(frame, cutoff, type, order_l, graph.c_str(),
+                                   ql.data(), qlbar.data()) != 0) {
     cpp11::stop("%s", seams_last_error());
   }
   const int *ids = seams_frame_ids(frame);
@@ -182,6 +183,18 @@ cpp11::data_frame cages_(SEXP ptr, double cutoff, int type, int k,
   out.attr("n_water") = n_water;
   out.attr("n_both") = n_both;
   return out;
+}
+
+[[cpp11::register]]
+double jump_tau90_(SEXP first, SEXP second, double dt, int oxygen_type,
+                    int hydrogen_type) {
+  const seams_frame *a = need(first);
+  const seams_frame *b = need(second);
+  double tau = 0.0;
+  if (seams_frames_jump_tau90(a, b, dt, oxygen_type, hydrogen_type, &tau) != 0) {
+    cpp11::stop("%s", seams_last_error());
+  }
+  return tau;
 }
 
 [[cpp11::register]]

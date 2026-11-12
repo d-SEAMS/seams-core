@@ -10,7 +10,7 @@ module Dseams
 
 using Libdl
 
-export Frame, nop, nframes, read_frame, chill_plus, cages, primitive_rings, steinhardt, signature_cages, symmetry
+export Frame, nop, nframes, read_frame, chill_plus, cages, primitive_rings, steinhardt, signature_cages, symmetry, jump_tau90
 
 const ICE_NAMES = (
     "cubic",
@@ -162,18 +162,19 @@ function primitive_rings(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, gr
     Dict(size => Int(counts[size + 1]) for size in 3:max_depth if counts[size + 1] != 0)
 end
 
-function steinhardt(frame::Frame, order_l::Integer; cutoff::Real = 3.5, type::Integer = 0)
+function steinhardt(frame::Frame, order_l::Integer; cutoff::Real = 3.5, type::Integer = 0, graph::AbstractString = "mutual")
     n = nop(frame)
     ql = Vector{Cdouble}(undef, n)
     qlbar = Vector{Cdouble}(undef, n)
     code = ccall(
-        dlsym(_so(), :seams_frame_steinhardt),
+        dlsym(_so(), :seams_frame_steinhardt_graph),
         Cint,
-        (Ptr{Cvoid}, Cdouble, Cint, Cint, Ptr{Cdouble}, Ptr{Cdouble}),
+        (Ptr{Cvoid}, Cdouble, Cint, Cint, Cstring, Ptr{Cdouble}, Ptr{Cdouble}),
         frame.ptr,
         cutoff,
         type,
         order_l,
+        graph,
         ql,
         qlbar,
     )
@@ -198,6 +199,23 @@ function signature_cages(frame::Frame, spec::AbstractString; cutoff::Real = 3.5,
     )
     _check(code)
     (cages = Int(n_cages[]), atoms = Int(n_atoms[]))
+end
+
+function jump_tau90(first::Frame, second::Frame, dt::Real = 1.0; oxygen_type::Integer = 1, hydrogen_type::Integer = 2)
+    tau = Ref{Cdouble}(0.0)
+    code = ccall(
+        dlsym(_so(), :seams_frames_jump_tau90),
+        Cint,
+        (Ptr{Cvoid}, Ptr{Cvoid}, Cdouble, Cint, Cint, Ptr{Cdouble}),
+        first.ptr,
+        second.ptr,
+        dt,
+        oxygen_type,
+        hydrogen_type,
+        tau,
+    )
+    _check(code)
+    tau[]
 end
 
 function symmetry(frame::Frame; shell_rmsd::Real = 0.12)

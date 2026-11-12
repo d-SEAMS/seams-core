@@ -1,6 +1,8 @@
 #ifndef SEAMS_LOCAL_SYMMETRY_H_
 #define SEAMS_LOCAL_SYMMETRY_H_
 
+#include <mol_sys.hpp>
+
 #include <Eigen/Core>
 #include <string>
 #include <vector>
@@ -95,6 +97,11 @@ void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vector
 // Column SoA coordinates. The canon shell is built once. kind is written in full.
 void classifyIceArrays(const double *x, const double *y, const double *z, int n, const double lat[3][3],
                        int *kind, double shellRmsd = kShellRmsd);
+
+// Same labels as classifyIceArrays, packed from a point cloud. On ideal
+// cubic ice the codes match diamondFromCsr (0 hexagonal, 1 cubic, -1 other).
+void classifyIceCloud(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                      std::vector<int> &kind);
 
 // Azimuthal cosine of each tetrahedral bond, largest first. The value is
 // the best alignment of an outer neighbour with one of the other three

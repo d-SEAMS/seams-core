@@ -1194,11 +1194,32 @@ int cmdCn(std::ostream &os, Cloud &cloud, double rmax, int bins, int typeI,
   return 0;
 }
 
-int cmdRings(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
+int cmdRings(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int maxSize) {
+  if (maxSize < 3) {
+    maxSize = 6;
+  }
   const int typ = typeOf(cloud, typeI);
-  const auto ids = nneigh::neighListO(cutoff, cloud, typ);
-  const auto idx = nneigh::neighbourListByIndex(cloud, ids);
-  const auto rings = primitive::ringNetwork(idx, 6);
+  std::vector<int> subset;
+  const std::vector<int> *sub = nullptr;
+  if (typ > 0) {
+    subset.reserve(static_cast<std::size_t>(cloud.nop));
+    for (int i = 0; i < cloud.nop; ++i) {
+      if (cloud.pts[static_cast<std::size_t>(i)].type == typ) {
+        subset.push_back(i);
+      }
+    }
+    sub = &subset;
+  }
+  std::vector<int> offsets;
+  std::vector<int> cols;
+  std::vector<std::vector<int>> rings;
+  if (nneigh::orthoFullCsr(cloud, sub, cutoff, offsets, cols, false)) {
+    rings = primitive::ringNetwork(offsets, cols, maxSize);
+  } else {
+    const auto ids = nneigh::neighListO(cutoff, cloud, typ);
+    const auto idx = nneigh::neighbourListByIndex(cloud, ids);
+    rings = primitive::ringNetwork(idx, maxSize);
+  }
   std::map<int, int> hist;
   for (const auto &ring : rings) {
     hist[static_cast<int>(ring.size())] += 1;
@@ -1353,11 +1374,19 @@ int cmdSteinhardt(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
   }
   const int typ = typeOf(cloud, typeI);
   const auto q3 = chill::steinhardtQlCutoff(cloud, cutoff, 3, typ, true);
+  const auto q4 = chill::steinhardtQlCutoff(cloud, cutoff, 4, typ, true);
+  const auto q6 = chill::steinhardtQlCutoff(cloud, cutoff, 6, typ, true);
   const auto q12 = chill::steinhardtQlCutoff(cloud, cutoff, 12, typ, true);
   os << colorizer.heading("nop") << " " << cloud.nop << " "
      << colorizer.longOption("q3") << " " << topoparam::meanFinite(q3.ql) << " "
      << colorizer.longOption("q3bar") << " " << topoparam::meanFinite(q3.qlBar)
-     << " " << colorizer.longOption("q12") << " "
+     << " " << colorizer.longOption("q4") << " " << topoparam::meanFinite(q4.ql)
+     << " " << colorizer.longOption("q4bar") << " "
+     << topoparam::meanFinite(q4.qlBar) << " "
+     << colorizer.longOption("q6") << " " << topoparam::meanFinite(q6.ql) << " "
+     << colorizer.longOption("q6bar") << " "
+     << topoparam::meanFinite(q6.qlBar) << " "
+     << colorizer.longOption("q12") << " "
      << topoparam::meanFinite(q12.ql) << " "
      << colorizer.longOption("q12bar") << " "
      << topoparam::meanFinite(q12.qlBar) << "\n";
@@ -1741,6 +1770,7 @@ int main(int argc, char *argv[]) {
   bool printConfig = false;
   bool strictInput = false;
   int htype = 1;
+  int ringMax = 6;
   double hdist = 2.42;
   double hangle = 30.0;
   bool allDonors = false;
@@ -2161,6 +2191,13 @@ int main(int argc, char *argv[]) {
                    cfg.cell = parseFloatingPoint<double>(value);
                  }));
 
+  parser.add(Option("--max-ring")
+                 .argName("N")
+                 .help("Largest primitive ring kept by rings (default 6)")
+                 .handler([&](std::string_view value) {
+                   ringMax = parseIntegral<int>(value);
+                 }));
+
   parser.add(Positional("command")
                  .help("read | chill | chill-plus | ovito-chill+ | cages | symmetry | "
                        "rings | prisms | cluster | fingerprint | ions | "
@@ -2554,7 +2591,7 @@ int main(int argc, char *argv[]) {
                        allDonors);
     }
     if (cmd == "rings") {
-      return cmdRings(os, cloud, cutoff, typeI);
+      return cmdRings(os, cloud, cutoff, typeI, ringMax);
     }
     if (cmd == "prisms") {
       return cmdPrisms(os, cloud, cutoff, typeI);

@@ -16,7 +16,7 @@
 
 #include <bop.hpp>
 #include <chill_plus_scheme.hpp>
-#include <diamond_cna.hpp>
+#include <local_symmetry.hpp>
 #include <franzblau.hpp>
 #include <neighbours.hpp>
 
@@ -419,7 +419,7 @@ FrameRecord analyzeFrame(molSys::PointCloud<molSys::Point<double>, double> &clou
   }
 
   std::vector<int> kind;
-  symm::diamondFromCsr(cloud, offsets, cols, kind);
+  symm::classifyIceCloud(cloud, kind);
   std::vector<Tag> symTag(static_cast<std::size_t>(cloud.nop));
   std::vector<char> symMask(static_cast<std::size_t>(cloud.nop), 0);
   for (int i = 0; i < cloud.nop; ++i) {

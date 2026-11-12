@@ -134,6 +134,17 @@ signature_cages.dseams_frame <- function(frame, spec = "512", cutoff = 3.5,
   signature_cages_(frame$ptr, cutoff, as.integer(type), graph, spec)
 }
 
+#' Jump-rotor tau_90 between two frames.
+#'
+#' Returns `dt` when any water's H-H vector rotates by at least 90 degrees,
+#' and `NaN` otherwise.
+#' @export
+jump_tau90 <- function(first, second, dt = 1, oxygen_type = 1L,
+                       hydrogen_type = 2L) {
+  jump_tau90_(first$ptr, second$ptr, dt, as.integer(oxygen_type),
+              as.integer(hydrogen_type))
+}
+
 #' Shell symmetry label for every atom.
 #'
 #' @return Integer codes: 0 ice Ih, 1 ice Ic, 2 stacking-disordered, -1 otherwise.
@@ -166,13 +177,15 @@ primitive_rings.dseams_frame <- function(frame, cutoff = 3.5, type = 0L,
 #' @param type LAMMPS type.
 #' @return A data.frame with columns `atom`, `ql`, `qlbar`.
 #' @export
-steinhardt <- function(frame, order_l = 6L, cutoff = 3.5, type = 0L) {
+steinhardt <- function(frame, order_l = 6L, cutoff = 3.5, type = 0L,
+                      graph = "mutual") {
   UseMethod("steinhardt")
 }
 
 #' @export
-steinhardt.dseams_frame <- function(frame, order_l = 6L, cutoff = 3.5, type = 0L) {
-  out <- steinhardt_(frame$ptr, cutoff, as.integer(type), as.integer(order_l))
+steinhardt.dseams_frame <- function(frame, order_l = 6L, cutoff = 3.5, type = 0L,
+                                    graph = "mutual") {
+  out <- steinhardt_(frame$ptr, cutoff, as.integer(type), as.integer(order_l), graph)
   class(out) <- c("dseams_steinhardt", "data.frame")
   out
 }
