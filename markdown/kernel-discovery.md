@@ -364,3 +364,52 @@ CHILL+ fit gives \(n^\* = 186\) (half-passage size 171, \(c = 0.007\)).
 The two estimates do not agree, and neither series waits and then
 runs away, so the inflection is the middle of the steady growth
 rather than a resolved barrier.
+
+Normalised \(\hat w_l\) is the Steinhardt contraction of \(q_{lm}\)
+with the Wigner 3j symbol \((l\,l\,l; m_1 m_2 m_3)\), divided by
+\((\sum_m |q_{lm}|^2)^{3/2}\). `seams_frame_wl` writes it for \(l = 4\)
+and \(l = 6\). On ideal ice Ic every molecule has
+\(\bar q_4 = 0.50917508\), \(\bar q_6 = 0.62853936\),
+\(\hat w_4 = -0.15931737\), \(\hat w_6 = 0.01316060\).
+
+Medians, milliseconds, eight samples after two warm-ups, neighbour
+build inside the call (`discovery/v10-session.txt`). Eight cores.
+OVITO 3.17.2 writes averaged q and does not write w. mdapy 2.0.0 is
+the same. pyscal3 4.1.0 writes both. Columns are seams / OVITO /
+mdapy / pyscal3, and a dash where that code has no w.
+
+One thread, 110592 molecules:
+
+| | q4-bar | q6-bar | w4 | w6 |
+| --- | --- | --- | --- | --- |
+| seams | 35.90 | 37.38 | 40.54 | 50.62 |
+| OVITO | 66.51 | 92.71 | - | - |
+| mdapy | 67.35 | 82.66 | - | - |
+| pyscal3 | 94.76 | 115.80 | 107.81 | 133.66 |
+
+One thread, 884736 molecules:
+
+| | q4-bar | q6-bar | w4 | w6 |
+| --- | --- | --- | --- | --- |
+| seams | 362.15 | 404.28 | 394.30 | 474.85 |
+| OVITO | 653.37 | 829.57 | - | - |
+| mdapy | 816.62 | 936.83 | - | - |
+| pyscal3 | 970.34 | 1068.16 | 983.26 | 1196.60 |
+
+Eight threads, 110592 molecules:
+
+| | q4-bar | q6-bar | w4 | w6 |
+| --- | --- | --- | --- | --- |
+| seams | 7.40 | 7.22 | 6.52 | 7.79 |
+| OVITO | 22.46 | 30.87 | - | - |
+| mdapy | 14.94 | 14.47 | - | - |
+| pyscal3 | 19.12 | 21.42 | 20.66 | 23.50 |
+
+Eight threads, 884736 molecules:
+
+| | q4-bar | q6-bar | w4 | w6 |
+| --- | --- | --- | --- | --- |
+| seams | 53.42 | 61.14 | 52.32 | 64.00 |
+| OVITO | 165.06 | 275.67 | - | - |
+| mdapy | 113.71 | 121.66 | - | - |
+| pyscal3 | 178.38 | 224.55 | 185.65 | 234.16 |

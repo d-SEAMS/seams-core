@@ -502,6 +502,40 @@ int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
   }
 }
 
+int seams_frame_wl(seams_frame *frame, double cutoff, int type, int order_l,
+                   double *wl) {
+  clear_error();
+  if (frame == nullptr || wl == nullptr) {
+    set_error("wl needs a frame");
+    return 1;
+  }
+  if (order_l != 4 && order_l != 6) {
+    set_error("wl is defined here for l = 4 and l = 6");
+    return 1;
+  }
+  try {
+    const int typ = resolve_type(frame->cloud, type);
+    if (!(frame->cloud.box.size() == 3 || frame->cloud.box.size() >= 6)) {
+      set_error("wl needs an orthorhombic or restricted triclinic frame");
+      return 1;
+    }
+    const chill::SteinhardtQl result =
+        chill::steinhardtQlCutoff(frame->cloud, cutoff, order_l, typ, false, true);
+    if (result.wl.size() != static_cast<std::size_t>(std::max(frame->cloud.nop, 0))) {
+      set_error("wl was not computed");
+      return 1;
+    }
+    const int n = frame->cloud.nop;
+    if (n > 0) {
+      std::memcpy(wl, result.wl.data(), static_cast<std::size_t>(n) * sizeof(double));
+    }
+    return 0;
+  } catch (...) {
+    remember_exception();
+    return 1;
+  }
+}
+
 int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
                             double *q4, double *q6, double *q4bar,
                             double *q6bar, int *labels, int counts9[9]) {

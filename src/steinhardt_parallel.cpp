@@ -16,6 +16,7 @@
 #include <sphericart_ylm.hpp>
 #include <steinhardt_device.hpp>
 #include <thread_team.hpp>
+#include <wigner_wl.hpp>
 #include <ylm_batch.hpp>
 
 #include <algorithm>
@@ -982,7 +983,7 @@ bool rowLists(const int *nom, int k, int row, int target) {
 // heavier search; on ice the cutoff shell is those four neighbours.
 SteinhardtQl cutoffSolid(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
-    int orderL, int typeI, bool average) {
+    int orderL, int typeI, bool average, bool invariants) {
   const int n = yCloud.nop;
   SteinhardtQl result;
   result.ql.assign(static_cast<std::size_t>(n), 0.0);
@@ -1418,6 +1419,17 @@ SteinhardtQl cutoffSolid(
     }
   }
   }
+  if (invariants && (orderL == 4 || orderL == 6)) {
+    result.wl.assign(static_cast<std::size_t>(n), 0.0);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (parallel)
+#endif
+    for (int i = 0; i < n; i++) {
+      const double *row = scratch.qlm.data() +
+                          static_cast<std::size_t>(i) * static_cast<std::size_t>(width);
+      result.wl[static_cast<std::size_t>(i)] = seams::wigner::hatW(orderL, row);
+    }
+  }
   const auto tYlm = std::chrono::steady_clock::now();
   if (average) {
 #ifdef SEAMS_HAS_OPENMP
@@ -1461,11 +1473,11 @@ SteinhardtQl cutoffSolid(
 
 SteinhardtQl steinhardtQlCutoff(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
-    int orderL, int typeI, bool average) {
+    int orderL, int typeI, bool average, bool invariants) {
   if ((orderL == 3 || orderL == 4 || orderL == 6) &&
       (yCloud.box.size() == 3 || yCloud.box.size() >= 6) && yCloud.nop > 0 &&
       cutoff > 0.0) {
-    SteinhardtQl fast = cutoffSolid(yCloud, cutoff, orderL, typeI, average);
+    SteinhardtQl fast = cutoffSolid(yCloud, cutoff, orderL, typeI, average, invariants);
     if (!fast.ql.empty()) {
       return fast;
     }

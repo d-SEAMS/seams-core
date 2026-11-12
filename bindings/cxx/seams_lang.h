@@ -69,6 +69,11 @@ int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
 int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
                            int order_l, double *ql, double *qlbar);
 
+/* Normalised Steinhardt hat{w}_l for l = 4 or 6 on the cutoff shell.
+ * Returns 1 on failure. */
+int seams_frame_wl(seams_frame *frame, double cutoff, int type, int order_l,
+                   double *wl);
+
 /* One cutoff list. Local q4, local q6, Lechner-Dellago q4-bar and
  * q6-bar, and published CHILL+ labels. q4bar and q6bar may be null.
  * counts9 and labels may be null. Returns 1 on failure. */

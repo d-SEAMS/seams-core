@@ -417,6 +417,7 @@ bool isInterfacial(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 struct SteinhardtQl {
   std::vector<double> ql;    //! Local @f$q_l(i)@f$
   std::vector<double> qlBar; //! Averaged @f$\bar{q}_l(i)@f$
+  std::vector<double> wl;    //! Normalised @f$\hat{w}_l@f$, empty unless requested
 };
 
 //! Local and neighbour-averaged Steinhardt parameters of degree 3, 4, 6,
@@ -437,9 +438,11 @@ steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 //! Neighbours are orthoFullCsr, not a four-nearest rebuild, and the
 //! kernel reads that CSR directly. Lechner-Dellago @f$\bar{q}_l@f$ is
 //! filled only when @a average is true. Otherwise `qlBar` stays zero.
+//! @a invariants fills @c wl with the normalised Steinhardt
+//! @f$\hat{w}_l@f$ for l = 4 or 6.
 [[nodiscard]] SteinhardtQl steinhardtQlCutoff(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-    double cutoff, int orderL, int typeI, bool average);
+    double cutoff, int orderL, int typeI, bool average, bool invariants = false);
 
 //! Mutual k-nearest Steinhardt parameters. The coordinate buffer built
 //! for the nomination is the one the harmonics read, and the neighbour
