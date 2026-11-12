@@ -26,8 +26,8 @@ pixi provides a compiler, Eigen, BLAS/LAPACK, Catch2, Meson, Ninja,
 Highway and chemfiles. Optional pixi features add IRA, sphericart,
 nauty, MPI, the docs stack, and the Coq/SymPy proofs.
 
-~-Dwith_python=true~ and ~-Dwith_lua=enabled~ are Meson errors that
-name the front-end repositories.
+~-Dwith_python=true~ builds the in-tree nanobind module.
+~-Dwith_lua=enabled~ is a Meson error: Lua is yodaStruct.
 
 * Clone and build
 
@@ -44,9 +44,9 @@ pixi run build
 pixi run test
 #+end_src
 
-~pixi run setup~ configures ~bbdir/~ with tests and the ~seams~ CLI
-(~-Dwith_tests=true -Dwith_python=false~). ~pixi run build~ compiles
-~libyodaLib~ and ~seams~. ~pixi run test~ runs the Catch2 suite.
+~pixi run setup~ configures ~bbdir/~ with tests, the ~seams~ CLI, and
+the nanobind module (~-Dwith_tests=true~). ~pixi run build~ compiles
+~libyodaLib~, ~libseams~, and ~seams~. ~pixi run test~ runs the suite.
 
 Nix:
 

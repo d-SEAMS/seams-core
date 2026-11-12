@@ -2,9 +2,8 @@
 #+OPTIONS: toc:nil num:nil
 
 d-SEAMS 2 is not a monolith. The classifier is one C++ library.
-Cutoff neighbour lists are optional vesin (brute-force fallback).
-Periodic k-nearest graphs are optional linkcell. Each language
-ships its own package against that library.
+~linkcell::pairs_within~ owns the cutoff list. vesin is the fallback
+when linkcell is not built. Each language front calls that library.
 
 | repository | product | role |
 |------------+---------+------|
@@ -64,16 +63,15 @@ There is no ~yodaStruct~ executable in any of the three repositories.
 - *Wheels*: cibuildwheel on PydSEAMSlib, CPython 3.12 limited ABI.
 
 The 2020 CMake Nix derivation of ~yodaStruct~ is gone.
-~-Dwith_python=true~ and ~-Dwith_lua=enabled~ are Meson errors that
-name PydSEAMSlib and yodaStruct.
+~-Dwith_python=true~ builds the in-tree nanobind module.
+~-Dwith_lua=enabled~ is a Meson error that names yodaStruct.
 
 * Neighbour backends
 
-- *vesin* (optional, ~SEAMS_HAS_VESIN~): cutoff pair lists
-  (~neighList~, ~neighListO~). Brute force if the wrap is off.
-- *linkcell* (optional, ~SEAMS_HAS_LINKCELL~): periodic k-NN for
-  ~knn~ / ~knn-union~ / ~seeded~ graphs and the device TUM walk.
-  Not a drop-in for vesin cutoff lists.
+- *linkcell* (optional, ~SEAMS_HAS_LINKCELL~): ~linkcell::pairs_within~
+  owns the cutoff list.
+- *vesin* (optional, ~SEAMS_HAS_VESIN~): the cutoff fallback when
+  linkcell is not built.
 
 ~seams --features~ prints both.
 

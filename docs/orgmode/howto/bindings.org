@@ -7,15 +7,13 @@ R and Julia call =libseams_lang=, which is built with the engine and does not re
 * Python
 
 #+begin_src bash
-pip install pydseamslib
-pip install 'pydseamslib[ase]'
-python -c 'import pydseams as ds; print(ds.__version__)'
+meson setup build -Dwith_python=true
+meson compile -C build
 #+end_src
 
-The package is [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
-The compiled module is ~pydseams.yoda~.
-~import pydseamslib~ is an alias.
-Do not add a second Python extension to seams-core.
+~dseams._core~ links the in-tree ~libseams~. A missing nanobind uses
+~subprojects/nanobind.wrap~. The default ~pixi run setup~ leaves
+~with_python~ at its Meson default, which is true.
 
 * R
 

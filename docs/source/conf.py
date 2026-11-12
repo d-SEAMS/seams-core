@@ -5,6 +5,34 @@ import sys
 
 # -- Path setup --------------------------------------------------------------
 _source = os.path.dirname(os.path.abspath(__file__))
+_docs = os.path.dirname(_source)
+
+
+def _stage_markdown_book():
+    """Copy the language pages into the Sphinx tree so myst renders them."""
+    import pathlib
+
+    groups = (
+        ("api", "stable", "Stable API"),
+        ("engines", "engines", "Engines"),
+        ("tutorials", "fronts", "Language tutorials"),
+    )
+    for src_name, dest_name, title in groups:
+        src = pathlib.Path(_docs) / src_name
+        dest = pathlib.Path(_source) / dest_name
+        dest.mkdir(parents=True, exist_ok=True)
+        names = []
+        for page in sorted(src.glob("*.md")):
+            (dest / page.name).write_text(page.read_text(encoding="utf-8"), encoding="utf-8")
+            names.append(page.stem)
+        underline = "=" * len(title)
+        body = [title, underline, "", ".. toctree::", "   :maxdepth: 1", ""]
+        body.extend("   {}".format(name) for name in names)
+        body.append("")
+        (dest / "index.rst").write_text("\n".join(body), encoding="utf-8")
+
+
+_stage_markdown_book()
 _doxyrest = os.path.abspath(os.path.join(_source, "../../subprojects/doxyrest/sphinx"))
 _xml_index = os.path.join(_source, "xml", "index.xml")
 _api_index = os.path.join(_source, "api", "index.rst")

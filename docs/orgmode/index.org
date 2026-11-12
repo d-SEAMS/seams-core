@@ -148,6 +148,24 @@ framework.
    paper/index
 
 .. toctree::
+   :maxdepth: 1
+   :caption: Stable API
+
+   stable/index
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Engines
+
+   engines/index
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Language tutorials
+
+   fronts/index
+
+.. toctree::
    :maxdepth: 2
    :caption: Development
 

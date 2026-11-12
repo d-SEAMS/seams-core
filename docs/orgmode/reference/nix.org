@@ -50,8 +50,8 @@ The fileset is =meson.build=, =meson_options.txt=, =src=, =tests=,
 
 * What stays off
 
-| ~with_python~ | Meson error if forced; Python is PydSEAMSlib |
-| ~with_lua~ | Meson error if forced; Lua is yodaStruct |
+| ~with_python~ | flake sets ~false~; ~true~ builds the in-tree nanobind module |
+| ~with_lua~ | flake sets ~disabled~; ~enabled~ is a Meson error (yodaStruct) |
 | ~with_mpi~ | ~false~ |
 | ~with_openmp_offload~ | ~false~ |
 | vesin, readcon-core, readcon-db, linkcell, minimage | wrap-git fallbacks are not fetched (~nodownload~) |

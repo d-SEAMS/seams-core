@@ -20,6 +20,77 @@ def symbols():
     return sorted({name for name in found if name not in skip and not name.endswith("_t")})
 
 
+def render_markdown(text):
+    """HTML for headings, lists, and fenced code. Code fences stay preformatted."""
+    out = []
+    paragraph = []
+    in_code = False
+    list_open = False
+
+    def inline(raw):
+        escaped = raw.replace("&", "&amp;").replace("<", "&lt;")
+        parts = escaped.split("`")
+        body = []
+        for index, part in enumerate(parts):
+            if index % 2:
+                body.append("<code>{}</code>".format(part))
+            else:
+                body.append(part)
+        return "".join(body)
+
+    def flush_paragraph():
+        nonlocal paragraph
+        if paragraph:
+            out.append("<p>{}</p>".format(inline(" ".join(paragraph))))
+            paragraph = []
+
+    def close_list():
+        nonlocal list_open
+        if list_open:
+            out.append("</ul>")
+            list_open = False
+
+    for line in text.splitlines():
+        if line.startswith("```"):
+            flush_paragraph()
+            close_list()
+            if in_code:
+                out.append("</code></pre>")
+                in_code = False
+            else:
+                out.append("<pre><code>")
+                in_code = True
+            continue
+        if in_code:
+            out.append(line.replace("&", "&amp;").replace("<", "&lt;"))
+            continue
+        if not line.strip():
+            flush_paragraph()
+            close_list()
+            continue
+        if line.startswith("#"):
+            flush_paragraph()
+            close_list()
+            level = len(line) - len(line.lstrip("#"))
+            level = min(max(level, 1), 4)
+            out.append("<h{0}>{1}</h{0}>".format(level, inline(line[level:].strip())))
+            continue
+        if line.startswith(("- ", "* ")):
+            flush_paragraph()
+            if not list_open:
+                out.append("<ul>")
+                list_open = True
+            out.append("<li>{}</li>".format(inline(line[2:].strip())))
+            continue
+        close_list()
+        paragraph.append(line.strip())
+    flush_paragraph()
+    close_list()
+    if in_code:
+        out.append("</code></pre>")
+    return "\n".join(out)
+
+
 def main():
     names = symbols()
     page = (DOCS / "api" / "c.md").read_text()
@@ -60,10 +131,7 @@ def main():
             print("missing", path, file=sys.stderr)
             return 1
         body = path.read_text()
-        html = ["<h1>{}</h1>".format(path.stem), "<pre>"]
-        html.append(body.replace("&", "&amp;").replace("<", "&lt;"))
-        html.append("</pre>")
-        parts.extend(html)
+        parts.append(render_markdown(body))
     parts.append("</body></html>")
     (OUT / "index.html").write_text("\n".join(parts))
     print("docs ok", len(names), "symbols")

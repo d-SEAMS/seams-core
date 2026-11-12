@@ -1,8 +1,8 @@
 #+TITLE: Install the engine
 #+OPTIONS: toc:nil num:nil
 
-Get a ~seams~ binary and ~libyodaLib~. This repository does not
-install Python or Lua.
+Get a ~seams~ binary, ~libyodaLib~, and ~libseams~. The nanobind
+module is built in this repository. Lua stays in yodaStruct.
 
 * pixi
 
@@ -48,8 +48,12 @@ seams --version
 seams --features
 #+end_src
 
-~-Dwith_python=true~ and ~-Dwith_lua=enabled~ are Meson errors that
-name [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] and
+The in-tree fronts are ~bindings/python~ (nanobind ~dseams._core~,
+~-Dwith_python=true~, the default), ~bindings/r/dseams~,
+~bindings/julia/Dseams~, ~bindings/fortran~, and ~bindings/rust~.
+Engine hooks follow ~-Dwith_lammps=auto~, ~-Dwith_gromacs=auto~,
+~-Dwith_openmm=auto~, and ~-Dwith_plumed=auto~.
+~-Dwith_lua=enabled~ is a Meson error: Lua stays in
 [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]].
 
 * Front ends and simulation interfaces

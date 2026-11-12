@@ -10,15 +10,18 @@ d-SEAMS is five packages:
 
 | repo | product |
 |------+---------|
-| [[https://github.com/d-SEAMS/seams-core][seams-core]] | ~libyodaLib~ and ~seams~ |
+| [[https://github.com/d-SEAMS/seams-core][seams-core]] | ~libyodaLib~, ~libseams~, ~seams~, and the in-tree fronts |
 | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseams~ |
 | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | ~dseams~ Lua/Fennel |
 | [[https://github.com/d-SEAMS/linkcell][linkcell]] | periodic k-nearest neighbour search |
 | [[https://github.com/d-SEAMS/dseams-plumed][dseams-plumed]] | ~DSEAMS_CAGES~ PLUMED action |
 
-Bindings do not live in seams-core. ~-Dwith_python=true~ and
-~-Dwith_lua=enabled~ are Meson errors that name those repositories.
-Do not add a language binding here. Do not resurrect
+Python, R, Julia, Fortran, and Rust bindings live in ~bindings/~.
+~-Dwith_python=true~ builds the nanobind module from the in-tree
+~libseams~. ~-Dwith_lammps~, ~-Dwith_gromacs~, ~-Dwith_openmm~, and
+~-Dwith_plumed~ are ~auto~: the hook is built when the library is
+found. ~-Dwith_lua=enabled~ is a Meson error that names
+[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]. Do not resurrect
 ~yodaStruct -c~ or ~conf.yaml~.
 
 * Checklist
