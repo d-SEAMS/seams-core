@@ -144,6 +144,13 @@ executable('bench_naming', 'bench_naming.cpp',
   include_directories: _incdirs,
   build_rpath: _test_rpath)
 
+executable('bench_robust', 'bench_robust.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: _test_rpath)
+
 executable('report_thermal', 'report_thermal.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,

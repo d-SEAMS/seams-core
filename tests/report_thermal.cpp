@@ -133,7 +133,7 @@ int geometryOf(const Eigen::MatrixXd &shell, double &rIh, double &rIc, double &r
 
 void analyze(const Frame &frame, const std::string &path) {
   const int n = static_cast<int>(frame.xyz.rows());
-  const double cutoffs[] = {0.55, 0.65, 0.75, 0.85, 0.95};
+  const double cutoffs[] = {0.75, 0.85, 0.90, 0.95, 1.05};
   std::vector<std::vector<int>> byCut(5);
   for (int k = 0; k < 5; k++) {
     symm::classifyIce(frame.xyz, frame.box, byCut[static_cast<size_t>(k)], cutoffs[k]);

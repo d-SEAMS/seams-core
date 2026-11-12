@@ -220,6 +220,100 @@ def thermal(workdir, name, temperature, role, vecs, atoms, steps, seed, nucleus=
     return moved
 
 
+def nucleus_frame(outdir):
+    """Melt the cell, put an ice Ic core back, and let the interface sit for 1 ps."""
+    vecs, atoms = ice_ic()
+    work = os.path.join(outdir, "run-melt")
+    os.makedirs(work, exist_ok=True)
+    write_sw(os.path.join(work, "mW.sw"))
+    write_data(os.path.join(work, "data.mw"), vecs, atoms)
+    melt = "\n".join(
+        [
+            "units real",
+            "atom_style atomic",
+            "boundary p p p",
+            "read_data data.mw",
+            "pair_style sw",
+            "pair_coeff * * mW.sw mW",
+            "neighbor 2.0 bin",
+            "neigh_modify every 1 delay 0 check yes",
+            "timestep 5.0",
+            "thermo 2000",
+            "thermo_style custom step temp pe",
+            "velocity all create 500.0 50011 dist gaussian",
+            "fix bath all nvt temp 500.0 500.0 200.0",
+            "run 8000",
+            "write_dump all custom melt.lammpstrj id type xu yu zu",
+            "",
+        ]
+    )
+    run_lammps(work, melt)
+    melted = read_dump(os.path.join(work, "melt.lammpstrj"))
+    side = vecs[0][0]
+    core_pos = []
+    for atom in atoms:
+        if atom[2] == 1:
+            core_pos.append(atom[0])
+
+    def wrap(pos):
+        return tuple(x - side * math.floor(x / side) for x in pos)
+
+    def overlaps(pos):
+        for core in core_pos:
+            d2 = 0.0
+            for a, b in zip(pos, core):
+                d = a - b
+                d -= side * math.floor(d / side + 0.5)
+                d2 += d * d
+            if d2 < 2.4 * 2.4:
+                return True
+        return False
+
+    mixed = []
+    for i, atom in enumerate(atoms):
+        if atom[2] == 1:
+            mixed.append((atom[0], -1, 1))
+        else:
+            pos = wrap(melted[i])
+            if overlaps(pos):
+                continue
+            mixed.append((pos, -1, 0))
+    core_ids = [i for i, atom in enumerate(mixed) if atom[2] == 1]
+    write_data(os.path.join(work, "data-core.mw"), vecs, mixed)
+    relax = "\n".join(
+        [
+            "units real",
+            "atom_style atomic",
+            "boundary p p p",
+            "read_data data-core.mw",
+            "pair_style sw",
+            "pair_coeff * * mW.sw mW",
+            "neighbor 2.0 bin",
+            "neigh_modify every 1 delay 0 check yes",
+            "timestep 5.0",
+            "thermo 200",
+            "thermo_style custom step temp pe",
+            "group core id " + " ".join(str(i + 1) for i in core_ids),
+            "group outer subtract all core",
+            "fix hold core setforce 0.0 0.0 0.0",
+            "min_style cg",
+            "minimize 1.0e-4 1.0e-6 40 400",
+            "velocity outer create 250.0 25011 dist gaussian",
+            "fix bath outer nvt temp 250.0 250.0 200.0",
+            "run 400",
+            "unfix hold",
+            "unfix bath",
+            "write_dump all custom last.lammpstrj id type xu yu zu",
+            "",
+        ]
+    )
+    run_lammps(work, relax)
+    coords = read_dump(os.path.join(work, "last.lammpstrj"))
+    moved = [(coords[i], mixed[i][1], mixed[i][2]) for i in range(len(mixed))]
+    write_frame(os.path.join(outdir, "nucleus-250.frame"), "nucleus-250", 250.0, "nucleus", vecs, moved)
+    print(f"wrote nucleus atoms={len(mixed)} core={len(core_ids)}", flush=True)
+
+
 def main():
     outdir = sys.argv[1] if len(sys.argv) > 1 else "/tmp/sym-v3"
     ideal_only = "--ideal-only" in sys.argv
@@ -249,27 +343,7 @@ def main():
             moved,
         )
         print(f"wrote stack-{int(temperature)}", flush=True)
-    nvecs, natoms = ice_ic()
-    moved = thermal(
-        os.path.join(outdir, "run-nucleus"),
-        "nucleus-250",
-        250.0,
-        "nucleus",
-        nvecs,
-        natoms,
-        0,
-        25011,
-        nucleus=True,
-    )
-    write_frame(
-        os.path.join(outdir, "nucleus-250.frame"),
-        "nucleus-250",
-        250.0,
-        "nucleus",
-        nvecs,
-        moved,
-    )
-    print(f"wrote nucleus atoms={len(natoms)}", flush=True)
+    nucleus_frame(outdir)
 
 
 if __name__ == "__main__":
