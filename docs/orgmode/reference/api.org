@@ -87,6 +87,43 @@ Every file under =src/include/internal=.
 ~pydseams.yoda~ and ~dseams.core~ register the C++ spellings from
 these headers. The generated pages are =api/index=.
 
+* Cutoff CSR
+
+The list both boxes build is one CSR of cloud indices.
+~offsets~ has length ~nop + 1~.
+The partners of atom ~i~ are ~cols[offsets[i] .. offsets[i + 1]]~, sorted, with no self entry.
+A pair is kept when the squared minimum image is strictly below the cutoff squared.
+~half~ keeps that pair only on the lower cloud index.
+A length-3 ~box~ is orthorhombic (~Lx, Ly, Lz~).
+A length of at least 6 is a LAMMPS dump: bound spans, then tilt factors ~xy, xz, yz~.
+Both call ~nneigh::orthoFullCsr~.
+The fast path fills the 27 image shifts once and walks the same stencil.
+A cell wider than the cutoff falls back to the fractional minimum image.
+The builders call ~omp_set_dynamic(0)~ and take the team from ~omp_get_max_threads~.
+Set ~OMP_NUM_THREADS~.
+There is no thread-count argument.
+A region that is already parallel does not fork again.
+
+| name | signature |
+|------+-----------|
+| ~nneigh::orthoFullCsr~ | ~bool (const PointCloud&, const vector<int>* subset, double rcutoff, vector<int>& offsets, vector<int>& cols, bool half = false)~. Null ~subset~ is every atom. Returns false when the box is not usable. Scratch is refilled on the next call. |
+| ~nneigh::CutoffSkin~ | ~CutoffSkin(double cutoff, double skin)~. Candidates are built at ~cutoff + skin~. |
+| ~CutoffSkin::update~ | ~bool update(const PointCloud&, const vector<int>* subset = nullptr, bool half = false)~. Rebuilds when ~moved~ is true, then ~filter~s to ~cutoff~. |
+| ~CutoffSkin::lastReused~ | ~bool lastReused() const~. True when the last ~update~ kept the wide list. |
+| ~CutoffSkin::offsets~, ~cols~ | The filtered CSR. |
+| ~CutoffSkin::moved~ | Private. True when the atom count, the box, ~boxLow~, or any minimum-image displacement has changed by more than ~skin/2~. |
+| ~CutoffSkin::filter~ | Private. Copies the wide CSR down to pairs whose current squared minimum image is below ~cutoff~ squared. |
+| ~nneigh::idRowsFromCsr~ | ~vector<vector<int>> (const PointCloud&, const vector<int>& indexToID, const vector<int>& offsets, const vector<int>& cols)~. Atom-ID rows, self first. |
+| ~nneigh::indexRowsFromCsr~ | ~vector<vector<int>> (int nop, const vector<int>& offsets, const vector<int>& cols)~. Index rows, self first. |
+| ~nneigh::halfIdRowsFromCsr~ | ~vector<vector<int>> (const PointCloud&, const vector<int>& indexToID, const vector<int>& offsets, const vector<int>& cols)~. The lower cloud index owns the pair. |
+| ~chill::classifyBondsCsr~ | ~void (PointCloud&, const vector<int>& offsets, const vector<int>& cols, const BondClassifier& rule, bool isSlice = false)~. Bond labels ~c_ij~ from the CSR. |
+| ~chill::chillPlusFromCsr~ | ~int (PointCloud&, const vector<int>& offsets, const vector<int>& cols)~. Four nearest of each row, real ~l = 3~ harmonics, CHILL+ labels. Returns the cubic count. |
+| ~symm::diamondFromCsr~ | ~void (const PointCloud&, const vector<int>& offsets, const vector<int>& cols, vector<int>& kind)~. Cubic shell is 1, hexagonal is 0, undecided is -1. |
+| ~chill::steinhardtQlCutoff~ | ~SteinhardtQl (const PointCloud&, double cutoff, int orderL, int typeI, bool average)~. ~orthoFullCsr~ for one type, then ~q_l~. ~qlBar~ is filled only when ~average~ is true. ~orderL~ is 3, 4, 6, 8, or 12. |
+
+The walk, the skin, and the session that timed them are in
+[[file:../howto/neighbour-lists.org][Cutoff neighbour lists]].
+
 The face-edge window is the same string on every front.
 Python is ~frame.cages_by_signature("512", edge="none")~.
 Lua (~require("dseams")~) is ~dseams.cages_by_signature(frame, "512", {edge = "none"})~.

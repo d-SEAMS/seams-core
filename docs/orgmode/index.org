@@ -137,6 +137,7 @@ framework.
    howto/bindings
    howto/versions
    howto/benchmarks
+   howto/neighbour-lists
    howto/openmp-offload
    howto/classify-cli
    howto/sheared-cells

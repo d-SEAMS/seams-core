@@ -1,0 +1,226 @@
+#+TITLE: Cutoff neighbour lists
+#+OPTIONS: toc:nil num:nil ^:nil
+
+Build the cutoff list, choose the thread count, and read the pinned
+session that compared it with vesin, freud, matscipy, mdapy, and OVITO.
+The calls are on the [[file:../reference/api.org][API map]].
+The drivers are on [[file:benchmarks.org][Benchmarks]].
+
+* Box
+
+~nneigh::orthoFullCsr~ reads ~PointCloud.box~.
+
+A length of 3 is orthorhombic. ~box[0..2]~ are ~Lx, Ly, Lz~.
+The minimum image on each axis is ~dr - L * floor(dr / L + 0.5)~.
+
+A length of at least 6 is a restricted triclinic LAMMPS dump.
+~box[0..2]~ are the bound spans ~xhi_bound - xlo_bound~ and so on.
+~box[3..5]~ are the tilt factors ~xy, xz, yz~ in the same length unit.
+~boxLow~ is the bound origin.
+~gen::makeFracBox~ recovers the edge lengths
+
+- ~lx = xspan - max(0, xy, xz, xy+xz) + min(0, xy, xz, xy+xz)~
+- ~ly = yspan - max(0, yz) + min(0, yz)~
+- ~lz = zspan~
+
+and the perpendicular widths ~wx, wy, wz~.
+The cartesian image of a fractional shift ~(sx, sy, sz)~ is
+
+- ~x = lx * sx + xy * sy + xz * sz~
+- ~y = ly * sy + yz * sz~
+- ~z = lz * sz~
+
+Cells are sized from those perpendicular widths.
+When every axis has reach 1 and at least four cells, both boxes fill
+the 27 image shifts once and walk that stencil.
+A wider cell uses the fractional minimum image.
+The pair is kept when the squared length is strictly below the cutoff
+squared.
+
+~nneigh::setBoxFromLammpsEdges~ stores edge lengths plus tilt as that
+dump box. A zero tilt stays three spans, so the orthorhombic loop is
+unchanged. ~seams read~ prints the spans and, when the box has six
+entries, ~xy xz yz~. There is no tilt flag.
+
+* CSR
+
+~offsets~ has length ~nop + 1~.
+~cols[offsets[i] .. offsets[i + 1]]~ is sorted by cloud index and has
+no self entry.
+A null subset is every atom.
+~half~ keeps the pair only on the lower cloud index.
+The pair set does not depend on the thread count.
+The call returns false when the box is not usable.
+Scratch stays allocated and is refilled on the next call.
+
+~idRowsFromCsr~ and ~indexRowsFromCsr~ put the atom itself first and
+then the CSR partners, as atom ids or as cloud indices.
+~halfIdRowsFromCsr~ keeps the pair on the lower index.
+~neighListO~, ~halfNeighList~, and ~getNewNeighbourListByIndex~ build
+this CSR and then those rows.
+
+~CutoffSkin~ builds candidates at ~cutoff + skin~.
+~update~ calls ~moved~. That is true when the atom count, the box, the
+origin, or any minimum-image displacement exceeds ~skin / 2~.
+Otherwise ~lastReused~ is true.
+~filter~ then copies the wide CSR down to pairs still inside ~cutoff~.
+~moved~ and ~filter~ are private. ~offsets~ and ~cols~ are the filtered
+list.
+
+~chill::classifyBondsCsr~ labels the bonds of that CSR.
+~chill::chillPlusFromCsr~ keeps the four nearest of each row, accumulates
+the real spherical harmonics at ~l = 3~, and returns the cubic count.
+~symm::diamondFromCsr~ reads the twelve second-shell vectors from the
+same rows: a clean cubic shell is 1, a clean hexagonal shell is 0, and
+an undecided shell is -1.
+~chill::steinhardtQlCutoff~ builds the CSR for one atom type and returns
+~q_l~. The Lechner-Dellago average is filled only when ~average~ is true.
+Degrees other than 3, 4, 6, 8, and 12 return zeros. ~l = 12~ runs on the
+host.
+
+* Threads
+
+The list, the skin filter, and the row converters use OpenMP.
+Each call sets ~omp_set_dynamic(0)~ and sizes its scratch for
+~omp_get_max_threads~.
+The thread count is ~OMP_NUM_THREADS~.
+There is no setter and no thread argument on these functions.
+A call made from inside an OpenMP region does not fork a second team.
+The pinned session also sets ~OMP_PROC_BIND=close~, ~OMP_PLACES=cores~,
+~OMP_DYNAMIC=FALSE~, and ~OMP_WAIT_POLICY=PASSIVE~, and pins the process
+with ~taskset~ to cores ~0 .. T-1~.
+
+* Orthorhombic session
+
+Ice Ic, lattice constant 6.35 Å, cutoff 3.5 Å.
+Each conventional cell holds 8 molecules, so the three frames are
+10648, 110592, and 884736 molecules.
+The full list has four neighbours per molecule, ~4N~ directed pairs.
+Rows are sorted by cloud index.
+The same checksum is produced at 1, 2, 4, and 8 threads.
+
+The host is a KVM guest, kernel 6.12.113+, one socket, Intel Xeon
+family 6 model 207 stepping 2, 8 cores, one thread per core, 2.4 GHz.
+Caches are L1d 384 KiB, L1i 256 KiB, L2 16 MiB, L3 320 MiB, with 47 GiB
+of RAM. The compiler is GCC 15.2.0, release ~-O3~.
+The guest does not expose hardware performance counters.
+Eight timed calls after two warmups. The median is the 5th of the 8
+sorted samples. Times are milliseconds.
+vesin is 0.6.2, freud is 3.6.1, matscipy is 1.3.1 with ASE 3.29.0.
+Every code returned ~4N~ pairs.
+
+| molecules | threads | d-SEAMS CSR | d-SEAMS rows | vesin | freud | matscipy |
+|-----------+---------+-------------+--------------+-------+-------+----------|
+| 10648 | 1 | 3.531 | 3.859 | 5.674 | 9.508 | 8.458 |
+| 10648 | 8 | 0.737 | 0.889 | 2.375 | 9.575 | 9.215 |
+| 110592 | 1 | 25.150 | 29.865 | 52.801 | 104.725 | 76.528 |
+| 110592 | 8 | 4.427 | 5.928 | 17.474 | 101.768 | 75.541 |
+| 884736 | 1 | 236.403 | 289.309 | 1073.681 | 1067.929 | 585.680 |
+| 884736 | 8 | 33.579 | 48.668 | 176.231 | 1068.058 | 590.335 |
+
+The 2-thread and 4-thread rows, and the phase split, are in
+=markdown/neighbours.md=.
+At 8 threads on 110592 molecules the CSR spent about 1.5 ms binning,
+2.2 ms counting, under 1 ms on the prefix, and 2.7 ms filling.
+The atom-ID rows added about 2.7 ms.
+
+#+begin_src bash
+meson setup build-release --buildtype=release -Dwith_tests=true \
+  -Dwith_cli=true -Dwith_mpi=disabled -Dwith_openmp_offload=disabled
+ninja -C build-release tests/bench_cutoff_list
+NEIGH_PYTHON=/tmp/neigh-venv/bin/python \
+  NEIGH_BENCH=$PWD/build-release/tests/bench_cutoff_list \
+  python3 scripts/bench_neighbours_threads.py
+#+end_src
+
+=bench_cutoff_list= is the d-SEAMS side of that driver.
+The comparison environment is vesin 0.6.2, freud-analysis, matscipy,
+and ASE. Do not install the unrelated PyPI package named freud.
+
+* Triclinic session, before the shared stencil
+
+The same ice, with ~xy = 0.25 L~, ~xz = 0.05 L~, ~yz = 0.12 L~.
+Eight timed calls after one warmup. The median is again the 5th sample.
+This shear does not change which molecules are neighbours: the checksum
+matches the orthorhombic list.
+The numbers below are the list before both boxes shared one stencil.
+mdapy is 2.0.0 and OVITO is 3.17.2.
+OVITO is timed with a new pipeline on every sample, because a pipeline
+caches its output. ~LD_LIBRARY_PATH~ points at the system libGL
+directories for that process only, and is unset for d-SEAMS.
+
+| molecules | threads | d-SEAMS | vesin | freud |
+|-----------+---------+---------+-------+-------|
+| 110592 | 1 | 43.250 | 52.412 | 138.003 |
+| 110592 | 8 | 10.873 | 22.582 | 137.605 |
+| 884736 | 1 | 643.776 | 1161.736 | 1291.377 |
+| 884736 | 8 | 97.572 | 194.677 | 1228.686 |
+
+Each analysis sample builds the CSR and then runs on those rows.
+The symmetry column here is the old template overlay, not the diamond
+common-neighbour test. freud has no CHILL+, ring census, or polyhedral
+template match.
+
+| analysis | molecules | threads | d-SEAMS | mdapy | OVITO |
+|----------+-----------+---------+---------+-------+-------|
+| CHILL+ | 110592 | 1 | 66.261 | 69.247 | 623.611 |
+| CHILL+ | 110592 | 8 | 16.797 | 87.292 | 89.249 |
+| CHILL+ | 884736 | 1 | 645.498 | 836.341 | 4896.235 |
+| CHILL+ | 884736 | 8 | 171.240 | 976.795 | 671.322 |
+| rings | 110592 | 1 | 127.569 | 2444.762 | 530.515 |
+| rings | 110592 | 8 | 45.258 | 2408.506 | 263.796 |
+| rings | 884736 | 1 | 1143.636 | 18713.615 | 5447.092 |
+| rings | 884736 | 8 | 387.861 | 18813.651 | 2974.254 |
+
+The full sample list is =markdown/neighbours-v2.md=.
+
+* Shared stencil
+
+At 110592 molecules the perpendicular widths give 42 by 43 by 43 cells,
+against 43 cubed for the cube. Both reaches are 1, so both lists use the
+27-cell stencil. The walks test 4,297,540 and 4,204,334 candidate pairs.
+The earlier 43 ms was the cell matrix, multiplied for every candidate.
+The 27 cartesian images are now filled once, and both boxes call that
+loop. Eight samples, median the 5th. Same host and same pin.
+
+| molecules | threads | triclinic | orthorhombic | vesin | freud |
+|-----------+---------+-----------+--------------+-------+-------|
+| 110592 | 1 | 30.572 | 25.426 | 51.994 | 122.628 |
+| 110592 | 8 | 6.093 | 4.882 | 24.911 | 127.350 |
+| 884736 | 1 | 443.024 | 299.010 | 1141.327 | 1191.634 |
+| 884736 | 8 | 65.550 | 45.357 | 203.597 | 1153.981 |
+
+CHILL+ on this CSR, diamond common-neighbour test, and the short-hop
+ring search:
+
+| analysis | molecules | threads | d-SEAMS | mdapy | OVITO |
+|----------+-----------+---------+---------+-------+-------|
+| CHILL+ | 110592 | 1 | 40.862 | 65.618 | 628.011 |
+| CHILL+ | 110592 | 8 | 9.070 | 88.058 | 92.206 |
+| CHILL+ | 884736 | 1 | 508.358 | 758.383 | 4942.828 |
+| CHILL+ | 884736 | 8 | 92.831 | 794.323 | 659.641 |
+| diamond | 110592 | 1 | 79.765 | 147.656 | 148.962 |
+| diamond | 110592 | 8 | 19.395 | 188.508 | 37.889 |
+| diamond | 884736 | 1 | 720.704 | 1190.894 | 1186.497 |
+| diamond | 884736 | 8 | 100.959 | 1295.796 | 290.571 |
+| rings | 110592 | 1 | 86.970 | 2330.859 | 560.793 |
+| rings | 110592 | 8 | 32.497 | 2342.910 | 282.745 |
+| rings | 884736 | 1 | 831.572 | 17972.932 | 4855.287 |
+| rings | 884736 | 8 | 273.613 | 18066.436 | 2601.361 |
+
+Every molecule of this ice is cubic, so the CHILL+ and diamond sinks
+equal ~N~. The ring counts match mdapy: 221184 at 110592 molecules and
+1769472 at 884736. The OVITO ring sink is the particle count, because
+FindRings does not write a structure code. PTM has no cubic-ice
+template, so its structure code is 0 on this crystal. The raw lines are
+in =markdown/neighbours-v3.md=.
+
+#+begin_src bash
+NEIGH_PYTHON=/tmp/neigh-venv/bin/python \
+  NEIGH_BENCH=$PWD/build-release/tests/bench_v2 \
+  python3 scripts/bench_neighbours_v2.py
+#+end_src
+
+The orthorhombic rows are ~bench_v2 ortho <molecules> <threads> 8~ under
+the same pin. ~bench_v2~ modes are ~tilt~, ~ortho~, ~chill~, ~rings~,
+and ~symmetry~.
