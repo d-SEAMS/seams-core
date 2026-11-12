@@ -17,7 +17,7 @@ Survey of ice and clathrate structure analysis from 2022 onward, plus the codes 
 | [GenIce](https://doi.org/10.1002/jcc.25077), [GenIce-core](https://doi.org/10.1063/5.0198056), [cycless](https://github.com/vitroid/cycless) | Builds hydrogen-disordered ice. cycless counts cycles | Generation complements d-SEAMS. cycless rings are already in the campaign and disagree on a confined frame. |
 | [matscipy](https://doi.org/10.21105/joss.05668) | Primitive rings | Already matched. |
 | [atomes](https://doi.org/10.1016/j.commatsci.2025.113805) | Ring statistics, editing and visualization | Competes on ring counts. A desktop program, not a library called from this harness. |
-| [RingsStatisticsMatter](https://github.com/MorrowChem/RingsStatisticsMatter) ([0.2.0](https://pypi.org/project/rings-statistics-matter/0.2.0/), [Yuan and Cormack](https://doi.org/10.1016/s0927-0256(01)00256-7)) | Primitive rings. Rust kernel and a Python wrapper; Julia is optional | Competes on the census. Timed in the afternoon section. A full search each frame. |
+| [RingsStatisticsMatter](https://github.com/MorrowChem/RingsStatisticsMatter) ([0.3.0](https://pypi.org/project/rings-statistics-matter/0.3.0/), [Yuan and Cormack](https://doi.org/10.1016/s0927-0256(01)00256-7)) | Primitive rings. Rust kernel and a Python wrapper; Julia is optional. 0.3.0 also takes an edge list | Competes on the census. Timed in the evening section. A full search each frame. |
 | [Palmer CHILL+ library](https://github.com/palmergroupUH/Order_Parameters_Library) | Fortran CHILL+ | Already matched. |
 | [mdevaluate `chill.py`](https://gitea.pkm.physik.tu-darmstadt.de/IPKM/mdevaluate) | Staggered and eclipsed bond counts | A non-periodic KDTree. Not the periodic cutoff list, so it was not timed. |
 | [ClavisCage 0.3.18](https://doi.org/10.5281/zenodo.24112918) | CHILL+, TRACE, HTR, GRADE, F3/F4, averaged Steinhardt, MCG-3, tetrahedral order. Browser and a Python wheel | Post-processing. CHILL+ is timed in the 12 November section. |
@@ -474,3 +474,56 @@ Other code, with no new timing:
 6. **CHILL+ follows Nguyen and Molinero, with the OVITO modifier as a second option.** Unchanged. No new CHILL+ implementation appeared after 06:15 UTC.
 
 7. **Cage labels come from the topology of the network, and local classifiers answer a different question.** Stands. No new classifier from this window returns the hexagonal-cage or double-diamond-cage count.
+
+## After 12:15 UTC, 12 November 2026
+
+The afternoon sweep closed at 06:15 CST. This section is what appeared after 2026-11-12T12:15:00Z.
+
+The arXiv listings for `physics.chem-ph`, `cond-mat.soft`, `physics.comp-ph` and `cond-mat.mtrl-sci`, sorted by `submittedDate`, still end on 10 November. The newest records are [2611.14377](https://arxiv.org/abs/2611.14377), [2611.14446](https://arxiv.org/abs/2611.14446), [2611.14158](https://arxiv.org/abs/2611.14158) and [2611.14444](https://arxiv.org/abs/2611.14444). A `submittedDate` window for 12 November was not returned: export.arxiv.org answered HTTP 500, and a retry was HTTP 429. Crossref title queries created after 12:15 UTC contain no CHILL, Steinhardt, primitive-ring or polyhedral-template-matching paper. The ice and hydrate titles in that window are sea ice, frozen soil, hydrate-bearing sediment, graphite made by ice templating, a geophysical hydrate-saturation estimate, and a boron–carbon clathrate with neodymium guests ([10.1039/d6qi01878e](https://doi.org/10.1039/d6qi01878e)). None identifies ice or cages in a trajectory. Computer Physics Communications deposited [10.1016/j.cpc.2026.110515](https://doi.org/10.1016/j.cpc.2026.110515), a GPU AMR framework for reacting flows. [Hydration layers and ice growth](https://doi.org/10.1021/acs.jpcb.6c04527) was created on 29 October, and the two Energy & Fuels hydrate articles ([10.1021/acs.energyfuels.6c04397](https://doi.org/10.1021/acs.energyfuels.6c04397), [10.1021/acs.energyfuels.6c03504](https://doi.org/10.1021/acs.energyfuels.6c03504)) on 2 and 3 November; only supplementary files were deposited after the cutoff. [Texture Holonomy](https://doi.org/10.33774/coe-2026-dzn3l) is a Landau–de Gennes defect law for a texture. No new citation.
+
+[rings-statistics-matter 0.3.0](https://pypi.org/project/rings-statistics-matter/0.3.0/) was uploaded at 2026-11-12T15:38:00Z. [Pull 11](https://github.com/MorrowChem/RingsStatisticsMatter/pull/11) adds `ring_statistics_graph` for a graph given as edges. The compare of `v0.2.0` to `v0.3.0` leaves `src/kernel.rs` unchanged. On a periodic graph the new function repeats the cell `maxlvl` times the largest absolute image component along each axis, then calls that kernel. For this ice, vesin 0.6.2 returns 4000 directed pairs on the 1000-molecule cell and the image components are −1, 0 or 1, so `maxlvl` 8 repeats the cell 8×8×8. One unpinned call on that edge list returned the same census, 0, 0, 0, 2000, and took 8.6 s. That call is outside the protocol below, and the 512-fold repeat was not run at 110 592 molecules.
+
+The timed call is `ring_statistics`, the atoms entry. Ideal ice Ic, oxygen bond 2.75 Å, cutoff 3.5 Å, `maxlvl` 8, `supercell` off, deduplicated rings, Rust backend. d-SEAMS is `seams_frame_rings` on the cutoff graph, depth 6, release `-O3`, version 2.13.0. One warm-up, six calls, median and type-7 IQR. One core is `taskset -c 0`. Eight cores are `taskset -c 0-7`. The Rust call is given `num_threads` of that width. Raw lines are `benchmarks/h2h-watch-v13.csv`. `snakemake related_watch_v13` regenerates them. Agreement is 1 when the census of rings of size 3 through 6 matches. It matches in every row: 0, 0, 0, and two six-rings per molecule (2 000, 21 296, 221 184).
+
+| Threads | Molecules | d-SEAMS median (IQR) ms | rings-statistics-matter 0.3.0 median (IQR) ms |
+| --- | --- | --- | --- |
+| 1 | 1000 | 1.150 (0.028) | 12.193 (0.090) |
+| 1 | 10648 | 10.336 (0.049) | 124.991 (0.844) |
+| 1 | 110592 | 105.096 (0.467) | 1094.041 (2.890) |
+| 8 | 1000 | 1.480 (2.671) | 3.620 (0.112) |
+| 8 | 10648 | 5.259 (0.148) | 29.242 (0.482) |
+| 8 | 110592 | 46.111 (1.289) | 247.816 (3.454) |
+
+At one core d-SEAMS is faster at every size, by a factor of about ten to twelve. At eight cores the median is lower at every size. At eight cores and 1 000 molecules the six d-SEAMS samples run from 0.712 ms to 4.069 ms. Two of them are slower than the rival median. The afternoon row had the d-SEAMS median above the rival; this median is below it. The kernel file is the afternoon kernel. The same d-SEAMS call, measured again in the default-supercell rows, has median 0.716 ms (IQR 0.052).
+
+The default `supercell=True` still repeats only the 1 000-molecule cell. Counts still match.
+
+| Threads | d-SEAMS median (IQR) ms | default supercell median (IQR) ms |
+| --- | --- | --- |
+| 1 | 1.118 (0.027) | 89.850 (1.435) |
+| 8 | 0.716 (0.052) | 22.843 (1.022) |
+
+Other code, with no new timing:
+
+- mdapy on PyPI is still 2.0.0. Master became 2.1.0rc1 at 16:09 UTC ([pull 85](https://github.com/mushroomfire/mdapy/pull/85)). The eighteen commits since 12:15 UTC are dislocation core atoms, elastic constants, and a remeasured comparison. No CHILL+, Steinhardt or ring source file is in that diff. [The published table](https://github.com/mushroomfire/mdapy/blob/master/docs/performance/comparison.md) times 2.1.0rc1 against OVITO 3.17.1 and freud 3.6.1 on fcc copper, 40 threads, the shortest of three calls. Steinhardt q2–q6 with 12 neighbours is one case, and polyhedral template matching is in the table. d-SEAMS is absent. The OVITO release checked here is still 3.17.2. The CHILL+ rows stand.
+- PLUMED 2.10.2 is still the release. [Pull 1618](https://github.com/plumed/plumed2/pull/1618), merged 17:43 UTC, and [pull 1616](https://github.com/plumed/plumed2/pull/1616), merged 17:42 UTC, choose the GPU kept by the openaccPTM plugin and by SAXS/SANS, and let the Windows build take any module. openaccPTM is the experimental OpenACC path behind `USEGPU`. It is a device choice, and it is not an ice collective variable.
+- freud 3.6.1 is still the release (`freud-analysis` on PyPI, 22 September). The default branch has no commit after 12:15 UTC. A review on the unmerged type-hint branch at 14:53 UTC left `q_l` where it was.
+- fastatomstruct 2.2.0 has no commit and no merged request on the GitLab project after 12:15 UTC. The `q_6` and King-ring rows stand.
+- OVITO 3.17.2 remains the PyPI upload of 2 November. `stuko/ovito` and `ovito-org/ovito` still return 404, and the download page returned 403, so the wheel is the check.
+- MDAnalysis 2.11.0, pyscal3 4.1.0, GenIce 2.2.13.3, vesin 0.6.2, SQQ 0.5.8, ClavisCage 0.3.18, matscipy 1.3.1 and cycless 0.7 have no newer release and no commit after 12:15 UTC. The ClavisCage Zenodo concept has only 0.3.18, updated 10 November. The vesin wheel pulled in with rings-statistics-matter 0.3.0 is 0.6.2.
+
+## Claims after the evening sweep
+
+1. **First code to return a full ring search from a local update.** Stands. rings-statistics-matter 0.3.0 still searches a whole frame. The new graph entry repeats a periodic cell and then does that search. Nothing in this window keeps rings whose bonds did not change.
+
+2. **Faster than OVITO, freud, pyscal, matscipy and the CHILL library in every matched comparison.** Stands for that list. rings-statistics-matter 0.3.0 is outside it. On the matched rows here the d-SEAMS 2.13.0 median is lower at every size and both widths. At eight cores and 1 000 molecules the six samples still span 0.712 ms to 4.069 ms, and two of them are slower than the rival median. The mdapy CHILL+ caveat is unchanged: 2.1.0rc1 does not touch that source.
+
+3. **Ring-statistics codes stop at counts, while d-SEAMS builds cages.** 0.3.0 returns the atom indices of each ring as well as the counts, from coordinates or from an edge list. It still does not assemble hexagonal or double-diamond cages.
+
+4. **OVITO, freud and pyscal have no nanotube-ice class.** Stands.
+
+5. **A LAMMPS compute assigns CHILL+ during the run.** Stands. The PLUMED merges choose a GPU and a Windows module path. mdapy 2.1.0rc1 is post-processing on master. No surveyed source assigns CHILL+ or cages from inside a PLUMED, LAMMPS or OpenMM step.
+
+6. **CHILL+ follows Nguyen and Molinero, with the OVITO modifier as a second option.** Unchanged. No new CHILL+ implementation appeared after 12:15 UTC.
+
+7. **Cage labels come from the topology of the network, and local classifiers answer a different question.** Stands. The papers in this window do not return the hexagonal-cage or double-diamond-cage count. mdapy's published polyhedral-template-matching numbers are a copper benchmark against OVITO 3.17.1, and they are not a cage count.
