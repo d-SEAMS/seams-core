@@ -1,5 +1,5 @@
 # Copyright (c) d-SEAMS developers
-"""Two steps of a frozen cubic-ice cell through an OpenMM reporter."""
+"""Two steps of a frozen cubic-ice cell through the one OpenMM reporter."""
 
 import math
 import sys
@@ -9,10 +9,11 @@ import openmm as mm
 import openmm.app as app
 import openmm.unit as unit
 
-from reporter import DseamsReporter
+from dseams_insitu.engine import InSitu
+from dseams_insitu.openmm import DseamsReporter
 
 
-def diamond(nrep=2):
+def diamond(nrep=1):
     a = 2.75 * 4.0 / math.sqrt(3.0)
     fcc = ((0, 0, 0), (0.5, 0.5, 0), (0.5, 0, 0.5), (0, 0.5, 0.5))
     basis = ((0, 0, 0), (0.25, 0.25, 0.25))
@@ -54,13 +55,19 @@ def main():
     platform = mm.Platform.getPlatformByName("Reference")
     simulation = app.Simulation(topology, system, integrator, platform)
     simulation.context.setPositions(pos_a * unit.angstrom)
-    reporter = DseamsReporter(1)
+    engine = InSitu()
+    reporter = DseamsReporter(engine, "unused", interval=1)
     simulation.reporters.append(reporter)
     simulation.step(2)
-    if reporter.calls < 2 or reporter.ice != reporter.atoms:
-        print("openmm calls", reporter.calls, "ice", reporter.ice, "atoms", reporter.atoms, file=sys.stderr)
+    if len(engine.frames) < 2:
+        print("openmm frames", len(engine.frames), file=sys.stderr)
         return 1
-    print(f"openmm calls {reporter.calls} ice {reporter.ice} overhead_s {reporter.overhead():.6e}")
+    for frame in engine.frames:
+        labels = frame["labels"]
+        if labels.shape != (n,) or not np.all(labels == 0):
+            print("openmm labels", labels, file=sys.stderr)
+            return 1
+    print(f"openmm calls {len(engine.frames)} ice {n * len(engine.frames)}")
     return 0
 
 
