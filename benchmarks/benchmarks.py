@@ -528,3 +528,34 @@ class RingsOneThread:
         work = getattr(self, "_work", None)
         if work is not None:
             work.cleanup()
+
+
+class HopStride:
+    """One carried ring update on a production-stride mW frame.
+
+    The dumps are written by input/hop/regenerate.py and are not stored
+    in git. The timed command is the same driver as the Snakemake rule,
+    limited to the opening transition. The trajectory medians live in
+    benchmarks/hop-stride-*.txt.
+    """
+
+    params = ([10, 100, 1000], ["cutoff", "seeded"])
+    param_names = ["stride", "graph"]
+
+    def setup(self, stride, graph):
+        dump = ROOT / "data" / "hop" / f"stride-{stride}.lammpstrj"
+        bench = ROOT / "build" / "tests" / "bench_hop_stride"
+        if not dump.is_file() or not bench.is_file():
+            raise NotImplementedError(
+                "production-stride dump is produced by input/hop/regenerate.py")
+        self.cmd = CORE + [
+            str(bench), "time", str(dump),
+            "--graph", graph,
+            "--reps", "1",
+            "--warmup", "0",
+            "--last", "2",
+            "--stride", str(stride),
+        ]
+
+    def time_carry(self, stride, graph):
+        _run(self.cmd)

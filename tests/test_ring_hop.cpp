@@ -7,6 +7,8 @@
 //-----------------------------------------------------------------------------------
 
 #include <franzblau.hpp>
+#include <mol_sys.hpp>
+#include <neighbours.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -350,4 +352,105 @@ TEST_CASE("a changed bond only rewrites rings through its endpoints", "[ring]") 
   const auto full = primitive::ringNetwork(withSelf(adj), 6);
   REQUIRE(second == full);
   REQUIRE(asSet(full).count(std::vector<int>{0, 1, 2, 3, 4, 5}) == 1);
+}
+
+TEST_CASE("a bond change on the box edge stays inside the hop ball", "[ring]") {
+  // Simple-cubic crystal. The cutoff keeps the six nearest neighbours
+  // and drops the face diagonal, so one displaced molecule changes only
+  // the bonds that touch it. The molecule sits on the low-x face and is
+  // moved through the periodic boundary.
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  const int nSide = 6;
+  const double spacing = 2.8;
+  const double edge = nSide * spacing;
+  cloud.box = {edge, edge, edge};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  int id = 1;
+  for (int ix = 0; ix < nSide; ++ix) {
+    for (int iy = 0; iy < nSide; ++iy) {
+      for (int iz = 0; iz < nSide; ++iz) {
+        molSys::Point<double> p;
+        p.type = 1;
+        p.atomID = id;
+        p.molID = id;
+        p.x = (ix + 0.5) * spacing;
+        p.y = (iy + 0.5) * spacing;
+        p.z = (iz + 0.5) * spacing;
+        cloud.idIndexMap[id] = id - 1;
+        cloud.pts.push_back(p);
+        ++id;
+      }
+    }
+  }
+  cloud.nop = static_cast<int>(cloud.pts.size());
+  const double cutoff = 3.2;
+  auto rowsOf = [&](molSys::PointCloud<molSys::Point<double>, double> &frame) {
+    return nneigh::neighbourListByIndex(frame, nneigh::neighListO(cutoff, frame, 1));
+  };
+  const auto initial = rowsOf(cloud);
+  primitive::RingUpdater updater(6);
+  REQUIRE(updater.update(initial) == primitive::ringNetwork(initial, 6));
+
+  int edgeAtom = 0;
+  for (int i = 1; i < cloud.nop; ++i) {
+    if (cloud.pts[static_cast<std::size_t>(i)].x <
+        cloud.pts[static_cast<std::size_t>(edgeAtom)].x) {
+      edgeAtom = i;
+    }
+  }
+  // 2 A from the low face crosses the periodic boundary and lands on
+  // the opposite face. The rest of the crystal is not moved.
+  cloud.pts[static_cast<std::size_t>(edgeAtom)].x -= 2.0;
+  if (cloud.pts[static_cast<std::size_t>(edgeAtom)].x < cloud.boxLow[0]) {
+    cloud.pts[static_cast<std::size_t>(edgeAtom)].x += edge;
+  }
+  const auto moved = rowsOf(cloud);
+  const auto &carried = updater.update(moved);
+  const auto full = primitive::ringNetwork(moved, 6);
+  REQUIRE(carried == full);
+  REQUIRE(updater.lastChangedBonds() > 0);
+  REQUIRE(updater.lastRecomputedSources() > 0);
+  REQUIRE(updater.lastRecomputedSources() < cloud.nop);
+}
+
+void link(std::vector<std::vector<int>> &adj, int a, int b) {
+  adj[static_cast<std::size_t>(a)].push_back(b);
+  adj[static_cast<std::size_t>(b)].push_back(a);
+}
+
+void unlink(std::vector<std::vector<int>> &adj, int a, int b) {
+  auto &row = adj[static_cast<std::size_t>(a)];
+  row.erase(std::remove(row.begin(), row.end(), b), row.end());
+  auto &back = adj[static_cast<std::size_t>(b)];
+  back.erase(std::remove(back.begin(), back.end(), a), back.end());
+}
+
+TEST_CASE("changed bonds below the whole vertex set do not force a full pass",
+          "[ring]") {
+  // No global bond-count threshold. A triangle is left untouched while
+  // four chords of a disjoint cycle are deleted. The update searches the
+  // hop ball of those chords and returns the rings of a full search.
+  const int n = 16;
+  std::vector<std::vector<int>> adj(static_cast<std::size_t>(n));
+  link(adj, 0, 1);
+  link(adj, 1, 2);
+  link(adj, 2, 0);
+  for (int i = 3; i < n - 1; ++i) {
+    link(adj, i, i + 1);
+  }
+  link(adj, n - 1, 3);
+  const int chords[][2] = {{3, 5}, {6, 8}, {9, 11}, {12, 14}};
+  for (const auto &chord : chords) {
+    link(adj, chord[0], chord[1]);
+  }
+  primitive::RingUpdater updater(6);
+  REQUIRE(updater.update(withSelf(adj)) == primitive::ringNetwork(withSelf(adj), 6));
+  for (const auto &chord : chords) {
+    unlink(adj, chord[0], chord[1]);
+  }
+  const auto &carried = updater.update(withSelf(adj));
+  REQUIRE(carried == primitive::ringNetwork(withSelf(adj), 6));
+  REQUIRE(updater.lastChangedBonds() == 4);
+  REQUIRE(updater.lastRecomputedSources() > 0);
+  REQUIRE(updater.lastRecomputedSources() < n);
 }
