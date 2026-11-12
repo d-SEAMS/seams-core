@@ -354,8 +354,10 @@ void levelsFrom(const Graph &adjacency, int src, int maxLvl, int minVertex,
     next.clear();
     for (const int u : frontier) {
       for (const int w : adjacency[u]) {
-        // A ring whose lowest member is src never uses a shorter path
-        // through a lower index: that vertex would sit on the ring.
+        // Distances are on the whole graph. A shortcut may pass through a
+        // vertex below the source without that vertex sitting on the ring.
+        // minVertex 0 keeps those shortcuts visible. A positive minVertex
+        // is only for a caller that has already restricted the component.
         if (w >= minVertex && w < static_cast<int>(lvl.size()) && lvl[w] == -1) {
           lvl[w] = depth;
           touched.push_back(w);
@@ -751,15 +753,14 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
     scr.lvl.assign(nVertices, -1);
     scr.touched.clear();
   }
-  // Full search enumerates each ring from its lowest member, so the
-  // breadth-first walk stays at indices >= src. The updater passes a
-  // through-mask and must still see every neighbour.
-  const int minVertex = through == nullptr ? src : 0;
-  levelsFrom(adjacency, src, maxLvl, minVertex, scr.lvl, scr.touched,
-             scr.frontier, scr.next);
-  // Directing: only the lowest-indexed member of a ring enumerates it, so
-  // vertices below the source leave the level field entirely. Only touched
-  // vertices hold a level.
+  // Distances use every vertex. A shortcut through an index below the
+  // source does not put that vertex on the ring, and hiding it made the
+  // antipode look farther than the graph distance. Rings are still emitted
+  // only from their lowest member: after the distances are known, vertices
+  // below the source lose their level so no path is extended through them.
+  // The updater passes a through-mask and keeps those levels.
+  levelsFrom(adjacency, src, maxLvl, 0, scr.lvl, scr.touched, scr.frontier,
+             scr.next);
   if (through == nullptr) {
     for (const int v : scr.touched) {
       if (v < src) {

@@ -92,7 +92,9 @@ struct Scratch {
 };
 
 Scratch &scratch() {
-  static Scratch s;
+  // One buffer per calling thread. A trial pool outside OpenMP used to
+  // share this scratch and tear the neighbour list.
+  thread_local Scratch s;
   return s;
 }
 
@@ -113,7 +115,7 @@ struct Phase {
 };
 
 Phase &phase() {
-  static Phase p;
+  thread_local Phase p;
   return p;
 }
 
