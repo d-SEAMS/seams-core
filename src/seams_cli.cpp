@@ -1691,7 +1691,7 @@ int main(int argc, char *argv[]) {
                    cageEdge = std::string(value);
                  }));
 
-  parser.add(Option("--types")
+  parser.add(Option("--pair-types")
                  .argName("I,J")
                  .help("Pair types for site-site rdf/cn (default I=J=--type)")
                  .handler([&](std::string_view value) {
@@ -2032,7 +2032,7 @@ int main(int argc, char *argv[]) {
   if (!typesFlag.empty()) {
     try {
       if (!parseTypePair(typesFlag, rdfTypeI, rdfTypeJ)) {
-        std::cerr << colorizer.error("bad --types (want I,J)") << "\n";
+        std::cerr << colorizer.error("bad --pair-types (want I,J)") << "\n";
         std::cerr << colorizer.warning(parser.formatUsage(progname, colorizer))
                   << "\n";
         return 2;

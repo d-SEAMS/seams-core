@@ -30,12 +30,12 @@ MIC as the ice neighbour lists.
 * Partial g(r)
 
 #+begin_src bash
-seams rdf FILE --types 1,2 --cutoff 6.0
-seams rdf FILE --types 1,2 --cutoff 6.0 --bins 60
+seams rdf FILE --pair-types 1,2 --cutoff 6.0
+seams rdf FILE --pair-types 1,2 --cutoff 6.0 --bins 60
 seams rdf FILE --type 2 --cutoff 6.0
 #+end_src
 
-~--types I,J~ selects the pair. The default is ~I = J = --type~
+~--pair-types I,J~ selects the pair. The default is ~I = J = --type~
 (a like-type g(r) of the guessed or requested species).
 ~--cutoff~ is rmax. ~--bins~ is optional (default ~rmax / 0.1~).
 
@@ -130,8 +130,8 @@ names the family. Unflagged ~seams chill~ stays the historical
 water path and is not an IL classifier.
 
 #+begin_src bash
-seams rdf FILE --types 1,2 --cutoff 6.0
-seams cn FILE --types 1,2 --cutoff 6.0
+seams rdf FILE --pair-types 1,2 --cutoff 6.0
+seams cn FILE --pair-types 1,2 --cutoff 6.0
 seams cn FILE --ions --site '1=cationHead,2=anion'
 seams pairs FILE --site '1=cationHead,2=anion'
 seams domains FILE --site '1=cationHead,2=anion,3=tail' --subset polar

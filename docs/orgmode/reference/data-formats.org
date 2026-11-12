@@ -111,7 +111,7 @@ hydrogen. Single-site mW dumps in this tree use type 1.
 A two-type (or multi-type) dump is the same text format. Each atom
 keeps its ~ITEM: ATOMS~ ~type~ value. ~seams read~ / ~chill~ /
 ~cages~ still filter through ~--type~ (~readLammpsTrjO~). ~seams
-rdf --types I,J~ with ~I != J~ loads every atom (~readLammpsTrj~)
+rdf --pair-types I,J~ with ~I != J~ loads every atom (~readLammpsTrj~)
 and histograms I-J pairs. The pair list is
 ~nneigh::neighListPair~; the histogram is ~rdf::partialRdf~.
 Neither is an ice score. A mixed-type

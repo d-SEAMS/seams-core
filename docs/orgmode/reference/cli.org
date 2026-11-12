@@ -77,7 +77,7 @@ load filter and is not that mask. Ice names are the
 ~--graph~.
 
 ~rdf~ and ~cn~ call ~rdf::partialRdf~ on LAMMPS type IDs from
-~--types I,J~ (default ~I = J = --type~). ~--cutoff~ is rmax. ~--bins~
+~--pair-types I,J~ (default ~I = J = --type~). ~--cutoff~ is rmax. ~--bins~
 is optional. The volume is ~nneigh::dumpVolume~ (det of dump ~H~).
 ~cn~ integrates the site-site RDF to that cutoff
 (~rdf::coordinationNumber~). Help text and the ~cn~ header say
@@ -138,7 +138,7 @@ initializers (Argum does not write defaults into the help).
 | ~--strict-input~ | off | ~Fail when a requested frame produces no atoms~ |
 | ~-t~, ~--type I~ | ~0~ | ~Atom type (0 guesses oxygen then type 1; density-z: 0 is every atom)~ |
 | ~--water-types T,U~ | unset | Neighbour graph on these LAMMPS types only (OW). Substrate and ions never enter the 4-NN list |
-| ~--types I,J~ | ~I = J = --type~ | ~Pair types for site-site rdf/cn (default I=J=--type)~ |
+| ~--pair-types I,J~ | ~I = J = --type~ | ~Pair types for site-site rdf/cn (default I=J=--type)~ |
 | ~--family NAME~ | ~waterIce~ | Material family. Ice scores refuse every value except ~waterIce~ |
 | ~--site SPEC~ | | Type-to-kind map for ~ionCloud~ (~1=cationHead,2=anion~) |
 | ~--ions~ | | ~cn~ on ~ionCloud~ cage degree (needs ~--site~) |
@@ -214,14 +214,14 @@ seams cages FILE --graph seeded --water-types 1
 seams ions FILE --ion-types 3,4 --water-types 1
 #+end_src
 
-* ~--types~
+* ~--pair-types~
 
 Used by ~rdf~ and ~cn~. The Argum form is ~I,J~ (one comma). A bad
-string exits 2 (~bad --types (want I,J)~). Omit the flag to set both
+string exits 2 (~bad --pair-types (want I,J)~). Omit the flag to set both
 sides to ~--type~. These are LAMMPS type IDs on the original cloud
 (site-site). ~cn --ions~ is a different path (ionCloud cage degree).
 
-| ~--types~ | single-frame load | ~--last~ range |
+| ~--pair-types~ | single-frame load | ~--last~ range |
 |-----------+-------------------+----------------|
 | omitted | same as ~--type~ (one species) | same as ~--type~ |
 | ~I,I~ (like) | keep type ~I~ | keep type ~I~ |
@@ -423,7 +423,7 @@ Color roles on this binary:
 | code | when |
 |------+------|
 | ~0~ | success, including ~--help~ / ~--version~ / ~--features~ / ~--print-config~ |
-| ~2~ | parse error, missing command or file, unknown command, unknown ~--graph~, bad ~--types~, ~--bins < 0~, unknown ~--family~, ice score refused by ~--family~ |
+| ~2~ | parse error, missing command or file, unknown command, unknown ~--graph~, bad ~--pair-types~, ~--bins < 0~, unknown ~--family~, ice score refused by ~--family~ |
 
 * Examples
 
@@ -435,8 +435,8 @@ seams cages dump.lammpstrj --graph cutoff
 seams cages dump.lammpstrj --graph knn
 seams cages dump.lammpstrj --graph knn-union
 seams chill-plus dump.lammpstrj --frame 1 --last 50 --jobs 8
-seams rdf dump.lammpstrj --types 1,2 --cutoff 10 --bins 100
-seams cn dump.lammpstrj --types 1,2 --cutoff 4.5
+seams rdf dump.lammpstrj --pair-types 1,2 --cutoff 10 --bins 100
+seams cn dump.lammpstrj --pair-types 1,2 --cutoff 4.5
 seams cn dump.lammpstrj --ions --site '1=cationHead,2=anion' --cutoff 6.0
 seams pairs dump.lammpstrj --site '1=cationHead,2=anion'
 seams hbonds dump.lammpstrj --type 2 --htype 1

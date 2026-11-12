@@ -25,7 +25,7 @@ The ~seams~ CLI has no tilt flag. A sheared dump is enough.
 ~seams density-z~ takes \(A_\perp\) from that H (~ly*lz~ for ~x~,
 and so on), not from bound spans.
 Type selection on a mixed dump is ~--type I~; unlike-pair RDF is
-~--types I,J~. See [[file:ionic-liquid.org][Ionic-liquid dumps]].
+~--pair-types I,J~. See [[file:ionic-liquid.org][Ionic-liquid dumps]].
 The dump layout is on [[file:../reference/data-formats.org][data
 formats]].
 

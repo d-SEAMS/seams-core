@@ -1,0 +1,2 @@
+# No project options. This file stops `meson configure` from copying the
+# superproject option list onto vesin.

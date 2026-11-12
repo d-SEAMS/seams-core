@@ -686,7 +686,7 @@ if get_option('with_cli')
     python3,
     args: [
       '-c',
-      'import subprocess,sys; p=subprocess.run([sys.argv[1],"cn",sys.argv[2],"--types","2,2","--cutoff","3.5"],capture_output=True,text=True); text=p.stdout+p.stderr; sys.exit(0 if p.returncode==0 and "site-site" in text else 1)',
+      'import subprocess,sys; p=subprocess.run([sys.argv[1],"cn",sys.argv[2],"--pair-types","2,2","--cutoff","3.5"],capture_output=True,text=True); text=p.stdout+p.stderr; sys.exit(0 if p.returncode==0 and "site-site" in text else 1)',
       seams_exe.full_path(),
       meson.project_source_root() / 'input' / 'traj' / 'exampleTraj.lammpstrj',
     ],

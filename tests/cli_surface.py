@@ -159,7 +159,7 @@ def main():
         ["f4", tip, "--type", "2", "--htype", "1"],
         ["steinhardt", tip, "--type", "2", "--cutoff", "3.5"],
         ["rdf", tip, "--type", "2", "--cutoff", "6", "--bins", "8"],
-        ["cn", tip, "--types", "2,2", "--cutoff", "3.5"],
+        ["cn", tip, "--pair-types", "2,2", "--cutoff", "3.5"],
         ["hbonds", tip, "--type", "2", "--htype", "1"],
         ["density-z", tip, "--type", "2", "--axis", "x"],
         ["density-z", tip, "--axis", "y", "--bins", "4"],
@@ -186,8 +186,8 @@ def main():
         ["--axis", "z", "density-z", tip, "--type", "0", "--bins", "4"],
         ["--water-types", "2", "chill", tip, "--type", "2"],
         ["--water-types", "1,2", "chill-plus", tip],
-        ["rdf", tip, "--types", "2,1", "--cutoff", "6", "--bins", "4"],
-        ["cn", tip, "--types", "1,2", "--cutoff", "3.5", "--bins", "4"],
+        ["rdf", tip, "--pair-types", "2,1", "--cutoff", "6", "--bins", "4"],
+        ["cn", tip, "--pair-types", "1,2", "--cutoff", "3.5", "--bins", "4"],
         ["cn", tip, "--ions", "--site", "1=cationHead,2=anion", "--cutoff", "3.5"],
         ["f4", empty, "--type", "1"],
         ["steinhardt", empty, "--type", "1"],
@@ -274,7 +274,7 @@ def main():
         ["chill", tip, "--graph", "banana"],
         ["--format", "yaml", "read", tip],
         ["rdf", tip, "--bins", "-1"],
-        ["rdf", tip, "--types", "2,x"],
+        ["rdf", tip, "--pair-types", "2,x"],
         ["density-z", tip, "--axis", "q"],
         ["domains", tip, "--subset", "nope", "--site", "1=tail"],
         ["--strict-input", "read", "missing-file.lammpstrj"],
@@ -307,8 +307,8 @@ def main():
         ["--per-atom", os.path.join(work, "no-such-dir", "out.lammpstrj"),
          "fingerprint", ice, "--type", "1", "--hops", "1"],
         ["chill", ice, "--type", "1", "--graph", "knn-union"],
-        ["--types", ",", "rdf", tip],
-        ["--types", "2,", "cn", tip],
+        ["--pair-types", ",", "rdf", tip],
+        ["--pair-types", "2,", "cn", tip],
         ["--site", "1=", "pairs", tip],
         ["--site", "=anion", "pairs", tip],
     ]
@@ -469,7 +469,7 @@ def main():
         ["chill-plus", empty, "--type", "1"],
         ["f4", ice, "--type", "1", "--htype", "1"],
         ["f4", ice, "--type", "0", "--htype", "9"],
-        ["rdf", tip, "--types", " 2 , 2 "],
+        ["rdf", tip, "--pair-types", " 2 , 2 "],
         ["--water-types", ",,", "chill", tip, "--type", "2"],
         ["--water-types", "1", "ions", tip, "--ion-types", "1",
          "--site", "1=cationHead,2=anion"],
@@ -542,15 +542,15 @@ def main():
             failed = True
     for args in (
         ["read", "missing-edge.con"],
-        ["--types", "nope", "rdf", tip],
+        ["--pair-types", "nope", "rdf", tip],
         ["--site", "zz=cationHead", "pairs", tip],
         ["--cage-edge", "9", "cages", ice, "--type", "1"],
         ["--family", "nope", "read", tip],
         ["--frame", "1", "--last", "2", "read", "missing-range.con"],
-        ["--types", "2,zz", "rdf", ice, "--type", "1"],
-        ["rdf", ions, "--types", "2,zz"],
-        ["rdf", tip, "--types", "2,2,2"],
-        ["cn", tip, "--types", ","],
+        ["--pair-types", "2,zz", "rdf", ice, "--type", "1"],
+        ["rdf", ions, "--pair-types", "2,zz"],
+        ["rdf", tip, "--pair-types", "2,2,2"],
+        ["cn", tip, "--pair-types", ","],
         ["cages", ice, "--type", "1", "--signature", "+"],
         ["--strict-input", "--frame", "1", "--last", "2", "read", gap],
         ["--strict-input", "--frame", "1", "--last", "3", "read", run_path],
@@ -612,7 +612,7 @@ def main():
 
         long_token = "n" * 64
         loud_sets = (
-            ["rdf", tip, "--types", long_token + ",1"],
+            ["rdf", tip, "--pair-types", long_token + ",1"],
             ["pairs", tip, "--site", long_token + "=cationHead"],
         )
         for loud_args in loud_sets:
@@ -695,8 +695,8 @@ def main():
     if framed.returncode != 2 or "not a number" not in framed.stderr:
         sys.stderr.write("frame zz\n" + framed.stderr)
         return 1
-    bad_types = run(seams, ["--types", "2,zz", "rdf", ice, "--type", "1"])
-    if bad_types.returncode != 2 or "bad --types" not in bad_types.stderr:
+    bad_types = run(seams, ["--pair-types", "2,zz", "rdf", ice, "--type", "1"])
+    if bad_types.returncode != 2 or "bad --pair-types" not in bad_types.stderr:
         sys.stderr.write("bad types\n" + bad_types.stderr)
         return 1
     bad_site = run(seams, ["--site", "zz=cationHead", "pairs", ice])
