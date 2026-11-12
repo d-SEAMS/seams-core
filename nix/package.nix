@@ -16,7 +16,7 @@
 
 stdenv.mkDerivation (finalAttrs: {
   pname = "seams";
-  version = "2.13.0";
+  version = "2.14.0";
 
   src = lib.fileset.toSource {
     root = ./..;

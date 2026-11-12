@@ -1,6 +1,6 @@
 name = "Dseams"
 uuid = "b7e4c1a2-6d58-4f0e-9a31-2c8e5d4f7a10"
-version = "2.13.0"
+version = "2.14.0"
 authors = ["Rohit Goswami <rgoswami@ieee.org>"]
 
 [compat]

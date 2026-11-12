@@ -10,6 +10,65 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
+## [2.14.0] - 2026-11-11
+
+### Added
+
+- Add Rodger F4 and host-only Steinhardt l=12 so the Zeron q3/q12 hydrate pair is a per-atom field.
+- Add TUM/rings stacking planes (HC-basal and DDC-equatorial) next to the CHILL+ I_sd molecule-bin reference.
+- Add a C ABI seams_chill_plus for native and emscripten builds.
+- Add channel, proton-key, hydrogen MSD, ice XXI library and HDA/MDA density labels.
+- Add extras/lammps compute dseams that writes seams_chill_plus per atom.
+- Assign guests by ray-parity inside fan-triangulated cage faces, and count ions per ice cluster on the oxygen graph.
+- Bin CHILL+ cubic and hexagonal molecules into basal layers and emit cubicity Phi_c plus the H/C stacking string.
+- Build CHILL+, cages, seeded ions and k-NN on an explicit water-type mask (`--water-types`) so substrate and ions never enter the four-neighbour list. The flag loads the mixed dump; ice and cage counts are the water types only.
+- Enumerate cups and incomplete cages on the ring graph; closed signature counts stay the closed path.
+- Name 51264, 51268 and sH cages, and report a per-cage occupancy histogram.
+- Update topology keys only on the hop-ball of atoms whose neighbourhood changed.
+
+### Changed
+
+- CHILL and CHILL+ default to the mutual four-nearest graph. vesin still owns cutoff pairs; linkcell still owns k-nearest.
+- MPI ring analyses can reduce ring counts and per-atom ring types with `seams::domain::reduceRings`, which keeps each rank on its own domain and sends only owned atoms to the root instead of gathering every ring on every rank.
+- Release builds define NDEBUG, so the libstdc++ assertions that meson adds when b_ndebug is false no longer run in them. The closed-cage search on the sI 2x2x2 crystal takes 13.2 ms instead of 16.0 ms, with the same output.
+- The cutoff list now covers restricted triclinic boxes.
+  A half list keeps each pair on the lower index.
+  A skin reuses the wide list while every atom stays inside the Verlet shell.
+  CHILL+, the ring census, and the template overlay read that CSR.
+- The orthorhombic cutoff neighbour list is built by a parallel cell sort.
+  Each thread counts its atoms, a prefix sum places them, and the pairs are
+  written straight into one CSR. The same buffers are reused on the next frame.
+  The pair set does not depend on the thread count.
+  q_l reads that CSR. The neighbour average is skipped when only q_l is requested.
+- The triclinic cutoff list uses the same stencil as the orthorhombic list.
+  CHILL+ evaluates the real spherical harmonics on that CSR.
+  The diamond common-neighbour test reads the same rows.
+  The ring census uses the short-hop search on that CSR.
+- Users who run chill-plus on a cutoff list now see different counts.
+  This is a bug fix in the shell count.
+  The old code counted bonds after the list had been cut to four.
+  A crystal row needs four neighbours inside the cutoff.
+  On the mixed TIP4P fixture, interClathrate moves from 12 to 9.
+  Water on that fixture moves from 238 to 241.
+  Default q3 uses up to four nearest neighbours in the cutoff.
+  Interfacial rows keep the neighbour test from the published table.
+  Users who want the OVITO labels use the ovito-chill+ command.
+  That command averages q3 on the full shell and skips the test.
+  Plain CHILL keeps four closest neighbours and Moore's test.
+  A reader error now returns exit code 2 instead of aborting the process.
+  We print reCubic and reHex as plain text.
+  A path that ends in xyz and cannot be opened returns an error.
+  An exception outside std::exception returns exit code 2.
+
+### Fixed
+
+- Accept a cup that fills the signature face count with dangling edges.
+- Evaluate Steinhardt l=12 qlBar on the host so the 25-component average does not overflow the device barRe[17] buffer.
+- Keep spherical-harmonic scratch local to each call so concurrent frames and changing thread counts do not share buffers.
+- Load oxygen and hydrogen together for `seams f4` so Rodger F4 is finite when mol IDs exist.
+- Require readcon-db 0.1.7 so static consumers receive only the archive and shared consumers receive the runtime search path.
+
+
 ## [2.13.0] - 2026-11-06
 
 ### Changed

@@ -239,7 +239,7 @@ def main():
             print(f"{kind} threads={threads} m={m} {op}", flush=True)
             if kind == "dseams":
                 samples = run_seams(threads, m, mode, lib)
-                version = "2.13.0"
+                version = "2.14.0"
                 code = "d-SEAMS"
             else:
                 version, samples = run_other(mode, threads, m)

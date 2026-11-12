@@ -13,7 +13,7 @@ They move together.
 | =nix/package.nix= | =version= |
 | =docs/source/Doxyfile_seams.cfg= | =PROJECT_NUMBER= |
 
-On this tree that string is 2.13.0.
+On this tree that string is 2.14.0.
 A release that bumps one of them and leaves the others is a broken pin.
 The docs site should show the string from the commit it was built from, not a number copied into a paragraph that will go stale.
 
