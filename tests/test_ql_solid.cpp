@@ -274,3 +274,31 @@ TEST_CASE("fused q6 on a triclinic cell matches the cutoff call", "[ql][chill]")
             molSys::atom_state_type::cubic);
   }
 }
+
+TEST_CASE("local q4 and q6 do not need the averaged row", "[ql][solid]") {
+  auto ice = iceIc(3);
+  molSys::PointCloud<molSys::Point<double>, double> liquid;
+  liquid.box = {18.0, 18.0, 18.0};
+  liquid.boxLow = {0.0, 0.0, 0.0};
+  liquid.currentFrame = 1;
+  std::mt19937 rng(91001);
+  std::uniform_real_distribution<double> u(0.0, 18.0);
+  for (int i = 0; i < 400; i++) {
+    molSys::Point<double> p;
+    p.x = u(rng);
+    p.y = u(rng);
+    p.z = u(rng);
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = p.atomID;
+    liquid.pts.push_back(p);
+  }
+  liquid.nop = static_cast<int>(liquid.pts.size());
+  for (const auto *cloud : {&ice, &liquid}) {
+    for (int order : {4, 6}) {
+      const auto full = chill::steinhardtQlCutoff(*cloud, 3.5, order, 1, true);
+      const auto local = chill::steinhardtQlCutoff(*cloud, 3.5, order, 1, false);
+      REQUIRE(maxAbs(full.ql, local.ql) < 1e-12);
+    }
+  }
+}

@@ -215,6 +215,17 @@ rule figure_pngs:
         "python3 paper/tex/figures/render_finish.py && python3 paper/tex/figures/rasterize_tikz.py"
 
 
+rule ql_eight:
+    input:
+        "scripts/bench_ql_threads.py",
+        "tests/bench_ql.cpp",
+    output:
+        "discovery/ql-eight.csv",
+    shell:
+        "PY=\"${{QL_PYTHON:-python3}}\"; "
+        "\"$PY\" scripts/bench_ql_threads.py --out discovery/ql-eight.csv"
+
+
 rule related_watch:
     input:
         "scripts/h2h_protocol.py",

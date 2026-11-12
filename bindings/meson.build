@@ -84,6 +84,14 @@ if get_option('with_cli') and get_option('with_tests')
     depends: [seams_lang],
     timeout: 180,
   )
+  test(
+    'q4_q6_equal',
+    find_program('python3', required: true),
+    args: [meson.project_source_root() / 'tests' / 'test_q4_q6_equal.py'],
+    env: {'SEAMS_LANG_LIB': seams_lang.full_path()},
+    depends: [seams_lang],
+    timeout: 180,
+  )
   install_data(
     'python/chill_plus.py',
     install_dir: get_option('datadir') / 'seams' / 'python',

@@ -479,7 +479,10 @@ int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
     // shared CSR. Anything else keeps the mutual four-nearest graph.
     chill::SteinhardtQl result;
     if (frame->cloud.box.size() == 3 || frame->cloud.box.size() >= 6) {
-      result = chill::steinhardtQlCutoff(frame->cloud, cutoff, order_l, typ, true);
+      // The average reads every neighbour row again. Callers that only
+      // want local q_l leave qlbar null and skip that pass.
+      const bool average = qlbar != nullptr;
+      result = chill::steinhardtQlCutoff(frame->cloud, cutoff, order_l, typ, average);
     } else {
       const double cand = cutoff + 1.5;
       result = chill::steinhardtQlMutual(frame->cloud, 4, cand, typ, order_l);

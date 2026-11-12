@@ -132,6 +132,12 @@ executable('bench_cutoff_list', 'bench_cutoff_list.cpp',
   link_args: _test_link_args,
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
+executable('bench_ql', 'bench_ql.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
 executable('bench_ozaki', 'bench_ozaki.cpp',
   dependencies: [yds_dep, mpfr_dep, gmp_dep],
   cpp_args: _args,

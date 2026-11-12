@@ -997,12 +997,19 @@ SteinhardtQl cutoffSolid(
     int orderL = -1;
   };
   static Scratch scratch;
-  if (scratch.n != n || scratch.orderL != orderL) {
-    scratch.qlm.assign(static_cast<std::size_t>(n) * static_cast<std::size_t>(width), 0.0);
+  // q_lm is only read by the Lechner-Dellago average and by w. A local
+  // q_l overwrites its own row, so that buffer stays unallocated.
+  const bool keepQlm = average || invariants;
+  if (scratch.xyz.size() != static_cast<std::size_t>(n) * 3) {
     scratch.xyz.resize(static_cast<std::size_t>(n) * 3);
-    scratch.n = n;
-    scratch.orderL = orderL;
   }
+  if (keepQlm && (scratch.n != n || scratch.orderL != orderL ||
+                  scratch.qlm.size() !=
+                      static_cast<std::size_t>(n) * static_cast<std::size_t>(width))) {
+    scratch.qlm.assign(static_cast<std::size_t>(n) * static_cast<std::size_t>(width), 0.0);
+  }
+  scratch.n = n;
+  scratch.orderL = orderL;
   const double ox = yCloud.boxLow.size() > 0 ? yCloud.boxLow[0] : 0.0;
   const double oy = yCloud.boxLow.size() > 1 ? yCloud.boxLow[1] : 0.0;
   const double oz = yCloud.boxLow.size() > 2 ? yCloud.boxLow[2] : 0.0;
@@ -1086,6 +1093,101 @@ SteinhardtQl cutoffSolid(
   const double axy = tilt ? frac.xy / frac.ly : 0.0;
   const double axz = tilt ? frac.xz / frac.lz : 0.0;
   const double ayz = tilt ? frac.yz / frac.lz : 0.0;
+  // Local q4 and q6. Eight atoms share one solid-harmonic sum. The
+  // neighbour shell is whatever the cutoff list stored, not a fixed
+  // four, and the q_lm row is not written.
+  bool wroteLocal = false;
+  if (!average && !invariants && uniform && (orderL == 4 || orderL == 6)) {
+    wroteLocal = true;
+    const int nTiles = (n + 7) / 8;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (parallel)
+#endif
+    for (int tile = 0; tile < nTiles; ++tile) {
+      const int begin = tile * 8;
+      const int alive = std::min(8, n - begin);
+      int nUsed[8] = {};
+      int upper = 0;
+      for (int a = 0; a < alive; ++a) {
+        const int i = begin + a;
+        const int span = scratch.offsets[static_cast<std::size_t>(i) + 1] -
+                         scratch.offsets[static_cast<std::size_t>(i)];
+        if (span > upper) {
+          upper = span;
+        }
+      }
+      thread_local std::vector<double> dxs, dys, dzs;
+      if (static_cast<int>(dxs.size()) < upper * 8) {
+        dxs.assign(static_cast<std::size_t>(upper * 8), 0.0);
+        dys.assign(static_cast<std::size_t>(upper * 8), 0.0);
+        dzs.assign(static_cast<std::size_t>(upper * 8), 0.0);
+      }
+      int maxB = 0;
+      for (int a = 0; a < alive; ++a) {
+        const int i = begin + a;
+        const int left = scratch.offsets[static_cast<std::size_t>(i)];
+        const int right = scratch.offsets[static_cast<std::size_t>(i) + 1];
+        const double xi = scratch.xyz[static_cast<std::size_t>(3 * i)];
+        const double yi = scratch.xyz[static_cast<std::size_t>(3 * i) + 1];
+        const double zi = scratch.xyz[static_cast<std::size_t>(3 * i) + 2];
+        int filled = 0;
+        for (int p = left; p < right; ++p) {
+          const int j = scratch.cols[static_cast<std::size_t>(p)];
+          double dx, dy, dz;
+          if (tilt) {
+            double dX = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
+            double dY = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
+            double dZ = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+            dX -= frac.lx * std::round(dX / frac.lx);
+            dY -= frac.ly * std::round(dY / frac.ly);
+            dZ -= frac.lz * std::round(dZ / frac.lz);
+            dx = dX + axy * dY + axz * dZ;
+            dy = dY + ayz * dZ;
+            dz = dZ;
+          } else {
+            dx = xi - scratch.xyz[static_cast<std::size_t>(3 * j)];
+            dy = yi - scratch.xyz[static_cast<std::size_t>(3 * j) + 1];
+            dz = zi - scratch.xyz[static_cast<std::size_t>(3 * j) + 2];
+            if (dx > hx) dx -= Lx;
+            else if (dx < -hx) dx += Lx;
+            if (dy > hy) dy -= Ly;
+            else if (dy < -hy) dy += Ly;
+            if (dz > hz) dz -= Lz;
+            else if (dz < -hz) dz += Lz;
+          }
+          if (!(dx * dx + dy * dy + dz * dz > 0.0)) {
+            continue;
+          }
+          dxs[static_cast<std::size_t>(filled * 8 + a)] = dx;
+          dys[static_cast<std::size_t>(filled * 8 + a)] = dy;
+          dzs[static_cast<std::size_t>(filled * 8 + a)] = dz;
+          ++filled;
+        }
+        nUsed[a] = filled;
+        if (filled > maxB) {
+          maxB = filled;
+        }
+      }
+      for (int a = 0; a < alive; ++a) {
+        for (int bond = nUsed[a]; bond < maxB; ++bond) {
+          dxs[static_cast<std::size_t>(bond * 8 + a)] = 0.0;
+          dys[static_cast<std::size_t>(bond * 8 + a)] = 0.0;
+          dzs[static_cast<std::size_t>(bond * 8 + a)] = 0.0;
+        }
+      }
+      for (int a = alive; a < 8; ++a) {
+        nUsed[a] = 0;
+      }
+      double tileQl[8] = {};
+      if (maxB > 0) {
+        seams::ylm::ylmLocalQl(orderL, dxs.data(), dys.data(), dzs.data(), maxB, nUsed,
+                               prefactor, tileQl);
+      }
+      for (int a = 0; a < alive; ++a) {
+        result.ql[static_cast<std::size_t>(begin + a)] = tileQl[a];
+      }
+    }
+  }
   // Pairing two atoms into one AVX-512 reduction was slower than the
   // four-bond kernel. The horizontal sum cost more than the idle lanes.
   bool quad = false && uniform && (orderL == 4 || orderL == 6);
@@ -1103,7 +1205,7 @@ SteinhardtQl cutoffSolid(
   const bool simd8 = false;
   (void)quad;
 #endif
-  if (simd8) {
+  if (!wroteLocal && simd8) {
     auto oneAtom = [&](int atom) {
       const int a = scratch.offsets[static_cast<std::size_t>(atom)];
       const double xi = scratch.xyz[static_cast<std::size_t>(3 * atom)];
@@ -1247,7 +1349,7 @@ SteinhardtQl cutoffSolid(
       }
     }
   }
-  if (!simd8) {
+  if (!wroteLocal && !simd8) {
   const int nTiles = (n + 7) / 8;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (parallel)

@@ -153,6 +153,88 @@ class ChillPlusIce:
             self._lib.seams_frame_free(self._frame)
 
 
+class LocalQl:
+    """Local q4 and q6 on 110592 molecules of ideal ice Ic.
+
+    Eight threads, cutoff 3.5 angstrom. The neighbour list is inside the
+    call. The averaged buffer is null, so the Lechner-Dellago pass is not
+    in the sample. Setup builds the frame and warms the scratch once.
+    """
+
+    def setup(self):
+        import ctypes
+        import math
+        os.environ["OMP_NUM_THREADS"] = "8"
+        os.environ["OMP_DYNAMIC"] = "FALSE"
+        os.environ["OMP_PROC_BIND"] = "false"
+        os.environ["OMP_WAIT_POLICY"] = "active"
+        try:
+            os.sched_setaffinity(0, set(range(8)))
+        except (AttributeError, OSError):
+            pass
+        import sys
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import release_build
+        lib_path, self.build = release_build.ensure_release(
+            os.environ.get("SEAMS_LANG_LIB"))
+        lib = ctypes.CDLL(lib_path)
+        lib.seams_frame_from_arrays.restype = ctypes.c_void_p
+        lib.seams_frame_from_arrays.argtypes = [
+            ctypes.POINTER(ctypes.c_double), ctypes.c_int,
+            ctypes.POINTER(ctypes.c_double),
+            ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int)]
+        lib.seams_frame_free.argtypes = [ctypes.c_void_p]
+        lib.seams_frame_steinhardt.restype = ctypes.c_int
+        lib.seams_frame_steinhardt.argtypes = [
+            ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_int,
+            ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double)]
+        bond = 2.75
+        lattice = 4.0 * bond / math.sqrt(3.0)
+        cells = 24
+        side = cells * lattice
+        fcc = ((0.0, 0.0, 0.0), (0.5, 0.5, 0.0), (0.5, 0.0, 0.5), (0.0, 0.5, 0.5))
+        xyz = []
+        for i in range(cells):
+            for j in range(cells):
+                for k in range(cells):
+                    for b in range(8):
+                        f = b % 4
+                        shift = 0.0 if b < 4 else 0.25
+                        xyz.append(((i + fcc[f][0] + shift) * lattice) % side)
+                        xyz.append(((j + fcc[f][1] + shift) * lattice) % side)
+                        xyz.append(((k + fcc[f][2] + shift) * lattice) % side)
+        n = len(xyz) // 3
+        arr = (ctypes.c_double * len(xyz))(*xyz)
+        box = (ctypes.c_double * 9)(0, 0, 0, side, side, side, 0, 0, 0)
+        types = (ctypes.c_int * n)(*([1] * n))
+        ids = (ctypes.c_int * n)(*range(1, n + 1))
+        frame = lib.seams_frame_from_arrays(arr, n, box, types, ids)
+        if not frame:
+            raise RuntimeError("could not build the ice frame")
+        ql = (ctypes.c_double * n)()
+        if lib.seams_frame_steinhardt(frame, 3.5, 1, 4, ql, None) != 0:
+            raise RuntimeError("warmup failed")
+        self._lib = lib
+        self._frame = frame
+        self._ql = ql
+        self._n = n
+
+    def time_q4(self):
+        if self._lib.seams_frame_steinhardt(
+                self._frame, 3.5, 1, 4, self._ql, None) != 0:
+            raise RuntimeError("q4 failed")
+
+    def time_q6(self):
+        if self._lib.seams_frame_steinhardt(
+                self._frame, 3.5, 1, 6, self._ql, None) != 0:
+            raise RuntimeError("q6 failed")
+
+    def teardown(self):
+        if getattr(self, "_frame", None):
+            self._lib.seams_frame_free(self._frame)
+            self._frame = None
+
+
 def _scale_plan():
     """The twelve-call campaign script is not part of this tree."""
     import importlib.util

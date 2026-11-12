@@ -89,7 +89,13 @@ struct Scratch {
   std::vector<int> hist;
   std::vector<int> counts;
   std::vector<int> cursor;
+  // Neighbour ids captured during the count walk, stride kStashCap.
+  // The fill then copies this instead of walking the cells again.
+  std::vector<int> stash;
+  int overflowed = 0;
 };
+
+constexpr int kStashCap = 48;
 
 Scratch &scratch() {
   // One buffer per calling thread. A trial pool outside OpenMP used to
@@ -270,6 +276,130 @@ void passFast(const double *xs, const double *ys, const double *zs,
         counts[ii] = n;
       }
     }
+  }
+}
+
+// Count pass that also keeps the neighbour ids. A shell longer than
+// kStashCap sets *overflowed and the caller repeats the geometry fill.
+void passFastStash(const double *xs, const double *ys, const double *zs,
+                   const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
+                   const double *shx, const double *shy, const double *shz, double rc2,
+                   int *counts, int *stash, int *overflowed) {
+  const int nCells = ncx * ncy * ncz;
+  *overflowed = 0;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nCells >= 64)
+#endif
+  for (int c = 0; c < nCells; ++c) {
+    const int b = cellStart[c];
+    const int e = cellStart[c + 1];
+    if (b == e) {
+      continue;
+    }
+    const int cz = c % ncz;
+    const int cy = (c / ncz) % ncy;
+    const int cx = c / (ncy * ncz);
+    struct Nbr {
+      int begin;
+      int end;
+      double sx, sy, sz;
+    };
+    Nbr nbr[27];
+    int nn = 0;
+    for (int ox = -1; ox <= 1; ++ox) {
+      int nx = cx + ox;
+      int ix = 0;
+      if (nx >= ncx) {
+        nx -= ncx;
+        ix = 1;
+      } else if (nx < 0) {
+        nx += ncx;
+        ix = -1;
+      }
+      for (int oy = -1; oy <= 1; ++oy) {
+        int ny = cy + oy;
+        int iy = 0;
+        if (ny >= ncy) {
+          ny -= ncy;
+          iy = 1;
+        } else if (ny < 0) {
+          ny += ncy;
+          iy = -1;
+        }
+        const int row = nx * ncy + ny;
+        for (int oz = -1; oz <= 1; ++oz) {
+          int nz = cz + oz;
+          int iz = 0;
+          if (nz >= ncz) {
+            nz -= ncz;
+            iz = 1;
+          } else if (nz < 0) {
+            nz += ncz;
+            iz = -1;
+          }
+          const int ncid = row * ncz + nz;
+          const int jb = cellStart[ncid];
+          const int je = cellStart[ncid + 1];
+          if (jb == je) {
+            continue;
+          }
+          const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
+          nbr[nn++] = {jb, je, shx[k], shy[k], shz[k]};
+        }
+      }
+    }
+    for (int i = b; i < e; ++i) {
+      const int ii = ids[i];
+      const double xi = xs[i];
+      const double yi = ys[i];
+      const double zi = zs[i];
+      int *row = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
+      int n = 0;
+      bool over = false;
+      for (int t = 0; t < nn; ++t) {
+        const Nbr nb = nbr[t];
+#pragma GCC unroll 1
+        for (int j = nb.begin; j < nb.end; ++j) {
+          if (j == i) {
+            continue;
+          }
+          const double dx = xi - xs[j] - nb.sx;
+          const double dy = yi - ys[j] - nb.sy;
+          const double dz = zi - zs[j] - nb.sz;
+          if (dx * dx + dy * dy + dz * dz < rc2) {
+            if (n < kStashCap) {
+              row[n] = ids[j];
+            } else {
+              over = true;
+            }
+            ++n;
+          }
+        }
+      }
+      counts[ii] = n;
+      if (over) {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp atomic write
+#endif
+        *overflowed = 1;
+      }
+    }
+  }
+}
+
+void scatterStash(const int *stash, const int *counts, const int *offsets, int *cols,
+                  int nop) {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nop >= 256)
+#endif
+  for (int i = 0; i < nop; ++i) {
+    const int n = counts[i];
+    const int *src = stash + static_cast<std::size_t>(i) * static_cast<std::size_t>(kStashCap);
+    int *dst = cols + offsets[i];
+    for (int k = 0; k < n; ++k) {
+      dst[k] = src[k];
+    }
+    sortRow(dst, n);
   }
 }
 
@@ -922,13 +1052,18 @@ bool orthoFullCsr(
   fillOrthoShift(len[0], len[1], len[2], shx, shy, shz);
 
   const auto tCount = Clock::now();
+  const bool stashOk = fast && !half;
+  if (stashOk &&
+      sc.stash.size() < static_cast<std::size_t>(nop) * static_cast<std::size_t>(kStashCap)) {
+    sc.stash.resize(static_cast<std::size_t>(nop) * static_cast<std::size_t>(kStashCap));
+  }
   if (fast) {
     if (half) {
       passFast<false, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                             ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr);
     } else {
-      passFast<false, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                             ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr);
+      passFastStash(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
+                    shx, shy, shz, rc2, sc.counts.data(), sc.stash.data(), &sc.overflowed);
     }
   } else {
     passSafe<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
@@ -950,7 +1085,9 @@ bool orthoFullCsr(
 
   const auto tFill = Clock::now();
   if (nnz > 0) {
-    if (fast) {
+    if (stashOk && sc.overflowed == 0) {
+      scatterStash(sc.stash.data(), sc.counts.data(), offsets.data(), cols.data(), nop);
+    } else if (fast) {
       if (half) {
         passFast<true, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                              ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data());

@@ -589,3 +589,64 @@ through 5. pyscal3 has no CHILL+.
 | OVITO | 392.19 | 476.43 | 638.98 | 4886.17 | 79.35 | 85.78 | 170.10 | 658.49 |
 | mdapy | 787.12 | 811.65 | 702.33 | 781.80 | 105.01 | 117.08 | 113.28 | 123.03 |
 | pyscal3 | 854.84 | 958.98 | 908.17 | — | 173.51 | 178.83 | 166.76 | — |
+
+## Eight threads against OVITO
+
+Local q4 and q6, cutoff 3.5 Å, the neighbour build inside the sample.
+One session, one warm-up, eight samples. The median of the eight is the
+mean of the two central values. The interquartile range is the type 7
+three-quarter value minus the one-quarter value. Eight cores, one
+thread per core. One-thread runs are pinned to cpu 0 and eight-thread
+runs to cpus 0–7. OVITO 3.17.2 is the cutoff Steinhardt modifier with
+`compute_averaged` off and `max_l` equal to the requested order, so a
+q6 sample also builds degrees 2 through 5. Only `compute` is timed, on
+a fresh pipeline. freud 3.6.1 is `Steinhardt(l, average=False)` with
+`r_max` 3.5. The raw samples are `discovery/ql-eight.csv`.
+
+The count walk of a full orthorhombic list now keeps the neighbour ids
+in a fixed-stride buffer and the fill sorts that buffer into the CSR.
+A shell longer than 48 falls back to the second geometry walk. Local
+q4 and q6, with no average and no w, sum the Cartesian solid harmonic
+over eight atoms and write q_l without the q_lm row. A null qlbar on
+`seams_frame_steinhardt` takes that path. The values are the same as
+the averaged call's local column.
+
+Ideal ice Ic. Medians in milliseconds, interquartile range in
+parentheses. seams / OVITO.
+
+| molecules | threads | q4 | q6 |
+| --- | --- | --- | --- |
+| 10648 | 1 | 2.754 (1.053) / 5.462 (0.090) | 3.712 (0.927) / 6.293 (0.134) |
+| 10648 | 8 | 0.662 (0.022) / 2.859 (0.788) | 0.694 (0.034) / 3.471 (0.646) |
+| 110592 | 1 | 22.667 (0.170) / 49.166 (0.298) | 23.450 (0.153) / 57.756 (1.332) |
+| 110592 | 8 | 6.026 (0.132) / 10.301 (0.918) | 5.510 (0.384) / 11.706 (0.470) |
+| 884736 | 1 | 173.461 (3.780) / 373.259 (2.940) | 179.606 (3.192) / 453.044 (2.891) |
+| 884736 | 8 | 39.721 (12.374) / 66.791 (3.112) | 27.612 (0.692) / 75.988 (3.697) |
+
+The liquid is the same ice shifted by a normal draw of width 0.9 Å,
+seed 91001, wrapped into the cube. It is generated when the timing
+script runs and is not stored.
+
+| molecules | threads | q4 | q6 |
+| --- | --- | --- | --- |
+| 10648 | 1 | 4.248 (0.082) / 6.649 (0.084) | 4.358 (0.117) / 7.464 (0.117) |
+| 10648 | 8 | 0.634 (0.018) / 3.211 (0.164) | 0.661 (0.007) / 3.366 (0.478) |
+| 110592 | 1 | 43.356 (0.432) / 66.108 (0.371) | 44.418 (0.501) / 75.253 (1.699) |
+| 110592 | 8 | 6.504 (0.220) / 13.056 (0.655) | 6.607 (0.205) / 14.287 (0.775) |
+| 884736 | 1 | 382.992 (2.102) / 548.819 (2.894) | 412.439 (1.887) / 635.939 (8.670) |
+| 884736 | 8 | 56.057 (0.879) / 90.249 (1.600) | 55.633 (7.354) / 97.764 (3.376) |
+
+On every eight-thread row the slowest seams sample is under the
+fastest OVITO sample. The widest seams spread is 884736 ice q4,
+26.407 to 47.366 ms, against OVITO 63.653 to 69.928. freud is slower
+on every row (110592 ice, eight threads: q4 50.716 ms, q6 57.680 ms).
+
+Against OVITO the largest absolute per-atom gap in the session is
+2.756e-13, on the 884736 liquid q6. That is inside 1e-10. Ideal ice
+matches to a few 1e-16. freud 3.6.1 stores q_l as float32. On ideal
+ice the gap is at most 1.565e-7, a few units in the last place of
+that format. On the liquid, float32 coordinates move shells that sit
+on the cutoff: the 110592 q6 gap reaches 5.2e-2 on those atoms, while
+the same frame matches OVITO to 4.0e-14. An empty shell is NaN in
+freud and 0 here and in OVITO. `tests/test_q4_q6_equal.py` checks the
+OVITO bound and the float32 ice bound.

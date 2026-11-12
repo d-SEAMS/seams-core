@@ -206,6 +206,64 @@ bool ylmSumRows4(int orderL, const double *dx, const double *dy,
   return true;
 }
 
+bool ylmLocalQlAvx(int orderL, const double *dx, const double *dy, const double *dz,
+                   int nbonds, const int *nUsed, double prefactor, double *ql) {
+  if ((orderL != 4 && orderL != 6) || nbonds < 0) {
+    return false;
+  }
+  const int nComp = 2 * orderL + 1;
+  V accRe[13];
+  V accIm[13];
+  const V zero(0.0);
+  for (int m = 0; m < 13; ++m) {
+    accRe[m] = zero;
+    accIm[m] = zero;
+  }
+  for (int bond = 0; bond < nbonds; ++bond) {
+    unsigned bits = 0;
+    for (int a = 0; a < 8; ++a) {
+      if (bond < nUsed[a]) {
+        bits |= 1u << a;
+      }
+    }
+    if (bits == 0) {
+      continue;
+    }
+    const __m512d x0 = _mm512_loadu_pd(dx + bond * 8);
+    const __m512d y0 = _mm512_loadu_pd(dy + bond * 8);
+    const __m512d z0 = _mm512_loadu_pd(dz + bond * 8);
+    V reV[13];
+    V imV[13];
+    evalSolidLanes(orderL, x0, y0, z0, static_cast<__mmask8>(bits), reV, imV);
+    for (int m = 0; m < nComp; ++m) {
+      accRe[m] = accRe[m] + reV[m];
+      accIm[m] = accIm[m] + imV[m];
+    }
+  }
+  alignas(64) double reT[13][8];
+  alignas(64) double imT[13][8];
+  for (int m = 0; m < nComp; ++m) {
+    _mm512_store_pd(reT[m], accRe[m].v);
+    _mm512_store_pd(imT[m], accIm[m].v);
+  }
+  for (int a = 0; a < 8; ++a) {
+    const int used = nUsed[a];
+    if (used <= 0) {
+      ql[a] = 0.0;
+      continue;
+    }
+    const double inv = 1.0 / static_cast<double>(used);
+    double sum = 0.0;
+    for (int m = 0; m < nComp; ++m) {
+      const double r = reT[m][a] * inv;
+      const double i = imT[m][a] * inv;
+      sum += r * r + i * i;
+    }
+    ql[a] = std::sqrt(prefactor * sum);
+  }
+  return true;
+}
+
 void ylmBatchAvx512(int orderL, const double *dx, const double *dy,
                     const double *dz, int n, double *re, double *im) {
   const int nComp = 2 * orderL + 1;

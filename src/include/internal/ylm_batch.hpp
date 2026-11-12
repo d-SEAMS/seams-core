@@ -26,6 +26,14 @@ void ylmAdd8(int orderL, const double *dx, const double *dy, const double *dz,
 bool ylmSumRows4(int orderL, const double *dx, const double *dy,
                  const double *dz, double *rows, int stride);
 
+// Eight atoms, a variable shell. dx/dy/dz are bond-major, nbonds groups
+// of eight. nUsed[a] is the number of leading live bonds of atom a;
+// a later slot is zero and is not summed. Writes ql[8] for l = 4 or 6.
+// The sum is the same Cartesian solid harmonic as ylmSumRows4, added in
+// bond order, then divided by nUsed.
+bool ylmLocalQl(int orderL, const double *dx, const double *dy, const double *dz,
+                int nbonds, const int *nUsed, double prefactor, double *ql);
+
 } // namespace ylm
 } // namespace seams
 

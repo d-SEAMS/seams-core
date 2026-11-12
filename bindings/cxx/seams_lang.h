@@ -66,6 +66,8 @@ int seams_frame_rings(seams_frame *frame, double cutoff, int type,
 int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
                            const char *graph);
 
+/* Local Steinhardt q_l on the cutoff shell. A null qlbar skips the
+ * Lechner-Dellago average; the local values do not use that pass. */
 int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
                            int order_l, double *ql, double *qlbar);
 
