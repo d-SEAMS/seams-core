@@ -41,6 +41,14 @@ struct RingSplitTimes {
 
 RingSplitTimes gRingSplit;
 int gUsedBalls = 0;
+struct alignas(64) PhaseSlot {
+  double levels = 0;
+  double paths = 0;
+  double pairs = 0;
+  double sort = 0;
+};
+PhaseSlot gPhase[64];
+bool gProfile = false;
 double gProfLevels = 0;
 double gProfPaths = 0;
 double gProfPairs = 0;
@@ -834,7 +842,11 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
   // known, vertices below the source lose their level, so no path is
   // extended through them. Rings are still emitted only from their lowest
   // member. The updater keeps those levels.
-  const auto tLevels = std::chrono::steady_clock::now();
+  const bool profiling = gProfile;
+  std::chrono::steady_clock::time_point tLevels, tPaths, tPairs;
+  if (profiling) {
+    tLevels = std::chrono::steady_clock::now();
+  }
   levelsFrom(adjacency, src, maxLvl, 0, scr.lvl, scr.touched, scr.frontier,
              scr.next);
   if (through == nullptr) {
@@ -844,11 +856,21 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
       }
     }
   }
-  gProfLevels += millisSince(tLevels);
-  const auto tPaths = std::chrono::steady_clock::now();
+#ifdef SEAMS_HAS_OPENMP
+  const int phaseSlot = profiling ? std::min(omp_get_thread_num(), 63) : 0;
+#else
+  const int phaseSlot = 0;
+#endif
+  if (profiling) {
+    gPhase[phaseSlot].levels += millisSince(tLevels);
+    tPaths = std::chrono::steady_clock::now();
+  }
   const int store = legacyPairs ? 0 : maxLvl;
   shortestPathsFrom(adjacency, src, scr, 0, store);
-  gProfPaths += millisSince(tPaths);
+  if (profiling) {
+    gPhase[phaseSlot].paths += millisSince(tPaths);
+    tPairs = std::chrono::steady_clock::now();
+  }
   if (static_cast<int>(scr.slot.size()) != nVertices) {
     scr.slot.assign(static_cast<std::size_t>(nVertices), -1);
   }
@@ -888,7 +910,7 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
       if (within2(at2[i], at2[j])) {
         close2[i] |= 1u << j;
         close2[j] |= 1u << i;
-      } else {
+      } else if (gProfile) {
         gOpen2++;
       }
     }
@@ -923,9 +945,11 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
     const int nP = scr.pathCount[p];
     // Even rings: two vertex-disjoint shortest paths to an antipodal vertex
     if (2 * lp >= 3 && 2 * lp <= maxDepth) {
-      gProfSumP += nP;
-      if (nP > gProfMaxP) {
-        gProfMaxP = nP;
+      if (gProfile) {
+        gProfSumP += nP;
+        if (nP > gProfMaxP) {
+          gProfMaxP = nP;
+        }
       }
       if (lp >= 4 && n2 > 0) {
         int seenKey[32];
@@ -979,11 +1003,13 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
       }
       for (int a = 0; a < nP; a++) {
         for (int b = a + 1; b < nP; b++) {
-          gProfPathPairs++;
-          if (lp >= 4) {
-            gProfLp4++;
-          } else {
-            gProfLp3++;
+          if (gProfile) {
+            gProfPathPairs++;
+            if (lp >= 4) {
+              gProfLp4++;
+            } else {
+              gProfLp3++;
+            }
           }
           bool disjoint = true;
           if (useMask) {
@@ -1021,7 +1047,9 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
             ring.push_back(pb[i]);
           }
           if (ringOwnedBySource(ring, src, through)) {
-            gProfTestN++;
+            if (gProfile) {
+              gProfTestN++;
+            }
             if (ringIsPrimitive(oracle, ring, legacyPairs ? -1 : 0,
                                 legacyPairs ? -1 : lp)) {
               keep(ring);
@@ -1040,7 +1068,9 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
         const int *pathsQ = scr.pathBuf.data() + scr.pathFirst[q];
         for (int a = 0; a < nP; a++) {
           for (int b = 0; b < scr.pathCount[q]; b++) {
-            gProfOddPairs++;
+            if (gProfile) {
+              gProfOddPairs++;
+            }
             const int *pa = pathsP + a * lp;
             const int *pb = pathsQ + b * lp;
             bool disjoint = true;
@@ -1072,11 +1102,19 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
       }
     }
   }
+  if (profiling) {
+    gPhase[phaseSlot].pairs += millisSince(tPairs);
+  }
   for (int i = 0; i < n2; i++) {
     scr.id2[static_cast<std::size_t>(at2[i])] = -1;
   }
   if (through == nullptr) {
+    const auto tSort = profiling ? std::chrono::steady_clock::now()
+                                 : std::chrono::steady_clock::time_point{};
     std::sort(out.begin() + static_cast<std::ptrdiff_t>(first), out.end());
+    if (profiling) {
+      gPhase[phaseSlot].sort += millisSince(tSort);
+    }
   }
 }
 
@@ -1211,6 +1249,13 @@ static std::vector<std::vector<int>>
 searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &sources,
              bool legacy) {
   seams::adoptThreads();
+  gProfile = false;
+  if (const char *prof = std::getenv("SEAMS_RING_PROFILE")) {
+    gProfile = prof[0] == '1';
+  }
+  for (auto &slot : gPhase) {
+    slot = {};
+  }
   gProfLevels = gProfPaths = gProfPairs = gProfTestMs = gProfOdd = 0;
   gProfPathPairs = gProfTestN = gProfOddPairs = gProfSumP = gProfLp3 = gProfLp4 = gOpen2 = 0;
   gProfMaxP = 0;
@@ -1393,6 +1438,25 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
     std::vector<std::size_t>().swap(adjacency.first);
     std::vector<RingPool>().swap(perSource);
     gRingSplit.merge_ms = millisSince(mergeStart);
+    if (const char *prof = std::getenv("SEAMS_RING_PROFILE")) {
+      if (prof[0] == '1') {
+        double levels = 0, paths = 0, pairs = 0, sort = 0;
+        for (const auto &slot : gPhase) {
+          levels += slot.levels;
+          paths += slot.paths;
+          pairs += slot.pairs;
+          sort += slot.sort;
+        }
+        std::fprintf(stderr,
+                     "profile balls_ms %.3f enum_ms %.3f merge_ms %.3f "
+                     "levels_ms %.3f paths_ms %.3f pairs_ms %.3f sort_ms %.3f "
+                     "path_pairs %lld tests %lld odd_pairs %lld sum_p %lld max_p %d "
+                     "lp3 %lld lp4 %lld open2 %lld\n",
+                     gRingSplit.balls_ms, gRingSplit.enumerate_ms, gRingSplit.merge_ms,
+                     levels, paths, pairs, sort, gProfPathPairs, gProfTestN, gProfOddPairs,
+                     gProfSumP, gProfMaxP, gProfLp3, gProfLp4, gOpen2);
+      }
+    }
     return rings;
   }
 #endif
@@ -1411,13 +1475,21 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
   gRingSplit.merge_ms = millisSince(mergeStart);
   if (const char *prof = std::getenv("SEAMS_RING_PROFILE")) {
     if (prof[0] == '1') {
+      double levels = 0, paths = 0, pairs = 0, sort = 0;
+      for (const auto &slot : gPhase) {
+        levels += slot.levels;
+        paths += slot.paths;
+        pairs += slot.pairs;
+        sort += slot.sort;
+      }
       std::fprintf(stderr,
-                   "profile levels_ms %.3f paths_ms %.3f pairs_ms %.3f tests_ms %.3f "
-                   "path_pairs %lld tests %lld odd_ms %.3f odd_pairs %lld sum_p %lld max_p %d\n",
-                   gProfLevels, gProfPaths, gProfPairs - gProfTestMs, gProfTestMs,
-                   gProfPathPairs, gProfTestN, gProfOdd, gProfOddPairs, gProfSumP, gProfMaxP);
-      std::fprintf(stderr, "profile lp3 %lld lp4 %lld open2 %lld\n", gProfLp3, gProfLp4,
-                   gOpen2);
+                   "profile balls_ms %.3f enum_ms %.3f merge_ms %.3f "
+                   "levels_ms %.3f paths_ms %.3f pairs_ms %.3f sort_ms %.3f "
+                   "path_pairs %lld tests %lld odd_pairs %lld sum_p %lld max_p %d "
+                   "lp3 %lld lp4 %lld open2 %lld\n",
+                   gRingSplit.balls_ms, gRingSplit.enumerate_ms, gRingSplit.merge_ms, levels,
+                   paths, pairs, sort, gProfPathPairs, gProfTestN, gProfOddPairs, gProfSumP,
+                   gProfMaxP, gProfLp3, gProfLp4, gOpen2);
     }
   }
 

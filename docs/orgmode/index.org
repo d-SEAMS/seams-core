@@ -156,6 +156,7 @@ framework.
    explanation/architecture
    explanation/chill-plus-vs-cages
    explanation/ring-completion
+   explanation/primitive-rings
    explanation/topological-network
    explanation/citation
 

@@ -240,7 +240,7 @@ TEST_CASE("length-2 shortcut is not a chord and is not a primitive ring", "[ring
   REQUIRE(fromCsr == hop);
 }
 
-TEST_CASE("full-graph distance check, the 62-hexagon shape", "[ring]") {
+TEST_CASE("antipode 0-1/4 hexagon is not primitive", "[ring]") {
   // Hexagon 1-2-3-4-5-6, and vertex 0 joined to the antipodes 1 and 4.
   // On the first liquid frame, 62 hexagons had this shape: primitive in the
   // subgraph of vertices at or above the source, and not primitive once the
