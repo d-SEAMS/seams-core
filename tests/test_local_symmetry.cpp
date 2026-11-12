@@ -359,7 +359,7 @@ TEST_CASE("the C API returns the template, the rotation and the space group",
   REQUIRE(count == 20);
 }
 
-TEST_CASE("the eclipsed cutoff sits between the staggered and eclipsed cosines",
+TEST_CASE("the eclipsed cutoff sits in the gap between staggered and eclipsed",
           "[symmetry]") {
   const auto ic = symm::crystal(symm::Crystal::iceIc);
   const auto ih = symm::crystal(symm::Crystal::iceIh);
@@ -369,12 +369,11 @@ TEST_CASE("the eclipsed cutoff sits between the staggered and eclipsed cosines",
   for (int label : kind) {
     REQUIRE(label == static_cast<int>(symm::Kind::iceIc));
   }
-  // 0.4 is below cos 60 degrees, so every staggered bond counts as eclipsed.
-  symm::classifyIce(ic.cartesian, ic.vectors, kind, 0.4);
+  symm::classifyIce(ic.cartesian, ic.vectors, kind, 0.05);
   for (int label : kind) {
-    REQUIRE(label == -1);
+    REQUIRE(label == static_cast<int>(symm::Kind::iceIc));
   }
-  symm::classifyIce(ic.cartesian, ic.vectors, kind, symm::kEclipsedCosine);
+  symm::classifyIce(ic.cartesian, ic.vectors, kind, symm::kShellRmsd);
   for (int label : kind) {
     REQUIRE(label == static_cast<int>(symm::Kind::iceIc));
   }
@@ -383,10 +382,9 @@ TEST_CASE("the eclipsed cutoff sits between the staggered and eclipsed cosines",
   for (int label : kind) {
     REQUIRE(label == static_cast<int>(symm::Kind::iceIh));
   }
-  // A cutoff above the ideal eclipsed cosine drops the hexagonal bond.
-  symm::classifyIce(ih.cartesian, ih.vectors, kind, 1.1);
+  symm::classifyIce(ih.cartesian, ih.vectors, kind, 0.05);
   for (int label : kind) {
-    REQUIRE(label == static_cast<int>(symm::Kind::iceIc));
+    REQUIRE(label == static_cast<int>(symm::Kind::iceIh));
   }
 
   std::vector<double> raw(static_cast<size_t>(3 * ih.cartesian.rows()));
@@ -403,9 +401,9 @@ TEST_CASE("the eclipsed cutoff sits between the staggered and eclipsed cosines",
   }
   std::vector<int> labels(static_cast<size_t>(ih.cartesian.rows()), 9);
   REQUIRE(seams_symmetry_classify_tol(raw.data(), static_cast<int>(ih.cartesian.rows()),
-                                      lattice, 1.1, labels.data()) == 0);
+                                      lattice, 0.05, labels.data()) == 0);
   for (int label : labels) {
-    REQUIRE(label == static_cast<int>(symm::Kind::iceIc));
+    REQUIRE(label == static_cast<int>(symm::Kind::iceIh));
   }
   REQUIRE(seams_symmetry_classify(raw.data(), static_cast<int>(ih.cartesian.rows()), lattice,
                                   labels.data()) == 0);

@@ -53,14 +53,13 @@ int seams_symmetry_crystal(int which, double *lattice9, double *xyz, int cap,
                            int *n_out);
 int seams_symmetry_backend(char *name, int name_len);
 /* Per-atom ice label. lattice9 is three row vectors. labels[i] is
- * 0 ice-Ih, 1 ice-Ic, 2 ice-Isd, or -1. The eclipsed cosine cutoff is
- * 0.75, between the ideal staggered value 0.5 and the ideal eclipsed
- * value 1. */
+ * 0 ice-Ih, 1 ice-Ic, 2 ice-Isd, or -1. The second-shell RMSD ceiling
+ * is 0.55 angstrom. */
 int seams_symmetry_classify(const double *xyz, int n, const double *lattice9,
                             int *labels);
-/* Same labels with an explicit eclipsed-cosine cutoff. */
+/* Same labels with an explicit second-shell RMSD ceiling, in angstrom. */
 int seams_symmetry_classify_tol(const double *xyz, int n, const double *lattice9,
-                                double eclipsed_cosine, int *labels);
+                                double shell_rmsd, int *labels);
 
 #ifdef __cplusplus
 }

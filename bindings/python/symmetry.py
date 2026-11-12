@@ -195,12 +195,11 @@ def template(ident):
     return buf
 
 
-def classify(cartesian, lattice, eclipsed_cosine=0.75):
+def classify(cartesian, lattice, shell_rmsd=0.55):
     """Per-atom ice label. 0 ice Ih, 1 ice Ic, 2 ice Isd, -1 otherwise.
 
-    ``eclipsed_cosine`` is the azimuthal cutoff. The ideal staggered bond
-    has cosine 0.5 and the ideal eclipsed bond has cosine 1. The default
-    0.75 sits between them.
+    ``shell_rmsd`` is the ceiling, in angstrom, on the second-shell
+    residual after the tetrahedron alignment.
     """
     xyz = np.ascontiguousarray(cartesian, dtype=np.float64)
     vec = np.ascontiguousarray(lattice, dtype=np.float64).reshape(9)
@@ -209,7 +208,7 @@ def classify(cartesian, lattice, eclipsed_cosine=0.75):
         xyz.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
         ctypes.c_int(xyz.shape[0]),
         vec.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
-        ctypes.c_double(eclipsed_cosine),
+        ctypes.c_double(shell_rmsd),
         labels.ctypes.data_as(ctypes.POINTER(ctypes.c_int)),
     )
     if code != 0:

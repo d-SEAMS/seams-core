@@ -35,10 +35,72 @@ constexpr int kMaxN = 32;
 constexpr double kBondLo = 2.35;
 constexpr double kBondHi = 3.25;
 constexpr double kShell = 5.0;
-constexpr double kEclipsed = 0.75;
+constexpr double kEclipsed = 0.90;
 
 // Rotate mobile (env) onto fixed (template). Proper rotation.
 double rmsdOf(const double fixed[][3], const double mobile[][3], int n, const double R[3][3]);
+
+// Largest eigenvector of a 4x4 symmetric matrix. One Jacobi sweep is a
+// closed rotation; a handful of sweeps is the quaternion form of Kabsch
+// (Coutsias, Seok, Dill 2004; Theobald 2005) without a 3x3 SVD.
+void jacobi4(double A[4][4], double Q[4][4]) {
+  for (int i = 0; i < 4; i++) {
+    for (int j = 0; j < 4; j++) {
+      Q[i][j] = i == j ? 1.0 : 0.0;
+    }
+  }
+  for (int sweep = 0; sweep < 6; sweep++) {
+    for (int p = 0; p < 3; p++) {
+      for (int q = p + 1; q < 4; q++) {
+        const double apq = A[p][q];
+        if (std::abs(apq) < 1e-14) {
+          continue;
+        }
+        const double app = A[p][p];
+        const double aqq = A[q][q];
+        const double tau = (aqq - app) / (2.0 * apq);
+        const double t = std::copysign(1.0, tau) / (std::abs(tau) + std::sqrt(1.0 + tau * tau));
+        const double c = 1.0 / std::sqrt(1.0 + t * t);
+        const double s = t * c;
+        A[p][p] = app - t * apq;
+        A[q][q] = aqq + t * apq;
+        A[p][q] = 0.0;
+        A[q][p] = 0.0;
+        for (int r = 0; r < 4; r++) {
+          if (r == p || r == q) {
+            continue;
+          }
+          const double arp = A[r][p];
+          const double arq = A[r][q];
+          A[r][p] = A[p][r] = c * arp - s * arq;
+          A[r][q] = A[q][r] = s * arp + c * arq;
+        }
+        for (int r = 0; r < 4; r++) {
+          const double qp = Q[r][p];
+          const double qq = Q[r][q];
+          Q[r][p] = c * qp - s * qq;
+          Q[r][q] = s * qp + c * qq;
+        }
+      }
+    }
+  }
+}
+
+void quatToR(const double q[4], double R[3][3]) {
+  const double w = q[0];
+  const double x = q[1];
+  const double y = q[2];
+  const double z = q[3];
+  R[0][0] = 1.0 - 2.0 * (y * y + z * z);
+  R[0][1] = 2.0 * (x * y - z * w);
+  R[0][2] = 2.0 * (x * z + y * w);
+  R[1][0] = 2.0 * (x * y + z * w);
+  R[1][1] = 1.0 - 2.0 * (x * x + z * z);
+  R[1][2] = 2.0 * (y * z - x * w);
+  R[2][0] = 2.0 * (x * z - y * w);
+  R[2][1] = 2.0 * (y * z + x * w);
+  R[2][2] = 1.0 - 2.0 * (x * x + y * y);
+}
 
 bool kabschQuat(const double fixed[][3], const double mobile[][3], int n, double R[3][3],
                 double &rmsd) {
@@ -55,55 +117,53 @@ bool kabschQuat(const double fixed[][3], const double mobile[][3], int n, double
     cf[k] *= inv;
     cm[k] *= inv;
   }
-  // 3x3 SVD of the covariance. Both H = sum q p^T and H = sum p q^T are
-  // tried; the residual picks the one that actually overlays the points.
-  Eigen::Matrix3d Hpq = Eigen::Matrix3d::Zero();
-  Eigen::Matrix3d Hqp = Eigen::Matrix3d::Zero();
+  double H[3][3] = {};
   for (int i = 0; i < n; i++) {
-    Eigen::Vector3d p(fixed[i][0] - cf[0], fixed[i][1] - cf[1], fixed[i][2] - cf[2]);
-    Eigen::Vector3d q(mobile[i][0] - cm[0], mobile[i][1] - cm[1], mobile[i][2] - cm[2]);
-    Hpq += p * q.transpose();
-    Hqp += q * p.transpose();
+    const double p[3] = {fixed[i][0] - cf[0], fixed[i][1] - cf[1], fixed[i][2] - cf[2]};
+    const double q[3] = {mobile[i][0] - cm[0], mobile[i][1] - cm[1], mobile[i][2] - cm[2]};
+    for (int a = 0; a < 3; a++) {
+      for (int b = 0; b < 3; b++) {
+        H[a][b] += p[a] * q[b];
+      }
+    }
   }
-  auto fromH = [](const Eigen::Matrix3d &H, double out[3][3]) {
-    Eigen::JacobiSVD<Eigen::Matrix3d> svd(H, Eigen::ComputeFullU | Eigen::ComputeFullV);
-    Eigen::Matrix3d U = svd.matrixU();
-    Eigen::Matrix3d V = svd.matrixV();
-    Eigen::Matrix3d R = V * U.transpose();
-    if (R.determinant() < 0.0) {
-      V.col(2) *= -1.0;
-      R = V * U.transpose();
+  // K such that its largest eigenvector is the quaternion taking q onto p.
+  double K[4][4];
+  K[0][0] = H[0][0] + H[1][1] + H[2][2];
+  K[0][1] = H[1][2] - H[2][1];
+  K[0][2] = H[2][0] - H[0][2];
+  K[0][3] = H[0][1] - H[1][0];
+  K[1][1] = H[0][0] - H[1][1] - H[2][2];
+  K[1][2] = H[0][1] + H[1][0];
+  K[1][3] = H[2][0] + H[0][2];
+  K[2][2] = -H[0][0] + H[1][1] - H[2][2];
+  K[2][3] = H[1][2] + H[2][1];
+  K[3][3] = -H[0][0] - H[1][1] + H[2][2];
+  K[1][0] = K[0][1];
+  K[2][0] = K[0][2];
+  K[2][1] = K[1][2];
+  K[3][0] = K[0][3];
+  K[3][1] = K[1][3];
+  K[3][2] = K[2][3];
+  double Q[4][4];
+  jacobi4(K, Q);
+  int best = 0;
+  for (int i = 1; i < 4; i++) {
+    if (K[i][i] > K[best][best]) {
+      best = i;
     }
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++) {
-        out[i][j] = R(i, j);
-      }
-    }
-  };
-  double R1[3][3];
-  double R2[3][3];
-  fromH(Hpq, R1);
-  fromH(Hqp, R2);
-  const double e1 = rmsdOf(fixed, mobile, n, R1);
-  const double e2 = rmsdOf(fixed, mobile, n, R2);
-  const double *use = e1 <= e2 ? R1[0] : R2[0];
-  // R1[0] is the first row pointer only if rows are contiguous. Copy explicitly.
-  if (e1 <= e2) {
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++) {
-        R[i][j] = R1[i][j];
-      }
-    }
-    rmsd = e1;
-  } else {
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++) {
-        R[i][j] = R2[i][j];
-      }
-    }
-    rmsd = e2;
   }
-  (void)use;
+  // The eigenvector is the quaternion of the inverse map. Conjugating it
+  // takes the mobile point onto the fixed point.
+  double q[4] = {Q[0][best], -Q[1][best], -Q[2][best], -Q[3][best]};
+  const double qn = std::sqrt(q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3]);
+  if (qn > 1e-15) {
+    for (int i = 0; i < 4; i++) {
+      q[i] /= qn;
+    }
+  }
+  quatToR(q, R);
+  rmsd = rmsdOf(fixed, mobile, n, R);
   return true;
 }
 
@@ -507,6 +567,11 @@ bool matchRing(const double env[][3], int n, const double templ[][3], int perm[k
             bestR[i][j] = Rtry[i][j];
           }
         }
+      }
+      // A ring has one cyclic class. The first overlay inside the noise is enough.
+      if (best < 0.06) {
+        dir = 2;
+        break;
       }
     }
   }
@@ -915,7 +980,8 @@ bool matchCage(const double env[][3], int n, const double templ[][3], int perm[k
           }
         }
       }
-      if (best < 1e-6) {
+      // One graph isomorphism is the cage. Further starts repeat it.
+      if (best < 0.08) {
         e0 = n;
         break;
       }
@@ -1190,9 +1256,249 @@ double shapeMeasure(const Eigen::MatrixXd &environment) {
   return 100.0 * std::max(0.0, residual) / gp;
 }
 
+// Even permutations of four bonds: the rotation group of the tetrahedron.
+const int kEven4[12][4] = {
+    {0, 1, 2, 3}, {0, 2, 3, 1}, {0, 3, 1, 2}, {1, 0, 3, 2}, {1, 2, 0, 3}, {1, 3, 2, 0},
+    {2, 0, 1, 3}, {2, 1, 3, 0}, {2, 3, 0, 1}, {3, 0, 2, 1}, {3, 1, 0, 2}, {3, 2, 1, 0},
+};
+
+struct CanonShell {
+  double first[3][4][3];
+  double second[3][12][3];
+  int parent[3][12];
+  double pts[3][17][3];
+};
+
+void loadOneShell(symm::Kind kind, double first[4][3], double second[12][3], int parent[12]) {
+  double p[kMaxN][3];
+  loadEigen(points(kind), p);
+  int hub[4];
+  nearest4(p, 17, 0, hub);
+  bool used[17] = {};
+  used[0] = true;
+  for (int k = 0; k < 4; k++) {
+    used[hub[k]] = true;
+    for (int c = 0; c < 3; c++) {
+      first[k][c] = p[hub[k]][c] - p[0][c];
+    }
+  }
+  int ns = 0;
+  for (int i = 1; i < 17 && ns < 12; i++) {
+    if (used[i]) {
+      continue;
+    }
+    for (int c = 0; c < 3; c++) {
+      second[ns][c] = p[i][c] - p[0][c];
+    }
+    int owner = 0;
+    double od = 1e300;
+    for (int k = 0; k < 4; k++) {
+      const double dx = second[ns][0] - first[k][0];
+      const double dy = second[ns][1] - first[k][1];
+      const double dz = second[ns][2] - first[k][2];
+      const double d2 = dx * dx + dy * dy + dz * dz;
+      if (d2 < od) {
+        od = d2;
+        owner = k;
+      }
+    }
+    parent[ns] = owner;
+    ns++;
+  }
+}
+
+void prepareCanon(CanonShell &out) {
+  const symm::Kind kinds[3] = {symm::Kind::iceIh, symm::Kind::iceIc, symm::Kind::iceIsd};
+  for (int k = 0; k < 3; k++) {
+    loadOneShell(kinds[k], out.first[k], out.second[k], out.parent[k]);
+    double raw[kMaxN][3];
+    loadEigen(points(kinds[k]), raw);
+    for (int i = 0; i < 17; i++) {
+      for (int c = 0; c < 3; c++) {
+        out.pts[k][i][c] = raw[i][c];
+      }
+    }
+  }
+}
+
+// The three ice templates share a regular tetrahedron. Their second shells
+// are stored in one frame, so each environment needs twelve alignments, not
+// thirty-six. The score is the mean square distance after the quaternion
+// Kabsch of those four bonds (Larsen, Schmidt, Schiotz 2016).
+int shellFit(const double center[3], const double nb[][3], int nNb, const CanonShell &canon,
+             double gate) {
+  const int m = std::min(nNb, 16);
+  int order[16];
+  double dd[16];
+  for (int i = 0; i < m; i++) {
+    order[i] = i;
+    dd[i] = dist2(center, nb[i]);
+  }
+  for (int a = 0; a < 4 && a < m; a++) {
+    int best = a;
+    for (int b = a + 1; b < m; b++) {
+      if (dd[b] < dd[best]) {
+        best = b;
+      }
+    }
+    std::swap(dd[a], dd[best]);
+    std::swap(order[a], order[best]);
+  }
+  int nFirst = 0;
+  int first[4];
+  for (int a = 0; a < 4 && a < m; a++) {
+    if (dd[a] >= kBondLo * kBondLo && dd[a] <= kBondHi * kBondHi) {
+      first[nFirst++] = order[a];
+    }
+  }
+  if (nFirst < 4) {
+    return -1;
+  }
+  double envF[4][3];
+  bool used[16] = {};
+  for (int k = 0; k < 4; k++) {
+    used[first[k]] = true;
+    for (int c = 0; c < 3; c++) {
+      envF[k][c] = nb[first[k]][c] - center[c];
+    }
+  }
+  double envS[12][3];
+  int nS = 0;
+  for (int i = 0; i < m && nS < 12; i++) {
+    if (used[i]) {
+      continue;
+    }
+    for (int c = 0; c < 3; c++) {
+      envS[nS][c] = nb[i][c] - center[c];
+    }
+    nS++;
+  }
+  if (nS < 12) {
+    return -1;
+  }
+  double best = 1e300;
+  int bestK = -1;
+  const int kindOrder[3] = {1, 0, 2};
+  for (int ko = 0; ko < 3 && !(best < 0.05); ko++) {
+    const int kind = kindOrder[ko];
+  int pidx[4] = {0, 1, 2, 3};
+  do {
+    double fixed[4][3];
+    double mobile[4][3];
+    for (int k = 0; k < 4; k++) {
+      for (int c = 0; c < 3; c++) {
+        fixed[k][c] = canon.first[kind][k][c];
+        mobile[k][c] = envF[pidx[k]][c];
+      }
+    }
+    double R[3][3];
+    double rms = 0.0;
+    kabschQuat(fixed, mobile, 4, R, rms);
+    if (rms > 0.8) {
+      continue;
+    }
+    {
+      int bonded[4][6];
+      int nBonded[4] = {};
+      for (int e = 0; e < nS; e++) {
+        for (int k = 0; k < 4; k++) {
+          const double dx = envS[e][0] - envF[k][0];
+          const double dy = envS[e][1] - envF[k][1];
+          const double dz = envS[e][2] - envF[k][2];
+          const double d2 = dx * dx + dy * dy + dz * dz;
+          if (d2 < kBondHi * kBondHi && nBonded[k] < 6) {
+            bonded[k][nBonded[k]++] = e;
+          }
+        }
+      }
+      double fixed17[17][3] = {};
+      double mobile17[17][3] = {};
+      for (int k = 0; k < 4; k++) {
+        for (int c = 0; c < 3; c++) {
+          fixed17[k + 1][c] = canon.first[kind][k][c];
+          mobile17[k + 1][c] = envF[pidx[k]][c];
+        }
+      }
+      for (int s = 0; s < 12; s++) {
+        const double q0 = canon.second[kind][s][0];
+        const double q1 = canon.second[kind][s][1];
+        const double q2 = canon.second[kind][s][2];
+        fixed17[5 + s][0] = q0;
+        fixed17[5 + s][1] = q1;
+        fixed17[5 + s][2] = q2;
+        const double pred[3] = {R[0][0] * q0 + R[1][0] * q1 + R[2][0] * q2,
+                                R[0][1] * q0 + R[1][1] * q1 + R[2][1] * q2,
+                                R[0][2] * q0 + R[1][2] * q1 + R[2][2] * q2};
+        const int envFirst = pidx[canon.parent[kind][s]];
+        double md = 1e300;
+        int me = 0;
+        for (int c = 0; c < nBonded[envFirst]; c++) {
+          const int e = bonded[envFirst][c];
+          const double dx = pred[0] - envS[e][0];
+          const double dy = pred[1] - envS[e][1];
+          const double dz = pred[2] - envS[e][2];
+          const double d2 = dx * dx + dy * dy + dz * dz;
+          if (d2 < md) {
+            md = d2;
+            me = e;
+          }
+        }
+        mobile17[5 + s][0] = envS[me][0];
+        mobile17[5 + s][1] = envS[me][1];
+        mobile17[5 + s][2] = envS[me][2];
+      }
+      double R17[3][3];
+      double rms17 = 0.0;
+      kabschQuat(fixed17, mobile17, 17, R17, rms17);
+      if (rms17 < best) {
+        best = rms17;
+        bestK = kind;
+      }
+    }
+    if (best < 0.2) {
+      break;
+    }
+  } while (std::next_permutation(pidx, pidx + 4));
+  }
+  if (!(best <= gate)) {
+    double env[17][3];
+    env[0][0] = center[0];
+    env[0][1] = center[1];
+    env[0][2] = center[2];
+    for (int i = 0; i < m; i++) {
+      env[i + 1][0] = nb[i][0];
+      env[i + 1][1] = nb[i][1];
+      env[i + 1][2] = nb[i][2];
+    }
+    const int nEnv = 1 + m;
+    best = 1e300;
+    bestK = -1;
+    for (int kind = 0; kind < 3; kind++) {
+      int perm[kMaxN];
+      double R[3][3];
+      double t[3];
+      double rms = 1e300;
+      symm::Kind named = symm::Kind::iceIc;
+      if (!matchIce(env, nEnv, canon.pts[kind], perm, R, t, rms, named, false)) {
+        continue;
+      }
+      if (rms < best) {
+        best = rms;
+        bestK = kind;
+      }
+    }
+  }
+  if (bestK < 0 || !(best <= gate)) {
+    return -1;
+  }
+  return bestK;
+}
+
 void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vectors,
-                 std::vector<int> &kind, double eclipsedCosine) {
-  const double cosine = std::isfinite(eclipsedCosine) ? eclipsedCosine : kEclipsed;
+                 std::vector<int> &kind, double shellRmsd) {
+  const double gate = std::isfinite(shellRmsd) && shellRmsd > 0.0 ? shellRmsd : 0.55;
+  CanonShell canon;
+  prepareCanon(canon);
   const int n = static_cast<int>(cartesian.rows());
   kind.assign(static_cast<size_t>(std::max(n, 0)), -1);
   if (n <= 0 || cartesian.cols() != 3) {
@@ -1281,35 +1587,40 @@ void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vector
     double ky[16];
     double kz[16];
     int nkeep = 0;
-    for (int dz = -1; dz <= 1; dz++) {
+    const double skew = std::abs(lat[1][0]) + std::abs(lat[2][0]) + std::abs(lat[2][1]);
+    const int reach = skew > 0.5 * kShell ? 4 : 1;
+    for (int dz = -reach; dz <= reach; dz++) {
       int iz = bz + dz;
       int sz = 0;
-      if (iz < 0) {
+      while (iz < 0) {
         iz += nz;
-        sz = -1;
-      } else if (iz >= nz) {
-        iz -= nz;
-        sz = 1;
+        sz--;
       }
-      for (int dy = -1; dy <= 1; dy++) {
+      while (iz >= nz) {
+        iz -= nz;
+        sz++;
+      }
+      for (int dy = -reach; dy <= reach; dy++) {
         int iy = by + dy;
         int sy = 0;
-        if (iy < 0) {
+        while (iy < 0) {
           iy += ny;
-          sy = -1;
-        } else if (iy >= ny) {
-          iy -= ny;
-          sy = 1;
+          sy--;
         }
-        for (int dx = -1; dx <= 1; dx++) {
+        while (iy >= ny) {
+          iy -= ny;
+          sy++;
+        }
+        for (int dx = -reach; dx <= reach; dx++) {
           int ix = bx + dx;
           int sx = 0;
-          if (ix < 0) {
+          while (ix < 0) {
             ix += nx;
-            sx = -1;
-          } else if (ix >= nx) {
+            sx--;
+          }
+          while (ix >= nx) {
             ix -= nx;
-            sx = 1;
+            sx++;
           }
           const int cell = (iz * ny + iy) * nx + ix;
           for (int j = head[static_cast<size_t>(cell)]; j >= 0; j = next[static_cast<size_t>(j)]) {
@@ -1371,12 +1682,7 @@ void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vector
       nb[k][1] = ky[k];
       nb[k][2] = kz[k];
     }
-    const int nEcl = eclipsedStored(ci, nb, 16, cosine);
-    if (nEcl < 0 || nEcl > 2) {
-      kind[static_cast<size_t>(i)] = -1;
-    } else {
-      kind[static_cast<size_t>(i)] = static_cast<int>(iceKindFromEclipsed(nEcl));
-    }
+    kind[static_cast<size_t>(i)] = shellFit(ci, nb, 16, canon, gate);
   }
 }
 

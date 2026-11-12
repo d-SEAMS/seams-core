@@ -63,17 +63,23 @@ Overlay matchKernel(const Eigen::MatrixXd &environment);
 // Same matcher on many environments. Independent shells run in parallel.
 void matchAll(const std::vector<Eigen::MatrixXd> &environments, std::vector<Overlay> &out);
 
-// Azimuthal cutoff between an eclipsed bond (ideal cosine 1) and a
-// staggered bond (ideal cosine 0.5).
-inline constexpr double kEclipsedCosine = 0.75;
+// A bond is counted eclipsed when its azimuthal cosine exceeds this value.
+// The ideal eclipsed cosine is 1 and the ideal staggered cosine is 0.5.
+// At 220-270 K the staggered bonds of mW ice reach about 0.85 while the
+// eclipsed bonds stay at 1, so 0.90 is the gap the second-shell template
+// leaves between them. 0.75 counts those warmed staggered bonds as eclipsed.
+inline constexpr double kEclipsedCosine = 0.90;
 
-// Per-atom ice label for a periodic cell. kind[i] is iceIh, iceIc, iceIsd,
-// or -1 when the oxygen is not a bulk ice shell. eclipsedCosine is the
-// cutoff above: the default sits between 0.5 and 1. A cutoff above 1
-// counts no bond as eclipsed, so an ideal hexagonal shell is labelled
-// ice Ic. A cutoff below 0.5 counts staggered bonds as eclipsed.
+// Ceiling, in angstrom, on the root-mean-square distance of the second
+// shell to the winning ice template.
+inline constexpr double kShellRmsd = 0.55;
+
+// Per-atom ice label. kind[i] is iceIh, iceIc, iceIsd, or -1. shellRmsd is
+// the second-shell residual ceiling. The label is the template with the
+// lowest quaternion-Kabsch residual after the bond-graph permutation of the
+// tetrahedron (Larsen, Schmidt, Schiotz 2016).
 void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vectors,
-                 std::vector<int> &kind, double eclipsedCosine = kEclipsedCosine);
+                 std::vector<int> &kind, double shellRmsd = kShellRmsd);
 
 // Azimuthal cosine of each tetrahedral bond, largest first. The value is
 // the best alignment of an outer neighbour with one of the other three

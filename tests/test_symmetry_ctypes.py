@@ -33,9 +33,9 @@ def main():
     labels = symmetry.classify(xyz, lattice)
     if not (labels == 1).all():
         raise SystemExit(f"ice Ic labels {labels}")
-    loose = symmetry.classify(xyz, lattice, eclipsed_cosine=0.4)
-    if (loose == 1).any():
-        raise SystemExit("cutoff 0.4 still called a cubic shell ice Ic")
+    tight = symmetry.classify(xyz, lattice, shell_rmsd=0.05)
+    if not (tight == 1).all():
+        raise SystemExit(f"tight ice Ic labels {tight}")
     space = symmetry.space_group(lattice, xyz)
     if space is not None and space[0] != 227:
         raise SystemExit(f"space group {space}")
