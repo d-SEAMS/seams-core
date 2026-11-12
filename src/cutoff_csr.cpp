@@ -1662,12 +1662,19 @@ bool orthoFullCsr(
   }
   // One half-stencil walk. Each unordered pair is tested once and written
   // into both rows. Private degree rows keep the threads off one counts line.
+  //
+  // The linkcell block gives each thread a private copy of its cells and
+  // the halo, then gathers pairs through bags. On the ice cutoff that copy
+  // is the whole neighbour build: the stash walk below records the same
+  // rows in one pass and is the faster of the two, so the CSR uses it.
+  // Callers that want the row vectors still take the block, which writes
+  // those vectors without a second materialisation.
   bool paired = false;
   bool directed = false;
   std::vector<std::vector<PairDir>> bags;
   std::vector<int> deg;
   int team = 1;
-  if (fast && !half && maxThreads > 1) {
+  if (fast && !half && maxThreads > 1 && directRows != nullptr) {
 #ifdef SEAMS_HAS_OPENMP
     team = std::max(1, omp_get_max_threads());
 #else
