@@ -323,6 +323,25 @@ getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
               const std::vector<std::vector<int>> &nList, bool isSlice = false,
               int coordinationNumber = 4, bool closedBounds = true);
 
+//! Published CHILL+ on the cutoff shell. The pair rows are read inside
+//! this call; the shared neighbour-list builder is not modified.
+//! Returns false when that search is not available.
+bool chillPlusPublishedCutoff(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
+    int typeI);
+
+//! Cubic pre-filter from discovery/pysr_prefilter.py. The selected
+//! expression is cmean^4. It writes cubic and returns true only when
+//! every atom has a cutoff shell of four and a negative mean correlation
+//! whose fourth power sits above the highest non-cubic score in that
+//! search. That forces every bond below -0.84, which the published rule
+//! labels staggered, so the atom is cubic. Otherwise it returns false
+//! and leaves the cloud unchanged. The default published call does not
+//! use it.
+bool chillPlusSymbolicPrefilter(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
+    int typeI);
+
 //! Classifies each atom according to the CHILL+ algorithm
 void
 getIceTypePlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,

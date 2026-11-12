@@ -343,14 +343,21 @@ int classify_chill(seams_frame *frame, double cutoff, int type,
       throw std::invalid_argument("unknown CHILL graph '" + which +
                                   "' (use cutoff or mutual)");
     }
-    auto nList = bond_list(frame->cloud, cutoff, typ, which, 4);
-    if (plus) {
-      chill::applyChillPlus(frame->cloud, nList,
-                            chill::chillPlusRule(rule == nullptr ? "" : rule),
-                            false);
-    } else {
-      chill::getCorrel(frame->cloud, nList, false);
-      chill::getIceTypeNoPrint(frame->cloud, nList, false);
+    const bool publishedRule =
+        rule == nullptr || rule[0] == '\0' || std::string(rule) == "chill+";
+    // Published cutoff CHILL+ reads its own pair rows. Other graphs and
+    // the OVITO rule keep the neighbour list the caller asked for.
+    if (!(plus && which == "cutoff" && publishedRule &&
+          chill::chillPlusPublishedCutoff(frame->cloud, cutoff, typ))) {
+      auto nList = bond_list(frame->cloud, cutoff, typ, which, 4);
+      if (plus) {
+        chill::applyChillPlus(frame->cloud, nList,
+                              chill::chillPlusRule(rule == nullptr ? "" : rule),
+                              false);
+      } else {
+        chill::getCorrel(frame->cloud, nList, false);
+        chill::getIceTypeNoPrint(frame->cloud, nList, false);
+      }
     }
     const int n = frame->cloud.nop;
     frame->labels.assign(static_cast<std::size_t>(std::max(n, 0)), 6);

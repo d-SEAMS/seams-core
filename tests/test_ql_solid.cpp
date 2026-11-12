@@ -2,6 +2,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <bop.hpp>
+#include <chill_plus_scheme.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <ylm_cartesian.hpp>
@@ -94,6 +95,90 @@ TEST_CASE("solid q4 and q6 match on a disordered cloud", "[ql][solid]") {
     REQUIRE(maxAbs(ref.ql, got.ql) < 1e-12);
     REQUIRE(maxAbs(ref.qlBar, got.qlBar) < 1e-12);
   }
+}
+
+TEST_CASE("symbolic cubic pre-filter falls back outside its certificate", "[chill][prefilter]") {
+  auto ice = iceIc(2);
+  auto viaFilter = ice;
+  REQUIRE(chill::chillPlusSymbolicPrefilter(viaFilter, 3.5, 1));
+  REQUIRE(chill::chillPlusPublishedCutoff(ice, 3.5, 1));
+  for (int i = 0; i < ice.nop; i++) {
+    REQUIRE(viaFilter.pts[static_cast<std::size_t>(i)].iceType ==
+            molSys::atom_state_type::cubic);
+    REQUIRE(ice.pts[static_cast<std::size_t>(i)].iceType ==
+            molSys::atom_state_type::cubic);
+    const auto &a = viaFilter.pts[static_cast<std::size_t>(i)].c_ij;
+    const auto &b = ice.pts[static_cast<std::size_t>(i)].c_ij;
+    REQUIRE(a.size() == b.size());
+    for (std::size_t k = 0; k < a.size(); k++) {
+      REQUIRE(std::fabs(a[k].c_value - b[k].c_value) < 1e-12);
+    }
+  }
+  molSys::PointCloud<molSys::Point<double>, double> liquid;
+  liquid.box = {20.0, 20.0, 20.0};
+  liquid.boxLow = {0.0, 0.0, 0.0};
+  liquid.currentFrame = 1;
+  std::mt19937 rng(91001);
+  std::uniform_real_distribution<double> u(0.0, 20.0);
+  for (int i = 0; i < 70; i++) {
+    molSys::Point<double> p;
+    p.x = u(rng);
+    p.y = u(rng);
+    p.z = u(rng);
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = p.atomID;
+    liquid.idIndexMap[p.atomID] = liquid.nop;
+    liquid.pts.push_back(p);
+    ++liquid.nop;
+  }
+  auto untouched = liquid;
+  REQUIRE_FALSE(chill::chillPlusSymbolicPrefilter(liquid, 3.5, 1));
+  for (int i = 0; i < liquid.nop; i++) {
+    REQUIRE(liquid.pts[static_cast<std::size_t>(i)].iceType ==
+            untouched.pts[static_cast<std::size_t>(i)].iceType);
+    REQUIRE(liquid.pts[static_cast<std::size_t>(i)].c_ij.size() ==
+            untouched.pts[static_cast<std::size_t>(i)].c_ij.size());
+  }
+}
+
+TEST_CASE("published cutoff CHILL+ matches the neighbour-list rule", "[chill][solid]") {
+  auto check = [](molSys::PointCloud<molSys::Point<double>, double> cloud) {
+    auto ref = cloud;
+    const auto rows = nneigh::neighListO(3.5, ref, 1);
+    chill::applyChillPlus(ref, rows, chill::ChillPlusRule::Published, false);
+    REQUIRE(chill::chillPlusPublishedCutoff(cloud, 3.5, 1));
+    for (int i = 0; i < cloud.nop; i++) {
+      REQUIRE(cloud.pts[static_cast<std::size_t>(i)].iceType ==
+              ref.pts[static_cast<std::size_t>(i)].iceType);
+      const auto &a = cloud.pts[static_cast<std::size_t>(i)].c_ij;
+      const auto &b = ref.pts[static_cast<std::size_t>(i)].c_ij;
+      REQUIRE(a.size() == b.size());
+      for (std::size_t k = 0; k < a.size(); k++) {
+        REQUIRE(std::fabs(a[k].c_value - b[k].c_value) < 1e-12);
+      }
+    }
+  };
+  check(iceIc(2));
+  molSys::PointCloud<molSys::Point<double>, double> liquid;
+  liquid.box = {20.0, 20.0, 20.0};
+  liquid.boxLow = {0.0, 0.0, 0.0};
+  liquid.currentFrame = 1;
+  std::mt19937 rng(91001);
+  std::uniform_real_distribution<double> u(0.0, 20.0);
+  for (int i = 0; i < 70; i++) {
+    molSys::Point<double> p;
+    p.x = u(rng);
+    p.y = u(rng);
+    p.z = u(rng);
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = p.atomID;
+    liquid.idIndexMap[p.atomID] = liquid.nop;
+    liquid.pts.push_back(p);
+    ++liquid.nop;
+  }
+  check(liquid);
 }
 
 TEST_CASE("Cartesian l=4 matches the trigonometric harmonic", "[ql][solid]") {

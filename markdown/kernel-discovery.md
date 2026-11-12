@@ -98,3 +98,105 @@ q4 samples, ms: 12.304, 11.593, 11.873, 11.423, 10.927, 11.364,
 Eight threads are about 4.9x the one-thread q6 median (56.00 / 11.55).
 The neighbour search is still about 6.5 ms of the eight-thread call
 after the affinity fix; the harmonic plus ql bar is about 4.5 ms.
+That nomination is the shared neighbour list. `perf/neighbours-threads`
+owns it, including the parallel CSR walk that `steinhardtQlCutoff`
+reads, so this branch does not replace it.
+
+## Published CHILL+
+
+The published cutoff rule (Nguyen and Molinero, closed edges
+c_ij <= -0.8 and -0.35 <= c_ij <= 0.25) now evaluates the real l = 3
+solid harmonic on the four nearest neighbours inside the CHILL+ call.
+An orthogonal box is walked with a cell list that lives in that call.
+The shared neighbour-list builder is not used and was not changed.
+A non-orthogonal box still uses the existing pair search.
+
+l = 3 needs one factor 1/(r^2 * sqrt(r^2)). The square root is the
+correctly rounded hardware operation. On ideal ice of 64 molecules
+and on two disordered clouds the labels and every c_ij match the
+neighbour-list rule with a difference of 0. `tests/test_ql_solid.cpp`
+checks the same agreement to 1e-12, including a cloud seeded with
+91001.
+
+### Same-session samples
+
+Ideal ice Ic, 110592 molecules, cutoff 3.5 A, every atom cubic
+(count 110592) in seams, mdapy 2.0.0 and OVITO 3.17.2. One warm-up,
+then eight samples. Taskset on cpus 0-7, no `OMP_PROC_BIND`. The raw
+transcript is `discovery/chillplus-session.txt`. An earlier OVITO
+attempt returned a cached pipeline (samples near 0.01 ms) and is not
+used; the samples below are fresh pipelines, timing only `compute`.
+
+One thread, ms. The seams row is the final binary.
+
+| code | samples | median | mean |
+| --- | --- | --- | --- |
+| seams | 36.0551, 34.5079, 34.4315, 34.2971, 34.5149, 34.0892, 34.2630, 34.3464 | 34.39 | 34.56 |
+| mdapy | 63.8681, 68.2311, 63.1378, 62.7007, 68.5828, 64.5342, 62.6098, 64.1594 | 64.01 | 64.73 |
+| OVITO | 619.6952, 616.3427, 622.8950, 615.9863, 617.4900, 619.0030, 617.7170, 615.0015 | 617.60 | 618.02 |
+
+Eight threads, ms.
+
+| code | samples | median | mean |
+| --- | --- | --- | --- |
+| seams | 12.1786, 11.5150, 12.0450, 8.3272, 11.7786, 8.3086, 10.3605, 10.3579 | 10.94 | 10.61 |
+| mdapy | 14.8743, 14.1306, 13.0941, 12.0581, 12.6429, 12.1378, 12.1279, 14.1280 | 12.87 | 13.15 |
+| OVITO | 86.2715, 87.3862, 86.7967, 87.1380, 87.1008, 86.0154, 88.3368, 87.0589 | 87.08 | 87.01 |
+
+## Sollya bounds
+
+`discovery/sollya_minimax.py` writes
+`discovery/generated/sollya_bounds.json` and
+`src/include/internal/minimax_coeff.hpp`. Each number is the upper
+endpoint of a Sollya `supnorm` enclosure (proof precision 1b-30 for
+the function, 1b-20 for the derivative).
+
+| approximant | interval | degree | supnorm |
+| --- | --- | --- | --- |
+| 2^{-x} relative | [0, 1] | 10 | 2.220446051253639e-16 |
+| derivative of 2^{-x}, relative | [0, 1] | 10 | 7.781709175237108e-14 |
+| 1/sqrt(x) relative | [1/2, 1] | 18 | 8.881784205014557e-16 |
+| derivative of 1/sqrt(x), relative | [1/2, 1] | 18 | 2.245317119382296e-12 |
+| ln(x) absolute | [1/2, 1] | 20 | 1.028838740165560e-17 |
+| ln(x) relative | [1/2, 1] | 20 | 1.065814104601747e-14 |
+
+The l = 3 path does not evaluate these polynomials. A degree-18
+reciprocal square root is slower than a hardware square root, and the
+hardware result is correctly rounded, which is why the checked c_ij
+values differ by 0. The coefficient header keeps the analytic
+derivative of each approximant beside the polynomial. q4, q6 and
+CHILL+ do not call it.
+
+## Symbolic pre-filter
+
+`discovery/pysr_prefilter.py` fits a cubic indicator on sorted c_ij,
+q3, the tetrahedral order and the neighbour radii. Training frames are
+ideal ice Ic, ice with gaussian noise, and disordered liquids. Seeds
+91001, 92002 and 93003 are held out, and so is one noisy ice cloud
+drawn with seed 93003. Forty iterations, serial, seed 0. The Pareto
+front, best loss last:
+
+| complexity | loss | expression |
+| --- | --- | --- |
+| 1 | 0.08223 | qtet |
+| 2 | 0.02647 | cmax^2 |
+| 3 | 0.01857 | cmean^4 |
+| 4 | 0.01628 | cmax^2 cmean^2 |
+| 6 | 0.01610 | cmax^2 cmean^2 / 0.9840904 |
+| 8 | 0.01532 | cmax^2 cmean^2 shell^2 / keep^2 |
+
+The selected expression is cmean^4. At a threshold of 0.5 the held-out
+accuracy against the published label is 1. The highest non-cubic score
+in the whole set, training and held-out, is 0.8528497963226561, and no
+non-cubic atom scores above it (0 false accepts, 1449 cubic accepts).
+
+`chillPlusSymbolicPrefilter` is not on the default path. It labels
+every atom cubic only when each atom has a shell of four and a
+negative cmean whose fourth power exceeds that ceiling by 1e-6.
+With every correlation in [-1, 1], cmean < -0.961 forces each of the
+four correlations to be <= -0.84395, which is staggered at the
+published edge -0.8. The atom is then cubic. A positive mean, a wider
+shell, or a score on the boundary returns false and leaves the cloud
+unchanged, so the caller runs the published rule. Ideal ice takes the
+fast label. A liquid seeded with 91001 does not. Thresholds are
+unchanged.
