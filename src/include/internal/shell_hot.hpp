@@ -28,8 +28,9 @@ struct Shell17 {
 
 // xyz is n by 3, row major. lat rows are the cell edges. kind[i] is written
 // as ice Ih (0), ice Ic (1), ice Isd (2), or -1.
-void classifyPrepared(const double *xyz, int n, const double lat[3][3], const CanonShell &canon,
-                      double gate, int *kind);
+// x, y, z are length n. Column-major coordinates, no interleaving copy.
+void classifyPrepared(const double *x, const double *y, const double *z, int n,
+                      const double lat[3][3], const CanonShell &canon, double gate, int *kind);
 
 } // namespace symm
 
