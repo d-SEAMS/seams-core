@@ -69,6 +69,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Require readcon-db 0.1.7 so static consumers receive only the archive and shared consumers receive the runtime search path.
 - Read a halo source from the frame index in share.local. The old index walked the local list as if it were the frame.
 - Keep the cutoff shell list and the per-share ring scratch on the calling thread. Overlapping calls no longer share those buffers.
+- Keep BondClassifier at the 2.13 layout, three doubles and one int. Open edges are an argument of classifyBond, so a caller that passes the struct by value is unchanged.
 
 
 ## [2.13.0] - 2026-11-06

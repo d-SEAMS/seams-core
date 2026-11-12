@@ -750,7 +750,7 @@ static void classifyBondsLeftFp64(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, const chill::BondClassifier &rule,
     bool isSlice, const std::vector<int> *csrOff = nullptr,
-    const std::vector<int> *csrCols = nullptr) {
+    const std::vector<int> *csrCols = nullptr, bool closed = true) {
   seams::adoptThreads();
   constexpr int l = 3;
   static_assert(l == 3, "the closed form below is the l = 3 polynomial");
@@ -960,7 +960,7 @@ static void classifyBondsLeftFp64(
       const double cij = correlationOf(dot, normI, qNorm[static_cast<std::size_t>(jatom)]);
       molSys::Result temp_cij;
       temp_cij.c_value = cij;
-      temp_cij.classifier = chill::classifyBond(cij, rule);
+      temp_cij.classifier = chill::classifyBond(cij, rule, closed);
       bonds.push_back(temp_cij);
     }
   }
@@ -970,11 +970,18 @@ void chill::classifyBonds(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<std::vector<int>> &nList, const chill::BondClassifier &rule,
     bool isSlice) {
+  chill::classifyBonds(yCloud, nList, rule, isSlice, true);
+}
+
+void chill::classifyBonds(
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    const std::vector<std::vector<int>> &nList, const chill::BondClassifier &rule,
+    bool isSlice, bool closed) {
   // Left-to-right fp64 is the path CHILL and CHILL+ run on. A different
   // product reduction or a non-fp64 dot product keeps the pairwise sum.
   if (seams::product::reduction() == seams::product::Reduction::Left &&
       seams::product::mode() == seams::product::Mode::Fp64) {
-    classifyBondsLeftFp64(yCloud, nList, rule, isSlice);
+    classifyBondsLeftFp64(yCloud, nList, rule, isSlice, nullptr, nullptr, closed);
     return;
   }
   constexpr int l = 3;
@@ -1085,7 +1092,7 @@ void chill::classifyBonds(
           correlationOf(dot_product.real(), Inorm.real(), Jnorm.real());
       molSys::Result temp_cij;
       temp_cij.c_value = cij_real;
-      temp_cij.classifier = chill::classifyBond(cij_real, rule);
+      temp_cij.classifier = chill::classifyBond(cij_real, rule, closed);
       yCloud.pts[iatom].c_ij.push_back(temp_cij);
     } // end loop over nearest neighbours
   }
@@ -1470,8 +1477,7 @@ chill::getCorrelPlus(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      int coordinationNumber, bool closedBounds) {
   chill::BondClassifier rule = chill::chillPlusRule();
   rule.coordinationNumber = coordinationNumber;
-  rule.closed = closedBounds;
-  chill::classifyBonds(yCloud, nList, rule, isSlice);
+  chill::classifyBonds(yCloud, nList, rule, isSlice, closedBounds);
 }
 
 /**
@@ -2082,7 +2088,7 @@ void chill::bondOrder(const molSys::PointCloud<molSys::Point<double>, double> &y
 
 void chill::correlFromOrder(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                             const BondOrder &order, const BondClassifier &rule, bool isSlice,
-                            const std::vector<char> *which) {
+                            const std::vector<char> *which, bool closed) {
   const int nop = yCloud.nop;
   const int keepMax = order.keepMax;
   const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
@@ -2124,7 +2130,7 @@ void chill::correlFromOrder(molSys::PointCloud<molSys::Point<double>, double> &y
           correlationOf(dot, normI, order.norm[static_cast<std::size_t>(jatom)]);
       molSys::Result temp;
       temp.c_value = cij;
-      temp.classifier = chill::classifyBond(cij, rule);
+      temp.classifier = chill::classifyBond(cij, rule, closed);
       bonds.push_back(temp);
     }
   }
@@ -2169,14 +2175,14 @@ void writeStaggered(molSys::PointCloud<molSys::Point<double>, double> &cloud, in
 
 void chill::distributedChillPlus(molSys::PointCloud<molSys::Point<double>, double> &full,
                                  double cutoff, BondClassifier rule, bool neighbourTest,
-                                 MPI_Comm comm) {
+                                 MPI_Comm comm, bool closed) {
   int rank = 0;
   int nRanks = 1;
   MPI_Comm_rank(comm, &rank);
   MPI_Comm_size(comm, &nRanks);
   if (nRanks <= 1) {
     const auto rows = nneigh::neighListO(cutoff, full, 1);
-    classifyBonds(full, rows, rule, false);
+    classifyBonds(full, rows, rule, false, closed);
     getIceTypePlusNoPrint(full, rows, false, neighbourTest);
     return;
   }
@@ -2218,7 +2224,7 @@ void chill::distributedChillPlus(molSys::PointCloud<molSys::Point<double>, doubl
     }
     (inside ? interior : boundary)[static_cast<std::size_t>(i)] = 1;
   }
-  correlFromOrder(work.cloud, order, rule, false, &interior);
+  correlFromOrder(work.cloud, order, rule, false, &interior, closed);
   seams::domain::waitBoundaryValues();
   for (int i = 0; i < nop; i++) {
     if (work.share.owned[static_cast<std::size_t>(i)]) {
@@ -2228,7 +2234,7 @@ void chill::distributedChillPlus(molSys::PointCloud<molSys::Point<double>, doubl
     std::copy_n(src, kRealL3, order.q.data() + static_cast<std::size_t>(i) * kRealL3);
     order.norm[static_cast<std::size_t>(i)] = src[kRealL3];
   }
-  correlFromOrder(work.cloud, order, rule, false, &boundary);
+  correlFromOrder(work.cloud, order, rule, false, &boundary, closed);
   // isInterfacial reads the four nearest neighbours' staggered counts.
   // An owned neighbour already has its bonds. A ghost count is needed
   // only when a boundary atom, this frame, is in one of those two rows.

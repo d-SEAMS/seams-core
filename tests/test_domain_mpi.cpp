@@ -105,12 +105,11 @@ int main(int argc, char **argv) {
     const auto q = chill::distributedSteinhardt(base, cutoff, 6, MPI_COMM_WORLD);
     chill::BondClassifier ovito = chill::chillPlusRule();
     ovito.coordinationNumber = 0;
-    ovito.closed = false;
     auto serialOvito = base;
-    chill::classifyBonds(serialOvito, rows, ovito, false);
+    chill::classifyBonds(serialOvito, rows, ovito, false, false);
     chill::getIceTypePlusNoPrint(serialOvito, rows, false, false);
     auto gotOvito = base;
-    chill::distributedChillPlus(gotOvito, cutoff, ovito, false, MPI_COMM_WORLD);
+    chill::distributedChillPlus(gotOvito, cutoff, ovito, false, MPI_COMM_WORLD, false);
     const auto share = seams::domain::decompose(base, rank, nRanks, cutoff);
     for (std::size_t k = 0; k < share.local.size(); k++) {
       if (!share.owned[k]) {

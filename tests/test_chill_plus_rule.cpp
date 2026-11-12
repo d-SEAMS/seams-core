@@ -19,8 +19,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <type_traits>
 #include <array>
 #include <cmath>
+#include <cstddef>
+#include <cstring>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
@@ -418,30 +421,46 @@ Cloud boundCloud() {
 
 void stampBonds(Cloud &cloud, double cij, bool closed) {
   chill::BondClassifier rule = chill::chillPlusRule();
-  rule.closed = closed;
   cloud.pts[0].c_ij.clear();
   for (int bond = 0; bond < 4; ++bond) {
     molSys::Result result;
     result.c_value = cij;
-    result.classifier = chill::classifyBond(cij, rule);
+    result.classifier = chill::classifyBond(cij, rule, closed);
     cloud.pts[0].c_ij.push_back(result);
   }
 }
 
+TEST_CASE("a 2.13 BondClassifier passed by value keeps inclusive edges",
+          "[chill][abi]") {
+  chill::BondClassifier rule = chill::chillPlusRule();
+  static_assert(std::is_standard_layout_v<chill::BondClassifier>);
+  static_assert(offsetof(chill::BondClassifier, coordinationNumber) == 24);
+  alignas(chill::BondClassifier) unsigned char raw[sizeof(rule)];
+  std::memcpy(raw, &rule, sizeof(rule));
+  // A 2.13 caller writes three doubles and one int. The tail of the
+  // 32-byte value is padding. Zero it, which is what a by-value pass
+  // leaves behind when that byte is not a member.
+  REQUIRE(sizeof(rule) > 28);
+  std::memset(raw + 28, 0, sizeof(rule) - 28);
+  std::memcpy(&rule, raw, sizeof(rule));
+  REQUIRE(chill::classifyBond(-0.8, rule) == molSys::bond_type::staggered);
+  REQUIRE(chill::classifyBond(-0.35, rule) == molSys::bond_type::eclipsed);
+  REQUIRE(chill::classifyBond(0.25, rule) == molSys::bond_type::eclipsed);
+  REQUIRE(chill::classifyBond(-0.8, rule, false) == molSys::bond_type::out_of_range);
+}
+
 TEST_CASE("a correlation exactly on a bound follows the edge each rule uses",
           "[chill][rule]") {
-  chill::BondClassifier closed = chill::chillPlusRule();
-  chill::BondClassifier open = closed;
-  open.closed = false;
-  REQUIRE(chill::classifyBond(-0.8, closed) == molSys::bond_type::staggered);
-  REQUIRE(chill::classifyBond(-0.8, open) == molSys::bond_type::out_of_range);
-  REQUIRE(chill::classifyBond(-0.35, closed) == molSys::bond_type::eclipsed);
-  REQUIRE(chill::classifyBond(-0.35, open) == molSys::bond_type::out_of_range);
-  REQUIRE(chill::classifyBond(0.25, closed) == molSys::bond_type::eclipsed);
-  REQUIRE(chill::classifyBond(0.25, open) == molSys::bond_type::out_of_range);
-  REQUIRE(chill::classifyBond(-1.0, open) == molSys::bond_type::staggered);
-  REQUIRE(chill::classifyBond(0.0, open) == molSys::bond_type::eclipsed);
-  REQUIRE(chill::classifyBond(0.5, closed) == molSys::bond_type::out_of_range);
+  chill::BondClassifier rule = chill::chillPlusRule();
+  REQUIRE(chill::classifyBond(-0.8, rule, true) == molSys::bond_type::staggered);
+  REQUIRE(chill::classifyBond(-0.8, rule, false) == molSys::bond_type::out_of_range);
+  REQUIRE(chill::classifyBond(-0.35, rule, true) == molSys::bond_type::eclipsed);
+  REQUIRE(chill::classifyBond(-0.35, rule, false) == molSys::bond_type::out_of_range);
+  REQUIRE(chill::classifyBond(0.25, rule, true) == molSys::bond_type::eclipsed);
+  REQUIRE(chill::classifyBond(0.25, rule, false) == molSys::bond_type::out_of_range);
+  REQUIRE(chill::classifyBond(-1.0, rule, false) == molSys::bond_type::staggered);
+  REQUIRE(chill::classifyBond(0.0, rule, false) == molSys::bond_type::eclipsed);
+  REQUIRE(chill::classifyBond(0.5, rule, true) == molSys::bond_type::out_of_range);
 
   const std::vector<std::vector<int>> rows{{1, 2, 3, 4, 5}};
   Cloud onStaggered = boundCloud();

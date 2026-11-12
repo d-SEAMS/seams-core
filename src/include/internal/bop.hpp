@@ -177,26 +177,28 @@ struct QlmAtom {
  *  or tetrahedral materials register their own thresholds and coordination.
  */
 struct BondClassifier {
-  double staggeredMax;    //! Staggered edge. Inclusive when closed is true
-  double eclipsedMin;     //! Lower edge of the eclipsed band
-  double eclipsedMax;     //! Upper edge of the eclipsed band
+  double staggeredMax;    //! Inclusive staggered edge, c_ij <= staggeredMax
+  double eclipsedMin;     //! Inclusive lower edge of the eclipsed band
+  double eclipsedMax;     //! Inclusive upper edge of the eclipsed band
   int coordinationNumber; //! Nearest neighbours in the bond sum; <= 0 keeps
                           //! each atom's whole neighbour row
-  bool closed = true;     //! Inclusive edges. OVITO Chill+ uses exclusive edges
 };
 
-//! Staggered, eclipsed, or out of range. Closed edges match Nguyen and
-//! Molinero (c <= staggeredMax, eclipsedMin <= c <= eclipsedMax). Open
-//! edges match OVITO 3.17.2 (c < staggeredMax, eclipsedMin < c < eclipsedMax).
-inline molSys::bond_type classifyBond(double cij, const BondClassifier &rule) {
-  const bool staggered =
-      rule.closed ? cij <= rule.staggeredMax : cij < rule.staggeredMax;
+//! Staggered, eclipsed, or out of range. @a closed selects inclusive edges
+//! (c <= staggeredMax, eclipsedMin <= c <= eclipsedMax), the Nguyen and
+//! Molinero rule and the 2.13 behaviour. Open edges match OVITO 3.17.2
+//! (c < staggeredMax, eclipsedMin < c < eclipsedMax). The flag is an
+//! argument so BondClassifier stays three doubles and one int. A caller
+//! that passes the struct by value does not carry a fifth field.
+inline molSys::bond_type classifyBond(double cij, const BondClassifier &rule,
+                                      bool closed = true) {
+  const bool staggered = closed ? cij <= rule.staggeredMax : cij < rule.staggeredMax;
   if (staggered) {
     return molSys::bond_type::staggered;
   }
   const bool eclipsed =
-      rule.closed ? (cij >= rule.eclipsedMin && cij <= rule.eclipsedMax)
-                  : (cij > rule.eclipsedMin && cij < rule.eclipsedMax);
+      closed ? (cij >= rule.eclipsedMin && cij <= rule.eclipsedMax)
+             : (cij > rule.eclipsedMin && cij < rule.eclipsedMax);
   if (eclipsed) {
     return molSys::bond_type::eclipsed;
   }
@@ -231,6 +233,13 @@ void classifyBonds(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    const std::vector<std::vector<int>> &nList,
                    const BondClassifier &rule, bool isSlice = false);
 
+//! Same classification as the four-argument form. @a closed false uses the
+//! open OVITO edges. The four-argument form stays the 2.13 symbol and keeps
+//! inclusive edges.
+void classifyBonds(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                   const std::vector<std::vector<int>> &nList,
+                   const BondClassifier &rule, bool isSlice, bool closed);
+
 //! CHILL/CHILL+ bonds from a CSR of cloud indices.
 void classifyBondsCsr(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                       const std::vector<int> &offsets, const std::vector<int> &cols,
@@ -261,7 +270,7 @@ void bondOrder(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 //! untouched, including a ghost's bond list.
 void correlFromOrder(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      const BondOrder &order, const BondClassifier &rule, bool isSlice,
-                     const std::vector<char> *which);
+                     const std::vector<char> *which, bool closed = true);
 
 #ifdef SEAMS_HAS_MPI
 //! Published or OVITO CHILL+ on the owned atoms. Coordinates move one
@@ -271,7 +280,7 @@ void correlFromOrder(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 //! written back onto the owned atoms of @a full.
 void distributedChillPlus(molSys::PointCloud<molSys::Point<double>, double> &full,
                           double cutoff, BondClassifier rule, bool neighbourTest,
-                          MPI_Comm comm);
+                          MPI_Comm comm, bool closed = true);
 #endif
 
 /**
