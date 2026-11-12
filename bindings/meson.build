@@ -59,6 +59,14 @@ if get_option('with_cli') and get_option('with_tests')
     depends: [seams_exe, seams_lang],
     timeout: 600,
   )
+  test(
+    'symmetry_ctypes',
+    find_program('python3', required: true),
+    args: [meson.project_source_root() / 'tests' / 'test_symmetry_ctypes.py'],
+    env: {'SEAMS_CORE_LIB': ydslib.full_path()},
+    depends: [ydslib],
+    timeout: 120,
+  )
 endif
 
 # CxxWrap needs libcxxwrap_julia, which is a BinaryBuilder product and
