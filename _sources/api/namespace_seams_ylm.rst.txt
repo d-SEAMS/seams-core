@@ -1,0 +1,36 @@
+.. index:: pair: namespace; seams::ylm
+.. _doxid-namespaceseams_1_1ylm:
+
+namespace seams::ylm
+====================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace ylm {
+
+	// global variables
+
+	double :target:`N3<doxid-namespaceseams_1_1ylm_1a0ea7855115022b2e51dfeec3257e2f7c>`[4]                            = {     0x1.7e21efc0768b0p-2,      0x1.4aefbf05f1305p-2,      0x1.05a0d7164496dp+0,      0x1.ab3cb8d675a30p-2   };
+	double :target:`N6<doxid-namespaceseams_1_1ylm_1a44d8f6d018716f5e2a02a91658d7d10e>`[7]                            = {     0x1.046123cc5b3b1p-4,       0x1.a5dce8e510806p-2,       0x1.4d830dc3746c6p-2,       0x1.4d830dc3746c6p-1,       0x1.6d58113f224e2p-2,       0x1.ac67615af3632p+0,       0x1.eead9a142c943p-2    };
+
+	// global functions
+
+	void :target:`ylmBatch<doxid-namespaceseams_1_1ylm_1aa0a1875983d8c0603569eb020f43fde2>`(int orderL, const double* dx, const double* dy, const double* dz, int n, double* re, double* im);
+
+	template <class T>
+	T :target:`legendrePoly<doxid-namespaceseams_1_1ylm_1a07e9327f44f07111da94f5f121da27f6>`(int orderL, int absM, const T* zpow);
+
+	template <class T>
+	void :target:`evalUnit<doxid-namespaceseams_1_1ylm_1ac0b8a775844aa8a94e1935d98c2fb22d>`(int orderL, T x, T y, T z, T* re, T* im);
+
+	bool :target:`ylmReal<doxid-namespaceseams_1_1ylm_1a9911ab8bbf1f648f47f0a6657a659d03>`(int orderL, double dx, double dy, double dz, double* re, double* im);
+
+	} // namespace ylm

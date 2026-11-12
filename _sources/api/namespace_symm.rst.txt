@@ -1,0 +1,71 @@
+.. index:: pair: namespace; symm
+.. _doxid-namespacesymm:
+
+namespace symm
+==============
+
+.. toctree::
+	:hidden:
+
+	enum_symm_Crystal.rst
+	enum_symm_Kind.rst
+	struct_symm_CanonShell.rst
+	struct_symm_Group.rst
+	struct_symm_Lattice.rst
+	struct_symm_Overlay.rst
+	struct_symm_Shell17.rst
+	struct_symm_Space.rst
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	
+	namespace symm {
+
+	// enums
+
+	enum :ref:`Crystal<doxid-namespacesymm_1a0d503bcc3d5952a25a838bb0dd2ef82d>`;
+	enum :ref:`Kind<doxid-namespacesymm_1ad93e6f708650d22301ab475a32337022>`;
+
+	// structs
+
+	struct :ref:`CanonShell<doxid-structsymm_1_1_canon_shell>`;
+	struct :ref:`Group<doxid-structsymm_1_1_group>`;
+	struct :ref:`Lattice<doxid-structsymm_1_1_lattice>`;
+	struct :ref:`Overlay<doxid-structsymm_1_1_overlay>`;
+	struct :ref:`Shell17<doxid-structsymm_1_1_shell17>`;
+	struct :ref:`Space<doxid-structsymm_1_1_space>`;
+
+	// global variables
+
+	int :target:`kTemplateCount<doxid-namespacesymm_1a18b4f207cb89fa68c9b88b737243452b>` = 8;
+	double :target:`kEclipsedCosine<doxid-namespacesymm_1a9b4cf619ad5f42deea89aaf87b58bf71>` = 0.90;
+	double :target:`kShellRmsd<doxid-namespacesymm_1a441a4b9599216d4ec218f599ecbe87fa>` = 0.12;
+
+	// global functions
+
+	void :target:`diamondFromCsr<doxid-namespacesymm_1a5d864afaa9e8bdf2e975d2fa3ac4d85d>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& offsets, const std::vector<int>& cols, std::vector<int>& kind);
+	const char* :target:`name<doxid-namespacesymm_1a6de3cd609961053178282be665bf5b13>`(:ref:`Kind<doxid-namespacesymm_1ad93e6f708650d22301ab475a32337022>` kind);
+	Eigen::MatrixXd :target:`points<doxid-namespacesymm_1a2c8403a35f0daa109f4cc90343002200>`(:ref:`Kind<doxid-namespacesymm_1ad93e6f708650d22301ab475a32337022>` kind);
+	std::vector<:ref:`Overlay<doxid-structsymm_1_1_overlay>`> :target:`score<doxid-namespacesymm_1af76dcf6f6e9583a9cd99ceea55b73f77>`(const Eigen::MatrixXd& environment, const char* backend = nullptr);
+	:ref:`Overlay<doxid-structsymm_1_1_overlay>` :target:`best<doxid-namespacesymm_1a5374e93c778190fce896be8d6567421f>`(const Eigen::MatrixXd& environment, const char* backend = nullptr);
+	:ref:`Overlay<doxid-structsymm_1_1_overlay>` :target:`matchKernel<doxid-namespacesymm_1aea0f3f10f434d271520104e26ddd6940>`(const Eigen::MatrixXd& environment);
+	void :target:`matchAll<doxid-namespacesymm_1a0d6f471026642e5d578d191f37fa3888>`(const std::vector<Eigen::MatrixXd>& environments, std::vector<:ref:`Overlay<doxid-structsymm_1_1_overlay>`>& out);
+	void :target:`classifyIce<doxid-namespacesymm_1af71c213f390254bf77878c72b46a59d7>`(const Eigen::MatrixXd& cartesian, const Eigen::Matrix3d& vectors, std::vector<int>& kind, double shellRmsd = :ref:`kShellRmsd<doxid-namespacesymm_1a441a4b9599216d4ec218f599ecbe87fa>`);
+	void :target:`classifyIceArrays<doxid-namespacesymm_1ad48a534521657a581174759a81c719fc>`(const double* x, const double* y, const double* z, int n, const double lat[3][3], int* kind, double shellRmsd = :ref:`kShellRmsd<doxid-namespacesymm_1a441a4b9599216d4ec218f599ecbe87fa>`);
+	int :target:`bondCosines<doxid-namespacesymm_1ae51b664e84ac3e7a8894b417fa4b3722>`(const Eigen::MatrixXd& environment, double out[4]);
+	double :target:`iceTemplateRmsd<doxid-namespacesymm_1a477f6563ad722b78e21afebe10bc0000>`(const Eigen::MatrixXd& environment, :ref:`Kind<doxid-namespacesymm_1ad93e6f708650d22301ab475a32337022>` kind);
+	double :target:`shapeMeasure<doxid-namespacesymm_1a2afeb3e6093bd3c1d29b6c4ba0b4d46d>`(const Eigen::MatrixXd& environment);
+	:ref:`Group<doxid-structsymm_1_1_group>` :target:`pointGroup<doxid-namespacesymm_1a35c5f089ab9b9fca61adf4d8e6f2e360>`(const Eigen::MatrixXd& xyz, double symThr = 0.05);
+	:ref:`Space<doxid-structsymm_1_1_space>` :target:`spaceGroup<doxid-namespacesymm_1a481a5432812fc55d840def77eb67d986>`(const Eigen::Matrix3d& vectors, const Eigen::MatrixXd& cartesian, double symprec = 1e-3);
+	:ref:`Lattice<doxid-structsymm_1_1_lattice>` :target:`crystal<doxid-namespacesymm_1aa2ec5ea19b218e462ab5cbff03d5ca7c>`(:ref:`Crystal<doxid-namespacesymm_1a0d503bcc3d5952a25a838bb0dd2ef82d>` which);
+	Eigen::MatrixXd :target:`iceShell<doxid-namespacesymm_1adec5164471ac99128cb3f7dab6020956>`(const Eigen::MatrixXd& cartesian, const Eigen::Matrix3d& vectors, int atom);
+	bool :target:`iraLinked<doxid-namespacesymm_1a9ff120d9b19c33196cc906af929466d3>`();
+	bool :target:`spglibLinked<doxid-namespacesymm_1a9b45faa173064de84c512b815e839985>`();
+	const char* :target:`matcher<doxid-namespacesymm_1a0f7e3ff9b3fecfaf6a79141c728b6b2b>`();
+	void :target:`classifyPrepared<doxid-namespacesymm_1ad14a718db3378b22d4f2b24eb109aae6>`(const double* x, const double* y, const double* z, int n, const double lat[3][3], const :ref:`CanonShell<doxid-structsymm_1_1_canon_shell>`& canon, double gate, int* kind);
+
+	} // namespace symm

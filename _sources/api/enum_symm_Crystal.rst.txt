@@ -1,0 +1,19 @@
+.. index:: pair: enum; Crystal
+.. _doxid-namespacesymm_1a0d503bcc3d5952a25a838bb0dd2ef82d:
+
+enum symm::Crystal
+==================
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <local_symmetry.hpp>
+
+	enum Crystal {
+	    :target:`iceIh<doxid-namespacesymm_1a0d503bcc3d5952a25a838bb0dd2ef82da258dadf6f3e4da9f8b92752ebfb5d5cf>`,
+	    :target:`iceIc<doxid-namespacesymm_1a0d503bcc3d5952a25a838bb0dd2ef82da24a56ee7f098bfe116170592ba67797c>`,
+	    :target:`fault<doxid-namespacesymm_1a0d503bcc3d5952a25a838bb0dd2ef82da3881bfd1571f85c6562ddfac94ea80ba>`,
+	};
+

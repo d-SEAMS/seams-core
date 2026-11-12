@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['mainpage_2edox_0',['mainpage.dox',['../mainpage_8dox.html',1,'']]],
-  ['mol_5fsys_2ehpp_1',['mol_sys.hpp',['../mol__sys_8hpp.html',1,'']]]
+  ['local_5fsymmetry_2ehpp_0',['local_symmetry.hpp',['../local__symmetry_8hpp.html',1,'']]]
 ];

@@ -18,7 +18,8 @@ var searchData=
   ['ringscontainingatom_15',['ringsContainingAtom',['../structring_1_1RingSearchIndex.html#a8e4433086bf9bec113ee61bc3c17b8bb',1,'ring::RingSearchIndex']]],
   ['ringshift_16',['ringShift',['../structring_1_1RingSearchIndex.html#a756c5dfcd0a8e96744dfff6775c1e31b',1,'ring::RingSearchIndex']]],
   ['rmax_17',['rmax',['../group__rdf.html#gaf633cbb773b23a72ae1e070d691c76ec',1,'rdf::PartialRdf']]],
-  ['rmsd_18',['rmsd',['../structcage_1_1CageShape.html#aff481658b1a1979a566dfc1667b36a9d',1,'cage::CageShape::rmsd'],['../structira_1_1Match.html#ab14b20ac985fe3c9fb6359973da2b5c9',1,'ira::Match::rmsd'],['../structchill_1_1TemplateHit.html#ab9b9bdbf34e6272e29ab3bdcf2c9e1c2',1,'chill::TemplateHit::rmsd']]],
-  ['rotation_19',['rotation',['../structira_1_1Match.html#a4a98f0d5bfd17ab0b1aa668dbf72c415',1,'ira::Match']]],
-  ['rowcap_20',['rowCap',['../structtum_1_1SpecializedCaps.html#ad8955b2eea49812c13dd01b5c29c93a1',1,'tum::SpecializedCaps']]]
+  ['rmsd_18',['rmsd',['../structcage_1_1CageShape.html#aff481658b1a1979a566dfc1667b36a9d',1,'cage::CageShape::rmsd'],['../structira_1_1Match.html#ab14b20ac985fe3c9fb6359973da2b5c9',1,'ira::Match::rmsd'],['../structsymm_1_1Overlay.html#a96153ac1fe52b3639139973752024c2f',1,'symm::Overlay::rmsd'],['../structchill_1_1TemplateHit.html#ab9b9bdbf34e6272e29ab3bdcf2c9e1c2',1,'chill::TemplateHit::rmsd']]],
+  ['rotation_19',['rotation',['../structira_1_1Match.html#a4a98f0d5bfd17ab0b1aa668dbf72c415',1,'ira::Match::rotation'],['../structsymm_1_1Overlay.html#a548510213b812305b214aeb56d9842ff',1,'symm::Overlay::rotation']]],
+  ['rowcap_20',['rowCap',['../structtum_1_1SpecializedCaps.html#ad8955b2eea49812c13dd01b5c29c93a1',1,'tum::SpecializedCaps']]],
+  ['rows_21',['rows',['../group__chill.html#gaaeaace17f46d341e1f09eac06dc64faf',1,'chill::BondOrder']]]
 ];

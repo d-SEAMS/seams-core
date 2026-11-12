@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.13.0</span>
+<span class="project_info">seams-core v2.14.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -245,6 +245,8 @@ Namespaces</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
+<tr class="memitem:nneigh_3A_3ACutoffSkin" id="r_nneigh_3A_3ACutoffSkin"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classnneigh_1_1CutoffSkin.html">nneigh::CutoffSkin</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">In-situ cutoff list.  <a href="classnneigh_1_1CutoffSkin.html#details">More...</a><br /></td></tr>
 <tr class="memitem:nneigh_3A_3ASkinNeighborList" id="r_nneigh_3A_3ASkinNeighborList"><td class="memItemLeft">class &#160;</td><td class="memItemRight"><a class="el" href="classnneigh_1_1SkinNeighborList.html">nneigh::SkinNeighborList</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Persistent neighbour list with a LAMMPS skin.  <a href="classnneigh_1_1SkinNeighborList.html#details">More...</a><br /></td></tr>
 </table><table class="memberdecls">
@@ -279,7 +281,22 @@ Functions</h2></td></tr>
 <tr class="memitem:ga9566a384474993ea7356e7abc414e40e" id="r_ga9566a384474993ea7356e7abc414e40e"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga9566a384474993ea7356e7abc414e40e">nneigh::neighList</a> (double rcutoff, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</td></tr>
 <tr class="memdesc:ga9566a384474993ea7356e7abc414e40e"><td class="mdescLeft">&#160;</td><td class="mdescRight">All these functions use atom IDs and not indices.  <br /></td></tr>
 <tr class="memitem:gadd6ed18f0c7e2e5fbd10d7cdbf6af429" id="r_gadd6ed18f0c7e2e5fbd10d7cdbf6af429"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gadd6ed18f0c7e2e5fbd10d7cdbf6af429">nneigh::neighListPair</a> (double rcutoff, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI, int typeJ)</td></tr>
+<tr class="memitem:ga4f12746b56fe9e1c8cfb7d2af32b64ba" id="r_ga4f12746b56fe9e1c8cfb7d2af32b64ba"><td class="memItemLeft">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;&#160;</td><td class="memItemRight"><a class="el" href="#ga4f12746b56fe9e1c8cfb7d2af32b64ba">nneigh::reusedShellList</a> (double rcutoff, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; char &gt; *source)</td></tr>
+<tr class="memitem:gaccd2ce503032424d9cb7c0fb6b329dce" id="r_gaccd2ce503032424d9cb7c0fb6b329dce"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#gaccd2ce503032424d9cb7c0fb6b329dce">nneigh::blockWindowRows</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double rcutoff, const std::vector&lt; char &gt; *source, std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rows)</td></tr>
 <tr class="memitem:ga8f5dd92092f5be635273a1ea18b57cb7" id="r_ga8f5dd92092f5be635273a1ea18b57cb7"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ga8f5dd92092f5be635273a1ea18b57cb7">nneigh::cellListRowsThreaded</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;subset, double rcutoff, std::vector&lt; std::vector&lt; int &gt; &gt; &amp;rows)</td></tr>
+<tr class="memitem:gad4ed66234b38b63ae408ef3dacff5444" id="r_gad4ed66234b38b63ae408ef3dacff5444"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#gad4ed66234b38b63ae408ef3dacff5444">nneigh::orthoFullCsr</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; *subset, double rcutoff, std::vector&lt; int &gt; &amp;offsets, std::vector&lt; int &gt; &amp;cols, bool half=false)</td></tr>
+<tr class="memdesc:gad4ed66234b38b63ae408ef3dacff5444"><td class="mdescLeft">&#160;</td><td class="mdescRight">Full cutoff list as CSR of cloud indices.  <br /></td></tr>
+<tr class="memitem:gaeea98d90f7f3fcf17c82d23530a7fc8e" id="r_gaeea98d90f7f3fcf17c82d23530a7fc8e"><td class="memItemLeft">&#160;</td><td class="memItemRight"><a class="el" href="#gaeea98d90f7f3fcf17c82d23530a7fc8e">nneigh::CutoffSkin::CutoffSkin</a> (double cutoff, double skin)</td></tr>
+<tr class="memitem:gafb2d6ad5afad66636670061b01915fee" id="r_gafb2d6ad5afad66636670061b01915fee"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#gafb2d6ad5afad66636670061b01915fee">nneigh::CutoffSkin::update</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; *subset=nullptr, bool half=false)</td></tr>
+<tr class="memitem:ga7b1473327d3872ef9cb1850faf21a16b" id="r_ga7b1473327d3872ef9cb1850faf21a16b"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ga7b1473327d3872ef9cb1850faf21a16b">nneigh::CutoffSkin::lastReused</a> () const</td></tr>
+<tr class="memitem:ga646bd46bc143ad26f92fd6bddf638cd4" id="r_ga646bd46bc143ad26f92fd6bddf638cd4"><td class="memItemLeft">const std::vector&lt; int &gt; &amp;&#160;</td><td class="memItemRight"><a class="el" href="#ga646bd46bc143ad26f92fd6bddf638cd4">nneigh::CutoffSkin::offsets</a> () const</td></tr>
+<tr class="memitem:ga3944f1934058db7a427622d531e616e8" id="r_ga3944f1934058db7a427622d531e616e8"><td class="memItemLeft">const std::vector&lt; int &gt; &amp;&#160;</td><td class="memItemRight"><a class="el" href="#ga3944f1934058db7a427622d531e616e8">nneigh::CutoffSkin::cols</a> () const</td></tr>
+<tr class="memitem:ga054007bfd5ef4ba81d50851c1eca6d61" id="r_ga054007bfd5ef4ba81d50851c1eca6d61"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga054007bfd5ef4ba81d50851c1eca6d61">nneigh::idRowsFromCsr</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;indexToID, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols)</td></tr>
+<tr class="memdesc:ga054007bfd5ef4ba81d50851c1eca6d61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Atom-ID rows, self first, from a CSR of cloud indices.  <br /></td></tr>
+<tr class="memitem:ga607468766af5b066de4b646601fcf0b4" id="r_ga607468766af5b066de4b646601fcf0b4"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga607468766af5b066de4b646601fcf0b4">nneigh::indexRowsFromCsr</a> (int nop, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols)</td></tr>
+<tr class="memdesc:ga607468766af5b066de4b646601fcf0b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index rows, self first, from a CSR of cloud indices.  <br /></td></tr>
+<tr class="memitem:gacb3f8226a248f4d7399707c779e91867" id="r_gacb3f8226a248f4d7399707c779e91867"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gacb3f8226a248f4d7399707c779e91867">nneigh::halfIdRowsFromCsr</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;indexToID, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols)</td></tr>
+<tr class="memdesc:gacb3f8226a248f4d7399707c779e91867"><td class="mdescLeft">&#160;</td><td class="mdescRight">Half list by atom ID. The lower cloud index owns the pair.  <br /></td></tr>
 <tr class="memitem:gafaf0f0ff09cef581076f99a68018b023" id="r_gafaf0f0ff09cef581076f99a68018b023"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gafaf0f0ff09cef581076f99a68018b023">nneigh::neighListO</a> (double rcutoff, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI)</td></tr>
 <tr class="memitem:ga651839704a066d725b22212c13c74327" id="r_ga651839704a066d725b22212c13c74327"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga651839704a066d725b22212c13c74327">nneigh::halfNeighList</a> (double rcutoff, const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int typeI=1)</td></tr>
 <tr class="memitem:gacf46d8c4b42f15e634ff0076ac83c012" id="r_gacf46d8c4b42f15e634ff0076ac83c012"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gacf46d8c4b42f15e634ff0076ac83c012">nneigh::neighbourListByIndex</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</td></tr>
@@ -339,15 +356,47 @@ Functions</h2></td></tr>
 <tr><td class="fieldname"><a id="ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706" name="ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706"></a>KnnUnion&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00462">462</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  462</span>{ <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">Cutoff</a>, <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">KnnMutual</a>, <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">KnnUnion</a> };</div>
-<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">nneigh::BondGraph::KnnUnion</a></div><div class="ttdeci">@ KnnUnion</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00462">neighbours.hpp:462</a></div></div>
-<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">nneigh::BondGraph::KnnMutual</a></div><div class="ttdeci">@ KnnMutual</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00462">neighbours.hpp:462</a></div></div>
-<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">nneigh::BondGraph::Cutoff</a></div><div class="ttdeci">@ Cutoff</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00462">neighbours.hpp:462</a></div></div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00550">550</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  550</span>{ <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">Cutoff</a>, <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">KnnMutual</a>, <a class="code hl_enumvalue" href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">KnnUnion</a> };</div>
+<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706">nneigh::BondGraph::KnnUnion</a></div><div class="ttdeci">@ KnnUnion</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00550">neighbours.hpp:550</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604">nneigh::BondGraph::KnnMutual</a></div><div class="ttdeci">@ KnnMutual</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00550">neighbours.hpp:550</a></div></div>
+<div class="ttc" id="agroup__nneigh_html_ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084"><div class="ttname"><a href="#ggae70187f6d039fe332d7f59be0112ff26abc5449e9092ea92f5393be6516916084">nneigh::BondGraph::Cutoff</a></div><div class="ttdeci">@ Cutoff</div><div class="ttdef"><b>Definition</b> <a href="neighbours_8hpp_source.html#l00550">neighbours.hpp:550</a></div></div>
 </div><!-- fragment -->
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="gaccd2ce503032424d9cb7c0fb6b329dce" name="gaccd2ce503032424d9cb7c0fb6b329dce"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaccd2ce503032424d9cb7c0fb6b329dce">&#9670;&#160;</a></span>blockWindowRows()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool nneigh::blockWindowRows </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>rcutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; char &gt; *</td>          <td class="paramname"><span class="paramname"><em>source</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>rows</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Neighbour rows on a cell grid that covers the owned block plus its halo. Anchors are folded onto the first owned atom. Every atom, ghosts included, is shifted by a box length so it sits against that block. An axis whose empty gap is wider than the cutoff does not wrap, and the fused cutoff list runs on that window rather than on the periodic box. Returns false when the atoms fill the box or the box is not orthorhombic. Rows are atom IDs, self first, in the same order as neighListO. A null source marks every atom as an anchor; otherwise only marked atoms receive partners. </p>
+
+</div>
+</div>
 <a id="gad285ff1c2c0bd1ca8495f3972faebb8c" name="gad285ff1c2c0bd1ca8495f3972faebb8c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gad285ff1c2c0bd1ca8495f3972faebb8c">&#9670;&#160;</a></span>bondGraphFromName()</h2>
 
@@ -405,10 +454,10 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00492">492</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  492</span>                                                               {</div>
-<div class="line"><span class="lineno">  493</span>    <span class="keywordflow">return</span> nList_;</div>
-<div class="line"><span class="lineno">  494</span>  }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00580">580</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  580</span>                                                               {</div>
+<div class="line"><span class="lineno">  581</span>    <span class="keywordflow">return</span> nList_;</div>
+<div class="line"><span class="lineno">  582</span>  }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -440,7 +489,6 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Threaded cell-list neighbour rows. <span class="tt">rows[k]</span> holds the indices within <span class="tt">rcutoff</span> of <span class="tt">subset[k]</span> under the minimum image convention, ascending and without the atom itself. Atoms are binned in fractional coordinates of the recovered triclinic cell H; every axis needs at least three cells of perpendicular width <span class="tt">rcutoff</span>, so that the nearest image of every neighbour sits in one of the 27 surrounding cells. Returns false, with <span class="tt">rows</span> untouched, when the cell is too small for that, and the caller takes the vesin or brute-force path. Each row is built by one thread. </p>
 
 </div>
 </div>
@@ -468,6 +516,55 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Erases memory for a vector of vectors for the neighbour list. </p>
+
+</div>
+</div>
+<a id="ga3944f1934058db7a427622d531e616e8" name="ga3944f1934058db7a427622d531e616e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3944f1934058db7a427622d531e616e8">&#9670;&#160;</a></span>cols()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; int &gt; &amp; nneigh::CutoffSkin::cols </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00409">409</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  409</span>{ <span class="keywordflow">return</span> cols_; }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gaeea98d90f7f3fcf17c82d23530a7fc8e" name="gaeea98d90f7f3fcf17c82d23530a7fc8e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaeea98d90f7f3fcf17c82d23530a7fc8e">&#9670;&#160;</a></span>CutoffSkin()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">nneigh::CutoffSkin::CutoffSkin </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>skin</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -897,9 +994,42 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00482">482</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  482</span>{ <span class="keywordflow">return</span> graph_; }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00570">570</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  570</span>{ <span class="keywordflow">return</span> graph_; }</div>
 </div><!-- fragment -->
+</div>
+</div>
+<a id="gacb3f8226a248f4d7399707c779e91867" name="gacb3f8226a248f4d7399707c779e91867"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gacb3f8226a248f4d7399707c779e91867">&#9670;&#160;</a></span>halfIdRowsFromCsr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; nneigh::halfIdRowsFromCsr </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>indexToID</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>offsets</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Half list by atom ID. The lower cloud index owns the pair. </p>
+
 </div>
 </div>
 <a id="ga651839704a066d725b22212c13c74327" name="ga651839704a066d725b22212c13c74327"></a>
@@ -926,6 +1056,67 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>Half neighbour list for one type (vesin cell list, brute-force fallback) You can only use this for neighbour lists with one type </p>
+
+</div>
+</div>
+<a id="ga054007bfd5ef4ba81d50851c1eca6d61" name="ga054007bfd5ef4ba81d50851c1eca6d61"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga054007bfd5ef4ba81d50851c1eca6d61">&#9670;&#160;</a></span>idRowsFromCsr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; nneigh::idRowsFromCsr </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>indexToID</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>offsets</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Atom-ID rows, self first, from a CSR of cloud indices. </p>
+
+</div>
+</div>
+<a id="ga607468766af5b066de4b646601fcf0b4" name="ga607468766af5b066de4b646601fcf0b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga607468766af5b066de4b646601fcf0b4">&#9670;&#160;</a></span>indexRowsFromCsr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; nneigh::indexRowsFromCsr </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>nop</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>offsets</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Index rows, self first, from a CSR of cloud indices. </p>
 
 </div>
 </div>
@@ -1097,8 +1288,8 @@ Functions</h2></td></tr>
 
 <p>Atoms whose cutoff bond set changed on the last update. </p>
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00491">491</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  491</span>{ <span class="keywordflow">return</span> changedAtoms_; }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00579">579</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  579</span>{ <span class="keywordflow">return</span> changedAtoms_; }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1125,8 +1316,36 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00489">489</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  489</span>{ <span class="keywordflow">return</span> rebuilt_; }</div>
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00577">577</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  577</span>{ <span class="keywordflow">return</span> rebuilt_; }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="ga7b1473327d3872ef9cb1850faf21a16b" name="ga7b1473327d3872ef9cb1850faf21a16b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga7b1473327d3872ef9cb1850faf21a16b">&#9670;&#160;</a></span>lastReused()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool nneigh::CutoffSkin::lastReused </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00407">407</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  407</span>{ <span class="keywordflow">return</span> reused_; }</div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -1301,6 +1520,105 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>I-J neighbour list (I==J is like-type and reuses neighListO). Unlike-type pairs use the same dump MIC as neighListO. </p>
+
+</div>
+</div>
+<a id="ga646bd46bc143ad26f92fd6bddf638cd4" name="ga646bd46bc143ad26f92fd6bddf638cd4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga646bd46bc143ad26f92fd6bddf638cd4">&#9670;&#160;</a></span>offsets()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; int &gt; &amp; nneigh::CutoffSkin::offsets </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="neighbours_8hpp_source.html#l00408">408</a> of file <a class="el" href="neighbours_8hpp_source.html">neighbours.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  408</span>{ <span class="keywordflow">return</span> offsets_; }</div>
+</div><!-- fragment -->
+</div>
+</div>
+<a id="gad4ed66234b38b63ae408ef3dacff5444" name="gad4ed66234b38b63ae408ef3dacff5444"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad4ed66234b38b63ae408ef3dacff5444">&#9670;&#160;</a></span>orthoFullCsr()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool nneigh::orthoFullCsr </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; *</td>          <td class="paramname"><span class="paramname"><em>subset</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>rcutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>offsets</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>half</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Full cutoff list as CSR of cloud indices. </p>
+<p>Orthorhombic boxes (<span class="tt">box.size() == 3</span>) and restricted triclinic dump boxes (<span class="tt">box.size() &gt;= 6</span>) both use the parallel cell sort. A null <em class="arg">subset</em> is every atom. <span class="tt">cols[offsets[i] .. offsets[i + 1]]</span> is sorted and has no self entry. A neighbour is kept when the squared minimum image is strictly below the cutoff squared. <em class="arg">half</em> keeps the pair only on the lower cloud index. The pair set does not depend on the thread count. Scratch buffers stay allocated and are refilled on the next call. Returns false when the box is not usable. </p>
+
+</div>
+</div>
+<a id="ga4f12746b56fe9e1c8cfb7d2af32b64ba" name="ga4f12746b56fe9e1c8cfb7d2af32b64ba"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4f12746b56fe9e1c8cfb7d2af32b64ba">&#9670;&#160;</a></span>reusedShellList()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp; nneigh::reusedShellList </td>
+          <td>(</td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>rcutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; char &gt; *</td>          <td class="paramname"><span class="paramname"><em>source</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Threaded cell-list neighbour rows. <span class="tt">rows[k]</span> holds the indices within <span class="tt">rcutoff</span> of <span class="tt">subset[k]</span> under the minimum image convention, ascending and without the atom itself. Atoms are binned in fractional coordinates of the recovered triclinic cell H; every axis needs at least three cells of perpendicular width <span class="tt">rcutoff</span>, so that the nearest image of every neighbour sits in one of the 27 surrounding cells. Returns false, with <span class="tt">rows</span> untouched, when the cell is too small for that, and the caller takes the vesin or brute-force path. Each row is built by one thread. Cutoff rows by atom ID, self first, for every atom or only the atoms marked in <em class="arg">source</em>. The cell counts and the row storage stay allocated on the calling thread and are refilled in place, so overlapping calls do not share them. The returned reference is valid on this thread until the next call on this thread. Same partners as neighListO for the rows that are filled. </p>
 
 </div>
 </div>
@@ -1574,8 +1892,34 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="gafb2d6ad5afad66636670061b01915fee" name="gafb2d6ad5afad66636670061b01915fee"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafb2d6ad5afad66636670061b01915fee">&#9670;&#160;</a></span>update() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool nneigh::CutoffSkin::update </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; *</td>          <td class="paramname"><span class="paramname"><em>subset</em></span><span class="paramdefsep"> = </span><span class="paramdefval">nullptr</span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>half</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <a id="ga81af9074f6b9311b1cba1321b64f21d7" name="ga81af9074f6b9311b1cba1321b64f21d7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga81af9074f6b9311b1cba1321b64f21d7">&#9670;&#160;</a></span>update()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ga81af9074f6b9311b1cba1321b64f21d7">&#9670;&#160;</a></span>update() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">

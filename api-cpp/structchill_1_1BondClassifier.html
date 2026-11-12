@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.13.0</span>
+<span class="project_info">seams-core v2.14.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -247,17 +247,17 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('structchill_1_
 Public Attributes</h2></td></tr>
 <tr class="memitem:ga146b6b87ef413723796680f70c8ecca5" id="r_ga146b6b87ef413723796680f70c8ecca5"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga146b6b87ef413723796680f70c8ecca5">staggeredMax</a></td></tr>
 <tr class="memitem:ga02940fdda8b90a912eda29b5d48a4bc3" id="r_ga02940fdda8b90a912eda29b5d48a4bc3"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga02940fdda8b90a912eda29b5d48a4bc3">eclipsedMin</a></td></tr>
-<tr class="memdesc:ga02940fdda8b90a912eda29b5d48a4bc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">c_ij at or below this is staggered  <br /></td></tr>
+<tr class="memdesc:ga02940fdda8b90a912eda29b5d48a4bc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inclusive staggered edge, c_ij &lt;= staggeredMax.  <br /></td></tr>
 <tr class="memitem:gaa9f8b29d2f9ab31e7cda7a399f2b4466" id="r_gaa9f8b29d2f9ab31e7cda7a399f2b4466"><td class="memItemLeft">double&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gaa9f8b29d2f9ab31e7cda7a399f2b4466">eclipsedMax</a></td></tr>
-<tr class="memdesc:gaa9f8b29d2f9ab31e7cda7a399f2b4466"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lower edge of the eclipsed band.  <br /></td></tr>
+<tr class="memdesc:gaa9f8b29d2f9ab31e7cda7a399f2b4466"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inclusive lower edge of the eclipsed band.  <br /></td></tr>
 <tr class="memitem:ga85100f5928056281b3c93e4dca7a1d5b" id="r_ga85100f5928056281b3c93e4dca7a1d5b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga85100f5928056281b3c93e4dca7a1d5b">coordinationNumber</a></td></tr>
-<tr class="memdesc:ga85100f5928056281b3c93e4dca7a1d5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Upper edge of the eclipsed band.  <br /></td></tr>
+<tr class="memdesc:ga85100f5928056281b3c93e4dca7a1d5b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Inclusive upper edge of the eclipsed band.  <br /></td></tr>
 </table>
 <a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>One rule set for classifying bond correlations \(c_{ij}\). </p>
 <p>A bond is staggered when \(c_{ij} \le\) staggeredMax, eclipsed when it falls in [eclipsedMin, eclipsedMax], and out of range otherwise. The CHILL and CHILL+ water rules are two instances; other hydrogen-bonded or tetrahedral materials register their own thresholds and coordination. </p>
 
-<p class="definition">Definition at line <a class="el" href="bop_8hpp_source.html#l00174">174</a> of file <a class="el" href="bop_8hpp_source.html">bop.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="bop_8hpp_source.html#l00179">179</a> of file <a class="el" href="bop_8hpp_source.html">bop.hpp</a>.</p>
 </div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li>src/include/internal/<a class="el" href="bop_8hpp_source.html">bop.hpp</a></li>
 </ul>

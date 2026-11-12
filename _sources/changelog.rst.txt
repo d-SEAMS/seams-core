@@ -11,6 +11,23 @@ The release history is `CHANGELOG.md <../../CHANGELOG.md>`_
 (Keep a Changelog, assembled by towncrier). This page is the
 narrative cut used in the book.
 
+2.14.0
+------
+
+The cutoff list covers restricted triclinic boxes, and the orthorhombic
+list is a parallel cell sort.
+CHILL+ on that list counts a crystal row with four neighbours inside
+the cutoff. On the mixed TIP4P fixture, interClathrate moves from 12
+to 9 and water from 238 to 241.
+``ovito-chill+`` averages q3 on the full shell.
+``--pair-types`` names the site-site pair. ``--types`` remains a deprecated
+exact alias and prints a warning.
+Local symmetry names an ice shell, a hydrate cage, or a ring, with an
+optional IRA, SOFI, or spglib report.
+A partial diamond signature keeps a shell that can still reach eight
+good (4,2,1) patterns.
+The book builds from the committed Org sources.
+
 2.13.0
 ------
 

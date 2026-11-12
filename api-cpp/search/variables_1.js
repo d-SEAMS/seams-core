@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['backend_0',['backend',['../structseams_1_1product_1_1RealDot.html#a370538360b39ac1bd03fac89cbc922cb',1,'seams::product::RealDot::backend'],['../structseams_1_1product_1_1ComplexDot.html#ad5559f7c7ad30016d9bfbc6e4493f044',1,'seams::product::ComplexDot::backend'],['../structseams_1_1product_1_1Cij.html#a92b4a8a74a1a8248ae2777513887cd3e',1,'seams::product::Cij::backend'],['../structseams_1_1product_1_1GemmInfo.html#ade8e7ad79d1207d18bb8bafff93fd429',1,'seams::product::GemmInfo::backend']]],
+  ['backend_0',['backend',['../structsymm_1_1Overlay.html#a11ca36b9a99e39326db0447246684ce6',1,'symm::Overlay::backend'],['../structseams_1_1product_1_1RealDot.html#a370538360b39ac1bd03fac89cbc922cb',1,'seams::product::RealDot::backend'],['../structseams_1_1product_1_1ComplexDot.html#ad5559f7c7ad30016d9bfbc6e4493f044',1,'seams::product::ComplexDot::backend'],['../structseams_1_1product_1_1Cij.html#a92b4a8a74a1a8248ae2777513887cd3e',1,'seams::product::Cij::backend'],['../structseams_1_1product_1_1GemmInfo.html#ade8e7ad79d1207d18bb8bafff93fd429',1,'seams::product::GemmInfo::backend']]],
   ['ball_5fcount_5fms_1',['ball_count_ms',['../group__primitive.html#ga96c5404f51682855bd20f1caccb4a6c9',1,'primitive::RingSearchSplit']]],
   ['ball_5ffill_5fms_2',['ball_fill_ms',['../group__primitive.html#ga554a37fa145adbd506dab889e438be7f',1,'primitive::RingSearchSplit']]],
   ['balls_5fms_3',['balls_ms',['../group__primitive.html#ga0e6ab106bff4d946013fa746d558ea1d',1,'primitive::RingSearchSplit']]],

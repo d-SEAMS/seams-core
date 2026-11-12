@@ -10,6 +10,7 @@ var annotated_dup =
     ] ],
     [ "chill", "namespacechill.html", [
       [ "BondClassifier", "structchill_1_1BondClassifier.html", "structchill_1_1BondClassifier" ],
+      [ "BondOrder", "structchill_1_1BondOrder.html", "structchill_1_1BondOrder" ],
       [ "ChillPlusResult", "structchill_1_1ChillPlusResult.html", "structchill_1_1ChillPlusResult" ],
       [ "LinearClassifier", "structchill_1_1LinearClassifier.html", "structchill_1_1LinearClassifier" ],
       [ "QlmAtom", "structchill_1_1QlmAtom.html", "structchill_1_1QlmAtom" ],
@@ -40,6 +41,7 @@ var annotated_dup =
       [ "PointCloud", "structmolSys_1_1PointCloud.html", "structmolSys_1_1PointCloud" ]
     ] ],
     [ "nneigh", "namespacenneigh.html", [
+      [ "CutoffSkin", "classnneigh_1_1CutoffSkin.html", "classnneigh_1_1CutoffSkin" ],
       [ "SkinNeighborList", "classnneigh_1_1SkinNeighborList.html", "classnneigh_1_1SkinNeighborList" ]
     ] ],
     [ "phase", "namespacephase.html", [
@@ -89,6 +91,14 @@ var annotated_dup =
       [ "InsideTrace", "structsite_1_1InsideTrace.html", "structsite_1_1InsideTrace" ],
       [ "IonEnvironment", "structsite_1_1IonEnvironment.html", "structsite_1_1IonEnvironment" ],
       [ "Table", "structsite_1_1Table.html", "structsite_1_1Table" ]
+    ] ],
+    [ "symm", "namespacesymm.html", [
+      [ "CanonShell", "structsymm_1_1CanonShell.html", "structsymm_1_1CanonShell" ],
+      [ "Group", "structsymm_1_1Group.html", "structsymm_1_1Group" ],
+      [ "Lattice", "structsymm_1_1Lattice.html", "structsymm_1_1Lattice" ],
+      [ "Overlay", "structsymm_1_1Overlay.html", "structsymm_1_1Overlay" ],
+      [ "Shell17", "structsymm_1_1Shell17.html", "structsymm_1_1Shell17" ],
+      [ "Space", "structsymm_1_1Space.html", "structsymm_1_1Space" ]
     ] ],
     [ "topo", "namespacetopo.html", [
       [ "LocalKey", "structtopo_1_1LocalKey.html", "structtopo_1_1LocalKey" ],

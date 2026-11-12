@@ -9,6 +9,7 @@ var structure__desc_8hpp =
       [ "chill::CrystalKind::hcp", "namespacechill.html#ac13b1a10b6669044f75448ec1abe5122a463ba1e631ac9ed1c3de0b306afd561e", null ],
       [ "chill::CrystalKind::bcc", "namespacechill.html#ac13b1a10b6669044f75448ec1abe5122adc9262a469f6f315f74c087a7b3a7f35", null ]
     ] ],
+    [ "chill::classifyTemplates", "namespacechill.html#a1690a928c74898a894d10efc8c2fe134", null ],
     [ "chill::classifyTemplates", "namespacechill.html#a6235256c303786bfee2a6143044b46a8", null ],
     [ "chill::soapSpectrum", "namespacechill.html#a7ce20c1ee581242dfd8e0dc80ddc17bc", null ],
     [ "chill::soapSpectrumAll", "namespacechill.html#a587a1bffcd6e21ecf2feb16a95fe01c1", null ],

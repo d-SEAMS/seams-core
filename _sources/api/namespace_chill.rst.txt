@@ -7,6 +7,7 @@ namespace chill
 .. toctree::
 	:hidden:
 
+	enum_chill_ChillPlusRule.rst
 	enum_chill_CrystalKind.rst
 	struct_chill_ChillPlusResult.rst
 	struct_chill_LinearClassifier.rst
@@ -27,11 +28,13 @@ CHILL and CHILL+ structure classification. :ref:`More...<details-namespacechill>
 
 	// enums
 
+	enum :ref:`ChillPlusRule<doxid-namespacechill_1aae69c0a74e3304a4c13bb04b662c2602>`;
 	enum :ref:`CrystalKind<doxid-namespacechill_1ac13b1a10b6669044f75448ec1abe5122>`;
 
 	// structs
 
 	struct :ref:`BondClassifier<doxid-structchill_1_1_bond_classifier>`;
+	struct :ref:`BondOrder<doxid-structchill_1_1_bond_order>`;
 	struct :ref:`ChillPlusResult<doxid-structchill_1_1_chill_plus_result>`;
 	struct :ref:`LinearClassifier<doxid-structchill_1_1_linear_classifier>`;
 	struct :ref:`QlmAtom<doxid-structchill_1_1_qlm_atom>`;
@@ -46,7 +49,13 @@ CHILL and CHILL+ structure classification. :ref:`More...<details-namespacechill>
 	:ref:`ChillPlusResult<doxid-structchill_1_1_chill_plus_result>` :ref:`hostChillPlus<doxid-namespacechill_1a2d5243660db62c90ccdad3bb9cda319e>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList);
 	:ref:`ChillPlusResult<doxid-structchill_1_1_chill_plus_result>` :ref:`specializedChillPlus<doxid-namespacechill_1a30ed8d4d44a99044fddf3ea0b7f0ee0c>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList);
 	:ref:`ChillPlusResult<doxid-structchill_1_1_chill_plus_result>` :target:`chillPlus<doxid-namespacechill_1ae9068c355d803c1932d2aa7e7cc27ec8>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList);
+	int :ref:`cutoffShellCount<doxid-namespacechill_1ad9570b8abd2d308248a07c2096e0b08e>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int iatom);
+	:ref:`ChillPlusRule<doxid-namespacechill_1aae69c0a74e3304a4c13bb04b662c2602>` :ref:`chillPlusRule<doxid-namespacechill_1a367fc45a45239f46fe8f136c1be5e110>`(std::string_view spec);
+	:ref:`ChillPlusRule<doxid-namespacechill_1aae69c0a74e3304a4c13bb04b662c2602>` :ref:`chillPlusRuleFromFile<doxid-namespacechill_1a378467b4caec951a3ea7a4e6d974ad31>`(const std::string& spec);
+	const char* :target:`chillPlusRuleName<doxid-namespacechill_1a27ffe1246039b6972897564b2c23d14d>`(:ref:`ChillPlusRule<doxid-namespacechill_1aae69c0a74e3304a4c13bb04b662c2602>` rule);
+	void :ref:`applyChillPlus<doxid-namespacechill_1ac113be17b69c0d4db2647dcd84985569>`(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, :ref:`ChillPlusRule<doxid-namespacechill_1aae69c0a74e3304a4c13bb04b662c2602>` rule, bool isSlice = false);
 	std::vector<:ref:`TemplateHit<doxid-structchill_1_1_template_hit>`> :ref:`classifyTemplates<doxid-namespacechill_1a6235256c303786bfee2a6143044b46a8>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int kNeigh = 12);
+	std::vector<:ref:`TemplateHit<doxid-structchill_1_1_template_hit>`> :ref:`classifyTemplates<doxid-namespacechill_1a1690a928c74898a894d10efc8c2fe134>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& offsets, const std::vector<int>& cols, int kNeigh = 12);
 	std::vector<double> :ref:`soapSpectrum<doxid-namespacechill_1a7ce20c1ee581242dfd8e0dc80ddc17bc>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, const std::vector<std::vector<int>>& nList, int nMax, int lMax, double rcut);
 	std::vector<std::vector<double>> :ref:`soapSpectrumAll<doxid-namespacechill_1a587a1bffcd6e21ecf2feb16a95fe01c1>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int nMax, int lMax, double rcut);
 	std::vector<double> :ref:`voronoiFeature<doxid-namespacechill_1af9780d7bcf4a3a4436a2d59cc26606bb>`(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, int iatom, double candidateCutoff);
@@ -168,6 +177,46 @@ Flattened CHILL+.
 
 Target device when compiled with offload.
 
+.. index:: pair: function; cutoffShellCount
+.. _doxid-namespacechill_1ad9570b8abd2d308248a07c2096e0b08e:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int cutoffShellCount(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int iatom)
+
+Neighbours in one cutoff row, ignoring the leading atom id and any id that is not in the cloud. This is the Table 1 shell count.
+
+.. index:: pair: function; chillPlusRule
+.. _doxid-namespacechill_1a367fc45a45239f46fe8f136c1be5e110:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`ChillPlusRule<doxid-namespacechill_1aae69c0a74e3304a4c13bb04b662c2602>` chillPlusRule(std::string_view spec)
+
+``chill+``, ``ovito-chill+``, a YAML document with ``rule:`` or ``chill-plus:``, or a Lua table fragment ``rule = "..."``. An empty string is the published rule. Anything else throws.
+
+.. index:: pair: function; chillPlusRuleFromFile
+.. _doxid-namespacechill_1a378467b4caec951a3ea7a4e6d974ad31:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	:ref:`ChillPlusRule<doxid-namespacechill_1aae69c0a74e3304a4c13bb04b662c2602>` chillPlusRuleFromFile(const std::string& spec)
+
+Read ``spec`` as a rule name. If ``spec`` names a readable file, the file is scanned for a ``rule`` or ``chill-plus`` key. Comments are skipped. The file is not executed as Lua or YAML.
+
+.. index:: pair: function; applyChillPlus
+.. _doxid-namespacechill_1ac113be17b69c0d4db2647dcd84985569:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void applyChillPlus(:ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, :ref:`ChillPlusRule<doxid-namespacechill_1aae69c0a74e3304a4c13bb04b662c2602>` rule, bool isSlice = false)
+
+Published or OVITO CHILL+ on one cloud. The neighbour list is the cutoff shell the rule counts.
+
 .. index:: pair: function; classifyTemplates
 .. _doxid-namespacechill_1a6235256c303786bfee2a6143044b46a8:
 
@@ -177,6 +226,16 @@ Target device when compiled with offload.
 	std::vector<:ref:`TemplateHit<doxid-structchill_1_1_template_hit>`> classifyTemplates(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<std::vector<int>>& nList, int kNeigh = 12)
 
 Overlay the k nearest neighbours of each particle onto FCC, HCP, BCC and SC shells. Uses IRA when linked; otherwise Horn on a distance-sorted correspondence (high-symmetry shells only).
+
+.. index:: pair: function; classifyTemplates
+.. _doxid-namespacechill_1a1690a928c74898a894d10efc8c2fe134:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<:ref:`TemplateHit<doxid-structchill_1_1_template_hit>`> classifyTemplates(const :ref:`molSys::PointCloud<doxid-structmol_sys_1_1_point_cloud>`<:ref:`molSys::Point<doxid-structmol_sys_1_1_point>`<double>, double>& yCloud, const std::vector<int>& offsets, const std::vector<int>& cols, int kNeigh = 12)
+
+Same overlay, reading a CSR of cloud indices.
 
 .. index:: pair: function; soapSpectrum
 .. _doxid-namespacechill_1a7ce20c1ee581242dfd8e0dc80ddc17bc:

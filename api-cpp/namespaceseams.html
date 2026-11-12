@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.13.0</span>
+<span class="project_info">seams-core v2.14.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -245,6 +245,7 @@ Namespaces</h2></td></tr>
 <tr class="memitem:product" id="r_product"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1product.html">product</a></td></tr>
 <tr class="memitem:sphericart_5Fylm" id="r_sphericart_5Fylm"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1sphericart__ylm.html">sphericart_ylm</a></td></tr>
 <tr class="memitem:steinhardt" id="r_steinhardt"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1steinhardt.html">steinhardt</a></td></tr>
+<tr class="memitem:ylm" id="r_ylm"><td class="memItemLeft">namespace &#160;</td><td class="memItemRight"><a class="el" href="namespaceseams_1_1ylm.html">ylm</a></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-nested-classes" class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
@@ -261,8 +262,62 @@ Functions</h2></td></tr>
 <tr class="memitem:ae8cf4ad5f2bb66332e94fb7f531c3194" id="r_ae8cf4ad5f2bb66332e94fb7f531c3194"><td class="memTemplParams" colspan="2">template&lt;class T, class Less&gt; </td></tr>
 <tr class="memitem:ae8cf4ad5f2bb66332e94fb7f531c3194 template"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ae8cf4ad5f2bb66332e94fb7f531c3194">parallelStableSort</a> (std::vector&lt; T &gt; &amp;values, Less less)</td></tr>
 <tr class="memitem:a7b2dc4f3d8257cc99b099ffbebd1a5ab" id="r_a7b2dc4f3d8257cc99b099ffbebd1a5ab"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#a7b2dc4f3d8257cc99b099ffbebd1a5ab">BatchPeriodicDistSq</a> (const double *dx, const double *dy, const double *dz, double bx, double by, double bz, double *out, size_t n)</td></tr>
+<tr class="memitem:afd71d1c59950dc2eabbff5aa9362a16c" id="r_afd71d1c59950dc2eabbff5aa9362a16c"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#afd71d1c59950dc2eabbff5aa9362a16c">adoptThreads</a> ()</td></tr>
 </table>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="afd71d1c59950dc2eabbff5aa9362a16c" name="afd71d1c59950dc2eabbff5aa9362a16c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd71d1c59950dc2eabbff5aa9362a16c">&#9670;&#160;</a></span>adoptThreads()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void seams::adoptThreads </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="thread__team_8hpp_source.html#l00020">20</a> of file <a class="el" href="thread__team_8hpp_source.html">thread_team.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   20</span>                           {</div>
+<div class="line"><span class="lineno">   21</span>  <span class="comment">// Idle OpenMP threads spin by default and take cores from Rayon.</span></div>
+<div class="line"><span class="lineno">   22</span>  setenv(<span class="stringliteral">&quot;OMP_WAIT_POLICY&quot;</span>, <span class="stringliteral">&quot;PASSIVE&quot;</span>, 0);</div>
+<div class="line"><span class="lineno">   23</span><span class="preprocessor">#ifdef SEAMS_HAS_OPENMP</span></div>
+<div class="line"><span class="lineno">   24</span>  <span class="comment">// A domain is searched by the thread that owns it. Rayon stays at one</span></div>
+<div class="line"><span class="lineno">   25</span>  <span class="comment">// so the OpenMP team is the only pool.</span></div>
+<div class="line"><span class="lineno">   26</span>  <span class="keywordflow">if</span> (omp_in_parallel()) {</div>
+<div class="line"><span class="lineno">   27</span><span class="preprocessor">#ifdef SEAMS_HAS_LINKCELL</span></div>
+<div class="line"><span class="lineno">   28</span>    <a class="code hl_function" href="thread__team_8hpp.html#a06195ae10c6517c497c4d0b11d8722b1">lc_set_threads</a>(1);</div>
+<div class="line"><span class="lineno">   29</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   30</span>    <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">   31</span>  }</div>
+<div class="line"><span class="lineno">   32</span>  <span class="keywordtype">int</span> n = omp_get_max_threads();</div>
+<div class="line"><span class="lineno">   33</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">   34</span>  <span class="keywordtype">int</span> n = 1;</div>
+<div class="line"><span class="lineno">   35</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   36</span>  <span class="keywordflow">if</span> (n &lt; 1) {</div>
+<div class="line"><span class="lineno">   37</span>    n = 1;</div>
+<div class="line"><span class="lineno">   38</span>  }</div>
+<div class="line"><span class="lineno">   39</span><span class="preprocessor">#ifdef SEAMS_HAS_LINKCELL</span></div>
+<div class="line"><span class="lineno">   40</span>  <a class="code hl_function" href="thread__team_8hpp.html#a06195ae10c6517c497c4d0b11d8722b1">lc_set_threads</a>(n);</div>
+<div class="line"><span class="lineno">   41</span><span class="preprocessor">#else</span></div>
+<div class="line"><span class="lineno">   42</span>  (void)n;</div>
+<div class="line"><span class="lineno">   43</span><span class="preprocessor">#endif</span></div>
+<div class="line"><span class="lineno">   44</span>}</div>
+<div class="ttc" id="athread__team_8hpp_html_a06195ae10c6517c497c4d0b11d8722b1"><div class="ttname"><a href="thread__team_8hpp.html#a06195ae10c6517c497c4d0b11d8722b1">lc_set_threads</a></div><div class="ttdeci">void lc_set_threads(int n)</div></div>
+</div><!-- fragment -->
+</div>
+</div>
 <a id="a7b2dc4f3d8257cc99b099ffbebd1a5ab" name="a7b2dc4f3d8257cc99b099ffbebd1a5ab"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7b2dc4f3d8257cc99b099ffbebd1a5ab">&#9670;&#160;</a></span>BatchPeriodicDistSq()</h2>
 

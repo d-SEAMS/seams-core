@@ -18,7 +18,16 @@ var namespaceseams =
       [ "ylmAll", "namespaceseams_1_1steinhardt.html#adf41cecc177768d88e4c00b88bef06d6", null ],
       [ "ylmAllTrig", "namespaceseams_1_1steinhardt.html#afc83186a4ec1a9286658962d8325e363", null ]
     ] ],
+    [ "ylm", "namespaceseams_1_1ylm.html", [
+      [ "evalUnit", "namespaceseams_1_1ylm.html#ac0b8a775844aa8a94e1935d98c2fb22d", null ],
+      [ "legendrePoly", "namespaceseams_1_1ylm.html#a07e9327f44f07111da94f5f121da27f6", null ],
+      [ "ylmBatch", "namespaceseams_1_1ylm.html#aa0a1875983d8c0603569eb020f43fde2", null ],
+      [ "ylmReal", "namespaceseams_1_1ylm.html#a9911ab8bbf1f648f47f0a6657a659d03", null ],
+      [ "N3", "namespaceseams_1_1ylm.html#a0ea7855115022b2e51dfeec3257e2f7c", null ],
+      [ "N6", "namespaceseams_1_1ylm.html#a44d8f6d018716f5e2a02a91658d7d10e", null ]
+    ] ],
     [ "EdgeSet", "structseams_1_1EdgeSet.html", "structseams_1_1EdgeSet" ],
+    [ "adoptThreads", "namespaceseams.html#afd71d1c59950dc2eabbff5aa9362a16c", null ],
     [ "BatchPeriodicDistSq", "namespaceseams.html#a7b2dc4f3d8257cc99b099ffbebd1a5ab", null ],
     [ "edgeSetOf", "namespaceseams.html#a18253b5fae99ed10e40bde67a6ccd3ce", null ],
     [ "exclusiveScan", "namespaceseams.html#ade36ab0f3594a27f4b1d229706d9443b", null ],

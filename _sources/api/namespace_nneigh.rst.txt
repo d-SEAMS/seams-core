@@ -21,6 +21,7 @@ Functions for building neighbour lists. :ref:`More...<details-namespacenneigh>`
 
 	// classes
 
+	class :ref:`CutoffSkin<doxid-classnneigh_1_1_cutoff_skin>`;
 	class :ref:`SkinNeighborList<doxid-classnneigh_1_1_skin_neighbor_list>`;
 
 	} // namespace nneigh

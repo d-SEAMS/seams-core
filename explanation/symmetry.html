@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="teal" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Local symmetry - d-SEAMS documentation</title><link rel="shortcut icon" href="../_static/dSeamsLogo.ico"/><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="Citation" href="citation.html" /><link rel="prev" title="Topological network criteria" href="topological-network.html" />
+      <link rel="canonical" href="https://docs.dseams.info/explanation/symmetry.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=e1a1ceaf" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=44020203" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-pygments.css?v=ff3f4257" />
+    <link rel="stylesheet" type="text/css" href="../_static/doxyrest-shibuya.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=9d7eab11" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    <meta property="og:type" content="website"/>
+  <meta property="og:url" content="https://docs.dseams.info/explanation/symmetry.html"/>
+  <meta property="og:title" content="Local symmetry"/>
+    <meta name="twitter:card" content="summary"/>
+  <!-- Antics analytics -->
+<script defer src="https://antics-api.turtletech.us/antics.js"></script>
+<script>window.antics=window.antics||{event:function(){}};document.addEventListener('click',function(e){var a=e.target.closest('a');if(a&&a.hostname!==location.hostname)antics.event('Outbound Link',{url:a.href})});</script></head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      <img class="light-logo" src="../_static/dSeamsLogo.png" alt="d-SEAMS" height="28" loading="lazy" />
+      <img class="dark-logo" src="../_static/dSeamsLogo.png" alt="d-SEAMS" height="28" loading="lazy" />
+      <strong>d-SEAMS</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"><ul><li class="link"><a href="/api-cpp/index.html">C++ API</a></li>
+      <li class="link"><button class="js-menu" type="button" id="nav-trigger-2" aria-controls="nav-children-2">
+            <span>Ecosystem</span>
+            <i class="i-lucide chevron-down"></i>
+          </button>
+        <ul id="nav-children-2" aria-labelledby="nav-trigger-2"><li><a href="https://docs.dseams.info">
+                <span>d-SEAMS engine</span>
+                <small>libyodaLib and the seams CLI</small>
+              </a></li><li><a href="https://d-seams.github.io/PydSEAMSlib/">
+                <span>pydseams</span>
+                <small>Python Frame API on yoda</small>
+              </a></li><li><a href="https://d-seams.github.io/yodaStruct/">
+                <span>dseams (Lua)</span>
+                <small>require("dseams") and Fennel</small>
+              </a></li><li><a href="https://github.com/d-SEAMS/linkcell">
+                <span>linkcell</span>
+                <small>Periodic linked-cell k-nearest neighbours</small>
+              </a></li></ul>
+      </li></ul></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+  <a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="1"><p class="caption" role="heading" aria-level="3"><span class="caption-text">Getting Started</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../quickstart.html">Quickstart</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">How-to</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../howto/index.html">How-to</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Explanation</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Explanation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="architecture.html">Repositories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chill-plus-vs-cages.html">CHILL+ versus cages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ring-completion.html">Ring-adjacent completion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="topological-network.html">Topological network criteria</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Local symmetry</a></li>
+<li class="toctree-l2"><a class="reference internal" href="citation.html">Citation</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../reference/index.html">Reference</a></li>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../changelog.html">Changelog</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">d-SEAMS 2.0 paper</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../paper/index.html">d-SEAMS 2.0 paper</a></li>
+</ul>
+<p class="caption" role="heading" aria-level="3"><span class="caption-text">Development</span></p>
+<ul>
+<li class="toctree-l1 _expand"><a class="reference internal" href="../contributing/index.html">Contributing</a></li>
+</ul>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#what-is-labelled">What is labelled</a></li>
+<li><a class="reference internal" href="#neighbours">Neighbours</a></li>
+<li><a class="reference internal" href="#tetrahedral-order">Tetrahedral order</a></li>
+<li><a class="reference internal" href="#common-neighbour-fingerprint">Common-neighbour fingerprint</a></li>
+<li><a class="reference internal" href="#the-fit">The fit</a></li>
+<li><a class="reference internal" href="#cages-rings-and-the-other-codes">Cages, rings, and the other codes</a></li>
+<li><a class="reference internal" href="#calling-it">Calling it</a></li>
+<li><a class="reference internal" href="#build-options">Build options</a></li>
+<li><a class="reference internal" href="#held-out-protocol">Held-out protocol</a></li>
+<li><a class="reference internal" href="#real-frames">Real frames</a></li>
+<li><a class="reference internal" href="#timings">Timings</a></li>
+</ul>
+</div><a class="js-repo-stats repo-stats flex items-center" href="https://github.com/d-SEAMS/seams-core"
+  data-type="github" data-user="d-SEAMS" data-repo="seams-core">
+  <span class="w-8 flex items-center justify-around shrink-0 text-3xl">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </span>
+  <span class="flex-grow px-2 break-all">
+    
+    
+      <span>seams-core</span>
+    
+    <span class="flex text-sm repo-stats-count">
+      <span class="flex items-center pr-3">
+        <iconify-icon icon="lucide:star"></iconify-icon>
+        <strong class="js-repo-stars ml-1">0</strong>
+      </span>
+      <span class="flex items-center">
+        <iconify-icon icon="lucide:git-fork"></iconify-icon>
+        <strong class="js-repo-forks ml-1">0</strong>
+      </span>
+    </span>
+  </span>
+</a><div class="edit-this-page">
+  <a href="https://github.com/d-SEAMS/seams-core/blob/main/docs/source/explanation/symmetry.rst">Edit this page</a>
+</div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">d-SEAMS</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="index.html"><span itemprop="name">Explanation</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">Local symmetry</strong>
+        <meta itemprop="position" content="3" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <div class="copy-page-wrapper relative pb-4 lg:absolute lg:top-8 lg:right-6 xl:right-12">
+  <div id="copy-page-trigger">
+    <button
+      type="button"
+      class="js-copy px-3 py-1 inline-flex items-center gap-1"
+      data-url="https://docs.dseams.info/_sources/explanation/symmetry.rst.txt"
+    >
+      <i class="i-lucide" data-icon="copy"></i>
+      <span>Copy page</span>
+    </button>
+    <button class="js-menu px-2 py-1" type="button" aria-label="More actions"
+      aria-haspopup="menu" aria-expanded="false" aria-controls="copy-page-content">
+      <i class="i-lucide chevron-down"></i>
+    </button>
+  </div>
+  <div id="copy-page-content" role="menu" aria-orientation="vertical" aria-hidden="true">
+    <div role="presentation">
+      <div class="flex flex-col" role="group">
+        <button class="js-copy" type="button" role="menuitem"
+          data-url="https://docs.dseams.info/_sources/explanation/symmetry.rst.txt">
+          <span class="iconify-icon">
+            <i class="i-lucide" data-icon="copy"></i>
+          </span>
+          <span>Copy page</span>
+        </button>
+        <a role="menuitem" href="https://docs.dseams.info/_sources/explanation/symmetry.rst.txt" target="_blank" rel="nofollow"><iconify-icon icon="bi:code-slash"></iconify-icon>
+            <span>View Source</span></a><a role="menuitem" href="https://chatgpt.com/?hints=search&q=Read%20https%3A//docs.dseams.info/_sources/explanation/symmetry.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+          <iconify-icon icon="bi:openai"></iconify-icon>
+          <span>Open in ChatGPT</span>
+        </a><a role="menuitem" href="https://claude.ai/new?q=Read%20https%3A//docs.dseams.info/_sources/explanation/symmetry.rst.txt%20so%20I%20can%20ask%20questions%20about%20it." target="_blank" rel="nofollow">
+          <iconify-icon icon="bi:claude"></iconify-icon>
+          <span>Open in Claude</span>
+        </a></div>
+    </div>
+  </div>
+</div><article class="yue dark-code" role="main">
+          <section id="local-symmetry">
+<h1>Local symmetry<a class="headerlink" href="#local-symmetry" title="Link to this heading">¶</a></h1>
+<p>The engine names a local environment as ice Ih, ice Ic, stacking-disordered ice, a hydrate cage, or a five- or six-ring, and it labels every oxygen in a cell.
+The per-atom ice label is the production path.
+Cage and ring names, the point group, and the space group are the same templates asked one cluster at a time.</p>
+<section id="what-is-labelled">
+<h2>What is labelled<a class="headerlink" href="#what-is-labelled" title="Link to this heading">¶</a></h2>
+<p>A crystal oxygen is ice Ih (0), ice Ic (1), or stacking-disordered ice (2).
+Anything else is -1.
+Only those two diamond structures count as crystal when the same frame is scored with OVITO.
+The first-neighbour and second-neighbour tags from identify diamond are not crystal, and polyhedral template matching counts only cubic diamond and hexagonal diamond.</p>
+<p>The seventeen-atom shell is the central oxygen, its four nearest neighbours, and the twelve neighbours of those four.
+That is the shell polyhedral template matching uses for diamond (Larsen, Schmidt and Schiøtz, <em>Modelling and Simulation in Materials Science and Engineering</em> 24, 055007, 2016, <a class="reference external" href="https://doi.org/10.1088/0965-0393/24/5/055007">10.1088/0965-0393/24/5/055007</a>).</p>
+</section>
+<section id="neighbours">
+<h2>Neighbours<a class="headerlink" href="#neighbours" title="Link to this heading">¶</a></h2>
+<p>The cell is orthorhombic.
+Atoms are wrapped into the box, histogrammed into cells of the bond cutoff, and stored as three coordinate columns.
+The bond cutoff is 3.5 Å and a neighbour closer than 2.15 Å is dropped.
+One thread walks each pair once and writes both ends of the bond.
+Interior cells use a fixed half of the 27-cell stencil, so that walk does not build a neighbour list for the cell.
+The four nearest bonds are kept by distance and then sorted, because the common-neighbour test and the fit both read them in that order.
+Each accepted pair is offered to those four seats, and a closer pair replaces the farthest.
+A frame with more than sixteen accepted pairs per atom still keeps the nearer neighbours.
+Eight threads scan the full stencil and write one end.
+The coordinate columns and the bond rows are allocated once and reused on the next frame of the same size.</p>
+<p>A centre whose four bonds do not all lie between 2.30 Å and 3.35 Å does not open a second shell.</p>
+</section>
+<section id="tetrahedral-order">
+<h2>Tetrahedral order<a class="headerlink" href="#tetrahedral-order" title="Link to this heading">¶</a></h2>
+<p>The tetrahedral order parameter q is the Chau–Hardwick / Errington–Debenedetti invariant of the four bonds (Errington and Debenedetti, <em>Nature</em> 409, 318, 2001, <a class="reference external" href="https://doi.org/10.1038/35053024">10.1038/35053024</a>).
+A shell with q below 0.94 does not open the second shell.
+That gate was chosen on the training seeds below.
+A shell that does open and then measures q below 0.88 is liquid.</p>
+</section>
+<section id="common-neighbour-fingerprint">
+<h2>Common-neighbour fingerprint<a class="headerlink" href="#common-neighbour-fingerprint" title="Link to this heading">¶</a></h2>
+<p>The second shell is the adaptive-cutoff common-neighbour signature of Maras, Trushin, Stukowski, Albe and Nordlund, <em>Computer Physics Communications</em> 205, 13 (2016), Appendix A (<a class="reference external" href="https://doi.org/10.1016/j.cpc.2016.04.001">10.1016/j.cpc.2016.04.001</a>).
+The cutoff for a bond of length r is r(1+sqrt(2))/2.
+The twelve neighbour distances are compared with that cutoff in one vector pass.</p>
+<p>An exact cubic signature, twelve (4,2,1) patterns, is ice Ic.
+An exact hexagonal signature, six (4,2,1) and six (4,2,2), is ice Ih.
+A partial cubic signature with at least eight (4,2,1) patterns and q at least 0.97 is ice Ic.
+A partial hexagonal signature with q at least 0.97 is ice Ih.
+Six (4,2,1) patterns are not labelled here: on the training seeds that count is the liquid false positive, and the shell is passed to the fit instead.
+An ideal shell, equal bonds and one second-shell radius, is named from the raw cosine of each second-shell bond with another first-shell bond and does not build this signature.
+The bond vectors are not projected.
+On the ideal cell that cosine is exactly 1/3 for a staggered arm and exactly 7/9 for an eclipsed arm.
+The fast path compares the squares, 1/9 and 49/81: an arm is eclipsed when the best square is at least 0.36, and staggered when that square is at most 0.25.
+Four staggered arms are ice Ic.
+One eclipsed arm and three staggered arms are ice Ih.</p>
+</section>
+<section id="the-fit">
+<h2>The fit<a class="headerlink" href="#the-fit" title="Link to this heading">¶</a></h2>
+<p>A shell is fitted only when it already has one crystal neighbour, q is at least 0.95, the four bonds differ by at most 15 percent, and the second-shell radius varies by at most a factor 1.6.
+The residual is scale-free.
+Both clouds are centred, the optimal rotation is a quaternion (Horn, <em>Journal of the Optical Society of America A</em> 4, 629, 1987, <a class="reference external" href="https://doi.org/10.1364/JOSAA.4.000629">10.1364/JOSAA.4.000629</a>; Coutsias, Seok and Dill, <em>Journal of Computational Chemistry</em> 25, 1849, 2004, <a class="reference external" href="https://doi.org/10.1002/jcc.20110">10.1002/jcc.20110</a>), and the residual is divided by the template radius, which is the normalisation Larsen, Schmidt and Schiøtz use.
+Zero is a perfect shape.
+The ceiling is 0.12.</p>
+<p>The bond-angle fingerprint names the one template the fit tries.
+This cosine is the azimuthal one: both bonds are projected onto the plane perpendicular to the central bond.
+Ideal staggered ice lies at 60 degrees, cosine 1/2, and ideal eclipsed ice lies at 0 degrees, cosine 1.
+An arm above 0.90 is eclipsed.
+The ideal-cell fast path uses the raw cosine above.
+Four eclipsed arms are liquid, except on the recovery pass, where that pattern is hexagonal.
+The eclipsed arm is anchored to the eclipsed arm of the template.
+The four-point orientation uses one Jacobi sweep and the seventeen-atom residual uses two.
+A shell that is still far after a handful of correspondences is not crystal, and a shell with only one crystal neighbour stops earlier than a shell with two.
+Hexagonal recovery is one pass over the atoms the first fit left unlabelled, and it tries the other templates.</p>
+<p>After the labels are written, a crystal atom that has no crystal neighbour among its four bonds is returned to liquid.
+The tests read the labels from the fit, before that filter.</p>
+</section>
+<section id="cages-rings-and-the-other-codes">
+<h2>Cages, rings, and the other codes<a class="headerlink" href="#cages-rings-and-the-other-codes" title="Link to this heading">¶</a></h2>
+<p>The same in-tree matcher names a cage or a ring.
+It is a 3×3 SVD with the permutation fixed by the bond graph.
+The continuous shape measure of that overlay is the scaled residual of Pinsky and Avnir (<em>Inorganic Chemistry</em> 37, 5575, 1998, <a class="reference external" href="https://doi.org/10.1021/ic9804925">10.1021/ic9804925</a>) and of the Alvarez shape program (<em>Coordination Chemistry Reviews</em> 249, 1693, 2005, <a class="reference external" href="https://doi.org/10.1016/j.ccr.2005.03.031">10.1016/j.ccr.2005.03.031</a>).
+The shape program is not in the tree.</p>
+<p>IRA (Gunde, Salles, Hémeryck and Martin-Samos, <em>Journal of Chemical Information and Modeling</em> 61, 5446, 2021, <a class="reference external" href="https://doi.org/10.1021/acs.jcim.1c00567">10.1021/acs.jcim.1c00567</a>) is an optional second matcher for the same templates.
+SOFI, from the same group (<em>Journal of Chemical Physics</em> 161, 062503, 2024, <a class="reference external" href="https://doi.org/10.1063/5.0215689">10.1063/5.0215689</a>), names the point group.
+spglib (Togo, Shinohara and Tanaka, <em>Science and Technology of Advanced Materials: Methods</em> 4, 2384822, 2024, <a class="reference external" href="https://doi.org/10.1080/27660400.2024.2384822">10.1080/27660400.2024.2384822</a>) names the space group.
+CHILL+ (Nguyen and Molinero, <em>Journal of Physical Chemistry B</em> 119, 9369, 2015, <a class="reference external" href="https://doi.org/10.1021/jp510289t">10.1021/jp510289t</a>) is a different label and is not this shell.</p>
+</section>
+<section id="calling-it">
+<h2>Calling it<a class="headerlink" href="#calling-it" title="Link to this heading">¶</a></h2>
+<p>C++, in <code class="docutils literal notranslate"><span class="pre">symm</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">classifyIce(cartesian,</span> <span class="pre">vectors,</span> <span class="pre">kind)</span></code> writes one label per row.
+<code class="docutils literal notranslate"><span class="pre">kind</span></code> is ice Ih, ice Ic, ice Isd, or -1.
+The default ceiling is <code class="docutils literal notranslate"><span class="pre">kShellRmsd</span></code> (0.12).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">classifyIceArrays(x,</span> <span class="pre">y,</span> <span class="pre">z,</span> <span class="pre">n,</span> <span class="pre">lattice,</span> <span class="pre">kind)</span></code> is the same call on three coordinate columns.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">best</span></code>, <code class="docutils literal notranslate"><span class="pre">matchKernel</span></code> and <code class="docutils literal notranslate"><span class="pre">matchAll</span></code> name one environment.
+Template ids are ice Ih, ice Ic, ice Isd, 5^12, 5^12 6^2, 5^12 6^4, ring-5 and ring-6.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pointGroup</span></code> needs SOFI.
+<code class="docutils literal notranslate"><span class="pre">spaceGroup</span></code> needs spglib.
+Either returns status 2 when that library was not linked.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">seams</span> <span class="pre">symmetry</span></code> on the command line prints the space group, one shell overlay, and the label tally.</p></li>
+</ul>
+<p>C, in <code class="docutils literal notranslate"><span class="pre">seams_c_api.h</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">seams_symmetry_classify</span></code> and <code class="docutils literal notranslate"><span class="pre">seams_symmetry_classify_tol</span></code> take row-major coordinates and three lattice rows, and write the same labels.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">seams_symmetry_match</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_symmetry_template</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_symmetry_crystal</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_symmetry_point_group</span></code>, <code class="docutils literal notranslate"><span class="pre">seams_symmetry_space_group</span></code> and <code class="docutils literal notranslate"><span class="pre">seams_symmetry_backend</span></code> cover one cluster.</p></li>
+</ul>
+<p>Python, <code class="docutils literal notranslate"><span class="pre">bindings/python/symmetry.py</span></code>, loads <code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code> through ctypes.
+Set <code class="docutils literal notranslate"><span class="pre">SEAMS_CORE_LIB</span></code> to the built library.
+<code class="docutils literal notranslate"><span class="pre">classify(cartesian,</span> <span class="pre">lattice,</span> <span class="pre">shell_rmsd=0.12)</span></code> is the per-atom label.</p>
+</section>
+<section id="build-options">
+<h2>Build options<a class="headerlink" href="#build-options" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">with_ira</span></code> is a feature option, <code class="docutils literal notranslate"><span class="pre">auto</span></code> by default.
+When libira links, the matcher can use IRA and SOFI.
+IRA is the Apache-2.0 option of its dual licence, and it is not required to build.</p>
+<p><code class="docutils literal notranslate"><span class="pre">with_csm</span></code> is a feature option, <code class="docutils literal notranslate"><span class="pre">disabled</span></code> by default.
+The continuous shape measure program is GPL-2.0.
+It is an external executable (<code class="docutils literal notranslate"><span class="pre">csm_shape</span></code> or <code class="docutils literal notranslate"><span class="pre">shape</span></code>), it is not vendored, and it is not linked into <code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code>.
+The Catch2 case that compares the in-tree measure with that program runs only when <code class="docutils literal notranslate"><span class="pre">CSM_SHAPE</span></code> is set.
+<code class="docutils literal notranslate"><span class="pre">with_spglib</span></code> stays <code class="docutils literal notranslate"><span class="pre">auto</span></code> and links libsymspg when it is present.</p>
+<p>On GCC and Clang the shell translation unit is a separate static library built with <code class="docutils literal notranslate"><span class="pre">-mavx2</span> <span class="pre">-mfma</span></code>.
+Other compilers compile it into <code class="docutils literal notranslate"><span class="pre">libyodaLib</span></code> with the ordinary flags.
+A release build is <code class="docutils literal notranslate"><span class="pre">-O3</span></code>.</p>
+</section>
+<section id="held-out-protocol">
+<h2>Held-out protocol<a class="headerlink" href="#held-out-protocol" title="Link to this heading">¶</a></h2>
+<p>The frames are the steepest-descent quenches of three mW nucleation seeds, 91001, 92002 and 93003, each a 12×12×12 ice Ic cell that was melted, reseeded, and run at 220 K.
+Seeds 91001 and 92002 are the training pair.
+They chose the q gate and the ceiling 0.12.
+Seed 93003 was not used to choose either, and it is the held-out frame.</p>
+<p>Three methods label each quench with their own production rule: this kernel, CHILL+, and polyhedral template matching at an RMSD cutoff of 0.1 with cubic and hexagonal diamond enabled.
+The majority truth is the template named by at least two of the three.
+The persistent truth keeps an atom only when the majority template is the same on the 190 ps quench and the 200 ps quench.
+A prediction is a true positive when the truth is crystal and the prediction names that same template, a false positive when the prediction is crystal and is not the truth, and a false negative when the truth is crystal and the prediction differs.</p>
+<p>On the held-out quench the kernel at ceiling 0.12 is</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>truth</p></th>
+<th class="head"><p>true positive</p></th>
+<th class="head"><p>false positive</p></th>
+<th class="head"><p>false negative</p></th>
+<th class="head"><p>precision</p></th>
+<th class="head"><p>recall</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>majority</p></td>
+<td><p>328</p></td>
+<td><p>6</p></td>
+<td><p>63</p></td>
+<td><p>0.9820</p></td>
+<td><p>0.8389</p></td>
+</tr>
+<tr class="row-odd"><td><p>persistent</p></td>
+<td><p>319</p></td>
+<td><p>15</p></td>
+<td><p>47</p></td>
+<td><p>0.9551</p></td>
+<td><p>0.8716</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Polyhedral template matching on the same two truths is majority precision 0.9635 and recall 0.8107 (317 true positives, 12 false positives, 74 false negatives), and persistent precision 0.9453 and recall 0.8497.
+The kernel is ahead of template matching on both precision and recall.
+Raising the ceiling to 0.125 on the training pair adds false positives as well as true positives, and an embedded-only relaxation of the ceiling did the same, so the production ceiling stays 0.12.
+The held-out recall is the number above.
+It was not pushed up by looking at seed 93003.</p>
+</section>
+<section id="real-frames">
+<h2>Real frames<a class="headerlink" href="#real-frames" title="Link to this heading">¶</a></h2>
+<p>The classifier rule is the one above.
+These frames were not used to choose it.
+An mW site is one molecule.
+Crystal for the kernel is ice Ih, ice Ic, or stacking-disordered ice.
+Crystal for polyhedral template matching and for identify diamond is cubic or hexagonal diamond only.
+The first-neighbour and second-neighbour tags from identify diamond are counted apart from crystal.
+CHILL+ is the 2015 rule in this tree, cutoff 3.5 Å: four nearest neighbours, the staggered and eclipsed windows of Nguyen and Molinero, and the neighbour test in footnote a of their Table 1.
+It is not the OVITO Chill+ modifier.</p>
+<p>The interface frame is <code class="docutils literal notranslate"><span class="pre">interface_f0.lammpstrj</span></code> from <code class="docutils literal notranslate"><span class="pre">science/interface-order</span></code> at <code class="docutils literal notranslate"><span class="pre">f5ca8ffc</span></code>, 864 mW molecules in a slab.
+The nucleation file is figshare <a class="reference external" href="https://doi.org/10.6084/m9.figshare.11448702.v1">10.6084/m9.figshare.11448702.v1</a>, md5 <code class="docutils literal notranslate"><span class="pre">c28fc209a2854d2ba49e8f9b55accbe8</span></code>, 148 frames of 4096 molecules, the trajectory read by <code class="docutils literal notranslate"><span class="pre">science/nucleation-pathways</span></code> at <code class="docutils literal notranslate"><span class="pre">170a6c18</span></code>.
+Its first frame is the shipped <code class="docutils literal notranslate"><span class="pre">input/traj/nucleation_f1.lammpstrj</span></code>.</p>
+<p>Interface slab, kernel against polyhedral template matching:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>kernel</p></th>
+<th class="head"><p>Ih</p></th>
+<th class="head"><p>Ic</p></th>
+<th class="head"><p>other</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Ih</p></td>
+<td><p>233</p></td>
+<td><p>0</p></td>
+<td><p>12</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ic</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Isd</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>other</p></td>
+<td><p>66</p></td>
+<td><p>0</p></td>
+<td><p>553</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Interface slab, kernel against identify diamond:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>kernel</p></th>
+<th class="head"><p>Ih</p></th>
+<th class="head"><p>Ic</p></th>
+<th class="head"><p>Ih neighbour</p></th>
+<th class="head"><p>Ic neighbour</p></th>
+<th class="head"><p>Ih second</p></th>
+<th class="head"><p>Ic second</p></th>
+<th class="head"><p>other</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Ih</p></td>
+<td><p>232</p></td>
+<td><p>0</p></td>
+<td><p>13</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>other</p></td>
+<td><p>81</p></td>
+<td><p>0</p></td>
+<td><p>67</p></td>
+<td><p>0</p></td>
+<td><p>72</p></td>
+<td><p>0</p></td>
+<td><p>399</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Interface slab, kernel against CHILL+:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>kernel</p></th>
+<th class="head"><p>hexagonal</p></th>
+<th class="head"><p>cubic</p></th>
+<th class="head"><p>interfacial</p></th>
+<th class="head"><p>clathrate</p></th>
+<th class="head"><p>interfacial clathrate</p></th>
+<th class="head"><p>water</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Ih</p></td>
+<td><p>245</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>other</p></td>
+<td><p>114</p></td>
+<td><p>1</p></td>
+<td><p>67</p></td>
+<td><p>13</p></td>
+<td><p>69</p></td>
+<td><p>355</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Nucleation frame 1, kernel against polyhedral template matching:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>kernel</p></th>
+<th class="head"><p>Ih</p></th>
+<th class="head"><p>Ic</p></th>
+<th class="head"><p>other</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Ih</p></td>
+<td><p>7</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ic</p></td>
+<td><p>0</p></td>
+<td><p>9</p></td>
+<td><p>3</p></td>
+</tr>
+<tr class="row-even"><td><p>Isd</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+</tr>
+<tr class="row-odd"><td><p>other</p></td>
+<td><p>4</p></td>
+<td><p>4</p></td>
+<td><p>4067</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Nucleation frame 1, kernel against identify diamond:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>kernel</p></th>
+<th class="head"><p>Ih</p></th>
+<th class="head"><p>Ic</p></th>
+<th class="head"><p>Ih neighbour</p></th>
+<th class="head"><p>Ic neighbour</p></th>
+<th class="head"><p>Ih second</p></th>
+<th class="head"><p>Ic second</p></th>
+<th class="head"><p>other</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Ih</p></td>
+<td><p>7</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ic</p></td>
+<td><p>0</p></td>
+<td><p>8</p></td>
+<td><p>2</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Isd</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>other</p></td>
+<td><p>7</p></td>
+<td><p>5</p></td>
+<td><p>28</p></td>
+<td><p>18</p></td>
+<td><p>68</p></td>
+<td><p>36</p></td>
+<td><p>3913</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Nucleation frame 1, kernel against CHILL+:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>kernel</p></th>
+<th class="head"><p>hexagonal</p></th>
+<th class="head"><p>cubic</p></th>
+<th class="head"><p>interfacial</p></th>
+<th class="head"><p>clathrate</p></th>
+<th class="head"><p>interfacial clathrate</p></th>
+<th class="head"><p>water</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Ih</p></td>
+<td><p>8</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>Ic</p></td>
+<td><p>0</p></td>
+<td><p>12</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-even"><td><p>Isd</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p>other</p></td>
+<td><p>59</p></td>
+<td><p>36</p></td>
+<td><p>272</p></td>
+<td><p>49</p></td>
+<td><p>305</p></td>
+<td><p>3354</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Over the 148 frames, 606208 molecule-frames, the kernel calls 7342 hexagonal, 10020 cubic and 1037 stacking-disordered.
+Template matching calls 7838 hexagonal and 10771 cubic.
+Identify diamond calls 8423 hexagonal and 11336 cubic, and a further 19417 first-neighbour plus 27904 second-neighbour tags.
+CHILL+ calls 19760 hexagonal and 17869 cubic, plus 46992 interfacial, 6468 clathrate and 50164 interfacial clathrate.
+Kernel hexagonal is CHILL+ hexagonal on 7264 of 7342 molecule-frames, and kernel cubic is CHILL+ cubic on 9980 of 10020.
+The extra CHILL+ crystal, 12495 hexagonal and 7889 cubic, is kernel liquid.
+Every stacking-disordered molecule-frame is template-matching liquid and CHILL+ interfacial.</p>
+<p>The disagreements follow from what each rule is allowed to name.
+CHILL+ cubic and hexagonal need four bond correlations in the staggered or eclipsed windows.
+A molecule can pass that table and still miss the kernel: the kernel also asks for a second-shell common-neighbour signature, a scale-free residual at most 0.12, and one crystal neighbour.
+On the slab, 114 of the 359 CHILL+ hexagonal molecules are kernel liquid.
+On the trajectory, the same gap is the 12495 hexagonal and 7889 cubic molecule-frames above.
+CHILL+ interfacial ice is two or three staggered bonds.
+The kernel has no interfacial label, so those molecules are liquid, except the stacking-disordered shells, which land in the interfacial row of CHILL+ because they are not four bonds of one kind.
+Template matching has cubic and hexagonal diamond templates and no stacking-disordered template, so every stacking-disordered label is template-matching liquid.
+The remaining template-matching mismatches are shells on opposite sides of the two cutoffs: an isolated template-matching diamond can fail the kernel’s crystal-neighbour test, and a shell the kernel fits can sit outside the 0.1 RMSD cutoff.
+Identify diamond’s neighbour tags are the molecules touching a diamond molecule.
+The kernel does not promote them to crystal, and that tag is most of the off-diagonal with identify diamond.
+Where both methods call the molecule itself crystal, hexagonal stays with hexagonal and cubic stays with cubic.</p>
+<p>IRA and SOFI are linked in this build.
+The matcher backend is IRA.
+SOFI is asked for the point group of the same 17-atom shell the ice templates use: the centre, its four neighbours between 2.15 Å and 3.5 Å, and three further neighbours of each of those four, in the minimum image.
+A shell that cannot be filled is left unmatched (68 molecules on the slab, 377 on nucleation frame 1).
+IRA returns a nearest ice template for every complete shell, because the only 17-atom templates are the three ice shells.
+On both frames every kernel crystal molecule is given that same template.
+The IRA RMSD, in ångströms, separates them from the liquid: on the slab the hexagonal median is 0.314 and the liquid median is 1.194; on frame 1 the hexagonal, cubic and stacking-disordered medians are 0.342, 0.377 and 0.458, and the liquid median is 1.112.
+The liquid still has a low tail, so the nearest-template name alone is not a crystal label.
+SOFI at its default threshold 0.05 returns C1 for every complete shell on both frames, crystal and liquid alike, so the point group does not separate ice Ih from ice Ic here.</p>
+</section>
+<section id="timings">
+<h2>Timings<a class="headerlink" href="#timings" title="Link to this heading">¶</a></h2>
+<p>One sitting, 11 November 2026, an Intel Xeon with 8 cores.
+<code class="docutils literal notranslate"><span class="pre">nproc</span></code> was read with <code class="docutils literal notranslate"><span class="pre">OMP_NUM_THREADS</span></code> unset and reported 8.
+The compiler is g++ 15.2.0.
+The library is a Meson release build, <code class="docutils literal notranslate"><span class="pre">-O3</span></code>, with <code class="docutils literal notranslate"><span class="pre">-mavx2</span> <span class="pre">-mfma</span></code> on the shell translation unit.
+Eight samples, one warm-up discarded, and the median of an even count is the mean of the two central samples.
+OVITO is 3.17.2.
+Identify diamond is <code class="docutils literal notranslate"><span class="pre">IdentifyDiamondModifier</span></code>.
+Template matching is <code class="docutils literal notranslate"><span class="pre">PolyhedralTemplateMatchingModifier</span></code> with the RMSD cutoff 0.1 and only cubic diamond and hexagonal diamond enabled.</p>
+<p>The bond stage was the largest piece of a one-thread call, about 3 ms of 5.3 ms at 13553 molecules and almost the whole 24 ms call on the ideal 110592-molecule cell.
+The pair walk now keeps the minimum-image vector it has already computed, and the later pass that rebuilt those vectors from the coordinates is gone.
+Inside the template fit, the second-shell arms are ordered by the unnormalised cross product, and an eclipsed arm is a squared-cosine test.
+Common-neighbour rows are built one at a time, and a shell that can no longer reach the ambiguous band does not build the rest.</p>
+<p>The timed frames are the 13553-molecule cells, not the quenches.
+One thread, eight samples, milliseconds, kernel then identify diamond in one process.
+The range is the slowest and fastest sample.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>seed</p></th>
+<th class="head"><p>kernel</p></th>
+<th class="head"><p>identify diamond</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>91001</p></td>
+<td><p>5.436 (5.325–5.485)</p></td>
+<td><p>6.618 (5.179–7.773)</p></td>
+</tr>
+<tr class="row-odd"><td><p>92002</p></td>
+<td><p>5.099 (4.987–5.281)</p></td>
+<td><p>5.939 (5.043–6.472)</p></td>
+</tr>
+<tr class="row-even"><td><p>93003</p></td>
+<td><p>5.251 (5.163–5.342)</p></td>
+<td><p>6.176 (5.225–7.059)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The eight kernel samples are 5.429 5.485 5.392 5.484 5.364 5.442 5.325 5.463, then 5.092 5.281 5.016 5.106 4.987 5.172 5.071 5.144, then 5.298 5.166 5.341 5.219 5.342 5.163 5.283 5.200.
+Identify diamond on the same frames is 6.726 6.509 7.119 7.773 6.057 5.179 6.934 5.550, then 5.815 6.457 5.178 6.472 5.043 6.062 5.605 6.314, then 5.739 6.272 7.059 5.918 6.314 5.225 6.247 6.104.
+On every seed the kernel median is below the identify-diamond median, and the kernel’s own spread is under 0.3 ms.
+The fastest identify-diamond sample on each seed is still below the slowest kernel sample, by 0.31 ms on 91001, 0.24 ms on 92002 and 0.12 ms on 93003.</p>
+<p>Eight threads, same cells, measured in the preceding minute:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>seed</p></th>
+<th class="head"><p>kernel</p></th>
+<th class="head"><p>identify diamond</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>91001</p></td>
+<td><p>2.222 (2.153–2.296)</p></td>
+<td><p>6.087 (5.590–13.502)</p></td>
+</tr>
+<tr class="row-odd"><td><p>92002</p></td>
+<td><p>1.940 (1.912–2.076)</p></td>
+<td><p>5.787 (4.925–6.548)</p></td>
+</tr>
+<tr class="row-even"><td><p>93003</p></td>
+<td><p>2.009 (1.958–2.056)</p></td>
+<td><p>5.714 (5.075–6.425)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The kernel’s slowest eight-thread sample on each seed is under identify diamond’s fastest sample.</p>
+<p>Template matching was measured in that same preceding run, kernel and template matching in one process.
+It does not speed up at eight threads.
+Per-atom times are the median divided by the atom count.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>frame</p></th>
+<th class="head"><p>threads</p></th>
+<th class="head"><p>kernel µs/atom</p></th>
+<th class="head"><p>template matching µs/atom</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>91001, 13553</p></td>
+<td><p>1</p></td>
+<td><p>0.406</p></td>
+<td><p>4.953</p></td>
+</tr>
+<tr class="row-odd"><td><p>92002, 13553</p></td>
+<td><p>1</p></td>
+<td><p>0.380</p></td>
+<td><p>4.655</p></td>
+</tr>
+<tr class="row-even"><td><p>93003, 13553</p></td>
+<td><p>1</p></td>
+<td><p>0.399</p></td>
+<td><p>4.698</p></td>
+</tr>
+<tr class="row-odd"><td><p>ideal ice Ic, 110592</p></td>
+<td><p>1</p></td>
+<td><p>0.218</p></td>
+<td><p>3.644</p></td>
+</tr>
+<tr class="row-even"><td><p>91001, 13553</p></td>
+<td><p>8</p></td>
+<td><p>0.177</p></td>
+<td><p>4.644</p></td>
+</tr>
+<tr class="row-odd"><td><p>92002, 13553</p></td>
+<td><p>8</p></td>
+<td><p>0.146</p></td>
+<td><p>4.658</p></td>
+</tr>
+<tr class="row-even"><td><p>93003, 13553</p></td>
+<td><p>8</p></td>
+<td><p>0.151</p></td>
+<td><p>4.713</p></td>
+</tr>
+<tr class="row-odd"><td><p>ideal ice Ic, 110592</p></td>
+<td><p>8</p></td>
+<td><p>0.071</p></td>
+<td><p>3.536</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The classify workspace, the coordinate columns and the canonical shell are one copy per calling thread, so two frames can be labelled at once.
+A later sitting on the same eight cores timed the C call again, two warm-ups and then eight samples.
+One thread, microseconds per atom: 91001 0.401, 92002 0.362, 93003 0.376, ideal ice Ic 0.215.
+Eight threads: 0.169, 0.137, 0.137, and the ideal cell remeasured at 0.071.
+The one-thread samples, milliseconds, are 5.416 5.168 5.291 5.294 5.446 6.678 5.777 5.561, then 5.054 4.869 4.758 4.831 5.066 4.729 4.950 5.120, then 5.145 5.134 4.954 5.331 5.265 5.053 4.868 5.034, and on the ideal cell 25.693 23.961 23.874 23.780 23.734 24.298 23.393 23.321.
+Eight threads: 2.276 2.293 2.287 3.296 2.398 4.829 2.170 2.266, then 2.006 2.123 1.913 1.765 1.747 1.815 1.891 1.829, then 1.857 1.868 1.872 1.766 1.801 1.816 1.846 1.897.
+The seeds sit under the per-atom figures above.
+The ideal cell is 0.215 against 0.218 at one thread.
+At eight threads that cell was measured again on 12 November 2026.
+<code class="docutils literal notranslate"><span class="pre">nproc</span></code> was read with <code class="docutils literal notranslate"><span class="pre">OMP_NUM_THREADS</span></code> unset and reported 8.
+One process ran <code class="docutils literal notranslate"><span class="pre">tests/bench_shell_scale</span></code> on the release build, one warm-up and then eight calls.
+The median of an even count is the mean of the two central samples, and the interquartile range is the upper quartile minus the lower.
+The median is 7.804 ms, the interquartile range is 0.148 ms, and that is 0.071 µs/atom.
+Template matching was timed in that same sitting, eight threads, the same warm-up and eight calls, RMSD cutoff 0.1, only cubic diamond and hexagonal diamond.
+Its median is 391.012 ms, its interquartile range is 4.280 ms, and that is 3.536 µs/atom.
+The kernel is faster per atom.</p>
+<p>The one-thread template-matching samples, milliseconds, are 63.493 64.348 65.309 71.131 81.903 72.515 68.933 63.321, then 64.195 62.642 65.019 63.439 64.351 61.660 62.748 61.902, then 64.377 62.895 63.863 63.724 63.622 64.526 63.316 63.037, and on the ideal cell 411.364 406.241 396.372 399.726 407.844 396.695 399.634 415.364.
+The ideal cell is 24×24×24 ice Ic, 110592 molecules, and every atom is labelled cubic.
+The one-thread kernel on that cell is 24.262 24.381 23.859 24.137 24.262 24.060 24.121 24.174.
+At eight threads the ideal kernel is 7.661 7.767 7.790 7.792 7.816 7.906 8.012 8.862 and template matching is 394.550 390.626 390.898 400.186 389.956 395.303 391.127 377.933.</p>
+</section>
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="topological-network.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">Topological network criteria</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="citation.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">Citation</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div
+      style="
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        color: var(--sy-c-text-weak);
+        font-size: 0.9em;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 1rem;
+          align-items: center;
+        "
+      >
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M7,20H4V4h3V20z M14,20h-3V12h3V20z M21,20h-3V8h3V20z" />
+          </svg>
+          <span
+            >Analytics by
+            <a
+              href="https://antics.turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >Antics</a
+            ></span
+          >
+        </span>
+
+        
+        <span style="display: inline-flex; align-items: center; gap: 0.3em">
+          <span>provided by</span>
+          <span style="display: inline-flex; align-items: center; gap: 0.3em">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1.2em"
+              height="1.2em"
+              viewBox="0 0 64 64"
+              aria-hidden="true"
+            >
+              <g fill-rule="evenodd">
+                <ellipse cx="32" cy="11" fill="#80D25B" rx="7" ry="9" />
+                <path
+                  fill="#80D25B"
+                  d="M20.302104,46 C20.302104,46 17.1330329,55.8812548 20.6828149,59.7817355 C24.232597,63.6822162 26.8008673,63.215359 26.8008673,53.7414927 C26.8008673,44.2676263 20.302104,46 20.302104,46 Z"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M38.302104,46 C38.302104,46 35.1330329,55.8812548 38.6828149,59.7817355 C42.232597,63.6822162 44.8008673,63.215359 44.8008673,53.7414927 C44.8008673,44.2676263 38.302104,46 38.302104,46 Z"
+                  transform="matrix(-1 0 0 1 81.8 0)"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M20.6227767,21.2218684 C20.6227767,21.2218684 13.956214,15.3844007 10.091955,16.0534044 C6.22769598,16.722408 6,22.2124633 6,23.9992899 C6,25.7861165 7.78917398,37.3159836 9.78726488,36.4967476 C11.7853558,35.6775115 13.7411938,27.959322 13.7411938,27.959322 15.6510232,30.2287702 18.609193,30.4630388"
+                />
+                <path
+                  fill="#80D25B"
+                  d="M57.6227767,21.2218684 C57.6227767,21.2218684 50.956214,15.3844007 47.091955,16.0534044 C43.227696,16.722408 43,22.2124633 43,23.9992899 C43,25.7861165 44.789174,37.3159836 46.7872649,36.4967476 C48.7853558,35.6775115 50.7411938,27.959322 50.7411938,27.959322 52.6510232,30.2287702 55.609193,30.4630388"
+                  transform="matrix(-1 0 0 1 100.623 0)"
+                />
+                <path
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32,53 C40.836556,53 48,44.4934102 48,34 C48,23.5065898 46.6814044,17 32,17 C17.3185956,17 16,23.5065898 16,34 C16,44.4934102 23.163444,53 32,53 Z"
+                />
+                <polygon
+                  fill="#BD7575"
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  points="32 22 38.928 26 38.928 34 32 38 25.072 34 25.072 26"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M30,8 C28.8954305,8 28,8.8954305 28,10"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M36,8 C34.8954305,8 34,8.8954305 34,10"
+                  transform="matrix(-1 0 0 1 70 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M32.1194396 38.1881507L32.1194396 52.4125899M32.0164956 21.7467197L32.0164956 17M25.2141026 26.0041506L17.737148 23.0721126M25.1254173 34.1534318L16.7659494 38.8876521"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M46.2141026,26.0041506 L38.737148,23.0721126"
+                  transform="matrix(-1 0 0 1 84.951 0)"
+                />
+                <path
+                  stroke="#595959"
+                  stroke-linecap="round"
+                  stroke-width="2"
+                  d="M47.1254173,34.1534318 L38.7659494,38.8876521"
+                  transform="matrix(-1 0 0 1 85.891 0)"
+                />
+              </g>
+            </svg>
+            <a
+              href="https://turtletech.us/"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; text-decoration: underline"
+              >TurtleTech ehf</a
+            >
+          </span>
+        </span>
+      </div>
+    </div>
+
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright"><p>2019-2026, d-SEAMS core team</p>
+  
+  <p>
+    Made with
+    
+    <a href="https://www.sphinx-doc.org/">Sphinx</a> and
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div> <div class="sy-foot-socials">
+<a href="https://github.com/d-SEAMS/seams-core" aria-label="GitHub">
+  <iconify-icon icon="simple-icons:github"></iconify-icon>
+</a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/target-highlight.js?v=df7d332b"></script>
+      <script src="../_static/design-tabs.js?v=f930bc37"></script>
+      <script src="../_static/shibuya.js?v=cac61aee"></script></body>
+</html>

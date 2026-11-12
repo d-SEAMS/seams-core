@@ -12,6 +12,7 @@ namespace seams
 	namespace_seams_product.rst
 	namespace_seams_sphericart_ylm.rst
 	namespace_seams_steinhardt.rst
+	namespace_seams_ylm.rst
 	struct_seams_EdgeSet.rst
 
 
@@ -30,6 +31,7 @@ namespace seams
 	namespace :ref:`seams::product<doxid-namespaceseams_1_1product>`;
 	namespace :ref:`seams::sphericart_ylm<doxid-namespaceseams_1_1sphericart__ylm>`;
 	namespace :ref:`seams::steinhardt<doxid-namespaceseams_1_1steinhardt>`;
+	namespace :ref:`seams::ylm<doxid-namespaceseams_1_1ylm>`;
 
 	// structs
 
@@ -49,5 +51,6 @@ namespace seams
 	void :target:`parallelStableSort<doxid-namespaceseams_1ae8cf4ad5f2bb66332e94fb7f531c3194>`(std::vector<T>& values, Less less);
 
 	void :target:`BatchPeriodicDistSq<doxid-namespaceseams_1a7b2dc4f3d8257cc99b099ffbebd1a5ab>`(const double* dx, const double* dy, const double* dz, double bx, double by, double bz, double* out, size_t n);
+	void :target:`adoptThreads<doxid-namespaceseams_1afd71d1c59950dc2eabbff5aa9362a16c>`();
 
 	} // namespace seams

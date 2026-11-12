@@ -1,0 +1,24 @@
+.. index:: pair: enum; Kind
+.. _doxid-namespacesymm_1ad93e6f708650d22301ab475a32337022:
+
+enum symm::Kind
+===============
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <local_symmetry.hpp>
+
+	enum Kind {
+	    :target:`iceIh<doxid-namespacesymm_1ad93e6f708650d22301ab475a32337022a258dadf6f3e4da9f8b92752ebfb5d5cf>`     = 0,
+	    :target:`iceIc<doxid-namespacesymm_1ad93e6f708650d22301ab475a32337022a24a56ee7f098bfe116170592ba67797c>`     = 1,
+	    :target:`iceIsd<doxid-namespacesymm_1ad93e6f708650d22301ab475a32337022a65227debde7196f276b608e58d1e49e7>`    = 2,
+	    :target:`cage512<doxid-namespacesymm_1ad93e6f708650d22301ab475a32337022adfa3028a54f4e1364e18e8fe2b5740eb>`   = 3,
+	    :target:`cage51262<doxid-namespacesymm_1ad93e6f708650d22301ab475a32337022ab2f0ac332fcb8d02a1661f1316756395>` = 4,
+	    :target:`cage51264<doxid-namespacesymm_1ad93e6f708650d22301ab475a32337022a3571b32066a4490865cbae8553fb31c2>` = 5,
+	    :target:`ring5<doxid-namespacesymm_1ad93e6f708650d22301ab475a32337022a96f6dccceb1934b7858e492d80c4031d>`     = 6,
+	    :target:`ring6<doxid-namespacesymm_1ad93e6f708650d22301ab475a32337022a6638298033092c24eac60e13b055997b>`     = 7,
+	};
+

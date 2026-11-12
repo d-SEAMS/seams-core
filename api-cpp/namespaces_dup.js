@@ -125,6 +125,7 @@ var namespaces_dup =
       [ "spheriHarmo", "group__chill.html#gaa9220b76da7400c9d934fa08ceeeba7a", null ],
       [ "spheriHarmoInto", "group__chill.html#ga54a26a87d40f9d1be9253f71ecac02c0", null ]
     ] ],
+    [ "symm", "namespacesymm.html", "namespacesymm" ],
     [ "topo", "namespacetopo.html", "namespacetopo" ],
     [ "topoparam", "namespacetopoparam.html", "namespacetopoparam" ],
     [ "tum", "namespacetum.html", "namespacetum" ],

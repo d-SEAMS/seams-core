@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.13.0</span>
+<span class="project_info">seams-core v2.14.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -256,6 +256,10 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga69f1b870183f33e58426c88ee93f0635" id="r_ga69f1b870183f33e58426c88ee93f0635"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga69f1b870183f33e58426c88ee93f0635">primitive::ringNetwork</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int maxDepth)</td></tr>
+<tr class="memitem:gad801fc7ee2fd122edf3886adc8a43486" id="r_gad801fc7ee2fd122edf3886adc8a43486"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gad801fc7ee2fd122edf3886adc8a43486">primitive::ringNetwork</a> (const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols, int maxDepth)</td></tr>
+<tr class="memdesc:gad801fc7ee2fd122edf3886adc8a43486"><td class="mdescLeft">&#160;</td><td class="mdescRight">Rings on a CSR of cloud indices (no self entry, one edge each).  <br /></td></tr>
+<tr class="memitem:ga827b14f8a901ae1e6ded2a5da2a5e90e" id="r_ga827b14f8a901ae1e6ded2a5da2a5e90e"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#ga827b14f8a901ae1e6ded2a5da2a5e90e">primitive::ringNetworkBalls</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int maxDepth)</td></tr>
+<tr class="memitem:ga78fa9b2181d5c4ee74a10363b84039e9" id="r_ga78fa9b2181d5c4ee74a10363b84039e9"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ga78fa9b2181d5c4ee74a10363b84039e9">primitive::lastRingSearchUsedBalls</a> ()</td></tr>
 <tr class="memitem:gaf77d72908c71333829fc895c931f38a7" id="r_gaf77d72908c71333829fc895c931f38a7"><td class="memItemLeft">std::vector&lt; std::vector&lt; int &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#gaf77d72908c71333829fc895c931f38a7">primitive::ringNetwork</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int maxDepth, const std::vector&lt; char &gt; &amp;sources)</td></tr>
 <tr class="memitem:ga14b7bc6572af7a5a4a0e9bff2b9dc1e8" id="r_ga14b7bc6572af7a5a4a0e9bff2b9dc1e8"><td class="memItemLeft"><a class="el" href="structprimitive_1_1Graph.html">Graph</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga14b7bc6572af7a5a4a0e9bff2b9dc1e8">primitive::populateGraphFromNListID</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;neighHbondList)</td></tr>
 <tr class="memitem:ga3f096393efc02530aeaa0945e24c0f76" id="r_ga3f096393efc02530aeaa0945e24c0f76"><td class="memItemLeft"><a class="el" href="structprimitive_1_1Graph.html">Graph</a>&#160;</td><td class="memItemRight"><a class="el" href="#ga3f096393efc02530aeaa0945e24c0f76">primitive::populateGraphFromIndices</a> (const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</td></tr>
@@ -531,6 +535,32 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="ga78fa9b2181d5c4ee74a10363b84039e9" name="ga78fa9b2181d5c4ee74a10363b84039e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga78fa9b2181d5c4ee74a10363b84039e9">&#9670;&#160;</a></span>lastRingSearchUsedBalls()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int primitive::lastRingSearchUsedBalls </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>0 when the last ringNetwork call answered every primitivity query from the adjacency rows, 1 when it filled the sorted pair table, 2 when it filled the occupancy bitset of the ball (rings of size 8 to 10). </p>
+
+</div>
+</div>
 <a id="ga55d76a1a5bff46d8f3f42e0116e3c783" name="ga55d76a1a5bff46d8f3f42e0116e3c783"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga55d76a1a5bff46d8f3f42e0116e3c783">&#9670;&#160;</a></span>operator=() <span class="overload">[1/2]</span></h2>
 
@@ -662,8 +692,36 @@ Variables</h2></td></tr>
 
 </div>
 </div>
+<a id="gad801fc7ee2fd122edf3886adc8a43486" name="gad801fc7ee2fd122edf3886adc8a43486"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad801fc7ee2fd122edf3886adc8a43486">&#9670;&#160;</a></span>ringNetwork() <span class="overload">[1/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; primitive::ringNetwork </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>offsets</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxDepth</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Rings on a CSR of cloud indices (no self entry, one edge each). </p>
+
+</div>
+</div>
 <a id="ga69f1b870183f33e58426c88ee93f0635" name="ga69f1b870183f33e58426c88ee93f0635"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga69f1b870183f33e58426c88ee93f0635">&#9670;&#160;</a></span>ringNetwork() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ga69f1b870183f33e58426c88ee93f0635">&#9670;&#160;</a></span>ringNetwork() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -685,7 +743,7 @@ Variables</h2></td></tr>
 </div>
 </div>
 <a id="gaf77d72908c71333829fc895c931f38a7" name="gaf77d72908c71333829fc895c931f38a7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaf77d72908c71333829fc895c931f38a7">&#9670;&#160;</a></span>ringNetwork() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#gaf77d72908c71333829fc895c931f38a7">&#9670;&#160;</a></span>ringNetwork() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -708,6 +766,28 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <p>The rings ringNetwork returns whose lowest-indexed member is flagged in <em class="arg">sources</em> (by index; empty flags every vertex), in the same order </p>
+
+</div>
+</div>
+<a id="ga827b14f8a901ae1e6ded2a5da2a5e90e" name="ga827b14f8a901ae1e6ded2a5da2a5e90e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga827b14f8a901ae1e6ded2a5da2a5e90e">&#9670;&#160;</a></span>ringNetworkBalls()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; std::vector&lt; int &gt; &gt; primitive::ringNetworkBalls </td>
+          <td>(</td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>maxDepth</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The same ring set, built with a bounded ball at every vertex and a primitivity test of every pair. ringNetwork leaves that table out when the largest ring is at most 7, because a strict shortcut is then a walk of at most two edges. </p>
 
 </div>
 </div>
@@ -926,7 +1006,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00229">229</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00245">245</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
 
 </div>
 </div>
@@ -958,7 +1038,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00230">230</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00246">246</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
 
 </div>
 </div>
@@ -974,7 +1054,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00231">231</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00247">247</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
 
 </div>
 </div>
@@ -990,7 +1070,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00226">226</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00242">242</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
 
 </div>
 </div>
@@ -1006,7 +1086,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00227">227</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00243">243</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
 
 </div>
 </div>
@@ -1041,7 +1121,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00228">228</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="franzblau_8hpp_source.html#l00244">244</a> of file <a class="el" href="franzblau_8hpp_source.html">franzblau.hpp</a>.</p>
 
 </div>
 </div>

@@ -5,6 +5,7 @@ var neighbours_8hpp =
       [ "nneigh::BondGraph::KnnMutual", "group__nneigh.html#ggae70187f6d039fe332d7f59be0112ff26a2701a56edf015319a7a1880ee0e1a604", null ],
       [ "nneigh::BondGraph::KnnUnion", "group__nneigh.html#ggae70187f6d039fe332d7f59be0112ff26a1475972dc8dd9d6302c92c421c45f706", null ]
     ] ],
+    [ "nneigh::blockWindowRows", "group__nneigh.html#gaccd2ce503032424d9cb7c0fb6b329dce", null ],
     [ "nneigh::bondGraphFromName", "group__nneigh.html#gad285ff1c2c0bd1ca8495f3972faebb8c", null ],
     [ "nneigh::bondGraphName", "group__nneigh.html#ga1c78a7396b0353d674abb0290e85d0ec", null ],
     [ "nneigh::cellListRowsThreaded", "group__nneigh.html#ga8f5dd92092f5be635273a1ea18b57cb7", null ],
@@ -18,7 +19,10 @@ var neighbours_8hpp =
     [ "nneigh::dumpVolume", "group__nneigh.html#ga786c8abbd20d2751403eb4f2c603cd95", null ],
     [ "nneigh::dumpVolume", "group__nneigh.html#gad17e972366865905372aa796e946a351", null ],
     [ "nneigh::getNewNeighbourListByIndex", "group__nneigh.html#ga97ad6e2c7bfaa504c7e021a527effe73", null ],
+    [ "nneigh::halfIdRowsFromCsr", "group__nneigh.html#gacb3f8226a248f4d7399707c779e91867", null ],
     [ "nneigh::halfNeighList", "group__nneigh.html#ga651839704a066d725b22212c13c74327", null ],
+    [ "nneigh::idRowsFromCsr", "group__nneigh.html#ga054007bfd5ef4ba81d50851c1eca6d61", null ],
+    [ "nneigh::indexRowsFromCsr", "group__nneigh.html#ga607468766af5b066de4b646601fcf0b4", null ],
     [ "nneigh::kNearestNeighbourList", "group__nneigh.html#ga5aeb17070b1a13a028fdcc5d3e7470b6", null ],
     [ "nneigh::kNearestNeighbourList", "group__nneigh.html#ga18cda509d1fc5e680abf22e36348fc61", null ],
     [ "nneigh::kNearestNeighbourPair", "group__nneigh.html#gae83921eb2fdda24a0dcda3638c8a2ebc", null ],
@@ -29,6 +33,8 @@ var neighbours_8hpp =
     [ "nneigh::neighList", "group__nneigh.html#ga9566a384474993ea7356e7abc414e40e", null ],
     [ "nneigh::neighListO", "group__nneigh.html#gafaf0f0ff09cef581076f99a68018b023", null ],
     [ "nneigh::neighListPair", "group__nneigh.html#gadd6ed18f0c7e2e5fbd10d7cdbf6af429", null ],
+    [ "nneigh::orthoFullCsr", "group__nneigh.html#gad4ed66234b38b63ae408ef3dacff5444", null ],
+    [ "nneigh::reusedShellList", "group__nneigh.html#ga4f12746b56fe9e1c8cfb7d2af32b64ba", null ],
     [ "nneigh::setBoxFromLammpsEdges", "group__nneigh.html#gad960860059d8e9d9fdee48c679e1c446", null ],
     [ "nneigh::setBoxFromLengthsAngles", "group__nneigh.html#ga77b70b894f0e7a72a980001e076f2a73", null ],
     [ "nneigh::shellSeparation", "group__nneigh.html#ga139165088e10b53a5efa6034434c9423", null ]

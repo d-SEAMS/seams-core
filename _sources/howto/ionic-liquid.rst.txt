@@ -36,11 +36,12 @@ Partial g(r)
 
 .. code:: bash
 
-    seams rdf FILE --types 1,2 --cutoff 6.0
-    seams rdf FILE --types 1,2 --cutoff 6.0 --bins 60
+    seams rdf FILE --pair-types 1,2 --cutoff 6.0
+    seams rdf FILE --pair-types 1,2 --cutoff 6.0 --bins 60
     seams rdf FILE --type 2 --cutoff 6.0
 
-``--types I,J`` selects the pair. The default is ``I = J = --type``
+``--pair-types I,J`` selects the pair. The default is ``I = J = --type``.
+``--types`` is a deprecated exact alias of ``--pair-types`` and prints a warning.
 (a like-type g(r) of the guessed or requested species).
 ``--cutoff`` is rmax. ``--bins`` is optional (default ``rmax / 0.1``).
 
@@ -141,8 +142,8 @@ water path and is not an IL classifier.
 
 .. code:: bash
 
-    seams rdf FILE --types 1,2 --cutoff 6.0
-    seams cn FILE --types 1,2 --cutoff 6.0
+    seams rdf FILE --pair-types 1,2 --cutoff 6.0
+    seams cn FILE --pair-types 1,2 --cutoff 6.0
     seams cn FILE --ions --site '1=cationHead,2=anion'
     seams pairs FILE --site '1=cationHead,2=anion'
     seams domains FILE --site '1=cationHead,2=anion,3=tail' --subset polar

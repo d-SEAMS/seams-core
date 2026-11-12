@@ -18,6 +18,8 @@ These pages are for understanding. They are not recipes.
     +-----------------------------------------------------------+----------------------------------------------------+
     | `Topological network criteria <topological-network.rst>`_ | The formulae the classifiers use                   |
     +-----------------------------------------------------------+----------------------------------------------------+
+    | `Local symmetry <symmetry.rst>`_                          | The ice shell, the cages, and the held-out scores  |
+    +-----------------------------------------------------------+----------------------------------------------------+
     | `Citation <citation.rst>`_                                | What to cite                                       |
     +-----------------------------------------------------------+----------------------------------------------------+
 
@@ -28,4 +30,5 @@ These pages are for understanding. They are not recipes.
    chill-plus-vs-cages
    ring-completion
    topological-network
+   symmetry
    citation

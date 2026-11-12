@@ -79,7 +79,7 @@ Expected output:
 
 ::
 
-    nop 250 interClathrate 12 water 238
+    nop 250 interClathrate 9 water 241
 
 .. code:: bash
 
@@ -181,7 +181,7 @@ On this dump the default prints:
 
 ::
 
-    IceCounts(interClathrate=12, water=238)
+    IceCounts(interClathrate=9, water=241)
     CageScore(n_ih=0, n_ic=0, n_water=250)
 
 The cage score matches the CLI.

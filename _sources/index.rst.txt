@@ -107,83 +107,47 @@ This documentation follows the `Diataxis <https://diataxis.fr/>`_
 framework.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Getting Started
 
    quickstart
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Tutorials
 
    tutorials/index
-   tutorials/bulk-ice
-   tutorials/ice-and-clathrate
-   tutorials/rings
-   tutorials/order-parameters
-   tutorials/confined-water
-   tutorials/paper-figures
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: How-to
 
    howto/index
-   howto/install
-   howto/bindings
-   howto/versions
-   howto/benchmarks
-   howto/openmp-offload
-   howto/classify-cli
-   howto/sheared-cells
-   howto/ionic-liquid
-   howto/ase-integration
-   howto/solvis
-   howto/confined-ice
-   howto/faq
-   howto/troubleshooting
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Explanation
 
    explanation/index
-   explanation/architecture
-   explanation/chill-plus-vs-cages
-   explanation/ring-completion
-   explanation/topological-network
-   explanation/citation
 
 .. toctree::
    :maxdepth: 2
    :caption: Reference
 
    reference/index
-   reference/cli
-   reference/data-formats
-   reference/walk-compare
-   reference/nix
-   reference/cross-language
-   reference/api
-   api/index
-   reference/glossary
    changelog
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: d-SEAMS 2.0 paper
 
    paper/index
-   paper/versions
-   paper/benchmarks
-   paper/reproduce
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Development
 
    contributing/index
-   contributing/lean
 
 The in-book C++ pages under ``api/`` are Doxygen via doxyrest. A sibling
 doxyYoda HTML tree (inline source, treeview) is at

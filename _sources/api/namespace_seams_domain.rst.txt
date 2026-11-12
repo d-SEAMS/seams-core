@@ -35,9 +35,15 @@ Overview
 
 	:ref:`RingSummary<doxid-structseams_1_1domain_1_1_ring_summary>` :ref:`summarize<doxid-namespaceseams_1_1domain_1a08b7a66725169b459556ffeb9a2791de>`(const std::vector<std::vector<int>>& ringList, int nAtoms, int maxDepth);
 	std::uint64_t :ref:`hilbertKey<doxid-namespaceseams_1_1domain_1ad678cb494640b797ce08a5c07565785c>`(std::uint32_t x, std::uint32_t y, std::uint32_t z, int bits);
+	int :ref:`ringHops<doxid-namespaceseams_1_1domain_1a6f6deb8c754079286665782899343096>`(int maxDepth);
+	int :ref:`ringRowHops<doxid-namespaceseams_1_1domain_1ae27bcdb378d3e3ff8d64c523885ba8fc>`(int maxDepth);
 	:ref:`Share<doxid-structseams_1_1domain_1_1_share>` :ref:`decompose<doxid-namespaceseams_1_1domain_1a98d70d81f9a7b925ff2ddefedb2be450>`(const :ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>`& cloud, int rank, int nRanks, double halo);
+	std::vector<int> :ref:`haloRanks<doxid-namespaceseams_1_1domain_1ab0d8b6bbc022b7e14dbf042227f7f211>`(const :ref:`Share<doxid-structseams_1_1domain_1_1_share>`& share);
+	void :ref:`markSources<doxid-namespaceseams_1_1domain_1ad442b81299c26dea6b2393169fe36717>`(const :ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>`& cloud, const :ref:`Share<doxid-structseams_1_1domain_1_1_share>`& share, double inner, std::vector<char>& source);
 	:ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>` :ref:`subCloud<doxid-namespaceseams_1_1domain_1a117adcb3bb1eb7b853386cdb464eded8>`(const :ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>`& cloud, const std::vector<int>& atoms);
 	std::vector<std::vector<int>> :ref:`rings<doxid-namespaceseams_1_1domain_1ab982f532567f97c32b948bf06caa992b>`(const :ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>`& cloud, double cutoff, int maxDepth, int rank, int nRanks);
+	std::vector<std::vector<int>> :ref:`ownedRings<doxid-namespaceseams_1_1domain_1a085fa137867f69df427a3f7a9247c309>`(const :ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>`& local, double cutoff, int maxDepth, const std::vector<char>& owned);
+	std::vector<std::vector<int>> :ref:`ringsFromRows<doxid-namespaceseams_1_1domain_1a46e8c2344b67a28640bfe7c9d5b4694c>`(const std::vector<int>& frame, const std::vector<std::vector<int>>& neigh, const std::vector<int>& sources, int maxDepth);
 
 	} // namespace domain
 .. _details-namespaceseams_1_1domain:
@@ -70,6 +76,26 @@ The summary of *ringList* over a frame of *nAtoms* atoms.
 
 Position of cell (x, y, z) along the Hilbert curve over a 2^bits grid.
 
+.. index:: pair: function; ringHops
+.. _doxid-namespaceseams_1_1domain_1a6f6deb8c754079286665782899343096:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int ringHops(int maxDepth)
+
+Cutoffs of coordinates a rank needs when it builds every neighbour row itself. A primitive ring of *maxDepth* members stays inside this many hops, and one hop is at most one cutoff.
+
+.. index:: pair: function; ringRowHops
+.. _doxid-namespaceseams_1_1domain_1ae27bcdb378d3e3ff8d64c523885ba8fc:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	int ringRowHops(int maxDepth)
+
+Cutoffs of neighbour rows the ring search reads past the owned block. The coordinate halo on the distributed path is one cutoff; rows out to this reach are computed by their owners and exchanged. Edges that leave the reach are dropped, which is the graph a coordinate halo of this many cutoffs would have built.
+
 .. index:: pair: function; decompose
 .. _doxid-namespaceseams_1_1domain_1a98d70d81f9a7b925ff2ddefedb2be450:
 
@@ -78,7 +104,27 @@ Position of cell (x, y, z) along the Hilbert curve over a 2^bits grid.
 
 	:ref:`Share<doxid-structseams_1_1domain_1_1_share>` decompose(const :ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>`& cloud, int rank, int nRanks, double halo)
 
-The atoms rank *rank* of *nRanks* owns, and every atom within *halo* of one of them. Without a periodic box rank 0 owns every atom.
+The atoms rank *rank* of *nRanks* owns, and every atom within *halo* of its block. Without a periodic box rank 0 owns every atom.
+
+.. index:: pair: function; haloRanks
+.. _doxid-namespaceseams_1_1domain_1ab0d8b6bbc022b7e14dbf042227f7f211:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<int> haloRanks(const :ref:`Share<doxid-structseams_1_1domain_1_1_share>`& share)
+
+Ranks that own a halo atom of *share*, sorted, without this rank. The relation is symmetric: a cell within *halo* of both sides is listed by each owner.
+
+.. index:: pair: function; markSources
+.. _doxid-namespaceseams_1_1domain_1ad442b81299c26dea6b2393169fe36717:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	void markSources(const :ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>`& cloud, const :ref:`Share<doxid-structseams_1_1domain_1_1_share>`& share, double inner, std::vector<char>& source)
+
+One where a local atom is owned or lies within *inner* of the owned block. *inner* below zero marks only the owned atoms.
 
 .. index:: pair: function; subCloud
 .. _doxid-namespaceseams_1_1domain_1a117adcb3bb1eb7b853386cdb464eded8:
@@ -99,4 +145,24 @@ The listed atoms of *cloud*, in that order, in the same box.
 	std::vector<std::vector<int>> rings(const :ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>`& cloud, double cutoff, int maxDepth, int rank, int nRanks)
 
 Primitive rings of the cutoff graph up to *maxDepth* members whose lowest-indexed member rank *rank* owns, by frame index, as :ref:`primitive::ringNetwork <doxid-group__primitive_1ga69f1b870183f33e58426c88ee93f0635>` lists them for the graph with ascending rows. Each rank needs only its share, and the ranks' rings partition the frame's.
+
+.. index:: pair: function; ownedRings
+.. _doxid-namespaceseams_1_1domain_1a085fa137867f69df427a3f7a9247c309:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> ownedRings(const :ref:`Cloud<doxid-namespaceseams_1_1domain_1ab1bfe8a7863d4a64c57f3ea273eacfc3>`& local, double cutoff, int maxDepth, const std::vector<char>& owned)
+
+Rings of a cloud that is already one share, in share order. *owned* selects the sources. Member indices are local.
+
+.. index:: pair: function; ringsFromRows
+.. _doxid-namespaceseams_1_1domain_1a46e8c2344b67a28640bfe7c9d5b4694c:
+
+.. ref-code-block:: cpp
+	:class: doxyrest-title-code-block
+
+	std::vector<std::vector<int>> ringsFromRows(const std::vector<int>& frame, const std::vector<std::vector<int>>& neigh, const std::vector<int>& sources, int maxDepth)
+
+Primitive rings from neighbour rows already in hand. *frame* [i] is the frame index of a vertex whose neighbours are *neigh* [i], also frame indices. A neighbour that is not one of *frame* is dropped. *sources* lists the frames that may enumerate a ring. Members in the result are frame indices.
 

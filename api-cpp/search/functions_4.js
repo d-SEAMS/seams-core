@@ -8,6 +8,7 @@ var searchData=
   ['equatorialconditions_5',['equatorialConditions',['../namespacering.html#a01243f4581fb55b417184d98f9ac70aa',1,'ring']]],
   ['estimatefootprint_6',['estimateFootprint',['../namespacegpu.html#a5e96b0fb97bcce4c6cca5e5888bea7a6',1,'gpu']]],
   ['euclideanifshorter_7',['euclideanIfShorter',['../namespacegen_1_1mic.html#a1a29504e3d6fb23c397d8523474955ce',1,'gen::mic']]],
-  ['exclusivescan_8',['exclusiveScan',['../namespaceseams.html#ade36ab0f3594a27f4b1d229706d9443b',1,'seams']]],
-  ['exportenviron_9',['exportEnviron',['../namespaceseams_1_1cfg.html#aabf071e8f8e859b7daa9df9a9024377f',1,'seams::cfg']]]
+  ['evalunit_8',['evalUnit',['../namespaceseams_1_1ylm.html#ac0b8a775844aa8a94e1935d98c2fb22d',1,'seams::ylm']]],
+  ['exclusivescan_9',['exclusiveScan',['../namespaceseams.html#ade36ab0f3594a27f4b1d229706d9443b',1,'seams']]],
+  ['exportenviron_10',['exportEnviron',['../namespaceseams_1_1cfg.html#aabf071e8f8e859b7daa9df9a9024377f',1,'seams::cfg']]]
 ];

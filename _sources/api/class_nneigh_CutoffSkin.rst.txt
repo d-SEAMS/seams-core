@@ -1,0 +1,23 @@
+.. index:: pair: class; nneigh::CutoffSkin
+.. _doxid-classnneigh_1_1_cutoff_skin:
+
+class nneigh::CutoffSkin
+========================
+
+.. toctree::
+	:hidden:
+
+Overview
+~~~~~~~~
+
+In-situ cutoff list. :ref:`More...<details-classnneigh_1_1_cutoff_skin>`
+
+.. _details-classnneigh_1_1_cutoff_skin:
+
+Detailed Documentation
+~~~~~~~~~~~~~~~~~~~~~~
+
+In-situ cutoff list.
+
+Candidates are built at ``cutoff + skin`` and reused while every atom and the box have moved by at most ``skin/2``. The filtered list matches a fresh build at ``cutoff``.
+

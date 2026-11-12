@@ -1,0 +1,30 @@
+.. index:: pair: struct; symm::Overlay
+.. _doxid-structsymm_1_1_overlay:
+
+struct symm::Overlay
+====================
+
+.. toctree::
+	:hidden:
+
+
+
+
+.. ref-code-block:: cpp
+	:class: doxyrest-overview-code-block
+
+	#include <src/include/internal/local_symmetry.hpp>
+	
+	struct Overlay {
+		// fields
+	
+		int :target:`status<doxid-structsymm_1_1_overlay_1aa695ee0edaefcaa53f5d2e2502dfa761>` = 1;
+		:ref:`Kind<doxid-namespacesymm_1ad93e6f708650d22301ab475a32337022>` :target:`kind<doxid-structsymm_1_1_overlay_1a576f0f4fe14d426d52f0982f3299bb8c>` = :ref:`Kind::iceIh<doxid-namespacesymm_1ad93e6f708650d22301ab475a32337022a258dadf6f3e4da9f8b92752ebfb5d5cf>`;
+		std::string :target:`name<doxid-structsymm_1_1_overlay_1a3f45e42e83a2a3fec52c7d0aa569a72c>`;
+		double :target:`rmsd<doxid-structsymm_1_1_overlay_1a96153ac1fe52b3639139973752024c2f>` = 0;
+		double :target:`hausdorff<doxid-structsymm_1_1_overlay_1a60860683941379ddb2a61c3289b4fa17>` = 0;
+		Eigen::Matrix3d :target:`rotation<doxid-structsymm_1_1_overlay_1a548510213b812305b214aeb56d9842ff>` = Eigen::Matrix3d::Identity();
+		Eigen::Vector3d :target:`translation<doxid-structsymm_1_1_overlay_1af05c5e3c40697a4b726c9aa2a7e071e6>` = Eigen::Vector3d::Zero();
+		std::vector<int> :target:`permutation<doxid-structsymm_1_1_overlay_1ae47948039598db83e995f03db7714131>`;
+		std::string :target:`backend<doxid-structsymm_1_1_overlay_1a11ca36b9a99e39326db0447246684ce6>`;
+	};

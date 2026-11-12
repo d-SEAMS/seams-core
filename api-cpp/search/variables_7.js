@@ -2,7 +2,7 @@ var searchData=
 [
   ['halfmin_0',['halfMin',['../group__gen.html#ga98c1cc9e3f0235611d771fd03fb05cf2',1,'gen::FracBox']]],
   ['hash_1',['hash',['../structseams_1_1EdgeSet.html#ab49b943304fb15c277ae6487f06fbc9f',1,'seams::EdgeSet']]],
-  ['hausdorff_2',['hausdorff',['../structira_1_1Match.html#ace1f42824c354ae15ac5f7abf006931c',1,'ira::Match']]],
+  ['hausdorff_2',['hausdorff',['../structira_1_1Match.html#ace1f42824c354ae15ac5f7abf006931c',1,'ira::Match::hausdorff'],['../structsymm_1_1Overlay.html#a60860683941379ddb2a61c3289b4fa17',1,'symm::Overlay::hausdorff']]],
   ['hc_3',['hc',['../structring_1_1CageAffiliation.html#ad64ca4fb8e7b4b56bec72ac899e5b084',1,'ring::CageAffiliation::hc'],['../structring_1_1SeededAtomLabels.html#a86b70944057c6a0478cc33617e95d819',1,'ring::SeededAtomLabels::hc']]],
   ['hexperlayer_4',['hexPerLayer',['../structtopoparam_1_1LayerStack.html#ae5019d26e1fc0a62d76c698b12953353',1,'topoparam::LayerStack']]],
   ['hi_5',['hi',['../structcage_1_1EdgeWindow.html#a23e4b113c169441d9436e1712b6f6416',1,'cage::EdgeWindow']]],

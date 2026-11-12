@@ -5,5 +5,6 @@ var searchData=
   ['cage_5fcanon_2ehpp_2',['cage_canon.hpp',['../cage__canon_8hpp.html',1,'']]],
   ['cage_5fenum_2ehpp_3',['cage_enum.hpp',['../cage__enum_8hpp.html',1,'']]],
   ['chill_5foffload_2ehpp_4',['chill_offload.hpp',['../chill__offload_8hpp.html',1,'']]],
-  ['cluster_2ehpp_5',['cluster.hpp',['../cluster_8hpp.html',1,'']]]
+  ['chill_5fplus_5fscheme_2ehpp_5',['chill_plus_scheme.hpp',['../chill__plus__scheme_8hpp.html',1,'']]],
+  ['cluster_2ehpp_6',['cluster.hpp',['../cluster_8hpp.html',1,'']]]
 ];

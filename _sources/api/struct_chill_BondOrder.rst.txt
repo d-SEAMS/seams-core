@@ -1,0 +1,11 @@
+.. index:: pair: struct; chill::BondOrder
+.. _doxid-structchill_1_1_bond_order:
+
+struct chill::BondOrder
+=======================
+
+.. toctree::
+	:hidden:
+
+Unnormalised real l = 3 bond-order vector of the atoms *which* selects. *which* null computes every atom. Ghost slots stay zero so a neighbour rank can write the vector it computed for that atom.
+

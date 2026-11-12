@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.13.0</span>
+<span class="project_info">seams-core v2.14.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -244,7 +244,16 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('seams__c__api_
 Functions</h2></td></tr>
 <tr class="memitem:a4aa681772840118e245156666761a0ac" id="r_a4aa681772840118e245156666761a0ac"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a4aa681772840118e245156666761a0ac">seams_chill_plus</a> (const double *xyz, int n, const double *box, int *labels)</td></tr>
 <tr class="memitem:a3cdbb04d3443c73b4f3067360bea8bf7" id="r_a3cdbb04d3443c73b4f3067360bea8bf7"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a3cdbb04d3443c73b4f3067360bea8bf7">seams_chill_plus_graph</a> (const double *xyz, int n, const double *box, double cutoff, const char *graph, int *labels)</td></tr>
+<tr class="memitem:a15b8a71d8194a40d3a495a6d6103dd7b" id="r_a15b8a71d8194a40d3a495a6d6103dd7b"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a15b8a71d8194a40d3a495a6d6103dd7b">seams_chill_plus_rule</a> (const double *xyz, int n, const double *box, double cutoff, const char *graph, const char *rule, int *labels)</td></tr>
 <tr class="memitem:a905d0436a8fd534e4177ff7627143e04" id="r_a905d0436a8fd534e4177ff7627143e04"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a905d0436a8fd534e4177ff7627143e04">seams_chill_plus_graph_lammps</a> (const double *xyz, int n, const double *box9, double cutoff, const char *graph, int *labels)</td></tr>
+<tr class="memitem:a7b2a4f4bf57d15eb7feb3f526b2bc998" id="r_a7b2a4f4bf57d15eb7feb3f526b2bc998"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a7b2a4f4bf57d15eb7feb3f526b2bc998">seams_symmetry_match</a> (const double *points, int n, int *template_id, double *rmsd, double *hausdorff, double *rotation9, double *translation3, int *permutation)</td></tr>
+<tr class="memitem:ad577898ecee04de6a1a7963f5605a52d" id="r_ad577898ecee04de6a1a7963f5605a52d"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ad577898ecee04de6a1a7963f5605a52d">seams_symmetry_point_group</a> (const double *points, int n, double sym_thr, char *symbol, int symbol_len, int *n_operations)</td></tr>
+<tr class="memitem:a2c3719eca0b342deb63fdaad3a4c9287" id="r_a2c3719eca0b342deb63fdaad3a4c9287"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a2c3719eca0b342deb63fdaad3a4c9287">seams_symmetry_space_group</a> (const double *lattice9, const double *cartesian, int n, double symprec, int *number, char *symbol, int symbol_len)</td></tr>
+<tr class="memitem:afd32896dc0affc747fc4135223d5b681" id="r_afd32896dc0affc747fc4135223d5b681"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#afd32896dc0affc747fc4135223d5b681">seams_symmetry_template</a> (int id, double *points, int cap, int *n_out)</td></tr>
+<tr class="memitem:af3d4dc8bf1573a9e50de07be31190cc1" id="r_af3d4dc8bf1573a9e50de07be31190cc1"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#af3d4dc8bf1573a9e50de07be31190cc1">seams_symmetry_crystal</a> (int which, double *lattice9, double *xyz, int cap, int *n_out)</td></tr>
+<tr class="memitem:a286fe6a9075c6439ef46ed62e24e3418" id="r_a286fe6a9075c6439ef46ed62e24e3418"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a286fe6a9075c6439ef46ed62e24e3418">seams_symmetry_backend</a> (char *name, int name_len)</td></tr>
+<tr class="memitem:af1a71a01de96262b637c4f96281db221" id="r_af1a71a01de96262b637c4f96281db221"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#af1a71a01de96262b637c4f96281db221">seams_symmetry_classify</a> (const double *xyz, int n, const double *lattice9, int *labels)</td></tr>
+<tr class="memitem:a2a8ad5ce8d5997725826f2b0d81d000f" id="r_a2a8ad5ce8d5997725826f2b0d81d000f"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#a2a8ad5ce8d5997725826f2b0d81d000f">seams_symmetry_classify_tol</a> (const double *xyz, int n, const double *lattice9, double shell_rmsd, int *labels)</td></tr>
 </table>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
 <a id="a4aa681772840118e245156666761a0ac" name="a4aa681772840118e245156666761a0ac"></a>
@@ -354,6 +363,345 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>labels</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a15b8a71d8194a40d3a495a6d6103dd7b" name="a15b8a71d8194a40d3a495a6d6103dd7b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a15b8a71d8194a40d3a495a6d6103dd7b">&#9670;&#160;</a></span>seams_chill_plus_rule()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_chill_plus_rule </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>box</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>cutoff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>graph</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>rule</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>labels</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a286fe6a9075c6439ef46ed62e24e3418" name="a286fe6a9075c6439ef46ed62e24e3418"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a286fe6a9075c6439ef46ed62e24e3418">&#9670;&#160;</a></span>seams_symmetry_backend()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_symmetry_backend </td>
+          <td>(</td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>name</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>name_len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af1a71a01de96262b637c4f96281db221" name="af1a71a01de96262b637c4f96281db221"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af1a71a01de96262b637c4f96281db221">&#9670;&#160;</a></span>seams_symmetry_classify()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_symmetry_classify </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>lattice9</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>labels</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2a8ad5ce8d5997725826f2b0d81d000f" name="a2a8ad5ce8d5997725826f2b0d81d000f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2a8ad5ce8d5997725826f2b0d81d000f">&#9670;&#160;</a></span>seams_symmetry_classify_tol()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_symmetry_classify_tol </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>lattice9</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>shell_rmsd</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>labels</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="af3d4dc8bf1573a9e50de07be31190cc1" name="af3d4dc8bf1573a9e50de07be31190cc1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af3d4dc8bf1573a9e50de07be31190cc1">&#9670;&#160;</a></span>seams_symmetry_crystal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_symmetry_crystal </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>which</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>lattice9</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>xyz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>n_out</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a7b2a4f4bf57d15eb7feb3f526b2bc998" name="a7b2a4f4bf57d15eb7feb3f526b2bc998"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b2a4f4bf57d15eb7feb3f526b2bc998">&#9670;&#160;</a></span>seams_symmetry_match()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_symmetry_match </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>points</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>template_id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>rmsd</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>hausdorff</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>rotation9</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>translation3</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>permutation</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ad577898ecee04de6a1a7963f5605a52d" name="ad577898ecee04de6a1a7963f5605a52d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad577898ecee04de6a1a7963f5605a52d">&#9670;&#160;</a></span>seams_symmetry_point_group()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_symmetry_point_group </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>points</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>sym_thr</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>symbol</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>symbol_len</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>n_operations</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a2c3719eca0b342deb63fdaad3a4c9287" name="a2c3719eca0b342deb63fdaad3a4c9287"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c3719eca0b342deb63fdaad3a4c9287">&#9670;&#160;</a></span>seams_symmetry_space_group()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_symmetry_space_group </td>
+          <td>(</td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>lattice9</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const double *</td>          <td class="paramname"><span class="paramname"><em>cartesian</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>n</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double</td>          <td class="paramname"><span class="paramname"><em>symprec</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>number</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">char *</td>          <td class="paramname"><span class="paramname"><em>symbol</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>symbol_len</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="afd32896dc0affc747fc4135223d5b681" name="afd32896dc0affc747fc4135223d5b681"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd32896dc0affc747fc4135223d5b681">&#9670;&#160;</a></span>seams_symmetry_template()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int seams_symmetry_template </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>id</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double *</td>          <td class="paramname"><span class="paramname"><em>points</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>cap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int *</td>          <td class="paramname"><span class="paramname"><em>n_out</em></span>&#160;)</td>
         </tr>
       </table>
 </div><div class="memdoc">

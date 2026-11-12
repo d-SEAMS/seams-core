@@ -70,7 +70,7 @@ mermaid.initialize({ startOnLoad: true, theme: theme });
 <nav class="title_area" aria-label="Project">
 <div class="title_area__start"></div>
 <div class="title_area__center">
-<span class="project_info">seams-core v2.13.0</span>
+<span class="project_info">seams-core v2.14.0</span>
 <span class="project_brief">libyodaLib, the C++ engine of d-SEAMS</span>
 </div>
 <div class="title_area__end">
@@ -245,6 +245,7 @@ document.addEventListener('DOMContentLoaded',() => { initNavTree('namespacechill
 Classes</h2></td></tr>
 <tr class="memitem:BondClassifier" id="r_BondClassifier"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One rule set for classifying bond correlations \(c_{ij}\).  <a href="structchill_1_1BondClassifier.html#details">More...</a><br /></td></tr>
+<tr class="memitem:BondOrder" id="r_BondOrder"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1BondOrder.html">BondOrder</a></td></tr>
 <tr class="memitem:ChillPlusResult" id="r_ChillPlusResult"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1ChillPlusResult.html">ChillPlusResult</a></td></tr>
 <tr class="memitem:LinearClassifier" id="r_LinearClassifier"><td class="memItemLeft">struct &#160;</td><td class="memItemRight"><a class="el" href="structchill_1_1LinearClassifier.html">LinearClassifier</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">One-versus-rest ridge classifier on a dense feature matrix.  <a href="structchill_1_1LinearClassifier.html#details">More...</a><br /></td></tr>
@@ -260,6 +261,9 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-enum-members" class="groupheader"><a id="enum-members" name="enum-members"></a>
 Enumerations</h2></td></tr>
+<tr class="memitem:aae69c0a74e3304a4c13bb04b662c2602" id="r_aae69c0a74e3304a4c13bb04b662c2602"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#aae69c0a74e3304a4c13bb04b662c2602">ChillPlusRule</a> { <a class="el" href="#aae69c0a74e3304a4c13bb04b662c2602a9b9d8a976b42e0bd66381797644943d5">Published</a>
+, <a class="el" href="#aae69c0a74e3304a4c13bb04b662c2602acd69ecf5d970fe87cfb420561667f2b9">Ovito</a>
+ }</td></tr>
 <tr class="memitem:ac13b1a10b6669044f75448ec1abe5122" id="r_ac13b1a10b6669044f75448ec1abe5122"><td class="memItemLeft">enum class &#160;</td><td class="memItemRight"><a class="el" href="#ac13b1a10b6669044f75448ec1abe5122">CrystalKind</a> { <br />
 &#160;&#160;<a class="el" href="#ac13b1a10b6669044f75448ec1abe5122a795f3202b17cb6bc3d4b771d8c6c9eaf">other</a> = 0
 , <a class="el" href="#ac13b1a10b6669044f75448ec1abe5122ad54185b71f614c30a396ac4bc44d3269">sc</a>
@@ -272,6 +276,7 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:gaf4ca04aace5b50713081cc6528bc771a" id="r_gaf4ca04aace5b50713081cc6528bc771a"><td class="memItemLeft"><a class="el" href="group__molSys.html#ga1c858200c3d088bf02839453d0f46328">molSys::bond_type</a>&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gaf4ca04aace5b50713081cc6528bc771a">classifyBond</a> (double cij, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool closed=true)</td></tr>
 <tr class="memitem:ga1bc0f302f0567e60061fd3f82a472b81" id="r_ga1bc0f302f0567e60061fd3f82a472b81"><td class="memItemLeft"><a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a>&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga1bc0f302f0567e60061fd3f82a472b81">chillRule</a> ()</td></tr>
 <tr class="memitem:gabb43db20557ea73beb0a103a11feb906" id="r_gabb43db20557ea73beb0a103a11feb906"><td class="memItemLeft"><a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a>&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gabb43db20557ea73beb0a103a11feb906">chillPlusRule</a> ()</td></tr>
 <tr class="memitem:gac4ea4fda92a94c624a187858ed83de2f" id="r_gac4ea4fda92a94c624a187858ed83de2f"><td class="memItemLeft"><a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a>&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gac4ea4fda92a94c624a187858ed83de2f">bondClassifier</a> (const std::string &amp;name)</td></tr>
@@ -279,6 +284,13 @@ Functions</h2></td></tr>
 <tr class="memitem:ga65e947224bbb3fd2082fe94f470e0765" id="r_ga65e947224bbb3fd2082fe94f470e0765"><td class="memItemLeft">std::vector&lt; std::string &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga65e947224bbb3fd2082fe94f470e0765">bondClassifierNames</a> ()</td></tr>
 <tr class="memdesc:ga65e947224bbb3fd2082fe94f470e0765"><td class="mdescLeft">&#160;</td><td class="mdescRight">Names of every registered rule set.  <br /></td></tr>
 <tr class="memitem:ga685e260b6bf728585deefc814eb82be1" id="r_ga685e260b6bf728585deefc814eb82be1"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga685e260b6bf728585deefc814eb82be1">classifyBonds</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool isSlice=false)</td></tr>
+<tr class="memitem:gac0ed780ae63ea9ed490be26139f483e1" id="r_gac0ed780ae63ea9ed490be26139f483e1"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gac0ed780ae63ea9ed490be26139f483e1">classifyBonds</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool isSlice, bool closed)</td></tr>
+<tr class="memitem:gaca144c74a1021bd03c80cd5787ca8753" id="r_gaca144c74a1021bd03c80cd5787ca8753"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gaca144c74a1021bd03c80cd5787ca8753">classifyBondsCsr</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool isSlice=false)</td></tr>
+<tr class="memdesc:gaca144c74a1021bd03c80cd5787ca8753"><td class="mdescLeft">&#160;</td><td class="mdescRight">CHILL/CHILL+ bonds from a CSR of cloud indices.  <br /></td></tr>
+<tr class="memitem:ga6f4df78035e34977f718ec80514f8504" id="r_ga6f4df78035e34977f718ec80514f8504"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga6f4df78035e34977f718ec80514f8504">chillPlusFromCsr</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols)</td></tr>
+<tr class="memdesc:ga6f4df78035e34977f718ec80514f8504"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bonds and CHILL+ labels from a cutoff CSR. Returns the cubic count.  <br /></td></tr>
+<tr class="memitem:ga60d3bf73811f8316bc61224ed751448a" id="r_ga60d3bf73811f8316bc61224ed751448a"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga60d3bf73811f8316bc61224ed751448a">bondOrder</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, <a class="el" href="structchill_1_1BondOrder.html">BondOrder</a> &amp;order, const std::vector&lt; char &gt; *which)</td></tr>
+<tr class="memitem:gadce994972bc6a6edaac9ac00a9410827" id="r_gadce994972bc6a6edaac9ac00a9410827"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gadce994972bc6a6edaac9ac00a9410827">correlFromOrder</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const <a class="el" href="structchill_1_1BondOrder.html">BondOrder</a> &amp;order, const <a class="el" href="structchill_1_1BondClassifier.html">BondClassifier</a> &amp;rule, bool isSlice, const std::vector&lt; char &gt; *which, bool closed=true)</td></tr>
 <tr class="memitem:ga4017efb120fe038acfabec9175e2aef6" id="r_ga4017efb120fe038acfabec9175e2aef6"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga4017efb120fe038acfabec9175e2aef6">getCorrel</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false, int coordinationNumber=4)</td></tr>
 <tr class="memdesc:ga4017efb120fe038acfabec9175e2aef6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function for getting the bond order correlations \(c_{ij}\) (or \(a_{ij}\) in some treatments) according to the CHILL algorithm.  <br /></td></tr>
 <tr class="memitem:ga6636e09d09e99448ff68eb6533d2e479" id="r_ga6636e09d09e99448ff68eb6533d2e479"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga6636e09d09e99448ff68eb6533d2e479">getIceTypeNoPrint</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false)</td></tr>
@@ -286,10 +298,13 @@ Functions</h2></td></tr>
 <tr class="memitem:ga86fb1f94d087bcc2d0a55f487629ca17" id="r_ga86fb1f94d087bcc2d0a55f487629ca17"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga86fb1f94d087bcc2d0a55f487629ca17">getIceType</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::string path, int firstFrame, bool isSlice=false, std::string outputFileName=&quot;chill.txt&quot;)</td></tr>
 <tr class="memdesc:ga86fb1f94d087bcc2d0a55f487629ca17"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function that classifies every particle's <a class="el" href="group__molSys.html#ga13ffe3a39a0816627553f195e102abb5">molSys::atom_state_type</a> ice type, according to the CHILL algorithm.  <br /></td></tr>
 <tr class="memitem:ga00437c7dd47b3126a35b5bb410904ee2" id="r_ga00437c7dd47b3126a35b5bb410904ee2"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga00437c7dd47b3126a35b5bb410904ee2">getCorrelPlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false, int coordinationNumber=4)</td></tr>
+<tr class="memitem:ga3d430e0ac5cc894ab47422cd2dad5e7f" id="r_ga3d430e0ac5cc894ab47422cd2dad5e7f"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga3d430e0ac5cc894ab47422cd2dad5e7f">getCorrelPlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice, int coordinationNumber, bool closedBounds)</td></tr>
+<tr class="memdesc:ga3d430e0ac5cc894ab47422cd2dad5e7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Same classification. closedBounds false uses the open OVITO edges.  <br /></td></tr>
 <tr class="memitem:gaf494786ce8fdcfe596b6181ef2a9979f" id="r_gaf494786ce8fdcfe596b6181ef2a9979f"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gaf494786ce8fdcfe596b6181ef2a9979f">getIceTypePlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::string path, int firstFrame, bool isSlice=false, std::string outputFileName=&quot;chillPlus.txt&quot;)</td></tr>
-<tr class="memdesc:gaf494786ce8fdcfe596b6181ef2a9979f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classifies each atom according to the CHILL+ algorithm.  <br /></td></tr>
+<tr class="memitem:gade10dbe4d8bea0ae2459cea84f63525b" id="r_gade10dbe4d8bea0ae2459cea84f63525b"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gade10dbe4d8bea0ae2459cea84f63525b">getIceTypePlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, std::string path, int firstFrame, bool isSlice, std::string outputFileName, bool neighbourTest)</td></tr>
+<tr class="memdesc:gade10dbe4d8bea0ae2459cea84f63525b"><td class="mdescLeft">&#160;</td><td class="mdescRight">neighbourTest false is the OVITO interfacial rule.  <br /></td></tr>
 <tr class="memitem:ga02005590b436de59a09ab102fd5d78cc" id="r_ga02005590b436de59a09ab102fd5d78cc"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga02005590b436de59a09ab102fd5d78cc">getIceTypePlusNoPrint</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false)</td></tr>
-<tr class="memdesc:ga02005590b436de59a09ab102fd5d78cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">CHILL+ ice types on the cloud. Does not write a file.  <br /></td></tr>
+<tr class="memitem:ga439ba1c08661531c9e90cfc8818e6b22" id="r_ga439ba1c08661531c9e90cfc8818e6b22"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga439ba1c08661531c9e90cfc8818e6b22">getIceTypePlusNoPrint</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice, bool neighbourTest)</td></tr>
 <tr class="memitem:ga6c253832dc8e20f4450ed81d1edc7bf7" id="r_ga6c253832dc8e20f4450ed81d1edc7bf7"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga6c253832dc8e20f4450ed81d1edc7bf7">clearIceTypesExcept</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;types)</td></tr>
 <tr class="memitem:gaa4cd8fa09ced6b06f44bf2258304a5e3" id="r_gaa4cd8fa09ced6b06f44bf2258304a5e3"><td class="memItemLeft">std::vector&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gaa4cd8fa09ced6b06f44bf2258304a5e3">getq6</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, bool isSlice=false)</td></tr>
 <tr class="memitem:gaaad5ad6884511e350e8b2cda1baeaea2" id="r_gaaad5ad6884511e350e8b2cda1baeaea2"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gaaad5ad6884511e350e8b2cda1baeaea2">reclassifyWater</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, std::vector&lt; double &gt; &amp;q6)</td></tr>
@@ -299,14 +314,28 @@ Functions</h2></td></tr>
 <tr class="memitem:gaba97c889c36d860a4842f43a3f81a6b5" id="r_gaba97c889c36d860a4842f43a3f81a6b5"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gaba97c889c36d860a4842f43a3f81a6b5">numStaggered</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int jatom)</td></tr>
 <tr class="memdesc:gaba97c889c36d860a4842f43a3f81a6b5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Finds the number of staggered bonds for a given atom of index jatom.  <br /></td></tr>
 <tr class="memitem:gad60f25b03dc9b26dc62d80fd3fac53c3" id="r_gad60f25b03dc9b26dc62d80fd3fac53c3"><td class="memItemLeft"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a>&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gad60f25b03dc9b26dc62d80fd3fac53c3">steinhardtQl</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int orderL)</td></tr>
+<tr class="memitem:gab2dd84ef3a70da39a6e7af85b9a48a0b" id="r_gab2dd84ef3a70da39a6e7af85b9a48a0b"><td class="memItemLeft"><a class="el" href="structchill_1_1SteinhardtQl.html">SteinhardtQl</a>&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gab2dd84ef3a70da39a6e7af85b9a48a0b">steinhardtQlCutoff</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, double cutoff, int orderL, int typeI, bool average)</td></tr>
 <tr class="memitem:ga794193ca26ae29cc438c91471a0cb3d5" id="r_ga794193ca26ae29cc438c91471a0cb3d5"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga794193ca26ae29cc438c91471a0cb3d5">setSteinhardtAtomSplit</a> (bool split)</td></tr>
+<tr class="memitem:gacf09e172dbd2b204fb6470c65ee38257" id="r_gacf09e172dbd2b204fb6470c65ee38257"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#gacf09e172dbd2b204fb6470c65ee38257">steinhardtQlmWidth</a> (int orderL)</td></tr>
+<tr class="memdesc:gacf09e172dbd2b204fb6470c65ee38257"><td class="mdescLeft">&#160;</td><td class="mdescRight">Width of one atom's interleaved q_lm: real, imaginary, m = -l..l.  <br /></td></tr>
+<tr class="memitem:ga5eb8eb075ca96976d2992150cfcfed5d" id="r_ga5eb8eb075ca96976d2992150cfcfed5d"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga5eb8eb075ca96976d2992150cfcfed5d">writeSteinhardtQlm</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int orderL, std::vector&lt; double &gt; &amp;qlm, const std::vector&lt; char &gt; *which)</td></tr>
+<tr class="memdesc:ga5eb8eb075ca96976d2992150cfcfed5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">q_lm for atoms <em class="arg">which</em> selects. Other atoms are left zero.  <br /></td></tr>
+<tr class="memitem:ga7b9094a4f11e908dcb0d0c3987bebea3" id="r_ga7b9094a4f11e908dcb0d0c3987bebea3"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="group__chill.html#ga7b9094a4f11e908dcb0d0c3987bebea3">readSteinhardtQl</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int orderL, const std::vector&lt; double &gt; &amp;qlm, std::vector&lt; double &gt; &amp;ql, std::vector&lt; double &gt; &amp;qlBar, const std::vector&lt; char &gt; *which)</td></tr>
+<tr class="memdesc:ga7b9094a4f11e908dcb0d0c3987bebea3"><td class="mdescLeft">&#160;</td><td class="mdescRight">ql and qlBar for atoms <em class="arg">which</em> selects, reading q_lm of their neighbours.  <br /></td></tr>
 <tr class="memitem:ac3eb9f55035d401247072181b24b563a" id="r_ac3eb9f55035d401247072181b24b563a"><td class="memItemLeft">bool&#160;</td><td class="memItemRight"><a class="el" href="#ac3eb9f55035d401247072181b24b563a">preferOffload</a> ()</td></tr>
 <tr class="memitem:a2d5243660db62c90ccdad3bb9cda319e" id="r_a2d5243660db62c90ccdad3bb9cda319e"><td class="memItemLeft"><a class="el" href="structchill_1_1ChillPlusResult.html">ChillPlusResult</a>&#160;</td><td class="memItemRight"><a class="el" href="#a2d5243660db62c90ccdad3bb9cda319e">hostChillPlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</td></tr>
 <tr class="memdesc:a2d5243660db62c90ccdad3bb9cda319e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Host CHILL+ (classifyBonds + getIceTypePlusNoPrint).  <br /></td></tr>
 <tr class="memitem:a30ed8d4d44a99044fddf3ea0b7f0ee0c" id="r_a30ed8d4d44a99044fddf3ea0b7f0ee0c"><td class="memItemLeft"><a class="el" href="structchill_1_1ChillPlusResult.html">ChillPlusResult</a>&#160;</td><td class="memItemRight"><a class="el" href="#a30ed8d4d44a99044fddf3ea0b7f0ee0c">specializedChillPlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</td></tr>
 <tr class="memdesc:a30ed8d4d44a99044fddf3ea0b7f0ee0c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flattened CHILL+.  <br /></td></tr>
 <tr class="memitem:ae9068c355d803c1932d2aa7e7cc27ec8" id="r_ae9068c355d803c1932d2aa7e7cc27ec8"><td class="memItemLeft"><a class="el" href="structchill_1_1ChillPlusResult.html">ChillPlusResult</a>&#160;</td><td class="memItemRight"><a class="el" href="#ae9068c355d803c1932d2aa7e7cc27ec8">chillPlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList)</td></tr>
+<tr class="memitem:ad9570b8abd2d308248a07c2096e0b08e" id="r_ad9570b8abd2d308248a07c2096e0b08e"><td class="memItemLeft">int&#160;</td><td class="memItemRight"><a class="el" href="#ad9570b8abd2d308248a07c2096e0b08e">cutoffShellCount</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int iatom)</td></tr>
+<tr class="memitem:a367fc45a45239f46fe8f136c1be5e110" id="r_a367fc45a45239f46fe8f136c1be5e110"><td class="memItemLeft"><a class="el" href="#aae69c0a74e3304a4c13bb04b662c2602">ChillPlusRule</a>&#160;</td><td class="memItemRight"><a class="el" href="#a367fc45a45239f46fe8f136c1be5e110">chillPlusRule</a> (std::string_view spec)</td></tr>
+<tr class="memitem:a378467b4caec951a3ea7a4e6d974ad31" id="r_a378467b4caec951a3ea7a4e6d974ad31"><td class="memItemLeft"><a class="el" href="#aae69c0a74e3304a4c13bb04b662c2602">ChillPlusRule</a>&#160;</td><td class="memItemRight"><a class="el" href="#a378467b4caec951a3ea7a4e6d974ad31">chillPlusRuleFromFile</a> (const std::string &amp;spec)</td></tr>
+<tr class="memitem:a27ffe1246039b6972897564b2c23d14d" id="r_a27ffe1246039b6972897564b2c23d14d"><td class="memItemLeft">const char *&#160;</td><td class="memItemRight"><a class="el" href="#a27ffe1246039b6972897564b2c23d14d">chillPlusRuleName</a> (<a class="el" href="#aae69c0a74e3304a4c13bb04b662c2602">ChillPlusRule</a> rule)</td></tr>
+<tr class="memitem:ac113be17b69c0d4db2647dcd84985569" id="r_ac113be17b69c0d4db2647dcd84985569"><td class="memItemLeft">void&#160;</td><td class="memItemRight"><a class="el" href="#ac113be17b69c0d4db2647dcd84985569">applyChillPlus</a> (<a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, <a class="el" href="#aae69c0a74e3304a4c13bb04b662c2602">ChillPlusRule</a> rule, bool isSlice=false)</td></tr>
 <tr class="memitem:a6235256c303786bfee2a6143044b46a8" id="r_a6235256c303786bfee2a6143044b46a8"><td class="memItemLeft">std::vector&lt; <a class="el" href="structchill_1_1TemplateHit.html">TemplateHit</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a6235256c303786bfee2a6143044b46a8">classifyTemplates</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int kNeigh=12)</td></tr>
+<tr class="memitem:a1690a928c74898a894d10efc8c2fe134" id="r_a1690a928c74898a894d10efc8c2fe134"><td class="memItemLeft">std::vector&lt; <a class="el" href="structchill_1_1TemplateHit.html">TemplateHit</a> &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a1690a928c74898a894d10efc8c2fe134">classifyTemplates</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; int &gt; &amp;offsets, const std::vector&lt; int &gt; &amp;cols, int kNeigh=12)</td></tr>
+<tr class="memdesc:a1690a928c74898a894d10efc8c2fe134"><td class="mdescLeft">&#160;</td><td class="mdescRight">Same overlay, reading a CSR of cloud indices.  <br /></td></tr>
 <tr class="memitem:a7ce20c1ee581242dfd8e0dc80ddc17bc" id="r_a7ce20c1ee581242dfd8e0dc80ddc17bc"><td class="memItemLeft">std::vector&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a7ce20c1ee581242dfd8e0dc80ddc17bc">soapSpectrum</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int iatom, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int nMax, int lMax, double rcut)</td></tr>
 <tr class="memitem:a587a1bffcd6e21ecf2feb16a95fe01c1" id="r_a587a1bffcd6e21ecf2feb16a95fe01c1"><td class="memItemLeft">std::vector&lt; std::vector&lt; double &gt; &gt;&#160;</td><td class="memItemRight"><a class="el" href="#a587a1bffcd6e21ecf2feb16a95fe01c1">soapSpectrumAll</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;nList, int nMax, int lMax, double rcut)</td></tr>
 <tr class="memitem:af9780d7bcf4a3a4436a2d59cc26606bb" id="r_af9780d7bcf4a3a4436a2d59cc26606bb"><td class="memItemLeft">std::vector&lt; double &gt;&#160;</td><td class="memItemRight"><a class="el" href="#af9780d7bcf4a3a4436a2d59cc26606bb">voronoiFeature</a> (const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;yCloud, int iatom, double candidateCutoff)</td></tr>
@@ -366,6 +395,37 @@ Changelog</h3>
 <li>Amrita Goswami [<a href="#" onclick="location.href='mai'+'lto:'+'amr'+'it'+'a16'+'th'+'aug'+'64'+'6@g'+'ma'+'il.'+'co'+'m'; return false;">amrit<span class="obfuscator">.nosp@m.</span>a16t<span class="obfuscator">.nosp@m.</span>haug6<span class="obfuscator">.nosp@m.</span>46@g<span class="obfuscator">.nosp@m.</span>mail.<span class="obfuscator">.nosp@m.</span>com</a>]; date modified: Sept 19, 2019 </li>
 </ul>
 </div><a name="doc-enum-members" id="doc-enum-members"></a><h2 id="header-doc-enum-members" class="groupheader">Enumeration Type Documentation</h2>
+<a id="aae69c0a74e3304a4c13bb04b662c2602" name="aae69c0a74e3304a4c13bb04b662c2602"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aae69c0a74e3304a4c13bb04b662c2602">&#9670;&#160;</a></span>ChillPlusRule</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum class <a class="el" href="#aae69c0a74e3304a4c13bb04b662c2602">chill::ChillPlusRule</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel strong">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="aae69c0a74e3304a4c13bb04b662c2602a9b9d8a976b42e0bd66381797644943d5" name="aae69c0a74e3304a4c13bb04b662c2602a9b9d8a976b42e0bd66381797644943d5"></a>Published&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="aae69c0a74e3304a4c13bb04b662c2602acd69ecf5d970fe87cfb420561667f2b9" name="aae69c0a74e3304a4c13bb04b662c2602acd69ecf5d970fe87cfb420561667f2b9"></a>Ovito&#160;</td><td class="fielddoc"></td></tr>
+</table>
+
+<p class="definition">Definition at line <a class="el" href="chill__plus__scheme_8hpp_source.html#l00043">43</a> of file <a class="el" href="chill__plus__scheme_8hpp_source.html">chill_plus_scheme.hpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   43</span>{ <a class="code hl_enumvalue" href="#aae69c0a74e3304a4c13bb04b662c2602a9b9d8a976b42e0bd66381797644943d5">Published</a>, <a class="code hl_enumvalue" href="#aae69c0a74e3304a4c13bb04b662c2602acd69ecf5d970fe87cfb420561667f2b9">Ovito</a> };</div>
+<div class="ttc" id="anamespacechill_html_aae69c0a74e3304a4c13bb04b662c2602a9b9d8a976b42e0bd66381797644943d5"><div class="ttname"><a href="#aae69c0a74e3304a4c13bb04b662c2602a9b9d8a976b42e0bd66381797644943d5">chill::ChillPlusRule::Published</a></div><div class="ttdeci">@ Published</div><div class="ttdef"><b>Definition</b> <a href="chill__plus__scheme_8hpp_source.html#l00043">chill_plus_scheme.hpp:43</a></div></div>
+<div class="ttc" id="anamespacechill_html_aae69c0a74e3304a4c13bb04b662c2602acd69ecf5d970fe87cfb420561667f2b9"><div class="ttname"><a href="#aae69c0a74e3304a4c13bb04b662c2602acd69ecf5d970fe87cfb420561667f2b9">chill::ChillPlusRule::Ovito</a></div><div class="ttdeci">@ Ovito</div><div class="ttdef"><b>Definition</b> <a href="chill__plus__scheme_8hpp_source.html#l00043">chill_plus_scheme.hpp:43</a></div></div>
+</div><!-- fragment -->
+</div>
+</div>
 <a id="ac13b1a10b6669044f75448ec1abe5122" name="ac13b1a10b6669044f75448ec1abe5122"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac13b1a10b6669044f75448ec1abe5122">&#9670;&#160;</a></span>CrystalKind</h2>
 
@@ -404,6 +464,38 @@ Changelog</h3>
 </div>
 </div>
 <a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a id="ac113be17b69c0d4db2647dcd84985569" name="ac113be17b69c0d4db2647dcd84985569"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac113be17b69c0d4db2647dcd84985569">&#9670;&#160;</a></span>applyChillPlus()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void chill::applyChillPlus </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="#aae69c0a74e3304a4c13bb04b662c2602">ChillPlusRule</a></td>          <td class="paramname"><span class="paramname"><em>rule</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>isSlice</em></span><span class="paramdefsep"> = </span><span class="paramdefval">false</span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Published or OVITO CHILL+ on one cloud. The neighbour list is the cutoff shell the rule counts. </p>
+
+</div>
+</div>
 <a id="ae9068c355d803c1932d2aa7e7cc27ec8" name="ae9068c355d803c1932d2aa7e7cc27ec8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae9068c355d803c1932d2aa7e7cc27ec8">&#9670;&#160;</a></span>chillPlus()</h2>
 
@@ -433,8 +525,126 @@ Changelog</h3>
 
 </div>
 </div>
+<a id="a367fc45a45239f46fe8f136c1be5e110" name="a367fc45a45239f46fe8f136c1be5e110"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a367fc45a45239f46fe8f136c1be5e110">&#9670;&#160;</a></span>chillPlusRule()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="#aae69c0a74e3304a4c13bb04b662c2602">ChillPlusRule</a> chill::chillPlusRule </td>
+          <td>(</td>
+          <td class="paramtype">std::string_view</td>          <td class="paramname"><span class="paramname"><em>spec</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p><span class="tt">chill+</span>, <span class="tt">ovito-chill+</span>, a YAML document with <span class="tt">rule:</span> or <span class="tt">chill-plus:</span>, or a Lua table fragment <span class="tt">rule = "..."</span>. An empty string is the published rule. Anything else throws. </p>
+
+</div>
+</div>
+<a id="a378467b4caec951a3ea7a4e6d974ad31" name="a378467b4caec951a3ea7a4e6d974ad31"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a378467b4caec951a3ea7a4e6d974ad31">&#9670;&#160;</a></span>chillPlusRuleFromFile()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="#aae69c0a74e3304a4c13bb04b662c2602">ChillPlusRule</a> chill::chillPlusRuleFromFile </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;</td>          <td class="paramname"><span class="paramname"><em>spec</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Read <span class="tt">spec</span> as a rule name. If <span class="tt">spec</span> names a readable file, the file is scanned for a <span class="tt">rule</span> or <span class="tt">chill-plus</span> key. Comments are skipped. The file is not executed as Lua or YAML. </p>
+
+</div>
+</div>
+<a id="a27ffe1246039b6972897564b2c23d14d" name="a27ffe1246039b6972897564b2c23d14d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27ffe1246039b6972897564b2c23d14d">&#9670;&#160;</a></span>chillPlusRuleName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char * chill::chillPlusRuleName </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="#aae69c0a74e3304a4c13bb04b662c2602">ChillPlusRule</a></td>          <td class="paramname"><span class="paramname"><em>rule</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a1690a928c74898a894d10efc8c2fe134" name="a1690a928c74898a894d10efc8c2fe134"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1690a928c74898a894d10efc8c2fe134">&#9670;&#160;</a></span>classifyTemplates() <span class="overload">[1/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::vector&lt; <a class="el" href="structchill_1_1TemplateHit.html">TemplateHit</a> &gt; chill::classifyTemplates </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>offsets</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; int &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>cols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>kNeigh</em></span><span class="paramdefsep"> = </span><span class="paramdefval">12</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Same overlay, reading a CSR of cloud indices. </p>
+
+</div>
+</div>
 <a id="a6235256c303786bfee2a6143044b46a8" name="a6235256c303786bfee2a6143044b46a8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a6235256c303786bfee2a6143044b46a8">&#9670;&#160;</a></span>classifyTemplates()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a6235256c303786bfee2a6143044b46a8">&#9670;&#160;</a></span>classifyTemplates() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -465,6 +675,41 @@ Changelog</h3>
 </table>
 </div><div class="memdoc">
 <p>Overlay the k nearest neighbours of each particle onto FCC, HCP, BCC and SC shells. Uses IRA when linked; otherwise Horn on a distance-sorted correspondence (high-symmetry shells only). </p>
+
+</div>
+</div>
+<a id="ad9570b8abd2d308248a07c2096e0b08e" name="ad9570b8abd2d308248a07c2096e0b08e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad9570b8abd2d308248a07c2096e0b08e">&#9670;&#160;</a></span>cutoffShellCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int chill::cutoffShellCount </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structmolSys_1_1PointCloud.html">molSys::PointCloud</a>&lt; <a class="el" href="structmolSys_1_1Point.html">molSys::Point</a>&lt; double &gt;, double &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>yCloud</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::vector&lt; std::vector&lt; int &gt; &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>nList</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>iatom</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel nodiscard">nodiscard</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Neighbours in one cutoff row, ignoring the leading atom id and any id that is not in the cloud. This is the Table 1 shell count. </p>
 
 </div>
 </div>

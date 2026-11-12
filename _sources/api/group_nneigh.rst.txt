@@ -8,6 +8,7 @@ Nneigh
 	:hidden:
 
 	namespace_nneigh.rst
+	class_nneigh_CutoffSkin.rst
 	class_nneigh_SkinNeighborList.rst
 
 
@@ -23,5 +24,6 @@ Nneigh
 
 	// classes
 
+	class :ref:`nneigh::CutoffSkin<doxid-classnneigh_1_1_cutoff_skin>`;
 	class :ref:`nneigh::SkinNeighborList<doxid-classnneigh_1_1_skin_neighbor_list>`;
 
