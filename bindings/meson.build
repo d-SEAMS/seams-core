@@ -69,7 +69,7 @@ if get_option('with_cli') and get_option('with_tests')
     timeout: 120,
   )
   install_data(
-    'python/chill_plus.py',
+    ['python/chill_plus.py', 'python/symmetry.py'],
     install_dir: get_option('datadir') / 'seams' / 'python',
   )
 endif

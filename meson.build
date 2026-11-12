@@ -330,11 +330,112 @@ if not ira_opt.disabled()
   if ira_dep.found() and cppc.links(ira_probe, dependencies: [ira_dep],
                                     args: ['-I' + ira_inc],
                                     name: 'libira C API')
+    if ira_dep.type_name() == 'pkgconfig'
+      ira_libdir = ira_dep.get_variable('libdir', default_value: '')
+      if ira_libdir != ''
+        ira_dep = declare_dependency(dependencies: [ira_dep],
+                                     link_args: ['-Wl,-rpath,' + ira_libdir])
+      endif
+    endif
     _deps += [ira_dep]
     _args += ['-DSEAMS_HAS_IRA=1']
     ira_found = true
   elif ira_opt.enabled()
     error('with_ira=enabled but libira does not link')
+  endif
+endif
+
+# spglib (Togo, Shinohara, Tanaka). Optional space groups. The probe
+# must run spg_get_dataset, not only find the shared library.
+spglib_opt = get_option('with_spglib')
+spglib_found = false
+if not spglib_opt.disabled()
+  spglib_dep = dependency('spglib', required: false)
+  if not spglib_dep.found()
+    spglib_lib = cppc.find_library('symspg', required: false)
+    if spglib_lib.found()
+      spglib_dep = declare_dependency(dependencies: [spglib_lib])
+    endif
+  endif
+  spglib_probe = '''
+    #include <spglib.h>
+    int main() {
+      double lattice[3][3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+      double position[1][3] = {{0, 0, 0}};
+      int types[1] = {1};
+      SpglibDataset *data = spg_get_dataset(lattice, position, types, 1, 1e-4);
+      int number = data ? data->spacegroup_number : 0;
+      if (data) spg_free_dataset(data);
+      return number > 0 ? 0 : 1;
+    }
+  '''
+  if spglib_dep.found() and cppc.links(spglib_probe, dependencies: [spglib_dep],
+                                       name: 'spglib dataset')
+    if spglib_dep.type_name() == 'pkgconfig'
+      spglib_libdir = spglib_dep.get_variable('libdir', default_value: '')
+      if spglib_libdir != ''
+        spglib_dep = declare_dependency(dependencies: [spglib_dep],
+                                        link_args: ['-Wl,-rpath,' + spglib_libdir])
+      endif
+    endif
+    _deps += [spglib_dep]
+    _args += ['-DSEAMS_HAS_SPGLIB=1']
+    spglib_found = true
+  elif spglib_opt.enabled()
+    error('with_spglib=enabled but libsymspg does not link')
+  endif
+endif
+
+# GPL-2 continuous shape measure (Pinsky, Avnir, Alvarez). The program
+# needs OpenBabel. It is not linked into libyodaLib. The in-tree measure
+# is the published formula on the fixed shells. This build uses IRA under
+# the Apache-2.0 option of its dual licence.
+csm_shape_bin = ''
+csm_opt = get_option('with_csm')
+if not csm_opt.disabled()
+  openbabel_dep = dependency('openbabel-3', required: false)
+  if not openbabel_dep.found()
+    openbabel_dep = dependency('openbabel-2.0', required: false)
+  endif
+  # A module pkg-config can miss the system OpenBabel. The shape program
+  # is built by the system compiler against that OpenBabel, and is not
+  # linked into libyodaLib.
+  if not openbabel_dep.found()
+    system_pkg = find_program('/usr/bin/pkg-config', required: false)
+    if system_pkg.found()
+      foreach ob_name : ['openbabel-3', 'openbabel-2.0']
+        ob_probe = run_command(system_pkg, '--exists', ob_name, check: false)
+        if ob_probe.returncode() == 0
+          openbabel_dep = declare_dependency()
+          break
+        endif
+      endforeach
+    endif
+  endif
+  if not openbabel_dep.found()
+    if csm_opt.enabled()
+      error('with_csm=enabled but OpenBabel was not found')
+    endif
+    message('CSM program left off (OpenBabel absent)')
+  else
+    csm_shape = custom_target(
+      'csm_shape',
+      input: files(
+        'third_party/csm/build.sh',
+        'third_party/csm/src/shape.cpp',
+        'third_party/csm/src/babelAdapter.cpp',
+        'third_party/csm/src/matrix.c',
+        'third_party/csm/src/Molecule.c',
+        'third_party/csm/src/svdcmp.c',
+        'third_party/csm/src/parseFunctions.c',
+        'third_party/csm/src/permuter.c',
+      ),
+      output: 'csm_shape',
+      command: [find_program('sh'), files('third_party/csm/build.sh'), '@OUTPUT@', meson.current_source_dir()],
+      build_by_default: true,
+    )
+    csm_shape_bin = csm_shape.full_path()
+    message('CSM shape program will be built (not linked into libyodaLib)')
   endif
 endif
 

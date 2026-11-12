@@ -15,6 +15,8 @@ ydslib_sources = files(
   'gpu_batch.cpp',
   'generic.cpp',
   'ira_sofi.cpp',
+  'local_symmetry.cpp',
+  'shell_kernel.cpp',
   'cage_canon.cpp',
   'chill_offload.cpp',
   'chill_plus_scheme.cpp',
@@ -64,6 +66,14 @@ if cpp_id == 'gcc' or cpp_id == 'clang'
     dependencies: _deps)
   _ylm_link += _ylm_avx
   _args += ['-DSEAMS_YLM_AVX512=1']
+  # The shell hot path has no Eigen, so AVX2 here does not fault in the allocator.
+  _shell_avx = static_library('shell_avx', 'shell_classify.cpp',
+    cpp_args: _args + ['-mavx2', '-mfma'],
+    include_directories: _incdirs,
+    dependencies: _deps)
+  _ylm_link += _shell_avx
+else
+  ydslib_sources += files('shell_classify.cpp')
 endif
 
 ydslib = library('yodaLib',
