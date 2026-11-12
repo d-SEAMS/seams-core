@@ -134,6 +134,19 @@ int seams_frame_monolayer(seams_frame *frame, double cutoff, int type,
                           int max_depth, double sheet_area,
                           const char *output_dir, int *counts, int counts_len);
 
+/* Keep water oxygens for later neighbours, CHILL, CHILL+, rings, cages
+ * and Steinhardt. type > 0 is that LAMMPS type. nmol > 0 keeps those
+ * molecule ids as well. type == 0 and nmol == 0 infers the oxygen of
+ * each multi-atom molecule. A missing type or molecule, or a selection
+ * that keeps nothing, returns 1 and sets seams_last_error. Atoms that
+ * are not selected stay in the frame and are left unclassified. */
+int seams_frame_select(seams_frame *frame, int type, const int *mols, int nmol);
+
+/* Same as seams_frame_from_arrays, plus molecule ids. mols may be NULL. */
+seams_frame *seams_frame_from_species(const double *xyz, int n,
+                                     const double *box9, const int *types,
+                                     const int *ids, const int *mols);
+
 #ifdef __cplusplus
 }
 #endif

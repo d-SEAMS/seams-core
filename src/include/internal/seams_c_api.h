@@ -61,6 +61,32 @@ int seams_symmetry_classify(const double *xyz, int n, const double *lattice9,
 int seams_symmetry_classify_tol(const double *xyz, int n, const double *lattice9,
                                 double shell_rmsd, int *labels);
 
+/* Mixed frames. types and mols may be NULL (every atom is then one
+ * species, mol id = index + 1). oxygen_type > 0 keeps that LAMMPS type.
+ * mol_mode 0 ignores molecules, 1 keeps the water oxygen of each
+ * multi-atom molecule, 2 keeps mol_ids[0..n_mol_ids). A mixed frame
+ * with mol_mode 0 and oxygen_type 0 is an error. Labels of atoms that
+ * are not water oxygens are unclassified (6). ion_ice, ion_liquid and
+ * ion_front may be NULL. ion_front is the nearest ice oxygen, or -1.
+ * seams_c_error() is the message after a non-zero return.
+ * On a single-species cloud the labels match seams_chill_plus_graph_lammps. */
+int seams_chill_plus_species(const double *xyz, int n, const double *box9,
+                             const int *types, const int *mols,
+                             int oxygen_type, int mol_mode, const int *mol_ids,
+                             int n_mol_ids, double cutoff, const char *graph,
+                             int *labels, int *ion_ice, int *ion_liquid,
+                             double *ion_front);
+
+/* degree[i] is the oxygen-oxygen neighbour count inside cutoff, or -1
+ * when atom i is not a selected water oxygen. */
+int seams_oxygen_cutoff_degree(const double *xyz, int n, const double *box9,
+                               const int *types, const int *mols,
+                               int oxygen_type, int mol_mode,
+                               const int *mol_ids, int n_mol_ids, double cutoff,
+                               int *degree);
+
+const char *seams_c_error(void);
+
 #ifdef __cplusplus
 }
 #endif

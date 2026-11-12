@@ -7,10 +7,14 @@ compute ice all dseams
 dump 1 all custom 1 dump.chill id type x y z c_ice
 ```
 
-The optional keywords are `graph cutoff|mutual` and `cutoff R`
-(angstrom). The defaults are `graph cutoff cutoff 3.5`, the list
-`seams chill-plus` uses. `graph mutual` keeps the mutual four nearest
+The optional keywords are `graph cutoff|mutual`, `cutoff R`
+(angstrom), `type I`, and `mol water` or `mol ID`. The defaults are
+`graph cutoff cutoff 3.5`. `graph mutual` keeps the mutual four nearest
 neighbours inside `R + 1.5`, as `seams chill-plus --graph mutual` does.
+`type I` scores water oxygens of LAMMPS type I and leaves every other
+type unclassified. `mol water` keeps the oxygen of each multi-atom
+molecule. A mixed frame that sets neither is an error, rather than
+labelling ions as water. A single-type frame is unchanged.
 
 The dump column is the same integer table as `seams chill-plus`
 (0 cubic, 1 hexagonal, 2 water, 3 interfacial, 4 clathrate,

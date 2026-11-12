@@ -1047,6 +1047,73 @@ int main(int argc, char **argv) {
   seams_frame_free(tip);
   seams_frame_free(ice);
   seams_frame_free(guest);
+  {
+    const double xyz[] = {10, 10, 10, 12.8, 10, 10, 9.07, 12.42, 10,
+                          9.07, 8.79, 11.62, 9.07, 8.79, 8.38, 12.0, 10, 10};
+    const double box9[] = {0, 0, 0, 30, 30, 30, 0, 0, 0};
+    const int types[] = {1, 1, 1, 1, 1, 3};
+    const int mols[] = {1, 2, 3, 4, 5, 6};
+    seams_frame *mixed =
+        seams_frame_from_species(xyz, 6, box9, types, nullptr, mols);
+    if (mixed == nullptr) {
+      return fail("brine frame");
+    }
+    int mixedLabels[6] = {};
+    if (seams_frame_chill_plus(mixed, 3.5, 0, "cutoff", mixedLabels, nullptr) !=
+        0) {
+      seams_frame_free(mixed);
+      return fail("brine untyped chill");
+    }
+    if (mixedLabels[5] == 6) {
+      seams_frame_free(mixed);
+      return fail("brine ion was already unclassified");
+    }
+    if (seams_frame_select(mixed, 1, nullptr, 0) != 0) {
+      seams_frame_free(mixed);
+      return fail("brine select");
+    }
+    int selected[6] = {};
+    if (seams_frame_chill_plus(mixed, 3.5, 1, "cutoff", selected, nullptr) != 0) {
+      seams_frame_free(mixed);
+      return fail("brine selected chill");
+    }
+    if (selected[5] != 6) {
+      seams_frame_free(mixed);
+      return fail("brine ion stayed labelled");
+    }
+    int ringCounts[7] = {};
+    if (seams_frame_rings(mixed, 3.5, 1, "cutoff", 6, ringCounts, 7) != 0) {
+      seams_frame_free(mixed);
+      return fail("brine rings");
+    }
+    int hex = 0;
+    int cubic = 0;
+    int water = 0;
+    int both = 0;
+    if (seams_frame_cages(mixed, 3.5, 1, 4, "cutoff", 0, nullptr, &hex, &cubic,
+                          &water, &both) != 0) {
+      seams_frame_free(mixed);
+      return fail("brine cages");
+    }
+    if (hex + cubic + water + both != 5) {
+      seams_frame_free(mixed);
+      return fail("brine cages counted the ion");
+    }
+    if (seams_frame_select(mixed, 9, nullptr, 0) == 0) {
+      seams_frame_free(mixed);
+      return fail("brine missing type was accepted");
+    }
+    if (std::string(seams_last_error()) != "atom type 9 is not in the frame") {
+      seams_frame_free(mixed);
+      return fail("brine missing type text");
+    }
+    const int absentMol = 99;
+    if (seams_frame_select(mixed, 1, &absentMol, 1) == 0) {
+      seams_frame_free(mixed);
+      return fail("brine missing molecule was accepted");
+    }
+    seams_frame_free(mixed);
+  }
   std::cout << "seams_lang ok " << seams_lang_version() << "\n";
   return 0;
 }

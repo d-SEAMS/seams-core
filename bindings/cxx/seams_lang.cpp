@@ -17,6 +17,7 @@
 #include <topo_one_dim.hpp>
 #include <topo_two_dim.hpp>
 #include <tum_offload.hpp>
+#include <water_select.hpp>
 
 #include <algorithm>
 #include <array>
@@ -259,6 +260,9 @@ struct seams_frame {
   int wide_type = 0;
   std::string wide_graph;
   bool wide_ready = false;
+  // Empty, or one entry per kept water oxygen. A list shorter than nop
+  // means later analyses run on that subset and leave ions unclassified.
+  std::vector<int> oxygen_index;
 
   void sync_arrays() {
     const int n = cloud.nop;
@@ -401,6 +405,51 @@ seams_frame *seams_frame_from_arrays(const double *xyz, int n,
   }
 }
 
+seams_frame *seams_frame_from_species(const double *xyz, int n,
+                                     const double *box9, const int *types,
+                                     const int *ids, const int *mols) {
+  seams_frame *out = seams_frame_from_arrays(xyz, n, box9, types, ids);
+  if (out == nullptr || mols == nullptr) {
+    return out;
+  }
+  for (int i = 0; i < n; ++i) {
+    out->cloud.pts[static_cast<std::size_t>(i)].molID = mols[i];
+  }
+  out->sync_arrays();
+  return out;
+}
+
+int seams_frame_select(seams_frame *frame, int type, const int *mols, int nmol) {
+  clear_error();
+  if (frame == nullptr) {
+    set_error("frame is null");
+    return 1;
+  }
+  try {
+    water::Request request;
+    if (type > 0) {
+      request.type = type;
+    } else if (type < 0) {
+      throw std::invalid_argument("atom type must be positive");
+    }
+    if (mols != nullptr && nmol > 0) {
+      request.mol_mode = water::MolMode::Ids;
+      request.molecules.assign(mols, mols + nmol);
+    } else if (type <= 0) {
+      request.mol_mode = water::MolMode::Water;
+    }
+    const auto selection = water::selectOxygens(frame->cloud, request);
+    frame->oxygen_index = selection.index;
+    return 0;
+  } catch (const std::exception &ex) {
+    set_error(ex.what());
+    return 1;
+  } catch (...) {
+    set_error("unknown error");
+    return 1;
+  }
+}
+
 void seams_frame_free(seams_frame *frame) { delete frame; }
 
 int seams_frame_nop(const seams_frame *frame) {
@@ -441,6 +490,27 @@ const int *seams_frame_ids(const seams_frame *frame) {
 
 namespace {
 
+bool drops_atoms(const seams_frame *frame) {
+  return frame != nullptr && !frame->oxygen_index.empty() &&
+         static_cast<int>(frame->oxygen_index.size()) < frame->cloud.nop;
+}
+
+seams_frame oxygen_subframe(const seams_frame *frame) {
+  water::Selection selection;
+  selection.index = frame->oxygen_index;
+  selection.n_oxygen = static_cast<int>(selection.index.size());
+  selection.keep.assign(static_cast<std::size_t>(std::max(frame->cloud.nop, 0)),
+                        0);
+  for (int index : selection.index) {
+    if (index >= 0 && index < frame->cloud.nop) {
+      selection.keep[static_cast<std::size_t>(index)] = 1;
+    }
+  }
+  seams_frame sub;
+  sub.cloud = water::subsetCloud(frame->cloud, selection);
+  return sub;
+}
+
 int classify_chill(seams_frame *frame, double cutoff, int type,
                    const char *graph, bool plus, const char *rule, int *labels,
                    int counts9[9]) {
@@ -448,6 +518,37 @@ int classify_chill(seams_frame *frame, double cutoff, int type,
   if (frame == nullptr) {
     set_error("frame is null");
     return 1;
+  }
+  if (drops_atoms(frame)) {
+    seams_frame sub = oxygen_subframe(frame);
+    std::vector<int> subLabels(
+        static_cast<std::size_t>(std::max(sub.cloud.nop, 0)));
+    int subCounts[9] = {};
+    const int rc = classify_chill(&sub, cutoff, type, graph, plus, rule,
+                                  sub.cloud.nop > 0 ? subLabels.data() : nullptr,
+                                  subCounts);
+    if (rc != 0) {
+      return rc;
+    }
+    const int n = frame->cloud.nop;
+    const int unclassified =
+        static_cast<int>(molSys::atom_state_type::unclassified);
+    frame->labels.assign(static_cast<std::size_t>(std::max(n, 0)), unclassified);
+    for (std::size_t k = 0; k < frame->oxygen_index.size(); ++k) {
+      const int index = frame->oxygen_index[k];
+      if (index >= 0 && index < n) {
+        frame->labels[static_cast<std::size_t>(index)] =
+            subLabels[k];
+      }
+    }
+    if (labels != nullptr && n > 0) {
+      std::memcpy(labels, frame->labels.data(),
+                  static_cast<std::size_t>(n) * sizeof(int));
+    }
+    if (counts9 != nullptr) {
+      std::memcpy(counts9, subCounts, sizeof(subCounts));
+    }
+    return 0;
   }
   try {
     const int typ = resolve_type(frame->cloud, type);
@@ -753,6 +854,11 @@ int seams_frame_rings(seams_frame *frame, double cutoff, int type,
     set_error("rings need a frame, max_depth >= 3, and counts_len");
     return 1;
   }
+  if (drops_atoms(frame)) {
+    seams_frame sub = oxygen_subframe(frame);
+    return seams_frame_rings(&sub, cutoff, type, graph, max_depth, counts,
+                             counts_len);
+  }
   try {
     const int typ = resolve_type(frame->cloud, type);
     const std::string which = graph == nullptr ? "mutual" : graph;
@@ -796,6 +902,35 @@ int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
     set_error("frame is null");
     return 1;
   }
+  if (drops_atoms(frame)) {
+    seams_frame sub = oxygen_subframe(frame);
+    std::vector<double> subQl(static_cast<std::size_t>(std::max(sub.cloud.nop, 0)));
+    std::vector<double> subBar(subQl.size());
+    const int rc = seams_frame_steinhardt(
+        &sub, cutoff, type, order_l, sub.cloud.nop > 0 ? subQl.data() : nullptr,
+        sub.cloud.nop > 0 ? subBar.data() : nullptr);
+    if (rc != 0) {
+      return rc;
+    }
+    const int n = frame->cloud.nop;
+    frame->ql.assign(static_cast<std::size_t>(std::max(n, 0)), 0.0);
+    frame->qlbar.assign(frame->ql.size(), 0.0);
+    for (std::size_t k = 0; k < frame->oxygen_index.size(); ++k) {
+      const int index = frame->oxygen_index[k];
+      if (index >= 0 && index < n) {
+        frame->ql[static_cast<std::size_t>(index)] = subQl[k];
+        frame->qlbar[static_cast<std::size_t>(index)] = subBar[k];
+      }
+    }
+    if (ql != nullptr && n > 0) {
+      std::memcpy(ql, frame->ql.data(), static_cast<std::size_t>(n) * sizeof(double));
+    }
+    if (qlbar != nullptr && n > 0) {
+      std::memcpy(qlbar, frame->qlbar.data(),
+                  static_cast<std::size_t>(n) * sizeof(double));
+    }
+    return 0;
+  }
   try {
     const int typ = resolve_type(frame->cloud, type);
     const double cand = cutoff + 1.5;
@@ -830,6 +965,46 @@ int seams_frame_cages(seams_frame *frame, double cutoff, int type, int k,
   }
   if (k <= 0) {
     k = 4;
+  }
+  if (drops_atoms(frame)) {
+    seams_frame sub = oxygen_subframe(frame);
+    std::vector<int> subPer(static_cast<std::size_t>(std::max(sub.cloud.nop, 0)));
+    int ih = 0;
+    int ic = 0;
+    int iw = 0;
+    int ib = 0;
+    const int rc = seams_frame_cages(
+        &sub, cutoff, type, k, graph, complete,
+        sub.cloud.nop > 0 ? subPer.data() : nullptr, &ih, &ic, &iw, &ib);
+    if (rc != 0) {
+      return rc;
+    }
+    const int n = frame->cloud.nop;
+    frame->per_atom.assign(static_cast<std::size_t>(std::max(n, 0)), 0);
+    for (std::size_t s = 0; s < frame->oxygen_index.size() && s < subPer.size();
+         ++s) {
+      const int index = frame->oxygen_index[s];
+      if (index >= 0 && index < n) {
+        frame->per_atom[static_cast<std::size_t>(index)] = subPer[s];
+      }
+    }
+    if (per_atom != nullptr && n > 0) {
+      std::memcpy(per_atom, frame->per_atom.data(),
+                  static_cast<std::size_t>(n) * sizeof(int));
+    }
+    if (n_hex != nullptr) {
+      *n_hex = ih;
+    }
+    if (n_cubic != nullptr) {
+      *n_cubic = ic;
+    }
+    if (n_water != nullptr) {
+      *n_water = iw;
+    }
+    if (n_both != nullptr) {
+      *n_both = ib;
+    }
+    return 0;
   }
   try {
     const int n = frame->cloud.nop;

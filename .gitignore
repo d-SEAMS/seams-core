@@ -71,6 +71,8 @@ output/
 si4-data/
 si5-data/
 docs/orgmode/explanation/figures/*.png
+# Coexistence frames and restart files. Uploaded separately.
+data/brine-front/
 bin/
 build/
 # docs/source/*.rst is generated from orgmode, but track orgmode + conf.py
@@ -371,6 +373,7 @@ proofs/CoqMakefile.conf
 repro/figshare/
 repro/results/
 repro/zenodo/payload/
+input/brine/work/
 .tip_sha
 /.lammps-src
 /docs/nucleation/mw4096-leads.png

@@ -23,6 +23,9 @@ private:
   double *chill;
   double cutoff;
   std::string graph;
+  int oxygen_type;
+  int mol_mode;
+  int mol_id;
 };
 
 } // namespace LAMMPS_NS

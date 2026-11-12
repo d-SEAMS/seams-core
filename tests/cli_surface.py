@@ -516,7 +516,6 @@ def main():
         ["rdf", "missing-volume.lammpstrj", "--type", "0", "--bins", "2", "--cutoff", "1"],
         ["density-z", pdb, "--bins", "0"],
         ["density-z", pdb, "--type", "0", "--bins", "0", "--axis", "x"],
-        ["--water-types", "9", "chill", tip, "--type", "2"],
         ["--water-types", "1,2", "f4", tip, "--type", "0", "--htype", "1"],
         ["--water-types", "1", "f4", ice, "--type", "0", "--htype", "1"],
         ["cn", ions, "--ions", "--site", "9=cationHead", "--cutoff", "6"],
@@ -529,7 +528,6 @@ def main():
         ["cages", ice, "--type", "1", "--signature", "512", "--graph", "mutual"],
         ["--guest-types", "1,,2", "cages", ice, "--type", "1", "--signature", "512"],
         ["--ion-types", "1,,2", "ions", tip, "--site", "1=cationHead,2=anion"],
-        ["--water-types", "9", "cages", ice, "--type", "1"],
         ["cages", ice, "--type", "1", "--graph", "knn", "--signature", "512"],
         ["fingerprint", ice, "--type", "1", "--graph", "knn", "--hops", "1"],
         ["fingerprint", ice, "--type", "1", "--graph", "knn-union", "--hops", "1"],
@@ -574,6 +572,10 @@ def main():
         ["chill", tip, "--type", "2", "--graph", "seedex"],
         ["chill", tip, "--type", "2", "--graph", "seede"],
         ["chill", ice, "--type", "1", "--graph", "seededX"],
+        ["--water-types", "9", "chill", tip, "--type", "2"],
+        ["--water-types", "9", "cages", ice, "--type", "1"],
+        ["--mol", "nope", "chill", tip, "--type", "2"],
+        ["--mol", "0-1", "chill", tip],
     ):
         result = run(seams, args)
         if result.returncode != 2:

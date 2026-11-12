@@ -1,0 +1,31 @@
+# v2 direct-coexistence accounting. The v1 front slopes are not used.
+# Throughput of one 3328-water TIP4P/2005 slab (9984 atoms).
+# LAMMPS 29 Aug 2024, CMAKE_BUILD_TYPE=Release, OpenMP, cutoff 10 A, 2 fs.
+# threads  steps_per_s  ns_per_day
+8  77.25  13.35
+4  46.91  8.11
+1  15.17  2.62
+# Melt loop on the production binary, 4 threads: 10000 steps in 143.643 s
+# = 69.6 steps/s = 12.0 ns/day.
+# Lamas, Vega, Noya 2022 NaCl at 236 K used 1200 ns to reach equilibrium
+# and averaged 500 ns. At 13.35 ns/day that average is 37 days on 8 threads,
+# and the 1200 ns trajectory is 90 days.
+# Five molalities times three seeds, even at 20 ns each, is
+# 300 ns / 13.35 ns/day = 22 days on 8 threads.
+# Crystal-density check, 512 ions, 8 ps, g/cm^3, block SE.
+# Zeron, Abascal, Vega Table V: 2.050 g/cm^3.
+crystal 2.0443 0.0008
+# Pure-water gate at 0.36 ns, one trajectory, not a melting point.
+# Fit from 0.06 ns onward: front velocity A/ns and crystal waters per ns.
+# 245: front -0.03 +/- 0.62, dN/dt -48.9 +/- 46.1 (n=16)
+# 255: front -3.10 +/- 0.64, dN/dt -264 +/- 50 (n=16)
+# 255 K melts. 245 K does not grow. Gate not passed.
+# Release build, one 9984-atom frame, serial, milliseconds.
+# Before the pocket-slot change, median 26.608:
+# 25.944 26.940 26.986 26.670 26.547 26.372 26.740 26.468
+# Stage means before: neigh 2.53 chill 1.13 bins 0.055 pockets 19.53 rings 2.93 ions 0.001
+# After, median 7.921:
+timing_after_ms 7.933 7.884 8.272 7.908 7.854 7.945 7.981 7.871
+# Stage means after: neigh 2.69 chill 1.21 bins 0.055 pockets 1.97 rings 2.05 ions 0.001
+# Salted 768-atom frame, four ions, median 0.783:
+timing_salt_ms 0.780 0.786 0.850 0.872 0.768 0.777 0.762 0.881

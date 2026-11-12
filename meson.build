@@ -646,6 +646,15 @@ if get_option('with_cli')
     link_args: seams_cli_link,
     build_rpath: _readcondb_rpath != '' ? _readcondb_rpath : meson.current_build_dir(),
     install: true)
+  brine_front_exe = executable(
+    'brine_front',
+    files('src/brine_front_main.cpp'),
+    dependencies: [yds_dep],
+    include_directories: _incdirs,
+    cpp_args: _args,
+    link_args: seams_cli_link,
+    build_rpath: _readcondb_rpath != '' ? _readcondb_rpath : meson.current_build_dir(),
+    install: true)
   test(
     'seams_read',
     seams_exe,

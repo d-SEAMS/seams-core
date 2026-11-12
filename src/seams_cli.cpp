@@ -23,6 +23,7 @@
 #include <seams_input.hpp>
 #include <site.hpp>
 #include <topo_bulk.hpp>
+#include <water_select.hpp>
 #include <topo_fingerprint.hpp>
 #include <tum_offload.hpp>
 
@@ -1620,6 +1621,51 @@ int cmdHbonds(std::ostream &os, Cloud &yCloud, Cloud &hCloud, double cutoff,
   return 0;
 }
 
+bool parseMolList(std::string_view value, std::vector<int> &ids) {
+  ids.clear();
+  if (value.empty()) {
+    return false;
+  }
+  std::size_t start = 0;
+  while (start <= value.size()) {
+    const std::size_t comma = value.find(',', start);
+    const auto token =
+        trimView(value.substr(start, comma == std::string_view::npos
+                                         ? std::string_view::npos
+                                         : comma - start));
+    if (token.empty()) {
+      return false;
+    }
+    const auto dash = token.find('-');
+    try {
+      if (dash == std::string_view::npos) {
+        ids.push_back(parseIntegral<int>(token));
+      } else {
+        const int lo = parseIntegral<int>(token.substr(0, dash));
+        const int hi = parseIntegral<int>(token.substr(dash + 1));
+        if (hi < lo) {
+          return false;
+        }
+        for (int mol = lo; mol <= hi; ++mol) {
+          ids.push_back(mol);
+        }
+      }
+    } catch (const ParsingException &) {
+      return false;
+    }
+    if (comma == std::string_view::npos) {
+      break;
+    }
+    start = comma + 1;
+  }
+  return !ids.empty();
+}
+
+bool scoringCommand(std::string_view cmd) {
+  return cmd == "chill" || cmd == "chill-plus" || cmd == "chill_plus" ||
+         cmd == "cages" || cmd == "fingerprint" || cmd == "steinhardt";
+}
+
 } // namespace
 
 int main(int argc, char *argv[]) {
@@ -1667,6 +1713,10 @@ int main(int argc, char *argv[]) {
   bool shapeFlag = false;
   bool byAtomFlag = false;
   std::string waterTypesFlag;
+  std::string molFlag;
+  bool molWater = false;
+  bool molSet = false;
+  std::vector<int> molIds;
   std::string subsetFlag;
   int rdfTypeI = 0;
   int rdfTypeJ = 0;
@@ -1923,9 +1973,19 @@ int main(int argc, char *argv[]) {
   parser.add(Option("--water-types")
                  .argName("T,U")
                  .help("Neighbour graph on these LAMMPS types only (OW). "
-                       "Substrate and ions never enter the 4-NN list")
+                       "Substrate and ions never enter the 4-NN list. "
+                       "A type that is not in the frame is an error")
                  .handler([&](std::string_view value) {
                    waterTypesFlag = std::string(value);
+                 }));
+
+  parser.add(Option("--mol")
+                 .argName("SPEC")
+                 .help("Water oxygens by molecule: water, or ids such as "
+                       "1,5-12. Neighbours, CHILL, CHILL+, rings and cages "
+                       "then ignore ions. A missing id is an error")
+                 .handler([&](std::string_view value) {
+                   molFlag = std::string(value);
                  }));
 
   parser.add(Option("--incomplete")
@@ -2227,6 +2287,34 @@ int main(int argc, char *argv[]) {
       }
     }
   }
+  if (!molFlag.empty()) {
+    const auto spec = trimView(molFlag);
+    if (spec == "water") {
+      molWater = true;
+      molSet = true;
+    } else if (!parseMolList(spec, molIds)) {
+      std::cerr << colorizer.error(
+                       "bad --mol (want water or ids such as 1,5-12)")
+                << "\n";
+      return 2;
+    } else {
+      molSet = true;
+    }
+  }
+  std::vector<int> ionTypes;
+  {
+    std::string tok;
+    std::istringstream in(ionTypesFlag);
+    while (std::getline(in, tok, ',')) {
+      if (!tok.empty()) {
+        try {
+          ionTypes.push_back(parseIntegral<int>(tok));
+        } catch (const ParsingException &) {
+          break;
+        }
+      }
+    }
+  }
   site::Kind domainKind = site::Kind::polar;
   if (cmd == "domains") {
     if (subsetFlag == "apolar" || subsetFlag == "tail") {
@@ -2243,6 +2331,53 @@ int main(int argc, char *argv[]) {
     if (strictInput && cloud.nop == 0) {
       os << "input frame " << cloud.currentFrame << " contains no atoms\n";
       return 2;
+    }
+    const bool scoring = scoringCommand(cmd);
+    std::vector<water::IonSite> brineIons;
+    if (scoring && cloud.nop > 0 &&
+        (molSet || !waterTypes.empty() ||
+         (typeI <= 0 && frameSource(file) == FrameSource::dump))) {
+      try {
+        const bool guests = cmd == "cages" && !guestTypesFlag.empty();
+        if (!waterTypes.empty() && !molSet) {
+          water::Request request;
+          request.types = waterTypes;
+          request.ion_types = ionTypes;
+          // Validates the types. The existing graph path still decides
+          // which of those types bond. A missing type is the error.
+          (void)water::selectOxygens(cloud, request);
+        } else if (molSet ||
+                   (typeI <= 0 && water::hasMultiAtomMolecule(cloud))) {
+          water::Request request;
+          request.ion_types = ionTypes;
+          if (!waterTypes.empty()) {
+            request.types = waterTypes;
+          } else if (typeI > 0) {
+            request.type = typeI;
+          }
+          if (molWater || (!molSet && typeI <= 0)) {
+            request.mol_mode = water::MolMode::Water;
+          } else if (molSet) {
+            request.mol_mode = water::MolMode::Ids;
+            request.molecules = molIds;
+          }
+          const auto selection = water::selectOxygens(cloud, request);
+          brineIons = water::collectIons(cloud, selection);
+          if (guests) {
+            if (waterTypes.empty()) {
+              waterTypes = selection.oxygen_types;
+            }
+          } else {
+            cloud = water::subsetCloud(cloud, selection);
+            waterTypes.clear();
+          }
+        } else if (typeI <= 0 && frameSource(file) == FrameSource::dump) {
+          cloud = water::keepHistoricalOxygen(cloud);
+        }
+      } catch (...) {
+        os << colorizer.error(exceptionText()) << "\n";
+        return 2;
+      }
     }
     // --family sets the flag in the same handler that replaces the
     // default, so an unset flag is waterIce.
@@ -2265,9 +2400,15 @@ int main(int argc, char *argv[]) {
     }
     if (cmd == "chill-plus" || cmd == "chill_plus") {
       try {
-        return cmdChillPlus(os, carry, cloud, cutoff, typeI, graph, chillRule,
-                            layersFlag, tumLayersFlag, densAxis, 3.7,
-                            waterTypes);
+        const int rc =
+            cmdChillPlus(os, carry, cloud, cutoff, typeI, graph, chillRule,
+                         layersFlag, tumLayersFlag, densAxis, 3.7, waterTypes);
+        if (rc == 0 && !brineIons.empty()) {
+          const auto report = water::ionFront(cloud, brineIons);
+          os << "ion-ice " << report.ice << " ion-liquid " << report.liquid
+             << " ion-front " << report.front << "\n";
+        }
+        return rc;
       } catch (...) {
         os << colorizer.error(exceptionText()) << "\n";
         return 2;
@@ -2275,7 +2416,13 @@ int main(int argc, char *argv[]) {
     }
     if (cmd == "chill") {
       try {
-        return cmdChill(os, cloud, cutoff, typeI, graph, waterTypes);
+        const int rc = cmdChill(os, cloud, cutoff, typeI, graph, waterTypes);
+        if (rc == 0 && !brineIons.empty()) {
+          const auto report = water::ionFront(cloud, brineIons);
+          os << "ion-ice " << report.ice << " ion-liquid " << report.liquid
+             << " ion-front " << report.front << "\n";
+        }
+        return rc;
       } catch (...) {
         os << colorizer.error(exceptionText()) << "\n";
         return 2;
@@ -2356,12 +2503,15 @@ int main(int argc, char *argv[]) {
     return 2;
   };
 
+  const bool scoreGuess =
+      scoringCommand(cmd) && typeI <= 0 && waterTypes.empty() && !molSet &&
+      frameSource(file) == FrameSource::dump;
   const bool loadAll =
       cmd == "pairs" || cmd == "ions" || cmd == "f4" ||
       (cmd == "cn" && ionsFlag) ||
       ((cmd == "rdf" || cmd == "cn") && typesSet && rdfTypeI != rdfTypeJ) ||
       (cmd == "density-z" && typeI <= 0) || cmd == "domains" ||
-      !waterTypes.empty();
+      !waterTypes.empty() || molSet || scoreGuess;
   const int loadType = loadAll ? -1 : typeI;
 
   if (last <= 0 || last == frame) {
