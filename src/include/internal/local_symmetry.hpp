@@ -138,6 +138,15 @@ struct Space {
 Space spaceGroup(const Eigen::Matrix3d &vectors, const Eigen::MatrixXd &cartesian,
                  double symprec = 1e-3);
 
+// Space group of one conventional cell when every label is the same ideal
+// ice and the box is a cubic integer supercell of that cell. Returns false
+// when the frame is not that crystal; the caller then uses spaceGroup on
+// the whole cell. The international symbol matches the full-cell call.
+bool conventionalCrystalSpace(const Eigen::Matrix3d &vectors,
+                              const Eigen::MatrixXd &cartesian,
+                              const std::vector<int> &kind, double symprec,
+                              Space &out);
+
 enum class Crystal { iceIh, iceIc, fault };
 
 struct Lattice {

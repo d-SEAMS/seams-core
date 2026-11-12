@@ -204,4 +204,5 @@ molSys::PointCloud<molSys::Point<double>, double>
 clearPointCloud(molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 } // namespace molSys
 
+/** @} */
 #endif // SEAMS_MOL_SYS_H_

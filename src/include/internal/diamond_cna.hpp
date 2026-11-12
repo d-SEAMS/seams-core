@@ -8,9 +8,10 @@
 
 #include <vector>
 
-// Diamond common-neighbour test. A clean cubic shell is 1 and a clean
-// hexagonal shell is 0. Anything the test cannot decide is -1. The twelve
-// second-shell vectors are read from the cutoff CSR, not from a second search.
+// Per-atom ice label from the shell kernel. A clean cubic shell is 1
+// (ice Ic), a clean hexagonal shell is 0 (ice Ih), stacking-disordered
+// ice is 2, and anything else is -1. The cutoff CSR is accepted so older
+// callers keep their signature; the kernel builds the 3.5 A shell itself.
 
 namespace symm {
 

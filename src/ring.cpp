@@ -193,7 +193,7 @@ ring::getSingleRingSize(const std::vector<std::vector<int>> &rings, int ringSize
   }
   std::vector<std::vector<int>> ringSingleSize(keep.size());
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) if (keep.size() >= 2048)
 #endif
   for (int k = 0; k < static_cast<int>(keep.size()); k++) {
     ringSingleSize[static_cast<std::size_t>(k)] =

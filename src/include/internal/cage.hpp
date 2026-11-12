@@ -122,4 +122,5 @@ struct Cage {
 
 } // namespace cage
 
+/** @} */
 #endif // SEAMS_CAGE_H_

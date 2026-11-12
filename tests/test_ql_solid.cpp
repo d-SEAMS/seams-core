@@ -3,6 +3,7 @@
 
 #include <bop.hpp>
 #include <chill_plus_scheme.hpp>
+#include <local_symmetry.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <ylm_cartesian.hpp>
@@ -46,6 +47,74 @@ molSys::PointCloud<molSys::Point<double>, double> iceIc(int cells) {
     }
   }
   return cloud;
+}
+
+molSys::PointCloud<molSys::Point<double>, double> iceIhCell() {
+  const auto cell = symm::crystal(symm::Crystal::iceIh);
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  const double a = cell.vectors(0, 0);
+  const double xy = cell.vectors(1, 0);
+  const double ly = cell.vectors(1, 1);
+  const double lz = cell.vectors(2, 2);
+  const double xmin = std::min(0.0, xy);
+  const double xmax = std::max(0.0, xy);
+  cloud.box = {a + xmax - xmin, ly, lz, xy, 0.0, 0.0};
+  cloud.boxLow = {xmin, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  int id = 1;
+  for (Eigen::Index i = 0; i < cell.cartesian.rows(); ++i) {
+    molSys::Point<double> p;
+    p.x = cell.cartesian(i, 0);
+    p.y = cell.cartesian(i, 1);
+    p.z = cell.cartesian(i, 2);
+    p.type = 1;
+    p.atomID = id;
+    p.molID = id;
+    cloud.idIndexMap[id] = cloud.nop;
+    cloud.pts.push_back(p);
+    ++cloud.nop;
+    ++id;
+  }
+  return cloud;
+}
+
+molSys::PointCloud<molSys::Point<double>, double> liquidBox(int n, unsigned seed) {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {20.0, 20.0, 20.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  std::mt19937 rng(seed);
+  std::uniform_real_distribution<double> u(0.0, 20.0);
+  for (int i = 0; i < n; i++) {
+    molSys::Point<double> p;
+    p.x = u(rng);
+    p.y = u(rng);
+    p.z = u(rng);
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = p.atomID;
+    cloud.idIndexMap[p.atomID] = cloud.nop;
+    cloud.pts.push_back(p);
+    ++cloud.nop;
+  }
+  return cloud;
+}
+
+void expectSameLabels(const molSys::PointCloud<molSys::Point<double>, double> &cloud) {
+  auto ref = cloud;
+  const auto rows = nneigh::neighListO(3.5, ref, 1);
+  chill::getCorrelPlus(ref, rows, false, 4);
+  chill::getIceTypePlusNoPrint(ref, rows, false, true);
+  auto got = cloud;
+  const auto again = nneigh::neighListO(3.5, got, 1);
+  chill::applyChillPlus(got, again, chill::ChillPlusRule::Published, false);
+  REQUIRE(got.nop == ref.nop);
+  for (int i = 0; i < ref.nop; i++) {
+    REQUIRE(got.pts[static_cast<std::size_t>(i)].molID ==
+            ref.pts[static_cast<std::size_t>(i)].molID);
+    REQUIRE(got.pts[static_cast<std::size_t>(i)].iceType ==
+            ref.pts[static_cast<std::size_t>(i)].iceType);
+  }
 }
 
 double maxAbs(const std::vector<double> &a, const std::vector<double> &b) {
@@ -98,6 +167,30 @@ TEST_CASE("solid q4 and q6 match on a disordered cloud", "[ql][solid]") {
     REQUIRE(maxAbs(got.ql, again.ql) < 1e-12);
     REQUIRE(maxAbs(got.qlBar, again.qlBar) < 1e-12);
   }
+}
+
+TEST_CASE("published CHILL+ CSR labels match the row rule per molecule", "[chill][solid]") {
+  expectSameLabels(iceIc(2));
+  expectSameLabels(iceIhCell());
+  expectSameLabels(liquidBox(80, 91001));
+  auto mixed = iceIc(2);
+  const double side = mixed.box[0];
+  std::mt19937 rng(93003);
+  std::uniform_real_distribution<double> u(0.0, side);
+  const int base = mixed.nop;
+  for (int i = 0; i < 24; i++) {
+    molSys::Point<double> p;
+    p.x = u(rng);
+    p.y = u(rng);
+    p.z = u(rng);
+    p.type = 1;
+    p.atomID = base + i + 1;
+    p.molID = p.atomID;
+    mixed.idIndexMap[p.atomID] = mixed.nop;
+    mixed.pts.push_back(p);
+    ++mixed.nop;
+  }
+  expectSameLabels(mixed);
 }
 
 TEST_CASE("symbolic cubic pre-filter falls back outside its certificate", "[chill][prefilter]") {

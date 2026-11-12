@@ -57,7 +57,7 @@ pairs | density-z | domains~. ~chill_plus~ is an accepted alias of
 | ~fingerprint --library FILE[,FILE...]~ | atoms named by key libraries | ~nop N graph KIND hops H method M matched X label=count ... unmatched=U~ and, with several libraries, ~depth H1=n1 H2=n2~ |
 | ~ions~ | ions classed by their first water shell against the seeded cages | ~nop N ice A ions I in-ice X front Y liquid Z shell S shell-ice F~ |
 | ~f4~ | Rodger F4 on H-O...O-H pairs | ~nop N f4 MEAN n M~ |
-| ~steinhardt~ | cutoff-shell \(q_3\), \(q_4\), \(q_6\), \(q_{12}\) and each Lechner-Dellago average. Degrees 4 and 6 use the solid-harmonic kernel | ~nop N q3 A q3bar B q4 C q4bar D q6 E q6bar F q12 G q12bar H~ |
+| ~steinhardt~ | cutoff-shell Steinhardt parameters for the degrees named by ~--l~ (default ~4,6~) and their Lechner-Dellago averages. Degrees 4 and 6 use the solid-harmonic kernel. ~--l 3,4,6,12~ is the former four-degree line | ~nop N~ then ~qL A qLbar B~ for each requested degree, in the order given |
 | ~rdf~ | partial site-site \(g_{IJ}(r)\) | ~# r g count~ then ~# types I J rmax R bins N volume V~ then one ~r g count~ row per bin |
 | ~cn~ | site-site coordination number | ~# site-site~ then ~# types I J cutoff R cn X nI N nJ M volume V~ |
 | ~cn --ions --site~ | cage degree on ~ionCloud~ | ~cage ionCloud types 1 2 cutoff R degree D nCation N nAnion M~ |
@@ -69,9 +69,13 @@ pairs | density-z | domains~. ~chill_plus~ is an accepted alias of
 ~chill~ / ~chill-plus~ default to ~--graph cutoff~: ~nneigh::neighListO~,
 every pair closer than ~--cutoff~. ~--graph mutual~ (alias ~knn~) calls
 ~nneigh::kNearestNeighbourList~ with ~k = 4~, mutual; there ~--cutoff~
-is only the cell-size hint (~cutoff + 1.5~). Other graphs exit 2. Then
-~chill::getCorrel~ / ~chill::getIceTypeNoPrint~ or
-~chill::getCorrelPlus~ / ~chill::getIceTypePlusNoPrint~.
+is only the cell-size hint (~cutoff + 1.5~). Other graphs exit 2.
+Published cutoff ~chill-plus~ classifies in ~chill::chillPlusPublishedCutoff~
+(one cutoff CSR and the fused \(q_3\)). Every other published call goes
+through ~chill::applyChillPlus~, which builds that same CSR from the
+neighbour rows and calls ~chill::chillPlusFromCsr~. ~ovito-chill+~ stays
+on ~chill::getCorrelPlus~ / ~chill::getIceTypePlusNoPrint~ with open
+edges. ~chill~ calls ~chill::getCorrel~ / ~chill::getIceTypeNoPrint~.
 ~--water-types T,U~ is the neighbour mask (OW only); ~--type~ is the
 load filter and is not that mask. Ice names are the
 ~molSys::atom_state_type~ enumerators: ~cubic~, ~hexagonal~,
@@ -150,6 +154,7 @@ initializers (Argum does not write defaults into the help).
 | ~--site SPEC~ | | Type-to-kind map for ~ionCloud~ (~1=cationHead,2=anion~) |
 | ~--ions~ | | ~cn~ on ~ionCloud~ cage degree (needs ~--site~) |
 | ~-c~, ~--cutoff ANGSTROM~ | ~3.5~ | ~Neighbour cutoff (rdf/cn rmax; hbonds heavy-atom nList)~ |
+| ~--l LIST~ | ~4,6~ | ~steinhardt: comma-separated degrees. 4 and 6 use the solid-harmonic kernel. 3, 8 and 12 are computed only when named~ |
 | ~--cage-edge SPEC~ | ~2.65,3.15~ | ~cages --signature: keep a face only when every edge lies in LO,HI, in the coordinate units of the file. ~none~ leaves the cage bound to the face census (~SEAMS_CAGE_EDGE~) |
 | ~--bins N~ | ~rmax / 0.1~ or ~L / 0.1~ | ~Histogram bins (rdf: rmax/0.1; density-z: bound span / 0.1)~ |
 | ~--axis XYZ~ | ~z~ | ~Histogram axis for density-z (x, y, or z)~ |

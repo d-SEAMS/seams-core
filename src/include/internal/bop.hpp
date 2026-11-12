@@ -573,4 +573,5 @@ std::complex<double> lookupTableQ6(int m, std::array<double, 2> angles);
 
 } // namespace sph
 
+/** @} */
 #endif // SEAMS_BOP_H_

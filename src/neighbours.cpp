@@ -2114,8 +2114,71 @@ void fillBothGraphsFromNom(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &nom, int k, std::vector<std::vector<int>> &mutual,
     std::vector<std::vector<int>> &uni) {
-  fillGraphFromNom(yCloud, nom, k, true, mutual);
-  fillGraphFromNom(yCloud, nom, k, false, uni);
+  const int n = yCloud.nop;
+  // The two graphs read the same nominations. Building them together asks
+  // listsPacked once per candidate. Each thread keeps the candidates of its
+  // contiguous atom block, and the blocks are replayed in atom order, so
+  // the neighbour rows match the serial fills.
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+  const bool scale = n >= 4096 && k > 0 && omp_get_max_threads() > 1 && !omp_in_parallel();
+#else
+  const bool scale = false;
+#endif
+  if (!scale) {
+    fillGraphFromNom(yCloud, nom, k, true, mutual);
+    fillGraphFromNom(yCloud, nom, k, false, uni);
+    return;
+  }
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+  struct Edge {
+    int i;
+    int j;
+  };
+  const int team = omp_get_max_threads();
+  std::vector<std::vector<Edge>> mutualParts(static_cast<std::size_t>(team));
+  std::vector<std::vector<Edge>> uniParts(static_cast<std::size_t>(team));
+#pragma omp parallel
+  {
+    std::vector<Edge> mutualLocal;
+    std::vector<Edge> uniLocal;
+#pragma omp for schedule(static)
+    for (int i = 0; i < n; i++) {
+      for (int t = 0; t < k; t++) {
+        const int j =
+            nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+                static_cast<std::size_t>(t)];
+        if (j < 0 || j >= n || j == i) {
+          continue;
+        }
+        const bool listed = listsPacked(nom, n, k, j, i);
+        if (i < j && listed) {
+          mutualLocal.push_back(Edge{i, j});
+        }
+        if (i < j || !listed) {
+          uniLocal.push_back(Edge{i, j});
+        }
+      }
+    }
+    mutualParts[static_cast<std::size_t>(omp_get_thread_num())] = std::move(mutualLocal);
+    uniParts[static_cast<std::size_t>(omp_get_thread_num())] = std::move(uniLocal);
+  }
+  auto replay = [&](const std::vector<std::vector<Edge>> &parts,
+                    std::vector<std::vector<int>> &out) {
+    out.assign(static_cast<std::size_t>(n), {});
+    for (int i = 0; i < n; i++) {
+      auto &row = out[static_cast<std::size_t>(i)];
+      row.reserve(8);
+      row.push_back(yCloud.pts[static_cast<std::size_t>(i)].atomID);
+    }
+    for (const auto &part : parts) {
+      for (const Edge &edge : part) {
+        addUndirectedIDs(out, yCloud, edge.i, edge.j);
+      }
+    }
+  };
+  replay(mutualParts, mutual);
+  replay(uniParts, uni);
+#endif
 }
 
 } // namespace

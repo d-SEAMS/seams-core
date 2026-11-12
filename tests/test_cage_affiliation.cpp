@@ -276,6 +276,75 @@ TEST_CASE("cageAffiliation marks hexagonal ice HC on every thread count",
 #endif
 }
 
+TEST_CASE("parallel cage affiliation matches the one-thread sweep",
+          "[cage_affiliation]") {
+#ifdef SEAMS_HAS_OPENMP
+  auto yCloud = iceIh(8, 5, 5);
+  auto nList = nneigh::neighListO(3.5, yCloud, 1);
+  auto idx = nneigh::neighbourListByIndex(yCloud, nList);
+  auto six = sixMembered(primitive::ringNetwork(idx, 6));
+  REQUIRE(six.size() >= 1024);
+
+  struct RestoreThreads {
+    int saved = omp_get_max_threads();
+    ~RestoreThreads() { omp_set_num_threads(saved); }
+  } restore;
+  const int parallelThreads = std::max(2, std::min(restore.saved, 4));
+  auto at = [&](int threads, const std::vector<std::vector<int>> &rows) {
+    omp_set_num_threads(threads);
+    return ring::cageAffiliation(six, rows);
+  };
+
+  const auto serial = at(1, idx);
+  const auto parallel = at(parallelThreads, idx);
+  REQUIRE(serial.hc == parallel.hc);
+  REQUIRE(serial.ddc == parallel.ddc);
+  REQUIRE(std::all_of(serial.hc.begin(), serial.hc.end(),
+                      [](bool on) { return on; }));
+  REQUIRE(std::none_of(serial.ddc.begin(), serial.ddc.end(),
+                       [](bool on) { return on; }));
+
+  // Drop every bond that touches every fifth atom. The flags are no longer
+  // uniform, so a sweep that marks the wrong union cannot hide in an
+  // all-hexagonal crystal.
+  auto damaged = idx;
+  for (std::size_t i = 0; i < damaged.size(); i += 5) {
+    if (damaged[i].empty()) {
+      continue;
+    }
+    const int self = damaged[i][0];
+    for (auto &row : damaged) {
+      if (row.size() <= 1) {
+        continue;
+      }
+      if (row[0] == self) {
+        row.resize(1);
+        continue;
+      }
+      row.erase(std::remove(row.begin() + 1, row.end(), self), row.end());
+    }
+  }
+  const auto serialCut = at(1, damaged);
+  const auto parallelCut = at(parallelThreads, damaged);
+  REQUIRE(serialCut.hc == parallelCut.hc);
+  REQUIRE(serialCut.ddc == parallelCut.ddc);
+  const bool hcMixed =
+      std::find(serialCut.hc.begin(), serialCut.hc.end(), false) !=
+          serialCut.hc.end() &&
+      std::find(serialCut.hc.begin(), serialCut.hc.end(), true) !=
+          serialCut.hc.end();
+  const bool ddcMixed =
+      std::find(serialCut.ddc.begin(), serialCut.ddc.end(), false) !=
+          serialCut.ddc.end() &&
+      std::find(serialCut.ddc.begin(), serialCut.ddc.end(), true) !=
+          serialCut.ddc.end();
+  REQUIRE((hcMixed || ddcMixed));
+  REQUIRE(serialCut.hc != serial.hc);
+#else
+  SUCCEED("the sweep is the one-thread path without OpenMP");
+#endif
+}
+
 TEST_CASE("hop-bound path grows its ring, row and pair buffers on ice Ih",
           "[cage_affiliation][offload]") {
   auto yCloud = iceIh(4, 3, 3);

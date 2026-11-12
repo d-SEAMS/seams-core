@@ -156,7 +156,7 @@ inline void dumpFromFrac(const double H[3][3], const double origin[3],
   r[2] = origin[2] + H[2][2] * s[2];
 }
 
-/// Triclinic dump-cell volume |det(H)| from dumpBoundsToH.
+/// Triclinic dump-cell volume, the absolute value of det(H), from dumpBoundsToH.
 /// Bound spans Lx*Ly*Lz are not the cell volume when tilt is present.
 inline double dumpVolume(const std::vector<double> &box,
                          const std::vector<double> &boxLow) {
@@ -623,4 +623,5 @@ private:
 
 }  // namespace nneigh
 
+/** @} */
 #endif  // SEAMS_NEIGHBOURS_H_

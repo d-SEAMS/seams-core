@@ -19,6 +19,7 @@
 #include <cctype>
 #include <fstream>
 #include <sstream>
+#include <vector>
 
 namespace chill {
 namespace {
@@ -145,6 +146,73 @@ std::string valueOfKey(const std::string &text, const std::string &key) {
   return {};
 }
 
+// Neighbour rows are atom-ID lists, self first, one row per cloud index.
+// The fused kernel reads a CSR of those same indices.
+bool csrFromIdRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                   const std::vector<std::vector<int>> &nList, std::vector<int> &offsets,
+                   std::vector<int> &cols) {
+  const int n = yCloud.nop;
+  if (n <= 0 || static_cast<int>(nList.size()) < n) {
+    return false;
+  }
+  int maxId = 0;
+  bool denseIds = true;
+  for (int i = 0; i < n; ++i) {
+    const int id = yCloud.pts[static_cast<std::size_t>(i)].atomID;
+    if (id > maxId) {
+      maxId = id;
+    }
+    if (id < 0) {
+      denseIds = false;
+    }
+  }
+  if (maxId > n * 4) {
+    denseIds = false;
+  }
+  std::vector<int> idToIndex;
+  if (denseIds) {
+    idToIndex.assign(static_cast<std::size_t>(maxId) + 1, -1);
+    for (int i = 0; i < n; ++i) {
+      const int id = yCloud.pts[static_cast<std::size_t>(i)].atomID;
+      idToIndex[static_cast<std::size_t>(id)] = i;
+    }
+  }
+  auto indexOf = [&](int id) {
+    if (denseIds) {
+      if (id < 0 || id > maxId) {
+        return -1;
+      }
+      return idToIndex[static_cast<std::size_t>(id)];
+    }
+    const auto it = yCloud.idIndexMap.find(id);
+    return it == yCloud.idIndexMap.end() ? -1 : it->second;
+  };
+  offsets.assign(static_cast<std::size_t>(n) + 1, 0);
+  for (int i = 0; i < n; ++i) {
+    const auto &row = nList[static_cast<std::size_t>(i)];
+    int count = 0;
+    for (std::size_t k = 1; k < row.size(); ++k) {
+      const int j = indexOf(row[k]);
+      if (j >= 0 && j < n && j != i) {
+        ++count;
+      }
+    }
+    offsets[static_cast<std::size_t>(i) + 1] = offsets[static_cast<std::size_t>(i)] + count;
+  }
+  cols.assign(static_cast<std::size_t>(offsets.back()), 0);
+  for (int i = 0; i < n; ++i) {
+    int at = offsets[static_cast<std::size_t>(i)];
+    const auto &row = nList[static_cast<std::size_t>(i)];
+    for (std::size_t k = 1; k < row.size(); ++k) {
+      const int j = indexOf(row[k]);
+      if (j >= 0 && j < n && j != i) {
+        cols[static_cast<std::size_t>(at++)] = j;
+      }
+    }
+  }
+  return true;
+}
+
 } // namespace
 
 int cutoffShellCount(
@@ -219,6 +287,18 @@ void applyChillPlus(
     getCorrelPlus(yCloud, nList, isSlice, 0, false);
     getIceTypePlusNoPrint(yCloud, nList, isSlice, false);
     return;
+  }
+  // Published rule, whole frame: the CSR kernel is the same four-nearest
+  // q3, closed edges, and neighbour test as getCorrelPlus plus
+  // getIceTypePlusNoPrint. A slice still walks the row list, which knows
+  // which atoms sit in the slice.
+  if (!isSlice) {
+    std::vector<int> offsets;
+    std::vector<int> cols;
+    if (csrFromIdRows(yCloud, nList, offsets, cols)) {
+      chillPlusFromCsr(yCloud, offsets, cols);
+      return;
+    }
   }
   getCorrelPlus(yCloud, nList, isSlice, 4);
   getIceTypePlusNoPrint(yCloud, nList, isSlice, true);

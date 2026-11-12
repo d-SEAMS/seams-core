@@ -29,6 +29,7 @@
 #include <tum_offload.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
@@ -597,7 +598,15 @@ int cmdSymmetry(std::ostream &os, Cloud &cloud) {
   vectors(1, 1) = cloud.box[1];
   vectors(2, 2) = cloud.box[2];
   os << "symmetry backend " << symm::matcher() << "\n";
-  const symm::Space space = symm::spaceGroup(vectors, xyz, 1e-3);
+  // Labels first. A perfect cubic supercell then asks spglib for one
+  // conventional cell, which is the same international symbol as the
+  // full cell and does not grow with the supercell.
+  std::vector<int> kind;
+  symm::classifyIce(xyz, vectors, kind);
+  symm::Space space;
+  if (!symm::conventionalCrystalSpace(vectors, xyz, kind, 1e-3, space)) {
+    space = symm::spaceGroup(vectors, xyz, 1e-3);
+  }
   if (space.status == 0) {
     os << "space-group " << space.number << " " << space.symbol << "\n";
   } else if (space.status == 2) {
@@ -615,8 +624,6 @@ int cmdSymmetry(std::ostream &os, Cloud &cloud) {
   std::map<std::string, int> tally;
   int unmatched = 0;
   bool wroteShell = false;
-  std::vector<int> kind;
-  symm::classifyIce(xyz, vectors, kind);
   for (int i = 0; i < cloud.nop; i++) {
     if (kind[static_cast<size_t>(i)] < 0) {
       unmatched++;
@@ -1297,9 +1304,22 @@ int cmdChillPlus(std::ostream &os, FrameCarry &carry, Cloud &cloud,
     return 0;
   }
   const int typ = typeOf(cloud, typeI);
-  auto nList = chillGraph(cloud, cutoff, typ, graphName, waterTypes);
-  chill::applyChillPlus(cloud, nList, chill::chillPlusRuleFromFile(ruleSpec),
-                        false);
+  const auto rule = chill::chillPlusRuleFromFile(ruleSpec);
+  const std::string graphKind =
+      (graphName.empty() || graphName == "seeded") ? std::string("cutoff") : graphName;
+  // Published cutoff is one cell walk and the fused q3. Building the
+  // atom-ID rows and classifying them again is the slow command.
+  bool fused = false;
+  std::vector<std::vector<int>> nList;
+  if (rule == chill::ChillPlusRule::Published && graphKind == "cutoff") {
+    fused = chill::chillPlusPublishedCutoff(cloud, cutoff, typ);
+  }
+  if (!fused || tumLayers) {
+    nList = chillGraph(cloud, cutoff, typ, graphName, waterTypes);
+  }
+  if (!fused) {
+    chill::applyChillPlus(cloud, nList, rule, false);
+  }
   chill::clearIceTypesExcept(cloud, waterTypes);
   printCounts(os, cloud, waterTypes);
   if (layers) {
@@ -1367,29 +1387,51 @@ int cmdF4(std::ostream &os, Cloud &cloud, double cutoff, int typeI, int hType) {
   return 0;
 }
 
-int cmdSteinhardt(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
+std::vector<int> steinhardtOrders(const std::string &spec) {
+  const std::string text = spec.empty() ? std::string("4,6") : spec;
+  std::vector<int> orders;
+  std::string part;
+  std::istringstream in(text);
+  while (std::getline(in, part, ',')) {
+    const auto raw = trimView(part);
+    if (raw.empty()) {
+      continue;
+    }
+    const int order = parseIntegral<int>(raw);
+    if (order != 3 && order != 4 && order != 6 && order != 8 && order != 12) {
+      throw std::invalid_argument(
+          "steinhardt --l wants degrees from 3,4,6,8,12");
+    }
+    if (std::find(orders.begin(), orders.end(), order) == orders.end()) {
+      orders.push_back(order);
+    }
+  }
+  if (orders.empty()) {
+    throw std::invalid_argument("steinhardt --l needs at least one degree");
+  }
+  return orders;
+}
+
+int cmdSteinhardt(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
+                  const std::string &orderSpec) {
   if (cloud.nop == 0) {
     os << colorizer.heading("nop") << " 0\n";
     return 0;
   }
   const int typ = typeOf(cloud, typeI);
-  const auto q3 = chill::steinhardtQlCutoff(cloud, cutoff, 3, typ, true);
-  const auto q4 = chill::steinhardtQlCutoff(cloud, cutoff, 4, typ, true);
-  const auto q6 = chill::steinhardtQlCutoff(cloud, cutoff, 6, typ, true);
-  const auto q12 = chill::steinhardtQlCutoff(cloud, cutoff, 12, typ, true);
-  os << colorizer.heading("nop") << " " << cloud.nop << " "
-     << colorizer.longOption("q3") << " " << topoparam::meanFinite(q3.ql) << " "
-     << colorizer.longOption("q3bar") << " " << topoparam::meanFinite(q3.qlBar)
-     << " " << colorizer.longOption("q4") << " " << topoparam::meanFinite(q4.ql)
-     << " " << colorizer.longOption("q4bar") << " "
-     << topoparam::meanFinite(q4.qlBar) << " "
-     << colorizer.longOption("q6") << " " << topoparam::meanFinite(q6.ql) << " "
-     << colorizer.longOption("q6bar") << " "
-     << topoparam::meanFinite(q6.qlBar) << " "
-     << colorizer.longOption("q12") << " "
-     << topoparam::meanFinite(q12.ql) << " "
-     << colorizer.longOption("q12bar") << " "
-     << topoparam::meanFinite(q12.qlBar) << "\n";
+  const auto orders = steinhardtOrders(orderSpec);
+  os << colorizer.heading("nop") << " " << cloud.nop;
+  for (const int order : orders) {
+    // Degrees 4 and 6 take the solid-harmonic kernel inside the cutoff
+    // call. A degree that was not named is not computed. --l 3,4,6,12
+    // is the former four-degree line.
+    const auto q = chill::steinhardtQlCutoff(cloud, cutoff, order, typ, true);
+    const std::string tag = "q" + std::to_string(order);
+    os << " " << colorizer.longOption(tag) << " " << topoparam::meanFinite(q.ql)
+       << " " << colorizer.longOption(tag + "bar") << " "
+       << topoparam::meanFinite(q.qlBar);
+  }
+  os << "\n";
   return 0;
 }
 
@@ -1600,21 +1642,41 @@ int cmdCages(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
   };
 
   if (graphName == "seeded") {
+    const bool cageTime = std::getenv("SEAMS_CAGE_TIME") != nullptr;
+    const auto cageT0 = std::chrono::steady_clock::now();
     auto graphs = knnPairOf();
+    const auto tKnn = std::chrono::steady_clock::now();
     const auto &mutual = graphs.first;
     const auto &uni = graphs.second;
     auto idxS = nneigh::neighbourListByIndex(cloud, mutual);
     auto idxU = nneigh::neighbourListByIndex(cloud, uni);
+    const auto tIdx = std::chrono::steady_clock::now();
     // tum::cageCounts reads one graph and has no ring completion, so the
     // seeded assignment stays on the host whatever SEAMS_OFFLOAD says.
     // Hash first. A match is checked again by comparing every edge.
-    if (seams::provenEqual(seams::edgeSetOf(idxS), seams::edgeSetOf(idxU))) {
-      const auto six = ring::contractibleRings(
-          sixRings(carry.rings(GraphSlot::strict, idxS, 6)), cloud);
+    const auto tEq0 = std::chrono::steady_clock::now();
+    const bool sameGraph =
+        seams::provenEqual(seams::edgeSetOf(idxS), seams::edgeSetOf(idxU));
+    const auto tEq1 = std::chrono::steady_clock::now();
+    if (sameGraph) {
+      const auto &rings = carry.rings(GraphSlot::strict, idxS, 6);
+      const auto tRing = std::chrono::steady_clock::now();
+      const auto six = ring::contractibleRings(sixRings(rings), cloud);
+      const auto tCon = std::chrono::steady_clock::now();
       const auto &once = carry.affiliation(GraphSlot::strict, six, idxS);
+      const auto tAff = std::chrono::steady_clock::now();
       const auto aff =
           ring::seededCageAffiliation(six, once, six, once, idxS, complete);
       tallyAtoms(aff.hc, aff.ddc);
+      if (cageTime) {
+        const auto ms = [](auto a, auto b) {
+          return std::chrono::duration<double, std::milli>(b - a).count();
+        };
+        std::cerr << "cage-detail eq_ms=" << ms(tEq0, tEq1)
+                  << " ring_ms=" << ms(tEq1, tRing)
+                  << " contract_ms=" << ms(tRing, tCon)
+                  << " aff_ms=" << ms(tCon, tAff) << "\n";
+      }
     } else {
       const auto sixS = ring::contractibleRings(
           sixRings(carry.rings(GraphSlot::strict, idxS, 6)), cloud);
@@ -1625,6 +1687,15 @@ int cmdCages(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
           carry.affiliation(GraphSlot::permissive, sixU, idxU), idxU,
           complete);
       tallyAtoms(aff.hc, aff.ddc);
+    }
+    if (cageTime) {
+      const auto tEnd = std::chrono::steady_clock::now();
+      const auto ms = [](auto a, auto b) {
+        return std::chrono::duration<double, std::milli>(b - a).count();
+      };
+      std::cerr << "cage-stages knn_ms=" << ms(cageT0, tKnn)
+                << " index_ms=" << ms(tKnn, tIdx)
+                << " rest_ms=" << ms(tIdx, tEnd) << "\n";
     }
   } else {
     const auto graph = nneigh::bondGraphFromName(graphName);
@@ -1776,6 +1847,7 @@ int main(int argc, char *argv[]) {
   bool allDonors = false;
   std::string cmd;
   std::string file;
+  std::string orderSpec;
   std::string typesFlag;
   std::string siteSpec;
   bool ionsFlag = false;
@@ -1891,6 +1963,15 @@ int main(int argc, char *argv[]) {
                        "density-z: 0 is every atom)")
                  .handler([&](std::string_view value) {
                    typeI = parseIntegral<int>(value);
+                 }));
+
+  parser.add(Option("--l")
+                 .argName("LIST")
+                 .help("Steinhardt degrees, comma-separated. Default 4,6, "
+                       "the solid-harmonic pair. 3, 8 and 12 are computed "
+                       "only when named")
+                 .handler([&](std::string_view value) {
+                   orderSpec = std::string(value);
                  }));
 
   parser.add(Option("--cutoff", "-c")
@@ -2565,7 +2646,12 @@ int main(int argc, char *argv[]) {
       return cmdF4(os, cloud, cutoff, typeI, htype);
     }
     if (cmd == "steinhardt") {
-      return cmdSteinhardt(os, cloud, cutoff, typeI);
+      try {
+        return cmdSteinhardt(os, cloud, cutoff, typeI, orderSpec);
+      } catch (...) {
+        os << colorizer.error(exceptionText()) << "\n";
+        return 2;
+      }
     }
     if (cmd == "rdf") {
       return cmdRdf(os, cloud, cutoff, bins, rdfTypeI, rdfTypeJ);

@@ -1,5 +1,5 @@
 project('vesin', 'cpp',
-  version: '0.3.0',
+  version: '0.5.7',
   default_options: ['cpp_std=c++17'])
 
 vesin_sources = files(

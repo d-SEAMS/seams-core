@@ -159,4 +159,5 @@ std::vector<int> findsCommonElements(const std::vector<int> &ring1,
 
 } // namespace ring
 
+/** @} */
 #endif // SEAMS_RINGS_H_

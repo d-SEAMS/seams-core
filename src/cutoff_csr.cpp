@@ -387,6 +387,115 @@ void passFastStash(const double *xs, const double *ys, const double *zs,
   }
 }
 
+// One thread records each pair from the lower packed slot and writes both
+// ends. The full stencil visits every pair twice; this visit is once.
+void passFastStashHalf(const double *xs, const double *ys, const double *zs,
+                       const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
+                       const double *shx, const double *shy, const double *shz, double rc2,
+                       int *counts, int *stash, int *overflowed) {
+  const int nCells = ncx * ncy * ncz;
+  *overflowed = 0;
+  for (int c = 0; c < nCells; ++c) {
+    const int b = cellStart[c];
+    const int e = cellStart[c + 1];
+    if (b == e) {
+      continue;
+    }
+    const int cz = c % ncz;
+    const int cy = (c / ncz) % ncy;
+    const int cx = c / (ncy * ncz);
+    struct Nbr {
+      int begin;
+      int end;
+      double sx, sy, sz;
+    };
+    Nbr nbr[14];
+    int nn = 0;
+    // Same cell, then the 13 cells on the positive side of the stencil.
+    // The opposite cell records the pair, so each pair is seen once.
+    nbr[nn++] = {b, e, 0.0, 0.0, 0.0};
+    for (int ox = -1; ox <= 1; ++ox) {
+      for (int oy = -1; oy <= 1; ++oy) {
+        for (int oz = -1; oz <= 1; ++oz) {
+          if (!(ox > 0 || (ox == 0 && oy > 0) || (ox == 0 && oy == 0 && oz > 0))) {
+            continue;
+          }
+          int nx = cx + ox;
+          int ix = 0;
+          if (nx >= ncx) {
+            nx -= ncx;
+            ix = 1;
+          } else if (nx < 0) {
+            nx += ncx;
+            ix = -1;
+          }
+          int ny = cy + oy;
+          int iy = 0;
+          if (ny >= ncy) {
+            ny -= ncy;
+            iy = 1;
+          } else if (ny < 0) {
+            ny += ncy;
+            iy = -1;
+          }
+          int nz = cz + oz;
+          int iz = 0;
+          if (nz >= ncz) {
+            nz -= ncz;
+            iz = 1;
+          } else if (nz < 0) {
+            nz += ncz;
+            iz = -1;
+          }
+          const int ncid = (nx * ncy + ny) * ncz + nz;
+          const int jb = cellStart[ncid];
+          const int je = cellStart[ncid + 1];
+          if (jb == je) {
+            continue;
+          }
+          const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
+          nbr[nn++] = {jb, je, shx[k], shy[k], shz[k]};
+        }
+      }
+    }
+    for (int i = b; i < e; ++i) {
+      const int ii = ids[i];
+      const double xi = xs[i];
+      const double yi = ys[i];
+      const double zi = zs[i];
+      int *rowI = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
+      for (int t = 0; t < nn; ++t) {
+        const Nbr nb = nbr[t];
+        const int j0 = (t == 0) ? i + 1 : nb.begin;
+        for (int j = j0; j < nb.end; ++j) {
+          const double dx = xi - xs[j] - nb.sx;
+          const double dy = yi - ys[j] - nb.sy;
+          const double dz = zi - zs[j] - nb.sz;
+          if (!(dx * dx + dy * dy + dz * dz < rc2)) {
+            continue;
+          }
+          const int jj = ids[j];
+          int &ni = counts[ii];
+          int &nj = counts[jj];
+          if (ni < kStashCap) {
+            rowI[ni] = jj;
+          } else {
+            *overflowed = 1;
+          }
+          ++ni;
+          int *rowJ = stash + static_cast<std::size_t>(jj) * static_cast<std::size_t>(kStashCap);
+          if (nj < kStashCap) {
+            rowJ[nj] = ii;
+          } else {
+            *overflowed = 1;
+          }
+          ++nj;
+        }
+      }
+    }
+  }
+}
+
 void scatterStash(const int *stash, const int *counts, const int *offsets, int *cols,
                   int nop) {
 #ifdef SEAMS_HAS_OPENMP
@@ -880,6 +989,32 @@ bool orthoFullCsr(
       yCloud.boxLow.size() > 1 ? yCloud.boxLow[1] : 0.0,
       yCloud.boxLow.size() > 2 ? yCloud.boxLow[2] : 0.0};
   const int nSubset = subset == nullptr ? nop : static_cast<int>(subset->size());
+  // Eight threads lose to one thread below this size. A 1000-molecule
+  // ring census was slower with a team than without one.
+  struct SerialBelow {
+    int saved = 1;
+    bool on = false;
+    explicit SerialBelow(int n) {
+#ifdef SEAMS_HAS_OPENMP
+      if (n < 2048 && !omp_in_parallel()) {
+        saved = std::max(1, omp_get_max_threads());
+        if (saved > 1) {
+          omp_set_num_threads(1);
+          on = true;
+        }
+      }
+#else
+      (void)n;
+#endif
+    }
+    ~SerialBelow() {
+#ifdef SEAMS_HAS_OPENMP
+      if (on) {
+        omp_set_num_threads(saved);
+      }
+#endif
+    }
+  } serialBelow(nSubset);
   offsets.assign(static_cast<std::size_t>(nop) + 1, 0);
   cols.clear();
   if (nop == 0 || nSubset == 0) {
@@ -1049,6 +1184,10 @@ bool orthoFullCsr(
     if (half) {
       passFast<false, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                             ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr);
+    } else if (maxThreads == 1) {
+      passFastStashHalf(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                        ncell[2], shx, shy, shz, rc2, sc.counts.data(), sc.stash.data(),
+                        &sc.overflowed);
     } else {
       passFastStash(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
                     shx, shy, shz, rc2, sc.counts.data(), sc.stash.data(), &sc.overflowed);

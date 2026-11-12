@@ -225,4 +225,5 @@ inline bool atomInSlice(double x, double y, double z,
 
 } // namespace sinp
 
+/** @} */
 #endif //// SEAMS_SEAMS_INPUT_H_

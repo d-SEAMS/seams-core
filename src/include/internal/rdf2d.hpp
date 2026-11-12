@@ -111,4 +111,5 @@ double getPlaneArea(std::vector<double> volumeLengths);
 
 } // namespace rdf2
 
+/** @} */
 #endif // SEAMS_RDF2D_H_

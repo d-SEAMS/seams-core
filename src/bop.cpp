@@ -29,6 +29,7 @@
 #include <cstdlib>
 #include <immintrin.h>
 #include <iostream>
+#include <mutex>
 #include <numbers>
 #include <unordered_map>
 #include <utility>
@@ -1271,6 +1272,10 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
   // eight-thread samples into a fast group near 8 ms and a slow group
   // near 12 ms.
   seams::prepareCompute();
+  // The scratch is shared with the OpenMP team. A second frame running
+  // in another worker waits, instead of writing that team's rows.
+  static std::mutex scratchMu;
+  std::lock_guard<std::mutex> scratchGuard(scratchMu);
   struct Scratch {
     std::vector<double> xyz;
     std::vector<int> head, next;
@@ -1349,8 +1354,11 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
     }
     which = &subset;
   }
+  const bool timing = std::getenv("SEAMS_CHILL_TIME") != nullptr;
+  const auto tCsr0 = std::chrono::steady_clock::now();
   const bool csrOk =
       nneigh::orthoFullCsr(yCloud, which, cutoff, scratch.offsets, scratch.cols);
+  const auto tCsr1 = std::chrono::steady_clock::now();
   if (tiltBox && !csrOk) {
     return false;
   }
@@ -1378,7 +1386,6 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
   const auto &norm = normQ3();
   const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
   const chill::BondClassifier rule = chill::chillPlusRule();
-  const bool timing = std::getenv("SEAMS_CHILL_TIME") != nullptr;
   const auto tWalk = std::chrono::steady_clock::now();
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 256)
@@ -1612,7 +1619,8 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
     const auto ms = [](auto a, auto b) {
       return std::chrono::duration<double, std::milli>(b - a).count();
     };
-    std::cerr << "chill-stages walk_ylm_ms=" << ms(tWalk, tYlm)
+    std::cerr << "chill-stages csr_ms=" << ms(tCsr0, tCsr1)
+              << " walk_ylm_ms=" << ms(tWalk, tYlm)
               << " label_ms=" << ms(tYlm, tEnd) << "\n";
   }
   return true;
@@ -2526,9 +2534,8 @@ int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &y
     }
     qn[static_cast<std::size_t>(i)] = useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
   }
-  int cubic = 0;
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for reduction(+ : cubic) schedule(static) if (n >= 256)
+#pragma omp parallel for schedule(static) if (n >= 256)
 #endif
   for (int i = 0; i < n; ++i) {
     const int keep = nkeep[static_cast<std::size_t>(i)];
@@ -2546,6 +2553,17 @@ int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &y
       bond.classifier = chill::classifyBond(bond.c_value, rule);
       bonds.push_back(bond);
     }
+  }
+  // Bonds are complete before the neighbour test reads them. The published
+  // interfacial row looks at a neighbour's staggered count; labelling in
+  // the bond loop would see a neighbour that had not been written yet.
+  int cubic = 0;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for reduction(+ : cubic) schedule(static) if (n >= 256)
+#endif
+  for (int i = 0; i < n; ++i) {
+    const int keep = nkeep[static_cast<std::size_t>(i)];
+    const auto &bonds = yCloud.pts[static_cast<std::size_t>(i)].c_ij;
     int nstag = 0;
     int neclip = 0;
     for (const auto &bond : bonds) {
@@ -2556,6 +2574,32 @@ int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &y
       }
     }
     const bool four = shell[static_cast<std::size_t>(i)] == 4 && keep == 4;
+    auto staggeredOf = [&](int j) {
+      int count = 0;
+      for (const auto &bond : yCloud.pts[static_cast<std::size_t>(j)].c_ij) {
+        if (bond.classifier == molSys::bond_type::staggered) {
+          ++count;
+        }
+      }
+      return count;
+    };
+    bool inter = false;
+    if (four && nstag == 2) {
+      for (int s = 0; s < 4; ++s) {
+        if (staggeredOf(chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)]) >
+            2) {
+          inter = true;
+        }
+      }
+    }
+    if (four && nstag == 3 && neclip == 0) {
+      for (int s = 0; s < 4; ++s) {
+        if (staggeredOf(chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)]) >
+            1) {
+          inter = true;
+        }
+      }
+    }
     auto &ice = yCloud.pts[static_cast<std::size_t>(i)].iceType;
     if (!four) {
       ice = molSys::atom_state_type::water;
@@ -2564,12 +2608,12 @@ int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &y
       ++cubic;
     } else if (neclip == 1 && nstag == 3) {
       ice = molSys::atom_state_type::hexagonal;
+    } else if (inter) {
+      ice = molSys::atom_state_type::interfacial;
     } else if (neclip == 4 && nstag == 0) {
       ice = molSys::atom_state_type::clathrate;
     } else if (neclip == 3) {
       ice = molSys::atom_state_type::interClathrate;
-    } else if (nstag == 2 || (nstag == 3 && neclip == 0)) {
-      ice = molSys::atom_state_type::interfacial;
     } else {
       ice = molSys::atom_state_type::water;
     }

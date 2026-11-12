@@ -150,4 +150,5 @@ std::vector<std::vector<int>> trimBonds(std::vector<std::vector<int>> bonds);
 
 } // namespace bond
 
+/** @} */
 #endif // SEAMS_BONDING_H_

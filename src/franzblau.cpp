@@ -143,7 +143,10 @@ struct BoundedBalls {
       return;
     }
 #ifdef SEAMS_HAS_OPENMP
-    const bool parallel = !omp_in_parallel() && omp_get_max_threads() > 1;
+    // Below this size the team costs more than the ball. 1000 molecules
+    // on eight threads was the cell that lost to a serial ring code.
+    const bool parallel = static_cast<int>(adjacency.size()) >= 2048 &&
+                          !omp_in_parallel() && omp_get_max_threads() > 1;
 #else
     const bool parallel = false;
 #endif
@@ -445,7 +448,8 @@ struct BitBalls {
       }
     }
 #ifdef SEAMS_HAS_OPENMP
-    const bool parallel = !omp_in_parallel() && omp_get_max_threads() > 1;
+    const bool parallel = nVertices >= 2048 && !omp_in_parallel() &&
+                          omp_get_max_threads() > 1;
 #pragma omp parallel if (parallel)
 #endif
     {
@@ -937,20 +941,25 @@ primitive::ringNetworkBalls(const std::vector<std::vector<int>> &nList, int maxD
 static std::vector<std::vector<int>>
 searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
             const std::vector<char> &sources, bool legacy) {
-  seams::adoptThreads();
   std::vector<std::vector<int>> rings;
   if (maxDepth < 3 || nList.empty()) {
     return rings;
+  }
+  const int nVertices = static_cast<int>(nList.size());
+  // The fork, the per-source pools, and pausing the team are slower than
+  // the search itself on a small graph. Larger graphs keep the team.
+  const bool serial = nVertices < 2048;
+  if (!serial) {
+    seams::adoptThreads();
   }
 
   // Adjacency by index; the first element of each nList row is the vertex
   // itself, so it is skipped. A repeated neighbour is one edge. A self
   // entry and an index outside the cloud are not edges.
   const auto adjStart = std::chrono::steady_clock::now();
-  const int nVertices = static_cast<int>(nList.size());
   std::vector<std::vector<int>> uniq(static_cast<std::size_t>(nVertices));
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (!omp_in_parallel())
+#pragma omp parallel for schedule(static) if (!serial && !omp_in_parallel())
 #endif
   for (int i = 0; i < nVertices; i++) {
     if (nList[static_cast<std::size_t>(i)].size() <= 1) {
@@ -977,7 +986,7 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
   }
   adjacency.cols.resize(adjacency.first[nVertices]);
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (!omp_in_parallel())
+#pragma omp parallel for schedule(static) if (!serial && !omp_in_parallel())
 #endif
   for (int i = 0; i < nVertices; i++) {
     const auto &row = uniq[static_cast<std::size_t>(i)];
@@ -1078,7 +1087,8 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
   // that list of lists costs more than the search. The directing step
   // clears levels only inside the ball this source touched, so the
   // search stays linear in the number of vertices.
-  const bool parallelSources = !omp_in_parallel() && omp_get_max_threads() > 1;
+  const bool parallelSources =
+      !serial && !omp_in_parallel() && omp_get_max_threads() > 1;
   if (parallelSources) {
     // Sources are independent given the shared read-only balls; per-source
     // collection keeps the output identical to the serial ascending-source

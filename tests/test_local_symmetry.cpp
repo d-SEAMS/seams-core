@@ -212,6 +212,41 @@ TEST_CASE("space groups separate ice Ih, ice Ic and a stacking fault", "[symmetr
   REQUIRE(gFault.number == 15);
 }
 
+TEST_CASE("a cubic ice Ic supercell has the conventional space group", "[symmetry]") {
+  if (!symm::spglibLinked()) {
+    SKIP("spglib is not linked");
+  }
+  const auto cell = symm::crystal(symm::Crystal::iceIc);
+  const int m = 3;
+  const int n0 = static_cast<int>(cell.cartesian.rows());
+  symm::Lattice big;
+  big.vectors = cell.vectors * static_cast<double>(m);
+  big.cartesian.resize(static_cast<Eigen::Index>(n0 * m * m * m), 3);
+  int w = 0;
+  for (int i = 0; i < m; i++) {
+    for (int j = 0; j < m; j++) {
+      for (int k = 0; k < m; k++) {
+        const Eigen::RowVector3d shift =
+            static_cast<double>(i) * cell.vectors.row(0) +
+            static_cast<double>(j) * cell.vectors.row(1) +
+            static_cast<double>(k) * cell.vectors.row(2);
+        for (int a = 0; a < n0; a++) {
+          big.cartesian.row(w++) = cell.cartesian.row(a) + shift;
+        }
+      }
+    }
+  }
+  std::vector<int> kind(static_cast<std::size_t>(big.cartesian.rows()),
+                        static_cast<int>(symm::Kind::iceIc));
+  symm::Space fast;
+  REQUIRE(symm::conventionalCrystalSpace(big.vectors, big.cartesian, kind, 1e-3, fast));
+  const symm::Space full = symm::spaceGroup(big.vectors, big.cartesian, 1e-3);
+  REQUIRE(fast.status == 0);
+  REQUIRE(fast.number == full.number);
+  REQUIRE(fast.symbol == full.symbol);
+  REQUIRE(fast.number == 227);
+}
+
 TEST_CASE("template names add what CHILL+ does not say", "[symmetry]") {
   const auto dod = symm::points(symm::Kind::cage512);
   const auto sI = symm::points(symm::Kind::cage51262);

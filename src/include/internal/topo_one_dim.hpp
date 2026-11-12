@@ -102,4 +102,5 @@ std::vector<std::vector<int>> keepAxialRingsOnly(
 
 }  // namespace ring
 
+/** @} */
 #endif  // __TOPOCONFINED_H_

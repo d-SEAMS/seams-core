@@ -134,7 +134,7 @@ Both return 0 on success.
 A null ~q4bar~ or ~q6bar~ skips that average.
 
 Python ~q4_q6~ in =bindings/python/chill_plus.py=, R ~q4_q6~, and Julia ~q4_q6~ call ~seams_frame_q4_q6~.
-~seams steinhardt~ prints the means of \(q_3\), \(q_4\), \(q_6\), and \(q_{12}\), and of each Lechner-Dellago average.
+~seams steinhardt~ prints the means of the degrees named by ~--l~ (default \(q_4\) and \(q_6\)) and of each Lechner-Dellago average.
 The \(q_4\) and \(q_6\) means are this kernel.
 
 * Fused q4, q6 and CHILL+

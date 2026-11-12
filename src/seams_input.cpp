@@ -88,8 +88,19 @@ int parseDumpFields(std::string_view line, double *out, int cap) {
       break;
     }
     double value = 0;
-    // libc++ on the macOS 11 conda SDK deletes from_chars(double).
-    // Dump fields are C-locale decimals; copy one token and use strtod.
+    // from_chars(double) is the fast C-locale scan. libc++ on the macOS 11
+    // conda SDK deletes it, and that build keeps strtod.
+#if defined(__cpp_lib_to_chars) && __cpp_lib_to_chars >= 201611L
+    const auto parsed = std::from_chars(p, end, value);
+    if (parsed.ec != std::errc{}) {
+      while (p < end && *p != ' ' && *p != '\t') {
+        ++p;
+      }
+      continue;
+    }
+    out[n++] = value;
+    p = parsed.ptr;
+#else
     char buf[64];
     const auto ntok = std::min<std::size_t>(static_cast<std::size_t>(end - p),
                                             sizeof(buf) - 1);
@@ -105,6 +116,7 @@ int parseDumpFields(std::string_view line, double *out, int cap) {
     }
     out[n++] = value;
     p += (endp - buf);
+#endif
   }
   return n;
 }
@@ -842,6 +854,7 @@ void parseLammpsFrameBody(
     if (readNOP && !itemLine) {
       if (parseDumpInt(line, nop) && nop >= 0) {
         yCloud.pts.reserve(static_cast<std::size_t>(nop));
+        yCloud.idIndexMap.reserve(static_cast<std::size_t>(nop));
         if (keep == LammpsKeep::All) {
           yCloud.nop = nop;
         }
@@ -1007,6 +1020,216 @@ bool openCloneAt(const std::string &filename, int frame, CloneRead &out) {
   return true;
 }
 
+bool parseLooseDouble(const char *&p, const char *end, double &out) {
+  while (p < end && (*p == ' ' || *p == '\t')) {
+    ++p;
+  }
+  if (p >= end) {
+    return false;
+  }
+#if defined(__cpp_lib_to_chars) && __cpp_lib_to_chars >= 201611L
+  const auto parsed = std::from_chars(p, end, out);
+  if (parsed.ec != std::errc{}) {
+    return false;
+  }
+  p = parsed.ptr;
+  return true;
+#else
+  char buf[64];
+  const auto ntok =
+      std::min<std::size_t>(static_cast<std::size_t>(end - p), sizeof(buf) - 1);
+  std::memcpy(buf, p, ntok);
+  buf[ntok] = '\0';
+  char *endp = nullptr;
+  out = std::strtod(buf, &endp);
+  if (endp == buf) {
+    return false;
+  }
+  p += endp - buf;
+  return true;
+#endif
+}
+
+bool parseLooseInt(const char *&p, const char *end, int &out) {
+  while (p < end && (*p == ' ' || *p == '\t')) {
+    ++p;
+  }
+  if (p >= end) {
+    return false;
+  }
+  const auto parsed = std::from_chars(p, end, out);
+  if (parsed.ec != std::errc{}) {
+    return false;
+  }
+  p = parsed.ptr;
+  return true;
+}
+
+// id type x y z on one orthorhombic frame. Anything else returns false and
+// the streaming parser reads the frame. The map is filled in one pass so a
+// 1e5-atom dump does not rehash and does not cross the iostream per line.
+bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
+                          molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                          int typeFilter, LammpsKeep keep, std::uint64_t &nextAt) {
+  if (keep == LammpsKeep::TypeInSlice) {
+    return false;
+  }
+  const int fd = ::open(filename.c_str(), O_RDONLY);
+  if (fd < 0) {
+    return false;
+  }
+  struct stat st {};
+  if (::fstat(fd, &st) != 0 || st.st_size <= 0) {
+    ::close(fd);
+    return false;
+  }
+  const auto nbytes = static_cast<std::size_t>(st.st_size);
+  if (frameAt >= nbytes) {
+    ::close(fd);
+    return false;
+  }
+  void *map = ::mmap(nullptr, nbytes, PROT_READ, MAP_PRIVATE, fd, 0);
+  ::close(fd);
+  if (map == MAP_FAILED) {
+    return false;
+  }
+  const char *const begin = static_cast<const char *>(map);
+  const char *const end = begin + nbytes;
+  const char *p = begin + frameAt;
+  auto nextLine = [&](const char *&s, const char *&e) {
+    s = p;
+    while (p < end && *p != '\n') {
+      ++p;
+    }
+    e = p;
+    if (e > s && e[-1] == '\r') {
+      --e;
+    }
+    if (p < end && *p == '\n') {
+      ++p;
+    }
+  };
+  const char *s = nullptr;
+  const char *e = nullptr;
+  auto startsWith = [](const char *s, const char *e, const char *lit) {
+    const std::size_t n = std::strlen(lit);
+    return static_cast<std::size_t>(e - s) >= n && std::memcmp(s, lit, n) == 0;
+  };
+  nextLine(s, e);
+  if (!startsWith(s, e, "ITEM: TIMESTEP")) {
+    ::munmap(map, nbytes);
+    return false;
+  }
+  nextLine(s, e);
+  nextLine(s, e);
+  if (!startsWith(s, e, "ITEM: NUMBER")) {
+    ::munmap(map, nbytes);
+    return false;
+  }
+  nextLine(s, e);
+  int nop = 0;
+  const char *np = s;
+  if (!parseLooseInt(np, e, nop) || nop < 0) {
+    ::munmap(map, nbytes);
+    return false;
+  }
+  nextLine(s, e);
+  if (!startsWith(s, e, "ITEM: BOX") ||
+      std::string_view(s, static_cast<std::size_t>(e - s)).find("xy") !=
+          std::string_view::npos) {
+    ::munmap(map, nbytes);
+    return false;
+  }
+  double span[3];
+  double low[3];
+  for (int axis = 0; axis < 3; ++axis) {
+    nextLine(s, e);
+    const char *bp = s;
+    double lo = 0;
+    double hi = 0;
+    if (!parseLooseDouble(bp, e, lo) || !parseLooseDouble(bp, e, hi)) {
+      ::munmap(map, nbytes);
+      return false;
+    }
+    low[axis] = lo;
+    span[axis] = hi - lo;
+  }
+  nextLine(s, e);
+  while (e > s && (e[-1] == ' ' || e[-1] == '\t')) {
+    --e;
+  }
+  if (std::string_view(s, static_cast<std::size_t>(e - s)) !=
+      "ITEM: ATOMS id type x y z") {
+    ::munmap(map, nbytes);
+    return false;
+  }
+  yCloud.pts.clear();
+  yCloud.pts.reserve(static_cast<std::size_t>(nop));
+  yCloud.idIndexMap.clear();
+  yCloud.idIndexMap.reserve(static_cast<std::size_t>(nop));
+  yCloud.box = {span[0], span[1], span[2]};
+  yCloud.boxLow = {low[0], low[1], low[2]};
+  const bool filter = keep != LammpsKeep::All;
+  int kept = 0;
+  bool failed = false;
+  for (int i = 0; i < nop; ++i) {
+    if (p >= end) {
+      failed = true;
+      break;
+    }
+    nextLine(s, e);
+    if (startsWith(s, e, "ITEM:")) {
+      failed = true;
+      break;
+    }
+    const char *ap = s;
+    int id = 0;
+    int typ = 0;
+    double x = 0;
+    double y = 0;
+    double z = 0;
+    if (!parseLooseInt(ap, e, id) || !parseLooseInt(ap, e, typ) ||
+        !parseLooseDouble(ap, e, x) || !parseLooseDouble(ap, e, y) ||
+        !parseLooseDouble(ap, e, z)) {
+      failed = true;
+      break;
+    }
+    if (filter && typ != typeFilter) {
+      continue;
+    }
+    molSys::Point<double> point;
+    point.atomID = id;
+    point.molID = id;
+    point.type = typ;
+    point.x = x;
+    point.y = y;
+    point.z = z;
+    yCloud.pts.push_back(point);
+    if (!yCloud.idIndexMap.emplace(id, kept).second) {
+      std::cerr << "Warning: duplicate atom ID " << id
+                << " in the input frame; the ID-to-index map keeps only the "
+                   "last atom read with this ID\n";
+      yCloud.idIndexMap[id] = kept;
+    }
+    ++kept;
+  }
+  if (failed) {
+    ::munmap(map, nbytes);
+    yCloud.pts.clear();
+    yCloud.idIndexMap.clear();
+    yCloud.box.clear();
+    yCloud.boxLow.clear();
+    return false;
+  }
+  if (keep == LammpsKeep::All && kept != nop) {
+    std::cerr << "Atoms didn't get filled in properly.\n";
+  }
+  yCloud.nop = kept;
+  nextAt = static_cast<std::uint64_t>(p - begin);
+  ::munmap(map, nbytes);
+  return true;
+}
+
 void loadLammpsFrame(
     const std::string &filename, int targetFrame,
     molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeFilter,
@@ -1030,6 +1253,17 @@ void loadLammpsFrame(
   if (lock.owns_lock()) {
     if (!sess->positionAt(targetFrame)) {
       std::cout << "You entered a frame that doesn't exist.\n";
+      yCloud.currentFrame = targetFrame;
+      return;
+    }
+    std::uint64_t nextAt = 0;
+    if (!isSlice && targetFrame >= 1 &&
+        static_cast<std::size_t>(targetFrame) <= sess->offsets.size() &&
+        parseMappedIdTypeXyz(
+            filename, sess->offsets[static_cast<std::size_t>(targetFrame - 1)],
+            yCloud, typeFilter, keep, nextAt)) {
+      sess->stream().clear();
+      sess->stream().seekg(static_cast<std::streamoff>(nextAt));
       yCloud.currentFrame = targetFrame;
       return;
     }

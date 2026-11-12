@@ -1805,6 +1805,27 @@ std::array<int, 3> bondImage(const gen::FracBox &box, double ax, double ay,
           static_cast<int>(std::round(szB - szA))};
 }
 
+bool ringContracts(const gen::FracBox &box,
+                   const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                   const std::vector<int> &ring, int nAtoms) {
+  const std::size_t n = ring.size();
+  std::array<int, 3> sum = {0, 0, 0};
+  for (std::size_t i = 0; i < n; i++) {
+    const int a = ring[i];
+    const int b = ring[(i + 1) % n];
+    if (a < 0 || b < 0 || a >= nAtoms || b >= nAtoms) {
+      return false;
+    }
+    const auto &pa = yCloud.pts[static_cast<std::size_t>(a)];
+    const auto &pb = yCloud.pts[static_cast<std::size_t>(b)];
+    const auto image = bondImage(box, pa.x, pa.y, pa.z, pb.x, pb.y, pb.z);
+    sum[0] += image[0];
+    sum[1] += image[1];
+    sum[2] += image[2];
+  }
+  return sum[0] == 0 && sum[1] == 0 && sum[2] == 0;
+}
+
 } // namespace
 
 /**
@@ -1821,29 +1842,33 @@ std::vector<std::vector<int>> ring::contractibleRings(
     return rings;
   }
   const int nAtoms = static_cast<int>(yCloud.pts.size());
+  const int nR = static_cast<int>(rings.size());
+  std::vector<char> keep(rings.size(), 0);
+  // Each ring reads only its own atoms. The kept list stays in input order.
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+  const bool scale = nR >= 1024 && omp_get_max_threads() > 1 && !omp_in_parallel();
+#else
+  const bool scale = false;
+#endif
+  if (scale) {
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp parallel for schedule(static)
+    for (int i = 0; i < nR; ++i) {
+      keep[static_cast<std::size_t>(i)] =
+          ringContracts(box, yCloud, rings[static_cast<std::size_t>(i)], nAtoms) ? 1 : 0;
+    }
+#endif
+  } else {
+    for (int i = 0; i < nR; ++i) {
+      keep[static_cast<std::size_t>(i)] =
+          ringContracts(box, yCloud, rings[static_cast<std::size_t>(i)], nAtoms) ? 1 : 0;
+    }
+  }
   std::vector<std::vector<int>> kept;
   kept.reserve(rings.size());
-  for (const auto &r : rings) {
-    const std::size_t n = r.size();
-    std::array<int, 3> sum = {0, 0, 0};
-    bool inFrame = true;
-    for (std::size_t i = 0; i < n && inFrame; i++) {
-      const int a = r[i];
-      const int b = r[(i + 1) % n];
-      if (a < 0 || b < 0 || a >= nAtoms || b >= nAtoms) {
-        inFrame = false;
-        break;
-      }
-      const auto &pa = yCloud.pts[static_cast<std::size_t>(a)];
-      const auto &pb = yCloud.pts[static_cast<std::size_t>(b)];
-      const auto image =
-          bondImage(box, pa.x, pa.y, pa.z, pb.x, pb.y, pb.z);
-      sum[0] += image[0];
-      sum[1] += image[1];
-      sum[2] += image[2];
-    }
-    if (inFrame && sum[0] == 0 && sum[1] == 0 && sum[2] == 0) {
-      kept.push_back(r);
+  for (int i = 0; i < nR; ++i) {
+    if (keep[static_cast<std::size_t>(i)] != 0) {
+      kept.push_back(rings[static_cast<std::size_t>(i)]);
     }
   }
   return kept;

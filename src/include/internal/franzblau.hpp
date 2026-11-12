@@ -252,4 +252,5 @@ struct RingSearchSplit {
 
 } // namespace primitive
 
+/** @} */
 #endif // SEAMS_FRANZBLAU_H_

@@ -48,7 +48,7 @@ julia --project=bindings/julia/Dseams bindings/julia/Dseams/test/runtests.jl
 The cutoff-shell solid-harmonic kernel is ~seams_q4_q6~ in the C API and ~seams_frame_q4_q6~ in =libseams_lang=.
 Python is ~q4_q6~ in =bindings/python/chill_plus.py= (~SEAMS_LANG_LIB= selects the library).
 R and Julia export ~q4_q6~.
-The CLI command is ~seams steinhardt~, which also prints the \(q_3\) and \(q_{12}\) means.
+The CLI command is ~seams steinhardt~. ~--l~ names the degrees (default ~4,6~). ~--l 3,12~ asks for the hydrate pair.
 
 * Tests
 

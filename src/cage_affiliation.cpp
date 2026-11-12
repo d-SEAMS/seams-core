@@ -447,9 +447,58 @@ ring::CageAffiliation batchSweep(const FrameContext &ctx) {
   const bool threaded = false;
 #endif
 
-  // A flag only turns on. Once every ring is on, later pairs cannot change
-  // the result, and on a ring-rich graph those pairs are most of the sweep.
-  {
+  // A flag only turns on, and a passing pair does not read flags that
+  // earlier pairs wrote. The marked set is the union over every ordered
+  // pair that passes, so the threads below and the one-thread sweep write
+  // the same hc vector. The one-thread sweep still stops once every ring
+  // is on: a later pair would only mark rings that are already on.
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+  const bool scale = threaded && omp_get_max_threads() > 1;
+#else
+  const bool scale = false;
+#endif
+  if (scale) {
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+    const int team = omp_get_max_threads();
+    std::vector<std::vector<char>> marked(
+        static_cast<std::size_t>(team),
+        std::vector<char>(static_cast<std::size_t>(nR), 0));
+#pragma omp parallel
+    {
+      const int tid = omp_get_thread_num();
+      auto &on = marked[static_cast<std::size_t>(tid)];
+      FrameContext::BasalScratch scratch;
+      std::vector<int> listHC;
+      std::vector<ring::strucType> types(nRings, ring::strucType::unclassified);
+#pragma omp for schedule(static)
+      for (int i = 0; i < nR; ++i) {
+        const std::vector<int> candidates = ctx.collectBasalCandidates(i, scratch);
+        for (const int j : candidates) {
+          if (!ctx.basalPair(i, j)) {
+            continue;
+          }
+          on[static_cast<std::size_t>(i)] = 1;
+          if (j >= 0 && j < nR) {
+            on[static_cast<std::size_t>(j)] = 1;
+          }
+          for (const int k : ctx.prismaticOf(i, j, listHC, types)) {
+            if (k >= 0 && k < nR) {
+              on[static_cast<std::size_t>(k)] = 1;
+            }
+          }
+        }
+      }
+    }
+    for (int i = 0; i < nR; ++i) {
+      for (int t = 0; t < team; ++t) {
+        if (marked[static_cast<std::size_t>(t)][static_cast<std::size_t>(i)] != 0) {
+          result.hc[static_cast<std::size_t>(i)] = true;
+          break;
+        }
+      }
+    }
+#endif
+  } else {
     std::vector<char> on(static_cast<std::size_t>(nR), 0);
     int left = nR;
     auto mark = [&](int m) {

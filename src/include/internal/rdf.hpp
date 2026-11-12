@@ -72,4 +72,5 @@ double coordinationNumber(const PartialRdf &h, double rMax, double rhoJ);
 
 } // namespace rdf
 
+/** @} */
 #endif // SEAMS_RDF_H_
