@@ -15,9 +15,16 @@ import platform
 import statistics
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+_TMP = Path(tempfile.gettempdir())
+H2H_DSEAMS = str(_TMP / "h2h_dseams")
+MDAPY_PYTHON = str(_TMP / "mdapy-venv" / "bin" / "python")
+CHILL_REL_LIB = str(
+    _TMP / "builds" / "chill-rel" / "bindings" / "libseams_lang.so"
+)
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import release_build
@@ -91,7 +98,7 @@ def seams_env(threads, lib):
 
 def run_seams(threads, molecules_m, mode, lib):
     # h2h_dseams warms up once, then prints one line per timed call.
-    cmd = ["taskset", "-c", "0-7", "/tmp/h2h_dseams", str(molecules_m), str(REPEATS), mode]
+    cmd = ["taskset", "-c", "0-7", H2H_DSEAMS, str(molecules_m), str(REPEATS), mode]
     done = subprocess.run(cmd, env=seams_env(threads, lib), text=True, capture_output=True, check=True)
     return [float(line) for line in done.stdout.split() if line.strip()]
 
@@ -104,12 +111,13 @@ def py_env():
     env["FASTATOMSTRUCT_NO_TELEMETRY"] = "1"
     env["OPENBLAS_NUM_THREADS"] = "1"
     env["MKL_NUM_THREADS"] = "1"
+    env["SEAMS_SCRIPTS"] = str(ROOT / "scripts")
     return env
 
 
 OTHER = r"""
 import json, math, os, sys, time
-sys.path.insert(0, "/agent/repos/seams-core/scripts")
+sys.path.insert(0, os.environ["SEAMS_SCRIPTS"])
 import h2h_protocol as proto
 import numpy as np
 kind, m, threads, repeats = sys.argv[1], int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4])
@@ -181,7 +189,7 @@ def run_other(kind, threads, molecules_m):
     if kind == "ovito":
         env["OVITO_THREAD_COUNT"] = str(threads)
     done = subprocess.run(
-        ["taskset", "-c", "0-7", "/tmp/mdapy-venv/bin/python", "-c", OTHER,
+        ["taskset", "-c", "0-7", MDAPY_PYTHON, "-c", OTHER,
          kind, str(molecules_m), str(threads), str(REPEATS)],
         env=env, text=True, capture_output=True, check=False,
     )
@@ -195,7 +203,7 @@ def run_other(kind, threads, molecules_m):
 
 def main():
     lib, build = release_build.ensure_release(
-        "/tmp/builds/chill-rel/bindings/libseams_lang.so")
+        CHILL_REL_LIB)
     hw = hardware()
     out = ROOT / "benchmarks" / "thread-scale.csv"
     fields = [

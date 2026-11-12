@@ -11,18 +11,21 @@ import csv
 import os
 import statistics
 import subprocess
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-BENCH = "/tmp/rank_bench"
+_TMP = Path(tempfile.gettempdir())
+BENCH = str(_TMP / "rank_bench")
+_CHILL = _TMP / "builds" / "chill-mpi"
 LIBS = ":".join(
     [
-        "/tmp/builds/chill-mpi/src",
-        "/tmp/builds/chill-mpi/subprojects/readcon-core",
-        "/tmp/builds/chill-mpi/subprojects/readcon-db",
-        "/tmp/builds/chill-mpi/subprojects/linkcell",
-        "/tmp/builds/chill-mpi/subprojects/vesin",
-        "/tmp/builds/chill-mpi/subprojects/minimage",
+        str(_CHILL / "src"),
+        str(_CHILL / "subprojects" / "readcon-core"),
+        str(_CHILL / "subprojects" / "readcon-db"),
+        str(_CHILL / "subprojects" / "linkcell"),
+        str(_CHILL / "subprojects" / "vesin"),
+        str(_CHILL / "subprojects" / "minimage"),
         "/usr/lib/x86_64-linux-gnu/openmpi/lib",
         "/cvmfs/software.eessi.io/versions/2026.06/software/linux/x86_64/intel/"
         "sapphirerapids/software/FlexiBLAS/3.5.0-GCC-15.2.0/lib",
