@@ -14,6 +14,10 @@ option('offload_triple', type: 'string', value: 'nvptx64-nvidia-cuda',
   description: 'OpenMP offload target triple when with_openmp_offload is enabled')
 option('with_ira', type: 'feature', value: 'auto',
   description: 'Link libira (IRA match and SOFI point groups)')
+option('with_spglib', type: 'feature', value: 'auto',
+  description: 'Link spglib for space groups of crystalline regions')
+option('with_csm', type: 'feature', value: 'disabled',
+  description: 'Optional external GPL-2 continuous shape measure. Off by default and not linked')
 option('with_sphericart', type: 'feature', value: 'auto',
   description: 'Batch Cartesian Ylm for host Steinhardt via sphericart')
 option('with_nauty', type: 'feature', value: 'auto',

@@ -10,6 +10,14 @@
   (package-install 'ox-rst))
 
 (require 'ox-rst)
+;; ox-rst.elc may have been compiled by another Emacs and then inlines
+;; org-element-property. Org 9.7 hands that copy a deferred string and
+;; the transcoder rejects it. Load the source so this Emacs's Org is used.
+(let ((compiled (locate-library "ox-rst")))
+  (when (and compiled (string-suffix-p ".elc" compiled))
+    (let ((source (concat (file-name-sans-extension compiled) ".el")))
+      (when (file-exists-p source)
+        (load source nil t t)))))
 (require 'ox-publish)
 
 ;; ox-rst 2025-04 calls Org 9.7 element helpers. Emacs 29 ships Org 9.6.

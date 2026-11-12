@@ -15,6 +15,8 @@ ydslib_sources = files(
   'gpu_batch.cpp',
   'generic.cpp',
   'ira_sofi.cpp',
+  'local_symmetry.cpp',
+  'shell_kernel.cpp',
   'cage_canon.cpp',
   'chill_offload.cpp',
   'chill_plus_scheme.cpp',
@@ -58,6 +60,18 @@ if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
   _lib_link_args += ['-Wl,-soname,libyodaLib.so']
 endif
 
+# The shell hot path has no Eigen, so AVX2 here does not fault in the allocator.
+_shell_link = []
+if cpp_id == 'gcc' or cpp_id == 'clang'
+  _shell_avx = static_library('shell_avx', 'shell_classify.cpp',
+    cpp_args: _args + ['-mavx2', '-mfma'],
+    include_directories: _incdirs,
+    dependencies: _deps)
+  _shell_link += _shell_avx
+else
+  ydslib_sources += files('shell_classify.cpp')
+endif
+
 _ylm_link = []
 if cpp_id == 'gcc' or cpp_id == 'clang'
   _ylm_avx = static_library('ylm_avx512', 'ylm_cartesian_avx512.cpp',
@@ -72,7 +86,7 @@ ydslib = library('yodaLib',
   ydslib_sources,
   dependencies: _deps,
   cpp_args: _args,
-  link_with: _ylm_link,
+  link_with: _shell_link + _ylm_link,
   link_args: _lib_link_args,
   include_directories: _incdirs,
   build_rpath: _readcondb_rpath != '' ? _readcondb_rpath : meson.current_build_dir(),
