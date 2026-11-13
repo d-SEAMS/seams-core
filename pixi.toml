@@ -32,6 +32,7 @@ mpfr = ">=4.2.2,<5"
 setup = "meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true --wipe 2>/dev/null; meson setup bbdir --prefix=$CONDA_PREFIX -Dwith_tests=true"
 build = { cmd = "ninja -j4 -C bbdir", depends-on = ["setup"] }
 test = { cmd = "meson test -C bbdir -v", depends-on = ["build"] }
+render-molecules = "python docs/scripts/render_molecules.py"
 install = { cmd = "meson install -C bbdir", depends-on = ["build"] }
 setup-bindings = { cmd = "meson setup bbdir-lang --prefix=$CONDA_PREFIX -Dwith_tests=true -Dwith_python=false -Dwith_cli=true" }
 build-bindings = { cmd = "ninja -C bbdir-lang bindings/test_seams_lang", depends-on = ["setup-bindings"] }

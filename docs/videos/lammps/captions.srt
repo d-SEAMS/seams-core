@@ -1,0 +1,7 @@
+1
+00:00:00,300 --> 00:00:19,680
+From engines/lammps the driver is the build's engines/run_hook and the deck is in.dseams. The cell has 64 atoms. The hook prints lammps calls 5 stride 2 ice 320, then lammps hexagonal 0 six-rings 128 q6 0.628539. docs_tutorial_insitu requires ice equal to calls times 64.
+
+2
+00:00:20,180 --> 00:00:33,310
+docs_engine_lammps writes a data file from the ice Ih dump and runs the same hook for one step. The census line is lammps hexagonal 128 six-rings 256 q6 0.625855.

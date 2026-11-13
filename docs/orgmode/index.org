@@ -104,7 +104,8 @@ seams cages water.lammpstrj
 2.14.0 ships ~libseams~ (~seams.h~) and ~libseams_lang~ in this
 tree, with C, C++, Fortran, Rust, Python (~import dseams~), Julia, and
 R fronts, plus LAMMPS, GROMACS, OpenMM, PLUMED, and in-situ hooks.
-The released Frame package and the Lua library stay separate:
+Lua and Fennel ~require("dseams")~ are in this tree as well.
+The released Frame package stays separate:
 
 - Python Frame: ~pydseams~ ([[https://d-seams.github.io/PydSEAMSlib/][Python docs]],
   [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]), compiled
@@ -164,6 +165,12 @@ framework.
    :caption: Tutorials
 
    tutorials/index
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Videos
+
+   videos/index
 
 .. toctree::
    :maxdepth: 2
@@ -229,7 +236,7 @@ current benchmark tables and rerun steps are under
 * Related projects
 
 - [[https://d-seams.github.io/PydSEAMSlib/][pydseams]] :: Python Frame API on ~yoda~
-- [[https://d-seams.github.io/yodaStruct/][dseams (Lua)]] :: ~require("dseams")~ and Fennel
+- [[https://d-seams.github.io/yodaStruct/][1.x Lua library]] :: the previous ~require("dseams")~. This tree ships that call as the Lua and Fennel front.
 - [[https://github.com/d-SEAMS/linkcell][linkcell]] :: periodic linked-cell k-nearest neighbours
 - [[https://dseams.info][dseams.info]] :: project site
 

@@ -1,0 +1,7 @@
+## scene-01.tape
+interface full waters 2048
+interface full published hexagonal 840 interfacial 8 water 1131 clathrate 16 interClathrate 53
+interface full ovito hexagonal 807 interfacial 43 water 1140 clathrate 17 interClathrate 41
+interface full phi-c 0
+interface full stack HHHHHHHHHH..........
+## scene-02.tape

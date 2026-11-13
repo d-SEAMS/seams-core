@@ -17,3 +17,14 @@ library through:
 ```bash
 DSEAMS_ROOT=$PWD meson test -C build language_fronts --print-errorlogs
 ```
+
+
+## Structure still
+
+```{figure} ../tutorials/molecules/r/overlay-web.png
+:alt: Molecule still for this front
+:width: 480px
+
+Ice Ih coloured by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug r` writes the 2400 by 1800 PNG.
+```
+

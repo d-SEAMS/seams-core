@@ -154,3 +154,14 @@ Units: labels are dimensionless codes
 
 Example: `docs/examples/minimal_julia.jl`
 <!-- API_SYMBOLS_END -->
+
+
+## Structure still
+
+```{figure} ../tutorials/molecules/julia/overlay-web.png
+:alt: Molecule still for this front
+:width: 480px
+
+Ice Ih coloured by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug julia` writes the 2400 by 1800 PNG.
+```
+

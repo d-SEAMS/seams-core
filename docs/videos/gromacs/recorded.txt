@@ -1,0 +1,3 @@
+## scene-01.tape
+gromacs frames 1 ice 0 atoms 128 overhead_s 2.673746e-02
+gromacs hexagonal 128 six-rings 256 q6 0.625855

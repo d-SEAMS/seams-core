@@ -761,11 +761,6 @@ if get_option('with_python')
     timeout: 180)
 endif
 
-# Lua is a library in the yodaStruct / luadseams repo, not this one.
-if not get_option('with_lua').disabled()
-  error('Lua/Fennel is the dseams library: https://github.com/d-SEAMS/yodaStruct')
-endif
-
 if get_option('with_cli')
   seams_cli_link = _link_args
   if host_machine.system() == 'linux'
@@ -801,6 +796,17 @@ if get_option('with_cli')
   test('seams_print_config', seams_exe, args: ['--print-config'])
 
   python3 = find_program('python3', required: true)
+  test(
+    'docs_c_api_tour',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'check_c_api_tour.py',
+      meson.project_source_root(),
+      meson.project_build_root() / 'src',
+      meson.project_build_root(),
+    ],
+    suite: 'docs',
+    timeout: 120)
   test(
     'docs_check',
     python3,
@@ -838,6 +844,17 @@ if get_option('with_cli')
     args: [meson.project_source_root() / 'docs' / 'check_api_coverage.py'],
     suite: 'docs',
     timeout: 60)
+  test(
+    'c_api_installed',
+    python3,
+    args: [
+      meson.project_source_root() / 'examples' / 'c' / 'check_installed.py',
+      meson.project_build_root(),
+      meson.project_source_root(),
+    ],
+    suite: 'docs',
+    depends: [seams_api_lib, ydslib],
+    timeout: 600)
   test(
     'docs_sitting',
     python3,
@@ -1333,6 +1350,34 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 120)
   test(
+    'docs_render_molecules',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'test_render_molecules.py',
+      '--slug', 'ice-ih',
+      '--out', meson.project_build_root() / 'molecule-stills',
+      '--libdir', meson.project_build_root() / 'src',
+    ],
+    env: tutorial_env,
+    depends: [seams_api_lib],
+    suite: 'docs',
+    timeout: 900)
+  test(
+    'docs_video_tapes',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'video_tapes.py',
+      meson.project_source_root(),
+      seams_exe.full_path(),
+      meson.project_build_root() / 'src',
+      meson.project_build_root() / 'bindings',
+      meson.project_build_root(),
+    ],
+    env: tutorial_env,
+    depends: [seams_exe, seams_api_lib, seams_lang],
+    suite: 'docs',
+    timeout: 600)
+  test(
     'docs_gallery',
     python3,
     args: [
@@ -1400,6 +1445,17 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 120)
   test(
+    'docs_binding_tours',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'check_binding_tours.py',
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_api_lib, binding_oracle],
+    suite: 'docs',
+    timeout: 180)
+  test(
     'docs_api_rust',
     python3,
     args: [
@@ -1408,7 +1464,7 @@ if get_option('with_cli')
       meson.project_build_root(),
     ],
     env: binding_env,
-    depends: [seams_api_lib],
+    depends: [seams_api_lib, binding_oracle],
     suite: 'docs',
     timeout: 180)
   test(

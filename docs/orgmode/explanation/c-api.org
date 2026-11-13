@@ -1,0 +1,88 @@
+#+TITLE: The C API
+#+OPTIONS: toc:nil num:nil
+
+=include/seams.h= is ABI 1 of =libseams=. The header is the contract.
+Language bindings and engine plugins include it and link =libseams=.
+They do not include the C++ headers under =src/include/internal=.
+
+* What the first cut already did
+
+The shipped surface had opaque =seams_system=, =seams_neighbours=, and
+=seams_rings= handles, create and destroy pairs, =seams_status= codes,
+a thread-local =seams_last_error=, and =SEAMS_API= on every export.
+=src/meson.build= compiles that library with =-fvisibility=hidden=.
+=SEAMS_VERSION_MAJOR=, =SEAMS_VERSION_MINOR=, =SEAMS_VERSION_PATCH=,
+and =SEAMS_VERSION_STRING= are written from =project().version=.
+
+The same cut stopped short of the libraries it was measured against.
+
+- Lengths on the first functions are =int=. A frame that fits in that
+  width is the ABI 1 frame. New buffers take =size_t=, and a count that
+  does not fit is =SEAMS_ERR_RANGE=.
+- =seams_neighbours_csr= hands back pointers owned by the handle.
+  =seams_neighbours_copy= is the caller-owned copy. A null buffer
+  queries the length. The old function remains, marked
+  =SEAMS_DEPRECATED=, and still returns those pointers until
+  =seams_neighbours_destroy=.
+- =seams_last_error= is the thread-local string, the same shape as
+  =git_error_last=. =seams_handle_error= is the string stored on the
+  handle, the same shape as =sqlite3_errmsg=. A failing call writes
+  both. The handle string survives a later call on a different handle.
+- Every entry that can throw is wrapped. A C caller sees a status code.
+- No public struct has fields. Enumerators keep their numeric values.
+  New enumerators are appended (=SEAMS_GRAPH_SEEDED= is 2). A later
+  struct, if one is added, starts with a =uint32_t= size set by the
+  caller, and the library reads only that prefix. =SEAMS_ABI= stays 1
+  until a shipped signature changes.
+- =seams_version= returns =SEAMS_VERSION_NUMBER=, packed as
+  =(major << 16) | (minor << 8) | patch=.
+
+One handle is used by one thread. Distinct handles may run together,
+except =seams_ql=, =seams_q4q6=, and =seams_q6bar=, which share one
+process-global harmonic scratch. =seams_set_num_threads= is
+process-global and must not run during an analysis. The OpenMP team
+is then the width every handle requests.
+
+* What a caller can run
+
+| call | analysis |
+|------+----------|
+| =seams_system_set_atoms= / =seams_system_set_frame= | frame from arrays |
+| =seams_system_read= / =seams_path_nframes= | XYZ, CON, chemfiles, and triclinic dumps; index 1-based |
+| =seams_neighbours_build= | cutoff list or mutual four-nearest list |
+| =seams_rings_find= | Franzblau rings, depth 3 to 12 |
+| =seams_ql= | local q3, q4, q6 (also 8 and 12) and the Lechner-Dellago average |
+| =seams_q4q6= | the ABI 1 pair, cutoff shell, local values |
+| =seams_q6bar= | averaged q6, mean, median, and the count above the caller's cut |
+| =seams_chill= | original CHILL, published inclusive edges or OVITO open edges |
+| =seams_chill_plus= | CHILL+, published table or the OVITO modifier |
+| =seams_cages= / =seams_signature_cages= | hexagonal, double-diamond, and census cages |
+| =seams_neighbours_knn= | k-nearest list, mutual or one-way |
+| =seams_steinhardt= | cutoff-shell q_l and the Lechner-Dellago average |
+| =seams_rdf= / =seams_running_cn= / =seams_coordination= | partial RDF and its integral |
+| =seams_hbonds= | hydrogen-bond count |
+| =seams_density_axis= | number density along one edge |
+| =seams_fingerprint= | topological key of the bonded graph |
+| =seams_prisms= / =seams_monolayer= | prism stacks and sheet rings |
+| =seams_site_table= / =seams_contact_pairs= / =seams_domains= | site spec, unlike contacts, polar domains |
+| =seams_system_symmetry= | per-atom ice Ih, ice Ic, stacking disorder, or no match |
+| =seams_brine_analyse= | planar front, rejection coefficient, profile, pockets |
+
+A non-positive shell residual selects the library ceiling (0.15 on
+this release). The nucleation q6-bar cut used by the quickstart is
+0.36. Coordinates and cutoffs are Angstrom. The cell is nine doubles:
+origin, edge lengths, then xy, xz, yz.
+
+* Install
+
+Meson installs =seams.h=, =seams_version.h=, =libseams.so=,
+=seams.pc=, and =lib/cmake/seams/seams-config.cmake=.
+
+#+begin_src sh
+pkg-config --cflags --libs seams
+#+end_src
+
+=examples/c= is a small C program that builds against that install,
+either with pkg-config or with =find_package(seams)= and the imported
+target =seams::seams=. =meson test c_api_installed= installs into the
+build tree and compiles that program both ways.

@@ -1,0 +1,20 @@
+WEBVTT
+
+NOTE
+Draft cues converted from captions.srt. Final wording and timing are recorded later.
+
+1
+00:00:00.320 --> 00:00:16.000 line:95% align:center size:80%
+Both interpreters print 2.14.0 and cubic 8. The LuaJIT FFI loads the same library and prints ffi ok.
+
+2
+00:00:16.300 --> 00:00:34.000 line:95% align:center size:80%
+The mixed dump keeps 250 oxygens. The guest frame is clathrate 46, with 184 neighbour entries and ring sizes through 8.
+
+3
+00:00:34.350 --> 00:00:52.000 line:95% align:center size:80%
+On ice Ih the published CHILL rule is hexagonal 128. The Lechner-Dellago average is 0.562448843702. Seeded cages are 128, the mutual neighbour list has 512 entries, and the sheet has 256 six-rings. The 512 signature on the guest frame is 2 cages and 40 atoms.
+
+4
+00:00:52.400 --> 00:01:06.000 line:95% align:center size:80%
+Fennel compiles the basal interface and prints interface chill 1 352 434 49 3 25 0 0 0.

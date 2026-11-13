@@ -35,6 +35,8 @@ def ice_atoms(root):
 def run_lammps(root, build):
     hook = Path(build) / "engines" / "run_hook"
     if not hook.is_file():
+        hook = Path(build) / "run_hook"
+    if not hook.is_file():
         return False
     deck = root / "engines" / "lammps" / "in.dseams"
     env = os.environ.copy()

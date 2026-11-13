@@ -18,3 +18,14 @@ julia --project=bindings/julia/Dseams bindings/julia/Dseams/test/runtests.jl
 ```
 
 The suite checks the mixed TIP4P frame, seeded cages, and that cubic count of 4096.
+
+
+## Structure still
+
+```{figure} ../tutorials/molecules/julia/overlay-web.png
+:alt: Molecule still for this front
+:width: 480px
+
+Ice Ih coloured by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug julia` writes the 2400 by 1800 PNG.
+```
+

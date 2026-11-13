@@ -14,3 +14,10 @@ and checks those numbers against the tutorial reports.
 #+begin_export rst
 .. include:: gallery-captions.rst
 #+end_export
+
+Molecule stills from chemparseplot sit below the OVITO gallery. They are
+drawn by =docs/scripts/render_molecules.py= when the book is built.
+
+#+begin_export rst
+.. include:: molecules.rst
+#+end_export

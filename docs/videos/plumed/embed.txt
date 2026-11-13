@@ -1,0 +1,2 @@
+# Odysee claim, one line when the upload exists:
+# claim-name:full-claim-id

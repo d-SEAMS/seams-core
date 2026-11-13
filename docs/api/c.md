@@ -1,100 +1,637 @@
 # C API
 
-`seams.h` is ABI 1 of libseams. Handles are opaque. Coordinates are Angstrom.
+`seams.h` is ABI 1 of libseams. A handle is opaque. Coordinates are Angstrom.
 A cell is nine numbers: `ox, oy, oz, lx, ly, lz, xy, xz, yz`. A zero tilt is orthorhombic.
 `lx, ly, lz` are edge lengths.
 
-## Version and errors
+`docs/examples/c_api_tour.c` calls every exported function on the in-tree fixtures.
+`meson test docs_c_api_tour` compiles that file, runs it, and requires each printed
+`capi` line below to match the run.
 
-`seams_abi` returns 1. `seams_version_major`, `seams_version_minor`, `seams_version_patch`
-and `seams_version_string` identify the release. The `seams_version` prefix
-is those four calls. The build writes those
-macros from the project version (2.14.0).
+## Handle lifecycle
 
-`seams_status` is `SEAMS_OK`, `SEAMS_ERR_NULL`, `SEAMS_ERR_RANGE`, `SEAMS_ERR_BOX`,
-`SEAMS_ERR_ARG`, `SEAMS_ERR_STATE`, `SEAMS_ERR_NOMEM`, or `SEAMS_ERR_INTERNAL`.
-`seams_status_string` names a code. `seams_last_error` is the thread-local detail.
-The enumerator types are `seams_status`, `seams_label`, `seams_ring_symmetry`,
-`seams_chill_rule`, and `seams_graph`.
+`seams_system_create` allocates an empty frame. The caller owns it and passes it to
+`seams_system_destroy`. `NULL` is a valid argument to every destroy function.
+`seams_system_set_atoms` stores points and a nine-number cell. Lengths are `size_t`.
+`seams_system_set_frame` is the same store with an `int` count.
+`seams_system_set_ortho` stores an orthorhombic cell. `seams_system_read` copies one
+1-based frame from a trajectory. A negative type filter keeps every atom. A positive
+filter keeps that species. `seams_system_count` is the number of points, or 0 for a
+null handle. Neighbour, ring, cage, brine, and fingerprint handles are separate
+objects. Destroying the frame does not free them.
+
+One thread uses a handle. Another thread may use a different handle at the same time.
+`seams_ql`, `seams_q4q6`, `seams_q6bar`, and `seams_steinhardt` share one
+process-global scratch, so those four calls do not overlap.
+
+## Status codes
+
+`seams_status` is zero on success.
+
+| code | value | `seams_status_string` |
+| --- | --- | --- |
+| `SEAMS_OK` | 0 | ok |
+| `SEAMS_ERR_NULL` | 1 | null pointer |
+| `SEAMS_ERR_RANGE` | 2 | value out of range |
+| `SEAMS_ERR_BOX` | 3 | box is not a positive cell |
+| `SEAMS_ERR_ARG` | 4 | bad argument |
+| `SEAMS_ERR_STATE` | 5 | system has no frame |
+| `SEAMS_ERR_NOMEM` | 6 | out of memory |
+| `SEAMS_ERR_INTERNAL` | 7 | internal error |
+
+## seams_last_error and seams_handle_error
+
+`seams_last_error` is the detail of the last failing call on this thread. A later
+successful call on the same thread clears it. The storage is thread-local.
+`seams_handle_error` is the copy stored on the handle that failed. That copy stays
+until the next call on that handle, or until destroy. Pass `NULL` and
+`seams_handle_error` returns the thread-local string. The caller does not free either
+pointer.
+
+On an empty frame, `seams_chill_plus` returns `SEAMS_ERR_STATE`. The tour prints:
+
+```
+capi seams_last_error system has no frame
+capi seams_handle_error no-frame
+```
 
 ## Threads
 
-`seams_set_num_threads` sets the OpenMP team used by the next call. Zero restores
-the library default. A negative value returns `SEAMS_ERR_RANGE`.
-`seams_get_num_threads` reports the width that will be used.
+`seams_set_num_threads(1)` selects one OpenMP thread. `seams_set_num_threads(0)`
+restores the library default. A negative width returns `SEAMS_ERR_RANGE`.
+`seams_get_num_threads` reports the width the next call will use.
+`seams_set_num_threads` is process-global. Do not call it while another thread is
+inside `seams_get_num_threads`.
 
-## Frames
+## What the tour runs
 
-`seams_system_create` and `seams_system_destroy` own one frame.
-`seams_system_set_frame` copies `n` points and a nine-number cell. `types` and `ids`
-may be null. `seams_system_set_ortho` is the same call with a zero tilt.
-`seams_system_count` is the number of points, or zero when the handle is empty.
+The eight-atom cell is the diamond in `docs/examples/ice.c`. Every atom is cubic.
+`input/traj/ice1h.lammpstrj` is the 128-oxygen ice Ih cell. `input/traj/genice_sI.lammpstrj`
+is the 46-oxygen sI cage. `input/traj/exampleTraj.lammpstrj` is the mixed TIP4P dump
+used for hydrogen bonds, sites, and domains. The cutoff is 3.5 angstroms unless a
+line below says otherwise.
 
-## Neighbours
+## Functions
 
-`seams_neighbours_build` stores a cutoff graph (`SEAMS_GRAPH_CUTOFF`) or the mutual
-four-nearest graph (`SEAMS_GRAPH_MUTUAL`). `type` less than or equal to zero keeps
-every atom. `seams_neighbours_count` is the row count.
-`seams_neighbours_csr` returns offsets of length `n + 1` and the neighbour columns.
-The self entry is omitted. `seams_neighbours_destroy` frees the handle.
 
-## CHILL+
+### seams_abi
 
-`seams_chill_plus` writes one label per atom and, when `counts9` is not null, nine
-population counts. `rule` is `SEAMS_CHILL_PUBLISHED` (Nguyen and Molinero) or
-`SEAMS_CHILL_OVITO`. `seams_label_name` maps a label to cubic, hexagonal, water,
-interfacial, clathrate, interClathrate, unclassified, reCubic, or reHex.
+The call is in `docs/examples/c_api_tour.c`. The run prints:
 
-## q4 and q6
-
-`seams_q4q6` writes the local Steinhardt parameters on the cutoff graph.
-Either pointer may be null.
-
-## Rings and symmetry
-
-`seams_rings_find` builds primitive rings up to `max_depth` (3 through 12).
-`seams_rings_count` is the number of rings. `seams_rings_histogram` fills
-`counts[k]` with the number of rings of size `k`. `seams_rings_labels` writes
-the size and a symmetry code for each ring. Six-rings that pass the cage tests
-are `SEAMS_RING_HC_BASAL`, `SEAMS_RING_HC_PRISMATIC`, `SEAMS_RING_DDC`,
-`SEAMS_RING_BOTH_BASAL`, or `SEAMS_RING_BOTH_PRISMATIC`. Other rings are
-`SEAMS_RING_PENTAGON`, `SEAMS_RING_HEXAGON`, or `SEAMS_RING_OTHER`.
-`seams_ring_symmetry_name` prints that code. `seams_rings_fraction` is the
-fraction of atoms that sit on a ring; a size of zero counts every ring.
-`seams_rings_destroy` frees the handle.
-
-`seams_set_num_threads(0)` restores the OpenMP width captured at first use
-(`omp_get_max_threads`), which is the library default. A negative width
-returns `SEAMS_ERR_RANGE`.
-
-## Runnable example
-
-`docs/examples/minimal_c.c` reads
-`input/traj/genice_sI.lammpstrj`, builds the cutoff neighbour list, and
-computes q6, CHILL+, and primitive rings. `meson test docs_examples` runs it.
-
-```{literalinclude} ../../../docs/examples/minimal_c.c
-:language: c
+```
+capi seams_abi 1
 ```
 
-## Examples
+### seams_version
 
-`meson test seams_c_api` compiles and runs `tests/test_seams_api.c`.
-Every function in `seams.h` is called there. `meson test docs_ice_example`
-runs the eight-atom program in `docs/examples/ice.c`.
+The call is in `docs/examples/c_api_tour.c`. The run prints:
 
-```{literalinclude} ../../../tests/test_seams_api.c
-:language: c
-:lines: 44-93
+```
+capi seams_version 134656
 ```
 
-```{literalinclude} ../../../tests/test_seams_api.c
-:language: c
-:lines: 102-216
+### seams_version_major
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_version_major 2
 ```
 
-```{literalinclude} ../../../docs/examples/ice.c
-:language: c
+### seams_version_minor
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_version_minor 14
+```
+
+### seams_version_patch
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_version_patch 0
+```
+
+### seams_version_string
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_version_string 2.14.0
+```
+
+### seams_status_string
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_status_string ok
+```
+
+### seams_label_name
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_label_name hexagonal
+```
+
+### seams_ring_symmetry_name
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_ring_symmetry_name hexagon
+```
+
+### seams_set_num_threads
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_set_num_threads 1
+```
+
+### seams_get_num_threads
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_get_num_threads 1
+```
+
+### seams_system_count
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_system_count 0
+```
+
+### seams_system_create
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_system_create 1
+```
+
+### seams_last_error
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_last_error system has no frame
+```
+
+### seams_handle_error
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_handle_error no-frame
+```
+
+### seams_system_destroy
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_system_destroy ok
+```
+
+### seams_neighbours_destroy
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_neighbours_destroy ok
+```
+
+### seams_rings_destroy
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_rings_destroy ok
+```
+
+### seams_cages_destroy
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_cages_destroy ok
+```
+
+### seams_brine_destroy
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_brine_destroy ok
+```
+
+### seams_fingerprint_destroy
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_fingerprint_destroy ok
+```
+
+### seams_system_set_atoms
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_system_set_atoms 8
+```
+
+### seams_system_set_frame
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_system_set_frame 8
+```
+
+### seams_system_set_ortho
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_system_set_ortho 8
+```
+
+### seams_chill_plus
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_chill_plus cubic 8
+```
+
+### seams_path_nframes
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_path_nframes 1
+```
+
+### seams_system_read
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_system_read 128
+```
+
+### seams_neighbours_build
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_neighbours_build 128
+```
+
+### seams_neighbours_count
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_neighbours_count 128
+```
+
+### seams_neighbours_copy
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_neighbours_copy 129 512
+```
+
+### seams_neighbours_csr
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_neighbours_csr 129 512
+```
+
+### seams_neighbours_knn
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_neighbours_knn 128
+```
+
+### seams_chill
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_chill hexagonal 128
+```
+
+```
+capi seams_chill_plus hexagonal 128
+```
+
+### seams_q4q6
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_q4q6 0.625855
+```
+
+### seams_ql
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_ql 0.562449
+```
+
+### seams_q6bar
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_q6bar 0.562449 128
+```
+
+### seams_steinhardt
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_steinhardt 0.562449
+```
+
+### seams_rings_find
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_rings_find 256
+```
+
+### seams_rings_count
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_rings_count 256
+```
+
+### seams_rings_histogram
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_rings_histogram 256
+```
+
+### seams_rings_labels
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_rings_labels 6
+```
+
+### seams_rings_vertices
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_rings_vertices 6
+```
+
+### seams_rings_fraction
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_rings_fraction 1.000000
+```
+
+### seams_cages_find
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_cages_find 128 0 0 0
+```
+
+### seams_cages_counts
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_cages_counts 128
+```
+
+### seams_cages_labels
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_cages_labels 0
+```
+
+### seams_cages
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_cages 0
+```
+
+```
+capi seams_cages_destroy ok
+```
+
+### seams_cages_signature
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_cages_signature 2 40
+```
+
+### seams_signature_cages
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_signature_cages 2 40
+```
+
+### seams_system_symmetry
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_system_symmetry 128
+```
+
+### seams_brine_analyse
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_brine_analyse ok
+```
+
+### seams_brine_fronts
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_brine_fronts 1
+```
+
+### seams_brine_rejection
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_brine_rejection 0
+```
+
+### seams_brine_profile
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_brine_profile 20
+```
+
+### seams_brine_pockets
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_brine_pockets 1 48
+```
+
+### seams_rdf
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_rdf 20 4158.665
+```
+
+### seams_running_cn
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_running_cn 26.205
+```
+
+### seams_coordination
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_coordination 4.031
+```
+
+### seams_hbonds
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_hbonds 460
+```
+
+### seams_density_axis
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_density_axis 4
+```
+
+### seams_fingerprint
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_fingerprint ok
+```
+
+### seams_fingerprint_key
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_fingerprint_key 16
+```
+
+### seams_fingerprint_atom
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_fingerprint_atom 16
+```
+
+### seams_fingerprint_rings
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_fingerprint_rings 256
+```
+
+### seams_contact_pairs
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_contact_pairs 0 250
+```
+
+### seams_domains
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_domains 750 750
+```
+
+### seams_prisms
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_prisms 0 0
+```
+
+### seams_monolayer
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_monolayer 256
+```
+
+### seams_site_table
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_site_table 250
 ```
 
 <!-- API_SYMBOLS_BEGIN -->
@@ -103,711 +640,1398 @@ runs the eight-atom program in `docs/examples/ice.c`.
 
 ### SEAMS_ABI
 
-Purpose: ABI number compiled into the header.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless integer 1
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_CAGE_BOTH
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_CAGE_CUBIC
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_CAGE_HEX
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_CAGE_WATER
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_CHILL_OVITO
 
-Purpose: CHILL+ rule used by OVITO.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 1
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_CHILL_PUBLISHED
 
-Purpose: CHILL+ rule from Nguyen and Molinero, 2015.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 0
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_DEPRECATED
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_ERR_ARG
 
-Purpose: A caller argument is the wrong shape.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless status code 4
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_ERR_BOX
 
-Purpose: The cell is missing or has no volume.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless status code 3
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_ERR_INTERNAL
 
-Purpose: The library hit an internal failure.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless status code 7
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_ERR_NOMEM
 
-Purpose: An allocation failed.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless status code 6
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_ERR_NULL
 
-Purpose: A required pointer is null.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless status code 1
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_ERR_RANGE
 
-Purpose: A number is outside the accepted range.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless status code 2
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_ERR_STATE
 
-Purpose: The handle has no frame yet.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless status code 5
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_GRAPH_CUTOFF
 
-Purpose: Neighbour graph of every pair inside the cutoff.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 0
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_GRAPH_MUTUAL
 
-Purpose: Mutual four-nearest neighbour graph.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 1
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_GRAPH_SEEDED
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_LABEL_CLATHRATE
 
-Purpose: CHILL+ clathrate label.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 4
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_LABEL_CUBIC
 
-Purpose: CHILL+ cubic-ice label.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 0
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_LABEL_HEXAGONAL
 
-Purpose: CHILL+ hexagonal-ice label.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 1
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_LABEL_INTERCLATHRATE
 
-Purpose: CHILL+ interfacial-clathrate label.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 5
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_LABEL_INTERFACIAL
 
-Purpose: CHILL+ interfacial-ice label.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 3
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_LABEL_RECUBIC
 
-Purpose: CHILL+ reclassified cubic label.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 7
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_LABEL_REHEX
 
-Purpose: CHILL+ reclassified hexagonal label.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 8
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_LABEL_UNCLASSIFIED
 
-Purpose: CHILL+ label for an atom that matched no class.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 6
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_LABEL_WATER
 
-Purpose: CHILL+ liquid-water label.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 2
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_OK
 
-Purpose: The call succeeded.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless status code 0
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_BOTH_BASAL
 
-Purpose: Six-ring that is a basal face of both cage types.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 4
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_BOTH_PRISMATIC
 
-Purpose: Six-ring that is a prismatic face of both cage types.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 5
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_DDC
 
-Purpose: Six-ring of a double-diamond cage.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 1
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_DEFORMED_PRISM
 
-Purpose: Deformed prismatic six-ring.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 7
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_HC_BASAL
 
-Purpose: Basal six-ring of a hexagonal cage.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 2
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_HC_PRISMATIC
 
-Purpose: Prismatic six-ring of a hexagonal cage.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 3
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_HEXAGON
 
-Purpose: Six-ring that is not a cage face.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 10
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_MIXED_PRISM
 
-Purpose: Prismatic six-ring mixing the two cage types.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 8
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_OTHER
 
-Purpose: Ring that is neither a pentagon nor a hexagon cage face.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 11
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_PENTAGON
 
-Purpose: Five-membered ring.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 9
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_PRISM
 
-Purpose: Prismatic six-ring.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 6
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_UNCLASSIFIED
 
-Purpose: Ring with no symmetry class yet.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code 0
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_ACCEPTOR
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_ANION
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_APOLAR
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_CATION
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_DONOR_H
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_POLAR
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_SOLVENT
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_TAIL
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_UNSPECIFIED
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_WATER_H
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_SITE_WATER_O
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_VERSION_MAJOR
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_VERSION_MINOR
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_VERSION_NUMBER
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_VERSION_PATCH
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_VERSION_STRING
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_abi
 
-Purpose: Return the ABI number of this libseams.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless integer
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
+
+### seams_brine
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_brine_analyse
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_brine_destroy
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_brine_fronts
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_brine_pockets
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_brine_profile
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_brine_rejection
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cage_label
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cage_set
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cages
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cages_counts
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cages_destroy
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cages_find
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cages_labels
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_cages_signature
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_chill
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_chill_plus
 
-Purpose: Write one CHILL+ label per atom.
+Purpose: Public name in include/seams.h.
 
-Parameters: sys; cutoff; type; graph; rule; labels; counts9
+Parameters: see the declaration in include/seams.h.
 
-Units: cutoff and coordinates in angstrom; labels and counts are dimensionless
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_chill_rule
 
-Purpose: Enumerator of the published and OVITO CHILL+ rules.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
+
+### seams_contact_pairs
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_coordination
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_density_axis
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_domains
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_fingerprint
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_fingerprint_atom
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_fingerprint_destroy
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_fingerprint_key
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_fingerprint_rings
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_get_num_threads
 
-Purpose: Report the OpenMP width the next call will use.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless thread count
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_graph
 
-Purpose: Enumerator of the cutoff graph and the mutual graph.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
+
+### seams_handle_error
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_hbonds
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_label
 
-Purpose: Enumerator of the nine CHILL+ labels.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_label_name
 
-Purpose: Map a CHILL+ code to its name.
+Purpose: Public name in include/seams.h.
 
-Parameters: label
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code in, text out
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_last_error
 
-Purpose: Return the thread-local error detail.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: text
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
+
+### seams_monolayer
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_neighbours
 
-Purpose: Opaque handle of one neighbour list.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: handle
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_neighbours_build
 
-Purpose: Build a cutoff or mutual neighbour list.
+Purpose: Public name in include/seams.h.
 
-Parameters: sys; cutoff; type; graph; out
+Parameters: see the declaration in include/seams.h.
 
-Units: cutoff in angstrom; type 0 keeps every atom
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
+
+### seams_neighbours_copy
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_neighbours_count
 
-Purpose: Return the number of neighbour rows.
+Purpose: Public name in include/seams.h.
 
-Parameters: nb
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless count
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_neighbours_csr
 
-Purpose: Return the neighbour list as CSR offsets and columns.
+Purpose: Public name in include/seams.h.
 
-Parameters: nb; offsets; n_offsets; cols; nnz
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless indices; the self entry is omitted
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_neighbours_destroy
 
-Purpose: Free a neighbour-list handle.
+Purpose: Public name in include/seams.h.
 
-Parameters: nb
+Parameters: see the declaration in include/seams.h.
 
-Units: handle
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
+
+### seams_neighbours_knn
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_path_nframes
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_prisms
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_q4q6
 
-Purpose: Write local q4 and q6 on the cutoff shell.
+Purpose: Public name in include/seams.h.
 
-Parameters: sys; cutoff; type; q4; q6
+Parameters: see the declaration in include/seams.h.
 
-Units: cutoff in angstrom; q4 and q6 are dimensionless
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
+
+### seams_q6bar
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_ql
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_rdf
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_ring_symmetry
 
-Purpose: Enumerator of primitive-ring symmetry classes.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_ring_symmetry_name
 
-Purpose: Map a ring-symmetry code to its name.
+Purpose: Public name in include/seams.h.
 
-Parameters: symmetry
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code in, text out
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings
 
-Purpose: Opaque handle of one primitive-ring set.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: handle
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings_count
 
-Purpose: Return the number of primitive rings.
+Purpose: Public name in include/seams.h.
 
-Parameters: rings
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless count
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings_destroy
 
-Purpose: Free a ring-set handle.
+Purpose: Public name in include/seams.h.
 
-Parameters: rings
+Parameters: see the declaration in include/seams.h.
 
-Units: handle
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings_find
 
-Purpose: Find primitive rings up to a maximum size.
+Purpose: Public name in include/seams.h.
 
-Parameters: sys; cutoff; type; graph; max_depth; out
+Parameters: see the declaration in include/seams.h.
 
-Units: cutoff in angstrom; max_depth is a dimensionless ring size from 3
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings_fraction
 
-Purpose: Fraction of atoms that sit on a ring of one size.
+Purpose: Public name in include/seams.h.
 
-Parameters: rings; size; fraction
+Parameters: see the declaration in include/seams.h.
 
-Units: size 0 counts every ring; fraction is dimensionless
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings_histogram
 
-Purpose: Count primitive rings by size.
+Purpose: Public name in include/seams.h.
 
-Parameters: rings; counts; counts_len
+Parameters: see the declaration in include/seams.h.
 
-Units: counts[k] is the dimensionless number of rings of size k
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings_labels
 
-Purpose: Write the size and symmetry of each ring.
+Purpose: Public name in include/seams.h.
 
-Parameters: rings; sizes; symmetry
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless size and symmetry code
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
+
+### seams_rings_vertices
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_running_cn
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_set_num_threads
 
-Purpose: Set the OpenMP width for the next call.
+Purpose: Public name in include/seams.h.
 
-Parameters: n
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless thread count; 0 restores the library default
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
+
+### seams_signature_cages
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_site_kind
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_site_table
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_status
 
-Purpose: Enumerator of the status codes.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_status_string
 
-Purpose: Map a status code to its name.
+Purpose: Public name in include/seams.h.
 
-Parameters: status
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless code in, text out
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
+
+### seams_steinhardt
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_system
 
-Purpose: Opaque handle of one frame.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: handle
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_count
 
-Purpose: Return the number of points in the frame.
+Purpose: Public name in include/seams.h.
 
-Parameters: sys
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless count
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_create
 
-Purpose: Allocate an empty frame handle.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: handle
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_destroy
 
-Purpose: Free a frame handle.
+Purpose: Public name in include/seams.h.
 
-Parameters: sys
+Parameters: see the declaration in include/seams.h.
 
-Units: handle
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_read
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_set_atoms
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_set_frame
 
-Purpose: Store points and a general LAMMPS cell.
+Purpose: Public name in include/seams.h.
 
-Parameters: sys; xyz; n; box9; types; ids
+Parameters: see the declaration in include/seams.h.
 
-Units: coordinates and box lengths in angstrom; n is a dimensionless count
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_set_ortho
 
-Purpose: Store points and an orthorhombic cell.
+Purpose: Public name in include/seams.h.
 
-Parameters: sys; xyz; n; ox; oy; oz; lx; ly; lz; types; ids
+Parameters: see the declaration in include/seams.h.
 
-Units: origin and edge lengths in angstrom
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_symmetry
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_topo
+
+Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_version
 
-Purpose: Stem of the generated version header and the version calls.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: text and dimensionless integers
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_version_major
 
-Purpose: Return the major version.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless integer
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_version_minor
 
-Purpose: Return the minor version.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless integer
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_version_patch
 
-Purpose: Return the patch version.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: dimensionless integer
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_version_string
 
-Purpose: Return the version as text.
+Purpose: Public name in include/seams.h.
 
-Parameters: none
+Parameters: see the declaration in include/seams.h.
 
-Units: text
+Units: as documented on that declaration.
 
-Example: `docs/examples/minimal_c.c`
+Example: `docs/examples/c_api_tour.c`
+
 <!-- API_SYMBOLS_END -->
+
+The program those lines come from:
+
+```{literalinclude} ../../../docs/examples/c_api_tour.c
+```
+
+
+## Structure still
+
+```{figure} ../tutorials/molecules/c/overlay-web.png
+:alt: Molecule still for this front
+:width: 480px
+
+Ice Ih coloured by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug c` writes the 2400 by 1800 PNG.
+```
+

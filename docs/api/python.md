@@ -44,9 +44,14 @@ positions and the nine-number box. `dseams.from_mdanalysis(universe)` reads
 `frames.py`. Set `SEAMS_LANG_LIB` to that shared library. The nanobind
 calls (`chill_plus`, `q4q6`, `neighbours`, `rings`, `Frame`) use `libseams`.
 
-`meson test docs_api_python` runs the eight-atom program below. It calls
-`dseams.chill_plus` and `dseams.q4q6` when the nanobind module imports, and
-the same `libseams` functions through ctypes otherwise.
+`meson test docs_api_python` runs the eight-atom program below. On that cell the ctypes path prints `python call cubic 8`, `python call q6bar 0.628539361055`, `python call cages 0 0 8 0`, `python call cn 4.57142857143`, `python call hbond 0`, `python call sheet 0`, and `python call vert 4 0`. The `512` signature on the sI guest frame prints `python call sig 2 40`. It calls
+`dseams.chill_plus` and `dseams.q4q6` when the nanobind module imports.
+The ctypes fallback calls those two and also `seams_system_read`,
+`seams_chill`, `seams_steinhardt`, `seams_cages`, `seams_signature_cages`,
+`seams_neighbours_knn`, `seams_rdf`, `seams_running_cn`, `seams_coordination`,
+`seams_hbonds`, `seams_density_axis`, `seams_fingerprint`,
+`seams_contact_pairs`, `seams_domains`, `seams_prisms`, `seams_monolayer`,
+`seams_rings_vertices`, and `seams_site_table`.
 `meson test python_dseams` runs `bindings/python/tests/test_dseams.py`.
 `tests/test_frames_abi.py` is the `frames_abi` check inside
 `tests/run_language_fronts.sh` (`meson test language_fronts`).
@@ -259,3 +264,14 @@ Units: text
 
 Example: `docs/examples/minimal_py.py`
 <!-- API_SYMBOLS_END -->
+
+
+## Structure still
+
+```{figure} ../tutorials/molecules/python/overlay-web.png
+:alt: Molecule still for this front
+:width: 480px
+
+Ice Ih coloured by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug python` writes the 2400 by 1800 PNG.
+```
+

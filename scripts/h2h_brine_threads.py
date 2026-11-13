@@ -21,12 +21,12 @@ import os
 import platform
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FRAME = ROOT / "input" / "brine" / "work" / "nacl-n50000-m1.0" / "dump.lammpstrj"
 LIB = ROOT / "bbdir" / "src" / "libyodaLib.so"
-PY = Path("/tmp/brine-venv/bin/python")
 CUTOFF = 3.5
 WARMUP = 1
 REPEATS = 6
@@ -256,7 +256,7 @@ def worker_dseams(threads):
     reported = int(lib.lc_num_threads())
     if reported != threads:
         raise SystemExit(f"linkcell threads {reported} != {threads}")
-    out = Path(f"/tmp/brine-labels-dseams-{threads}.npy")
+    out = label_path("dseams", threads)
     np.save(out, chill_labels)
     emit("d-SEAMS", "2.13.0", threads, reported, [
         {"operation": "chill+", "samples": chill, "labels": str(out)},
@@ -287,7 +287,7 @@ def worker_mdapy(threads):
 
     chill, labels = time_calls(run_chill)
     neigh, pairs = time_calls(run_neigh)
-    out = Path(f"/tmp/brine-labels-mdapy-{threads}.npy")
+    out = label_path("mdapy", threads)
     np.save(out, labels.astype(np.int32))
     emit("mdapy", mdapy.__version__, threads, reported, [
         {"operation": "chill+", "samples": chill, "labels": str(out)},
@@ -323,7 +323,7 @@ def worker_ovito(threads):
         return np.asarray(pipe.compute().particles["Structure Type"]).copy()
 
     chill, labels = time_calls(run_chill)
-    out = Path(f"/tmp/brine-labels-ovito-{threads}.npy")
+    out = label_path("ovito", threads)
     np.save(out, labels.astype(np.int32))
     emit("OVITO", ".".join(str(v) for v in tuple(ovito.version)[:3]), threads, threads, [
         {"operation": "chill+", "samples": chill, "labels": str(out)},
@@ -381,10 +381,19 @@ def agreement(a, b):
     return float(np.mean(a == b))
 
 
-def run_worker(role, threads):
+def label_path(tool, threads):
+    root = os.environ.get("BRINE_LABEL_DIR")
+    if not root:
+        root = tempfile.mkdtemp(prefix="brine-labels-")
+        os.environ["BRINE_LABEL_DIR"] = root
+    return Path(root) / f"brine-labels-{tool}-{threads}.npy"
+
+
+def run_worker(role, threads, python, labels):
     env = base_env()
     env["OMP_NUM_THREADS"] = str(threads)
     env["RAYON_NUM_THREADS"] = str(threads)
+    env["BRINE_LABEL_DIR"] = str(labels)
     if role == "dseams":
         env.pop("LD_LIBRARY_PATH", None)
     elif role == "ovito":
@@ -395,7 +404,7 @@ def run_worker(role, threads):
         env.pop("LD_LIBRARY_PATH", None)
     cmd = [
         "taskset", "-c", mask_for(threads),
-        str(PY), str(Path(__file__).resolve()),
+        str(python), str(Path(__file__).resolve()),
         "--worker", role, "--threads", str(threads),
     ]
     done = subprocess.run(cmd, env=env, text=True, capture_output=True, check=False)
@@ -411,6 +420,16 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--worker", choices=("dseams", "mdapy", "ovito", "freud"))
     parser.add_argument("--threads", type=int)
+    parser.add_argument(
+        "--python",
+        default=os.environ.get("BRINE_PYTHON", sys.executable),
+        help="Interpreter for the worker processes. BRINE_PYTHON overrides the default.",
+    )
+    parser.add_argument(
+        "--label-dir",
+        default=os.environ.get("BRINE_LABEL_DIR"),
+        help="Directory for the label arrays. BRINE_LABEL_DIR overrides the default.",
+    )
     args = parser.parse_args()
     if args.worker:
         os.environ["OMP_NUM_THREADS"] = str(args.threads)
@@ -425,6 +444,8 @@ def main():
 
     import numpy as np
 
+    labels = Path(args.label_dir) if args.label_dir else Path(tempfile.mkdtemp(prefix="brine-labels-"))
+    labels.mkdir(parents=True, exist_ok=True)
     hw = hardware()
     csv_path = ROOT / "benchmarks" / "h2h-brine-50k-threads.csv"
     log_path = ROOT / "benchmarks" / "h2h-brine-50k-threads.txt"
@@ -449,7 +470,7 @@ def main():
     for threads in WIDTHS:
         for role in ("dseams", "mdapy", "ovito", "freud"):
             print(f"{role} threads={threads}", flush=True)
-            payload = run_worker(role, threads)
+            payload = run_worker(role, threads, args.python, labels)
             for result in payload["results"]:
                 samples = [float(v) for v in result["samples"]]
                 med, q1, q3, iqr = summarize(samples)

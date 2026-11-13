@@ -1,0 +1,26 @@
+# Silent picture tracks for the docs videos.
+#
+#   snakemake -s docs/videos/Snakefile videos
+#
+# Each scene is its own 1920x1080, 30 fps, crf 16 segment so the lead-in
+# can be retimed. The .tape files are vhs tapes. This rule uses the
+# headless renderer, which draws the recorded terminal and leaves the
+# lower band empty. A later narration mix is:
+#   ffmpeg -i <slug>.mp4 -i narration.m4a -c:v copy -c:a aac -aac_coder fast out.mp4
+
+import os
+
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(workflow.snakefile))))
+OUT = os.environ.get("VIDEO_OUT", os.path.join("build", "videos"))
+SLUGS = [
+    "c", "cpp", "python", "fortran", "rust", "julia", "r", "cli",
+    "interface", "rings-cages", "brine", "nucleation", "insitu", "migrate",
+    "lammps", "gromacs", "plumed", "lua",
+]
+
+
+rule videos:
+    output:
+        expand(os.path.join(OUT, "{slug}", "{slug}.mp4"), slug=SLUGS)
+    shell:
+        "python3 " + os.path.join(ROOT, "docs", "render_videos.py") + " " + OUT

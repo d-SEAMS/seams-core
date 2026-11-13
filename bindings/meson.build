@@ -1,6 +1,13 @@
 # C ABI for the R and Julia fronts. Python is PydSEAMSlib and links
 # libyodaLib itself. The classifiers stay in libyodaLib.
 
+binding_oracle = executable(
+  'binding_oracle',
+  files('../tests/binding_oracle.cpp'),
+  dependencies: [yds_dep],
+  build_rpath: meson.project_build_root() / 'src',
+)
+
 seams_lang = shared_library(
   'seams_lang',
   files('cxx/seams_lang.cpp'),
@@ -169,6 +176,8 @@ endif
 # CxxWrap needs libcxxwrap_julia, which is a BinaryBuilder product and
 # is not part of the pixi or Nix closure. The Julia front that ships is
 # the ccall package under bindings/julia/Dseams.
+subdir('lua')
+
 cxxwrap_dep = dependency('libcxxwrap_julia', required: false)
 if cxxwrap_dep.found()
   message('libcxxwrap_julia found; the shipped Julia front is still ccall')

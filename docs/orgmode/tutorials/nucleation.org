@@ -23,3 +23,12 @@ not separate the 47 cubic molecules from the 62 hexagonal ones. The
 cluster is the connected crystal, which on the first frame is 59
 molecules, smaller than the cubic-plus-hexagonal count because the
 rest sit in other components.
+
+#+begin_export rst
+.. figure:: molecules/nucleation/overlay-web.png
+   :width: 480px
+   :alt: Nucleation frame coloured by published CHILL+.
+
+   Nucleation frame coloured by published CHILL+. ``python docs/scripts/render_molecules.py --slug nucleation`` writes the 2400 by 1800 still.
+#+end_export
+

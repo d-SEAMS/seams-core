@@ -24,3 +24,12 @@ liquid, apart from one crystal molecule near 44 Å.
 #+begin_src bash
 seams chill-plus input/traj/interface_f0.lammpstrj --type 1 --layers --axis 2
 #+end_src
+
+#+begin_export rst
+.. figure:: molecules/interface/overlay-web.png
+   :width: 480px
+   :alt: Basal interface coloured by published CHILL+.
+
+   Basal interface coloured by published CHILL+. ``python docs/scripts/render_molecules.py --slug interface`` writes the 2400 by 1800 still.
+#+end_export
+

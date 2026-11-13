@@ -1,0 +1,1 @@
+docs_engine_gromacs writes a one-frame gro from the ice Ih dump and runs gmx-seams with cutoff 3.5. The census line is gromacs hexagonal 128 six-rings 256 q6 0.625855. gromacs_mdrun then takes a short frozen trajectory through the same tool.

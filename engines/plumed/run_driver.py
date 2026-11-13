@@ -1,6 +1,7 @@
 # Copyright (c) d-SEAMS developers
 """Run plumed driver on ice.xyz. Skip only when plumed itself is absent."""
 
+import os
 import shutil
 import subprocess
 import sys
@@ -24,12 +25,15 @@ work = here / "plumed.driver.dat"
 colvar = here / "colvar"
 work.write_text(text)
 try:
+    env = os.environ.copy()
+    env["PLUMED_NUM_THREADS"] = env.get("PLUMED_NUM_THREADS", "1")
     done = subprocess.run(
         ["plumed", "driver", "--plumed", str(work), "--ixyz", str(xyz)],
         check=False,
         capture_output=True,
         text=True,
         cwd=here,
+        env=env,
     )
     if done.returncode != 0:
         sys.stderr.write(done.stdout)

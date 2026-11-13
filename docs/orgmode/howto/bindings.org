@@ -4,8 +4,8 @@
 The nanobind module =dseams._core= is built in this repository when
 nanobind is found. R and Julia call =libseams_lang=, which is built
 with the engine and does not reimplement the classifiers. The released
-Frame package remains [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]. Lua remains
-[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]].
+Frame package remains [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
+The Lua module in this tree is [[file:lua.org][require("dseams")]].
 
 * Python
 
@@ -43,6 +43,13 @@ export DSEAMS_ROOT="$PWD"
 julia --project=bindings/julia/Dseams -e 'using Pkg; Pkg.instantiate()'
 julia --project=bindings/julia/Dseams bindings/julia/Dseams/test/runtests.jl
 #+end_src
+
+* Lua and Fennel
+
+~-Dwith_lua=auto~ builds ~dseams_core.so~ for Lua 5.4 and for LuaJIT.
+~require("dseams")~ and ~(require :dseams)~ call ~seams.h~.
+The how-to is [[file:lua.org][Lua and Fennel]].
+~meson test lua_examples~ runs the example scripts.
 
 * q4 and q6
 

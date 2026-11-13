@@ -11,9 +11,15 @@
 // strong copy in liblinkcell replaces them.
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 
 #ifdef SEAMS_HAS_OPENMP
 #include <omp.h>
+#endif
+
+#ifdef SEAMS_HAS_LINKCELL
+#include <linkcell.h>
 #endif
 
 extern "C" __attribute__((weak)) void lc_set_threads(int n) {

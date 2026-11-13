@@ -1,0 +1,26 @@
+#+TITLE: Videos
+#+OPTIONS: toc:nil num:nil
+
+Silent picture tracks for the bindings and the tutorials. Each recording
+is a terminal session at 1920 by 1080. Finished recordings are hosted on
+Odysee. =docs/videos/<slug>/embed.txt= holds one line,
+=claim-name:full-claim-id=, after that upload exists. Until the line is
+there, the page says video coming soon. Captions are burned into the
+upload. The VTT file in =docs/videos/<slug>/= stays available as the
+transcript.
+
+A later mix of narration audio uses ffmpeg with =-c:a aac -aac_coder fast=.
+
+Molecule stills for the overlays are drawn with
+
+#+begin_src bash
+python docs/scripts/render_molecules.py --out docs/videos
+#+end_src
+
+The command is described in =docs/videos/README.md=. The PNG files stay
+out of the repository.
+
+#+begin_export rst
+.. include:: players.rst
+#+end_export
+
