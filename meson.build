@@ -1604,7 +1604,7 @@ if get_option('capi_valgrind')
     is_parallel: false)
 endif
 
-_capi_warn = ['-Wall', '-Wextra', '-Werror', '-pedantic']
+_capi_warn = ['-Wall', '-Wextra', '-Wpedantic', '-Werror']
 _capi_headers = [
   ['seams_h', 'seams.h',
    ['-I' + meson.project_source_root() / 'include',
@@ -1622,6 +1622,34 @@ foreach _hdr : _capi_headers
     executable('capi_header_cxx17_' + _hdr[0], files('tests/capi_header_unit.cpp'),
       cpp_args: ['-std=c++17', '-include', _hdr[1]] + _capi_warn + _hdr[2]))
 endforeach
+
+capi_contract = executable(
+  'capi_contract',
+  files('tests/capi_contract.c'),
+  link_with: seams_api_lib,
+  include_directories: include_directories('include'),
+  c_args: ['-std=c11'] + _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
+  link_args: ['-lm'])
+test(
+  'capi_contract',
+  capi_contract,
+  args: [
+    meson.project_source_root() / 'tests' / 'capi_symbols.txt',
+    meson.project_source_root(),
+  ],
+  env: _capi_env,
+  timeout: 300)
+test(
+  'capi_symbols',
+  find_program('python3', required: true),
+  args: [
+    meson.project_source_root() / 'tests' / 'capi_symbols.py',
+    meson.project_source_root() / 'include' / 'seams.h',
+    meson.project_source_root() / 'tests' / 'capi_symbols.txt',
+    seams_api_lib.full_path(),
+  ],
+  depends: [seams_api_lib],
+  timeout: 60)
 
 test(
   'capi_abi',
