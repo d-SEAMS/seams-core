@@ -98,7 +98,7 @@ def main():
         pngs = sorted(out.glob("*/overlay.png")) if out.is_dir() else []
         if pngs:
             frame = subprocess.run(
-                [sys.executable, str(ROOT / "scripts" / "check_frame.py"), *map(str, pngs)],
+                [sys.executable, str(ROOT / "docs" / "scripts" / "check_frame.py"), *map(str, pngs)],
                 check=False,
             )
             return frame.returncode

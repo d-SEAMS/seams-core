@@ -1367,6 +1367,12 @@ if get_option('with_cli')
     depends: [seams_exe, seams_api_lib, seams_lang],
     suite: 'docs',
     timeout: 120)
+  molecule_env = environment()
+  molecule_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+  # Full publication stills are 4096 px and 256 samples. The test checks
+  # the frame and the palette, which a 2048 px, 64-sample draw already shows.
+  molecule_env.set('MOLECULES_SCALE', '1')
+  molecule_env.set('MOLECULES_SAMPLES', '64')
   test(
     'docs_render_molecules',
     python3,
@@ -1376,7 +1382,7 @@ if get_option('with_cli')
       '--out', meson.project_build_root() / 'molecule-stills',
       '--libdir', meson.project_build_root() / 'src',
     ],
-    env: tutorial_env,
+    env: molecule_env,
     depends: [seams_api_lib],
     suite: 'docs',
     timeout: 900)

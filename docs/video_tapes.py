@@ -4,6 +4,8 @@
 
 import os
 import re
+import shlex
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -50,7 +52,13 @@ def prepare(root, seams, libdir, langdir, build):
         link = shim / name
         if link.is_symlink() or link.exists():
             link.unlink()
-        link.symlink_to(target)
+        if name == "python3":
+            # A symlink makes Python compute its prefix from the shim directory
+            # and miss the suite environment's site-packages.
+            link.write_text("#!/bin/sh\nexec {} \"$@\"\n".format(shlex.quote(str(target))))
+            link.chmod(0o755)
+        else:
+            link.symlink_to(target)
     env = os.environ.copy()
     env["PATH"] = str(shim) + os.pathsep + env.get("PATH", "")
     env["NO_COLOR"] = "1"
@@ -69,7 +77,17 @@ def prepare(root, seams, libdir, langdir, build):
         [str(libdir), str(langdir), env.get("LD_LIBRARY_PATH", "")]
     )
     if not env.get("FENNEL_LUA"):
-        for candidate in ("/usr/local/share/fennel.lua", "/usr/share/lua/5.4/fennel.lua"):
+        candidates = [
+            "/usr/local/share/fennel.lua",
+            "/usr/share/lua/5.4/fennel.lua",
+        ]
+        conda = env.get("CONDA_PREFIX", "")
+        if conda:
+            candidates.append(str(Path(conda) / "share" / "lua" / "5.4" / "fennel.lua"))
+        lua = shutil.which("lua5.4") or shutil.which("lua")
+        if lua:
+            candidates.append(str(Path(lua).resolve().parents[1] / "share" / "lua" / "5.4" / "fennel.lua"))
+        for candidate in candidates:
             if Path(candidate).is_file():
                 env["FENNEL_LUA"] = candidate
                 break
