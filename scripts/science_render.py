@@ -34,7 +34,7 @@ CHILL = {
     0: ("cubic Ic", (0.000, 0.447, 0.698)),
     1: ("hexagonal Ih", (0.902, 0.624, 0.000)),
     3: ("interfacial", (0.941, 0.894, 0.259)),
-    2: ("liquid", (0.900, 0.900, 0.900)),
+    2: ("liquid", (0.940, 0.940, 0.940)),
     4: ("clathrate", (0.133, 0.533, 0.200)),
     5: ("interfacial clathrate", (0.533, 0.133, 0.333)),
 }
@@ -171,11 +171,22 @@ def run_front(dump: Path, out: Path, command: str) -> None:
 
 def label_positions(box: np.ndarray, pos: np.ndarray, work: Path, command: str):
     work.mkdir(parents=True, exist_ok=True)
+    name = "nucleus-atoms.csv" if command == "nucleation" else "interface-atoms.csv"
+    out = work / "labels"
+    cached = out / name
+    if os.environ.get("SCIENCE_REUSE_LABELS") == "1" and cached.is_file():
+        header, rows, _ = read_table(cached)
+        chill = column(header, rows, "chill").astype(int)
+        if chill.shape[0] != pos.shape[0]:
+            raise SystemExit(f"{cached} has {chill.shape[0]} rows for {pos.shape[0]} atoms")
+        extended = None
+        if "in_extended" in header:
+            extended = column(header, rows, "in_extended") > 0.5
+        print(f"reuse labels {cached}", flush=True)
+        return chill, extended
     dump = work / "one.lammpstrj"
     write_one_frame(dump, box, pos)
-    out = work / "labels"
     run_front(dump, out, command)
-    name = "nucleus-atoms.csv" if command == "nucleation" else "interface-atoms.csv"
     header, rows, _ = read_table(out / name)
     chill = column(header, rows, "chill").astype(int)
     extended = None
@@ -1022,16 +1033,61 @@ def nucleus_sheet(pos: np.ndarray, chill: np.ndarray, mask: np.ndarray, stacking
     return sheet, view
 
 
-def render_molecule(pos, chill, bonds, forward, up, png, half_h, half_v, width_px, liquid_alpha, nucleus: bool = False):
+def display_layer_ids(pos: np.ndarray, mask: np.ndarray, axis: np.ndarray) -> np.ndarray:
+    """Layer index of each atom, numbered as on the stacking bar."""
+    ids = -np.ones(pos.shape[0], dtype=int)
+    chosen = np.flatnonzero(mask)
+    if chosen.size == 0:
+        return ids
+    projection = pos[chosen] @ unit(axis)
+    period = layer_period(projection)
+    raw = np.floor((projection - projection.min()) / period).astype(int)
+    order = [index for index in range(int(raw.min()), int(raw.max()) + 1) if np.any(raw == index)]
+    remap = {bin_id: number for number, bin_id in enumerate(order)}
+    ids[chosen] = [remap[int(bin_id)] for bin_id in raw]
+    return ids
+
+
+def draw_layer_guides(png: Path, pos: np.ndarray, layer_ids: np.ndarray, forward, up, half_v: float) -> None:
+    """Faint horizontal lines at each drawn layer, numbered as in panel (c)."""
+    from PIL import Image, ImageDraw, ImageFont
+
+    image = Image.open(png).convert("RGBA")
+    forward, _right, up = basis(forward, up)
+    centre, _h, _v, forward, _right, up = project(pos, forward, up)
+    height = image.height
+    draw = ImageDraw.Draw(image)
+    # The nucleus image is already at print scale. 7 pt at 600 dpi is 58 px.
+    font_px = max(28, int(round(7.0 * PRINT_DPI / 72.0)))
+    try:
+        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", font_px)
+    except OSError:
+        font = ImageFont.load_default()
+        font_px = 14
+    present = sorted({int(item) for item in layer_ids if item >= 0})
+    vertical = (pos - centre) @ up
+    span = 2.0 * half_v
+    for layer in present:
+        members = np.flatnonzero(layer_ids == layer)
+        if members.size == 0:
+            continue
+        height_world = float(np.median(vertical[members]))
+        y = (half_v - height_world) / span * height
+        if not 0 <= y < height:
+            continue
+        draw.line([(font_px + 8, y), (image.width - 8, y)], fill=(168, 168, 168, 255), width=2)
+        draw.text((4, max(0, y - 0.55 * font_px)), str(layer), font=font, fill=(70, 70, 70, 255))
+    image.convert("RGB").save(png)
+
+
+def _paint(pos, chill, bonds, forward, up, png, half_h, half_v, width_px, liquid_alpha, nucleus: bool, frame_pos=None):
     from ovito.data import DataCollection, Particles, SimulationCell
     from ovito.pipeline import Pipeline, StaticSource
     from ovito.vis import BondsVis, TachyonRenderer, Viewport
 
     forward, _right, up = basis(forward, up)
-    # The nucleus frame was measured on the ice. Liquid around it must not
-    # drag the camera off that ice.
-    focus = pos
-    if liquid_alpha < 0.3:
+    focus = pos if frame_pos is None else frame_pos
+    if frame_pos is None and liquid_alpha < 0.3:
         solid = ~np.isin(chill, [2])
         if np.any(solid):
             focus = pos[solid]
@@ -1048,11 +1104,6 @@ def render_molecule(pos, chill, bonds, forward, up, png, half_h, half_v, width_p
     particles = Particles()
     particles.create_property("Position", data=np.ascontiguousarray(pos, dtype=np.float64))
     colours = np.array([CHILL.get(int(code), ("other", (0.5, 0.5, 0.5)))[1] for code in chill])
-    # The nucleus fades the far side of the lattice so the near stacking
-    # planes stay readable. The slab keeps a mild depth cue.
-    # The slab darkens slightly with depth. The nucleus blends far atoms
-    # toward the white page, so a far cubic stays blue rather than navy,
-    # and shrinks them.
     if nucleus:
         colours, near = depth_cue(colours, pos @ forward, tint=np.array([0.94, 0.94, 0.95]))
     else:
@@ -1061,7 +1112,9 @@ def render_molecule(pos, chill, bonds, forward, up, png, half_h, half_v, width_p
     liquid = np.isin(chill, [2])
     guest = np.isin(chill, [4, 5])
     transparency = np.zeros(pos.shape[0])
-    transparency[liquid] = 1.0 - liquid_alpha
+    # Tachyon multiplies overlapping transparent spheres, so a crowd of
+    # liquid becomes opaque. The caller composites one liquid layer instead.
+    transparency[liquid] = 0.0
     transparency[guest] = 0.0
     radius = np.full(pos.shape[0], ATOM_RADIUS)
     if nucleus:
@@ -1104,6 +1157,44 @@ def render_molecule(pos, chill, bonds, forward, up, png, half_h, half_v, width_p
     return height_px
 
 
+def render_molecule(pos, chill, bonds, forward, up, png, half_h, half_v, width_px, liquid_alpha, nucleus: bool = False):
+    """Ray-trace the molecules.
+
+    Liquid is painted on its own and blended at ``liquid_alpha``. Overlapping
+    transparent spheres in one Tachyon pass multiply and turn the liquid solid.
+    """
+    from PIL import Image
+
+    liquid = np.isin(chill, [2])
+    if (not nucleus) and 0.0 <= liquid_alpha < 0.999 and np.any(liquid) and np.any(~liquid):
+        solid = ~liquid
+        ice_png = png.with_name(png.stem + "-ice.png")
+        liq_png = png.with_name(png.stem + "-liq.png")
+        solid_bonds = bonds
+        if bonds is not None and len(bonds):
+            keep = solid[bonds[:, 0]] & solid[bonds[:, 1]]
+            solid_bonds = bonds[keep]
+            remap = -np.ones(pos.shape[0], dtype=int)
+            remap[np.flatnonzero(solid)] = np.arange(int(solid.sum()))
+            if len(solid_bonds):
+                solid_bonds = np.stack([remap[solid_bonds[:, 0]], remap[solid_bonds[:, 1]]], axis=1)
+        _paint(pos[solid], chill[solid], solid_bonds, forward, up, ice_png, half_h, half_v, width_px, 1.0, False, frame_pos=pos)
+        _paint(pos[liquid], chill[liquid], None, forward, up, liq_png, half_h, half_v, width_px, 1.0, False, frame_pos=pos)
+        ice = np.asarray(Image.open(ice_png).convert("RGB"), dtype=np.float32)
+        liq = np.asarray(Image.open(liq_png).convert("RGB"), dtype=np.float32)
+        veil = np.any(liq < 250, axis=2)
+        blended = ice.copy()
+        blended[veil] = liquid_alpha * liq[veil] + (1.0 - liquid_alpha) * ice[veil]
+        Image.fromarray(np.clip(blended, 0, 255).astype(np.uint8)).save(png)
+        covered = blended[veil]
+        print(
+            f"liquid alpha {liquid_alpha:.2f} pixels {int(veil.sum())} mean {covered.mean():.1f}",
+            flush=True,
+        )
+        return ice.shape[0]
+    return _paint(pos, chill, bonds, forward, up, png, half_h, half_v, width_px, liquid_alpha, nucleus)
+
+
 def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None:
     import matplotlib
 
@@ -1113,8 +1204,8 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
 
     dpi = PRINT_DPI
     margin_l, margin_r, margin_t = 8.0, 3.5, 3.2
-    legend_h, caption_h = 7.5, 10.5
-    margin_b = legend_h + caption_h + 1.2
+    legend_h, caption_h = 7.5, 0.0
+    margin_b = legend_h + 1.2
     gap = 2.2
     narrow = width_mm < 150.0
     content_w = width_mm - margin_l - margin_r
@@ -1159,7 +1250,7 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
         slab_y = margin_b + max(0.0, right_h - slab_h)
         right_x = margin_l + slab_w + gap
         right_top = margin_b + right_h
-    if height_mm > 230.0:
+    if (not narrow) and height_mm > 230.0:
         raise SystemExit(f"figure is {height_mm:.0f} mm tall, past a CPC page")
     print(f"figure {width_mm:.0f} x {height_mm:.1f} mm", flush=True)
 
@@ -1287,20 +1378,6 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
         fontsize=7,
         bbox_to_anchor=(0.5, (caption_h + 0.4) / height_mm),
     )
-    new = stacks["cubicity"]
-    fig.text(
-        0.5,
-        0.012,
-        "The sheet in (b) is the outlined central run of (c). "
-        f"Layer cubicity is {new['late']:.2f} late and {new['minimum']:.2f} minimum. "
-        "Molecule cubicity is 0.576 late and 0.507 minimum.\n"
-        "Late layers are 0.75–0.81 of one CHILL+ class and the rest the other class, measured stacking disorder.",
-        fontsize=6.5,
-        ha="center",
-        va="bottom",
-        linespacing=1.25,
-        transform=fig.transFigure,
-    )
     png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(png, dpi=dpi)
     fig.savefig(pdf)
@@ -1362,15 +1439,18 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
             bonds = bonds[keep_bond]
         drawn = npos[sheet]
         drawn_chill = nchill[sheet]
+        # Number the guides with the stacking-bar index, not a fresh count
+        # of whichever layers survived the sheet cut.
+        layer_ids = display_layer_ids(npos, extended & np.isin(nchill, [0, 1]), axis)[sheet]
         remap = -np.ones(npos.shape[0], dtype=int)
         remap[np.flatnonzero(sheet)] = np.arange(int(sheet.sum()))
         if len(bonds):
             bonds = np.stack([remap[bonds[:, 0]], remap[bonds[:, 1]]], axis=1)
         print(f"  {label} drawn {int(sheet.sum())} bonds {len(bonds)}", flush=True)
-        prepared[label] = (drawn, drawn_chill, bonds, view, axis)
+        prepared[label] = (drawn, drawn_chill, bonds, view, axis, layer_ids)
         clouds[label] = (npos, nchill, extended, view, axis)
     def raw_half(label: str) -> tuple[float, float]:
-        drawn, drawn_chill, _bonds, view_i, axis_i = prepared[label]
+        drawn, drawn_chill, _bonds, view_i, axis_i, _ids = prepared[label]
         cluster = drawn[np.isin(drawn_chill, [0, 1])]
         _forward_i, right_i, up_i = basis(view_i, axis_i)
         centred = cluster - cluster.mean(axis=0)
@@ -1383,13 +1463,15 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
     angstrom_per_px = angstrom_per_mm / (PRINT_DPI / 25.4)
     images = {}
     stacks = {"shown": {}, "cubicity": {}}
-    for label, (drawn, drawn_chill, bonds, view, axis) in prepared.items():
+    for label, (drawn, drawn_chill, bonds, view, axis, layer_ids) in prepared.items():
         images[label] = work / f"nucleus-{label}.png"
         half_h, half_v = raw_half(label)
         width_px = max(32, int(round(2.0 * half_h / angstrom_per_px)))
         render_molecule(
             drawn, drawn_chill, bonds, view, axis, images[label], half_h, half_v, width_px, 0.18, nucleus=True
         )
+        draw_layer_guides(images[label], drawn, layer_ids, view, axis, half_v)
+        print(f"  {label} guides {sorted({int(i) for i in layer_ids if i >= 0})}", flush=True)
         npos, nchill, extended, _view, axis = clouds[label]
         kinds = layer_kinds(npos, nchill, extended, axis)
         stacks[label] = kinds
