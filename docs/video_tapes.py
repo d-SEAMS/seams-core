@@ -68,6 +68,11 @@ def prepare(root, seams, libdir, langdir, build):
     env["LD_LIBRARY_PATH"] = os.pathsep.join(
         [str(libdir), str(langdir), env.get("LD_LIBRARY_PATH", "")]
     )
+    if not env.get("FENNEL_LUA"):
+        for candidate in ("/usr/local/share/fennel.lua", "/usr/share/lua/5.4/fennel.lua"):
+            if Path(candidate).is_file():
+                env["FENNEL_LUA"] = candidate
+                break
     return root, env
 
 

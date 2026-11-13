@@ -94,8 +94,14 @@ A later mix of narration audio uses ffmpeg with =-c:a aac -aac_coder fast=.
    </video>
    <p>PLUMED driver.</p>
    <video controls width="960" preload="none">
+     <source src="https://huggingface.co/datasets/d-SEAMS/docs-videos/resolve/main/lua.mp4" type="video/mp4">
+     <track kind="captions" srclang="en" label="English" src="../_static/captions/lua.vtt" default>
+   </video>
+   <p>Lua and Fennel.</p>
+   <video controls width="960" preload="none">
      <source src="https://huggingface.co/datasets/d-SEAMS/docs-videos/resolve/main/migrate.mp4" type="video/mp4">
      <track kind="captions" srclang="en" label="English" src="../_static/captions/migrate.vtt" default>
    </video>
    <p>Migrate from 1.x.</p>
 #+end_export
+

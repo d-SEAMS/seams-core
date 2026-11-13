@@ -30,6 +30,7 @@ Pages for each front, with the 2.14.0 build command and the test CI runs:
 | Python | [api/python.md](api/python.md) | [tutorials/python.md](tutorials/python.md) |
 | Julia | [api/julia.md](api/julia.md) | [tutorials/julia.md](tutorials/julia.md) |
 | R | [api/r.md](api/r.md) | [tutorials/r.md](tutorials/r.md) |
+| Lua / Fennel | [api/lua.md](api/lua.md) | [tutorials/lua.md](tutorials/lua.md) |
 | GROMACS | [engines/gromacs.md](engines/gromacs.md) | [tutorials/gromacs.md](tutorials/gromacs.md) |
 | LAMMPS | [engines/lammps.md](engines/lammps.md) | [tutorials/lammps.md](tutorials/lammps.md) |
 | OpenMM | [engines/openmm.md](engines/openmm.md) | [tutorials/openmm.md](tutorials/openmm.md) |

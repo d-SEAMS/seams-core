@@ -39,6 +39,28 @@ if not luajit_dep.found()
     )
   endif
 endif
+# Debian relocates prefix from the multiarch pkgconfig directory, so the
+# stock Cflags point at a directory that does not hold lauxlib.h. Ask
+# pkg-config for the prefix written in the file.
+if luajit_dep.found() and not cc.has_header('lauxlib.h', dependencies: luajit_dep, required: false)
+  luajit_probe = run_command('pkg-config', '--dont-define-prefix', '--cflags', '--libs', 'luajit', check: false)
+  if luajit_probe.returncode() == 0
+    luajit_args = luajit_probe.stdout().split()
+    luajit_compile = []
+    luajit_link = []
+    foreach flag : luajit_args
+      if flag.startswith('-I') or flag.startswith('-D')
+        luajit_compile += flag
+      else
+        luajit_link += flag
+      endif
+    endforeach
+    luajit_dep = declare_dependency(
+      compile_args: luajit_compile,
+      link_args: luajit_link,
+    )
+  endif
+endif
 
 if not lua54_dep.found() and not luajit_dep.found()
   if lua_opt.enabled()

@@ -1,0 +1,7 @@
+Both interpreters print 2.14.0 and cubic 8. The LuaJIT FFI loads the same library and prints ffi ok.
+
+The mixed dump keeps 250 oxygens. The guest frame is clathrate 46, with 184 neighbour entries and ring sizes through 8.
+
+On ice Ih the published CHILL rule is hexagonal 128. The Lechner-Dellago average is 0.562448843702. Seeded cages are 128, the mutual neighbour list has 512 entries, and the sheet has 256 six-rings. The 512 signature on the guest frame is 2 cages and 40 atoms.
+
+Fennel compiles the basal interface and prints interface chill 1 352 434 49 3 25 0 0 0.

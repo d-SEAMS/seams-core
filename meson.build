@@ -797,6 +797,17 @@ if get_option('with_cli')
 
   python3 = find_program('python3', required: true)
   test(
+    'docs_c_api_tour',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'check_c_api_tour.py',
+      meson.project_source_root(),
+      meson.project_build_root() / 'src',
+      meson.project_build_root(),
+    ],
+    suite: 'docs',
+    timeout: 120)
+  test(
     'docs_check',
     python3,
     args: [meson.project_source_root() / 'docs' / 'check_examples.py'],

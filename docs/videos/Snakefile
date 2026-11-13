@@ -15,7 +15,7 @@ OUT = os.environ.get("VIDEO_OUT", os.path.join("build", "videos"))
 SLUGS = [
     "c", "cpp", "python", "fortran", "rust", "julia", "r", "cli",
     "interface", "rings-cages", "brine", "nucleation", "insitu", "migrate",
-    "lammps", "gromacs", "plumed",
+    "lammps", "gromacs", "plumed", "lua",
 ]
 
 

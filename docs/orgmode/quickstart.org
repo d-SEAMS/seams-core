@@ -145,12 +145,13 @@ Cage membership is not the CHILL+ star.
 ~import dseams~ is the in-tree module over ~libseams~.
 The Frame package is [[https://github.com/d-SEAMS/PydSEAMSlib][pydseams]]
 (~pip install pydseamslib~, compiled module ~yoda~).
-Lua is [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
-(~require("dseams")~).
+~require("dseams")~ is the in-tree Lua and Fennel module over the same
+header. The 1.x Lua library remains
+[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]].
 ~import pydseamslib~ is an alias of ~pydseams~.
 
 The Frame tutorial is [[https://d-seams.github.io/PydSEAMSlib/][pydseams docs]].
-Lua is [[https://d-seams.github.io/yodaStruct/][dseams docs]].
+The in-tree Lua pages are ~docs/api/lua.md~ and ~docs/tutorials/lua.md~.
 Language pages for the in-tree fronts are under ~docs/api~ and ~docs/tutorials~.
 
 The full install matrix is [[file:howto/install.org][Install]].

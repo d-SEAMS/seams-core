@@ -1,0 +1,36 @@
+## scene-01.tape
+2.14.0 cubic 8
+
+2.14.0 cubic 8
+
+ffi ok
+## scene-02.tape
+dseams.read nop=250
+
+cubic 0 hexagonal 0 water 0 interfacial 0 clathrate 46 interClathrate 0 unclassified 0 reCubic 0 reHex 0
+
+neighbors rows=46 nnz=184
+
+q6 0.595133082718
+
+rings 3 37 4 273 5 34 6 167 7 0 8 0 fraction 1.000000
+## scene-03.tape
+hexagonal 128
+q6bar 0.562448843702
+cages 128 0 0 0
+knn 512
+rdf 8 4158.66460658 0
+rcn 26.2047244094
+cn 4.03149606299
+hbond 0
+rho 4 0.0307791111112
+fp 16 256
+site 8
+pairs 0 128 0
+domain 0 0 0
+prism 0
+sheet 256
+vert 6 0
+sig 2 40
+## scene-04.tape
+interface chill 1 352 434 49 3 25 0 0 0

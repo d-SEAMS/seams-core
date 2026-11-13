@@ -22,7 +22,7 @@ PAGES = {
     "r": "r.md",
 }
 EXAMPLES = {
-    "c": "docs/examples/minimal_c.c",
+    "c": "docs/examples/c_api_tour.c",
     "cxx": "docs/examples/minimal_cpp.cpp",
     "python": "docs/examples/minimal_py.py",
     "rust": "docs/examples/minimal_rust.rs",
