@@ -17,7 +17,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "docs" / "examples"))
 
 import science_render as render
-from render_scenes import basal_bilayers
+from render_scenes import basal_bilayers, centres_outside_outline, wrap_into_cell
 
 
 def check_layers(positions: np.ndarray, labels: np.ndarray):
@@ -62,6 +62,17 @@ def check_layers(positions: np.ndarray, labels: np.ndarray):
     return centres
 
 
+def check_wrapped(raw, origin, lengths):
+    before = centres_outside_outline(raw, origin, lengths)
+    if before == 0:
+        raise SystemExit("the interface dump has no centre outside the cell")
+    wrapped = wrap_into_cell(raw, origin, lengths)
+    after = centres_outside_outline(wrapped, origin, lengths)
+    if after:
+        raise SystemExit(f"{after} wrapped centres project outside the cell outline")
+    print(f"wrapped {before} outside centres into the cell")
+
+
 def main():
     import os
     import science_tutorials as tutorials
@@ -78,6 +89,16 @@ def main():
     positions = tutorials.read_dump(path)
     labels, _counts = tutorials.chill_file(tutorials._lib(Path(libdir)), path)
     check_layers(positions, labels)
+    origin = np.zeros(3)
+    lengths = []
+    with path.open() as handle:
+        for line in handle:
+            if line.startswith("ITEM: BOX BOUNDS"):
+                for _ in range(3):
+                    lo, hi = (float(item) for item in handle.readline().split()[:2])
+                    lengths.append(hi - lo)
+                break
+    check_wrapped(positions, origin, np.asarray(lengths))
     return 0
 
 
