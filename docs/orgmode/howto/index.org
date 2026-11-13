@@ -5,6 +5,7 @@ A how-to solves a goal you already have. It is not a learning path.
 
 | guide | goal |
 |-------+------|
+| [[file:upgrade-2.14.org][Upgrade from 2.13]] | API, engines, threads, and the remaining ~--types~ alias |
 | [[file:install.org][Install the engine]] | Get a ~seams~ binary |
 | [[file:bindings.org][Language fronts]] | Python, R, and Julia against ~libseams_lang~ |
 | [[file:versions.org][Version pins]] | The five files that must agree |
@@ -32,6 +33,7 @@ A how-to solves a goal you already have. It is not a learning path.
 .. toctree::
    :maxdepth: 1
 
+   upgrade-2.14
    install
    bindings
    versions

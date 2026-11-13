@@ -13,6 +13,8 @@ macros from the project version (2.14.0).
 `seams_status` is `SEAMS_OK`, `SEAMS_ERR_NULL`, `SEAMS_ERR_RANGE`, `SEAMS_ERR_BOX`,
 `SEAMS_ERR_ARG`, `SEAMS_ERR_STATE`, `SEAMS_ERR_NOMEM`, or `SEAMS_ERR_INTERNAL`.
 `seams_status_string` names a code. `seams_last_error` is the thread-local detail.
+The enumerator types are `seams_status`, `seams_label`, `seams_ring_symmetry`,
+`seams_chill_rule`, and `seams_graph`.
 
 ## Threads
 

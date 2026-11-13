@@ -750,6 +750,12 @@ if get_option('with_cli')
     args: [meson.project_source_root() / 'docs' / 'check_examples.py'],
     timeout: 60)
   test(
+    'docs_c_symbols',
+    python3,
+    args: ['-m', 'doctest', meson.project_source_root() / 'docs' / 'check_c_symbols.py'],
+    workdir: meson.project_source_root() / 'docs',
+    timeout: 60)
+  test(
     'docs_sitting',
     python3,
     args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check'],

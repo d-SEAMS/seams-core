@@ -15,6 +15,7 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 | [[file:glossary.org][glossary]] | Engine terms |
 | [[file:../explanation/performance.org][Sitting tables]] | Medians from ~benchmarks/rc3-sitting.csv~ |
 | [[file:../explanation/trace-threads.org][Thread controls]] | ~OMP_NUM_THREADS~, ~taskset~, ~lc_set_threads~ |
+| [[file:release-2.14.org][2.14.0 release notes]] | API, engines, threads, and deprecations since ~2dbefa97~ |
 
 #+begin_export rst
 .. toctree::
@@ -28,4 +29,5 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
    nix
    cross-language
    glossary
+   release-2.14
 #+end_export
