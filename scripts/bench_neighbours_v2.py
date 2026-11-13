@@ -214,6 +214,18 @@ def main():
                 if mode == "symmetry":
                     jobs.append(("py", "mdapy-diamond", molecules, threads))
                     jobs.append(("py", "ovito-diamond", molecules, threads))
+    only = os.environ.get("NEIGH_ONLY", "")
+    if only:
+        mode, mol_s, thr_s = only.split(":")
+        molecules = int(mol_s)
+        threads = int(thr_s)
+        wanted = {mode, f"ovito-{mode}"}
+        jobs = [
+            job for job in jobs
+            if job[1] in wanted and job[2] == molecules and job[3] == threads
+        ]
+        if len(jobs) != 2:
+            raise SystemExit(f"NEIGH_ONLY={only} matched {len(jobs)} jobs")
     for who, kind, molecules, threads in jobs:
         cores = "0" if threads == 1 else f"0-{threads - 1}"
         if who == "dseams":
