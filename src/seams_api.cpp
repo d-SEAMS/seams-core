@@ -52,9 +52,11 @@
 #include <exception>
 #include <fstream>
 #include <memory>
+#include <mutex>
 #include <new>
 #include <set>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -73,6 +75,30 @@ struct seams_object {
 thread_local std::string g_error;
 thread_local seams_object *g_current = nullptr;
 int g_threads = 0;
+std::mutex g_live_mu;
+std::unordered_set<void *> g_live;
+
+void *track(void *ptr) {
+  if (ptr == nullptr) {
+    return nullptr;
+  }
+  std::lock_guard<std::mutex> lock(g_live_mu);
+  g_live.insert(ptr);
+  return ptr;
+}
+
+/* NULL is a no-op. A second destroy records an error and does not free. */
+bool claim(void *ptr) {
+  if (ptr == nullptr) {
+    return false;
+  }
+  std::lock_guard<std::mutex> lock(g_live_mu);
+  if (g_live.erase(ptr) == 0) {
+    g_error = "double destroy";
+    return false;
+  }
+  return true;
+}
 
 struct handle_guard {
   seams_object *previous;
@@ -617,7 +643,9 @@ int seams_get_num_threads(void) {
 seams_system *seams_system_create(void) {
   try {
     clear_error();
-    return new seams_system();
+    auto *sys = new seams_system();
+    track(sys);
+    return sys;
   } catch (const std::bad_alloc &) {
     g_error = "out of memory";
     return nullptr;
@@ -625,10 +653,10 @@ seams_system *seams_system_create(void) {
 }
 
 void seams_system_destroy(seams_system *sys) {
-  try {
-    delete sys;
-  } catch (...) {
+  if (!claim(sys)) {
+    return;
   }
+  delete sys;
 }
 
 seams_status seams_system_set_atoms(seams_system *sys, const double *xyz, size_t n,
@@ -775,7 +803,7 @@ seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type,
         nb->cols[static_cast<std::size_t>(cursor++)] = id;
       }
     }
-    *out = nb.release();
+    *out = static_cast<seams_neighbours *>(track(nb.release()));
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
@@ -788,10 +816,10 @@ seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type,
 }
 
 void seams_neighbours_destroy(seams_neighbours *nb) {
-  try {
-    delete nb;
-  } catch (...) {
+  if (!claim(nb)) {
+    return;
   }
+  delete nb;
 }
 
 int seams_neighbours_count(const seams_neighbours *nb) {
@@ -1098,7 +1126,7 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
     } catch (const std::exception &) {
       /* Prism labels stay at the size or cage code already written. */
     }
-    *out = rings.release();
+    *out = static_cast<seams_rings *>(track(rings.release()));
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
@@ -1111,10 +1139,10 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
 }
 
 void seams_rings_destroy(seams_rings *rings) {
-  try {
-    delete rings;
-  } catch (...) {
+  if (!claim(rings)) {
+    return;
   }
+  delete rings;
 }
 
 int seams_rings_count(const seams_rings *rings) {
@@ -1398,6 +1426,28 @@ seams_status seams_ql(seams_system *sys, double cutoff, int type, int order_l, i
   if (!(cutoff > 0.0) || !std::isfinite(cutoff)) {
     return fail(SEAMS_ERR_RANGE, "cutoff must be positive");
   }
+  if (sys->cloud.box.size() >= 3) {
+    const double edge =
+        std::min(sys->cloud.box[0], std::min(sys->cloud.box[1], sys->cloud.box[2]));
+    double absurd = edge;
+    if (sys->cloud.box.size() >= 6) {
+      absurd = std::max(absurd, std::max(std::abs(sys->cloud.box[3]),
+                                         std::max(std::abs(sys->cloud.box[4]),
+                                                  std::abs(sys->cloud.box[5]))));
+      absurd = std::max(absurd, std::max(sys->cloud.box[0], std::max(sys->cloud.box[1],
+                                                                    sys->cloud.box[2])));
+    }
+    double shear = 0.0;
+    if (sys->cloud.box.size() >= 6 && edge > 0.0) {
+      shear = std::max(std::abs(sys->cloud.box[3]),
+                       std::max(std::abs(sys->cloud.box[4]), std::abs(sys->cloud.box[5]))) /
+              edge;
+    }
+    const bool many = edge > 0.0 && (cutoff / edge > 64.0 || shear > 64.0);
+    if (many || absurd > 1.0e8) {
+      return fail(SEAMS_ERR_BOX, "cutoff spans too many periodic images");
+    }
+  }
   if (order_l != 3 && order_l != 4 && order_l != 6 && order_l != 8 && order_l != 12) {
     return fail(SEAMS_ERR_RANGE, "order is 3, 4, 6, 8, or 12");
   }
@@ -1596,7 +1646,7 @@ seams_status seams_cages_find(seams_system *sys, double cutoff, int type, int gr
     }
     auto cages = std::make_unique<seams_cage_set>();
     tally_cages(cages.get(), work, type, hc, ddc);
-    *out = cages.release();
+    *out = static_cast<seams_cage_set *>(track(cages.release()));
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
@@ -1609,10 +1659,10 @@ seams_status seams_cages_find(seams_system *sys, double cutoff, int type, int gr
 }
 
 void seams_cages_destroy(seams_cage_set *cages) {
-  try {
-    delete cages;
-  } catch (...) {
+  if (!claim(cages)) {
+    return;
   }
+  delete cages;
 }
 
 seams_status seams_cages_counts(const seams_cage_set *cages, int *n_hex, int *n_cubic,
@@ -1805,7 +1855,7 @@ seams_status seams_brine_analyse(seams_system *sys, const int *ice, size_t n_ice
     options.axis = axis;
     auto front = std::make_unique<seams_brine>();
     front->snapshot = site::analyseFront(sys->cloud, ice_flag, waters, ions, options);
-    *out = front.release();
+    *out = static_cast<seams_brine *>(track(front.release()));
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
@@ -1818,10 +1868,10 @@ seams_status seams_brine_analyse(seams_system *sys, const int *ice, size_t n_ice
 }
 
 void seams_brine_destroy(seams_brine *front) {
-  try {
-    delete front;
-  } catch (...) {
+  if (!claim(front)) {
+    return;
   }
+  delete front;
 }
 
 seams_status seams_brine_fronts(const seams_brine *front, double *z_enter, double *z_exit,
@@ -2007,7 +2057,7 @@ seams_status seams_neighbours_knn(seams_system *sys, int k, double cutoff, int t
         nb->cols[static_cast<std::size_t>(cursor++)] = id;
       }
     }
-    *out = nb.release();
+    *out = static_cast<seams_neighbours *>(track(nb.release()));
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
@@ -2307,7 +2357,7 @@ seams_status seams_fingerprint(seams_system *sys, double cutoff, int type, int k
     handle->atom_keys = fp.atomKeys;
     handle->ring_census = fp.ringCensus;
     handle->hops = fp.hops;
-    *out = handle.release();
+    *out = static_cast<seams_topo *>(track(handle.release()));
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
@@ -2320,10 +2370,10 @@ seams_status seams_fingerprint(seams_system *sys, double cutoff, int type, int k
 }
 
 void seams_fingerprint_destroy(seams_topo *fp) {
-  try {
-    delete fp;
-  } catch (...) {
+  if (!claim(fp)) {
+    return;
   }
+  delete fp;
 }
 
 seams_status seams_fingerprint_key(const seams_topo *fp, char *buf, size_t cap, size_t *n_out) {
