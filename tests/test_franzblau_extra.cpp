@@ -255,6 +255,35 @@ TEST_CASE("ringNetwork on a dense box matches the filtered search",
   }
 }
 
+TEST_CASE("a failing size-7 arm matches the pairing walk", "[franzblau]") {
+  // 0-1-3-5-6-4-2 is a primitive 7-ring. A second arm 0-7-8-5 gives vertex
+  // 5 two shortest paths, so cap 1 takes the level walk. Arm 0-9-10-5
+  // already meets 6, through 10-6 and through 9-12-6, and is dropped
+  // before it is paired.
+  std::vector<std::vector<int>> idx(13);
+  auto link = [&](int a, int b) {
+    idx[static_cast<std::size_t>(a)].push_back(b);
+    idx[static_cast<std::size_t>(b)].push_back(a);
+  };
+  for (int i = 0; i < 13; i++) {
+    idx[static_cast<std::size_t>(i)].push_back(i);
+  }
+  for (const auto edge : {std::pair{0, 1}, {1, 3}, {3, 5}, {5, 6}, {6, 4}, {4, 2}, {2, 0},
+                          {0, 7}, {7, 8}, {8, 5}, {0, 9}, {9, 10}, {10, 5}, {10, 6}, {9, 12},
+                          {12, 6}}) {
+    link(edge.first, edge.second);
+  }
+  const auto paired = primitive::ringNetworkAtCap(idx, 7, 0);
+  const auto levels = primitive::ringNetworkAtCap(idx, 7, 1);
+  REQUIRE(paired == levels);
+  std::set<std::vector<int>> got;
+  for (const auto &ring : levels) {
+    got.insert(canonicalRing(ring));
+  }
+  REQUIRE(got.count(canonicalRing({0, 1, 3, 5, 6, 4, 2})) == 1);
+  REQUIRE(got.count(canonicalRing({0, 9, 10, 5, 6, 4, 2})) == 0);
+}
+
 TEST_CASE("two ring searches at once keep their own rings", "[franzblau]") {
   std::vector<std::vector<int>> sparse(120);
   for (int c = 0; c < 20; c++) {

@@ -18,6 +18,10 @@ std::vector<int> ringCensusCounts(const std::vector<std::vector<int>> &nList, in
 #include <stdexcept>
 #include <unordered_set>
 
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
+
 namespace {
 
 constexpr std::uint64_t kOffset = 1469598103934665603ULL;
@@ -172,6 +176,94 @@ std::uint64_t wlHash(const std::vector<std::vector<int>> &adjacency, int root,
   return h;
 }
 
+// Same refinement as wlHash. A wide ball repeats neighbour colors, so one
+// sort names them and each vertex counts copies instead of sorting its list.
+std::uint64_t wlHashWide(const std::vector<std::vector<int>> &adjacency, int root,
+                         int rounds, const std::vector<int> &colors) {
+  const int n = static_cast<int>(adjacency.size());
+  const bool colored = static_cast<int>(colors.size()) == n;
+  thread_local std::vector<std::uint64_t> color;
+  thread_local std::vector<std::uint64_t> next;
+  thread_local std::vector<std::uint64_t> all;
+  thread_local std::vector<std::uint64_t> palette;
+  thread_local std::vector<int> colorId;
+  thread_local std::vector<int> counts;
+  thread_local std::vector<std::pair<std::uint64_t, int>> order;
+  color.resize(static_cast<std::size_t>(n));
+  next.resize(static_cast<std::size_t>(n));
+  for (int i = 0; i < n; i++) {
+    const std::uint64_t deg =
+        static_cast<std::uint64_t>(adjacency[static_cast<std::size_t>(i)].size());
+    std::uint64_t h = mix(kOffset, deg + (i == root ? 0x9e3779b97f4a7c15ULL : 0ULL));
+    if (colored) {
+      h = mix(h, static_cast<std::uint64_t>(
+                     static_cast<std::int64_t>(colors[static_cast<std::size_t>(i)])) +
+                     1ULL);
+    }
+    color[static_cast<std::size_t>(i)] = h;
+  }
+  for (int r = 0; r < rounds; r++) {
+    order.resize(static_cast<std::size_t>(n));
+    for (int i = 0; i < n; i++) {
+      order[static_cast<std::size_t>(i)] = {color[static_cast<std::size_t>(i)], i};
+    }
+    std::sort(order.begin(), order.end());
+    palette.clear();
+    colorId.resize(static_cast<std::size_t>(n));
+    for (int i = 0; i < n; i++) {
+      if (palette.empty() || palette.back() != order[static_cast<std::size_t>(i)].first) {
+        palette.push_back(order[static_cast<std::size_t>(i)].first);
+      }
+      colorId[static_cast<std::size_t>(order[static_cast<std::size_t>(i)].second)] =
+          static_cast<int>(palette.size()) - 1;
+    }
+    const int nColors = static_cast<int>(palette.size());
+    if (nColors > 64) {
+      thread_local std::vector<std::uint64_t> bag;
+      for (int i = 0; i < n; i++) {
+        bag.clear();
+        for (const int j : adjacency[static_cast<std::size_t>(i)]) {
+          bag.push_back(color[static_cast<std::size_t>(j)]);
+        }
+        std::sort(bag.begin(), bag.end());
+        std::uint64_t h = mix(kOffset, color[static_cast<std::size_t>(i)]);
+        for (const std::uint64_t c : bag) {
+          h = mix(h, c);
+        }
+        next[static_cast<std::size_t>(i)] = h;
+      }
+    } else {
+      counts.assign(static_cast<std::size_t>(std::max(nColors, 0)), 0);
+      for (int i = 0; i < n; i++) {
+        std::fill(counts.begin(), counts.end(), 0);
+        for (const int j : adjacency[static_cast<std::size_t>(i)]) {
+          counts[static_cast<std::size_t>(colorId[static_cast<std::size_t>(j)])]++;
+        }
+        std::uint64_t h = mix(kOffset, color[static_cast<std::size_t>(i)]);
+        for (int c = 0; c < nColors; c++) {
+          const std::uint64_t col = palette[static_cast<std::size_t>(c)];
+          const int copies = counts[static_cast<std::size_t>(c)];
+          for (int t = 0; t < copies; t++) {
+            h = mix(h, col);
+          }
+        }
+        next[static_cast<std::size_t>(i)] = h;
+      }
+    }
+    color.swap(next);
+  }
+  all.assign(color.begin(), color.begin() + n);
+  std::sort(all.begin(), all.end());
+  std::uint64_t h = mix(kOffset, static_cast<std::uint64_t>(n));
+  if (root >= 0 && root < n) {
+    h = mix(h, color[static_cast<std::size_t>(root)]);
+  }
+  for (const std::uint64_t c : all) {
+    h = mix(h, c);
+  }
+  return h;
+}
+
 struct LocalGraph {
   std::vector<int> atoms;
   std::vector<std::vector<int>> adjacency;
@@ -294,6 +386,62 @@ LocalKey localKey(const Rows &rows, int atom, int hops, const std::vector<int> &
                            nullptr);
 }
 
+bool ballCoversAll(const Rows &rows, int hops) {
+  const int n = static_cast<int>(rows.size());
+  if (n <= 1 || hops < 1) {
+    return n <= 1;
+  }
+  std::vector<int> seen(static_cast<std::size_t>(n), 0);
+  std::vector<int> depth(static_cast<std::size_t>(n), 0);
+  std::vector<int> order;
+  order.reserve(static_cast<std::size_t>(n));
+  for (int atom = 0; atom < n; atom++) {
+    std::fill(seen.begin(), seen.end(), 0);
+    order.clear();
+    seen[static_cast<std::size_t>(atom)] = 1;
+    depth[static_cast<std::size_t>(atom)] = 0;
+    order.push_back(atom);
+    for (std::size_t head = 0; head < order.size(); head++) {
+      const int v = order[head];
+      if (depth[static_cast<std::size_t>(v)] == hops) {
+        continue;
+      }
+      const auto &row = rows[static_cast<std::size_t>(v)];
+      for (std::size_t m = 1; m < row.size(); m++) {
+        const int u = row[m];
+        if (u < 0 || u >= n || seen[static_cast<std::size_t>(u)] != 0) {
+          continue;
+        }
+        depth[static_cast<std::size_t>(u)] = depth[static_cast<std::size_t>(v)] + 1;
+        seen[static_cast<std::size_t>(u)] = 1;
+        order.push_back(u);
+      }
+    }
+    if (static_cast<int>(order.size()) != n) {
+      return false;
+    }
+  }
+  return true;
+}
+
+std::vector<std::vector<int>> adjacencyInBall(const Rows &rows) {
+  const int n = static_cast<int>(rows.size());
+  std::vector<std::vector<int>> adj(static_cast<std::size_t>(n));
+  for (int i = 0; i < n; i++) {
+    const auto &row = rows[static_cast<std::size_t>(i)];
+    auto &out = adj[static_cast<std::size_t>(i)];
+    out.reserve(row.empty() ? 0 : row.size() - 1);
+    for (std::size_t m = 1; m < row.size(); m++) {
+      const int u = row[m];
+      if (u < 0 || u >= n || u == i) {
+        continue;
+      }
+      out.push_back(u);
+    }
+  }
+  return adj;
+}
+
 FrameFingerprint fingerprint(const Rows &rows, int hops, int maxRingSize,
                              const std::vector<int> &colors) {
   FrameFingerprint out;
@@ -306,14 +454,48 @@ FrameFingerprint fingerprint(const Rows &rows, int hops, int maxRingSize,
   // a nauty host and a plain host name the same frame the same way; the
   // per-atom keys carry the exact certificate when it exists.
   std::vector<std::uint64_t> wl(static_cast<std::size_t>(n));
-  for (int i = 0; i < n; i++) {
-    const LocalGraph g = buildLocalGraph(rows, i, hops, colors);
-    std::uint64_t refined = 0;
-    LocalKey lk = localKeyFromGraph(g, hops, &refined);
-    out.method = lk.method;
-    out.classes[lk.key] += 1;
-    out.atomKeys.push_back(std::move(lk.key));
-    wl[static_cast<std::size_t>(i)] = refined;
+  // A hop ball that is the whole frame is the same graph from every atom.
+  // The refinement only moves the distinguished root. Ice is far larger
+  // than this and keeps the per-atom ball.
+#ifndef SEAMS_HAS_NAUTY
+  int maxDeg = 0;
+  if (n > 1 && n <= 4096) {
+    for (const auto &row : rows) {
+      maxDeg = std::max(maxDeg, static_cast<int>(row.size()) - 1);
+    }
+  }
+  // Only a very dense frame can have every hop ball equal the whole graph.
+  const bool shared = maxDeg > 100 && ballCoversAll(rows, hops);
+#else
+  const bool shared = false;
+#endif
+  if (shared) {
+    const auto adj = adjacencyInBall(rows);
+    const std::vector<int> none;
+    const std::vector<int> &paint = colored ? colors : none;
+    out.atomKeys.resize(static_cast<std::size_t>(n));
+    out.method = "wl";
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (n >= 128 && !omp_in_parallel())
+#endif
+    for (int i = 0; i < n; i++) {
+      const std::uint64_t refined = wlHashWide(adj, i, hops + 2, paint);
+      wl[static_cast<std::size_t>(i)] = refined;
+      out.atomKeys[static_cast<std::size_t>(i)] = hex(refined);
+    }
+    for (const auto &key : out.atomKeys) {
+      out.classes[key] += 1;
+    }
+  } else {
+    for (int i = 0; i < n; i++) {
+      const LocalGraph g = buildLocalGraph(rows, i, hops, colors);
+      std::uint64_t refined = 0;
+      LocalKey lk = localKeyFromGraph(g, hops, &refined);
+      out.method = lk.method;
+      out.classes[lk.key] += 1;
+      out.atomKeys.push_back(std::move(lk.key));
+      wl[static_cast<std::size_t>(i)] = refined;
+    }
   }
   out.wlAtom = wl;
   std::sort(wl.begin(), wl.end());
