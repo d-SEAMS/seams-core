@@ -27,7 +27,7 @@ Highway and chemfiles. Optional pixi features add IRA, sphericart,
 nauty, MPI, the docs stack, and the Coq/SymPy proofs.
 
 ~-Dwith_python=true~ builds the in-tree nanobind module.
-~-Dwith_lua=enabled~ is a Meson error: Lua is yodaStruct.
+~-Dwith_lua=auto~ builds the in-tree Lua module when Lua 5.4 or LuaJIT is present.
 
 * Clone and build
 

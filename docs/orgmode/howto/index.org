@@ -9,6 +9,7 @@ A how-to solves a goal you already have. It is not a learning path.
 | [[file:migrate-1x.org][Migrate from 1.x]] | Lua and ~yodaStruct -c~ mapped onto ~seams~ and the C API |
 | [[file:install.org][Install the engine]] | Get a ~seams~ binary |
 | [[file:bindings.org][Language fronts]] | Python, R, and Julia against ~libseams_lang~ |
+| [[file:lua.org][Lua and Fennel]] | ~require("dseams")~ over ~seams.h~ |
 | [[file:versions.org][Version pins]] | The five files that must agree |
 | [[file:benchmarks.org][Benchmarks]] | Which driver to time, and what to record |
 | [[file:literature-h2h.org][Literature head-to-head]] | mdapy, pyscal3, vesin, IRA and SQQ on ideal ice |
@@ -46,6 +47,7 @@ A how-to solves a goal you already have. It is not a learning path.
    migrate-1x
    install
    bindings
+   lua
    versions
    benchmarks
    paper-tables

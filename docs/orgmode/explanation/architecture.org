@@ -14,8 +14,9 @@ vesin is the fallback when linkcell is not built.
 
 ~import dseams~ in this tree is the nanobind module over ~seams.h~.
 It is not ~pydseams.Frame~. The two Python surfaces call the same
-classifiers and keep separate release trains. Lua stays in yodaStruct
-so a C++ build does not need a Lua toolchain.
+classifiers and keep separate release trains. ~require("dseams")~
+in this tree calls ~seams.h~. ~-Dwith_lua=disabled~ leaves the Lua
+toolchain out of a C++ build.
 
 The front ends take seams-core as a Meson subproject (~libyodaLib~)
 or as a flake input. They do not vendor a second engine.
@@ -72,7 +73,7 @@ There is no ~yodaStruct~ executable in any of the three repositories.
 
 The 2020 CMake Nix derivation of ~yodaStruct~ is gone.
 ~-Dwith_python=true~ builds the in-tree nanobind module.
-~-Dwith_lua=enabled~ is a Meson error that names yodaStruct.
+~-Dwith_lua=auto~ builds ~require("dseams")~ over ~seams.h~ when Lua 5.4 or LuaJIT is present.
 
 * Neighbour backends
 

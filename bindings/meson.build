@@ -169,6 +169,8 @@ endif
 # CxxWrap needs libcxxwrap_julia, which is a BinaryBuilder product and
 # is not part of the pixi or Nix closure. The Julia front that ships is
 # the ccall package under bindings/julia/Dseams.
+subdir('lua')
+
 cxxwrap_dep = dependency('libcxxwrap_julia', required: false)
 if cxxwrap_dep.found()
   message('libcxxwrap_julia found; the shipped Julia front is still ccall')

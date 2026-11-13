@@ -761,11 +761,6 @@ if get_option('with_python')
     timeout: 180)
 endif
 
-# Lua is a library in the yodaStruct / luadseams repo, not this one.
-if not get_option('with_lua').disabled()
-  error('Lua/Fennel is the dseams library: https://github.com/d-SEAMS/yodaStruct')
-endif
-
 if get_option('with_cli')
   seams_cli_link = _link_args
   if host_machine.system() == 'linux'

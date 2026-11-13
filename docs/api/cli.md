@@ -20,8 +20,7 @@ and `6 54`.
 
 `docs/examples/minimal_cli.sh` runs those five
 commands. `meson test docs_examples` runs it.
-Lua is not a binding in this repository. `examples/chill-plus.lua` is an
-options table for the separate yodaStruct package.
+`require("dseams")` is the Lua module over `seams.h`. `examples/chill-plus.lua` is the options table passed as the CHILL+ rule.
 
 ```{literalinclude} ../../../docs/examples/minimal_cli.sh
 :language: bash
