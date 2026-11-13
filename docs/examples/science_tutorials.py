@@ -418,7 +418,7 @@ def render_interface_v12(root: Path, pos, chill, box, figures: Path):
 
         render = _load_science_render(root)
         origin = np.zeros(3)
-        render_interface(render, pos, chill, origin, box, png, width=1280)
+        render_interface(render, pos, chill, origin, box, png)
         if not png.is_file() or png.stat().st_size < 1000:
             raise RuntimeError("renderer wrote no raster")
         print(f"v12 raster {png.name} bytes {png.stat().st_size}")
