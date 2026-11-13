@@ -186,6 +186,30 @@ def _link_capi():
 
 
 _link_capi()
+
+
+def _link_lang():
+    """Point the generated book at the per-language API pages."""
+    index = os.path.join(_source, "index.rst")
+    if not os.path.isfile(index):
+        return
+    text = open(index, encoding="utf-8").read()
+    if "lang/index" in text:
+        return
+    extra = (
+        "\n.. toctree::\n"
+        "   :maxdepth: 2\n"
+        "   :caption: Language APIs\n"
+        "\n"
+        "   lang/index\n"
+    )
+    with open(index, "a", encoding="utf-8") as handle:
+        handle.write(extra)
+
+
+_link_lang()
+os.environ["DSEAMS_DOC_BUILD"] = "1"
+sys.path.insert(0, os.path.abspath(os.path.join(_docs, "..", "bindings", "python")))
 _doxyrest = os.path.abspath(os.path.join(_source, "../../subprojects/doxyrest/sphinx"))
 _xml_index = os.path.join(_source, "xml", "index.xml")
 _api_index = os.path.join(_source, "api", "index.rst")
@@ -210,12 +234,17 @@ author = "Rohit Goswami, Amrita Goswami, Ruhila S"
 # -- General configuration ---------------------------------------------------
 extensions = [
     "myst_parser",
+    "sphinx.ext.autodoc",
     "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
+    "numpydoc",
     "sphinx_sitemap",
     "sphinx_design",
     "sphinxcontrib.mermaid",
 ]
+numpydoc_show_class_members = False
+numpydoc_class_members_toctree = False
+numpydoc_validation_checks = set()
 doctest_global_setup = "import sys\nsys.path.insert(0, {!r})\n".format(
     os.path.join(_docs, "examples")
 )

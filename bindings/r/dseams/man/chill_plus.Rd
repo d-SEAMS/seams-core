@@ -25,4 +25,17 @@ A data.frame with columns \code{atom}, \code{type}, \code{label},
 }
 \description{
 Per-atom CHILL+ labels from libyodaLib.
+Ice Ih (\code{input/traj/ice1h.lammpstrj}, every atom) is 128 hexagonal
+waters. The example asserts that count and the 256 primitive six-rings.
+}
+\examples{
+root <- Sys.getenv("DSEAMS_ROOT", "")
+if (nzchar(root)) {
+  frame <- read_frame(file.path(root, "input", "traj", "ice1h.lammpstrj"),
+                      type = -1L)
+  ice <- chill_plus(frame, graph = "cutoff")
+  stopifnot(sum(ice$name == "hexagonal") == 128L)
+  rings <- primitive_rings(frame, graph = "cutoff", max_depth = 6L)
+  stopifnot(rings$n[rings$size == 6L] == 256L)
+}
 }

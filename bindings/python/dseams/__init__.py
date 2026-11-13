@@ -4,22 +4,99 @@
 Positions are Angstrom, C-contiguous, and are not copied on the way in.
 ``box`` is three edge lengths or the nine LAMMPS numbers
 ``ox, oy, oz, lx, ly, lz, xy, xz, yz``.
+
+Ice Ih (``input/traj/ice1h.lammpstrj``, every atom) is 128 hexagonal
+waters and 256 primitive six-rings. ``core_counts.check`` asserts both.
 """
 
 from __future__ import annotations
 
+import os
+
 import numpy as np
 
-from dseams import _core
+if os.environ.get("DSEAMS_DOC_BUILD") == "1":
+
+    class _DocCore:
+        """Stand-in for the extension module while the book is built."""
+
+        PUBLISHED = 0
+        OVITO = 1
+        CUTOFF = 0
+        MUTUAL = 1
+
+        class Frame:
+            """A frame whose box may be three lengths or nine LAMMPS numbers."""
+
+            def set_frame(self, positions, box):
+                """Store positions and a cell. The documentation build does not call this."""
+
+            def chill_plus(self, cutoff, graph, rule):
+                """CHILL+ labels. The documentation build does not call this."""
+
+            def q4q6(self, cutoff):
+                """Local q4 and q6. The documentation build does not call this."""
+
+            def neighbours(self, cutoff, graph):
+                """Neighbour list. The documentation build does not call this."""
+
+            def rings(self, cutoff, max_depth):
+                """Ring census. The documentation build does not call this."""
+
+        @staticmethod
+        def version():
+            """Engine version string."""
+            return "docs"
+
+        @staticmethod
+        def set_num_threads(n):
+            """Request worker threads."""
+
+        @staticmethod
+        def num_threads():
+            """Worker threads the engine is using."""
+            return 1
+
+    _core = _DocCore()
+else:
+    from dseams import _core
 
 PUBLISHED = _core.PUBLISHED
 OVITO = _core.OVITO
 CUTOFF = _core.CUTOFF
 MUTUAL = _core.MUTUAL
 
-version = _core.version
-set_num_threads = _core.set_num_threads
-num_threads = _core.num_threads
+
+def version():
+    """Engine version string.
+
+    Returns
+    -------
+    str
+        Version reported by the C library.
+    """
+    return _core.version()
+
+
+def set_num_threads(n):
+    """Request worker threads.
+
+    Parameters
+    ----------
+    n : int
+        Thread count.
+    """
+    return _core.set_num_threads(n)
+
+
+def num_threads():
+    """Worker threads the engine is using.
+
+    Returns
+    -------
+    int
+    """
+    return _core.num_threads()
 
 
 def _frame_api():
@@ -55,6 +132,15 @@ class Frame(_core.Frame):
     """A frame whose box may be three lengths, nine LAMMPS numbers, or an array."""
 
     def set_frame(self, positions, box):
+        """Store positions and a cell.
+
+        Parameters
+        ----------
+        positions : array_like
+            Coordinates, shape ``(n, 3)``, in angstrom.
+        box : array_like
+            Three edge lengths or nine LAMMPS cell numbers.
+        """
         pos = np.ascontiguousarray(positions, dtype=np.float64)
         super().set_frame(pos, _as_box(box))
 
@@ -68,6 +154,22 @@ def chill_plus(positions, box, rule=PUBLISHED, graph=CUTOFF, cutoff=3.5):
 
 
 def q4q6(positions, box, cutoff=3.5):
+    """Local q4 and q6 on the cutoff shell.
+
+    Parameters
+    ----------
+    positions : array_like
+        Coordinates, shape ``(n, 3)``, in angstrom.
+    box : array_like
+        Three edge lengths or nine LAMMPS cell numbers.
+    cutoff : float
+        Neighbour cutoff in angstrom.
+
+    Returns
+    -------
+    tuple
+        Local q4, local q6, and the Lechner-Dellago averages.
+    """
     pos = np.ascontiguousarray(positions, dtype=np.float64)
     frame = Frame()
     frame.set_frame(pos, _as_box(box))

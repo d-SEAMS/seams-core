@@ -18,4 +18,6 @@ A data.frame with columns \code{size} and \code{n}.
 }
 \description{
 Franzblau shortest-path rings on the bond graph.
+On Ice Ih with \code{graph = "cutoff"} the six-ring row is 256.
+See \code{\link{chill_plus}} for the example that asserts it.
 }

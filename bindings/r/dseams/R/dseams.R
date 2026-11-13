@@ -24,6 +24,7 @@ nframes <- function(path) {
   nframes_(normalizePath(path, mustWork = TRUE))
 }
 
+#' @rdname positions
 #' @export
 print.dseams_frame <- function(x, ...) {
   cat("dseams frame", x$frame, "nop", nop_(x$ptr), "\n", sep = " ")
@@ -37,6 +38,7 @@ positions <- function(frame) {
   UseMethod("positions")
 }
 
+#' @rdname positions
 #' @export
 positions.dseams_frame <- function(frame) {
   n <- nop_(frame$ptr)
@@ -65,12 +67,25 @@ positions.dseams_frame <- function(frame) {
 #'   a `rule` field is accepted.
 #' @return A data.frame with columns `atom`, `type`, `label`, `name`.
 #'   The `counts` attribute is the nine-label histogram.
+#' Ice Ih (`input/traj/ice1h.lammpstrj`, every atom) is 128 hexagonal
+#' waters and 256 primitive six-rings.
+#' @examples
+#' root <- Sys.getenv("DSEAMS_ROOT", "")
+#' if (nzchar(root)) {
+#'   frame <- read_frame(file.path(root, "input", "traj", "ice1h.lammpstrj"),
+#'                       type = -1L)
+#'   ice <- chill_plus(frame, graph = "cutoff")
+#'   stopifnot(sum(ice$name == "hexagonal") == 128L)
+#'   rings <- primitive_rings(frame, graph = "cutoff", max_depth = 6L)
+#'   stopifnot(rings$n[rings$size == 6L] == 256L)
+#' }
 #' @export
 chill_plus <- function(frame, cutoff = 3.5, type = 0L, graph = "cutoff",
                        rule = "chill+") {
   UseMethod("chill_plus")
 }
 
+#' @rdname chill_plus
 #' @export
 chill_plus.dseams_frame <- function(frame, cutoff = 3.5, type = 0L,
                                     graph = "cutoff", rule = "chill+") {
@@ -95,6 +110,7 @@ cages <- function(frame, cutoff = 3.5, type = 0L, k = 4L, graph = "seeded") {
   UseMethod("cages")
 }
 
+#' @rdname cages
 #' @export
 cages.dseams_frame <- function(frame, cutoff = 3.5, type = 0L, k = 4L,
                                graph = "seeded") {
@@ -128,6 +144,7 @@ signature_cages <- function(frame, spec = "512", cutoff = 3.5, type = 0L,
   UseMethod("signature_cages")
 }
 
+#' @rdname signature_cages
 #' @export
 signature_cages.dseams_frame <- function(frame, spec = "512", cutoff = 3.5,
                                          type = 0L, graph = "cutoff") {
@@ -153,11 +170,13 @@ symmetry <- function(frame, shell_rmsd = 0.12) {
   UseMethod("symmetry")
 }
 
+#' @rdname symmetry
 #' @export
 symmetry.dseams_frame <- function(frame, shell_rmsd = 0.12) {
   symmetry_(frame$ptr, shell_rmsd)
 }
 
+#' @rdname primitive_rings
 #' @export
 primitive_rings.dseams_frame <- function(frame, cutoff = 3.5, type = 0L,
                                          graph = "mutual", max_depth = 6L) {
@@ -186,6 +205,7 @@ steinhardt <- function(frame, order_l = 6L, cutoff = 3.5, type = 0L,
   UseMethod("steinhardt")
 }
 
+#' @rdname steinhardt
 #' @export
 steinhardt.dseams_frame <- function(frame, order_l = 6L, cutoff = 3.5, type = 0L,
                                     graph = NULL) {
@@ -209,6 +229,7 @@ q4_q6 <- function(frame, cutoff = 3.5, type = 0L) {
   UseMethod("q4_q6")
 }
 
+#' @rdname q4_q6
 #' @export
 q4_q6.dseams_frame <- function(frame, cutoff = 3.5, type = 0L) {
   out <- q4_q6_(frame$ptr, cutoff, as.integer(type))
