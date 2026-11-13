@@ -1026,6 +1026,15 @@ SteinhardtQl cutoffSolid(
   }
   scratch.n = n;
   scratch.orderL = orderL;
+  // A PDB with no CRYST1 line has no box. Indexing it is a fault, and a
+  // cutoff on a missing cell is an empty q_l.
+  if (yCloud.box.size() < 3 || !(yCloud.box[0] > 0.0 && yCloud.box[1] > 0.0 &&
+                                 yCloud.box[2] > 0.0)) {
+    if (q6out != nullptr) {
+      q6out->clear();
+    }
+    return {};
+  }
   const double ox = yCloud.boxLow.size() > 0 ? yCloud.boxLow[0] : 0.0;
   const double oy = yCloud.boxLow.size() > 1 ? yCloud.boxLow[1] : 0.0;
   const double oz = yCloud.boxLow.size() > 2 ? yCloud.boxLow[2] : 0.0;
