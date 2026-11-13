@@ -127,6 +127,9 @@ inline int teamFor(int n) {
 struct TeamWidth {
   int saved = 1;
   bool on = false;
+#ifdef __linux__
+  cpu_set_t oldMask;
+#endif
   explicit TeamWidth(int n) {
 #ifdef SEAMS_HAS_OPENMP
     if (!omp_in_parallel()) {
@@ -136,6 +139,41 @@ struct TeamWidth {
         omp_set_num_threads(want);
         on = true;
       }
+#ifdef __linux__
+      // A four-thread team on an eight-core mask still migrates across
+      // all eight. Bind it to the first cores the process is allowed,
+      // before the workers are created, so they inherit that mask.
+      if (want > 0 && want < saved &&
+          sched_getaffinity(0, sizeof(oldMask), &oldMask) == 0) {
+        int cpus[256];
+        int ncpu = 0;
+        for (int cpu = 0; cpu < CPU_SETSIZE && ncpu < want && ncpu < 256; ++cpu) {
+          if (CPU_ISSET(cpu, &oldMask)) {
+            cpus[ncpu++] = cpu;
+          }
+        }
+        if (ncpu > 0) {
+          // Once per process. Repeating the bind on a call of a few
+          // hundred microseconds was the whole gap between four threads
+          // requested directly and eight narrowed to four. OpenMP's own
+          // bind would put the workers back on the whole allowed set,
+          // so it is turned off before the team is created.
+          static int bound = 0;
+          if (bound != want) {
+            setenv("OMP_PROC_BIND", "false", 1);
+#pragma omp parallel num_threads(want)
+            {
+              const int tid = omp_get_thread_num();
+              cpu_set_t mask;
+              CPU_ZERO(&mask);
+              CPU_SET(cpus[tid < ncpu ? tid : 0], &mask);
+              sched_setaffinity(0, sizeof(mask), &mask);
+            }
+            bound = want;
+          }
+        }
+      }
+#endif
     }
 #else
     (void)n;

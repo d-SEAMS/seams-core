@@ -1,0 +1,1 @@
+The carried ring update sorts ring indices and merges the kept rings in parallel, and it keeps dropped ring buffers instead of freeing them on the update. The orthorhombic cutoff list counts each pair once, a z layer at a time, so several threads beat the single-thread walk. One-thread and several-thread results still match.

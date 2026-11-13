@@ -284,112 +284,226 @@ void passFast(const double *xs, const double *ys, const double *zs,
   }
 }
 
+// One z layer of the half stencil. Layers two apart do not write the
+// same atom: a layer records its own atoms and the atoms in the next
+// layer, and the next layer is the other parity. Even layers run
+// together, then odd layers.
+void halfZLayer(int cz, const double *xs, const double *ys, const double *zs,
+                const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
+                const double *shx, const double *shy, const double *shz, double rc2,
+                int *counts, int *stash, int *overflowed) {
+  for (int cy = 0; cy < ncy; ++cy) {
+    for (int cx = 0; cx < ncx; ++cx) {
+      const int c = (cx * ncy + cy) * ncz + cz;
+      const int b = cellStart[c];
+      const int e = cellStart[c + 1];
+      if (b == e) {
+        continue;
+      }
+      // Interior cells have no periodic image. The thirteen forward
+      // neighbours are plain index steps, and the shift is zero.
+      if (cx > 0 && cx + 1 < ncx && cy > 0 && cy + 1 < ncy && cz > 0 && cz + 1 < ncz) {
+        struct Step {
+          int begin;
+          int end;
+        };
+        Step nbr[14];
+        int nn = 0;
+        nbr[nn++] = {b, e};
+        const int delta[13][3] = {
+            {1, -1, -1}, {1, -1, 0}, {1, -1, 1}, {1, 0, -1}, {1, 0, 0},
+            {1, 0, 1},   {1, 1, -1}, {1, 1, 0},  {1, 1, 1},  {0, 1, -1},
+            {0, 1, 0},   {0, 1, 1},   {0, 0, 1},
+        };
+        for (const auto &d : delta) {
+          const int ncid = ((cx + d[0]) * ncy + (cy + d[1])) * ncz + (cz + d[2]);
+          const int jb = cellStart[ncid];
+          const int je = cellStart[ncid + 1];
+          if (jb != je) {
+            nbr[nn++] = {jb, je};
+          }
+        }
+        for (int i = b; i < e; ++i) {
+          const int ii = ids[i];
+          const double xi = xs[i];
+          const double yi = ys[i];
+          const double zi = zs[i];
+          int *rowI = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
+          for (int t = 0; t < nn; ++t) {
+            const int j0 = (t == 0) ? i + 1 : nbr[t].begin;
+            for (int j = j0; j < nbr[t].end; ++j) {
+              const double dx = xi - xs[j];
+              const double dy = yi - ys[j];
+              const double dz = zi - zs[j];
+              if (!(dx * dx + dy * dy + dz * dz < rc2)) {
+                continue;
+              }
+              const int jj = ids[j];
+              int &ni = counts[ii];
+              int &nj = counts[jj];
+              if (ni < kStashCap) {
+                rowI[ni] = jj;
+              } else {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp atomic write
+#endif
+                *overflowed = 1;
+              }
+              ++ni;
+              int *rowJ = stash + static_cast<std::size_t>(jj) * static_cast<std::size_t>(kStashCap);
+              if (nj < kStashCap) {
+                rowJ[nj] = ii;
+              } else {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp atomic write
+#endif
+                *overflowed = 1;
+              }
+              ++nj;
+            }
+          }
+        }
+        continue;
+      }
+      struct Nbr {
+        int begin;
+        int end;
+        double sx, sy, sz;
+      };
+      Nbr nbr[14];
+      int nn = 0;
+      nbr[nn++] = {b, e, 0.0, 0.0, 0.0};
+      for (int ox = -1; ox <= 1; ++ox) {
+        for (int oy = -1; oy <= 1; ++oy) {
+          for (int oz = -1; oz <= 1; ++oz) {
+            if (!(ox > 0 || (ox == 0 && oy > 0) || (ox == 0 && oy == 0 && oz > 0))) {
+              continue;
+            }
+            int nx = cx + ox;
+            int ix = 0;
+            if (nx >= ncx) {
+              nx -= ncx;
+              ix = 1;
+            } else if (nx < 0) {
+              nx += ncx;
+              ix = -1;
+            }
+            int ny = cy + oy;
+            int iy = 0;
+            if (ny >= ncy) {
+              ny -= ncy;
+              iy = 1;
+            } else if (ny < 0) {
+              ny += ncy;
+              iy = -1;
+            }
+            int nz = cz + oz;
+            int iz = 0;
+            if (nz >= ncz) {
+              nz -= ncz;
+              iz = 1;
+            } else if (nz < 0) {
+              nz += ncz;
+              iz = -1;
+            }
+            const int ncid = (nx * ncy + ny) * ncz + nz;
+            const int jb = cellStart[ncid];
+            const int je = cellStart[ncid + 1];
+            if (jb == je) {
+              continue;
+            }
+            const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
+            nbr[nn++] = {jb, je, shx[k], shy[k], shz[k]};
+          }
+        }
+      }
+      for (int i = b; i < e; ++i) {
+        const int ii = ids[i];
+        const double xi = xs[i];
+        const double yi = ys[i];
+        const double zi = zs[i];
+        int *rowI = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
+        for (int t = 0; t < nn; ++t) {
+          const Nbr nb = nbr[t];
+          const int j0 = (t == 0) ? i + 1 : nb.begin;
+          for (int j = j0; j < nb.end; ++j) {
+            const double dx = xi - xs[j] - nb.sx;
+            const double dy = yi - ys[j] - nb.sy;
+            const double dz = zi - zs[j] - nb.sz;
+            if (!(dx * dx + dy * dy + dz * dz < rc2)) {
+              continue;
+            }
+            const int jj = ids[j];
+            int &ni = counts[ii];
+            int &nj = counts[jj];
+            if (ni < kStashCap) {
+              rowI[ni] = jj;
+            } else {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp atomic write
+#endif
+              *overflowed = 1;
+            }
+            ++ni;
+            int *rowJ = stash + static_cast<std::size_t>(jj) * static_cast<std::size_t>(kStashCap);
+            if (nj < kStashCap) {
+              rowJ[nj] = ii;
+            } else {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp atomic write
+#endif
+              *overflowed = 1;
+            }
+            ++nj;
+          }
+        }
+      }
+    }
+  }
+}
+
+void passFastStashHalf(const double *xs, const double *ys, const double *zs,
+                       const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
+                       const double *shx, const double *shy, const double *shz, double rc2,
+                       int *counts, int *stash, int *overflowed);
+
 // Count pass that also keeps the neighbour ids. A shell longer than
 // kStashCap sets *overflowed and the caller repeats the geometry fill.
+// Several threads take the half stencil a z layer at a time. The full
+// stencil visited every pair twice and did not beat one thread.
 void passFastStash(const double *xs, const double *ys, const double *zs,
                    const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
                    const double *shx, const double *shy, const double *shz, double rc2,
                    int *counts, int *stash, int *overflowed) {
-  const int nCells = ncx * ncy * ncz;
   *overflowed = 0;
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (nCells >= 64)
-#endif
-  for (int c = 0; c < nCells; ++c) {
-    const int b = cellStart[c];
-    const int e = cellStart[c + 1];
-    if (b == e) {
-      continue;
+  if (ncz >= 2 && omp_get_max_threads() > 1) {
+    // A layer writes its own atoms and the next layer's. Layers of one
+    // parity therefore do not share an atom. When the length is odd the
+    // last layer's +z wraps onto layer 0, which is the same parity, so
+    // that layer runs alone after the others have stopped.
+    const int lastWraps = (ncz % 2) == 1;
+    const int nEven = ncz / 2;
+#pragma omp parallel for schedule(static)
+    for (int k = 0; k < nEven; ++k) {
+      halfZLayer(k * 2, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
+                 counts, stash, overflowed);
     }
-    const int cz = c % ncz;
-    const int cy = (c / ncz) % ncy;
-    const int cx = c / (ncy * ncz);
-    struct Nbr {
-      int begin;
-      int end;
-      double sx, sy, sz;
-    };
-    Nbr nbr[27];
-    int nn = 0;
-    for (int ox = -1; ox <= 1; ++ox) {
-      int nx = cx + ox;
-      int ix = 0;
-      if (nx >= ncx) {
-        nx -= ncx;
-        ix = 1;
-      } else if (nx < 0) {
-        nx += ncx;
-        ix = -1;
-      }
-      for (int oy = -1; oy <= 1; ++oy) {
-        int ny = cy + oy;
-        int iy = 0;
-        if (ny >= ncy) {
-          ny -= ncy;
-          iy = 1;
-        } else if (ny < 0) {
-          ny += ncy;
-          iy = -1;
-        }
-        const int row = nx * ncy + ny;
-        for (int oz = -1; oz <= 1; ++oz) {
-          int nz = cz + oz;
-          int iz = 0;
-          if (nz >= ncz) {
-            nz -= ncz;
-            iz = 1;
-          } else if (nz < 0) {
-            nz += ncz;
-            iz = -1;
-          }
-          const int ncid = row * ncz + nz;
-          const int jb = cellStart[ncid];
-          const int je = cellStart[ncid + 1];
-          if (jb == je) {
-            continue;
-          }
-          const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
-          nbr[nn++] = {jb, je, shx[k], shy[k], shz[k]};
-        }
-      }
+    if (lastWraps) {
+      halfZLayer(ncz - 1, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
+                 counts, stash, overflowed);
     }
-    for (int i = b; i < e; ++i) {
-      const int ii = ids[i];
-      const double xi = xs[i];
-      const double yi = ys[i];
-      const double zi = zs[i];
-      int *row = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
-      int n = 0;
-      bool over = false;
-      for (int t = 0; t < nn; ++t) {
-        const Nbr nb = nbr[t];
-#pragma GCC unroll 1
-        for (int j = nb.begin; j < nb.end; ++j) {
-          if (j == i) {
-            continue;
-          }
-          const double dx = xi - xs[j] - nb.sx;
-          const double dy = yi - ys[j] - nb.sy;
-          const double dz = zi - zs[j] - nb.sz;
-          if (dx * dx + dy * dy + dz * dz < rc2) {
-            if (n < kStashCap) {
-              row[n] = ids[j];
-            } else {
-              over = true;
-            }
-            ++n;
-          }
-        }
-      }
-      counts[ii] = n;
-      if (over) {
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp atomic write
-#endif
-        *overflowed = 1;
-      }
+    const int nOdd = ncz / 2;
+#pragma omp parallel for schedule(static)
+    for (int k = 0; k < nOdd; ++k) {
+      halfZLayer(k * 2 + 1, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
+                 counts, stash, overflowed);
     }
+    return;
   }
+#endif
+  passFastStashHalf(xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2, counts,
+                    stash, overflowed);
 }
 
 // One thread records each pair from the lower packed slot and writes both

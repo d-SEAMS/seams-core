@@ -106,8 +106,9 @@ Sample once(const std::string &kernel, const Cloud &ice, const Cloud &moved,
   }
   if (kernel == "chill") {
     Cloud work = ice;
+    const auto tChill = std::chrono::steady_clock::now();
     const bool ok = chill::chillPlusPublishedCutoff(work, 3.5, 1);
-    const double ms = msSince(t0);
+    const double ms = msSince(tChill);
     std::uint64_t h = ok ? 1 : 0;
     for (int i = 0; i < work.nop; ++i) {
       h = mix(h, static_cast<std::uint64_t>(work.pts[static_cast<std::size_t>(i)].iceType));

@@ -16,6 +16,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
+#include <iterator>
 #include <numeric>
 #include <vector>
 
@@ -1777,6 +1778,10 @@ struct primitive::RingUpdater::Impl {
   int which = 0;
   bool primed = false;
   std::vector<std::vector<int>> flattened;
+  // Ring buffers dropped by a carried update. Kept so the update does
+  // not free a million blocks before it returns; the next frame reuses
+  // them. The updater releases them when it is destroyed.
+  std::vector<std::vector<int>> spare;
   bool ballsStale = true;
   BoundedBalls balls;
   std::vector<RingPool> bySource;
@@ -2031,46 +2036,206 @@ struct primitive::RingUpdater::Impl {
                             &inT);
       }
     }
-    std::size_t total = 0;
-    for (int k = 0; k < n; k++) {
-      total += bySource[static_cast<std::size_t>(T[static_cast<std::size_t>(k)])].n;
+    if (nThreads <= 1) {
+      // The index sort and the parallel merge allocate and move every
+      // ring buffer. On one thread the direct copy and sort is faster,
+      // and it is the path that the carried update used before.
+      std::size_t total = 0;
+      for (int k = 0; k < n; k++) {
+        total += bySource[static_cast<std::size_t>(T[static_cast<std::size_t>(k)])].n;
+      }
+      std::vector<std::vector<int>> out;
+      out.reserve(total);
+      for (int k = 0; k < n; k++) {
+        RingPool &pool = bySource[static_cast<std::size_t>(T[static_cast<std::size_t>(k)])];
+        for (std::size_t i = 0; i < pool.n; i++) {
+          out.push_back(pool.storage[i]);
+        }
+        pool.reset();
+      }
+      std::sort(out.begin(), out.end());
+      return out;
     }
-    std::vector<std::vector<int>> out;
-    out.reserve(total);
+    std::vector<std::size_t> ringAt(static_cast<std::size_t>(n) + 1, 0);
+    for (int k = 0; k < n; k++) {
+      ringAt[static_cast<std::size_t>(k) + 1] =
+          ringAt[static_cast<std::size_t>(k)] +
+          bySource[static_cast<std::size_t>(T[static_cast<std::size_t>(k)])].n;
+    }
+    std::vector<std::vector<int>> out(ringAt[static_cast<std::size_t>(n)]);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static)
+#endif
     for (int k = 0; k < n; k++) {
       RingPool &pool = bySource[static_cast<std::size_t>(T[static_cast<std::size_t>(k)])];
+      std::size_t at = ringAt[static_cast<std::size_t>(k)];
       for (std::size_t i = 0; i < pool.n; i++) {
-        out.push_back(pool.storage[i]);
+        out[at++] = pool.storage[i];
       }
       pool.reset();
     }
-    std::sort(out.begin(), out.end());
+    // Sort indices. Moving the ring buffers at every merge level of a
+    // vector sort is most of this step, and the order is the same when
+    // every ring is unique.
+    std::vector<int> order(out.size());
+    std::iota(order.begin(), order.end(), 0);
+    const auto byRing = [&out](int a, int b) {
+      return out[static_cast<std::size_t>(a)] < out[static_cast<std::size_t>(b)];
+    };
+    seams::parallelStableSort(order, byRing);
+    std::vector<std::vector<int>> sorted(out.size());
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static)
+#endif
+    for (int i = 0; i < static_cast<int>(order.size()); ++i) {
+      sorted[static_cast<std::size_t>(i)] =
+          std::move(out[static_cast<std::size_t>(order[static_cast<std::size_t>(i)])]);
+    }
+    out.swap(sorted);
     return out;
   }
 
   void splice(const std::vector<char> &inT,
               std::vector<std::vector<int>> added) {
-    std::vector<std::vector<int>> merged;
-    merged.reserve(flattened.size() + added.size());
-    auto a = added.begin();
-    for (auto &r : flattened) {
-      bool meets = false;
-      for (const int v : r) {
+    int nThreads = 1;
+#ifdef SEAMS_HAS_OPENMP
+    if (!omp_in_parallel()) {
+      nThreads = seams::teamFor(static_cast<int>(flattened.size()));
+    }
+#endif
+    if (nThreads <= 1) {
+      std::vector<std::vector<int>> merged;
+      merged.reserve(flattened.size() + added.size());
+      auto a = added.begin();
+      for (auto &r : flattened) {
+        bool meets = false;
+        for (const int v : r) {
+          if (inT[static_cast<std::size_t>(v)]) {
+            meets = true;
+            break;
+          }
+        }
+        if (meets) {
+          continue;
+        }
+        while (a != added.end() && *a < r) {
+          merged.push_back(std::move(*a++));
+        }
+        merged.push_back(std::move(r));
+      }
+      while (a != added.end()) {
+        merged.push_back(std::move(*a++));
+      }
+      flattened.swap(merged);
+      return;
+    }
+    const int nRing = static_cast<int>(flattened.size());
+    std::vector<char> drop(static_cast<std::size_t>(nRing), 0);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) num_threads(nThreads)
+#endif
+    for (int i = 0; i < nRing; ++i) {
+      for (const int v : flattened[static_cast<std::size_t>(i)]) {
         if (inT[static_cast<std::size_t>(v)]) {
-          meets = true;
+          drop[static_cast<std::size_t>(i)] = 1;
           break;
         }
       }
-      if (meets) {
+    }
+    int kept = 0;
+    for (int i = 0; i < nRing; ++i) {
+      if (drop[static_cast<std::size_t>(i)] == 0) {
+        ++kept;
+      }
+    }
+    std::vector<std::vector<std::vector<int>>> dropped(static_cast<std::size_t>(std::max(nThreads, 1)));
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel num_threads(nThreads) if (nThreads > 1)
+#endif
+    {
+      int tid = 0;
+#ifdef SEAMS_HAS_OPENMP
+      tid = omp_get_thread_num();
+#endif
+      auto &mine = dropped[static_cast<std::size_t>(tid)];
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
+      for (int i = 0; i < nRing; ++i) {
+        if (drop[static_cast<std::size_t>(i)] != 0 &&
+            flattened[static_cast<std::size_t>(i)].capacity() != 0) {
+          mine.push_back(std::move(flattened[static_cast<std::size_t>(i)]));
+        }
+      }
+    }
+    std::size_t nSpare = spare.size();
+    for (const auto &mine : dropped) {
+      nSpare += mine.size();
+    }
+    spare.reserve(nSpare);
+    for (auto &mine : dropped) {
+      spare.insert(spare.end(), std::make_move_iterator(mine.begin()),
+                   std::make_move_iterator(mine.end()));
+    }
+    std::vector<int> keepIdx;
+    keepIdx.reserve(static_cast<std::size_t>(kept));
+    for (int i = 0; i < nRing; ++i) {
+      if (drop[static_cast<std::size_t>(i)] == 0) {
+        keepIdx.push_back(i);
+      }
+    }
+    const int nPart = std::max(nThreads, 1);
+    std::vector<int> aSplit(static_cast<std::size_t>(nPart) + 1, 0);
+    aSplit[static_cast<std::size_t>(nPart)] = static_cast<int>(added.size());
+    for (int tid = 1; tid < nPart; ++tid) {
+      const int k0 = tid * kept / nPart;
+      if (k0 >= kept) {
+        aSplit[static_cast<std::size_t>(tid)] = static_cast<int>(added.size());
         continue;
       }
-      while (a != added.end() && *a < r) {
-        merged.push_back(std::move(*a++));
-      }
-      merged.push_back(std::move(r));
+      const auto &ring = flattened[static_cast<std::size_t>(keepIdx[static_cast<std::size_t>(k0)])];
+      const auto at = std::lower_bound(added.begin(), added.end(), ring);
+      aSplit[static_cast<std::size_t>(tid)] = static_cast<int>(at - added.begin());
     }
-    while (a != added.end()) {
-      merged.push_back(std::move(*a++));
+    std::vector<std::vector<std::vector<int>>> parts(static_cast<std::size_t>(nPart));
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel num_threads(nPart) if (nPart > 1)
+#endif
+    {
+      int tid = 0;
+#ifdef SEAMS_HAS_OPENMP
+      tid = omp_get_thread_num();
+#endif
+      const int k0 = tid * kept / nPart;
+      const int k1 = (tid + 1) * kept / nPart;
+      const auto a0 = added.begin() + aSplit[static_cast<std::size_t>(tid)];
+      const auto a1 = added.begin() + aSplit[static_cast<std::size_t>(tid + 1)];
+      auto &mine = parts[static_cast<std::size_t>(tid)];
+      mine.reserve(static_cast<std::size_t>(k1 - k0) +
+                   static_cast<std::size_t>(a1 - a0));
+      int k = k0;
+      auto a = a0;
+      while (k < k1 && a != a1) {
+        auto &ring = flattened[static_cast<std::size_t>(keepIdx[static_cast<std::size_t>(k)])];
+        if (*a < ring) {
+          mine.push_back(std::move(*a++));
+        } else {
+          mine.push_back(std::move(ring));
+          ++k;
+        }
+      }
+      while (k < k1) {
+        mine.push_back(std::move(flattened[static_cast<std::size_t>(keepIdx[static_cast<std::size_t>(k++)])]));
+      }
+      while (a != a1) {
+        mine.push_back(std::move(*a++));
+      }
+    }
+    std::vector<std::vector<int>> merged;
+    merged.reserve(static_cast<std::size_t>(kept) + added.size());
+    for (auto &part : parts) {
+      merged.insert(merged.end(), std::make_move_iterator(part.begin()),
+                    std::make_move_iterator(part.end()));
     }
     flattened.swap(merged);
   }
@@ -2385,7 +2550,8 @@ primitive::RingUpdater::update(const std::vector<std::vector<int>> &nList) {
     st.ballsRefreshed =
         st.balls.refreshNear(prev, next, changed, st.ballRadius);
   }
-  st.splice(inT, st.ringsMeeting(next, T, inT));
+  auto added = st.ringsMeeting(next, T, inT);
+  st.splice(inT, std::move(added));
   st.which = slot;
   st.recomputed = static_cast<int>(T.size());
   return st.flattened;

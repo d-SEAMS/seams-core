@@ -1339,12 +1339,9 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
     return false;
   }
 #ifdef SEAMS_HAS_OPENMP
-  const int savedThreads = std::max(1, omp_get_max_threads());
-  omp_set_num_threads(seams::teamFor(n));
-  struct RestoreThreads {
-    int saved;
-    ~RestoreThreads() { omp_set_num_threads(saved); }
-  } restoreThreads{savedThreads};
+  // Caps the team and, when that is narrower than the process, binds
+  // those workers to that many cores of the allowed set.
+  [[maybe_unused]] const seams::TeamWidth teamWidth(n);
 #endif
   std::vector<int> subset;
   const std::vector<int> *which = nullptr;
