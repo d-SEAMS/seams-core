@@ -26,17 +26,17 @@ from pathlib import Path
 import numpy as np
 
 # Published CHILL+ classes, molSys::atom_state_type.
-# Okabe-Ito. Liquid is grey so the five categorical colours stay on the ice classes.
-# In the 230 K slab the molecules that look pink and sky blue inside the liquid
-# are interfacial clathrate (33) and clathrate (10). CHILL+ assigns those
-# patterns; the colours are not a drawing error and the cutoffs are not refit.
+# Okabe-Ito for the ice classes. Clathrate is Paul Tol green and interfacial
+# clathrate is wine, so neither sits on the cubic blue after a deuteranopia
+# simulation. In the 230 K slab the green and wine molecules in the liquid are
+# clathrate and interfacial clathrate. The cutoffs are not refit.
 CHILL = {
     0: ("cubic Ic", (0.000, 0.447, 0.698)),
     1: ("hexagonal Ih", (0.902, 0.624, 0.000)),
     3: ("interfacial", (0.941, 0.894, 0.259)),
     2: ("liquid", (0.780, 0.780, 0.780)),
-    4: ("clathrate", (0.337, 0.706, 0.914)),
-    5: ("interfacial clathrate", (0.800, 0.475, 0.655)),
+    4: ("clathrate", (0.133, 0.533, 0.200)),
+    5: ("interfacial clathrate", (0.533, 0.133, 0.333)),
 }
 ICE = {0, 1, 3, 4, 5}
 # One radius and one bond width for every panel. 85 mm is the CPC column.
@@ -991,20 +991,17 @@ def render_molecule(pos, chill, bonds, forward, up, png, half_h, half_v, width_p
     colours = np.array([CHILL.get(int(code), ("other", (0.5, 0.5, 0.5)))[1] for code in chill])
     # The nucleus fades the far side of the lattice so the near stacking
     # planes stay readable. The slab keeps a mild depth cue.
+    # Far atoms get darker, never lighter. On the nucleus they also shrink.
     colours, near = depth_cue(colours, pos @ forward, 0.62 if nucleus else 0.22)
     particles.create_property("Color", data=np.clip(colours, 0.0, 1.0))
     liquid = np.isin(chill, [2])
     guest = np.isin(chill, [4, 5])
-    interfacial = np.isin(chill, [3])
     transparency = np.zeros(pos.shape[0])
     transparency[liquid] = 1.0 - liquid_alpha
     transparency[guest] = 0.15
     radius = np.full(pos.shape[0], ATOM_RADIUS)
     if nucleus:
-        transparency[interfacial] = 0.62
-        radius[interfacial] = 0.40
-        lattice = np.isin(chill, [0, 1])
-        transparency[lattice] = np.maximum(transparency[lattice], 0.55 * (1.0 - near[lattice]))
+        radius *= 0.55 + 0.45 * near
     particles.create_property("Transparency", data=transparency)
     particles.create_property("Radius", data=radius)
     if bonds is not None and len(bonds):
@@ -1084,8 +1081,8 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
         scale = late_w / nuclei["late"]["w_mm"]
     bar_mm = 10.0 / angstrom_per_mm * (scale if narrow else 1.0)
     title_h = 4.6
-    pair_gap = 4.4
-    bar_row = 6.0
+    pair_gap = 7.2
+    bar_row = 7.2
     stack_h = 11.5
     right_h = title_h + late_h + pair_gap + min_h + bar_row + stack_h
     if narrow:
@@ -1167,7 +1164,8 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
         ha="center",
         va="bottom",
     )
-    scale_bar(right_x, min_y - 3.4, False, "10 Å")
+    scale_bar(right_x, late_y - 2.8, False, "10 Å")
+    scale_bar(right_x, min_y - 2.8, False, "10 Å")
 
     bar_h = stack_h
     bar_bottom = min_y - bar_row - bar_h
@@ -1225,14 +1223,13 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
         fontsize=7,
         bbox_to_anchor=(0.5, (caption_h + 0.4) / height_mm),
     )
-    old = stacks["cubicity_shared"]
     new = stacks["cubicity"]
     fig.text(
         0.5,
         0.012,
         "The sheet in (b) is the outlined central run of (c). "
-        f"Layer cubicity is {new['late']:.2f} late and {new['minimum']:.2f} minimum"
-        f" ({old['late']:.2f} and {old['minimum']:.2f} on one shared axis).\n"
+        f"Layer cubicity is {new['late']:.2f} late and {new['minimum']:.2f} minimum. "
+        "Molecule cubicity is 0.576 late and 0.507 minimum.\n"
         "Late layers are 0.75–0.81 of one CHILL+ class and the rest the other class, measured stacking disorder.",
         fontsize=6.5,
         ha="center",
@@ -1310,7 +1307,7 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
         half_h, half_v = raw_half(label)
         width_px = max(32, int(round(2.0 * half_h / angstrom_per_px)))
         render_molecule(
-            drawn, drawn_chill, bonds, view, axis, images[label], half_h, half_v, width_px, 0.18, nucleus=False
+            drawn, drawn_chill, bonds, view, axis, images[label], half_h, half_v, width_px, 0.18, nucleus=True
         )
         npos, nchill, extended, _view, axis = clouds[label]
         kinds = layer_kinds(npos, nchill, extended, axis)
