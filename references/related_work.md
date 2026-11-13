@@ -527,3 +527,44 @@ Other code, with no new timing:
 6. **CHILL+ follows Nguyen and Molinero, with the OVITO modifier as a second option.** Unchanged. No new CHILL+ implementation appeared after 12:15 UTC.
 
 7. **Cage labels come from the topology of the network, and local classifiers answer a different question.** Stands. The papers in this window do not return the hexagonal-cage or double-diamond-cage count. mdapy's published polyhedral-template-matching numbers are a copper benchmark against OVITO 3.17.1, and they are not a cage count.
+
+## After 00:00 UTC, 13 November 2026
+
+The evening sweep closed at 18:12 UTC. This section is what appeared after 2026-11-13T00:00:00Z. The checks were repeated through 2026-11-13T01:15:00Z.
+
+The arXiv new-listing pages for `physics.chem-ph`, `cond-mat.soft`, `physics.comp-ph` and `cond-mat.mtrl-sci` still read Wednesday, 11 November 2026, at 01:14 UTC. Sorted by `submittedDate`, the newest records are [2611.14377](https://arxiv.org/abs/2611.14377) (2026-11-10T17:31:44Z), [2611.14446](https://arxiv.org/abs/2611.14446) (2026-11-10T18:16:09Z), [2611.14158](https://arxiv.org/abs/2611.14158) (2026-11-10T14:43:16Z) and [2611.14444](https://arxiv.org/abs/2611.14444) (2026-11-10T18:14:07Z). An export query for `physics.chem-ph` early in the hour returned HTTP 429. The same query at 01:12 UTC returned those 10 November records. The 11 November new, cross and replacement entries were read. The word hits are organotin hydrates, artificial spin ice, and other uses of ice, hydrate and cage. No clathrate, CHILL, Steinhardt, primitive-ring or cage-identification paper. No new citation.
+
+Crossref `from-created-date:2026-11-13` and `from-deposit-date:2026-11-13` both returned 0 works at 00:10 UTC. At 01:13 UTC the totals were 435 created and 979 deposited. Every created record was read. Every deposited title and abstract was scanned for clathrate, Steinhardt, CHILL+, primitive rings, polyhedral template matching, bond-orientational order, ice nucleation and gas hydrate. The created records whose text matches ice, hydrate or cage are a cement-hydration study ([10.21203/rs.3.rs-11412626/v1](https://doi.org/10.21203/rs.3.rs-11412626/v1)), a clinical ICE scale ([10.51891/rease.v12i11.32359](https://doi.org/10.51891/rease.v12i11.32359)), a road de-icing roller ([10.4271/2026-99-2128](https://doi.org/10.4271/2026-99-2128)), a cellulose battery separator ([10.1021/acssuschemeng.6c08681](https://doi.org/10.1021/acssuschemeng.6c08681)), and fish-farm cages ([10.1007/s11802-026-6741-6](https://doi.org/10.1007/s11802-026-6741-6)). The Journal of Open Source Software deposit is HUSTLE-tools for Hubble spectra ([10.21105/joss.09723](https://doi.org/10.21105/joss.09723)). Computer Physics Communications and The Journal of Chemical Physics are absent from that deposit list. bioRxiv has no posts dated 13 November. No new citation.
+
+[mdapy 2.1.0rc1](https://pypi.org/project/mdapy/2.1.0rc1/) is now a PyPI pre-release. A default install still receives 2.0.0. Nine files, eight wheels and the sdist, were uploaded from 2026-11-13T00:43:02Z to 2026-11-13T00:43:16Z. The [GitHub release](https://github.com/mushroomfire/mdapy/releases/tag/v2.1.0rc1) was published at 2026-11-13T00:44:48Z. The annotated tag, created 2026-11-13T00:29:23Z, points at `a0f4b7ab`, the merge of 2026-11-12T16:09:05Z. Master has no commit after the cutoff. [The comparison table](https://github.com/mushroomfire/mdapy/blob/master/docs/performance/comparison.md) is still the file from 2026-11-12T15:43:55Z: 2.1.0rc1 against OVITO 3.17.1 and freud 3.6.1, the shortest of three calls, 40 threads. The newest tag is `v2.1.0rc1`. The last commits on the matched sources are before the cutoff: `structure.cpp` at 2026-11-11T16:10:21Z, the CHILL+ page at 2026-11-11T16:19:14Z, Steinhardt at 2026-10-29T16:31:42Z, rings at 2026-11-11T17:33:12Z, and polyhedral template matching at 2026-11-12T08:29:10Z. The published wheels are that tree. No new head-to-head.
+
+Other code, with no commit after 2026-11-13T00:00:00Z and no new timing. A repository search for that creation date, on ice, clathrate, hydrate, Steinhardt and CHILL, returned nothing.
+
+- freud 3.6.1. Last commit on main is 2026-11-11T23:31:58Z. The last commit on `feat/freud-spatula` is 2026-11-12T14:28:09Z.
+- OVITO 3.17.2. The CHILL+ manual page is the Python reference for 3.17.2. The PyPI upload remains 2 November.
+- MDAnalysis 2.11.0. The last push to `develop` is 2026-11-08T18:51:56Z.
+- pyscal3 4.1.0. The last push is 2026-11-01T16:09:22Z.
+- GenIce 2.2.13.3, last push 2026-08-25T09:57:19Z. cycless 0.7, last push 2026-02-18T02:44:43Z.
+- vesin 0.6.2. The last committer date is 2026-11-11T09:54:21Z.
+- SQQ 0.5.8. The last push is 2026-11-11T09:00:22Z.
+- ClavisCage 0.3.18. The last commit, 2026-11-12T22:42:25Z, is a contributing guide. Zenodo [10.5281/zenodo.24112918](https://doi.org/10.5281/zenodo.24112918) is still 0.3.18, updated 2026-11-10. Concept [10.5281/zenodo.24112917](https://doi.org/10.5281/zenodo.24112917) has that one version.
+- rings-statistics-matter 0.3.0. The wheels remain the upload of 2026-11-12T15:38:00Z. The last commit is 2026-11-12T15:25:49Z.
+- PLUMED 2.10.2. The last master commit, 2026-11-12T22:14:45Z, restores zero Lepton derivatives for `step` and `delta` ([pull 1622](https://github.com/plumed/plumed2/pull/1622)). [Pull 1617](https://github.com/plumed/plumed2/pull/1617), merged at 20:40 UTC the same day, lists actions with no regtest. Neither is an ice collective variable.
+- matscipy 1.3.1. The last push is 2026-10-27T21:37:19Z.
+- fastatomstruct 2.2.0. The GitLab tag is still 2.2.0. The last master commit is 2026-11-12T21:17:49Z, a structure-comparison helper. Earlier that evening the project added nanocluster and nanotube builders, LAMMPS text dumps, and a cluster cutout. The `q_6` and King-ring rows stand.
+
+## Claims after the 13 November sweep
+
+1. **First code to return a full ring search from a local update.** Stands. Nothing in this window keeps rings whose bonds did not change. rings-statistics-matter remains 0.3.0.
+
+2. **Faster than OVITO, freud, pyscal, matscipy and the CHILL library in every matched comparison.** Stands for that list. The mdapy caveat is unchanged. The new wheels are the master tree from 16:09 UTC on 12 November, and the CHILL+ source has no commit after the cutoff.
+
+3. **Ring-statistics codes stop at counts, while d-SEAMS builds cages.** Unchanged from the evening note. 0.3.0 still returns ring indices and counts, and it still does not assemble hexagonal or double-diamond cages.
+
+4. **OVITO, freud and pyscal have no nanotube-ice class.** Stands.
+
+5. **A LAMMPS compute assigns CHILL+ during the run.** Stands. The PLUMED commits on 12 November are a derivative rule and a regtest list. The mdapy release is post-processing. No surveyed source assigns CHILL+ or cages from inside a PLUMED, LAMMPS or OpenMM step.
+
+6. **CHILL+ follows Nguyen and Molinero, with the OVITO modifier as a second option.** Unchanged. No new CHILL+ implementation appeared after 00:00 UTC.
+
+7. **Cage labels come from the topology of the network, and local classifiers answer a different question.** Stands. The records created on 13 November do not return the hexagonal-cage or double-diamond-cage count. The mdapy comparison table is the same copper benchmark against OVITO 3.17.1.
