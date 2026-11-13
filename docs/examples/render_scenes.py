@@ -33,7 +33,8 @@ CL = np.array(CHLORIDE)
 BRINE_COLOUR = {name: np.array(colour) for name, colour in COLOUR.items()}
 BRINE_LEGEND = tuple((label, np.array(colour)) for label, colour in LEGEND)
 # Slightly under the paper radii so the ice and liquid stay readable.
-BRINE_RADIUS = {"O": 0.90, "Na": 1.15, "Cl": 1.28}
+# Liquid is smaller than the ice oxygen. Ions are a step larger than the ice.
+BRINE_RADIUS = {"O": 0.90, "water": 0.50, "Na": 1.32, "Cl": 1.45}
 MAX_FACE_EDGE = 3.5
 MAX_PLANARITY = 0.35
 
@@ -368,7 +369,7 @@ def tachyon_scene(render, path, positions, colours, radii, meshes, forward, up, 
         pipeline.remove_from_scene()
 
 
-def render_brine(render, rows, path, box, width=1100):
+def render_brine(render, rows, path, box, width=1400):
     """Oxygens by the paper CHILL+ palette. Na is violet and Cl is black.
 
     Hydrogens are omitted. Clathrate and interfacial clathrate are the
@@ -391,11 +392,11 @@ def render_brine(render, rows, path, box, width=1100):
             present.add("Cl-")
         else:
             colours.append(BRINE_COLOUR.get(label, BRINE_COLOUR["unclassified"]))
-            radii.append(BRINE_RADIUS["O"] if label != "water" else 0.78)
+            radii.append(BRINE_RADIUS["O"] if label != "water" else BRINE_RADIUS["water"])
             present.add("liquid" if label == "water" else ("interf. clathrate" if label == "interClathrate" else label))
     colours = np.vstack(colours)
     radii = np.asarray(radii)
-    # Liquid is painted faintly, the same 0.40 blend as the interface.
+    # Liquid is a light veil so the ions stay visible. The interface slab keeps 0.40.
     liquid = np.array([row[0] == "O" and row[4] == "water" for row in kept])
     solid = ~liquid
     ice_png = path.with_name(path.stem + "-ice.png")
@@ -410,7 +411,7 @@ def render_brine(render, rows, path, box, width=1100):
     liquid_image = np.asarray(Image.open(liq_png).convert("RGB"), dtype=np.float32)
     veil = np.any(liquid_image < 250, axis=2)
     blended = ice.copy()
-    blended[veil] = 0.40 * liquid_image[veil] + 0.60 * ice[veil]
+    blended[veil] = 0.18 * liquid_image[veil] + 0.82 * ice[veil]
     Image.fromarray(np.clip(blended, 0, 255).astype(np.uint8)).save(path)
     origin = np.array(box[:3], dtype=float)
     lengths = np.array(box[3:6], dtype=float)

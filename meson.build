@@ -1423,6 +1423,16 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_interface_layers',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'check_interface_layers.py',
+    ],
+    env: binding_env,
+    depends: [seams_api_lib],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_palette',
     python3,
     args: [

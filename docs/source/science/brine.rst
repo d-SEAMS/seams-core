@@ -40,9 +40,9 @@ coefficient is the bulk-ice molality divided by the bulk-liquid molality.
    :end-before: static int cmd_brine
 
 .. figure:: figures/brine.png
-   :alt: 5 ns brine front with a colour legend. Hexagonal ice is orange, the interface is yellow, liquid is grey, clathrate is green, interfacial clathrate is wine, sodium is violet, and chloride is black.
+   :alt: 5 ns brine front with a colour legend. Hexagonal ice is orange, the interface is yellow, liquid is a faint grey, clathrate is green, interfacial clathrate is pink, sodium is violet, and chloride is black.
 
-   The 5 ns frame. Hydrogens are omitted. Four oxygens are clathrate and 41 are interfacial clathrate; the engine and the frame column agree. Those two colours, and the yellow interface, are the same colours as the cage and slab figures. Sodium is violet and chloride is black. The box outline and the 1 nm bar sit clear of the atoms.
+   The 5 ns frame. Hydrogens are omitted. Liquid oxygens are small and faint so the ions stay visible. Four oxygens are clathrate and 41 are interfacial clathrate; the engine and the frame column agree. Sodium is violet and interfacial clathrate is pink. Those two are 31 CIEDE2000 apart. Chloride is black. ``feat/brine-science`` at ``c2c7e46f`` still paints interfacial green, clathrate light blue, and interfacial clathrate pink. Figure 15 matches this page when that branch imports ``scripts/chill_palette.py``. ``paper/data/brine-frames/render_front.py`` in this tree already does.
 
 What this tells you
 -------------------

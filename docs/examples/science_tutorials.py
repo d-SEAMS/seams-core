@@ -497,7 +497,7 @@ def render_brine_scene(root: Path, frame: Path, figures: Path):
     box, rows = read_xyz(frame)
 
     def draw():
-        render_brine(render, rows, figures / "brine.png", box, width=1100)
+        render_brine(render, rows, figures / "brine.png", box, width=1400)
 
     _raster_or_fail(figures / "brine.png", draw)
 
@@ -630,6 +630,10 @@ def main():
     expect(abs(cubicity(kinds) - 1.0 / 9.0) < 1e-12, cubicity(kinds))
     print("interface hexagonal 352 water 434 interfacial 49 cubic 1")
     print("interface layers", stacking, "cubicity", f"{cubicity(kinds):.6f}")
+    sys.path.insert(0, str(root / "docs"))
+    from check_interface_layers import check_layers
+
+    check_layers(pos, _labels)
 
     nucleus = traj / "nucleation_f1.lammpstrj"
     npos = read_dump(nucleus)
