@@ -387,31 +387,44 @@ def render_brine(render, rows, path, box, width=1400):
     kept = [row for row in rows if row[0] in ("O", "Na", "Cl")]
     origin = np.array(box[:3], dtype=float)
     lengths = np.array(box[3:6], dtype=float)
-    positions = wrap_into_cell(
-        np.array([[row[1], row[2], row[3]] for row in kept], dtype=float),
-        origin,
-        lengths,
+    raw = np.array([[row[1], row[2], row[3]] for row in kept], dtype=float)
+    hex_z = np.array([raw[i, 2] for i, row in enumerate(kept) if row[0] == "O" and row[4] == "hexagonal"])
+    shell_z = np.array([raw[i, 2] for i, row in enumerate(kept) if row[0] == "O" and row[4] == "interfacial"])
+    origin = origin.copy()
+    origin[2] = lower_ice_origin(hex_z, shell_z, float(lengths[2]))
+    positions = wrap_into_cell(raw, origin, lengths)
+    ice_z = np.array(
+        [positions[i, 2] for i, row in enumerate(kept) if row[0] == "O" and row[4] == "hexagonal"]
     )
+    front = connected_slab_top(ice_z)
     colours = []
     radii = []
     present = set()
-    for species, _x, _y, _z, label in kept:
+    drawn_liquid = []
+    for index, (species, _x, _y, _z, label) in enumerate(kept):
         if species == "Na":
             colours.append(NA)
             radii.append(BRINE_RADIUS["Na"])
             present.add("Na+")
+            drawn_liquid.append(False)
         elif species == "Cl":
             colours.append(CL)
             radii.append(BRINE_RADIUS["Cl"])
             present.add("Cl-")
+            drawn_liquid.append(False)
         else:
-            colours.append(BRINE_COLOUR.get(label, BRINE_COLOUR["unclassified"]))
-            radii.append(BRINE_RADIUS["O"] if label != "water" else BRINE_RADIUS["water"])
-            present.add("liquid" if label == "water" else ("interf. clathrate" if label == "interClathrate" else label))
+            # CHILL+ is unchanged. Only the picture fades classes more than
+            # 1.5 nm from the growth front into liquid grey. Ions stay.
+            shown = label
+            if shown != "hexagonal" and abs(float(positions[index, 2]) - front) > 15.0:
+                shown = "water"
+            colours.append(BRINE_COLOUR.get(shown, BRINE_COLOUR["unclassified"]))
+            radii.append(BRINE_RADIUS["O"] if shown != "water" else BRINE_RADIUS["water"])
+            present.add("liquid" if shown == "water" else ("interf. clathrate" if shown == "interClathrate" else shown))
+            drawn_liquid.append(shown == "water")
     colours = np.vstack(colours)
     radii = np.asarray(radii)
-    # Liquid is a light veil so the ions stay visible. The interface slab keeps 0.40.
-    liquid = np.array([row[0] == "O" and row[4] == "water" for row in kept])
+    liquid = np.asarray(drawn_liquid, dtype=bool)
     solid = ~liquid
     ice_png = path.with_name(path.stem + "-ice.png")
     liq_png = path.with_name(path.stem + "-liq.png")
@@ -431,12 +444,9 @@ def render_brine(render, rows, path, box, width=1400):
     Image.fromarray(np.clip(blended, 0, 255).astype(np.uint8)).save(path)
     corners = cell_corners(origin, lengths)
     legend = [item for item in BRINE_LEGEND if item[0] in present]
-    ice_z = np.array(
-        [positions[index, 2] for index, row in enumerate(kept) if row[0] == "O" and row[4] == "hexagonal"]
-    )
     annotate(
         render, path, positions, forward, up, width, corners, legend,
-        frame=frame, origin=origin, lengths=lengths, ice_z=ice_z,
+        frame=frame, origin=origin, lengths=lengths, ice_z=ice_z, pad_radius=pad_radius,
     )
 
 
@@ -503,19 +513,40 @@ def require_disjoint(marks):
         raise RuntimeError(detail)
 
 
-def annotate(render, path, positions, forward, up, width, corners, legend=None, layer_title=None, frame=None, origin=None, lengths=None, ice_z=None):
+def annotate(render, path, positions, forward, up, width, corners, legend=None, layer_title=None, frame=None, origin=None, lengths=None, ice_z=None, pad_radius=None):
     """Box outline, a 1 nm bar, and the colour legend under the atoms.
 
     The bar is below the legend. When ``ice_z`` is given, a bracket marks
-    the ice and an arrow marks the growth front.
+    the ice, a depth axis runs up the cell, and an arrow marks the growth
+    front clear of the boundary spheres.
     """
     from PIL import Image, ImageDraw
 
     centre, half_h, half_v, forward, right, up = _camera(render, frame if frame is not None else positions, forward, up)
-    image = Image.open(path).convert("RGB")
+    raw = Image.open(path).convert("RGB")
     font = _legend_font(LEGEND_FONT_PX)
     swatch = 32
     row_h = 52
+
+    def raw_pix(point):
+        offset = np.asarray(point, dtype=float) - centre
+        x = (float(np.dot(offset, right)) / (2.0 * half_h) + 0.5) * raw.width
+        y = (0.5 - float(np.dot(offset, up)) / (2.0 * half_v)) * raw.height
+        return x, y
+
+    crop_x0 = crop_y0 = 0
+    sphere_pad = 0
+    image = raw
+    if pad_radius is not None and origin is not None and lengths is not None:
+        raw_corners = [raw_pix(corner) for corner in cell_corners(origin, lengths)]
+        sphere_pad = int(np.ceil(float(pad_radius) * raw.width / (2.0 * half_h))) + 2
+        crop_x0 = int(min(point[0] for point in raw_corners)) - sphere_pad
+        crop_y0 = int(min(point[1] for point in raw_corners)) - sphere_pad
+        crop_x1 = int(max(point[0] for point in raw_corners)) + sphere_pad + 1
+        crop_y1 = int(max(point[1] for point in raw_corners)) + sphere_pad + 1
+        if crop_x0 < 0 or crop_y0 < 0 or crop_x1 > raw.width or crop_y1 > raw.height:
+            raise RuntimeError("the render does not include one sphere radius outside the cell")
+        image = raw.crop((crop_x0, crop_y0, crop_x1, crop_y1))
     legend_rows = 1
     labels = [(display_label(label), colour) for label, colour in (legend or ())]
     if labels:
@@ -529,8 +560,8 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
             x += width_px + 18
         legend_rows = rows
     margin = 24 + row_h * legend_rows + LEGEND_FONT_PX + 48
-    left = 170 if ice_z is not None else (110 if layer_title else 0)
-    right_margin = 500 if ice_z is not None else 0
+    left = 210 if ice_z is not None else (110 if layer_title else 0)
+    right_margin = 520 if ice_z is not None else 0
     top = 8 if ice_z is not None else 0
     canvas = Image.new("RGB", (image.width + left + right_margin, image.height + top + margin), (255, 255, 255))
     canvas.paste(image, (left, top))
@@ -548,10 +579,8 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
         canvas.paste(turned, (6, max(8, (image.height - turned.height) // 2)))
 
     def project(point):
-        offset = np.asarray(point, dtype=float) - centre
-        x = left + (float(np.dot(offset, right)) / (2.0 * half_h) + 0.5) * image.width
-        y = top + (0.5 - float(np.dot(offset, up)) / (2.0 * half_v)) * image.height
-        return (x, y)
+        x, y = raw_pix(point)
+        return x - crop_x0 + left, y - crop_y0 + top
 
     projected = [project(corner) for corner in corners]
     for first in range(8):
@@ -570,15 +599,37 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
 
         x_left = min(point[0] for point in projected)
         x_right = max(point[0] for point in projected)
-        brine = "brine"
-        brine_w = float(font.getlength(brine))
-        add_text("brine", (max(8, x_left - brine_w - 16), y_of(0.5 * (z_cut + z_hi)) - LEGEND_FONT_PX / 2.0), brine)
-        bracket_x = x_right + 28
+        # Depth, in nanometres, from the lower ice surface. The interface
+        # figure numbers its basal layers; this slab is viewed along that
+        # stack, so the visible axis is the growth direction.
+        step = 10.0
+        depth = 0
+        z_tick = z_lo
+        while z_tick <= z_hi + 1e-6:
+            y_tick = y_of(z_tick)
+            draw.line([(x_left - 14, y_tick), (x_left, y_tick)], fill=(20, 20, 20), width=3)
+            label = str(depth)
+            label_w = float(font.getlength(label))
+            add_text(f"depth {label}", (x_left - 22 - label_w, y_tick - LEGEND_FONT_PX / 2.0), label)
+            z_tick += step
+            depth += 1
+        depth_label = "depth"
+        plate = Image.new("RGB", (int(font.getlength(depth_label)) + 8, LEGEND_FONT_PX + 8), (255, 255, 255))
+        ImageDraw.Draw(plate).text((0, 0), depth_label, font=font, fill=(20, 20, 20))
+        turned = plate.rotate(90, expand=True)
+        depth_x = 8
+        depth_y = int(0.5 * (y_of(z_lo) + y_of(z_hi)) - turned.height / 2.0)
+        canvas.paste(turned, (depth_x, max(top, depth_y)))
+        marks.append(("depth", (depth_x, max(top, depth_y), depth_x + turned.width, max(top, depth_y) + turned.height)))
+        bracket_x = x_right + max(sphere_pad, 28) + 18
         y_front = y_of(z_cut)
         y_ice = y_of(z_lo)
+        y_brine = y_of(0.5 * (z_cut + z_hi))
+        add_text("brine", (bracket_x + 14, y_brine - LEGEND_FONT_PX / 2.0), "brine")
         draw.line([(bracket_x, y_front), (bracket_x, y_ice)], fill=(20, 20, 20), width=3)
         add_text("ice Ih", (bracket_x + 14, 0.5 * (y_front + y_ice) - LEGEND_FONT_PX / 2.0), "ice Ih")
-        draw.polygon([(x_right + 4, y_front), (x_right + 22, y_front - 7), (x_right + 22, y_front + 7)], fill=(20, 20, 20))
+        arrow_x = x_right + max(sphere_pad, 8) + 8
+        draw.polygon([(arrow_x, y_front), (arrow_x + 18, y_front - 7), (arrow_x + 18, y_front + 7)], fill=(20, 20, 20))
         draw.line([(bracket_x - 8, y_front), (bracket_x + 8, y_front)], fill=(20, 20, 20), width=3)
         add_text("growth front", (bracket_x + 14, y_front - LEGEND_FONT_PX - 4), "growth front")
     legend_bottom = image.height + top
@@ -595,7 +646,7 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
             add_text(f"legend {label}", (x + swatch + 10, y), label)
             legend_bottom = max(legend_bottom, y + swatch, marks[-1][1][3])
             x += swatch + 16 + text_w + 18
-    bar = 10.0 * image.width / (2.0 * half_h)
+    bar = 10.0 * raw.width / (2.0 * half_h)
     bar_y = legend_bottom + 28
     bar_x = left + 16
     draw.line([(bar_x, bar_y), (bar_x + bar, bar_y)], fill=(20, 20, 20), width=6)
@@ -683,6 +734,30 @@ def connected_slab_top(z_values, gap=8.0):
     breaks = np.flatnonzero(np.diff(z) > gap)
     end = int(breaks[0]) + 1 if breaks.size else int(z.size)
     return float(z[end - 1])
+
+
+def lower_ice_origin(z_hex, z_shell, length_z, gap=8.0):
+    """Cell origin on the lower ice surface.
+
+    Hexagonal oxygens that the periodic boundary left above the brine,
+    and the interfacial oxygens in that same layer, belong one cell
+    below. The returned origin puts that surface at the bottom of the
+    cell so a later wrap makes one slab.
+    """
+    z_hex = np.asarray(z_hex, dtype=float)
+    order = np.sort(z_hex)
+    if order.size == 0:
+        raise ValueError("the ice slab is empty")
+    diffs = np.diff(order)
+    if diffs.size == 0 or float(diffs.max()) <= gap:
+        return float(order[0])
+    cut = float(order[int(np.argmax(diffs))])
+    top = z_hex[z_hex > cut]
+    band = float(np.min(top)) - 2.0
+    shell = np.asarray(z_shell, dtype=float)
+    shell = shell[shell >= band]
+    candidates = np.concatenate([top, shell]) if shell.size else top
+    return float(np.min(candidates) - length_z)
 
 
 def centres_outside_outline(positions, origin, lengths, forward=None, up=None):
