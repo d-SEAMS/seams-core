@@ -73,6 +73,7 @@ test_sources = {
   'basal_needle': 'test_basal_needle.cpp',
   'ddc_copies': 'test_ddc_copies.cpp',
   'hc_template': 'test_hc_template.cpp',
+  'avx_gemm': 'test_avx_gemm.cpp',
 }
 
 if readcon_dep.found()

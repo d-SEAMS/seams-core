@@ -536,7 +536,9 @@ __attribute__((target("avx512f,avx512bw,avx512vnni"))) bool int8GemmVnni(
     }
   }
 #ifdef SEAMS_HAS_OPENMP
+#if !defined(__clang__)
 #pragma omp parallel for schedule(static) if (m >= 32)
+#endif
 #endif
   for (int i = 0; i < m; i++) {
     std::vector<int32_t> row(static_cast<std::size_t>(np), 0);
@@ -675,7 +677,9 @@ __attribute__((target("avx512f,fma"))) void gemmAvx512Rows(
     int m, int n, int k, const double *A, int lda, const double *B, int ldb,
     double *C, int ldc) {
 #ifdef SEAMS_HAS_OPENMP
+#if !defined(__clang__)
 #pragma omp parallel for schedule(static) if (m >= 32)
+#endif
 #endif
   for (int i = 0; i < m; i++) {
     int j = 0;
