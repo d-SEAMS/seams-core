@@ -25,6 +25,12 @@ meson test -C build seams_lang_fixtures --print-errorlogs
 
 `bindings/cxx/test_lang.cpp` is the `seams_lang_fixtures` test. It calls
 every function in `seams_lang.h` on the in-tree trajectories.
+`meson test docs_api_cpp` compiles and runs the eight-atom program below.
+It calls `seams_set_num_threads`, `seams_chill_plus`, and `seams_q4q6`.
+
+```{literalinclude} ../../../docs/examples/ice.cpp
+:language: cpp
+```
 
 ```{literalinclude} ../../../bindings/cxx/test_lang.cpp
 :language: cpp

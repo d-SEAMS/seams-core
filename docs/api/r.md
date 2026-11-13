@@ -17,6 +17,13 @@ DSEAMS_ROOT=$PWD R CMD INSTALL bindings/r/dseams
 CI runs the testthat file when `Rscript` is on `PATH` and
 `DSEAMS_ROOT` points at this tree. The meson target is `language_fronts`
 (`tests/run_language_fronts.sh`). A missing R skips that front.
+`meson test docs_api_r` installs the package against `libseams_lang` and
+runs the script below.
+
+```{literalinclude} ../../../docs/examples/r_api.R
+:language: r
+```
+
 `seams_lang_fixtures` is the C++ driver of `seams_lang.h`, not the R package.
 
 ```bash

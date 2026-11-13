@@ -207,3 +207,12 @@ docs_ice_example = executable(
   c_args: ['-I' + meson.current_build_dir()],
   link_args: ['-lm'])
 test('docs_ice_example', docs_ice_example, timeout: 60)
+
+docs_api_cpp = executable(
+  'docs_api_cpp',
+  files('../docs/examples/ice.cpp'),
+  link_with: seams_api_lib,
+  include_directories: include_directories('../include'),
+  cpp_args: ['-I' + meson.current_build_dir()],
+  link_args: ['-lm'])
+test('docs_api_cpp', docs_api_cpp, timeout: 60)

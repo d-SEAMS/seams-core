@@ -1055,3 +1055,63 @@ if get_option('with_cli')
 endif
 
 subdir('bindings')
+
+if get_option('with_cli')
+  binding_env = environment()
+  binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+  binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'bindings')
+  test(
+    'docs_api_python',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'python_api.py',
+      meson.project_build_root() / 'src',
+    ],
+    env: binding_env,
+    depends: [seams_api_lib],
+    timeout: 60)
+  test(
+    'docs_api_fortran',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_binding.py',
+      'fortran',
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_api_lib],
+    timeout: 120)
+  test(
+    'docs_api_rust',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_binding.py',
+      'rust',
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_api_lib],
+    timeout: 180)
+  test(
+    'docs_api_r',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_binding.py',
+      'r',
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_lang],
+    timeout: 300)
+  test(
+    'docs_api_julia',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_binding.py',
+      'julia',
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_lang],
+    timeout: 180)
+endif
