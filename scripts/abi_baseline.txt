@@ -49,6 +49,7 @@ T seams_q4q6_n
 T seams_q6bar
 T seams_ql
 T seams_rdf
+T seams_ring_symmetry_name
 T seams_rings_count
 T seams_rings_destroy
 T seams_rings_find
@@ -59,7 +60,6 @@ T seams_rings_labels
 T seams_rings_labels_n
 T seams_rings_nrings
 T seams_rings_vertices
-T seams_ring_symmetry_name
 T seams_running_cn
 T seams_set_num_threads
 T seams_signature_cages
@@ -115,12 +115,12 @@ T seams_frame_select
 T seams_frame_set_positions
 T seams_frame_signature
 T seams_frame_signature_edge
-T seams_frames_jump_tau90
 T seams_frame_steinhardt
 T seams_frame_steinhardt_graph
 T seams_frame_symmetry
 T seams_frame_types
 T seams_frame_wl
+T seams_frames_jump_tau90
 T seams_lang_version
 T seams_last_error
 T seams_path_nframes

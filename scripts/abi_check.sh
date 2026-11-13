@@ -27,7 +27,7 @@ dump_lib() {
   title=$2
   echo "### $title"
   # Address-free, stable text. C linkage only: C++ symbols start with _Z.
-  nm -D --defined-only "$lib" | awk '{print $2, $3}' | awk '$2 !~ /^_Z/ && $2 ~ /^seams_/ {print}' | sort
+  nm -D --defined-only "$lib" | awk '{print $2, $3}' | awk '$2 !~ /^_Z/ && $2 ~ /^seams_/ {print}' | LC_ALL=C sort
 }
 
 {
