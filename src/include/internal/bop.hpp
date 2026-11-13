@@ -482,14 +482,13 @@ steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     double cutoff, int orderL, int typeI, bool average, bool invariants = false);
 
-<<<<<<< HEAD
 //! Local q4 and q6 from one cutoff list. Same values as two
 //! steinhardtQlCutoff calls with averaging off. Returns false when the
 //! shared shell cannot be built.
 bool localCutoffQ4Q6(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
     int typeI, std::vector<double> &q4, std::vector<double> &q6);
-=======
+
 //! q4 and q6 from one cutoff list. The bond vectors are wrapped once.
 //! Each degree then uses the same harmonic as steinhardtQlCutoff, so the
 //! values match two separate calls. Returns false when that list is not
@@ -497,7 +496,6 @@ bool localCutoffQ4Q6(
 [[nodiscard]] bool steinhardtQ4Q6Cutoff(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     double cutoff, int typeI, bool average, SteinhardtQl &q4, SteinhardtQl &q6);
->>>>>>> haozeke/perf/cli-fast-paths
 
 //! Mutual k-nearest Steinhardt parameters. The coordinate buffer built
 //! for the nomination is the one the harmonics read, and the neighbour

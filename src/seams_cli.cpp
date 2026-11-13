@@ -1452,19 +1452,15 @@ int cmdSteinhardt(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
   os << colorizer.heading("nop") << " " << cloud.nop;
   for (const int order : orders) {
     // Degrees 4 and 6 take the solid-harmonic kernel inside the cutoff
-<<<<<<< HEAD
     // call. A degree that was not named is not computed. --l 3,4,6,12
-    // is the former four-degree line.
-    const auto q = chill::steinhardtQlCutoff(cloud, cutoff, order, typ, true);
-=======
-    // call. A degree that was not named is not computed.
+    // is the former four-degree line. Degrees 4 and 6 reuse the paired
+    // cutoff list when it was built.
     chill::SteinhardtQl single;
     if (!(paired && (order == 4 || order == 6))) {
       single = chill::steinhardtQlCutoff(cloud, cutoff, order, typ, true);
     }
     const chill::SteinhardtQl &q =
         (paired && order == 4) ? q4 : (paired && order == 6) ? q6 : single;
->>>>>>> haozeke/perf/cli-fast-paths
     const std::string tag = "q" + std::to_string(order);
     os << " " << colorizer.longOption(tag) << " " << topoparam::meanFinite(q.ql)
        << " " << colorizer.longOption(tag + "bar") << " "

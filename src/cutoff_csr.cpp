@@ -469,28 +469,17 @@ void passFastStashHalf(const double *xs, const double *ys, const double *zs,
 
 // Count pass that also keeps the neighbour ids. A shell longer than
 // kStashCap sets *overflowed and the caller repeats the geometry fill.
-<<<<<<< HEAD
 // Several threads take the half stencil a z layer at a time. The full
-// stencil visited every pair twice and did not beat one thread.
-=======
-// One pair is recorded from the cell of its lower packed slot, on every
-// thread. The full 27-cell stencil walked that pair twice. The slot in
-// each atom's stash is claimed with an atomic increment, and the fill
-// sorts the row, so the CSR matches the one-thread half walk.
->>>>>>> haozeke/perf/cli-fast-paths
+// stencil visited every pair twice and did not beat one thread. One pair
+// is recorded from the cell of its lower packed slot, and the fill sorts
+// the row so the CSR matches the one-thread half walk.
+
 void passFastStash(const double *xs, const double *ys, const double *zs,
                    const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
                    const double *shx, const double *shy, const double *shz, double rc2,
                    int *counts, int *stash, int *overflowed) {
   *overflowed = 0;
-  // The 13 cells with ox > 0, or ox == 0 and oy > 0, or ox == oy == 0
-  // and oz > 0. The opposite cell records the pair, matching
-  // passFastStashHalf.
-  static constexpr int kFwd[13][3] = {
-      {1, -1, -1}, {1, -1, 0}, {1, -1, 1}, {1, 0, -1}, {1, 0, 0}, {1, 0, 1},
-      {1, 1, -1},  {1, 1, 0},  {1, 1, 1},  {0, 1, -1}, {0, 1, 0}, {0, 1, 1}, {0, 0, 1}};
 #ifdef SEAMS_HAS_OPENMP
-<<<<<<< HEAD
   if (ncz >= 2 && omp_get_max_threads() > 1) {
     // A layer writes its own atoms and the next layer's. Layers of one
     // parity therefore do not share an atom. When the length is odd the
@@ -512,112 +501,6 @@ void passFastStash(const double *xs, const double *ys, const double *zs,
     for (int k = 0; k < nOdd; ++k) {
       halfZLayer(k * 2 + 1, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
                  counts, stash, overflowed);
-=======
-#pragma omp parallel
-#endif
-  {
-    int localOver = 0;
-    auto claim = [&](int atom, int other) {
-      int slot = 0;
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp atomic capture
-#endif
-      slot = counts[atom]++;
-      if (slot < kStashCap) {
-        stash[static_cast<std::size_t>(atom) * static_cast<std::size_t>(kStashCap) +
-              static_cast<std::size_t>(slot)] = other;
-      } else {
-        localOver = 1;
-      }
-    };
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp for schedule(static)
-#endif
-    for (int c = 0; c < nCells; ++c) {
-      const int b = cellStart[c];
-      const int e = cellStart[c + 1];
-      if (b == e) {
-        continue;
-      }
-      const int cz = c % ncz;
-      const int cy = (c / ncz) % ncy;
-      const int cx = c / (ncy * ncz);
-      const bool interior = cx > 0 && cx + 1 < ncx && cy > 0 && cy + 1 < ncy && cz > 0 &&
-                            cz + 1 < ncz;
-      for (int i = b; i < e; ++i) {
-        const int ii = ids[i];
-        const double xi = xs[i];
-        const double yi = ys[i];
-        const double zi = zs[i];
-        auto accept = [&](int j, double sx, double sy, double sz) {
-          const double dx = xi - xs[j] - sx;
-          const double dy = yi - ys[j] - sy;
-          const double dz = zi - zs[j] - sz;
-          if (!(dx * dx + dy * dy + dz * dz < rc2)) {
-            return;
-          }
-          const int jj = ids[j];
-          claim(ii, jj);
-          claim(jj, ii);
-        };
-        for (int j = i + 1; j < e; ++j) {
-          accept(j, 0.0, 0.0, 0.0);
-        }
-        if (interior) {
-          for (const auto &off : kFwd) {
-            const int ncid = ((cx + off[0]) * ncy + (cy + off[1])) * ncz + (cz + off[2]);
-            const int jb = cellStart[ncid];
-            const int je = cellStart[ncid + 1];
-            for (int j = jb; j < je; ++j) {
-              accept(j, 0.0, 0.0, 0.0);
-            }
-          }
-          continue;
-        }
-        for (const auto &off : kFwd) {
-          int nx = cx + off[0];
-          int ix = 0;
-          if (nx >= ncx) {
-            nx -= ncx;
-            ix = 1;
-          } else if (nx < 0) {
-            nx += ncx;
-            ix = -1;
-          }
-          int ny = cy + off[1];
-          int iy = 0;
-          if (ny >= ncy) {
-            ny -= ncy;
-            iy = 1;
-          } else if (ny < 0) {
-            ny += ncy;
-            iy = -1;
-          }
-          int nz = cz + off[2];
-          int iz = 0;
-          if (nz >= ncz) {
-            nz -= ncz;
-            iz = 1;
-          } else if (nz < 0) {
-            nz += ncz;
-            iz = -1;
-          }
-          const int ncid = (nx * ncy + ny) * ncz + nz;
-          const int jb = cellStart[ncid];
-          const int je = cellStart[ncid + 1];
-          const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
-          for (int j = jb; j < je; ++j) {
-            accept(j, shx[k], shy[k], shz[k]);
-          }
-        }
-      }
-    }
-    if (localOver) {
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp atomic write
-#endif
-      *overflowed = 1;
->>>>>>> haozeke/perf/cli-fast-paths
     }
     return;
   }
@@ -626,8 +509,7 @@ void passFastStash(const double *xs, const double *ys, const double *zs,
                     stash, overflowed);
 }
 
-// One thread records each pair from the lower packed slot and writes both
-// ends. The full stencil visits every pair twice; this visit is once.
+
 void passFastStashHalf(const double *xs, const double *ys, const double *zs,
                        const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
                        const double *shx, const double *shy, const double *shz, double rc2,

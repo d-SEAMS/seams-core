@@ -992,12 +992,8 @@ bool rowLists(const int *nom, int k, int row, int target) {
 // heavier search; on ice the cutoff shell is those four neighbours.
 SteinhardtQl cutoffSolid(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
-<<<<<<< HEAD
     int orderL, int typeI, bool average, bool invariants,
-    std::vector<double> *q6out = nullptr) {
-=======
-    int orderL, int typeI, bool average, bool invariants, bool rebuild = true) {
->>>>>>> haozeke/perf/cli-fast-paths
+    std::vector<double> *q6out = nullptr, bool rebuild = true) {
   const int n = yCloud.nop;
   SteinhardtQl result;
   result.ql.assign(static_cast<std::size_t>(n), 0.0);
@@ -1635,7 +1631,6 @@ SteinhardtQl cutoffSolid(
   return result;
 }
 
-<<<<<<< HEAD
 bool localCutoffQ4Q6(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
     int typeI, std::vector<double> &q4, std::vector<double> &q6) {
@@ -1645,21 +1640,22 @@ bool localCutoffQ4Q6(
     return false;
   }
   q4 = std::move(got.ql);
-=======
+  return true;
+}
+
 bool steinhardtQ4Q6Cutoff(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
     int typeI, bool average, SteinhardtQl &q4, SteinhardtQl &q6) {
-  SteinhardtQl a4 = cutoffSolid(yCloud, cutoff, 4, typeI, average, false, true);
+  SteinhardtQl a4 = cutoffSolid(yCloud, cutoff, 4, typeI, average, false, nullptr, true);
   if (a4.ql.empty()) {
     return false;
   }
-  SteinhardtQl a6 = cutoffSolid(yCloud, cutoff, 6, typeI, average, false, false);
+  SteinhardtQl a6 = cutoffSolid(yCloud, cutoff, 6, typeI, average, false, nullptr, false);
   if (a6.ql.empty()) {
     return false;
   }
   q4 = std::move(a4);
   q6 = std::move(a6);
->>>>>>> haozeke/perf/cli-fast-paths
   return true;
 }
 
