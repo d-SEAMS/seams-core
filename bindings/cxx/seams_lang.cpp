@@ -20,6 +20,8 @@
 #include <tum_offload.hpp>
 #include <water_select.hpp>
 
+#include <edge_set.hpp>
+
 #include <algorithm>
 #include <array>
 #include <charconv>
@@ -1384,12 +1386,26 @@ int seams_frame_cages(seams_frame *frame, double cutoff, int type, int k,
       }
       auto idx_strict = nneigh::neighbourListByIndex(frame->cloud, graphs.first);
       auto idx_union = nneigh::neighbourListByIndex(frame->cloud, graphs.second);
-      auto six_strict = six_of(ring::contractibleRings(
-          primitive::ringNetwork(idx_strict, 6), frame->cloud));
-      auto six_union = six_of(ring::contractibleRings(
-          primitive::ringNetwork(idx_union, 6), frame->cloud));
-      const auto aff = ring::seededCageAffiliation(
-          six_strict, idx_strict, six_union, idx_union, complete != 0);
+      // The mutual and union lists are the same edges on a crystal whose
+      // shell is exactly k neighbours. One ring search and one affiliation
+      // then match the two-graph call, which is what the CLI does.
+      const bool sameGraph = seams::provenEqual(seams::edgeSetOf(idx_strict),
+                                                seams::edgeSetOf(idx_union));
+      ring::SeededAtomLabels aff;
+      if (sameGraph) {
+        auto six = six_of(ring::contractibleRings(
+            primitive::ringNetwork(idx_strict, 6), frame->cloud));
+        const auto once = ring::cageAffiliation(six, idx_strict);
+        aff = ring::seededCageAffiliation(six, once, six, once, idx_strict,
+                                          complete != 0);
+      } else {
+        auto six_strict = six_of(ring::contractibleRings(
+            primitive::ringNetwork(idx_strict, 6), frame->cloud));
+        auto six_union = six_of(ring::contractibleRings(
+            primitive::ringNetwork(idx_union, 6), frame->cloud));
+        aff = ring::seededCageAffiliation(six_strict, idx_strict, six_union,
+                                          idx_union, complete != 0);
+      }
       const int m = std::min(n, static_cast<int>(aff.hc.size()));
       for (int i = 0; i < m; ++i) {
         hc[static_cast<std::size_t>(i)] = aff.hc[static_cast<std::size_t>(i)];
