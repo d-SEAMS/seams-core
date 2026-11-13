@@ -794,6 +794,17 @@ if get_option('with_cli')
     depends: [seams_exe],
     timeout: 180)
   test(
+    'docs_tutorial_interface',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'tutorials' / 'test_interface.py',
+      meson.project_source_root(),
+      seams_exe.full_path(),
+      meson.project_build_root() / 'src',
+    ],
+    depends: [seams_exe],
+    timeout: 120)
+  test(
     'engines_tutorial',
     python3,
     args: [
