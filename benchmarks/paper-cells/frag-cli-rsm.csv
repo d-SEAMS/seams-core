@@ -1,3 +1,3 @@
-cell,code,molecules,threads,cores,affinity,warmup,n,median_ms,iqr_ms,samples_ms,detail
-"rings-statistics-matter 0.3.0, 1 thread",rings-statistics-matter,110592,1,8,0-7,1,8,1589.597981,29.415175,1572.720686 1578.309828 1584.211473 1627.275672 1559.366230 1594.984488 1651.182129 1599.345066,command time includes process start; 221184 six-rings
-rings-statistics-matter 0.3.0,rings-statistics-matter,110592,8,8,0-7,1,8,1606.785885,14.612869,1615.075704 1610.267240 1585.041148 1603.304531 1619.887872 1610.832832 1600.861634 1586.537822,command time includes process start; 221184 six-rings
+source_commit,cpu_model,cpu_cores,affinity,phase,operation,code,version,molecules,threads,warmup,n,median_ms,iqr_ms,q1_ms,q3_ms,samples_ms,detail
+2914162cb8200dc1a5668a54d570130785ccef0c,Intel(R) Xeon(R) Processor,8,0-7,ice,rings,rings-statistics-matter,0.3.0,110592,1,1,8,1195.295069,24.397233,1184.265524,1208.662757,1198.873475 1171.423559 1163.118065 1188.546179 1261.432233 1209.469968 1208.393686 1191.716663,six=221184 maxlvl=8
+2914162cb8200dc1a5668a54d570130785ccef0c,Intel(R) Xeon(R) Processor,8,0-7,ice,rings,rings-statistics-matter,0.3.0,110592,8,1,8,272.072615,13.301967,264.822068,278.124035,284.873438 275.874234 270.757453 273.387777 259.620194 261.374899 265.971124 321.094878,six=221184 maxlvl=8
