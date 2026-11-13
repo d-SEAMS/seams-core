@@ -523,6 +523,67 @@ void passFastStashHalf(const double *xs, const double *ys, const double *zs,
     const int cz = c % ncz;
     const int cy = (c / ncz) % ncy;
     const int cx = c / (ncy * ncz);
+    // An interior cell has no periodic image. The forward neighbours are
+    // index steps and the shift is zero, so the wrap tests stay on the
+    // boundary layer.
+    if (cx > 0 && cx + 1 < ncx && cy > 0 && cy + 1 < ncy && cz > 0 && cz + 1 < ncz) {
+      int begin[14];
+      int end[14];
+      int nn = 0;
+      begin[nn] = b;
+      end[nn] = e;
+      ++nn;
+      const int delta[13][3] = {
+          {1, -1, -1}, {1, -1, 0}, {1, -1, 1}, {1, 0, -1}, {1, 0, 0},
+          {1, 0, 1},   {1, 1, -1}, {1, 1, 0},  {1, 1, 1},  {0, 1, -1},
+          {0, 1, 0},   {0, 1, 1},   {0, 0, 1},
+      };
+      for (const auto &d : delta) {
+        const int ncid = ((cx + d[0]) * ncy + (cy + d[1])) * ncz + (cz + d[2]);
+        const int jb = cellStart[ncid];
+        const int je = cellStart[ncid + 1];
+        if (jb != je) {
+          begin[nn] = jb;
+          end[nn] = je;
+          ++nn;
+        }
+      }
+      for (int i = b; i < e; ++i) {
+        const int ii = ids[i];
+        const double xi = xs[i];
+        const double yi = ys[i];
+        const double zi = zs[i];
+        int *rowI = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
+        for (int t = 0; t < nn; ++t) {
+          const int j0 = (t == 0) ? i + 1 : begin[t];
+          for (int j = j0; j < end[t]; ++j) {
+            const double dx = xi - xs[j];
+            const double dy = yi - ys[j];
+            const double dz = zi - zs[j];
+            if (!(dx * dx + dy * dy + dz * dz < rc2)) {
+              continue;
+            }
+            const int jj = ids[j];
+            int &ni = counts[ii];
+            int &nj = counts[jj];
+            if (ni < kStashCap) {
+              rowI[ni] = jj;
+            } else {
+              *overflowed = 1;
+            }
+            ++ni;
+            int *rowJ = stash + static_cast<std::size_t>(jj) * static_cast<std::size_t>(kStashCap);
+            if (nj < kStashCap) {
+              rowJ[nj] = ii;
+            } else {
+              *overflowed = 1;
+            }
+            ++nj;
+          }
+        }
+      }
+      continue;
+    }
     struct Nbr {
       int begin;
       int end;

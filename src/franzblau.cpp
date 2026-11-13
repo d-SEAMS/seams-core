@@ -1003,6 +1003,105 @@ struct ReuseRings {
   }
 };
 
+
+[[gnu::noinline]] PackedRows teamNeighbourRows(
+    const std::vector<std::vector<int>> &nList, int nVertices, int use) {
+  PackedRows adjacency;
+  adjacency.first.assign(static_cast<std::size_t>(nVertices) + 1, 0);
+  // Partners land in one array, sorted per row. A vector per atom made
+  // this copy wait on the allocator, and the wait was longer after the
+  // cell list than after linkcell. The stack buffer covers a cutoff
+  // shell; a longer row falls back to the heap for that atom only.
+  auto uniqueInto = [&](int i, int *dst, int cap, int *nOut) -> bool {
+    const auto &src = nList[static_cast<std::size_t>(i)];
+    int n = 0;
+    for (std::size_t k = 1; k < src.size(); ++k) {
+      const int j = src[k];
+      if (j < 0 || j >= nVertices || j == i) {
+        continue;
+      }
+      bool seen = false;
+      for (int t = 0; t < n; ++t) {
+        if (dst[t] == j) {
+          seen = true;
+          break;
+        }
+      }
+      if (seen) {
+        continue;
+      }
+      if (n == cap) {
+        return false;
+      }
+      dst[n++] = j;
+    }
+    if (n > 1) {
+      std::sort(dst, dst + n);
+    }
+    *nOut = n;
+    return true;
+  };
+  std::vector<int> degree(static_cast<std::size_t>(nVertices), 0);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) num_threads(use) if (!omp_in_parallel())
+#endif
+  for (int i = 0; i < nVertices; i++) {
+    if (nList[static_cast<std::size_t>(i)].size() <= 1) {
+      continue;
+    }
+    int tmp[256];
+    int n = 0;
+    if (!uniqueInto(i, tmp, 256, &n)) {
+      std::vector<int> extra;
+      extra.reserve(nList[static_cast<std::size_t>(i)].size());
+      for (std::size_t k = 1; k < nList[static_cast<std::size_t>(i)].size(); ++k) {
+        const int j = nList[static_cast<std::size_t>(i)][k];
+        if (j < 0 || j >= nVertices || j == i) {
+          continue;
+        }
+        if (std::find(extra.begin(), extra.end(), j) == extra.end()) {
+          extra.push_back(j);
+        }
+      }
+      n = static_cast<int>(extra.size());
+    }
+    degree[static_cast<std::size_t>(i)] = n;
+  }
+  for (int i = 0; i < nVertices; i++) {
+    adjacency.first[i + 1] = adjacency.first[i] + degree[static_cast<std::size_t>(i)];
+  }
+  adjacency.cols.resize(adjacency.first[nVertices]);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) num_threads(use) if (!omp_in_parallel())
+#endif
+  for (int i = 0; i < nVertices; i++) {
+    const int n = degree[static_cast<std::size_t>(i)];
+    if (n <= 0) {
+      continue;
+    }
+    int *dst = adjacency.cols.data() + adjacency.first[static_cast<std::size_t>(i)];
+    if (n <= 256) {
+      int got = 0;
+      uniqueInto(i, dst, 256, &got);
+    } else {
+      std::vector<int> extra;
+      extra.reserve(static_cast<std::size_t>(n));
+      for (std::size_t k = 1; k < nList[static_cast<std::size_t>(i)].size(); ++k) {
+        const int j = nList[static_cast<std::size_t>(i)][k];
+        if (j < 0 || j >= nVertices || j == i) {
+          continue;
+        }
+        if (std::find(extra.begin(), extra.end(), j) == extra.end()) {
+          extra.push_back(j);
+        }
+      }
+      std::sort(extra.begin(), extra.end());
+      std::copy(extra.begin(), extra.end(), dst);
+    }
+  }
+  return adjacency;
+}
+
 static const std::vector<std::vector<int>> &
 searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
             const std::vector<char> &sources, bool legacy) {
@@ -1047,44 +1146,48 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
   // itself, so it is skipped. A repeated neighbour is one edge. A self
   // entry and an index outside the cloud are not edges.
   const auto adjStart = std::chrono::steady_clock::now();
-  std::vector<std::vector<int>> uniq(static_cast<std::size_t>(nVertices));
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) num_threads(use) if (!serial && !omp_in_parallel())
-#endif
-  for (int i = 0; i < nVertices; i++) {
-    if (nList[static_cast<std::size_t>(i)].size() <= 1) {
-      continue;
-    }
-    auto &row = uniq[static_cast<std::size_t>(i)];
-    row.reserve(nList[static_cast<std::size_t>(i)].size() - 1);
-    for (std::size_t k = 1; k < nList[static_cast<std::size_t>(i)].size(); k++) {
-      const int j = nList[static_cast<std::size_t>(i)][k];
-      if (j < 0 || j >= nVertices || j == i) {
-        continue;
-      }
-      if (std::find(row.begin(), row.end(), j) == row.end()) {
-        row.push_back(j);
-      }
-    }
-  }
   PackedRows adjacency;
   adjacency.first.assign(nVertices + 1, 0);
-  for (int i = 0; i < nVertices; i++) {
-    adjacency.first[i + 1] =
-        adjacency.first[i] +
-        static_cast<int>(uniq[static_cast<std::size_t>(i)].size());
-  }
-  adjacency.cols.resize(adjacency.first[nVertices]);
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) num_threads(use) if (!serial && !omp_in_parallel())
-#endif
-  for (int i = 0; i < nVertices; i++) {
-    const auto &row = uniq[static_cast<std::size_t>(i)];
-    if (!row.empty()) {
-      std::copy(row.begin(), row.end(),
-                adjacency.cols.begin() +
-                    static_cast<std::ptrdiff_t>(adjacency.first[i]));
+  // Kept until the search has allocated its rings. Freeing these rows
+  // first hands the ring buffers a heap of just-released blocks, and the
+  // one-thread search gets slower.
+  std::vector<std::vector<int>> uniq;
+  if (serial) {
+    // One thread keeps a row vector. The packed fill below is for a
+    // team: allocating one vector per atom there was slower after the
+    // cell list than after linkcell.
+    uniq.resize(static_cast<std::size_t>(nVertices));
+    for (int i = 0; i < nVertices; i++) {
+      if (nList[static_cast<std::size_t>(i)].size() <= 1) {
+        continue;
+      }
+      auto &row = uniq[static_cast<std::size_t>(i)];
+      row.reserve(nList[static_cast<std::size_t>(i)].size() - 1);
+      for (std::size_t k = 1; k < nList[static_cast<std::size_t>(i)].size(); k++) {
+        const int j = nList[static_cast<std::size_t>(i)][k];
+        if (j < 0 || j >= nVertices || j == i) {
+          continue;
+        }
+        if (std::find(row.begin(), row.end(), j) == row.end()) {
+          row.push_back(j);
+        }
+      }
     }
+    for (int i = 0; i < nVertices; i++) {
+      adjacency.first[i + 1] =
+          adjacency.first[i] + static_cast<int>(uniq[static_cast<std::size_t>(i)].size());
+    }
+    adjacency.cols.resize(adjacency.first[nVertices]);
+    for (int i = 0; i < nVertices; i++) {
+      const auto &row = uniq[static_cast<std::size_t>(i)];
+      if (!row.empty()) {
+        std::copy(row.begin(), row.end(),
+                  adjacency.cols.begin() +
+                      static_cast<std::ptrdiff_t>(adjacency.first[i]));
+      }
+    }
+  } else {
+    adjacency = teamNeighbourRows(nList, nVertices, use);
   }
 
   const int maxLvl = maxDepth / 2;
