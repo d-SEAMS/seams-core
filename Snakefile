@@ -808,6 +808,22 @@ rule paper_cells:
         "python3 scripts/paper_cells_join.py benchmarks/paper-cells"
 
 
+# One process, eight samples, d-SEAMS, freud, and OVITO. Core count, no host name.
+rule h2h_session:
+    output:
+        "benchmarks/h2h-session.txt",
+    shell:
+        "OVITO_THREAD_COUNT=8 python3 scripts/h2h_session.py > {output}"
+
+
+# One process, eight samples. The record names the core count.
+rule omp_scale_time:
+    output:
+        "benchmarks/omp-scale.txt",
+    shell:
+        "python3 scripts/omp_scale_time.py > {output}"
+
+
 rule growth_curve:
     input:
         "input/interface/growth_curve.py",

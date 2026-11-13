@@ -65,10 +65,10 @@ inline void releaseTeam() {
 // and freeze the team size, and leave the workers asleep only under
 // the passive wait policy.
 inline void prepareCompute() {
-  // Linkcell's pool sleeps on a condvar between searches. Forcing OpenMP
-  // passive as well made the next region wake on a spread of tens of
-  // milliseconds, which is the slow 8-thread sample. Leave OpenMP on the
-  // active wait the benchmark already uses.
+  // Linkcell sleeps between searches. Forcing a passive OpenMP wait
+  // on top of that made the next region late by tens of milliseconds,
+  // which dominated a k-nearest call of about a millisecond. Leave the
+  // wait policy the process was started with.
   widenAffinity();
 #ifdef SEAMS_HAS_OPENMP
   omp_set_dynamic(0);
@@ -101,20 +101,13 @@ inline void adoptThreads() {
 #endif
 }
 
-// Thread count for a call that is too small for the fork. Below 2048
-// atoms an eight-thread region is slower than the serial walk. Below
-// 8192 atoms four threads beat eight: the extra workers do not have a
-// full share of the walk.
+// Width the caller asked for. The neighbour and q_l walks are one
+// OpenMP team; shrinking that team by the atom count left eight
+// requested threads idle on the sizes where the search does scale.
 inline int teamFor(int n) {
 #ifdef SEAMS_HAS_OPENMP
-  const int team = std::max(1, omp_get_max_threads());
-  if (n < 2048) {
-    return 1;
-  }
-  if (n < 8192 && team > 4) {
-    return 4;
-  }
-  return team;
+  (void)n;
+  return std::max(1, omp_get_max_threads());
 #else
   (void)n;
   return 1;

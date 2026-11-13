@@ -36,6 +36,7 @@
 #include <seams_input.hpp>
 #include <string_view>
 #include <thread>
+#include <utility>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <ext/stdio_filebuf.h>
@@ -1195,7 +1196,6 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
     return false;
   }
   yCloud.pts.clear();
-  yCloud.pts.reserve(static_cast<std::size_t>(nop));
   yCloud.idIndexMap.clear();
   yCloud.idIndexMap.reserve(static_cast<std::size_t>(nop));
   yCloud.box = {span[0], span[1], span[2]};
@@ -1203,46 +1203,89 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
   const bool filter = keep != LammpsKeep::All;
   int kept = 0;
   bool failed = false;
-  for (int i = 0; i < nop; ++i) {
-    if (p >= end) {
-      failed = true;
-      break;
+  // One pointer per atom line, then the numbers are parsed with no
+  // per-line string. The lines are independent, so the team splits them.
+  std::vector<const char *> lineAt(static_cast<std::size_t>(nop));
+  std::vector<const char *> lineEnd(static_cast<std::size_t>(nop));
+  {
+    const char *scan = p;
+    for (int i = 0; i < nop; ++i) {
+      if (scan >= end) {
+        failed = true;
+        break;
+      }
+      const char *ls = scan;
+      while (scan < end && *scan != '\n') {
+        ++scan;
+      }
+      const char *le = scan;
+      if (le > ls && le[-1] == '\r') {
+        --le;
+      }
+      if (startsWith(ls, le, "ITEM:")) {
+        failed = true;
+        break;
+      }
+      lineAt[static_cast<std::size_t>(i)] = ls;
+      lineEnd[static_cast<std::size_t>(i)] = le;
+      if (scan < end && *scan == '\n') {
+        ++scan;
+      }
     }
-    nextLine(s, e);
-    if (startsWith(s, e, "ITEM:")) {
-      failed = true;
-      break;
+    if (!failed) {
+      p = scan;
     }
-    const char *ap = s;
+  }
+  struct Parsed {
     int id = 0;
     int typ = 0;
     double x = 0;
     double y = 0;
     double z = 0;
-    if (!parseLooseInt(ap, e, id) || !parseLooseInt(ap, e, typ) ||
-        !parseLooseDouble(ap, e, x) || !parseLooseDouble(ap, e, y) ||
-        !parseLooseDouble(ap, e, z)) {
-      failed = true;
-      break;
+    char ok = 0;
+  };
+  std::vector<Parsed> parsed(static_cast<std::size_t>(failed ? 0 : nop));
+  if (!failed) {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nop >= 1024 && !omp_in_parallel())
+#endif
+    for (int i = 0; i < nop; ++i) {
+      const char *ap = lineAt[static_cast<std::size_t>(i)];
+      const char *ae = lineEnd[static_cast<std::size_t>(i)];
+      Parsed row;
+      row.ok = parseLooseInt(ap, ae, row.id) && parseLooseInt(ap, ae, row.typ) &&
+                       parseLooseDouble(ap, ae, row.x) && parseLooseDouble(ap, ae, row.y) &&
+                       parseLooseDouble(ap, ae, row.z)
+                   ? 1
+                   : 0;
+      parsed[static_cast<std::size_t>(i)] = row;
     }
-    if (filter && typ != typeFilter) {
-      continue;
+    yCloud.pts.reserve(static_cast<std::size_t>(nop));
+    for (int i = 0; i < nop; ++i) {
+      const Parsed &row = parsed[static_cast<std::size_t>(i)];
+      if (!row.ok) {
+        failed = true;
+        break;
+      }
+      if (filter && row.typ != typeFilter) {
+        continue;
+      }
+      molSys::Point<double> point;
+      point.atomID = row.id;
+      point.molID = row.id;
+      point.type = row.typ;
+      point.x = row.x;
+      point.y = row.y;
+      point.z = row.z;
+      yCloud.pts.push_back(point);
+      if (!yCloud.idIndexMap.emplace(row.id, kept).second) {
+        std::cerr << "Warning: duplicate atom ID " << row.id
+                  << " in the input frame; the ID-to-index map keeps only the "
+                     "last atom read with this ID\n";
+        yCloud.idIndexMap[row.id] = kept;
+      }
+      ++kept;
     }
-    molSys::Point<double> point;
-    point.atomID = id;
-    point.molID = id;
-    point.type = typ;
-    point.x = x;
-    point.y = y;
-    point.z = z;
-    yCloud.pts.push_back(point);
-    if (!yCloud.idIndexMap.emplace(id, kept).second) {
-      std::cerr << "Warning: duplicate atom ID " << id
-                << " in the input frame; the ID-to-index map keeps only the "
-                   "last atom read with this ID\n";
-      yCloud.idIndexMap[id] = kept;
-    }
-    ++kept;
   }
   if (failed) {
     // The snapshot was taken at st.st_size. An append or a replace during
@@ -1344,7 +1387,7 @@ sinp::readLammpsTrj(std::string filename, int targetFrame,
                     std::array<double, 3> coordHigh) {
   loadLammpsFrame(filename, targetFrame, yCloud, -1, LammpsKeep::All, isSlice,
                   coordLow, coordHigh);
-  return yCloud;
+  return std::move(yCloud);
 }
 
 /**
@@ -1367,7 +1410,7 @@ sinp::readLammpsTrjO(std::string filename, int targetFrame,
                      std::array<double, 3> coordHigh) {
   loadLammpsFrame(filename, targetFrame, yCloud, typeO, LammpsKeep::Type,
                   isSlice, coordLow, coordHigh);
-  return yCloud;
+  return std::move(yCloud);
 }
 
 /**
@@ -1389,7 +1432,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readLammpsTrjreduced(
     std::array<double, 3> coordHigh) {
   loadLammpsFrame(filename, targetFrame, yCloud, typeI,
                   LammpsKeep::TypeInSlice, isSlice, coordLow, coordHigh);
-  return yCloud;
+  return std::move(yCloud);
 }
 
 #ifdef SEAMS_HAS_READCON
