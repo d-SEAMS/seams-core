@@ -289,10 +289,11 @@ struct seams_system : seams_object {
   std::unordered_map<int, int> spare_ids;
   std::vector<double> spare_box;
   std::vector<double> spare_low;
-  // set_positions writes the new coordinates here in the same pass that
-  // checks them, and swaps this with cloud.pts only when every value was
-  // finite. While staged_current is set, types and ids here match the
-  // frame; any load clears it.
+  // With stage set, set_positions writes the new coordinates here in the
+  // same pass that checks them, and swaps this with cloud.pts only when
+  // every value was finite. While staged_current is set, types and ids
+  // here match the frame; any load clears it.
+  bool stage = false;
   decltype(Cloud::pts) staged;
   bool staged_current = false;
 };
@@ -3133,31 +3134,46 @@ seams_status seams_system_set_positions(seams_system *sys, const double *xyz, si
                                        box9[7], box9[8])) {
       return fail(SEAMS_ERR_BOX, "box edge lengths must be positive");
     }
-    auto &next = sys->staged;
-    if (!sys->staged_current) {
-      next = sys->cloud.pts;
-      sys->staged_current = true;
+    if (sys->stage) {
+      auto &next = sys->staged;
+      if (!sys->staged_current) {
+        next = sys->cloud.pts;
+        sys->staged_current = true;
+      }
+      constexpr std::uint64_t exponent = 0x7ff0000000000000ULL;
+      std::uint64_t bad = 0;
+      for (std::size_t i = 0; i < n; ++i) {
+        std::uint64_t bits[3];
+        std::memcpy(bits, xyz + 3 * i, sizeof bits);
+        bad |= static_cast<std::uint64_t>((bits[0] & exponent) == exponent) |
+               static_cast<std::uint64_t>((bits[1] & exponent) == exponent) |
+               static_cast<std::uint64_t>((bits[2] & exponent) == exponent);
+        auto &point = next[i];
+        point.x = xyz[3 * i];
+        point.y = xyz[3 * i + 1];
+        point.z = xyz[3 * i + 2];
+        point.iceType = molSys::atom_state_type::unclassified;
+        point.inSlice = true;
+        point.c_ij.clear();
+      }
+      if (bad != 0) {
+        return fail(SEAMS_ERR_ARG, "a coordinate is not finite");
+      }
+      sys->cloud.pts.swap(next);
+    } else {
+      if (!finite_coordinates(xyz, n)) {
+        return fail(SEAMS_ERR_ARG, "a coordinate is not finite");
+      }
+      for (std::size_t i = 0; i < n; ++i) {
+        auto &point = sys->cloud.pts[i];
+        point.x = xyz[3 * i];
+        point.y = xyz[3 * i + 1];
+        point.z = xyz[3 * i + 2];
+        point.iceType = molSys::atom_state_type::unclassified;
+        point.inSlice = true;
+        point.c_ij.clear();
+      }
     }
-    constexpr std::uint64_t exponent = 0x7ff0000000000000ULL;
-    std::uint64_t bad = 0;
-    for (std::size_t i = 0; i < n; ++i) {
-      std::uint64_t bits[3];
-      std::memcpy(bits, xyz + 3 * i, sizeof bits);
-      bad |= static_cast<std::uint64_t>((bits[0] & exponent) == exponent) |
-             static_cast<std::uint64_t>((bits[1] & exponent) == exponent) |
-             static_cast<std::uint64_t>((bits[2] & exponent) == exponent);
-      auto &point = next[i];
-      point.x = xyz[3 * i];
-      point.y = xyz[3 * i + 1];
-      point.z = xyz[3 * i + 2];
-      point.iceType = molSys::atom_state_type::unclassified;
-      point.inSlice = true;
-      point.c_ij.clear();
-    }
-    if (bad != 0) {
-      return fail(SEAMS_ERR_ARG, "a coordinate is not finite");
-    }
-    sys->cloud.pts.swap(next);
     if (box9 != nullptr) {
       sys->cloud.box.swap(sys->spare_box);
       sys->cloud.boxLow.swap(sys->spare_low);
@@ -3169,6 +3185,20 @@ seams_status seams_system_set_positions(seams_system *sys, const double *xyz, si
     remember();
     return SEAMS_ERR_INTERNAL;
   }
+}
+
+seams_status seams_system_stage_positions(seams_system *sys, int enable) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system is null");
+  }
+  sys->stage = enable != 0;
+  if (!sys->stage) {
+    decltype(Cloud::pts)().swap(sys->staged);
+    sys->staged_current = false;
+  }
+  return SEAMS_OK;
 }
 
 seams_status seams_system_box(const seams_system *sys, double *box9, size_t box_len) {

@@ -139,6 +139,10 @@ int main(int argc, char **argv) {
   }
   need("set_positions", seams_system_set_positions(cell, moved, 8, NULL, 0), cell);
   printf("capi seams_system_set_positions %d\n", seams_system_count(cell));
+  need("stage_positions", seams_system_stage_positions(cell, 1), cell);
+  need("set_positions", seams_system_set_positions(cell, moved, 8, NULL, 0), cell);
+  need("stage_positions", seams_system_stage_positions(cell, 0), cell);
+  printf("capi seams_system_stage_positions %d\n", seams_system_count(cell));
   double cell9[9];
   need("box", seams_system_box(cell, cell9, 9), cell);
   printf("capi seams_system_box %.3f %.3f %.3f %.3f %.3f %.3f\n", cell9[0], cell9[1], cell9[2],

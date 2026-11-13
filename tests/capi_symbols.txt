@@ -76,6 +76,7 @@ seams_system_set_atoms
 seams_system_set_frame
 seams_system_set_ortho
 seams_system_set_positions
+seams_system_stage_positions
 seams_system_symmetry
 seams_system_types
 seams_version

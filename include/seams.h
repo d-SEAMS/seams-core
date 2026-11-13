@@ -506,8 +506,8 @@ SEAMS_API void seams_system_destroy(seams_system *sys);
  * A reload on the same handle reuses its per-atom storage. When @p ids
  * is NULL or 1..n and @p n matches the previous load, the id table is
  * kept as well, so reloading a trajectory frame by frame costs one pass
- * over the input. seams_system_set_positions() also skips the type and
- * id pass.
+ * over the input after the finiteness check. seams_system_set_positions()
+ * also skips the type and id pass.
  *
  * @param sys Frame handle.
  * @param xyz n times 3 Cartesian coordinates, Angstrom. Every value must
@@ -2221,7 +2221,7 @@ SEAMS_API seams_status seams_rings_histogram_n(const seams_rings *rings, int *co
  * per-atom records, so a view onto caller memory would be copied on each
  * analysis call instead of once per frame. A trajectory loop calls
  * seams_system_set_atoms() once and seams_system_set_positions() for each
- * later frame, which is one pass over the caller's coordinates.
+ * later frame, which writes only the coordinates.
  * @{
  */
 
@@ -2232,12 +2232,10 @@ SEAMS_API seams_status seams_rings_histogram_n(const seams_rings *rings, int *co
  * seams_chill() or seams_chill_plus() are reset. On failure the frame is
  * unchanged.
  *
- * The handle keeps a second set of per-atom records. Each call checks
- * and writes the coordinates into that set in one pass, then swaps it
- * with the stored frame when every value was finite. The first call
- * after a load fills the second set from the frame; later calls do not,
- * so a trajectory loop costs about as much as writing the coordinates
- * in place. The second set doubles the per-atom memory of the handle.
+ * By default the call checks every coordinate first and then writes them
+ * in place, which reads xyz twice and needs no extra memory. After
+ * seams_system_stage_positions(sys, 1) it reads xyz once instead (see
+ * there).
  *
  * @param sys Frame handle with a stored frame.
  * @param xyz n times 3 Cartesian coordinates, Angstrom. Every value must
@@ -2272,6 +2270,38 @@ SEAMS_API seams_status seams_rings_histogram_n(const seams_rings *rings, int *co
 SEAMS_API seams_status seams_system_set_positions(seams_system *sys, const double *xyz,
                                                   size_t n, const double *box9,
                                                   size_t box_len);
+
+/**
+ * @brief Trade memory for a single pass in seams_system_set_positions().
+ *
+ * With enable nonzero the handle keeps a second set of per-atom records,
+ * about 72 bytes per atom. seams_system_set_positions() then checks and
+ * writes the coordinates into that set in one pass and swaps it with the
+ * stored frame when every value was finite, so a failed call still leaves
+ * the frame unchanged. The first reload after each load fills the second
+ * set from the frame. With enable 0, the default, the second set is freed.
+ * The setting survives loads.
+ *
+ * @param sys Frame handle, with or without a stored frame.
+ * @param enable Nonzero to keep the second set, 0 to free it.
+ * @return ::SEAMS_OK; ::SEAMS_ERR_NULL for a NULL sys.
+ * @par Handle access
+ * Non-const: changes how later reloads use memory. The stored frame is
+ * not touched.
+ * @par Ownership
+ * The library owns the second set and frees it with enable 0 or
+ * seams_system_destroy().
+ * @par Thread safety
+ * Exclusive use of sys.
+ * @par Example
+ * @code
+ * seams_system_stage_positions(sys, 1);
+ * for (size_t f = 1; f < nframes; ++f) {
+ *   seams_system_set_positions(sys, frames[f], n, NULL, 0);
+ * }
+ * @endcode
+ */
+SEAMS_API seams_status seams_system_stage_positions(seams_system *sys, int enable);
 
 /**
  * @brief Copy the stored cell out as nine LAMMPS numbers.

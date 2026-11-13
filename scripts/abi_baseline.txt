@@ -78,6 +78,7 @@ T seams_system_set_atoms
 T seams_system_set_frame
 T seams_system_set_ortho
 T seams_system_set_positions
+T seams_system_stage_positions
 T seams_system_symmetry
 T seams_system_types
 T seams_version

@@ -129,11 +129,13 @@ calls `seams_system_set_atoms` once and `seams_system_set_positions` for each la
 frame. There is no borrowed-pointer load. Every analysis reads the library's per-atom
 records, so a view onto caller memory would be copied on every analysis call instead
 of once per frame. A failed load or reload leaves the earlier frame in place.
-`seams_system_set_positions` keeps that guarantee by writing into a second set of
-per-atom records on the handle, checked in the same pass, and swapping it in at the
-end. The first reload after a load fills that set from the frame; later reloads
-cost about as much as writing the coordinates in place, at twice the per-atom
-memory.
+`seams_system_set_positions` keeps that guarantee by checking every coordinate
+before it writes any, so it reads the input twice and needs no extra memory.
+`seams_system_stage_positions(sys, 1)` makes it read the input once instead: it
+writes into a second set of per-atom records, checked in the same pass, and swaps
+that set in at the end. The set costs about 72 bytes per atom, 15 to 18% of the
+resident memory of a process that has loaded an ice frame of 0.1 to 0.9 million
+molecules and run CHILL+ on it, and makes a reload 11 to 19% faster.
 
 ## Threads
 
@@ -408,6 +410,15 @@ keeps its types and ids. The run prints:
 
 ```
 capi seams_system_set_positions 8
+```
+
+### seams_system_stage_positions
+
+The call is in `docs/examples/c_api_tour.c`. It reloads the cell once through the
+second set of records and then frees that set. The run prints:
+
+```
+capi seams_system_stage_positions 8
 ```
 
 ### seams_system_box
@@ -2285,6 +2296,16 @@ Purpose: Overwrite the coordinates, and optionally the cell, of the stored frame
 Parameters: see the declaration in include/seams.h.
 
 Units: Angstrom
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_stage_positions
+
+Purpose: Keep a second set of per-atom records so seams_system_set_positions reads the coordinates once.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: none
 
 Example: `docs/examples/c_api_tour.c`
 
