@@ -69,31 +69,21 @@ if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
 endif
 
 # The shell hot path has no Eigen, so AVX2 here does not fault in the allocator.
+# One shell_avx archive is linked into both the shell path and the Ylm path.
 _shell_link = []
+_ylm_link = []
 if cpp_id == 'gcc' or cpp_id == 'clang'
   _shell_avx = static_library('shell_avx', 'shell_classify.cpp',
     cpp_args: _args + ['-mavx2', '-mfma'],
     include_directories: _incdirs,
     dependencies: _deps)
   _shell_link += _shell_avx
-else
-  ydslib_sources += files('shell_classify.cpp')
-endif
-
-_ylm_link = []
-if cpp_id == 'gcc' or cpp_id == 'clang'
   _ylm_avx = static_library('ylm_avx512', 'ylm_cartesian_avx512.cpp',
     cpp_args: _args + ['-mavx512f', '-mavx512dq', '-mfma'],
     include_directories: _incdirs,
     dependencies: _deps)
-  _ylm_link += _ylm_avx
+  _ylm_link += [_ylm_avx, _shell_avx]
   _args += ['-DSEAMS_YLM_AVX512=1']
-  # The shell hot path has no Eigen, so AVX2 here does not fault in the allocator.
-  _shell_avx = static_library('shell_avx', 'shell_classify.cpp',
-    cpp_args: _args + ['-mavx2', '-mfma'],
-    include_directories: _incdirs,
-    dependencies: _deps)
-  _ylm_link += _shell_avx
 else
   ydslib_sources += files('shell_classify.cpp')
 endif
