@@ -12,6 +12,21 @@
 
 #ifdef SEAMS_HAS_LINKCELL
 #include <linkcell.h>
+// The measured-weights library names this test lc_within_reach and
+// asks for coordinates. A nonzero return selects the geometric blocks.
+extern "C" __attribute__((weak)) int lc_owned_mask(const int *nxyz, const int *assign, std::size_t ncell,
+                             const int *point_cell, std::size_t nop, int rank,
+                             const std::uint32_t *hwidth, int *hit) {
+  (void)nxyz;
+  (void)assign;
+  (void)ncell;
+  (void)point_cell;
+  (void)nop;
+  (void)rank;
+  (void)hwidth;
+  (void)hit;
+  return 1;
+}
 #endif
 
 #include <franzblau.hpp>
