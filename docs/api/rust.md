@@ -13,7 +13,9 @@ let (six, fraction) = sys.six_ring_fraction(3.5)?;
 ```
 
 `set_frame` takes the nine-number cell, including a non-zero tilt.
-`seams::set_num_threads` and `seams::version` match the C API.
+`seams::set_num_threads`, `seams::num_threads`, and `seams::version` match the C API.
+`seams::Error` carries the status `code` and the `message` from `seams_last_error`.
+`System::count` is the number of points in the frame.
 `bindings/rust/seams/tests/ice.rs` is the `cargo test` that calls every
 safe wrapper. `meson test docs_api_rust` runs that test.
 `examples/ice.rs` prints the cubic count.
