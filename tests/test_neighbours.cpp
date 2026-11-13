@@ -1490,7 +1490,7 @@ TEST_CASE("cutoff pairs match vesin on ice Ic", "[neighbours]") {
   options.return_shifts = false;
   options.return_distances = false;
   options.return_vectors = false;
-  VesinNeighborList neighbors;
+  VesinNeighborList neighbors{};
   const char *error = nullptr;
   const VesinDevice device{VesinCPU, 0};
   REQUIRE(vesin_neighbors(reinterpret_cast<const double (*)[3]>(xyz.data()), xyz.size(),
