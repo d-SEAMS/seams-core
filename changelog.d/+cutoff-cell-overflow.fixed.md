@@ -1,0 +1,1 @@
+The cutoff neighbour search clamps its cell count and stencil reach before converting them to integers. A cell edge many orders of magnitude shorter or longer than the cutoff overflowed both, which is undefined behaviour and in practice left the reach at one cell. Found by `capi_reload_fuzzer` under UBSan.

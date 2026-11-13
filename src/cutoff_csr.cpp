@@ -151,21 +151,20 @@ void publishProfile() {
                p.rows);
 }
 
+// Both ratios are clamped before the cast: an edge many orders of magnitude
+// longer or shorter than the cutoff would not fit an int. Past kMaxCells
+// the count is cut back anyway, and a reach of ncell already visits every
+// cell once.
 int chooseCount(double length, double cutoff) {
-  int n = static_cast<int>(std::floor(length / cutoff));
-  if (n < 1) {
-    n = 1;
-  }
-  return n;
+  const double n = std::min(std::floor(length / cutoff), static_cast<double>(kMaxCells));
+  return n < 1.0 ? 1 : static_cast<int>(n);
 }
 
 int reachOf(double length, int ncell, double cutoff) {
   const double width = length / static_cast<double>(ncell);
-  int r = static_cast<int>(std::ceil(cutoff / width - 1e-12));
-  if (r < 1) {
-    r = 1;
-  }
-  return r;
+  const double r =
+      std::min(std::ceil(cutoff / width - 1e-12), static_cast<double>(ncell));
+  return r < 1.0 ? 1 : static_cast<int>(r);
 }
 
 // shx/shy/shz hold the cartesian image of fractional shift (ix,iy,iz),
@@ -1134,10 +1133,7 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
   const double width[3] = {box.wx, box.wy, box.wz};
   int ncell[3];
   for (int d = 0; d < 3; ++d) {
-    ncell[d] = width[d] > 0.0 ? static_cast<int>(std::floor(width[d] / rcutoff)) : 1;
-    if (ncell[d] < 1) {
-      ncell[d] = 1;
-    }
+    ncell[d] = width[d] > 0.0 ? chooseCount(width[d], rcutoff) : 1;
   }
   while (static_cast<long>(ncell[0]) * ncell[1] * ncell[2] > kMaxCells) {
     int *which = &ncell[0];
@@ -1154,11 +1150,7 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
   }
   int reach[3];
   for (int d = 0; d < 3; ++d) {
-    const double cellW = width[d] / static_cast<double>(ncell[d]);
-    reach[d] = cellW > 0.0 ? static_cast<int>(std::ceil(rcutoff / cellW - 1e-12)) : 1;
-    if (reach[d] < 1) {
-      reach[d] = 1;
-    }
+    reach[d] = width[d] > 0.0 ? reachOf(width[d], ncell[d], rcutoff) : 1;
   }
   // Two cells along an edge are enough for the one-cell stencil. The
   // other image of a neighbour then sits at least half an edge away, and

@@ -774,6 +774,37 @@ static void analysis_contract(void) {
 /* ------------------------------------------------------------------ */
 /* Result handles                                                      */
 
+/* Cell edges far shorter or longer than the cutoff once overflowed the
+ * cell count and stencil reach of the cutoff search (found by
+ * capi_reload_fuzzer under UBSan). Any status but an internal error passes;
+ * the sanitizer builds catch the overflow itself. */
+static void extreme_cells_contract(void) {
+  const double xyz[12] = {0.1, 0.2, 0.3, 1.0, 1.1, 1.2, 2.0, 2.1, 2.2, 3.0, 3.1, 3.2};
+  const double edges[2] = {1e-20, 1e250};
+  seams_system *sys = seams_system_create();
+  for (int e = 0; e < 2; ++e) {
+    for (int tilted = 0; tilted < 2; ++tilted) {
+      const double edge = edges[e];
+      const double tilt = tilted ? 0.25 * edge : 0.0;
+      const double box[9] = {0, 0, 0, edge, edge, edge, tilt, 0, 0};
+      const char *what = e == 0 ? (tilted ? "thin tilted cell" : "thin cell")
+                                : (tilted ? "long tilted cell" : "long cell");
+      if (seams_system_set_atoms(sys, xyz, 4, box, 9, NULL, NULL) != SEAMS_OK) {
+        continue;
+      }
+      int labels[4];
+      truth(seams_chill_plus_n(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels,
+                               4, NULL) != SEAMS_ERR_INTERNAL,
+            "seams_chill_plus_n", what);
+      seams_neighbours *nb = NULL;
+      truth(seams_neighbours_build(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, &nb) != SEAMS_ERR_INTERNAL,
+            "seams_neighbours_build", what);
+      seams_neighbours_destroy(nb);
+    }
+  }
+  seams_system_destroy(sys);
+}
+
 static void neighbours_contract(void) {
   seams_neighbours *nb = NULL;
   expect(seams_neighbours_build(g_good, 3.5, 0, SEAMS_GRAPH_CUTOFF, &nb), SEAMS_OK,
@@ -1089,6 +1120,7 @@ int main(int argc, char **argv) {
   frame_io_contract();
   read_contract(argv[2]);
   analysis_contract();
+  extreme_cells_contract();
   neighbours_contract();
   rings_contract();
   cages_contract();
