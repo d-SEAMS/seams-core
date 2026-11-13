@@ -828,6 +828,92 @@ def frame_bounds(positions, radii, transparency):
     return low, high
 
 
+def camera_fit(positions, radii, meshes, panel, names=None):
+    """Ortho camera for the panels whose framing is checked.
+
+    None leaves the historical fit alone, so Ice Ih, sII, the interface
+    and the brine slab are not moved.
+    """
+    import numpy as np
+
+    panel = str(panel)
+    if not (panel.startswith("cage-sh") or panel.startswith("nucleation")):
+        return None
+    points = np.asarray(positions, dtype=float)
+    radius = np.asarray(radii, dtype=float)
+    framed = [points]
+    for mesh in meshes or []:
+        framed.append(np.asarray(mesh["vertices"], dtype=float))
+    framed = np.vstack(framed)
+    if panel.startswith("cage-sh"):
+        # The sphere, and the face that sits just outside it, stay in the box.
+        pad = float(radius.max()) + 0.55 if len(radius) else 1.0
+        low = framed.min(axis=0) - pad
+        high = framed.max(axis=0) + pad
+        centre = np.array([
+            float(low[0] + high[0]) / 2.0,
+            float(low[1] + high[1]) / 2.0,
+            float(framed[:, 2].mean()),
+        ])
+        width = float(high[0] - low[0])
+        height = float(high[1] - low[1])
+        vertical = max(height, width * HEIGHT / float(WIDTH))
+        # The padded box occupies 90% of the view: 5% of the axes on each side.
+        return centre, vertical / 0.90
+    names = list(names or [])
+    crystal = [
+        index for index, name in enumerate(names)
+        if name in ("cubic", "hexagonal", "reCubic", "reHex")
+    ]
+    if len(crystal) < 8:
+        crystal = list(range(len(points)))
+    chosen = points[crystal]
+    span_x = float(chosen[:, 0].max() - chosen[:, 0].min())
+    span_y = float(chosen[:, 1].max() - chosen[:, 1].min())
+    centre = np.array([
+        float(chosen[:, 0].mean()),
+        float(chosen[:, 1].mean()),
+        float(chosen[:, 2].mean()),
+    ])
+    # The crystal itself fills about 70% of the panel. The caption and the
+    # crop take some of the page, so the camera is a little tighter than that.
+    ortho = max(span_y / 0.78, (span_x / 0.78) * HEIGHT / float(WIDTH))
+    horiz = ortho * WIDTH / float(HEIGHT)
+    for _step in range(16):
+        left = 0.5 + (points[:, 0] - radius - centre[0]) / horiz
+        right = 0.5 + (points[:, 0] + radius - centre[0]) / horiz
+        lower = 0.5 + (points[:, 1] - radius - centre[1]) / ortho
+        upper = 0.5 + (points[:, 1] + radius - centre[1]) / ortho
+        if left.min() >= 0.0 and right.max() <= 1.0 and lower.min() >= 0.0 and upper.max() <= 1.0:
+            break
+        ortho *= 1.05
+        horiz = ortho * WIDTH / float(HEIGHT)
+    return centre, ortho
+
+
+def assert_atoms_inside(positions, radii, centre, ortho_scale, margin=0.05):
+    """Fail when a sphere falls outside the camera axes.
+
+    ``margin`` is the fraction of the axes that must stay empty. The sH
+    cages use 5%. A nucleus only has to stay inside the axes.
+    """
+    import numpy as np
+
+    points = np.asarray(positions, dtype=float)
+    radius = np.asarray(radii, dtype=float)
+    horiz = float(ortho_scale) * WIDTH / float(HEIGHT)
+    left = 0.5 + (points[:, 0] - radius - centre[0]) / horiz
+    right = 0.5 + (points[:, 0] + radius - centre[0]) / horiz
+    lower = 0.5 + (points[:, 1] - radius - centre[1]) / float(ortho_scale)
+    upper = 0.5 + (points[:, 1] + radius - centre[1]) / float(ortho_scale)
+    if np.any(left < 0.0) or np.any(right > 1.0) or np.any(lower < 0.0) or np.any(upper > 1.0):
+        fail("projected atom falls outside the axes")
+    edge = min(float(left.min()), float(1.0 - right.max()), float(lower.min()), float(1.0 - upper.max()))
+    if edge < float(margin) - 1.0e-6:
+        fail("projected atom is {:.1%} from the axes; need {:.0%} margin".format(edge, margin))
+    print("axes margin {:.1%}".format(edge), flush=True)
+
+
 def cycles_job():
     """Headless Cycles. The parent passes one numpy archive on argv."""
     import numpy as np
@@ -848,21 +934,26 @@ def cycles_job():
         if key in job.files:
             framed.append(np.asarray(job[key], dtype=float))
     framed = np.vstack(framed)
-    com = framed.mean(axis=0)
-    panel_name = str(job["panel"]) if "panel" in job.files else ""
-    # The sH row is wide. A smaller pad lets the cages fill the column.
-    pad_extra = 0.45 if panel_name.startswith("cage-sh") else 1.8
-    pad = float(radii.max()) + pad_extra if len(radii) else pad_extra
-    low = framed.min(axis=0) - pad
-    high = framed.max(axis=0) + pad
-    half = np.maximum(com - low, high - com)
-    # Look at the atom centroid and fit the farther side, so the mass sits
-    # in the middle and nothing is clipped.
-    centre = np.array([float(com[0]), float(com[1]), float((low[2] + high[2]) / 2.0)])
-    width = float(2.0 * half[0])
-    height = float(2.0 * half[1])
-    look = centre.copy()
-    vertical = max(height, width * HEIGHT / float(WIDTH))
+    preset = "view_ortho" in job.files
+    if preset:
+        # The parent already fitted this panel and checked the axes.
+        centre = np.asarray(job["view_centre"], dtype=float)
+        vertical = float(job["view_ortho"])
+        look = centre.copy()
+        high = framed.max(axis=0)
+    else:
+        com = framed.mean(axis=0)
+        pad = float(radii.max()) + 1.8 if len(radii) else 1.8
+        low = framed.min(axis=0) - pad
+        high = framed.max(axis=0) + pad
+        half = np.maximum(com - low, high - com)
+        # Look at the atom centroid and fit the farther side, so the mass sits
+        # in the middle and nothing is clipped.
+        centre = np.array([float(com[0]), float(com[1]), float((low[2] + high[2]) / 2.0)])
+        width = float(2.0 * half[0])
+        height = float(2.0 * half[1])
+        look = centre.copy()
+        vertical = max(height, width * HEIGHT / float(WIDTH))
 
     for obj in list(bpy.data.objects):
         bpy.data.objects.remove(obj, do_unlink=True)
@@ -1072,11 +1163,8 @@ def cycles_job():
     target = Vector((float(centre[0]), float(centre[1]), float(centre[2])))
     if ortho:
         camera_data.type = "ORTHO"
-        # cage-sh is three cages. A higher fill keeps the large cage near the
-        # sII large cage's size on the page.
-        label = str(job["panel"]) if "panel" in job.files else ""
-        fill = 0.90 if label.startswith("cage-sh") else 0.86
-        vertical = vertical / fill
+        if not preset:
+            vertical = vertical / 0.86
         camera_data.ortho_scale = vertical
         camera.location = target + Vector((0.0, 0.0, 40.0))
         camera_data.clip_start = 0.1
@@ -1168,7 +1256,7 @@ def cycles_job():
     return 0
 
 
-def cycles_launch(positions, colors, radii, transparency, bonds, meshes, background, panel="panel", samples=None, ortho=False, bold=None, bond_radius=0.045, bond_rgb=None):
+def cycles_launch(positions, colors, radii, transparency, bonds, meshes, background, panel="panel", samples=None, ortho=False, bold=None, bond_radius=0.045, bond_rgb=None, view_centre=None, view_ortho=None):
     """Render with Cycles in a fresh interpreter. None when bpy is absent."""
     import subprocess
     import tempfile
@@ -1196,6 +1284,9 @@ def cycles_launch(positions, colors, radii, transparency, bonds, meshes, backgro
         "bond_radius": np.float64(bond_radius),
         "bond_rgb": np.asarray(bond_rgb if bond_rgb is not None else (0.42, 0.44, 0.47), dtype=np.float64),
     }
+    if view_centre is not None and view_ortho is not None:
+        payload["view_centre"] = np.asarray(view_centre, dtype=np.float64)
+        payload["view_ortho"] = np.float64(view_ortho)
     if bold is not None and len(bold):
         payload["bold_bonds"] = np.asarray(bold, dtype=np.int32)
     for slot, mesh in enumerate(meshes):
@@ -1243,13 +1334,14 @@ def cycles_launch(positions, colors, radii, transparency, bonds, meshes, backgro
                 pass
 
 
-def raytrace(positions, colors, radii, transparency, bonds, meshes, background, perspective, ortho=False, bold=None, bond_radius=0.045, bond_rgb=None):
+def raytrace(positions, colors, radii, transparency, bonds, meshes, background, perspective, ortho=False, bold=None, bond_radius=0.045, bond_rgb=None, view_centre=None, view_ortho=None):
     """Cycles when requested. Tachyon is only used when the engine is tachyon."""
     if RENDER_ENGINE == "cycles":
         drawn = cycles_launch(
             positions, colors, radii, transparency, bonds, meshes, background,
             panel=PANEL_NAME, ortho=ortho, bold=bold,
             bond_radius=bond_radius, bond_rgb=bond_rgb,
+            view_centre=view_centre, view_ortho=view_ortho,
         )
         if drawn is None:
             fail("Cycles was requested (--engine cycles) and did not produce a picture")
@@ -1381,11 +1473,14 @@ def crop_margin(picture, light):
     cols = np.where(mask.any(axis=0))[0]
     if len(rows) == 0:
         return picture, picture.size[1], picture.size[1]
-    pad = 28
-    top = max(0, int(rows[0]) - pad)
-    bottom = min(array.shape[0], int(rows[-1]) + pad)
-    left = max(0, int(cols[0]) - pad)
-    right = min(array.shape[1], int(cols[-1]) + pad)
+    # Keep 5% of the render, so a sphere that is inside the axes is not
+    # cropped back to the ink and sliced on the page.
+    pad_x = max(28, int(round(array.shape[1] * 0.05)))
+    pad_y = max(28, int(round(array.shape[0] * 0.05)))
+    top = max(0, int(rows[0]) - pad_y)
+    bottom = min(array.shape[0], int(rows[-1]) + pad_y)
+    left = max(0, int(cols[0]) - pad_x)
+    right = min(array.shape[1], int(cols[-1]) + pad_x)
     cropped = Image.fromarray(array[top:bottom, left:right])
     return cropped, bottom - top, array.shape[0]
 
@@ -1521,6 +1616,10 @@ def compose(structure, legend, world_height, light):
     region_top = top
     region_bottom = HEIGHT - caption - gap
     struct_y = region_top + max(0, (region_bottom - region_top - sized[1]) // 2)
+    # Three cages in a row are short. Sit them higher so the row is not
+    # stranded under a band of empty page.
+    if str(PANEL_NAME).startswith("cage-sh"):
+        struct_y = max(region_top + 12, struct_y - 48)
 
     def structure_layer(origin_y):
         layer = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
@@ -1572,7 +1671,8 @@ def compose(structure, legend, world_height, light):
             x += width + gap_px
     # Nudge only the drawing so the ink centroid stays near the middle,
     # and stop before the atoms meet the caption.
-    best = structure_layer(struct_y)
+    placed = struct_y
+    best = structure_layer(placed)
     base = canvas.convert("RGBA")
     merged = Image.alpha_composite(base, best).convert("RGB")
     arr = np.asarray(merged)
@@ -1583,9 +1683,17 @@ def compose(structure, legend, world_height, light):
         shift = int(round(-dy * HEIGHT))
         floor = region_top
         ceiling = region_bottom - sized[1]
-        shifted = min(max(struct_y + shift, floor), max(floor, ceiling))
-        if shifted != struct_y:
-            best = structure_layer(shifted)
+        shifted = min(max(placed + shift, floor), max(floor, ceiling))
+        if shifted != placed:
+            placed = shifted
+            best = structure_layer(placed)
+            merged = Image.alpha_composite(base, best).convert("RGB")
+    # The row is short. A small lift keeps it from sitting on the caption
+    # while the horizontal margin stays put.
+    if str(PANEL_NAME).startswith("cage-sh"):
+        lifted = max(region_top, placed - 28)
+        if lifted != placed:
+            best = structure_layer(lifted)
             merged = Image.alpha_composite(base, best).convert("RGB")
     return merged
 
@@ -1732,12 +1840,12 @@ def save_pair(image, directory, stem):
     return directory / "{}.png".format(stem)
 
 
-def largest_cluster(frame, labels, shell=3.6):
+def largest_cluster(frame, labels, shell=3.6, core=(0, 1, 3, 7, 8)):
     """The biggest crystal component, plus waters that touch it."""
     import numpy as np
     from scipy.spatial import cKDTree
 
-    crystal = np.array([i for i, label in enumerate(labels) if label in (0, 1, 3, 7, 8)], dtype=int)
+    crystal = np.array([i for i, label in enumerate(labels) if label in core], dtype=int)
     if len(crystal) == 0:
         return central_slice(frame, labels, 400)
     tree = cKDTree(frame.xyz[crystal])
@@ -1918,13 +2026,7 @@ def finish(positions, colors, radii, transparency, names, bonds, meshes, view, c
                     "legend": mesh.get("legend"),
                 })
             meshes = posed
-            radii, transparency, near = _depth_cue(positions, radii, transparency, names)
-            crystal = {"cubic", "hexagonal", "reCubic", "reHex"}
-            bonds = [
-                pair for pair in bonds
-                if names[pair[0]] in crystal and names[pair[1]] in crystal
-                and float(near[pair[0]]) >= 0.50 and float(near[pair[1]]) >= 0.50
-            ]
+            radii, transparency, _near = _depth_cue(positions, radii, transparency, names)
         else:
             positions = orient(positions, view, center)
             meshes = [
@@ -1981,10 +2083,18 @@ def finish(positions, colors, radii, transparency, names, bonds, meshes, view, c
             positions[index, 2] += 0.9
         elif name == "_rim":
             positions[index, 2] -= 0.25
-    ortho = view in ("basal", "channel", "slab", "pair") or bool(align)
+    ortho = view in ("basal", "channel", "slab", "pair", "row") or bool(align)
+    fit = camera_fit(positions, radii, meshes, PANEL_NAME, names)
+    view_centre = view_ortho = None
+    if fit is not None:
+        view_centre, view_ortho = fit
+        # Cages need 5% of the axes clear. The nucleus only has to stay inside.
+        margin = 0.05 if str(PANEL_NAME).startswith("cage") else 0.0
+        assert_atoms_inside(positions, radii, view_centre, view_ortho, margin)
     light_picture, world = raytrace(
         positions, colors, radii, transparency, bonds, meshes, (1, 1, 1), perspective,
         ortho=ortho, bold=bold, bond_radius=bond_radius, bond_rgb=bond_rgb,
+        view_centre=view_centre, view_ortho=view_ortho,
     )
     if os.environ.get("MOLECULES_THEMES") == "light":
         dark_picture = light_picture
@@ -1992,6 +2102,7 @@ def finish(positions, colors, radii, transparency, names, bonds, meshes, view, c
         dark_picture, _world = raytrace(
             positions, colors, radii, transparency, bonds, meshes, (0.09, 0.10, 0.12), perspective,
             ortho=ortho, bold=bold, bond_radius=bond_radius, bond_rgb=bond_rgb,
+            view_centre=view_centre, view_ortho=view_ortho,
         )
     return (
         compose(light_picture, legend, world, True),
@@ -2044,39 +2155,44 @@ def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=
     bonds = oxygen_bonds(xyz, heavy)
     if cluster:
         # Cubic and hexagonal only. Mixed stays unbound, and liquid has no bonds.
+        # Every crystal neighbour is kept, including the ones at the back, so
+        # the two domains read as lattices that meet at the stacking boundary.
         crystal = {0, 1, 7, 8}
-        bonds = [
-            pair for pair in bonds
-            if int(kept_labels[pair[0]]) in crystal and int(kept_labels[pair[1]]) in crystal
-        ]
-    if cluster and bonds:
-        keep = set(range(len(xyz)))
-        for _pass in range(4):
-            degree = {index: 0 for index in keep}
-            for left, right in bonds:
-                if left in keep and right in keep:
-                    degree[left] += 1
-                    degree[right] += 1
-            drop = {
-                index for index, count in degree.items()
-                if count < 2 and int(kept_labels[index]) not in (2, 3)
-            }
-            if not drop or len(keep - drop) < 12:
-                break
-            keep -= drop
-        order = sorted(keep)
-        remap = {old: new for new, old in enumerate(order)}
-        xyz = xyz[order]
-        colors = [colors[index] for index in order]
-        names = [names[index] for index in order]
-        radii = [radii[index] for index in order]
-        transparency = [transparency[index] for index in order]
-        kept_labels = [kept_labels[index] for index in order]
-        bonds = [
-            (remap[left], remap[right])
-            for left, right in bonds
-            if left in remap and right in remap
-        ]
+        from scipy.spatial import cKDTree
+
+        core = [index for index, label in enumerate(kept_labels) if int(label) in crystal]
+        keep = set(core)
+        if core:
+            tree = cKDTree(xyz[core])
+            for index, label in enumerate(kept_labels):
+                # Liquid is left out. A mixed oxygen is kept only when it
+                # touches the cubic or hexagonal lattice.
+                if int(label) != 3:
+                    continue
+                dist, _near = tree.query(xyz[index], k=1)
+                if float(dist) <= 3.0:
+                    keep.add(index)
+        if keep and len(keep) < len(xyz):
+            order = sorted(keep)
+            remap = {old: new for new, old in enumerate(order)}
+            xyz = xyz[order]
+            colors = [colors[index] for index in order]
+            names = [names[index] for index in order]
+            radii = [radii[index] for index in order]
+            transparency = [transparency[index] for index in order]
+            kept_labels = [kept_labels[index] for index in order]
+            bonds = [
+                (remap[left], remap[right])
+                for left, right in bonds
+                if left in remap and right in remap
+                and int(kept_labels[remap[left]]) in crystal
+                and int(kept_labels[remap[right]]) in crystal
+            ]
+        else:
+            bonds = [
+                pair for pair in bonds
+                if int(kept_labels[pair[0]]) in crystal and int(kept_labels[pair[1]]) in crystal
+            ]
     elif slab:
         # Ice and the interfacial layer are bonded. Liquid stays as atoms
         # so a crystal bond does not run off into the solvent.
@@ -2939,6 +3055,27 @@ def depth_slab(frame, labels, x_lo=6.0, x_hi=12.5, z_lo=4.5, z_hi=26.0, liquid_r
     return frame.subset(index), [labels[i] for i in index]
 
 
+def best_nucleus(library):
+    """The largest cubic/hexagonal cluster in the trajectory.
+
+    Frame 1 is the historical still. A later frame replaces it when that
+    frame holds a larger crystal.
+    """
+    path = ROOT / "input/traj/nucleation_three.lammpstrj"
+    best = None
+    for index in range(3):
+        frame = read_dump(path, index)
+        labels = chill_labels(library, frame)
+        chosen, chosen_labels, centre = largest_cluster(
+            frame, labels, shell=3.0, core=(0, 1, 7, 8),
+        )
+        score = sum(1 for label in chosen_labels if int(label) in (0, 1, 7, 8))
+        if best is None or score > best[0] or (score == best[0] and index > best[1]):
+            best = (score, index, chosen, chosen_labels, centre)
+    print("nucleation frame {} crystal {}".format(best[1], best[0]), flush=True)
+    return best[2], best[3], best[4]
+
+
 def draw(library, scene):
     global PANEL_NAME
     PANEL_NAME = scene
@@ -2964,9 +3101,7 @@ def draw(library, scene):
         frame, labels = depth_slab(frame, labels)
         return labelled_picture(frame, labels, "slab", False, slab=True)
     if scene == "nucleation":
-        frame = read_dump(ROOT / "input/traj/nucleation_three.lammpstrj", frame_index=1)
-        labels = chill_labels(library, frame)
-        frame, labels, centre = largest_cluster(frame, labels, shell=4.0)
+        frame, labels, centre = best_nucleus(library)
         return labelled_picture(
             frame, labels, "cage", True, perspective=False, center=centre, cluster=True,
         )
