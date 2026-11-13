@@ -98,7 +98,7 @@ def rust_symbols():
 
 def fortran_symbols():
     """Parameters and procedures exported by the Fortran module."""
-    text = (ROOT / "bindings" / "fortran" / "seams.f90").read_text()
+    text = (ROOT / "bindings" / "fortran" / "src" / "seams.f90").read_text()
     names = set(re.findall(r"parameter :: ([A-Z0-9_]+)", text))
     names.update(re.findall(r"(?:function|subroutine) ([a-z0-9_]+)\(", text))
     return sorted(names)

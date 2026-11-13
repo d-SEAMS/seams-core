@@ -96,7 +96,7 @@ def main(argv):
     env = os.environ.copy()
     env["OMP_NUM_THREADS"] = "1"
     env["SEAMS_LIB"] = lib
-    env["LUA_PATH"] = str(root / "bindings" / "lua") + "/?.lua;;"
+    env["LUA_PATH"] = str(work) + "/?.lua;" + str(root / "bindings" / "lua") + "/?.lua;;"
     env["LUA_CPATH"] = ""
     frame = work / "ih.lammpstrj"
     oracle_text = run([oracle, str(frame), str(root)], env, root)
@@ -130,6 +130,9 @@ def main(argv):
     compiled = {}
     for script in fennel_scripts:
         compiled[script] = run(compile_cmd + [str(script)], compile_env, root)
+    for library in sorted((root / "bindings" / "lua").glob("*.fnl")):
+        generated = work / (library.stem + ".lua")
+        generated.write_text(run(compile_cmd + [str(library)], compile_env, root))
     for index in range(0, len(lua_mods), 2):
         lua = lua_mods[index]
         cpath = lua_mods[index + 1]

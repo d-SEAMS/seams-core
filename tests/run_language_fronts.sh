@@ -87,10 +87,18 @@ fi
 
 if command -v gfortran >/dev/null 2>&1; then
   mod=$(mktemp -d)
-  gfortran -J"$mod" -c "$root/bindings/fortran/seams.f90" -o "$mod/seams.o"
-  gfortran -I"$mod" "$root/bindings/fortran/test_seams.f90" "$mod/seams.o" \
+  gfortran -J"$mod" -c "$root/bindings/fortran/src/seams_kinds.f90" -o "$mod/seams_kinds.o"
+  gfortran -J"$mod" -I"$mod" -c "$root/bindings/fortran/src/seams_c.f90" -o "$mod/seams_c.o"
+  gfortran -J"$mod" -I"$mod" -c "$root/bindings/fortran/src/seams_support.f90" -o "$mod/seams_support.o"
+  gfortran -J"$mod" -I"$mod" -c "$root/bindings/fortran/src/seams.f90" -o "$mod/seams.o"
+  gfortran -J"$mod" -I"$mod" -c "$root/bindings/fortran/src/seams_methods.f90" -o "$mod/seams_methods.o"
+  gfortran -I"$mod" "$root/bindings/fortran/test_seams.f90" "$mod/seams_c.o" \
     -o "$mod/test_seams" -L"$lib" -lseams -Wl,-rpath,"$lib"
+  gfortran -I"$mod" "$root/bindings/fortran/test/test_high.f90" \
+    "$mod/seams_kinds.o" "$mod/seams_c.o" "$mod/seams_support.o" "$mod/seams.o" "$mod/seams_methods.o" \
+    -o "$mod/test_high" -L"$lib" -lseams -Wl,-rpath,"$lib"
   OMP_NUM_THREADS=1 LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} "$mod/test_seams" "$root"
+  OMP_NUM_THREADS=1 LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} "$mod/test_high" "$root"
   rm -rf "$mod"
 else
   note_missing gfortran

@@ -26,6 +26,7 @@ Pages for each front, with the 2.14.0 build command and the test CI runs:
 | C | [api/c.md](api/c.md) | [tutorials/c.md](tutorials/c.md) |
 | C++ | [api/cpp.md](api/cpp.md) | [tutorials/cpp.md](tutorials/cpp.md) |
 | Fortran | [api/fortran.md](api/fortran.md) | [tutorials/fortran.md](tutorials/fortran.md) |
+| Lua | [api/lua.md](api/lua.md) | [api/lua.md](api/lua.md) |
 | Rust | [api/rust.md](api/rust.md) | [tutorials/rust.md](tutorials/rust.md) |
 | Python | [api/python.md](api/python.md) | [tutorials/python.md](tutorials/python.md) |
 | Julia | [api/julia.md](api/julia.md) | [tutorials/julia.md](tutorials/julia.md) |
@@ -41,7 +42,8 @@ Then run one front:
 ```bash
 python -m dseams
 cargo run --manifest-path bindings/rust/Cargo.toml --example ice
-gfortran -Ibindings/fortran bindings/fortran/test_seams.f90 -L$SEAMS_LIB_DIR -lseams
+gfortran -Jbuild/fmod -c bindings/fortran/src/seams_c.f90 -o build/fmod/seams_c.o
+gfortran -Ibuild/fmod bindings/fortran/test_seams.f90 build/fmod/seams_c.o -L$SEAMS_LIB_DIR -lseams
 julia --project=bindings/julia/Dseams bindings/julia/Dseams/test/runtests.jl
 ```
 

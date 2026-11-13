@@ -137,17 +137,23 @@ def compile_and_run(build):
     gfortran = shutil.which("gfortran")
     if gfortran is None:
         raise SystemExit("gfortran is not on PATH")
-    run(
-        [
-            gfortran,
-            "-J",
-            str(work),
-            "-c",
-            str(ROOT / "bindings/fortran/seams.f90"),
-            "-o",
-            str(work / "seams.o"),
-        ]
-    )
+    objects = []
+    for name in ("seams_kinds.f90", "seams_c.f90", "seams_support.f90", "seams.f90", "seams_methods.f90"):
+        obj = work / name.replace(".f90", ".o")
+        run(
+            [
+                gfortran,
+                "-J",
+                str(work),
+                "-I",
+                str(work),
+                "-c",
+                str(ROOT / "bindings/fortran/src" / name),
+                "-o",
+                str(obj),
+            ]
+        )
+        objects.append(str(obj))
     f_bin = work / "minimal_fortran"
     run(
         [
@@ -155,7 +161,7 @@ def compile_and_run(build):
             "-I",
             str(work),
             str(ROOT / "docs/examples/minimal_fortran.f90"),
-            str(work / "seams.o"),
+            *objects,
             "-o",
             str(f_bin),
             "-L" + str(build / "src"),

@@ -1,0 +1,29 @@
+name = "seams"
+version = "2.14.0"
+license = "MIT"
+author = "Rohit Goswami"
+maintainer = "Rohit Goswami <rgoswami@ieee.org>"
+copyright = "Copyright (c) d-SEAMS developers"
+description = "Fortran 2008 bindings for the d-SEAMS C API"
+
+[library]
+source-dir = "src"
+
+[build]
+auto-executables = false
+auto-tests = false
+auto-examples = false
+link = ["seams"]
+
+[install]
+library = true
+
+[[test]]
+name = "capi"
+source-dir = "ci"
+main = "test_seams.f90"
+
+[[test]]
+name = "high"
+source-dir = "test"
+main = "test_high.f90"
