@@ -5,7 +5,8 @@
  *   capi  seams_chill_plus_n on a handle loaded with seams_system_set_atoms
  *   cpp   nneigh::orthoFullCsr + chill::chillPlusFromCsr on a Cloud
  * Both run serial and interleaved, one rep of each per round. The load is
- * timed apart from the analysis, again interleaved, as five cases:
+ * timed apart from the analysis, again interleaved, as five cases, with
+ * set_positions and cpp Cloud refill back to back in alternating order:
  *   set_atoms fresh   set_atoms on a new handle (create and destroy untimed)
  *   set_atoms reuse   set_atoms on a handle that already holds a frame
  *   set_positions     set_positions on a handle loaded once, as in a
@@ -181,10 +182,6 @@ void load_costs(const Lattice &lat, int reps) {
          "set_atoms");
     const double b = seconds(t0);
 
-    t0 = Clock::now();
-    need(seams_system_set_positions(moving, lat.xyz.data(), n, lat.box, 9), "set_positions");
-    const double c = seconds(t0);
-
     double d = 0;
     {
       t0 = Clock::now();
@@ -193,15 +190,33 @@ void load_costs(const Lattice &lat, int reps) {
       sink += cloud.nop;
     }
 
-    t0 = Clock::now();
-    for (int i = 0; i < lat.n; ++i) {
-      auto &point = refill.pts[static_cast<std::size_t>(i)];
-      point.x = lat.xyz[static_cast<std::size_t>(3 * i)];
-      point.y = lat.xyz[static_cast<std::size_t>(3 * i + 1)];
-      point.z = lat.xyz[static_cast<std::size_t>(3 * i + 2)];
-      point.iceType = molSys::atom_state_type::unclassified;
+    auto time_positions = [&] {
+      const auto t = Clock::now();
+      need(seams_system_set_positions(moving, lat.xyz.data(), n, lat.box, 9),
+           "set_positions");
+      return seconds(t);
+    };
+    auto time_refill = [&] {
+      const auto t = Clock::now();
+      for (int i = 0; i < lat.n; ++i) {
+        auto &point = refill.pts[static_cast<std::size_t>(i)];
+        point.x = lat.xyz[static_cast<std::size_t>(3 * i)];
+        point.y = lat.xyz[static_cast<std::size_t>(3 * i + 1)];
+        point.z = lat.xyz[static_cast<std::size_t>(3 * i + 2)];
+        point.iceType = molSys::atom_state_type::unclassified;
+      }
+      return seconds(t);
+    };
+    // Whichever runs second finds the coordinates in cache, so the order
+    // alternates.
+    double c = 0, e = 0;
+    if (r % 2 == 0) {
+      c = time_positions();
+      e = time_refill();
+    } else {
+      e = time_refill();
+      c = time_positions();
     }
-    const double e = seconds(t0);
     sink += refill.pts.back().x > 0;
 
     if (r >= 0) {
