@@ -1,0 +1,1 @@
+`capi_reload_fuzzer` drives `seams_system_set_atoms`, `seams_system_set_positions` and `seams_system_stage_positions` with random atom counts, NULL pointers, wrong lengths, NaN and infinite values in both reload modes, and reads the frame back after every call. Under clang the libFuzzer harnesses are built with `-fsanitize=fuzzer` and the `capi_sanitize` sanitizer.

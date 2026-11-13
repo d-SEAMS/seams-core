@@ -1942,65 +1942,60 @@ test(
   depends: _abi_depends,
   timeout: 300)
 
-_fuzzer_rt = ''
-foreach _cand : [
-  '/usr/lib/llvm-18/lib/clang/18/lib/linux/libclang_rt.fuzzer-x86_64.a',
-  '/usr/lib/llvm-19/lib/clang/19/lib/linux/libclang_rt.fuzzer-x86_64.a',
-  '/usr/lib/llvm-20/lib/clang/20/lib/linux/libclang_rt.fuzzer-x86_64.a',
-]
-  if _fuzzer_rt == '' and import('fs').exists(_cand)
-    _fuzzer_rt = _cand
-  endif
-endforeach
-if _fuzzer_rt != '' and get_option('capi_sanitize') == 'none'
-  capi_fuzzer = custom_target(
-    'capi_read_fuzzer',
-    output: 'capi_read_fuzzer',
-    command: meson.get_compiler('c').cmd_array() + [
-      '-std=c11', '-g', '-O1',
-      '-I' + meson.project_source_root() / 'include',
-      '-I' + meson.current_build_dir() / 'src',
-      meson.project_source_root() / 'fuzz' / 'capi_read_fuzzer.c',
-      '-o', '@OUTPUT@',
-      seams_api_lib.full_path(),
-      _fuzzer_rt,
-      '-Wl,-rpath,' + meson.current_build_dir() / 'src',
-      '-lstdc++', '-lpthread', '-lm',
-    ],
-    depends: [seams_api_lib],
-    build_by_default: true)
-  capi_array_fuzzer = custom_target(
-    'capi_array_fuzzer',
-    output: 'capi_array_fuzzer',
-    command: meson.get_compiler('c').cmd_array() + [
-      '-std=c11', '-g', '-O1',
-      '-I' + meson.project_source_root() / 'include',
-      '-I' + meson.current_build_dir() / 'src',
-      meson.project_source_root() / 'fuzz' / 'capi_array_fuzzer.c',
-      '-o', '@OUTPUT@',
-      seams_api_lib.full_path(),
-      _fuzzer_rt,
-      '-Wl,-rpath,' + meson.current_build_dir() / 'src',
-      '-lstdc++', '-lpthread', '-lm',
-    ],
-    depends: [seams_api_lib],
-    build_by_default: true)
-  test(
-    'capi_fuzzer',
-    capi_fuzzer,
-    args: [
-      '-max_total_time=' + get_option('capi_fuzz_seconds').to_string(),
-      '-timeout=15', '-rss_limit_mb=4096', '-fork=1', '-ignore_timeouts=1',
-    ],
-    timeout: get_option('capi_fuzz_seconds') + 180,
-    is_parallel: false)
-  test(
-    'capi_array_fuzzer',
-    capi_array_fuzzer,
-    args: [
-      '-max_total_time=' + get_option('capi_fuzz_seconds').to_string(),
-      '-timeout=15', '-rss_limit_mb=4096', '-fork=1', '-ignore_timeouts=1',
-    ],
-    timeout: get_option('capi_fuzz_seconds') + 180,
-    is_parallel: false)
+# libFuzzer harnesses. Under clang they are built with -fsanitize=fuzzer,
+# plus the capi_sanitize sanitizer, so libFuzzer gets coverage from the
+# harness; configure with c_args and cpp_args -fsanitize=fuzzer-no-link to
+# instrument libseams as well. Other compilers link a clang fuzzer runtime
+# from the usual Debian path, without coverage, when one is installed.
+_fuzz_cc = meson.get_compiler('c')
+_fuzz_args = []
+if _fuzz_cc.get_id() == 'clang' and _fuzz_cc.has_argument('-fsanitize=fuzzer-no-link')
+  _fuzz_args = ['-fsanitize=fuzzer' + (_capi_san == 'none' ? '' : ',' + _capi_san)]
+elif _capi_san == 'none'
+  foreach _cand : [
+    '/usr/lib/llvm-18/lib/clang/18/lib/linux/libclang_rt.fuzzer-x86_64.a',
+    '/usr/lib/llvm-19/lib/clang/19/lib/linux/libclang_rt.fuzzer-x86_64.a',
+    '/usr/lib/llvm-20/lib/clang/20/lib/linux/libclang_rt.fuzzer-x86_64.a',
+  ]
+    if _fuzz_args.length() == 0 and import('fs').exists(_cand)
+      _fuzz_args = [_cand]
+    endif
+  endforeach
+endif
+if _fuzz_args.length() > 0
+  _fuzz_env = environment()
+  _fuzz_env.set('LSAN_OPTIONS',
+                'suppressions=' + meson.project_source_root() / 'fuzz' / 'lsan.supp')
+  foreach _fuzz : [
+    ['capi_fuzzer', 'capi_read_fuzzer'],
+    ['capi_array_fuzzer', 'capi_array_fuzzer'],
+    ['capi_reload_fuzzer', 'capi_reload_fuzzer'],
+  ]
+    _fuzz_exe = custom_target(
+      _fuzz[1],
+      output: _fuzz[1],
+      command: _fuzz_cc.cmd_array() + [
+        '-std=c11', '-g', '-O1',
+        '-I' + meson.project_source_root() / 'include',
+        '-I' + meson.current_build_dir() / 'src',
+        meson.project_source_root() / 'fuzz' / (_fuzz[1] + '.c'),
+        '-o', '@OUTPUT@',
+        seams_api_lib.full_path(),
+      ] + _fuzz_args + [
+        '-Wl,-rpath,' + meson.current_build_dir() / 'src',
+        '-lstdc++', '-lpthread', '-lm',
+      ],
+      depends: [seams_api_lib],
+      build_by_default: true)
+    test(
+      _fuzz[0],
+      _fuzz_exe,
+      env: _fuzz_env,
+      args: [
+        '-max_total_time=' + get_option('capi_fuzz_seconds').to_string(),
+        '-timeout=15', '-rss_limit_mb=4096', '-fork=1', '-ignore_timeouts=1',
+      ],
+      timeout: get_option('capi_fuzz_seconds') + 180,
+      is_parallel: false)
+  endforeach
 endif

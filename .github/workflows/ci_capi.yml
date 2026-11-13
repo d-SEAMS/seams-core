@@ -65,8 +65,8 @@ jobs:
           cache-key: pixi-capi-fuzz-
       - run: sudo apt-get update && sudo apt-get install -y clang
       - run: pixi run meson setup build-fuzz -Dwith_tests=true -Dwith_python=false -Dcapi_fuzz_seconds=600
-      - run: pixi run ninja -C build-fuzz capi_read_fuzzer capi_array_fuzzer
-      - run: pixi run meson test -C build-fuzz --print-errorlogs capi_fuzzer capi_array_fuzzer
+      - run: pixi run ninja -C build-fuzz capi_read_fuzzer capi_array_fuzzer capi_reload_fuzzer
+      - run: pixi run meson test -C build-fuzz --print-errorlogs capi_fuzzer capi_array_fuzzer capi_reload_fuzzer
 
   capi-crosscheck:
     runs-on: ubuntu-latest
