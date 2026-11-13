@@ -256,7 +256,7 @@ do not change from one thread to eight. TRACE does not either.
 The sI unit-cell census is the disagreement above. The q6
 derivative, checked separately on a symmetry-broken
 eight-molecule cell, matches an independent nanometre difference
-to 1.110e-12.
+to 3.99e-11.
 
 The non-heavy test suite was run three times on this build:
 128 passed, 2 expected failures, 1 skip, 0 failures. =seams_input=

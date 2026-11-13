@@ -79,7 +79,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 ### Fixed
 
 - A LAMMPS dump that is still being appended is kept, instead of being reported as truncated. The language fronts use the build's Python and skip a library mismatch.
-- The PLUMED q6 derivative is taken in nanometres. The finite-difference step is an angstrom, so the value passed to PLUMED is ten times the angstrom derivative. On a symmetry-broken eight-molecule cell the worst absolute error against an independent difference is 1.1e-12.
+- The PLUMED q6 derivative is taken in nanometres. The finite-difference step is an angstrom, so the value passed to PLUMED is ten times the angstrom derivative. On a symmetry-broken eight-molecule cell the worst absolute error against an independent difference is 3.99e-11.
 - The PLUMED kernel linked into the collective variable is the one named by pkg-config, so an older kernel earlier on the linker path is not selected.
 - Accept a cup that fills the signature face count with dangling edges.
 - Evaluate Steinhardt l=12 qlBar on the host so the 25-component average does not overflow the device barRe[17] buffer.
