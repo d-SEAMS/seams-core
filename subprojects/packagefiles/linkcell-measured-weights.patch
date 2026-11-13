@@ -1,8 +1,8 @@
 diff --git a/include/linkcell.h b/include/linkcell.h
-index 1e4fc2b..0c880fa 100644
+index 1e4fc2b..b731843 100644
 --- a/include/linkcell.h
 +++ b/include/linkcell.h
-@@ -405,6 +405,88 @@ int lc_halo(const int *nxyz,
+@@ -405,6 +405,89 @@ int lc_halo(const int *nxyz,
              size_t cap,
              size_t *out_count);
  
@@ -80,9 +80,10 @@ index 1e4fc2b..0c880fa 100644
 +                  int *out_hit);
 +
 +/**
-+ * Use `n` Rayon threads for later searches. `n <= 0` means one thread.
-+ * Safe to call again with a different `n`.
++ * Use `n` Rayon threads for later searches. `n == 0` runs on the calling
++ * thread. `n < 0` means one thread. Safe to call again with a different `n`.
 + */
++/** `n == 0` runs the next search on the calling thread. `n < 0` selects one thread. */
 +void lc_set_threads(int n);
 +
 +/** Width last passed to `lc_set_threads`, or the global pool when unset. */
@@ -122,10 +123,10 @@ index b6f3b1b..007adcf 100644
          let parallel = false;
          if buf.offsets.len() != ncell + 1 {
 diff --git a/src/capi.rs b/src/capi.rs
-index 7989fd4..8190597 100644
+index 7989fd4..7c42e43 100644
 --- a/src/capi.rs
 +++ b/src/capi.rs
-@@ -5,9 +5,62 @@
+@@ -5,9 +5,67 @@
  use std::cell::RefCell;
  use std::ffi::{c_char, c_int, CString};
  use std::ptr;
@@ -134,43 +135,48 @@ index 7989fd4..8190597 100644
  
  use crate::{Cell, Error};
  
-+/// How many Rayon threads the next search should use. Zero means the
-+/// process-wide pool, which is what `RAYON_NUM_THREADS` built.
++/// How many Rayon threads the next search should use. Zero or one runs
++/// on the calling thread.
 +static WANTED_THREADS: AtomicUsize = AtomicUsize::new(0);
 +
-+fn pool_of(n: usize) -> &'static rayon::ThreadPool {
-+    static CACHE: Mutex<Vec<(usize, &'static rayon::ThreadPool)>> = Mutex::new(Vec::new());
-+    let mut guard = CACHE.lock().unwrap_or_else(|e| e.into_inner());
-+    if let Some((_, pool)) = guard.iter().find(|(k, _)| *k == n) {
-+        return *pool;
-+    }
-+    let pool = Box::leak(Box::new(
-+        rayon::ThreadPoolBuilder::new()
-+            .num_threads(n)
-+            .build()
-+            .unwrap_or_else(|_| rayon::ThreadPoolBuilder::new().num_threads(1).build().unwrap()),
-+    ));
-+    guard.push((n, pool));
-+    pool
-+}
-+
-+/// Run `work` on a pool of the requested width so `current_num_threads`
-+/// inside linkcell matches that width. A width of one is the serial walk.
++/// One pool for the process. A different width drops the previous pool
++/// before the new one starts, so two widths never run together. The
++/// workers sleep on a condvar between searches (rayon's idle path),
++/// which is the passive wait.
 +fn with_threads<R: Send>(work: impl FnOnce() -> R + Send) -> R {
 +    let n = WANTED_THREADS.load(Ordering::Relaxed);
-+    if n == 0 {
++    if n <= 1 {
 +        return work();
 +    }
 +    if rayon::current_thread_index().is_some() && rayon::current_num_threads() == n {
 +        return work();
 +    }
-+    pool_of(n).install(work)
++    struct Slot {
++        n: usize,
++        pool: rayon::ThreadPool,
++    }
++    static CACHE: Mutex<Option<Slot>> = Mutex::new(None);
++    let mut guard = CACHE.lock().unwrap_or_else(|err| err.into_inner());
++    if guard.as_ref().map(|slot| slot.n) != Some(n) {
++        *guard = None;
++        let pool = rayon::ThreadPoolBuilder::new()
++            .num_threads(n)
++            .build()
++            .unwrap_or_else(|_| rayon::ThreadPoolBuilder::new().num_threads(1).build().unwrap());
++        *guard = Some(Slot { n, pool });
++    }
++    guard.as_ref().unwrap().pool.install(work)
 +}
 +
-+/// Choose the Rayon width for later searches. `n <= 0` selects one thread.
++/// Choose the Rayon width for later searches. `n == 0` runs the search
++/// on the calling thread. `n < 0` selects one thread.
 +#[no_mangle]
 +pub extern "C" fn lc_set_threads(n: c_int) {
-+    let n = if n < 1 { 1 } else { n as usize };
++    let n = if n < 0 {
++        1
++    } else {
++        n as usize
++    };
 +    WANTED_THREADS.store(n, Ordering::Relaxed);
 +}
 +
@@ -188,7 +194,7 @@ index 7989fd4..8190597 100644
  /// Periodic parallelepiped. Lattice vectors are a, b, c (same as vesin rows).
  #[repr(C)]
  #[derive(Clone, Copy, Debug)]
-@@ -245,11 +298,13 @@ pub unsafe extern "C" fn lc_knearest_many(
+@@ -245,11 +303,13 @@ pub unsafe extern "C" fn lc_knearest_many(
          d2_store = unsafe { std::slice::from_raw_parts_mut(out_d2, need) };
          Some(&mut d2_store[..])
      };
@@ -207,7 +213,27 @@ index 7989fd4..8190597 100644
      if let Err(e) = err {
          set_error(&e.to_string());
          return 1;
-@@ -466,8 +521,10 @@ unsafe fn pairs_call<'a>(
+@@ -403,11 +463,15 @@ pub unsafe extern "C" fn lc_pairs_within_rows(
+         park(&key, found);
+         return fail_msg("pair buffer is shorter than the pair count");
+     }
+-    // Safety: the caller gave `cap >= rows` rows.
++    // Safety: the caller gave `cap >= rows` rows. The fill runs on the
++    // same pool as the search. `in_pool` would otherwise open the global
++    // Rayon pool beside it.
+     let rows_out = RowOut(out);
+-    crate::pairs::in_pool(found.rows(), move || {
+-        let out = rows_out.get();
+-        unsafe { found.write_rows(out, |i, j, shift, dist2| lc_pair { i, j, shift, dist2 }) }
++    with_threads(move || {
++        crate::pairs::in_pool(found.rows(), move || {
++            let out = rows_out.get();
++            unsafe { found.write_rows(out, |i, j, shift, dist2| lc_pair { i, j, shift, dist2 }) }
++        })
+     });
+     clear_error();
+     0
+@@ -466,8 +530,10 @@ unsafe fn pairs_call<'a>(
          return Ok((key, found));
      }
      let mask_vec: Option<Vec<bool>> = mask_raw.map(|m| m.iter().map(|&v| v != 0).collect());
@@ -220,7 +246,7 @@ index 7989fd4..8190597 100644
      });
      match found {
          Ok(found) => Ok((key, found)),
-@@ -942,3 +999,333 @@ pub unsafe extern "C" fn lc_halo(
+@@ -942,3 +1008,333 @@ pub unsafe extern "C" fn lc_halo(
      clear_error();
      0
  }

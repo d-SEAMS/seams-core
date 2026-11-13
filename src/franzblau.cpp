@@ -33,6 +33,28 @@ std::atomic<std::uint64_t> gPrimCycles{0};
 bool gTimePrimitive = false;
 double gTscPerMs = 0;
 
+// Ring enumeration wants about 80 sources per thread, and a team is
+// not started until those sources fill every worker. A few hundred
+// changed vertices are still a serial update: the fork costs more
+// than the search. This is not teamFor, which would also drop a
+// crystal of a few hundred molecules onto one thread.
+int sourceTeam(int sources) {
+#ifdef SEAMS_HAS_OPENMP
+  if (omp_in_parallel()) {
+    return 1;
+  }
+  const int team = std::max(1, omp_get_max_threads());
+  if (sources < team * 80) {
+    return 1;
+  }
+  const int fit = sources / 80;
+  return fit < team ? fit : team;
+#else
+  (void)sources;
+  return 1;
+#endif
+}
+
 std::uint64_t readTsc() {
   unsigned lo = 0;
   unsigned hi = 0;
@@ -189,12 +211,12 @@ struct BoundedBalls {
     int nThreads = 1;
 #ifdef SEAMS_HAS_OPENMP
     if (parallel) {
-      nThreads = std::max(1, omp_get_max_threads());
+      nThreads = seams::teamFor(nWhich);
     }
 #endif
     std::vector<Bag> bags(static_cast<std::size_t>(nThreads));
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel if (parallel)
+#pragma omp parallel if (parallel && nThreads > 1) num_threads(nThreads)
 #endif
     {
       int tid = 0;
@@ -989,12 +1011,24 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
     return rings.finish();
   }
   const int nVertices = static_cast<int>(nList.size());
-  // The fork, the per-source pools, and pausing the team are slower than
-  // the search itself on a small graph. Larger graphs keep the team.
-  const bool serial = nVertices < 2048;
-  if (!serial) {
-    seams::adoptThreads();
+  // A thread wants about 80 vertices before the fork pays. Past that the
+  // enumeration is most of a signature call, including on the GenIce cells
+  // that sit well below the old 2048 cutoff. Asking for more threads than
+  // the graph can feed makes the 8-thread cell slower than the 4-thread one.
+  int team = 1;
+#ifdef SEAMS_HAS_OPENMP
+  if (!omp_in_parallel()) {
+    team = std::max(1, omp_get_max_threads());
   }
+#endif
+  int use = team;
+  if (use > 1) {
+    const int fit = nVertices / 80;
+    if (fit < use) {
+      use = std::max(fit, 1);
+    }
+  }
+  const bool serial = use <= 1;
   const auto phaseWall0 = std::chrono::steady_clock::now();
   const std::uint64_t phaseTsc0 = gTimePrimitive ? readTsc() : 0;
   const auto noteRate = [&]() {
@@ -1014,7 +1048,7 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
   const auto adjStart = std::chrono::steady_clock::now();
   std::vector<std::vector<int>> uniq(static_cast<std::size_t>(nVertices));
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (!serial && !omp_in_parallel())
+#pragma omp parallel for schedule(static) num_threads(use) if (!serial && !omp_in_parallel())
 #endif
   for (int i = 0; i < nVertices; i++) {
     if (nList[static_cast<std::size_t>(i)].size() <= 1) {
@@ -1041,7 +1075,7 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
   }
   adjacency.cols.resize(adjacency.first[nVertices]);
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (!serial && !omp_in_parallel())
+#pragma omp parallel for schedule(static) num_threads(use) if (!serial && !omp_in_parallel())
 #endif
   for (int i = 0; i < nVertices; i++) {
     const auto &row = uniq[static_cast<std::size_t>(i)];
@@ -1142,8 +1176,7 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
   // that list of lists costs more than the search. The directing step
   // clears levels only inside the ball this source touched, so the
   // search stays linear in the number of vertices.
-  const bool parallelSources =
-      !serial && !omp_in_parallel() && omp_get_max_threads() > 1;
+  const bool parallelSources = !serial && !omp_in_parallel() && use > 1;
   if (parallelSources) {
     // Sources are independent given the shared read-only balls; per-source
     // collection keeps the output identical to the serial ascending-source
@@ -1166,7 +1199,7 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
       perSource[static_cast<std::size_t>(k)].reset();
     }
     auto *pools = &perSource;
-#pragma omp parallel
+#pragma omp parallel num_threads(use)
     {
       RingScratch scratch;
 #pragma omp for schedule(guided)
@@ -1192,10 +1225,8 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
     }
     gRingSplit.enumerate_ms = millisSince(enumStart);
     const auto mergeStart = std::chrono::steady_clock::now();
-    // Every ring, source list and ball is a heap block of its own; moving
-    // and freeing them on one thread is a sizeable share of a threaded search
     for (int k = 0; k < nFrom; k++) {
-      for (const auto &ring : perSource[static_cast<std::size_t>(k)]) {
+      for (const auto &ring : (*pools)[static_cast<std::size_t>(k)]) {
         rings.push_back(ring);
       }
     }
@@ -1782,7 +1813,8 @@ struct primitive::RingUpdater::Impl {
     }
     dst.cols.resize(dst.first[static_cast<std::size_t>(nVertices)]);
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (nVertices >= 1024 && !omp_in_parallel())
+#pragma omp parallel for schedule(static) num_threads(seams::teamFor(nVertices)) \
+    if (seams::teamFor(nVertices) > 1 && !omp_in_parallel())
 #endif
     for (int v = 0; v < nVertices; v++) {
       const auto n = dst.first[static_cast<std::size_t>(v) + 1] -
@@ -1881,7 +1913,7 @@ struct primitive::RingUpdater::Impl {
     int nThreads = 1;
 #ifdef SEAMS_HAS_OPENMP
     if (!omp_in_parallel()) {
-      nThreads = omp_get_max_threads();
+      nThreads = sourceTeam(nVertices);
     }
 #endif
     if (static_cast<int>(scratches.size()) < nThreads) {
@@ -1889,7 +1921,7 @@ struct primitive::RingUpdater::Impl {
     }
 #ifdef SEAMS_HAS_OPENMP
     if (nThreads > 1) {
-#pragma omp parallel
+#pragma omp parallel num_threads(nThreads)
       {
         RingScratch &scratch = scratches[static_cast<std::size_t>(omp_get_thread_num())];
         // Guided chunks: a nucleus and a partial shell put much heavier
@@ -1955,7 +1987,8 @@ struct primitive::RingUpdater::Impl {
     int nThreads = 1;
 #ifdef SEAMS_HAS_OPENMP
     if (!omp_in_parallel()) {
-      nThreads = omp_get_max_threads();
+      // The work is the sources in T, not the whole crystal.
+      nThreads = sourceTeam(n);
     }
 #endif
     if (static_cast<int>(scratches.size()) < nThreads) {
@@ -1963,7 +1996,7 @@ struct primitive::RingUpdater::Impl {
     }
 #ifdef SEAMS_HAS_OPENMP
     if (nThreads > 1) {
-#pragma omp parallel
+#pragma omp parallel num_threads(nThreads)
       {
         RingScratch &scratch =
             scratches[static_cast<std::size_t>(omp_get_thread_num())];
@@ -2147,15 +2180,15 @@ primitive::RingUpdater::update(const std::vector<std::vector<int>> &nList) {
   int nThreads = 1;
 #ifdef SEAMS_HAS_OPENMP
   if (!omp_in_parallel()) {
-    nThreads = omp_get_max_threads();
+    nThreads = seams::teamFor(nVertices);
   }
-  if (nVertices >= 1024 && nThreads > 1) {
+  if (nThreads > 1) {
     struct alignas(64) Acc {
       std::vector<int> vs;
       int directed = 0;
     };
     std::vector<Acc> acc(static_cast<std::size_t>(nThreads));
-#pragma omp parallel
+#pragma omp parallel num_threads(nThreads)
     {
       Acc &me = acc[static_cast<std::size_t>(omp_get_thread_num())];
 #pragma omp for schedule(static)

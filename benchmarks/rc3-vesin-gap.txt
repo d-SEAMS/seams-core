@@ -1,0 +1,9 @@
+vesin 0.6.2 molecules 110592 cutoff 3.5
+full cell copy ij t8 pairs=442368 median_ms=20.331 iqr=0.493 cpus=0-7 samples=21.470 20.198 20.467 20.464 19.416 19.898
+full cell nocopy ij t8 pairs=442368 median_ms=17.667 iqr=0.665 cpus=0-7 samples=17.779 19.833 18.101 17.042 17.289 17.555
+half cell copy ij t8 pairs=221184 median_ms=19.831 iqr=1.116 cpus=0-7 samples=20.048 16.899 20.213 19.962 19.700 18.647
+full auto copy ij t8 pairs=442368 median_ms=19.399 iqr=0.565 cpus=0-7 samples=19.522 19.454 19.344 18.795 19.589 18.806
+full cell copy ijS t8 pairs=442368 median_ms=19.965 iqr=0.319 cpus=0-7 samples=20.020 20.096 20.177 19.537 19.706 19.911
+full cell copy ij t1 pairs=442368 median_ms=50.539 iqr=0.354 cpus=0-7 samples=50.099 50.568 50.858 50.405 50.510 51.629
+full cell copy ij t0 pairs=442368 median_ms=50.621 iqr=0.838 cpus=0-7 samples=49.348 50.782 50.459 50.403 51.413 53.112
+full cell fortran t8 pairs=442368 median_ms=19.216 iqr=1.271 cpus=0-7 samples=20.566 18.840 19.323 19.109 18.838 20.464

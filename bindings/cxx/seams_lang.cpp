@@ -255,6 +255,7 @@ struct seams_frame {
   std::vector<double> rdf_r;
   std::vector<double> rdf_g;
   std::vector<int> ring_counts;
+  int neighbour_pairs = -1;
   std::vector<std::vector<int>> wide_list;
   std::vector<double> wide_xyz;
   double wide_box[9] = {};
@@ -994,6 +995,14 @@ int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
     const int typ = resolve_type(frame->cloud, type);
     const std::string which = graph == nullptr ? "cutoff" : graph;
     auto rows = bond_list(frame->cloud, cutoff, typ, which, 4);
+    // Each row begins with the molecule itself. The pairs are the rest.
+    int pairs = 0;
+    for (const auto &row : rows) {
+      if (!row.empty()) {
+        pairs += static_cast<int>(row.size()) - 1;
+      }
+    }
+    frame->neighbour_pairs = pairs;
     return rows.size() == static_cast<std::size_t>(std::max(frame->cloud.nop, 0))
                ? 0
                : 1;
@@ -1001,6 +1010,10 @@ int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
     remember_exception();
     return 1;
   }
+}
+
+int seams_frame_neighbour_pairs(const seams_frame *frame) {
+  return frame == nullptr ? -1 : frame->neighbour_pairs;
 }
 
 int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
@@ -1413,7 +1426,16 @@ int seams_frame_signature_edge(seams_frame *frame, double cutoff, int type,
     const int typ = resolve_type(frame->cloud, type);
     const std::string which =
         (graph == nullptr || graph[0] == '\0') ? "cutoff" : graph;
-    auto idx = index_graph(frame, cutoff, typ, which, 4);
+    std::vector<std::vector<int>> idx;
+    if (which == "cutoff") {
+      auto ids = nneigh::neighListLinkcell(cutoff, frame->cloud, typ);
+      if (ids.empty()) {
+        ids = nneigh::neighListO(cutoff, frame->cloud, typ);
+      }
+      idx = nneigh::neighbourListByIndex(frame->cloud, ids);
+    } else {
+      idx = index_graph(frame, cutoff, typ, which, 4);
+    }
     const auto signature = cage::Signature::parse(spec);
     const int depth = std::max(signature.maxRingSize(), 3);
     const auto rings = ring::cageRings(primitive::ringNetwork(idx, depth),

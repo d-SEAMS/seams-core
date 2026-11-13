@@ -34,11 +34,11 @@ def atoms_of(pos, side):
     return fs.Atoms(pos, cell, elements)
 
 
-def run(path, operation, warmup, repeats, once):
+def run(path, operation, warmup, repeats, once, threads=1):
     fs.disable_telemetry()
     fs.suppress_telemetry_notice()
-    fs.set_num_threads(1)
-    if fs.get_num_threads() != 1:
+    fs.set_num_threads(threads)
+    if fs.get_num_threads() != threads:
         raise RuntimeError(f"fastatomstruct threads {fs.get_num_threads()}")
     pos, side = load_frame(path)
     atoms = atoms_of(pos, side)
@@ -91,9 +91,10 @@ def main():
     parser.add_argument("--operation", choices=("rings", "q6"), required=True)
     parser.add_argument("--warmup", type=int, default=proto.WARMUP)
     parser.add_argument("--repeats", type=int, default=proto.REPEATS)
+    parser.add_argument("--threads", type=int, default=1)
     parser.add_argument("--once", action="store_true")
     args = parser.parse_args()
-    run(args.frame, args.operation, args.warmup, args.repeats, args.once)
+    run(args.frame, args.operation, args.warmup, args.repeats, args.once, args.threads)
 
 
 if __name__ == "__main__":

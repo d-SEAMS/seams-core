@@ -877,7 +877,10 @@ void setSteinhardtAtomSplit([[maybe_unused]] bool split) {
 
 SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                           const std::vector<std::vector<int>> &nList, int orderL) {
-  seams::adoptThreads();
+  // OpenMP only. adoptThreads would pause the team and start a Rayon
+  // pool this harmonic never uses.
+  seams::prepareCompute();
+  [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
   SteinhardtQl result;
   result.ql.assign(yCloud.nop, 0.0);
   result.qlBar.assign(yCloud.nop, 0.0);

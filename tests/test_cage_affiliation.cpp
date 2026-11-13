@@ -420,6 +420,68 @@ TEST_CASE("AffiliationUpdater equals batch across the mW trajectory",
   }
 }
 
+std::map<std::string, int> cageCensus(const ring::CageAffiliation &flags) {
+  std::map<std::string, int> census{{"rings", 0}, {"hc", 0}, {"ddc", 0}, {"both", 0}};
+  census["rings"] = static_cast<int>(flags.hc.size());
+  for (std::size_t i = 0; i < flags.hc.size(); ++i) {
+    const bool hc = flags.hc[i];
+    const bool ddc = i < flags.ddc.size() && flags.ddc[i];
+    census["hc"] += hc ? 1 : 0;
+    census["ddc"] += ddc ? 1 : 0;
+    census["both"] += (hc && ddc) ? 1 : 0;
+  }
+  return census;
+}
+
+TEST_CASE("cage census matches the rebuild on every frame", "[cage_affiliation]") {
+  ring::AffiliationUpdater updater;
+  nneigh::SkinNeighborList skin(3.5, 2.0, 1);
+  for (int frame = 1; frame <= 11; ++frame) {
+    molSys::PointCloud<molSys::Point<double>, double> yCloud;
+    yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", frame, yCloud, 1);
+    auto nList = skin.update(yCloud);
+    auto idx = nneigh::neighbourListByIndex(yCloud, nList);
+    auto six = sixMembered(primitive::ringNetwork(idx, 7));
+    const auto &carried = updater.update(six, idx);
+    const auto rebuilt = ring::cageAffiliation(six, idx);
+    INFO("frame " << frame);
+    REQUIRE(cageCensus(carried) == cageCensus(rebuilt));
+    REQUIRE(carried.hc == rebuilt.hc);
+    REQUIRE(carried.ddc == rebuilt.ddc);
+  }
+
+  // A bond removed on each step, so the census is not a copy of frame 1.
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  auto rows = nneigh::neighbourListByIndex(
+      yCloud, nneigh::neighListO(3.5, yCloud, 1));
+  ring::AffiliationUpdater churn;
+  for (int step = 0; step < 6; ++step) {
+    if (step > 0) {
+      for (int a = 0; a < static_cast<int>(rows.size()); ++a) {
+        if (rows[static_cast<std::size_t>(a)].size() > 2) {
+          const int b = rows[static_cast<std::size_t>(a)][1];
+          auto drop = [](std::vector<int> &row, int value) {
+            row.erase(std::remove(row.begin() + 1, row.end(), value), row.end());
+          };
+          drop(rows[static_cast<std::size_t>(a)], b);
+          if (b >= 0 && b < static_cast<int>(rows.size())) {
+            drop(rows[static_cast<std::size_t>(b)], a);
+          }
+          break;
+        }
+      }
+    }
+    auto six = sixMembered(primitive::ringNetwork(rows, 6));
+    const auto &carried = churn.update(six, rows);
+    const auto rebuilt = ring::cageAffiliation(six, rows);
+    INFO("step " << step);
+    REQUIRE(cageCensus(carried) == cageCensus(rebuilt));
+    REQUIRE(carried.hc == rebuilt.hc);
+    REQUIRE(carried.ddc == rebuilt.ddc);
+  }
+}
+
 TEST_CASE("AffiliationUpdater tracks synthetic topology churn exactly",
           "[cage_affiliation]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
@@ -592,10 +654,11 @@ TEST_CASE("AffiliationUpdater falls back when the ring set churns",
   REQUIRE(swept.ddc == expect.ddc);
   REQUIRE(churn.lastReclassified() == static_cast<int>(fresh.size()));
 
-  // The sweep does not store pairs. The next frame rebuilds them, and the
-  // frame after that carries. Later frames are not forced onto the sweep.
+  // The sweep keeps the rows it compared and does not store pairs. The same
+  // graph on the next frame carries, and a later frame is not forced onto
+  // the sweep.
   churn.update(fresh, idx);
-  REQUIRE(churn.lastReclassified() == static_cast<int>(fresh.size()));
+  REQUIRE(churn.lastReclassified() == 0);
   churn.update(fresh, idx);
   REQUIRE(churn.lastReclassified() == 0);
 }

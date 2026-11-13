@@ -159,7 +159,12 @@ if plumed_opt.allowed()
     plumed_probe_deps = plumed_dep.found() ? [plumed_dep] : []
     # libplumed.so is the loader. The collective-variable symbols live in
     # libplumedKernel.so.
-    plumed_kernel = cppc.find_library('plumedKernel', required: false)
+    # The kernel must be the one that matches this PLUMED. A conda prefix
+    # earlier on the linker path can supply an older libplumedKernel.
+    plumed_libdir = plumed_dep.found() ? plumed_dep.get_variable('libdir', default_value: '') : ''
+    plumed_kernel = cppc.find_library('plumedKernel',
+      dirs: plumed_libdir != '' ? [plumed_libdir] : [],
+      required: false)
     if plumed_kernel.found()
       plumed_probe_deps += plumed_kernel
     endif

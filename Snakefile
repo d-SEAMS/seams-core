@@ -287,8 +287,11 @@ rule related_watch:
         "scripts/h2h_protocol.py",
         "scripts/h2h_watch.py",
         "scripts/h2h_mdapy.py",
+        "scripts/h2h_mdapy_q6.py",
+        "scripts/h2h_mdapy_rings.py",
         "scripts/h2h_ovito.py",
         "scripts/h2h_fastatomstruct.py",
+        "scripts/h2h_vesin.py",
         "scripts/release_build.py",
         "benchmarks/h2h_watch.py",
     output:
@@ -298,6 +301,27 @@ rule related_watch:
         "\"$PY\" scripts/h2h_watch.py "
         "--python \"$PY\" "
         "--out benchmarks/h2h-watch.csv"
+
+
+# One sitting. Ideal ice Ic at 110592 and 884736 molecules, one thread
+# and eight, six timed calls after a warm-up. GenIce cages and the King
+# ladder are in the same run. benchmarks/h2h_watch.py is the one-call
+# Airspeed Velocity arm.
+rule rc3_sitting:
+    input:
+        "scripts/h2h_protocol.py",
+        "scripts/h2h_rc3_sitting.py",
+        "scripts/h2h_literature.py",
+        "scripts/release_build.py",
+        "bbdir-release/bindings/libseams_lang.so",
+    output:
+        "benchmarks/rc3-sitting.csv",
+        "benchmarks/rc3-sitting.txt",
+        "benchmarks/rc3-vesin-gap.txt",
+    shell:
+        "PY=\"${{H2H_PYTHON:-python3}}\"; "
+        "\"$PY\" scripts/h2h_rc3_sitting.py "
+        "--out {output[0]} --log {output[1]}"
 
 
 rule linkcell_scale:
@@ -342,6 +366,7 @@ rule hop_stride_generate:
         "data/hop/stride-10.lammpstrj",
         "data/hop/stride-100.lammpstrj",
         "data/hop/stride-1000.lammpstrj",
+        "data/hop/nucleation.lammpstrj",
         "data/hop/manifest.txt",
     shell:
         "python3 input/hop/regenerate.py --frame 104 "
@@ -477,7 +502,41 @@ rule classify_carry:
 
 # Paper cells that were unmeasured. One rule per producer. The stride
 # dumps come from hop_stride_generate and stay out of git. Run
-# `snakemake -j1 paper_cells`.
+# `snakemake -j1 paper_cells`. The hop rule times carried cages against
+# a full rebuild at 1 and 8 threads in one sitting and writes
+# cage_speedup on each row of tab-hop-stride.csv.
+# Hydrate signature search at 1, 2, 4 and 8 threads. Replicates larger
+# than the GenIce unit cell are built in the benchmark and are not
+# committed. One sitting, serial.
+# One sitting of the neighbour-fed kernels at 1, 2, 4 and 8 threads.
+# Ice Ic at 4096, 32768, 110592 and 884736 molecules is built in the
+# benchmark and is not written out.
+rule pool_audit:
+    input:
+        "scripts/pool_audit_sitting.py",
+        "scripts/paper_stats.py",
+        "bbdir-release/tests/bench_pool_audit",
+    output:
+        "benchmarks/pool-audit.csv",
+        "benchmarks/pool-audit.txt",
+    shell:
+        "python3 scripts/pool_audit_sitting.py --out benchmarks"
+
+
+rule trace_threads:
+    input:
+        "scripts/trace_threads_sitting.py",
+        "scripts/paper_stats.py",
+        "bbdir-release/tests/bench_trace_threads",
+        "input/traj/genice_sI.lammpstrj",
+        "input/traj/genice_sII.lammpstrj",
+    output:
+        "benchmarks/trace-threads.csv",
+        "benchmarks/trace-threads.txt",
+    shell:
+        "python3 scripts/trace_threads_sitting.py --out benchmarks"
+
+
 rule paper_hop_stride:
     input:
         "scripts/paper_hop_stride.py",
@@ -486,6 +545,7 @@ rule paper_hop_stride:
         "data/hop/stride-10.lammpstrj",
         "data/hop/stride-100.lammpstrj",
         "data/hop/stride-1000.lammpstrj",
+        "data/hop/nucleation.lammpstrj",
     output:
         "benchmarks/paper-cells/tab-hop-stride.csv",
         "benchmarks/paper-cells/raw-hop-stride.txt",
@@ -623,6 +683,8 @@ rule paper_rerun:
 rule paper_cells:
     input:
         "scripts/paper_cells_join.py",
+        # tab-hop-stride.csv carries cage_speedup from the 1-thread and
+        # 8-thread sitting (paper_hop_stride).
         "benchmarks/paper-cells/tab-hop-stride.csv",
         "benchmarks/paper-cells/tab-sym-eq.csv",
         "benchmarks/paper-cells/tab-ql-eq.csv",

@@ -116,10 +116,10 @@ public:
   //! the first call reports every ring.
   [[nodiscard]] int lastReclassified() const;
 
-  //! Above this fraction of dirty rings, update runs the batch sweep instead
-  //! (default 0.25; 1 never falls back). After such a frame the next 1, 2,
-  //! 4, then at most 8 frames run the batch sweep without the diff, while
-  //! frames keep falling back
+  //! Above this fraction of dirty rings, update runs one sweep on the index
+  //! it keeps from the previous frame instead of remapping stored pairs
+  //! (default 0.25; 1 never takes that sweep). The next frame still diffs.
+  //! An unchanged graph returns the stored flags.
   void setBatchFraction(double fraction);
 
 private:

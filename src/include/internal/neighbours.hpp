@@ -480,6 +480,13 @@ std::vector<std::vector<int>> neighListO(
     double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     int typeI);
 
+//! Cutoff rows from the threaded linkcell list. Empty when linkcell is not
+//! built or the call fails; the caller then uses neighListO. The width is
+//! the OpenMP team, and the OpenMP team is left running.
+std::vector<std::vector<int>> neighListLinkcell(
+    double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    int typeI);
+
 //! Half neighbour list for one type (vesin cell list, brute-force fallback)
 //! You can only use this for neighbour lists with one type
 std::vector<std::vector<int>> halfNeighList(

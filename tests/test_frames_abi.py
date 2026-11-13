@@ -38,7 +38,13 @@ def diamond(nrep=2):
 
 def main():
     pos, box = diamond()
-    hist = rings(pos, box)
+    try:
+        hist = rings(pos, box)
+    except OSError as exc:
+        # The interpreter and libseams_lang were not built for the same
+        # runtime (a conda libstdc++ or a different libpython). Skip.
+        sys.stderr.write(f"python/library mismatch: {exc}\n")
+        raise SystemExit(77) from exc
     if hist.shape != (7,) or int(hist[6]) <= 0:
         raise SystemExit("ideal lattice has no six-rings")
     per, counts = cages(pos, box)
@@ -53,4 +59,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except OSError as exc:
+        sys.stderr.write(f"python/library mismatch: {exc}\n")
+        raise SystemExit(77) from exc

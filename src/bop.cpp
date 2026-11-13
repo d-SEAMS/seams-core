@@ -695,7 +695,8 @@ static void classifyBondsLeftFp64(
     const std::vector<std::vector<int>> &nList, const chill::BondClassifier &rule,
     bool isSlice, const std::vector<int> *csrOff = nullptr,
     const std::vector<int> *csrCols = nullptr, bool closed = true) {
-  seams::adoptThreads();
+  seams::prepareCompute();
+  [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
   constexpr int l = 3;
   static_assert(l == 3, "the closed form below is the l = 3 polynomial");
   const int nop = yCloud.nop;
@@ -1965,7 +1966,11 @@ bool chill::chillPlusPublishedCutoff(
   if (n <= 0 || !(cutoff > 0.0) || yCloud.box.size() < 3) {
     return false;
   }
-  seams::adoptThreads();
+  seams::prepareCompute();
+  [[maybe_unused]] const seams::TeamWidth team(n);
+#ifdef SEAMS_HAS_LINKCELL
+  lc_set_threads(seams::teamFor(n));
+#endif
   const bool timing = std::getenv("SEAMS_CHILL_TIME") != nullptr;
   const auto t0 = std::chrono::steady_clock::now();
   struct Scratch {
@@ -3136,7 +3141,8 @@ void chill::bondOrder(const molSys::PointCloud<molSys::Point<double>, double> &y
                       const std::vector<std::vector<int>> &nList,
                       const BondClassifier &rule, BondOrder &order,
                       const std::vector<char> *which, bool fresh) {
-  seams::adoptThreads();
+  seams::prepareCompute();
+  [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
   const int nop = yCloud.nop;
   const int keepMax = rule.coordinationNumber;
   order.keepMax = keepMax;

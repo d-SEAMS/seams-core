@@ -1,36 +1,84 @@
 cores 8
+model Intel(R) Xeon(R) Processor
+commit d22f9d199d0093b015af6fea9618320f82dd49fe
 affinity 0-7
-threads 8
+threads 1 8
 warmup 1
 n 8
 graph cutoff
 driver bench_trajectory_incremental
 carried_ms median of per-pass mean affilInc_ms on frames after the first
-ratio median of sum(affilBatch_ms)/sum(affilInc_ms) on those frames
-stride_ps 0.1 warmup mean_inc_ms 1.582895 sum_batch_ms 293.214000 sum_inc_ms 316.579000 ratio 0.926195 steady_frames 200 equal yes
-stride_ps 0.1 sample mean_inc_ms 1.577890 sum_batch_ms 282.397000 sum_inc_ms 315.578000 ratio 0.894856 steady_frames 200 equal yes
-stride_ps 0.1 sample mean_inc_ms 1.638390 sum_batch_ms 281.561000 sum_inc_ms 327.678000 ratio 0.859261 steady_frames 200 equal yes
-stride_ps 0.1 sample mean_inc_ms 1.679835 sum_batch_ms 296.702000 sum_inc_ms 335.967000 ratio 0.883128 steady_frames 200 equal yes
-stride_ps 0.1 sample mean_inc_ms 1.585195 sum_batch_ms 278.979000 sum_inc_ms 317.039000 ratio 0.879952 steady_frames 200 equal yes
-stride_ps 0.1 sample mean_inc_ms 1.567210 sum_batch_ms 281.690000 sum_inc_ms 313.442000 ratio 0.898699 steady_frames 200 equal yes
-stride_ps 0.1 sample mean_inc_ms 1.569230 sum_batch_ms 279.428000 sum_inc_ms 313.846000 ratio 0.890335 steady_frames 200 equal yes
-stride_ps 0.1 sample mean_inc_ms 1.556090 sum_batch_ms 280.869000 sum_inc_ms 311.218000 ratio 0.902483 steady_frames 200 equal yes
-stride_ps 0.1 sample mean_inc_ms 1.594355 sum_batch_ms 279.292000 sum_inc_ms 318.871000 ratio 0.875878 steady_frames 200 equal yes
-stride_ps 1.0 warmup mean_inc_ms 1.710350 sum_batch_ms 293.088000 sum_inc_ms 342.070000 ratio 0.856807 steady_frames 200 equal yes
-stride_ps 1.0 sample mean_inc_ms 1.770260 sum_batch_ms 306.464000 sum_inc_ms 354.052000 ratio 0.865590 steady_frames 200 equal yes
-stride_ps 1.0 sample mean_inc_ms 1.757055 sum_batch_ms 303.194000 sum_inc_ms 351.411000 ratio 0.862790 steady_frames 200 equal yes
-stride_ps 1.0 sample mean_inc_ms 1.790740 sum_batch_ms 303.243000 sum_inc_ms 358.148000 ratio 0.846697 steady_frames 200 equal yes
-stride_ps 1.0 sample mean_inc_ms 1.682010 sum_batch_ms 298.734000 sum_inc_ms 336.402000 ratio 0.888027 steady_frames 200 equal yes
-stride_ps 1.0 sample mean_inc_ms 1.717105 sum_batch_ms 295.534000 sum_inc_ms 343.421000 ratio 0.860559 steady_frames 200 equal yes
-stride_ps 1.0 sample mean_inc_ms 1.759615 sum_batch_ms 301.303000 sum_inc_ms 351.923000 ratio 0.856162 steady_frames 200 equal yes
-stride_ps 1.0 sample mean_inc_ms 1.788405 sum_batch_ms 304.326000 sum_inc_ms 357.681000 ratio 0.850831 steady_frames 200 equal yes
-stride_ps 1.0 sample mean_inc_ms 1.704725 sum_batch_ms 295.220000 sum_inc_ms 340.945000 ratio 0.865887 steady_frames 200 equal yes
-stride_ps 10.0 warmup mean_inc_ms 2.309855 sum_batch_ms 437.201000 sum_inc_ms 461.971000 ratio 0.946382 steady_frames 200 equal yes
-stride_ps 10.0 sample mean_inc_ms 2.292930 sum_batch_ms 444.511000 sum_inc_ms 458.586000 ratio 0.969308 steady_frames 200 equal yes
-stride_ps 10.0 sample mean_inc_ms 2.279905 sum_batch_ms 438.109000 sum_inc_ms 455.981000 ratio 0.960805 steady_frames 200 equal yes
-stride_ps 10.0 sample mean_inc_ms 2.303865 sum_batch_ms 437.837000 sum_inc_ms 460.773000 ratio 0.950223 steady_frames 200 equal yes
-stride_ps 10.0 sample mean_inc_ms 2.335905 sum_batch_ms 440.180000 sum_inc_ms 467.181000 ratio 0.942204 steady_frames 200 equal yes
-stride_ps 10.0 sample mean_inc_ms 2.324095 sum_batch_ms 440.925000 sum_inc_ms 464.819000 ratio 0.948595 steady_frames 200 equal yes
-stride_ps 10.0 sample mean_inc_ms 2.306395 sum_batch_ms 448.601000 sum_inc_ms 461.279000 ratio 0.972516 steady_frames 200 equal yes
-stride_ps 10.0 sample mean_inc_ms 2.439455 sum_batch_ms 442.938000 sum_inc_ms 487.891000 ratio 0.907863 steady_frames 200 equal yes
-stride_ps 10.0 sample mean_inc_ms 2.351105 sum_batch_ms 449.647000 sum_inc_ms 470.221000 ratio 0.956246 steady_frames 200 equal yes
+cage_speedup median of sum(affilBatch_ms)/sum(affilInc_ms) on those frames
+one sitting: 0.1 ps, 1 ps, 10 ps, and the 148-frame trajectory, at 1 and 8 threads
+threads 1 stride_ps 0.1 cell carried cages, 0.1 ps warmup mean_inc_ms 4.212280 sum_batch_ms 943.138000 sum_inc_ms 842.456000 ratio 1.119510 steady_frames 200 equal yes
+threads 1 stride_ps 0.1 cell carried cages, 0.1 ps sample mean_inc_ms 4.156565 sum_batch_ms 932.097000 sum_inc_ms 831.313000 ratio 1.121235 steady_frames 200 equal yes
+threads 1 stride_ps 0.1 cell carried cages, 0.1 ps sample mean_inc_ms 4.204015 sum_batch_ms 938.027000 sum_inc_ms 840.803000 ratio 1.115632 steady_frames 200 equal yes
+threads 1 stride_ps 0.1 cell carried cages, 0.1 ps sample mean_inc_ms 4.156345 sum_batch_ms 929.287000 sum_inc_ms 831.269000 ratio 1.117914 steady_frames 200 equal yes
+threads 1 stride_ps 0.1 cell carried cages, 0.1 ps sample mean_inc_ms 4.135765 sum_batch_ms 925.423000 sum_inc_ms 827.153000 ratio 1.118805 steady_frames 200 equal yes
+threads 1 stride_ps 0.1 cell carried cages, 0.1 ps sample mean_inc_ms 4.208850 sum_batch_ms 940.160000 sum_inc_ms 841.770000 ratio 1.116885 steady_frames 200 equal yes
+threads 1 stride_ps 0.1 cell carried cages, 0.1 ps sample mean_inc_ms 4.168470 sum_batch_ms 931.003000 sum_inc_ms 833.694000 ratio 1.116720 steady_frames 200 equal yes
+threads 1 stride_ps 0.1 cell carried cages, 0.1 ps sample mean_inc_ms 4.165070 sum_batch_ms 932.689000 sum_inc_ms 833.014000 ratio 1.119656 steady_frames 200 equal yes
+threads 1 stride_ps 0.1 cell carried cages, 0.1 ps sample mean_inc_ms 4.201425 sum_batch_ms 938.901000 sum_inc_ms 840.285000 ratio 1.117360 steady_frames 200 equal yes
+threads 1 stride_ps 1 cell carried cages, 1 ps warmup mean_inc_ms 4.589095 sum_batch_ms 1015.868000 sum_inc_ms 917.819000 ratio 1.106828 steady_frames 200 equal yes
+threads 1 stride_ps 1 cell carried cages, 1 ps sample mean_inc_ms 4.565415 sum_batch_ms 1015.891000 sum_inc_ms 913.083000 ratio 1.112594 steady_frames 200 equal yes
+threads 1 stride_ps 1 cell carried cages, 1 ps sample mean_inc_ms 4.507910 sum_batch_ms 998.985000 sum_inc_ms 901.582000 ratio 1.108036 steady_frames 200 equal yes
+threads 1 stride_ps 1 cell carried cages, 1 ps sample mean_inc_ms 4.530315 sum_batch_ms 1006.520000 sum_inc_ms 906.063000 ratio 1.110872 steady_frames 200 equal yes
+threads 1 stride_ps 1 cell carried cages, 1 ps sample mean_inc_ms 4.500910 sum_batch_ms 997.494000 sum_inc_ms 900.182000 ratio 1.108103 steady_frames 200 equal yes
+threads 1 stride_ps 1 cell carried cages, 1 ps sample mean_inc_ms 4.538475 sum_batch_ms 1009.872000 sum_inc_ms 907.695000 ratio 1.112568 steady_frames 200 equal yes
+threads 1 stride_ps 1 cell carried cages, 1 ps sample mean_inc_ms 4.656100 sum_batch_ms 1034.625000 sum_inc_ms 931.220000 ratio 1.111043 steady_frames 200 equal yes
+threads 1 stride_ps 1 cell carried cages, 1 ps sample mean_inc_ms 4.517255 sum_batch_ms 1012.377000 sum_inc_ms 903.451000 ratio 1.120567 steady_frames 200 equal yes
+threads 1 stride_ps 1 cell carried cages, 1 ps sample mean_inc_ms 4.518990 sum_batch_ms 1002.501000 sum_inc_ms 903.798000 ratio 1.109209 steady_frames 200 equal yes
+threads 1 stride_ps 10 cell carried cages, 10 ps warmup mean_inc_ms 8.273330 sum_batch_ms 1796.323000 sum_inc_ms 1654.666000 ratio 1.085611 steady_frames 200 equal yes
+threads 1 stride_ps 10 cell carried cages, 10 ps sample mean_inc_ms 8.235290 sum_batch_ms 1786.759000 sum_inc_ms 1647.058000 ratio 1.084819 steady_frames 200 equal yes
+threads 1 stride_ps 10 cell carried cages, 10 ps sample mean_inc_ms 8.186805 sum_batch_ms 1781.668000 sum_inc_ms 1637.361000 ratio 1.088134 steady_frames 200 equal yes
+threads 1 stride_ps 10 cell carried cages, 10 ps sample mean_inc_ms 8.213570 sum_batch_ms 1783.906000 sum_inc_ms 1642.714000 ratio 1.085950 steady_frames 200 equal yes
+threads 1 stride_ps 10 cell carried cages, 10 ps sample mean_inc_ms 8.201715 sum_batch_ms 1773.494000 sum_inc_ms 1640.343000 ratio 1.081173 steady_frames 200 equal yes
+threads 1 stride_ps 10 cell carried cages, 10 ps sample mean_inc_ms 8.178115 sum_batch_ms 1775.651000 sum_inc_ms 1635.623000 ratio 1.085611 steady_frames 200 equal yes
+threads 1 stride_ps 10 cell carried cages, 10 ps sample mean_inc_ms 8.203755 sum_batch_ms 1781.821000 sum_inc_ms 1640.751000 ratio 1.085979 steady_frames 200 equal yes
+threads 1 stride_ps 10 cell carried cages, 10 ps sample mean_inc_ms 8.167575 sum_batch_ms 1779.012000 sum_inc_ms 1633.515000 ratio 1.089070 steady_frames 200 equal yes
+threads 1 stride_ps 10 cell carried cages, 10 ps sample mean_inc_ms 8.164065 sum_batch_ms 1773.035000 sum_inc_ms 1632.813000 ratio 1.085878 steady_frames 200 equal yes
+threads 1 stride_ps 10 cell carried cages, nucleation 148 frames warmup mean_inc_ms 3.970850 sum_batch_ms 649.932000 sum_inc_ms 583.715000 ratio 1.113441 steady_frames 147 equal yes
+threads 1 stride_ps 10 cell carried cages, nucleation 148 frames sample mean_inc_ms 3.970912 sum_batch_ms 651.420000 sum_inc_ms 583.724000 ratio 1.115973 steady_frames 147 equal yes
+threads 1 stride_ps 10 cell carried cages, nucleation 148 frames sample mean_inc_ms 4.093531 sum_batch_ms 664.308000 sum_inc_ms 601.749000 ratio 1.103962 steady_frames 147 equal yes
+threads 1 stride_ps 10 cell carried cages, nucleation 148 frames sample mean_inc_ms 4.085313 sum_batch_ms 667.409000 sum_inc_ms 600.541000 ratio 1.111346 steady_frames 147 equal yes
+threads 1 stride_ps 10 cell carried cages, nucleation 148 frames sample mean_inc_ms 4.030667 sum_batch_ms 661.802000 sum_inc_ms 592.508000 ratio 1.116950 steady_frames 147 equal yes
+threads 1 stride_ps 10 cell carried cages, nucleation 148 frames sample mean_inc_ms 4.012803 sum_batch_ms 659.193000 sum_inc_ms 589.882000 ratio 1.117500 steady_frames 147 equal yes
+threads 1 stride_ps 10 cell carried cages, nucleation 148 frames sample mean_inc_ms 4.096034 sum_batch_ms 673.559000 sum_inc_ms 602.117000 ratio 1.118651 steady_frames 147 equal yes
+threads 1 stride_ps 10 cell carried cages, nucleation 148 frames sample mean_inc_ms 4.046122 sum_batch_ms 662.837000 sum_inc_ms 594.780000 ratio 1.114424 steady_frames 147 equal yes
+threads 1 stride_ps 10 cell carried cages, nucleation 148 frames sample mean_inc_ms 4.005605 sum_batch_ms 657.036000 sum_inc_ms 588.824000 ratio 1.115844 steady_frames 147 equal yes
+threads 8 stride_ps 0.1 cell carried cages, 0.1 ps warmup mean_inc_ms 1.107245 sum_batch_ms 267.034000 sum_inc_ms 221.449000 ratio 1.205849 steady_frames 200 equal yes
+threads 8 stride_ps 0.1 cell carried cages, 0.1 ps sample mean_inc_ms 1.182410 sum_batch_ms 282.445000 sum_inc_ms 236.482000 ratio 1.194362 steady_frames 200 equal yes
+threads 8 stride_ps 0.1 cell carried cages, 0.1 ps sample mean_inc_ms 1.121555 sum_batch_ms 271.896000 sum_inc_ms 224.311000 ratio 1.212139 steady_frames 200 equal yes
+threads 8 stride_ps 0.1 cell carried cages, 0.1 ps sample mean_inc_ms 1.136230 sum_batch_ms 281.505000 sum_inc_ms 227.246000 ratio 1.238768 steady_frames 200 equal yes
+threads 8 stride_ps 0.1 cell carried cages, 0.1 ps sample mean_inc_ms 1.129520 sum_batch_ms 273.189000 sum_inc_ms 225.904000 ratio 1.209315 steady_frames 200 equal yes
+threads 8 stride_ps 0.1 cell carried cages, 0.1 ps sample mean_inc_ms 1.145405 sum_batch_ms 279.418000 sum_inc_ms 229.081000 ratio 1.219735 steady_frames 200 equal yes
+threads 8 stride_ps 0.1 cell carried cages, 0.1 ps sample mean_inc_ms 1.138380 sum_batch_ms 278.683000 sum_inc_ms 227.676000 ratio 1.224033 steady_frames 200 equal yes
+threads 8 stride_ps 0.1 cell carried cages, 0.1 ps sample mean_inc_ms 1.136590 sum_batch_ms 280.234000 sum_inc_ms 227.318000 ratio 1.232784 steady_frames 200 equal yes
+threads 8 stride_ps 0.1 cell carried cages, 0.1 ps sample mean_inc_ms 1.123855 sum_batch_ms 271.268000 sum_inc_ms 224.771000 ratio 1.206864 steady_frames 200 equal yes
+threads 8 stride_ps 1 cell carried cages, 1 ps warmup mean_inc_ms 1.207420 sum_batch_ms 285.159000 sum_inc_ms 241.484000 ratio 1.180861 steady_frames 200 equal yes
+threads 8 stride_ps 1 cell carried cages, 1 ps sample mean_inc_ms 1.240005 sum_batch_ms 297.785000 sum_inc_ms 248.001000 ratio 1.200741 steady_frames 200 equal yes
+threads 8 stride_ps 1 cell carried cages, 1 ps sample mean_inc_ms 1.250640 sum_batch_ms 300.546000 sum_inc_ms 250.128000 ratio 1.201569 steady_frames 200 equal yes
+threads 8 stride_ps 1 cell carried cages, 1 ps sample mean_inc_ms 1.228750 sum_batch_ms 305.342000 sum_inc_ms 245.750000 ratio 1.242490 steady_frames 200 equal yes
+threads 8 stride_ps 1 cell carried cages, 1 ps sample mean_inc_ms 1.221210 sum_batch_ms 291.364000 sum_inc_ms 244.242000 ratio 1.192932 steady_frames 200 equal yes
+threads 8 stride_ps 1 cell carried cages, 1 ps sample mean_inc_ms 1.202960 sum_batch_ms 289.870000 sum_inc_ms 240.592000 ratio 1.204820 steady_frames 200 equal yes
+threads 8 stride_ps 1 cell carried cages, 1 ps sample mean_inc_ms 1.214210 sum_batch_ms 306.738000 sum_inc_ms 242.842000 ratio 1.263118 steady_frames 200 equal yes
+threads 8 stride_ps 1 cell carried cages, 1 ps sample mean_inc_ms 1.252780 sum_batch_ms 295.213000 sum_inc_ms 250.556000 ratio 1.178232 steady_frames 200 equal yes
+threads 8 stride_ps 1 cell carried cages, 1 ps sample mean_inc_ms 1.233240 sum_batch_ms 291.167000 sum_inc_ms 246.648000 ratio 1.180496 steady_frames 200 equal yes
+threads 8 stride_ps 10 cell carried cages, 10 ps warmup mean_inc_ms 1.879495 sum_batch_ms 437.744000 sum_inc_ms 375.899000 ratio 1.164526 steady_frames 200 equal yes
+threads 8 stride_ps 10 cell carried cages, 10 ps sample mean_inc_ms 1.869925 sum_batch_ms 436.514000 sum_inc_ms 373.985000 ratio 1.167197 steady_frames 200 equal yes
+threads 8 stride_ps 10 cell carried cages, 10 ps sample mean_inc_ms 1.951340 sum_batch_ms 453.857000 sum_inc_ms 390.268000 ratio 1.162937 steady_frames 200 equal yes
+threads 8 stride_ps 10 cell carried cages, 10 ps sample mean_inc_ms 2.006515 sum_batch_ms 468.054000 sum_inc_ms 401.303000 ratio 1.166336 steady_frames 200 equal yes
+threads 8 stride_ps 10 cell carried cages, 10 ps sample mean_inc_ms 1.906985 sum_batch_ms 451.846000 sum_inc_ms 381.397000 ratio 1.184713 steady_frames 200 equal yes
+threads 8 stride_ps 10 cell carried cages, 10 ps sample mean_inc_ms 1.923915 sum_batch_ms 451.835000 sum_inc_ms 384.783000 ratio 1.174259 steady_frames 200 equal yes
+threads 8 stride_ps 10 cell carried cages, 10 ps sample mean_inc_ms 1.970620 sum_batch_ms 447.802000 sum_inc_ms 394.124000 ratio 1.136196 steady_frames 200 equal yes
+threads 8 stride_ps 10 cell carried cages, 10 ps sample mean_inc_ms 1.908630 sum_batch_ms 437.707000 sum_inc_ms 381.726000 ratio 1.146652 steady_frames 200 equal yes
+threads 8 stride_ps 10 cell carried cages, 10 ps sample mean_inc_ms 1.884025 sum_batch_ms 439.059000 sum_inc_ms 376.805000 ratio 1.165215 steady_frames 200 equal yes
+threads 8 stride_ps 10 cell carried cages, nucleation 148 frames warmup mean_inc_ms 1.228354 sum_batch_ms 197.058000 sum_inc_ms 180.568000 ratio 1.091323 steady_frames 147 equal yes
+threads 8 stride_ps 10 cell carried cages, nucleation 148 frames sample mean_inc_ms 1.105156 sum_batch_ms 193.714000 sum_inc_ms 162.458000 ratio 1.192394 steady_frames 147 equal yes
+threads 8 stride_ps 10 cell carried cages, nucleation 148 frames sample mean_inc_ms 1.144211 sum_batch_ms 199.235000 sum_inc_ms 168.199000 ratio 1.184520 steady_frames 147 equal yes
+threads 8 stride_ps 10 cell carried cages, nucleation 148 frames sample mean_inc_ms 1.120844 sum_batch_ms 199.858000 sum_inc_ms 164.764000 ratio 1.212996 steady_frames 147 equal yes
+threads 8 stride_ps 10 cell carried cages, nucleation 148 frames sample mean_inc_ms 1.156156 sum_batch_ms 237.043000 sum_inc_ms 169.955000 ratio 1.394740 steady_frames 147 equal yes
+threads 8 stride_ps 10 cell carried cages, nucleation 148 frames sample mean_inc_ms 1.139184 sum_batch_ms 200.304000 sum_inc_ms 167.460000 ratio 1.196130 steady_frames 147 equal yes
+threads 8 stride_ps 10 cell carried cages, nucleation 148 frames sample mean_inc_ms 1.136000 sum_batch_ms 199.422000 sum_inc_ms 166.992000 ratio 1.194201 steady_frames 147 equal yes
+threads 8 stride_ps 10 cell carried cages, nucleation 148 frames sample mean_inc_ms 1.079673 sum_batch_ms 188.406000 sum_inc_ms 158.712000 ratio 1.187094 steady_frames 147 equal yes
+threads 8 stride_ps 10 cell carried cages, nucleation 148 frames sample mean_inc_ms 1.102388 sum_batch_ms 193.174000 sum_inc_ms 162.051000 ratio 1.192057 steady_frames 147 equal yes
