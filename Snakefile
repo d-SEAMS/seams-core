@@ -507,6 +507,20 @@ rule paper_ptm:
         "python3 scripts/paper_ptm.py --out benchmarks/paper-cells"
 
 
+rule paper_ptm_templates:
+    input:
+        "scripts/paper_ptm_templates.py",
+        "scripts/paper_stats.py",
+        "bbdir-release/src/libyodaLib.so",
+    output:
+        "benchmarks/paper-cells/ptm-default.csv",
+        "benchmarks/paper-cells/ptm-ice.csv",
+        "benchmarks/paper-cells/ptm-agreement.csv",
+        "benchmarks/paper-cells/raw-ptm-templates.txt",
+    shell:
+        "python3 scripts/paper_ptm_templates.py --out benchmarks/paper-cells"
+
+
 rule paper_q6:
     input:
         "scripts/thread_scale_time.py",

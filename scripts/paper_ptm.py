@@ -2,11 +2,14 @@
 """End-to-end diamond classifier against two-template PTM.
 
 One sitting. Ideal ice Ic, 110592 molecules, eight threads, one warm-up
-and eight calls. PTM is PolyhedralTemplateMatchingModifier with RMSD
-cutoff 0.1 and only the cubic and hexagonal diamond templates. The
-classifier is bench_v2 mode symmetry: the cutoff neighbour list plus
-diamondFromCsr. NEIGH_ONLY on scripts/bench_neighbours_v2.py selects
-those two jobs and no others.
+and eight calls. This row is the ice-only template search: RMSD cutoff
+0.1 and only cubic and hexagonal diamond. It does not name FCC, HCP or
+BCC. The classifier writes a label for every atom (ice Ih, ice Ic,
+stacking-disordered, or other). The every-atom PTM search is the
+modifier's default set, timed with the ice-only set at 1 and 8 threads
+by scripts/paper_ptm_templates.py. The classifier is bench_v2 mode
+symmetry: the cutoff neighbour list plus diamondFromCsr. NEIGH_ONLY
+selects those two jobs and no others.
 """
 
 from __future__ import annotations

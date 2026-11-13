@@ -1,0 +1,10 @@
+frame,molecules,code,our_class,their_class,count,our_total,applies,agree
+ih,432,PTM,Ih,hex-diamond,432,432,yes,yes
+ih,432,CHILL+,Ih,hexagonal-ice,432,432,yes,yes
+ic,110592,PTM,Ic,cubic-diamond,110592,110592,yes,yes
+ic,110592,CHILL+,Ic,cubic-ice,110592,110592,yes,yes
+brine,576,PTM,other,Other,432,432,yes,yes
+brine,576,PTM,Ih,hex-diamond,144,144,yes,yes
+brine,576,CHILL+,other,Other,360,432,yes,yes
+brine,576,CHILL+,other,hexagonal-ice,72,432,yes,no
+brine,576,CHILL+,Ih,hexagonal-ice,144,144,yes,yes

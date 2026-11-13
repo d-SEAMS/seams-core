@@ -147,9 +147,16 @@ elif kind.startswith("ovito-"):
             pipe.modifiers.append(IdentifyDiamondModifier())
         else:
             mod = PolyhedralTemplateMatchingModifier(rmsd_cutoff=0.1)
-            # PTM_MATCH_DCUB is 6 and PTM_MATCH_DHEX is 7. OVITO leaves both off.
-            for structure in mod.structures:
-                structure.enabled = structure.id in (6, 7)
+            # ice: only cubic and hexagonal diamond. default: the modifier's
+            # own set (FCC, HCP, BCC), which names every atom and is not
+            # those two ice templates. The classifier writes a label for
+            # every atom either way.
+            which = os.environ.get("NEIGH_PTM", "ice")
+            if which == "ice":
+                for structure in mod.structures:
+                    structure.enabled = structure.id in (6, 7)
+            elif which != "default":
+                raise SystemExit("NEIGH_PTM is ice or default")
             pipe.modifiers.append(mod)
         out = pipe.compute()
         if op in ("symmetry", "diamond", "chill") and "Structure Type" in out.particles:
