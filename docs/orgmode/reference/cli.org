@@ -336,7 +336,7 @@ Analysis choice (which command) is not this table.
 ~seams~ picks a reader from the path suffix
 (~path.find_last_of('.')~):
 
-| suffix | reader | compile-time gate |
+| suffix | reader | included when |
 |--------+--------+-------------------|
 | ~xyz~ | ~sinp::readXYZ~ | always |
 | ~con~ | ~sinp::readCon~ | ~SEAMS_HAS_READCON~ |
@@ -345,7 +345,7 @@ Analysis choice (which command) is not this table.
 
 A build without chemfiles or readcon-core treats ~.pdb~ / ~.gro~ /
 ~.dcd~ / ~.con~ as LAMMPS dumps. ~seams --features~ reports those
-gates.
+readers.
 
 * Frame ranges
 

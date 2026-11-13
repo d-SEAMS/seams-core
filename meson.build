@@ -814,6 +814,12 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_prose',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_prose.py'],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_changelog',
     python3,
     args: [meson.project_source_root() / 'docs' / 'check_changelog.py', '--check'],
@@ -842,6 +848,12 @@ if get_option('with_cli')
     'docs_pool_audit',
     python3,
     args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-pool'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_cutoff_rings',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-cutoff'],
     suite: 'docs',
     timeout: 60)
   test(
@@ -918,6 +930,17 @@ if get_option('with_cli')
     depends: [seams_api_lib],
     suite: 'docs',
     timeout: 120)
+  test(
+    'docs_science_front',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'howto' / 'test_science_front.py',
+      meson.project_source_root(),
+      meson.project_build_root(),
+    ],
+    env: tutorial_env,
+    suite: 'docs',
+    timeout: 180)
   test(
     'docs_tutorial_insitu',
     python3,

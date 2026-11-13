@@ -81,7 +81,7 @@ Stoddard's clusters on that subset. It does not run CHILL or
 ~q_6~. Neighbours are the dump-MIC cutoff list (~--cutoff~).
 Stdout is ~subset polar n N largest L P P_inf~ with
 ~P_inf = L / N~. Missing ~--site~ exits 2. ~--family~ still only
-gates ice scores.
+applies to ice scores.
 
 * Confined layers
 
@@ -121,7 +121,7 @@ triclinic (~box.size() >= 6~), the tilt ~xy xz yz~. Bound spans
 are not edge lengths; see [[file:sheared-cells.org][Sheared
 cells]].
 
-* Family gate
+* Family names
 
 ~--family~ names the material. The default is ~waterIce~.
 ~seams chill~, ~chill-plus~, and ~cages~ refuse (exit 2) when

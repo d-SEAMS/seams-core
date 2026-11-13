@@ -26,10 +26,10 @@ Four fronts, one engine (~libyodaLib~). Flags live on
 
 ~pixi run -e docs doxybuild~ runs from =docs/source=:
 
-1. ~doxygen Doxyfile_seams.cfg~ -- ~INPUT~ is
+1. ~doxygen Doxyfile_seams.cfg~. ~INPUT~ is
    =../../src/include/internal= (~EXTRACT_ALL=YES~, private members
    off). =src/include/external= and =tests/= are excluded.
-2. ~doxyrest -c doxyrest-config.lua~ -- reads =xml/index.xml=, writes
+2. ~doxyrest -c doxyrest-config.lua~ reads =xml/index.xml= and writes
    =api/index.rst~ with title ~API Reference~.
 
 The book includes that tree as =api/index= (Reference toctree), not

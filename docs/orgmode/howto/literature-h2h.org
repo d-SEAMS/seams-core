@@ -164,8 +164,8 @@ recorded \(q_4\) is 57.042 ms against PLUMED 1294.172 ms and \(q_6\)
 is 48.591 ms against 1671.743 ms. The sharp neighbour count is
 31.356 ms against 161.853 ms. The columns the driver labeled eight
 threads, near 1304 ms, 1692 ms and 163 ms, are that same one-thread
-measurement. On the dense frame and the TIP4P slab some
-TIP4P slab some
+measurement. The 884736-molecule sitting sets ~PLUMED_NUM_THREADS~,
+so its q6 rows are not this measurement. On the dense frame and the TIP4P slab some
 neighbours sit on the cutoff, so the continuous switch is a different
 number. The largest \(q_4\) gap on the dense frame is 0.025 and the
 coordination gap is 6.8. The sharp list is the value that matches
@@ -257,7 +257,8 @@ both find 16 of 5^{12} and 8 of 5^{12}6^{4}.
 **Where d-SEAMS is slower.** On no paired row. The PLUMED q4 and q6
 rows were measured on one thread because ~PLUMED_NUM_THREADS~ was
 unset, so the ~threads~ column is the width the driver requested.
-TRACE does not change from one thread to eight.
+The 884736-molecule sitting sets the variable. TRACE does not change
+from one thread to eight.
 The sI unit-cell census is the disagreement above. The q6
 derivative, checked separately on a symmetry-broken
 eight-molecule cell, matches an independent nanometre difference

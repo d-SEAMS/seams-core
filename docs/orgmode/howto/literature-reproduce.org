@@ -43,8 +43,9 @@ left ~PLUMED_NUM_THREADS~ alone. In PLUMED 2.10.2,
 ~src/tools/OpenMP.cpp~ stores the width at one and ~getNumThreads~
 reads ~PLUMED_NUM_THREADS~. That is why the ~threads=1~ column and the
 ~threads=8~ column of these rows are the same one-thread measurement.
-A later sitting sets ~PLUMED_NUM_THREADS~. These rows are not that
-measurement.
+~benchmarks/paper-cells/sitting-large.csv~ sets
+~PLUMED_NUM_THREADS~ to the width of the row, and that q6 time falls
+from one thread to eight. These rc3 rows are not that measurement.
 
 #+begin_src cpp
 unsigned getNumThreads() {

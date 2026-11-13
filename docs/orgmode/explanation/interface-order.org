@@ -58,7 +58,7 @@ If more than one lever moves the label, the atom is mixed.
 
 On both frames below, every atom that changes label has exactly four
 neighbours inside 3.5 Å.
-The shell gate of Table 1 is not the split.
+The shell condition in Table 1 is not the split.
 Widening ~q3~ changes the label of a four-coordinated molecule when
 one of its neighbours has a further neighbour inside the cutoff.
 The open edges move no atom on either frame.
