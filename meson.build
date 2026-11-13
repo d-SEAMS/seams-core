@@ -1885,6 +1885,13 @@ test(
     link_args: ['-lm']),
   env: _capi_env,
   timeout: 300)
+executable(
+  'bench_capi_rss',
+  files('tests/bench_capi_rss.c'),
+  link_with: seams_api_lib,
+  include_directories: include_directories('include'),
+  c_args: ['-std=c11'] + _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
+  link_args: ['-lm'])
 test(
   'capi_symbols',
   find_program('python3', required: true),
