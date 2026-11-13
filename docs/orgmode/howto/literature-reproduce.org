@@ -37,10 +37,29 @@ one. OVITO's template matching and its ring finder fall with the same
 control as its CHILL+. ~meson test docs_h2h_threads~ checks those
 inequalities against the CSV.
 
-PLUMED does not. Its \(q_4\) and \(q_6\) medians at eight threads stay
-within five percent of the one-thread medians. The collective variable
-is one kernel launch; extra OpenMP threads do not shorten it in this
-sitting.
+PLUMED's symfunc does not speed up with ~OMP_NUM_THREADS~ on these
+cells. The \(q_4\) and \(q_6\) medians at eight threads stay within
+five percent of the one-thread medians, on both 110592 and 884736
+molecules. The driver sets ~OMP_NUM_THREADS~ and does not set
+~PLUMED_NUM_THREADS~.
+
+PLUMED 2.10.2 reads its own width. In ~src/tools/OpenMP.cpp~ the stored
+count starts at one (~unsigned num_threads=1~), and ~getNumThreads~
+consults ~PLUMED_NUM_THREADS~ only. ~OMP_NUM_THREADS~ does not appear
+under ~src/~ of that release, so the symfunc stays on one thread while
+the driver varies the OpenMP variable.
+
+#+begin_src cpp
+unsigned getNumThreads() {
+  if(!OpenMPVars::get().nt_env_set) {
+    if(std::getenv("PLUMED_NUM_THREADS")) {
+      Tools::convert(std::getenv("PLUMED_NUM_THREADS"),OpenMPVars::get().num_threads);
+    }
+    OpenMPVars::get().nt_env_set = true;
+  }
+  return OpenMPVars::get().num_threads;
+}
+#+end_src
 
 #+begin_export rst
 .. include:: literature-speed.rst
