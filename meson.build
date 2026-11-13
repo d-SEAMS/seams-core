@@ -783,6 +783,17 @@ if get_option('with_cli')
   tutorial_env = environment()
   tutorial_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
   test(
+    'docs_tutorial_clathrate',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'tutorials' / 'test_clathrate.py',
+      meson.project_source_root(),
+      seams_exe.full_path(),
+      meson.project_build_root() / 'src',
+    ],
+    depends: [seams_exe],
+    timeout: 180)
+  test(
     'engines_tutorial',
     python3,
     args: [

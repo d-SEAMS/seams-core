@@ -1,0 +1,34 @@
+#+TITLE: Classify a clathrate
+#+OPTIONS: toc:nil num:nil
+
+GenIce builds the three clathrate ices without guests. The cage search
+is the signature census: closed polyhedra whose faces match a ring-size
+list. ~meson test docs_tutorial_clathrate~ runs that search and checks
+the counts.
+
+The cells are already in the tree, each well under a megabyte.
+
+| cell | file | molecules | census |
+|------+------+-----------+--------|
+| sI | ~input/traj/genice_sI.lammpstrj~ | 46 | 2 of \(5^{12}\), 6 of \(5^{12}6^{2}\) |
+| sII | ~input/traj/genice_sII.lammpstrj~ | 136 | 16 of \(5^{12}\), 8 of \(5^{12}6^{4}\) |
+| sH | ~input/traj/genice_sH.lammpstrj~ | 136 | four unit cells, so 12, 8 and 4 |
+
+The sH unit cell is 3 of \(5^{12}\), 2 of \(4^{3}5^{6}6^{3}\), and 1 of
+\(5^{12}6^{8}\). The file is that cell repeated four times, and the
+test checks \(12, 8, 4 = 4 \times (3, 2, 1)\).
+
+sH is a skewed cell. The default cage-edge window measures bond lengths
+as if the box were orthorhombic, and the long faces then fall outside
+it. ~--cage-edge none~ keeps every primitive ring. sI and sII are
+orthogonal, and the default window leaves their census unchanged.
+
+#+begin_src bash
+seams cages input/traj/genice_sI.lammpstrj --type 1 --graph cutoff --signature 512+51262
+seams cages input/traj/genice_sII.lammpstrj --type 1 --graph cutoff --signature 512+51264
+seams cages input/traj/genice_sH.lammpstrj --type 1 --graph cutoff \
+  --cage-edge none --signature 512+sh+51268
+#+end_src
+
+The lines you should see are ~cages 2~ and ~cages 6~ on sI, ~cages 16~
+and ~cages 8~ on sII, and ~cages 12~, ~cages 8~ and ~cages 4~ on sH.
