@@ -28,6 +28,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Brine scoring keeps water oxygens, leaves ions out, and measures a Madrid-2019 freezing front.
 - Cage identification and the DDC search are faster, and a coplanar pair is not a prism.
 - Local q4 and q6 on the cutoff shell use the solid-harmonic kernel. `seams steinhardt` computes the degrees named by `--l` (default `4,6`). Each OpenMP thread owns a block of the linkcell cell cut. Primitive rings are timed on one thread against OVITO FindRings, and the literature head-to-head covers neighbours, q4, q6, diamond, rings and local symmetry.
+- A TIP4P/2005 ice/water slab is timed at strides of 0.01, 0.1 and 1 ps next to the mW strides of 0.1, 1 and 10 ps. Every transition stays inside the hop ball and the carried rings match a full search. The strict seeded graph is 8.3, 3.3 and 2.6 times a rebuild.
 
 ### Breaking
 
