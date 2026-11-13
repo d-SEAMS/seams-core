@@ -716,29 +716,98 @@ ring::stackingPlanes(const std::vector<std::vector<int>> &rings,
     return out;
   }
   FrameContext ctx(rings, nList);
-  std::vector<bool> hc(nRings, false);
-  for (size_t i = 0; i < nRings; i++) {
-    const std::vector<int> &candidates = ctx.basalCandidates(static_cast<int>(i));
-    for (const int j : candidates) {
-      if (!ctx.basalPair(static_cast<int>(i), j)) {
-        continue;
+  const int nR = static_cast<int>(nRings);
+  std::vector<char> hc(nRings, 0);
+  std::vector<char> basal(nRings, 0);
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+  const bool scale = nR >= 1024 && !omp_in_parallel() && omp_get_max_threads() > 1;
+#else
+  const bool scale = false;
+#endif
+  if (scale) {
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+    const int team = omp_get_max_threads();
+    std::vector<std::vector<char>> basalT(static_cast<std::size_t>(team),
+                                          std::vector<char>(nRings, 0));
+    std::vector<std::vector<char>> hcT(static_cast<std::size_t>(team),
+                                       std::vector<char>(nRings, 0));
+#pragma omp parallel
+    {
+      const int tid = omp_get_thread_num();
+      FrameContext::BasalScratch scratch;
+      std::vector<int> candidates;
+      std::vector<int> listHC;
+      std::vector<int> prismatic;
+      std::vector<ring::strucType> types(nRings, ring::strucType::unclassified);
+      auto &mineBasal = basalT[static_cast<std::size_t>(tid)];
+      auto &mineHc = hcT[static_cast<std::size_t>(tid)];
+#pragma omp for schedule(static)
+      for (int i = 0; i < nR; ++i) {
+        ctx.collectBasalCandidates(i, scratch, candidates);
+        for (const int j : candidates) {
+          if (!ctx.basalPair(i, j)) {
+            continue;
+          }
+          mineBasal[static_cast<std::size_t>(i)] = 1;
+          mineHc[static_cast<std::size_t>(i)] = 1;
+          if (j >= 0 && j < nR) {
+            mineBasal[static_cast<std::size_t>(j)] = 1;
+            mineHc[static_cast<std::size_t>(j)] = 1;
+          }
+          ctx.prismaticInto(i, j, listHC, types, prismatic);
+          for (const int k : prismatic) {
+            if (k >= 0 && k < nR) {
+              mineHc[static_cast<std::size_t>(k)] = 1;
+            }
+          }
+        }
       }
-      out.basal[i] = true;
-      out.basal[static_cast<std::size_t>(j)] = true;
-      hc[i] = true;
-      hc[static_cast<std::size_t>(j)] = true;
-      for (const int k : ctx.prismaticOf(static_cast<int>(i), j)) {
-        if (k >= 0 && static_cast<std::size_t>(k) < nRings) {
-          hc[static_cast<std::size_t>(k)] = true;
+    }
+    for (int i = 0; i < nR; ++i) {
+      for (int t = 0; t < team; ++t) {
+        if (basalT[static_cast<std::size_t>(t)][static_cast<std::size_t>(i)] != 0) {
+          basal[static_cast<std::size_t>(i)] = 1;
+        }
+        if (hcT[static_cast<std::size_t>(t)][static_cast<std::size_t>(i)] != 0) {
+          hc[static_cast<std::size_t>(i)] = 1;
+        }
+      }
+    }
+#endif
+  } else {
+    for (int i = 0; i < nR; ++i) {
+      const std::vector<int> &candidates = ctx.basalCandidates(i);
+      for (const int j : candidates) {
+        if (!ctx.basalPair(i, j)) {
+          continue;
+        }
+        basal[static_cast<std::size_t>(i)] = 1;
+        hc[static_cast<std::size_t>(i)] = 1;
+        if (j >= 0 && j < nR) {
+          basal[static_cast<std::size_t>(j)] = 1;
+          hc[static_cast<std::size_t>(j)] = 1;
+        }
+        for (const int k : ctx.prismaticOf(i, j)) {
+          if (k >= 0 && k < nR) {
+            hc[static_cast<std::size_t>(k)] = 1;
+          }
         }
       }
     }
   }
-  std::vector<int> peripherals;
-  for (size_t i = 0; i < nRings; i++) {
-    if (ctx.equatorialPass(static_cast<int>(i), hc[i], peripherals)) {
-      out.equatorial[i] = true;
+  std::vector<char> equatorial(nRings, 0);
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp parallel for schedule(static) if (scale)
+#endif
+  for (int i = 0; i < nR; ++i) {
+    std::vector<int> peripherals;
+    if (ctx.equatorialPass(i, hc[static_cast<std::size_t>(i)] != 0, peripherals)) {
+      equatorial[static_cast<std::size_t>(i)] = 1;
     }
+  }
+  for (int i = 0; i < nR; ++i) {
+    out.basal[static_cast<std::size_t>(i)] = basal[static_cast<std::size_t>(i)] != 0;
+    out.equatorial[static_cast<std::size_t>(i)] = equatorial[static_cast<std::size_t>(i)] != 0;
   }
   return out;
 }
