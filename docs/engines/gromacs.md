@@ -26,6 +26,7 @@ by 10 on the way into `seams_chill_plus`. The box conversion is
 ```
 
 `ice.gro` is two frames of the 64-atom cubic cell. The tool prints
-`overhead_s`, the mean seconds per frame. A topology is not required.
+`overhead_s`, the mean seconds per frame, and for the last frame
+`gromacs hexagonal N six-rings M q6 Q`. A topology is not required.
 The same step is what an mdrun analysis hook would call. Biasing from inside
 mdrun goes through the PLUMED collective variable, which links the same C API.

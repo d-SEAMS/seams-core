@@ -59,3 +59,33 @@ jobs:
               exit 1
             fi
           done
+
+  docs-engine-howtos:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-docs-engines-
+      - name: Install the four engines from conda-forge
+        run: pixi add gromacs lammps openmm "plumed=2.10.*"
+      - name: Build with each engine enabled and run the docs engine tests
+        run: |
+          set -euo pipefail
+          pixi run bash -lc '
+            export PKG_CONFIG_PATH="$CONDA_PREFIX/lib/pkgconfig:$CONDA_PREFIX/lib.AVX2_256/pkgconfig:$CONDA_PREFIX/lib.AVX_256/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+            export LIBRARY_PATH="$CONDA_PREFIX/lib:$CONDA_PREFIX/lib.AVX2_256${LIBRARY_PATH:+:$LIBRARY_PATH}"
+            export CPATH="$CONDA_PREFIX/include${CPATH:+:$CPATH}"
+            meson setup build-docs-eng -Dwith_tests=false -Dwith_gromacs=enabled -Dwith_lammps=enabled -Dwith_openmm=enabled -Dwith_plumed=enabled
+            meson compile -C build-docs-eng
+            meson test -C build-docs-eng --print-errorlogs \
+              docs_engine_gromacs docs_engine_lammps docs_engine_openmm docs_engine_plumed docs_engine_insitu \
+              | tee build-docs-eng/docs-engine.txt
+            for name in docs_engine_gromacs docs_engine_lammps docs_engine_openmm docs_engine_plumed docs_engine_insitu; do
+              if ! grep -E "${name}[[:space:]]+OK" build-docs-eng/docs-engine.txt >/dev/null; then
+                echo "${name} did not pass" >&2
+                exit 1
+              fi
+            done
+          '

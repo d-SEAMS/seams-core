@@ -1,0 +1,9 @@
+threads,operation,median_ms
+1,one search,451.756
+1,two searches,746.377
+1,cold rebuild,1273.680
+1,warm sweep,1287.510
+8,one search,145.817
+8,two searches,222.791
+8,cold rebuild,165.353
+8,warm sweep,163.526

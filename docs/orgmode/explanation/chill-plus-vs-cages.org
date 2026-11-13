@@ -54,6 +54,8 @@ The commands are in [[file:../tutorials/bulk-ice.org][the mixed TIP4P tutorial]]
 On a perfect cubic crystal the four graphs coincide.
 On a mixed nucleation dump they do not have to.
 
+Pool-audit ~ac510645~ records the fix in ~18588dac~. The seeded cage call searches once when the mutual and union edge sets match. ~fellBack()~ runs before a dirty frame returns, so the following frames are warm sweeps.
+
 * Ring-adjacent completion
 
 ~ring::seededCageAffiliation~ takes a fifth argument, ~ringAdjacentCompletion~, default ~false~.
