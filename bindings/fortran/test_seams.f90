@@ -1,7 +1,7 @@
 ! Copyright (c) d-SEAMS developers
 program test_seams
   use, intrinsic :: iso_c_binding
-  use seams
+  use seams_c
   implicit none
   integer, parameter :: nrep = 2
   integer, parameter :: n = nrep * nrep * nrep * 8

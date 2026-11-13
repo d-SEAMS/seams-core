@@ -160,8 +160,22 @@ description = "Copy doxyYoda HTML into the Sphinx publish tree"
 depends-on = ["sphinxbld", "doxyhtml"]
 cmd = "rm -rf docs/build/api-cpp && cp -R docs/doxygen-html/html docs/build/api-cpp"
 
+[feature.docs.tasks.ford]
+description = "FORD HTML for the Fortran bindings"
+cmd = "ford bindings/fortran/ford.md"
+
+[feature.docs.tasks.ldoc]
+description = "LDoc HTML for the Lua bindings"
+cwd = "bindings/lua"
+cmd = "ldoc ."
+
+[feature.docs.tasks.install-binding-docs]
+description = "Copy FORD and LDoc HTML into the Sphinx publish tree"
+depends-on = ["sphinxbld", "ford", "ldoc"]
+cmd = "rm -rf docs/build/fortran docs/build/lua && cp -R docs/ford docs/build/fortran && cp -R docs/ldoc docs/build/lua"
+
 [feature.docs.tasks.docbld]
-depends-on = ["sphinxbld", "install-doxyhtml"]
+depends-on = ["sphinxbld", "install-doxyhtml", "install-binding-docs"]
 
 [feature.docs.tasks.docdel]
 cwd = "docs"
@@ -170,6 +184,8 @@ cmd = """
 rm -rf build
 rm -rf doctrees
 rm -rf doxygen-html
+rm -rf ford
+rm -rf ldoc
 rm -rf source/xml
 rm -rf source/api
 rm -rf source/contributing

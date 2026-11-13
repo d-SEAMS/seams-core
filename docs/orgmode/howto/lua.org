@@ -57,7 +57,9 @@ local rings = dseams.ringNetwork(cloud, 8)
 
 The basal interface is =examples/fennel/interface.fnl=. The published
 rule on the cutoff list is ~dseams.chill-plus~. The rings tutorial
-frame is =examples/fennel/rings.fnl=.
+frame is =examples/fennel/rings.fnl=. The eight-atom cell through the
+Fennel module is =examples/fennel/cubic.fnl=, which loads
+=bindings/lua/seams.fnl=.
 
 #+begin_src fennel
 # excerpt: examples/fennel/interface.fnl

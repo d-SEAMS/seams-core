@@ -98,6 +98,8 @@ build/
 markdown/cli-fast-plots/
 # docs/source/*.rst is generated from orgmode, but track orgmode + conf.py
 docs/build/
+docs/ford/
+docs/ldoc/
 docs/doctrees/
 docs/doxygen-html/
 docs/source/*.rst

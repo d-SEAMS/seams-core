@@ -32,6 +32,8 @@ option('with_nauty', type: 'feature', value: 'auto',
   description: 'Canonical cage certificates via nauty')
 option('with_lua', type: 'feature', value: 'auto',
   description: 'Build require("dseams") for Lua 5.4 and LuaJIT when the interpreter is found')
+option('with_fortran', type: 'feature', value: 'auto',
+  description: 'Build the Fortran module when a Fortran compiler is found')
 
 option('with_chemfiles', type: 'feature', value: 'auto',
   description: 'Trajectory I/O via chemfiles (on when the library is found or can be fetched)')

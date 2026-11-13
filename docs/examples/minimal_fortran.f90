@@ -1,54 +1,55 @@
 ! Read the GenIce sI cell, then neighbours, q6, CHILL+, and rings.
 program minimal_fortran
-  use, intrinsic :: iso_c_binding
   use seams
   implicit none
   integer, parameter :: kmax = 64
-  real(c_double) :: xyz(3 * kmax), q4(kmax), q6(kmax), lx, ly, lz, mean
-  integer(c_int) :: labels(kmax), counts(9), hist(0:12), n, code, i
-  integer(c_int) :: n_offsets, nnz
-  type(c_ptr) :: sys, nb, rings, offsets, cols
+  real(seams_real) :: flat(3 * kmax), lx, ly, lz, mean
+  real(seams_real), allocatable :: xyz(:, :), q4(:), q6(:)
+  integer(seams_int), allocatable :: labels(:), counts(:), columns(:), hist(:)
+  integer(seams_int) :: n, i
+  type(seams_frame) :: frame
+  type(seams_neighbours) :: nb
+  type(seams_rings) :: rings
   character(len=512) :: path
   integer :: argc
 
   argc = command_argument_count()
   if (argc < 1) stop 1
   call get_command_argument(1, path)
-  call read_dump(trim(path), xyz, n, lx, ly, lz)
+  call read_dump(trim(path), flat, n, lx, ly, lz)
   if (n /= 46) stop 2
-  if (seams_set_num_threads(1) /= SEAMS_OK) stop 3
-  sys = seams_system_create()
-  if (seams_system_set_ortho(sys, xyz, n, 0.0d0, 0.0d0, 0.0d0, lx, ly, lz, &
-      c_null_ptr, c_null_ptr) /= SEAMS_OK) stop 4
-  if (seams_neighbours_build(sys, 3.5d0, 0, SEAMS_GRAPH_CUTOFF, nb) /= SEAMS_OK) stop 5
-  code = seams_neighbours_csr(nb, offsets, n_offsets, cols, nnz)
-  if (code /= SEAMS_OK .or. nnz < 150) stop 7
-  call seams_neighbours_destroy(nb)
-  if (seams_q4q6(sys, 3.5d0, 0, q4, q6) /= SEAMS_OK) stop 8
-  mean = 0.0d0
+  xyz = reshape(flat(1:3 * n), [3, n])
+  call set_num_threads(1_seams_int)
+  frame = new_frame()
+  call frame%set_ortho(xyz, lx, ly, lz)
+  nb = frame%neighbours()
+  call nb%columns(columns)
+  if (size(columns) < 150) stop 7
+  call nb%close()
+  call frame%q4q6(q4, q6)
+  mean = 0.0_seams_real
   do i = 1, n
     mean = mean + q6(i)
   end do
   mean = mean / n
-  if (seams_chill_plus(sys, 3.5d0, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, &
-      labels, counts) /= SEAMS_OK) stop 9
+  call frame%chill_plus(labels, counts)
   if (counts(5) /= 46) stop 10
-  if (seams_rings_find(sys, 3.5d0, 0, SEAMS_GRAPH_CUTOFF, 6, rings) /= SEAMS_OK) stop 11
-  if (seams_rings_histogram(rings, hist, 13) /= SEAMS_OK) stop 12
+  rings = frame%rings(max_depth=6_seams_int)
+  call rings%histogram(hist)
   if (hist(5) /= 48 .or. hist(6) /= 54) stop 13
-  if (mean <= 0.5d0) stop 14
+  if (mean <= 0.5_seams_real) stop 14
   print *, "fortran example ok"
-  call seams_rings_destroy(rings)
-  call seams_system_destroy(sys)
+  call rings%close()
+  call frame%close()
 
 contains
   subroutine read_dump(filename, coords, natom, edge_x, edge_y, edge_z)
     character(len=*), intent(in) :: filename
-    real(c_double), intent(out) :: coords(*), edge_x, edge_y, edge_z
-    integer(c_int), intent(out) :: natom
+    real(seams_real), intent(out) :: coords(*), edge_x, edge_y, edge_z
+    integer(seams_int), intent(out) :: natom
     character(len=256) :: line
     integer :: unit, ios, id, typ, axis
-    real(c_double) :: lo, hi, x, y, z
+    real(seams_real) :: lo, hi, x, y, z
     natom = 0
     open(newunit=unit, file=filename, status="old", action="read")
     do

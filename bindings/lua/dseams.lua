@@ -1,7 +1,20 @@
 -- Copyright (c) d-SEAMS developers
 -- SPDX-License-Identifier: MIT
 --
--- 1.x names on top of dseams_core. Every call goes through seams.h.
+--- d-SEAMS Lua module.
+-- `require("dseams")` is the table programs use. `require("yoda")` is
+-- the same table. Handles are metatables. `__gc` and Lua 5.4 `__close`
+-- free the underlying C object, and `:close()` does the same call.
+--
+-- Errors are raised with `error`. There is no `nil, message` return.
+-- Wrap a call in `pcall` when the caller wants the message. The text is
+-- `seams_last_error` when the library set one, otherwise the status name.
+--
+-- LuaJIT loads the same C module as PUC Lua 5.4. The FFI cdef generated
+-- from `include/seams.h` is LuaJIT only; `require("dseams")` does not
+-- need it. Fennel loads this table through `bindings/lua/seams.fnl`.
+--
+-- @module dseams
 
 local core = require("dseams_core")
 
@@ -16,10 +29,12 @@ local dseams = {
 local cloud_mt = {}
 cloud_mt.__index = cloud_mt
 
+--- The nine LAMMPS cell numbers stored on the cloud.
 function cloud_mt:box()
   return self._box
 end
 
+--- Free the frame. A second call is a no-op.
 function cloud_mt:close()
   if self._sys ~= nil then
     self._sys:close()
@@ -28,6 +43,11 @@ function cloud_mt:close()
 end
 
 function cloud_mt:__close()
+  self:close()
+end
+
+--- Release the frame when the cloud is collected.
+function cloud_mt:__gc()
   self:close()
 end
 
@@ -95,6 +115,7 @@ local function named_counts(codes)
   return named
 end
 
+--- Build a frame. Without coordinates this is an empty frame for :read.
 function dseams.system(xyz, box, types, ids)
   local sys = core.system()
   if xyz == nil then
@@ -104,22 +125,27 @@ function dseams.system(xyz, box, types, ids)
   return wrap(sys, xyz, box, types, ids)
 end
 
+--- Set the OpenMP width. Zero restores the library default.
 function dseams.set_num_threads(n)
   return core.set_num_threads(n)
 end
 
+--- Width the next analysis will request.
 function dseams.num_threads()
   return core.num_threads()
 end
 
+--- Library version text.
 function dseams.version()
   return core.version()
 end
 
+--- Name of a CHILL label code.
 function dseams.label_name(code)
   return core.label_name(code)
 end
 
+--- Read one frame. o.type is the species. o.all keeps every atom. o.frame is 1-based.
 function dseams.read(path, o)
   o = opts(o)
   local filter = -1
@@ -135,6 +161,7 @@ function dseams.read(path, o)
   return wrap(sys)
 end
 
+--- Number of frames in a trajectory path.
 function dseams.nframes(path)
   return core.nframes(path)
 end
@@ -165,6 +192,7 @@ local function rows_of(nb, cloud)
   return rows
 end
 
+--- Neighbour rows. o.cutoff defaults to 3.5. o.graph is cutoff, mutual, or seeded.
 function dseams.neighbors(cloud, o)
   o = opts(o)
   return rows_of(cloud._sys:neighbours(o.cutoff or 3.5, o.type or 0, graph_of(o.graph)), cloud)
@@ -173,6 +201,7 @@ end
 dseams.neighbours = dseams.neighbors
 dseams.neighListO = dseams.neighbors
 
+--- k-nearest rows. o.mutual defaults to true.
 function dseams.knn(cloud, o)
   o = opts(o)
   local mutual = o.mutual == false and 0 or 1
@@ -191,6 +220,7 @@ local function ice_result(labels, counts)
   return names
 end
 
+--- CHILL+ labels, codes, and named population counts.
 function dseams.chill_plus(cloud, o)
   o = opts(o)
   local labels, counts = cloud._sys:chill_plus(
@@ -202,6 +232,7 @@ dseams.getIceTypePlus = dseams.chill_plus
 dseams.getCorrelPlus = dseams.chill_plus
 dseams.getIceTypePlusNoPrint = dseams.chill_plus
 
+--- Original CHILL labels, codes, and named population counts.
 function dseams.chill(cloud, o)
   o = opts(o)
   local labels, counts = cloud._sys:chill(
@@ -212,12 +243,14 @@ end
 dseams.getIceType = dseams.chill
 dseams.getCorrel = dseams.chill
 
+--- Local q4 and q6 on the cutoff shell.
 function dseams.q4q6(cloud, o)
   o = opts(o)
   local q4, q6 = cloud._sys:q4q6(o.cutoff or 3.5, o.type or 0)
   return {q4 = q4, q6 = q6}
 end
 
+--- Local q_l. o.l is the degree. o.average requests the Lechner-Dellago mean.
 function dseams.steinhardtQl(cloud, o)
   o = opts(o)
   local order = o.l or o.order or 6
@@ -226,6 +259,7 @@ function dseams.steinhardtQl(cloud, o)
   return {ql = ql, qlBar = bar}
 end
 
+--- Primitive rings, histogram, symmetry, fraction, and vertices.
 function dseams.rings(cloud, o)
   o = opts(o)
   local depth = o.max_depth or o.max_ring or o.depth or 6
@@ -253,6 +287,7 @@ function dseams.rings(cloud, o)
   }
 end
 
+--- rings, or rings with a numeric maximum depth.
 function dseams.ringNetwork(cloud, depth)
   if type(depth) == "number" then
     return dseams.rings(cloud, {max_depth = depth})
@@ -265,6 +300,7 @@ dseams.getPrimitiveRings = function(cloud, depth)
   return dseams.ringNetwork(cloud, depth).vertices
 end
 
+--- Hexagonal and double-diamond membership. The default graph is seeded.
 function dseams.cages(cloud, o)
   o = opts(o)
   local graph = o.graph or "seeded"
@@ -284,6 +320,7 @@ end
 
 dseams.seededCageAffiliation = dseams.cages
 
+--- Hexagonal and double-diamond membership. The default graph is seeded.
 function dseams.cages_by_signature(cloud, spec, o)
   o = opts(o)
   local n_cages, n_atoms = cloud._sys:signature(
@@ -293,6 +330,7 @@ end
 
 dseams.findBySignature = dseams.cages_by_signature
 
+--- Partial radial distribution. o.rmax defaults to 12.
 function dseams.rdf(cloud, o)
   o = opts(o)
   local r, g, volume = cloud._sys:rdf(
@@ -302,6 +340,7 @@ end
 
 dseams.calcRDF3D = dseams.rdf
 
+--- Running coordination along the partial RDF.
 function dseams.running_cn(cloud, o)
   o = opts(o)
   local r, cn = cloud._sys:running_cn(
@@ -311,6 +350,7 @@ end
 
 dseams.calcRunningCN = dseams.running_cn
 
+--- Coordination number integrated to o.cutoff or o.rmax.
 function dseams.cn(cloud, o)
   o = opts(o)
   return cloud._sys:coordination(
@@ -319,6 +359,7 @@ end
 
 dseams.calcCN = dseams.cn
 
+--- Hydrogen-bond count. Distances are angstrom and the angle is degrees.
 function dseams.hbonds(cloud, o)
   o = opts(o)
   return cloud._sys:hbonds(
@@ -328,6 +369,7 @@ end
 
 dseams.getHbondNetwork = dseams.hbonds
 
+--- Number density along x, y, or z.
 function dseams.density(cloud, o)
   o = opts(o)
   local axis = o.axis or 2
@@ -338,6 +380,7 @@ end
 
 dseams.densityByType = dseams.density
 
+--- Topological fingerprint key and ring census.
 function dseams.fingerprint(cloud, o)
   o = opts(o)
   local key, rings = cloud._sys:fingerprint(
@@ -348,6 +391,7 @@ end
 
 dseams.topologyFingerprint = dseams.fingerprint
 
+--- Per-atom site kind for a site-table spec.
 function dseams.site_table(cloud, spec)
   if type(cloud) == "string" then
     error("site_table needs a frame and a spec", 2)
@@ -355,6 +399,7 @@ function dseams.site_table(cloud, spec)
   return cloud._sys:site_table(spec)
 end
 
+--- Mutual nearest unlike contacts.
 function dseams.pairs(cloud, o)
   o = opts(o)
   local n_pairs, n_cation, n_anion = cloud._sys:contact_pairs(o.spec or o.table)
@@ -363,6 +408,7 @@ end
 
 dseams.contactPairs = dseams.pairs
 
+--- Largest polar or apolar domain.
 function dseams.domain(cloud, o)
   o = opts(o)
   local subset = o.subset
@@ -376,12 +422,14 @@ end
 
 dseams.domainStats = dseams.domain
 
+--- Perfect and imperfect prism counts.
 function dseams.prisms(cloud, o)
   o = opts(o)
   local perfect, imperfect = cloud._sys:prisms(o.cutoff or 3.5, o.type or 0)
   return {perfect = perfect, imperfect = imperfect}
 end
 
+--- Primitive-ring histogram of a monolayer.
 function dseams.monolayer(cloud, o)
   o = opts(o)
   local depth = o.max_depth or 6

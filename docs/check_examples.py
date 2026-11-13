@@ -59,7 +59,7 @@ def lang_symbols():
 
 
 def fortran_symbols():
-    text = (ROOT / "bindings" / "fortran" / "seams.f90").read_text()
+    text = (ROOT / "bindings" / "fortran" / "src" / "seams_c.f90").read_text()
     return re.findall(r'bind\(C, name="([^"]+)"\)', text)
 
 

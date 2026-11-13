@@ -131,3 +131,27 @@ jobs:
           pixi run ninja -C bbdir-py seams
           pixi run python tests/chill_plus_fronts.py bbdir-py/seams bbdir-py/bindings/libseams_lang.so --require-all
           pixi run sh tests/run_language_fronts.sh "$PWD/bbdir-py"
+
+  fortran-lua:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-fortran-lua-
+      - name: Install Fortran, Lua, and Fennel
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gfortran lua5.4 liblua5.4-dev luajit libluajit-5.1-dev
+          curl -fsSL -o "$RUNNER_TEMP/fennel.lua" https://raw.githubusercontent.com/bakpakin/Fennel/main/bootstrap/fennel.lua
+          sudo mkdir -p /usr/local/share /usr/share/lua/5.4
+          sudo cp "$RUNNER_TEMP/fennel.lua" /usr/local/share/fennel.lua
+          sudo cp "$RUNNER_TEMP/fennel.lua" /usr/share/lua/5.4/fennel.lua
+      - name: Build libseams and the Lua modules
+        run: |
+          pixi run meson setup bbdir-fl -Dwith_python=false -Dwith_tests=true -Dwith_cli=false -Dwith_lua=auto -Dwith_fortran=auto
+          pixi run ninja -C bbdir-fl
+      - name: Test Fortran and Lua
+        run: |
+          pixi run meson test -C bbdir-fl fortran_capi fortran_high fortran_cubic lua_examples --print-errorlogs

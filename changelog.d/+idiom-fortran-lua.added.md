@@ -1,0 +1,1 @@
+Fortran callers use a `seams` module of derived types with final procedures, allocatable results, and an optional `stat`/`errmsg` pair, and Lua callers get a Fennel module, a rockspec, and LDoc comments. The numbers match the existing tests.
