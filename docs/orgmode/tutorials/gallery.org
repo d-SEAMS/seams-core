@@ -1,0 +1,16 @@
+#+TITLE: Science gallery
+#+OPTIONS: toc:nil num:nil
+
+The pictures are drawn when the book is built, from the same full runs
+the slow tutorial tests check. OVITO's Python renderer colours the
+atoms. When OVITO is missing, matplotlib draws the same coordinates
+in 3D. The image files are produced in the build and are not stored
+in the repository.
+
+Each caption says what the colours mean and repeats the numbers the
+tutorial test asserts. ~meson test docs_gallery~ builds the images
+and checks those numbers against the tutorial reports.
+
+#+begin_export rst
+.. include:: gallery-captions.rst
+#+end_export

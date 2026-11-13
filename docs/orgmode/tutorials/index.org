@@ -24,6 +24,7 @@ in-tree mixed TIP4P dump two ways.
 | [[file:paper-rings.org][Ring statistics]] | Primitive rings and the shortest-path test |
 | [[file:paper-brine.org][Ice in brine]] | The front, and the crystal count, along a short run |
 | [[file:paper-nucleation.org][Nucleation score]] | Mean q6bar as a nucleus is restored |
+| [[file:gallery.org][Science gallery]] | The full runs, drawn and captioned from their reports |
 
 How-tos solve a goal you already have. Reference names flags and
 headers. Explanation is why the two classifiers exist.
@@ -58,4 +59,5 @@ should see.
    paper-rings
    paper-brine
    paper-nucleation
+   gallery
 #+end_export

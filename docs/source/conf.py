@@ -38,6 +38,21 @@ def _write_h2h():
 _write_h2h()
 
 
+def _write_gallery():
+    """Draw the science gallery from the slow tutorial runs."""
+    import importlib.util
+
+    script = os.path.join(_docs, "render_gallery.py")
+    spec = importlib.util.spec_from_file_location("render_gallery", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    if module.main([]) != 0:
+        raise SystemExit("science gallery failed")
+
+
+_write_gallery()
+
+
 def _write_pool_v5():
     """Fill the pool-audit v5 tables before Sphinx reads the benchmarks page."""
     import importlib.util

@@ -1260,6 +1260,20 @@ if get_option('with_cli')
     depends: [seams_exe, seams_api_lib, seams_lang],
     suite: 'docs',
     timeout: 180)
+  test(
+    'docs_gallery',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'render_gallery.py',
+      '--check',
+      seams_exe.full_path(),
+      meson.project_build_root() / 'src',
+      meson.project_build_root() / 'bindings',
+    ],
+    env: tutorial_env,
+    depends: [seams_exe, seams_api_lib, seams_lang],
+    suite: 'docs',
+    timeout: 300)
   binding_env = environment()
   binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
   binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'bindings')

@@ -84,6 +84,8 @@ docs/build/
 docs/doctrees/
 docs/doxygen-html/
 docs/source/*.rst
+docs/source/tutorials/gallery/
+docs/source/tutorials/gallery-captions.rst
 docs/source/xml/
 docs/source/api/
 m.css/
