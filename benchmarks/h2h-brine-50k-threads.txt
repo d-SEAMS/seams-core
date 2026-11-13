@@ -1,0 +1,104 @@
+frame nacl-n50000-m1.0
+oxygens 50000
+build release -O3
+hardware Intel(R) Xeon(R) Processor; nproc=1; nproc_all=8; affinity=0-7
+warmup 1
+n 6
+cutoff 3.5
+one thread pinned to core 0; eight threads on cores 0-7
+threads 1 affinity 0 code d-SEAMS version 2.13.0 operation chill+ reported_threads 1
+sample 1 31.178505
+sample 2 29.573569
+sample 3 29.542049
+sample 4 29.278312
+sample 5 29.449593
+sample 6 29.372511
+median 29.495821 q1 29.391782 q3 29.565689 iqr 0.173907 agreement 1.0000
+threads 1 affinity 0 code d-SEAMS version 2.13.0 operation neighbours reported_threads 1
+sample 1 16.950414
+sample 2 16.909442
+sample 3 16.852554
+sample 4 16.942242
+sample 5 16.929842
+sample 6 17.047354
+median 16.936042 q1 16.914542 q3 16.948371 iqr 0.033829 agreement na degree_sum 289424
+threads 1 affinity 0 code mdapy version 2.0.0 operation chill+ reported_threads 1
+sample 1 38.714485
+sample 2 39.250942
+sample 3 39.610805
+sample 4 39.691728
+sample 5 39.656039
+sample 6 39.654642
+median 39.632723 q1 39.340908 q3 39.655690 iqr 0.314782 agreement 0.9934
+threads 1 affinity 0 code mdapy version 2.0.0 operation neighbours reported_threads 1
+sample 1 26.201635
+sample 2 26.350334
+sample 3 26.249846
+sample 4 26.239109
+sample 5 26.376314
+sample 6 26.357407
+median 26.300090 q1 26.241793 q3 26.355639 iqr 0.113846 agreement na pairs 289424
+threads 1 affinity 0 code OVITO version 3.17.2 operation chill+ reported_threads 1
+sample 1 383.588619
+sample 2 381.752314
+sample 3 381.324571
+sample 4 381.467918
+sample 5 383.937835
+sample 6 382.082170
+median 381.917242 q1 381.539017 q3 383.212007 iqr 1.672990 agreement 0.9934
+threads 1 affinity 0 code freud version 3.6.1 operation neighbours reported_threads 1
+sample 1 62.936811
+sample 2 60.820098
+sample 3 60.694030
+sample 4 60.608152
+sample 5 60.847961
+sample 6 61.950043
+median 60.834029 q1 60.725547 q3 61.674523 iqr 0.948976 agreement na degree_sum 289424
+threads 8 affinity 0-7 code d-SEAMS version 2.13.0 operation chill+ reported_threads 8
+sample 1 18.891745
+sample 2 17.644107
+sample 3 21.045206
+sample 4 18.226463
+sample 5 17.939902
+sample 6 17.854849
+median 18.083182 q1 17.876112 q3 18.725424 iqr 0.849312 agreement 1.0000
+threads 8 affinity 0-7 code d-SEAMS version 2.13.0 operation neighbours reported_threads 8
+sample 1 15.594957
+sample 2 16.272731
+sample 3 15.541910
+sample 4 15.648036
+sample 5 15.694459
+sample 6 15.857642
+median 15.671247 q1 15.608227 q3 15.816846 iqr 0.208620 agreement na degree_sum 289424
+threads 8 affinity 0-7 code mdapy version 2.0.0 operation chill+ reported_threads 8
+sample 1 61.431288
+sample 2 60.838078
+sample 3 60.553386
+sample 4 60.929191
+sample 5 61.733947
+sample 6 61.672938
+median 61.180239 q1 60.860856 q3 61.612526 iqr 0.751669 agreement 0.9934
+threads 8 affinity 0-7 code mdapy version 2.0.0 operation neighbours reported_threads 8
+sample 1 43.480861
+sample 2 43.886282
+sample 3 44.667794
+sample 4 44.270231
+sample 5 44.708770
+sample 6 43.693094
+median 44.078257 q1 43.741391 q3 44.568403 iqr 0.827012 agreement na pairs 289424
+threads 8 affinity 0-7 code OVITO version 3.17.2 operation chill+ reported_threads 8
+sample 1 58.638509
+sample 2 58.598857
+sample 3 57.556210
+sample 4 59.061101
+sample 5 56.856304
+sample 6 57.692463
+median 58.145660 q1 57.590273 q3 58.628596 iqr 1.038323 agreement 0.9934
+threads 8 affinity 0-7 code freud version 3.6.1 operation neighbours reported_threads 8
+sample 1 65.444232
+sample 2 62.725691
+sample 3 62.255313
+sample 4 61.404784
+sample 5 61.172518
+sample 6 61.655688
+median 61.955500 q1 61.467510 q3 62.608097 iqr 1.140587 agreement na degree_sum 289424
