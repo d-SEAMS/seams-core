@@ -531,23 +531,38 @@ class RingsOneThread:
 
 
 class HopStride:
-    """One carried ring update on a production-stride mW frame.
+    """One carried ring update on a production-stride frame.
 
-    The dumps are written by input/hop/regenerate.py and are not stored
-    in git. The timed command is the same driver as the Snakemake rule,
-    limited to the opening transition. The trajectory medians live in
-    benchmarks/hop-stride-*.txt.
+    model mw is the 4096-site growth window. Its strides are 10, 100 and
+    1000 steps of 10 fs, which is 0.1, 1 and 10 ps. The dumps are written
+    by input/hop/regenerate.py.
+
+    model tip4p is the 4096-molecule TIP4P/2005 ice/water slab. Its
+    strides are 5, 50 and 500 steps of 2 fs, which is 0.01, 0.1 and 1 ps.
+    The dumps are written by input/hop/regenerate_tip4p.py. A stride that
+    does not belong to the model is skipped.
+
+    The dumps are not stored in git. The timed command is the same driver
+    as the Snakemake rule, limited to the opening transition. The
+    trajectory medians live in benchmarks/hop-stride-*.txt.
     """
 
-    params = ([10, 100, 1000], ["cutoff", "seeded"])
-    param_names = ["stride", "graph"]
+    params = (["mw", "tip4p"], [5, 10, 50, 100, 500, 1000], ["cutoff", "seeded"])
+    param_names = ["model", "stride", "graph"]
+    _steps = {"mw": {10, 100, 1000}, "tip4p": {5, 50, 500}}
 
-    def setup(self, stride, graph):
-        dump = ROOT / "data" / "hop" / f"stride-{stride}.lammpstrj"
+    def setup(self, model, stride, graph):
+        if stride not in self._steps.get(model, set()):
+            raise NotImplementedError(f"{model} has no {stride}-step stride")
+        if model == "mw":
+            dump = ROOT / "data" / "hop" / f"stride-{stride}.lammpstrj"
+            missing = "production-stride dump is produced by input/hop/regenerate.py"
+        else:
+            dump = ROOT / "data" / "hop" / f"tip4p-stride-{stride}.lammpstrj"
+            missing = "TIP4P dump is produced by input/hop/regenerate_tip4p.py"
         bench = ROOT / "build" / "tests" / "bench_hop_stride"
         if not dump.is_file() or not bench.is_file():
-            raise NotImplementedError(
-                "production-stride dump is produced by input/hop/regenerate.py")
+            raise NotImplementedError(missing)
         self.cmd = CORE + [
             str(bench), "time", str(dump),
             "--graph", graph,
@@ -555,7 +570,8 @@ class HopStride:
             "--warmup", "0",
             "--last", "2",
             "--stride", str(stride),
+            "--type", "1",
         ]
 
-    def time_carry(self, stride, graph):
+    def time_carry(self, model, stride, graph):
         _run(self.cmd)
