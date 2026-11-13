@@ -14,8 +14,8 @@ jobs:
         with:
           environments: default
           cache-key: pixi-tidy-
-      - name: Install clang-tidy
-        run: sudo apt-get update && sudo apt-get install -y clang-tidy
+      - name: Install clang-tidy and Clang OpenMP
+        run: sudo apt-get update && sudo apt-get install -y clang clang-tidy libomp-dev
       - name: Export compile commands
         run: pixi run meson setup build-tidy -Dwith_tests=false -Dwith_python=false
       - name: Run clang-tidy

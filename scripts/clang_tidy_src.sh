@@ -17,38 +17,29 @@ else
   exit 1
 fi
 
+if [[ -n ${CLANG:-} ]]; then
+  clang=$CLANG
+elif command -v clang-18 >/dev/null 2>&1; then
+  clang=clang-18
+elif command -v clang >/dev/null 2>&1; then
+  clang=clang
+else
+  echo "clang is not on PATH; install clang and libomp-dev" >&2
+  exit 1
+fi
+
 if [[ ! -f "$build/compile_commands.json" ]]; then
   echo "missing $build/compile_commands.json" >&2
   exit 1
 fi
 
 build=$(cd "$build" && pwd)
-omp="$build/tidy-omp"
-mkdir -p "$omp"
-rm -f "$omp/omp.h"
-# A short stand-in for omp.h. Clang's parser rejects the malloc attribute
-# in the GCC 13+ header, and the real declarations are not what the checks
-# read. The pragmas do not need this file.
-cat > "$omp/omp.h" << 'EOF'
-#pragma once
-#ifdef __cplusplus
-extern "C" {
-#endif
-int omp_get_max_threads(void);
-int omp_get_num_threads(void);
-int omp_get_thread_num(void);
-void omp_set_num_threads(int);
-int omp_in_parallel(void);
-double omp_get_wtime(void);
-void omp_set_dynamic(int);
-int omp_get_num_devices(void);
-void omp_pause_resource_all(int);
-#ifdef __cplusplus
-}
-#endif
-#define omp_pause_soft 1
-#define omp_pause_hard 2
-EOF
+resource=$("$clang" -print-resource-dir)
+omp="$resource/include/omp.h"
+if [[ ! -f "$omp" ]]; then
+  echo "missing $omp; install libomp-dev (Clang's OpenMP, not GCC's)" >&2
+  exit 1
+fi
 
 mapfile -t files < <(find "$root/src" -name '*.cpp' ! -path '*/include/*' | sort)
 if [[ ${#files[@]} -eq 0 ]]; then
@@ -56,4 +47,6 @@ if [[ ${#files[@]} -eq 0 ]]; then
   exit 1
 fi
 
-"$tidy" -p "$build" --extra-arg="-I$omp" --quiet "${files[@]}"
+# -I the Clang resource directory so <omp.h> is libomp's header. GCC's
+# omp.h uses attributes Clang rejects, and a stub hides a missing install.
+"$tidy" -p "$build" --extra-arg="-I$resource/include" --quiet "${files[@]}"
