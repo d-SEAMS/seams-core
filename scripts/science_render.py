@@ -430,54 +430,28 @@ def column_axis(pos: np.ndarray, chill: np.ndarray, box: np.ndarray) -> tuple[np
     return direction, median
 
 
-def stacking_axis(pos: np.ndarray, mask: np.ndarray) -> np.ndarray:
-    """Smallest eigenvector of the ice-ice bond tensor.
-
-    A hexagonal or cubic cluster has three basal bond directions and one
-    stacking direction, so the stacking axis is the least populated.
-    """
-    chosen = np.flatnonzero(mask)
-    pts = pos[chosen]
-    if pts.shape[0] < 8:
-        return np.array([0.0, 0.0, 1.0])
-    tensor = np.zeros((3, 3))
-    cell = HBOND_A
-    keys = np.floor(pts / cell).astype(int)
-    bins: dict[tuple[int, int, int], list[int]] = {}
-    for index, key in enumerate(map(tuple, keys)):
-        bins.setdefault(key, []).append(index)
-    bonds = 0
-    for index, key in enumerate(map(tuple, keys)):
-        for dx in (-1, 0, 1):
-            for dy in (-1, 0, 1):
-                for dz in (-1, 0, 1):
-                    for other in bins.get((key[0] + dx, key[1] + dy, key[2] + dz), []):
-                        if other <= index:
-                            continue
-                        delta = pts[other] - pts[index]
-                        length = float(np.linalg.norm(delta))
-                        if length <= 0.0 or length > HBOND_A:
-                            continue
-                        hat = delta / length
-                        tensor += np.outer(hat, hat)
-                        bonds += 1
-    if bonds < 4:
-        return np.array([0.0, 0.0, 1.0])
-    _values, vectors = np.linalg.eigh(tensor)
-    axis = vectors[:, 0]
-    if axis[2] < 0.0:
-        axis = -axis
-    return unit(axis)
+def layer_period(projection: np.ndarray) -> float:
+    """Basal repeat along a stacking axis, from the strongest density wave."""
+    best_score = -1.0
+    best = 3.6
+    centred = projection - float(np.mean(projection))
+    for period in np.linspace(3.30, 4.05, 16):
+        wave = np.exp(1j * (2.0 * np.pi / float(period)) * centred)
+        score = float(np.abs(np.mean(wave)))
+        if score > best_score:
+            best_score = score
+            best = float(period)
+    return best
 
 
 def layer_kinds(pos: np.ndarray, chill: np.ndarray, mask: np.ndarray, axis: np.ndarray) -> list[int]:
-    """Ih (1) or Ic (0) for each 3.7 A bin. Interfacial molecules do not colour a layer."""
-    pts = pos[mask]
-    kinds = chill[mask]
-    if pts.shape[0] == 0:
+    """Ih (1) or Ic (0) for each basal layer. Interfacial molecules do not colour a layer."""
+    chosen = np.flatnonzero(mask & np.isin(chill, [0, 1]))
+    if chosen.size == 0:
         return []
-    projection = pts @ unit(axis)
-    bins = np.floor((projection - projection.min()) / 3.7).astype(int)
+    projection = pos[chosen] @ unit(axis)
+    kinds = chill[chosen]
+    bins = np.floor((projection - projection.min()) / layer_period(projection)).astype(int)
     letters = []
     for index in range(int(bins.max()) + 1):
         selected = kinds[bins == index]
@@ -498,56 +472,48 @@ def hexagonality(chill: np.ndarray, mask: np.ndarray) -> float:
 
 
 def stacking_axis(pos: np.ndarray, chill: np.ndarray, mask: np.ndarray) -> np.ndarray:
-    """Direction whose 3.7 A bins are the purest Ih or Ic layers."""
-    pts = pos[mask]
+    """Normal of the basal planes, from the density wave of the Ih/Ic lattice.
+
+    A purity score on fixed bins can sit a few degrees off the planes. The
+    layers then smear into each other and the edge-on view is not a stripe.
+    """
+    lattice = mask & np.isin(chill, [0, 1])
+    pts = pos[lattice]
     if pts.shape[0] < 8:
         return np.array([0.0, 0.0, 1.0])
-    candidates = []
-    covariance = np.cov(pts.T)
-    _values, vectors = np.linalg.eigh(covariance)
-    candidates.extend(list(vectors.T))
-    tensor = np.zeros((3, 3))
-    chosen = np.flatnonzero(mask)
-    cell = HBOND_A
-    keys = np.floor(pts / cell).astype(int)
-    bins: dict[tuple[int, int, int], list[int]] = {}
-    for index, key in enumerate(map(tuple, keys)):
-        bins.setdefault(key, []).append(index)
-    for index, key in enumerate(map(tuple, keys)):
-        for dx in (-1, 0, 1):
-            for dy in (-1, 0, 1):
-                for dz in (-1, 0, 1):
-                    for other in bins.get((key[0] + dx, key[1] + dy, key[2] + dz), []):
-                        if other <= index:
-                            continue
-                        delta = pts[other] - pts[index]
-                        length = float(np.linalg.norm(delta))
-                        if 0.0 < length <= HBOND_A:
-                            hat = delta / length
-                            tensor += np.outer(hat, hat)
-    if float(np.trace(tensor)) > 0.0:
-        _bond_values, bond_vectors = np.linalg.eigh(tensor)
-        candidates.extend(list(bond_vectors.T))
-    best_axis = np.array([0.0, 0.0, 1.0])
-    best_score = -1.0
-    for axis in candidates:
-        axis = unit(axis)
+
+    def amplitude(axis: np.ndarray, period: float) -> float:
         projection = pts @ axis
-        layers = np.floor((projection - projection.min()) / 3.7).astype(int)
-        owned = 0
-        total = 0
-        for layer in range(int(layers.max()) + 1):
-            selected = chill[chosen][layers == layer]
-            hexagonal = int(np.sum(selected == 1))
-            cubic = int(np.sum(selected == 0))
-            if hexagonal + cubic == 0:
-                continue
-            owned += max(hexagonal, cubic)
-            total += hexagonal + cubic
-        score = owned / float(total) if total else 0.0
-        if score > best_score:
-            best_score = score
-            best_axis = axis
+        wave = np.exp(1j * (2.0 * np.pi / period) * (projection - projection.mean()))
+        return float(np.abs(np.mean(wave)))
+
+    best_score = -1.0
+    best_axis = np.array([0.0, 0.0, 1.0])
+    best_period = 3.6
+    for theta in np.linspace(0.0, np.pi, 24, endpoint=False):
+        for phi in np.linspace(0.0, np.pi, 24, endpoint=False):
+            axis = np.array(
+                [np.sin(theta) * np.cos(phi), np.sin(theta) * np.sin(phi), np.cos(theta)]
+            )
+            for period in (3.40, 3.60, 3.80):
+                score = amplitude(axis, period)
+                if score > best_score:
+                    best_score = score
+                    best_axis = axis
+                    best_period = period
+    for scale in (0.12, 0.04, 0.015):
+        tangent = np.array([1.0, 0.0, 0.0]) if abs(float(best_axis[2])) > 0.9 else np.array([0.0, 0.0, 1.0])
+        east = unit(np.cross(tangent, best_axis))
+        north = np.cross(best_axis, east)
+        for step_east in np.linspace(-scale, scale, 7):
+            for step_north in np.linspace(-scale, scale, 7):
+                axis = unit(best_axis + step_east * east + step_north * north)
+                for period in np.linspace(best_period - 0.12, best_period + 0.12, 5):
+                    score = amplitude(axis, float(period))
+                    if score > best_score:
+                        best_score = score
+                        best_axis = axis
+                        best_period = float(period)
     if best_axis[2] < 0.0:
         best_axis = -best_axis
     return best_axis
@@ -635,11 +601,12 @@ def contained_bonds(pos: np.ndarray, box: np.ndarray | None, mask: np.ndarray) -
     return np.array(kept, dtype=np.int32)
 
 
-def depth_cue(colours: np.ndarray, depth: np.ndarray) -> np.ndarray:
+def depth_cue(colours: np.ndarray, depth: np.ndarray, fade: float = 0.22) -> tuple[np.ndarray, np.ndarray]:
+    """Darken and report nearness. fade is how far the far atoms drop."""
     span = float(depth.max() - depth.min())
-    near = 1.0 if span < 1e-6 else 1.0 - (depth - depth.min()) / span
-    factor = 0.78 + 0.22 * near
-    return colours * factor[:, None]
+    near = np.ones(len(depth)) if span < 1e-6 else 1.0 - (depth - depth.min()) / span
+    factor = (1.0 - fade) + fade * near
+    return colours * factor[:, None], near
 
 
 def scene(pos, chill, bonds, liquid_alpha: float, forward: np.ndarray):
@@ -658,7 +625,7 @@ def scene(pos, chill, bonds, liquid_alpha: float, forward: np.ndarray):
     particles = Particles()
     particles.create_property("Position", data=np.ascontiguousarray(pos, dtype=np.float64))
     colours = np.array([CHILL.get(int(code), ("other", (0.5, 0.5, 0.5)))[1] for code in chill])
-    colours = depth_cue(colours, pos @ unit(forward))
+    colours, _near = depth_cue(colours, pos @ unit(forward))
     particles.create_property("Color", data=np.clip(colours, 0.0, 1.0))
     liquid = np.isin(chill, [2, 4, 5])
     transparency = np.where(liquid, 1.0 - liquid_alpha, 0.0)
@@ -735,10 +702,16 @@ def prepare_slab(pos, chill, box):
     sheet = bilayer_sheet(pos, crystal, forward, box)
     ice_z = pos[np.isin(chill, [0, 1]), 2]
     z_mid = float(np.median(ice_z)) if ice_z.size else 0.0
-    depth = pos @ unit(forward)
     liquid = np.isin(chill, [2, 4, 5])
-    centre = float(np.median(depth[crystal])) if np.any(crystal) else float(np.median(depth))
-    in_slice = np.abs(depth - centre) <= 0.5 * SLICE_A
+    # The drawn ice is one [11-20] slice. The liquid has to be that same
+    # slice, minimum-imaged, or the upper contact layer — which sits in
+    # this slice and not at the middle of the block — is left out and the
+    # picture shows an empty band.
+    anchor = pos[sheet].mean(axis=0) if np.any(sheet) else pos[crystal].mean(axis=0)
+    delta = pos - anchor
+    delta -= box * np.round(delta / box)
+    along = delta @ unit(forward)
+    in_slice = np.abs(along) <= 0.5 * SLICE_A
     keep = sheet | (liquid & (pos[:, 2] > z_mid) & in_slice) | (liquid & (pos[:, 2] < z_mid) & in_slice)
     # Clathrate classes stay opaque; only true liquid is faint.
     faint = keep & (chill == 2)
@@ -778,9 +751,10 @@ def prepare_nucleus(pos, chill, extended, forward, up):
     keep = crystal | liquid
     drawn = pos[keep]
     drawn_chill = chill[keep]
-    local = np.zeros(pos.shape[0], dtype=bool)
-    local[np.flatnonzero(keep)] = crystal[keep]
-    bonds = contained_bonds(pos, None, local)
+    # Bonds only between cubic and hexagonal oxygens. Interfacial atoms
+    # stay a faint shell so they do not bury the lattice.
+    lattice = keep & np.isin(chill, [0, 1])
+    bonds = contained_bonds(pos, None, lattice)
     remap = -np.ones(pos.shape[0], dtype=int)
     remap[np.flatnonzero(keep)] = np.arange(int(keep.sum()))
     if len(bonds):
@@ -790,7 +764,7 @@ def prepare_nucleus(pos, chill, extended, forward, up):
     return drawn, drawn_chill, bonds
 
 
-def render_molecule(pos, chill, bonds, forward, up, png, half_h, half_v, width_px, liquid_alpha):
+def render_molecule(pos, chill, bonds, forward, up, png, half_h, half_v, width_px, liquid_alpha, nucleus: bool = False):
     from ovito.data import DataCollection, Particles, SimulationCell
     from ovito.pipeline import Pipeline, StaticSource
     from ovito.vis import BondsVis, TachyonRenderer, Viewport
@@ -816,15 +790,24 @@ def render_molecule(pos, chill, bonds, forward, up, png, half_h, half_v, width_p
     particles = Particles()
     particles.create_property("Position", data=np.ascontiguousarray(pos, dtype=np.float64))
     colours = np.array([CHILL.get(int(code), ("other", (0.5, 0.5, 0.5)))[1] for code in chill])
-    colours = depth_cue(colours, pos @ forward)
+    # The nucleus fades the far side of the lattice so the near stacking
+    # planes stay readable. The slab keeps a mild depth cue.
+    colours, near = depth_cue(colours, pos @ forward, 0.62 if nucleus else 0.22)
     particles.create_property("Color", data=np.clip(colours, 0.0, 1.0))
     liquid = np.isin(chill, [2])
     guest = np.isin(chill, [4, 5])
+    interfacial = np.isin(chill, [3])
     transparency = np.zeros(pos.shape[0])
     transparency[liquid] = 1.0 - liquid_alpha
     transparency[guest] = 0.15
+    radius = np.full(pos.shape[0], ATOM_RADIUS)
+    if nucleus:
+        transparency[interfacial] = 0.62
+        radius[interfacial] = 0.40
+        lattice = np.isin(chill, [0, 1])
+        transparency[lattice] = np.maximum(transparency[lattice], 0.55 * (1.0 - near[lattice]))
     particles.create_property("Transparency", data=transparency)
-    particles.create_property("Radius", data=np.full(pos.shape[0], ATOM_RADIUS))
+    particles.create_property("Radius", data=radius)
     if bonds is not None and len(bonds):
         bond_data = particles.create_bonds()
         bond_data.create_property("Topology", data=np.ascontiguousarray(bonds, dtype=np.int32))
@@ -1052,10 +1035,14 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
         loaded[label] = (npos, nchill, extended)
     late_pos, late_chill, late_ext = loaded["late"]
     axis = stacking_axis(late_pos, late_chill, late_ext)
-    hint = np.array([1.0, 0.0, 0.0])
-    if abs(float(np.dot(hint, axis))) > 0.85:
-        hint = np.array([0.0, 1.0, 0.0])
-    view = unit(np.cross(axis, hint))
+    # Stacking planes edge-on: the axis is vertical in the picture, and the
+    # camera looks along the short in-plane direction so each layer is a stripe.
+    lattice = late_ext & np.isin(late_chill, [0, 1])
+    centred = late_pos[lattice] - late_pos[lattice].mean(axis=0)
+    flat = centred - np.outer(centred @ axis, axis)
+    _values, vectors = np.linalg.eigh(np.cov(flat.T))
+    long = unit(vectors[:, int(np.argmax(_values))])
+    view = unit(np.cross(axis, long))
     for label, (npos, nchill, extended) in loaded.items():
         clouds[label] = (npos, nchill, extended, view, axis)
     # The late cluster fills about 70% of the panel. Both frames use that scale.
@@ -1065,26 +1052,31 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
         prepared[label] = (drawn, drawn_chill, bonds, view, axis)
     def raw_half(label: str) -> tuple[float, float]:
         drawn, drawn_chill, _bonds, view_i, axis_i = prepared[label]
-        cluster = drawn[np.isin(drawn_chill, [0, 1, 3])]
+        cluster = drawn[np.isin(drawn_chill, [0, 1])]
         _forward_i, right_i, up_i = basis(view_i, axis_i)
         centred = cluster - cluster.mean(axis=0)
         half_h = float(np.max(np.abs(centred @ right_i))) + ATOM_RADIUS
         half_v = float(np.max(np.abs(centred @ up_i))) + ATOM_RADIUS
         return half_h, half_v
 
-    # Late fills 70% of its panel. Minimum keeps that camera and that
-    # panel shape, framed closer so the smear is large enough to read.
+    # Each lattice fills about 70% of its panel. Both keep the late
+    # cluster's camera and that panel's aspect, so neither image is stretched.
     late_h, late_v = raw_half("late")
     min_h, min_v = raw_half("minimum")
-    share_h = late_h / 0.70
-    share_v = late_v / 0.70
-    aspect = share_v / share_h
-    # Same camera and the same panel shape as the late cluster. The
-    # minimum is framed tighter so the small nucleus fills the panel.
-    min_frame_h = max(min_h / 0.82, (min_v / 0.82) / aspect)
+    aspect = late_v / late_h
+
+    def frame_for(height: float, width: float) -> tuple[float, float]:
+        half_h = height / 0.70
+        half_v = width / 0.70
+        if half_v / half_h < aspect:
+            half_v = half_h * aspect
+        else:
+            half_h = half_v / aspect
+        return half_h, half_v
+
     frames = {
-        "late": (share_h, share_v),
-        "minimum": (min_frame_h, min_frame_h * aspect),
+        "late": frame_for(late_h, late_v),
+        "minimum": frame_for(min_h, min_v),
     }
     nucleus_px = int(round(48.0 / 25.4 * PRINT_DPI))
     images = {}
@@ -1092,11 +1084,19 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
     for label, (drawn, drawn_chill, bonds, view, axis) in prepared.items():
         images[label] = work / f"nucleus-{label}.png"
         share_h, share_v = frames[label]
-        render_molecule(drawn, drawn_chill, bonds, view, axis, images[label], share_h, share_v, nucleus_px, 0.18)
+        render_molecule(
+            drawn, drawn_chill, bonds, view, axis, images[label], share_h, share_v, nucleus_px, 0.18, nucleus=True
+        )
         npos, nchill, extended, _view, axis = clouds[label]
         stacks[label] = layer_kinds(npos, nchill, extended, axis)
         stacks["hexagonality"][label] = hexagonality(nchill, extended)
-    nuclei = {"minimum": images["minimum"], "late": images["late"], "half_h": share_h, "half_v": share_v}
+    late_frame_h, late_frame_v = frames["late"]
+    nuclei = {
+        "minimum": images["minimum"],
+        "late": images["late"],
+        "half_h": late_frame_h,
+        "half_v": late_frame_v,
+    }
     for width, stem in ((170.0, "figure-170mm"), (85.0, "figure-85mm")):
         compose(slab, nuclei, stacks, width, out / f"{stem}.png", out / f"{stem}.pdf")
         print(f"wrote {stem}", flush=True)
