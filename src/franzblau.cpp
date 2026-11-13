@@ -1948,35 +1948,68 @@ struct primitive::RingUpdater::Impl {
   ringsMeeting(const Graph &adj, const std::vector<int> &T,
                const std::vector<char> &inT) {
     const int n = static_cast<int>(T.size());
-    std::vector<std::vector<std::vector<int>>> fresh(T.size());
+    const int nVertices = static_cast<int>(adj.size());
+    if (static_cast<int>(bySource.size()) != nVertices) {
+      bySource.assign(static_cast<std::size_t>(nVertices), {});
+    }
+    int nThreads = 1;
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel if (!omp_in_parallel())
+    if (!omp_in_parallel()) {
+      nThreads = omp_get_max_threads();
+    }
+#endif
+    if (static_cast<int>(scratches.size()) < nThreads) {
+      scratches.resize(static_cast<std::size_t>(nThreads));
+    }
+#ifdef SEAMS_HAS_OPENMP
+    if (nThreads > 1) {
+#pragma omp parallel
+      {
+        RingScratch &scratch =
+            scratches[static_cast<std::size_t>(omp_get_thread_num())];
+        DistOracle oracle;
+        oracle.adj = &adj;
+        oracle.balls = hopOnly ? nullptr : &balls;
+        oracle.hop2 = hopOnly;
+#pragma omp for schedule(guided)
+        for (int k = 0; k < n; k++) {
+          const int src = T[static_cast<std::size_t>(k)];
+          RingPool &pool = bySource[static_cast<std::size_t>(src)];
+          pool.reset();
+          enumerateFromSource(adj, oracle, src, maxDepth, maxLvl, scratch, pool,
+                              &inT);
+        }
+      }
+    } else
 #endif
     {
-      RingScratch scratch;
+      if (scratches.empty()) {
+        scratches.emplace_back();
+      }
       DistOracle oracle;
       oracle.adj = &adj;
       oracle.balls = hopOnly ? nullptr : &balls;
       oracle.hop2 = hopOnly;
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp for schedule(guided)
-#endif
       for (int k = 0; k < n; k++) {
-        enumerateFromSource(adj, oracle, T[static_cast<std::size_t>(k)],
-                            maxDepth, maxLvl, scratch,
-                            fresh[static_cast<std::size_t>(k)], &inT);
+        const int src = T[static_cast<std::size_t>(k)];
+        RingPool &pool = bySource[static_cast<std::size_t>(src)];
+        pool.reset();
+        enumerateFromSource(adj, oracle, src, maxDepth, maxLvl, scratches[0], pool,
+                            &inT);
       }
     }
     std::size_t total = 0;
-    for (const auto &f : fresh) {
-      total += f.size();
+    for (int k = 0; k < n; k++) {
+      total += bySource[static_cast<std::size_t>(T[static_cast<std::size_t>(k)])].n;
     }
     std::vector<std::vector<int>> out;
     out.reserve(total);
-    for (auto &f : fresh) {
-      for (auto &r : f) {
-        out.push_back(std::move(r));
+    for (int k = 0; k < n; k++) {
+      RingPool &pool = bySource[static_cast<std::size_t>(T[static_cast<std::size_t>(k)])];
+      for (std::size_t i = 0; i < pool.n; i++) {
+        out.push_back(pool.storage[i]);
       }
+      pool.reset();
     }
     std::sort(out.begin(), out.end());
     return out;
@@ -2159,7 +2192,112 @@ primitive::RingUpdater::update(const std::vector<std::vector<int>> &nList) {
   const bool overAtoms =
       st.useVertexFraction && st.fullPassFraction < 1.0 &&
       (st.fullPassFraction <= 0.0 || changed.size() > atomLimit);
-  if (overAtoms || overBonds) {
+  // Connected components of the changed vertices, on edges of either
+  // frame. The radius is the eccentricity inside the component. A
+  // component exceeds the hop ball when that radius is greater than
+  // ballRadius. Only then, and only when the ball of those components
+  // in the full graph is every vertex, does the frame take one pass.
+  // Every other component is carried with the sources in T.
+  auto componentExceedsFrame = [&]() {
+    std::vector<char> changedMark(static_cast<std::size_t>(nVertices), 0);
+    for (const int v : changed) {
+      if (v >= 0 && v < nVertices) {
+        changedMark[static_cast<std::size_t>(v)] = 1;
+      }
+    }
+    std::vector<char> seen(static_cast<std::size_t>(nVertices), 0);
+    std::vector<int> exceeding;
+    std::vector<int> queue;
+    std::vector<int> dist(static_cast<std::size_t>(nVertices), -1);
+    for (const int seed : changed) {
+      if (seed < 0 || seed >= nVertices || seen[static_cast<std::size_t>(seed)]) {
+        continue;
+      }
+      queue.clear();
+      queue.push_back(seed);
+      seen[static_cast<std::size_t>(seed)] = 1;
+      std::vector<int> members;
+      for (std::size_t head = 0; head < queue.size(); ++head) {
+        const int u = queue[head];
+        members.push_back(u);
+        auto walk = [&](const PackedRows &g) {
+          for (const int w : g[static_cast<std::size_t>(u)]) {
+            if (w < 0 || w >= nVertices || !changedMark[static_cast<std::size_t>(w)] ||
+                seen[static_cast<std::size_t>(w)]) {
+              continue;
+            }
+            seen[static_cast<std::size_t>(w)] = 1;
+            queue.push_back(w);
+          }
+        };
+        walk(prev);
+        walk(next);
+      }
+      for (const int v : members) {
+        dist[static_cast<std::size_t>(v)] = -1;
+      }
+      dist[static_cast<std::size_t>(seed)] = 0;
+      int radius = 0;
+      std::vector<int> layer{seed};
+      for (std::size_t head = 0; head < layer.size(); ++head) {
+        const int u = layer[head];
+        const int du = dist[static_cast<std::size_t>(u)];
+        if (du > radius) {
+          radius = du;
+        }
+        auto step = [&](const PackedRows &g) {
+          for (const int w : g[static_cast<std::size_t>(u)]) {
+            if (w < 0 || w >= nVertices || !changedMark[static_cast<std::size_t>(w)] ||
+                dist[static_cast<std::size_t>(w)] != -1) {
+              continue;
+            }
+            dist[static_cast<std::size_t>(w)] = du + 1;
+            layer.push_back(w);
+          }
+        };
+        step(prev);
+        step(next);
+      }
+      if (radius > st.ballRadius) {
+        exceeding.insert(exceeding.end(), members.begin(), members.end());
+      }
+    }
+    if (exceeding.empty()) {
+      return false;
+    }
+    std::vector<char> covered(static_cast<std::size_t>(nVertices), 0);
+    int nCovered = 0;
+    std::vector<int> ball = exceeding;
+    for (const int v : exceeding) {
+      if (!covered[static_cast<std::size_t>(v)]) {
+        covered[static_cast<std::size_t>(v)] = 1;
+        ++nCovered;
+      }
+      dist[static_cast<std::size_t>(v)] = 0;
+    }
+    for (std::size_t head = 0; head < ball.size(); ++head) {
+      const int u = ball[head];
+      const int du = dist[static_cast<std::size_t>(u)];
+      if (du >= st.ballRadius) {
+        continue;
+      }
+      auto grow = [&](const PackedRows &g) {
+        for (const int w : g[static_cast<std::size_t>(u)]) {
+          if (w < 0 || w >= nVertices || covered[static_cast<std::size_t>(w)]) {
+            continue;
+          }
+          covered[static_cast<std::size_t>(w)] = 1;
+          dist[static_cast<std::size_t>(w)] = du + 1;
+          ball.push_back(w);
+          ++nCovered;
+        }
+      };
+      grow(prev);
+      grow(next);
+    }
+    return nCovered == nVertices;
+  };
+  if ((overAtoms || overBonds) && componentExceedsFrame()) {
     st.which = slot;
     st.fastEnumerate(st.graph[st.which]);
     return st.flattened;
@@ -2194,9 +2332,11 @@ primitive::RingUpdater::update(const std::vector<std::vector<int>> &nList) {
     frontier.swap(wave);
   }
 
-  // Each source in T is enumerated once. A full pass enumerates n sources.
-  // Those counts meet when T is the whole vertex set, and only then.
-  if (static_cast<int>(T.size()) == nVertices) {
+  // A full pass is the regions whose changes exceed the hop ball and
+  // whose ball is the whole vertex set. A frame of smaller regions
+  // enumerates those sources and carries every ring that misses them,
+  // even when the changed rows together touch every molecule.
+  if (static_cast<int>(T.size()) == nVertices && componentExceedsFrame()) {
     st.which = slot;
     st.fastEnumerate(st.graph[st.which]);
     return st.flattened;
