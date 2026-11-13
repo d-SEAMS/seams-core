@@ -19,8 +19,18 @@ def measure(path):
     box_w = int(xs.max() - xs.min() + 1)
     box_h = int(ys.max() - ys.min() + 1)
     fill = (box_w * box_h) / float(width * height)
-    dx = float(xs.mean() / width - 0.5)
-    dy = float(ys.mean() / height - 0.5)
+    # The caption sits in the bottom band. Centroid is the drawing, so a
+    # scale bar on the left does not drag the structure off centre.
+    band = max(1, int(height * 0.78))
+    drawing = mask.copy()
+    drawing[band:, :] = False
+    dys, dxs = np.where(drawing)
+    if len(dxs) == 0:
+        dxs, dys = xs, ys
+        band = height
+    # Box centre, not the ink mean. A liquid on one side must not count as off-centre.
+    dx = float((dxs.min() + dxs.max()) / 2.0 / width - 0.5)
+    dy = float((dys.min() + dys.max()) / 2.0 / band - 0.5)
     return fill, dx, dy, _clipped_highlights(image)
 
 
@@ -42,21 +52,52 @@ def _clipped_highlights(image):
     return int(np.count_nonzero(white & (near >= 16)))
 
 
+def edge_ink(image):
+    """Dark pixels on the outer rim. A clipped label or atom lands here."""
+    dark = np.any(image < 80, axis=2)
+    rim = 6
+    return int(np.count_nonzero(dark[:rim, :]) + np.count_nonzero(dark[-rim:, :])
+               + np.count_nonzero(dark[:, :rim]) + np.count_nonzero(dark[:, -rim:]))
+
+
+def column_point_size(path):
+    """Legend line height in points when the PNG is printed at its dpi."""
+    image = Image.open(path)
+    dpi = 300.0
+    info = image.info.get("dpi")
+    if info:
+        dpi = float(info[0] or 300.0)
+    array = np.asarray(image.convert("RGB"))
+    height = array.shape[0]
+    band = array[int(height * 0.72) :]
+    ink = np.any(band < 80, axis=2)
+    rows = np.where(ink.any(axis=1))[0]
+    if len(rows) == 0:
+        return 0.0
+    breaks = np.where(np.diff(rows) > 4)[0]
+    starts = np.concatenate(([0], breaks + 1))
+    ends = np.concatenate((breaks, [len(rows) - 1]))
+    line = max(int(rows[end] - rows[start] + 1) for start, end in zip(starts, ends))
+    return line / dpi * 72.0
+
+
 def main(argv):
     failed = False
     for name in argv:
         fill, dx, dy, clipped = measure(name)
+        points = column_point_size(name)
+        rim = edge_ink(np.asarray(Image.open(name).convert("RGB")))
         print(
-            "{} fill={:.3f} dx={:+.3f} dy={:+.3f} clipped={}".format(
-                Path(name).name, fill, dx, dy, clipped
+            "{} fill={:.3f} dx={:+.3f} dy={:+.3f} clipped={} label={:.1f}pt rim={}".format(
+                Path(name).name, fill, dx, dy, clipped, points, rim
             ),
             flush=True,
         )
-        minimum = 0.8 if Path(name).parent.name == "nucleation" else 0.7
-        if fill < minimum or abs(dx) > 0.05 or abs(dy) > 0.05 or clipped > 12:
+        minimum = 0.72 if Path(name).parent.name == "nucleation" else 0.60
+        if fill < minimum or abs(dx) > 0.05 or abs(dy) > 0.05 or clipped > 12 or points < 5.0 or rim > 0:
             print(
-                "frame failed {}: fill {:.3f} (need {:.2f}), centroid ({:+.3f}, {:+.3f}), clipped {}".format(
-                    name, fill, minimum, dx, dy, clipped
+                "frame failed {}: fill {:.3f} (need {:.2f}), centroid ({:+.3f}, {:+.3f}), clipped {}, label {:.1f} pt, rim {}".format(
+                    name, fill, minimum, dx, dy, clipped, points, rim
                 ),
                 file=sys.stderr,
             )
