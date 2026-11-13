@@ -74,6 +74,8 @@ si5-data/
 docs/orgmode/explanation/figures/*.png
 # Coexistence frames and restart files. Uploaded separately.
 data/brine-front/
+# Production-stride dumps, restarts and LAMMPS logs. Regenerated, not stored.
+data/hop/
 bin/
 build/
 markdown/cli-fast-plots/

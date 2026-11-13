@@ -1,0 +1,39 @@
+# Restart a growth frame of the published 4096-molecule mW trajectory
+# and equilibrate the new velocities.
+# Ensemble of that run: NPT, 1 atm, 208 K
+# (Goswami, Goswami and Singh, J. Chem. Inf. Model. 60, 2169 (2020)).
+# The integrator step is 10 fs. The Nose-Hoover temperature damping
+# is 1 ps and the pressure damping is 5 ps, the mW constants of
+# Moore and Molinero, Nature 479, 506 (2011). The published frames
+# are isotropic, so the barostat is iso.
+# pair_style sw reads mW.sw: epsilon 6.189 kcal/mol, sigma 2.3925 A,
+# lambda 23.15 (Molinero and Moore, J. Phys. Chem. B 113, 4008 (2009)).
+
+variable step index 15780000
+variable nequil index 2000
+variable seed index 15780000
+
+units real
+atom_style atomic
+boundary p p p
+atom_modify map array
+
+region box block 0 1 0 1 0 1
+create_box 1 box
+read_dump start.lammpstrj ${step} x y z box yes add yes
+
+mass 1 18.015
+pair_style sw
+pair_coeff * * mW.sw mW
+neighbor 2.0 bin
+neigh_modify every 1 delay 0 check yes
+
+timestep 10.0
+velocity all create 208.0 ${seed} mom yes rot yes dist gaussian
+fix bath all npt temp 208.0 208.0 1000.0 iso 1.0 1.0 5000.0
+thermo 500
+thermo_style custom step temp pe press density
+
+run ${nequil}
+write_restart equil.restart
+write_dump all custom equil.lammpstrj id type x y z modify sort id

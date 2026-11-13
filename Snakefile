@@ -325,6 +325,91 @@ rule literature_h2h:
         "--log benchmarks/h2h-literature.txt"
 
 
+rule hop_stride:
+    input:
+        expand("benchmarks/hop-stride-{stride}.txt", stride=[10, 100, 1000]),
+        "benchmarks/hop-stride-crossover.txt",
+        expand("benchmarks/hop-stride-tip4p-{stride}.txt", stride=[5, 50, 500]),
+
+
+rule hop_stride_generate:
+    input:
+        "input/hop/regenerate.py",
+        "input/hop/in.equilibrate",
+        "input/hop/in.stride",
+        "input/mw215/mW.sw",
+    output:
+        "data/hop/stride-10.lammpstrj",
+        "data/hop/stride-100.lammpstrj",
+        "data/hop/stride-1000.lammpstrj",
+        "data/hop/manifest.txt",
+    shell:
+        "python3 input/hop/regenerate.py --frame 104 "
+        "--strides 10,100,1000 --transitions 200 "
+        "--nequil 2000 --seed 15780000 --threads 4"
+
+
+rule hop_stride_time:
+    input:
+        "build/tests/bench_hop_stride",
+        "data/hop/manifest.txt",
+        "data/hop/stride-{stride}.lammpstrj",
+    output:
+        "benchmarks/hop-stride-{stride}.txt",
+    shell:
+        "cat data/hop/manifest.txt > {output}; "
+        "./build/tests/bench_hop_stride time "
+        "data/hop/stride-{stride}.lammpstrj "
+        "--graph both --reps 8 --warmup 1 --stride {stride} >> {output}"
+
+
+rule hop_tip4p_generate:
+    input:
+        "input/hop/regenerate_tip4p.py",
+        "input/hop/in.tip4p.equilibrate",
+        "input/hop/in.tip4p.stride",
+        "input/brine/regenerate.py",
+        "input/brine/grow.py",
+    output:
+        "data/hop/tip4p-stride-5.lammpstrj",
+        "data/hop/tip4p-stride-50.lammpstrj",
+        "data/hop/tip4p-stride-500.lammpstrj",
+        "data/hop/tip4p-manifest.txt",
+    shell:
+        "python3 input/hop/regenerate_tip4p.py "
+        "--strides 5,50,500 --transitions 200 "
+        "--nmelt 10000 --ncool 5000 --nequil 10000 "
+        "--seed 2522005 --temp 252.00 --threads 8"
+
+
+rule hop_tip4p_time:
+    input:
+        "build/tests/bench_hop_stride",
+        "data/hop/tip4p-manifest.txt",
+        "data/hop/tip4p-stride-{stride}.lammpstrj",
+    output:
+        "benchmarks/hop-stride-tip4p-{stride}.txt",
+    shell:
+        "cat data/hop/tip4p-manifest.txt > {output}; "
+        "./build/tests/bench_hop_stride time "
+        "data/hop/tip4p-stride-{stride}.lammpstrj "
+        "--graph both --reps 8 --warmup 1 --stride {stride} "
+        "--type 1 >> {output}"
+
+
+rule hop_stride_crossover:
+    input:
+        "build/tests/bench_hop_stride",
+        "data/hop/stride-1000.lammpstrj",
+    output:
+        "benchmarks/hop-stride-crossover.txt",
+    shell:
+        "./build/tests/bench_hop_stride crossover "
+        "data/hop/stride-1000.lammpstrj "
+        "--graph both --frame-a 1 --frame-b 2 "
+        "--reps 8 --warmup 1 > {output}"
+
+
 rule rings_one_thread:
     input:
         "bbdir-release/tests/bench_rings_h2h",

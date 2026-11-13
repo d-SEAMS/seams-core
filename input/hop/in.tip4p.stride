@@ -1,0 +1,50 @@
+# Continue the equilibrated TIP4P/2005 slab and write one oxygen frame
+# every `stride` steps. `ntrans` transitions need stride*ntrans steps
+# after the frame at step 0, which is the equilibrated configuration.
+# Thermostat, barostat and step are those of in.tip4p.equilibrate.
+# The restart carries positions, velocities and the box. The pair style,
+# Shake and the barostat are stated again because a restart does not
+# keep them. Only oxygens are written: the neighbour graphs are
+# oxygen-only.
+
+variable stride index 5
+variable ntrans index 200
+variable temp index 252.0
+
+units real
+atom_style full
+boundary p p p
+atom_modify map array
+
+read_restart equil.restart
+# The restart restores the long-range pair style, which will not
+# initialise until the kspace style is set.
+kspace_style pppm/tip4p 1.0e-4
+pair_style lj/cut/tip4p/long 1 2 1 1 0.1546 10.0
+pair_modify mix arithmetic
+pair_coeff 1 1 0.1852 3.1589
+pair_coeff 2 2 0.0 1.0
+pair_coeff 1 2 0.0 1.0
+
+bond_style harmonic
+bond_coeff 1 450.0 0.9572
+angle_style harmonic
+angle_coeff 1 55.0 104.52
+special_bonds lj/coul 0.0 0.0 0.0
+reset_atoms image all
+
+neighbor 2.0 bin
+neigh_modify every 1 delay 0 check yes
+fix shake all shake 0.0001 20 0 b 1 a 1
+fix bath all npt temp ${temp} ${temp} 200.0 z 1.0 1.0 2000.0
+
+timestep 2.0
+thermo 5000
+thermo_style custom step temp pe press density
+
+reset_timestep 0
+group oxygen type 1
+variable nsteps equal ${stride}*${ntrans}
+dump 1 oxygen custom ${stride} prod.lammpstrj id type x y z
+dump_modify 1 sort id
+run ${nsteps}
