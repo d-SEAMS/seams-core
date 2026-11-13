@@ -65,8 +65,14 @@ a static archive. `tests/capi_symbols.txt` is the exported list, and the
 `capi_abi` compares the exported names with `scripts/abi_baseline.txt`. When
 libabigail's `abidiff` is on `PATH` at configure time, it also builds libseams once
 more with debug info and compares its types with the ABI 1 corpus in
-`scripts/abi_baseline.abi`: added functions pass, and anything else fails. Without
-`abidiff` that step is skipped.
+`scripts/abi_baseline.abi`: added functions pass, and anything else fails. The
+`abi` pixi environment carries conda-forge's libabigail, so
+`pixi run -e abi meson setup <builddir>` finds it, and the `capi-abi` CI job runs
+that way. Distribution packages work too: `abigail-tools` on Debian and Ubuntu,
+`libabigail` on Fedora. The corpus is format 2.4, which libabigail 2.9 and 3.0
+read. Without
+`abidiff`, or with an older one, `capi_abi` still checks the exported names, says
+the type step was skipped, and passes.
 
 ## seams_last_error and seams_handle_error
 

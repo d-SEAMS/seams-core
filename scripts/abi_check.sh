@@ -6,11 +6,15 @@
 # When SEAMS_ABIDIFF names abidiff and SEAMS_ABI_DEBUG_LIB a libseams
 # built with -g, libseams is also compared type by type with the ABI 1
 # corpus in abi_baseline.abi. Added functions pass; any other change
-# fails. Without either, that step is skipped and says so. The corpus is
-# libseams at 0127f41e (2.14.0, ABI 1), written from a -g build with
+# fails. Without either, or with an abidiff too old to read the corpus,
+# that step is skipped and says so. `pixi run -e abi` provides abidiff.
+# The corpus is libseams at 0127f41e (2.14.0, ABI 1), written from a -g
+# build by libabigail 2.9 (corpus format 2.4, which 2.9 and 3.0 read)
+# with
 #   abidw --headers-dir include --drop-private-types --drop-undefined-syms \
 #     --no-corpus-path --no-comp-dir-path --no-show-locs \
 #     --no-load-undefined-interfaces -o scripts/abi_baseline.abi libseams.so
+# and the abi-instr path cut to src/seams_api.cpp.
 set -eu
 build=${1:?build directory}
 baseline=${2:?baseline file}
@@ -74,6 +78,11 @@ fi
 status=0
 "$abidiff" --no-added-syms --drop-private-types --headers-dir2 "$include" \
   "$corpus" "$debug_lib" > "$build/capi-abidiff.txt" 2>&1 || status=$?
+if [ "$status" -eq 1 ] && grep -q "incompatible format version" "$build/capi-abidiff.txt"; then
+  cat "$build/capi-abidiff.txt"
+  echo "$abidiff cannot read the ABI 1 corpus format; type-level check skipped"
+  exit 0
+fi
 if [ "$status" -ne 0 ]; then
   cat "$build/capi-abidiff.txt"
   echo "libseams differs from the ABI 1 corpus beyond added functions (abidiff status $status)" >&2

@@ -86,9 +86,9 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
-          environments: default
+          environments: abi
           cache-key: pixi-capi-abi-
-      - run: sudo apt-get update && sudo apt-get install -y abigail-tools
-      - run: pixi run meson setup build-abi -Dwith_tests=true -Dwith_python=false
-      - run: pixi run ninja -C build-abi src/libseams.so src/libyodaLib.so bindings/libseams_lang.so
-      - run: pixi run meson test -C build-abi --print-errorlogs capi_abi
+      - run: pixi run -e abi meson setup build-abi -Dwith_tests=true -Dwith_python=false
+      - run: pixi run -e abi ninja -C build-abi src/libseams.so src/libyodaLib.so bindings/libseams_lang.so
+      - run: pixi run -e abi meson test -C build-abi --print-errorlogs capi_abi
+      - run: grep -q "additions only" build-abi/meson-logs/testlog.txt
