@@ -9,6 +9,12 @@ benchmarks/paper-cells/*.pdf
 benchmarks/paper-cells/.liquid-work/
 benchmarks/*.png
 mw215-frames/
+# Rendered by docs/render_h2h.py from benchmarks/paper-cells/*.csv, both
+# at Sphinx build (docs/source/conf.py) and by meson test docs_h2h_tables.
+docs/source/explanation/performance-h2h-tables.rst
+docs/source/explanation/sitting-large-threads.svg
+# LAMMPS writes its log beside the deck unless told -log none.
+engines/lammps/log.lammps
 /result
 /.ccls-cache/
 shellBuild/
