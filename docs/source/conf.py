@@ -208,6 +208,47 @@ def _link_lang():
 
 
 _link_lang()
+
+
+def _link_science():
+    """Point the generated book at the science tutorials."""
+    index = os.path.join(_source, "index.rst")
+    if not os.path.isfile(index):
+        return
+    text = open(index, encoding="utf-8").read()
+    if "science/index" in text:
+        return
+    extra = (
+        "\n.. toctree::\n"
+        "   :maxdepth: 2\n"
+        "   :caption: Science tutorials\n"
+        "\n"
+        "   science/index\n"
+    )
+    with open(index, "a", encoding="utf-8") as handle:
+        handle.write(extra)
+
+
+def _science_figure_stubs():
+    """Keep the book buildable before the tutorial script has drawn."""
+    dest = os.path.join(_source, "science", "figures")
+    os.makedirs(dest, exist_ok=True)
+    stub = (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="80">'
+        '<rect width="100%" height="100%" fill="white"/>'
+        '<text x="16" y="44" font-size="14">'
+        "Figure is drawn by docs/examples/science_tutorials.py"
+        "</text></svg>\n"
+    )
+    for name in ("interface", "brine", "cages"):
+        path = os.path.join(dest, name + ".svg")
+        if not os.path.isfile(path):
+            with open(path, "w", encoding="utf-8") as handle:
+                handle.write(stub)
+
+
+_link_science()
+_science_figure_stubs()
 os.environ["DSEAMS_DOC_BUILD"] = "1"
 sys.path.insert(0, os.path.abspath(os.path.join(_docs, "..", "bindings", "python")))
 _doxyrest = os.path.abspath(os.path.join(_source, "../../subprojects/doxyrest/sphinx"))
@@ -257,7 +298,7 @@ if os.path.isfile(_xml_index) and os.path.isdir(_doxyrest):
     breathe_default_project = "seams"
 
 templates_path = ["_templates"]
-exclude_patterns = []
+exclude_patterns = ["science/figures/**"]
 # A warning is a failed book. Sphinx stops instead of publishing it.
 warningiserror = True
 

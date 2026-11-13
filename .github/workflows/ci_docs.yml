@@ -24,11 +24,6 @@ jobs:
           doxygen docs/Doxyfile.lang
           ldoc --fatalwarnings -c docs/config.ld bindings/lua/dseams.lua
 
-      - run: pixi run -e docs docbld
-
-      - name: Link check
-        run: pixi run -e docs sphinx-build -W --keep-going -b linkcheck -d docs/doctrees docs/source docs/linkcheck
-
       - name: Build the library the examples call
         uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
@@ -44,8 +39,20 @@ jobs:
 
       - run: pixi run -e default setup
       - run: pixi run -e default build
-      - name: Ice Ih and sII examples
-        run: pixi run -e default meson test -C bbdir docs_core_counts docs_capi_examples docs_capi_symbols docs_binding_docstrings docs_lang_ice --print-errorlogs
+
+      - name: Cache the brine frames
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: docs/.cache/brine-front-230K
+          key: brine-front-230K-4828e33ecf419c70643b2d466bfa4f283b4138dc
+
+      - name: Ice Ih, language APIs, and science tutorials
+        run: pixi run -e default meson test -C bbdir docs_core_counts docs_capi_examples docs_capi_symbols docs_binding_docstrings docs_lang_ice docs_science_tutorials --print-errorlogs
+
+      - run: pixi run -e docs docbld
+
+      - name: Link check
+        run: pixi run -e docs sphinx-build -W --keep-going -b linkcheck -d docs/doctrees docs/source docs/linkcheck
 
       - name: Julia Documenter
         run: |
