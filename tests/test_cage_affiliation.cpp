@@ -1600,3 +1600,53 @@ TEST_CASE("Affiliation reads a pivot past the cloud and a one-sided seed",
   REQUIRE(ring::cageAffiliation(hex, many).hc.size() == 1);
 #endif
 }
+
+TEST_CASE("one affiliation matches two searches on an equal seeded graph",
+          "[cage]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  const double a = 6.35;
+  const int n = 4;
+  const double L = n * a;
+  const double b[8][3] = {{0, 0, 0},         {0, 0.5, 0.5},     {0.5, 0, 0.5},
+                          {0.5, 0.5, 0},     {0.25, 0.25, 0.25}, {0.25, 0.75, 0.75},
+                          {0.75, 0.25, 0.75}, {0.75, 0.75, 0.25}};
+  cloud.nop = n * n * n * 8;
+  cloud.currentFrame = 1;
+  cloud.box = {L, L, L};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.pts.resize(static_cast<std::size_t>(cloud.nop));
+  int t = 0;
+  for (int ix = 0; ix < n; ++ix) {
+    for (int iy = 0; iy < n; ++iy) {
+      for (int iz = 0; iz < n; ++iz) {
+        for (int k = 0; k < 8; ++k, ++t) {
+          auto &p = cloud.pts[static_cast<std::size_t>(t)];
+          p.type = 1;
+          p.atomID = t + 1;
+          p.molID = p.atomID;
+          p.x = (ix + b[k][0]) * a;
+          p.y = (iy + b[k][1]) * a;
+          p.z = (iz + b[k][2]) * a;
+          cloud.idIndexMap[p.atomID] = t;
+        }
+      }
+    }
+  }
+  const auto graphs = nneigh::kNearestNeighbourPair(cloud, 4, 5.0, 1);
+  REQUIRE(graphs.first == graphs.second);
+  const auto idx = nneigh::neighbourListByIndex(cloud, graphs.first);
+  const auto six =
+      ring::contractibleRings(sixMembered(primitive::ringNetwork(idx, 6)), cloud);
+  const auto once = ring::cageAffiliation(six, idx);
+  const auto one =
+      ring::seededCageAffiliation(six, once, six, once, idx, false);
+  const auto two = ring::seededCageAffiliation(six, idx, six, idx, false);
+  REQUIRE(one.hc == two.hc);
+  REQUIRE(one.ddc == two.ddc);
+  int cubic = 0;
+  for (int i = 0; i < cloud.nop; ++i) {
+    cubic += one.ddc[static_cast<std::size_t>(i)] ? 1 : 0;
+    REQUIRE(!one.hc[static_cast<std::size_t>(i)]);
+  }
+  REQUIRE(cubic == cloud.nop);
+}
