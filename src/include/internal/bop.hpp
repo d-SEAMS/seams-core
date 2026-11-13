@@ -253,6 +253,12 @@ int chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      const std::vector<int> &offsets, const std::vector<int> &cols,
                      bool keepBonds = true);
 
+//! Published CHILL labels from a cutoff CSR. Correlations are the four
+//! nearest neighbours in the list. Bond vectors are not stored. Returns
+//! the cubic count. Thresholds are chillRule().
+int chillFromCsr(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                 const std::vector<int> &offsets, const std::vector<int> &cols);
+
 //! Unnormalised real l = 3 bond-order vector of the atoms @a which selects.
 //! @a which null computes every atom. Ghost slots stay zero so a neighbour
 //! rank can write the vector it computed for that atom.

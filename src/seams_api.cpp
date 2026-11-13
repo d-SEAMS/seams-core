@@ -1416,9 +1416,14 @@ seams_status seams_chill(seams_system *sys, double cutoff, int type, int graph, 
   try {
     use_threads();
     int typ = 1;
-    Cloud work = unified_copy(sys->cloud, type, typ);
     if (rule == SEAMS_CHILL_PUBLISHED &&
         (graph == SEAMS_GRAPH_CUTOFF || graph == SEAMS_GRAPH_MUTUAL)) {
+      // Correlations stay in a flat table. The per-atom bond vectors are
+      // not built. iceType is written on the frame the caller already holds.
+      Cloud &work = sys->cloud;
+      if (type > 0) {
+        typ = type;
+      }
       std::vector<int> offsets;
       std::vector<int> cols;
       bool listed = false;
@@ -1448,12 +1453,12 @@ seams_status seams_chill(seams_system *sys, double cutoff, int type, int graph, 
         listed = static_cast<int>(offsets.size()) == work.nop + 1;
       }
       if (listed) {
-        chill::classifyBondsCsr(work, offsets, cols, chill::chillRule(), false);
-        chill::getIceTypeNoPrint(work, {}, false);
+        chill::chillFromCsr(work, offsets, cols);
         write_ice_labels(work, type, labels, counts9);
         return SEAMS_OK;
       }
     }
+    Cloud work = unified_copy(sys->cloud, type, typ);
     auto rows = bond_rows(work, cutoff, typ, graph);
     if (rule == SEAMS_CHILL_OVITO) {
       chill::BondClassifier classifier = chill::chillRule();

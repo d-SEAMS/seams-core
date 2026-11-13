@@ -226,3 +226,53 @@ TEST_CASE("one thread and eight threads agree on knn, q6 and CHILL", "[omp][c_ap
   seams_neighbours_destroy(wideNb);
   seams_system_destroy(sys);
 }
+
+TEST_CASE("CHILL labels match at one and eight threads on the three ice cells",
+          "[omp][c_api][chill]") {
+  const ThreadRestore restore;
+  for (const int ncell : {8, 16, 24}) {
+    const IceFrame ice = iceIh(ncell);
+    seams_system *sys = seams_system_create();
+    REQUIRE(sys != nullptr);
+    std::vector<int> types(static_cast<std::size_t>(ice.n), 1);
+    std::vector<int> ids(static_cast<std::size_t>(ice.n));
+    for (int i = 0; i < ice.n; ++i) {
+      ids[static_cast<std::size_t>(i)] = i + 1;
+    }
+    REQUIRE(seams_system_set_frame(sys, ice.xyz.data(), ice.n, ice.box, types.data(),
+                                   ids.data()) == SEAMS_OK);
+
+    std::vector<int> lab1(static_cast<std::size_t>(ice.n));
+    std::vector<int> lab8(static_cast<std::size_t>(ice.n));
+    int counts1[9] = {};
+    int counts8[9] = {};
+    REQUIRE(seams_set_num_threads(1) == SEAMS_OK);
+    REQUIRE(seams_chill(sys, 3.5, 1, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, lab1.data(),
+                        lab1.size(), counts1) == SEAMS_OK);
+    REQUIRE(seams_set_num_threads(8) == SEAMS_OK);
+    REQUIRE(seams_chill(sys, 3.5, 1, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, lab8.data(),
+                        lab8.size(), counts8) == SEAMS_OK);
+    REQUIRE(lab8 == lab1);
+    REQUIRE(counts1[SEAMS_LABEL_HEXAGONAL] == ice.n);
+    for (int label = 0; label < 9; ++label) {
+      REQUIRE(counts8[label] == counts1[label]);
+    }
+    for (int i = 0; i < ice.n; ++i) {
+      REQUIRE(lab1[static_cast<std::size_t>(i)] == SEAMS_LABEL_HEXAGONAL);
+    }
+
+    std::vector<int> plus1(static_cast<std::size_t>(ice.n));
+    std::vector<int> plus8(static_cast<std::size_t>(ice.n));
+    int plusCounts1[9] = {};
+    int plusCounts8[9] = {};
+    REQUIRE(seams_set_num_threads(1) == SEAMS_OK);
+    REQUIRE(seams_chill_plus(sys, 3.5, 1, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED,
+                             plus1.data(), plusCounts1) == SEAMS_OK);
+    REQUIRE(seams_set_num_threads(8) == SEAMS_OK);
+    REQUIRE(seams_chill_plus(sys, 3.5, 1, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED,
+                             plus8.data(), plusCounts8) == SEAMS_OK);
+    REQUIRE(plus8 == plus1);
+    REQUIRE(plusCounts1[SEAMS_LABEL_HEXAGONAL] == ice.n);
+    seams_system_destroy(sys);
+  }
+}
