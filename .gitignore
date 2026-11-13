@@ -74,6 +74,10 @@ si5-data/
 docs/orgmode/explanation/figures/*.png
 # Coexistence frames and restart files. Uploaded separately.
 data/brine-front/
+# Interface and nucleation frames kept out of git. Paths are listed in
+# paper/tex/figures/data/science/large-frames.csv.
+data/science-frames/
+paper/tex/figures/science-pdf/
 # Production-stride dumps, restarts and LAMMPS logs. Regenerated, not stored.
 data/hop/
 bin/
