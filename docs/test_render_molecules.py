@@ -73,7 +73,16 @@ def check(module):
 
 def main():
     check(load())
-    done = subprocess.run([sys.executable, str(SCRIPT), *sys.argv[1:]], check=False)
+    colour = subprocess.run(
+        [sys.executable, str(SCRIPT), "--check-colour", "--engine", "cycles"],
+        check=False,
+    )
+    if colour.returncode != 0:
+        return colour.returncode
+    args = list(sys.argv[1:])
+    if "--engine" not in args:
+        args = ["--engine", "cycles", *args]
+    done = subprocess.run([sys.executable, str(SCRIPT), *args], check=False)
     return done.returncode
 
 

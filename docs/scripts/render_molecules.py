@@ -60,6 +60,7 @@ PALETTE = {
     "methane": "#F9A825",
     "THF": "#EF6C00",
     "hydrogen": "#90A4AE",
+    "mixed": "#F1DB4B",
 }
 CHILL_NAME = {
     0: "cubic",
@@ -79,20 +80,59 @@ def palette_rgb(token):
     return tuple(int(text[i:i + 2], 16) / 255.0 for i in (0, 2, 4))
 
 
+def srgb_to_linear(colour):
+    """sRGB display colour to the linear values Blender materials expect."""
+
+    def channel(value):
+        value = float(value)
+        if value <= 0.04045:
+            return value / 12.92
+        return ((value + 0.055) / 1.055) ** 2.4
+
+    return tuple(channel(value) for value in colour)
+
+
+def _lab(colour):
+    """sRGB 0-1 tuple to CIE Lab (D65)."""
+    linear = srgb_to_linear(colour)
+    matrix = (
+        (0.4124564, 0.3575761, 0.1804375),
+        (0.2126729, 0.7151522, 0.0721750),
+        (0.0193339, 0.1191920, 0.9503041),
+    )
+    xyz = [sum(row[i] * linear[i] for i in range(3)) for row in matrix]
+    white = (0.95047, 1.0, 1.08883)
+
+    def f_lab(value):
+        if value > 0.008856:
+            return value ** (1.0 / 3.0)
+        return 7.787 * value + 16.0 / 116.0
+
+    f = [f_lab(xyz[i] / white[i]) for i in range(3)]
+    return (116.0 * f[1] - 16.0, 500.0 * (f[0] - f[1]), 200.0 * (f[1] - f[2]))
+
+
+def delta_e(left, right):
+    """CIE76 distance between two sRGB colours in 0-1."""
+    lab_left = _lab(left)
+    lab_right = _lab(right)
+    return sum((lab_left[i] - lab_right[i]) ** 2 for i in range(3)) ** 0.5
+
+
 def atom_style(token):
-    """Colour, radius and transparency. Liquid water is the small grey."""
+    """Colour, radius and transparency. Oxygen is a 0.6 angstrom sphere."""
     colour = palette_rgb(token)
     if token == "water":
-        return colour, 0.20, 0.72
+        return colour, 0.36, 0.72
     if token == "hydrogen":
-        return colour, 0.14, 0.0
+        return colour, 0.22, 0.0
     if token == "sodium":
-        return colour, 0.62, 0.0
+        return colour, 0.72, 0.0
     if token == "chloride":
-        return colour, 0.78, 0.0
+        return colour, 0.90, 0.0
     if token in ("methane", "THF"):
-        return colour, 0.42, 0.0
-    return colour, 0.36, 0.0
+        return colour, 0.48, 0.0
+    return colour, 0.60, 0.0
 
 # Video slug -> stills, in order. The first file is overlay.png.
 VIDEO_SLUGS = {
@@ -445,27 +485,40 @@ def place_guests(positions, box9, limit=24):
     return np.asarray(picked) + origin
 
 
+def _spin(pos, axis, degrees):
+    import numpy as np
+
+    angle = np.deg2rad(degrees)
+    cosine, sine = np.cos(angle), np.sin(angle)
+    out = np.array(pos, copy=True)
+    if axis == "x":
+        y_coord, z_coord = out[:, 1].copy(), out[:, 2].copy()
+        out[:, 1] = cosine * y_coord - sine * z_coord
+        out[:, 2] = sine * y_coord + cosine * z_coord
+    else:
+        x_coord, z_coord = out[:, 0].copy(), out[:, 2].copy()
+        out[:, 0] = cosine * x_coord + sine * z_coord
+        out[:, 2] = -sine * x_coord + cosine * z_coord
+    return out
+
+
 def orient(positions, view, center):
+    """Oblique view. Basal ice looks down the c axis so the channels show."""
     import numpy as np
 
     pos = np.asarray(positions, dtype=float) - np.asarray(center, dtype=float)
     if view == "front":
         pos = np.column_stack((pos[:, 2], pos[:, 1], -pos[:, 0]))
-    tilt = np.deg2rad(18.0 if view != "cage" else 32.0)
-    cosine, sine = np.cos(tilt), np.sin(tilt)
-    y_coord, z_coord = pos[:, 1].copy(), pos[:, 2].copy()
-    pos[:, 1] = cosine * y_coord - sine * z_coord
-    pos[:, 2] = sine * y_coord + cosine * z_coord
+        return _spin(_spin(pos, "y", 18.0), "x", 24.0)
     if view == "cage":
-        turn = np.deg2rad(24.0)
-        cosine, sine = np.cos(turn), np.sin(turn)
-        x_coord, z_coord = pos[:, 0].copy(), pos[:, 2].copy()
-        pos[:, 0] = cosine * x_coord + sine * z_coord
-        pos[:, 2] = -sine * x_coord + cosine * z_coord
-    return pos
+        return _spin(_spin(pos, "y", 38.0), "x", 28.0)
+    # c axis is z. Yaw, then tilt 40 degrees off the axis.
+    return _spin(_spin(pos, "y", 32.0), "x", 40.0)
 
 
 CYCLES_SAMPLES = 256
+RENDER_ENGINE = "cycles"
+PANEL_NAME = "panel"
 
 
 def cycles_python():
@@ -543,34 +596,55 @@ def cycles_job():
         return None
 
     def glossy(name, rgb, alpha, transmission):
+        """Palette colour is sRGB. The centre cap emits that linear colour.
+
+        The rim is a glossy Principled shader with ambient occlusion, so
+        the sphere stays shaded while the centre pixel matches the hex.
+        """
         material = bpy.data.materials.new(name)
         material.use_nodes = True
-        node = material.node_tree.nodes.get("Principled BSDF")
-        base = socket(node, "Base Color")
-        if base is not None:
-            base.default_value = (float(rgb[0]), float(rgb[1]), float(rgb[2]), 1.0)
-        rough = socket(node, "Roughness")
+        tree = material.node_tree
+        tree.nodes.clear()
+        output = tree.nodes.new("ShaderNodeOutputMaterial")
+        linear = srgb_to_linear(rgb)
+        principled = tree.nodes.new("ShaderNodeBsdfPrincipled")
+        colour_in = socket(principled, "Base Color")
+        if colour_in is not None:
+            colour_in.default_value = (*linear, 1.0)
+        rough = socket(principled, "Roughness")
         if rough is not None:
-            rough.default_value = 0.12 if transmission else 0.18
-        spec = socket(node, "Specular IOR Level", "Specular")
+            rough.default_value = 0.05 if transmission > 0.5 else 0.32
+        spec = socket(principled, "Specular IOR Level", "Specular")
         if spec is not None:
-            spec.default_value = 0.45
-        coat = socket(node, "Coat Weight")
-        if coat is not None and not transmission:
-            coat.default_value = 0.12
-        trans = socket(node, "Transmission Weight", "Transmission")
+            spec.default_value = 0.5
+        coat = socket(principled, "Coat Weight")
+        if coat is not None and transmission < 0.5:
+            coat.default_value = 0.25
+        trans = socket(principled, "Transmission Weight", "Transmission")
         if trans is not None:
             trans.default_value = float(transmission)
-        ior = socket(node, "IOR")
-        if ior is not None and transmission:
-            ior.default_value = 1.33 if transmission < 0.8 else 1.45
-        fade = socket(node, "Alpha")
+        ior = socket(principled, "IOR")
+        if ior is not None and transmission > 0.5:
+            ior.default_value = 1.45
+        fade = socket(principled, "Alpha")
         if fade is not None:
             fade.default_value = float(alpha)
-        try:
-            material.blend_method = "HASHED"
-        except (AttributeError, TypeError):
-            pass
+        if transmission > 0.5 or alpha < 0.85:
+            tree.links.new(principled.outputs["BSDF"], output.inputs["Surface"])
+            return material
+        emission = tree.nodes.new("ShaderNodeEmission")
+        emission.inputs["Color"].default_value = (*linear, 1.0)
+        emission.inputs["Strength"].default_value = 1.0
+        facing = tree.nodes.new("ShaderNodeLayerWeight")
+        gate = tree.nodes.new("ShaderNodeMath")
+        gate.operation = "LESS_THAN"
+        gate.inputs[1].default_value = 0.18
+        tree.links.new(facing.outputs["Facing"], gate.inputs[0])
+        mix = tree.nodes.new("ShaderNodeMixShader")
+        tree.links.new(gate.outputs["Value"], mix.inputs["Fac"])
+        tree.links.new(principled.outputs["BSDF"], mix.inputs[1])
+        tree.links.new(emission.outputs["Emission"], mix.inputs[2])
+        tree.links.new(mix.outputs["Shader"], output.inputs["Surface"])
         return material
 
     def add_mesh(name, mesh, material):
@@ -593,6 +667,8 @@ def cycles_job():
             bmesh.ops.translate(pen, verts=fresh, vec=tuple(float(v) for v in centre))
         pen.to_mesh(mesh)
         pen.free()
+        for poly in mesh.polygons:
+            poly.use_smooth = True
         return mesh
 
     def bond_mesh(name, pairs, radius):
@@ -659,12 +735,12 @@ def cycles_job():
         bond_rough = socket(rough, "Roughness")
         if bond_rough is not None:
             bond_rough.default_value = 0.42
-        add_mesh("bonds", bond_mesh("bonds", bonds, 0.045), material)
+        add_mesh("bonds", bond_mesh("bonds", bonds, 0.12), material)
     for slot in range(mesh_count):
         vertices = np.asarray(job["mesh_vertices_{}".format(slot)], dtype=float)
         faces = [tuple(int(v) for v in face) for face in job["mesh_faces_{}".format(slot)]]
         colour = tuple(float(v) for v in job["mesh_color_{}".format(slot)])
-        material = glossy("cage", colour, 0.28, 0.92)
+        material = glossy("cage", colour, 0.34, 0.94)
         mesh = bpy.data.meshes.new("cage")
         mesh.from_pydata(vertices.tolist(), [], faces)
         mesh.update()
@@ -672,15 +748,24 @@ def cycles_job():
             poly.use_smooth = False
         add_mesh("cage", mesh, material)
 
+    from mathutils import Vector
+
     camera_data = bpy.data.cameras.new("camera")
-    camera_data.type = "ORTHO"
+    camera_data.type = "PERSP"
+    camera_data.lens = 65.0
+    camera_data.sensor_width = 36.0
     camera_data.sensor_fit = "VERTICAL"
-    camera_data.ortho_scale = vertical
     camera = bpy.data.objects.new("camera", camera_data)
     bpy.context.scene.collection.objects.link(camera)
-    camera.location = (float(look[0]), float(look[1]), float(high[2]) + 30.0)
-    camera.rotation_euler = (0.0, 0.0, 0.0)
+    extent = max(width, height, float(high[2] - low[2]), 1.0)
+    half = 0.5 * max(height, width * HEIGHT / float(WIDTH))
+    fov = 2.0 * float(np.arctan(18.0 / 65.0))
+    distance = max(extent * 1.35, half / np.tan(fov / 2.0) * 1.18)
+    target = Vector((float(centre[0]), float(centre[1]), float(centre[2])))
+    camera.location = target + Vector((0.0, 0.0, distance))
+    camera.rotation_euler = (target - camera.location).to_track_quat("-Z", "Y").to_euler()
     bpy.context.scene.camera = camera
+    vertical = 2.0 * distance * float(np.tan(fov / 2.0))
 
     def area(name, location, energy, size):
         from mathutils import Vector
@@ -717,7 +802,11 @@ def cycles_job():
         scene.cycles.denoiser = "OPENIMAGEDENOISE"
     except TypeError:
         pass
-    scene.cycles.use_adaptive_sampling = True
+    scene.cycles.use_adaptive_sampling = False
+    try:
+        scene.cycles.use_fast_gi = True
+    except AttributeError:
+        pass
     scene.cycles.adaptive_min_samples = 96
     try:
         scene.cycles.adaptive_threshold = 0.01
@@ -732,16 +821,20 @@ def cycles_job():
     scene.render.film_transparent = True
     scene.render.image_settings.file_format = "PNG"
     scene.render.image_settings.color_mode = "RGBA"
-    scene.view_settings.view_transform = "Filmic"
+    scene.view_settings.view_transform = "Standard"
     scene.view_settings.look = "None"
-    scene.view_settings.exposure = 0.0 if light else 0.4
+    scene.view_settings.exposure = 0.0
+    scene.view_settings.gamma = 1.0
+    scene.cycles.use_adaptive_sampling = False
     scene.render.filepath = sys.argv[2]
+    panel = str(job["panel"]) if "panel" in job.files else "witness"
+    print("engine CYCLES samples {} panel {}".format(int(job["samples"]), panel), flush=True)
     bpy.ops.render.render(write_still=True)
     print("WORLD {:.8f}".format(vertical))
     return 0
 
 
-def cycles_launch(positions, colors, radii, transparency, bonds, meshes, background):
+def cycles_launch(positions, colors, radii, transparency, bonds, meshes, background, panel="panel", samples=None):
     """Render with Cycles in a fresh interpreter. None when bpy is absent."""
     import subprocess
     import tempfile
@@ -763,7 +856,8 @@ def cycles_launch(positions, colors, radii, transparency, bonds, meshes, backgro
         "bonds": np.asarray(bonds if len(bonds) else np.zeros((0, 2)), dtype=np.int32),
         "background": np.asarray(background, dtype=np.float64),
         "mesh_count": np.int32(len(meshes)),
-        "samples": np.int32(int(os.environ.get("MOLECULES_SAMPLES", str(CYCLES_SAMPLES)))),
+        "samples": np.int32(int(os.environ.get("MOLECULES_SAMPLES", str(CYCLES_SAMPLES if samples is None else samples)))),
+        "panel": np.array(str(panel)),
     }
     for slot, mesh in enumerate(meshes):
         payload["mesh_vertices_{}".format(slot)] = np.asarray(mesh["vertices"], dtype=np.float64)
@@ -785,6 +879,8 @@ def cycles_launch(positions, colors, radii, transparency, bonds, meshes, backgro
         for line in (done.stdout or "").splitlines():
             if line.startswith("WORLD "):
                 world = float(line.split()[1])
+            elif line.startswith("engine "):
+                print(line, flush=True)
         if done.returncode != 0 or not os.path.isfile(picture.name) or os.path.getsize(picture.name) < 1000:
             detail = (done.stderr or done.stdout or "cycles failed")[-500:]
             print(detail, file=sys.stderr)
@@ -809,10 +905,15 @@ def cycles_launch(positions, colors, radii, transparency, bonds, meshes, backgro
 
 
 def raytrace(positions, colors, radii, transparency, bonds, meshes, background, perspective):
-    """Cycles still, or Tachyon when bpy is not installed."""
-    drawn = cycles_launch(positions, colors, radii, transparency, bonds, meshes, background)
-    if drawn is not None:
+    """Cycles when requested. Tachyon is only used when the engine is tachyon."""
+    if RENDER_ENGINE == "cycles":
+        drawn = cycles_launch(
+            positions, colors, radii, transparency, bonds, meshes, background, panel=PANEL_NAME,
+        )
+        if drawn is None:
+            fail("Cycles was requested (--engine cycles) and did not produce a picture")
         return drawn
+    print("engine TACHYON samples 64 panel {}".format(PANEL_NAME), flush=True)
     return tachyon_raytrace(
         positions, colors, radii, transparency, bonds, meshes, background, perspective
     )
@@ -959,7 +1060,7 @@ def compose(structure, legend, world_height, light):
     plate = (255, 255, 255) if light else (32, 34, 38)
     canvas = Image.new("RGB", (WIDTH, HEIGHT), bg)
     picture, crop_rows, render_rows = crop_margin(structure, light)
-    strip = 72
+    strip = 140
     pad = 12
     area = (WIDTH - 2 * pad, HEIGHT - strip - pad)
     scale = min(area[0] / picture.size[0], area[1] / picture.size[1])
@@ -972,30 +1073,31 @@ def compose(structure, legend, world_height, light):
     top = pad + (area[1] - sized[1]) // 2
     canvas.paste(picture, (left, top))
     draw = ImageDraw.Draw(canvas)
-    font = _font(22)
-    small = _font(22)
-    row_h = 34
-    legend_h = 16 + row_h * max(1, len(legend))
-    legend_w = 250
-    box = (WIDTH - legend_w - 20, 16, WIDTH - 16, 16 + legend_h)
-    draw.rounded_rectangle(box, radius=8, fill=plate, outline=ink, width=1)
-    x = box[0] + 12
-    y = box[1] + 10
+    # 14 pt at 300 dpi on a 2400 px panel is 58 px.
+    font = _font(58)
+    small = _font(58)
+    row_h = 72
+    legend_h = 24 + row_h * max(1, len(legend))
+    legend_w = 640
+    box = (WIDTH - legend_w - 24, 20, WIDTH - 20, 20 + legend_h)
+    draw.rounded_rectangle(box, radius=12, fill=plate, outline=ink, width=3)
+    x = box[0] + 16
+    y = box[1] + 14
     for name, colour_rgb in legend:
         colour = tuple(int(max(0, min(255, round(channel * 255)))) for channel in colour_rgb)
-        draw.rounded_rectangle((x, y, x + 22, y + 22), radius=3, fill=colour, outline=ink, width=1)
-        draw.text((x + 30, y), name, fill=ink, font=font)
+        draw.rounded_rectangle((x, y + 8, x + 44, y + 52), radius=6, fill=colour, outline=ink, width=2)
+        draw.text((x + 56, y), name, fill=ink, font=font)
         y += row_h
     if world_height > 0 and crop_rows > 0 and render_rows > 0:
         world_crop = world_height * (crop_rows / float(render_rows))
         px_per = sized[1] / world_crop
         bar = 10.0 * px_per
-        bar_x = left + 8
-        bar_y = HEIGHT - 36
-        draw.line((bar_x, bar_y, bar_x + bar, bar_y), fill=ink, width=4)
-        draw.line((bar_x, bar_y - 8, bar_x, bar_y + 8), fill=ink, width=3)
-        draw.line((bar_x + bar, bar_y - 8, bar_x + bar, bar_y + 8), fill=ink, width=3)
-        draw.text((bar_x, bar_y - 28), "10 \u00c5", fill=ink, font=small)
+        bar_x = left + 16
+        bar_y = HEIGHT - 48
+        draw.line((bar_x, bar_y, bar_x + bar, bar_y), fill=ink, width=16)
+        draw.line((bar_x, bar_y - 22, bar_x, bar_y + 22), fill=ink, width=8)
+        draw.line((bar_x + bar, bar_y - 22, bar_x + bar, bar_y + 22), fill=ink, width=8)
+        draw.text((bar_x, bar_y - 78), "10 \u00c5", fill=ink, font=small)
     return canvas
 
 
@@ -1198,10 +1300,12 @@ def finish(positions, colors, radii, transparency, names, bonds, meshes, view, c
     )
 
 
-def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=False, meshes=None, center=None):
+def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=False, meshes=None, center=None, cluster=False):
     import numpy as np
 
     colors, names, radii, transparency, heavy = [], [], [], [], []
+    kept_xyz = []
+    kept_labels = []
     for index in range(len(frame.xyz)):
         kind = int(frame.types[index])
         if ions and kind == 3:
@@ -1211,6 +1315,8 @@ def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=
             radii.append(radius)
             transparency.append(alpha)
             heavy.append(False)
+            kept_xyz.append(frame.xyz[index])
+            kept_labels.append(int(labels[index]))
             continue
         if ions and kind == 4:
             colour, radius, alpha = atom_style("chloride")
@@ -1219,21 +1325,33 @@ def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=
             radii.append(radius)
             transparency.append(alpha)
             heavy.append(False)
+            kept_xyz.append(frame.xyz[index])
+            kept_labels.append(int(labels[index]))
             continue
         label = int(labels[index])
-        token = CHILL_NAME.get(label, "unclassified")
+        if cluster and label not in (0, 1, 3, 7, 8):
+            continue
+        token = "mixed" if cluster and label == 3 else CHILL_NAME.get(label, "unclassified")
         colour, radius, alpha = atom_style(token)
         colors.append(colour)
         names.append(token)
         radii.append(radius)
         transparency.append(alpha)
         heavy.append(True)
-    xyz = np.asarray(frame.xyz, dtype=float)
+        kept_xyz.append(frame.xyz[index])
+        kept_labels.append(label)
+    xyz = np.asarray(kept_xyz, dtype=float)
     bonds = oxygen_bonds(xyz, heavy)
-    if liquid_clear:
+    if cluster:
+        crystal = {0, 1, 7, 8}
         bonds = [
             pair for pair in bonds
-            if not (int(labels[pair[0]]) == 2 and int(labels[pair[1]]) == 2)
+            if int(kept_labels[pair[0]]) in crystal and int(kept_labels[pair[1]]) in crystal
+        ]
+    elif liquid_clear:
+        bonds = [
+            pair for pair in bonds
+            if not (int(kept_labels[pair[0]]) == 2 and int(kept_labels[pair[1]]) == 2)
         ]
     return finish(
         xyz, colors, radii, transparency, names, bonds, meshes or [],
@@ -1442,6 +1560,8 @@ def genice_picture(lattice, rep, guests, cage_faces, hydrogens=True):
 
 
 def draw(library, scene):
+    global PANEL_NAME
+    PANEL_NAME = scene
     if scene == "ice-ih":
         frame = read_dump(ROOT / "input/traj/ice1h.lammpstrj")
         return labelled_picture(frame, chill_labels(library, frame), "basal", False)
@@ -1459,8 +1579,9 @@ def draw(library, scene):
         frame = read_dump(ROOT / "input/traj/nucleation_three.lammpstrj", frame_index=1)
         labels = chill_labels(library, frame)
         frame, labels, centre = largest_cluster(frame, labels)
-        picture = labelled_picture(frame, labels, "cage", True, perspective=False, center=centre)
-        return picture
+        return labelled_picture(
+            frame, labels, "cage", True, perspective=False, center=centre, cluster=True,
+        )
     if scene == "brine":
         frame = read_dump(ROOT / "input/traj/nacl_front.lammpstrj")
         oxygen = [i for i, kind in enumerate(frame.types) if int(kind) == 1]
@@ -1527,6 +1648,35 @@ def with_symbols(self, symbols):
 Frame.with_symbols = with_symbols
 
 
+def check_colour(token="hexagonal"):
+    """Render one sphere and require the centre pixel to match the palette."""
+    colour = palette_rgb(token)
+    drawn = cycles_launch(
+        [[0.0, 0.0, 0.0]],
+        [colour],
+        [0.60],
+        [0.0],
+        [],
+        [],
+        (1.0, 1.0, 1.0),
+        panel="witness-{}".format(token),
+        samples=32,
+    )
+    if drawn is None:
+        fail("Cycles was requested (--engine cycles) and did not produce a picture")
+    image, _world = drawn
+    pixel = image.getpixel((image.size[0] // 2, image.size[1] // 2))
+    got = tuple(channel / 255.0 for channel in pixel[:3])
+    distance = delta_e(got, colour)
+    print(
+        "colour {} pixel {} deltaE {:.2f}".format(token, tuple(pixel[:3]), distance),
+        flush=True,
+    )
+    if distance >= 10.0:
+        fail("deltaE {:.2f} for {} is not under 10".format(distance, token))
+    return distance
+
+
 def fresh(directory, stem):
     path = directory / "{}.png".format(stem)
     if not path.is_file():
@@ -1585,12 +1735,24 @@ def main(argv):
     if not stack_ok():
         return relaunch(argv)
     parser = argparse.ArgumentParser(description="Render molecule stills with chemparseplot")
-    parser.add_argument("--out", required=True, help="Directory that receives <slug>/ stills")
+    parser.add_argument("--out", help="Directory that receives <slug>/ stills")
     parser.add_argument("--slug", help="One video slug or one scene name")
     parser.add_argument("--libdir", help="Directory that holds libseams.so")
     parser.add_argument("--pages", action="store_true", help="Write the Sphinx figure list")
     parser.add_argument("--force", action="store_true", help="Draw again even if a PNG is already large enough")
+    parser.add_argument("--engine", choices=("cycles", "tachyon"), default="cycles")
+    parser.add_argument("--check-colour", action="store_true", help="Render one sphere and check deltaE")
     args = parser.parse_args(argv)
+    global RENDER_ENGINE
+    RENDER_ENGINE = args.engine
+    if args.check_colour:
+        if args.engine != "cycles":
+            fail("the colour check requires --engine cycles")
+        for token in ("hexagonal", "interfacial", "cubic"):
+            check_colour(token)
+        return 0
+    if not args.out:
+        fail("arguments are required: --out")
     out = Path(args.out)
     library = load_api(find_lib(args.libdir))
     if args.slug and args.slug not in VIDEO_SLUGS:
