@@ -177,9 +177,21 @@ def run_samples(call, rival: bool, threads: int):
     return samples, last, note
 
 
-def time_dseams(lib, core, xyz, box, version: str) -> None:
+def save_agree(threads: int, code: str, operation: str, values) -> None:
+    root = os.environ.get("SIT_AGREE")
+    if not root:
+        return
+    import numpy as np
+    path = Path(root) / f"t{threads}-{code}-{operation}.npy"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    np.save(path, np.asarray(values))
+
+
+def time_dseams(lib, core, xyz, box, version: str, threads: int) -> None:
     import ctypes
     import numpy as np
+    lib.seams_frame_neighbour_pairs.restype = ctypes.c_int
+    lib.seams_frame_neighbour_pairs.argtypes = [ctypes.c_void_p]
     handle, n = sit.frame_from(lib, xyz, box)
     try:
         counts = (ctypes.c_int * 7)()
@@ -211,6 +223,8 @@ def time_dseams(lib, core, xyz, box, version: str) -> None:
                 continue
             emit({"event": "begin", "operation": name})
             samples, _probe, note = run_samples(local(order, dest), False, 0)
+            if name == "q6":
+                save_agree(threads, "d-SEAMS", "q6", np.ctypeslib.as_array(dest))
             _done(name, "d-SEAMS", version, n, samples,
                   "seams_frame_steinhardt; local q only", note)
 
@@ -228,13 +242,14 @@ def time_dseams(lib, core, xyz, box, version: str) -> None:
         def neighbours():
             sit.fail_lang(lib, lib.seams_frame_neighbours(
                 handle, CUTOFF, 1, b"cutoff"), "neighbours")
-            return 0
+            return int(lib.seams_frame_neighbour_pairs(handle))
 
         if not skip("neighbours"):
             emit({"event": "begin", "operation": "neighbours"})
-            samples, _probe, note = run_samples(neighbours, False, 0)
+            samples, pairs, note = run_samples(neighbours, False, 0)
+            save_agree(threads, "d-SEAMS", "neighbours", [pairs])
             _done("neighbours", "d-SEAMS", version, n, samples,
-                  "seams_frame_neighbours cutoff", note)
+                  f"seams_frame_neighbours cutoff pairs={pairs}", note)
 
         labels = (ctypes.c_int * n)()
         counts9 = (ctypes.c_int * 9)()
@@ -249,6 +264,7 @@ def time_dseams(lib, core, xyz, box, version: str) -> None:
             samples, cubic, note = run_samples(chill, False, 0)
             if cubic != n:
                 raise RuntimeError(f"CHILL+ cubic {cubic} != {n}")
+            save_agree(threads, "d-SEAMS", "chill+", np.ctypeslib.as_array(labels))
             _done("chill+", "d-SEAMS", version, n, samples, f"cubic={cubic}", note)
 
         core.seams_symmetry_classify.restype = ctypes.c_int
@@ -268,12 +284,14 @@ def time_dseams(lib, core, xyz, box, version: str) -> None:
                 raise RuntimeError(f"seams_symmetry_classify returned {code}")
             return int(np.count_nonzero(sym == 1))
 
-        if not skip("symmetry"):
-            emit({"event": "begin", "operation": "symmetry"})
+        if not skip("classifier"):
+            emit({"event": "begin", "operation": "classifier"})
             samples, ic, note = run_samples(symmetry, False, 0)
             if ic != n:
-                raise RuntimeError(f"symmetry ice Ic {ic} != {n}")
-            _done("symmetry", "d-SEAMS", version, n, samples, f"ice-Ic={ic}", note)
+                raise RuntimeError(f"classifier ice Ic {ic} != {n}")
+            save_agree(threads, "d-SEAMS", "classifier", sym)
+            _done("classifier", "d-SEAMS", version, n, samples,
+                  f"ice-Ic={ic} seams_symmetry_classify", note)
     finally:
         lib.seams_frame_free(handle)
 
@@ -381,6 +399,7 @@ def arm_mdapy(threads: int) -> str:
 
 def time_mdapy(xyz, side: float, threads: int) -> None:
     os.environ["MDAPY_NUM_THREADS"] = str(threads)
+    import numpy as np
     import mdapy
     from mdapy import System, get_num_threads, set_num_threads
     from mdapy.analysis import RingStatistics, SteinhardtParameters
@@ -403,10 +422,12 @@ def time_mdapy(xyz, side: float, threads: int) -> None:
     for order, name in ((4, "q4"), (6, "q6")):
         tool = SteinhardtParameters(degrees=(order,), cutoff=CUTOFF)
 
-        def run(tool=tool):
+        def run(tool=tool, order=order):
             hold_affinity(threads)
             set_num_threads(threads)
             result = tool.compute(system)
+            if order == 6:
+                save_agree(threads, "mdapy", "q6", np.asarray(result.q).reshape(-1))
             return int(result.q.shape[0])
 
         jobs.append((name, run, "rows"))
@@ -443,7 +464,9 @@ def time_vesin(xyz, side: float, threads: int) -> None:
         hold_affinity(threads)
         left, _right = finder.compute(
             points=xyz, box=box, periodic=True, quantities="ij", copy=True)
-        return int(np.asarray(left).shape[0])
+        pairs = int(np.asarray(left).shape[0])
+        save_agree(threads, "vesin", "neighbours", [pairs])
+        return pairs
 
     _rival_jobs(
         "vesin", version, [("neighbours", run, "pairs")], threads,
@@ -464,7 +487,9 @@ def time_freud(xyz, side: float, threads: int) -> None:
         freud.parallel.set_num_threads(threads)
         query = freud.locality.AABBQuery(box, pts)
         found = query.query(pts, {"r_max": CUTOFF, "exclude_ii": True}).toNeighborList()
-        return int(len(found))
+        pairs = int(len(found))
+        save_agree(threads, "freud", "neighbours", [pairs])
+        return pairs
 
     jobs = [("neighbours", neighbours, "pairs")]
     for order, name in ((4, "q4"), (6, "q6")):
@@ -473,7 +498,10 @@ def time_freud(xyz, side: float, threads: int) -> None:
             freud.parallel.set_num_threads(threads)
             op = freud.order.Steinhardt(l=order, average=False)
             op.compute((box, pts), neighbors={"r_max": CUTOFF, "exclude_ii": True})
-            return int(np.asarray(op.ql).shape[0])
+            values = np.asarray(op.ql).reshape(-1)
+            if order == 6:
+                save_agree(threads, "freud", "q6", values)
+            return int(values.shape[0])
 
         jobs.append((name, run, "rows"))
     _rival_jobs(
@@ -503,6 +531,7 @@ def time_ovito(xyz, side: float, threads: int) -> None:
         pipe = Pipeline(source=StaticSource(data=data))
         pipe.modifiers.append(ChillPlusModifier(cutoff=CUTOFF))
         result = pipe.compute()
+        save_agree(threads, "OVITO", "chill+", np.asarray(result.particles["Structure Type"]))
         return int(result.particles.count)
 
     jobs = [("chill+", chill, "rows")]
@@ -529,7 +558,10 @@ def time_ovito(xyz, side: float, threads: int) -> None:
                     structure.enabled = structure.id in (6, 7)
             pipe.modifiers.append(mod)
             result = pipe.compute()
-            return int(np.asarray(result.particles["Structure Type"]).shape[0])
+            values = np.asarray(result.particles["Structure Type"])
+            if kind == "ice":
+                save_agree(threads, "OVITO", "ptm-ice", values)
+            return int(values.shape[0])
         return run
 
     jobs.append(("ptm-default", ptm("default"), "rows"))
@@ -583,7 +615,7 @@ def worker(args) -> int:
         import ctypes
         lib = sit.open_lang(args.lib)
         core = ctypes.CDLL(args.core)
-        time_dseams(lib, core, xyz, box, args.version)
+        time_dseams(lib, core, xyz, box, args.version, args.threads)
         return 0
     if key == "rsm":
         time_rsm(xyz, side, args.threads)
@@ -722,7 +754,7 @@ def _name(code_key: str) -> str:
 
 
 OPS = {
-    "dseams": ["rings", "q4", "q6", "q4+q6", "neighbours", "chill+", "symmetry"],
+    "dseams": ["rings", "q4", "q6", "q4+q6", "neighbours", "chill+", "classifier"],
     "rsm": ["rings"],
     "mdapy": ["neighbours", "q4", "q6", "rings", "chill+"],
     "vesin": ["neighbours"],
@@ -861,6 +893,7 @@ def main() -> int:
             env["LD_LIBRARY_PATH"] = os.pathsep.join(parts)
             env["QT_QPA_PLATFORM"] = "offscreen"
             env["PYTHONUNBUFFERED"] = "1"
+            env["SIT_AGREE"] = str(args.out / ".sitting-agree")
             messages = drive(key, threads, rival, args, env)
             for msg in messages:
                 if not msg.get("code"):
@@ -873,9 +906,97 @@ def main() -> int:
             write_outputs(args.out, collected, info)
     if not collected:
         raise SystemExit("the sitting produced no rows")
+    problems = record_agreement(collected, args.out / ".sitting-agree")
     write_outputs(args.out, collected, info)
     require_rival_scaling(collected)
+    if problems:
+        raise SystemExit("results do not match the rivals\n" + "\n".join(problems))
     return 0
+
+
+def _note(row: dict, text: str) -> None:
+    detail = row.get("detail", "")
+    row["detail"] = f"{detail} {text}".strip()
+
+
+def record_agreement(rows: list[dict], root: Path) -> None:
+    """Stamp each paired row with how it compares to the other codes.
+
+    q6 values, neighbour-pair counts, CHILL+ cubic labels and the
+    classifier versus ice-only PTM are compared on the same frame.
+    """
+    import numpy as np
+    by = {(str(r["threads"]), r["code"], r["operation"]): r for r in rows}
+    problems = []
+
+    def load(threads: str, code: str, operation: str):
+        path = root / f"t{threads}-{code}-{operation}.npy"
+        if not path.is_file():
+            return None
+        return np.load(path)
+
+    for threads in ("1", "2", "4", "8"):
+        ours = load(threads, "d-SEAMS", "q6")
+        freud = load(threads, "freud", "q6")
+        mdapy = load(threads, "mdapy", "q6")
+        if ours is not None and freud is not None and mdapy is not None:
+            gap_freud = float(np.max(np.abs(ours - freud)))
+            gap_mdapy = float(np.max(np.abs(ours - mdapy)))
+            text = (
+                f"agree_freud_max_abs={gap_freud:.3e} "
+                f"agree_mdapy_max_abs={gap_mdapy:.3e}"
+            )
+            for code in ("d-SEAMS", "freud", "mdapy"):
+                row = by.get((threads, code, "q6"))
+                if row:
+                    _note(row, text)
+            if gap_freud > 1e-4 or gap_mdapy > 1e-4:
+                problems.append(
+                    f"q6 threads {threads} freud {gap_freud:.3e} mdapy {gap_mdapy:.3e}"
+                )
+        counts = []
+        names = ("d-SEAMS", "vesin", "freud")
+        for code in names:
+            values = load(threads, code, "neighbours")
+            counts.append(None if values is None else int(np.asarray(values).reshape(-1)[0]))
+        if all(count is not None for count in counts):
+            text = "pairs=" + "/".join(str(count) for count in counts) + " agree=d-SEAMS/vesin/freud"
+            matched = len(set(counts)) == 1
+            if not matched:
+                text = text.replace("agree=", "disagree=")
+                problems.append(f"neighbours threads {threads} {counts}")
+            for code in names:
+                row = by.get((threads, code, "neighbours"))
+                if row:
+                    _note(row, text)
+        dchill = load(threads, "d-SEAMS", "chill+")
+        ochill = load(threads, "OVITO", "chill+")
+        if dchill is not None and ochill is not None:
+            d_cubic = int(np.count_nonzero(dchill == 0))
+            o_cubic = int(np.count_nonzero(ochill == 2))
+            text = f"cubic_dseams={d_cubic} cubic_ovito={o_cubic}"
+            for code in ("d-SEAMS", "OVITO"):
+                row = by.get((threads, code, "chill+"))
+                if row:
+                    _note(row, text)
+            if d_cubic != len(dchill) or o_cubic != len(ochill):
+                problems.append(f"chill+ threads {threads} d-SEAMS {d_cubic} OVITO {o_cubic}")
+        labels = load(threads, "d-SEAMS", "classifier")
+        ptm = load(threads, "OVITO", "ptm-ice")
+        if labels is not None and ptm is not None:
+            matched = int(np.count_nonzero((labels == 1) & (ptm == 6)))
+            text = f"agree_ice_ic_cubic_diamond={matched}/{len(labels)}"
+            for code, operation in (("d-SEAMS", "classifier"), ("OVITO", "ptm-ice")):
+                row = by.get((threads, code, operation))
+                if row:
+                    _note(row, text)
+            if matched != len(labels):
+                problems.append(f"classifier threads {threads} {matched}/{len(labels)}")
+        for code in ("d-SEAMS", "rings-statistics-matter"):
+            row = by.get((threads, code, "rings"))
+            if row and "six=1769472" in row.get("detail", ""):
+                _note(row, "agree_six=1769472")
+    return problems
 
 
 def require_rival_scaling(rows: list[dict]) -> None:
