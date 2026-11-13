@@ -42,6 +42,10 @@ ICE = {0, 1, 3, 4, 5}
 # One radius and one bond width for every panel. 85 mm is the CPC column.
 ATOM_RADIUS = 0.90
 BOND_WIDTH = 0.25
+# A floor bin is one basal repeat wide, so its tails sit between the layer
+# means. A molecule farther than this fraction of the repeat from its layer
+# mean belongs to no drawn layer.
+LAYER_BAND = 0.34
 HBOND_A = 3.2
 SLICE_A = 10.0
 COLUMN_MM = 85.0
@@ -1048,15 +1052,30 @@ def display_layer_ids(pos: np.ndarray, mask: np.ndarray, axis: np.ndarray) -> np
     return ids
 
 
-def draw_layer_guides(png: Path, pos: np.ndarray, layer_ids: np.ndarray, forward, up, half_v: float) -> None:
-    """Faint horizontal lines at each drawn layer, numbered as in panel (c)."""
+def layer_band(pos: np.ndarray, layer_ids: np.ndarray, axis: np.ndarray, period: float) -> tuple[np.ndarray, float]:
+    """Molecules that sit on a drawn layer, and the half-width of that band.
+
+    Membership is distance to the mean height of the layer's own bin. The
+    tails of the bin, and anything with no layer index, are left out.
+    """
+    half = LAYER_BAND * float(period)
+    projection = pos @ unit(axis)
+    keep = np.zeros(pos.shape[0], dtype=bool)
+    for layer in sorted({int(item) for item in layer_ids if item >= 0}):
+        members = np.flatnonzero(layer_ids == layer)
+        centre = float(projection[members].mean())
+        keep[members] = np.abs(projection[members] - centre) <= half
+    return keep, half
+
+
+def draw_layer_guides(png: Path, pos: np.ndarray, layer_ids: np.ndarray, kinds: list[int], forward, up, half_v: float, band_half: float) -> None:
+    """Tint each basal band in its panel (c) colour and rule it at the mean height."""
     from PIL import Image, ImageDraw, ImageFont
 
     image = Image.open(png).convert("RGBA")
     forward, _right, up = basis(forward, up)
     centre, _h, _v, forward, _right, up = project(pos, forward, up)
     height = image.height
-    draw = ImageDraw.Draw(image)
     # The nucleus image is already at print scale. 7 pt at 600 dpi is 58 px.
     font_px = max(28, int(round(7.0 * PRINT_DPI / 72.0)))
     try:
@@ -1067,17 +1086,50 @@ def draw_layer_guides(png: Path, pos: np.ndarray, layer_ids: np.ndarray, forward
     present = sorted({int(item) for item in layer_ids if item >= 0})
     vertical = (pos - centre) @ up
     span = 2.0 * half_v
+    # Cover the spheres, then stop at the gap before the neighbouring layer
+    # so the bands stay separate.
+    gap = 0.18
+    entries = []
     for layer in present:
         members = np.flatnonzero(layer_ids == layer)
         if members.size == 0:
             continue
-        height_world = float(np.median(vertical[members]))
+        height_world = float(np.mean(vertical[members]))
+        spread = float(np.max(np.abs(vertical[members] - height_world)))
+        entries.append((layer, height_world, max(spread, band_half)))
+    entries.sort(key=lambda item: -item[1])
+    overlay = Image.new("RGBA", image.size, (0, 0, 0, 0))
+    bands = ImageDraw.Draw(overlay)
+    placed = []
+    for index, (layer, height_world, spread) in enumerate(entries):
+        hi = height_world + spread + ATOM_RADIUS
+        lo = height_world - spread - ATOM_RADIUS
+        if index > 0:
+            mid = 0.5 * (entries[index - 1][1] + height_world)
+            hi = min(hi, mid - gap)
+        if index + 1 < len(entries):
+            mid = 0.5 * (height_world + entries[index + 1][1])
+            lo = max(lo, mid + gap)
         y = (half_v - height_world) / span * height
+        y_hi = (half_v - hi) / span * height
+        y_lo = (half_v - lo) / span * height
         if not 0 <= y < height:
             continue
-        draw.line([(font_px + 8, y), (image.width - 8, y)], fill=(168, 168, 168, 255), width=2)
-        draw.text((4, max(0, y - 0.55 * font_px)), str(layer), font=font, fill=(70, 70, 70, 255))
-    image.convert("RGB").save(png)
+        kind = kinds[layer] if 0 <= layer < len(kinds) else None
+        colour = CHILL.get(kind, ("", (0.75, 0.75, 0.75)))[1]
+        rgb = tuple(int(round(255.0 * channel)) for channel in colour)
+        bands.rectangle((0, y_hi, image.width, y_lo), fill=rgb + (46,))
+        placed.append((layer, y))
+    image = Image.alpha_composite(image, overlay)
+    # Tick labels sit in a white gutter, clear of the molecules.
+    pad = font_px + 18
+    framed = Image.new("RGBA", (image.width + pad, image.height), (255, 255, 255, 255))
+    framed.paste(image, (pad, 0))
+    draw = ImageDraw.Draw(framed)
+    for layer, y in placed:
+        draw.line([(pad + 4, y), (framed.width - 8, y)], fill=(168, 168, 168, 255), width=2)
+        draw.text((6, max(0, y - 0.55 * font_px)), str(layer), font=font, fill=(40, 40, 40, 255))
+    framed.convert("RGB").save(png)
 
 
 def _paint(pos, chill, bonds, forward, up, png, half_h, half_v, width_px, liquid_alpha, nucleus: bool, frame_pos=None):
@@ -1236,7 +1288,7 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
         scale = late_w / nuclei["late"]["w_mm"]
     bar_mm = 10.0 / angstrom_per_mm * (scale if narrow else 1.0)
     title_h = 4.6
-    pair_gap = 7.2
+    pair_gap = 9.6
     bar_row = 7.2
     stack_h = 11.5
     right_h = title_h + late_h + pair_gap + min_h + bar_row + stack_h
@@ -1319,8 +1371,11 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
         ha="center",
         va="bottom",
     )
-    scale_bar(right_x, late_y - 2.8, False, "10 Å")
-    scale_bar(right_x, min_y - 2.8, False, "10 Å")
+    # The bar sits at the right of the column. The minimum title is centred
+    # on the narrower sheet, so a bar on the left runs through that word.
+    bar_x = right_x + max(0.0, right_w - bar_mm - 9.0)
+    scale_bar(bar_x, late_y - 3.4, False, "10 Å")
+    scale_bar(bar_x, min_y - 3.4, False, "10 Å")
 
     bar_h = stack_h
     bar_bottom = min_y - bar_row - bar_h
@@ -1425,6 +1480,14 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
             shown_now += 1
         outlined = outlined_layers(npos, extended & np.isin(nchill, [0, 1]), axis, shown_now)
         sheet = sheet & outlined
+        lattice = extended & np.isin(nchill, [0, 1])
+        ids_full = display_layer_ids(npos, lattice, axis)
+        ids_full = np.where(sheet, ids_full, -1)
+        period = layer_period(npos[lattice] @ unit(axis)) if int(lattice.sum()) else 3.6
+        belong, band_half = layer_band(npos, ids_full, axis, period)
+        dropped = int(sheet.sum() - np.count_nonzero(sheet & belong))
+        sheet = sheet & belong
+        print(f"  {label} outside layers {dropped}", flush=True)
         bonds = ice_bonds(raw, raw_box, sheet, 3.5)
         if len(bonds):
             straight = np.linalg.norm(npos[bonds[:, 1]] - npos[bonds[:, 0]], axis=1)
@@ -1441,16 +1504,16 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
         drawn_chill = nchill[sheet]
         # Number the guides with the stacking-bar index, not a fresh count
         # of whichever layers survived the sheet cut.
-        layer_ids = display_layer_ids(npos, extended & np.isin(nchill, [0, 1]), axis)[sheet]
+        layer_ids = ids_full[sheet]
         remap = -np.ones(npos.shape[0], dtype=int)
         remap[np.flatnonzero(sheet)] = np.arange(int(sheet.sum()))
         if len(bonds):
             bonds = np.stack([remap[bonds[:, 0]], remap[bonds[:, 1]]], axis=1)
         print(f"  {label} drawn {int(sheet.sum())} bonds {len(bonds)}", flush=True)
-        prepared[label] = (drawn, drawn_chill, bonds, view, axis, layer_ids)
+        prepared[label] = (drawn, drawn_chill, bonds, view, axis, layer_ids, kinds_now, band_half)
         clouds[label] = (npos, nchill, extended, view, axis)
     def raw_half(label: str) -> tuple[float, float]:
-        drawn, drawn_chill, _bonds, view_i, axis_i, _ids = prepared[label]
+        drawn, drawn_chill, _bonds, view_i, axis_i, _ids, _kinds, _band = prepared[label]
         cluster = drawn[np.isin(drawn_chill, [0, 1])]
         _forward_i, right_i, up_i = basis(view_i, axis_i)
         centred = cluster - cluster.mean(axis=0)
@@ -1463,14 +1526,14 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
     angstrom_per_px = angstrom_per_mm / (PRINT_DPI / 25.4)
     images = {}
     stacks = {"shown": {}, "cubicity": {}}
-    for label, (drawn, drawn_chill, bonds, view, axis, layer_ids) in prepared.items():
+    for label, (drawn, drawn_chill, bonds, view, axis, layer_ids, kinds_now, band_half) in prepared.items():
         images[label] = work / f"nucleus-{label}.png"
         half_h, half_v = raw_half(label)
         width_px = max(32, int(round(2.0 * half_h / angstrom_per_px)))
         render_molecule(
             drawn, drawn_chill, bonds, view, axis, images[label], half_h, half_v, width_px, 0.18, nucleus=True
         )
-        draw_layer_guides(images[label], drawn, layer_ids, view, axis, half_v)
+        draw_layer_guides(images[label], drawn, layer_ids, kinds_now, view, axis, half_v, band_half)
         print(f"  {label} guides {sorted({int(i) for i in layer_ids if i >= 0})}", flush=True)
         npos, nchill, extended, _view, axis = clouds[label]
         kinds = layer_kinds(npos, nchill, extended, axis)
