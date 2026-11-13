@@ -194,3 +194,25 @@ lua = ">=5.4,<5.5"
 
 [feature.repro.pypi-dependencies]
 snakemake = ">=8.0"
+
+[target.linux-64.dependencies]
+lammps = ">=2024.8.29,<2026"
+gromacs = ">=2026.3,<2027"
+openmm = ">=8.6.1,<9"
+plumed = ">=2.9.2,<3"
+packmol = ">=21.2.1,<22"
+freud = ">=3.6.1,<4"
+pyscal3 = ">=4.1.0,<5"
+ase = ">=3.29.0,<4"
+libegl = ">=1.7.0,<2"
+libglvnd = ">=1.7.0,<2"
+libopengl = ">=1.7.0,<2"
+libgl = ">=1.7.0,<2"
+libxkbcommon = ">=1.13.2,<2"
+glib = ">=2.88.3,<3"
+libvulkan-loader = ">=1.4.357.0,<2"
+mesa-lavapipe = ">=26.3.0,<27"
+
+[pypi-dependencies]
+ovito = ">=3.12.0, <4"
+genice2 = ">=2.2.13.3, <3"
