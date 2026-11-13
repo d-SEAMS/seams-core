@@ -568,22 +568,18 @@ Eigen::MatrixXd pntToPnt::getPointSetCage(ring::strucType type) {
       setCloud; // PointCloud for holding the reference point values
 
   if (type == ring::strucType::HCbasal) {
-    // Read in the XYZ file
-    std::string fileName = "templates/hc.xyz";
-    //
-    sinp::readXYZ(fileName);
-    int n = setCloud.nop; // Number of points in the reference point set
-    Eigen::MatrixXd pointSet(n, 3); // Output point set for a regular polygon
-
-    // Loop through every particle
+    // Read in the XYZ file. The cloud is the return value; discarding it
+    // left setCloud empty and the matrix with no rows.
+    setCloud = sinp::readXYZ("templates/hc.xyz");
+    const int n = setCloud.nop;
+    Eigen::MatrixXd filled(n, 3);
     for (int i = 0; i < n; i++) {
-      pointSet(i, 0) = setCloud.pts[i].x; // x
-      pointSet(i, 1) = setCloud.pts[i].y; // y
-      pointSet(i, 2) = setCloud.pts[i].z; // z
-    } // end of looping through every particle
-
-    // Return the filled point set
-    return pointSet;
+      const auto &atom = setCloud.pts[static_cast<std::size_t>(i)];
+      filled(i, 0) = atom.x;
+      filled(i, 1) = atom.y;
+      filled(i, 2) = atom.z;
+    }
+    return filled;
   } // end of reference point set for HCs
   // else {
   //   // ddc

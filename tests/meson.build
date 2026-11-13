@@ -72,6 +72,7 @@ test_sources = {
   'prism_empty': 'test_prism_empty.cpp',
   'basal_needle': 'test_basal_needle.cpp',
   'ddc_copies': 'test_ddc_copies.cpp',
+  'hc_template': 'test_hc_template.cpp',
 }
 
 if readcon_dep.found()
