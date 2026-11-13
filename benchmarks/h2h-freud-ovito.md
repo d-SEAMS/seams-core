@@ -26,31 +26,31 @@ d-SEAMS labels the crystal core (ice Ih, ice Ic, or stacking disorder). PTM at R
 
 | Molecules | Operation | d-SEAMS 1 | d-SEAMS 8 | freud 1 | freud 8 | OVITO 1 | OVITO 8 |
 |---:|---|---:|---:|---:|---:|---:|---:|
-| 4096 | cutoff | 0.274 | 0.240 | 2.921 | 0.992 | 1.429 | 1.311 |
-| 4096 | knn | 0.502 | 0.507 | 3.483 | 1.048 | 3.366 | 3.390 |
-| 4096 | q3 | 0.950 | 0.590 | 9.803 | 2.338 | — | — |
-| 4096 | q6 | 0.889 | 0.602 | 14.49 | 2.906 | — | — |
-| 4096 | q3 and q6 | 1.827 | 1.181 | — | — | 3.313 | 3.127 |
-| 4096 | CHILL+ ovito | 0.713 | 0.424 | — | — | 7.304 | 7.295 |
-| 4096 | symmetry / PTM | 0.687 | 0.292 | — | — | 28.70 | 29.17 |
-| 4096 | symmetry / diamond | 0.687 | 0.292 | — | — | 2.475 | 2.204 |
-| 32768 | cutoff | 2.611 | 1.519 | 24.09 | 8.511 | 3.221 | 3.071 |
-| 32768 | knn | 3.436 | 3.432 | 28.75 | 8.558 | 4.989 | 5.144 |
-| 32768 | q3 | 8.219 | 4.425 | 79.76 | 15.26 | — | — |
-| 32768 | q6 | 7.583 | 4.420 | 114.4 | 20.15 | — | — |
-| 32768 | q3 and q6 | 15.75 | 8.720 | — | — | 9.942 | 6.373 |
-| 32768 | CHILL+ ovito | 6.198 | 2.810 | — | — | 20.38 | 20.38 |
-| 32768 | symmetry / PTM | 5.846 | 2.087 | — | — | 111.4 | 113.1 |
-| 32768 | symmetry / diamond | 5.846 | 2.087 | — | — | 8.454 | 8.483 |
-| 110592 | cutoff | 8.347 | 5.602 | 91.34 | 28.05 | 7.148 | 8.028 |
-| 110592 | knn | 10.52 | 11.13 | 107.0 | 29.14 | 20.36 | 20.78 |
-| 110592 | q3 | 27.07 | 15.18 | 270.7 | 51.34 | — | — |
-| 110592 | q6 | 25.33 | 13.09 | 399.6 | 67.70 | — | — |
-| 110592 | q3 and q6 | 52.14 | 29.42 | — | — | 31.71 | 32.21 |
-| 110592 | CHILL+ ovito | 20.49 | 8.704 | — | — | 71.82 | 72.10 |
-| 110592 | symmetry / PTM | 21.06 | 7.405 | — | — | 391.3 | 394.3 |
-| 110592 | symmetry / diamond | 21.06 | 7.405 | — | — | 31.45 | 30.81 |
+| 4096 | cutoff | 0.202 | 0.159 | 2.959 | 1.015 | 1.768 | 1.552 |
+| 4096 | knn | 0.556 | 0.434 | 3.552 | 1.156 | 3.581 | 3.956 |
+| 4096 | q3 | 0.905 | 0.469 | 10.22 | 2.188 | — | — |
+| 4096 | q6 | 0.829 | 0.461 | 14.97 | 2.839 | — | — |
+| 4096 | q3 and q6 | 1.714 | 0.980 | — | — | 3.901 | 3.797 |
+| 4096 | CHILL+ ovito | 0.637 | 0.323 | — | — | 9.012 | 10.22 |
+| 4096 | symmetry / PTM | 0.700 | 0.295 | — | — | 31.34 | 31.79 |
+| 4096 | symmetry / diamond | 0.700 | 0.295 | — | — | 2.284 | 2.678 |
+| 32768 | cutoff | 2.081 | 1.400 | 26.33 | 7.296 | 3.709 | 3.144 |
+| 32768 | knn | 3.234 | 3.453 | 29.69 | 7.656 | 6.169 | 7.230 |
+| 32768 | q3 | 7.767 | 3.311 | 81.34 | 18.39 | — | — |
+| 32768 | q6 | 7.196 | 3.306 | 119.1 | 20.28 | — | — |
+| 32768 | q3 and q6 | 14.91 | 6.581 | — | — | 9.759 | 9.163 |
+| 32768 | CHILL+ ovito | 5.679 | 2.034 | — | — | 21.27 | 33.89 |
+| 32768 | symmetry / PTM | 5.969 | 1.857 | — | — | 118.0 | 150.8 |
+| 32768 | symmetry / diamond | 5.969 | 1.857 | — | — | 10.37 | 9.190 |
+| 110592 | cutoff | 7.343 | 4.430 | 106.0 | 28.52 | 8.358 | 9.124 |
+| 110592 | knn | 10.88 | 10.67 | 127.9 | 31.60 | 24.90 | 24.51 |
+| 110592 | q3 | 28.55 | 11.61 | 296.9 | 57.41 | — | — |
+| 110592 | q6 | 26.00 | 11.81 | 443.9 | 74.37 | — | — |
+| 110592 | q3 and q6 | 54.68 | 25.52 | — | — | 40.38 | 42.46 |
+| 110592 | CHILL+ ovito | 19.88 | 6.277 | — | — | 83.58 | 94.22 |
+| 110592 | symmetry / PTM | 22.68 | 6.404 | — | — | 422.7 | 483.5 |
+| 110592 | symmetry / diamond | 22.68 | 6.404 | — | — | 35.01 | 35.11 |
 
 OVITO's Steinhardt arm is one modifier with `max_l = 6`, so it computes q2 through q6 and the averages. d-SEAMS q3 and q6 are two calls. Freud's q arm is one `Steinhardt` with `average=True`.
 
-The one place a large cell is slower in d-SEAMS is the serial cutoff at 110592: 8.347 ms against OVITO CreateBonds at 7.148 ms. `SEAMS_NEIGH_PROFILE` puts 5.50 ms of the steady serial call in the pair-count walk (`passFast`), 1.62 ms in the bin, 0.09 ms in the prefix, and 1.09 ms in the fill. That walk is the specialized cell-list kernel, and the neighbour pairs it writes already match both codes exactly, so the count loop was not retuned. At eight threads the same cutoff is 5.602 ms against OVITO's 8.028 ms and freud's 28.05 ms. On 512-atom frames an eight-thread kNN call can lose a few hundredths of a millisecond to freud; the team setup is the whole of that gap, and at 110592 the same call is 11.13 ms against freud's 29.14 ms.
+The serial cutoff at 110592 is 7.343 ms against OVITO CreateBonds at 8.358 ms, and 4.430 ms against 9.124 ms at eight threads. The half stencil already tested each pair once and kept both ends in a fixed stash; a second geometry walk was not where the time went. The stash walk now tests four candidates at a time (AVX2), the degree-4 row is sorted with a five-compare network while it is copied into the CSR, and an in-box coordinate is binned with a multiply instead of a division and a floor. `SEAMS_NEIGH_PROFILE` on the steady serial call is about 1.05 ms in the bin, 4.5 ms in that stencil, 0.09 ms in the prefix, and 0.61 ms in the copy. `perf stat` on this guest reports the hardware counters as not supported, so that phase split is the profile. The neighbour pairs are unchanged: the cutoff tests still match the minimum image at one, two, four, and eight threads. On 512-atom frames an eight-thread kNN call can lose a few hundredths of a millisecond to freud; the team setup is the whole of that gap, and at 110592 the same call is 10.67 ms against freud's 31.60 ms.

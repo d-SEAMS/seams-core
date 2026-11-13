@@ -6,26 +6,26 @@ Unordered pairs inside 3.5 A match exactly (8192, 65536, and 221184). Each oxyge
 
 | Molecules | Operation | d-SEAMS 1 | d-SEAMS 8 | mdapy 1 | mdapy 8 | pyscal3 1 | pyscal3 8 | vesin 1 | vesin 8 |
 |---:|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| 4096 | cutoff | 0.2785 | 0.2549 | 1.978 | 0.6336 | 1.925 | 1.605 | 1.681 | 0.8267 |
-| 4096 | knn | 0.5871 | 0.6319 | 3.809 | 0.8289 | 15.31 | 6.065 | — | — |
-| 4096 | q6 | 0.9753 | 0.6191 | 4.655 | 1.069 | 3.588 | 2.246 | — | — |
-| 4096 | CHILL | 0.8209 | 0.4655 | — | — | — | — | — | — |
-| 4096 | CHILL+ paper | 0.7715 | 0.4569 | — | — | — | — | — | — |
-| 4096 | CHILL+ ovito | 0.7173 | 0.4224 | 2.639 | 0.8103 | — | — | — | — |
-| 4096 | diamond | — | — | — | — | 4.433 | 2.754 | — | — |
-| 32768 | cutoff | 2.659 | 1.613 | 12.67 | 3.041 | 17.79 | 5.443 | 13.54 | 7.842 |
-| 32768 | knn | 3.764 | 3.847 | 30.90 | 4.941 | 111.1 | 28.72 | — | — |
-| 32768 | q6 | 8.214 | 4.171 | 32.91 | 5.877 | 29.39 | 7.937 | — | — |
-| 32768 | CHILL | 6.977 | 2.755 | — | — | — | — | — | — |
-| 32768 | CHILL+ paper | 6.540 | 2.657 | — | — | — | — | — | — |
-| 32768 | CHILL+ ovito | 6.195 | 2.711 | 17.59 | 4.171 | — | — | — | — |
-| 32768 | diamond | — | — | — | — | 28.24 | 9.078 | — | — |
-| 110592 | cutoff | 8.543 | 4.833 | 40.22 | 8.599 | 60.45 | 15.56 | 45.70 | 24.60 |
-| 110592 | knn | 11.23 | 11.67 | 110.3 | 17.03 | 492.8 | 101.0 | — | — |
-| 110592 | q6 | 27.12 | 12.45 | 108.9 | 17.45 | 99.43 | 21.87 | — | — |
-| 110592 | CHILL | 23.32 | 7.929 | — | — | — | — | — | — |
-| 110592 | CHILL+ paper | 21.99 | 7.723 | — | — | — | — | — | — |
-| 110592 | CHILL+ ovito | 20.72 | 7.492 | 57.21 | 11.39 | — | — | — | — |
-| 110592 | diamond | — | — | — | — | 95.09 | 24.78 | — | — |
+| 4096 | cutoff | 0.2462 | 0.2063 | 2.211 | 0.4723 | 2.138 | 1.620 | 1.829 | 0.8214 |
+| 4096 | knn | 0.5211 | 0.6070 | 4.135 | 0.8684 | 17.16 | 6.143 | — | — |
+| 4096 | q6 | 0.9719 | 0.5143 | 5.253 | 0.9478 | 3.816 | 2.247 | — | — |
+| 4096 | CHILL | 0.8562 | 0.3830 | — | — | — | — | — | — |
+| 4096 | CHILL+ paper | 1.123 | 0.3779 | — | — | — | — | — | — |
+| 4096 | CHILL+ ovito | 1.102 | 0.3350 | 2.874 | 0.6360 | — | — | — | — |
+| 4096 | diamond | — | — | — | — | 4.901 | 2.246 | — | — |
+| 32768 | cutoff | 2.397 | 1.715 | 13.81 | 2.657 | 20.61 | 5.924 | 15.25 | 6.446 |
+| 32768 | knn | 3.637 | 3.959 | 35.68 | 5.432 | 150.9 | 28.77 | — | — |
+| 32768 | q6 | 8.619 | 4.112 | 43.36 | 6.047 | 32.94 | 8.550 | — | — |
+| 32768 | CHILL | 7.590 | 2.510 | — | — | — | — | — | — |
+| 32768 | CHILL+ paper | 9.621 | 2.791 | — | — | — | — | — | — |
+| 32768 | CHILL+ ovito | 9.103 | 2.471 | 19.83 | 3.710 | — | — | — | — |
+| 32768 | diamond | — | — | — | — | 31.21 | 8.081 | — | — |
+| 110592 | cutoff | 7.065 | 5.784 | 47.20 | 8.864 | 75.12 | 18.40 | 49.84 | 20.21 |
+| 110592 | knn | 11.77 | 11.95 | 131.8 | 21.75 | 626.5 | 119.5 | — | — |
+| 110592 | q6 | 29.17 | 15.31 | 127.5 | 23.55 | 140.8 | 24.11 | — | — |
+| 110592 | CHILL | 24.70 | 6.825 | — | — | — | — | — | — |
+| 110592 | CHILL+ paper | 22.24 | 6.386 | — | — | — | — | — | — |
+| 110592 | CHILL+ ovito | 25.94 | 6.342 | 71.51 | 14.59 | — | — | — | — |
+| 110592 | diamond | — | — | — | — | 131.9 | 23.96 | — | — |
 
-q6 is the local Steinhardt parameter and the Lechner-Dellago average, timed together. pyscal3's ice row is extended CNA (`diamond_structure`), not CHILL. The mdapy column on the CHILL+ ovito row is mdapy CHILL+. Paper mode is the default. At eight threads and 110592 molecules, paper CHILL+ is 7.723 ms and ovito CHILL+ is 7.492 ms; mdapy CHILL+ is 11.39 ms.
+q6 is the local Steinhardt parameter and the Lechner-Dellago average, timed together. pyscal3's ice row is extended CNA (`diamond_structure`), not CHILL. The mdapy column on the CHILL+ ovito row is mdapy CHILL+. Paper mode is the default. The serial cutoff at 110592 is 7.065 ms. At eight threads and 110592 molecules, paper CHILL+ is 6.386 ms and ovito CHILL+ is 6.342 ms; mdapy CHILL+ is 14.59 ms.
