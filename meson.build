@@ -760,6 +760,11 @@ if get_option('with_cli')
     args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-trace'],
     timeout: 60)
   test(
+    'docs_pool_audit',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-pool'],
+    timeout: 60)
+  test(
     'docs_h2h_threads',
     python3,
     args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-h2h'],

@@ -43,7 +43,7 @@ The algorithm pages are
 [[file:trace-assembly.org][TRACE and signature cages]],
 [[file:symmetry.org][the symmetry classifier]], and
 [[file:hop-ball.org][carried rings]].
-The signature-search widths from ~5982ddee~ are
+The signature-search widths, and the kernel teams from ~848426f9~, are
 [[file:trace-threads.org][thread controls]].
 
 #+begin_export rst

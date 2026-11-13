@@ -69,12 +69,49 @@ hexagonal and double-diamond cages, to match the one-thread result.
 Membership is the sorted atom ids of each face, not the ring index.
 
 ~seams_set_num_threads~ is the installed way to set the OpenMP width
-the next search reads. ~seams::adoptThreads~ is the other helper: it
-still asks for ~OMP_WAIT_POLICY=PASSIVE~ when a search hands the cores
-to Rayon. The signature path does not use that helper.
+the next search reads.
+
+* Every kernel
+
+Commit ~848426f9~ sizes the team on every kernel, and the sitting at
+~3c1f5ef1~ records it. The rows are ~benchmarks/pool-audit.csv~. Eight
+kernels run on ideal ice Ic: primitive rings, local and cutoff \(q_4\)
+and \(q_6\), CHILL+, the shell label, and one carried hop-ball update.
+The sizes are 4096, 32768, 110592 and 884736 molecules. Each size is
+32 rows, the eight kernels at 1, 2, 4 and 8 threads. One warm-up, then
+eight timed calls. The fingerprint of a kernel is the same at every
+width. ~meson test docs_pool_audit~ recomputes each median and type-7
+interquartile range from ~samples_ms~.
+
+~seams::teamFor~ is the width of a per-atom walk. Below 2048 atoms it
+is one thread. Below 8192 atoms, when the caller asked for more than
+four, it is four. At or above 8192 atoms it is the OpenMP width.
+~seams::TeamWidth~ sets that width for the rest of the call and
+restores the caller's width afterwards. Bond order, published CHILL+,
+the k-nearest list, the shell label, and local \(q_l\) use it. Those
+calls do not start a Rayon pool.
+
+~seams::adoptThreads~ no longer pauses the OpenMP team and no longer
+sets ~OMP_WAIT_POLICY~. It calls ~prepareCompute~, then
+~lc_set_threads~. The linkcell pool is still one per process, and its
+workers still sleep between searches. The OpenMP team is left running,
+so the next region does not pay the wake-up that used to move by tens
+of milliseconds.
+
+A carried ring update uses ~sourceTeam~, not ~teamFor~. The work is
+the changed sources. The update stays on the calling thread until
+those sources fill the workers, about 80 sources per thread. Fewer
+than that is a serial update, because the fork costs more than the
+search. ~teamFor~ is a different rule: it would also put a crystal of
+a few hundred molecules on one thread.
+
+The linkcell cap below 4096 molecules, and the row placement below
+\(2^{20}\) pairs, are the signature-search rules above. They are not
+replaced by ~teamFor~.
 
 #+begin_export rst
 :doc:`/stable/c` names ``seams_set_num_threads`` and ``seams_get_num_threads``.
 
 .. include:: trace-threads-tables.rst
+.. include:: pool-audit-tables.rst
 #+end_export

@@ -17,8 +17,21 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 CSV = ROOT / "benchmarks" / "rc3-sitting.csv"
 TRACE = ROOT / "benchmarks" / "trace-threads.csv"
+POOL = ROOT / "benchmarks" / "pool-audit.csv"
 OUT = ROOT / "docs" / "source" / "explanation" / "performance-tables.rst"
 TRACE_OUT = ROOT / "docs" / "source" / "explanation" / "trace-threads-tables.rst"
+POOL_OUT = ROOT / "docs" / "source" / "explanation" / "pool-audit-tables.rst"
+POOL_KERNELS = (
+    "rings",
+    "q4-local",
+    "q6-local",
+    "q4-cutoff",
+    "q6-cutoff",
+    "chill",
+    "symmetry",
+    "hop",
+)
+POOL_SIZES = ("4096", "32768", "110592", "884736")
 H2H_OUT = ROOT / "docs" / "source" / "howto" / "literature-speed.rst"
 # Guest codes in the reproduction how-to. PLUMED stays flat in this sitting.
 H2H_FALL = (
@@ -103,6 +116,65 @@ def write_trace(rows, path):
     for name in sorted(grouped):
         block = sorted(grouped[name], key=lambda row: (int(row["molecules"]), int(row["threads"])))
         title = "signature cages, {}".format(name)
+        lines.append(title)
+        lines.append("^" * len(title))
+        lines.append("")
+        lines.append(".. csv-table::")
+        lines.append("   :header: " + ", ".join(header))
+        lines.append("")
+        for row in block:
+            lines.append("   " + ", ".join(cell(row[key]) for key in header))
+        lines.append("")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n")
+
+
+def check_pool(rows):
+    errors = check(rows, 1.5e-4)
+    if len(rows) != 128:
+        errors.append("pool-audit has {} rows, expected 128".format(len(rows)))
+    widths = sorted({int(row["threads"]) for row in rows})
+    if widths != [1, 2, 4, 8]:
+        errors.append("pool threads are {}, expected 1 2 4 8".format(widths))
+    kernels = sorted({row["kernel"] for row in rows})
+    if kernels != sorted(POOL_KERNELS):
+        errors.append("pool kernels are {}".format(kernels))
+    by_size = {}
+    fingerprints = {}
+    for row in rows:
+        by_size[row["molecules"]] = by_size.get(row["molecules"], 0) + 1
+        key = (row["kernel"], row["molecules"])
+        fingerprints.setdefault(key, set()).add(row["fingerprint"])
+    for size in POOL_SIZES:
+        if by_size.get(size) != 32:
+            errors.append("molecules {} has {} rows, expected 32".format(size, by_size.get(size, 0)))
+    for key, found in sorted(fingerprints.items()):
+        if len(found) != 1:
+            errors.append("{} fingerprint changes with threads".format(key))
+    return errors
+
+
+def write_pool(rows, path):
+    grouped = {}
+    order = {name: index for index, name in enumerate(POOL_KERNELS)}
+    for row in rows:
+        grouped.setdefault(row["molecules"], []).append(row)
+    lines = [
+        ".. list-table::",
+        "   :header-rows: 0",
+        "",
+        "   * - Written by ``docs/render_sitting.py`` from ``benchmarks/pool-audit.csv``.",
+        "       Each size is one 32-row table: eight kernels at 1, 2, 4 and 8 threads.",
+        "       ``median_ms`` and ``iqr_ms`` are recomputed from ``samples_ms``.",
+        "",
+    ]
+    header = ("kernel", "threads", "cores", "n", "median_ms", "iqr_ms")
+    for molecules in POOL_SIZES:
+        block = sorted(
+            grouped.get(molecules, []),
+            key=lambda row: (order.get(row["kernel"], 99), int(row["threads"])),
+        )
+        title = "ice Ic, {} molecules".format(molecules)
         lines.append(title)
         lines.append("^" * len(title))
         lines.append("")
@@ -221,6 +293,14 @@ def main(argv):
             return 1
         print("h2h thread scaling ok", len(h2h_pairs(h2h_index(rows))), "rows")
         return 0
+    if "--check-pool" in argv:
+        rows = load(POOL)
+        errors = check_pool(rows)
+        if errors:
+            print("\n".join(errors), file=sys.stderr)
+            return 1
+        print("pool-audit csv ok", len(rows), "rows")
+        return 0
     if "--check-trace" in argv:
         rows = load(TRACE)
         errors = check(rows, 1.5e-4)
@@ -252,6 +332,12 @@ def main(argv):
         print("\n".join(h2h_errors), file=sys.stderr)
         return 1
     write_h2h(rows, H2H_OUT)
+    pool_rows = load(POOL)
+    pool_errors = check_pool(pool_rows)
+    if pool_errors:
+        print("\n".join(pool_errors), file=sys.stderr)
+        return 1
+    write_pool(pool_rows, POOL_OUT)
     print("wrote", OUT.relative_to(ROOT), len(rows), "rows")
     print("wrote", TRACE_OUT.relative_to(ROOT), len(trace_rows), "rows")
     return 0

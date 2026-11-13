@@ -16,7 +16,7 @@ These pages are for understanding. They are not recipes.
 | [[file:symmetry.org][Local symmetry]] | The ice shell, the cages, and the held-out scores |
 | [[file:trace-assembly.org][TRACE and signature cages]] | Hydrogen-bond cages and \(V-E+F=2\) |
 | [[file:hop-ball.org][Carried rings]] | Which rings a changed bond can touch |
-| [[file:trace-threads.org][Signature thread controls]] | The 1, 2, 4 and 8 thread sitting at ~5982ddee~ |
+| [[file:trace-threads.org][Signature thread controls]] | Team size, the OpenMP wait, and the pool-audit kernels |
 | [[file:performance.org][Release-candidate sitting]] | Tables built from ~benchmarks/rc3-sitting.csv~ |
 | [[file:citation.org][Citation]] | What to cite |
 
