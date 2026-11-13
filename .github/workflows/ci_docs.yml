@@ -40,14 +40,26 @@ jobs:
       - run: pixi run -e default setup
       - run: pixi run -e default build
 
-      - name: Cache the brine frames
+      - name: Cache the brine frames and the renderer wheels
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
-          path: docs/.cache/brine-front-230K
-          key: brine-front-230K-4828e33ecf419c70643b2d466bfa4f283b4138dc
+          path: |
+            docs/.cache/brine-front-230K
+            ~/.cache/pip
+          key: docs-xvfb-ovito-${{ runner.os }}-brine-4828e33ecf419c70643b2d466bfa4f283b4138dc
 
       - name: Headless molecule renderer and OpenMM
         run: pixi run -e default python -m pip install ovito pillow openmm
+
+      - name: Xvfb and software Vulkan
+        run: |
+          Xvfb :99 -screen 0 1280x1024x24 >/dev/null 2>&1 &
+          echo "DISPLAY=:99" >> "$GITHUB_ENV"
+          echo "QT_QPA_PLATFORM=xcb" >> "$GITHUB_ENV"
+          echo "LIBGL_ALWAYS_SOFTWARE=1" >> "$GITHUB_ENV"
+          echo "GALLIUM_DRIVER=llvmpipe" >> "$GITHUB_ENV"
+          echo "VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/lvp_icd.json" >> "$GITHUB_ENV"
+          echo "VK_DRIVER_FILES=/usr/share/vulkan/icd.d/lvp_icd.json" >> "$GITHUB_ENV"
 
       - name: Ice Ih, language APIs, and science tutorials
         run: DOCS_CI=1 pixi run -e default meson test -C bbdir docs_core_counts docs_capi_examples docs_capi_symbols docs_binding_docstrings docs_lang_ice docs_science_render_copy docs_science_tutorials docs_engine_walkthrough --print-errorlogs
