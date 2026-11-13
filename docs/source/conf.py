@@ -398,6 +398,44 @@ def _science_figure_stubs():
 
 _link_science()
 _science_figure_stubs()
+
+
+def _link_walkthrough():
+    """Point the generated book at the engine walkthroughs."""
+    index = os.path.join(_source, "index.rst")
+    if not os.path.isfile(index):
+        return
+    text = open(index, encoding="utf-8").read()
+    if "walkthrough/index" in text:
+        return
+    extra = (
+        "\n.. toctree::\n"
+        "   :maxdepth: 2\n"
+        "   :caption: Engine walkthroughs\n"
+        "\n"
+        "   walkthrough/index\n"
+    )
+    with open(index, "a", encoding="utf-8") as handle:
+        handle.write(extra)
+
+
+def _walkthrough_stubs():
+    dest = os.path.join(_source, "walkthrough", "figures")
+    os.makedirs(dest, exist_ok=True)
+    stub = (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="420" height="80">'
+        '<rect width="100%" height="100%" fill="white"/>'
+        '<text x="16" y="44" font-size="14">engine census</text></svg>\n'
+    )
+    for name in ("lammps", "gromacs", "openmm", "plumed"):
+        path = os.path.join(dest, name + ".svg")
+        if not os.path.isfile(path):
+            with open(path, "w", encoding="utf-8") as handle:
+                handle.write(stub)
+
+
+_link_walkthrough()
+_walkthrough_stubs()
 os.environ["DSEAMS_DOC_BUILD"] = "1"
 sys.path.insert(0, os.path.abspath(os.path.join(_docs, "..", "bindings", "python")))
 _doxyrest = os.path.abspath(os.path.join(_source, "../../subprojects/doxyrest/sphinx"))

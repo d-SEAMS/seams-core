@@ -368,6 +368,66 @@ def write_figure(stem: str, title: str, pairs, figures: Path):
     _bars(title, pairs, figures / f"{stem}.svg")
 
 
+def render_interface_v12(pos, chill, box, figures: Path):
+    """Paint the slab with the v12 rules from science_render.py.
+
+    Liquid is blended at 0.40. Basal layers are numbered by
+    display_layer_ids. The picture has no baked caption. Tachyon is
+    used when Vulkan starts; otherwise the same colours and guides are
+    written as SVG.
+    """
+    import science_render as render
+
+    forward, _spread = render.column_axis(pos, chill, box)
+    up = np.array([0.0, 0.0, 1.0])
+    centre, half_h, half_v, forward, _right, up = render.project(pos, forward, up)
+    png = figures / "interface-tachyon.png"
+    painted = False
+    try:
+        render.render_molecule(pos, chill, None, forward, up, png, half_h, half_v, 480, 0.40, False)
+        ids = render.display_layer_ids(pos, np.isin(chill, [0, 1]), up)
+        render.draw_layer_guides(png, pos, ids, forward, up, half_v)
+        painted = png.is_file() and png.stat().st_size > 0
+    except Exception as exc:
+        print(f"v12 Tachyon render unavailable ({exc}); painting the same blend and guides")
+        painted = False
+    if painted:
+        return
+    width, height = 640, 480
+    ids = render.display_layer_ids(pos, np.isin(chill, [0, 1]), up)
+    vertical = (pos - centre) @ up
+    span = 2.0 * half_v
+
+    def xy_of(point):
+        offset = point - centre
+        x = (float(offset @ _right) / (2.0 * half_h) + 0.5) * (width - 80) + 40
+        y = (0.5 - float(offset @ up) / span) * (height - 40) + 20
+        return x, y
+
+    shapes = []
+    order = np.argsort(np.where(chill == 2, 0, 1))
+    for index in order:
+        x, y = xy_of(pos[index])
+        red, green, blue = render.CHILL.get(int(chill[index]), ("", (0.5, 0.5, 0.5)))[1]
+        opacity = 0.40 if int(chill[index]) == 2 else 1.0
+        shapes.append(
+            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4.2" fill="rgb({int(red*255)},{int(green*255)},{int(blue*255)})" fill-opacity="{opacity:.2f}"/>'
+        )
+    guides = []
+    for layer in sorted({int(item) for item in ids if item >= 0}):
+        members = np.flatnonzero(ids == layer)
+        y = (0.5 - float(np.median(vertical[members])) / span) * (height - 40) + 20
+        guides.append(f'<line x1="36" y1="{y:.1f}" x2="{width-8}" y2="{y:.1f}" stroke="#a8a8a8" stroke-width="1"/>')
+        guides.append(f'<text x="8" y="{y+4:.1f}" font-size="12" fill="#464646">{layer}</text>')
+    (figures / "interface.svg").write_text(
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}">'
+        '<rect width="100%" height="100%" fill="white"/>'
+        + "".join(shapes)
+        + "".join(guides)
+        + "</svg>\n"
+    )
+
+
 def expect(condition, message):
     if not condition:
         raise SystemExit(message)
@@ -404,6 +464,79 @@ def run_c(root: Path, build: Path, mode: str, extra: list[str]):
     return out
 
 
+def _language_env(libdir: Path):
+    env = os.environ.copy()
+    env["SEAMS_LIB"] = str(libdir / "libseams.so")
+    env["LD_LIBRARY_PATH"] = str(libdir) + os.pathsep + env.get("LD_LIBRARY_PATH", "")
+    return env
+
+
+def _expect_languages(text, frames):
+    for line in (
+        "interface hexagonal 352",
+        "HHHHHHHHC",
+        "nucleus cubic 47",
+        "CHHHCHHHHHHHHH",
+        "cages sII 512 16",
+        "cages sH 51268 4",
+    ):
+        expect(line in text, text)
+    if frames is not None:
+        expect("brine t0 hexagonal 733" in text and "brine tend hexagonal 741" in text, text)
+    else:
+        expect("brine tutorial skipped" in text, text)
+
+
+def run_julia(root: Path, libdir: Path, frames):
+    julia = shutil.which("julia")
+    if julia is None:
+        print("julia tutorial skipped: julia was not found")
+        return
+    args = [julia, str(root / "docs" / "examples" / "science_tutorials.jl"), str(root)]
+    if frames is not None:
+        args.extend(str(path) for path in frames)
+    text = subprocess.check_output(args, cwd=root, env=_language_env(libdir), text=True)
+    _expect_languages(text, frames)
+    print("julia tutorials ok")
+
+
+def run_r(root: Path, build: Path, libdir: Path, frames):
+    rscript = shutil.which("Rscript")
+    if rscript is None:
+        print("r tutorial skipped: Rscript was not found")
+        return
+    cc = shutil.which("cc") or shutil.which("gcc")
+    if cc is None:
+        print("r tutorial skipped: cc was not found")
+        return
+    work = build / "docs-science"
+    work.mkdir(parents=True, exist_ok=True)
+    shared = work / "science_r.so"
+    subprocess.check_call(
+        [
+            cc,
+            "-shared",
+            "-fPIC",
+            "-I",
+            str(root / "include"),
+            "-I",
+            str(libdir),
+            str(root / "docs" / "examples" / "science_r.c"),
+            "-L" + str(libdir),
+            "-lseams",
+            "-Wl,-rpath," + str(libdir),
+            "-o",
+            str(shared),
+        ]
+    )
+    args = [rscript, str(root / "docs" / "examples" / "science_tutorials.R"), str(root), str(shared)]
+    if frames is not None:
+        args.extend(str(path) for path in frames)
+    text = subprocess.check_output(args, cwd=root, env=_language_env(libdir), text=True)
+    _expect_languages(text, frames)
+    print("r tutorials ok")
+
+
 def main():
     root = Path(sys.argv[1] if len(sys.argv) > 1 else Path(__file__).resolve().parents[2])
     build = Path(sys.argv[2]) if len(sys.argv) > 2 else Path(os.environ.get("SEAMS_BUILD", root / "bbdir"))
@@ -436,18 +569,15 @@ def main():
     expect(abs(cubicity(nkinds) - 2.0 / 14.0) < 1e-12, cubicity(nkinds))
     print("nucleus cubic 47 hexagonal 62 water 3589 interfacial 240")
     print("nucleus axis", axis_name, "layers", nstack, "cubicity", f"{cubicity(nkinds):.6f}")
-    write_figure(
-        "interface",
-        "Ice/liquid interface and the nucleus, CHILL+",
-        [
-            ("Ih slab", 352),
-            ("liquid slab", 434),
-            ("surface", 49),
-            ("Ic nucleus", 47),
-            ("Ih nucleus", 62),
-        ],
-        figures,
-    )
+    edge = []
+    with interface.open() as handle:
+        for line in handle:
+            if line.startswith("ITEM: BOX BOUNDS"):
+                for _ in range(3):
+                    lo, hi = (float(item) for item in handle.readline().split()[:2])
+                    edge.append(hi - lo)
+                break
+    render_interface_v12(pos, _labels, np.asarray(edge), figures)
 
     sii = signature(lib, traj / "genice_sII.lammpstrj", "512")
     sii_large = signature(lib, traj / "genice_sII.lammpstrj", "51264")
@@ -518,6 +648,8 @@ def main():
             expect("brine tend hexagonal 741" in c_brine, c_brine)
             expect("k 0.0" in c_brine, c_brine)
         print("c tutorials ok")
+    run_julia(root, libdir, frames)
+    run_r(root, build, libdir, frames)
     print("science tutorials ok")
     return 0
 

@@ -8,11 +8,15 @@ trajectory released with the paper (``input/traj/nucleation_f1.lammpstrj``,
 at 3.5 angstrom on the cutoff graph.
 
 Layer cubicity is the cubic share of the basal layers. The period, the
-majority class of each layer, and the cubicity are the definitions in
-``scripts/science_render.py`` at ``702d85b2454e459dd14d9ec5fa3bd6b331e73862``.
-On the slab the stacking axis is z, the long edge. On the nucleus it is
-the box axis whose crystal atoms have the strongest density wave in
-that period window.
+majority class of each layer, and the cubicity follow
+``scripts/science_render.py``. The figure itself is the v12 renderer
+from ``science/interface-nucleation`` at
+``f65657b9b89481e7dd6617b1987bc58b2ec0f01c``, vendored as
+``docs/examples/science_render.py``. Liquid is blended at 0.40, basal
+layers are numbered, and the image has no baked caption. On the slab
+the stacking axis is z, the long edge. On the nucleus it is the box
+axis whose crystal atoms have the strongest density wave in that
+period window.
 
 Python and C print the same census:
 
@@ -34,9 +38,9 @@ Python and C print the same census:
    :end-before: static int cmd_interface
 
 .. figure:: figures/interface.svg
-   :alt: CHILL+ counts for the ice/liquid slab and the nucleus.
+   :alt: Interface slab painted with the v12 renderer. Liquid is at 40 percent and basal layers are numbered.
 
-   CHILL+ counts for the ice/liquid slab and the nucleus.
+   v12 render of the interface slab. Liquid opacity is 0.40 and the basal layers are numbered.
 
 What this tells you
 -------------------

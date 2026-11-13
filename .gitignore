@@ -118,6 +118,7 @@ bindings/julia/Seams/docs/build/
 bindings/julia/Seams/docs/Manifest.toml
 bindings/r/dseams.Rcheck/
 docs/source/science/figures/
+docs/source/walkthrough/figures/
 docs/.cache/
 docs/source/*.rst
 docs/source/tutorials/gallery/
