@@ -1,0 +1,26 @@
+#+TITLE: Ice-water interface
+#+OPTIONS: toc:nil num:nil
+
+One frame of a basal interface is ~input/traj/interface_f0.lammpstrj~,
+864 molecules, 35 kB. ~meson test docs_tutorial_interface~ labels it
+with CHILL+ and reads the profile along the long box edge.
+
+The published rule on the cutoff list prints
+
+#+begin_src text
+hexagonal 352 water 434
+stack HHHHHHHH....C.
+#+end_src
+
+The stack is eight hexagonal slabs, a gap, and one cubic layer. Cubic
+ice is one molecule of the 864. \(\phi_c\), the cubic fraction of the
+crystal molecules, is about 0.003.
+
+Slabs are 3.7 Å along \(z\). The ice fraction is 0.95 in the slab that
+starts at 18.5 Å and 0.48 in the next one. The front is the height
+where that fraction crosses one half, 22.03 Å. Above it the slabs are
+liquid, apart from one crystal molecule near 44 Å.
+
+#+begin_src bash
+seams chill-plus input/traj/interface_f0.lammpstrj --type 1 --layers --axis 2
+#+end_src

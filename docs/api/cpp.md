@@ -15,8 +15,24 @@ meson setup build -Dwith_tests=true
 meson compile -C build
 ```
 
-CI runs the C API test, which is the same binary a C++ caller links:
+CI runs the C API test, which is the same binary a C++ caller links.
+The executable is `build/src/test_seams_api`.
 
 ```bash
 meson test -C build seams_c_api --print-errorlogs
+meson test -C build seams_lang_fixtures --print-errorlogs
+```
+
+`bindings/cxx/test_lang.cpp` is the `seams_lang_fixtures` test. It calls
+every function in `seams_lang.h` on the in-tree trajectories.
+`meson test docs_api_cpp` compiles and runs the eight-atom program below.
+It calls `seams_set_num_threads`, `seams_chill_plus`, and `seams_q4q6`.
+
+```{literalinclude} ../../../docs/examples/ice.cpp
+:language: cpp
+```
+
+```{literalinclude} ../../../bindings/cxx/test_lang.cpp
+:language: cpp
+:lines: 33-40,53-75,108-120,141-159,184-208,301-357,449-453,495-502,1058-1075,1119-1192
 ```

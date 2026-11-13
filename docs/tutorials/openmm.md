@@ -2,14 +2,9 @@
 
 `DseamsReporter` in `adapters/python/dseams_insitu/openmm.py` asks for positions every interval and calls `InSitu.observe`.
 
-```python
-from dseams_insitu.engine import InSitu
-from dseams_insitu.openmm import DseamsReporter
-
-engine = InSitu()
-reporter = DseamsReporter(engine, "unused", interval=1)
-simulation.reporters.append(reporter)
-simulation.step(2)
+```{literalinclude} ../../../engines/openmm/test_reporter.py
+:language: python
+:lines: 12-14,58-61
 ```
 
 ```bash

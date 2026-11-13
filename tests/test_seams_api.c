@@ -46,6 +46,44 @@ int main(void) {
   expect(seams_version_minor() == SEAMS_VERSION_MINOR, "minor");
   expect(seams_version_patch() == SEAMS_VERSION_PATCH, "patch");
   expect(strcmp(seams_version_string(), SEAMS_VERSION_STRING) == 0, "version string");
+  expect(strcmp(seams_status_string(SEAMS_OK), "ok") == 0, "status ok");
+  expect(strcmp(seams_status_string(SEAMS_ERR_NULL), "null pointer") == 0, "status null");
+  expect(strcmp(seams_status_string(SEAMS_ERR_RANGE), "value out of range") == 0, "status range");
+  expect(strcmp(seams_status_string(SEAMS_ERR_BOX), "box is not a positive cell") == 0, "status box");
+  expect(strcmp(seams_status_string(SEAMS_ERR_ARG), "bad argument") == 0, "status arg");
+  expect(strcmp(seams_status_string(SEAMS_ERR_STATE), "system has no frame") == 0, "status state");
+  expect(strcmp(seams_status_string(SEAMS_ERR_NOMEM), "out of memory") == 0, "status nomem");
+  expect(strcmp(seams_status_string(SEAMS_ERR_INTERNAL), "internal error") == 0, "status internal");
+  expect(strcmp(seams_label_name(SEAMS_LABEL_CUBIC), "cubic") == 0, "label cubic");
+  expect(strcmp(seams_label_name(SEAMS_LABEL_HEXAGONAL), "hexagonal") == 0, "label hexagonal");
+  expect(strcmp(seams_label_name(SEAMS_LABEL_WATER), "water") == 0, "label water");
+  expect(strcmp(seams_label_name(SEAMS_LABEL_INTERFACIAL), "interfacial") == 0, "label interfacial");
+  expect(strcmp(seams_label_name(SEAMS_LABEL_CLATHRATE), "clathrate") == 0, "label clathrate");
+  expect(strcmp(seams_label_name(SEAMS_LABEL_INTERCLATHRATE), "interClathrate") == 0,
+         "label interClathrate");
+  expect(strcmp(seams_label_name(SEAMS_LABEL_UNCLASSIFIED), "unclassified") == 0,
+         "label unclassified");
+  expect(strcmp(seams_label_name(SEAMS_LABEL_RECUBIC), "reCubic") == 0, "label reCubic");
+  expect(strcmp(seams_label_name(SEAMS_LABEL_REHEX), "reHex") == 0, "label reHex");
+  expect(strcmp(seams_ring_symmetry_name(SEAMS_RING_UNCLASSIFIED), "unclassified") == 0,
+         "ring unclassified");
+  expect(strcmp(seams_ring_symmetry_name(SEAMS_RING_DDC), "ddc") == 0, "ring ddc");
+  expect(strcmp(seams_ring_symmetry_name(SEAMS_RING_HC_BASAL), "hc-basal") == 0, "ring hc basal");
+  expect(strcmp(seams_ring_symmetry_name(SEAMS_RING_HC_PRISMATIC), "hc-prismatic") == 0,
+         "ring hc prismatic");
+  expect(strcmp(seams_ring_symmetry_name(SEAMS_RING_BOTH_BASAL), "both-basal") == 0,
+         "ring both basal");
+  expect(strcmp(seams_ring_symmetry_name(SEAMS_RING_BOTH_PRISMATIC), "both-prismatic") == 0,
+         "ring both prismatic");
+  expect(strcmp(seams_ring_symmetry_name(SEAMS_RING_PRISM), "prism") == 0, "ring prism");
+  expect(strcmp(seams_ring_symmetry_name(SEAMS_RING_DEFORMED_PRISM), "deformed-prism") == 0,
+         "ring deformed");
+  expect(strcmp(seams_ring_symmetry_name(SEAMS_RING_MIXED_PRISM), "mixed-prism") == 0,
+         "ring mixed");
+  expect(strcmp(seams_ring_symmetry_name(SEAMS_RING_PENTAGON), "pentagon") == 0, "ring pentagon");
+  expect(strcmp(seams_ring_symmetry_name(SEAMS_RING_HEXAGON), "hexagon") == 0, "ring hexagon");
+  expect(strcmp(seams_ring_symmetry_name(SEAMS_RING_OTHER), "other") == 0, "ring other");
+  expect(seams_last_error() != NULL, "last error pointer");
   const int original_threads = seams_get_num_threads();
   expect(seams_set_num_threads(2) == SEAMS_OK, "set threads");
   expect(seams_get_num_threads() == 2, "get threads");
@@ -83,6 +121,7 @@ int main(void) {
   int nnz = 0;
   expect(seams_neighbours_csr(nb, &offsets, &n_offsets, &cols, &nnz) == SEAMS_OK, "csr");
   expect(n_offsets == n + 1, "csr rows");
+  expect(seams_neighbours_count(nb) == n, "neighbour rows");
   int degree_ok = 1;
   for (int i = 0; i < n; i++) {
     if (offsets[i + 1] - offsets[i] != 4) {

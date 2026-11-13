@@ -2,12 +2,11 @@
 
 `seams-sys` is the FFI crate. `seams` is the safe wrapper. Point `SEAMS_LIB_DIR` at `libseams.so` before building.
 
-```rust
-fn main() {
-    let mut sys = seams::System::new().unwrap();
-    sys.set_ortho(&[0.0, 0.0, 0.0], 10.0, 10.0, 10.0).unwrap();
-    println!("{}", seams::version());
-}
+`bindings/rust/seams/tests/ice.rs` is the test `cargo test` runs:
+
+```{literalinclude} ../../../bindings/rust/seams/tests/ice.rs
+:language: rust
+:lines: 25-57
 ```
 
 The ice example builds a 64-atom cell:

@@ -7,7 +7,9 @@ program test_seams
   integer, parameter :: n = nrep * nrep * nrep * 8
   real(c_double) :: xyz(3 * n), q4(n), q6(n), length, a, fraction
   integer(c_int) :: labels(n), counts(9), code, i, cubic
-  type(c_ptr) :: sys, nb, rings
+  integer(c_int) :: n_offsets, nnz
+  real(c_double) :: box9(9)
+  type(c_ptr) :: sys, nb, rings, offsets, cols, ver
   integer(c_int) :: hist(0:6)
   real(c_double) :: fcc(3, 4), basis(3, 2)
   integer :: ii, jj, kk, f, s, cursor
@@ -32,6 +34,9 @@ program test_seams
   end do
   length = nrep * a
 
+  ver = seams_version_string()
+  if (.not. c_associated(ver)) stop 14
+  ver = seams_last_error()
   if (seams_set_num_threads(1) /= SEAMS_OK) stop 1
   if (seams_get_num_threads() /= 1) stop 2
   sys = seams_system_create()
@@ -39,6 +44,9 @@ program test_seams
   code = seams_system_set_ortho(sys, xyz, n, 0d0, 0d0, 0d0, length, length, length, &
                                 c_null_ptr, c_null_ptr)
   if (code /= SEAMS_OK) stop 4
+  box9 = [0d0, 0d0, 0d0, length, length, length, 0d0, 0d0, 0d0]
+  code = seams_system_set_frame(sys, xyz, n, box9, c_null_ptr, c_null_ptr)
+  if (code /= SEAMS_OK) stop 15
   code = seams_chill_plus(sys, 3.5d0, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels, counts)
   if (code /= SEAMS_OK) stop 5
   cubic = 0
@@ -53,6 +61,8 @@ program test_seams
   if (sum(q6) / n <= 0.3d0) stop 9
   code = seams_neighbours_build(sys, 3.5d0, 0, SEAMS_GRAPH_CUTOFF, nb)
   if (code /= SEAMS_OK) stop 10
+  code = seams_neighbours_csr(nb, offsets, n_offsets, cols, nnz)
+  if (code /= SEAMS_OK .or. nnz <= 0) stop 16
   call seams_neighbours_destroy(nb)
   code = seams_rings_find(sys, 3.5d0, 0, SEAMS_GRAPH_CUTOFF, 6, rings)
   if (code /= SEAMS_OK) stop 11

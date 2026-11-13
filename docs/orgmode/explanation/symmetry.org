@@ -77,6 +77,54 @@ Hexagonal recovery is one pass over the atoms the first fit left unlabelled, and
 After the labels are written, a crystal atom that has no crystal neighbour among its four bonds is returned to liquid.
 The tests read the labels from the fit, before that filter.
 
+* Gates, in symbols
+
+The tetrahedral order of the four bonds is the Errington–Debenedetti
+invariant. With \(\theta_{jk}\) the angle at the centre between
+neighbours \(j\) and \(k\),
+
+\[
+q = 1 - \frac{3}{8}
+\sum_{j=1}^{3} \sum_{k=j+1}^{4}
+\left(\cos\theta_{jk} + \frac{1}{3}\right)^{2}.
+\]
+
+A centre opens a second shell only when all four bonds lie in
+\([2.30, 3.35]\,\text{Å}\) and \(q \ge 0.94\). A shell that opens and
+then measures \(q < 0.88\) is liquid. An exact cubic fingerprint is
+twelve \((4,2,1)\) patterns. An exact hexagonal fingerprint is six
+\((4,2,1)\) and six \((4,2,2)\). A partial cubic fingerprint needs at
+least eight \((4,2,1)\) patterns and \(q \ge 0.97\). The same threshold
+on \(q\) keeps a partial hexagonal fingerprint.
+
+The fit runs only when the centre already has one crystal neighbour,
+\(q \ge 0.95\), the four bond lengths differ by at most 15 percent, and
+the second-shell radius varies by at most a factor \(1.6\). Both clouds
+are centred. The residual is the root-mean-square distance after the
+optimal rotation, divided by the template radius. The production ceiling
+is \(0.12\):
+
+\[
+\frac{\mathrm{RMSD}}{R_{\mathrm{template}}} \le 0.12.
+\]
+
+On the ideal cell the raw cosine of a second-shell bond with another
+first-shell bond is \(1/3\) when the arm is staggered and \(7/9\) when
+it is eclipsed. The fast path compares the squares \(1/9\) and \(49/81\).
+An arm is eclipsed when the best square is at least \(0.36\), and
+staggered when that square is at most \(0.25\). The azimuthal cosine,
+after both bonds are projected perpendicular to the central bond, calls
+an arm eclipsed above \(0.90\).
+
+~seams_frame_symmetry~ writes one integer per atom. The second argument
+is that ceiling, and \(0.12\) is the value the CLI uses. Labels are
+0 ice Ih, 1 ice Ic, 2 stacking-disordered, and \(-1\) otherwise.
+~seams symmetry~ prints the space group, one shell overlay, and the tally.
+
+#+begin_export rst
+The call is on :doc:`/stable/cpp`.
+#+end_export
+
 * Cages, rings, and the other codes
 
 The same in-tree matcher names a cage or a ring.

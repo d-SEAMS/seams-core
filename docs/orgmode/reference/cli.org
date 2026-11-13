@@ -91,7 +91,8 @@ load filter and is not that mask. Ice names are the
 is optional. The volume is ~nneigh::dumpVolume~ (det of dump ~H~).
 ~cn~ integrates the site-site RDF to that cutoff
 (~rdf::coordinationNumber~). Help text and the ~cn~ header say
-~site-site~. There is no cage CN and no ~--ions~.
+~site-site~. ~cn --ions --site~ is the cage degree, documented in the
+next paragraph.
 
 ~cn --ions --site SPEC~ builds ~site::ionCloud~ and prints the mean
 unlike degree of type-1 (cation) vertices from

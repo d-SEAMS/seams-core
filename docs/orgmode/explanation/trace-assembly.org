@@ -1,0 +1,50 @@
+#+TITLE: TRACE and signature cages
+#+OPTIONS: toc:nil num:nil
+
+TRACE (Hsu and Lin, J. Chem. Theory Comput. 2025,
+[[https://doi.org/10.1021/acs.jctc.5c01459][10.1021/acs.jctc.5c01459]])
+assembles hydrate cages from a hydrogen-bond graph. d-SEAMS answers
+the oxygen question: which rings tile a closed polyhedron of a given
+face census. The timed comparison is the how-to
+[[file:../howto/cages-trace.org][Cages and TRACE]]. This page is the
+two constructions.
+
+* The hydrogen-bond cage
+
+TRACE places one hydrogen \(0.96\,\text{Å}\) from each oxygen along each
+of the two nearest oxygen-oxygen bonds, then keeps a bond when the
+donor-acceptor distance is inside \(0.35\,\text{nm}\) and the angle at
+the donor is within \(35^\circ\) of linear. Cups are grown by depth-first
+search and closed when the face list matches a hydrate polyhedron.
+The three census strings used in the sitting are \(5^{12}\),
+\(5^{12}6^{2}\) and \(5^{12}6^{4}\).
+
+d-SEAMS does not place those hydrogens and does not call TRACE. On ice,
+which has no five-rings, both searches report no cage of those three
+kinds. The numbers are in the rc3 sitting tables.
+
+* A closed face list
+
+~seams_frame_signature~ and ~seams cages --signature~ count a set of
+primitive rings as one cage when two conditions hold. Every vertex of
+the surface lies on at least three faces that close around it, and the
+cell is a topological sphere:
+
+\[
+V - E + F = 2.
+\]
+
+\(F\) is the number of faces, \(E\) the number of distinct edges, and
+\(V\) the number of distinct vertices. A ring whose minimum-image bonds
+sum to a nonzero lattice vector winds through the periodic cell and is
+dropped before this test. The default face-edge window is
+\([2.65, 3.15]\) in the coordinate units of the file. ~none~ leaves the
+bound to the census alone.
+
+The string ~512~ is twelve pentagons. ~51262~ is twelve pentagons and
+two hexagons. The C entry that takes the window is
+~seams_frame_signature_edge~.
+
+#+begin_export rst
+Both calls are on :doc:`/stable/cpp`.
+#+end_export

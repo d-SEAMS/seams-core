@@ -10,10 +10,17 @@
   biasable either: a `RESTRAINT` on `seams.ice` or `seams.ring` is rejected
   because those components carry no derivatives.
 
+`meson test plumed_driver` runs `engines/plumed/plumed.dat`. The collective
+variable calls `seams_q4q6` and `seams_rings_find` after scaling internal
+nanometres to angstroms. The q6 derivative uses a 0.001 angstrom step and
+multiplies by 10 so PLUMED sees a per-nanometre derivative.
+
+```{literalinclude} ../../../engines/plumed/plumed.dat
 ```
-seams: SEAMS ATOMS=1-64 CUTOFF=3.5
-RESTRAINT ARG=seams.q6 AT=0.5 KAPPA=10.0
-PRINT ARG=seams.q6,seams.ice,seams.ring FILE=colvar
+
+```{literalinclude} ../../../engines/plumed/SeamsColvar.cpp
+:language: cpp
+:lines: 54-85
 ```
 
 PLUMED stores positions in nanometres. `getPosition` and `getBox` are those

@@ -24,6 +24,7 @@ fn diamond(nrep: usize) -> (Vec<f64>, f64) {
 fn cubic_ice_through_the_c_api() {
     seams::set_num_threads(1).unwrap();
     assert_eq!(seams::num_threads(), 1);
+    assert!(!seams::version().is_empty());
     let (xyz, length) = diamond(2);
     let mut sys = seams::System::new().unwrap();
     sys.set_ortho(&xyz, length, length, length).unwrap();
@@ -32,6 +33,7 @@ fn cubic_ice_through_the_c_api() {
         .unwrap();
     assert!(labels.iter().all(|label| *label == 0));
     assert_eq!(counts[0] as usize, labels.len());
+    assert_eq!(sys.count() as usize, labels.len());
     let (_, counts) = sys
         .chill_plus(3.5, seams_sys::SEAMS_GRAPH_MUTUAL, seams_sys::SEAMS_CHILL_OVITO)
         .unwrap();

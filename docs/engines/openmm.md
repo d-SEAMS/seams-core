@@ -5,12 +5,18 @@ There is one reporter, `DseamsReporter` in
 positions every `interval` steps. `report` reads the context in angstrom
 and calls `InSitu.observe`.
 
-```python
-from dseams_insitu.engine import InSitu
-from dseams_insitu.openmm import DseamsReporter
+`meson test openmm_reporter` runs `engines/openmm/test_reporter.py`.
+`meson test openmm_plugin` runs `engines/openmm/plugin.cpp`, which calls
+`seams_chill_plus` after scaling OpenMM nanometres by 10.
 
-engine = InSitu()
-simulation.reporters.append(DseamsReporter(engine, "unused", interval=1))
+```{literalinclude} ../../../engines/openmm/test_reporter.py
+:language: python
+:lines: 12-14,58-61
+```
+
+```{literalinclude} ../../../engines/openmm/plugin.cpp
+:language: cpp
+:lines: 46-56
 ```
 
 `engines/openmm/test_reporter.py` builds an 8-atom cubic cell, a zero

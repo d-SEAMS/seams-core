@@ -109,10 +109,11 @@ The corresponding `bibtex` entry is:
 # Compilation
 
 The live builds are `pixi` + meson, or the Nix flake. This repository
-builds `libyodaLib` and the `seams` CLI. Lua is
+builds `libyodaLib`, `libseams`, and the `seams` CLI. The in-tree
+Python module is `import dseams`. The released Frame package is
+[PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib). Lua is
 [yodaStruct](https://github.com/d-SEAMS/yodaStruct)
-(`require("dseams")`). Python is
-[PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib).
+(`require("dseams")`).
 
 ```bash
 pixi run setup && pixi run build && pixi run test

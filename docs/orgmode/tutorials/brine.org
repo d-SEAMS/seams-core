@@ -1,0 +1,25 @@
+#+TITLE: Brine and NaCl
+#+OPTIONS: toc:nil num:nil
+
+~input/traj/nacl_front.lammpstrj~ is the 864-molecule interface with
+nine ions added. Type 1 is water. Types 3 and 4 are chloride and
+sodium. One chloride sits in a slab that CHILL+ calls fully
+crystalline. The other eight ions sit in liquid slabs.
+~meson test docs_tutorial_brine~ checks that split.
+
+CHILL+ is run on the water alone, so an ion is not given an ice
+label. Each ion is then counted in the 3.7 Å slab that contains it.
+A slab is ice when at least half of its water is cubic, hexagonal,
+reCubic or reHex.
+
+| slab | ions | side |
+|------+------+------|
+| 3 | 1 | ice |
+| 9 | 2 | liquid |
+| 10 | 2 | liquid |
+| 12 | 2 | liquid |
+| 13 | 2 | liquid |
+
+One ion is on the ice side of the front and eight are on the liquid
+side. The water census is unchanged from the ion-free frame:
+hexagonal 352.

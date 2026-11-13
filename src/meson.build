@@ -198,3 +198,30 @@ seams_api_test = executable(
   c_args: ['-I' + meson.current_build_dir()])
 
 test('seams_c_api', seams_api_test, timeout: 180)
+
+docs_ice_example = executable(
+  'docs_ice_example',
+  files('../docs/examples/ice.c'),
+  link_with: seams_api_lib,
+  include_directories: include_directories('../include'),
+  c_args: ['-I' + meson.current_build_dir()],
+  link_args: ['-lm'])
+test('docs_ice_example', docs_ice_example, suite: 'docs', timeout: 60)
+
+docs_api_cpp = executable(
+  'docs_api_cpp',
+  files('../docs/examples/ice.cpp'),
+  link_with: seams_api_lib,
+  include_directories: include_directories('../include'),
+  cpp_args: ['-I' + meson.current_build_dir()],
+  link_args: ['-lm'])
+test('docs_api_cpp', docs_api_cpp, suite: 'docs', timeout: 60)
+
+docs_quickstart_c = executable(
+  'docs_quickstart_c',
+  files('../docs/examples/quickstart.c'),
+  link_with: seams_api_lib,
+  include_directories: include_directories('../include'),
+  c_args: ['-I' + meson.current_build_dir()],
+  link_args: ['-lm'])
+test('docs_quickstart_c', docs_quickstart_c, suite: 'docs', timeout: 60)

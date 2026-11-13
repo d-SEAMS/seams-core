@@ -1,0 +1,58 @@
+#+TITLE: Carried rings and the hop ball
+#+OPTIONS: toc:nil num:nil
+
+A trajectory frame shares almost every bond with the frame before it.
+~primitive::RingUpdater~ recomputes only the rings that can have
+changed, and the result equals ~primitive::ringNetwork~ on that frame.
+The measured speedups are the how-to
+[[file:../howto/linkcell-carried.org][Linkcell neighbours and carried updates]].
+
+* What can change
+
+Let \(G\) and \(G'\) be the neighbour graphs of two consecutive frames,
+and let \(C\) be the vertices whose adjacency row differs. Those
+vertices are the endpoints of every added or removed edge. Write \(D\)
+for the deepest ring the search keeps, and
+
+\[
+L = \lfloor D/2 \rfloor, \qquad
+r = \lfloor (L - 2)/2 \rfloor.
+\]
+
+A cycle of at most \(D\) members is a primitive ring of one graph and
+not of the other only if it contains a changed edge, or a changed edge
+lies on a shortcut between two of its members. One endpoint of that
+shortcut then lies within \(r\) edges of a ring member. Every ring that
+differs therefore meets \(T\), the set of vertices within distance \(r\)
+of \(C\) in the union of \(G\) and \(G'\).
+
+For \(D \le 7\), \(r = 0\), so \(T = C\). The update drops the stored
+rings that meet \(T\) and adds the rings of \(G'\) that meet \(T\). Each
+new ring is enumerated once, from its lowest-indexed member in \(T\).
+Rings stay in the canonical order of ~ringNetwork~, so the lists compare
+equal element by element.
+
+The balls used by the longer primitive test are refreshed only when an
+edge within \(L - 1\) of a vertex changes. ~--rebuild~, a single frame,
+and a worker pool above one thread turn the carry off and call
+~ringNetwork~ on every frame.
+
+When the carry stays on, enumerating the changed sources uses
+~sourceTeam~. That search stays on the calling thread until those
+sources fill the workers, about 80 sources for each thread. A few
+hundred changed vertices are still one thread. That width is not
+~teamFor~. On one thread the update then copies the new rings and
+sorts them directly, and merges the rings that stay with a direct
+walk. Several threads sort the indices, scan for rings that meet
+\(T\), and merge the kept rings with ~teamFor~. Dropped ring buffers
+are kept for the next update. The timed carried update is the hop
+kernel on [[file:trace-threads.org][the thread-control page]], retimed
+in ~benchmarks/pool-audit.csv~ at ~1ce3be3b~.
+
+~seams_frame_chill_rings~ is the language call that can keep a neighbour
+list across frames when a skin is set. The ring carry itself is the
+updater above, used by a sequential ~seams~ frame walk.
+
+#+begin_export rst
+The ring calls are on :doc:`/stable/c` and :doc:`/stable/cpp`.
+#+end_export

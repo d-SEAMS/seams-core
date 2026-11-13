@@ -745,6 +745,145 @@ if get_option('with_cli')
 
   python3 = find_program('python3', required: true)
   test(
+    'docs_check',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_examples.py'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_table_csv',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_tables.py'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_changelog',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_changelog.py', '--check'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_c_symbols',
+    python3,
+    args: ['-m', 'doctest', meson.project_source_root() / 'docs' / 'check_c_symbols.py'],
+    workdir: meson.project_source_root() / 'docs',
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_sitting',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_trace_threads',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-trace'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_pool_audit',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-pool'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_sitting_large',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-large'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_h2h_threads',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-h2h'],
+    suite: 'docs',
+    timeout: 60)
+  tutorial_env = environment()
+  tutorial_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+  test(
+    'docs_quickstart_py',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_quickstart.py',
+      meson.project_build_root() / 'src',
+    ],
+    env: tutorial_env,
+    suite: 'docs',
+    depends: [seams_api_lib],
+    timeout: 60)
+  test(
+    'docs_tutorial_clathrate',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'tutorials' / 'test_clathrate.py',
+      meson.project_source_root(),
+      seams_exe.full_path(),
+      meson.project_build_root() / 'src',
+    ],
+    depends: [seams_exe],
+    suite: 'docs',
+    timeout: 180)
+  test(
+    'docs_tutorial_interface',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'tutorials' / 'test_interface.py',
+      meson.project_source_root(),
+      seams_exe.full_path(),
+      meson.project_build_root() / 'src',
+    ],
+    env: tutorial_env,
+    depends: [seams_exe],
+    suite: 'docs',
+    timeout: 120)
+  test(
+    'docs_tutorial_nucleation',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'tutorials' / 'test_nucleation.py',
+      meson.project_source_root(),
+      meson.project_build_root() / 'src',
+    ],
+    env: tutorial_env,
+    depends: [seams_api_lib],
+    suite: 'docs',
+    timeout: 180)
+  test(
+    'docs_tutorial_brine',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'tutorials' / 'test_brine.py',
+      meson.project_source_root(),
+      meson.project_build_root() / 'src',
+    ],
+    env: tutorial_env,
+    depends: [seams_api_lib],
+    suite: 'docs',
+    timeout: 120)
+  test(
+    'docs_tutorial_insitu',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'tutorials' / 'test_insitu.py',
+      meson.project_source_root(),
+      meson.project_build_root(),
+    ],
+    env: tutorial_env,
+    suite: 'docs',
+    timeout: 180)
+  test(
+    'engines_tutorial',
+    python3,
+    args: [
+      meson.project_source_root() / 'engines' / 'tutorial_walk.py',
+      meson.project_build_root(),
+    ],
+    env: tutorial_env,
+    depends: [seams_api_lib],
+    suite: 'docs',
+    timeout: 120)
+  test(
     'seams_water_types_cutoff',
     python3,
     args: [
@@ -1023,3 +1162,68 @@ if get_option('with_cli')
 endif
 
 subdir('bindings')
+
+if get_option('with_cli')
+  binding_env = environment()
+  binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+  binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'bindings')
+  test(
+    'docs_api_python',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'python_api.py',
+      meson.project_build_root() / 'src',
+    ],
+    env: binding_env,
+    depends: [seams_api_lib],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_api_fortran',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_binding.py',
+      'fortran',
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_api_lib],
+    suite: 'docs',
+    timeout: 120)
+  test(
+    'docs_api_rust',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_binding.py',
+      'rust',
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_api_lib],
+    suite: 'docs',
+    timeout: 180)
+  test(
+    'docs_api_r',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_binding.py',
+      'r',
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_lang],
+    suite: 'docs',
+    timeout: 300)
+  test(
+    'docs_api_julia',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_binding.py',
+      'julia',
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_lang],
+    suite: 'docs',
+    timeout: 180)
+endif

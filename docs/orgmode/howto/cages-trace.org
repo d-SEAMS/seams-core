@@ -1,0 +1,68 @@
+#+TITLE: Cages and TRACE
+#+OPTIONS: toc:nil num:nil
+
+Ask which molecules sit in a complete ice cage, or which polyhedra
+match a ring-size signature. TRACE, as run by ClavisCage, answers a
+different cage question. This page is the pair of commands and the
+comparison that was actually timed.
+
+* Ice cages
+
+~seams cages~ reports hexagonal (HC, ice Ih), cubic (DDC, ice Ic),
+both, and water. The default graph is ~seeded~: mutual four-nearest
+seeds, then union completions. Water is everything that is not in a
+complete cage.
+
+#+begin_src bash
+seams cages input/traj/exampleTraj.lammpstrj --type 2
+seams cages input/traj/mW_cubic.lammpstrj --type 1
+#+end_src
+
+The mixed frame is ~hexagonal 0 cubic 0 water 250~. The 4096-molecule
+cubic mW cell is ~cubic 4096~. ~tests/cli_surface.py~ runs the mixed
+frame and the signature census:
+
+#+begin_src python
+# excerpt: tests/cli_surface.py
+        ["cages", tip, "--type", "2"],
+        ["rings", tip, "--type", "2"],
+        ["prisms", ice, "--type", "1"],
+        ["cluster", tip, "--type", "2"],
+        ["cages", tip, "--graph", "cutoff", "--cutoff", "3.5", "--type", "2"],
+        ["cages", ice, "--graph", "mutual", "--type", "1", "--signature", "512"],
+#+end_src
+
+* A signature
+
+~--signature 512~ counts closed 5^{12} cages. ~--signature 51262~ is
+5^{12}6^{2}. ~--cage-edge none~ leaves the bound to the face census.
+~--guest-types~ places guests. The C call is ~seams_frame_signature~.
+
+#+begin_src bash
+seams cages input/traj/genice_sI.lammpstrj --type 1 --graph cutoff --signature 512
+#+end_src
+
+The language test reads that cell and requires 2 cages and 40 atoms
+when the edge window is the default, and the same counts when the
+window is ~none~.
+
+* TRACE
+
+ClavisCage 0.3.18 runs TRACE, the hydrogen-bond cage search of Hsu and
+Lin (JCTC 2025). Hydrogens are placed 0.96 Å along the two nearest
+oxygen-oxygen bonds. d-SEAMS times the 5^{12} count from
+~seams_frame_signature~ and reads the 5^{12}6^{2} and 5^{12}6^{4}
+counts on the same graph. TRACE uses its default 0.35 nm cutoff and a
+35 degree angle.
+
+On ice, and on the TIP4P oxygens, both codes then use the four nearest
+neighbours, because a 0.35 nm shell of the dense frame has median
+degree 56 and TRACE does not return on it. Every such frame reports no
+cage of those three kinds. Ice has no five-rings, so a dodecahedron is
+absent. At 110592 molecules of ice Ic the d-SEAMS count is 59.557 ms
+on one thread and 15.924 ms on eight, against TRACE at 368.404 ms and
+367.804 ms. Both counts are zero cages. The full table is
+[[file:literature-h2h.org][Literature head-to-head]].
+
+d-SEAMS does not shell out to TRACE. The numbers above are the sitting
+recorded in that how-to.

@@ -59,15 +59,24 @@ d-SEAMS (Deferred Structural Elucidation Analysis for Molecular
 Simulations) classifies ice in molecular-dynamics trajectories. This
 repository is the C++ engine (~libyodaLib~) and the ~seams~ CLI.
 
+The first classification is five lines. Install with
+~pip install pydseamslib~ for the Frame package, with conda-forge's
+Meson toolchain, or with ~meson setup build && meson compile -C build~,
+then run the Python and C programs on
+[[file:quickstart.org][the quick start]]. Both report 8 cubic molecules.
+
 #+begin_src bash
 seams read water.lammpstrj
 seams chill-plus water.lammpstrj --cutoff 3.5
 seams cages water.lammpstrj
 #+end_src
 
-Scripting front ends are separate packages:
+2.14.0 ships ~libseams~ (~seams.h~) and ~libseams_lang~ in this
+tree, with C, C++, Fortran, Rust, Python (~import dseams~), Julia, and
+R fronts, plus LAMMPS, GROMACS, OpenMM, PLUMED, and in-situ hooks.
+The released Frame package and the Lua library stay separate:
 
-- Python: ~pydseams~ ([[https://d-seams.github.io/PydSEAMSlib/][Python docs]],
+- Python Frame: ~pydseams~ ([[https://d-seams.github.io/PydSEAMSlib/][Python docs]],
   [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]), compiled
   module ~yoda~
 - Lua/Fennel: ~dseams~ ([[https://d-seams.github.io/yodaStruct/][Lua docs]],
@@ -88,16 +97,20 @@ Build with a Nix flake (~nix build~, ~nix develop~) or with
    flowchart TB
      subgraph engine["seams-core"]
        LIB[libyodaLib]
+       API[libseams]
        CLI[seams CLI]
      end
      subgraph fronts["Front ends"]
        PY[pydseams Frame]
+       DS[import dseams]
        LUA["require(\"dseams\")"]
      end
      LC[linkcell]
      DUMP[LAMMPS / XYZ / chemfiles / con] --> LIB
      LC --> LIB
-     LIB --> CLI
+     LIB --> API
+     API --> CLI
+     API --> DS
      LIB --> PY
      LIB --> LUA
      CLI --> OUT[stdout counts]

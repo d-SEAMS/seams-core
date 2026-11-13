@@ -20,3 +20,16 @@ box that is neither 3 nor 9 numbers is accepted:
 ```bash
 meson test -C build insitu_observe --print-errorlogs
 ```
+
+`observe` stores a length-3 box as `0, 0, 0, lx, ly, lz, 0, 0, 0` and
+classifies through `seams_frame_chill_rings`.
+
+```{literalinclude} ../../../engines/insitu_observe.py
+:language: python
+:lines: 38-40
+```
+
+```{literalinclude} ../../../adapters/python/dseams_insitu/engine.py
+:language: python
+:lines: 199-205
+```
