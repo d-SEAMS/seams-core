@@ -208,10 +208,14 @@ void binCutoffRows(std::size_t count, const Ends &ends,
                                subset[static_cast<std::size_t>(j)]};
   };
   int threads = 1;
-  // nvc++ -mp=gpu SIGSEGVs host parallel regions in libnvomp
+  // The parallel sort forks a team that has just been idle through the
+  // linkcell search. Waking it is several milliseconds on some samples
+  // and tens on others, which is slower than placing the rows on the
+  // calling thread. Keep the parallel path for a list that is large
+  // enough for that wake to be the smaller term.
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-  if (!gSerialCutoff && nop >= kParallelRowsMinAtoms && !omp_in_parallel() &&
-      omp_get_max_threads() > 1) {
+  if (!gSerialCutoff && nop >= kParallelRowsMinAtoms && count >= (1u << 20) &&
+      !omp_in_parallel() && omp_get_max_threads() > 1) {
     threads = omp_get_max_threads();
   }
 #endif
