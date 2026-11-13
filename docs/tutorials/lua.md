@@ -61,7 +61,15 @@ rings 3 37 4 273 5 34 6 167 7 0 8 0 fraction 1.000000
 
 `docs/examples/lua_analyses.lua` calls the remaining names on
 `input/traj/ice1h.lammpstrj`, then the cage signature on the sI guest
-frame. The printed lines are:
+frame. `docs/examples/core_counts.lua` checks that cell and sII:
+128 hexagonal waters, 256 six-rings, 136 clathrate waters, 144
+five-rings and 16 six-rings. `meson test docs_core_counts` runs it.
+
+```{literalinclude} ../../../docs/examples/core_counts.lua
+:language: lua
+```
+
+The printed lines are:
 
 ```
 hexagonal 128

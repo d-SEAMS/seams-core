@@ -95,6 +95,15 @@ is the 46-oxygen sI cage. `input/traj/exampleTraj.lammpstrj` is the mixed TIP4P 
 used for hydrogen bonds, sites, and domains. The cutoff is 3.5 angstroms unless a
 line below says otherwise.
 
+`docs/examples/core_counts.c` reads `input/traj/ice1h.lammpstrj` and
+`input/traj/genice_sII.lammpstrj` and checks the C core: 128 hexagonal
+waters and 256 six-rings, then 136 clathrate waters, 144 five-rings and
+16 six-rings. `meson test docs_core_counts` compiles and runs it.
+
+```{literalinclude} ../../../docs/examples/core_counts.c
+:language: c
+```
+
 ## Functions
 
 

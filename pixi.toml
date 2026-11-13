@@ -143,7 +143,7 @@ cmd = "python3 ../../scripts/doxygen_version_header.py && doxygen Doxyfile_seams
 
 [feature.docs.tasks.sphinxbld]
 depends-on = ["mkrst", "doxybuild"]
-cmd = "sphinx-build -W -b html -d docs/doctrees docs/source/ docs/build"
+cmd = "sphinx-build -W --keep-going -b html -d docs/doctrees docs/source/ docs/build"
 
 [feature.docs.tasks.fetch-doxyyoda]
 description = "Download the doxyYoda 0.2.2 HTML theme"

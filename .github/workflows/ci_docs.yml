@@ -17,6 +17,33 @@ jobs:
           cache-key: pixi-docs-
       - run: pixi run -e docs docbld
 
+      - name: Link check
+        run: pixi run -e docs sphinx-build -W --keep-going -b linkcheck -d docs/doctrees docs/source docs/linkcheck
+
+      - name: Build the library the examples call
+        uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-default-
+
+      - name: Language runtimes
+        run: sudo apt-get update && sudo apt-get install -y lua5.4 liblua5.4-dev r-base-core gfortran
+
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: "1.10"
+
+      - run: pixi run -e default setup
+      - run: pixi run -e default build
+      - name: Ice Ih and sII examples
+        run: pixi run -e default meson test -C bbdir docs_core_counts --print-errorlogs
+
+      - name: Python doctest
+        run: |
+          export SEAMS_LIBDIR="$PWD/bbdir/src"
+          export LD_LIBRARY_PATH="$PWD/bbdir/src:$PWD/bbdir/bindings${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+          pixi run -e docs sphinx-build -W --keep-going -b doctest -d docs/doctrees docs/source docs/doctest
+
       - name: Deploy to GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0

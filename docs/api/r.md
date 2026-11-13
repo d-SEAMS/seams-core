@@ -1,9 +1,27 @@
 # R
 
-The package is `bindings/r/dseams`. `libseams_lang` serves the frame
-generics. `libseams` serves `seams_system_new` and the analyses named
-`seams_*`. roxygen2 writes `man/` and `NAMESPACE`. pkgdown renders the
-package site from `_pkgdown.yml`.
+d-SEAMS 2.14.0. The package is `bindings/r/dseams`. `libseams_lang`
+serves the frame generics through cpp11. `libseams` serves
+`seams_system_new` and the analyses named `seams_*`. roxygen2 writes
+`man/` and `NAMESPACE`. pkgdown renders the package site from
+`_pkgdown.yml`. The exported frames are `read_frame`, `nframes`,
+`positions`, `chill_plus`, `cages`, `primitive_rings`,
+`signature_cages`, `symmetry`, `steinhardt`, `q4_q6`, and `jump_tau90`.
+`print` on a frame dispatches to `print.dseams_frame`.
+The methods are `positions.dseams_frame`, `chill_plus.dseams_frame`,
+`cages.dseams_frame`, `primitive_rings.dseams_frame`,
+`signature_cages.dseams_frame`, `symmetry.dseams_frame`,
+`steinhardt.dseams_frame`, and `q4_q6.dseams_frame`.
+
+`docs/examples/core_counts.R` checks Ice Ih (128 hexagonal, 256
+six-rings) and sII (136 clathrate, 144 five-rings, 16 six-rings).
+`meson test docs_core_counts` runs it.
+
+```{literalinclude} ../../../docs/examples/core_counts.R
+:language: r
+```
+
+Build the library, then install the package against it:
 
 ```bash
 meson setup build -Dwith_tests=true

@@ -81,6 +81,14 @@ The built reference is linked from this book:
 and <a href="../julia-seams/index.html">Seams Documenter reference</a>.</p>
 ```
 
+`docs/examples/core_counts.jl` checks Ice Ih (128 hexagonal, 256
+six-rings) and sII (136 clathrate, 144 five-rings, 16 six-rings).
+`meson test docs_core_counts` runs it.
+
+```{literalinclude} ../../../docs/examples/core_counts.jl
+:language: julia
+```
+
 ```{literalinclude} ../../../docs/examples/minimal_julia.jl
 :language: julia
 ```

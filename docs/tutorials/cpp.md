@@ -9,7 +9,11 @@ meson compile -C build test_seams_api docs_ice_example
 ./build/src/docs_ice_example
 ```
 
-`test_seams_api` is the `seams_c_api` test. `docs_ice_example` is the eight-atom program in `docs/examples/ice.c`.
+`test_seams_api` is the `seams_c_api` test. `docs_ice_example` is the eight-atom program in `docs/examples/ice.c`. `docs/examples/core_counts.cpp` checks Ice Ih and sII. `meson test docs_core_counts` runs it.
+
+```{literalinclude} ../../../docs/examples/core_counts.cpp
+:language: cpp
+```
 
 ```bash
 meson test -C build seams_c_api --print-errorlogs

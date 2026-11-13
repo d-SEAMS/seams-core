@@ -2,7 +2,11 @@
 
 `bindings/julia/Dseams` is the package CI tests. It calls `libseams_lang` and covers rings, cages, and the TIP4P counts. `bindings/julia/Seams` is the thin `libseams` example (`examples/ice.jl` builds an eight-atom diamond cell).
 
-The cubic mW dump is ice Ic. CHILL+ labels all 4096 oxygens cubic.
+The cubic mW dump is ice Ic. CHILL+ labels all 4096 oxygens cubic. `docs/examples/core_counts.jl` checks Ice Ih and sII. `meson test docs_core_counts` runs it.
+
+```{literalinclude} ../../../docs/examples/core_counts.jl
+:language: julia
+```
 
 ```{literalinclude} ../../../bindings/julia/Dseams/test/runtests.jl
 :language: julia

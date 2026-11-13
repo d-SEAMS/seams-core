@@ -1419,6 +1419,18 @@ if get_option('with_cli')
   binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
   binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'bindings')
   test(
+    'docs_core_counts',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_core_counts.py',
+      meson.project_source_root(),
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_api_lib, seams_lang],
+    suite: 'docs',
+    timeout: 300)
+  test(
     'docs_examples',
     python3,
     args: [

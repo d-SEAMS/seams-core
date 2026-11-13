@@ -25,6 +25,13 @@ The wider language ABI remains `libseams_lang` (`seams_frame_*`). A program
 that only needs `seams.hpp` does not link it. `docs/examples/minimal_cpp.cpp`
 is that ABI on the GenIce sI cell. `meson test docs_examples` runs it.
 
+`docs/examples/core_counts.cpp` is the same census on Ice Ih and sII.
+`meson test docs_core_counts` runs it.
+
+```{literalinclude} ../../../docs/examples/core_counts.cpp
+:language: cpp
+```
+
 ```{literalinclude} ../../../docs/examples/minimal_cpp.cpp
 :language: cpp
 ```
