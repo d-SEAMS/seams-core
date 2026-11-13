@@ -1,0 +1,18 @@
+sitting one
+warmup 1
+n 8
+frame ideal ice Ic 110592
+checksum sink is the atom count, crystal is labels >= 0
+PTM default is FCC HCP BCC; ice is cubic and hexagonal diamond, rmsd 0.1
+classifier threads 1 median_ms 43.181700 iqr_ms 4.127975 sink 110592 crystal 110592 samples 41.222200 45.739700 39.655200 46.494700 43.458800 38.691600 44.698000 42.904600
+ptm default threads 1 median_ms 1487.650335 iqr_ms 26.726135 samples 1519.262902 1470.535076 1481.920338 1474.790479 1493.380333 1513.056144 1498.779595 1475.899970
+ptm ice threads 1 median_ms 2728.768986 iqr_ms 17.556691 samples 2735.407144 2720.528347 2736.501316 2709.377839 2724.307969 2733.230003 2740.825055 2710.910944
+classifier threads 8 median_ms 13.502150 iqr_ms 0.439425 sink 110592 crystal 110592 samples 13.931900 13.664800 13.108600 13.193000 13.308600 13.339500 13.718200 13.721900
+ptm default threads 8 median_ms 207.289673 iqr_ms 4.726098 samples 217.690358 207.128647 204.614646 205.049605 210.463967 209.560562 205.063885 207.450700
+ptm ice threads 8 median_ms 373.206306 iqr_ms 2.282125 samples 370.321799 374.739909 374.183613 371.737441 373.254371 379.863093 373.158242 372.141602
+ratio classifier threads 1 this_over_classifier 1.000000 classifier_over_this 1.000000
+ratio PTM-default threads 1 this_over_classifier 34.450944 classifier_over_this 0.029027
+ratio PTM-ice threads 1 this_over_classifier 63.192718 classifier_over_this 0.015825
+ratio classifier threads 8 this_over_classifier 1.000000 classifier_over_this 1.000000
+ratio PTM-default threads 8 this_over_classifier 15.352346 classifier_over_this 0.065137
+ratio PTM-ice threads 8 this_over_classifier 27.640510 classifier_over_this 0.036179

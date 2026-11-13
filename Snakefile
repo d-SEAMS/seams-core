@@ -521,6 +521,20 @@ rule paper_ptm_templates:
         "python3 scripts/paper_ptm_templates.py --out benchmarks/paper-cells"
 
 
+rule paper_symmetry_vs_ptm:
+    input:
+        "scripts/paper_symmetry_sitting.py",
+        "scripts/paper_ptm_templates.py",
+        "scripts/paper_stats.py",
+        "bbdir-release/tests/bench_v2",
+        "bbdir-release/src/libyodaLib.so",
+    output:
+        "benchmarks/paper-cells/symmetry-vs-ptm.csv",
+        "benchmarks/paper-cells/raw-symmetry-vs-ptm.txt",
+    shell:
+        "python3 scripts/paper_symmetry_sitting.py --timing --out benchmarks/paper-cells"
+
+
 rule paper_q6:
     input:
         "scripts/thread_scale_time.py",

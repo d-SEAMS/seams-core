@@ -1,0 +1,27 @@
+frame equil.lammpstrj
+source TIP4P/2005 ice/water slab after hop equilibration
+no 230 K brine trajectory is in the tree
+oxygens 4096
+original ice molecules 2048
+original liquid molecules 2048
+CHILL+ hexagonal is type 1; interfacial ice is type 3
+extra hexagonal (classifier other, CHILL+ hexagonal) 903
+of those, original ice 883
+of those, within 3.5 A of the crystal z edge 235
+crystal-neighbour count among the four nearest 0:255 1:358 2:258 3:30 4:2
+gate fewer-than-4-within-3.5 0
+gate four-nearest-outside-2.30-3.35 9
+gate tetrahedral-q-below-0.94 606
+gate no-crystal-neighbour 97
+gate passes-early-gates 191
+agree PTM other Other 2643 of 3134
+agree PTM other hex-diamond 491 of 3134
+agree PTM Ih Other 52 of 962
+agree PTM Ih hex-diamond 910 of 962
+agree CHILL+ other Other 1856 of 3134
+agree CHILL+ other hexagonal-ice 903 of 3134
+agree CHILL+ other interfacial-ice 242 of 3134
+agree CHILL+ other hydrate 16 of 3134
+agree CHILL+ other interfacial-hydrate 117 of 3134
+agree CHILL+ Ih hexagonal-ice 959 of 962
+agree CHILL+ Ih interfacial-ice 3 of 962
