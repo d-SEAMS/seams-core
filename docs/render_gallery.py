@@ -222,7 +222,7 @@ def render_atoms(path, positions, colors, radii, bonds, bond_positions, size):
     import ovito
     from ovito.data import DataCollection, Particles
     from ovito.pipeline import Pipeline, StaticSource
-    from ovito.vis import OSPRayRenderer, TachyonRenderer, Viewport
+    from ovito.vis import TachyonRenderer, Viewport
 
     while ovito.scene.pipelines:
         ovito.scene.pipelines[0].remove_from_scene()
@@ -251,22 +251,13 @@ def render_atoms(path, positions, colors, radii, bonds, bond_positions, size):
             antialiasing_samples=6,
             shadows=True,
         )
-        try:
-            view.render_image(
-                filename=str(path),
-                size=size,
-                background=(1, 1, 1),
-                renderer=renderer,
-            )
-            engine = "tachyon"
-        except Exception:
-            view.render_image(
-                filename=str(path),
-                size=size,
-                background=(1, 1, 1),
-                renderer=OSPRayRenderer(ambient_light_enabled=True, samples_per_pixel=8),
-            )
-            engine = "ospray"
+        view.render_image(
+            filename=str(path),
+            size=size,
+            background=(1, 1, 1),
+            renderer=renderer,
+        )
+        engine = "tachyon"
         world_height = 2.0 * float(view.fov)
         return engine, world_height
     finally:
@@ -338,7 +329,7 @@ def render_matplotlib(path, positions, colors, radii, bonds, bond_positions, leg
     axis = figure.add_axes((0.04, 0.08, 0.68, 0.86), projection="3d")
     sizes = 8.0 if radii is None else radii * 10.0
     axis.scatter(positions[:, 0], positions[:, 1], positions[:, 2], c=colors, s=sizes, depthshade=False)
-    if bonds and bond_positions is not None:
+    if bonds is not None and len(bonds) and bond_positions is not None:
         step = max(1, len(bonds) // 4000)
         for left, right in bonds[::step]:
             segment = bond_positions[[left, right]]

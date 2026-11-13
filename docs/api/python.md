@@ -126,6 +126,16 @@ The nanobind module and the language-binding examples stay below.
 positions and the nine-number box. `dseams.from_mdanalysis(universe)` reads
 `universe.dimensions` (lengths and angles) and `universe.atoms.positions`.
 
+```python
+# excerpt: bindings/python/dseams/__init__.py
+def from_ase(atoms):
+```
+
+```python
+# excerpt: bindings/python/dseams/__init__.py
+def from_mdanalysis(universe, select="all"):
+```
+
 `python -m dseams` labels one cubic cell.
 
 `cages`, `signature_cages`, and `symmetry` load `libseams_lang` through

@@ -647,6 +647,23 @@ RENDER_ENGINE = "cycles"
 PANEL_NAME = "panel"
 
 
+def cycles_env(base=None):
+    """Library path that can load bpy's X11 dependencies.
+
+    The interpreter RPATH hides the host cache, so libXrender and its
+    siblings are only found when their directory is named here.
+    """
+    env = os.environ.copy() if base is None else base
+    extra = [
+        path
+        for path in ("/usr/lib/x86_64-linux-gnu", "/lib/x86_64-linux-gnu")
+        if os.path.isdir(path)
+    ]
+    current = env.get("LD_LIBRARY_PATH", "")
+    env["LD_LIBRARY_PATH"] = os.pathsep.join(extra + ([current] if current else []))
+    return env
+
+
 def cycles_python():
     """A Python that can import bpy. None when Cycles is not installed."""
     import subprocess
@@ -668,6 +685,7 @@ def cycles_python():
             [program, "-c", "import bpy"],
             check=False,
             capture_output=True,
+            env=cycles_env(),
         )
         if probe.returncode == 0:
             return program
@@ -1038,7 +1056,7 @@ def cycles_launch(positions, colors, radii, transparency, bonds, meshes, backgro
         payload["mesh_faces_{}".format(slot)] = np.asarray(mesh["faces"], dtype=np.int32)
         payload["mesh_color_{}".format(slot)] = np.asarray(mesh["color"], dtype=np.float64)
     np.savez(handle.name, **payload)
-    env = os.environ.copy()
+    env = cycles_env()
     env["MOLECULES_CYCLES"] = "1"
     env.pop("OMP_NUM_THREADS", None)
     try:

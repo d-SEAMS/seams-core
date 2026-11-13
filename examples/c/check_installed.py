@@ -8,6 +8,16 @@ import sys
 from pathlib import Path
 
 
+def pkg_config_program():
+    """The conda pkg-config wrapper applies PKG_CONFIG_SYSROOT_DIR twice."""
+    found = shutil.which("pkg-config")
+    if found:
+        sibling = Path(found).with_name("pkg-config.bin")
+        if sibling.is_file():
+            return str(sibling)
+    return found or "pkg-config"
+
+
 def run(cmd, env=None, cwd=None):
     subprocess.check_call(cmd, env=env, cwd=cwd)
 
@@ -72,11 +82,12 @@ def main():
     env = os.environ.copy()
     env["PKG_CONFIG_PATH"] = str(pc.parent)
     env["PKG_CONFIG_SYSROOT_DIR"] = str(stage)
+    pkg_config = pkg_config_program()
     cflags = subprocess.check_output(
-        ["pkg-config", "--cflags", "seams"], env=env, text=True
+        [pkg_config, "--cflags", "seams"], env=env, text=True
     ).split()
     libs = subprocess.check_output(
-        ["pkg-config", "--libs", "seams"], env=env, text=True
+        [pkg_config, "--libs", "seams"], env=env, text=True
     ).split()
     binary = work / "quickstart-pkg"
     cc = os.environ.get("CC", "cc")

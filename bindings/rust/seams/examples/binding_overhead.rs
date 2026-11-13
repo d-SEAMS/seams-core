@@ -60,20 +60,45 @@ fn main() {
                 loaded.insert(path.clone(), true);
                 sink += f64::from(sys.count());
             }),
-            "knn" => sys.knn(4, 3.5, true).and_then(|nb| {
-                sink += nb.nnz()? as f64;
-                Ok(())
-            }),
-            "steinhardt" => sys.steinhardt(3.5, 6, true).map(|(ql, bar)| {
-                let extra = bar.as_ref().map(|v| v[0]).unwrap_or(0.0);
-                sink += ql[0] + extra;
-            }),
-            "chill" => sys.chill(3.5, 0, 0, 0).map(|(_labels, counts)| {
-                sink += f64::from(counts[1]);
-            }),
-            "rings" => sys.rings(3.5, 6).map(|rings| {
-                sink += f64::from(rings.count());
-            }),
+            "knn" => sys
+                .knn(&seams::KnnOptions {
+                    k: 4,
+                    cutoff: 3.5,
+                    mutual: true,
+                    ..seams::KnnOptions::default()
+                })
+                .and_then(|nb| {
+                    sink += nb.nnz()? as f64;
+                    Ok(())
+                }),
+            "steinhardt" => sys
+                .steinhardt(&seams::SteinhardtOptions {
+                    cutoff: 3.5,
+                    order: 6,
+                    average: true,
+                    ..seams::SteinhardtOptions::default()
+                })
+                .map(|q| {
+                    let extra = q.average.as_ref().map(|v| v[0]).unwrap_or(0.0);
+                    sink += q.local[0] + extra;
+                }),
+            "chill" => sys
+                .chill(&seams::ChillOptions {
+                    cutoff: 3.5,
+                    ..seams::ChillOptions::default()
+                })
+                .map(|ice| {
+                    sink += f64::from(ice.counts[1]);
+                }),
+            "rings" => sys
+                .rings(&seams::RingOptions {
+                    cutoff: 3.5,
+                    max_size: 6,
+                    ..seams::RingOptions::default()
+                })
+                .map(|rings| {
+                    sink += f64::from(rings.size());
+                }),
             _ => {
                 eprintln!("error {op}");
                 std::process::exit(1);

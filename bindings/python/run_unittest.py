@@ -44,7 +44,10 @@ if os.environ.get("DSEAMS_PY_READY") != "1":
     env = os.environ.copy()
     lib = build / "src"
     env["LD_LIBRARY_PATH"] = str(lib) + os.pathsep + env.get("LD_LIBRARY_PATH", "")
-    env["PYTHONPATH"] = str(stage) + os.pathsep + env.get("PYTHONPATH", "")
+    ctypes_src = root / "src"
+    env["PYTHONPATH"] = os.pathsep.join(
+        [str(stage), str(ctypes_src), env.get("PYTHONPATH", "")]
+    )
     env["DSEAMS_PY_READY"] = "1"
     os.execve(sys.executable, [sys.executable, __file__], env)
 

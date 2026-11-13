@@ -171,7 +171,9 @@ bool mmcifHasData(const std::string &filename) {
   std::string chunk(8192, '\0');
   in.read(chunk.data(), static_cast<std::streamsize>(chunk.size()));
   chunk.resize(static_cast<std::size_t>(std::max<std::streamsize>(in.gcount(), 0)));
-  return chunk.find("data_") != std::string::npos;
+  return chunk.find("data_") != std::string::npos ||
+         chunk.find("_atom_site") != std::string::npos ||
+         chunk.find("_cell.") != std::string::npos;
 }
 
 int sinp::chemfilesSteps(const std::string &filename) {

@@ -449,6 +449,9 @@ ring::findPrisms(const std::vector<std::vector<int>> &rings,
 bool ring::basalPrismConditions(const std::vector<std::vector<int>> &nList,
                                 std::vector<int> &basal1,
                                 std::vector<int> &basal2) {
+  if (basal1.empty() || basal2.empty()) {
+    return false;
+  }
   int l1 = basal1[0]; // first element of basal1 ring
   int ringSize =
       basal1.size(); // Size of the ring; each ring contains n elements

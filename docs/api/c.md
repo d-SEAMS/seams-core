@@ -4,7 +4,7 @@
 A cell is nine numbers: `ox, oy, oz, lx, ly, lz, xy, xz, yz`. A zero tilt is orthorhombic.
 `lx, ly, lz` are edge lengths.
 
-`docs/examples/c_api_tour.c` calls every exported function on the in-tree fixtures.
+`docs/examples/minimal_c.c` is the short program. `docs/examples/c_api_tour.c` calls every exported function on the in-tree fixtures.
 `meson test docs_c_api_tour` compiles that file, runs it, and requires each printed
 `capi` line below to match the run.
 
