@@ -44,6 +44,15 @@ coefficient is the bulk-ice molality divided by the bulk-liquid molality.
 
    The 5 ns frame. Hydrogens are omitted. The cell origin is the lowest hexagonal oxygen, and the coordinates are then wrapped, so the slab is one piece and the periodic image of the brine is not left under the ice. The frame keeps one sphere radius outside the outline, including above the top edge. Liquid oxygens are small and faint. Sodium and chloride use the oxygen scale: Na is 1.0 Å and Cl is 1.8 Å where oxygen is 1.4 Å, drawn at 0.90 for the ice oxygen. The legend writes Na⁺ and Cl⁻ on two balanced rows. Brackets with end ticks mark the brine and the ice Ih slab, with a gap at the front. A dashed line across the cell is the growth front. The axis reads ``depth from lower ice surface (nm)``. The 1 nm bar sits below the legend. CHILL+ on the whole cell is 741 hexagonal, 621 liquid, 89 interfacial, 41 interfacial clathrate, 4 clathrate and no cubic. The picture keeps those non-hexagonal colours only within 1.5 nm of the growth front: 42 interfacial, 37 interfacial clathrate and all 4 clathrate. Farther from the front they are drawn as liquid. Sodium and chloride are not recoloured. The engine and the frame column agree. Sodium is violet and interfacial clathrate is pink. Those two are 31 CIEDE2000 apart. Chloride is black. ``feat/brine-science`` at ``80201fa2`` imports ``scripts/chill_palette.py``. ``paper/data/brine-frames/render_front.py`` in this tree does too.
 
+Paper Fig 18 and SI Figs 25-26 call the same renderer:
+
+.. code-block:: text
+
+   python docs/examples/render_brine.py --xyz T230_m20_r0_tend.xyz --out brine.png --width-mm 85
+
+``--width-mm`` is the atom panel at 300 ppi. ``--out`` is the png, which
+also includes the depth axis and the legend.
+
 What this tells you
 -------------------
 

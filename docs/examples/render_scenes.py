@@ -493,9 +493,12 @@ def present_cage(render, path, origin, vectors, legend, title, forward, up, fram
         y = (0.5 - float(np.dot(offset, up)) / (2.0 * half_v)) * raw.height
         return x, y
 
-    pad = int(np.ceil(float(pad_radius) * raw.width / (2.0 * half_h))) + 4
-    covered = list(corners) + [np.asarray(point, dtype=float) for point in cage_points]
-    image, (crop_x0, crop_y0) = clip_to_padded_cell(raw, raw_pix, covered, pad)
+    # The camera already includes every vertex plus pad_radius. Do not crop:
+    # a crop from the projected vertices was cutting faces that render
+    # outside that projection.
+    image = raw
+    crop_x0 = crop_y0 = 0
+    margin_px = float(pad_radius) * raw.width / (2.0 * half_h)
     left, right_margin, top = 24, 24, 8
     margin = 24 + row_h * 2 + LEGEND_FONT_PX + 48
     canvas = Image.new("RGB", (image.width + left + right_margin, image.height + top + margin), (255, 255, 255))
@@ -549,6 +552,8 @@ def present_cage(render, path, origin, vectors, legend, title, forward, up, fram
     draw.line([(bar_x, bar_y), (bar_x + bar, bar_y)], fill=(20, 20, 20), width=6)
     marks.append(("1 nm bar", (bar_x, bar_y - 4, bar_x + bar, bar_y + 4)))
     add_text("1 nm", (bar_x + bar + 14, bar_y - LEGEND_FONT_PX / 2.0), "1 nm")
+    projected_vertices = [project(point) for point in cage_points]
+    assert_projected_inside(canvas.width, canvas.height, projected_vertices, margin_px)
     require_disjoint(marks)
     canvas.save(path)
 
@@ -576,17 +581,8 @@ def render_host(render, lib, dump, path, kinds, width=1700):
     radii = np.full(len(corners), 0.22)
     forward = np.array([0.55, 0.35, 0.76])
     up = np.array([0.0, 0.0, 1.0])
-    cell = _cell_corners(origin, vectors)
-    import science_render as science
-
-    _forward, right, up_axis = science.basis(forward, up)
-    extra = []
-    for corner in cell:
-        extra.append(corner + 3.0 * right)
-        extra.append(corner - 3.0 * right)
-        extra.append(corner + 3.0 * up_axis)
-        extra.append(corner - 3.0 * up_axis)
-    frame = np.vstack([corners, np.asarray(extra, dtype=float)])
+    # Two angstroms past every vertex, in the view plane, before projection.
+    frame = screen_frame(corners, forward, up, 2.0)
     tachyon_scene(render, path, corners, colours, radii, meshes, forward, up, width, frame=frame)
     title = {"sii": "sII", "sh": "sH"}.get(path.stem, path.stem)
     present_cage(render, path, origin, vectors, legend, title, forward, up, frame, corners, pad_radius=2.0)
@@ -650,6 +646,36 @@ def legend_groups(labels, font, swatch, max_width):
         return groups
     cut = best[1]
     return [list(labels[:cut]), list(labels[cut:])]
+
+
+def screen_frame(points, forward, up, margin):
+    """Corners of the view-plane box around ``points``, grown by ``margin`` angstrom."""
+    import science_render as science
+
+    _forward, right, up_axis = science.basis(np.asarray(forward, dtype=float), np.asarray(up, dtype=float))
+    pts = np.asarray(points, dtype=float)
+    origin = pts.mean(axis=0)
+    rel = pts - origin
+    horizontal = rel @ right
+    vertical = rel @ up_axis
+    h0 = float(horizontal.mean())
+    v0 = float(vertical.mean())
+    frame = []
+    for hh in (float(horizontal.min()) - margin, float(horizontal.max()) + margin):
+        for vv in (float(vertical.min()) - margin, float(vertical.max()) + margin):
+            frame.append(origin + (hh - h0) * right + (vv - v0) * up_axis)
+    return np.asarray(frame, dtype=float)
+
+
+def assert_projected_inside(width, height, xy, margin):
+    """Every projected point lies inside the image by ``margin`` pixels."""
+    margin = float(margin)
+    for x, y in xy:
+        if x < margin or y < margin or x > float(width) - margin or y > float(height) - margin:
+            raise RuntimeError(
+                f"projected point ({x:.1f}, {y:.1f}) is outside the {width}x{height} image "
+                f"with a {margin:.1f} px margin"
+            )
 
 
 def assert_nanometre_bar(bar_px, span_px, span_angstroms, bar_angstroms=10.0):
@@ -866,6 +892,9 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
     draw.line([(bar_x, bar_y), (bar_x + bar, bar_y)], fill=(20, 20, 20), width=6)
     marks.append(("1 nm bar", (bar_x, bar_y - 4, bar_x + bar, bar_y + 4)))
     add_text("1 nm", (bar_x + bar + 14, bar_y - LEGEND_FONT_PX / 2.0), "1 nm")
+    if pad_radius is not None:
+        margin_px = max(2.0, float(sphere_pad) * 0.5)
+        assert_projected_inside(canvas.width, canvas.height, [project(point) for point in positions], margin_px)
     require_disjoint(marks)
     canvas.save(path)
 
@@ -1125,6 +1154,7 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
     draw.line([(bar_x, bar_y), (bar_x + bar, bar_y)], fill=(20, 20, 20), width=6)
     marks.append(("1 nm bar", (bar_x, bar_y - 4, bar_x + bar, bar_y + 4)))
     add_text("1 nm", (bar_x + bar + 14, bar_y - LEGEND_FONT_PX / 2.0), "1 nm")
+    assert_projected_inside(canvas.width, canvas.height, [pix(point) for point in positions], max(2.0, float(pad) * 0.5))
     require_disjoint(marks)
     canvas.save(path)
 
