@@ -209,6 +209,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The PLUMED q6 derivative is expressed per nanometre. A 0.001 angstrom step matched an independent difference to 3.99e-11 on a shifted eight-molecule cell.
 - The cutoff neighbour list sizes its row buffer from the pairs found. A shell denser than the ideal-gas estimate no longer writes past that buffer.
 - The cutoff neighbour search clamps its cell count and stencil reach before converting them to integers. A cell edge many orders of magnitude shorter or longer than the cutoff overflowed both, which is undefined behaviour and in practice left the reach at one cell. Found by `capi_reload_fuzzer` under UBSan.
+- The library builds with clang again: the prism code in `topo_one_dim.cpp` casts its signed ring and atom indices explicitly, as the rest of the tree does, so the `-Werror=sign-conversion` and `-Werror=shorten-64-to-32` that clang builds use no longer stop it.
 - The multi-thread cutoff list records neighbour ids during the count walk, and the linkcell pool is sized to the OpenMP width.
 - The nucleation notebook rule declares ``figshare-incremental.json``
   as an output. A later ``test -s`` stamp cannot see a side-effect

@@ -1,0 +1,1 @@
+The library builds with clang again: the prism code in `topo_one_dim.cpp` casts its signed ring and atom indices explicitly, as the rest of the tree does, so the `-Werror=sign-conversion` and `-Werror=shorten-64-to-32` that clang builds use no longer stop it.

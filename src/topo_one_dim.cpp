@@ -83,17 +83,16 @@ int ring::prismAnalysis(
   // -------------------------------------------------------------------------------
   // Init
   nPrismList.resize(
-      maxDepth -
-      2); // Has a value for every value of ringSize from 3, upto maxDepth
-  nDefPrismList.resize(maxDepth - 2);
-  heightPercent.resize(maxDepth - 2);
+      static_cast<std::size_t>(maxDepth - 2)); // Has a value for every value of ringSize from 3, upto maxDepth
+  nDefPrismList.resize(static_cast<std::size_t>(maxDepth - 2));
+  heightPercent.resize(static_cast<std::size_t>(maxDepth - 2));
   // The atomTypes vector is the same size as the pointCloud atoms
-  atomTypes.resize(yCloud.nop, 1); // The dummy or unclassified value is 1
+  atomTypes.resize(static_cast<std::size_t>(yCloud.nop), 1); // The dummy or unclassified value is 1
   // The rmsdPerAtom vector is the same size as the pointCloud atoms and has an
   // RMSD value for every atom
-  rmsdPerAtom.resize(yCloud.nop, -1);
+  rmsdPerAtom.resize(static_cast<std::size_t>(yCloud.nop), -1);
   // Resize the atom state vector
-  atomState.resize(yCloud.nop); // Dummy or unclassified
+  atomState.resize(static_cast<std::size_t>(yCloud.nop)); // Dummy or unclassified
   // -------------------------------------------------------------------------------
   // Run this loop for rings of sizes upto maxDepth
   // The smallest possible ring is of size 3
@@ -105,9 +104,9 @@ int ring::prismAnalysis(
     //
     // Continue if there are zero rings of ringSize
     if (ringsOneType.empty()) {
-      nPrismList[ringSize - 3] = 0;      // Update the number of prisms
-      nDefPrismList[ringSize - 3] = 0;   // Update the number of deformed prisms
-      heightPercent[ringSize - 3] = 0.0; // Update the height%
+      nPrismList[static_cast<std::size_t>(ringSize - 3)] = 0;      // Update the number of prisms
+      nDefPrismList[static_cast<std::size_t>(ringSize - 3)] = 0;   // Update the number of deformed prisms
+      heightPercent[static_cast<std::size_t>(ringSize - 3)] = 0.0; // Update the height%
       continue;
     } // skip if there are no rings
     //
@@ -126,13 +125,13 @@ int ring::prismAnalysis(
                                  nImperfectPrisms, nList, yCloud, rmsdPerAtom,
                                  doShapeMatching);
     // -------------
-    nPrismList[ringSize - 3] =
+    nPrismList[static_cast<std::size_t>(ringSize - 3)] =
         nPerfectPrisms; // Update the number of perfect prisms
-    nDefPrismList[ringSize - 3] =
+    nDefPrismList[static_cast<std::size_t>(ringSize - 3)] =
         nImperfectPrisms; // Update the number of defromed prisms
     int totalPrisms = nPerfectPrisms + nImperfectPrisms;
     // Update the height% for the phase
-    heightPercent[ringSize - 3] =
+    heightPercent[static_cast<std::size_t>(ringSize - 3)] =
         topoparam::normHeightPercent(yCloud, totalPrisms, avgPrismHeight);
     // Continue if there are no prism units
     if (nPerfectPrisms + nImperfectPrisms == 0) {
@@ -454,13 +453,13 @@ bool ring::basalPrismConditions(const std::vector<std::vector<int>> &nList,
   }
   int l1 = basal1[0]; // first element of basal1 ring
   int ringSize =
-      basal1.size(); // Size of the ring; each ring contains n elements
+      static_cast<int>(basal1.size()); // Size of the ring; each ring contains n elements
   int m_k;              // Atom ID of element in basal2
   bool l1_neighbour;    // m_k is a neighbour of l1(true) or not (false)
 
   // isNeighbour is initialized to false for all basal2 elements; indication if
   // basal2 elements are neighbours of basal1
-  std::vector<bool> isNeighbour(ringSize, false);
+  std::vector<bool> isNeighbour(static_cast<std::size_t>(ringSize), false);
   int kIndex;  // m_k index
   int lAtomID; // atomID of the current element of basal1
   int kAtomID; // atomID of the current element of basal2
@@ -469,14 +468,14 @@ bool ring::basalPrismConditions(const std::vector<std::vector<int>> &nList,
   // COMPARISON OF basal2 ELEMENTS WITH l1
   for (int k = 0; k < ringSize; k++) {
     l1_neighbour = false;
-    m_k = basal2[k];
+    m_k = basal2[static_cast<std::size_t>(k)];
     // =================================
     // Checking to seee if m_k is be a neighbour of l1
     // Find m_k inside l1 neighbour list
-    auto it = std::find(nList[l1].begin() + 1, nList[l1].end(), m_k);
+    auto it = std::find(nList[static_cast<std::size_t>(l1)].begin() + 1, nList[static_cast<std::size_t>(l1)].end(), m_k);
 
     // If the element has been found, for l1
-    if (it != nList[l1].end()) {
+    if (it != nList[static_cast<std::size_t>(l1)].end()) {
       l1_neighbour = true;
       kIndex = k;
       break;
@@ -491,27 +490,27 @@ bool ring::basalPrismConditions(const std::vector<std::vector<int>> &nList,
 
   // ---------------------------------------------
   // NEIGHBOURS of basal1 in basal2
-  isNeighbour[kIndex] = true;
+  isNeighbour[static_cast<std::size_t>(kIndex)] = true;
 
   // All elements of basal1 must be neighbours of basal2
   for (int i = 1; i < ringSize; i++) {
-    lAtomID = basal1[i]; // element of basal1 ring
+    lAtomID = basal1[static_cast<std::size_t>(i)]; // element of basal1 ring
     for (int k = 0; k < ringSize; k++) {
       // Skip if already a neighbour
-      if (isNeighbour[k]) {
+      if (isNeighbour[static_cast<std::size_t>(k)]) {
         continue;
       }
       // Get the comparison basal2 element
-      kAtomID = basal2[k]; // element of basal2 ring;
+      kAtomID = basal2[static_cast<std::size_t>(k)]; // element of basal2 ring;
 
       // Checking to see if kAtomID is a neighbour of lAtomID
       // Find kAtomID inside lAtomID neighbour list
       auto it1 =
-          std::find(nList[lAtomID].begin() + 1, nList[lAtomID].end(), kAtomID);
+          std::find(nList[static_cast<std::size_t>(lAtomID)].begin() + 1, nList[static_cast<std::size_t>(lAtomID)].end(), kAtomID);
 
       // If the element has been found, for l1
-      if (it1 != nList[lAtomID].end()) {
-        isNeighbour[k] = true;
+      if (it1 != nList[static_cast<std::size_t>(lAtomID)].end()) {
+        isNeighbour[static_cast<std::size_t>(k)] = true;
       }
     } // Loop through basal2
   }   // end of check for neighbours of basal1
@@ -521,7 +520,7 @@ bool ring::basalPrismConditions(const std::vector<std::vector<int>> &nList,
   // They should all be neighbours
   for (int k = 0; k < ringSize; k++) {
     // Check to see if any element is false
-    if (!isNeighbour[k]) {
+    if (!isNeighbour[static_cast<std::size_t>(k)]) {
       return false;
     }
   }
@@ -538,7 +537,7 @@ bool ring::relaxedPrismConditions(const std::vector<std::vector<int>> &nList,
                                   std::vector<int> &basal1,
                                   std::vector<int> &basal2) {
   int ringSize =
-      basal1.size();     // Size of the ring; each ring contains n elements
+      static_cast<int>(basal1.size());     // Size of the ring; each ring contains n elements
   int m_k;                  // Atom ID of element in basal2
   bool isNeighbour = false; // This is true if there is at least one bond
                             // between the basal rings
@@ -548,16 +547,16 @@ bool ring::relaxedPrismConditions(const std::vector<std::vector<int>> &nList,
   // COMPARISON OF basal2 ELEMENTS (m_k) WITH basal1 ELEMENTS (l_k)
   // Loop through all the elements of basal1
   for (int l = 0; l < ringSize; l++) {
-    l_k = basal1[l];
+    l_k = basal1[static_cast<std::size_t>(l)];
     // Search for the nearest neighbour of l_k in basal2
     // Loop through basal2 elements
     for (int m = 0; m < ringSize; m++) {
-      m_k = basal2[m];
+      m_k = basal2[static_cast<std::size_t>(m)];
       // Find m_k inside l_k neighbour list
-      auto it = std::find(nList[l_k].begin() + 1, nList[l_k].end(), m_k);
+      auto it = std::find(nList[static_cast<std::size_t>(l_k)].begin() + 1, nList[static_cast<std::size_t>(l_k)].end(), m_k);
 
       // If the element has been found, for l1
-      if (it != nList[l_k].end()) {
+      if (it != nList[static_cast<std::size_t>(l_k)].end()) {
         isNeighbour = true;
         break;
       } // found element
@@ -589,7 +588,7 @@ bool ring::discardExtraTetragonBlocks(
     std::vector<int> &basal1, std::vector<int> &basal2,
     molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   int ringSize =
-      basal1.size(); // Size of the ring; each ring contains n elements
+      static_cast<int>(basal1.size()); // Size of the ring; each ring contains n elements
   int iatomIndex,
       jatomIndex;  // Indices of the elements in basal1 and basal2 respectively
   double r_i, r_j; // Coordinates in the axial dimension of iatom and jatom of
@@ -622,21 +621,21 @@ bool ring::discardExtraTetragonBlocks(
 
   // All points except the first pair
   for (int k = 1; k < ringSize; k++) {
-    iatomIndex = basal1[k]; // Current vertex
+    iatomIndex = basal1[static_cast<std::size_t>(k)]; // Current vertex
 
     // Add to the polygon area
     // ------
     // XY plane
-    areaXY += (yCloud.pts[jatomIndex].x + yCloud.pts[iatomIndex].x) *
-              (yCloud.pts[jatomIndex].y - yCloud.pts[iatomIndex].y);
+    areaXY += (yCloud.pts[static_cast<std::size_t>(jatomIndex)].x + yCloud.pts[static_cast<std::size_t>(iatomIndex)].x) *
+              (yCloud.pts[static_cast<std::size_t>(jatomIndex)].y - yCloud.pts[static_cast<std::size_t>(iatomIndex)].y);
     // ------
     // XZ plane
-    areaXZ += (yCloud.pts[jatomIndex].x + yCloud.pts[iatomIndex].x) *
-              (yCloud.pts[jatomIndex].z - yCloud.pts[iatomIndex].z);
+    areaXZ += (yCloud.pts[static_cast<std::size_t>(jatomIndex)].x + yCloud.pts[static_cast<std::size_t>(iatomIndex)].x) *
+              (yCloud.pts[static_cast<std::size_t>(jatomIndex)].z - yCloud.pts[static_cast<std::size_t>(iatomIndex)].z);
     // ------
     // YZ plane
-    areaYZ += (yCloud.pts[jatomIndex].y + yCloud.pts[iatomIndex].y) *
-              (yCloud.pts[jatomIndex].z - yCloud.pts[iatomIndex].z);
+    areaYZ += (yCloud.pts[static_cast<std::size_t>(jatomIndex)].y + yCloud.pts[static_cast<std::size_t>(iatomIndex)].y) *
+              (yCloud.pts[static_cast<std::size_t>(jatomIndex)].z - yCloud.pts[static_cast<std::size_t>(iatomIndex)].z);
     // ------
     jatomIndex = iatomIndex;
   }
@@ -645,16 +644,16 @@ bool ring::discardExtraTetragonBlocks(
   iatomIndex = basal1[0];
   // ------
   // XY plane
-  areaXY += (yCloud.pts[jatomIndex].x + yCloud.pts[iatomIndex].x) *
-            (yCloud.pts[jatomIndex].y - yCloud.pts[iatomIndex].y);
+  areaXY += (yCloud.pts[static_cast<std::size_t>(jatomIndex)].x + yCloud.pts[static_cast<std::size_t>(iatomIndex)].x) *
+            (yCloud.pts[static_cast<std::size_t>(jatomIndex)].y - yCloud.pts[static_cast<std::size_t>(iatomIndex)].y);
   // ------
   // XZ plane
-  areaXZ += (yCloud.pts[jatomIndex].x + yCloud.pts[iatomIndex].x) *
-            (yCloud.pts[jatomIndex].z - yCloud.pts[iatomIndex].z);
+  areaXZ += (yCloud.pts[static_cast<std::size_t>(jatomIndex)].x + yCloud.pts[static_cast<std::size_t>(iatomIndex)].x) *
+            (yCloud.pts[static_cast<std::size_t>(jatomIndex)].z - yCloud.pts[static_cast<std::size_t>(iatomIndex)].z);
   // ------
   // YZ plane
-  areaYZ += (yCloud.pts[jatomIndex].y + yCloud.pts[iatomIndex].y) *
-            (yCloud.pts[jatomIndex].z - yCloud.pts[iatomIndex].z);
+  areaYZ += (yCloud.pts[static_cast<std::size_t>(jatomIndex)].y + yCloud.pts[static_cast<std::size_t>(iatomIndex)].y) *
+            (yCloud.pts[static_cast<std::size_t>(jatomIndex)].z - yCloud.pts[static_cast<std::size_t>(iatomIndex)].z);
   // ------
   // The actual projected area is half of this
   areaXY *= 0.5;
@@ -702,21 +701,21 @@ bool ring::discardExtraTetragonBlocks(
 
   // All points except the first pair
   for (int k = 1; k < ringSize; k++) {
-    iatomIndex = basal2[k]; // Current vertex
+    iatomIndex = basal2[static_cast<std::size_t>(k)]; // Current vertex
 
     // Add to the polygon area
     // ------
     // XY plane
-    areaXY += (yCloud.pts[jatomIndex].x + yCloud.pts[iatomIndex].x) *
-              (yCloud.pts[jatomIndex].y - yCloud.pts[iatomIndex].y);
+    areaXY += (yCloud.pts[static_cast<std::size_t>(jatomIndex)].x + yCloud.pts[static_cast<std::size_t>(iatomIndex)].x) *
+              (yCloud.pts[static_cast<std::size_t>(jatomIndex)].y - yCloud.pts[static_cast<std::size_t>(iatomIndex)].y);
     // ------
     // XZ plane
-    areaXZ += (yCloud.pts[jatomIndex].x + yCloud.pts[iatomIndex].x) *
-              (yCloud.pts[jatomIndex].z - yCloud.pts[iatomIndex].z);
+    areaXZ += (yCloud.pts[static_cast<std::size_t>(jatomIndex)].x + yCloud.pts[static_cast<std::size_t>(iatomIndex)].x) *
+              (yCloud.pts[static_cast<std::size_t>(jatomIndex)].z - yCloud.pts[static_cast<std::size_t>(iatomIndex)].z);
     // ------
     // YZ plane
-    areaYZ += (yCloud.pts[jatomIndex].y + yCloud.pts[iatomIndex].y) *
-              (yCloud.pts[jatomIndex].z - yCloud.pts[iatomIndex].z);
+    areaYZ += (yCloud.pts[static_cast<std::size_t>(jatomIndex)].y + yCloud.pts[static_cast<std::size_t>(iatomIndex)].y) *
+              (yCloud.pts[static_cast<std::size_t>(jatomIndex)].z - yCloud.pts[static_cast<std::size_t>(iatomIndex)].z);
     // ------
     jatomIndex = iatomIndex;
   }
@@ -725,16 +724,16 @@ bool ring::discardExtraTetragonBlocks(
   iatomIndex = basal2[0];
   // ------
   // XY plane
-  areaXY += (yCloud.pts[jatomIndex].x + yCloud.pts[iatomIndex].x) *
-            (yCloud.pts[jatomIndex].y - yCloud.pts[iatomIndex].y);
+  areaXY += (yCloud.pts[static_cast<std::size_t>(jatomIndex)].x + yCloud.pts[static_cast<std::size_t>(iatomIndex)].x) *
+            (yCloud.pts[static_cast<std::size_t>(jatomIndex)].y - yCloud.pts[static_cast<std::size_t>(iatomIndex)].y);
   // ------
   // XZ plane
-  areaXZ += (yCloud.pts[jatomIndex].x + yCloud.pts[iatomIndex].x) *
-            (yCloud.pts[jatomIndex].z - yCloud.pts[iatomIndex].z);
+  areaXZ += (yCloud.pts[static_cast<std::size_t>(jatomIndex)].x + yCloud.pts[static_cast<std::size_t>(iatomIndex)].x) *
+            (yCloud.pts[static_cast<std::size_t>(jatomIndex)].z - yCloud.pts[static_cast<std::size_t>(iatomIndex)].z);
   // ------
   // YZ plane
-  areaYZ += (yCloud.pts[jatomIndex].y + yCloud.pts[iatomIndex].y) *
-            (yCloud.pts[jatomIndex].z - yCloud.pts[iatomIndex].z);
+  areaYZ += (yCloud.pts[static_cast<std::size_t>(jatomIndex)].y + yCloud.pts[static_cast<std::size_t>(iatomIndex)].y) *
+            (yCloud.pts[static_cast<std::size_t>(jatomIndex)].z - yCloud.pts[static_cast<std::size_t>(iatomIndex)].z);
   // ------
   // The actual projected area is half of this
   areaXY *= 0.5;
@@ -810,31 +809,31 @@ int ring::assignPrismType(const std::vector<std::vector<int>> &rings,
 
   // Loop through every ring in rings
   for (int i = 0; i < listPrism.size(); i++) {
-    iring = listPrism[i];
+    iring = listPrism[static_cast<std::size_t>(i)];
     // Get the state of all atoms in the ring
-    currentState = ringType[iring];
+    currentState = ringType[static_cast<std::size_t>(iring)];
     // Loop through every element in iring
     for (int j = 0; j < ringSize; j++) {
-      iatom = rings[iring][j]; // Atom index
+      iatom = rings[static_cast<std::size_t>(iring)][static_cast<std::size_t>(j)]; // Atom index
       // Update the atom type
-      atomTypes[iatom] = ringSize;
+      atomTypes[static_cast<std::size_t>(iatom)] = ringSize;
       //
       // Update the state of the atom
-      if (atomState[iatom] == ring::strucType::unclassified) {
-        atomState[iatom] = currentState;
+      if (atomState[static_cast<std::size_t>(iatom)] == ring::strucType::unclassified) {
+        atomState[static_cast<std::size_t>(iatom)] = currentState;
       } // Update the unclassified atom
       else {
-        if (atomState[iatom] != currentState) {
+        if (atomState[static_cast<std::size_t>(iatom)] != currentState) {
           // For mixed, there is a preference
           if (currentState == ring::strucType::mixedPrismRing) {
-            atomState[iatom] = currentState;
+            atomState[static_cast<std::size_t>(iatom)] = currentState;
           } // fill
-          else if (atomState[iatom] == ring::strucType::deformedPrism &&
+          else if (atomState[static_cast<std::size_t>(iatom)] == ring::strucType::deformedPrism &&
                    currentState == ring::strucType::Prism) {
-            atomState[iatom] = ring::strucType::mixedPrismRing;
-          } else if (atomState[iatom] == ring::strucType::Prism &&
+            atomState[static_cast<std::size_t>(iatom)] = ring::strucType::mixedPrismRing;
+          } else if (atomState[static_cast<std::size_t>(iatom)] == ring::strucType::Prism &&
                      currentState == ring::strucType::deformedPrism) {
-            atomState[iatom] = ring::strucType::mixedPrismRing;
+            atomState[static_cast<std::size_t>(iatom)] = ring::strucType::mixedPrismRing;
           }
         } //
       }   // already filled?
@@ -859,17 +858,17 @@ int ring::assignPrismType(const std::vector<std::vector<int>> &rings,
 int ring::deformedPrismTypes(const std::vector<ring::strucType> &atomState,
                              std::vector<int> &atomTypes, int maxDepth) {
   //
-  int nop = atomState.size(); // Number of particles
+  int nop = static_cast<int>(atomState.size()); // Number of particles
 
   // Loop through all particles
   for (int iatom = 0; iatom < nop; iatom++) {
     // Check the atom state
     // Deformed
-    if (atomState[iatom] == ring::strucType::deformedPrism) {
-      atomTypes[iatom] += maxDepth - 2;
+    if (atomState[static_cast<std::size_t>(iatom)] == ring::strucType::deformedPrism) {
+      atomTypes[static_cast<std::size_t>(iatom)] += maxDepth - 2;
     } // type for a deformed prism atom
-    else if (atomState[iatom] == ring::strucType::mixedPrismRing) {
-      atomTypes[iatom] = 2;
+    else if (atomState[static_cast<std::size_t>(iatom)] == ring::strucType::mixedPrismRing) {
+      atomTypes[static_cast<std::size_t>(iatom)] = 2;
     } // type for a mixed prism ring
   }   // end of reassignation
 
@@ -913,20 +912,20 @@ int ring::rmAxialTranslations(
     }
   }
   double s0[3];
-  nneigh::dumpToFrac(H, origin, yCloud.pts[atomIndex].x,
-                     yCloud.pts[atomIndex].y, yCloud.pts[atomIndex].z, s0);
+  nneigh::dumpToFrac(H, origin, yCloud.pts[static_cast<std::size_t>(atomIndex)].x,
+                     yCloud.pts[static_cast<std::size_t>(atomIndex)].y, yCloud.pts[static_cast<std::size_t>(atomIndex)].z, s0);
   const double shift = -s0[axialDim];
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     double s[3];
     double r[3];
-    nneigh::dumpToFrac(H, origin, yCloud.pts[iatom].x, yCloud.pts[iatom].y,
-                       yCloud.pts[iatom].z, s);
+    nneigh::dumpToFrac(H, origin, yCloud.pts[static_cast<std::size_t>(iatom)].x, yCloud.pts[static_cast<std::size_t>(iatom)].y,
+                       yCloud.pts[static_cast<std::size_t>(iatom)].z, s);
     s[axialDim] += shift;
     s[axialDim] -= std::floor(s[axialDim]);
     nneigh::dumpFromFrac(H, origin, s, r);
-    yCloud.pts[iatom].x = r[0];
-    yCloud.pts[iatom].y = r[1];
-    yCloud.pts[iatom].z = r[2];
+    yCloud.pts[static_cast<std::size_t>(iatom)].x = r[0];
+    yCloud.pts[static_cast<std::size_t>(iatom)].y = r[1];
+    yCloud.pts[static_cast<std::size_t>(iatom)].z = r[2];
   }
   return 0;
 }
