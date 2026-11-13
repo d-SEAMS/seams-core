@@ -91,7 +91,18 @@ def main():
     if "--engine" not in args:
         args = ["--engine", "cycles", *args]
     done = subprocess.run([sys.executable, str(SCRIPT), *args], check=False)
-    return done.returncode
+    if done.returncode != 0:
+        return done.returncode
+    if "--out" in args:
+        out = Path(args[args.index("--out") + 1])
+        pngs = sorted(out.glob("*/overlay.png")) if out.is_dir() else []
+        if pngs:
+            frame = subprocess.run(
+                [sys.executable, str(ROOT / "scripts" / "check_frame.py"), *map(str, pngs)],
+                check=False,
+            )
+            return frame.returncode
+    return 0
 
 
 if __name__ == "__main__":
