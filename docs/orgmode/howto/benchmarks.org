@@ -49,11 +49,11 @@ Medians, in milliseconds:
 | seams | 1 | 290.91 | 320.84 | 368.01 | 380.34 |
 | OVITO | 1 | 392.19 | 476.43 | 638.98 | 4886.17 |
 | mdapy | 1 | 787.12 | 811.65 | 702.33 | 781.80 |
-| pyscal3 | 1 | 854.84 | 958.98 | 908.17 | — |
+| pyscal3 | 1 | 854.84 | 958.98 | 908.17 | none |
 | seams | 8 | 44.69 | 45.64 | 48.41 | 56.90 |
 | OVITO | 8 | 79.35 | 85.78 | 170.10 | 658.49 |
 | mdapy | 8 | 105.01 | 117.08 | 113.28 | 123.03 |
-| pyscal3 | 8 | 173.51 | 178.83 | 166.76 | — |
+| pyscal3 | 8 | 173.51 | 178.83 | 166.76 | none |
 
 One q4 sample in an earlier eight-sample run took 523.6 ms.
 The first call of a degree is the one that faults.

@@ -18,7 +18,7 @@ A centre whose four bonds do not all lie between 2.30 Å and 3.35 Å does not op
 
 ## Tetrahedral order
 
-The tetrahedral order parameter *q* is the Chau–Hardwick / Errington–Debenedetti invariant of the four bonds (Errington and Debenedetti, *Nature* 409, 318, 2001, [10.1038/35053024](https://doi.org/10.1038/35053024)). A shell with *q* below 0.94 does not open the second shell. That gate was chosen on the training seeds below. A shell that does open and then measures *q* below 0.88 is liquid.
+The tetrahedral order parameter *q* is the Chau–Hardwick / Errington–Debenedetti invariant of the four bonds (Errington and Debenedetti, *Nature* 409, 318, 2001, [10.1038/35053024](https://doi.org/10.1038/35053024)). A shell with *q* below 0.94 does not open the second shell. That cutoff was chosen on the training seeds below. A shell that does open and then measures *q* below 0.88 is liquid.
 
 ## Common-neighbour fingerprint
 
@@ -67,9 +67,9 @@ On GCC and Clang the shell translation unit is a separate static library built w
 
 ## Held-out protocol
 
-The frames are the steepest-descent quenches of three mW nucleation seeds, 91001, 92002 and 93003, each a 12×12×12 ice Ic cell that was melted, reseeded, and run at 220 K. Seeds 91001 and 92002 are the training pair. They chose the *q* gate and the ceiling 0.12. Seed 93003 was not used to choose either, and it is the held-out frame.
+The frames are the steepest-descent quenches of three mW nucleation seeds, 91001, 92002 and 93003, each a 12×12×12 ice Ic cell that was melted, reseeded, and run at 220 K. Seeds 91001 and 92002 are the training pair. They chose the *q* cutoff and the ceiling 0.12. Seed 93003 was not used to choose either, and it is the held-out frame.
 
-Three methods label each quench with their own production rule: this kernel, CHILL+, and polyhedral template matching at an RMSD cutoff of 0.1 with cubic and hexagonal diamond enabled. The majority truth is the template named by at least two of the three. The persistent truth keeps an atom only when the majority template is the same on the 190 ps quench and the 200 ps quench. A prediction is a true positive when the truth is crystal and the prediction names that same template, a false positive when the prediction is crystal and is not the truth, and a false negative when the truth is crystal and the prediction differs.
+Three methods label each quench with their own production rule: this kernel, CHILL+, and polyhedral template matching at an RMSD cutoff of 0.1 with cubic and hexagonal diamond enabled. The majority truth is the template named by at least two of the three. The persistent truth keeps an atom only when the majority template is the same on the 190 ps quench and the 200 ps quench. A prediction is a true positive when the reference label is crystal and the prediction names that same template, a false positive when the prediction is crystal and the reference label is a different template, and a false negative when the reference label is crystal and the prediction differs.
 
 On the held-out quench the kernel at ceiling 0.12 is:
 

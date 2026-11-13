@@ -757,6 +757,12 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_prose',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_prose.py'],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_changelog',
     python3,
     args: [meson.project_source_root() / 'docs' / 'check_changelog.py', '--check'],

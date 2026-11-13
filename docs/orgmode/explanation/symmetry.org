@@ -34,7 +34,7 @@ A centre whose four bonds do not all lie between 2.30 Å and 3.35 Å does not op
 
 The tetrahedral order parameter q is the Chau–Hardwick / Errington–Debenedetti invariant of the four bonds (Errington and Debenedetti, /Nature/ 409, 318, 2001, [[https://doi.org/10.1038/35053024][10.1038/35053024]]).
 A shell with q below 0.94 does not open the second shell.
-That gate was chosen on the training seeds below.
+That cutoff was chosen on the training seeds below.
 A shell that does open and then measures q below 0.88 is liquid.
 
 * Common-neighbour fingerprint
@@ -77,7 +77,7 @@ Hexagonal recovery is one pass over the atoms the first fit left unlabelled, and
 After the labels are written, a crystal atom that has no crystal neighbour among its four bonds is returned to liquid.
 The tests read the labels from the fit, before that filter.
 
-* Gates, in symbols
+* Cutoffs, in symbols
 
 The tetrahedral order of the four bonds is the Errington–Debenedetti
 invariant. With \(\theta_{jk}\) the angle at the centre between
@@ -181,13 +181,13 @@ A release build is ~-O3~.
 
 The frames are the steepest-descent quenches of three mW nucleation seeds, 91001, 92002 and 93003, each a 12×12×12 ice Ic cell that was melted, reseeded, and run at 220 K.
 Seeds 91001 and 92002 are the training pair.
-They chose the q gate and the ceiling 0.12.
+They chose the q cutoff and the ceiling 0.12.
 Seed 93003 was not used to choose either, and it is the held-out frame.
 
 Three methods label each quench with their own production rule: this kernel, CHILL+, and polyhedral template matching at an RMSD cutoff of 0.1 with cubic and hexagonal diamond enabled.
 The majority truth is the template named by at least two of the three.
 The persistent truth keeps an atom only when the majority template is the same on the 190 ps quench and the 200 ps quench.
-A prediction is a true positive when the truth is crystal and the prediction names that same template, a false positive when the prediction is crystal and is not the truth, and a false negative when the truth is crystal and the prediction differs.
+A prediction is a true positive when the reference label is crystal and the prediction names that same template, a false positive when the prediction is crystal and the reference label is a different template, and a false negative when the reference label is crystal and the prediction differs.
 
 On the held-out quench the kernel at ceiling 0.12 is
 

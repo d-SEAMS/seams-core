@@ -2,7 +2,7 @@
 #+OPTIONS: toc:nil num:nil
 
 Name the ice shell of each oxygen. The account of the shell, the
-tetrahedral gate, and the fit is
+tetrahedral cutoff, and the fit is
 [[file:../explanation/symmetry.org][Local symmetry]]. This page is the
 command and the call the test runs.
 
