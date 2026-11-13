@@ -674,3 +674,55 @@ TEST_CASE("shell kernel matches diamondFromCsr on ideal cubic ice", "[symmetry]"
   symm::classifyIceCloud(cloud, shell);
   REQUIRE(shell == diamond);
 }
+
+TEST_CASE("the equilibrated TIP4P interface keeps its thermal ice counts", "[symmetry]") {
+  // 4096 oxygens from the TIP4P/2005 ice/water slab after the hop
+  // equilibration (target 252 K). A minimisation of that restart and a
+  // 4 ps average both call the vibrating-frame misses crystal: 867 of
+  // the 903 CHILL+ hexagonal misses and all 491 PTM hex-diamond misses.
+  // The counts below are this classifier after the thermal gates, not a
+  // copy of CHILL+.
+  std::ifstream in;
+  for (const char *path : {"tests/data/tip4p252-oxygens.txt",
+                           "../tests/data/tip4p252-oxygens.txt"}) {
+    in.open(path);
+    if (in) {
+      break;
+    }
+    in.clear();
+  }
+  REQUIRE(in);
+  int n = 0;
+  double lx = 0, ly = 0, lz = 0;
+  in >> n >> lx >> ly >> lz;
+  REQUIRE(n == 4096);
+  Eigen::MatrixXd xyz(n, 3);
+  for (int i = 0; i < n; i++) {
+    in >> xyz(i, 0) >> xyz(i, 1) >> xyz(i, 2);
+  }
+  REQUIRE(in);
+  Eigen::Matrix3d box = Eigen::Matrix3d::Zero();
+  box(0, 0) = lx;
+  box(1, 1) = ly;
+  box(2, 2) = lz;
+  std::vector<int> kind;
+  symm::classifyIce(xyz, box, kind);
+  REQUIRE(static_cast<int>(kind.size()) == n);
+  int ih = 0, ic = 0, isd = 0, other = 0;
+  for (int label : kind) {
+    if (label == static_cast<int>(symm::Kind::iceIh)) {
+      ++ih;
+    } else if (label == static_cast<int>(symm::Kind::iceIc)) {
+      ++ic;
+    } else if (label == static_cast<int>(symm::Kind::iceIsd)) {
+      ++isd;
+    } else {
+      REQUIRE(label < 0);
+      ++other;
+    }
+  }
+  REQUIRE(ih == 1772);
+  REQUIRE(ic == 0);
+  REQUIRE(isd == 1);
+  REQUIRE(other == 2323);
+}
