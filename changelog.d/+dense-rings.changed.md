@@ -1,0 +1,1 @@
+When a vertex has more shortest paths than the pairing walk stores, the same primitive rings are taken from the breadth-first levels, and a dense census counts them instead of storing each ring. Each search keeps its own count and path cap.

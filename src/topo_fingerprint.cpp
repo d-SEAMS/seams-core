@@ -7,6 +7,10 @@
 #include <cage_canon.hpp>
 #include <franzblau.hpp>
 
+namespace primitive {
+std::vector<int> ringCensusCounts(const std::vector<std::vector<int>> &nList, int maxDepth);
+}
+
 #include <algorithm>
 #include <iomanip>
 #include <limits>
@@ -29,6 +33,32 @@ std::uint64_t mix(std::uint64_t h, std::uint64_t v) {
   h *= 0xbf58476d1ce4e5b9ULL;
   h ^= h >> 32;
   return h;
+}
+
+void fillRingCensus(std::vector<int> &census,
+                    const std::vector<std::vector<int>> &rows, int maxRingSize) {
+  census.assign(static_cast<std::size_t>(maxRingSize) + 1, 0);
+  if (rows.empty() || maxRingSize < 3) {
+    return;
+  }
+  int maxDeg = 0;
+  for (const auto &row : rows) {
+    maxDeg = std::max(maxDeg, static_cast<int>(row.size()) - 1);
+  }
+  // A dense ball has more primitive rings than it is worth storing. The
+  // census is the only thing the frame key reads.
+  if (maxDeg > 24) {
+    census = primitive::ringCensusCounts(rows, maxRingSize);
+    if (static_cast<int>(census.size()) < maxRingSize + 1) {
+      census.resize(static_cast<std::size_t>(maxRingSize) + 1, 0);
+    }
+    return;
+  }
+  for (const auto &ring : primitive::ringNetwork(rows, maxRingSize)) {
+    if (ring.size() <= static_cast<std::size_t>(maxRingSize)) {
+      census[ring.size()] += 1;
+    }
+  }
 }
 
 std::uint64_t hashString(const std::string &s) {
@@ -291,14 +321,7 @@ FrameFingerprint fingerprint(const Rows &rows, int hops, int maxRingSize,
   for (std::uint64_t v : wl) {
     h = mix(h, v);
   }
-  out.ringCensus.assign(static_cast<std::size_t>(maxRingSize) + 1, 0);
-  if (n > 0 && maxRingSize >= 3) {
-    for (const auto &ring : primitive::ringNetwork(rows, maxRingSize)) {
-      if (ring.size() <= static_cast<std::size_t>(maxRingSize)) {
-        out.ringCensus[ring.size()] += 1;
-      }
-    }
-  }
+  fillRingCensus(out.ringCensus, rows, maxRingSize);
   for (int s = 0; s <= maxRingSize; s++) {
     h = mix(h, static_cast<std::uint64_t>(out.ringCensus[static_cast<std::size_t>(s)]));
   }
@@ -358,14 +381,7 @@ FrameFingerprint incrementalFingerprint(const FrameFingerprint &prev,
   for (const auto &k : out.atomKeys) {
     out.classes[k] += 1;
   }
-  out.ringCensus.assign(static_cast<std::size_t>(maxRingSize) + 1, 0);
-  if (n > 0 && maxRingSize >= 3) {
-    for (const auto &ring : primitive::ringNetwork(rows, maxRingSize)) {
-      if (ring.size() <= static_cast<std::size_t>(maxRingSize)) {
-        out.ringCensus[ring.size()] += 1;
-      }
-    }
-  }
+  fillRingCensus(out.ringCensus, rows, maxRingSize);
   rebuildFrameKey(out, maxRingSize);
   return out;
 }

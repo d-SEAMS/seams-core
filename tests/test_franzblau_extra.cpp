@@ -1,6 +1,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <franzblau.hpp>
+#include <seams_input.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -9,6 +10,13 @@
 #include <map>
 #include <queue>
 #include <set>
+#include <thread>
+
+namespace primitive {
+std::vector<std::vector<int>>
+ringNetworkAtCap(const std::vector<std::vector<int>> &nList, int maxDepth, int cap);
+std::vector<int> ringCensusCounts(const std::vector<std::vector<int>> &nList, int maxDepth);
+}
 #include <utility>
 #include <vector>
 #include <mol_sys.hpp>
@@ -200,6 +208,165 @@ TEST_CASE("ringNetwork matches the generate-then-filter route", "[franzblau]") {
       REQUIRE(fastSet == refSet);
     }
   }
+}
+
+TEST_CASE("ringNetwork on a dense box matches the filtered search",
+          "[franzblau]") {
+  // Three complete bipartite layers. A vertex in the last layer has
+  // width*width shortest paths of length 3, past the pairing cap, so the
+  // chordless walk has to list the same primitive rings.
+  const int width = 8;
+  const int n = 1 + 3 * width;
+  std::vector<std::vector<int>> idx(static_cast<std::size_t>(n));
+  auto link = [&](int a, int b) {
+    idx[static_cast<std::size_t>(a)].push_back(b);
+    idx[static_cast<std::size_t>(b)].push_back(a);
+  };
+  for (int i = 0; i < n; i++) {
+    idx[static_cast<std::size_t>(i)].push_back(i);
+  }
+  for (int layer = 0; layer < 3; layer++) {
+    const int left = layer == 0 ? 0 : 1 + (layer - 1) * width;
+    const int leftN = layer == 0 ? 1 : width;
+    const int right = 1 + layer * width;
+    for (int a = 0; a < leftN; a++) {
+      for (int b = 0; b < width; b++) {
+        link(left + a, right + b);
+      }
+    }
+  }
+  for (const int maxDepth : {5, 6}) {
+    INFO("maxDepth " << maxDepth);
+    const auto fast = primitive::ringNetwork(idx, maxDepth);
+    auto graph = primitive::countAllRingsFromIndex(idx, maxDepth);
+    primitive::removeNonSPrings(graph);
+    std::set<std::vector<int>> fastSet;
+    std::set<std::vector<int>> refSet;
+    for (const auto &r : fast) {
+      fastSet.insert(canonicalRing(r));
+      REQUIRE(r == canonicalRing(r));
+    }
+    for (auto &r : graph.rings) {
+      refSet.insert(canonicalRing(r));
+    }
+    REQUIRE(fastSet.size() == fast.size());
+    REQUIRE(std::is_sorted(fast.begin(), fast.end()));
+    REQUIRE(fastSet == refSet);
+  }
+}
+
+TEST_CASE("two ring searches at once keep their own rings", "[franzblau]") {
+  std::vector<std::vector<int>> sparse(120);
+  for (int c = 0; c < 20; c++) {
+    for (int k = 0; k < 6; k++) {
+      const int v = c * 6 + k;
+      sparse[static_cast<std::size_t>(v)] = {v, c * 6 + (k + 5) % 6,
+                                             c * 6 + (k + 1) % 6};
+    }
+  }
+  const int width = 8;
+  const int n = 1 + 3 * width;
+  std::vector<std::vector<int>> dense(static_cast<std::size_t>(n));
+  auto link = [&](int a, int b) {
+    dense[static_cast<std::size_t>(a)].push_back(b);
+    dense[static_cast<std::size_t>(b)].push_back(a);
+  };
+  for (int i = 0; i < n; i++) {
+    dense[static_cast<std::size_t>(i)].push_back(i);
+  }
+  for (int layer = 0; layer < 3; layer++) {
+    const int left = layer == 0 ? 0 : 1 + (layer - 1) * width;
+    const int leftN = layer == 0 ? 1 : width;
+    const int right = 1 + layer * width;
+    for (int a = 0; a < leftN; a++) {
+      for (int b = 0; b < width; b++) {
+        link(left + a, right + b);
+      }
+    }
+  }
+
+  const auto serialSparse = primitive::ringNetwork(sparse, 7);
+  const auto serialDense = primitive::ringNetwork(dense, 6);
+  const auto censusSparse = primitive::ringCensusCounts(sparse, 7);
+  const auto censusDense = primitive::ringCensusCounts(dense, 6);
+  auto tally = [](const std::vector<std::vector<int>> &rings, int maxDepth) {
+    std::vector<int> hist(static_cast<std::size_t>(maxDepth) + 1, 0);
+    for (const auto &ring : rings) {
+      if (static_cast<int>(ring.size()) <= maxDepth) {
+        hist[ring.size()]++;
+      }
+    }
+    return hist;
+  };
+  REQUIRE(serialSparse.size() == 20);
+  REQUIRE(!serialDense.empty());
+  REQUIRE(censusSparse == tally(serialSparse, 7));
+  REQUIRE(censusDense == tally(serialDense, 6));
+
+  for (int round = 0; round < 8; round++) {
+    std::vector<std::vector<int>> gotSparse, gotDense;
+    std::vector<int> gotCensusSparse, gotCensusDense;
+    std::thread sparseThread([&] {
+      gotSparse = primitive::ringNetwork(sparse, 7);
+      gotCensusSparse = primitive::ringCensusCounts(sparse, 7);
+    });
+    std::thread denseThread([&] {
+      gotDense = primitive::ringNetwork(dense, 6);
+      gotCensusDense = primitive::ringCensusCounts(dense, 6);
+    });
+    sparseThread.join();
+    denseThread.join();
+    REQUIRE(gotSparse == serialSparse);
+    REQUIRE(gotDense == serialDense);
+    REQUIRE(gotCensusSparse == censusSparse);
+    REQUIRE(gotCensusDense == censusDense);
+  }
+}
+
+TEST_CASE("cropped dump-l rings match the pairing walk and the filtered search",
+          "[franzblau]") {
+  // The first atoms of the dense frame, in the original box. Small enough
+  // that the pairing walk returns, and dense enough that a cap of one takes
+  // the level walk.
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud = sinp::readLammpsTrjO("traj/dump-l.lammpstrj", 1, cloud, 1);
+  REQUIRE(cloud.nop > 64);
+  // Every eighth atom. The piece stays on the original box and cutoff,
+  // and its shortest-path counts stay small enough for the pairing walk.
+  std::vector<molSys::Point<double>> kept;
+  for (int i = 0; i < cloud.nop; i += 8) {
+    kept.push_back(cloud.pts[static_cast<std::size_t>(i)]);
+  }
+  cloud.pts.swap(kept);
+  cloud.nop = static_cast<int>(cloud.pts.size());
+  cloud.idIndexMap.clear();
+  for (int i = 0; i < cloud.nop; i++) {
+    cloud.idIndexMap[cloud.pts[static_cast<std::size_t>(i)].atomID] = i;
+  }
+  const auto idx =
+      nneigh::neighbourListByIndex(cloud, nneigh::neighListO(3.5, cloud, 1));
+  int maxDeg = 0;
+  for (const auto &row : idx) {
+    maxDeg = std::max(maxDeg, static_cast<int>(row.size()) - 1);
+  }
+  REQUIRE(maxDeg > 8);
+
+  const auto paired = primitive::ringNetworkAtCap(idx, 7, 0);
+  const auto levels = primitive::ringNetworkAtCap(idx, 7, 1);
+  REQUIRE(paired == levels);
+
+  auto graph = primitive::countAllRingsFromIndex(idx, 7);
+  primitive::removeNonSPrings(graph);
+  std::set<std::vector<int>> got, ref;
+  for (const auto &r : levels) {
+    got.insert(canonicalRing(r));
+    REQUIRE(r == canonicalRing(r));
+  }
+  for (auto &r : graph.rings) {
+    ref.insert(canonicalRing(r));
+  }
+  REQUIRE(got.size() == levels.size());
+  REQUIRE(got == ref);
 }
 
 TEST_CASE("ringNetwork lists its rings in canonical sorted order",
