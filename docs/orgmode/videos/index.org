@@ -1,0 +1,86 @@
+#+TITLE: Videos
+#+OPTIONS: toc:nil num:nil
+
+Silent picture tracks for the bindings and the tutorials. Each recording
+is a terminal session at 1920 by 1080, with a blank band along the bottom
+for captions. The files will live on the Hugging Face d-SEAMS dataset.
+Until those uploads exist, the player below points at the placeholder URL.
+The caption track is the draft VTT, loaded with a HTML track element and
+not burned into the picture.
+
+A later mix of narration audio uses ffmpeg with =-c:a aac -aac_coder fast=.
+
+#+begin_export rst
+.. raw:: html
+
+   <video controls width="960" preload="none" poster="">
+     <source src="https://huggingface.co/datasets/d-SEAMS/docs-videos/resolve/main/c.mp4" type="video/mp4">
+     <track kind="captions" srclang="en" label="English" src="../_static/captions/c.vtt" default>
+   </video>
+   <p>C on ice Ih.</p>
+   <video controls width="960" preload="none">
+     <source src="https://huggingface.co/datasets/d-SEAMS/docs-videos/resolve/main/cpp.mp4" type="video/mp4">
+     <track kind="captions" srclang="en" label="English" src="../_static/captions/cpp.vtt" default>
+   </video>
+   <p>C++ on ice Ih.</p>
+   <video controls width="960" preload="none">
+     <source src="https://huggingface.co/datasets/d-SEAMS/docs-videos/resolve/main/python.mp4" type="video/mp4">
+     <track kind="captions" srclang="en" label="English" src="../_static/captions/python.vtt" default>
+   </video>
+   <p>Python on ice Ih.</p>
+   <video controls width="960" preload="none">
+     <source src="https://huggingface.co/datasets/d-SEAMS/docs-videos/resolve/main/fortran.mp4" type="video/mp4">
+     <track kind="captions" srclang="en" label="English" src="../_static/captions/fortran.vtt" default>
+   </video>
+   <p>Fortran on ice Ih.</p>
+   <video controls width="960" preload="none">
+     <source src="https://huggingface.co/datasets/d-SEAMS/docs-videos/resolve/main/rust.mp4" type="video/mp4">
+     <track kind="captions" srclang="en" label="English" src="../_static/captions/rust.vtt" default>
+   </video>
+   <p>Rust on ice Ih.</p>
+   <video controls width="960" preload="none">
+     <source src="https://huggingface.co/datasets/d-SEAMS/docs-videos/resolve/main/julia.mp4" type="video/mp4">
+     <track kind="captions" srclang="en" label="English" src="../_static/captions/julia.vtt" default>
+   </video>
+   <p>Julia on ice Ih.</p>
+   <video controls width="960" preload="none">
+     <source src="https://huggingface.co/datasets/d-SEAMS/docs-videos/resolve/main/r.mp4" type="video/mp4">
+     <track kind="captions" srclang="en" label="English" src="../_static/captions/r.vtt" default>
+   </video>
+   <p>R on ice Ih.</p>
+   <video controls width="960" preload="none">
+     <source src="https://huggingface.co/datasets/d-SEAMS/docs-videos/resolve/main/cli.mp4" type="video/mp4">
+     <track kind="captions" srclang="en" label="English" src="../_static/captions/cli.vtt" default>
+   </video>
+   <p>The seams command on ice Ih.</p>
+   <video controls width="960" preload="none">
+     <source src="https://huggingface.co/datasets/d-SEAMS/docs-videos/resolve/main/interface.mp4" type="video/mp4">
+     <track kind="captions" srclang="en" label="English" src="../_static/captions/interface.vtt" default>
+   </video>
+   <p>CHILL+ on the 2048-water interface.</p>
+   <video controls width="960" preload="none">
+     <source src="https://huggingface.co/datasets/d-SEAMS/docs-videos/resolve/main/rings-cages.mp4" type="video/mp4">
+     <track kind="captions" srclang="en" label="English" src="../_static/captions/rings-cages.vtt" default>
+   </video>
+   <p>Rings and sI, sII cages.</p>
+   <video controls width="960" preload="none">
+     <source src="https://huggingface.co/datasets/d-SEAMS/docs-videos/resolve/main/brine.mp4" type="video/mp4">
+     <track kind="captions" srclang="en" label="English" src="../_static/captions/brine.vtt" default>
+   </video>
+   <p>The brine front.</p>
+   <video controls width="960" preload="none">
+     <source src="https://huggingface.co/datasets/d-SEAMS/docs-videos/resolve/main/nucleation.mp4" type="video/mp4">
+     <track kind="captions" srclang="en" label="English" src="../_static/captions/nucleation.vtt" default>
+   </video>
+   <p>Nucleation q6bar.</p>
+   <video controls width="960" preload="none">
+     <source src="https://huggingface.co/datasets/d-SEAMS/docs-videos/resolve/main/insitu.mp4" type="video/mp4">
+     <track kind="captions" srclang="en" label="English" src="../_static/captions/insitu.vtt" default>
+   </video>
+   <p>LAMMPS, GROMACS, OpenMM, and PLUMED.</p>
+   <video controls width="960" preload="none">
+     <source src="https://huggingface.co/datasets/d-SEAMS/docs-videos/resolve/main/migrate.mp4" type="video/mp4">
+     <track kind="captions" srclang="en" label="English" src="../_static/captions/migrate.vtt" default>
+   </video>
+   <p>Migrate from 1.x.</p>
+#+end_export

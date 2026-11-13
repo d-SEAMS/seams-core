@@ -1,0 +1,11 @@
+I build this tree with the seams-core pixi environment. The two lines on screen are the install: meson setup build, then meson compile -C build. That produces the seams command and libseams, which is the library the Rust call sits on. I keep that build and use it for every count in this recording.
+
+The input is input/traj/ice1h.lammpstrj. seams read prints nop 128 frame 1. Those are the 128 oxygens in one frame. This is the cell docs_engine_openmm scores, and it is the cell I hand to Rust.
+
+Neighbours are a cutoff of 3.5 angstroms on type 1. seams cn prints nI 128, so every oxygen is in the list. Ice Ih keeps a four-neighbour shell inside that cutoff. The Rust neighbour call walks this same list.
+
+Primitive rings use that list. The histogram is 6 256, and the summary is rings 256. Two six-rings for each of the 128 waters, and no other size. docs_engine_openmm names that count six-rings 256.
+
+Local q6 on the same cutoff prints q6 0.625855. Published CHILL+ then prints hexagonal 128. Every water is hexagonal. I want the Rust result to show the same two figures before I trust the wrapper.
+
+The Rust example is cargo run --example minimal on input/traj/genice_sI.lammpstrj. It prints rust example ok and q6 0.595. docs_examples locks that q6 0.595 line. The ice Ih cell beside it remains nop 128, q6 0.625855, hexagonal 128, rings 256.

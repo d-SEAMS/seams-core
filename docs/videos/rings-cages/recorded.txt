@@ -1,0 +1,7 @@
+## scene-01.tape
+rings full nop 4096 rings 8192
+rings full histogram 6 8192
+## scene-02.tape
+cages full sI 16 48
+cages full sII 64 32
+cages full sH 24 16 8

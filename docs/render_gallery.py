@@ -19,18 +19,33 @@ IMAGE_DIR = ROOT / "docs" / "source" / "tutorials" / "gallery"
 CAPTIONS = ROOT / "docs" / "source" / "tutorials" / "gallery-captions.rst"
 RUNS = ROOT / "docs" / "build" / "gallery-runs"
 
+# Okabe-Ito, so the CHILL+ classes stay distinct for the common colour-vision deficiencies.
 LABEL_COLOR = {
-    0: (0.12, 0.47, 0.71),
-    1: (0.90, 0.45, 0.13),
-    2: (0.65, 0.82, 0.89),
-    3: (0.95, 0.78, 0.20),
-    4: (0.55, 0.34, 0.70),
-    5: (0.17, 0.62, 0.35),
-    6: (0.60, 0.60, 0.60),
-    7: (0.20, 0.30, 0.70),
-    8: (0.70, 0.25, 0.15),
+    0: (0.00, 0.45, 0.70),
+    1: (0.90, 0.62, 0.00),
+    2: (0.35, 0.70, 0.91),
+    3: (0.94, 0.89, 0.26),
+    4: (0.80, 0.47, 0.65),
+    5: (0.00, 0.62, 0.45),
+    6: (0.55, 0.55, 0.55),
+    7: (0.80, 0.47, 0.65),
+    8: (0.00, 0.62, 0.45),
 }
-ION_COLOR = {2: (0.85, 0.15, 0.15), 3: (0.15, 0.65, 0.25)}
+LABEL_NAME = {
+    0: "cubic",
+    1: "hexagonal",
+    2: "water",
+    3: "interfacial",
+    4: "clathrate",
+    5: "interClathrate",
+    6: "unclassified",
+    7: "reCubic",
+    8: "reHex",
+}
+ION_COLOR = {2: (0.84, 0.37, 0.00), 3: (0.00, 0.45, 0.70)}
+ION_NAME = {2: "sodium", 3: "chloride"}
+FIGURE_WIDTH = 2400
+FIGURE_HEIGHT = 1800
 
 
 def have_stack(program):
@@ -191,90 +206,181 @@ def color_from_labels(labels):
 def color_q6(values):
     import numpy as np
 
+    # Cividis stops: low q6bar is dark blue, high q6bar is yellow.
     span = np.clip((values - 0.2) / 0.45, 0.0, 1.0)
-    colors = np.zeros((len(values), 3))
-    colors[:, 0] = span
-    colors[:, 1] = 0.25
-    colors[:, 2] = 1.0 - span
-    return colors
+    low = np.array((0.00, 0.13, 0.30))
+    high = np.array((0.95, 0.85, 0.25))
+    return low + (high - low) * span[:, None]
 
 
-def render_scene(path, positions, colors, radii=None, bonds=None, bond_positions=None):
+def render_atoms(path, positions, colors, radii, bonds, bond_positions, size):
+    """Ray-trace the atoms. Tachyon is preferred; OSPRay is the fallback engine."""
     paper_module().prepare_vulkan()
-    try:
-        import warnings
+    import warnings
 
-        warnings.filterwarnings("ignore", message=".*OVITO.*PyPI")
-        import ovito
-        from ovito.data import DataCollection, Particles
-        from ovito.pipeline import Pipeline, StaticSource
-        from ovito.vis import Viewport
+    warnings.filterwarnings("ignore", message=".*OVITO.*PyPI")
+    import ovito
+    from ovito.data import DataCollection, Particles
+    from ovito.pipeline import Pipeline, StaticSource
+    from ovito.vis import OSPRayRenderer, TachyonRenderer, Viewport
 
-        while ovito.scene.pipelines:
-            ovito.scene.pipelines[0].remove_from_scene()
-    except ImportError:
-        return render_matplotlib(path, positions, colors, radii, bonds, bond_positions)
+    while ovito.scene.pipelines:
+        ovito.scene.pipelines[0].remove_from_scene()
+    data = DataCollection()
+    particles = Particles()
+    particles.create_property("Position", data=positions)
+    particles.create_property("Color", data=colors)
+    if radii is not None:
+        particles.create_property("Radius", data=radii)
+    if bonds is not None and len(bonds):
+        particles.create_bonds().create_property("Topology", data=bonds)
+        particles.bonds.vis.width = 0.12
+        particles.bonds.vis.color = (0.15, 0.15, 0.15)
+    data.objects.append(particles)
+    particles.vis.radius = 0.55
+    pipeline = Pipeline(source=StaticSource(data=data))
+    pipeline.add_to_scene()
     try:
-        data = DataCollection()
-        particles = Particles()
-        particles.create_property("Position", data=positions)
-        particles.create_property("Color", data=colors)
-        if radii is not None:
-            particles.create_property("Radius", data=radii)
-        if bonds is not None and len(bonds):
-            particles.create_bonds().create_property("Topology", data=bonds)
-        data.objects.append(particles)
-        particles.vis.radius = 0.55
-        pipeline = Pipeline(source=StaticSource(data=data))
-        pipeline.add_to_scene()
+        view = Viewport(type=Viewport.Type.Ortho)
+        view.zoom_all()
+        renderer = TachyonRenderer(
+            ambient_occlusion=True,
+            ambient_occlusion_brightness=0.8,
+            ambient_occlusion_samples=8,
+            antialiasing=True,
+            antialiasing_samples=6,
+            shadows=True,
+        )
         try:
-            view = Viewport(type=Viewport.Type.Ortho)
-            view.zoom_all()
-            view.render_image(filename=str(path), size=(480, 360), background=(1, 1, 1))
-        finally:
-            pipeline.remove_from_scene()
-    except Exception:
-        return render_matplotlib(path, positions, colors, radii, bonds, bond_positions)
-    if not path.is_file():
-        return render_matplotlib(path, positions, colors, radii, bonds, bond_positions)
-    return "ovito"
+            view.render_image(
+                filename=str(path),
+                size=size,
+                background=(1, 1, 1),
+                renderer=renderer,
+            )
+            engine = "tachyon"
+        except Exception:
+            view.render_image(
+                filename=str(path),
+                size=size,
+                background=(1, 1, 1),
+                renderer=OSPRayRenderer(ambient_light_enabled=True, samples_per_pixel=8),
+            )
+            engine = "ospray"
+        world_height = 2.0 * float(view.fov)
+        return engine, world_height
+    finally:
+        pipeline.remove_from_scene()
 
 
-def render_matplotlib(path, positions, colors, radii, bonds, bond_positions):
+def _font(size):
+    from PIL import ImageFont
+
+    for path in (
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+    ):
+        if os.path.isfile(path):
+            return ImageFont.truetype(path, size)
+    return ImageFont.load_default()
+
+
+def compose_figure(atom_png, dest, legend, scale_a, world_height, atom_size):
+    from PIL import Image, ImageDraw
+
+    canvas = Image.new("RGB", (FIGURE_WIDTH, FIGURE_HEIGHT), (255, 255, 255))
+    atoms = Image.open(atom_png).convert("RGB")
+    left, top = 48, 36
+    canvas.paste(atoms, (left, top))
+    draw = ImageDraw.Draw(canvas)
+    label_font = _font(28)
+    title_font = _font(32)
+    legend_x = left + atom_size[0] + 36
+    cursor = top + 8
+    draw.text((legend_x, cursor), "Legend", fill=(20, 20, 20), font=title_font)
+    cursor += 52
+    for name, rgb in legend:
+        colour = tuple(int(channel * 255) for channel in rgb)
+        draw.rectangle((legend_x, cursor, legend_x + 36, cursor + 36), fill=colour, outline=(20, 20, 20))
+        draw.text((legend_x + 48, cursor + 2), name, fill=(20, 20, 20), font=label_font)
+        cursor += 52
+    if world_height > 0 and scale_a > 0:
+        pixels = scale_a * (atom_size[1] / world_height)
+        pixels = max(40.0, min(pixels, atom_size[0] * 0.45))
+        bar_y = top + atom_size[1] + 28
+        draw.line((left, bar_y, left + pixels, bar_y), fill=(20, 20, 20), width=6)
+        draw.line((left, bar_y - 10, left, bar_y + 10), fill=(20, 20, 20), width=4)
+        draw.line((left + pixels, bar_y - 10, left + pixels, bar_y + 10), fill=(20, 20, 20), width=4)
+        draw.text((left, bar_y + 16), "{} A".format(int(scale_a)), fill=(20, 20, 20), font=label_font)
+    canvas.save(dest)
+
+
+def legend_for(colors, names):
+    found = []
+    seen = set()
+    for colour, name in zip(colors, names):
+        key = (name, tuple(round(float(channel), 3) for channel in colour))
+        if name in seen:
+            continue
+        seen.add(name)
+        found.append((name, colour))
+    return found
+
+
+def render_matplotlib(path, positions, colors, radii, bonds, bond_positions, legend, scale_a):
     import matplotlib
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
+    from matplotlib.lines import Line2D
 
-    figure = plt.figure(figsize=(6.4, 4.8))
-    axis = figure.add_subplot(111, projection="3d")
+    figure = plt.figure(figsize=(FIGURE_WIDTH / 100, FIGURE_HEIGHT / 100), dpi=100)
+    axis = figure.add_axes((0.04, 0.08, 0.68, 0.86), projection="3d")
     sizes = 8.0 if radii is None else radii * 10.0
     axis.scatter(positions[:, 0], positions[:, 1], positions[:, 2], c=colors, s=sizes, depthshade=False)
     if bonds and bond_positions is not None:
-        for left, right in bonds[:: max(1, len(bonds) // 4000)]:
+        step = max(1, len(bonds) // 4000)
+        for left, right in bonds[::step]:
             segment = bond_positions[[left, right]]
-            axis.plot(segment[:, 0], segment[:, 1], segment[:, 2], color=(0.85, 0.65, 0.10), linewidth=0.4)
+            axis.plot(segment[:, 0], segment[:, 1], segment[:, 2], color=(0.15, 0.15, 0.15), linewidth=0.4)
     axis.set_axis_off()
-    figure.tight_layout()
-    figure.savefig(path, dpi=100)
+    handles = [
+        Line2D([0], [0], marker="o", color="none", markerfacecolor=rgb, markeredgecolor="black", markersize=10, label=name)
+        for name, rgb in legend
+    ]
+    figure.legend(handles=handles, loc="center left", bbox_to_anchor=(0.78, 0.55), frameon=False, fontsize=14)
+    span = float(positions[:, 0].max() - positions[:, 0].min()) or 1.0
+    axis.plot([positions[:, 0].min(), positions[:, 0].min() + min(scale_a, span)], [positions[:, 1].min()] * 2, [positions[:, 2].min()] * 2, color="black", linewidth=3)
+    figure.text(0.08, 0.03, "{} A".format(int(scale_a)), fontsize=16)
+    figure.savefig(path)
     plt.close(figure)
     return "matplotlib"
 
 
-def save(path, positions, colors, radii=None, bonds=None, bond_positions=None):
+def save(path, positions, colors, radii=None, bonds=None, bond_positions=None, legend=None, scale_a=10.0):
     import numpy as np
 
-    kind = render_scene(
-        path,
-        np.asarray(positions, dtype=float),
-        np.asarray(colors, dtype=float),
-        None if radii is None else np.asarray(radii, dtype=float),
-        None if not bonds else np.asarray(bonds, dtype=int),
-        None if bond_positions is None else np.asarray(bond_positions, dtype=float),
-    )
+    positions = np.asarray(positions, dtype=float)
+    colors = np.asarray(colors, dtype=float)
+    radii_arr = None if radii is None else np.asarray(radii, dtype=float)
+    bond_arr = None if not bonds else np.asarray(bonds, dtype=int)
+    bond_pos = None if bond_positions is None else np.asarray(bond_positions, dtype=float)
+    if legend is None:
+        legend = [("atom", (0.2, 0.4, 0.7))]
+    atom_size = (1960, 1480)
+    raw = path.with_suffix(".atoms.png")
+    world_height = 0.0
+    try:
+        _engine, world_height = render_atoms(raw, positions, colors, radii_arr, bond_arr, bond_pos, atom_size)
+        compose_figure(raw, path, legend, scale_a, world_height, atom_size)
+    except Exception:
+        render_matplotlib(path, positions, colors, radii_arr, bond_arr, bond_pos, legend, scale_a)
+    finally:
+        if raw.is_file():
+            raw.unlink()
     if not path.is_file() or path.stat().st_size == 0:
         raise SystemExit("missing figure {}".format(path.name))
-    return kind
+    return path
 
 
 def brine_colors(lang, dump, frame):
@@ -287,15 +393,45 @@ def brine_colors(lang, dump, frame):
     lang.seams_frame_free(everyone)
     colors = np.zeros((len(positions), 3))
     radii = np.full(len(positions), 0.45)
+    legend = []
+    seen = set()
     cursor = 0
     for index, kind in enumerate(types):
-        if int(kind) in ION_COLOR:
-            colors[index] = ION_COLOR[int(kind)]
+        kind = int(kind)
+        if kind in ION_COLOR:
+            colors[index] = ION_COLOR[kind]
             radii[index] = 1.15
+            key = ION_NAME[kind]
+            paint = ION_COLOR[kind]
         else:
-            colors[index] = LABEL_COLOR.get(int(labels[cursor]), (0.7, 0.7, 0.7))
+            label = int(labels[cursor])
+            colors[index] = LABEL_COLOR.get(label, (0.7, 0.7, 0.7))
+            key = LABEL_NAME.get(label, "other")
+            paint = LABEL_COLOR.get(label, (0.7, 0.7, 0.7))
             cursor += 1
-    return positions, colors, radii
+        if key not in seen:
+            seen.add(key)
+            legend.append((key, paint))
+    return positions, colors, radii, legend
+
+
+def labels_legend(labels):
+    items = []
+    seen = set()
+    for label in labels:
+        label = int(label)
+        if label in seen:
+            continue
+        seen.add(label)
+        items.append((LABEL_NAME.get(label, "other"), LABEL_COLOR.get(label, (0.5, 0.5, 0.5))))
+    return items
+
+
+def scale_of(positions):
+    span = 0.0
+    for axis in range(3):
+        span = max(span, float(positions[:, axis].max() - positions[:, axis].min()))
+    return 5.0 if span < 25.0 else 10.0
 
 
 def ring_scene(lang, api, dump):
@@ -359,22 +495,49 @@ def build(seams, libdir, langdir):
     handle, positions, _types = cloud(lang, interface, 1, 1)
     labels = chill_labels(lang, handle, len(positions))
     lang.seams_frame_free(handle)
-    save(IMAGE_DIR / "gallery-interface.png", positions, color_from_labels(labels))
+    save(
+        IMAGE_DIR / "gallery-interface.png",
+        positions,
+        color_from_labels(labels),
+        legend=labels_legend(labels),
+        scale_a=scale_of(positions),
+    )
 
     brine = RUNS / "brine" / "brine-full.lammpstrj"
     for frame, name in ((1, "gallery-brine-start.png"), (3, "gallery-brine-end.png")):
-        positions, colors, radii = brine_colors(lang, brine, frame)
-        save(IMAGE_DIR / name, positions, colors, radii)
+        positions, colors, radii, legend = brine_colors(lang, brine, frame)
+        save(
+            IMAGE_DIR / name,
+            positions,
+            colors,
+            radii,
+            legend=legend,
+            scale_a=scale_of(positions),
+        )
 
     rings = RUNS / "rings" / "rings-full.lammpstrj"
     positions, colors, bonds = ring_scene(lang, api, rings)
-    save(IMAGE_DIR / "gallery-rings.png", positions, colors, bonds=bonds, bond_positions=positions)
+    save(
+        IMAGE_DIR / "gallery-rings.png",
+        positions,
+        colors,
+        bonds=bonds,
+        bond_positions=positions,
+        legend=[("oxygen", (0.75, 0.84, 0.92)), ("cutoff bond", (0.15, 0.15, 0.15))],
+        scale_a=scale_of(positions),
+    )
 
     nucleus = RUNS / "nucleation" / "nucleation-full.lammpstrj"
     handle, positions, _types = cloud(lang, nucleus, 2, 1)
     values = q6bar_values(lang, handle, len(positions))
     lang.seams_frame_free(handle)
-    save(IMAGE_DIR / "gallery-nucleation.png", positions, color_q6(values))
+    save(
+        IMAGE_DIR / "gallery-nucleation.png",
+        positions,
+        color_q6(values),
+        legend=[("low q6bar", (0.00, 0.13, 0.30)), ("high q6bar", (0.95, 0.85, 0.25))],
+        scale_a=scale_of(positions),
+    )
 
     for name, dump in (
         ("gallery-cages-sI.png", RUNS / "cages" / "sI-full.lammpstrj"),
@@ -385,9 +548,18 @@ def build(seams, libdir, langdir):
             bonds = undirected_bonds(lang, api, handle)
         finally:
             lang.seams_frame_free(handle)
-        tint = (0.55, 0.34, 0.70) if "sI" in name else (0.15, 0.45, 0.70)
+        tint = (0.80, 0.47, 0.65) if "sI" in name else (0.00, 0.45, 0.70)
         colors = np.tile(tint, (len(positions), 1))
-        save(IMAGE_DIR / name, positions, colors, bonds=bonds, bond_positions=positions)
+        title = "sI water" if "sI" in name else "sII water"
+        save(
+            IMAGE_DIR / name,
+            positions,
+            colors,
+            bonds=bonds,
+            bond_positions=positions,
+            legend=[(title, tint), ("cage bond", (0.15, 0.15, 0.15))],
+            scale_a=scale_of(positions),
+        )
 
     def piece(line, key):
         parts = line.split()
@@ -413,7 +585,7 @@ def build(seams, libdir, langdir):
                     "The picture is the 2048-water slab, coloured by published CHILL+.",
                     published.replace("interface full published ", "Published CHILL+ reports ") + ".",
                     ovito.replace("interface full ovito ", "The OVITO rule reports ") + ".",
-                    "Hexagonal ice is the warm colour and liquid water is pale. The interfacial shell is where the two rules part.",
+                    "Hexagonal ice is orange and liquid water is sky blue. The interfacial shell is where the two rules part.",
                 ]
             ),
             reports["interface"],
@@ -424,7 +596,7 @@ def build(seams, libdir, langdir):
             " ".join(
                 [
                     "The first picture is the start of the 240 K run and the second picture is the end.",
-                    "Sodium is red and chloride is green.",
+                    "Sodium is vermillion and chloride is blue.",
                     brine_lines[0].replace("brine full frame 0 ", "At the start, ") + ".",
                     brine_lines[2].replace("brine full frame 2 ", "At the end, ") + ".",
                     "The front moves from {} Å to {} Å as hexagonal water fills the next lattice planes.".format(
@@ -453,7 +625,7 @@ def build(seams, libdir, langdir):
             " ".join(
                 [
                     "Each molecule is coloured by its own q6bar on the frame that restores the basal nucleus.",
-                    "Blue is liquid-like and red is ice-like.",
+                    "Dark blue is liquid-like and yellow is ice-like.",
                     q_lines[0].replace("nucleation full frame 0 ", "Frame 0 has ") + ".",
                     q_lines[1].replace("nucleation full frame 1 ", "Frame 1 has ") + ".",
                     q_lines[2].replace("nucleation full frame 2 ", "Frame 2 has ") + ".",
@@ -505,6 +677,12 @@ def check(reports):
             errors.append("missing {}".format(name))
         elif name not in text:
             errors.append("caption does not show {}".format(name))
+        else:
+            from PIL import Image
+
+            width, _height = Image.open(image).size
+            if width < FIGURE_WIDTH:
+                errors.append("{} is {} px wide".format(name, width))
     return errors
 
 

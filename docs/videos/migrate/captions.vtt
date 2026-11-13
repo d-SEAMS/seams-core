@@ -1,0 +1,12 @@
+WEBVTT
+
+NOTE
+Draft cues converted from captions.srt. Final wording and timing are recorded later.
+
+1
+00:00:00.300 --> 00:00:13.020 line:95% align:center size:80%
+The migration check uses input/traj/exampleTraj.lammpstrj. seams hbonds prints nop 250 hbonds 460. seams cn for the 1,2 pair at cutoff 4.5 prints cn 9.144. docs_migrate requires both lines.
+
+2
+00:00:13.520 --> 00:00:33.320 line:95% align:center size:80%
+seams fingerprint prints classes 89. seams pairs prints count 0. seams domains on the polar subset prints largest 750. docs_migrate requires classes 89, count 0, and largest 750. The old name and the current command in the guide are the two sides of that check.

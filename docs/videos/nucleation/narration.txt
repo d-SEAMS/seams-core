@@ -1,0 +1,3 @@
+The nucleation tutorial prints three mean q6bar values. Frame 0 is 0.26828. Frame 1 is 0.287644. Frame 2 is 0.56248. docs_paper_nucleation_full asserts those three lines.
+
+I leave the report on screen. The numbers above are the ones the test locks. The picture track keeps a blank band under the text so a later caption can sit there without covering a count.

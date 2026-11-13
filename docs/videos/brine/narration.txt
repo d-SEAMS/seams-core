@@ -1,0 +1,5 @@
+The brine tutorial prints three frames. Frame 0 is hexagonal 93, water 152, front 18.50. Frame 1 is hexagonal 160, water 86, front 25.90. Frame 2 is hexagonal 218, water 38, front 37.00. docs_paper_brine_full asserts those three lines. The temperature in the driver is 240 K, and this shot prints that from the source.
+
+The front numbers come from a run at 240 K. The driver source contains 240 K, and this command prints brine temperature 240.
+
+I leave the report on screen. The numbers above are the ones the test locks. The picture track keeps a blank band under the text so a later caption can sit there without covering a count.

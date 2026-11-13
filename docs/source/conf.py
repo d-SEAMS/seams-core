@@ -164,6 +164,7 @@ linkcheck_ignore = [
     r"https://onlinelibrary\.wiley\.com/.*",
     r"https://pubs\.aip\.org/.*",
     r"https://www\.tandfonline\.com/.*",
+    r"https://huggingface\.co/datasets/d-SEAMS/.*",
 ]
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
@@ -239,3 +240,24 @@ html_sidebars = {
 }
 
 html_baseurl = "https://docs.dseams.info/"
+
+
+def _copy_caption_tracks(app, exception):
+    """Publish the draft VTT files next to the HTML so <track> can load them."""
+    if exception is not None:
+        return
+    import shutil
+
+    source = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "videos"))
+    dest = os.path.join(app.outdir, "_static", "captions")
+    os.makedirs(dest, exist_ok=True)
+    if not os.path.isdir(source):
+        return
+    for name in os.listdir(source):
+        track = os.path.join(source, name, "captions.vtt")
+        if os.path.isfile(track):
+            shutil.copy(track, os.path.join(dest, name + ".vtt"))
+
+
+def setup(app):
+    app.connect("build-finished", _copy_caption_tracks)

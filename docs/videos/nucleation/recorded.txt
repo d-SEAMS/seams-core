@@ -1,0 +1,5 @@
+## scene-01.tape
+nucleation full frame 0 q6bar 0.26828
+nucleation full frame 1 q6bar 0.287644
+nucleation full frame 2 q6bar 0.56248
+## scene-02.tape
