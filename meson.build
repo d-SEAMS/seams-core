@@ -1361,7 +1361,7 @@ if get_option('with_cli')
     env: tutorial_env,
     depends: [seams_api_lib],
     suite: 'docs',
-    timeout: 180)
+    timeout: 900)
   test(
     'docs_video_tapes',
     python3,

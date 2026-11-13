@@ -3,13 +3,11 @@
 """Draw molecule stills.
 
 chemparseplot is the entry point for the oxygen-oxygen bond list.
-It does not ray-trace, it does not colour atoms by a classifier,
-and it does not draw translucent faces. The pixels are OVITO's
-Tachyon ray tracer: soft shadows, ambient occlusion, depth of field
-off, thin sticks, and triangle meshes for cage faces and rings.
-OSPRay is available in the same module, but on this build its Vulkan
-device does not initialise and the CPU path does not finish a
-translucent cage at print resolution.
+It does not path-trace, it does not colour atoms by a classifier,
+and it does not draw translucent faces. The picture is Blender
+Cycles when ``bpy`` imports: glossy spheres, cylinder bonds, glass
+cage faces, area lights, a studio backdrop and filmic tone mapping.
+Tachyon is the fallback, with antialiasing of 64 samples.
 
     python docs/scripts/render_molecules.py --out <dir> [--slug <slug>]
 
@@ -467,8 +465,361 @@ def orient(positions, view, center):
     return pos
 
 
+CYCLES_SAMPLES = 256
+
+
+def cycles_python():
+    """A Python that can import bpy. None when Cycles is not installed."""
+    import subprocess
+
+    programs = []
+    chosen = os.environ.get("MOLECULES_BPY")
+    if chosen:
+        programs.append(chosen)
+    programs.append(sys.executable)
+    for folder in os.environ.get("PATH", "").split(os.pathsep):
+        for name in ("python3.13", "python3"):
+            programs.append(os.path.join(folder, name))
+    seen = set()
+    for program in programs:
+        if not program or program in seen or not os.path.isfile(program):
+            continue
+        seen.add(program)
+        probe = subprocess.run(
+            [program, "-c", "import bpy"],
+            check=False,
+            capture_output=True,
+        )
+        if probe.returncode == 0:
+            return program
+    return None
+
+
+def frame_bounds(positions, radii, transparency):
+    """World box around the opaque atoms, with a margin of liquid context."""
+    import numpy as np
+
+    points = np.asarray(positions, dtype=float)
+    radius = np.asarray(radii, dtype=float)
+    alpha = np.asarray(transparency, dtype=float)
+    opaque = alpha < 0.5
+    chosen = points[opaque] if np.any(opaque) else points
+    chosen_r = radius[opaque] if np.any(opaque) else radius
+    low = chosen.min(axis=0) - chosen_r.max() - 1.6
+    high = chosen.max(axis=0) + chosen_r.max() + 1.6
+    return low, high
+
+
+def cycles_job():
+    """Headless Cycles. The parent passes one numpy archive on argv."""
+    import numpy as np
+    import bpy
+
+    job = np.load(sys.argv[1], allow_pickle=False)
+    positions = np.asarray(job["positions"], dtype=float)
+    colors = np.asarray(job["colors"], dtype=float)
+    radii = np.asarray(job["radii"], dtype=float)
+    transparency = np.asarray(job["transparency"], dtype=float)
+    bonds = np.asarray(job["bonds"], dtype=int)
+    background = tuple(float(channel) for channel in job["background"])
+    mesh_count = int(job["mesh_count"])
+    light = background[0] > 0.5
+    low, high = frame_bounds(positions, radii, transparency)
+    centre = (low + high) / 2.0
+    width = float(high[0] - low[0])
+    height = float(high[1] - low[1])
+    aspect = WIDTH / float(HEIGHT)
+    # Leave the upper right clear for the legend and the bottom for the scale bar.
+    look = np.array([centre[0] + 0.04 * width, centre[1] - 0.02 * height, centre[2]])
+    vertical = max(height, width / aspect) * 1.12
+
+    for obj in list(bpy.data.objects):
+        bpy.data.objects.remove(obj, do_unlink=True)
+
+    def socket(node, *names):
+        for name in names:
+            if name in node.inputs:
+                return node.inputs[name]
+        return None
+
+    def glossy(name, rgb, alpha, transmission):
+        material = bpy.data.materials.new(name)
+        material.use_nodes = True
+        node = material.node_tree.nodes.get("Principled BSDF")
+        base = socket(node, "Base Color")
+        if base is not None:
+            base.default_value = (float(rgb[0]), float(rgb[1]), float(rgb[2]), 1.0)
+        rough = socket(node, "Roughness")
+        if rough is not None:
+            rough.default_value = 0.12 if transmission else 0.18
+        spec = socket(node, "Specular IOR Level", "Specular")
+        if spec is not None:
+            spec.default_value = 0.45
+        coat = socket(node, "Coat Weight")
+        if coat is not None and not transmission:
+            coat.default_value = 0.12
+        trans = socket(node, "Transmission Weight", "Transmission")
+        if trans is not None:
+            trans.default_value = float(transmission)
+        ior = socket(node, "IOR")
+        if ior is not None and transmission:
+            ior.default_value = 1.33 if transmission < 0.8 else 1.45
+        fade = socket(node, "Alpha")
+        if fade is not None:
+            fade.default_value = float(alpha)
+        try:
+            material.blend_method = "HASHED"
+        except (AttributeError, TypeError):
+            pass
+        return material
+
+    def add_mesh(name, mesh, material):
+        obj = bpy.data.objects.new(name, mesh)
+        bpy.context.scene.collection.objects.link(obj)
+        obj.data.materials.append(material)
+        return obj
+
+    def sphere_mesh(name, centres, radius):
+        import bmesh
+
+        mesh = bpy.data.meshes.new(name)
+        pen = bmesh.new()
+        for centre in centres:
+            before = set(pen.verts)
+            bmesh.ops.create_uvsphere(
+                pen, u_segments=20, v_segments=12, radius=float(radius),
+            )
+            fresh = [vert for vert in pen.verts if vert not in before]
+            bmesh.ops.translate(pen, verts=fresh, vec=tuple(float(v) for v in centre))
+        pen.to_mesh(mesh)
+        pen.free()
+        return mesh
+
+    def bond_mesh(name, pairs, radius):
+        import bmesh
+
+        mesh = bpy.data.meshes.new(name)
+        pen = bmesh.new()
+        up = np.array([0.0, 0.0, 1.0])
+        for left, right in pairs:
+            start = positions[int(left)]
+            stop = positions[int(right)]
+            span = stop - start
+            length = float(np.linalg.norm(span))
+            if length < 1e-6:
+                continue
+            direction = span / length
+            gap = float(radii[int(left)] + radii[int(right)])
+            visible = length - gap * 0.92
+            if visible < 0.08:
+                continue
+            mid = (start + stop) / 2.0
+            before = set(pen.verts)
+            bmesh.ops.create_cone(
+                pen, cap_ends=True, segments=8,
+                radius1=radius, radius2=radius, depth=visible,
+            )
+            fresh = [vert for vert in pen.verts if vert not in before]
+            axis = np.cross(up, direction)
+            cosine = float(np.dot(up, direction))
+            if cosine < -0.999:
+                matrix = np.diag([1.0, -1.0, -1.0])
+            else:
+                cross = np.array([
+                    [0.0, -axis[2], axis[1]],
+                    [axis[2], 0.0, -axis[0]],
+                    [-axis[1], axis[0], 0.0],
+                ])
+                matrix = np.eye(3) + cross + cross @ cross * (1.0 / (1.0 + cosine))
+            for vert in fresh:
+                point = matrix @ np.array(vert.co)
+                vert.co = tuple(float(v) for v in (point + mid))
+        pen.to_mesh(mesh)
+        pen.free()
+        return mesh
+
+    groups = {}
+    for index, colour in enumerate(colors):
+        key = tuple(round(float(channel), 4) for channel in colour)
+        groups.setdefault(key, {"index": [], "alpha": [], "radius": []})
+        groups[key]["index"].append(index)
+        groups[key]["alpha"].append(float(1.0 - transparency[index]))
+        groups[key]["radius"].append(float(radii[index]))
+    for key, group in groups.items():
+        alpha = min(group["alpha"])
+        transmission = 0.62 if alpha < 0.7 else 0.0
+        material = glossy("atom", key, alpha, transmission)
+        radius = float(np.median(group["radius"]))
+        mesh = sphere_mesh("spheres", positions[group["index"]], radius)
+        add_mesh("spheres", mesh, material)
+    if len(bonds):
+        ink = (0.23, 0.24, 0.27) if light else (0.78, 0.79, 0.82)
+        material = glossy("bond", ink, 1.0, 0.0)
+        rough = material.node_tree.nodes["Principled BSDF"]
+        bond_rough = socket(rough, "Roughness")
+        if bond_rough is not None:
+            bond_rough.default_value = 0.42
+        add_mesh("bonds", bond_mesh("bonds", bonds, 0.045), material)
+    for slot in range(mesh_count):
+        vertices = np.asarray(job["mesh_vertices_{}".format(slot)], dtype=float)
+        faces = [tuple(int(v) for v in face) for face in job["mesh_faces_{}".format(slot)]]
+        colour = tuple(float(v) for v in job["mesh_color_{}".format(slot)])
+        material = glossy("cage", colour, 0.28, 0.92)
+        mesh = bpy.data.meshes.new("cage")
+        mesh.from_pydata(vertices.tolist(), [], faces)
+        mesh.update()
+        for poly in mesh.polygons:
+            poly.use_smooth = False
+        add_mesh("cage", mesh, material)
+
+    camera_data = bpy.data.cameras.new("camera")
+    camera_data.type = "ORTHO"
+    camera_data.sensor_fit = "VERTICAL"
+    camera_data.ortho_scale = vertical
+    camera = bpy.data.objects.new("camera", camera_data)
+    bpy.context.scene.collection.objects.link(camera)
+    camera.location = (float(look[0]), float(look[1]), float(high[2]) + 30.0)
+    camera.rotation_euler = (0.0, 0.0, 0.0)
+    bpy.context.scene.camera = camera
+
+    def area(name, location, energy, size):
+        from mathutils import Vector
+
+        data = bpy.data.lights.new(name, "AREA")
+        data.energy = energy
+        data.size = size
+        data.shape = "DISK"
+        obj = bpy.data.objects.new(name, data)
+        bpy.context.scene.collection.objects.link(obj)
+        obj.location = location
+        direction = Vector(look) - Vector(location)
+        obj.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
+        return obj
+
+    area("key", (float(look[0]) - 14.0, float(look[1]) + 16.0, float(high[2]) + 22.0), 250.0, 30.0)
+    area("fill", (float(look[0]) + 16.0, float(look[1]) - 10.0, float(high[2]) + 14.0), 90.0, 40.0)
+    area("rim", (float(look[0]) - 6.0, float(look[1]) - 18.0, float(centre[2]) + 4.0), 60.0, 14.0)
+
+    world = bpy.data.worlds.new("studio")
+    bpy.context.scene.world = world
+    world.use_nodes = True
+    backdrop = world.node_tree.nodes.get("Background")
+    if backdrop is not None:
+        backdrop.inputs["Color"].default_value = (*background, 1.0)
+        backdrop.inputs["Strength"].default_value = 0.45 if light else 0.15
+
+    scene = bpy.context.scene
+    scene.render.engine = "CYCLES"
+    scene.cycles.device = "CPU"
+    scene.cycles.samples = int(job["samples"])
+    scene.cycles.use_denoising = True
+    try:
+        scene.cycles.denoiser = "OPENIMAGEDENOISE"
+    except TypeError:
+        pass
+    scene.cycles.use_adaptive_sampling = True
+    scene.cycles.adaptive_min_samples = 96
+    try:
+        scene.cycles.adaptive_threshold = 0.01
+    except (AttributeError, TypeError):
+        pass
+    scene.cycles.max_bounces = 6
+    scene.cycles.transmission_bounces = 6
+    scene.cycles.glossy_bounces = 3
+    scene.render.resolution_x = WIDTH
+    scene.render.resolution_y = HEIGHT
+    scene.render.resolution_percentage = 100
+    scene.render.film_transparent = True
+    scene.render.image_settings.file_format = "PNG"
+    scene.render.image_settings.color_mode = "RGBA"
+    scene.view_settings.view_transform = "Filmic"
+    scene.view_settings.look = "None"
+    scene.view_settings.exposure = 0.0 if light else 0.4
+    scene.render.filepath = sys.argv[2]
+    bpy.ops.render.render(write_still=True)
+    print("WORLD {:.8f}".format(vertical))
+    return 0
+
+
+def cycles_launch(positions, colors, radii, transparency, bonds, meshes, background):
+    """Render with Cycles in a fresh interpreter. None when bpy is absent."""
+    import subprocess
+    import tempfile
+
+    import numpy as np
+
+    program = cycles_python()
+    if program is None:
+        return None
+    handle = tempfile.NamedTemporaryFile(suffix=".npz", delete=False)
+    picture = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+    handle.close()
+    picture.close()
+    payload = {
+        "positions": np.asarray(positions, dtype=np.float64),
+        "colors": np.asarray(colors, dtype=np.float64),
+        "radii": np.asarray(radii, dtype=np.float64),
+        "transparency": np.asarray(transparency, dtype=np.float64),
+        "bonds": np.asarray(bonds if len(bonds) else np.zeros((0, 2)), dtype=np.int32),
+        "background": np.asarray(background, dtype=np.float64),
+        "mesh_count": np.int32(len(meshes)),
+        "samples": np.int32(int(os.environ.get("MOLECULES_SAMPLES", str(CYCLES_SAMPLES)))),
+    }
+    for slot, mesh in enumerate(meshes):
+        payload["mesh_vertices_{}".format(slot)] = np.asarray(mesh["vertices"], dtype=np.float64)
+        payload["mesh_faces_{}".format(slot)] = np.asarray(mesh["faces"], dtype=np.int32)
+        payload["mesh_color_{}".format(slot)] = np.asarray(mesh["color"], dtype=np.float64)
+    np.savez(handle.name, **payload)
+    env = os.environ.copy()
+    env["MOLECULES_CYCLES"] = "1"
+    try:
+        done = subprocess.run(
+            [program, str(Path(__file__).resolve()), handle.name, picture.name],
+            check=False,
+            capture_output=True,
+            text=True,
+            env=env,
+            timeout=1800,
+        )
+        world = 0.0
+        for line in (done.stdout or "").splitlines():
+            if line.startswith("WORLD "):
+                world = float(line.split()[1])
+        if done.returncode != 0 or not os.path.isfile(picture.name) or os.path.getsize(picture.name) < 1000:
+            detail = (done.stderr or done.stdout or "cycles failed")[-500:]
+            print(detail, file=sys.stderr)
+            return None
+        from PIL import Image
+
+        image = Image.open(picture.name).convert("RGBA")
+        plate = tuple(int(round(channel * 255)) for channel in background)
+        canvas = Image.new("RGBA", image.size, plate + (255,))
+        image = Image.alpha_composite(canvas, image).convert("RGB")
+        image.load()
+        return image, world
+    except (OSError, subprocess.TimeoutExpired, ValueError) as exc:
+        print(str(exc), file=sys.stderr)
+        return None
+    finally:
+        for path in (handle.name, picture.name):
+            try:
+                os.unlink(path)
+            except OSError:
+                pass
+
+
 def raytrace(positions, colors, radii, transparency, bonds, meshes, background, perspective):
-    """Tachyon still. Depth of field stays off. The render is twice the panel."""
+    """Cycles still, or Tachyon when bpy is not installed."""
+    drawn = cycles_launch(positions, colors, radii, transparency, bonds, meshes, background)
+    if drawn is not None:
+        return drawn
+    return tachyon_raytrace(
+        positions, colors, radii, transparency, bonds, meshes, background, perspective
+    )
+
+
+def tachyon_raytrace(positions, colors, radii, transparency, bonds, meshes, background, perspective):
+    """Tachyon fallback. Antialiasing stays at 64 samples. Depth of field stays off."""
     import tempfile
 
     import numpy as np
@@ -516,27 +867,31 @@ def raytrace(positions, colors, radii, transparency, bonds, meshes, background, 
         view.camera_up = (0.0, 1.0, 0.0)
         if perspective:
             view.fov = 28.0
-        view.zoom_all()
-        camera = np.array(view.camera_pos, dtype=float)
-        forward = np.array(view.camera_dir, dtype=float)
-        if float(np.dot(forward, -camera)) < 0.0:
-            camera = -camera
-            view.camera_pos = (float(camera[0]), float(camera[1]), float(camera[2]))
-            view.camera_dir = (0.0, 0.0, -1.0)
+        low, high = frame_bounds(positions, radii, transparency)
+        centre = (low + high) / 2.0
+        span_x = float(high[0] - low[0])
+        span_y = float(high[1] - low[1])
+        aspect = WIDTH / float(HEIGHT)
+        look_x = centre[0] + 0.04 * span_x
+        look_y = centre[1] - 0.02 * span_y
+        view.camera_dir = (0.0, 0.0, -1.0)
+        view.camera_up = (0.0, 1.0, 0.0)
+        view.camera_pos = (look_x, look_y, float(high[2]) + 40.0)
         if perspective:
-            view.camera_pos = (float(camera[0]) * 1.12, float(camera[1]) * 1.12, float(camera[2]) * 1.12)
-            distance = abs(float(view.camera_pos[2]))
+            view.fov = 28.0
+            distance = max(span_y, span_x / aspect) / (2.0 * float(np.tan(np.deg2rad(14.0))))
+            view.camera_pos = (look_x, look_y, float(high[2]) + distance)
             world = 2.0 * distance * float(np.tan(np.deg2rad(float(view.fov) / 2.0)))
         else:
-            view.fov = float(view.fov) * 1.12
+            world = max(span_y, span_x / aspect) * 1.12
             # Orthographic fov is the half-height of the view.
-            world = 2.0 * float(view.fov)
+            view.fov = world / 2.0
         renderer = TachyonRenderer(
             ambient_occlusion=True,
             ambient_occlusion_brightness=0.55,
-            ambient_occlusion_samples=4,
+            ambient_occlusion_samples=16,
             antialiasing=True,
-            antialiasing_samples=4,
+            antialiasing_samples=64,
             shadows=True,
             depth_of_field=False,
             aperture=0.0,
@@ -596,47 +951,51 @@ def _font(size):
 
 
 def compose(structure, legend, world_height, light):
-    """One family of frames: molecule, legend, and a 10 angstrom bar."""
+    """One family of frames: molecule, a small legend, and a 10 angstrom bar."""
     from PIL import Image, ImageDraw
 
     bg = (255, 255, 255) if light else (22, 24, 28)
     ink = (25, 25, 28) if light else (236, 237, 239)
+    plate = (255, 255, 255) if light else (32, 34, 38)
     canvas = Image.new("RGB", (WIDTH, HEIGHT), bg)
     picture, crop_rows, render_rows = crop_margin(structure, light)
-    legend_w = 360
-    strip = 86
-    pad = 18
-    area_w = WIDTH - legend_w - 2 * pad
-    area_h = HEIGHT - strip - 2 * pad
-    scale = min(area_w / picture.size[0], area_h / picture.size[1])
+    strip = 72
+    pad = 12
+    area = (WIDTH - 2 * pad, HEIGHT - strip - pad)
+    scale = min(area[0] / picture.size[0], area[1] / picture.size[1])
     sized = (
         max(1, int(round(picture.size[0] * scale))),
         max(1, int(round(picture.size[1] * scale))),
     )
     picture = picture.resize(sized, Image.Resampling.LANCZOS)
-    left = pad + (area_w - sized[0]) // 2
-    top = pad + (area_h - sized[1]) // 2
+    left = pad + (area[0] - sized[0]) // 2
+    top = pad + (area[1] - sized[1]) // 2
     canvas.paste(picture, (left, top))
     draw = ImageDraw.Draw(canvas)
-    font = _font(28)
-    small = _font(26)
-    x = WIDTH - legend_w + 8
-    y = pad
+    font = _font(22)
+    small = _font(22)
+    row_h = 34
+    legend_h = 16 + row_h * max(1, len(legend))
+    legend_w = 250
+    box = (WIDTH - legend_w - 20, 16, WIDTH - 16, 16 + legend_h)
+    draw.rounded_rectangle(box, radius=8, fill=plate, outline=ink, width=1)
+    x = box[0] + 12
+    y = box[1] + 10
     for name, colour_rgb in legend:
         colour = tuple(int(max(0, min(255, round(channel * 255)))) for channel in colour_rgb)
-        draw.rounded_rectangle((x, y, x + 32, y + 32), radius=4, fill=colour, outline=ink, width=2)
-        draw.text((x + 44, y + 1), name, fill=ink, font=font)
-        y += 48
+        draw.rounded_rectangle((x, y, x + 22, y + 22), radius=3, fill=colour, outline=ink, width=1)
+        draw.text((x + 30, y), name, fill=ink, font=font)
+        y += row_h
     if world_height > 0 and crop_rows > 0 and render_rows > 0:
         world_crop = world_height * (crop_rows / float(render_rows))
         px_per = sized[1] / world_crop
         bar = 10.0 * px_per
-        bar_x = left
-        bar_y = HEIGHT - 46
-        draw.line((bar_x, bar_y, bar_x + bar, bar_y), fill=ink, width=5)
-        draw.line((bar_x, bar_y - 9, bar_x, bar_y + 9), fill=ink, width=3)
-        draw.line((bar_x + bar, bar_y - 9, bar_x + bar, bar_y + 9), fill=ink, width=3)
-        draw.text((bar_x, bar_y + 12), "10 \u00c5", fill=ink, font=small)
+        bar_x = left + 8
+        bar_y = HEIGHT - 36
+        draw.line((bar_x, bar_y, bar_x + bar, bar_y), fill=ink, width=4)
+        draw.line((bar_x, bar_y - 8, bar_x, bar_y + 8), fill=ink, width=3)
+        draw.line((bar_x + bar, bar_y - 8, bar_x + bar, bar_y + 8), fill=ink, width=3)
+        draw.text((bar_x, bar_y - 28), "10 \u00c5", fill=ink, font=small)
     return canvas
 
 
@@ -710,40 +1069,59 @@ def genice_atoms(lattice, rep, guests):
     return atoms, box
 
 
-def cage_meshes(oxygens, guests):
-    """Convex hull of each guest whose water shell sits inside the cell."""
+def cage_meshes(oxygens, guests, box):
+    """One small cage and one large cage, each wrapped around its guest.
+
+    Waters across the periodic boundary are unfolded next to the guest
+    so the polyhedron and the molecule stay in one piece.
+    """
     import numpy as np
     from scipy.spatial import ConvexHull
 
     if len(guests) == 0 or len(oxygens) < 8:
-        return []
+        return [], np.zeros((0, 3))
+    lengths = np.asarray(box[:3], dtype=float)
     origin = np.asarray(oxygens, dtype=float).mean(axis=0)
     found = []
     for kind, heavy in guests:
         centre = np.asarray(heavy, dtype=float).mean(axis=0)
-        distance = np.linalg.norm(oxygens - centre, axis=1)
-        limit = 4.40 if kind == "CH4" else 5.40
+        delta = np.asarray(oxygens, dtype=float) - centre
+        delta -= lengths * np.round(delta / lengths)
+        distance = np.linalg.norm(delta, axis=1)
+        limit = 4.45 if kind == "CH4" else 5.45
         chosen = (distance > 2.4) & (distance < limit)
-        if int(np.count_nonzero(chosen)) < 12:
+        if int(np.count_nonzero(chosen)) < (16 if kind == "CH4" else 24):
             continue
-        shell = oxygens[chosen]
+        shell = centre + delta[chosen]
         try:
             hull = ConvexHull(shell, qhull_options="QJ")
         except Exception:
             continue
         token = "hexagonal" if kind == "CH4" else "clathrate"
-        found.append((float(np.linalg.norm(centre - origin)), kind, {
+        found.append((float(np.linalg.norm(centre - origin)), kind, shell, {
             "vertices": shell,
             "faces": hull.simplices.astype(int),
             "color": palette_rgb(token),
-            "transparency": 0.86,
+            "transparency": 0.82,
             "legend": "small cage" if kind == "CH4" else "large cage",
         }))
     meshes = []
+    extra = []
+    oxygens = np.asarray(oxygens, dtype=float)
     for kind in ("CH4", "THF"):
         ranked = sorted(item for item in found if item[1] == kind)
-        meshes.extend(item[2] for item in ranked[:1])
-    return meshes
+        if not ranked:
+            continue
+        _distance, _kind, shell, mesh = ranked[0]
+        meshes.append(mesh)
+        if len(oxygens):
+            nearest = np.linalg.norm(shell[:, None, :] - oxygens[None, :, :], axis=2).min(axis=1)
+            extra.append(shell[nearest > 1.2])
+    if extra:
+        extra = np.vstack(extra)
+    else:
+        extra = np.zeros((0, 3))
+    return meshes, extra
 
 
 def ring_meshes(positions, rings):
@@ -789,9 +1167,7 @@ def finish(positions, colors, radii, transparency, names, bonds, meshes, view, c
     import numpy as np
 
     positions = orient(positions, view, center)
-    depth = positions[:, 2]
-    span = float(depth.max() - depth.min()) or 1.0
-    radii = np.asarray(radii, dtype=float) * (0.90 + 0.12 * (depth - float(depth.min())) / span)
+    radii = np.asarray(radii, dtype=float)
     turned = []
     for mesh in meshes:
         turned.append({
@@ -810,9 +1186,12 @@ def finish(positions, colors, radii, transparency, names, bonds, meshes, view, c
     light_picture, world = raytrace(
         positions, colors, radii, transparency, bonds, turned, (1, 1, 1), perspective
     )
-    dark_picture, _world = raytrace(
-        positions, colors, radii, transparency, bonds, turned, (0.09, 0.10, 0.12), perspective
-    )
+    if os.environ.get("MOLECULES_THEMES") == "light":
+        dark_picture = light_picture
+    else:
+        dark_picture, _world = raytrace(
+            positions, colors, radii, transparency, bonds, turned, (0.09, 0.10, 0.12), perspective
+        )
     return (
         compose(light_picture, legend, world, True),
         compose(dark_picture, legend, world, False),
@@ -891,29 +1270,70 @@ def ring_lists(library, frame):
 
 
 def reimage_atoms(atoms, box):
-    """Move each molecule into the image nearest the cell centre."""
+    """Keep every molecule whole and put each guest inside one cage.
+
+    Each guest moves by one lattice vector, chosen so the periodic
+    image has the most cage waters around it and does not land on
+    another guest. Every atom of the residue shares that vector.
+    """
     import numpy as np
     from collections import defaultdict
 
     lengths = np.asarray(box[:3], dtype=float)
-    origin = lengths / 2.0
     grouped = defaultdict(list)
     for residue, atom, xyz, resid in atoms:
         grouped[resid].append((residue, atom, np.asarray(xyz, dtype=float), resid))
-    placed = []
+    molecules = []
+    kinds = []
     for items in grouped.values():
-        base = items[0][2]
+        heavy_at = [xyz for _residue, atom, xyz, _resid in items if not str(atom).startswith("H")]
+        base = heavy_at[0] if heavy_at else items[0][2]
         local = []
         for residue, atom, xyz, resid in items:
             delta = xyz - base
             delta -= lengths * np.round(delta / lengths)
             local.append((residue, atom, base + delta, resid))
-        heavy = [xyz for _residue, atom, xyz, _resid in local if not str(atom).startswith("H")]
-        anchor = np.mean(heavy if heavy else [local[0][2]], axis=0)
-        image = np.round((anchor - origin) / lengths)
-        for residue, atom, xyz, resid in local:
-            placed.append((residue, atom, xyz - image * lengths, resid))
-    return placed
+        molecules.append(local)
+        kinds.append(local[0][0])
+    anchors = []
+    for mol in molecules:
+        heavy = [xyz for _residue, atom, xyz, _resid in mol if not str(atom).startswith("H")]
+        anchors.append(np.mean(heavy if heavy else [mol[0][2]], axis=0))
+    anchors = np.asarray(anchors, dtype=float)
+    oxygen = np.asarray([
+        xyz for mol in molecules for _residue, atom, xyz, _resid in mol if atom == "OW"
+    ], dtype=float)
+    guests = [index for index, kind in enumerate(kinds) if kind in ("CH4", "THF")]
+
+    def images_of(index):
+        limit = 4.55 if kinds[index] == "CH4" else 5.45
+        found = []
+        for image in np.ndindex(3, 3, 3):
+            shift = (np.asarray(image, dtype=float) - 1.0) * lengths
+            trial = anchors[index] + shift
+            count = int(np.sum(np.linalg.norm(oxygen - trial, axis=1) < limit))
+            found.append((count, shift))
+        found.sort(key=lambda item: item[0], reverse=True)
+        return found
+
+    occupied = []
+    for index in sorted(guests, key=lambda item: images_of(item)[0][0], reverse=True):
+        chosen = np.zeros(3)
+        for count, shift in images_of(index):
+            trial = anchors[index] + shift
+            if occupied and float(np.linalg.norm(trial - np.asarray(occupied), axis=1).min()) < 4.5:
+                continue
+            chosen = shift
+            break
+        occupied.append(anchors[index] + chosen)
+        molecules[index] = [
+            (residue, atom, xyz + chosen, resid)
+            for residue, atom, xyz, resid in molecules[index]
+        ]
+    seated = []
+    for mol in molecules:
+        seated.extend(mol)
+    return seated
 
 
 def host_token(lattice):
@@ -930,11 +1350,26 @@ def genice_picture(lattice, rep, guests, cage_faces, hydrogens=True):
     atoms, box = genice_atoms(lattice, rep, guests)
     atoms = reimage_atoms(atoms, box)
     host = host_token(lattice)
+    oxygen_now = np.asarray(
+        [xyz for residue, atom, xyz, _resid in atoms if atom == "OW"], dtype=float,
+    )
+    weak_guests = set()
+    guest_heavy = {}
+    for residue, atom, xyz, resid in atoms:
+        if residue in ("CH4", "THF") and not str(atom).startswith("H"):
+            guest_heavy.setdefault(resid, {"kind": residue, "xyz": []})["xyz"].append(xyz)
+    for resid, group in guest_heavy.items():
+        centre = np.mean(group["xyz"], axis=0)
+        limit = 4.55 if group["kind"] == "CH4" else 5.45
+        if len(oxygen_now) and int(np.sum(np.linalg.norm(oxygen_now - centre, axis=1) < limit)) < 8:
+            weak_guests.add(resid)
     positions, colors, names, radii, transparency = [], [], [], [], []
     residue_index = []
     oxygens = []
     guest_groups = {}
     for residue, atom, xyz, resid in atoms:
+        if resid in weak_guests:
+            continue
         if str(atom).startswith("H") and residue not in ("CH4", "THF") and not hydrogens:
             continue
         positions.append(xyz)
@@ -983,14 +1418,23 @@ def genice_picture(lattice, rep, guests, cage_faces, hydrogens=True):
                 bonds.append((left, right))
     meshes = []
     if cage_faces:
-        meshes = cage_meshes(
+        meshes, extra = cage_meshes(
             np.asarray(oxygens, dtype=float),
             [
                 (group["kind"], np.asarray(group["heavy"], dtype=float))
                 for group in guest_groups.values()
                 if group["heavy"]
             ],
+            box,
         )
+        if len(extra):
+            colour, radius, alpha = atom_style(host)
+            xyz = np.vstack([xyz, np.asarray(extra, dtype=float)])
+            for _point in extra:
+                colors.append(colour)
+                names.append(host)
+                radii.append(radius)
+                transparency.append(alpha)
     return finish(
         xyz, colors, radii, transparency, names, bonds, meshes,
         "cage", xyz.mean(axis=0), False,
@@ -1189,4 +1633,6 @@ def main(argv):
 
 
 if __name__ == "__main__":
+    if os.environ.get("MOLECULES_CYCLES") == "1":
+        raise SystemExit(cycles_job())
     raise SystemExit(main(sys.argv[1:]))
