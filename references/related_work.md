@@ -568,3 +568,39 @@ Other code, with no commit after 2026-11-13T00:00:00Z and no new timing. A repos
 6. **CHILL+ follows Nguyen and Molinero, with the OVITO modifier as a second option.** Unchanged. No new CHILL+ implementation appeared after 00:00 UTC.
 
 7. **Cage labels come from the topology of the network, and local classifiers answer a different question.** Stands. The records created on 13 November do not return the hexagonal-cage or double-diamond-cage count. The mdapy comparison table is the same copper benchmark against OVITO 3.17.1.
+
+## After 01:15 UTC, 13 November 2026
+
+The 13 November sweep closed at 01:15 UTC. This section is what was visible after that check. The queries were repeated through 2026-11-13T06:08:00Z.
+
+At 01:14 UTC the arXiv export, sorted by `submittedDate`, still ended on 10 November. The same query now returns submissions from 11 and 12 November. The new-listing pages for `physics.chem-ph`, `cond-mat.soft`, `physics.comp-ph` and `cond-mat.mtrl-sci` still read Wednesday, 11 November 2026. No record in those four categories has a `submittedDate` after 01:15 UTC.
+
+Two of the newly returned records are in scope. Both were submitted on 11 November, before this cutoff, and neither was in the export result the previous section recorded.
+
+Camarillo, Oller-Iscar, Conde, Ramírez, Blazquez and Sanz, [Phys. Rev. E 114, 045418 (2026)](https://doi.org/10.1103/s5l1-b3jm). Crossref created the DOI on 24 September 2026 and deposited the version of record on 29 October 2026, the online date. Volume 114, issue 4, article number 045418. The arXiv copy is [2611.15806](https://arxiv.org/abs/2611.15806), submitted 2026-11-11T18:22:49Z. Molecular dynamics of TIP4P/Ice against a substrate that is a stretched ice lattice. The temperature at which ice nucleates during the run falls by about 5–6 K for each percent of stretch. A molecule is ice-like when its averaged \(\bar{q}_6\) exceeds 0.364, with neighbours inside 3.5 Å, and two ice-like molecules share a cluster when they lie within 3.5 Å. The text has no CHILL+ label, no ring census, and no hexagonal or double-diamond cage.
+
+Bagchi, [arXiv:2611.14915](https://arxiv.org/abs/2611.14915), submitted 2026-11-11T02:14:08Z. A reaction–transport theory for deeply supercooled water: structural relaxation follows the concentration of one three-coordinated hydrogen-bond defect. Crossref returns no work for `10.48550/arXiv.2611.14915`. It does not label a molecule with CHILL+ or a cage.
+
+The other newly indexed titles are outside the survey. [2611.17096](https://arxiv.org/abs/2611.17096) is inelastic X-ray scattering of the low-frequency mode of compressed water. [2611.15028](https://arxiv.org/abs/2611.15028) is continuum melt, with entrapped air as a mechanical forcing. [2611.16396](https://arxiv.org/abs/2611.16396) is a ring-polymer propagator. [2611.15183](https://arxiv.org/abs/2611.15183) is a polymer conformation model. No citation for those four.
+
+Crossref `from-created-date:2026-11-13` held 4908 works, 3564 of them created after 01:15 UTC. `from-deposit-date:2026-11-13` held 18433 works, 14337 deposited after 01:15 UTC. Titles and abstracts in that set contain no clathrate, Steinhardt, CHILL+, primitive-ring or polyhedral-template-matching paper. The methane-hydrate deposit [10.1016/j.geoen.2026.214925](https://doi.org/10.1016/j.geoen.2026.214925) was created on 10 November; the record has no abstract, and the title is dissociation in an alternating electric field. Journal of Chemical Theory and Computation deposited [10.1021/acs.jctc.6c01796](https://doi.org/10.1021/acs.jctc.6c01796) and [10.1021/acs.jctc.6c01891](https://doi.org/10.1021/acs.jctc.6c01891) after the cutoff: GPU nonadiabatic dynamics, and magnesium parameters for RNA. Computer Physics Communications deposited [10.1016/j.cpc.2026.110516](https://doi.org/10.1016/j.cpc.2026.110516) at 00:53 UTC, before the cutoff, on OpenMC tallies. The Journal of Open Source Software deposits on 13 November are also before the cutoff. bioRxiv has no ice-structure post in 12–13 November. No further journal citation.
+
+No watched release was uploaded after 01:15 UTC. mdapy on PyPI is still 2.0.0; the 2.1.0rc1 files remain the 00:43 UTC upload, and master has no later commit. freud 3.6.1, OVITO 3.17.2, MDAnalysis 2.11.0, pyscal3 4.1.0, GenIce 2.2.13.3, cycless 0.7, vesin 0.6.2, SQQ 0.5.8, rings-statistics-matter 0.3.0, matscipy 1.3.1, moyo 0.22.0 and fastatomstruct 2.2.0 have no commit after the cutoff and no newer release. ClavisCage is still Zenodo [10.5281/zenodo.24112918](https://doi.org/10.5281/zenodo.24112918), version 0.3.18, updated 10 November. The polyhedral-template-matching repository has no commit after the cutoff. There is no new head-to-head: no rival release changes the timed comparisons.
+
+[PLUMED pull 1620](https://github.com/plumed/plumed2/pull/1620) merged at 2026-11-13T06:02:34Z (`f923375156` on master). It drops `--enable-openacc` from the core configure. `USEGPU` then runs the GPU form supplied by the openaccPTM plugin, which the input loads with `LOAD`. Without that plugin a lone `DISTANCE` stays on the CPU, and the vector forms of `POSITION`, `DISTANCE` and `SAXS` are rejected. The release tag is still 2.10.2. The change is a device path. It is not an ice collective variable.
+
+## Claims after 01:15 UTC
+
+1. **First code to return a full ring search from a local update.** Stands. The two papers do not search rings. No code in this window keeps rings whose bonds did not change.
+
+2. **Faster than OVITO, freud, pyscal, matscipy and the CHILL library in every matched comparison.** Stands for that list. No rival release after 01:15 UTC. The mdapy caveat is unchanged: 2.1.0rc1 is the same master tree, and cutoff CHILL+ has no new commit.
+
+3. **Ring-statistics codes stop at counts, while d-SEAMS builds cages.** Unchanged. rings-statistics-matter remains 0.3.0. Camarillo and others count an ice-like cluster. Bagchi follows a hydrogen-bond defect. Neither assembles a hexagonal or double-diamond cage.
+
+4. **OVITO, freud and pyscal have no nanotube-ice class.** Stands.
+
+5. **A LAMMPS compute assigns CHILL+ during the run.** Stands. Pull 1620 moves an experimental GPU path onto a plugin loaded after the input is read. It does not assign CHILL+ or a cage. No surveyed source assigns either label from inside a PLUMED, LAMMPS or OpenMM step.
+
+6. **CHILL+ follows Nguyen and Molinero, with the OVITO modifier as a second option.** Unchanged. The new ice-like label is a single \(\bar{q}_6\) cut, 0.364, on a 3.5 Å shell. It is not the staggered and eclipsed CHILL+ cuts. No new CHILL+ implementation appeared after 01:15 UTC.
+
+7. **Cage labels come from the topology of the network, and local classifiers answer a different question.** Stands. Averaged \(\bar{q}_6\) and the three-coordinated defect are local tags. Neither paper returns the hexagonal-cage or double-diamond-cage count.
