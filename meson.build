@@ -14,8 +14,9 @@ project('seams-core', ['cpp', 'c'],
 _capi_san = get_option('capi_sanitize')
 if _capi_san != 'none'
   _san_args = ['-fsanitize=' + _capi_san, '-fno-omit-frame-pointer']
-  if _capi_san == 'undefined'
-    _san_args += ['-fno-sanitize-recover=all']
+  if _capi_san.contains('undefined')
+    # GCC leaves float-to-int overflow out of -fsanitize=undefined.
+    _san_args += ['-fsanitize=float-cast-overflow', '-fno-sanitize-recover=all']
   endif
   add_project_arguments(_san_args, language: ['c', 'cpp'])
   add_project_link_arguments(_san_args, language: ['c', 'cpp'])
