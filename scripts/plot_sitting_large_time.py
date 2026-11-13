@@ -33,15 +33,22 @@ def draw(rows: list[dict], dest: Path) -> None:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    curves: dict[str, dict[tuple[str, str], dict[int, float]]] = defaultdict(lambda: defaultdict(dict))
+    phases = ("ice", "liquid")
+    curves: dict[str, dict[str, dict[str, dict[int, float]]]] = defaultdict(
+        lambda: defaultdict(lambda: defaultdict(dict)))
     for row in rows:
         if str(row.get("molecules")) != "884736":
             continue
+        phase = row.get("phase") or "ice"
         value = numeric(row.get("median_ms", ""))
         if value is None or value <= 0:
             continue
-        curves[row["operation"]][(row["code"], row["operation"])][int(row["threads"])] = value
-    operations = [op for op in curves if curves[op]]
+        curves[phase][row["operation"]][row["code"]][int(row["threads"])] = value
+    operations = []
+    for phase in phases:
+        for operation in curves.get(phase, {}):
+            if operation not in operations:
+                operations.append(operation)
     if not operations:
         raise SystemExit("no 884736 timings to plot")
     colors = {
@@ -55,26 +62,30 @@ def draw(rows: list[dict], dest: Path) -> None:
         "PLUMED": "#F0E442",
     }
     fig, axes = plt.subplots(
-        len(operations), 1, figsize=(7.2, 1.7 * len(operations)), sharex=True, squeeze=False)
+        len(operations), len(phases), figsize=(10.4, 1.55 * len(operations)),
+        sharex=True, squeeze=False)
     commit = rows[0].get("source_commit", "")[:12]
     fig.suptitle(f"884736 molecules, time against threads, commit {commit}", fontsize=11)
     widths = [1, 2, 4, 8]
-    for index, operation in enumerate(operations):
-        axis = axes[index][0]
-        axis.set_yscale("log")
-        for (code, _op), times in sorted(curves[operation].items()):
-            xs = [width for width in widths if width in times]
-            if not xs:
-                continue
-            axis.plot(
-                xs, [times[width] for width in xs],
-                marker="o", color=colors.get(code, "#333333"), label=code,
-            )
-        axis.set_ylabel("ms")
-        axis.set_title(operation, loc="left", fontsize=10)
-        axis.legend(fontsize=7, loc="upper right", frameon=False, ncol=2)
-    axes[-1][0].set_xlabel("threads")
-    axes[-1][0].set_xticks(widths)
+    for col, phase in enumerate(phases):
+        axes[0][col].set_title(phase, fontsize=11)
+        for index, operation in enumerate(operations):
+            axis = axes[index][col]
+            axis.set_yscale("log")
+            for code, times in sorted(curves.get(phase, {}).get(operation, {}).items()):
+                xs = [width for width in widths if width in times]
+                if not xs:
+                    continue
+                axis.plot(
+                    xs, [times[width] for width in xs],
+                    marker="o", color=colors.get(code, "#333333"), label=code,
+                )
+            if col == 0:
+                axis.set_ylabel(operation)
+            axis.legend(fontsize=6, loc="upper right", frameon=False, ncol=2)
+    for col in range(len(phases)):
+        axes[-1][col].set_xlabel("threads")
+        axes[-1][col].set_xticks(widths)
     fig.tight_layout()
     dest.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(dest)
