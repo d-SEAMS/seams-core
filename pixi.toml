@@ -138,7 +138,7 @@ cmd = "emacs --batch --load export.el"
 description = "Generates XML via Doxygen and converts it to RST via Doxyrest"
 cwd = "docs/source"
 depends-on = ["patch-doxyrest"]
-cmd = "doxygen Doxyfile_seams.cfg && doxyrest -c doxyrest-config.lua && python3 ../../scripts/doxyrest_targets.py ."
+cmd = "python3 ../../scripts/doxygen_version_header.py && doxygen Doxyfile_seams.cfg && doxyrest -c doxyrest-config.lua && python3 ../../scripts/doxyrest_targets.py ."
 
 [feature.docs.tasks.sphinxbld]
 depends-on = ["mkrst", "doxybuild"]

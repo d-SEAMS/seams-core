@@ -6,6 +6,49 @@ on:
     branches: [main]
 
 jobs:
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-bindings-rust-
+      - name: Install Rust
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable --profile minimal --component rustfmt,clippy
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+      - name: Build libseams
+        run: |
+          pixi run meson setup bbdir-rust -Dwith_python=false -Dwith_tests=true -Dwith_cli=false
+          pixi run ninja -C bbdir-rust src/libseams.so bindings/binding_oracle
+      - name: Test the safe crate
+        run: |
+          export SEAMS_LIB_DIR="$PWD/bbdir-rust/src"
+          export LD_LIBRARY_PATH="$SEAMS_LIB_DIR"
+          export SEAMS_CPP_ORACLE="$PWD/bbdir-rust/bindings/binding_oracle"
+          export SEAMS_SOURCE_ROOT="$PWD"
+          export OMP_NUM_THREADS=1
+          cargo fmt --manifest-path bindings/rust/Cargo.toml --all -- --check
+          cargo clippy --offline --manifest-path bindings/rust/Cargo.toml --all-targets -- -D warnings
+          cargo test --offline --manifest-path bindings/rust/Cargo.toml -- --test-threads=1
+          cargo test --offline --manifest-path bindings/rust/Cargo.toml --examples -- --test-threads=1
+          cargo doc --offline --manifest-path bindings/rust/Cargo.toml --no-deps -p seams
+
+  cpp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-bindings-cpp-
+      - name: Build and test the C++ wrapper
+        run: |
+          pixi run meson setup bbdir-cpp -Dwith_python=false -Dwith_tests=true -Dwith_cli=false
+          pixi run ninja -C bbdir-cpp bindings/test_seams_hpp src/docs_api_hpp
+          pixi run meson test -C bbdir-cpp seams_hpp_match docs_api_hpp --print-errorlogs
+
   python:
     runs-on: ubuntu-latest
     steps:

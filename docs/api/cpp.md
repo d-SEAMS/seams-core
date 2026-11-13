@@ -1,53 +1,146 @@
 # C++
 
-d-SEAMS 2.14.0. C++ callers include `seams.h` and link `libseams`. The
-header is C linkage. Coordinates are Angstrom. A cell is nine LAMMPS
-numbers: `ox, oy, oz, lx, ly, lz, xy, xz, yz`.
+`include/seams.hpp` is the header-only C++ API. It lives in namespace
+`seams`, includes `seams.h`, and links `libseams`. Meson installs the
+header next to `seams.h`. `pkg-config --cflags seams` and
+`find_package(seams)` both put that directory on the include path.
+`SEAMS_CXX_HEADER` in `seams-config.cmake` is the installed `seams.hpp`.
 
-`libseams_lang` is the wider C ABI used by the language fronts
-(`seams_frame_*`). It is not required for a program that only needs
-`seams.h`.
+## Quickstart
 
-`docs/examples/minimal_cpp.cpp` reads the
-GenIce sI cell with `seams_frame_read`, then calls
-`seams_frame_neighbours`, `seams_frame_steinhardt`,
-`seams_frame_chill_plus`, and `seams_frame_rings`.
-`meson test docs_examples` runs it.
+```bash
+c++ -std=c++20 -Iinclude docs/examples/cpp_api.cpp -Lbuild/src -lseams -o cpp_api
+./cpp_api "$PWD"
+```
+
+`meson test docs_api_hpp` compiles that program and runs it on this tree.
+The eight-atom diamond is cubic. Ice Ih is hexagonal, 128 atoms, with mean
+q6-bar 0.562448843702.
+
+```{literalinclude} ../../../docs/examples/cpp_api.cpp
+:language: cpp
+```
+
+The wider language ABI remains `libseams_lang` (`seams_frame_*`). A program
+that only needs `seams.hpp` does not link it. `docs/examples/minimal_cpp.cpp`
+is that ABI on the GenIce sI cell. `meson test docs_examples` runs it.
 
 ```{literalinclude} ../../../docs/examples/minimal_cpp.cpp
 :language: cpp
 ```
 
-Build:
-
-```bash
-meson setup build -Dwith_tests=true
-meson compile -C build
-```
-
-CI runs the C API test, which is the same binary a C++ caller links.
-The executable is `build/src/test_seams_api`.
-
-```bash
-meson test -C build seams_c_api --print-errorlogs
-meson test -C build seams_lang_fixtures --print-errorlogs
-```
-
-`bindings/cxx/test_lang.cpp` is the `seams_lang_fixtures` test. It calls
-every function in `seams_lang.h` on the in-tree trajectories.
-`include/seams.hpp` is the header-only RAII wrapper over `seams.h`.
-`seams::System`, `seams::Neighbours`, `seams::Rings`, `seams::Cages`, and
-`seams::Fingerprint` free their handles on destruction. A status other than
-`SEAMS_OK` throws `seams::Error`, and the message is `seams_handle_error`.
-`tests/test_seams_hpp.cpp` checks those calls against the C++ path on ice Ih,
-sI, the XYZ file, the CON file, and the triclinic sH dump.
-`meson test seams_hpp_match` runs that program.
-`meson test docs_api_cpp` compiles and runs the eight-atom program below.
-It calls `seams_set_num_threads`, `seams_chill_plus`, and `seams_q4q6`.
+`docs/examples/ice.cpp` is the eight-atom C call. `meson test docs_api_cpp`
+runs it.
 
 ```{literalinclude} ../../../docs/examples/ice.cpp
 :language: cpp
 ```
+
+## Concepts
+
+`System`, `Neighbours`, `Rings`, `Cages`, `Fingerprint`, and `Brine` are
+move-only. The destructor frees the C handle. Copying is deleted.
+
+A status other than success throws `seams::Error`. `what()` is
+`seams_handle_error`. `code()` is the status integer. `status()` is the
+`Status` enumerator.
+
+Coordinates enter as `std::span<const double>`. Paths and site-table text
+enter as `std::string_view`. Results come back as values, `std::vector`,
+`std::array`, or `std::string`. `Neighbours::pairs` returns the directed
+pairs. `Rings` is a range: `begin` and `end` walk the rings.
+
+`Graph`, `ChillRule`, `Label`, `CageLabel`, `SiteKind`, `RingSymmetry`,
+`Axis`, and `DomainSubset` are `enum class`. Analyses with several knobs
+take an options aggregate. `ChillOptions`, `SteinhardtOptions`,
+`CageOptions`, `DistributionOptions`, `BondOptions`, and the rest default
+to the published cutoff of 3.5 angstroms.
+
+Methods that return a value are `[[nodiscard]]`. A method that reads a
+frame takes a non-const `System` because the C call clears the handle
+error. `count` is const.
+
+A handle requires exclusive use. The Steinhardt scratch inside the library
+is process-global, so two frames must not run `steinhardt`, `ql`, `q4q6`,
+or `q6bar` at the same time. `set_num_threads` is process-global.
+
+Doxygen comments on `seams.hpp` and `seams.h` feed the same doxyrest tree
+as the engine headers (`Doxyfile_seams.cfg`, the rgpot layout). The
+generated pages are `api/index`.
+
+## Ice Ih
+
+`input/traj/ice1h.lammpstrj`, frame 1, every atom, cutoff 3.5 angstrom, one
+thread. `tests/test_seams_hpp.cpp` (`meson test seams_hpp_match`) requires
+these numbers to match the C++ engine.
+
+```
+ih n 128
+ih chill0 0 128 0 0 0 0 0 0 0
+ih q3 0.744029547233
+ih q4 0.509334928671
+ih q6 0.625855471508
+ih q6bar 0.562448843702
+ih q8 0.229702115021
+ih q12 0.421988011385
+ih vert 6 0
+ih cages 128 0 0 0
+ih knn 512
+ih rdf 8 4158.664606579 0
+ih rcn 26.204724409449
+ih cn 4.031496062992
+ih hbond 0
+ih rho 4 0.030779111111
+ih fp 16 256
+ih site 8
+ih pairs 0 128 0
+ih domain 0 0 0
+ih prism 0
+ih sheet 256
+```
+
+`chill0` is the nine original CHILL populations in label order. q3 through
+q12 are means. q6bar is the mean of the Lechner-Dellago average. `vert` is
+the length of ring 0 and its first atom. `cages` is hexagonal, cubic,
+water, both. `knn` is the mutual four-neighbour pair count. `rdf` is the
+bin count, the volume in cubic angstroms, and g of the first bin. `rcn` is
+the last running coordination. `cn` is the coordination to 3.5 angstroms.
+`fp` is the fingerprint key length and the ring-census sum. `site` is atom
+0 under `1=waterO`. `pairs` is contacts, cations, and anions under
+`1=cationHead`. `domain` is the apolar subset. `prism` is perfect
+six-stacks. `sheet` is six-rings in the monolayer histogram.
+
+sI has 46 atoms and 2 cages of signature `512` covering 40 atoms. The XYZ
+file has 256 atoms and coordination 43.325490196078 out to 6 angstroms.
+The CON file has 4 atoms and 0 hydrogen bonds. Triclinic sH has 136 atoms
+and mean q6 0.625601998379.
+
+`symmetry` writes one shell label per atom. `brine` measures a planar front
+from an ice flag per atom. `docs/examples/cpp_api.cpp` prints:
+
+```
+ice Ih atoms 128 hexagonal 128 q6bar 0.562448843702 shell_ih 128 pockets 0
+```
+
+The test rejects any other hexagonal count or q6-bar mean.
+
+## Errors and ownership
+
+```cpp
+try {
+  seams::System system;
+  system.read("missing.lammpstrj", 1, -1);
+} catch (const seams::Error &err) {
+  // err.what() is seams_handle_error. err.code() is the status.
+}
+```
+
+`System` and the result handles are move-only. A move leaves the source
+empty. The destructor of an empty handle does nothing. The caller does not
+call `seams_*_destroy`.
+
+`bindings/cxx/test_lang.cpp` is the `seams_lang` fixture. It is a separate
+ABI from `seams.hpp`.
 
 ```{literalinclude} ../../../bindings/cxx/test_lang.cpp
 :language: cpp

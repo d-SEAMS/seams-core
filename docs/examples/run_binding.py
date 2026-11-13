@@ -59,16 +59,24 @@ def run_rust(build):
     env["SEAMS_CPP_ORACLE"] = str(build / "bindings" / "binding_oracle")
     env["SEAMS_SOURCE_ROOT"] = str(ROOT)
     env["OMP_NUM_THREADS"] = "1"
+    manifest = str(ROOT / "bindings/rust/Cargo.toml")
     subprocess.check_call(
-        [
-            cargo,
-            "test",
-            "--offline",
-            "--manifest-path",
-            str(ROOT / "bindings/rust/Cargo.toml"),
-            "--",
-            "--test-threads=1",
-        ],
+        [cargo, "fmt", "--check", "--manifest-path", manifest, "--all"],
+        env=env,
+        cwd=ROOT,
+    )
+    subprocess.check_call(
+        [cargo, "clippy", "--offline", "--manifest-path", manifest, "--all-targets", "--", "-D", "warnings"],
+        env=env,
+        cwd=ROOT,
+    )
+    subprocess.check_call(
+        [cargo, "test", "--offline", "--manifest-path", manifest, "--", "--test-threads=1"],
+        env=env,
+        cwd=ROOT,
+    )
+    subprocess.check_call(
+        [cargo, "test", "--offline", "--manifest-path", manifest, "--examples", "--", "--test-threads=1"],
         env=env,
         cwd=ROOT,
     )

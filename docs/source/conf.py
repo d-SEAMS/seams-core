@@ -203,6 +203,42 @@ if os.path.isfile(_xml_index) and os.path.isdir(_doxyrest):
     breathe_projects = {"seams": os.path.join(_source, "xml")}
     breathe_default_project = "seams"
 
+# Rust API pages. sphinxcontrib-rust (the same extension rgpot uses) renders
+# rustdoc into the book when the safe crate can link libseams. Without that
+# library, or without the extension, a short page keeps the toctree valid.
+_rust_page = os.path.join(_source, "crates", "seams", "lib.rst")
+_seams_lib_dir = os.environ.get("SEAMS_LIB_DIR", "")
+_rust_ready = False
+if _seams_lib_dir:
+    try:
+        import importlib
+
+        importlib.import_module("sphinxcontrib_rust")
+        _rust_ready = True
+    except ImportError:
+        _rust_ready = False
+if _rust_ready:
+    extensions.append("sphinxcontrib_rust")
+    rust_crates = {
+        "seams": os.path.abspath(os.path.join(_source, "../../bindings/rust/seams")),
+    }
+    rust_doc_dir = os.path.join(_source, "crates")
+    rust_rustdoc_fmt = "rst"
+    rust_generate_mode = "always"
+else:
+    os.makedirs(os.path.dirname(_rust_page), exist_ok=True)
+    if not os.path.isfile(_rust_page):
+        with open(_rust_page, "w", encoding="utf-8") as _rust_stub:
+            _rust_stub.write(
+                "Rust API\n"
+                "========\n"
+                "\n"
+                "The safe crate is ``seams``. ``seams-sys`` is the raw FFI crate.\n"
+                "``cargo doc --manifest-path bindings/rust/Cargo.toml --no-deps``\n"
+                "writes the rustdoc. Set ``SEAMS_LIB_DIR`` and install\n"
+                "``sphinxcontrib-rust`` to render those pages in this book.\n"
+            )
+
 templates_path = ["_templates"]
 exclude_patterns = []
 

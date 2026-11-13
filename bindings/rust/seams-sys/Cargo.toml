@@ -2,8 +2,14 @@
 name = "seams-sys"
 version = "2.14.0"
 edition = "2021"
-description = "Raw FFI for the d-SEAMS C API"
+rust-version = "1.74"
+description = "Raw FFI for the d-SEAMS C API. The safe API is the seams crate."
 license = "MIT"
+authors = ["Rohit Goswami <rgoswami@ieee.org>"]
+repository = "https://github.com/d-SEAMS/seams-core"
+homepage = "https://dseams.info"
+keywords = ["ffi", "molecular-dynamics", "chemistry"]
+categories = ["external-ffi-bindings", "science"]
 links = "seams"
 
 [dependencies]

@@ -180,13 +180,13 @@ seams_api_lib = shared_library(
   link_args: _lib_link_args,
   install: true)
 
-install_headers(files('../include/seams.h'))
+install_headers(files('../include/seams.h', '../include/seams.hpp'))
 
 pkgconfig.generate(
   seams_api_lib,
   name: 'seams',
   filebase: 'seams',
-  description: 'd-SEAMS stable C API',
+  description: 'd-SEAMS stable C API and the seams.hpp C++ wrapper',
   version: meson.project_version(),
   extra_cflags: _public_defines)
 
@@ -248,6 +248,19 @@ docs_api_cpp = executable(
   cpp_args: ['-I' + meson.current_build_dir()],
   link_args: ['-lm'])
 test('docs_api_cpp', docs_api_cpp, suite: 'docs', timeout: 60)
+
+docs_api_hpp = executable(
+  'docs_api_hpp',
+  files('../docs/examples/cpp_api.cpp'),
+  link_with: seams_api_lib,
+  include_directories: include_directories('../include'),
+  cpp_args: ['-I' + meson.current_build_dir()])
+test(
+  'docs_api_hpp',
+  docs_api_hpp,
+  args: [meson.project_source_root()],
+  suite: 'docs',
+  timeout: 120)
 
 docs_quickstart_c = executable(
   'docs_quickstart_c',
