@@ -1141,10 +1141,18 @@ ring::AffiliationUpdater::update(const std::vector<std::vector<int>> &rings,
     st.answersValid = false;
     return st.current;
   }
-  // A previous frame no longer forces every later frame through the
-  // whole-frame sweep. Each frame carries the rings outside the regions
-  // that changed.
-  st.skip = 0;
+  // After a dirty frame the next few frames are warm sweeps. The wait
+  // doubles while frames keep falling back, and a quiet frame clears it.
+  if (st.skip > 0 && st.primed) {
+    --st.skip;
+    st.fastAffiliation(rings, nList);
+    st.rememberRings(rings);
+    st.pack(nList, st.nextPack);
+    std::swap(st.prevPack, st.nextPack);
+    st.answersValid = false;
+    st.primed = true;
+    return st.current;
+  }
   st.batchHot = false;
   st.pack(nList, st.nextPack);
   if (!st.primed || st.prevPack.n != static_cast<int>(nList.size())) {
@@ -1176,6 +1184,7 @@ ring::AffiliationUpdater::update(const std::vector<std::vector<int>> &rings,
   if (nChanged == 0 && st.sameRings(rings)) {
     st.lastReclassified = 0;
     st.backoff = 0;
+    st.skip = 0;
     return st.current;
   }
   // A whole-frame sweep does not store pairs. The next frame still diffs,
@@ -1267,7 +1276,9 @@ ring::AffiliationUpdater::update(const std::vector<std::vector<int>> &rings,
     st.answersValid = false;
     st.primed = true;
     st.batchHot = false;
-    st.skip = 0;
+    // Before the return. A call after it never ran, so the backoff stayed
+    // at zero and every later transition paid the diff and the sweep.
+    st.fellBack();
     return st.current;
   }
 

@@ -1,9 +1,12 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <cage_affiliation.hpp>
+#include <edge_set.hpp>
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+
+#include "ice_ic.hpp"
 #include <order_parameter.hpp>
 #include <ring.hpp>
 #include <seams_input.hpp>
@@ -654,13 +657,43 @@ TEST_CASE("AffiliationUpdater falls back when the ring set churns",
   REQUIRE(swept.ddc == expect.ddc);
   REQUIRE(churn.lastReclassified() == static_cast<int>(fresh.size()));
 
-  // The sweep keeps the rows it compared and does not store pairs. The same
-  // graph on the next frame carries, and a later frame is not forced onto
-  // the sweep.
-  churn.update(fresh, idx);
+  // The fallback starts a one-frame backoff. That frame is a warm sweep
+  // even though the graph did not change, and it still matches a rebuild.
+  const auto &backed = churn.update(fresh, idx);
+  REQUIRE(backed.hc == expect.hc);
+  REQUIRE(backed.ddc == expect.ddc);
+  REQUIRE(churn.lastReclassified() == static_cast<int>(fresh.size()));
+
+  // The backoff has expired. The same graph carries.
+  const auto &carried = churn.update(fresh, idx);
+  REQUIRE(carried.hc == expect.hc);
+  REQUIRE(carried.ddc == expect.ddc);
   REQUIRE(churn.lastReclassified() == 0);
-  churn.update(fresh, idx);
-  REQUIRE(churn.lastReclassified() == 0);
+}
+
+TEST_CASE("one seeded search matches two when the edge sets are the same",
+          "[cage_affiliation]") {
+  const auto ice = iceIc(512);
+  const auto graphs = nneigh::kNearestNeighbourPair(ice, 4, 5.0, 1);
+  const auto strict = nneigh::neighbourListByIndex(ice, graphs.first);
+  const auto uni = nneigh::neighbourListByIndex(ice, graphs.second);
+  REQUIRE(seams::provenEqual(seams::edgeSetOf(strict), seams::edgeSetOf(uni)));
+  const auto sixStrict = sixMembered(
+      ring::contractibleRings(primitive::ringNetwork(strict, 6), ice));
+  const auto sixUnion =
+      sixMembered(ring::contractibleRings(primitive::ringNetwork(uni, 6), ice));
+  const auto both =
+      ring::seededCageAffiliation(sixStrict, strict, sixUnion, uni, false);
+  const auto onceAff = ring::cageAffiliation(sixStrict, strict);
+  const auto once = ring::seededCageAffiliation(sixStrict, onceAff, sixStrict,
+                                                onceAff, strict, false);
+  REQUIRE(once.hc == both.hc);
+  REQUIRE(once.ddc == both.ddc);
+  int cubic = 0;
+  for (bool flag : once.ddc) {
+    cubic += flag ? 1 : 0;
+  }
+  REQUIRE(cubic == ice.nop);
 }
 
 TEST_CASE("cage membership is not a function of the four-neighbour star",
