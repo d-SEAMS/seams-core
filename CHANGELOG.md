@@ -12,7 +12,6 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ## [2.14.0] - 2026-11-13
 
-
 ### Added
 
 - A nucleation-pathway census reports primitive rings by size, both CHILL+ rules, Lechner-Dellago q6-bar, and diamond symmetry labels on every frame.
@@ -102,6 +101,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
   ~readLammpsTrjreduced~ drops atoms outside the slice. An axis with
   ~lo == hi~ is unconstrained.
 - Inside the one-image ball the in-plane RDF walks Rapaport cell pairs: cells span the cutoff across each face separation, a half stencil visits each neighbouring pair of cells once, and one lattice shift serves the pair. It replaces the packed grid and the vesin list; 8192 atoms at a 6 Å cutoff take 2.2 ms on one thread and 0.4 ms on eight.
+- Interior cells of the one-thread orthorhombic cutoff skip the periodic-shift branches. A parallel ring search writes each neighbour row, already sorted, into one array, so the walk after the cell list matches the walk after linkcell.
 - MPI ring analyses can reduce ring counts and per-atom ring types with `seams::domain::reduceRings`, which keeps each rank on its own domain and sends only owned atoms to the root instead of gathering every ring on every rank.
 - Neighbour, order-parameter, ring and shell calls keep one worker pool and leave the OpenMP team running between a Rayon search and the next region. A per-atom walk under 8192 atoms stays at four threads. Ring sources still take one thread per eighty sources. The one-thread and several-thread results match.
 - Neighbour-list q3 uses the one-bond kernel. The eight-bond batch stays on degrees 4 and 6.
@@ -132,12 +132,14 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The linkcell wrap tracks v0.3.9 and the minimage wrap tracks v0.1.4. The linkcell patch builds that crate against the minimage wrap checked out beside it.
 - The minimage wrap pin is v0.1.2. Distances use mi_displacement_euclidean, and a failed call keeps the in-tree formula.
 - The one-thread carried ring update copies and sorts its rings directly again. Several threads still sort indices and merge in parallel. A team narrower than the process is bound once to that many cores of the allowed set. Interior cells of the orthorhombic cutoff skip the periodic-shift arithmetic. One-thread and several-thread results still match.
+- The one-thread ring search packs sorted neighbour rows in one pass, and interior cells of a triclinic cutoff skip the image-wrap branches. Both stencils keep the same directed pairs as the branchy walk.
 - The orthorhombic cutoff neighbour list is built by a parallel cell sort.
   Each thread counts its atoms, a prefix sum places them, and the pairs are
   written straight into one CSR. The same buffers are reused on the next frame.
   The pair set does not depend on the thread count.
   q_l reads that CSR. The neighbour average is skipped when only q_l is requested.
 - The ring search builds each source's shortest paths once, in breadth-first order into one buffer, keeps the graph in two packed arrays, and moves the per-source results out on every thread. With the fix above, `bench_strong`'s ring stage at 65536 atoms goes from 1408 to 265 ms on one thread and from 190 to 40 ms on eight (release builds), and lists the same rings in the same order.
+- The seeded cage binding searches one graph when the mutual and union edge sets match. A dirty cage frame starts the backoff before it returns, so the following frames are warm sweeps instead of another diff.
 - The seeded cage call searches once when the mutual and union edge sets match. fellBack() runs before a dirty frame returns, so the following frames are warm sweeps.
 - The triclinic cutoff list uses the same stencil as the orthorhombic list.
   CHILL+ evaluates the real spherical harmonics on that CSR.

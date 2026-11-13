@@ -87,6 +87,6 @@ jobs:
             --platform manylinux_2_34_x86_64 --python-version 312 \
             --implementation cp --abi cp312 -d "$dest"
           pixi run python -m pip install --force-reinstall --no-deps "$dest"/ovito-*.whl
-          pixi run python -m pip install 'snakemake>=8'
+          pixi run python -m pip install 'snakemake>=8' 'towncrier>=24'
       - name: Build and run the full suite
         run: pixi run bash scripts/ci_pixi_suite.sh
