@@ -1,0 +1,1 @@
+C API: libseams exports only the `seams_*` functions in `seams.h` (hidden visibility plus a linker export list). No call aborts or exits: the MIS self-test throws instead of calling `exit`, every allocation in the wrappers is caught, a missing trajectory returns `SEAMS_ERR_ARG`, and infinite cutoffs are rejected by `seams_hbonds` and `seams_monolayer`.
