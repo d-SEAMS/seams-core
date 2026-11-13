@@ -267,16 +267,28 @@ def write_h2h(rows, path):
     path.write_text("\n".join(lines) + "\n")
 
 
+def neighbour_codes_agree(detail):
+    if "agree=d-SEAMS/vesin/freud" in detail:
+        return True
+    if "agree=" not in detail:
+        return False
+    token = detail.split("agree=", 1)[1].split()[0]
+    return "vesin" in token and "freud" in token
+
+
 def check_large(rows):
     errors = check(rows, 1.5e-4)
-    if len(rows) != 104:
-        errors.append("sitting-large has {} rows, expected 104".format(len(rows)))
+    if len(rows) != 208:
+        errors.append("sitting-large has {} rows, expected 208".format(len(rows)))
     widths = sorted({int(row["threads"]) for row in rows})
     if widths != [1, 2, 4, 8]:
         errors.append("sitting-large threads are {}".format(widths))
     sizes = sorted({row["molecules"] for row in rows})
     if sizes != ["884736"]:
         errors.append("sitting-large molecules are {}".format(sizes))
+    phases = sorted({row.get("phase", "") for row in rows})
+    if phases != ["ice", "liquid"]:
+        errors.append("sitting-large phases are {}".format(phases))
     # The detail column is the agreement check on one shared ice Ic frame.
     for row in rows:
         detail = row.get("detail", "")
@@ -293,10 +305,11 @@ def check_large(rows):
             if code == "PLUMED" and "PLUMED_NUM_THREADS=" not in detail:
                 errors.append("PLUMED q6 threads {} did not set PLUMED_NUM_THREADS".format(row["threads"]))
         if operation == "neighbours" and code in ("vesin", "freud"):
-            if "agree=d-SEAMS/vesin/freud" not in detail:
+            if not neighbour_codes_agree(detail):
                 errors.append("neighbours {} threads {} missing the pair agreement".format(code, row["threads"]))
         if operation == "neighbours" and code in ("d-SEAMS", "pyscal3"):
-            if "agree=d-SEAMS,pyscal3" not in detail:
+            agree = detail.split("agree=", 1)[1].split()[0] if "agree=" in detail else ""
+            if "pyscal3" not in agree:
                 errors.append("neighbours {} threads {} missing the pyscal3 agreement".format(code, row["threads"]))
         if operation == "coordination" and code == "OVITO":
             if "coordination_sum=" not in detail or "dseams_pairs=" not in detail:
@@ -304,9 +317,21 @@ def check_large(rows):
         if operation == "chill+" and code in ("d-SEAMS", "OVITO"):
             if "cubic_dseams=" not in detail or "cubic_ovito=" not in detail:
                 errors.append("chill+ {} threads {} missing the cubic agreement".format(code, row["threads"]))
-        if (code, operation) in (("d-SEAMS", "classifier"), ("OVITO", "ptm-ice")):
+        if row.get("phase") == "ice" and (code, operation) in (
+            ("d-SEAMS", "classifier"),
+            ("OVITO", "ptm-ice"),
+        ):
             if "agree_ice_ic_cubic_diamond=" not in detail:
                 errors.append("{} {} threads {} missing the classifier agreement".format(code, operation, row["threads"]))
+        if row.get("phase") == "liquid" and operation == "q6" and code == "freud":
+            if "agree_freud_max_abs=1.525e-04" not in detail:
+                errors.append("liquid freud q6 threads {} gap is not the recorded hard-cutoff gap".format(row["threads"]))
+        if row.get("phase") == "liquid" and operation == "q6" and code == "PLUMED":
+            if "agree_PLUMED_max_abs=1.679e-01" not in detail:
+                errors.append("liquid PLUMED q6 threads {} gap is not the recorded switch gap".format(row["threads"]))
+        if row.get("phase") == "liquid" and operation == "chill+" and code == "d-SEAMS":
+            if "chill_match=830736/884736" not in detail:
+                errors.append("liquid CHILL+ threads {} match is not 830736/884736".format(row["threads"]))
     return errors
 
 
@@ -333,13 +358,13 @@ def write_large(rows, path):
         "   :header-rows: 0",
         "",
         "   * - Written by ``docs/render_sitting.py`` from ``benchmarks/paper-cells/sitting-large.csv``.",
-        "       Ice Ic at 884736 molecules. Each code is timed at 1, 2, 4 and 8 threads.",
+        "       Ice Ic and the TIP4P/ice liquid, 884736 molecules, at 1, 2, 4 and 8 threads.",
         "       ``median_ms`` and ``iqr_ms`` are recomputed from ``samples_ms``.",
         "",
     ]
-    header = ("code", "version", "operation", "threads", "n", "median_ms", "iqr_ms")
+    header = ("phase", "code", "version", "operation", "threads", "n", "median_ms", "iqr_ms")
     for name in names:
-        block = sorted(grouped[name], key=lambda row: (row["code"], int(row["threads"])))
+        block = sorted(grouped[name], key=lambda row: (row.get("phase", ""), row["code"], int(row["threads"])))
         title = "884736 molecules, {}".format(name)
         lines.append(title)
         lines.append("^" * len(title))
@@ -470,7 +495,7 @@ def write_overview(books, path):
         lines,
         "884736-molecule sitting, one thread against eight",
         books[1][1],
-        ("code", "operation"),
+        ("phase", "code", "operation"),
     )
     append_ratio_table(
         lines,

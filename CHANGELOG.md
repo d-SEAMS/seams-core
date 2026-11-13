@@ -10,63 +10,198 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
-## [2.14.0] - 2026-11-12
+## [2.14.0] - 2026-11-13
 
-Each bullet is one lane merged after 2.13.0, or a first-parent change that landed with that lane.
 
 ### Added
 
-- Stable C API (`include/seams.h`, `libseams`, ABI 1) and the language ABI `seams_lang.h`. Fortran, Rust, Python (`import dseams`), Julia (`Dseams` and `Seams`), and R call those libraries. `seams_chill_plus_flat` stays on the internal header used by the Catch2 suite. It is not installed. (`feat/engines-api`)
-- LAMMPS `run_hook` (`fix external`), the copy-in `compute dseams` under `extras/lammps`, GROMACS `gmx-seams`, the OpenMM reporter and the C++ plugin, the PLUMED collective variable `SEAMS`, and `InSitu.observe`. Each plugin is built only when its library is found. `with_lammps` and `with_gromacs` default to auto. A found library whose plugin cannot be built is an error.
-- `seams symmetry` prints the space group, one shell overlay, and the ice-label tally. `seams_frame_symmetry` is the same per-atom label. IRA, SOFI, and spglib stay optional. (`local symmetry`)
-- `seams rings`, `seams prisms`, and `seams cluster` print the primitive-ring histogram, prism counts, and the largest connected component. Python, R, and Julia wrap rings, cages, signature cages, and the shell label.
-- `topoparam::jumpRotorTau90` reports the time for a 90-degree hydrogen-hydrogen rotation and is NaN when the pair does not rotate. R and Julia export `jump_tau90`.
-- `--water-types` keeps every named type on the cutoff list, including pairs between those types. `seams ions` counts each of those types in the first shell. `--mol` applies to rings.
-- Nucleation census of rings, CHILL+, q6-bar, and diamond on liquid mW quenches. (`science/nucleation-pathways`)
-- Interface growth of mW on basal and prism faces, including the six-temperature campaign and the Wilson-Frenkel speeds. (`science/interface-order`)
-- Brine scoring keeps water oxygens, leaves ions out, and measures a Madrid-2019 freezing front. (`feat/brine-science`)
-- OpenMM classifies a TIP4P/Ice frame in situ. chemfiles reads PDB, GRO, and the other formats it supports, with the mmCIF fallback below. (`feat/openmm-chemfiles`)
-- Local q4 and q6 on the cutoff shell use the solid-harmonic kernel. `seams steinhardt` prints the degrees named by `--l` (default `4,6`). (`integrate/kernel-q`)
-- Each OpenMP thread owns a block of the linkcell cell cut. Ranks are cut on that cell grid, and `seams::domain::reduceRings` sends owned atoms to the root. (`integrate/linkcell`, and the cell-grid rank cut)
-- Literature head-to-head against mdapy, pyscal3, vesin, IRA, and SQQ, plus the related-work watch of ClavisCage TRACE and PLUMED q. Primitive rings are timed on one thread against OVITO FindRings. (`bench/h2h-literature`, `related/watch-v1`, `perf/rings-one-thread`)
-- One sitting retimes neighbours, local q4 and q6, CHILL+, primitive rings, the shell symmetry label, and hydrate cages at 110592 and 884736 molecules, on one thread and on eight. PLUMED 2.10.2 is built with the symfunc module. The raw lines are `benchmarks/rc3-sitting.csv`. (`integrate/rc2-perf`)
-- Carried rings on a TIP4P/2005 slab at 0.01, 0.1, and 1 ps, next to mW at 0.1, 1, and 10 ps. Every transition stays inside the hop ball and matches a full search. The `seeded-strict` speedups on the TIP4P strides are 8.31, 3.28, and 2.59. (`integrate/hop-stride`, `integrate/hop-tip4p`)
+- A nucleation-pathway census reports primitive rings by size, both CHILL+ rules, Lechner-Dellago q6-bar, and diamond symmetry labels on every frame.
+  The CHILL+ staggered and eclipsed edges are unchanged.
+  Largest-cluster size and the Ic/Ih fraction are recorded for each definition.
+  `nucleation-pathway` writes the table. `input/nucleation/regenerate.py` rebuilds the short mW quenches outside the work tree.
+- A running molecular dynamics calculation can call the in-situ engine on
+  each frame it chooses.
+  The engine reports the primitive ring census.
+  It also reports the published common neighbour ice labelling (CHILL)
+  labels.
+  The cage flags cover hexagonal and double-diamond cages.
+  LAMMPS, GROMACS, OpenMM, i-PI, and the Atomic Simulation Environment
+  attach through optional adapters.
+  -Dplumed=enabled now errors. Live analysis does not use PLUMED.
+- Add Rodger F4 and host-only Steinhardt l=12 so the Zeron q3/q12 hydrate pair is a per-atom field.
+- Add TUM/rings stacking planes (HC-basal and DDC-equatorial) next to the CHILL+ I_sd molecule-bin reference.
+- Add a C ABI seams_chill_plus for native and emscripten builds.
+- Add a pinned head-to-head of cutoff neighbours, q4, q6, diamond, rings and local symmetry against mdapy, pyscal3, vesin, IRA and SQQ.
+- Add extras/lammps compute dseams that writes seams_chill_plus per atom.
+- Add optional IRA, SOFI and spglib symmetry reports for ice shells, hydrate cages and rings.
+- Add pinned head-to-heads of 5^12 cages against ClavisCage TRACE and of q4, q6 and coordination against PLUMED.
+- Assign guests by ray-parity inside fan-triangulated cage faces, and count ions per ice cluster on the oxygen graph.
+- Bin CHILL+ cubic and hexagonal molecules into basal layers and emit cubicity Phi_c plus the H/C stacking string.
+- Build CHILL+, cages, seeded ions and k-NN on an explicit water-type mask (`--water-types`) so substrate and ions never enter the four-neighbour list. The flag loads the mixed dump; ice and cage counts are the water types only.
+- Direct-coexistence mW growth is scored on basal and secondary-prism slabs of 8064 molecules at 1 bar.
+  The 2015 CHILL+ thresholds are unchanged.
+- Each OpenMP thread owns a block of the linkcell weighted cell cut and writes the neighbour rows of those cells. The halo is painted in that owned walk. On 884736 molecules, eight threads build the neighbour rows in 5.72 times the one-thread time.
+- Each language front reports rings, cages, signature cages and symmetry, and the binding CI runs those calls.
+- Enumerate cups and incomplete cages on the ring graph; closed signature counts stay the closed path.
+- Hexagonal channels are stacked six-ring prisms, not a raw six-ring count. Ice XXI (Lee et al. 2026, Z=152 BCT) also requires a tetrahedral 3.5 A graph and a primitive six-ring. Hydrogen MSD uses the minimum image. Glass labels use local-density windows for ice/LDA/MDA/HDA. `compute dseams` ships with `water.data` and `pair_style zero`.
+- Ice XXI library matches the Lee et al. 2026 I-42d oxygen cell (SI CIF, Z=152).
+- Live analysis for LAMMPS, GROMACS, and OpenMM calls the library.
+  The LAMMPS plugin and the in-tree package share one fix.
+  GROMACS uses a module inside mdrun.
+  OpenMM uses a reporter.
+  Chemfiles reads the saved trajectory.
+- Local q4 and q6 on the cutoff shell use the solid-harmonic kernel from `seams steinhardt`, `seams_q4_q6`, and the Python, R, and Julia `q4_q6` fronts.
+- Name 51264, 51268 and sH cages, and report a per-cage occupancy histogram.
+- One sitting pairs ice Ic at 884736 molecules with freud, mdapy, vesin, OVITO PTM and CHILL+, and rings-statistics-matter, at 1, 2, 4 and 8 threads. The detail column records the agreement check on that frame. The rings row is the cutoff list and the ring search together. The pool-audit rings kernel is ringNetwork alone.
+- One sitting retimes neighbours, q4, q6, CHILL+, rings, symmetry and hydrate cages at 110592 and 884736 molecules on one thread and on eight. The raw lines are benchmarks/rc3-sitting.csv.
+- OpenMP target offload of the TUM ice score: hop-bound primitive six-rings and HC/DDC cage affiliation. `SEAMS_OFFLOAD=1` cage counts match the host on mW cubic, including `seams cages --graph seeded` (union 4-NN graph). Device CHILL+ is not this path.
+- Orthorhombic frames are cut by linkcell's weighted recursive coordinate bisection of the cell grid. The halo is the stencil painted while walking the cells a rank owns, and the same cut is reused on the next frame of that size. Neighbour rows, CHILL+, q6 and primitive rings keep their scratch across that repeat, and the ring search answers a length-2 shortcut that passes below the source.
+- Python, Julia, Rust and Fortran call the C API. Python reads NumPy arrays in place and accepts ASE and MDAnalysis frames. Julia uses ccall. Rust splits the raw FFI from the safe crate. Fortran binds the same symbols with iso_c_binding.
+- R (`bindings/r/dseams`) and Julia (`bindings/julia/Dseams`) call
+  `libseams_lang`. Python stays `pydseamslib`. The executable tutorials
+  under `docs/tutorials` import `pydseams`.
+- Saved trajectories other than CON are read with chemfiles, including xyz, a LAMMPS dump, gro, pdb, dcd, xtc and Amber NetCDF. A selection expression names water oxygen and hydrogen. The dependency is optional and on by default.
+- TIP4P/2005 ring updates at 0.01, 0.1 and 1 ps stay inside the hop ball and match a full search. The strict seeded graph is 8.3, 3.3 and 2.6 times a rebuild.
+- The 884736-molecule sitting adds pyscal3 neighbours and q6, PLUMED q6 with PLUMED_NUM_THREADS set to the row width, and OVITO coordination. Those rows agree with d-SEAMS on the same ice Ic frame. scripts/plot_sitting_large_time.py draws time against threads and does not store the PDF.
+- The PLUMED SEAMS collective variable reports q6, the CHILL+ ice fraction and the six-ring fraction, and a restraint can bias q6.
+- The ice label is the residual of the seventeen-atom shell after the optimal rotation and scale. The shell is the four bonded neighbours and each of their bonded neighbours.
+- The ice label takes an eclipsed-cosine cutoff, and cage, ring and shell naming runs in parallel.
+- The mW front speed was measured again under the other readings of L and tau, under Lechner-Dellago q6, on the three faces, and at a 5 fs step.
+  The one-front speed is a quarter of Espinosa et al. Table I at both 240 K and 260 K, and it matches the primary-prism markers in Shi et al., J. Chem. Phys. 162, 054714 (2025), Figure 3.
+  Equation 2 is unchanged.
+- The mW one-front speed was measured on the basal, primary-prism and secondary-prism faces from 220 K to 265 K.
+  A Wilson-Frenkel curve is fit to the count-slope estimator on each face.
+- The secondary-prism speed is reported under equation 2 and under the solid-count slope, on the 4000-molecule cell.
+  The 2015 CHILL+ thresholds are unchanged.
+- Under mpiexec, an MPI build of `seams` shares a LAMMPS dump's `--frame`/`--last` frames among the ranks in serpentine rounds (`sinp::forEachLammpsFrame` takes a part and a part count), and rank 0 prints every frame in order. Other readers stay on rank 0, `--per-atom` needs a single rank, ranks that differ in arguments, directory or `SEAMS_` settings are refused, `OMP_NUM_THREADS` and `RAYON_NUM_THREADS` default to 1 on a launch of several ranks, and a run without a launcher, or with `SEAMS_MPI=0`, never starts MPI. `chill::setSteinhardtAtomSplit(false)` keeps `steinhardtQl` from splitting atoms over ranks that hold different frames, and a dump frame cut short keeps the atoms it read, with its warning on stderr. With Open MPI's libfabric probe skipped (`--mca btl ^ofi`), eight ranks match eight `--jobs` workers on one node for `cages` over 32 frames of 32768-atom ice (4.2 against 4.3 s), and keep load balance 0.99 where frame cost steps or alternates along the run (2.6 s against 2.8 and 3.1 s for `--jobs`; contiguous blocks reach 0.59 on the step). On two four-core core sets standing in for nodes, with MPI over TCP only, eight ranks take 4.4 s against 8.7 s for threads on one, at POP parallel efficiency 0.98 (release builds).
+- Update topology keys only on the hop-ball of atoms whose neighbourhood changed.
+- `bench_rings_h2h` times primitive rings against OVITO FindRings with the cutoff graph outside the timer. A small-graph test checks that census against a brute-force cycle list.
+- `interface_order wc` reports a Willard-Chandler width on the crystal centre of mass.
+  `input/interface/campaign.py` grows the shipped mW slab at several temperatures and seeds.
+  The 2015 CHILL+ thresholds are unchanged.
+- `interface_order` compares the Nguyen and Molinero 2015 CHILL+ rule with the OVITO 3.17.2 rule on one frame or a short trajectory.
+  The thresholds are unchanged.
+  A square, pentagonal or hexagonal nanotube is labelled by its prism blocks, and a honeycomb sheet by its polygon or bilayer rings.
+- `seams::domain` splits a periodic frame over ranks: cells ordered along a Hilbert curve are cut into runs of equal atom count, and each rank also holds every atom within a halo of its own. `domain::rings` finds the primitive rings whose lowest-indexed member a rank owns from its share alone, `primitive::ringNetwork` takes a mask of the sources to enumerate from, and `domain::gatherRings` collects every rank's rings on every MPI rank in the order `ringNetwork` lists them. On one eight-core node threads still win (a 65536-atom frame takes 58 ms on one rank of eight threads and 67 ms on eight single-thread ranks), and every rank rebuilding the whole list costs 72 ms of 251 at 262144 atoms on eight ranks; `bench_strong` reports it as `domain/ms` in MPI builds, and CI runs the gather under `mpiexec`.
+- science::layersOf bins published CHILL+, the shell label and q6 along the interface normal. science::criticalSize is the mean size of the band around the smallest largest cluster. That number is an upper bound when the minimum falls in the first two frames. It is not a committor.
+- seams rings prints the primitive-ring census by size. seams prisms counts perfect and imperfect prisms of size 3 to 6. seams cluster prints the largest domain, the subset, and whether it percolates.
+- seams.h is ABI 1. A frame carries an orthorhombic or triclinic cell, and the library returns neighbours, both CHILL+ rules, q4 and q6, primitive rings, and ring symmetry labels.
+- seams_frame_q4_q6_chill and the Python wrapper write q4, q6, q4-bar and q6-bar together with the published CHILL+ labels.
 
 ### Changed
 
-- CHILL and CHILL+ map the default graph name `seeded` onto the cutoff list. `mutual` is the four-nearest graph. `seams cages` keeps `seeded` as its own graph (mutual seeds plus union completions). On the mixed TIP4P fixture the cutoff counts are interClathrate 9 and water 241. The mutual counts are clathrate 1, interClathrate 7, and water 242. A crystal row needs four neighbours inside the cutoff. The old count ran after the list had already been cut to four. `ovito-chill+` averages q3 on the full shell and skips that test. Plain CHILL keeps four closest neighbours and Moore's test. A multi-atom dump with no `--type` infers the oxygen.
-- `linkcell::pairs_within` owns the cutoff list. vesin 0.5.7 is the fallback when linkcell is not built. The list covers restricted triclinic boxes. The orthorhombic list is one parallel cell sort into a CSR, and the triclinic list uses the same stencil. A half list keeps the lower index. A skin reuses the wide list inside the Verlet shell. CHILL+, q_l, the diamond test, and the ring census read that CSR. (`2.14.0 neighbour-list release`)
-- CHILL+, symmetry, and Steinhardt on the CLI and the language fronts go through those cutoff kernels. (`perf/cli-fast-paths`)
-- Cage identification and the double-diamond search are faster. A coplanar pair is not a prism. Release builds define `NDEBUG`. The closed-cage search on the sI 2×2×2 crystal takes 13.2 ms instead of 16.0 ms, with the same output. (`perf/ice-cage-id`, `perf/ddc-regression-fix`, `fix/prism-shapematch`, `perf/rings-cages`)
-- `seams steinhardt` prints q4 and q6. The cutoff shell is the neighbour list for that command.
-- A reader error, including an XYZ coordinate that is not a number, returns exit code 2.
-- `reCubic` and `reHex` are printed as those names.
-
-### Deprecated
-
-- `--types` is a deprecated exact alias of `--pair-types`. Using `--types` prints a one-line warning on stderr.
+- A threaded cutoff neighbour list on an orthorhombic cell uses the scaling cell list instead of linkcell's buffered walk. The rows stay the same sorted cutoff set, so the ring search matches the one-thread list.
+- Below half the narrowest face separation the cutoff list skips minimage's pair reduction, which only sorted there, and sorts its rows on every thread; `getNewNeighbourListByIndex` and `neighListO` fill their rows in parallel, and `neighListO` takes the cutoff list first at every thread count. On `bench_strong`'s 65536-atom frame the index list goes from 25.8 to 13.9 ms on one thread and from 22.7 to 7.8 ms on eight (release builds).
+- CHILL and CHILL+ default to the mutual four-nearest graph. vesin still owns cutoff pairs; linkcell still owns k-nearest.
+- CHILL and CHILL+ use one default neighbour list on every front: the cutoff list (pairs closer than `cutoff`, 3.5 Å by default). The mutual four-nearest list is `graph = "mutual"` under that name everywhere: `seams chill` and `seams chill-plus --graph mutual`, R `chill_plus(graph = "mutual")`, Julia `chill_plus(; graph = "mutual")`, pydseamslib `Frame.chill_plus(graph="mutual")`, the C ABI `seams_chill_plus_graph`, and the LAMMPS `compute dseams ... graph mutual`. `seams chill`, R, Julia, `seams_chill_plus`, and `compute dseams` used the mutual list by default before. `tests/chill_plus_fronts.py` checks that the CLI, Python, R, and Julia agree on `exampleTraj.lammpstrj` with both lists.
+- CON frames are read with readcon-core's frame iterator. Lengths and angles become the minimage cell, and that cell is the dump box linkcell already uses. A readcon-db corpus, including a sharded campaign root, is selected and decoded with the same reader.
+- Cutoff neighbour lists (`neighListPair`, `halfNeighList`, `SkinNeighborList`, and `neighListO` / `getNewNeighbourListByIndex` below 2048 atoms) come from linkcell's `lc_pairs_within` with cells of about 20 atoms, and vesin is the fallback. `halfNeighList` on 8192 atoms at water density with a 3.5 Å cutoff goes from 8.9 to 4.7 ms on one thread and 4.0 ms on eight. The first linkcell cutoff list keeps freed pages on the heap for the rest of the process (`M_TRIM_THRESHOLD`, `M_MMAP_THRESHOLD`).
+- Cutoff neighbour lists use linkcell pairs_within with cells of about 20 atoms rather than one cutoff, ahead of the threaded cell rows. The neighbour list still keeps one index per atom. k-nearest stays knearest.
+- Document the two LAMMPS type-filtered readers: ~readLammpsTrjO~
+  flags ~inSlice~ and keeps every atom of the type;
+  ~readLammpsTrjreduced~ drops atoms outside the slice. An axis with
+  ~lo == hi~ is unconstrained.
+- Inside the one-image ball the in-plane RDF walks Rapaport cell pairs: cells span the cutoff across each face separation, a half stencil visits each neighbouring pair of cells once, and one lattice shift serves the pair. It replaces the packed grid and the vesin list; 8192 atoms at a 6 Å cutoff take 2.2 ms on one thread and 0.4 ms on eight.
+- MPI ring analyses can reduce ring counts and per-atom ring types with `seams::domain::reduceRings`, which keeps each rank on its own domain and sends only owned atoms to the root instead of gathering every ring on every rank.
+- Neighbour, order-parameter, ring and shell calls keep one worker pool and leave the OpenMP team running between a Rayon search and the next region. A per-atom walk under 8192 atoms stays at four threads. Ring sources still take one thread per eighty sources. The one-thread and several-thread results match.
+- Neighbour-list q3 uses the one-bond kernel. The eight-bond batch stays on degrees 4 and 6.
+- Neighbours, CHILL, CHILL+, rings and cages can keep water oxygens by atom type or by molecule, and leave ions out of that graph.
+  `seams --mol water` uses the atom that appears once in a multi-atom molecule.
+  `seams --mol 1,5-12` keeps those molecule ids.
+  A type or molecule that is not in the frame is an error.
+  On a LAMMPS dump with multi-atom molecules and no `--type`, the same choice replaces the old preference for type 2, which labelled hydrogens or sodium.
+  `compute dseams` takes `type I` and `mol water`. A mixed frame that sets neither is an error.
+  CHILL+ then reports `ion-ice`, `ion-liquid` and `ion-front` when ions remain in the frame.
+- Pair distances use the fractional wrap below half the narrowest face separation, and call the Euclidean image only past that. The in-plane RDF bins the cell-list distance inside that ball, and the direct loop runs in parallel.
+- Release builds define NDEBUG, so the libstdc++ assertions that meson adds when b_ndebug is false no longer run in them. The closed-cage search on the sI 2x2x2 crystal takes 13.2 ms instead of 16.0 ms, with the same output.
+- The C API version macros come from the project version at build time. This release is 2.14.0.
+- The SOAP power spectrum evaluates each neighbour's spherical harmonics once and reuses them for every radial function, since its basis is a product of the two; the values are unchanged. On 8192 atoms at water density with nMax 8, lMax 6 and a 6 Å cutoff, `soapSpectrumAll` goes from 831 to 199 ms on one thread (release builds).
+- The carried ring update sorts ring indices and merges the kept rings in parallel, and it keeps dropped ring buffers instead of freeing them on the update. The orthorhombic cutoff list counts each pair once, a z layer at a time, so several threads beat the single-thread walk. One-thread and several-thread results still match.
+- The clathrate face-edge window is `SEAMS_CAGE_EDGE` and `--cage-edge`, default `2.65,3.15` in the coordinate units of the file. `none` turns the window off, and the cage bound is then the face census alone. `seams_frame_signature_edge` takes the same string. Python is `frame.cages_by_signature("512", edge="none")` and Lua is `dseams.cages_by_signature(frame, "512", {edge = "none"})`.
+- The closed-cage search skips a ring that shares two consecutive edges with a chosen face or passes through a vertex whose faces already close, and keeps the vertex and edge counts inside V - E + F = 2. No cage is lost. The search runs on dense edge ids, adds the forced faces and picks the open edge with the fewest rings in one pass, and lists the cages of a signature by their sorted faces.
+- The cutoff list now covers restricted triclinic boxes.
+  A half list keeps each pair on the lower index.
+  A skin reuses the wide list while every atom stays inside the Verlet shell.
+  CHILL+, the ring census, and the template overlay read that CSR.
+- The cutoff lists bin linkcell's pairs by row on every thread: the pairs are dealt into blocks of rows, four per thread, and one thread counts, places and sorts each block, so no pass waits on shared counters and the rows do not depend on the thread count. linkcell fills a buffer through `lc_pairs_within_rows`, where `linkcell::pairs_within` zeroes its vector on one thread first, and `neighListO` allocates each row once, on the thread that fills it. On a jittered 65536-atom lattice at water density the cutoff list goes from 17.6 to 14.5 ms on one thread, and at 262144 atoms from 67.7 to 57.6 ms on one thread and from 35.1 to 15.2 ms on eight (medians of three interleaved rounds, release builds, both on the same linkcell build).
+- The hexagonal-cage sweep in `seams cages` runs across the threads. One thread and several threads mark the same rings.
+- The hydrate signature search scales with threads. The cutoff list is the threaded linkcell list, built on one reused worker pool, and crystals under a few thousand molecules stay at four threads so a wider team does not slow them down. Neighbour rows are placed on the calling thread until the pair list is large enough that a parallel sort is the smaller cost. The cage index is merged from per-thread buckets in ring order. Census and cage membership match the one-thread result.
+- The ice cage search counts distinct atoms in a small buffer and builds only the least ring reading.
+- The in-plane RDF builds an explicit grid whose cells are the cutoff and bins packed coordinates from the neighbouring cells. Each thread keeps its own histogram until the frame finishes.
+- The linkcell wrap pin is 3700ea3 (0.3.5).
+- The linkcell wrap tracks v0.3.9 and the minimage wrap tracks v0.1.4. The linkcell patch builds that crate against the minimage wrap checked out beside it.
+- The minimage wrap pin is v0.1.2. Distances use mi_displacement_euclidean, and a failed call keeps the in-tree formula.
+- The one-thread carried ring update copies and sorts its rings directly again. Several threads still sort indices and merge in parallel. A team narrower than the process is bound once to that many cores of the allowed set. Interior cells of the orthorhombic cutoff skip the periodic-shift arithmetic. One-thread and several-thread results still match.
+- The orthorhombic cutoff neighbour list is built by a parallel cell sort.
+  Each thread counts its atoms, a prefix sum places them, and the pairs are
+  written straight into one CSR. The same buffers are reused on the next frame.
+  The pair set does not depend on the thread count.
+  q_l reads that CSR. The neighbour average is skipped when only q_l is requested.
+- The ring search builds each source's shortest paths once, in breadth-first order into one buffer, keeps the graph in two packed arrays, and moves the per-source results out on every thread. With the fix above, `bench_strong`'s ring stage at 65536 atoms goes from 1408 to 265 ms on one thread and from 190 to 40 ms on eight (release builds), and lists the same rings in the same order.
+- The seeded cage call searches once when the mutual and union edge sets match. fellBack() runs before a dirty frame returns, so the following frames are warm sweeps.
+- The triclinic cutoff list uses the same stencil as the orthorhombic list.
+  CHILL+ evaluates the real spherical harmonics on that CSR.
+  The diamond common-neighbour test reads the same rows.
+  The ring census uses the short-hop search on that CSR.
+- Users who run chill-plus on a cutoff list now see different counts.
+  This is a bug fix in the shell count.
+  The old code counted bonds after the list had been cut to four.
+  A crystal row needs four neighbours inside the cutoff.
+  On the mixed TIP4P fixture, interClathrate moves from 12 to 9.
+  Water on that fixture moves from 238 to 241.
+  Default q3 uses up to four nearest neighbours in the cutoff.
+  Interfacial rows keep the neighbour test from the published table.
+  Users who want the OVITO labels use the ovito-chill+ command.
+  That command averages q3 on the full shell and skips the test.
+  Plain CHILL keeps four closest neighbours and Moore's test.
+  A reader error now returns exit code 2 instead of aborting the process.
+  We print reCubic and reHex as plain text.
+  A path that ends in xyz and cannot be opened returns an error.
+  An exception outside std::exception returns exit code 2.
+- `cageAffiliation` runs its hexagonal- and double-diamond-cage sweeps on every thread, and `basalConditions` and `commonElementsInThreeRings` stop allocating per call. Seeded cage affiliation of a 32768-atom jittered cubic-ice frame goes from 1046 to 849 ms on one thread and to 132 ms on eight, and `cages` over 32 such frames from 36.2 to 6.3 s on eight threads (release builds).
+- `nearestUnlike` and the threaded neighbour rows score candidates with minimage's `mi_dist2_many` over positions packed once per call, and take the Euclidean image on that call's cell; the in-plane RDF's direct loop past the one-image ball takes each row's Euclidean images in one `mi_dist2_euclidean_many` call. On eight threads `nearestUnlike` over 8192 atoms goes from 24.6 to 3.7 ms, the orthorhombic direct loop from 4.2 to 1.6 ms, and tilted threaded rows from 3.7 to 2.4 ms. Under tilt the row batch takes the direct loop on 2048 atoms at a 30 Å cutoff from 60.4 to 19.5 ms on one thread, against `mi_dist2_many` plus one Euclidean call per pair past the Smith ball, with the same distances bit for bit on default compiler flags.
+- `seams chill-plus` on a published cutoff classifies from the fused CSR kernel. `seams steinhardt` computes the degrees named by `--l` (default `4,6`). `seams symmetry` builds the reported shell from the cells inside 5 Å. Primitive rings and the orthorhombic cutoff list stay on one thread below 2048 atoms. The vendored vesin meson project reports 0.5.7.
+- `steinhardtQl` builds its bond table with the box computed once rather than once per bond, and counts and fills its rows on every thread; the values are unchanged. On `bench_strong`'s 65536-atom frame the stage goes from 11.7 to 4.0 ms on eight threads and from 23.1 to 19.7 ms on one (release builds).
+- findDDC on the mixed-site frame returns 0, not 605243. A double-diamond cage is kept only when its seven rings span 14 molecules and each peripheral shares three equatorial atoms, and every hexagon of that frame fails the test. Clathrate faces are rings whose edges all lie between 2.65 and 3.15 angstroms, so the closure search stays inside one cage instead of the whole ring complex.
+- q4 and q6 share one cutoff list. A multi-thread cutoff walk records each pair once. Seeded cages with identical neighbour rows search rings and cages once, and the k-nearest nomination uses the same thread count as the rest of the command.
 
 ### Fixed
 
-- The PLUMED q6 derivative is per nanometre. The finite-difference step is 0.001 Å, and the value passed to PLUMED is ten times the angstrom derivative. On a shifted eight-molecule cell the worst absolute error against an independent difference is 3.99e-11. The kernel linked into the collective variable is the one named by pkg-config.
-- GROMACS reads the lower-triangle cell tilts and scales nanometres to angstroms. The in-situ observer accepts a three-length orthorhombic box. The OpenMM path keeps one reporter.
-- Python builds `_core` from the in-tree library. R derives include and library paths from `DSEAMS_ROOT`. Steinhardt on the language fronts defaults to the cutoff shell.
-- q4 and q6 share one cutoff shell and record the multi-thread list in one pass. The neighbour ids are written during the count walk, and the linkcell pool follows the OpenMP width.
-- A box-edge bond stays inside the hop ball, so a carried ring search matches a full search on that frame.
-- A LAMMPS dump that is still being appended is kept. The language fronts follow the build's Python and skip a library mismatch.
-- A diamond shell is kept while eight good (4,2,1) signatures, or the ambiguous band, are still reachable.
-- mmCIF is read through a chemfiles that can open an atom with no residue id. conda-forge 0.10.4 writes `label_seq_id "."` and omits `label_entity_id`. Configure probes `cmake/mmcif_no_entity.mmcif` and, on failure, builds tag 0.10.4 with `cmake/patches/chemfiles-0.10.4-mmcif.patch`. When patchelf is available the patched library gets the soname `libseams-chemfiles.so.0.10`.
-- A cup may fill the signature face count with dangling edges. Steinhardt l=12 `qlBar` is evaluated on the host so the 25-component average does not overflow the device buffer. Spherical-harmonic scratch, the cutoff shell, and the per-share ring scratch stay on the calling thread.
-- `seams f4` loads oxygen and hydrogen together, so Rodger F4 is finite when molecule ids exist. readcon-db is 0.1.8. A halo source is read from the frame index in `share.local`.
-- `BondClassifier` stays at the 2.13 layout. `getCorrelPlus`, `getIceTypePlus`, and `getIceTypePlusNoPrint` keep the 2.13 signatures as overloads.
-- The site-site flag is `--pair-types`. The gpulite and vesin wraps have their own option files.
-- The Sphinx book builds with warnings as errors from the committed Org sources. Doxygen XML is optional, and each page is listed in one toctree.
-
-### Breaking
-
-- CHILL and CHILL+ on the default graph now score the cutoff shell. A caller that treated the default as the mutual four-nearest list sees the counts in Changed. `seams cages` is unchanged: its default remains `seeded`.
-- A reader error returns exit code 2.
-- `seams steinhardt` prints q4 and q6 as well as any other degree named by `--l`.
+- A LAMMPS dump that grows while it is read is kept. The language fronts follow the build Python and skip a library mismatch.
+- Accept a cup that fills the signature face count with dangling edges.
+- An orthorhombic displacement wraps every period, not one. Unfolded coordinates 16 apart in a 10 box are 4 apart, not 6.
+- Build the Sphinx book with warnings as errors from the committed sources. Doxygen XML and the C++ pages are optional, and each page is listed in one toctree.
+- Cage object counts no longer follow the wrapped coordinates. `findDDC` reports a maximum set of non-conflicting double-diamond cages, and both searches order rings by sorted atom indices plus the unwrapped shift of the cycle. A periodic translation or a permutation of the atoms leaves the count unchanged.
+- Cage search drops rings whose minimum-image lattice shifts wind through the periodic cell, and refuses a cutoff that can see two images of one pair. The R, Julia and C fronts keep the seeded label on the host rule when offload is requested. `seams cages` and the language fronts report disjoint hexagonal, cubic, both and water counts. `scripts/rerun_main_text.py` reruns the engine counts behind the main-text cage numbers and writes the archive hash.
+- Coordination and homopolar counts skip the leading self entry on an index neighbour row.
+- Evaluate Steinhardt l=12 qlBar on the host so the 25-component average does not overflow the device barRe[17] buffer.
+- Host OpenMP cell-list loops no longer fork under nvc++ `-mp=gpu`, so `[bulkTUM][offload]` reaches `usedDevice`.
+- In OpenMP builds the threaded neighbour rows gave an atom missing from `idIndexMap` its neighbours' IDs as a row header, and gave its partners -1. That atom now keeps an empty row.
+- Keep spherical-harmonic scratch local to each call so concurrent frames and changing thread counts do not share buffers.
+- Keep the 2.13 signatures of `getCorrelPlus`, `getIceTypePlus`, and `getIceTypePlusNoPrint` as overloads. The longer forms take the open-edge flag and the OVITO neighbour test.
+- Load oxygen and hydrogen together for `seams f4` so Rodger F4 is finite when mol IDs exist.
+- On a crowded shell the diamond label uses the four nearest neighbours, the list mdapy uses, and the labels stay those of the cutoff list.
+- Place sI hydrogens with TIP3P HOH and a 15 degree libration so Rodger F4 sits near 0.7, score Zeron q12bar against a disordered liquid, and evaluate host l=12 Ylm when sphericart is off.
+- Rename the site-site pair flag from `--types` to `--pair-types`, so `--type` is not a prefix of another flag. Give the gpulite and vesin wraps their own option files so `meson configure` does not copy the engine options onto them.
+- Require readcon-db 0.1.7 so static consumers receive only the archive and shared consumers receive the runtime search path.
+- SOAP now fills every l through lMax. classifyBonds reuses a Ylm buffer. Fingerprint builds one hop graph per atom.
+- The 2D RDF histogram, `nearestUnlike`, and `shellSeparation` trust the fractional wrap only below half the narrowest face separation of a tilted cell. Half an edge or half a bound span let a pair inside the cutoff wrap to a longer image and drop out, and let the RDF grid put a pair two cells apart.
+- The C API builds q4 and q6 from one cutoff shell and does not fill an atom-index map on that path.
+- The PLUMED q6 derivative is expressed per nanometre. A 0.001 angstrom step matched an independent difference to 3.99e-11 on a shifted eight-molecule cell.
+- The cutoff neighbour list sizes its row buffer from the pairs found. A shell denser than the ideal-gas estimate no longer writes past that buffer.
+- The multi-thread cutoff list records neighbour ids during the count walk, and the linkcell pool is sized to the OpenMP width.
+- The nucleation notebook rule declares ``figshare-incremental.json``
+  as an output. A later ``test -s`` stamp cannot see a side-effect
+  file because Snakemake deletes declared outputs before the job.
+- The reproducibility DAG builds yodaStruct as ``require("dseams")`` and
+  runs the five figshare deposits through that library. There is no
+  in-tree ``yodaStruct`` binary.
+- The ring search no longer clears the level field over every lower index for each source, a pass quadratic in the frame: on one thread `bench_strong`'s ring stage grew about threefold with each doubling of the frame, to 16.9 s at 262144 atoms, and now doubles.
+- Use linkcell 0.3.10 and minimage 0.1.4 without a downstream source patch. The with_linkcell and with_minimage options can require these dependencies.
+- Use the one-cell neighbour stencil from two cells per edge, so a short box is not left on the general walk.
+- `cages --signature` counts a face set as a cage only when its faces tile a sphere: every vertex lies on at least three faces that close around it, and V - E + F = 2. Rings whose minimum-image bonds add up to a lattice vector wind through the periodic cell, bound no face, and are dropped first (`ring::contractibleRings`). On frame 1 of the figshare mW nucleation run (4096 molecules, 3.5 Å cutoff) the search found 3 5¹²6², 20 5¹²6⁴, 270 5¹²6⁸ and 143 4³5⁶6³ cages in the liquid; it now finds none. On the GenIce sI unit cell it found 90 5¹²6², 4248 5¹²6⁴ and 218305 5¹²6⁸; it now finds 2 5¹² and 6 5¹²6².
+- `tests/check_invariance` exits 2 when the trajectory cannot be read, the frame holds no atom of the requested type, or the graph has no six-ring. It used to compare empty results, print PASS and exit 0. The meson tests `invariance_missing_input` and `invariance_empty_frame` expect that failure.
+- q4 and q6 build the multi-thread cutoff list in one pass again, instead of copying each linkcell block.
 
 ## [2.13.0] - 2026-11-06
 

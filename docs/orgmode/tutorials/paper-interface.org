@@ -36,3 +36,34 @@ name the rule when you quote an interface count. The layer stack is
 ~HHHHH~: five crystal slabs and no cubic ice, so \(\phi_c\) is 0.
 OVITO draws the same oxygens, so you can see the slab the numbers
 came from. The test exits 77 when GenIce, OpenMM, or OVITO is absent.
+
+* Full run
+
+The fast liquid is a shaken copy of 64 crystal waters, so the two
+rules have almost the same answer. A slab that can teach the
+interface needs a liquid that was never on the lattice, and it needs
+enough molecules for a layer to be a layer. =snakemake -s
+docs/tutorials/Snakefile interface= builds that slab. GenIce ice Ih,
+4 by 4 by 4, is the crystal half: 1024 oxygens. Another 1024 waters
+are placed uniformly at random in the upper half. That is 2048
+waters. OpenMM uses the Reference platform so the trajectory repeats.
+Langevin dynamics run at 240 K for 400 steps of 0.002 ps, after a
+40-iteration minimise, with the random seed 240. The crystal half
+stays restrained, which is why it is still ice when you score it.
+
+=meson test --suite slow docs_paper_interface_full= checks
+
+#+begin_src text
+interface full waters 2048
+interface full published hexagonal 840 interfacial 8 water 1131 clathrate 16 interClathrate 53
+interface full ovito hexagonal 807 interfacial 43 water 1140 clathrate 17 interClathrate 41
+interface full phi-c 0
+interface full stack HHHHHHHHHH..........
+#+end_src
+
+The stack is ten hexagonal slabs and then liquid, so \(\phi_c\) is 0.
+The published rule counts 840 hexagonal and 8 interfacial. The OVITO
+rule counts 807 hexagonal and 43 interfacial. The gap is the
+interface, and it is wide enough to see. OVITO draws the 2048
+oxygens. The test exits 77 when GenIce, OpenMM, OVITO, or Snakemake
+is absent.

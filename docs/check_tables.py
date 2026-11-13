@@ -100,7 +100,7 @@ def parse_csv_tables(lines):
         while cursor < len(lines) and (lines[cursor].startswith("   ") or lines[cursor].strip() == ""):
             stripped = lines[cursor].strip()
             if stripped.startswith(":header:"):
-                headers = [header_name(cell) for cell in stripped.split(":", 1)[1].split(",")]
+                headers = [header_name(cell) for cell in stripped[len(":header:") :].split(",")]
             elif stripped and not stripped.startswith(":") and headers is not None:
                 break
             cursor += 1
@@ -183,6 +183,8 @@ def as_number(text):
 def close_enough(cell, raw):
     if re.fullmatch(r"-?\d+", cell):
         return int(cell) == int(float(raw))
+    if raw == "":
+        return False
     got = as_number(cell)
     if got is None:
         return cell == raw

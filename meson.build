@@ -935,6 +935,36 @@ if get_option('with_cli')
       suite: 'docs',
       timeout: 300)
   endforeach
+  # Full paper runs. Suite slow only, so `meson test --suite docs` stays fast.
+  foreach _paper : ['interface', 'cages', 'rings', 'brine', 'nucleation']
+    test(
+      'docs_paper_' + _paper + '_full',
+      python3,
+      args: [
+        meson.project_source_root() / 'docs' / 'tutorials' / 'test_paper_full.py',
+        _paper,
+        meson.project_source_root(),
+        seams_exe.full_path(),
+        meson.project_build_root() / 'src',
+        meson.project_build_root(),
+      ],
+      env: tutorial_env,
+      depends: [seams_exe],
+      suite: 'slow',
+      timeout: 900)
+  endforeach
+  test(
+    'docs_towncrier',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_towncrier.py'],
+    suite: 'docs',
+    timeout: 120)
+  test(
+    'docs_h2h_tables',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_h2h.py', '--check'],
+    suite: 'docs',
+    timeout: 60)
   test(
     'docs_tutorial_nucleation',
     python3,
@@ -1273,6 +1303,49 @@ endif
 subdir('bindings')
 
 if get_option('with_cli')
+  test(
+    'docs_migrate',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'tutorials' / 'test_migrate.py',
+      meson.project_source_root(),
+      seams_exe.full_path(),
+      meson.project_build_root() / 'src',
+      meson.project_build_root() / 'bindings',
+    ],
+    env: tutorial_env,
+    depends: [seams_exe, seams_api_lib, seams_lang],
+    suite: 'docs',
+    timeout: 180)
+  test(
+    'docs_chill_rule',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'test_chill_rule_page.py',
+      meson.project_source_root(),
+      seams_exe.full_path(),
+      meson.project_build_root() / 'src',
+      meson.project_build_root() / 'bindings',
+      meson.project_build_root(),
+    ],
+    env: tutorial_env,
+    depends: [seams_exe, seams_api_lib, seams_lang],
+    suite: 'docs',
+    timeout: 120)
+  test(
+    'docs_gallery',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'render_gallery.py',
+      '--check',
+      seams_exe.full_path(),
+      meson.project_build_root() / 'src',
+      meson.project_build_root() / 'bindings',
+    ],
+    env: tutorial_env,
+    depends: [seams_exe, seams_api_lib, seams_lang],
+    suite: 'docs',
+    timeout: 300)
   binding_env = environment()
   binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
   binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'bindings')

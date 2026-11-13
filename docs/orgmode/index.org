@@ -55,6 +55,36 @@
 
 * Overview
 
+d-SEAMS 2.14 reads a molecular-dynamics trajectory and names the ice in it.
+~libseams~ is the library: CHILL+, cages, primitive rings, and \(q_6\) share one cutoff neighbour list.
+The ~seams~ command and the C, C++, Python, Fortran, Julia, Rust, and R fronts call that library.
+
+Install the engine with one line.
+
+#+begin_src bash
+meson setup build && meson compile -C build
+#+end_src
+
+Ten lines classify the cubic cell shipped in ~input/traj~.
+
+#+begin_src bash
+dump=input/traj/mW_cubic.lammpstrj
+seams read "$dump" --type 1
+seams chill-plus "$dump" --type 1 --cutoff 3.5
+seams ovito-chill+ "$dump" --type 1 --cutoff 3.5
+seams rings "$dump" --type 1 --cutoff 3.5
+seams steinhardt "$dump" --type 1 --l 6
+seams cages "$dump" --type 1
+seams cages input/traj/genice_sI.lammpstrj --type 1 --signature 512 --cage-edge none
+seams rdf "$dump" --pair-types 1,1 --cutoff 6 --bins 4
+seams prisms "$dump" --type 1
+#+end_src
+
+The [[file:howto/migrate-1x.org][1.x migration]], the
+[[file:explanation/performance-h2h.org][performance tables]], and the
+[[file:reference/release-2.14.org][2.14.0 notes]] are the rest of this
+release.
+
 d-SEAMS (Deferred Structural Elucidation Analysis for Molecular
 Simulations) classifies ice in molecular-dynamics trajectories. This
 repository is the C++ engine (~libyodaLib~) and the ~seams~ CLI.

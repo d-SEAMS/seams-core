@@ -1,0 +1,75 @@
+#+TITLE: CHILL+: the published rule and the OVITO rule
+#+OPTIONS: toc:nil num:nil
+
+Nguyen and Molinero, J. Phys. Chem. B 2015, 119, 9369, equation 1
+averages \(q_3\) over the four nearest neighbours of a shell that
+already holds four neighbours inside the cutoff. Table 1 gives the
+bond rows. A staggered bond is \(c(i,j) \le -0.8\). An eclipsed bond
+lies on \(-0.35 \le c(i,j) \le 0.25\). Those edges are closed.
+Footnote a of Table 1 is the neighbour test: two staggered bonds need
+a neighbour with more than two staggered bonds, and three staggered
+bonds with no eclipsed bond need a neighbour with more than one.
+
+OVITO 3.17.2 averages \(q_3\) over the whole cutoff shell. Its
+staggered edge is the open cut \(c(i,j) < -0.8\), and the eclipsed
+band is open at both ends. The modifier skips the neighbour test in
+footnote a. ~ovito-chill+~ in this tree is that rule. ~chill-plus~
+with no ~--rule~ is the 2015 rule.
+
+* One oxygen from the liquid
+
+~input/chill-def/liquid-four-nearest.txt~ is an 18-atom piece of the
+TIP4P/ice liquid. The focus is atom 1, the second oxygen in the file.
+Its cutoff shell holds four neighbours. One of those neighbours has a
+fifth oxygen inside 3.5 Å, so the whole-shell average of \(q_3\)
+moves off the four-nearest average. None of the four correlations sits on
+~-0.8~, ~-0.35~ or ~0.25~.
+
+The published rule counts two eclipsed bonds and labels atom 1 water.
+~ovito-chill+~ counts three eclipsed bonds and labels atom 1
+interClathrate. That is the one atom the fixture is built to move.
+
+#+begin_src text
+fixture focus 1 published water ovito interClathrate
+#+end_src
+
+* The 4096-molecule liquid
+
+On the 4096-molecule TIP4P/ice liquid, 250 of 4096 seed atoms differ
+between the published rule and OVITO 3.17.2. Every one of the 250 has
+four neighbours inside 3.5 Å. 235 of them change an eclipsed or
+staggered count because a neighbour has a fifth oxygen in the shell:
+that is the \(q_3\) average. The other 15 keep those bond counts and
+differ on the neighbour test alone. ~ovito-chill+~ matches the OVITO
+modifier on all 4096 atoms. Ideal ice stays cubic under both rules.
+
+* How to select the rule
+
+The command ~seams chill-plus~ takes ~--rule chill+~ or
+~--rule ovito-chill+~. The command ~seams ovito-chill+~ is the second
+of those.
+
+#+begin_src bash
+seams chill-plus water.lammpstrj --cutoff 3.5 --type 1 --rule chill+
+seams chill-plus water.lammpstrj --cutoff 3.5 --type 1 --rule ovito-chill+
+seams ovito-chill+ water.lammpstrj --cutoff 3.5 --type 1
+#+end_src
+
+The C call ~seams_chill_plus~ takes ~SEAMS_CHILL_PUBLISHED~ or
+~SEAMS_CHILL_OVITO~. ~seams_frame_chill_plus_rule~ takes the strings
+~chill+~ and ~ovito-chill+~.
+
+#+begin_src c
+seams_chill_plus(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels, counts);
+seams_chill_plus(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_OVITO, labels, counts);
+seams_frame_chill_plus_rule(frame, 3.5, 1, "cutoff", "chill+", labels, counts);
+seams_frame_chill_plus_rule(frame, 3.5, 1, "cutoff", "ovito-chill+", labels, counts);
+#+end_src
+
+Python is ~dseams.chill_plus~. ~dseams.PUBLISHED~ is the 2015 rule.
+~dseams.OVITO~ is the OVITO rule.
+
+#+begin_src python
+labels, counts = dseams.chill_plus(positions, box, rule=dseams.PUBLISHED)
+labels, counts = dseams.chill_plus(positions, box, rule=dseams.OVITO)
+#+end_src

@@ -40,7 +40,8 @@ def draw(rows: list[dict], dest: Path) -> None:
         value = numeric(row.get("median_ms", ""))
         if value is None or value <= 0:
             continue
-        curves[row["operation"]][(row["code"], row["operation"])][int(row["threads"])] = value
+        phase = row.get("phase") or ""
+        curves[row["operation"]][(phase, row["code"])][int(row["threads"])] = value
     operations = [op for op in curves if curves[op]]
     if not operations:
         raise SystemExit("no 884736 timings to plot")
@@ -62,13 +63,16 @@ def draw(rows: list[dict], dest: Path) -> None:
     for index, operation in enumerate(operations):
         axis = axes[index][0]
         axis.set_yscale("log")
-        for (code, _op), times in sorted(curves[operation].items()):
+        for (phase, code), times in sorted(curves[operation].items()):
             xs = [width for width in widths if width in times]
             if not xs:
                 continue
+            label = "{} {}".format(phase, code).strip()
             axis.plot(
                 xs, [times[width] for width in xs],
-                marker="o", color=colors.get(code, "#333333"), label=code,
+                marker="o", color=colors.get(code, "#333333"),
+                linestyle="--" if phase == "liquid" else "-",
+                label=label,
             )
         axis.set_ylabel("ms")
         axis.set_title(operation, loc="left", fontsize=10)
