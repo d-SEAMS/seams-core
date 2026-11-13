@@ -60,6 +60,7 @@ test_sources = {
   'chill_plus_rule': 'test_chill_plus_rule.cpp',
   'nucleation_pathway': 'test_nucleation_pathway.cpp',
   'interface_order': 'test_interface_order.cpp',
+  'science_front': 'test_science_front.cpp',
   'ql_solid': 'test_ql_solid.cpp',
   'thread_scale': 'test_thread_scale.cpp',
   'gpu_residency': 'test_gpu_residency.cpp',
@@ -139,6 +140,8 @@ foreach name, src : test_sources
     _timeout = 600
   elif name == 'interface_order'
     _timeout = 600
+  elif name == 'science_front'
+    _timeout = 300
   endif
   test(name,
     executable('test_' + name, src,

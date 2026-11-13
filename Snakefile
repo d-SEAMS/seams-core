@@ -449,6 +449,93 @@ rule rings_one_thread:
         "--bench {input[0]} --python \"$PY\" --json {output}"
 
 
+# Ice Ih basal face against liquid TIP4P/Ice, and the mW nucleation census.
+# The threaded kernels are science-front (CHILL+, q6, shell label).
+# Dumps larger than 1 MB stay out of git. dump_ps in the meta file is the
+# spacing passed to the interface rule. SCIENCE_FRONT overrides the binary.
+
+rule science_tip4p_basal:
+    output:
+        "data/science-frames/tip4p-basal.lammpstrj",
+        "paper/tex/figures/data/science/interface-meta.csv",
+        "paper/tex/figures/data/science/large-frames.csv",
+    shell:
+        "${{SCIENCE_PYTHON:-python3}} scripts/make_tip4p_basal.py"
+
+
+rule science_nucleation_dump:
+    output:
+        "data/science-frames/nucleation.lammpstrj",
+    shell:
+        "python3 scripts/fetch_mw_nucleation.py"
+
+
+rule science_interface:
+    input:
+        "data/science-frames/tip4p-basal.lammpstrj",
+        "paper/tex/figures/data/science/interface-meta.csv",
+    output:
+        "paper/tex/figures/data/science/interface-layers.csv",
+        "paper/tex/figures/data/science/interface-fronts.csv",
+        "paper/tex/figures/data/science/interface-velocity.csv",
+        "paper/tex/figures/data/science/interface-atoms.csv",
+        "paper/tex/figures/data/science/interface-causes.csv",
+    shell:
+        "ps=$(awk '$1==\"dump_ps\"{{print $2}}' paper/tex/figures/data/science/interface-meta.csv); "
+        "OMP_NUM_THREADS=${{SCIENCE_THREADS:-4}} "
+        "${{SCIENCE_FRONT:-bbdir/science-front}} interface {input[0]} "
+        "--ps \"$ps\" --bin 1 --out-dir paper/tex/figures/data/science "
+        "--threads ${{SCIENCE_THREADS:-4}}"
+
+
+rule science_nucleation:
+    input:
+        "data/science-frames/nucleation.lammpstrj",
+    output:
+        "paper/tex/figures/data/science/nucleation-clusters.csv",
+        "paper/tex/figures/data/science/nucleation-summary.csv",
+        "paper/tex/figures/data/science/nucleus-atoms.csv",
+        "paper/tex/figures/data/science/nucleation-causes.csv",
+    shell:
+        "OMP_NUM_THREADS=${{SCIENCE_THREADS:-4}} "
+        "${{SCIENCE_FRONT:-bbdir/science-front}} nucleation {input} "
+        "--out-dir paper/tex/figures/data/science "
+        "--threads ${{SCIENCE_THREADS:-4}}"
+
+
+rule science_validate:
+    input:
+        "paper/tex/figures/data/science/interface-atoms.csv",
+        "paper/tex/figures/data/science/nucleus-atoms.csv",
+        "paper/tex/figures/data/science/interface-causes.csv",
+        "paper/tex/figures/data/science/nucleation-causes.csv",
+    output:
+        "paper/tex/figures/data/science/validation.csv",
+    shell:
+        "OVITO_THREAD_COUNT=${{SCIENCE_THREADS:-4}} "
+        "${{SCIENCE_PYTHON:-python3}} scripts/science_validate.py"
+
+
+rule science_figures:
+    input:
+        "paper/tex/figures/data/science/interface-layers.csv",
+        "paper/tex/figures/data/science/interface-fronts.csv",
+        "paper/tex/figures/data/science/interface-velocity.csv",
+        "paper/tex/figures/data/science/interface-atoms.csv",
+        "paper/tex/figures/data/science/nucleation-clusters.csv",
+        "paper/tex/figures/data/science/nucleation-summary.csv",
+        "paper/tex/figures/data/science/nucleus-atoms.csv",
+        "paper/tex/figures/data/science/validation.csv",
+    output:
+        "paper/tex/figures/science-pdf/interface-snapshot.pdf",
+        "paper/tex/figures/science-pdf/interface-profiles.pdf",
+        "paper/tex/figures/science-pdf/cluster-size.pdf",
+        "paper/tex/figures/science-pdf/nucleus.pdf",
+    shell:
+        "${{SCIENCE_PYTHON:-python3}} scripts/science_figures.py "
+        "--out paper/tex/figures/science-pdf"
+
+
 rule shipped_campaign:
     input:
         "paper/tex/repro/shipped_campaign.py",

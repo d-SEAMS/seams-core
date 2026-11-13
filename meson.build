@@ -647,6 +647,16 @@ nucleation_link = _link_args
 if host_system == 'linux'
   nucleation_link += ['-Wl,--enable-new-dtags']
 endif
+science_front_exe = executable(
+  'science-front',
+  files('scripts/science_front.cpp'),
+  dependencies: [yds_dep],
+  include_directories: _incdirs,
+  cpp_args: _args,
+  link_args: nucleation_link,
+  build_rpath: meson.current_build_dir() / 'src',
+  install: true)
+
 nucleation_pathway_exe = executable(
   'nucleation-pathway',
   files('scripts/nucleation_pathway.cpp'),
