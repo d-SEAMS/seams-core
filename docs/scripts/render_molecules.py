@@ -43,6 +43,10 @@ def _loader_path():
 _loader_path()
 WIDTH = 2048
 HEIGHT = 1536
+COLUMN_MM = 85.0
+# 8 pt at 85 mm on the 2048-wide still. The scale bar and the legend share it.
+CAPTION_PX = int(round(8.0 / 72.0 * (WIDTH / (COLUMN_MM / 25.4))))
+CAPTION_MARGIN = 128
 RENDER_SCALE = max(1, int(os.environ.get("MOLECULES_SCALE", "2")))
 WEB = (960, 720)
 
@@ -753,13 +757,14 @@ def cycles_job():
             colour_in.default_value = (*linear, 1.0)
         rough = socket(principled, "Roughness")
         if rough is not None:
-            rough.default_value = 0.05 if transmission > 0.5 else 0.32
+            # Matte. A specular peak was blowing the bottom of the spheres out to white.
+            rough.default_value = 1.0
         spec = socket(principled, "Specular IOR Level", "Specular")
         if spec is not None:
-            spec.default_value = 0.5
+            spec.default_value = 0.0
         coat = socket(principled, "Coat Weight")
-        if coat is not None and transmission < 0.5:
-            coat.default_value = 0.25
+        if coat is not None:
+            coat.default_value = 0.0
         trans = socket(principled, "Transmission Weight", "Transmission")
         if trans is not None:
             trans.default_value = float(transmission)
@@ -782,19 +787,16 @@ def cycles_job():
         tree.links.new(ao.outputs["Color"], tint.inputs["Color2"])
         tree.links.new(tint.outputs["Color"], colour_in)
         if rough is not None:
-            # Soft enough that the specular peak stays off pure white.
-            rough.default_value = 0.55
+            rough.default_value = 1.0
         if spec is not None:
-            spec.default_value = 0.10
+            spec.default_value = 0.0
         if coat is not None:
             coat.default_value = 0.0
+        # Flat palette colour. Lighting was painting a hotspot on a few oxygens.
         emission = tree.nodes.new("ShaderNodeEmission")
         emission.inputs["Color"].default_value = (*linear, 1.0)
-        emission.inputs["Strength"].default_value = 0.18
-        added = tree.nodes.new("ShaderNodeAddShader")
-        tree.links.new(principled.outputs["BSDF"], added.inputs[0])
-        tree.links.new(emission.outputs["Emission"], added.inputs[1])
-        tree.links.new(added.outputs["Shader"], output.inputs["Surface"])
+        emission.inputs["Strength"].default_value = 1.0
+        tree.links.new(emission.outputs["Emission"], output.inputs["Surface"])
         return material
 
     def add_mesh(name, mesh, material):
@@ -869,7 +871,10 @@ def cycles_job():
         if rough is not None:
             bond_rough = socket(rough, "Roughness")
             if bond_rough is not None:
-                bond_rough.default_value = 0.45
+                bond_rough.default_value = 1.0
+            bond_spec = socket(rough, "Specular IOR Level", "Specular")
+            if bond_spec is not None:
+                bond_spec.default_value = 0.0
         up = Vector((0.0, 0.0, 1.0))
         matrices = []
         for left, right in pairs:
@@ -885,6 +890,9 @@ def cycles_job():
             if visible < 0.08:
                 continue
             mid = (start + stop) / 2.0
+            mid = np.array(mid, dtype=float, copy=True)
+            # Sit the bond just behind the atoms so a flat sheet does not z-fight.
+            mid[2] -= 0.08
             quat = up.rotation_difference(Vector(tuple(float(v) for v in direction)))
             scale = Matrix.Diagonal((float(radius), float(radius), float(visible), 1.0))
             matrices.append(Matrix.Translation(tuple(float(v) for v in mid)) @ quat.to_matrix().to_4x4() @ scale)
@@ -959,9 +967,8 @@ def cycles_job():
         obj.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
         return obj
 
-    area("key", (float(centre[0]) - 9.0, float(centre[1]) + 11.0, float(high[2]) + 14.0), 1800.0, 18.0)
-    area("fill", (float(centre[0]) + 14.0, float(centre[1]) + 4.0, float(high[2]) + 18.0), 480.0, 36.0)
-    area("rim", (float(centre[0]) + 1.0, float(centre[1]) - 16.0, float(low[2]) + 5.0), 520.0, 10.0)
+    # One large lamp on the camera axis. Every sphere then has the same shade.
+    area("key", (float(centre[0]), float(centre[1]), float(high[2]) + 28.0), 700.0, 48.0)
 
     world = bpy.data.worlds.new("studio")
     bpy.context.scene.world = world
@@ -969,7 +976,7 @@ def cycles_job():
     backdrop = world.node_tree.nodes.get("Background")
     if backdrop is not None:
         backdrop.inputs["Color"].default_value = (*background, 1.0)
-        backdrop.inputs["Strength"].default_value = 0.34 if light else 0.08
+        backdrop.inputs["Strength"].default_value = 0.85 if light else 0.2
 
     panel = str(job["panel"]) if "panel" in job.files else "witness"
     scene = bpy.context.scene
@@ -1079,9 +1086,6 @@ def cycles_launch(positions, colors, radii, transparency, bonds, meshes, backgro
         from PIL import Image
 
         image = Image.open(picture.name).convert("RGBA")
-        plate = tuple(int(round(channel * 255)) for channel in background)
-        canvas = Image.new("RGBA", image.size, plate + (255,))
-        image = Image.alpha_composite(canvas, image).convert("RGB")
         image = image.resize((WIDTH, HEIGHT), Image.Resampling.LANCZOS)
         image.load()
         return image, world
@@ -1211,15 +1215,25 @@ def tachyon_raytrace(positions, colors, radii, transparency, bonds, meshes, back
             pass
 
 
+def _ink_mask(picture, light):
+    """Atoms, including a highlight. Alpha is the mask when the render has one."""
+    import numpy as np
+
+    if picture.mode == "RGBA":
+        alpha = np.asarray(picture.split()[-1])
+        return alpha > 16
+    array = np.asarray(picture.convert("RGB"))
+    if light:
+        return np.any(array < 246, axis=2)
+    return np.any(array > 40, axis=2)
+
+
 def crop_margin(picture, light):
     import numpy as np
     from PIL import Image
 
     array = np.asarray(picture)
-    if light:
-        mask = np.any(array < 246, axis=2)
-    else:
-        mask = np.any(array > 40, axis=2)
+    mask = _ink_mask(picture, light)
     rows = np.where(mask.any(axis=1))[0]
     cols = np.where(mask.any(axis=0))[0]
     if len(rows) == 0:
@@ -1250,11 +1264,7 @@ def _contact_shadow(picture, light):
     import numpy as np
     from PIL import Image, ImageFilter
 
-    array = np.asarray(picture.convert("RGB"))
-    if light:
-        mask = np.any(array < 246, axis=2)
-    else:
-        mask = np.any(array > 40, axis=2)
+    mask = _ink_mask(picture, light)
     plate = Image.fromarray((mask.astype(np.uint8) * 255))
     plate = plate.filter(ImageFilter.GaussianBlur(radius=7))
     shade = (186, 188, 190) if light else (12, 12, 14)
@@ -1318,31 +1328,23 @@ def _balance_rows(rows, span, gap):
 
 
 def _legend_layout(items):
-    """Largest caption font that keeps every label inside the frame at 85 mm.
+    """Caption at 8 pt when the still is printed 85 mm wide.
 
-    56 px on the 2048-wide still is 6.6 pt at 85 mm. The search stops there.
+    The scale bar label uses this same font. Rows wrap so a label is not clipped.
     """
     from PIL import Image, ImageDraw
 
     probe = Image.new("RGB", (WIDTH, 400), (255, 255, 255))
     draw = ImageDraw.Draw(probe)
-    margin = 48
+    margin = CAPTION_MARGIN
     full = WIDTH - 2 * margin
-    chosen = None
-    for size in (72, 68, 64, 60, 56):
-        font = _font(size)
-        swatch = int(round(size * 0.62))
-        rows = _pack_labels(draw, items, font, full, swatch, 36.0)
-        if rows is None or len(rows) > 3:
-            continue
-        chosen = (font, size, swatch, rows)
-        break
-    if chosen is None:
-        font = _font(56)
-        swatch = int(round(56 * 0.62))
-        rows = _pack_labels(draw, items, font, full, swatch, 24.0) or [[]]
-        chosen = (font, 56, swatch, rows)
-    return chosen
+    size = CAPTION_PX
+    font = _font(size)
+    swatch = int(round(size * 0.62))
+    rows = _pack_labels(draw, items, font, full, swatch, 36.0)
+    if rows is None or len(rows) > 3:
+        rows = _pack_labels(draw, items, font, full, swatch, 18.0) or [[]]
+    return font, size, swatch, rows
 
 
 def compose(structure, legend, world_height, light):
@@ -1358,7 +1360,7 @@ def compose(structure, legend, world_height, light):
         colour = tuple(int(max(0, min(255, round(channel * 255)))) for channel in colour_rgb)
         items.append((name, colour))
     font, font_size, swatch, rows = _legend_layout(items)
-    margin = 48
+    margin = CAPTION_MARGIN
     bar_band = font_size + 28
     row_h = font_size + 26
     caption = 20 + bar_band + 8 + row_h * max(1, len(rows)) + 16
@@ -1383,9 +1385,8 @@ def compose(structure, legend, world_height, light):
         tint = Image.new("RGBA", picture.size, (186, 188, 190, 70) if light else (8, 8, 10, 90))
         tint.putalpha(plate.point(lambda value: int(value * 0.45)))
         layer.paste(tint, (left, origin_y + 10), tint)
-        opaque = np.any(np.asarray(picture.convert("RGB")) < 246, axis=2)
         sprite = picture.convert("RGBA")
-        sprite.putalpha(Image.fromarray((opaque.astype(np.uint8) * 255)))
+        sprite.putalpha(Image.fromarray((_ink_mask(picture, light).astype(np.uint8) * 255)))
         layer.paste(sprite, (left, origin_y), sprite)
         return layer
 
@@ -1446,7 +1447,6 @@ def compose(structure, legend, world_height, light):
     return merged
 
 
-COLUMN_MM = 85.0
 COLUMN_DPI = 300
 
 
@@ -1800,7 +1800,11 @@ def finish(positions, colors, radii, transparency, names, bonds, meshes, view, c
                 }
                 for mesh in meshes
             ]
-            # True orthographic view down c. One bilayer is drawn, so no tilt.
+            # True orthographic view down c. One bilayer, flattened so every
+            # oxygen takes the same light and a ring stays a whole hexagon.
+            positions[:, 2] = 0.0
+            for mesh in meshes:
+                mesh["vertices"][:, 2] = 0.0
         else:
             positions = orient(positions, view, center)
             meshes = [

@@ -93,7 +93,8 @@ def main(argv):
             ),
             flush=True,
         )
-        minimum = 0.72 if Path(name).parent.name == "nucleation" else 0.60
+        # The caption margin is 128 px, so a compact nucleus fills less of the page.
+        minimum = 0.68 if Path(name).parent.name == "nucleation" else 0.60
         if fill < minimum or abs(dx) > 0.05 or abs(dy) > 0.05 or clipped > 12 or points < 5.0 or rim > 0:
             print(
                 "frame failed {}: fill {:.3f} (need {:.2f}), centroid ({:+.3f}, {:+.3f}), clipped {}, label {:.1f} pt, rim {}".format(
