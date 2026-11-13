@@ -7,6 +7,7 @@
 # brine_dataset downloads the labelled frames of d-SEAMS/brine-front-230K
 # at hf_revision into hf_local. brine_replicas writes the per-replica
 # table and the replica ranges from them; both CSVs are in git.
+# brine_front_pdf builds the figure from the same frames and table.
 #
 #   snakemake -s paper/data/brine-frames/Snakefile -n paper/data/brine-frames/out/T230_m0_r0_t0.xyz
 #   snakemake -s paper/data/brine-frames/Snakefile -j1 paper/data/brine-frames/replicas.csv
@@ -105,13 +106,15 @@ rule brine_replicas:
 
 rule brine_front_pdf:
     input:
-        t0="paper/data/brine-frames/out/T230_m20_r0_t0.xyz",
-        tend="paper/data/brine-frames/out/T230_m20_r0_tend.xyz",
+        manifest=HF_MANIFEST,
+        replicas="paper/data/brine-frames/replicas.csv",
         script="paper/data/brine-frames/render_front.py",
     output:
         "paper/tex/figures/brine_front.pdf",
     params:
         python=config["render_python"],
+        t0=f"{HF_LOCAL}/data/frames/T230_m20_r0_t0.xyz",
+        tend=f"{HF_LOCAL}/data/frames/T230_m20_r0_tend.xyz",
     shell:
         "{params.python} paper/data/brine-frames/render_front.py "
-        "--xyz {input.t0} {input.tend} --pdf {output}"
+        "--xyz {params.t0} {params.tend} --replicas {input.replicas} --pdf {output}"

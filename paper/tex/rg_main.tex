@@ -824,13 +824,16 @@ Every molecule of the hexagonal lattice lies on hexagonal cages, and every molec
 % paper/tex/repro/brine_front.sh runs the brine_front_pdf rule.
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=\textwidth]{figures/brine_front}
-\caption{\textbf{A 230 K TIP4P/2005 ice front against Madrid-2019 brine, 20 NaCl pairs.}
-(a) The production frame after the liquid half was melted at 400 K and quenched.
-(b) The same cell after 5 ns.
-Water oxygens are coloured by the d-SEAMS CHILL+ label.
-Hexagonal ice is blue, the liquid is grey, and interfacial molecules are green.
-Sodium is yellow and chloride is red, and both sit in the liquid.}
+\includegraphics[width=85mm]{figures/brine_front}
+\caption{\textbf{A 230 K TIP4P/2005 ice front against Madrid-2019 brine.}
+(a) The 20-pair cell at the start of production, after the liquid half was melted at 400 K and quenched, and the same cell after 5 ns.
+Water oxygens are coloured by the d-SEAMS CHILL+ label: hexagonal orange, cubic blue, interfacial green, liquid grey, clathrate light blue and interfacial clathrate pink.
+Sodium is violet and chloride is black, and both sit in the liquid.
+(b) Hexagonal and cubic molecules and the ice thickness at 5 ns against the NaCl loading, one marker per replica.
+The thickness is the distance between the two half-crystal crossings of a 20-bin profile along $z$.
+A bar spans the replicas when two or more have the frame.
+Only replica r0 at 0, 20 and 40 pairs is in the dataset; there is no second replica and no 10-pair loading, so no range is drawn.
+The values are in \texttt{paper/data/brine-frames/replicas.csv}.}
 \label{fig:brine-front}
 \end{figure}
 
