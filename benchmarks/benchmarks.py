@@ -635,3 +635,37 @@ class OmpScale:
 
 OmpScale.time_session.repeat = 1
 OmpScale.time_session.number = 1
+
+
+class H2HSession:
+    """d-SEAMS, freud, and OVITO in one process.
+
+    Eight samples of knn, q6, and read at 4096, 32768, and 110592
+    molecules. The Snakemake rule writes the raw log and the core count.
+    """
+
+    def setup(self):
+        import importlib.util
+
+        script = ROOT / "scripts" / "h2h_session.py"
+        lib_path = ROOT / "bbdir-release" / "src" / "libseams.so"
+        if not lib_path.is_file():
+            raise NotImplementedError("bbdir-release/src/libseams.so is not built")
+        spec = importlib.util.spec_from_file_location("h2h_session", script)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self._module = module
+        os.environ.setdefault("OVITO_THREAD_COUNT", "8")
+        os.environ.setdefault("SEAMS_LIB", str(lib_path))
+        try:
+            import freud  # noqa: F401
+            import ovito  # noqa: F401
+        except Exception as exc:
+            raise NotImplementedError("freud and ovito are not importable") from exc
+
+    def time_session(self):
+        self._module.run_session()
+
+
+H2HSession.time_session.repeat = 1
+H2HSession.time_session.number = 1

@@ -1,0 +1,86 @@
+cores 8
+samples 8
+ovito_thread_count 8
+note freud has no lammpstrj reader; read is d-SEAMS and OVITO
+note OVITO_THREAD_COUNT is read when OVITO starts
+molecules 4096
+arm dseams op knn threads 1 molecules 4096 samples_ms 0.6774 0.7038 0.5930 0.6392 0.8735 0.6084 0.6723 0.7439
+arm dseams op knn threads 1 molecules 4096 median_ms 0.6748
+arm dseams op q6 threads 1 molecules 4096 samples_ms 1.1772 1.1528 1.0802 1.0556 1.1380 1.0245 1.1299 1.2085
+arm dseams op q6 threads 1 molecules 4096 median_ms 1.1339
+arm dseams op read threads 1 molecules 4096 samples_ms 0.8181 0.6065 0.5973 0.5946 0.6017 0.5405 0.5768 0.5963
+arm dseams op read threads 1 molecules 4096 median_ms 0.5968
+arm freud op knn threads 1 molecules 4096 samples_ms 4.8005 4.6143 4.5086 4.3484 4.4057 4.6182 4.5359 4.5563
+arm freud op knn threads 1 molecules 4096 median_ms 4.5461
+arm freud op q6 threads 1 molecules 4096 samples_ms 17.0177 16.9941 16.9585 17.2273 17.1661 17.2562 17.5084 17.5959
+arm freud op q6 threads 1 molecules 4096 median_ms 17.1967
+arm dseams op knn threads 8 molecules 4096 samples_ms 0.6689 0.7465 0.8014 0.6515 0.6554 0.6762 0.6314 0.6490
+arm dseams op knn threads 8 molecules 4096 median_ms 0.6621
+arm dseams op q6 threads 8 molecules 4096 samples_ms 0.6792 0.6447 0.6262 0.6069 0.6520 0.6188 0.6050 0.6068
+arm dseams op q6 threads 8 molecules 4096 median_ms 0.6225
+arm dseams op read threads 8 molecules 4096 samples_ms 0.5634 0.5606 0.5990 0.5612 0.5719 0.5708 0.5686 0.5592
+arm dseams op read threads 8 molecules 4096 median_ms 0.5660
+arm freud op knn threads 8 molecules 4096 samples_ms 4.1375 4.3122 4.1080 3.7468 4.0847 4.6520 4.0905 5.2593
+arm freud op knn threads 8 molecules 4096 median_ms 4.1227
+arm freud op q6 threads 8 molecules 4096 samples_ms 26.4853 23.5134 26.3146 27.1894 21.7951 23.3302 24.2527 24.5788
+arm freud op q6 threads 8 molecules 4096 median_ms 24.4158
+arm ovito op knn threads 8 molecules 4096 samples_ms 7.9790 4.0016 3.5719 3.5894 3.5989 4.0621 3.6758 3.6030
+arm ovito op knn threads 8 molecules 4096 median_ms 3.6394
+arm ovito op q6 threads 8 molecules 4096 samples_ms 5.2670 5.1724 4.2050 4.5007 4.0609 4.2716 3.9388 4.1497
+arm ovito op q6 threads 8 molecules 4096 median_ms 4.2383
+arm ovito op read threads 8 molecules 4096 samples_ms 0.6060 0.6096 0.5353 1.1076 0.7265 0.5685 0.6203 0.5765
+arm ovito op read threads 8 molecules 4096 median_ms 0.6078
+molecules 32768
+arm dseams op knn threads 1 molecules 32768 samples_ms 12.0175 11.6352 12.0651 11.6470 11.6894 12.1779 11.8399 11.3895
+arm dseams op knn threads 1 molecules 32768 median_ms 11.7646
+arm dseams op q6 threads 1 molecules 32768 samples_ms 9.3138 10.0989 9.4027 9.3878 9.5234 9.8613 9.9908 9.3303
+arm dseams op q6 threads 1 molecules 32768 median_ms 9.4631
+arm dseams op read threads 1 molecules 32768 samples_ms 5.2587 4.8876 5.0044 4.8523 4.9292 5.5161 5.1842 4.9138
+arm dseams op read threads 1 molecules 32768 median_ms 4.9668
+arm freud op knn threads 1 molecules 32768 samples_ms 40.9691 41.6409 40.8516 41.4233 38.5456 40.4079 38.0526 37.9427
+arm freud op knn threads 1 molecules 32768 median_ms 40.6297
+arm freud op q6 threads 1 molecules 32768 samples_ms 392.7564 483.3236 395.5642 395.5819 393.2020 382.9724 394.4291 409.3215
+arm freud op q6 threads 1 molecules 32768 median_ms 394.9966
+arm dseams op knn threads 8 molecules 32768 samples_ms 12.4824 11.7267 15.3840 7.9484 11.8367 11.5575 12.0193 11.2429
+arm dseams op knn threads 8 molecules 32768 median_ms 11.7817
+arm dseams op q6 threads 8 molecules 32768 samples_ms 3.7611 3.4038 4.0125 4.2657 4.1131 4.4309 4.0890 3.7849
+arm dseams op q6 threads 8 molecules 32768 median_ms 4.0508
+arm dseams op read threads 8 molecules 32768 samples_ms 3.4694 3.4846 3.4188 3.3672 3.4514 3.4347 3.3743 3.4457
+arm dseams op read threads 8 molecules 32768 median_ms 3.4402
+arm freud op knn threads 8 molecules 32768 samples_ms 35.1839 28.8117 32.5174 26.9894 31.8553 29.0083 31.5201 25.3163
+arm freud op knn threads 8 molecules 32768 median_ms 30.2642
+arm freud op q6 threads 8 molecules 32768 samples_ms 124.0171 141.5766 158.4127 120.0703 123.8795 128.1225 136.1795 115.9066
+arm freud op q6 threads 8 molecules 32768 median_ms 126.0698
+arm ovito op knn threads 8 molecules 32768 samples_ms 20.1672 12.2096 21.3954 20.8867 23.6468 23.3453 24.8542 21.3854
+arm ovito op knn threads 8 molecules 32768 median_ms 21.3904
+arm ovito op q6 threads 8 molecules 32768 samples_ms 30.4734 39.8370 28.9168 34.8157 23.7880 21.6811 31.5989 32.9120
+arm ovito op q6 threads 8 molecules 32768 median_ms 31.0361
+arm ovito op read threads 8 molecules 32768 samples_ms 5.3435 5.5969 5.9188 3.7081 4.7355 3.7685 3.6791 3.5218
+arm ovito op read threads 8 molecules 32768 median_ms 4.2520
+molecules 110592
+arm dseams op knn threads 1 molecules 110592 samples_ms 41.0200 32.2463 26.2566 37.2979 30.7968 38.3036 29.2163 31.0253
+arm dseams op knn threads 1 molecules 110592 median_ms 31.6358
+arm dseams op q6 threads 1 molecules 110592 samples_ms 32.1853 30.2360 29.6979 31.9086 31.8413 33.6635 34.7882 37.2184
+arm dseams op q6 threads 1 molecules 110592 median_ms 32.0469
+arm dseams op read threads 1 molecules 110592 samples_ms 17.1256 17.1325 16.4275 16.5504 16.8325 17.0171 16.8656 16.8993
+arm dseams op read threads 1 molecules 110592 median_ms 16.8825
+arm freud op knn threads 1 molecules 110592 samples_ms 141.4461 142.1874 139.6462 144.7118 139.2061 141.8418 135.8615 138.1430
+arm freud op knn threads 1 molecules 110592 median_ms 140.5461
+arm freud op q6 threads 1 molecules 110592 samples_ms 1344.9633 1424.4066 1377.3143 1415.1718 1398.0528 1397.1611 1342.2588 1316.4364
+arm freud op q6 threads 1 molecules 110592 median_ms 1387.2377
+arm dseams op knn threads 8 molecules 110592 samples_ms 35.1330 24.8485 24.8068 31.8419 32.6081 36.2716 30.2497 19.1286
+arm dseams op knn threads 8 molecules 110592 median_ms 31.0458
+arm dseams op q6 threads 8 molecules 110592 samples_ms 11.0405 10.9565 10.5256 10.6539 10.6815 10.7618 11.2929 10.5780
+arm dseams op q6 threads 8 molecules 110592 median_ms 10.7216
+arm dseams op read threads 8 molecules 110592 samples_ms 11.0118 10.7241 11.0363 11.1517 10.7158 10.7319 10.9444 10.5742
+arm dseams op read threads 8 molecules 110592 median_ms 10.8381
+arm freud op knn threads 8 molecules 110592 samples_ms 91.4717 94.6912 79.7499 78.5917 73.7267 82.7220 85.0169 72.2343
+arm freud op knn threads 8 molecules 110592 median_ms 81.2359
+arm freud op q6 threads 8 molecules 110592 samples_ms 355.6348 335.4245 378.6661 442.7180 395.8720 355.1193 363.8434 343.6635
+arm freud op q6 threads 8 molecules 110592 median_ms 359.7391
+arm ovito op knn threads 8 molecules 110592 samples_ms 40.5395 42.3776 51.8627 41.3871 59.6725 53.5844 44.4236 58.3618
+arm ovito op knn threads 8 molecules 110592 median_ms 48.1432
+arm ovito op q6 threads 8 molecules 110592 samples_ms 63.4609 67.7763 102.7011 78.9462 57.9489 72.6286 60.4361 69.3003
+arm ovito op q6 threads 8 molecules 110592 median_ms 68.5383
+arm ovito op read threads 8 molecules 110592 samples_ms 11.7243 11.0404 10.5546 15.0797 10.8544 13.1174 12.6115 10.8857
+arm ovito op read threads 8 molecules 110592 median_ms 11.3824
