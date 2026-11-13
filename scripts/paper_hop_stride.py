@@ -100,6 +100,7 @@ def main() -> int:
     args.out.mkdir(parents=True, exist_ok=True)
     cores, affinity = stats.cores_now()
     log_lines = [
+        *stats.machine_lines(ROOT),
         f"cores {cores}",
         f"affinity {affinity}",
         f"threads {args.threads}",

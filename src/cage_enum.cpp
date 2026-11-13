@@ -5,7 +5,9 @@
 
 #include <cage_canon.hpp>
 #include <cage_enum.hpp>
+#include <generic.hpp>
 #include <ira_sofi.hpp>
+#include <mol_sys.hpp>
 #include <number_parse.hpp>
 #include <topo_bulk.hpp>
 
@@ -35,17 +37,20 @@ namespace {
 // `lo` and `hi` are inclusive and use the coordinate units of `xyz`.
 // The reference oxygen-oxygen contacts sit near 2.74–2.81 when those
 // units are angstroms (mW 2.757, sI 2.771–2.805, sII 2.737–2.771).
+// An orthorhombic dump stores the three edge lengths. A tilt dump stores
+// the bound spans in box[0..2] and xy, xz, yz in box[3..5]; those spans
+// are not the edge lengths, so the image is the fractional one.
 bool waterFace(const std::vector<int> &ring,
                const std::vector<std::array<double, 3>> &xyz,
                const std::vector<double> *box, double lo, double hi) {
   const int n = static_cast<int>(ring.size());
-  double len[3] = {0, 0, 0};
-  const bool ortho = box != nullptr && box->size() >= 3;
-  if (ortho) {
-    len[0] = (*box)[0];
-    len[1] = (*box)[1];
-    len[2] = (*box)[2];
+  molSys::PointCloud<molSys::Point<double>, double> probe;
+  if (box != nullptr) {
+    probe.box = *box;
   }
+  const gen::FracBox metric = gen::makeFracBox(probe);
+  const double lo2 = lo * lo;
+  const double hi2 = hi * hi;
   for (int i = 0; i < n; ++i) {
     const int ia = ring[static_cast<size_t>(i)];
     const int ib = ring[static_cast<size_t>((i + 1) % n)];
@@ -53,16 +58,19 @@ bool waterFace(const std::vector<int> &ring,
         static_cast<size_t>(ib) >= xyz.size()) {
       return false;
     }
-    double d[3];
-    for (int k = 0; k < 3; ++k) {
-      d[k] = xyz[static_cast<size_t>(ia)][static_cast<size_t>(k)] -
-             xyz[static_cast<size_t>(ib)][static_cast<size_t>(k)];
-      if (ortho && len[k] > 0) {
-        d[k] -= len[k] * std::round(d[k] / len[k]);
-      }
+    const auto &a = xyz[static_cast<size_t>(ia)];
+    const auto &b = xyz[static_cast<size_t>(ib)];
+    double r2 = 0.0;
+    if (metric.ok) {
+      const auto d = gen::fracDelta(metric, a[0], a[1], a[2], b[0], b[1], b[2]);
+      r2 = d[0] * d[0] + d[1] * d[1] + d[2] * d[2];
+    } else {
+      const double d0 = a[0] - b[0];
+      const double d1 = a[1] - b[1];
+      const double d2 = a[2] - b[2];
+      r2 = d0 * d0 + d1 * d1 + d2 * d2;
     }
-    const double r = std::sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
-    if (r < lo || r > hi) {
+    if (r2 < lo2 || r2 > hi2) {
       return false;
     }
   }

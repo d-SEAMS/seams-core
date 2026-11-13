@@ -1,5 +1,6 @@
 # Additions
 .pixi/
+.venv-paper/
 benchmarks/*.png
 /result
 /.ccls-cache/

@@ -68,3 +68,43 @@ def taskset_cores(threads: int) -> str:
     if threads < 1:
         raise ValueError("threads")
     return "0" if threads == 1 else f"0-{threads - 1}"
+
+
+def _lscpu_field(label: str) -> str:
+    import subprocess
+    text = subprocess.check_output(["lscpu"], text=True)
+    prefix = label + ":"
+    for line in text.splitlines():
+        if line.startswith(prefix):
+            return line.split(":", 1)[1].strip()
+    raise RuntimeError(f"lscpu has no {label}")
+
+
+def source_commit(root) -> str:
+    import subprocess
+    done = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "HEAD"],
+        check=True, text=True, capture_output=True)
+    return done.stdout.strip()
+
+
+def machine(root) -> dict[str, str]:
+    """Commit, CPU model and core count. The host name is not read."""
+    cores, affinity = cores_now()
+    return {
+        "source_commit": source_commit(root),
+        "cpu_model": _lscpu_field("Model name"),
+        "cpu_cores": _lscpu_field("CPU(s)"),
+        "cores": str(cores),
+        "affinity": affinity,
+    }
+
+
+def machine_lines(root) -> list[str]:
+    info = machine(root)
+    return [
+        f"source_commit {info['source_commit']}",
+        f"cpu_model {info['cpu_model']}",
+        f"cpu_cores {info['cpu_cores']}",
+        f"affinity {info['affinity']}",
+    ]
