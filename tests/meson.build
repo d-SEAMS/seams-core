@@ -71,6 +71,7 @@ test_sources = {
   'offset_limit': 'test_offset_limit.cpp',
   'prism_empty': 'test_prism_empty.cpp',
   'basal_needle': 'test_basal_needle.cpp',
+  'ddc_copies': 'test_ddc_copies.cpp',
 }
 
 if readcon_dep.found()

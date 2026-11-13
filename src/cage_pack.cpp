@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <atomic>
 #include <mutex>
 #include <numeric>
 #include <unordered_map>
@@ -19,10 +20,10 @@
 
 namespace {
 
-std::uint64_t gDdcMatchSteps = 0;
-std::uint64_t gDdcRowCopies = 0;
-std::uint64_t gDdcKeyDigits = 0;
-std::uint64_t gDdcBucketSteps = 0;
+std::atomic<std::uint64_t> gDdcMatchSteps{0};
+std::atomic<std::uint64_t> gDdcRowCopies{0};
+std::atomic<std::uint64_t> gDdcKeyDigits{0};
+std::atomic<std::uint64_t> gDdcBucketSteps{0};
 thread_local std::vector<std::uint64_t> *gPackedLive = nullptr;
 
 // One conflict row per candidate. Eight neighbours sit in the row, which is
@@ -95,7 +96,7 @@ struct Row {
       n = kept;
       return;
     }
-    gDdcRowCopies += static_cast<std::uint64_t>(n);
+    gDdcRowCopies.fetch_add(static_cast<std::uint64_t>(n), std::memory_order_relaxed);
     int stack[64];
     int *buf = stack;
     std::vector<int> heap;
@@ -658,7 +659,7 @@ bool parallelEulerMatch(int nL, int nR, const std::vector<int> &off, const std::
         sc->seen[static_cast<std::size_t>(a)] = 1;
         sc->cycle.push_back(a);
         a = sc->succ[static_cast<std::size_t>(a)];
-        gDdcMatchSteps++;
+        gDdcMatchSteps.fetch_add(1, std::memory_order_relaxed);
         if (++guard > narcs) {
           return false;
         }
@@ -1059,7 +1060,7 @@ bool assignPackedIds(const std::vector<PKey> &keys, std::vector<std::array<int, 
     cliqueCount[static_cast<std::size_t>(id)]++;
     ends[static_cast<std::size_t>(key.ring)][static_cast<std::size_t>(key.slot)] = id;
   }
-  gDdcKeyDigits += static_cast<std::uint64_t>(nKeys) * 4;
+  gDdcKeyDigits.fetch_add(static_cast<std::uint64_t>(nKeys) * 4, std::memory_order_relaxed);
   return true;
 }
 
@@ -1155,7 +1156,7 @@ void orderCliqueKeys(std::vector<int> &ord, const std::vector<PKey> &keys) {
           },
           maxId + 1);
     }
-    gDdcKeyDigits += static_cast<std::uint64_t>(n) * 5;
+    gDdcKeyDigits.fetch_add(static_cast<std::uint64_t>(n) * 5, std::memory_order_relaxed);
     return;
   }
   const int buckets = maxId + 1;
@@ -1186,8 +1187,8 @@ void orderCliqueKeys(std::vector<int> &ord, const std::vector<PKey> &keys) {
   if (src != ord.data()) {
     std::copy(src, src + n, ord.begin());
   }
-  gDdcKeyDigits += static_cast<std::uint64_t>(n) * 4;
-  gDdcBucketSteps += static_cast<std::uint64_t>(buckets) * 4U;
+  gDdcKeyDigits.fetch_add(static_cast<std::uint64_t>(n) * 4, std::memory_order_relaxed);
+  gDdcBucketSteps.fetch_add(static_cast<std::uint64_t>(buckets) * 4U, std::memory_order_relaxed);
   gPackedLive = packedP;
 }
 
@@ -2009,10 +2010,10 @@ std::vector<int> ring::maximumEquators(const std::vector<ring::EquatorChoice> &p
   }
   const auto t0 = std::chrono::steady_clock::now();
   resetPackParts();
-  gDdcMatchSteps = 0;
-  gDdcRowCopies = 0;
-  gDdcKeyDigits = 0;
-  gDdcBucketSteps = 0;
+  gDdcMatchSteps.store(0, std::memory_order_relaxed);
+  gDdcRowCopies.store(0, std::memory_order_relaxed);
+  gDdcKeyDigits.store(0, std::memory_order_relaxed);
+  gDdcBucketSteps.store(0, std::memory_order_relaxed);
   const int n = static_cast<int>(periph.size());
   std::vector<Row> conf(static_cast<size_t>(n));
   int nEdges = 0;
@@ -2197,18 +2198,18 @@ std::vector<int> ring::maximumEquators(const std::vector<ring::EquatorChoice> &p
 ring::PackParts ring::lastPackParts() { return gPackParts; }
 
 extern "C" __attribute__((visibility("default"), used)) std::uint64_t seams_ddc_match_steps() {
-  return gDdcMatchSteps;
+  return gDdcMatchSteps.load(std::memory_order_relaxed);
 }
 
 extern "C" __attribute__((visibility("default"), used)) std::uint64_t seams_ddc_row_copies() {
-  return gDdcRowCopies;
+  return gDdcRowCopies.load(std::memory_order_relaxed);
 }
 
 extern "C" __attribute__((visibility("default"), used)) std::uint64_t seams_ddc_key_digits() {
-  return gDdcKeyDigits;
+  return gDdcKeyDigits.load(std::memory_order_relaxed);
 }
 
 extern "C" __attribute__((visibility("default"), used)) std::uint64_t seams_ddc_bucket_steps() {
-  return gDdcBucketSteps;
+  return gDdcBucketSteps.load(std::memory_order_relaxed);
 }
 
