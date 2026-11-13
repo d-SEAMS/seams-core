@@ -643,7 +643,7 @@ test('mw215_deck', find_program('python3'),
 test('mw215_frame', find_program('python3'),
   args: [files('test_mw215_deck.py'), 'frame'],
   workdir: meson.project_source_root(),
-  timeout: 30)
+  timeout: 600)
 
 dump_faults = shared_module('dump_faults', 'dump_faults_preload.c', name_prefix: 'lib')
 dump_fault_driver = executable('dump_fault_driver', 'dump_fault_driver.cpp',

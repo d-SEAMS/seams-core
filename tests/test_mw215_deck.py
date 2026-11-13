@@ -15,8 +15,11 @@ FRAME = pathlib.Path(os.environ.get("MW215_DIR", "mw215-frames")) / "mw-liquid-5
 def main() -> int:
     if len(sys.argv) > 1 and sys.argv[1] == "frame":
         if not FRAME.is_file():
-            sys.stderr.write("skip missing 215 K frame\n")
-            return 77
+            # The liquid dump is produced by the deck, not stored in git.
+            sys.path.insert(0, str(ROOT / "input" / "mw215"))
+            from regenerate import generate
+
+            generate(8)
         if FRAME.stat().st_size < 1000:
             sys.stderr.write("frame is empty\n")
             return 1
