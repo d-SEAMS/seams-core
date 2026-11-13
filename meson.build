@@ -144,6 +144,17 @@ if openmp_dep_ok
     _deps += [openmp_dep]
     _args += ['-DSEAMS_HAS_OPENMP=1']
     openmp_found = true
+    # Clang links libomp by name from its own target directory, which the
+    # loader does not search; without a runpath there every library and
+    # test fails to start unless LD_LIBRARY_PATH names it.
+    if cpp_id == 'clang'
+      _omp_so = run_command(cppc.cmd_array() + ['-print-file-name=libomp.so'],
+                            check: false).stdout().strip()
+      if _omp_so.startswith('/') and not _omp_so.startswith('/usr/') and import('fs').exists(_omp_so)
+        _deps += [declare_dependency(
+          link_args: ['-Wl,-rpath,' + import('fs').parent(_omp_so)])]
+      endif
+    endif
   else
     message('OpenMP was found but a parallel region does not link; ' +
             'building the per-particle loops single-threaded')
