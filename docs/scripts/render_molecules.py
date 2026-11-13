@@ -427,6 +427,91 @@ def legend_rows(names, colors):
     return rows
 
 
+def _lattice(box9):
+    """Columns are the LAMMPS cell vectors, including tilt."""
+    import numpy as np
+
+    length_x, length_y, length_z = box9[3:6]
+    tilt_xy, tilt_xz, tilt_yz = box9[6:9]
+    return np.array(
+        [
+            [length_x, tilt_xy, tilt_xz],
+            [0.0, length_y, tilt_yz],
+            [0.0, 0.0, length_z],
+        ],
+        dtype=float,
+    )
+
+
+def unwrap_around(points, centre, box9):
+    """Bring every atom to the image nearest the centre of mass.
+
+    A wrapped cluster otherwise projects a neighbour onto the far side of
+    the cell, and the bond is drawn across the panel.
+    """
+    import numpy as np
+
+    lattice = _lattice(box9)
+    delta = np.asarray(points, dtype=float) - np.asarray(centre, dtype=float)
+    fractional = delta @ np.linalg.inv(lattice).T
+    fractional -= np.round(fractional)
+    return np.asarray(centre, dtype=float) + fractional @ lattice.T
+
+
+def crystal_bonds(points, labels):
+    """O–O contacts under 3.5 Å. Each water keeps its four shortest.
+
+    The points are already unwrapped, so the cartesian length is the
+    minimum-image length. A longer segment is not drawn.
+    """
+    import numpy as np
+
+    crystal = {0, 1, 7, 8}
+    points = np.asarray(points, dtype=float)
+    ids = [index for index, label in enumerate(labels) if int(label) in crystal]
+    found = []
+    for cursor, left in enumerate(ids):
+        for right in ids[cursor + 1 :]:
+            span = float(np.linalg.norm(points[left] - points[right]))
+            if 2.30 <= span < 3.5:
+                found.append((span, left, right))
+    degree = {index: [] for index in ids}
+    for span, left, right in found:
+        degree[left].append((span, right))
+        degree[right].append((span, left))
+    dropped = set()
+    for index, neighbours in degree.items():
+        if len(neighbours) <= 4:
+            continue
+        for _span, other in sorted(neighbours)[4:]:
+            dropped.add(tuple(sorted((index, other))))
+    bonds = [
+        (left, right)
+        for span, left, right in found
+        if tuple(sorted((left, right))) not in dropped
+    ]
+    count = {index: 0 for index in ids}
+    for left, right in bonds:
+        span = float(np.linalg.norm(points[left] - points[right]))
+        if span >= 3.5:
+            fail("bond is {:.2f} Å, longer than 3.5".format(span))
+        count[left] += 1
+        count[right] += 1
+    over = [index for index, number in count.items() if number > 4]
+    if over:
+        fail("a water has {} bonds; the limit is 4".format(max(count.values())))
+    longest = max(
+        (float(np.linalg.norm(points[left] - points[right])) for left, right in bonds),
+        default=0.0,
+    )
+    degree_max = max(count.values(), default=0)
+    print(
+        "nucleus bonds {} longest {:.2f} A degree {}".format(len(bonds), longest, degree_max),
+        flush=True,
+    )
+    return bonds
+
+
 def oxygen_bonds(positions, heavy):
     """Oxygen-oxygen contacts between 2.30 and 3.30 angstroms.
 
@@ -2016,6 +2101,11 @@ def finish(positions, colors, radii, transparency, names, bonds, meshes, view, c
         if int(np.count_nonzero(solid)) >= 8:
             mapper = _cluster_mapper(positions, list(names))
             positions = mapper(positions)
+            if str(PANEL_NAME).startswith("nucleation"):
+                for left, right in bonds:
+                    span = float(np.linalg.norm(positions[int(left)] - positions[int(right)]))
+                    if span >= 3.5:
+                        fail("projected bond is {:.2f} Å, longer than 3.5".format(span))
             posed = []
             for mesh in meshes:
                 posed.append({
@@ -2152,15 +2242,17 @@ def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=
         kept_xyz.append(frame.xyz[index])
         kept_labels.append(label)
     xyz = np.asarray(kept_xyz, dtype=float)
-    bonds = oxygen_bonds(xyz, heavy)
+    bonds = [] if cluster else oxygen_bonds(xyz, heavy)
     if cluster:
         # Cubic and hexagonal only. Mixed stays unbound, and liquid has no bonds.
-        # Every crystal neighbour is kept, including the ones at the back, so
-        # the two domains read as lattices that meet at the stacking boundary.
+        # Unwrap before the bonds are chosen, so a periodic image is not drawn
+        # as a line across the cluster.
         crystal = {0, 1, 7, 8}
         from scipy.spatial import cKDTree
 
         core = [index for index, label in enumerate(kept_labels) if int(label) in crystal]
+        if core:
+            xyz = unwrap_around(xyz, xyz[core].mean(axis=0), frame.box9)
         keep = set(core)
         if core:
             tree = cKDTree(xyz[core])
@@ -2174,25 +2266,13 @@ def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=
                     keep.add(index)
         if keep and len(keep) < len(xyz):
             order = sorted(keep)
-            remap = {old: new for new, old in enumerate(order)}
             xyz = xyz[order]
             colors = [colors[index] for index in order]
             names = [names[index] for index in order]
             radii = [radii[index] for index in order]
             transparency = [transparency[index] for index in order]
             kept_labels = [kept_labels[index] for index in order]
-            bonds = [
-                (remap[left], remap[right])
-                for left, right in bonds
-                if left in remap and right in remap
-                and int(kept_labels[remap[left]]) in crystal
-                and int(kept_labels[remap[right]]) in crystal
-            ]
-        else:
-            bonds = [
-                pair for pair in bonds
-                if int(kept_labels[pair[0]]) in crystal and int(kept_labels[pair[1]]) in crystal
-            ]
+        bonds = crystal_bonds(xyz, kept_labels)
     elif slab:
         # Ice and the interfacial layer are bonded. Liquid stays as atoms
         # so a crystal bond does not run off into the solvent.
