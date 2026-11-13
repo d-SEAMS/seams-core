@@ -69,7 +69,9 @@ The default for LAMMPS and GROMACS is auto.
 
 A head-to-head that times PLUMED's own symfunc has to set
 ~PLUMED_NUM_THREADS~. The rows in ~benchmarks/rc3-sitting.csv~ left
-that variable unset, so they were measured on one thread.
+that variable unset, so they were measured on one thread. The q6 rows
+in ~benchmarks/paper-cells/sitting-large.csv~ set it, and that time
+falls as the width grows.
 
 * Threads
 

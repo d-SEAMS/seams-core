@@ -788,6 +788,12 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_cutoff_rings',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-cutoff'],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_sitting_large',
     python3,
     args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-large'],

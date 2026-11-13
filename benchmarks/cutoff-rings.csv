@@ -1,0 +1,33 @@
+code,operation,threads,n,median_ms,iqr_ms,samples_ms
+linkcell,total,1,8,653.639,9.726,670.036 660.042 671.401 652.915 652.515 652.939 654.339 647.744
+cell-list,total,1,8,654.896,8.296,667.219 657.762 651.574 652.168 651.916 667.473 657.623 651.235
+linkcell,link,1,8,131.875,,
+cell-list,link,1,8,132.279,,
+linkcell,convert,1,8,28.935,,
+cell-list,convert,1,8,28.719,,
+linkcell,search,1,8,493.166,,
+cell-list,search,1,8,492.962,,
+linkcell,total,2,8,521.980,4.294,519.866 528.169 523.806 522.457 518.209 517.516 523.726 521.503
+cell-list,total,2,8,418.741,3.510,420.042 423.155 419.353 415.125 413.767 416.312 418.224 419.258
+linkcell,link,2,8,206.762,,
+cell-list,link,2,8,86.208,,
+linkcell,convert,2,8,15.060,,
+cell-list,convert,2,8,15.368,,
+linkcell,search,2,8,298.425,,
+cell-list,search,2,8,316.537,,
+linkcell,total,4,8,323.101,1.161,323.005 324.953 323.035 320.251 323.167 319.974 323.461 323.526
+cell-list,total,4,8,252.877,1.991,254.082 254.403 251.155 252.129 252.791 252.963 253.918 251.487
+linkcell,link,4,8,137.551,,
+cell-list,link,4,8,52.179,,
+linkcell,convert,4,8,7.941,,
+cell-list,convert,4,8,7.783,,
+linkcell,search,4,8,177.345,,
+cell-list,search,4,8,192.863,,
+linkcell,total,8,8,228.632,5.324,228.005 228.435 224.906 240.167 242.565 228.829 230.262 225.643
+cell-list,total,8,8,173.215,2.554,173.605 171.950 175.657 175.705 172.825 172.112 174.282 171.896
+linkcell,link,8,8,107.620,,
+cell-list,link,8,8,35.622,,
+linkcell,convert,8,8,4.544,,
+cell-list,convert,8,8,4.628,,
+linkcell,search,8,8,115.945,,
+cell-list,search,8,8,132.576,,

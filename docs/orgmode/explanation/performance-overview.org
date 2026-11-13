@@ -5,16 +5,18 @@ Four sittings sit next to each other. ~docs/render_sitting.py~ writes
 every number on this page from the CSVs when the book is built. A
 ratio is the threads=1 median divided by the threads=8 median. The
 script marks a row flat when that ratio is between 0.95 and 1.05.
-A PLUMED row says it was measured on one thread because
-~PLUMED_NUM_THREADS~ was unset. The note names that variable on this
-sitting. A later sitting sets it.
+A PLUMED row in the release-candidate table was measured on one
+thread because ~PLUMED_NUM_THREADS~ was unset. The 884736-molecule
+sitting sets that variable, so its PLUMED q6 row is timed at the
+width the column names.
 
 | file | what it times |
 |------+---------------|
 | ~benchmarks/rc3-sitting.csv~ | The release-candidate head-to-head, one thread and eight |
 | ~benchmarks/trace-threads.csv~ | The hydrate signature search at 1, 2, 4 and 8 threads |
-| ~benchmarks/paper-cells/sitting-large.csv~ | Ice Ic at 884736 molecules, paired with freud, mdapy, vesin, OVITO and rings-statistics-matter at 1, 2, 4 and 8 threads, retimed at ~758058f4~ |
+| ~benchmarks/paper-cells/sitting-large.csv~ | Ice Ic at 884736 molecules, paired with freud, mdapy, vesin, pyscal3, PLUMED, OVITO and rings-statistics-matter at 1, 2, 4 and 8 threads, recorded by ~537deb7a~ |
 | ~benchmarks/pool-audit.csv~ | The pool-sized kernels on ice Ic, retimed at ~1ce3be3b~ |
+| ~benchmarks/cutoff-rings.csv~ | The full cutoff ring call at 884736 molecules, linkcell against the cell list, recorded by ~cad887b2~ |
 
 The full tables are
 [[file:performance.org][the release-candidate sitting]],
@@ -35,12 +37,16 @@ that timer starts after the neighbour graph exists. The two numbers
 are not interchangeable.
 
 The large-cell ~detail~ column is the agreement check on that one ice
-Ic frame. q6 is compared with freud and with mdapy. The neighbour
-count is the directed pairs left by the cutoff list, compared across
-d-SEAMS, vesin and freud. Both CHILL+ codes are compared on the cubic
+Ic frame. q6 is compared with freud and with mdapy, and, on the rows
+this sitting remeasured, with pyscal3 and with PLUMED. The neighbour
+count is the directed pairs left by the cutoff list. d-SEAMS is
+compared with vesin and freud, and with pyscal3. OVITO coordination
+is the same pair sum. Both CHILL+ codes are compared on the cubic
 label. The classifier is compared with OVITO PTM restricted to the
 cubic and hexagonal diamond templates, where ice Ic is cubic diamond.
 The six-ring count is compared with rings-statistics-matter.
+PLUMED q6 in this file set ~PLUMED_NUM_THREADS~. It is not the
+one-thread rc3 row.
 
 #+begin_export rst
 .. include:: performance-overview-tables.rst
@@ -48,14 +54,19 @@ The six-ring count is compared with rings-statistics-matter.
 
 * The 884736-molecule sitting
 
-~758058f4~ is one sitting. One warm-up, then eight calls, at 1, 2, 4
+~537deb7a~ is one sitting. One warm-up, then eight calls, at 1, 2, 4
 and 8 threads. Each width is its own process. The rivals are freud,
-mdapy, vesin, OVITO (CHILL+, q4, q6, and PTM with the default templates
-and with only the diamond templates), and rings-statistics-matter.
+mdapy, vesin, pyscal3 (neighbours and q6), PLUMED q6 with
+~PLUMED_NUM_THREADS~ set to that width, OVITO (CHILL+, q4, q6,
+coordination, and PTM with the default templates and with only the
+diamond templates), and rings-statistics-matter.
+~scripts/plot_sitting_large_time.py~ draws time against threads on a
+log axis, one panel per operation. The PDF is not stored.
 ~docs/render_sitting.py~ writes the tables from the CSV, and
 ~meson test docs_sitting_large~ recomputes each median and checks that
 the agreement notes are present. ~docs_table_csv~ checks the copied
-numbers.
+numbers. The rings row is still the full cutoff call. The separate
+~cad887b2~ table times that call with the cell-list builder.
 
 #+begin_export rst
 .. include:: sitting-large-tables.rst

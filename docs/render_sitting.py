@@ -19,8 +19,10 @@ CSV = ROOT / "benchmarks" / "rc3-sitting.csv"
 TRACE = ROOT / "benchmarks" / "trace-threads.csv"
 POOL = ROOT / "benchmarks" / "pool-audit.csv"
 LARGE = ROOT / "benchmarks" / "paper-cells" / "sitting-large.csv"
+CUTOFF = ROOT / "benchmarks" / "cutoff-rings.csv"
 OVERVIEW_OUT = ROOT / "docs" / "source" / "explanation" / "performance-overview-tables.rst"
 LARGE_OUT = ROOT / "docs" / "source" / "explanation" / "sitting-large-tables.rst"
+CUTOFF_OUT = ROOT / "docs" / "source" / "explanation" / "cutoff-rings-tables.rst"
 OUT = ROOT / "docs" / "source" / "explanation" / "performance-tables.rst"
 TRACE_OUT = ROOT / "docs" / "source" / "explanation" / "trace-threads-tables.rst"
 POOL_OUT = ROOT / "docs" / "source" / "explanation" / "pool-audit-tables.rst"
@@ -36,8 +38,9 @@ POOL_KERNELS = (
 )
 POOL_SIZES = ("4096", "32768", "110592", "884736")
 H2H_OUT = ROOT / "docs" / "source" / "howto" / "literature-speed.rst"
-# Guest codes in the reproduction how-to. The PLUMED columns were both
-# recorded with PLUMED_NUM_THREADS unset, so both are one thread.
+# Guest codes in the rc3 reproduction how-to. Those PLUMED columns were
+# recorded with PLUMED_NUM_THREADS unset, so both are one thread. The
+# 884736 sitting sets the variable and is not in this list.
 H2H_FALL = (
     ("freud", "q4"),
     ("freud", "q6"),
@@ -266,8 +269,8 @@ def write_h2h(rows, path):
 
 def check_large(rows):
     errors = check(rows, 1.5e-4)
-    if len(rows) != 88:
-        errors.append("sitting-large has {} rows, expected 88".format(len(rows)))
+    if len(rows) != 104:
+        errors.append("sitting-large has {} rows, expected 104".format(len(rows)))
     widths = sorted({int(row["threads"]) for row in rows})
     if widths != [1, 2, 4, 8]:
         errors.append("sitting-large threads are {}".format(widths))
@@ -281,12 +284,23 @@ def check_large(rows):
         if code in ("d-SEAMS", "rings-statistics-matter") and operation == "rings":
             if "agree_six=" not in detail:
                 errors.append("rings {} threads {} missing six-ring agreement".format(code, row["threads"]))
-        if operation == "q6" and code in ("d-SEAMS", "freud", "mdapy"):
+        if operation == "q6" and code in ("freud", "mdapy"):
             if "agree_freud_max_abs=" not in detail or "agree_mdapy_max_abs=" not in detail:
                 errors.append("q6 {} threads {} missing the q6 agreement".format(code, row["threads"]))
-        if operation == "neighbours" and code in ("d-SEAMS", "vesin", "freud"):
+        if operation == "q6" and code in ("d-SEAMS", "pyscal3", "PLUMED"):
+            if "agree_pyscal3_max_abs=" not in detail or "agree_PLUMED_max_abs=" not in detail:
+                errors.append("q6 {} threads {} missing the pyscal3/PLUMED agreement".format(code, row["threads"]))
+            if code == "PLUMED" and "PLUMED_NUM_THREADS=" not in detail:
+                errors.append("PLUMED q6 threads {} did not set PLUMED_NUM_THREADS".format(row["threads"]))
+        if operation == "neighbours" and code in ("vesin", "freud"):
             if "agree=d-SEAMS/vesin/freud" not in detail:
                 errors.append("neighbours {} threads {} missing the pair agreement".format(code, row["threads"]))
+        if operation == "neighbours" and code in ("d-SEAMS", "pyscal3"):
+            if "agree=d-SEAMS,pyscal3" not in detail:
+                errors.append("neighbours {} threads {} missing the pyscal3 agreement".format(code, row["threads"]))
+        if operation == "coordination" and code == "OVITO":
+            if "coordination_sum=" not in detail or "dseams_pairs=" not in detail:
+                errors.append("coordination threads {} missing the pair sum".format(row["threads"]))
         if operation == "chill+" and code in ("d-SEAMS", "OVITO"):
             if "cubic_dseams=" not in detail or "cubic_ovito=" not in detail:
                 errors.append("chill+ {} threads {} missing the cubic agreement".format(code, row["threads"]))
@@ -306,6 +320,7 @@ def write_large(rows, path):
         "q6",
         "q4+q6",
         "neighbours",
+        "coordination",
         "chill+",
         "classifier",
         "ptm-default",
@@ -339,7 +354,49 @@ def write_large(rows, path):
     path.write_text("\n".join(lines) + "\n")
 
 
-def ratio_series(rows, fields):
+def check_cutoff(rows):
+    errors = []
+    timed = [row for row in rows if row.get("samples_ms")]
+    errors.extend(check(timed, 1.5e-3))
+    if len(rows) != 32:
+        errors.append("cutoff rings has {} rows, expected 32".format(len(rows)))
+    widths = sorted({int(row["threads"]) for row in rows})
+    if widths != [1, 2, 4, 8]:
+        errors.append("cutoff rings threads are {}".format(widths))
+    codes = sorted({row["code"] for row in rows})
+    if codes != ["cell-list", "linkcell"]:
+        errors.append("cutoff rings codes are {}".format(codes))
+    return errors
+
+
+def write_cutoff(rows, path):
+    order = {"total": 0, "link": 1, "convert": 2, "search": 3}
+    block = sorted(rows, key=lambda row: (order.get(row["operation"], 9), row["code"], int(row["threads"])))
+    lines = [
+        ".. list-table::",
+        "   :header-rows: 0",
+        "",
+        "   * - Written by ``docs/render_sitting.py`` from ``benchmarks/cutoff-rings.csv``.",
+        "       Ice Ic at 884736 molecules. ``linkcell`` is the 1ce3be3b builder.",
+        "       ``cell-list`` is the orthorhombic list inside the ring call.",
+        "       ``total`` medians are recomputed from ``samples_ms``.",
+        "",
+        "Full cutoff ring call",
+        "^^^^^^^^^^^^^^^^^^^^^^",
+        "",
+        ".. csv-table::",
+        "   :header: code, operation, threads, n, median_ms, iqr_ms",
+        "",
+    ]
+    header = ("code", "operation", "threads", "n", "median_ms", "iqr_ms")
+    for row in block:
+        lines.append("   " + ", ".join(cell(row[key]) for key in header))
+    lines.append("")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n")
+
+
+def ratio_series(rows, fields, unset_plumed=False):
     grouped = {}
     for row in rows:
         key = tuple(row[field] for field in fields)
@@ -350,7 +407,7 @@ def ratio_series(rows, fields):
         if "1" not in widths or "8" not in widths or widths["8"] <= 0:
             continue
         ratio = widths["1"] / widths["8"]
-        if "PLUMED" in key:
+        if unset_plumed and "PLUMED" in key:
             label = "one thread; PLUMED_NUM_THREADS unset"
         elif 0.95 <= ratio <= 1.05:
             label = "flat"
@@ -362,7 +419,7 @@ def ratio_series(rows, fields):
     return series
 
 
-def append_ratio_table(lines, title, rows, fields):
+def append_ratio_table(lines, title, rows, fields, unset_plumed=False):
     lines.append(title)
     lines.append("^" * len(title))
     lines.append("")
@@ -370,7 +427,7 @@ def append_ratio_table(lines, title, rows, fields):
     lines.append(".. csv-table::")
     lines.append("   :header: " + ", ".join(header))
     lines.append("")
-    for item in ratio_series(rows, fields):
+    for item in ratio_series(rows, fields, unset_plumed):
         text = [str(part) for part in item[:-4]]
         left, right, ratio, label = item[-4:]
         text.extend(["{:.3f}".format(left), "{:.3f}".format(right), "{:.3f}".format(ratio), label])
@@ -386,8 +443,9 @@ def write_overview(books, path):
         "   * - Written by ``docs/render_sitting.py`` from the four CSVs.",
         "       ``ratio`` is the threads=1 median divided by the threads=8 median.",
         "       ``flat`` means that ratio is between 0.95 and 1.05.",
-        "       A PLUMED row says ``one thread; PLUMED_NUM_THREADS unset``.",
+        "       A PLUMED row in the rc3 table says ``one thread; PLUMED_NUM_THREADS unset``.",
         "       Both of its columns were measured on one thread because that variable was unset.",
+        "       The large-cell PLUMED row set ``PLUMED_NUM_THREADS``, so it is not that label.",
         "",
         "What each file holds",
         "^^^^^^^^^^^^^^^^^^^^",
@@ -401,7 +459,13 @@ def write_overview(books, path):
         molecules = " ".join(sorted({row["molecules"] for row in rows}, key=int))
         lines.append("   {}, {}, {}, {}".format(name, len(rows), threads, molecules))
     lines.append("")
-    append_ratio_table(lines, "rc3 sitting, one thread against eight", books[0][1], ("code", "operation", "molecules"))
+    append_ratio_table(
+        lines,
+        "rc3 sitting, one thread against eight",
+        books[0][1],
+        ("code", "operation", "molecules"),
+        unset_plumed=True,
+    )
     append_ratio_table(
         lines,
         "884736-molecule sitting, one thread against eight",
@@ -490,6 +554,14 @@ def main(argv):
             return 1
         print("h2h thread scaling ok", len(h2h_pairs(h2h_index(rows))), "rows")
         return 0
+    if "--check-cutoff" in argv:
+        rows = load(CUTOFF)
+        errors = check_cutoff(rows)
+        if errors:
+            print("\n".join(errors), file=sys.stderr)
+            return 1
+        print("cutoff rings csv ok", len(rows), "rows")
+        return 0
     if "--check-large" in argv:
         rows = load(LARGE)
         errors = check_large(rows)
@@ -549,6 +621,12 @@ def main(argv):
         print("\n".join(large_errors), file=sys.stderr)
         return 1
     write_large(large_rows, LARGE_OUT)
+    cutoff_rows = load(CUTOFF)
+    cutoff_errors = check_cutoff(cutoff_rows)
+    if cutoff_errors:
+        print("\n".join(cutoff_errors), file=sys.stderr)
+        return 1
+    write_cutoff(cutoff_rows, CUTOFF_OUT)
     write_overview(
         (
             ("rc3-sitting.csv", rows),

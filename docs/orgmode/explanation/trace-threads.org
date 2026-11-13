@@ -93,6 +93,23 @@ of ~benchmarks/paper-cells/sitting-large.csv~ is ~seams_frame_rings~,
 which builds the cutoff list and then searches the rings. Those two
 rows are not the same measurement.
 
+* The full cutoff ring call
+
+Several threads inside ~neighListLinkcell~ build an orthorhombic or
+triclinic cutoff list with the cell-list CSR. One thread still uses
+linkcell's buffered walk. The rows are the same sorted cutoff set, so
+the ring search matches across thread counts. ~cad887b2~ times that
+full call, the neighbour list plus the index conversion plus the
+depth-6 search, on ice Ic at 884736 molecules. It is interleaved with
+the ~1ce3be3b~ builder. Each sample is the last of three repeats in a
+fresh process. The table is ~benchmarks/cutoff-rings.csv~. ~link~ is
+the neighbour-list build. This sitting is not the ~ringNetwork~ kernel
+above, and it is not the rings row of the 884736-molecule sitting.
+
+#+begin_export rst
+.. include:: cutoff-rings-tables.rst
+#+end_export
+
 ~seams::teamFor~ is the width of a per-atom walk. Below 2048 atoms it
 is one thread. Below 8192 atoms, when the caller asked for more than
 four, it is four. At or above 8192 atoms it is the OpenMP width.
