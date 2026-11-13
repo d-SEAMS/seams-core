@@ -15,7 +15,7 @@ doxyYoda C++ tree to =docs/build/api-cpp/=.
 
 Two supported compiler shells:
 
-- [[https://pixi.sh][pixi]] (locked conda-forge toolchain)
+- [[https://pixi.prefix.dev/][pixi]] (locked conda-forge toolchain)
 - ~nix develop~ (flake inputs: compiler, Eigen, BLAS, Catch2, gdb)
 
 #+begin_src bash

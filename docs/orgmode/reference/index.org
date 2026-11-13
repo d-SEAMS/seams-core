@@ -9,7 +9,7 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 | [[file:data-formats.org][data formats]] | LAMMPS dump, XYZ, chemfiles, ~.con~ |
 | [[file:walk-compare.org][walk_compare]] | ~tests/walk_compare~ inputs and columns |
 | [[file:api.org][API map]] | fronts and headers; the tree is =api/index= |
-| [[file:../api/index][API Reference]] | Doxygen comments, via doxyrest |
+| [[file:api.org][API Reference]] | Doxygen comments, via doxyrest; the generated tree is =api/index= |
 | [[file:nix.org][Nix flake]] | ~nix build~, ~nix develop~, flake outputs |
 | [[file:cross-language.org][One task, three languages]] | CHILL+ on the cubic mW frame |
 | [[file:glossary.org][glossary]] | Engine terms |
