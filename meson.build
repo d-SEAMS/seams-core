@@ -802,8 +802,20 @@ if get_option('with_cli')
       seams_exe.full_path(),
       meson.project_build_root() / 'src',
     ],
+    env: tutorial_env,
     depends: [seams_exe],
     timeout: 120)
+  test(
+    'docs_tutorial_nucleation',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'tutorials' / 'test_nucleation.py',
+      meson.project_source_root(),
+      meson.project_build_root() / 'src',
+    ],
+    env: tutorial_env,
+    depends: [seams_api_lib],
+    timeout: 180)
   test(
     'engines_tutorial',
     python3,

@@ -1,0 +1,25 @@
+#+TITLE: Nucleation
+#+OPTIONS: toc:nil num:nil
+
+The 148-frame mW trajectory is figshare
+[[https://doi.org/10.6084/m9.figshare.11448702.v1][10.6084/m9.figshare.11448702.v1]].
+~input/traj/nucleation_three.lammpstrj~ is its first three
+frames, timesteps 15677000, 15678000 and 15679000, 468 kB.
+~meson test docs_tutorial_nucleation~ labels each frame and grows the
+largest crystal cluster.
+
+Crystal atoms are cubic, hexagonal, reCubic and reHex. Two crystal
+atoms share a cluster when the cutoff list joins them. The cubic and
+hexagonal fractions are those counts divided by 4096.
+
+| frame | cubic | hexagonal | largest cluster |
+|-------+-------+-----------+-----------------|
+| 1 | 47 | 62 | 59 |
+| 2 | 50 | 60 | 64 |
+| 3 | 44 | 69 | 70 |
+
+A \(q_6\) cutoff would call every high-\(q_6\) molecule ice and would
+not separate the 47 cubic molecules from the 62 hexagonal ones. The
+cluster is the connected crystal, which on the first frame is 59
+molecules, smaller than the cubic-plus-hexagonal count because the
+rest sit in other components.
