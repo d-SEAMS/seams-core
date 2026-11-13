@@ -19,7 +19,7 @@ then receives the same width through its own control.
 | OVITO | CHILL+, primitive rings, polyhedral template matching | ~OVITO_THREAD_COUNT=n~ before ~import ovito~ |
 | mdapy | CHILL+, q4, q6, rings | ~mdapy.set_num_threads(n)~ |
 | vesin | full cell-list neighbour pairs | ~NeighborList(..., n_threads=n, algorithm="cell_list")~ |
-| PLUMED | symfunc q4 and q6 | ~OMP_NUM_THREADS=n~ on the driver |
+| PLUMED | symfunc q4 and q6 | ~PLUMED_NUM_THREADS~ was unset, so both columns are one thread |
 | rings-statistics-matter | primitive rings, Rust backend | ~ring_statistics(..., num_threads=n)~ |
 
 Polyhedral template matching is the OVITO modifier. Its row is
@@ -37,17 +37,14 @@ one. OVITO's template matching and its ring finder fall with the same
 control as its CHILL+. ~meson test docs_h2h_threads~ checks those
 inequalities against the CSV.
 
-PLUMED's symfunc does not speed up with ~OMP_NUM_THREADS~ on these
-cells. The \(q_4\) and \(q_6\) medians at eight threads stay within
-five percent of the one-thread medians, on both 110592 and 884736
-molecules. The driver sets ~OMP_NUM_THREADS~ and does not set
-~PLUMED_NUM_THREADS~.
-
-PLUMED 2.10.2 reads its own width. In ~src/tools/OpenMP.cpp~ the stored
-count starts at one (~unsigned num_threads=1~), and ~getNumThreads~
-consults ~PLUMED_NUM_THREADS~ only. ~OMP_NUM_THREADS~ does not appear
-under ~src/~ of that release, so the symfunc stays on one thread while
-the driver varies the OpenMP variable.
+The PLUMED rows in this sitting were measured on one thread because
+~PLUMED_NUM_THREADS~ was unset. The driver set ~OMP_NUM_THREADS~ and
+left ~PLUMED_NUM_THREADS~ alone. In PLUMED 2.10.2,
+~src/tools/OpenMP.cpp~ stores the width at one and ~getNumThreads~
+reads ~PLUMED_NUM_THREADS~. That is why the ~threads=1~ column and the
+~threads=8~ column of these rows are the same one-thread measurement.
+A later sitting sets ~PLUMED_NUM_THREADS~. These rows are not that
+measurement.
 
 #+begin_src cpp
 unsigned getNumThreads() {

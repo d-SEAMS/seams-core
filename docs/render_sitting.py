@@ -35,7 +35,8 @@ POOL_KERNELS = (
 )
 POOL_SIZES = ("4096", "32768", "110592", "884736")
 H2H_OUT = ROOT / "docs" / "source" / "howto" / "literature-speed.rst"
-# Guest codes in the reproduction how-to. PLUMED stays flat in this sitting.
+# Guest codes in the reproduction how-to. The PLUMED columns were both
+# recorded with PLUMED_NUM_THREADS unset, so both are one thread.
 H2H_FALL = (
     ("freud", "q4"),
     ("freud", "q6"),
@@ -220,7 +221,11 @@ def check_h2h(rows):
     for code, operation, molecules, left, right, ratio in h2h_pairs(found):
         if (code, operation) in H2H_FLAT:
             if not 0.95 <= ratio <= 1.05:
-                errors.append("{} {} {} ratio {:.3f} is not flat".format(code, operation, molecules, ratio))
+                errors.append(
+                    "{} {} {} columns differ ({:.3f}); both were recorded with PLUMED_NUM_THREADS unset".format(
+                        code, operation, molecules, ratio
+                    )
+                )
         elif not right < left:
             errors.append("{} {} {} did not fall ({} -> {})".format(code, operation, molecules, left, right))
     return errors
@@ -232,20 +237,25 @@ def write_h2h(rows, path):
         "   :header-rows: 0",
         "",
         "   * - Written by ``docs/render_sitting.py`` from ``benchmarks/rc3-sitting.csv``.",
-        "       ``t1`` and ``t8`` are the one-thread and eight-thread medians, in milliseconds.",
+        "       ``t1`` and ``t8`` are the medians in the threads=1 and threads=8 columns.",
         "       ``ratio`` is ``t1 / t8``.",
+        "       A PLUMED row was measured on one thread because ``PLUMED_NUM_THREADS`` was unset.",
+        "       Both of its columns are that measurement.",
         "",
         "One thread against eight",
         "^^^^^^^^^^^^^^^^^^^^^^^^",
         "",
         ".. csv-table::",
-        "   :header: code, operation, molecules, t1_ms, t8_ms, ratio",
+        "   :header: code, operation, molecules, t1_ms, t8_ms, ratio, note",
         "",
     ]
     for code, operation, molecules, left, right, ratio in h2h_pairs(h2h_index(rows)):
+        note = ""
+        if code == "PLUMED":
+            note = "one thread; PLUMED_NUM_THREADS unset"
         lines.append(
-            "   {}, {}, {}, {:.3f}, {:.3f}, {:.2f}".format(
-                code, operation, molecules, left, right, ratio
+            "   {}, {}, {}, {:.3f}, {:.3f}, {:.2f}, {}".format(
+                code, operation, molecules, left, right, ratio, note
             )
         )
     lines.append("")
@@ -277,7 +287,9 @@ def ratio_series(rows, fields):
         if "1" not in widths or "8" not in widths or widths["8"] <= 0:
             continue
         ratio = widths["1"] / widths["8"]
-        if 0.95 <= ratio <= 1.05:
+        if "PLUMED" in key:
+            label = "one thread; PLUMED_NUM_THREADS unset"
+        elif 0.95 <= ratio <= 1.05:
             label = "flat"
         elif ratio > 1:
             label = "falls"
@@ -309,8 +321,10 @@ def write_overview(books, path):
         "   :header-rows: 0",
         "",
         "   * - Written by ``docs/render_sitting.py`` from the four CSVs.",
-        "       ``ratio`` is the one-thread median divided by the eight-thread median.",
+        "       ``ratio`` is the threads=1 median divided by the threads=8 median.",
         "       ``flat`` means that ratio is between 0.95 and 1.05.",
+        "       A PLUMED row says ``one thread; PLUMED_NUM_THREADS unset``.",
+        "       Both of its columns were measured on one thread because that variable was unset.",
         "",
         "What each file holds",
         "^^^^^^^^^^^^^^^^^^^^",

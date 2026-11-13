@@ -3,8 +3,11 @@
 
 Four sittings sit next to each other. ~docs/render_sitting.py~ writes
 every number on this page from the CSVs when the book is built. A
-ratio is the one-thread median divided by the eight-thread median. The
+ratio is the threads=1 median divided by the threads=8 median. The
 script marks a row flat when that ratio is between 0.95 and 1.05.
+A PLUMED row says it was measured on one thread because
+~PLUMED_NUM_THREADS~ was unset. The note names that variable on this
+sitting. A later sitting sets it.
 
 | file | what it times |
 |------+---------------|
