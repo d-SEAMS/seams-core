@@ -572,7 +572,7 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
     font = _legend_font(LEGEND_FONT_PX)
     swatch = 32
     row_h = 52
-    left, right_margin, top = 170, 210, 36
+    left, right_margin, top = 170, 860, 36
     legend_rows = 1
     if legend:
         x = 16
@@ -615,6 +615,10 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
         text = str(layer)
         text_w = float(font.getlength(text))
         draw.text((x - text_w / 2.0, y_bottom + 20), text, font=font, fill=(20, 20, 20))
+    bar = 10.0 * image.width / (2.0 * half_h)
+    bar_y = y_bottom - 28
+    draw.line([(x_left + 18, bar_y), (x_left + 18 + bar, bar_y)], fill=(20, 20, 20), width=6)
+    draw.text((x_left + 26 + bar, bar_y - 22), "1 nm", font=font, fill=(20, 20, 20))
     title = "layer index"
     title_w = float(font.getlength(title))
     draw.text(((x_left + x_right - title_w) / 2.0, y_bottom + 20 + LEGEND_FONT_PX + 4), title, font=font, fill=(20, 20, 20))
@@ -632,15 +636,17 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
         text_w = float(font.getlength(text))
         draw.text((max(8, x_left - text_w - 16), y_of(z_mid) - LEGEND_FONT_PX / 2.0), text, font=font, fill=(20, 20, 20))
 
-    # Both interfaces, outside the cell: the growth front and its periodic image.
+    # One bracket over the crystal. The arrows name the two ends of that slab.
     bracket_x = x_right + 28
     y_front = y_of(z_cut)
     y_periodic = y_of(z_lo)
     draw.line([(bracket_x, y_front), (bracket_x, y_periodic)], fill=(20, 20, 20), width=3)
-    for y_mark, text in ((y_front, "interface"), (y_periodic, "periodic")):
+    slab = "ice Ih slab"
+    draw.text((bracket_x + 14, 0.5 * (y_front + y_periodic) - LEGEND_FONT_PX / 2.0), slab, font=font, fill=(20, 20, 20))
+    for y_mark, text in ((y_front, "growth front"), (y_periodic, "periodic image of the front")):
         draw.polygon([(x_right + 4, y_mark), (x_right + 22, y_mark - 7), (x_right + 22, y_mark + 7)], fill=(20, 20, 20))
         draw.line([(bracket_x - 8, y_mark), (bracket_x + 8, y_mark)], fill=(20, 20, 20), width=3)
-        draw.text((bracket_x + 14, y_mark - LEGEND_FONT_PX / 2.0), text, font=font, fill=(20, 20, 20))
+        draw.text((bracket_x + 14, y_mark - LEGEND_FONT_PX - 4), text, font=font, fill=(20, 20, 20))
 
     if legend:
         x, y = left + 16, image.height + top + 20 + 2 * LEGEND_FONT_PX + 24
@@ -653,12 +659,6 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
             draw.rectangle([x, y, x + swatch, y + swatch], fill=rgb, outline=(30, 30, 30))
             draw.text((x + swatch + 10, y), label, font=font, fill=(20, 20, 20))
             x += swatch + 16 + text_w + 18
-        bar_y = y + row_h + 16
-    else:
-        bar_y = image.height + top + 36
-    bar = 10.0 * image.width / (2.0 * half_h)
-    draw.line([(left + 16, bar_y), (left + 16 + bar, bar_y)], fill=(20, 20, 20), width=6)
-    draw.text((left + 16, bar_y + 10), "1 nm", font=font, fill=(20, 20, 20))
     canvas.save(path)
 
 
@@ -672,7 +672,9 @@ def render_interface(render, positions, labels, origin, lengths, path, width=Non
     radii = np.where(np.asarray(labels) == 2, BRINE_RADIUS["water"], 0.85)
     liquid = np.asarray(labels) == 2
     basal = np.asarray(render.stacking_axis(positions, labels, np.isin(labels, [1])), dtype=float)
-    forward = np.array([1.0, 0.0, 0.0])
+    # Look along -x so bilayer 0 is on the left. up stays +z, so the
+    # camera (right, up, forward) stays right-handed.
+    forward = np.array([-1.0, 0.0, 0.0])
     up = np.array([0.0, 0.0, 1.0])
     _centre, half_h, half_v, forward, _right, up = _camera(render, positions, forward, up)
     if width is None:

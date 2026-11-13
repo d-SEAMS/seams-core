@@ -40,9 +40,9 @@ Python and C print the same census:
    :end-before: static int cmd_interface
 
 .. figure:: figures/interface.png
-   :alt: Interface slab with ice at the bottom and liquid at the top, a rectangular cell, and bilayer ticks along the bottom.
+   :alt: Primary prism face of the interface slab. Basal bilayers are vertical, growth runs up the page, and the cell is a rectangle.
 
-   Orthographic view straight down x, with growth vertical, as in the brine figure. The cell is a rectangle. Short ticks on the bottom axis mark the six basal bilayers, about 3.67 angstrom apart. No line crosses the liquid. ``ice Ih`` and ``liquid`` sit outside the cell, and the arrows on the right mark the growth front and its periodic image. Liquid is radius 0.50 at 18 percent opacity. The legend matches the brine figure in order and type size.
+   This is the primary prism face :math:`(10\bar{1}0)`. The basal planes stand perpendicular to the interface, so the bilayers are vertical, and growth runs along z. The orthographic camera looks straight down x. Short ticks under the cell number the six bilayers from 0 on the left. A bracket beside the crystal reads ``ice Ih slab``; its top arrow is the growth front and its bottom arrow is the periodic image of the front. ``ice Ih`` and ``liquid`` sit outside the cell. The 1 nm bar lies inside the figure, beside the bottom edge of the cell. Liquid is radius 0.50 at 18 percent opacity. The legend matches the brine figure in order and type size.
 
 What this tells you
 -------------------
