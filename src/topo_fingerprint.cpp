@@ -9,9 +9,9 @@
 
 #include <algorithm>
 #include <iomanip>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
-#include <unordered_map>
 #include <unordered_set>
 
 namespace {
@@ -33,8 +33,7 @@ std::uint64_t mix(std::uint64_t h, std::uint64_t v) {
 
 std::uint64_t hashString(const std::string &s) {
   std::uint64_t h = kOffset;
-  for (char raw : s) {
-    const auto c = static_cast<unsigned char>(raw);
+  for (unsigned char c : s) {
     h ^= c;
     h *= kPrime;
   }
@@ -56,23 +55,40 @@ std::vector<int> hopNeighbourhood(const Rows &rows, int atom, int hops) {
   if (atom < 0 || atom >= static_cast<int>(rows.size())) {
     return order;
   }
-  std::unordered_map<int, int> depth;
-  depth[atom] = 0;
+  // One stamp for the walk. The visit order is the neighbour-row order,
+  // the same order a map of first sightings produces.
+  thread_local std::vector<int> seen;
+  thread_local std::vector<int> depth;
+  thread_local int epoch = 0;
+  const int n = static_cast<int>(rows.size());
+  if (static_cast<int>(seen.size()) < n) {
+    seen.assign(static_cast<std::size_t>(n), 0);
+    depth.assign(static_cast<std::size_t>(n), 0);
+    epoch = 0;
+  }
+  if (epoch == std::numeric_limits<int>::max()) {
+    std::fill(seen.begin(), seen.end(), 0);
+    epoch = 0;
+  }
+  ++epoch;
+  depth[static_cast<std::size_t>(atom)] = 0;
+  seen[static_cast<std::size_t>(atom)] = epoch;
   order.push_back(atom);
   std::size_t head = 0;
   while (head < order.size()) {
     const int v = order[head++];
-    const int d = depth[v];
+    const int d = depth[static_cast<std::size_t>(v)];
     if (d == hops) {
       continue;
     }
     const auto &row = rows[static_cast<std::size_t>(v)];
     for (std::size_t m = 1; m < row.size(); m++) {
       const int u = row[m];
-      if (u < 0 || u >= static_cast<int>(rows.size()) || depth.count(u)) {
+      if (u < 0 || u >= n || seen[static_cast<std::size_t>(u)] == epoch) {
         continue;
       }
-      depth[u] = d + 1;
+      depth[static_cast<std::size_t>(u)] = d + 1;
+      seen[static_cast<std::size_t>(u)] = epoch;
       order.push_back(u);
     }
   }
@@ -83,7 +99,14 @@ std::uint64_t wlHash(const std::vector<std::vector<int>> &adjacency, int root,
                      int rounds, const std::vector<int> &colors) {
   const int n = static_cast<int>(adjacency.size());
   const bool colored = static_cast<int>(colors.size()) == n;
-  std::vector<std::uint64_t> color(static_cast<std::size_t>(n));
+  // The same four buffers serve every neighbourhood. Each call overwrites
+  // the n colors it reads, so a later graph does not see a previous one.
+  thread_local std::vector<std::uint64_t> color;
+  thread_local std::vector<std::uint64_t> next;
+  thread_local std::vector<std::uint64_t> bag;
+  thread_local std::vector<std::uint64_t> all;
+  color.resize(static_cast<std::size_t>(n));
+  next.resize(static_cast<std::size_t>(n));
   for (int i = 0; i < n; i++) {
     const std::uint64_t deg = static_cast<std::uint64_t>(adjacency[static_cast<std::size_t>(i)].size());
     std::uint64_t h = mix(kOffset, deg + (i == root ? 0x9e3779b97f4a7c15ULL : 0ULL));
@@ -92,8 +115,6 @@ std::uint64_t wlHash(const std::vector<std::vector<int>> &adjacency, int root,
     }
     color[static_cast<std::size_t>(i)] = h;
   }
-  std::vector<std::uint64_t> next(static_cast<std::size_t>(n));
-  std::vector<std::uint64_t> bag;
   for (int r = 0; r < rounds; r++) {
     for (int i = 0; i < n; i++) {
       bag.clear();
@@ -109,7 +130,7 @@ std::uint64_t wlHash(const std::vector<std::vector<int>> &adjacency, int root,
     }
     color.swap(next);
   }
-  std::vector<std::uint64_t> all(color.begin(), color.end());
+  all.assign(color.begin(), color.begin() + n);
   std::sort(all.begin(), all.end());
   std::uint64_t h = mix(kOffset, static_cast<std::uint64_t>(n));
   if (root >= 0 && root < n) {
@@ -135,10 +156,26 @@ LocalGraph buildLocalGraph(const Rows &rows, int atom, int hops,
   if (g.atoms.empty()) {
     return g;
   }
-  std::unordered_map<int, int> local;
-  local.reserve(g.atoms.size());
+  // Local index of each atom in this ball. The stamp is the call, so a
+  // neighbour outside the ball is simply unmarked.
+  thread_local std::vector<int> seen;
+  thread_local std::vector<int> local;
+  thread_local int epoch = 0;
+  const int nRows = static_cast<int>(rows.size());
+  if (static_cast<int>(seen.size()) < nRows) {
+    seen.assign(static_cast<std::size_t>(nRows), 0);
+    local.assign(static_cast<std::size_t>(nRows), 0);
+    epoch = 0;
+  }
+  if (epoch == std::numeric_limits<int>::max()) {
+    std::fill(seen.begin(), seen.end(), 0);
+    epoch = 0;
+  }
+  ++epoch;
   for (std::size_t i = 0; i < g.atoms.size(); i++) {
-    local[g.atoms[i]] = static_cast<int>(i);
+    const int a = g.atoms[i];
+    seen[static_cast<std::size_t>(a)] = epoch;
+    local[static_cast<std::size_t>(a)] = static_cast<int>(i);
   }
   const int n = static_cast<int>(g.atoms.size());
   g.adjacency.resize(static_cast<std::size_t>(n));
@@ -147,13 +184,17 @@ LocalGraph buildLocalGraph(const Rows &rows, int atom, int hops,
     auto &adj = g.adjacency[static_cast<std::size_t>(i)];
     adj.reserve(row.empty() ? 0 : row.size() - 1);
     for (std::size_t m = 1; m < row.size(); m++) {
-      const auto it = local.find(row[m]);
-      if (it == local.end() || it->second == i) {
+      const int u = row[m];
+      if (u < 0 || u >= nRows || seen[static_cast<std::size_t>(u)] != epoch) {
         continue;
       }
-      adj.push_back(it->second);
-      if (i < it->second) {
-        g.edges.emplace_back(i, it->second);
+      const int j = local[static_cast<std::size_t>(u)];
+      if (j == i) {
+        continue;
+      }
+      adj.push_back(j);
+      if (i < j) {
+        g.edges.emplace_back(i, j);
       }
     }
     std::sort(adj.begin(), adj.end());
@@ -168,11 +209,15 @@ LocalGraph buildLocalGraph(const Rows &rows, int atom, int hops,
   return g;
 }
 
-LocalKey localKeyFromGraph(const LocalGraph &g, int hops) {
+LocalKey localKeyFromGraph(const LocalGraph &g, int hops,
+                            std::uint64_t *refinement) {
   LocalKey out;
   if (g.atoms.empty()) {
     out.method = "wl";
     out.key = hex(0);
+    if (refinement != nullptr) {
+      *refinement = 0;
+    }
     return out;
   }
   auto edges = g.edges;
@@ -180,6 +225,13 @@ LocalKey localKeyFromGraph(const LocalGraph &g, int hops) {
   edges.erase(std::unique(edges.begin(), edges.end()), edges.end());
   out.vertices = static_cast<int>(g.atoms.size());
   out.edges = static_cast<int>(edges.size());
+  // The frame key is this refinement even when the local key is a
+  // certificate, so it is hashed once and handed back to the caller.
+  const std::uint64_t refined =
+      wlHash(g.adjacency, 0, hops + 2, g.localColors);
+  if (refinement != nullptr) {
+    *refinement = refined;
+  }
   const bool colored = !g.localColors.empty();
   const int n = static_cast<int>(g.atoms.size());
   const std::string cert = colored
@@ -203,12 +255,13 @@ LocalKey localKeyFromGraph(const LocalGraph &g, int hops) {
     return out;
   }
   out.method = "wl";
-  out.key = hex(wlHash(g.adjacency, 0, hops + 2, g.localColors));
+  out.key = hex(refined);
   return out;
 }
 
 LocalKey localKey(const Rows &rows, int atom, int hops, const std::vector<int> &colors) {
-  return localKeyFromGraph(buildLocalGraph(rows, atom, hops, colors), hops);
+  return localKeyFromGraph(buildLocalGraph(rows, atom, hops, colors), hops,
+                           nullptr);
 }
 
 FrameFingerprint fingerprint(const Rows &rows, int hops, int maxRingSize,
@@ -225,12 +278,12 @@ FrameFingerprint fingerprint(const Rows &rows, int hops, int maxRingSize,
   std::vector<std::uint64_t> wl(static_cast<std::size_t>(n));
   for (int i = 0; i < n; i++) {
     const LocalGraph g = buildLocalGraph(rows, i, hops, colors);
-    LocalKey lk = localKeyFromGraph(g, hops);
+    std::uint64_t refined = 0;
+    LocalKey lk = localKeyFromGraph(g, hops, &refined);
     out.method = lk.method;
     out.classes[lk.key] += 1;
     out.atomKeys.push_back(std::move(lk.key));
-    wl[static_cast<std::size_t>(i)] =
-        g.atoms.empty() ? 0 : wlHash(g.adjacency, 0, hops + 2, g.localColors);
+    wl[static_cast<std::size_t>(i)] = refined;
   }
   out.wlAtom = wl;
   std::sort(wl.begin(), wl.end());
@@ -296,11 +349,11 @@ FrameFingerprint incrementalFingerprint(const FrameFingerprint &prev,
   out.classes.clear();
   for (int i : dirty) {
     const LocalGraph g = buildLocalGraph(rows, i, hops, colors);
-    LocalKey lk = localKeyFromGraph(g, hops);
+    std::uint64_t refined = 0;
+    LocalKey lk = localKeyFromGraph(g, hops, &refined);
     out.method = lk.method;
     out.atomKeys[static_cast<std::size_t>(i)] = std::move(lk.key);
-    out.wlAtom[static_cast<std::size_t>(i)] =
-        g.atoms.empty() ? 0 : wlHash(g.adjacency, 0, hops + 2, g.localColors);
+    out.wlAtom[static_cast<std::size_t>(i)] = refined;
   }
   for (const auto &k : out.atomKeys) {
     out.classes[k] += 1;
