@@ -36,7 +36,7 @@ jobs:
       - run: pixi run -e default setup
       - run: pixi run -e default build
       - name: Ice Ih and sII examples
-        run: pixi run -e default meson test -C bbdir docs_core_counts --print-errorlogs
+        run: pixi run -e default meson test -C bbdir docs_core_counts docs_capi_examples docs_capi_symbols --print-errorlogs
 
       - name: Python doctest
         run: |

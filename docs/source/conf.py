@@ -312,9 +312,29 @@ def _stage_native_html():
         _native_page(r_dest, "dseams", "Rscript is not on PATH. The roxygen topics are in man/.")
 
 
+def _link_capi():
+    """Point the generated book at the committed C API section."""
+    index = os.path.join(_source, "index.rst")
+    if not os.path.isfile(index):
+        return
+    text = open(index, encoding="utf-8").read()
+    if "capi/index" in text:
+        return
+    extra = (
+        "\n.. toctree::\n"
+        "   :maxdepth: 2\n"
+        "   :caption: C API\n"
+        "\n"
+        "   capi/index\n"
+    )
+    with open(index, "a", encoding="utf-8") as handle:
+        handle.write(extra)
+
+
 _stage_markdown_book()
 _stage_ctypes_autodoc()
 _stage_native_html()
+_link_capi()
 _doxyrest = os.path.abspath(os.path.join(_source, "../../subprojects/doxyrest/sphinx"))
 _xml_index = os.path.join(_source, "xml", "index.xml")
 _api_index = os.path.join(_source, "api", "index.rst")
