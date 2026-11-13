@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
-"""One sitting at 884736 molecules, eight times the 110592 ice Ic cell.
+"""One sitting at 884736 molecules on two frames.
 
-The operations are the ice rows of sitting.csv plus the symmetry
-classifier and both PTM template sets: rings, local q4, local q6, the
-q4+q6 library call, the cutoff neighbour list, CHILL+, the symmetry
-classifier, PTM with its default templates, and PTM with only the
-cubic and hexagonal diamond templates. Rivals are
-rings-statistics-matter 0.3.0, mdapy, vesin, freud and OVITO.
+The first frame is ice Ic, eight times the 110592 cell. The second is
+a TIP4P/ice liquid: the 4096-molecule frame in
+benchmarks/paper-cells/tip4pice-liquid-4096.txt, replicated 6 by 6 by
+6. Ideal ice puts every neighbour on a lattice, which flatters a cell
+list. The liquid does not.
+
+The operations are rings, local q4, local q6, the q4+q6 library call,
+the cutoff neighbour list, CHILL+, the symmetry classifier, PTM with
+its default templates, PTM with only the cubic and hexagonal diamond
+templates, and OVITO coordination. Rivals are rings-statistics-matter
+0.3.0, mdapy, vesin, freud, OVITO, pyscal3 and PLUMED. Every row is
+timed in this sitting.
 
 One warm-up, then eight calls. A rival call over 30 s is kept at six
 calls and marked. A rival call over 120 s, or a process killed for
@@ -60,7 +66,13 @@ CODES = (
     ("vesin", "vesin", True),
     ("freud", "freud", True),
     ("ovito", "OVITO", True),
+    ("pyscal", "pyscal3", True),
+    ("plumed", "PLUMED", True),
+    ("ovito-coord", "OVITO", True),
 )
+PHASES = ("ice", "liquid")
+LIQUID_SEED = ROOT / "benchmarks/paper-cells/tip4pice-liquid-4096.txt"
+LIQUID_TILE = 6
 
 LSCPU_FIELDS = (
     "Architecture",
@@ -121,6 +133,13 @@ def lscpu_details() -> list[str]:
     return [f"{label}: {wanted[label]}" for label in LSCPU_FIELDS]
 
 
+def current_phase() -> str:
+    phase = os.environ.get("SIT_PHASE", "ice")
+    if phase not in PHASES:
+        raise RuntimeError(f"unknown phase {phase}")
+    return phase
+
+
 def ice():
     import h2h_protocol as proto
     pos, side = proto.ice_ic(CELLS)
@@ -130,6 +149,32 @@ def ice():
     xyz = np.ascontiguousarray(pos, dtype=np.float64)
     box = np.array([0, 0, 0, side, side, side, 0, 0, 0], dtype=np.float64)
     return xyz, box, float(side)
+
+
+def liquid():
+    """Tile the 4096-molecule TIP4P/ice frame to 884736 molecules."""
+    import numpy as np
+    tokens = LIQUID_SEED.read_text().split()
+    n = int(tokens[0])
+    side = float(tokens[1])
+    coords = np.asarray(tokens[4:], dtype=np.float64).reshape(n, 3)
+    shifts = []
+    for ix in range(LIQUID_TILE):
+        for iy in range(LIQUID_TILE):
+            for iz in range(LIQUID_TILE):
+                shifts.append(coords + np.array([ix * side, iy * side, iz * side]))
+    xyz = np.ascontiguousarray(np.concatenate(shifts), dtype=np.float64)
+    if len(xyz) != MOLECULES:
+        raise RuntimeError(f"liquid has {len(xyz)} molecules, need {MOLECULES}")
+    big = side * LIQUID_TILE
+    box = np.array([0, 0, 0, big, big, big, 0, 0, 0], dtype=np.float64)
+    return xyz, box, float(big)
+
+
+def load_frame():
+    if current_phase() == "liquid":
+        return liquid()
+    return ice()
 
 
 def hold_affinity(threads: int) -> int:
@@ -185,7 +230,7 @@ def save_agree(threads: int, code: str, operation: str, values) -> None:
     if not root:
         return
     import numpy as np
-    path = Path(root) / f"t{threads}-{code}-{operation}.npy"
+    path = Path(root) / f"t{threads}-{current_phase()}-{code}-{operation}.npy"
     path.parent.mkdir(parents=True, exist_ok=True)
     np.save(path, np.asarray(values))
 
@@ -207,7 +252,7 @@ def time_dseams(lib, core, xyz, box, version: str, threads: int) -> None:
         if not skip("rings"):
             emit({"event": "begin", "operation": "rings"})
             samples, six, note = run_samples(rings, False, 0)
-            if six != SIX:
+            if current_phase() == "ice" and six != SIX:
                 raise RuntimeError(f"d-SEAMS six-rings {six} != {SIX}")
             _done("rings", "d-SEAMS", version, n, samples, f"six={six}", note)
 
@@ -265,7 +310,7 @@ def time_dseams(lib, core, xyz, box, version: str, threads: int) -> None:
         if not skip("chill+"):
             emit({"event": "begin", "operation": "chill+"})
             samples, cubic, note = run_samples(chill, False, 0)
-            if cubic != n:
+            if current_phase() == "ice" and cubic != n:
                 raise RuntimeError(f"CHILL+ cubic {cubic} != {n}")
             save_agree(threads, "d-SEAMS", "chill+", np.ctypeslib.as_array(labels))
             _done("chill+", "d-SEAMS", version, n, samples, f"cubic={cubic}", note)
@@ -290,7 +335,7 @@ def time_dseams(lib, core, xyz, box, version: str, threads: int) -> None:
         if not skip("classifier"):
             emit({"event": "begin", "operation": "classifier"})
             samples, ic, note = run_samples(symmetry, False, 0)
-            if ic != n:
+            if current_phase() == "ice" and ic != n:
                 raise RuntimeError(f"classifier ice Ic {ic} != {n}")
             save_agree(threads, "d-SEAMS", "classifier", sym)
             _done("classifier", "d-SEAMS", version, n, samples,
@@ -343,7 +388,7 @@ def time_rsm(xyz, side: float, threads: int) -> None:
             backend="rust", num_threads=threads)
         values = np.asarray(counts, dtype=np.float64)
         six = int(round(float(values[5])))
-        if six != SIX:
+        if current_phase() == "ice" and six != SIX:
             raise RuntimeError(f"rings-statistics-matter six-rings {six} != {SIX}")
         return six
 
@@ -418,7 +463,9 @@ def time_mdapy(xyz, side: float, threads: int) -> None:
         hold_affinity(threads)
         set_num_threads(threads)
         built = NeighborList.build(system, cutoff=CUTOFF)
-        return int(sit.np_len(built))
+        pairs = int(sit.np_len(built))
+        save_agree(threads, "mdapy", "neighbours", [pairs])
+        return pairs
 
     jobs.append(("neighbours", neighbours, "pairs"))
 
@@ -617,8 +664,13 @@ def time_pyscal(xyz, side: float, threads: int) -> None:
         hold_affinity(threads)
         pyscal3.set_num_threads(threads)
         pyscal3.find_neighbors(atoms, method="cutoff", cutoff=CUTOFF)
-        rows = atoms.arrays["pyscal_neighbors"]
-        pairs = int(np.asarray(rows).size)
+        if "pyscal_bond_neighbors" in atoms.info:
+            pairs = int(np.asarray(atoms.info["pyscal_bond_neighbors"]).shape[0])
+        elif "pyscal_neighbors" in atoms.arrays:
+            rows = np.asarray(atoms.arrays["pyscal_neighbors"])
+            pairs = int(np.count_nonzero(rows >= 0))
+        else:
+            pairs = sum(len(row) for row in atoms.info["pyscal_neighbors"])
         save_agree(threads, "pyscal3", "neighbours", [pairs])
         return pairs
 
@@ -747,7 +799,7 @@ def worker(args) -> int:
         raise RuntimeError(f"affinity has {cores} cores, width is {args.threads}")
     if args.from_op:
         os.environ["SITTING_FROM"] = args.from_op
-    xyz, box, side = ice()
+    xyz, box, side = load_frame()
     key = args.code
     if key == "dseams":
         import ctypes
@@ -922,14 +974,14 @@ def _next_op(code_key: str, operation: str) -> str:
     return ops[index]
 
 
-def row_from(msg: dict, threads: int, affinity: str, info: dict) -> dict:
+def row_from(msg: dict, threads: int, affinity: str, info: dict, phase: str) -> dict:
     if msg.get("event") == "fail" or "samples_ms" not in msg:
         return {
             "source_commit": info["source_commit"],
             "cpu_model": info["cpu_model"],
             "cpu_cores": info["cpu_cores"],
             "affinity": affinity,
-            "phase": "ice",
+            "phase": phase,
             "operation": msg.get("operation", ""),
             "code": msg.get("code", ""),
             "version": msg.get("version", ""),
@@ -950,7 +1002,7 @@ def row_from(msg: dict, threads: int, affinity: str, info: dict) -> dict:
         "cpu_model": info["cpu_model"],
         "cpu_cores": info["cpu_cores"],
         "affinity": affinity,
-        "phase": "ice",
+        "phase": phase,
         "operation": msg["operation"],
         "code": msg["code"],
         "version": msg["version"],
@@ -984,7 +1036,8 @@ def write_outputs(out: Path, rows: list[dict], info: dict) -> None:
         "n_if_rival_call_exceeds_30s 6",
         "rival_call_limit_s 120",
         f"molecules {MOLECULES}",
-        "cell ice Ic 48^3 conventional cells, eight times 24^3",
+        "ice Ic 48^3 conventional cells, eight times 24^3",
+        "liquid TIP4P/ice, 4096 molecules melted at 300 K, replicated 6^3",
         "cutoff_A 3.5",
         "widths 1 2 4 8",
         "one sitting; each width and each code is one process",
@@ -992,7 +1045,7 @@ def write_outputs(out: Path, rows: list[dict], info: dict) -> None:
     ]
     for row in rows:
         log.append(
-            f"{row['operation']} {row['code']} threads {row['threads']} "
+            f"{row['phase']} {row['operation']} {row['code']} threads {row['threads']} "
             f"n {row['n']} median_ms {row['median_ms']} iqr_ms {row['iqr_ms']} "
             f"affinity {row['affinity']} {row['detail']}"
         )
@@ -1034,43 +1087,44 @@ def main() -> int:
             ("plumed", "PLUMED", True),
             ("ovito-coord", "OVITO", True),
         ]
-    if args.extra:
-        agree = args.out / ".sitting-agree"
-        if agree.is_dir():
-            for path in agree.glob("*.npy"):
-                path.unlink()
+    agree = args.out / ".sitting-agree"
+    if agree.is_dir():
+        for path in agree.glob("*.npy"):
+            path.unlink()
     collected = []
-    for threads in widths:
-        affinity = stats.taskset_cores(threads)
-        for key, _name, rival in catalog:
-            if only and key not in only:
-                continue
-            print(f"threads {threads} code {key}", flush=True)
-            env = rival_env(threads) if rival else stats.pin_env(threads)
-            if args.extra and key == "dseams":
-                env["SITTING_ONLY"] = "rings,q6,neighbours"
-            prior = env.get("LD_LIBRARY_PATH", "")
-            libs = sit.library_path(args.lib)
-            system = "/usr/lib/x86_64-linux-gnu"
-            parts = [libs]
-            if prior:
-                parts.append(prior)
-            parts.append(system)
-            env["LD_LIBRARY_PATH"] = os.pathsep.join(parts)
-            env["QT_QPA_PLATFORM"] = "offscreen"
-            env["PYTHONUNBUFFERED"] = "1"
-            env["SIT_AGREE"] = str(args.out / ".sitting-agree")
-            messages = drive(key, threads, rival, args, env)
-            for msg in messages:
-                if not msg.get("code"):
-                    msg["code"] = _name
-                collected.append(row_from(msg, threads, affinity, info))
-            print(
-                f"threads {threads} code {key} rows "
-                f"{sum(1 for row in collected if row['threads'] == threads and row['code'] == _name)}",
-                flush=True)
-            if not args.extra:
-                write_outputs(args.out, collected, info)
+    for phase in PHASES:
+        for threads in widths:
+            affinity = stats.taskset_cores(threads)
+            for key, _name, rival in catalog:
+                if only and key not in only:
+                    continue
+                print(f"phase {phase} threads {threads} code {key}", flush=True)
+                env = rival_env(threads) if rival else stats.pin_env(threads)
+                env["SIT_PHASE"] = phase
+                if args.extra and key == "dseams":
+                    env["SITTING_ONLY"] = "rings,q6,neighbours"
+                prior = env.get("LD_LIBRARY_PATH", "")
+                libs = sit.library_path(args.lib)
+                system = "/usr/lib/x86_64-linux-gnu"
+                parts = [libs]
+                if prior:
+                    parts.append(prior)
+                parts.append(system)
+                env["LD_LIBRARY_PATH"] = os.pathsep.join(parts)
+                env["QT_QPA_PLATFORM"] = "offscreen"
+                env["PYTHONUNBUFFERED"] = "1"
+                env["SIT_AGREE"] = str(args.out / ".sitting-agree")
+                messages = drive(key, threads, rival, args, env)
+                for msg in messages:
+                    if not msg.get("code"):
+                        msg["code"] = _name
+                    collected.append(row_from(msg, threads, affinity, info, phase))
+                print(
+                    f"phase {phase} threads {threads} code {key} rows "
+                    f"{sum(1 for row in collected if row['phase'] == phase and row['threads'] == threads and row['code'] == _name)}",
+                    flush=True)
+                if not args.extra:
+                    write_outputs(args.out, collected, info)
     if not collected:
         raise SystemExit("the sitting produced no rows")
     problems = record_agreement(collected, args.out / ".sitting-agree")
@@ -1107,133 +1161,186 @@ def _note(row: dict, text: str) -> None:
     row["detail"] = f"{detail} {text}".strip()
 
 
-def record_agreement(rows: list[dict], root: Path) -> None:
-    """Stamp each paired row with how it compares to the other codes.
+def _six(detail: str):
+    match = re.search(r"six=(\d+)", detail or "")
+    if not match:
+        return None
+    return int(match.group(1))
 
-    q6 values, neighbour-pair counts, CHILL+ cubic labels and the
-    classifier versus ice-only PTM are compared on the same frame.
+
+def record_agreement(rows: list[dict], root: Path) -> list[str]:
+    """Stamp each paired row with how it compares on the same frame.
+
+    Hard-cutoff q6, neighbour-pair counts, the coordination sum and the
+    six-ring count have to match. On ice, CHILL+ is entirely cubic and
+    the classifier matches ice-only PTM on every atom. On the liquid,
+    CHILL+ labels match after the OVITO type map, and neither the
+    classifier nor PTM may call the frame a crystal.
     """
     import numpy as np
-    by = {(str(r["threads"]), r["code"], r["operation"]): r for r in rows}
+    by = {(r["phase"], str(r["threads"]), r["code"], r["operation"]): r for r in rows}
     problems = []
+    # OVITO ChillPlusModifier.Type to d-SEAMS atom_state_type.
+    ovito_to_dseams = np.array([2, 1, 0, 3, 4, 5], dtype=np.int32)
 
-    def load(threads: str, code: str, operation: str):
-        path = root / f"t{threads}-{code}-{operation}.npy"
+    def load(phase: str, threads: str, code: str, operation: str):
+        path = root / f"t{threads}-{phase}-{code}-{operation}.npy"
         if not path.is_file():
             return None
         return np.load(path)
 
-    for threads in ("1", "2", "4", "8"):
-        ours = load(threads, "d-SEAMS", "q6")
-        freud = load(threads, "freud", "q6")
-        mdapy = load(threads, "mdapy", "q6")
-        gaps = []
-        if ours is not None and freud is not None:
-            gaps.append(("freud", float(np.max(np.abs(ours - freud)))))
-        if ours is not None and mdapy is not None:
-            gaps.append(("mdapy", float(np.max(np.abs(ours - mdapy)))))
-        pyscal = load(threads, "pyscal3", "q6")
-        plumed = load(threads, "PLUMED", "q6")
-        if ours is not None and pyscal is not None:
-            gaps.append(("pyscal3", float(np.max(np.abs(ours - pyscal)))))
-        if ours is not None and plumed is not None:
-            gaps.append(("PLUMED", float(np.max(np.abs(ours - plumed)))))
-        if gaps:
-            text = " ".join(f"agree_{name}_max_abs={gap:.3e}" for name, gap in gaps)
-            codes = ["d-SEAMS"] + [name for name, _gap in gaps]
-            for code in codes:
-                row = by.get((threads, code, "q6"))
-                if row:
-                    _note(row, text)
-            for name, gap in gaps:
-                if gap > 1e-4:
-                    problems.append(f"q6 threads {threads} {name} {gap:.3e}")
-        counts = []
-        names = ("d-SEAMS", "vesin", "freud", "pyscal3")
-        present = []
-        for code in names:
-            values = load(threads, code, "neighbours")
-            count = None if values is None else int(np.asarray(values).reshape(-1)[0])
-            if count is not None:
-                present.append(code)
-                counts.append(count)
-        if "d-SEAMS" in present and len(present) >= 2:
-            text = "pairs=" + "/".join(
-                f"{code}:{count}" for code, count in zip(present, counts)
-            )
-            matched = len(set(counts)) == 1
-            text += " agree=" + ",".join(present) if matched else " disagree=" + ",".join(present)
-            if not matched:
-                problems.append(f"neighbours threads {threads} {list(zip(present, counts))}")
-            for code in present:
-                row = by.get((threads, code, "neighbours"))
-                if row:
-                    _note(row, text)
-        dchill = load(threads, "d-SEAMS", "chill+")
-        ochill = load(threads, "OVITO", "chill+")
-        if dchill is not None and ochill is not None:
-            d_cubic = int(np.count_nonzero(dchill == 0))
-            o_cubic = int(np.count_nonzero(ochill == 2))
-            text = f"cubic_dseams={d_cubic} cubic_ovito={o_cubic}"
-            for code in ("d-SEAMS", "OVITO"):
-                row = by.get((threads, code, "chill+"))
-                if row:
-                    _note(row, text)
-            if d_cubic != len(dchill) or o_cubic != len(ochill):
-                problems.append(f"chill+ threads {threads} d-SEAMS {d_cubic} OVITO {o_cubic}")
-        labels = load(threads, "d-SEAMS", "classifier")
-        ptm = load(threads, "OVITO", "ptm-ice")
-        if labels is not None and ptm is not None:
-            matched = int(np.count_nonzero((labels == 1) & (ptm == 6)))
-            text = f"agree_ice_ic_cubic_diamond={matched}/{len(labels)}"
-            for code, operation in (("d-SEAMS", "classifier"), ("OVITO", "ptm-ice")):
-                row = by.get((threads, code, operation))
-                if row:
-                    _note(row, text)
-            if matched != len(labels):
-                problems.append(f"classifier threads {threads} {matched}/{len(labels)}")
-        coord = load(threads, "OVITO", "coordination")
-        ours_pairs = load(threads, "d-SEAMS", "neighbours")
-        if coord is not None and ours_pairs is not None:
-            total = int(np.sum(coord))
-            pairs = int(np.asarray(ours_pairs).reshape(-1)[0])
-            text = f"coordination_sum={total} dseams_pairs={pairs}"
-            for code, operation in (("OVITO", "coordination"), ("d-SEAMS", "neighbours")):
-                row = by.get((threads, code, operation))
-                if row:
-                    _note(row, text)
-            if total != pairs:
-                problems.append(f"coordination threads {threads} {total} vs {pairs}")
-        for code in ("d-SEAMS", "rings-statistics-matter"):
-            row = by.get((threads, code, "rings"))
-            if row and "six=1769472" in row.get("detail", ""):
-                _note(row, "agree_six=1769472")
+    for phase in PHASES:
+        for threads in ("1", "2", "4", "8"):
+            ours = load(phase, threads, "d-SEAMS", "q6")
+            gaps = []
+            for code in ("freud", "mdapy", "pyscal3", "PLUMED"):
+                other = load(phase, threads, code, "q6")
+                if ours is None or other is None:
+                    continue
+                gaps.append((code, float(np.max(np.abs(ours - other)))))
+            if ours is not None:
+                mean_q = float(np.mean(ours))
+                if phase == "liquid" and mean_q > 0.50:
+                    problems.append(f"liquid q6 mean {mean_q:.3f} still looks like ice")
+            if gaps:
+                text = " ".join(f"agree_{name}_max_abs={gap:.3e}" for name, gap in gaps)
+                if ours is not None and phase == "liquid":
+                    text += f" mean_q6={mean_q:.4f}"
+                for code in ["d-SEAMS"] + [name for name, _gap in gaps]:
+                    row = by.get((phase, threads, code, "q6"))
+                    if row:
+                        _note(row, text)
+                for name, gap in gaps:
+                    limit = 1.0e-4
+                    # PLUMED's rational switch is a hard cutoff on the ice
+                    # shell and a smooth cutoff through the liquid's first
+                    # minimum. A large gap is still a broken run.
+                    if phase == "liquid" and name == "PLUMED":
+                        limit = 0.25
+                    elif phase == "liquid":
+                        # Freud on the 300 A liquid box is 1.5e-4. mdapy and
+                        # pyscal3 stay at rounding error on the same atoms.
+                        limit = 2.0e-4
+                    if gap > limit:
+                        problems.append(f"{phase} q6 threads {threads} {name} {gap:.3e}")
+            counts = []
+            names = ("d-SEAMS", "vesin", "freud", "pyscal3", "mdapy")
+            present = []
+            for code in names:
+                values = load(phase, threads, code, "neighbours")
+                count = None if values is None else int(np.asarray(values).reshape(-1)[0])
+                if count is not None:
+                    present.append(code)
+                    counts.append(count)
+            if "d-SEAMS" in present and len(present) >= 2:
+                text = "pairs=" + "/".join(
+                    f"{code}:{count}" for code, count in zip(present, counts)
+                )
+                matched = len(set(counts)) == 1
+                text += " agree=" + ",".join(present) if matched else " disagree=" + ",".join(present)
+                if not matched:
+                    problems.append(f"{phase} neighbours threads {threads} {list(zip(present, counts))}")
+                for code in present:
+                    row = by.get((phase, threads, code, "neighbours"))
+                    if row:
+                        _note(row, text)
+            dchill = load(phase, threads, "d-SEAMS", "chill+")
+            ochill = load(phase, threads, "OVITO", "chill+")
+            if dchill is not None and ochill is not None:
+                mapped = np.full(dchill.shape, -1, dtype=np.int32)
+                known = (ochill >= 0) & (ochill < len(ovito_to_dseams))
+                mapped[known] = ovito_to_dseams[ochill[known]]
+                same = int(np.count_nonzero(mapped == dchill))
+                d_cubic = int(np.count_nonzero(dchill == 0))
+                o_cubic = int(np.count_nonzero(ochill == 2))
+                text = f"cubic_dseams={d_cubic} cubic_ovito={o_cubic} chill_match={same}/{len(dchill)}"
+                for code in ("d-SEAMS", "OVITO"):
+                    row = by.get((phase, threads, code, "chill+"))
+                    if row:
+                        _note(row, text)
+                if phase == "ice" and (d_cubic != len(dchill) or o_cubic != len(ochill) or same != len(dchill)):
+                    problems.append(
+                        f"ice chill+ threads {threads} d-SEAMS {d_cubic} "
+                        f"OVITO {o_cubic} match {same}/{len(dchill)}")
+            labels = load(phase, threads, "d-SEAMS", "classifier")
+            ptm = load(phase, threads, "OVITO", "ptm-ice")
+            if labels is not None and ptm is not None:
+                if phase == "ice":
+                    matched = int(np.count_nonzero((labels == 1) & (ptm == 6)))
+                    text = f"agree_ice_ic_cubic_diamond={matched}/{len(labels)}"
+                    if matched != len(labels):
+                        problems.append(f"ice classifier threads {threads} {matched}/{len(labels)}")
+                else:
+                    d_crystal = int(np.count_nonzero(labels >= 0))
+                    o_crystal = int(np.count_nonzero((ptm == 6) | (ptm == 7)))
+                    text = f"crystal_dseams={d_crystal} crystal_ptm={o_crystal}"
+                    limit = int(0.05 * len(labels))
+                    if d_crystal > limit or o_crystal > limit:
+                        problems.append(
+                            f"liquid classifier threads {threads} "
+                            f"d-SEAMS {d_crystal} PTM {o_crystal}")
+                for code, operation in (("d-SEAMS", "classifier"), ("OVITO", "ptm-ice")):
+                    row = by.get((phase, threads, code, operation))
+                    if row:
+                        _note(row, text)
+            coord = load(phase, threads, "OVITO", "coordination")
+            ours_pairs = load(phase, threads, "d-SEAMS", "neighbours")
+            if coord is not None and ours_pairs is not None:
+                total = int(np.sum(coord))
+                pairs = int(np.asarray(ours_pairs).reshape(-1)[0])
+                text = f"coordination_sum={total} dseams_pairs={pairs}"
+                for code, operation in (("OVITO", "coordination"), ("d-SEAMS", "neighbours")):
+                    row = by.get((phase, threads, code, operation))
+                    if row:
+                        _note(row, text)
+                if total != pairs:
+                    problems.append(f"{phase} coordination threads {threads} {total} vs {pairs}")
+            sixes = []
+            for code in ("d-SEAMS", "rings-statistics-matter"):
+                row = by.get((phase, threads, code, "rings"))
+                if not row:
+                    continue
+                six = _six(row.get("detail", ""))
+                if six is None:
+                    continue
+                sixes.append((code, six, row))
+            if len({six for _code, six, _row in sixes}) == 1 and sixes:
+                for _code, six, row in sixes:
+                    _note(row, f"agree_six={six}")
+            elif len(sixes) >= 2:
+                problems.append(f"{phase} rings threads {threads} {[(c, s) for c, s, _r in sixes]}")
+            if phase == "ice":
+                for code, six, _row in sixes:
+                    if six != SIX:
+                        problems.append(f"ice rings {code} threads {threads} six={six}")
     return problems
 
 
 def require_rival_scaling(rows: list[dict]) -> None:
-    """A rival row is trusted only when its time falls from 1 thread to 8."""
+    """A finished rival row is trusted only when its time falls from 1 to 8 threads.
+
+    A cell that hit the 120 s cap is already recorded and is not a
+    missing thread count.
+    """
     rivals = {name for _key, name, rival in CODES if rival}
-    grouped: dict[tuple[str, str], dict[int, float]] = {}
+    grouped: dict[tuple[str, str, str], dict[int, float]] = {}
     for row in rows:
         if row["code"] not in rivals:
             continue
         try:
             value = float(row["median_ms"])
-        except ValueError:
-            raise SystemExit(
-                f"{row['code']} {row['operation']} at {row['threads']} threads "
-                f"is {row['median_ms']}, not a time")
-        grouped.setdefault((row["code"], row["operation"]), {})[int(row["threads"])] = value
+        except (TypeError, ValueError):
+            continue
+        grouped.setdefault(
+            (row["phase"], row["code"], row["operation"]), {})[int(row["threads"])] = value
     problems = []
     for key in sorted(grouped):
         times = grouped[key]
         if 1 not in times or 8 not in times:
-            problems.append(f"{key[0]} {key[1]} missing a width: {sorted(times)}")
             continue
         if not times[8] < times[1]:
             text = " ".join(f"{width}:{times[width]:.1f}" for width in sorted(times))
-            problems.append(f"{key[0]} {key[1]} does not fall with threads: {text}")
+            problems.append(f"{key[0]} {key[1]} {key[2]} does not fall with threads: {text}")
     if problems:
         raise SystemExit("rival thread counts did not take effect\n" + "\n".join(problems))
 

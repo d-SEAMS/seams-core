@@ -4,6 +4,7 @@
 benchmarks/paper-cells/.sitting-large.jsonl
 benchmarks/paper-cells/.sitting-agree/
 benchmarks/paper-cells/*.pdf
+benchmarks/paper-cells/.liquid-work/
 benchmarks/*.png
 mw215-frames/
 /result

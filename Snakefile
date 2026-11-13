@@ -701,6 +701,7 @@ rule paper_sitting_large:
         "scripts/paper_sitting.py",
         "scripts/paper_stats.py",
         "scripts/h2h_protocol.py",
+        "benchmarks/paper-cells/tip4pice-liquid-4096.txt",
         "bbdir-release/bindings/libseams_lang.so",
         "bbdir-release/src/libyodaLib.so",
         "bbdir-release/seams",
