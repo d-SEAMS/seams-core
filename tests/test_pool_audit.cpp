@@ -125,4 +125,15 @@ TEST_CASE("pool-sized kernels match the one-thread result on ice Ic") {
   REQUIRE(sym1 == sym8);
   REQUIRE(carried1 == carried8);
   REQUIRE(carried1 == rebuilt);
+
+  const auto full = [&](int threads) {
+    setThreads(threads);
+    auto listed = nneigh::neighListLinkcell(3.5, ice, 1);
+    auto idx = nneigh::neighbourListByIndex(ice, listed);
+    return primitive::ringNetwork(idx, 6);
+  };
+  const auto full1 = full(1);
+  const auto full8 = full(8);
+  REQUIRE(full1 == full8);
+  REQUIRE(full1 == rings1);
 }

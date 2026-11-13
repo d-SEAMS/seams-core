@@ -1876,6 +1876,22 @@ nneigh::neighListLinkcell(
   if (typeIIndices.empty()) {
     return {};
   }
+  // Linkcell's buffered walk does not speed up on a large crystal: at
+  // 884736 molecules it stays near the one-thread time while the
+  // orthorhombic cell list does not. The rows are the same cutoff set,
+  // sorted, so the ring search does not depend on which builder ran.
+#ifdef SEAMS_HAS_OPENMP
+  const bool csrTeam = !gSerialCutoff && !omp_in_parallel() && pool > 1;
+#else
+  const bool csrTeam = false;
+#endif
+  if (csrTeam && (yCloud.box.size() == 3 || yCloud.box.size() >= 6)) {
+    std::vector<int> offsets;
+    std::vector<int> cols;
+    if (orthoFullCsr(yCloud, &typeIIndices, rcutoff, offsets, cols, false)) {
+      return idRowsFromCsr(yCloud, indexToID, offsets, cols);
+    }
+  }
   CutoffRows rows;
   if (!cutoffRows(yCloud, typeIIndices, rcutoff, rows, false, 0.0)) {
     return {};
