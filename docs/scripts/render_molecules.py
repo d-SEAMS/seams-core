@@ -516,6 +516,127 @@ def _spin(pos, axis, degrees):
     return out
 
 
+def _rotation_taking(source, target):
+    """Matrix that sends the column vector source onto target."""
+    import numpy as np
+
+    source = np.asarray(source, dtype=float)
+    target = np.asarray(target, dtype=float)
+    source = source / (np.linalg.norm(source) or 1.0)
+    target = target / (np.linalg.norm(target) or 1.0)
+    cross = np.cross(source, target)
+    sine = float(np.linalg.norm(cross))
+    cosine = float(np.dot(source, target))
+    if sine < 1e-8:
+        if cosine > 0.0:
+            return np.eye(3)
+        axis = np.array([1.0, 0.0, 0.0])
+        if abs(float(source[0])) > 0.9:
+            axis = np.array([0.0, 1.0, 0.0])
+        axis = np.cross(source, axis)
+        axis = axis / np.linalg.norm(axis)
+        skew = np.array([
+            [0.0, -axis[2], axis[1]],
+            [axis[2], 0.0, -axis[0]],
+            [-axis[1], axis[0], 0.0],
+        ])
+        return np.eye(3) + 2.0 * (skew @ skew)
+    axis = cross / sine
+    skew = np.array([
+        [0.0, -axis[2], axis[1]],
+        [axis[2], 0.0, -axis[0]],
+        [-axis[1], axis[0], 0.0],
+    ])
+    return np.eye(3) + sine * skew + (1.0 - cosine) * (skew @ skew)
+
+
+def _cluster_mapper(positions, names):
+    """Put the stacking axis up the page, with a turn so the bands have depth."""
+    import numpy as np
+
+    pts = np.asarray(positions, dtype=float)
+    crystal = np.array([
+        name in ("cubic", "hexagonal", "reCubic", "reHex") for name in names
+    ])
+    if int(np.count_nonzero(crystal)) < 8:
+        crystal = np.ones(len(pts), dtype=bool)
+    chosen = pts[crystal]
+    centre = chosen.mean(axis=0)
+    delta = chosen - centre
+    _values, vectors = np.linalg.eigh(np.cov(delta.T))
+    order = np.argsort(_values)
+    hex_mark = np.array([
+        name in ("hexagonal", "reHex")
+        for name, keep in zip(names, crystal) if keep
+    ], dtype=float)
+    best_score = -1.0
+    stacking = vectors[:, int(order[0])]
+    for col in range(3):
+        axis = vectors[:, col]
+        seq = hex_mark[np.argsort(delta @ axis)]
+        if len(seq) < 6:
+            score = 0.0
+        else:
+            smooth = np.convolve(seq, np.ones(5) / 5.0, mode="valid")
+            score = float(np.sum(np.abs(np.diff(smooth)) > 0.2))
+        if col == int(order[0]):
+            score += 1.0
+        if score > best_score:
+            best_score = score
+            stacking = axis
+    stacking = stacking / (np.linalg.norm(stacking) or 1.0)
+    perp = delta - np.outer(delta @ stacking, stacking)
+    spread, plane = np.linalg.eigh(np.cov(perp.T))
+    across = plane[:, int(np.argmax(spread))]
+    across = across - stacking * float(np.dot(across, stacking))
+    across = across / (np.linalg.norm(across) or 1.0)
+    depth = np.cross(across, stacking)
+    depth = depth / (np.linalg.norm(depth) or 1.0)
+    basis = np.column_stack((across, stacking, depth))
+    if np.linalg.det(basis) < 0.0:
+        basis[:, 2] *= -1.0
+    # row' = row @ spin matches _spin. Yaw, then a small tilt.
+    yaw, tilt = np.deg2rad(28.0), np.deg2rad(16.0)
+    cy, sy = np.cos(yaw), np.sin(yaw)
+    ct, st = np.cos(tilt), np.sin(tilt)
+    spin_y = np.array([[cy, 0.0, -sy], [0.0, 1.0, 0.0], [sy, 0.0, cy]])
+    spin_x = np.array([[1.0, 0.0, 0.0], [0.0, ct, st], [0.0, -st, ct]])
+    matrix = basis @ spin_y @ spin_x
+
+    def apply(points):
+        return (np.asarray(points, dtype=float) - centre) @ matrix
+
+    return apply
+
+
+def _depth_cue(positions, radii, transparency, names):
+    """Shrink and fade atoms toward the back of the cluster.
+
+    Cubic and hexagonal stay a little larger than the Ice Ih oxygen.
+    Mixed atoms stay smaller. The renderer treats mid alpha as glass,
+    so the fade steps from solid to a flat ghost.
+    """
+    import numpy as np
+
+    z = np.asarray(positions, dtype=float)[:, 2]
+    span = float(z.max() - z.min()) or 1.0
+    near = (z - float(z.min())) / span
+    radii = np.asarray(radii, dtype=float).copy()
+    transparency = np.asarray(transparency, dtype=float).copy()
+    for index, name in enumerate(names):
+        if name in ("cubic", "hexagonal", "reCubic", "reHex"):
+            base = ATOM_RADIUS * 1.12
+        elif name in ("mixed", "interfacial"):
+            base = ATOM_RADIUS * 0.64
+        elif name == "water":
+            base = ATOM_RADIUS * 0.40
+        else:
+            continue
+        radii[index] = base * (0.58 + 0.42 * float(near[index]))
+        transparency[index] = 0.0 if float(near[index]) >= 0.50 else 0.78
+    return radii, transparency, near
+
+
 def _basal_flat(points, center):
     """Basal coordinates before the small tilt. The c axis lies on z."""
     import numpy as np
@@ -657,6 +778,9 @@ def orient(positions, view, center):
     if view == "pair":
         # Cages already sit side by side. A small tilt shows the guest inside.
         return _spin(pos, "x", 20.0)
+    if view == "row":
+        # sH cages are posed per cage, including a pentagon facing the camera.
+        return pos
     return pos
 
 
@@ -725,7 +849,10 @@ def cycles_job():
             framed.append(np.asarray(job[key], dtype=float))
     framed = np.vstack(framed)
     com = framed.mean(axis=0)
-    pad = float(radii.max()) + 1.8 if len(radii) else 1.8
+    panel_name = str(job["panel"]) if "panel" in job.files else ""
+    # The sH row is wide. A smaller pad lets the cages fill the column.
+    pad_extra = 0.45 if panel_name.startswith("cage-sh") else 1.8
+    pad = float(radii.max()) + pad_extra if len(radii) else pad_extra
     low = framed.min(axis=0) - pad
     high = framed.max(axis=0) + pad
     half = np.maximum(com - low, high - com)
@@ -848,20 +975,21 @@ def cycles_job():
 
     groups = {}
     for index, colour in enumerate(colors):
-        key = tuple(round(float(channel), 4) for channel in colour)
-        groups.setdefault(key, {"index": [], "alpha": [], "radius": []})
-        groups[key]["index"].append(index)
-        groups[key]["alpha"].append(float(1.0 - transparency[index]))
-        groups[key]["radius"].append(float(radii[index]))
-    for key, group in groups.items():
-        alpha = min(group["alpha"])
+        # Radius and alpha stay per atom so a depth cue can shrink the back.
+        key = (
+            tuple(round(float(channel), 4) for channel in colour),
+            round(float(radii[index]), 3),
+            round(float(1.0 - transparency[index]), 2),
+        )
+        groups.setdefault(key, []).append(index)
+    for key, members in groups.items():
+        colour, radius, alpha = key
         # Faint context (the liquid shell) stays a flat ghost. Mid alpha is glass.
         transmission = 0.55 if 0.22 < alpha < 0.75 else 0.0
-        material = glossy("atom", key, alpha, transmission)
-        radius = float(np.median(group["radius"]))
+        material = glossy("atom", colour, alpha, transmission)
         from mathutils import Matrix
 
-        centres = positions[group["index"]]
+        centres = positions[members]
         matrices = [
             Matrix.Translation(tuple(float(v) for v in centre))
             for centre in centres
@@ -944,9 +1072,10 @@ def cycles_job():
     target = Vector((float(centre[0]), float(centre[1]), float(centre[2])))
     if ortho:
         camera_data.type = "ORTHO"
-        # cage-sh holds three cages, so the box sits further inside the frame.
+        # cage-sh is three cages. A higher fill keeps the large cage near the
+        # sII large cage's size on the page.
         label = str(job["panel"]) if "panel" in job.files else ""
-        fill = 0.72 if label.startswith("cage-sh") else 0.86
+        fill = 0.90 if label.startswith("cage-sh") else 0.86
         vertical = vertical / fill
         camera_data.ortho_scale = vertical
         camera.location = target + Vector((0.0, 0.0, 40.0))
@@ -1777,18 +1906,25 @@ def finish(positions, colors, radii, transparency, names, bonds, meshes, view, c
     if align and len(positions) > 8:
         solid = transparency < 0.5
         if int(np.count_nonzero(solid)) >= 8:
-            origin, basis = _principal_basis(positions, solid)
-            positions = _spin(_apply_basis(positions, origin, basis), "x", 12.0)
+            mapper = _cluster_mapper(positions, list(names))
+            positions = mapper(positions)
             posed = []
             for mesh in meshes:
                 posed.append({
-                    "vertices": _spin(_apply_basis(mesh["vertices"], origin, basis), "x", 12.0),
+                    "vertices": mapper(mesh["vertices"]),
                     "faces": mesh["faces"],
                     "color": mesh["color"],
                     "transparency": mesh["transparency"],
                     "legend": mesh.get("legend"),
                 })
             meshes = posed
+            radii, transparency, near = _depth_cue(positions, radii, transparency, names)
+            crystal = {"cubic", "hexagonal", "reCubic", "reHex"}
+            bonds = [
+                pair for pair in bonds
+                if names[pair[0]] in crystal and names[pair[1]] in crystal
+                and float(near[pair[0]]) >= 0.50 and float(near[pair[1]]) >= 0.50
+            ]
         else:
             positions = orient(positions, view, center)
             meshes = [
@@ -1907,7 +2043,8 @@ def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=
     xyz = np.asarray(kept_xyz, dtype=float)
     bonds = oxygen_bonds(xyz, heavy)
     if cluster:
-        crystal = {0, 1, 3, 7, 8}
+        # Cubic and hexagonal only. Mixed stays unbound, and liquid has no bonds.
+        crystal = {0, 1, 7, 8}
         bonds = [
             pair for pair in bonds
             if int(kept_labels[pair[0]]) in crystal and int(kept_labels[pair[1]]) in crystal
@@ -1922,7 +2059,7 @@ def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=
                     degree[right] += 1
             drop = {
                 index for index, count in degree.items()
-                if count < 2 and int(kept_labels[index]) != 2
+                if count < 2 and int(kept_labels[index]) not in (2, 3)
             }
             if not drop or len(keep - drop) < 12:
                 break
@@ -2240,6 +2377,86 @@ def host_token(lattice):
     return "clathrate"
 
 
+def _pentagon_matrix(shell, faces):
+    """Rotate a 5^12 cage so one pentagon faces the camera, vertex up."""
+    import numpy as np
+
+    shell = np.asarray(shell, dtype=float)
+    centre = shell.mean(axis=0)
+    groups = {}
+    for tri in np.asarray(faces, dtype=int):
+        groups.setdefault(int(tri[0]), []).append((int(tri[1]), int(tri[2])))
+    best_normal = None
+    best_cycle = None
+    best_score = -2.0
+    for _hub, edges in groups.items():
+        nxt = {left: right for left, right in edges}
+        if len(nxt) < 5:
+            continue
+        start = next(iter(nxt))
+        cycle = [start]
+        seen = {start}
+        while nxt.get(cycle[-1]) not in (None, start) and len(cycle) < 8:
+            nxt_i = nxt[cycle[-1]]
+            if nxt_i in seen:
+                break
+            cycle.append(nxt_i)
+            seen.add(nxt_i)
+        if nxt.get(cycle[-1]) != start or len(cycle) != 5:
+            continue
+        pts = shell[cycle]
+        normal = np.zeros(3)
+        for index, left in enumerate(pts):
+            right = pts[(index + 1) % len(pts)]
+            normal[0] += (left[1] - right[1]) * (left[2] + right[2])
+            normal[1] += (left[2] - right[2]) * (left[0] + right[0])
+            normal[2] += (left[0] - right[0]) * (left[1] + right[1])
+        length = float(np.linalg.norm(normal)) or 1.0
+        normal = normal / length
+        if float(np.dot(normal, pts.mean(axis=0) - centre)) < 0.0:
+            normal = -normal
+        score = float(normal[2])
+        if score > best_score:
+            best_score = score
+            best_normal = normal
+            best_cycle = cycle
+    if best_normal is None:
+        return np.eye(3)
+    aiming = _rotation_taking(best_normal, np.array([0.0, 0.0, 1.0]))
+    turned = (shell[best_cycle] - centre) @ aiming.T
+    top = turned[int(np.argmax(turned[:, 1]))]
+    yaw = float(np.arctan2(top[0], top[1]))
+    cosine, sine = np.cos(yaw), np.sin(yaw)
+    upright = np.array([
+        [cosine, -sine, 0.0],
+        [sine, cosine, 0.0],
+        [0.0, 0.0, 1.0],
+    ])
+    return upright @ aiming
+
+
+def _pose_cage(legend, waters, vertices, guests, faces):
+    """Small cage shows a pentagon. The others take a small tilt."""
+    import numpy as np
+
+    origin = np.asarray(waters, dtype=float).mean(axis=0)
+    if legend == "small cage":
+        matrix = _pentagon_matrix(waters, faces)
+    else:
+        angle = np.deg2rad(18.0)
+        cosine, sine = np.cos(angle), np.sin(angle)
+        matrix = np.array([
+            [1.0, 0.0, 0.0],
+            [0.0, cosine, -sine],
+            [0.0, sine, cosine],
+        ])
+
+    def turn(points):
+        return (np.asarray(points, dtype=float) - origin) @ matrix.T + origin
+
+    return turn(waters), turn(vertices), [turn(point) for point in guests]
+
+
 def side_by_side_cages(meshes, xyz, names, colors, radii, transparency, residue_index):
     """One water radius, two cages, a gap between them.
 
@@ -2262,7 +2479,8 @@ def side_by_side_cages(meshes, xyz, names, colors, radii, transparency, residue_
         guests.setdefault(residue_index[index], []).append(index)
     order = sorted(range(len(meshes)), key=lambda slot: 0 if meshes[slot].get("legend") == "small cage" else 1)
     cursor = None
-    gap = 4.0
+    # Three sH cages sit closer so the large one can match the sII large cage.
+    gap = 1.4 if any(mesh.get("legend") == "medium cage" for mesh in meshes) else 4.0
     out_pos, out_col, out_name, out_rad, out_alpha = [], [], [], [], []
     bonds = []
     shifted = []
@@ -2279,9 +2497,17 @@ def side_by_side_cages(meshes, xyz, names, colors, radii, transparency, residue_
             if dist < best_dist and dist <= limit:
                 best_dist = dist
                 mine = list(indices)
+        guest_points = [np.array(xyz[index], dtype=float, copy=True) for index in mine]
+        if "shell" in mesh:
+            waters, posed_vertices, guest_points = _pose_cage(
+                mesh.get("legend"), waters, mesh["vertices"], guest_points, mesh["faces"],
+            )
+            mesh = dict(mesh)
+            mesh["vertices"] = posed_vertices
+            mesh["shell"] = np.asarray(waters, dtype=float)
         stacked = waters
-        if mine:
-            stacked = np.vstack([waters, xyz[mine]])
+        if guest_points:
+            stacked = np.vstack([waters, np.asarray(guest_points, dtype=float)])
         xmin = float(stacked[:, 0].min())
         xmax = float(stacked[:, 0].max())
         shift = 0.0 if cursor is None else cursor + gap - xmin
@@ -2323,7 +2549,7 @@ def side_by_side_cages(meshes, xyz, names, colors, radii, transparency, residue_
                     bonds.append((start + left, start + right))
         guest_at = start + len(waters)
         for offset, index in enumerate(mine):
-            point = np.array(xyz[index], dtype=float, copy=True)
+            point = np.array(guest_points[offset], dtype=float, copy=True)
             point[0] += shift
             point[1] -= anchor[1]
             point[2] -= anchor[2]
@@ -2460,9 +2686,11 @@ def genice_picture(lattice, rep, guests, cage_faces, hydrogens=True):
             xyz, colors, radii, transparency, names, bonds, meshes = side_by_side_cages(
                 meshes, xyz, names, colors, radii, transparency, residue_index,
             )
+            # sH is posed per cage, so the row view must not tilt the pentagon.
+            view = "row" if lattice == "sH" else "pair"
             return finish(
                 xyz, colors, radii, transparency, names, bonds, meshes,
-                "pair", xyz.mean(axis=0), False, bold=bonds,
+                view, xyz.mean(axis=0), False, bold=bonds,
                 bond_radius=BOND_RADIUS, bond_rgb=(0.33, 0.35, 0.38),
             )
     return finish(
@@ -2686,6 +2914,27 @@ def depth_slab(frame, labels, x_lo=6.0, x_hi=12.5, z_lo=4.5, z_hi=26.0, liquid_r
                         continue
                     if float(np.linalg.norm(xyz[other] - xyz[pick])) <= 4.0:
                         chosen.add(int(other))
+        # The liquid sodium must not sit on a chloride. Keep the sodium
+        # whose nearest chloride is furthest away, and drop any chloride
+        # still within 4 angstroms of it.
+        chlorides = [i for i in chosen if int(frame.types[i]) == 3]
+        liquid_sodium = [
+            i for i in chosen
+            if int(frame.types[i]) == 4 and float(xyz[i, 2]) > ice_max
+        ]
+        if liquid_sodium and chlorides:
+            def clearance(index):
+                return min(float(np.linalg.norm(xyz[index] - xyz[other])) for other in chlorides)
+
+            separated = [index for index in liquid_sodium if clearance(index) >= 4.0]
+            pick = separated[0] if separated else max(liquid_sodium, key=clearance)
+            for other in liquid_sodium:
+                if other != pick:
+                    chosen.discard(other)
+            if clearance(pick) < 4.0:
+                for other in chlorides:
+                    if float(np.linalg.norm(xyz[pick] - xyz[other])) < 4.0:
+                        chosen.discard(other)
     index = sorted(chosen)
     return frame.subset(index), [labels[i] for i in index]
 
