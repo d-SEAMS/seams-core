@@ -88,12 +88,15 @@ NeighbourCSR flatten(const molSys::PointCloud<molSys::Point<double>, double> &yC
 
   // A row keeps the same neighbours in both passes and writes only its own
   // run of cols and dr, so the rows are independent.
-  // nvc++ -mp=gpu SIGSEGVs host parallel-fors in libnvomp
+  // nvc++ -mp=gpu SIGSEGVs host parallel-fors in libnvomp.
+  // The thread test is outside the pragma. An `if` clause on the pragma
+  // is read again by each worker, which races with the master's stack.
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
   const bool useThreads = g.nop >= kParallelThreshold;
-#pragma omp parallel for schedule(static) if (useThreads)
+#else
+  const bool useThreads = false;
 #endif
-  for (int i = 0; i < nRows; i++) {
+  auto countRow = [&](int i) {
     int kept = 0;
     std::vector<int> seen;
     seen.reserve(8);
@@ -109,6 +112,17 @@ NeighbourCSR flatten(const molSys::PointCloud<molSys::Point<double>, double> &yC
       kept++;
     }
     g.offsets[static_cast<size_t>(i) + 1] = kept;
+  };
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+  if (useThreads) {
+#pragma omp parallel for schedule(static)
+    for (int i = 0; i < nRows; i++) {
+      countRow(i);
+    }
+  } else
+#endif
+  for (int i = 0; i < nRows; i++) {
+    countRow(i);
   }
   std::partial_sum(g.offsets.begin(), g.offsets.end(), g.offsets.begin());
   const int nnz = g.offsets[static_cast<size_t>(g.nop)];
@@ -116,10 +130,7 @@ NeighbourCSR flatten(const molSys::PointCloud<molSys::Point<double>, double> &yC
   g.dr.resize(static_cast<size_t>(nnz) * 3);
 
   const gen::FracBox frame = gen::makeFracBox(yCloud);
-#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-#pragma omp parallel for schedule(static) if (useThreads)
-#endif
-  for (int i = 0; i < nRows; i++) {
+  auto fillRow = [&](int i) {
     int k = g.offsets[static_cast<size_t>(i)];
     std::vector<int> seen;
     seen.reserve(8);
@@ -140,6 +151,18 @@ NeighbourCSR flatten(const molSys::PointCloud<molSys::Point<double>, double> &yC
       g.dr[3 * static_cast<size_t>(k) + 2] = d[2];
       k++;
     }
+  };
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+  if (useThreads) {
+    const int rowCount = nRows;
+#pragma omp parallel for schedule(static) firstprivate(rowCount)
+    for (int i = 0; i < rowCount; i++) {
+      fillRow(i);
+    }
+  } else
+#endif
+  for (int i = 0; i < nRows; i++) {
+    fillRow(i);
   }
   return g;
 }
