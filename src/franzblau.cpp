@@ -2450,10 +2450,44 @@ struct primitive::RingUpdater::Impl {
         nVertices > 0 ? static_cast<double>(changedBonds) / nVertices : 0.0;
   }
 
+  // Odd rings are skipped only while the graph stays bipartite. The flag
+  // is global, and a full search of a crystal leaves it set, so each
+  // update reads it from the graph it is about to walk.
+  template <typename Graph> static bool skipsOddRings(const Graph &adjacency) {
+    const int nVertices = static_cast<int>(adjacency.size());
+    std::vector<char> color(static_cast<std::size_t>(std::max(nVertices, 0)), -1);
+    std::vector<int> queue;
+    for (int s = 0; s < nVertices; s++) {
+      if (color[static_cast<std::size_t>(s)] >= 0) {
+        continue;
+      }
+      color[static_cast<std::size_t>(s)] = 0;
+      queue.assign(1, s);
+      for (std::size_t q = 0; q < queue.size(); q++) {
+        const int u = queue[q];
+        const char cu = color[static_cast<std::size_t>(u)];
+        for (const int w : adjacency[u]) {
+          if (w < 0 || w >= nVertices) {
+            continue;
+          }
+          char &cw = color[static_cast<std::size_t>(w)];
+          if (cw < 0) {
+            cw = static_cast<char>(1 - cu);
+            queue.push_back(w);
+          } else if (cw == cu) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  }
+
   // Whole-frame enumeration into persistent per-source pools, then a copy
   // into the flattened buffer that keeps each ring's allocation.
   template <typename Graph> void fastEnumerate(const Graph &adj) {
     const int nVertices = static_cast<int>(adj.size());
+    gSkipOdd = skipsOddRings(adj);
     if (hopOnly) {
       ballsRefreshed = 0;
       ballsStale = false;
@@ -2540,6 +2574,7 @@ struct primitive::RingUpdater::Impl {
                const std::vector<char> &inT) {
     const int n = static_cast<int>(T.size());
     const int nVertices = static_cast<int>(adj.size());
+    gSkipOdd = skipsOddRings(adj);
     if (static_cast<int>(bySource.size()) != nVertices) {
       bySource.assign(static_cast<std::size_t>(nVertices), {});
     }
