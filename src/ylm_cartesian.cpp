@@ -16,8 +16,9 @@ void ylmBatchScalar(int orderL, const double *dx, const double *dy,
                     const double *dz, int n, double *re, double *im) {
   const int nComp = 2 * orderL + 1;
   for (int b = 0; b < n; ++b) {
-    ylmReal(orderL, dx[b], dy[b], dz[b], re + static_cast<std::size_t>(b) * nComp,
-            im + static_cast<std::size_t>(b) * nComp);
+    ylmReal(orderL, dx[b], dy[b], dz[b],
+            re + static_cast<std::size_t>(b) * static_cast<std::size_t>(nComp),
+            im + static_cast<std::size_t>(b) * static_cast<std::size_t>(nComp));
   }
 }
 

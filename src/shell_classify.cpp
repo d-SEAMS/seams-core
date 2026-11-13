@@ -12,6 +12,7 @@
 // Eigen is not included in this file, so the translation unit can be built
 // with AVX2.
 
+#include <index_range.hpp>
 #include <shell_hot.hpp>
 #include <thread_team.hpp>
 
@@ -2064,7 +2065,14 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     ny = std::max(1, static_cast<int>(lb / kGrid));
     nz = std::max(1, static_cast<int>(lc / kGrid));
   }
-  const int ncell = nx * ny * nz;
+  // A box of a few thousand angstroms makes nx*ny*nz overflow a signed
+  // int. Coarser cells stay at least one bond wide, so the same 27-cell
+  // stencil still holds every neighbour inside the bond cutoff.
+  seams::coarsenUntilFits(nx, ny, nz, fast ? 3 : 1);
+  int ncell = 0;
+  if (!seams::gridFits(nx, ny, nz, ncell)) {
+    return;
+  }
   const int reach = fast ? 1 : (skew > 1.0 ? 4 : 2);
   Workspace &mem = workspace();
   mem.fit(static_cast<size_t>(n), static_cast<size_t>(ncell));
@@ -2663,14 +2671,14 @@ int bondsBeyond(int atom, const Packed *packed, const int *cellStart, int nx, in
         continue;
       }
       const double dx = nbr.x + sx * lat[0][0] + sy * lat[1][0] + sz * lat[2][0] - ci0;
-      const double dy = nbr.y + sx * lat[0][1] + sy * lat[1][1] + sz * lat[2][1] - ci1;
-      const double dz = nbr.z + sx * lat[0][2] + sy * lat[1][2] + sz * lat[2][2] - ci2;
-      const double d2 = dx * dx + dy * dy + dz * dz;
+      const double offY = nbr.y + sx * lat[0][1] + sy * lat[1][1] + sz * lat[2][1] - ci1;
+      const double offZ = nbr.z + sx * lat[0][2] + sy * lat[1][2] + sz * lat[2][2] - ci2;
+      const double d2 = dx * dx + offY * offY + offZ * offZ;
       if (d2 <= kBond * kBond || d2 > kWide * kWide) {
         continue;
       }
       if (nw < kMaxWide) {
-        row[nw] = Bond{nbr.id, dx, dy, dz};
+        row[nw] = Bond{nbr.id, dx, offY, offZ};
         rd[nw] = d2;
         nw++;
       } else {
@@ -2681,7 +2689,7 @@ int bondsBeyond(int atom, const Packed *packed, const int *cellStart, int nx, in
           }
         }
         if (d2 < rd[worst]) {
-          row[worst] = Bond{nbr.id, dx, dy, dz};
+          row[worst] = Bond{nbr.id, dx, offY, offZ};
           rd[worst] = d2;
         }
       }

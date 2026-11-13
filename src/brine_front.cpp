@@ -13,6 +13,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <brine_front.hpp>
+#include <index_range.hpp>
 
 #include <franzblau.hpp>
 #include <generic.hpp>
@@ -94,7 +95,13 @@ Cells makeCells(const Cloud &cloud, const std::vector<int> &members, double cuto
   cells.ny = std::max(1, static_cast<int>(std::floor(ly / cells.cell)));
   cells.nz = std::max(1, static_cast<int>(std::floor(lz / cells.cell)));
   cells.cell = cutoff;
-  cells.buckets.resize(static_cast<std::size_t>(cells.nx * cells.ny * cells.nz));
+  seams::coarsenUntilFits(cells.nx, cells.ny, cells.nz, 1);
+  int nBuckets = 0;
+  if (!seams::gridFits(cells.nx, cells.ny, cells.nz, nBuckets)) {
+    cells.nx = cells.ny = cells.nz = 1;
+    nBuckets = 1;
+  }
+  cells.buckets.resize(static_cast<std::size_t>(nBuckets));
   auto bin = [&](double value, double origin, double length, int n) {
     if (length <= 0 || n <= 1) {
       return 0;

@@ -26,6 +26,7 @@
 #include <edge_set.hpp>
 #include <franzblau.hpp>
 #include <generic.hpp>
+#include <index_range.hpp>
 #include <local_symmetry.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
@@ -780,7 +781,7 @@ seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type,
       idx.resize(static_cast<std::size_t>(n));
     }
     nb->n = n;
-    nb->offsets.assign(static_cast<std::size_t>(n + 1), 0);
+    std::vector<int> degrees(static_cast<std::size_t>(n), 0);
     for (int i = 0; i < n; ++i) {
       const auto &row = idx[static_cast<std::size_t>(i)];
       int degree = 0;
@@ -789,8 +790,10 @@ seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type,
           ++degree;
         }
       }
-      nb->offsets[static_cast<std::size_t>(i + 1)] =
-          nb->offsets[static_cast<std::size_t>(i)] + degree;
+      degrees[static_cast<std::size_t>(i)] = degree;
+    }
+    if (!seams::prefixCounts(degrees.data(), n, nb->offsets)) {
+      return fail(SEAMS_ERR_RANGE, "neighbour list does not fit");
     }
     nb->cols.resize(static_cast<std::size_t>(nb->offsets[static_cast<std::size_t>(n)]));
     for (int i = 0; i < n; ++i) {

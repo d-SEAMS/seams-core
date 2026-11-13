@@ -823,7 +823,7 @@ std::vector<std::vector<int>> rings(const Cloud &cloud, double cutoff,
     const int f = near.local[k];
     frame.push_back(f);
     std::vector<int> row;
-    if (f >= 0 && static_cast<std::size_t>(f) < full.size() && !full[f].empty()) {
+    if (f >= 0 && static_cast<std::size_t>(f) < full.size() && !full[static_cast<std::size_t>(f)].empty()) {
       row.assign(full[static_cast<std::size_t>(f)].begin() + 1,
                  full[static_cast<std::size_t>(f)].end());
     }

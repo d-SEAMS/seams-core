@@ -115,7 +115,7 @@ double pntToPnt::getRadiusFromRings(
   double avgRadius = 0.0;
   std::vector<double> centroid1, centroid2;
   std::vector<double> dist;     // Distances
-  int ringSize = basal1.size(); // Number of nodes in the basal rings
+  int ringSize = static_cast<int>(basal1.size()); // Number of nodes in the basal rings
   double r1, r2;                // Distance from the centroid
   int iatom; // Atom index in yCloud for the current point in basal1
   int jatom; // Atom index in yCloud for the current point in basal2
@@ -126,28 +126,28 @@ double pntToPnt::getRadiusFromRings(
   // Loop through basal1 and basal2
   for (int i = 0; i < ringSize; i++) {
     // For basal1
-    centroid1[0] += yCloud.pts[basal1[i]].x;
-    centroid1[1] += yCloud.pts[basal1[i]].y;
-    centroid1[2] += yCloud.pts[basal1[i]].z;
+    centroid1[0] += yCloud.pts[static_cast<std::size_t>(basal1[static_cast<std::size_t>(i)])].x;
+    centroid1[1] += yCloud.pts[static_cast<std::size_t>(basal1[static_cast<std::size_t>(i)])].y;
+    centroid1[2] += yCloud.pts[static_cast<std::size_t>(basal1[static_cast<std::size_t>(i)])].z;
     //
     // For basal2
-    centroid2[0] += yCloud.pts[basal2[i]].x;
-    centroid2[1] += yCloud.pts[basal2[i]].y;
-    centroid2[2] += yCloud.pts[basal2[i]].z;
+    centroid2[0] += yCloud.pts[static_cast<std::size_t>(basal2[static_cast<std::size_t>(i)])].x;
+    centroid2[1] += yCloud.pts[static_cast<std::size_t>(basal2[static_cast<std::size_t>(i)])].y;
+    centroid2[2] += yCloud.pts[static_cast<std::size_t>(basal2[static_cast<std::size_t>(i)])].z;
     //
   } // end of loop through basal1 and basal2
   // Normalize by the number of nodes
   for (int k = 0; k < 3; k++) {
-    centroid1[k] /= ringSize;
-    centroid2[k] /= ringSize;
+    centroid1[static_cast<std::size_t>(k)] /= ringSize;
+    centroid2[static_cast<std::size_t>(k)] /= ringSize;
   } // end of dividing by the number
   // Calculated the centroid for basal1 and basal2!
   // -----------------------
   // Calculate the distances of each point from the respective centroid
   for (int i = 0; i < ringSize; i++) {
     // Get the current point in basal1 and basal2
-    iatom = basal1[i];
-    jatom = basal2[i];
+    iatom = basal1[static_cast<std::size_t>(i)];
+    jatom = basal2[static_cast<std::size_t>(i)];
     // Get the distance from the respective centroid
     // basal1
     r1 = gen::unWrappedDistFromPoint(yCloud, iatom, centroid1);
@@ -175,15 +175,15 @@ double pntToPnt::getAvgHeightPrismBlock(
   double avgHeight = 0.0;
   double r_ij;                  // Distance between a point in basal1 and basal2
   std::vector<double> dist;     // Distances
-  int ringSize = basal1.size(); // Number of nodes in the basal rings
+  int ringSize = static_cast<int>(basal1.size()); // Number of nodes in the basal rings
   int iatom; // Atom index in yCloud for the current point in basal1
   int jatom; // Atom index in yCloud for the current point in basal2
   // -----------------------
   // Calculate the distances of each point from the respective centroid
   for (int i = 0; i < ringSize; i++) {
     // Get the current point in basal1 and basal2
-    iatom = basal1[i];
-    jatom = basal2[i];
+    iatom = basal1[static_cast<std::size_t>(i)];
+    jatom = basal2[static_cast<std::size_t>(i)];
     // Get the distance between a point in basal1 and the corresponding point in
     // basal2
     r_ij = gen::periodicDist(yCloud, iatom, jatom);
@@ -210,7 +210,7 @@ int pntToPnt::relOrderPrismBlock(
     const std::vector<std::vector<int>> &nList, std::vector<int> &outBasal1,
     std::vector<int> &outBasal2) {
   //
-  int ringSize = basal1.size(); // Number of nodes in basal1 and basal2
+  int ringSize = static_cast<int>(basal1.size()); // Number of nodes in basal1 and basal2
   int nBonds;       // Number of bonds between two parallel basal rings
   bool isNeighbour; // Bool for checking if two atoms are neighbours or not
   int l_k, m_k;     // Elements in basal1 and basal2
@@ -224,18 +224,18 @@ int pntToPnt::relOrderPrismBlock(
   isNeighbour = false;
   // Loop through every element of basal1
   for (int l = 0; l < ringSize; l++) {
-    l_k = basal1[l]; // This is the atom particle C++ index
+    l_k = basal1[static_cast<std::size_t>(l)]; // This is the atom particle C++ index
 
     // Search for the nearest neighbour of l_k in basal2
     // Loop through basal2 elements
     for (int m = 0; m < ringSize; m++) {
-      m_k = basal2[m]; // Atom index to find in the neighbour list of iatom
+      m_k = basal2[static_cast<std::size_t>(m)]; // Atom index to find in the neighbour list of iatom
 
       // Find m_k inside l_k neighbour list
-      auto it = std::find(nList[l_k].begin() + 1, nList[l_k].end(), m_k);
+      auto it = std::find(nList[static_cast<std::size_t>(l_k)].begin() + 1, nList[static_cast<std::size_t>(l_k)].end(), m_k);
 
       // If the element has been found, for l1
-      if (it != nList[l_k].end()) {
+      if (it != nList[static_cast<std::size_t>(l_k)].end()) {
         isNeighbour = true;
         iatom = l; // index of basal1
         jatom = m; // index of basal2
@@ -274,9 +274,9 @@ int pntToPnt::relOrderPrismBlock(
     tempJback = ringSize - 1;
   }
 
-  int forwardJ = basal2[tempJfor];
-  int backwardJ = basal2[tempJback];
-  int currentI = basal1[iatom];
+  int forwardJ = basal2[static_cast<std::size_t>(tempJfor)];
+  int backwardJ = basal2[static_cast<std::size_t>(tempJback)];
+  int currentI = basal1[static_cast<std::size_t>(iatom)];
 
   // Check clockwise
   double distClock = gen::periodicDist(yCloud, currentI, forwardJ);
@@ -317,8 +317,8 @@ int pntToPnt::relOrderPrismBlock(
     }   // end of anti-clockwise update
 
     // Add to outBasal1 and outBasal2 now
-    outBasal1.push_back(basal1[currentIatom]);
-    outBasal2.push_back(basal2[currentJatom]);
+    outBasal1.push_back(basal1[static_cast<std::size_t>(currentIatom)]);
+    outBasal2.push_back(basal2[static_cast<std::size_t>(currentJatom)]);
   } //
   //
 
@@ -337,7 +337,7 @@ int pntToPnt::relOrderPrismBlock(
     const std::vector<int> &basal1, const std::vector<int> &basal2,
     std::vector<int> &outBasal1, std::vector<int> &outBasal2) {
   //
-  int ringSize = basal1.size(); // Number of nodes in basal1 and basal2
+  int ringSize = static_cast<int>(basal1.size()); // Number of nodes in basal1 and basal2
   int nBonds;       // Number of bonds between two parallel basal rings
   bool isNeighbour; // Bool for checking if two atoms are neighbours or not
   int l_k, m_k;     // Elements in basal1 and basal2
@@ -358,7 +358,7 @@ int pntToPnt::relOrderPrismBlock(
   // Search for the nearest neighbour of l_k in basal2
   // Loop through basal2 elements
   for (int m = 0; m < ringSize; m++) {
-    m_k = basal2[m]; // Atom index to find in the neighbour list of iatom
+    m_k = basal2[static_cast<std::size_t>(m)]; // Atom index to find in the neighbour list of iatom
 
     // Calculate the distance
     double dist = gen::periodicDist(yCloud, l_k, m_k);
@@ -402,9 +402,9 @@ int pntToPnt::relOrderPrismBlock(
     tempJback = ringSize - 1;
   }
 
-  int forwardJ = basal2[tempJfor];
-  int backwardJ = basal2[tempJback];
-  int currentI = basal1[iatom];
+  int forwardJ = basal2[static_cast<std::size_t>(tempJfor)];
+  int backwardJ = basal2[static_cast<std::size_t>(tempJback)];
+  int currentI = basal1[static_cast<std::size_t>(iatom)];
 
   // Check clockwise
   double distClock = gen::periodicDist(yCloud, currentI, forwardJ);
@@ -445,8 +445,8 @@ int pntToPnt::relOrderPrismBlock(
     }   // end of anti-clockwise update
 
     // Add to outBasal1 and outBasal2 now
-    outBasal1.push_back(basal1[currentIatom]);
-    outBasal2.push_back(basal2[currentJatom]);
+    outBasal1.push_back(basal1[static_cast<std::size_t>(currentIatom)]);
+    outBasal2.push_back(basal2[static_cast<std::size_t>(currentJatom)]);
   } //
   //
 
@@ -463,8 +463,8 @@ Eigen::MatrixXd pntToPnt::fillPointSetPrismRing(
   //
   //
   int dim = 3;                        // Number of dimensions (3)
-  int ringSize = basalRing.size();    // Number of nodes in the ring
-  int nop = basalRing.size();         // Number of particles in the basal ring
+  int ringSize = static_cast<int>(basalRing.size());    // Number of nodes in the ring
+  int nop = static_cast<int>(basalRing.size());         // Number of particles in the basal ring
   Eigen::MatrixXd pointSet(nop, dim); // Output set of 3D points
   // Indices for the first and second basal rings being filled
   int currentPosition; // Current index in basalRing
@@ -487,10 +487,10 @@ Eigen::MatrixXd pntToPnt::fillPointSetPrismRing(
     //
     // -------------------
     // Basal ring points
-    index = basalRing[currentPosition];    // Index of the current point
-    pointSet(i, 0) = yCloud.pts[index].x; // x coord
-    pointSet(i, 1) = yCloud.pts[index].y; // y coord
-    pointSet(i, 2) = yCloud.pts[index].z; // z coord
+    index = basalRing[static_cast<std::size_t>(currentPosition)];    // Index of the current point
+    pointSet(i, 0) = yCloud.pts[static_cast<std::size_t>(index)].x; // x coord
+    pointSet(i, 1) = yCloud.pts[static_cast<std::size_t>(index)].y; // y coord
+    pointSet(i, 2) = yCloud.pts[static_cast<std::size_t>(index)].z; // z coord
   } // end of point filling from the relative ordering vector of vectors
 
   // Return the set of points
@@ -507,7 +507,7 @@ Eigen::MatrixXd pntToPnt::fillPointSetPrismBlock(
   //
   //
   int dim = 3;                        // Number of dimensions (3)
-  int ringSize = basal1.size();       // Number of nodes in the ring
+  int ringSize = static_cast<int>(basal1.size());       // Number of nodes in the ring
   int nop = ringSize * 2;             // Number of particles in prism block
   Eigen::MatrixXd pointSet(nop, dim); // Output set of 3D points
   // Indices for the first and second basal rings being filled
@@ -536,19 +536,19 @@ Eigen::MatrixXd pntToPnt::fillPointSetPrismBlock(
     // -------------------
     // Basal1 ring points
     iatomIndex =
-        basal1[currentPosition]; // Index of the current point in basal1
+        basal1[static_cast<std::size_t>(currentPosition)]; // Index of the current point in basal1
     iatom = i;                   // index in the point set being filled
-    pointSet(iatom, 0) = yCloud.pts[iatomIndex].x; // x coord
-    pointSet(iatom, 1) = yCloud.pts[iatomIndex].y; // y coord
-    pointSet(iatom, 2) = yCloud.pts[iatomIndex].z; // z coord
+    pointSet(iatom, 0) = yCloud.pts[static_cast<std::size_t>(iatomIndex)].x; // x coord
+    pointSet(iatom, 1) = yCloud.pts[static_cast<std::size_t>(iatomIndex)].y; // y coord
+    pointSet(iatom, 2) = yCloud.pts[static_cast<std::size_t>(iatomIndex)].z; // z coord
     // -------------------
     // Basal2 ring points
     jatomIndex =
-        basal2[currentPosition]; // Index of the current point in basal2
+        basal2[static_cast<std::size_t>(currentPosition)]; // Index of the current point in basal2
     jatom = i + ringSize;        // index in the point set being filled
-    pointSet(jatom, 0) = yCloud.pts[jatomIndex].x; // x coord
-    pointSet(jatom, 1) = yCloud.pts[jatomIndex].y; // y coord
-    pointSet(jatom, 2) = yCloud.pts[jatomIndex].z; // z coord
+    pointSet(jatom, 0) = yCloud.pts[static_cast<std::size_t>(jatomIndex)].x; // x coord
+    pointSet(jatom, 1) = yCloud.pts[static_cast<std::size_t>(jatomIndex)].y; // y coord
+    pointSet(jatom, 2) = yCloud.pts[static_cast<std::size_t>(jatomIndex)].z; // z coord
   } // end of point filling from the relative ordering vector of vectors
 
   // Return the set of points
@@ -568,22 +568,18 @@ Eigen::MatrixXd pntToPnt::getPointSetCage(ring::strucType type) {
       setCloud; // PointCloud for holding the reference point values
 
   if (type == ring::strucType::HCbasal) {
-    // Read in the XYZ file
-    std::string fileName = "templates/hc.xyz";
-    //
-    sinp::readXYZ(fileName);
-    int n = setCloud.nop; // Number of points in the reference point set
-    Eigen::MatrixXd pointSet(n, 3); // Output point set for a regular polygon
-
-    // Loop through every particle
+    // Read in the XYZ file. The cloud is the return value; discarding it
+    // left setCloud empty and the matrix with no rows.
+    setCloud = sinp::readXYZ("templates/hc.xyz");
+    const int n = setCloud.nop;
+    Eigen::MatrixXd filled(n, 3);
     for (int i = 0; i < n; i++) {
-      pointSet(i, 0) = setCloud.pts[i].x; // x
-      pointSet(i, 1) = setCloud.pts[i].y; // y
-      pointSet(i, 2) = setCloud.pts[i].z; // z
-    } // end of looping through every particle
-
-    // Return the filled point set
-    return pointSet;
+      const auto &atom = setCloud.pts[static_cast<std::size_t>(i)];
+      filled(i, 0) = atom.x;
+      filled(i, 1) = atom.y;
+      filled(i, 2) = atom.z;
+    }
+    return filled;
   } // end of reference point set for HCs
   // else {
   //   // ddc
@@ -610,7 +606,7 @@ int pntToPnt::relOrderHC(
   //
   int l1 = basal1[0];           // First element of basal1
   int l2 = basal1[1];           // Second element of basal1
-  int ringSize = basal1.size(); // Number of nodes in the basal rings
+  int ringSize = static_cast<int>(basal1.size()); // Number of nodes in the basal rings
   bool neighOne, neighTwo;      // Basal2 element is the neighbour of l1 or l2
   bool neighbourFound = false;
   int m_k;               // Element of basal2 which is a neighbour of l1 or l2
@@ -621,18 +617,18 @@ int pntToPnt::relOrderHC(
   bool isReversedOrder;  // basal2 is reversed wrt basal1
   int index;
 
-  matchedBasal1.resize(ringSize);
-  matchedBasal2.resize(ringSize);
+  matchedBasal1.resize(static_cast<std::size_t>(ringSize));
+  matchedBasal2.resize(static_cast<std::size_t>(ringSize));
 
   // Search to see if l1 or l2 is a neighbour
   // -------------------
   // Searching for the neighbours of l1 or l2
   for (int i = 0; i < ringSize; i++) {
-    iatom = basal2[i]; // Element of basal2
+    iatom = basal2[static_cast<std::size_t>(i)]; // Element of basal2
     // Search for the current element in the neighbour list of l1
-    auto it = std::find(nList[l1].begin() + 1, nList[l1].end(), iatom);
+    auto it = std::find(nList[static_cast<std::size_t>(l1)].begin() + 1, nList[static_cast<std::size_t>(l1)].end(), iatom);
     // If iatom is the neighbour of l1
-    if (it != nList[l1].end()) {
+    if (it != nList[static_cast<std::size_t>(l1)].end()) {
       neighbourFound = true;
       neighOne = true;
       m_k = iatom;  // Element found
@@ -642,9 +638,9 @@ int pntToPnt::relOrderHC(
     } // iatom is the neighbour of l1
     // l2 neighbour check
     else {
-      auto it1 = std::find(nList[l2].begin() + 1, nList[l2].end(), iatom);
+      auto it1 = std::find(nList[static_cast<std::size_t>(l2)].begin() + 1, nList[static_cast<std::size_t>(l2)].end(), iatom);
       // If iatom is the neighbour of l2
-      if (it1 != nList[l2].end()) {
+      if (it1 != nList[static_cast<std::size_t>(l2)].end()) {
         neighbourFound = true;
         neighOne = false;
         neighTwo = true;
@@ -675,12 +671,12 @@ int pntToPnt::relOrderHC(
   if (index >= ringSize) {
     index -= ringSize;
   } // wrap-around
-  nextBasal2Element = basal2[index];
+  nextBasal2Element = basal2[static_cast<std::size_t>(index)];
   // Search for the next basal element
-  auto it = std::find(nList[nextBasal1Element].begin() + 1,
-                      nList[nextBasal1Element].end(), nextBasal2Element);
+  auto it = std::find(nList[static_cast<std::size_t>(nextBasal1Element)].begin() + 1,
+                      nList[static_cast<std::size_t>(nextBasal1Element)].end(), nextBasal2Element);
   // If this element is found, then the original order is correct
-  if (it != nList[nextBasal1Element].end()) {
+  if (it != nList[static_cast<std::size_t>(nextBasal1Element)].end()) {
     // Fill up the temporary vector with basal2 elements
     for (int i = 0; i < ringSize; i++) {
       index = m_kIndex + i; // index in basal2
@@ -688,7 +684,7 @@ int pntToPnt::relOrderHC(
       if (index >= ringSize) {
         index -= ringSize;
       }                                    // end of wrap-around
-      matchedBasal2[i] = basal2[index]; // fill up values
+      matchedBasal2[static_cast<std::size_t>(i)] = basal2[static_cast<std::size_t>(index)]; // fill up values
     }                                      // end of filling up tempBasal2
   }                                        // the original order is correct
   else {
@@ -698,12 +694,12 @@ int pntToPnt::relOrderHC(
     if (index < 0) {
       index += ringSize;
     } // wrap-around
-    nextBasal2Element = basal2[index];
+    nextBasal2Element = basal2[static_cast<std::size_t>(index)];
     // Search for the next basal element
-    auto it = std::find(nList[nextBasal1Element].begin() + 1,
-                        nList[nextBasal1Element].end(), nextBasal2Element);
+    auto found = std::find(nList[static_cast<std::size_t>(nextBasal1Element)].begin() + 1,
+                           nList[static_cast<std::size_t>(nextBasal1Element)].end(), nextBasal2Element);
     // If this element is found, then the original order is correct
-    if (it != nList[nextBasal1Element].end()) {
+    if (found != nList[static_cast<std::size_t>(nextBasal1Element)].end()) {
       // Fill up the temporary vector with basal2 elements
       for (int i = 0; i < ringSize; i++) {
         index = m_kIndex - i; // index in basal2
@@ -711,7 +707,7 @@ int pntToPnt::relOrderHC(
         if (index < 0) {
           index += ringSize;
         }                                    // end of wrap-around
-        matchedBasal2[i] = basal2[index]; // fill up values
+        matchedBasal2[static_cast<std::size_t>(i)] = basal2[static_cast<std::size_t>(index)]; // fill up values
       }                                      // end of filling up tempBasal2
 
     }
@@ -750,18 +746,18 @@ Eigen::MatrixXd pntToPnt::changeHexCageOrder(
   };
 
   iatomOne = basalAt(basal1, 0);
-  pointSet(0, 0) = yCloud.pts[iatomOne].x;
-  pointSet(0, 1) = yCloud.pts[iatomOne].y;
-  pointSet(0, 2) = yCloud.pts[iatomOne].z;
+  pointSet(0, 0) = yCloud.pts[static_cast<std::size_t>(iatomOne)].x;
+  pointSet(0, 1) = yCloud.pts[static_cast<std::size_t>(iatomOne)].y;
+  pointSet(0, 2) = yCloud.pts[static_cast<std::size_t>(iatomOne)].z;
   // basal2
   jatomIndex = basalAt(basal2, 0);
   // Get the distance from basal1
   dr = gen::relDist(yCloud, iatomOne, jatomIndex);
 
   // basal2
-  pointSet(6, 0) = yCloud.pts[iatomOne].x + dr[0];
-  pointSet(6, 1) = yCloud.pts[iatomOne].y + dr[1];
-  pointSet(6, 2) = yCloud.pts[iatomOne].z + dr[2];
+  pointSet(6, 0) = yCloud.pts[static_cast<std::size_t>(iatomOne)].x + dr[0];
+  pointSet(6, 1) = yCloud.pts[static_cast<std::size_t>(iatomOne)].y + dr[1];
+  pointSet(6, 2) = yCloud.pts[static_cast<std::size_t>(iatomOne)].z + dr[2];
   //
   // Loop through the rest of the points
   for (int i = 1; i < 6; i++) {
@@ -772,16 +768,16 @@ Eigen::MatrixXd pntToPnt::changeHexCageOrder(
     // Get the distance from the first atom
     dr = gen::relDist(yCloud, iatomOne, iatomIndex);
     //
-    pointSet(i, 0) = yCloud.pts[iatomOne].x + dr[0];
-    pointSet(i, 1) = yCloud.pts[iatomOne].y + dr[1];
-    pointSet(i, 2) = yCloud.pts[iatomOne].z + dr[2];
+    pointSet(i, 0) = yCloud.pts[static_cast<std::size_t>(iatomOne)].x + dr[0];
+    pointSet(i, 1) = yCloud.pts[static_cast<std::size_t>(iatomOne)].y + dr[1];
+    pointSet(i, 2) = yCloud.pts[static_cast<std::size_t>(iatomOne)].z + dr[2];
     //
     // Get the distance from the first atom
     dr = gen::relDist(yCloud, iatomOne, jatomIndex);
     // basal2
-    pointSet(i + 6, 0) = yCloud.pts[iatomOne].x + dr[0];
-    pointSet(i + 6, 1) = yCloud.pts[iatomOne].y + dr[1];
-    pointSet(i + 6, 2) = yCloud.pts[iatomOne].z + dr[2];
+    pointSet(i + 6, 0) = yCloud.pts[static_cast<std::size_t>(iatomOne)].x + dr[0];
+    pointSet(i + 6, 1) = yCloud.pts[static_cast<std::size_t>(iatomOne)].y + dr[1];
+    pointSet(i + 6, 2) = yCloud.pts[static_cast<std::size_t>(iatomOne)].z + dr[2];
     //
   } // end of loop
 
@@ -821,10 +817,10 @@ std::vector<int> pntToPnt::relOrderDDC(int index,
                                        const std::vector<std::vector<int>> &rings,
                                        const std::vector<cage::Cage> &cageList) {
   if (index < 0 || index >= static_cast<int>(cageList.size()) ||
-      cageList[index].rings.empty()) {
+      cageList[static_cast<std::size_t>(index)].rings.empty()) {
     return std::vector<int>();
   }
-  return pntToPnt::relOrderDDC(rings[cageList[index].rings[0]], index, rings,
+  return pntToPnt::relOrderDDC(rings[static_cast<std::size_t>(cageList[static_cast<std::size_t>(index)].rings[0])], index, rings,
                                cageList);
 }
 
@@ -847,14 +843,14 @@ std::vector<int> pntToPnt::relOrderDDC(const std::vector<int> &equatorial,
 
   // Validate cage structure (DDC has 1 equatorial + 6 peripheral rings)
   if (index < 0 || index >= static_cast<int>(cageList.size()) ||
-      static_cast<int>(cageList[index].rings.size()) < 7 ||
+      static_cast<int>(cageList[static_cast<std::size_t>(index)].rings.size()) < 7 ||
       static_cast<int>(equatorial.size()) != ringSize) {
     return std::vector<int>();
   }
   // Add the equatorial ring particles in the traversal supplied by the
   // caller; the connectivity below derives from this order
   for (int i = 0; i < ringSize; i++) {
-    ddcOrder.push_back(equatorial[i]);
+    ddcOrder.push_back(equatorial[static_cast<std::size_t>(i)]);
   } // end of adding equatorial ring particles
   //
   // ------------------------------
@@ -863,19 +859,19 @@ std::vector<int> pntToPnt::relOrderDDC(const std::vector<int> &equatorial,
   //
   for (int i = 0; i < ringSize; i++) {
     // Init
-    iatom = ddcOrder[i]; // element of the equatorial ring
+    iatom = ddcOrder[static_cast<std::size_t>(i)]; // element of the equatorial ring
     // Get the next and previous elements of iatom
     // next element
     if (i == ringSize - 1) {
       nextI = ddcOrder[0];
-      prevI = ddcOrder[i - 1];
+      prevI = ddcOrder[static_cast<std::size_t>(i - 1)];
     } // if last element
     else if (i == 0) {
-      nextI = ddcOrder[i + 1];
+      nextI = ddcOrder[static_cast<std::size_t>(i + 1)];
       prevI = ddcOrder[5]; // wrapped
     } else {
-      nextI = ddcOrder[i + 1];
-      prevI = ddcOrder[i - 1];
+      nextI = ddcOrder[static_cast<std::size_t>(i + 1)];
+      prevI = ddcOrder[static_cast<std::size_t>(i - 1)];
     }
     // ------------------
     // Search all the peripheral rings for iatom, get the nearest neighbours and
@@ -883,15 +879,15 @@ std::vector<int> pntToPnt::relOrderDDC(const std::vector<int> &equatorial,
     // equatorial ring (thus they are second nearest neighbours)
     for (int j = 1; j <= ringSize; j++) {
       //
-      jring = cageList[index].rings[j]; // Peripheral ring
+      jring = cageList[static_cast<std::size_t>(index)].rings[static_cast<std::size_t>(j)]; // Peripheral ring
       // Search for iatom
       //
-      auto it = std::find(rings[jring].begin(), rings[jring].end(), iatom);
+      auto it = std::find(rings[static_cast<std::size_t>(jring)].begin(), rings[static_cast<std::size_t>(jring)].end(), iatom);
       // If iatom was found in jring peripheral ring
-      if (it != rings[jring].end()) {
+      if (it != rings[static_cast<std::size_t>(jring)].end()) {
         // ----------------
         // Atom index for iatom found
-        jatomIndex = std::distance(rings[jring].begin(), it);
+        jatomIndex = static_cast<int>(std::distance(rings[static_cast<std::size_t>(jring)].begin(), it));
         // ----------------
         // Get the next and previous element
         //
@@ -901,13 +897,13 @@ std::vector<int> pntToPnt::relOrderDDC(const std::vector<int> &equatorial,
         if (atomIndex >= ringSize) {
           atomIndex -= ringSize;
         } // end of wrap-around
-        nextJ = rings[jring][atomIndex];
+        nextJ = rings[static_cast<std::size_t>(jring)][static_cast<std::size_t>(atomIndex)];
         // Previous atom
         atomIndex = jatomIndex - 1;
         if (atomIndex < 0) {
           atomIndex += ringSize;
         } // end of wrap-around
-        prevJ = rings[jring][atomIndex];
+        prevJ = rings[static_cast<std::size_t>(jring)][static_cast<std::size_t>(atomIndex)];
         // ----------------
         // Check to see if nextJ or prevJ are different from nextI and prevI
         //
@@ -925,7 +921,7 @@ std::vector<int> pntToPnt::relOrderDDC(const std::vector<int> &equatorial,
               if (atomIndex < 0) {
                 atomIndex += ringSize;
               } // end of wrap-around
-              apex1 = rings[jring][atomIndex];
+              apex1 = rings[static_cast<std::size_t>(jring)][static_cast<std::size_t>(atomIndex)];
             } // apex1 for i=0
           }   // peripheral1
           // if odd peripheral2
@@ -939,7 +935,7 @@ std::vector<int> pntToPnt::relOrderDDC(const std::vector<int> &equatorial,
               if (atomIndex < 0) {
                 atomIndex += ringSize;
               } // end of wrap-around
-              apex2 = rings[jring][atomIndex];
+              apex2 = rings[static_cast<std::size_t>(jring)][static_cast<std::size_t>(atomIndex)];
             } // apex2 for i=1
           }   // peripheral 2
           // Get apex1 or apex2 for i=0 or i=1
@@ -961,7 +957,7 @@ std::vector<int> pntToPnt::relOrderDDC(const std::vector<int> &equatorial,
               if (atomIndex >= ringSize) {
                 atomIndex -= ringSize;
               } // end of wrap-around
-              apex1 = rings[jring][atomIndex];
+              apex1 = rings[static_cast<std::size_t>(jring)][static_cast<std::size_t>(atomIndex)];
             } // apex1 for i=0
           }   // peripheral1
           // if odd peripheral2
@@ -975,7 +971,7 @@ std::vector<int> pntToPnt::relOrderDDC(const std::vector<int> &equatorial,
               if (atomIndex >= ringSize) {
                 atomIndex -= ringSize;
               } // end of wrap-around
-              apex2 = rings[jring][atomIndex];
+              apex2 = rings[static_cast<std::size_t>(jring)][static_cast<std::size_t>(atomIndex)];
             } // apex2 for i=1
           }   // peripheral 2
           // Get apex1 or apex2 for i=0 or i=1
@@ -997,7 +993,7 @@ std::vector<int> pntToPnt::relOrderDDC(const std::vector<int> &equatorial,
   //
   // peripheral1
   for (int i = 0; i < peripheral1.size(); i++) {
-    ddcOrder.push_back(peripheral1[i]);
+    ddcOrder.push_back(peripheral1[static_cast<std::size_t>(i)]);
   } // end of adding peripheral1
   //
   // apex1
@@ -1005,7 +1001,7 @@ std::vector<int> pntToPnt::relOrderDDC(const std::vector<int> &equatorial,
   //
   // peripheral2
   for (int i = 0; i < peripheral2.size(); i++) {
-    ddcOrder.push_back(peripheral2[i]);
+    ddcOrder.push_back(peripheral2[static_cast<std::size_t>(i)]);
   } // end of adding peripheral2
   //
   // apex2
@@ -1060,7 +1056,7 @@ Eigen::MatrixXd pntToPnt::changeDiaCageOrder(
     wrappedDDC = ddcOrder;
   } // if the order does not have to be changed
   else {
-    wrappedDDC.resize(nop); // Should be the same size as ddcOrder
+    wrappedDDC.resize(static_cast<std::size_t>(nop)); // Should be the same size as ddcOrder
     // ------------------
     // EQUATORIAL RING
     // Change the order of the equatorial ring
@@ -1071,7 +1067,7 @@ Eigen::MatrixXd pntToPnt::changeDiaCageOrder(
         currentIndex -= ringSize;
       } // end of wrap-around
       // Update the equatorial ring
-      wrappedDDC[i] = ddcOrder[currentIndex];
+      wrappedDDC[static_cast<std::size_t>(i)] = ddcOrder[static_cast<std::size_t>(currentIndex)];
     } // end of wrapping the equatorial ring
     // ------------------
     // PERIPHERAL RINGS
@@ -1088,13 +1084,13 @@ Eigen::MatrixXd pntToPnt::changeDiaCageOrder(
     // Update the portions of the wrappedDDC vector (peripheral1: indices 6-8)
     for (int i = 6; i < 9; i++) {
       currentIndex = 6 + (i - 6 + peripheralStartingIndex) % 3;
-      wrappedDDC[i] = ddcOrder[currentIndex];
+      wrappedDDC[static_cast<std::size_t>(i)] = ddcOrder[static_cast<std::size_t>(currentIndex)];
     } // peripheral1
     //
     // Update the peripheral2 portions of the wrappedDDC vector (indices 10-12)
     for (int i = 10; i < 13; i++) {
       currentIndex = 10 + (i - 10 + peripheralStartingIndex) % 3;
-      wrappedDDC[i] = ddcOrder[currentIndex];
+      wrappedDDC[static_cast<std::size_t>(i)] = ddcOrder[static_cast<std::size_t>(currentIndex)];
     } // peripheral2
     // ------------------
     // SECOND-NEAREST NEIGHBOURS
@@ -1105,28 +1101,28 @@ Eigen::MatrixXd pntToPnt::changeDiaCageOrder(
 
   // Validate that all indices in wrappedDDC are within yCloud bounds
   for (int i = 0; i < nop; i++) {
-    if (wrappedDDC[i] < 0 ||
-        wrappedDDC[i] >= static_cast<int>(yCloud.pts.size())) {
+    if (wrappedDDC[static_cast<std::size_t>(i)] < 0 ||
+        wrappedDDC[static_cast<std::size_t>(i)] >= static_cast<int>(yCloud.pts.size())) {
       pointSet.setZero();
       return pointSet;
     }
   }
   // FILL UP THE EIGEN MATRIX
   iatomIndex = wrappedDDC[0]; // first point
-  pointSet(0, 0) = yCloud.pts[iatomIndex].x;
-  pointSet(0, 1) = yCloud.pts[iatomIndex].y;
-  pointSet(0, 2) = yCloud.pts[iatomIndex].z;
+  pointSet(0, 0) = yCloud.pts[static_cast<std::size_t>(iatomIndex)].x;
+  pointSet(0, 1) = yCloud.pts[static_cast<std::size_t>(iatomIndex)].y;
+  pointSet(0, 2) = yCloud.pts[static_cast<std::size_t>(iatomIndex)].z;
   // Loop through the rest of the equatorial ring points
   for (int i = 1; i < 14; i++) {
     //
-    jatomIndex = wrappedDDC[i]; // Atom index to be filled
+    jatomIndex = wrappedDDC[static_cast<std::size_t>(i)]; // Atom index to be filled
     // Get the distance from iatomIndex
     dr = gen::relDist(yCloud, iatomIndex, jatomIndex);
 
     // basal2
-    pointSet(i, 0) = yCloud.pts[iatomIndex].x + dr[0];
-    pointSet(i, 1) = yCloud.pts[iatomIndex].y + dr[1];
-    pointSet(i, 2) = yCloud.pts[iatomIndex].z + dr[2];
+    pointSet(i, 0) = yCloud.pts[static_cast<std::size_t>(iatomIndex)].x + dr[0];
+    pointSet(i, 1) = yCloud.pts[static_cast<std::size_t>(iatomIndex)].y + dr[1];
+    pointSet(i, 2) = yCloud.pts[static_cast<std::size_t>(iatomIndex)].z + dr[2];
   } // end of loop
 
   return pointSet;

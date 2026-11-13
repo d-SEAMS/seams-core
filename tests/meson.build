@@ -67,6 +67,13 @@ test_sources = {
   'gpu_residency': 'test_gpu_residency.cpp',
   'config': 'test_config.cpp',
   'site': 'test_site.cpp',
+  'wide_cell': 'test_wide_cell.cpp',
+  'offset_limit': 'test_offset_limit.cpp',
+  'prism_empty': 'test_prism_empty.cpp',
+  'basal_needle': 'test_basal_needle.cpp',
+  'ddc_copies': 'test_ddc_copies.cpp',
+  'hc_template': 'test_hc_template.cpp',
+  'avx_gemm': 'test_avx_gemm.cpp',
 }
 
 if readcon_dep.found()

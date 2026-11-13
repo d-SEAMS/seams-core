@@ -43,6 +43,13 @@ if cpp_id == 'gcc' or cpp_id == 'clang'
     _args += ['-Wno-maybe-uninitialized']
   else
     _args += ['-Wno-uninitialized']
+    # Signed index conversions, shadowed names, and unknown attributes
+    # are errors on Clang. The flags stay on this project; subprojects
+    # keep their own warning set.
+    _args += ['-Wsign-conversion', '-Wshorten-64-to-32', '-Wshadow',
+              '-Wunknown-attributes', '-Werror=sign-conversion',
+              '-Werror=shorten-64-to-32', '-Werror=shadow',
+              '-Werror=unknown-attributes']
   endif
   # Suppress [[nodiscard]] warnings from legacy callers
   _args += ['-Wno-unused-result']
@@ -235,6 +242,7 @@ endif
 
 gpulite_opt = get_option('with_gpulite')
 gpulite_dep = dependency('gpulite', required: false,
+                         include_type: 'system',
                          fallback: ['gpulite', 'gpulite_dep'])
 if gpulite_opt.enabled() and not gpulite_dep.found()
   error('with_gpulite=enabled but gpulite was not found')

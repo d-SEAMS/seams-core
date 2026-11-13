@@ -330,7 +330,7 @@ namespace Argum {
     #undef ARGUM_DEFINE_CHAR_CONSTANTS
     
     inline auto CharConstants<char>::isSpace(char c) -> bool { return isspace(c); }
-    inline auto CharConstants<wchar_t>::isSpace(wchar_t c) -> bool { return iswspace(c); }
+    inline auto CharConstants<wchar_t>::isSpace(wchar_t c) -> bool { return iswspace(static_cast<unsigned>(c)); }
 
     inline auto CharConstants<char>::toLong(const char * str, char ** str_end, int base) -> long {
         return strtol(str, str_end, base);
@@ -859,7 +859,7 @@ namespace Argum {
 
         int res = Impl::simpleWidth(str.data(), str.size());
         if (res >= 0)
-            return res;
+            return static_cast<unsigned>(res);
         
         std::wstring stripped;
         enum {
@@ -916,7 +916,7 @@ namespace Argum {
 
         res = Impl::simpleWidth(stripped.data(), stripped.size());
         if (res >= 0)
-            return res;
+            return static_cast<unsigned>(res);
         
         return unsigned(stripped.size());
     }
@@ -2563,7 +2563,7 @@ namespace Argum {
                     return this->callHandler(std::forward<Func>(handler), OptionToken{argIdx, first->value(), std::move(usedName), std::move(arg)});
                 } else if (last != first) {
                     StringType actualPrefix(option.substr(0, nameStart));
-                    std::vector<StringType> candidates(last - first);
+                    std::vector<StringType> candidates(static_cast<std::size_t>(last - first));
                     std::transform(first, last, candidates.begin(), [&](const auto & p) {return actualPrefix + p.key(); });
                     return this->callHandler(std::forward<Func>(handler), AmbiguousOptionToken{argIdx, std::move(usedName), std::move(arg), candidates});
                 }
@@ -2713,10 +2713,10 @@ namespace Argum {
                         StringType actualPrefix(option.substr(0, nameStart));
                         std::vector<StringType> candidates;
                         if (mustMatchExact) {
-                            candidates.reserve(1 + (last - first));
+                            candidates.reserve(static_cast<std::size_t>(1 + (last - first)));
                             candidates.push_back(StringType(option.substr(0, nameStart + 1)));
                         } else {
-                            candidates.reserve(last - first);
+                            candidates.reserve(static_cast<std::size_t>(last - first));
                         }
                         std::transform(first, last, std::back_inserter(candidates), [&](const auto & p) { return actualPrefix + p.key(); });
                         return this->callHandler(std::forward<Func>(handler), AmbiguousOptionToken{argIdx, std::move(usedName), std::move(arg), candidates});
@@ -3630,28 +3630,28 @@ namespace Argum {
                 return  this->m_parser.options().begin();
             auto subCommandMark = this->m_parser.subCommandMark();
             if (subCommandMark.optionIdx != size_t(-1))
-                return this->m_parser.options().begin() + subCommandMark.optionIdx;
+                return this->m_parser.options().begin() + static_cast<std::ptrdiff_t>(subCommandMark.optionIdx);
             return this->m_parser.options().end();
         }
         auto optionsEnd(bool forSubCommand) const {
             auto subCommandMark = this->m_parser.subCommandMark();
             if (forSubCommand || subCommandMark.optionIdx == size_t(-1))
                 return this->m_parser.options().end();
-            return this->m_parser.options().begin() + subCommandMark.optionIdx;
+            return this->m_parser.options().begin() + static_cast<std::ptrdiff_t>(subCommandMark.optionIdx);
         }
         auto positionalsBegin(bool forSubCommand) const {
             if (!forSubCommand)
                 return this->m_parser.positionals().begin();
             auto subCommandMark = this->m_parser.subCommandMark();
             if (subCommandMark.positionalIdx != size_t(-1))
-                return this->m_parser.positionals().begin() + subCommandMark.positionalIdx + 1;
+                return this->m_parser.positionals().begin() + static_cast<std::ptrdiff_t>(subCommandMark.positionalIdx) + 1;
             return this->m_parser.positionals().end();
         }
         auto positionalsEnd(bool forSubCommand) const {
             auto subCommandMark = this->m_parser.subCommandMark();
             if (forSubCommand || subCommandMark.positionalIdx == size_t(-1))
                 return this->m_parser.positionals().end();
-            return this->m_parser.positionals().begin() + subCommandMark.positionalIdx;
+            return this->m_parser.positionals().begin() + static_cast<std::ptrdiff_t>(subCommandMark.positionalIdx);
         }
 
         static auto appendSyntax(StringType base, StringType addend) -> StringType {

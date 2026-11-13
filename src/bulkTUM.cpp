@@ -96,10 +96,10 @@ int tum3::topoUnitMatchingBulk(
   }
 
   // Init the atom type vector
-  atomTypes.resize(yCloud.nop); // Has a value for each atom
+  atomTypes.resize(static_cast<std::size_t>(yCloud.nop)); // Has a value for each atom
   // Init the rmsd per atom
-  rmsdPerAtom.resize(yCloud.nop, -1);    // Has a value for each atom
-  noOfCommonElements.resize(yCloud.nop); // Has a value for each atom
+  rmsdPerAtom.resize(static_cast<std::size_t>(yCloud.nop), -1);    // Has a value for each atom
+  noOfCommonElements.resize(static_cast<std::size_t>(yCloud.nop)); // Has a value for each atom
 
   // ----------------------------------------------
   // Init
@@ -154,8 +154,8 @@ int tum3::topoUnitMatchingBulk(
   //
   // Loop through all the atoms and set commonElements to 1 for PNC atoms
   for (int i = 0; i < yCloud.nop; i++) {
-    if (rmsdPerAtom[i] != -1) {
-      noOfCommonElements[i] = 1;
+    if (rmsdPerAtom[static_cast<std::size_t>(i)] != -1) {
+      noOfCommonElements[static_cast<std::size_t>(i)] = 1;
     } // for atoms which have been updated
   }   // end of updating commonElements
   //
@@ -171,17 +171,17 @@ int tum3::topoUnitMatchingBulk(
 #endif
   for (int icage = 0; icage < static_cast<int>(cageList.size()); icage++) {
     if (icage < numHC) {
-      tum3::shapeMatchHC(yCloud, refPntsHC, cageList[icage], ringsOneType,
+      tum3::shapeMatchHC(yCloud, refPntsHC, cageList[static_cast<std::size_t>(icage)], ringsOneType,
                          nList, quat, rmsd);
     } else {
       tum3::shapeMatchDDC(yCloud, refPntsDDC, cageList, icage, ringsOneType,
                           quat, rmsd);
     }
-    quatList[icage] = quat;
+    quatList[static_cast<std::size_t>(icage)] = quat;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp critical(seams_tum_rmsd)
 #endif
-    tum3::updateRMSDatom(ringsOneType, cageList[icage], rmsd, rmsdPerAtom,
+    tum3::updateRMSDatom(ringsOneType, cageList[static_cast<std::size_t>(icage)], rmsd, rmsdPerAtom,
                          noOfCommonElements, atomTypes);
   } // end of looping through all cages
 
@@ -203,23 +203,23 @@ int tum3::topoUnitMatchingBulk(
   dumpAtomTypes.resize(atomTypes.size());
   // Change from enum to int
   for (int i = 0; i < atomTypes.size(); i++) {
-    if (atomTypes[i] == cage::iceType::hc) {
-      dumpAtomTypes[i] = 1;
+    if (atomTypes[static_cast<std::size_t>(i)] == cage::iceType::hc) {
+      dumpAtomTypes[static_cast<std::size_t>(i)] = 1;
     } // HC
-    else if (atomTypes[i] == cage::iceType::ddc) {
-      dumpAtomTypes[i] = 2;
+    else if (atomTypes[static_cast<std::size_t>(i)] == cage::iceType::ddc) {
+      dumpAtomTypes[static_cast<std::size_t>(i)] = 2;
     } // DDC
-    else if (atomTypes[i] == cage::iceType::mixed) {
-      dumpAtomTypes[i] = 3;
+    else if (atomTypes[static_cast<std::size_t>(i)] == cage::iceType::mixed) {
+      dumpAtomTypes[static_cast<std::size_t>(i)] = 3;
     } // mixed rings
-    else if (atomTypes[i] == cage::iceType::pnc) {
-      dumpAtomTypes[i] = 4;
+    else if (atomTypes[static_cast<std::size_t>(i)] == cage::iceType::pnc) {
+      dumpAtomTypes[static_cast<std::size_t>(i)] = 4;
     } // pnc
-    else if (atomTypes[i] == cage::iceType::mixed2) {
-      dumpAtomTypes[i] = 5;
+    else if (atomTypes[static_cast<std::size_t>(i)] == cage::iceType::mixed2) {
+      dumpAtomTypes[static_cast<std::size_t>(i)] = 5;
     } // shared by pnc and ddc/hc
     else {
-      dumpAtomTypes[i] = 0;
+      dumpAtomTypes[static_cast<std::size_t>(i)] = 0;
     } // dummy atoms
   }   // end of changing the type to int
   sout::writeLAMMPSdumpCages(yCloud, rmsdPerAtom, dumpAtomTypes, path,
@@ -279,7 +279,7 @@ int tum3::shapeMatchHC(
   //
   // ----------------
   // Re-order the basal rings so that they are matched
-  pntToPnt::relOrderHC(yCloud, rings[iring], rings[jring], nList, basal1,
+  pntToPnt::relOrderHC(yCloud, rings[static_cast<std::size_t>(iring)], rings[static_cast<std::size_t>(jring)], nList, basal1,
                        basal2);
   // ----------------
   // The ring topology fixes the point correspondence, so the joint
@@ -399,7 +399,7 @@ Eigen::MatrixXd tum3::buildRefHC(const std::string &fileName) {
   auto setCloud = sinp::readXYZ(fileName);
   // box lengths
   for (int i = 0; i < 3; i++) {
-    setCloud.box[i] = 50;
+    setCloud.box[static_cast<std::size_t>(i)] = 50;
   } // end of setting box lengths
   //
 
@@ -423,7 +423,7 @@ Eigen::MatrixXd tum3::buildRefHC(const std::string &fileName) {
   // Get the re-ordered matched basal rings, ordered with respect to each
   // other
 
-  pntToPnt::relOrderHC(setCloud, rings[iring], rings[jring], nList,
+  pntToPnt::relOrderHC(setCloud, rings[static_cast<std::size_t>(iring)], rings[static_cast<std::size_t>(jring)], nList,
                        matchedBasal1, matchedBasal2);
   // Get the reference point set
   refPnts =
@@ -460,7 +460,7 @@ Eigen::MatrixXd tum3::buildRefDDC(const std::string &fileName) {
 
   // box lengths
   for (int i = 0; i < 3; i++) {
-    setCloud.box[i] = 50;
+    setCloud.box[static_cast<std::size_t>(i)] = 50;
   } // end of setting box lengths
   //
 
@@ -497,32 +497,32 @@ int tum3::updateRMSDatom(const std::vector<std::vector<int>> &rings,
   if (rmsd < 0.0) {
     return 0;
   }
-  int nRings = cageUnit.rings.size(); // Number of rings in the current cage
+  int nRings = static_cast<int>(cageUnit.rings.size()); // Number of rings in the current cage
   int iring; // Index according to the rings vector of vector, for the current
              // ring inside the cage
   int iatom; // Current atom index
-  int ringSize = rings[0].size(); // Number of nodes in each ring (6)
+  int ringSize = static_cast<int>(rings[0].size()); // Number of nodes in each ring (6)
 
   // Loop through the rings in each cage
   for (int i = 0; i < nRings; i++) {
-    iring = cageUnit.rings[i]; // Current ring
+    iring = cageUnit.rings[static_cast<std::size_t>(i)]; // Current ring
 
     // Loop through all the atoms in the ring
     for (int j = 0; j < ringSize; j++) {
-      iatom = rings[iring][j]; // Current atom index
+      iatom = rings[static_cast<std::size_t>(iring)][static_cast<std::size_t>(j)]; // Current atom index
 
       // Skip for PNC atoms
-      if (atomTypes[iatom] == cage::iceType::pnc || atomTypes[iatom] == cage::iceType::mixed2) {
+      if (atomTypes[static_cast<std::size_t>(iatom)] == cage::iceType::pnc || atomTypes[static_cast<std::size_t>(iatom)] == cage::iceType::mixed2) {
         continue;
       } // Do not update if the atom is a PNC
       //
       // UPDATE
-      if (rmsdPerAtom[iatom] == -1) {
-        rmsdPerAtom[iatom] = rmsd;
-        noOfCommonAtoms[iatom] = 1;
+      if (rmsdPerAtom[static_cast<std::size_t>(iatom)] == -1) {
+        rmsdPerAtom[static_cast<std::size_t>(iatom)] = rmsd;
+        noOfCommonAtoms[static_cast<std::size_t>(iatom)] = 1;
       } else {
-        rmsdPerAtom[iatom] += rmsd;
-        noOfCommonAtoms[iatom] += 1;
+        rmsdPerAtom[static_cast<std::size_t>(iatom)] += rmsd;
+        noOfCommonAtoms[static_cast<std::size_t>(iatom)] += 1;
       }
     } // end of looping through all the atoms in the ring
 
@@ -537,14 +537,14 @@ int tum3::updateRMSDatom(const std::vector<std::vector<int>> &rings,
 int tum3::averageRMSDatom(std::vector<double> &rmsdPerAtom,
                           std::vector<int> &noOfCommonAtoms) {
   //
-  int nop = rmsdPerAtom.size(); // Number of particles
+  int nop = static_cast<int>(rmsdPerAtom.size()); // Number of particles
 
   for (int iatom = 0; iatom < nop; iatom++) {
     //
-    if (noOfCommonAtoms[iatom] == 0) {
-      rmsdPerAtom[iatom] = -1; // Dummy atom
+    if (noOfCommonAtoms[static_cast<std::size_t>(iatom)] == 0) {
+      rmsdPerAtom[static_cast<std::size_t>(iatom)] = -1; // Dummy atom
     } else {
-      rmsdPerAtom[iatom] /= noOfCommonAtoms[iatom];
+      rmsdPerAtom[static_cast<std::size_t>(iatom)] /= noOfCommonAtoms[static_cast<std::size_t>(iatom)];
     }
   } // end of averaging
 
@@ -676,11 +676,11 @@ int tum3::clusterCages(
   cage::cageType type;    // Type of the cages in the cluster
   // -----------------------------------------------------------
   // INITIALIZATION
-  linkedList.resize(nCages); // init to dummy value
+  linkedList.resize(static_cast<std::size_t>(nCages)); // init to dummy value
   // Initial values of the list.
   for (int icage = 0; icage < nCages; icage++) {
     // Assign the index as the ID
-    linkedList[icage] = icage; // Index
+    linkedList[static_cast<std::size_t>(icage)] = icage; // Index
   }                            // init of cluster IDs
   // -----------------------------------------------------------
   // GETTING THE LINKED LIST
@@ -688,7 +688,7 @@ int tum3::clusterCages(
   // HCs first
   for (int i = 0; i < nCages - 1; i++) {
     // If iatom is already in a cluster, skip it
-    if (linkedList[i] != i) {
+    if (linkedList[static_cast<std::size_t>(i)] != i) {
       continue;
     } // Already part of a cluster
     //
@@ -699,47 +699,47 @@ int tum3::clusterCages(
       // Go through the rest of the atoms (KLOOP)
       for (int k = i + 1; k < nCages; k++) {
         // Skip if already part of a cluster
-        if (linkedList[k] != k) {
+        if (linkedList[static_cast<std::size_t>(k)] != k) {
           continue;
         } // Already part of a cluster
         //
         // k and j must be of the same type
-        if (cageList[k].type != cageList[j].type) {
+        if (cageList[static_cast<std::size_t>(k)].type != cageList[static_cast<std::size_t>(j)].type) {
           continue;
         } // skip if k and j are not of the same type
         // Check to see if k is a nearest neighbour of j
         isNeighbour =
-            ring::hasCommonElements(cageList[k].rings, cageList[j].rings);
+            ring::hasCommonElements(cageList[static_cast<std::size_t>(k)].rings, cageList[static_cast<std::size_t>(j)].rings);
         if (isNeighbour) {
           // Swap!
-          temp = linkedList[j];
-          linkedList[j] = linkedList[k];
-          linkedList[k] = temp;
+          temp = linkedList[static_cast<std::size_t>(j)];
+          linkedList[static_cast<std::size_t>(j)] = linkedList[static_cast<std::size_t>(k)];
+          linkedList[static_cast<std::size_t>(k)] = temp;
         } // j and k are neighbouring cages
       }   // end of loop through k (KLOOP)
       //
-      j = linkedList[j];
+      j = linkedList[static_cast<std::size_t>(j)];
     } while (j != i); // end of control for j!=i
   } // end of getting the linked list (looping through every i)
   // -----------------------------------------------------------
   // WRITE-OUTS
   //
   // init
-  visited.resize(nCages);
+  visited.resize(static_cast<std::size_t>(nCages));
   singleDDCs = 0;
   singleHCs = 0;
 
   for (int i = 0; i < nCages; i++) {
     //
-    if (visited[i]) {
+    if (visited[static_cast<std::size_t>(i)]) {
       continue;
     } // Already counted
     // Now that the cage has been visited, set it to true
-    visited[i] = true; // Visited
+    visited[static_cast<std::size_t>(i)] = true; // Visited
     // If only one cage is in the cluster
-    if (linkedList[i] == i) {
+    if (linkedList[static_cast<std::size_t>(i)] == i) {
       // Add to the number of single DDCs
-      if (cageList[i].type == cage::cageType::DoubleDiaC) {
+      if (cageList[static_cast<std::size_t>(i)].type == cage::cageType::DoubleDiaC) {
         singleDDCs++;
       } // add to the single DDCs
       else {
@@ -751,9 +751,9 @@ int tum3::clusterCages(
     // init
     clusterCages.resize(0);
     //
-    type = cageList[i].type;
+    type = cageList[static_cast<std::size_t>(i)].type;
     currentIndex = i;
-    nextElement = linkedList[currentIndex];
+    nextElement = linkedList[static_cast<std::size_t>(currentIndex)];
     index = i;
     iClusterNumber = 1;        // at least one value
     clusterCages.push_back(i); // Add the first cage
@@ -761,16 +761,16 @@ int tum3::clusterCages(
     while (nextElement != index) {
       iClusterNumber++;
       currentIndex = nextElement;
-      visited[currentIndex] = true;
+      visited[static_cast<std::size_t>(currentIndex)] = true;
       clusterCages.push_back(currentIndex); // Add the first cage
-      nextElement = linkedList[currentIndex];
+      nextElement = linkedList[static_cast<std::size_t>(currentIndex)];
     } // get number
     // Update the number of molecules in the cluster
     nClusters.push_back(iClusterNumber);
     // --------------
     // PRINT OUT
     atoms = tum3::atomsFromCages(rings, cageList, clusterCages);
-    int clusterID = nClusters.size();
+    int clusterID = static_cast<int>(nClusters.size());
     // Write out the cluster
     sout::writeXYZcluster(path, yCloud, atoms, clusterID, type);
     // Print out the cages into an XYZ file
@@ -812,20 +812,20 @@ std::vector<int> tum3::atomsFromCages(const std::vector<std::vector<int>> &rings
                                       const std::vector<int> &clusterCages) {
   //
   std::vector<int> atoms; // Contains the atom indices (not IDs) of atoms
-  int ringSize = rings[0].size(); // Number of nodes in each ring
+  int ringSize = static_cast<int>(rings[0].size()); // Number of nodes in each ring
   int iring;                      // Index of ring in rings vector of vectors
   int icage;                      // Index of the current cage in cageList
   int iatom;                      // Atom index
   //
   for (int i = 0; i < clusterCages.size(); i++) {
     //
-    icage = clusterCages[i];
+    icage = clusterCages[static_cast<std::size_t>(i)];
     // Loop through every ring in the cage
-    for (int j = 0; j < cageList[icage].rings.size(); j++) {
-      iring = cageList[icage].rings[j]; // Current ring index
+    for (int j = 0; j < cageList[static_cast<std::size_t>(icage)].rings.size(); j++) {
+      iring = cageList[static_cast<std::size_t>(icage)].rings[static_cast<std::size_t>(j)]; // Current ring index
       // Loop through every atom in iring
       for (int k = 0; k < ringSize; k++) {
-        iatom = rings[iring][k];
+        iatom = rings[static_cast<std::size_t>(iring)][static_cast<std::size_t>(k)];
         atoms.push_back(iatom); // Add the atom
       }                         // Loop through every atom in iring
     }                           // loop through every ring in the current cage
@@ -837,7 +837,7 @@ std::vector<int> tum3::atomsFromCages(const std::vector<std::vector<int>> &rings
   sort(atoms.begin(), atoms.end());
   auto ip = std::unique(atoms.begin(), atoms.end());
   // Resize peripheral rings to remove undefined terms
-  atoms.resize(std::distance(atoms.begin(), ip));
+  atoms.resize(static_cast<std::size_t>(std::distance(atoms.begin(), ip)));
   //
   // Return the vector of atoms
   return atoms;

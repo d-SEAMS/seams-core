@@ -304,7 +304,7 @@ struct LammpsDumpSession {
       }
     }
     stream().clear();
-    stream().seekg(static_cast<std::streamoff>(offsets[frame - 1]));
+    stream().seekg(static_cast<std::streamoff>(offsets[static_cast<std::size_t>(frame - 1)]));
     std::string line;
     if (!std::getline(stream(), line) || !isLammpsTimestep(line)) {
       return false;
@@ -505,7 +505,7 @@ std::vector<std::vector<int>> sinp::readBonds(std::string filename) {
       bool ok = true;
       for (int i = 0; i < static_cast<int>(tokens.size()); i++) {
         try {
-          id.push_back(std::stoi(tokens[i]));
+          id.push_back(std::stoi(tokens[static_cast<std::size_t>(i)]));
         } catch (...) {
           ok = false;
           break;
@@ -681,7 +681,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
       throw;
     }
     // Reserve memory for atom coordinates using nop read in
-    yCloud.pts.reserve(nop);
+    yCloud.pts.reserve(static_cast<std::size_t>(nop));
     yCloud.nop = nop;
     // Run this until EOF or you reach the next timestep
     std::map<std::string, int> elementType;
@@ -966,16 +966,16 @@ void parseLammpsFrameBody(
         sawMol = false;
         nextSyntheticId = 1;
         for (int i = 2; i < static_cast<int>(tokens.size()); i++) {
-          if (tokens[i] == "type") {
+          if (tokens[static_cast<std::size_t>(i)] == "type") {
             typeIndex = i - 2;
-          } else if (tokens[i] == "mol") {
+          } else if (tokens[static_cast<std::size_t>(i)] == "mol") {
             molIndex = i - 2;
             sawMol = true;
-          } else if (tokens[i] == "id") {
+          } else if (tokens[static_cast<std::size_t>(i)] == "id") {
             atomIndex = i - 2;
             sawId = true;
           } else {
-            noteCoordColumn(i - 2, tokens[i], xIndex, yIndex, zIndex);
+            noteCoordColumn(i - 2, tokens[static_cast<std::size_t>(i)], xIndex, yIndex, zIndex);
           }
         }
       }

@@ -50,19 +50,19 @@ int ring::assignPolygonType(const std::vector<std::vector<int>> &rings,
 
   // Loop through every ring in rings
   for (int iring = 0; iring < rings.size(); iring++) {
-    ringSize = rings[iring].size();
+    ringSize = static_cast<int>(rings[static_cast<std::size_t>(iring)].size());
     // Loop through every element in iring
     for (int j = 0; j < ringSize; j++) {
-      iatom = rings[iring][j]; // Atom index
+      iatom = rings[static_cast<std::size_t>(iring)][static_cast<std::size_t>(j)]; // Atom index
       // Update the atom type
-      if (atomTypes[iatom] == 1) {
-        atomTypes[iatom] = ringSize;
+      if (atomTypes[static_cast<std::size_t>(iatom)] == 1) {
+        atomTypes[static_cast<std::size_t>(iatom)] = ringSize;
       } // The atom is unclassified
       else {
         // Only update the ring type if the number is higher
-        prevRingSize = atomTypes[iatom]; // Previously assigned ring size
+        prevRingSize = atomTypes[static_cast<std::size_t>(iatom)]; // Previously assigned ring size
         if (ringSize > prevRingSize) {
-          atomTypes[iatom] = ringSize;
+          atomTypes[static_cast<std::size_t>(iatom)] = ringSize;
         } // end of assigning the new ring size
       }   // only update if the number is higher
     }     // end of loop through every atom in iring
@@ -85,7 +85,7 @@ std::vector<int> ring::findsCommonElements(const std::vector<int> &ring1,
   int iatom; // Index to search for
 
   for (int i = 0; i < ring1.size(); i++) {
-    iatom = ring1[i];
+    iatom = ring1[static_cast<std::size_t>(i)];
     // Search for iatom in ring2
 
     auto it = std::find(ring2.begin(), ring2.end(), iatom);
@@ -130,7 +130,7 @@ bool ring::commonElementsInThreeRings(const std::vector<int> &ring1,
  */
 bool ring::findTripletInRing(const std::vector<int> &ring, const std::vector<int> &triplet) {
   //
-  int ringSize = ring.size();   // should be 6
+  int ringSize = static_cast<int>(ring.size());   // should be 6
   std::vector<int> ringTriplet; // triplet from the ring to be searched
   int kIndex;                   // Used for making the triplet
 
@@ -138,7 +138,7 @@ bool ring::findTripletInRing(const std::vector<int> &ring, const std::vector<int
   for (int i = 0; i < ringSize; i++) {
     ringTriplet.clear(); // init
     // Get the first element of the ring triplet
-    ringTriplet.push_back(ring[i]);
+    ringTriplet.push_back(ring[static_cast<std::size_t>(i)]);
     //
     // Get the next two elements
     for (int k = 1; k < 3; k++) {
@@ -147,7 +147,7 @@ bool ring::findTripletInRing(const std::vector<int> &ring, const std::vector<int
       if (kIndex >= ringSize) {
         kIndex -= ringSize;
       } // end of wrap-around
-      ringTriplet.push_back(ring[kIndex]);
+      ringTriplet.push_back(ring[static_cast<std::size_t>(kIndex)]);
     } // next two elements of ringTriplet
     //
     // Obtained ringTriplet!

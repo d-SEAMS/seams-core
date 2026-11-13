@@ -37,8 +37,8 @@ Eigen::MatrixXd shellOf(const Cloud &yCloud,
   if (iatom < 0 || iatom >= static_cast<int>(nList.size())) {
     return {};
   }
-  for (size_t j = 1; j < nList[iatom].size(); j++) {
-    const int id = nList[iatom][j];
+  for (size_t j = 1; j < nList[static_cast<std::size_t>(iatom)].size(); j++) {
+    const int id = nList[static_cast<std::size_t>(iatom)][j];
     const auto it = yCloud.idIndexMap.find(id);
     if (it == yCloud.idIndexMap.end()) {
       continue;
@@ -229,20 +229,20 @@ std::vector<double> soapOne(const Cloud &yCloud, const gen::FracBox &frame,
       for (int l = 0; l <= lMax; l++) {
         const int base = l * l;
         if (l == 0) {
-          coeff[static_cast<size_t>(n) * nComp + base] +=
+          coeff[static_cast<size_t>(n) * static_cast<std::size_t>(nComp) + static_cast<std::size_t>(base)] +=
               g * (0.5 / std::sqrt(std::numbers::pi));
           continue;
         }
         const auto &yl = ylm[static_cast<size_t>(l)];
         for (int m = 0; m < 2 * l + 1; m++) {
-          coeff[static_cast<size_t>(n) * nComp + base + m] +=
+          coeff[static_cast<size_t>(n) * static_cast<std::size_t>(nComp) + static_cast<std::size_t>(base) + static_cast<std::size_t>(m)] +=
               g * yl[static_cast<size_t>(m)];
         }
       }
     }
   };
-  for (size_t j = 1; j < nList[iatom].size(); j++) {
-    const int id = nList[iatom][j];
+  for (size_t j = 1; j < nList[static_cast<std::size_t>(iatom)].size(); j++) {
+    const int id = nList[static_cast<std::size_t>(iatom)][j];
     const auto it = yCloud.idIndexMap.find(id);
     if (it == yCloud.idIndexMap.end()) {
       continue;
@@ -263,14 +263,14 @@ std::vector<double> soapOne(const Cloud &yCloud, const gen::FracBox &frame,
         if (productMode == seams::product::Mode::Fp64) {
           std::complex<double> acc = 0.0;
           for (int m = 0; m < 2 * l + 1; m++) {
-            acc += coeff[static_cast<size_t>(n) * nComp + base + m] *
-                   std::conj(coeff[static_cast<size_t>(np) * nComp + base + m]);
+            acc += coeff[static_cast<size_t>(n) * static_cast<std::size_t>(nComp) + static_cast<std::size_t>(base) + static_cast<std::size_t>(m)] *
+                   std::conj(coeff[static_cast<size_t>(np) * static_cast<std::size_t>(nComp) + static_cast<std::size_t>(base) + static_cast<std::size_t>(m)]);
           }
           spec[static_cast<size_t>(slot++)] = acc.real();
         } else {
           spec[static_cast<size_t>(slot++)] = seams::product::complexDot(
-              coeff.data() + static_cast<size_t>(n) * nComp + base,
-              coeff.data() + static_cast<size_t>(np) * nComp + base, 2 * l + 1,
+              coeff.data() + static_cast<size_t>(n) * static_cast<std::size_t>(nComp) + base,
+              coeff.data() + static_cast<size_t>(np) * static_cast<std::size_t>(nComp) + base, 2 * l + 1,
               productMode).re;
         }
       }
@@ -303,7 +303,7 @@ std::vector<chill::TemplateHit> chill::classifyTemplates(
 std::vector<chill::TemplateHit> chill::classifyTemplates(
     const Cloud &yCloud, const std::vector<std::vector<int>> &nList,
     int kNeigh) {
-  std::vector<TemplateHit> out(yCloud.nop);
+  std::vector<TemplateHit> out(static_cast<std::size_t>(yCloud.nop));
   const struct {
     CrystalKind kind;
     const char *name;

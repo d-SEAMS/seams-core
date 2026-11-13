@@ -811,8 +811,8 @@ struct ClosedSearch {
       int n = 0;
       void reset(int expect) {
         std::size_t cap = 16;
-        const std::size_t need = static_cast<std::size_t>(std::max(expect, 1)) * 2;
-        while (cap < need) {
+        const std::size_t slots = static_cast<std::size_t>(std::max(expect, 1)) * 2;
+        while (cap < slots) {
           cap *= 2;
         }
         keys.assign(cap, ~std::uint64_t{0});
@@ -1067,7 +1067,7 @@ struct ClosedSearch {
     for (std::size_t e = 0; e < edgeEnds.size(); ++e) {
       ringsOfEdge.off[e + 1] += ringsOfEdge.off[e];
     }
-    ringsOfEdge.col.assign(ringsOfEdge.off.back(), 0);
+    ringsOfEdge.col.assign(static_cast<std::size_t>(ringsOfEdge.off.back()), 0);
     std::vector<int> at(ringsOfEdge.off.begin(), ringsOfEdge.off.end() - 1);
     for (const int i : cand) {
       for (const int e : ringEdges[static_cast<size_t>(i)]) {
@@ -1111,7 +1111,7 @@ struct ClosedSearch {
         ringsOfEdge.off[static_cast<std::size_t>(e) + 1] =
             ringsOfEdge.off[static_cast<std::size_t>(e)] + sum;
       }
-      ringsOfEdge.col.assign(ringsOfEdge.off.back(), 0);
+      ringsOfEdge.col.assign(static_cast<std::size_t>(ringsOfEdge.off.back()), 0);
       std::vector<std::vector<int>> start(
           static_cast<std::size_t>(indexTeam),
           std::vector<int>(static_cast<std::size_t>(nEdge), 0));

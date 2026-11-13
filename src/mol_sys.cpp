@@ -51,8 +51,8 @@ std::unordered_map<int, int> molSys::createIDMolIDmap(
 
   // Loop through the atoms in yCloud
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-    iatomID = yCloud.pts[iatom].atomID;   // atom ID
-    iatomMolID = yCloud.pts[iatom].molID; // molecular ID
+    iatomID = yCloud.pts[static_cast<std::size_t>(iatom)].atomID;   // atom ID
+    iatomMolID = yCloud.pts[static_cast<std::size_t>(iatom)].molID; // molecular ID
     // Update the unordered map
     idMolIDmap[iatomID] = iatomMolID;
   } // end of loop through every iatom in pointCloud
@@ -74,8 +74,8 @@ std::unordered_multimap<int, int> molSys::createMolIDAtomIDMultiMap(
 
   // Loop through the atoms in yCloud
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-    iatomID = yCloud.pts[iatom].atomID;   // atom ID
-    iatomMolID = yCloud.pts[iatom].molID; // molecular ID
+    iatomID = yCloud.pts[static_cast<std::size_t>(iatom)].atomID;   // atom ID
+    iatomMolID = yCloud.pts[static_cast<std::size_t>(iatom)].molID; // molecular ID
     // Update the unordered multimap
     molIDAtomIDmap.emplace(iatomMolID,iatomID);
   } // end of loop through every iatom in pointCloud
@@ -99,18 +99,18 @@ std::vector<std::vector<int>> molSys::hAtomMolList(
 
   for (int iatom = 0; iatom < oCloud.nop; iatom++) {
     // Get the molID
-    iMolID = oCloud.pts[iatom].molID;
+    iMolID = oCloud.pts[static_cast<std::size_t>(iatom)].molID;
 
     hMolList.push_back(std::vector<int>()); // Empty vector for the index iatom
     // Fill the first element with the molecular ID
-    hMolList[iatom].push_back(iMolID);
+    hMolList[static_cast<std::size_t>(iatom)].push_back(iMolID);
 
     nHatoms = 0; // init (no. of h atoms for the particular molID)
 
     // Now search through the hydrogen atom pointCloud for this particular molID
     for (int jatom = 0; jatom < hCloud.nop; jatom++) {
-      if (hCloud.pts[jatom].molID == iMolID) {
-        hMolList[iatom].push_back(jatom); // fill the hatom index
+      if (hCloud.pts[static_cast<std::size_t>(jatom)].molID == iMolID) {
+        hMolList[static_cast<std::size_t>(iatom)].push_back(jatom); // fill the hatom index
         nHatoms++;
         // If the two hydrogens have been found, break out of the loop
         if (nHatoms == 2) {
@@ -133,9 +133,9 @@ int molSys::searchMolList(const std::vector<std::vector<int>> &molList,
                           int molIDtoFind) {
   int index = -1; // init invalid index
 
-  for (int iatom = 0; iatom < molList.size(); iatom++) {
+  for (int iatom = 0; iatom < static_cast<int>(molList.size()); iatom++) {
     // If the molecular ID is equal, return the index in the array
-    if (molList[iatom][0] == molIDtoFind) {
+    if (molList[static_cast<std::size_t>(iatom)][0] == molIDtoFind) {
       index = iatom;
       return index;
     } // end of check

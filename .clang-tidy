@@ -1,0 +1,21 @@
+# Checks that stay clean on src/ and the internal headers.
+# bugprone-*, cert-*, performance-*, concurrency-* and modernize-* were
+# triaged. The families that flag existing style (const parameters,
+# modernize-use-auto, performance-unnecessary-copy, concurrency-mt-unsafe
+# on getenv) are left off so this file can fail the build.
+Checks: >
+  -*,
+  bugprone-assignment-in-if-condition,
+  bugprone-dangling-handle,
+  bugprone-macro-repeated-side-effects,
+  bugprone-sizeof-expression,
+  bugprone-suspicious-semicolon,
+  bugprone-too-small-loop-variable,
+  bugprone-undefined-memory-manipulation,
+  bugprone-unused-raii,
+  bugprone-use-after-move,
+  cert-err52-cpp,
+  cert-err60-cpp
+WarningsAsErrors: '*'
+HeaderFilterRegex: '(src/include/internal/|include/seams\\.h)'
+FormatStyle: none

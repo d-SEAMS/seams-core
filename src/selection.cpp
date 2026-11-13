@@ -50,13 +50,13 @@ gen::getPointCloudOneAtomType(
   // Loop through every iatom and check the type
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // Skip if the atom is not of the desired type 
-    if (yCloud.pts[iatom].type != atomTypeI) {
+    if (yCloud.pts[static_cast<std::size_t>(iatom)].type != atomTypeI) {
       continue;
     } // end of checking for the type 
     // ----------------
     // only if a slice has been requested
     if (isSlice) {
-      pointInSlice = sinp::atomInSlice(yCloud.pts[iatom].x, yCloud.pts[iatom].y, yCloud.pts[iatom].z,
+      pointInSlice = sinp::atomInSlice(yCloud.pts[static_cast<std::size_t>(iatom)].x, yCloud.pts[static_cast<std::size_t>(iatom)].y, yCloud.pts[static_cast<std::size_t>(iatom)].z,
                                                coordLow, coordHigh);
       // Skip if the atom is not part of the slice
       if (!pointInSlice) {
@@ -66,13 +66,13 @@ gen::getPointCloudOneAtomType(
     //
     // Actually add the atoms to the outCloud
     natoms++; // Update the number of atoms in outCloud
-    outCloud.pts.push_back(yCloud.pts[iatom]); // Update the pts vector
-    outCloud.idIndexMap[yCloud.pts[iatom].atomID] =
-                outCloud.pts.size() - 1; // array index
+    outCloud.pts.push_back(yCloud.pts[static_cast<std::size_t>(iatom)]); // Update the pts vector
+    outCloud.idIndexMap[yCloud.pts[static_cast<std::size_t>(iatom)].atomID] =
+                static_cast<int>(outCloud.pts.size() - 1); // array index
   }
 
   // Update the number of particles in the PointCloud
-  outCloud.nop = outCloud.pts.size();
+  outCloud.nop = static_cast<int>(outCloud.pts.size());
 
   // Box and box lengths 
   outCloud.box = yCloud.box;
@@ -109,7 +109,7 @@ void gen::atomsInSingleSlice(
   if (clearPreviousSliceSelection)
   {
     for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-      yCloud.pts[iatom].inSlice = false;
+      yCloud.pts[static_cast<std::size_t>(iatom)].inSlice = false;
     }
   } // end of init
   // --------------------
@@ -117,10 +117,10 @@ void gen::atomsInSingleSlice(
   // Loop through every iatom and check if the atom is in the slice or not 
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // Check if the current atom is in the slice 
-    pointInSlice = sinp::atomInSlice(yCloud.pts[iatom].x, yCloud.pts[iatom].y, yCloud.pts[iatom].z,
+    pointInSlice = sinp::atomInSlice(yCloud.pts[static_cast<std::size_t>(iatom)].x, yCloud.pts[static_cast<std::size_t>(iatom)].y, yCloud.pts[static_cast<std::size_t>(iatom)].z,
                                                coordLow, coordHigh);
 
-    yCloud.pts[iatom].inSlice = pointInSlice; // iatom is inside the slice
+    yCloud.pts[static_cast<std::size_t>(iatom)].inSlice = pointInSlice; // iatom is inside the slice
     //
   }
 
@@ -166,7 +166,7 @@ void gen::moleculesInSingleSlice(
   if (clearPreviousSliceSelection)
   {
     for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-      yCloud.pts[iatom].inSlice = false;
+      yCloud.pts[static_cast<std::size_t>(iatom)].inSlice = false;
     }
   } // end of init
   // --------------------
@@ -174,15 +174,15 @@ void gen::moleculesInSingleSlice(
   // Loop through every iatom and check if the atom is in the slice or not 
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // Check if the current atom is in the slice 
-    pointInSlice = sinp::atomInSlice(yCloud.pts[iatom].x, yCloud.pts[iatom].y, yCloud.pts[iatom].z,
+    pointInSlice = sinp::atomInSlice(yCloud.pts[static_cast<std::size_t>(iatom)].x, yCloud.pts[static_cast<std::size_t>(iatom)].y, yCloud.pts[static_cast<std::size_t>(iatom)].z,
                                                coordLow, coordHigh);
     //
     // Set the inSlice bool for the particular Point 
     if (pointInSlice)
     {
-      yCloud.pts[iatom].inSlice = true; // iatom is inside the slice
+      yCloud.pts[static_cast<std::size_t>(iatom)].inSlice = true; // iatom is inside the slice
       // Find mol ID and atoms with that particular molecular ID 
-      iatomMolID = yCloud.pts[iatom].molID; // molecule ID 
+      iatomMolID = yCloud.pts[static_cast<std::size_t>(iatom)].molID; // molecule ID 
       // -----------
       // Find all atoms with iatomMolID and set the inSlice bool
       // to true
@@ -195,7 +195,7 @@ void gen::moleculesInSingleSlice(
         auto gotJ = yCloud.idIndexMap.find(jatomID);
         jatomIndex = gotJ->second;
         // Set the jatom inSlice bool to true
-        yCloud.pts[jatomIndex].inSlice = true; // jatomIndex is inside the slice 
+        yCloud.pts[static_cast<std::size_t>(jatomIndex)].inSlice = true; // jatomIndex is inside the slice 
       }
       // -----------
     } // the atom is in the slice
@@ -238,7 +238,7 @@ void gen::setAtomsWithSameMolID(
     auto gotJ = yCloud.idIndexMap.find(jatomID);
     jatomIndex = gotJ->second;
     // Set the jatom inSlice bool to true
-    yCloud.pts[jatomIndex].inSlice = inSliceValue; // jatomIndex is assigned inSliceValue
+    yCloud.pts[static_cast<std::size_t>(jatomIndex)].inSlice = inSliceValue; // jatomIndex is assigned inSliceValue
   } // end of loop through all atoms with molID
 
   // IC(yCloud.pts[jatomIndex]);
@@ -292,7 +292,7 @@ void ring::getEdgeMoleculesInRings(
   // The indices of oCloud and rings should match (or this will produce unexpected results)
   for (int iatom = 0; iatom < oCloud.nop; iatom++) {
     // Skip if iatom is not in the slice
-    if (!oCloud.pts[iatom].inSlice)
+    if (!oCloud.pts[static_cast<std::size_t>(iatom)].inSlice)
     {
       continue;
     } // skip for iatom not in slice
@@ -302,24 +302,24 @@ void ring::getEdgeMoleculesInRings(
     for (int iring = 0; iring < rings.size(); iring++)
     {
       // Skip if iring is in the slice already
-      if (ringInSlice[iring])
+      if (ringInSlice[static_cast<std::size_t>(iring)])
       {
         continue;
       } // skip for iring in slice 
       // Check and see if iatom is in iring 
-      if(std::find(rings[iring].begin(), rings[iring].end(), iatom)!=rings[iring].end()){
+      if(std::find(rings[static_cast<std::size_t>(iring)].begin(), rings[static_cast<std::size_t>(iring)].end(), iatom)!=rings[static_cast<std::size_t>(iring)].end()){
         // Found iatom; ring is part of the slice 
-        ringInSlice[iring] = true; // update the vector of bool values
+        ringInSlice[static_cast<std::size_t>(iring)] = true; // update the vector of bool values
         // --------------------------
         // Change the inSlice bool of every iatom in oCloud 
         // (and optionally, yCloud) in the ring to true
         // Loop through the elements of the ring 
-        for (int j = 0; j < rings[iring].size(); j++)
+        for (int j = 0; j < rings[static_cast<std::size_t>(iring)].size(); j++)
         {
-          jatomIndex = rings[iring][j]; // Index of the atom in oCloud 
+          jatomIndex = rings[static_cast<std::size_t>(iring)][static_cast<std::size_t>(j)]; // Index of the atom in oCloud 
           // Set this to true in oCloud 
-          oCloud.pts[jatomIndex].inSlice = true; // part of slice 
-          jatomID = oCloud.pts[jatomIndex].atomID; // Atom ID 
+          oCloud.pts[static_cast<std::size_t>(jatomIndex)].inSlice = true; // part of slice 
+          jatomID = oCloud.pts[static_cast<std::size_t>(jatomIndex)].atomID; // Atom ID 
           // Now if oCloud and yCloud are not the same, use the
           // atom ID to set the inSlice bool value in yCloud 
           if (!identicalCloud)
@@ -329,10 +329,10 @@ void ring::getEdgeMoleculesInRings(
             jatomIndex1 = gotJ->second;
             // throw if not found ?
             // Set the jatom inSlice bool to true
-            yCloud.pts[jatomIndex1].inSlice = true; // jatomIndex is inside the slice 
+            yCloud.pts[static_cast<std::size_t>(jatomIndex1)].inSlice = true; // jatomIndex is inside the slice 
             // set the inSlice value of all atoms in yCloud with the current molecule ID 
             gen::setAtomsWithSameMolID(yCloud, molIDAtomIDmap, 
-              yCloud.pts[jatomIndex1].molID, true);
+              yCloud.pts[static_cast<std::size_t>(jatomIndex1)].molID, true);
           } // end of setting values in yCloud 
         } // end of loop through the elements of the current ring 
         // --------------------------
