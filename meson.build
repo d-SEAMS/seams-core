@@ -1423,6 +1423,24 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_palette',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'check_palette.py',
+    ],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_sh_cell',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'check_sh_cell.py',
+    ],
+    env: binding_env,
+    depends: [seams_lang],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_science_tutorials',
     python3,
     args: [

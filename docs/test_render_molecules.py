@@ -10,15 +10,18 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "docs" / "scripts" / "render_molecules.py"
 
-# The deck colours. The renderer must take these from one palette dict.
-EXPECTED = {
-    "hexagonal": "#1E88E5",
-    "cubic": "#FF655D",
-    "interfacial": "#F1DB4B",
-    "clathrate": "#D81B60",
-    "interClathrate": "#004D40",
-    "water": "#B0BEC5",
-}
+# The deck colours. They come from scripts/chill_palette.py.
+sys.path.insert(0, str(ROOT.parent / "scripts"))
+from chill_palette import COLOUR
+
+
+def _hex(colour):
+    return "#{:02X}{:02X}{:02X}".format(*(int(round(channel * 255)) for channel in colour))
+
+
+EXPECTED = {name: _hex(COLOUR[name]) for name in (
+    "hexagonal", "cubic", "interfacial", "clathrate", "interClathrate", "water",
+)}
 
 
 def fail(message):

@@ -16,9 +16,15 @@ def read_dump(path):
             if line == "":
                 break
             if line.startswith("ITEM: BOX BOUNDS"):
-                for _ in range(3):
-                    lo, hi = handle.readline().split()[:2]
-                    edges.append(float(hi) - float(lo))
+                import sys
+                from pathlib import Path
+                root = Path(__file__).resolve().parents[2]
+                if str(root / "scripts") not in sys.path:
+                    sys.path.insert(0, str(root / "scripts"))
+                from lammps_box import cell_from_bounds
+                rows = [handle.readline().split() for _ in range(3)]
+                _origin, recovered, _tilts = cell_from_bounds(rows)
+                edges.extend(recovered)
             elif line.startswith("ITEM: ATOMS"):
                 reading = True
             elif reading:

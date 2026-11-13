@@ -9,9 +9,17 @@ medium cage is interfacial yellow, and 5^12 6^8 is clathrate green.
 from __future__ import annotations
 
 import ctypes
+import sys
 from collections import defaultdict
+from pathlib import Path
 
 import numpy as np
+
+_SCRIPTS = Path(__file__).resolve().parents[2] / "scripts"
+if str(_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS))
+from chill_palette import CHLORIDE, COLOUR, LEGEND, SODIUM
+from lammps_box import cell_from_bounds
 
 # Face-size census of each cage, and the CHILL+ colour index it borrows.
 CAGE_KINDS = (
@@ -20,35 +28,10 @@ CAGE_KINDS = (
     ("sh", {4: 3, 5: 6, 6: 3}, 3),
     ("51268", {5: 12, 6: 8}, 4),
 )
-# Ion colours from paper/data/brine-frames/render_front.py at
-# feat/brine-science c2c7e46f2904c25f8878a682fc8674d2797e2910.
-NA = np.array((0.37, 0.24, 0.60))
-CL = np.array((0.12, 0.12, 0.12))
-# Brine CHILL+ colours from that same renderer. Cubic and hexagonal match
-# scripts/science_render.py. Clathrate is the paper's light blue, and
-# interfacial clathrate is the paper's pink, so neither is an unnamed green
-# or maroon in the liquid.
-BRINE_COLOUR = {
-    "cubic": np.array((0.000, 0.447, 0.698)),
-    "hexagonal": np.array((0.902, 0.624, 0.000)),
-    "interfacial": np.array((0.000, 0.620, 0.451)),
-    "water": np.array((0.780, 0.780, 0.780)),
-    "clathrate": np.array((0.337, 0.706, 0.914)),
-    "interClathrate": np.array((0.800, 0.475, 0.655)),
-    "unclassified": np.array((0.45, 0.45, 0.45)),
-    "reCubic": np.array((0.000, 0.447, 0.698)),
-    "reHex": np.array((0.902, 0.624, 0.000)),
-}
-BRINE_LEGEND = (
-    ("hexagonal", BRINE_COLOUR["hexagonal"]),
-    ("cubic", BRINE_COLOUR["cubic"]),
-    ("interfacial", BRINE_COLOUR["interfacial"]),
-    ("liquid", BRINE_COLOUR["water"]),
-    ("clathrate", BRINE_COLOUR["clathrate"]),
-    ("interf. clathrate", BRINE_COLOUR["interClathrate"]),
-    ("Na+", NA),
-    ("Cl-", CL),
-)
+NA = np.array(SODIUM)
+CL = np.array(CHLORIDE)
+BRINE_COLOUR = {name: np.array(colour) for name, colour in COLOUR.items()}
+BRINE_LEGEND = tuple((label, np.array(colour)) for label, colour in LEGEND)
 # Slightly under the paper radii so the ice and liquid stay readable.
 BRINE_RADIUS = {"O": 0.90, "Na": 1.15, "Cl": 1.28}
 MAX_FACE_EDGE = 3.5
@@ -195,20 +178,12 @@ def _box_vectors(path):
         for line in handle:
             if not line.startswith("ITEM: BOX"):
                 continue
-            rows = [[float(item) for item in handle.readline().split()] for _ in range(3)]
-            xy = rows[0][2] if len(rows[0]) > 2 else 0.0
-            xz = rows[1][2] if len(rows[1]) > 2 else 0.0
-            yz = rows[2][2] if len(rows[2]) > 2 else 0.0
-            # LAMMPS writes the bounding box, not the cell edges, when the
-            # dump is triclinic. Recover lx, ly, lz before building vectors.
-            xlo = rows[0][0] - min(0.0, xy, xz, xy + xz)
-            xhi = rows[0][1] - max(0.0, xy, xz, xy + xz)
-            ylo = rows[1][0] - min(0.0, yz)
-            yhi = rows[1][1] - max(0.0, yz)
+            rows = [handle.readline().split() for _ in range(3)]
+            _origin, (lx, ly, lz), (xy, xz, yz) = cell_from_bounds(rows)
             return [
-                np.array([xhi - xlo, 0.0, 0.0]),
-                np.array([xy, yhi - ylo, 0.0]),
-                np.array([xz, yz, rows[2][1] - rows[2][0]]),
+                np.array([lx, 0.0, 0.0]),
+                np.array([xy, ly, 0.0]),
+                np.array([xz, yz, lz]),
             ]
     raise RuntimeError(f"no box in {path}")
 
@@ -471,35 +446,49 @@ def render_host(render, lib, dump, path, kinds, width=1280):
     return expected
 
 
-def annotate(render, path, positions, forward, up, width, corners, legend=None):
-    """Box outline on the slab, and a 1 nm bar in the margin below the atoms."""
-    from PIL import Image, ImageDraw, ImageFont
+def _legend_font(size):
+    from PIL import ImageFont
+
+    try:
+        return ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", size)
+    except OSError:
+        return ImageFont.load_default()
+
+
+def annotate(render, path, positions, forward, up, width, corners, legend=None, layer_title=None):
+    """Box outline, a 1 nm bar, and the colour legend under the atoms."""
+    from PIL import Image, ImageDraw
 
     centre, half_h, half_v, forward, right, up = _camera(render, positions, forward, up)
     image = Image.open(path).convert("RGB")
-    try:
-        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
-    except OSError:
-        font = ImageFont.load_default()
+    font = _legend_font(44)
+    swatch = 32
+    row_h = 52
     legend_rows = 1
     if legend:
         x = 16
         rows = 1
         for label, _colour in legend:
-            width_px = 36 + float(font.getlength(label))
+            width_px = swatch + 16 + float(font.getlength(label))
             if x + width_px > image.width - 8:
                 rows += 1
                 x = 16
-            x += width_px + 16
+            x += width_px + 18
         legend_rows = rows
-    margin = 28 + 34 * legend_rows + 56
-    canvas = Image.new("RGB", (image.width, image.height + margin), (255, 255, 255))
-    canvas.paste(image, (0, 0))
+    margin = 24 + row_h * legend_rows + 64
+    left = 110 if layer_title else 0
+    canvas = Image.new("RGB", (image.width + left, image.height + margin), (255, 255, 255))
+    canvas.paste(image, (left, 0))
     draw = ImageDraw.Draw(canvas)
+    if layer_title:
+        text = Image.new("RGB", (int(font.getlength(layer_title)) + 8, 52), (255, 255, 255))
+        ImageDraw.Draw(text).text((0, 4), layer_title, font=font, fill=(20, 20, 20))
+        turned = text.rotate(90, expand=True)
+        canvas.paste(turned, (6, max(8, (image.height - turned.height) // 2)))
 
     def project(point):
         offset = np.asarray(point, dtype=float) - centre
-        x = (float(np.dot(offset, right)) / (2.0 * half_h) + 0.5) * image.width
+        x = left + (float(np.dot(offset, right)) / (2.0 * half_h) + 0.5) * image.width
         y = (0.5 - float(np.dot(offset, up)) / (2.0 * half_v)) * image.height
         return (x, y)
 
@@ -509,22 +498,22 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None):
                 continue
             draw.line([project(corners[first]), project(corners[second])], fill=(70, 70, 70), width=2)
     if legend:
-        x, y = 16, image.height + 16
+        x, y = left + 16, image.height + 16
         for label, colour in legend:
             text_w = float(font.getlength(label))
-            if x + 36 + text_w > image.width - 8:
-                x = 16
-                y += 34
+            if x + swatch + 16 + text_w > canvas.width - 8:
+                x = left + 16
+                y += row_h
             rgb = tuple(int(round(channel * 255)) for channel in colour)
-            draw.rectangle([x, y, x + 22, y + 22], fill=rgb, outline=(30, 30, 30))
-            draw.text((x + 28, y), label, font=font, fill=(20, 20, 20))
-            x += 36 + text_w + 16
-        bar_y = y + 46
+            draw.rectangle([x, y, x + swatch, y + swatch], fill=rgb, outline=(30, 30, 30))
+            draw.text((x + swatch + 10, y), label, font=font, fill=(20, 20, 20))
+            x += swatch + 16 + text_w + 18
+        bar_y = y + row_h + 8
     else:
         bar_y = image.height + 36
     bar = 10.0 * image.width / (2.0 * half_h)
-    draw.line([(16, bar_y), (16 + bar, bar_y)], fill=(20, 20, 20), width=5)
-    draw.text((24 + bar, bar_y - 12), "1 nm", font=font, fill=(20, 20, 20))
+    draw.line([(left + 16, bar_y), (left + 16 + bar, bar_y)], fill=(20, 20, 20), width=6)
+    draw.text((left + 28 + bar, bar_y - 22), "1 nm", font=font, fill=(20, 20, 20))
     canvas.save(path)
 
 
@@ -556,7 +545,13 @@ def render_interface(render, positions, labels, origin, lengths, path, width=128
         for j in (0, 1)
         for k in (0, 1)
     ]
-    annotate(render, path, positions, np.array([0.0, 1.0, 0.0]), np.array([0.0, 0.0, 1.0]), width, corners)
+    names = {0: "cubic", 1: "hexagonal", 2: "liquid", 3: "interfacial", 4: "clathrate", 5: "interf. clathrate"}
+    present = {names[int(code)] for code in labels if int(code) in names}
+    legend = [item for item in BRINE_LEGEND if item[0] in present]
+    annotate(
+        render, path, positions, np.array([0.0, 1.0, 0.0]), np.array([0.0, 0.0, 1.0]),
+        width, corners, legend, layer_title="layer index",
+    )
 
 
 def _positions(path):

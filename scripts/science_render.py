@@ -28,19 +28,12 @@ from pathlib import Path
 
 import numpy as np
 
-# Published CHILL+ classes, molSys::atom_state_type.
-# Okabe-Ito for the ice classes. Clathrate is Paul Tol green and interfacial
-# clathrate is wine, so neither sits on the cubic blue after a deuteranopia
-# simulation. In the 230 K slab the green and wine molecules in the liquid are
-# clathrate and interfacial clathrate. The cutoffs are not refit.
-CHILL = {
-    0: ("cubic Ic", (0.000, 0.447, 0.698)),
-    1: ("hexagonal Ih", (0.902, 0.624, 0.000)),
-    3: ("interfacial", (0.941, 0.894, 0.259)),
-    2: ("liquid", (0.940, 0.940, 0.940)),
-    4: ("clathrate", (0.133, 0.533, 0.200)),
-    5: ("interfacial clathrate", (0.533, 0.133, 0.333)),
-}
+# Published CHILL+ classes live in scripts/chill_palette.py so a colour
+# is one role in every figure. The cutoffs are not refit.
+_SCRIPTS = Path(__file__).resolve().parent
+if str(_SCRIPTS) not in sys.path:
+    sys.path.insert(0, str(_SCRIPTS))
+from chill_palette import CHILL
 ICE = {0, 1, 3, 4, 5}
 # One radius and one bond width for every panel. 85 mm is the CPC column.
 ATOM_RADIUS = 0.90
@@ -128,10 +121,9 @@ def read_dump_frame(path: Path, frame: int):
             bounds = handle.readline()
             if not bounds.startswith("ITEM: BOX BOUNDS"):
                 raise SystemExit("dump is missing box bounds")
-            lengths = []
-            for _ in range(3):
-                lo, hi = handle.readline().split()[:2]
-                lengths.append(float(hi) - float(lo))
+            rows = [handle.readline().split() for _ in range(3)]
+            _origin, edges, _tilts = __import__("lammps_box").cell_from_bounds(rows)
+            lengths = list(edges)
             atoms = handle.readline()
             if not atoms.startswith("ITEM: ATOMS"):
                 raise SystemExit("dump is missing the atom table")

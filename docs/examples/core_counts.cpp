@@ -1,5 +1,6 @@
 /* Same Ice Ih and sII census as core_counts.c, through seams.h. */
 #include "seams.h"
+#include "seams_lammps_box.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -11,31 +12,25 @@ static int read_dump(const char *path, std::vector<double> &xyz, std::vector<int
   FILE *in = std::fopen(path, "r");
   char line[512];
   int reading = 0;
-  double lo, hi;
   if (in == nullptr) {
     return 1;
   }
   while (std::fgets(line, sizeof line, in) != nullptr) {
     if (std::strncmp(line, "ITEM: BOX BOUNDS", 16) == 0) {
-      if (std::fscanf(in, "%lf %lf", &lo, &hi) != 2) {
-        std::fclose(in);
-        return 1;
+      double bound_lo[3], bound_hi[3], tilt[3];
+      for (int axis = 0; axis < 3; ++axis) {
+        char bound[128];
+        if (std::fgets(bound, sizeof bound, in) == nullptr) {
+          std::fclose(in);
+          return 1;
+        }
+        tilt[axis] = 0.0;
+        if (std::sscanf(bound, "%lf %lf %lf", &bound_lo[axis], &bound_hi[axis], &tilt[axis]) < 2) {
+          std::fclose(in);
+          return 1;
+        }
       }
-      box9[0] = lo;
-      box9[3] = hi - lo;
-      if (std::fscanf(in, "%lf %lf", &lo, &hi) != 2) {
-        std::fclose(in);
-        return 1;
-      }
-      box9[1] = lo;
-      box9[4] = hi - lo;
-      if (std::fscanf(in, "%lf %lf", &lo, &hi) != 2) {
-        std::fclose(in);
-        return 1;
-      }
-      box9[2] = lo;
-      box9[5] = hi - lo;
-      box9[6] = box9[7] = box9[8] = 0.0;
+      seams_lammps_bounds(bound_lo, bound_hi, tilt, box9);
     } else if (std::strncmp(line, "ITEM: ATOMS", 11) == 0) {
       reading = 1;
     } else if (reading) {

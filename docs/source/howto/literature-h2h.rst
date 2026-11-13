@@ -170,11 +170,14 @@ steep rational switch cut at 3.5 Å. PLUMED stores the norm of the
 averaged spherical-harmonic vector and omits :math:`\sqrt{4\pi/(2l+1)}`.
 Restoring that factor makes it the local Steinhardt parameter. On ideal
 ice every restored value is within :math:`10^{-6}` of d-SEAMS, and the
-coordination number is 4. At one thread on ice Ic of 110592 molecules,
-:math:`q_4` is 57.042 ms against PLUMED 1294.172 ms and :math:`q_6` is 48.591 ms
-against 1671.743 ms. The sharp neighbour count is 31.356 ms against
-161.853 ms. At eight threads those PLUMED times stay near 1304 ms,
-1692 ms and 163 ms. On the dense frame and the TIP4P slab some
+coordination number is 4. The PLUMED rows in that sitting were measured on one thread because
+``PLUMED_NUM_THREADS`` was unset. On ice Ic of 110592 molecules the
+recorded :math:`q_4` is 57.042 ms against PLUMED 1294.172 ms and :math:`q_6`
+is 48.591 ms against 1671.743 ms. The sharp neighbour count is
+31.356 ms against 161.853 ms. The columns the driver labeled eight
+threads, near 1304 ms, 1692 ms and 163 ms, are that same one-thread
+measurement. The 884736-molecule sitting sets ``PLUMED_NUM_THREADS``,
+so its q6 rows are not this measurement. On the dense frame and the TIP4P slab some
 neighbours sit on the cutoff, so the continuous switch is a different
 number. The largest :math:`q_4` gap on the dense frame is 0.025 and the
 coordination gap is 6.8. The sharp list is the value that matches
@@ -243,7 +246,7 @@ The table below uses the full list. One thread is 28.325 ms
 against 51.194 ms. Eight threads are 6.453 ms against 22.269 ms.
 
 ****Numbers that this sitting does not match.**** Primitive rings at
-110592 molecules and one thread are 88.959 ms against mdapy
+110592 molecules and one thread are 86.531 ms against mdapy
 2276.747 ms. Both censuses are 221184 six-rings. The quoted
 0.12 s is not this median. The quoted 2.2 s is the mdapy median.
 Cutoff q6 against mdapy is 25.832 ms against 79.232 ms, and the
@@ -270,12 +273,17 @@ boundary. On the sI unit cell (46 oxygens) d-SEAMS finds 2 of
 inside the cell: both codes find 16 and 48. On sII (136 oxygens)
 both find 16 of 5^{12} and 8 of 5^{12}6^{4}.
 
-****Where d-SEAMS is slower.**** On no paired row. PLUMED q4 and q6
-do not change from one thread to eight. TRACE does not either.
+****Where d-SEAMS is slower.**** On no paired row. The PLUMED q4 and q6
+rows were measured on one thread because ``PLUMED_NUM_THREADS`` was
+unset, so the ``threads`` column is the width the driver requested.
+The 884736-molecule sitting sets the variable. TRACE does not change
+from one thread to eight.
 The sI unit-cell census is the disagreement above. The q6
 derivative, checked separately on a symmetry-broken
 eight-molecule cell, matches an independent nanometre difference
 to 3.99e-11.
+
+The table is ``benchmarks/rc3-sitting.csv``: code, version, molecules, operation, threads, cores, n, median, and the type-7 interquartile range.
 
 The non-heavy test suite was run three times on this build:
 128 passed, 2 expected failures, 1 skip, 0 failures. ``seams_input``
@@ -312,7 +320,7 @@ and ``language_fronts`` passed on each run.
     +-------------------------+----------------+-----------+------------+---------+-------+---+------------+-----------+
     | OVITO                   |         3.17.2 |    110592 | CHILL+     |       1 |     0 | 6 |    622.424 |     3.316 |
     +-------------------------+----------------+-----------+------------+---------+-------+---+------------+-----------+
-    | d-SEAMS                 |         2.14.0 |    110592 | rings      |       1 |   0-7 | 6 |     88.959 |     1.764 |
+    | d-SEAMS                 |         2.14.0 |    110592 | rings      |       1 |   0-7 | 6 |     86.531 |     1.036 |
     +-------------------------+----------------+-----------+------------+---------+-------+---+------------+-----------+
     | OVITO                   |         3.17.2 |    110592 | rings      |       1 |     0 | 6 |    583.334 |     7.617 |
     +-------------------------+----------------+-----------+------------+---------+-------+---+------------+-----------+
@@ -350,7 +358,7 @@ and ``language_fronts`` passed on each run.
     +-------------------------+----------------+-----------+------------+---------+-------+---+------------+-----------+
     | OVITO                   |         3.17.2 |    110592 | CHILL+     |       8 |   0-7 | 6 |     88.685 |     1.045 |
     +-------------------------+----------------+-----------+------------+---------+-------+---+------------+-----------+
-    | d-SEAMS                 |         2.14.0 |    110592 | rings      |       8 |   0-7 | 6 |     33.441 |     0.481 |
+    | d-SEAMS                 |         2.14.0 |    110592 | rings      |       8 |   0-7 | 6 |     32.665 |     0.343 |
     +-------------------------+----------------+-----------+------------+---------+-------+---+------------+-----------+
     | OVITO                   |         3.17.2 |    110592 | rings      |       8 |   0-7 | 6 |    354.605 |    17.902 |
     +-------------------------+----------------+-----------+------------+---------+-------+---+------------+-----------+

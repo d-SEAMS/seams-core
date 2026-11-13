@@ -47,20 +47,39 @@ contains
     real(c_double), intent(out) :: coords(*), edge_x, edge_y, edge_z
     integer(c_int), intent(out) :: natom
     character(len=256) :: line
-    integer :: unit, ios, id, typ, axis
-    real(c_double) :: lo, hi, x, y, z
+    integer :: unit, ios, id, typ
+    real(c_double) :: x, y, z
     natom = 0
     open(newunit=unit, file=filename, status="old", action="read")
     do
       read(unit, "(A)", iostat=ios) line
       if (ios /= 0) exit
       if (index(line, "ITEM: BOX BOUNDS") == 1) then
-        do axis = 1, 3
-          read(unit, *) lo, hi
-          if (axis == 1) edge_x = hi - lo
-          if (axis == 2) edge_y = hi - lo
-          if (axis == 3) edge_z = hi - lo
-        end do
+        block
+          character(len=256) :: bound
+          real(c_double) :: xy, xz, yz, xmin, xmax, ymin, ymax
+          real(c_double) :: xlo_b, xhi_b, ylo_b, yhi_b, zlo_b, zhi_b
+          integer :: ios
+          xy = 0d0
+          xz = 0d0
+          yz = 0d0
+          read(unit, "(A)") bound
+          read(bound, *, iostat=ios) xlo_b, xhi_b, xy
+          if (ios /= 0) read(bound, *) xlo_b, xhi_b
+          read(unit, "(A)") bound
+          read(bound, *, iostat=ios) ylo_b, yhi_b, xz
+          if (ios /= 0) read(bound, *) ylo_b, yhi_b
+          read(unit, "(A)") bound
+          read(bound, *, iostat=ios) zlo_b, zhi_b, yz
+          if (ios /= 0) read(bound, *) zlo_b, zhi_b
+          xmin = min(0d0, xy, xz, xy + xz)
+          xmax = max(0d0, xy, xz, xy + xz)
+          ymin = min(0d0, yz)
+          ymax = max(0d0, yz)
+          edge_x = (xhi_b - xlo_b) - xmax + xmin
+          edge_y = (yhi_b - ylo_b) - ymax + ymin
+          edge_z = zhi_b - zlo_b
+        end block
       else if (index(line, "ITEM: ATOMS") == 1) then
         do
           read(unit, *, iostat=ios) id, typ, x, y, z

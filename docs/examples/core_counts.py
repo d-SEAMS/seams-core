@@ -7,9 +7,12 @@ on ``input/traj/ice1h.lammpstrj`` and ``input/traj/genice_sII.lammpstrj``.
 
 import ctypes
 import os
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts"))
+from lammps_box import cell_from_bounds
 
 
 def _load_dump(path):
@@ -20,20 +23,9 @@ def _load_dump(path):
     with open(path) as handle:
         for line in handle:
             if line.startswith("ITEM: BOX BOUNDS"):
-                bounds = []
-                for _ in range(3):
-                    bounds.append([float(item) for item in handle.readline().split()])
-                box = [
-                    bounds[0][0],
-                    bounds[1][0],
-                    bounds[2][0],
-                    bounds[0][1] - bounds[0][0],
-                    bounds[1][1] - bounds[1][0],
-                    bounds[2][1] - bounds[2][0],
-                    0.0,
-                    0.0,
-                    0.0,
-                ]
+                rows = [handle.readline().split() for _ in range(3)]
+                origin, edges, tilts = cell_from_bounds(rows)
+                box = [*origin, *edges, *tilts]
             elif line.startswith("ITEM: ATOMS"):
                 reading = True
             elif reading:

@@ -25,6 +25,8 @@ import warnings
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "scripts"))
+from lammps_box import cell_from_bounds
 
 
 def _loader_path():
@@ -50,27 +52,24 @@ CAPTION_MARGIN = 128
 RENDER_SCALE = max(1, int(os.environ.get("MOLECULES_SCALE", "2")))
 WEB = (960, 720)
 
-# Ruhi palette. Every slug reads colours from this dict and from nowhere else.
-PALETTE = {
-    "hexagonal": "#1E88E5",
-    "cubic": "#FF655D",
-    "interfacial": "#F1DB4B",
-    "clathrate": "#D81B60",
-    "interClathrate": "#004D40",
-    "water": "#B0BEC5",
-    "unclassified": "#78909C",
-    "reCubic": "#FF655D",
-    "reHex": "#1E88E5",
-    "sodium": "#AA00FF",
-    "chloride": "#00C853",
+# Colours come from scripts/chill_palette.py. Guest colours stay here and
+# must not repeat a palette triple.
+from chill_palette import COLOUR as _SHARED
+
+
+def _hex(colour):
+    return "#{:02X}{:02X}{:02X}".format(*(int(round(channel * 255)) for channel in colour))
+
+
+PALETTE = {name: _hex(colour) for name, colour in _SHARED.items()}
+PALETTE.update({
     "methane": "#F9A825",
     "THF": "#EF6C00",
     "hydrogen": "#90A4AE",
     # ColorBrewer Dark2 purple. It stays clear of the interfacial yellow.
     "mixed": "#7570B3",
-    # The oxygen in a THF ring. Carbons stay the THF orange.
-    "ring O": "#C62828",
-}
+    "ring O": _hex(_SHARED["red"]),
+})
 CHILL_NAME = {
     0: "cubic",
     1: "hexagonal",
@@ -283,21 +282,13 @@ def read_dump(path, frame_index=0):
         i += 2
         if not lines[i].startswith("ITEM: BOX BOUNDS"):
             fail("box bounds missing in {}".format(path))
-        tilted = "xy" in lines[i]
-        bounds = []
-        for _ in range(3):
-            i += 1
-            bounds.append([float(item) for item in lines[i].split()])
         i += 1
-        if tilted:
-            xy, xz, yz = bounds[0][2], bounds[1][2], bounds[2][2]
-            xlo, xhi = bounds[0][0], bounds[0][1]
-            ylo, yhi = bounds[1][0], bounds[1][1]
-            zlo, zhi = bounds[2][0], bounds[2][1]
-        else:
-            xy = xz = yz = 0.0
-            (xlo, xhi), (ylo, yhi), (zlo, zhi) = bounds
-        box9 = [xlo, ylo, zlo, xhi - xlo, yhi - ylo, zhi - zlo, xy, xz, yz]
+        rows = []
+        for _ in range(3):
+            rows.append([float(item) for item in lines[i].split()])
+            i += 1
+        origin, edges, tilts = cell_from_bounds(rows)
+        box9 = [*origin, *edges, *tilts]
         if not lines[i].startswith("ITEM: ATOMS"):
             fail("atom header missing in {}".format(path))
         columns = lines[i].split()[2:]
