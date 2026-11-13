@@ -11,6 +11,7 @@ in-tree mixed TIP4P dump two ways.
 | [[file:interface.org][Ice-water interface]] | CHILL+ slabs along the normal, and the front |
 | [[file:nucleation.org][Nucleation]] | Largest crystal cluster on three of the 148 frames |
 | [[file:brine.org][Brine and NaCl]] | Ions per layer across the ice front |
+| [[file:insitu-run.org][Run in situ]] | LAMMPS and OpenMM on one cubic cell, skipped when the library is absent |
 | [[file:bulk-ice.org][Classify ice on the mixed TIP4P example]] | ~seams read~, CHILL+, cages, and why the scores disagree |
 | [[file:ice-and-clathrate.org][Ice and clathrate labels]] | CHILL+ and cage signatures from Python |
 | [[file:rings.org][Primitive rings]] | Franzblau census on one frame |
@@ -34,6 +35,7 @@ should see.
    interface
    nucleation
    brine
+   insitu-run
    bulk-ice
    ice-and-clathrate
    rings

@@ -828,6 +828,16 @@ if get_option('with_cli')
     depends: [seams_api_lib],
     timeout: 120)
   test(
+    'docs_tutorial_insitu',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'tutorials' / 'test_insitu.py',
+      meson.project_source_root(),
+      meson.project_build_root(),
+    ],
+    env: tutorial_env,
+    timeout: 180)
+  test(
     'engines_tutorial',
     python3,
     args: [
