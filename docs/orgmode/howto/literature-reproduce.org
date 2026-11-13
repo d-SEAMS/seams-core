@@ -1,0 +1,47 @@
+#+TITLE: Reproduce the literature head-to-head
+#+OPTIONS: toc:nil num:nil
+
+~scripts/h2h_rc3_sitting.py~ writes ~benchmarks/rc3-sitting.csv~.
+One warm-up, then six timed calls. The median and the type-7
+interquartile range are the columns on
+[[file:../explanation/performance.org][the sitting page]].
+This page is how each guest code is given a thread width, and what
+that width did to the median.
+
+The driver starts every row under ~taskset~. One thread is
+~taskset -c 0~. Eight threads are ~taskset -c 0-7~. It also sets
+~OMP_NUM_THREADS~ to that width and ~OMP_DYNAMIC=FALSE~. Each code
+then receives the same width through its own control.
+
+| code | what is timed | thread control |
+|------+---------------+----------------|
+| freud | local q4 and q6 | ~freud.parallel.set_num_threads(n)~ |
+| OVITO | CHILL+, primitive rings, polyhedral template matching | ~OVITO_THREAD_COUNT=n~ before ~import ovito~ |
+| mdapy | CHILL+, q4, q6, rings | ~mdapy.set_num_threads(n)~ |
+| vesin | full cell-list neighbour pairs | ~NeighborList(..., n_threads=n, algorithm="cell_list")~ |
+| PLUMED | symfunc q4 and q6 | ~OMP_NUM_THREADS=n~ on the driver |
+| rings-statistics-matter | primitive rings, Rust backend | ~ring_statistics(..., num_threads=n)~ |
+
+Polyhedral template matching is the OVITO modifier. Its row is
+~PTM~. rings-statistics-matter is the ~rsm~ package.
+
+#+begin_src bash
+python3 scripts/h2h_rc3_sitting.py
+#+end_src
+
+* What the medians do
+
+On ideal ice Ic at 110592 and 884736 molecules, freud, OVITO, mdapy,
+vesin, and rings-statistics-matter are faster at eight threads than at
+one. OVITO's template matching and its ring finder fall with the same
+control as its CHILL+. ~meson test docs_h2h_threads~ checks those
+inequalities against the CSV.
+
+PLUMED does not. Its \(q_4\) and \(q_6\) medians at eight threads stay
+within five percent of the one-thread medians. The collective variable
+is one kernel launch; extra OpenMP threads do not shorten it in this
+sitting.
+
+#+begin_export rst
+.. include:: literature-speed.rst
+#+end_export

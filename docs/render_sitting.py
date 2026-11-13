@@ -19,6 +19,23 @@ CSV = ROOT / "benchmarks" / "rc3-sitting.csv"
 TRACE = ROOT / "benchmarks" / "trace-threads.csv"
 OUT = ROOT / "docs" / "source" / "explanation" / "performance-tables.rst"
 TRACE_OUT = ROOT / "docs" / "source" / "explanation" / "trace-threads-tables.rst"
+H2H_OUT = ROOT / "docs" / "source" / "howto" / "literature-speed.rst"
+# Guest codes in the reproduction how-to. PLUMED stays flat in this sitting.
+H2H_FALL = (
+    ("freud", "q4"),
+    ("freud", "q6"),
+    ("OVITO", "CHILL+"),
+    ("OVITO", "PTM"),
+    ("OVITO", "rings"),
+    ("mdapy", "CHILL+"),
+    ("mdapy", "q4"),
+    ("mdapy", "q6"),
+    ("mdapy", "rings"),
+    ("vesin", "neighbours"),
+    ("rings-statistics-matter", "rings"),
+)
+H2H_FLAT = (("PLUMED", "q4"), ("PLUMED", "q6"))
+H2H_SIZES = ("110592", "884736")
 
 ORDER = ("neighbours", "q4", "q6", "CHILL+", "rings", "cages", "PTM", "king")
 
@@ -99,6 +116,69 @@ def write_trace(rows, path):
     path.write_text("\n".join(lines) + "\n")
 
 
+def h2h_index(rows):
+    found = {}
+    for row in rows:
+        found[(row["code"], row["operation"], row["molecules"], row["threads"])] = float(row["median_ms"])
+    return found
+
+
+def h2h_pairs(found):
+    pairs = []
+    for code, operation in H2H_FALL + H2H_FLAT:
+        for molecules in H2H_SIZES:
+            left = found.get((code, operation, molecules, "1"))
+            right = found.get((code, operation, molecules, "8"))
+            if left is None or right is None:
+                continue
+            pairs.append((code, operation, molecules, left, right, left / right))
+    return pairs
+
+
+def check_h2h(rows):
+    errors = []
+    found = h2h_index(rows)
+    seen = {(code, operation, molecules) for code, operation, molecules, _a, _b, _r in h2h_pairs(found)}
+    for code, operation in H2H_FALL + H2H_FLAT:
+        for molecules in H2H_SIZES:
+            if (code, operation, molecules) not in seen:
+                errors.append("missing {} {} {}".format(code, operation, molecules))
+    for code, operation, molecules, left, right, ratio in h2h_pairs(found):
+        if (code, operation) in H2H_FLAT:
+            if not 0.95 <= ratio <= 1.05:
+                errors.append("{} {} {} ratio {:.3f} is not flat".format(code, operation, molecules, ratio))
+        elif not right < left:
+            errors.append("{} {} {} did not fall ({} -> {})".format(code, operation, molecules, left, right))
+    return errors
+
+
+def write_h2h(rows, path):
+    lines = [
+        ".. list-table::",
+        "   :header-rows: 0",
+        "",
+        "   * - Written by ``docs/render_sitting.py`` from ``benchmarks/rc3-sitting.csv``.",
+        "       ``t1`` and ``t8`` are the one-thread and eight-thread medians, in milliseconds.",
+        "       ``ratio`` is ``t1 / t8``.",
+        "",
+        "One thread against eight",
+        "^^^^^^^^^^^^^^^^^^^^^^^^",
+        "",
+        ".. csv-table::",
+        "   :header: code, operation, molecules, t1_ms, t8_ms, ratio",
+        "",
+    ]
+    for code, operation, molecules, left, right, ratio in h2h_pairs(h2h_index(rows)):
+        lines.append(
+            "   {}, {}, {}, {:.3f}, {:.3f}, {:.2f}".format(
+                code, operation, molecules, left, right, ratio
+            )
+        )
+    lines.append("")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n")
+
+
 def write_tables(rows, path):
     grouped = {}
     for row in rows:
@@ -133,6 +213,14 @@ def write_tables(rows, path):
 
 
 def main(argv):
+    if "--check-h2h" in argv:
+        rows = load(CSV)
+        errors = check_h2h(rows)
+        if errors:
+            print("\n".join(errors), file=sys.stderr)
+            return 1
+        print("h2h thread scaling ok", len(h2h_pairs(h2h_index(rows))), "rows")
+        return 0
     if "--check-trace" in argv:
         rows = load(TRACE)
         errors = check(rows, 1.5e-4)
@@ -159,6 +247,11 @@ def main(argv):
         print("\n".join(trace_errors), file=sys.stderr)
         return 1
     write_trace(trace_rows, TRACE_OUT)
+    h2h_errors = check_h2h(rows)
+    if h2h_errors:
+        print("\n".join(h2h_errors), file=sys.stderr)
+        return 1
+    write_h2h(rows, H2H_OUT)
     print("wrote", OUT.relative_to(ROOT), len(rows), "rows")
     print("wrote", TRACE_OUT.relative_to(ROOT), len(trace_rows), "rows")
     return 0
