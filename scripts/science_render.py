@@ -1,8 +1,8 @@
+# Vendored from science/interface-nucleation f65657b9b89481e7dd6617b1987bc58b2ec0f01c.
+# docs/check_science_render.py hashes every byte after the END-HEADER line.
+# END-HEADER
 #!/usr/bin/env python3
 # Copyright (c) d-SEAMS developers
-# Vendored from science/interface-nucleation f65657b9b89481e7dd6617b1987bc58b2ec0f01c.
-# v12 render: no baked caption, liquid blended at 0.40, numbered basal-layer guides.
-
 
 """Offscreen OVITO renders of the basal slab and the nucleus.
 

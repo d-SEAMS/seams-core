@@ -12,8 +12,10 @@ majority class of each layer, and the cubicity follow
 ``scripts/science_render.py``. The figure itself is the v12 renderer
 from ``science/interface-nucleation`` at
 ``f65657b9b89481e7dd6617b1987bc58b2ec0f01c``, vendored as
-``docs/examples/science_render.py``. Liquid is blended at 0.40, basal
-layers are numbered, and the image has no baked caption. On the slab
+``scripts/science_render.py``. Liquid is blended at 0.40, basal
+layers are numbered, and the image has no baked caption. Tachyon
+draws the raster under Xvfb. An SVG stand-in is logged and fails the
+docs job. On the slab
 the stacking axis is z, the long edge. On the nucleus it is the box
 axis whose crystal atoms have the strongest density wave in that
 period window.
@@ -37,10 +39,10 @@ Python and C print the same census:
    :start-after: static double layer_period
    :end-before: static int cmd_interface
 
-.. figure:: figures/interface.svg
-   :alt: Interface slab painted with the v12 renderer. Liquid is at 40 percent and basal layers are numbered.
+.. figure:: figures/interface.png
+   :alt: Interface slab from the v12 Tachyon renderer. Liquid is at 40 percent and basal layers are numbered.
 
-   v12 render of the interface slab. Liquid opacity is 0.40 and the basal layers are numbered.
+   v12 Tachyon raster of the interface slab. Liquid is blended at 0.40 and the basal layers are numbered.
 
 What this tells you
 -------------------

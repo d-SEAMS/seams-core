@@ -240,11 +240,33 @@ def _science_figure_stubs():
         "Figure is drawn by docs/examples/science_tutorials.py"
         "</text></svg>\n"
     )
-    for name in ("interface", "brine", "cages"):
+    for name in ("brine", "cages"):
         path = os.path.join(dest, name + ".svg")
         if not os.path.isfile(path):
             with open(path, "w", encoding="utf-8") as handle:
                 handle.write(stub)
+    png = os.path.join(dest, "interface.png")
+    if not os.path.isfile(png):
+        # 1x1 white PNG so a checkout without the renderer still parses.
+        # The docs job replaces it with the Tachyon raster and fails if
+        # that raster was not written.
+        import struct
+        import zlib
+
+        raw = b"\x00\xff\xff\xff"
+        def chunk(tag, data):
+            return (
+                struct.pack(">I", len(data))
+                + tag
+                + data
+                + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF)
+            )
+
+        blob = b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", 1, 1, 8, 2, 0, 0, 0))
+        blob += chunk(b"IDAT", zlib.compress(raw))
+        blob += chunk(b"IEND", b"")
+        with open(png, "wb") as handle:
+            handle.write(blob)
 
 
 _link_science()

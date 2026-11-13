@@ -31,7 +31,7 @@ jobs:
           cache-key: pixi-default-
 
       - name: Language runtimes
-        run: sudo apt-get update && sudo apt-get install -y lua5.4 liblua5.4-dev r-base-core gfortran pandoc devscripts texlive-latex-base texlive-latex-recommended texlive-fonts-recommended
+        run: sudo apt-get update && sudo apt-get install -y lua5.4 liblua5.4-dev r-base-core gfortran pandoc devscripts texlive-latex-base texlive-latex-recommended texlive-fonts-recommended xvfb libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-xkb1 libxkbcommon-x11-0 mesa-vulkan-drivers libgl1-mesa-dri
 
       - uses: julia-actions/setup-julia@v2
         with:
@@ -46,8 +46,11 @@ jobs:
           path: docs/.cache/brine-front-230K
           key: brine-front-230K-4828e33ecf419c70643b2d466bfa4f283b4138dc
 
+      - name: Headless molecule renderer and OpenMM
+        run: pixi run -e default python -m pip install ovito pillow openmm
+
       - name: Ice Ih, language APIs, and science tutorials
-        run: pixi run -e default meson test -C bbdir docs_core_counts docs_capi_examples docs_capi_symbols docs_binding_docstrings docs_lang_ice docs_science_tutorials docs_engine_walkthrough --print-errorlogs
+        run: DOCS_CI=1 pixi run -e default meson test -C bbdir docs_core_counts docs_capi_examples docs_capi_symbols docs_binding_docstrings docs_lang_ice docs_science_render_copy docs_science_tutorials docs_engine_walkthrough --print-errorlogs
 
       - run: pixi run -e docs docbld
 
