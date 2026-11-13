@@ -12,6 +12,7 @@
 
 #include "seams.h"
 
+#include <float.h>
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -378,6 +379,55 @@ static void frame_io_contract(void) {
     truth(memcmp(got, ids, sizeof(int) * n) == 0, fn, "reload keeps the latest ids");
     expect(seams_system_positions(sys, out, 3 * n), SEAMS_OK, "seams_system_positions", "frame");
     truth(memcmp(out, xyz, sizeof(double) * 3 * n) == 0, fn, "reload after new types is stored");
+  }
+  seams_system_destroy(sys);
+}
+
+/* The finite check reads the coordinates in vector blocks with a scalar
+ * tail, so one bad value is tried at every index of a frame whose length
+ * is not a multiple of any block. The largest, smallest and subnormal
+ * finite values and negative zero must still pass, bit for bit. */
+static void finite_scan_contract(void) {
+  const size_t n = 401;
+  const double box[9] = {0, 0, 0, 50.0, 50.0, 50.0, 0, 0, 0};
+  const double bad[4] = {NAN, -NAN, INFINITY, -INFINITY};
+  static double xyz[3 * 401];
+  static double out[3 * 401];
+  for (size_t k = 0; k < 3 * n; ++k) {
+    xyz[k] = 0.1 * (double)(k % 401);
+  }
+  seams_system *sys = seams_system_create();
+  expect(seams_system_set_atoms(sys, xyz, n, box, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "scan frame");
+  for (int stage = 0; stage < 2; ++stage) {
+    seams_system_stage_positions(sys, stage);
+    int rejected = 1;
+    for (size_t k = 0; k < 3 * n; ++k) {
+      const double keep = xyz[k];
+      for (int b = 0; b < 4; ++b) {
+        xyz[k] = bad[b];
+        rejected &= seams_system_set_positions(sys, xyz, n, NULL, 0) == SEAMS_ERR_ARG;
+        rejected &= stage || seams_system_set_atoms(sys, xyz, n, box, 9, NULL, NULL) == SEAMS_ERR_ARG;
+      }
+      xyz[k] = keep;
+    }
+    truth(rejected, "seams_system_set_positions", "a non-finite value at every index");
+    expect(seams_system_positions(sys, out, 3 * n), SEAMS_OK, "seams_system_positions", "frame");
+    truth(memcmp(out, xyz, sizeof xyz) == 0, "seams_system_set_positions",
+          "rejected values leave the frame");
+  }
+  double edge[3 * 401];
+  const double finite[6] = {DBL_MAX, -DBL_MAX, DBL_MIN, 4.9406564584124654e-324, -0.0, 1.0};
+  for (size_t k = 0; k < 3 * n; ++k) {
+    edge[k] = finite[k % 6];
+  }
+  for (int stage = 0; stage < 2; ++stage) {
+    seams_system_stage_positions(sys, stage);
+    expect(seams_system_set_positions(sys, edge, n, NULL, 0), SEAMS_OK,
+           "seams_system_set_positions", "extreme finite values");
+    expect(seams_system_positions(sys, out, 3 * n), SEAMS_OK, "seams_system_positions", "frame");
+    truth(memcmp(out, edge, sizeof edge) == 0, "seams_system_set_positions",
+          "extreme finite values round trip");
   }
   seams_system_destroy(sys);
 }
@@ -1118,6 +1168,7 @@ int main(int argc, char **argv) {
   meta_contract();
   frame_contract();
   frame_io_contract();
+  finite_scan_contract();
   read_contract(argv[2]);
   analysis_contract();
   extreme_cells_contract();
