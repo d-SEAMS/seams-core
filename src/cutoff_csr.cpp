@@ -934,7 +934,13 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
   sc.ids.resize(static_cast<std::size_t>(nSubset));
   sc.cellStart.assign(static_cast<std::size_t>(nCells) + 1, 0);
   sc.hist.assign(static_cast<std::size_t>(maxThreads) * static_cast<std::size_t>(nCells), 0);
-  sc.counts.assign(static_cast<std::size_t>(nop), 0);
+  // A full set writes every count from the cell that owns the atom.
+  // Zeroing those lines on this thread first only adds a fault.
+  if (sc.counts.size() != static_cast<std::size_t>(nop)) {
+    sc.counts.assign(static_cast<std::size_t>(nop), 0);
+  } else if (subset != nullptr) {
+    std::fill(sc.counts.begin(), sc.counts.end(), 0);
+  }
   const auto tBin = Clock::now();
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (!nested && nSubset >= 256)
@@ -1676,7 +1682,13 @@ bool orthoFullCsr(
   sc.cellStart.assign(static_cast<std::size_t>(nCells) + 1, 0);
   sc.hist.assign(static_cast<std::size_t>(maxThreads) * static_cast<std::size_t>(nCells),
                  0);
-  sc.counts.assign(static_cast<std::size_t>(nop), 0);
+  // A full set writes every count from the cell that owns the atom.
+  // Zeroing those lines on this thread first only adds a fault.
+  if (sc.counts.size() != static_cast<std::size_t>(nop)) {
+    sc.counts.assign(static_cast<std::size_t>(nop), 0);
+  } else if (subset != nullptr) {
+    std::fill(sc.counts.begin(), sc.counts.end(), 0);
+  }
 
   const auto tBin = Clock::now();
   int threads = 1;
