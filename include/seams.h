@@ -502,6 +502,11 @@ SEAMS_API void seams_system_destroy(seams_system *sys);
  *
  * On failure the previously stored frame, if any, is kept.
  *
+ * A reload on the same handle reuses its per-atom storage. When @p ids
+ * is NULL or 1..n and @p n matches the previous load, the id table is
+ * kept as well, so reloading a trajectory frame by frame costs one pass
+ * over the input.
+ *
  * @param sys Frame handle.
  * @param xyz n times 3 Cartesian coordinates, Angstrom. Every value must
  *        be finite.

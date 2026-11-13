@@ -49,6 +49,7 @@
 #include <charconv>
 #include <climits>
 #include <cmath>
+#include <cstdint>
 #include <cstring>
 #include <exception>
 #include <fstream>
@@ -217,6 +218,19 @@ bool finite_box(const double *box9) {
   return true;
 }
 
+// A double is NaN or infinite exactly when its exponent bits are all set.
+// The integer form vectorises; std::isfinite in a loop does not.
+bool finite_coordinates(const double *xyz, std::size_t n_atoms) {
+  constexpr std::uint64_t exponent = 0x7ff0000000000000ULL;
+  std::uint64_t bad = 0;
+  for (std::size_t k = 0; k < 3 * n_atoms; ++k) {
+    std::uint64_t bits;
+    std::memcpy(&bits, xyz + k, sizeof bits);
+    bad |= static_cast<std::uint64_t>((bits & exponent) == exponent);
+  }
+  return bad == 0;
+}
+
 Cloud unified_copy(const Cloud &cloud, int type, int &typ) {
   Cloud work = cloud;
   if (type > 0) {
@@ -266,6 +280,15 @@ std::vector<std::vector<int>> bond_rows(const Cloud &cloud, double cutoff, int t
 struct seams_system : seams_object {
   Cloud cloud;
   bool ready = false;
+  // cloud.idIndexMap holds atom id i + 1 -> i for this many atoms, so a
+  // reload with default or sequential ids keeps the map. Zero after any
+  // other load.
+  std::size_t identity_ids = 0;
+  // A load is built here first and swapped in only once it has passed
+  // every check, so a failed load leaves the frame as it was.
+  std::unordered_map<int, int> spare_ids;
+  std::vector<double> spare_box;
+  std::vector<double> spare_low;
 };
 
 struct seams_neighbours : seams_object {
@@ -734,36 +757,56 @@ seams_status seams_system_set_atoms(seams_system *sys, const double *xyz, size_t
     return fail(SEAMS_ERR_BOX, "box contains a non-finite number");
   }
   try {
-    Cloud cloud;
-    if (!nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, box9[0], box9[1],
+    if (!nneigh::setBoxFromLammpsEdges(sys->spare_box, sys->spare_low, box9[0], box9[1],
                                       box9[2], box9[3], box9[4], box9[5], box9[6],
                                       box9[7], box9[8])) {
       return fail(SEAMS_ERR_BOX, "box edge lengths must be positive");
     }
-    cloud.nop = count;
-    cloud.currentFrame = 1;
+    if (!finite_coordinates(xyz, n)) {
+      return fail(SEAMS_ERR_ARG, "a coordinate is not finite");
+    }
+    bool sequential = true;
+    if (ids != nullptr) {
+      for (int i = 0; i < count && sequential; ++i) {
+        sequential = ids[i] == i + 1;
+      }
+    }
+    const bool rebuild = !sequential || !sys->ready || sys->identity_ids != n;
+    if (rebuild) {
+      auto &map = sys->spare_ids;
+      map.clear();
+      map.reserve(n);
+      for (int i = 0; i < count; ++i) {
+        if (!map.emplace(ids == nullptr ? i + 1 : ids[i], i).second) {
+          return fail(SEAMS_ERR_ARG, "atom ids are not unique");
+        }
+      }
+    }
+    Cloud &cloud = sys->cloud;
     cloud.pts.resize(n);
+    // Nothing below allocates, so the frame is either the old one or the
+    // whole new one.
     for (int i = 0; i < count; ++i) {
       const std::size_t base = static_cast<std::size_t>(i) * 3;
-      const double x = xyz[base];
-      const double y = xyz[base + 1];
-      const double z = xyz[base + 2];
-      if (!std::isfinite(x) || !std::isfinite(y) || !std::isfinite(z)) {
-        return fail(SEAMS_ERR_ARG, "a coordinate is not finite");
-      }
       auto &point = cloud.pts[static_cast<std::size_t>(i)];
-      point.x = x;
-      point.y = y;
-      point.z = z;
+      point.x = xyz[base];
+      point.y = xyz[base + 1];
+      point.z = xyz[base + 2];
       point.type = types == nullptr ? 1 : types[i];
       point.atomID = ids == nullptr ? i + 1 : ids[i];
       point.molID = point.atomID;
       point.iceType = molSys::atom_state_type::unclassified;
-      if (!cloud.idIndexMap.emplace(point.atomID, i).second) {
-        return fail(SEAMS_ERR_ARG, "atom ids are not unique");
-      }
+      point.inSlice = true;
+      point.c_ij.clear();
     }
-    sys->cloud = std::move(cloud);
+    if (rebuild) {
+      cloud.idIndexMap.swap(sys->spare_ids);
+    }
+    cloud.box.swap(sys->spare_box);
+    cloud.boxLow.swap(sys->spare_low);
+    cloud.nop = count;
+    cloud.currentFrame = 1;
+    sys->identity_ids = sequential ? n : 0;
     sys->ready = true;
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
@@ -1510,6 +1553,7 @@ seams_status seams_system_read(seams_system *sys, const char *path, int frame,
       cloud.currentFrame = frame;
     }
     sys->cloud = std::move(cloud);
+    sys->identity_ids = 0;
     sys->ready = true;
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
