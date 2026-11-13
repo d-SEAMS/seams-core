@@ -69,6 +69,14 @@ def check(module):
     for name in ("cubic", "interfacial", "clathrate", "interClathrate"):
         if module.atom_style(name)[2] != 0.0:
             fail("{} is not opaque".format(name))
+    if "mixed" not in module.PALETTE:
+        fail("palette has no mixed")
+    if module.PALETTE["mixed"].upper() == EXPECTED["interfacial"]:
+        fail("mixed uses the interfacial yellow")
+    if module.PALETTE["mixed"].upper() != "#7570B3":
+        fail("mixed is {}".format(module.PALETTE["mixed"]))
+    if module.delta_e(module.palette_rgb("mixed"), module.palette_rgb("interfacial")) < 20:
+        fail("mixed is too close to interfacial")
 
 
 def main():

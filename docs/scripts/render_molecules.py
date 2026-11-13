@@ -60,7 +60,8 @@ PALETTE = {
     "methane": "#F9A825",
     "THF": "#EF6C00",
     "hydrogen": "#90A4AE",
-    "mixed": "#F1DB4B",
+    # ColorBrewer Dark2 purple. It stays clear of the interfacial yellow.
+    "mixed": "#7570B3",
 }
 CHILL_NAME = {
     0: "cubic",
@@ -503,7 +504,12 @@ def _spin(pos, axis, degrees):
 
 
 def orient(positions, view, center):
-    """Oblique view. Basal ice looks down the c axis so the channels show."""
+    """Place the structure for the camera, which looks down minus z.
+
+    In the ice Ih dump the c axis is y: the layers alternate a short
+    gap and a long one. Basal view looks down that axis, four degrees
+    off, so the chair rings stay readable.
+    """
     import numpy as np
 
     pos = np.asarray(positions, dtype=float) - np.asarray(center, dtype=float)
@@ -511,9 +517,11 @@ def orient(positions, view, center):
         pos = np.column_stack((pos[:, 2], pos[:, 1], -pos[:, 0]))
         return _spin(_spin(pos, "y", 18.0), "x", 24.0)
     if view == "cage":
-        return _spin(_spin(pos, "y", 38.0), "x", 28.0)
-    # c axis is z. Yaw, then tilt 40 degrees off the axis.
-    return _spin(_spin(pos, "y", 32.0), "x", 40.0)
+        return _spin(_spin(pos, "y", 34.0), "x", 26.0)
+    if view == "basal":
+        pos = np.column_stack((pos[:, 0], pos[:, 2], pos[:, 1]))
+        return _spin(pos, "x", 4.0)
+    return pos
 
 
 CYCLES_SAMPLES = 256
@@ -558,8 +566,8 @@ def frame_bounds(positions, radii, transparency):
     opaque = alpha < 0.5
     chosen = points[opaque] if np.any(opaque) else points
     chosen_r = radius[opaque] if np.any(opaque) else radius
-    low = chosen.min(axis=0) - chosen_r.max() - 1.6
-    high = chosen.max(axis=0) + chosen_r.max() + 1.6
+    low = chosen.min(axis=0) - float(chosen_r.max()) - 3.2
+    high = chosen.max(axis=0) + float(chosen_r.max()) + 3.2
     return low, high
 
 
@@ -714,9 +722,18 @@ def cycles_job():
         pen.free()
         return mesh
 
+    depth_z = positions[:, 2]
+    depth_span = float(np.ptp(depth_z))
+    if depth_span < 1.0e-6:
+        near = np.ones(len(positions))
+    else:
+        near = (depth_z - float(depth_z.min())) / depth_span
     groups = {}
     for index, colour in enumerate(colors):
-        key = tuple(round(float(channel), 4) for channel in colour)
+        # Far atoms are a little darker. The nearest bin stays on the hex.
+        factor = 0.82 + 0.18 * float(near[index])
+        shaded = tuple(max(0.0, min(1.0, float(channel) * factor)) for channel in colour)
+        key = tuple(round(channel, 4) for channel in shaded)
         groups.setdefault(key, {"index": [], "alpha": [], "radius": []})
         groups[key]["index"].append(index)
         groups[key]["alpha"].append(float(1.0 - transparency[index]))
@@ -728,14 +745,29 @@ def cycles_job():
         radius = float(np.median(group["radius"]))
         mesh = sphere_mesh("spheres", positions[group["index"]], radius)
         add_mesh("spheres", mesh, material)
-    if len(bonds):
-        ink = (0.23, 0.24, 0.27) if light else (0.78, 0.79, 0.82)
-        material = glossy("bond", ink, 1.0, 0.0)
-        rough = material.node_tree.nodes["Principled BSDF"]
-        bond_rough = socket(rough, "Roughness")
-        if bond_rough is not None:
-            bond_rough.default_value = 0.42
-        add_mesh("bonds", bond_mesh("bonds", bonds, 0.12), material)
+    def add_bond_set(pairs, radius, name):
+        if len(pairs) == 0:
+            return
+        ink = (0.16, 0.17, 0.19) if light else (0.82, 0.83, 0.86)
+        material = glossy(name, ink, 1.0, 0.0)
+        rough = material.node_tree.nodes.get("Principled BSDF")
+        if rough is not None:
+            bond_rough = socket(rough, "Roughness")
+            if bond_rough is not None:
+                bond_rough.default_value = 0.45
+        add_mesh(name, bond_mesh(name, pairs, radius), material)
+
+    bold = np.asarray(job["bold_bonds"], dtype=int) if "bold_bonds" in job.files else np.zeros((0, 2), dtype=int)
+    if len(bonds) and len(bold):
+        bold_key = {tuple(sorted((int(pair[0]), int(pair[1])))) for pair in bold}
+        thin_pairs = [
+            pair for pair in bonds
+            if tuple(sorted((int(pair[0]), int(pair[1])))) not in bold_key
+        ]
+        add_bond_set(thin_pairs, 0.09, "bonds")
+        add_bond_set(bold, 0.22, "cage-bonds")
+    elif len(bonds):
+        add_bond_set(bonds, 0.12, "bonds")
     for slot in range(mesh_count):
         vertices = np.asarray(job["mesh_vertices_{}".format(slot)], dtype=float)
         faces = [tuple(int(v) for v in face) for face in job["mesh_faces_{}".format(slot)]]
@@ -750,22 +782,29 @@ def cycles_job():
 
     from mathutils import Vector
 
+    ortho = bool(int(job["ortho"])) if "ortho" in job.files else False
     camera_data = bpy.data.cameras.new("camera")
-    camera_data.type = "PERSP"
-    camera_data.lens = 65.0
-    camera_data.sensor_width = 36.0
     camera_data.sensor_fit = "VERTICAL"
     camera = bpy.data.objects.new("camera", camera_data)
     bpy.context.scene.collection.objects.link(camera)
-    extent = max(width, height, float(high[2] - low[2]), 1.0)
-    half = 0.5 * max(height, width * HEIGHT / float(WIDTH))
-    fov = 2.0 * float(np.arctan(18.0 / 65.0))
-    distance = max(extent * 1.35, half / np.tan(fov / 2.0) * 1.18)
     target = Vector((float(centre[0]), float(centre[1]), float(centre[2])))
-    camera.location = target + Vector((0.0, 0.0, distance))
+    if ortho:
+        camera_data.type = "ORTHO"
+        vertical = max(height, width * HEIGHT / float(WIDTH)) * 1.22
+        camera_data.ortho_scale = vertical
+        camera.location = target + Vector((0.0, 0.0, 40.0))
+    else:
+        camera_data.type = "PERSP"
+        camera_data.lens = 65.0
+        camera_data.sensor_width = 36.0
+        extent = max(width, height, float(high[2] - low[2]), 1.0)
+        half = 0.5 * max(height, width * HEIGHT / float(WIDTH))
+        fov = 2.0 * float(np.arctan(18.0 / 65.0))
+        distance = max(extent * 1.65, half / np.tan(fov / 2.0) * 1.35)
+        camera.location = target + Vector((0.0, 0.0, distance))
+        vertical = 2.0 * distance * float(np.tan(fov / 2.0))
     camera.rotation_euler = (target - camera.location).to_track_quat("-Z", "Y").to_euler()
     bpy.context.scene.camera = camera
-    vertical = 2.0 * distance * float(np.tan(fov / 2.0))
 
     def area(name, location, energy, size):
         from mathutils import Vector
@@ -781,9 +820,19 @@ def cycles_job():
         obj.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
         return obj
 
-    area("key", (float(look[0]) - 14.0, float(look[1]) + 16.0, float(high[2]) + 22.0), 250.0, 30.0)
-    area("fill", (float(look[0]) + 16.0, float(look[1]) - 10.0, float(high[2]) + 14.0), 90.0, 40.0)
-    area("rim", (float(look[0]) - 6.0, float(look[1]) - 18.0, float(centre[2]) + 4.0), 60.0, 14.0)
+    area("key", (float(centre[0]) - 12.0, float(centre[1]) + 14.0, float(high[2]) + 18.0), 250.0, 30.0)
+    area("fill", (float(centre[0]) + 14.0, float(centre[1]) - 8.0, float(high[2]) + 12.0), 90.0, 40.0)
+    area("rim", (float(centre[0]) - 4.0, float(centre[1]) - 16.0, float(low[2]) - 6.0), 70.0, 16.0)
+    floor_z = float(low[2]) - 1.4
+    floor = bpy.data.meshes.new("ground")
+    floor.from_pydata(
+        [(-120.0, -120.0, floor_z), (120.0, -120.0, floor_z),
+         (120.0, 120.0, floor_z), (-120.0, 120.0, floor_z)],
+        [], [(0, 1, 2), (0, 2, 3)],
+    )
+    floor.update()
+    ground = add_mesh("ground", floor, glossy("ground", (1, 1, 1), 1.0, 0.0))
+    ground.is_shadow_catcher = True
 
     world = bpy.data.worlds.new("studio")
     bpy.context.scene.world = world
@@ -834,7 +883,7 @@ def cycles_job():
     return 0
 
 
-def cycles_launch(positions, colors, radii, transparency, bonds, meshes, background, panel="panel", samples=None):
+def cycles_launch(positions, colors, radii, transparency, bonds, meshes, background, panel="panel", samples=None, ortho=False, bold=None):
     """Render with Cycles in a fresh interpreter. None when bpy is absent."""
     import subprocess
     import tempfile
@@ -858,7 +907,10 @@ def cycles_launch(positions, colors, radii, transparency, bonds, meshes, backgro
         "mesh_count": np.int32(len(meshes)),
         "samples": np.int32(int(os.environ.get("MOLECULES_SAMPLES", str(CYCLES_SAMPLES if samples is None else samples)))),
         "panel": np.array(str(panel)),
+        "ortho": np.int32(1 if ortho else 0),
     }
+    if bold is not None and len(bold):
+        payload["bold_bonds"] = np.asarray(bold, dtype=np.int32)
     for slot, mesh in enumerate(meshes):
         payload["mesh_vertices_{}".format(slot)] = np.asarray(mesh["vertices"], dtype=np.float64)
         payload["mesh_faces_{}".format(slot)] = np.asarray(mesh["faces"], dtype=np.int32)
@@ -904,11 +956,12 @@ def cycles_launch(positions, colors, radii, transparency, bonds, meshes, backgro
                 pass
 
 
-def raytrace(positions, colors, radii, transparency, bonds, meshes, background, perspective):
+def raytrace(positions, colors, radii, transparency, bonds, meshes, background, perspective, ortho=False, bold=None):
     """Cycles when requested. Tachyon is only used when the engine is tachyon."""
     if RENDER_ENGINE == "cycles":
         drawn = cycles_launch(
-            positions, colors, radii, transparency, bonds, meshes, background, panel=PANEL_NAME,
+            positions, colors, radii, transparency, bonds, meshes, background,
+            panel=PANEL_NAME, ortho=ortho, bold=bold,
         )
         if drawn is None:
             fail("Cycles was requested (--engine cycles) and did not produce a picture")
@@ -1060,9 +1113,11 @@ def compose(structure, legend, world_height, light):
     plate = (255, 255, 255) if light else (32, 34, 38)
     canvas = Image.new("RGB", (WIDTH, HEIGHT), bg)
     picture, crop_rows, render_rows = crop_margin(structure, light)
-    strip = 140
-    pad = 12
-    area = (WIDTH - 2 * pad, HEIGHT - strip - pad)
+    # The legend sits in its own column, clear of the atoms.
+    legend_w = 700
+    strip = 160
+    pad = 16
+    area = (WIDTH - legend_w - pad, HEIGHT - strip - pad)
     scale = min(area[0] / picture.size[0], area[1] / picture.size[1])
     sized = (
         max(1, int(round(picture.size[0] * scale))),
@@ -1078,8 +1133,7 @@ def compose(structure, legend, world_height, light):
     small = _font(58)
     row_h = 72
     legend_h = 24 + row_h * max(1, len(legend))
-    legend_w = 640
-    box = (WIDTH - legend_w - 24, 20, WIDTH - 20, 20 + legend_h)
+    box = (WIDTH - legend_w + 8, 20, WIDTH - 16, 20 + legend_h)
     draw.rounded_rectangle(box, radius=12, fill=plate, outline=ink, width=3)
     x = box[0] + 16
     y = box[1] + 14
@@ -1181,7 +1235,7 @@ def cage_meshes(oxygens, guests, box):
     from scipy.spatial import ConvexHull
 
     if len(guests) == 0 or len(oxygens) < 8:
-        return [], np.zeros((0, 3))
+        return [], np.zeros((0, 3)), []
     lengths = np.asarray(box[:3], dtype=float)
     origin = np.asarray(oxygens, dtype=float).mean(axis=0)
     found = []
@@ -1200,7 +1254,7 @@ def cage_meshes(oxygens, guests, box):
         except Exception:
             continue
         token = "hexagonal" if kind == "CH4" else "clathrate"
-        found.append((float(np.linalg.norm(centre - origin)), kind, shell, {
+        found.append((float(np.linalg.norm(centre - origin)), kind, shell, np.where(chosen)[0], {
             "vertices": shell,
             "faces": hull.simplices.astype(int),
             "color": palette_rgb(token),
@@ -1209,13 +1263,15 @@ def cage_meshes(oxygens, guests, box):
         }))
     meshes = []
     extra = []
+    highlighted = []
     oxygens = np.asarray(oxygens, dtype=float)
     for kind in ("CH4", "THF"):
         ranked = sorted(item for item in found if item[1] == kind)
         if not ranked:
             continue
-        _distance, _kind, shell, mesh = ranked[0]
+        _distance, _kind, shell, indices, mesh = ranked[0]
         meshes.append(mesh)
+        highlighted.append(np.asarray(indices, dtype=int))
         if len(oxygens):
             nearest = np.linalg.norm(shell[:, None, :] - oxygens[None, :, :], axis=2).min(axis=1)
             extra.append(shell[nearest > 1.2])
@@ -1223,7 +1279,7 @@ def cage_meshes(oxygens, guests, box):
         extra = np.vstack(extra)
     else:
         extra = np.zeros((0, 3))
-    return meshes, extra
+    return meshes, extra, highlighted
 
 
 def ring_meshes(positions, rings):
@@ -1265,7 +1321,7 @@ def ring_meshes(positions, rings):
     return meshes
 
 
-def finish(positions, colors, radii, transparency, names, bonds, meshes, view, center, perspective):
+def finish(positions, colors, radii, transparency, names, bonds, meshes, view, center, perspective, bold=None):
     import numpy as np
 
     positions = orient(positions, view, center)
@@ -1285,14 +1341,17 @@ def finish(positions, colors, radii, transparency, names, bonds, meshes, view, c
         if label and label not in seen:
             legend.append((label, mesh["color"]))
             seen.add(label)
+    ortho = view == "basal"
     light_picture, world = raytrace(
-        positions, colors, radii, transparency, bonds, turned, (1, 1, 1), perspective
+        positions, colors, radii, transparency, bonds, turned, (1, 1, 1), perspective,
+        ortho=ortho, bold=bold,
     )
     if os.environ.get("MOLECULES_THEMES") == "light":
         dark_picture = light_picture
     else:
         dark_picture, _world = raytrace(
-            positions, colors, radii, transparency, bonds, turned, (0.09, 0.10, 0.12), perspective
+            positions, colors, radii, transparency, bonds, turned, (0.09, 0.10, 0.12), perspective,
+            ortho=ortho, bold=bold,
         )
     return (
         compose(light_picture, legend, world, True),
@@ -1343,7 +1402,7 @@ def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=
     xyz = np.asarray(kept_xyz, dtype=float)
     bonds = oxygen_bonds(xyz, heavy)
     if cluster:
-        crystal = {0, 1, 7, 8}
+        crystal = {0, 1, 3, 7, 8}
         bonds = [
             pair for pair in bonds
             if int(kept_labels[pair[0]]) in crystal and int(kept_labels[pair[1]]) in crystal
@@ -1535,8 +1594,9 @@ def genice_picture(lattice, rep, guests, cage_faces, hydrogens=True):
             if 2.40 <= gap <= 3.20:
                 bonds.append((left, right))
     meshes = []
+    bold = []
     if cage_faces:
-        meshes, extra = cage_meshes(
+        meshes, extra, highlighted = cage_meshes(
             np.asarray(oxygens, dtype=float),
             [
                 (group["kind"], np.asarray(group["heavy"], dtype=float))
@@ -1545,17 +1605,34 @@ def genice_picture(lattice, rep, guests, cage_faces, hydrogens=True):
             ],
             box,
         )
+        cage_atoms = set()
+        for indices in highlighted:
+            for slot in indices:
+                cage_atoms.add(oxygen_ids[int(slot)])
+        water_colour = palette_rgb("water")
+        for slot, atom_index in enumerate(oxygen_ids):
+            if atom_index in cage_atoms:
+                radii[atom_index] = 0.42
+                transparency[atom_index] = 0.0
+            else:
+                radii[atom_index] = 0.22
+                transparency[atom_index] = 0.75
+            colors[atom_index] = water_colour
+            names[atom_index] = "water"
         if len(extra):
-            colour, radius, alpha = atom_style(host)
             xyz = np.vstack([xyz, np.asarray(extra, dtype=float)])
             for _point in extra:
-                colors.append(colour)
-                names.append(host)
-                radii.append(radius)
-                transparency.append(alpha)
+                colors.append(water_colour)
+                names.append("water")
+                radii.append(0.42)
+                transparency.append(0.0)
+        bold = [
+            pair for pair in bonds
+            if pair[0] in cage_atoms and pair[1] in cage_atoms
+        ]
     return finish(
         xyz, colors, radii, transparency, names, bonds, meshes,
-        "cage", xyz.mean(axis=0), False,
+        "cage", xyz.mean(axis=0), False, bold=bold,
     )
 
 
