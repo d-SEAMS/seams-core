@@ -1,0 +1,39 @@
+cores 1
+pinned_threads 8
+samples 20
+order ABAB
+freud 3.6.1 ovito 3.17.2 mdapy 2.0.0
+robust op cutoff threads 8 molecules 4096 dseams_median 0.3512 dseams_iqr 0.0325 dseams_min 0.3265 freud_median 0.9063 freud_iqr 0.0700 freud_min 0.8634 WIN
+robust op cutoff threads 8 molecules 4096 dseams_median 0.4629 dseams_iqr 0.2730 dseams_min 0.3003 ovito_median 1.2064 ovito_iqr 0.4897 ovito_min 1.0478 WIN
+robust op cutoff threads 8 molecules 4096 dseams_median 0.4280 dseams_iqr 0.0238 dseams_min 0.3929 mdapy_median 0.5470 mdapy_iqr 0.0419 mdapy_min 0.5172 WIN
+robust op knn threads 8 molecules 4096 dseams_median 0.6026 dseams_iqr 0.0908 dseams_min 0.5768 freud_median 1.1061 freud_iqr 0.0312 freud_min 1.0814 WIN
+robust op knn threads 8 molecules 4096 dseams_median 0.8297 dseams_iqr 0.1136 dseams_min 0.5957 ovito_median 3.3140 ovito_iqr 0.1255 ovito_min 3.0573 WIN
+robust op knn threads 8 molecules 4096 dseams_median 0.5938 dseams_iqr 0.0611 dseams_min 0.5372 mdapy_median 0.9755 mdapy_iqr 0.1265 mdapy_min 0.9207 WIN
+robust op q6 threads 8 molecules 4096 dseams_median 0.7431 dseams_iqr 0.1040 dseams_min 0.6404 freud_median 2.4248 freud_iqr 0.1745 freud_min 2.2991 WIN
+robust op q6 threads 8 molecules 4096 dseams_median 0.8811 dseams_iqr 0.4066 dseams_min 0.7011 ovito_median 2.9641 ovito_iqr 0.3037 ovito_min 2.7194 WIN
+robust op q6 threads 8 molecules 4096 dseams_median 0.6459 dseams_iqr 0.0504 dseams_min 0.5938 mdapy_median 1.3588 mdapy_iqr 0.0510 mdapy_min 1.3103 WIN
+robust op chill_plus threads 8 molecules 4096 dseams_median 0.6675 dseams_iqr 0.1603 dseams_min 0.4171 ovito_median 7.0051 ovito_iqr 0.1918 ovito_min 6.6401 WIN
+robust op chill_plus threads 8 molecules 4096 dseams_median 0.5739 dseams_iqr 0.0327 dseams_min 0.5298 mdapy_median 0.6633 mdapy_iqr 0.0418 mdapy_min 0.6233 WIN
+robust op cutoff threads 8 molecules 32768 dseams_median 1.5127 dseams_iqr 0.0927 dseams_min 1.4042 freud_median 7.2113 freud_iqr 0.2300 freud_min 6.9014 WIN
+robust op cutoff threads 8 molecules 32768 dseams_median 1.5445 dseams_iqr 0.1930 dseams_min 1.3351 ovito_median 2.1736 ovito_iqr 1.3228 ovito_min 1.7176 WIN
+robust op cutoff threads 8 molecules 32768 dseams_median 1.5570 dseams_iqr 0.2042 dseams_min 1.3362 mdapy_median 2.3163 mdapy_iqr 0.1084 mdapy_min 2.2220 WIN
+robust op knn threads 8 molecules 32768 dseams_median 3.1379 dseams_iqr 0.2894 dseams_min 2.8501 freud_median 7.7613 freud_iqr 0.1710 freud_min 7.5249 WIN
+robust op knn threads 8 molecules 32768 dseams_median 3.0695 dseams_iqr 0.1952 dseams_min 2.8317 ovito_median 4.8441 ovito_iqr 0.2874 ovito_min 4.6097 WIN
+robust op knn threads 8 molecules 32768 dseams_median 2.9895 dseams_iqr 0.1320 dseams_min 2.8311 mdapy_median 4.8960 mdapy_iqr 3.2992 mdapy_min 4.6489 WIN
+robust op q6 threads 8 molecules 32768 dseams_median 4.2424 dseams_iqr 0.6757 dseams_min 3.4417 freud_median 18.4319 freud_iqr 0.2492 freud_min 18.0629 WIN
+robust op q6 threads 8 molecules 32768 dseams_median 3.7011 dseams_iqr 0.2931 dseams_min 3.4896 ovito_median 4.8214 ovito_iqr 4.7283 ovito_min 4.2558 WIN
+robust op q6 threads 8 molecules 32768 dseams_median 3.7069 dseams_iqr 0.1607 dseams_min 3.3562 mdapy_median 7.2278 mdapy_iqr 0.1173 mdapy_min 7.0472 WIN
+robust op chill_plus threads 8 molecules 32768 dseams_median 2.6393 dseams_iqr 0.2001 dseams_min 2.4897 ovito_median 21.2097 ovito_iqr 3.4990 ovito_min 20.1605 WIN
+robust op chill_plus threads 8 molecules 32768 dseams_median 2.2447 dseams_iqr 0.0791 dseams_min 2.1238 mdapy_median 3.0965 mdapy_iqr 0.0790 mdapy_min 3.0279 WIN
+robust op cutoff threads 8 molecules 110592 dseams_median 4.8095 dseams_iqr 0.7027 dseams_min 4.1764 freud_median 32.9249 freud_iqr 0.7268 freud_min 31.5962 WIN
+robust op cutoff threads 8 molecules 110592 dseams_median 4.3427 dseams_iqr 0.5877 dseams_min 3.6401 ovito_median 6.2000 ovito_iqr 0.6994 ovito_min 5.6688 WIN
+robust op cutoff threads 8 molecules 110592 dseams_median 3.7031 dseams_iqr 0.3163 dseams_min 3.4213 mdapy_median 6.7093 mdapy_iqr 0.2234 mdapy_min 6.5752 WIN
+robust op knn threads 8 molecules 110592 dseams_median 9.7613 dseams_iqr 0.4956 dseams_min 9.3158 freud_median 33.9493 freud_iqr 1.4713 freud_min 32.8116 WIN
+robust op knn threads 8 molecules 110592 dseams_median 9.6508 dseams_iqr 0.5498 dseams_min 9.4432 ovito_median 19.9048 ovito_iqr 0.2856 ovito_min 19.5116 WIN
+robust op knn threads 8 molecules 110592 dseams_median 10.1648 dseams_iqr 0.5937 dseams_min 9.5528 mdapy_median 16.4699 mdapy_iqr 0.6374 mdapy_min 15.9853 WIN
+robust op q6 threads 8 molecules 110592 dseams_median 12.0097 dseams_iqr 0.5017 dseams_min 11.2831 freud_median 65.3774 freud_iqr 1.4199 freud_min 64.3319 WIN
+robust op q6 threads 8 molecules 110592 dseams_median 12.7459 dseams_iqr 1.3986 dseams_min 11.6641 ovito_median 30.5643 ovito_iqr 14.2791 ovito_min 25.1994 WIN
+robust op q6 threads 8 molecules 110592 dseams_median 12.1102 dseams_iqr 0.8752 dseams_min 11.2036 mdapy_median 23.2943 mdapy_iqr 1.3538 mdapy_min 22.3543 WIN
+robust op chill_plus threads 8 molecules 110592 dseams_median 8.4353 dseams_iqr 0.6071 dseams_min 6.9452 ovito_median 71.8072 ovito_iqr 0.6856 ovito_min 71.4168 WIN
+robust op chill_plus threads 8 molecules 110592 dseams_median 7.0206 dseams_iqr 0.7062 dseams_min 6.5477 mdapy_median 10.1267 mdapy_iqr 0.2302 mdapy_min 9.8729 WIN
+losses 0

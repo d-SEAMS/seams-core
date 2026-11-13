@@ -237,6 +237,13 @@ struct seams_rings : seams_object {
   std::vector<std::vector<int>> rings;
   std::vector<int> symmetry;
   int n_atoms = 0;
+  // Kept so prism and cage labels can be filled when a caller asks for
+  // them. The ring census itself does not need that pass.
+  Cloud cloud;
+  std::vector<int> offsets;
+  std::vector<int> cols;
+  std::vector<std::vector<int>> idx;
+  bool refined = false;
 };
 
 struct seams_cage_set : seams_object {
@@ -1062,6 +1069,9 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
     Cloud work = unified_copy(sys->cloud, type, typ);
     std::vector<std::vector<int>> idx;
     std::vector<std::vector<int>> found;
+    std::vector<int> offsets;
+    std::vector<int> cols;
+    bool listed = false;
     if (graph == SEAMS_GRAPH_CUTOFF) {
       std::vector<int> subset;
       const std::vector<int> *sub = nullptr;
@@ -1074,23 +1084,12 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
         }
         sub = &subset;
       }
-      std::vector<int> offsets;
-      std::vector<int> cols;
       if (nneigh::orthoFullCsr(work, sub, cutoff, offsets, cols, false)) {
+        listed = true;
         found = primitive::ringNetwork(offsets, cols, max_depth);
-        idx.assign(static_cast<std::size_t>(work.nop), {});
-        for (int i = 0; i < work.nop && i + 1 < static_cast<int>(offsets.size()); ++i) {
-          const int a = offsets[static_cast<std::size_t>(i)];
-          const int b = offsets[static_cast<std::size_t>(i) + 1];
-          auto &row = idx[static_cast<std::size_t>(i)];
-          row.reserve(static_cast<std::size_t>(std::max(0, b - a)));
-          for (int k = a; k < b; ++k) {
-            row.push_back(cols[static_cast<std::size_t>(k)]);
-          }
-        }
       }
     }
-    if (found.empty() && idx.empty()) {
+    if (!listed) {
       auto rows = bond_rows(work, cutoff, typ, graph);
       idx = nneigh::neighbourListByIndex(work, rows);
       if (static_cast<int>(idx.size()) < work.nop) {
@@ -1098,14 +1097,57 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
       }
       found = primitive::ringNetwork(idx, max_depth);
     }
-    if (static_cast<int>(idx.size()) < work.nop) {
-      idx.resize(static_cast<std::size_t>(work.nop));
-    }
     auto rings = std::make_unique<seams_rings>();
     rings->n_atoms = work.nop;
+    rings->cloud = std::move(work);
+    rings->offsets = std::move(offsets);
+    rings->cols = std::move(cols);
+    rings->idx = std::move(idx);
     rings->rings = std::move(found);
     rings->symmetry.assign(rings->rings.size(), SEAMS_RING_OTHER);
-    std::vector<std::vector<int>> six;
+    for (std::size_t i = 0; i < rings->rings.size(); ++i) {
+      const int size = static_cast<int>(rings->rings[i].size());
+      if (size == 5) {
+        rings->symmetry[i] = SEAMS_RING_PENTAGON;
+      } else if (size == 6) {
+        rings->symmetry[i] = SEAMS_RING_HEXAGON;
+      }
+    }
+    *out = static_cast<seams_rings *>(track(rings.release()));
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (const std::invalid_argument &ex) {
+    return fail(SEAMS_ERR_ARG, ex.what());
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+// The census is the ring list. Cage and prism codes are filled the first
+// time a caller reads symmetry, from the cloud and neighbour rows kept
+// on the handle.
+void refine_ring_labels(seams_rings *rings) {
+  if (rings == nullptr || rings->refined) {
+    return;
+  }
+  rings->refined = true;
+  if (rings->idx.empty() && rings->offsets.size() >= 2) {
+    const int nop = rings->n_atoms;
+    rings->idx.assign(static_cast<std::size_t>(std::max(nop, 0)), {});
+    for (int i = 0; i < nop && i + 1 < static_cast<int>(rings->offsets.size()); ++i) {
+      const int a = rings->offsets[static_cast<std::size_t>(i)];
+      const int b = rings->offsets[static_cast<std::size_t>(i) + 1];
+      auto &row = rings->idx[static_cast<std::size_t>(i)];
+      row.reserve(static_cast<std::size_t>(std::max(0, b - a)));
+      for (int k = a; k < b; ++k) {
+        row.push_back(rings->cols[static_cast<std::size_t>(k)]);
+      }
+    }
+  }
+  const auto &idx = rings->idx;
+  std::vector<std::vector<int>> six;
     std::vector<int> six_at;
     for (std::size_t i = 0; i < rings->rings.size(); ++i) {
       const int size = static_cast<int>(rings->rings[i].size());
@@ -1161,10 +1203,11 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
           continue;
         }
         std::vector<ring::strucType> kind(bySize[size].size(), ring::strucType::unclassified);
-        std::vector<double> rmsd(static_cast<std::size_t>(std::max(work.nop, 0)), -1.0);
+        std::vector<double> rmsd(static_cast<std::size_t>(std::max(rings->cloud.nop, 0)), -1.0);
         int perfect = 0;
         int imperfect = 0;
-        ring::findPrisms(bySize[size], kind, perfect, imperfect, idx, work, rmsd, false);
+        ring::findPrisms(bySize[size], kind, perfect, imperfect, idx, rings->cloud, rmsd,
+                         false);
         for (std::size_t k = 0; k < kind.size(); ++k) {
           int code = -1;
           if (kind[k] == ring::strucType::Prism) {
@@ -1188,16 +1231,6 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
     } catch (const std::exception &) {
       /* Prism labels stay at the size or cage code already written. */
     }
-    *out = static_cast<seams_rings *>(track(rings.release()));
-    return SEAMS_OK;
-  } catch (const std::bad_alloc &) {
-    return fail(SEAMS_ERR_NOMEM, "out of memory");
-  } catch (const std::invalid_argument &ex) {
-    return fail(SEAMS_ERR_ARG, ex.what());
-  } catch (...) {
-    remember();
-    return SEAMS_ERR_INTERNAL;
-  }
 }
 
 void seams_rings_destroy(seams_rings *rings) {
@@ -1241,6 +1274,9 @@ seams_status seams_rings_labels(const seams_rings *rings, int *sizes, int *symme
   }
   if (sizes == nullptr && symmetry == nullptr) {
     return fail(SEAMS_ERR_NULL, "sizes and symmetry are both null");
+  }
+  if (symmetry != nullptr) {
+    refine_ring_labels(const_cast<seams_rings *>(rings));
   }
   for (std::size_t i = 0; i < rings->rings.size(); ++i) {
     if (sizes != nullptr) {

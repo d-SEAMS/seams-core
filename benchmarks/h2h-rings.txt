@@ -1,0 +1,99 @@
+cores 1
+samples 8
+cutoff_A 3.5
+max_ring 6
+rings-statistics-matter 0.3.0
+cycless 0.7
+ovito 3.17.2
+note OVITO FindRings histogram starts at size 4; 3-rings are compared for d-SEAMS and rings-statistics-matter
+frame ice4096 molecules 4096
+check ice4096 size 3 dseams 0 ringsstat 0 ovito 0 cycless 0
+check ice4096 size 4 dseams 0 ringsstat 0 ovito 0 cycless 0
+check ice4096 size 5 dseams 0 ringsstat 0 ovito 0 cycless 0
+check ice4096 size 6 dseams 8192 ringsstat 8192 ovito 8192 cycless 8192
+arm dseams frame ice4096 threads 1 median_ms 4.6320 samples_ms 4.6542 4.9300 5.5768 4.6978 4.6097 4.3964 4.5536 4.3999
+arm ringsstat frame ice4096 threads 1 median_ms 59.4859 samples_ms 59.7944 59.2221 58.8062 58.6226 59.7497 60.3017 66.5245 58.8776
+arm ovito frame ice4096 threads 1 median_ms 16.7057 samples_ms 20.2182 18.5028 18.1831 16.3261 16.5345 16.3593 16.8769 16.0897
+arm dseams frame ice4096 threads 8 median_ms 2.4883 samples_ms 2.6334 2.7240 3.4684 3.0617 2.3433 2.1762 2.3290 1.9100
+arm ringsstat frame ice4096 threads 8 median_ms 15.5708 samples_ms 15.3911 15.7093 16.2405 15.4323 14.6568 21.5747 18.7167 14.9190
+arm ovito frame ice4096 threads 8 median_ms 22.7154 samples_ms 25.5821 23.3256 23.5161 22.7166 22.7142 22.6825 16.9729 16.4631
+note ice4096 cycless not repeated: a 512-molecule interface already spends several seconds in cycles_iter
+frame ice32768 molecules 32768
+check ice32768 size 3 dseams 0 ringsstat 0 ovito 0 cycless skipped
+check ice32768 size 4 dseams 0 ringsstat 0 ovito 0 cycless skipped
+check ice32768 size 5 dseams 0 ringsstat 0 ovito 0 cycless skipped
+check ice32768 size 6 dseams 65536 ringsstat 65536 ovito 65536 cycless skipped
+arm dseams frame ice32768 threads 1 median_ms 33.7120 samples_ms 35.4064 33.5795 33.5507 33.7672 34.0163 33.7077 33.7164 33.5872
+arm ringsstat frame ice32768 threads 1 median_ms 440.9139 samples_ms 441.5156 432.7054 428.7345 442.6329 440.3121 436.1160 453.0697 442.0431
+arm ovito frame ice32768 threads 1 median_ms 147.8789 samples_ms 173.7896 159.9582 148.0561 154.2817 147.7016 145.6095 140.8686 141.1719
+arm dseams frame ice32768 threads 8 median_ms 12.7056 samples_ms 14.8055 12.7039 12.6596 12.7074 12.9047 12.7077 12.2546 12.4696
+arm ringsstat frame ice32768 threads 8 median_ms 98.6841 samples_ms 103.2243 97.8977 102.0273 100.1812 99.4705 95.9025 95.4939 96.1582
+arm ovito frame ice32768 threads 8 median_ms 148.0557 samples_ms 164.9697 160.2933 148.0598 149.4994 148.0516 141.6309 140.3324 138.9470
+note ice32768 cycless not repeated: a 512-molecule interface already spends several seconds in cycles_iter
+frame ice110592 molecules 110592
+check ice110592 size 3 dseams 0 ringsstat 0 ovito 0 cycless skipped
+check ice110592 size 4 dseams 0 ringsstat 0 ovito 0 cycless skipped
+check ice110592 size 5 dseams 0 ringsstat 0 ovito 0 cycless skipped
+check ice110592 size 6 dseams 221184 ringsstat 221184 ovito 221184 cycless skipped
+arm dseams frame ice110592 threads 1 median_ms 113.8216 samples_ms 118.7570 115.0646 113.5151 112.5028 113.2793 114.3818 113.1991 114.1281
+arm ringsstat frame ice110592 threads 1 median_ms 1398.5339 samples_ms 1430.7499 1395.2801 1378.0716 1401.7878 1388.0518 1385.8623 1413.3494 1443.0819
+arm ovito frame ice110592 threads 1 median_ms 669.8102 samples_ms 722.2553 639.6298 679.5240 663.4897 655.9289 687.0205 676.1308 657.5686
+arm dseams frame ice110592 threads 8 median_ms 48.0217 samples_ms 49.3539 48.1336 48.1427 47.9099 42.8875 43.5751 47.7145 48.3346
+arm ringsstat frame ice110592 threads 8 median_ms 361.4519 samples_ms 348.6866 353.3077 353.2632 583.6532 581.0757 369.5960 374.7778 331.3936
+arm ovito frame ice110592 threads 8 median_ms 651.4264 samples_ms 693.7426 663.3072 663.0589 680.1305 639.7938 587.1488 558.3208 570.9271
+note ice110592 cycless not repeated: a 512-molecule interface already spends several seconds in cycles_iter
+frame interface molecules 512
+check interface size 3 dseams 637 ringsstat 637 ovito 0 cycless 637
+check interface size 4 dseams 52 ringsstat 52 ovito 52 cycless 52
+check interface size 5 dseams 55 ringsstat 55 ovito 55 cycless 48
+check interface size 6 dseams 407 ringsstat 407 ovito 407 cycless 403
+note interface size 5 cycless 48 dseams 55 cycless walks only a shortest path between one pair of neighbours of each root and misses primitive rings that search does not emit; the rings it does emit are a subset
+note interface size 6 cycless 403 dseams 407 cycless walks only a shortest path between one pair of neighbours of each root and misses primitive rings that search does not emit; the rings it does emit are a subset
+arm dseams frame interface threads 1 median_ms 1.8060 samples_ms 1.8128 1.8269 1.8238 1.7992 1.7015 1.7482 1.7266 1.8965
+arm ringsstat frame interface threads 1 median_ms 13.5230 samples_ms 13.8653 13.5579 12.9282 13.5572 13.4108 13.0044 13.4889 13.6392
+arm ovito frame interface threads 1 median_ms 3.2981 samples_ms 3.1804 3.3841 3.4356 3.4577 3.3599 3.0151 3.1679 3.2362
+arm cycless frame interface threads 1 median_ms 7600.3083 samples_ms 7873.3340 7831.7711 7935.7080 7607.7732 7592.8434 7552.9294 7574.6464 7441.2925
+arm dseams frame interface threads 8 median_ms 0.6816 samples_ms 0.8062 0.9817 0.9267 0.7089 0.6165 0.5365 0.5729 0.6544
+arm ringsstat frame interface threads 8 median_ms 3.7061 samples_ms 3.9045 5.0890 3.5191 3.7664 3.6457 3.4608 4.0613 3.5668
+arm ovito frame interface threads 8 median_ms 3.1522 samples_ms 3.1750 3.0702 3.1326 3.1286 3.0459 3.1718 3.1984 3.3565
+arm cycless frame interface threads 8 median_ms 7677.0306 samples_ms 7880.0936 7820.5931 7726.9433 7720.9996 7622.7787 7633.0616 7537.8193 7572.2173
+frame stacking molecules 512
+check stacking size 3 dseams 0 ringsstat 0 ovito 0 cycless 0
+check stacking size 4 dseams 0 ringsstat 0 ovito 0 cycless 0
+check stacking size 5 dseams 0 ringsstat 0 ovito 0 cycless 0
+check stacking size 6 dseams 800 ringsstat 800 ovito 800 cycless 800
+arm dseams frame stacking threads 1 median_ms 0.8097 samples_ms 0.8109 0.8896 0.7952 0.8054 0.8072 0.8210 0.8096 0.8098
+arm ringsstat frame stacking threads 1 median_ms 6.8919 samples_ms 6.6087 7.0237 7.2499 6.7601 6.6485 7.2246 7.2686 6.6973
+arm ovito frame stacking threads 1 median_ms 2.5540 samples_ms 2.7602 2.6320 2.4676 2.5330 2.4044 2.5860 2.5749 2.5141
+arm cycless frame stacking threads 1 median_ms 1310.4308 samples_ms 1295.6046 1343.5805 1308.6955 1366.4070 1299.1084 1305.7876 1312.1660 1315.2130
+arm dseams frame stacking threads 8 median_ms 0.5433 samples_ms 0.5618 0.7855 0.7616 0.3312 0.3055 0.4751 0.5248 0.8270
+arm ringsstat frame stacking threads 8 median_ms 2.2046 samples_ms 3.4231 2.7436 2.2037 2.2713 2.1970 2.2054 2.1894 2.2039
+arm ovito frame stacking threads 8 median_ms 2.4052 samples_ms 2.2988 2.3937 2.4100 2.5184 2.5248 2.5862 2.4004 2.3656
+arm cycless frame stacking threads 8 median_ms 1313.8598 samples_ms 1312.6008 1307.7833 1316.4082 1314.1503 1307.1906 1317.8446 1317.7339 1313.5693
+frame melted molecules 512
+check melted size 3 dseams 191 ringsstat 191 ovito 0 cycless 191
+check melted size 4 dseams 21 ringsstat 21 ovito 21 cycless 21
+check melted size 5 dseams 25 ringsstat 25 ovito 25 cycless 20
+check melted size 6 dseams 807 ringsstat 807 ovito 807 cycless 807
+note melted size 5 cycless 20 dseams 25 cycless walks only a shortest path between one pair of neighbours of each root and misses primitive rings that search does not emit; the rings it does emit are a subset
+arm dseams frame melted threads 1 median_ms 1.2797 samples_ms 1.3035 1.2728 1.2755 1.2816 1.2791 1.2745 1.2803 1.3507
+arm ringsstat frame melted threads 1 median_ms 9.5423 samples_ms 9.3812 9.5799 9.5047 9.1805 9.4346 9.7291 9.9577 11.2695
+arm ovito frame melted threads 1 median_ms 3.0264 samples_ms 3.4307 3.1402 3.0394 2.9599 3.0135 3.3502 2.8239 2.6956
+arm cycless frame melted threads 1 median_ms 2384.4926 samples_ms 2389.0457 2356.8189 2379.9395 2389.4851 2413.9886 2401.2548 2379.7097 2372.4682
+arm dseams frame melted threads 8 median_ms 0.5127 samples_ms 1.1444 0.5783 0.5191 0.5128 0.5126 0.4940 0.5091 0.4838
+arm ringsstat frame melted threads 8 median_ms 2.7418 samples_ms 3.1953 2.8025 2.8606 2.7030 2.7186 2.5724 2.6089 2.7649
+arm ovito frame melted threads 8 median_ms 2.8354 samples_ms 2.8746 2.7892 3.1258 2.8002 2.8720 2.8214 2.8341 2.8367
+arm cycless frame melted threads 8 median_ms 2421.1792 samples_ms 2404.9089 2426.8345 2377.7444 2442.1822 2412.4545 2420.5879 2421.7704 2438.2490
+frame sII molecules 136
+check sII size 3 dseams 0 ringsstat 0 ovito 0 cycless 0
+check sII size 4 dseams 0 ringsstat 0 ovito 0 cycless 0
+check sII size 5 dseams 144 ringsstat 144 ovito 144 cycless 144
+check sII size 6 dseams 16 ringsstat 16 ovito 16 cycless 16
+arm dseams frame sII threads 1 median_ms 0.2658 samples_ms 0.2763 0.2628 0.2745 0.2563 0.2687 0.2590 0.2478 0.2978
+arm ringsstat frame sII threads 1 median_ms 2.1967 samples_ms 2.4208 2.1245 2.4134 2.0322 2.1781 1.9817 2.2152 2.3600
+arm ovito frame sII threads 1 median_ms 1.0305 samples_ms 1.1067 1.4013 1.1358 0.7794 0.9543 1.1620 0.7675 0.7925
+arm cycless frame sII threads 1 median_ms 131.0829 samples_ms 130.9085 143.8470 130.2374 130.3103 131.2573 133.9623 134.2325 130.0706
+arm dseams frame sII threads 8 median_ms 0.2469 samples_ms 0.2768 0.2606 0.2541 0.2483 0.2456 0.2412 0.2407 0.2388
+arm ringsstat frame sII threads 8 median_ms 1.4561 samples_ms 2.1087 1.8506 1.4832 1.5562 1.4289 1.2208 1.2006 1.2953
+arm ovito frame sII threads 8 median_ms 0.7708 samples_ms 0.8154 0.7552 0.7777 0.7707 0.7737 0.7580 0.7709 0.7463
+arm cycless frame sII threads 8 median_ms 130.6642 samples_ms 129.8474 130.5585 130.7699 130.9835 133.1445 134.4163 130.5566 130.4635

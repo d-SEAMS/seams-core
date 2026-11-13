@@ -841,6 +841,16 @@ rule h2h_freud_ovito:
         "python3 scripts/h2h_freud_ovito.py > {output}"
 
 
+# Primitive rings, eight samples, one and eight threads.
+# Ice Ih, the mixed frames, and one sII cell.
+rule h2h_rings:
+    output:
+        "benchmarks/h2h-rings.txt",
+    shell:
+        "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu "
+        "python3 scripts/h2h_rings.py > {output}"
+
+
 # One process, eight samples, d-SEAMS, freud, and OVITO. Core count, no host name.
 rule h2h_session:
     output:
