@@ -1,0 +1,2 @@
+cell,code,molecules,threads,cores,affinity,warmup,n,median_ms,iqr_ms,q1_ms,q3_ms,samples_ms,detail
+q6 eight threads,d-SEAMS,110592,8,8,0-7,1,8,6.310121,0.589397,6.080998,6.670395,5.913800 7.002157 6.559808 7.399735 6.136731 6.271286 6.348957 5.882730,seams_ql_cutoff; the q4 cell of this table is the 25.0 ms protocol

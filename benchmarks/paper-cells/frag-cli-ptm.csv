@@ -1,0 +1,2 @@
+cell,code,molecules,threads,cores,affinity,warmup,n,median_ms,iqr_ms,samples_ms,detail
+PTM diamond templates,OVITO PTM,110592,8,8,0-7,1,8,411.245450,11.296500,403.818100 408.117900 408.859000 410.678700 411.812200 415.904900 432.166200 468.268900,"rmsd 0.1, templates 6 and 7; IQR is q3-q1"

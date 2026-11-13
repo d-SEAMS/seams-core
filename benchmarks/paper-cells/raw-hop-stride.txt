@@ -1,0 +1,36 @@
+cores 8
+affinity 0-7
+threads 8
+warmup 1
+n 8
+graph cutoff
+driver bench_trajectory_incremental
+carried_ms median of per-pass mean affilInc_ms on frames after the first
+ratio median of sum(affilBatch_ms)/sum(affilInc_ms) on those frames
+stride_ps 0.1 warmup mean_inc_ms 1.582895 sum_batch_ms 293.214000 sum_inc_ms 316.579000 ratio 0.926195 steady_frames 200 equal yes
+stride_ps 0.1 sample mean_inc_ms 1.577890 sum_batch_ms 282.397000 sum_inc_ms 315.578000 ratio 0.894856 steady_frames 200 equal yes
+stride_ps 0.1 sample mean_inc_ms 1.638390 sum_batch_ms 281.561000 sum_inc_ms 327.678000 ratio 0.859261 steady_frames 200 equal yes
+stride_ps 0.1 sample mean_inc_ms 1.679835 sum_batch_ms 296.702000 sum_inc_ms 335.967000 ratio 0.883128 steady_frames 200 equal yes
+stride_ps 0.1 sample mean_inc_ms 1.585195 sum_batch_ms 278.979000 sum_inc_ms 317.039000 ratio 0.879952 steady_frames 200 equal yes
+stride_ps 0.1 sample mean_inc_ms 1.567210 sum_batch_ms 281.690000 sum_inc_ms 313.442000 ratio 0.898699 steady_frames 200 equal yes
+stride_ps 0.1 sample mean_inc_ms 1.569230 sum_batch_ms 279.428000 sum_inc_ms 313.846000 ratio 0.890335 steady_frames 200 equal yes
+stride_ps 0.1 sample mean_inc_ms 1.556090 sum_batch_ms 280.869000 sum_inc_ms 311.218000 ratio 0.902483 steady_frames 200 equal yes
+stride_ps 0.1 sample mean_inc_ms 1.594355 sum_batch_ms 279.292000 sum_inc_ms 318.871000 ratio 0.875878 steady_frames 200 equal yes
+stride_ps 1.0 warmup mean_inc_ms 1.710350 sum_batch_ms 293.088000 sum_inc_ms 342.070000 ratio 0.856807 steady_frames 200 equal yes
+stride_ps 1.0 sample mean_inc_ms 1.770260 sum_batch_ms 306.464000 sum_inc_ms 354.052000 ratio 0.865590 steady_frames 200 equal yes
+stride_ps 1.0 sample mean_inc_ms 1.757055 sum_batch_ms 303.194000 sum_inc_ms 351.411000 ratio 0.862790 steady_frames 200 equal yes
+stride_ps 1.0 sample mean_inc_ms 1.790740 sum_batch_ms 303.243000 sum_inc_ms 358.148000 ratio 0.846697 steady_frames 200 equal yes
+stride_ps 1.0 sample mean_inc_ms 1.682010 sum_batch_ms 298.734000 sum_inc_ms 336.402000 ratio 0.888027 steady_frames 200 equal yes
+stride_ps 1.0 sample mean_inc_ms 1.717105 sum_batch_ms 295.534000 sum_inc_ms 343.421000 ratio 0.860559 steady_frames 200 equal yes
+stride_ps 1.0 sample mean_inc_ms 1.759615 sum_batch_ms 301.303000 sum_inc_ms 351.923000 ratio 0.856162 steady_frames 200 equal yes
+stride_ps 1.0 sample mean_inc_ms 1.788405 sum_batch_ms 304.326000 sum_inc_ms 357.681000 ratio 0.850831 steady_frames 200 equal yes
+stride_ps 1.0 sample mean_inc_ms 1.704725 sum_batch_ms 295.220000 sum_inc_ms 340.945000 ratio 0.865887 steady_frames 200 equal yes
+stride_ps 10.0 warmup mean_inc_ms 2.309855 sum_batch_ms 437.201000 sum_inc_ms 461.971000 ratio 0.946382 steady_frames 200 equal yes
+stride_ps 10.0 sample mean_inc_ms 2.292930 sum_batch_ms 444.511000 sum_inc_ms 458.586000 ratio 0.969308 steady_frames 200 equal yes
+stride_ps 10.0 sample mean_inc_ms 2.279905 sum_batch_ms 438.109000 sum_inc_ms 455.981000 ratio 0.960805 steady_frames 200 equal yes
+stride_ps 10.0 sample mean_inc_ms 2.303865 sum_batch_ms 437.837000 sum_inc_ms 460.773000 ratio 0.950223 steady_frames 200 equal yes
+stride_ps 10.0 sample mean_inc_ms 2.335905 sum_batch_ms 440.180000 sum_inc_ms 467.181000 ratio 0.942204 steady_frames 200 equal yes
+stride_ps 10.0 sample mean_inc_ms 2.324095 sum_batch_ms 440.925000 sum_inc_ms 464.819000 ratio 0.948595 steady_frames 200 equal yes
+stride_ps 10.0 sample mean_inc_ms 2.306395 sum_batch_ms 448.601000 sum_inc_ms 461.279000 ratio 0.972516 steady_frames 200 equal yes
+stride_ps 10.0 sample mean_inc_ms 2.439455 sum_batch_ms 442.938000 sum_inc_ms 487.891000 ratio 0.907863 steady_frames 200 equal yes
+stride_ps 10.0 sample mean_inc_ms 2.351105 sum_batch_ms 449.647000 sum_inc_ms 470.221000 ratio 0.956246 steady_frames 200 equal yes

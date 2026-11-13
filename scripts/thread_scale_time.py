@@ -201,7 +201,243 @@ def run_other(kind, threads, molecules_m):
     return version, samples
 
 
+def _lang_env(lib: str, threads: int) -> None:
+    os.environ.pop("LD_PRELOAD", None)
+    os.environ["LD_LIBRARY_PATH"] = lib_env(lib)
+    os.environ["OMP_NUM_THREADS"] = str(threads)
+    os.environ["OMP_DYNAMIC"] = "FALSE"
+    os.environ["OMP_PROC_BIND"] = "close"
+    os.environ["RAYON_NUM_THREADS"] = str(threads)
+    os.environ["OPENBLAS_NUM_THREADS"] = "1"
+    os.environ["MKL_NUM_THREADS"] = "1"
+    try:
+        os.sched_setaffinity(0, set(range(threads)))
+    except (AttributeError, OSError):
+        pass
+
+
+def _ice_frame(lib, cells: int):
+    import ctypes
+    import numpy as np
+    import h2h_protocol as proto
+
+    pos, side = proto.ice_ic(cells)
+    n = len(pos)
+    xyz = np.ascontiguousarray(pos, dtype=np.float64)
+    box = np.array([0, 0, 0, side, side, side, 0, 0, 0], dtype=np.float64)
+    types = np.ones(n, dtype=np.int32)
+    ids = np.arange(1, n + 1, dtype=np.int32)
+    handle = lib.seams_frame_from_arrays(
+        xyz.ctypes.data_as(ctypes.POINTER(ctypes.c_double)), n,
+        box.ctypes.data_as(ctypes.POINTER(ctypes.c_double)),
+        types.ctypes.data_as(ctypes.POINTER(ctypes.c_int)),
+        ids.ctypes.data_as(ctypes.POINTER(ctypes.c_int)))
+    if not handle:
+        raise RuntimeError("could not build the ice frame")
+    return handle, n, xyz, box
+
+
+def _bind_lang(lib):
+    import ctypes
+    lib.seams_last_error.restype = ctypes.c_char_p
+    lib.seams_frame_from_arrays.restype = ctypes.c_void_p
+    lib.seams_frame_from_arrays.argtypes = [
+        ctypes.POINTER(ctypes.c_double), ctypes.c_int,
+        ctypes.POINTER(ctypes.c_double),
+        ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int)]
+    lib.seams_frame_free.argtypes = [ctypes.c_void_p]
+    lib.seams_frame_steinhardt.restype = ctypes.c_int
+    lib.seams_frame_steinhardt.argtypes = [
+        ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_int,
+        ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double)]
+    lib.seams_frame_q4_q6.restype = ctypes.c_int
+    lib.seams_frame_q4_q6.argtypes = [
+        ctypes.c_void_p, ctypes.c_double, ctypes.c_int,
+        ctypes.POINTER(ctypes.c_double), ctypes.POINTER(ctypes.c_double),
+        ctypes.c_void_p, ctypes.c_void_p]
+    return lib
+
+
+def _timed(call, warmup: int, repeats: int) -> list[float]:
+    import time
+    samples = []
+    for index in range(warmup + repeats):
+        t0 = time.perf_counter()
+        call()
+        elapsed = (time.perf_counter() - t0) * 1000.0
+        if index >= warmup:
+            samples.append(elapsed)
+    return samples
+
+
+def write_paper_q(out_dir: Path, repeats: int, threads: int, lang_lib: str,
+                  core_lib: str, protocol: str) -> None:
+    """Three q6 protocols. They are not one number.
+
+    tab:ql-eq is seams_frame_steinhardt of order 6 with the averaged
+    buffer filled, neighbour build inside the call. That is the driver
+    behind the filled 4.005 ms q4 cell. tab:cli is seams_frame_q4_q6
+    after the frame is loaded, q4 and q6 together, averaged buffers
+    null. tab:lit is seams_ql_cutoff on the core library, the call whose
+    q4 median on this size is 25.0 ms.
+    """
+    import ctypes
+    import numpy as np
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import paper_stats as stats
+    import release_build
+
+    if repeats < 8:
+        raise SystemExit("paper cells need n >= 8")
+    cells = 24
+    molecules = 8 * cells ** 3
+    out_dir.mkdir(parents=True, exist_ok=True)
+    # Record the mask before libgomp initialises. OpenMP's proc bind can
+    # narrow the main thread to one place while the team still uses the rest.
+    cores, affinity = stats.cores_now()
+    _lang_env(lang_lib, threads)
+    _label = release_build.assert_release(Path(lang_lib).resolve().parents[1])
+    lang = _bind_lang(ctypes.CDLL(lang_lib))
+    frame, n, xyz, box = _ice_frame(lang, cells)
+    if n != molecules:
+        raise SystemExit(f"ice Ic has {n} molecules")
+    if cores < threads:
+        raise SystemExit(f"affinity has {cores} cores, need {threads}")
+    log = [
+        f"cores {cores}",
+        f"affinity {affinity}",
+        f"threads {threads}",
+        f"molecules {molecules}",
+        "warmup 1",
+        f"n {repeats}",
+        f"build {_label}",
+        "ql-eq seams_frame_steinhardt order 6, ql and qlbar, neighbour inside",
+        "cli seams_frame_q4_q6 after the frame is loaded, q4 and q6 together",
+        "lit seams_ql_cutoff order 6, neighbour inside the core call",
+    ]
+
+    def write_csv(path: Path, rows: list[dict]) -> None:
+        with path.open("w", newline="") as handle:
+            writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+            writer.writeheader()
+            writer.writerows(rows)
+
+    def one(cell: str, code: str, samples: list[float]) -> dict:
+        summary = stats.summarize(samples)
+        log.append(
+            f"{cell} median_ms {summary['median_ms']:.6f} "
+            f"iqr_ms {summary['iqr_ms']:.6f} samples {stats.fmt_samples(samples)}"
+        )
+        print(f"{cell} {summary['median_ms']:.4f} ms iqr {summary['iqr_ms']:.4f}", flush=True)
+        return {
+            "cell": cell,
+            "code": code,
+            "molecules": molecules,
+            "threads": threads,
+            "cores": cores,
+            "affinity": affinity,
+            "warmup": WARMUP,
+            "n": summary["n"],
+            "median_ms": f"{summary['median_ms']:.6f}",
+            "iqr_ms": f"{summary['iqr_ms']:.6f}",
+            "q1_ms": f"{summary['q1_ms']:.6f}",
+            "q3_ms": f"{summary['q3_ms']:.6f}",
+            "samples_ms": stats.fmt_samples(samples),
+        }
+
+    if protocol == "ql-eq":
+        ql = (ctypes.c_double * n)()
+        bar = (ctypes.c_double * n)()
+
+        def ql_eq():
+            if lang.seams_frame_steinhardt(frame, 3.5, 1, 6, ql, bar) != 0:
+                raise RuntimeError(lang.seams_last_error().decode())
+
+        eq = one("q6 eight threads", "d-SEAMS", _timed(ql_eq, WARMUP, repeats))
+        write_csv(out_dir / "tab-ql-eq.csv", [eq])
+    if protocol == "cli":
+        q4 = (ctypes.c_double * n)()
+        q6 = (ctypes.c_double * n)()
+
+        def both():
+            if lang.seams_frame_q4_q6(frame, 3.5, 1, q4, q6, None, None) != 0:
+                raise RuntimeError(lang.seams_last_error().decode())
+
+        cli = one("library q4, q6", "d-SEAMS", _timed(both, WARMUP, repeats))
+        write_csv(out_dir / "frag-cli-q.csv", [{
+            **cli,
+            "detail": "library call after the frame is loaded; q4 and q6 together",
+        }])
+    lang.seams_frame_free(frame)
+    if protocol != "lit":
+        (out_dir / "raw-q6.txt").write_text(
+            ((out_dir / "raw-q6.txt").read_text(encoding="utf-8") if (out_dir / "raw-q6.txt").is_file() else "")
+            + "\n".join(log) + "\n",
+            encoding="utf-8",
+        )
+        return
+
+    core = ctypes.CDLL(core_lib)
+    core.seams_ql_cutoff.restype = ctypes.c_int
+    core.seams_ql_cutoff.argtypes = [
+        ctypes.POINTER(ctypes.c_double), ctypes.c_int,
+        ctypes.POINTER(ctypes.c_double), ctypes.c_double,
+        ctypes.c_int, ctypes.POINTER(ctypes.c_double)]
+    values = np.empty(n, dtype=np.float64)
+    xyz_ptr = xyz.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+    box_ptr = box.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+    ql_ptr = values.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+
+    def lit():
+        code = core.seams_ql_cutoff(xyz_ptr, n, box_ptr, 3.5, 6, ql_ptr)
+        if code != 0:
+            raise RuntimeError(f"seams_ql_cutoff returned {code}")
+
+    lit_row = one("q6 eight threads", "d-SEAMS", _timed(lit, WARMUP, repeats))
+    lit_row["detail"] = "seams_ql_cutoff; the q4 cell of this table is the 25.0 ms protocol"
+    write_csv(out_dir / "frag-lit-q6.csv", [lit_row])
+    previous = (out_dir / "raw-q6.txt").read_text(encoding="utf-8") if (out_dir / "raw-q6.txt").is_file() else ""
+    (out_dir / "raw-q6.txt").write_text(previous + "\n".join(log) + "\n", encoding="utf-8")
+
+
 def main():
+    global REPEATS
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repeats", type=int, default=REPEATS)
+    parser.add_argument("--paper-cells", type=Path, default=None)
+    parser.add_argument("--threads", type=int, default=8)
+    parser.add_argument(
+        "--lang-lib",
+        default=str(ROOT / "bbdir-release/bindings/libseams_lang.so"))
+    parser.add_argument(
+        "--core-lib",
+        default=str(ROOT / "bbdir-release/src/libyodaLib.so"))
+    parser.add_argument("--protocol", choices=("ql-eq", "cli", "lit"))
+    args, _unknown = parser.parse_known_args()
+    REPEATS = args.repeats
+    if args.paper_cells is not None and args.protocol is None:
+        raw = args.paper_cells / "raw-q6.txt"
+        args.paper_cells.mkdir(parents=True, exist_ok=True)
+        raw.write_text("", encoding="utf-8")
+        cores = f"0-{args.threads - 1}" if args.threads > 1 else "0"
+        for protocol in ("ql-eq", "cli", "lit"):
+            cmd = [
+                "taskset", "-c", cores, sys.executable, str(Path(__file__).resolve()),
+                "--paper-cells", str(args.paper_cells),
+                "--repeats", str(args.repeats),
+                "--threads", str(args.threads),
+                "--lang-lib", args.lang_lib,
+                "--core-lib", args.core_lib,
+                "--protocol", protocol,
+            ]
+            subprocess.run(cmd, check=True)
+        return
+    if args.paper_cells is not None:
+        write_paper_q(
+            args.paper_cells, args.repeats, args.threads,
+            args.lang_lib, args.core_lib, args.protocol)
+        return
     lib, build = release_build.ensure_release(
         CHILL_REL_LIB)
     hw = hardware()

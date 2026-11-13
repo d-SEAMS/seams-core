@@ -1,0 +1,5 @@
+cell,code,molecules,threads,cores,affinity,warmup,n,median_ms,iqr_ms,samples_ms,detail,q1_ms,q3_ms
+PTM diamond templates,OVITO PTM,110592,8,8,0-7,1,8,411.245450,11.296500,403.818100 408.117900 408.859000 410.678700 411.812200 415.904900 432.166200 468.268900,"rmsd 0.1, templates 6 and 7; IQR is q3-q1",,
+"library q4, q6",d-SEAMS,110592,8,8,0-7,1,8,11.572306,0.522129,14.300233 10.682756 11.749337 11.427003 11.680461 12.084623 10.963109 11.464150,library call after the frame is loaded; q4 and q6 together,11.311029,11.833158
+"rings-statistics-matter 0.3.0, 1 thread",rings-statistics-matter,110592,1,8,0-7,1,8,1589.597981,29.415175,1572.720686 1578.309828 1584.211473 1627.275672 1559.366230 1594.984488 1651.182129 1599.345066,command time includes process start; 221184 six-rings,,
+rings-statistics-matter 0.3.0,rings-statistics-matter,110592,8,8,0-7,1,8,1606.785885,14.612869,1615.075704 1610.267240 1585.041148 1603.304531 1619.887872 1610.832832 1600.861634 1586.537822,command time includes process start; 221184 six-rings,,

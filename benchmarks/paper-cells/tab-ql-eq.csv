@@ -1,0 +1,2 @@
+cell,code,molecules,threads,cores,affinity,warmup,n,median_ms,iqr_ms,q1_ms,q3_ms,samples_ms
+q6 eight threads,d-SEAMS,110592,8,8,0-7,1,8,6.491073,0.632734,6.158629,6.791362,6.243989 7.493319 7.745197 5.902549 5.881260 6.557377 6.503237 6.478908

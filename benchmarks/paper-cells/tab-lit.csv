@@ -1,0 +1,7 @@
+cell,code,molecules,threads,cores,affinity,warmup,n,median_ms,iqr_ms,q1_ms,q3_ms,samples_ms,detail,phase
+q6 eight threads,d-SEAMS,110592,8,8,0-7,1,8,6.310121,0.589397,6.080998,6.670395,5.913800 7.002157 6.559808 7.399735 6.136731 6.271286 6.348957 5.882730,seams_ql_cutoff; the q4 cell of this table is the 25.0 ms protocol,
+sI sII cage counts,d-SEAMS,,8,8,0-7,,,,,,,,match sI 512 expected 2 got 2 genice_sI.lammpstrj; match sI 51262 expected 6 got 6 genice_sI.lammpstrj; match sI 51264 expected 0 got 0 genice_sI.lammpstrj; match sI 51268 expected 0 got 0 genice_sI.lammpstrj; match sII 512 expected 16 got 16 genice_sII.lammpstrj; match sII 51264 expected 8 got 8 genice_sII.lammpstrj; match sII 51262 expected 0 got 0 genice_sII.lammpstrj; match sII 51268 expected 0 got 0 genice_sII.lammpstrj,sI/sII
+sI sII cages,d-SEAMS,46,8,8,0-7,1,8,0.244926,0.018501,,,0.232512 0.232541 0.241630 0.235660 0.248223 0.259067 0.251486 0.271645,"clathrate 5:12=2 5:12,6:2=6 5:12,6:4=0",sI
+sI sII ClavisCage,ClavisCage,46,8,8,0-7,1,8,51.695929,0.197635,,,51.748267 51.642648 51.770620 52.378343 51.643592 51.856540 51.076896 51.449918,ClavisCage 0.3.18 TRACE 512=1 51262=0 51264=0,sI
+sI sII cages,d-SEAMS,136,8,8,0-7,1,8,0.405405,0.008787,,,0.404633 0.417333 0.405361 0.405449 0.392244 0.397628 0.409781 0.463679,"clathrate 5:12=16 5:12,6:2=0 5:12,6:4=8",sII
+sI sII ClavisCage,ClavisCage,136,8,8,0-7,1,8,69.833965,0.914700,,,69.348896 69.376946 73.787535 69.917642 70.115496 69.522708 71.257383 69.750288,ClavisCage 0.3.18 TRACE 512=16 51262=0 51264=8,sII

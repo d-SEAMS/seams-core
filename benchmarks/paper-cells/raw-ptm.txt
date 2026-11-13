@@ -1,0 +1,7 @@
+cores 8
+affinity 0-7
+ptm rmsd_cutoff 0.1 templates cubic-diamond hexagonal-diamond
+classifier bench_v2 symmetry cutoff-csr diamondFromCsr
+sitting one
+mode=symmetry molecules=110592 threads=8 pairs=442368 checksum=8222705064348099955 sink=110592 median_ms=15.3696 samples_ms=15.6597,14.7480,15.3696,15.3572,14.7276,14.7622,20.8266,16.5611
+kind=ovito-symmetry molecules=110592 threads=8 sink=110592 median_ms=411.8122 samples_ms=403.8181,408.1179,408.8590,410.6787,411.8122,415.9049,432.1662,468.2689

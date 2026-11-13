@@ -1,0 +1,2 @@
+cell,code,molecules,threads,cores,affinity,warmup,n,median_ms,iqr_ms,q1_ms,q3_ms,samples_ms,detail
+"library q4, q6",d-SEAMS,110592,8,8,0-7,1,8,11.572306,0.522129,11.311029,11.833158,14.300233 10.682756 11.749337 11.427003 11.680461 12.084623 10.963109 11.464150,library call after the frame is loaded; q4 and q6 together

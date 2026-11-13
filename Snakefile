@@ -475,6 +475,103 @@ rule classify_carry:
         "--out {output}"
 
 
+# Paper cells that were unmeasured. One rule per producer. The stride
+# dumps come from hop_stride_generate and stay out of git. Run
+# `snakemake -j1 paper_cells`.
+rule paper_hop_stride:
+    input:
+        "scripts/paper_hop_stride.py",
+        "scripts/paper_stats.py",
+        "bbdir-release/tests/bench_trajectory_incremental",
+        "data/hop/stride-10.lammpstrj",
+        "data/hop/stride-100.lammpstrj",
+        "data/hop/stride-1000.lammpstrj",
+    output:
+        "benchmarks/paper-cells/tab-hop-stride.csv",
+        "benchmarks/paper-cells/raw-hop-stride.txt",
+    shell:
+        "python3 scripts/paper_hop_stride.py --out benchmarks/paper-cells"
+
+
+rule paper_ptm:
+    input:
+        "scripts/paper_ptm.py",
+        "scripts/paper_stats.py",
+        "scripts/bench_neighbours_v2.py",
+        "bbdir-release/tests/bench_v2",
+    output:
+        "benchmarks/paper-cells/tab-sym-eq.csv",
+        "benchmarks/paper-cells/frag-cli-ptm.csv",
+        "benchmarks/paper-cells/raw-ptm.txt",
+    shell:
+        "python3 scripts/paper_ptm.py --out benchmarks/paper-cells"
+
+
+rule paper_q6:
+    input:
+        "scripts/thread_scale_time.py",
+        "scripts/paper_stats.py",
+        "bbdir-release/bindings/libseams_lang.so",
+        "bbdir-release/src/libyodaLib.so",
+    output:
+        "benchmarks/paper-cells/tab-ql-eq.csv",
+        "benchmarks/paper-cells/frag-cli-q.csv",
+        "benchmarks/paper-cells/frag-lit-q6.csv",
+        "benchmarks/paper-cells/raw-q6.txt",
+    shell:
+        "python3 scripts/thread_scale_time.py --paper-cells benchmarks/paper-cells "
+        "--repeats 8 --threads 8"
+
+
+rule paper_rings:
+    input:
+        "scripts/paper_rings.py",
+        "scripts/paper_stats.py",
+        "bbdir-release/bindings/libseams_lang.so",
+    output:
+        "benchmarks/paper-cells/tab-rings-214.csv",
+        "benchmarks/paper-cells/frag-cli-rsm.csv",
+        "benchmarks/paper-cells/raw-rings.txt",
+    shell:
+        "python3 scripts/paper_rings.py --out benchmarks/paper-cells"
+
+
+rule paper_cages:
+    input:
+        "scripts/paper_cages.py",
+        "scripts/paper_stats.py",
+        "scripts/rerun_main_text.py",
+        "bbdir-release/tests/bench_cage_h2h",
+        "bbdir-release/seams",
+        "input/traj/genice_sI.lammpstrj",
+        "input/traj/genice_sII.lammpstrj",
+    output:
+        "benchmarks/paper-cells/frag-lit-cages.csv",
+        "benchmarks/paper-cells/raw-cages.txt",
+        "benchmarks/paper-cells/rerun-main/report.txt",
+    shell:
+        "python3 scripts/paper_cages.py --out benchmarks/paper-cells"
+
+
+rule paper_cells:
+    input:
+        "scripts/paper_cells_join.py",
+        "benchmarks/paper-cells/tab-hop-stride.csv",
+        "benchmarks/paper-cells/tab-sym-eq.csv",
+        "benchmarks/paper-cells/tab-ql-eq.csv",
+        "benchmarks/paper-cells/tab-rings-214.csv",
+        "benchmarks/paper-cells/frag-cli-ptm.csv",
+        "benchmarks/paper-cells/frag-cli-q.csv",
+        "benchmarks/paper-cells/frag-cli-rsm.csv",
+        "benchmarks/paper-cells/frag-lit-q6.csv",
+        "benchmarks/paper-cells/frag-lit-cages.csv",
+    output:
+        "benchmarks/paper-cells/tab-cli.csv",
+        "benchmarks/paper-cells/tab-lit.csv",
+    shell:
+        "python3 scripts/paper_cells_join.py benchmarks/paper-cells"
+
+
 rule growth_curve:
     input:
         "input/interface/growth_curve.py",
