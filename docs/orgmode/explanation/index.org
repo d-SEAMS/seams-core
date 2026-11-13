@@ -15,6 +15,7 @@ These pages are for understanding. They are not recipes.
 | [[file:topological-network.org][Topological network criteria]] | The formulae the classifiers use |
 | [[file:symmetry.org][Local symmetry]] | The ice shell, the cages, and the held-out scores |
 | [[file:trace-assembly.org][TRACE and signature cages]] | Hydrogen-bond cages and \(V-E+F=2\) |
+| [[file:stacking-disorder.org][Stacking disorder]] | Why a ring census separates cubic ice from hexagonal ice |
 | [[file:hop-ball.org][Carried rings]] | Which rings a changed bond can touch |
 | [[file:trace-threads.org][Signature thread controls]] | Team size, the OpenMP wait, and the pool-audit kernels |
 | [[file:performance.org][Release-candidate sitting]] | Tables built from ~benchmarks/rc3-sitting.csv~ |
@@ -35,6 +36,7 @@ These pages are for understanding. They are not recipes.
    topological-network
    symmetry
    trace-assembly
+   stacking-disorder
    hop-ball
    trace-threads
    performance
