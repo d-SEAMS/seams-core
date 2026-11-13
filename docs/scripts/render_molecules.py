@@ -700,8 +700,16 @@ def cycles_job():
     background = tuple(float(channel) for channel in job["background"])
     mesh_count = int(job["mesh_count"])
     light = background[0] > 0.5
-    com = positions.mean(axis=0)
-    low, high = frame_bounds(positions, radii, transparency)
+    framed = [positions]
+    for slot in range(mesh_count):
+        key = "mesh_vertices_{}".format(slot)
+        if key in job.files:
+            framed.append(np.asarray(job[key], dtype=float))
+    framed = np.vstack(framed)
+    com = framed.mean(axis=0)
+    pad = float(radii.max()) + 1.1 if len(radii) else 1.1
+    low = framed.min(axis=0) - pad
+    high = framed.max(axis=0) + pad
     half = np.maximum(com - low, high - com)
     # Look at the atom centroid and fit the farther side, so the mass sits
     # in the middle and nothing is clipped.
@@ -1316,10 +1324,12 @@ def compose(structure, legend, world_height, light):
         if not row:
             continue
         y = y0 + row_index * row_h
-        gap = 36.0
         need = [44 + text_w for _name, _colour, text_w in row]
-        row_w = sum(need) + gap * max(0, len(row) - 1)
-        x = float(legend_left) + max(0.0, (span - row_w) / 2.0)
+        spare = max(0.0, span - sum(need))
+        gap = spare / (len(row) - 1) if len(row) > 1 else 0.0
+        x = float(legend_left)
+        if len(row) == 1:
+            x = legend_left + spare / 2.0
         for (name, colour, _text_w), width in zip(row, need):
             draw.rounded_rectangle((x, y + 4, x + 28, y + 32), radius=4, fill=colour, outline=ink, width=2)
             draw.text((x + 36, y), name, fill=ink, font=font)
@@ -1638,6 +1648,31 @@ def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=
         bonds = [
             pair for pair in bonds
             if int(kept_labels[pair[0]]) in crystal and int(kept_labels[pair[1]]) in crystal
+        ]
+    if cluster and bonds:
+        keep = set(range(len(xyz)))
+        for _pass in range(4):
+            degree = {index: 0 for index in keep}
+            for left, right in bonds:
+                if left in keep and right in keep:
+                    degree[left] += 1
+                    degree[right] += 1
+            drop = {index for index, count in degree.items() if count < 2}
+            if not drop or len(keep - drop) < 12:
+                break
+            keep -= drop
+        order = sorted(keep)
+        remap = {old: new for new, old in enumerate(order)}
+        xyz = xyz[order]
+        colors = [colors[index] for index in order]
+        names = [names[index] for index in order]
+        radii = [radii[index] for index in order]
+        transparency = [transparency[index] for index in order]
+        kept_labels = [kept_labels[index] for index in order]
+        bonds = [
+            (remap[left], remap[right])
+            for left, right in bonds
+            if left in remap and right in remap
         ]
     elif liquid_clear:
         bonds = [

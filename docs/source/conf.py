@@ -190,6 +190,8 @@ if os.path.isfile(_xml_index) and os.path.isdir(_doxyrest):
 
 templates_path = ["_templates"]
 exclude_patterns = []
+# A warning is a failed book. Sphinx stops instead of publishing it.
+warningiserror = True
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),

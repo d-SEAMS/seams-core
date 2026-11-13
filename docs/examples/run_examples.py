@@ -229,6 +229,30 @@ def run_r(build, fixture):
     run([script, str(ROOT / "docs/examples/minimal_r.R"), fixture], env=env)
 
 
+def run_lua(build, fixture):
+    lua = shutil.which("lua5.4") or shutil.which("lua")
+    if lua is None:
+        raise SystemExit("lua is not on PATH")
+    modules = list((build / "bindings").rglob("dseams_core.so"))
+    if not modules:
+        raise SystemExit("dseams_core.so was not built")
+    env = os.environ.copy()
+    env["LUA_PATH"] = str(ROOT / "bindings" / "lua") + "/?.lua;;"
+    env["LUA_CPATH"] = str(modules[0].parent) + "/?.so;;"
+    env["LD_LIBRARY_PATH"] = library_path(build)
+    env["OMP_NUM_THREADS"] = "1"
+    done = subprocess.run(
+        [lua, str(ROOT / "docs/examples/minimal_lua.lua"), fixture],
+        env=env,
+        cwd=ROOT,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+    )
+    if done.returncode != 0 or "lua clathrate 46" not in done.stdout:
+        raise SystemExit("lua example failed\n{}".format(done.stdout[-800:]))
+
+
 def main():
     if len(sys.argv) != 3:
         raise SystemExit("usage: run_examples.py ROOT BUILD")
@@ -238,6 +262,7 @@ def main():
     compile_and_run(build)
     run_julia(build, fixture)
     run_r(build, fixture)
+    run_lua(build, fixture)
     print("docs examples ok")
 
 
