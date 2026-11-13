@@ -505,6 +505,23 @@ rule classify_carry:
 # `snakemake -j1 paper_cells`. The hop rule times carried cages against
 # a full rebuild at 1 and 8 threads in one sitting and writes
 # cage_speedup on each row of tab-hop-stride.csv.
+# Hydrate signature search at 1, 2, 4 and 8 threads. Replicates larger
+# than the GenIce unit cell are built in the benchmark and are not
+# committed. One sitting, serial.
+rule trace_threads:
+    input:
+        "scripts/trace_threads_sitting.py",
+        "scripts/paper_stats.py",
+        "bbdir-release/tests/bench_trace_threads",
+        "input/traj/genice_sI.lammpstrj",
+        "input/traj/genice_sII.lammpstrj",
+    output:
+        "benchmarks/trace-threads.csv",
+        "benchmarks/trace-threads.txt",
+    shell:
+        "python3 scripts/trace_threads_sitting.py --out benchmarks"
+
+
 rule paper_hop_stride:
     input:
         "scripts/paper_hop_stride.py",

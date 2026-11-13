@@ -16,6 +16,7 @@
 #include <cmath>
 #include <cstdint>
 #include <map>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -528,26 +529,90 @@ struct Search {
 // already close around it gives that vertex a second cycle. Up to 32
 // signatures share one search: a face set grows while its census fits in
 // one of them, and a closed set is a cage of the signature it equals.
+// A ring is a simple cycle when its vertices are unique. Sorting a handful
+// of ids is the whole test; a node-based set made the cage index allocate
+// once per face.
+bool distinctVertices(const std::vector<int> &ring) {
+  const int sz = static_cast<int>(ring.size());
+  if (sz <= 1) {
+    return true;
+  }
+  int stack[32];
+  int *tmp = stack;
+  std::vector<int> heap;
+  if (sz > 32) {
+    heap = ring;
+    tmp = heap.data();
+  } else {
+    std::copy(ring.begin(), ring.end(), tmp);
+  }
+  std::sort(tmp, tmp + sz);
+  for (int i = 1; i < sz; ++i) {
+    if (tmp[i] == tmp[i - 1]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// One allocation for every row. A vector per ring was most of the cage
+// index, and the search only walks the rows.
+struct IdRows {
+  std::vector<int> off;
+  std::vector<int> col;
+  struct View {
+    const int *b = nullptr;
+    const int *e = nullptr;
+    const int *begin() const { return b; }
+    const int *end() const { return e; }
+    std::size_t size() const { return static_cast<std::size_t>(e - b); }
+    bool empty() const { return b == e; }
+  };
+  View operator[](std::size_t i) const {
+    return {col.data() + off[i], col.data() + off[i + 1]};
+  }
+  void reset(int nRows) {
+    off.assign(static_cast<std::size_t>(nRows) + 1, 0);
+    col.clear();
+  }
+};
+
 struct ClosedSearch {
+  // Edge and ring tables are read by every worker. Sharing them is what
+  // lets a team search seeds without copying the index onto each thread.
+  struct Spine {
+    std::vector<std::vector<int>> need;
+    std::vector<int> facesOf;
+    std::vector<int> maxVerts;
+    std::vector<int> maxEdges;
+    std::vector<int> cand;
+    std::vector<int> ringSize;
+    IdRows ringEdges;
+    IdRows ringWedges;
+    IdRows ringVerts;
+    IdRows ringsOfEdge;
+    std::vector<std::array<int, 2>> edgeEnds;
+  };
+  std::shared_ptr<Spine> spine;
   const std::vector<std::vector<int>> &rings;
   const std::vector<cage::Signature> &sigs;
+  std::vector<std::vector<int>> &need;
+  std::vector<int> &facesOf;
+  std::vector<int> &maxVerts;
+  std::vector<int> &maxEdges;
+  std::vector<int> &cand;
+  std::vector<int> &ringSize;
+  IdRows &ringEdges;
+  IdRows &ringWedges;
+  IdRows &ringVerts;
+  IdRows &ringsOfEdge;
+  std::vector<std::array<int, 2>> &edgeEnds;
   int maxFaces = 0;
-  std::vector<std::vector<int>> need;
-  std::vector<int> facesOf;
-  std::vector<int> maxVerts;
-  std::vector<int> maxEdges;
   std::vector<int> have;
   // room[s]: the signatures with space for one more ring of size s.
   // fits[d]: the signatures whose census holds the first d chosen rings.
   std::vector<unsigned> room;
   std::vector<unsigned> fits;
-  std::vector<int> cand;
-  std::vector<int> ringSize;
-  std::vector<std::vector<int>> ringEdges;
-  std::vector<std::vector<int>> ringWedges;
-  std::vector<std::vector<int>> ringVerts;
-  std::vector<std::vector<int>> ringsOfEdge;
-  std::vector<std::array<int, 2>> edgeEnds;
   std::vector<unsigned char> edgeUse;
   std::vector<unsigned char> wedgeUse;
   std::vector<int> half;
@@ -574,7 +639,12 @@ struct ClosedSearch {
                const std::vector<std::array<double, 3>> *xyz = nullptr,
                const std::vector<double> *box = nullptr,
                const cage::EdgeWindow &window = {})
-      : rings(allRings), sigs(signatures) {
+      : spine(std::make_shared<Spine>()), rings(allRings), sigs(signatures),
+        need(spine->need), facesOf(spine->facesOf), maxVerts(spine->maxVerts),
+        maxEdges(spine->maxEdges), cand(spine->cand), ringSize(spine->ringSize),
+        ringEdges(spine->ringEdges), ringWedges(spine->ringWedges),
+        ringVerts(spine->ringVerts), ringsOfEdge(spine->ringsOfEdge),
+        edgeEnds(spine->edgeEnds) {
     const size_t nSig = sigs.size();
     int maxSize = 0;
     for (const auto &s : sigs) {
@@ -612,13 +682,16 @@ struct ClosedSearch {
     const int nRings = static_cast<int>(rings.size());
     used.assign(static_cast<size_t>(nRings), 0);
     ringSize.assign(static_cast<size_t>(nRings), 0);
-    ringEdges.resize(static_cast<size_t>(nRings));
-    ringWedges.resize(static_cast<size_t>(nRings));
-    ringVerts.resize(static_cast<size_t>(nRings));
-    std::unordered_map<Edge, int> edgeId;
-    std::unordered_map<std::uint64_t, int> wedgeId;
-    std::unordered_map<int, int> vertexId;
-    std::vector<int> ordered;
+    std::vector<char> keep(static_cast<size_t>(nRings), 0);
+    int indexTeam = 1;
+#ifdef SEAMS_HAS_OPENMP
+    if (!omp_in_parallel()) {
+      indexTeam = std::max(1, omp_get_max_threads());
+    }
+#endif
+#if defined(SEAMS_HAS_OPENMP)
+#pragma omp parallel for schedule(static) if (nRings >= 128 && indexTeam > 1)
+#endif
     for (int i = 0; i < nRings; ++i) {
       const auto &ring = rings[static_cast<size_t>(i)];
       const int sz = static_cast<int>(ring.size());
@@ -634,48 +707,169 @@ struct ClosedSearch {
           !waterFace(ring, *xyz, box, window.lo, window.hi)) {
         continue;
       }
-      std::set<int> distinct(ring.begin(), ring.end());
-      if (static_cast<int>(distinct.size()) != sz) {
+      if (!distinctVertices(ring)) {
+        continue;
+      }
+      keep[static_cast<size_t>(i)] = 1;
+    }
+    int slots = 0;
+    int maxV = -1;
+    cand.reserve(static_cast<size_t>(nRings));
+    for (int i = 0; i < nRings; ++i) {
+      if (keep[static_cast<size_t>(i)] == 0) {
         continue;
       }
       cand.push_back(i);
+      const int sz = static_cast<int>(rings[static_cast<size_t>(i)].size());
       ringSize[static_cast<size_t>(i)] = sz;
-      ordered.assign(static_cast<size_t>(sz), 0);
+      slots += sz;
+      for (const int v : rings[static_cast<size_t>(i)]) {
+        maxV = std::max(maxV, v);
+      }
+    }
+    auto lay = [&](IdRows &rows) {
+      rows.off.assign(static_cast<size_t>(nRings) + 1, 0);
+      int cursor = 0;
+      for (int i = 0; i < nRings; ++i) {
+        rows.off[static_cast<size_t>(i)] = cursor;
+        if (keep[static_cast<size_t>(i)] != 0) {
+          cursor += ringSize[static_cast<size_t>(i)];
+        }
+      }
+      rows.off[static_cast<size_t>(nRings)] = cursor;
+      rows.col.assign(static_cast<size_t>(cursor), 0);
+    };
+    lay(ringEdges);
+    lay(ringWedges);
+    lay(ringVerts);
+
+    // Open-addressed ids in first-seen order. Node-based maps allocated once
+    // per edge and dominated the index on a few thousand faces.
+    struct FlatId {
+      std::vector<std::uint64_t> keys;
+      std::vector<int> ids;
+      std::size_t mask = 0;
+      int n = 0;
+      void reset(int expect) {
+        std::size_t cap = 16;
+        const std::size_t need = static_cast<std::size_t>(std::max(expect, 1)) * 2;
+        while (cap < need) {
+          cap *= 2;
+        }
+        keys.assign(cap, ~std::uint64_t{0});
+        ids.assign(cap, -1);
+        mask = cap - 1;
+        n = 0;
+      }
+      int intern(std::uint64_t key) {
+        std::size_t h = static_cast<std::size_t>(key * 11400714819323198485ull) & mask;
+        while (keys[h] != ~std::uint64_t{0} && keys[h] != key) {
+          h = (h + 1) & mask;
+        }
+        if (keys[h] == ~std::uint64_t{0}) {
+          keys[h] = key;
+          const int id = n++;
+          ids[h] = id;
+          return id;
+        }
+        return ids[h];
+      }
+    };
+    FlatId edgeId;
+    FlatId wedgeId;
+    edgeId.reset(std::max(slots, 1));
+    wedgeId.reset(std::max(slots, 1));
+    std::vector<std::array<int, 2>> edgeAtoms;
+    std::vector<int> vertexOf;
+    if (maxV >= 0) {
+      vertexOf.assign(static_cast<size_t>(maxV) + 1, -1);
+    }
+    int nV = 0;
+    for (const int i : cand) {
+      const auto &ring = rings[static_cast<size_t>(i)];
+      const int sz = ringSize[static_cast<size_t>(i)];
+      int *eCol = ringEdges.col.data() + ringEdges.off[static_cast<size_t>(i)];
+      int *vCol = ringVerts.col.data() + ringVerts.off[static_cast<size_t>(i)];
       for (int k = 0; k < sz; ++k) {
         const int a = ring[static_cast<size_t>(k)];
         const int b = ring[static_cast<size_t>((k + 1) % sz)];
-        const Edge e = packEdge(a, b);
-        auto ins = edgeId.emplace(e, static_cast<int>(edgeEnds.size()));
-        if (ins.second) {
-          edgeEnds.push_back({std::min(a, b), std::max(a, b)});
-          ringsOfEdge.emplace_back();
+        const int before = edgeId.n;
+        const int id = edgeId.intern(packEdge(a, b));
+        if (id == before) {
+          edgeAtoms.push_back({std::min(a, b), std::max(a, b)});
         }
-        ordered[static_cast<size_t>(k)] = ins.first->second;
-        ringsOfEdge[static_cast<size_t>(ins.first->second)].push_back(i);
-        auto vin = vertexId.emplace(a, static_cast<int>(vertexId.size()));
-        ringVerts[static_cast<size_t>(i)].push_back(vin.first->second);
+        eCol[k] = id;
+        int vid = -1;
+        if (a >= 0 && a < static_cast<int>(vertexOf.size())) {
+          vid = vertexOf[static_cast<size_t>(a)];
+          if (vid < 0) {
+            vid = nV++;
+            vertexOf[static_cast<size_t>(a)] = vid;
+          }
+        }
+        vCol[k] = vid;
       }
-      ringEdges[static_cast<size_t>(i)] = ordered;
+      int *wCol = ringWedges.col.data() + ringWedges.off[static_cast<size_t>(i)];
       for (int k = 0; k < sz; ++k) {
-        const auto e1 = static_cast<std::uint64_t>(ordered[static_cast<size_t>(k)]);
-        const auto e2 = static_cast<std::uint64_t>(
-            ordered[static_cast<size_t>((k + 1) % sz)]);
+        const auto e1 = static_cast<std::uint64_t>(eCol[k]);
+        const auto e2 = static_cast<std::uint64_t>(eCol[(k + 1) % sz]);
         const std::uint64_t key = (std::min(e1, e2) << 32) | std::max(e1, e2);
-        auto win = wedgeId.emplace(key, static_cast<int>(wedgeId.size()));
-        ringWedges[static_cast<size_t>(i)].push_back(win.first->second);
+        wCol[k] = wedgeId.intern(key);
       }
     }
-    for (auto &ends : edgeEnds) {
-      ends = {vertexId.at(ends[0]), vertexId.at(ends[1])};
+    edgeEnds.resize(edgeAtoms.size());
+    for (std::size_t e = 0; e < edgeAtoms.size(); ++e) {
+      const int a = edgeAtoms[e][0];
+      const int b = edgeAtoms[e][1];
+      const int va = (a >= 0 && a < static_cast<int>(vertexOf.size()))
+                         ? vertexOf[static_cast<size_t>(a)]
+                         : -1;
+      const int vb = (b >= 0 && b < static_cast<int>(vertexOf.size()))
+                         ? vertexOf[static_cast<size_t>(b)]
+                         : -1;
+      edgeEnds[e] = {va, vb};
+    }
+    ringsOfEdge.off.assign(edgeEnds.size() + 1, 0);
+    for (const int i : cand) {
+      const auto row = ringEdges[static_cast<size_t>(i)];
+      for (const int e : row) {
+        ringsOfEdge.off[static_cast<size_t>(e) + 1]++;
+      }
+    }
+    for (std::size_t e = 0; e < edgeEnds.size(); ++e) {
+      ringsOfEdge.off[e + 1] += ringsOfEdge.off[e];
+    }
+    ringsOfEdge.col.assign(ringsOfEdge.off.back(), 0);
+    std::vector<int> at(ringsOfEdge.off.begin(), ringsOfEdge.off.end() - 1);
+    for (const int i : cand) {
+      for (const int e : ringEdges[static_cast<size_t>(i)]) {
+        ringsOfEdge.col[static_cast<size_t>(at[static_cast<size_t>(e)]++)] = i;
+      }
     }
     edgeUse.assign(edgeEnds.size(), 0);
     halfPos.assign(edgeEnds.size(), -1);
-    wedgeUse.assign(wedgeId.size(), 0);
-    openAt.assign(vertexId.size(), 0);
-    facesAt.assign(vertexId.size(), 0);
+    wedgeUse.assign(static_cast<size_t>(wedgeId.n), 0);
+    openAt.assign(static_cast<size_t>(nV), 0);
+    facesAt.assign(static_cast<size_t>(nV), 0);
     optsAt.resize(static_cast<size_t>(maxFaces) + 1);
     found.resize(nSig);
   }
+
+  // Workers share the spine and keep a private stack. The stack is empty
+  // here, so the copy is the occupancy vectors, not the ring index.
+  ClosedSearch(const ClosedSearch &o)
+      : spine(o.spine), rings(o.rings), sigs(o.sigs), need(spine->need),
+        facesOf(spine->facesOf), maxVerts(spine->maxVerts),
+        maxEdges(spine->maxEdges), cand(spine->cand), ringSize(spine->ringSize),
+        ringEdges(spine->ringEdges), ringWedges(spine->ringWedges),
+        ringVerts(spine->ringVerts), ringsOfEdge(spine->ringsOfEdge),
+        edgeEnds(spine->edgeEnds), maxFaces(o.maxFaces), have(o.have),
+        room(o.room), fits(o.fits), edgeUse(o.edgeUse), wedgeUse(o.wedgeUse),
+        half(o.half), halfPos(o.halfPos), openAt(o.openAt), facesAt(o.facesAt),
+        used(o.used), chosen(o.chosen), optsAt(o.optsAt), found(o.found),
+        branchOverride(o.branchOverride), seenFaces(o.seenFaces),
+        trivalent(o.trivalent), seed(o.seed), nVerts(o.nVerts),
+        nEdges(o.nEdges) {}
 
   void updateRoom(int s) {
     unsigned m = 0;
@@ -1082,23 +1276,27 @@ struct ClosedSearch {
     return false;
   }
 
+  void searchOne(int r) {
+    seed = r;
+    seenFaces.clear();
+    bool seedOk = true;
+    for (const int e : ringEdges[static_cast<size_t>(r)]) {
+      if (ringsOfEdge[static_cast<size_t>(e)].size() < 2) {
+        seedOk = false;
+        break;
+      }
+    }
+    if (!seedOk) {
+      return;
+    }
+    addRing(r);
+    search();
+    undoRing();
+  }
+
   void searchSeeds(const std::vector<int> &seeds) {
     for (const int r : seeds) {
-      seed = r;
-      seenFaces.clear();
-      bool seedOk = true;
-      for (const int e : ringEdges[static_cast<size_t>(r)]) {
-        if (ringsOfEdge[static_cast<size_t>(e)].size() < 2) {
-          seedOk = false;
-          break;
-        }
-      }
-      if (!seedOk) {
-        continue;
-      }
-      addRing(r);
-      search();
-      undoRing();
+      searchOne(r);
     }
   }
 
@@ -1157,22 +1355,23 @@ struct ClosedSearch {
       {
 #if defined(SEAMS_HAS_OPENMP)
         const int tid = omp_get_thread_num();
-        const int team = omp_get_num_threads();
 #else
         const int tid = 0;
-        const int team = 1;
 #endif
         ClosedSearch local(*this);
         for (auto &list : local.found) {
           list.clear();
         }
-        std::vector<int> mine;
-        mine.reserve(cand.size() / static_cast<size_t>(team) + 1);
-        for (size_t i = static_cast<size_t>(tid); i < cand.size();
-             i += static_cast<size_t>(team)) {
-          mine.push_back(cand[i]);
+        // Low ring indices own more completions, so a static stride leaves
+        // the first threads holding the long seeds. Dynamic chunks hand
+        // those seeds out as threads finish.
+        const int nCand = static_cast<int>(cand.size());
+#if defined(SEAMS_HAS_OPENMP)
+#pragma omp for schedule(dynamic, 8)
+#endif
+        for (int i = 0; i < nCand; ++i) {
+          local.searchOne(cand[static_cast<size_t>(i)]);
         }
-        local.searchSeeds(mine);
         if (tid < nThreads) {
           partial[static_cast<size_t>(tid)] = std::move(local.found);
         }
