@@ -18,7 +18,7 @@ import numpy as np
 _SCRIPTS = Path(__file__).resolve().parents[2] / "scripts"
 if str(_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS))
-from chill_palette import CHLORIDE, COLOUR, LEGEND, SODIUM
+from chill_palette import CHLORIDE, CLATHRATE, COLOUR, CUBIC, HEXAGONAL, INTERFACIAL, LEGEND, SODIUM
 from lammps_box import cell_from_bounds
 
 # Face-size census of each cage, and the CHILL+ colour index it borrows.
@@ -183,18 +183,33 @@ def find_cages(cycles, need, limit):
 
 
 def _box_vectors(path):
+    origin, vectors = _box_cell(path)
+    del origin
+    return vectors
+
+
+def _box_cell(path):
     with open(path) as handle:
         for line in handle:
             if not line.startswith("ITEM: BOX"):
                 continue
             rows = [handle.readline().split() for _ in range(3)]
-            _origin, (lx, ly, lz), (xy, xz, yz) = cell_from_bounds(rows)
-            return [
+            origin, (lx, ly, lz), (xy, xz, yz) = cell_from_bounds(rows)
+            return np.array(origin, dtype=float), [
                 np.array([lx, 0.0, 0.0]),
                 np.array([xy, ly, 0.0]),
                 np.array([xz, yz, lz]),
             ]
     raise RuntimeError(f"no box in {path}")
+
+
+# Cage colour index to the shared palette. The symbols match the paper.
+CAGE_LEGEND = {
+    0: ("5\u00b9\u00b26\u2074", np.array(CUBIC)),
+    1: ("5\u00b9\u00b2", np.array(HEXAGONAL)),
+    3: ("4\u00b35\u20766\u00b3", np.array(INTERFACIAL)),
+    4: ("5\u00b9\u00b26\u2078", np.array(CLATHRATE)),
+}
 
 
 def _shifts(vectors):
@@ -452,17 +467,102 @@ def render_brine(render, rows, path, box, width=1400):
     )
 
 
-def render_host(render, lib, dump, path, kinds, width=1280):
+def _cell_corners(origin, vectors):
+    return [
+        np.asarray(origin, dtype=float) + i * vectors[0] + j * vectors[1] + k * vectors[2]
+        for i in (0, 1)
+        for j in (0, 1)
+        for k in (0, 1)
+    ]
+
+
+def present_cage(render, path, origin, vectors, legend, title, forward, up, frame, pad_radius=0.9):
+    """Legend, bracket, and padded-cell clip shared with the slab figures."""
+    from PIL import Image, ImageDraw
+
+    corners = _cell_corners(origin, vectors)
+    centre, half_h, half_v, forward, right, up = _camera(render, frame, forward, up)
+    raw = Image.open(path).convert("RGB")
+    font = _legend_font(LEGEND_FONT_PX)
+    swatch = 32
+    row_h = 52
+
+    def raw_pix(point):
+        offset = np.asarray(point, dtype=float) - centre
+        x = (float(np.dot(offset, right)) / (2.0 * half_h) + 0.5) * raw.width
+        y = (0.5 - float(np.dot(offset, up)) / (2.0 * half_v)) * raw.height
+        return x, y
+
+    pad = int(np.ceil(float(pad_radius) * raw.width / (2.0 * half_h))) + 2
+    image, (crop_x0, crop_y0) = clip_to_padded_cell(raw, raw_pix, corners, pad)
+    left, right_margin, top = 40, 220, 8
+    groups = legend_groups(legend, font, swatch, image.width + right_margin - 40)
+    legend_rows = max(1, len(groups))
+    margin = 24 + row_h * legend_rows + LEGEND_FONT_PX + 48
+    canvas = Image.new("RGB", (image.width + left + right_margin, image.height + top + margin), (255, 255, 255))
+    canvas.paste(image, (left, top))
+    draw = ImageDraw.Draw(canvas)
+    marks = []
+
+    def add_text(name, xy, text):
+        marks.append((name, text_bbox(font, xy, text)))
+        draw.text(xy, text, font=font, fill=(20, 20, 20))
+
+    def project(point):
+        x, y = raw_pix(point)
+        return x - crop_x0 + left, y - crop_y0 + top
+
+    projected = [project(corner) for corner in corners]
+    for first in range(8):
+        for second in range(first + 1, 8):
+            if bin(first ^ second).count("1") != 1:
+                continue
+            draw.line([projected[first], projected[second]], fill=(70, 70, 70), width=2)
+    x_right = max(point[0] for point in projected)
+    y_top = min(point[1] for point in projected)
+    y_bottom = max(point[1] for point in projected)
+    bracket_x = x_right + pad + 18
+    stroke_bracket(draw, bracket_x, y_top, y_bottom)
+    add_text(title, (bracket_x + 14, 0.5 * (y_top + y_bottom) - LEGEND_FONT_PX / 2.0), title)
+    legend_bottom = image.height + top
+    y = image.height + top + 16
+    for group in groups:
+        x = left + 16
+        for label, colour in group:
+            text_w = float(font.getlength(label))
+            rgb = tuple(int(round(channel * 255)) for channel in colour)
+            draw.rectangle([x, y, x + swatch, y + swatch], fill=rgb, outline=(30, 30, 30))
+            marks.append((f"swatch {label}", (x, y, x + swatch, y + swatch)))
+            add_text(f"legend {label}", (x + swatch + 10, y), label)
+            legend_bottom = max(legend_bottom, y + swatch, marks[-1][1][3])
+            x += swatch + 16 + text_w + 18
+        y += row_h
+    bar = 10.0 * raw.width / (2.0 * half_h)
+    bar_y = legend_bottom + 28
+    bar_x = left + 16
+    draw.line([(bar_x, bar_y), (bar_x + bar, bar_y)], fill=(20, 20, 20), width=6)
+    marks.append(("1 nm bar", (bar_x, bar_y - 4, bar_x + bar, bar_y + 4)))
+    add_text("1 nm", (bar_x + bar + 14, bar_y - LEGEND_FONT_PX / 2.0), "1 nm")
+    require_disjoint(marks)
+    canvas.save(path)
+
+
+def render_host(render, lib, dump, path, kinds, width=1700):
     cycles = _rings(lib, str(dump))
     positions = _positions(dump)
     groups = []
     expected = []
+    legend = []
+    seen = set()
     for _name, need, colour, limit in kinds:
         facesets = find_cages(cycles, need, limit)
         expected.append(len(facesets))
         for faces in facesets:
             groups.append((faces, colour))
-    vectors = _box_vectors(dump)
+        if colour not in seen and colour in CAGE_LEGEND:
+            seen.add(colour)
+            legend.append(CAGE_LEGEND[colour])
+    origin, vectors = _box_cell(dump)
     meshes, stats = cage_meshes(cycles, groups, positions, vectors)
     assert_drawn_faces(stats)
     corners = np.vstack([vertices for vertices, _faces, _colour in meshes])
@@ -470,7 +570,20 @@ def render_host(render, lib, dump, path, kinds, width=1280):
     radii = np.full(len(corners), 0.22)
     forward = np.array([0.55, 0.35, 0.76])
     up = np.array([0.0, 0.0, 1.0])
-    tachyon_scene(render, path, corners, colours, radii, meshes, forward, up, width)
+    cell = _cell_corners(origin, vectors)
+    import science_render as science
+
+    _forward, right, up_axis = science.basis(forward, up)
+    extra = []
+    for corner in cell:
+        extra.append(corner + 1.2 * right)
+        extra.append(corner - 1.2 * right)
+        extra.append(corner + 1.2 * up_axis)
+        extra.append(corner - 1.2 * up_axis)
+    frame = np.vstack([corners, np.asarray(extra, dtype=float)])
+    tachyon_scene(render, path, corners, colours, radii, meshes, forward, up, width, frame=frame)
+    title = {"sii": "sII", "sh": "sH"}.get(path.stem, path.stem)
+    present_cage(render, path, origin, vectors, legend, title, forward, up, frame, pad_radius=0.9)
     return expected
 
 
@@ -533,6 +646,49 @@ def legend_groups(labels, font, swatch, max_width):
     return [list(labels[:cut]), list(labels[cut:])]
 
 
+def stroke_bracket(draw, x, y0, y1, tick=16):
+    """A vertical span with a tick at each end."""
+    top, bottom = (y0, y1) if y0 <= y1 else (y1, y0)
+    if bottom - top < 4:
+        return
+    draw.line([(x, top), (x, bottom)], fill=(20, 20, 20), width=3)
+    draw.line([(x - tick / 2.0, top), (x + tick / 2.0, top)], fill=(20, 20, 20), width=3)
+    draw.line([(x - tick / 2.0, bottom), (x + tick / 2.0, bottom)], fill=(20, 20, 20), width=3)
+
+
+def dashed_hline(draw, x0, x1, y, dash=18, gap=12, width=4):
+    """A horizontal dashed line long enough to read at figure scale."""
+    x = float(min(x0, x1))
+    end = float(max(x0, x1))
+    while x < end:
+        draw.line([(x, y), (min(x + dash, end), y)], fill=(20, 20, 20), width=width)
+        x += dash + gap
+
+
+def clip_to_padded_cell(raw, project, corners, pad_px):
+    """White out every pixel outside the cell expanded by ``pad_px`` on each side."""
+    pts = [project(corner) for corner in corners]
+    x0 = int(np.floor(min(point[0] for point in pts) - pad_px))
+    y0 = int(np.floor(min(point[1] for point in pts) - pad_px))
+    x1 = int(np.ceil(max(point[0] for point in pts) + pad_px))
+    y1 = int(np.ceil(max(point[1] for point in pts) + pad_px))
+    if x0 < 0 or y0 < 0 or x1 > raw.width or y1 > raw.height:
+        raise RuntimeError("the render does not include one sphere radius outside the cell")
+    arr = np.array(raw)
+    white = np.array([255, 255, 255], dtype=arr.dtype)
+    if y0 > 0:
+        arr[:y0] = white
+    if y1 < arr.shape[0]:
+        arr[y1:] = white
+    if x0 > 0:
+        arr[:, :x0] = white
+    if x1 < arr.shape[1]:
+        arr[:, x1:] = white
+    from PIL import Image
+
+    return Image.fromarray(arr).crop((x0, y0, x1, y1)), (x0, y0)
+
+
 def marks_overlap(marks):
     """Pairs of named boxes whose interiors meet."""
     hits = []
@@ -575,20 +731,13 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
     sphere_pad = 0
     image = raw
     if pad_radius is not None and origin is not None and lengths is not None:
-        raw_corners = [raw_pix(corner) for corner in cell_corners(origin, lengths)]
-        pad_x = int(np.ceil(float(pad_radius) * raw.width / (2.0 * half_h))) + 6
-        pad_y = int(np.ceil(float(pad_radius) * raw.height / (2.0 * half_v))) + 6
-        sphere_pad = pad_x
-        crop_x0 = int(min(point[0] for point in raw_corners)) - pad_x
-        crop_y0 = int(min(point[1] for point in raw_corners)) - pad_y
-        crop_x1 = int(max(point[0] for point in raw_corners)) + pad_x + 1
-        crop_y1 = int(max(point[1] for point in raw_corners)) + pad_y + 1
-        if crop_x0 < 0 or crop_y0 < 0 or crop_x1 > raw.width or crop_y1 > raw.height:
-            raise RuntimeError("the render does not include one sphere radius outside the cell")
-        image = raw.crop((crop_x0, crop_y0, crop_x1, crop_y1))
+        sphere_pad = int(np.ceil(float(pad_radius) * raw.width / (2.0 * half_h))) + 2
+        image, (crop_x0, crop_y0) = clip_to_padded_cell(
+            raw, raw_pix, cell_corners(origin, lengths), sphere_pad
+        )
     labels = [(display_label(label), colour) for label, colour in (legend or ())]
     left = 220 if ice_z is not None else (110 if layer_title else 0)
-    right_margin = 520 if ice_z is not None else 0
+    right_margin = 720 if ice_z is not None else 0
     # The legend starts at left+16 and must end before the canvas edge.
     groups = legend_groups(labels, font, swatch, image.width + right_margin - 40)
     legend_rows = max(1, len(groups))
@@ -657,15 +806,14 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
         y_front = y_of(z_cut)
         y_ice = y_of(z_lo)
         y_top = y_of(z_hi)
-        y_brine = 0.5 * (y_front + y_top)
-        draw.line([(bracket_x, y_top), (bracket_x, y_front)], fill=(20, 20, 20), width=3)
-        add_text("brine", (bracket_x + 14, y_brine - LEGEND_FONT_PX / 2.0), "brine")
-        draw.line([(bracket_x, y_front), (bracket_x, y_ice)], fill=(20, 20, 20), width=3)
+        gap = 28
+        # Screen y grows downward: the brine span is the upper one.
+        stroke_bracket(draw, bracket_x, y_top, y_front - gap)
+        stroke_bracket(draw, bracket_x, y_front + gap, y_ice)
+        add_text("brine", (bracket_x + 14, 0.5 * (y_top + y_front) - LEGEND_FONT_PX / 2.0), "brine")
         add_text("ice Ih", (bracket_x + 14, 0.5 * (y_front + y_ice) - LEGEND_FONT_PX / 2.0), "ice Ih")
-        arrow_x = x_right + max(sphere_pad, 8) + 8
-        draw.polygon([(arrow_x, y_front), (arrow_x + 18, y_front - 7), (arrow_x + 18, y_front + 7)], fill=(20, 20, 20))
-        draw.line([(bracket_x - 8, y_front), (bracket_x + 8, y_front)], fill=(20, 20, 20), width=3)
-        add_text("growth front", (bracket_x + 14, y_front - LEGEND_FONT_PX - 4), "growth front")
+        dashed_hline(draw, x_left, x_right, y_front)
+        add_text("growth front", (bracket_x + 200, y_front - LEGEND_FONT_PX / 2.0), "growth front")
     legend_bottom = image.height + top
     y = image.height + top + 16
     for group in groups:
@@ -832,18 +980,10 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
     font = _legend_font(LEGEND_FONT_PX)
     swatch = 32
     row_h = 52
-    left, right_margin, top = 150, 520, 8
-    legend_rows = 1
-    if legend:
-        x = 16
-        rows = 1
-        for label, _colour in legend:
-            width_px = swatch + 16 + float(font.getlength(label))
-            if x + width_px > raw.width - 8:
-                rows += 1
-                x = 16
-            x += width_px + 18
-        legend_rows = rows
+    left, right_margin, top = 170, 720, 8
+    shown_legend = [(display_label(label), colour) for label, colour in (legend or ())]
+    groups = legend_groups(shown_legend, font, swatch, raw.width + right_margin - 40)
+    legend_rows = max(1, len(groups))
     def raw_pix(point):
         offset = np.asarray(point, dtype=float) - centre
         x = (float(np.dot(offset, right)) / (2.0 * half_h) + 0.5) * raw.width
@@ -854,15 +994,10 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
         np.asarray(origin, dtype=float) + np.array((0.0, j * lengths[1], k * lengths[2]))
         for j, k in ((0, 0), (1, 0), (1, 1), (0, 1))
     ]
-    raw_corners = [raw_pix(point) for point in raw_face]
     pad = int(np.ceil(float(pad_radius) * raw.width / (2.0 * half_h))) + 2
-    crop_x0 = int(min(point[0] for point in raw_corners)) - pad
-    crop_y0 = int(min(point[1] for point in raw_corners)) - pad
-    crop_x1 = int(max(point[0] for point in raw_corners)) + pad + 1
-    crop_y1 = int(max(point[1] for point in raw_corners)) + pad + 1
-    if crop_x0 < 0 or crop_y0 < 0 or crop_x1 > raw.width or crop_y1 > raw.height:
-        raise RuntimeError("the render does not include one sphere radius outside the cell")
-    image = raw.crop((crop_x0, crop_y0, crop_x1, crop_y1))
+    image, (crop_x0, crop_y0) = clip_to_padded_cell(raw, raw_pix, raw_face, pad)
+    groups = legend_groups(shown_legend, font, swatch, image.width + right_margin - 40)
+    legend_rows = max(1, len(groups))
     bottom = 340 + row_h * legend_rows
     canvas = Image.new("RGB", (image.width + left + right_margin, image.height + top + bottom), (255, 255, 255))
     canvas.paste(image, (left, top))
@@ -912,37 +1047,32 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
         point = np.asarray(origin, dtype=float) + np.array((0.0, 0.5 * lengths[1], z_value - z_lo))
         return pix(point)[1]
 
-    for text, z_mid in (("liquid", 0.5 * (z_cut + z_hi)),):
-        text_w = float(font.getlength(text))
-        add_text(text, (max(8, x_left - text_w - 16), y_of(z_mid) - LEGEND_FONT_PX / 2.0), text)
-
-    # One bracket over the crystal. The arrows name the two ends of that slab.
-    bracket_x = x_right + 28
+    bracket_x = x_right + pad + 18
     y_front = y_of(z_cut)
     y_periodic = y_of(z_lo)
-    draw.line([(bracket_x, y_front), (bracket_x, y_periodic)], fill=(20, 20, 20), width=3)
-    slab = "ice Ih slab"
-    add_text(slab, (bracket_x + 14, 0.5 * (y_front + y_periodic) - LEGEND_FONT_PX / 2.0), slab)
-    for y_mark, text in ((y_front, "growth front"), (y_periodic, "periodic boundary")):
-        draw.polygon([(x_right + 4, y_mark), (x_right + 22, y_mark - 7), (x_right + 22, y_mark + 7)], fill=(20, 20, 20))
-        draw.line([(bracket_x - 8, y_mark), (bracket_x + 8, y_mark)], fill=(20, 20, 20), width=3)
-        add_text(text, (bracket_x + 14, y_mark - LEGEND_FONT_PX - 4), text)
+    y_top_cell = y_of(z_hi)
+    gap = 28
+    stroke_bracket(draw, bracket_x, y_top_cell, y_front - gap)
+    stroke_bracket(draw, bracket_x, y_front + gap, y_periodic)
+    add_text("liquid", (bracket_x + 14, 0.5 * (y_top_cell + y_front) - LEGEND_FONT_PX / 2.0), "liquid")
+    add_text("ice Ih", (bracket_x + 14, 0.5 * (y_front + y_periodic) - LEGEND_FONT_PX / 2.0), "ice Ih")
+    dashed_hline(draw, x_left, x_right, y_front)
+    add_text("growth front", (bracket_x + 200, y_front - LEGEND_FONT_PX / 2.0), "growth front")
+    add_text("periodic boundary", (bracket_x + 200, y_periodic - LEGEND_FONT_PX - 4), "periodic boundary")
 
     legend_bottom = title_y + LEGEND_FONT_PX
-    if legend:
-        x, y = left + 16, title_y + LEGEND_FONT_PX + 16
-        for label, colour in legend:
-            shown = display_label(label)
-            text_w = float(font.getlength(shown))
-            if x + swatch + 16 + text_w > canvas.width - 8:
-                x = left + 16
-                y += row_h
+    y = title_y + LEGEND_FONT_PX + 16
+    for group in groups:
+        x = left + 16
+        for label, colour in group:
+            text_w = float(font.getlength(label))
             rgb = tuple(int(round(channel * 255)) for channel in colour)
             draw.rectangle([x, y, x + swatch, y + swatch], fill=rgb, outline=(30, 30, 30))
-            marks.append((f"swatch {shown}", (x, y, x + swatch, y + swatch)))
-            add_text(f"legend {shown}", (x + swatch + 10, y), shown)
+            marks.append((f"swatch {label}", (x, y, x + swatch, y + swatch)))
+            add_text(f"legend {label}", (x + swatch + 10, y), label)
             legend_bottom = max(legend_bottom, y + swatch, marks[-1][1][3])
             x += swatch + 16 + text_w + 18
+        y += row_h
     bar = 10.0 * raw.width / (2.0 * half_h)
     bar_y = legend_bottom + 28
     bar_x = x_left
@@ -976,7 +1106,7 @@ def render_interface(render, positions, labels, origin, lengths, path, width=Non
     forward = np.array([-1.0, 0.0, 0.0])
     up = np.array([0.0, 0.0, 1.0])
     pad_radius = 0.85
-    frame = padded_frame(positions, origin, lengths, forward, up, pad_radius)
+    frame = padded_frame(positions, origin, lengths, forward, up, pad_radius + 1.0)
     _centre, half_h, half_v, forward, _right, up = _camera(render, frame, forward, up)
     if width is None:
         short = 1700
