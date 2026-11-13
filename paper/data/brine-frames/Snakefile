@@ -1,0 +1,76 @@
+# Labelled 230 K brine frames, and the two-panel figure.
+# Restarts and frames stay out of git. config.yaml points at the Hugging
+# Face dataset d-SEAMS/brine-frames: data/restarts is read, data/frames
+# receives a copy of each labelled xyz. The rule outputs are
+# paper/data/brine-frames/out/T230_m{0,20,40}_r0_{t0,t1,t2,tend}.xyz.
+#
+#   snakemake -s paper/data/brine-frames/Snakefile -n paper/data/brine-frames/out/T230_m0_r0_t0.xyz
+#   paper/tex/repro/brine_front.sh
+
+from pathlib import Path
+
+_RULES = Path(workflow.basedir)
+_REPO = _RULES.parents[2]
+
+configfile: str(_RULES / "config.yaml")
+
+workdir: str(_REPO)
+
+DATASET = config["dataset"]
+RESTARTS = config.get("restarts", f"{DATASET}/data/restarts")
+FRAMES = config.get("frames", f"{DATASET}/data/frames")
+
+FRAME_STEP = {"t0": 0, "t1": 830000, "t2": 1670000, "tend": 2500000}
+
+
+wildcard_constraints:
+    pairs="0|20|40",
+    name="t0|t1|t2|tend",
+
+
+def _restart(wildcards):
+    step = FRAME_STEP[wildcards.name]
+    return f"{RESTARTS}/T230_m{wildcards.pairs}_r0/step-{step}.restart"
+
+
+rule brine_frames:
+    input:
+        expand(
+            "paper/data/brine-frames/out/T230_m{pairs}_r0_{name}.xyz",
+            pairs=["0", "20", "40"],
+            name=["t0", "t1", "t2", "tend"],
+        ),
+
+
+rule brine_frame:
+    input:
+        restart=_restart,
+        deck="paper/data/brine-frames/deck/in.resume.lmp",
+        script="paper/data/brine-frames/regenerate.py",
+    output:
+        out="paper/data/brine-frames/out/T230_m{pairs}_r0_{name}.xyz",
+        published=FRAMES + "/T230_m{pairs}_r0_{name}.xyz",
+    params:
+        step=lambda wildcards: FRAME_STEP[wildcards.name],
+        python=config["python"],
+        lmp=config["lmp"],
+        seams=config["seams"],
+        lib=config["lib"],
+    shell:
+        "{params.python} paper/data/brine-frames/regenerate.py frame "
+        "--restart {input.restart} --out {output.out} --publish {output.published} "
+        "--step {params.step} --lmp {params.lmp} --seams {params.seams} --lib {params.lib}"
+
+
+rule brine_front_pdf:
+    input:
+        t0="paper/data/brine-frames/out/T230_m20_r0_t0.xyz",
+        tend="paper/data/brine-frames/out/T230_m20_r0_tend.xyz",
+        script="paper/data/brine-frames/render_front.py",
+    output:
+        "paper/tex/figures/brine_front.pdf",
+    params:
+        python=config["render_python"],
+    shell:
+        "{params.python} paper/data/brine-frames/render_front.py "
+        "--xyz {input.t0} {input.tend} --pdf {output}"

@@ -793,7 +793,7 @@ Hexagonal, cubic and mixed molecules in each of the \dsv{n@frames} frames of \ds
 \label{fig:nucleation}
 \end{figure}
 
-The benchmark systems are the cages, the ice lattices, a nucleation seed, a brine slab and the two clathrate hydrates (Figures~\ref{fig:renders-cages}, \ref{fig:renders-ice}, \ref{fig:renders-seed} and~\ref{fig:renders-hydrate}).
+The benchmark systems are the cages, the ice lattices, a nucleation seed, a brine front and the two clathrate hydrates (Figures~\ref{fig:renders-cages}, \ref{fig:renders-ice}, \ref{fig:renders-seed}, \ref{fig:brine-front} and~\ref{fig:renders-hydrate}).
 
 \begin{figure}[tbp]
 \centering
@@ -820,14 +820,26 @@ Every molecule of the hexagonal lattice lies on hexagonal cages, and every molec
 \label{fig:renders-seed}
 \end{figure}
 
+% paper/tex/figures/brine_front.pdf is gitignored.
+% paper/tex/repro/brine_front.sh runs the brine_front_pdf rule.
 \begin{figure}[tbp]
 \centering
-\includegraphics[width=0.32\textwidth]{figures/brine_slab_xyzrender}\hfill
-\includegraphics[width=0.32\textwidth]{figures/si_hydrate_xyzrender}\hfill
-\includegraphics[width=0.32\textwidth]{figures/sii_hydrate_xyzrender}
-\caption{\textbf{The brine slab and the two methane hydrates.}
-In the brine drawing the ice is the connected slab and the ions sit in the liquid half.
-Every drawn hydrate cage contains one methane.}
+\includegraphics[width=\textwidth]{figures/brine_front}
+\caption{\textbf{A 230 K TIP4P/2005 ice front against Madrid-2019 brine, 20 NaCl pairs.}
+(a) The production frame after the liquid half was melted at 400 K and quenched.
+(b) The same cell after 5 ns.
+Water oxygens are coloured by the d-SEAMS CHILL+ label.
+Hexagonal ice is blue, the liquid is grey, and interfacial molecules are green.
+Sodium is yellow and chloride is red, and both sit in the liquid.}
+\label{fig:brine-front}
+\end{figure}
+
+\begin{figure}[tbp]
+\centering
+\includegraphics[width=0.48\textwidth]{figures/si_hydrate_xyzrender}\hfill
+\includegraphics[width=0.48\textwidth]{figures/sii_hydrate_xyzrender}
+\caption{\textbf{The two methane hydrates.}
+Every drawn cage contains one methane.}
 \label{fig:renders-hydrate}
 \end{figure}
 

@@ -371,6 +371,7 @@ repro/results/
 repro/zenodo/payload/
 input/brine/work/
 paper/data/brine-frames/out/
+paper/tex/figures/brine_front.pdf
 paper/data/brine-frames/.dry-run/
 # Local checkout of the d-SEAMS/brine-frames dataset.
 /d-SEAMS/
