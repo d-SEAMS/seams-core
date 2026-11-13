@@ -104,6 +104,7 @@ def main():
         [cc, str(source / "examples" / "c" / "quickstart.c"), "-o", str(binary), *cflags, *libs, "-lm"],
         env=env,
     )
+    compile_env = dict(env)
     env["LD_LIBRARY_PATH"] = os.pathsep.join(
         [str(libdir), str(build / "src"), env.get("LD_LIBRARY_PATH", "")]
     )
@@ -124,7 +125,10 @@ def main():
         raise SystemExit("pkg-config --exists 'seams >= {}' failed".format(version))
     find_check = source / "examples" / "c" / "find_check"
     version_bin = work / "version-pkg"
-    run([cc, str(find_check / "version.c"), "-o", str(version_bin), *cflags, *libs], env=env)
+    run(
+        [cc, str(find_check / "version.c"), "-o", str(version_bin), *cflags, *libs],
+        env=compile_env,
+    )
     env = library_dirs(version_bin, env, [stage, build])
     run([str(version_bin), version], env=env)
 
