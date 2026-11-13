@@ -25,8 +25,15 @@ def have_openmm():
     return importlib.util.find_spec("openmm") is not None
 
 
+def ice_atoms(root):
+    for line in (root / "engines" / "lammps" / "ice.data").read_text().splitlines():
+        if line.endswith(" atoms"):
+            return int(line.split()[0])
+    raise SystemExit("ice.data has no atom count")
+
+
 def run_lammps(root, build):
-    hook = Path(build) / "engines" / "lammps_hook"
+    hook = Path(build) / "engines" / "run_hook"
     if not hook.is_file():
         return False
     deck = root / "engines" / "lammps" / "in.dseams"
@@ -38,7 +45,7 @@ def run_lammps(root, build):
     parts = text.split()
     calls = int(parts[parts.index("calls") + 1])
     ice = int(parts[parts.index("ice") + 1])
-    if calls < 1 or ice != calls * 8:
+    if calls < 1 or ice != calls * ice_atoms(root):
         raise SystemExit(text)
     print(text.strip())
     return True
