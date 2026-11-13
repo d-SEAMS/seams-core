@@ -2037,7 +2037,7 @@ seams_status seams_cages_signature(seams_system *sys, double cutoff, int type, i
     int typ = type > 0 ? type : 1;
     Cloud copied;
     const Cloud *held = &sys->cloud;
-    if (type <= 0) {
+    if (type > 0) {
       copied = unified_copy(sys->cloud, type, typ);
       held = &copied;
     }
@@ -2061,7 +2061,7 @@ seams_status seams_cages_signature(seams_system *sys, double cutoff, int type, i
       xyz[static_cast<std::size_t>(i)] = {point.x, point.y, point.z};
     }
     const auto found_of = cage::findBySignatures(rings, idx, std::vector<cage::Signature>{signature},
-                                                 {}, &xyz, &work.box, window);
+                                                 {}, &xyz, &work.box, window, &work.boxLow);
     const auto &found = found_of.at(0);
     std::set<int> atoms;
     for (const auto &cage_i : found) {
