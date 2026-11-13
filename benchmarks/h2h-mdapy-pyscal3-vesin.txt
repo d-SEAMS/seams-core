@@ -26,62 +26,62 @@ check ice mdapy hexagonal_ice=4096
 note published CHILL, published CHILL+, and mdapy CHILL+ each label every oxygen hexagonal on this ice
 check ice pyscal3 hex_diamond=4096
 check dseams threads 1 and 8 agree
-arm dseams op cutoff threads 1 molecules 4096 samples_ms 0.2992 0.2881 0.3030 0.2682 0.2761 0.2768 0.2647 0.2892
-arm dseams op cutoff threads 1 molecules 4096 median_ms 0.2824
-arm dseams op knn threads 1 molecules 4096 samples_ms 0.5317 0.6005 0.4698 1.1454 0.7105 0.4900 0.5398 0.6064
-arm dseams op knn threads 1 molecules 4096 median_ms 0.5701
-arm dseams op q6 threads 1 molecules 4096 samples_ms 0.9291 0.9055 0.9349 0.9429 0.9022 0.8952 0.8957 0.8968
-arm dseams op q6 threads 1 molecules 4096 median_ms 0.9038
-arm dseams op chill threads 1 molecules 4096 samples_ms 1.1995 1.1874 1.2389 1.2224 1.2044 1.2125 1.2100 1.1980
-arm dseams op chill threads 1 molecules 4096 median_ms 1.2072
-arm dseams op chill_plus threads 1 molecules 4096 samples_ms 0.7976 0.7620 0.7592 0.7551 0.7611 0.7666 0.7529 0.7542
-arm dseams op chill_plus threads 1 molecules 4096 median_ms 0.7602
-arm dseams op cutoff threads 8 molecules 4096 samples_ms 0.2519 0.2329 0.2178 0.2261 0.2328 0.2343 0.2526 0.2225
-arm dseams op cutoff threads 8 molecules 4096 median_ms 0.2329
-arm dseams op knn threads 8 molecules 4096 samples_ms 0.6205 0.5281 0.4898 0.9039 0.5649 0.4728 0.4641 0.4659
-arm dseams op knn threads 8 molecules 4096 median_ms 0.5090
-arm dseams op q6 threads 8 molecules 4096 samples_ms 0.5705 0.5569 0.5559 0.5572 0.5549 0.5836 0.5478 0.5424
-arm dseams op q6 threads 8 molecules 4096 median_ms 0.5564
-arm dseams op chill threads 8 molecules 4096 samples_ms 1.1691 1.1826 1.2033 1.1701 1.1692 1.1781 1.1715 1.1622
-arm dseams op chill threads 8 molecules 4096 median_ms 1.1708
-arm dseams op chill_plus threads 8 molecules 4096 samples_ms 0.4248 0.4207 0.4432 0.4390 0.4477 0.4243 0.4184 0.4372
-arm dseams op chill_plus threads 8 molecules 4096 median_ms 0.4310
-arm vesin op cutoff threads 1 molecules 4096 samples_ms 1.6990 1.6852 1.6738 1.6693 1.6763 1.6578 1.6600 1.6641
-arm vesin op cutoff threads 1 molecules 4096 median_ms 1.6716
-arm mdapy op cutoff threads 1 molecules 4096 samples_ms 2.0001 1.9477 1.9182 1.9454 1.9415 1.9359 1.9174 1.9249
-arm mdapy op cutoff threads 1 molecules 4096 median_ms 1.9387
-arm mdapy op knn threads 1 molecules 4096 samples_ms 3.8182 3.7837 3.7840 3.7993 3.7921 3.7439 3.8039 3.7762
-arm mdapy op knn threads 1 molecules 4096 median_ms 3.7880
-arm mdapy op q6 threads 1 molecules 4096 samples_ms 4.6683 4.6467 4.6260 4.6338 4.6032 4.6135 4.6777 4.6268
-arm mdapy op q6 threads 1 molecules 4096 median_ms 4.6303
-arm mdapy op chill_plus threads 1 molecules 4096 samples_ms 2.6301 2.6322 2.6346 2.6160 2.5861 2.6213 2.6129 2.6287
-arm mdapy op chill_plus threads 1 molecules 4096 median_ms 2.6250
-arm pyscal3 op cutoff threads 1 molecules 4096 samples_ms 2.0131 1.9056 1.9219 1.9489 1.9598 1.9290 1.8929 1.9745
-arm pyscal3 op cutoff threads 1 molecules 4096 median_ms 1.9390
-arm pyscal3 op knn threads 1 molecules 4096 samples_ms 15.9210 15.4635 15.4923 15.4650 15.4855 15.5315 15.4946 15.4955
-arm pyscal3 op knn threads 1 molecules 4096 median_ms 15.4935
-arm pyscal3 op q6 threads 1 molecules 4096 samples_ms 3.5215 3.4963 3.4735 3.4723 3.4812 3.4668 3.4543 3.4489
-arm pyscal3 op q6 threads 1 molecules 4096 median_ms 3.4729
-arm pyscal3 op diamond threads 1 molecules 4096 samples_ms 4.4988 4.3824 4.4299 4.5185 4.4536 4.4088 4.4578 4.4020
-arm pyscal3 op diamond threads 1 molecules 4096 median_ms 4.4417
-arm vesin op cutoff threads 8 molecules 4096 samples_ms 1.0100 1.3301 0.8227 0.7064 0.6966 1.0529 0.7133 0.6993
-arm vesin op cutoff threads 8 molecules 4096 median_ms 0.7680
-arm mdapy op cutoff threads 8 molecules 4096 samples_ms 0.5921 0.5766 0.5537 0.5675 0.5485 0.5429 0.5495 0.5525
-arm mdapy op cutoff threads 8 molecules 4096 median_ms 0.5531
-arm mdapy op knn threads 8 molecules 4096 samples_ms 0.8635 0.8331 0.8164 0.8319 0.8247 0.8042 0.8031 0.8011
-arm mdapy op knn threads 8 molecules 4096 median_ms 0.8206
-arm mdapy op q6 threads 8 molecules 4096 samples_ms 0.9859 0.9870 1.0039 1.0191 0.9898 0.9898 0.9967 0.9908
-arm mdapy op q6 threads 8 molecules 4096 median_ms 0.9903
-arm mdapy op chill_plus threads 8 molecules 4096 samples_ms 0.7176 0.7103 0.7130 0.7343 0.7164 0.7463 0.7374 0.7219
-arm mdapy op chill_plus threads 8 molecules 4096 median_ms 0.7197
-arm pyscal3 op cutoff threads 8 molecules 4096 samples_ms 1.4355 1.5670 1.8467 1.6225 1.6049 1.6366 1.6161 1.6134
-arm pyscal3 op cutoff threads 8 molecules 4096 median_ms 1.6148
-arm pyscal3 op knn threads 8 molecules 4096 samples_ms 5.6017 5.5698 5.6299 5.2190 5.3431 5.4520 5.5421 5.5074
-arm pyscal3 op knn threads 8 molecules 4096 median_ms 5.5247
-arm pyscal3 op q6 threads 8 molecules 4096 samples_ms 2.1624 2.1133 2.1790 2.1490 2.2419 2.0149 2.2505 2.0818
-arm pyscal3 op q6 threads 8 molecules 4096 median_ms 2.1557
-arm pyscal3 op diamond threads 8 molecules 4096 samples_ms 2.3121 2.3911 2.3228 2.2456 2.4161 2.3440 2.4570 2.4036
-arm pyscal3 op diamond threads 8 molecules 4096 median_ms 2.3676
+arm dseams op cutoff threads 1 molecules 4096 samples_ms 0.3394 0.3259 0.3302 0.3145 0.3104 0.3017 0.3109 0.3267
+arm dseams op cutoff threads 1 molecules 4096 median_ms 0.3202
+arm dseams op knn threads 1 molecules 4096 samples_ms 0.5050 0.5446 0.6774 1.0196 0.7656 0.6932 0.5884 1.0404
+arm dseams op knn threads 1 molecules 4096 median_ms 0.6853
+arm dseams op q6 threads 1 molecules 4096 samples_ms 1.1943 1.1136 1.0399 0.9797 0.9549 0.9281 0.9837 0.9897
+arm dseams op q6 threads 1 molecules 4096 median_ms 0.9867
+arm dseams op chill threads 1 molecules 4096 samples_ms 0.9232 0.9141 0.9593 0.8882 0.9039 0.9731 0.9039 0.9138
+arm dseams op chill threads 1 molecules 4096 median_ms 0.9140
+arm dseams op chill_plus threads 1 molecules 4096 samples_ms 1.0115 1.2275 0.8922 0.9171 0.8388 0.8023 0.7881 0.8382
+arm dseams op chill_plus threads 1 molecules 4096 median_ms 0.8655
+arm dseams op cutoff threads 8 molecules 4096 samples_ms 0.2394 0.2483 0.2216 0.2229 0.2277 0.2281 0.2338 0.2241
+arm dseams op cutoff threads 8 molecules 4096 median_ms 0.2279
+arm dseams op knn threads 8 molecules 4096 samples_ms 0.6767 0.6212 0.7470 0.9421 0.6133 0.4962 0.6524 0.7293
+arm dseams op knn threads 8 molecules 4096 median_ms 0.6645
+arm dseams op q6 threads 8 molecules 4096 samples_ms 0.8101 0.8296 0.8864 0.8810 0.8093 0.6573 0.6373 0.6637
+arm dseams op q6 threads 8 molecules 4096 median_ms 0.8097
+arm dseams op chill threads 8 molecules 4096 samples_ms 0.4905 0.5006 0.4837 0.4854 0.4705 0.5054 0.4632 0.5036
+arm dseams op chill threads 8 molecules 4096 median_ms 0.4879
+arm dseams op chill_plus threads 8 molecules 4096 samples_ms 0.5277 0.4746 0.4731 0.4947 0.5122 0.4816 0.4796 0.4801
+arm dseams op chill_plus threads 8 molecules 4096 median_ms 0.4808
+arm vesin op cutoff threads 1 molecules 4096 samples_ms 1.8480 1.8120 1.8030 1.8454 1.9571 2.2856 1.9190 1.8104
+arm vesin op cutoff threads 1 molecules 4096 median_ms 1.8467
+arm mdapy op cutoff threads 1 molecules 4096 samples_ms 2.1902 2.0789 2.6507 2.3699 2.2326 2.1170 2.0690 2.0959
+arm mdapy op cutoff threads 1 molecules 4096 median_ms 2.1536
+arm mdapy op knn threads 1 molecules 4096 samples_ms 4.1624 5.2451 5.1549 4.3593 3.9136 4.0188 4.8657 4.8600
+arm mdapy op knn threads 1 molecules 4096 median_ms 4.6097
+arm mdapy op q6 threads 1 molecules 4096 samples_ms 5.1813 4.9053 5.7977 4.9596 4.9133 5.2479 5.0074 5.1725
+arm mdapy op q6 threads 1 molecules 4096 median_ms 5.0900
+arm mdapy op chill_plus threads 1 molecules 4096 samples_ms 3.1669 2.7626 2.7962 2.7266 2.8508 2.7115 2.7469 2.8067
+arm mdapy op chill_plus threads 1 molecules 4096 median_ms 2.7794
+arm pyscal3 op cutoff threads 1 molecules 4096 samples_ms 2.0588 2.0433 2.0865 2.1385 2.0239 1.9686 1.9624 2.1296
+arm pyscal3 op cutoff threads 1 molecules 4096 median_ms 2.0511
+arm pyscal3 op knn threads 1 molecules 4096 samples_ms 17.3650 17.0557 16.9010 16.7775 16.8634 17.8615 17.5784 16.9649
+arm pyscal3 op knn threads 1 molecules 4096 median_ms 17.0103
+arm pyscal3 op q6 threads 1 molecules 4096 samples_ms 5.3294 4.0881 4.0390 3.8083 3.4153 3.5743 3.7131 3.6874
+arm pyscal3 op q6 threads 1 molecules 4096 median_ms 3.7607
+arm pyscal3 op diamond threads 1 molecules 4096 samples_ms 4.3971 4.6728 4.3699 4.5224 4.6397 4.4996 4.7988 4.6974
+arm pyscal3 op diamond threads 1 molecules 4096 median_ms 4.5811
+arm vesin op cutoff threads 8 molecules 4096 samples_ms 1.4420 1.5925 0.9697 1.2408 1.1497 0.8155 0.6642 1.1643
+arm vesin op cutoff threads 8 molecules 4096 median_ms 1.1570
+arm mdapy op cutoff threads 8 molecules 4096 samples_ms 0.6292 0.5893 0.5481 0.7276 0.5641 0.5685 0.5738 0.5409
+arm mdapy op cutoff threads 8 molecules 4096 median_ms 0.5711
+arm mdapy op knn threads 8 molecules 4096 samples_ms 1.0217 0.9256 0.8466 0.8457 0.9712 0.8997 0.8746 0.8809
+arm mdapy op knn threads 8 molecules 4096 median_ms 0.8903
+arm mdapy op q6 threads 8 molecules 4096 samples_ms 1.0158 1.0787 1.0989 1.0704 1.0670 1.0785 1.0075 1.0903
+arm mdapy op q6 threads 8 molecules 4096 median_ms 1.0745
+arm mdapy op chill_plus threads 8 molecules 4096 samples_ms 0.7901 0.7478 0.7912 0.8221 0.7667 0.7372 0.7777 0.7736
+arm mdapy op chill_plus threads 8 molecules 4096 median_ms 0.7756
+arm pyscal3 op cutoff threads 8 molecules 4096 samples_ms 1.8985 2.4784 1.9426 2.2301 2.2315 1.9628 2.0430 2.2682
+arm pyscal3 op cutoff threads 8 molecules 4096 median_ms 2.1365
+arm pyscal3 op knn threads 8 molecules 4096 samples_ms 7.2033 6.9620 6.5754 6.1522 6.9799 6.9402 7.3962 7.4863
+arm pyscal3 op knn threads 8 molecules 4096 median_ms 6.9709
+arm pyscal3 op q6 threads 8 molecules 4096 samples_ms 2.6831 3.0404 3.1141 2.8019 3.0795 2.8494 5.5541 2.5002
+arm pyscal3 op q6 threads 8 molecules 4096 median_ms 2.9449
+arm pyscal3 op diamond threads 8 molecules 4096 samples_ms 2.2558 3.0871 2.4038 2.1658 2.1648 3.0095 3.1245 2.7912
+arm pyscal3 op diamond threads 8 molecules 4096 median_ms 2.5975
 molecules 32768
 check cutoff dseams pairs 65536
 check cutoff vesin pairs 65536 match exact
@@ -101,62 +101,62 @@ check ice mdapy hexagonal_ice=32768
 note published CHILL, published CHILL+, and mdapy CHILL+ each label every oxygen hexagonal on this ice
 check ice pyscal3 hex_diamond=32768
 check dseams threads 1 and 8 agree
-arm dseams op cutoff threads 1 molecules 32768 samples_ms 2.7376 2.7595 2.6863 2.7089 2.7375 2.6951 2.6760 2.6976
-arm dseams op cutoff threads 1 molecules 32768 median_ms 2.7032
-arm dseams op knn threads 1 molecules 32768 samples_ms 4.0302 3.4577 3.7144 3.3601 3.3737 3.4613 3.2835 3.3754
-arm dseams op knn threads 1 molecules 32768 median_ms 3.4166
-arm dseams op q6 threads 1 molecules 32768 samples_ms 7.6301 7.5820 7.6301 7.6497 7.6467 7.6042 7.6165 7.6431
-arm dseams op q6 threads 1 molecules 32768 median_ms 7.6301
-arm dseams op chill threads 1 molecules 32768 samples_ms 10.1183 10.1276 10.1194 10.0797 10.1197 10.1260 10.1308 10.1288
-arm dseams op chill threads 1 molecules 32768 median_ms 10.1228
-arm dseams op chill_plus threads 1 molecules 32768 samples_ms 6.5347 6.5254 6.4944 6.5454 6.5111 6.5139 6.5115 6.5281
-arm dseams op chill_plus threads 1 molecules 32768 median_ms 6.5196
-arm dseams op cutoff threads 8 molecules 32768 samples_ms 1.6107 1.5970 1.9785 2.2117 2.0932 2.1659 2.4852 1.6298
-arm dseams op cutoff threads 8 molecules 32768 median_ms 2.0358
-arm dseams op knn threads 8 molecules 32768 samples_ms 3.0542 4.5365 3.3774 4.2889 3.1326 3.7091 3.2453 3.3613
-arm dseams op knn threads 8 molecules 32768 median_ms 3.3694
-arm dseams op q6 threads 8 molecules 32768 samples_ms 4.2078 4.1488 4.1119 4.1149 4.1617 4.1222 4.0977 4.1684
-arm dseams op q6 threads 8 molecules 32768 median_ms 4.1355
-arm dseams op chill threads 8 molecules 32768 samples_ms 5.7992 5.6985 5.8924 5.7605 5.7101 5.7111 5.7052 5.6919
-arm dseams op chill threads 8 molecules 32768 median_ms 5.7106
-arm dseams op chill_plus threads 8 molecules 32768 samples_ms 2.6002 2.6255 2.5966 2.5776 2.6282 2.6492 2.5880 2.6720
-arm dseams op chill_plus threads 8 molecules 32768 median_ms 2.6129
-arm vesin op cutoff threads 1 molecules 32768 samples_ms 13.5745 13.4895 13.4907 13.4530 13.5068 13.5282 13.5517 13.4814
-arm vesin op cutoff threads 1 molecules 32768 median_ms 13.4987
-arm mdapy op cutoff threads 1 molecules 32768 samples_ms 12.3906 12.3186 12.4363 16.1631 12.6169 12.4181 12.4234 12.3422
-arm mdapy op cutoff threads 1 molecules 32768 median_ms 12.4208
-arm mdapy op knn threads 1 molecules 32768 samples_ms 30.9191 30.9088 31.0492 30.8756 31.0019 30.8166 30.8640 30.8424
-arm mdapy op knn threads 1 molecules 32768 median_ms 30.8922
-arm mdapy op q6 threads 1 molecules 32768 samples_ms 33.0978 32.8833 32.8630 32.6527 32.9255 32.9886 32.6678 32.9307
-arm mdapy op q6 threads 1 molecules 32768 median_ms 32.9044
-arm mdapy op chill_plus threads 1 molecules 32768 samples_ms 17.5215 18.1403 17.5153 17.6289 17.6813 17.5676 17.4092 17.4231
-arm mdapy op chill_plus threads 1 molecules 32768 median_ms 17.5446
-arm pyscal3 op cutoff threads 1 molecules 32768 samples_ms 17.5650 22.4631 17.7057 17.6737 17.6488 17.9021 17.4788 17.5328
-arm pyscal3 op cutoff threads 1 molecules 32768 median_ms 17.6613
-arm pyscal3 op knn threads 1 molecules 32768 samples_ms 115.3074 109.5254 109.7833 109.1917 108.8728 109.5572 108.8822 108.9257
-arm pyscal3 op knn threads 1 molecules 32768 median_ms 109.3585
-arm pyscal3 op q6 threads 1 molecules 32768 samples_ms 29.6845 29.2956 30.4218 29.2158 29.6972 29.6766 29.5422 29.1918
-arm pyscal3 op q6 threads 1 molecules 32768 median_ms 29.6094
-arm pyscal3 op diamond threads 1 molecules 32768 samples_ms 28.7392 28.8811 28.5392 28.3993 28.5756 28.9201 28.7822 28.3001
-arm pyscal3 op diamond threads 1 molecules 32768 median_ms 28.6574
-arm vesin op cutoff threads 8 molecules 32768 samples_ms 5.7543 5.7849 5.9708 5.9066 5.7782 5.8038 6.0178 5.7911
-arm vesin op cutoff threads 8 molecules 32768 median_ms 5.7975
-arm mdapy op cutoff threads 8 molecules 32768 samples_ms 2.7638 2.8044 2.7469 2.7882 2.8073 2.8042 2.8012 2.7813
-arm mdapy op cutoff threads 8 molecules 32768 median_ms 2.7947
-arm mdapy op knn threads 8 molecules 32768 samples_ms 5.2719 5.2765 5.2708 5.3136 5.4697 5.2316 5.2851 5.4292
-arm mdapy op knn threads 8 molecules 32768 median_ms 5.2808
-arm mdapy op q6 threads 8 molecules 32768 samples_ms 5.7690 5.7400 5.6655 5.7180 5.7253 5.7142 5.7086 5.7374
-arm mdapy op q6 threads 8 molecules 32768 median_ms 5.7217
-arm mdapy op chill_plus threads 8 molecules 32768 samples_ms 3.8679 3.9259 3.9785 3.9686 3.9746 3.9753 3.8349 4.4557
-arm mdapy op chill_plus threads 8 molecules 32768 median_ms 3.9716
-arm pyscal3 op cutoff threads 8 molecules 32768 samples_ms 5.6597 5.8987 5.7240 5.9126 5.6938 5.8811 5.5526 5.8330
-arm pyscal3 op cutoff threads 8 molecules 32768 median_ms 5.7785
-arm pyscal3 op knn threads 8 molecules 32768 samples_ms 27.5635 26.7222 25.9856 25.6187 25.8807 25.4814 25.7513 24.7297
-arm pyscal3 op knn threads 8 molecules 32768 median_ms 25.8160
-arm pyscal3 op q6 threads 8 molecules 32768 samples_ms 6.9012 6.8138 6.5834 6.6597 6.8173 6.5796 6.5217 6.7170
-arm pyscal3 op q6 threads 8 molecules 32768 median_ms 6.6883
-arm pyscal3 op diamond threads 8 molecules 32768 samples_ms 7.6650 7.8536 8.0240 7.8738 7.4377 7.2050 7.2903 7.2102
-arm pyscal3 op diamond threads 8 molecules 32768 median_ms 7.5513
+arm dseams op cutoff threads 1 molecules 32768 samples_ms 2.9168 2.8195 2.6904 2.9686 2.8098 2.7572 2.7196 2.8168
+arm dseams op cutoff threads 1 molecules 32768 median_ms 2.8133
+arm dseams op knn threads 1 molecules 32768 samples_ms 4.1855 4.0654 3.6010 3.8079 4.6185 4.0544 4.0013 3.7607
+arm dseams op knn threads 1 molecules 32768 median_ms 4.0279
+arm dseams op q6 threads 1 molecules 32768 samples_ms 8.5251 8.5731 8.1466 7.9080 7.7966 7.8911 8.0712 8.1399
+arm dseams op q6 threads 1 molecules 32768 median_ms 8.1055
+arm dseams op chill threads 1 molecules 32768 samples_ms 7.1050 7.3301 7.3885 7.2145 7.5932 7.7082 7.8091 7.3411
+arm dseams op chill threads 1 molecules 32768 median_ms 7.3648
+arm dseams op chill_plus threads 1 molecules 32768 samples_ms 6.7347 6.8076 6.6152 7.2639 6.9748 6.8227 6.9820 7.0329
+arm dseams op chill_plus threads 1 molecules 32768 median_ms 6.8987
+arm dseams op cutoff threads 8 molecules 32768 samples_ms 1.8090 1.7007 1.7777 1.7289 1.7280 1.7822 1.6815 1.6558
+arm dseams op cutoff threads 8 molecules 32768 median_ms 1.7284
+arm dseams op knn threads 8 molecules 32768 samples_ms 4.3833 4.4516 4.2642 3.5956 3.3228 3.2685 3.3709 3.4260
+arm dseams op knn threads 8 molecules 32768 median_ms 3.5108
+arm dseams op q6 threads 8 molecules 32768 samples_ms 4.3261 4.1071 4.1657 4.0401 4.0588 4.2795 3.9634 4.0670
+arm dseams op q6 threads 8 molecules 32768 median_ms 4.0871
+arm dseams op chill threads 8 molecules 32768 samples_ms 2.5746 2.5409 2.6559 2.5032 2.5429 2.4933 2.7471 2.5713
+arm dseams op chill threads 8 molecules 32768 median_ms 2.5571
+arm dseams op chill_plus threads 8 molecules 32768 samples_ms 2.6999 2.7521 2.6237 2.5314 3.1483 3.3941 3.3817 3.3410
+arm dseams op chill_plus threads 8 molecules 32768 median_ms 2.9502
+arm vesin op cutoff threads 1 molecules 32768 samples_ms 14.7972 14.8907 20.1935 14.8299 14.4411 13.8624 13.9348 14.3032
+arm vesin op cutoff threads 1 molecules 32768 median_ms 14.6191
+arm mdapy op cutoff threads 1 molecules 32768 samples_ms 12.8376 12.8813 12.6788 12.8676 13.0339 12.6710 12.7706 12.8006
+arm mdapy op cutoff threads 1 molecules 32768 median_ms 12.8191
+arm mdapy op knn threads 1 molecules 32768 samples_ms 32.1554 32.1760 32.5857 32.4876 32.5427 32.9159 32.4068 33.1464
+arm mdapy op knn threads 1 molecules 32768 median_ms 32.5152
+arm mdapy op q6 threads 1 molecules 32768 samples_ms 37.1531 37.9613 37.9108 37.9982 37.1563 36.9173 37.7387 35.1867
+arm mdapy op q6 threads 1 molecules 32768 median_ms 37.4475
+arm mdapy op chill_plus threads 1 molecules 32768 samples_ms 18.1406 19.6119 18.2980 18.7477 18.5029 18.2552 18.6832 18.4597
+arm mdapy op chill_plus threads 1 molecules 32768 median_ms 18.4813
+arm pyscal3 op cutoff threads 1 molecules 32768 samples_ms 19.8756 18.8741 19.0612 18.4341 17.8862 17.8073 18.3236 18.2398
+arm pyscal3 op cutoff threads 1 molecules 32768 median_ms 18.3789
+arm pyscal3 op knn threads 1 molecules 32768 samples_ms 136.9784 141.4553 135.0266 149.2452 135.8670 137.2690 141.3836 135.6077
+arm pyscal3 op knn threads 1 molecules 32768 median_ms 137.1237
+arm pyscal3 op q6 threads 1 molecules 32768 samples_ms 31.6185 30.5035 30.8007 30.1159 30.0590 30.3640 30.7079 29.9124
+arm pyscal3 op q6 threads 1 molecules 32768 median_ms 30.4338
+arm pyscal3 op diamond threads 1 molecules 32768 samples_ms 28.8074 28.8928 29.8682 29.4026 29.7813 29.7572 30.6193 29.1290
+arm pyscal3 op diamond threads 1 molecules 32768 median_ms 29.5799
+arm vesin op cutoff threads 8 molecules 32768 samples_ms 5.9474 6.3416 6.1393 6.5807 6.4267 6.1808 6.0671 6.1225
+arm vesin op cutoff threads 8 molecules 32768 median_ms 6.1601
+arm mdapy op cutoff threads 8 molecules 32768 samples_ms 3.4344 3.4273 4.0834 6.4589 6.3449 3.5318 4.2209 3.4669
+arm mdapy op cutoff threads 8 molecules 32768 median_ms 3.8076
+arm mdapy op knn threads 8 molecules 32768 samples_ms 5.9049 6.0137 6.1635 5.5789 5.7420 5.6224 5.5081 5.2699
+arm mdapy op knn threads 8 molecules 32768 median_ms 5.6822
+arm mdapy op q6 threads 8 molecules 32768 samples_ms 5.9828 5.7490 5.9519 5.8083 5.8319 5.9442 5.6362 5.8510
+arm mdapy op q6 threads 8 molecules 32768 median_ms 5.8414
+arm mdapy op chill_plus threads 8 molecules 32768 samples_ms 6.1348 4.6257 4.0669 4.0569 4.1395 4.0726 4.0564 4.3037
+arm mdapy op chill_plus threads 8 molecules 32768 median_ms 4.1060
+arm pyscal3 op cutoff threads 8 molecules 32768 samples_ms 8.4161 7.4206 7.1987 7.2328 7.1942 6.9092 6.8909 6.6128
+arm pyscal3 op cutoff threads 8 molecules 32768 median_ms 7.1964
+arm pyscal3 op knn threads 8 molecules 32768 samples_ms 31.1498 30.8950 31.5697 28.8534 30.9429 29.4238 30.0726 28.9243
+arm pyscal3 op knn threads 8 molecules 32768 median_ms 30.4838
+arm pyscal3 op q6 threads 8 molecules 32768 samples_ms 9.6318 9.7703 9.6711 9.3206 9.3686 9.6407 9.5737 9.5837
+arm pyscal3 op q6 threads 8 molecules 32768 median_ms 9.6077
+arm pyscal3 op diamond threads 8 molecules 32768 samples_ms 9.3383 9.4957 9.2301 9.4588 9.9047 9.0612 9.2450 9.4797
+arm pyscal3 op diamond threads 8 molecules 32768 median_ms 9.3985
 molecules 110592
 check cutoff dseams pairs 221184
 check cutoff vesin pairs 221184 match exact
@@ -176,59 +176,59 @@ check ice mdapy hexagonal_ice=110592
 note published CHILL, published CHILL+, and mdapy CHILL+ each label every oxygen hexagonal on this ice
 check ice pyscal3 hex_diamond=110592
 check dseams threads 1 and 8 agree
-arm dseams op cutoff threads 1 molecules 110592 samples_ms 8.5987 8.4691 8.3662 8.4786 8.3197 8.4885 8.2596 8.3213
-arm dseams op cutoff threads 1 molecules 110592 median_ms 8.4176
-arm dseams op knn threads 1 molecules 110592 samples_ms 10.1052 10.5968 11.8432 10.7093 10.0881 9.7610 9.8574 10.7025
-arm dseams op knn threads 1 molecules 110592 median_ms 10.3510
-arm dseams op q6 threads 1 molecules 110592 samples_ms 25.6225 25.5516 25.6839 26.0511 25.5756 25.5547 25.6356 25.6278
-arm dseams op q6 threads 1 molecules 110592 median_ms 25.6251
-arm dseams op chill threads 1 molecules 110592 samples_ms 34.2634 34.0971 34.1217 34.1136 34.1075 34.1299 34.2092 34.2478
-arm dseams op chill threads 1 molecules 110592 median_ms 34.1258
-arm dseams op chill_plus threads 1 molecules 110592 samples_ms 22.0586 21.9607 21.9735 22.0914 22.0064 22.0698 21.9676 22.0422
-arm dseams op chill_plus threads 1 molecules 110592 median_ms 22.0243
-arm dseams op cutoff threads 8 molecules 110592 samples_ms 4.7627 4.6038 4.5985 4.6202 4.6358 4.6174 4.6329 4.5415
-arm dseams op cutoff threads 8 molecules 110592 median_ms 4.6188
-arm dseams op knn threads 8 molecules 110592 samples_ms 10.0649 10.0341 10.1564 10.4305 9.7307 13.3545 9.7321 10.4926
-arm dseams op knn threads 8 molecules 110592 median_ms 10.1106
-arm dseams op q6 threads 8 molecules 110592 samples_ms 11.8218 11.8169 11.4562 11.8524 11.3862 11.6039 11.6795 11.5924
-arm dseams op q6 threads 8 molecules 110592 median_ms 11.6417
-arm dseams op chill threads 8 molecules 110592 samples_ms 16.8738 16.1996 16.7854 16.2535 16.7444 16.9875 16.6484 16.8559
-arm dseams op chill threads 8 molecules 110592 median_ms 16.7649
-arm dseams op chill_plus threads 8 molecules 110592 samples_ms 6.9674 7.0598 6.9488 6.9714 6.9647 6.9935 6.9329 6.9800
-arm dseams op chill_plus threads 8 molecules 110592 median_ms 6.9694
-arm vesin op cutoff threads 1 molecules 110592 samples_ms 45.8600 45.8211 45.7867 45.6695 45.6714 48.5972 45.7681 45.7202
-arm vesin op cutoff threads 1 molecules 110592 median_ms 45.7774
-arm mdapy op cutoff threads 1 molecules 110592 samples_ms 39.6549 39.8356 40.0194 39.9799 39.8159 39.8866 39.9245 40.1172
-arm mdapy op cutoff threads 1 molecules 110592 median_ms 39.9056
-arm mdapy op knn threads 1 molecules 110592 samples_ms 109.9387 109.9656 110.0200 109.9707 109.9492 110.4831 110.0681 110.2848
-arm mdapy op knn threads 1 molecules 110592 median_ms 109.9954
-arm mdapy op q6 threads 1 molecules 110592 samples_ms 108.3111 108.0336 108.4165 108.2492 108.0347 108.0602 108.2405 108.2910
-arm mdapy op q6 threads 1 molecules 110592 median_ms 108.2448
-arm mdapy op chill_plus threads 1 molecules 110592 samples_ms 56.4254 56.8594 56.9898 56.4305 56.5466 56.7274 56.8125 56.5401
-arm mdapy op chill_plus threads 1 molecules 110592 median_ms 56.6370
-arm pyscal3 op cutoff threads 1 molecules 110592 samples_ms 61.1791 59.4956 60.7041 60.6337 60.1555 59.9308 60.3710 60.1067
-arm pyscal3 op cutoff threads 1 molecules 110592 median_ms 60.2632
-arm pyscal3 op knn threads 1 molecules 110592 samples_ms 466.6058 476.3425 465.8090 464.8008 463.8376 464.4501 464.9446 464.1980
-arm pyscal3 op knn threads 1 molecules 110592 median_ms 464.8727
-arm pyscal3 op q6 threads 1 molecules 110592 samples_ms 102.1258 100.7856 99.7161 100.1948 100.0895 99.4892 98.8596 98.7316
-arm pyscal3 op q6 threads 1 molecules 110592 median_ms 99.9028
-arm pyscal3 op diamond threads 1 molecules 110592 samples_ms 96.0125 96.5946 96.2916 96.6136 96.4511 99.7537 96.0424 96.0203
-arm pyscal3 op diamond threads 1 molecules 110592 median_ms 96.3714
-arm vesin op cutoff threads 8 molecules 110592 samples_ms 15.5187 15.3877 15.4185 15.4713 15.5898 15.5199 15.6212 15.4277
-arm vesin op cutoff threads 8 molecules 110592 median_ms 15.4950
-arm mdapy op cutoff threads 8 molecules 110592 samples_ms 6.4839 6.4343 6.4055 6.4486 6.3730 6.3538 6.3676 6.3990
-arm mdapy op cutoff threads 8 molecules 110592 median_ms 6.4023
-arm mdapy op knn threads 8 molecules 110592 samples_ms 15.4927 15.5449 15.4903 15.5334 15.4911 15.6681 15.6163 15.5368
-arm mdapy op knn threads 8 molecules 110592 median_ms 15.5351
-arm mdapy op q6 threads 8 molecules 110592 samples_ms 15.0873 15.1296 15.0814 15.0766 15.1034 15.9278 15.1610 15.0747
-arm mdapy op q6 threads 8 molecules 110592 median_ms 15.0953
-arm mdapy op chill_plus threads 8 molecules 110592 samples_ms 9.0564 9.0537 9.0696 9.1698 9.0770 9.0137 9.1160 9.0677
-arm mdapy op chill_plus threads 8 molecules 110592 median_ms 9.0686
-arm pyscal3 op cutoff threads 8 molecules 110592 samples_ms 13.6650 12.7318 12.8007 12.5495 12.6255 12.9445 12.6078 12.4644
-arm pyscal3 op cutoff threads 8 molecules 110592 median_ms 12.6786
-arm pyscal3 op knn threads 8 molecules 110592 samples_ms 84.4098 83.3389 86.3794 84.5425 89.1218 88.3026 86.8066 92.5652
-arm pyscal3 op knn threads 8 molecules 110592 median_ms 86.5930
-arm pyscal3 op q6 threads 8 molecules 110592 samples_ms 20.2130 19.7706 19.4085 19.4740 19.2778 19.1945 19.3629 19.2861
-arm pyscal3 op q6 threads 8 molecules 110592 median_ms 19.3857
-arm pyscal3 op diamond threads 8 molecules 110592 samples_ms 22.6283 22.5837 23.2665 23.2157 22.2720 22.7012 23.0574 23.0718
-arm pyscal3 op diamond threads 8 molecules 110592 median_ms 22.8793
+arm dseams op cutoff threads 1 molecules 110592 samples_ms 12.3321 8.7453 8.8535 8.6338 8.9871 8.5565 8.6649 8.6722
+arm dseams op cutoff threads 1 molecules 110592 median_ms 8.7087
+arm dseams op knn threads 1 molecules 110592 samples_ms 12.4377 13.7842 13.8628 12.1949 13.2643 12.4257 11.3448 11.9371
+arm dseams op knn threads 1 molecules 110592 median_ms 12.4317
+arm dseams op q6 threads 1 molecules 110592 samples_ms 36.0297 31.3119 33.9834 27.9449 26.9105 26.5819 26.6482 25.8855
+arm dseams op q6 threads 1 molecules 110592 median_ms 27.4277
+arm dseams op chill threads 1 molecules 110592 samples_ms 24.0802 24.0500 24.6576 24.1577 24.0842 23.9852 23.6483 28.7951
+arm dseams op chill threads 1 molecules 110592 median_ms 24.0822
+arm dseams op chill_plus threads 1 molecules 110592 samples_ms 22.3005 22.0462 22.5611 24.9921 23.3132 23.0254 22.2041 22.5739
+arm dseams op chill_plus threads 1 molecules 110592 median_ms 22.5675
+arm dseams op cutoff threads 8 molecules 110592 samples_ms 5.6335 5.9791 5.4759 5.6549 8.8157 5.7776 5.8332 6.0274
+arm dseams op cutoff threads 8 molecules 110592 median_ms 5.8054
+arm dseams op knn threads 8 molecules 110592 samples_ms 11.2733 10.8659 11.0283 11.6838 11.4400 10.9962 11.3143 18.1399
+arm dseams op knn threads 8 molecules 110592 median_ms 11.2938
+arm dseams op q6 threads 8 molecules 110592 samples_ms 15.8095 14.7896 14.6207 14.6234 19.2223 15.6183 14.7250 14.8680
+arm dseams op q6 threads 8 molecules 110592 median_ms 14.8288
+arm dseams op chill threads 8 molecules 110592 samples_ms 10.7277 10.5973 10.4191 10.0589 9.9658 12.0615 10.3964 9.7183
+arm dseams op chill threads 8 molecules 110592 median_ms 10.4077
+arm dseams op chill_plus threads 8 molecules 110592 samples_ms 9.5302 9.4046 9.7150 9.5096 9.2087 9.1558 9.0320 9.1503
+arm dseams op chill_plus threads 8 molecules 110592 median_ms 9.3066
+arm vesin op cutoff threads 1 molecules 110592 samples_ms 46.6519 46.7884 46.9675 46.8571 46.4897 50.7129 46.5925 46.5573
+arm vesin op cutoff threads 1 molecules 110592 median_ms 46.7201
+arm mdapy op cutoff threads 1 molecules 110592 samples_ms 43.4982 41.4136 41.0456 41.2190 45.5062 41.2952 41.0110 44.2437
+arm mdapy op cutoff threads 1 molecules 110592 median_ms 41.3544
+arm mdapy op knn threads 1 molecules 110592 samples_ms 112.2824 116.5310 112.6846 113.4259 112.0907 118.6344 112.6025 112.7600
+arm mdapy op knn threads 1 molecules 110592 median_ms 112.7223
+arm mdapy op q6 threads 1 molecules 110592 samples_ms 133.0378 121.8727 112.3470 111.0156 125.8031 117.7241 127.4242 125.4720
+arm mdapy op q6 threads 1 molecules 110592 median_ms 123.6723
+arm mdapy op chill_plus threads 1 molecules 110592 samples_ms 80.5129 77.4573 75.3076 75.6785 73.0568 65.3067 67.5576 66.7529
+arm mdapy op chill_plus threads 1 molecules 110592 median_ms 74.1822
+arm pyscal3 op cutoff threads 1 molecules 110592 samples_ms 74.6308 71.5587 70.3913 71.2990 70.1793 69.2206 67.0342 63.9382
+arm pyscal3 op cutoff threads 1 molecules 110592 median_ms 70.2853
+arm pyscal3 op knn threads 1 molecules 110592 samples_ms 576.8582 548.6024 549.2147 584.5518 597.4493 605.8708 618.1092 595.6182
+arm pyscal3 op knn threads 1 molecules 110592 median_ms 590.0850
+arm pyscal3 op q6 threads 1 molecules 110592 samples_ms 138.5677 135.2725 127.6702 133.5072 124.1236 125.0247 117.3370 119.7766
+arm pyscal3 op q6 threads 1 molecules 110592 median_ms 126.3475
+arm pyscal3 op diamond threads 1 molecules 110592 samples_ms 104.3614 99.1094 100.0093 99.8381 101.2617 101.8914 106.5348 105.3873
+arm pyscal3 op diamond threads 1 molecules 110592 median_ms 101.5765
+arm vesin op cutoff threads 8 molecules 110592 samples_ms 20.3988 18.5209 18.1285 19.0108 18.6839 18.5302 18.6385 19.1391
+arm vesin op cutoff threads 8 molecules 110592 median_ms 18.6612
+arm mdapy op cutoff threads 8 molecules 110592 samples_ms 8.3688 8.1617 8.1489 8.9490 8.1130 8.1799 8.1906 8.0197
+arm mdapy op cutoff threads 8 molecules 110592 median_ms 8.1708
+arm mdapy op knn threads 8 molecules 110592 samples_ms 18.2120 17.9311 18.3565 18.2667 18.0035 18.1692 17.9820 20.0745
+arm mdapy op knn threads 8 molecules 110592 median_ms 18.1906
+arm mdapy op q6 threads 8 molecules 110592 samples_ms 26.1696 20.7397 20.3674 19.7778 20.5346 20.2560 20.0021 20.7748
+arm mdapy op q6 threads 8 molecules 110592 median_ms 20.4510
+arm mdapy op chill_plus threads 8 molecules 110592 samples_ms 13.0282 13.2346 12.6561 13.1353 12.9206 14.6028 13.4694 13.2777
+arm mdapy op chill_plus threads 8 molecules 110592 median_ms 13.1849
+arm pyscal3 op cutoff threads 8 molecules 110592 samples_ms 27.0743 20.8232 20.2457 21.1316 21.6089 21.2392 21.2340 22.5044
+arm pyscal3 op cutoff threads 8 molecules 110592 median_ms 21.2366
+arm pyscal3 op knn threads 8 molecules 110592 samples_ms 111.1802 116.2532 109.1310 106.6078 107.6955 96.9793 99.4168 105.7354
+arm pyscal3 op knn threads 8 molecules 110592 median_ms 107.1517
+arm pyscal3 op q6 threads 8 molecules 110592 samples_ms 26.7681 24.2446 24.0235 23.9390 23.6324 23.7758 23.5982 23.8337
+arm pyscal3 op q6 threads 8 molecules 110592 median_ms 23.8864
+arm pyscal3 op diamond threads 8 molecules 110592 samples_ms 22.8018 22.2102 22.4355 21.9972 22.1448 23.0082 22.5807 23.0798
+arm pyscal3 op diamond threads 8 molecules 110592 median_ms 22.5081
