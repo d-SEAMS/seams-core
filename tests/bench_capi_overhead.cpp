@@ -4,8 +4,13 @@
  * CHILL+ on a cutoff graph (published rule, 3.5 A) of an ice Ic supercell:
  *   capi  seams_chill_plus_n on a handle loaded with seams_system_set_atoms
  *   cpp   nneigh::orthoFullCsr + chill::chillPlusFromCsr on a Cloud
- * Both run serial and interleaved, one rep of each per round. The load
- * (set_atoms against building the Cloud) is timed apart from the analysis.
+ * Both run serial and interleaved, one rep of each per round. The load is
+ * timed apart from the analysis, again interleaved, as five cases:
+ *   set_atoms fresh   set_atoms on a new handle (create and destroy untimed)
+ *   set_atoms reuse   set_atoms on a handle that already holds a frame
+ *   set_positions     set_positions on that handle, same atom count
+ *   cpp Cloud fresh   building a Cloud (destruction untimed)
+ *   cpp Cloud refill  writing x, y, z and the label into a built Cloud
  * A trivial call (seams_system_natoms) gives the fixed cost per call.
  *
  * Usage: bench_capi_overhead [reps] [cells...]   default 11 reps, cells 8 24
@@ -133,6 +138,82 @@ void trivial_calls(seams_system *sys) {
               median(per), lowest(per), sum % 7);
 }
 
+void report(const char *what, const std::vector<double> &v, const std::vector<double> &ref,
+            const char *ref_name) {
+  const double m = median(v), r = median(ref);
+  std::printf("  %-17s median %.3f ms min %.3f ms  vs %s median %+.1f%%, min %+.1f%%\n", what,
+              m * 1e3, lowest(v) * 1e3, ref_name, 100.0 * (m - r) / r,
+              100.0 * (lowest(v) - lowest(ref)) / lowest(ref));
+}
+
+void load_costs(const Lattice &lat, int reps) {
+  const auto n = static_cast<size_t>(lat.n);
+  seams_system *kept = seams_system_create();
+  if (kept == nullptr) {
+    std::exit(1);
+  }
+  need(seams_system_set_atoms(kept, lat.xyz.data(), n, lat.box, 9, nullptr, nullptr),
+       "set_atoms");
+  Cloud refill = cloud_of(lat);
+  std::vector<double> fresh_c, reuse_c, pos_c, fresh_cpp, refill_cpp;
+  int sink = 0;
+
+  for (int r = -1; r < reps; ++r) {
+    seams_system *fresh = seams_system_create();
+    if (fresh == nullptr) {
+      std::exit(1);
+    }
+    auto t0 = Clock::now();
+    need(seams_system_set_atoms(fresh, lat.xyz.data(), n, lat.box, 9, nullptr, nullptr),
+         "set_atoms");
+    const double a = seconds(t0);
+    seams_system_destroy(fresh);
+
+    t0 = Clock::now();
+    need(seams_system_set_atoms(kept, lat.xyz.data(), n, lat.box, 9, nullptr, nullptr),
+         "set_atoms");
+    const double b = seconds(t0);
+
+    t0 = Clock::now();
+    need(seams_system_set_positions(kept, lat.xyz.data(), n, lat.box, 9), "set_positions");
+    const double c = seconds(t0);
+
+    double d = 0;
+    {
+      t0 = Clock::now();
+      Cloud cloud = cloud_of(lat);
+      d = seconds(t0);
+      sink += cloud.nop;
+    }
+
+    t0 = Clock::now();
+    for (int i = 0; i < lat.n; ++i) {
+      auto &point = refill.pts[static_cast<std::size_t>(i)];
+      point.x = lat.xyz[static_cast<std::size_t>(3 * i)];
+      point.y = lat.xyz[static_cast<std::size_t>(3 * i + 1)];
+      point.z = lat.xyz[static_cast<std::size_t>(3 * i + 2)];
+      point.iceType = molSys::atom_state_type::unclassified;
+    }
+    const double e = seconds(t0);
+    sink += refill.pts.back().x > 0;
+
+    if (r >= 0) {
+      fresh_c.push_back(a);
+      reuse_c.push_back(b);
+      pos_c.push_back(c);
+      fresh_cpp.push_back(d);
+      refill_cpp.push_back(e);
+    }
+  }
+  std::printf("  load (sink %d)\n", sink % 2);
+  report("cpp Cloud fresh", fresh_cpp, fresh_cpp, "cpp fresh");
+  report("set_atoms fresh", fresh_c, fresh_cpp, "cpp fresh");
+  report("set_atoms reuse", reuse_c, fresh_cpp, "cpp fresh");
+  report("cpp Cloud refill", refill_cpp, refill_cpp, "cpp refill");
+  report("set_positions", pos_c, refill_cpp, "cpp refill");
+  seams_system_destroy(kept);
+}
+
 void run(int k, int reps) {
   const Lattice lat = ice_ic(k);
   const double cutoff = 3.5;
@@ -144,24 +225,20 @@ void run(int k, int reps) {
   int counts9[9] = {};
   std::vector<int> offsets;
   std::vector<int> cols;
-  std::vector<double> load_c, load_cpp, chill_c, chill_cpp;
+  std::vector<double> chill_c, chill_cpp;
 
   for (int r = -1; r < reps; ++r) {
-    auto t0 = Clock::now();
     need(seams_system_set_atoms(sys, lat.xyz.data(), static_cast<size_t>(lat.n), lat.box, 9,
                                 nullptr, nullptr),
          "set_atoms");
-    const double lc = seconds(t0);
 
-    t0 = Clock::now();
+    auto t0 = Clock::now();
     need(seams_chill_plus_n(sys, cutoff, 1, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED,
                             labels.data(), labels.size(), counts9),
          "chill_plus_n");
     const double cc = seconds(t0);
 
-    t0 = Clock::now();
     Cloud cloud = cloud_of(lat);
-    const double lp = seconds(t0);
 
     t0 = Clock::now();
     if (!nneigh::orthoFullCsr(cloud, nullptr, cutoff, offsets, cols, false)) {
@@ -177,8 +254,6 @@ void run(int k, int reps) {
       std::exit(1);
     }
     if (r >= 0) {
-      load_c.push_back(lc);
-      load_cpp.push_back(lp);
       chill_c.push_back(cc);
       chill_cpp.push_back(cp);
     }
@@ -191,8 +266,7 @@ void run(int k, int reps) {
   std::printf("  chill+ overhead median %.3f ms (%+.2f%%), min-to-min %+.2f%%\n",
               (mc - mp) * 1e3, 100.0 * (mc - mp) / mp,
               100.0 * (lowest(chill_c) - lowest(chill_cpp)) / lowest(chill_cpp));
-  std::printf("  load capi set_atoms median %.3f ms, cpp Cloud median %.3f ms\n",
-              median(load_c) * 1e3, median(load_cpp) * 1e3);
+  load_costs(lat, reps);
   if (k == 8) {
     trivial_calls(sys);
   }
