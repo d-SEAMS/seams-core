@@ -38,6 +38,21 @@ def _write_h2h():
 _write_h2h()
 
 
+def _write_science_gallery():
+    """Fill the four-figure page from the shared census CSV."""
+    import importlib.util
+
+    script = os.path.join(_docs, "write_science_gallery.py")
+    spec = importlib.util.spec_from_file_location("write_science_gallery", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    if module.main([]) != 0:
+        raise SystemExit("science gallery was not written")
+
+
+_write_science_gallery()
+
+
 def _write_gallery():
     """Draw the science gallery from the slow tutorial runs."""
     import importlib.util

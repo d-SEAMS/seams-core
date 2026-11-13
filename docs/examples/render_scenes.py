@@ -431,7 +431,9 @@ def render_brine(render, rows, path, box, width=1400):
     forward = np.array([0.0, 1.0, 0.0])
     up = np.array([0.0, 0.0, 1.0])
     pad_radius = float(np.max(radii))
-    frame = padded_frame(positions, origin, lengths, forward, up, pad_radius)
+    # The viewport is wider than the crop so a sphere centred on the cell
+    # edge, including the top edge, is drawn whole.
+    frame = padded_frame(positions, origin, lengths, forward, up, pad_radius + 1.0)
     tachyon_scene(render, ice_png, positions[solid], colours[solid], radii[solid], [], forward, up, width, frame=frame)
     tachyon_scene(render, liq_png, positions[liquid], colours[liquid], radii[liquid], [], forward, up, width, frame=frame)
     from PIL import Image
@@ -496,6 +498,41 @@ def text_bbox(font, xy, text):
     return (x + left, y + top, x + right, y + bottom)
 
 
+def legend_groups(labels, font, swatch, max_width):
+    """One row when it fits, otherwise two rows of similar width.
+
+    A greedy wrap leaves the last swatch alone. The split keeps both
+    rows non-empty and as close in width as the order allows.
+    """
+    if not labels:
+        return []
+    widths = [swatch + 16.0 + float(font.getlength(label)) + 18.0 for label, _colour in labels]
+    if sum(widths) <= max_width:
+        return [list(labels)]
+    best = None
+    acc = 0.0
+    total = sum(widths)
+    for index in range(1, len(labels)):
+        acc += widths[index - 1]
+        other = total - acc
+        if acc <= max_width and other <= max_width:
+            score = abs(acc - other)
+            if best is None or score < best[0]:
+                best = (score, index)
+    if best is None:
+        groups = [[]]
+        used = 0.0
+        for item, width in zip(labels, widths):
+            if groups[-1] and used + width > max_width:
+                groups.append([])
+                used = 0.0
+            groups[-1].append(item)
+            used += width
+        return groups
+    cut = best[1]
+    return [list(labels[:cut]), list(labels[cut:])]
+
+
 def marks_overlap(marks):
     """Pairs of named boxes whose interiors meet."""
     hits = []
@@ -539,29 +576,23 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
     image = raw
     if pad_radius is not None and origin is not None and lengths is not None:
         raw_corners = [raw_pix(corner) for corner in cell_corners(origin, lengths)]
-        sphere_pad = int(np.ceil(float(pad_radius) * raw.width / (2.0 * half_h))) + 2
-        crop_x0 = int(min(point[0] for point in raw_corners)) - sphere_pad
-        crop_y0 = int(min(point[1] for point in raw_corners)) - sphere_pad
-        crop_x1 = int(max(point[0] for point in raw_corners)) + sphere_pad + 1
-        crop_y1 = int(max(point[1] for point in raw_corners)) + sphere_pad + 1
+        pad_x = int(np.ceil(float(pad_radius) * raw.width / (2.0 * half_h))) + 6
+        pad_y = int(np.ceil(float(pad_radius) * raw.height / (2.0 * half_v))) + 6
+        sphere_pad = pad_x
+        crop_x0 = int(min(point[0] for point in raw_corners)) - pad_x
+        crop_y0 = int(min(point[1] for point in raw_corners)) - pad_y
+        crop_x1 = int(max(point[0] for point in raw_corners)) + pad_x + 1
+        crop_y1 = int(max(point[1] for point in raw_corners)) + pad_y + 1
         if crop_x0 < 0 or crop_y0 < 0 or crop_x1 > raw.width or crop_y1 > raw.height:
             raise RuntimeError("the render does not include one sphere radius outside the cell")
         image = raw.crop((crop_x0, crop_y0, crop_x1, crop_y1))
-    legend_rows = 1
     labels = [(display_label(label), colour) for label, colour in (legend or ())]
-    if labels:
-        x = 16
-        rows = 1
-        for label, _colour in labels:
-            width_px = swatch + 16 + float(font.getlength(label))
-            if x + width_px > image.width - 8:
-                rows += 1
-                x = 16
-            x += width_px + 18
-        legend_rows = rows
-    margin = 24 + row_h * legend_rows + LEGEND_FONT_PX + 48
-    left = 210 if ice_z is not None else (110 if layer_title else 0)
+    left = 220 if ice_z is not None else (110 if layer_title else 0)
     right_margin = 520 if ice_z is not None else 0
+    # The legend starts at left+16 and must end before the canvas edge.
+    groups = legend_groups(labels, font, swatch, image.width + right_margin - 40)
+    legend_rows = max(1, len(groups))
+    margin = 24 + row_h * legend_rows + LEGEND_FONT_PX + 48
     top = 8 if ice_z is not None else 0
     canvas = Image.new("RGB", (image.width + left + right_margin, image.height + top + margin), (255, 255, 255))
     canvas.paste(image, (left, top))
@@ -613,18 +644,21 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
             add_text(f"depth {label}", (x_left - 22 - label_w, y_tick - LEGEND_FONT_PX / 2.0), label)
             z_tick += step
             depth += 1
-        depth_label = "depth"
+        depth_label = "depth from lower ice surface (nm)"
         plate = Image.new("RGB", (int(font.getlength(depth_label)) + 8, LEGEND_FONT_PX + 8), (255, 255, 255))
         ImageDraw.Draw(plate).text((0, 0), depth_label, font=font, fill=(20, 20, 20))
         turned = plate.rotate(90, expand=True)
         depth_x = 8
         depth_y = int(0.5 * (y_of(z_lo) + y_of(z_hi)) - turned.height / 2.0)
-        canvas.paste(turned, (depth_x, max(top, depth_y)))
-        marks.append(("depth", (depth_x, max(top, depth_y), depth_x + turned.width, max(top, depth_y) + turned.height)))
+        depth_y = max(top, depth_y)
+        canvas.paste(turned, (depth_x, depth_y))
+        marks.append(("depth", (depth_x, depth_y, depth_x + turned.width, depth_y + turned.height)))
         bracket_x = x_right + max(sphere_pad, 28) + 18
         y_front = y_of(z_cut)
         y_ice = y_of(z_lo)
-        y_brine = y_of(0.5 * (z_cut + z_hi))
+        y_top = y_of(z_hi)
+        y_brine = 0.5 * (y_front + y_top)
+        draw.line([(bracket_x, y_top), (bracket_x, y_front)], fill=(20, 20, 20), width=3)
         add_text("brine", (bracket_x + 14, y_brine - LEGEND_FONT_PX / 2.0), "brine")
         draw.line([(bracket_x, y_front), (bracket_x, y_ice)], fill=(20, 20, 20), width=3)
         add_text("ice Ih", (bracket_x + 14, 0.5 * (y_front + y_ice) - LEGEND_FONT_PX / 2.0), "ice Ih")
@@ -633,19 +667,18 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
         draw.line([(bracket_x - 8, y_front), (bracket_x + 8, y_front)], fill=(20, 20, 20), width=3)
         add_text("growth front", (bracket_x + 14, y_front - LEGEND_FONT_PX - 4), "growth front")
     legend_bottom = image.height + top
-    if labels:
-        x, y = left + 16, image.height + top + 16
-        for label, colour in labels:
+    y = image.height + top + 16
+    for group in groups:
+        x = left + 16
+        for label, colour in group:
             text_w = float(font.getlength(label))
-            if x + swatch + 16 + text_w > canvas.width - 8:
-                x = left + 16
-                y += row_h
             rgb = tuple(int(round(channel * 255)) for channel in colour)
             draw.rectangle([x, y, x + swatch, y + swatch], fill=rgb, outline=(30, 30, 30))
             marks.append((f"swatch {label}", (x, y, x + swatch, y + swatch)))
             add_text(f"legend {label}", (x + swatch + 10, y), label)
             legend_bottom = max(legend_bottom, y + swatch, marks[-1][1][3])
             x += swatch + 16 + text_w + 18
+        y += row_h
     bar = 10.0 * raw.width / (2.0 * half_h)
     bar_y = legend_bottom + 28
     bar_x = left + 16
@@ -737,13 +770,14 @@ def connected_slab_top(z_values, gap=8.0):
 
 
 def lower_ice_origin(z_hex, z_shell, length_z, gap=8.0):
-    """Cell origin on the lower ice surface.
+    """Cell origin on the lowest hexagonal oxygen.
 
-    Hexagonal oxygens that the periodic boundary left above the brine,
-    and the interfacial oxygens in that same layer, belong one cell
-    below. The returned origin puts that surface at the bottom of the
-    cell so a later wrap makes one slab.
+    The periodic image of the brine can sit just under that oxygen.
+    Seating the origin on the ice, not on the brine, wraps that row to
+    the top of the cell. ``z_shell`` is accepted so callers can pass the
+    interfacial coordinates; the ice surface is hexagonal.
     """
+    del z_shell
     z_hex = np.asarray(z_hex, dtype=float)
     order = np.sort(z_hex)
     if order.size == 0:
@@ -753,11 +787,7 @@ def lower_ice_origin(z_hex, z_shell, length_z, gap=8.0):
         return float(order[0])
     cut = float(order[int(np.argmax(diffs))])
     top = z_hex[z_hex > cut]
-    band = float(np.min(top)) - 2.0
-    shell = np.asarray(z_shell, dtype=float)
-    shell = shell[shell >= band]
-    candidates = np.concatenate([top, shell]) if shell.size else top
-    return float(np.min(candidates) - length_z)
+    return float(np.min(top) - length_z)
 
 
 def centres_outside_outline(positions, origin, lengths, forward=None, up=None):

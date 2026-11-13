@@ -1441,6 +1441,14 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_figure_census',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'check_figure_census.py',
+    ],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_palette',
     python3,
     args: [

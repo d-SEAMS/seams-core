@@ -158,6 +158,8 @@ def check_brine_wrap():
         front = connected_slab_top(ice)
         if np.any(ice > front + 1e-6):
             raise SystemExit("brine hexagonal ice sits above the growth front")
+        if np.any(moved[:, 2] < float(np.min(ice)) - 1e-6):
+            raise SystemExit("a centre sits below the lower ice surface")
         print(f"brine frame centres stay inside the outline ({len(points)} atoms)")
     else:
         print("brine frame cache is absent; the shifted-cell wrap was checked")
