@@ -66,11 +66,12 @@ end
 function seams_steinhardt(sys::System, order::Integer; cutoff::Real=3.5, average::Bool=false)
     n = _count(sys)
     ql = Vector{Float64}(undef, n)
-    bar = Vector{Float64}(undef, n)
+    bar = average ? Vector{Float64}(undef, n) : Float64[]
     _seams_check(ccall(_seams_sym(:seams_steinhardt), Cint,
                        (Ptr{Cvoid}, Cdouble, Cint, Cint, Ptr{Float64}, Csize_t, Ptr{Float64}, Csize_t),
-                       sys.ptr, cutoff, 0, order, ql, n, average ? pointer(bar) : C_NULL, n), sys.ptr)
-    return ql, average ? bar : Float64[]
+                       sys.ptr, cutoff, 0, order, ql, n,
+                       average ? pointer(bar) : C_NULL, average ? n : 0), sys.ptr)
+    return ql, bar
 end
 
 function seams_cages(sys::System; cutoff::Real=3.5, graph::Integer=2, k::Integer=4, complete::Bool=false)

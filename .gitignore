@@ -2,6 +2,8 @@
 .pixi/
 .venv-paper/
 benchmarks/paper-cells/.sitting-large.jsonl
+benchmarks/logs/binding-overhead/
+docs/source/_static/binding-overhead.png
 benchmarks/paper-cells/.sitting-agree/
 benchmarks/paper-cells/*.pdf
 benchmarks/paper-cells/.liquid-work/

@@ -1,0 +1,17 @@
+#+TITLE: Binding overhead
+
+Ice Ih at 4096, 32768, and 110592 molecules.
+
+The run used 8 cores of Intel(R) Xeon(R) Processor. No host name is recorded. One process per binding stayed open for both thread widths. The serial phase set OMP_NUM_THREADS and PLUMED_NUM_THREADS to 1. The threaded phase set both to 8 and called seams_set_num_threads. Each cell below is the median of 8 repeats after one warmup, in milliseconds, with the interquartile range in parentheses.
+
+Read, the mutual 4-neighbour list, and the primitive-ring search return a handle. On the 110592-molecule cell the slowest of those wrappers was python read at 1 thread, 1.09 times the direct C call. The file parser and the search run inside libseams. The wrapper passes a pointer and, for rings and neighbours, destroys the handle.
+
+CHILL and q6 write one number per molecule, and the timed q6 call also writes q6bar. C, C++, Fortran, Rust, Julia, R, and the ctypes module fill one contiguous buffer and hand its address to libseams. Lua then stores every value in a table. On the 110592-molecule cell, Lua q6 at 1 thread is 1.05 times the C median. That gap is the table write.
+
+Two copies that did not belong in the wrappers are gone. Lua's CSR export walked the neighbour lists into a temporary buffer and then into the table. It now reads the CSR that the handle already owns. Julia's orthorhombic frame setter copied a 3-by-n Float64 matrix that was already the layout seams_system_set_ortho copies. It now passes that pointer. Rust, C++, and Julia allocate the q6bar buffer only when the caller asks for the Lechner-Dellago average. The timed call asks for it, so both buffers are required.
+
+freud and OVITO are separate programs, timed in the same session on the same oxygen coordinates. Freud times knn, q6. OVITO times knn, q6, read, rings. freud's neighbour query is the one-way 4-nearest list inside 5 angstroms, the candidate shell the mutual list uses, and its q6 call includes the averaged parameter. OVITO reads the dump, builds a 4-neighbour finder, runs the Steinhardt modifier with the averaged parameters, and runs FindRings after creating bonds at 3.5 angstroms. OVITO has no original CHILL modifier, and freud has no reader, no CHILL, and no primitive-ring search, so those cells are empty. seams_rings_find also classifies prisms. That walk is about one second at 4096 molecules, where every binding was repeated. The C search was repeated at 32768 molecules as well. A 110592-molecule call did not return within 180 seconds, so that cell is empty. Python's ctypes ring call is 1.36 times C on that cell. The other languages return the ring handle and stay with the C time.
+
+At 8 threads the seams neighbour, q6, and CHILL calls take longer than the one-thread calls, on every language at once. freud and OVITO move the other way and get faster. The bindings are following the library, not adding a cost of their own.
+
+The Sphinx page is docs/source/explanation/binding-overhead.rst. The figure is drawn when the docs are built.

@@ -37,7 +37,9 @@ num_threads() = Int(ccall((:seams_get_num_threads, _lib()), Cint, ()))
 
 function set_ortho!(sys::System, xyz::AbstractMatrix{<:Real}, lengths::NTuple{3,Real})
     size(xyz, 1) == 3 || error("xyz is 3 by n")
-    flat = collect(vec(Float64.(xyz)))
+    # A 3-by-n Float64 matrix is already the interleaved layout the C API copies.
+    flat = xyz isa StridedMatrix{Float64} && stride(xyz, 1) == 1 && stride(xyz, 2) == 3 ? xyz :
+           collect(Float64, xyz)
     _check(ccall((:seams_system_set_ortho, _lib()), Cint,
                  (Ptr{Cvoid}, Ptr{Float64}, Cint, Float64, Float64, Float64, Float64, Float64, Float64, Ptr{Cint}, Ptr{Cint}),
                  sys.ptr, flat, Cint(size(xyz, 2)),

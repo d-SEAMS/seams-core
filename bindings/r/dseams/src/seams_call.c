@@ -61,6 +61,14 @@ SEXP seams_r_read(SEXP ext, SEXP path, SEXP frame, SEXP type) {
 
 SEXP seams_r_count(SEXP ext) { return ScalarInteger(seams_system_count(sys_of(ext))); }
 
+SEXP seams_r_threads(SEXP n) {
+  int threads = Rf_asInteger(n);
+  if (seams_set_num_threads(threads) != SEAMS_OK) {
+    error("%s", seams_last_error());
+  }
+  return ScalarInteger(seams_get_num_threads());
+}
+
 SEXP seams_r_chill(SEXP ext, SEXP cutoff, SEXP type, SEXP graph, SEXP rule) {
   seams_system *sys = sys_of(ext);
   const int n = seams_system_count(sys);

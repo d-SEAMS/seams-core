@@ -13,6 +13,7 @@
 #include <lua.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #if defined(__has_include)
 #if __has_include(<luajit.h>)
@@ -404,33 +405,19 @@ static int nb_count(lua_State *L) {
 
 static int nb_csr(lua_State *L) {
   NeighbourBox *box = neighbour_box(L, 1);
-  size_t n_offsets = 0;
-  size_t nnz = 0;
-  int *offsets = NULL;
-  int *cols = NULL;
-  seams_status status =
-      seams_neighbours_copy(box->nb, NULL, 0, &n_offsets, NULL, 0, &nnz);
+  const int *offsets = NULL;
+  const int *cols = NULL;
+  int n_offsets = 0;
+  int nnz = 0;
+  /* The CSR lives on the handle until it is closed. Copying it into a
+   * temporary and then into the Lua table walked the same integers twice. */
+  seams_status status = seams_neighbours_csr(box->nb, &offsets, &n_offsets, &cols, &nnz);
   if (status != SEAMS_OK) {
     return raise_status(L, status);
   }
-  offsets = (int *)calloc(n_offsets > 0 ? n_offsets : 1, sizeof(int));
-  cols = (int *)calloc(nnz > 0 ? nnz : 1, sizeof(int));
-  if (offsets == NULL || cols == NULL) {
-    free(offsets);
-    free(cols);
-    return luaL_error(L, "out of memory");
-  }
-  status = seams_neighbours_copy(box->nb, offsets, n_offsets, &n_offsets, cols, nnz, &nnz);
-  if (status != SEAMS_OK) {
-    free(offsets);
-    free(cols);
-    return raise_status(L, status);
-  }
-  push_ints(L, offsets, (int)n_offsets);
-  push_ints(L, cols, (int)nnz);
+  push_ints(L, offsets, n_offsets);
+  push_ints(L, cols, nnz);
   lua_pushinteger(L, (lua_Integer)nnz);
-  free(offsets);
-  free(cols);
   return 3;
 }
 
@@ -550,6 +537,15 @@ static int l_set_threads(lua_State *L) {
 
 static int l_threads(lua_State *L) {
   lua_pushinteger(L, seams_get_num_threads());
+  return 1;
+}
+
+static int l_monotonic(lua_State *L) {
+  struct timespec ts;
+  if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
+    return luaL_error(L, "clock");
+  }
+  lua_pushnumber(L, (lua_Number)ts.tv_sec + (lua_Number)ts.tv_nsec * 1e-9);
   return 1;
 }
 
@@ -1073,6 +1069,7 @@ static const luaL_Reg module_funcs[] = {
     {"ring_symmetry_name", l_ring_name},
     {"set_num_threads", l_set_threads},
     {"num_threads", l_threads},
+    {"monotonic", l_monotonic},
     {"last_error", l_last_error},
     {"nframes", l_nframes},
     {NULL, NULL},

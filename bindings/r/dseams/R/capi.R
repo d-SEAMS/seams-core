@@ -17,6 +17,11 @@ seams_system_count <- function(sys) {
 }
 
 #' @export
+seams_set_num_threads <- function(n) {
+  .Call(`_dseams_seams_r_threads`, as.integer(n))
+}
+
+#' @export
 seams_chill <- function(sys, cutoff = 3.5, type = 0L, graph = 0L, rule = 0L) {
   .Call(`_dseams_seams_r_chill`, sys, cutoff, as.integer(type), as.integer(graph), as.integer(rule))
 }

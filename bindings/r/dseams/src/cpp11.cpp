@@ -90,6 +90,7 @@ extern "C" SEXP _dseams_cages_(SEXP ptr, SEXP cutoff, SEXP type, SEXP k, SEXP gr
 extern "C" SEXP seams_r_system(void);
 extern "C" SEXP seams_r_read(SEXP, SEXP, SEXP, SEXP);
 extern "C" SEXP seams_r_count(SEXP);
+extern "C" SEXP seams_r_threads(SEXP);
 extern "C" SEXP seams_r_chill(SEXP, SEXP, SEXP, SEXP, SEXP);
 extern "C" SEXP seams_r_steinhardt(SEXP, SEXP, SEXP, SEXP);
 extern "C" SEXP seams_r_cages(SEXP, SEXP, SEXP, SEXP, SEXP);
@@ -125,6 +126,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_dseams_seams_r_system", (DL_FUNC) &seams_r_system, 0},
     {"_dseams_seams_r_read", (DL_FUNC) &seams_r_read, 4},
     {"_dseams_seams_r_count", (DL_FUNC) &seams_r_count, 1},
+    {"_dseams_seams_r_threads", (DL_FUNC) &seams_r_threads, 1},
     {"_dseams_seams_r_chill", (DL_FUNC) &seams_r_chill, 5},
     {"_dseams_seams_r_steinhardt", (DL_FUNC) &seams_r_steinhardt, 4},
     {"_dseams_seams_r_cages", (DL_FUNC) &seams_r_cages, 5},

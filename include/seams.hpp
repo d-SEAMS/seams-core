@@ -211,13 +211,15 @@ class System {
   std::pair<std::vector<double>, std::vector<double>> steinhardt(double cutoff, int order, bool average) {
     const int n = count();
     std::vector<double> ql(static_cast<std::size_t>(n));
-    std::vector<double> bar(static_cast<std::size_t>(n));
-    check(seams_steinhardt(ptr_, cutoff, 0, order, ql.data(), static_cast<std::size_t>(n),
-                           average ? bar.data() : nullptr, static_cast<std::size_t>(n)),
-          ptr_);
-    if (!average) {
-      bar.clear();
+    std::vector<double> bar;
+    double *bar_ptr = nullptr;
+    if (average) {
+      bar.resize(static_cast<std::size_t>(n));
+      bar_ptr = bar.data();
     }
+    check(seams_steinhardt(ptr_, cutoff, 0, order, ql.data(), static_cast<std::size_t>(n),
+                           bar_ptr, average ? static_cast<std::size_t>(n) : 0),
+          ptr_);
     return {ql, bar};
   }
 

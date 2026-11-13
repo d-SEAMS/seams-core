@@ -359,11 +359,11 @@ impl System {
     ) -> Result<(Vec<f64>, Option<Vec<f64>>), Error> {
         let n = self.count() as usize;
         let mut ql = vec![0.0; n];
-        let mut bar = vec![0.0; n];
-        let bar_ptr = if average {
-            bar.as_mut_ptr()
+        let mut bar = if average { vec![0.0; n] } else { Vec::new() };
+        let (bar_ptr, bar_len) = if average {
+            (bar.as_mut_ptr(), n)
         } else {
-            std::ptr::null_mut()
+            (std::ptr::null_mut(), 0)
         };
         check(
             unsafe {
@@ -375,7 +375,7 @@ impl System {
                     ql.as_mut_ptr(),
                     n,
                     bar_ptr,
-                    n,
+                    bar_len,
                 )
             },
             self.handle(),
