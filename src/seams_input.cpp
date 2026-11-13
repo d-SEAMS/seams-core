@@ -38,6 +38,14 @@
 #include <thread>
 #include <utility>
 #include <sys/stat.h>
+
+// Larger than the 884736-molecule cell. A header past this is not a frame
+// the reader will allocate.
+constexpr int kMaxDeclaredAtoms = 8000000;
+
+bool declaredAtomsOk(int nop) {
+  return nop >= 0 && nop <= kMaxDeclaredAtoms;
+}
 #include <unistd.h>
 #include <ext/stdio_filebuf.h>
 #include <unordered_map>
@@ -667,7 +675,7 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
       xyzFile->close();
       throw std::runtime_error("XYZ header is not an atom count.");
     }
-    if (nop < 0) {
+    if (!declaredAtomsOk(nop)) {
       xyzFile->close();
       throw std::runtime_error("XYZ header is not an atom count.");
     }
@@ -873,6 +881,9 @@ void parseLammpsFrameBody(
 
     if (readNOP && !itemLine) {
       if (parseDumpInt(line, nop) && nop >= 0) {
+        if (!declaredAtomsOk(nop)) {
+          throw std::runtime_error("declared atom count is past the reader limit");
+        }
         yCloud.pts.reserve(static_cast<std::size_t>(nop));
         yCloud.idIndexMap.reserve(static_cast<std::size_t>(nop));
         if (keep == LammpsKeep::All) {
@@ -1165,7 +1176,7 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
   nextLine(s, e);
   int nop = 0;
   const char *np = s;
-  if (!parseLooseInt(np, e, nop) || nop < 0) {
+  if (!parseLooseInt(np, e, nop) || !declaredAtomsOk(nop)) {
     return false;
   }
   nextLine(s, e);

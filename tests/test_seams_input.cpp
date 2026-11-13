@@ -1555,6 +1555,35 @@ TEST_CASE("an empty xyz names the header", "[seams_input]") {
   fs::remove(path);
 }
 
+TEST_CASE("an xyz header past the reader limit is refused", "[seams_input][reader_limit]") {
+  const auto path = dseams_test::freshFile("dseams_huge.xyz");
+  {
+    std::ofstream out(path, std::ios::binary);
+    const char bytes[] = "666666666\x14" "666666666\n";
+    out.write(bytes, sizeof bytes - 1);
+  }
+  try {
+    sinp::readXYZ(path.string());
+    FAIL("a huge xyz header must not allocate the declared count");
+  } catch (const std::runtime_error &err) {
+    REQUIRE(std::string(err.what()) == "XYZ header is not an atom count.");
+  }
+  fs::remove(path);
+}
+
+TEST_CASE("a dump header past the reader limit is refused", "[seams_input][reader_limit]") {
+  const auto path = dseams_test::freshFile("dseams_huge.lammpstrj");
+  {
+    std::ofstream out(path);
+    out << "ITEM: TIMESTEP\n0\nITEM: NUMBER OF ATOMS\n666666666\n"
+        << "ITEM: BOX BOUNDS pp pp pp\n0 1\n0 1\n0 1\n"
+        << "ITEM: ATOMS id type x y z\n";
+  }
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  REQUIRE_THROWS_AS(sinp::readLammpsTrj(path.string(), 1, cloud), std::runtime_error);
+  fs::remove(path);
+}
+
 TEST_CASE("a junk xyz header names the failure", "[seams_input]") {
   const auto path = dseams_test::freshFile("dseams_junk.xyz");
   {
