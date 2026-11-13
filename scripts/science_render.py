@@ -820,6 +820,104 @@ def column_view(pos: np.ndarray, mask: np.ndarray, stacking: np.ndarray) -> np.n
     return unit(best[1])
 
 
+def layer_rows(pos: np.ndarray, chill: np.ndarray, mask: np.ndarray, axis: np.ndarray) -> list[tuple[int, float, int]]:
+    """Majority class, purity and count of each basal layer along axis.
+
+    Bins follow the same repeat as the stacking bar. A layer shorter than
+    four molecules is an edge fragment and is left out of the purity check.
+    """
+    axis = unit(axis)
+    chosen = np.flatnonzero(mask & np.isin(chill, [0, 1]))
+    if chosen.size == 0:
+        return []
+    projection = pos[chosen] @ axis
+    kinds = chill[chosen]
+    centred = projection - float(projection.mean())
+    best: tuple | None = None
+    for period in np.linspace(3.30, 4.05, 16):
+        for shift in np.linspace(0.0, float(period), 8, endpoint=False):
+            bins = np.floor((centred - shift) / float(period)).astype(int)
+            rows = []
+            for index in range(int(bins.min()), int(bins.max()) + 1):
+                selected = kinds[bins == index]
+                if selected.size < 4:
+                    continue
+                cubic = int(np.sum(selected == 0))
+                hexagonal = int(np.sum(selected == 1))
+                purity = max(cubic, hexagonal) / float(selected.size)
+                rows.append((1 if hexagonal >= cubic else 0, purity, int(selected.size)))
+            if len(rows) < 2:
+                continue
+            score = min(row[1] for row in rows)
+            if best is None or score > best[0]:
+                best = (score, rows)
+    return [] if best is None else best[1]
+
+
+def orient_nucleus(pos: np.ndarray, chill: np.ndarray, mask: np.ndarray):
+    """Local c-axis vertical, view along [11-20], two layers through the centre.
+
+    The axis is this nucleus's own, chosen so the sheet's horizontal layers
+    are as pure as the CHILL+ labels allow.
+    """
+    lattice = mask & np.isin(chill, [0, 1])
+    centre = pos[lattice].mean(axis=0)
+
+    def pack(axis: np.ndarray, view: np.ndarray):
+        axis = unit(axis)
+        view = view - axis * float(view @ axis)
+        view = unit(view)
+        depth = (pos - centre) @ view
+        sheet = lattice & (np.abs(depth) <= 4.6)
+        rows = layer_rows(pos, chill, sheet, axis)
+        if len(rows) < 2:
+            return None
+        return (min(row[1] for row in rows), rows, axis, view, sheet)
+
+    seeds = [stacking_axis(pos, chill, mask)]
+    best = None
+    for theta in np.linspace(0.2, np.pi - 0.2, 14):
+        for phi in np.linspace(0.0, np.pi, 14, endpoint=False):
+            seeds.append(
+                np.array([np.sin(theta) * np.cos(phi), np.sin(theta) * np.sin(phi), np.cos(theta)])
+            )
+    for seed in seeds:
+        axis = unit(seed)
+        hint = np.array([1.0, 0.0, 0.0]) if abs(float(axis[0])) < 0.9 else np.array([0.0, 1.0, 0.0])
+        east = unit(np.cross(axis, hint))
+        north = unit(np.cross(axis, east))
+        for degree in np.linspace(0.0, 180.0, 24, endpoint=False):
+            theta = math.radians(float(degree))
+            view = math.cos(theta) * east + math.sin(theta) * north
+            packed = pack(axis, view)
+            if packed is not None and (best is None or packed[0] > best[0]):
+                best = packed
+    if best is None:
+        axis = stacking_axis(pos, chill, mask)
+        view = column_view(pos, lattice, axis)
+        packed = pack(axis, view)
+        best = packed if packed is not None else (0.0, [], unit(axis), unit(view), lattice)
+    _score, rows, axis, view, sheet = best
+    # Tighten the view onto [11-20] without leaving the basal plane.
+    tightened = column_view(pos, sheet if int(sheet.sum()) > 12 else lattice, axis)
+    repacked = pack(axis, tightened)
+    if repacked is not None and repacked[0] + 0.02 >= best[0]:
+        _score, rows, axis, view, sheet = repacked
+    if axis[2] < 0.0:
+        axis = -axis
+    print("nucleus c-axis", np.round(axis, 3), flush=True)
+    for kind, purity, count in rows:
+        print(f"  layer class {kind} purity {purity:.3f} n {count}", flush=True)
+    weak = [row for row in rows if row[2] >= 4 and row[1] < 0.80]
+    if weak:
+        print(
+            "  CHILL+ mixes both classes inside "
+            f"{len(weak)} basal layer(s); purity stays the label, not a recolouring",
+            flush=True,
+        )
+    return sheet, view, axis, rows
+
+
 def nucleus_sheet(pos: np.ndarray, chill: np.ndarray, mask: np.ndarray, stacking: np.ndarray):
     """Two [11-20] layers through the centre of mass. Liquid and interfacial water are left out."""
     lattice = mask & np.isin(chill, [0, 1])
@@ -1152,13 +1250,11 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
         raw = npos.copy()
         npos, _nbox = unwrap_cluster(npos, nbox, extended, HBOND_A)
         loaded[label] = (npos, nchill, extended, raw, nbox)
-    late_pos, late_chill, late_ext, _late_raw, _late_box = loaded["late"]
-    axis = stacking_axis(late_pos, late_chill, late_ext)
-    # [0001] is vertical, so the bands line up with panel (c). The camera
-    # looks along [11-20], through a two-layer sheet.
+    # Each nucleus keeps its own c-axis. That axis is vertical and the
+    # camera looks along the local [11-20], through two layers at the centre.
     prepared = {}
     for label, (npos, nchill, extended, raw, raw_box) in loaded.items():
-        sheet, view = nucleus_sheet(npos, nchill, extended, axis)
+        sheet, view, axis, _rows = orient_nucleus(npos, nchill, extended)
         bonds = ice_bonds(raw, raw_box, sheet, 3.5)
         if len(bonds):
             straight = np.linalg.norm(npos[bonds[:, 1]] - npos[bonds[:, 0]], axis=1)
