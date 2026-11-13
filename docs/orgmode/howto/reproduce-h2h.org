@@ -1,0 +1,64 @@
+#+TITLE: Reproduce a head-to-head
+#+OPTIONS: toc:nil num:nil
+
+Each head-to-head is a Snakemake rule and, where a one-call arm
+exists, an Airspeed Velocity benchmark. Both read the same script.
+The pixi environment that holds the guest codes is =repro=. It is
+Linux only. The pins are in =pixi.toml=:
+
+#+begin_src toml
+[feature.repro.dependencies]
+freud = ">=3.0"
+pyscal3 = ">=3.0"
+jupytext = ">=1.16"
+ipykernel = ">=6.0"
+papermill = ">=2.4"
+matplotlib-base = ">=3.8"
+lua = ">=5.4,<5.5"
+
+[feature.repro.pypi-dependencies]
+snakemake = ">=8.0"
+#+end_src
+
+Install that environment, then run a rule by name.
+
+#+begin_src bash
+pixi install -e repro
+pixi run -e repro -- snakemake literature_h2h
+#+end_src
+
+=asv.conf.json= sets =environment_type= to =existing= and
+=benchmark_dir= to =benchmarks=. Point =asv run= at the repro
+interpreter. The class names below are the =asv= =--bench= selectors.
+
+#+begin_src bash
+pixi run -e repro -- asv run \
+  -E existing:.pixi/envs/repro/bin/python \
+  --set-commit-hash "$(git rev-parse HEAD)" \
+  -b h2h_literature.LiteratureMdapy
+#+end_src
+
+| comparison | Snakemake rule | asv class | CSV |
+|------------+----------------+-----------+-----|
+| mdapy, pyscal3, vesin, IRA, SQQ, ClavisCage, PLUMED | =literature_h2h= | =h2h_literature.Literature*= | =benchmarks/h2h-literature.csv= |
+| mdapy, fastatomstruct, vesin on the watch set | =related_watch= | =h2h_watch.RelatedWatch= | =benchmarks/h2h-watch.csv= |
+| release-candidate sitting, one and eight threads | =rc3_sitting= | =h2h_watch.Rc3Sitting= | =benchmarks/rc3-sitting.csv= |
+| CHILL+ against ClavisCage TRACE | =related_watch_v11= | | =benchmarks/h2h-watch-v11.csv= |
+| rings against rings-statistics-matter | =related_watch_v12= | | =benchmarks/h2h-watch-v12.csv= |
+| PTM and the ice classifier | =related_watch_v5= | | =benchmarks/h2h-watch-v5.csv= |
+| rings against cycless, mdapy, OVITO | =related_watch_v4= | | =benchmarks/h2h-watch-v4.csv= |
+| linkcell rank scaling | =linkcell_scale= | =benchmarks.LinkcellPartition= | =benchmarks/rank-scale.csv= |
+| rings on one thread against OVITO | =rings_one_thread= | =benchmarks.RingsOneThread= | |
+
+The 884736-molecule sitting, ice and the TIP4P/ice liquid, is
+=benchmarks/paper-cells/sitting-large.csv=. Commit =2ed49e87= on
+=bench/sitting-large= writes it with the rule =paper_sitting_large=:
+
+#+begin_src bash
+python3 scripts/paper_sitting_large.py --out benchmarks/paper-cells
+#+end_src
+
+That script is the one in =2ed49e87=. This checkout stores the CSV
+that command produced and draws the thread figure from it when the
+book is built. =scripts/plot_sitting_large_time.py= is the same
+curves as a PDF, written only where =--out= says.
