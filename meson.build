@@ -750,6 +750,23 @@ if get_option('with_cli')
     args: [meson.project_source_root() / 'docs' / 'check_examples.py'],
     timeout: 60)
   test(
+    'docs_sitting',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check'],
+    timeout: 60)
+  tutorial_env = environment()
+  tutorial_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+  test(
+    'engines_tutorial',
+    python3,
+    args: [
+      meson.project_source_root() / 'engines' / 'tutorial_walk.py',
+      meson.project_build_root(),
+    ],
+    env: tutorial_env,
+    depends: [seams_api_lib],
+    timeout: 120)
+  test(
     'seams_water_types_cutoff',
     python3,
     args: [

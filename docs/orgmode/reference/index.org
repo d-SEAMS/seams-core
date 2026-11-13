@@ -13,6 +13,8 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 | [[file:nix.org][Nix flake]] | ~nix build~, ~nix develop~, flake outputs |
 | [[file:cross-language.org][One task, three languages]] | CHILL+ on the cubic mW frame |
 | [[file:glossary.org][glossary]] | Engine terms |
+| [[file:../explanation/performance.org][Sitting tables]] | Medians from ~benchmarks/rc3-sitting.csv~ |
+| [[file:../explanation/trace-threads.org][Thread controls]] | ~OMP_NUM_THREADS~, ~taskset~, ~lc_set_threads~ |
 
 #+begin_export rst
 .. toctree::

@@ -8,6 +8,21 @@ _source = os.path.dirname(os.path.abspath(__file__))
 _docs = os.path.dirname(_source)
 
 
+def _write_sitting_tables():
+    """Fill the performance tables from the CSV before Sphinx reads pages."""
+    import importlib.util
+
+    script = os.path.join(_docs, "render_sitting.py")
+    spec = importlib.util.spec_from_file_location("render_sitting", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    if module.main([]) != 0:
+        raise SystemExit("rc3 sitting tables do not match the CSV")
+
+
+_write_sitting_tables()
+
+
 def _stage_markdown_book():
     """Copy the language pages into the Sphinx tree so myst renders them."""
     import pathlib

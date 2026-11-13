@@ -1,0 +1,59 @@
+#+TITLE: Signature-search thread controls
+#+OPTIONS: toc:nil num:nil
+
+Commit ~5982ddee~ on ~perf/trace-threads~ retimes the hydrate signature
+search at 1, 2, 4 and 8 threads. The census at every width is the
+one-thread census. This page is the controls that sitting uses. The
+raw lines are ~benchmarks/trace-threads.csv~ on that commit. They are
+not in this tree.
+
+* The process
+
+~scripts/paper_stats.py~ on that commit builds the environment for one
+width \(n\):
+
+| variable | value |
+|----------+-------|
+| ~OMP_NUM_THREADS~ | \(n\) |
+| ~OMP_DYNAMIC~ | ~FALSE~ |
+| ~OMP_PROC_BIND~ | ~close~ |
+| ~OMP_PLACES~ | ~cores~ |
+| ~RAYON_NUM_THREADS~ | \(n\) |
+| ~OPENBLAS_NUM_THREADS~, ~MKL_NUM_THREADS~, ~NUMEXPR_NUM_THREADS~ | ~1~ |
+
+The process is pinned with ~taskset -c 0~ when \(n = 1\), and with
+~taskset -c 0-(n-1)~ otherwise. One warm-up is dropped. Eight repeats
+remain. The median of an even count is the mean of the two central
+samples. The interquartile range is the type-7 upper quartile minus
+the lower one. The log records ~lscpu~'s model name, the source commit,
+and ~Cpus_allowed_list~.
+
+* Inside the library
+
+Each sample is one linkcell neighbour list, one depth-6 primitive-ring
+network, and one combined search of \(5^{12}\), \(5^{12}6^{2}\) and
+\(5^{12}6^{4}\). ~nneigh::neighListLinkcell~, added on that commit,
+sets the linkcell pool to ~omp_get_max_threads~ unless the cutoff walk
+was asked to stay serial or the caller is already inside an OpenMP
+region, in which case the pool is one thread. The cage index is merged
+from per-thread buckets in ring order, so a different team cannot
+reorder the published cages.
+
+On this tree the same knobs are ~seams_set_num_threads~ and
+~seams::adoptThreads~. ~adoptThreads~ widens the Linux affinity mask,
+sets ~OMP_WAIT_POLICY=PASSIVE~, and passes the OpenMP width to
+~lc_set_threads~ when linkcell is linked. A call that is already inside
+a parallel region keeps the linkcell pool at one thread.
+~seams::prepareCompute~ sets ~omp_set_dynamic(0)~ and does not force a
+passive wait, because a team that sleeps between calls wakes up on a
+spread of several milliseconds. ~teamFor~ stays on one thread below
+2048 atoms.
+
+~tests/test_trace_threads.cpp~ on that commit requires the closed-cage
+faces, and the hexagonal and double-diamond cages, to match the
+one-thread result. Membership is the sorted atom ids of each face, not
+the ring index.
+
+#+begin_export rst
+:doc:`/stable/c` names ``seams_set_num_threads`` and ``seams_get_num_threads``.
+#+end_export
