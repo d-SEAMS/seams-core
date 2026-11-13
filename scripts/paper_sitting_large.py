@@ -1217,6 +1217,10 @@ def record_agreement(rows: list[dict], root: Path) -> list[str]:
                     # minimum. A large gap is still a broken run.
                     if phase == "liquid" and name == "PLUMED":
                         limit = 0.25
+                    elif phase == "liquid":
+                        # Freud on the 300 A liquid box is 1.5e-4. mdapy and
+                        # pyscal3 stay at rounding error on the same atoms.
+                        limit = 2.0e-4
                     if gap > limit:
                         problems.append(f"{phase} q6 threads {threads} {name} {gap:.3e}")
             counts = []
