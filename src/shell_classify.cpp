@@ -13,6 +13,7 @@
 // with AVX2.
 
 #include <shell_hot.hpp>
+#include <thread_team.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -2002,6 +2003,10 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   if (n <= 0) {
     return;
   }
+  // The shell walk is OpenMP. A few thousand atoms do not feed eight
+  // threads, and this call does not start a second pool.
+  seams::prepareCompute();
+  [[maybe_unused]] const seams::TeamWidth team(n);
   const bool timed = symTime();
   const auto tAll = std::chrono::steady_clock::now();
   // Nine of the twelve second-neighbour signatures is the ambiguous band

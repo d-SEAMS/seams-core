@@ -2840,7 +2840,11 @@ std::vector<std::vector<int>>
 nneigh::kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     double candidateCutoff, int typeI, bool mutual) {
-  seams::adoptThreads();
+  seams::prepareCompute();
+  [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
+#ifdef SEAMS_HAS_LINKCELL
+  lc_set_threads(seams::teamFor(yCloud.nop));
+#endif
   if (yCloud.nop <= 0 || k <= 0) {
     return {};
   }
@@ -2907,7 +2911,11 @@ std::vector<std::vector<int>>
 nneigh::kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     double candidateCutoff, const std::vector<int> &types, bool mutual) {
-  seams::adoptThreads();
+  seams::prepareCompute();
+  [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
+#ifdef SEAMS_HAS_LINKCELL
+  lc_set_threads(seams::teamFor(yCloud.nop));
+#endif
   if (yCloud.nop <= 0 || k <= 0 || types.empty()) {
     return {};
   }

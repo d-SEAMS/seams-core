@@ -52,6 +52,7 @@ test_sources = {
   'cage_affiliation': 'test_cage_affiliation.cpp',
   'cage_enum': 'test_cage_enum.cpp',
   'trace_threads': 'test_trace_threads.cpp',
+  'pool_audit': 'test_pool_audit.cpp',
   'ddc_regression': 'test_ddc_regression.cpp',
   'c_api': 'test_c_api.cpp',
   'brine_select': 'test_brine_select.cpp',
@@ -127,6 +128,9 @@ foreach name, src : test_sources
   elif name == 'trace_threads'
     # GenIce cells at several widths, the mW frame, and all 148 nucleation frames.
     _timeout = 600
+  elif name == 'pool_audit'
+    # Ice Ic at 4096 molecules, each kernel at one thread and at eight.
+    _timeout = 300
   elif name == 'cage_affiliation'
     # The seeded case passes. A parallel run was killed at 120s on the
     # last assertion.
@@ -354,6 +358,13 @@ executable('bench_cages', 'bench_cages.cpp',
   build_rpath: '$ORIGIN/../src')
 
 executable('bench_ddc_ladder', 'bench_ddc_ladder.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_pool_audit', 'bench_pool_audit.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
   link_args: _test_link_args,

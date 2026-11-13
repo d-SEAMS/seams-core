@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cstdlib>
 
 // One width for OpenMP and Rayon. OpenMP already follows
@@ -11,8 +12,9 @@
 // OMP_PROC_BIND pins the calling thread before Rayon starts its pool,
 // and the workers then inherit that single cpu. The mask is widened to
 // every cpu the kernel still allows, once, before the pool is created.
-// A live OpenMP team is asked to stop spinning so the search can use
-// those cpus.
+// The pool is built once and its workers sleep between searches. The
+// OpenMP team is not paused: a pause makes the next region pay a
+// wake-up that moves by tens of milliseconds.
 
 #ifdef SEAMS_HAS_OPENMP
 #include <omp.h>
@@ -74,13 +76,11 @@ inline void prepareCompute() {
 }
 
 inline void adoptThreads() {
-  // Idle OpenMP threads spin by default and take cores from Rayon.
-  setenv("OMP_WAIT_POLICY", "PASSIVE", 0);
-  widenAffinity();
-  releaseTeam();
+  // Record the Rayon width and leave the OpenMP team running. Pausing
+  // it, or forcing a passive wait, made the next region late by tens of
+  // milliseconds. The pool sleeps on its own condvar between searches.
+  prepareCompute();
 #ifdef SEAMS_HAS_OPENMP
-  // A domain is searched by the thread that owns it. Rayon stays at one
-  // so the OpenMP team is the only pool.
   if (omp_in_parallel()) {
 #ifdef SEAMS_HAS_LINKCELL
     lc_set_threads(1);
@@ -95,22 +95,24 @@ inline void adoptThreads() {
     n = 1;
   }
 #ifdef SEAMS_HAS_LINKCELL
-  // The next linkcell search uses this width. OpenMP is the team that
-  // walks the cutoff rows; an idle Rayon pool waits passively.
   lc_set_threads(n);
 #else
   (void)n;
 #endif
 }
 
-// Thread count for a call that is too small for the fork. Measured on
-// this host: below 2048 atoms an eight-thread region is slower than the
-// serial walk, for both the cutoff list and the CHILL+ cell walk.
+// Thread count for a call that is too small for the fork. Below 2048
+// atoms an eight-thread region is slower than the serial walk. Below
+// 8192 atoms four threads beat eight: the extra workers do not have a
+// full share of the walk.
 inline int teamFor(int n) {
 #ifdef SEAMS_HAS_OPENMP
   const int team = std::max(1, omp_get_max_threads());
   if (n < 2048) {
     return 1;
+  }
+  if (n < 8192 && team > 4) {
+    return 4;
   }
   return team;
 #else
@@ -118,5 +120,36 @@ inline int teamFor(int n) {
   return 1;
 #endif
 }
+
+// Sets the OpenMP width from teamFor for the rest of the scope, then
+// puts the caller's width back. An OpenMP-only kernel uses this instead
+// of adoptThreads, which would also start the Rayon pool.
+struct TeamWidth {
+  int saved = 1;
+  bool on = false;
+  explicit TeamWidth(int n) {
+#ifdef SEAMS_HAS_OPENMP
+    if (!omp_in_parallel()) {
+      saved = std::max(1, omp_get_max_threads());
+      const int want = teamFor(n);
+      if (want != saved) {
+        omp_set_num_threads(want);
+        on = true;
+      }
+    }
+#else
+    (void)n;
+#endif
+  }
+  ~TeamWidth() {
+#ifdef SEAMS_HAS_OPENMP
+    if (on) {
+      omp_set_num_threads(saved);
+    }
+#endif
+  }
+  TeamWidth(const TeamWidth &) = delete;
+  TeamWidth &operator=(const TeamWidth &) = delete;
+};
 
 } // namespace seams

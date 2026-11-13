@@ -508,6 +508,21 @@ rule classify_carry:
 # Hydrate signature search at 1, 2, 4 and 8 threads. Replicates larger
 # than the GenIce unit cell are built in the benchmark and are not
 # committed. One sitting, serial.
+# One sitting of the neighbour-fed kernels at 1, 2, 4 and 8 threads.
+# Ice Ic at 4096, 32768, 110592 and 884736 molecules is built in the
+# benchmark and is not written out.
+rule pool_audit:
+    input:
+        "scripts/pool_audit_sitting.py",
+        "scripts/paper_stats.py",
+        "bbdir-release/tests/bench_pool_audit",
+    output:
+        "benchmarks/pool-audit.csv",
+        "benchmarks/pool-audit.txt",
+    shell:
+        "python3 scripts/pool_audit_sitting.py --out benchmarks"
+
+
 rule trace_threads:
     input:
         "scripts/trace_threads_sitting.py",
