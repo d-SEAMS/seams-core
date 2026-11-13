@@ -17,12 +17,16 @@
  :cages dseams.cages
  :cages-by-signature dseams.cages_by_signature
  :rdf dseams.rdf
+ :running-cn dseams.running_cn
  :cn dseams.cn
  :hbonds dseams.hbonds
  :density dseams.density
  :fingerprint dseams.fingerprint
  :pairs dseams.pairs
  :domain dseams.domain
+ :prisms dseams.prisms
+ :monolayer dseams.monolayer
+ :site-table dseams.site_table
  :core dseams.core
  :PUBLISHED dseams.PUBLISHED
  :OVITO dseams.OVITO}

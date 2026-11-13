@@ -25,7 +25,9 @@ def declarations(header):
         stripped = line.strip()
         if stripped.startswith("#"):
             continue
-        if stripped.startswith("/*") or stripped.startswith("*"):
+        if stripped.startswith("/*") or stripped.startswith("*") or stripped.startswith("*/"):
+            continue
+        if stripped.startswith("SEAMS_DEPRECATED"):
             continue
         lines.append(line)
     return "\n".join(lines).strip() + "\n"

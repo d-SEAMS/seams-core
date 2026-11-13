@@ -17,10 +17,11 @@ meson compile -C build
 #+end_src
 
 ~LUA_PATH~ points at ~bindings/lua~. ~LUA_CPATH~ points at the
-directory that holds ~dseams_core.so~. Names the header does not
-export are listed on [[file:../explanation/c-api-gaps.org][the C API gaps page]].
+directory that holds ~dseams_core.so~. Reading, CHILL, Steinhardt
+parameters, cages, neighbour lists, the RDF, hydrogen bonds, density,
+the fingerprint, prisms, and the monolayer all call ~seams.h~.
 ~meson test lua_examples~ runs the scripts below on Lua 5.4 and
-LuaJIT and checks the census against the C++ path.
+LuaJIT and checks each census against the C++ path.
 
 * Eight-atom cubic cell
 
@@ -37,9 +38,10 @@ The script is =examples/lua/ice.lua=.
 
 * Read a dump
 
-~dseams.read~ accepts an orthorhombic LAMMPS dump and a
-~# dseams-frame~ file. The mixed TIP4P dump keeps 250 oxygens when
-~type~ is 2. =examples/lua/read.lua= is that check.
+~dseams.read~ calls ~seams_system_read~. It reads XYZ, CON, and
+chemfiles trajectories, including a triclinic LAMMPS dump. The mixed
+TIP4P dump keeps 250 oxygens when ~type~ is 2.
+=examples/lua/read.lua= is that check.
 =examples/lua/chill_plus.lua= loads =examples/chill-plus.lua= as the
 rule table and labels =input/traj/genice_sI.lammpstrj=.
 =examples/lua/neighbors.lua= is the cutoff rows.
@@ -69,6 +71,9 @@ frame is =examples/fennel/rings.fnl=.
 
 The test compiles both files with Fennel and runs the Lua on each
 interpreter. The CHILL+ line and the ring histogram match
-~tests/lua_oracle.cpp~, which calls ~orthoFullCsr~,
-~chillPlusFromCsr~, ~steinhardtQlCutoff~, and ~ringNetwork~ on ice
-Ih, sI, the interface, and the TIP4P oxygen frame.
+~tests/lua_oracle.cpp~. That oracle also checks CHILL, Steinhardt
+orders 3, 4, 6, 8, and 12 (including the Lechner-Dellago average),
+cage counts, the cage signature, k-nearest neighbours, the RDF, the
+running coordination, hydrogen bonds, the density profile, the
+fingerprint, the site table, contact pairs, domains, prisms, the
+monolayer, and ring vertices against the C++ path.

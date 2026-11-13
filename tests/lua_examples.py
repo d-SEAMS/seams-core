@@ -73,9 +73,13 @@ def compare(oracle, other, keys):
     for key in keys:
         if key not in right:
             raise SystemExit("missing {} {}".format(key[0], key[1]))
-        if key[1] == "q6":
-            if abs(float(left[key][0]) - float(right[key][0])) > 1e-8:
-                raise SystemExit("q6 {} {} {}".format(key[0], left[key], right[key]))
+        numeric = any(("." in token) or ("e" in token.lower()) for token in left[key] + right[key])
+        if numeric:
+            if len(left[key]) != len(right[key]):
+                raise SystemExit("{} {} oracle {} lua {}".format(key[0], key[1], left[key], right[key]))
+            for a, b in zip(left[key], right[key]):
+                if abs(float(a) - float(b)) > 1e-8:
+                    raise SystemExit("{} {} oracle {} lua {}".format(key[0], key[1], left[key], right[key]))
         elif left[key] != right[key]:
             raise SystemExit("{} {} oracle {} lua {}".format(key[0], key[1], left[key], right[key]))
 
@@ -94,13 +98,22 @@ def main(argv):
     env["SEAMS_LIB"] = lib
     env["LUA_PATH"] = str(root / "bindings" / "lua") + "/?.lua;;"
     env["LUA_CPATH"] = ""
-    frame = work / "ih.frame"
+    frame = work / "ih.lammpstrj"
     oracle_text = run([oracle, str(frame), str(root)], env, root)
     full_keys = []
     for name in ("ih", "si", "interface", "tip"):
         for field in ("n", "chill", "rings", "q6", "nnz"):
             full_keys.append((name, field))
     fennel_keys = [("interface", "chill"), ("tip", "rings")]
+    for field in (
+        "chill0", "q3", "q6bar", "vert", "cages", "knn", "rdf", "rcn", "cn",
+        "hbond", "rho", "fp", "site", "pairs", "domain", "prism", "sheet",
+    ):
+        full_keys.append(("ih", field))
+    full_keys.extend([
+        ("read", "si"), ("read", "tip"), ("read", "xyz"), ("read", "con"), ("read", "tri"),
+        ("si", "sig"),
+    ])
     fennel_lib = env.get("FENNEL_LUA", "")
     if not fennel_lib:
         raise SystemExit("FENNEL_LUA is not set")

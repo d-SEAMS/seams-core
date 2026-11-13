@@ -8,7 +8,7 @@ local rows = dseams.neighbors(cloud, {cutoff = 3.5, type = 1, graph = "cutoff"})
 assert(#rows == cloud.nop)
 local nnz = 0
 for i, row in ipairs(rows) do
-  assert(row[1] == cloud._ids[i])
+  assert(row[1] == i)
   nnz = nnz + #row - 1
 end
 print(string.format("neighbors rows=%d nnz=%d", #rows, nnz))
