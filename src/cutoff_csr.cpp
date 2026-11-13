@@ -1277,15 +1277,23 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
     }
   }
   const auto tCount = Clock::now();
+  const bool stashOk = shifted && !half;
+  if (stashOk &&
+      sc.stash.size() < static_cast<std::size_t>(nop) * static_cast<std::size_t>(kStashCap)) {
+    sc.stash.resize(static_cast<std::size_t>(nop) * static_cast<std::size_t>(kStashCap));
+  }
   if (shifted) {
     if (half) {
       passFast<false, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                             ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr,
                             branchy);
+    } else if (maxThreads == 1) {
+      passFastStashHalf(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                        ncell[2], shx, shy, shz, rc2, sc.counts.data(), sc.stash.data(),
+                        &sc.overflowed, branchy);
     } else {
-      passFast<false, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                             ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr,
-                             branchy);
+      passFastStash(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
+                    shx, shy, shz, rc2, sc.counts.data(), sc.stash.data(), &sc.overflowed);
     }
   } else {
     passTilt<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
@@ -1304,7 +1312,9 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
   phase().prefix = msSince(tPrefix);
   const auto tFill = Clock::now();
   if (nnz > 0) {
-    if (shifted) {
+    if (stashOk && sc.overflowed == 0) {
+      scatterStash(sc.stash.data(), sc.counts.data(), offsets.data(), cols.data(), nop);
+    } else if (shifted) {
       if (half) {
         passFast<true, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                              ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data(),

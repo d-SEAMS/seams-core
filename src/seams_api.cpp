@@ -2134,7 +2134,12 @@ seams_status seams_neighbours_knn(seams_system *sys, int k, double cutoff, int t
     }
     auto nb = std::make_unique<seams_neighbours>();
     nb->n = src->nop;
-    nneigh::kNearestCsr(*src, k, cutoff + 1.5, typ, mutual != 0, nb->offsets, nb->cols);
+    // Parking the OpenMP team at the start of a k-nearest call made the
+    // next search late by a fraction of a millisecond, which is the whole
+    // of a few-thousand-atom triclinic query. The linkcell pool sleeps
+    // on its own.
+    nneigh::kNearestCsr(*src, k, cutoff + 1.5, typ, mutual != 0, nb->offsets, nb->cols,
+                        false);
     *out = nb.release();
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {

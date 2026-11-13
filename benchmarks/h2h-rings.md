@@ -27,7 +27,7 @@ Sizes that are zero on the ideal ice and on sII are omitted. d-SEAMS, rings-stat
 
 OVITO's ring-size histogram starts at 4, so the 637 triangles on the interface and the 191 triangles on the melted frame are absent from its table. d-SEAMS, rings-statistics-matter, and cycless agree on those triangles.
 
-cycless is short by 7 pentagons and 4 hexagons on the interface, and by 5 pentagons on the melted frame. `cycles_iter` grows a ring only as a shortest path between one pair of neighbours of a root. The rings it misses are still cycles, and no pair of members has a graph distance shorter than the distance along the ring. One missed pentagon on the interface, in cycle order, is atoms 123, 298, 260, 337, 383. On ice, stacking, and sII, where that search does not drop a ring, the four codes match.
+cycless is short by 7 pentagons and 4 hexagons on the interface, and by 5 pentagons on the melted frame. `cycles_iter` grows a ring only as a shortest path between one pair of neighbours of a root, and that walk does not emit every primitive ring. The rings it misses are cycles in the same 3.5 A graph, and no pair of members has a graph distance shorter than the distance along the ring, so they are shortest-path rings. On the interface the witness pentagon, in cycle order, is atoms 123, 298, 260, 337, 383. `tests/test_cycless_pentagon.py` rebuilds that frame and checks the d-SEAMS census contains it. On ice, stacking, and sII, where the cycless walk does not drop a ring, the four codes match.
 
 ## Time, median of eight samples, milliseconds
 

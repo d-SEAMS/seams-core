@@ -2650,10 +2650,22 @@ int chill::chillPlusOvitoFromCsr(molSys::PointCloud<molSys::Point<double>, doubl
   const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
   const auto &norm = normQ3();
   const chill::BondClassifier rule = chill::chillPlusRule();
-  std::vector<double> q(static_cast<std::size_t>(n) * kRealL3, 0.0);
-  std::vector<double> qn(static_cast<std::size_t>(n), 0.0);
-  std::vector<int> chosen(static_cast<std::size_t>(n) * 4, -1);
-  std::vector<int> nkeep(static_cast<std::size_t>(n), 0);
+  // Reused across calls. Every slot a later loop reads is written below.
+  struct Scratch {
+    std::vector<double> q;
+    std::vector<double> qn;
+    std::vector<int> chosen;
+    std::vector<int> nkeep;
+  };
+  static Scratch scratch;
+  auto &q = scratch.q;
+  auto &qn = scratch.qn;
+  auto &chosen = scratch.chosen;
+  auto &nkeep = scratch.nkeep;
+  q.resize(static_cast<std::size_t>(n) * kRealL3);
+  qn.resize(static_cast<std::size_t>(n));
+  chosen.resize(static_cast<std::size_t>(n) * 4);
+  nkeep.resize(static_cast<std::size_t>(n));
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 256)
 #endif

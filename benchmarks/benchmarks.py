@@ -777,3 +777,73 @@ class H2HRings:
 
 H2HRings.time_session.repeat = 1
 H2HRings.time_session.number = 1
+
+
+class H2HTriclinic:
+    """Tilted ice Ih and sH against freud, OVITO and mdapy.
+
+    The Snakemake rule writes the pinned ABAB log. This entry runs the
+    agreement check on the small cells.
+    """
+
+    def setup(self):
+        import importlib.util
+
+        script = ROOT / "scripts" / "h2h_triclinic.py"
+        lib_path = ROOT / "bbdir-release" / "src" / "libseams.so"
+        if not lib_path.is_file():
+            raise NotImplementedError("bbdir-release/src/libseams.so is not built")
+        spec = importlib.util.spec_from_file_location("h2h_triclinic", script)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self._module = module
+        os.environ.setdefault("SEAMS_LIB", str(lib_path))
+
+    def time_check(self):
+        self._module.main_check = None
+        # The module's main reads argv. Call the check directly.
+        import freud  # noqa: F401
+        import mdapy  # noqa: F401
+        import ovito  # noqa: F401
+
+        lib = self._module.load_seams(self._module.library_path())
+        self._module.bind_rings(lib)
+        pos, box = self._module.tilted_ice(2, 2, 2)
+        if not self._module.check_frame(lib, "ice64", pos, box):
+            raise RuntimeError("tilted ice disagrees")
+
+
+H2HTriclinic.time_check.repeat = 1
+H2HTriclinic.time_check.number = 1
+
+
+class H2HScale:
+    """442368-molecule tilted ice, cutoff, CHILL+ and rings.
+
+    The Snakemake rule writes the serial and eight-thread log.
+    """
+
+    def setup(self):
+        import importlib.util
+
+        script = ROOT / "scripts" / "h2h_triclinic.py"
+        lib_path = ROOT / "bbdir-release" / "src" / "libseams.so"
+        if not lib_path.is_file():
+            raise NotImplementedError("bbdir-release/src/libseams.so is not built")
+        spec = importlib.util.spec_from_file_location("h2h_triclinic_scale", script)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self._module = module
+        os.environ.setdefault("SEAMS_LIB", str(lib_path))
+
+    def time_scale(self):
+        lib = self._module.load_seams(self._module.library_path())
+        self._module.bind_rings(lib)
+        pos, box = self._module.tilted_ice(24, 24, 96)
+        keep = {"cutoff", "chill_paper", "chill_plus", "rings"}
+        if not self._module.time_frame(lib, "ice442368", pos, box, 1, 1, only=keep):
+            raise RuntimeError("scale sample lost")
+
+
+H2HScale.time_scale.repeat = 1
+H2HScale.time_scale.number = 1
