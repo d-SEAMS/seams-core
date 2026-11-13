@@ -119,6 +119,15 @@ struct Graph {
 std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,
                                           int maxDepth);
 
+//! Which adjacency the ring search packs before it walks. Auto uses one
+//! sorted array per row: a single pass on one thread, a team on several.
+//! Vectors keeps a std::vector per atom. Packed forces the array even
+//! when the team has one thread. The ring set does not depend on the choice.
+enum class RingRows { Auto, Vectors, Packed };
+
+std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,
+                                          int maxDepth, RingRows rows);
+
 //! The rings ringNetwork returns whose lowest-indexed member is flagged in
 //! @a sources (by index; empty flags every vertex), in the same order
 std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,

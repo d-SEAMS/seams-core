@@ -404,7 +404,7 @@ bool orthoFullCsr(
     const std::vector<int> *subset, double rcutoff, std::vector<int> &offsets,
     std::vector<int> &cols, bool half = false,
     std::vector<std::vector<int>> *directRows = nullptr, const int *indexToID = nullptr,
-    bool *wroteRows = nullptr);
+    bool *wroteRows = nullptr, bool branchy = false);
 
 //! Same rows as neighListO, written into @a rows. A row keeps the capacity
 //! of the previous call, so a repeated frame does not allocate per atom.

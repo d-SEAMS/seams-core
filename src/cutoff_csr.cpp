@@ -185,7 +185,7 @@ template <bool Write, bool Half>
 void passFast(const double *xs, const double *ys, const double *zs,
               const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
               const double *shx, const double *shy, const double *shz, double rc2,
-              int *counts, int *offsets, int *cols) {
+              int *counts, int *offsets, int *cols, bool branchy = false) {
   const int nCells = ncx * ncy * ncz;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (nCells >= 64)
@@ -199,6 +199,65 @@ void passFast(const double *xs, const double *ys, const double *zs,
     const int cz = c % ncz;
     const int cy = (c / ncz) % ncy;
     const int cx = c / (ncy * ncz);
+    // Interior cells have a zero image shift. The wrap tests stay on the
+    // boundary, which is the same shortcut as the orthorhombic stash.
+    if (!branchy && cx > 0 && cx + 1 < ncx && cy > 0 && cy + 1 < ncy && cz > 0 &&
+        cz + 1 < ncz) {
+      int begin[27];
+      int endn[27];
+      int nn = 0;
+      begin[nn] = b;
+      endn[nn] = e;
+      ++nn;
+      for (int ox = -1; ox <= 1; ++ox) {
+        for (int oy = -1; oy <= 1; ++oy) {
+          for (int oz = -1; oz <= 1; ++oz) {
+            if (ox == 0 && oy == 0 && oz == 0) {
+              continue;
+            }
+            const int ncid = ((cx + ox) * ncy + (cy + oy)) * ncz + (cz + oz);
+            const int jb = cellStart[ncid];
+            const int je = cellStart[ncid + 1];
+            if (jb == je) {
+              continue;
+            }
+            begin[nn] = jb;
+            endn[nn] = je;
+            ++nn;
+          }
+        }
+      }
+      for (int i = b; i < e; ++i) {
+        const int ii = ids[i];
+        const double xi = xs[i];
+        const double yi = ys[i];
+        const double zi = zs[i];
+        const int base = Write ? offsets[ii] : 0;
+        int n = 0;
+        for (int t = 0; t < nn; ++t) {
+          for (int j = begin[t]; j < endn[t]; ++j) {
+            if (j == i || (Half && ids[j] < ii)) {
+              continue;
+            }
+            const double dx = xi - xs[j];
+            const double dy = yi - ys[j];
+            const double dz = zi - zs[j];
+            if (dx * dx + dy * dy + dz * dz < rc2) {
+              if (Write) {
+                cols[base + n] = ids[j];
+              }
+              ++n;
+            }
+          }
+        }
+        if (Write) {
+          sortRow(cols + base, n);
+        } else {
+          counts[ii] = n;
+        }
+      }
+      continue;
+    }
     struct Nbr {
       int begin;
       int end;
@@ -465,7 +524,7 @@ void halfZLayer(int cz, const double *xs, const double *ys, const double *zs,
 void passFastStashHalf(const double *xs, const double *ys, const double *zs,
                        const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
                        const double *shx, const double *shy, const double *shz, double rc2,
-                       int *counts, int *stash, int *overflowed);
+                       int *counts, int *stash, int *overflowed, bool branchy = false);
 
 // Count pass that also keeps the neighbour ids. A shell longer than
 // kStashCap sets *overflowed and the caller repeats the geometry fill.
@@ -513,7 +572,7 @@ void passFastStash(const double *xs, const double *ys, const double *zs,
 void passFastStashHalf(const double *xs, const double *ys, const double *zs,
                        const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
                        const double *shx, const double *shy, const double *shz, double rc2,
-                       int *counts, int *stash, int *overflowed) {
+                       int *counts, int *stash, int *overflowed, bool branchy) {
   const int nCells = ncx * ncy * ncz;
   *overflowed = 0;
   for (int c = 0; c < nCells; ++c) {
@@ -527,8 +586,9 @@ void passFastStashHalf(const double *xs, const double *ys, const double *zs,
     const int cx = c / (ncy * ncz);
     // An interior cell has no periodic image. The forward neighbours are
     // index steps and the shift is zero, so the wrap tests stay on the
-    // boundary layer.
-    if (cx > 0 && cx + 1 < ncx && cy > 0 && cy + 1 < ncy && cz > 0 && cz + 1 < ncz) {
+    // boundary layer. branchy keeps those tests on every cell.
+    if (!branchy && cx > 0 && cx + 1 < ncx && cy > 0 && cy + 1 < ncy && cz > 0 &&
+        cz + 1 < ncz) {
       int begin[14];
       int end[14];
       int nn = 0;
@@ -809,7 +869,7 @@ template <bool Write>
 void passTilt(const double *xs, const double *ys, const double *zs, const int *ids,
               const int *cellStart, int ncx, int ncy, int ncz, int rx, int ry, int rz,
               const Tilt &h, double rc2, bool half, bool shifted, int *counts,
-              int *offsets, int *cols) {
+              int *offsets, int *cols, bool branchy = false) {
   const int nCells = ncx * ncy * ncz;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (nCells >= 8)
@@ -831,6 +891,11 @@ void passTilt(const double *xs, const double *ys, const double *zs, const int *i
       const int cz = c % ncz;
       const int cy = (c / ncz) % ncy;
       const int cx = c / (ncy * ncz);
+      // A cell whose reach window stays inside the grid has no image shift.
+      // The while-wraps below are then dead branches, same as on an
+      // orthorhombic interior cell.
+      const bool deep = !branchy && cx >= rx && cx + rx < ncx && cy >= ry && cy + ry < ncy &&
+                        cz >= rz && cz + rz < ncz;
       for (int i = b; i < e; ++i) {
         const int ii = ids[i];
         found.clear();
@@ -842,35 +907,41 @@ void passTilt(const double *xs, const double *ys, const double *zs, const int *i
         for (int ox = -rx; ox <= rx; ++ox) {
           int nx = cx + ox;
           double ssx = 0.0;
-          while (nx >= ncx) {
-            nx -= ncx;
-            ssx += 1.0;
-          }
-          while (nx < 0) {
-            nx += ncx;
-            ssx -= 1.0;
+          if (!deep) {
+            while (nx >= ncx) {
+              nx -= ncx;
+              ssx += 1.0;
+            }
+            while (nx < 0) {
+              nx += ncx;
+              ssx -= 1.0;
+            }
           }
           for (int oy = -ry; oy <= ry; ++oy) {
             int ny = cy + oy;
             double ssy = 0.0;
-            while (ny >= ncy) {
-              ny -= ncy;
-              ssy += 1.0;
-            }
-            while (ny < 0) {
-              ny += ncy;
-              ssy -= 1.0;
+            if (!deep) {
+              while (ny >= ncy) {
+                ny -= ncy;
+                ssy += 1.0;
+              }
+              while (ny < 0) {
+                ny += ncy;
+                ssy -= 1.0;
+              }
             }
             for (int oz = -rz; oz <= rz; ++oz) {
               int nz = cz + oz;
               double ssz = 0.0;
-              while (nz >= ncz) {
-                nz -= ncz;
-                ssz += 1.0;
-              }
-              while (nz < 0) {
-                nz += ncz;
-                ssz -= 1.0;
+              if (!deep) {
+                while (nz >= ncz) {
+                  nz -= ncz;
+                  ssz += 1.0;
+                }
+                while (nz < 0) {
+                  nz += ncz;
+                  ssz -= 1.0;
+                }
               }
               const int ncid = (nx * ncy + ny) * ncz + nz;
               if (stamp[static_cast<std::size_t>(ncid)] == gen) {
@@ -919,7 +990,8 @@ void passTilt(const double *xs, const double *ys, const double *zs, const int *i
 
 bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  const std::vector<int> *subset, double rcutoff,
-                 std::vector<int> &offsets, std::vector<int> &cols, bool half) {
+                 std::vector<int> &offsets, std::vector<int> &cols, bool half,
+                 bool branchy = false) {
   const gen::FracBox box = gen::makeFracBox(yCloud);
   if (!box.ok || !box.triclinic) {
     return false;
@@ -1108,15 +1180,17 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
   if (shifted) {
     if (half) {
       passFast<false, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                            ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr);
+                            ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr,
+                            branchy);
     } else {
       passFast<false, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                             ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr);
+                             ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr,
+                             branchy);
     }
   } else {
     passTilt<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
                     reach[0], reach[1], reach[2], h, rc2, half, false, sc.counts.data(),
-                    nullptr, nullptr);
+                    nullptr, nullptr, branchy);
   }
   phase().count = msSince(tCount);
   const auto tPrefix = Clock::now();
@@ -1133,15 +1207,17 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
     if (shifted) {
       if (half) {
         passFast<true, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                             ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data());
+                             ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data(),
+                             branchy);
       } else {
         passFast<true, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                              ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data());
+                              ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data(),
+                              branchy);
       }
     } else {
       passTilt<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
                      reach[0], reach[1], reach[2], h, rc2, half, false, nullptr, offsets.data(),
-                     cols.data());
+                     cols.data(), branchy);
     }
   }
   phase().fill = msSince(tFill);
@@ -1631,13 +1707,13 @@ bool orthoFullCsr(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> *subset, double rcutoff, std::vector<int> &offsets,
     std::vector<int> &cols, bool half, std::vector<std::vector<int>> *directRows,
-    const int *indexToID, bool *wroteRows) {
+    const int *indexToID, bool *wroteRows, bool branchy) {
   const int nop = yCloud.nop;
   if (nop < 0 || !(rcutoff > 0.0)) {
     return false;
   }
   if (yCloud.box.size() >= 6) {
-    return tiltFullCsr(yCloud, subset, rcutoff, offsets, cols, half);
+    return tiltFullCsr(yCloud, subset, rcutoff, offsets, cols, half, branchy);
   }
   if (yCloud.box.size() != 3) {
     return false;
@@ -1866,11 +1942,12 @@ bool orthoFullCsr(
   if (fast) {
     if (half) {
       passFast<false, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                            ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr);
+                            ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr,
+                            branchy);
     } else if (maxThreads == 1) {
       passFastStashHalf(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                         ncell[2], shx, shy, shz, rc2, sc.counts.data(), sc.stash.data(),
-                        &sc.overflowed);
+                        &sc.overflowed, branchy);
     } else {
       passFastStash(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
                     shx, shy, shz, rc2, sc.counts.data(), sc.stash.data(), &sc.overflowed);
@@ -1900,10 +1977,12 @@ bool orthoFullCsr(
     } else if (fast) {
       if (half) {
         passFast<true, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                             ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data());
+                             ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data(),
+                             branchy);
       } else {
         passFast<true, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                              ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data());
+                              ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data(),
+                              branchy);
       }
     } else {
       passSafe<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
