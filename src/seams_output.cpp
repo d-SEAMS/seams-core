@@ -534,10 +534,10 @@ int sout::writeBasalRingsHex(const std::vector<int> &currentCage, int cageNum,
   // Variables for ordering basal2
   // After finding the nearest neighbours, elements which are not nearest
   // neighbours are assigned a value of zero.
-  int needle;      // First non-zero element of basal2 after getting the nearest
+  int needle = 0;  // First non-zero element of basal2 after getting the nearest
                    // neighbours
-  int startNeedle; // Index of basal2; the first non-zero element of basal2
-  int startHayStack; // Index of unOrderedBasal2, corresponding to the first
+  int startNeedle = 0; // Index of basal2; the first non-zero element of basal2
+  int startHayStack = 0; // Index of unOrderedBasal2, corresponding to the first
                      // non-zero element of basal2
   bool isClock;      // Original order of unOrderedBasal2
   int nextElement;   // Next element in unOrderedBasal2 after startHayStack
@@ -609,6 +609,9 @@ int sout::writeBasalRingsHex(const std::vector<int> &currentCage, int cageNum,
 
   // ---------------
   // Get the first non-zero index {needle}
+  if (basal2.size() < 2 || unOrderedBasal2.size() < 2) {
+    return 1;
+  }
   for (int i = 0; i < 2; i++) {
     if (basal2[i] != 0) {
       needle = basal2[i]; // Set the needle to the first non-zero element

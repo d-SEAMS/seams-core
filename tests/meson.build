@@ -70,6 +70,7 @@ test_sources = {
   'wide_cell': 'test_wide_cell.cpp',
   'offset_limit': 'test_offset_limit.cpp',
   'prism_empty': 'test_prism_empty.cpp',
+  'basal_needle': 'test_basal_needle.cpp',
 }
 
 if readcon_dep.found()
