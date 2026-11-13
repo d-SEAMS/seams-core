@@ -555,7 +555,9 @@ def large_frames(outdir):
 
 
 def main():
-    outdir = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("--") else "/tmp/sym-v3"
+    root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    outdir = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith("--") else os.environ.get(
+        "SEAMS_FRAME_OUT", os.path.join(root, "build", "sym-v3"))
     if "--large" in sys.argv:
         os.makedirs(outdir, exist_ok=True)
         large_frames(outdir)

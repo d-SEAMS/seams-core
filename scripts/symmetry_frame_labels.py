@@ -9,6 +9,7 @@ notes. kind is ice Ih (0), ice Ic (1), ice Isd (2), or -1.
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -57,7 +58,8 @@ def main():
         (root / "input" / "traj" / "interface_f0.lammpstrj", read_lammpstrj, out / "interface_f0.csv"),
     ]
     for seed in (91001, 92002, 93003):
-        src = Path(f"/tmp/nuc200/seed-{seed}-200ps.xyz")
+        seed_dir = Path(os.environ.get("SEAMS_NUC200", root / "input" / "traj"))
+        src = seed_dir / f"seed-{seed}-200ps.xyz"
         if src.is_file():
             jobs.append((src, read_seed, out / f"seed-{seed}-200ps.csv"))
     for src, reader, dest in jobs:
