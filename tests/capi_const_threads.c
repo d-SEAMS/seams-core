@@ -75,11 +75,14 @@ static void need(seams_status status, const char *what) {
 static void *reader(void *arg) {
   const size_t n = (size_t)g_n;
   long *bad = arg;
+  double *xyz = malloc(sizeof(double) * 3 * n);
+  int *ints = malloc(sizeof(int) * n);
   int *sizes = malloc(sizeof(int) * g_nrings);
   int *sym = malloc(sizeof(int) * g_nrings);
   int *off = malloc(sizeof(int) * g_noff);
   int *cols = malloc(sizeof(int) * g_nnz);
-  if (sizes == NULL || sym == NULL || off == NULL || cols == NULL) {
+  double cell[9];
+  if (xyz == NULL || ints == NULL || sizes == NULL || sym == NULL || off == NULL || cols == NULL) {
     *bad += 1;
     return NULL;
   }
@@ -89,9 +92,14 @@ static void *reader(void *arg) {
     *bad += memcmp(sizes, g_ref_sizes, sizeof(int) * g_nrings) != 0;
     *bad += memcmp(sym, g_ref_sym, sizeof(int) * g_nrings) != 0;
 
-    size_t natoms = 0;
-    *bad += seams_system_natoms(g_sys, &natoms) != SEAMS_OK;
-    *bad += natoms != n;
+    *bad += seams_system_positions(g_sys, xyz, 3 * n) != SEAMS_OK;
+    *bad += memcmp(xyz, g_xyz, sizeof(double) * 3 * n) != 0;
+    *bad += seams_system_types(g_sys, ints, n) != SEAMS_OK;
+    *bad += memcmp(ints, g_types, sizeof(int) * n) != 0;
+    *bad += seams_system_ids(g_sys, ints, n) != SEAMS_OK;
+    *bad += ints[n - 1] != g_n;
+    *bad += seams_system_box(g_sys, cell, 9) != SEAMS_OK;
+    *bad += fabs(cell[3] - g_box[3]) > 1e-12 * g_box[3];
     *bad += seams_system_count(g_sys) != g_n;
 
     size_t no = 0, nz = 0;
@@ -100,11 +108,13 @@ static void *reader(void *arg) {
     *bad += memcmp(off, g_ref_off, sizeof(int) * g_noff) != 0;
     *bad += memcmp(cols, g_ref_cols, sizeof(int) * g_nnz) != 0;
 
-    *bad += seams_rings_labels_n(g_rings, sizes, g_nrings - 1, NULL, 0) != SEAMS_ERR_RANGE;
+    *bad += seams_system_positions(g_sys, xyz, 3 * n - 1) != SEAMS_ERR_RANGE;
     *bad += seams_last_error_message()[0] == '\0';
     *bad += seams_neighbours_copy(g_nb, off, 0, &no, cols, g_nnz, &nz) != SEAMS_ERR_RANGE;
     *bad += seams_last_error_message()[0] == '\0';
   }
+  free(xyz);
+  free(ints);
   free(sizes);
   free(sym);
   free(off);
@@ -159,7 +169,7 @@ int main(void) {
   }
   pthread_barrier_destroy(&g_start);
   /* The handle copy aliases the handle, so it is read once the threads are done. */
-  total += seams_handle_error(g_rings)[0] == '\0';
+  total += seams_handle_error(g_sys)[0] == '\0';
   total += seams_handle_error(g_nb)[0] == '\0';
 
   printf("capi_const_threads: %d threads x %d rounds, %zu atoms, %zu rings, %ld mismatches\n",

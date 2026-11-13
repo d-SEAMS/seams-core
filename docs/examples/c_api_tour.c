@@ -133,6 +133,30 @@ int main(int argc, char **argv) {
   need("natoms", seams_system_natoms(ih, &natoms), ih);
   printf("capi seams_system_natoms %zu\n", natoms);
 
+  double moved[24];
+  for (int k = 0; k < 24; ++k) {
+    moved[k] = xyz[k] + 0.25;
+  }
+  need("set_positions", seams_system_set_positions(cell, moved, 8, NULL, 0), cell);
+  printf("capi seams_system_set_positions %d\n", seams_system_count(cell));
+  double cell9[9];
+  need("box", seams_system_box(cell, cell9, 9), cell);
+  printf("capi seams_system_box %.3f %.3f %.3f %.3f %.3f %.3f\n", cell9[0], cell9[1], cell9[2],
+         cell9[3], cell9[4], cell9[5]);
+  double back[24];
+  need("positions", seams_system_positions(cell, back, 24), cell);
+  printf("capi seams_system_positions %.3f %.3f %.3f\n", back[0], back[1], back[2]);
+  int types8[8];
+  need("types", seams_system_types(cell, types8, 8), cell);
+  int ones = 0;
+  for (int i = 0; i < 8; ++i) {
+    ones += types8[i] == 1;
+  }
+  printf("capi seams_system_types %d of type 1\n", ones);
+  int ids8[8];
+  need("ids", seams_system_ids(cell, ids8, 8), cell);
+  printf("capi seams_system_ids %d %d\n", ids8[0], ids8[7]);
+
   seams_neighbours *nb = NULL;
   need("neigh", seams_neighbours_build(ih, 3.5, 1, SEAMS_GRAPH_CUTOFF, &nb), ih);
   printf("capi seams_neighbours_build %d\n", seams_neighbours_count(nb));

@@ -67,8 +67,11 @@ a static archive. `tests/capi_symbols.txt` is the exported list, and the
 `seams_last_error_message` and its ABI 1 spelling `seams_last_error` return the same
 string. `seams_last_error` is the detail of the last failing call on this thread. A later
 successful call on the same thread clears it. The storage is thread-local.
-`seams_handle_error` is the copy stored on the handle that failed. That copy stays
-until the next call on that handle, or until destroy. Pass `NULL` and
+`seams_handle_error` is the copy stored on the handle that failed. A call that takes
+the handle non-const clears that copy on entry. A call that takes it `const` writes the
+copy only when it fails, so a successful `const` call leaves the last failure in place.
+The copy stays until the next failing call or non-const call on that handle, or until
+destroy. Pass `NULL` and
 `seams_handle_error` returns the thread-local string. The caller does not free either
 pointer.
 
@@ -78,6 +81,43 @@ On an empty frame, `seams_chill_plus` returns `SEAMS_ERR_STATE`. The tour prints
 capi seams_last_error system has no frame
 capi seams_handle_error no-frame
 ```
+
+## Const handles
+
+A function that takes a `const` handle is a read-only accessor. On success it writes
+nothing to the handle; on failure it writes only the error copy, under a lock. Several
+threads may make `const` calls on one handle at the same time, as long as no non-const
+call on that handle overlaps them. Read the message with `seams_last_error_message`
+when threads share a handle. `tests/capi_const_threads.c` runs eight threads this way.
+
+The frame accessors are `seams_system_count`, `seams_system_natoms`, `seams_system_box`,
+`seams_system_positions`, `seams_system_types`, and `seams_system_ids`. Every query on
+a neighbour, ring, cage, brine, or fingerprint handle is also `const`. The ring label
+cache that `seams_rings_labels` fills on the first symmetry request is built once,
+under a lock.
+
+The analyses on a `seams_system` stay non-const, and each declaration in `seams.h`
+says why under "Handle access":
+
+- the loads replace the stored frame;
+- `seams_chill`, `seams_chill_plus`, and `seams_chill_plus_n` write CHILL+ labels into
+  the stored frame;
+- `seams_ql`, `seams_q4q6`, `seams_q4q6_n`, `seams_q6bar`, and `seams_steinhardt` use
+  process-global q_lm scratch, so two of them must not overlap even on different
+  handles;
+- the others keep no scratch on the handle, and are non-const only because they clear
+  the error copy on entry, which is what lets `seams_handle_error` report that call.
+
+## Reloading a frame
+
+`seams_system_set_atoms` reuses the storage of the frame it replaces. When the ids
+are `NULL`, or 1 to n in order, and the atom count is unchanged, it also keeps the id
+index. `seams_system_set_positions` overwrites only the coordinates, and optionally
+the cell, for a frame of the same atom count; types and ids stay. A trajectory loop
+calls `seams_system_set_atoms` once and `seams_system_set_positions` for each later
+frame. There is no borrowed-pointer load. Every analysis reads the library's per-atom
+records, so a view onto caller memory would be copied on every analysis call instead
+of once per frame. A failed load or reload leaves the earlier frame in place.
 
 ## Threads
 
@@ -343,6 +383,47 @@ The call is in `docs/examples/c_api_tour.c`. The run prints:
 
 ```
 capi seams_system_natoms 128
+```
+
+### seams_system_set_positions
+
+The call is in `docs/examples/c_api_tour.c`. It moves the eight-atom cell and
+keeps its types and ids. The run prints:
+
+```
+capi seams_system_set_positions 8
+```
+
+### seams_system_box
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_system_box 0.000 0.000 0.000 6.351 6.351 6.351
+```
+
+### seams_system_positions
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_system_positions 0.250 0.250 0.250
+```
+
+### seams_system_types
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_system_types 8 of type 1
+```
+
+### seams_system_ids
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_system_ids 1 8
 ```
 
 ### seams_neighbours_build
@@ -2071,6 +2152,16 @@ Units: as documented on that declaration.
 
 Example: `docs/examples/c_api_tour.c`
 
+### seams_system_box
+
+Purpose: Copy the stored cell out as the nine LAMMPS numbers; read-only on a const handle.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: Angstrom
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_system_count
 
 Purpose: Public name in include/seams.h.
@@ -2101,6 +2192,16 @@ Units: as documented on that declaration.
 
 Example: `docs/examples/c_api_tour.c`
 
+### seams_system_ids
+
+Purpose: Copy the stored atom ids out; read-only on a const handle.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: none
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_system_natoms
 
 Purpose: Atom count of a frame, returned through a status.
@@ -2108,6 +2209,16 @@ Purpose: Atom count of a frame, returned through a status.
 Parameters: see the declaration in include/seams.h.
 
 Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_positions
+
+Purpose: Copy the stored coordinates out; read-only on a const handle.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: Angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
@@ -2151,6 +2262,16 @@ Units: as documented on that declaration.
 
 Example: `docs/examples/c_api_tour.c`
 
+### seams_system_set_positions
+
+Purpose: Overwrite the coordinates, and optionally the cell, of the stored frame in place.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: Angstrom
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_system_symmetry
 
 Purpose: Public name in include/seams.h.
@@ -2158,6 +2279,16 @@ Purpose: Public name in include/seams.h.
 Parameters: see the declaration in include/seams.h.
 
 Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_types
+
+Purpose: Copy the stored atom types out; read-only on a const handle.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: none
 
 Example: `docs/examples/c_api_tour.c`
 

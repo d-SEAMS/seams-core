@@ -225,6 +225,120 @@ static void frame_contract(void) {
   truth(seams_last_error_message()[0] != '\0', fn, "double destroy is reported");
 }
 
+static void frame_io_contract(void) {
+  const size_t n = (size_t)g_n;
+  seams_system *sys = seams_system_create();
+  double xyz[3 * N_MAX];
+  double out[3 * N_MAX];
+  double box[9];
+  double cell[9];
+  int ids[N_MAX];
+  int got[N_MAX];
+  memcpy(xyz, g_xyz, sizeof(double) * 3 * n);
+  memcpy(box, g_box, sizeof box);
+
+  const char *fn = "seams_system_set_positions";
+  expect(seams_system_set_positions(NULL, xyz, n, NULL, 0), SEAMS_ERR_NULL, fn, "NULL sys");
+  expect(seams_system_set_positions(sys, NULL, n, NULL, 0), SEAMS_ERR_NULL, fn, "NULL xyz");
+  expect(seams_system_set_positions(sys, xyz, n, NULL, 0), SEAMS_ERR_STATE, fn, "no frame");
+  for (int i = 0; i < g_n; ++i) {
+    ids[i] = 100 + 3 * (g_n - i);
+  }
+  expect(seams_system_set_atoms(sys, xyz, n, box, 9, g_types, ids), SEAMS_OK,
+         "seams_system_set_atoms", "explicit ids");
+  expect(seams_system_set_positions(sys, xyz, n - 1, NULL, 0), SEAMS_ERR_RANGE, fn, "count changed");
+  expect(seams_system_set_positions(sys, xyz, n, box, 6), SEAMS_ERR_RANGE, fn, "short box length");
+  box[4] = -1.0;
+  expect(seams_system_set_positions(sys, xyz, n, box, 9), SEAMS_ERR_BOX, fn, "negative edge");
+  box[4] = g_box[4];
+  for (size_t k = 0; k < 3 * n; ++k) {
+    xyz[k] = g_xyz[k] + 0.125;
+  }
+  xyz[3 * n - 1] = NAN;
+  expect(seams_system_set_positions(sys, xyz, n, NULL, 0), SEAMS_ERR_ARG, fn, "NaN coordinate");
+  expect(seams_system_positions(sys, out, 3 * n), SEAMS_OK, "seams_system_positions", "frame");
+  truth(memcmp(out, g_xyz, sizeof(double) * 3 * n) == 0, fn, "failed reload keeps the frame");
+  xyz[3 * n - 1] = g_xyz[3 * n - 1] + 0.125;
+  box[3] += 1.0;
+  expect(seams_system_set_positions(sys, xyz, n, box, 9), SEAMS_OK, fn, "new positions and cell");
+  expect(seams_system_set_positions(sys, xyz, n, NULL, 0), SEAMS_OK, fn, "positions only");
+
+  fn = "seams_system_positions";
+  expect(seams_system_positions(NULL, out, 3 * n), SEAMS_ERR_NULL, fn, "NULL sys");
+  expect(seams_system_positions(sys, NULL, 3 * n), SEAMS_ERR_NULL, fn, "NULL out");
+  expect(seams_system_positions(g_empty, out, 3 * n), SEAMS_ERR_STATE, fn, "no frame");
+  expect(seams_system_positions(sys, out, 3 * n - 1), SEAMS_ERR_RANGE, fn, "short buffer");
+  truth(seams_handle_error(sys)[0] != '\0', fn, "const failure reaches the handle");
+  expect(seams_system_positions(sys, out, 3 * n), SEAMS_OK, fn, "frame");
+  truth(memcmp(out, xyz, sizeof(double) * 3 * n) == 0, fn, "round trip");
+
+  fn = "seams_system_box";
+  expect(seams_system_box(NULL, cell, 9), SEAMS_ERR_NULL, fn, "NULL sys");
+  expect(seams_system_box(sys, NULL, 9), SEAMS_ERR_NULL, fn, "NULL out");
+  expect(seams_system_box(sys, cell, 6), SEAMS_ERR_RANGE, fn, "short buffer");
+  expect(seams_system_box(g_empty, cell, 9), SEAMS_ERR_STATE, fn, "no frame");
+  expect(seams_system_box(sys, cell, 9), SEAMS_OK, fn, "frame");
+  int same = 1;
+  for (int k = 0; k < 9; ++k) {
+    same &= fabs(cell[k] - box[k]) <= 1e-12 * (1.0 + fabs(box[k]));
+  }
+  truth(same, fn, "cell round trip");
+  const double tilted[9] = {-1.0, 0.5, 2.0, 9.0, 8.0, 7.0, 1.5, -0.75, 0.25};
+  expect(seams_system_set_positions(sys, xyz, n, tilted, 9), SEAMS_OK,
+         "seams_system_set_positions", "triclinic cell");
+  expect(seams_system_box(sys, cell, 9), SEAMS_OK, fn, "triclinic frame");
+  same = 1;
+  for (int k = 0; k < 9; ++k) {
+    same &= fabs(cell[k] - tilted[k]) <= 1e-12 * (1.0 + fabs(tilted[k]));
+  }
+  truth(same, fn, "triclinic round trip");
+
+  fn = "seams_system_types";
+  expect(seams_system_types(NULL, got, n), SEAMS_ERR_NULL, fn, "NULL sys");
+  expect(seams_system_types(sys, NULL, n), SEAMS_ERR_NULL, fn, "NULL out");
+  expect(seams_system_types(g_empty, got, n), SEAMS_ERR_STATE, fn, "no frame");
+  expect(seams_system_types(sys, got, n - 1), SEAMS_ERR_RANGE, fn, "short buffer");
+  expect(seams_system_types(sys, got, n), SEAMS_OK, fn, "frame");
+  truth(memcmp(got, g_types, sizeof(int) * n) == 0, fn, "round trip");
+
+  fn = "seams_system_ids";
+  expect(seams_system_ids(NULL, got, n), SEAMS_ERR_NULL, fn, "NULL sys");
+  expect(seams_system_ids(sys, NULL, n), SEAMS_ERR_NULL, fn, "NULL out");
+  expect(seams_system_ids(g_empty, got, n), SEAMS_ERR_STATE, fn, "no frame");
+  expect(seams_system_ids(sys, got, n - 1), SEAMS_ERR_RANGE, fn, "short buffer");
+  expect(seams_system_ids(sys, got, n), SEAMS_OK, fn, "explicit ids");
+  truth(memcmp(got, ids, sizeof(int) * n) == 0, fn, "explicit ids round trip");
+  expect(seams_system_set_atoms(sys, g_xyz, n, g_box, 9, NULL, NULL), SEAMS_OK,
+         "seams_system_set_atoms", "default ids after explicit ids");
+  expect(seams_system_ids(sys, got, n), SEAMS_OK, fn, "default ids");
+  int sequential = 1;
+  for (int i = 0; i < g_n; ++i) {
+    sequential &= got[i] == i + 1;
+  }
+  truth(sequential, fn, "default ids are 1..n");
+  int labels[N_MAX];
+  expect(seams_chill_plus_n(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels, n,
+                            NULL),
+         SEAMS_OK, "seams_chill_plus_n", "after a default-id reload");
+  int cubic = 0;
+  for (int i = 0; i < g_n; ++i) {
+    cubic += labels[i] == SEAMS_LABEL_CUBIC;
+  }
+  truth(cubic == g_n, "seams_chill_plus_n", "reloaded ice is all cubic");
+  expect(seams_system_set_positions(sys, g_xyz, n, NULL, 0), SEAMS_OK,
+         "seams_system_set_positions", "same positions");
+  expect(seams_chill_plus_n(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels, n,
+                            NULL),
+         SEAMS_OK, "seams_chill_plus_n", "after set_positions");
+  cubic = 0;
+  for (int i = 0; i < g_n; ++i) {
+    cubic += labels[i] == SEAMS_LABEL_CUBIC;
+  }
+  truth(cubic == g_n, "seams_chill_plus_n", "labels survive a position reload");
+  truth(seams_handle_error(sys)[0] == '\0', "seams_handle_error", "non-const call clears the slot");
+  seams_system_destroy(sys);
+}
+
 static void read_contract(const char *root) {
   char path[4096];
   snprintf(path, sizeof path, "%s/input/traj/agi_water_tiny.lammpstrj", root);
@@ -929,6 +1043,7 @@ int main(int argc, char **argv) {
   frames();
   meta_contract();
   frame_contract();
+  frame_io_contract();
   read_contract(argv[2]);
   analysis_contract();
   neighbours_contract();

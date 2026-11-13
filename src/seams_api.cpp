@@ -3021,4 +3021,143 @@ seams_status seams_rings_histogram_n(const seams_rings *rings, int *counts,
   return SEAMS_OK;
 }
 
+seams_status seams_system_set_positions(seams_system *sys, const double *xyz, size_t n,
+                                        const double *box9, size_t box_len) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || xyz == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or coordinates is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (n != static_cast<std::size_t>(sys->cloud.nop)) {
+    return fail(SEAMS_ERR_RANGE, "atom count differs from the loaded frame");
+  }
+  if (box9 != nullptr) {
+    if (box_len != 9) {
+      return fail(SEAMS_ERR_RANGE, "box length is 9");
+    }
+    if (!finite_box(box9)) {
+      return fail(SEAMS_ERR_BOX, "box contains a non-finite number");
+    }
+  }
+  try {
+    if (box9 != nullptr &&
+        !nneigh::setBoxFromLammpsEdges(sys->spare_box, sys->spare_low, box9[0], box9[1],
+                                       box9[2], box9[3], box9[4], box9[5], box9[6],
+                                       box9[7], box9[8])) {
+      return fail(SEAMS_ERR_BOX, "box edge lengths must be positive");
+    }
+    if (!finite_coordinates(xyz, n)) {
+      return fail(SEAMS_ERR_ARG, "a coordinate is not finite");
+    }
+    auto &pts = sys->cloud.pts;
+    for (std::size_t i = 0; i < n; ++i) {
+      auto &point = pts[i];
+      point.x = xyz[3 * i];
+      point.y = xyz[3 * i + 1];
+      point.z = xyz[3 * i + 2];
+      point.iceType = molSys::atom_state_type::unclassified;
+      point.inSlice = true;
+      point.c_ij.clear();
+    }
+    if (box9 != nullptr) {
+      sys->cloud.box.swap(sys->spare_box);
+      sys->cloud.boxLow.swap(sys->spare_low);
+    }
+    return SEAMS_OK;
+  } catch (const std::bad_alloc &) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  } catch (...) {
+    remember();
+    return SEAMS_ERR_INTERNAL;
+  }
+}
+
+seams_status seams_system_box(const seams_system *sys, double *box9, size_t box_len) {
+  read_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || box9 == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or box is null");
+  }
+  if (box_len != 9) {
+    return fail(SEAMS_ERR_RANGE, "box length is 9");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  double H[3][3];
+  double origin[3];
+  nneigh::dumpBoundsToH(sys->cloud.box, sys->cloud.boxLow, H, origin);
+  box9[0] = origin[0];
+  box9[1] = origin[1];
+  box9[2] = origin[2];
+  box9[3] = H[0][0];
+  box9[4] = H[1][1];
+  box9[5] = H[2][2];
+  box9[6] = H[1][0];
+  box9[7] = H[2][0];
+  box9[8] = H[2][1];
+  return SEAMS_OK;
+}
+
+seams_status seams_system_positions(const seams_system *sys, double *xyz, size_t len) {
+  read_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || xyz == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or coordinates is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  const std::size_t n = static_cast<std::size_t>(sys->cloud.nop);
+  if (len / 3 < n) {
+    return fail(SEAMS_ERR_RANGE, "coordinate buffer is short");
+  }
+  for (std::size_t i = 0; i < n; ++i) {
+    const auto &point = sys->cloud.pts[i];
+    xyz[3 * i] = point.x;
+    xyz[3 * i + 1] = point.y;
+    xyz[3 * i + 2] = point.z;
+  }
+  return SEAMS_OK;
+}
+
+seams_status seams_system_types(const seams_system *sys, int *types, size_t len) {
+  read_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || types == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or types is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (!buffer_fits(len, sys->cloud.nop)) {
+    return fail(SEAMS_ERR_RANGE, "type buffer is short");
+  }
+  for (int i = 0; i < sys->cloud.nop; ++i) {
+    types[i] = sys->cloud.pts[static_cast<std::size_t>(i)].type;
+  }
+  return SEAMS_OK;
+}
+
+seams_status seams_system_ids(const seams_system *sys, int *ids, size_t len) {
+  read_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || ids == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or ids is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (!buffer_fits(len, sys->cloud.nop)) {
+    return fail(SEAMS_ERR_RANGE, "id buffer is short");
+  }
+  for (int i = 0; i < sys->cloud.nop; ++i) {
+    ids[i] = sys->cloud.pts[static_cast<std::size_t>(i)].atomID;
+  }
+  return SEAMS_OK;
+}
+
 } // extern "C"
