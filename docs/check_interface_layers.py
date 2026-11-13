@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""The interface ticks are the basal-bin medians.
+"""Interface ticks are crystalline basal bilayers.
 
-Layer 8 is the one cubic oxygen. It sits in the liquid, so the gap
-above layer 7 is the assignment, not a misplaced tick.
+The two puckered halves of a bilayer share one index. A bin with fewer
+than half the oxygens of the fullest bilayer is not indexed, so the
+stray cubic oxygen and the interfacial shell have no layer number.
+The numbered centres are about 3.67 angstrom apart.
 """
 
 import sys
@@ -15,47 +17,40 @@ sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "docs" / "examples"))
 
 import science_render as render
-
-
-def layer_centres(positions: np.ndarray, labels: np.ndarray, axis=None):
-    """Median height of each basal bin, the same quantity the tick uses."""
-    if axis is None:
-        axis = np.array([0.0, 0.0, 1.0])
-    ids = render.display_layer_ids(positions, np.isin(labels, [0, 1]), axis)
-    projection = positions @ render.unit(np.asarray(axis, dtype=float))
-    centres = []
-    for layer in range(int(ids.max()) + 1):
-        members = np.flatnonzero(ids == layer)
-        centres.append((layer, members, float(np.median(projection[members]))))
-    return ids, centres
+from render_scenes import basal_bilayers
 
 
 def check_layers(positions: np.ndarray, labels: np.ndarray):
-    ids, centres = layer_centres(positions, labels)
-    if len(centres) != 9:
-        raise SystemExit(f"interface has {len(centres)} layer bins, expected 9")
-    for layer, members, _centre in centres[:8]:
-        kinds = labels[members]
-        if int(np.sum(kinds == 0)) != 0 or int(np.sum(kinds == 1)) != len(members):
-            raise SystemExit(f"layer {layer} is not hexagonal")
-    layer, members, centre = centres[8]
-    if len(members) != 1 or int(labels[members[0]]) != 0:
-        raise SystemExit(f"layer 8 is {len(members)} atoms, labels {labels[members]}")
-    gap = centre - centres[7][2]
-    if gap < 15.0:
-        raise SystemExit(f"layer 8 is only {gap:.2f} A above layer 7")
-    if abs(centre - 47.5779) > 0.01:
-        raise SystemExit(f"layer 8 centre {centre:.4f} is not the cubic oxygen")
-    # The drawn tick is this median. Recompute it the way draw_layer_guides does.
-    up = render.unit(np.array([0.0, 0.0, 1.0]))
-    vertical = positions @ up
-    for layer, members, expected in centres:
-        drawn = float(np.median(vertical[members]))
-        if abs(drawn - expected) > 1e-9:
-            raise SystemExit(f"layer {layer} tick {drawn} is not the bin median {expected}")
+    basal = np.asarray(render.stacking_axis(positions, labels, np.isin(labels, [1])), dtype=float)
+    if float(basal[1]) < 0.0:
+        basal = -basal
+    ids, centres = basal_bilayers(positions, labels, basal)
+    if len(centres) < 4:
+        raise SystemExit(f"interface has {len(centres)} bilayers")
+    gaps = np.diff(centres)
+    mean = float(np.mean(gaps))
+    if abs(mean - 3.67) > 0.25:
+        raise SystemExit(f"bilayer spacing {mean:.3f} A is not about 3.67 A")
+    if float(np.max(np.abs(gaps - mean))) > 0.4:
+        raise SystemExit(f"bilayer gaps are uneven: {np.round(gaps, 3)}")
+    counts = [int(np.sum(ids == layer)) for layer in range(len(centres))]
+    fullest = max(counts)
+    if min(counts) < 0.5 * fullest:
+        raise SystemExit(f"a numbered bilayer is below half of {fullest}: {counts}")
+    if np.any(ids[labels != 1] >= 0):
+        raise SystemExit("a non-hexagonal oxygen was given a layer index")
+    if np.any(ids[labels == 0] >= 0) or np.any(ids[labels == 3] >= 0):
+        raise SystemExit("cubic or interfacial oxygen was indexed")
+    # The tick is the median of the indexed members.
+    projection = positions @ (basal / np.linalg.norm(basal))
+    for layer, centre in enumerate(centres):
+        members = np.flatnonzero(ids == layer)
+        drawn = float(np.median(projection[members]))
+        if abs(drawn - centre) > 1e-9:
+            raise SystemExit(f"layer {layer} tick {drawn} is not the bilayer median")
     print(
-        f"interface layers 9, layer 8 cubic singleton at {centre:.3f} A, "
-        f"gap {gap:.3f} A"
+        f"interface bilayers {len(centres)} spacing {mean:.3f} A "
+        f"counts {counts}"
     )
     return centres
 

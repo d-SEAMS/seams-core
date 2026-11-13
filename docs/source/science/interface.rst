@@ -40,19 +40,19 @@ Python and C print the same census:
    :end-before: static int cmd_interface
 
 .. figure:: figures/interface.png
-   :alt: Interface slab with a colour legend, numbered basal layers, a layer-index axis, and a 1 nm bar.
+   :alt: Interface slab with basal bilayer indices, a shared colour legend, and a label on the periodic image of the interface.
 
-   v12 Tachyon raster of the interface slab. Liquid is blended at 0.40. Each tick is the median height of one basal bin. Layers 0 to 7 are the hexagonal block, and their spacing is the spacing of those bins. Layer 8 is the single cubic oxygen. It sits in the liquid, about 23 angstrom above layer 7, so that gap is the assignment.
+   The view looks along x, so the basal stack is vertical. Each numbered tick is one crystalline basal bilayer: the two puckered halves share an index, and the centres are about 3.67 angstrom apart. A bin with fewer than half the oxygens of a full bilayer is not numbered, so the single cubic oxygen and the interfacial shell have no index. Liquid is drawn like the brine figure, at radius 0.50 and 18 percent opacity. The low-z edge is labelled ``interface (periodic image)`` because that face is the periodic copy of the high-z interface. The legend uses the same order and the same type size as the brine figure.
 
 What this tells you
 -------------------
 
 The slab is a hexagonal ice block against liquid. 352 molecules are
 hexagonal, 434 are liquid, and 49 are the interfacial shell. One
-molecule is cubic. The layer index gives it bin 8, a bin with no
-hexagonal neighbour, so that one molecule is a cubic-majority layer
-and the layer cubicity is 1/9. Its height is 47.6 angstrom, in the
-liquid, 22.7 angstrom above the last hexagonal bin. The nucleus in the first saved frame is
+molecule is cubic. Along z the old floor bins count that molecule as
+its own layer and the cubicity of those nine bins is 1/9. The figure
+does not number it. The numbered index is the basal stack: six
+bilayers of hexagonal ice. The nucleus in the first saved frame is
 mixed: 47 cubic and 62 hexagonal molecules in a liquid of 3589.
 Molecule cubicity is 47/109. Along x, two of the fourteen layers are
 cubic-majority, so the layer cubicity is 2/14. That mixed stacking is

@@ -35,6 +35,8 @@ BRINE_LEGEND = tuple((label, np.array(colour)) for label, colour in LEGEND)
 # Slightly under the paper radii so the ice and liquid stay readable.
 # Liquid is smaller than the ice oxygen. Ions are a step larger than the ice.
 BRINE_RADIUS = {"O": 0.90, "water": 0.50, "Na": 1.32, "Cl": 1.45}
+# One size for the interface legend and the brine legend.
+LEGEND_FONT_PX = 44
 MAX_FACE_EDGE = 3.5
 MAX_PLANARITY = 0.35
 
@@ -462,7 +464,7 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
 
     centre, half_h, half_v, forward, right, up = _camera(render, positions, forward, up)
     image = Image.open(path).convert("RGB")
-    font = _legend_font(44)
+    font = _legend_font(LEGEND_FONT_PX)
     swatch = 32
     row_h = 52
     legend_rows = 1
@@ -518,13 +520,95 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
     canvas.save(path)
 
 
-def render_interface(render, positions, labels, origin, lengths, path, width=1280):
-    """Interface slab: CHILL+ colours, 0.40 liquid, depth cue, box, and scale bar."""
+def basal_bilayers(positions, labels, axis, gap=0.8):
+    """Index crystalline basal bilayers along ``axis``.
+
+    A gap larger than ``gap`` angstrom starts a new sheet. Two sheets
+    whose centres are closer than 2.2 angstrom are the puckered halves
+    of one bilayer and share an index. A bilayer is numbered only when
+    it holds at least half the oxygens of the fullest one. Cubic and
+    interfacial oxygens stay at -1.
+    """
+    ids = np.full(len(positions), -1, dtype=int)
+    axis = np.asarray(axis, dtype=float)
+    axis = axis / np.linalg.norm(axis)
+    chosen = np.flatnonzero(np.asarray(labels) == 1)
+    if chosen.size == 0:
+        return ids, []
+    projection = positions @ axis
+    order = np.argsort(projection[chosen])
+    ordered = chosen[order]
+    values = projection[ordered]
+    breaks = np.flatnonzero(np.diff(values) > gap) + 1
+    sheets = [sheet for sheet in np.split(ordered, breaks) if len(sheet)]
+    merged = []
+    for sheet in sheets:
+        centre = float(np.median(projection[sheet]))
+        if merged and centre - merged[-1][0] < 2.2:
+            members = np.concatenate([merged[-1][1], sheet])
+            merged[-1] = (float(np.median(projection[members])), members)
+        else:
+            merged.append((centre, sheet))
+    fullest = max(len(members) for _centre, members in merged)
+    kept = [item for item in merged if len(item[1]) >= 0.5 * fullest]
+    centres = []
+    for index, (_centre, members) in enumerate(kept):
+        ids[members] = index
+        centres.append(float(np.median(projection[members])))
+    return ids, centres
+
+
+def _draw_bilayers(render, path, positions, forward, up, ids, note):
+    """Number each bilayer at its median, in the legend font."""
+    from PIL import Image, ImageDraw
+
+    centre, half_h, half_v, forward, right, up = _camera(render, positions, forward, up)
+    image = Image.open(path).convert("RGB")
+    draw = ImageDraw.Draw(image)
+    font = _legend_font(LEGEND_FONT_PX)
+    vertical = (positions - centre) @ up
+    span = 2.0 * half_v
+    present = sorted({int(item) for item in ids if item >= 0})
+    for layer in present:
+        members = np.flatnonzero(ids == layer)
+        height_world = float(np.median(vertical[members]))
+        y = (half_v - height_world) / span * image.height
+        if not 0.0 <= y < image.height:
+            continue
+        draw.line([(8, y), (image.width - 8, y)], fill=(90, 90, 90), width=3)
+        draw.text((12, max(0, y - LEGEND_FONT_PX)), str(layer), font=font, fill=(20, 20, 20))
+    if note is not None:
+        point, text = note
+        offset = np.asarray(point, dtype=float) - centre
+        x = (float(np.dot(offset, right)) / (2.0 * half_h) + 0.5) * image.width
+        y = (0.5 - float(np.dot(offset, up)) / (2.0 * half_v)) * image.height
+        text_w = float(font.getlength(text))
+        if x > image.width * 0.5:
+            x = min(x, image.width - text_w - 12)
+        x = max(8.0, x)
+        y = min(max(8.0, y - LEGEND_FONT_PX), image.height - LEGEND_FONT_PX - 8.0)
+        draw.text((x, y), text, font=font, fill=(20, 20, 20))
+    image.save(path)
+
+
+def render_interface(render, positions, labels, origin, lengths, path, width=None):
+    """Slab seen across x, with basal bilayers horizontal.
+
+    Liquid uses the brine veil: radius 0.50 and 18 percent opacity.
+    The low-z edge is the periodic image of the high-z interface.
+    """
     colours = np.array([render.CHILL.get(int(code), ("", (0.5, 0.5, 0.5)))[1] for code in labels])
-    radii = np.where(np.asarray(labels) == 2, 0.70, 0.85)
+    radii = np.where(np.asarray(labels) == 2, BRINE_RADIUS["water"], 0.85)
     liquid = np.asarray(labels) == 2
-    forward = np.array([0.0, 1.0, 0.0])
-    up = np.array([0.0, 0.0, 1.0])
+    basal = np.asarray(render.stacking_axis(positions, labels, np.isin(labels, [1])), dtype=float)
+    if float(basal[1]) < 0.0:
+        basal = -basal
+    up = basal
+    forward = np.array([1.0, 0.0, 0.0])
+    _centre, half_h, half_v, forward, _right, up = _camera(render, positions, forward, up)
+    if width is None:
+        short = 1400
+        width = short if half_h <= half_v else int(np.ceil(short * half_h / max(half_v, 1e-6)))
     ice_png = path.with_name(path.stem + "-ice.png")
     liq_png = path.with_name(path.stem + "-liq.png")
     tachyon_scene(render, ice_png, positions[~liquid], colours[~liquid], radii[~liquid], [], forward, up, width, frame=positions)
@@ -535,11 +619,12 @@ def render_interface(render, positions, labels, origin, lengths, path, width=128
     liquid_image = np.asarray(Image.open(liq_png).convert("RGB"), dtype=np.float32)
     veil = np.any(liquid_image < 250, axis=2)
     blended = ice.copy()
-    blended[veil] = 0.40 * liquid_image[veil] + 0.60 * ice[veil]
+    blended[veil] = 0.18 * liquid_image[veil] + 0.82 * ice[veil]
     Image.fromarray(np.clip(blended, 0, 255).astype(np.uint8)).save(path)
-    ids = render.display_layer_ids(positions, np.isin(labels, [0, 1]), up)
-    _centre, _half_h, half_v, forward, _right, up = _camera(render, positions, forward, up)
-    render.draw_layer_guides(path, positions, ids, forward, up, half_v)
+    ids, _centres = basal_bilayers(positions, labels, basal)
+    # The cell face at z = origin is the periodic image of the high-z interface.
+    note_point = np.asarray(origin, dtype=float) + np.array([0.5 * lengths[0], 0.5 * lengths[1], 0.0])
+    _draw_bilayers(render, path, positions, forward, up, ids, (note_point, "interface (periodic image)"))
     corners = [
         np.asarray(origin) + np.array((i * lengths[0], j * lengths[1], k * lengths[2]))
         for i in (0, 1)
@@ -549,10 +634,7 @@ def render_interface(render, positions, labels, origin, lengths, path, width=128
     names = {0: "cubic", 1: "hexagonal", 2: "liquid", 3: "interfacial", 4: "clathrate", 5: "interf. clathrate"}
     present = {names[int(code)] for code in labels if int(code) in names}
     legend = [item for item in BRINE_LEGEND if item[0] in present]
-    annotate(
-        render, path, positions, np.array([0.0, 1.0, 0.0]), np.array([0.0, 0.0, 1.0]),
-        width, corners, legend, layer_title="layer index",
-    )
+    annotate(render, path, positions, forward, up, width, corners, legend, layer_title="layer index")
 
 
 def _positions(path):
