@@ -53,6 +53,7 @@ test_sources = {
   'cage_enum': 'test_cage_enum.cpp',
   'trace_threads': 'test_trace_threads.cpp',
   'pool_audit': 'test_pool_audit.cpp',
+  'stencil_rows': 'test_stencil_rows.cpp',
   'ddc_regression': 'test_ddc_regression.cpp',
   'c_api': 'test_c_api.cpp',
   'brine_select': 'test_brine_select.cpp',

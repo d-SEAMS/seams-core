@@ -937,11 +937,18 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
  */
 static const std::vector<std::vector<int>> &
 searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
-            const std::vector<char> &sources, bool legacy);
+            const std::vector<char> &sources, bool legacy,
+            primitive::RingRows rows = primitive::RingRows::Auto);
 
 const std::vector<std::vector<int>> &
 primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth) {
   return searchRings(nList, maxDepth, std::vector<char>(), false);
+}
+
+const std::vector<std::vector<int>> &
+primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth,
+                       RingRows rows) {
+  return searchRings(nList, maxDepth, std::vector<char>(), false, rows);
 }
 
 const std::vector<std::vector<int>> &
@@ -1004,6 +1011,53 @@ struct ReuseRings {
 };
 
 
+[[gnu::noinline]] PackedRows vectorNeighbourRows(
+    const std::vector<std::vector<int>> &nList, int nVertices, int use) {
+  std::vector<std::vector<int>> uniq(static_cast<std::size_t>(nVertices));
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) num_threads(use) if (use > 1 && !omp_in_parallel())
+#endif
+  for (int i = 0; i < nVertices; i++) {
+    if (nList[static_cast<std::size_t>(i)].size() <= 1) {
+      continue;
+    }
+    auto &row = uniq[static_cast<std::size_t>(i)];
+    row.reserve(nList[static_cast<std::size_t>(i)].size() - 1);
+    for (std::size_t k = 1; k < nList[static_cast<std::size_t>(i)].size(); k++) {
+      const int j = nList[static_cast<std::size_t>(i)][k];
+      if (j < 0 || j >= nVertices || j == i) {
+        continue;
+      }
+      if (std::find(row.begin(), row.end(), j) == row.end()) {
+        row.push_back(j);
+      }
+    }
+    if (row.size() > 1) {
+      std::sort(row.begin(), row.end());
+    }
+  }
+  PackedRows adjacency;
+  adjacency.first.assign(static_cast<std::size_t>(nVertices) + 1, 0);
+  for (int i = 0; i < nVertices; i++) {
+    adjacency.first[static_cast<std::size_t>(i) + 1] =
+        adjacency.first[static_cast<std::size_t>(i)] +
+        static_cast<int>(uniq[static_cast<std::size_t>(i)].size());
+  }
+  adjacency.cols.resize(adjacency.first[static_cast<std::size_t>(nVertices)]);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) num_threads(use) if (use > 1 && !omp_in_parallel())
+#endif
+  for (int i = 0; i < nVertices; i++) {
+    const auto &row = uniq[static_cast<std::size_t>(i)];
+    if (!row.empty()) {
+      std::copy(row.begin(), row.end(),
+                adjacency.cols.begin() +
+                    static_cast<std::ptrdiff_t>(adjacency.first[static_cast<std::size_t>(i)]));
+    }
+  }
+  return adjacency;
+}
+
 [[gnu::noinline]] PackedRows teamNeighbourRows(
     const std::vector<std::vector<int>> &nList, int nVertices, int use) {
   PackedRows adjacency;
@@ -1042,6 +1096,46 @@ struct ReuseRings {
     return true;
   };
   std::vector<int> degree(static_cast<std::size_t>(nVertices), 0);
+  // One thread appends sorted rows into one buffer. A second walk and a
+  // vector per atom both cost more than this pass on a single core.
+  if (use <= 1) {
+    std::vector<int> scratch;
+    scratch.reserve(static_cast<std::size_t>(std::max(nVertices, 0)) * 4);
+    for (int i = 0; i < nVertices; ++i) {
+      if (nList[static_cast<std::size_t>(i)].size() <= 1) {
+        continue;
+      }
+      int tmp[256];
+      int n = 0;
+      if (!uniqueInto(i, tmp, 256, &n)) {
+        std::vector<int> extra;
+        extra.reserve(nList[static_cast<std::size_t>(i)].size());
+        for (std::size_t k = 1; k < nList[static_cast<std::size_t>(i)].size(); ++k) {
+          const int j = nList[static_cast<std::size_t>(i)][k];
+          if (j < 0 || j >= nVertices || j == i) {
+            continue;
+          }
+          if (std::find(extra.begin(), extra.end(), j) == extra.end()) {
+            extra.push_back(j);
+          }
+        }
+        if (extra.size() > 1) {
+          std::sort(extra.begin(), extra.end());
+        }
+        scratch.insert(scratch.end(), extra.begin(), extra.end());
+        n = static_cast<int>(extra.size());
+      } else if (n > 0) {
+        scratch.insert(scratch.end(), tmp, tmp + n);
+      }
+      degree[static_cast<std::size_t>(i)] = n;
+    }
+    for (int i = 0; i < nVertices; ++i) {
+      adjacency.first[static_cast<std::size_t>(i) + 1] =
+          adjacency.first[static_cast<std::size_t>(i)] + degree[static_cast<std::size_t>(i)];
+    }
+    adjacency.cols = std::move(scratch);
+    return adjacency;
+  }
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) num_threads(use) if (!omp_in_parallel())
 #endif
@@ -1104,7 +1198,8 @@ struct ReuseRings {
 
 static const std::vector<std::vector<int>> &
 searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
-            const std::vector<char> &sources, bool legacy) {
+            const std::vector<char> &sources, bool legacy,
+            primitive::RingRows adjRows) {
   thread_local ReuseRings rings;
   rings.reset();
   if (maxDepth < 3 || nList.empty()) {
@@ -1146,49 +1241,14 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
   // itself, so it is skipped. A repeated neighbour is one edge. A self
   // entry and an index outside the cloud are not edges.
   const auto adjStart = std::chrono::steady_clock::now();
-  PackedRows adjacency;
-  adjacency.first.assign(nVertices + 1, 0);
-  // Kept until the search has allocated its rings. Freeing these rows
-  // first hands the ring buffers a heap of just-released blocks, and the
-  // one-thread search gets slower.
-  std::vector<std::vector<int>> uniq;
-  if (serial) {
-    // One thread keeps a row vector. The packed fill below is for a
-    // team: allocating one vector per atom there was slower after the
-    // cell list than after linkcell.
-    uniq.resize(static_cast<std::size_t>(nVertices));
-    for (int i = 0; i < nVertices; i++) {
-      if (nList[static_cast<std::size_t>(i)].size() <= 1) {
-        continue;
-      }
-      auto &row = uniq[static_cast<std::size_t>(i)];
-      row.reserve(nList[static_cast<std::size_t>(i)].size() - 1);
-      for (std::size_t k = 1; k < nList[static_cast<std::size_t>(i)].size(); k++) {
-        const int j = nList[static_cast<std::size_t>(i)][k];
-        if (j < 0 || j >= nVertices || j == i) {
-          continue;
-        }
-        if (std::find(row.begin(), row.end(), j) == row.end()) {
-          row.push_back(j);
-        }
-      }
-    }
-    for (int i = 0; i < nVertices; i++) {
-      adjacency.first[i + 1] =
-          adjacency.first[i] + static_cast<int>(uniq[static_cast<std::size_t>(i)].size());
-    }
-    adjacency.cols.resize(adjacency.first[nVertices]);
-    for (int i = 0; i < nVertices; i++) {
-      const auto &row = uniq[static_cast<std::size_t>(i)];
-      if (!row.empty()) {
-        std::copy(row.begin(), row.end(),
-                  adjacency.cols.begin() +
-                      static_cast<std::ptrdiff_t>(adjacency.first[i]));
-      }
-    }
-  } else {
-    adjacency = teamNeighbourRows(nList, nVertices, use);
-  }
+  // One thread packs sorted rows in a single pass. Several threads use
+  // the same packed rows. The per-atom vectors stay available so a test
+  // can check that both builders return the same rings.
+  const bool perAtom = adjRows == primitive::RingRows::Vectors;
+  PackedRows adjacency =
+      perAtom ? vectorNeighbourRows(nList, nVertices, use)
+              : teamNeighbourRows(nList, nVertices,
+                                  (serial && adjRows != primitive::RingRows::Packed) ? 1 : use);
 
   const int maxLvl = maxDepth / 2;
   const int radius = std::max(maxLvl - 1, 1);
@@ -1335,7 +1395,6 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
       }
     }
     balls.clear();
-    std::vector<std::vector<int>>().swap(uniq);
     std::vector<int>().swap(adjacency.cols);
     std::vector<std::size_t>().swap(adjacency.first);
     gRingSplit.merge_ms = millisSince(mergeStart);
@@ -1366,7 +1425,6 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
   gRingSplit.enumerate_ms = millisSince(enumStart);
   const auto mergeStart = std::chrono::steady_clock::now();
   balls.clear();
-  std::vector<std::vector<int>>().swap(uniq);
   std::vector<int>().swap(adjacency.cols);
   std::vector<std::size_t>().swap(adjacency.first);
   gRingSplit.merge_ms = millisSince(mergeStart);
