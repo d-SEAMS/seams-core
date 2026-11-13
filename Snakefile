@@ -534,7 +534,7 @@ rule paper_sitting:
         "benchmarks/paper-cells/sitting.csv",
         "benchmarks/paper-cells/raw-sitting.txt",
     shell:
-        "${PYTHON:-python3} scripts/paper_sitting.py --out benchmarks/paper-cells"
+        "python3 scripts/paper_sitting.py --out benchmarks/paper-cells"
 
 
 # One command per table. Each file is a selection of sitting.csv.
