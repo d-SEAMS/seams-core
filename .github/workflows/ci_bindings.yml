@@ -13,8 +13,12 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.12"
-      - run: pip install numpy pytest
+      - run: pip install numpy pytest mypy pyright
+      - run: python -m pip install -e bindings/python
+      - run: python -m mypy --strict bindings/python/src/seams
+      - run: pyright bindings/python/src/seams
       - run: pytest docs/tutorials -q
+      - run: pytest bindings/python/src/seams --doctest-modules -q
 
   r-julia:
     runs-on: ubuntu-latest
@@ -37,12 +41,12 @@ jobs:
           sudo cmake --install "$RUNNER_TEMP/chemfiles-build"
           sudo ldconfig
       - run: pixi run meson setup bbdir-py -Dwith_python=false -Dwith_tests=true -Dwith_cli=true
-      - run: pixi run ninja -C bbdir-py bindings/libseams_lang.so bindings/test_seams_lang
+      - run: pixi run ninja -C bbdir-py bindings/libseams_lang.so bindings/test_seams_lang bindings/binding_oracle src/libseams.so
       - run: pixi run meson test -C bbdir-py seams_lang_fixtures chill_plus_ctypes symmetry_ctypes frames_abi --print-errorlogs
       - name: Install R
         run: |
           sudo apt-get update
-          sudo apt-get install -y r-base-dev libuv1-dev
+          sudo apt-get install -y r-base-dev libuv1-dev pandoc devscripts
           export R_LIBS_USER="$HOME/R/library"
           mkdir -p "$R_LIBS_USER"
           echo "R_LIBS_USER=$R_LIBS_USER" >> "$GITHUB_ENV"
@@ -69,9 +73,31 @@ jobs:
         run: |
           export DSEAMS_ROOT="$PWD"
           export SEAMS_LANG_LIB="$PWD/bbdir-py/bindings/libseams_lang.so"
+          export SEAMS_LIB="$PWD/bbdir-py/src/libseams.so"
+          export SEAMS_CPP_ORACLE="$PWD/bbdir-py/bindings/binding_oracle"
+          export SEAMS_SOURCE_ROOT="$PWD"
           export LD_LIBRARY_PATH="$PWD/bbdir-py/bindings:$PWD/bbdir-py/src:${LD_LIBRARY_PATH:-}"
-          julia --project=bindings/julia/Dseams -e 'using Pkg; Pkg.instantiate()'
-          julia --project=bindings/julia/Dseams bindings/julia/Dseams/test/runtests.jl
+          julia --project=bindings/julia/Dseams -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
+          julia --project=bindings/julia/Seams -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
+      - name: Documenter
+        run: |
+          julia --project=bindings/julia/Dseams/docs -e 'using Pkg; Pkg.instantiate()'
+          julia --project=bindings/julia/Dseams/docs bindings/julia/Dseams/docs/make.jl
+          julia --project=bindings/julia/Seams/docs -e 'using Pkg; Pkg.instantiate()'
+          julia --project=bindings/julia/Seams/docs bindings/julia/Seams/docs/make.jl
+      - name: ctypes package
+        run: |
+          export SEAMS_LIB="$PWD/bbdir-py/src/libseams.so"
+          export DSEAMS_ROOT="$PWD"
+          export LD_LIBRARY_PATH="$PWD/bbdir-py/bindings:$PWD/bbdir-py/src:${LD_LIBRARY_PATH:-}"
+          pixi run python -m pip install -e bindings/python
+          pixi run python -m pytest bindings/python/tests/test_seams_package.py bindings/python/src/seams --doctest-modules -q
+      - name: R CMD check
+        run: |
+          export R_LIBS_USER="${R_LIBS_USER:-$HOME/R/library}"
+          export DSEAMS_ROOT="$PWD"
+          export LD_LIBRARY_PATH="$PWD/bbdir-py/bindings:$PWD/bbdir-py/src:${LD_LIBRARY_PATH:-}"
+          R CMD check bindings/r/dseams --no-manual --no-vignettes
       - name: Install pydseamslib with chill_plus(graph=)
         run: pixi run python -m pip install "pydseamslib @ git+https://github.com/d-SEAMS/PydSEAMSlib@${PYDSEAMSLIB_REF:-main}"
       - name: Install Fortran and Rust

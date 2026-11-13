@@ -107,7 +107,40 @@ def _stage_markdown_book():
         (dest / "index.rst").write_text("\n".join(body), encoding="utf-8")
 
 
+def _stage_ctypes_autodoc():
+    """Pull numpydoc into the book when the ctypes package imports.
+
+    rgpot keeps the narrative page and the generated API apart. This page
+    is the generated half. A docs build without NumPy leaves it out, so
+    sphinx-build -W still passes.
+    """
+    stable = os.path.join(_source, "stable")
+    page = os.path.join(stable, "seams_ctypes.rst")
+    index = os.path.join(stable, "index.rst")
+    try:
+        import seams  # noqa: F401
+    except Exception:
+        return
+    with open(page, "w", encoding="utf-8") as handle:
+        handle.write(
+            "ctypes reference\n"
+            "================\n"
+            "\n"
+            "Generated from the numpydoc strings on ``seams``.\n"
+            "The how-to is :doc:`python`.\n"
+            "\n"
+            ".. automodule:: seams\n"
+            "   :members:\n"
+            "   :undoc-members:\n"
+            "   :show-inheritance:\n"
+        )
+    if os.path.isfile(index):
+        with open(index, "a", encoding="utf-8") as handle:
+            handle.write("   seams_ctypes\n")
+
+
 _stage_markdown_book()
+_stage_ctypes_autodoc()
 _doxyrest = os.path.abspath(os.path.join(_source, "../../subprojects/doxyrest/sphinx"))
 _xml_index = os.path.join(_source, "xml", "index.xml")
 _api_index = os.path.join(_source, "api", "index.rst")
@@ -133,10 +166,17 @@ author = "Rohit Goswami, Amrita Goswami, Ruhila S"
 extensions = [
     "myst_parser",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.autodoc",
+    "sphinx.ext.napoleon",
     "sphinx_sitemap",
     "sphinx_design",
     "sphinxcontrib.mermaid",
 ]
+napoleon_numpy_docstring = True
+napoleon_google_docstring = False
+napoleon_include_special_with_doc = True
+autodoc_typehints = "description"
+sys.path.insert(0, os.path.abspath(os.path.join(_docs, "..", "bindings", "python", "src")))
 # doxyrest and the XML tree are produced by the docs task. A build from
 # the committed sources does not require them to already exist.
 if os.path.isfile(_xml_index) and os.path.isdir(_doxyrest):

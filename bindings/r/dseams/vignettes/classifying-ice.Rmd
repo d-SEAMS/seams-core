@@ -11,12 +11,17 @@ vignette: >
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = FALSE)
 root <- Sys.getenv("DSEAMS_ROOT", unset = "")
 tip <- file.path(root, "input", "traj", "exampleTraj.lammpstrj")
-knitr::opts_chunk$set(eval = root != "" && file.exists(tip))
+# R CMD build sets DSEAMS_ROOT so the package can link. Evaluating the
+# engine inside that build overflows the C stack knitr leaves. Set
+# SEAMS_VIGNETTE_EVAL=1 to run the chunks.
+run <- Sys.getenv("SEAMS_VIGNETTE_EVAL", unset = "")
+knitr::opts_chunk$set(eval = nzchar(run) && nzchar(root) && file.exists(tip))
 ```
 
 This vignette classifies the in-tree mixed TIP4P dump. The engine has
 to be on the link line (`SEAMS_LIBDIR`) and `DSEAMS_ROOT` has to point
-at a seams-core checkout. Without those, the chunks stay unevaluated.
+at a seams-core checkout. Set `SEAMS_VIGNETTE_EVAL=1` as well. Without
+those, the chunks stay unevaluated.
 
 ```{r}
 library(dseams)

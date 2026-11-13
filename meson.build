@@ -1393,6 +1393,23 @@ if get_option('with_cli')
     depends: [seams_api_lib],
     suite: 'docs',
     timeout: 60)
+  _ctypes_env = environment()
+  _ctypes_env.set('PYTHONPATH', meson.project_source_root() / 'bindings' / 'python' / 'src')
+  _ctypes_env.set('SEAMS_LIB', seams_api_lib.full_path())
+  _ctypes_env.set('DSEAMS_ROOT', meson.project_source_root())
+  test(
+    'python_seams_ctypes',
+    python3,
+    args: [
+      '-m', 'pytest', '-q',
+      meson.project_source_root() / 'bindings' / 'python' / 'tests' / 'test_seams_package.py',
+      '--doctest-modules',
+      meson.project_source_root() / 'bindings' / 'python' / 'src' / 'seams',
+    ],
+    env: _ctypes_env,
+    depends: [seams_api_lib],
+    suite: 'docs',
+    timeout: 180)
   test(
     'docs_api_fortran',
     python3,
