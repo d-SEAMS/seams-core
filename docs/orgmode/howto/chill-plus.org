@@ -1,0 +1,51 @@
+#+TITLE: CHILL+
+#+OPTIONS: toc:nil num:nil
+
+Label every oxygen with the published CHILL+ star, or with the OVITO
+rule. The two scores disagree with cage membership for the reason in
+[[file:../explanation/chill-plus-vs-cages.org][CHILL+ versus cages]].
+
+* The default list
+
+~seams chill-plus~ bonds every pair closer than ~--cutoff~ (3.5 Å).
+The configuration name of that default is ~seeded~, and the CHILL
+path maps ~seeded~ onto the cutoff list. ~--graph mutual~ is the
+mutual four nearest neighbours. ~cages~ does not make that mapping:
+there ~seeded~ is its own graph.
+
+#+begin_src bash
+seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2
+seams chill-plus input/traj/exampleTraj.lammpstrj --cutoff 3.5 --type 2 --graph mutual
+#+end_src
+
+The cutoff line is ~interClathrate 9 water 241~. The mutual line is
+~clathrate 1 interClathrate 7 water 242~. The names are the
+~molSys::atom_state_type~ spellings, including ~interClathrate~.
+
+#+begin_src python
+# excerpt: tests/cli_surface.py
+        ["chill-plus", tip, "--cutoff", "3.5", "--type", "2"],
+#+end_src
+
+* The OVITO rule
+
+~--rule ovito-chill+~ averages q3 on the full shell and skips the
+published neighbour test. ~seams ovito-chill+~ is the same rule as a
+command. The C constant is ~SEAMS_CHILL_OVITO~.
+
+* From the library
+
+~seams_chill_plus~ writes one label per atom and nine counts.
+~meson test seams_c_api~ requires every atom of the cubic cell to be
+~SEAMS_LABEL_CUBIC~ under both rules.
+
+#+begin_src c
+// excerpt: tests/test_seams_api.c
+  expect(seams_chill_plus(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels,
+                          counts) == SEAMS_OK,
+         "published chill+");
+#+end_src
+
+~--water-types~ keeps those LAMMPS types, including pairs between
+them, and leaves other atoms in the frame unclassified. A multi-atom
+dump with no ~--type~ infers the oxygen.

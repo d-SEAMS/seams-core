@@ -128,6 +128,7 @@ def run_timing(args) -> None:
     args.out.mkdir(parents=True, exist_ok=True)
     measured = []
     log = [
+        *stats.machine_lines(ROOT),
         "sitting one",
         f"warmup {args.warmup}",
         f"n {args.repeats}",
@@ -342,6 +343,7 @@ def run_interface(args) -> None:
                 surface += 1
     rows = []
     log = [
+        *stats.machine_lines(ROOT),
         f"frame {path.name}",
         "source TIP4P/2005 ice/water slab after hop equilibration",
         "no 230 K brine trajectory is in the tree",

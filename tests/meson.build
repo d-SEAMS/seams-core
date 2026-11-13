@@ -60,6 +60,7 @@ test_sources = {
   'chill_plus_rule': 'test_chill_plus_rule.cpp',
   'nucleation_pathway': 'test_nucleation_pathway.cpp',
   'interface_order': 'test_interface_order.cpp',
+  'science_front': 'test_science_front.cpp',
   'ql_solid': 'test_ql_solid.cpp',
   'thread_scale': 'test_thread_scale.cpp',
   'gpu_residency': 'test_gpu_residency.cpp',
@@ -139,6 +140,8 @@ foreach name, src : test_sources
     _timeout = 600
   elif name == 'interface_order'
     _timeout = 600
+  elif name == 'science_front'
+    _timeout = 300
   endif
   test(name,
     executable('test_' + name, src,
@@ -399,6 +402,13 @@ executable('bench_rings_incremental', 'bench_rings_incremental.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
+executable('bench_ring_ic', 'bench_ring_ic.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
 _check_invariance = executable('check_invariance', 'check_invariance.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
@@ -615,6 +625,11 @@ test('option_names', find_program('python3'),
          meson.project_build_root()],
   workdir: meson.project_source_root(),
   timeout: 60)
+test('ovito_ring_counts', find_program('python3'),
+  args: [files('test_ovito_ring_counts.py'),
+         meson.project_build_root() / 'tests' / 'bench_ring_ic'],
+  workdir: meson.project_source_root(),
+  timeout: 120)
 test('cli_surface', find_program('python3'),
   args: [files('cli_surface.py'), meson.project_build_root() / 'seams'],
   workdir: meson.project_source_root(),

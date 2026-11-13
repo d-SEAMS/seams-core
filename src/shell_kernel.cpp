@@ -1424,7 +1424,7 @@ double shellGate(double shellRmsd) {
 // The per-atom search lives in shell_classify.cpp, which does not include
 // Eigen and is built with AVX2. This wrapper only copies the coordinates.
 void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vectors,
-                 std::vector<int> &kind, double shellRmsd) {
+                 std::vector<int> &kind, double shellRmsd, double thermalQ, double bondRatio) {
   const int n = static_cast<int>(cartesian.rows());
   kind.assign(static_cast<size_t>(std::max(n, 0)), -1);
   if (n <= 0 || cartesian.cols() != 3) {
@@ -1434,7 +1434,7 @@ void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vector
                             {vectors(1, 0), vectors(1, 1), vectors(1, 2)},
                             {vectors(2, 0), vectors(2, 1), vectors(2, 2)}};
   classifyPrepared(cartesian.col(0).data(), cartesian.col(1).data(), cartesian.col(2).data(), n, lat,
-                   canonShell(), shellGate(shellRmsd), kind.data());
+                   canonShell(), shellGate(shellRmsd), kind.data(), thermalQ, bondRatio);
 }
 
 void classifyIceCloud(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
@@ -1467,11 +1467,11 @@ void classifyIceCloud(const molSys::PointCloud<molSys::Point<double>, double> &y
 }
 
 void classifyIceArrays(const double *x, const double *y, const double *z, int n, const double lat[3][3],
-                       int *kind, double shellRmsd) {
+                       int *kind, double shellRmsd, double thermalQ, double bondRatio) {
   if (n <= 0 || x == nullptr || y == nullptr || z == nullptr || kind == nullptr) {
     return;
   }
-  classifyPrepared(x, y, z, n, lat, canonShell(), shellGate(shellRmsd), kind);
+  classifyPrepared(x, y, z, n, lat, canonShell(), shellGate(shellRmsd), kind, thermalQ, bondRatio);
 }
 
 void matchAll(const std::vector<Eigen::MatrixXd> &environments, std::vector<Overlay> &out) {

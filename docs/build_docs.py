@@ -123,6 +123,7 @@ def main():
         DOCS / "tutorials" / "openmm.md",
         DOCS / "tutorials" / "plumed.md",
         DOCS / "tutorials" / "insitu.md",
+        DOCS / "tutorials" / "engines.md",
     ]
     OUT.mkdir(parents=True, exist_ok=True)
     parts = ["<html><body>"]
@@ -134,6 +135,22 @@ def main():
         parts.append(render_markdown(body))
     parts.append("</body></html>")
     (OUT / "index.html").write_text("\n".join(parts))
+    import importlib.util
+
+    sitting = DOCS / "render_sitting.py"
+    spec = importlib.util.spec_from_file_location("render_sitting", sitting)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    code = module.main(["--check"])
+    if code != 0:
+        return code
+    checker = DOCS / "check_examples.py"
+    spec = importlib.util.spec_from_file_location("check_examples", checker)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    code = module.main()
+    if code != 0:
+        return code
     print("docs ok", len(names), "symbols")
     return 0
 

@@ -489,6 +489,14 @@ bool localCutoffQ4Q6(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
     int typeI, std::vector<double> &q4, std::vector<double> &q6);
 
+//! q4 and q6 from one cutoff list. The bond vectors are wrapped once.
+//! Each degree then uses the same harmonic as steinhardtQlCutoff, so the
+//! values match two separate calls. Returns false when that list is not
+//! available; the outputs are left untouched.
+[[nodiscard]] bool steinhardtQ4Q6Cutoff(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    double cutoff, int typeI, bool average, SteinhardtQl &q4, SteinhardtQl &q6);
+
 //! Mutual k-nearest Steinhardt parameters. The coordinate buffer built
 //! for the nomination is the one the harmonics read, and the neighbour
 //! rows stay in one packed array. l is 3, 4 or 6; other degrees return

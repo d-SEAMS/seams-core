@@ -1,0 +1,16 @@
+#+TITLE: 2.14.0 release notes
+#+OPTIONS: toc:nil num:nil
+
+These notes are built from the fragments in ~changelog.d/~.
+Each file is one user-visible change on the 2.14 lanes, in the
+towncrier form ~+slug.<type>.md~. ~docs/check_changelog.py~ renders
+them and fails if a fragment is left out or repeated.
+The lanes are the pool audit, the large sitting, and the engines,
+rings, symmetry, scaling, kernel, interface, nucleation and brine
+branches that have not merged to ~2dbefa97~ (~v2.13.0-85-g2dbefa97~).
+The upgrade from 2.13 is
+[[file:../howto/upgrade-2.14.org][the upgrade guide]].
+
+#+begin_export rst
+.. include:: release-2.14-notes.rst
+#+end_export

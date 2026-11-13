@@ -19,6 +19,7 @@ end
 @testset "cubic ice" begin
     set_num_threads(1)
     @test num_threads() == 1
+    @test !isempty(version())
     xyz, edge = diamond(2)
     sys = System()
     set_ortho!(sys, xyz, (edge, edge, edge))

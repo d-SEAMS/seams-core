@@ -1,0 +1,31 @@
+#+TITLE: Stacking disorder
+#+OPTIONS: toc:nil num:nil
+
+Cubic ice and hexagonal ice are the same puckered hexagons stacked in
+two orders. Hexagonal ice repeats every two layers. Cubic ice repeats
+every three, and the next layer sits over the hole of the one before.
+A stacking fault is one layer in the other order. Both crystals, and
+the fault between them, have a high local \(q_6\). A cutoff on \(q_6\)
+therefore reports "ice" and stops.
+
+The ring and cage census names the order. A hexagonal layer is a
+six-ring that is the base of a hexagonal cage: two basal faces and
+three prismatic faces. A cubic layer is a six-ring that closes a
+double-diamond cage, seven six-rings around one chair. A molecule that
+belongs to both cages sits on the fault. CHILL+ writes that as
+~both~, and writes the rest of each layer as ~hexagonal~ or ~cubic~.
+None of those names is a threshold on \(q_6\).
+
+The interface frame in
+[[file:../tutorials/interface.org][the interface tutorial]] is the
+small case. Its stack string is ~HHHHHHHH....C.~: eight hexagonal
+slabs and one cubic layer. Of 864 molecules, 352 are hexagonal and 1
+is cubic. A \(q_6\) cutoff would add those together. The cage search
+keeps them apart, which is what a growth rate on the basal face needs:
+the front advances by adding a layer of one polytype, and the fault
+is a layer, not a drop in \(q_6\).
+
+The same split is why the nucleation frames report cubic and
+hexagonal counts separately. The largest crystal cluster can contain
+both, and the fraction of each says which polytype the nucleus is
+growing. \(q_6\) on that cluster is one number.

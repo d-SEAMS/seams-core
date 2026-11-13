@@ -39,3 +39,32 @@ list, both reject the hexagon and keep the pentagons.
 
 ~tests/test_ring_hop.cpp~ is that fixture. The same rule is what the
 depth-10 census matches against OVITO at ring sizes 4 through 10.
+
+* The shortest-path statement
+
+Yuan and Cormack (Comput. Mater. Sci. 24, 343, 2002) build each ring
+from shortest paths. Let \(D\) be the largest size sought and write
+\(L = \lfloor D/2 \rfloor\). A ring of even size \(2L\) is a source
+plus two vertex-disjoint shortest paths to one vertex at level \(L\).
+A ring of odd size \(2L+1\) closes on an edge that joins two vertices
+both at level \(L\).
+
+Franzblau's filter then drops a candidate when any pair of its members
+is closer through the graph than along the ring. For a cycle
+\((v_0,\ldots,v_{n-1})\),
+
+\[
+d_G(v_i, v_j) = \min_{k \in \mathbb{Z}} |i - j + kn|
+\]
+
+must hold for every pair, with \(d_G\) the breadth-first distance on
+the whole neighbour graph. The search reports each ring once, from its
+lowest index, and sorts the list lexicographically. The output depends
+on the graph, not on the order of the rows.
+
+The installed call is ~seams_rings_find~ in ~seams.h~. The language
+ABI is ~seams_frame_rings~. The CLI is ~seams rings~.
+
+#+begin_export rst
+The signatures are on :doc:`/stable/c` and :doc:`/stable/cpp`.
+#+end_export

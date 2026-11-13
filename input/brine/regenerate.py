@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Build NaCl brine frames with TIP4P/2005 and Madrid-2019 scaled charges.
+"""Build NaCl brine frames with TIP4P/2005.
+
+Madrid-2019 uses scaled ion charges. Joung-Cheatham uses the full
+charges. Set BRINE_DECK=jc for the Joung-Cheatham deck.
 
 Writes data files and LAMMPS dumps under input/brine/work/. Those frames
 are not committed. `--check` only tests the ice Ih cell.
@@ -20,7 +23,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-DECK = ROOT / "in.tip4p2005-madrid2019.lmp"
+if os.environ.get("BRINE_DECK") == "jc":
+    DECK = ROOT / "in.tip4p2005-jc.lmp"
+else:
+    DECK = ROOT / "in.tip4p2005-madrid2019.lmp"
 WORK = ROOT / "work"
 
 # Orthogonal ice Ih, 16 oxygens, from GenIce's 1h cell (absolute angstrom).
@@ -49,8 +55,12 @@ OH = 0.9572
 HOH = math.radians(104.52)
 Q_O = -1.1128
 Q_H = 0.5564
-Q_NA = 0.85
-Q_CL = -0.85
+if os.environ.get("BRINE_DECK") == "jc":
+    Q_NA = 1.0
+    Q_CL = -1.0
+else:
+    Q_NA = 0.85
+    Q_CL = -0.85
 MOLAL_FACTOR = 18.01528 / 1000.0
 RHO = 0.997 * 0.602214
 

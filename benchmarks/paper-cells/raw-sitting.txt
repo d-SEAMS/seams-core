@@ -1,0 +1,99 @@
+source_commit c2f0d10a6b9f25fc0a6caf7fc116649ec1e37db2
+cpu_model Intel Xeon Processor
+cpu_family 6
+cpu_model_id 207
+cpu_stepping 2
+cpu_flags avx2 avx512
+cpu_cache L1d 384 KiB (8 instances); L1i 256 KiB (8 instances); L2 16 MiB (8 instances); L3 320 MiB (1 instance)
+cpu_cores 8
+affinity 0-7
+cores 8
+warmup 1
+n 8
+molecules 110592
+cutoff_A 3.5
+one sitting; each width is one process
+host name is not recorded
+ice rings d-SEAMS threads 1 median_ms 81.629026 iqr_ms 0.573433 six=221184
+ice q4 d-SEAMS threads 1 median_ms 17.250924 iqr_ms 0.207605 seams_frame_steinhardt; local q only
+ice q6 d-SEAMS threads 1 median_ms 17.944460 iqr_ms 0.163214 seams_frame_steinhardt; local q only
+ice q4-bar d-SEAMS threads 1 median_ms 23.513161 iqr_ms 0.340296 seams_frame_steinhardt; averaged buffer filled
+ice q6-bar d-SEAMS threads 1 median_ms 26.233446 iqr_ms 0.304287 seams_frame_steinhardt; averaged buffer filled
+ice q4+q6 d-SEAMS threads 1 median_ms 35.934934 iqr_ms 0.270882 seams_frame_q4_q6; both averages null
+ice q4-core d-SEAMS threads 1 median_ms 18.094819 iqr_ms 0.159506 seams_ql_cutoff order 4
+ice q6-core d-SEAMS threads 1 median_ms 18.994154 iqr_ms 0.284607 seams_ql_cutoff order 6
+ice neighbours d-SEAMS threads 1 median_ms 28.222630 iqr_ms 0.558780 seams_frame_neighbours cutoff
+ice chill+ d-SEAMS threads 1 median_ms 23.761086 iqr_ms 0.384871 cubic=110592
+ice cages d-SEAMS threads 1 median_ms 368.425685 iqr_ms 2.452418 hexagonal=0 cubic=110592 water=0 both=0
+ice rings rings-statistics-matter threads 1 median_ms 1131.680239 iqr_ms 11.774415 six=221184 maxlvl=8
+ice neighbours mdapy threads 1 median_ms 41.725046 iqr_ms 0.737876 pairs=442368
+ice q4 mdapy threads 1 median_ms 61.372049 iqr_ms 0.307008 rows=110592
+ice q6 mdapy threads 1 median_ms 80.153873 iqr_ms 2.319596 rows=110592
+ice rings mdapy threads 1 median_ms 2240.678870 iqr_ms 17.802023 last_count=221184
+ice chill+ mdapy threads 1 median_ms 59.443680 iqr_ms 0.846455 rows=110592
+ice neighbours vesin threads 1 median_ms 49.853156 iqr_ms 0.309678 pairs=442368
+ice neighbours freud threads 1 median_ms 93.546405 iqr_ms 0.472818 pairs=442368
+ice q4 freud threads 1 median_ms 258.721439 iqr_ms 1.069805 rows=110592
+ice q6 freud threads 1 median_ms 341.748597 iqr_ms 1.300406 rows=110592
+ice chill+ OVITO threads 1 median_ms 620.207686 iqr_ms 3.228424 rows=110592
+ice q4 OVITO threads 1 median_ms 50.006449 iqr_ms 0.128508 rows=110592 max_l=4
+ice q6 OVITO threads 1 median_ms 58.344764 iqr_ms 0.217903 rows=110592 max_l=6
+ice classifier d-SEAMS threads 1 median_ms 38.576900 iqr_ms 0.410675 sink=110592 crystal=110592 diamondFromCsr
+ice ptm-default OVITO threads 1 median_ms 1480.583275 iqr_ms 27.663670 PTM default FCC HCP BCC
+ice ptm-ice OVITO threads 1 median_ms 2733.745684 iqr_ms 22.524180 PTM cubic and hexagonal diamond rmsd 0.1
+sI cages d-SEAMS threads 1 median_ms 0.702132 iqr_ms 0.141626 signature calls 512 51262 51264; census 512=2 51262=6 51264=0 51268=0 sh=0
+sI cages ClavisCage threads 1 median_ms 51.154167 iqr_ms 0.322670 TRACE 512=1 51262=0 51264=0
+sI-222 cages d-SEAMS threads 1 median_ms 4.704932 iqr_ms 0.103109 signature calls 512 51262 51264; census 512=16 51262=48 51264=0 51268=0 sh=0
+sI-222 cages ClavisCage threads 1 median_ms 302.894883 iqr_ms 2.206795 TRACE 512=16 51262=48 51264=0
+sII cages d-SEAMS threads 1 median_ms 2.125226 iqr_ms 0.117631 signature calls 512 51262 51264; census 512=16 51262=0 51264=8 51268=0 sh=0
+sII cages ClavisCage threads 1 median_ms 69.212217 iqr_ms 0.168816 TRACE 512=16 51262=0 51264=8
+sII-222 cages d-SEAMS threads 1 median_ms 13.497232 iqr_ms 0.275511 signature calls 512 51262 51264; census 512=128 51262=0 51264=64 51268=0 sh=0
+sII-222 cages ClavisCage threads 1 median_ms 711.733158 iqr_ms 5.050087 TRACE 512=128 51262=0 51264=64
+ice rings d-SEAMS threads 8 median_ms 28.450589 iqr_ms 1.973650 six=221184
+ice q4 d-SEAMS threads 8 median_ms 4.144025 iqr_ms 0.040582 seams_frame_steinhardt; local q only
+ice q6 d-SEAMS threads 8 median_ms 4.239259 iqr_ms 0.153865 seams_frame_steinhardt; local q only
+ice q4-bar d-SEAMS threads 8 median_ms 5.157093 iqr_ms 0.348070 seams_frame_steinhardt; averaged buffer filled
+ice q6-bar d-SEAMS threads 8 median_ms 5.882650 iqr_ms 0.209472 seams_frame_steinhardt; averaged buffer filled
+ice q4+q6 d-SEAMS threads 8 median_ms 10.412332 iqr_ms 0.483007 seams_frame_q4_q6; both averages null
+ice q4-core d-SEAMS threads 8 median_ms 5.402596 iqr_ms 0.190965 seams_ql_cutoff order 4
+ice q6-core d-SEAMS threads 8 median_ms 5.443936 iqr_ms 0.084841 seams_ql_cutoff order 6
+ice neighbours d-SEAMS threads 8 median_ms 6.172616 iqr_ms 0.344180 seams_frame_neighbours cutoff
+ice chill+ d-SEAMS threads 8 median_ms 5.831279 iqr_ms 0.271607 cubic=110592
+ice cages d-SEAMS threads 8 median_ms 106.702112 iqr_ms 5.604576 hexagonal=0 cubic=110592 water=0 both=0
+ice rings rings-statistics-matter threads 8 median_ms 253.722532 iqr_ms 9.398611 six=221184 maxlvl=8
+ice neighbours mdapy threads 8 median_ms 6.718463 iqr_ms 0.073498 pairs=442368
+ice q4 mdapy threads 8 median_ms 16.586697 iqr_ms 0.180487 rows=110592
+ice q6 mdapy threads 8 median_ms 10.988150 iqr_ms 0.117549 rows=110592
+ice rings mdapy threads 8 median_ms 376.572982 iqr_ms 13.108679 last_count=221184
+ice chill+ mdapy threads 8 median_ms 9.902826 iqr_ms 0.106039 rows=110592
+ice neighbours vesin threads 8 median_ms 18.297115 iqr_ms 0.398653 pairs=442368
+ice neighbours freud threads 8 median_ms 25.204568 iqr_ms 0.293768 pairs=442368
+ice q4 freud threads 8 median_ms 48.190950 iqr_ms 2.285816 rows=110592
+ice q6 freud threads 8 median_ms 52.699529 iqr_ms 1.310782 rows=110592
+ice chill+ OVITO threads 8 median_ms 87.163243 iqr_ms 1.229447 rows=110592
+ice q4 OVITO threads 8 median_ms 9.029745 iqr_ms 0.432073 rows=110592 max_l=4
+ice q6 OVITO threads 8 median_ms 10.515526 iqr_ms 0.568896 rows=110592 max_l=6
+ice classifier d-SEAMS threads 8 median_ms 10.894300 iqr_ms 0.420125 sink=110592 crystal=110592 diamondFromCsr
+ice ptm-default OVITO threads 8 median_ms 208.203658 iqr_ms 10.898358 PTM default FCC HCP BCC
+ice ptm-ice OVITO threads 8 median_ms 369.978210 iqr_ms 3.107907 PTM cubic and hexagonal diamond rmsd 0.1
+sI cages d-SEAMS threads 8 median_ms 0.582097 iqr_ms 0.012804 signature calls 512 51262 51264; census 512=2 51262=6 51264=0 51268=0 sh=0
+sI cages ClavisCage threads 8 median_ms 50.940304 iqr_ms 0.537992 TRACE 512=1 51262=0 51264=0
+sI-222 cages d-SEAMS threads 8 median_ms 3.812176 iqr_ms 0.124033 signature calls 512 51262 51264; census 512=16 51262=48 51264=0 51268=0 sh=0
+sI-222 cages ClavisCage threads 8 median_ms 303.400045 iqr_ms 2.666482 TRACE 512=16 51262=48 51264=0
+sII cages d-SEAMS threads 8 median_ms 1.554056 iqr_ms 0.073074 signature calls 512 51262 51264; census 512=16 51262=0 51264=8 51268=0 sh=0
+sII cages ClavisCage threads 8 median_ms 73.459697 iqr_ms 8.275712 TRACE 512=16 51262=0 51264=8
+sII-222 cages d-SEAMS threads 8 median_ms 12.204673 iqr_ms 0.296324 signature calls 512 51262 51264; census 512=128 51262=0 51264=64 51268=0 sh=0
+sII-222 cages ClavisCage threads 8 median_ms 716.503861 iqr_ms 2.635799 TRACE 512=128 51262=0 51264=64
+
+No q4 median in this sitting differs from the matching q6 median by more than 2. At 8 threads local q4 is 4.144 ms and local q6 is 4.239 ms; seams_ql_cutoff is 5.403 ms and 5.444 ms. The published 4.0 ms and 25.0 ms were not one kernel measured twice. 4.0 ms is local cutoff q4. 25.0 ms was a label carried on the seams_ql_cutoff cell from another sitting, and that call does not reproduce it. Both calls use steinhardtQlCutoff, and orders 4 and 6 share that solid-harmonic kernel. The q4+q6 library call is seams_frame_q4_q6, which evaluates the two orders on two walks of one cutoff list.
+
+Hydrate census, 8 threads.
+sI d-SEAMS signature calls 512 51262 51264; census 512=2 51262=6 51264=0 51268=0 sh=0
+sI ClavisCage TRACE 512=1 51262=0 51264=0
+sI-222 d-SEAMS signature calls 512 51262 51264; census 512=16 51262=48 51264=0 51268=0 sh=0
+sI-222 ClavisCage TRACE 512=16 51262=48 51264=0
+sII d-SEAMS signature calls 512 51262 51264; census 512=16 51262=0 51264=8 51268=0 sh=0
+sII ClavisCage TRACE 512=16 51262=0 51264=8
+sII-222 d-SEAMS signature calls 512 51262 51264; census 512=128 51262=0 51264=64 51268=0 sh=0
+sII-222 ClavisCage TRACE 512=128 51262=0 51264=64
+On the sI unit cell TRACE returns 1 of 5^12 and 0 of 5^12 6^2, 1 of the 8 cages. On the 2x2x2 cell it returns 16 and 48, 64 cages, against 64 from d-SEAMS. The unit-cell miss does not survive the tiling: the supercell census matches.

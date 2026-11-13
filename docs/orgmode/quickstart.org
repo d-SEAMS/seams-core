@@ -1,6 +1,55 @@
 #+TITLE: Quickstart
 #+OPTIONS: toc:nil num:nil
 
+Install the engine, then classify one cubic cell. The five Python lines
+and the C program below are ~meson test docs_quickstart_py~ and
+~docs_quickstart_c~. Both expect 8 cubic molecules.
+
+* Install
+
+pip installs the Frame package. The five lines use the in-tree module,
+which Meson builds.
+
+#+begin_src bash
+pip install pydseamslib
+#+end_src
+
+conda-forge has no ~d-seams~ package. It does have the toolchain, and
+Meson builds the engine from this tree:
+
+#+begin_src bash
+conda install -c conda-forge meson ninja pkg-config eigen python numpy
+meson setup build -Dwith_python=true
+meson compile -C build
+#+end_src
+
+The same two Meson lines are the install when the compilers are already
+on ~PATH~. ~-Dwith_python=true~ is the default. ~import dseams~ then
+loads ~build/python~ or the installed extension. Put that directory on
+~PYTHONPATH~, and ~build/src~ on ~LD_LIBRARY_PATH~.
+
+* Five lines of Python
+
+#+begin_export rst
+.. literalinclude:: ../examples/quickstart.py
+   :language: python
+#+end_export
+
+~chill_plus~ returns labels and the nine counts. Index 0 is cubic.
+
+* Five calls in C
+
+#+begin_src c
+seams_system *sys = seams_system_create();
+seams_system_set_ortho(sys, xyz, 8, 0, 0, 0, a, a, a, NULL, NULL);
+seams_chill_plus(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels, counts);
+printf("cubic %d\n", counts[0]);
+seams_system_destroy(sys);
+#+end_src
+
+~docs/examples/quickstart.c~ is that call on the eight-atom diamond.
+The program prints ~cubic 8~.
+
 Build the engine, read a frame, and print what this binary linked.
 
 The in-tree mixed TIP4P dump is ~input/traj/exampleTraj.lammpstrj~ (750 atoms, 250 waters; type 2 is oxygen).
@@ -23,8 +72,9 @@ pixi run build
 ./bbdir/seams --help
 #+end_src
 
-Either path produces ~libyodaLib~ and the ~seams~ CLI.
-This repository does not install Python or Lua.
+Either path produces ~libyodaLib~, ~libseams~, and the ~seams~ CLI.
+~-Dwith_python=true~ (the Meson default) also builds ~import dseams~.
+Lua stays in yodaStruct.
 
 * Read a frame
 
@@ -79,16 +129,29 @@ The default cage graph is ~--graph seeded~ (mutual four-nearest seeds, union com
 This mixed frame has no complete HC or DDC.
 Cage membership is not the CHILL+ star.
 
+* One analysis at a time
+
+| goal | command | how-to |
+|------+---------+--------|
+| rings | ~seams rings FILE --type 2~ | [[file:howto/rings.org][Primitive rings]] |
+| cages | ~seams cages FILE --type 2~ | [[file:howto/cages-trace.org][Cages and TRACE]] |
+| q4 and q6 | ~seams steinhardt FILE --type 2~ | [[file:howto/q4-q6.org][Local q4 and q6]] |
+| CHILL+ | ~seams chill-plus FILE --type 2~ | [[file:howto/chill-plus.org][CHILL+]] |
+| symmetry | ~seams symmetry FILE --type 1~ | [[file:howto/symmetry-classifier.org][Symmetry classifier]] |
+| neighbours | cutoff CSR, carried rings | [[file:howto/linkcell-carried.org][Linkcell and carried rings]] |
+
 * Python and Lua
 
-The engine CLI is not a scripting host.
-Install [[https://github.com/d-SEAMS/PydSEAMSlib][pydseams]] (~pip install pydseamslib~, compiled module ~yoda~) or
-[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
+~import dseams~ is the in-tree module over ~libseams~.
+The Frame package is [[https://github.com/d-SEAMS/PydSEAMSlib][pydseams]]
+(~pip install pydseamslib~, compiled module ~yoda~).
+Lua is [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
 (~require("dseams")~).
 ~import pydseamslib~ is an alias of ~pydseams~.
 
 The Frame tutorial is [[https://d-seams.github.io/PydSEAMSlib/][pydseams docs]].
 Lua is [[https://d-seams.github.io/yodaStruct/][dseams docs]].
+Language pages for the in-tree fronts are under ~docs/api~ and ~docs/tutorials~.
 
 The full install matrix is [[file:howto/install.org][Install]].
 The mixed-frame walkthrough is [[file:tutorials/bulk-ice.org][Classify ice on the mixed TIP4P example]].

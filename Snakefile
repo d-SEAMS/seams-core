@@ -243,6 +243,18 @@ rule related_watch_v12:
         "--out benchmarks/h2h-watch-v12.csv"
 
 
+rule related_watch_v13:
+    input:
+        "scripts/h2h_protocol.py",
+        "scripts/h2h_v13_rings.py",
+        "scripts/release_build.py",
+    output:
+        "benchmarks/h2h-watch-v13.csv",
+    shell:
+        "PY=\"${{H2H_PYTHON:-python3}}\"; "
+        "\"$PY\" scripts/h2h_v13_rings.py "
+        "--python \"$PY\" "
+        "--out benchmarks/h2h-watch-v13.csv"
 rule related_watch_v5:
     input:
         "scripts/h2h_protocol.py",
@@ -280,8 +292,6 @@ rule ql_eight:
     shell:
         "PY=\"${{QL_PYTHON:-python3}}\"; "
         "\"$PY\" scripts/bench_ql_threads.py --out discovery/ql-eight.csv"
-
-
 rule related_watch:
     input:
         "scripts/h2h_protocol.py",
@@ -449,6 +459,93 @@ rule rings_one_thread:
         "--bench {input[0]} --python \"$PY\" --json {output}"
 
 
+# Ice Ih basal face against liquid TIP4P/Ice, and the mW nucleation census.
+# The threaded kernels are science-front (CHILL+, q6, shell label).
+# Dumps larger than 1 MB stay out of git. dump_ps in the meta file is the
+# spacing passed to the interface rule. SCIENCE_FRONT overrides the binary.
+
+rule science_tip4p_basal:
+    output:
+        "data/science-frames/tip4p-basal.lammpstrj",
+        "paper/tex/figures/data/science/interface-meta.csv",
+        "paper/tex/figures/data/science/large-frames.csv",
+    shell:
+        "${{SCIENCE_PYTHON:-python3}} scripts/make_tip4p_basal.py"
+
+
+rule science_nucleation_dump:
+    output:
+        "data/science-frames/nucleation.lammpstrj",
+    shell:
+        "python3 scripts/fetch_mw_nucleation.py"
+
+
+rule science_interface:
+    input:
+        "data/science-frames/tip4p-basal.lammpstrj",
+        "paper/tex/figures/data/science/interface-meta.csv",
+    output:
+        "paper/tex/figures/data/science/interface-layers.csv",
+        "paper/tex/figures/data/science/interface-fronts.csv",
+        "paper/tex/figures/data/science/interface-velocity.csv",
+        "paper/tex/figures/data/science/interface-atoms.csv",
+        "paper/tex/figures/data/science/interface-causes.csv",
+    shell:
+        "ps=$(awk '$1==\"dump_ps\"{{print $2}}' paper/tex/figures/data/science/interface-meta.csv); "
+        "OMP_NUM_THREADS=${{SCIENCE_THREADS:-4}} "
+        "${{SCIENCE_FRONT:-bbdir/science-front}} interface {input[0]} "
+        "--ps \"$ps\" --bin 1 --out-dir paper/tex/figures/data/science "
+        "--threads ${{SCIENCE_THREADS:-4}}"
+
+
+rule science_nucleation:
+    input:
+        "data/science-frames/nucleation.lammpstrj",
+    output:
+        "paper/tex/figures/data/science/nucleation-clusters.csv",
+        "paper/tex/figures/data/science/nucleation-summary.csv",
+        "paper/tex/figures/data/science/nucleus-atoms.csv",
+        "paper/tex/figures/data/science/nucleation-causes.csv",
+    shell:
+        "OMP_NUM_THREADS=${{SCIENCE_THREADS:-4}} "
+        "${{SCIENCE_FRONT:-bbdir/science-front}} nucleation {input} "
+        "--out-dir paper/tex/figures/data/science "
+        "--threads ${{SCIENCE_THREADS:-4}}"
+
+
+rule science_validate:
+    input:
+        "paper/tex/figures/data/science/interface-atoms.csv",
+        "paper/tex/figures/data/science/nucleus-atoms.csv",
+        "paper/tex/figures/data/science/interface-causes.csv",
+        "paper/tex/figures/data/science/nucleation-causes.csv",
+    output:
+        "paper/tex/figures/data/science/validation.csv",
+    shell:
+        "OVITO_THREAD_COUNT=${{SCIENCE_THREADS:-4}} "
+        "${{SCIENCE_PYTHON:-python3}} scripts/science_validate.py"
+
+
+rule science_figures:
+    input:
+        "paper/tex/figures/data/science/interface-layers.csv",
+        "paper/tex/figures/data/science/interface-fronts.csv",
+        "paper/tex/figures/data/science/interface-velocity.csv",
+        "paper/tex/figures/data/science/interface-atoms.csv",
+        "paper/tex/figures/data/science/nucleation-clusters.csv",
+        "paper/tex/figures/data/science/nucleation-summary.csv",
+        "paper/tex/figures/data/science/nucleus-atoms.csv",
+        "paper/tex/figures/data/science/validation.csv",
+    output:
+        "paper/tex/figures/science-pdf/interface-snapshot.pdf",
+        "paper/tex/figures/science-pdf/interface-profiles.pdf",
+        "paper/tex/figures/science-pdf/cluster-size.pdf",
+        "paper/tex/figures/science-pdf/nucleus.pdf",
+    shell:
+        "${{SCIENCE_PYTHON:-python3}} scripts/science_figures.py "
+        "--out paper/tex/figures/science-pdf"
+
+
 rule shipped_campaign:
     input:
         "paper/tex/repro/shipped_campaign.py",
@@ -555,16 +652,7 @@ rule paper_hop_stride:
 
 rule paper_ptm:
     input:
-        "scripts/paper_ptm.py",
-        "scripts/paper_stats.py",
-        "scripts/bench_neighbours_v2.py",
-        "bbdir-release/tests/bench_v2",
-    output:
         "benchmarks/paper-cells/tab-sym-eq.csv",
-        "benchmarks/paper-cells/frag-cli-ptm.csv",
-        "benchmarks/paper-cells/raw-ptm.txt",
-    shell:
-        "python3 scripts/paper_ptm.py --out benchmarks/paper-cells"
 
 
 rule paper_ptm_templates:
@@ -583,62 +671,110 @@ rule paper_ptm_templates:
 
 rule paper_symmetry_vs_ptm:
     input:
-        "scripts/paper_symmetry_sitting.py",
-        "scripts/paper_ptm_templates.py",
-        "scripts/paper_stats.py",
-        "bbdir-release/tests/bench_v2",
-        "bbdir-release/src/libyodaLib.so",
-    output:
         "benchmarks/paper-cells/symmetry-vs-ptm.csv",
-        "benchmarks/paper-cells/raw-symmetry-vs-ptm.txt",
-    shell:
-        "python3 scripts/paper_symmetry_sitting.py --timing --out benchmarks/paper-cells"
 
 
-rule paper_q6:
+# One sitting. Every quoted timing is a row of sitting.csv.
+rule paper_sitting:
     input:
-        "scripts/thread_scale_time.py",
+        "scripts/paper_sitting.py",
         "scripts/paper_stats.py",
+        "scripts/h2h_protocol.py",
+        "scripts/h2h_literature.py",
         "bbdir-release/bindings/libseams_lang.so",
         "bbdir-release/src/libyodaLib.so",
+        "bbdir-release/seams",
+        "bbdir-release/tests/bench_v2",
+        "input/traj/genice_sI.lammpstrj",
+        "input/traj/genice_sII.lammpstrj",
     output:
-        "benchmarks/paper-cells/tab-ql-eq.csv",
-        "benchmarks/paper-cells/frag-cli-q.csv",
-        "benchmarks/paper-cells/frag-lit-q6.csv",
-        "benchmarks/paper-cells/raw-q6.txt",
+        "benchmarks/paper-cells/sitting.csv",
+        "benchmarks/paper-cells/raw-sitting.txt",
     shell:
-        "python3 scripts/thread_scale_time.py --paper-cells benchmarks/paper-cells "
-        "--repeats 8 --threads 8"
+        "python3 scripts/paper_sitting.py --out benchmarks/paper-cells"
+
+
+# Same ice operations as sitting.csv, on an 8x ice Ic cell, at 1, 2, 4 and 8 threads.
+rule paper_sitting_large:
+    input:
+        "scripts/paper_sitting_large.py",
+        "scripts/paper_sitting.py",
+        "scripts/paper_stats.py",
+        "scripts/h2h_protocol.py",
+        "bbdir-release/bindings/libseams_lang.so",
+        "bbdir-release/src/libyodaLib.so",
+        "bbdir-release/seams",
+    output:
+        "benchmarks/paper-cells/sitting-large.csv",
+        "benchmarks/paper-cells/raw-sitting-large.txt",
+    shell:
+        "python3 scripts/paper_sitting_large.py --out benchmarks/paper-cells"
+
+
+# One command per table. Each file is a selection of sitting.csv.
+rule paper_tables:
+    input:
+        "scripts/paper_tables.py",
+        "benchmarks/paper-cells/sitting.csv",
+    output:
+        "benchmarks/paper-cells/tab-rings-214.csv",
+        "benchmarks/paper-cells/tab-ql-eq.csv",
+        "benchmarks/paper-cells/tab-neighbours.csv",
+        "benchmarks/paper-cells/tab-chill.csv",
+        "benchmarks/paper-cells/tab-cages.csv",
+        "benchmarks/paper-cells/frag-cli-q.csv",
+        "benchmarks/paper-cells/frag-cli-rsm.csv",
+        "benchmarks/paper-cells/frag-lit-q6.csv",
+        "benchmarks/paper-cells/frag-lit-cages.csv",
+        "benchmarks/paper-cells/symmetry-vs-ptm.csv",
+        "benchmarks/paper-cells/tab-sym-eq.csv",
+        "benchmarks/paper-cells/frag-cli-ptm.csv",
+    shell:
+        "python3 scripts/paper_tables.py benchmarks/paper-cells"
 
 
 rule paper_rings:
     input:
-        "scripts/paper_rings.py",
-        "scripts/paper_stats.py",
-        "bbdir-release/bindings/libseams_lang.so",
-    output:
         "benchmarks/paper-cells/tab-rings-214.csv",
-        "benchmarks/paper-cells/frag-cli-rsm.csv",
-        "benchmarks/paper-cells/raw-rings.txt",
-    shell:
-        "python3 scripts/paper_rings.py --out benchmarks/paper-cells"
+
+
+rule paper_q6:
+    input:
+        "benchmarks/paper-cells/tab-ql-eq.csv",
+
+
+rule paper_neighbours:
+    input:
+        "benchmarks/paper-cells/tab-neighbours.csv",
+
+
+rule paper_chill:
+    input:
+        "benchmarks/paper-cells/tab-chill.csv",
 
 
 rule paper_cages:
     input:
-        "scripts/paper_cages.py",
-        "scripts/paper_stats.py",
+        "benchmarks/paper-cells/tab-cages.csv",
+        "benchmarks/paper-cells/rerun-main/report.txt",
+
+
+rule paper_rerun:
+    input:
         "scripts/rerun_main_text.py",
-        "bbdir-release/tests/bench_cage_h2h",
         "bbdir-release/seams",
+        "input/traj/mW_cubic.lammpstrj",
         "input/traj/genice_sI.lammpstrj",
         "input/traj/genice_sII.lammpstrj",
+        "input/traj/genice_sH.lammpstrj",
+        "input/traj/nucleation_f1.lammpstrj",
     output:
-        "benchmarks/paper-cells/frag-lit-cages.csv",
-        "benchmarks/paper-cells/raw-cages.txt",
         "benchmarks/paper-cells/rerun-main/report.txt",
     shell:
-        "python3 scripts/paper_cages.py --out benchmarks/paper-cells"
+        "python3 scripts/rerun_main_text.py "
+        "--seams bbdir-release/seams --input input/traj "
+        "--archive input/traj/genice_sI.lammpstrj --source . "
+        "--out benchmarks/paper-cells/rerun-main"
 
 
 rule paper_cells:

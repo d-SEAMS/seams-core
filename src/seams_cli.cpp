@@ -1441,12 +1441,26 @@ int cmdSteinhardt(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
   }
   const int typ = typeOf(cloud, typeI);
   const auto orders = steinhardtOrders(orderSpec);
+  const bool both = std::find(orders.begin(), orders.end(), 4) != orders.end() &&
+                    std::find(orders.begin(), orders.end(), 6) != orders.end();
+  chill::SteinhardtQl q4;
+  chill::SteinhardtQl q6;
+  // One neighbour list for the two degrees. Each harmonic is the cutoff
+  // kernel, so a lone --l 4 or --l 6 is unchanged.
+  const bool paired =
+      both && chill::steinhardtQ4Q6Cutoff(cloud, cutoff, typ, true, q4, q6);
   os << colorizer.heading("nop") << " " << cloud.nop;
   for (const int order : orders) {
     // Degrees 4 and 6 take the solid-harmonic kernel inside the cutoff
     // call. A degree that was not named is not computed. --l 3,4,6,12
-    // is the former four-degree line.
-    const auto q = chill::steinhardtQlCutoff(cloud, cutoff, order, typ, true);
+    // is the former four-degree line. Degrees 4 and 6 reuse the paired
+    // cutoff list when it was built.
+    chill::SteinhardtQl single;
+    if (!(paired && (order == 4 || order == 6))) {
+      single = chill::steinhardtQlCutoff(cloud, cutoff, order, typ, true);
+    }
+    const chill::SteinhardtQl &q =
+        (paired && order == 4) ? q4 : (paired && order == 6) ? q6 : single;
     const std::string tag = "q" + std::to_string(order);
     os << " " << colorizer.longOption(tag) << " " << topoparam::meanFinite(q.ql)
        << " " << colorizer.longOption(tag + "bar") << " "
@@ -1668,14 +1682,21 @@ int cmdCages(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
     const auto tKnn = std::chrono::steady_clock::now();
     const auto &mutual = graphs.first;
     const auto &uni = graphs.second;
+    // Identical rows are one graph. The edge-set sort is only the proof
+    // for two row orders of the same undirected edges.
+    const bool rowsEqual = mutual == uni;
     auto idxS = nneigh::neighbourListByIndex(cloud, mutual);
-    auto idxU = nneigh::neighbourListByIndex(cloud, uni);
+    std::vector<std::vector<int>> idxU;
+    if (!rowsEqual) {
+      idxU = nneigh::neighbourListByIndex(cloud, uni);
+    }
     const auto tIdx = std::chrono::steady_clock::now();
     // tum::cageCounts reads one graph and has no ring completion, so the
     // seeded assignment stays on the host whatever SEAMS_OFFLOAD says.
     // Hash first. A match is checked again by comparing every edge.
     const auto tEq0 = std::chrono::steady_clock::now();
     const bool sameGraph =
+        rowsEqual ||
         seams::provenEqual(seams::edgeSetOf(idxS), seams::edgeSetOf(idxU));
     const auto tEq1 = std::chrono::steady_clock::now();
     if (sameGraph) {
@@ -2588,6 +2609,9 @@ int main(int argc, char *argv[]) {
         return cmdSymmetry(os, cloud);
       } catch (const std::exception &e) {
         os << colorizer.error(e.what()) << "\n";
+        return 2;
+      } catch (...) {
+        os << colorizer.error(exceptionText()) << "\n";
         return 2;
       }
     }

@@ -11,6 +11,7 @@ ydslib_sources = files(
   'cluster.cpp',
   'domain.cpp',
   'franzblau.cpp',
+  'lc_threads.cpp',
   'gpu_residency.cpp',
   'gpu_batch.cpp',
   'generic.cpp',
@@ -22,6 +23,7 @@ ydslib_sources = files(
   'chill_offload.cpp',
   'chill_plus_scheme.cpp',
   'interface_order.cpp',
+  'science_front.cpp',
   'interface_wc.cpp',
   'topo_fingerprint.cpp',
   'tum_offload.cpp',
@@ -67,25 +69,23 @@ if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
 endif
 
 # The shell hot path has no Eigen, so AVX2 here does not fault in the allocator.
+# One shell_avx archive is linked into both the shell path and the Ylm path.
 _shell_link = []
+_ylm_link = []
 if cpp_id == 'gcc' or cpp_id == 'clang'
   _shell_avx = static_library('shell_avx', 'shell_classify.cpp',
     cpp_args: _args + ['-mavx2', '-mfma'],
     include_directories: _incdirs,
     dependencies: _deps)
   _shell_link += _shell_avx
-else
-  ydslib_sources += files('shell_classify.cpp')
-endif
-
-_ylm_link = []
-if cpp_id == 'gcc' or cpp_id == 'clang'
   _ylm_avx = static_library('ylm_avx512', 'ylm_cartesian_avx512.cpp',
     cpp_args: _args + ['-mavx512f', '-mavx512dq', '-mfma'],
     include_directories: _incdirs,
     dependencies: _deps)
-  _ylm_link += _ylm_avx
+  _ylm_link += [_ylm_avx, _shell_avx]
   _args += ['-DSEAMS_YLM_AVX512=1']
+else
+  ydslib_sources += files('shell_classify.cpp')
 endif
 
 ydslib = library('yodaLib',
@@ -198,3 +198,30 @@ seams_api_test = executable(
   c_args: ['-I' + meson.current_build_dir()])
 
 test('seams_c_api', seams_api_test, timeout: 180)
+
+docs_ice_example = executable(
+  'docs_ice_example',
+  files('../docs/examples/ice.c'),
+  link_with: seams_api_lib,
+  include_directories: include_directories('../include'),
+  c_args: ['-I' + meson.current_build_dir()],
+  link_args: ['-lm'])
+test('docs_ice_example', docs_ice_example, suite: 'docs', timeout: 60)
+
+docs_api_cpp = executable(
+  'docs_api_cpp',
+  files('../docs/examples/ice.cpp'),
+  link_with: seams_api_lib,
+  include_directories: include_directories('../include'),
+  cpp_args: ['-I' + meson.current_build_dir()],
+  link_args: ['-lm'])
+test('docs_api_cpp', docs_api_cpp, suite: 'docs', timeout: 60)
+
+docs_quickstart_c = executable(
+  'docs_quickstart_c',
+  files('../docs/examples/quickstart.c'),
+  link_with: seams_api_lib,
+  include_directories: include_directories('../include'),
+  c_args: ['-I' + meson.current_build_dir()],
+  link_args: ['-lm'])
+test('docs_quickstart_c', docs_quickstart_c, suite: 'docs', timeout: 60)

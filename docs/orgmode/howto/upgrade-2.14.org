@@ -1,0 +1,95 @@
+#+TITLE: Upgrade from 2.13 to 2.14
+#+OPTIONS: toc:nil num:nil
+
+~2dbefa97~ is the 2.13 tree these notes start from (~v2.13.0-85-g2dbefa97~).
+The release notes are
+[[file:../reference/release-2.14.org][2.14.0]].
+Rebuild the engine, then relink anything that should call ~libseams~.
+
+* C and C++
+
+Add ~#include "seams.h"~ and link ~libseams~. The header is C linkage,
+so a C++ caller uses it as it stands. ~seams_set_num_threads(0)~ puts
+back the OpenMP width the library captured at first use.
+Frame, neighbour, CHILL+, q4/q6, and ring calls are on that header.
+A program that already used the C++ classes keeps those classes.
+~BondClassifier~ is the 2.13 layout.
+
+The language ABI is ~seams_lang.h~ and ~libseams_lang~. Use it when
+the program reads a trajectory path or keeps a frame across calls.
+
+* Fortran
+
+~bindings/fortran/seams.f90~ is a new module ~seams~. Compile it with
+the program and link ~libseams~. Every procedure is ~bind(C)~ to the
+symbol in ~seams.h~.
+
+* Python
+
+The in-tree module is ~import dseams~. ~chill_plus~ defaults to the
+published rule and the cutoff graph. ~q4q6~, ~neighbours~, and ~rings~
+read ~libseams~. ~cages~, ~signature_cages~, and ~symmetry~ need
+~libseams_lang~ on the loader path (~SEAMS_LANG_LIB~).
+PydSEAMSlib is still the separate package. A script that imported that
+package keeps doing so. A script that wants the 2.14 calls uses ~dseams~.
+
+* Julia
+
+Point ~SEAMS_LANG_LIB~ at ~libseams_lang~ and ~DSEAMS_ROOT~ at the
+checkout. ~Dseams~ now exports ~chill_plus~, ~cages~,
+~primitive_rings~, ~steinhardt~, ~signature_cages~, ~symmetry~,
+~q4_q6~, and ~jump_tau90~. ~chill_plus~ defaults ~graph~ to ~"cutoff"~.
+~Seams~ is the new thin wrapper over ~libseams~.
+
+* R
+
+~R CMD INSTALL~ still needs ~DSEAMS_ROOT~, or ~SEAMS_INCLUDE~ and
+~SEAMS_LIBDIR~, so the package finds ~seams_lang.h~ and
+~libseams_lang~. The new calls are ~signature_cages~, ~symmetry~,
+~q4_q6~, ~jump_tau90~, and ~steinhardt~ on the cutoff shell.
+
+* Rust
+
+Set ~SEAMS_LIB_DIR~ to the directory that contains ~libseams.so~ and
+build ~bindings/rust~. ~seams::System~ is the safe wrapper.
+~seams::set_num_threads~ and ~seams::version~ match the C API.
+
+* Engines
+
+Turn a plugin on by letting Meson find the library, or by setting
+~-Dwith_lammps~, ~-Dwith_gromacs~, ~-Dwith_openmm~, or ~-Dwith_plumed~.
+The default for LAMMPS and GROMACS is auto.
+
+| engine | what to change |
+|--------+----------------|
+| LAMMPS | The hook reads angstroms. ~engines/lammps/in.dseams~ is the deck. The copy-in compute lives under ~extras/lammps~. |
+| GROMACS | ~gmx-seams~ reads the lower-triangle cell and scales nanometres to angstroms before CHILL+. |
+| OpenMM | One ~DseamsReporter~. Positions are nanometres and are multiplied by 10. ~InSitu.observe~ is the same classification. |
+| PLUMED | The ~SEAMS~ collective variable scales internal nanometres to angstroms and returns a q6 derivative per nanometre. |
+
+A head-to-head that times PLUMED's own symfunc has to set
+~PLUMED_NUM_THREADS~. The rows in ~benchmarks/rc3-sitting.csv~ left
+that variable unset, so they were measured on one thread.
+
+* Threads
+
+~OMP_NUM_THREADS~ is still the OpenMP width. ~seams::teamFor~ uses one
+thread below 2048 atoms and four threads below 8192 atoms when the
+width asked for is larger than four. ~prepareCompute~ does not set
+~OMP_WAIT_POLICY~, and ~adoptThreads~ leaves the OpenMP team running.
+The orthorhombic cutoff list is shared by published CHILL+ and cutoff
+q6. Each pair is counted once. An interior cell skips the periodic
+shift. On one thread a carried ring update copies and sorts directly.
+Several threads still sort and merge in parallel. A team narrower than
+the process is bound once to that many cores of the allowed set, and
+that bind stays for the process.
+
+* Deprecations and breaks
+
+~--types~ remains the deprecated alias of ~--pair-types~ and still
+warns. The log from ~2dbefa97~ does not add another deprecation.
+
+CHILL and CHILL+ on the default name ~seeded~ now score the cutoff
+list. Pass ~mutual~ for the four-nearest graph. ~seams cages~ still
+treats ~seeded~ as its own graph. A reader error exits 2. ~seams
+steinhardt~ prints q4 and q6 along with the degrees in ~--l~.

@@ -262,6 +262,7 @@ def main() -> int:
     args.out.mkdir(parents=True, exist_ok=True)
     cores, affinity = stats.cores_now()
     log = [
+        *stats.machine_lines(ROOT),
         f"cores {cores}",
         f"affinity {affinity}",
         "cutoff_A 3.5",

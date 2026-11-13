@@ -530,10 +530,12 @@ void runPass1(const NeighbourCSR &g, int orderL, int begin, int end,
 #endif
   const bool pairwise =
       seams::product::reduction() != seams::product::Reduction::Left && orderL <= 8;
-  // l = 6 batches the Cartesian harmonic eight bonds at a time. Each
-  // atom still sums its own bonds in list order, so the value matches
-  // the one-bond kernel and does not depend on the thread count.
-  const bool batchSolid = (orderL == 3 || orderL == 4 || orderL == 6) && !pairwise;
+  // Degrees 4 and 6 sum eight bonds through the Cartesian harmonic.
+  // Each atom still adds its own bonds in list order. Degree 3 stays
+  // on the one-bond kernel: the batch normalises by r^3, which is a
+  // square root and a divide, and on a four-neighbour shell that costs
+  // more than the seven components it writes.
+  const bool batchSolid = (orderL == 4 || orderL == 6) && !pairwise;
 #ifdef SEAMS_HAS_OPENMP
   const bool useThreads = g.nop >= kParallelThreshold && omp_get_max_threads() > 1;
 #pragma omp parallel for schedule(static) if (useThreads)
@@ -554,7 +556,8 @@ void runPass1Mask(const NeighbourCSR &g, int orderL, std::vector<double> &qlm,
                   const std::vector<char> *which) {
   const bool pairwise =
       seams::product::reduction() != seams::product::Reduction::Left && orderL <= 8;
-  const bool batchSolid = (orderL == 3 || orderL == 4 || orderL == 6) && !pairwise;
+  // Same split as runPass1: degree 3 stays on the one-bond kernel.
+  const bool batchSolid = (orderL == 4 || orderL == 6) && !pairwise;
 #ifdef SEAMS_HAS_OPENMP
   const bool useThreads = g.nop >= kParallelThreshold && omp_get_max_threads() > 1;
 #pragma omp parallel for schedule(static) if (useThreads)
@@ -990,7 +993,7 @@ bool rowLists(const int *nom, int k, int row, int target) {
 SteinhardtQl cutoffSolid(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
     int orderL, int typeI, bool average, bool invariants,
-    std::vector<double> *q6out = nullptr) {
+    std::vector<double> *q6out = nullptr, bool rebuild = true) {
   const int n = yCloud.nop;
   SteinhardtQl result;
   result.ql.assign(static_cast<std::size_t>(n), 0.0);
@@ -1000,20 +1003,26 @@ SteinhardtQl cutoffSolid(
   struct Scratch {
     std::vector<int> offsets, cols;
     std::vector<double> xyz, qlm;
+    std::vector<double> box, boxLow;
     int n = -1;
     int orderL = -1;
+    int geomN = -1;
+    int geomType = 0;
+    double geomCut = 0;
   };
   static Scratch scratch;
   // q_lm is only read by the Lechner-Dellago average and by w. A local
   // q_l overwrites its own row, so that buffer stays unallocated.
+  // The row is packed at this degree's width. A wider buffer left by a
+  // higher degree is reused; growing is the only allocation.
   const bool keepQlm = average || invariants;
   if (scratch.xyz.size() != static_cast<std::size_t>(n) * 3) {
     scratch.xyz.resize(static_cast<std::size_t>(n) * 3);
   }
-  if (keepQlm && (scratch.n != n || scratch.orderL != orderL ||
-                  scratch.qlm.size() !=
-                      static_cast<std::size_t>(n) * static_cast<std::size_t>(width))) {
-    scratch.qlm.assign(static_cast<std::size_t>(n) * static_cast<std::size_t>(width), 0.0);
+  const std::size_t qlmNeed =
+      static_cast<std::size_t>(n) * static_cast<std::size_t>(width);
+  if (keepQlm && scratch.qlm.size() < qlmNeed) {
+    scratch.qlm.assign(qlmNeed, 0.0);
   }
   scratch.n = n;
   scratch.orderL = orderL;
@@ -1052,10 +1061,21 @@ SteinhardtQl cutoffSolid(
 #endif
   const bool timing = std::getenv("SEAMS_QL_TIME") != nullptr;
   const auto t0 = std::chrono::steady_clock::now();
-  const bool have = nneigh::orthoFullCsr(yCloud, which, cutoff, scratch.offsets, scratch.cols);
+  const bool sameGeom = !rebuild && scratch.geomN == n && scratch.geomType == typeI &&
+                        scratch.geomCut == cutoff && scratch.box == yCloud.box &&
+                        scratch.boxLow == yCloud.boxLow &&
+                        scratch.offsets.size() == static_cast<std::size_t>(n) + 1;
+  bool have = true;
+  if (!sameGeom) {
+    have = nneigh::orthoFullCsr(yCloud, which, cutoff, scratch.offsets, scratch.cols);
+    scratch.geomN = -1;
+  }
   const auto tCsr = std::chrono::steady_clock::now();
 #ifdef SEAMS_HAS_OPENMP
   const bool parallel = seams::teamFor(n) > 1;
+#endif
+  if (!sameGeom) {
+#ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (parallel)
 #endif
   for (int i = 0; i < n; i++) {
@@ -1087,6 +1107,14 @@ SteinhardtQl cutoffSolid(
       scratch.xyz[static_cast<std::size_t>(3 * i)] = wrap(p.x, ox, Lx);
       scratch.xyz[static_cast<std::size_t>(3 * i) + 1] = wrap(p.y, oy, Ly);
       scratch.xyz[static_cast<std::size_t>(3 * i) + 2] = wrap(p.z, oz, Lz);
+    }
+  }
+    if (have) {
+      scratch.geomN = n;
+      scratch.geomType = typeI;
+      scratch.geomCut = cutoff;
+      scratch.box = yCloud.box;
+      scratch.boxLow = yCloud.boxLow;
     }
   }
   if (!have) {
@@ -1612,6 +1640,22 @@ bool localCutoffQ4Q6(
     return false;
   }
   q4 = std::move(got.ql);
+  return true;
+}
+
+bool steinhardtQ4Q6Cutoff(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
+    int typeI, bool average, SteinhardtQl &q4, SteinhardtQl &q6) {
+  SteinhardtQl a4 = cutoffSolid(yCloud, cutoff, 4, typeI, average, false, nullptr, true);
+  if (a4.ql.empty()) {
+    return false;
+  }
+  SteinhardtQl a6 = cutoffSolid(yCloud, cutoff, 6, typeI, average, false, nullptr, false);
+  if (a6.ql.empty()) {
+    return false;
+  }
+  q4 = std::move(a4);
+  q6 = std::move(a6);
   return true;
 }
 

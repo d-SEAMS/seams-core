@@ -30,3 +30,28 @@ positions and the nine-number box. `dseams.from_mdanalysis(universe)` reads
 `universe.dimensions` (lengths and angles) and `universe.atoms.positions`.
 
 `python -m dseams` labels one cubic cell.
+
+`cages`, `signature_cages`, and `symmetry` load `libseams_lang` through
+`frames.py`. Set `SEAMS_LANG_LIB` to that shared library. The nanobind
+calls (`chill_plus`, `q4q6`, `neighbours`, `rings`, `Frame`) use `libseams`.
+
+`meson test docs_api_python` runs the eight-atom program below. It calls
+`dseams.chill_plus` and `dseams.q4q6` when the nanobind module imports, and
+the same `libseams` functions through ctypes otherwise.
+`meson test python_dseams` runs `bindings/python/tests/test_dseams.py`.
+`tests/test_frames_abi.py` is the `frames_abi` check inside
+`tests/run_language_fronts.sh` (`meson test language_fronts`).
+
+```{literalinclude} ../../../docs/examples/python_api.py
+:language: python
+```
+
+```{literalinclude} ../../../bindings/python/tests/test_dseams.py
+:language: python
+:lines: 41-74,80-93
+```
+
+```{literalinclude} ../../../tests/test_frames_abi.py
+:language: python
+:lines: 50-57
+```

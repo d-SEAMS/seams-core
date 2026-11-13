@@ -1116,6 +1116,79 @@ int main(int argc, char **argv) {
     }
     seams_frame_free(mixed);
   }
+  {
+    seams_frame *fresh = seams_frame_read(tip4p.c_str(), 1, 2);
+    if (fresh == nullptr) {
+      return fail("reread tip4p");
+    }
+    const int nFresh = seams_frame_nop(fresh);
+    std::vector<double> moved(static_cast<std::size_t>(nFresh) * 3);
+    const double *src = seams_frame_positions(fresh);
+    for (int i = 0; i < nFresh * 3; ++i) {
+      moved[static_cast<std::size_t>(i)] = src[i];
+    }
+    moved[0] += 1.0e-4;
+    double box9[9];
+    seams_frame_box(fresh, box9);
+    if (seams_frame_set_positions(fresh, moved.data(), nFresh, box9) != 0) {
+      seams_frame_free(fresh);
+      return fail("set positions");
+    }
+    if (seams_frame_neighbours(fresh, 3.5, 2, "cutoff") != 0) {
+      seams_frame_free(fresh);
+      return fail("neighbours");
+    }
+    if (seams_frame_neighbour_pairs(fresh) <= 0) {
+      seams_frame_free(fresh);
+      return fail("neighbour pairs");
+    }
+    std::vector<double> ql(static_cast<std::size_t>(nFresh));
+    std::vector<double> bar(static_cast<std::size_t>(nFresh));
+    if (seams_frame_steinhardt(fresh, 3.5, 2, 6, ql.data(), bar.data()) != 0) {
+      seams_frame_free(fresh);
+      return fail("steinhardt");
+    }
+    if (seams_frame_steinhardt_graph(fresh, 3.5, 2, 6, "cutoff", ql.data(), bar.data()) != 0) {
+      seams_frame_free(fresh);
+      return fail("steinhardt graph");
+    }
+    std::vector<double> wl(static_cast<std::size_t>(nFresh));
+    if (seams_frame_wl(fresh, 3.5, 2, 4, wl.data()) != 0) {
+      seams_frame_free(fresh);
+      return fail("wl");
+    }
+    std::vector<double> q4(static_cast<std::size_t>(nFresh));
+    std::vector<double> q6(static_cast<std::size_t>(nFresh));
+    if (seams_frame_q4_q6(fresh, 3.5, 2, q4.data(), q6.data(), nullptr, nullptr) != 0) {
+      seams_frame_free(fresh);
+      return fail("q4 q6");
+    }
+    std::vector<int> iceLabels(static_cast<std::size_t>(nFresh));
+    int fused[9] = {};
+    if (seams_frame_q4_q6_chill(fresh, 3.5, 2, q4.data(), q6.data(), nullptr, nullptr,
+                               iceLabels.data(), fused) != 0) {
+      seams_frame_free(fresh);
+      return fail("q4 q6 chill");
+    }
+    std::vector<int> ringCounts(9);
+    seams_phase_times times{};
+    if (seams_frame_chill_rings(fresh, 3.5, 2, "cutoff", 6, 0.0, iceLabels.data(), fused,
+                               ringCounts.data(), 9, &times) != 0) {
+      seams_frame_free(fresh);
+      return fail("chill rings");
+    }
+    std::vector<int> shell(static_cast<std::size_t>(nFresh));
+    if (seams_frame_symmetry(fresh, 0.12, shell.data()) != 0) {
+      seams_frame_free(fresh);
+      return fail("symmetry");
+    }
+    double tau = 0.0;
+    if (seams_frames_jump_tau90(fresh, fresh, 1.0, 2, 1, &tau) != 0) {
+      seams_frame_free(fresh);
+      return fail("jump tau");
+    }
+    seams_frame_free(fresh);
+  }
   std::cout << "seams_lang ok " << seams_lang_version() << "\n";
   return 0;
 }

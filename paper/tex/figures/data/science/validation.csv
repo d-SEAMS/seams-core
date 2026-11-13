@@ -1,0 +1,9 @@
+system quantity n pearson_or_fraction rms max_abs frac_close agree note
+interface ovito_chill_plus 1464 1.000000 0 0 1.000000 1 d-SEAMS ovito-chill+ against OVITO ChillPlusModifier at cutoff 3.5 A
+interface published_chill_plus 1464 0.978142 0 0 0.978142 0 published CHILL+ keeps the 2015 neighbour test and the four-neighbour q3 average. OVITO does not. neighbour_test 7 q3_shell 25 open_edge 0 mixed 0
+interface freud_q6 1464 1.000000 0.000001 0.000013 1.000000 1 cutoff 3.5 A ball, same threshold as the d-SEAMS kernel
+interface freud_q6bar 1464 1.000000 0.000001 0.000006 1.000000 1 cutoff 3.5 A ball, same threshold as the d-SEAMS kernel
+nucleation ovito_chill_plus 4096 1.000000 0 0 1.000000 1 d-SEAMS ovito-chill+ against OVITO ChillPlusModifier at cutoff 3.5 A
+nucleation published_chill_plus 4096 0.894531 0 0 0.894531 0 On frame 2, published CHILL+ keeps the 2015 neighbour test and the four-neighbour q3 average. OVITO does not. neighbour_test 220 q3_shell 207 open_edge 0 mixed 5
+nucleation freud_q6 4096 1.000000 0.000001 0.000026 1.000000 1 cutoff 3.5 A ball, same threshold as the d-SEAMS kernel
+nucleation freud_q6bar 4096 1.000000 0.000001 0.000010 1.000000 1 cutoff 3.5 A ball, same threshold as the d-SEAMS kernel

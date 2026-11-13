@@ -470,7 +470,10 @@ void passFastStashHalf(const double *xs, const double *ys, const double *zs,
 // Count pass that also keeps the neighbour ids. A shell longer than
 // kStashCap sets *overflowed and the caller repeats the geometry fill.
 // Several threads take the half stencil a z layer at a time. The full
-// stencil visited every pair twice and did not beat one thread.
+// stencil visited every pair twice and did not beat one thread. One pair
+// is recorded from the cell of its lower packed slot, and the fill sorts
+// the row so the CSR matches the one-thread half walk.
+
 void passFastStash(const double *xs, const double *ys, const double *zs,
                    const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
                    const double *shx, const double *shy, const double *shz, double rc2,
@@ -506,8 +509,7 @@ void passFastStash(const double *xs, const double *ys, const double *zs,
                     stash, overflowed);
 }
 
-// One thread records each pair from the lower packed slot and writes both
-// ends. The full stencil visits every pair twice; this visit is once.
+
 void passFastStashHalf(const double *xs, const double *ys, const double *zs,
                        const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
                        const double *shx, const double *shy, const double *shz, double rc2,
@@ -995,7 +997,13 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
   sc.ids.resize(static_cast<std::size_t>(nSubset));
   sc.cellStart.assign(static_cast<std::size_t>(nCells) + 1, 0);
   sc.hist.assign(static_cast<std::size_t>(maxThreads) * static_cast<std::size_t>(nCells), 0);
-  sc.counts.assign(static_cast<std::size_t>(nop), 0);
+  // A full set writes every count from the cell that owns the atom.
+  // Zeroing those lines on this thread first only adds a fault.
+  if (sc.counts.size() != static_cast<std::size_t>(nop)) {
+    sc.counts.assign(static_cast<std::size_t>(nop), 0);
+  } else if (subset != nullptr) {
+    std::fill(sc.counts.begin(), sc.counts.end(), 0);
+  }
   const auto tBin = Clock::now();
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (!nested && nSubset >= 256)
@@ -1737,7 +1745,13 @@ bool orthoFullCsr(
   sc.cellStart.assign(static_cast<std::size_t>(nCells) + 1, 0);
   sc.hist.assign(static_cast<std::size_t>(maxThreads) * static_cast<std::size_t>(nCells),
                  0);
-  sc.counts.assign(static_cast<std::size_t>(nop), 0);
+  // A full set writes every count from the cell that owns the atom.
+  // Zeroing those lines on this thread first only adds a fault.
+  if (sc.counts.size() != static_cast<std::size_t>(nop)) {
+    sc.counts.assign(static_cast<std::size_t>(nop), 0);
+  } else if (subset != nullptr) {
+    std::fill(sc.counts.begin(), sc.counts.end(), 0);
+  }
 
   const auto tBin = Clock::now();
   int threads = 1;

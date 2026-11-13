@@ -52,13 +52,21 @@ RingSummary summarize(const std::vector<std::vector<int>> &ringList,
 std::uint64_t hilbertKey(std::uint32_t x, std::uint32_t y, std::uint32_t z,
                          int bits);
 
-//! Cutoffs of coordinates a rank needs when it builds every neighbour row
-//! itself. A primitive ring of @a maxDepth members stays inside this many
-//! hops, and one hop is at most one cutoff.
-inline int ringHops(int maxDepth) {
-  const int maxLvl = maxDepth > 0 ? maxDepth / 2 : 0;
-  return maxLvl > 0 ? maxLvl : 0;
+//! Bonds of ghost skin around an owned atom. A primitive ring of length
+//! at most @a ringSize lies in the closed ball of radius floor(ringSize/2)
+//! about any of its members (formal/Formal/Halo.lean,
+//! primitive_ring_subset_ball), so this many bonds hold the ring and any
+//! shortcut the primitivity test can see.
+inline constexpr int kRingHaloHalf = 2;
+
+inline int ringHaloBonds(int ringSize) {
+  return ringSize > 0 ? ringSize / kRingHaloHalf : 0;
 }
+
+//! Cutoffs of coordinates a rank needs when it builds every neighbour row
+//! itself. One bond is at most one cutoff, so the coordinate skin is
+//! ringHaloBonds() cutoffs.
+inline int ringHops(int maxDepth) { return ringHaloBonds(maxDepth); }
 
 //! Cutoffs of neighbour rows the ring search reads past the owned block.
 //! The coordinate halo on the distributed path is one cutoff; rows out to

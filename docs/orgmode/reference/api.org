@@ -15,6 +15,9 @@ Four fronts, one engine (~libyodaLib~). Flags live on
 | Front | Package | First call |
 |-------+---------+------------|
 | CLI | this repo (~seams~) | ~seams read FILE~, ~seams chill-plus FILE~, ~seams cages FILE~ |
+| Stable C | this repo (~libseams~, ~seams.h~) | ~seams_system_create~ |
+| Language ABI | this repo (~libseams_lang~) | ~seams_frame_read~ |
+| Python | this repo (~import dseams~) | ~dseams.chill_plus~ |
 | Python Frame | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseams.Frame~ from ~pydseams.read(...)~ |
 | Lua | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | ~require("dseams")~ |
 | Compiled Python | PydSEAMSlib | ~pydseams.yoda~ (~_core~ and ~cyoda~ are aliases) |
@@ -125,8 +128,9 @@ The C entry those packages call is ~seams_frame_signature_edge~; a null edge str
 * Fast q4 and q6
 
 Degrees 4 and 6 on an orthorhombic or restricted-triclinic cutoff shell use the solid-harmonic kernel inside ~chill::steinhardtQlCutoff~.
+~seams_q4q6~ in =include/seams.h= is the installed pair on ~libseams~.
 ~seams_frame_q4_q6~ in =bindings/cxx/seams_lang.h= returns both local values and, when the pointers are non-null, the Lechner-Dellago averages.
-~seams_q4_q6~ in =src/include/internal/seams_c_api.h= is the same pair for a native caller.
+~seams_q4_q6~ in =src/include/internal/seams_c_api.h= is the flat entry inside the library, not the installed ~seams_q4q6~.
 Its box is ~ox, oy, oz, lx, ly, lz~, the six numbers ~seams_chill_plus~ already takes.
 ~seams_q4_q6_lammps~ takes the nine-number LAMMPS cell.
 Both return 0 on success.

@@ -292,6 +292,10 @@ TEST_CASE("findBySignature(hc) and findBySignature(ddc) match findHC/findDDC "
           vertexSetsOf(cageList, cage::cageType::HexC, six));
   REQUIRE(vertexSetsOf(ddc) ==
           vertexSetsOf(cageList, cage::cageType::DoubleDiaC, six));
+  // bench cages_v2 deposited 2040. That was the unpatched conflict set.
+  // The maximum packing is one cage for every two molecules.
+  REQUIRE(yCloud.nop == 4096);
+  REQUIRE(ddc.size() == 2048);
 }
 
 struct DumpCages {
@@ -897,4 +901,44 @@ TEST_CASE("default and disabled edge windows agree on the reference clathrates",
   const auto sii10 = replicateCloud(sii, 10, 10, 10);
   REQUIRE(sii10.nop == 1000 * sii.nop);
   expectWindowAgrees(sii10, 16000, 0, 8000);
+}
+
+TEST_CASE("default and disabled edge windows agree on triclinic sH",
+          "[cage_enum]") {
+  // 136 waters: four formula units of structure H. Each unit is
+  // 3 * 5^12, 2 * 4^3 5^6 6^3 and 1 * 5^12 6^8.
+  // Wrapping the bound spans as orthogonal lengths drops the cages
+  // whose edges cross the xy shear.
+  CageCloud cell;
+  cell = sinp::readLammpsTrjO("traj/genice_sH.lammpstrj", 1, cell, 1);
+  REQUIRE(cell.nop == 136);
+  REQUIRE(cell.box.size() >= 6);
+  auto nList = nneigh::neighListO(3.5, cell, 1);
+  nList = nneigh::neighbourListByIndex(cell, nList);
+  const auto rings =
+      ring::cageRings(primitive::ringNetwork(nList, 6), cell, 3.5);
+  std::vector<std::array<double, 3>> xyz(static_cast<std::size_t>(cell.nop));
+  for (int i = 0; i < cell.nop; ++i) {
+    const auto &p = cell.pts[static_cast<std::size_t>(i)];
+    xyz[static_cast<std::size_t>(i)] = {p.x, p.y, p.z};
+  }
+  const std::vector<cage::Signature> sigs = {
+      cage::Signature::parse("512"),
+      cage::Signature::parse("51262"),
+      cage::Signature::parse("51264"),
+      cage::Signature::parse("51268"),
+      cage::Signature::parse("sh"),
+  };
+  const std::size_t want[] = {12, 0, 0, 4, 8};
+  const auto on = cage::findBySignatures(rings, nList, sigs, {}, &xyz,
+                                         &cell.box, {});
+  const auto off = cage::findBySignatures(rings, nList, sigs, {}, &xyz,
+                                          &cell.box, cage::parseEdgeWindow("none"));
+  REQUIRE(on.size() == 5);
+  REQUIRE(off.size() == 5);
+  for (std::size_t i = 0; i < 5; ++i) {
+    INFO(sigs[i].str());
+    REQUIRE(on[i].size() == want[i]);
+    REQUIRE(off[i].size() == want[i]);
+  }
 }

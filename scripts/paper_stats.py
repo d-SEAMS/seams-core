@@ -68,3 +68,93 @@ def taskset_cores(threads: int) -> str:
     if threads < 1:
         raise ValueError("threads")
     return "0" if threads == 1 else f"0-{threads - 1}"
+
+
+def _lscpu() -> dict[str, str]:
+    import subprocess
+    found = {}
+    text = subprocess.check_output(["lscpu"], text=True)
+    for line in text.splitlines():
+        if ":" not in line:
+            continue
+        key, value = line.split(":", 1)
+        found[key.strip()] = value.strip()
+    return found
+
+
+def _lscpu_field(label: str) -> str:
+    found = _lscpu()
+    if label not in found:
+        raise RuntimeError(f"lscpu has no {label}")
+    return found[label]
+
+
+def cpu_model_name(raw: str) -> str:
+    """Vendor and product only. Registered marks are not part of the name."""
+    cleaned = raw.replace("(R)", " ").replace("(TM)", " ").replace("®", " ")
+    return " ".join(cleaned.split())
+
+
+def flag_summary(flags: str) -> str:
+    tokens = set(flags.split())
+    parts = []
+    if "avx2" in tokens:
+        parts.append("avx2")
+    if any(token.startswith("avx512") for token in tokens):
+        parts.append("avx512")
+    return " ".join(parts)
+
+
+def cache_summary(rows: dict[str, str]) -> str:
+    parts = []
+    for label, key in (
+        ("L1d cache", "L1d"),
+        ("L1i cache", "L1i"),
+        ("L2 cache", "L2"),
+        ("L3 cache", "L3"),
+    ):
+        if label not in rows:
+            raise RuntimeError(f"lscpu has no {label}")
+        parts.append(f"{key} {rows[label]}")
+    return "; ".join(parts)
+
+
+def source_commit(root) -> str:
+    import subprocess
+    done = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "HEAD"],
+        check=True, text=True, capture_output=True)
+    return done.stdout.strip()
+
+
+def machine(root) -> dict[str, str]:
+    """Commit and the lscpu identity of the CPU. The host name is not read."""
+    cores, affinity = cores_now()
+    rows = _lscpu()
+    return {
+        "source_commit": source_commit(root),
+        "cpu_model": cpu_model_name(rows["Model name"]),
+        "cpu_family": rows["CPU family"],
+        "cpu_model_id": rows["Model"],
+        "cpu_stepping": rows["Stepping"],
+        "cpu_flags": flag_summary(rows["Flags"]),
+        "cpu_cache": cache_summary(rows),
+        "cpu_cores": rows["CPU(s)"],
+        "cores": str(cores),
+        "affinity": affinity,
+    }
+
+
+def machine_lines(root) -> list[str]:
+    info = machine(root)
+    return [
+        f"source_commit {info['source_commit']}",
+        f"cpu_model {info['cpu_model']}",
+        f"cpu_family {info['cpu_family']}",
+        f"cpu_model_id {info['cpu_model_id']}",
+        f"cpu_stepping {info['cpu_stepping']}",
+        f"cpu_flags {info['cpu_flags']}",
+        f"cpu_cache {info['cpu_cache']}",
+        f"cpu_cores {info['cpu_cores']}",
+        f"affinity {info['affinity']}",
+    ]

@@ -294,6 +294,48 @@ TEST_CASE("Cartesian l=4 matches the trigonometric harmonic", "[ql][solid]") {
   }
 }
 
+TEST_CASE("one cutoff list matches two q4 and q6 calls", "[ql][solid]") {
+  auto check = [](const molSys::PointCloud<molSys::Point<double>, double> &cloud,
+                  bool average) {
+    const auto q4 = chill::steinhardtQlCutoff(cloud, 3.5, 4, 1, average);
+    const auto q6 = chill::steinhardtQlCutoff(cloud, 3.5, 6, 1, average);
+    chill::SteinhardtQl a4;
+    chill::SteinhardtQl a6;
+    REQUIRE(chill::steinhardtQ4Q6Cutoff(cloud, 3.5, 1, average, a4, a6));
+    REQUIRE(a4.ql == q4.ql);
+    REQUIRE(a6.ql == q6.ql);
+    REQUIRE(a4.qlBar == q4.qlBar);
+    REQUIRE(a6.qlBar == q6.qlBar);
+    chill::SteinhardtQl b4;
+    chill::SteinhardtQl b6;
+    REQUIRE(chill::steinhardtQ4Q6Cutoff(cloud, 3.5, 1, average, b4, b6));
+    REQUIRE(b4.ql == q4.ql);
+    REQUIRE(b6.ql == q6.ql);
+  };
+  check(iceIc(3), false);
+  check(iceIc(3), true);
+  molSys::PointCloud<molSys::Point<double>, double> liquid;
+  liquid.box = {16.0, 16.0, 16.0};
+  liquid.boxLow = {0.0, 0.0, 0.0};
+  liquid.currentFrame = 1;
+  std::mt19937 rng(91001);
+  std::uniform_real_distribution<double> u(0.0, 16.0);
+  for (int i = 0; i < 180; i++) {
+    molSys::Point<double> p;
+    p.x = u(rng);
+    p.y = u(rng);
+    p.z = u(rng);
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = p.atomID;
+    liquid.idIndexMap[p.atomID] = liquid.nop;
+    liquid.pts.push_back(p);
+    ++liquid.nop;
+  }
+  check(liquid, true);
+  check(liquid, false);
+}
+
 TEST_CASE("fused q4 q6 and q-bar match the cutoff Steinhardt", "[ql][chill]") {
   auto check = [](molSys::PointCloud<molSys::Point<double>, double> cloud) {
     auto labeled = cloud;
@@ -366,6 +408,22 @@ TEST_CASE("fused q6 on a triclinic cell matches the cutoff call", "[ql][chill]")
     REQUIRE(labeled.pts[static_cast<std::size_t>(i)].iceType ==
             molSys::atom_state_type::cubic);
   }
+}
+
+TEST_CASE("neighbour-list q3 stays with the one-bond value", "[ql][solid]") {
+  // Ideal ice Ic is one tetrahedral shell. q3 is scale-free, so every
+  // atom shares the one-bond value. The eight-bond batch is not used
+  // for this degree.
+  auto cloud = iceIc(2);
+  const auto rows = nneigh::neighListO(3.5, cloud, 1);
+  const auto q3 = chill::steinhardtQl(cloud, rows, 3);
+  REQUIRE(q3.ql.size() == static_cast<std::size_t>(cloud.nop));
+  for (double v : q3.ql) {
+    REQUIRE(std::fabs(v - 0.74535599249993) < 1e-12);
+  }
+  const auto mutual = chill::steinhardtQlMutual(cloud, 4, 5.0, 1, 3);
+  REQUIRE(maxAbs(q3.ql, mutual.ql) < 1e-12);
+  REQUIRE(maxAbs(q3.qlBar, mutual.qlBar) < 1e-12);
 }
 
 TEST_CASE("local q4 and q6 do not need the averaged row", "[ql][solid]") {

@@ -4,11 +4,7 @@
 
 `plumed driver` reads xyz in nanometres. `engines/plumed/ice.xyz` is the 64-atom cell in nanometres. The plugin multiplies `getPosition` and the box by 10, because d-SEAMS expects angstroms and `CUTOFF=3.5` is angstroms. Leave the driver's length unit at the default. Do not set `UNITS LENGTH=A`.
 
-```
-LOAD FILE=./libSeamsPlumed.so
-seams: SEAMS ATOMS=1-64 CUTOFF=3.5
-RESTRAINT ARG=seams.q6 AT=0.5 KAPPA=10.0
-PRINT ARG=seams.q6,seams.ice,seams.ring FILE=colvar STRIDE=1
+```{literalinclude} ../../../engines/plumed/plumed.dat
 ```
 
 ```bash

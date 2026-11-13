@@ -492,16 +492,63 @@ endif
 
 # Continuous shape measure (Pinsky, Avnir, Alvarez), GPL-2.0. The
 # program is an optional external dependency, off by default, and is
-# never vendored or linked into libyodaLib. The in-tree measure is the
+# never vendored into libyodaLib. When enabled, an existing csm_shape
+# or shape on PATH is used. Otherwise the program is built from
+# third_party/csm if OpenBabel is present. The in-tree measure is the
 # published formula on the fixed shells. IRA stays optional under the
 # Apache-2.0 option of its dual licence.
 csm_shape_bin = ''
 csm_opt = get_option('with_csm')
 if not csm_opt.disabled()
-  csm_prog = find_program('csm_shape', 'shape', required: csm_opt)
+  csm_prog = find_program('csm_shape', 'shape', required: false)
   if csm_prog.found()
     csm_shape_bin = csm_prog.full_path()
     message('External CSM shape program found (not linked into libyodaLib)')
+  else
+    openbabel_dep = dependency('openbabel-3', required: false)
+    if not openbabel_dep.found()
+      openbabel_dep = dependency('openbabel-2.0', required: false)
+    endif
+    # A module pkg-config can miss the system OpenBabel. The shape program
+    # is built by the system compiler against that OpenBabel, and is not
+    # linked into libyodaLib.
+    if not openbabel_dep.found()
+      system_pkg = find_program('/usr/bin/pkg-config', required: false)
+      if system_pkg.found()
+        foreach ob_name : ['openbabel-3', 'openbabel-2.0']
+          ob_probe = run_command(system_pkg, '--exists', ob_name, check: false)
+          if ob_probe.returncode() == 0
+            openbabel_dep = declare_dependency()
+            break
+          endif
+        endforeach
+      endif
+    endif
+    if not openbabel_dep.found()
+      if csm_opt.enabled()
+        error('with_csm=enabled but OpenBabel was not found and csm_shape is not on PATH')
+      endif
+      message('CSM program left off (OpenBabel absent)')
+    else
+      csm_shape = custom_target(
+        'csm_shape',
+        input: files(
+          'third_party/csm/build.sh',
+          'third_party/csm/src/shape.cpp',
+          'third_party/csm/src/babelAdapter.cpp',
+          'third_party/csm/src/matrix.c',
+          'third_party/csm/src/Molecule.c',
+          'third_party/csm/src/svdcmp.c',
+          'third_party/csm/src/parseFunctions.c',
+          'third_party/csm/src/permuter.c',
+        ),
+        output: 'csm_shape',
+        command: [find_program('sh'), files('third_party/csm/build.sh'), '@OUTPUT@', meson.current_source_dir()],
+        build_by_default: true,
+      )
+      csm_shape_bin = csm_shape.full_path()
+      message('CSM shape program will be built (not linked into libyodaLib)')
+    endif
   endif
 endif
 
@@ -647,6 +694,16 @@ nucleation_link = _link_args
 if host_system == 'linux'
   nucleation_link += ['-Wl,--enable-new-dtags']
 endif
+science_front_exe = executable(
+  'science-front',
+  files('scripts/science_front.cpp'),
+  dependencies: [yds_dep],
+  include_directories: _incdirs,
+  cpp_args: _args,
+  link_args: nucleation_link,
+  build_rpath: meson.current_build_dir() / 'src',
+  install: true)
+
 nucleation_pathway_exe = executable(
   'nucleation-pathway',
   files('scripts/nucleation_pathway.cpp'),
@@ -744,6 +801,145 @@ if get_option('with_cli')
   test('seams_print_config', seams_exe, args: ['--print-config'])
 
   python3 = find_program('python3', required: true)
+  test(
+    'docs_check',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_examples.py'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_table_csv',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_tables.py'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_changelog',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_changelog.py', '--check'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_c_symbols',
+    python3,
+    args: ['-m', 'doctest', meson.project_source_root() / 'docs' / 'check_c_symbols.py'],
+    workdir: meson.project_source_root() / 'docs',
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_sitting',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_trace_threads',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-trace'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_pool_audit',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-pool'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_sitting_large',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-large'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_h2h_threads',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-h2h'],
+    suite: 'docs',
+    timeout: 60)
+  tutorial_env = environment()
+  tutorial_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+  test(
+    'docs_quickstart_py',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_quickstart.py',
+      meson.project_build_root() / 'src',
+    ],
+    env: tutorial_env,
+    suite: 'docs',
+    depends: [seams_api_lib],
+    timeout: 60)
+  test(
+    'docs_tutorial_clathrate',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'tutorials' / 'test_clathrate.py',
+      meson.project_source_root(),
+      seams_exe.full_path(),
+      meson.project_build_root() / 'src',
+    ],
+    depends: [seams_exe],
+    suite: 'docs',
+    timeout: 180)
+  test(
+    'docs_tutorial_interface',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'tutorials' / 'test_interface.py',
+      meson.project_source_root(),
+      seams_exe.full_path(),
+      meson.project_build_root() / 'src',
+    ],
+    env: tutorial_env,
+    depends: [seams_exe],
+    suite: 'docs',
+    timeout: 120)
+  test(
+    'docs_tutorial_nucleation',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'tutorials' / 'test_nucleation.py',
+      meson.project_source_root(),
+      meson.project_build_root() / 'src',
+    ],
+    env: tutorial_env,
+    depends: [seams_api_lib],
+    suite: 'docs',
+    timeout: 180)
+  test(
+    'docs_tutorial_brine',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'tutorials' / 'test_brine.py',
+      meson.project_source_root(),
+      meson.project_build_root() / 'src',
+    ],
+    env: tutorial_env,
+    depends: [seams_api_lib],
+    suite: 'docs',
+    timeout: 120)
+  test(
+    'docs_tutorial_insitu',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'tutorials' / 'test_insitu.py',
+      meson.project_source_root(),
+      meson.project_build_root(),
+    ],
+    env: tutorial_env,
+    suite: 'docs',
+    timeout: 180)
+  test(
+    'engines_tutorial',
+    python3,
+    args: [
+      meson.project_source_root() / 'engines' / 'tutorial_walk.py',
+      meson.project_build_root(),
+    ],
+    env: tutorial_env,
+    depends: [seams_api_lib],
+    suite: 'docs',
+    timeout: 120)
   test(
     'seams_water_types_cutoff',
     python3,
@@ -1023,3 +1219,68 @@ if get_option('with_cli')
 endif
 
 subdir('bindings')
+
+if get_option('with_cli')
+  binding_env = environment()
+  binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+  binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'bindings')
+  test(
+    'docs_api_python',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'python_api.py',
+      meson.project_build_root() / 'src',
+    ],
+    env: binding_env,
+    depends: [seams_api_lib],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_api_fortran',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_binding.py',
+      'fortran',
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_api_lib],
+    suite: 'docs',
+    timeout: 120)
+  test(
+    'docs_api_rust',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_binding.py',
+      'rust',
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_api_lib],
+    suite: 'docs',
+    timeout: 180)
+  test(
+    'docs_api_r',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_binding.py',
+      'r',
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_lang],
+    suite: 'docs',
+    timeout: 300)
+  test(
+    'docs_api_julia',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_binding.py',
+      'julia',
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_lang],
+    suite: 'docs',
+    timeout: 180)
+endif

@@ -121,6 +121,7 @@ def main() -> int:
     model = model_name()
     commit = source_commit()
     log_lines = [
+        *stats.machine_lines(ROOT),
         f"cores {cores}",
         f"model {model}",
         f"commit {commit}",

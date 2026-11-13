@@ -1,0 +1,175 @@
+# end-to-end neighbours plus rings, release -O3
+# d-SEAMS builds the orthorhombic cutoff CSR and then searches
+sample e2e threads 1 molecules 10648 depth 6 neigh_ms 7.629484 ring_ms 24.455748 total_ms 32.085232 rings 21296 csr 1
+sample e2e threads 1 molecules 10648 depth 6 neigh_ms 7.679823 ring_ms 24.146847 total_ms 31.826670 rings 21296 csr 1
+sample e2e threads 1 molecules 10648 depth 6 neigh_ms 7.542071 ring_ms 24.458705 total_ms 32.000776 rings 21296 csr 1
+sample e2e threads 1 molecules 10648 depth 6 neigh_ms 4.515707 ring_ms 12.145108 total_ms 16.660815 rings 21296 csr 1
+sample e2e threads 1 molecules 10648 depth 6 neigh_ms 3.640351 ring_ms 11.970032 total_ms 15.610383 rings 21296 csr 1
+sample e2e threads 1 molecules 10648 depth 6 neigh_ms 3.500457 ring_ms 12.095120 total_ms 15.595577 rings 21296 csr 1
+summary e2e threads 1 molecules 10648 depth 6 total_median_ms 31.826670 rings 21296 equal 1 used_balls 0
+sample e2e threads 8 molecules 10648 depth 6 neigh_ms 0.766205 ring_ms 2.972702 total_ms 3.738907 rings 21296 csr 1
+sample e2e threads 8 molecules 10648 depth 6 neigh_ms 0.768317 ring_ms 2.891679 total_ms 3.659996 rings 21296 csr 1
+sample e2e threads 8 molecules 10648 depth 6 neigh_ms 0.818930 ring_ms 3.012655 total_ms 3.831585 rings 21296 csr 1
+sample e2e threads 8 molecules 10648 depth 6 neigh_ms 0.776585 ring_ms 3.237262 total_ms 4.013847 rings 21296 csr 1
+sample e2e threads 8 molecules 10648 depth 6 neigh_ms 0.761324 ring_ms 3.002904 total_ms 3.764228 rings 21296 csr 1
+sample e2e threads 8 molecules 10648 depth 6 neigh_ms 0.823410 ring_ms 3.383905 total_ms 4.207315 rings 21296 csr 1
+summary e2e threads 8 molecules 10648 depth 6 total_median_ms 3.831585 rings 21296 equal 1 used_balls 0
+sample e2e threads 1 molecules 110592 depth 6 neigh_ms 26.431810 ring_ms 132.135186 total_ms 158.566996 rings 221184 csr 1
+sample e2e threads 1 molecules 110592 depth 6 neigh_ms 26.095970 ring_ms 127.077865 total_ms 153.173835 rings 221184 csr 1
+sample e2e threads 1 molecules 110592 depth 6 neigh_ms 25.758308 ring_ms 125.869835 total_ms 151.628143 rings 221184 csr 1
+sample e2e threads 1 molecules 110592 depth 6 neigh_ms 26.088921 ring_ms 124.319256 total_ms 150.408177 rings 221184 csr 1
+sample e2e threads 1 molecules 110592 depth 6 neigh_ms 25.688363 ring_ms 123.942547 total_ms 149.630910 rings 221184 csr 1
+sample e2e threads 1 molecules 110592 depth 6 neigh_ms 25.971186 ring_ms 122.827276 total_ms 148.798462 rings 221184 csr 1
+summary e2e threads 1 molecules 110592 depth 6 total_median_ms 151.628143 rings 221184 equal 1 used_balls 0
+sample e2e threads 8 molecules 110592 depth 6 neigh_ms 4.802325 ring_ms 26.259869 total_ms 31.062194 rings 221184 csr 1
+sample e2e threads 8 molecules 110592 depth 6 neigh_ms 4.685690 ring_ms 27.678321 total_ms 32.364011 rings 221184 csr 1
+sample e2e threads 8 molecules 110592 depth 6 neigh_ms 4.439416 ring_ms 26.940640 total_ms 31.380056 rings 221184 csr 1
+sample e2e threads 8 molecules 110592 depth 6 neigh_ms 4.964440 ring_ms 27.251231 total_ms 32.215671 rings 221184 csr 1
+sample e2e threads 8 molecules 110592 depth 6 neigh_ms 5.087010 ring_ms 26.720106 total_ms 31.807116 rings 221184 csr 1
+sample e2e threads 8 molecules 110592 depth 6 neigh_ms 4.494312 ring_ms 27.832027 total_ms 32.326339 rings 221184 csr 1
+summary e2e threads 8 molecules 110592 depth 6 total_median_ms 32.215671 rings 221184 equal 1 used_balls 0
+sample e2e threads 1 molecules 884736 depth 6 neigh_ms 458.792720 ring_ms 1284.151870 total_ms 1742.944590 rings 1769472 csr 1
+sample e2e threads 1 molecules 884736 depth 6 neigh_ms 259.713377 ring_ms 1136.630185 total_ms 1396.343562 rings 1769472 csr 1
+sample e2e threads 1 molecules 884736 depth 6 neigh_ms 255.709175 ring_ms 1032.882960 total_ms 1288.592135 rings 1769472 csr 1
+sample e2e threads 1 molecules 884736 depth 6 neigh_ms 252.511019 ring_ms 1042.952968 total_ms 1295.463987 rings 1769472 csr 1
+sample e2e threads 1 molecules 884736 depth 6 neigh_ms 243.186840 ring_ms 1062.639610 total_ms 1305.826450 rings 1769472 csr 1
+sample e2e threads 1 molecules 884736 depth 6 neigh_ms 246.040256 ring_ms 1035.482364 total_ms 1281.522620 rings 1769472 csr 1
+summary e2e threads 1 molecules 884736 depth 6 total_median_ms 1305.826450 rings 1769472 equal 1 used_balls 0
+sample e2e threads 8 molecules 884736 depth 6 neigh_ms 43.359330 ring_ms 283.816366 total_ms 327.175696 rings 1769472 csr 1
+sample e2e threads 8 molecules 884736 depth 6 neigh_ms 40.048214 ring_ms 347.150136 total_ms 387.198350 rings 1769472 csr 1
+sample e2e threads 8 molecules 884736 depth 6 neigh_ms 51.538557 ring_ms 365.408227 total_ms 416.946784 rings 1769472 csr 1
+sample e2e threads 8 molecules 884736 depth 6 neigh_ms 39.095325 ring_ms 373.686412 total_ms 412.781737 rings 1769472 csr 1
+sample e2e threads 8 molecules 884736 depth 6 neigh_ms 44.966978 ring_ms 362.576966 total_ms 407.543944 rings 1769472 csr 1
+sample e2e threads 8 molecules 884736 depth 6 neigh_ms 38.730991 ring_ms 338.332027 total_ms 377.063018 rings 1769472 csr 1
+summary e2e threads 8 molecules 884736 depth 6 total_median_ms 407.543944 rings 1769472 equal 1 used_balls 0
+sample e2e threads 1 molecules 10648 depth 8 neigh_ms 3.543723 ring_ms 41.823785 total_ms 45.367508 rings 21296 csr 1
+sample e2e threads 1 molecules 10648 depth 8 neigh_ms 4.040363 ring_ms 42.504390 total_ms 46.544753 rings 21296 csr 1
+sample e2e threads 1 molecules 10648 depth 8 neigh_ms 3.494809 ring_ms 42.017459 total_ms 45.512268 rings 21296 csr 1
+sample e2e threads 1 molecules 10648 depth 8 neigh_ms 3.607963 ring_ms 41.106860 total_ms 44.714823 rings 21296 csr 1
+sample e2e threads 1 molecules 10648 depth 8 neigh_ms 3.518680 ring_ms 41.562696 total_ms 45.081376 rings 21296 csr 1
+sample e2e threads 1 molecules 10648 depth 8 neigh_ms 3.660000 ring_ms 41.227256 total_ms 44.887256 rings 21296 csr 1
+summary e2e threads 1 molecules 10648 depth 8 total_median_ms 45.367508 rings 21296 equal 1 used_balls 1
+sample e2e threads 8 molecules 10648 depth 8 neigh_ms 0.663851 ring_ms 7.253252 total_ms 7.917103 rings 21296 csr 1
+sample e2e threads 8 molecules 10648 depth 8 neigh_ms 0.673188 ring_ms 7.009288 total_ms 7.682476 rings 21296 csr 1
+sample e2e threads 8 molecules 10648 depth 8 neigh_ms 0.700413 ring_ms 7.115889 total_ms 7.816302 rings 21296 csr 1
+sample e2e threads 8 molecules 10648 depth 8 neigh_ms 0.660061 ring_ms 7.649084 total_ms 8.309145 rings 21296 csr 1
+sample e2e threads 8 molecules 10648 depth 8 neigh_ms 0.671060 ring_ms 7.219666 total_ms 7.890726 rings 21296 csr 1
+sample e2e threads 8 molecules 10648 depth 8 neigh_ms 0.667034 ring_ms 7.482208 total_ms 8.149242 rings 21296 csr 1
+summary e2e threads 8 molecules 10648 depth 8 total_median_ms 7.917103 rings 21296 equal 1 used_balls 1
+sample e2e threads 1 molecules 110592 depth 8 neigh_ms 26.503077 ring_ms 416.978548 total_ms 443.481625 rings 221184 csr 1
+sample e2e threads 1 molecules 110592 depth 8 neigh_ms 26.290331 ring_ms 422.203938 total_ms 448.494269 rings 221184 csr 1
+sample e2e threads 1 molecules 110592 depth 8 neigh_ms 26.332878 ring_ms 426.954312 total_ms 453.287190 rings 221184 csr 1
+sample e2e threads 1 molecules 110592 depth 8 neigh_ms 26.249029 ring_ms 426.228126 total_ms 452.477155 rings 221184 csr 1
+sample e2e threads 1 molecules 110592 depth 8 neigh_ms 26.169685 ring_ms 422.506223 total_ms 448.675908 rings 221184 csr 1
+sample e2e threads 1 molecules 110592 depth 8 neigh_ms 29.005051 ring_ms 423.527772 total_ms 452.532823 rings 221184 csr 1
+summary e2e threads 1 molecules 110592 depth 8 total_median_ms 452.477155 rings 221184 equal 1 used_balls 1
+sample e2e threads 8 molecules 110592 depth 8 neigh_ms 6.975268 ring_ms 82.055732 total_ms 89.031000 rings 221184 csr 1
+sample e2e threads 8 molecules 110592 depth 8 neigh_ms 7.576836 ring_ms 93.039907 total_ms 100.616743 rings 221184 csr 1
+sample e2e threads 8 molecules 110592 depth 8 neigh_ms 8.496317 ring_ms 73.884987 total_ms 82.381304 rings 221184 csr 1
+sample e2e threads 8 molecules 110592 depth 8 neigh_ms 5.282948 ring_ms 71.040917 total_ms 76.323865 rings 221184 csr 1
+sample e2e threads 8 molecules 110592 depth 8 neigh_ms 5.684941 ring_ms 72.953243 total_ms 78.638184 rings 221184 csr 1
+sample e2e threads 8 molecules 110592 depth 8 neigh_ms 4.601195 ring_ms 72.115882 total_ms 76.717077 rings 221184 csr 1
+summary e2e threads 8 molecules 110592 depth 8 total_median_ms 82.381304 rings 221184 equal 1 used_balls 1
+sample e2e threads 1 molecules 884736 depth 8 neigh_ms 241.320473 ring_ms 3464.774894 total_ms 3706.095367 rings 1769472 csr 1
+sample e2e threads 1 molecules 884736 depth 8 neigh_ms 239.774244 ring_ms 3367.052537 total_ms 3606.826781 rings 1769472 csr 1
+sample e2e threads 1 molecules 884736 depth 8 neigh_ms 235.958913 ring_ms 3371.283138 total_ms 3607.242051 rings 1769472 csr 1
+sample e2e threads 1 molecules 884736 depth 8 neigh_ms 256.727262 ring_ms 3403.914570 total_ms 3660.641832 rings 1769472 csr 1
+sample e2e threads 1 molecules 884736 depth 8 neigh_ms 244.766876 ring_ms 3358.663277 total_ms 3603.430153 rings 1769472 csr 1
+sample e2e threads 1 molecules 884736 depth 8 neigh_ms 243.504626 ring_ms 3320.761760 total_ms 3564.266386 rings 1769472 csr 1
+summary e2e threads 1 molecules 884736 depth 8 total_median_ms 3607.242051 rings 1769472 equal 1 used_balls 1
+sample e2e threads 8 molecules 884736 depth 8 neigh_ms 43.104140 ring_ms 668.530906 total_ms 711.635046 rings 1769472 csr 1
+sample e2e threads 8 molecules 884736 depth 8 neigh_ms 36.620557 ring_ms 644.767478 total_ms 681.388035 rings 1769472 csr 1
+sample e2e threads 8 molecules 884736 depth 8 neigh_ms 37.642826 ring_ms 677.195015 total_ms 714.837841 rings 1769472 csr 1
+sample e2e threads 8 molecules 884736 depth 8 neigh_ms 35.546471 ring_ms 694.976183 total_ms 730.522654 rings 1769472 csr 1
+sample e2e threads 8 molecules 884736 depth 8 neigh_ms 34.888975 ring_ms 697.355256 total_ms 732.244231 rings 1769472 csr 1
+sample e2e threads 8 molecules 884736 depth 8 neigh_ms 37.834193 ring_ms 698.020347 total_ms 735.854540 rings 1769472 csr 1
+summary e2e threads 8 molecules 884736 depth 8 total_median_ms 730.522654 rings 1769472 equal 1 used_balls 1
+sample e2e threads 1 molecules 10648 depth 10 neigh_ms 3.498100 ring_ms 155.093524 total_ms 158.591624 rings 21296 csr 1
+sample e2e threads 1 molecules 10648 depth 10 neigh_ms 3.504826 ring_ms 157.237991 total_ms 160.742817 rings 21296 csr 1
+sample e2e threads 1 molecules 10648 depth 10 neigh_ms 3.525290 ring_ms 156.007431 total_ms 159.532721 rings 21296 csr 1
+sample e2e threads 1 molecules 10648 depth 10 neigh_ms 3.521650 ring_ms 156.980892 total_ms 160.502542 rings 21296 csr 1
+sample e2e threads 1 molecules 10648 depth 10 neigh_ms 3.511515 ring_ms 157.773632 total_ms 161.285147 rings 21296 csr 1
+sample e2e threads 1 molecules 10648 depth 10 neigh_ms 3.591611 ring_ms 158.848452 total_ms 162.440063 rings 21296 csr 1
+summary e2e threads 1 molecules 10648 depth 10 total_median_ms 160.742817 rings 21296 equal 1 used_balls 2
+sample e2e threads 8 molecules 10648 depth 10 neigh_ms 0.768084 ring_ms 23.173845 total_ms 23.941929 rings 21296 csr 1
+sample e2e threads 8 molecules 10648 depth 10 neigh_ms 0.657986 ring_ms 23.263437 total_ms 23.921423 rings 21296 csr 1
+sample e2e threads 8 molecules 10648 depth 10 neigh_ms 0.760421 ring_ms 23.115021 total_ms 23.875442 rings 21296 csr 1
+sample e2e threads 8 molecules 10648 depth 10 neigh_ms 0.784299 ring_ms 23.373261 total_ms 24.157560 rings 21296 csr 1
+sample e2e threads 8 molecules 10648 depth 10 neigh_ms 0.744852 ring_ms 23.190908 total_ms 23.935760 rings 21296 csr 1
+sample e2e threads 8 molecules 10648 depth 10 neigh_ms 0.758440 ring_ms 24.080516 total_ms 24.838956 rings 21296 csr 1
+summary e2e threads 8 molecules 10648 depth 10 total_median_ms 23.941929 rings 21296 equal 1 used_balls 2
+sample e2e threads 1 molecules 110592 depth 10 neigh_ms 26.818619 ring_ms 1792.302494 total_ms 1819.121113 rings 221184 csr 1
+sample e2e threads 1 molecules 110592 depth 10 neigh_ms 26.604155 ring_ms 1782.217078 total_ms 1808.821233 rings 221184 csr 1
+sample e2e threads 1 molecules 110592 depth 10 neigh_ms 26.716173 ring_ms 1822.998236 total_ms 1849.714409 rings 221184 csr 1
+sample e2e threads 1 molecules 110592 depth 10 neigh_ms 26.303596 ring_ms 1860.444492 total_ms 1886.748088 rings 221184 csr 1
+sample e2e threads 1 molecules 110592 depth 10 neigh_ms 26.646864 ring_ms 1855.815339 total_ms 1882.462203 rings 221184 csr 1
+sample e2e threads 1 molecules 110592 depth 10 neigh_ms 27.725718 ring_ms 1969.827213 total_ms 1997.552931 rings 221184 csr 1
+summary e2e threads 1 molecules 110592 depth 10 total_median_ms 1882.462203 rings 221184 equal 1 used_balls 2
+sample e2e threads 8 molecules 110592 depth 10 neigh_ms 6.614206 ring_ms 294.919896 total_ms 301.534102 rings 221184 csr 1
+sample e2e threads 8 molecules 110592 depth 10 neigh_ms 5.353250 ring_ms 306.549690 total_ms 311.902940 rings 221184 csr 1
+sample e2e threads 8 molecules 110592 depth 10 neigh_ms 5.900566 ring_ms 308.291629 total_ms 314.192195 rings 221184 csr 1
+sample e2e threads 8 molecules 110592 depth 10 neigh_ms 5.934115 ring_ms 378.951615 total_ms 384.885730 rings 221184 csr 1
+sample e2e threads 8 molecules 110592 depth 10 neigh_ms 5.903172 ring_ms 289.035904 total_ms 294.939076 rings 221184 csr 1
+sample e2e threads 8 molecules 110592 depth 10 neigh_ms 5.714485 ring_ms 293.015528 total_ms 298.730013 rings 221184 csr 1
+summary e2e threads 8 molecules 110592 depth 10 total_median_ms 311.902940 rings 221184 equal 1 used_balls 2
+sample e2e threads 1 molecules 884736 depth 10 neigh_ms 248.329074 ring_ms 14664.690514 total_ms 14913.019588 rings 1769472 csr 1
+sample e2e threads 1 molecules 884736 depth 10 neigh_ms 234.063629 ring_ms 14457.800632 total_ms 14691.864261 rings 1769472 csr 1
+sample e2e threads 1 molecules 884736 depth 10 neigh_ms 241.410667 ring_ms 14951.519592 total_ms 15192.930259 rings 1769472 csr 1
+sample e2e threads 1 molecules 884736 depth 10 neigh_ms 253.454010 ring_ms 14802.343907 total_ms 15055.797917 rings 1769472 csr 1
+sample e2e threads 1 molecules 884736 depth 10 neigh_ms 243.322597 ring_ms 14899.964603 total_ms 15143.287200 rings 1769472 csr 1
+sample e2e threads 1 molecules 884736 depth 10 neigh_ms 246.173994 ring_ms 14867.772869 total_ms 15113.946863 rings 1769472 csr 1
+summary e2e threads 1 molecules 884736 depth 10 total_median_ms 15113.946863 rings 1769472 equal 1 used_balls 2
+sample e2e threads 8 molecules 884736 depth 10 neigh_ms 43.161553 ring_ms 2607.233370 total_ms 2650.394923 rings 1769472 csr 1
+sample e2e threads 8 molecules 884736 depth 10 neigh_ms 46.726616 ring_ms 2608.915870 total_ms 2655.642486 rings 1769472 csr 1
+sample e2e threads 8 molecules 884736 depth 10 neigh_ms 36.847465 ring_ms 2662.097137 total_ms 2698.944602 rings 1769472 csr 1
+sample e2e threads 8 molecules 884736 depth 10 neigh_ms 39.360894 ring_ms 2624.234289 total_ms 2663.595183 rings 1769472 csr 1
+sample e2e threads 8 molecules 884736 depth 10 neigh_ms 69.880234 ring_ms 2632.823392 total_ms 2702.703626 rings 1769472 csr 1
+sample e2e threads 8 molecules 884736 depth 10 neigh_ms 43.941745 ring_ms 2573.367586 total_ms 2617.309331 rings 1769472 csr 1
+summary e2e threads 8 molecules 884736 depth 10 total_median_ms 2663.595183 rings 1769472 equal 1 used_balls 2
+
+# ring search only, depth 8, after the full-graph distance walk
+summary threads 1 molecules 110592 legacy_median_ms 460.638289 hop_median_ms 429.761113 rings 221184 equal 1 used_balls 1
+summary threads 8 molecules 110592 legacy_median_ms 92.775164 hop_median_ms 89.711801 rings 221184 equal 1 used_balls 1
+
+# SQQ 0.5.8 and OVITO, neighbours plus rings of size 6, one timed call after a warm-up
+sample tool sqq-0.5.8 threads 1 molecules 10648 depth 6 ms 1295.670891 rings 21296 n6 21296
+sample tool ovito threads 1 molecules 10648 depth 6 ms 53.796166 rings 21296 n6 21296
+sample tool sqq-0.5.8 threads 1 molecules 110592 depth 6 ms 14225.883934 rings 221184 n6 221184
+sample tool ovito threads 1 molecules 110592 depth 6 ms 628.783949 rings 221184 n6 221184
+sample tool sqq-0.5.8 threads 1 molecules 884736 depth 6 ms 118529.690766 rings 1769472 n6 1769472
+sample tool ovito threads 1 molecules 884736 depth 6 ms 5150.751646 rings 1769472 n6 1769472
+sample tool sqq-0.5.8 threads 8 molecules 10648 depth 6 ms 1303.502348 rings 21296 n6 21296
+sample tool ovito threads 8 molecules 10648 depth 6 ms 51.554869 rings 21296 n6 21296
+sample tool sqq-0.5.8 threads 8 molecules 110592 depth 6 ms 13742.184952 rings 221184 n6 221184
+sample tool ovito threads 8 molecules 110592 depth 6 ms 638.159730 rings 221184 n6 221184
+sample tool sqq-0.5.8 threads 8 molecules 884736 depth 6 ms 115177.862661 rings 1769472 n6 1769472
+sample tool ovito threads 8 molecules 884736 depth 6 ms 5051.471671 rings 1769472 n6 1769472
+
+# disordered frames, primitive rings from the cutoff CSR
+dump frame 1 molecules 4096 depth 6 csr 1 rings 10563 n3 1693 n4 2113 n5 3846 n6 2911 edges 10431
+dump frame 2 molecules 4096 depth 6 csr 1 rings 10912 n3 1731 n4 2279 n5 4010 n6 2892 edges 10539
+dump frame 3 molecules 4096 depth 6 csr 1 rings 10783 n3 1642 n4 2253 n5 3931 n6 2957 edges 10463
+dump frame 4 molecules 4096 depth 6 csr 1 rings 10501 n3 1665 n4 2126 n5 3834 n6 2876 edges 10416
+dump frame 5 molecules 4096 depth 6 csr 1 rings 10644 n3 1632 n4 2098 n5 3943 n6 2971 edges 10408
+dump frame 1 molecules 4096 depth 6 csr 1 rings 7790 n3 678 n4 895 n5 2808 n6 3409 edges 9245
+dump frame 50 molecules 4096 depth 6 csr 1 rings 8143 n3 797 n4 988 n5 2883 n6 3475 edges 9368
+dump frame 100 molecules 4096 depth 6 csr 1 rings 7743 n3 641 n4 787 n5 2689 n6 3626 edges 9170
+dump frame 148 molecules 4096 depth 6 csr 1 rings 7984 n3 689 n4 844 n5 2535 n6 3916 edges 9213
+dump frame 1 molecules 4096 depth 8 csr 1 rings 12836 n3 1693 n4 2113 n5 3846 n6 2911 n7 1791 n8 482 edges 10431
+dump frame 2 molecules 4096 depth 8 csr 1 rings 13207 n3 1731 n4 2279 n5 4010 n6 2892 n7 1851 n8 444 edges 10539
+dump frame 3 molecules 4096 depth 8 csr 1 rings 13009 n3 1642 n4 2253 n5 3931 n6 2957 n7 1815 n8 411 edges 10463
+dump frame 4 molecules 4096 depth 8 csr 1 rings 12830 n3 1665 n4 2126 n5 3834 n6 2876 n7 1884 n8 445 edges 10416
+dump frame 5 molecules 4096 depth 8 csr 1 rings 12752 n3 1632 n4 2098 n5 3943 n6 2971 n7 1744 n8 364 edges 10408
+dump frame 1 molecules 4096 depth 8 csr 1 rings 10122 n3 678 n4 895 n5 2808 n6 3409 n7 1973 n8 359 edges 9245
+dump frame 50 molecules 4096 depth 8 csr 1 rings 10362 n3 797 n4 988 n5 2883 n6 3475 n7 1838 n8 381 edges 9368
+dump frame 100 molecules 4096 depth 8 csr 1 rings 9964 n3 641 n4 787 n5 2689 n6 3626 n7 1895 n8 326 edges 9170
+dump frame 148 molecules 4096 depth 8 csr 1 rings 10080 n3 689 n4 844 n5 2535 n6 3916 n7 1764 n8 332 edges 9213
+dump frame 1 molecules 4096 depth 10 csr 1 rings 12977 n3 1693 n4 2113 n5 3846 n6 2911 n7 1791 n8 482 n9 128 n10 13 edges 10431
+dump frame 2 molecules 4096 depth 10 csr 1 rings 13363 n3 1731 n4 2279 n5 4010 n6 2892 n7 1851 n8 444 n9 144 n10 12 edges 10539
+dump frame 3 molecules 4096 depth 10 csr 1 rings 13190 n3 1642 n4 2253 n5 3931 n6 2957 n7 1815 n8 411 n9 147 n10 34 edges 10463
+dump frame 4 molecules 4096 depth 10 csr 1 rings 13024 n3 1665 n4 2126 n5 3834 n6 2876 n7 1884 n8 445 n9 170 n10 24 edges 10416
+dump frame 5 molecules 4096 depth 10 csr 1 rings 12928 n3 1632 n4 2098 n5 3943 n6 2971 n7 1744 n8 364 n9 171 n10 5 edges 10408
+dump frame 1 molecules 4096 depth 10 csr 1 rings 10190 n3 678 n4 895 n5 2808 n6 3409 n7 1973 n8 359 n9 66 n10 2 edges 9245
+dump frame 50 molecules 4096 depth 10 csr 1 rings 10441 n3 797 n4 988 n5 2883 n6 3475 n7 1838 n8 381 n9 73 n10 6 edges 9368
+dump frame 100 molecules 4096 depth 10 csr 1 rings 10046 n3 641 n4 787 n5 2689 n6 3626 n7 1895 n8 326 n9 81 n10 1 edges 9170
+dump frame 148 molecules 4096 depth 10 csr 1 rings 10147 n3 689 n4 844 n5 2535 n6 3916 n7 1764 n8 332 n9 63 n10 4 edges 9213

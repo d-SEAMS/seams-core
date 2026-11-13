@@ -6,7 +6,7 @@
 //-----------------------------------------------------------------------------------
 
 // Raw samples for the in-tree ice kernel. Release -O3. One warm-up, then
-// eight calls. Threads come from argv (default 1).
+// eight calls, and at least six. Threads come from argv (default 1).
 
 #include <local_symmetry.hpp>
 

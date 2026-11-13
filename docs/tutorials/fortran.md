@@ -12,13 +12,9 @@ build/test_seams
 
 It prints `fortran ok` after the 64-atom cell is entirely cubic under both CHILL+ rules, q6 is above 0.3, and the six-ring fraction is above one half.
 
-A shorter call from your own program:
+The program the script compiles:
 
-```fortran
-use seams
-sys = seams_system_create()
-code = seams_system_set_ortho(sys, xyz, n, 0d0, 0d0, 0d0, lx, ly, lz, &
-                              c_null_ptr, c_null_ptr)
-code = seams_chill_plus(sys, 3.5d0, 0, SEAMS_GRAPH_CUTOFF, &
-                        SEAMS_CHILL_PUBLISHED, labels, counts)
+```{literalinclude} ../../../bindings/fortran/test_seams.f90
+:language: fortran
+:lines: 37-74
 ```

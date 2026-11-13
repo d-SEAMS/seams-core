@@ -1,0 +1,48 @@
+#+TITLE: The symmetry classifier
+#+OPTIONS: toc:nil num:nil
+
+Name the ice shell of each oxygen. The account of the shell, the
+tetrahedral gate, and the fit is
+[[file:../explanation/symmetry.org][Local symmetry]]. This page is the
+command and the call the test runs.
+
+* The CLI
+
+~seams symmetry~ prints the matcher backend, a space-group line, one
+shell overlay when a crystal shell exists, and a tally:
+
+#+begin_src text
+shells ice-Ic N ice-Ih M unmatched U
+#+end_src
+
+Labels are ice Ih (0), ice Ic (1), stacking-disordered (2), or -1.
+IRA and SOFI are consulted only when the build linked them. spglib
+supplies the space group when it is present. A build without it
+prints ~space-group off~.
+
+#+begin_src bash
+seams symmetry input/traj/mW_cubic.lammpstrj --type 1
+#+end_src
+
+The bench driver calls that command on one core:
+
+#+begin_src python
+# excerpt: scripts/bench_cli_fast.py
+        ["taskset", "-c", "0", str(seams), "symmetry", str(dump), "--type", "1"],
+#+end_src
+
+* The library
+
+~seams_frame_symmetry~ writes the same integer labels.
+~shell_rmsd~ 0.12 is the production ceiling.
+~meson test seams_lang_fixtures~ calls it on the mixed TIP4P frame
+after the other classifiers:
+
+#+begin_src cpp
+// excerpt: bindings/cxx/test_lang.cpp
+    if (seams_frame_symmetry(fresh, 0.12, shell.data()) != 0) {
+#+end_src
+
+Python is ~dseams.symmetry~. R and Julia ~Dseams~ export ~symmetry~.
+The per-atom code is the production path. Point group and space group
+are the same templates asked of one cluster.

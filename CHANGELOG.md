@@ -12,89 +12,61 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ## [2.14.0] - 2026-11-12
 
+Each bullet is one lane merged after 2.13.0, or a first-parent change that landed with that lane.
+
 ### Added
 
-- `seams symmetry` prints the space group, one shell overlay, and the ice-label tally. IRA and SOFI stay optional and are used only when the build links them.
-- `topoparam::jumpRotorTau90` reports the time for a 90-degree hydrogen-hydrogen rotation and is NaN when the pair does not rotate.
-- A versioned C API (`seams.h`, `libseams`) and Fortran, Python, Julia, and Rust fronts call it. LAMMPS, GROMACS, OpenMM, and PLUMED drivers call the same library.
-- `seams_set_num_threads(0)` restores the OpenMP width saved before the last explicit width. A non-positive type is unified on a copy of the frame. The flat CHILL entry is `seams_chill_plus_flat`.
-- `--water-types` keeps every named type on the cutoff list, including pairs between those types. `seams ions` counts each of those types in the first shell. `--mol` applies to rings, so a frame with an ion can score water only.
-- LAMMPS, GROMACS, OpenMM, and PLUMED link only when their libraries are found. `with_lammps` and `with_gromacs` default to auto and use the Meson compiler. A found library whose plugin cannot be built is an error.
-- Python, R, and Julia wrap rings, cages, signature cages, and the shell symmetry label on `libseams_lang`.
-- `seams rings`, `seams prisms`, and `seams cluster` print the primitive-ring histogram, prism counts, and the largest connected component.
-- A nucleation census scores rings, CHILL+, q6-bar, and diamond on liquid mW quenches.
-- OpenMM can classify a TIP4P/Ice frame in situ, and chemfiles reads PDB, GRO, and the other formats it supports.
-- Interface growth measures mW on basal and prism faces, including the six-temperature campaign and Wilson-Frenkel speeds.
-- Brine scoring keeps water oxygens, leaves ions out, and measures a Madrid-2019 freezing front.
-- Cage identification and the DDC search are faster, and a coplanar pair is not a prism.
-- Local q4 and q6 on the cutoff shell use the solid-harmonic kernel. `seams steinhardt` computes the degrees named by `--l` (default `4,6`). Each OpenMP thread owns a block of the linkcell cell cut. Primitive rings are timed on one thread against OVITO FindRings, and the literature head-to-head covers neighbours, q4, q6, diamond, rings and local symmetry.
-- A TIP4P/2005 ice/water slab is timed at strides of 0.01, 0.1 and 1 ps next to the mW strides of 0.1, 1 and 10 ps. Every transition stays inside the hop ball and the carried rings match a full search. The strict seeded graph is 8.3, 3.3 and 2.6 times a rebuild.
-- One sitting retimes neighbours, local q4 and q6, CHILL+, primitive rings, the shell symmetry label and hydrate cages at 110592 and 884736 molecules, on one thread and on eight. PLUMED 2.10.2 is built with the symfunc module. The raw lines are `benchmarks/rc3-sitting.csv`.
-
-### Breaking
-
-- CHILL and CHILL+ default to `seeded` (the cutoff list). A build that treated the default as the mutual four-nearest graph now sees the cutoff shell. On the mixed TIP4P fixture the tested counts are: default and cutoff, interClathrate 9 and water 241; mutual, clathrate 1, interClathrate 7 and water 242. A multi-atom LAMMPS dump with no `--type` infers the water oxygen instead of preferring type 2.
-- A reader error, including an XYZ coordinate that is not a number or a short XYZ frame, returns exit code 2 instead of skipping the atom or aborting.
-- `seams steinhardt` prints q4 and q6 next to q3 and q12. The cutoff shell is the default neighbour list for that command.
+- Stable C API (`include/seams.h`, `libseams`, ABI 1) and the language ABI `seams_lang.h`. Fortran, Rust, Python (`import dseams`), Julia (`Dseams` and `Seams`), and R call those libraries. `seams_chill_plus_flat` stays on the internal header used by the Catch2 suite. It is not installed. (`feat/engines-api`)
+- LAMMPS `run_hook` (`fix external`), the copy-in `compute dseams` under `extras/lammps`, GROMACS `gmx-seams`, the OpenMM reporter and the C++ plugin, the PLUMED collective variable `SEAMS`, and `InSitu.observe`. Each plugin is built only when its library is found. `with_lammps` and `with_gromacs` default to auto. A found library whose plugin cannot be built is an error.
+- `seams symmetry` prints the space group, one shell overlay, and the ice-label tally. `seams_frame_symmetry` is the same per-atom label. IRA, SOFI, and spglib stay optional. (`local symmetry`)
+- `seams rings`, `seams prisms`, and `seams cluster` print the primitive-ring histogram, prism counts, and the largest connected component. Python, R, and Julia wrap rings, cages, signature cages, and the shell label.
+- `topoparam::jumpRotorTau90` reports the time for a 90-degree hydrogen-hydrogen rotation and is NaN when the pair does not rotate. R and Julia export `jump_tau90`.
+- `--water-types` keeps every named type on the cutoff list, including pairs between those types. `seams ions` counts each of those types in the first shell. `--mol` applies to rings.
+- Nucleation census of rings, CHILL+, q6-bar, and diamond on liquid mW quenches. (`science/nucleation-pathways`)
+- Interface growth of mW on basal and prism faces, including the six-temperature campaign and the Wilson-Frenkel speeds. (`science/interface-order`)
+- Brine scoring keeps water oxygens, leaves ions out, and measures a Madrid-2019 freezing front. (`feat/brine-science`)
+- OpenMM classifies a TIP4P/Ice frame in situ. chemfiles reads PDB, GRO, and the other formats it supports, with the mmCIF fallback below. (`feat/openmm-chemfiles`)
+- Local q4 and q6 on the cutoff shell use the solid-harmonic kernel. `seams steinhardt` prints the degrees named by `--l` (default `4,6`). (`integrate/kernel-q`)
+- Each OpenMP thread owns a block of the linkcell cell cut. Ranks are cut on that cell grid, and `seams::domain::reduceRings` sends owned atoms to the root. (`integrate/linkcell`, and the cell-grid rank cut)
+- Literature head-to-head against mdapy, pyscal3, vesin, IRA, and SQQ, plus the related-work watch of ClavisCage TRACE and PLUMED q. Primitive rings are timed on one thread against OVITO FindRings. (`bench/h2h-literature`, `related/watch-v1`, `perf/rings-one-thread`)
+- One sitting retimes neighbours, local q4 and q6, CHILL+, primitive rings, the shell symmetry label, and hydrate cages at 110592 and 884736 molecules, on one thread and on eight. PLUMED 2.10.2 is built with the symfunc module. The raw lines are `benchmarks/rc3-sitting.csv`. (`integrate/rc2-perf`)
+- Carried rings on a TIP4P/2005 slab at 0.01, 0.1, and 1 ps, next to mW at 0.1, 1, and 10 ps. Every transition stays inside the hop ball and matches a full search. The `seeded-strict` speedups on the TIP4P strides are 8.31, 3.28, and 2.59. (`integrate/hop-stride`, `integrate/hop-tip4p`)
 
 ### Changed
 
-- CHILL and CHILL+ default to the graph name `seeded`, which is the cutoff list. `mutual` is the four-nearest graph. `linkcell::pairs_within` owns the cutoff list. vesin is the fallback when linkcell is not built.
-- MPI ring analyses can reduce ring counts and per-atom ring types with `seams::domain::reduceRings`, which keeps each rank on its own domain and sends only owned atoms to the root instead of gathering every ring on every rank.
-- Release builds define NDEBUG, so the libstdc++ assertions that meson adds when b_ndebug is false no longer run in them. The closed-cage search on the sI 2x2x2 crystal takes 13.2 ms instead of 16.0 ms, with the same output.
-- The cutoff list now covers restricted triclinic boxes.
-  A half list keeps each pair on the lower index.
-  A skin reuses the wide list while every atom stays inside the Verlet shell.
-  CHILL+, the ring census, and the template overlay read that CSR.
-- The orthorhombic cutoff neighbour list is built by a parallel cell sort.
-  Each thread counts its atoms, a prefix sum places them, and the pairs are
-  written straight into one CSR. The same buffers are reused on the next frame.
-  The pair set does not depend on the thread count.
-  q_l reads that CSR. The neighbour average is skipped when only q_l is requested.
-- The triclinic cutoff list uses the same stencil as the orthorhombic list.
-  CHILL+ evaluates the real spherical harmonics on that CSR.
-  The diamond common-neighbour test reads the same rows.
-  The ring census uses the short-hop search on that CSR.
-- Users who run chill-plus on a cutoff list now see different counts.
-  This is a bug fix in the shell count.
-  The old code counted bonds after the list had been cut to four.
-  A crystal row needs four neighbours inside the cutoff.
-  On the mixed TIP4P fixture the tested counts are interClathrate 9 and water 241 for the default and the cutoff list.
-  The mutual list on that fixture is clathrate 1, interClathrate 7 and water 242.
-  A multi-atom dump infers the oxygen when `--type` is unset.
-  Default q3 uses up to four nearest neighbours in the cutoff.
-  Interfacial rows keep the neighbour test from the published table.
-  Users who want the OVITO labels use the ovito-chill+ command.
-  That command averages q3 on the full shell and skips the test.
-  Plain CHILL keeps four closest neighbours and Moore's test.
-  A reader error now returns exit code 2 instead of aborting the process.
-  We print reCubic and reHex as plain text.
-  A path that ends in xyz and cannot be opened returns an error.
-  An exception outside std::exception returns exit code 2.
+- CHILL and CHILL+ map the default graph name `seeded` onto the cutoff list. `mutual` is the four-nearest graph. `seams cages` keeps `seeded` as its own graph (mutual seeds plus union completions). On the mixed TIP4P fixture the cutoff counts are interClathrate 9 and water 241. The mutual counts are clathrate 1, interClathrate 7, and water 242. A crystal row needs four neighbours inside the cutoff. The old count ran after the list had already been cut to four. `ovito-chill+` averages q3 on the full shell and skips that test. Plain CHILL keeps four closest neighbours and Moore's test. A multi-atom dump with no `--type` infers the oxygen.
+- `linkcell::pairs_within` owns the cutoff list. vesin 0.5.7 is the fallback when linkcell is not built. The list covers restricted triclinic boxes. The orthorhombic list is one parallel cell sort into a CSR, and the triclinic list uses the same stencil. A half list keeps the lower index. A skin reuses the wide list inside the Verlet shell. CHILL+, q_l, the diamond test, and the ring census read that CSR. (`2.14.0 neighbour-list release`)
+- CHILL+, symmetry, and Steinhardt on the CLI and the language fronts go through those cutoff kernels. (`perf/cli-fast-paths`)
+- Cage identification and the double-diamond search are faster. A coplanar pair is not a prism. Release builds define `NDEBUG`. The closed-cage search on the sI 2×2×2 crystal takes 13.2 ms instead of 16.0 ms, with the same output. (`perf/ice-cage-id`, `perf/ddc-regression-fix`, `fix/prism-shapematch`, `perf/rings-cages`)
+- `seams steinhardt` prints q4 and q6. The cutoff shell is the neighbour list for that command.
+- A reader error, including an XYZ coordinate that is not a number, returns exit code 2.
+- `reCubic` and `reHex` are printed as those names.
 
 ### Deprecated
 
-- `--types` is a deprecated exact alias of `--pair-types`. The exact names both bind, and using `--types` prints a one-line warning on stderr.
+- `--types` is a deprecated exact alias of `--pair-types`. Using `--types` prints a one-line warning on stderr.
 
 ### Fixed
 
-- A LAMMPS dump that is still being appended is kept, instead of being reported as truncated. The language fronts use the build's Python and skip a library mismatch.
-- The PLUMED q6 derivative is taken in nanometres. The finite-difference step is an angstrom, so the value passed to PLUMED is ten times the angstrom derivative. On a symmetry-broken eight-molecule cell the worst absolute error against an independent difference is 3.99e-11.
-- The PLUMED kernel linked into the collective variable is the one named by pkg-config, so an older kernel earlier on the linker path is not selected.
-- Accept a cup that fills the signature face count with dangling edges.
-- Evaluate Steinhardt l=12 qlBar on the host so the 25-component average does not overflow the device barRe[17] buffer.
-- Keep spherical-harmonic scratch local to each call so concurrent frames and changing thread counts do not share buffers.
-- Load oxygen and hydrogen together for `seams f4` so Rodger F4 is finite when mol IDs exist.
-- Require readcon-db 0.1.8 so static consumers receive only the archive and shared consumers receive the runtime search path.
-- Read a halo source from the frame index in share.local. The old index walked the local list as if it were the frame.
-- Keep the cutoff shell list and the per-share ring scratch on the calling thread. Overlapping calls no longer share those buffers.
-- Keep BondClassifier at the 2.13 layout, three doubles and one int. Open edges are an argument of classifyBond, so a caller that passes the struct by value is unchanged.
-- Keep the 2.13 signatures of `getCorrelPlus`, `getIceTypePlus`, and `getIceTypePlusNoPrint` as overloads. The longer forms take the open-edge flag and the OVITO neighbour test.
-- Name the site-site pair flag `--pair-types`. Give the gpulite and vesin wraps their own option files so `meson configure` does not copy the engine options onto them.
-- Build the Sphinx book with warnings as errors from the committed sources. Doxygen XML and the C++ pages are optional, and each page is listed in one toctree.
-- Keep a diamond shell while eight good (4,2,1) signatures, or the ambiguous band, are still reachable. The old count stopped once four bad rows made nine good signatures unreachable.
-- Read mmCIF through a chemfiles that can open an atom with no residue id. conda-forge 0.10.4 writes label_seq_id "." and omits label_entity_id. The reader dereferences that missing column: a later read throws, and a write followed by a read in the same process segfaults inside mmCIFFormat::read. Configure reads cmake/mmcif_no_entity.mmcif. A failure builds tag 0.10.4 with cmake/patches/chemfiles-0.10.4-mmcif.patch. The patched library gets the soname libseams-chemfiles.so.0.10 when patchelf is available, so a conda libchemfiles.so.0.10 earlier on the RPATH is not used. The CMake lookup does the same probe. The mmCIF round trip still runs.
+- The PLUMED q6 derivative is per nanometre. The finite-difference step is 0.001 Å, and the value passed to PLUMED is ten times the angstrom derivative. On a shifted eight-molecule cell the worst absolute error against an independent difference is 3.99e-11. The kernel linked into the collective variable is the one named by pkg-config.
+- GROMACS reads the lower-triangle cell tilts and scales nanometres to angstroms. The in-situ observer accepts a three-length orthorhombic box. The OpenMM path keeps one reporter.
+- Python builds `_core` from the in-tree library. R derives include and library paths from `DSEAMS_ROOT`. Steinhardt on the language fronts defaults to the cutoff shell.
+- q4 and q6 share one cutoff shell and record the multi-thread list in one pass. The neighbour ids are written during the count walk, and the linkcell pool follows the OpenMP width.
+- A box-edge bond stays inside the hop ball, so a carried ring search matches a full search on that frame.
+- A LAMMPS dump that is still being appended is kept. The language fronts follow the build's Python and skip a library mismatch.
+- A diamond shell is kept while eight good (4,2,1) signatures, or the ambiguous band, are still reachable.
+- mmCIF is read through a chemfiles that can open an atom with no residue id. conda-forge 0.10.4 writes `label_seq_id "."` and omits `label_entity_id`. Configure probes `cmake/mmcif_no_entity.mmcif` and, on failure, builds tag 0.10.4 with `cmake/patches/chemfiles-0.10.4-mmcif.patch`. When patchelf is available the patched library gets the soname `libseams-chemfiles.so.0.10`.
+- A cup may fill the signature face count with dangling edges. Steinhardt l=12 `qlBar` is evaluated on the host so the 25-component average does not overflow the device buffer. Spherical-harmonic scratch, the cutoff shell, and the per-share ring scratch stay on the calling thread.
+- `seams f4` loads oxygen and hydrogen together, so Rodger F4 is finite when molecule ids exist. readcon-db is 0.1.8. A halo source is read from the frame index in `share.local`.
+- `BondClassifier` stays at the 2.13 layout. `getCorrelPlus`, `getIceTypePlus`, and `getIceTypePlusNoPrint` keep the 2.13 signatures as overloads.
+- The site-site flag is `--pair-types`. The gpulite and vesin wraps have their own option files.
+- The Sphinx book builds with warnings as errors from the committed Org sources. Doxygen XML is optional, and each page is listed in one toctree.
 
+### Breaking
+
+- CHILL and CHILL+ on the default graph now score the cutoff shell. A caller that treated the default as the mutual four-nearest list sees the counts in Changed. `seams cages` is unchanged: its default remains `seeded`.
+- A reader error returns exit code 2.
+- `seams steinhardt` prints q4 and q6 as well as any other degree named by `--l`.
 
 ## [2.13.0] - 2026-11-06
 

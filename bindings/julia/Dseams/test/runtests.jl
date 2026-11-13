@@ -60,4 +60,9 @@ end
     @test ice.counts["cubic"] == 4096
     found = cages(frame)
     @test found.n_ic == 4096
+    @test nframes(cubic) >= 1
+    order = q4_q6(frame)
+    @test length(order.q6) == nop(frame)
+    tau = jump_tau90(frame, frame, 1.0)
+    @test isnan(tau) || isfinite(tau)
 end

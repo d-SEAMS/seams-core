@@ -15,5 +15,5 @@ The vignette is evaluated when `DSEAMS_ROOT` is set. CI runs the same
 library through:
 
 ```bash
-DSEAMS_ROOT=$PWD meson test -C build seams_lang_fixtures --print-errorlogs
+DSEAMS_ROOT=$PWD meson test -C build language_fronts --print-errorlogs
 ```

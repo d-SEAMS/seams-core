@@ -18,10 +18,32 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import os
 import re
 import subprocess
 import sys
 from pathlib import Path
+
+
+def affinity_label() -> str:
+    try:
+        allowed = sorted(os.sched_getaffinity(0))
+    except (AttributeError, OSError):
+        return "not recorded"
+    if not allowed:
+        return "not recorded"
+    if allowed == list(range(allowed[0], allowed[-1] + 1)):
+        return f"{allowed[0]}-{allowed[-1]}" if len(allowed) > 1 else str(allowed[0])
+    return ",".join(str(cpu) for cpu in allowed)
+
+
+def lscpu_field(label: str) -> str:
+    proc = subprocess.run(["lscpu"], check=True, capture_output=True, text=True)
+    prefix = label + ":"
+    for line in proc.stdout.splitlines():
+        if line.startswith(prefix):
+            return line.split(":", 1)[1].strip()
+    raise RuntimeError(f"lscpu has no {label}")
 
 
 def sha256(path: Path) -> str:
@@ -107,12 +129,14 @@ def main() -> int:
     traj = args.input
     seams = args.seams
 
-    # Cubic mW, frame 1. Deposited: 2040 DDC objects, 4096 cubic molecules,
-    # 0 hexagonal, 0 both (walks and bench-cages on mW_cubic.lammpstrj).
+    # Cubic mW, frame 1, 4096 molecules. One double-diamond cage for every
+    # two molecules: the conflict graph is the line graph of a 4-regular
+    # bipartite graph, so the maximum packing is n/2. bench cages_v2
+    # deposited 2040, the count from the unpatched library.
     mw = traj / "mW_cubic.lammpstrj"
     if mw.is_file():
         ddc = cage_line(seams, mw, "--type", "1", "--graph", "cutoff", "--signature", "ddc")
-        check("mW DDC cages", signature_cages(ddc), 2040, "bench cages_v2")
+        check("mW DDC cages", signature_cages(ddc), 2048, "maximum packing n/2")
         seeded = cage_line(seams, mw, "--type", "1", "--graph", "seeded")
         check("mW seeded hexagonal", field(seeded, "hexagonal"), 0, "mW cubic")
         check("mW seeded cubic", field(seeded, "cubic"), 4096, "mW cubic")
@@ -183,7 +207,7 @@ def main() -> int:
     dirty = ""
     if args.source is not None:
         dirty = run(
-            ["git", "-C", str(args.source), "status", "--porcelain"]
+            ["git", "-C", str(args.source), "status", "--porcelain", "--untracked-files=no"]
         ).strip()
     report = args.out / "report.txt"
     body = [
@@ -192,6 +216,9 @@ def main() -> int:
         f"seams {args.seams}",
         f"seams_version {version}",
         f"source_commit {source_commit or 'not recorded'}",
+        f"cpu_model {lscpu_field('Model name')}",
+        f"cpu_cores {lscpu_field('CPU(s)')}",
+        f"affinity {affinity_label()}",
         f"source_tree {source_tree or 'not recorded'}",
         "source_dirty "
         + ("yes" if dirty else "no" if args.source is not None else "not recorded"),
