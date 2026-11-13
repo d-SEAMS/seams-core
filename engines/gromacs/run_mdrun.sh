@@ -17,5 +17,5 @@ cp "$root/topol.top" "$root/md.mdp" "$work/"
   env -u LD_LIBRARY_PATH -u LIBRARY_PATH \
     gmx mdrun -s ice.tpr -deffnm ice -nsteps 4
 )
-env -u LIBRARY_PATH LD_LIBRARY_PATH="$libdir" \
+env -u LIBRARY_PATH LD_LIBRARY_PATH="$libdir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
   "$tool" -f "$work/ice.xtc" -cutoff 3.5
