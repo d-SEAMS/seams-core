@@ -19,4 +19,10 @@ lua54_named = custom_target(
   install_dir: get_option('libdir') / 'lua' / '5.4',
 )
 lua_mod_targets += lua54_named
-lua_runners += [find_program('lua5.4').full_path(), meson.current_build_dir()]
+lua54_prog = find_program('lua5.4', required: false)
+if not lua54_prog.found()
+  lua54_prog = find_program('lua', required: false)
+endif
+if lua54_prog.found()
+  lua_runners += [lua54_prog.full_path(), meson.current_build_dir()]
+endif

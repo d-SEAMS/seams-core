@@ -11,6 +11,12 @@ if not lua54_dep.found()
   lua54_dep = dependency('lua-5.4', required: false)
 endif
 if not lua54_dep.found()
+  lua_any = dependency('lua', required: false)
+  if lua_any.found() and lua_any.version().version_compare('>=5.4') and lua_any.version().version_compare('<5.5')
+    lua54_dep = lua_any
+  endif
+endif
+if not lua54_dep.found()
   lua54_lib = cc.find_library('lua5.4', required: false, dirs: ['/usr/lib/x86_64-linux-gnu'])
   if lua54_lib.found() and cc.has_header('lua.h', args: ['-I/usr/include/lua5.4'])
     lua54_dep = declare_dependency(
@@ -71,7 +77,16 @@ endif
 
 fs = import('fs')
 fennel_lua = ''
-foreach candidate : ['/usr/local/share/fennel.lua', '/usr/share/lua/5.4/fennel.lua']
+fennel_candidates = ['/usr/local/share/fennel.lua', '/usr/share/lua/5.4/fennel.lua']
+conda_prefix = run_command('sh', '-c', 'printf %s "$CONDA_PREFIX"', check: false)
+if conda_prefix.returncode() == 0 and conda_prefix.stdout() != ''
+  fennel_candidates += conda_prefix.stdout() / 'share/lua/5.4/fennel.lua'
+endif
+lua_prog = find_program('lua', required: false)
+if lua_prog.found()
+  fennel_candidates += fs.parent(fs.parent(lua_prog.full_path())) / 'share/lua/5.4/fennel.lua'
+endif
+foreach candidate : fennel_candidates
   if fennel_lua == '' and fs.exists(candidate)
     fennel_lua = candidate
   endif
