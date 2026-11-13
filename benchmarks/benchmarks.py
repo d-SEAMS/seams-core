@@ -743,3 +743,37 @@ class H2HFreudOvito:
 
 H2HFreudOvito.time_session.repeat = 1
 H2HFreudOvito.time_session.number = 1
+
+
+class H2HRings:
+    """Primitive rings against rings-statistics-matter, cycless, and OVITO.
+
+    Eight samples at one thread and eight threads. The Snakemake rule
+    writes the raw log.
+    """
+
+    def setup(self):
+        import importlib.util
+
+        script = ROOT / "scripts" / "h2h_rings.py"
+        lib_path = ROOT / "bbdir-release" / "src" / "libseams.so"
+        if not lib_path.is_file():
+            raise NotImplementedError("bbdir-release/src/libseams.so is not built")
+        spec = importlib.util.spec_from_file_location("h2h_rings", script)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self._module = module
+        os.environ.setdefault("SEAMS_LIB", str(lib_path))
+        try:
+            import cycless  # noqa: F401
+            import ovito  # noqa: F401
+            import rings_statistics_matter  # noqa: F401
+        except Exception as exc:
+            raise NotImplementedError("ring libraries are not importable") from exc
+
+    def time_session(self):
+        self._module.run_session()
+
+
+H2HRings.time_session.repeat = 1
+H2HRings.time_session.number = 1
