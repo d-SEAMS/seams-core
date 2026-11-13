@@ -414,13 +414,11 @@ def render_interface_v12(root: Path, pos, chill, box, figures: Path):
     server = _ensure_display()
     png = figures / "interface.png"
     try:
+        from render_scenes import render_interface
+
         render = _load_science_render(root)
-        forward, _spread = render.column_axis(pos, chill, box)
-        up = np.array([0.0, 0.0, 1.0])
-        _centre, half_h, half_v, forward, _right, up = render.project(pos, forward, up)
-        render.render_molecule(pos, chill, None, forward, up, png, half_h, half_v, 640, 0.40, False)
-        ids = render.display_layer_ids(pos, np.isin(chill, [0, 1]), up)
-        render.draw_layer_guides(png, pos, ids, forward, up, half_v)
+        origin = np.zeros(3)
+        render_interface(render, pos, chill, origin, box, png, width=1280)
         if not png.is_file() or png.stat().st_size < 1000:
             raise RuntimeError("renderer wrote no raster")
         print(f"v12 raster {png.name} bytes {png.stat().st_size}")
@@ -496,10 +494,10 @@ def render_brine_scene(root: Path, frame: Path, figures: Path):
     from render_scenes import render_brine
 
     render = _load_science_render(root)
-    _box, rows = read_xyz(frame)
+    box, rows = read_xyz(frame)
 
     def draw():
-        render_brine(render, rows, figures / "brine.png")
+        render_brine(render, rows, figures / "brine.png", box, width=1100)
 
     _raster_or_fail(figures / "brine.png", draw)
 
@@ -716,6 +714,10 @@ def main():
         print("c tutorials ok")
     run_julia(root, libdir, frames)
     run_r(root, build, libdir, frames)
+    sys.path.insert(0, str(root / "docs"))
+    from check_contact_sheet import check
+
+    check(figures)
     print("science tutorials ok")
     return 0
 

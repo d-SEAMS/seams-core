@@ -20,11 +20,55 @@ CAGE_KINDS = (
     ("sh", {4: 3, 5: 6, 6: 3}, 3),
     ("51268", {5: 12, 6: 8}, 4),
 )
-NA = np.array((0.55, 0.17, 0.89))
-CL = np.array((0.15, 0.78, 0.82))
+# Ion colours from paper/data/brine-frames/render_front.py at
+# feat/brine-science c2c7e46f2904c25f8878a682fc8674d2797e2910.
+NA = np.array((0.37, 0.24, 0.60))
+CL = np.array((0.12, 0.12, 0.12))
+# Brine CHILL+ colours from that same renderer. Cubic and hexagonal match
+# scripts/science_render.py. Clathrate is the paper's light blue, and
+# interfacial clathrate is the paper's pink, so neither is an unnamed green
+# or maroon in the liquid.
+BRINE_COLOUR = {
+    "cubic": np.array((0.000, 0.447, 0.698)),
+    "hexagonal": np.array((0.902, 0.624, 0.000)),
+    "interfacial": np.array((0.000, 0.620, 0.451)),
+    "water": np.array((0.780, 0.780, 0.780)),
+    "clathrate": np.array((0.337, 0.706, 0.914)),
+    "interClathrate": np.array((0.800, 0.475, 0.655)),
+    "unclassified": np.array((0.45, 0.45, 0.45)),
+    "reCubic": np.array((0.000, 0.447, 0.698)),
+    "reHex": np.array((0.902, 0.624, 0.000)),
+}
+BRINE_LEGEND = (
+    ("hexagonal", BRINE_COLOUR["hexagonal"]),
+    ("cubic", BRINE_COLOUR["cubic"]),
+    ("interfacial", BRINE_COLOUR["interfacial"]),
+    ("liquid", BRINE_COLOUR["water"]),
+    ("clathrate", BRINE_COLOUR["clathrate"]),
+    ("interf. clathrate", BRINE_COLOUR["interClathrate"]),
+    ("Na+", NA),
+    ("Cl-", CL),
+)
+# Slightly under the paper radii so the ice and liquid stay readable.
+BRINE_RADIUS = {"O": 0.90, "Na": 1.15, "Cl": 1.28}
+MAX_FACE_EDGE = 3.5
+MAX_PLANARITY = 0.35
 
 
 def _rings(lib, path: str):
+    lib.seams_rings_find.argtypes = [
+        ctypes.c_void_p, ctypes.c_double, ctypes.c_int, ctypes.c_int, ctypes.c_int,
+        ctypes.POINTER(ctypes.c_void_p),
+    ]
+    lib.seams_rings_find.restype = ctypes.c_int
+    lib.seams_rings_count.argtypes = [ctypes.c_void_p]
+    lib.seams_rings_count.restype = ctypes.c_int
+    lib.seams_rings_vertices.argtypes = [
+        ctypes.c_void_p, ctypes.c_int, ctypes.POINTER(ctypes.c_int), ctypes.c_size_t,
+        ctypes.POINTER(ctypes.c_size_t),
+    ]
+    lib.seams_rings_vertices.restype = ctypes.c_int
+    lib.seams_rings_destroy.argtypes = [ctypes.c_void_p]
     system = lib.seams_system_create()
     if lib.seams_system_read(system, path.encode(), 1, -1) != 0:
         raise RuntimeError(lib.seams_last_error())
@@ -155,85 +199,129 @@ def _box_vectors(path):
             xy = rows[0][2] if len(rows[0]) > 2 else 0.0
             xz = rows[1][2] if len(rows[1]) > 2 else 0.0
             yz = rows[2][2] if len(rows[2]) > 2 else 0.0
+            # LAMMPS writes the bounding box, not the cell edges, when the
+            # dump is triclinic. Recover lx, ly, lz before building vectors.
+            xlo = rows[0][0] - min(0.0, xy, xz, xy + xz)
+            xhi = rows[0][1] - max(0.0, xy, xz, xy + xz)
+            ylo = rows[1][0] - min(0.0, yz)
+            yhi = rows[1][1] - max(0.0, yz)
             return [
-                np.array([rows[0][1] - rows[0][0], 0.0, 0.0]),
-                np.array([xy, rows[1][1] - rows[1][0], 0.0]),
+                np.array([xhi - xlo, 0.0, 0.0]),
+                np.array([xy, yhi - ylo, 0.0]),
                 np.array([xz, yz, rows[2][1] - rows[2][0]]),
             ]
     raise RuntimeError(f"no box in {path}")
 
 
-def _unwrap_cage(faces, positions, vectors):
-    """Bring every atom of one cage next to its neighbours."""
-    neighbours = defaultdict(set)
-    for face in faces:
-        for index, atom in enumerate(face):
-            other = face[(index + 1) % len(face)]
-            neighbours[atom].add(other)
-            neighbours[other].add(atom)
-    shifts = [
+def _shifts(vectors):
+    return [
         i * vectors[0] + j * vectors[1] + k * vectors[2]
         for i in (-1, 0, 1)
         for j in (-1, 0, 1)
         for k in (-1, 0, 1)
     ]
-    start = faces[0][0]
-    placed = {start: positions[start].copy()}
-    queue = [start]
-    while queue:
-        atom = queue.pop()
-        for other in neighbours[atom]:
-            if other in placed:
-                continue
-            point = positions[other]
-            placed[other] = point + min(shifts, key=lambda shift: np.linalg.norm(point + shift - placed[atom]))
-            queue.append(other)
-    return placed
+
+
+def _mic(point, target, shifts):
+    return point + min(shifts, key=lambda shift: np.linalg.norm(point + shift - target))
+
+
+def cage_centre(atom_ids, positions, vectors):
+    """Mean of each atom's image nearest a seed atom."""
+    shifts = _shifts(vectors)
+    seed = positions[atom_ids[0]]
+    placed = [_mic(positions[atom], seed, shifts) for atom in atom_ids]
+    return np.mean(placed, axis=0)
+
+
+def face_metrics(coords):
+    """Longest edge and the largest distance from the best-fit plane."""
+    rolled = np.roll(coords, -1, axis=0)
+    longest = float(np.linalg.norm(rolled - coords, axis=1).max())
+    centred = coords - coords.mean(axis=0)
+    _u, _s, vh = np.linalg.svd(centred, full_matrices=False)
+    normal = vh[-1]
+    residual = float(np.abs(centred @ normal).max())
+    return longest, residual
+
+
+def drawn_ring(cycle, positions, centre, vectors):
+    """Place one ring on the images nearest the cage centre.
+
+    A face whose longest edge reaches 3.5 angstrom, or whose planarity
+    residual exceeds 0.35 angstrom, is not drawn. A non-planar ring is
+    split into triangles from its first vertex, and only the triangles
+    that pass the same tests are kept.
+    """
+    shifts = _shifts(vectors)
+    coords = np.vstack([_mic(positions[atom], centre, shifts) for atom in cycle])
+    longest, residual = face_metrics(coords)
+    if longest < MAX_FACE_EDGE and residual <= MAX_PLANARITY:
+        return [coords], [(longest, residual)]
+    kept = []
+    stats = []
+    for index in range(1, len(coords) - 1):
+        triangle = coords[[0, index, index + 1]]
+        edge, _flat = face_metrics(triangle)
+        if edge < MAX_FACE_EDGE:
+            kept.append(triangle)
+            stats.append((edge, 0.0))
+    return kept, stats
 
 
 def cage_meshes(cycles, groups, positions, vectors):
-    """One vertex array and face list per colour index."""
+    """One vertex array and triangle list per colour index.
+
+    Each ring is unwrapped onto the images nearest the cage centre.
+    The returned stats are ``(longest edge, planarity residual)`` for
+    every polygon that is actually drawn.
+    """
     by_colour = defaultdict(list)
     reference = None
-    shifts = [
-        i * vectors[0] + j * vectors[1] + k * vectors[2]
-        for i in (-1, 0, 1)
-        for j in (-1, 0, 1)
-        for k in (-1, 0, 1)
-    ]
+    shifts = _shifts(vectors)
+    stats = []
     for faces, colour in groups:
-        placed = _unwrap_cage([cycles[face] for face in faces], positions, vectors)
-        centre = np.mean(list(placed.values()), axis=0)
-        if reference is None:
-            reference = centre
-        else:
-            delta = min(shifts, key=lambda shift: np.linalg.norm(centre + shift - reference))
-            placed = {atom: point + delta for atom, point in placed.items()}
-            centre = centre + delta
-        span = np.ptp(np.vstack(list(placed.values())), axis=0)
-        if float(span.max()) > 14.0:
-            continue
-        oriented = []
+        atoms = sorted({atom for face in faces for atom in cycles[face]})
+        centre = cage_centre(atoms, positions, vectors)
+        polygons = []
         for face in faces:
-            cycle = cycles[face]
-            coords = np.vstack([placed[atom] for atom in cycle])
-            normal = np.cross(coords[1] - coords[0], coords[2] - coords[0])
-            if float(np.dot(normal, coords.mean(axis=0) - centre)) < 0.0:
-                cycle = tuple(reversed(cycle))
-            oriented.append(tuple(placed[atom] for atom in cycle))
-        by_colour[colour].append(oriented)
+            pieces, piece_stats = drawn_ring(cycles[face], positions, centre, vectors)
+            for coords in pieces:
+                normal = np.cross(coords[1] - coords[0], coords[2] - coords[0])
+                if float(np.dot(normal, coords.mean(axis=0) - centre)) < 0.0:
+                    coords = coords[::-1]
+                polygons.append(coords)
+            stats.extend(piece_stats)
+        if not polygons:
+            continue
+        cage_centre_now = np.mean([poly.mean(axis=0) for poly in polygons], axis=0)
+        if reference is None:
+            reference = cage_centre_now
+            delta = np.zeros(3)
+        else:
+            delta = min(shifts, key=lambda shift: np.linalg.norm(cage_centre_now + shift - reference))
+        by_colour[colour].append([poly + delta for poly in polygons])
     meshes = []
     for colour, cages in by_colour.items():
         vertices = []
-        faces = []
+        triangles = []
         for cage in cages:
             for polygon in cage:
                 base = len(vertices)
                 vertices.extend(polygon)
                 for index in range(1, len(polygon) - 1):
-                    faces.append([base, base + index, base + index + 1])
-        meshes.append((np.asarray(vertices, dtype=float), faces, colour))
-    return meshes
+                    triangles.append([base, base + index, base + index + 1])
+        meshes.append((np.asarray(vertices, dtype=float), triangles, colour))
+    return meshes, stats
+
+
+def assert_drawn_faces(stats):
+    """Every drawn face is a short, nearly planar polygon."""
+    if not stats:
+        raise RuntimeError("no cage faces were drawn")
+    for longest, residual in stats:
+        if longest >= MAX_FACE_EDGE or residual > MAX_PLANARITY:
+            raise RuntimeError(f"drawn face edge {longest:.3f} A residual {residual:.3f} A")
 
 
 def _camera(render, positions, forward, up):
@@ -257,11 +345,14 @@ def tachyon_scene(render, path, positions, colours, radii, meshes, forward, up, 
     cell[:, 3] = low
     cell.vis.enabled = False
     data.objects.append(cell)
-    tinted, _near = render.depth_cue(colours, positions @ forward, 0.22)
+    tinted, near = render.depth_cue(
+        colours, positions @ forward, fade=0.38, tint=np.array((0.94, 0.94, 0.96))
+    )
+    radii = np.asarray(radii, dtype=np.float64) * (0.84 + 0.16 * near)
     particles = Particles()
     particles.create_property("Position", data=np.ascontiguousarray(positions, dtype=np.float64))
     particles.create_property("Color", data=np.clip(tinted, 0.0, 1.0))
-    particles.create_property("Radius", data=np.asarray(radii, dtype=np.float64))
+    particles.create_property("Radius", data=radii)
     particles.create_property("Transparency", data=np.zeros(len(positions)))
     data.objects.append(particles)
     particles.vis.radius = float(np.median(radii))
@@ -302,26 +393,31 @@ def tachyon_scene(render, path, positions, colours, radii, meshes, forward, up, 
         pipeline.remove_from_scene()
 
 
-def render_brine(render, rows, path, width=560):
-    """Oxygens by CHILL+, sodium and chloride as larger spheres."""
-    names = {name: index for index, name in enumerate((
-        "cubic", "hexagonal", "water", "interfacial", "clathrate",
-        "interClathrate", "unclassified", "reCubic", "reHex",
-    ))}
+def render_brine(render, rows, path, box, width=1100):
+    """Oxygens by the paper CHILL+ palette. Na is violet and Cl is black.
+
+    Hydrogens are omitted. Clathrate and interfacial clathrate are the
+    light-blue and pink labels from render_front.py, and both appear in
+    the legend.
+    """
     kept = [row for row in rows if row[0] in ("O", "Na", "Cl")]
     positions = np.array([[row[1], row[2], row[3]] for row in kept], dtype=float)
     colours = []
     radii = []
+    present = set()
     for species, _x, _y, _z, label in kept:
         if species == "Na":
             colours.append(NA)
-            radii.append(1.25)
+            radii.append(BRINE_RADIUS["Na"])
+            present.add("Na+")
         elif species == "Cl":
             colours.append(CL)
-            radii.append(1.45)
+            radii.append(BRINE_RADIUS["Cl"])
+            present.add("Cl-")
         else:
-            colours.append(np.array(render.CHILL.get(names[label], ("", (0.5, 0.5, 0.5)))[1]))
-            radii.append(0.72 if label != "water" else 0.62)
+            colours.append(BRINE_COLOUR.get(label, BRINE_COLOUR["unclassified"]))
+            radii.append(BRINE_RADIUS["O"] if label != "water" else 0.78)
+            present.add("liquid" if label == "water" else ("interf. clathrate" if label == "interClathrate" else label))
     colours = np.vstack(colours)
     radii = np.asarray(radii)
     # Liquid is painted faintly, the same 0.40 blend as the interface.
@@ -341,9 +437,19 @@ def render_brine(render, rows, path, width=560):
     blended = ice.copy()
     blended[veil] = 0.40 * liquid_image[veil] + 0.60 * ice[veil]
     Image.fromarray(np.clip(blended, 0, 255).astype(np.uint8)).save(path)
+    origin = np.array(box[:3], dtype=float)
+    lengths = np.array(box[3:6], dtype=float)
+    corners = [
+        origin + np.array((i * lengths[0], j * lengths[1], k * lengths[2]))
+        for i in (0, 1)
+        for j in (0, 1)
+        for k in (0, 1)
+    ]
+    legend = [item for item in BRINE_LEGEND if item[0] in present]
+    annotate(render, path, positions, forward, up, width, corners, legend)
 
 
-def render_host(render, lib, dump, path, kinds, width=560):
+def render_host(render, lib, dump, path, kinds, width=1280):
     cycles = _rings(lib, str(dump))
     positions = _positions(dump)
     groups = []
@@ -354,7 +460,8 @@ def render_host(render, lib, dump, path, kinds, width=560):
         for faces in facesets:
             groups.append((faces, colour))
     vectors = _box_vectors(dump)
-    meshes = cage_meshes(cycles, groups, positions, vectors)
+    meshes, stats = cage_meshes(cycles, groups, positions, vectors)
+    assert_drawn_faces(stats)
     corners = np.vstack([vertices for vertices, _faces, _colour in meshes])
     colours = np.tile(np.array((0.96, 0.96, 0.96)), (len(corners), 1))
     radii = np.full(len(corners), 0.22)
@@ -362,6 +469,94 @@ def render_host(render, lib, dump, path, kinds, width=560):
     up = np.array([0.0, 0.0, 1.0])
     tachyon_scene(render, path, corners, colours, radii, meshes, forward, up, width)
     return expected
+
+
+def annotate(render, path, positions, forward, up, width, corners, legend=None):
+    """Box outline on the slab, and a 1 nm bar in the margin below the atoms."""
+    from PIL import Image, ImageDraw, ImageFont
+
+    centre, half_h, half_v, forward, right, up = _camera(render, positions, forward, up)
+    image = Image.open(path).convert("RGB")
+    try:
+        font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 22)
+    except OSError:
+        font = ImageFont.load_default()
+    legend_rows = 1
+    if legend:
+        x = 16
+        rows = 1
+        for label, _colour in legend:
+            width_px = 36 + float(font.getlength(label))
+            if x + width_px > image.width - 8:
+                rows += 1
+                x = 16
+            x += width_px + 16
+        legend_rows = rows
+    margin = 28 + 34 * legend_rows + 56
+    canvas = Image.new("RGB", (image.width, image.height + margin), (255, 255, 255))
+    canvas.paste(image, (0, 0))
+    draw = ImageDraw.Draw(canvas)
+
+    def project(point):
+        offset = np.asarray(point, dtype=float) - centre
+        x = (float(np.dot(offset, right)) / (2.0 * half_h) + 0.5) * image.width
+        y = (0.5 - float(np.dot(offset, up)) / (2.0 * half_v)) * image.height
+        return (x, y)
+
+    for first in range(8):
+        for second in range(first + 1, 8):
+            if bin(first ^ second).count("1") != 1:
+                continue
+            draw.line([project(corners[first]), project(corners[second])], fill=(70, 70, 70), width=2)
+    if legend:
+        x, y = 16, image.height + 16
+        for label, colour in legend:
+            text_w = float(font.getlength(label))
+            if x + 36 + text_w > image.width - 8:
+                x = 16
+                y += 34
+            rgb = tuple(int(round(channel * 255)) for channel in colour)
+            draw.rectangle([x, y, x + 22, y + 22], fill=rgb, outline=(30, 30, 30))
+            draw.text((x + 28, y), label, font=font, fill=(20, 20, 20))
+            x += 36 + text_w + 16
+        bar_y = y + 46
+    else:
+        bar_y = image.height + 36
+    bar = 10.0 * image.width / (2.0 * half_h)
+    draw.line([(16, bar_y), (16 + bar, bar_y)], fill=(20, 20, 20), width=5)
+    draw.text((24 + bar, bar_y - 12), "1 nm", font=font, fill=(20, 20, 20))
+    canvas.save(path)
+
+
+def render_interface(render, positions, labels, origin, lengths, path, width=1280):
+    """Interface slab: CHILL+ colours, 0.40 liquid, depth cue, box, and scale bar."""
+    colours = np.array([render.CHILL.get(int(code), ("", (0.5, 0.5, 0.5)))[1] for code in labels])
+    radii = np.where(np.asarray(labels) == 2, 0.70, 0.85)
+    liquid = np.asarray(labels) == 2
+    forward = np.array([0.0, 1.0, 0.0])
+    up = np.array([0.0, 0.0, 1.0])
+    ice_png = path.with_name(path.stem + "-ice.png")
+    liq_png = path.with_name(path.stem + "-liq.png")
+    tachyon_scene(render, ice_png, positions[~liquid], colours[~liquid], radii[~liquid], [], forward, up, width, frame=positions)
+    tachyon_scene(render, liq_png, positions[liquid], colours[liquid], radii[liquid], [], forward, up, width, frame=positions)
+    from PIL import Image
+
+    ice = np.asarray(Image.open(ice_png).convert("RGB"), dtype=np.float32)
+    liquid_image = np.asarray(Image.open(liq_png).convert("RGB"), dtype=np.float32)
+    veil = np.any(liquid_image < 250, axis=2)
+    blended = ice.copy()
+    blended[veil] = 0.40 * liquid_image[veil] + 0.60 * ice[veil]
+    Image.fromarray(np.clip(blended, 0, 255).astype(np.uint8)).save(path)
+    ids = render.display_layer_ids(positions, np.isin(labels, [0, 1]), up)
+    _centre, _half_h, half_v, forward, _right, up = _camera(render, positions, forward, up)
+    render.draw_layer_guides(path, positions, ids, forward, up, half_v)
+    corners = [
+        np.asarray(origin) + np.array((i * lengths[0], j * lengths[1], k * lengths[2]))
+        for i in (0, 1)
+        for j in (0, 1)
+        for k in (0, 1)
+    ]
+    annotate(render, path, positions, np.array([0.0, 1.0, 0.0]), np.array([0.0, 0.0, 1.0]), width, corners)
 
 
 def _positions(path):
