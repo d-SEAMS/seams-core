@@ -1,0 +1,30 @@
+cores 8
+model Intel(R) Xeon(R) Processor
+affinity 0-7
+n 8
+crystal ice Ic 884736 molecules, cutoff 3.5 A
+each sample is the third call in a fresh process
+neighbours interleaved: d-SEAMS seams_frame_neighbours and OVITO CoordinationAnalysisModifier
+OVITO_THREAD_COUNT is set before OVITO is imported
+directed pairs 3538944
+neighbours threads 1 seams_ms 142.803 ovito_ms 235.820
+seams_samples 141.874 139.640 138.688 153.956 151.232 143.731 152.822 136.896
+ovito_samples 235.807 234.113 235.259 234.369 236.122 238.333 248.637 235.833
+neighbours threads 8 seams_ms 46.160 ovito_ms 52.130
+seams_samples 45.158 44.873 47.146 46.939 45.754 46.565 45.250 47.140
+ovito_samples 51.961 51.710 53.317 55.093 52.300 50.772 55.046 50.792
+full cutoff rings call interleaved against cad887b2
+phases are neighbour list, index conversion, primitive rings depth 6
+hash 16968914358209379624
+rings threads 1 base_total 671.204 new_total 678.397 base_link 139.027 new_link 134.417 base_search 496.326 new_search 509.275
+base_total_samples 655.522 685.956 665.452 676.956 662.435 686.495 662.792 679.489
+new_total_samples 679.181 677.219 677.612 675.060 673.444 693.850 704.276 688.925
+rings threads 2 base_total 425.875 new_total 408.562 base_link 89.277 new_link 91.491 base_search 320.089 new_search 297.029
+base_total_samples 415.558 423.243 443.304 416.471 420.090 478.154 430.021 428.507
+new_total_samples 397.400 411.879 408.898 408.227 403.315 595.812 406.264 436.557
+rings threads 4 base_total 261.232 new_total 245.209 base_link 54.601 new_link 58.769 base_search 199.153 new_search 172.349
+base_total_samples 257.415 255.544 262.487 258.673 259.977 268.037 281.930 306.583
+new_total_samples 245.339 238.555 245.080 250.648 242.894 258.090 243.516 278.336
+rings threads 8 base_total 177.018 new_total 163.807 base_link 36.755 new_link 45.987 base_search 134.539 new_search 112.440
+base_total_samples 174.220 175.452 182.333 178.584 174.560 174.067 182.622 190.495
+new_total_samples 164.479 156.649 164.834 165.702 163.135 163.013 162.186 170.148

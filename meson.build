@@ -794,6 +794,12 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_pool_v5',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_pool_v5.py', '--check'],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_cutoff_rings',
     python3,
     args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-cutoff'],

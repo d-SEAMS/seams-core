@@ -23,6 +23,21 @@ def _write_sitting_tables():
 _write_sitting_tables()
 
 
+def _write_pool_v5():
+    """Fill the pool-audit v5 tables before Sphinx reads the benchmarks page."""
+    import importlib.util
+
+    script = os.path.join(_docs, "render_pool_v5.py")
+    spec = importlib.util.spec_from_file_location("render_pool_v5", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    if module.main([]) != 0:
+        raise SystemExit("pool-audit v5 tables do not match the log")
+
+
+_write_pool_v5()
+
+
 def _write_release_notes():
     """Fill the 2.14.0 notes from changelog.d before Sphinx reads pages."""
     import importlib.util
