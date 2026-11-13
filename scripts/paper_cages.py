@@ -111,6 +111,7 @@ def rerun(seams: Path, out_dir: Path) -> str:
         "--seams", str(seams.resolve().relative_to(ROOT)),
         "--input", "input/traj",
         "--archive", "input/traj/genice_sI.lammpstrj",
+        "--source", ".",
         "--out", str(dest.resolve().relative_to(ROOT)),
     ]
     done = subprocess.run(cmd, cwd=ROOT, text=True, capture_output=True)
@@ -159,6 +160,7 @@ def main() -> int:
     report = rerun(args.seams, args.out)
     counted = census_rows(report)
     log = [
+        *stats.machine_lines(ROOT),
         f"cores {cores}",
         f"affinity {affinity}",
         f"threads {args.threads}",

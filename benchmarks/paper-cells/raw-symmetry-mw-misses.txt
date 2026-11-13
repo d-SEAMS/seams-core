@@ -1,0 +1,53 @@
+mW slab, thermostat 274 K, vibrating frame versus the quench.
+New gates are residual 0.15, tetrahedral q 0.85, bond ratio 1.20.
+These probes are not a retune.
+quench majority 444 both 420 new ice 369 CHILL+ ice 386 PTM ice 310
+new misses against quench majority 76
+of those, CHILL+ calls ice on the vibrating frame 33
+new misses against quench PTM and CHILL+ 58
+
+tetrahedral q
+  majority misses n=76 min=0.547 p05=0.727 p25=0.867 med=0.917 p75=0.944 p95=0.975 max=0.993
+  CHILL+ gap n=33 min=0.816 p05=0.853 p25=0.902 med=0.931 p75=0.949 p95=0.975 max=0.990
+  both-agree misses n=58 min=0.723 p05=0.733 p25=0.881 med=0.917 p75=0.948 p95=0.973 max=0.993
+  both-agree caught n=362 min=0.850 p05=0.891 p25=0.933 med=0.959 p75=0.976 p95=0.988 max=0.998
+  neither external on the vibrating frame n=473 min=0.167 p05=0.432 p25=0.645 med=0.784 p75=0.898 p95=0.959 max=0.993
+bond ratio
+  majority misses n=76 min=1.005 p05=1.055 p25=1.095 med=1.159 p75=1.211 p95=1.300 max=1.348
+  CHILL+ gap n=33 min=1.005 p05=1.069 p25=1.132 med=1.176 p75=1.241 p95=1.291 max=1.346
+  both-agree misses n=58 min=1.005 p05=1.066 p25=1.125 med=1.172 p75=1.233 p95=1.299 max=1.346
+  both-agree caught n=362 min=1.007 p05=1.046 p25=1.086 med=1.118 p75=1.157 p95=1.226 max=1.385
+  neither external on the vibrating frame n=473 min=1.016 p05=1.055 p25=1.098 med=1.146 p75=1.201 p95=1.289 max=1.388
+
+majority misses prefilter: q<0.85 16 q<0.94 56 ratio>1.20 26 ratio>1.15 42 passes 0.85/1.20 38 / 76
+CHILL+ gap prefilter: q<0.85 2 q<0.94 23 ratio>1.20 14 ratio>1.15 21 passes 0.85/1.20 17 / 33
+both-agree misses prefilter: q<0.85 11 q<0.94 41 ratio>1.20 21 ratio>1.15 36 passes 0.85/1.20 29 / 58
+
+residual ceiling, q=0.85 and bond ratio=1.20 held fixed
+  majority misses recovered 0.15:0, 0.18:8, 0.20:12, 0.25:16, 0.30:16, 0.40:16, 0.50:16, 0.75:16, 1.00:16, 2.00:16
+  CHILL+ gap recovered 0.15:0, 0.18:4, 0.20:7, 0.25:8, 0.30:8, 0.40:8, 0.50:8, 0.75:8, 1.00:8, 2.00:8
+  both-agree misses recovered 0.15:0, 0.18:6, 0.20:10, 0.25:12, 0.30:12, 0.40:12, 0.50:12, 0.75:12, 1.00:12, 2.00:12
+tetrahedral-q floor, residual 0.15 and bond ratio 1.20 held fixed
+  q>=0.85 recovers majority misses 0/76 both-agree misses 0/58
+  q>=0.80 recovers majority misses 3/76 both-agree misses 3/58
+  q>=0.70 recovers majority misses 3/76 both-agree misses 3/58
+  q>=0.50 recovers majority misses 3/76 both-agree misses 3/58
+  q>=0.00 recovers majority misses 3/76 both-agree misses 3/58
+bond-ratio cap, residual 0.15 and q=0.85 held fixed
+  ratio<=1.20 recovers majority misses 0/76 both-agree misses 0/58
+  ratio<=1.30 recovers majority misses 19/76 both-agree misses 18/58
+  ratio<=1.50 recovers majority misses 19/76 both-agree misses 18/58
+  ratio<=2.00 recovers majority misses 19/76 both-agree misses 18/58
+
+exclusive partition of the misses. A probe opens one gate and leaves the other two at the shipped values.
+  majority misses: residual 16 bond 15 q 3 more than one 2 unmatched at every ceiling 40 / 76
+    unmatched q n=40 min=0.547 p05=0.721 p25=0.806 med=0.874 p75=0.932 p95=0.975 max=0.990
+    unmatched bond ratio n=40 min=1.043 p05=1.066 p25=1.087 med=1.147 p75=1.205 p95=1.307 max=1.348
+  CHILL+ gap: residual 8 bond 9 q 3 more than one 2 unmatched at every ceiling 11 / 33
+    unmatched q n=11 min=0.816 p05=0.843 p25=0.886 med=0.931 p75=0.949 p95=0.976 max=0.990
+    unmatched bond ratio n=11 min=1.076 p05=1.077 p25=1.093 med=1.152 p75=1.219 p95=1.266 max=1.283
+  both-agree misses: residual 12 bond 14 q 3 more than one 2 unmatched at every ceiling 27 / 58
+    unmatched q n=27 min=0.723 p05=0.725 p25=0.828 med=0.880 p75=0.936 p95=0.961 max=0.990
+    unmatched bond ratio n=27 min=1.043 p05=1.070 p25=1.093 med=1.152 p75=1.207 p95=1.298 max=1.339
+
+The misses are an mW thermal tail, not a threshold parked against these gates. 40 of the 76 majority misses stay other when the residual ceiling is 2, the q floor is 0 and the bond-ratio cap is 2, so those three numbers do not label them. The atoms one gate does release are split between a bond-ratio wing that appears at 1.30 and a residual wing that saturates at 0.25. Caught crystal has a higher q and a tighter bond ratio than the misses, and the misses lie toward the liquid rather than in a pile against 0.85 or 1.20. The gates are unchanged.

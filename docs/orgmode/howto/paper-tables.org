@@ -1,0 +1,29 @@
+#+TITLE: Paper tables
+
+Each table is one Snakemake target. The timings come from one sitting,
+=benchmarks/paper-cells/sitting.csv=. The other timing files are
+selections of that file. A command is run from the checkout. =nix run
+.#<name>= is the same target.
+
+The record names the source commit, the =lscpu= model name, the core
+count and the affinity. It does not name the host.
+
+| Table | Command |
+|-------+---------|
+| sitting | =snakemake -j2 benchmarks/paper-cells/sitting.csv= |
+| rings | =snakemake -j2 benchmarks/paper-cells/tab-rings-214.csv= |
+| q values | =snakemake -j2 benchmarks/paper-cells/tab-ql-eq.csv= |
+| neighbours | =snakemake -j2 benchmarks/paper-cells/tab-neighbours.csv= |
+| CHILL+ | =snakemake -j2 benchmarks/paper-cells/tab-chill.csv= |
+| cages | =snakemake -j2 benchmarks/paper-cells/tab-cages.csv= |
+| command fragments | =snakemake -j2 benchmarks/paper-cells/tab-cli.csv= |
+| literature | =snakemake -j2 benchmarks/paper-cells/tab-lit.csv= |
+| hop stride | =snakemake -j2 benchmarks/paper-cells/tab-hop-stride.csv= |
+| symmetry | =snakemake -j2 benchmarks/paper-cells/tab-sym-eq.csv= |
+| symmetry against template matching | =snakemake -j2 benchmarks/paper-cells/symmetry-vs-ptm.csv= |
+| template sets | =snakemake -j2 benchmarks/paper-cells/ptm-ice.csv= |
+
+The flake apps are =sitting=, =tab-rings-214=, =tab-ql-eq=,
+=tab-neighbours=, =tab-chill=, =tab-cages=, =tab-cli=, =tab-lit=,
+=tab-hop-stride=, =tab-sym-eq=, =symmetry-vs-ptm= and =ptm-ice=.
+=nix run .#tab-rings-214= regenerates the ring table.

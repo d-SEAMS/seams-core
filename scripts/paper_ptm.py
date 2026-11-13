@@ -118,6 +118,7 @@ def main() -> int:
         rows.append(row_for(cell, item, summary, cores, affinity))
         print(f"{cell} {summary['median_ms']:.4f} ms iqr {summary['iqr_ms']:.4f}", flush=True)
     header = [
+        *stats.machine_lines(ROOT),
         f"cores {cores}",
         f"affinity {affinity}",
         "ptm rmsd_cutoff 0.1 templates cubic-diamond hexagonal-diamond",

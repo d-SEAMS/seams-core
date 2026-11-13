@@ -304,6 +304,7 @@ def write_paper_q(out_dir: Path, repeats: int, threads: int, lang_lib: str,
     if cores < threads:
         raise SystemExit(f"affinity has {cores} cores, need {threads}")
     log = [
+        *stats.machine_lines(ROOT),
         f"cores {cores}",
         f"affinity {affinity}",
         f"threads {threads}",

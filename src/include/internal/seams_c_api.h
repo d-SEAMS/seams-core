@@ -60,6 +60,12 @@ int seams_symmetry_classify(const double *xyz, int n, const double *lattice9,
 /* Same labels with an explicit scale-free residual ceiling. */
 int seams_symmetry_classify_tol(const double *xyz, int n, const double *lattice9,
                                 double shell_rmsd, int *labels);
+/* thermal_q is the tetrahedral-order prefilter and bond_ratio is the
+ * longest/shortest of the four nearest bonds. The shipped gates are
+ * 0.85 and 1.20. The previous gates were 0.94 and 1.15 with shell_rmsd 0.12. */
+int seams_symmetry_classify_gates(const double *xyz, int n, const double *lattice9,
+                                  double shell_rmsd, double thermal_q, double bond_ratio,
+                                  int *labels);
 
 /* Mixed frames. types and mols may be NULL (every atom is then one
  * species, mol id = index + 1). oxygen_type > 0 keeps that LAMMPS type.
