@@ -1427,8 +1427,14 @@ def cage_meshes(oxygens, guests, box):
         delta -= lengths * np.round(delta / lengths)
         distance = np.linalg.norm(delta, axis=1)
         limit = 4.45 if kind == "CH4" else 5.45
+        minimum = 16 if kind == "CH4" else 24
         chosen = (distance > 2.4) & (distance < limit)
-        if int(np.count_nonzero(chosen)) < (16 if kind == "CH4" else 24):
+        # The sH large cage sits further from its THF than an sII cage does.
+        if kind != "CH4" and int(np.count_nonzero(chosen)) < minimum:
+            limit = 8.8
+            minimum = 18
+            chosen = (distance > 2.4) & (distance < limit)
+        if int(np.count_nonzero(chosen)) < minimum:
             continue
         shell = centre + delta[chosen]
         try:
@@ -1920,7 +1926,7 @@ def genice_picture(lattice, rep, guests, cage_faces, hydrogens=True):
             stacked = np.vstack(centres)
             distance = np.linalg.norm(xyz[oxygen_ids, None, :] - stacked[None, :, :], axis=2).min(axis=1)
             for atom_index, gap in zip(oxygen_ids, distance):
-                if float(gap) <= 6.4:
+                if float(gap) <= 7.6:
                     near_cage.add(int(atom_index))
         cage_atoms = {index for index in cage_atoms if index in near_cage}
         guest_names = {"methane", "THF", "hydrogen"}
