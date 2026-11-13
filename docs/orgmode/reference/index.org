@@ -26,6 +26,7 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
    walk-compare
    api
    ../api/index
+   ../crates/seams/lib
    nix
    cross-language
    glossary

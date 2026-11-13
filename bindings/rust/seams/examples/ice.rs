@@ -1,7 +1,12 @@
 /* Copyright (c) d-SEAMS developers */
 fn diamond(nrep: usize) -> (Vec<f64>, f64) {
     let a = 2.75 * 4.0 / 3.0_f64.sqrt();
-    let fcc = [[0.0, 0.0, 0.0], [0.5, 0.5, 0.0], [0.5, 0.0, 0.5], [0.0, 0.5, 0.5]];
+    let fcc = [
+        [0.0, 0.0, 0.0],
+        [0.5, 0.5, 0.0],
+        [0.5, 0.0, 0.5],
+        [0.0, 0.5, 0.5],
+    ];
     let basis = [[0.0, 0.0, 0.0], [0.25, 0.25, 0.25]];
     let mut xyz = Vec::new();
     for i in 0..nrep {
@@ -24,13 +29,18 @@ fn main() {
     let (xyz, length) = diamond(2);
     let mut sys = seams::System::new().expect("system");
     sys.set_ortho(&xyz, length, length, length).expect("frame");
-    let (labels, counts) = sys
-        .chill_plus(3.5, seams_sys::SEAMS_GRAPH_CUTOFF, seams_sys::SEAMS_CHILL_PUBLISHED)
+    let ice = sys
+        .chill_plus(&seams::ChillOptions::default())
         .expect("chill+");
     println!(
         "dseams {} cubic {} of {}",
         seams::version(),
-        counts[0],
-        labels.len()
+        ice.counts[0],
+        ice.labels.len()
     );
+}
+
+#[test]
+fn example_runs() {
+    main();
 }

@@ -86,27 +86,15 @@ extern "C" {
     pub fn seams_version_minor() -> c_int;
     pub fn seams_version_patch() -> c_int;
     pub fn seams_version_string() -> *const c_char;
-    pub fn seams_status_string(
-        status: c_int,
-    ) -> *const c_char;
+    pub fn seams_status_string(status: c_int) -> *const c_char;
     pub fn seams_last_error() -> *const c_char;
-    pub fn seams_handle_error(
-        handle: *const c_void,
-    ) -> *const c_char;
-    pub fn seams_label_name(
-        label: c_int,
-    ) -> *const c_char;
-    pub fn seams_ring_symmetry_name(
-        symmetry: c_int,
-    ) -> *const c_char;
-    pub fn seams_set_num_threads(
-        n: c_int,
-    ) -> c_int;
+    pub fn seams_handle_error(handle: *const c_void) -> *const c_char;
+    pub fn seams_label_name(label: c_int) -> *const c_char;
+    pub fn seams_ring_symmetry_name(symmetry: c_int) -> *const c_char;
+    pub fn seams_set_num_threads(n: c_int) -> c_int;
     pub fn seams_get_num_threads() -> c_int;
     pub fn seams_system_create() -> *mut seams_system;
-    pub fn seams_system_destroy(
-        sys: *mut seams_system,
-    ) -> ();
+    pub fn seams_system_destroy(sys: *mut seams_system);
     pub fn seams_system_set_atoms(
         sys: *mut seams_system,
         xyz: *const f64,
@@ -143,13 +131,8 @@ extern "C" {
         frame: c_int,
         type_filter: c_int,
     ) -> c_int;
-    pub fn seams_path_nframes(
-        path: *const c_char,
-        nframes: *mut usize,
-    ) -> c_int;
-    pub fn seams_system_count(
-        sys: *const seams_system,
-    ) -> c_int;
+    pub fn seams_path_nframes(path: *const c_char, nframes: *mut usize) -> c_int;
+    pub fn seams_system_count(sys: *const seams_system) -> c_int;
     pub fn seams_neighbours_build(
         sys: *mut seams_system,
         cutoff: f64,
@@ -157,12 +140,8 @@ extern "C" {
         graph: c_int,
         out: *mut *mut seams_neighbours,
     ) -> c_int;
-    pub fn seams_neighbours_destroy(
-        nb: *mut seams_neighbours,
-    ) -> ();
-    pub fn seams_neighbours_count(
-        nb: *const seams_neighbours,
-    ) -> c_int;
+    pub fn seams_neighbours_destroy(nb: *mut seams_neighbours);
+    pub fn seams_neighbours_count(nb: *const seams_neighbours) -> c_int;
     pub fn seams_neighbours_csr(
         nb: *const seams_neighbours,
         offsets: *mut *const c_int,
@@ -235,12 +214,8 @@ extern "C" {
         max_depth: c_int,
         out: *mut *mut seams_rings,
     ) -> c_int;
-    pub fn seams_rings_destroy(
-        rings: *mut seams_rings,
-    ) -> ();
-    pub fn seams_rings_count(
-        rings: *const seams_rings,
-    ) -> c_int;
+    pub fn seams_rings_destroy(rings: *mut seams_rings);
+    pub fn seams_rings_count(rings: *const seams_rings) -> c_int;
     pub fn seams_rings_histogram(
         rings: *const seams_rings,
         counts: *mut c_int,
@@ -272,9 +247,7 @@ extern "C" {
         complete: c_int,
         out: *mut *mut seams_cage_set,
     ) -> c_int;
-    pub fn seams_cages_destroy(
-        cages: *mut seams_cage_set,
-    ) -> ();
+    pub fn seams_cages_destroy(cages: *mut seams_cage_set);
     pub fn seams_cages_counts(
         cages: *const seams_cage_set,
         n_hex: *mut c_int,
@@ -312,9 +285,7 @@ extern "C" {
         axis: c_int,
         out: *mut *mut seams_brine,
     ) -> c_int;
-    pub fn seams_brine_destroy(
-        front: *mut seams_brine,
-    ) -> ();
+    pub fn seams_brine_destroy(front: *mut seams_brine);
     pub fn seams_brine_fronts(
         front: *const seams_brine,
         z_enter: *mut f64,
@@ -439,9 +410,7 @@ extern "C" {
         colour_types: c_int,
         out: *mut *mut seams_topo,
     ) -> c_int;
-    pub fn seams_fingerprint_destroy(
-        fp: *mut seams_topo,
-    ) -> ();
+    pub fn seams_fingerprint_destroy(fp: *mut seams_topo);
     pub fn seams_fingerprint_key(
         fp: *const seams_topo,
         buf: *mut c_char,

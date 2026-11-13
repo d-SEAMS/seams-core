@@ -6,7 +6,7 @@
 
 ```{literalinclude} ../../../bindings/rust/seams/tests/ice.rs
 :language: rust
-:lines: 25-57
+:lines: 29-63
 ```
 
 The ice example builds a 64-atom cell:

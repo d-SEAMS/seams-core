@@ -27,8 +27,10 @@ Four fronts, one engine (~libyodaLib~). Flags live on
 ~pixi run -e docs doxybuild~ runs from =docs/source=:
 
 1. ~doxygen Doxyfile_seams.cfg~. ~INPUT~ is
-   =../../src/include/internal= (~EXTRACT_ALL=YES~, private members
-   off). =src/include/external= and =tests/= are excluded.
+   =../../src/include/internal=, =include/seams.h=, and =include/seams.hpp=
+   (~EXTRACT_ALL=YES~, private members off). =src/include/external= and
+   =tests/= are excluded. ~scripts/doxygen_version_header.py~ writes the
+   version header Doxygen needs to read =seams.h=.
 2. ~doxyrest -c doxyrest-config.lua~ reads =xml/index.xml= and writes
    =api/index.rst~ with title ~API Reference~.
 

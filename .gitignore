@@ -14,7 +14,10 @@ doxyYoda
 doxyYoda_*
 /run*
 bbdir/
+bbdir-*/
 bbdir-cov/
+bindings/rust/target/
+__pycache__/
 /.snakemake/
 # Manual updates ONLY
 spack.yml
@@ -99,6 +102,8 @@ docs/source/*.rst
 docs/source/tutorials/gallery/
 docs/source/tutorials/gallery-captions.rst
 docs/source/xml/
+docs/source/doxygen-include/
+docs/source/crates/
 docs/source/api/
 m.css/
 compile_commands.json

@@ -1,5 +1,5 @@
 //! Read the GenIce sI cell through the safe seams crate.
-use seams::{System, num_threads, set_num_threads, version};
+use seams::{num_threads, set_num_threads, version, System};
 use std::env;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
@@ -52,13 +52,13 @@ fn main() {
     assert_eq!(system.count(), 46);
     let degree = system.neighbour_degree(3.5).expect("neighbours");
     assert_eq!(degree.len(), 46);
-    let (_q4, q6) = system.q4q6(3.5).expect("q6");
-    let mean = q6.iter().sum::<f64>() / q6.len() as f64;
-    let (_labels, counts) = system
-        .chill_plus(3.5, seams_sys::SEAMS_GRAPH_CUTOFF, seams_sys::SEAMS_CHILL_PUBLISHED)
+    let orders = system.q4q6(3.5).expect("q6");
+    let mean = orders.q6.iter().sum::<f64>() / orders.q6.len() as f64;
+    let ice = system
+        .chill_plus(&seams::ChillOptions::default())
         .expect("chill+");
     let (six, _fraction) = system.six_ring_fraction(3.5).expect("rings");
-    assert_eq!(counts[4], 46);
+    assert_eq!(ice.counts[4], 46);
     assert_eq!(six, 54);
     assert!(mean > 0.5);
     println!("rust example ok {} q6 {:.3}", version(), mean);
