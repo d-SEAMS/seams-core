@@ -36,7 +36,7 @@ The four engine how-tos score the ice Ih dump. The locked line is hexagonal 128,
 
 ## Scene 2. In-situ frame
 
-Lead-in: 0.40 s. Segment length: 20.77 s.
+Lead-in: 0.40 s. Segment length: 14.93 s.
 
 Tests: `docs_video_tapes`, `docs_engine_openmm`.
 
@@ -54,4 +54,4 @@ insitu hexagonal 128 six-rings 256
 
 Draft narration:
 
-The in-situ call reads the same dump through libseams_lang and prints insitu hexagonal 128 six-rings 256. GROMACS, LAMMPS, and PLUMED use this census when those engines are compiled. This build leaves them out, so those three how-tos are described in the shot list rather than run.
+The in-situ call reads the same dump through libseams_lang and prints insitu hexagonal 128 six-rings 256. LAMMPS, GROMACS, and PLUMED each have a shot list that runs the same ice Ih census.

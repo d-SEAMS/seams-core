@@ -282,12 +282,14 @@ def run_plumed(root, build):
             plugin, len(atoms), colvar
         )
     )
+    env = env_libs(build)
+    env["PLUMED_NUM_THREADS"] = "1"
     done = subprocess.run(
         ["plumed", "driver", "--plumed", str(deck), "--ixyz", str(xyz)],
         check=False,
         capture_output=True,
         text=True,
-        env=env_libs(build),
+        env=env,
     )
     if done.returncode != 0 or not colvar.is_file():
         sys.stderr.write(done.stdout)

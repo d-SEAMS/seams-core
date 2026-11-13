@@ -170,6 +170,7 @@ def videos():
         })
     built.append(cli_video())
     built.extend(science_videos())
+    built.extend(engine_videos())
     return built
 
 
@@ -351,7 +352,7 @@ def insitu_video():
             ),
             scene(
                 "In-situ frame",
-                "The in-situ call reads the same dump through libseams_lang and prints insitu hexagonal 128 six-rings 256. GROMACS, LAMMPS, and PLUMED use this census when those engines are compiled. This build leaves them out, so those three how-tos are described in the shot list rather than run.",
+                "The in-situ call reads the same dump through libseams_lang and prints insitu hexagonal 128 six-rings 256. LAMMPS, GROMACS, and PLUMED each have a shot list that runs the same ice Ih census.",
                 ['python3 docs/howto/test_engines.py insitu . "$SEAMS_BUILD"'],
                 ["insitu hexagonal 128 six-rings 256"],
                 [TAPE, ENGINE],
@@ -393,6 +394,69 @@ def migrate_video():
             ),
         ],
     }
+
+
+def engine_videos():
+    census = "hexagonal 128 six-rings 256 q6 0.625855"
+    pixi = "dseams-engines (lammps, gromacs, plumed 2.10) plus seams-core for the hook."
+    return [
+        {
+            "slug": "lammps",
+            "title": "LAMMPS run_hook",
+            "pixi": pixi,
+            "inputs": ["engines/lammps/in.dseams", "engines/lammps/ice.data", "input/traj/ice1h.lammpstrj"],
+            "scenes": [
+                scene(
+                    "Cubic cell",
+                    "From engines/lammps the driver is the build's engines/run_hook and the deck is in.dseams. The cell has 64 atoms. The hook prints lammps calls 5 stride 2 ice 320, then lammps hexagonal 0 six-rings 128 q6 0.628539. docs_tutorial_insitu requires ice equal to calls times 64.",
+                    ['cd engines/lammps && "$SEAMS_BUILD/engines/run_hook" in.dseams'],
+                    ["lammps calls 5 stride 2 ice 320", "lammps hexagonal 0 six-rings 128 q6 0.628539"],
+                    [TAPE, "docs_tutorial_insitu"],
+                    0.30,
+                ),
+                scene(
+                    "Ice Ih census",
+                    "docs_engine_lammps writes a data file from the ice Ih dump and runs the same hook for one step. The census line is lammps hexagonal 128 six-rings 256 q6 0.625855.",
+                    ['python3 docs/howto/test_engines.py lammps . "$SEAMS_BUILD"'],
+                    ["lammps " + census],
+                    [TAPE, "docs_engine_lammps"],
+                    0.35,
+                ),
+            ],
+        },
+        {
+            "slug": "gromacs",
+            "title": "GROMACS gmx-seams",
+            "pixi": pixi,
+            "inputs": ["input/traj/ice1h.lammpstrj", "engines/gromacs/ice.gro"],
+            "scenes": [
+                scene(
+                    "Ice Ih gro",
+                    "docs_engine_gromacs writes a one-frame gro from the ice Ih dump and runs gmx-seams with cutoff 3.5. The census line is gromacs hexagonal 128 six-rings 256 q6 0.625855. gromacs_mdrun then takes a short frozen trajectory through the same tool.",
+                    ['python3 docs/howto/test_engines.py gromacs . "$SEAMS_BUILD"'],
+                    ["gromacs " + census],
+                    [TAPE, "docs_engine_gromacs", "gromacs_mdrun"],
+                    0.30,
+                ),
+            ],
+        },
+        {
+            "slug": "plumed",
+            "title": "PLUMED driver",
+            "pixi": pixi,
+            "inputs": ["input/traj/ice1h.lammpstrj", "engines/plumed/plumed.dat"],
+            "scenes": [
+                scene(
+                    "Driver on ice Ih",
+                    "PLUMED_NUM_THREADS is set to one thread before plumed driver starts. docs_engine_plumed loads libSeamsPlumed.so, writes an xyz in nanometres, and prints plumed hexagonal 128 six-rings 256 q6 0.625855. plumed_driver checks the cubic cell the same way.",
+                    ['PLUMED_NUM_THREADS=1 python3 docs/howto/test_engines.py plumed . "$SEAMS_BUILD"'],
+                    ["plumed " + census],
+                    [TAPE, "docs_engine_plumed", "plumed_driver"],
+                    0.32,
+                ),
+            ],
+        },
+    ]
 
 
 def brine_temperature_scene(video):

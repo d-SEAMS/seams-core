@@ -1,0 +1,8 @@
+WEBVTT
+
+NOTE
+Draft cues converted from captions.srt. Final wording and timing are recorded later.
+
+1
+00:00:00.320 --> 00:00:15.950 line:95% align:center size:80%
+PLUMED_NUM_THREADS is set to one thread before plumed driver starts. docs_engine_plumed loads libSeamsPlumed.so, writes an xyz in nanometres, and prints plumed hexagonal 128 six-rings 256 q6 0.625855. plumed_driver checks the cubic cell the same way.

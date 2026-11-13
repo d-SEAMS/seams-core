@@ -110,6 +110,28 @@ if gromacs_opt.allowed()
   if not gromacs_dep.found() and gromacs_opt.enabled()
     error('with_gromacs is enabled but libgromacs was not found')
   endif
+  if gromacs_dep.found() and gromacs_rpath == ''
+    gromacs_py = find_program('python3', required: false)
+    if gromacs_py.found()
+      gromacs_where = run_command(gromacs_py, '-c',
+        'import os, pathlib\n' +
+        'prefix = os.environ.get("CONDA_PREFIX", "")\n' +
+        'if not prefix:\n' +
+        '    raise SystemExit(1)\n' +
+        'root = pathlib.Path(prefix)\n' +
+        'names = ("lib.AVX2_256", "lib.AVX_256", "lib")\n' +
+        'for name in names:\n' +
+        '    lib = root / name / "libgromacs.so"\n' +
+        '    if lib.is_file():\n' +
+        '        print(lib.parent)\n' +
+        '        raise SystemExit(0)\n' +
+        'raise SystemExit(1)\n',
+        check: false)
+      if gromacs_where.returncode() == 0 and gromacs_where.stdout().strip() != ''
+        gromacs_rpath = gromacs_where.stdout().strip()
+      endif
+    endif
+  endif
   if gromacs_dep.found()
     gmx_seams = executable(
       'gmx-seams',
@@ -168,7 +190,25 @@ if plumed_opt.allowed()
     # libplumedKernel.so.
     # The kernel must be the one that matches this PLUMED. A conda prefix
     # earlier on the linker path can supply an older libplumedKernel.
-    plumed_libdir = plumed_dep.found() ? plumed_dep.get_variable('libdir', default_value: '') : ''
+    # find_library returns an external library, which has no pkg-config variables.
+    plumed_libdir = ''
+    if plumed_dep.found() and plumed_dep.type_name() == 'pkgconfig'
+      plumed_libdir = plumed_dep.get_variable('libdir', default_value: '')
+    endif
+    if plumed_libdir == ''
+      plumed_where = run_command(find_program('python3'), '-c',
+        'import os, pathlib\n' +
+        'prefix = os.environ.get("CONDA_PREFIX", "")\n' +
+        'kernel = pathlib.Path(prefix) / "lib" / "libplumedKernel.so" if prefix else None\n' +
+        'if kernel is not None and kernel.is_file():\n' +
+        '    print(kernel.parent)\n' +
+        '    raise SystemExit(0)\n' +
+        'raise SystemExit(1)\n',
+        check: false)
+      if plumed_where.returncode() == 0 and plumed_where.stdout().strip() != ''
+        plumed_libdir = plumed_where.stdout().strip()
+      endif
+    endif
     plumed_kernel = cppc.find_library('plumedKernel',
       dirs: plumed_libdir != '' ? [plumed_libdir] : [],
       required: false)

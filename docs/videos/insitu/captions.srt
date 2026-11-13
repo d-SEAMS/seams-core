@@ -3,5 +3,5 @@
 The four engine how-tos score the ice Ih dump. The locked line is hexagonal 128, six-rings 256, q6 0.625855. docs_engine_openmm asserts that line. On this build the OpenMM how-to is the one that runs, and it prints openmm hexagonal 128 six-rings 256 q6 0.625855.
 
 2
-00:00:20,230 --> 00:00:40,450
-The in-situ call reads the same dump through libseams_lang and prints insitu hexagonal 128 six-rings 256. GROMACS, LAMMPS, and PLUMED use this census when those engines are compiled. This build leaves them out, so those three how-tos are described in the shot list rather than run.
+00:00:20,230 --> 00:00:34,610
+The in-situ call reads the same dump through libseams_lang and prints insitu hexagonal 128 six-rings 256. LAMMPS, GROMACS, and PLUMED each have a shot list that runs the same ice Ih census.
