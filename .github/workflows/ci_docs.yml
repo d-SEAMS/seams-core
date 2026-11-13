@@ -47,7 +47,7 @@ jobs:
           key: brine-front-230K-4828e33ecf419c70643b2d466bfa4f283b4138dc
 
       - name: Ice Ih, language APIs, and science tutorials
-        run: pixi run -e default meson test -C bbdir docs_core_counts docs_capi_examples docs_capi_symbols docs_binding_docstrings docs_lang_ice docs_science_tutorials --print-errorlogs
+        run: pixi run -e default meson test -C bbdir docs_core_counts docs_capi_examples docs_capi_symbols docs_binding_docstrings docs_lang_ice docs_science_tutorials docs_engine_walkthrough --print-errorlogs
 
       - run: pixi run -e docs docbld
 

@@ -1427,6 +1427,18 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 180)
   test(
+    'docs_engine_walkthrough',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'engine_walkthrough.py',
+      meson.project_source_root(),
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_api_lib],
+    suite: 'docs',
+    timeout: 120)
+  test(
     'docs_capi_symbols',
     python3,
     args: [
