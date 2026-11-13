@@ -191,6 +191,61 @@ def clusters(path: Path) -> None:
     save(fig, path)
 
 
+def read_literature():
+    path = DATA / "growth-literature.csv"
+    rows = []
+    if not path.is_file():
+        return rows
+    header = None
+    for line in path.read_text().splitlines():
+        if not line or line.startswith("#"):
+            continue
+        parts = line.split("|")
+        if header is None:
+            header = parts
+            continue
+        rows.append(dict(zip(header, parts)))
+    return rows
+
+
+def speeds(path: Path) -> None:
+    header, rows = read_table(DATA / "interface-speed.csv")
+    temp = column(header, rows, "temperature_K")
+    rate = column(header, rows, "mean_front_A_per_ns")
+    lo = column(header, rows, "lo_A_per_ns")
+    hi = column(header, rows, "hi_A_per_ns")
+    fig, ax = plt.subplots(figsize=(4.6, 3.6))
+    ax.errorbar(
+        temp,
+        rate,
+        yerr=np.vstack([rate - lo, hi - rate]),
+        fmt="o",
+        color="#0072B2",
+        ms=5,
+        lw=1,
+        capsize=2,
+        label="this work, basal, restrained ice",
+    )
+    for row in read_literature():
+        if row.get("kind") != "measured" or not row.get("temperature_K") or not row.get("rate_A_per_ns"):
+            continue
+        sigma = float(row["rate_sigma"]) if row.get("rate_sigma") else 0.0
+        ax.errorbar(
+            [float(row["temperature_K"])],
+            [float(row["rate_A_per_ns"])],
+            yerr=[[sigma], [sigma]] if sigma else None,
+            fmt="s",
+            color="#D55E00",
+            ms=5,
+            capsize=2,
+            label="Shi 2024 basal maximum",
+        )
+    ax.set_xlabel("temperature (K)")
+    ax.set_ylabel("front speed (A/ns)")
+    ax.legend(frameon=False, fontsize=7)
+    save(fig, path)
+
+
 def nucleus(path: Path) -> None:
     header, rows = read_table(DATA / "nucleus-atoms.csv")
     keep = column(header, rows, "in_extended") > 0.5
@@ -235,10 +290,10 @@ def main() -> int:
     args = parser.parse_args()
     style()
     out = args.out
-    snapshot(out / "interface-snapshot.pdf")
     profiles(out / "interface-profiles.pdf")
     clusters(out / "cluster-size.pdf")
-    nucleus(out / "nucleus.pdf")
+    if (DATA / "interface-speed.csv").is_file():
+        speeds(out / "growth-rate.pdf")
     print(out)
     return 0
 

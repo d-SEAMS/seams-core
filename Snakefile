@@ -473,13 +473,30 @@ rule rings_one_thread:
 # Dumps larger than 1 MB stay out of git. dump_ps in the meta file is the
 # spacing passed to the interface rule. SCIENCE_FRONT overrides the binary.
 
-rule science_tip4p_basal:
+# 10 ns of TIP4P/Ice at 230, 240 and 250 K. Ice oxygens stay restrained.
+# SCIENCE_EQUIL_PS=15 is the 320 K liquid equilibration used for the
+# short basal run as well. Dumps are oxygen-only and are not committed.
+
+rule science_tip4p_temp:
     output:
-        "data/science-frames/tip4p-basal.lammpstrj",
-        "paper/tex/figures/data/science/interface-meta.csv",
+        "data/science-frames/tip4p-basal-{temp}K.lammpstrj",
+        "paper/tex/figures/data/science/interface-meta-{temp}K.csv",
+    shell:
+        "SCIENCE_EQUIL_PS=15 SCIENCE_TEMP_K={wildcards.temp} "
+        "SCIENCE_PROD_PS=10000 SCIENCE_DUMP_PS=100 "
+        "SCIENCE_THREADS=${{SCIENCE_THREADS:-2}} "
+        "SCIENCE_TAG={wildcards.temp}K "
+        "SCIENCE_META=paper/tex/figures/data/science/interface-meta-{wildcards.temp}K.csv "
+        "${{SCIENCE_PYTHON:-python3}} scripts/make_tip4p_basal.py"
+
+
+rule science_tip4p_basal:
+    input:
+        expand("paper/tex/figures/data/science/interface-meta-{temp}K.csv", temp=["230", "240", "250"]),
+    output:
         "paper/tex/figures/data/science/large-frames.csv",
     shell:
-        "${{SCIENCE_PYTHON:-python3}} scripts/make_tip4p_basal.py"
+        "test -s paper/tex/figures/data/science/large-frames.csv"
 
 
 rule science_nucleation_dump:
@@ -489,10 +506,45 @@ rule science_nucleation_dump:
         "python3 scripts/fetch_mw_nucleation.py"
 
 
+rule science_interface_temp:
+    input:
+        "data/science-frames/tip4p-basal-{temp}K.lammpstrj",
+        "paper/tex/figures/data/science/interface-meta-{temp}K.csv",
+    output:
+        "paper/tex/figures/data/science/interface-{temp}K/interface-layers.csv",
+        "paper/tex/figures/data/science/interface-{temp}K/interface-fronts.csv",
+        "paper/tex/figures/data/science/interface-{temp}K/interface-velocity.csv",
+        "paper/tex/figures/data/science/interface-{temp}K/interface-atoms.csv",
+        "paper/tex/figures/data/science/interface-{temp}K/interface-causes.csv",
+    shell:
+        "ps=$(awk '$1==\"dump_ps\"{{print $2}}' paper/tex/figures/data/science/interface-meta-{wildcards.temp}K.csv); "
+        "OMP_NUM_THREADS=${{SCIENCE_THREADS:-2}} "
+        "${{SCIENCE_FRONT:-bbdir/science-front}} interface {input[0]} "
+        "--ps \"$ps\" --bin 1 "
+        "--out-dir paper/tex/figures/data/science/interface-{wildcards.temp}K "
+        "--threads ${{SCIENCE_THREADS:-2}}"
+
+
+rule science_growth:
+    input:
+        expand(
+            "paper/tex/figures/data/science/interface-{temp}K/interface-velocity.csv",
+            temp=["230", "240", "250"],
+        ),
+    output:
+        "paper/tex/figures/data/science/interface-speed.csv",
+    shell:
+        "${{SCIENCE_PYTHON:-python3}} scripts/science_growth.py"
+
+
 rule science_interface:
     input:
-        "data/science-frames/tip4p-basal.lammpstrj",
-        "paper/tex/figures/data/science/interface-meta.csv",
+        "paper/tex/figures/data/science/interface-230K/interface-layers.csv",
+        "paper/tex/figures/data/science/interface-230K/interface-fronts.csv",
+        "paper/tex/figures/data/science/interface-230K/interface-velocity.csv",
+        "paper/tex/figures/data/science/interface-230K/interface-atoms.csv",
+        "paper/tex/figures/data/science/interface-230K/interface-causes.csv",
+        "paper/tex/figures/data/science/interface-speed.csv",
     output:
         "paper/tex/figures/data/science/interface-layers.csv",
         "paper/tex/figures/data/science/interface-fronts.csv",
@@ -500,11 +552,11 @@ rule science_interface:
         "paper/tex/figures/data/science/interface-atoms.csv",
         "paper/tex/figures/data/science/interface-causes.csv",
     shell:
-        "ps=$(awk '$1==\"dump_ps\"{{print $2}}' paper/tex/figures/data/science/interface-meta.csv); "
-        "OMP_NUM_THREADS=${{SCIENCE_THREADS:-4}} "
-        "${{SCIENCE_FRONT:-bbdir/science-front}} interface {input[0]} "
-        "--ps \"$ps\" --bin 1 --out-dir paper/tex/figures/data/science "
-        "--threads ${{SCIENCE_THREADS:-4}}"
+        "for name in interface-layers interface-fronts interface-velocity "
+        "interface-atoms interface-causes; do "
+        "cp paper/tex/figures/data/science/interface-230K/$name.csv "
+        "paper/tex/figures/data/science/$name.csv; "
+        "done"
 
 
 rule science_nucleation:
@@ -540,19 +592,24 @@ rule science_figures:
         "paper/tex/figures/data/science/interface-layers.csv",
         "paper/tex/figures/data/science/interface-fronts.csv",
         "paper/tex/figures/data/science/interface-velocity.csv",
-        "paper/tex/figures/data/science/interface-atoms.csv",
+        "paper/tex/figures/data/science/interface-speed.csv",
         "paper/tex/figures/data/science/nucleation-clusters.csv",
         "paper/tex/figures/data/science/nucleation-summary.csv",
-        "paper/tex/figures/data/science/nucleus-atoms.csv",
         "paper/tex/figures/data/science/validation.csv",
     output:
-        "paper/tex/figures/science-pdf/interface-snapshot.pdf",
-        "paper/tex/figures/science-pdf/interface-profiles.pdf",
-        "paper/tex/figures/science-pdf/cluster-size.pdf",
-        "paper/tex/figures/science-pdf/nucleus.pdf",
+        "paper/tex/figures/data/science/figure-manifest.txt",
     shell:
-        "${{SCIENCE_PYTHON:-python3}} scripts/science_figures.py "
-        "--out paper/tex/figures/science-pdf"
+        "fig=${{SCIENCE_FIGDIR:-paper/tex/figures/science-pdf}}; "
+        "mkdir -p \"$fig\"; "
+        "${{SCIENCE_PYTHON:-python3}} scripts/science_figures.py --out \"$fig\"; "
+        "QT_QPA_PLATFORM=ovitoheadless LIBGL_ALWAYS_SOFTWARE=1 "
+        "OVITO_THREAD_COUNT=${{SCIENCE_THREADS:-2}} "
+        "${{SCIENCE_PYTHON:-python3}} scripts/science_render.py --out \"$fig\" "
+        "--pixels 2400 --tag 230K "
+        "--interface-dump data/science-frames/tip4p-basal-230K.lammpstrj "
+        "--nucleus-dump data/science-frames/nucleation.lammpstrj "
+        "--nucleus-min-frame 2 --nucleus-late-frame -1; "
+        "find \"$fig\" -maxdepth 1 -type f -printf '%f\\n' | sort > {output}"
 
 
 rule shipped_campaign:
