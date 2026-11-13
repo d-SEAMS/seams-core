@@ -7,6 +7,14 @@
 # Extra arguments are passed to `meson setup`. The build directory is
 # build-san next to this repository. ThreadSanitizer is a separate
 # configure: -Db_sanitize=thread.
+#
+# R and Julia are not part of this run. Preloading the sanitizer runtime
+# makes R abort inside its own startup (readRDS of the base package), and
+# Julia's JIT frees a pointer it did not obtain from the sanitizer
+# allocator before any seams call. bindings/meson.build therefore does
+# not register those fronts when b_sanitize contains address. The Python
+# ctypes front does run, because the interpreter can host the runtime
+# when it is loaded first.
 set -eu
 root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 build=$root/build-san
