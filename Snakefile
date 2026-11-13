@@ -342,6 +342,7 @@ rule hop_stride_generate:
         "data/hop/stride-10.lammpstrj",
         "data/hop/stride-100.lammpstrj",
         "data/hop/stride-1000.lammpstrj",
+        "data/hop/nucleation.lammpstrj",
         "data/hop/manifest.txt",
     shell:
         "python3 input/hop/regenerate.py --frame 104 "
@@ -477,7 +478,9 @@ rule classify_carry:
 
 # Paper cells that were unmeasured. One rule per producer. The stride
 # dumps come from hop_stride_generate and stay out of git. Run
-# `snakemake -j1 paper_cells`.
+# `snakemake -j1 paper_cells`. The hop rule times carried cages against
+# a full rebuild at 1 and 8 threads in one sitting and writes
+# cage_speedup on each row of tab-hop-stride.csv.
 rule paper_hop_stride:
     input:
         "scripts/paper_hop_stride.py",
@@ -486,6 +489,7 @@ rule paper_hop_stride:
         "data/hop/stride-10.lammpstrj",
         "data/hop/stride-100.lammpstrj",
         "data/hop/stride-1000.lammpstrj",
+        "data/hop/nucleation.lammpstrj",
     output:
         "benchmarks/paper-cells/tab-hop-stride.csv",
         "benchmarks/paper-cells/raw-hop-stride.txt",
@@ -584,6 +588,8 @@ rule paper_cages:
 rule paper_cells:
     input:
         "scripts/paper_cells_join.py",
+        # tab-hop-stride.csv carries cage_speedup from the 1-thread and
+        # 8-thread sitting (paper_hop_stride).
         "benchmarks/paper-cells/tab-hop-stride.csv",
         "benchmarks/paper-cells/tab-sym-eq.csv",
         "benchmarks/paper-cells/tab-ql-eq.csv",
