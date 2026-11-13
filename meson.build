@@ -1496,6 +1496,23 @@ test(
   depends: [capi_cpp_ref, seams_api_lib],
   timeout: 3600,
   is_parallel: false)
+_cross_env = environment()
+_cross_env.prepend('LD_LIBRARY_PATH', meson.current_build_dir() / 'src')
+_cross_env.set('SEAMS_LIB', seams_api_lib.full_path())
+_cross_env.set('OMP_NUM_THREADS', '1')
+_cross_env.set('RAYON_NUM_THREADS', '1')
+_cross_env.set('OVITO_THREAD_COUNT', '1')
+test(
+  'capi_crosscheck',
+  find_program('python3', required: true),
+  args: [
+    meson.project_source_root() / 'tests' / 'capi_ovito_freud.py',
+    '--root', meson.project_source_root(),
+  ],
+  env: _cross_env,
+  depends: [seams_api_lib],
+  timeout: 900,
+  is_parallel: false)
 if get_option('capi_valgrind')
   test(
     'capi_valgrind',

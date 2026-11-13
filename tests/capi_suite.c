@@ -912,8 +912,11 @@ static void one(const char *src, const char *cpp, const char *py, const char *wo
   const char *only = strcmp(name, "brine") == 0 ? "brine_" : NULL;
   snprintf(cmd, sizeof cmd, "\"%s\" \"%s\" %s", cpp, path, name);
   compare_cmd(cmd, "c++", frame->n, 1e-6, only);
-  snprintf(cmd, sizeof cmd, "python3 \"%s\" \"%s\"", py, path);
-  compare_cmd(cmd, "ovito", frame->n, 1e-4, only);
+  /* Neighbour lists, Steinhardt parameters, CHILL+, template labels,
+   * the RDF, and coordination are compared with freud and OVITO by
+   * tests/capi_ovito_freud.py. That program calls this library through
+   * ctypes. A missing import used to print nothing and exit 0. */
+  (void)py;
   (void)src;
 }
 
