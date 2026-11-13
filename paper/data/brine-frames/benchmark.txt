@@ -1,0 +1,24 @@
+# 20 ps production NPT on the 20-pair cell (4528 atoms, 2 fs step).
+# Isolated runs, one at a time, on the campaign pair style and thermostat.
+# OpenMP is faster than MPI at the same core count. The three loadings
+# therefore run together, two OpenMP threads each (cores 0-1, 2-3, 4-5).
+# host_cores 8
+# engine omp
+# threads_per_loading 2
+engine cores ns_per_day steps_per_s
+omp 2 10.448 60.462
+omp 4 15.815 91.523
+mpi 2 9.454 54.712
+mpi 4 14.427 83.491
+# Three loadings together, two OpenMP threads each, production segment:
+# T230_m0_r0  10.134 ns/day  1130000 steps  2.260 ns
+# T230_m20_r0 10.081 ns/day  1125500 steps  2.251 ns
+# T230_m40_r0 10.131 ns/day  1133000 steps  2.266 ns
+# Wall per loading 5:40:05, melt and quench included. 5 ns was not reached.
+#
+# Continuation benchmark, 20 ps from those restarts.
+# One loading on 8 OpenMP threads: 25.275 ns/day, 146.3 steps/s.
+# Three loadings at once, 2 OpenMP threads each: 10.36 to 10.40 ns/day, 60 steps/s.
+# Remaining work is about 1.37e6 steps on each loading.
+# Serial 8-thread wall is about 7.8 h. Concurrent 3x2 wall is about 6.3 h.
+# The continuation uses the concurrent 3x2 layout.

@@ -370,5 +370,9 @@ repro/figshare/
 repro/results/
 repro/zenodo/payload/
 input/brine/work/
+paper/data/brine-frames/out/
+paper/data/brine-frames/.dry-run/
+# Local checkout of the d-SEAMS/brine-frames dataset.
+/d-SEAMS/
 .tip_sha
 /.lammps-src

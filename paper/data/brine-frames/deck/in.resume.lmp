@@ -1,0 +1,41 @@
+# Continue a campaign front run from a restart written by in.brine.lmp.
+# Pair style, timestep and the production thermostat match that deck.
+# The restart already holds positions, velocities and the step count.
+# Variables: restart, T, P, steps, dumpevery, dump
+units           real
+atom_style      full
+boundary        p p p
+read_restart    ${restart}
+
+pair_style      lj/cut/tip4p/long 1 2 1 1 0.1546 8.5
+pair_modify     tail no
+kspace_style    pppm/tip4p 1.0e-5
+pair_coeff      1 1 0.18520 3.1589
+pair_coeff      2 2 0.0 0.0
+pair_coeff      3 3 0.35190 2.2173668
+pair_coeff      4 4 0.018385 4.6990563
+pair_coeff      1 3 0.18963 2.6083754
+pair_coeff      1 4 0.014814 4.2386698
+pair_coeff      3 4 0.34391 3.0051231
+pair_coeff      2 3 0.0 0.0
+pair_coeff      2 4 0.0 0.0
+pair_coeff      1 2 0.0 0.0
+bond_style      harmonic
+bond_coeff      1 0.0 0.9572
+angle_style     harmonic
+angle_coeff     1 0.0 104.52
+neighbor        2.0 bin
+neigh_modify    every 1 delay 0 check yes
+timestep        2.0
+
+group           water type 1 2
+fix             shake water shake 1.0e-5 100 0 b 1 a 1
+fix             npt all npt temp ${T} ${T} 200.0 z ${P} ${P} 2000.0
+thermo          1000
+thermo_style    custom step temp press vol pe
+thermo_modify   flush yes
+dump            d all custom ${dumpevery} ${dump} id type x y z
+dump_modify     d flush yes append yes
+restart         125000 restart.a restart.b
+run             ${steps}
+write_restart   end.restart
