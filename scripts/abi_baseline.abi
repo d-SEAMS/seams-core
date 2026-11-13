@@ -1,0 +1,723 @@
+<abi-corpus version='3.0' architecture='elf-amd-x86_64' soname='libseams.so' tracking-non-reachable-types='yes'>
+  <elf-needed>
+    <dependency name='libyodaLib.so'/>
+    <dependency name='libreadcon_core.so'/>
+    <dependency name='libstdc++.so.6'/>
+    <dependency name='libm.so.6'/>
+    <dependency name='libgomp.so.1'/>
+    <dependency name='libgcc_s.so.1'/>
+    <dependency name='libc.so.6'/>
+    <dependency name='ld-linux-x86-64.so.2'/>
+  </elf-needed>
+  <elf-function-symbols>
+    <elf-symbol name='seams_abi' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_brine_analyse' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_brine_destroy' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_brine_fronts' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_brine_pockets' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_brine_profile' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_brine_rejection' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_cages' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_cages_counts' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_cages_destroy' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_cages_find' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_cages_labels' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_cages_signature' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_chill' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_chill_plus' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_chill_plus_n' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_contact_pairs' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_coordination' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_density_axis' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_domains' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_fingerprint' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_fingerprint_atom' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_fingerprint_destroy' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_fingerprint_key' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_fingerprint_rings' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_get_num_threads' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_handle_error' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_hbonds' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_label_name' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_last_error' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_last_error_message' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_monolayer' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_neighbours_build' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_neighbours_copy' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_neighbours_count' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_neighbours_csr' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_neighbours_destroy' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_neighbours_knn' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_neighbours_nrows' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_path_nframes' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_prisms' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_q4q6' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_q4q6_n' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_q6bar' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_ql' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_rdf' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_ring_symmetry_name' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_rings_count' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_rings_destroy' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_rings_find' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_rings_fraction' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_rings_histogram' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_rings_histogram_n' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_rings_labels' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_rings_labels_n' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_rings_nrings' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_rings_vertices' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_running_cn' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_set_num_threads' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_signature_cages' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_site_table' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_status_string' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_steinhardt' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_system_count' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_system_create' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_system_destroy' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_system_natoms' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_system_read' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_system_set_atoms' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_system_set_frame' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_system_set_ortho' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_system_symmetry' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_version' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_version_major' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_version_minor' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_version_patch' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+    <elf-symbol name='seams_version_string' type='func-type' binding='global-binding' visibility='default-visibility' is-defined='yes'/>
+  </elf-function-symbols>
+  <abi-types>
+    <type-decl name='char' size-in-bits='8' hash='65b2d157027b431a' id='type-id-1'/>
+    <pointer-type-def type-id='type-id-1' size-in-bits='64' hash='cdcd419d6a95ce45' id='type-id-2'/>
+    <qualified-type-def type-id='type-id-1' const='yes' hash='45ae2830e476ce98' id='type-id-3'/>
+    <pointer-type-def type-id='type-id-3' size-in-bits='64' hash='83a5509e2ae27d75' id='type-id-4'/>
+    <qualified-type-def type-id='type-id-5' const='yes' hash='5b554ef661d318c6' id='type-id-6'/>
+    <pointer-type-def type-id='type-id-6' size-in-bits='64' hash='fdb7ed2f1a74590d' id='type-id-7'/>
+    <qualified-type-def type-id='type-id-8' const='yes' hash='429c6f27cc2685d8' id='type-id-9'/>
+    <pointer-type-def type-id='type-id-9' size-in-bits='64' hash='5e782202144ebe2a' id='type-id-10'/>
+    <pointer-type-def type-id='type-id-10' size-in-bits='64' hash='4e13d100ab55a3c0' id='type-id-11'/>
+    <qualified-type-def type-id='type-id-12' const='yes' hash='bb55f16ccb5947d8' id='type-id-13'/>
+    <pointer-type-def type-id='type-id-13' size-in-bits='64' hash='dab7cdbe66c659c0' id='type-id-14'/>
+    <qualified-type-def type-id='type-id-15' const='yes' hash='3ef443752f10484e' id='type-id-16'/>
+    <pointer-type-def type-id='type-id-16' size-in-bits='64' hash='e18d58f37151a271' id='type-id-17'/>
+    <qualified-type-def type-id='type-id-18' const='yes' hash='fae695337562782c' id='type-id-19'/>
+    <pointer-type-def type-id='type-id-19' size-in-bits='64' hash='92256acdb7b574ef' id='type-id-20'/>
+    <qualified-type-def type-id='type-id-21' const='yes' hash='2dbca020d3cca4b7' id='type-id-22'/>
+    <pointer-type-def type-id='type-id-22' size-in-bits='64' hash='8789d868d310feff' id='type-id-23'/>
+    <qualified-type-def type-id='type-id-24' const='yes' hash='c6c804fcf48d154c' id='type-id-25'/>
+    <pointer-type-def type-id='type-id-25' size-in-bits='64' hash='c50bee3645987abb' id='type-id-26'/>
+    <qualified-type-def type-id='type-id-27' const='yes' hash='a0d7cf4bd1428584' id='type-id-28'/>
+    <pointer-type-def type-id='type-id-28' size-in-bits='64' hash='58f2cfef56c64726' id='type-id-29'/>
+    <type-decl name='double' size-in-bits='64' hash='e9e9b320886d9aa6' id='type-id-5'/>
+    <pointer-type-def type-id='type-id-5' size-in-bits='64' hash='8924c1b16b829305' id='type-id-30'/>
+    <enum-decl name='seams_status' size-in-bits='32' alignment-in-bits='32' hash='5f4822272da7506a' id='type-id-31'>
+      <underlying-type type-id='type-id-32'/>
+      <enumerator name='SEAMS_OK' value='0'/>
+      <enumerator name='SEAMS_ERR_NULL' value='1'/>
+      <enumerator name='SEAMS_ERR_RANGE' value='2'/>
+      <enumerator name='SEAMS_ERR_BOX' value='3'/>
+      <enumerator name='SEAMS_ERR_ARG' value='4'/>
+      <enumerator name='SEAMS_ERR_STATE' value='5'/>
+      <enumerator name='SEAMS_ERR_NOMEM' value='6'/>
+      <enumerator name='SEAMS_ERR_INTERNAL' value='7'/>
+    </enum-decl>
+    <function-type size-in-bits='64' hash='1d2a0e161d00b727' id='type-id-33'>
+      <parameter type-id='type-id-8'/>
+      <return type-id='type-id-4'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='da4645530233f061' id='type-id-34'>
+      <parameter type-id='type-id-35'/>
+      <return type-id='type-id-4'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='2c8e1a2425f8663b' id='type-id-36'>
+      <return type-id='type-id-4'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='41fc8c68ff8f81d7' id='type-id-37'>
+      <parameter type-id='type-id-38'/>
+      <return type-id='type-id-4'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='d1ac6e44625a841b' id='type-id-39'>
+      <parameter type-id='type-id-20'/>
+      <return type-id='type-id-8'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='58e977d62f9de2c6' id='type-id-40'>
+      <parameter type-id='type-id-23'/>
+      <return type-id='type-id-8'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='af2f93fc41dbc679' id='type-id-41'>
+      <parameter type-id='type-id-26'/>
+      <return type-id='type-id-8'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='674662ad261e59a7' id='type-id-42'>
+      <return type-id='type-id-8'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='fce3eb7c8ece4201' id='type-id-43'>
+      <parameter type-id='type-id-4'/>
+      <parameter type-id='type-id-44'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='a64f33aa60311cab' id='type-id-45'>
+      <parameter type-id='type-id-14'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-46'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='53144676705a66e5' id='type-id-47'>
+      <parameter type-id='type-id-14'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-48'/>
+      <parameter type-id='type-id-44'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='e752fef242a1e2a0' id='type-id-49'>
+      <parameter type-id='type-id-14'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-46'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='bacc05ba4758963c' id='type-id-50'>
+      <parameter type-id='type-id-17'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-46'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='c752ff4a80f15ae6' id='type-id-51'>
+      <parameter type-id='type-id-17'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-48'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='1600c62e2fa65ae9' id='type-id-52'>
+      <parameter type-id='type-id-20'/>
+      <parameter type-id='type-id-11'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-11'/>
+      <parameter type-id='type-id-46'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='4c856eda7d637fd1' id='type-id-53'>
+      <parameter type-id='type-id-20'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-48'/>
+      <parameter type-id='type-id-44'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-48'/>
+      <parameter type-id='type-id-44'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='a473d2bcf251af02' id='type-id-54'>
+      <parameter type-id='type-id-20'/>
+      <parameter type-id='type-id-44'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='42f832f95d5bae1b' id='type-id-55'>
+      <parameter type-id='type-id-23'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-8'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='9b2dac3b55209d84' id='type-id-56'>
+      <parameter type-id='type-id-23'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-46'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='ed98745880e2ebcd' id='type-id-57'>
+      <parameter type-id='type-id-23'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-48'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='aae11b2e1792d637' id='type-id-58'>
+      <parameter type-id='type-id-23'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-48'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-48'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='ed45fe6e5d48b940' id='type-id-59'>
+      <parameter type-id='type-id-23'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-30'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='6a1683bcedc4846f' id='type-id-60'>
+      <parameter type-id='type-id-23'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-48'/>
+      <parameter type-id='type-id-44'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='2d14fc684550a5a2' id='type-id-61'>
+      <parameter type-id='type-id-23'/>
+      <parameter type-id='type-id-44'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='7eb40ee9017cafe0' id='type-id-62'>
+      <parameter type-id='type-id-26'/>
+      <parameter type-id='type-id-44'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='f17c5411358a99ce' id='type-id-63'>
+      <parameter type-id='type-id-29'/>
+      <parameter type-id='type-id-2'/>
+      <parameter type-id='type-id-48'/>
+      <parameter type-id='type-id-44'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='02fa205815c810a6' id='type-id-64'>
+      <parameter type-id='type-id-29'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-48'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='0128b4b878a8d604' id='type-id-65'>
+      <parameter type-id='type-id-29'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-2'/>
+      <parameter type-id='type-id-48'/>
+      <parameter type-id='type-id-44'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='6e5bde0e5bd285da' id='type-id-66'>
+      <parameter type-id='type-id-8'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='180dca2b775b2763' id='type-id-67'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-4'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-48'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='472c64f7f1071f58' id='type-id-69'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-4'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='25e295ae309671c6' id='type-id-70'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-4'/>
+      <parameter type-id='type-id-44'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-46'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='f6dd17f7b8e8300d' id='type-id-71'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-7'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-7'/>
+      <parameter type-id='type-id-10'/>
+      <parameter type-id='type-id-10'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='3714f9d2f28bdf17' id='type-id-72'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-7'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-10'/>
+      <parameter type-id='type-id-10'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='d32afc0d89ea94fa' id='type-id-73'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-7'/>
+      <parameter type-id='type-id-48'/>
+      <parameter type-id='type-id-7'/>
+      <parameter type-id='type-id-48'/>
+      <parameter type-id='type-id-10'/>
+      <parameter type-id='type-id-10'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='2201a731b3a53f5f' id='type-id-74'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-10'/>
+      <parameter type-id='type-id-48'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-75'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='0662159d92a7fe84' id='type-id-76'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-4'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-30'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='4f3e6693e40ff2d9' id='type-id-77'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-48'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='de48e789dc4b4d9e' id='type-id-78'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-30'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='269c1cc7fa31b9e8' id='type-id-79'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-48'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-48'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='21a37b197a52e26e' id='type-id-80'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-48'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-46'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='8a7bd454649b34c6' id='type-id-81'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-48'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='c1f59b42623e86f7' id='type-id-82'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-4'/>
+      <parameter type-id='type-id-44'/>
+      <parameter type-id='type-id-44'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='2b1e02cf0514ee0f' id='type-id-83'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-48'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-48'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='290fd514d99b2386' id='type-id-84'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-46'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='a2391f5cc8cd01f1' id='type-id-85'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-48'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='9b02643a02df5592' id='type-id-86'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-30'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='490c849d36707db3' id='type-id-87'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-48'/>
+      <parameter type-id='type-id-44'/>
+      <parameter type-id='type-id-30'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='a08145ea5bd970cd' id='type-id-88'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-48'/>
+      <parameter type-id='type-id-44'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='bc77071558a40bdf' id='type-id-89'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-48'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-48'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='c92e9b97d6dd9ab3' id='type-id-90'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-46'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='08f87530f478ae85' id='type-id-91'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-46'/>
+      <parameter type-id='type-id-48'/>
+      <parameter type-id='type-id-46'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='8c96b5df6982e542' id='type-id-92'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-93'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='b6ce41faf595a86c' id='type-id-94'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-95'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='f50da6d6a699fbe5' id='type-id-96'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-97'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='a8c0481ecf434c73' id='type-id-98'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-99'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='51d9410701941a89' id='type-id-100'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-5'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-99'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='65c465b7efa318e9' id='type-id-101'>
+      <parameter type-id='type-id-68'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-8'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-30'/>
+      <parameter type-id='type-id-48'/>
+      <parameter type-id='type-id-44'/>
+      <return type-id='type-id-35'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='2b867fcd24d92180' id='type-id-102'>
+      <return type-id='type-id-68'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='45397df9da64896c' id='type-id-103'>
+      <parameter type-id='type-id-104'/>
+      <return type-id='type-id-105'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='b547d4ed99172b07' id='type-id-106'>
+      <parameter type-id='type-id-107'/>
+      <return type-id='type-id-105'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='90cad2d68b6dd9a5' id='type-id-108'>
+      <parameter type-id='type-id-109'/>
+      <return type-id='type-id-105'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='7b9f61a58b047ecc' id='type-id-110'>
+      <parameter type-id='type-id-111'/>
+      <return type-id='type-id-105'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='45b0df318e977ae6' id='type-id-112'>
+      <parameter type-id='type-id-68'/>
+      <return type-id='type-id-105'/>
+    </function-type>
+    <function-type size-in-bits='64' hash='52fb7c6de974bec7' id='type-id-113'>
+      <parameter type-id='type-id-114'/>
+      <return type-id='type-id-105'/>
+    </function-type>
+    <type-decl name='int' size-in-bits='32' hash='09d17c08f594edc7' id='type-id-8'/>
+    <pointer-type-def type-id='type-id-8' size-in-bits='64' hash='d546a866961a5bb9' id='type-id-46'/>
+    <pointer-type-def type-id='type-id-12' size-in-bits='64' hash='d5efd24c5a54d168' id='type-id-104'/>
+    <pointer-type-def type-id='type-id-104' size-in-bits='64' hash='5994a66c917b8e77' id='type-id-75'/>
+    <pointer-type-def type-id='type-id-15' size-in-bits='64' hash='1d702fe2fd9540fd' id='type-id-107'/>
+    <pointer-type-def type-id='type-id-107' size-in-bits='64' hash='c6e0d00e68a66c2c' id='type-id-95'/>
+    <pointer-type-def type-id='type-id-18' size-in-bits='64' hash='95fb8bd5b6a77059' id='type-id-109'/>
+    <pointer-type-def type-id='type-id-109' size-in-bits='64' hash='c135b4d98d9500c1' id='type-id-99'/>
+    <pointer-type-def type-id='type-id-21' size-in-bits='64' hash='c564046aadb9a356' id='type-id-111'/>
+    <pointer-type-def type-id='type-id-111' size-in-bits='64' hash='9dbdbbcd9567db15' id='type-id-97'/>
+    <pointer-type-def type-id='type-id-24' size-in-bits='64' hash='9a2b2c0abf06cdfc' id='type-id-68'/>
+    <pointer-type-def type-id='type-id-27' size-in-bits='64' hash='fc0832ccda4a1bc7' id='type-id-114'/>
+    <pointer-type-def type-id='type-id-114' size-in-bits='64' hash='8082c4781c58208c' id='type-id-93'/>
+    <pointer-type-def type-id='type-id-48' size-in-bits='64' hash='fce61c10660e5f2d' id='type-id-44'/>
+    <class-decl name='seams_brine' is-struct='yes' visibility='default' is-declaration-only='yes' hash='af93e9c32960a798' id='type-id-115'/>
+    <class-decl name='seams_cage_set' is-struct='yes' visibility='default' is-declaration-only='yes' hash='ed53a34b389a338d' id='type-id-116'/>
+    <class-decl name='seams_neighbours' is-struct='yes' visibility='default' is-declaration-only='yes' hash='64bb7268d701fe22' id='type-id-117'/>
+    <class-decl name='seams_rings' is-struct='yes' visibility='default' is-declaration-only='yes' hash='b1bdb7c0ce7d75ff' id='type-id-118'/>
+    <class-decl name='seams_system' is-struct='yes' visibility='default' is-declaration-only='yes' hash='3d3efb8e9b364ddb' id='type-id-119'/>
+    <class-decl name='seams_topo' is-struct='yes' visibility='default' is-declaration-only='yes' hash='3a5f32ae3bc96d6d' id='type-id-120'/>
+    <typedef-decl name='seams_brine' type-id='type-id-115' hash='af93e9c32960a798' id='type-id-12'/>
+    <typedef-decl name='seams_cage_set' type-id='type-id-116' hash='ed53a34b389a338d' id='type-id-15'/>
+    <typedef-decl name='seams_neighbours' type-id='type-id-117' hash='64bb7268d701fe22' id='type-id-18'/>
+    <typedef-decl name='seams_rings' type-id='type-id-118' hash='b1bdb7c0ce7d75ff' id='type-id-21'/>
+    <typedef-decl name='seams_status' type-id='type-id-31' size-in-bits='32' alignment-in-bits='32' hash='4f49a8532001b998' id='type-id-35'/>
+    <typedef-decl name='seams_system' type-id='type-id-119' hash='3d3efb8e9b364ddb' id='type-id-24'/>
+    <typedef-decl name='seams_topo' type-id='type-id-120' hash='3a5f32ae3bc96d6d' id='type-id-27'/>
+    <typedef-decl name='size_t' type-id='type-id-121' size-in-bits='64' hash='8b230c0ebd12548b' id='type-id-48'/>
+    <type-decl name='unnamed-enum-underlying-type-32' size-in-bits='32' alignment-in-bits='32' is-anonymous='yes' hash='c6ed5e1365fd2b09' id='type-id-32'/>
+    <type-decl name='unsigned long int' size-in-bits='64' hash='da551c1631705dfe' id='type-id-121'/>
+    <type-decl name='void' hash='8dcbc64750c3d4e3' id='type-id-105'/>
+    <pointer-type-def type-id='type-id-105' hash='19e246ce75ee6a42' id='type-id-38'/>
+  </abi-types>
+  <abi-instr address-size='64' path='src/seams_api.cpp' language='LANG_C_plus_plus_14'>
+      <function-decl name='seams_handle_error' type-id='type-id-37' mangled-name='seams_handle_error' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_handle_error'/>
+      <function-decl name='seams_label_name' type-id='type-id-33' mangled-name='seams_label_name' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_label_name'/>
+      <function-decl name='seams_last_error' type-id='type-id-36' mangled-name='seams_last_error' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_last_error'/>
+      <function-decl name='seams_ring_symmetry_name' type-id='type-id-33' mangled-name='seams_ring_symmetry_name' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_ring_symmetry_name'/>
+      <function-decl name='seams_status_string' type-id='type-id-34' mangled-name='seams_status_string' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_status_string'/>
+      <function-decl name='seams_version_string' type-id='type-id-36' mangled-name='seams_version_string' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_version_string'/>
+      <function-decl name='seams_abi' type-id='type-id-42' mangled-name='seams_abi' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_abi'/>
+      <function-decl name='seams_get_num_threads' type-id='type-id-42' mangled-name='seams_get_num_threads' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_get_num_threads'/>
+      <function-decl name='seams_neighbours_count' type-id='type-id-39' mangled-name='seams_neighbours_count' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_neighbours_count'/>
+      <function-decl name='seams_rings_count' type-id='type-id-40' mangled-name='seams_rings_count' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_rings_count'/>
+      <function-decl name='seams_system_count' type-id='type-id-41' mangled-name='seams_system_count' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_system_count'/>
+      <function-decl name='seams_version' type-id='type-id-42' mangled-name='seams_version' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_version'/>
+      <function-decl name='seams_version_major' type-id='type-id-42' mangled-name='seams_version_major' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_version_major'/>
+      <function-decl name='seams_version_minor' type-id='type-id-42' mangled-name='seams_version_minor' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_version_minor'/>
+      <function-decl name='seams_version_patch' type-id='type-id-42' mangled-name='seams_version_patch' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_version_patch'/>
+      <function-decl name='seams_brine_analyse' type-id='type-id-74' mangled-name='seams_brine_analyse' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_brine_analyse'/>
+      <function-decl name='seams_brine_fronts' type-id='type-id-45' mangled-name='seams_brine_fronts' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_brine_fronts'/>
+      <function-decl name='seams_brine_pockets' type-id='type-id-49' mangled-name='seams_brine_pockets' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_brine_pockets'/>
+      <function-decl name='seams_brine_profile' type-id='type-id-47' mangled-name='seams_brine_profile' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_brine_profile'/>
+      <function-decl name='seams_brine_rejection' type-id='type-id-45' mangled-name='seams_brine_rejection' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_brine_rejection'/>
+      <function-decl name='seams_cages' type-id='type-id-94' mangled-name='seams_cages' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_cages'/>
+      <function-decl name='seams_cages_counts' type-id='type-id-50' mangled-name='seams_cages_counts' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_cages_counts'/>
+      <function-decl name='seams_cages_find' type-id='type-id-94' mangled-name='seams_cages_find' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_cages_find'/>
+      <function-decl name='seams_cages_labels' type-id='type-id-51' mangled-name='seams_cages_labels' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_cages_labels'/>
+      <function-decl name='seams_cages_signature' type-id='type-id-82' mangled-name='seams_cages_signature' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_cages_signature'/>
+      <function-decl name='seams_chill' type-id='type-id-91' mangled-name='seams_chill' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_chill'/>
+      <function-decl name='seams_chill_plus' type-id='type-id-90' mangled-name='seams_chill_plus' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_chill_plus'/>
+      <function-decl name='seams_chill_plus_n' type-id='type-id-91' mangled-name='seams_chill_plus_n' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_chill_plus_n'/>
+      <function-decl name='seams_contact_pairs' type-id='type-id-70' mangled-name='seams_contact_pairs' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_contact_pairs'/>
+      <function-decl name='seams_coordination' type-id='type-id-86' mangled-name='seams_coordination' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_coordination'/>
+      <function-decl name='seams_density_axis' type-id='type-id-101' mangled-name='seams_density_axis' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_density_axis'/>
+      <function-decl name='seams_domains' type-id='type-id-76' mangled-name='seams_domains' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_domains'/>
+      <function-decl name='seams_fingerprint' type-id='type-id-92' mangled-name='seams_fingerprint' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_fingerprint'/>
+      <function-decl name='seams_fingerprint_atom' type-id='type-id-65' mangled-name='seams_fingerprint_atom' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_fingerprint_atom'/>
+      <function-decl name='seams_fingerprint_key' type-id='type-id-63' mangled-name='seams_fingerprint_key' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_fingerprint_key'/>
+      <function-decl name='seams_fingerprint_rings' type-id='type-id-64' mangled-name='seams_fingerprint_rings' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_fingerprint_rings'/>
+      <function-decl name='seams_hbonds' type-id='type-id-84' mangled-name='seams_hbonds' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_hbonds'/>
+      <function-decl name='seams_monolayer' type-id='type-id-85' mangled-name='seams_monolayer' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_monolayer'/>
+      <function-decl name='seams_neighbours_build' type-id='type-id-98' mangled-name='seams_neighbours_build' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_neighbours_build'/>
+      <function-decl name='seams_neighbours_copy' type-id='type-id-53' mangled-name='seams_neighbours_copy' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_neighbours_copy'/>
+      <function-decl name='seams_neighbours_csr' type-id='type-id-52' mangled-name='seams_neighbours_csr' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_neighbours_csr'/>
+      <function-decl name='seams_neighbours_knn' type-id='type-id-100' mangled-name='seams_neighbours_knn' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_neighbours_knn'/>
+      <function-decl name='seams_neighbours_nrows' type-id='type-id-54' mangled-name='seams_neighbours_nrows' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_neighbours_nrows'/>
+      <function-decl name='seams_path_nframes' type-id='type-id-43' mangled-name='seams_path_nframes' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_path_nframes'/>
+      <function-decl name='seams_prisms' type-id='type-id-81' mangled-name='seams_prisms' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_prisms'/>
+      <function-decl name='seams_q4q6' type-id='type-id-78' mangled-name='seams_q4q6' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_q4q6'/>
+      <function-decl name='seams_q4q6_n' type-id='type-id-79' mangled-name='seams_q4q6_n' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_q4q6_n'/>
+      <function-decl name='seams_q6bar' type-id='type-id-80' mangled-name='seams_q6bar' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_q6bar'/>
+      <function-decl name='seams_ql' type-id='type-id-89' mangled-name='seams_ql' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_ql'/>
+      <function-decl name='seams_rdf' type-id='type-id-87' mangled-name='seams_rdf' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_rdf'/>
+      <function-decl name='seams_rings_find' type-id='type-id-96' mangled-name='seams_rings_find' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_rings_find'/>
+      <function-decl name='seams_rings_fraction' type-id='type-id-59' mangled-name='seams_rings_fraction' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_rings_fraction'/>
+      <function-decl name='seams_rings_histogram' type-id='type-id-55' mangled-name='seams_rings_histogram' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_rings_histogram'/>
+      <function-decl name='seams_rings_histogram_n' type-id='type-id-57' mangled-name='seams_rings_histogram_n' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_rings_histogram_n'/>
+      <function-decl name='seams_rings_labels' type-id='type-id-56' mangled-name='seams_rings_labels' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_rings_labels'/>
+      <function-decl name='seams_rings_labels_n' type-id='type-id-58' mangled-name='seams_rings_labels_n' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_rings_labels_n'/>
+      <function-decl name='seams_rings_nrings' type-id='type-id-61' mangled-name='seams_rings_nrings' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_rings_nrings'/>
+      <function-decl name='seams_rings_vertices' type-id='type-id-60' mangled-name='seams_rings_vertices' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_rings_vertices'/>
+      <function-decl name='seams_running_cn' type-id='type-id-88' mangled-name='seams_running_cn' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_running_cn'/>
+      <function-decl name='seams_set_num_threads' type-id='type-id-66' mangled-name='seams_set_num_threads' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_set_num_threads'/>
+      <function-decl name='seams_signature_cages' type-id='type-id-82' mangled-name='seams_signature_cages' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_signature_cages'/>
+      <function-decl name='seams_site_table' type-id='type-id-67' mangled-name='seams_site_table' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_site_table'/>
+      <function-decl name='seams_steinhardt' type-id='type-id-83' mangled-name='seams_steinhardt' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_steinhardt'/>
+      <function-decl name='seams_system_natoms' type-id='type-id-62' mangled-name='seams_system_natoms' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_system_natoms'/>
+      <function-decl name='seams_system_read' type-id='type-id-69' mangled-name='seams_system_read' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_system_read'/>
+      <function-decl name='seams_system_set_atoms' type-id='type-id-73' mangled-name='seams_system_set_atoms' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_system_set_atoms'/>
+      <function-decl name='seams_system_set_frame' type-id='type-id-71' mangled-name='seams_system_set_frame' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_system_set_frame'/>
+      <function-decl name='seams_system_set_ortho' type-id='type-id-72' mangled-name='seams_system_set_ortho' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_system_set_ortho'/>
+      <function-decl name='seams_system_symmetry' type-id='type-id-77' mangled-name='seams_system_symmetry' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_system_symmetry'/>
+      <function-decl name='seams_system_create' type-id='type-id-102' mangled-name='seams_system_create' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_system_create'/>
+      <function-decl name='seams_brine_destroy' type-id='type-id-103' mangled-name='seams_brine_destroy' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_brine_destroy'/>
+      <function-decl name='seams_cages_destroy' type-id='type-id-106' mangled-name='seams_cages_destroy' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_cages_destroy'/>
+      <function-decl name='seams_fingerprint_destroy' type-id='type-id-113' mangled-name='seams_fingerprint_destroy' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_fingerprint_destroy'/>
+      <function-decl name='seams_neighbours_destroy' type-id='type-id-108' mangled-name='seams_neighbours_destroy' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_neighbours_destroy'/>
+      <function-decl name='seams_rings_destroy' type-id='type-id-110' mangled-name='seams_rings_destroy' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_rings_destroy'/>
+      <function-decl name='seams_system_destroy' type-id='type-id-112' mangled-name='seams_system_destroy' visibility='default' binding='global' size-in-bits='64' elf-symbol-id='seams_system_destroy'/>
+  </abi-instr>
+</abi-corpus>

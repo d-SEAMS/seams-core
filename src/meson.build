@@ -179,16 +179,22 @@ if host_machine.system() not in ['darwin', 'windows'] and \
   _seams_api_link += ['-Wl,--version-script=' + (meson.current_source_dir() / 'libseams.map')]
   _seams_api_link_depends += _seams_map
 endif
+_seams_api_args = _args + ['-fvisibility=hidden', '-fvisibility-inlines-hidden',
+                           '-DSEAMS_BUILDING', '-I' + meson.current_build_dir()]
 seams_api_lib = shared_library(
   'seams',
   'seams_api.cpp',
   dependencies: yds_dep,
   include_directories: include_directories('../include'),
-  cpp_args: _args + ['-fvisibility=hidden', '-fvisibility-inlines-hidden',
-                     '-DSEAMS_BUILDING', '-I' + meson.current_build_dir()],
+  cpp_args: _seams_api_args,
   link_args: _seams_api_link,
   link_depends: _seams_api_link_depends,
   install: true)
+
+_abidiff = find_program('abidiff', required: false)
+if _abidiff.found()
+  subdir('abi')
+endif
 
 install_headers(files('../include/seams.h', '../include/seams.hpp'))
 

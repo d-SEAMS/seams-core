@@ -61,6 +61,11 @@ The library build defines `SEAMS_BUILDING`, which selects `dllexport` on Windows
 consumers get `dllimport`. Define `SEAMS_STATIC` before including `seams.h` to link
 a static archive. `tests/capi_symbols.txt` is the exported list, and the
 `capi_symbols` test compares it with the header and the built library.
+`capi_abi` compares the exported names with `scripts/abi_baseline.txt`. When
+libabigail's `abidiff` is on `PATH` at configure time, it also builds libseams once
+more with debug info and compares its types with the ABI 1 corpus in
+`scripts/abi_baseline.abi`: added functions pass, and anything else fails. Without
+`abidiff` that step is skipped.
 
 ## seams_last_error and seams_handle_error
 

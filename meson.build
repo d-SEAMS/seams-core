@@ -1733,6 +1733,13 @@ if _doxygen.found()
     timeout: 120)
 endif
 
+_abi_env = environment()
+_abi_depends = [seams_api_lib]
+if _abidiff.found()
+  _abi_env.set('SEAMS_ABIDIFF', _abidiff.full_path())
+  _abi_env.set('SEAMS_ABI_DEBUG_LIB', seams_abi_lib.full_path())
+  _abi_depends += seams_abi_lib
+endif
 test(
   'capi_abi',
   find_program('sh'),
@@ -1741,8 +1748,9 @@ test(
     meson.current_build_dir(),
     meson.project_source_root() / 'scripts' / 'abi_baseline.txt',
   ],
-  depends: [seams_api_lib],
-  timeout: 180)
+  env: _abi_env,
+  depends: _abi_depends,
+  timeout: 300)
 
 _fuzzer_rt = ''
 foreach _cand : [
