@@ -111,24 +111,25 @@ def main() -> int:
     render_env.setdefault("VK_DRIVER_FILES", "/usr/share/vulkan/icd.d/lvp_icd.json")
     render_env["VK_ICD_FILENAMES"] = render_env["VK_DRIVER_FILES"]
     render_env["LP_NUM_THREADS"] = "1"
-    for temp in TEMPS:
-        run(
-            [
-                py,
-                str(ROOT / "scripts" / "science_render.py"),
-                "--out",
-                str(figdir),
-                "--pixels",
-                "2400",
-                "--tag",
-                f"{temp}K",
-                "--interface-dump",
-                str(FRAMES / f"tip4p-basal-{temp}K.lammpstrj"),
-                "--interface-frames",
-                "-1",
-            ],
-            render_env,
-        )
+    run(
+        [
+            py,
+            str(ROOT / "scripts" / "science_render.py"),
+            "--out",
+            str(figdir),
+            "--interface-dump",
+            str(FRAMES / "tip4p-basal-230K.lammpstrj"),
+            "--interface-frame",
+            "-1",
+            "--nucleus-dump",
+            str(FRAMES / "nucleation.lammpstrj"),
+            "--nucleus-min-frame",
+            "2",
+            "--nucleus-late-frame",
+            "-1",
+        ],
+        render_env,
+    )
     run([py, str(ROOT / "scripts" / "science_figures.py"), "--out", str(figdir)], child)
     print("collected", flush=True)
     return 0
