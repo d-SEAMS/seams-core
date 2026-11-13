@@ -1,0 +1,18 @@
+cores 8 affinity 1
+pinned_threads 1
+samples 20
+note no remote branch holds bc-035d2d78 PTM/IRA work; the standalone PTM library is not installed, OVITO PTM is the reference
+check Ih4096 molecules 4096 agree 4096 of 4096 hex/hex=4096
+robust op Ih4096 symmetry threads 1 molecules 4096 dseams_median 2.4104 dseams_iqr 0.9609 dseams_min 2.2518 ovito_ptm_median 108.3331 ovito_ptm_iqr 3.1630 ovito_ptm_min 106.5466 WIN
+check Ih32768 molecules 32768 agree 32768 of 32768 hex/hex=32768
+robust op Ih32768 symmetry threads 1 molecules 32768 dseams_median 19.9947 dseams_iqr 1.4027 dseams_min 18.1767 ovito_ptm_median 852.6052 ovito_ptm_iqr 16.7496 ovito_ptm_min 840.1066 WIN
+check Ic4096 molecules 4096 agree 4096 of 4096 cubic/cubic=4096
+robust op Ic4096 symmetry threads 1 molecules 4096 dseams_median 2.6558 dseams_iqr 0.2833 dseams_min 2.4686 ovito_ptm_median 119.2836 ovito_ptm_iqr 2.4164 ovito_ptm_min 117.4380 WIN
+check Ic32768 molecules 32768 agree 32768 of 32768 cubic/cubic=32768
+robust op Ic32768 symmetry threads 1 molecules 32768 dseams_median 21.4780 dseams_iqr 1.5824 dseams_min 19.6966 ovito_ptm_median 953.7826 ovito_ptm_iqr 7.5504 ovito_ptm_min 932.8435 WIN
+check interface molecules 512 agree 492 of 512 cubic/other=9 hex/hex=128 hex/other=11 other/other=364
+robust op interface symmetry threads 1 molecules 512 dseams_median 0.7214 dseams_iqr 0.0384 dseams_min 0.7130 ovito_ptm_median 15.2149 ovito_ptm_iqr 0.1089 ovito_ptm_min 15.0579 WIN
+check stacking molecules 512 agree 512 of 512 cubic/cubic=128 hex/hex=256 other/other=128
+robust op stacking symmetry threads 1 molecules 512 dseams_median 0.5044 dseams_iqr 0.0311 dseams_min 0.4875 ovito_ptm_median 15.0136 ovito_ptm_iqr 0.2161 ovito_ptm_min 14.6502 WIN
+check melted molecules 512 agree 477 of 512 hex/hex=315 hex/other=32 other/hex=2 other/other=162 stack/other=1
+robust op melted symmetry threads 1 molecules 512 dseams_median 0.5900 dseams_iqr 0.0299 dseams_min 0.5717 ovito_ptm_median 15.0140 ovito_ptm_iqr 0.3028 ovito_ptm_min 14.6540 WIN

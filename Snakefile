@@ -846,6 +846,60 @@ rule h2h_scale:
         "mv {output}.1 {output}"
 
 
+rule h2h_plumed:
+    output:
+        "benchmarks/h2h-plumed.txt",
+    shell:
+        "PLUMED_KERNEL=/cvmfs/software.eessi.io/versions/2026.06/software/linux/x86_64/intel/sapphirerapids/software/PLUMED/2.10.0-foss-2026.1/lib/libplumedKernel.so "
+        "LD_LIBRARY_PATH=/cvmfs/software.eessi.io/versions/2026.06/software/linux/x86_64/intel/sapphirerapids/software/PLUMED/2.10.0-foss-2026.1/lib:/usr/lib/x86_64-linux-gnu:bbdir-release/src "
+        "taskset -c 0 env OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE python3 scripts/h2h_plumed.py 1 > {output}.1 && "
+        "taskset -c 0-7 env OMP_NUM_THREADS=8 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE python3 scripts/h2h_plumed.py 8 >> {output}.1 && "
+        "mv {output}.1 {output}"
+
+
+rule h2h_plumed_plugin:
+    output:
+        "benchmarks/h2h-plumed-plugin.txt",
+    shell:
+        "PLUMED_PREFIX=/cvmfs/software.eessi.io/versions/2026.06/software/linux/x86_64/intel/sapphirerapids/software/PLUMED/2.10.0-foss-2026.1 && "
+        "g++ -shared -fPIC -O2 -std=c++17 -Iengines -Iinclude -Ibbdir-release/src -I$$PLUMED_PREFIX/include "
+        "engines/plumed/SeamsColvar.cpp -Lbbdir-release/src -lseams -L$$PLUMED_PREFIX/lib -lplumedKernel "
+        "-Wl,-rpath,'$$ORIGIN/src' -Wl,-rpath,$$PLUMED_PREFIX/lib -o bbdir-release/libSeamsPlumed.so && "
+        "PLUMED_KERNEL=$$PLUMED_PREFIX/lib/libplumedKernel.so "
+        "LD_LIBRARY_PATH=bbdir-release/src:$$PLUMED_PREFIX/lib:/usr/lib/x86_64-linux-gnu "
+        "taskset -c 0 env OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE python3 scripts/h2h_plumed_plugin.py bbdir-release/libSeamsPlumed.so 1 > {output}.1 && "
+        "taskset -c 0-7 env OMP_NUM_THREADS=8 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE python3 scripts/h2h_plumed_plugin.py bbdir-release/libSeamsPlumed.so 8 >> {output}.1 && "
+        "mv {output}.1 {output}"
+
+
+rule h2h_ptm:
+    output:
+        "benchmarks/h2h-ptm.txt",
+    shell:
+        "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:bbdir-release/src "
+        "taskset -c 0 env OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE QT_QPA_PLATFORM=offscreen "
+        "python3 scripts/h2h_ptm.py 1 > {output}.1 && "
+        "taskset -c 0-7 env OMP_NUM_THREADS=8 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE QT_QPA_PLATFORM=offscreen "
+        "python3 scripts/h2h_ptm.py 8 >> {output}.1 && "
+        "mv {output}.1 {output}"
+
+
+rule h2h_cages:
+    output:
+        "benchmarks/h2h-cages.txt",
+    shell:
+        "LD_LIBRARY_PATH=bbdir-release/src "
+        "taskset -c 0 env OMP_NUM_THREADS=1 python3 scripts/h2h_cages.py 1 > {output}.1 && "
+        "taskset -c 0-7 env OMP_NUM_THREADS=8 python3 scripts/h2h_cages.py 8 >> {output}.1 && "
+        "mv {output}.1 {output}"
+
+
 rule h2h_rings:
     output:
         "benchmarks/h2h-rings.txt",

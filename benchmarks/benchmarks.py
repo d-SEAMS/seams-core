@@ -847,3 +847,133 @@ class H2HScale:
 
 H2HScale.time_scale.repeat = 1
 H2HScale.time_scale.number = 1
+
+
+class H2HPlumed:
+    """PLUMED 2.10 coordination and Q6 against d-SEAMS.
+
+    The Snakemake rule writes the pinned ABAB log. This entry checks the
+    64-molecule ice cell.
+    """
+
+    def setup(self):
+        import importlib.util
+
+        script = ROOT / "scripts" / "h2h_plumed.py"
+        lib_path = ROOT / "bbdir-release" / "src" / "libseams.so"
+        if not lib_path.is_file():
+            raise NotImplementedError("bbdir-release/src/libseams.so is not built")
+        os.environ.setdefault(
+            "PLUMED_KERNEL",
+            "/cvmfs/software.eessi.io/versions/2026.06/software/linux/x86_64/intel/"
+            "sapphirerapids/software/PLUMED/2.10.0-foss-2026.1/lib/libplumedKernel.so",
+        )
+        spec = importlib.util.spec_from_file_location("h2h_plumed", script)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self._module = module
+        try:
+            import plumed  # noqa: F401
+        except Exception as exc:
+            raise NotImplementedError("plumed is not importable") from exc
+
+    def time_check(self):
+        lib = self._module.load_seams(self._module.library_path())
+        pos, lengths = self._module.ice_positions(2)
+        sys = self._module.frame_system(lib, pos, lengths)
+        degree = self._module.degree(lib, sys)
+        q6 = self._module.local_q6(lib, sys, len(pos))
+        if degree.shape[0] != len(pos) or q6.shape[0] != len(pos):
+            raise RuntimeError("q6 shape")
+
+
+H2HPlumed.time_check.repeat = 1
+H2HPlumed.time_check.number = 1
+
+
+class H2HPlumedPlugin:
+    """In-tree SEAMS colvar against the C API on 64-molecule ice."""
+
+    def setup(self):
+        import importlib.util
+
+        so = ROOT / "bbdir-release" / "libSeamsPlumed.so"
+        if not so.is_file():
+            raise NotImplementedError("bbdir-release/libSeamsPlumed.so is not built")
+        script = ROOT / "scripts" / "h2h_plumed_plugin.py"
+        spec = importlib.util.spec_from_file_location("h2h_plumed_plugin", script)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        os.environ.setdefault("PLUMED_KERNEL", module.KERNEL)
+        self._module = module
+        self._so = so
+
+    def time_check(self):
+        lib = self._module.load_seams(self._module.library_path())
+        self._module.require(lib, lib.seams_set_num_threads(1), "threads")
+        pos, lengths = self._module.ice_positions(2)
+        ref = self._module.reference(lib, pos, lengths)
+        got = self._module.Plugin(self._so, len(pos), lengths).values(pos)
+        if abs(got["q6"] - ref["q6"]) > 1e-8 or abs(got["ring"] - ref["ring"]) > 1e-8:
+            raise RuntimeError(f"plugin q6 {got['q6']} api {ref['q6']}")
+
+
+H2HPlumedPlugin.time_check.repeat = 1
+H2HPlumedPlugin.time_check.number = 1
+
+
+class H2HPtm:
+    """OVITO PTM against d-SEAMS symmetry. The Snakemake rule writes the log."""
+
+    def setup(self):
+        import importlib.util
+
+        script = ROOT / "scripts" / "h2h_ptm.py"
+        if not (ROOT / "bbdir-release" / "src" / "libseams.so").is_file():
+            raise NotImplementedError("bbdir-release/src/libseams.so is not built")
+        spec = importlib.util.spec_from_file_location("h2h_ptm", script)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self._module = module
+        try:
+            import ovito  # noqa: F401
+        except Exception as exc:
+            raise NotImplementedError("ovito is not importable") from exc
+
+    def time_check(self):
+        # Importing the script is the check that the harness is present.
+        if not hasattr(self._module, "dseams_sym"):
+            raise RuntimeError("ptm harness")
+
+
+H2HPtm.time_check.repeat = 1
+H2HPtm.time_check.number = 1
+
+
+class H2HCages:
+    """cmdCages against SQQ. The Snakemake rule writes the log."""
+
+    def setup(self):
+        import importlib.util
+
+        script = ROOT / "scripts" / "h2h_cages.py"
+        if not (ROOT / "bbdir-release" / "seams").is_file():
+            raise NotImplementedError("bbdir-release/seams is not built")
+        spec = importlib.util.spec_from_file_location("h2h_cages", script)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self._module = module
+        try:
+            import sqq  # noqa: F401
+        except Exception as exc:
+            raise NotImplementedError("sqq is not importable") from exc
+
+    def time_check(self):
+        path = ROOT / "input" / "traj" / "genice_sI.lammpstrj"
+        found = self._module.seams_cages(path, 1)
+        if found.get("5:12") != 2:
+            raise RuntimeError(f"sI 5^12 count {found}")
+
+
+H2HCages.time_check.repeat = 1
+H2HCages.time_check.number = 1

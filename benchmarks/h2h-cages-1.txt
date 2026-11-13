@@ -1,0 +1,15 @@
+cores 8
+pinned_threads 1
+samples 20
+sqq 0.5.8
+note ClavisCage clavis_engine is not installable here; pip's clavis package is a different client
+check sI dseams {'5:12': 2, '5:12,6:2': 6, '5:12,6:4': 0, '5:12,6:8': 0, '4:3,5:6,6:3': 0} sqq {'512': 2, '51262': 6}
+check sII dseams {'5:12': 16, '5:12,6:2': 0, '5:12,6:4': 8, '5:12,6:8': 0, '4:3,5:6,6:3': 0} sqq {'512': 16, '51264': 8}
+check sH dseams {'5:12': 12, '5:12,6:2': 0, '5:12,6:4': 0, '5:12,6:8': 4, '4:3,5:6,6:3': 8}
+frame sI molecules 126224
+arm dseams frame sI threads 1 molecules 126224 median_ms 625.3245 iqr_ms 26.1986 min_ms 607.7317 census {'5:12': 5488, '5:12,6:2': 16464, '5:12,6:4': 0, '5:12,6:8': 0, '4:3,5:6,6:3': 0}
+frame sII molecules 122400
+arm dseams frame sII threads 1 molecules 122400 median_ms 740.8862 iqr_ms 8.7174 min_ms 726.5070 census {'5:12': 14400, '5:12,6:2': 0, '5:12,6:4': 7200, '5:12,6:8': 0, '4:3,5:6,6:3': 0}
+frame sH molecules 119952
+arm dseams frame sH threads 1 molecules 119952 median_ms 725.5687 iqr_ms 8.8152 min_ms 718.1581 census {'5:12': 10584, '5:12,6:2': 0, '5:12,6:4': 0, '5:12,6:8': 3528, '4:3,5:6,6:3': 7056}
+arm sqq frame sI-unit threads 1 molecules 46 median_ms 474909.5508 iqr_ms 3416.0639 min_ms 472564.2671 note four samples; the python cage walk does not scale to 120000
