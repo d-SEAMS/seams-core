@@ -28,6 +28,11 @@ in-tree mixed TIP4P dump two ways.
 How-tos solve a goal you already have. Reference names flags and
 headers. Explanation is why the two classifiers exist.
 
+Each paper tutorial keeps its fast test and adds a full run. The full
+run is a Snakemake rule, =snakemake -s docs/tutorials/Snakefile=, and
+=meson test --suite slow= checks that rule. The fast tests stay in
+the docs suite.
+
 The Python files under =docs/tutorials= are the runs. CI executes
 them. The pages here say what you are doing and what number you
 should see.

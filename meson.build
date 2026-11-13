@@ -878,6 +878,24 @@ if get_option('with_cli')
       suite: 'docs',
       timeout: 300)
   endforeach
+  # Full paper runs. Suite slow only, so `meson test --suite docs` stays fast.
+  foreach _paper : ['interface', 'cages', 'rings', 'brine', 'nucleation']
+    test(
+      'docs_paper_' + _paper + '_full',
+      python3,
+      args: [
+        meson.project_source_root() / 'docs' / 'tutorials' / 'test_paper_full.py',
+        _paper,
+        meson.project_source_root(),
+        seams_exe.full_path(),
+        meson.project_build_root() / 'src',
+        meson.project_build_root(),
+      ],
+      env: tutorial_env,
+      depends: [seams_exe],
+      suite: 'slow',
+      timeout: 900)
+  endforeach
   test(
     'docs_tutorial_nucleation',
     python3,

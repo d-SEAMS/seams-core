@@ -23,3 +23,28 @@ nucleation frame 2 q6bar 0.334254
 
 The mean rises at each stage. OVITO draws the last frame. The test
 exits 77 when GenIce, OpenMM, or OVITO is absent.
+
+* Full run
+
+The ice threshold on the mean Lechner-Dellago \(\bar q_6\) is 0.36.
+The fast run finishes at 0.334254, still on the liquid side of that
+cut, because the restored nucleus is only the basal half of 64
+waters. =snakemake -s docs/tutorials/Snakefile nucleation= uses a 4
+by 4 by 4 ice Ih cell, 1024 molecules. Frame 0 shakes every oxygen by
+up to 1.6 Å. Frame 1 puts 256 basal molecules back on the lattice.
+Frame 2 puts all 1024 back. OpenMM on the Reference platform
+minimises each frame, and the restored sites are restrained so the
+nucleus cannot dissolve before you measure it.
+
+=meson test --suite slow docs_paper_nucleation_full= checks
+
+#+begin_src text
+nucleation full frame 0 q6bar 0.26828
+nucleation full frame 1 q6bar 0.287644
+nucleation full frame 2 q6bar 0.56248
+#+end_src
+
+Frames 0 and 1 stay below 0.36. Frame 2 is 0.56248, above the ice
+threshold. The mean crosses the cut when the cell is crystalline
+again. OVITO draws that last frame. The test exits 77 when GenIce,
+OpenMM, OVITO, or Snakemake is absent.

@@ -29,3 +29,31 @@ crystal has not filled another 3.7 Å slab. The hexagonal count still
 rises from 31 to 32, and the water count falls from 38 to 35. One
 molecule has joined the ice. OVITO draws the last frame. The test
 exits 77 when GenIce, packmol, OpenMM, or OVITO is absent.
+
+* Full run
+
+One new hexagonal molecule does not fill a 3.7 Å slab, which is why
+the fast front never leaves 7.40 Å. The full run gives each stage a
+whole plane. =snakemake -s docs/tutorials/Snakefile brine= builds a
+2 by 2 by 2 ice Ih block, 128 waters, and two liquid planes of 64
+waters seated a fraction of an angstrom off the next lattice sites.
+Two sodium ions and two chloride ions sit above those planes. The ice
+block stays restrained. Langevin dynamics run at 240 K on the
+Reference platform, seed 240, friction 5 per ps, step 0.001 ps. Each
+later stage turns on the spring field of the next plane, minimises,
+and integrates 800 steps. The field is the undercooling that seats
+that plane at 240 K. The run is long enough for the front to move.
+
+=meson test --suite slow docs_paper_brine_full= checks
+
+#+begin_src text
+brine full frame 0 hexagonal 93 water 152 front 18.50 stack HHHHH.......
+brine full frame 1 hexagonal 160 water 86 front 25.90 stack HHHHHHH.....
+brine full frame 2 hexagonal 218 water 38 front 37.00 stack HHHHHHHHHH..
+#+end_src
+
+The front moves from 18.50 Å to 25.90 Å, a gain of one slab, and then
+to 37.00 Å. The stack grows from ~HHHHH.......~ to ~HHHHHHH.....~ and
+then to ~HHHHHHHHHH..~. Hexagonal waters rise from 93 to 218, and
+liquid waters fall from 152 to 38. OVITO draws the last frame. The
+test exits 77 when GenIce, OpenMM, OVITO, or Snakemake is absent.

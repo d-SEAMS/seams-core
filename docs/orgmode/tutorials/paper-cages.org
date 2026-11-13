@@ -28,3 +28,27 @@ sII, 136 waters: 16 of \(5^{12}\) and 8 of \(5^{12}6^{4}\).
 sH, the GenIce HS3 cell, 68 waters: 6 of \(5^{12}\), 4 of
 \(4^{3}5^{6}6^{3}\), and 2 of \(5^{12}6^{8}\). OVITO draws the sI
 oxygens. The test exits 77 when GenIce or OVITO is absent.
+
+* Full run
+
+The unit cell is already the right cage. A larger host has to hold
+that census times the number of cells, or the count is wrong.
+=snakemake -s docs/tutorials/Snakefile cages= builds sI as 2 by 2 by
+2, eight cells and 368 waters, and sII and sH as 2 by 2 by 1, four
+cells, 544 and 272 waters. sH keeps its tilt. ~--cage-edge none~
+still leaves every primitive ring eligible.
+
+=meson test --suite slow docs_paper_cages_full= checks
+
+#+begin_src text
+cages full sI 16 48
+cages full sII 64 32
+cages full sH 24 16 8
+#+end_src
+
+Eight sI cells hold 16 of \(5^{12}\) and 48 of \(5^{12}6^{2}\). Four
+sII cells hold 64 of \(5^{12}\) and 32 of \(5^{12}6^{4}\). Four sH
+cells hold 24 of \(5^{12}\), 16 of \(4^{3}5^{6}6^{3}\), and 8 of
+\(5^{12}6^{8}\). Each number is the unit-cell count times the number
+of cells. OVITO draws the sI repeat. The test exits 77 when GenIce,
+OVITO, or Snakemake is absent.
