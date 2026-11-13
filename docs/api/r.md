@@ -5,6 +5,10 @@ d-SEAMS 2.14.0. The R package is `bindings/r/dseams`. It calls
 `nframes`, `positions`, `chill_plus`, `cages`, `primitive_rings`,
 `signature_cages`, `symmetry`, `steinhardt`, `q4_q6`, and `jump_tau90`.
 `print` on a frame dispatches to `print.dseams_frame`.
+The methods are `positions.dseams_frame`, `chill_plus.dseams_frame`,
+`cages.dseams_frame`, `primitive_rings.dseams_frame`,
+`signature_cages.dseams_frame`, `symmetry.dseams_frame`,
+`steinhardt.dseams_frame`, and `q4_q6.dseams_frame`.
 
 Build the library, then install the package against it:
 

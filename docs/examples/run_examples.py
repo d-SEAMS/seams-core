@@ -25,6 +25,9 @@ EXAMPLES = {
     "cxx": "docs/examples/minimal_cpp.cpp",
     "python": "docs/examples/minimal_py.py",
     "rust": "docs/examples/minimal_rust.rs",
+    "fortran": "docs/examples/minimal_fortran.f90",
+    "julia": "docs/examples/minimal_julia.jl",
+    "r": "docs/examples/minimal_r.R",
 }
 
 
@@ -61,6 +64,9 @@ def require_example_links():
         "cxx": symbols.cxx_symbols(),
         "python": symbols.python_symbols(),
         "rust": symbols.rust_symbols(),
+        "fortran": symbols.fortran_symbols(),
+        "julia": symbols.julia_symbols(),
+        "r": symbols.r_symbols(),
     }
     blobs = page_blobs()
     missing = []

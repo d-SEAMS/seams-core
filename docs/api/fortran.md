@@ -12,6 +12,15 @@ gfortran and runs it.
 `input/traj/genice_sI.lammpstrj` and calls the same C entry points.
 `meson test docs_examples` runs it.
 
+The module exports `SEAMS_OK`, `SEAMS_CHILL_PUBLISHED`, `SEAMS_CHILL_OVITO`,
+`SEAMS_GRAPH_CUTOFF`, `SEAMS_GRAPH_MUTUAL`, `SEAMS_LABEL_CUBIC`,
+`seams_version_string`, `seams_last_error`, `seams_set_num_threads`,
+`seams_get_num_threads`, `seams_system_create`, `seams_system_destroy`,
+`seams_system_set_ortho`, `seams_system_set_frame`, `seams_chill_plus`,
+`seams_q4q6`, `seams_neighbours_build`, `seams_neighbours_destroy`,
+`seams_neighbours_csr`, `seams_rings_find`, `seams_rings_destroy`,
+`seams_rings_histogram`, and `seams_rings_fraction`.
+
 ```{literalinclude} ../../../docs/examples/minimal_fortran.f90
 :language: fortran
 ```
