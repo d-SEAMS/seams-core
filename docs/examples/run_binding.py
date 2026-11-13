@@ -98,12 +98,14 @@ def run_r(build):
     env["SEAMS_LIBDIR"] = str(build / "bindings")
     env["LD_LIBRARY_PATH"] = library_path(build)
     env["R_LIBS_USER"] = str(dest)
-    if not (dest / "dseams").is_dir():
-        subprocess.check_call(
-            [r_cmd, "CMD", "INSTALL", "-l", str(dest), str(ROOT / "bindings/r/dseams")],
-            env=env,
-        )
+    subprocess.check_call(
+        [r_cmd, "CMD", "INSTALL", "-l", str(dest), str(ROOT / "bindings/r/dseams")],
+        env=env,
+    )
+    env["SEAMS_CPP_ORACLE"] = str(build / "bindings" / "binding_oracle")
+    env["OMP_NUM_THREADS"] = "1"
     subprocess.check_call([script, str(ROOT / "docs/examples/r_api.R")], env=env)
+    subprocess.check_call([script, str(ROOT / "docs/examples/r_capi.R")], env=env)
 
 
 def julia_bin():

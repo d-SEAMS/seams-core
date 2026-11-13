@@ -1,0 +1,1 @@
+Julia, R, and C++ call the analyses `seams.h` now exports. Julia uses `ccall` on `libseams`. R keeps the `libseams_lang` frame API and adds a C shim. `seams.hpp` is a header-only RAII wrapper whose exceptions carry `seams_handle_error`.

@@ -249,6 +249,206 @@ Parameters: frame
 Units: dimensionless label codes
 
 Example: `docs/examples/minimal_r.R`
+### seams_system_new
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_system_read
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_system_count
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_chill
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_steinhardt
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_cages
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_signature_cages
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_neighbours_knn
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_rdf
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_running_cn
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_coordination
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_hbonds
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_density_axis
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_fingerprint
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_contact_pairs
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_domains
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_prisms
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_monolayer
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_rings_vertices
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_site_table
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
 <!-- API_SYMBOLS_END -->
 
 

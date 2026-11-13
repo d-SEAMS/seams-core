@@ -11,6 +11,10 @@ module Dseams
 using Libdl
 
 export Frame, nop, nframes, read_frame, chill_plus, cages, primitive_rings, steinhardt, signature_cages, symmetry, jump_tau90, q4_q6
+export System, seams_system_count, seams_system_read, seams_chill, seams_steinhardt, seams_cages, seams_signature_cages
+export seams_neighbours_knn, seams_rdf, seams_running_cn, seams_coordination, seams_hbonds
+export seams_density_axis, seams_fingerprint, seams_contact_pairs, seams_domains, seams_prisms
+export seams_monolayer, seams_rings_vertices, seams_site_table
 
 const ICE_NAMES = (
     "cubic",
@@ -269,5 +273,7 @@ function q4_q6(frame::Frame; cutoff::Real = 3.5, type::Integer = 0)
     _check(code)
     (q4 = q4, q6 = q6, q4bar = q4bar, q6bar = q6bar)
 end
+
+include(joinpath(@__DIR__, "..", "..", "capi.jl"))
 
 end

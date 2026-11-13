@@ -111,6 +111,21 @@ def _write_pool_v5():
 _write_pool_v5()
 
 
+def _write_binding_overhead():
+    """Draw the binding-overhead figure before Sphinx reads the page."""
+    import importlib.util
+
+    script = os.path.join(_docs, "render_binding_overhead.py")
+    spec = importlib.util.spec_from_file_location("render_binding_overhead", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    if module.main([]) != 0:
+        raise SystemExit("binding overhead page failed")
+
+
+_write_binding_overhead()
+
+
 def _write_release_notes():
     """Fill the 2.14.0 notes from changelog.d before Sphinx reads pages."""
     import importlib.util

@@ -821,3 +821,22 @@ rule growth_curve:
         "python3 input/interface/growth_curve.py && "
         "python3 scripts/growth_curve_rates.py --bin bbdir/tests/interface_order && "
         "python3 scripts/q6bar_timing.py --bin bbdir/tests/interface_order"
+
+
+rule binding_overhead:
+    input:
+        "scripts/bench_binding_overhead.py",
+        "benchmarks/binding_overhead_c.c",
+        "benchmarks/binding_overhead_cpp.cpp",
+        "benchmarks/binding_overhead.f90",
+        "benchmarks/binding_overhead.jl",
+        "benchmarks/binding_overhead.R",
+        "benchmarks/binding_overhead.lua",
+        "benchmarks/binding_overhead.py",
+        "bindings/rust/seams/examples/binding_overhead.rs",
+        "include/seams.hpp",
+        "build/src/libseams.so",
+    output:
+        "benchmarks/binding-overhead.csv",
+    shell:
+        "python3 scripts/bench_binding_overhead.py --out benchmarks/binding-overhead.csv --reps 8"

@@ -29,7 +29,10 @@ if [ ! -f "${SEAMS_INCLUDE}/seams_lang.h" ]; then
   echo "seams_lang.h is not in ${SEAMS_INCLUDE}" >&2
   exit 1
 fi
+SEAMS_H_DIR="${DSEAMS_ROOT}/include"
+SEAMS_SO_DIR="${DSEAMS_ROOT}/build/src"
 cat > src/Makevars << EOF
+PKG_CFLAGS = -I${SEAMS_H_DIR} -I${SEAMS_SO_DIR}
 PKG_CXXFLAGS = -I${SEAMS_INCLUDE}
-PKG_LIBS = -L${SEAMS_LIBDIR} -lseams_lang -Wl,-rpath,${SEAMS_LIBDIR}
+PKG_LIBS = -L${SEAMS_LIBDIR} -lseams_lang -L${SEAMS_SO_DIR} -lseams -Wl,-rpath,${SEAMS_LIBDIR} -Wl,-rpath,${SEAMS_SO_DIR}
 EOF
