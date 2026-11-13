@@ -71,7 +71,11 @@ endif
 
 gromacs_opt = get_option('with_gromacs')
 if gromacs_opt.allowed()
+  gromacs_rpath = ''
   gromacs_dep = dependency('libgromacs', required: false)
+  if gromacs_dep.found()
+    gromacs_rpath = gromacs_dep.get_variable('libdir', default_value: '')
+  endif
   if not gromacs_dep.found()
     gromacs_dep = cppc.find_library('gromacs', has_headers: ['gromacs/trajectoryanalysis/analysismodule.h'],
                                    required: false)
@@ -95,8 +99,9 @@ if gromacs_opt.allowed()
         'raise SystemExit(1)\n',
         check: false)
       if gromacs_where.returncode() == 0 and gromacs_where.stdout().strip() != ''
+        gromacs_rpath = gromacs_where.stdout().strip()
         gromacs_dep = cppc.find_library('gromacs',
-          dirs: [gromacs_where.stdout().strip()],
+          dirs: [gromacs_rpath],
           has_headers: ['gromacs/trajectoryanalysis/analysismodule.h'],
           required: false)
       endif
@@ -113,6 +118,8 @@ if gromacs_opt.allowed()
       link_with: seams_api_lib,
       include_directories: [seams_inc, include_directories('.')],
       cpp_args: _args + seams_api_args,
+      build_rpath: gromacs_rpath,
+      install_rpath: gromacs_rpath,
       install: true)
     test(
       'gromacs_mdrun',

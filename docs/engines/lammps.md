@@ -7,7 +7,8 @@ you can copy into a LAMMPS source tree. This build does not compile it.
 
 `in.dseams` is the deck. `ice.data` is 64 oxygens of cubic ice. Forces are
 zeroed so the cell does not melt. The hook prints `overhead_s`, the mean
-seconds spent inside d-SEAMS per step. `run_hook.cpp` includes `library.h`,
+seconds spent inside d-SEAMS per step, and for the last step
+`lammps hexagonal N six-rings M q6 Q`. `run_hook.cpp` includes `library.h`,
 so the LAMMPS include directory is on the compile line. `meson test lammps_hook`
 runs this deck. The copy-in compute style is `extras/lammps/in.dseams`.
 

@@ -3,15 +3,18 @@
 The thread count comes from `PLUMED_NUM_THREADS`. Set that variable
 before PLUMED starts. `OMP_NUM_THREADS` does not change the PLUMED team.
 
-`SEAMS` is a collective variable with three components.
+`SEAMS` is a collective variable with five components.
 
 - `seams.q6` is the mean local q6. Its derivatives are a central difference, so
-  `RESTRAINT` can bias it.
+  `RESTRAINT` can bias it. A `PRINT` leaves that derivative array empty, and
+  the difference runs only after a `RESTRAINT` has allocated it.
 - `seams.ice` is the fraction of atoms published CHILL+ calls cubic. The label
   is discrete, so the component has no derivatives and is not biasable.
 - `seams.ring` is the fraction of atoms on a primitive six-ring. It is not
   biasable either: a `RESTRAINT` on `seams.ice` or `seams.ring` is rejected
   because those components carry no derivatives.
+- `seams.hexagonal` is the CHILL+ hexagonal count.
+- `seams.six` is the primitive six-ring count.
 
 `meson test plumed_driver` runs `engines/plumed/plumed.dat`. The collective
 variable calls `seams_q4q6` and `seams_rings_find` after scaling internal
@@ -23,7 +26,7 @@ multiplies by 10 so PLUMED sees a per-nanometre derivative.
 
 ```{literalinclude} ../../../engines/plumed/SeamsColvar.cpp
 :language: cpp
-:lines: 54-85
+:lines: 73-86
 ```
 
 PLUMED stores positions in nanometres. `getPosition` and `getBox` are those

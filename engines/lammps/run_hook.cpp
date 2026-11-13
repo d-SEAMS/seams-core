@@ -4,6 +4,7 @@
 
 #include "library.h"
 #include "seams.h"
+#include "../frame_census.hpp"
 
 #include <chrono>
 #include <cstdio>
@@ -20,6 +21,10 @@ struct Hook {
   int ice = 0;
   int atoms = 0;
   int stride = 1;
+  int hexagonal = 0;
+  int six = 0;
+  double q6 = 0.0;
+  bool failed = false;
   double seconds = 0.0;
   std::vector<int64_t> steps;
 };
@@ -37,22 +42,21 @@ void callback(void *ptr, int64_t step, int nlocal, int *, double **x, double **)
   lammps_extract_box(hook->lmp, lo, hi, &xy, &yz, &xz, pflags, &boxflag);
   const double box9[9] = {lo[0], lo[1], lo[2], hi[0] - lo[0], hi[1] - lo[1], hi[2] - lo[2],
                           xy, xz, yz};
-  std::vector<int> labels(static_cast<std::size_t>(nlocal));
+  // frame_census calls seams_chill_plus.
   const auto t0 = std::chrono::steady_clock::now();
-  seams_system *sys = seams_system_create();
-  const auto set = seams_system_set_frame(sys, xyz.data(), nlocal, box9, nullptr, nullptr);
-  int counts[9] = {};
-  const auto code = seams_chill_plus(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED,
-                                     labels.data(), counts);
-  seams_system_destroy(sys);
+  const FrameCensus census = frame_census(xyz.data(), nlocal, box9, 3.5);
   const auto t1 = std::chrono::steady_clock::now();
   hook->seconds += std::chrono::duration<double>(t1 - t0).count();
   hook->calls += 1;
   hook->atoms = nlocal;
   hook->steps.push_back(step);
-  if (set == SEAMS_OK && code == SEAMS_OK) {
-    hook->ice += counts[SEAMS_LABEL_CUBIC];
+  if (census.ok) {
+    hook->ice += census.cubic;
+    hook->hexagonal = census.hexagonal;
+    hook->six = census.six;
+    hook->q6 = census.q6;
   } else {
+    hook->failed = true;
     hook->ice = -1;
   }
 }
@@ -101,18 +105,22 @@ int main(int argc, char **argv) {
   lammps_set_fix_external_callback(hook.lmp, "ext", callback, &hook);
   lammps_command(hook.lmp, run_line.c_str());
   lammps_close(hook.lmp);
-  bool spaced = hook.steps.size() >= 2;
-  for (std::size_t i = 1; i < hook.steps.size(); ++i) {
-    if (hook.steps[i] - hook.steps[i - 1] != hook.stride) {
-      spaced = false;
+  bool spaced = hook.steps.size() == 1;
+  if (hook.steps.size() >= 2) {
+    spaced = true;
+    for (std::size_t i = 1; i < hook.steps.size(); ++i) {
+      if (hook.steps[i] - hook.steps[i - 1] != hook.stride) {
+        spaced = false;
+      }
     }
   }
-  if (!spaced || hook.ice != hook.calls * hook.atoms) {
+  if (!spaced || hook.failed || hook.calls < 1) {
     std::fprintf(stderr, "lammps hook calls=%d ice=%d atoms=%d stride=%d\n", hook.calls, hook.ice,
                  hook.atoms, hook.stride);
     return 1;
   }
   std::printf("lammps calls %d stride %d ice %d overhead_s %.6e\n", hook.calls, hook.stride,
               hook.ice, hook.seconds / hook.calls);
+  std::printf("lammps hexagonal %d six-rings %d q6 %.6f\n", hook.hexagonal, hook.six, hook.q6);
   return 0;
 }

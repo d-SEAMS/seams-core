@@ -1,28 +1,31 @@
 #+TITLE: LAMMPS
 #+OPTIONS: toc:nil num:nil
 
-Build the in-run hook when liblammps is installed:
+The build below used conda-forge LAMMPS 2022.06.23. The serial binary
+reports 23 Jun 2022, Update 1. The compiler and Eigen stay on the path.
+The same prefix holds GROMACS 2026.3, OpenMM 8.6.0, and PLUMED 2.10.1.
 
 #+begin_src bash
-meson setup build -Dwith_lammps=enabled
+pixi init -c conda-forge dseams-engines
+pixi add --manifest-path dseams-engines/pixi.toml gromacs lammps openmm "plumed=2.10.*"
+eval "$(pixi shell-hook --manifest-path dseams-engines/pixi.toml)"
+export PKG_CONFIG_PATH="$CONDA_PREFIX/lib/pkgconfig:$CONDA_PREFIX/lib.AVX2_256/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+export LIBRARY_PATH="$CONDA_PREFIX/lib:$CONDA_PREFIX/lib.AVX2_256${LIBRARY_PATH:+:$LIBRARY_PATH}"
+export CPATH="$CONDA_PREFIX/include${CPATH:+:$CPATH}"
+meson setup build -Dwith_gromacs=enabled -Dwith_lammps=enabled -Dwith_openmm=enabled -Dwith_plumed=enabled
 meson compile -C build
+meson test -C build docs_engine_lammps --print-errorlogs
 #+end_src
 
 ~run_hook~ registers a ~fix external~ callback. LAMMPS passes positions
-in angstroms. Each sampled step calls ~seams_chill_plus~. The program
-prints ~lammps calls N stride S ice M~. On the cubic deck shipped with
-the hook, ~ice~ equals ~calls~ times the atom count.
+in angstroms. The docs test writes a data file from
+~input/traj/ice1h.lammpstrj~, freezes the forces, and runs one step of
+the callback. The hook prints:
 
-The ice Ih dump in this repository is ~input/traj/ice1h.lammpstrj~.
-~seams chill-plus~ on that file returns ~hexagonal 128~. ~seams rings~
-returns 256 six-rings. ~seams steinhardt --l 6~ returns mean q6 0.625855.
-
-#+begin_src bash
-seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5
-seams rings input/traj/ice1h.lammpstrj --cutoff 3.5
-seams steinhardt input/traj/ice1h.lammpstrj --cutoff 3.5 --l 6
+#+begin_src text
+lammps hexagonal 128 six-rings 256 q6 0.625855
 #+end_src
 
 ~engines/lammps/compute_dseams.cpp~ is the copy-in compute. This build
-does not compile it. ~meson test docs_engine_lammps~ runs ~run_hook~
-when that binary is in the build and exits 77 when it is not.
+does not compile it. ~meson test docs_engine_lammps~ exits 77 when
+~run_hook~ was not built.

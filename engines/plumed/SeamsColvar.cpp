@@ -24,6 +24,8 @@ class SeamsCV : public Colvar {
 
  private:
   double cutoff_;
+  mutable int hexagonal_ = 0;
+  mutable int six_ = 0;
   bool score(const std::vector<double> &xyz, const double box9[9], double &q6, double &ice,
              double &ring) const;
 };
@@ -35,6 +37,8 @@ void SeamsCV::registerKeywords(Keywords &keys) {
   keys.addOutputComponent("q6", "default", "mean local q6, the continuous bias component");
   keys.addOutputComponent("ice", "default", "CHILL+ cubic fraction; not biasable, no derivatives");
   keys.addOutputComponent("ring", "default", "primitive six-ring fraction; not biasable, no derivatives");
+  keys.addOutputComponent("hexagonal", "default", "CHILL+ hexagonal count; not biasable, no derivatives");
+  keys.addOutputComponent("six", "default", "primitive six-ring count; not biasable, no derivatives");
 }
 
 SeamsCV::SeamsCV(const ActionOptions &ao) : PLUMED_COLVAR_INIT(ao), cutoff_(3.5) {
@@ -49,6 +53,10 @@ SeamsCV::SeamsCV(const ActionOptions &ao) : PLUMED_COLVAR_INIT(ao), cutoff_(3.5)
   componentIsNotPeriodic("ice");
   addComponent("ring");
   componentIsNotPeriodic("ring");
+  addComponent("hexagonal");
+  componentIsNotPeriodic("hexagonal");
+  addComponent("six");
+  componentIsNotPeriodic("six");
 }
 
 bool SeamsCV::score(const std::vector<double> &xyz, const double box9[9], double &q6, double &ice,
@@ -72,16 +80,20 @@ bool SeamsCV::score(const std::vector<double> &xyz, const double box9[9], double
   for (double value : q6v) sum += value;
   q6 = sum / static_cast<double>(n);
   ice = static_cast<double>(counts[SEAMS_LABEL_CUBIC]) / static_cast<double>(n);
+  hexagonal_ = counts[SEAMS_LABEL_HEXAGONAL];
   seams_rings *rings = nullptr;
   if (seams_rings_find(sys, cutoff_, 0, SEAMS_GRAPH_CUTOFF, 6, &rings) != SEAMS_OK) {
     seams_system_destroy(sys);
     return false;
   }
-  if (seams_rings_fraction(rings, 6, &ring) != SEAMS_OK) {
+  int hist[7] = {};
+  if (seams_rings_fraction(rings, 6, &ring) != SEAMS_OK ||
+      seams_rings_histogram(rings, hist, 7) != SEAMS_OK) {
     seams_rings_destroy(rings);
     seams_system_destroy(sys);
     return false;
   }
+  six_ = hist[6];
   seams_rings_destroy(rings);
   seams_system_destroy(sys);
   return true;
@@ -92,7 +104,7 @@ void SeamsCV::calculate() {
   // expects angstroms, and CUTOFF is parsed as a bare number in angstroms.
   const double to_angstrom = 10.0;
   const unsigned n = getNumberOfAtoms();
-  std::vector<double> xyz(3 * n);
+  std::vector<double> xyz(3 * static_cast<std::size_t>(n));
   for (unsigned i = 0; i < n; ++i) {
     const Vector p = getPosition(i);
     xyz[3 * i] = p[0] * to_angstrom;
@@ -111,6 +123,23 @@ void SeamsCV::calculate() {
   double q6 = 0, ice = 0, ring = 0;
   if (!score(xyz, box9, q6, ice, ring)) {
     error("d-SEAMS rejected this frame");
+  }
+  const int hexagonal = hexagonal_;
+  const int six = six_;
+  Value *vq = getPntrToComponent("q6");
+  Value *vi = getPntrToComponent("ice");
+  Value *vr = getPntrToComponent("ring");
+  Value *vh = getPntrToComponent("hexagonal");
+  Value *vs = getPntrToComponent("six");
+  vq->set(q6);
+  vi->set(ice);
+  vr->set(ring);
+  vh->set(static_cast<double>(hexagonal));
+  vs->set(static_cast<double>(six));
+  // A PRINT of the value does not allocate derivative storage. Writing
+  // into that empty array aborts. A RESTRAINT does allocate it.
+  if (vq->getNumberOfDerivatives() == 0) {
+    return;
   }
   // Central difference on q6 only. ice and ring have no derivatives.
   const double eps = 1.0e-3;
@@ -133,12 +162,6 @@ void SeamsCV::calculate() {
       dq[i][d] = (q_plus - q_minus) / (2.0 * eps) * to_angstrom;
     }
   }
-  Value *vq = getPntrToComponent("q6");
-  Value *vi = getPntrToComponent("ice");
-  Value *vr = getPntrToComponent("ring");
-  vq->set(q6);
-  vi->set(ice);
-  vr->set(ring);
   for (unsigned i = 0; i < n; ++i) {
     setAtomsDerivatives(vq, static_cast<int>(i), dq[i]);
   }
