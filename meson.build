@@ -751,6 +751,12 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_table_csv',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_tables.py'],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_c_symbols',
     python3,
     args: ['-m', 'doctest', meson.project_source_root() / 'docs' / 'check_c_symbols.py'],
