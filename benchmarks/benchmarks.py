@@ -530,6 +530,35 @@ class RingsOneThread:
             work.cleanup()
 
 
+class ClassifyIce:
+    """Ideal ice Ic structure labels against the release library.
+
+    110592 molecules, one and eight threads. The OVITO polyhedral
+    template match of the same frame, with cubic and hexagonal diamond
+    enabled, is the sitting in benchmarks/classify-carry-sitting.txt.
+    """
+
+    params = [1, 8]
+    param_names = ["threads"]
+
+    def setup(self, threads):
+        bench = ROOT / "bbdir-release" / "tests" / "bench_shell_scale"
+        if not bench.is_file():
+            raise NotImplementedError("release bench_shell_scale is not built")
+        cpus = "0" if threads == 1 else "0-7"
+        self.cmd = [
+            "taskset", "-c", cpus,
+            str(bench), str(threads),
+        ]
+        self.env = os.environ.copy()
+        self.env["OMP_NUM_THREADS"] = str(threads)
+        self.env["OMP_DYNAMIC"] = "FALSE"
+
+    def time_classify(self, threads):
+        subprocess.run(self.cmd, env=self.env, check=True,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
 class HopStride:
     """One carried ring update on a production-stride frame.
 

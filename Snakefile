@@ -456,6 +456,25 @@ rule ddc_regression:
 
 # Basal, primary prism and secondary prism at 220 to 265 K.
 # Frames stay in $SI4_DATA (default si4-data/) and are not inputs here.
+rule classify_carry:
+    input:
+        "scripts/bench_classify_carry.py",
+        "scripts/bench_classify_carry_worker.py",
+        "bbdir-release/tests/bench_ql",
+        "bbdir-release/tests/bench_trajectory_incremental",
+        "bbdir-release/src/libyodaLib.so",
+        "input/traj/genice_sI.lammpstrj",
+        "input/traj/genice_sII.lammpstrj",
+    output:
+        "benchmarks/classify-carry-sitting.txt",
+    shell:
+        "python3 scripts/bench_classify_carry.py "
+        "--lib bbdir-release/src/libyodaLib.so "
+        "--ql bbdir-release/tests/bench_ql "
+        "--traj \"$CLASSIFY_TRAJ\" "
+        "--out {output}"
+
+
 rule growth_curve:
     input:
         "input/interface/growth_curve.py",
