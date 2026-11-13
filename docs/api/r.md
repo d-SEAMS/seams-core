@@ -12,7 +12,13 @@ DSEAMS_ROOT=$PWD R CMD INSTALL bindings/r/dseams
 ```
 
 `R CMD check` is the cleanliness check. It expects no errors and no
-warnings. `pkgdown::build_site()` writes the native HTML.
+warnings. `pkgdown::build_site()` writes the native HTML from the
+roxygen topics. The built site is linked from this book:
+
+```{raw} html
+<p><a href="../pkgdown/index.html">dseams pkgdown reference</a>,
+generated from the roxygen topics in <code>man/</code>.</p>
+```
 
 ## Quickstart
 

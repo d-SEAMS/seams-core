@@ -27,3 +27,8 @@ reference:
     desc: One system handle, then an analysis. Errors are stop() with the handle text.
     contents:
       - starts_with("seams_")
+  - title: Print and summary
+    desc: S3 methods for frames and for each result class.
+    contents:
+      - starts_with("print.")
+      - starts_with("summary.")

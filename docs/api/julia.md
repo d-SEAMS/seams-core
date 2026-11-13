@@ -74,6 +74,12 @@ julia --project=bindings/julia/Seams/docs bindings/julia/Seams/docs/make.jl
 That is the same split readcon uses between the bindings page and the
 generated crate pages. `doctest = false` in `make.jl` because the
 numerical checks live in `Pkg.test`, which needs the shared libraries.
+The built reference is linked from this book:
+
+```{raw} html
+<p><a href="../julia-dseams/index.html">Dseams Documenter reference</a>
+and <a href="../julia-seams/index.html">Seams Documenter reference</a>.</p>
+```
 
 ```{literalinclude} ../../../docs/examples/minimal_julia.jl
 :language: julia

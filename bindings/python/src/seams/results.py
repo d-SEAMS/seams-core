@@ -16,8 +16,8 @@ I32 = npt.NDArray[np.int32]
 class ChillResult:
     """Per-atom labels and the nine population counts.
 
-    Attributes
-    ----------
+    Notes
+    -----
     labels : numpy.ndarray
         One ``seams_label`` code per atom.
     counts : numpy.ndarray
@@ -33,8 +33,8 @@ class ChillResult:
 class OrderResult:
     """Local Steinhardt parameters.
 
-    Attributes
-    ----------
+    Notes
+    -----
     ql : numpy.ndarray
         One value per atom. Dimensionless.
     qlbar : numpy.ndarray or None
@@ -50,8 +50,8 @@ class OrderResult:
 class Q4Q6:
     """Local q4 and q6 on the cutoff shell.
 
-    Attributes
-    ----------
+    Notes
+    -----
     q4, q6 : numpy.ndarray
         One dimensionless value per atom.
     """
@@ -64,8 +64,8 @@ class Q4Q6:
 class Q6Bar:
     """Lechner-Dellago q6-bar and the summary above a cut.
 
-    Attributes
-    ----------
+    Notes
+    -----
     values : numpy.ndarray or None
         Per-atom q6-bar when it was requested.
     mean, median : float
@@ -84,8 +84,8 @@ class Q6Bar:
 class Signature:
     """Closed cages of one ring census.
 
-    Attributes
-    ----------
+    Notes
+    -----
     n_cages, n_atoms : int
         Closed cages, and the distinct vertices in those cages.
     """
@@ -98,8 +98,8 @@ class Signature:
 class CageCounts:
     """Disjoint cage populations. The four counts sum to the kept atoms.
 
-    Attributes
-    ----------
+    Notes
+    -----
     n_hex, n_cubic, n_water, n_both : int
         Hexagonal only, double-diamond only, neither, both.
     """
@@ -114,8 +114,8 @@ class CageCounts:
 class NeighbourCSR:
     """Caller-owned CSR. Column indices omit the self entry.
 
-    Attributes
-    ----------
+    Notes
+    -----
     offsets : numpy.ndarray
         Length ``n + 1``.
     columns : numpy.ndarray
@@ -130,8 +130,8 @@ class NeighbourCSR:
 class RingLabels:
     """Size and symmetry of each primitive ring.
 
-    Attributes
-    ----------
+    Notes
+    -----
     sizes, symmetry : numpy.ndarray
         ``symmetry`` holds ``seams_ring_symmetry`` codes.
     """
@@ -144,8 +144,8 @@ class RingLabels:
 class Radial:
     """Partial radial distribution.
 
-    Attributes
-    ----------
+    Notes
+    -----
     r : numpy.ndarray
         Bin centres, angstrom.
     g : numpy.ndarray
@@ -166,8 +166,8 @@ class Radial:
 class RunningCN:
     """Running coordination number.
 
-    Attributes
-    ----------
+    Notes
+    -----
     r, cn : numpy.ndarray
         ``r`` is angstrom. ``cn`` is dimensionless.
     """
@@ -180,8 +180,8 @@ class RunningCN:
 class Density:
     """Number density along one cell axis.
 
-    Attributes
-    ----------
+    Notes
+    -----
     z, rho : numpy.ndarray
         ``z`` is angstrom. ``rho`` is number density.
     """
@@ -194,8 +194,8 @@ class Density:
 class Contacts:
     """Mutual nearest unlike contacts.
 
-    Attributes
-    ----------
+    Notes
+    -----
     n_pairs, n_cation, n_anion : int
         Pair count, and molecule counts in the ion cloud.
     """
@@ -209,8 +209,8 @@ class Contacts:
 class Domains:
     """Largest polar or apolar domain.
 
-    Attributes
-    ----------
+    Notes
+    -----
     n_subset, largest : int
         Atoms in the subset, and the largest domain.
     percolation : float
@@ -226,8 +226,8 @@ class Domains:
 class Prisms:
     """Perfect and imperfect prism counts. Index is the ring size.
 
-    Attributes
-    ----------
+    Notes
+    -----
     perfect, imperfect : numpy.ndarray
         Length 7. Sizes 3 through 6 are filled.
     """
@@ -240,8 +240,8 @@ class Prisms:
 class BrineFronts:
     """The two planar crossings of an ice slab.
 
-    Attributes
-    ----------
+    Notes
+    -----
     z_enter, z_exit, thickness : float
         Angstrom, in the frame cell.
     found : bool
@@ -258,8 +258,8 @@ class BrineFronts:
 class BrineRejection:
     """Molal rejection coefficient ``k = c_ice / c_liquid``.
 
-    Attributes
-    ----------
+    Notes
+    -----
     c_ice, c_liquid, k : float
         Molality is formula units per kilogram of water.
     defined : bool
@@ -276,8 +276,8 @@ class BrineRejection:
 class BrineProfile:
     """Concentration profile along the front axis.
 
-    Attributes
-    ----------
+    Notes
+    -----
     z_mid : numpy.ndarray
         Bin centres, angstrom.
     molality : numpy.ndarray
@@ -295,8 +295,8 @@ class BrineProfile:
 class BrinePockets:
     """Brine pockets trapped in the ice.
 
-    Attributes
-    ----------
+    Notes
+    -----
     n_pockets, reservoir_waters : int
         Pocket count, and waters in the liquid reservoir.
     """

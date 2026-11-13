@@ -100,9 +100,10 @@ buffer. `set_num_threads` is process-global too.
 
 Docstrings are numpydoc. `sphinx.ext.napoleon` and `sphinx.ext.autodoc`
 render `seams` when the package imports, the same split rgpot uses
-between the narrative page and the generated API. `mypy --strict` and
-`pyright` check `bindings/python/src/seams`. `py.typed` ships with the
-package. Doctests cover `as_box9` and `SeamsError`.
+between the narrative page and the generated API. The generated page is
+{doc}`seams_ctypes`. `mypy --strict` and `pyright` check
+`bindings/python/src/seams`. `py.typed` ships with the package.
+Doctests cover `as_box9` and `SeamsError`.
 
 The nanobind module and the language-binding examples stay below.
 

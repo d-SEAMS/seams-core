@@ -108,11 +108,11 @@ def _stage_markdown_book():
 
 
 def _stage_ctypes_autodoc():
-    """Pull numpydoc into the book when the ctypes package imports.
+    """Pull numpydoc into the book.
 
     rgpot keeps the narrative page and the generated API apart. This page
-    is the generated half. A docs build without NumPy leaves it out, so
-    sphinx-build -W still passes.
+    is the generated half. A missing import still leaves a page so the
+    how-to link resolves.
     """
     stable = os.path.join(_source, "stable")
     page = os.path.join(stable, "seams_ctypes.rst")
@@ -120,9 +120,15 @@ def _stage_ctypes_autodoc():
     try:
         import seams  # noqa: F401
     except Exception:
-        return
-    with open(page, "w", encoding="utf-8") as handle:
-        handle.write(
+        body = (
+            "ctypes reference\n"
+            "================\n"
+            "\n"
+            "The ``seams`` package did not import in this build.\n"
+            "The how-to is :doc:`python`.\n"
+        )
+    else:
+        body = (
             "ctypes reference\n"
             "================\n"
             "\n"
@@ -134,13 +140,101 @@ def _stage_ctypes_autodoc():
             "   :undoc-members:\n"
             "   :show-inheritance:\n"
         )
+    with open(page, "w", encoding="utf-8") as handle:
+        handle.write(body)
     if os.path.isfile(index):
         with open(index, "a", encoding="utf-8") as handle:
             handle.write("   seams_ctypes\n")
 
 
+def _native_page(folder, title, detail):
+    """One HTML page so a language link resolves when the tool is absent."""
+    os.makedirs(folder, exist_ok=True)
+    index = os.path.join(folder, "index.html")
+    if os.path.isfile(index):
+        return
+    with open(index, "w", encoding="utf-8") as handle:
+        handle.write("<!DOCTYPE html><title>{}</title><p>{}</p>\n".format(title, detail))
+
+
+def _stage_native_html():
+    """Copy Documenter and pkgdown HTML next to the Sphinx book.
+
+    The language pages link at these paths. A missing tool writes one
+    page and does not stop the book, the same way a missing C++ index
+    still leaves the Reference toctree resolvable.
+    """
+    import glob
+    import shutil
+    import subprocess
+
+    native = os.path.join(_docs, "native-html")
+    os.makedirs(native, exist_ok=True)
+    root = os.path.abspath(os.path.join(_docs, ".."))
+    julia = shutil.which("julia")
+    if not julia:
+        matches = sorted(glob.glob(os.path.join(root, "bbdir", "julia-*", "bin", "julia")))
+        julia = matches[-1] if matches else ""
+    pairs = (
+        ("julia-dseams", os.path.join(root, "bindings", "julia", "Dseams", "docs")),
+        ("julia-seams", os.path.join(root, "bindings", "julia", "Seams", "docs")),
+    )
+    if julia:
+        env = os.environ.copy()
+        for name, project in pairs:
+            subprocess.run(
+                [julia, "--project=" + project, "-e", "using Pkg; Pkg.instantiate()"],
+                cwd=root,
+                env=env,
+                check=False,
+            )
+            subprocess.run(
+                [julia, "--project=" + project, os.path.join(project, "make.jl")],
+                cwd=root,
+                env=env,
+                check=False,
+            )
+            built = os.path.join(project, "build")
+            dest = os.path.join(native, name)
+            if os.path.isdir(built):
+                if os.path.isdir(dest):
+                    shutil.rmtree(dest)
+                shutil.copytree(built, dest)
+                shutil.rmtree(built, ignore_errors=True)
+            else:
+                _native_page(dest, name, "Documenter did not write this build.")
+    else:
+        print("julia is absent; Documenter pages are placeholders")
+        for name, _project in pairs:
+            _native_page(os.path.join(native, name), name, "Julia is not on PATH.")
+    r_dest = os.path.join(native, "pkgdown")
+    rscript = shutil.which("Rscript")
+    if rscript:
+        env = os.environ.copy()
+        libs = env.get("R_LIBS_USER", os.path.join(root, "bbdir", "rlib"))
+        env["R_LIBS_USER"] = libs
+        env.setdefault("DSEAMS_ROOT", root)
+        done = subprocess.run(
+            [
+                rscript,
+                "-e",
+                "pkgdown::build_site('bindings/r/dseams', override=list(destination='%s'))" % r_dest,
+            ],
+            cwd=root,
+            env=env,
+            check=False,
+        )
+        if done.returncode != 0 or not os.path.isfile(os.path.join(r_dest, "index.html")):
+            print("pkgdown did not build; the roxygen page is a placeholder")
+            _native_page(r_dest, "dseams", "pkgdown did not build. The roxygen topics are in man/.")
+    else:
+        print("Rscript is absent; the pkgdown page is a placeholder")
+        _native_page(r_dest, "dseams", "Rscript is not on PATH. The roxygen topics are in man/.")
+
+
 _stage_markdown_book()
 _stage_ctypes_autodoc()
+_stage_native_html()
 _doxyrest = os.path.abspath(os.path.join(_source, "../../subprojects/doxyrest/sphinx"))
 _xml_index = os.path.join(_source, "xml", "index.xml")
 _api_index = os.path.join(_source, "api", "index.rst")
@@ -206,6 +300,7 @@ linkcheck_ignore = [
     r"https://www\.tandfonline\.com/.*",
 ]
 html_static_path = ["_static"]
+html_extra_path = [os.path.join(_docs, "native-html")]
 html_css_files = ["custom.css"]
 html_js_files = []
 html_favicon = "_static/dSeamsLogo.ico"
@@ -279,3 +374,14 @@ html_sidebars = {
 }
 
 html_baseurl = "https://docs.dseams.info/"
+
+
+def _skip_attributes(app, what, name, obj, skip, options):
+    """Napoleon already documents dataclass fields from the Attributes section."""
+    if what == "attribute":
+        return True
+    return skip
+
+
+def setup(app):
+    app.connect("autodoc-skip-member", _skip_attributes)
