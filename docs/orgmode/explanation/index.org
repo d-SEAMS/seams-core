@@ -6,7 +6,7 @@ These pages are for understanding. They are not recipes.
 | page | question |
 |------+----------|
 | [[file:architecture.org][Three repositories]] | Why the engine, Python, and Lua are three packages |
-| [[file:c-api-gaps.org][C API gaps for the Lua binding]] | 1.x names that ~seams.h~ does not export yet |
+| [[file:c-api.org][The C API]] | Opaque handles, errors, and the analyses libseams exports |
 | [[file:chill-plus-vs-cages.org][CHILL+ versus cages]] | Why the two scores disagree |
 | [[file:chill-plus-rules.org][CHILL+: the published rule and the OVITO rule]] | Four-nearest q3, the neighbour test, and the OVITO shell |
 | [[file:interface-order.org][Interface and confined ice]] | Where the 2015 rule and the OVITO rule part |
@@ -30,7 +30,7 @@ These pages are for understanding. They are not recipes.
    :maxdepth: 1
 
    architecture
-   c-api-gaps
+   c-api
    chill-plus-vs-cages
    chill-plus-rules
    interface-order

@@ -213,6 +213,256 @@ int main(void) {
     expect(!(q2[2] > 0.2), "the other type stays out of the type 2 shell");
   }
 
+  expect(seams_version() == SEAMS_VERSION_NUMBER, "packed version");
+  expect(seams_system_set_frame(sys, xyz, n, box, NULL, NULL) == SEAMS_OK, "restore diamond");
+  expect(seams_system_set_atoms(sys, xyz, (size_t)n, box, 9, NULL, NULL) == SEAMS_OK,
+         "set atoms");
+  expect(seams_system_set_atoms(sys, xyz, (size_t)n, box, 8, NULL, NULL) == SEAMS_ERR_RANGE,
+         "box length");
+  expect(seams_handle_error(sys)[0] != '\0', "handle keeps the box error");
+  expect(seams_system_set_atoms(sys, xyz, (size_t)n, box, 9, NULL, NULL) == SEAMS_OK,
+         "set atoms again");
+
+  seams_neighbours *copy_nb = NULL;
+  expect(seams_neighbours_build(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, &copy_nb) == SEAMS_OK,
+         "neighbours again");
+  size_t n_off = 0;
+  size_t n_col = 0;
+  expect(seams_neighbours_copy(copy_nb, NULL, 0, &n_off, NULL, 0, &n_col) == SEAMS_OK,
+         "csr query");
+  expect(n_off == (size_t)n + 1, "query rows");
+  int *off_copy = calloc(n_off, sizeof(int));
+  int *col_copy = calloc(n_col > 0 ? n_col : 1, sizeof(int));
+  expect(seams_neighbours_copy(copy_nb, off_copy, n_off, &n_off, col_copy, n_col, &n_col) ==
+             SEAMS_OK,
+         "csr copy");
+  expect(seams_neighbours_copy(copy_nb, off_copy, 1, &n_off, col_copy, n_col, &n_col) ==
+             SEAMS_ERR_RANGE,
+         "short csr buffer");
+  seams_neighbours_destroy(copy_nb);
+
+  double *q3 = calloc((size_t)n, sizeof(double));
+  double *q3bar = calloc((size_t)n, sizeof(double));
+  double *ql4 = calloc((size_t)n, sizeof(double));
+  double *ql6 = calloc((size_t)n, sizeof(double));
+  expect(seams_ql(sys, 3.5, 0, 3, SEAMS_GRAPH_CUTOFF, q3, (size_t)n, q3bar, (size_t)n) ==
+             SEAMS_OK,
+         "q3");
+  expect(seams_ql(sys, 3.5, 0, 4, SEAMS_GRAPH_CUTOFF, ql4, (size_t)n, NULL, 0) == SEAMS_OK,
+         "q4");
+  expect(seams_ql(sys, 3.5, 0, 6, SEAMS_GRAPH_MUTUAL, ql6, (size_t)n, NULL, 0) == SEAMS_OK,
+         "q6 mutual");
+  int q_ok = 1;
+  for (int i = 0; i < n; i++) {
+    if (!isfinite(q3[i]) || !isfinite(ql4[i]) || !isfinite(ql6[i])) {
+      q_ok = 0;
+    }
+  }
+  expect(q_ok, "q3 q4 q6 are finite");
+
+  double *q6bar = calloc((size_t)n, sizeof(double));
+  double q6_mean = 0.0;
+  double q6_median = 0.0;
+  int q6_ice = 0;
+  expect(seams_q6bar(sys, 3.5, 0, 0.36, q6bar, (size_t)n, &q6_mean, &q6_median, &q6_ice) ==
+             SEAMS_OK,
+         "q6bar");
+  expect(isfinite(q6_mean) && isfinite(q6_median) && q6_ice >= 0, "q6bar summary");
+
+  expect(seams_chill(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels, (size_t)n,
+                     counts) == SEAMS_OK,
+         "published chill");
+  expect(counts[SEAMS_LABEL_CUBIC] > 0, "published chill finds cubic ice");
+  expect(seams_chill(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_OVITO, labels, (size_t)n,
+                     counts) == SEAMS_OK,
+         "ovito chill");
+
+  seams_rings *again = NULL;
+  expect(seams_rings_find(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6, &again) == SEAMS_OK,
+         "rings again");
+  size_t n_vert = 0;
+  expect(seams_rings_vertices(again, 0, NULL, 0, &n_vert) == SEAMS_OK, "ring query");
+  int *verts = calloc(n_vert > 0 ? n_vert : 1, sizeof(int));
+  expect(seams_rings_vertices(again, 0, verts, n_vert, &n_vert) == SEAMS_OK, "ring vertices");
+  seams_rings_destroy(again);
+
+  seams_cage_set *cages = NULL;
+  expect(seams_cages(sys, 3.5, 0, SEAMS_GRAPH_SEEDED, 4, 0, &cages) == SEAMS_OK,
+         "seeded cages");
+  int n_hex = 0;
+  int n_cubic = 0;
+  int n_water = 0;
+  int n_both = 0;
+  expect(seams_cages_counts(cages, &n_hex, &n_cubic, &n_water, &n_both) == SEAMS_OK,
+         "cage counts");
+  expect(n_hex + n_cubic + n_water + n_both == n, "cage counts cover the frame");
+  int *per_atom = calloc((size_t)n, sizeof(int));
+  expect(seams_cages_labels(cages, per_atom, (size_t)n) == SEAMS_OK, "cage labels");
+  seams_cage_label tag = (seams_cage_label)per_atom[0];
+  expect(tag == SEAMS_CAGE_WATER || tag == SEAMS_CAGE_HEX || tag == SEAMS_CAGE_CUBIC ||
+             tag == SEAMS_CAGE_BOTH,
+         "cage code");
+  seams_cages_destroy(cages);
+  size_t n_sig = 0;
+  size_t n_sig_atoms = 0;
+  expect(seams_cages_signature(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, "512", &n_sig, &n_sig_atoms) ==
+             SEAMS_OK,
+         "signature alias");
+  expect(seams_signature_cages(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, "512", &n_sig, &n_sig_atoms) ==
+             SEAMS_OK,
+         "signature cages");
+
+  int *shell = calloc((size_t)n, sizeof(int));
+  expect(seams_system_symmetry(sys, 0.0, shell, (size_t)n) == SEAMS_OK, "symmetry");
+  int shell_ok = 1;
+  for (int i = 0; i < n; i++) {
+    if (shell[i] < -1 || shell[i] > 2) {
+      shell_ok = 0;
+    }
+  }
+  expect(shell_ok, "shell labels");
+
+  int *ice = calloc((size_t)n, sizeof(int));
+  for (int i = 0; i < n; i++) {
+    ice[i] = 1;
+  }
+  seams_brine *front = NULL;
+  expect(seams_brine_analyse(sys, ice, (size_t)n, 0, 0, 4, 2, &front) == SEAMS_OK, "brine");
+  double z_enter = 0.0;
+  double z_exit = 0.0;
+  double thickness = 0.0;
+  int found = 0;
+  expect(seams_brine_fronts(front, &z_enter, &z_exit, &thickness, &found) == SEAMS_OK,
+         "fronts");
+  double c_ice = 0.0;
+  double c_liquid = 0.0;
+  double rejection = 0.0;
+  int defined = 0;
+  expect(seams_brine_rejection(front, &c_ice, &c_liquid, &rejection, &defined) == SEAMS_OK,
+         "rejection");
+  size_t n_bins = 0;
+  expect(seams_brine_profile(front, NULL, NULL, NULL, 0, &n_bins) == SEAMS_OK, "profile query");
+  double *z_mid = calloc(n_bins > 0 ? n_bins : 1, sizeof(double));
+  double *molality = calloc(n_bins > 0 ? n_bins : 1, sizeof(double));
+  double *ice_fraction = calloc(n_bins > 0 ? n_bins : 1, sizeof(double));
+  expect(seams_brine_profile(front, z_mid, molality, ice_fraction, n_bins, &n_bins) == SEAMS_OK,
+         "profile");
+  int n_pockets = 0;
+  int reservoir = 0;
+  expect(seams_brine_pockets(front, &n_pockets, &reservoir) == SEAMS_OK, "pockets");
+  seams_brine_destroy(front);
+
+  size_t nframes = 0;
+  expect(seams_path_nframes(NULL, &nframes) == SEAMS_ERR_NULL, "null path");
+  const char *sample = getenv("SEAMS_SAMPLE");
+  if (sample != NULL) {
+    expect(seams_path_nframes(sample, &nframes) == SEAMS_OK, "nframes");
+    expect(nframes >= 1, "at least one frame");
+    seams_system *file = seams_system_create();
+    expect(seams_system_read(file, sample, 1, -1) == SEAMS_OK, "read frame");
+    expect(seams_system_count(file) > 0, "read count");
+    seams_system_destroy(file);
+  }
+  const char *xyz_path = getenv("SEAMS_XYZ");
+  if (xyz_path != NULL) {
+    seams_system *xyz_frame = seams_system_create();
+    expect(seams_system_read(xyz_frame, xyz_path, 1, -1) == SEAMS_OK, "read xyz");
+    expect(seams_system_count(xyz_frame) > 0, "xyz count");
+    seams_system_destroy(xyz_frame);
+  }
+  const char *con_path = getenv("SEAMS_CON");
+  if (con_path != NULL) {
+    size_t con_frames = 0;
+    expect(seams_path_nframes(con_path, &con_frames) == SEAMS_OK, "con frames");
+    expect(con_frames >= 1, "con has a frame");
+    seams_system *con_frame = seams_system_create();
+    expect(seams_system_read(con_frame, con_path, 1, -1) == SEAMS_OK, "read con");
+    expect(seams_system_count(con_frame) > 0, "con count");
+    seams_system_destroy(con_frame);
+  }
+  {
+    FILE *dump = fopen("capi_triclinic.lammpstrj", "w");
+    expect(dump != NULL, "write triclinic dump");
+    if (dump != NULL) {
+      fputs("ITEM: TIMESTEP\n0\nITEM: NUMBER OF ATOMS\n2\n"
+            "ITEM: BOX BOUNDS xy xz yz pp pp pp\n0.0 10.0 0.5\n0.0 10.0 0.2\n"
+            "0.0 10.0 0.1\nITEM: ATOMS id type x y z\n1 1 1.0 1.0 1.0\n"
+            "2 1 2.0 1.0 1.0\n",
+            dump);
+      fclose(dump);
+      seams_system *tri = seams_system_create();
+      expect(seams_system_read(tri, "capi_triclinic.lammpstrj", 1, -1) == SEAMS_OK,
+             "read triclinic dump");
+      expect(seams_system_count(tri) == 2, "triclinic count");
+      seams_system_destroy(tri);
+      remove("capi_triclinic.lammpstrj");
+    }
+  }
+
+  expect(seams_steinhardt(sys, 3.5, 0, 6, q6bar, (size_t)n, NULL, 0) == SEAMS_OK, "steinhardt");
+  seams_neighbours *knn = NULL;
+  expect(seams_neighbours_knn(sys, 4, 3.5, 0, 1, &knn) == SEAMS_OK, "knn mutual");
+  expect(seams_neighbours_count(knn) == n, "knn rows");
+  seams_neighbours_destroy(knn);
+  expect(seams_neighbours_knn(sys, 4, 3.5, 0, 0, &knn) == SEAMS_OK, "knn one way");
+  seams_neighbours_destroy(knn);
+  size_t n_rdf = 0;
+  double volume = 0.0;
+  expect(seams_rdf(sys, 6.0, 20, 0, 0, NULL, NULL, NULL, 0, &n_rdf, &volume) == SEAMS_OK,
+         "rdf query");
+  expect(n_rdf > 0 && volume > 0.0, "rdf bins");
+  double *rdf_r = calloc(n_rdf, sizeof(double));
+  double *rdf_g = calloc(n_rdf, sizeof(double));
+  expect(seams_rdf(sys, 6.0, 20, 0, 0, rdf_r, rdf_g, NULL, n_rdf, &n_rdf, NULL) == SEAMS_OK,
+         "rdf");
+  size_t n_cn = 0;
+  expect(seams_running_cn(sys, 6.0, 20, 0, 0, NULL, NULL, 0, &n_cn) == SEAMS_OK, "running cn");
+  double cn = 0.0;
+  expect(seams_coordination(sys, 3.5, 20, 0, 0, &cn) == SEAMS_OK, "coordination");
+  expect(isfinite(cn) && cn > 0.0, "coordination value");
+  int n_hbonds = -1;
+  expect(seams_hbonds(sys, 3.5, 1, 2, 2.42, 30.0, &n_hbonds) == SEAMS_OK, "hbonds");
+  expect(n_hbonds == 0, "no hydrogens");
+  size_t n_rho = 0;
+  expect(seams_density_axis(sys, 0, 8, 2, NULL, NULL, 0, &n_rho) == SEAMS_OK, "density");
+  expect(n_rho == 8, "density bins");
+  seams_topo *fp = NULL;
+  expect(seams_fingerprint(sys, 3.5, 0, 4, SEAMS_GRAPH_CUTOFF, 2, 0, &fp) == SEAMS_OK,
+         "fingerprint");
+  size_t key_len = 0;
+  expect(seams_fingerprint_key(fp, NULL, 0, &key_len) == SEAMS_OK, "frame key");
+  expect(key_len > 0, "frame key length");
+  char *key = calloc(key_len + 1, 1);
+  expect(seams_fingerprint_key(fp, key, key_len + 1, &key_len) == SEAMS_OK, "frame key text");
+  expect(seams_fingerprint_atom(fp, 0, key, key_len + 1, &key_len) == SEAMS_OK, "atom key");
+  int fp_rings[8];
+  expect(seams_fingerprint_rings(fp, fp_rings, 8) == SEAMS_OK, "fingerprint rings");
+  seams_fingerprint_destroy(fp);
+  int kinds[64];
+  expect(seams_site_table(sys, "1=waterO", kinds, (size_t)n) == SEAMS_OK, "site table");
+  seams_site_kind kind = (seams_site_kind)kinds[0];
+  expect(kind == SEAMS_SITE_WATER_O, "water oxygen kind");
+  size_t n_pairs = 0;
+  int n_cation = 0;
+  int n_anion = 0;
+  expect(seams_contact_pairs(sys, "1=cationHead", &n_pairs, &n_cation, &n_anion) == SEAMS_OK,
+         "contact pairs");
+  int n_subset = 0;
+  int largest = 0;
+  double percolation = 0.0;
+  expect(seams_domains(sys, 3.5, "1=waterO", 0, &n_subset, &largest, &percolation) == SEAMS_OK,
+         "domains");
+  int perfect[7];
+  int imperfect[7];
+  expect(seams_prisms(sys, 3.5, 0, perfect, imperfect, 7) == SEAMS_OK, "prisms");
+  int sheet[7];
+  expect(seams_monolayer(sys, 3.5, 0, 6, 100.0, sheet, 7) == SEAMS_OK, "monolayer");
+  expect(sheet[6] > 0, "monolayer hexagons");
+  seams_cage_set *again_cages = NULL;
+  expect(seams_cages_find(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, 4, 0, &again_cages) == SEAMS_OK,
+         "cages find");
+  seams_cages_destroy(again_cages);
+
   seams_system_destroy(sys);
   free(xyz);
   free(labels);
@@ -220,6 +470,23 @@ int main(void) {
   free(q6);
   free(sizes);
   free(sym);
+  free(off_copy);
+  free(col_copy);
+  free(q3);
+  free(q3bar);
+  free(ql4);
+  free(ql6);
+  free(q6bar);
+  free(verts);
+  free(per_atom);
+  free(shell);
+  free(ice);
+  free(z_mid);
+  free(molality);
+  free(ice_fraction);
+  free(rdf_r);
+  free(rdf_g);
+  free(key);
   if (g_fails != 0) {
     fprintf(stderr, "%d checks failed\n", g_fails);
     return 1;

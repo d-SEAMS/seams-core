@@ -67,6 +67,55 @@ fraction of atoms that sit on a ring; a size of zero counts every ring.
 (`omp_get_max_threads`), which is the library default. A negative width
 returns `SEAMS_ERR_RANGE`.
 
+## Frames from a file
+
+`seams_path_nframes` reports how many frames a path holds.
+`seams_system_read` copies frame 1, or a later 1-based index, into a
+handle. A negative type filter keeps every atom. `seams_system_set_atoms`
+is the array entry with `size_t` lengths. `seams_system_set_frame` remains
+the int-length entry.
+
+## Order parameters, cages, symmetry, and the front
+
+`seams_ql` writes local q3, q4, or q6, and the Lechner-Dellago average
+when the average pointer is present. `seams_q6bar` summarises that
+average. The nucleation cut used in the quickstart is 0.36.
+`seams_chill` is the original CHILL rule. `SEAMS_CHILL_PUBLISHED` keeps
+inclusive edges and `SEAMS_CHILL_OVITO` keeps the open edges.
+`seams_chill_plus` is unchanged.
+`seams_cages_find` scores hexagonal and double-diamond membership.
+`SEAMS_GRAPH_SEEDED` is the mutual-seed graph. `seams_cages_signature`
+counts closed cages of one census, such as `512`.
+`seams_system_symmetry` writes the shell label of each atom. A
+non-positive residual selects the library ceiling.
+`seams_brine_analyse` measures a planar ice front from a caller-supplied
+ice assignment.
+`seams_steinhardt` is the cutoff-shell q_l, including q3, with the
+Lechner-Dellago average when the second buffer is present.
+`seams_neighbours_knn` builds a k-nearest list, mutual or one-way.
+`seams_rdf`, `seams_running_cn`, and `seams_coordination` are the
+partial distribution and its integral.
+`seams_hbonds` counts hydrogen bonds. `seams_density_axis` is the
+number density along one edge. `seams_fingerprint` names the bonded
+graph. `seams_prisms` and `seams_monolayer` are the prism and sheet
+censuses. `seams_site_table`, `seams_contact_pairs`, and `seams_domains`
+read a site spec such as `1=waterO`. `seams_cages` and
+`seams_signature_cages` are the cage searches.
+
+`seams_handle_error` is the detail stored on the handle that failed.
+`seams_last_error` remains the thread-local detail.
+`seams_neighbours_copy` fills caller buffers. A null buffer queries the
+length. `seams_neighbours_csr` still returns pointers owned by the handle
+until `seams_neighbours_destroy`.
+
+One handle is used by one thread. Distinct handles may run together.
+`seams_set_num_threads` is process-global.
+
+`examples/c` builds the quickstart against the installed library.
+`pkg-config --cflags --libs seams` and `find_package(seams)` both name
+that install. The design of the ABI is
+`docs/orgmode/explanation/c-api.org`.
+
 ## Runnable example
 
 `docs/examples/minimal_c.c` reads
@@ -90,7 +139,11 @@ runs the eight-atom program in `docs/examples/ice.c`.
 
 ```{literalinclude} ../../../tests/test_seams_api.c
 :language: c
-:lines: 102-216
+:lines: 102-466
+```
+
+```{literalinclude} ../../../examples/c/quickstart.c
+:language: c
 ```
 
 ```{literalinclude} ../../../docs/examples/ice.c
@@ -111,6 +164,46 @@ Units: dimensionless integer 1
 
 Example: `docs/examples/minimal_c.c`
 
+### SEAMS_CAGE_BOTH
+
+Purpose: Atom that belongs to both cage types.
+
+Parameters: none
+
+Units: dimensionless code 3
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_CAGE_CUBIC
+
+Purpose: Atom that belongs only to a double-diamond cage.
+
+Parameters: none
+
+Units: dimensionless code 2
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_CAGE_HEX
+
+Purpose: Atom that belongs only to a hexagonal cage.
+
+Parameters: none
+
+Units: dimensionless code 1
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_CAGE_WATER
+
+Purpose: Atom that belongs to neither cage.
+
+Parameters: none
+
+Units: dimensionless code 0
+
+Example: `docs/examples/minimal_c.c`
+
 ### SEAMS_CHILL_OVITO
 
 Purpose: CHILL+ rule used by OVITO.
@@ -128,6 +221,16 @@ Purpose: CHILL+ rule from Nguyen and Molinero, 2015.
 Parameters: none
 
 Units: dimensionless code 0
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_DEPRECATED
+
+Purpose: Mark a shipped name and name its replacement.
+
+Parameters: message
+
+Units: attribute text
 
 Example: `docs/examples/minimal_c.c`
 
@@ -218,6 +321,16 @@ Purpose: Mutual four-nearest neighbour graph.
 Parameters: none
 
 Units: dimensionless code 1
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_GRAPH_SEEDED
+
+Purpose: Cage graph: mutual seeds and union completions.
+
+Parameters: none
+
+Units: dimensionless code 2
 
 Example: `docs/examples/minimal_c.c`
 
@@ -441,6 +554,166 @@ Units: dimensionless code 0
 
 Example: `docs/examples/minimal_c.c`
 
+### SEAMS_SITE_ACCEPTOR
+
+Purpose: Site kind of an acceptor atom.
+
+Parameters: none
+
+Units: dimensionless code 5
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_SITE_ANION
+
+Purpose: Site kind of an anion.
+
+Parameters: none
+
+Units: dimensionless code 2
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_SITE_APOLAR
+
+Purpose: Site kind of an apolar atom.
+
+Parameters: none
+
+Units: dimensionless code 7
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_SITE_CATION
+
+Purpose: Site kind of a cation head.
+
+Parameters: none
+
+Units: dimensionless code 1
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_SITE_DONOR_H
+
+Purpose: Site kind of a donor hydrogen.
+
+Parameters: none
+
+Units: dimensionless code 4
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_SITE_POLAR
+
+Purpose: Site kind of a polar atom.
+
+Parameters: none
+
+Units: dimensionless code 6
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_SITE_SOLVENT
+
+Purpose: Site kind of a solvent atom.
+
+Parameters: none
+
+Units: dimensionless code 10
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_SITE_TAIL
+
+Purpose: Site kind of a tail atom.
+
+Parameters: none
+
+Units: dimensionless code 3
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_SITE_UNSPECIFIED
+
+Purpose: Site kind that the table did not name.
+
+Parameters: none
+
+Units: dimensionless code 0
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_SITE_WATER_H
+
+Purpose: Site kind of a water hydrogen.
+
+Parameters: none
+
+Units: dimensionless code 9
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_SITE_WATER_O
+
+Purpose: Site kind of a water oxygen.
+
+Parameters: none
+
+Units: dimensionless code 8
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_VERSION_MAJOR
+
+Purpose: Major component of this release.
+
+Parameters: none
+
+Units: dimensionless integer
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_VERSION_MINOR
+
+Purpose: Minor component of this release.
+
+Parameters: none
+
+Units: dimensionless integer
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_VERSION_NUMBER
+
+Purpose: Packed version, (major << 16) | (minor << 8) | patch.
+
+Parameters: none
+
+Units: dimensionless integer
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_VERSION_PATCH
+
+Purpose: Patch component of this release.
+
+Parameters: none
+
+Units: dimensionless integer
+
+Example: `docs/examples/minimal_c.c`
+
+### SEAMS_VERSION_STRING
+
+Purpose: Release text written by the build.
+
+Parameters: none
+
+Units: text
+
+Example: `docs/examples/minimal_c.c`
+
 ### seams_abi
 
 Purpose: Return the ABI number of this libseams.
@@ -448,6 +721,166 @@ Purpose: Return the ABI number of this libseams.
 Parameters: none
 
 Units: dimensionless integer
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_brine
+
+Purpose: Opaque handle of one ice-front measurement.
+
+Parameters: none
+
+Units: handle
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_brine_analyse
+
+Purpose: Measure a planar ice front from an ice assignment.
+
+Parameters: sys; ice; n_ice; water_type; ion_type; n_bins; axis; out
+
+Units: lengths in angstrom; ice flags are dimensionless
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_brine_destroy
+
+Purpose: Free a brine-front handle.
+
+Parameters: front
+
+Units: handle
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_brine_fronts
+
+Purpose: Report the two planar crossings of the ice slab.
+
+Parameters: front; z_enter; z_exit; thickness; found
+
+Units: lengths in angstrom
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_brine_pockets
+
+Purpose: Count brine pockets and the liquid reservoir.
+
+Parameters: front; n_pockets; reservoir_waters
+
+Units: dimensionless counts
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_brine_profile
+
+Purpose: Copy the concentration profile along the front axis.
+
+Parameters: front; z_mid; molality; ice_fraction; cap; n_out
+
+Units: z in angstrom; molality in mol/kg; ice fraction is dimensionless
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_brine_rejection
+
+Purpose: Report the molal rejection coefficient.
+
+Parameters: front; c_ice; c_liquid; k; defined
+
+Units: molality in mol/kg; k is dimensionless
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_cage_label
+
+Purpose: Enumerator of per-atom cage membership.
+
+Parameters: none
+
+Units: dimensionless
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_cage_set
+
+Purpose: Opaque handle of hexagonal and double-diamond membership.
+
+Parameters: none
+
+Units: handle
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_cages
+
+Purpose: Build hexagonal and double-diamond cage membership.
+
+Parameters: sys; cutoff; type; graph; k; complete; out
+
+Units: cutoff in angstrom
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_cages_counts
+
+Purpose: Disjoint cage population counts.
+
+Parameters: cages; n_hex; n_cubic; n_water; n_both
+
+Units: dimensionless counts
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_cages_destroy
+
+Purpose: Free a cage-membership handle.
+
+Parameters: cages
+
+Units: handle
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_cages_find
+
+Purpose: Score hexagonal and double-diamond cages.
+
+Parameters: sys; cutoff; type; graph; k; complete; out
+
+Units: cutoff in angstrom; k is a dimensionless neighbour count
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_cages_labels
+
+Purpose: Write one cage code per atom.
+
+Parameters: cages; per_atom; len
+
+Units: dimensionless codes
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_cages_signature
+
+Purpose: Count closed cages of one ring census.
+
+Parameters: sys; cutoff; type; graph; spec; n_cages; n_atoms
+
+Units: cutoff in angstrom; counts are dimensionless
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_chill
+
+Purpose: Write one original CHILL label per atom.
+
+Parameters: sys; cutoff; type; graph; rule; labels; labels_len; counts9
+
+Units: cutoff in angstrom; labels are dimensionless
 
 Example: `docs/examples/minimal_c.c`
 
@@ -471,6 +904,96 @@ Units: dimensionless
 
 Example: `docs/examples/minimal_c.c`
 
+### seams_contact_pairs
+
+Purpose: Count mutual nearest unlike contacts of a site table.
+
+Parameters: sys; site_spec; n_pairs; n_cation; n_anion
+
+Units: dimensionless counts
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_coordination
+
+Purpose: Coordination number integrated to rmax.
+
+Parameters: sys; rmax; bins; type_i; type_j; cn
+
+Units: rmax in angstrom; cn is dimensionless
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_density_axis
+
+Purpose: Number density along one cell axis.
+
+Parameters: sys; type; bins; axis; z; rho; cap; n_out
+
+Units: z in angstrom; rho is number density
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_domains
+
+Purpose: Largest polar or apolar domain.
+
+Parameters: sys; cutoff; site_spec; subset; n_subset; largest; percolation
+
+Units: cutoff in angstrom; percolation is dimensionless
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_fingerprint
+
+Purpose: Topological fingerprint of the bonded graph.
+
+Parameters: sys; cutoff; type; k; graph; hops; colour_types; out
+
+Units: cutoff in angstrom; hops is a dimensionless depth
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_fingerprint_atom
+
+Purpose: Local key of one atom.
+
+Parameters: fp; index; buf; cap; n_out
+
+Units: text
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_fingerprint_destroy
+
+Purpose: Free a fingerprint handle.
+
+Parameters: fp
+
+Units: handle
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_fingerprint_key
+
+Purpose: Frame key of a fingerprint.
+
+Parameters: fp; buf; cap; n_out
+
+Units: text
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_fingerprint_rings
+
+Purpose: Primitive-ring census stored on a fingerprint.
+
+Parameters: fp; counts; counts_len
+
+Units: dimensionless ring counts
+
+Example: `docs/examples/minimal_c.c`
+
 ### seams_get_num_threads
 
 Purpose: Report the OpenMP width the next call will use.
@@ -488,6 +1011,26 @@ Purpose: Enumerator of the cutoff graph and the mutual graph.
 Parameters: none
 
 Units: dimensionless
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_handle_error
+
+Purpose: Return the detail string stored on a handle.
+
+Parameters: handle
+
+Units: text
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_hbonds
+
+Purpose: Count hydrogen bonds on one frame.
+
+Parameters: sys; cutoff; oxygen_type; hydrogen_type; dist_cutoff; angle_cutoff; n_bonds
+
+Units: distances in angstrom; angle in degrees; n_bonds is dimensionless
 
 Example: `docs/examples/minimal_c.c`
 
@@ -521,6 +1064,16 @@ Units: text
 
 Example: `docs/examples/minimal_c.c`
 
+### seams_monolayer
+
+Purpose: Primitive-ring histogram of a monolayer.
+
+Parameters: sys; cutoff; type; max_depth; sheet_area; counts; counts_len
+
+Units: cutoff in angstrom; sheet_area in square angstrom
+
+Example: `docs/examples/minimal_c.c`
+
 ### seams_neighbours
 
 Purpose: Opaque handle of one neighbour list.
@@ -538,6 +1091,16 @@ Purpose: Build a cutoff or mutual neighbour list.
 Parameters: sys; cutoff; type; graph; out
 
 Units: cutoff in angstrom; type 0 keeps every atom
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_neighbours_copy
+
+Purpose: Copy the neighbour list into caller buffers.
+
+Parameters: nb; offsets; offsets_cap; n_offsets; cols; cols_cap; nnz
+
+Units: dimensionless indices; a null buffer queries the length
 
 Example: `docs/examples/minimal_c.c`
 
@@ -571,6 +1134,36 @@ Units: handle
 
 Example: `docs/examples/minimal_c.c`
 
+### seams_neighbours_knn
+
+Purpose: Build a k-nearest neighbour list.
+
+Parameters: sys; k; cutoff; type; mutual; out
+
+Units: cutoff in angstrom; k is a dimensionless neighbour count
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_path_nframes
+
+Purpose: Count frames in a trajectory path.
+
+Parameters: path; nframes
+
+Units: dimensionless count
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_prisms
+
+Purpose: Perfect and imperfect prism counts by ring size.
+
+Parameters: sys; cutoff; type; perfect; imperfect; len
+
+Units: cutoff in angstrom; counts are dimensionless
+
+Example: `docs/examples/minimal_c.c`
+
 ### seams_q4q6
 
 Purpose: Write local q4 and q6 on the cutoff shell.
@@ -578,6 +1171,36 @@ Purpose: Write local q4 and q6 on the cutoff shell.
 Parameters: sys; cutoff; type; q4; q6
 
 Units: cutoff in angstrom; q4 and q6 are dimensionless
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_q6bar
+
+Purpose: Write Lechner-Dellago q6-bar and the ice count above a cut.
+
+Parameters: sys; cutoff; type; ice_cut; q6bar; q6bar_len; mean; median; n_ice
+
+Units: cutoff in angstrom; q6-bar is dimensionless
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_ql
+
+Purpose: Write local q_l and, on request, its neighbour average.
+
+Parameters: sys; cutoff; type; order_l; graph; ql; ql_len; qlbar; qlbar_len
+
+Units: cutoff in angstrom; q_l is dimensionless
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_rdf
+
+Purpose: Partial radial distribution.
+
+Parameters: sys; rmax; bins; type_i; type_j; r; g; count; cap; n_out; volume
+
+Units: r and rmax in angstrom; g is dimensionless; volume in cubic angstrom
 
 Example: `docs/examples/minimal_c.c`
 
@@ -671,6 +1294,26 @@ Units: dimensionless size and symmetry code
 
 Example: `docs/examples/minimal_c.c`
 
+### seams_rings_vertices
+
+Purpose: Copy the atom indices of one ring.
+
+Parameters: rings; index; atoms; cap; n_out
+
+Units: dimensionless indices
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_running_cn
+
+Purpose: Running coordination number along the partial RDF.
+
+Parameters: sys; rmax; bins; type_i; type_j; r; cn; cap; n_out
+
+Units: r in angstrom; cn is dimensionless
+
+Example: `docs/examples/minimal_c.c`
+
 ### seams_set_num_threads
 
 Purpose: Set the OpenMP width for the next call.
@@ -678,6 +1321,36 @@ Purpose: Set the OpenMP width for the next call.
 Parameters: n
 
 Units: dimensionless thread count; 0 restores the library default
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_signature_cages
+
+Purpose: Count closed cages of one ring census.
+
+Parameters: sys; cutoff; type; graph; spec; n_cages; n_atoms
+
+Units: cutoff in angstrom; counts are dimensionless
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_site_kind
+
+Purpose: Enumerator of site-table kinds.
+
+Parameters: none
+
+Units: dimensionless
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_site_table
+
+Purpose: Per-atom site kind from a site-table spec.
+
+Parameters: sys; spec; kinds; len
+
+Units: dimensionless kind codes
 
 Example: `docs/examples/minimal_c.c`
 
@@ -698,6 +1371,16 @@ Purpose: Map a status code to its name.
 Parameters: status
 
 Units: dimensionless code in, text out
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_steinhardt
+
+Purpose: Local Steinhardt q_l on the cutoff shell, with the average on request.
+
+Parameters: sys; cutoff; type; order_l; ql; ql_len; qlbar; qlbar_len
+
+Units: cutoff in angstrom; q_l is dimensionless
 
 Example: `docs/examples/minimal_c.c`
 
@@ -741,6 +1424,26 @@ Units: handle
 
 Example: `docs/examples/minimal_c.c`
 
+### seams_system_read
+
+Purpose: Read one frame from a trajectory path.
+
+Parameters: sys; path; frame; type_filter
+
+Units: frame index is 1-based; coordinates in angstrom
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_system_set_atoms
+
+Purpose: Store points and a cell, with size_t lengths.
+
+Parameters: sys; xyz; n; box9; box_len; types; ids
+
+Units: coordinates and box lengths in angstrom
+
+Example: `docs/examples/minimal_c.c`
+
 ### seams_system_set_frame
 
 Purpose: Store points and a general LAMMPS cell.
@@ -761,13 +1464,33 @@ Units: origin and edge lengths in angstrom
 
 Example: `docs/examples/minimal_c.c`
 
-### seams_version
+### seams_system_symmetry
 
-Purpose: Stem of the generated version header and the version calls.
+Purpose: Write one ice-shell label per atom.
+
+Parameters: sys; shell_rmsd; labels; labels_len
+
+Units: shell_rmsd is a dimensionless residual; labels are dimensionless codes
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_topo
+
+Purpose: Opaque handle of one topological fingerprint.
 
 Parameters: none
 
-Units: text and dimensionless integers
+Units: handle
+
+Example: `docs/examples/minimal_c.c`
+
+### seams_version
+
+Purpose: Return the packed release number.
+
+Parameters: none
+
+Units: dimensionless integer, (major << 16) | (minor << 8) | patch
 
 Example: `docs/examples/minimal_c.c`
 

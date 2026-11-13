@@ -27,6 +27,10 @@
 
 #ifdef SEAMS_HAS_LINKCELL
 #include <linkcell.h>
+extern "C" int lc_halo_width(double cutoff, int images, const double *width, std::uint32_t *halo);
+extern "C" int lc_partition_weights(const int *nxyz, const std::uint64_t *weight,
+                                    std::size_t ncell, std::size_t parts, int balance,
+                                    double slack, int *assign);
 #endif
 
 // The linked cell this tree was built against does not always export

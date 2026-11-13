@@ -1011,17 +1011,16 @@ SteinhardtQl cutoffSolid(
     double geomCut = 0;
   };
   static Scratch scratch;
-  // q_lm is only read by the Lechner-Dellago average and by w. A local
-  // q_l overwrites its own row, so that buffer stays unallocated.
-  // The row is packed at this degree's width. A wider buffer left by a
-  // higher degree is reused; growing is the only allocation.
-  const bool keepQlm = average || invariants;
+  // The fast local q4/q6 kernel can skip the row. Every other degree
+  // writes q_lm, including a local q3, so the row exists before that
+  // loop. A wider buffer left by a higher degree is reused; growing is
+  // the only allocation.
   if (scratch.xyz.size() != static_cast<std::size_t>(n) * 3) {
     scratch.xyz.resize(static_cast<std::size_t>(n) * 3);
   }
   const std::size_t qlmNeed =
       static_cast<std::size_t>(n) * static_cast<std::size_t>(width);
-  if (keepQlm && scratch.qlm.size() < qlmNeed) {
+  if (scratch.qlm.size() < qlmNeed) {
     scratch.qlm.assign(qlmNeed, 0.0);
   }
   scratch.n = n;

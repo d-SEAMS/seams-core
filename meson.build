@@ -834,6 +834,17 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 60)
   test(
+    'c_api_installed',
+    python3,
+    args: [
+      meson.project_source_root() / 'examples' / 'c' / 'check_installed.py',
+      meson.project_build_root(),
+      meson.project_source_root(),
+    ],
+    suite: 'docs',
+    depends: [seams_api_lib, ydslib],
+    timeout: 600)
+  test(
     'docs_sitting',
     python3,
     args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check'],

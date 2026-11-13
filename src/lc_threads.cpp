@@ -11,9 +11,67 @@
 // strong copy in liblinkcell replaces them.
 
 #include <algorithm>
+#include <cstddef>
+#include <cstdint>
 
 #ifdef SEAMS_HAS_OPENMP
 #include <omp.h>
+#endif
+
+#ifdef SEAMS_HAS_LINKCELL
+#include <linkcell.h>
+#endif
+
+// linkcell 0.3.11 does not export the mesh partition used by the domain
+// split. A nonzero return is the failure the callers already handle.
+// A newer liblinkcell that defines these symbols replaces the weak copies.
+#ifdef SEAMS_HAS_LINKCELL
+extern "C" __attribute__((weak)) int
+lc_halo_width(double cutoff, int images, const double *width, std::uint32_t *halo) {
+  (void)cutoff;
+  (void)images;
+  (void)width;
+  (void)halo;
+  return 1;
+}
+
+extern "C" __attribute__((weak)) int
+lc_mesh_cut(const double *xyz, std::size_t n, const lc_cell *box, double cutoff,
+            const void *mask, double hint, std::size_t parts, int order, double skin,
+            int flags, int *nxyz, double *bin, int *assign, int *point,
+            std::size_t assign_cap, std::size_t point_cap, std::size_t *ncell) {
+  (void)xyz;
+  (void)n;
+  (void)box;
+  (void)cutoff;
+  (void)mask;
+  (void)hint;
+  (void)parts;
+  (void)order;
+  (void)skin;
+  (void)flags;
+  (void)nxyz;
+  (void)bin;
+  (void)assign;
+  (void)point;
+  (void)assign_cap;
+  (void)point_cap;
+  (void)ncell;
+  return 1;
+}
+
+extern "C" __attribute__((weak)) int
+lc_partition_weights(const int *nxyz, const std::uint64_t *weight, std::size_t ncell,
+                     std::size_t parts, int balance, double slack, int *assign) {
+  (void)nxyz;
+  (void)weight;
+  (void)ncell;
+  (void)parts;
+  (void)balance;
+  (void)slack;
+  (void)assign;
+  return 1;
+}
 #endif
 
 extern "C" __attribute__((weak)) void lc_set_threads(int n) {
