@@ -12,6 +12,8 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
+#include <index_range.hpp>
+
 #include <algorithm>
 #include <atomic>
 #include <array>
@@ -608,6 +610,7 @@ bool nneigh::cellListRowsThreaded(
       return false;
     }
   }
+  seams::coarsenUntilFits(ncell[0], ncell[1], ncell[2], 3);
   // fractional coordinates of the subset, wrapped into [0, 1)
   std::vector<int> cellOf(n);
   const auto wrap = [](double f) {
@@ -629,7 +632,10 @@ bool nneigh::cellListRowsThreaded(
     }
     cellOf[k] = (c[0] * ncell[1] + c[1]) * ncell[2] + c[2];
   }
-  const int nCells = ncell[0] * ncell[1] * ncell[2];
+  int nCells = 0;
+  if (!seams::gridFits(ncell[0], ncell[1], ncell[2], nCells)) {
+    return false;
+  }
   std::vector<int> cellStart(static_cast<std::size_t>(nCells) + 1, 0);
   for (std::size_t k = 0; k < n; k++) {
     ++cellStart[static_cast<std::size_t>(cellOf[k]) + 1];
@@ -1135,7 +1141,11 @@ bool nneigh::blockWindowRows(
   for (int d = 0; d < 3; d++) {
     nc[d] = std::max(1, static_cast<int>(std::floor(edge[d] / rcutoff)));
   }
-  const int nCells = nc[0] * nc[1] * nc[2];
+  seams::coarsenUntilFits(nc[0], nc[1], nc[2], 1);
+  int nCells = 0;
+  if (!seams::gridFits(nc[0], nc[1], nc[2], nCells)) {
+    return false;
+  }
   std::vector<int> cellOf(static_cast<std::size_t>(n), 0);
   std::vector<int> cellCount(static_cast<std::size_t>(nCells), 0);
   auto cellIndex = [&](double s, int axis) {
@@ -1397,7 +1407,12 @@ const std::vector<std::vector<int>> &nneigh::reusedShellList(
     rows = neighListO(rcutoff, yCloud, 1);
     return rows;
   }
-  const int nCells = ncell[0] * ncell[1] * ncell[2];
+  seams::coarsenUntilFits(ncell[0], ncell[1], ncell[2], 3);
+  int nCells = 0;
+  if (!seams::gridFits(ncell[0], ncell[1], ncell[2], nCells)) {
+    rows = neighListO(rcutoff, yCloud, 1);
+    return rows;
+  }
   cellOf.resize(static_cast<std::size_t>(n));
   cellStart.assign(static_cast<std::size_t>(nCells) + 1, 0);
   cellAtoms.resize(static_cast<std::size_t>(n));
@@ -1521,13 +1536,17 @@ bool orthoFullList(const molSys::PointCloud<molSys::Point<double>, double> &yClo
       return false;
     }
   }
+  seams::coarsenUntilFits(ncell[0], ncell[1], ncell[2], 3);
   const double origin[3] = {
       yCloud.boxLow.size() > 0 ? yCloud.boxLow[0] : 0.0,
       yCloud.boxLow.size() > 1 ? yCloud.boxLow[1] : 0.0,
       yCloud.boxLow.size() > 2 ? yCloud.boxLow[2] : 0.0};
   const std::size_t n = subset.size();
   const double rc2 = rcutoff * rcutoff;
-  const int nCells = ncell[0] * ncell[1] * ncell[2];
+  int nCells = 0;
+  if (!seams::gridFits(ncell[0], ncell[1], ncell[2], nCells)) {
+    return false;
+  }
   struct Packed {
     double x, y, z;
   };
@@ -2547,7 +2566,11 @@ std::vector<int> nominatePacked(
   int nx = std::max(1, static_cast<int>(std::floor(bx / edge)));
   int ny = std::max(1, static_cast<int>(std::floor(by / edge)));
   int nz = std::max(1, static_cast<int>(std::floor(bz / edge)));
-  const int ncell = nx * ny * nz;
+  seams::coarsenUntilFits(nx, ny, nz, 1);
+  int ncell = 0;
+  if (!seams::gridFits(nx, ny, nz, ncell)) {
+    return nom;
+  }
   const double invx = static_cast<double>(nx) / bx;
   const double invy = static_cast<double>(ny) / by;
   const double invz = static_cast<double>(nz) / bz;
@@ -2834,9 +2857,8 @@ bool nneigh::directedKNearestCsr(
       }
     }
   }
-  for (int i = 0; i < n; i++) {
-    offsets[static_cast<std::size_t>(i + 1)] =
-        offsets[static_cast<std::size_t>(i)] + counts[static_cast<std::size_t>(i)];
+  if (!seams::prefixCounts(counts.data(), n, offsets)) {
+    return false;
   }
   cols.assign(static_cast<std::size_t>(offsets[static_cast<std::size_t>(n)]), 0);
   std::vector<int> slot(offsets.begin(), offsets.end() - 1);

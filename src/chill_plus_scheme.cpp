@@ -13,6 +13,7 @@
 //-----------------------------------------------------------------------------------
 
 #include <chill_plus_scheme.hpp>
+#include <index_range.hpp>
 
 #include <bop.hpp>
 
@@ -187,7 +188,7 @@ bool csrFromIdRows(const molSys::PointCloud<molSys::Point<double>, double> &yClo
     const auto it = yCloud.idIndexMap.find(id);
     return it == yCloud.idIndexMap.end() ? -1 : it->second;
   };
-  offsets.assign(static_cast<std::size_t>(n) + 1, 0);
+  std::vector<int> counts(static_cast<std::size_t>(n), 0);
   for (int i = 0; i < n; ++i) {
     const auto &row = nList[static_cast<std::size_t>(i)];
     int count = 0;
@@ -197,7 +198,10 @@ bool csrFromIdRows(const molSys::PointCloud<molSys::Point<double>, double> &yClo
         ++count;
       }
     }
-    offsets[static_cast<std::size_t>(i) + 1] = offsets[static_cast<std::size_t>(i)] + count;
+    counts[static_cast<std::size_t>(i)] = count;
+  }
+  if (!seams::prefixCounts(counts.data(), n, offsets)) {
+    return false;
   }
   cols.assign(static_cast<std::size_t>(offsets.back()), 0);
   for (int i = 0; i < n; ++i) {

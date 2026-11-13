@@ -68,6 +68,7 @@ test_sources = {
   'config': 'test_config.cpp',
   'site': 'test_site.cpp',
   'wide_cell': 'test_wide_cell.cpp',
+  'offset_limit': 'test_offset_limit.cpp',
 }
 
 if readcon_dep.found()

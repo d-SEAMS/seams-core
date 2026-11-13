@@ -10,6 +10,7 @@
 // A copy of the MIT License is included in the LICENSE file of this repository.
 //-----------------------------------------------------------------------------------
 
+#include <index_range.hpp>
 #include <neighbours.hpp>
 
 #include <algorithm>
@@ -1199,10 +1200,8 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
   }
   phase().count = msSince(tCount);
   const auto tPrefix = Clock::now();
-  offsets[0] = 0;
-  for (int i = 0; i < nop; ++i) {
-    offsets[static_cast<std::size_t>(i) + 1] =
-        offsets[static_cast<std::size_t>(i)] + sc.counts[static_cast<std::size_t>(i)];
+  if (!seams::prefixCounts(sc.counts.data(), nop, offsets)) {
+    return false;
   }
   const int nnz = offsets[static_cast<std::size_t>(nop)];
   cols.resize(static_cast<std::size_t>(nnz));
@@ -1727,6 +1726,19 @@ bool orthoFullCsr(
   if (!(len[0] > 0.0 && len[1] > 0.0 && len[2] > 0.0)) {
     return false;
   }
+  // Every minimum image is strictly inside this cutoff, so the list is
+  // the complete pair set. That set does not fit in a 32-bit offset.
+  if (nop > 1) {
+    const double maxImage =
+        0.5 * std::sqrt(len[0] * len[0] + len[1] * len[1] + len[2] * len[2]);
+    if (rcutoff > maxImage) {
+      const std::int64_t pairs = half ? std::int64_t{nop} * (nop - 1) / 2
+                                      : std::int64_t{nop} * (nop - 1);
+      if (pairs > std::numeric_limits<int>::max()) {
+        return false;
+      }
+    }
+  }
   const double origin[3] = {
       yCloud.boxLow.size() > 0 ? yCloud.boxLow[0] : 0.0,
       yCloud.boxLow.size() > 1 ? yCloud.boxLow[1] : 0.0,
@@ -1959,10 +1971,8 @@ bool orthoFullCsr(
   phase().count = msSince(tCount);
 
   const auto tPrefix = Clock::now();
-  offsets[0] = 0;
-  for (int i = 0; i < nop; ++i) {
-    offsets[static_cast<std::size_t>(i) + 1] =
-        offsets[static_cast<std::size_t>(i)] + sc.counts[static_cast<std::size_t>(i)];
+  if (!seams::prefixCounts(sc.counts.data(), nop, offsets)) {
+    return false;
   }
   const int nnz = offsets[static_cast<std::size_t>(nop)];
   cols.resize(static_cast<std::size_t>(nnz));

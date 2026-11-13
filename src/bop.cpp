@@ -15,6 +15,7 @@
 #include <chrono>
 
 #include <bop.hpp>
+#include <index_range.hpp>
 #include <chill_plus_scheme.hpp>
 #include <domain.hpp>
 #include <neighbours.hpp>
@@ -1289,10 +1290,14 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
     int ncell = -1;
   };
   static Scratch scratch;
-  const int nx = std::max(1, static_cast<int>(std::ceil(Lx / cutoff)));
-  const int ny = std::max(1, static_cast<int>(std::ceil(Ly / cutoff)));
-  const int nz = std::max(1, static_cast<int>(std::ceil(Lz / cutoff)));
-  const int ncell = nx * ny * nz;
+  int nx = std::max(1, static_cast<int>(std::ceil(Lx / cutoff)));
+  int ny = std::max(1, static_cast<int>(std::ceil(Ly / cutoff)));
+  int nz = std::max(1, static_cast<int>(std::ceil(Lz / cutoff)));
+  seams::coarsenUntilFits(nx, ny, nz, 1);
+  int ncell = 0;
+  if (!seams::gridFits(nx, ny, nz, ncell)) {
+    return false;
+  }
   if (scratch.n != n) {
     scratch.xyz.resize(static_cast<std::size_t>(n) * 3);
     scratch.next.assign(static_cast<std::size_t>(n), -1);
@@ -2022,10 +2027,14 @@ bool chill::chillPlusPublishedCutoff(
     const double Lx = yCloud.box[0];
     const double Ly = yCloud.box[1];
     const double Lz = yCloud.box[2];
-    const int nx = std::max(1, static_cast<int>(std::ceil(Lx / cutoff)));
-    const int ny = std::max(1, static_cast<int>(std::ceil(Ly / cutoff)));
-    const int nz = std::max(1, static_cast<int>(std::ceil(Lz / cutoff)));
-    const int ncell = nx * ny * nz;
+    int nx = std::max(1, static_cast<int>(std::ceil(Lx / cutoff)));
+    int ny = std::max(1, static_cast<int>(std::ceil(Ly / cutoff)));
+    int nz = std::max(1, static_cast<int>(std::ceil(Lz / cutoff)));
+    seams::coarsenUntilFits(nx, ny, nz, 1);
+    int ncell = 0;
+    if (!seams::gridFits(nx, ny, nz, ncell)) {
+      return false;
+    }
     std::vector<int> head(static_cast<std::size_t>(ncell), -1);
     std::vector<int> next(static_cast<std::size_t>(n), -1);
     const double invx = static_cast<double>(nx) / Lx;
@@ -2133,11 +2142,8 @@ bool chill::chillPlusPublishedCutoff(
     }
   }
   }
-  scratch.offsets.assign(static_cast<std::size_t>(n) + 1, 0);
-  for (int i = 0; i < n; i++) {
-    scratch.offsets[static_cast<std::size_t>(i) + 1] =
-        scratch.offsets[static_cast<std::size_t>(i)] +
-        scratch.degree[static_cast<std::size_t>(i)];
+  if (!seams::prefixCounts(scratch.degree.data(), n, scratch.offsets)) {
+    return false;
   }
   const int nnz = scratch.offsets[static_cast<std::size_t>(n)];
   scratch.cols.resize(static_cast<std::size_t>(nnz));
@@ -2145,10 +2151,14 @@ bool chill::chillPlusPublishedCutoff(
     const double Lx = yCloud.box[0];
     const double Ly = yCloud.box[1];
     const double Lz = yCloud.box[2];
-    const int nx = std::max(1, static_cast<int>(std::ceil(Lx / cutoff)));
-    const int ny = std::max(1, static_cast<int>(std::ceil(Ly / cutoff)));
-    const int nz = std::max(1, static_cast<int>(std::ceil(Lz / cutoff)));
-    const int ncell = nx * ny * nz;
+    int nx = std::max(1, static_cast<int>(std::ceil(Lx / cutoff)));
+    int ny = std::max(1, static_cast<int>(std::ceil(Ly / cutoff)));
+    int nz = std::max(1, static_cast<int>(std::ceil(Lz / cutoff)));
+    seams::coarsenUntilFits(nx, ny, nz, 1);
+    int ncell = 0;
+    if (!seams::gridFits(nx, ny, nz, ncell)) {
+      return false;
+    }
     std::vector<int> head(static_cast<std::size_t>(ncell), -1);
     std::vector<int> next(static_cast<std::size_t>(n), -1);
     const double invx = static_cast<double>(nx) / Lx;
