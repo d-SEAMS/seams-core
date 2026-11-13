@@ -846,6 +846,17 @@ int cmdDensityZ(std::ostream &os, Cloud &cloud, int typeI, int bins, int axis) {
   return 0;
 }
 
+std::vector<std::vector<int>> sixRings(const std::vector<std::vector<int>> &rings) {
+  std::vector<std::vector<int>> six;
+  six.reserve(rings.size());
+  for (const auto &r : rings) {
+    if (r.size() == 6) {
+      six.push_back(r);
+    }
+  }
+  return six;
+}
+
 //! The graphs one command builds on a frame, each with its own carried state
 enum class GraphSlot { single, strict, permissive };
 
@@ -876,6 +887,16 @@ public:
     return it->second.update(idx);
   }
 
+  // Six-membered rings only. A cold frame does not search for shorter rings.
+  // A carried frame still updates the full network and drops the other sizes.
+  const Rows &hexRings(GraphSlot slot, const Rows &idx) {
+    const int key = static_cast<int>(slot) + 8;
+    if (!carry_) {
+      return scratchRings_[key] = primitive::ringNetwork(idx, 6, 6);
+    }
+    return scratchRings_[key] = sixRings(rings(slot, idx, 6));
+  }
+
   const ring::CageAffiliation &affiliation(GraphSlot slot, const Rows &six,
                                            const Rows &idx) {
     const int key = static_cast<int>(slot);
@@ -892,16 +913,6 @@ private:
   std::map<int, Rows> scratchRings_;
   std::map<int, ring::CageAffiliation> scratchAffiliation_;
 };
-
-std::vector<std::vector<int>> sixRings(const std::vector<std::vector<int>> &rings) {
-  std::vector<std::vector<int>> six;
-  for (const auto &r : rings) {
-    if (r.size() == 6) {
-      six.push_back(r);
-    }
-  }
-  return six;
-}
 
 // Label-independent topology keys of the bonded graph: one key per atom
 // for the rooted neighbourhood within `hops` bonds, the histogram of keys,
@@ -1122,8 +1133,8 @@ int cmdIons(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
           : nneigh::kNearestNeighbourPair(cloud, k, cand, waterTypes);
   auto idxS = nneigh::neighbourListByIndex(cloud, graphs.first);
   auto idxU = nneigh::neighbourListByIndex(cloud, graphs.second);
-  const auto sixS = sixRings(carry.rings(GraphSlot::strict, idxS, 6));
-  const auto sixU = sixRings(carry.rings(GraphSlot::permissive, idxU, 6));
+  const auto &sixS = carry.hexRings(GraphSlot::strict, idxS);
+  const auto &sixU = carry.hexRings(GraphSlot::permissive, idxU);
   const auto aff = ring::seededCageAffiliation(
       sixS, carry.affiliation(GraphSlot::strict, sixS, idxS), sixU,
       carry.affiliation(GraphSlot::permissive, sixU, idxU), idxU, complete);
@@ -1378,7 +1389,7 @@ int cmdChillPlus(std::ostream &os, FrameCarry &carry, Cloud &cloud,
   }
   if (tumLayers) {
     auto idx = nneigh::neighbourListByIndex(cloud, nList);
-    const auto six = sixRings(carry.rings(GraphSlot::single, idx, 6));
+    const auto &six = carry.hexRings(GraphSlot::single, idx);
     const auto planes = ring::stackingPlanes(six, idx);
     const auto st =
         topoparam::tumLayerStack(cloud, six, planes.basal, planes.equatorial,
@@ -1730,9 +1741,9 @@ int cmdCages(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
         seams::provenEqual(seams::edgeSetOf(idxS), seams::edgeSetOf(idxU));
     const auto tEq1 = std::chrono::steady_clock::now();
     if (sameGraph) {
-      const auto &rings = carry.rings(GraphSlot::strict, idxS, 6);
+      const auto &rings = carry.hexRings(GraphSlot::strict, idxS);
       const auto tRing = std::chrono::steady_clock::now();
-      const auto six = ring::contractibleRings(sixRings(rings), cloud);
+      const auto six = ring::contractibleRings(rings, cloud);
       const auto tCon = std::chrono::steady_clock::now();
       const auto &once = carry.affiliation(GraphSlot::strict, six, idxS);
       const auto tAff = std::chrono::steady_clock::now();
@@ -1750,9 +1761,9 @@ int cmdCages(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
       }
     } else {
       const auto sixS = ring::contractibleRings(
-          sixRings(carry.rings(GraphSlot::strict, idxS, 6)), cloud);
+          carry.hexRings(GraphSlot::strict, idxS), cloud);
       const auto sixU = ring::contractibleRings(
-          sixRings(carry.rings(GraphSlot::permissive, idxU, 6)), cloud);
+          carry.hexRings(GraphSlot::permissive, idxU), cloud);
       const auto aff = ring::seededCageAffiliation(
           sixS, carry.affiliation(GraphSlot::strict, sixS, idxS), sixU,
           carry.affiliation(GraphSlot::permissive, sixU, idxU), idxU,
@@ -1790,7 +1801,7 @@ int cmdCages(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
       tallyAtoms(hc, ddc);
     } else {
       const auto six = ring::contractibleRings(
-          sixRings(carry.rings(GraphSlot::single, idx, 6)), cloud);
+          carry.hexRings(GraphSlot::single, idx), cloud);
       const auto &aff = carry.affiliation(GraphSlot::single, six, idx);
       std::vector<bool> hc(static_cast<std::size_t>(cloud.nop), false);
       std::vector<bool> ddc(static_cast<std::size_t>(cloud.nop), false);

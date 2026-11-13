@@ -884,7 +884,8 @@ template <typename Graph, typename Out>
 void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
                          int src, int maxDepth, int maxLvl, RingScratch &scr,
                          Out &out, const std::vector<char> *through = nullptr,
-                         bool legacyPairs = false, bool skipOdd = false) {
+                         bool legacyPairs = false, bool skipOdd = false,
+                         int minSize = 3) {
   const int nVertices = static_cast<int>(adjacency.size());
   if (static_cast<int>(scr.lvl.size()) != nVertices) {
     scr.lvl.assign(static_cast<std::size_t>(nVertices), -1);
@@ -1008,7 +1009,7 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
     const int *pathsP = scr.pathBuf.data() + scr.pathFirst[static_cast<std::size_t>(p)];
     const int nP = scr.pathCount[static_cast<std::size_t>(p)];
     // Even rings: two vertex-disjoint shortest paths to an antipodal vertex
-    if (2 * lp >= 3 && 2 * lp <= maxDepth) {
+    if (2 * lp >= minSize && 2 * lp <= maxDepth) {
       if (gProfile) {
         gProfSumP += nP;
         if (nP > gProfMaxP) {
@@ -1124,7 +1125,7 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
     }
   odd_part:
     // Odd rings: an antipodal edge between two vertices at the same level
-    if (!skipOdd && 2 * lp + 1 <= maxDepth) {
+    if (!skipOdd && 2 * lp + 1 >= minSize && 2 * lp + 1 <= maxDepth) {
       for (const int q : adjacency[static_cast<std::size_t>(p)]) {
         if (q <= p || q >= nVertices || scr.lvl[static_cast<std::size_t>(q)] != lp) {
           continue;
@@ -1229,7 +1230,7 @@ struct SizeCounts {
 
 static std::vector<std::vector<int>>
 searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &sources,
-             bool legacy, SizeCounts sizes = {});
+             bool legacy, SizeCounts sizes = {}, int minSize = 3);
 
 //! Ring sizes held by the per-source pools, summed over the team.
 static void countSizes(RingPool *pools, int nPools, int use, SizeCounts sizes) {
@@ -1450,7 +1451,7 @@ static void countSizes(RingPool *pools, int nPools, int use, SizeCounts sizes) {
 static std::vector<std::vector<int>>
 searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
             const std::vector<char> &sources, bool legacy,
-            primitive::RingRows rows = primitive::RingRows::Auto) {
+            primitive::RingRows rows = primitive::RingRows::Auto, int minSize = 3) {
   const auto adjStart = std::chrono::steady_clock::now();
   const int nVertices = static_cast<int>(nList.size());
   int use = 1;
@@ -1475,7 +1476,7 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
               : teamNeighbourRows(nList, nVertices,
                                   (serial && rows != primitive::RingRows::Packed) ? 1 : use);
   gRingSplit.adj_ms = millisSince(adjStart);
-  return searchPacked(std::move(adjacency), maxDepth, sources, legacy);
+  return searchPacked(std::move(adjacency), maxDepth, sources, legacy, {}, minSize);
 }
 
 std::vector<std::vector<int>>
@@ -1487,6 +1488,16 @@ std::vector<std::vector<int>>
 primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth,
                        primitive::RingRows rows) {
   return searchRings(nList, maxDepth, std::vector<char>(), false, rows);
+}
+
+std::vector<std::vector<int>>
+primitive::ringNetwork(const std::vector<std::vector<int>> &nList, int maxDepth,
+                       int minDepth) {
+  if (minDepth < 3) {
+    minDepth = 3;
+  }
+  return searchRings(nList, maxDepth, std::vector<char>(), false,
+                     primitive::RingRows::Auto, minDepth);
 }
 
 std::vector<std::vector<int>>
@@ -1552,7 +1563,7 @@ void primitive::ringSizeCounts(const std::vector<int> &offsets, const std::vecto
  */
 static std::vector<std::vector<int>>
 searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &sources,
-             bool legacy, SizeCounts sizes) {
+             bool legacy, SizeCounts sizes, int minSize) {
   seams::adoptThreads();
   gProfile = false;
   if (const char *prof = std::getenv("SEAMS_RING_PROFILE")) {
@@ -1782,12 +1793,12 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
         if (gSourceWorkPtr == nullptr) {
           enumerateFromSource(adjacency, oracle, from[static_cast<std::size_t>(k)], maxDepth, maxLvl,
                               scratch, (*pools)[static_cast<std::size_t>(k)],
-                              nullptr, legacy, skipOdd);
+                              nullptr, legacy, skipOdd, minSize);
         } else {
           const auto srcStart = std::chrono::steady_clock::now();
           enumerateFromSource(adjacency, oracle, from[static_cast<std::size_t>(k)], maxDepth, maxLvl,
                               scratch, (*pools)[static_cast<std::size_t>(k)],
-                              nullptr, legacy, skipOdd);
+                              nullptr, legacy, skipOdd, minSize);
           const int src = from[static_cast<std::size_t>(k)];
           if (src >= 0 && src < nVertices) {
             gSourceWorkPtr[src] +=
@@ -1830,7 +1841,7 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
     for (const int src : from) {
       pool.reset();
       enumerateFromSource(adjacency, oracle, src, maxDepth, maxLvl, scratch, pool,
-                          nullptr, legacy, skipOdd);
+                          nullptr, legacy, skipOdd, minSize);
       for (const auto &ring : pool) {
         const std::size_t size = ring.size();
         if (size < static_cast<std::size_t>(sizes.len)) {
@@ -1841,13 +1852,13 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
   } else if (gSourceWorkPtr == nullptr) {
     for (const int src : from) {
       enumerateFromSource(adjacency, oracle, src, maxDepth, maxLvl, scratch,
-                          rings, nullptr, legacy, skipOdd);
+                          rings, nullptr, legacy, skipOdd, minSize);
     }
   } else {
     for (const int src : from) {
       const auto srcStart = std::chrono::steady_clock::now();
       enumerateFromSource(adjacency, oracle, src, maxDepth, maxLvl, scratch,
-                          rings, nullptr, legacy, skipOdd);
+                          rings, nullptr, legacy, skipOdd, minSize);
       if (src >= 0 && src < nVertices) {
         gSourceWorkPtr[src] += std::chrono::duration<double, std::micro>(
                                    std::chrono::steady_clock::now() - srcStart)

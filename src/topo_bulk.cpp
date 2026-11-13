@@ -373,12 +373,9 @@ struct IntBuf {
 };
 
 // Every ring that contains all three atoms, except skipA and skipB.
-template <class Out>
-void ringsThrough(const ring::RingSearchIndex &index, int a, int b, int c,
-                  int skipA, int skipB, Out &out) {
-  const auto &A = atomRow(index, a);
-  const auto &B = atomRow(index, b);
-  const auto &C = atomRow(index, c);
+template <class Row, class Out>
+void ringsThroughRows(const Row &A, const Row &B, const Row &C, int skipA,
+                      int skipB, Out &out) {
   size_t i = 0;
   size_t j = 0;
   size_t k = 0;
@@ -406,6 +403,13 @@ void ringsThrough(const ring::RingSearchIndex &index, int a, int b, int c,
       ++k;
     }
   }
+}
+
+template <class Out>
+void ringsThrough(const ring::RingSearchIndex &index, int a, int b, int c,
+                  int skipA, int skipB, Out &out) {
+  ringsThroughRows(atomRow(index, a), atomRow(index, b), atomRow(index, c),
+                   skipA, skipB, out);
 }
 
 // A partner ring on an adjacent triplet already shares the atoms of that
@@ -2242,10 +2246,12 @@ bool ring::equatorialConditions(const std::vector<std::vector<int>> &rings,
   if (R.size() != 6) {
     return false;
   }
-  for (const int atom : R) {
-    const auto row = atomRow(index, atom);
+  // The six triplet walks reload these rows. Keep the pointers.
+  RingRow rowOf[6];
+  for (int k = 0; k < 6; k++) {
+    rowOf[k] = atomRow(index, R[static_cast<std::size_t>(k)]);
     int others = 0;
-    for (const int r : row) {
+    for (const int r : rowOf[k]) {
       others += static_cast<int>(r != iring);
     }
     if (others < 3) {
@@ -2254,7 +2260,8 @@ bool ring::equatorialConditions(const std::vector<std::vector<int>> &rings,
   }
   std::array<IntBuf, 6> T;
   for (int k = 0; k < 6; k++) {
-    ringsThrough(index, R[static_cast<std::size_t>(k)], R[static_cast<std::size_t>((k + 1) % 6)], R[static_cast<std::size_t>((k + 2) % 6)], iring, -1, T[static_cast<std::size_t>(k)]);
+    ringsThroughRows(rowOf[k], rowOf[(k + 1) % 6], rowOf[(k + 2) % 6], iring, -1,
+                     T[static_cast<std::size_t>(k)]);
     if (T[static_cast<std::size_t>(k)].empty()) {
       return false;
     }

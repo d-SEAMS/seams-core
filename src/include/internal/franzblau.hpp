@@ -119,6 +119,11 @@ struct Graph {
 std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,
                                           int maxDepth);
 
+//! Primitive rings whose size is at least @a minDepth and at most
+//! @a maxDepth. ringNetwork(nList, maxDepth) is minDepth 3.
+std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,
+                                          int maxDepth, int minDepth);
+
 //! Which adjacency the ring search packs before it walks. Auto uses one
 //! sorted array per row: a single pass on one thread, a team on several.
 //! Vectors keeps a std::vector per atom. Packed forces the array even
