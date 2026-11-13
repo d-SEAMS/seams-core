@@ -799,6 +799,14 @@ rule paper_cells:
         "python3 scripts/paper_cells_join.py benchmarks/paper-cells"
 
 
+# One process, eight samples, d-SEAMS, mdapy, pyscal3, and vesin. Core count, no host name.
+rule h2h_mdapy_pyscal3_vesin:
+    output:
+        "benchmarks/h2h-mdapy-pyscal3-vesin.txt",
+    shell:
+        "python3 scripts/h2h_mdapy_pyscal3_vesin.py > {output}"
+
+
 # One process, eight samples, d-SEAMS, freud, and OVITO. Core count, no host name.
 rule h2h_session:
     output:
