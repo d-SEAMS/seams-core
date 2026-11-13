@@ -1,6 +1,55 @@
 #+TITLE: Quickstart
 #+OPTIONS: toc:nil num:nil
 
+Install the engine, then classify one cubic cell. The five Python lines
+and the C program below are ~meson test docs_quickstart_py~ and
+~docs_quickstart_c~. Both expect 8 cubic molecules.
+
+* Install
+
+pip installs the Frame package. The five lines use the in-tree module,
+which Meson builds.
+
+#+begin_src bash
+pip install pydseamslib
+#+end_src
+
+conda-forge has no ~d-seams~ package. It does have the toolchain, and
+Meson builds the engine from this tree:
+
+#+begin_src bash
+conda install -c conda-forge meson ninja pkg-config eigen python numpy
+meson setup build -Dwith_python=true
+meson compile -C build
+#+end_src
+
+The same two Meson lines are the install when the compilers are already
+on ~PATH~. ~-Dwith_python=true~ is the default. ~import dseams~ then
+loads ~build/python~ or the installed extension. Put that directory on
+~PYTHONPATH~, and ~build/src~ on ~LD_LIBRARY_PATH~.
+
+* Five lines of Python
+
+#+begin_export rst
+.. literalinclude:: ../examples/quickstart.py
+   :language: python
+#+end_export
+
+~chill_plus~ returns labels and the nine counts. Index 0 is cubic.
+
+* Five calls in C
+
+#+begin_src c
+seams_system *sys = seams_system_create();
+seams_system_set_ortho(sys, xyz, 8, 0, 0, 0, a, a, a, NULL, NULL);
+seams_chill_plus(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels, counts);
+printf("cubic %d\n", counts[0]);
+seams_system_destroy(sys);
+#+end_src
+
+~docs/examples/quickstart.c~ is that call on the eight-atom diamond.
+The program prints ~cubic 8~.
+
 Build the engine, read a frame, and print what this binary linked.
 
 The in-tree mixed TIP4P dump is ~input/traj/exampleTraj.lammpstrj~ (750 atoms, 250 waters; type 2 is oxygen).

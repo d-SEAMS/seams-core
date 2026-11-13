@@ -59,6 +59,12 @@ d-SEAMS (Deferred Structural Elucidation Analysis for Molecular
 Simulations) classifies ice in molecular-dynamics trajectories. This
 repository is the C++ engine (~libyodaLib~) and the ~seams~ CLI.
 
+The first classification is five lines. Install with
+~pip install pydseamslib~ for the Frame package, with conda-forge's
+Meson toolchain, or with ~meson setup build && meson compile -C build~,
+then run the Python and C programs on
+[[file:quickstart.org][the quick start]]. Both report 8 cubic molecules.
+
 #+begin_src bash
 seams read water.lammpstrj
 seams chill-plus water.lammpstrj --cutoff 3.5

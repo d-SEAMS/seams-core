@@ -790,6 +790,17 @@ if get_option('with_cli')
   tutorial_env = environment()
   tutorial_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
   test(
+    'docs_quickstart_py',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_quickstart.py',
+      meson.project_build_root() / 'src',
+    ],
+    env: tutorial_env,
+    suite: 'docs',
+    depends: [seams_api_lib],
+    timeout: 60)
+  test(
     'docs_tutorial_clathrate',
     python3,
     args: [

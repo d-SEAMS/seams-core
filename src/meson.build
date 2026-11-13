@@ -216,3 +216,12 @@ docs_api_cpp = executable(
   cpp_args: ['-I' + meson.current_build_dir()],
   link_args: ['-lm'])
 test('docs_api_cpp', docs_api_cpp, suite: 'docs', timeout: 60)
+
+docs_quickstart_c = executable(
+  'docs_quickstart_c',
+  files('../docs/examples/quickstart.c'),
+  link_with: seams_api_lib,
+  include_directories: include_directories('../include'),
+  c_args: ['-I' + meson.current_build_dir()],
+  link_args: ['-lm'])
+test('docs_quickstart_c', docs_quickstart_c, suite: 'docs', timeout: 60)
