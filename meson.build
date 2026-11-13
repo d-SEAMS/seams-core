@@ -868,6 +868,17 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 120)
   test(
+    'docs_science_front',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'howto' / 'test_science_front.py',
+      meson.project_source_root(),
+      meson.project_build_root(),
+    ],
+    env: tutorial_env,
+    suite: 'docs',
+    timeout: 180)
+  test(
     'docs_tutorial_insitu',
     python3,
     args: [
