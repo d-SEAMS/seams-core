@@ -158,7 +158,27 @@ std::string forcedFormat(const std::string &filename) {
   return "";
 }
 
+// chemfiles 0.10 mmCIFFormat::init_ dereferences a null block when the
+// file has no data_ record. Reject those files before the constructor.
+bool mmcifHasData(const std::string &filename) {
+  if (extensionOf(filename) != "mmcif") {
+    return true;
+  }
+  std::ifstream in(filename);
+  if (!in) {
+    return false;
+  }
+  std::string chunk(8192, '\0');
+  in.read(chunk.data(), static_cast<std::streamsize>(chunk.size()));
+  chunk.resize(static_cast<std::size_t>(std::max<std::streamsize>(in.gcount(), 0)));
+  return chunk.find("data_") != std::string::npos;
+}
+
 int sinp::chemfilesSteps(const std::string &filename) {
+  if (!mmcifHasData(filename)) {
+    chemfilesError = "mmCIF file has no data_ block";
+    return -1;
+  }
   try {
     chemfiles::Trajectory trajectory(filename, 'r', forcedFormat(filename));
     return static_cast<int>(trajectory.nsteps());
@@ -186,6 +206,11 @@ sinp::readChemfiles(std::string filename,
   chemfilesError.clear();
   yCloud = molSys::clearPointCloud(yCloud);
   if (request.frame < 1) {
+    return yCloud;
+  }
+  if (!mmcifHasData(filename)) {
+    chemfilesUnreadable = true;
+    chemfilesError = "mmCIF file has no data_ block";
     return yCloud;
   }
   try {

@@ -1,0 +1,94 @@
+name: C API
+on:
+  push:
+    branches: [main, modernize]
+  pull_request:
+    branches: [main]
+
+jobs:
+  capi-asan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-capi-asan-
+      - run: pixi run meson setup build-asan -Dwith_tests=true -Dwith_python=false -Dcapi_sanitize=address
+      - run: pixi run ninja -C build-asan capi_suite capi_cpp_ref
+      - run: pixi run meson test -C build-asan --print-errorlogs capi_suite capi_header_c99_seams_h capi_header_cxx17_seams_h capi_header_c99_seams_lang_h capi_header_cxx17_seams_lang_h capi_header_c99_seams_version_h capi_header_cxx17_seams_version_h
+
+  capi-ubsan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-capi-ubsan-
+      - run: pixi run meson setup build-ubsan -Dwith_tests=true -Dwith_python=false -Dcapi_sanitize=undefined
+      - run: pixi run ninja -C build-ubsan capi_suite capi_cpp_ref
+      - run: pixi run meson test -C build-ubsan --print-errorlogs capi_suite
+
+  capi-tsan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-capi-tsan-
+      - run: pixi run meson setup build-tsan -Dwith_tests=true -Dwith_python=false -Dcapi_sanitize=thread
+      - run: pixi run ninja -C build-tsan capi_suite capi_cpp_ref
+      - run: pixi run meson test -C build-tsan --print-errorlogs capi_suite
+
+  capi-valgrind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-capi-valgrind-
+      - run: sudo apt-get update && sudo apt-get install -y valgrind
+      - run: pixi run meson setup build-valgrind -Dwith_tests=true -Dwith_python=false -Dcapi_valgrind=true
+      - run: pixi run ninja -C build-valgrind capi_suite capi_cpp_ref
+      - run: pixi run meson test -C build-valgrind --print-errorlogs capi_valgrind
+
+  capi-fuzz:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-capi-fuzz-
+      - run: sudo apt-get update && sudo apt-get install -y clang
+      - run: pixi run meson setup build-fuzz -Dwith_tests=true -Dwith_python=false -Dcapi_fuzz_seconds=600
+      - run: pixi run ninja -C build-fuzz capi_read_fuzzer capi_array_fuzzer
+      - run: pixi run meson test -C build-fuzz --print-errorlogs capi_fuzzer capi_array_fuzzer
+
+  capi-crosscheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: crosscheck
+          cache-key: pixi-capi-crosscheck-
+      - run: pixi run -e crosscheck meson setup build-crosscheck -Dwith_tests=true -Dwith_python=false
+      - run: pixi run -e crosscheck ninja -C build-crosscheck src/libseams.so
+      - run: pixi run -e crosscheck meson test -C build-crosscheck --print-errorlogs capi_crosscheck
+
+  capi-abi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-capi-abi-
+      - run: sudo apt-get update && sudo apt-get install -y abigail-tools
+      - run: pixi run meson setup build-abi -Dwith_tests=true -Dwith_python=false
+      - run: pixi run ninja -C build-abi src/libseams.so src/libyodaLib.so bindings/libseams_lang.so
+      - run: pixi run meson test -C build-abi --print-errorlogs capi_abi
