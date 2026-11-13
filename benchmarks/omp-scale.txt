@@ -1,0 +1,10 @@
+cores 8
+samples 8
+knn threads 1 median_ms 11.424
+q6 threads 1 median_ms 25.033
+chill threads 1 median_ms 42.255
+read threads 1 median_ms 13.650
+knn threads 8 median_ms 8.969
+q6 threads 8 median_ms 12.450
+chill threads 8 median_ms 17.120
+read threads 8 median_ms 9.734

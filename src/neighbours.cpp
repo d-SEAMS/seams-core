@@ -27,6 +27,7 @@
 #include <queue>
 #include <stdexcept>
 #include <string>
+#include <thread>
 #include <utility>
 
 #include <neighbours.hpp>
@@ -2496,6 +2497,14 @@ std::vector<int> nominatePacked(
   if (n <= 0 || k <= 0 || yCloud.box.size() < 3) {
     return nom;
   }
+#ifdef SEAMS_HAS_OPENMP
+  // Parking the team here made the following region pay a wake that
+  // moved by several milliseconds from call to call. The search keeps
+  // the width linkcell was given; the graph build below uses this team.
+  const bool parallelSearch = !omp_in_parallel() && omp_get_max_threads() > 1;
+#else
+  const bool parallelSearch = false;
+#endif
 #ifdef SEAMS_HAS_LINKCELL
   if (nominateByLinkcell(yCloud, k, typeI, cellHint, nom, types)) {
     return nom;
@@ -2510,18 +2519,26 @@ std::vector<int> nominatePacked(
   }
   if (yCloud.box.size() >= 6) {
     const gen::FracBox frame = gen::makeFracBox(yCloud);
-    for (const int i : owners) {
+    const int nOwners = static_cast<int>(owners.size());
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (parallelSearch)
+#endif
+    for (int oi = 0; oi < nOwners; ++oi) {
+      const int i = owners[static_cast<std::size_t>(oi)];
       std::priority_queue<std::pair<double, int>> heap;
       for (const int j : owners) {
         if (j == i) {
           continue;
         }
         const double d2 = gen::periodicDistSq(frame, yCloud, i, j);
+        // Equal distances keep the smaller index, the same rule as the
+        // one-thread linkcell heap, so the packed row matches it.
+        const std::pair<double, int> cand{d2, j};
         if (static_cast<int>(heap.size()) < k) {
-          heap.push({d2, j});
-        } else if (d2 < heap.top().first) {
+          heap.push(cand);
+        } else if (cand < heap.top()) {
           heap.pop();
-          heap.push({d2, j});
+          heap.push(cand);
         }
       }
       const int take = std::min(k, static_cast<int>(heap.size()));
@@ -2598,64 +2615,118 @@ std::vector<int> nominatePacked(
   }
 
   const int maxReach = std::max({nx, ny, nz}) / 2 + 1;
-  std::vector<unsigned> seen(static_cast<std::size_t>(ncell), 0);
-  unsigned stamp = 1;
-  for (const int i : owners) {
-    std::priority_queue<std::pair<double, int>> heap;
-    int ix = 0;
-    int iy = 0;
-    int iz = 0;
-    cellOf(i, ix, iy, iz);
-    ++stamp;
-    if (stamp == 0) {
-      std::fill(seen.begin(), seen.end(), 0);
-      stamp = 1;
-    }
-    int reach = 1;
-    while (reach <= maxReach) {
-      for (int dx = -reach; dx <= reach; dx++) {
-        for (int dy = -reach; dy <= reach; dy++) {
-          for (int dz = -reach; dz <= reach; dz++) {
-            const bool shell = (reach == 1) || (std::abs(dx) == reach ||
-                                                std::abs(dy) == reach ||
-                                                std::abs(dz) == reach);
-            if (!shell && reach > 1) {
-              continue;
+  const int nOwners = static_cast<int>(owners.size());
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (parallelSearch)
+#endif
+  {
+    // One stamp row per worker. Sharing it made every cell visit bounce
+    // a cache line between the threads doing the search.
+    std::vector<unsigned> seen(static_cast<std::size_t>(ncell), 0);
+    unsigned stamp = 1;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static)
+#endif
+    for (int oi = 0; oi < nOwners; ++oi) {
+      const int i = owners[static_cast<std::size_t>(oi)];
+      struct Near {
+        double d2;
+        int j;
+      };
+      // k is four on the C API path. The row stays on the stack so the
+      // workers do not allocate once per atom.
+      Near best[32];
+      int nbest = 0;
+      std::priority_queue<std::pair<double, int>> heap;
+      const bool smallK = k <= 32;
+      auto push = [&](double d2, int j) {
+        if (smallK) {
+          int slot = nbest;
+          if (nbest == k) {
+            if (d2 > best[k - 1].d2 || (d2 == best[k - 1].d2 && j >= best[k - 1].j)) {
+              return;
             }
-            const int c = cellIndex(ix + dx, iy + dy, iz + dz);
-            if (seen[static_cast<std::size_t>(c)] == stamp) {
-              continue;
-            }
-            seen[static_cast<std::size_t>(c)] = stamp;
-            int j = head[static_cast<std::size_t>(c)];
-            while (j >= 0) {
-              if (j != i) {
-                const double d2 = gen::periodicDistSq(frame, yCloud, i, j);
-                if (static_cast<int>(heap.size()) < k) {
-                  heap.push({d2, j});
-                } else if (d2 < heap.top().first) {
-                  heap.pop();
-                  heap.push({d2, j});
-                }
+            slot = k - 1;
+          } else {
+            ++nbest;
+          }
+          while (slot > 0 &&
+                 (d2 < best[slot - 1].d2 ||
+                  (d2 == best[slot - 1].d2 && j < best[slot - 1].j))) {
+            best[slot] = best[slot - 1];
+            --slot;
+          }
+          best[slot] = {d2, j};
+          return;
+        }
+        const std::pair<double, int> cand{d2, j};
+        if (static_cast<int>(heap.size()) < k) {
+          heap.push(cand);
+        } else if (cand < heap.top()) {
+          heap.pop();
+          heap.push(cand);
+        }
+      };
+      int ix = 0;
+      int iy = 0;
+      int iz = 0;
+      cellOf(i, ix, iy, iz);
+      ++stamp;
+      if (stamp == 0) {
+        std::fill(seen.begin(), seen.end(), 0);
+        stamp = 1;
+      }
+      int reach = 1;
+      while (reach <= maxReach) {
+        for (int dx = -reach; dx <= reach; dx++) {
+          for (int dy = -reach; dy <= reach; dy++) {
+            for (int dz = -reach; dz <= reach; dz++) {
+              const bool shell = (reach == 1) || (std::abs(dx) == reach ||
+                                                  std::abs(dy) == reach ||
+                                                  std::abs(dz) == reach);
+              if (!shell && reach > 1) {
+                continue;
               }
-              j = next[static_cast<std::size_t>(j)];
+              const int c = cellIndex(ix + dx, iy + dy, iz + dz);
+              if (seen[static_cast<std::size_t>(c)] == stamp) {
+                continue;
+              }
+              seen[static_cast<std::size_t>(c)] = stamp;
+              int j = head[static_cast<std::size_t>(c)];
+              while (j >= 0) {
+                if (j != i) {
+                  push(gen::periodicDistSq(frame, yCloud, i, j), j);
+                }
+                j = next[static_cast<std::size_t>(j)];
+              }
             }
           }
         }
+        const bool full = smallK ? nbest == k : static_cast<int>(heap.size()) >= k;
+        if (full) {
+          const double worst = smallK ? best[nbest - 1].d2 : heap.top().first;
+          const double bound = static_cast<double>(reach) * cellMin;
+          // Strict: an atom on the shell boundary can tie the worst
+          // distance and win on the smaller index.
+          if (worst < bound * bound) {
+            break;
+          }
+        }
+        ++reach;
       }
-      if (static_cast<int>(heap.size()) >= k) {
-        const double bound = static_cast<double>(reach) * cellMin;
-        if (heap.top().first <= bound * bound) {
-          break;
+      if (smallK) {
+        for (int t = 0; t < nbest; ++t) {
+          nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+              static_cast<std::size_t>(t)] = best[t].j;
+        }
+      } else {
+        const int take = std::min(k, static_cast<int>(heap.size()));
+        for (int t = take - 1; t >= 0; t--) {
+          nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+              static_cast<std::size_t>(t)] = heap.top().second;
+          heap.pop();
         }
       }
-      ++reach;
-    }
-    const int take = std::min(k, static_cast<int>(heap.size()));
-    for (int t = take - 1; t >= 0; t--) {
-      nom[static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
-          static_cast<std::size_t>(t)] = heap.top().second;
-      heap.pop();
     }
   }
   return nom;
@@ -2865,10 +2936,170 @@ nneigh::kNearestNeighbourList(
     return {};
   }
   const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
+  const bool timing = std::getenv("SEAMS_KNN_TIME") != nullptr;
+  const auto t0 = std::chrono::steady_clock::now();
   const auto nom = nominatePacked(yCloud, k, typeI, hint);
+  const auto tNom = std::chrono::steady_clock::now();
   std::vector<std::vector<int>> out;
   fillGraphFromNom(yCloud, nom, k, mutual, out);
+  if (timing) {
+    const auto ms = [](auto a, auto b) {
+      return std::chrono::duration<double, std::milli>(b - a).count();
+    };
+    std::cerr << "knn-split n=" << yCloud.nop << " nom_ms=" << ms(t0, tNom)
+              << " graph_ms=" << ms(tNom, std::chrono::steady_clock::now()) << "\n";
+  }
   return out;
+}
+
+namespace {
+
+void csrFromRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                 const std::vector<std::vector<int>> &rows, std::vector<int> &offsets,
+                 std::vector<int> &cols) {
+  const auto idx = nneigh::neighbourListByIndex(yCloud, rows);
+  const int n = yCloud.nop;
+  offsets.assign(static_cast<std::size_t>(n) + 1, 0);
+  for (int i = 0; i < n; ++i) {
+    int degree = 0;
+    if (static_cast<int>(idx.size()) > i) {
+      for (int id : idx[static_cast<std::size_t>(i)]) {
+        if (id != i) {
+          ++degree;
+        }
+      }
+    }
+    offsets[static_cast<std::size_t>(i) + 1] = offsets[static_cast<std::size_t>(i)] + degree;
+  }
+  cols.resize(static_cast<std::size_t>(offsets[static_cast<std::size_t>(n)]));
+  for (int i = 0; i < n; ++i) {
+    if (static_cast<int>(idx.size()) <= i) {
+      continue;
+    }
+    int cursor = offsets[static_cast<std::size_t>(i)];
+    for (int id : idx[static_cast<std::size_t>(i)]) {
+      if (id == i) {
+        continue;
+      }
+      cols[static_cast<std::size_t>(cursor++)] = id;
+    }
+  }
+}
+
+}  // namespace
+
+void nneigh::kNearestCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+                         double candidateCutoff, int typeI, bool mutual,
+                         std::vector<int> &offsets, std::vector<int> &cols) {
+  seams::prepareCompute();
+  [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
+#ifdef SEAMS_HAS_LINKCELL
+  // Eight Rayon workers do not beat this AVX scan: the block join costs
+  // as much as the walk, and those workers share the cores with the
+  // OpenMP team that fills the CSR. One worker runs the scan.
+  lc_set_threads(1);
+#endif
+  const int n = yCloud.nop;
+  offsets.assign(static_cast<std::size_t>(std::max(n, 0)) + 1, 0);
+  cols.clear();
+  if (n <= 0 || k <= 0) {
+    return;
+  }
+  const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
+  const auto nom = nominatePacked(yCloud, k, typeI, hint);
+  // The ragged atom-id rows allocate one vector per atom and then map
+  // every id back through the hash table. The mutual row is determined
+  // by the packed nominations: lower indices ascending, then the higher
+  // indices in nearest-first order. k above 64 keeps that row builder.
+  if (!mutual || k > 64) {
+    std::vector<std::vector<int>> rows;
+    fillGraphFromNom(yCloud, nom, k, mutual, rows);
+    csrFromRows(yCloud, rows, offsets, cols);
+    return;
+  }
+  // A joined worker, not an OpenMP region: the region would keep
+  // spinning after the fill and the next search would share its core
+  // with that wait. The worker exists only for this call.
+  const bool split =
+#ifdef SEAMS_HAS_OPENMP
+      n >= 65536 && !omp_in_parallel() && omp_get_max_threads() > 1
+#else
+      false
+#endif
+      ;
+  const int mid = split ? n / 2 : n;
+  std::vector<int> deg(static_cast<std::size_t>(n), 0);
+  auto degreeRange = [&](int begin, int end) {
+  for (int i = begin; i < end; ++i) {
+    int degree = 0;
+    const int *row = nom.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(k);
+    for (int t = 0; t < k; ++t) {
+      const int j = row[t];
+      if (j < 0 || j >= n || j == i) {
+        continue;
+      }
+      if (listsPacked(nom, n, k, j, i)) {
+        ++degree;
+      }
+    }
+    deg[static_cast<std::size_t>(i)] = degree;
+  }
+  };
+  if (split) {
+    std::thread worker([&] { degreeRange(mid, n); });
+    degreeRange(0, mid);
+    worker.join();
+  } else {
+    degreeRange(0, n);
+  }
+  for (int i = 0; i < n; ++i) {
+    offsets[static_cast<std::size_t>(i) + 1] =
+        offsets[static_cast<std::size_t>(i)] + deg[static_cast<std::size_t>(i)];
+  }
+  cols.assign(static_cast<std::size_t>(offsets[static_cast<std::size_t>(n)]), 0);
+  auto fillRange = [&](int begin, int end) {
+  for (int i = begin; i < end; ++i) {
+    int low[64];
+    int high[64];
+    int nlow = 0;
+    int nhigh = 0;
+    const int *row = nom.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(k);
+    for (int t = 0; t < k; ++t) {
+      const int j = row[t];
+      if (j < 0 || j >= n || j == i || !listsPacked(nom, n, k, j, i)) {
+        continue;
+      }
+      if (j < i) {
+        low[nlow++] = j;
+      } else {
+        high[nhigh++] = j;
+      }
+    }
+    for (int a = 1; a < nlow; ++a) {
+      const int v = low[a];
+      int b = a;
+      while (b > 0 && low[b - 1] > v) {
+        low[b] = low[b - 1];
+        --b;
+      }
+      low[b] = v;
+    }
+    int cursor = offsets[static_cast<std::size_t>(i)];
+    for (int t = 0; t < nlow; ++t) {
+      cols[static_cast<std::size_t>(cursor++)] = low[t];
+    }
+    for (int t = 0; t < nhigh; ++t) {
+      cols[static_cast<std::size_t>(cursor++)] = high[t];
+    }
+  }
+  };
+  if (split) {
+    std::thread worker([&] { fillRange(mid, n); });
+    fillRange(0, mid);
+    worker.join();
+  } else {
+    fillRange(0, n);
+  }
 }
 
 void nneigh::kNearestPacked(

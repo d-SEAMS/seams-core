@@ -604,3 +604,34 @@ class HopStride:
 
     def time_carry(self, model, stride, graph):
         _run(self.cmd)
+
+
+class OmpScale:
+    """C API knn, q6, CHILL and a dump read at one and eight threads.
+
+    The timed body is eight samples in this process. The Snakemake rule
+    writes the same session and records the core count, not the host name.
+    """
+
+    params = [1, 8]
+    param_names = ["threads"]
+
+    def setup(self, threads):
+        import importlib.util
+
+        script = ROOT / "scripts" / "omp_scale_time.py"
+        lib_path = ROOT / "bbdir-release" / "src" / "libseams.so"
+        if not lib_path.is_file():
+            raise NotImplementedError("bbdir-release/src/libseams.so is not built")
+        spec = importlib.util.spec_from_file_location("omp_scale_time", script)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self._module = module
+        self._lib = module.load_library(lib_path)
+
+    def time_session(self, threads):
+        self._module.session(self._lib, threads, samples=8)
+
+
+OmpScale.time_session.repeat = 1
+OmpScale.time_session.number = 1

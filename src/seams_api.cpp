@@ -1977,36 +1977,27 @@ seams_status seams_neighbours_knn(seams_system *sys, int k, double cutoff, int t
   try {
     use_threads();
     int typ = 1;
-    Cloud work = unified_copy(sys->cloud, type, typ);
-    auto rows = nneigh::kNearestNeighbourList(work, k, cutoff + 1.5, typ, mutual != 0);
-    auto idx = nneigh::neighbourListByIndex(work, rows);
+    const Cloud *src = &sys->cloud;
+    Cloud owned;
+    if (type > 0) {
+      typ = type;
+      bool uniform = sys->cloud.nop > 0;
+      for (int i = 0; i < sys->cloud.nop && uniform; ++i) {
+        if (sys->cloud.pts[static_cast<std::size_t>(i)].type != type) {
+          uniform = false;
+        }
+      }
+      if (!uniform) {
+        owned = unified_copy(sys->cloud, type, typ);
+        src = &owned;
+      }
+    } else {
+      owned = unified_copy(sys->cloud, type, typ);
+      src = &owned;
+    }
     auto nb = std::make_unique<seams_neighbours>();
-    const int n = work.nop;
-    if (static_cast<int>(idx.size()) < n) {
-      idx.resize(static_cast<std::size_t>(n));
-    }
-    nb->n = n;
-    nb->offsets.assign(static_cast<std::size_t>(n + 1), 0);
-    for (int i = 0; i < n; ++i) {
-      int degree = 0;
-      for (int id : idx[static_cast<std::size_t>(i)]) {
-        if (id != i) {
-          ++degree;
-        }
-      }
-      nb->offsets[static_cast<std::size_t>(i + 1)] =
-          nb->offsets[static_cast<std::size_t>(i)] + degree;
-    }
-    nb->cols.resize(static_cast<std::size_t>(nb->offsets[static_cast<std::size_t>(n)]));
-    for (int i = 0; i < n; ++i) {
-      int cursor = nb->offsets[static_cast<std::size_t>(i)];
-      for (int id : idx[static_cast<std::size_t>(i)]) {
-        if (id == i) {
-          continue;
-        }
-        nb->cols[static_cast<std::size_t>(cursor++)] = id;
-      }
-    }
+    nb->n = src->nop;
+    nneigh::kNearestCsr(*src, k, cutoff + 1.5, typ, mutual != 0, nb->offsets, nb->cols);
     *out = nb.release();
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {

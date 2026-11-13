@@ -526,6 +526,13 @@ std::vector<std::vector<int>> kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     double candidateCutoff, int typeI, bool mutual = true);
 
+//! Same neighbours as kNearestNeighbourList, as a CSR of cloud indices
+//! with no self entry. Column order matches that list after the
+//! atom-id rows are mapped back to indices.
+void kNearestCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+                 double candidateCutoff, int typeI, bool mutual, std::vector<int> &offsets,
+                 std::vector<int> &cols);
+
 //! Packed nominations from the same search as kNearestNeighbourList.
 //! `xyz` is n by 3 and `nom` is n by k cloud indices, nearest first,
 //! with unused slots set to -1. The rows are not symmetrized.
