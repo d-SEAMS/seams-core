@@ -262,11 +262,17 @@ TEST_CASE("signature cages match the serial census on GenIce and mW",
 
 TEST_CASE("nucleation frames keep cage membership at every width",
           "[trace][threads]") {
-  const int frames = sinp::nLammpsFrames("../data/hop/nucleation.lammpstrj");
+  // The 148-frame growth dump is the published figshare trajectory and
+  // stays outside the checkout. Without it there is no frame to compare.
+  const char *path = "../data/hop/nucleation.lammpstrj";
+  const int frames = sinp::nLammpsFrames(path);
+  if (frames == 0) {
+    SKIP("nucleation.lammpstrj is not in this checkout");
+  }
   REQUIRE(frames >= 148);
   const int wide = teamWidth();
   for (int frame = 1; frame <= 148; ++frame) {
-    const Cloud cloud = loadFrame("../data/hop/nucleation.lammpstrj", frame);
+    const Cloud cloud = loadFrame(path, frame);
     setThreads(1);
     const Snapshot serial = take(cloud);
     for (int threads = 2; threads <= wide; threads *= 2) {
