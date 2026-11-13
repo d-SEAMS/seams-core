@@ -205,10 +205,10 @@ def _box_cell(path):
 
 # Cage colour index to the shared palette. The symbols match the paper.
 CAGE_LEGEND = {
-    0: ("5\u00b9\u00b26\u2074", np.array(CUBIC)),
-    1: ("5\u00b9\u00b2", np.array(HEXAGONAL)),
-    3: ("4\u00b35\u20766\u00b3", np.array(INTERFACIAL)),
-    4: ("5\u00b9\u00b26\u2078", np.array(CLATHRATE)),
+    0: (r"$5^{12}6^{4}$", np.array(CUBIC)),
+    1: (r"$5^{12}$", np.array(HEXAGONAL)),
+    3: (r"$4^{3}5^{6}6^{3}$", np.array(INTERFACIAL)),
+    4: (r"$5^{12}6^{8}$", np.array(CLATHRATE)),
 }
 
 
@@ -476,8 +476,8 @@ def _cell_corners(origin, vectors):
     ]
 
 
-def present_cage(render, path, origin, vectors, legend, title, forward, up, frame, pad_radius=0.9):
-    """Legend, bracket, and padded-cell clip shared with the slab figures."""
+def present_cage(render, path, origin, vectors, legend, title, forward, up, frame, cage_points, pad_radius=2.0):
+    """Legend and scale. The crop keeps every cage vertex, not only the cell."""
     from PIL import Image, ImageDraw
 
     corners = _cell_corners(origin, vectors)
@@ -493,12 +493,11 @@ def present_cage(render, path, origin, vectors, legend, title, forward, up, fram
         y = (0.5 - float(np.dot(offset, up)) / (2.0 * half_v)) * raw.height
         return x, y
 
-    pad = int(np.ceil(float(pad_radius) * raw.width / (2.0 * half_h))) + 2
-    image, (crop_x0, crop_y0) = clip_to_padded_cell(raw, raw_pix, corners, pad)
-    left, right_margin, top = 40, 220, 8
-    groups = legend_groups(legend, font, swatch, image.width + right_margin - 40)
-    legend_rows = max(1, len(groups))
-    margin = 24 + row_h * legend_rows + LEGEND_FONT_PX + 48
+    pad = int(np.ceil(float(pad_radius) * raw.width / (2.0 * half_h))) + 4
+    covered = list(corners) + [np.asarray(point, dtype=float) for point in cage_points]
+    image, (crop_x0, crop_y0) = clip_to_padded_cell(raw, raw_pix, covered, pad)
+    left, right_margin, top = 24, 24, 8
+    margin = 24 + row_h * 2 + LEGEND_FONT_PX + 48
     canvas = Image.new("RGB", (image.width + left + right_margin, image.height + top + margin), (255, 255, 255))
     canvas.paste(image, (left, top))
     draw = ImageDraw.Draw(canvas)
@@ -518,26 +517,33 @@ def present_cage(render, path, origin, vectors, legend, title, forward, up, fram
             if bin(first ^ second).count("1") != 1:
                 continue
             draw.line([projected[first], projected[second]], fill=(70, 70, 70), width=2)
+    x_left = min(point[0] for point in projected)
     x_right = max(point[0] for point in projected)
     y_top = min(point[1] for point in projected)
     y_bottom = max(point[1] for point in projected)
-    bracket_x = x_right + pad + 18
-    stroke_bracket(draw, bracket_x, y_top, y_bottom)
-    add_text(title, (bracket_x + 14, 0.5 * (y_top + y_bottom) - LEGEND_FONT_PX / 2.0), title)
     legend_bottom = image.height + top
-    y = image.height + top + 16
-    for group in groups:
-        x = left + 16
-        for label, colour in group:
-            text_w = float(font.getlength(label))
-            rgb = tuple(int(round(channel * 255)) for channel in colour)
-            draw.rectangle([x, y, x + swatch, y + swatch], fill=rgb, outline=(30, 30, 30))
-            marks.append((f"swatch {label}", (x, y, x + swatch, y + swatch)))
-            add_text(f"legend {label}", (x + swatch + 10, y), label)
-            legend_bottom = max(legend_bottom, y + swatch, marks[-1][1][3])
-            x += swatch + 16 + text_w + 18
-        y += row_h
+    y = image.height + top + 8
+    title_w = float(font.getlength(title))
+    add_text(title, (left + 16, y), title)
+    marks[-1] = (title, marks[-1][1])
+    y += row_h
+    x = left + 16
+    for label, colour in legend:
+        glyph = mathtext_image(label, LEGEND_FONT_PX)
+        if x + swatch + 16 + glyph.width > canvas.width - 8:
+            x = left + 16
+            y += row_h
+        rgb = tuple(int(round(channel * 255)) for channel in colour)
+        draw.rectangle([x, y, x + swatch, y + swatch], fill=rgb, outline=(30, 30, 30))
+        marks.append((f"swatch {label}", (x, y, x + swatch, y + swatch)))
+        canvas.paste(glyph, (int(x + swatch + 10), int(y)), glyph)
+        marks.append((f"legend {label}", (x + swatch + 10, y, x + swatch + 10 + glyph.width, y + glyph.height)))
+        legend_bottom = max(legend_bottom, y + max(swatch, glyph.height))
+        x += swatch + 16 + glyph.width + 18
     bar = 10.0 * raw.width / (2.0 * half_h)
+    ten = project(centre + 10.0 * right)
+    origin_px = project(centre)
+    assert_nanometre_bar(bar, abs(ten[0] - origin_px[0]), 10.0)
     bar_y = legend_bottom + 28
     bar_x = left + 16
     draw.line([(bar_x, bar_y), (bar_x + bar, bar_y)], fill=(20, 20, 20), width=6)
@@ -576,14 +582,14 @@ def render_host(render, lib, dump, path, kinds, width=1700):
     _forward, right, up_axis = science.basis(forward, up)
     extra = []
     for corner in cell:
-        extra.append(corner + 1.2 * right)
-        extra.append(corner - 1.2 * right)
-        extra.append(corner + 1.2 * up_axis)
-        extra.append(corner - 1.2 * up_axis)
+        extra.append(corner + 3.0 * right)
+        extra.append(corner - 3.0 * right)
+        extra.append(corner + 3.0 * up_axis)
+        extra.append(corner - 3.0 * up_axis)
     frame = np.vstack([corners, np.asarray(extra, dtype=float)])
     tachyon_scene(render, path, corners, colours, radii, meshes, forward, up, width, frame=frame)
     title = {"sii": "sII", "sh": "sH"}.get(path.stem, path.stem)
-    present_cage(render, path, origin, vectors, legend, title, forward, up, frame, pad_radius=0.9)
+    present_cage(render, path, origin, vectors, legend, title, forward, up, frame, corners, pad_radius=2.0)
     return expected
 
 
@@ -644,6 +650,33 @@ def legend_groups(labels, font, swatch, max_width):
         return groups
     cut = best[1]
     return [list(labels[:cut]), list(labels[cut:])]
+
+
+def assert_nanometre_bar(bar_px, span_px, span_angstroms, bar_angstroms=10.0):
+    """The drawn 1 nm bar must match the on-screen length of the cell edge."""
+    if span_px <= 1.0 or span_angstroms <= 0.0:
+        raise RuntimeError("the scale bar has no cell edge to check")
+    expected = bar_angstroms * float(span_px) / float(span_angstroms)
+    if abs(float(bar_px) - expected) > 1.5:
+        raise RuntimeError(
+            f"1 nm bar is {bar_px:.2f} px but {span_angstroms:.3f} A of cell is {span_px:.2f} px"
+        )
+
+
+def mathtext_image(expr, height_px):
+    """Rasterise one mathtext label at the legend height."""
+    from io import BytesIO
+
+    from matplotlib import mathtext
+    from PIL import Image
+
+    buf = BytesIO()
+    mathtext.math_to_image(expr, buf, dpi=200, format="png")
+    buf.seek(0)
+    image = Image.open(buf).convert("RGBA")
+    scale = float(height_px) / float(image.height)
+    width = max(1, int(round(image.width * scale)))
+    return image.resize((width, int(height_px)), Image.Resampling.LANCZOS)
 
 
 def stroke_bracket(draw, x, y0, y1, tick=16):
@@ -965,12 +998,12 @@ def centres_outside_outline(positions, origin, lengths, forward=None, up=None):
 
 
 def _present_interface(render, path, positions, labels, origin, lengths, forward, up, ids, legend, frame=None, pad_radius=0.85):
-    """Rectangle cell, bottom bilayer ticks, and labels outside the box.
+    """Rectangle cell and the same depth axis as the brine figure.
 
-    The camera looks down x with up along z, so growth is vertical, as in
-    the brine figure, and an orthorhombic cell is a rectangle. Tick marks
-    sit on the bottom axis only.
+    The camera looks down x with up along z, so growth is vertical.
+    ``ids`` is retained for the bilayer test and is not drawn.
     """
+    del ids
     from PIL import Image, ImageDraw
 
     centre, half_h, half_v, forward, right, up = _camera(
@@ -980,10 +1013,10 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
     font = _legend_font(LEGEND_FONT_PX)
     swatch = 32
     row_h = 52
-    left, right_margin, top = 170, 720, 8
+    left, right_margin, top = 220, 720, 8
     shown_legend = [(display_label(label), colour) for label, colour in (legend or ())]
-    groups = legend_groups(shown_legend, font, swatch, raw.width + right_margin - 40)
-    legend_rows = max(1, len(groups))
+    groups = [shown_legend] if shown_legend else []
+    legend_rows = 1
     def raw_pix(point):
         offset = np.asarray(point, dtype=float) - centre
         x = (float(np.dot(offset, right)) / (2.0 * half_h) + 0.5) * raw.width
@@ -996,9 +1029,13 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
     ]
     pad = int(np.ceil(float(pad_radius) * raw.width / (2.0 * half_h))) + 2
     image, (crop_x0, crop_y0) = clip_to_padded_cell(raw, raw_pix, raw_face, pad)
-    groups = legend_groups(shown_legend, font, swatch, image.width + right_margin - 40)
-    legend_rows = max(1, len(groups))
-    bottom = 340 + row_h * legend_rows
+    groups = [shown_legend] if shown_legend else []
+    legend_rows = 1
+    legend_width = 16.0
+    for label, _colour in shown_legend:
+        legend_width += swatch + 16.0 + float(font.getlength(label)) + 18.0
+    right_margin = max(right_margin, int(legend_width - image.width) + 48)
+    bottom = 120 + row_h * legend_rows
     canvas = Image.new("RGB", (image.width + left + right_margin, image.height + top + bottom), (255, 255, 255))
     canvas.paste(image, (left, top))
     draw = ImageDraw.Draw(canvas)
@@ -1025,19 +1062,6 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
         marks.append((name, text_bbox(font, xy, text)))
         draw.text(xy, text, font=font, fill=(20, 20, 20))
 
-    for layer in sorted({int(item) for item in ids if item >= 0}):
-        members = np.flatnonzero(ids == layer)
-        horiz = float(np.median((positions[members] - centre) @ right))
-        x = left + (horiz / (2.0 * half_h) + 0.5) * raw.width - crop_x0
-        draw.line([(x, y_bottom), (x, y_bottom + 16)], fill=(20, 20, 20), width=3)
-        text = str(layer)
-        text_w = float(font.getlength(text))
-        add_text(f"layer {text}", (x - text_w / 2.0, y_bottom + 20), text)
-    title = "layer index"
-    title_w = float(font.getlength(title))
-    title_y = y_bottom + 28 + LEGEND_FONT_PX
-    add_text("layer index", ((x_left + x_right - title_w) / 2.0, title_y), title)
-
     z_ice = positions[np.asarray(labels) == 1, 2]
     z_cut = float(np.percentile(z_ice, 98)) if z_ice.size else float(origin[2] + 0.5 * lengths[2])
     z_lo = float(origin[2])
@@ -1047,21 +1071,40 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
         point = np.asarray(origin, dtype=float) + np.array((0.0, 0.5 * lengths[1], z_value - z_lo))
         return pix(point)[1]
 
+    step = 10.0
+    depth = 0
+    z_tick = z_lo
+    while z_tick <= z_hi + 1e-6:
+        y_tick = y_of(z_tick)
+        draw.line([(x_left - 14, y_tick), (x_left, y_tick)], fill=(20, 20, 20), width=3)
+        numeral = str(depth)
+        numeral_w = float(font.getlength(numeral))
+        add_text(f"depth {numeral}", (x_left - 22 - numeral_w, y_tick - LEGEND_FONT_PX / 2.0), numeral)
+        z_tick += step
+        depth += 1
+    depth_label = "depth from lower ice surface (nm)"
+    plate = Image.new("RGB", (int(font.getlength(depth_label)) + 8, LEGEND_FONT_PX + 8), (255, 255, 255))
+    ImageDraw.Draw(plate).text((0, 0), depth_label, font=font, fill=(20, 20, 20))
+    turned = plate.rotate(90, expand=True)
+    depth_x = 8
+    depth_y = max(top, int(0.5 * (y_of(z_lo) + y_of(z_hi)) - turned.height / 2.0))
+    canvas.paste(turned, (depth_x, depth_y))
+    marks.append(("depth", (depth_x, depth_y, depth_x + turned.width, depth_y + turned.height)))
+
     bracket_x = x_right + pad + 18
     y_front = y_of(z_cut)
-    y_periodic = y_of(z_lo)
+    y_ice = y_of(z_lo)
     y_top_cell = y_of(z_hi)
     gap = 28
     stroke_bracket(draw, bracket_x, y_top_cell, y_front - gap)
-    stroke_bracket(draw, bracket_x, y_front + gap, y_periodic)
+    stroke_bracket(draw, bracket_x, y_front + gap, y_ice)
     add_text("liquid", (bracket_x + 14, 0.5 * (y_top_cell + y_front) - LEGEND_FONT_PX / 2.0), "liquid")
-    add_text("ice Ih", (bracket_x + 14, 0.5 * (y_front + y_periodic) - LEGEND_FONT_PX / 2.0), "ice Ih")
+    add_text("ice Ih", (bracket_x + 14, 0.5 * (y_front + y_ice) - LEGEND_FONT_PX / 2.0), "ice Ih")
     dashed_hline(draw, x_left, x_right, y_front)
     add_text("growth front", (bracket_x + 200, y_front - LEGEND_FONT_PX / 2.0), "growth front")
-    add_text("periodic boundary", (bracket_x + 200, y_periodic - LEGEND_FONT_PX - 4), "periodic boundary")
 
-    legend_bottom = title_y + LEGEND_FONT_PX
-    y = title_y + LEGEND_FONT_PX + 16
+    legend_bottom = image.height + top
+    y = image.height + top + 16
     for group in groups:
         x = left + 16
         for label, colour in group:
@@ -1074,6 +1117,9 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
             x += swatch + 16 + text_w + 18
         y += row_h
     bar = 10.0 * raw.width / (2.0 * half_h)
+    # The horizontal edge is the cell's y length when the camera looks down x.
+    assert_nanometre_bar(bar, x_right - x_left, float(lengths[1]))
+    assert_nanometre_bar(bar, abs(y_bottom - y_top), float(lengths[2]))
     bar_y = legend_bottom + 28
     bar_x = x_left
     draw.line([(bar_x, bar_y), (bar_x + bar, bar_y)], fill=(20, 20, 20), width=6)
@@ -1087,9 +1133,15 @@ def render_interface(render, positions, labels, origin, lengths, path, width=Non
     """Growth vertical, orthographic view straight down x.
 
     Liquid uses the brine veil: radius 0.50 and 18 percent opacity.
-    Bilayer ticks are short marks on the bottom axis.
+    The depth axis matches the brine figure.
     """
+    origin = np.array(origin, dtype=float).copy()
+    lengths = np.array(lengths, dtype=float)
+    hex_z = positions[np.asarray(labels) == 1, 2]
+    origin[2] = lower_ice_origin(hex_z, [], float(lengths[2]))
     positions = wrap_into_cell(positions, origin, lengths)
+    if np.any(positions[:, 2] < float(np.min(positions[np.asarray(labels) == 1, 2])) - 1e-6):
+        raise RuntimeError("an interface centre sits below the lower ice surface")
     shown = np.array(labels, copy=True)
     ice_z = positions[shown == 1, 2]
     front = float(np.percentile(ice_z, 98)) if ice_z.size else float(origin[2])
