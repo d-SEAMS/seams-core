@@ -1,0 +1,81 @@
+#!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
+"""The molecule stills use the Ruhi palette, then one still is drawn."""
+
+import importlib.util
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPT = ROOT / "docs" / "scripts" / "render_molecules.py"
+
+# The deck colours. The renderer must take these from one palette dict.
+EXPECTED = {
+    "hexagonal": "#1E88E5",
+    "cubic": "#FF655D",
+    "interfacial": "#F1DB4B",
+    "clathrate": "#D81B60",
+    "interClathrate": "#004D40",
+    "water": "#B0BEC5",
+}
+
+
+def fail(message):
+    print(message, file=sys.stderr)
+    raise SystemExit(1)
+
+
+def load():
+    spec = importlib.util.spec_from_file_location("render_molecules", SCRIPT)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def check(module):
+    for name, colour in EXPECTED.items():
+        if name not in module.PALETTE:
+            fail("palette has no {}".format(name))
+        if module.PALETTE[name].upper() != colour.upper():
+            fail("{} is {}, expected {}".format(name, module.PALETTE[name], colour))
+        style = module.atom_style(name)
+        if style[0] != module.palette_rgb(name):
+            fail("{} colour does not come from the palette".format(name))
+    if module.PALETTE["reCubic"].upper() != EXPECTED["cubic"]:
+        fail("reCubic drifted from cubic")
+    if module.PALETTE["reHex"].upper() != EXPECTED["hexagonal"]:
+        fail("reHex drifted from hexagonal")
+    for code, name in (
+        (0, "cubic"),
+        (1, "hexagonal"),
+        (2, "water"),
+        (3, "interfacial"),
+        (4, "clathrate"),
+        (5, "interClathrate"),
+    ):
+        if module.CHILL_NAME[code] != name:
+            fail("label {} is {}".format(code, module.CHILL_NAME[code]))
+        if module.atom_style(module.CHILL_NAME[code])[0] != module.palette_rgb(name):
+            fail("label {} is not {}".format(name, EXPECTED[name]))
+    water = module.atom_style("water")
+    crystal = module.atom_style("hexagonal")
+    if water[1] >= crystal[1]:
+        fail("water is not smaller than hexagonal ice")
+    if water[2] < 0.5:
+        fail("water is not semi-transparent")
+    if crystal[2] != 0.0:
+        fail("hexagonal ice is not opaque")
+    for name in ("cubic", "interfacial", "clathrate", "interClathrate"):
+        if module.atom_style(name)[2] != 0.0:
+            fail("{} is not opaque".format(name))
+
+
+def main():
+    check(load())
+    done = subprocess.run([sys.executable, str(SCRIPT), *sys.argv[1:]], check=False)
+    return done.returncode
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

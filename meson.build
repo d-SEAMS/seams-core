@@ -1353,7 +1353,7 @@ if get_option('with_cli')
     'docs_render_molecules',
     python3,
     args: [
-      meson.project_source_root() / 'docs' / 'scripts' / 'render_molecules.py',
+      meson.project_source_root() / 'docs' / 'test_render_molecules.py',
       '--slug', 'ice-ih',
       '--out', meson.project_build_root() / 'molecule-stills',
       '--libdir', meson.project_build_root() / 'src',
