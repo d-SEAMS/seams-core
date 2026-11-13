@@ -12,8 +12,10 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
+#include <array>
 #include <iostream>
 #include <memory>
+#include <unordered_map>
 #include <mol_sys.hpp>
 
 /**
@@ -90,35 +92,38 @@ std::unordered_multimap<int, int> molSys::createMolIDAtomIDMultiMap(
 std::vector<std::vector<int>> molSys::hAtomMolList(
     molSys::PointCloud<molSys::Point<double>, double> &hCloud,
     molSys::PointCloud<molSys::Point<double>, double> &oCloud) {
-  std::vector<std::vector<int>>
-      hMolList; // the first column contains the molecular IDs, and the next
-                // two elements in the row are the hydrogen bond atoms in the
-                // molecule
-  int iMolID;   // Current molecular ID
-  int nHatoms;  // No. of h atoms found for a particular molID.
+  // The first column is the molecular ID. The next entries are the first
+  // two hydrogen indices of that molecule, in hydrogen-cloud order. One
+  // pass records those indices; each oxygen then reads its own molecule.
+  std::unordered_map<int, std::array<int, 2>> firstTwo;
+  std::unordered_map<int, int> nFound;
+  firstTwo.reserve(static_cast<std::size_t>(std::max(hCloud.nop, 0)));
+  nFound.reserve(static_cast<std::size_t>(std::max(hCloud.nop, 0)));
+  for (int jatom = 0; jatom < hCloud.nop; jatom++) {
+    const int molID = hCloud.pts[static_cast<std::size_t>(jatom)].molID;
+    int &nHatoms = nFound[molID];
+    if (nHatoms >= 2) {
+      continue;
+    }
+    firstTwo[molID][static_cast<std::size_t>(nHatoms)] = jatom;
+    nHatoms++;
+  }
 
+  std::vector<std::vector<int>> hMolList;
+  hMolList.reserve(static_cast<std::size_t>(std::max(oCloud.nop, 0)));
   for (int iatom = 0; iatom < oCloud.nop; iatom++) {
-    // Get the molID
-    iMolID = oCloud.pts[static_cast<std::size_t>(iatom)].molID;
-
-    hMolList.push_back(std::vector<int>()); // Empty vector for the index iatom
-    // Fill the first element with the molecular ID
-    hMolList[static_cast<std::size_t>(iatom)].push_back(iMolID);
-
-    nHatoms = 0; // init (no. of h atoms for the particular molID)
-
-    // Now search through the hydrogen atom pointCloud for this particular molID
-    for (int jatom = 0; jatom < hCloud.nop; jatom++) {
-      if (hCloud.pts[static_cast<std::size_t>(jatom)].molID == iMolID) {
-        hMolList[static_cast<std::size_t>(iatom)].push_back(jatom); // fill the hatom index
-        nHatoms++;
-        // If the two hydrogens have been found, break out of the loop
-        if (nHatoms == 2) {
-          break;
-        } // end of break
-      }   // end of check to see if jatom is part of iMolID
-    }     // end of loop through the hydrogen atom pointCloud
-  }       // end of looping through every oxygen atom
+    const int iMolID = oCloud.pts[static_cast<std::size_t>(iatom)].molID;
+    std::vector<int> row;
+    row.push_back(iMolID);
+    const auto found = nFound.find(iMolID);
+    if (found != nFound.end()) {
+      const auto &hs = firstTwo[iMolID];
+      for (int k = 0; k < found->second; k++) {
+        row.push_back(hs[static_cast<std::size_t>(k)]);
+      }
+    }
+    hMolList.push_back(std::move(row));
+  }
 
   return hMolList;
 } // end of function
