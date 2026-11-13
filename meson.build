@@ -817,6 +817,17 @@ if get_option('with_cli')
     depends: [seams_api_lib],
     timeout: 180)
   test(
+    'docs_tutorial_brine',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'tutorials' / 'test_brine.py',
+      meson.project_source_root(),
+      meson.project_build_root() / 'src',
+    ],
+    env: tutorial_env,
+    depends: [seams_api_lib],
+    timeout: 120)
+  test(
     'engines_tutorial',
     python3,
     args: [
