@@ -217,29 +217,29 @@ six_of(const std::vector<std::vector<int>> &rings) {
 }
 
 void fill_box(const Cloud &cloud, double box9[9]) {
-  for (int i = 0; i < 9; ++i) {
-    box9[i] = 0.0;
-  }
-  box9[0] = cloud.boxLow[0];
-  box9[1] = cloud.boxLow[1];
-  box9[2] = cloud.boxLow[2];
-  box9[3] = cloud.box[0];
-  box9[4] = cloud.box[1];
-  box9[5] = cloud.box[2];
-  if (cloud.box.size() >= 6) {
-    box9[6] = cloud.box[3];
-    box9[7] = cloud.box[4];
-    box9[8] = cloud.box[5];
-  }
+  // The frame stores a LAMMPS dump: bound spans plus xy, xz, yz.
+  // Callers read ox, oy, oz, lx, ly, lz, xy, xz, yz, and lx is
+  // xhi - xlo, not xhi_bound - xlo_bound.
+  double cell[3][3];
+  double origin[3];
+  nneigh::dumpBoundsToH(cloud.box, cloud.boxLow, cell, origin);
+  box9[0] = origin[0];
+  box9[1] = origin[1];
+  box9[2] = origin[2];
+  box9[3] = cell[0][0];
+  box9[4] = cell[1][1];
+  box9[5] = cell[2][2];
+  box9[6] = cell[1][0];
+  box9[7] = cell[2][0];
+  box9[8] = cell[2][1];
 }
 
 void apply_box(Cloud &cloud, const double *box9) {
-  cloud.boxLow = {box9[0], box9[1], box9[2]};
-  const bool sheared = box9[6] != 0.0 || box9[7] != 0.0 || box9[8] != 0.0;
-  if (sheared) {
-    cloud.box = {box9[3], box9[4], box9[5], box9[6], box9[7], box9[8]};
-  } else {
+  if (!nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, box9[0], box9[1],
+                                    box9[2], box9[3], box9[4], box9[5], box9[6],
+                                    box9[7], box9[8])) {
     cloud.box = {box9[3], box9[4], box9[5]};
+    cloud.boxLow = {box9[0], box9[1], box9[2]};
   }
 }
 
