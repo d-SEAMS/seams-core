@@ -2036,6 +2036,26 @@ struct primitive::RingUpdater::Impl {
                             &inT);
       }
     }
+    if (nThreads <= 1) {
+      // The index sort and the parallel merge allocate and move every
+      // ring buffer. On one thread the direct copy and sort is faster,
+      // and it is the path that the carried update used before.
+      std::size_t total = 0;
+      for (int k = 0; k < n; k++) {
+        total += bySource[static_cast<std::size_t>(T[static_cast<std::size_t>(k)])].n;
+      }
+      std::vector<std::vector<int>> out;
+      out.reserve(total);
+      for (int k = 0; k < n; k++) {
+        RingPool &pool = bySource[static_cast<std::size_t>(T[static_cast<std::size_t>(k)])];
+        for (std::size_t i = 0; i < pool.n; i++) {
+          out.push_back(pool.storage[i]);
+        }
+        pool.reset();
+      }
+      std::sort(out.begin(), out.end());
+      return out;
+    }
     std::vector<std::size_t> ringAt(static_cast<std::size_t>(n) + 1, 0);
     for (int k = 0; k < n; k++) {
       ringAt[static_cast<std::size_t>(k) + 1] =
@@ -2044,7 +2064,7 @@ struct primitive::RingUpdater::Impl {
     }
     std::vector<std::vector<int>> out(ringAt[static_cast<std::size_t>(n)]);
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (nThreads > 1)
+#pragma omp parallel for schedule(static)
 #endif
     for (int k = 0; k < n; k++) {
       RingPool &pool = bySource[static_cast<std::size_t>(T[static_cast<std::size_t>(k)])];
@@ -2059,19 +2079,17 @@ struct primitive::RingUpdater::Impl {
     // every ring is unique.
     std::vector<int> order(out.size());
     std::iota(order.begin(), order.end(), 0);
-    const auto byRing = [&out](int a, int b) { return out[static_cast<std::size_t>(a)] <
-                                                       out[static_cast<std::size_t>(b)]; };
-    if (nThreads > 1) {
-      seams::parallelStableSort(order, byRing);
-    } else {
-      std::sort(order.begin(), order.end(), byRing);
-    }
+    const auto byRing = [&out](int a, int b) {
+      return out[static_cast<std::size_t>(a)] < out[static_cast<std::size_t>(b)];
+    };
+    seams::parallelStableSort(order, byRing);
     std::vector<std::vector<int>> sorted(out.size());
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (nThreads > 1)
+#pragma omp parallel for schedule(static)
 #endif
     for (int i = 0; i < static_cast<int>(order.size()); ++i) {
-      sorted[static_cast<std::size_t>(i)] = std::move(out[static_cast<std::size_t>(order[static_cast<std::size_t>(i)])]);
+      sorted[static_cast<std::size_t>(i)] =
+          std::move(out[static_cast<std::size_t>(order[static_cast<std::size_t>(i)])]);
     }
     out.swap(sorted);
     return out;
@@ -2079,14 +2097,42 @@ struct primitive::RingUpdater::Impl {
 
   void splice(const std::vector<char> &inT,
               std::vector<std::vector<int>> added) {
-    const int nRing = static_cast<int>(flattened.size());
-    std::vector<char> drop(static_cast<std::size_t>(nRing), 0);
     int nThreads = 1;
 #ifdef SEAMS_HAS_OPENMP
     if (!omp_in_parallel()) {
-      nThreads = seams::teamFor(nRing);
+      nThreads = seams::teamFor(static_cast<int>(flattened.size()));
     }
-#pragma omp parallel for schedule(static) if (nThreads > 1) num_threads(nThreads)
+#endif
+    if (nThreads <= 1) {
+      std::vector<std::vector<int>> merged;
+      merged.reserve(flattened.size() + added.size());
+      auto a = added.begin();
+      for (auto &r : flattened) {
+        bool meets = false;
+        for (const int v : r) {
+          if (inT[static_cast<std::size_t>(v)]) {
+            meets = true;
+            break;
+          }
+        }
+        if (meets) {
+          continue;
+        }
+        while (a != added.end() && *a < r) {
+          merged.push_back(std::move(*a++));
+        }
+        merged.push_back(std::move(r));
+      }
+      while (a != added.end()) {
+        merged.push_back(std::move(*a++));
+      }
+      flattened.swap(merged);
+      return;
+    }
+    const int nRing = static_cast<int>(flattened.size());
+    std::vector<char> drop(static_cast<std::size_t>(nRing), 0);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) num_threads(nThreads)
 #endif
     for (int i = 0; i < nRing; ++i) {
       for (const int v : flattened[static_cast<std::size_t>(i)]) {

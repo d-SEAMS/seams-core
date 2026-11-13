@@ -300,6 +300,71 @@ void halfZLayer(int cz, const double *xs, const double *ys, const double *zs,
       if (b == e) {
         continue;
       }
+      // Interior cells have no periodic image. The thirteen forward
+      // neighbours are plain index steps, and the shift is zero.
+      if (cx > 0 && cx + 1 < ncx && cy > 0 && cy + 1 < ncy && cz > 0 && cz + 1 < ncz) {
+        struct Step {
+          int begin;
+          int end;
+        };
+        Step nbr[14];
+        int nn = 0;
+        nbr[nn++] = {b, e};
+        const int delta[13][3] = {
+            {1, -1, -1}, {1, -1, 0}, {1, -1, 1}, {1, 0, -1}, {1, 0, 0},
+            {1, 0, 1},   {1, 1, -1}, {1, 1, 0},  {1, 1, 1},  {0, 1, -1},
+            {0, 1, 0},   {0, 1, 1},   {0, 0, 1},
+        };
+        for (const auto &d : delta) {
+          const int ncid = ((cx + d[0]) * ncy + (cy + d[1])) * ncz + (cz + d[2]);
+          const int jb = cellStart[ncid];
+          const int je = cellStart[ncid + 1];
+          if (jb != je) {
+            nbr[nn++] = {jb, je};
+          }
+        }
+        for (int i = b; i < e; ++i) {
+          const int ii = ids[i];
+          const double xi = xs[i];
+          const double yi = ys[i];
+          const double zi = zs[i];
+          int *rowI = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
+          for (int t = 0; t < nn; ++t) {
+            const int j0 = (t == 0) ? i + 1 : nbr[t].begin;
+            for (int j = j0; j < nbr[t].end; ++j) {
+              const double dx = xi - xs[j];
+              const double dy = yi - ys[j];
+              const double dz = zi - zs[j];
+              if (!(dx * dx + dy * dy + dz * dz < rc2)) {
+                continue;
+              }
+              const int jj = ids[j];
+              int &ni = counts[ii];
+              int &nj = counts[jj];
+              if (ni < kStashCap) {
+                rowI[ni] = jj;
+              } else {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp atomic write
+#endif
+                *overflowed = 1;
+              }
+              ++ni;
+              int *rowJ = stash + static_cast<std::size_t>(jj) * static_cast<std::size_t>(kStashCap);
+              if (nj < kStashCap) {
+                rowJ[nj] = ii;
+              } else {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp atomic write
+#endif
+                *overflowed = 1;
+              }
+              ++nj;
+            }
+          }
+        }
+        continue;
+      }
       struct Nbr {
         int begin;
         int end;
