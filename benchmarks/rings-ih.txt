@@ -1,0 +1,55 @@
+cores 8
+molecules 4096 threads 1 reps 8 median_ms 15.948 count 8192 hc-basal 2040 hc-prismatic 5484 hexagon 668 prism 0
+sample_ms 16.367
+sample_ms 16.007
+sample_ms 16.172
+sample_ms 16.332
+sample_ms 15.777
+sample_ms 15.838
+sample_ms 15.761
+sample_ms 15.890
+molecules 4096 threads 8 reps 8 median_ms 6.005 count 8192 hc-basal 2040 hc-prismatic 5484 hexagon 668 prism 0
+sample_ms 5.918
+sample_ms 6.227
+sample_ms 6.566
+sample_ms 6.152
+sample_ms 6.041
+sample_ms 5.968
+sample_ms 5.671
+sample_ms 5.537
+molecules 32768 threads 1 reps 8 median_ms 139.247 count 65536 hc-basal 16368 hc-prismatic 46308 hexagon 2860 prism 0
+sample_ms 140.057
+sample_ms 139.774
+sample_ms 137.756
+sample_ms 135.493
+sample_ms 140.099
+sample_ms 136.360
+sample_ms 139.216
+sample_ms 139.278
+molecules 32768 threads 8 reps 8 median_ms 38.308 count 65536 hc-basal 16368 hc-prismatic 46308 hexagon 2860 prism 0
+sample_ms 38.422
+sample_ms 38.316
+sample_ms 38.841
+sample_ms 38.299
+sample_ms 38.593
+sample_ms 37.946
+sample_ms 37.892
+sample_ms 37.659
+molecules 110592 threads 1 reps 8 median_ms 580.872 count 221184 hc-basal 55272 hc-prismatic 159324 hexagon 6588 prism 0
+sample_ms 585.660
+sample_ms 586.852
+sample_ms 586.100
+sample_ms 580.093
+sample_ms 580.919
+sample_ms 580.826
+sample_ms 574.068
+sample_ms 578.324
+molecules 110592 threads 8 reps 8 median_ms 139.406 count 221184 hc-basal 55272 hc-prismatic 159324 hexagon 6588 prism 0
+sample_ms 139.910
+sample_ms 138.918
+sample_ms 138.360
+sample_ms 139.034
+sample_ms 139.778
+sample_ms 139.019
+sample_ms 143.544
+sample_ms 140.793

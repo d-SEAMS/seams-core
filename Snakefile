@@ -445,6 +445,15 @@ rule hop_stride_crossover:
         "--reps 8 --warmup 1 > {output}"
 
 
+rule rings_ih:
+    output:
+        "benchmarks/rings-ih.txt",
+    shell:
+        "OMP_DYNAMIC=FALSE "
+        "bbdir-release/tests/bench_rings_ih --session --reps 8 --warmup 1 "
+        "> {output}"
+
+
 rule rings_one_thread:
     input:
         "bbdir-release/tests/bench_rings_h2h",

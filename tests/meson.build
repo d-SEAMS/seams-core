@@ -466,6 +466,28 @@ executable('bench_rings_h2h', 'bench_rings_h2h.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
+rings_ih_inc = [include_directories('.'), include_directories('../include')]
+rings_ih_args = _args + ['-I' + meson.project_build_root() / 'src']
+rings_ih_test = executable('test_rings_ih', 'test_rings_ih.cpp',
+  dependencies: [catch2_dep],
+  link_with: seams_api_lib,
+  cpp_args: rings_ih_args,
+  link_args: _test_link_args,
+  include_directories: rings_ih_inc,
+  build_rpath: _test_rpath)
+test('rings_ih', rings_ih_test, timeout: 180, env: _test_env)
+
+executable('bench_rings_ih', 'bench_rings_ih.cpp',
+  link_with: seams_api_lib,
+  cpp_args: rings_ih_args,
+  link_args: _test_link_args,
+  include_directories: rings_ih_inc,
+  build_rpath: _test_rpath)
+
+test('rings_ih_external', find_program('python3'),
+  args: [meson.project_source_root() / 'tests' / 'test_rings_ih_external.py'],
+  timeout: 180)
+
 executable('bench_stages', 'bench_stages.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
