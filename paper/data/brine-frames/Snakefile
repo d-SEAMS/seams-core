@@ -4,7 +4,12 @@
 # receives a copy of each labelled xyz. The rule outputs are
 # paper/data/brine-frames/out/T230_m{0,20,40}_r0_{t0,t1,t2,tend}.xyz.
 #
+# brine_dataset downloads the labelled frames of d-SEAMS/brine-front-230K
+# at hf_revision into hf_local. brine_replicas writes the per-replica
+# table and the replica ranges from them; both CSVs are in git.
+#
 #   snakemake -s paper/data/brine-frames/Snakefile -n paper/data/brine-frames/out/T230_m0_r0_t0.xyz
+#   snakemake -s paper/data/brine-frames/Snakefile -j1 paper/data/brine-frames/replicas.csv
 #   paper/tex/repro/brine_front.sh
 
 from pathlib import Path
@@ -60,6 +65,42 @@ rule brine_frame:
         "{params.python} paper/data/brine-frames/regenerate.py frame "
         "--restart {input.restart} --out {output.out} --publish {output.published} "
         "--step {params.step} --lmp {params.lmp} --seams {params.seams} --lib {params.lib}"
+
+
+HF_LOCAL = config["hf_local"]
+HF_REVISION = config["hf_revision"]
+HF_MANIFEST = f"{HF_LOCAL}/frames-{HF_REVISION}.txt"
+
+
+rule brine_dataset:
+    input:
+        script="paper/data/brine-frames/replicas.py",
+    output:
+        HF_MANIFEST,
+    params:
+        python=config["python"],
+        dataset=config["hf_dataset"],
+    shell:
+        "{params.python} paper/data/brine-frames/replicas.py fetch "
+        "--dest {HF_LOCAL} --dataset {params.dataset} --revision {HF_REVISION}"
+
+
+# One row per replica x loading x frame; frames the revision lacks are
+# rows with status not_in_dataset.
+rule brine_replicas:
+    input:
+        manifest=HF_MANIFEST,
+        script="paper/data/brine-frames/replicas.py",
+    output:
+        table="paper/data/brine-frames/replicas.csv",
+        span="paper/data/brine-frames/replicas_range.csv",
+    params:
+        python=config["python"],
+    shell:
+        "{params.python} paper/data/brine-frames/replicas.py table "
+        "--frames {HF_LOCAL}/data/frames --csv {output.table} && "
+        "{params.python} paper/data/brine-frames/replicas.py range "
+        "--csv {output.table} --out {output.span}"
 
 
 rule brine_front_pdf:

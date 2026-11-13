@@ -9,3 +9,8 @@ render_python: python3
 lmp: lmp
 seams: seams
 lib: libyodaLib.so
+# Labelled frames of d-SEAMS/brine-front-230K, downloaded at one revision.
+# hf_local is gitignored (/d-SEAMS/).
+hf_dataset: d-SEAMS/brine-front-230K
+hf_revision: 4828e33ecf419c70643b2d466bfa4f283b4138dc
+hf_local: d-SEAMS/brine-front-230K
