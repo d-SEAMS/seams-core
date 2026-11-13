@@ -12,11 +12,13 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
+#include <index_range.hpp>
 #include <neighbours.hpp>
 #include <rdf2d.hpp>
 
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <vector>
 
 #ifdef SEAMS_HAS_OPENMP
@@ -61,13 +63,17 @@ bool histogramCellPairs(
                  static_cast<int>(std::min(frame.wy / span, 1.0e6)),
                  static_cast<int>(std::min(frame.wz / span, 1.0e6))};
   // A dilute frame takes coarser cells rather than walking empty ones.
-  while (1LL * dims[0] * dims[1] * dims[2] > 2LL * n + 27) {
+  const long long cellCap = std::min(2LL * n + 27, static_cast<long long>(std::numeric_limits<int>::max()));
+  while (1LL * dims[0] * dims[1] * dims[2] > cellCap) {
     int *widest = std::max_element(dims, dims + 3);
     *widest = std::max(1, *widest / 2);
   }
   const int ny = dims[1];
   const int nz = dims[2];
-  const int ncell = dims[0] * ny * nz;
+  int ncell = 0;
+  if (!seams::gridFits(dims[0], ny, nz, ncell)) {
+    return false;
+  }
   const double lx = frame.lx, ly = frame.ly, lz = frame.lz;
   const double xy = frame.xy, xz = frame.xz, yz = frame.yz;
 

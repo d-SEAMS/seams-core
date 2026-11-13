@@ -67,6 +67,7 @@ test_sources = {
   'gpu_residency': 'test_gpu_residency.cpp',
   'config': 'test_config.cpp',
   'site': 'test_site.cpp',
+  'wide_cell': 'test_wide_cell.cpp',
 }
 
 if readcon_dep.found()

@@ -5,6 +5,7 @@
 // SPDX-License-Identifier: MIT
 //-----------------------------------------------------------------------------------
 
+#include <index_range.hpp>
 #include <local_symmetry.hpp>
 
 #include <ira_sofi.hpp>
@@ -755,10 +756,14 @@ Eigen::MatrixXd iceShellOrtho(const Eigen::MatrixXd &cartesian, double Lx, doubl
     }
     return std::max(3, ncell);
   };
-  const int nx = cellsOf(Lx);
-  const int ny = cellsOf(Ly);
-  const int nz = cellsOf(Lz);
-  const int ncell = nx * ny * nz;
+  int nx = cellsOf(Lx);
+  int ny = cellsOf(Ly);
+  int nz = cellsOf(Lz);
+  seams::coarsenUntilFits(nx, ny, nz, 3);
+  int ncell = 0;
+  if (!seams::gridFits(nx, ny, nz, ncell)) {
+    return {};
+  }
   std::vector<int> head(static_cast<std::size_t>(ncell), -1);
   std::vector<int> next(static_cast<std::size_t>(n), -1);
   std::vector<double> wrapped(static_cast<std::size_t>(n) * 3);

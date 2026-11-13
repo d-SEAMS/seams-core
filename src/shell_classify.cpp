@@ -12,6 +12,7 @@
 // Eigen is not included in this file, so the translation unit can be built
 // with AVX2.
 
+#include <index_range.hpp>
 #include <shell_hot.hpp>
 #include <thread_team.hpp>
 
@@ -2064,7 +2065,14 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     ny = std::max(1, static_cast<int>(lb / kGrid));
     nz = std::max(1, static_cast<int>(lc / kGrid));
   }
-  const int ncell = nx * ny * nz;
+  // A box of a few thousand angstroms makes nx*ny*nz overflow a signed
+  // int. Coarser cells stay at least one bond wide, so the same 27-cell
+  // stencil still holds every neighbour inside the bond cutoff.
+  seams::coarsenUntilFits(nx, ny, nz, fast ? 3 : 1);
+  int ncell = 0;
+  if (!seams::gridFits(nx, ny, nz, ncell)) {
+    return;
+  }
   const int reach = fast ? 1 : (skew > 1.0 ? 4 : 2);
   Workspace &mem = workspace();
   mem.fit(static_cast<size_t>(n), static_cast<size_t>(ncell));
