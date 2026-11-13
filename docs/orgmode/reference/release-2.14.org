@@ -73,10 +73,26 @@ that pool is capped at four. The orthorhombic cutoff list is shared:
 each pair is counted once, even z layers together, a wrapping last
 layer alone, then the odd layers. Published CHILL+ and cutoff q6 read
 that list. A carried ring update enumerates changed sources with
-~sourceTeam~ and sorts and merges the kept rings with ~teamFor~.
+~sourceTeam~. On one thread it then copies and sorts directly, and
+merges the rings that stay with a direct walk. Several threads still
+sort and merge with ~teamFor~. ~seams::TeamWidth~, when it narrows the
+team, binds those workers once to the first cores of the allowed set
+and sets ~OMP_PROC_BIND~ to ~false~. That bind stays for the process.
+An interior cutoff cell skips the periodic shift. ~1ce3be3b~ retimes
+~benchmarks/pool-audit.csv~ after that change. The rings kernel there
+is ~ringNetwork~ alone. The neighbour graph is built before the timer
+starts.
 
-The signature-search and pool-audit sittings are the CSVs on
-[[file:../explanation/trace-threads.org][the thread-control page]].
+~758058f4~ retimes ~benchmarks/paper-cells/sitting-large.csv~. Ice Ic
+at 884736 molecules is paired with freud, mdapy, vesin, OVITO PTM and
+CHILL+, and rings-statistics-matter, at 1, 2, 4 and 8 threads. The
+~detail~ column records the agreement check on that frame. The rings
+row of that file is ~seams_frame_rings~, the cutoff list and the ring
+search together. It is not the pool-audit rings kernel.
+
+The signature-search, pool-audit, and large-cell sittings are the CSVs
+on [[file:../explanation/trace-threads.org][the thread-control page]]
+and [[file:../explanation/performance-overview.org][the performance overview]].
 
 * Deprecations
 

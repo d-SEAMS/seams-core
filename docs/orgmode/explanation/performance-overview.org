@@ -13,8 +13,8 @@ sitting. A later sitting sets it.
 |------+---------------|
 | ~benchmarks/rc3-sitting.csv~ | The release-candidate head-to-head, one thread and eight |
 | ~benchmarks/trace-threads.csv~ | The hydrate signature search at 1, 2, 4 and 8 threads |
-| ~benchmarks/paper-cells/sitting-large.csv~ | Ice Ic at 884736 molecules, each code on its own thread control, recorded by ~f49f4cbb~ |
-| ~benchmarks/pool-audit.csv~ | The pool-sized kernels on ice Ic, retimed at ~1c578c6f~ |
+| ~benchmarks/paper-cells/sitting-large.csv~ | Ice Ic at 884736 molecules, paired with freud, mdapy, vesin, OVITO and rings-statistics-matter at 1, 2, 4 and 8 threads, retimed at ~758058f4~ |
+| ~benchmarks/pool-audit.csv~ | The pool-sized kernels on ice Ic, retimed at ~1ce3be3b~ |
 
 The full tables are
 [[file:performance.org][the release-candidate sitting]],
@@ -28,6 +28,35 @@ is the guest's local parameter. The pool-audit file splits local and
 cutoff. The large-cell file names the call in its ~detail~ column. The
 tables keep the operation string the CSV stored.
 
+The rings row in the large-cell file is the full cutoff call. It is
+~seams_frame_rings~: the cutoff list and the ring search together.
+The rings kernel in the pool-audit file is ~ringNetwork~ alone, and
+that timer starts after the neighbour graph exists. The two numbers
+are not interchangeable.
+
+The large-cell ~detail~ column is the agreement check on that one ice
+Ic frame. q6 is compared with freud and with mdapy. The neighbour
+count is the directed pairs left by the cutoff list, compared across
+d-SEAMS, vesin and freud. Both CHILL+ codes are compared on the cubic
+label. The classifier is compared with OVITO PTM restricted to the
+cubic and hexagonal diamond templates, where ice Ic is cubic diamond.
+The six-ring count is compared with rings-statistics-matter.
+
 #+begin_export rst
-.. include:: performance-overview.rst
+.. include:: performance-overview-tables.rst
+#+end_export
+
+* The 884736-molecule sitting
+
+~758058f4~ is one sitting. One warm-up, then eight calls, at 1, 2, 4
+and 8 threads. Each width is its own process. The rivals are freud,
+mdapy, vesin, OVITO (CHILL+, q4, q6, and PTM with the default templates
+and with only the diamond templates), and rings-statistics-matter.
+~docs/render_sitting.py~ writes the tables from the CSV, and
+~meson test docs_sitting_large~ recomputes each median and checks that
+the agreement notes are present. ~docs_table_csv~ checks the copied
+numbers.
+
+#+begin_export rst
+.. include:: sitting-large-tables.rst
 #+end_export

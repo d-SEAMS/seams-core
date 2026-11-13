@@ -19,7 +19,8 @@ CSV = ROOT / "benchmarks" / "rc3-sitting.csv"
 TRACE = ROOT / "benchmarks" / "trace-threads.csv"
 POOL = ROOT / "benchmarks" / "pool-audit.csv"
 LARGE = ROOT / "benchmarks" / "paper-cells" / "sitting-large.csv"
-OVERVIEW_OUT = ROOT / "docs" / "source" / "explanation" / "performance-overview.rst"
+OVERVIEW_OUT = ROOT / "docs" / "source" / "explanation" / "performance-overview-tables.rst"
+LARGE_OUT = ROOT / "docs" / "source" / "explanation" / "sitting-large-tables.rst"
 OUT = ROOT / "docs" / "source" / "explanation" / "performance-tables.rst"
 TRACE_OUT = ROOT / "docs" / "source" / "explanation" / "trace-threads-tables.rst"
 POOL_OUT = ROOT / "docs" / "source" / "explanation" / "pool-audit-tables.rst"
@@ -273,7 +274,69 @@ def check_large(rows):
     sizes = sorted({row["molecules"] for row in rows})
     if sizes != ["884736"]:
         errors.append("sitting-large molecules are {}".format(sizes))
+    # The detail column is the agreement check on one shared ice Ic frame.
+    for row in rows:
+        detail = row.get("detail", "")
+        code, operation = row["code"], row["operation"]
+        if code in ("d-SEAMS", "rings-statistics-matter") and operation == "rings":
+            if "agree_six=" not in detail:
+                errors.append("rings {} threads {} missing six-ring agreement".format(code, row["threads"]))
+        if operation == "q6" and code in ("d-SEAMS", "freud", "mdapy"):
+            if "agree_freud_max_abs=" not in detail or "agree_mdapy_max_abs=" not in detail:
+                errors.append("q6 {} threads {} missing the q6 agreement".format(code, row["threads"]))
+        if operation == "neighbours" and code in ("d-SEAMS", "vesin", "freud"):
+            if "agree=d-SEAMS/vesin/freud" not in detail:
+                errors.append("neighbours {} threads {} missing the pair agreement".format(code, row["threads"]))
+        if operation == "chill+" and code in ("d-SEAMS", "OVITO"):
+            if "cubic_dseams=" not in detail or "cubic_ovito=" not in detail:
+                errors.append("chill+ {} threads {} missing the cubic agreement".format(code, row["threads"]))
+        if (code, operation) in (("d-SEAMS", "classifier"), ("OVITO", "ptm-ice")):
+            if "agree_ice_ic_cubic_diamond=" not in detail:
+                errors.append("{} {} threads {} missing the classifier agreement".format(code, operation, row["threads"]))
     return errors
+
+
+def write_large(rows, path):
+    grouped = {}
+    for row in rows:
+        grouped.setdefault(row["operation"], []).append(row)
+    order = (
+        "rings",
+        "q4",
+        "q6",
+        "q4+q6",
+        "neighbours",
+        "chill+",
+        "classifier",
+        "ptm-default",
+        "ptm-ice",
+    )
+    names = [name for name in order if name in grouped]
+    names.extend(sorted(set(grouped) - set(names)))
+    lines = [
+        ".. list-table::",
+        "   :header-rows: 0",
+        "",
+        "   * - Written by ``docs/render_sitting.py`` from ``benchmarks/paper-cells/sitting-large.csv``.",
+        "       Ice Ic at 884736 molecules. Each code is timed at 1, 2, 4 and 8 threads.",
+        "       ``median_ms`` and ``iqr_ms`` are recomputed from ``samples_ms``.",
+        "",
+    ]
+    header = ("code", "version", "operation", "threads", "n", "median_ms", "iqr_ms")
+    for name in names:
+        block = sorted(grouped[name], key=lambda row: (row["code"], int(row["threads"])))
+        title = "884736 molecules, {}".format(name)
+        lines.append(title)
+        lines.append("^" * len(title))
+        lines.append("")
+        lines.append(".. csv-table::")
+        lines.append("   :header: " + ", ".join(header))
+        lines.append("")
+        for row in block:
+            lines.append("   " + ", ".join(cell(row[key]) for key in header))
+        lines.append("")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n")
 
 
 def ratio_series(rows, fields):
@@ -485,6 +548,7 @@ def main(argv):
     if large_errors:
         print("\n".join(large_errors), file=sys.stderr)
         return 1
+    write_large(large_rows, LARGE_OUT)
     write_overview(
         (
             ("rc3-sitting.csv", rows),
