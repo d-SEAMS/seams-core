@@ -77,7 +77,7 @@ bool match::matchPrism(
     std::vector<int> &basal1, std::vector<int> &basal2,
     std::vector<double> &rmsdPerAtom, bool isPerfect) {
   //
-  int ringSize = basal1.size(); // Number of nodes in each basal ring
+  int ringSize = static_cast<int>(basal1.size()); // Number of nodes in each basal ring
   std::vector<int> matchedBasal1,
       matchedBasal2; // Re-ordered basal rings 1 and 2
   int dim = 3;       // Number of dimensions
@@ -165,7 +165,7 @@ bool match::matchUntetheredPrism(
     std::vector<int> &basal1, std::vector<int> &basal2,
     std::vector<double> &rmsdPerAtom) {
   //
-  int ringSize = basal1.size(); // Number of nodes in each basal ring
+  int ringSize = static_cast<int>(basal1.size()); // Number of nodes in each basal ring
   std::vector<int> matchedBasal1,
       matchedBasal2; // Re-ordered basal rings 1 and 2
   int dim = 3;       // Number of dimensions
@@ -240,7 +240,7 @@ int match::updatePerAtomRMSDRing(const std::vector<int> &basalRing, int starting
                                  std::vector<double> &rmsdPerAtom) {
   //
   int atomIndex;                   // Atom particle index, in rmsdPerAtom
-  int ringSize = basalRing.size(); // Size of the basal ring
+  int ringSize = static_cast<int>(basalRing.size()); // Size of the basal ring
   int index;                       // Corresponding index in the basal ring
   double iRMSD;                    // Per-particle RMSD
 
@@ -254,11 +254,11 @@ int match::updatePerAtomRMSDRing(const std::vector<int> &basalRing, int starting
     } // end of wrap-around
     //
     // Get the atom index
-    atomIndex = basalRing[index];
+    atomIndex = basalRing[static_cast<std::size_t>(index)];
     // Get and update the RMSD per particle
-    iRMSD = rmsdFromMatch[i];
-    if (rmsdPerAtom[atomIndex] == -1) {
-      rmsdPerAtom[atomIndex] = iRMSD;
+    iRMSD = rmsdFromMatch[static_cast<std::size_t>(i)];
+    if (rmsdPerAtom[static_cast<std::size_t>(atomIndex)] == -1) {
+      rmsdPerAtom[static_cast<std::size_t>(atomIndex)] = iRMSD;
     } // end of update of RMSD
 
   } // end of updating the RMSD per particle
@@ -273,7 +273,7 @@ int match::updateRMSDRing(const std::vector<int> &basalRing, int startingIndex,
                           double rmsdVal, std::vector<double> &rmsdPerAtom) {
   //
   int atomIndex;                   // Atom particle index, in rmsdPerAtom
-  int ringSize = basalRing.size(); // Size of the basal ring
+  int ringSize = static_cast<int>(basalRing.size()); // Size of the basal ring
   int index;                       // Corresponding index in the basal ring
 
   // -----------------
@@ -286,10 +286,10 @@ int match::updateRMSDRing(const std::vector<int> &basalRing, int startingIndex,
     } // end of wrap-around
     //
     // Get the atom index
-    atomIndex = basalRing[index];
+    atomIndex = basalRing[static_cast<std::size_t>(index)];
     // The RMSD value to update with is rmsdVal
-    if (rmsdPerAtom[atomIndex] == -1) {
-      rmsdPerAtom[atomIndex] = rmsdVal;
+    if (rmsdPerAtom[static_cast<std::size_t>(atomIndex)] == -1) {
+      rmsdPerAtom[static_cast<std::size_t>(atomIndex)] = rmsdVal;
     } // end of update of RMSD
 
   } // end of updating the RMSD for each particle
@@ -305,7 +305,7 @@ bool match::matchPrismBlock(
     const std::vector<std::vector<int>> &nList, const Eigen::MatrixXd &refPoints,
     std::vector<int> &basal1, std::vector<int> &basal2, int &beginIndex) {
   //
-  int ringSize = basal1.size(); // Number of nodes in the basal rings
+  int ringSize = static_cast<int>(basal1.size()); // Number of nodes in the basal rings
   bool isMatch; // Qualifier for whether the prism block matches or not
   // The reference height is this candidate's own mean pairwise
   // distance, and an RMSD of 6 still counts as a match, so two

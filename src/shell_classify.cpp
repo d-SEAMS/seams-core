@@ -2671,14 +2671,14 @@ int bondsBeyond(int atom, const Packed *packed, const int *cellStart, int nx, in
         continue;
       }
       const double dx = nbr.x + sx * lat[0][0] + sy * lat[1][0] + sz * lat[2][0] - ci0;
-      const double dy = nbr.y + sx * lat[0][1] + sy * lat[1][1] + sz * lat[2][1] - ci1;
-      const double dz = nbr.z + sx * lat[0][2] + sy * lat[1][2] + sz * lat[2][2] - ci2;
-      const double d2 = dx * dx + dy * dy + dz * dz;
+      const double offY = nbr.y + sx * lat[0][1] + sy * lat[1][1] + sz * lat[2][1] - ci1;
+      const double offZ = nbr.z + sx * lat[0][2] + sy * lat[1][2] + sz * lat[2][2] - ci2;
+      const double d2 = dx * dx + offY * offY + offZ * offZ;
       if (d2 <= kBond * kBond || d2 > kWide * kWide) {
         continue;
       }
       if (nw < kMaxWide) {
-        row[nw] = Bond{nbr.id, dx, dy, dz};
+        row[nw] = Bond{nbr.id, dx, offY, offZ};
         rd[nw] = d2;
         nw++;
       } else {
@@ -2689,7 +2689,7 @@ int bondsBeyond(int atom, const Packed *packed, const int *cellStart, int nx, in
           }
         }
         if (d2 < rd[worst]) {
-          row[worst] = Bond{nbr.id, dx, dy, dz};
+          row[worst] = Bond{nbr.id, dx, offY, offZ};
           rd[worst] = d2;
         }
       }

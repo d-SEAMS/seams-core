@@ -152,18 +152,18 @@ struct BoundedBalls {
                   std::vector<std::pair<int, int>> &out) const {
     const int nVertices = static_cast<int>(adjacency.size());
     for (const int w : touched) {
-      dist[w] = -1;
+      dist[static_cast<std::size_t>(w)] = -1;
     }
     touched.clear();
-    dist[v] = 0;
+    dist[static_cast<std::size_t>(v)] = 0;
     touched.push_back(v);
     frontier.assign(1, v);
     for (int depth = 1; depth <= radius && !frontier.empty(); depth++) {
       next.clear();
       for (const int u : frontier) {
-        for (const int w : adjacency[u]) {
-          if (w >= 0 && w < nVertices && dist[w] == -1) {
-            dist[w] = depth;
+        for (const int w : adjacency[static_cast<std::size_t>(u)]) {
+          if (w >= 0 && w < nVertices && dist[static_cast<std::size_t>(w)] == -1) {
+            dist[static_cast<std::size_t>(w)] = depth;
             touched.push_back(w);
             next.push_back(w);
           }
@@ -174,7 +174,7 @@ struct BoundedBalls {
     const auto begin = out.size();
     for (const int w : touched) {
       if (w != v) {
-        out.emplace_back(w, dist[w]);
+        out.emplace_back(w, dist[static_cast<std::size_t>(w)]);
       }
     }
     std::sort(out.begin() + static_cast<std::ptrdiff_t>(begin), out.end());
@@ -216,7 +216,7 @@ struct BoundedBalls {
     int cell = 1;
     for (int v = 0; v < nVertices; v++) {
       int degree = 0;
-      for (const int neighbour : adjacency[v]) {
+      for (const int neighbour : adjacency[static_cast<std::size_t>(v)]) {
         (void)neighbour;
         ++degree;
       }
@@ -249,7 +249,7 @@ struct BoundedBalls {
       tid = omp_get_thread_num();
 #endif
       auto &bag = bags[static_cast<std::size_t>(tid)];
-      std::vector<int> dist(nVertices, -1);
+      std::vector<int> dist(static_cast<std::size_t>(nVertices), -1);
       std::vector<int> touched;
       std::vector<int> frontier;
       std::vector<int> next;
@@ -317,11 +317,11 @@ struct BoundedBalls {
       return nVertices;
     }
     std::vector<char> isChanged(static_cast<std::size_t>(nVertices), 0);
-    std::vector<int> dist(nVertices, -1);
+    std::vector<int> dist(static_cast<std::size_t>(nVertices), -1);
     std::vector<int> frontier, next, affected;
     for (const int v : changed) {
-      if (v >= 0 && v < nVertices && dist[v] == -1) {
-        dist[v] = 0;
+      if (v >= 0 && v < nVertices && dist[static_cast<std::size_t>(v)] == -1) {
+        dist[static_cast<std::size_t>(v)] = 0;
         frontier.push_back(v);
         affected.push_back(v);
         isChanged[static_cast<std::size_t>(v)] = 1;
@@ -331,17 +331,17 @@ struct BoundedBalls {
       next.clear();
       for (const int u : frontier) {
         if (isChanged[static_cast<std::size_t>(u)]) {
-          for (const int w : oldAdj[u]) {
-            if (w >= 0 && w < nVertices && dist[w] == -1) {
-              dist[w] = depth;
+          for (const int w : oldAdj[static_cast<std::size_t>(u)]) {
+            if (w >= 0 && w < nVertices && dist[static_cast<std::size_t>(w)] == -1) {
+              dist[static_cast<std::size_t>(w)] = depth;
               affected.push_back(w);
               next.push_back(w);
             }
           }
         }
-        for (const int w : newAdj[u]) {
-          if (w >= 0 && w < nVertices && dist[w] == -1) {
-            dist[w] = depth;
+        for (const int w : newAdj[static_cast<std::size_t>(u)]) {
+          if (w >= 0 && w < nVertices && dist[static_cast<std::size_t>(w)] == -1) {
+            dist[static_cast<std::size_t>(w)] = depth;
             affected.push_back(w);
             next.push_back(w);
           }
@@ -349,7 +349,7 @@ struct BoundedBalls {
       }
       frontier.swap(next);
     }
-    std::vector<int> scratchDist(nVertices, -1);
+    std::vector<int> scratchDist(static_cast<std::size_t>(nVertices), -1);
     std::vector<int> touched, fr, nxt;
     std::vector<std::pair<int, int>> repl;
     std::vector<int> replAt(static_cast<std::size_t>(nVertices), -1);
@@ -426,22 +426,22 @@ void levelsFrom(const Graph &adjacency, int src, int maxLvl, int minVertex,
                 std::vector<int> &lvl, std::vector<int> &touched,
                 std::vector<int> &frontier, std::vector<int> &next) {
   for (const int w : touched) {
-    lvl[w] = -1;
+    lvl[static_cast<std::size_t>(w)] = -1;
   }
   touched.clear();
-  lvl[src] = 0;
+  lvl[static_cast<std::size_t>(src)] = 0;
   touched.push_back(src);
   frontier.assign(1, src);
   for (int depth = 1; depth <= maxLvl && !frontier.empty(); depth++) {
     next.clear();
     for (const int u : frontier) {
-      for (const int w : adjacency[u]) {
+      for (const int w : adjacency[static_cast<std::size_t>(u)]) {
         // A shortcut may pass through a vertex that is not on the ring,
         // including one whose index is below the source. The walk has to
         // see it. A ring that actually contains such a vertex is dropped
         // later, because its lowest member is not this source.
-        if (w >= minVertex && w < static_cast<int>(lvl.size()) && lvl[w] == -1) {
-          lvl[w] = depth;
+        if (w >= minVertex && w < static_cast<int>(lvl.size()) && lvl[static_cast<std::size_t>(w)] == -1) {
+          lvl[static_cast<std::size_t>(w)] = depth;
           touched.push_back(w);
           next.push_back(w);
         }
@@ -733,7 +733,7 @@ bool ringIsPrimitive(const DistOracle &oracle, const std::vector<int> &ring,
       if (ringDist <= 1) {
         continue;
       }
-      if (oracle.shorter(ring[i], ring[j], ringDist)) {
+      if (oracle.shorter(ring[static_cast<std::size_t>(i)], ring[static_cast<std::size_t>(j)], ringDist)) {
         ok = false;
         break;
       }
@@ -781,33 +781,33 @@ void shortestPathsFrom(const Graph &adjacency, int src, RingScratch &scr, int mi
                        int maxStore) {
   const int nVertices = static_cast<int>(adjacency.size());
   if (static_cast<int>(scr.pathFirst.size()) != nVertices) {
-    scr.pathFirst.assign(nVertices, 0);
-    scr.pathCount.assign(nVertices, 0);
+    scr.pathFirst.assign(static_cast<std::size_t>(nVertices), 0);
+    scr.pathCount.assign(static_cast<std::size_t>(nVertices), 0);
   }
   scr.pathBuf.clear();
-  scr.pathFirst[src] = 0;
-  scr.pathCount[src] = 1;
+  scr.pathFirst[static_cast<std::size_t>(src)] = 0;
+  scr.pathCount[static_cast<std::size_t>(src)] = 1;
   for (const int v : scr.touched) {
-    const int lv = scr.lvl[v];
+    const int lv = scr.lvl[static_cast<std::size_t>(v)];
     if (lv < 1) {
       continue;
     }
     if (maxStore > 0 && lv > maxStore) {
-      scr.pathCount[v] = 0;
+      scr.pathCount[static_cast<std::size_t>(v)] = 0;
       continue;
     }
     const int first = static_cast<int>(scr.pathBuf.size());
     int count = 0;
-    for (const int w : adjacency[v]) {
+    for (const int w : adjacency[static_cast<std::size_t>(v)]) {
       // Levels below the source are cleared before this walk, so a parent
       // there has level -1 and is not extended. minParent is the same gate
       // for a caller that still passes a floor.
-      if (w < minParent || w >= nVertices || scr.lvl[w] != lv - 1) {
+      if (w < minParent || w >= nVertices || scr.lvl[static_cast<std::size_t>(w)] != lv - 1) {
         continue;
       }
       const int plen = lv - 1;
-      for (int k = 0; k < scr.pathCount[w]; k++) {
-        const int from = scr.pathFirst[w] + k * plen;
+      for (int k = 0; k < scr.pathCount[static_cast<std::size_t>(w)]; k++) {
+        const int from = scr.pathFirst[static_cast<std::size_t>(w)] + k * plen;
         const int dest = static_cast<int>(scr.pathBuf.size());
         scr.pathBuf.resize(scr.pathBuf.size() + static_cast<std::size_t>(lv));
         if (plen > 0) {
@@ -818,8 +818,8 @@ void shortestPathsFrom(const Graph &adjacency, int src, RingScratch &scr, int mi
         count++;
       }
     }
-    scr.pathFirst[v] = first;
-    scr.pathCount[v] = count;
+    scr.pathFirst[static_cast<std::size_t>(v)] = first;
+    scr.pathCount[static_cast<std::size_t>(v)] = count;
   }
 }
 
@@ -885,7 +885,7 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
                          bool legacyPairs = false) {
   const int nVertices = static_cast<int>(adjacency.size());
   if (static_cast<int>(scr.lvl.size()) != nVertices) {
-    scr.lvl.assign(nVertices, -1);
+    scr.lvl.assign(static_cast<std::size_t>(nVertices), -1);
     scr.touched.clear();
   }
   // Distances use every vertex. A shortcut through an index below the
@@ -904,7 +904,7 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
   if (through == nullptr) {
     for (const int v : scr.touched) {
       if (v < src) {
-        scr.lvl[v] = -1;
+        scr.lvl[static_cast<std::size_t>(v)] = -1;
       }
     }
   }
@@ -934,7 +934,7 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
   unsigned close2[32] = {};
   int n2 = 0;
   for (const int v : scr.touched) {
-    if (scr.lvl[v] == 2 && n2 < 32) {
+    if (scr.lvl[static_cast<std::size_t>(v)] == 2 && n2 < 32) {
       scr.id2[static_cast<std::size_t>(v)] = n2;
       at2[n2++] = v;
     }
@@ -943,13 +943,13 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
     if (x == y) {
       return true;
     }
-    for (const int w : adjacency[x]) {
+    for (const int w : adjacency[static_cast<std::size_t>(x)]) {
       if (w == y) {
         return true;
       }
     }
-    for (const int w : adjacency[x]) {
-      for (const int z : adjacency[w]) {
+    for (const int w : adjacency[static_cast<std::size_t>(x)]) {
+      for (const int z : adjacency[static_cast<std::size_t>(w)]) {
         if (z == y) {
           return true;
         }
@@ -989,12 +989,12 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
   };
   std::vector<int> &ring = scr.ring;
   for (const int p : scr.touched) {
-    const int lp = scr.lvl[p];
+    const int lp = scr.lvl[static_cast<std::size_t>(p)];
     if (lp < 1 || lp > maxLvl) {
       continue;
     }
-    const int *pathsP = scr.pathBuf.data() + scr.pathFirst[p];
-    const int nP = scr.pathCount[p];
+    const int *pathsP = scr.pathBuf.data() + scr.pathFirst[static_cast<std::size_t>(p)];
+    const int nP = scr.pathCount[static_cast<std::size_t>(p)];
     // Even rings: two vertex-disjoint shortest paths to an antipodal vertex
     if (2 * lp >= 3 && 2 * lp <= maxDepth) {
       if (gProfile) {
@@ -1113,13 +1113,13 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
   odd_part:
     // Odd rings: an antipodal edge between two vertices at the same level
     if (!gSkipOdd && 2 * lp + 1 <= maxDepth) {
-      for (const int q : adjacency[p]) {
-        if (q <= p || q >= nVertices || scr.lvl[q] != lp) {
+      for (const int q : adjacency[static_cast<std::size_t>(p)]) {
+        if (q <= p || q >= nVertices || scr.lvl[static_cast<std::size_t>(q)] != lp) {
           continue;
         }
-        const int *pathsQ = scr.pathBuf.data() + scr.pathFirst[q];
+        const int *pathsQ = scr.pathBuf.data() + scr.pathFirst[static_cast<std::size_t>(q)];
         for (int a = 0; a < nP; a++) {
-          for (int b = 0; b < scr.pathCount[q]; b++) {
+          for (int b = 0; b < scr.pathCount[static_cast<std::size_t>(q)]; b++) {
             if (gProfile) {
               gProfOddPairs++;
             }
@@ -1242,7 +1242,7 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
   for (int i = 0; i < nVertices; i++) {
     adjacency.first[static_cast<std::size_t>(i) + 1] =
         adjacency.first[static_cast<std::size_t>(i)] +
-        static_cast<int>(uniq[static_cast<std::size_t>(i)].size());
+        static_cast<std::size_t>(uniq[static_cast<std::size_t>(i)].size());
   }
   adjacency.cols.resize(adjacency.first[static_cast<std::size_t>(nVertices)]);
 #ifdef SEAMS_HAS_OPENMP
@@ -1332,7 +1332,7 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
     }
     for (int i = 0; i < nVertices; ++i) {
       adjacency.first[static_cast<std::size_t>(i) + 1] =
-          adjacency.first[static_cast<std::size_t>(i)] + degree[static_cast<std::size_t>(i)];
+          adjacency.first[static_cast<std::size_t>(i)] + static_cast<std::size_t>(degree[static_cast<std::size_t>(i)]);
     }
     adjacency.cols = std::move(scratch);
     return adjacency;
@@ -1363,9 +1363,9 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
     degree[static_cast<std::size_t>(i)] = n;
   }
   for (int i = 0; i < nVertices; i++) {
-    adjacency.first[i + 1] = adjacency.first[i] + degree[static_cast<std::size_t>(i)];
+    adjacency.first[static_cast<std::size_t>(i + 1)] = adjacency.first[static_cast<std::size_t>(i)] + static_cast<std::size_t>(degree[static_cast<std::size_t>(i)]);
   }
-  adjacency.cols.resize(adjacency.first[nVertices]);
+  adjacency.cols.resize(adjacency.first[static_cast<std::size_t>(nVertices)]);
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) num_threads(use) if (!omp_in_parallel())
 #endif
@@ -1623,7 +1623,7 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
   const bool meet = !legacy && maxLvl == 5;
   std::vector<int> from;
   for (int v = 0; v < nVertices; v++) {
-    if (sources.empty() || (v < static_cast<int>(sources.size()) && sources[v])) {
+    if (sources.empty() || (v < static_cast<int>(sources.size()) && sources[static_cast<std::size_t>(v)])) {
       from.push_back(v);
     }
   }
@@ -1643,7 +1643,7 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
       for (std::size_t q = 0; bipartite && q < queue.size(); q++) {
         const int u = queue[q];
         const char cu = color[static_cast<std::size_t>(u)];
-        for (const int w : adjacency[u]) {
+        for (const int w : adjacency[static_cast<std::size_t>(u)]) {
           if (w < 0 || w >= nVertices) {
             continue;
           }
@@ -1670,18 +1670,18 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
     gUsedBalls = 3;
     std::vector<int> reach = from;
     if (static_cast<int>(from.size()) != nVertices) {
-      std::vector<int> lvl(nVertices, -1);
+      std::vector<int> lvl(static_cast<std::size_t>(nVertices), -1);
       for (const int v : from) {
-        lvl[v] = 0;
+        lvl[static_cast<std::size_t>(v)] = 0;
       }
       for (std::size_t k = 0; k < reach.size(); k++) {
         const int u = reach[k];
-        if (lvl[u] == maxLvl) {
+        if (lvl[static_cast<std::size_t>(u)] == maxLvl) {
           continue;
         }
-        for (const int w : adjacency[u]) {
-          if (w >= 0 && w < nVertices && lvl[w] == -1) {
-            lvl[w] = lvl[u] + 1;
+        for (const int w : adjacency[static_cast<std::size_t>(u)]) {
+          if (w >= 0 && w < nVertices && lvl[static_cast<std::size_t>(w)] == -1) {
+            lvl[static_cast<std::size_t>(w)] = lvl[static_cast<std::size_t>(u)] + 1;
             reach.push_back(w);
           }
         }
@@ -1696,19 +1696,19 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
     if (static_cast<int>(from.size()) == nVertices) {
       balls.fillList(adjacency, radius, from);
     } else {
-      std::vector<int> lvl(nVertices, -1);
+      std::vector<int> lvl(static_cast<std::size_t>(nVertices), -1);
       std::vector<int> reached = from;
       for (const int v : from) {
-        lvl[v] = 0;
+        lvl[static_cast<std::size_t>(v)] = 0;
       }
       for (std::size_t k = 0; k < reached.size(); k++) {
         const int u = reached[k];
-        if (lvl[u] == maxLvl) {
+        if (lvl[static_cast<std::size_t>(u)] == maxLvl) {
           continue;
         }
-        for (const int w : adjacency[u]) {
-          if (w >= 0 && w < nVertices && lvl[w] == -1) {
-            lvl[w] = lvl[u] + 1;
+        for (const int w : adjacency[static_cast<std::size_t>(u)]) {
+          if (w >= 0 && w < nVertices && lvl[static_cast<std::size_t>(w)] == -1) {
+            lvl[static_cast<std::size_t>(w)] = lvl[static_cast<std::size_t>(u)] + 1;
             reached.push_back(w);
           }
         }
@@ -1760,12 +1760,12 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
 #pragma omp for schedule(guided)
       for (int k = 0; k < nFrom; k++) {
         if (gSourceWorkPtr == nullptr) {
-          enumerateFromSource(adjacency, oracle, from[k], maxDepth, maxLvl,
+          enumerateFromSource(adjacency, oracle, from[static_cast<std::size_t>(k)], maxDepth, maxLvl,
                               scratch, (*pools)[static_cast<std::size_t>(k)],
                               nullptr, legacy);
         } else {
           const auto srcStart = std::chrono::steady_clock::now();
-          enumerateFromSource(adjacency, oracle, from[k], maxDepth, maxLvl,
+          enumerateFromSource(adjacency, oracle, from[static_cast<std::size_t>(k)], maxDepth, maxLvl,
                               scratch, (*pools)[static_cast<std::size_t>(k)],
                               nullptr, legacy);
           const int src = from[static_cast<std::size_t>(k)];
@@ -1930,7 +1930,7 @@ int primitive::findRings(Graph &fullGraph, int v, std::vector<int> &visited,
   // For the first call:
   if (root == -1) {
     root = v;                          // Init the root as the current node
-    fullGraph.pts[v].inGraph = false; // Remove the root from the graph
+    fullGraph.pts[static_cast<std::size_t>(v)].inGraph = false; // Remove the root from the graph
   }                                    // first call
   //
   // Checks
@@ -1952,31 +1952,31 @@ int primitive::findRings(Graph &fullGraph, int v, std::vector<int> &visited,
   // -------------
   // Start the search
   depth += 1; // Go to the next layer
-  nnumNeighbours = fullGraph.pts[v].neighListIndex.size();
+  nnumNeighbours = static_cast<int>(fullGraph.pts[static_cast<std::size_t>(v)].neighListIndex.size());
   // Loop through the neighbours of iNode
   for (int j = 0; j < nnumNeighbours; j++) {
-    n = fullGraph.pts[v].neighListIndex[j]; // Neighbour index
+    n = fullGraph.pts[static_cast<std::size_t>(v)].neighListIndex[static_cast<std::size_t>(j)]; // Neighbour index
     // Has a ring been found?!
     if (depth > 2 && n == root) {
       // Add the visited vector to the rings vector of vector
       fullGraph.rings.push_back(visited);
     } // A ring has been found!
     // Otherwise search all the neighbours which have not been searched already
-    else if (fullGraph.pts[n].inGraph) {
-      fullGraph.pts[n].inGraph = false; // Set to false now
+    else if (fullGraph.pts[static_cast<std::size_t>(n)].inGraph) {
+      fullGraph.pts[static_cast<std::size_t>(n)].inGraph = false; // Set to false now
       // Recursive call
       primitive::findRings(fullGraph, n, visited, maxDepth, depth, root);
-      fullGraph.pts[n].inGraph = true; // Put n back in the graph
+      fullGraph.pts[static_cast<std::size_t>(n)].inGraph = true; // Put n back in the graph
     } // Search the other unsearched neighbours
   }   // end of search through all neighbours
   // -------------
   // When the depth is 2, remove just the root from the neighbours of iNode
   if (depth == 2) {
     // Search for root in the neighbour list of v
-    for (int j = 0; j < fullGraph.pts[v].neighListIndex.size(); j++) {
-      if (root == fullGraph.pts[v].neighListIndex[j]) {
-        fullGraph.pts[v].neighListIndex.erase(
-            fullGraph.pts[v].neighListIndex.begin() + j);
+    for (int j = 0; j < fullGraph.pts[static_cast<std::size_t>(v)].neighListIndex.size(); j++) {
+      if (root == fullGraph.pts[static_cast<std::size_t>(v)].neighListIndex[static_cast<std::size_t>(j)]) {
+        fullGraph.pts[static_cast<std::size_t>(v)].neighListIndex.erase(
+            fullGraph.pts[static_cast<std::size_t>(v)].neighListIndex.begin() + j);
       } // end of erase
     }   // end of search
   }     // remove root not edges
@@ -2013,10 +2013,9 @@ primitive::Graph primitive::populateGraphFromNListID(
     // -----
     // Update the neighbours of iatom (only the indices!)
     iNeigh.clear(); // init
-    nnumNeighbours = neighHbondList[iatom].size() -
-                     1; // The first element is atomID of iatom
+    nnumNeighbours = static_cast<int>(neighHbondList[static_cast<std::size_t>(iatom)].size() - 1);
     for (int j = 1; j <= nnumNeighbours; j++) {
-      jatomID = neighHbondList[iatom][j]; // Atom ID
+      jatomID = neighHbondList[static_cast<std::size_t>(iatom)][static_cast<std::size_t>(j)]; // Atom ID
       // Get the atom index for the vector nearest neighbour list
       auto it = yCloud.idIndexMap.find(jatomID);
       if (it != yCloud.idIndexMap.end()) {
@@ -2065,12 +2064,12 @@ primitive::populateGraphFromIndices(const std::vector<std::vector<int>> &nList) 
   // ------------------------------
   // Loop through every point in nList
   for (int i = 0; i < nList.size(); i++) {
-    iatom = nList[i][0]; // Atom index of i
+    iatom = nList[static_cast<std::size_t>(i)][0]; // Atom index of i
     // neighListIndex is simply the i^th row of nList
     //
     // Update iVertex
     iVertex.atomIndex = iatom;
-    iVertex.neighListIndex = nList[i];
+    iVertex.neighListIndex = nList[static_cast<std::size_t>(i)];
     // Add to the Graph object
     fullGraph.pts.push_back(iVertex);
   } // end of loop through iatom
@@ -2099,7 +2098,7 @@ primitive::restoreEdgesFromIndices(Graph &fullGraph,
   for (int i = 0; i < nList.size(); i++) {
     // neighListIndex is simply the i^th row of nList
     // Update the neighListIndex list in the graph object
-    fullGraph.pts[i].neighListIndex = nList[i];
+    fullGraph.pts[static_cast<std::size_t>(i)].neighListIndex = nList[static_cast<std::size_t>(i)];
   } // end of loop through iatom
 }
 
@@ -2115,8 +2114,8 @@ primitive::restoreEdgesFromIndices(Graph &fullGraph,
  */
 void primitive::removeNonSPrings(primitive::Graph &fullGraph) {
   //
-  const int nVertices = fullGraph.pts.size(); // Number of vertices in the graph
-  const int nRings = fullGraph.rings.size();  // Number of rings
+  const int nVertices = static_cast<int>(fullGraph.pts.size()); // Number of vertices in the graph
+  const int nRings = static_cast<int>(fullGraph.rings.size());  // Number of rings
   std::vector<bool> ringsToRemove; // Vector containing the logical values for
                                    // removal of the current ring index
   std::vector<std::vector<int>>
@@ -2126,7 +2125,7 @@ void primitive::removeNonSPrings(primitive::Graph &fullGraph) {
   // -------------------
   // Make sure all the vertices are in the graph before removing non-SP rings
   for (int iVer = 0; iVer < nVertices; iVer++) {
-    fullGraph.pts[iVer].inGraph = true;
+    fullGraph.pts[static_cast<std::size_t>(iVer)].inGraph = true;
   } // end of loop through every vertex
   // -------------------
   // The criterion compares, for each pair of non-adjacent ring members, the
@@ -2140,58 +2139,58 @@ void primitive::removeNonSPrings(primitive::Graph &fullGraph) {
   // ring. The sweep reaches only the handful of vertices within the bound, so
   // its scratch is cleared by walking what it touched rather than the whole
   // graph.
-  ringsToRemove.assign(nRings, false);
+  ringsToRemove.assign(static_cast<std::size_t>(nRings), false);
 
   struct Query {
     int target;   // The other ring member
     int ringHops; // Separation around the ring, in edges
     int ring;     // Which ring asked
   };
-  std::vector<std::vector<Query>> queries(nVertices);
+  std::vector<std::vector<Query>> queries(static_cast<std::size_t>(nVertices));
 
   int maxHops = 0;
   for (int iRing = 0; iRing < nRings; iRing++) {
-    const std::vector<int> &currentRing = fullGraph.rings[iRing];
-    const int ringSize = currentRing.size();
+    const std::vector<int> &currentRing = fullGraph.rings[static_cast<std::size_t>(iRing)];
+    const int ringSize = static_cast<int>(currentRing.size());
     maxHops = std::max(maxHops, ringSize / 2);
     for (int jVer = 0; jVer < ringSize; jVer++) {
       // connect with all other, skip j-j (distance=0) and j-(j+1) (nearest
       // neighbors)
       for (int kVer = jVer + 2; kVer < ringSize; kVer++) {
-        const int currentV = currentRing[jVer];
-        const int currentN = currentRing[kVer];
+        const int currentV = currentRing[static_cast<std::size_t>(jVer)];
+        const int currentN = currentRing[static_cast<std::size_t>(kVer)];
         if (currentV < 0 || currentV >= nVertices || currentN < 0 ||
             currentN >= nVertices) {
           continue;
         }
         const int d_jk = std::abs(jVer - kVer);
-        queries[currentV].push_back(
+        queries[static_cast<std::size_t>(currentV)].push_back(
             {currentN, std::min(d_jk, std::abs(d_jk - ringSize)), iRing});
       } // end of loop through k^th vertex
     }   // end of loop through j^th vertex
   }     // end of loop through rings
 
   // Answer each vertex's questions with one bounded sweep
-  std::vector<int> distance(nVertices, -1);
+  std::vector<int> distance(static_cast<std::size_t>(nVertices), -1);
   std::vector<int> touched;
   std::vector<int> frontier;
   std::vector<int> next;
 
   for (int v = 0; v < nVertices; v++) {
-    if (queries[v].empty()) {
+    if (queries[static_cast<std::size_t>(v)].empty()) {
       continue;
     }
 
     touched.clear();
     frontier.assign(1, v);
-    distance[v] = 0;
+    distance[static_cast<std::size_t>(v)] = 0;
     touched.push_back(v);
     for (int depth = 1; depth <= maxHops && !frontier.empty(); depth++) {
       next.clear();
       for (const int u : frontier) {
-        for (const int w : fullGraph.pts[u].neighListIndex) {
-          if (w >= 0 && w < nVertices && distance[w] == -1) {
-            distance[w] = depth;
+        for (const int w : fullGraph.pts[static_cast<std::size_t>(u)].neighListIndex) {
+          if (w >= 0 && w < nVertices && distance[static_cast<std::size_t>(w)] == -1) {
+            distance[static_cast<std::size_t>(w)] = depth;
             touched.push_back(w);
             next.push_back(w);
           }
@@ -2200,24 +2199,24 @@ void primitive::removeNonSPrings(primitive::Graph &fullGraph) {
       frontier.swap(next);
     }
 
-    for (const Query &q : queries[v]) {
+    for (const Query &q : queries[static_cast<std::size_t>(v)]) {
       // Separation through the graph, in edges; -1 when beyond the bound
-      const int graphHops = distance[q.target];
+      const int graphHops = distance[static_cast<std::size_t>(q.target)];
       if (graphHops >= 0 && graphHops < q.ringHops) {
-        ringsToRemove[q.ring] = true;
+        ringsToRemove[static_cast<std::size_t>(q.ring)] = true;
       } // Decide whether to keep or remove the ring
     }
 
     // Clear only what this sweep reached
     for (const int w : touched) {
-      distance[w] = -1;
+      distance[static_cast<std::size_t>(w)] = -1;
     }
   } // end of loop through vertices
   // -------------------
   // Remove all the rings whose indices are given in the ringsToRemove vector
   for (int i = 0; i < ringsToRemove.size(); i++) {
-    if (!ringsToRemove[i]) {
-      primitiveRings.push_back(fullGraph.rings[i]);
+    if (!ringsToRemove[static_cast<std::size_t>(i)]) {
+      primitiveRings.push_back(fullGraph.rings[static_cast<std::size_t>(i)]);
     } // updates new copy
   }   // end of loop through ringsToRemove
   // -------------------
@@ -2257,7 +2256,7 @@ int primitive::shortestPath(Graph &fullGraph, int v, int goal,
         v); // Add the current vertex to the path (visited points)
     //
     if (v == goal) {
-      len_path = path.size(); // Path of the length of visited points
+      len_path = static_cast<int>(path.size()); // Path of the length of visited points
       // If the current path is shorter OR this is the first path found
       if (depth < len_path || len_path == 0) {
         path = visited;
@@ -2266,16 +2265,16 @@ int primitive::shortestPath(Graph &fullGraph, int v, int goal,
     }   // Goal reached
     // Recursive calls to function
     else {
-      nnumNeighbours = fullGraph.pts[v].neighListIndex.size();
+      nnumNeighbours = static_cast<int>(fullGraph.pts[static_cast<std::size_t>(v)].neighListIndex.size());
       // Search all the neighbours
       for (int j = 0; j < nnumNeighbours; j++) {
-        n = fullGraph.pts[v].neighListIndex[j]; // Index of nearest neighbour
+        n = fullGraph.pts[static_cast<std::size_t>(v)].neighListIndex[static_cast<std::size_t>(j)]; // Index of nearest neighbour
         // If n has not already been searched:
-        if (fullGraph.pts[n].inGraph == true) {
-          fullGraph.pts[n].inGraph = false; // Set to false
+        if (fullGraph.pts[static_cast<std::size_t>(n)].inGraph == true) {
+          fullGraph.pts[static_cast<std::size_t>(n)].inGraph = false; // Set to false
           primitive::shortestPath(fullGraph, n, goal, path, visited, maxDepth,
                                   depth);   // Recursive call
-          fullGraph.pts[n].inGraph = true; // Put back in the graph
+          fullGraph.pts[static_cast<std::size_t>(n)].inGraph = true; // Put back in the graph
         } // If n is in the graph, call recursively
       }   // End of loop over all neighbours
     }     // Goal not reached
@@ -2466,7 +2465,7 @@ struct primitive::RingUpdater::Impl {
       for (std::size_t q = 0; q < queue.size(); q++) {
         const int u = queue[q];
         const char cu = color[static_cast<std::size_t>(u)];
-        for (const int w : adjacency[u]) {
+        for (const int w : adjacency[static_cast<std::size_t>(u)]) {
           if (w < 0 || w >= nVertices) {
             continue;
           }

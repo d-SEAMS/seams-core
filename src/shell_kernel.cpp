@@ -568,12 +568,12 @@ bool matchRing(const double env[][3], int n, const double templ[][3], int perm[k
     for (int shift = 0; shift < n; shift++) {
       int permTry[kMaxN];
       double mob[kMaxN][3];
-      for (int t = 0; t < n; t++) {
-        const int slot = dir == 0 ? (shift + t) % n : (shift + n - t) % n;
-        permTry[t] = order[slot].i;
-        mob[t][0] = env[permTry[t]][0];
-        mob[t][1] = env[permTry[t]][1];
-        mob[t][2] = env[permTry[t]][2];
+      for (int step = 0; step < n; step++) {
+        const int slot = dir == 0 ? (shift + step) % n : (shift + n - step) % n;
+        permTry[step] = order[slot].i;
+        mob[step][0] = env[permTry[step]][0];
+        mob[step][1] = env[permTry[step]][1];
+        mob[step][2] = env[permTry[step]][2];
       }
       double Rtry[3][3];
       double rms = 0.0;
@@ -584,8 +584,8 @@ bool matchRing(const double env[][3], int n, const double templ[][3], int perm[k
       if (measured < best) {
         best = measured;
         rmsd = measured;
-        for (int t = 0; t < n; t++) {
-          bestPerm[t] = permTry[t];
+        for (int step = 0; step < n; step++) {
+          bestPerm[step] = permTry[step];
         }
         for (int i = 0; i < 3; i++) {
           for (int j = 0; j < 3; j++) {
@@ -603,8 +603,8 @@ bool matchRing(const double env[][3], int n, const double templ[][3], int perm[k
   if (!(best < 1.0)) {
     return false;
   }
-  for (int t = 0; t < n; t++) {
-    perm[t] = bestPerm[t];
+  for (int step = 0; step < n; step++) {
+    perm[step] = bestPerm[step];
   }
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
@@ -612,10 +612,10 @@ bool matchRing(const double env[][3], int n, const double templ[][3], int perm[k
     }
   }
   double mob[kMaxN][3];
-  for (int t = 0; t < n; t++) {
-    mob[t][0] = env[perm[t]][0];
-    mob[t][1] = env[perm[t]][1];
-    mob[t][2] = env[perm[t]][2];
+  for (int step = 0; step < n; step++) {
+    mob[step][0] = env[perm[step]][0];
+    mob[step][1] = env[perm[step]][1];
+    mob[step][2] = env[perm[step]][2];
   }
   translationOf(templ, mob, n, R, t);
   rmsd = best;
@@ -856,7 +856,8 @@ bool cageRecurse(const std::array<int, 3> adjE[], const std::array<int, 3> adjT[
     }
     int open = 0;
     for (int k = 0; k < 3; k++) {
-      if (adjE[i][k] >= 0 && mapE[adjE[i][k]] == -1) {
+      if (adjE[i][static_cast<std::size_t>(k)] >= 0 &&
+          mapE[adjE[i][static_cast<std::size_t>(k)]] == -1) {
         open++;
       }
     }
@@ -889,15 +890,17 @@ bool cageRecurse(const std::array<int, 3> adjE[], const std::array<int, 3> adjT[
   int openE[3];
   int nOpenE = 0;
   for (int k = 0; k < 3; k++) {
-    if (adjE[e][k] >= 0 && mapE[adjE[e][k]] == -1) {
-      openE[nOpenE++] = adjE[e][k];
+    if (adjE[e][static_cast<std::size_t>(k)] >= 0 &&
+        mapE[adjE[e][static_cast<std::size_t>(k)]] == -1) {
+      openE[nOpenE++] = adjE[e][static_cast<std::size_t>(k)];
     }
   }
   int openT[3];
   int nOpenT = 0;
   for (int k = 0; k < 3; k++) {
-    if (adjT[t][k] >= 0 && mapT[adjT[t][k]] == -1) {
-      openT[nOpenT++] = adjT[t][k];
+    if (adjT[t][static_cast<std::size_t>(k)] >= 0 &&
+        mapT[adjT[t][static_cast<std::size_t>(k)]] == -1) {
+      openT[nOpenT++] = adjT[t][static_cast<std::size_t>(k)];
     }
   }
   if (nOpenE != nOpenT) {

@@ -97,10 +97,10 @@ bool hasPeriodicBox(
  */
 std::vector<int> indexToIDTable(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
-  std::vector<int> indexToID(yCloud.nop, -1);
+  std::vector<int> indexToID(static_cast<std::size_t>(yCloud.nop), -1);
   for (const auto &[atomID, index] : yCloud.idIndexMap) {
     if (index >= 0 && index < yCloud.nop) {
-      indexToID[index] = atomID;
+      indexToID[static_cast<std::size_t>(index)] = atomID;
     }
   }
   return indexToID;
@@ -285,7 +285,7 @@ bool cutoffRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
   std::vector<std::array<double, 3>> positions(nSubset);
   for (size_t i = 0; i < nSubset; i++) {
     const int idx = subset[i];
-    positions[i] = {yCloud.pts[idx].x, yCloud.pts[idx].y, yCloud.pts[idx].z};
+    positions[i] = {yCloud.pts[static_cast<std::size_t>(idx)].x, yCloud.pts[static_cast<std::size_t>(idx)].y, yCloud.pts[static_cast<std::size_t>(idx)].z};
   }
 
   double box[3][3];
@@ -447,13 +447,13 @@ bool cutoffRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
  */
 std::vector<std::vector<int>> seedWithSelfIDs(const std::vector<int> &indexToID,
                                               int nop) {
-  std::vector<std::vector<int>> nList(nop);
+  std::vector<std::vector<int>> nList(static_cast<std::size_t>(nop));
   for (int iatom = 0; iatom < nop; iatom++) {
-    if (indexToID[iatom] == -1) {
+    if (indexToID[static_cast<std::size_t>(iatom)] == -1) {
       std::cerr << "Something is wrong with your idIndexMap!\n";
       continue;
     }
-    nList[iatom].push_back(indexToID[iatom]);
+    nList[static_cast<std::size_t>(iatom)].push_back(indexToID[static_cast<std::size_t>(iatom)]);
   }
   return nList;
 }
@@ -461,7 +461,7 @@ std::vector<std::vector<int>> seedWithSelfIDs(const std::vector<int> &indexToID,
 //! True when index has a real atom ID in the reverse table.
 bool hasAtomID(const std::vector<int> &indexToID, int index) {
   return index >= 0 && static_cast<size_t>(index) < indexToID.size() &&
-         indexToID[index] != -1;
+         indexToID[static_cast<std::size_t>(index)] != -1;
 }
 
 //! Appends jatom's ID to iatom's row only when both particles have IDs.
@@ -473,7 +473,7 @@ void appendNeighbourID(std::vector<std::vector<int>> &nList,
   if (!hasAtomID(indexToID, iatom) || !hasAtomID(indexToID, jatom)) {
     return;
   }
-  nList[iatom].push_back(indexToID[jatom]);
+  nList[static_cast<std::size_t>(iatom)].push_back(indexToID[static_cast<std::size_t>(jatom)]);
 }
 
 #ifdef SEAMS_HAS_CUTOFF_LIST
@@ -483,7 +483,7 @@ std::vector<std::vector<int>> rowsByID(const CutoffRows &rows,
                                        const std::vector<int> &indexToID,
                                        int nop) {
   for (int iatom = 0; iatom < nop; iatom++) {
-    if (indexToID[iatom] == -1) {
+    if (indexToID[static_cast<std::size_t>(iatom)] == -1) {
       std::cerr << "Something is wrong with your idIndexMap!\n";
     }
   }
@@ -493,15 +493,15 @@ std::vector<std::vector<int>> rowsByID(const CutoffRows &rows,
 #pragma omp parallel for schedule(static) if (!gSerialCutoff && nop >= kParallelRowsMinAtoms && !omp_in_parallel() && omp_get_max_threads() > 1)
 #endif
   for (int iatom = 0; iatom < nop; iatom++) {
-    if (indexToID[iatom] == -1) {
+    if (indexToID[static_cast<std::size_t>(iatom)] == -1) {
       continue;
     }
     auto &row = nList[static_cast<std::size_t>(iatom)];
-    row.reserve(1 + rows.first[iatom + 1] - rows.first[iatom]);
-    row.push_back(indexToID[iatom]);
-    for (std::size_t k = rows.first[iatom]; k < rows.first[iatom + 1]; k++) {
+    row.reserve(1 + rows.first[static_cast<std::size_t>(iatom + 1)] - rows.first[static_cast<std::size_t>(iatom)]);
+    row.push_back(indexToID[static_cast<std::size_t>(iatom)]);
+    for (std::size_t k = rows.first[static_cast<std::size_t>(iatom)]; k < rows.first[static_cast<std::size_t>(iatom + 1)]; k++) {
       if (hasAtomID(indexToID, rows.partner[k])) {
-        row.push_back(indexToID[rows.partner[k]]);
+        row.push_back(indexToID[static_cast<std::size_t>(rows.partner[k])]);
       }
     }
   }
@@ -1439,7 +1439,7 @@ const std::vector<std::vector<int>> &nneigh::reusedShellList(
   }
   fill.assign(cellStart.begin(), cellStart.end() - 1);
   for (int k = 0; k < n; k++) {
-    cellAtoms[static_cast<std::size_t>(fill[static_cast<std::size_t>(cellOf[k])]++)] = k;
+    cellAtoms[static_cast<std::size_t>(fill[static_cast<std::size_t>(cellOf[static_cast<std::size_t>(k)])]++)] = k;
   }
   if (static_cast<int>(rows.size()) != n) {
     rows.assign(static_cast<std::size_t>(n), {});
@@ -1950,7 +1950,7 @@ nneigh::neighListO(double rcutoff,
   // Collect indices of typeI atoms
   std::vector<int> typeIIndices;
   for (int i = 0; i < yCloud.nop; i++) {
-    if (yCloud.pts[i].type == typeI) {
+    if (yCloud.pts[static_cast<std::size_t>(i)].type == typeI) {
       typeIIndices.push_back(i);
     }
   }
@@ -2101,7 +2101,7 @@ nneigh::neighListPair(
     std::vector<int> subset;
     subset.reserve(static_cast<size_t>(yCloud.nop));
     for (int i = 0; i < yCloud.nop; i++) {
-      const int t = yCloud.pts[i].type;
+      const int t = yCloud.pts[static_cast<std::size_t>(i)].type;
       if (t == typeI || t == typeJ) {
         subset.push_back(i);
       }
@@ -2109,8 +2109,8 @@ nneigh::neighListPair(
     CutoffRows rows;
     if (cutoffRows(yCloud, subset, rcutoff, rows)) {
       rows.forEachPair([&](int iatom, int jatom) {
-        const int ti = yCloud.pts[iatom].type;
-        const int tj = yCloud.pts[jatom].type;
+        const int ti = yCloud.pts[static_cast<std::size_t>(iatom)].type;
+        const int tj = yCloud.pts[static_cast<std::size_t>(jatom)].type;
         const bool mixed = (ti == typeI && tj == typeJ) ||
                            (ti == typeJ && tj == typeI);
         if (!mixed) {
@@ -2129,7 +2129,7 @@ nneigh::neighListPair(
   iIdx.reserve(static_cast<size_t>(yCloud.nop));
   jIdx.reserve(static_cast<size_t>(yCloud.nop));
   for (int i = 0; i < yCloud.nop; i++) {
-    const int t = yCloud.pts[i].type;
+    const int t = yCloud.pts[static_cast<std::size_t>(i)].type;
     if (t == typeI) {
       iIdx.push_back(i);
     }
@@ -2188,7 +2188,7 @@ nneigh::halfNeighList(double rcutoff,
   if (yCloud.box.size() == 3 || yCloud.box.size() >= 6) {
     std::vector<int> typeIIndices;
     for (int i = 0; i < yCloud.nop; i++) {
-      if (yCloud.pts[i].type == typeI) {
+      if (yCloud.pts[static_cast<std::size_t>(i)].type == typeI) {
         typeIIndices.push_back(i);
       }
     }
@@ -2203,7 +2203,7 @@ nneigh::halfNeighList(double rcutoff,
   {
     std::vector<int> typeIIndices;
     for (int i = 0; i < yCloud.nop; i++) {
-      if (yCloud.pts[i].type == typeI) {
+      if (yCloud.pts[static_cast<std::size_t>(i)].type == typeI) {
         typeIIndices.push_back(i);
       }
     }
@@ -2227,12 +2227,12 @@ nneigh::halfNeighList(double rcutoff,
 
   // Loop through every iatom and find nearest neighbours within rcutoff
   for (int iatom = 0; iatom < yCloud.nop - 1; iatom++) {
-    if (yCloud.pts[iatom].type != typeI) {
+    if (yCloud.pts[static_cast<std::size_t>(iatom)].type != typeI) {
       continue;
     }
     // Loop through the other atoms
     for (int jatom = iatom + 1; jatom < yCloud.nop; jatom++) {
-      if (yCloud.pts[jatom].type != typeI) {
+      if (yCloud.pts[static_cast<std::size_t>(jatom)].type != typeI) {
         continue;
       }
       // If the distance is greater than rcutoff, continue
@@ -2266,7 +2266,7 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
     return {};
   }
 
-  std::vector<std::vector<int>> nList(yCloud.nop);
+  std::vector<std::vector<int>> nList(static_cast<std::size_t>(yCloud.nop));
 
   if (yCloud.box.size() == 3 || yCloud.box.size() >= 6) {
     std::vector<int> offsets;
@@ -2298,7 +2298,7 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
 #ifdef SEAMS_HAS_CUTOFF_LIST
   // Cutoff list over every particle.
   {
-    std::vector<int> allIndices(yCloud.nop);
+    std::vector<int> allIndices(static_cast<std::size_t>(yCloud.nop));
     std::iota(allIndices.begin(), allIndices.end(), 0);
 
     CutoffRows rows;
@@ -2308,10 +2308,10 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
 #pragma omp parallel for schedule(static) if (yCloud.nop >= kParallelRowsMinAtoms && !omp_in_parallel())
 #endif
       for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-        auto &row = nList[iatom];
-        row.reserve(1 + rows.first[iatom + 1] - rows.first[iatom]);
+        auto &row = nList[static_cast<std::size_t>(iatom)];
+        row.reserve(1 + rows.first[static_cast<std::size_t>(iatom + 1)] - rows.first[static_cast<std::size_t>(iatom)]);
         row.push_back(iatom);
-        for (std::size_t k = rows.first[iatom]; k < rows.first[iatom + 1]; k++) {
+        for (std::size_t k = rows.first[static_cast<std::size_t>(iatom)]; k < rows.first[static_cast<std::size_t>(iatom + 1)]; k++) {
           row.push_back(rows.partner[k]);
         }
       }
@@ -2322,7 +2322,7 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
   // Initialize and fill the first element with the index of the atom whose
   // neighbour list will be filled
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
-    nList[iatom].push_back(iatom);
+    nList[static_cast<std::size_t>(iatom)].push_back(iatom);
   } // end of init
 #ifdef SEAMS_HAS_OPENMP
   if (yCloud.nop >= kThreadedCellRowsMinAtoms) {
@@ -2343,8 +2343,8 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
 
   // Scratch buffers for the batched distance kernel, sized once for the
   // largest batch and reused across iatom
-  std::vector<double> dx(yCloud.nop), dy(yCloud.nop), dz(yCloud.nop);
-  std::vector<double> distSq(yCloud.nop);
+  std::vector<double> dx(static_cast<std::size_t>(yCloud.nop)), dy(static_cast<std::size_t>(yCloud.nop)), dz(static_cast<std::size_t>(yCloud.nop));
+  std::vector<double> distSq(static_cast<std::size_t>(yCloud.nop));
   std::vector<int> allIdx(static_cast<std::size_t>(yCloud.nop));
   std::iota(allIdx.begin(), allIdx.end(), 0);
 
@@ -2361,8 +2361,8 @@ std::vector<std::vector<int>> nneigh::getNewNeighbourListByIndex(
         continue;
       }
       const int jatom = iatom + 1 + static_cast<int>(jj);
-      nList[iatom].push_back(jatom);
-      nList[jatom].push_back(iatom);
+      nList[static_cast<std::size_t>(iatom)].push_back(jatom);
+      nList[static_cast<std::size_t>(jatom)].push_back(iatom);
     } // End of loop through jatom
   }   // End of loop for iatom
 
@@ -3155,13 +3155,13 @@ std::pair<double, double> nneigh::shellSeparation(
   const gen::FracBox frame = gen::makeFracBox(yCloud);
   std::vector<double> dists;
   for (int i = 0; i < yCloud.nop; i++) {
-    if (yCloud.pts[i].type != typeI) {
+    if (yCloud.pts[static_cast<std::size_t>(i)].type != typeI) {
       continue;
     }
     const auto &pi = yCloud.pts[static_cast<std::size_t>(i)];
     dists.clear();
     for (int j = 0; j < yCloud.nop; j++) {
-      if (j == i || yCloud.pts[j].type != typeI) {
+      if (j == i || yCloud.pts[static_cast<std::size_t>(j)].type != typeI) {
         continue;
       }
       const auto &pj = yCloud.pts[static_cast<std::size_t>(j)];
@@ -3176,7 +3176,7 @@ std::pair<double, double> nneigh::shellSeparation(
     if (frame.ok && !gen::smithInside(frame, dists[static_cast<std::size_t>(k)])) {
       dists.clear();
       for (int j = 0; j < yCloud.nop; j++) {
-        if (j == i || yCloud.pts[j].type != typeI) {
+        if (j == i || yCloud.pts[static_cast<std::size_t>(j)].type != typeI) {
           continue;
         }
         dists.push_back(gen::periodicDistSq(frame, yCloud, i, j));
@@ -3244,7 +3244,7 @@ bool nneigh::SkinNeighborList::mustRebuild(
   }
   std::vector<double> old(3);
   for (int i = 0; i < yCloud.nop; i++) {
-    if (yCloud.pts[i].type != typeI_) {
+    if (yCloud.pts[static_cast<std::size_t>(i)].type != typeI_) {
       continue;
     }
     old[0] = x0_[static_cast<std::size_t>(i)];
@@ -3266,7 +3266,7 @@ void nneigh::SkinNeighborList::rebuildCandidates(
   std::vector<int> subset;
   subset.reserve(static_cast<std::size_t>(yCloud.nop));
   for (int i = 0; i < yCloud.nop; i++) {
-    if (yCloud.pts[i].type == typeI_) {
+    if (yCloud.pts[static_cast<std::size_t>(i)].type == typeI_) {
       subset.push_back(i);
     }
   }
@@ -3282,11 +3282,11 @@ void nneigh::SkinNeighborList::rebuildCandidates(
   {
     const auto wideList = nneigh::neighListO(wide, yCloud, typeI_);
     for (int i = 0; i < yCloud.nop; i++) {
-      if (static_cast<int>(wideList.size()) <= i || wideList[i].size() <= 1) {
+      if (static_cast<int>(wideList.size()) <= i || wideList[static_cast<std::size_t>(i)].size() <= 1) {
         continue;
       }
-      for (std::size_t n = 1; n < wideList[i].size(); n++) {
-        const auto it = yCloud.idIndexMap.find(wideList[i][n]);
+      for (std::size_t n = 1; n < wideList[static_cast<std::size_t>(i)].size(); n++) {
+        const auto it = yCloud.idIndexMap.find(wideList[static_cast<std::size_t>(i)][n]);
         if (it == yCloud.idIndexMap.end()) {
           continue;
         }
@@ -3301,9 +3301,9 @@ void nneigh::SkinNeighborList::rebuildCandidates(
   y0_.resize(static_cast<std::size_t>(yCloud.nop));
   z0_.resize(static_cast<std::size_t>(yCloud.nop));
   for (int i = 0; i < yCloud.nop; i++) {
-    x0_[static_cast<std::size_t>(i)] = yCloud.pts[i].x;
-    y0_[static_cast<std::size_t>(i)] = yCloud.pts[i].y;
-    z0_[static_cast<std::size_t>(i)] = yCloud.pts[i].z;
+    x0_[static_cast<std::size_t>(i)] = yCloud.pts[static_cast<std::size_t>(i)].x;
+    y0_[static_cast<std::size_t>(i)] = yCloud.pts[static_cast<std::size_t>(i)].y;
+    z0_[static_cast<std::size_t>(i)] = yCloud.pts[static_cast<std::size_t>(i)].z;
   }
   box0_ = yCloud.box;
 }

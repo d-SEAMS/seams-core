@@ -33,7 +33,8 @@ std::uint64_t mix(std::uint64_t h, std::uint64_t v) {
 
 std::uint64_t hashString(const std::string &s) {
   std::uint64_t h = kOffset;
-  for (unsigned char c : s) {
+  for (char raw : s) {
+    const auto c = static_cast<unsigned char>(raw);
     h ^= c;
     h *= kPrime;
   }

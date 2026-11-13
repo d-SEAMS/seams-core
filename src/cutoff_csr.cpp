@@ -1648,9 +1648,9 @@ bool ownedBlockPairs(const double *x, const double *y, const double *z, const in
           start[static_cast<std::size_t>(i) + 1] += start[static_cast<std::size_t>(i)];
         }
         std::vector<int> neigh(bag.size());
-        std::vector<int> cursor = start;
+        std::vector<int> slot = start;
         for (const PairDir &p : bag) {
-          neigh[static_cast<std::size_t>(cursor[static_cast<std::size_t>(p.a)]++)] = p.b;
+          neigh[static_cast<std::size_t>(slot[static_cast<std::size_t>(p.a)]++)] = p.b;
         }
         for (int c : owned) {
           for (int s = begin[static_cast<std::size_t>(c)]; s < end[static_cast<std::size_t>(c)]; ++s) {

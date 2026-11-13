@@ -409,7 +409,7 @@ void qlmOneAtomDrPairwise(int iatom, int orderL, const double *dr,
   const int j0 = offsets[iatom];
   const int j1 = offsets[iatom + 1];
   std::vector<double> bonds;
-  bonds.reserve(static_cast<std::size_t>(std::max(0, j1 - j0)) * nComp * 2);
+  bonds.reserve(static_cast<std::size_t>(std::max(0, j1 - j0)) * static_cast<std::size_t>(nComp) * 2);
   int nUsed = 0;
   for (int p = j0; p < j1; p++) {
     double tmp[34] = {};
@@ -428,13 +428,13 @@ void qlmOneAtomDrPairwise(int iatom, int orderL, const double *dr,
   std::vector<double> comp(static_cast<std::size_t>(nUsed));
   for (int m = 0; m < nComp; m++) {
     for (int t = 0; t < nUsed; t++) {
-      comp[static_cast<std::size_t>(t)] = bonds[static_cast<std::size_t>(t) * nComp * 2 + 2 * m];
+      comp[static_cast<std::size_t>(t)] = bonds[static_cast<std::size_t>(t) * static_cast<std::size_t>(nComp) * 2 + static_cast<std::size_t>(2 * m)];
     }
     qlmInterleaved[2 * (row + m)] =
         seams::product::reduce(comp.data(), nUsed, seams::product::reduction());
     for (int t = 0; t < nUsed; t++) {
       comp[static_cast<std::size_t>(t)] =
-          bonds[static_cast<std::size_t>(t) * nComp * 2 + 2 * m + 1];
+          bonds[static_cast<std::size_t>(t) * static_cast<std::size_t>(nComp) * 2 + static_cast<std::size_t>(2 * m) + 1];
     }
     qlmInterleaved[2 * (row + m) + 1] =
         seams::product::reduce(comp.data(), nUsed, seams::product::reduction());
@@ -472,8 +472,8 @@ void qlmOneAtomBatch(int iatom, int orderL, const double *dr, const int *offsets
     }
     seams::ylm::ylmBatch(orderL, xs, ys, zs, filled, re, im);
     for (int b = 0; b < filled; b++) {
-      const double *yr = re + static_cast<std::size_t>(b) * nComp;
-      const double *yi = im + static_cast<std::size_t>(b) * nComp;
+      const double *yr = re + static_cast<std::size_t>(b) * static_cast<std::size_t>(nComp);
+      const double *yi = im + static_cast<std::size_t>(b) * static_cast<std::size_t>(nComp);
       for (int m = 0; m < nComp; m++) {
         qlm[2 * (row + m)] += yr[m];
         qlm[2 * (row + m) + 1] += yi[m];
@@ -885,8 +885,8 @@ SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double
   seams::prepareCompute();
   [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
   SteinhardtQl result;
-  result.ql.assign(yCloud.nop, 0.0);
-  result.qlBar.assign(yCloud.nop, 0.0);
+  result.ql.assign(static_cast<std::size_t>(yCloud.nop), 0.0);
+  result.qlBar.assign(static_cast<std::size_t>(yCloud.nop), 0.0);
 
   if (orderL != 3 && orderL != 4 && orderL != 6 && orderL != 8 &&
       orderL != 12) {
@@ -898,7 +898,7 @@ SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double
 
   const NeighbourCSR graph = flatten(yCloud, nList);
   const int nComp = 2 * orderL + 1;
-  std::vector<double> qlm(static_cast<size_t>(graph.nop) * nComp * 2, 0.0);
+  std::vector<double> qlm(static_cast<size_t>(graph.nop) * static_cast<std::size_t>(nComp) * 2, 0.0);
 
 #ifdef SEAMS_HAS_OFFLOAD
   // Device Ylm has no l=12; force the host path (sphericart or Legendre).
@@ -1525,11 +1525,11 @@ SteinhardtQl cutoffSolid(
       }
       seams::ylm::ylmBatch(orderL, xs, ys, zs, filled, re, im);
       for (int bond = 0; bond < filled; bond++) {
-        const double *yr = re + static_cast<std::size_t>(bond) * nComp;
-        const double *yi = im + static_cast<std::size_t>(bond) * nComp;
+        const double *yr = re + static_cast<std::size_t>(bond) * static_cast<std::size_t>(nComp);
+        const double *imag = im + static_cast<std::size_t>(bond) * static_cast<std::size_t>(nComp);
         for (int m = 0; m < nComp; m++) {
           dst[2 * m] += yr[m];
-          dst[2 * m + 1] += yi[m];
+          dst[2 * m + 1] += imag[m];
         }
       }
       filled = 0;
@@ -1603,12 +1603,12 @@ SteinhardtQl cutoffSolid(
     for (int i = 0; i < n; i++) {
       const int a = scratch.offsets[static_cast<std::size_t>(i)];
       const int b = scratch.offsets[static_cast<std::size_t>(i) + 1];
-      const double *self = scratch.qlm.data() + static_cast<std::size_t>(i) * width;
+      const double *self = scratch.qlm.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(width);
       double acc[26];
       for (int c = 0; c < width; ++c) acc[c] = self[c];
       for (int p = a; p < b; p++) {
         const int j = scratch.cols[static_cast<std::size_t>(p)];
-        const double *other = scratch.qlm.data() + static_cast<std::size_t>(j) * width;
+        const double *other = scratch.qlm.data() + static_cast<std::size_t>(j) * static_cast<std::size_t>(width);
         for (int c = 0; c < width; ++c) acc[c] += other[c];
       }
       const double inv = 1.0 / static_cast<double>(b - a + 1);
@@ -1874,10 +1874,10 @@ SteinhardtQl steinhardtQlMutual(
     seams::ylm::ylmBatch(orderL, dxs, dys, dzs, count, re, im);
     for (int b = 0; b < count; b++) {
       const double *yr = re + static_cast<std::size_t>(b) * static_cast<std::size_t>(nComp);
-      const double *yi = im + static_cast<std::size_t>(b) * static_cast<std::size_t>(nComp);
+      const double *imag = im + static_cast<std::size_t>(b) * static_cast<std::size_t>(nComp);
       for (int m = 0; m < nComp; m++) {
         dst[2 * m] += yr[m];
-        dst[2 * m + 1] += yi[m];
+        dst[2 * m + 1] += imag[m];
       }
     }
     const double inv = 1.0 / static_cast<double>(count);

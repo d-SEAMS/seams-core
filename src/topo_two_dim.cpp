@@ -58,13 +58,12 @@ int ring::polygonRingAnalysis(
   // -------------------------------------------------------------------------------
   // Init
   nRingList.resize(
-      maxDepth -
-      2); // Has a value for every value of ringSize from 3, upto maxDepth
-  coverageAreaXY.resize(maxDepth - 2);
-  coverageAreaXZ.resize(maxDepth - 2);
-  coverageAreaYZ.resize(maxDepth - 2);
+      static_cast<std::size_t>(maxDepth - 2)); // Has a value for every value of ringSize from 3, upto maxDepth
+  coverageAreaXY.resize(static_cast<std::size_t>(maxDepth - 2));
+  coverageAreaXZ.resize(static_cast<std::size_t>(maxDepth - 2));
+  coverageAreaYZ.resize(static_cast<std::size_t>(maxDepth - 2));
   // The atomTypes vector is the same size as the pointCloud atoms
-  atomTypes.resize(yCloud.nop, 1); // The dummy or unclassified value is 1
+  atomTypes.resize(static_cast<std::size_t>(yCloud.nop), 1); // The dummy or unclassified value is 1
   // -------------------------------------------------------------------------------
   // Run this loop for rings of sizes upto maxDepth
   // The smallest possible ring is of size 3
@@ -76,28 +75,28 @@ int ring::polygonRingAnalysis(
     //
     // Continue if there are zero rings of ringSize
     if (ringsOneType.empty()) {
-      nRingList[ringSize - 3] = 0; // Update the number of prisms
+      nRingList[static_cast<std::size_t>(ringSize - 3)] = 0; // Update the number of prisms
       // Update the coverage area%
-      coverageAreaXY[ringSize - 3] = 0.0;
-      coverageAreaXZ[ringSize - 3] = 0.0;
-      coverageAreaYZ[ringSize - 3] = 0.0;
+      coverageAreaXY[static_cast<std::size_t>(ringSize - 3)] = 0.0;
+      coverageAreaXZ[static_cast<std::size_t>(ringSize - 3)] = 0.0;
+      coverageAreaYZ[static_cast<std::size_t>(ringSize - 3)] = 0.0;
       continue;
     } // skip if there are no rings
     //
     // -------------
     // Number of rings with n nodes
-    nRings = ringsOneType.size();
+    nRings = static_cast<int>(ringsOneType.size());
     // -------------
     // Now that you have rings of a certain size:
-    nRingList[ringSize - 3] = nRings; // Update the number of n-membered rings
+    nRingList[static_cast<std::size_t>(ringSize - 3)] = nRings; // Update the number of n-membered rings
     // Update the coverage area% for the n-membered ring phase.
     singleAreas = topoparam::calcCoverageArea(yCloud, ringsOneType, sheetArea);
     // XY plane
-    coverageAreaXY[ringSize - 3] = singleAreas[0];
+    coverageAreaXY[static_cast<std::size_t>(ringSize - 3)] = singleAreas[0];
     // XZ plane
-    coverageAreaXZ[ringSize - 3] = singleAreas[1];
+    coverageAreaXZ[static_cast<std::size_t>(ringSize - 3)] = singleAreas[1];
     // YZ plane
-    coverageAreaYZ[ringSize - 3] = singleAreas[2];
+    coverageAreaYZ[static_cast<std::size_t>(ringSize - 3)] = singleAreas[2];
     // -------------
   } // end of loop through every possible ringSize
 

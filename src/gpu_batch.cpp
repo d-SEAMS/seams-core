@@ -759,25 +759,25 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
       {
         void *raw[] = {&ws.dcols.p, &nA, &nFr, &kM, &ws.dmdeg.p, &ws.dmcols.p};
         auto a = launchArgs(raw, sizeof(raw) / sizeof(raw[0]));
-        kMut->launch(dim3(grid), dim3(block), 0, q, a, false);
+        kMut->launch(dim3(static_cast<unsigned>(grid)), dim3(static_cast<unsigned>(block)), 0, q, a, false);
       }
       {
         void *raw[] = {&ws.dmdeg.p, &ws.dmcols.p, &nA, &nFr, &mR,
                        &ws.dnRings.p, &ws.dringAtoms.p};
         auto a = launchArgs(raw, sizeof(raw) / sizeof(raw[0]));
-        kSix->launch(dim3(grid), dim3(block), 0, q, a, false);
+        kSix->launch(dim3(static_cast<unsigned>(grid)), dim3(static_cast<unsigned>(block)), 0, q, a, false);
       }
       {
         void *raw[] = {&ws.dnRings.p, &ws.dringAtoms.p, &nA, &nFr, &mR, &mP,
                        &ws.dthroughCount.p, &ws.dthrough.p};
         auto a = launchArgs(raw, sizeof(raw) / sizeof(raw[0]));
-        kInv->launch(dim3(ringGrid), dim3(block), 0, q, a, false);
+        kInv->launch(dim3(static_cast<unsigned>(ringGrid)), dim3(static_cast<unsigned>(block)), 0, q, a, false);
       }
       {
         void *raw[] = {&ws.dthroughCount.p, &ws.dthrough.p, &nA, &nFr, &mP,
                        &ws.drowMax.p};
         auto a = launchArgs(raw, sizeof(raw) / sizeof(raw[0]));
-        kSort->launch(dim3(grid), dim3(block), 0, q, a, false);
+        kSort->launch(dim3(static_cast<unsigned>(grid)), dim3(static_cast<unsigned>(block)), 0, q, a, false);
       }
       {
         void *emitRaw[] = {&ws.dnRings.p,        &ws.dringAtoms.p, &ws.dmdeg.p,
@@ -786,13 +786,13 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
                            &mR,                  &mP,              &mPairs,
                            &ws.dnPairs.p,        &ws.dpairs.p};
         auto a = launchArgs(emitRaw, sizeof(emitRaw) / sizeof(emitRaw[0]));
-        kEmit->launch(dim3(ringGrid), dim3(block), 0, q, a, false);
+        kEmit->launch(dim3(static_cast<unsigned>(ringGrid)), dim3(static_cast<unsigned>(block)), 0, q, a, false);
         void *hcRaw[] = {&ws.dnPairs.p,  &ws.dpairs.p,        &ws.dringAtoms.p,
                          &ws.dthroughCount.p, &ws.dthrough.p, &nA,
                          &nFr,           &mR,                 &mP,
                          &mPairs,        &ws.dhc.p};
         auto b = launchArgs(hcRaw, sizeof(hcRaw) / sizeof(hcRaw[0]));
-        kHc->launch(dim3(pairGrid), dim3(block), 0, q, b, false);
+        kHc->launch(dim3(static_cast<unsigned>(pairGrid)), dim3(static_cast<unsigned>(block)), 0, q, b, false);
       }
       {
         void *raw[] = {&ws.dnRings.p,        &ws.dringAtoms.p, &ws.dthroughCount.p,
@@ -800,14 +800,14 @@ BatchResult analyzeResident(const double *xyz, const double *box, int nAtoms,
                        &nFr,                 &mR,              &mP,
                        &ws.dddc.p};
         auto a = launchArgs(raw, sizeof(raw) / sizeof(raw[0]));
-        kDdc->launch(dim3(ringGrid), dim3(block), 0, q, a, false);
+        kDdc->launch(dim3(static_cast<unsigned>(ringGrid)), dim3(static_cast<unsigned>(block)), 0, q, a, false);
       }
       {
         void *raw[] = {&ws.dnRings.p,  &ws.dringAtoms.p, &ws.dhc.p, &ws.dddc.p,
                        &nA,            &nFr,             &mR,       &ws.datomHc.p,
                        &ws.datomDdc.p, &ws.dsix.p};
         auto a = launchArgs(raw, sizeof(raw) / sizeof(raw[0]));
-        kAtom->launch(dim3(ringGrid), dim3(block), 0, q, a, false);
+        kAtom->launch(dim3(static_cast<unsigned>(ringGrid)), dim3(static_cast<unsigned>(block)), 0, q, a, false);
       }
       knn.wait();
       out.computeMs += msSince(t0);

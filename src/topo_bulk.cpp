@@ -456,7 +456,7 @@ void partnersOf(const std::vector<std::vector<int>> &rings,
                 const int *tripRight, int nAtoms, PartnerScratch &scratch,
                 std::vector<std::vector<int>> &adj) {
   const int nRight = static_cast<int>(right.size());
-  adj.assign(left.size(), {});
+  adj.assign(static_cast<std::size_t>(left.size()), {});
   scratch.prepare(nAtoms, nRight);
   scratch.clearBuckets();
   if (++scratch.tripTick <= 0) {
@@ -1362,10 +1362,9 @@ int ring::bulkPolygonRingAnalysis(
   // -------------------------------------------------------------------------------
   // Init
   nRingList.resize(
-      maxDepth -
-      2); // Has a value for every value of ringSize from 3, upto maxDepth
+      static_cast<std::size_t>(maxDepth - 2)); // Has a value for every value of ringSize from 3, upto maxDepth
   // The atomTypes vector is the same size as the pointCloud atoms
-  atomTypes.resize(yCloud.nop, 1); // The dummy or unclassified value is 1
+  atomTypes.resize(static_cast<std::size_t>(yCloud.nop), 1); // The dummy or unclassified value is 1
   // -------------------------------------------------------------------------------
   // Run this loop for rings of sizes upto maxDepth
   // The smallest possible ring is of size 3
@@ -1377,16 +1376,16 @@ int ring::bulkPolygonRingAnalysis(
     //
     // Continue if there are zero rings of ringSize
     if (ringsOneType.empty()) {
-      nRingList[ringSize - 3] = 0; // Update the number of prisms
+      nRingList[static_cast<std::size_t>(ringSize - 3)] = 0; // Update the number of prisms
       continue;
     } // skip if there are no rings
     //
     // -------------
     // Number of rings with n nodes
-    nRings = ringsOneType.size();
+    nRings = static_cast<int>(ringsOneType.size());
     // -------------
     // Now that you have rings of a certain size:
-    nRingList[ringSize - 3] = nRings; // Update the number of n-membered rings
+    nRingList[static_cast<std::size_t>(ringSize - 3)] = nRings; // Update the number of n-membered rings
     // -------------
   } // end of loop through every possible ringSize
 
@@ -1485,9 +1484,9 @@ int ring::topoBulkAnalysis(
   }
 
   // Init the atom type vector
-  atomTypes.resize(yCloud.nop); // Has a value for each atom
+  atomTypes.resize(static_cast<std::size_t>(yCloud.nop)); // Has a value for each atom
   // Init the rmsd per atom (not used yet)
-  rmsdPerAtom.resize(yCloud.nop); // Has a value for each atom
+  rmsdPerAtom.resize(static_cast<std::size_t>(yCloud.nop)); // Has a value for each atom
 
   // ----------------------------------------------
   // Init
@@ -1708,7 +1707,7 @@ ring::RingSearchIndex ring::buildRingSearchIndex(
 #pragma omp parallel for schedule(static)
 #endif
     for (int r = 0; r < nRings; r++) {
-      const auto &ring = rings[r];
+      const auto &ring = rings[static_cast<std::size_t>(r)];
       std::array<int, 3> wind{0, 0, 0};
       bool inFrame = true;
       for (size_t i = 0; i < ring.size() && inFrame; i++) {
@@ -1732,7 +1731,7 @@ ring::RingSearchIndex ring::buildRingSearchIndex(
         }
       }
       if (inFrame) {
-        index.ringShift[r] = wind;
+        index.ringShift[static_cast<std::size_t>(r)] = wind;
       }
     }
   }
@@ -1746,35 +1745,36 @@ ring::RingSearchIndex ring::buildRingSearchIndex(
 std::vector<int> ring::positionRank(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
   const int n = static_cast<int>(yCloud.pts.size());
-  std::vector<std::array<double, 3>> wrapped(n);
+  std::vector<std::array<double, 3>> wrapped(static_cast<std::size_t>(n));
   for (int i = 0; i < n; i++) {
-    const auto &p = yCloud.pts[i];
-    wrapped[i] = {p.x, p.y, p.z};
+    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+    wrapped[static_cast<std::size_t>(i)] = {p.x, p.y, p.z};
     for (size_t d = 0; d < 3; d++) {
       if (d < yCloud.box.size() && yCloud.box[d] > 0) {
         const double lo = d < yCloud.boxLow.size() ? yCloud.boxLow[d] : 0.0;
-        wrapped[i][d] -=
-            yCloud.box[d] * std::floor((wrapped[i][d] - lo) / yCloud.box[d]);
+        wrapped[static_cast<std::size_t>(i)][d] -=
+            yCloud.box[d] * std::floor((wrapped[static_cast<std::size_t>(i)][d] - lo) / yCloud.box[d]);
       }
     }
   }
-  std::vector<int> order(n);
+  std::vector<int> order(static_cast<std::size_t>(n));
   for (int i = 0; i < n; i++) {
-    order[i] = i;
+    order[static_cast<std::size_t>(i)] = i;
   }
   std::sort(order.begin(), order.end(), [&wrapped](int a, int b) {
-    return wrapped[a] != wrapped[b] ? wrapped[a] < wrapped[b] : a < b;
+    return wrapped[static_cast<std::size_t>(a)] != wrapped[static_cast<std::size_t>(b)] ? wrapped[static_cast<std::size_t>(a)] < wrapped[static_cast<std::size_t>(b)] : a < b;
   });
   for (int r = 1; r < n; r++) {
-    if (wrapped[order[r]] == wrapped[order[r - 1]]) {
-      throw std::invalid_argument("atoms " + std::to_string(order[r - 1]) +
-                                  " and " + std::to_string(order[r]) +
+    if (wrapped[static_cast<std::size_t>(order[static_cast<std::size_t>(r)])] ==
+        wrapped[static_cast<std::size_t>(order[static_cast<std::size_t>(r - 1)])]) {
+      throw std::invalid_argument("atoms " + std::to_string(order[static_cast<std::size_t>(r - 1)]) +
+                                  " and " + std::to_string(order[static_cast<std::size_t>(r)]) +
                                   " share a wrapped position");
     }
   }
-  std::vector<int> rank(n);
+  std::vector<int> rank(static_cast<std::size_t>(n));
   for (int r = 0; r < n; r++) {
-    rank[order[r]] = r;
+    rank[static_cast<std::size_t>(order[static_cast<std::size_t>(r)])] = r;
   }
   return rank;
 }
@@ -2119,7 +2119,7 @@ std::vector<int> ring::findDDC(const std::vector<std::vector<int>> &rings,
   // true if the ring is prismatic, basal or peripheral
   std::vector<char> notEquatorial(static_cast<size_t>(totalRingNum), 0);
   for (const int currentRingIndex : listHC) {
-    notEquatorial[currentRingIndex] = true;
+    notEquatorial[static_cast<std::size_t>(currentRingIndex)] = true;
   }
 
   // The peripheral tie-break and the emitted order use the ring key
@@ -2169,19 +2169,19 @@ std::vector<int> ring::findDDC(const std::vector<std::vector<int>> &rings,
     for (int k = 0; k < choice.n; k++) {
       peripheralRings[static_cast<std::size_t>(k)] = choice.idAt(k);
     }
-    if (ringType[iring] == ring::strucType::unclassified) {
-      ringType[iring] = ring::strucType::DDC;
+    if (ringType[static_cast<std::size_t>(iring)] == ring::strucType::unclassified) {
+      ringType[static_cast<std::size_t>(iring)] = ring::strucType::DDC;
       listDDC.push_back(iring);
     }
     for (const int jring : peripheralRings) {
-      if (ringType[jring] == ring::strucType::unclassified) {
-        ringType[jring] = ring::strucType::DDC;
+      if (ringType[static_cast<std::size_t>(jring)] == ring::strucType::unclassified) {
+        ringType[static_cast<std::size_t>(jring)] = ring::strucType::DDC;
         listDDC.push_back(jring);
-      } else if (ringType[jring] == ring::strucType::HCbasal) {
-        ringType[jring] = ring::strucType::bothBasal;
+      } else if (ringType[static_cast<std::size_t>(jring)] == ring::strucType::HCbasal) {
+        ringType[static_cast<std::size_t>(jring)] = ring::strucType::bothBasal;
         listDDC.push_back(jring);
-      } else if (ringType[jring] == ring::strucType::HCprismatic) {
-        ringType[jring] = ring::strucType::bothPrismatic;
+      } else if (ringType[static_cast<std::size_t>(jring)] == ring::strucType::HCprismatic) {
+        ringType[static_cast<std::size_t>(jring)] = ring::strucType::bothPrismatic;
         listDDC.push_back(jring);
       }
     }
@@ -2230,7 +2230,7 @@ bool ring::equatorialConditions(const std::vector<std::vector<int>> &rings,
   if (raw != nullptr) {
     raw->n = 0;
   }
-  const std::vector<int> &R = rings[iring];
+  const std::vector<int> &R = rings[static_cast<std::size_t>(iring)];
   if (R.size() != 6) {
     return false;
   }
@@ -2246,8 +2246,8 @@ bool ring::equatorialConditions(const std::vector<std::vector<int>> &rings,
   }
   std::array<IntBuf, 6> T;
   for (int k = 0; k < 6; k++) {
-    ringsThrough(index, R[k], R[(k + 1) % 6], R[(k + 2) % 6], iring, -1, T[k]);
-    if (T[k].empty()) {
+    ringsThrough(index, R[static_cast<std::size_t>(k)], R[static_cast<std::size_t>((k + 1) % 6)], R[static_cast<std::size_t>((k + 2) % 6)], iring, -1, T[static_cast<std::size_t>(k)]);
+    if (T[static_cast<std::size_t>(k)].empty()) {
       return false;
     }
   }
@@ -2255,7 +2255,7 @@ bool ring::equatorialConditions(const std::vector<std::vector<int>> &rings,
   // only candidate, so the chain search is a single 14-molecule check.
   bool oneEach = true;
   for (int k = 0; k < 6; k++) {
-    if (T[k].size() != 1) {
+    if (T[static_cast<std::size_t>(k)].size() != 1) {
       oneEach = false;
       break;
     }
@@ -2264,7 +2264,7 @@ bool ring::equatorialConditions(const std::vector<std::vector<int>> &rings,
     int r[6];
     bool distinct = true;
     for (int k = 0; k < 6; k++) {
-      r[k] = T[k][0];
+      r[k] = T[static_cast<std::size_t>(k)][0];
       for (int j = 0; j < k; j++) {
         distinct = distinct && r[j] != r[k];
       }
@@ -2420,28 +2420,28 @@ bool ring::equatorialConditions(const std::vector<std::vector<int>> &rings,
     std::vector<char> shareCA(static_cast<std::size_t>(nc) * static_cast<std::size_t>(na));
     for (int ia = 0; ia < na; ia++) {
       const int a = Ta[ia];
-      const auto &A = rings[a];
+      const auto &A = rings[static_cast<std::size_t>(a)];
       for (int ib = 0; ib < nb; ib++) {
         const int b = Tb[ib];
         shareAB[static_cast<std::size_t>(ia) * static_cast<std::size_t>(nb) +
                 static_cast<std::size_t>(ib)] =
-            static_cast<char>(b != a && sharedAtoms(A, rings[b]) >= 3);
+            static_cast<char>(b != a && sharedAtoms(A, rings[static_cast<std::size_t>(b)]) >= 3);
       }
       for (int ic = 0; ic < nc; ic++) {
         const int c = Tc[ic];
         shareCA[static_cast<std::size_t>(ic) * static_cast<std::size_t>(na) +
                 static_cast<std::size_t>(ia)] =
-            static_cast<char>(c != a && sharedAtoms(rings[c], A) >= 3);
+            static_cast<char>(c != a && sharedAtoms(rings[static_cast<std::size_t>(c)], A) >= 3);
       }
     }
     for (int ib = 0; ib < nb; ib++) {
       const int b = Tb[ib];
-      const auto &B = rings[b];
+      const auto &B = rings[static_cast<std::size_t>(b)];
       for (int ic = 0; ic < nc; ic++) {
         const int c = Tc[ic];
         shareBC[static_cast<std::size_t>(ib) * static_cast<std::size_t>(nc) +
                 static_cast<std::size_t>(ic)] =
-            static_cast<char>(c != b && sharedAtoms(B, rings[c]) >= 3);
+            static_cast<char>(c != b && sharedAtoms(B, rings[static_cast<std::size_t>(c)]) >= 3);
       }
     }
     for (int ia = 0; ia < na; ia++) {
@@ -2470,7 +2470,7 @@ bool ring::equatorialConditions(const std::vector<std::vector<int>> &rings,
           if (middles == 0U) {
             continue;
           }
-          if (!commonAtom(rings[a], rings[b], rings[c])) {
+          if (!commonAtom(rings[static_cast<std::size_t>(a)], rings[static_cast<std::size_t>(b)], rings[static_cast<std::size_t>(c)])) {
             continue;
           }
           out.push_back({{a, b, c}, middles});
@@ -2556,8 +2556,8 @@ bool ring::equatorialConditions(const std::vector<std::vector<int>> &rings,
       }
       if (rank != nullptr && (chosen != nullptr || raw != nullptr)) {
         for (int t = 0; t < 3; t++) {
-          candidate[t] = (*rank)[static_cast<size_t>(e.r[static_cast<size_t>(t)])];
-          candidate[3 + t] = (*rank)[static_cast<size_t>(o.r[static_cast<size_t>(t)])];
+          candidate[static_cast<std::size_t>(t)] = (*rank)[static_cast<size_t>(e.r[static_cast<size_t>(t)])];
+          candidate[static_cast<std::size_t>(3 + t)] = (*rank)[static_cast<size_t>(o.r[static_cast<size_t>(t)])];
         }
         std::sort(candidate.begin(), candidate.end());
         if (!haveBest || candidate < best) {
@@ -2649,7 +2649,7 @@ bool ring::conditionOneDDC(const std::vector<std::vector<int>> &rings,
                            const ring::RingSearchIndex &index) {
   // Loop through each element of iring for finding matches
   for (int m = 0; m < 6; m++) {
-    const int atom = rings[iring][m]; // Atom index to be matched with
+    const int atom = rings[static_cast<std::size_t>(iring)][static_cast<std::size_t>(m)]; // Atom index to be matched with
     int noOfCommonRings = 0;          // init to zero.
 
     if (atom < 0 ||
@@ -2658,7 +2658,7 @@ bool ring::conditionOneDDC(const std::vector<std::vector<int>> &rings,
     }
 
     // Every ring holding this atom, in ascending ring order
-    for (const int jring : index.ringsContainingAtom[atom]) {
+    for (const int jring : index.ringsContainingAtom[static_cast<std::size_t>(atom)]) {
       if (jring == iring) {
         continue;
       } // Skip for iring
@@ -2679,12 +2679,12 @@ bool ring::conditionOneDDC(const std::vector<std::vector<int>> &rings,
                                  // which unique elements are present
   // Duplicate IDs must be removed
   int numElements =
-      peripheralRings.size(); // number of elements in peripheralRings
+      static_cast<int>(peripheralRings.size()); // number of elements in peripheralRings
   sort(peripheralRings.begin(), peripheralRings.end());
   ip = std::unique(peripheralRings.begin(),
                    peripheralRings.begin() + numElements);
   // Resize peripheral rings to remove undefined terms
-  peripheralRings.resize(std::distance(peripheralRings.begin(), ip));
+  peripheralRings.resize(static_cast<std::size_t>(std::distance(peripheralRings.begin(), ip)));
 
   return true;
 }
@@ -3076,7 +3076,7 @@ std::vector<int> ring::findHC(const std::vector<std::vector<int>> &rings,
   sort(listHC.begin(), listHC.end());
   auto ip = std::unique(listHC.begin(), listHC.end());
   // Resize peripheral rings to remove undefined terms
-  listHC.resize(std::distance(listHC.begin(), ip));
+  listHC.resize(static_cast<std::size_t>(std::distance(listHC.begin(), ip)));
 
   return listHC;
 }
@@ -3216,15 +3216,15 @@ bool ring::basalNeighbours(const std::vector<std::vector<int>> &nList,
   // For first element needle1, which must belong to either atomOne's or
   // atomTwo's neighbour list Search atomOne's neighbours
   auto it =
-      std::find(nList[atomOne].begin() + 1, nList[atomOne].end(), needle1);
-  if (it != nList[atomOne].end()) {
+      std::find(nList[static_cast<std::size_t>(atomOne)].begin() + 1, nList[static_cast<std::size_t>(atomOne)].end(), needle1);
+  if (it != nList[static_cast<std::size_t>(atomOne)].end()) {
     neighbourFound = true;
     neighOne = true;
   } // atomOne's neighbour
   // If it is not atomOne's neighbour, it might be atomTwo's neighbour
   if (!neighOne) {
-    it = std::find(nList[atomTwo].begin() + 1, nList[atomTwo].end(), needle1);
-    if (it != nList[atomTwo].end()) {
+    it = std::find(nList[static_cast<std::size_t>(atomTwo)].begin() + 1, nList[static_cast<std::size_t>(atomTwo)].end(), needle1);
+    if (it != nList[static_cast<std::size_t>(atomTwo)].end()) {
       neighbourFound = true;
       neighTwo = true;
     } // end of check to see if neighbour was found
@@ -3240,9 +3240,9 @@ bool ring::basalNeighbours(const std::vector<std::vector<int>> &nList,
   // if atomOne was a neighbour of needle1, needle2 must be a neighbour of
   // atomTwo
   if (neighOne) {
-    it = std::find(nList[atomTwo].begin() + 1, nList[atomTwo].end(), needle2);
+    it = std::find(nList[static_cast<std::size_t>(atomTwo)].begin() + 1, nList[static_cast<std::size_t>(atomTwo)].end(), needle2);
     // It is a neighbour
-    if (it != nList[atomTwo].end()) {
+    if (it != nList[static_cast<std::size_t>(atomTwo)].end()) {
       return true;
     }
     // It is not a neighbour
@@ -3254,9 +3254,9 @@ bool ring::basalNeighbours(const std::vector<std::vector<int>> &nList,
   // if atomTwo was a neighbour of needle1, needle2 must be a neighbour of
   // atomOne
   else {
-    it = std::find(nList[atomOne].begin() + 1, nList[atomOne].end(), needle2);
+    it = std::find(nList[static_cast<std::size_t>(atomOne)].begin() + 1, nList[static_cast<std::size_t>(atomOne)].end(), needle2);
     // It is a neighbour
-    if (it != nList[atomOne].end()) {
+    if (it != nList[static_cast<std::size_t>(atomOne)].end()) {
       return true;
     }
     // It is not a neighbour
@@ -3285,16 +3285,16 @@ bool ring::notNeighboursOfRing(const std::vector<std::vector<int>> &nList,
   std::vector<int>::const_iterator it;
 
   for (int i = 0; i < triplet.size(); i++) {
-    iatom = triplet[i]; // AtomID to be searched for
+    iatom = triplet[static_cast<std::size_t>(i)]; // AtomID to be searched for
     // iatom must be searched for in the neighbour lists of all elements
     // of the ring vector
     for (int j = 0; j < ring.size(); j++) {
-      jatom = ring[j];
+      jatom = ring[static_cast<std::size_t>(j)];
       // ------------------
       // Search for iatom in the neighbour list of jatom
-      it = std::find(nList[jatom].begin() + 1, nList[jatom].end(), iatom);
+      it = std::find(nList[static_cast<std::size_t>(jatom)].begin() + 1, nList[static_cast<std::size_t>(jatom)].end(), iatom);
       // It is a neighbour!
-      if (it != nList[jatom].end()) {
+      if (it != nList[static_cast<std::size_t>(jatom)].end()) {
         return false;
       }
       // ------------------
@@ -3337,7 +3337,7 @@ int ring::findPrismatic(const std::vector<std::vector<int>> &rings,
                         int jring, std::vector<int> &prismaticRings,
                         const ring::RingSearchIndex &index) {
   int iIndex;                     // Used for making rings to be searched
-  int ringSize = rings[0].size(); // This is 6 for hexagons
+  int ringSize = static_cast<int>(rings[0].size()); // This is 6 for hexagons
   std::vector<int> iTriplet;      // triplet formed from iring
   std::vector<int> jTriplet;      // triplet formed from jring
   std::vector<int> common;        // Common elements
@@ -3354,7 +3354,7 @@ int ring::findPrismatic(const std::vector<std::vector<int>> &rings,
       if (iIndex >= ringSize) {
         iIndex -= ringSize;
       }
-      iTriplet.push_back(rings[iring][iIndex]);
+      iTriplet.push_back(rings[static_cast<std::size_t>(iring)][static_cast<std::size_t>(iIndex)]);
     } // end of getting a triplet from iring
 
     candidates.clear();
@@ -3368,7 +3368,7 @@ int ring::findPrismatic(const std::vector<std::vector<int>> &rings,
       jTriplet.clear(); // init
       // Make jTriplet
       for (int j = 0; j < ringSize; j++) {
-        int katom = rings[kring][j];
+        int katom = rings[static_cast<std::size_t>(kring)][static_cast<std::size_t>(j)];
         auto it = std::find(iTriplet.begin(), iTriplet.end(), katom);
 
         // If not found, add it to jTriplet
@@ -3379,7 +3379,7 @@ int ring::findPrismatic(const std::vector<std::vector<int>> &rings,
       // -----------------
 
       // Now search for jTriplet inside jring
-      common = ring::findsCommonElements(jTriplet, rings[jring]);
+      common = ring::findsCommonElements(jTriplet, rings[static_cast<std::size_t>(jring)]);
 
       // Update the prismatic rings
       if (common.size() == 3) {
@@ -3388,12 +3388,12 @@ int ring::findPrismatic(const std::vector<std::vector<int>> &rings,
         prismaticRings.push_back(kring); // Update prismatic rings
         // Update the type inside ringType
         // If the ring is already a DDC ring, it is a mixed ring
-        if (ringType[kring] == ring::strucType::DDC) {
-          ringType[kring] = ring::strucType::bothPrismatic;
+        if (ringType[static_cast<std::size_t>(kring)] == ring::strucType::DDC) {
+          ringType[static_cast<std::size_t>(kring)] = ring::strucType::bothPrismatic;
         }
         // If it is unclassified, it is just a prismatic ring
-        if (ringType[kring] == ring::strucType::unclassified) {
-          ringType[kring] = ring::strucType::HCprismatic;
+        if (ringType[static_cast<std::size_t>(kring)] == ring::strucType::unclassified) {
+          ringType[static_cast<std::size_t>(kring)] = ring::strucType::HCprismatic;
         } // end ring update
       }   // add kring to the list of prismatic rings
     }     // end of searching through rings for kring
@@ -3427,8 +3427,8 @@ std::vector<int> ring::findMixedRings(const std::vector<std::vector<int>> &rings
   // adds the ring Indices of all rings which are both DDCs and HCs
   for (int iring = 0; iring < ringType.size(); iring++) {
     // If iring is of mixed type, add it to the listMixed vector
-    if (ringType[iring] == ring::strucType::bothBasal ||
-        ringType[iring] == ring::strucType::bothPrismatic) {
+    if (ringType[static_cast<std::size_t>(iring)] == ring::strucType::bothBasal ||
+        ringType[static_cast<std::size_t>(iring)] == ring::strucType::bothPrismatic) {
       listMixed.push_back(iring);
 
       //-----------------
@@ -3468,38 +3468,38 @@ int ring::getAtomTypesTopoBulk(const std::vector<std::vector<int>> &rings,
                                std::vector<cage::iceType> &atomTypes) {
   cage::iceType iRingType;        // Type of the current ring
   int iatom;                      // Current ring
-  int ringSize = rings[0].size(); // Size of the ring
+  int ringSize = static_cast<int>(rings[0].size()); // Size of the ring
 
   // Loop through every ring in ringType
   for (int iring = 0; iring < ringType.size(); iring++) {
     //
     // Skip if the ring is unclassified
-    if (ringType[iring] == ring::strucType::unclassified) {
+    if (ringType[static_cast<std::size_t>(iring)] == ring::strucType::unclassified) {
       continue;
     } // skip for unclassified rings
 
     // ------------
     // Get the current ring type
     // DDC
-    if (ringType[iring] == ring::strucType::DDC) {
+    if (ringType[static_cast<std::size_t>(iring)] == ring::strucType::DDC) {
       iRingType = cage::iceType::ddc;
     } // DDC atoms
     //
     // HC
-    else if (ringType[iring] == ring::strucType::HCbasal ||
-             ringType[iring] == ring::strucType::HCprismatic) {
+    else if (ringType[static_cast<std::size_t>(iring)] == ring::strucType::HCbasal ||
+             ringType[static_cast<std::size_t>(iring)] == ring::strucType::HCprismatic) {
       iRingType = cage::iceType::hc;
     } // HC atoms
     //
     // Mixed
-    else if (ringType[iring] == ring::strucType::bothBasal ||
-             ringType[iring] == ring::strucType::bothPrismatic) {
+    else if (ringType[static_cast<std::size_t>(iring)] == ring::strucType::bothBasal ||
+             ringType[static_cast<std::size_t>(iring)] == ring::strucType::bothPrismatic) {
       iRingType = cage::iceType::mixed;
     } // HC atoms
     // Prism
-    else if (ringType[iring] == ring::strucType::Prism ||
-             ringType[iring] == ring::strucType::deformedPrism ||
-             ringType[iring] == ring::strucType::mixedPrismRing) {
+    else if (ringType[static_cast<std::size_t>(iring)] == ring::strucType::Prism ||
+             ringType[static_cast<std::size_t>(iring)] == ring::strucType::deformedPrism ||
+             ringType[static_cast<std::size_t>(iring)] == ring::strucType::mixedPrismRing) {
       iRingType = cage::iceType::pnc; // 5 membered pnc
     }                        // prism
     // Should never go here
@@ -3510,20 +3510,20 @@ int ring::getAtomTypesTopoBulk(const std::vector<std::vector<int>> &rings,
     // Otherwise, loop through every inside the ring and assign atomTypes the
     // iRingType
     for (int i = 0; i < ringSize; i++) {
-      iatom = rings[iring][i]; // Atom index in ring
-      if (atomTypes[iatom] == cage::iceType::mixed ||
-          atomTypes[iatom] == cage::iceType::mixed2) {
+      iatom = rings[static_cast<std::size_t>(iring)][static_cast<std::size_t>(i)]; // Atom index in ring
+      if (atomTypes[static_cast<std::size_t>(iatom)] == cage::iceType::mixed ||
+          atomTypes[static_cast<std::size_t>(iatom)] == cage::iceType::mixed2) {
         continue;
       } // Don't reassign
       // For atoms shared by PNCs and DDCs/HCs
       if (ringSize == 6) {
-        if (atomTypes[iatom] == cage::iceType::pnc) {
-          atomTypes[iatom] = cage::iceType::mixed2;
+        if (atomTypes[static_cast<std::size_t>(iatom)] == cage::iceType::pnc) {
+          atomTypes[static_cast<std::size_t>(iatom)] = cage::iceType::mixed2;
         } else {
-          atomTypes[iatom] = iRingType;
+          atomTypes[static_cast<std::size_t>(iatom)] = iRingType;
         }
       } else {
-        atomTypes[iatom] = iRingType;
+        atomTypes[static_cast<std::size_t>(iatom)] = iRingType;
       }
     } // end of loop thorugh the current ring
   }   // end of loop through every ring
@@ -3563,12 +3563,12 @@ int ring::getStrucNumbers(const std::vector<ring::strucType> &ringType,
   for (int icage = 0; icage < cageList.size(); icage++) {
     //
     // HC
-    if (cageList[icage].type == cage::cageType::HexC) {
+    if (cageList[static_cast<std::size_t>(icage)].type == cage::cageType::HexC) {
       numHC += 1;
     } // end of updating HC number
     //
     // DDC
-    if (cageList[icage].type == cage::cageType::DoubleDiaC) {
+    if (cageList[static_cast<std::size_t>(icage)].type == cage::cageType::DoubleDiaC) {
       numDDC += 1;
     } // end of updating DDC number
   }   // end of loop through cages
@@ -3577,25 +3577,25 @@ int ring::getStrucNumbers(const std::vector<ring::strucType> &ringType,
   // Loop through the rings
   for (int iring = 0; iring < ringType.size(); iring++) {
     // Mixed
-    if (ringType[iring] == ring::strucType::bothBasal ||
-        ringType[iring] == ring::strucType::bothPrismatic) {
+    if (ringType[static_cast<std::size_t>(iring)] == ring::strucType::bothBasal ||
+        ringType[static_cast<std::size_t>(iring)] == ring::strucType::bothPrismatic) {
       mixedRings += 1;
       // Also update basal rings
-      if (ringType[iring] == ring::strucType::bothBasal) {
+      if (ringType[static_cast<std::size_t>(iring)] == ring::strucType::bothBasal) {
         basalRings += 1;
       } // mixed basal rings
       // Also update prismatic rings
-      if (ringType[iring] == ring::strucType::bothPrismatic) {
+      if (ringType[static_cast<std::size_t>(iring)] == ring::strucType::bothPrismatic) {
         prismaticRings += 1;
       } // mixed prismatic rings
     }   // end of updating mixed
     //
     // HCs
-    if (ringType[iring] == ring::strucType::HCprismatic) {
+    if (ringType[static_cast<std::size_t>(iring)] == ring::strucType::HCprismatic) {
       prismaticRings += 1;
     } // HC prismatic
     // basal HCs
-    if (ringType[iring] == ring::strucType::HCbasal) {
+    if (ringType[static_cast<std::size_t>(iring)] == ring::strucType::HCbasal) {
       basalRings += 1;
     } // HC basal
   }   // end of loop through every ring
@@ -3632,11 +3632,11 @@ int prism3::findBulkPrisms(
     const std::vector<std::vector<int>> &nList,
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     std::vector<double> &rmsdPerAtom, double heightCutoff) {
-  int totalRingNum = rings.size(); // Total number of rings
+  int totalRingNum = static_cast<int>(rings.size()); // Total number of rings
   std::vector<int> basal1;         // First basal ring
   std::vector<int> basal2;         // Second basal ring
   bool cond1, cond2; // Conditions for rings to be basal (true) or not (false)
-  int ringSize = rings[0].size(); // Number of nodes in each ring
+  int ringSize = static_cast<int>(rings[0].size()); // Number of nodes in each ring
   // Matrix for the reference ring for a given ringSize.
   Eigen::MatrixXd refPointSet(ringSize, 3);
 
@@ -3648,10 +3648,10 @@ int prism3::findBulkPrisms(
   for (int iring = 0; iring < totalRingNum - 1; iring++) {
     cond1 = false;
     cond2 = false;
-    basal1 = rings[iring]; // Assign iring to basal1
+    basal1 = rings[static_cast<std::size_t>(iring)]; // Assign iring to basal1
     // Loop through the other rings to get a pair
     for (int jring = iring + 1; jring < totalRingNum; jring++) {
-      basal2 = rings[jring]; // Assign jring to basal2
+      basal2 = rings[static_cast<std::size_t>(jring)]; // Assign jring to basal2
       // ------------
       // Put extra check for axial basal rings if shapeMatching is being done
       // ------------
@@ -3678,12 +3678,12 @@ int prism3::findBulkPrisms(
       if (isPrism) {
         //
         // Update iring
-        if (ringType[iring] == ring::strucType::unclassified) {
-          ringType[iring] = ring::strucType::Prism;
+        if (ringType[static_cast<std::size_t>(iring)] == ring::strucType::unclassified) {
+          ringType[static_cast<std::size_t>(iring)] = ring::strucType::Prism;
         }
         // Update jring
-        if (ringType[jring] == ring::strucType::unclassified) {
-          ringType[jring] = ring::strucType::Prism;
+        if (ringType[static_cast<std::size_t>(jring)] == ring::strucType::unclassified) {
+          ringType[static_cast<std::size_t>(jring)] = ring::strucType::Prism;
         }
       } // end of reduced criteria
       // Strict criteria
@@ -3694,12 +3694,12 @@ int prism3::findBulkPrisms(
           continue;
         }
         // Update iring
-        if (ringType[iring] == ring::strucType::unclassified) {
-          ringType[iring] = ring::strucType::Prism;
+        if (ringType[static_cast<std::size_t>(iring)] == ring::strucType::unclassified) {
+          ringType[static_cast<std::size_t>(iring)] = ring::strucType::Prism;
         }
         // Update jring
-        if (ringType[jring] == ring::strucType::unclassified) {
-          ringType[jring] = ring::strucType::Prism;
+        if (ringType[static_cast<std::size_t>(jring)] == ring::strucType::unclassified) {
+          ringType[static_cast<std::size_t>(jring)] = ring::strucType::Prism;
         }
         //
         // Shape-matching to get the RMSD (if shape-matching is desired)
@@ -3736,13 +3736,13 @@ bool prism3::basalPrismConditions(const std::vector<std::vector<int>> &nList,
   }
   int l1 = basal1[0]; // first element of basal1 ring
   int ringSize =
-      basal1.size(); // Size of the ring; each ring contains n elements
+      static_cast<int>(basal1.size()); // Size of the ring; each ring contains n elements
   int m_k;              // Atom ID of element in basal2
   bool l1_neighbour = false; // m_k is a neighbour of l1(true) or not (false)
 
   // isNeighbour is initialized to false for all basal2 elements; indication if
   // basal2 elements are neighbours of basal1
-  std::vector<bool> isNeighbour(ringSize, false);
+  std::vector<bool> isNeighbour(static_cast<std::size_t>(ringSize), false);
   int kIndex = 0; // m_k index
   int lAtomID; // atomID of the current element of basal1
   int kAtomID; // atomID of the current element of basal2
@@ -3751,14 +3751,14 @@ bool prism3::basalPrismConditions(const std::vector<std::vector<int>> &nList,
   // COMPARISON OF basal2 ELEMENTS WITH l1
   for (int k = 0; k < ringSize; k++) {
     l1_neighbour = false;
-    m_k = basal2[k];
+    m_k = basal2[static_cast<std::size_t>(k)];
     // =================================
     // Checking to seee if m_k is be a neighbour of l1
     // Find m_k inside l1 neighbour list
-    auto it = std::find(nList[l1].begin() + 1, nList[l1].end(), m_k);
+    auto it = std::find(nList[static_cast<std::size_t>(l1)].begin() + 1, nList[static_cast<std::size_t>(l1)].end(), m_k);
 
     // If the element has been found, for l1
-    if (it != nList[l1].end()) {
+    if (it != nList[static_cast<std::size_t>(l1)].end()) {
       l1_neighbour = true;
       kIndex = k;
       break;
@@ -3773,27 +3773,27 @@ bool prism3::basalPrismConditions(const std::vector<std::vector<int>> &nList,
 
   // ---------------------------------------------
   // NEIGHBOURS of basal1 in basal2
-  isNeighbour[kIndex] = true;
+  isNeighbour[static_cast<std::size_t>(kIndex)] = true;
 
   // All elements of basal1 must be neighbours of basal2
   for (int i = 1; i < ringSize; i++) {
-    lAtomID = basal1[i]; // element of basal1 ring
+    lAtomID = basal1[static_cast<std::size_t>(i)]; // element of basal1 ring
     for (int k = 0; k < ringSize; k++) {
       // Skip if already a neighbour
-      if (isNeighbour[k]) {
+      if (isNeighbour[static_cast<std::size_t>(k)]) {
         continue;
       }
       // Get the comparison basal2 element
-      kAtomID = basal2[k]; // element of basal2 ring;
+      kAtomID = basal2[static_cast<std::size_t>(k)]; // element of basal2 ring;
 
       // Checking to see if kAtomID is a neighbour of lAtomID
       // Find kAtomID inside lAtomID neighbour list
       auto it1 =
-          std::find(nList[lAtomID].begin() + 1, nList[lAtomID].end(), kAtomID);
+          std::find(nList[static_cast<std::size_t>(lAtomID)].begin() + 1, nList[static_cast<std::size_t>(lAtomID)].end(), kAtomID);
 
       // If the element has been found, for l1
-      if (it1 != nList[lAtomID].end()) {
-        isNeighbour[k] = true;
+      if (it1 != nList[static_cast<std::size_t>(lAtomID)].end()) {
+        isNeighbour[static_cast<std::size_t>(k)] = true;
       }
     } // Loop through basal2
   }   // end of check for neighbours of basal1
@@ -3803,7 +3803,7 @@ bool prism3::basalPrismConditions(const std::vector<std::vector<int>> &nList,
   // They should all be neighbours
   for (int k = 0; k < ringSize; k++) {
     // Check to see if any element is false
-    if (!isNeighbour[k]) {
+    if (!isNeighbour[static_cast<std::size_t>(k)]) {
       return false;
     }
   }
@@ -3822,7 +3822,7 @@ bool prism3::relaxedPrismConditions(const std::vector<std::vector<int>> &nList,
                                     std::vector<int> &basal1,
                                     std::vector<int> &basal2) {
   int ringSize =
-      basal1.size();     // Size of the ring; each ring contains n elements
+      static_cast<int>(basal1.size());     // Size of the ring; each ring contains n elements
   int m_k;                  // Atom ID of element in basal2
   bool isNeighbour = false; // This is true if there is at least one bond
                             // between the basal rings
@@ -3832,16 +3832,16 @@ bool prism3::relaxedPrismConditions(const std::vector<std::vector<int>> &nList,
   // COMPARISON OF basal2 ELEMENTS (m_k) WITH basal1 ELEMENTS (l_k)
   // Loop through all the elements of basal1
   for (int l = 0; l < ringSize; l++) {
-    l_k = basal1[l];
+    l_k = basal1[static_cast<std::size_t>(l)];
     // Search for the nearest neighbour of l_k in basal2
     // Loop through basal2 elements
     for (int m = 0; m < ringSize; m++) {
-      m_k = basal2[m];
+      m_k = basal2[static_cast<std::size_t>(m)];
       // Find m_k inside l_k neighbour list
-      auto it = std::find(nList[l_k].begin() + 1, nList[l_k].end(), m_k);
+      auto it = std::find(nList[static_cast<std::size_t>(l_k)].begin() + 1, nList[static_cast<std::size_t>(l_k)].end(), m_k);
 
       // If the element has been found, for l1
-      if (it != nList[l_k].end()) {
+      if (it != nList[static_cast<std::size_t>(l_k)].end()) {
         isNeighbour = true;
         break;
       } // found element
@@ -3863,7 +3863,7 @@ bool prism3::basalRingsSeparation(
     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> &basal1, const std::vector<int> &basal2, double heightCutoff) {
   //
-  int ringSize = basal1.size();
+  int ringSize = static_cast<int>(basal1.size());
   int l_k, m_k; // Atom indices
   double infHugeNumber = 100000;
   double leastDist = infHugeNumber;
@@ -3875,7 +3875,7 @@ bool prism3::basalRingsSeparation(
   // Search for the nearest neighbour of l_k in basal2
   // Loop through basal2 elements
   for (int m = 0; m < ringSize; m++) {
-    m_k = basal2[m]; // Atom index to find in the neighbour list of iatom
+    m_k = basal2[static_cast<std::size_t>(m)]; // Atom index to find in the neighbour list of iatom
 
     // Calculate the distance
     double dist = gen::periodicDist(yCloud, l_k, m_k);

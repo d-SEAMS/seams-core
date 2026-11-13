@@ -62,11 +62,11 @@ rdf::PartialRdf rdf::partialRdf(
     if (yCloud.pts[static_cast<std::size_t>(iatom)].type != typeI) {
       continue;
     }
-    if (static_cast<int>(nList.size()) <= iatom || nList[iatom].size() < 2) {
+    if (static_cast<int>(nList.size()) <= iatom || nList[static_cast<std::size_t>(iatom)].size() < 2) {
       continue;
     }
-    for (std::size_t k = 1; k < nList[iatom].size(); ++k) {
-      const int jid = nList[iatom][k];
+    for (std::size_t k = 1; k < nList[static_cast<std::size_t>(iatom)].size(); ++k) {
+      const int jid = nList[static_cast<std::size_t>(iatom)][k];
       const auto found = yCloud.idIndexMap.find(jid);
       if (found == yCloud.idIndexMap.end()) {
         continue;
