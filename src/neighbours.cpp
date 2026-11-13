@@ -263,8 +263,13 @@ void binCutoffRows(std::size_t count, const Ends &ends,
  */
 bool cutoffRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                 const std::vector<int> &subset, double rcutoff,
-                CutoffRows &out) {
-  seams::adoptThreads();
+                CutoffRows &out, bool handoff = true, double cellHint = 0.0) {
+  // The handoff pauses the OpenMP team so another pool can take the
+  // cores. The signature search keeps that team and only sets the
+  // linkcell width.
+  if (handoff) {
+    seams::adoptThreads();
+  }
   const size_t nSubset = subset.size();
   if (nSubset == 0) {
     out.first.assign(static_cast<std::size_t>(yCloud.nop) + 1, 0);
@@ -293,10 +298,13 @@ bool cutoffRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
         {box[0][0], box[0][1], box[0][2]}, {box[1][0], box[1][1], box[1][2]},
         {box[2][0], box[2][1], box[2][2]},
         {origin[0], origin[1], origin[2]});
-    const double hint = std::max(
-        rcutoff, std::cbrt(kAtomsPerLinkcellCell *
-                           nneigh::dumpVolume(yCloud.box, yCloud.boxLow) /
-                           static_cast<double>(nSubset)));
+    const double hinted = cellHint > 0.0
+                              ? cellHint
+                              : std::max(rcutoff,
+                                         std::cbrt(kAtomsPerLinkcellCell *
+                                                   nneigh::dumpVolume(yCloud.box, yCloud.boxLow) /
+                                                   static_cast<double>(nSubset)));
+    const double hint = hinted;
     // linkcell::pairs_within zeroes its vector on this thread before the
     // fill writes it; the C call fills a buffer nothing has touched
     const lc_cell raw = cell.raw();
@@ -1818,6 +1826,48 @@ bool nneigh::refillIndexRows(const molSys::PointCloud<molSys::Point<double>, dou
     }
   }
   return true;
+}
+
+std::vector<std::vector<int>>
+nneigh::neighListLinkcell(
+    double rcutoff,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeI) {
+#ifndef SEAMS_HAS_LINKCELL
+  (void)rcutoff;
+  (void)yCloud;
+  (void)typeI;
+  return {};
+#else
+  if (!hasPeriodicBox(yCloud) || !(rcutoff > 0.0) || yCloud.nop <= 0) {
+    return {};
+  }
+  seams::prepareCompute();
+  int pool = 1;
+#ifdef SEAMS_HAS_OPENMP
+  if (!gSerialCutoff && !omp_in_parallel()) {
+    pool = std::max(1, omp_get_max_threads());
+  }
+#endif
+  // The pool is built for this list and dropped when it returns, so the
+  // workers are gone before the ring search starts its OpenMP team.
+  lc_set_threads(pool);
+  const std::vector<int> indexToID = indexToIDTable(yCloud);
+  std::vector<int> typeIIndices;
+  typeIIndices.reserve(static_cast<std::size_t>(yCloud.nop));
+  for (int i = 0; i < yCloud.nop; i++) {
+    if (yCloud.pts[static_cast<std::size_t>(i)].type == typeI) {
+      typeIIndices.push_back(i);
+    }
+  }
+  if (typeIIndices.empty()) {
+    return {};
+  }
+  CutoffRows rows;
+  if (!cutoffRows(yCloud, typeIIndices, rcutoff, rows, false, 0.0)) {
+    return {};
+  }
+  return rowsByID(rows, indexToID, yCloud.nop);
+#endif
 }
 
 std::vector<std::vector<int>>

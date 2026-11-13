@@ -1,8 +1,8 @@
 diff --git a/include/linkcell.h b/include/linkcell.h
-index 1e4fc2b..0c880fa 100644
+index 1e4fc2b..b731843 100644
 --- a/include/linkcell.h
 +++ b/include/linkcell.h
-@@ -405,6 +405,88 @@ int lc_halo(const int *nxyz,
+@@ -405,6 +405,89 @@ int lc_halo(const int *nxyz,
              size_t cap,
              size_t *out_count);
  
@@ -80,9 +80,10 @@ index 1e4fc2b..0c880fa 100644
 +                  int *out_hit);
 +
 +/**
-+ * Use `n` Rayon threads for later searches. `n <= 0` means one thread.
-+ * Safe to call again with a different `n`.
++ * Use `n` Rayon threads for later searches. `n == 0` runs on the calling
++ * thread. `n < 0` means one thread. Safe to call again with a different `n`.
 + */
++/** `n == 0` runs the next search on the calling thread. `n < 0` selects one thread. */
 +void lc_set_threads(int n);
 +
 +/** Width last passed to `lc_set_threads`, or the global pool when unset. */
@@ -122,15 +123,14 @@ index b6f3b1b..007adcf 100644
          let parallel = false;
          if buf.offsets.len() != ncell + 1 {
 diff --git a/src/capi.rs b/src/capi.rs
-index 7989fd4..8190597 100644
+index 7989fd4..0e128c1 100644
 --- a/src/capi.rs
 +++ b/src/capi.rs
-@@ -5,9 +5,62 @@
+@@ -5,9 +5,56 @@
  use std::cell::RefCell;
  use std::ffi::{c_char, c_int, CString};
  use std::ptr;
 +use std::sync::atomic::{AtomicUsize, Ordering};
-+use std::sync::Mutex;
  
  use crate::{Cell, Error};
  
@@ -138,39 +138,34 @@ index 7989fd4..8190597 100644
 +/// process-wide pool, which is what `RAYON_NUM_THREADS` built.
 +static WANTED_THREADS: AtomicUsize = AtomicUsize::new(0);
 +
-+fn pool_of(n: usize) -> &'static rayon::ThreadPool {
-+    static CACHE: Mutex<Vec<(usize, &'static rayon::ThreadPool)>> = Mutex::new(Vec::new());
-+    let mut guard = CACHE.lock().unwrap_or_else(|e| e.into_inner());
-+    if let Some((_, pool)) = guard.iter().find(|(k, _)| *k == n) {
-+        return *pool;
-+    }
-+    let pool = Box::leak(Box::new(
-+        rayon::ThreadPoolBuilder::new()
-+            .num_threads(n)
-+            .build()
-+            .unwrap_or_else(|_| rayon::ThreadPoolBuilder::new().num_threads(1).build().unwrap()),
-+    ));
-+    guard.push((n, pool));
-+    pool
-+}
-+
 +/// Run `work` on a pool of the requested width so `current_num_threads`
-+/// inside linkcell matches that width. A width of one is the serial walk.
++/// inside linkcell matches that width. The pool is dropped when `work`
++/// returns, so its workers are not still spinning when an OpenMP team
++/// starts. A width of zero or one runs on the calling thread.
 +fn with_threads<R: Send>(work: impl FnOnce() -> R + Send) -> R {
 +    let n = WANTED_THREADS.load(Ordering::Relaxed);
-+    if n == 0 {
++    if n <= 1 {
 +        return work();
 +    }
 +    if rayon::current_thread_index().is_some() && rayon::current_num_threads() == n {
 +        return work();
 +    }
-+    pool_of(n).install(work)
++    let pool = rayon::ThreadPoolBuilder::new()
++        .num_threads(n)
++        .build()
++        .unwrap_or_else(|_| rayon::ThreadPoolBuilder::new().num_threads(1).build().unwrap());
++    pool.install(work)
 +}
 +
-+/// Choose the Rayon width for later searches. `n <= 0` selects one thread.
++/// Choose the Rayon width for later searches. `n == 0` runs the search
++/// on the calling thread. `n < 0` selects one thread.
 +#[no_mangle]
 +pub extern "C" fn lc_set_threads(n: c_int) {
-+    let n = if n < 1 { 1 } else { n as usize };
++    let n = if n < 0 {
++        1
++    } else {
++        n as usize
++    };
 +    WANTED_THREADS.store(n, Ordering::Relaxed);
 +}
 +
@@ -188,7 +183,7 @@ index 7989fd4..8190597 100644
  /// Periodic parallelepiped. Lattice vectors are a, b, c (same as vesin rows).
  #[repr(C)]
  #[derive(Clone, Copy, Debug)]
-@@ -245,11 +298,13 @@ pub unsafe extern "C" fn lc_knearest_many(
+@@ -245,11 +292,13 @@ pub unsafe extern "C" fn lc_knearest_many(
          d2_store = unsafe { std::slice::from_raw_parts_mut(out_d2, need) };
          Some(&mut d2_store[..])
      };
@@ -207,7 +202,7 @@ index 7989fd4..8190597 100644
      if let Err(e) = err {
          set_error(&e.to_string());
          return 1;
-@@ -466,8 +521,10 @@ unsafe fn pairs_call<'a>(
+@@ -466,8 +515,10 @@ unsafe fn pairs_call<'a>(
          return Ok((key, found));
      }
      let mask_vec: Option<Vec<bool>> = mask_raw.map(|m| m.iter().map(|&v| v != 0).collect());
@@ -220,7 +215,7 @@ index 7989fd4..8190597 100644
      });
      match found {
          Ok(found) => Ok((key, found)),
-@@ -942,3 +999,333 @@ pub unsafe extern "C" fn lc_halo(
+@@ -942,3 +993,333 @@ pub unsafe extern "C" fn lc_halo(
      clear_error();
      0
  }

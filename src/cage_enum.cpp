@@ -774,17 +774,182 @@ struct ClosedSearch {
         }
         return ids[h];
       }
+      int find(std::uint64_t key) const {
+        std::size_t h = static_cast<std::size_t>(key * 11400714819323198485ull) & mask;
+        while (keys[h] != ~std::uint64_t{0} && keys[h] != key) {
+          h = (h + 1) & mask;
+        }
+        return keys[h] == key ? ids[h] : -1;
+      }
     };
     FlatId edgeId;
     FlatId wedgeId;
     edgeId.reset(std::max(slots, 1));
     wedgeId.reset(std::max(slots, 1));
+    const bool serialIndex =
+        indexTeam <= 1 || static_cast<int>(cand.size()) < 256 || maxV < 0;
     std::vector<std::array<int, 2>> edgeAtoms;
     std::vector<int> vertexOf;
+    int nV = 0;
+    if (!serialIndex) {
+      // Each thread records the edges and vertices first seen in its
+      // slice of the ring list. Merging those slices in ring order
+      // assigns the same ids as one thread walking the rings.
+      struct FreshEdge {
+        std::uint64_t key;
+        int a;
+        int b;
+      };
+      struct Bucket {
+        std::vector<FreshEdge> edges;
+        std::vector<int> verts;
+        std::vector<std::uint64_t> wedges;
+      };
+      const int nCand = static_cast<int>(cand.size());
+      std::vector<Bucket> buckets(static_cast<std::size_t>(indexTeam));
+      std::vector<std::vector<int>> edgeMap(static_cast<std::size_t>(indexTeam));
+      std::vector<std::vector<int>> wedgeMap(static_cast<std::size_t>(indexTeam));
+#if defined(SEAMS_HAS_OPENMP)
+#pragma omp parallel num_threads(indexTeam)
+#endif
+      {
+#if defined(SEAMS_HAS_OPENMP)
+        const int tid = omp_get_thread_num();
+        const int team = omp_get_num_threads();
+#else
+        const int tid = 0;
+        const int team = 1;
+#endif
+        const int c0 = static_cast<int>((static_cast<long long>(nCand) * tid) / team);
+        const int c1 = static_cast<int>((static_cast<long long>(nCand) * (tid + 1)) / team);
+        FlatId local;
+        local.reset(std::max(c1 - c0, 1) * 8);
+        std::vector<int> stamp(static_cast<std::size_t>(maxV) + 1, 0);
+        auto &bucket = buckets[static_cast<std::size_t>(tid)];
+        bucket.edges.reserve(static_cast<std::size_t>(std::max(c1 - c0, 0)));
+        bucket.verts.reserve(static_cast<std::size_t>(std::max(c1 - c0, 0)));
+        for (int ci = c0; ci < c1; ++ci) {
+          const int i = cand[static_cast<std::size_t>(ci)];
+          const auto &ring = rings[static_cast<std::size_t>(i)];
+          const int sz = ringSize[static_cast<std::size_t>(i)];
+          int *eCol = ringEdges.col.data() + ringEdges.off[static_cast<std::size_t>(i)];
+          for (int k = 0; k < sz; ++k) {
+            const int a = ring[static_cast<std::size_t>(k)];
+            const int b = ring[static_cast<std::size_t>((k + 1) % sz)];
+            const std::uint64_t key = packEdge(a, b);
+            const int before = local.n;
+            const int id = local.intern(key);
+            eCol[k] = id;
+            if (id == before) {
+              bucket.edges.push_back({key, std::min(a, b), std::max(a, b)});
+            }
+            if (a >= 0 && a <= maxV && stamp[static_cast<std::size_t>(a)] == 0) {
+              stamp[static_cast<std::size_t>(a)] = 1;
+              bucket.verts.push_back(a);
+            }
+          }
+        }
+      }
+      vertexOf.assign(static_cast<std::size_t>(maxV) + 1, -1);
+      for (int t = 0; t < indexTeam; ++t) {
+        const auto &bucket = buckets[static_cast<std::size_t>(t)];
+        auto &map = edgeMap[static_cast<std::size_t>(t)];
+        map.resize(bucket.edges.size());
+        for (std::size_t localId = 0; localId < bucket.edges.size(); ++localId) {
+          const auto &edge = bucket.edges[localId];
+          const int before = edgeId.n;
+          const int id = edgeId.intern(edge.key);
+          map[localId] = id;
+          if (id == before) {
+            edgeAtoms.push_back({edge.a, edge.b});
+          }
+        }
+        for (const int atom : bucket.verts) {
+          if (atom >= 0 && atom <= maxV &&
+              vertexOf[static_cast<std::size_t>(atom)] < 0) {
+            vertexOf[static_cast<std::size_t>(atom)] = nV++;
+          }
+        }
+      }
+#if defined(SEAMS_HAS_OPENMP)
+#pragma omp parallel for schedule(static) num_threads(indexTeam)
+#endif
+      for (int ci = 0; ci < nCand; ++ci) {
+        const int i = cand[static_cast<std::size_t>(ci)];
+        const int sz = ringSize[static_cast<std::size_t>(i)];
+        const auto &ring = rings[static_cast<std::size_t>(i)];
+        const int tid = static_cast<int>((static_cast<long long>(ci) * indexTeam) / nCand);
+        const auto &map = edgeMap[static_cast<std::size_t>(tid)];
+        int *eCol = ringEdges.col.data() + ringEdges.off[static_cast<std::size_t>(i)];
+        int *vCol = ringVerts.col.data() + ringVerts.off[static_cast<std::size_t>(i)];
+        for (int k = 0; k < sz; ++k) {
+          eCol[k] = map[static_cast<std::size_t>(eCol[k])];
+          const int a = ring[static_cast<std::size_t>(k)];
+          vCol[k] = (a >= 0 && a <= maxV) ? vertexOf[static_cast<std::size_t>(a)] : -1;
+        }
+      }
+#if defined(SEAMS_HAS_OPENMP)
+#pragma omp parallel num_threads(indexTeam)
+#endif
+      {
+#if defined(SEAMS_HAS_OPENMP)
+        const int tid = omp_get_thread_num();
+        const int team = omp_get_num_threads();
+#else
+        const int tid = 0;
+        const int team = 1;
+#endif
+        const int c0 = static_cast<int>((static_cast<long long>(nCand) * tid) / team);
+        const int c1 = static_cast<int>((static_cast<long long>(nCand) * (tid + 1)) / team);
+        FlatId local;
+        local.reset(std::max(c1 - c0, 1) * 8);
+        auto &bucket = buckets[static_cast<std::size_t>(tid)];
+        bucket.wedges.clear();
+        bucket.wedges.reserve(static_cast<std::size_t>(std::max(c1 - c0, 0)) * 6);
+        for (int ci = c0; ci < c1; ++ci) {
+          const int i = cand[static_cast<std::size_t>(ci)];
+          const int sz = ringSize[static_cast<std::size_t>(i)];
+          const int *eCol =
+              ringEdges.col.data() + ringEdges.off[static_cast<std::size_t>(i)];
+          int *wCol = ringWedges.col.data() + ringWedges.off[static_cast<std::size_t>(i)];
+          for (int k = 0; k < sz; ++k) {
+            const auto e1 = static_cast<std::uint64_t>(eCol[k]);
+            const auto e2 = static_cast<std::uint64_t>(eCol[(k + 1) % sz]);
+            const std::uint64_t key = (std::min(e1, e2) << 32) | std::max(e1, e2);
+            const int before = local.n;
+            const int id = local.intern(key);
+            wCol[k] = id;
+            if (id == before) {
+              bucket.wedges.push_back(key);
+            }
+          }
+        }
+      }
+      for (int t = 0; t < indexTeam; ++t) {
+        const auto &bucket = buckets[static_cast<std::size_t>(t)];
+        auto &map = wedgeMap[static_cast<std::size_t>(t)];
+        map.resize(bucket.wedges.size());
+        for (std::size_t localId = 0; localId < bucket.wedges.size(); ++localId) {
+          map[localId] = wedgeId.intern(bucket.wedges[localId]);
+        }
+      }
+#if defined(SEAMS_HAS_OPENMP)
+#pragma omp parallel for schedule(static) num_threads(indexTeam)
+#endif
+      for (int ci = 0; ci < nCand; ++ci) {
+        const int i = cand[static_cast<std::size_t>(ci)];
+        const int sz = ringSize[static_cast<std::size_t>(i)];
+        int *wCol = ringWedges.col.data() + ringWedges.off[static_cast<std::size_t>(i)];
+        const int tid = static_cast<int>((static_cast<long long>(ci) * indexTeam) / nCand);
+        const auto &map = wedgeMap[static_cast<std::size_t>(tid)];
+        for (int k = 0; k < sz; ++k) {
+          wCol[k] = map[static_cast<std::size_t>(wCol[k])];
+        }
+      }
+    } else {
     if (maxV >= 0) {
       vertexOf.assign(static_cast<size_t>(maxV) + 1, -1);
     }
-    int nV = 0;
     for (const int i : cand) {
       const auto &ring = rings[static_cast<size_t>(i)];
       const int sz = ringSize[static_cast<size_t>(i)];
@@ -817,6 +982,7 @@ struct ClosedSearch {
         wCol[k] = wedgeId.intern(key);
       }
     }
+    }
     edgeEnds.resize(edgeAtoms.size());
     for (std::size_t e = 0; e < edgeAtoms.size(); ++e) {
       const int a = edgeAtoms[e][0];
@@ -830,6 +996,9 @@ struct ClosedSearch {
       edgeEnds[e] = {va, vb};
     }
     ringsOfEdge.off.assign(edgeEnds.size() + 1, 0);
+    const int nEdge = static_cast<int>(edgeEnds.size());
+    const bool parallelRows = !serialIndex && nEdge > 0 && indexTeam > 1;
+    if (!parallelRows) {
     for (const int i : cand) {
       const auto row = ringEdges[static_cast<size_t>(i)];
       for (const int e : row) {
@@ -844,6 +1013,77 @@ struct ClosedSearch {
     for (const int i : cand) {
       for (const int e : ringEdges[static_cast<size_t>(i)]) {
         ringsOfEdge.col[static_cast<size_t>(at[static_cast<size_t>(e)]++)] = i;
+      }
+    }
+    } else {
+      const int nCandRows = static_cast<int>(cand.size());
+      std::vector<std::vector<int>> part(
+          static_cast<std::size_t>(indexTeam),
+          std::vector<int>(static_cast<std::size_t>(nEdge), 0));
+#if defined(SEAMS_HAS_OPENMP)
+#pragma omp parallel num_threads(indexTeam)
+#endif
+      {
+#if defined(SEAMS_HAS_OPENMP)
+        const int tid = omp_get_thread_num();
+        const int team = omp_get_num_threads();
+#else
+        const int tid = 0;
+        const int team = 1;
+#endif
+        const int c0 = static_cast<int>((static_cast<long long>(nCandRows) * tid) / team);
+        const int c1 =
+            static_cast<int>((static_cast<long long>(nCandRows) * (tid + 1)) / team);
+        auto &mine = part[static_cast<std::size_t>(tid)];
+        for (int ci = c0; ci < c1; ++ci) {
+          const int i = cand[static_cast<std::size_t>(ci)];
+          for (const int e : ringEdges[static_cast<std::size_t>(i)]) {
+            if (e >= 0 && e < nEdge) {
+              ++mine[static_cast<std::size_t>(e)];
+            }
+          }
+        }
+      }
+      for (int e = 0; e < nEdge; ++e) {
+        int sum = 0;
+        for (int t = 0; t < indexTeam; ++t) {
+          sum += part[static_cast<std::size_t>(t)][static_cast<std::size_t>(e)];
+        }
+        ringsOfEdge.off[static_cast<std::size_t>(e) + 1] =
+            ringsOfEdge.off[static_cast<std::size_t>(e)] + sum;
+      }
+      ringsOfEdge.col.assign(ringsOfEdge.off.back(), 0);
+      std::vector<std::vector<int>> start(
+          static_cast<std::size_t>(indexTeam),
+          std::vector<int>(static_cast<std::size_t>(nEdge), 0));
+      for (int e = 0; e < nEdge; ++e) {
+        int cursor = ringsOfEdge.off[static_cast<std::size_t>(e)];
+        for (int t = 0; t < indexTeam; ++t) {
+          start[static_cast<std::size_t>(t)][static_cast<std::size_t>(e)] = cursor;
+          cursor += part[static_cast<std::size_t>(t)][static_cast<std::size_t>(e)];
+        }
+      }
+#if defined(SEAMS_HAS_OPENMP)
+#pragma omp parallel num_threads(indexTeam)
+#endif
+      {
+#if defined(SEAMS_HAS_OPENMP)
+        const int tid = omp_get_thread_num();
+        const int team = omp_get_num_threads();
+#else
+        const int tid = 0;
+        const int team = 1;
+#endif
+        const int c0 = static_cast<int>((static_cast<long long>(nCandRows) * tid) / team);
+        const int c1 =
+            static_cast<int>((static_cast<long long>(nCandRows) * (tid + 1)) / team);
+        auto &cursor = start[static_cast<std::size_t>(tid)];
+        for (int ci = c0; ci < c1; ++ci) {
+          const int i = cand[static_cast<std::size_t>(ci)];
+          for (const int e : ringEdges[static_cast<std::size_t>(i)]) {
+            ringsOfEdge.col[static_cast<std::size_t>(cursor[static_cast<std::size_t>(e)]++)] = i;
+          }
+        }
       }
     }
     edgeUse.assign(edgeEnds.size(), 0);
@@ -1367,7 +1607,7 @@ struct ClosedSearch {
         // those seeds out as threads finish.
         const int nCand = static_cast<int>(cand.size());
 #if defined(SEAMS_HAS_OPENMP)
-#pragma omp for schedule(dynamic, 8)
+#pragma omp for schedule(dynamic, 32)
 #endif
         for (int i = 0; i < nCand; ++i) {
           local.searchOne(cand[static_cast<size_t>(i)]);

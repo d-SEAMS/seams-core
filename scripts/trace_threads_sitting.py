@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """One sitting of the hydrate signature search at 1, 2, 4 and 8 threads.
 
-The cells are GenIce sI and sII replicated 2x2x2, 4x4x4 and 6x6x6.
-The replicate is built in the benchmark process and is not written out.
+The cells are GenIce sI and sII replicated 2x2x2, 4x4x4, 6x6x6 and 8x8x8.
+Each sample is one linkcell neighbour list, one depth-6 ring network, and
+one combined search of 5^12, 5^12 6^2 and 5^12 6^4. The replicate is built
+in the benchmark process and is not written out.
 One warm-up and at least eight repeats. The median of an even sample is
 the mean of the two central values, and the interquartile range is the
 type-7 upper quartile minus the lower one. The log records the core
@@ -22,8 +24,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import paper_stats as stats
 
 CELLS = (
-    ("sI", "input/traj/genice_sI.lammpstrj", (2, 4, 6)),
-    ("sII", "input/traj/genice_sII.lammpstrj", (2, 4, 6)),
+    ("sI", "input/traj/genice_sI.lammpstrj", (2, 4, 6, 8)),
+    ("sII", "input/traj/genice_sII.lammpstrj", (2, 4, 6, 8)),
 )
 THREADS = (1, 2, 4, 8)
 
@@ -94,7 +96,7 @@ def main() -> int:
         "threads 1 2 4 8",
         f"warmup {args.warmup}",
         f"n {args.repeats}",
-        "operation signature cages 512 51262 51264",
+        "operation one linkcell list, one ring network, signatures 512 51262 51264",
         "driver bench_trace_threads",
         "replicates are built in memory from the GenIce unit cells",
         "one sitting, serial: each cell at 1, 2, 4 and 8 threads before the next cell",

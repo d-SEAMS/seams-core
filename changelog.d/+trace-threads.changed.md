@@ -1,1 +1,1 @@
-The hydrate signature search scales with threads. Ring enumeration and the closed-cage seeds share one read-only index, and a small crystal no longer starts a team it cannot feed. Census and cage membership match the one-thread result.
+The hydrate signature search scales with threads. The cutoff list is the threaded linkcell list, and the cage index is merged from per-thread buckets in ring order. Census and cage membership match the one-thread result.

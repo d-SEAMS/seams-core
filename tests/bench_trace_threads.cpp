@@ -1,8 +1,7 @@
 /*
-** Time the hydrate signature search the way the language binding does:
-** a cutoff neighbour list, primitive rings, and one closed-cage search
-** for 5^12, then again for 5^12 6^2, then again for 5^12 6^4.
-** The replicate is built in memory from the unit-cell dump.
+** Time one hydrate signature search: the threaded linkcell neighbour
+** list, one depth-6 ring network, and one closed-cage search of 5^12,
+** 5^12 6^2 and 5^12 6^4 together. The replicate is built in memory.
 */
 #include <cage_enum.hpp>
 #include <franzblau.hpp>
@@ -72,16 +71,29 @@ Cloud tile(Cloud src, int n) {
   return out;
 }
 
-int signatureCount(const Cloud &cloud, const char *spec) {
-  const auto signature = cage::Signature::parse(spec);
-  const int depth = std::max(signature.maxRingSize(), 3);
-  auto listed = nneigh::neighListO(3.5, cloud, 1);
+struct Census {
+  int n512 = 0;
+  int n62 = 0;
+  int n64 = 0;
+};
+
+Census signatureCensus(const Cloud &cloud) {
+  auto listed = nneigh::neighListLinkcell(3.5, cloud, 1);
+  if (listed.empty()) {
+    listed = nneigh::neighListO(3.5, cloud, 1);
+  }
   auto idx = nneigh::neighbourListByIndex(cloud, listed);
   const auto rings =
-      ring::cageRings(primitive::ringNetwork(idx, depth), cloud, 3.5);
-  const auto found = cage::findBySignatures(
-      rings, idx, std::vector<cage::Signature>{signature}, {});
-  return static_cast<int>(found.at(0).size());
+      ring::cageRings(primitive::ringNetwork(idx, 6), cloud, 3.5);
+  const auto sigs = std::vector<cage::Signature>{
+      cage::Signature::parse("512"),
+      cage::Signature::parse("51262"),
+      cage::Signature::parse("51264"),
+  };
+  const auto found = cage::findBySignatures(rings, idx, sigs, {});
+  return {static_cast<int>(found.at(0).size()),
+          static_cast<int>(found.at(1).size()),
+          static_cast<int>(found.at(2).size())};
 }
 
 } // namespace
@@ -106,18 +118,20 @@ int main(int argc, char **argv) {
     return 1;
   }
   const Cloud cloud = tile(std::move(raw), ntile);
-  const int n512 = signatureCount(cloud, "512");
-  const int n62 = signatureCount(cloud, "51262");
-  const int n64 = signatureCount(cloud, "51264");
+  const Census census = signatureCensus(cloud);
+  const int n512 = census.n512;
+  const int n62 = census.n62;
+  const int n64 = census.n64;
   std::cout << "atoms " << cloud.nop << "\n";
   std::cout << "census " << n512 << " " << n62 << " " << n64 << "\n";
   std::cout.flush();
   for (int rep = 0; rep < warmup + repeats; ++rep) {
     const auto t0 = std::chrono::steady_clock::now();
-    const int a = signatureCount(cloud, "512");
-    const int b = signatureCount(cloud, "51262");
-    const int c = signatureCount(cloud, "51264");
+    const Census got = signatureCensus(cloud);
     const double ms = msSince(t0);
+    const int a = got.n512;
+    const int b = got.n62;
+    const int c = got.n64;
     if (a != n512 || b != n62 || c != n64) {
       std::cerr << "census changed during timing\n";
       return 1;

@@ -142,7 +142,10 @@ struct Snapshot {
 };
 
 Snapshot take(const Cloud &cloud) {
-  auto listed = nneigh::neighListO(3.5, cloud, 1);
+  auto listed = nneigh::neighListLinkcell(3.5, cloud, 1);
+  if (listed.empty()) {
+    listed = nneigh::neighListO(3.5, cloud, 1);
+  }
   auto idx = nneigh::neighbourListByIndex(cloud, listed);
   const auto rings6 =
       ring::cageRings(primitive::ringNetwork(idx, 6), cloud, 3.5);

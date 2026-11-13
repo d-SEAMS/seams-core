@@ -1426,7 +1426,16 @@ int seams_frame_signature_edge(seams_frame *frame, double cutoff, int type,
     const int typ = resolve_type(frame->cloud, type);
     const std::string which =
         (graph == nullptr || graph[0] == '\0') ? "cutoff" : graph;
-    auto idx = index_graph(frame, cutoff, typ, which, 4);
+    std::vector<std::vector<int>> idx;
+    if (which == "cutoff") {
+      auto ids = nneigh::neighListLinkcell(cutoff, frame->cloud, typ);
+      if (ids.empty()) {
+        ids = nneigh::neighListO(cutoff, frame->cloud, typ);
+      }
+      idx = nneigh::neighbourListByIndex(frame->cloud, ids);
+    } else {
+      idx = index_graph(frame, cutoff, typ, which, 4);
+    }
     const auto signature = cage::Signature::parse(spec);
     const int depth = std::max(signature.maxRingSize(), 3);
     const auto rings = ring::cageRings(primitive::ringNetwork(idx, depth),

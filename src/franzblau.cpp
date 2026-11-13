@@ -1007,12 +1007,6 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
     }
   }
   const bool serial = use <= 1;
-  // The large-graph handoff pauses the team so a later pool can take the
-  // cores. On a few hundred vertices that pause is the search, so the
-  // GenIce cells keep the team that is already running.
-  if (!serial && nVertices >= 2048) {
-    seams::adoptThreads();
-  }
   const auto phaseWall0 = std::chrono::steady_clock::now();
   const std::uint64_t phaseTsc0 = gTimePrimitive ? readTsc() : 0;
   const auto noteRate = [&]() {
@@ -1209,10 +1203,8 @@ searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,
     }
     gRingSplit.enumerate_ms = millisSince(enumStart);
     const auto mergeStart = std::chrono::steady_clock::now();
-    // Every ring, source list and ball is a heap block of its own; moving
-    // and freeing them on one thread is a sizeable share of a threaded search
     for (int k = 0; k < nFrom; k++) {
-      for (const auto &ring : perSource[static_cast<std::size_t>(k)]) {
+      for (const auto &ring : (*pools)[static_cast<std::size_t>(k)]) {
         rings.push_back(ring);
       }
     }
