@@ -36,15 +36,28 @@
  * buffer. The length pointer still receives the required count.
  *
  * @par Const correctness
- * Input arrays are const. Accessors on result handles take a const
- * handle. Analysis calls take a non-const ::seams_system because they
- * record their error on the handle and reuse per-frame scratch; they
- * never change the stored coordinates, cell, types, or ids.
+ * Input arrays are const. A function that takes a const handle is a
+ * read-only accessor: on success it writes nothing to the handle, and on
+ * failure it writes only the handle's error slot, under a lock. The
+ * frame accessors seams_system_count() and seams_system_natoms(), and
+ * every query on a neighbour, ring, cage, brine, or fingerprint handle,
+ * are of this kind. A function that takes
+ * a non-const ::seams_system says why in its "Handle access" paragraph.
+ * There are three reasons. A load replaces the frame. seams_chill(),
+ * seams_chill_plus() and seams_chill_plus_n() write their labels into
+ * the frame. Every other analysis clears the handle's error slot on
+ * entry, so seams_handle_error() reports that call and no earlier one;
+ * that is the only handle state those calls write. None of them changes
+ * the stored coordinates, cell, types, or ids.
  *
  * @par Thread safety
  * Distinct handles may be used from distinct threads at the same time.
- * One handle must not be used by two threads at once. The error string
- * is thread-local. seams_set_num_threads() is process-global.
+ * Const-handle calls on one handle may run on several threads at once,
+ * provided no call taking that handle non-const runs at the same time.
+ * Two non-const calls on one handle must not overlap. When threads share
+ * a handle, read failures with seams_last_error_message(), which is
+ * thread-local; the handle's slot holds whichever failure landed last.
+ * seams_set_num_threads() is process-global.
  *
  * @par ABI policy
  * SEAMS_ABI stays 1 while every shipped function keeps its signature and
@@ -360,9 +373,13 @@ SEAMS_API const char *seams_last_error(void);
  *        ::seams_cage_set, ::seams_topo, or ::seams_brine, or NULL.
  * @return The handle's string, or the thread-local string when handle
  *         is NULL. Never NULL.
+ *
+ * A call taking the handle non-const clears the string on entry. A call
+ * taking it const writes the string only when it fails, so after a
+ * successful const call the string still holds the last failure.
  * @par Ownership
- * Owned by the handle. Valid until the next call on that handle or
- * until destroy.
+ * Owned by the handle. Valid until the next failing call on that
+ * handle, the next non-const call on it, or destroy.
  * @par Thread safety
  * Reading a handle requires that no other thread is inside a call on
  * that same handle.
@@ -499,6 +516,8 @@ SEAMS_API void seams_system_destroy(seams_system *sys);
  *         for a non-finite cell or a non-positive edge; ::SEAMS_ERR_ARG
  *         for a non-finite coordinate or repeated ids; ::SEAMS_ERR_NOMEM;
  *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const: replaces the stored frame. On failure the old frame stays.
  * @par Ownership
  * The library copies the arrays. The caller keeps them.
  * @par Thread safety
@@ -527,6 +546,8 @@ SEAMS_API seams_status seams_system_set_atoms(seams_system *sys, const double *x
  * @param types Types, or NULL for type 1.
  * @param ids Ids, or NULL for 1..n.
  * @return Same codes as seams_system_set_atoms().
+ * @par Handle access
+ * Non-const: replaces the stored frame. On failure the old frame stays.
  * @par Ownership
  * The library copies the arrays.
  * @par Thread safety
@@ -554,6 +575,8 @@ SEAMS_API seams_status seams_system_set_frame(seams_system *sys, const double *x
  * @param types Types, or NULL.
  * @param ids Ids, or NULL.
  * @return Same codes as seams_system_set_frame(). The tilt is zero.
+ * @par Handle access
+ * Non-const: replaces the stored frame. On failure the old frame stays.
  * @par Ownership
  * The library copies the arrays.
  * @par Thread safety
@@ -579,6 +602,8 @@ SEAMS_API seams_status seams_system_set_ortho(seams_system *sys, const double *x
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE (frame index
  *         or empty frame), ::SEAMS_ERR_ARG (unreadable file),
  *         ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const: replaces the stored frame. On failure the old frame stays.
  * @par Ownership
  * The library copies the frame out of the file.
  * @par Thread safety
@@ -617,7 +642,8 @@ SEAMS_API seams_status seams_path_nframes(const char *path, size_t *nframes);
  * @param sys Frame handle, or NULL.
  * @return The atom count, or 0 when sys is NULL or holds no frame.
  * @par Thread safety
- * Exclusive use of sys.
+ * Read-only: may run alongside other const calls on sys, and not
+ * alongside a non-const call on sys.
  * @par Example
  * @code
  * int n = seams_system_count(sys);
@@ -645,6 +671,10 @@ SEAMS_API int seams_system_count(const seams_system *sys);
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
  *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Ownership
  * The caller frees *out with seams_neighbours_destroy(). The list is a
  * copy and does not borrow sys.
@@ -685,7 +715,8 @@ SEAMS_API void seams_neighbours_destroy(seams_neighbours *nb);
  * @param nb Neighbour handle, or NULL.
  * @return The row count, or 0 when nb is NULL.
  * @par Thread safety
- * Exclusive use of nb.
+ * Read-only: may run alongside other const calls on nb, and not
+ * alongside a non-const call on nb.
  * @par Example
  * @code
  * int rows = seams_neighbours_count(nb);
@@ -740,7 +771,8 @@ SEAMS_API seams_status seams_neighbours_csr(const seams_neighbours *nb,
  * @par Ownership
  * The caller owns the buffers. The handle is not modified.
  * @par Thread safety
- * Exclusive use of nb.
+ * Read-only: may run alongside other const calls on nb, and not
+ * alongside a non-const call on nb.
  * @par Example
  * @code
  * size_t n_off = 0, nnz = 0;
@@ -781,6 +813,10 @@ SEAMS_API seams_status seams_neighbours_copy(const seams_neighbours *nb,
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
  *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const: writes each atom's CHILL+ label into the stored frame and
+ * clears the handle's error slot on entry. Coordinates, cell, types, and
+ * ids are not changed.
  * @par Ownership
  * The caller owns labels and counts9.
  * @par Thread safety
@@ -809,6 +845,10 @@ SEAMS_API seams_status seams_chill(seams_system *sys, double cutoff, int type,
  * @param labels Caller buffer of one label per atom.
  * @param counts9 Nine ints, or NULL.
  * @return Same codes as seams_chill_plus_n().
+ * @par Handle access
+ * Non-const: writes each atom's CHILL+ label into the stored frame and
+ * clears the handle's error slot on entry. Coordinates, cell, types, and
+ * ids are not changed.
  * @par Ownership
  * The caller owns labels and counts9.
  * @par Thread safety
@@ -843,6 +883,11 @@ SEAMS_API seams_status seams_chill_plus(seams_system *sys, double cutoff, int ty
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
  *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry; it reads the frame and nothing else on the handle. The q_lm work
+ * arrays are process-global, so this call must not overlap seams_ql(),
+ * seams_q4q6(), seams_q6bar(), or seams_steinhardt() on any handle.
  * @par Ownership
  * The caller owns both arrays.
  * @par Thread safety
@@ -871,6 +916,11 @@ SEAMS_API seams_status seams_ql(seams_system *sys, double cutoff, int type,
  * @param q6 Local q6, or NULL. q4 and q6 may not both be NULL.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry; it reads the frame and nothing else on the handle. The q_lm work
+ * arrays are process-global, so this call must not overlap seams_ql(),
+ * seams_q4q6(), seams_q6bar(), or seams_steinhardt() on any handle.
  * @par Ownership
  * The caller owns q4 and q6.
  * @par Thread safety
@@ -904,6 +954,11 @@ SEAMS_API seams_status seams_q4q6(seams_system *sys, double cutoff, int type,
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL. At
  *         least one of q6bar, mean, median, and n_ice must be non-NULL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry; it reads the frame and nothing else on the handle. The q_lm work
+ * arrays are process-global, so this call must not overlap seams_ql(),
+ * seams_q4q6(), seams_q6bar(), or seams_steinhardt() on any handle.
  * @par Ownership
  * The caller owns q6bar.
  * @par Thread safety
@@ -939,6 +994,10 @@ SEAMS_API seams_status seams_q6bar(seams_system *sys, double cutoff, int type,
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
  *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Ownership
  * The caller frees *out with seams_rings_destroy().
  * @par Thread safety
@@ -976,7 +1035,8 @@ SEAMS_API void seams_rings_destroy(seams_rings *rings);
  * @param rings Ring handle, or NULL.
  * @return The ring count, or 0 when rings is NULL.
  * @par Thread safety
- * Exclusive use of rings.
+ * Read-only: may run alongside other const calls on rings, and not
+ * alongside a non-const call on rings.
  * @par Example
  * @code
  * int nr = seams_rings_count(rings);
@@ -997,7 +1057,8 @@ SEAMS_API int seams_rings_count(const seams_rings *rings);
  * @par Ownership
  * The caller owns counts.
  * @par Thread safety
- * Exclusive use of rings.
+ * Read-only: may run alongside other const calls on rings, and not
+ * alongside a non-const call on rings.
  * @par Example
  * @code
  * int hist[13];
@@ -1022,8 +1083,9 @@ SEAMS_API seams_status seams_rings_histogram(const seams_rings *rings, int *coun
  * @par Ownership
  * The caller owns both arrays.
  * @par Thread safety
- * Exclusive use of rings. The first symmetry request fills a cache on
- * the handle.
+ * Read-only: may run alongside other const calls on rings, and not
+ * alongside a non-const call on rings. The first symmetry request fills
+ * a cache on the handle under a lock; later requests only read it.
  * @par Example
  * @code
  * seams_rings_labels(rings, sizes, symmetry);
@@ -1043,7 +1105,8 @@ SEAMS_API seams_status seams_rings_labels(const seams_rings *rings, int *sizes,
  * @par Ownership
  * The caller owns atoms. Indices are positions in the frame.
  * @par Thread safety
- * Exclusive use of rings.
+ * Read-only: may run alongside other const calls on rings, and not
+ * alongside a non-const call on rings.
  * @par Example
  * @code
  * int atoms[12];
@@ -1061,7 +1124,8 @@ SEAMS_API seams_status seams_rings_vertices(const seams_rings *rings, int index,
  * @param fraction Receives a value in [0, 1].
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_NOMEM.
  * @par Thread safety
- * Exclusive use of rings.
+ * Read-only: may run alongside other const calls on rings, and not
+ * alongside a non-const call on rings.
  * @par Example
  * @code
  * double f6 = 0;
@@ -1094,6 +1158,10 @@ SEAMS_API seams_status seams_rings_fraction(const seams_rings *rings, int size,
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
  *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Ownership
  * The caller frees *out with seams_cages_destroy().
  * @par Thread safety
@@ -1138,7 +1206,8 @@ SEAMS_API void seams_cages_destroy(seams_cage_set *cages);
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL when cages is NULL or every
  *         count pointer is NULL.
  * @par Thread safety
- * Exclusive use of cages.
+ * Read-only: may run alongside other const calls on cages, and not
+ * alongside a non-const call on cages.
  * @par Example
  * @code
  * int hex = 0, cubic = 0;
@@ -1160,7 +1229,8 @@ SEAMS_API seams_status seams_cages_counts(const seams_cage_set *cages, int *n_he
  * @par Ownership
  * The caller owns per_atom.
  * @par Thread safety
- * Exclusive use of cages.
+ * Read-only: may run alongside other const calls on cages, and not
+ * alongside a non-const call on cages.
  * @par Example
  * @code
  * seams_cages_labels(cages, per_atom, n);
@@ -1186,6 +1256,10 @@ SEAMS_API seams_status seams_cages_labels(const seams_cage_set *cages, int *per_
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
  *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Thread safety
  * Exclusive use of sys.
  * @par Example
@@ -1212,6 +1286,10 @@ SEAMS_API seams_status seams_cages_signature(seams_system *sys, double cutoff,
  * @param labels_len Must be at least the frame count.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_INTERNAL, ::SEAMS_ERR_NOMEM.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Ownership
  * The caller owns labels.
  * @par Thread safety
@@ -1251,6 +1329,10 @@ SEAMS_API seams_status seams_system_symmetry(seams_system *sys, double shell_rms
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
  *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Ownership
  * The caller frees *out with seams_brine_destroy().
  * @par Thread safety
@@ -1295,7 +1377,8 @@ SEAMS_API void seams_brine_destroy(seams_brine *front);
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL when front is NULL or every
  *         output pointer is NULL.
  * @par Thread safety
- * Exclusive use of front.
+ * Read-only: may run alongside other const calls on front, and not
+ * alongside a non-const call on front.
  * @par Example
  * @code
  * double thick = 0;
@@ -1320,7 +1403,8 @@ SEAMS_API seams_status seams_brine_fronts(const seams_brine *front, double *z_en
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL when front is NULL or every
  *         output pointer is NULL.
  * @par Thread safety
- * Exclusive use of front.
+ * Read-only: may run alongside other const calls on front, and not
+ * alongside a non-const call on front.
  * @par Example
  * @code
  * double k = 0;
@@ -1349,7 +1433,8 @@ SEAMS_API seams_status seams_brine_rejection(const seams_brine *front, double *c
  * @par Ownership
  * The caller owns the columns.
  * @par Thread safety
- * Exclusive use of front.
+ * Read-only: may run alongside other const calls on front, and not
+ * alongside a non-const call on front.
  * @par Example
  * @code
  * size_t bins = 0;
@@ -1369,7 +1454,8 @@ SEAMS_API seams_status seams_brine_profile(const seams_brine *front, double *z_m
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL when front is NULL or both
  *         output pointers are NULL.
  * @par Thread safety
- * Exclusive use of front.
+ * Read-only: may run alongside other const calls on front, and not
+ * alongside a non-const call on front.
  * @par Example
  * @code
  * int pockets = 0;
@@ -1397,6 +1483,10 @@ SEAMS_API seams_status seams_brine_pockets(const seams_brine *front, int *n_pock
  * @param complete Non-zero runs ring-adjacent completion on seeded labels.
  * @param out Receives a ::seams_cage_set. On failure *out is NULL.
  * @return Same codes as seams_cages_find().
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Ownership
  * The caller frees *out with seams_cages_destroy().
  * @par Thread safety
@@ -1421,6 +1511,10 @@ SEAMS_API seams_status seams_cages(seams_system *sys, double cutoff, int type, i
  * @param n_cages Receives the cage count.
  * @param n_atoms Receives the vertex count.
  * @return Same codes as seams_cages_signature().
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Thread safety
  * Exclusive use of sys.
  * @par Example
@@ -1447,6 +1541,11 @@ SEAMS_API seams_status seams_signature_cages(seams_system *sys, double cutoff, i
  * @param qlbar Averaged q_l, or NULL to skip the Lechner-Dellago average.
  * @param qlbar_len Length of qlbar. Ignored when qlbar is NULL.
  * @return Same codes as seams_ql().
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry; it reads the frame and nothing else on the handle. The q_lm work
+ * arrays are process-global, so this call must not overlap seams_ql(),
+ * seams_q4q6(), seams_q6bar(), or seams_steinhardt() on any handle.
  * @par Ownership
  * The caller owns both arrays.
  * @par Thread safety
@@ -1474,6 +1573,10 @@ SEAMS_API seams_status seams_steinhardt(seams_system *sys, double cutoff, int ty
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
  *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Ownership
  * The caller frees *out with seams_neighbours_destroy().
  * @par Thread safety
@@ -1507,6 +1610,10 @@ SEAMS_API seams_status seams_neighbours_knn(seams_system *sys, int k, double cut
  * @param volume Receives the cell volume, or NULL.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Ownership
  * The caller owns the columns.
  * @par Thread safety
@@ -1534,6 +1641,10 @@ SEAMS_API seams_status seams_rdf(seams_system *sys, double rmax, int bins, int t
  * @param n_out Receives the bin count.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Ownership
  * The caller owns the columns.
  * @par Thread safety
@@ -1559,6 +1670,10 @@ SEAMS_API seams_status seams_running_cn(seams_system *sys, double rmax, int bins
  * @param cn Receives the coordination number.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Thread safety
  * Exclusive use of sys.
  * @par Example
@@ -1583,6 +1698,10 @@ SEAMS_API seams_status seams_coordination(seams_system *sys, double rmax, int bi
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
  *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Thread safety
  * Exclusive use of sys.
  * @par Example
@@ -1610,6 +1729,10 @@ SEAMS_API seams_status seams_hbonds(seams_system *sys, double cutoff, int oxygen
  * @param n_out Receives the bin count.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Ownership
  * The caller owns the columns.
  * @par Thread safety
@@ -1637,6 +1760,10 @@ SEAMS_API seams_status seams_density_axis(seams_system *sys, int type, int bins,
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
  *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Ownership
  * The caller frees *out with seams_fingerprint_destroy().
  * @par Thread safety
@@ -1677,7 +1804,8 @@ SEAMS_API void seams_fingerprint_destroy(seams_topo *fp);
  * @par Ownership
  * The caller owns buf. The copy is NUL-terminated.
  * @par Thread safety
- * Exclusive use of fp.
+ * Read-only: may run alongside other const calls on fp, and not
+ * alongside a non-const call on fp.
  * @par Example
  * @code
  * size_t len = 0;
@@ -1701,7 +1829,8 @@ SEAMS_API seams_status seams_fingerprint_key(const seams_topo *fp, char *buf, si
  * @par Ownership
  * The caller owns buf.
  * @par Thread safety
- * Exclusive use of fp.
+ * Read-only: may run alongside other const calls on fp, and not
+ * alongside a non-const call on fp.
  * @par Example
  * @code
  * char key[256];
@@ -1723,7 +1852,8 @@ SEAMS_API seams_status seams_fingerprint_atom(const seams_topo *fp, int index, c
  * @par Ownership
  * The caller owns counts.
  * @par Thread safety
- * Exclusive use of fp.
+ * Read-only: may run alongside other const calls on fp, and not
+ * alongside a non-const call on fp.
  * @par Example
  * @code
  * int census[13];
@@ -1746,6 +1876,10 @@ SEAMS_API seams_status seams_fingerprint_rings(const seams_topo *fp, int *counts
  *        one of the three outputs must be non-NULL.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Thread safety
  * Exclusive use of sys.
  * @par Example
@@ -1770,6 +1904,10 @@ SEAMS_API seams_status seams_contact_pairs(seams_system *sys, const char *site_s
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
  *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Thread safety
  * Exclusive use of sys.
  * @par Example
@@ -1797,6 +1935,10 @@ SEAMS_API seams_status seams_domains(seams_system *sys, double cutoff, const cha
  *        6 are filled.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Ownership
  * The caller owns both buffers.
  * @par Thread safety
@@ -1821,6 +1963,10 @@ SEAMS_API seams_status seams_prisms(seams_system *sys, double cutoff, int type, 
  * @param counts_len Must be at least max_depth + 1.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Ownership
  * The caller owns counts.
  * @par Thread safety
@@ -1845,6 +1991,10 @@ SEAMS_API seams_status seams_monolayer(seams_system *sys, double cutoff, int typ
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
  *         ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
  * @par Ownership
  * The caller owns kinds.
  * @par Thread safety
@@ -1897,7 +2047,8 @@ SEAMS_API const char *seams_last_error_message(void);
  *         ::SEAMS_ERR_STATE when sys holds no frame. *n is unchanged on
  *         failure.
  * @par Thread safety
- * Exclusive use of sys.
+ * Read-only: may run alongside other const calls on sys, and not
+ * alongside a non-const call on sys.
  * @par Example
  * @code
  * size_t n = 0;
@@ -1912,7 +2063,8 @@ SEAMS_API seams_status seams_system_natoms(const seams_system *sys, size_t *n);
  * @param n Receives the row count.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL when nb or n is NULL.
  * @par Thread safety
- * Exclusive use of nb.
+ * Read-only: may run alongside other const calls on nb, and not
+ * alongside a non-const call on nb.
  * @par Example
  * @code
  * size_t rows = 0;
@@ -1927,7 +2079,8 @@ SEAMS_API seams_status seams_neighbours_nrows(const seams_neighbours *nb, size_t
  * @param n Receives the ring count.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL when rings or n is NULL.
  * @par Thread safety
- * Exclusive use of rings.
+ * Read-only: may run alongside other const calls on rings, and not
+ * alongside a non-const call on rings.
  * @par Example
  * @code
  * size_t nr = 0;
@@ -1958,6 +2111,10 @@ SEAMS_API seams_status seams_rings_nrings(const seams_rings *rings, size_t *n);
  *         for a short labels buffer or a non-positive or non-finite
  *         cutoff; ::SEAMS_ERR_ARG for an unknown rule or graph;
  *         ::SEAMS_ERR_NOMEM; ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const: writes each atom's CHILL+ label into the stored frame and
+ * clears the handle's error slot on entry. Coordinates, cell, types, and
+ * ids are not changed.
  * @par Ownership
  * The caller owns labels and counts9.
  * @par Thread safety
@@ -1985,6 +2142,11 @@ SEAMS_API seams_status seams_chill_plus_n(seams_system *sys, double cutoff, int 
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE for a short buffer or a bad cutoff,
  *         ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry; it reads the frame and nothing else on the handle. The q_lm work
+ * arrays are process-global, so this call must not overlap seams_ql(),
+ * seams_q4q6(), seams_q6bar(), or seams_steinhardt() on any handle.
  * @par Ownership
  * The caller owns q4 and q6.
  * @par Thread safety
@@ -2012,7 +2174,8 @@ SEAMS_API seams_status seams_q4q6_n(seams_system *sys, double cutoff, int type, 
  * @par Ownership
  * The caller owns both arrays.
  * @par Thread safety
- * Exclusive use of rings.
+ * Read-only: may run alongside other const calls on rings, and not
+ * alongside a non-const call on rings.
  * @par Example
  * @code
  * size_t nr = 0;
@@ -2036,7 +2199,8 @@ SEAMS_API seams_status seams_rings_labels_n(const seams_rings *rings, int *sizes
  * @par Ownership
  * The caller owns counts.
  * @par Thread safety
- * Exclusive use of rings.
+ * Read-only: may run alongside other const calls on rings, and not
+ * alongside a non-const call on rings.
  * @par Example
  * @code
  * int hist[13];

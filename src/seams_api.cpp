@@ -69,12 +69,16 @@ namespace {
 
 using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
 
+/* The error slot is the only state a const-handle call may write, and only
+ * when it fails. Several threads may run const calls on one handle, so
+ * those writes take the lock. */
 struct seams_object {
-  std::string error;
+  mutable std::string error;
+  mutable std::mutex error_mu;
 };
 
 thread_local std::string g_error;
-thread_local seams_object *g_current = nullptr;
+thread_local const seams_object *g_current = nullptr;
 int g_threads = 0;
 std::mutex g_live_mu;
 std::unordered_set<void *> g_live;
@@ -116,11 +120,14 @@ bool claim(void *ptr) noexcept {
   return true;
 }
 
+/* Calls on a mutable handle own it, so the slot is cleared on entry and
+ * seams_handle_error reports this call. */
 struct handle_guard {
-  seams_object *previous;
+  const seams_object *previous;
   explicit handle_guard(seams_object *object) : previous(g_current) {
     g_current = object;
     if (object != nullptr) {
+      std::lock_guard<std::mutex> lock(object->error_mu);
       object->error.clear();
     }
   }
@@ -129,14 +136,31 @@ struct handle_guard {
   handle_guard &operator=(const handle_guard &) = delete;
 };
 
+/* Calls on a const handle write nothing on success. A failure still lands
+ * in the slot, so bindings that read seams_handle_error after a failed
+ * status keep their message. */
+struct read_guard {
+  const seams_object *previous;
+  explicit read_guard(const seams_object *object) : previous(g_current) {
+    g_current = object;
+  }
+  ~read_guard() { g_current = previous; }
+  read_guard(const read_guard &) = delete;
+  read_guard &operator=(const read_guard &) = delete;
+};
+
 void note_error() noexcept {
   if (g_current == nullptr) {
     return;
   }
   try {
-    g_current->error = g_error;
+    std::lock_guard<std::mutex> lock(g_current->error_mu);
+    try {
+      g_current->error = g_error;
+    } catch (...) {
+      g_current->error.clear();
+    }
   } catch (...) {
-    g_current->error.clear();
   }
 }
 
@@ -252,15 +276,19 @@ struct seams_neighbours : seams_object {
 
 struct seams_rings : seams_object {
   std::vector<std::vector<int>> rings;
-  std::vector<int> symmetry;
+  // Filled lazily by const label reads, under refine_mu.
+  mutable std::vector<int> symmetry;
   int n_atoms = 0;
   // Kept so prism and cage labels can be filled when a caller asks for
-  // them. The ring census itself does not need that pass.
-  Cloud cloud;
+  // them. The ring census itself does not need that pass. The prism
+  // search takes the frame by non-const reference, so it is mutable too
+  // and only touched under refine_mu.
+  mutable Cloud cloud;
   std::vector<int> offsets;
   std::vector<int> cols;
-  std::vector<std::vector<int>> idx;
-  bool refined = false;
+  mutable std::vector<std::vector<int>> idx;
+  mutable bool refined = false;
+  mutable std::mutex refine_mu;
 };
 
 struct seams_cage_set : seams_object {
@@ -887,7 +915,7 @@ int seams_neighbours_count(const seams_neighbours *nb) {
 
 seams_status seams_neighbours_csr(const seams_neighbours *nb, const int **offsets,
                                   int *n_offsets, const int **cols, int *nnz) {
-  handle_guard guard(const_cast<seams_neighbours *>(nb));
+  read_guard guard(nb);
   clear_error();
   if (nb == nullptr || offsets == nullptr || n_offsets == nullptr || cols == nullptr ||
       nnz == nullptr) {
@@ -1145,11 +1173,14 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
 // The census is the ring list. Cage and prism codes are filled the first
 // time a caller reads symmetry, from the cloud and neighbour rows kept
 // on the handle.
-void refine_ring_labels(seams_rings *rings) {
-  if (rings == nullptr || rings->refined) {
+void refine_ring_labels(const seams_rings *rings) {
+  if (rings == nullptr) {
     return;
   }
-  rings->refined = true;
+  std::lock_guard<std::mutex> lock(rings->refine_mu);
+  if (rings->refined) {
+    return;
+  }
   if (rings->idx.empty() && rings->offsets.size() >= 2) {
     const int nop = rings->n_atoms;
     rings->idx.assign(static_cast<std::size_t>(std::max(nop, 0)), {});
@@ -1248,6 +1279,7 @@ void refine_ring_labels(seams_rings *rings) {
     } catch (const std::exception &) {
       /* Prism labels stay at the size or cage code already written. */
     }
+  rings->refined = true;
 }
 
 void seams_rings_destroy(seams_rings *rings) {
@@ -1263,7 +1295,7 @@ int seams_rings_count(const seams_rings *rings) {
 
 seams_status seams_rings_histogram(const seams_rings *rings, int *counts,
                                    int counts_len) {
-  handle_guard guard(const_cast<seams_rings *>(rings));
+  read_guard guard(rings);
   clear_error();
   if (rings == nullptr || counts == nullptr) {
     return fail(SEAMS_ERR_NULL, "histogram output is null");
@@ -1284,7 +1316,7 @@ seams_status seams_rings_histogram(const seams_rings *rings, int *counts,
 }
 
 seams_status seams_rings_labels(const seams_rings *rings, int *sizes, int *symmetry) {
-  handle_guard guard(const_cast<seams_rings *>(rings));
+  read_guard guard(rings);
   clear_error();
   if (rings == nullptr) {
     return fail(SEAMS_ERR_NULL, "rings handle is null");
@@ -1294,7 +1326,7 @@ seams_status seams_rings_labels(const seams_rings *rings, int *sizes, int *symme
   }
   if (symmetry != nullptr) {
     try {
-      refine_ring_labels(const_cast<seams_rings *>(rings));
+      refine_ring_labels(rings);
     } catch (const std::bad_alloc &) {
       return fail(SEAMS_ERR_NOMEM, "out of memory");
     } catch (...) {
@@ -1314,7 +1346,7 @@ seams_status seams_rings_labels(const seams_rings *rings, int *sizes, int *symme
 }
 
 seams_status seams_rings_fraction(const seams_rings *rings, int size, double *fraction) {
-  handle_guard guard(const_cast<seams_rings *>(rings));
+  read_guard guard(rings);
   clear_error();
   if (rings == nullptr || fraction == nullptr) {
     return fail(SEAMS_ERR_NULL, "fraction output is null");
@@ -1350,7 +1382,7 @@ seams_status seams_rings_fraction(const seams_rings *rings, int size, double *fr
 seams_status seams_neighbours_copy(const seams_neighbours *nb, int *offsets,
                                    size_t offsets_cap, size_t *n_offsets, int *cols,
                                    size_t cols_cap, size_t *nnz) {
-  handle_guard guard(const_cast<seams_neighbours *>(nb));
+  read_guard guard(nb);
   clear_error();
   if (nb == nullptr || n_offsets == nullptr || nnz == nullptr) {
     return fail(SEAMS_ERR_NULL, "csr output is null");
@@ -1374,7 +1406,7 @@ seams_status seams_neighbours_copy(const seams_neighbours *nb, int *offsets,
 
 seams_status seams_rings_vertices(const seams_rings *rings, int index, int *atoms,
                                   size_t cap, size_t *n_out) {
-  handle_guard guard(const_cast<seams_rings *>(rings));
+  read_guard guard(rings);
   clear_error();
   if (rings == nullptr || n_out == nullptr) {
     return fail(SEAMS_ERR_NULL, "ring vertex output is null");
@@ -1838,7 +1870,7 @@ void seams_cages_destroy(seams_cage_set *cages) {
 
 seams_status seams_cages_counts(const seams_cage_set *cages, int *n_hex, int *n_cubic,
                                 int *n_water, int *n_both) {
-  handle_guard guard(const_cast<seams_cage_set *>(cages));
+  read_guard guard(cages);
   clear_error();
   if (cages == nullptr) {
     return fail(SEAMS_ERR_NULL, "cages handle is null");
@@ -1862,7 +1894,7 @@ seams_status seams_cages_counts(const seams_cage_set *cages, int *n_hex, int *n_
 }
 
 seams_status seams_cages_labels(const seams_cage_set *cages, int *per_atom, size_t len) {
-  handle_guard guard(const_cast<seams_cage_set *>(cages));
+  read_guard guard(cages);
   clear_error();
   if (cages == nullptr || per_atom == nullptr) {
     return fail(SEAMS_ERR_NULL, "cage labels are null");
@@ -2047,7 +2079,7 @@ void seams_brine_destroy(seams_brine *front) {
 
 seams_status seams_brine_fronts(const seams_brine *front, double *z_enter, double *z_exit,
                                 double *thickness, int *found) {
-  handle_guard guard(const_cast<seams_brine *>(front));
+  read_guard guard(front);
   clear_error();
   if (front == nullptr) {
     return fail(SEAMS_ERR_NULL, "brine handle is null");
@@ -2073,7 +2105,7 @@ seams_status seams_brine_fronts(const seams_brine *front, double *z_enter, doubl
 
 seams_status seams_brine_rejection(const seams_brine *front, double *c_ice, double *c_liquid,
                                    double *k, int *defined) {
-  handle_guard guard(const_cast<seams_brine *>(front));
+  read_guard guard(front);
   clear_error();
   if (front == nullptr) {
     return fail(SEAMS_ERR_NULL, "brine handle is null");
@@ -2099,7 +2131,7 @@ seams_status seams_brine_rejection(const seams_brine *front, double *c_ice, doub
 
 seams_status seams_brine_profile(const seams_brine *front, double *z_mid, double *molality,
                                  double *ice_fraction, size_t cap, size_t *n_out) {
-  handle_guard guard(const_cast<seams_brine *>(front));
+  read_guard guard(front);
   clear_error();
   if (front == nullptr || n_out == nullptr) {
     return fail(SEAMS_ERR_NULL, "profile output is null");
@@ -2545,7 +2577,7 @@ void seams_fingerprint_destroy(seams_topo *fp) {
 }
 
 seams_status seams_fingerprint_key(const seams_topo *fp, char *buf, size_t cap, size_t *n_out) {
-  handle_guard guard(const_cast<seams_topo *>(fp));
+  read_guard guard(fp);
   clear_error();
   if (fp == nullptr) {
     return fail(SEAMS_ERR_NULL, "fingerprint handle is null");
@@ -2555,7 +2587,7 @@ seams_status seams_fingerprint_key(const seams_topo *fp, char *buf, size_t cap, 
 
 seams_status seams_fingerprint_atom(const seams_topo *fp, int index, char *buf, size_t cap,
                                     size_t *n_out) {
-  handle_guard guard(const_cast<seams_topo *>(fp));
+  read_guard guard(fp);
   clear_error();
   if (fp == nullptr || n_out == nullptr) {
     return fail(SEAMS_ERR_NULL, "fingerprint atom output is null");
@@ -2567,7 +2599,7 @@ seams_status seams_fingerprint_atom(const seams_topo *fp, int index, char *buf, 
 }
 
 seams_status seams_fingerprint_rings(const seams_topo *fp, int *counts, size_t counts_len) {
-  handle_guard guard(const_cast<seams_topo *>(fp));
+  read_guard guard(fp);
   clear_error();
   if (fp == nullptr || counts == nullptr) {
     return fail(SEAMS_ERR_NULL, "fingerprint ring output is null");
@@ -2818,7 +2850,7 @@ seams_status seams_site_table(seams_system *sys, const char *spec, int *kinds, s
 
 seams_status seams_brine_pockets(const seams_brine *front, int *n_pockets,
                                  int *reservoir_waters) {
-  handle_guard guard(const_cast<seams_brine *>(front));
+  read_guard guard(front);
   clear_error();
   if (front == nullptr) {
     return fail(SEAMS_ERR_NULL, "brine handle is null");
@@ -2838,7 +2870,7 @@ seams_status seams_brine_pockets(const seams_brine *front, int *n_pockets,
 const char *seams_last_error_message(void) { return g_error.c_str(); }
 
 seams_status seams_system_natoms(const seams_system *sys, size_t *n) {
-  handle_guard guard(const_cast<seams_system *>(sys));
+  read_guard guard(sys);
   clear_error();
   if (sys == nullptr || n == nullptr) {
     return fail(SEAMS_ERR_NULL, "system or count is null");
@@ -2851,7 +2883,7 @@ seams_status seams_system_natoms(const seams_system *sys, size_t *n) {
 }
 
 seams_status seams_neighbours_nrows(const seams_neighbours *nb, size_t *n) {
-  handle_guard guard(const_cast<seams_neighbours *>(nb));
+  read_guard guard(nb);
   clear_error();
   if (nb == nullptr || n == nullptr) {
     return fail(SEAMS_ERR_NULL, "neighbours or count is null");
@@ -2861,7 +2893,7 @@ seams_status seams_neighbours_nrows(const seams_neighbours *nb, size_t *n) {
 }
 
 seams_status seams_rings_nrings(const seams_rings *rings, size_t *n) {
-  handle_guard guard(const_cast<seams_rings *>(rings));
+  read_guard guard(rings);
   clear_error();
   if (rings == nullptr || n == nullptr) {
     return fail(SEAMS_ERR_NULL, "rings or count is null");
@@ -2908,7 +2940,7 @@ seams_status seams_q4q6_n(seams_system *sys, double cutoff, int type, double *q4
 
 seams_status seams_rings_labels_n(const seams_rings *rings, int *sizes, size_t sizes_len,
                                   int *symmetry, size_t symmetry_len) {
-  handle_guard guard(const_cast<seams_rings *>(rings));
+  read_guard guard(rings);
   clear_error();
   if (rings == nullptr) {
     return fail(SEAMS_ERR_NULL, "rings handle is null");
@@ -2926,7 +2958,7 @@ seams_status seams_rings_labels_n(const seams_rings *rings, int *sizes, size_t s
 
 seams_status seams_rings_histogram_n(const seams_rings *rings, int *counts,
                                      size_t counts_len) {
-  handle_guard guard(const_cast<seams_rings *>(rings));
+  read_guard guard(rings);
   clear_error();
   if (rings == nullptr || counts == nullptr) {
     return fail(SEAMS_ERR_NULL, "histogram output is null");
