@@ -2952,52 +2952,24 @@ nneigh::kNearestNeighbourList(
   return out;
 }
 
-namespace {
-
-void csrFromRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                 const std::vector<std::vector<int>> &rows, std::vector<int> &offsets,
-                 std::vector<int> &cols) {
-  const auto idx = nneigh::neighbourListByIndex(yCloud, rows);
-  const int n = yCloud.nop;
-  offsets.assign(static_cast<std::size_t>(n) + 1, 0);
-  for (int i = 0; i < n; ++i) {
-    int degree = 0;
-    if (static_cast<int>(idx.size()) > i) {
-      for (int id : idx[static_cast<std::size_t>(i)]) {
-        if (id != i) {
-          ++degree;
-        }
-      }
-    }
-    offsets[static_cast<std::size_t>(i) + 1] = offsets[static_cast<std::size_t>(i)] + degree;
-  }
-  cols.resize(static_cast<std::size_t>(offsets[static_cast<std::size_t>(n)]));
-  for (int i = 0; i < n; ++i) {
-    if (static_cast<int>(idx.size()) <= i) {
-      continue;
-    }
-    int cursor = offsets[static_cast<std::size_t>(i)];
-    for (int id : idx[static_cast<std::size_t>(i)]) {
-      if (id == i) {
-        continue;
-      }
-      cols[static_cast<std::size_t>(cursor++)] = id;
-    }
-  }
-}
-
-}  // namespace
-
 void nneigh::kNearestCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
                          double candidateCutoff, int typeI, bool mutual,
-                         std::vector<int> &offsets, std::vector<int> &cols) {
+                         std::vector<int> &offsets, std::vector<int> &cols, bool park) {
   seams::prepareCompute();
-  [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
+  // The scan is a Rayon pool. An OpenMP team left in active wait from
+  // the previous region sits on the same cores, and the one-thread scan
+  // then loses to a library that uses the whole team. Park that team
+  // for this call. A caller that classifies in OpenMP immediately
+  // afterwards leaves the team running: parking it makes that region
+  // pay the wake inside the same call.
+  const int width = seams::teamFor(yCloud.nop);
+  if (park) {
+    seams::releaseTeam();
+  }
 #ifdef SEAMS_HAS_LINKCELL
-  // Eight Rayon workers do not beat this AVX scan: the block join costs
-  // as much as the walk, and those workers share the cores with the
-  // OpenMP team that fills the CSR. One worker runs the scan.
-  lc_set_threads(1);
+  lc_set_threads(std::max(1, width));
+#else
+  (void)width;
 #endif
   const int n = yCloud.nop;
   offsets.assign(static_cast<std::size_t>(std::max(n, 0)) + 1, 0);
@@ -3011,10 +2983,48 @@ void nneigh::kNearestCsr(const molSys::PointCloud<molSys::Point<double>, double>
   // every id back through the hash table. The mutual row is determined
   // by the packed nominations: lower indices ascending, then the higher
   // indices in nearest-first order. k above 64 keeps that row builder.
+  // The one-way and wide-k rows are the same edges as fillGraphFromNom,
+  // written straight into the CSR in that push order.
   if (!mutual || k > 64) {
-    std::vector<std::vector<int>> rows;
-    fillGraphFromNom(yCloud, nom, k, mutual, rows);
-    csrFromRows(yCloud, rows, offsets, cols);
+    std::vector<int> degree(static_cast<std::size_t>(n), 0);
+    auto accept = [&](int i, int j) {
+      if (j < 0 || j >= n || j == i) {
+        return false;
+      }
+      const bool listed = listsPacked(nom, n, k, j, i);
+      if (mutual) {
+        return i < j && listed;
+      }
+      return i < j || !listed;
+    };
+    for (int i = 0; i < n; ++i) {
+      const int *row = nom.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(k);
+      for (int t = 0; t < k; ++t) {
+        const int j = row[t];
+        if (!accept(i, j)) {
+          continue;
+        }
+        degree[static_cast<std::size_t>(i)] += 1;
+        degree[static_cast<std::size_t>(j)] += 1;
+      }
+    }
+    for (int i = 0; i < n; ++i) {
+      offsets[static_cast<std::size_t>(i) + 1] =
+          offsets[static_cast<std::size_t>(i)] + degree[static_cast<std::size_t>(i)];
+    }
+    cols.assign(static_cast<std::size_t>(offsets[static_cast<std::size_t>(n)]), 0);
+    std::vector<int> cursor(offsets.begin(), offsets.end() - 1);
+    for (int i = 0; i < n; ++i) {
+      const int *row = nom.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(k);
+      for (int t = 0; t < k; ++t) {
+        const int j = row[t];
+        if (!accept(i, j)) {
+          continue;
+        }
+        cols[static_cast<std::size_t>(cursor[static_cast<std::size_t>(i)]++)] = j;
+        cols[static_cast<std::size_t>(cursor[static_cast<std::size_t>(j)]++)] = i;
+      }
+    }
     return;
   }
   // A joined worker, not an OpenMP region: the region would keep

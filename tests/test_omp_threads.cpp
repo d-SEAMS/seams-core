@@ -2,6 +2,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <seams.h>
 
+#include <algorithm>
 #include <cmath>
 #include <vector>
 
@@ -81,6 +82,20 @@ TEST_CASE("one thread and eight threads agree on knn, q6 and CHILL", "[omp][c_ap
           SEAMS_OK);
 
   REQUIRE(seams_set_num_threads(1) == SEAMS_OK);
+  seams_neighbours *serialCut = nullptr;
+  REQUIRE(seams_neighbours_build(sys, 3.5, 1, SEAMS_GRAPH_CUTOFF, &serialCut) == SEAMS_OK);
+  std::size_t cutNoff = 0;
+  std::size_t cutNnz = 0;
+  REQUIRE(seams_neighbours_copy(serialCut, nullptr, 0, &cutNoff, nullptr, 0, &cutNnz) == SEAMS_OK);
+  std::vector<int> cutOff1(cutNoff);
+  std::vector<int> cutCol1(cutNnz);
+  REQUIRE(seams_neighbours_copy(serialCut, cutOff1.data(), cutOff1.size(), &cutNoff, cutCol1.data(),
+                                cutCol1.size(), &cutNnz) == SEAMS_OK);
+  REQUIRE(cutNnz == static_cast<std::size_t>(ice.n) * 4);
+  for (int i = 0; i < ice.n; ++i) {
+    REQUIRE(cutOff1[static_cast<std::size_t>(i) + 1] - cutOff1[static_cast<std::size_t>(i)] == 4);
+  }
+
   seams_neighbours *serialNb = nullptr;
   REQUIRE(seams_neighbours_knn(sys, 4, 3.5, 1, 1, &serialNb) == SEAMS_OK);
   std::size_t serialNoff = 0;
@@ -100,8 +115,51 @@ TEST_CASE("one thread and eight threads agree on knn, q6 and CHILL", "[omp][c_ap
   int counts1[9] = {};
   REQUIRE(seams_chill(sys, 3.5, 1, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, lab1.data(),
                       lab1.size(), counts1) == SEAMS_OK);
+  REQUIRE(counts1[SEAMS_LABEL_HEXAGONAL] == ice.n);
+  std::vector<int> plus1(static_cast<std::size_t>(ice.n));
+  int plusCounts1[9] = {};
+  REQUIRE(seams_chill_plus(sys, 3.5, 1, SEAMS_GRAPH_MUTUAL, SEAMS_CHILL_PUBLISHED, plus1.data(),
+                           plusCounts1) == SEAMS_OK);
+  REQUIRE(plusCounts1[SEAMS_LABEL_HEXAGONAL] == ice.n);
+
+  seams_neighbours *serialOneWay = nullptr;
+  REQUIRE(seams_neighbours_knn(sys, 4, 3.5, 1, 0, &serialOneWay) == SEAMS_OK);
+  std::size_t oneNoff = 0;
+  std::size_t oneNnz = 0;
+  REQUIRE(seams_neighbours_copy(serialOneWay, nullptr, 0, &oneNoff, nullptr, 0, &oneNnz) ==
+          SEAMS_OK);
+  std::vector<int> oneOff(oneNoff);
+  std::vector<int> oneCol(oneNnz);
+  REQUIRE(seams_neighbours_copy(serialOneWay, oneOff.data(), oneOff.size(), &oneNoff, oneCol.data(),
+                                oneCol.size(), &oneNnz) == SEAMS_OK);
+  for (int i = 0; i < ice.n; ++i) {
+    const int a = cutOff1[static_cast<std::size_t>(i)];
+    const int b = cutOff1[static_cast<std::size_t>(i) + 1];
+    const int c = oneOff[static_cast<std::size_t>(i)];
+    const int d = oneOff[static_cast<std::size_t>(i) + 1];
+    REQUIRE(b - a == d - c);
+    std::vector<int> fromCut(cutCol1.begin() + a, cutCol1.begin() + b);
+    std::vector<int> fromKnn(oneCol.begin() + c, oneCol.begin() + d);
+    std::sort(fromCut.begin(), fromCut.end());
+    std::sort(fromKnn.begin(), fromKnn.end());
+    REQUIRE(fromCut == fromKnn);
+  }
 
   REQUIRE(seams_set_num_threads(8) == SEAMS_OK);
+  seams_neighbours *wideCut = nullptr;
+  REQUIRE(seams_neighbours_build(sys, 3.5, 1, SEAMS_GRAPH_CUTOFF, &wideCut) == SEAMS_OK);
+  std::size_t wideCutNoff = 0;
+  std::size_t wideCutNnz = 0;
+  REQUIRE(seams_neighbours_copy(wideCut, nullptr, 0, &wideCutNoff, nullptr, 0, &wideCutNnz) ==
+          SEAMS_OK);
+  REQUIRE(wideCutNoff == cutNoff);
+  REQUIRE(wideCutNnz == cutNnz);
+  std::vector<int> cutOff8(wideCutNoff);
+  std::vector<int> cutCol8(wideCutNnz);
+  REQUIRE(seams_neighbours_copy(wideCut, cutOff8.data(), cutOff8.size(), &wideCutNoff,
+                                cutCol8.data(), cutCol8.size(), &wideCutNnz) == SEAMS_OK);
+  REQUIRE(cutOff8 == cutOff1);
+  REQUIRE(cutCol8 == cutCol1);
   seams_neighbours *wideNb = nullptr;
   REQUIRE(seams_neighbours_knn(sys, 4, 3.5, 1, 1, &wideNb) == SEAMS_OK);
   std::size_t wideNoff = 0;
@@ -136,7 +194,34 @@ TEST_CASE("one thread and eight threads agree on knn, q6 and CHILL", "[omp][c_ap
   for (int label = 0; label < 9; ++label) {
     REQUIRE(counts8[label] == counts1[label]);
   }
+  std::vector<int> plus8(static_cast<std::size_t>(ice.n));
+  int plusCounts8[9] = {};
+  REQUIRE(seams_chill_plus(sys, 3.5, 1, SEAMS_GRAPH_MUTUAL, SEAMS_CHILL_PUBLISHED, plus8.data(),
+                           plusCounts8) == SEAMS_OK);
+  REQUIRE(plus8 == plus1);
+  for (int label = 0; label < 9; ++label) {
+    REQUIRE(plusCounts8[label] == plusCounts1[label]);
+  }
 
+  seams_neighbours *wideOneWay = nullptr;
+  REQUIRE(seams_neighbours_knn(sys, 4, 3.5, 1, 0, &wideOneWay) == SEAMS_OK);
+  std::size_t wideOneNoff = 0;
+  std::size_t wideOneNnz = 0;
+  REQUIRE(seams_neighbours_copy(wideOneWay, nullptr, 0, &wideOneNoff, nullptr, 0, &wideOneNnz) ==
+          SEAMS_OK);
+  REQUIRE(wideOneNoff == oneNoff);
+  REQUIRE(wideOneNnz == oneNnz);
+  std::vector<int> oneOff8(wideOneNoff);
+  std::vector<int> oneCol8(wideOneNnz);
+  REQUIRE(seams_neighbours_copy(wideOneWay, oneOff8.data(), oneOff8.size(), &wideOneNoff,
+                                oneCol8.data(), oneCol8.size(), &wideOneNnz) == SEAMS_OK);
+  REQUIRE(oneOff8 == oneOff);
+  REQUIRE(oneCol8 == oneCol);
+
+  seams_neighbours_destroy(serialCut);
+  seams_neighbours_destroy(wideCut);
+  seams_neighbours_destroy(serialOneWay);
+  seams_neighbours_destroy(wideOneWay);
   seams_neighbours_destroy(serialNb);
   seams_neighbours_destroy(wideNb);
   seams_system_destroy(sys);

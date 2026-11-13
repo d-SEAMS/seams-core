@@ -2457,7 +2457,8 @@ void chill::classifyBondsCsr(
 }
 
 int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                            const std::vector<int> &offsets, const std::vector<int> &cols) {
+                            const std::vector<int> &offsets, const std::vector<int> &cols,
+                            bool keepBonds) {
   const int n = yCloud.nop;
   if (n <= 0 || static_cast<int>(offsets.size()) < n + 1) {
     return 0;
@@ -2471,6 +2472,7 @@ int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &y
   std::vector<int> chosen(static_cast<std::size_t>(n) * 4, -1);
   std::vector<int> nkeep(static_cast<std::size_t>(n), 0);
   std::vector<int> shell(static_cast<std::size_t>(n), 0);
+  std::vector<std::int8_t> kind(static_cast<std::size_t>(n) * 4, 0);
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 256)
 #endif
@@ -2543,19 +2545,28 @@ int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &y
 #endif
   for (int i = 0; i < n; ++i) {
     const int keep = nkeep[static_cast<std::size_t>(i)];
-    auto &bonds = yCloud.pts[static_cast<std::size_t>(i)].c_ij;
-    bonds.clear();
-    bonds.reserve(static_cast<std::size_t>(keep));
     const double *qi = q.data() + static_cast<std::size_t>(i) * kRealL3;
     const double ni = qn[static_cast<std::size_t>(i)];
+    if (keepBonds) {
+      auto &bonds = yCloud.pts[static_cast<std::size_t>(i)].c_ij;
+      bonds.clear();
+      bonds.reserve(static_cast<std::size_t>(keep));
+    }
     for (int s = 0; s < keep; ++s) {
       const int j = chosen[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)];
       const double *qj = q.data() + static_cast<std::size_t>(j) * kRealL3;
-      molSys::Result bond;
-      bond.c_value = correlationOf(useAvx ? realL3Dot(qi, qj) : realL3DotScalar(qi, qj), ni,
-                                   qn[static_cast<std::size_t>(j)]);
-      bond.classifier = chill::classifyBond(bond.c_value, rule);
-      bonds.push_back(bond);
+      const double c_value =
+          correlationOf(useAvx ? realL3Dot(qi, qj) : realL3DotScalar(qi, qj), ni,
+                        qn[static_cast<std::size_t>(j)]);
+      const auto classifier = chill::classifyBond(c_value, rule);
+      kind[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)] =
+          static_cast<std::int8_t>(classifier);
+      if (keepBonds) {
+        molSys::Result bond;
+        bond.c_value = c_value;
+        bond.classifier = classifier;
+        yCloud.pts[static_cast<std::size_t>(i)].c_ij.push_back(bond);
+      }
     }
   }
   // Bonds are complete before the neighbour test reads them. The published
@@ -2567,21 +2578,25 @@ int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &y
 #endif
   for (int i = 0; i < n; ++i) {
     const int keep = nkeep[static_cast<std::size_t>(i)];
-    const auto &bonds = yCloud.pts[static_cast<std::size_t>(i)].c_ij;
     int nstag = 0;
     int neclip = 0;
-    for (const auto &bond : bonds) {
-      if (bond.classifier == molSys::bond_type::staggered) {
+    for (int s = 0; s < keep; ++s) {
+      const auto classifier = static_cast<molSys::bond_type>(
+          kind[static_cast<std::size_t>(i) * 4 + static_cast<std::size_t>(s)]);
+      if (classifier == molSys::bond_type::staggered) {
         ++nstag;
-      } else if (bond.classifier == molSys::bond_type::eclipsed) {
+      } else if (classifier == molSys::bond_type::eclipsed) {
         ++neclip;
       }
     }
     const bool four = shell[static_cast<std::size_t>(i)] == 4 && keep == 4;
     auto staggeredOf = [&](int j) {
       int count = 0;
-      for (const auto &bond : yCloud.pts[static_cast<std::size_t>(j)].c_ij) {
-        if (bond.classifier == molSys::bond_type::staggered) {
+      const int jk = nkeep[static_cast<std::size_t>(j)];
+      for (int s = 0; s < jk; ++s) {
+        if (static_cast<molSys::bond_type>(
+                kind[static_cast<std::size_t>(j) * 4 + static_cast<std::size_t>(s)]) ==
+            molSys::bond_type::staggered) {
           ++count;
         }
       }

@@ -246,8 +246,12 @@ void classifyBondsCsr(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                       const BondClassifier &rule, bool isSlice = false);
 
 //! Bonds and CHILL+ labels from a cutoff CSR. Returns the cubic count.
+//! @a keepBonds false still writes iceType and skips the per-atom bond
+//! vectors. The labels are the same either way. The vectors are what a
+//! caller that reads c_ij needs.
 int chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                     const std::vector<int> &offsets, const std::vector<int> &cols);
+                     const std::vector<int> &offsets, const std::vector<int> &cols,
+                     bool keepBonds = true);
 
 //! Unnormalised real l = 3 bond-order vector of the atoms @a which selects.
 //! @a which null computes every atom. Ghost slots stay zero so a neighbour
