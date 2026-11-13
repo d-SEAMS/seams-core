@@ -807,7 +807,7 @@ seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type,
       auto direct = std::make_unique<seams_neighbours>();
       direct->n = work.nop;
       if (nneigh::orthoFullCsr(work, sub, cutoff, direct->offsets, direct->cols, false)) {
-        *out = direct.release();
+        *out = static_cast<seams_neighbours *>(track(direct.release()));
         return SEAMS_OK;
       }
     }

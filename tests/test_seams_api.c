@@ -129,7 +129,11 @@ int main(void) {
     }
   }
   expect(degree_ok, "four neighbours");
+  expect(seams_system_count(sys) == n, "clear the error before destroy");
   seams_neighbours_destroy(nb);
+  expect(strcmp(seams_last_error(), "double destroy") != 0, "first destroy frees the list");
+  seams_neighbours_destroy(nb);
+  expect(strcmp(seams_last_error(), "double destroy") == 0, "second destroy is refused");
 
   int *labels = calloc((size_t)n, sizeof(int));
   int counts[9];
