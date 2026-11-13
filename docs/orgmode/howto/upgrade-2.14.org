@@ -78,7 +78,11 @@ thread below 2048 atoms and four threads below 8192 atoms when the
 width asked for is larger than four. ~prepareCompute~ does not set
 ~OMP_WAIT_POLICY~, and ~adoptThreads~ leaves the OpenMP team running.
 The orthorhombic cutoff list is shared by published CHILL+ and cutoff
-q6. Each pair is counted once.
+q6. Each pair is counted once. An interior cell skips the periodic
+shift. On one thread a carried ring update copies and sorts directly.
+Several threads still sort and merge in parallel. A team narrower than
+the process is bound once to that many cores of the allowed set, and
+that bind stays for the process.
 
 * Deprecations and breaks
 

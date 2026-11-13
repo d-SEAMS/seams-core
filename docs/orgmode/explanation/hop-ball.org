@@ -41,11 +41,13 @@ When the carry stays on, enumerating the changed sources uses
 ~sourceTeam~. That search stays on the calling thread until those
 sources fill the workers, about 80 sources for each thread. A few
 hundred changed vertices are still one thread. That width is not
-~teamFor~. After the new rings exist, the index sort, the drop scan,
-and the merge of the kept rings use ~teamFor~. Dropped ring buffers
+~teamFor~. On one thread the update then copies the new rings and
+sorts them directly, and merges the rings that stay with a direct
+walk. Several threads sort the indices, scan for rings that meet
+\(T\), and merge the kept rings with ~teamFor~. Dropped ring buffers
 are kept for the next update. The timed carried update is the hop
 kernel on [[file:trace-threads.org][the thread-control page]], retimed
-in ~benchmarks/pool-audit.csv~ at ~1c578c6f~.
+in ~benchmarks/pool-audit.csv~ at ~1ce3be3b~.
 
 ~seams_frame_chill_rings~ is the language call that can keep a neighbour
 list across frames when a skin is set. The ring carry itself is the

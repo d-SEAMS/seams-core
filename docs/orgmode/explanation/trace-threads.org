@@ -73,24 +73,38 @@ the next search reads.
 
 * Every kernel
 
-Commit ~848426f9~ sizes the team on every kernel. ~1c578c6f~ retimes
-the same eight kernels after the carried-ring and cutoff-list fixes
-in ~4b96e879~. The rows are ~benchmarks/pool-audit.csv~. Eight
-kernels run on ideal ice Ic: primitive rings, local and cutoff \(q_4\)
-and \(q_6\), CHILL+, the shell label, and one carried hop-ball update.
-The sizes are 4096, 32768, 110592 and 884736 molecules. Each size is
-32 rows, the eight kernels at 1, 2, 4 and 8 threads. One warm-up, then
-eight timed calls. The fingerprint of a kernel is the same at every
-width. ~meson test docs_pool_audit~ recomputes each median and type-7
-interquartile range from ~samples_ms~.
+Commit ~848426f9~ sizes the team on every kernel. ~caeb71f8~ puts the
+one-thread carried update back on a direct copy and sort, binds a
+narrowed team to that many cores, and skips the periodic shift inside
+an interior cutoff cell. ~1ce3be3b~ retimes the same eight kernels
+after that change. The rows are ~benchmarks/pool-audit.csv~. The
+~commit~ column is ~caeb71f8~. Eight kernels run on ideal ice Ic:
+primitive rings, local and cutoff \(q_4\) and \(q_6\), CHILL+, the
+shell label, and one carried hop-ball update. The sizes are 4096,
+32768, 110592 and 884736 molecules. Each size is 32 rows, the eight
+kernels at 1, 2, 4 and 8 threads. One warm-up, then eight timed calls.
+The fingerprint of a kernel is the same at every width. ~meson test
+docs_pool_audit~ recomputes each median and type-7 interquartile range
+from ~samples_ms~.
+
+The rings kernel is ~primitive::ringNetwork~ on a neighbour graph built
+before the timer starts. It is not the full cutoff call. The rings row
+of ~benchmarks/paper-cells/sitting-large.csv~ is ~seams_frame_rings~,
+which builds the cutoff list and then searches the rings. Those two
+rows are not the same measurement.
 
 ~seams::teamFor~ is the width of a per-atom walk. Below 2048 atoms it
 is one thread. Below 8192 atoms, when the caller asked for more than
 four, it is four. At or above 8192 atoms it is the OpenMP width.
 ~seams::TeamWidth~ sets that width for the rest of the call and
-restores the caller's width afterwards. Bond order, published CHILL+,
-the k-nearest list, the shell label, and local \(q_l\) use it. Those
-calls do not start a Rayon pool.
+restores the caller's width afterwards. When the width is narrower
+than the process, it binds the workers once to the first cores of the
+allowed set, one core for each worker, and sets ~OMP_PROC_BIND~ to
+~false~ so OpenMP does not put them back on the whole mask. The bind
+is once for that width and is not undone when the call returns. Four
+workers asked for on an eight-core mask therefore stay on four cores.
+Bond order, published CHILL+, the k-nearest list, the shell label, and
+local \(q_l\) use ~TeamWidth~. Those calls do not start a Rayon pool.
 
 ~seams::adoptThreads~ no longer pauses the OpenMP team and no longer
 sets ~OMP_WAIT_POLICY~. It calls ~prepareCompute~, then
@@ -104,10 +118,14 @@ Enumerating the changed ring sources uses ~sourceTeam~, not
 fill the workers, about 80 sources per thread. Fewer than that is a
 serial enumeration, because the fork costs more than the search.
 ~teamFor~ is a different rule: it would also put a crystal of a few
-hundred molecules on one thread. The sort of ring indices, the scan
-that drops rings meeting \(T\), and the merge of the rings that are
-kept use ~teamFor~ and run on several threads. Dropped ring buffers
-are kept and reused. They are not freed on the update.
+hundred molecules on one thread. On one thread the carried update
+copies the new rings and sorts them directly, then merges the rings
+that stay with a direct walk. The parallel index sort and the parallel
+merge are the several-thread path. They were slower than the direct
+copy when only one thread ran. Several threads still sort the indices,
+scan for rings that meet \(T\), and merge the rings that are kept,
+using ~teamFor~. Dropped ring buffers are kept and reused. They are
+not freed on the update.
 
 The orthorhombic cutoff list is one shared CSR. Each pair is counted
 once, from the atom with the lower slot, on the z layer that owns
@@ -115,7 +133,11 @@ that atom. A layer writes its own atoms and the atoms in the next
 layer, so layers of one parity do not share an atom. Even layers run
 together. When the number of layers is odd, the last layer wraps onto
 layer 0 and runs only after the even layers have stopped. Odd layers
-run after that. One thread uses the same half stencil without a team.
+run after that. An interior cell has no periodic image. Its thirteen
+forward neighbours are plain index steps and the shift is zero, so
+that cell skips the periodic-shift arithmetic. A cell on the boundary
+still applies the shift. One thread uses the same half stencil without
+a team.
 Published CHILL+ and cutoff \(q_6\) both read this list. The one-thread
 and several-thread pair lists match.
 
