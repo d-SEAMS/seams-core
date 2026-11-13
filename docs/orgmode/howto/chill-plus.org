@@ -31,7 +31,9 @@ The cutoff line is ~interClathrate 9 water 241~. The mutual line is
 
 ~--rule ovito-chill+~ averages q3 on the full shell and skips the
 published neighbour test. ~seams ovito-chill+~ is the same rule as a
-command. The C constant is ~SEAMS_CHILL_OVITO~.
+command. The C constant is ~SEAMS_CHILL_OVITO~. The 18-atom liquid
+fixture, and the 250-atom split on the 4096-molecule liquid, are
+[[file:../explanation/chill-plus-rules.org][the published rule and the OVITO rule]].
 
 * From the library
 

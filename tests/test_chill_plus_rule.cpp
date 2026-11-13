@@ -19,7 +19,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
 #include <type_traits>
+#include <utility>
 #include <array>
 #include <cmath>
 #include <cstddef>
@@ -868,4 +870,71 @@ TEST_CASE("cancelled shells keep CHILL+ labels when the cloud is shifted", "[chi
     const Cloud cloud = sheet(n);
     REQUIRE(labels(cloud) == labels(shift(cloud)));
   }
+}
+
+// Nguyen and Molinero, J. Phys. Chem. B 2015, 119, 9369. Equation 1
+// averages q3 over the four nearest neighbours. Table 1, footnote a,
+// counts the whole cutoff shell and requires four for a crystal row.
+// The staggered edge is c_ij <= -0.8 and the eclipsed band is
+// -0.35 <= c_ij <= 0.25. An interfacial row also looks at a neighbour:
+// two staggered bonds need a neighbour with more than two, and three
+// staggered bonds with no eclipsed bond need a neighbour with more
+// than one. OVITO 3.17.2 averages q3 over the whole shell, uses open
+// edges, and skips that neighbour test. On this oxygen the shell holds
+// four neighbours, none of the four correlations sits on an edge, and
+// one neighbour has a fifth oxygen inside 3.5 A. That fifth oxygen
+// moves one correlation into the eclipsed band, so the published rule
+// counts two eclipsed bonds (liquid) and ovito-chill+ counts three
+// (interfacial clathrate).
+TEST_CASE("liquid CHILL+ keeps the published four-nearest q3", "[chill][rule]") {
+  auto frame = readXyz("chill-def/liquid-four-nearest.txt");
+  auto rows = nneigh::neighListO(3.5, frame.cloud, 1);
+  REQUIRE(chill::cutoffShellCount(frame.cloud, rows, frame.focus) == 4);
+  int wider = 0;
+  for (std::size_t k = 1; k < rows[static_cast<std::size_t>(frame.focus)].size(); ++k) {
+    const auto found = frame.cloud.idIndexMap.find(rows[static_cast<std::size_t>(frame.focus)][k]);
+    REQUIRE(found != frame.cloud.idIndexMap.end());
+    if (chill::cutoffShellCount(frame.cloud, rows, found->second) != 4) {
+      ++wider;
+    }
+  }
+  REQUIRE(wider >= 1);
+  auto published = frame.cloud;
+  auto ovito = frame.cloud;
+  chill::applyChillPlus(published, rows, chill::ChillPlusRule::Published, false);
+  chill::applyChillPlus(ovito, rows, chill::ChillPlusRule::Ovito, false);
+  const auto &focusP = published.pts[static_cast<std::size_t>(frame.focus)];
+  const auto &focusO = ovito.pts[static_cast<std::size_t>(frame.focus)];
+  REQUIRE(focusP.iceType == molSys::atom_state_type::water);
+  REQUIRE(focusO.iceType == molSys::atom_state_type::interClathrate);
+  auto tally = [](const std::vector<molSys::Result> &bonds) {
+    int staggered = 0;
+    int eclipsed = 0;
+    for (const auto &bond : bonds) {
+      REQUIRE(std::abs(bond.c_value + 0.8) > 1.0e-6);
+      REQUIRE(std::abs(bond.c_value + 0.35) > 1.0e-6);
+      REQUIRE(std::abs(bond.c_value - 0.25) > 1.0e-6);
+      if (bond.classifier == molSys::bond_type::staggered) {
+        ++staggered;
+      } else if (bond.classifier == molSys::bond_type::eclipsed) {
+        ++eclipsed;
+      }
+    }
+    return std::pair<int, int>(staggered, eclipsed);
+  };
+  REQUIRE(tally(focusP.c_ij) == std::pair<int, int>(0, 2));
+  REQUIRE(tally(focusO.c_ij) == std::pair<int, int>(0, 3));
+  std::vector<double> left;
+  std::vector<double> right;
+  for (const auto &bond : focusP.c_ij) left.push_back(bond.c_value);
+  for (const auto &bond : focusO.c_ij) right.push_back(bond.c_value);
+  std::sort(left.begin(), left.end());
+  std::sort(right.begin(), right.end());
+  REQUIRE(left.size() == 4);
+  REQUIRE(right.size() == 4);
+  double moved = 0.0;
+  for (std::size_t i = 0; i < left.size(); ++i) {
+    moved = std::max(moved, std::abs(left[i] - right[i]));
+  }
+  REQUIRE(moved > 0.1);
 }

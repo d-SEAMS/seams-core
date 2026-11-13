@@ -1261,6 +1261,21 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 180)
   test(
+    'docs_chill_rule',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'test_chill_rule_page.py',
+      meson.project_source_root(),
+      seams_exe.full_path(),
+      meson.project_build_root() / 'src',
+      meson.project_build_root() / 'bindings',
+      meson.project_build_root(),
+    ],
+    env: tutorial_env,
+    depends: [seams_exe, seams_api_lib, seams_lang],
+    suite: 'docs',
+    timeout: 120)
+  test(
     'docs_gallery',
     python3,
     args: [
