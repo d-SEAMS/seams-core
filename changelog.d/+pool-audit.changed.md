@@ -1,0 +1,1 @@
+Neighbour, order-parameter, ring and shell calls keep one worker pool and leave the OpenMP team running between a Rayon search and the next region. A per-atom walk under 8192 atoms stays at four threads. Ring sources still take one thread per eighty sources. The one-thread and several-thread results match.

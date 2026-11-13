@@ -23,6 +23,21 @@ def _write_sitting_tables():
 _write_sitting_tables()
 
 
+def _write_release_notes():
+    """Fill the 2.14.0 notes from changelog.d before Sphinx reads pages."""
+    import importlib.util
+
+    script = os.path.join(_docs, "check_changelog.py")
+    spec = importlib.util.spec_from_file_location("check_changelog", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    if module.main([]) != 0:
+        raise SystemExit("2.14.0 notes do not match changelog.d")
+
+
+_write_release_notes()
+
+
 def _stage_markdown_book():
     """Copy the language pages into the Sphinx tree so myst renders them."""
     import pathlib

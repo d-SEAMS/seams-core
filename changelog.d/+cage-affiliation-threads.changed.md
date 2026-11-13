@@ -1,0 +1,1 @@
+`cageAffiliation` runs its hexagonal- and double-diamond-cage sweeps on every thread, and `basalConditions` and `commonElementsInThreeRings` stop allocating per call. Seeded cage affiliation of a 32768-atom jittered cubic-ice frame goes from 1046 to 849 ms on one thread and to 132 ms on eight, and `cages` over 32 such frames from 36.2 to 6.3 s on eight threads (release builds).

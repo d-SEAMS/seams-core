@@ -1,0 +1,1 @@
+`steinhardtQl` builds its bond table with the box computed once rather than once per bond, and counts and fills its rows on every thread; the values are unchanged. On `bench_strong`'s 65536-atom frame the stage goes from 11.7 to 4.0 ms on eight threads and from 23.1 to 19.7 ms on one (release builds).
