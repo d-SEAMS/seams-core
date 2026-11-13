@@ -22,8 +22,6 @@ from render_scenes import basal_bilayers
 
 def check_layers(positions: np.ndarray, labels: np.ndarray):
     basal = np.asarray(render.stacking_axis(positions, labels, np.isin(labels, [1])), dtype=float)
-    if float(basal[1]) < 0.0:
-        basal = -basal
     ids, centres = basal_bilayers(positions, labels, basal)
     if len(centres) < 4:
         raise SystemExit(f"interface has {len(centres)} bilayers")
@@ -48,6 +46,15 @@ def check_layers(positions: np.ndarray, labels: np.ndarray):
         drawn = float(np.median(projection[members]))
         if abs(drawn - centre) > 1e-9:
             raise SystemExit(f"layer {layer} tick {drawn} is not the bilayer median")
+    forward = np.array([-1.0, 0.0, 0.0])
+    up = np.array([0.0, 0.0, 1.0])
+    _forward, right, _up = render.basis(forward, up)
+    horiz = [
+        float(np.median(positions[ids == layer] @ right))
+        for layer in range(len(centres))
+    ]
+    if any(horiz[i] >= horiz[i + 1] for i in range(len(horiz) - 1)):
+        raise SystemExit(f"bilayer index does not ascend left to right: {np.round(horiz, 2)}")
     print(
         f"interface bilayers {len(centres)} spacing {mean:.3f} A "
         f"counts {counts}"
