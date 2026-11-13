@@ -471,6 +471,13 @@ def hexagonality(chill: np.ndarray, mask: np.ndarray) -> float:
     return hexagonal / float(hexagonal + cubic)
 
 
+def cubicity(kinds: list[int]) -> float:
+    """Cubic share of the basal layers, one majority class per layer."""
+    if not kinds:
+        return float("nan")
+    return sum(1 for kind in kinds if kind == 0) / float(len(kinds))
+
+
 def stacking_axis(pos: np.ndarray, chill: np.ndarray, mask: np.ndarray) -> np.ndarray:
     """Normal of the basal planes, from the density wave of the Ih/Ic lattice.
 
@@ -1044,33 +1051,56 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
     from PIL import Image
 
     dpi = PRINT_DPI
-    # Right margin holds the z scale bar. Bottom margin holds the legend.
-    margin_l, margin_r, margin_t, margin_b = 10.0, 4.0, 5.0, 18.0
-    gap = 3.0
-    if width_mm >= 150.0:
-        slab_w = 70.0
-        content_w = width_mm - margin_l - margin_r
-        nucleus_w = (content_w - slab_w - gap) / 2.0
-        slab_h = slab_w * slab["half_v"] / slab["half_h"]
-        nucleus_h = nucleus_w * nuclei["half_v"] / nuclei["half_h"]
-        bar_h = 12.0
-        right_h = nucleus_h + 6.0 + bar_h
-        height_mm = margin_t + margin_b + max(slab_h, right_h)
-        slab_x, slab_y = margin_l, margin_b + max(0.0, right_h - slab_h)
-        nuc_x = margin_l + slab_w + gap
-        nuc_y = margin_b + bar_h + 6.0 + max(0.0, slab_h - right_h)
+    margin_l, margin_r, margin_t = 8.0, 3.5, 3.2
+    legend_h, caption_h = 7.5, 10.5
+    margin_b = legend_h + caption_h + 1.2
+    gap = 2.2
+    narrow = width_mm < 150.0
+    content_w = width_mm - margin_l - margin_r
+    slab_w = content_w if narrow else 70.0
+    right_w = content_w if narrow else content_w - slab_w - gap
+    slab_h = slab_w * slab["half_v"] / slab["half_h"]
+    angstrom_per_mm = (2.0 * slab["half_h"]) / slab_w
+
+    def panel_mm(entry: dict) -> tuple[float, float]:
+        image = Image.open(entry["png"])
+        # The render used the slab scale. Keep that scale on the wide figure.
+        # The narrow figure fits the column, so both nuclei still share one scale.
+        width = entry["w_mm"]
+        height = entry["h_mm"]
+        if narrow or width > right_w:
+            scale = right_w / width
+            width *= scale
+            height *= scale
+        return width, height
+
+    late_w, late_h = panel_mm(nuclei["late"])
+    min_w, min_h = panel_mm(nuclei["minimum"])
+    # On the wide figure the two sheets share the slab scale, so the 10 A
+    # bars have one length. The narrow figure scales both by the same factor.
+    if not narrow:
+        scale = 1.0
     else:
-        content_w = width_mm - margin_l - margin_r
-        slab_w = content_w
-        slab_h = slab_w * slab["half_v"] / slab["half_h"]
-        nucleus_w = (content_w - gap) / 2.0
-        nucleus_h = nucleus_w * nuclei["half_v"] / nuclei["half_h"]
-        bar_h = 16.0
-        height_mm = margin_t + margin_b + slab_h + gap + nucleus_h + gap + bar_h
-        slab_x, slab_y = margin_l, margin_b + bar_h + gap + nucleus_h + gap
-        nuc_x, nuc_y = margin_l, margin_b + bar_h + gap
+        scale = late_w / nuclei["late"]["w_mm"]
+    bar_mm = 10.0 / angstrom_per_mm * (scale if narrow else 1.0)
+    title_h = 4.6
+    pair_gap = 4.4
+    bar_row = 6.0
+    stack_h = 11.5
+    right_h = title_h + late_h + pair_gap + min_h + bar_row + stack_h
+    if narrow:
+        height_mm = margin_t + slab_h + gap + right_h + margin_b
+        slab_x, slab_y = margin_l, margin_b + right_h + gap
+        right_x, right_top = margin_l, margin_b + right_h
+    else:
+        height_mm = margin_t + max(slab_h, right_h) + margin_b
+        slab_x = margin_l
+        slab_y = margin_b + max(0.0, right_h - slab_h)
+        right_x = margin_l + slab_w + gap
+        right_top = margin_b + right_h
     if height_mm > 230.0:
         raise SystemExit(f"figure is {height_mm:.0f} mm tall, past a CPC page")
+    print(f"figure {width_mm:.0f} x {height_mm:.1f} mm", flush=True)
 
     fig = plt.figure(figsize=(width_mm / 25.4, height_mm / 25.4), dpi=dpi)
     fig.patch.set_facecolor("white")
@@ -1093,103 +1123,78 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
             color="black",
         )
 
-    place(slab["png"], slab_x, slab_y, slab_w, slab_h)
-    letter("(a)", slab_x, slab_y + slab_h + 0.3)
-    angstrom_per_mm = (2.0 * slab["half_v"]) / slab_h
-    bar_mm = 10.0 / angstrom_per_mm
-    bar_x = 2.2 / width_mm
-    bar_y = (slab_y + 0.5 * (slab_h - bar_mm)) / height_mm
-    fig.add_artist(
-        plt.Line2D(
-            [bar_x, bar_x],
-            [bar_y, bar_y + bar_mm / height_mm],
-            transform=fig.transFigure,
-            color="black",
-            lw=1.1,
-            solid_capstyle="butt",
+    def scale_bar(x_mm, y_mm, vertical: bool, label: str):
+        if vertical:
+            xs = [x_mm / width_mm, x_mm / width_mm]
+            ys = [y_mm / height_mm, (y_mm + bar_mm) / height_mm]
+            text_x = (x_mm + 1.0) / width_mm
+            text_y = (y_mm + 0.5 * bar_mm) / height_mm
+            ha, va = "left", "center"
+        else:
+            xs = [x_mm / width_mm, (x_mm + bar_mm) / width_mm]
+            ys = [y_mm / height_mm, y_mm / height_mm]
+            text_x = (x_mm + bar_mm + 0.8) / width_mm
+            text_y = y_mm / height_mm
+            ha, va = "left", "center"
+        fig.add_artist(
+            plt.Line2D(xs, ys, transform=fig.transFigure, color="black", lw=1.1, solid_capstyle="butt")
         )
-    )
-    fig.text(
-        bar_x + 0.9 / width_mm,
-        bar_y + 0.5 * bar_mm / height_mm,
-        "z\n10 Å",
-        fontsize=7,
-        ha="left",
-        va="center",
-        linespacing=1.15,
-    )
+        fig.text(text_x, text_y, label, fontsize=7, ha=ha, va=va, linespacing=1.15)
 
-    for offset, key, tag in ((0.0, "minimum", "minimum"), (nucleus_w + gap, "late", "late")):
-        place(nuclei[key], nuc_x + offset, nuc_y, nucleus_w, nucleus_h)
-    # 10 Å on the nucleus panels. Both sheets share half_v, so the bar
-    # has the same length on each.
-    nucleus_angstrom_per_mm = (2.0 * nuclei["half_v"]) / nucleus_h
-    nucleus_bar_mm = 10.0 / nucleus_angstrom_per_mm
-    bar_x_mm = nuc_x + 1.2
-    bar_y_mm = nuc_y + 1.6
-    fig.add_artist(
-        plt.Line2D(
-            [bar_x_mm / width_mm, (bar_x_mm + nucleus_bar_mm) / width_mm],
-            [bar_y_mm / height_mm, bar_y_mm / height_mm],
-            transform=fig.transFigure,
-            color="black",
-            lw=1.1,
-            solid_capstyle="butt",
-        )
-    )
+    place(slab["png"], slab_x, slab_y, slab_w, slab_h)
+    letter("(a)", slab_x, slab_y + slab_h + 0.2)
+    scale_bar(1.1, slab_y + 0.5 * slab_h - 0.5 * bar_mm, True, "z\n10 Å")
+
+    # (b) stacked above (c), both in the right column. One 10 A bar for (b).
+    late_y = right_top - title_h - late_h
+    min_y = late_y - pair_gap - min_h
+    place(nuclei["late"]["png"], right_x, late_y, late_w, late_h)
+    place(nuclei["minimum"]["png"], right_x, min_y, min_w, min_h)
+    letter("(b)", right_x, right_top + 0.2)
     fig.text(
-        (bar_x_mm + nucleus_bar_mm + 0.6) / width_mm,
-        bar_y_mm / height_mm,
-        "10 Å",
-        fontsize=7,
-        ha="left",
-        va="center",
-    )
-    letter("(b)", nuc_x, nuc_y + nucleus_h + 3.2)
-    fig.text(
-        (nuc_x + 0.5 * nucleus_w) / width_mm,
-        (nuc_y + nucleus_h + 0.15) / height_mm,
-        "minimum",
-        fontsize=7,
-        ha="center",
-        va="bottom",
-    )
-    fig.text(
-        (nuc_x + nucleus_w + gap + 0.5 * nucleus_w) / width_mm,
-        (nuc_y + nucleus_h + 0.15) / height_mm,
+        (right_x + 0.5 * late_w) / width_mm,
+        (late_y + late_h + 0.15) / height_mm,
         "late",
         fontsize=7,
         ha="center",
         va="bottom",
     )
+    fig.text(
+        (right_x + 0.5 * min_w) / width_mm,
+        (min_y + min_h + 0.15) / height_mm,
+        "minimum",
+        fontsize=7,
+        ha="center",
+        va="bottom",
+    )
+    scale_bar(right_x, min_y - 3.4, False, "10 Å")
 
-    if width_mm >= 150.0:
-        bar_left = nuc_x + 16.0
-        bar_width = 2 * nucleus_w + gap - 16.0
-        bar_bottom = nuc_y - 6.0 - bar_h
-    else:
-        bar_left = margin_l + 16.0
-        bar_width = content_w - 16.0
-        bar_bottom = margin_b
-    letter("(c)", bar_left - 16.0, bar_bottom + bar_h)
+    bar_h = stack_h
+    bar_bottom = min_y - bar_row - bar_h
+    letter("(c)", right_x, bar_bottom + bar_h + 0.4)
+    label_w = 16.0
     axis = fig.add_axes(
         (
-            bar_left / width_mm,
-            (bar_bottom + 1.0) / height_mm,
-            bar_width / width_mm,
-            (bar_h - 4.0) / height_mm,
+            (right_x + label_w) / width_mm,
+            (bar_bottom + 1.2) / height_mm,
+            (right_w - label_w) / width_mm,
+            (bar_h - 3.2) / height_mm,
         )
     )
-    for row, (name, kinds) in enumerate((("minimum", stacks["minimum"]), ("late", stacks["late"]))):
+    for row, name in enumerate(("minimum", "late")):
+        kinds = stacks[name]
+        shown = int(stacks["shown"][name])
         for column, kind in enumerate(kinds):
             colour = CHILL.get(kind, ("", (0.5, 0.5, 0.5)))[1]
+            axis.add_patch(plt.Rectangle((column, row), 1.0, 0.72, facecolor=colour, edgecolor="white", lw=0.3))
+        if shown > 0:
             axis.add_patch(
-                plt.Rectangle((column, row), 1.0, 0.72, facecolor=colour, edgecolor="white", lw=0.3)
+                plt.Rectangle((0.0, row), shown, 0.72, fill=False, edgecolor="black", lw=0.9, zorder=3)
             )
-        fraction = stacks["hexagonality"][name]
+        fraction = stacks["cubicity"][name]
         fig.text(
-            (bar_left - 1.2) / width_mm,
-            (bar_bottom + 1.0 + (bar_h - 4.0) * (row + 0.36) / 1.9) / height_mm,
+            (right_x + label_w - 0.6) / width_mm,
+            (bar_bottom + 1.2 + (bar_h - 3.2) * (row + 0.36) / 1.9) / height_mm,
             f"{name}  {fraction:.2f}",
             fontsize=7,
             ha="right",
@@ -1200,12 +1205,12 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
     axis.set_axis_off()
     axis.set_aspect("auto")
     fig.text(
-        (bar_left + bar_width) / width_mm,
-        (bar_bottom + 0.2) / height_mm,
+        (right_x + right_w) / width_mm,
+        (bar_bottom - 0.3) / height_mm,
         "layer index along [0001]",
         fontsize=7,
         ha="right",
-        va="bottom",
+        va="top",
     )
 
     handles = [
@@ -1215,10 +1220,25 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
     fig.legend(
         handles=handles,
         loc="lower center",
-        ncol=3 if width_mm < 150.0 else 6,
+        ncol=3 if narrow else 6,
         frameon=False,
         fontsize=7,
-        bbox_to_anchor=(0.5, 0.028),
+        bbox_to_anchor=(0.5, (caption_h + 0.4) / height_mm),
+    )
+    old = stacks["cubicity_shared"]
+    new = stacks["cubicity"]
+    fig.text(
+        0.5,
+        0.012,
+        "The sheet in (b) is the outlined central run of (c). "
+        f"Layer cubicity is {new['late']:.2f} late and {new['minimum']:.2f} minimum"
+        f" ({old['late']:.2f} and {old['minimum']:.2f} on one shared axis).\n"
+        "Late layers are 0.75–0.81 of one CHILL+ class and the rest the other class, measured stacking disorder.",
+        fontsize=6.5,
+        ha="center",
+        va="bottom",
+        linespacing=1.25,
+        transform=fig.transFigure,
     )
     png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(png, dpi=dpi)
@@ -1253,8 +1273,9 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
     # Each nucleus keeps its own c-axis. That axis is vertical and the
     # camera looks along the local [11-20], through two layers at the centre.
     prepared = {}
+    orient_rows = {}
     for label, (npos, nchill, extended, raw, raw_box) in loaded.items():
-        sheet, view, axis, _rows = orient_nucleus(npos, nchill, extended)
+        sheet, view, axis, orient_rows[label] = orient_nucleus(npos, nchill, extended)
         bonds = ice_bonds(raw, raw_box, sheet, 3.5)
         if len(bonds):
             straight = np.linalg.norm(npos[bonds[:, 1]] - npos[bonds[:, 0]], axis=1)
@@ -1279,39 +1300,41 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
         half_v = float(np.max(np.abs(centred @ up_i))) + ATOM_RADIUS
         return half_h, half_v
 
-    # One scale for both sheets, so a single 10 Å bar is honest. The late
-    # sheet fills about 70% of the panel; the minimum sheet is smaller.
-    late_h, late_v = raw_half("late")
-    min_h, min_v = raw_half("minimum")
-    aspect = late_v / max(late_h, 1e-6)
-    span_h = max(late_h, min_h)
-    span_v = max(late_v, min_v)
-    share_h = span_h / 0.70
-    share_v = span_v / 0.70
-    if share_v / share_h < aspect:
-        share_v = share_h * aspect
-    else:
-        share_h = share_v / aspect
-    frames = {"late": (share_h, share_v), "minimum": (share_h, share_v)}
-    nucleus_px = int(round(48.0 / 25.4 * PRINT_DPI))
+    # Both sheets use the slab's angstrom scale, so one 10 A bar serves (b).
+    angstrom_per_mm = (2.0 * slab["half_h"]) / 70.0
+    angstrom_per_px = angstrom_per_mm / (PRINT_DPI / 25.4)
     images = {}
-    stacks = {"hexagonality": {}}
+    stacks = {"shown": {}, "cubicity": {}}
     for label, (drawn, drawn_chill, bonds, view, axis) in prepared.items():
         images[label] = work / f"nucleus-{label}.png"
-        share_h, share_v = frames[label]
+        half_h, half_v = raw_half(label)
+        width_px = max(32, int(round(2.0 * half_h / angstrom_per_px)))
         render_molecule(
-            drawn, drawn_chill, bonds, view, axis, images[label], share_h, share_v, nucleus_px, 0.18, nucleus=False
+            drawn, drawn_chill, bonds, view, axis, images[label], half_h, half_v, width_px, 0.18, nucleus=False
         )
         npos, nchill, extended, _view, axis = clouds[label]
-        stacks[label] = layer_kinds(npos, nchill, extended, axis)
-        stacks["hexagonality"][label] = hexagonality(nchill, extended)
-    late_frame_h, late_frame_v = frames["late"]
-    nuclei = {
-        "minimum": images["minimum"],
-        "late": images["late"],
-        "half_h": late_frame_h,
-        "half_v": late_frame_v,
+        kinds = layer_kinds(npos, nchill, extended, axis)
+        stacks[label] = kinds
+        stacks["cubicity"][label] = cubicity(kinds)
+        sheet_kinds = [kind for kind, _purity, count in orient_rows[label] if count >= 4]
+        shown = 0
+        for full_kind, sheet_kind in zip(kinds, sheet_kinds):
+            if full_kind != sheet_kind:
+                break
+            shown += 1
+        stacks["shown"][label] = shown
+    shared = stacking_axis(loaded["late"][0], loaded["late"][1], loaded["late"][2])
+    stacks["cubicity_shared"] = {
+        label: cubicity(layer_kinds(npos, nchill, extended, shared))
+        for label, (npos, nchill, extended, _view, _axis) in clouds.items()
     }
+    px_per_mm = PRINT_DPI / 25.4
+    nuclei = {}
+    for label, path in images.items():
+        from PIL import Image
+
+        image = Image.open(path)
+        nuclei[label] = {"png": path, "w_mm": image.width / px_per_mm, "h_mm": image.height / px_per_mm}
     for width, stem in ((170.0, "figure-170mm"), (85.0, "figure-85mm")):
         compose(slab, nuclei, stacks, width, out / f"{stem}.png", out / f"{stem}.pdf")
         print(f"wrote {stem}", flush=True)
