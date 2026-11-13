@@ -968,6 +968,17 @@ rule h2h_ptm:
         "mv {output}.1 {output}"
 
 
+rule h2h_followup:
+    output:
+        "benchmarks/h2h-followup.txt",
+    shell:
+        "taskset -c 0-7 env "
+        "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:bbdir-release/src "
+        "QT_QPA_PLATFORM=offscreen "
+        "OMP_PROC_BIND=close OMP_PLACES=cores OMP_WAIT_POLICY=PASSIVE "
+        "python3 scripts/h2h_followup.py > {output}"
+
+
 rule h2h_paper_review:
     output:
         "benchmarks/h2h-paper-review.txt",

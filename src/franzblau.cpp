@@ -907,6 +907,16 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
         scr.lvl[static_cast<std::size_t>(v)] = -1;
       }
     }
+  } else {
+    // A lower flagged vertex owns any ring that contains it. Dropping
+    // its level keeps this source on the same walk as a full search
+    // from the lowest flagged member. An unflagged vertex below src
+    // stays, because a shortcut through it still decides primitivity.
+    for (const int v : scr.touched) {
+      if (v < src && (*through)[static_cast<std::size_t>(v)]) {
+        scr.lvl[v] = -1;
+      }
+    }
   }
 #ifdef SEAMS_HAS_OPENMP
   const int phaseSlot = profiling ? std::min(omp_get_thread_num(), 63) : 0;
@@ -2736,35 +2746,6 @@ struct primitive::RingUpdater::Impl {
         ++kept;
       }
     }
-    std::vector<std::vector<std::vector<int>>> dropped(static_cast<std::size_t>(std::max(nThreads, 1)));
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel num_threads(nThreads) if (nThreads > 1)
-#endif
-    {
-      int tid = 0;
-#ifdef SEAMS_HAS_OPENMP
-      tid = omp_get_thread_num();
-#endif
-      auto &mine = dropped[static_cast<std::size_t>(tid)];
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp for schedule(static)
-#endif
-      for (int i = 0; i < nRing; ++i) {
-        if (drop[static_cast<std::size_t>(i)] != 0 &&
-            flattened[static_cast<std::size_t>(i)].capacity() != 0) {
-          mine.push_back(std::move(flattened[static_cast<std::size_t>(i)]));
-        }
-      }
-    }
-    std::size_t nSpare = spare.size();
-    for (const auto &mine : dropped) {
-      nSpare += mine.size();
-    }
-    spare.reserve(nSpare);
-    for (auto &mine : dropped) {
-      spare.insert(spare.end(), std::make_move_iterator(mine.begin()),
-                   std::make_move_iterator(mine.end()));
-    }
     std::vector<int> keepIdx;
     keepIdx.reserve(static_cast<std::size_t>(kept));
     for (int i = 0; i < nRing; ++i) {
@@ -3083,11 +3064,12 @@ primitive::RingUpdater::update(const std::vector<std::vector<int>> &nList) {
     }
     return nCovered == nVertices;
   };
-  if ((overAtoms || overBonds) && componentExceedsFrame()) {
-    st.which = slot;
-    st.fastEnumerate(st.graph[st.which]);
-    return st.flattened;
-  }
+  // The atom-fraction and bond-crossover rules used to replace this
+  // frame with a search from every vertex. A ring that does not meet T
+  // is unchanged, so those rules now only record that the change is
+  // large. The search below still starts at T.
+  (void)overAtoms;
+  (void)overBonds;
 
   // T: within reach of a changed vertex in the union of both frames' graphs.
   std::vector<char> inT(static_cast<std::size_t>(nVertices), 0);

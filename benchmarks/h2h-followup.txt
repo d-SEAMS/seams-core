@@ -1,0 +1,146 @@
+cores 8 affinity 8
+samples 8
+recorded rings source paper/tex/figures/data/ring-head2head.json git c5da2d9f one thread fresh bench_stages graph outside the timer type-7 median orth-1e5 864.701 vs 511.024 orth-4k 31.617 vs 15.831 tri-136 1.078 vs 0.697
+recorded symmetry pair 40.6 vs 36.1 is not a labelled median; nearest is symmetry-v20 ideal-110592 kernel 21.743 identify-diamond 36.564
+[rings] tri-136 threads 1
+[rings] tri-136 t1 dseams 0.2603 ovito 0.5508 census {'4': 12, '5': 120, '6': 68}
+[rings] orth-4k threads 1
+[rings] orth-4k t1 dseams 4.2718 ovito 14.1501 census {'6': 8192}
+[rings] orth-1e5 threads 1
+[rings] orth-1e5 t1 dseams 116.0440 ovito 627.1597 census {'6': 221184}
+[rings] tri-136 threads 8
+[rings] tri-136 t8 dseams 0.3846 ovito 0.6113 census {'4': 12, '5': 120, '6': 68}
+[rings] orth-4k threads 8
+[rings] orth-4k t8 dseams 2.6196 ovito 14.6331 census {'6': 8192}
+[rings] orth-1e5 threads 8
+[rings] orth-1e5 t8 dseams 33.7283 ovito 334.8456 census {'6': 221184}
+Wrote benchmarks/h2h-recorded-rings.json
+robust op tri-136 rings threads 1 molecules 136 dseams_median 0.2603 dseams_min 0.2260 ovito_median 0.5508 ovito_min 0.5084 affinity 1 WIN census {'4': 12, '5': 120, '6': 68}
+robust op orth-4k rings threads 1 molecules 4096 dseams_median 4.2718 dseams_min 3.8198 ovito_median 14.1501 ovito_min 13.7223 affinity 1 WIN census {'6': 8192}
+robust op orth-1e5 rings threads 1 molecules 110592 dseams_median 116.0440 dseams_min 111.4282 ovito_median 627.1597 ovito_min 613.3667 affinity 1 WIN census {'6': 221184}
+robust op tri-136 rings threads 8 molecules 136 dseams_median 0.3846 dseams_min 0.3439 ovito_median 0.6113 ovito_min 0.5540 affinity 8 WIN census {'4': 12, '5': 120, '6': 68}
+robust op orth-4k rings threads 8 molecules 4096 dseams_median 2.6196 dseams_min 2.0928 ovito_median 14.6331 ovito_min 14.2794 affinity 8 WIN census {'6': 8192}
+robust op orth-1e5 rings threads 8 molecules 110592 dseams_median 33.7283 dseams_min 30.2948 ovito_median 334.8456 ovito_min 315.5679 affinity 8 WIN census {'6': 221184}
+ovito 3.17.2
+robust op orth-4k symmetry threads 1 molecules 4096 dseams_median 1.7500 dseams_min 1.6640 diamond_median 5.5603 diamond_min 5.2735 affinity 1 WIN
+robust op orth-1e5 symmetry threads 1 molecules 110592 dseams_median 62.6496 dseams_min 59.5150 diamond_median 171.6700 diamond_min 167.1840 affinity 1 WIN
+robust op orth-4k symmetry threads 8 molecules 4096 dseams_median 1.6148 dseams_min 1.3260 diamond_median 6.3351 diamond_min 5.5269 affinity 8 WIN
+robust op orth-1e5 symmetry threads 8 molecules 110592 dseams_median 20.7674 dseams_min 17.9895 diamond_median 162.9890 diamond_min 158.4574 affinity 8 WIN
+ring_carry churn threads 1 affinity 1
+molecules 4096 samples 8
+changed_bonds 3670 per_molecule 0.8960
+recomputed 2881 of 4096
+old_full_pass_rule yes
+identical yes
+full_median 20.6020 full_min 20.0974
+carry_median 20.0734 carry_min 19.7626 WIN
+carry_sample 19.7626
+carry_sample 20.1188
+carry_sample 19.9613
+carry_sample 20.0280
+carry_sample 19.7693
+carry_sample 21.0037
+carry_sample 20.8641
+carry_sample 21.1861
+full_sample 20.5682
+full_sample 20.0974
+full_sample 20.4347
+full_sample 20.4421
+full_sample 20.6358
+full_sample 22.3709
+full_sample 20.6615
+full_sample 22.2742
+ring_carry local threads 1 affinity 1
+molecules 4096 samples 8
+changed_bonds 577 per_molecule 0.1409
+recomputed 850 of 4096
+old_full_pass_rule yes
+identical yes
+full_median 18.6880 full_min 17.8617
+carry_median 9.3498 carry_min 9.0283 WIN
+carry_sample 9.2658
+carry_sample 9.5875
+carry_sample 9.8331
+carry_sample 9.4339
+carry_sample 9.2298
+carry_sample 9.0283
+carry_sample 9.1844
+carry_sample 9.4989
+full_sample 18.4706
+full_sample 18.9730
+full_sample 19.9236
+full_sample 19.8306
+full_sample 18.5638
+full_sample 17.9108
+full_sample 17.8617
+full_sample 18.8122
+ring_carry churn threads 8 affinity 8
+molecules 4096 samples 8
+changed_bonds 3670 per_molecule 0.8960
+recomputed 2881 of 4096
+old_full_pass_rule yes
+identical yes
+full_median 5.2254 full_min 5.1032
+carry_median 6.5902 carry_min 5.6698 LOSE
+carry_sample 6.5510
+carry_sample 6.9348
+carry_sample 5.6698
+carry_sample 6.9602
+carry_sample 5.9568
+carry_sample 6.5051
+carry_sample 7.0453
+carry_sample 6.6294
+full_sample 5.1336
+full_sample 5.1474
+full_sample 5.2132
+full_sample 5.2375
+full_sample 5.6949
+full_sample 5.3592
+full_sample 5.3366
+full_sample 5.1032
+ring_carry local threads 8 affinity 8
+molecules 4096 samples 8
+changed_bonds 577 per_molecule 0.1409
+recomputed 850 of 4096
+old_full_pass_rule yes
+identical yes
+full_median 5.4198 full_min 4.6205
+carry_median 3.7580 carry_min 3.2086 WIN
+carry_sample 4.6984
+carry_sample 4.0576
+carry_sample 3.4566
+carry_sample 3.5718
+carry_sample 3.6618
+carry_sample 3.8542
+carry_sample 3.2086
+carry_sample 4.3603
+full_sample 5.6575
+full_sample 5.3030
+full_sample 5.3623
+full_sample 6.0051
+full_sample 4.6205
+full_sample 4.6781
+full_sample 5.5449
+full_sample 5.4773
+chill_plus published staggered<=-0.35 eclipsed -0.8..0.25 four nearest
+chill_plus ovito open edges every neighbour inside 3.5 A
+recall mW-lattice paper tp 512 fp 0 fn 0 tn 0 recall 1.000000 matrix ice/ice=512
+recall mW-lattice ovito_rule tp 512 fp 0 fn 0 tn 0 recall 1.000000 matrix ice/ice=512
+recall mW-lattice modifier tp 512 fp 0 fn 0 tn 0 recall 1.000000 matrix ice/ice=512
+matrix mW-lattice paper_vs_ovito_rule hexagonal/hexagonal=512
+recall mW-seed paper tp 397 fp 0 fn 115 tn 256 recall 0.775391 matrix ice/ice=397 ice/other=115 other/other=256
+recall mW-seed ovito_rule tp 402 fp 0 fn 110 tn 256 recall 0.785156 matrix ice/ice=402 ice/other=110 other/other=256
+recall mW-seed modifier tp 402 fp 0 fn 110 tn 256 recall 0.785156 matrix ice/ice=402 ice/other=110 other/other=256
+matrix mW-seed paper_vs_ovito_rule clathrate/interclathrate=1 hexagonal/hexagonal=397 interclathrate/interclathrate=1 interclathrate/water=4 interfacial/hexagonal=5 interfacial/interfacial=40 water/interclathrate=3 water/interfacial=1 water/water=316
+recall TIP4P-lattice paper tp 512 fp 0 fn 0 tn 0 recall 1.000000 matrix ice/ice=512
+recall TIP4P-lattice ovito_rule tp 512 fp 0 fn 0 tn 0 recall 1.000000 matrix ice/ice=512
+recall TIP4P-lattice modifier tp 512 fp 0 fn 0 tn 0 recall 1.000000 matrix ice/ice=512
+matrix TIP4P-lattice paper_vs_ovito_rule hexagonal/hexagonal=512
+recall TIP4P-seed paper tp 396 fp 0 fn 116 tn 256 recall 0.773438 matrix ice/ice=396 ice/other=116 other/other=256
+recall TIP4P-seed ovito_rule tp 401 fp 0 fn 111 tn 256 recall 0.783203 matrix ice/ice=401 ice/other=111 other/other=256
+recall TIP4P-seed modifier tp 401 fp 0 fn 111 tn 256 recall 0.783203 matrix ice/ice=401 ice/other=111 other/other=256
+matrix TIP4P-seed paper_vs_ovito_rule clathrate/interclathrate=1 hexagonal/hexagonal=396 interclathrate/interclathrate=2 interclathrate/water=3 interfacial/hexagonal=5 interfacial/interfacial=41 water/interclathrate=4 water/interfacial=1 water/water=315
+sqq 0.5.8
+accept genice_sI.lammpstrj orthorhombic dump
+reject genice_sH.lammpstrj ValueError: Triclinic/tilted LAMMPS dump boxes are not supported: genice_sH.lammpstrj frame 0.
+reject box_mode triclinic ConfigurationError: Unable to resolve SQQ configuration: pbc.box_mode must be orthorhombic.

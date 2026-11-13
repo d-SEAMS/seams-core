@@ -417,6 +417,13 @@ executable('bench_h2h_cpc', 'bench_h2h_cpc.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
+bench_ring_carry = executable('bench_ring_carry', 'bench_ring_carry.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
 executable('bench_ring_ic', 'bench_ring_ic.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
@@ -695,6 +702,13 @@ test('cycless_pentagon', find_program('python3'),
          meson.project_build_root() / 'src' / 'libseams.so'],
   workdir: meson.project_source_root(),
   timeout: 120)
+test('sqq_sh_triclinic', find_program('python3'),
+  args: [files('test_sqq_sh.py')],
+  workdir: meson.project_source_root(),
+  timeout: 60)
+test('ring_carry', bench_ring_carry,
+  args: ['800', '2'],
+  timeout: 180)
 test('ovito_chill_atoms', find_program('python3'),
   args: [files('test_ovito_chill_atoms.py'),
          meson.project_build_root() / 'src' / 'libseams.so'],

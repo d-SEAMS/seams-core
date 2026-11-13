@@ -1095,3 +1095,49 @@ class H2HPaperReview:
 
 H2HPaperReview.time_check.repeat = 1
 H2HPaperReview.time_check.number = 8
+
+
+class H2HFollowup:
+    """Carried-ring update on a small cell. asv repeats it eight times."""
+
+    def setup(self):
+        import subprocess
+
+        self._bin = ROOT / "bbdir-release" / "tests" / "bench_ring_carry"
+        if not self._bin.is_file():
+            raise NotImplementedError("bench_ring_carry is not built")
+        self._run = subprocess.run
+
+    def time_check(self):
+        done = self._run(
+            [str(self._bin), "256", "2"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        if "identical yes" not in done.stdout:
+            raise RuntimeError(done.stdout)
+
+
+H2HFollowup.time_check.repeat = 1
+H2HFollowup.time_check.number = 8
+
+
+class H2HSqqBox:
+    """SQQ rejects the tilted sH dump. asv repeats the check eight times."""
+
+    def setup(self):
+        try:
+            import sqq  # noqa: F401
+        except ImportError as exc:
+            raise NotImplementedError("sqq is not installed") from exc
+
+    def time_check(self):
+        import runpy
+
+        runpy.run_path(str(ROOT / "scripts" / "h2h_sqq_box.py"), run_name="__main__")
+
+
+H2HSqqBox.time_check.repeat = 1
+H2HSqqBox.time_check.number = 8

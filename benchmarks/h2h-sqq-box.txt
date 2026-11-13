@@ -1,0 +1,4 @@
+sqq 0.5.8
+accept genice_sI.lammpstrj orthorhombic dump
+reject genice_sH.lammpstrj ValueError: Triclinic/tilted LAMMPS dump boxes are not supported: genice_sH.lammpstrj frame 0.
+reject box_mode triclinic ConfigurationError: Unable to resolve SQQ configuration: pbc.box_mode must be orthorhombic.
