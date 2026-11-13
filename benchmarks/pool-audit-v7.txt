@@ -1,0 +1,21 @@
+cores 8
+model Intel(R) Xeon(R) Processor
+affinity 0-7
+n 8
+seeded cages, ice Ic 110592: one search when the edge sets match, against both searches
+cage affiliation, ice Ic 4096: cold rebuild against the warm sweep after a fallback
+each pair is interleaved
+threads 1 same_edges 1
+threads 1 one_search_ms 451.756 two_search_ms 746.377
+one_search_samples 481.254 444.490 457.361 444.825 458.969 447.372 456.140 444.089
+two_search_samples 743.792 748.713 743.333 748.214 741.769 751.264 744.539 752.006
+threads 1 cold_rebuild_ms 1273.680 warm_sweep_ms 1287.510
+cold_samples 1295.370 1288.024 1277.620 1258.650 1269.741 1223.442 1297.437 1266.785
+warm_samples 1287.655 1290.222 1287.364 1290.493 1249.086 1296.939 1275.925 1233.205
+threads 8 same_edges 1
+threads 8 one_search_ms 145.817 two_search_ms 222.791
+one_search_samples 181.116 143.517 149.359 143.831 147.598 144.036 148.074 143.492
+two_search_samples 229.218 221.288 222.128 221.291 247.781 227.224 222.040 223.455
+threads 8 cold_rebuild_ms 165.353 warm_sweep_ms 163.526
+cold_samples 164.146 165.657 163.336 168.482 205.644 164.107 165.049 166.732
+warm_samples 163.233 164.028 164.397 163.343 172.932 163.376 163.319 163.675
