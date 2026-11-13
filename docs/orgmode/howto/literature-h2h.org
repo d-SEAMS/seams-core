@@ -227,7 +227,7 @@ The table below uses the full list. One thread is 28.325 ms
 against 51.194 ms. Eight threads are 6.453 ms against 22.269 ms.
 
 **Numbers that this sitting does not match.** Primitive rings at
-110592 molecules and one thread are 88.959 ms against mdapy
+110592 molecules and one thread are 86.531 ms against mdapy
 2276.747 ms. Both censuses are 221184 six-rings. The quoted
 0.12 s is not this median. The quoted 2.2 s is the mdapy median.
 Cutoff q6 against mdapy is 25.832 ms against 79.232 ms, and the
@@ -263,6 +263,8 @@ derivative, checked separately on a symmetry-broken
 eight-molecule cell, matches an independent nanometre difference
 to 3.99e-11.
 
+The table is ~benchmarks/rc3-sitting.csv~: code, version, molecules, operation, threads, cores, n, median, and the type-7 interquartile range.
+
 The non-heavy test suite was run three times on this build:
 128 passed, 2 expected failures, 1 skip, 0 failures. =seams_input=
 and =language_fronts= passed on each run.
@@ -282,7 +284,7 @@ and =language_fronts= passed on each run.
 | d-SEAMS | 2.14.0 | 110592 | CHILL+ | 1 | 0-7 | 6 | 24.102 | 0.308 |
 | mdapy | 2.0.0 | 110592 | CHILL+ | 1 | 0 | 6 | 61.938 | 0.226 |
 | OVITO | 3.17.2 | 110592 | CHILL+ | 1 | 0 | 6 | 622.424 | 3.316 |
-| d-SEAMS | 2.14.0 | 110592 | rings | 1 | 0-7 | 6 | 88.959 | 1.764 |
+| d-SEAMS | 2.14.0 | 110592 | rings | 1 | 0-7 | 6 | 86.531 | 1.036 |
 | OVITO | 3.17.2 | 110592 | rings | 1 | 0 | 6 | 583.334 | 7.617 |
 | mdapy | 2.0.0 | 110592 | rings | 1 | 0 | 6 | 2276.747 | 13.477 |
 | rings-statistics-matter | 0.3.0 | 110592 | rings | 1 | 0 | 6 | 1151.862 | 46.483 |
@@ -301,7 +303,7 @@ and =language_fronts= passed on each run.
 | d-SEAMS | 2.14.0 | 110592 | CHILL+ | 8 | 0-7 | 6 | 5.697 | 0.204 |
 | mdapy | 2.0.0 | 110592 | CHILL+ | 8 | 0-7 | 6 | 12.379 | 0.422 |
 | OVITO | 3.17.2 | 110592 | CHILL+ | 8 | 0-7 | 6 | 88.685 | 1.045 |
-| d-SEAMS | 2.14.0 | 110592 | rings | 8 | 0-7 | 6 | 33.441 | 0.481 |
+| d-SEAMS | 2.14.0 | 110592 | rings | 8 | 0-7 | 6 | 32.665 | 0.343 |
 | OVITO | 3.17.2 | 110592 | rings | 8 | 0-7 | 6 | 354.605 | 17.902 |
 | mdapy | 2.0.0 | 110592 | rings | 8 | 0-7 | 6 | 375.967 | 3.766 |
 | rings-statistics-matter | 0.3.0 | 110592 | rings | 8 | 0-7 | 6 | 264.953 | 10.643 |
