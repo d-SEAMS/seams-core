@@ -1681,3 +1681,61 @@ TEST_CASE("sheared ice keeps the shared shift-table pairs", "[neighbours][tricli
   REQUIRE(cols.size() == 3538944);
   REQUIRE(csrDigest(offsets, cols) == 0xba88eb7da3372fc6ull);
 }
+
+TEST_CASE("a shell longer than the stash matches the brute-force cutoff", "[neighbours]") {
+#ifdef SEAMS_HAS_OPENMP
+  const int saved = omp_get_max_threads();
+  omp_set_num_threads(saved < 8 ? saved : 8);
+#endif
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud.box = {8.0, 8.0, 8.0};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  const int nSide = 4;
+  const int n = nSide * nSide * nSide;
+  for (int iz = 0; iz < nSide; ++iz) {
+    for (int iy = 0; iy < nSide; ++iy) {
+      for (int ix = 0; ix < nSide; ++ix) {
+        molSys::Point<double> pt;
+        pt.type = 1;
+        pt.atomID = static_cast<int>(cloud.pts.size());
+        pt.molID = pt.atomID;
+        pt.x = ix * 2.0;
+        pt.y = iy * 2.0;
+        pt.z = iz * 2.0;
+        cloud.idIndexMap[pt.atomID] = pt.atomID;
+        cloud.pts.push_back(pt);
+      }
+    }
+  }
+  cloud.nop = n;
+  const double cutoff = 6.0;
+  const double rc2 = cutoff * cutoff;
+  const double edge = 8.0;
+  std::vector<int> offsets;
+  std::vector<int> cols;
+  REQUIRE(nneigh::orthoFullCsr(cloud, nullptr, cutoff, offsets, cols));
+  REQUIRE(offsets.size() == static_cast<std::size_t>(n + 1));
+  for (int i = 0; i < n; ++i) {
+    int brute = 0;
+    for (int j = 0; j < n; ++j) {
+      if (j == i) {
+        continue;
+      }
+      const double dx = cloud.pts[static_cast<std::size_t>(j)].x - cloud.pts[static_cast<std::size_t>(i)].x;
+      const double dy = cloud.pts[static_cast<std::size_t>(j)].y - cloud.pts[static_cast<std::size_t>(i)].y;
+      const double dz = cloud.pts[static_cast<std::size_t>(j)].z - cloud.pts[static_cast<std::size_t>(i)].z;
+      const double wx = dx - std::nearbyint(dx / edge) * edge;
+      const double wy = dy - std::nearbyint(dy / edge) * edge;
+      const double wz = dz - std::nearbyint(dz / edge) * edge;
+      if (wx * wx + wy * wy + wz * wz < rc2) {
+        ++brute;
+      }
+    }
+    REQUIRE(brute > 48);
+    REQUIRE(offsets[static_cast<std::size_t>(i + 1)] - offsets[static_cast<std::size_t>(i)] == brute);
+  }
+#ifdef SEAMS_HAS_OPENMP
+  omp_set_num_threads(saved);
+#endif
+}

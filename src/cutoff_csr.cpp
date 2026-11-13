@@ -607,6 +607,9 @@ inline __attribute__((target("avx2,fma"), always_inline)) void stashScanAvx(
         if (ni < kStashCap) {
           rowI[ni] = jj;
         } else {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp atomic write
+#endif
           *overflowed = 1;
         }
         ++ni;
@@ -615,6 +618,9 @@ inline __attribute__((target("avx2,fma"), always_inline)) void stashScanAvx(
         if (nj < kStashCap) {
           rowJ[nj] = ii;
         } else {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp atomic write
+#endif
           *overflowed = 1;
         }
         ++nj;
@@ -632,6 +638,9 @@ inline __attribute__((target("avx2,fma"), always_inline)) void stashScanAvx(
       if (ni < kStashCap) {
         rowI[ni] = jj;
       } else {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp atomic write
+#endif
         *overflowed = 1;
       }
       ++ni;
@@ -640,6 +649,9 @@ inline __attribute__((target("avx2,fma"), always_inline)) void stashScanAvx(
       if (nj < kStashCap) {
         rowJ[nj] = ii;
       } else {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp atomic write
+#endif
         *overflowed = 1;
       }
       ++nj;
@@ -2069,6 +2081,17 @@ bool orthoFullCsr(
                     sc.counts.data(), nullptr, nullptr, half);
   }
   phase().count = msSince(tCount);
+
+  // The half-stencil stash keeps only kStashCap ids. The degree still
+  // counts every pair, but the reverse copy stops at the cap, so the
+  // stored degree is short of the full shell. The fill walk writes that
+  // full shell and would step off the row. Recount from the geometry.
+  if (fast && !half && sc.overflowed != 0) {
+    std::fill(sc.counts.begin(), sc.counts.end(), 0);
+    passFast<false, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                           ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr,
+                           branchy);
+  }
 
   const auto tPrefix = Clock::now();
   if (!seams::prefixCounts(sc.counts.data(), nop, offsets)) {
