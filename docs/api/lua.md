@@ -88,3 +88,14 @@ declaration span of the header, so each exported function is callable
 as `C.seams_*` with the C buffer convention. `tests/lua_ffi.lua` loads
 that module, labels the cubic cell through `seams_chill_plus`, and
 prints `ffi ok`.
+
+
+## Structure still
+
+```{figure} ../tutorials/molecules/lua/overlay-web.png
+:alt: Molecule still for this front
+:width: 480px
+
+Ice Ih coloured by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug lua` writes the 2400 by 1800 PNG.
+```
+

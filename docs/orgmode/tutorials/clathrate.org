@@ -32,3 +32,12 @@ seams cages input/traj/genice_sH.lammpstrj --type 1 --graph cutoff \
 
 The lines you should see are ~cages 2~ and ~cages 6~ on sI, ~cages 16~
 and ~cages 8~ on sII, and ~cages 12~, ~cages 8~ and ~cages 4~ on sH.
+
+#+begin_export rst
+.. figure:: molecules/cage-si/overlay-web.png
+   :width: 480px
+   :alt: GenIce sI host. sII and sH are drawn the same way.
+
+   GenIce sI host. sII and sH are drawn the same way. ``python docs/scripts/render_molecules.py --slug cage-si`` writes the 2400 by 1800 still.
+#+end_export
+

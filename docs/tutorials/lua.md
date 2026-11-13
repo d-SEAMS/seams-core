@@ -125,3 +125,14 @@ cdef, so a LuaJIT program can call `seams_system_read`,
 `seams_steinhardt`, `seams_cages`, `seams_rdf`, `seams_hbonds`,
 `seams_rings_vertices`, and the rest of the C API directly.
 `tests/lua_ffi.lua` does that for the cubic cell and prints `ffi ok`.
+
+
+## Structure still
+
+```{figure} ../tutorials/molecules/lua/overlay-web.png
+:alt: Molecule still for this front
+:width: 480px
+
+Ice Ih coloured by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug lua` writes the 2400 by 1800 PNG.
+```
+

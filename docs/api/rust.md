@@ -440,3 +440,14 @@ Units: dimensionless site codes
 
 Example: `docs/examples/minimal_rust.rs`
 <!-- API_SYMBOLS_END -->
+
+
+## Structure still
+
+```{figure} ../tutorials/molecules/rust/overlay-web.png
+:alt: Molecule still for this front
+:width: 480px
+
+Ice Ih coloured by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug rust` writes the 2400 by 1800 PNG.
+```
+

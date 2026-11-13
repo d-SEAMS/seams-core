@@ -20,3 +20,12 @@ print(ring_census(frame, max_size=8))
 
 On the 250 oxygens the census is 1 three-ring, 230 four-rings, 4 five-rings, and 192 six-rings.
 The CLI CHILL+ graph is the mutual four-nearest list, so a census of that graph is a different number.
+
+#+begin_export rst
+.. figure:: molecules/rings/overlay-web.png
+   :width: 480px
+   :alt: Five- and six-rings on the sI host.
+
+   Five- and six-rings on the sI host. ``python docs/scripts/render_molecules.py --slug rings`` writes the 2400 by 1800 still.
+#+end_export
+

@@ -250,3 +250,14 @@ Units: dimensionless label codes
 
 Example: `docs/examples/minimal_r.R`
 <!-- API_SYMBOLS_END -->
+
+
+## Structure still
+
+```{figure} ../tutorials/molecules/r/overlay-web.png
+:alt: Molecule still for this front
+:width: 480px
+
+Ice Ih coloured by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug r` writes the 2400 by 1800 PNG.
+```
+

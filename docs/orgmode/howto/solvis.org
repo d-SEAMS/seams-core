@@ -23,3 +23,12 @@ returns, including ~ice_type~ / ~hc~ / ~ddc~ arrays after those
 calls. Interactive plots follow the
 [[https://github.com/amritagos/solvis][solvis examples]]. The full
 howto is [[https://d-seams.github.io/PydSEAMSlib/][pydseams solvis]].
+
+#+begin_export rst
+.. figure:: ../tutorials/molecules/solvis/overlay-web.png
+   :width: 480px
+   :alt: sI oxygen cell drawn with the solvis backend of chemparseplot.
+
+   sI oxygen cell drawn with the solvis backend of chemparseplot. ``python docs/scripts/render_molecules.py --slug solvis`` writes the 2400 by 1800 still.
+#+end_export
+

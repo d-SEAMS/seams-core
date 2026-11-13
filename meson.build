@@ -1350,6 +1350,19 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 120)
   test(
+    'docs_render_molecules',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'scripts' / 'render_molecules.py',
+      '--slug', 'ice-ih',
+      '--out', meson.project_build_root() / 'molecule-stills',
+      '--libdir', meson.project_build_root() / 'src',
+    ],
+    env: tutorial_env,
+    depends: [seams_api_lib],
+    suite: 'docs',
+    timeout: 180)
+  test(
     'docs_video_tapes',
     python3,
     args: [

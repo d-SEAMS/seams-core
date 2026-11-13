@@ -98,6 +98,10 @@ docs/doxygen-html/
 docs/source/*.rst
 docs/source/tutorials/gallery/
 docs/source/tutorials/gallery-captions.rst
+docs/source/tutorials/molecules/
+docs/source/tutorials/molecules.rst
+docs/source/videos/players.rst
+docs/videos/**/*.png
 docs/source/xml/
 docs/source/api/
 m.css/
@@ -403,3 +407,4 @@ bench/local/
 *.bench.log
 
 docs/_build/
+__pycache__/

@@ -53,6 +53,49 @@ def _write_gallery():
 _write_gallery()
 
 
+def _write_molecules():
+    """Draw chemparseplot stills before Sphinx reads the figure list."""
+    import importlib.util
+
+    script = os.path.join(_docs, "scripts", "render_molecules.py")
+    spec = importlib.util.spec_from_file_location("render_molecules", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    argv = ["--out", os.path.join(_source, "tutorials", "molecules"), "--pages"]
+    libdir = os.environ.get("SEAMS_LIBDIR", "")
+    if libdir:
+        argv.extend(["--libdir", libdir])
+    if module.main(argv) != 0:
+        raise SystemExit("molecule stills failed")
+
+
+_write_molecules()
+
+
+def _write_video_players():
+    """Fill the Odysee player list from docs/videos/<slug>/embed.txt."""
+    import importlib.util
+    import pathlib
+    import shutil
+
+    script = os.path.join(_docs, "video_page.py")
+    spec = importlib.util.spec_from_file_location("video_page", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    videos = pathlib.Path(_docs) / "videos"
+    dest = pathlib.Path(_source) / "videos" / "players.rst"
+    module.write_players(videos, dest)
+    static = os.path.join(_source, "_static", "captions")
+    os.makedirs(static, exist_ok=True)
+    for name in os.listdir(videos):
+        track = os.path.join(videos, name, "captions.vtt")
+        if os.path.isfile(track):
+            shutil.copy(track, os.path.join(static, name + ".vtt"))
+
+
+_write_video_players()
+
+
 def _write_pool_v5():
     """Fill the pool-audit v5 tables before Sphinx reads the benchmarks page."""
     import importlib.util

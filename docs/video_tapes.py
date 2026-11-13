@@ -159,12 +159,45 @@ def check_folder(folder, env, root, record):
     print(folder.name, "scenes", len(parsed), "ok")
 
 
+def check_embeds(root):
+    """Odysee claims come from embed.txt. Missing claims stay a coming-soon note."""
+    from video_page import players_rst, read_claim, slugs
+
+    videos = root / "docs" / "videos"
+    if (videos / "lua-fennel").exists():
+        fail("lua-fennel should be the lua slug")
+    page = (root / "docs" / "orgmode" / "videos" / "index.org").read_text()
+    if "huggingface.co/datasets/d-SEAMS/docs-videos" in page:
+        fail("videos page still points at the old dataset")
+    html = players_rst(videos)
+    if "huggingface.co" in html:
+        fail("video player html still names huggingface")
+    for slug in slugs(videos):
+        folder = videos / slug
+        if not (folder / "embed.txt").is_file():
+            fail("{} is missing embed.txt".format(slug))
+        if not (folder / "captions.vtt").is_file():
+            fail("{} is missing captions.vtt".format(slug))
+        claim = read_claim(folder)
+        if "docs/videos/{}/captions.vtt".format(slug) not in html:
+            fail("{} transcript link is missing".format(slug))
+        if claim is None:
+            if "video coming soon" not in html:
+                fail("coming soon note is missing")
+        else:
+            src = "https://odysee.com/$/embed/{}:{}".format(claim[0], claim[1])
+            if src not in html:
+                fail("{} iframe is missing".format(slug))
+    print("video embeds ok")
+
+
 def main():
     record = "--record" in sys.argv
     args = [item for item in sys.argv[1:] if item != "--record"]
     if len(args) != 5:
         fail("usage: video_tapes.py [--record] ROOT SEAMS LIBDIR LANGDIR BUILD")
     root, env = prepare(*args)
+    check_embeds(root)
     folders = sorted(path for path in (root / "docs" / "videos").iterdir() if (path / "script.md").is_file())
     if len(folders) < 14:
         fail("expected 14 videos, found {}".format(len(folders)))

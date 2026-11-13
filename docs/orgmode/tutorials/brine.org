@@ -23,3 +23,12 @@ reCubic or reHex.
 One ion is on the ice side of the front and eight are on the liquid
 side. The water census is unchanged from the ion-free frame:
 hexagonal 352.
+
+#+begin_export rst
+.. figure:: molecules/brine/overlay-web.png
+   :width: 480px
+   :alt: NaCl front. Water, sodium and chloride.
+
+   NaCl front. Water, sodium and chloride. ``python docs/scripts/render_molecules.py --slug brine`` writes the 2400 by 1800 still.
+#+end_export
+

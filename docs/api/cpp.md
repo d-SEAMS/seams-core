@@ -461,3 +461,14 @@ Units: dimensionless counts
 
 Example: `docs/examples/minimal_cpp.cpp`
 <!-- API_SYMBOLS_END -->
+
+
+## Structure still
+
+```{figure} ../tutorials/molecules/cpp/overlay-web.png
+:alt: Molecule still for this front
+:width: 480px
+
+Ice Ih coloured by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug cpp` writes the 2400 by 1800 PNG.
+```
+
