@@ -16,7 +16,7 @@ Julia, and Rust fronts call it. LAMMPS, GROMACS, OpenMM, and PLUMED
 drivers call the same library. ~with_lammps~ and ~with_gromacs~
 default to auto. A found library whose plugin cannot be built is an
 error.
-~seams_set_num_threads(0)~ restores the saved OpenMP width.
+~seams_set_num_threads(0)~ restores the OpenMP width captured at first use.
 ~--water-types~ keeps every named type on the cutoff list, cross pairs
 included, and ~seams ions~ counts each of those types in the shell.
 ~linkcell::pairs_within~ owns the cutoff list. vesin is the fallback

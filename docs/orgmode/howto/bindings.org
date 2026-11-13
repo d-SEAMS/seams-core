@@ -1,8 +1,11 @@
 #+TITLE: Build the language fronts
 #+OPTIONS: toc:nil num:nil
 
-Python is not built in this repository.
-R and Julia call =libseams_lang=, which is built with the engine and does not reimplement the classifiers.
+The nanobind module =dseams._core= is built in this repository when
+nanobind is found. R and Julia call =libseams_lang=, which is built
+with the engine and does not reimplement the classifiers. The released
+Frame package remains [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]. Lua remains
+[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]].
 
 * Python
 
@@ -43,7 +46,7 @@ julia --project=bindings/julia/Dseams bindings/julia/Dseams/test/runtests.jl
 
 * q4 and q6
 
-The cutoff-shell solid-harmonic kernel is ~seams_q4_q6~ in the C API and ~seams_frame_q4_q6~ in =libseams_lang=.
+The cutoff-shell solid-harmonic kernel is ~seams_q4q6~ in ~seams.h~ and ~seams_frame_q4_q6~ in =libseams_lang=. The flat name ~seams_q4_q6~ lives in ~src/include/internal/seams_c_api.h~ and is not installed.
 Python is ~q4_q6~ in =bindings/python/chill_plus.py= (~SEAMS_LANG_LIB= selects the library).
 R and Julia export ~q4_q6~.
 The CLI command is ~seams steinhardt~. ~--l~ names the degrees (default ~4,6~). ~--l 3,12~ asks for the hydrate pair.

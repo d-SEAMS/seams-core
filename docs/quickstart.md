@@ -3,9 +3,11 @@
 Build the C library and the API test:
 
 ```bash
-meson setup build --wrap-mode=nofallback -Dwith_tests=false
-meson compile -C build test_seams_api
-./build/test_seams_api
+meson setup build --wrap-mode=nofallback -Dwith_tests=true
+meson compile -C build test_seams_api docs_ice_example
+./build/src/test_seams_api
+./build/src/docs_ice_example
+meson test -C build docs_check seams_c_api docs_ice_example --print-errorlogs
 ```
 
 `libseams.so` exports `seams.h`. The language fronts and the engine hooks link

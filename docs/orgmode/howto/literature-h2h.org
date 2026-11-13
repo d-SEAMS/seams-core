@@ -73,7 +73,7 @@ change the 128-molecule ice Ic list is 0.059 ms against vesin at
 0.095 ms, and the dense frame is 1.384 ms against mdapy at 1.635 ms
 and vesin at 1.992 ms, still with the same neighbour sets.
 
-**\(q_4\) and \(q_6\).** Local Steinhardt parameters on the cutoff list.
+*q4 and q6.* Local Steinhardt parameters \(q_4\) and \(q_6\) on the cutoff list.
 On ideal ice the first shell is a perfect tetrahedron, so Ih and Ic
 share the same \(q_l\). Every compared value is within \(10^{-6}\); the
 largest absolute gap on the 110592-molecule cells is a few times

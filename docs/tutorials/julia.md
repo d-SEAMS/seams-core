@@ -4,12 +4,9 @@
 
 The cubic mW dump is ice Ic. CHILL+ labels all 4096 oxygens cubic.
 
-```julia
-using Dseams
-root = get(ENV, "DSEAMS_ROOT", pwd())
-frame = read_frame(joinpath(root, "input", "traj", "mW_cubic.lammpstrj"); type = 1)
-ice = chill_plus(frame)
-println(ice.counts["cubic"])
+```{literalinclude} ../../../bindings/julia/Dseams/test/runtests.jl
+:language: julia
+:lines: 57-62
 ```
 
 ```bash

@@ -23,8 +23,9 @@ pixi run build
 ./bbdir/seams --help
 #+end_src
 
-Either path produces ~libyodaLib~ and the ~seams~ CLI.
-This repository does not install Python or Lua.
+Either path produces ~libyodaLib~, ~libseams~, and the ~seams~ CLI.
+~-Dwith_python=true~ (the Meson default) also builds ~import dseams~.
+Lua stays in yodaStruct.
 
 * Read a frame
 
@@ -79,16 +80,29 @@ The default cage graph is ~--graph seeded~ (mutual four-nearest seeds, union com
 This mixed frame has no complete HC or DDC.
 Cage membership is not the CHILL+ star.
 
+* One analysis at a time
+
+| goal | command | how-to |
+|------+---------+--------|
+| rings | ~seams rings FILE --type 2~ | [[file:howto/rings.org][Primitive rings]] |
+| cages | ~seams cages FILE --type 2~ | [[file:howto/cages-trace.org][Cages and TRACE]] |
+| q4 and q6 | ~seams steinhardt FILE --type 2~ | [[file:howto/q4-q6.org][Local q4 and q6]] |
+| CHILL+ | ~seams chill-plus FILE --type 2~ | [[file:howto/chill-plus.org][CHILL+]] |
+| symmetry | ~seams symmetry FILE --type 1~ | [[file:howto/symmetry-classifier.org][Symmetry classifier]] |
+| neighbours | cutoff CSR, carried rings | [[file:howto/linkcell-carried.org][Linkcell and carried rings]] |
+
 * Python and Lua
 
-The engine CLI is not a scripting host.
-Install [[https://github.com/d-SEAMS/PydSEAMSlib][pydseams]] (~pip install pydseamslib~, compiled module ~yoda~) or
-[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
+~import dseams~ is the in-tree module over ~libseams~.
+The Frame package is [[https://github.com/d-SEAMS/PydSEAMSlib][pydseams]]
+(~pip install pydseamslib~, compiled module ~yoda~).
+Lua is [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
 (~require("dseams")~).
 ~import pydseamslib~ is an alias of ~pydseams~.
 
 The Frame tutorial is [[https://d-seams.github.io/PydSEAMSlib/][pydseams docs]].
 Lua is [[https://d-seams.github.io/yodaStruct/][dseams docs]].
+Language pages for the in-tree fronts are under ~docs/api~ and ~docs/tutorials~.
 
 The full install matrix is [[file:howto/install.org][Install]].
 The mixed-frame walkthrough is [[file:tutorials/bulk-ice.org][Classify ice on the mixed TIP4P example]].

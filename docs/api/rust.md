@@ -14,4 +14,10 @@ let (six, fraction) = sys.six_ring_fraction(3.5)?;
 
 `set_frame` takes the nine-number cell, including a non-zero tilt.
 `seams::set_num_threads` and `seams::version` match the C API.
-`examples/ice.rs` prints the cubic count.
+`bindings/rust/seams/tests/ice.rs` is the `cargo test` that calls every
+safe wrapper. `examples/ice.rs` prints the cubic count.
+
+```{literalinclude} ../../../bindings/rust/seams/tests/ice.rs
+:language: rust
+:lines: 25-57
+```

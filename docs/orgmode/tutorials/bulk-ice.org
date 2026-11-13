@@ -111,7 +111,7 @@ It is ice Ic only when it belongs to a double-diamond cage.
 Otherwise it is water.
 Partial ice-like order is water on that score.
 
-On this mixed frame the cutoff list labels 12 oxygens interfacial clathrate, and the mutual four-neighbour list labels one clathrate and seven interfacial clathrate.
+On this mixed frame the cutoff list labels 9 oxygens interClathrate, and the mutual four-neighbour list labels one clathrate and seven interClathrate.
 TUM finds no complete HC or DDC.
 A three-eclipsed star is not cage membership.
 
@@ -131,8 +131,8 @@ The mixed TIP4P frame is the one that separates the two scores.
 
 * Step 6: Python, the same lists
 
-Python is not built in this repository.
-Install the package the paper uses:
+The in-tree module is ~import dseams~ (~-Dwith_python=true~, the Meson default).
+The Frame package the paper uses is separate:
 
 #+begin_src bash
 pip install pydseamslib
@@ -154,9 +154,9 @@ IceCounts(interClathrate=9, water=241)
 CageScore(n_ih=0, n_ic=0, n_water=250)
 #+end_example
 
-The cage score matches the CLI.
-The CHILL+ histogram does not, because the neighbour lists differ.
-~import pydseamslib~ is the same package.
+Those counts are the cutoff list, the same list as Step 2.
+~import pydseamslib~ is the released Frame package.
+The in-tree module is ~import dseams~, built from ~libseams~.
 The Frame walkthrough is [[https://d-seams.github.io/PydSEAMSlib/][pydseams]].
 Lua is [[https://d-seams.github.io/yodaStruct/][require("dseams")]].
 
@@ -167,8 +167,8 @@ Lua is [[https://d-seams.github.io/yodaStruct/][require("dseams")]].
   mW is type 1.
 - Unknown command, exit 2: the binary is ~seams~, not ~yodaStruct~.
   Commands are ~read~, ~chill~, ~chill-plus~, and ~cages~.
-- ~ModuleNotFoundError: pydseams~: this repo does not install Python.
-  ~pip install pydseamslib~.
+- ~ModuleNotFoundError: pydseams~: that name is the released Frame package.
+  ~pip install pydseamslib~. The in-tree module is ~import dseams~.
 - Lua ~require("dseams")~: that module lives in yodaStruct.
 
 * Next steps

@@ -1,26 +1,29 @@
 #+TITLE: Repositories
 #+OPTIONS: toc:nil num:nil
 
-d-SEAMS 2 is not a monolith. The classifier is one C++ library.
-~linkcell::pairs_within~ owns the cutoff list. vesin is the fallback
-when linkcell is not built. Each language front calls that library.
+d-SEAMS 2.14 is one C++ library plus the stable ABI that the
+in-tree fronts call. ~linkcell::pairs_within~ owns the cutoff list.
+vesin is the fallback when linkcell is not built.
 
 | repository | product | role |
 |------------+---------+------|
-| [[https://github.com/d-SEAMS/seams-core][seams-core]] | ~libyodaLib~, ~seams~ | C++ engine and CLI |
-| [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseams~ | Python helpers on ~yoda~ |
+| [[https://github.com/d-SEAMS/seams-core][seams-core]] | ~libyodaLib~, ~seams~, ~libseams~, ~libseams_lang~ | Engine, CLI, C API, language ABI, engine plugins |
+| [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseams~ | Released Python Frame API on ~yoda~ |
 | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | ~dseams~ | Lua/Fennel library |
-| [[https://github.com/d-SEAMS/linkcell][linkcell]] | ~lc_*~ | Periodic linked-cell k-nearest neighbours |
+| [[https://github.com/d-SEAMS/linkcell][linkcell]] | ~lc_*~ | Periodic linked-cell neighbours |
+
+~import dseams~ in this tree is the nanobind module over ~seams.h~.
+It is not ~pydseams.Frame~. The two Python surfaces call the same
+classifiers and keep separate release trains. Lua stays in yodaStruct
+so a C++ build does not need a Lua toolchain.
 
 The front ends take seams-core as a Meson subproject (~libyodaLib~)
 or as a flake input. They do not vendor a second engine.
 
-A language binding that lived in the engine tree would force every
-C++ user to take that language's toolchain, and every wheel or rock
-to rebuild the same library. Splitting the repos keeps the Catch2
-suite, the ~seams~ CLI, and the optional backends on one Meson
-project, while Python and Lua version and release on their own
-schedules.
+The stable C ABI and the language fronts that call it live in this
+tree, so a caller can link ~libseams~ without a second checkout.
+PydSEAMSlib and yodaStruct still version on their own schedules.
+A Lua toolchain is not required to build the engine.
 
 #+begin_export rst
 .. mermaid::
@@ -28,10 +31,12 @@ schedules.
    flowchart TB
      subgraph engine["seams-core"]
        LIB[libyodaLib]
+       API[libseams]
        CLI[seams CLI]
      end
      subgraph fronts["Front ends"]
        PY[pydseams Frame]
+       DS[import dseams]
        LUA["require(\"dseams\")"]
      end
      LC["linkcell k-NN"]
@@ -41,7 +46,9 @@ schedules.
      LC --> LIB
      VE --> LIB
      GPU --> LIB
-     LIB --> CLI
+     LIB --> API
+     API --> CLI
+     API --> DS
      LIB --> PY
      LIB --> LUA
 #+end_export
@@ -50,8 +57,9 @@ schedules.
 
 The 2020 product was a single executable named ~yodaStruct~. That
 binary is gone. The compiled C++ surface kept the name so existing
-registrations stay findable: the Python module is ~pydseams.yoda~
-(~_core~ and ~cyoda~ are aliases of ~yoda~). Lua helpers are
+registrations stay findable: the PydSEAMSlib module is ~pydseams.yoda~
+(~_core~ and ~cyoda~ are aliases of ~yoda~). The in-tree module is
+~dseams._core~ over ~libseams~. Lua helpers are
 ~require("dseams")~; ~require("yoda")~ still resolves to that table.
 There is no ~yodaStruct~ executable in any of the three repositories.
 

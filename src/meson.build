@@ -198,3 +198,12 @@ seams_api_test = executable(
   c_args: ['-I' + meson.current_build_dir()])
 
 test('seams_c_api', seams_api_test, timeout: 180)
+
+docs_ice_example = executable(
+  'docs_ice_example',
+  files('../docs/examples/ice.c'),
+  link_with: seams_api_lib,
+  include_directories: include_directories('../include'),
+  c_args: ['-I' + meson.current_build_dir()],
+  link_args: ['-lm'])
+test('docs_ice_example', docs_ice_example, timeout: 60)

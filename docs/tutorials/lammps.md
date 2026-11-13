@@ -2,9 +2,8 @@
 
 `engines/lammps/in.dseams` is a real LAMMPS run. `fix ext` uses `pf/callback 2 2`, so the library calls d-SEAMS every two steps. Forces are cleared and the cell stays cubic.
 
-```
-fix ext all external pf/callback 2 2
-run 8
+```{literalinclude} ../../../engines/lammps/in.dseams
+:lines: 12-15
 ```
 
 The driver is `run_hook`. It registers the callback before the `run` line and checks that successive calls are one stride apart.

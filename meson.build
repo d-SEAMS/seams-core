@@ -745,6 +745,11 @@ if get_option('with_cli')
 
   python3 = find_program('python3', required: true)
   test(
+    'docs_check',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_examples.py'],
+    timeout: 60)
+  test(
     'seams_water_types_cutoff',
     python3,
     args: [

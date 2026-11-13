@@ -59,3 +59,27 @@ are `SEAMS_RING_HC_BASAL`, `SEAMS_RING_HC_PRISMATIC`, `SEAMS_RING_DDC`,
 `seams_ring_symmetry_name` prints that code. `seams_rings_fraction` is the
 fraction of atoms that sit on a ring; a size of zero counts every ring.
 `seams_rings_destroy` frees the handle.
+
+`seams_set_num_threads(0)` restores the OpenMP width captured at first use
+(`omp_get_max_threads`), which is the library default. A negative width
+returns `SEAMS_ERR_RANGE`.
+
+## Examples
+
+`meson test seams_c_api` compiles and runs `tests/test_seams_api.c`.
+Every function in `seams.h` is called there. `meson test docs_ice_example`
+runs the eight-atom program in `docs/examples/ice.c`.
+
+```{literalinclude} ../../../tests/test_seams_api.c
+:language: c
+:lines: 44-93
+```
+
+```{literalinclude} ../../../tests/test_seams_api.c
+:language: c
+:lines: 102-216
+```
+
+```{literalinclude} ../../../docs/examples/ice.c
+:language: c
+```

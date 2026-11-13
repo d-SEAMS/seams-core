@@ -1,0 +1,73 @@
+#+TITLE: Linkcell neighbours and carried updates
+#+OPTIONS: toc:nil num:nil
+
+Build the cutoff neighbour list, then keep rings when only part of
+the next frame moved. The scaling argument is
+[[file:../explanation/linkcell-scaling.org][Linkcell strong scaling]].
+The list itself is
+[[file:neighbour-lists.org][Cutoff neighbour lists]].
+
+* The cutoff list
+
+~linkcell::pairs_within~ owns the cutoff list when the build links
+linkcell. vesin is the fallback. The orthorhombic list is one parallel
+cell sort: each thread counts, a prefix sum places the atoms, and the
+pairs are written into one CSR. The pair set does not depend on the
+thread count. q4, q6, CHILL+, and the ring census read that CSR.
+
+The half list keeps each pair on the lower index. The test that locks
+this is the Catch2 case ~half cutoff list is the lower index of the
+full list~:
+
+#+begin_src cpp
+// excerpt: tests/test_neighbours.cpp
+  REQUIRE(nneigh::orthoFullCsr(cloud, nullptr, 3.5, fullOff, fullCols, false));
+  REQUIRE(nneigh::orthoFullCsr(cloud, nullptr, 3.5, halfOff, halfCols, true));
+#+end_src
+
+A skin reuses the wide list while every atom stays inside the Verlet
+shell. Bonds are the pairs still inside the cutoff.
+
+* Carried rings
+
+A frame walk on one worker visits frames in order through one
+~FrameCarry~. ~RingUpdater~ redoes only the sources near a changed
+bond. The result equals ~ringNetwork~ on that frame. ~--jobs~ above 1,
+a single frame, and ~--rebuild~ use an instance with carry off, which
+recomputes every call.
+
+The hop-ball test moves one atom across a periodic face and requires
+the carried rings to match a full search, with fewer sources recomputed
+than the atom count:
+
+#+begin_src cpp
+// excerpt: tests/test_ring_hop.cpp
+  const auto &carried = updater.update(moved);
+  const auto full = primitive::ringNetwork(moved, 6);
+  REQUIRE(carried == full);
+#+end_src
+
+* What was timed
+
+Both tables are 4096 molecules, 200 transitions, eight threads. Every
+transition stayed inside the hop ball, and the carried rings matched a
+full search. Speedup is rebuild divided by carry.
+
+The mW window (10 fs step) at 0.1, 1, and 10 ps is in
+[[file:benchmarks.org][Benchmarks]]. The strict seeded graph there is
+the row ~seeded-strict~.
+
+The TIP4P/2005 ice/water slab (2 fs step) is finer: 0.01, 0.1, and
+1 ps. An oxygen moves farther in one picosecond than an mW site. The
+~seeded-strict~ speedups are 8.31, 3.28, and 2.59. The logs are
+~benchmarks/hop-stride-tip4p-5.txt~,
+~benchmarks/hop-stride-tip4p-50.txt~, and
+~benchmarks/hop-stride-tip4p-500.txt~.
+
+#+begin_src python
+# excerpt: tests/cli_surface.py
+        ["--frame", "1", "--last", "2", "--jobs", "1", "--rebuild", "read", cubic],
+#+end_src
+
+That argv is the walk with carry forced off. Drop ~--rebuild~ to keep
+the updater.
