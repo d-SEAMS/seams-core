@@ -7,3 +7,15 @@ nucleation ovito_chill_plus 4096 1.000000 0 0 1.000000 1 d-SEAMS ovito-chill+ ag
 nucleation published_chill_plus 4096 0.894531 0 0 0.894531 0 On frame 2, published CHILL+ keeps the 2015 neighbour test and the four-neighbour q3 average. OVITO does not. neighbour_test 220 q3_shell 207 open_edge 0 mixed 5
 nucleation freud_q6 4096 1.000000 0.000001 0.000026 1.000000 1 cutoff 3.5 A ball, same threshold as the d-SEAMS kernel
 nucleation freud_q6bar 4096 1.000000 0.000001 0.000010 1.000000 1 cutoff 3.5 A ball, same threshold as the d-SEAMS kernel
+interface-230K-start ovito_chill_plus 1464 1.000000 0 0 1.000000 1 d-SEAMS ovito-chill+ against OVITO ChillPlusModifier at cutoff 3.5 A
+interface-230K-start published_chill_plus 1464 0.980191 0 0 0.980191 0 published CHILL+ keeps the 2015 neighbour test and the four-neighbour q3 average. OVITO does not. neighbour_test 6 q3_shell 23 open_edge 0 mixed 0
+interface-230K-start freud_q6 1464 1.000000 0.000002 0.000012 1.000000 1 cutoff 3.5 A ball, same threshold as the d-SEAMS kernel
+interface-230K-start freud_q6bar 1464 1.000000 0.000001 0.000006 1.000000 1 cutoff 3.5 A ball, same threshold as the d-SEAMS kernel
+interface-240K-start ovito_chill_plus 1464 1.000000 0 0 1.000000 1 d-SEAMS ovito-chill+ against OVITO ChillPlusModifier at cutoff 3.5 A
+interface-240K-start published_chill_plus 1464 0.974727 0 0 0.974727 0 published CHILL+ keeps the 2015 neighbour test and the four-neighbour q3 average. OVITO does not. neighbour_test 4 q3_shell 33 open_edge 0 mixed 0
+interface-240K-start freud_q6 1464 1.000000 0.000002 0.000020 1.000000 1 cutoff 3.5 A ball, same threshold as the d-SEAMS kernel
+interface-240K-start freud_q6bar 1464 1.000000 0.000001 0.000010 1.000000 1 cutoff 3.5 A ball, same threshold as the d-SEAMS kernel
+interface-250K-start ovito_chill_plus 1464 1.000000 0 0 1.000000 1 d-SEAMS ovito-chill+ against OVITO ChillPlusModifier at cutoff 3.5 A
+interface-250K-start published_chill_plus 1464 0.980874 0 0 0.980874 0 published CHILL+ keeps the 2015 neighbour test and the four-neighbour q3 average. OVITO does not. neighbour_test 4 q3_shell 23 open_edge 0 mixed 1
+interface-250K-start freud_q6 1464 1.000000 0.000002 0.000019 1.000000 1 cutoff 3.5 A ball, same threshold as the d-SEAMS kernel
+interface-250K-start freud_q6bar 1464 1.000000 0.000001 0.000006 1.000000 1 cutoff 3.5 A ball, same threshold as the d-SEAMS kernel

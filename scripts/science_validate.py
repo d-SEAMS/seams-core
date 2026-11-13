@@ -160,6 +160,8 @@ def label_row(system: str, quantity: str, ours: np.ndarray, theirs: np.ndarray, 
 def cause_note(causes: dict[str, int], published_frac: float) -> str:
     if published_frac >= 0.99:
         return "published CHILL+ and OVITO assign the same label"
+    if not causes:
+        return "published CHILL+ differs from OVITO; cause file was not written for this frame"
     frame = causes.get("frame")
     where = f"On frame {frame}, " if frame is not None else ""
     return (
@@ -174,16 +176,24 @@ def main() -> int:
     rows = [
         "system quantity n pearson_or_fraction rms max_abs frac_close agree note"
     ]
-    jobs = (
+    jobs = [
         ("interface", DATA / "interface-atoms.csv", DATA / "interface-causes.csv"),
         ("nucleation", DATA / "nucleus-atoms.csv", DATA / "nucleation-causes.csv"),
-    )
+    ]
+    for atoms in sorted(DATA.glob("interface-atoms-*.csv")):
+        tag = atoms.name[len("interface-atoms-") : -len(".csv")]
+        causes = DATA / f"interface-causes-{tag}.csv"
+        jobs.append((f"interface-{tag}", atoms, causes if causes.is_file() else None))
+    for atoms in sorted(DATA.glob("nucleus-atoms-*.csv")):
+        tag = atoms.name[len("nucleus-atoms-") : -len(".csv")]
+        causes = DATA / f"nucleation-causes-{tag}.csv"
+        jobs.append((f"nucleation-{tag}", atoms, causes if causes.is_file() else None))
     for system, atoms, causes_path in jobs:
         box, pos, chill, ovito_rule, q6, q6bar = read_atoms(atoms)
         dump = FRAMES / f"validate-{system}.lammpstrj"
         write_lammpstrj(dump, box, pos)
         external = ovito_labels(dump)
-        causes = read_causes(causes_path)
+        causes = read_causes(causes_path) if causes_path is not None else {}
         rule_frac = float(np.mean(ovito_rule == external))
         rows.append(
             label_row(

@@ -1,0 +1,7 @@
+source|facet|ensemble|temperature_K|deltaT_K|rate_A_per_ns|rate_sigma|kind|note
+Shi2024|basal|QLL|260||0.621|0.104|measured|TIP4P/Ice basal maximum in Shi et al., arXiv:2410.07050. The basal and prism1 series spans 0.2 to 0.9 A/ns from 240 K to 270 K. Ice was held rigid while a quasi-liquid layer recrystallised. They quote a melting temperature of 272.2 K.
+Shi2024|basal|QLL|240||0.2||range|Lower edge of the 0.2 to 0.9 A/ns band in arXiv:2410.07050. Not a single-temperature measurement.
+Shi2024|basal|QLL|270||0.9||range|Upper edge of that band. The measured maximum is the 260 K row.
+Montero2019|secondary-prism|NVE||14|1.0||quoted|Shi et al. report that Montero de Hijes, Espinosa, Vega and Sanz, J. Chem. Phys. 151, 044509 (2019), found about 1 A/ns at 14 K supercooling on the TIP4P/Ice secondary prism in bulk.
+Montero2019|secondary-prism|NVE||25|0.5||quoted|The same J. Chem. Phys. 151, 044509 (2019) result, about 0.5 A/ns at 25 K supercooling, secondary prism.
+Montero2023|mixed|bulk||14|||quoted|J. Chem. Phys. 158, 204706 (2023), arXiv:2303.11092. TIP4P/Ice peaks at the same supercooling as their neural-network potential, 14 plus or minus 1 K. That potential reaches 6.5 plus or minus 1 A/ns and is almost an order of magnitude faster than TIP4P/Ice.
