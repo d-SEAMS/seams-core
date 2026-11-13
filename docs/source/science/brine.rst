@@ -39,10 +39,10 @@ coefficient is the bulk-ice molality divided by the bulk-liquid molality.
    :start-after: static void one_brine
    :end-before: static int cmd_brine
 
-.. figure:: figures/brine.svg
-   :alt: Hexagonal waters at 0 ns and at 5 ns on the 20-pair brine front.
+.. figure:: figures/brine.png
+   :alt: 5 ns brine front. Hexagonal ice is orange, liquid is pale, sodium and chloride are spheres.
 
-   Hexagonal waters at 0 ns and at 5 ns.
+   The 5 ns frame. Waters use the CHILL+ colours. Sodium and chloride are the larger spheres.
 
 What this tells you
 -------------------

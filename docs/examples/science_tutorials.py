@@ -438,6 +438,72 @@ def render_interface_v12(root: Path, pos, chill, box, figures: Path):
             server.terminate()
 
 
+def _raster_or_fail(png: Path, draw):
+    server = _ensure_display()
+    try:
+        draw()
+        if not png.is_file() or png.stat().st_size < 1000:
+            raise RuntimeError(f"{png.name} is not a raster")
+        print(f"v12 raster {png.name} bytes {png.stat().st_size}")
+    except Exception as exc:
+        print(f"SVG fallback: v12 raster renderer failed: {exc}", file=sys.stderr)
+        png.with_suffix(".svg").write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="80">'
+            '<rect width="100%" height="100%" fill="white"/>'
+            '<text x="16" y="44" font-size="14">SVG fallback</text></svg>\n'
+        )
+        if os.environ.get("DOCS_CI") == "1":
+            raise SystemExit(1) from exc
+    finally:
+        if server is not None:
+            server.terminate()
+
+
+def render_hosts(root: Path, lib, figures: Path):
+    from render_scenes import render_host
+
+    render = _load_science_render(root)
+    hosts = {
+        "sii": (
+            root / "input" / "traj" / "genice_sII.lammpstrj",
+            [
+                ("512", {5: 12}, 1, 16),
+                ("51264", {5: 12, 6: 4}, 0, 8),
+            ],
+            (16, 8),
+        ),
+        "sh": (
+            root / "input" / "traj" / "genice_sH.lammpstrj",
+            [
+                ("512", {5: 12}, 1, 12),
+                ("sh", {4: 3, 5: 6, 6: 3}, 3, 8),
+                ("51268", {5: 12, 6: 8}, 4, 4),
+            ],
+            (12, 8, 4),
+        ),
+    }
+
+    def draw():
+        for stem, (dump, kinds, want) in hosts.items():
+            got = render_host(render, lib, dump, figures / f"{stem}.png", kinds)
+            if tuple(got) != want:
+                raise RuntimeError(f"{stem} cages {got} wanted {want}")
+
+    _raster_or_fail(figures / "sii.png", draw)
+
+
+def render_brine_scene(root: Path, frame: Path, figures: Path):
+    from render_scenes import render_brine
+
+    render = _load_science_render(root)
+    _box, rows = read_xyz(frame)
+
+    def draw():
+        render_brine(render, rows, figures / "brine.png")
+
+    _raster_or_fail(figures / "brine.png", draw)
+
+
 def expect(condition, message):
     if not condition:
         raise SystemExit(message)
@@ -600,12 +666,7 @@ def main():
     print("cages sH 512 12")
     print("cages sH sh 8")
     print("cages sH 51268 4")
-    write_figure(
-        "cages",
-        "Hydrate cages on the GenIce hosts",
-        [("sII 5^12", 16), ("sII 5^12 6^4", 8), ("sH 5^12", 12), ("sH 4^3 5^6 6^3", 8), ("sH 5^12 6^8", 4)],
-        figures,
-    )
+    render_hosts(root, lib, figures)
 
     cache = root / "docs" / ".cache" / "brine-front-230K" / BRINE_REV
     frames = fetch_brine(cache)
@@ -631,12 +692,7 @@ def main():
         print(f"brine t0 thickness {early['thickness']:.4f} k {early['k']:.1f}")
         print("brine tend hexagonal 741 water 621 interfacial 89 cubic 0 agree 1496")
         print(f"brine tend thickness {late['thickness']:.4f} k {late['k']:.1f}")
-        write_figure(
-            "brine",
-            "230 K brine front, 20 NaCl pairs, hexagonal waters",
-            [("0 ns", 733), ("5 ns", 741)],
-            figures,
-        )
+        render_brine_scene(root, frames[1], figures)
 
     if build.is_dir() and (build / "src" / "libseams.so").is_file():
         c_interface = run_c(root, build, "interface", [])

@@ -26,10 +26,15 @@ angstrom on the cutoff graph. The signatures are ``512`` for
    :start-after: static int cages_of
    :end-before: static int read_xyz
 
-.. figure:: figures/cages.svg
-   :alt: Cage counts for the GenIce sII and sH hosts.
+.. figure:: figures/sii.png
+   :alt: sII cages. 5^12 polyhedra are orange and 5^12 6^4 polyhedra are blue.
 
-   Cage counts for the GenIce sII and sH hosts.
+   sII. Orange is :math:`5^{12}` and blue is :math:`5^{12}6^{4}`, the hexagonal and cubic colours.
+
+.. figure:: figures/sh.png
+   :alt: sH cages. 5^12 is orange, the medium cage is yellow, and 5^12 6^8 is green.
+
+   sH. Orange is :math:`5^{12}`, yellow is :math:`4^{3}5^{6}6^{3}`, and green is :math:`5^{12}6^{8}`.
 
 What this tells you
 -------------------
