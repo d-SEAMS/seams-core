@@ -495,16 +495,7 @@ rule paper_hop_stride:
 
 rule paper_ptm:
     input:
-        "scripts/paper_ptm.py",
-        "scripts/paper_stats.py",
-        "scripts/bench_neighbours_v2.py",
-        "bbdir-release/tests/bench_v2",
-    output:
         "benchmarks/paper-cells/tab-sym-eq.csv",
-        "benchmarks/paper-cells/frag-cli-ptm.csv",
-        "benchmarks/paper-cells/raw-ptm.txt",
-    shell:
-        "python3 scripts/paper_ptm.py --out benchmarks/paper-cells"
 
 
 rule paper_ptm_templates:
@@ -523,16 +514,7 @@ rule paper_ptm_templates:
 
 rule paper_symmetry_vs_ptm:
     input:
-        "scripts/paper_symmetry_sitting.py",
-        "scripts/paper_ptm_templates.py",
-        "scripts/paper_stats.py",
-        "bbdir-release/tests/bench_v2",
-        "bbdir-release/src/libyodaLib.so",
-    output:
         "benchmarks/paper-cells/symmetry-vs-ptm.csv",
-        "benchmarks/paper-cells/raw-symmetry-vs-ptm.txt",
-    shell:
-        "python3 scripts/paper_symmetry_sitting.py --timing --out benchmarks/paper-cells"
 
 
 # One sitting. Every quoted timing is a row of sitting.csv.
@@ -545,6 +527,7 @@ rule paper_sitting:
         "bbdir-release/bindings/libseams_lang.so",
         "bbdir-release/src/libyodaLib.so",
         "bbdir-release/seams",
+        "bbdir-release/tests/bench_v2",
         "input/traj/genice_sI.lammpstrj",
         "input/traj/genice_sII.lammpstrj",
     output:
@@ -569,6 +552,9 @@ rule paper_tables:
         "benchmarks/paper-cells/frag-cli-rsm.csv",
         "benchmarks/paper-cells/frag-lit-q6.csv",
         "benchmarks/paper-cells/frag-lit-cages.csv",
+        "benchmarks/paper-cells/symmetry-vs-ptm.csv",
+        "benchmarks/paper-cells/tab-sym-eq.csv",
+        "benchmarks/paper-cells/frag-cli-ptm.csv",
     shell:
         "python3 scripts/paper_tables.py benchmarks/paper-cells"
 

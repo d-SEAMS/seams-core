@@ -43,7 +43,8 @@ REPEATS = 8
 CUTOFF = 3.5
 
 FIELDS = [
-    "source_commit", "cpu_model", "cpu_cores", "affinity",
+    "source_commit", "cpu_model", "cpu_family", "cpu_model_id", "cpu_stepping",
+    "cpu_flags", "cpu_cache", "cpu_cores", "affinity",
     "phase", "operation", "code", "version",
     "molecules", "threads", "warmup", "n",
     "median_ms", "iqr_ms", "q1_ms", "q3_ms", "samples_ms", "detail",
@@ -574,6 +575,31 @@ def time_ovito(pos, side: float, threads: int) -> None:
         })
 
 
+def time_symmetry(threads: int, version: str) -> None:
+    """New-gate classifier and both PTM sets, in this same sitting."""
+    import paper_symmetry_sitting as sym
+
+    binary = ROOT / "bbdir-release/tests/bench_v2"
+    samples, sink, crystal = sym.time_classifier(binary, threads, REPEATS)
+    if sink != MOLECULES:
+        raise RuntimeError(f"classifier labelled {sink} of {MOLECULES}")
+    emit({
+        "phase": "ice", "operation": "classifier", "code": "d-SEAMS",
+        "version": version, "molecules": MOLECULES, "threads": threads,
+        "samples_ms": samples,
+        "detail": f"sink={sink} crystal={crystal} diamondFromCsr",
+    })
+    for kind, operation in (("default", "ptm-default"), ("ice", "ptm-ice")):
+        samples = sym.time_ptm(kind, threads, WARMUP, REPEATS)
+        emit({
+            "phase": "ice", "operation": operation, "code": "OVITO",
+            "version": "3.17.2", "molecules": MOLECULES, "threads": threads,
+            "samples_ms": samples,
+            "detail": "PTM default FCC HCP BCC" if kind == "default"
+            else "PTM cubic and hexagonal diamond rmsd 0.1",
+        })
+
+
 def signature_census(lib, frame: dict) -> dict[str, int]:
     import ctypes
     xyz = frame["positions"]
@@ -690,6 +716,7 @@ def worker(args) -> int:
     time_vesin(xyz, side, args.threads)
     time_freud(xyz, side, args.threads)
     time_ovito(xyz, side, args.threads)
+    time_symmetry(args.threads, version)
     unit = {
         "sI": read_dump(ROOT / "input/traj/genice_sI.lammpstrj"),
         "sII": read_dump(ROOT / "input/traj/genice_sII.lammpstrj"),
@@ -810,6 +837,11 @@ def write_outputs(out: Path, raw_rows: list[dict], info: dict) -> None:
         rows.append({
             "source_commit": info["source_commit"],
             "cpu_model": info["cpu_model"],
+            "cpu_family": info["cpu_family"],
+            "cpu_model_id": info["cpu_model_id"],
+            "cpu_stepping": info["cpu_stepping"],
+            "cpu_flags": info["cpu_flags"],
+            "cpu_cache": info["cpu_cache"],
             "cpu_cores": info["cpu_cores"],
             "affinity": info["affinity"],
             "phase": item["phase"],

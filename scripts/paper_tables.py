@@ -74,7 +74,114 @@ def main() -> int:
     ]
     write(out / "frag-lit-cages.csv", cages)
     write(out / "tab-cages.csv", cages)
+    sym = [
+        row for row in ice
+        if row["operation"] in ("classifier", "ptm-default", "ptm-ice")
+    ]
+    write(out / "symmetry-vs-ptm.csv", symmetry_rows(sym))
+    write(out / "tab-sym-eq.csv", sym_eq_rows(sym))
+    ice_ptm = [
+        row for row in sym
+        if row["operation"] == "ptm-ice" and row["threads"] == "8"
+    ]
+    write(out / "frag-cli-ptm.csv", ice_ptm)
     return 0
+
+
+def symmetry_rows(rows: list[dict]) -> list[dict]:
+    classifier = {
+        (row["threads"]): float(row["median_ms"])
+        for row in rows if row["operation"] == "classifier"
+    }
+    names = {
+        "classifier": ("classifier", "classifier"),
+        "ptm-default": ("PTM-default", "default"),
+        "ptm-ice": ("PTM-ice", "ice"),
+    }
+    out = []
+    for row in rows:
+        code, kind = names[row["operation"]]
+        median = float(row["median_ms"])
+        base = classifier[row["threads"]]
+        sink = crystal = ""
+        if row["operation"] == "classifier":
+            detail = row["detail"]
+            sink = detail.split("sink=")[1].split()[0]
+            crystal = detail.split("crystal=")[1].split()[0]
+        out.append({
+            "source_commit": row["source_commit"],
+            "cpu_model": row["cpu_model"],
+            "cpu_family": row["cpu_family"],
+            "cpu_model_id": row["cpu_model_id"],
+            "cpu_stepping": row["cpu_stepping"],
+            "cpu_flags": row["cpu_flags"],
+            "cpu_cache": row["cpu_cache"],
+            "cpu_cores": row["cpu_cores"],
+            "code": code,
+            "template_set": kind,
+            "molecules": row["molecules"],
+            "threads": row["threads"],
+            "affinity": row["affinity"],
+            "warmup": row["warmup"],
+            "n": row["n"],
+            "median_ms": row["median_ms"],
+            "iqr_ms": row["iqr_ms"],
+            "q1_ms": row["q1_ms"],
+            "q3_ms": row["q3_ms"],
+            "sink": sink,
+            "crystal": crystal,
+            "ratio_this_over_classifier": f"{median / base:.6f}",
+            "ratio_classifier_over_this": f"{base / median:.6f}",
+            "samples_ms": row["samples_ms"],
+            "detail": row["detail"],
+        })
+    return out
+
+
+def sym_eq_rows(rows: list[dict]) -> list[dict]:
+    cells = {
+        "classifier": "classifier against PTM",
+        "ptm-default": "PTM default templates",
+        "ptm-ice": "PTM diamond templates",
+    }
+    codes = {
+        "classifier": "symmetry",
+        "ptm-default": "ovito-symmetry-default",
+        "ptm-ice": "ovito-symmetry",
+    }
+    out = []
+    for row in rows:
+        molecules = int(row["molecules"])
+        median = float(row["median_ms"])
+        sink = ""
+        if row["operation"] == "classifier":
+            sink = row["detail"].split("sink=")[1].split()[0]
+        out.append({
+            "source_commit": row["source_commit"],
+            "cpu_model": row["cpu_model"],
+            "cpu_family": row["cpu_family"],
+            "cpu_model_id": row["cpu_model_id"],
+            "cpu_stepping": row["cpu_stepping"],
+            "cpu_flags": row["cpu_flags"],
+            "cpu_cache": row["cpu_cache"],
+            "cpu_cores": row["cpu_cores"],
+            "cell": cells[row["operation"]],
+            "code": codes[row["operation"]],
+            "molecules": row["molecules"],
+            "threads": row["threads"],
+            "affinity": row["affinity"],
+            "warmup": row["warmup"],
+            "n": row["n"],
+            "median_ms": row["median_ms"],
+            "iqr_ms": row["iqr_ms"],
+            "q1_ms": row["q1_ms"],
+            "q3_ms": row["q3_ms"],
+            "us_per_atom": f"{median * 1000.0 / molecules:.6f}",
+            "sink": sink,
+            "samples_ms": row["samples_ms"],
+            "detail": row["detail"],
+        })
+    return out
 
 
 if __name__ == "__main__":
