@@ -1190,5 +1190,23 @@ int main(int argc, char **argv) {
     seams_frame_free(fresh);
   }
   std::cout << "seams_lang ok " << seams_lang_version() << "\n";
+  const std::string shPath = root + "/input/traj/genice_sH.lammpstrj";
+  seams_frame *sh = seams_frame_read(shPath.c_str(), 1, 1);
+  if (sh == nullptr || seams_frame_nop(sh) != 136) {
+    return fail("sH frame");
+  }
+  double shBox[9] = {};
+  seams_frame_box(sh, shBox);
+  seams_frame_free(sh);
+  if (std::abs(shBox[3] - 24.8424228) > 1e-4 || std::abs(shBox[4] - 10.7570846) > 1e-4 ||
+      std::abs(shBox[5] - 20.1312910) > 1e-4 || std::abs(shBox[6] + 6.2106057) > 1e-4 ||
+      std::abs(shBox[7]) > 1e-6 || std::abs(shBox[8]) > 1e-6) {
+    std::cerr << "sH box";
+    for (double value : shBox) {
+      std::cerr << " " << value;
+    }
+    std::cerr << "\n";
+    return fail("sH cell");
+  }
   return 0;
 }

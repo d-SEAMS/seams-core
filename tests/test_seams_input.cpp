@@ -2214,6 +2214,25 @@ TEST_CASE("a triclinic lattice is bounds plus tilt", "[seams_input]") {
   fs::remove(path);
 }
 
+TEST_CASE("genice sH recovers the cell edge and the tilts", "[seams_input]") {
+  // BOX BOUNDS is the bounding box. xy = -6.2106057 pads x, so the
+  // edge is 24.8424228 rather than the 31.053 span of the bounds.
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud = sinp::readLammpsTrj("traj/genice_sH.lammpstrj", 1, cloud);
+  REQUIRE(cloud.nop == 136);
+  REQUIRE(cloud.box.size() >= 6);
+  double cell[3][3];
+  double origin[3];
+  nneigh::dumpBoundsToH(cloud.box, cloud.boxLow, cell, origin);
+  REQUIRE_THAT(cell[0][0], Catch::Matchers::WithinAbs(24.8424228, 1e-6));
+  REQUIRE_THAT(cell[1][1], Catch::Matchers::WithinAbs(10.7570846, 1e-6));
+  REQUIRE_THAT(cell[2][2], Catch::Matchers::WithinAbs(20.1312910, 1e-6));
+  REQUIRE_THAT(cell[1][0], Catch::Matchers::WithinAbs(-6.2106057, 1e-6));
+  REQUIRE_THAT(cell[2][0], Catch::Matchers::WithinAbs(0.0, 1e-9));
+  REQUIRE_THAT(cell[2][1], Catch::Matchers::WithinAbs(0.0, 1e-9));
+  REQUIRE_THAT(origin[0], Catch::Matchers::WithinAbs(0.0, 1e-6));
+}
+
 TEST_CASE("a dump stream does not throw ios_base::failure", "[seams_input]") {
   // loadLammpsFrame calls parseLammpsFrameBody on an ifstream or an
   // OwnedFdStream. Neither enables exceptions(), and the body throws
