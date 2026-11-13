@@ -168,7 +168,13 @@ if plumed_opt.allowed()
     # libplumedKernel.so.
     # The kernel must be the one that matches this PLUMED. A conda prefix
     # earlier on the linker path can supply an older libplumedKernel.
-    plumed_libdir = plumed_dep.found() ? plumed_dep.get_variable('libdir', default_value: '') : ''
+    plumed_libdir = ''
+    if plumed_dep.found() and plumed_dep.type_name() == 'pkgconfig'
+      plumed_libdir = plumed_dep.get_variable('libdir', default_value: '')
+    endif
+    if plumed_libdir == '' and plumed_prog.found()
+      plumed_libdir = fs.parent(fs.parent(plumed_prog.full_path())) / 'lib'
+    endif
     plumed_kernel = cppc.find_library('plumedKernel',
       dirs: plumed_libdir != '' ? [plumed_libdir] : [],
       required: false)
