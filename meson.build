@@ -861,6 +861,23 @@ if get_option('with_cli')
     depends: [seams_exe],
     suite: 'docs',
     timeout: 120)
+  foreach _paper : ['interface', 'cages', 'rings', 'brine', 'nucleation']
+    test(
+      'docs_paper_' + _paper,
+      python3,
+      args: [
+        meson.project_source_root() / 'docs' / 'tutorials' / 'test_paper.py',
+        _paper,
+        meson.project_source_root(),
+        seams_exe.full_path(),
+        meson.project_build_root() / 'src',
+        meson.project_build_root(),
+      ],
+      env: tutorial_env,
+      depends: [seams_exe],
+      suite: 'docs',
+      timeout: 300)
+  endforeach
   test(
     'docs_tutorial_nucleation',
     python3,

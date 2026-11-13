@@ -1,0 +1,30 @@
+#+TITLE: Primitive rings and the shortest-path test
+#+OPTIONS: toc:nil num:nil
+
+A ring search first walks every simple cycle up to a chosen size.
+Many of those cycles are not useful: a chord gives a shorter route
+between two vertices, so the long way around is not a ring of the
+network. The Franzblau test keeps a cycle only when, for every pair
+of its vertices, some shortest path between them lies on the cycle.
+Those survivors are the primitive rings. ~seams rings~ reports that
+census. The tutorial also counts the cycles before the test, so you
+can see what the filter removes.
+
+The cell is GenIce ice Ih, one unit, 16 oxygens, cutoff 3.5 Å.
+It is small on purpose. Every cycle of length 4, 5 or 6 can be
+listed, and the same neighbour list is what the primitive search uses.
+A larger crystal would hide the filter, because almost every six-cycle
+in ice Ih already passes.
+
+~meson test docs_paper_rings~ checks
+
+#+begin_src text
+rings primitive 4 24 6 32
+rings shortest 4 24 6 32
+rings searched 4 24 6 128
+#+end_src
+
+The shortest-path test and ~seams rings~ agree: 24 four-rings and 32
+six-rings. The unfiltered search found 128 six-cycles. The other 96
+have a shortcut, so they are dropped. There is no five-ring. OVITO
+draws the 16 oxygens. The test exits 77 when GenIce or OVITO is absent.

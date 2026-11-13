@@ -19,6 +19,11 @@ in-tree mixed TIP4P dump two ways.
 | [[file:confined-water.org][Confined water]] | in-plane RDF, sheet rings, prisms |
 | [[file:nanotube.org][Quasi-one-dimensional ice]] | where the nanotube and monolayer examples live |
 | [[file:paper-figures.org][Paper figures]] | the in-tree numbers behind the 2020 figures |
+| [[file:paper-interface.org][Interface slab]] | Published CHILL+ against the OVITO rule on a slab you build |
+| [[file:paper-cages.org][Clathrate cages]] | GenIce sI, sII and sH, built in the test |
+| [[file:paper-rings.org][Ring statistics]] | Primitive rings and the shortest-path test |
+| [[file:paper-brine.org][Ice in brine]] | The front, and the crystal count, along a short run |
+| [[file:paper-nucleation.org][Nucleation score]] | Mean q6bar as a nucleus is restored |
 
 How-tos solve a goal you already have. Reference names flags and
 headers. Explanation is why the two classifiers exist.
@@ -43,4 +48,9 @@ should see.
    confined-water
    nanotube
    paper-figures
+   paper-interface
+   paper-cages
+   paper-rings
+   paper-brine
+   paper-nucleation
 #+end_export
