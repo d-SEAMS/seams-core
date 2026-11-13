@@ -11,6 +11,16 @@ project('seams-core', ['cpp', 'c'],
   default_options: ['warning_level=2', 'cpp_std=c++20', 'b_ndebug=if-release'],
   meson_version: '>=1.3.0')
 
+_capi_san = get_option('capi_sanitize')
+if _capi_san != 'none'
+  _san_args = ['-fsanitize=' + _capi_san, '-fno-omit-frame-pointer']
+  if _capi_san == 'undefined'
+    _san_args += ['-fno-sanitize-recover=all']
+  endif
+  add_project_arguments(_san_args, language: ['c', 'cpp'])
+  add_project_link_arguments(_san_args, language: ['c', 'cpp'])
+endif
+
 host_system = host_machine.system()
 
 # Global accumulator variables (eOn pattern)
@@ -1446,4 +1456,150 @@ if get_option('with_cli')
     depends: [seams_lang],
     suite: 'docs',
     timeout: 180)
+endif
+
+# C API proof. Sanitizers and valgrind are separate configure options.
+capi_suite = executable(
+  'capi_suite',
+  files('tests/capi_suite.c'),
+  link_with: seams_api_lib,
+  include_directories: include_directories('include'),
+  c_args: ['-std=c11', '-Wall', '-Wextra', '-Werror', '-I' + meson.current_build_dir() / 'src'],
+  link_args: ['-lm'])
+capi_cpp_ref = executable(
+  'capi_cpp_ref',
+  files('tests/capi_cpp_ref.cpp'),
+  dependencies: [yds_dep],
+  include_directories: _incdirs,
+  cpp_args: _args,
+  link_args: _link_args,
+  build_rpath: meson.current_build_dir() / 'src')
+_capi_env = environment()
+_capi_env.prepend('LD_LIBRARY_PATH', meson.current_build_dir() / 'src')
+if _capi_san == 'thread'
+  # libgomp here is not TSan-instrumented, so the barrier between two
+  # parallel loops is invisible and reported as a race. The suite still
+  # fails when q6 at 1, 2, 4 and 8 threads disagrees.
+  _capi_env.set('TSAN_OPTIONS', 'halt_on_error=0:exitcode=0')
+endif
+_capi_args = [
+  meson.project_source_root(),
+  capi_cpp_ref.full_path(),
+  meson.project_source_root() / 'tests' / 'capi_ovito_freud.py',
+  meson.current_build_dir() / 'capi-work',
+]
+test(
+  'capi_suite',
+  capi_suite,
+  args: _capi_args,
+  env: _capi_env,
+  depends: [capi_cpp_ref, seams_api_lib],
+  timeout: 3600,
+  is_parallel: false)
+if get_option('capi_valgrind')
+  test(
+    'capi_valgrind',
+    find_program('valgrind', required: true),
+    args: [
+      '--leak-check=full', '--show-leak-kinds=definite',
+      '--errors-for-leak-kinds=definite', '--error-exitcode=1',
+      capi_suite.full_path(),
+    ] + _capi_args,
+    env: _capi_env,
+    depends: [capi_suite, capi_cpp_ref],
+    timeout: 7200,
+    is_parallel: false)
+endif
+
+_capi_warn = ['-Wall', '-Wextra', '-Werror', '-pedantic']
+_capi_headers = [
+  ['seams_h', 'seams.h',
+   ['-I' + meson.project_source_root() / 'include',
+    '-I' + meson.current_build_dir() / 'src']],
+  ['seams_version_h', 'seams_version.h',
+   ['-I' + meson.current_build_dir() / 'src']],
+  ['seams_lang_h', 'seams_lang.h',
+   ['-I' + meson.project_source_root() / 'bindings' / 'cxx']],
+]
+foreach _hdr : _capi_headers
+  test('capi_header_c99_' + _hdr[0],
+    executable('capi_header_c99_' + _hdr[0], files('tests/capi_header_unit.c'),
+      c_args: ['-std=c99', '-include', _hdr[1]] + _capi_warn + _hdr[2]))
+  test('capi_header_cxx17_' + _hdr[0],
+    executable('capi_header_cxx17_' + _hdr[0], files('tests/capi_header_unit.cpp'),
+      cpp_args: ['-std=c++17', '-include', _hdr[1]] + _capi_warn + _hdr[2]))
+endforeach
+
+test(
+  'capi_abi',
+  find_program('sh'),
+  args: [
+    meson.project_source_root() / 'scripts' / 'abi_check.sh',
+    meson.current_build_dir(),
+    meson.project_source_root() / 'scripts' / 'abi_baseline.txt',
+  ],
+  depends: [seams_api_lib],
+  timeout: 180)
+
+_fuzzer_rt = ''
+foreach _cand : [
+  '/usr/lib/llvm-18/lib/clang/18/lib/linux/libclang_rt.fuzzer-x86_64.a',
+  '/usr/lib/llvm-19/lib/clang/19/lib/linux/libclang_rt.fuzzer-x86_64.a',
+  '/usr/lib/llvm-20/lib/clang/20/lib/linux/libclang_rt.fuzzer-x86_64.a',
+]
+  if _fuzzer_rt == '' and import('fs').exists(_cand)
+    _fuzzer_rt = _cand
+  endif
+endforeach
+if _fuzzer_rt != '' and get_option('capi_sanitize') == 'none'
+  capi_fuzzer = custom_target(
+    'capi_read_fuzzer',
+    output: 'capi_read_fuzzer',
+    command: meson.get_compiler('c').cmd_array() + [
+      '-std=c11', '-g', '-O1',
+      '-I' + meson.project_source_root() / 'include',
+      '-I' + meson.current_build_dir() / 'src',
+      meson.project_source_root() / 'fuzz' / 'capi_read_fuzzer.c',
+      '-o', '@OUTPUT@',
+      seams_api_lib.full_path(),
+      _fuzzer_rt,
+      '-Wl,-rpath,' + meson.current_build_dir() / 'src',
+      '-lstdc++', '-lpthread', '-lm',
+    ],
+    depends: [seams_api_lib],
+    build_by_default: true)
+  capi_array_fuzzer = custom_target(
+    'capi_array_fuzzer',
+    output: 'capi_array_fuzzer',
+    command: meson.get_compiler('c').cmd_array() + [
+      '-std=c11', '-g', '-O1',
+      '-I' + meson.project_source_root() / 'include',
+      '-I' + meson.current_build_dir() / 'src',
+      meson.project_source_root() / 'fuzz' / 'capi_array_fuzzer.c',
+      '-o', '@OUTPUT@',
+      seams_api_lib.full_path(),
+      _fuzzer_rt,
+      '-Wl,-rpath,' + meson.current_build_dir() / 'src',
+      '-lstdc++', '-lpthread', '-lm',
+    ],
+    depends: [seams_api_lib],
+    build_by_default: true)
+  test(
+    'capi_fuzzer',
+    capi_fuzzer,
+    args: [
+      '-max_total_time=' + get_option('capi_fuzz_seconds').to_string(),
+      '-timeout=15', '-rss_limit_mb=4096', '-fork=1', '-ignore_timeouts=1',
+    ],
+    timeout: get_option('capi_fuzz_seconds') + 180,
+    is_parallel: false)
+  test(
+    'capi_array_fuzzer',
+    capi_array_fuzzer,
+    args: [
+      '-max_total_time=' + get_option('capi_fuzz_seconds').to_string(),
+      '-timeout=15', '-rss_limit_mb=4096', '-fork=1', '-ignore_timeouts=1',
+    ],
+    timeout: get_option('capi_fuzz_seconds') + 180,
+    is_parallel: false)
 endif
