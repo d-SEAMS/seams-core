@@ -51,7 +51,7 @@ int chillLabels(molSys::PointCloud<molSys::Point<double>, double> &cloud,
 }
 
 molSys::PointCloud<molSys::Point<double>, double>
-cloudFromXyz(const double *xyz, int n) {
+cloudFromXyz(const double *xyz, int n, bool index = true) {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud.nop = n;
   cloud.currentFrame = 1;
@@ -64,7 +64,9 @@ cloudFromXyz(const double *xyz, int n) {
     p.type = 1;
     p.atomID = i + 1;
     p.molID = i + 1;
-    cloud.idIndexMap[i + 1] = i;
+    if (index) {
+      cloud.idIndexMap[i + 1] = i;
+    }
   }
   return cloud;
 }
@@ -72,6 +74,22 @@ cloudFromXyz(const double *xyz, int n) {
 int writeQ4Q6(molSys::PointCloud<molSys::Point<double>, double> &cloud,
               double cutoff, double *q4, double *q6, double *q4bar,
               double *q6bar) {
+  // Two separate calls each rebuild the cutoff list. The paired kernel
+  // walks that list once and writes both orders. Averaged q-bar still
+  // takes the two calls, because the average reads every neighbour's q_lm.
+  if (q4bar == nullptr && q6bar == nullptr) {
+    std::vector<double> a4;
+    std::vector<double> a6;
+    if (chill::localCutoffQ4Q6(cloud, cutoff, 1, a4, a6) &&
+        static_cast<int>(a4.size()) == cloud.nop &&
+        static_cast<int>(a6.size()) == cloud.nop) {
+      if (cloud.nop > 0) {
+        std::memcpy(q4, a4.data(), static_cast<std::size_t>(cloud.nop) * sizeof(double));
+        std::memcpy(q6, a6.data(), static_cast<std::size_t>(cloud.nop) * sizeof(double));
+      }
+      return 0;
+    }
+  }
   const auto a4 =
       chill::steinhardtQlCutoff(cloud, cutoff, 4, 1, q4bar != nullptr);
   const auto a6 =
@@ -318,7 +336,6 @@ Cloud cloudOf(const double *xyz, int n, const double *box9) {
     p.type = 1;
     p.atomID = i + 1;
     p.molID = i + 1;
-    cloud.idIndexMap[i + 1] = i;
   }
   if (!nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, box9[0], box9[1],
                                     box9[2], box9[3], box9[4], box9[5], box9[6],
@@ -454,7 +471,7 @@ int seams_q4_q6(const double *xyz, int n, const double *box, double cutoff,
   if (!(box[3] > 0.0 && box[4] > 0.0 && box[5] > 0.0)) {
     return 1;
   }
-  auto cloud = cloudFromXyz(xyz, n);
+  auto cloud = cloudFromXyz(xyz, n, q4bar != nullptr || q6bar != nullptr);
   cloud.box = {box[3], box[4], box[5]};
   cloud.boxLow = {box[0], box[1], box[2]};
   return writeQ4Q6(cloud, cutoff, q4, q6, q4bar, q6bar);
@@ -467,7 +484,7 @@ int seams_q4_q6_lammps(const double *xyz, int n, const double *box9,
       n <= 0 || !(cutoff > 0.0)) {
     return 1;
   }
-  auto cloud = cloudFromXyz(xyz, n);
+  auto cloud = cloudFromXyz(xyz, n, q4bar != nullptr || q6bar != nullptr);
   if (!nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, box9[0], box9[1],
                                     box9[2], box9[3], box9[4], box9[5],
                                     box9[6], box9[7], box9[8])) {

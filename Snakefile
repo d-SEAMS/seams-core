@@ -327,7 +327,7 @@ rule literature_h2h:
 
 rule rings_one_thread:
     input:
-        "build/tests/bench_rings_h2h",
+        "bbdir-release/tests/bench_rings_h2h",
         "scripts/rings_one_thread.py",
         "input/traj/genice_sH.lammpstrj",
         "input/traj/mW_cubic.lammpstrj",
