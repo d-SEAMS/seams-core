@@ -1877,7 +1877,8 @@ def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=
     for index in range(len(frame.xyz)):
         kind = int(frame.types[index])
         if ions and kind in (3, 4):
-            token = "sodium" if kind == 3 else "chloride"
+            # brine.rst: type 3 is chloride and type 4 is sodium.
+            token = "chloride" if kind == 3 else "sodium"
             colour, radius, alpha = atom_style(token)
             rim = (0.12, 0.12, 0.14)
             colors.append(rim)
@@ -1987,6 +1988,16 @@ def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=
             transparency = [transparency[index] for index in order]
             kept_labels = [kept_labels[index] for index in order]
             bonds = [(remap[left], remap[right]) for left, right in bonds]
+    if slab:
+        # One oxygen radius, the same one Ice Ih uses. Phase is colour alone.
+        oxygen = {
+            "hexagonal", "cubic", "water", "interfacial", "clathrate",
+            "interClathrate", "unclassified", "reCubic", "reHex", "mixed",
+        }
+        for index, name in enumerate(names):
+            if name in oxygen:
+                radii[index] = ATOM_RADIUS
+                transparency[index] = 0.0
     if view == "channel":
         radii = [value * (0.72 if name not in ("sodium", "chloride", "_rim") else 1.0) for value, name in zip(radii, names)]
     bond_radius = BOND_RADIUS
@@ -2092,6 +2103,101 @@ def reimage_atoms(atoms, box):
     return seated
 
 
+def sh_large_ring_mesh(oxygens, guest_centre, box):
+    """The sH 5^12 6^8 cage. Each face is one of its twelve pentagons or eight hexagons.
+
+    The 36 waters are the cage around the ideal large-cage centre in the
+    GenIce sH cell, snapped onto the relaxed oxygens. A convex hull of a
+    wide shell pulls in the neighbouring cages and draws long flat faces.
+    """
+    import numpy as np
+
+    offsets = np.array([
+        3.8878, -2.2439, -1.7655, -3.8878, 2.2439, -1.7655, 3.8872, 2.2450, -1.7655,
+        -0.0006, 4.4889, -1.7655, 0.0006, -4.4889, -1.7655, -3.8872, -2.2450, -1.7655,
+        -2.4103, 4.1748, -0.3724, 2.4103, 4.1748, -0.3724, -2.4103, -4.1748, -0.3724,
+        2.4103, -4.1748, -0.3724, 4.8207, 0.0000, -0.3724, -4.8207, 0.0000, -0.3724,
+        -2.4302, 1.4038, -4.0263, 2.4302, -1.4038, -4.0263, -0.0006, -2.8065, -4.0263,
+        -2.4308, -1.4027, -4.0263, 2.4308, 1.4027, -4.0263, 0.0006, 2.8065, -4.0263,
+        2.4103, 4.1748, 2.3876, -2.4103, 4.1748, 2.3876, -2.4103, -4.1748, 2.3876,
+        2.4103, -4.1748, 2.3876, 4.8207, 0.0000, 2.3876, -4.8207, 0.0000, 2.3876,
+        3.8872, 2.2450, 3.7786, -3.8878, 2.2439, 3.7786, 3.8878, -2.2439, 3.7786,
+        -0.0006, 4.4889, 3.7786, 0.0006, -4.4889, 3.7786, -3.8872, -2.2450, 3.7786,
+        -2.4302, 1.4038, 6.0394, 0.0006, 2.8065, 6.0394, -2.4308, -1.4027, 6.0394,
+        -0.0006, -2.8065, 6.0394, 2.4302, -1.4038, 6.0394, 2.4308, 1.4027, 6.0394,
+    ], dtype=float).reshape(-1, 3)
+    rings = (
+        (0, 9, 4, 14, 13), (0, 10, 2, 16, 13), (1, 6, 3, 17, 12), (1, 11, 5, 15, 12),
+        (2, 7, 3, 17, 16), (4, 8, 5, 15, 14), (18, 24, 35, 31, 27), (19, 25, 30, 31, 27),
+        (20, 28, 33, 32, 29), (21, 26, 34, 33, 28), (22, 24, 35, 34, 26), (23, 25, 30, 32, 29),
+        (0, 9, 21, 26, 22, 10), (1, 6, 19, 25, 23, 11), (2, 7, 18, 24, 22, 10), (3, 6, 19, 27, 18, 7),
+        (4, 8, 20, 28, 21, 9), (5, 8, 20, 29, 23, 11), (12, 15, 14, 13, 16, 17), (30, 31, 35, 34, 33, 32),
+    )
+    length_a = 12.4212113964
+    length_c = 10.0656455142 * 2.0
+    angle = np.deg2rad(120.0)
+
+    def cartesian(frac):
+        frac = np.atleast_2d(np.asarray(frac, dtype=float))
+        return np.column_stack((
+            length_a * frac[:, 0] + length_a * np.cos(angle) * frac[:, 1],
+            length_a * np.sin(angle) * frac[:, 1],
+            length_c * frac[:, 2],
+        ))
+
+    lattice = cartesian([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+    homes = cartesian([[1.0, 0.0, 0.2], [0.0, 0.0, 0.75]])
+    guest = np.asarray(guest_centre, dtype=float)
+    images = []
+    for ix in (-1, 0, 1):
+        for iy in (-1, 0, 1):
+            for iz in (-1, 0, 1):
+                images.append(homes + ix * lattice[0] + iy * lattice[1] + iz * lattice[2])
+    images = np.vstack(images)
+    home = images[int(np.linalg.norm(images - guest, axis=1).argmin())]
+    ideal = home + offsets
+    oxy = np.asarray(oxygens, dtype=float)
+    copies = []
+    for ix in (-1, 0, 1):
+        for iy in (-1, 0, 1):
+            for iz in (-1, 0, 1):
+                copies.append(oxy + ix * lattice[0] + iy * lattice[1] + iz * lattice[2])
+    copies = np.vstack(copies)
+    shell = []
+    for point in ideal:
+        shell.append(copies[int(np.linalg.norm(copies - point, axis=1).argmin())])
+    shell = np.asarray(shell, dtype=float)
+    vertices = [row for row in shell]
+    faces = []
+    for ring in rings:
+        points = shell[list(ring)]
+        centre = points.mean(axis=0)
+        normal = np.zeros(3)
+        for index, left in enumerate(points):
+            right = points[(index + 1) % len(points)]
+            normal[0] += (left[1] - right[1]) * (left[2] + right[2])
+            normal[1] += (left[2] - right[2]) * (left[0] + right[0])
+            normal[2] += (left[0] - right[0]) * (left[1] + right[1])
+        length = float(np.linalg.norm(normal)) or 1.0
+        normal = normal / length
+        if float(np.dot(normal, home - centre)) < 0.0:
+            normal = -normal
+        centre = centre + normal * 0.12
+        base = len(vertices)
+        vertices.append(centre)
+        for index in range(len(ring)):
+            faces.append((base, ring[index], ring[(index + 1) % len(ring)]))
+    return {
+        "vertices": np.asarray(vertices, dtype=float),
+        "shell": shell,
+        "faces": np.asarray(faces, dtype=int),
+        "color": palette_rgb("clathrate"),
+        "transparency": 0.55,
+        "legend": "large cage",
+        "alpha": 0.42,
+    }
+
+
 def host_token(lattice):
     if lattice in ("1h", "ice1h"):
         return "hexagonal"
@@ -2111,7 +2217,10 @@ def side_by_side_cages(meshes, xyz, names, colors, radii, transparency, residue_
     guest_names = {"methane", "THF", "ring O", "hydrogen"}
     water_colour = palette_rgb("water")
     xyz = np.asarray(xyz, dtype=float)
-    centres = [np.asarray(mesh["vertices"], dtype=float).mean(axis=0) for mesh in meshes]
+    centres = [
+        np.asarray(mesh["shell"] if "shell" in mesh else mesh["vertices"], dtype=float).mean(axis=0)
+        for mesh in meshes
+    ]
     guests = {}
     for index, name in enumerate(names):
         if name not in guest_names:
@@ -2125,7 +2234,7 @@ def side_by_side_cages(meshes, xyz, names, colors, radii, transparency, residue_
     shifted = []
     for slot in order:
         mesh = meshes[slot]
-        waters = np.asarray(mesh["vertices"], dtype=float).copy()
+        waters = np.asarray(mesh["shell"] if "shell" in mesh else mesh["vertices"], dtype=float).copy()
         mine = []
         best_dist = 1.0e9
         for indices in guests.values():
@@ -2164,7 +2273,8 @@ def side_by_side_cages(meshes, xyz, names, colors, radii, transparency, residue_
         for left in range(len(waters)):
             for right in range(left + 1, len(waters)):
                 span = float(np.linalg.norm(waters[left] - waters[right]))
-                if 2.40 <= span <= 3.20:
+                limit = 3.30 if "shell" in mesh else 3.20
+                if 2.40 <= span <= limit:
                     bonds.append((start + left, start + right))
         guest_at = start + len(waters)
         for offset, index in enumerate(mine):
@@ -2280,6 +2390,24 @@ def genice_picture(lattice, rep, guests, cage_faces, hydrogens=True):
             ],
             box,
         )
+        if lattice == "sH" and meshes:
+            replaced = []
+            for mesh in meshes:
+                if mesh.get("legend") != "large cage":
+                    replaced.append(mesh)
+                    continue
+                guest = None
+                for group in guest_groups.values():
+                    if group["kind"] != "THF" or not group["heavy"]:
+                        continue
+                    centre = np.mean(group["heavy"], axis=0)
+                    if guest is None:
+                        guest = centre
+                if guest is None:
+                    replaced.append(mesh)
+                    continue
+                replaced.append(sh_large_ring_mesh(np.asarray(oxygens, dtype=float), guest, box))
+            meshes = replaced
         if meshes:
             xyz, colors, radii, transparency, names, bonds, meshes = side_by_side_cages(
                 meshes, xyz, names, colors, radii, transparency, residue_index,
@@ -2441,7 +2569,7 @@ def quiet_stray_clathrate(frame, labels):
     return labels
 
 
-def depth_slab(frame, labels, x_lo=4.0, x_hi=16.0, z_lo=4.5, z_hi=26.0, liquid_reach=6.0):
+def depth_slab(frame, labels, x_lo=6.0, x_hi=12.5, z_lo=4.5, z_hi=26.0, liquid_reach=6.0):
     """One depth through the interface: ice, then the interfacial layer, then liquid.
 
     x is the depth. The window is a few angstroms, so a liquid ion does not
@@ -2535,8 +2663,8 @@ def draw(library, scene):
         labels = [2] * len(frame.xyz)
         for index, label in zip(oxygen, labelled):
             labels[index] = label
-        # The sodium at about (11, 10, 12) has hexagonal neighbours in this
-        # same slice. It is not a liquid ion projected onto the ice.
+        # Type 3 at about (11, 10, 12) is the chloride in the crystalline
+        # slab. CHILL+ runs on the water alone, so the ion is not ice.
         frame, labels = depth_slab(frame, labels)
         return labelled_picture(frame, labels, "slab", False, ions=True, slab=True)
     if scene == "rings":
@@ -2660,7 +2788,7 @@ def write_pages(out):
         "cage-sii": "GenIce sII with methane in the small cages and THF in the large cages.",
         "cage-sh": "GenIce sH with methane and THF guests.",
         "cage-guest": "THF guest and the surrounding water.",
-        "brine": "NaCl front. Water, sodium and chloride.",
+        "brine": "NaCl front. The chloride in the ice slice is not an ice label. CHILL+ runs on the water alone.",
         "interface": "Basal interface, one ice bilayer. Crystal bonds stop at the ice. An interClathrate oxygen with only liquid neighbours is drawn as water.",
         "nucleation": "Nucleation frame coloured by published CHILL+.",
         "genice": "GenIce FAU host.",
