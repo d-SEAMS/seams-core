@@ -8,6 +8,8 @@ fn read_dump(path: &str) -> (Vec<f64>, [f64; 3]) {
     let file = File::open(path).expect("open fixture");
     let mut xyz = Vec::new();
     let mut edges = [0.0; 3];
+    let mut tilts = [0.0; 3];
+    let mut lows = [0.0; 3];
     let mut axis = 0;
     let mut reading = false;
     let mut bounds = false;
@@ -21,10 +23,25 @@ fn read_dump(path: &str) -> (Vec<f64>, [f64; 3]) {
             let mut parts = line.split_whitespace();
             let lo: f64 = parts.next().unwrap().parse().unwrap();
             let hi: f64 = parts.next().unwrap().parse().unwrap();
+            let tilt: f64 = parts.next().and_then(|item| item.parse().ok()).unwrap_or(0.0);
+            // Recovered after all three rows. Store the bound span and
+            // the tilt, then convert once the third row arrives.
             edges[axis] = hi - lo;
+            tilts[axis] = tilt;
+            lows[axis] = lo;
             axis += 1;
             if axis == 3 {
+                let xy = tilts[0];
+                let xz = tilts[1];
+                let yz = tilts[2];
+                let xmin = xy.min(xz).min(xy + xz).min(0.0);
+                let xmax = xy.max(xz).max(xy + xz).max(0.0);
+                let ymin = yz.min(0.0);
+                let ymax = yz.max(0.0);
+                edges[0] = edges[0] - xmax + xmin;
+                edges[1] = edges[1] - ymax + ymin;
                 bounds = false;
+                let _ = lows;
             }
         } else if line.starts_with("ITEM: ATOMS") {
             reading = true;

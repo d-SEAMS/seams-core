@@ -1,5 +1,6 @@
 /* Read input/traj/genice_sI.lammpstrj, then neighbours, q6, CHILL+, rings. */
 #include "seams.h"
+#include "seams_lammps_box.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,21 +21,26 @@ static int read_dump(const char *path, double *xyz, int *n, double *lx, double *
   *n = 0;
   while (fgets(line, sizeof line, in) != NULL) {
     if (strncmp(line, "ITEM: BOX BOUNDS", 16) == 0) {
-      if (fscanf(in, "%lf %lf", &lo, &hi) != 2) {
-        fclose(in);
-        return 1;
+      double bound_lo[3], bound_hi[3], tilt[3], box9[9];
+      int axis;
+      for (axis = 0; axis < 3; ++axis) {
+        char bound[128];
+        if (fgets(bound, sizeof bound, in) == NULL) {
+          fclose(in);
+          return 1;
+        }
+        tilt[axis] = 0.0;
+        if (sscanf(bound, "%lf %lf %lf", &bound_lo[axis], &bound_hi[axis], &tilt[axis]) < 2) {
+          fclose(in);
+          return 1;
+        }
       }
-      *lx = hi - lo;
-      if (fscanf(in, "%lf %lf", &lo, &hi) != 2) {
-        fclose(in);
-        return 1;
-      }
-      *ly = hi - lo;
-      if (fscanf(in, "%lf %lf", &lo, &hi) != 2) {
-        fclose(in);
-        return 1;
-      }
-      *lz = hi - lo;
+      seams_lammps_bounds(bound_lo, bound_hi, tilt, box9);
+      *lx = box9[3];
+      *ly = box9[4];
+      *lz = box9[5];
+      (void)lo;
+      (void)hi;
     } else if (strncmp(line, "ITEM: ATOMS", 11) == 0) {
       reading = 1;
     } else if (reading) {

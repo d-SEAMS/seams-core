@@ -5,6 +5,7 @@
  * and 16 six-rings. seams_chill_plus and seams_rings_histogram at 3.5 Å.
  */
 #include "seams.h"
+#include "seams_lammps_box.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,7 +16,6 @@ static int read_dump(const char *path, double **xyz, int **types, int *n, double
   char line[512];
   int reading = 0;
   int cap = 0;
-  double lo, hi;
   if (in == NULL) {
     return 1;
   }
@@ -24,25 +24,21 @@ static int read_dump(const char *path, double **xyz, int **types, int *n, double
   *types = NULL;
   while (fgets(line, sizeof line, in) != NULL) {
     if (strncmp(line, "ITEM: BOX BOUNDS", 16) == 0) {
-      if (fscanf(in, "%lf %lf", &lo, &hi) != 2) {
-        fclose(in);
-        return 1;
+      double bound_lo[3], bound_hi[3], tilt[3];
+      int axis;
+      for (axis = 0; axis < 3; ++axis) {
+        char bound[128];
+        if (fgets(bound, sizeof bound, in) == NULL) {
+          fclose(in);
+          return 1;
+        }
+        tilt[axis] = 0.0;
+        if (sscanf(bound, "%lf %lf %lf", &bound_lo[axis], &bound_hi[axis], &tilt[axis]) < 2) {
+          fclose(in);
+          return 1;
+        }
       }
-      box9[0] = lo;
-      box9[3] = hi - lo;
-      if (fscanf(in, "%lf %lf", &lo, &hi) != 2) {
-        fclose(in);
-        return 1;
-      }
-      box9[1] = lo;
-      box9[4] = hi - lo;
-      if (fscanf(in, "%lf %lf", &lo, &hi) != 2) {
-        fclose(in);
-        return 1;
-      }
-      box9[2] = lo;
-      box9[5] = hi - lo;
-      box9[6] = box9[7] = box9[8] = 0.0;
+      seams_lammps_bounds(bound_lo, bound_hi, tilt, box9);
     } else if (strncmp(line, "ITEM: ATOMS", 11) == 0) {
       reading = 1;
     } else if (reading) {

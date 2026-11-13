@@ -35,38 +35,17 @@ from pathlib import Path
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
+REPO = HERE.parents[3]
 sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(REPO / "scripts"))
 import regenerate as deck  # noqa: E402
+from chill_palette import COLOUR, LEGEND as _LEGEND  # noqa: E402
 
-# scripts/science_render.py, published CHILL+ classes.
-CUBIC = (0.000, 0.447, 0.698)
-HEXAGONAL = (0.902, 0.624, 0.000)
-INTERFACIAL = (0.000, 0.620, 0.451)
-LIQUID = (0.780, 0.780, 0.780)
-CLATHRATE = (0.337, 0.706, 0.914)
-INTER_CLATHRATE = (0.800, 0.475, 0.655)
-COLOUR = {
-    "cubic": CUBIC,
-    "hexagonal": HEXAGONAL,
-    "water": LIQUID,
-    "interfacial": INTERFACIAL,
-    "clathrate": CLATHRATE,
-    "interClathrate": INTER_CLATHRATE,
-    "unclassified": (0.45, 0.45, 0.45),
-    "reCubic": CUBIC,
-    "reHex": HEXAGONAL,
-}
-NA = (0.37, 0.24, 0.60)
-CL = (0.12, 0.12, 0.12)
-LEGEND = (
-    ("hexagonal", HEXAGONAL),
-    ("cubic", CUBIC),
-    ("interfacial", INTERFACIAL),
-    ("liquid", LIQUID),
-    ("clathrate", CLATHRATE),
-    ("interf. clathrate", INTER_CLATHRATE),
-    ("Na$^+$", NA),
-    ("Cl$^-$", CL),
+NA = COLOUR["sodium"]
+CL = COLOUR["chloride"]
+LEGEND = tuple(
+    (("Na$^+$", NA) if label == "Na+" else ("Cl$^-$", CL) if label == "Cl-" else (label, colour))
+    for label, colour in _LEGEND
 )
 RADIUS = {"O": 1.05, "Na": 1.55, "Cl": 1.75}
 PPI = 300

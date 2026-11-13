@@ -40,9 +40,9 @@ Python and C print the same census:
    :end-before: static int cmd_interface
 
 .. figure:: figures/interface.png
-   :alt: Interface slab from the v12 Tachyon renderer. Liquid is at 40 percent and basal layers are numbered.
+   :alt: Interface slab with a colour legend, numbered basal layers, a layer-index axis, and a 1 nm bar.
 
-   v12 Tachyon raster of the interface slab. Liquid is blended at 0.40 and the basal layers are numbered.
+   v12 Tachyon raster of the interface slab. Liquid is blended at 0.40. The legend uses the shared palette, including the wine interfacial-clathrate oxygens. The numbers on the left are the layer index. The 1 nm bar uses the same type as the legend.
 
 What this tells you
 -------------------

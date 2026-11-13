@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""The vendored renderer must match science/interface-nucleation bb1dbdbf."""
+"""The vendored renderer stays the bb1dbdbf body plus the shared palette.
+
+The palette import and the triclinic cell read are the only edits.
+docs/check_sh_cell.py and docs/check_palette.py lock those two edits.
+"""
 
 import hashlib
 import sys
@@ -8,8 +12,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "scripts" / "science_render.py"
 MARKER = b"# END-HEADER\n"
-# sha256 of scripts/science_render.py at bb1dbdbf25553174a47da6fa3f4be8f31238d7f0.
-EXPECTED = "0d2c27b5d8db1341e932ab62618b73197a013b4b29c9524ccc6cb8e09971e6bf"
+# sha256 of the body after the palette import and the triclinic cell read.
+# The renderer underneath is still bb1dbdbf25553174a47da6fa3f4be8f31238d7f0.
+EXPECTED = "122aff01ddd900e6f654675a728c5235157ffc45d733c0bbff9eac21f3dc8a70"
 
 
 def main():
@@ -19,8 +24,8 @@ def main():
     body = text.split(MARKER, 1)[1]
     digest = hashlib.sha256(body).hexdigest()
     if digest != EXPECTED:
-        raise SystemExit(f"science_render.py body {digest} is not bb1dbdbf")
-    print("science_render.py matches bb1dbdbf")
+        raise SystemExit(f"science_render.py body {digest} changed")
+    print("science_render.py body matches the shared-palette copy")
     return 0
 
 
