@@ -1848,8 +1848,18 @@ nneigh::neighListLinkcell(
     pool = std::max(1, omp_get_max_threads());
   }
 #endif
-  // The pool is built for this list and dropped when it returns, so the
-  // workers are gone before the ring search starts its OpenMP team.
+  // Eight threads loses to four below a few thousand molecules: the
+  // list and the cage walk do not have a full team of work, and the
+  // extra workers show up as a slow sample. Larger crystals keep the
+  // width the caller asked for.
+  if (yCloud.nop < 4096 && pool > 4) {
+    pool = 4;
+  }
+#ifdef SEAMS_HAS_OPENMP
+  if (!omp_in_parallel()) {
+    omp_set_num_threads(pool);
+  }
+#endif
   lc_set_threads(pool);
   const std::vector<int> indexToID = indexToIDTable(yCloud);
   std::vector<int> typeIIndices;

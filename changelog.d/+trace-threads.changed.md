@@ -1,1 +1,1 @@
-The hydrate signature search scales with threads. The cutoff list is the threaded linkcell list, and the cage index is merged from per-thread buckets in ring order. Census and cage membership match the one-thread result.
+The hydrate signature search scales with threads. The cutoff list is the threaded linkcell list, built on one reused worker pool, and crystals under a few thousand molecules stay at four threads so a wider team does not slow them down. The cage index is merged from per-thread buckets in ring order. Census and cage membership match the one-thread result.

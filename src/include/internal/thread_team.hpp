@@ -63,9 +63,10 @@ inline void releaseTeam() {
 // and freeze the team size, and leave the workers asleep only under
 // the passive wait policy.
 inline void prepareCompute() {
-  // Do not force a passive wait. A team that sleeps between calls wakes
-  // up on a spread of several milliseconds; the benchmark keeps the
-  // team with OMP_WAIT_POLICY=active.
+  // Linkcell's pool sleeps on a condvar between searches. Forcing OpenMP
+  // passive as well made the next region wake on a spread of tens of
+  // milliseconds, which is the slow 8-thread sample. Leave OpenMP on the
+  // active wait the benchmark already uses.
   widenAffinity();
 #ifdef SEAMS_HAS_OPENMP
   omp_set_dynamic(0);
