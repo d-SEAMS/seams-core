@@ -40,9 +40,9 @@ Python and C print the same census:
    :end-before: static int cmd_interface
 
 .. figure:: figures/interface.png
-   :alt: Interface slab with basal bilayer indices, a shared colour legend, and a label on the periodic image of the interface.
+   :alt: Interface slab with ice at the bottom and liquid at the top, a rectangular cell, and bilayer ticks along the bottom.
 
-   The view looks along x, so the basal stack is vertical. Each numbered tick is one crystalline basal bilayer: the two puckered halves share an index, and the centres are about 3.67 angstrom apart. A bin with fewer than half the oxygens of a full bilayer is not numbered, so the single cubic oxygen and the interfacial shell have no index. Liquid is drawn like the brine figure, at radius 0.50 and 18 percent opacity. The low-z edge is labelled ``interface (periodic image)`` because that face is the periodic copy of the high-z interface. The legend uses the same order and the same type size as the brine figure.
+   Orthographic view straight down x, with growth vertical, as in the brine figure. The cell is a rectangle. Short ticks on the bottom axis mark the six basal bilayers, about 3.67 angstrom apart. No line crosses the liquid. ``ice Ih`` and ``liquid`` sit outside the cell, and the arrows on the right mark the growth front and its periodic image. Liquid is radius 0.50 at 18 percent opacity. The legend matches the brine figure in order and type size.
 
 What this tells you
 -------------------

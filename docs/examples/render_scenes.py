@@ -558,56 +558,125 @@ def basal_bilayers(positions, labels, axis, gap=0.8):
     return ids, centres
 
 
-def _draw_bilayers(render, path, positions, forward, up, ids, note):
-    """Number each bilayer at its median, in the legend font."""
+def _present_interface(render, path, positions, labels, origin, lengths, forward, up, ids, legend):
+    """Rectangle cell, bottom bilayer ticks, and labels outside the box.
+
+    The camera looks down x with up along z, so growth is vertical, as in
+    the brine figure, and an orthorhombic cell is a rectangle. Tick marks
+    sit on the bottom axis only.
+    """
     from PIL import Image, ImageDraw
 
     centre, half_h, half_v, forward, right, up = _camera(render, positions, forward, up)
     image = Image.open(path).convert("RGB")
-    draw = ImageDraw.Draw(image)
     font = _legend_font(LEGEND_FONT_PX)
-    vertical = (positions - centre) @ up
-    span = 2.0 * half_v
-    present = sorted({int(item) for item in ids if item >= 0})
-    for layer in present:
-        members = np.flatnonzero(ids == layer)
-        height_world = float(np.median(vertical[members]))
-        y = (half_v - height_world) / span * image.height
-        if not 0.0 <= y < image.height:
-            continue
-        draw.line([(8, y), (image.width - 8, y)], fill=(90, 90, 90), width=3)
-        draw.text((12, max(0, y - LEGEND_FONT_PX)), str(layer), font=font, fill=(20, 20, 20))
-    if note is not None:
-        point, text = note
+    swatch = 32
+    row_h = 52
+    left, right_margin, top = 170, 210, 36
+    legend_rows = 1
+    if legend:
+        x = 16
+        rows = 1
+        for label, _colour in legend:
+            width_px = swatch + 16 + float(font.getlength(label))
+            if x + width_px > image.width - 8:
+                rows += 1
+                x = 16
+            x += width_px + 18
+        legend_rows = rows
+    bottom = 36 + LEGEND_FONT_PX + 8 + LEGEND_FONT_PX + 16 + row_h * legend_rows + 110
+    canvas = Image.new("RGB", (image.width + left + right_margin, image.height + top + bottom), (255, 255, 255))
+    canvas.paste(image, (left, top))
+    draw = ImageDraw.Draw(canvas)
+
+    def pix(point):
         offset = np.asarray(point, dtype=float) - centre
-        x = (float(np.dot(offset, right)) / (2.0 * half_h) + 0.5) * image.width
-        y = (0.5 - float(np.dot(offset, up)) / (2.0 * half_v)) * image.height
+        x = left + (float(np.dot(offset, right)) / (2.0 * half_h) + 0.5) * image.width
+        y = top + (0.5 - float(np.dot(offset, up)) / (2.0 * half_v)) * image.height
+        return x, y
+
+    face = [
+        np.asarray(origin, dtype=float) + np.array((0.0, j * lengths[1], k * lengths[2]))
+        for j, k in ((0, 0), (1, 0), (1, 1), (0, 1))
+    ]
+    corners = [pix(point) for point in face]
+    for first, second in ((0, 1), (1, 2), (2, 3), (3, 0)):
+        draw.line([corners[first], corners[second]], fill=(40, 40, 40), width=3)
+    y_bottom = max(point[1] for point in corners)
+    x_left = min(point[0] for point in corners)
+    x_right = max(point[0] for point in corners)
+    y_top = min(point[1] for point in corners)
+
+    for layer in sorted({int(item) for item in ids if item >= 0}):
+        members = np.flatnonzero(ids == layer)
+        horiz = float(np.median((positions[members] - centre) @ right))
+        x = left + (horiz / (2.0 * half_h) + 0.5) * image.width
+        draw.line([(x, y_bottom), (x, y_bottom + 16)], fill=(20, 20, 20), width=3)
+        text = str(layer)
         text_w = float(font.getlength(text))
-        if x > image.width * 0.5:
-            x = min(x, image.width - text_w - 12)
-        x = max(8.0, x)
-        y = min(max(8.0, y - LEGEND_FONT_PX), image.height - LEGEND_FONT_PX - 8.0)
-        draw.text((x, y), text, font=font, fill=(20, 20, 20))
-    image.save(path)
+        draw.text((x - text_w / 2.0, y_bottom + 20), text, font=font, fill=(20, 20, 20))
+    title = "layer index"
+    title_w = float(font.getlength(title))
+    draw.text(((x_left + x_right - title_w) / 2.0, y_bottom + 20 + LEGEND_FONT_PX + 4), title, font=font, fill=(20, 20, 20))
+
+    z_ice = positions[np.asarray(labels) == 1, 2]
+    z_cut = float(np.percentile(z_ice, 98)) if z_ice.size else float(origin[2] + 0.5 * lengths[2])
+    z_lo = float(origin[2])
+    z_hi = z_lo + float(lengths[2])
+
+    def y_of(z_value):
+        point = np.asarray(origin, dtype=float) + np.array((0.0, 0.5 * lengths[1], z_value - z_lo))
+        return pix(point)[1]
+
+    for text, z_mid in (("ice Ih", 0.5 * (z_lo + z_cut)), ("liquid", 0.5 * (z_cut + z_hi))):
+        text_w = float(font.getlength(text))
+        draw.text((max(8, x_left - text_w - 16), y_of(z_mid) - LEGEND_FONT_PX / 2.0), text, font=font, fill=(20, 20, 20))
+
+    # Both interfaces, outside the cell: the growth front and its periodic image.
+    bracket_x = x_right + 28
+    y_front = y_of(z_cut)
+    y_periodic = y_of(z_lo)
+    draw.line([(bracket_x, y_front), (bracket_x, y_periodic)], fill=(20, 20, 20), width=3)
+    for y_mark, text in ((y_front, "interface"), (y_periodic, "periodic")):
+        draw.polygon([(x_right + 4, y_mark), (x_right + 22, y_mark - 7), (x_right + 22, y_mark + 7)], fill=(20, 20, 20))
+        draw.line([(bracket_x - 8, y_mark), (bracket_x + 8, y_mark)], fill=(20, 20, 20), width=3)
+        draw.text((bracket_x + 14, y_mark - LEGEND_FONT_PX / 2.0), text, font=font, fill=(20, 20, 20))
+
+    if legend:
+        x, y = left + 16, image.height + top + 20 + 2 * LEGEND_FONT_PX + 24
+        for label, colour in legend:
+            text_w = float(font.getlength(label))
+            if x + swatch + 16 + text_w > canvas.width - 8:
+                x = left + 16
+                y += row_h
+            rgb = tuple(int(round(channel * 255)) for channel in colour)
+            draw.rectangle([x, y, x + swatch, y + swatch], fill=rgb, outline=(30, 30, 30))
+            draw.text((x + swatch + 10, y), label, font=font, fill=(20, 20, 20))
+            x += swatch + 16 + text_w + 18
+        bar_y = y + row_h + 16
+    else:
+        bar_y = image.height + top + 36
+    bar = 10.0 * image.width / (2.0 * half_h)
+    draw.line([(left + 16, bar_y), (left + 16 + bar, bar_y)], fill=(20, 20, 20), width=6)
+    draw.text((left + 16, bar_y + 10), "1 nm", font=font, fill=(20, 20, 20))
+    canvas.save(path)
 
 
 def render_interface(render, positions, labels, origin, lengths, path, width=None):
-    """Slab seen across x, with basal bilayers horizontal.
+    """Growth vertical, orthographic view straight down x.
 
     Liquid uses the brine veil: radius 0.50 and 18 percent opacity.
-    The low-z edge is the periodic image of the high-z interface.
+    Bilayer ticks are short marks on the bottom axis.
     """
     colours = np.array([render.CHILL.get(int(code), ("", (0.5, 0.5, 0.5)))[1] for code in labels])
     radii = np.where(np.asarray(labels) == 2, BRINE_RADIUS["water"], 0.85)
     liquid = np.asarray(labels) == 2
     basal = np.asarray(render.stacking_axis(positions, labels, np.isin(labels, [1])), dtype=float)
-    if float(basal[1]) < 0.0:
-        basal = -basal
-    up = basal
     forward = np.array([1.0, 0.0, 0.0])
+    up = np.array([0.0, 0.0, 1.0])
     _centre, half_h, half_v, forward, _right, up = _camera(render, positions, forward, up)
     if width is None:
-        short = 1400
+        short = 1700
         width = short if half_h <= half_v else int(np.ceil(short * half_h / max(half_v, 1e-6)))
     ice_png = path.with_name(path.stem + "-ice.png")
     liq_png = path.with_name(path.stem + "-liq.png")
@@ -622,19 +691,10 @@ def render_interface(render, positions, labels, origin, lengths, path, width=Non
     blended[veil] = 0.18 * liquid_image[veil] + 0.82 * ice[veil]
     Image.fromarray(np.clip(blended, 0, 255).astype(np.uint8)).save(path)
     ids, _centres = basal_bilayers(positions, labels, basal)
-    # The cell face at z = origin is the periodic image of the high-z interface.
-    note_point = np.asarray(origin, dtype=float) + np.array([0.5 * lengths[0], 0.5 * lengths[1], 0.0])
-    _draw_bilayers(render, path, positions, forward, up, ids, (note_point, "interface (periodic image)"))
-    corners = [
-        np.asarray(origin) + np.array((i * lengths[0], j * lengths[1], k * lengths[2]))
-        for i in (0, 1)
-        for j in (0, 1)
-        for k in (0, 1)
-    ]
     names = {0: "cubic", 1: "hexagonal", 2: "liquid", 3: "interfacial", 4: "clathrate", 5: "interf. clathrate"}
     present = {names[int(code)] for code in labels if int(code) in names}
     legend = [item for item in BRINE_LEGEND if item[0] in present]
-    annotate(render, path, positions, forward, up, width, corners, legend, layer_title="layer index")
+    _present_interface(render, path, positions, labels, origin, lengths, forward, up, ids, legend)
 
 
 def _positions(path):
