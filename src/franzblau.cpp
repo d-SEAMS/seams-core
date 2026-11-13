@@ -1516,6 +1516,14 @@ primitive::ringNetwork(const std::vector<int> &offsets, const std::vector<int> &
     adjacency.first[i] = static_cast<std::size_t>(offsets[i]);
   }
   adjacency.cols = cols;
+  const int nRows = static_cast<int>(offsets.size()) - 1;
+  for (int i = 0; i < nRows; ++i) {
+    auto *begin = adjacency.cols.data() +
+                  static_cast<std::ptrdiff_t>(adjacency.first[static_cast<std::size_t>(i)]);
+    auto *end = adjacency.cols.data() +
+                static_cast<std::ptrdiff_t>(adjacency.first[static_cast<std::size_t>(i + 1)]);
+    std::sort(begin, end);
+  }
   gRingSplit.adj_ms = 0;
   return searchPacked(std::move(adjacency), maxDepth, sources, false);
 }
