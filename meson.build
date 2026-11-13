@@ -851,6 +851,12 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_pool_v5',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_pool_v5.py', '--check'],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_cutoff_rings',
     python3,
     args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-cutoff'],
@@ -1247,6 +1253,33 @@ if get_option('with_cli')
   binding_env = environment()
   binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
   binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'bindings')
+  test(
+    'docs_examples',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_examples.py',
+      meson.project_source_root(),
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_api_lib, seams_lang, seams_exe],
+    suite: 'docs',
+    timeout: 300)
+  foreach _engine : ['gromacs', 'lammps', 'openmm', 'plumed', 'insitu']
+    test(
+      'docs_engine_' + _engine,
+      python3,
+      args: [
+        meson.project_source_root() / 'docs' / 'howto' / 'test_engines.py',
+        _engine,
+        meson.project_source_root(),
+        meson.project_build_root(),
+      ],
+      env: binding_env,
+      depends: [seams_lang],
+      suite: 'docs',
+      timeout: 180)
+  endforeach
   test(
     'docs_api_python',
     python3,

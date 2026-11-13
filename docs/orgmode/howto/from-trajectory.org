@@ -1,0 +1,57 @@
+#+TITLE: From a trajectory to the ice front
+#+OPTIONS: toc:nil num:nil
+
+You have a trajectory and want CHILL+ labels, the primitive rings,
+and the position of the ice front. The commands are the same for a
+LAMMPS dump and, when chemfiles is compiled in, for a GROMACS
+=.gro= or =.xtc=. The files you can run from this tree are the
+LAMMPS dumps under ~input/traj/~.
+
+* Read the frame
+
+~input/traj/ice1h.lammpstrj~ is 128 molecules of ice Ih.
+~input/traj/interface_f0.lammpstrj~ is 864 molecules of a basal
+ice-water interface. Type 1 is the water in both files.
+
+#+begin_src bash
+seams read input/traj/ice1h.lammpstrj
+seams read input/traj/interface_f0.lammpstrj --type 1
+#+end_src
+
+The first line of each answer is the atom count and the box.
+Ice Ih reports ~nop 128~. The interface reports ~nop 864~.
+
+* CHILL+ labels
+
+#+begin_src bash
+seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5
+seams chill-plus input/traj/interface_f0.lammpstrj --type 1 --cutoff 3.5
+#+end_src
+
+Ice Ih is ~hexagonal 128~. The interface is ~hexagonal 352~,
+~water 434~, ~interfacial 49~, ~interClathrate 25~, ~clathrate 3~,
+and ~cubic 1~.
+
+* Rings
+
+#+begin_src bash
+seams rings input/traj/ice1h.lammpstrj --cutoff 3.5
+seams rings input/traj/interface_f0.lammpstrj --type 1 --cutoff 3.5
+#+end_src
+
+Ice Ih has 256 rings, all of size 6. The interface has 1850 rings:
+142 of size 3, 188 of size 4, 377 of size 5, and 1143 of size 6.
+
+* The ice front
+
+~--layers --axis 2~ bins the CHILL+ labels along z, the long edge
+of the interface cell.
+
+#+begin_src bash
+seams chill-plus input/traj/interface_f0.lammpstrj --type 1 --layers --axis 2
+#+end_src
+
+The stack string is ~HHHHHHHH....C.~. Eight hexagonal slabs, a gap,
+and one cubic layer. The ice fraction is 0.95 in the slab that
+starts at 18.5 Å and 0.48 in the next one. The front is the height
+where that fraction crosses one half, 22.03 Å.

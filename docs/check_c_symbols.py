@@ -96,8 +96,31 @@ def rust_symbols():
     return sorted(names)
 
 
+def fortran_symbols():
+    """Parameters and procedures exported by the Fortran module."""
+    text = (ROOT / "bindings" / "fortran" / "seams.f90").read_text()
+    names = set(re.findall(r"parameter :: ([A-Z0-9_]+)", text))
+    names.update(re.findall(r"(?:function|subroutine) ([a-z0-9_]+)\(", text))
+    return sorted(names)
+
+
+def julia_symbols():
+    """Names on the Dseams export line."""
+    text = (ROOT / "bindings" / "julia" / "Dseams" / "src" / "Dseams.jl").read_text()
+    match = re.search(r"^export (.+)$", text, re.M)
+    if match is None:
+        return []
+    return sorted(part.strip() for part in match.group(1).split(",") if part.strip())
+
+
+def r_symbols():
+    """Functions marked @export in the R package."""
+    text = (ROOT / "bindings" / "r" / "dseams" / "R" / "dseams.R").read_text()
+    return sorted(re.findall(r"#' @export\n([A-Za-z0-9_.]+) <- function", text))
+
+
 def missing_public_symbols():
-    """Undocumented public C, C++, Python, and Rust names.
+    """Undocumented public names in each shipped language front.
 
     >>> missing_public_symbols()
     []
@@ -108,4 +131,7 @@ def missing_public_symbols():
     missing.extend("cxx:" + name for name in _missing(cxx_symbols(), blob))
     missing.extend("python:" + name for name in _missing(python_symbols(), blob))
     missing.extend("rust:" + name for name in _missing(rust_symbols(), blob))
+    missing.extend("fortran:" + name for name in _missing(fortran_symbols(), blob))
+    missing.extend("julia:" + name for name in _missing(julia_symbols(), blob))
+    missing.extend("r:" + name for name in _missing(r_symbols(), blob))
     return missing

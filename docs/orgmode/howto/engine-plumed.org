@@ -1,0 +1,38 @@
+#+TITLE: PLUMED
+#+OPTIONS: toc:nil num:nil
+
+The thread count comes from ~PLUMED_NUM_THREADS~. Set that variable
+before PLUMED starts. ~OMP_NUM_THREADS~ does not change the PLUMED team.
+In PLUMED 2.10 the width starts at 1, and ~getNumThreads~ reads only
+~PLUMED_NUM_THREADS~.
+
+Build the collective variable when PLUMED is installed:
+
+#+begin_src bash
+meson setup build -Dwith_plumed=enabled
+meson compile -C build
+#+end_src
+
+~SEAMS~ has three components. ~seams.q6~ is the mean local q6, and a
+~RESTRAINT~ can bias it. ~seams.ice~ is the fraction of atoms that
+published CHILL+ calls cubic. ~seams.ring~ is the fraction of atoms on
+a primitive six-ring. The ice and ring components have no derivatives.
+
+Load ~libSeamsPlumed.so~, then name the atoms and the cutoff in
+angstroms. PLUMED stores positions in nanometres. The plugin multiplies
+positions and the box by 10 before the d-SEAMS calls.
+
+The dump you can run from this repository is
+~input/traj/ice1h.lammpstrj~. On that cell ~seams chill-plus~ returns
+~hexagonal 128~, so the cubic fraction is 0. ~seams rings~ returns 256
+six-rings. ~seams steinhardt --l 6~ returns mean q6 0.625855.
+
+#+begin_src bash
+seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5
+seams rings input/traj/ice1h.lammpstrj --cutoff 3.5
+seams steinhardt input/traj/ice1h.lammpstrj --cutoff 3.5 --l 6
+#+end_src
+
+~meson test docs_engine_plumed~ runs ~plumed driver~ when both the
+~plumed~ program and ~libSeamsPlumed.so~ are present. It exits 77 when
+either is missing. On the cubic cell in nanometres, ~seams.ice~ is 1.

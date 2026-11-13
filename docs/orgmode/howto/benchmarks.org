@@ -176,3 +176,18 @@ is 50.6 ms. An explicit pool of eight threads is 20.3 ms.
 =benchmarks/rc3-vesin-gap.txt= is that probe. A half list is a
 different pair count. The cell list, the copy and the layout move
 the eight-thread time by a few milliseconds.
+
+* Neighbour list and the full ring call, 9fcaab36
+
+~9fcaab36~ times ~seams_frame_neighbours~ against OVITO
+CoordinationAnalysis on ice Ic at 884736 molecules, cutoff 3.5 Å.
+~OVITO_THREAD_COUNT~ is set before OVITO is imported. Both codes
+report 3538944 directed pairs. Each sample is the third call in a
+fresh process. Eight samples remain. The same sitting retimes the
+full cutoff ring call, the neighbour list plus the index conversion
+plus the depth-6 search, against ~cad887b2~. The raw lines are
+~benchmarks/pool-audit-v5.txt~.
+
+#+begin_export rst
+.. include:: pool-audit-v5-tables.rst
+#+end_export

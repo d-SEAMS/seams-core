@@ -1,0 +1,36 @@
+#+TITLE: GROMACS
+#+OPTIONS: toc:nil num:nil
+
+Build the trajectory tool when libgromacs is installed:
+
+#+begin_src bash
+meson setup build -Dwith_gromacs=enabled
+meson compile -C build
+#+end_src
+
+~gmx-seams~ reads a GROMACS trajectory in nanometres, multiplies the
+coordinates and the box by 10, and calls ~seams_chill_plus~.
+
+#+begin_src bash
+gmx-seams -f TRAJECTORY.gro -cutoff 3.5
+#+end_src
+
+The tool prints ~gromacs frames N ice K atoms N overhead_s T~.
+~ice~ is the number of atoms labelled cubic. ~overhead_s~ is the mean
+seconds spent in that call per frame. On a cubic cell ~ice~ equals
+~atoms~. The tool exits 1 when the two counts differ.
+
+The ice Ih dump in this repository is ~input/traj/ice1h.lammpstrj~,
+128 molecules, box 15.6457 by 14.7071 by 18.073 Å. The same CHILL+
+call returns ~hexagonal 128~. Primitive rings are 256, all of size 6.
+The mean local q6 is 0.625855.
+
+#+begin_src bash
+seams read input/traj/ice1h.lammpstrj
+seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5
+seams rings input/traj/ice1h.lammpstrj --cutoff 3.5
+seams steinhardt input/traj/ice1h.lammpstrj --cutoff 3.5 --l 6
+#+end_src
+
+~meson test docs_engine_gromacs~ runs ~gmx-seams~ when the binary is
+in the build and exits 77 when it is not.
