@@ -320,9 +320,12 @@ TEST_CASE("hop probe matches the ball table and an independent cycle search", "[
       (void)primitive::ringNetwork(nList, depth);
       if (depth <= 7) {
         REQUIRE(primitive::lastRingSearchUsedBalls() == 0);
-      } else {
-        // Rings of size 8 to 10 answer distance from the occupancy bitset.
-        REQUIRE(primitive::lastRingSearchUsedBalls() == 2);
+      } else if (depth <= 9) {
+        // Radius 3 stays on the sorted pair table.
+        REQUIRE(primitive::lastRingSearchUsedBalls() == 1);
+      } else if (depth == 10) {
+        // Radius-2 pair table, meet in the middle for distance 4.
+        REQUIRE(primitive::lastRingSearchUsedBalls() == 3);
       }
       (void)primitive::ringNetworkBalls(nList, depth);
       REQUIRE(primitive::lastRingSearchUsedBalls() == 1);

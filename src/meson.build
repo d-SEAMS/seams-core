@@ -11,6 +11,7 @@ ydslib_sources = files(
   'cluster.cpp',
   'domain.cpp',
   'franzblau.cpp',
+  'lc_threads.cpp',
   'gpu_residency.cpp',
   'gpu_batch.cpp',
   'generic.cpp',

@@ -472,6 +472,26 @@ const std::vector<std::vector<int>> &ringsOf(const Cloud &local, double cutoff,
     static const std::vector<std::vector<int>> empty;
     return empty;
   }
+  // Orthorhombic frames take the cutoff CSR directly. The ring search
+  // reads those offsets and columns; it does not expand them into a
+  // vector of rows first.
+  {
+    std::vector<int> offsets;
+    std::vector<int> cols;
+    if (nneigh::orthoFullCsr(local, nullptr, cutoff, offsets, cols)) {
+      thread_local std::vector<std::vector<int>> csrRings;
+      const auto search0 = std::chrono::steady_clock::now();
+      csrRings = primitive::ringNetwork(offsets, cols, maxDepth, owned);
+      const double searchAll =
+          std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - search0)
+              .count();
+      gRingPhases.primitiveMs = primitive::takePrimitiveMs();
+      gRingPhases.searchMs = std::max(0.0, searchAll - gRingPhases.primitiveMs);
+      gRingPhases.rebuildMs = 0;
+      gRingPhases.reduceMs = 0;
+      return csrRings;
+    }
+  }
   // Rows are reused only when the points themselves are unchanged. Two
   // slots cover the block and cell clouds the bench alternates. A new
   // frame keeps the domain cut and rebuilds these rows.
@@ -485,6 +505,7 @@ const std::vector<std::vector<int>> &ringsOf(const Cloud &local, double cutoff,
     std::vector<char> owned;
     std::vector<std::vector<int>> raw;
     std::vector<std::vector<int>> trimmed;
+    std::vector<std::vector<int>> rings;
   };
   // One cache per calling thread. Overlapping rings() calls used to
   // share these rows and tear each other's neighbour list.
@@ -649,14 +670,15 @@ const std::vector<std::vector<int>> &ringsOf(const Cloud &local, double cutoff,
   const std::vector<std::vector<int>> &graph = nList;
   const std::vector<char> &sources = cache[hit].owned.empty() ? owned : cache[hit].owned;
   const auto search0 = std::chrono::steady_clock::now();
-  const auto &found = primitive::ringNetwork(graph, maxDepth, sources);
+  auto found = primitive::ringNetwork(graph, maxDepth, sources);
   const double searchAll =
       std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - search0).count();
   gRingPhases.primitiveMs = primitive::takePrimitiveMs();
   gRingPhases.searchMs = std::max(0.0, searchAll - gRingPhases.primitiveMs);
   gRingPhases.rebuildMs = rebuildMs;
   gRingPhases.reduceMs = 0;
-  return found;
+  cache[hit].rings = std::move(found);
+  return cache[hit].rings;
 }
 
 } // namespace
@@ -1829,11 +1851,12 @@ const std::vector<std::vector<int>> &distributedRings(const Cloud &cloud, double
     skewed = rings(cloud, cutoff, maxDepth, rank, nRanks);
     return skewed;
   }
-  // ringHops is the coordinate width that reproduces the serial census,
-  // one hop inside the previous surface term. Owned sources are searched
-  // on that halo and mapped back to the frame. The bond ball itself ends
-  // near 7.8 A on this crystal, but a skin of that radius made the wall
-  // longer, so the gather stays at ringHops cutoffs.
+  // ringHops is ringHaloBonds, floor(maxDepth/2). The coordinate skin is
+  // that many cutoffs: every primitive ring through an owned atom, and
+  // every shortcut of it, stays inside the skin. Owned sources are
+  // searched on that halo and mapped back to the frame. The bond ball
+  // itself ends near 7.8 A on this crystal, but a skin of that radius
+  // made the wall longer, so the gather stays at ringHops cutoffs.
   const Work &work = gatherWork(cloud, ringHops(maxDepth) * cutoff, comm, kWorkRings);
   const bool measure = !gMeasured[kWorkRings].ready;
   std::vector<double> sourceUs;

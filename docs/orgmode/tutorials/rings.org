@@ -3,6 +3,8 @@
 
 A primitive ring is a cycle that survives the Franzblau shortest-path test.
 For every pair of vertices on the cycle, a shortest path between them lies on the cycle.
+Distances are read on the whole graph, and only then are levels below the source cleared.
+The hexagon with vertex 0 joined to vertices 1 and 4 is the worked example on the primitive-rings page.
 ~pydseams.band.ring_census~ counts those rings on ~Frame.bonds_by_index~.
 For an oxygen-only frame that list is the cutoff neighbour list.
 
