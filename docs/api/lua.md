@@ -1,5 +1,11 @@
 # Lua API
 
+`docs/examples/minimal_lua.lua` reads one trajectory and prints the CHILL+ clathrate count. `meson test docs_examples` runs it.
+
+```{literalinclude} ../../../docs/examples/minimal_lua.lua
+:language: lua
+```
+
 `require("dseams")` binds Lua 5.4 and LuaJIT to `include/seams.h`.
 Fennel uses `(require :dseams)`. A system, a neighbour list, and a ring
 census are userdata. `:close()` frees the handle. Lua 5.4 also frees it

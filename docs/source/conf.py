@@ -384,6 +384,8 @@ else:
 
 templates_path = ["_templates"]
 exclude_patterns = []
+# A warning is a failed book. Sphinx stops instead of publishing it.
+warningiserror = True
 
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
