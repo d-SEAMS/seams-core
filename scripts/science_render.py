@@ -33,7 +33,7 @@ import numpy as np
 CHILL = {
     0: ("cubic Ic", (0.000, 0.447, 0.698)),
     1: ("hexagonal Ih", (0.902, 0.624, 0.000)),
-    3: ("interfacial", (0.000, 0.620, 0.451)),
+    3: ("interfacial", (0.941, 0.894, 0.259)),
     2: ("liquid", (0.780, 0.780, 0.780)),
     4: ("clathrate", (0.337, 0.706, 0.914)),
     5: ("interfacial clathrate", (0.800, 0.475, 0.655)),
@@ -336,11 +336,98 @@ def basal_forward(pos: np.ndarray, chill: np.ndarray, box: np.ndarray) -> np.nda
         delta = (angle - centre + 30.0) % 60.0 - 30.0
         if abs(delta) <= 8.0:
             members.append(xy)
-    if len(members) < 4:
-        radians = math.radians(centre)
-        return np.array([math.cos(radians), math.sin(radians), 0.0])
-    mean = np.mean(np.asarray(members), axis=0)
-    return unit(np.array([mean[0], mean[1], 0.0]))
+    # Average only one of the three [11-20] axes. Folding all three
+    # together points the camera between lattice rows.
+    best_count = -1
+    best_mean = np.array([1.0, 0.0])
+    for shift in (0.0, 60.0, 120.0):
+        target = (centre + shift) % 180.0
+        picked = []
+        for angle, xy in zip(angles, vectors):
+            delta = (angle - target + 90.0) % 180.0 - 90.0
+            if abs(delta) <= 8.0:
+                picked.append(xy if float(xy[0]) >= 0.0 else -xy)
+        if len(picked) > best_count:
+            best_count = len(picked)
+            best_mean = np.mean(np.asarray(picked), axis=0)
+    return unit(np.array([best_mean[0], best_mean[1], 0.0]))
+
+
+def _column_offsets(pts: np.ndarray, direction: np.ndarray) -> np.ndarray:
+    """In-plane distance from each core oxygen to its partner one lattice step along the view.
+
+    Ice Ih repeats every a ≈ 4.5 Å along [11-20]. That partner is the other
+    oxygen of the column.
+    """
+    direction = unit(direction)
+    _forward, right, up = basis(direction, np.array([0.0, 0.0, 1.0]))
+    horizontal = pts @ right
+    vertical = pts @ up
+    depth = pts @ direction
+    offsets = []
+    for index in range(len(pts)):
+        delta_depth = np.abs(depth - depth[index])
+        plane = np.hypot(horizontal - horizontal[index], vertical - vertical[index])
+        chosen = (delta_depth > 3.8) & (delta_depth < 5.1) & (plane < 1.2)
+        if np.any(chosen):
+            offsets.append(float(np.min(plane[chosen])))
+    if not offsets:
+        return np.array([9.0])
+    return np.asarray(offsets, dtype=float)
+
+
+def column_axis(pos: np.ndarray, chill: np.ndarray, box: np.ndarray) -> tuple[np.ndarray, float]:
+    """[11-20], the basal row, from the oxygen columns.
+
+    The camera looks along the lattice repeat, which lies in the basal
+    plane. A nearest-neighbour bond is the wrong axis: it is tilted by
+    the tetrahedral angle, and the two oxygens of a column then sit about
+    half a diameter apart. The returned spread is the median in-plane
+    offset of the column partner.
+    """
+    core = np.flatnonzero(np.isin(chill, [0, 1]) & (pos[:, 2] > 8.0) & (pos[:, 2] < 26.0))
+    if core.size < 30:
+        core = np.flatnonzero(np.isin(chill, [0, 1]))
+    pts = pos[core]
+    if pts.shape[0] < 10:
+        return basal_forward(pos, chill, box), 9.0
+
+    def candidate(azimuth: float, tilt: float) -> tuple[np.ndarray, np.ndarray]:
+        theta = math.radians(azimuth)
+        phi = math.radians(tilt)
+        in_plane = np.array([math.cos(theta), math.sin(theta), 0.0])
+        direction = math.cos(phi) * in_plane + math.sin(phi) * np.array([0.0, 0.0, 1.0])
+        return unit(direction), _column_offsets(pts, direction)
+
+    best: tuple | None = None
+    for azimuth in np.linspace(0.0, 180.0, 180, endpoint=False):
+        direction, offsets = candidate(float(azimuth), 0.0)
+        median = float(np.median(offsets))
+        # More matched columns, then a tighter median.
+        rank = (-int(np.sum(offsets < 1.0)), median)
+        if best is None or rank < best[0]:
+            best = (rank, float(azimuth), direction, offsets)
+    assert best is not None
+    azimuth = best[1]
+    refined: tuple | None = None
+    for delta in np.linspace(-2.0, 2.0, 17):
+        for tilt in np.linspace(-2.0, 2.0, 9):
+            direction, offsets = candidate(azimuth + float(delta), float(tilt))
+            median = float(np.median(offsets))
+            rank = (float(np.percentile(offsets, 90)), median, -int(np.sum(offsets < 1.0)))
+            if refined is None or rank < refined[0]:
+                refined = (rank, direction, offsets)
+    assert refined is not None
+    direction, offsets = refined[1], refined[2]
+    median = float(np.median(offsets))
+    print(
+        "column axis "
+        f"{np.round(direction, 3)} median {median:.3f} A "
+        f"p90 {float(np.percentile(offsets, 90)):.3f} A "
+        f"max {float(np.max(offsets)):.3f} A",
+        flush=True,
+    )
+    return direction, median
 
 
 def stacking_axis(pos: np.ndarray, mask: np.ndarray) -> np.ndarray:
@@ -491,6 +578,24 @@ def bilayer_sheet(pos: np.ndarray, crystal: np.ndarray, forward: np.ndarray, box
             extra[second] = True
         if inside[second]:
             extra[first] = True
+    extra &= ~inside
+    # The oxygen one lattice step along [11-20] projects onto a column
+    # that is already drawn. Keeping it paints a second sphere on the
+    # first. A partner that lands on a new vertex stays, so a bond that
+    # crosses the slice still has both ends.
+    if np.any(inside) and np.any(extra):
+        _forward, right, up = basis(unit(forward), np.array([0.0, 0.0, 1.0]))
+        horizontal = pos @ right
+        vertical = pos @ up
+        centre = float(np.median(depth[inside]))
+        order = np.flatnonzero(extra)[np.argsort(np.abs(depth[extra] - centre))]
+        kept = list(np.flatnonzero(inside))
+        for atom in order:
+            plane = np.hypot(horizontal[kept] - horizontal[atom], vertical[kept] - vertical[atom])
+            if float(np.min(plane)) < 1.05:
+                extra[atom] = False
+            else:
+                kept.append(int(atom))
     return inside | extra
 
 
@@ -622,7 +727,9 @@ def render_view(pos, chill, bonds, forward, up, png: Path, half_h: float, half_v
 
 
 def prepare_slab(pos, chill, box):
-    forward = basal_forward(pos, chill, box)
+    forward, spread = column_axis(pos, chill, box)
+    if spread > 0.22:
+        raise SystemExit(f"column spread {spread:.3f} A is above 0.22 A")
     up = np.array([0.0, 0.0, 1.0])
     crystal = np.isin(chill, [0, 1, 3])
     sheet = bilayer_sheet(pos, crystal, forward, box)
@@ -689,7 +796,14 @@ def render_molecule(pos, chill, bonds, forward, up, png, half_h, half_v, width_p
     from ovito.vis import BondsVis, TachyonRenderer, Viewport
 
     forward, _right, up = basis(forward, up)
-    centre, _h, _v, forward, _right, up = project(pos, forward, up)
+    # The nucleus frame was measured on the ice. Liquid around it must not
+    # drag the camera off that ice.
+    focus = pos
+    if liquid_alpha < 0.3:
+        solid = ~np.isin(chill, [2])
+        if np.any(solid):
+            focus = pos[solid]
+    centre, _h, _v, forward, _right, up = project(focus, forward, up)
     height_px = max(int(round(width_px * half_v / max(half_h, 1e-6))), 32)
     data = DataCollection()
     lo = pos.min(axis=0) - 6.0
@@ -928,36 +1042,56 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
     if late_frame < 0:
         late_frame = n_frames + 1 + late_frame
     clouds = {}
-    axes = {}
-    for label, frame in (("minimum", min_frame), ("late", late_frame)):
+    loaded = {}
+    for label, frame in (("late", late_frame), ("minimum", min_frame)):
         nbox, npos = read_dump_frame(nucleus_dump, frame)
         nchill, extended = label_positions(nbox, npos, work / label, "nucleation")
         if extended is None:
             extended = np.isin(nchill, [0, 1, 3])
         npos, _nbox = unwrap_cluster(npos, nbox, extended, HBOND_A)
-        axis = stacking_axis(npos, nchill, extended)
-        hint = np.array([1.0, 0.0, 0.0])
-        if abs(float(np.dot(hint, axis))) > 0.85:
-            hint = np.array([0.0, 1.0, 0.0])
-        view = unit(np.cross(axis, hint))
+        loaded[label] = (npos, nchill, extended)
+    late_pos, late_chill, late_ext = loaded["late"]
+    axis = stacking_axis(late_pos, late_chill, late_ext)
+    hint = np.array([1.0, 0.0, 0.0])
+    if abs(float(np.dot(hint, axis))) > 0.85:
+        hint = np.array([0.0, 1.0, 0.0])
+    view = unit(np.cross(axis, hint))
+    for label, (npos, nchill, extended) in loaded.items():
         clouds[label] = (npos, nchill, extended, view, axis)
-        axes[label] = axis
     # The late cluster fills about 70% of the panel. Both frames use that scale.
     prepared = {}
     for label, (npos, nchill, extended, view, axis) in clouds.items():
         drawn, drawn_chill, bonds = prepare_nucleus(npos, nchill, extended, view, axis)
         prepared[label] = (drawn, drawn_chill, bonds, view, axis)
-    late_pos, late_chill, _bonds, late_view, late_axis = prepared["late"]
-    cluster = late_pos[np.isin(late_chill, [0, 1, 3])]
-    late_forward, late_right, late_up = basis(late_view, late_axis)
-    centred = cluster - cluster.mean(axis=0)
-    share_h = (float(np.max(np.abs(centred @ late_right))) + ATOM_RADIUS) / 0.70
-    share_v = (float(np.max(np.abs(centred @ late_up))) + ATOM_RADIUS) / 0.70
+    def raw_half(label: str) -> tuple[float, float]:
+        drawn, drawn_chill, _bonds, view_i, axis_i = prepared[label]
+        cluster = drawn[np.isin(drawn_chill, [0, 1, 3])]
+        _forward_i, right_i, up_i = basis(view_i, axis_i)
+        centred = cluster - cluster.mean(axis=0)
+        half_h = float(np.max(np.abs(centred @ right_i))) + ATOM_RADIUS
+        half_v = float(np.max(np.abs(centred @ up_i))) + ATOM_RADIUS
+        return half_h, half_v
+
+    # Late fills 70% of its panel. Minimum keeps that camera and that
+    # panel shape, framed closer so the smear is large enough to read.
+    late_h, late_v = raw_half("late")
+    min_h, min_v = raw_half("minimum")
+    share_h = late_h / 0.70
+    share_v = late_v / 0.70
+    aspect = share_v / share_h
+    # Same camera and the same panel shape as the late cluster. The
+    # minimum is framed tighter so the small nucleus fills the panel.
+    min_frame_h = max(min_h / 0.82, (min_v / 0.82) / aspect)
+    frames = {
+        "late": (share_h, share_v),
+        "minimum": (min_frame_h, min_frame_h * aspect),
+    }
     nucleus_px = int(round(48.0 / 25.4 * PRINT_DPI))
     images = {}
     stacks = {"hexagonality": {}}
     for label, (drawn, drawn_chill, bonds, view, axis) in prepared.items():
         images[label] = work / f"nucleus-{label}.png"
+        share_h, share_v = frames[label]
         render_molecule(drawn, drawn_chill, bonds, view, axis, images[label], share_h, share_v, nucleus_px, 0.18)
         npos, nchill, extended, _view, axis = clouds[label]
         stacks[label] = layer_kinds(npos, nchill, extended, axis)
