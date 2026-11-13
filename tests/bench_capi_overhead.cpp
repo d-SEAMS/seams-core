@@ -5,18 +5,23 @@
  *   capi  seams_chill_plus_n on a handle loaded with seams_system_set_atoms
  *   cpp   nneigh::orthoFullCsr + chill::chillPlusFromCsr on a Cloud
  * Both run serial and interleaved, one rep of each per round. The load is
- * timed apart from the analysis, again interleaved, as five cases, with
- * set_positions and cpp Cloud refill back to back in alternating order:
- *   set_atoms fresh   set_atoms on a new handle (create and destroy untimed)
- *   set_atoms reuse   set_atoms on a handle that already holds a frame
- *   set_positions     set_positions on a handle loaded once, as in a
- *                     trajectory loop, same atom count
- *   cpp Cloud fresh   building a Cloud (destruction untimed)
- *   cpp Cloud refill  writing x, y, z and the label into a built Cloud
- * A trivial call (seams_system_natoms) gives the fixed cost per call.
+ * timed apart from the analysis, again interleaved, as six cases. The
+ * three reloads run as batches of 100 calls per round, next to each other
+ * in an order that rotates every round, and report the time per call:
+ *   set_atoms fresh       set_atoms on a new handle (create and destroy
+ *                         untimed)
+ *   set_atoms reuse       set_atoms on a handle that already holds a frame
+ *   set_positions         set_positions on a handle loaded once, as in a
+ *                         trajectory loop, same atom count
+ *   set_positions staged  the same after seams_system_stage_positions(1)
+ *   cpp Cloud fresh       building a Cloud (destruction untimed)
+ *   cpp Cloud refill      writing x, y, z and the label into a built Cloud
+ * Each line gives the median over rounds and the interquartile range. A
+ * trivial call (seams_system_natoms) gives the fixed cost per call.
  *
- * Usage: bench_capi_overhead [reps] [cells...]   default 11 reps, cells 8 24
- * Cells per edge k give 8 k^3 molecules: 8 -> 4096, 24 -> 110592.
+ * Usage: bench_capi_overhead [reps] [cells...]   default 21 reps, cells 8 24 48
+ * Cells per edge k give 8 k^3 molecules: 8 -> 4096, 24 -> 110592,
+ * 48 -> 884736.
  */
 #include <seams.h>
 
@@ -107,6 +112,18 @@ double median(std::vector<double> v) {
 
 double lowest(const std::vector<double> &v) { return *std::min_element(v.begin(), v.end()); }
 
+// Interquartile range, quartiles by linear interpolation.
+double iqr(std::vector<double> v) {
+  std::sort(v.begin(), v.end());
+  const auto at = [&v](double q) {
+    const double pos = q * static_cast<double>(v.size() - 1);
+    const auto lo = static_cast<std::size_t>(pos);
+    const std::size_t hi = std::min(lo + 1, v.size() - 1);
+    return v[lo] + (pos - static_cast<double>(lo)) * (v[hi] - v[lo]);
+  };
+  return at(0.75) - at(0.25);
+}
+
 void need(seams_status status, const char *what) {
   if (status != SEAMS_OK) {
     std::fprintf(stderr, "%s: %s (%s)\n", what, seams_status_string(status),
@@ -143,10 +160,13 @@ void trivial_calls(seams_system *sys) {
 void report(const char *what, const std::vector<double> &v, const std::vector<double> &ref,
             const char *ref_name) {
   const double m = median(v), r = median(ref);
-  std::printf("  %-17s median %.3f ms min %.3f ms  vs %s median %+.1f%%, min %+.1f%%\n", what,
-              m * 1e3, lowest(v) * 1e3, ref_name, 100.0 * (m - r) / r,
-              100.0 * (lowest(v) - lowest(ref)) / lowest(ref));
+  std::printf("  %-21s median %.4f ms IQR %.4f ms (%.1f%%)  vs %s median %+.1f%%\n", what,
+              m * 1e3, iqr(v) * 1e3, 100.0 * iqr(v) / m, ref_name, 100.0 * (m - r) / r);
 }
+
+// Reloads are timed kBatch at a time, so one sample of the smallest cell
+// is about a millisecond.
+constexpr int kBatch = 100;
 
 void load_costs(const Lattice &lat, int reps) {
   const auto n = static_cast<size_t>(lat.n);
@@ -162,8 +182,15 @@ void load_costs(const Lattice &lat, int reps) {
   }
   need(seams_system_set_atoms(moving, lat.xyz.data(), n, lat.box, 9, nullptr, nullptr),
        "set_atoms");
+  seams_system *staged = seams_system_create();
+  if (staged == nullptr) {
+    std::exit(1);
+  }
+  need(seams_system_set_atoms(staged, lat.xyz.data(), n, lat.box, 9, nullptr, nullptr),
+       "set_atoms");
+  need(seams_system_stage_positions(staged, 1), "stage_positions");
   Cloud refill = cloud_of(lat);
-  std::vector<double> fresh_c, reuse_c, pos_c, fresh_cpp, refill_cpp;
+  std::vector<double> fresh_c, reuse_c, pos_c, staged_c, fresh_cpp, refill_cpp;
   int sink = 0;
 
   for (int r = -1; r < reps; ++r) {
@@ -190,39 +217,50 @@ void load_costs(const Lattice &lat, int reps) {
       sink += cloud.nop;
     }
 
-    auto time_positions = [&] {
+    auto time_positions = [&](seams_system *handle) {
       const auto t = Clock::now();
-      need(seams_system_set_positions(moving, lat.xyz.data(), n, lat.box, 9),
-           "set_positions");
-      return seconds(t);
+      for (int b = 0; b < kBatch; ++b) {
+        need(seams_system_set_positions(handle, lat.xyz.data(), n, lat.box, 9),
+             "set_positions");
+      }
+      return seconds(t) / kBatch;
     };
     auto time_refill = [&] {
       const auto t = Clock::now();
-      for (int i = 0; i < lat.n; ++i) {
-        auto &point = refill.pts[static_cast<std::size_t>(i)];
-        point.x = lat.xyz[static_cast<std::size_t>(3 * i)];
-        point.y = lat.xyz[static_cast<std::size_t>(3 * i + 1)];
-        point.z = lat.xyz[static_cast<std::size_t>(3 * i + 2)];
-        point.iceType = molSys::atom_state_type::unclassified;
+      for (int b = 0; b < kBatch; ++b) {
+        for (int i = 0; i < lat.n; ++i) {
+          auto &point = refill.pts[static_cast<std::size_t>(i)];
+          point.x = lat.xyz[static_cast<std::size_t>(3 * i)];
+          point.y = lat.xyz[static_cast<std::size_t>(3 * i + 1)];
+          point.z = lat.xyz[static_cast<std::size_t>(3 * i + 2)];
+          point.iceType = molSys::atom_state_type::unclassified;
+        }
+        sink += refill.pts.back().x > 0;
       }
-      return seconds(t);
+      return seconds(t) / kBatch;
     };
-    // Whichever runs second finds the coordinates in cache, so the order
-    // alternates.
-    double c = 0, e = 0;
-    if (r % 2 == 0) {
-      c = time_positions();
-      e = time_refill();
-    } else {
-      e = time_refill();
-      c = time_positions();
+    // The first batch of a round finds the coordinates colder than the
+    // others, so the order rotates.
+    double c = 0, e = 0, g = 0;
+    for (int slot = 0; slot < 3; ++slot) {
+      switch ((slot + r + 1) % 3) {
+      case 0:
+        c = time_positions(moving);
+        break;
+      case 1:
+        g = time_positions(staged);
+        break;
+      default:
+        e = time_refill();
+        break;
+      }
     }
-    sink += refill.pts.back().x > 0;
 
     if (r >= 0) {
       fresh_c.push_back(a);
       reuse_c.push_back(b);
       pos_c.push_back(c);
+      staged_c.push_back(g);
       fresh_cpp.push_back(d);
       refill_cpp.push_back(e);
     }
@@ -233,6 +271,8 @@ void load_costs(const Lattice &lat, int reps) {
   report("set_atoms reuse", reuse_c, fresh_cpp, "cpp fresh");
   report("cpp Cloud refill", refill_cpp, refill_cpp, "cpp refill");
   report("set_positions", pos_c, refill_cpp, "cpp refill");
+  report("set_positions staged", staged_c, refill_cpp, "cpp refill");
+  seams_system_destroy(staged);
   seams_system_destroy(kept);
   seams_system_destroy(moving);
 }
@@ -299,13 +339,13 @@ void run(int k, int reps) {
 } // namespace
 
 int main(int argc, char **argv) {
-  const int reps = argc > 1 ? std::max(8, std::atoi(argv[1])) : 11;
+  const int reps = argc > 1 ? std::max(8, std::atoi(argv[1])) : 21;
   std::vector<int> cells;
   for (int i = 2; i < argc; ++i) {
     cells.push_back(std::atoi(argv[i]));
   }
   if (cells.empty()) {
-    cells = {8, 24};
+    cells = {8, 24, 48};
   }
   need(seams_set_num_threads(1), "threads");
 #ifdef _OPENMP
