@@ -1290,15 +1290,23 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
     }
   }
   const auto tCount = Clock::now();
+  const bool stashOk = shifted && !half;
+  if (stashOk &&
+      sc.stash.size() < static_cast<std::size_t>(nop) * static_cast<std::size_t>(kStashCap)) {
+    sc.stash.resize(static_cast<std::size_t>(nop) * static_cast<std::size_t>(kStashCap));
+  }
   if (shifted) {
     if (half) {
       passFast<false, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                             ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr,
                             branchy);
+    } else if (maxThreads == 1) {
+      passFastStashHalf(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                        ncell[2], shx, shy, shz, rc2, sc.counts.data(), sc.stash.data(),
+                        &sc.overflowed, branchy);
     } else {
-      passFast<false, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                             ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr,
-                             branchy);
+      passFastStash(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
+                    shx, shy, shz, rc2, sc.counts.data(), sc.stash.data(), &sc.overflowed);
     }
   } else {
     passTilt<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
@@ -1306,6 +1314,14 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
                     nullptr, nullptr, branchy);
   }
   phase().count = msSince(tCount);
+  // Same as the orthorhombic walk: a shell past the stash cap keeps a
+  // short reverse copy, and the geometry fill would write past the row.
+  if (stashOk && sc.overflowed != 0) {
+    std::fill(sc.counts.begin(), sc.counts.end(), 0);
+    passFast<false, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                           ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr,
+                           branchy);
+  }
   const auto tPrefix = Clock::now();
   if (!seams::prefixCounts(sc.counts.data(), nop, offsets)) {
     return false;
@@ -1315,7 +1331,9 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
   phase().prefix = msSince(tPrefix);
   const auto tFill = Clock::now();
   if (nnz > 0) {
-    if (shifted) {
+    if (stashOk && sc.overflowed == 0) {
+      scatterStash(sc.stash.data(), sc.counts.data(), offsets.data(), cols.data(), nop);
+    } else if (shifted) {
       if (half) {
         passFast<true, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                              ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data(),

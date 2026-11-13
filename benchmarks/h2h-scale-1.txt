@@ -1,0 +1,12 @@
+cores 8 affinity 1
+freud 3.6.1 ovito 3.17.2 mdapy 2.0.0
+cell triclinic LAMMPS tilt xy xz yz
+scale molecules 442368 pinned_threads 1
+robust op ice442368 cutoff threads 1 molecules 442368 dseams_median 55.9595 dseams_iqr 1.9046 dseams_min 55.5708 freud_median 509.3380 freud_iqr 26.5157 freud_min 496.3821 WIN
+robust op ice442368 cutoff threads 1 molecules 442368 dseams_median 42.4489 dseams_iqr 2.8343 dseams_min 41.6167 ovito_median 130.9422 ovito_iqr 2.8765 ovito_min 127.2063 WIN
+robust op ice442368 cutoff threads 1 molecules 442368 dseams_median 49.5017 dseams_iqr 3.6876 dseams_min 44.7607 mdapy_median 223.5264 mdapy_iqr 20.6234 mdapy_min 208.1065 WIN
+robust op chill_paper threads 1 molecules 442368 frame ice442368 dseams_median 107.5935 dseams_iqr 0.6821 dseams_min 106.4016
+robust op ice442368 chill_plus threads 1 molecules 442368 dseams_median 130.6595 dseams_iqr 2.1041 dseams_min 104.5501 ovito_median 2375.6957 ovito_iqr 41.0116 ovito_min 2340.0078 WIN
+robust op ice442368 chill_plus threads 1 molecules 442368 dseams_median 133.7806 dseams_iqr 2.8276 dseams_min 131.7790 mdapy_median 291.3334 mdapy_iqr 8.8253 mdapy_min 282.1601 WIN
+robust op ice442368 rings threads 1 molecules 442368 dseams_median 502.8952 dseams_iqr 15.0271 dseams_min 484.3837 ovito_median 2260.1164 ovito_iqr 37.7088 ovito_min 2233.3808 WIN
+robust op ice442368 rings threads 1 molecules 442368 dseams_median 495.8072 dseams_iqr 18.1552 dseams_min 484.5214 ringsstat_median 6729.6872 ringsstat_iqr 38.3863 ringsstat_min 6684.9105 WIN

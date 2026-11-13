@@ -900,6 +900,30 @@ rule h2h_freud_ovito:
 
 # Primitive rings, eight samples, one and eight threads.
 # Ice Ih, the mixed frames, and one sII cell.
+rule h2h_triclinic:
+    output:
+        "benchmarks/h2h-triclinic.txt",
+    shell:
+        "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu "
+        "taskset -c 0 env OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE python3 scripts/h2h_triclinic.py time 1 > {output}.1 && "
+        "taskset -c 0-7 env OMP_NUM_THREADS=8 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE python3 scripts/h2h_triclinic.py time 8 >> {output}.1 && "
+        "mv {output}.1 {output}"
+
+
+rule h2h_scale:
+    output:
+        "benchmarks/h2h-scale.txt",
+    shell:
+        "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu "
+        "taskset -c 0 env OMP_NUM_THREADS=1 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE python3 scripts/h2h_triclinic.py scale 1 > {output}.1 && "
+        "taskset -c 0-7 env OMP_NUM_THREADS=8 OMP_PROC_BIND=close OMP_PLACES=cores "
+        "OMP_WAIT_POLICY=PASSIVE python3 scripts/h2h_triclinic.py scale 8 >> {output}.1 && "
+        "mv {output}.1 {output}"
+
+
 rule h2h_rings:
     output:
         "benchmarks/h2h-rings.txt",
