@@ -43,6 +43,10 @@ def _loader_path():
 _loader_path()
 WIDTH = 2048
 HEIGHT = 1536
+COLUMN_MM = 85.0
+# 8 pt at 85 mm on the 2048-wide still. The scale bar and the legend share it.
+CAPTION_PX = int(round(8.0 / 72.0 * (WIDTH / (COLUMN_MM / 25.4))))
+CAPTION_MARGIN = 128
 RENDER_SCALE = max(1, int(os.environ.get("MOLECULES_SCALE", "2")))
 WEB = (960, 720)
 
@@ -646,6 +650,13 @@ def orient(positions, view, center):
     if view == "channel":
         # The ice c axis is y. The long cell axis z runs across the page.
         return np.column_stack((pos[:, 2], pos[:, 0], pos[:, 1]))
+    if view == "slab":
+        # One depth (x). The interface normal z runs across the page and the
+        # c axis y runs up it, so the ice reads as columns.
+        return np.column_stack((pos[:, 2], pos[:, 1], -pos[:, 0]))
+    if view == "pair":
+        # Cages already sit side by side. A small tilt shows the guest inside.
+        return _spin(pos, "x", 20.0)
     return pos
 
 
@@ -771,13 +782,14 @@ def cycles_job():
             colour_in.default_value = (*linear, 1.0)
         rough = socket(principled, "Roughness")
         if rough is not None:
-            rough.default_value = 0.05 if transmission > 0.5 else 0.32
+            # Matte. A specular peak was blowing the bottom of the spheres out to white.
+            rough.default_value = 1.0
         spec = socket(principled, "Specular IOR Level", "Specular")
         if spec is not None:
-            spec.default_value = 0.5
+            spec.default_value = 0.0
         coat = socket(principled, "Coat Weight")
-        if coat is not None and transmission < 0.5:
-            coat.default_value = 0.25
+        if coat is not None:
+            coat.default_value = 0.0
         trans = socket(principled, "Transmission Weight", "Transmission")
         if trans is not None:
             trans.default_value = float(transmission)
@@ -800,19 +812,16 @@ def cycles_job():
         tree.links.new(ao.outputs["Color"], tint.inputs["Color2"])
         tree.links.new(tint.outputs["Color"], colour_in)
         if rough is not None:
-            # Soft enough that the specular peak stays off pure white.
-            rough.default_value = 0.55
+            rough.default_value = 1.0
         if spec is not None:
-            spec.default_value = 0.10
+            spec.default_value = 0.0
         if coat is not None:
             coat.default_value = 0.0
+        # Flat palette colour. Lighting was painting a hotspot on a few oxygens.
         emission = tree.nodes.new("ShaderNodeEmission")
         emission.inputs["Color"].default_value = (*linear, 1.0)
-        emission.inputs["Strength"].default_value = 0.18
-        added = tree.nodes.new("ShaderNodeAddShader")
-        tree.links.new(principled.outputs["BSDF"], added.inputs[0])
-        tree.links.new(emission.outputs["Emission"], added.inputs[1])
-        tree.links.new(added.outputs["Shader"], output.inputs["Surface"])
+        emission.inputs["Strength"].default_value = 1.0
+        tree.links.new(emission.outputs["Emission"], output.inputs["Surface"])
         return material
 
     def add_mesh(name, mesh, material):
@@ -887,7 +896,10 @@ def cycles_job():
         if rough is not None:
             bond_rough = socket(rough, "Roughness")
             if bond_rough is not None:
-                bond_rough.default_value = 0.45
+                bond_rough.default_value = 1.0
+            bond_spec = socket(rough, "Specular IOR Level", "Specular")
+            if bond_spec is not None:
+                bond_spec.default_value = 0.0
         up = Vector((0.0, 0.0, 1.0))
         matrices = []
         for left, right in pairs:
@@ -903,6 +915,9 @@ def cycles_job():
             if visible < 0.08:
                 continue
             mid = (start + stop) / 2.0
+            mid = np.array(mid, dtype=float, copy=True)
+            # Sit the bond just behind the atoms so a flat sheet does not z-fight.
+            mid[2] -= 0.08
             quat = up.rotation_difference(Vector(tuple(float(v) for v in direction)))
             scale = Matrix.Diagonal((float(radius), float(radius), float(visible), 1.0))
             matrices.append(Matrix.Translation(tuple(float(v) for v in mid)) @ quat.to_matrix().to_4x4() @ scale)
@@ -925,7 +940,11 @@ def cycles_job():
         vertices = np.asarray(job["mesh_vertices_{}".format(slot)], dtype=float)
         faces = [tuple(int(v) for v in face) for face in job["mesh_faces_{}".format(slot)]]
         colour = tuple(float(v) for v in job["mesh_color_{}".format(slot)])
-        material = glossy("cage", colour, 0.22, 0.12)
+        face = 0.42
+        key = "mesh_alpha_{}".format(slot)
+        if key in job.files:
+            face = float(job[key])
+        material = glossy("cage", colour, face, 0.35)
         mesh = bpy.data.meshes.new("cage")
         mesh.from_pydata(vertices.tolist(), [], faces)
         mesh.update()
@@ -943,8 +962,10 @@ def cycles_job():
     target = Vector((float(centre[0]), float(centre[1]), float(centre[2])))
     if ortho:
         camera_data.type = "ORTHO"
-        # The atom box fills about 92 percent of the limiting frame edge.
-        vertical = vertical / 0.86
+        # cage-sh holds three cages, so the box sits further inside the frame.
+        label = str(job["panel"]) if "panel" in job.files else ""
+        fill = 0.72 if label.startswith("cage-sh") else 0.86
+        vertical = vertical / fill
         camera_data.ortho_scale = vertical
         camera.location = target + Vector((0.0, 0.0, 40.0))
         camera_data.clip_start = 0.1
@@ -977,9 +998,8 @@ def cycles_job():
         obj.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
         return obj
 
-    area("key", (float(centre[0]) - 9.0, float(centre[1]) + 11.0, float(high[2]) + 14.0), 1800.0, 18.0)
-    area("fill", (float(centre[0]) + 14.0, float(centre[1]) + 4.0, float(high[2]) + 18.0), 480.0, 36.0)
-    area("rim", (float(centre[0]) + 1.0, float(centre[1]) - 16.0, float(low[2]) + 5.0), 520.0, 10.0)
+    # One large lamp on the camera axis. Every sphere then has the same shade.
+    area("key", (float(centre[0]), float(centre[1]), float(high[2]) + 28.0), 700.0, 48.0)
 
     world = bpy.data.worlds.new("studio")
     bpy.context.scene.world = world
@@ -987,7 +1007,7 @@ def cycles_job():
     backdrop = world.node_tree.nodes.get("Background")
     if backdrop is not None:
         backdrop.inputs["Color"].default_value = (*background, 1.0)
-        backdrop.inputs["Strength"].default_value = 0.34 if light else 0.08
+        backdrop.inputs["Strength"].default_value = 0.85 if light else 0.2
 
     panel = str(job["panel"]) if "panel" in job.files else "witness"
     scene = bpy.context.scene
@@ -1071,6 +1091,7 @@ def cycles_launch(positions, colors, radii, transparency, bonds, meshes, backgro
         payload["mesh_vertices_{}".format(slot)] = np.asarray(mesh["vertices"], dtype=np.float64)
         payload["mesh_faces_{}".format(slot)] = np.asarray(mesh["faces"], dtype=np.int32)
         payload["mesh_color_{}".format(slot)] = np.asarray(mesh["color"], dtype=np.float64)
+        payload["mesh_alpha_{}".format(slot)] = np.float64(mesh.get("alpha", 0.42))
     np.savez(handle.name, **payload)
     env = cycles_env()
     env["MOLECULES_CYCLES"] = "1"
@@ -1097,9 +1118,6 @@ def cycles_launch(positions, colors, radii, transparency, bonds, meshes, backgro
         from PIL import Image
 
         image = Image.open(picture.name).convert("RGBA")
-        plate = tuple(int(round(channel * 255)) for channel in background)
-        canvas = Image.new("RGBA", image.size, plate + (255,))
-        image = Image.alpha_composite(canvas, image).convert("RGB")
         image = image.resize((WIDTH, HEIGHT), Image.Resampling.LANCZOS)
         image.load()
         return image, world
@@ -1229,15 +1247,25 @@ def tachyon_raytrace(positions, colors, radii, transparency, bonds, meshes, back
             pass
 
 
+def _ink_mask(picture, light):
+    """Atoms, including a highlight. Alpha is the mask when the render has one."""
+    import numpy as np
+
+    if picture.mode == "RGBA":
+        alpha = np.asarray(picture.split()[-1])
+        return alpha > 16
+    array = np.asarray(picture.convert("RGB"))
+    if light:
+        return np.any(array < 246, axis=2)
+    return np.any(array > 40, axis=2)
+
+
 def crop_margin(picture, light):
     import numpy as np
     from PIL import Image
 
     array = np.asarray(picture)
-    if light:
-        mask = np.any(array < 246, axis=2)
-    else:
-        mask = np.any(array > 40, axis=2)
+    mask = _ink_mask(picture, light)
     rows = np.where(mask.any(axis=1))[0]
     cols = np.where(mask.any(axis=0))[0]
     if len(rows) == 0:
@@ -1268,11 +1296,7 @@ def _contact_shadow(picture, light):
     import numpy as np
     from PIL import Image, ImageFilter
 
-    array = np.asarray(picture.convert("RGB"))
-    if light:
-        mask = np.any(array < 246, axis=2)
-    else:
-        mask = np.any(array > 40, axis=2)
+    mask = _ink_mask(picture, light)
     plate = Image.fromarray((mask.astype(np.uint8) * 255))
     plate = plate.filter(ImageFilter.GaussianBlur(radius=7))
     shade = (186, 188, 190) if light else (12, 12, 14)
@@ -1336,31 +1360,23 @@ def _balance_rows(rows, span, gap):
 
 
 def _legend_layout(items):
-    """Largest caption font that keeps every label inside the frame at 85 mm.
+    """Caption at 8 pt when the still is printed 85 mm wide.
 
-    56 px on the 2048-wide still is 6.6 pt at 85 mm. The search stops there.
+    The scale bar label uses this same font. Rows wrap so a label is not clipped.
     """
     from PIL import Image, ImageDraw
 
     probe = Image.new("RGB", (WIDTH, 400), (255, 255, 255))
     draw = ImageDraw.Draw(probe)
-    margin = 48
+    margin = CAPTION_MARGIN
     full = WIDTH - 2 * margin
-    chosen = None
-    for size in (72, 68, 64, 60, 56):
-        font = _font(size)
-        swatch = int(round(size * 0.62))
-        rows = _pack_labels(draw, items, font, full, swatch, 36.0)
-        if rows is None or len(rows) > 3:
-            continue
-        chosen = (font, size, swatch, rows)
-        break
-    if chosen is None:
-        font = _font(56)
-        swatch = int(round(56 * 0.62))
-        rows = _pack_labels(draw, items, font, full, swatch, 24.0) or [[]]
-        chosen = (font, 56, swatch, rows)
-    return chosen
+    size = CAPTION_PX
+    font = _font(size)
+    swatch = int(round(size * 0.62))
+    rows = _pack_labels(draw, items, font, full, swatch, 36.0)
+    if rows is None or len(rows) > 3:
+        rows = _pack_labels(draw, items, font, full, swatch, 18.0) or [[]]
+    return font, size, swatch, rows
 
 
 def compose(structure, legend, world_height, light):
@@ -1376,7 +1392,7 @@ def compose(structure, legend, world_height, light):
         colour = tuple(int(max(0, min(255, round(channel * 255)))) for channel in colour_rgb)
         items.append((name, colour))
     font, font_size, swatch, rows = _legend_layout(items)
-    margin = 48
+    margin = CAPTION_MARGIN
     bar_band = font_size + 28
     row_h = font_size + 26
     caption = 20 + bar_band + 8 + row_h * max(1, len(rows)) + 16
@@ -1401,9 +1417,8 @@ def compose(structure, legend, world_height, light):
         tint = Image.new("RGBA", picture.size, (186, 188, 190, 70) if light else (8, 8, 10, 90))
         tint.putalpha(plate.point(lambda value: int(value * 0.45)))
         layer.paste(tint, (left, origin_y + 10), tint)
-        opaque = np.any(np.asarray(picture.convert("RGB")) < 246, axis=2)
         sprite = picture.convert("RGBA")
-        sprite.putalpha(Image.fromarray((opaque.astype(np.uint8) * 255)))
+        sprite.putalpha(Image.fromarray((_ink_mask(picture, light).astype(np.uint8) * 255)))
         layer.paste(sprite, (left, origin_y), sprite)
         return layer
 
@@ -1464,7 +1479,6 @@ def compose(structure, legend, world_height, light):
     return merged
 
 
-COLUMN_MM = 85.0
 COLUMN_DPI = 300
 
 
@@ -1818,7 +1832,11 @@ def finish(positions, colors, radii, transparency, names, bonds, meshes, view, c
                 }
                 for mesh in meshes
             ]
-            # True orthographic view down c. One bilayer is drawn, so no tilt.
+            # True orthographic view down c. One bilayer, flattened so every
+            # oxygen takes the same light and a ring stays a whole hexagon.
+            positions[:, 2] = 0.0
+            for mesh in meshes:
+                mesh["vertices"][:, 2] = 0.0
         else:
             positions = orient(positions, view, center)
             meshes = [
@@ -1841,11 +1859,11 @@ def finish(positions, colors, radii, transparency, names, bonds, meshes, view, c
     positions = np.asarray(positions, dtype=float)
     radii = np.asarray(radii, dtype=float)
     for index, name in enumerate(names):
-        if name in ("methane", "THF", "ring O"):
+        if view == "cage" and name in ("methane", "THF", "ring O"):
             positions[index, 2] += 0.9
         elif name == "_rim":
             positions[index, 2] -= 0.25
-    ortho = view in ("basal", "channel") or bool(align)
+    ortho = view in ("basal", "channel", "slab", "pair") or bool(align)
     light_picture, world = raytrace(
         positions, colors, radii, transparency, bonds, meshes, (1, 1, 1), perspective,
         ortho=ortho, bold=bold, bond_radius=bond_radius, bond_rgb=bond_rgb,
@@ -1870,7 +1888,7 @@ def finish(positions, colors, radii, transparency, names, bonds, meshes, view, c
     )
 
 
-def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=False, meshes=None, center=None, cluster=False):
+def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=False, meshes=None, center=None, cluster=False, slab=False):
     import numpy as np
 
     colors, names, radii, transparency, heavy = [], [], [], [], []
@@ -1879,28 +1897,21 @@ def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=
     for index in range(len(frame.xyz)):
         kind = int(frame.types[index])
         if ions and kind in (3, 4):
-            token = "sodium" if kind == 3 else "chloride"
-            colour, radius, alpha = atom_style(token)
-            rim = (0.12, 0.12, 0.14)
-            colors.append(rim)
-            names.append("_rim")
-            radii.append(radius * 1.18)
-            transparency.append(0.0)
-            heavy.append(False)
-            kept_xyz.append(frame.xyz[index])
-            kept_labels.append(int(labels[index]))
+            # brine.rst: type 3 is chloride and type 4 is sodium.
+            token = "chloride" if kind == 3 else "sodium"
+            colour = palette_rgb(token)
+            # Shannon radii relative to the oxygen used for the ice: Cl 1.81, Na 1.02.
+            radius = ATOM_RADIUS * (1.8 if token == "chloride" else 1.0)
             colors.append(colour)
             names.append(token)
             radii.append(radius)
-            transparency.append(alpha)
+            transparency.append(0.0)
             heavy.append(False)
             kept_xyz.append(frame.xyz[index])
             kept_labels.append(int(labels[index]))
             continue
         label = int(labels[index])
-        if cluster and label == 2:
-            continue
-        if cluster and label not in (0, 1, 3, 7, 8):
+        if cluster and label not in (0, 1, 2, 3, 7, 8):
             continue
         token = "mixed" if cluster and label == 3 else CHILL_NAME.get(label, "unclassified")
         colour, radius, alpha = atom_style(token)
@@ -1927,7 +1938,10 @@ def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=
                 if left in keep and right in keep:
                     degree[left] += 1
                     degree[right] += 1
-            drop = {index for index, count in degree.items() if count < 2}
+            drop = {
+                index for index, count in degree.items()
+                if count < 2 and int(kept_labels[index]) != 2
+            }
             if not drop or len(keep - drop) < 12:
                 break
             keep -= drop
@@ -1943,6 +1957,13 @@ def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=
             (remap[left], remap[right])
             for left, right in bonds
             if left in remap and right in remap
+        ]
+    elif slab:
+        # Ice and the interfacial layer are bonded. Liquid stays as atoms
+        # so a crystal bond does not run off into the solvent.
+        bonds = [
+            pair for pair in bonds
+            if int(kept_labels[pair[0]]) != 2 and int(kept_labels[pair[1]]) != 2
         ]
     elif liquid_clear:
         # An interfacial oxygen must not grow a bond into a liquid that is not drawn.
@@ -1981,9 +2002,19 @@ def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=
             transparency = [transparency[index] for index in order]
             kept_labels = [kept_labels[index] for index in order]
             bonds = [(remap[left], remap[right]) for left, right in bonds]
+    if slab:
+        # One oxygen radius, the same one Ice Ih uses. Phase is colour alone.
+        oxygen = {
+            "hexagonal", "cubic", "water", "interfacial", "clathrate",
+            "interClathrate", "unclassified", "reCubic", "reHex", "mixed",
+        }
+        for index, name in enumerate(names):
+            if name in oxygen:
+                radii[index] = ATOM_RADIUS
+                transparency[index] = 0.0
     if view == "channel":
         radii = [value * (0.72 if name not in ("sodium", "chloride", "_rim") else 1.0) for value, name in zip(radii, names)]
-    bond_radius = BOND_RADIUS
+    bond_radius = BOND_RADIUS * (1.45 if cluster else 1.0)
     return finish(
         xyz, colors, radii, transparency, names, bonds, meshes or [],
         view, frame.xyz.mean(axis=0) if center is None else center, perspective,
@@ -2086,12 +2117,254 @@ def reimage_atoms(atoms, box):
     return seated
 
 
+def sh_ring_mesh(oxygens, guest_centre, box, kind="20"):
+    """One sH cage, with each face taken from its own ring.
+
+    12 is the 5^12 cage, 12_1 is 4^3 5^6 6^3, and 20 is 5^12 6^8.
+    Waters are the ideal cage snapped onto the relaxed oxygens. A convex
+    hull of a wide shell pulls in neighbouring cages.
+    """
+    import numpy as np
+
+    if kind == "12":
+        legend, colour = "small cage", palette_rgb("hexagonal")
+        homes_frac = ((0.5, 0.5, 0.5),)
+        offsets = np.array([
+            3.1059, -1.7932, 1.4072, 3.1059, -1.7932, -1.4072, -3.1059, 1.7932, -1.4072,
+            -3.1059, 1.7932, 1.4072, -0.6950, -1.2037, -3.6518, 0.6950, 1.2037, -3.6518,
+            -0.6950, -1.2037, 3.6538, 0.6950, 1.2037, 3.6538, -0.7819, 3.1335, -2.2607,
+            -0.7819, 3.1335, 2.2607, 0.7819, -3.1335, 2.2607, 0.7819, -3.1335, -2.2607,
+            -3.1059, -0.8896, -2.2607, 3.1059, 0.8896, -2.2607, 3.1059, 0.8896, 2.2607,
+            -3.1059, -0.8896, 2.2607, -3.1047, -2.5720, 0.0000, 3.1047, 2.5720, 0.0000,
+            0.6745, 3.9758, 0.0000, -0.6745, -3.9758, 0.0000,
+        ], dtype=float).reshape(-1, 3)
+        rings = (
+            (0, 1, 11, 19, 10), (0, 1, 13, 17, 14), (0, 10, 6, 7, 14), (1, 11, 4, 5, 13),
+            (2, 3, 9, 18, 8), (2, 3, 15, 16, 12), (2, 8, 5, 4, 12), (3, 9, 7, 6, 15),
+            (4, 11, 19, 16, 12), (5, 8, 18, 17, 13), (6, 10, 19, 16, 15), (7, 9, 18, 17, 14),
+        )
+    elif kind == "12_1":
+        legend, colour = "medium cage", (0.0, 0.537, 0.482)
+        homes_frac = ((0.75, 0.3333, 0.75),)
+        offsets = np.array([
+            2.7650, 0.5895, -1.3790, 2.7650, 0.5895, 1.3810, 1.2875, -1.3414, 2.7721,
+            1.2875, -1.3414, -2.7721, 1.3750, 2.9969, -1.3790, 1.3750, 2.9969, 1.3810,
+            -1.0347, 0.0000, -3.6256, -1.0347, 0.0000, 3.6256, 0.3546, -3.5853, -1.3790,
+            0.3546, -3.5853, 1.3810, -1.0347, 2.6828, 2.7721, -1.0347, 2.6828, -2.7721,
+            -2.4252, -3.5853, -1.3790, -2.4252, -3.5853, 1.3810, -3.3587, -1.3403, 2.7721,
+            -3.3587, -1.3403, -2.7721, -3.4456, 2.9969, -1.3790, -3.4456, 2.9969, 1.3810,
+            -4.8356, 0.5895, -1.3790, -4.8356, 0.5895, 1.3810,
+        ], dtype=float).reshape(-1, 3)
+        rings = (
+            (0, 1, 5, 4), (8, 9, 13, 12), (16, 17, 19, 18),
+            (0, 3, 6, 11, 4), (1, 2, 7, 10, 5), (2, 7, 14, 13, 9),
+            (3, 6, 15, 12, 8), (6, 11, 16, 18, 15), (7, 10, 17, 19, 14),
+            (0, 1, 2, 9, 8, 3), (4, 5, 10, 17, 16, 11), (12, 13, 14, 19, 18, 15),
+        )
+    else:
+        legend, colour = "large cage", palette_rgb("clathrate")
+        homes_frac = ((1.0, 0.0, 0.2), (0.0, 0.0, 0.75))
+        offsets = np.array([
+        3.8878, -2.2439, -1.7655, -3.8878, 2.2439, -1.7655, 3.8872, 2.2450, -1.7655,
+        -0.0006, 4.4889, -1.7655, 0.0006, -4.4889, -1.7655, -3.8872, -2.2450, -1.7655,
+        -2.4103, 4.1748, -0.3724, 2.4103, 4.1748, -0.3724, -2.4103, -4.1748, -0.3724,
+        2.4103, -4.1748, -0.3724, 4.8207, 0.0000, -0.3724, -4.8207, 0.0000, -0.3724,
+        -2.4302, 1.4038, -4.0263, 2.4302, -1.4038, -4.0263, -0.0006, -2.8065, -4.0263,
+        -2.4308, -1.4027, -4.0263, 2.4308, 1.4027, -4.0263, 0.0006, 2.8065, -4.0263,
+        2.4103, 4.1748, 2.3876, -2.4103, 4.1748, 2.3876, -2.4103, -4.1748, 2.3876,
+        2.4103, -4.1748, 2.3876, 4.8207, 0.0000, 2.3876, -4.8207, 0.0000, 2.3876,
+        3.8872, 2.2450, 3.7786, -3.8878, 2.2439, 3.7786, 3.8878, -2.2439, 3.7786,
+        -0.0006, 4.4889, 3.7786, 0.0006, -4.4889, 3.7786, -3.8872, -2.2450, 3.7786,
+        -2.4302, 1.4038, 6.0394, 0.0006, 2.8065, 6.0394, -2.4308, -1.4027, 6.0394,
+        -0.0006, -2.8065, 6.0394, 2.4302, -1.4038, 6.0394,         2.4308, 1.4027, 6.0394,
+        ], dtype=float).reshape(-1, 3)
+        rings = (
+            (0, 9, 4, 14, 13), (0, 10, 2, 16, 13), (1, 6, 3, 17, 12), (1, 11, 5, 15, 12),
+            (2, 7, 3, 17, 16), (4, 8, 5, 15, 14), (18, 24, 35, 31, 27), (19, 25, 30, 31, 27),
+            (20, 28, 33, 32, 29), (21, 26, 34, 33, 28), (22, 24, 35, 34, 26), (23, 25, 30, 32, 29),
+            (0, 9, 21, 26, 22, 10), (1, 6, 19, 25, 23, 11), (2, 7, 18, 24, 22, 10), (3, 6, 19, 27, 18, 7),
+            (4, 8, 20, 28, 21, 9), (5, 8, 20, 29, 23, 11), (12, 15, 14, 13, 16, 17), (30, 31, 35, 34, 33, 32),
+        )
+    length_a = 12.4212113964
+    length_c = 10.0656455142 * 2.0
+    angle = np.deg2rad(120.0)
+
+    def cartesian(frac):
+        frac = np.atleast_2d(np.asarray(frac, dtype=float))
+        return np.column_stack((
+            length_a * frac[:, 0] + length_a * np.cos(angle) * frac[:, 1],
+            length_a * np.sin(angle) * frac[:, 1],
+            length_c * frac[:, 2],
+        ))
+
+    lattice = cartesian([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]])
+    homes = cartesian(homes_frac)
+    guest = np.asarray(guest_centre, dtype=float)
+    images = []
+    for ix in (-1, 0, 1):
+        for iy in (-1, 0, 1):
+            for iz in (-1, 0, 1):
+                images.append(homes + ix * lattice[0] + iy * lattice[1] + iz * lattice[2])
+    images = np.vstack(images)
+    home = images[int(np.linalg.norm(images - guest, axis=1).argmin())]
+    ideal = home + offsets
+    oxy = np.asarray(oxygens, dtype=float)
+    copies = []
+    for ix in (-1, 0, 1):
+        for iy in (-1, 0, 1):
+            for iz in (-1, 0, 1):
+                copies.append(oxy + ix * lattice[0] + iy * lattice[1] + iz * lattice[2])
+    copies = np.vstack(copies)
+    shell = []
+    for point in ideal:
+        shell.append(copies[int(np.linalg.norm(copies - point, axis=1).argmin())])
+    shell = np.asarray(shell, dtype=float)
+    vertices = [row for row in shell]
+    faces = []
+    for ring in rings:
+        points = shell[list(ring)]
+        centre = points.mean(axis=0)
+        normal = np.zeros(3)
+        for index, left in enumerate(points):
+            right = points[(index + 1) % len(points)]
+            normal[0] += (left[1] - right[1]) * (left[2] + right[2])
+            normal[1] += (left[2] - right[2]) * (left[0] + right[0])
+            normal[2] += (left[0] - right[0]) * (left[1] + right[1])
+        length = float(np.linalg.norm(normal)) or 1.0
+        normal = normal / length
+        if float(np.dot(normal, home - centre)) < 0.0:
+            normal = -normal
+        centre = centre + normal * 0.12
+        base = len(vertices)
+        vertices.append(centre)
+        for index in range(len(ring)):
+            faces.append((base, ring[index], ring[(index + 1) % len(ring)]))
+    return {
+        "vertices": np.asarray(vertices, dtype=float),
+        "shell": shell,
+        "faces": np.asarray(faces, dtype=int),
+        "color": colour,
+        "transparency": 0.55,
+        "legend": legend,
+        "alpha": 0.42,
+    }
+
+
 def host_token(lattice):
     if lattice in ("1h", "ice1h"):
         return "hexagonal"
     if lattice in ("1c", "ice1c"):
         return "cubic"
     return "clathrate"
+
+
+def side_by_side_cages(meshes, xyz, names, colors, radii, transparency, residue_index):
+    """One water radius, two cages, a gap between them.
+
+    Each cage is its own shell. Shared crystal waters are copied so the
+    cages do not occupy the same space.
+    """
+    import numpy as np
+
+    guest_names = {"methane", "THF", "ring O", "hydrogen"}
+    water_colour = palette_rgb("water")
+    xyz = np.asarray(xyz, dtype=float)
+    centres = [
+        np.asarray(mesh["shell"] if "shell" in mesh else mesh["vertices"], dtype=float).mean(axis=0)
+        for mesh in meshes
+    ]
+    guests = {}
+    for index, name in enumerate(names):
+        if name not in guest_names:
+            continue
+        guests.setdefault(residue_index[index], []).append(index)
+    order = sorted(range(len(meshes)), key=lambda slot: 0 if meshes[slot].get("legend") == "small cage" else 1)
+    cursor = None
+    gap = 4.0
+    out_pos, out_col, out_name, out_rad, out_alpha = [], [], [], [], []
+    bonds = []
+    shifted = []
+    for slot in order:
+        mesh = meshes[slot]
+        waters = np.asarray(mesh["shell"] if "shell" in mesh else mesh["vertices"], dtype=float).copy()
+        mine = []
+        best_dist = 1.0e9
+        for indices in guests.values():
+            centre = xyz[indices].mean(axis=0)
+            dist = float(np.linalg.norm(centre - centres[slot]))
+            guest_kind = {names[index] for index in indices}
+            limit = 5.5 if guest_kind & {"THF", "ring O"} else 3.2
+            if dist < best_dist and dist <= limit:
+                best_dist = dist
+                mine = list(indices)
+        stacked = waters
+        if mine:
+            stacked = np.vstack([waters, xyz[mine]])
+        xmin = float(stacked[:, 0].min())
+        xmax = float(stacked[:, 0].max())
+        shift = 0.0 if cursor is None else cursor + gap - xmin
+        cursor = xmax + shift
+        # Share one vertical centre so a small cage is not pushed off the top.
+        anchor = waters.mean(axis=0)
+        waters[:, 0] += shift
+        waters[:, 1] -= anchor[1]
+        waters[:, 2] -= anchor[2]
+        moved = {
+            "vertices": np.asarray(mesh["vertices"], dtype=float).copy(),
+            "faces": mesh["faces"],
+            "color": mesh["color"],
+            "transparency": mesh.get("transparency", 0.55),
+            "legend": mesh.get("legend"),
+            "alpha": 0.42,
+        }
+        if "shell" in mesh:
+            moved["shell"] = np.asarray(mesh["shell"], dtype=float).copy()
+            moved["shell"][:, 0] += shift
+            moved["shell"][:, 1] -= anchor[1]
+            moved["shell"][:, 2] -= anchor[2]
+        moved["vertices"][:, 0] += shift
+        moved["vertices"][:, 1] -= anchor[1]
+        moved["vertices"][:, 2] -= anchor[2]
+        shifted.append(moved)
+        start = len(out_pos)
+        for point in waters:
+            out_pos.append(point)
+            out_col.append(water_colour)
+            out_name.append("water")
+            out_rad.append(ATOM_RADIUS)
+            out_alpha.append(0.0)
+        for left in range(len(waters)):
+            for right in range(left + 1, len(waters)):
+                span = float(np.linalg.norm(waters[left] - waters[right]))
+                limit = 3.30 if "shell" in mesh else 3.20
+                if 2.40 <= span <= limit:
+                    bonds.append((start + left, start + right))
+        guest_at = start + len(waters)
+        for offset, index in enumerate(mine):
+            point = np.array(xyz[index], dtype=float, copy=True)
+            point[0] += shift
+            point[1] -= anchor[1]
+            point[2] -= anchor[2]
+            out_pos.append(point)
+            out_col.append(colors[index])
+            out_name.append(names[index])
+            out_rad.append(radii[index] if names[index] == "hydrogen" else ATOM_RADIUS)
+            out_alpha.append(transparency[index])
+            for earlier in range(offset):
+                other = mine[earlier]
+                if residue_index[other] != residue_index[index]:
+                    continue
+                if float(np.linalg.norm(out_pos[guest_at + offset] - out_pos[guest_at + earlier])) < 1.70:
+                    bonds.append((guest_at + earlier, guest_at + offset))
+    return (
+        np.asarray(out_pos, dtype=float),
+        out_col,
+        out_rad,
+        out_alpha,
+        out_name,
+        bonds,
+        shifted,
+    )
 
 
 def genice_picture(lattice, rep, guests, cage_faces, hydrogens=True):
@@ -2173,7 +2446,7 @@ def genice_picture(lattice, rep, guests, cage_faces, hydrogens=True):
     meshes = []
     bold = []
     if cage_faces:
-        meshes, extra, highlighted = cage_meshes(
+        meshes, _extra, _highlighted = cage_meshes(
             np.asarray(oxygens, dtype=float),
             [
                 (group["kind"], np.asarray(group["heavy"], dtype=float))
@@ -2182,114 +2455,37 @@ def genice_picture(lattice, rep, guests, cage_faces, hydrogens=True):
             ],
             box,
         )
-        cage_atoms = set()
-        for indices in highlighted:
-            for slot in indices:
-                cage_atoms.add(oxygen_ids[int(slot)])
-        # Draw the methane and the THF that sit in the two glass cages.
-        # The other guests sit on the cell boundary and read as clutter.
-        featured = set()
-        for mesh in meshes:
-            centre = np.asarray(mesh["vertices"], dtype=float).mean(axis=0)
-            best_resid, best_gap = None, 1.0e9
-            for resid, group in guest_groups.items():
-                gap = float(np.linalg.norm(np.mean(group["heavy"], axis=0) - centre))
-                if gap < best_gap:
-                    best_resid, best_gap = resid, gap
-            if best_resid is not None and best_gap < 3.0:
-                featured.add(best_resid)
-        guest_resids = set(guest_groups)
-        if not featured:
-            keep = list(range(len(residue_index)))
-        else:
-            keep = [
-                index for index, resid in enumerate(residue_index)
-                if resid not in guest_resids or resid in featured
-            ]
-        remap = {old: new for new, old in enumerate(keep)}
-        xyz = xyz[keep]
-        colors = [colors[index] for index in keep]
-        names = [names[index] for index in keep]
-        radii = [radii[index] for index in keep]
-        transparency = [transparency[index] for index in keep]
-        residue_index = [residue_index[index] for index in keep]
-        bonds = [
-            (remap[pair[0]], remap[pair[1]])
-            for pair in bonds
-            if pair[0] in remap and pair[1] in remap
-        ]
-        cage_atoms = {remap[index] for index in cage_atoms if index in remap}
-        oxygen_ids = [remap[index] for index in oxygen_ids if index in remap]
-        water_colour = palette_rgb("water")
-        centres = [np.asarray(mesh["vertices"], dtype=float).mean(axis=0) for mesh in meshes]
-        near_cage = set()
-        if centres and oxygen_ids:
-            stacked = np.vstack(centres)
-            distance = np.linalg.norm(xyz[oxygen_ids, None, :] - stacked[None, :, :], axis=2).min(axis=1)
-            for atom_index, gap in zip(oxygen_ids, distance):
-                if float(gap) <= 7.6:
-                    near_cage.add(int(atom_index))
-        cage_atoms = {index for index in cage_atoms if index in near_cage}
-        guest_names = {"methane", "THF", "ring O", "hydrogen"}
-        keep = [
-            index for index, name in enumerate(names)
-            if name in guest_names or index in cage_atoms
-        ]
-        remap = {old: new for new, old in enumerate(keep)}
-        old_names = names
-        old_residues = residue_index
-        xyz = xyz[keep]
-        colors = [colors[index] for index in keep]
-        names = [names[index] for index in keep]
-        radii = [radii[index] for index in keep]
-        transparency = [transparency[index] for index in keep]
-        cage_atoms = {remap[index] for index in cage_atoms if index in remap}
-        bonds = [
-            (remap[pair[0]], remap[pair[1]])
-            for pair in bonds
-            if pair[0] in remap and pair[1] in remap and (
-                (remap[pair[0]] in cage_atoms and remap[pair[1]] in cage_atoms)
-                or (
-                    old_names[pair[0]] in guest_names and old_names[pair[1]] in guest_names
-                    and old_residues[pair[0]] == old_residues[pair[1]]
-                )
+        if lattice == "sH":
+            built = []
+            for kind in ("12", "12_1", "20"):
+                best_mesh = None
+                best_dist = 1.0e9
+                want = "THF" if kind == "20" else "CH4"
+                for group in guest_groups.values():
+                    if group["kind"] != want or not group["heavy"]:
+                        continue
+                    centre = np.mean(group["heavy"], axis=0)
+                    trial = sh_ring_mesh(np.asarray(oxygens, dtype=float), centre, box, kind=kind)
+                    dist = float(np.linalg.norm(centre - trial["shell"].mean(axis=0)))
+                    if dist < best_dist:
+                        best_dist = dist
+                        best_mesh = trial
+                if best_mesh is not None and best_dist < 3.0:
+                    built.append(best_mesh)
+            if built:
+                meshes = built
+        if meshes:
+            xyz, colors, radii, transparency, names, bonds, meshes = side_by_side_cages(
+                meshes, xyz, names, colors, radii, transparency, residue_index,
             )
-        ]
-        for index, name in enumerate(names):
-            if name in guest_names:
-                continue
-            if index in cage_atoms:
-                radii[index] = ATOM_RADIUS
-                transparency[index] = 0.0
-            else:
-                radii[index] = ATOM_RADIUS
-                transparency[index] = 0.45
-            colors[index] = water_colour
-            names[index] = "water"
-        if len(extra):
-            xyz = np.vstack([xyz, np.asarray(extra, dtype=float)])
-            for _point in extra:
-                colors.append(water_colour)
-                names.append("water")
-                radii.append(ATOM_RADIUS)
-                transparency.append(0.0)
-        # Unfolded shell copies have no bond yet. Join every water pair at
-        # a hydrogen-bond length so each cage edge is drawn once.
-        seen = {tuple(sorted((int(a), int(b)))) for a, b in bonds}
-        waters = [index for index, name in enumerate(names) if name == "water"]
-        for cursor, left in enumerate(waters):
-            for right in waters[cursor + 1 :]:
-                key = (left, right) if left < right else (right, left)
-                if key in seen:
-                    continue
-                gap = float(np.linalg.norm(xyz[left] - xyz[right]))
-                if 2.40 <= gap <= 3.20:
-                    bonds.append(key)
-                    seen.add(key)
-        bold = list(bonds)
+            return finish(
+                xyz, colors, radii, transparency, names, bonds, meshes,
+                "pair", xyz.mean(axis=0), False, bold=bonds,
+                bond_radius=BOND_RADIUS, bond_rgb=(0.33, 0.35, 0.38),
+            )
     return finish(
         xyz, colors, radii, transparency, names, bonds, meshes,
-        "cage", xyz.mean(axis=0), False, bold=bold,
+        "cage", xyz.mean(axis=0), False,
         bond_radius=BOND_RADIUS, bond_rgb=(0.33, 0.35, 0.38),
     )
 
@@ -2439,6 +2635,79 @@ def quiet_stray_clathrate(frame, labels):
     return labels
 
 
+def depth_slab(frame, labels, x_lo=6.0, x_hi=12.5, z_lo=4.5, z_hi=26.0, liquid_reach=6.0):
+    """One depth through the interface: ice, then the interfacial layer, then liquid.
+
+    x is the depth. The window is a few angstroms, so a liquid ion does not
+    land on the ice by projection. Liquid is the shell that touches the ice,
+    not the far solvent, which is what opened a gap in the picture.
+    """
+    import numpy as np
+    from scipy.spatial import cKDTree
+
+    labels = list(labels)
+    for index, label in enumerate(labels):
+        if int(label) in (4, 5):
+            labels[index] = 2
+    xyz = np.asarray(frame.xyz, dtype=float)
+    depth = (xyz[:, 0] >= x_lo) & (xyz[:, 0] < x_hi)
+    hexagonal = depth & np.array([int(label) == 1 for label in labels])
+    if not np.any(hexagonal):
+        index = np.where(depth)[0]
+        return frame.subset(index), [labels[int(i)] for i in index]
+    front = float(np.percentile(xyz[hexagonal, 2], 75))
+    ice_max = float(xyz[hexagonal, 2].max())
+    # Ice through the front, plus the interfacial waters just beyond it.
+    # The periodic interface on the low-z side is left out.
+    chosen = set(
+        int(i) for i in np.where(
+            depth & (xyz[:, 2] >= z_lo) & (xyz[:, 2] <= ice_max + 0.6)
+            & np.array([int(label) != 2 for label in labels])
+        )[0]
+    )
+    chosen.update(
+        int(i) for i in np.where(
+            depth & np.array([int(label) == 3 for label in labels])
+            & (xyz[:, 2] >= front) & (xyz[:, 2] <= ice_max + 6.0)
+        )[0]
+    )
+    liquid = [
+        i for i, label in enumerate(labels)
+        if depth[i] and int(label) == 2
+        and ice_max - 1.5 <= float(xyz[i, 2]) <= ice_max + 14.0
+    ]
+    chosen.update(liquid)
+    # Ions that sit on a drawn water. Type 3 in the ice is a chloride.
+    # A liquid sodium (type 4) is added below when the slice would otherwise miss it.
+    if chosen and getattr(frame, "types", None) is not None:
+        tree = cKDTree(xyz[sorted(chosen)])
+        for index, kind in enumerate(frame.types):
+            if int(kind) not in (3, 4) or not depth[index]:
+                continue
+            gap, _near = tree.query(xyz[index], k=1)
+            if float(gap) <= 4.0 and z_lo <= float(xyz[index, 2]) <= ice_max + 16.0:
+                chosen.add(int(index))
+        liquid_sodium = [
+            index for index in chosen
+            if int(frame.types[index]) == 4 and float(xyz[index, 2]) > ice_max
+        ]
+        if not liquid_sodium:
+            outside = [
+                index for index, kind in enumerate(frame.types)
+                if int(kind) == 4 and depth[index] and float(xyz[index, 2]) > ice_max
+            ]
+            if outside:
+                pick = min(outside, key=lambda index: float(xyz[index, 2]))
+                chosen.add(int(pick))
+                for other, label in enumerate(labels):
+                    if not depth[other] or int(label) != 2:
+                        continue
+                    if float(np.linalg.norm(xyz[other] - xyz[pick])) <= 4.0:
+                        chosen.add(int(other))
+    index = sorted(chosen)
+    return frame.subset(index), [labels[i] for i in index]
+
+
 def draw(library, scene):
     global PANEL_NAME
     PANEL_NAME = scene
@@ -2461,15 +2730,12 @@ def draw(library, scene):
     if scene == "interface":
         frame = read_dump(ROOT / "input/traj/interface_f0.lammpstrj")
         labels = chill_labels(library, frame)
-        frame, labels = clip_axis(frame, labels, 2, 0.0, 34.0)
-        labels = quiet_stray_clathrate(frame, labels)
-        frame, labels = front_sheet(frame, labels, axis=1, keep_liquid=True)
-        frame, labels = closed_crystal_rings(frame, labels)
-        return labelled_picture(frame, labels, "channel", True)
+        frame, labels = depth_slab(frame, labels)
+        return labelled_picture(frame, labels, "slab", False, slab=True)
     if scene == "nucleation":
         frame = read_dump(ROOT / "input/traj/nucleation_three.lammpstrj", frame_index=1)
         labels = chill_labels(library, frame)
-        frame, labels, centre = largest_cluster(frame, labels, shell=0.0)
+        frame, labels, centre = largest_cluster(frame, labels, shell=4.0)
         return labelled_picture(
             frame, labels, "cage", True, perspective=False, center=centre, cluster=True,
         )
@@ -2480,11 +2746,10 @@ def draw(library, scene):
         labels = [2] * len(frame.xyz)
         for index, label in zip(oxygen, labelled):
             labels[index] = label
-        frame, labels = clip_axis(frame, labels, 2, 8.0, 50.0)
-        labels = quiet_stray_clathrate(frame, labels)
-        frame, labels = front_sheet(frame, labels, axis=1, keep_liquid=True)
-        frame, labels = closed_crystal_rings(frame, labels)
-        return labelled_picture(frame, labels, "channel", True, ions=True)
+        # Type 3 at about (11, 10, 12) is the chloride in the crystalline
+        # slab. CHILL+ runs on the water alone, so the ion is not ice.
+        frame, labels = depth_slab(frame, labels)
+        return labelled_picture(frame, labels, "slab", False, ions=True, slab=True)
     if scene == "rings":
         frame = read_dump(ROOT / "input/traj/genice_sI.lammpstrj")
         meshes = ring_meshes(frame.xyz, ring_lists(library, frame))
@@ -2606,7 +2871,7 @@ def write_pages(out):
         "cage-sii": "GenIce sII with methane in the small cages and THF in the large cages.",
         "cage-sh": "GenIce sH with methane and THF guests.",
         "cage-guest": "THF guest and the surrounding water.",
-        "brine": "NaCl front. Water, sodium and chloride.",
+        "brine": "NaCl front. The chloride in the ice slice is not an ice label. CHILL+ runs on the water alone.",
         "interface": "Basal interface, one ice bilayer. Crystal bonds stop at the ice. An interClathrate oxygen with only liquid neighbours is drawn as water.",
         "nucleation": "Nucleation frame coloured by published CHILL+.",
         "genice": "GenIce FAU host.",
