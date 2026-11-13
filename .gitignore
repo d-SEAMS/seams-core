@@ -1,6 +1,7 @@
 # Additions
 .pixi/
 .venv-paper/
+benchmarks/paper-cells/.sitting-large.jsonl
 benchmarks/*.png
 /result
 /.ccls-cache/

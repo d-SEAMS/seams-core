@@ -537,6 +537,23 @@ rule paper_sitting:
         "python3 scripts/paper_sitting.py --out benchmarks/paper-cells"
 
 
+# Same ice operations as sitting.csv, on an 8x ice Ic cell, at 1, 2, 4 and 8 threads.
+rule paper_sitting_large:
+    input:
+        "scripts/paper_sitting_large.py",
+        "scripts/paper_sitting.py",
+        "scripts/paper_stats.py",
+        "scripts/h2h_protocol.py",
+        "bbdir-release/bindings/libseams_lang.so",
+        "bbdir-release/src/libyodaLib.so",
+        "bbdir-release/seams",
+    output:
+        "benchmarks/paper-cells/sitting-large.csv",
+        "benchmarks/paper-cells/raw-sitting-large.txt",
+    shell:
+        "python3 scripts/paper_sitting_large.py --out benchmarks/paper-cells"
+
+
 # One command per table. Each file is a selection of sitting.csv.
 rule paper_tables:
     input:
