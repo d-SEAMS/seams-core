@@ -28,9 +28,11 @@ void ylmAdd8(int orderL, const double *dx, const double *dy, const double *dz,
 // slot in the outer index, and each group of eight is 64-byte aligned.
 // The solid harmonics stay in SoA while the four bonds are added, then
 // one blocked transpose writes atom a at rows[a * stride + 2 * m].
-// l is 4 or 6. Returns false if any bond has zero length.
+// l is 4 or 6. nKeep leading components are written (m = -l upward).
+// The positive orders are the conjugate partners of those and are not
+// stored. Returns false if any bond has zero length.
 bool ylmSumRows4(int orderL, const double *dx, const double *dy,
-                 const double *dz, double *rows, int stride);
+                 const double *dz, double *rows, int stride, int nKeep);
 
 // Eight atoms, a variable shell. dx/dy/dz are bond-major, nbonds groups
 // of eight. nUsed[a] is the number of leading live bonds of atom a;

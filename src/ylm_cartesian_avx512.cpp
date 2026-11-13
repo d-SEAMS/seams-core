@@ -165,11 +165,12 @@ void storePairs(double *dst, __m512d re, __m512d im, int nComp) {
 }
 
 bool ylmSumRows4(int orderL, const double *dx, const double *dy,
-                 const double *dz, double *rows, int stride) {
-  if ((orderL != 4 && orderL != 6) || stride < 2 * (2 * orderL + 1)) {
+                 const double *dz, double *rows, int stride, int nKeep) {
+  const int nComp = 2 * orderL + 1;
+  if ((orderL != 4 && orderL != 6) || nKeep < 1 || nKeep > nComp ||
+      stride < 2 * nKeep) {
     return false;
   }
-  const int nComp = 2 * orderL + 1;
   V accRe[13];
   V accIm[13];
   const V zero(0.0);
@@ -191,22 +192,24 @@ bool ylmSumRows4(int orderL, const double *dx, const double *dy,
     V reV[13];
     V imV[13];
     evalSolidLanes(orderL, x0, y0, z0, live, reV, imV);
-    for (int m = 0; m < nComp; ++m) {
+    // m > 0 is the conjugate partner of a stored m < 0. The polynomial
+    // still forms both; only the stored side is accumulated.
+    for (int m = 0; m < nKeep; ++m) {
       accRe[m] = accRe[m] + reV[m];
       accIm[m] = accIm[m] + imV[m];
     }
   }
   const __m512d zreg = _mm512_setzero_pd();
-  for (int block = 0; block < nComp; block += 8) {
-    const int have = std::min(8, nComp - block);
+  for (int block = 0; block < nKeep; block += 8) {
+    const int have = std::min(8, nKeep - block);
     __m512d reIn[8];
     __m512d imIn[8];
     __m512d reOut[8];
     __m512d imOut[8];
     for (int k = 0; k < 8; ++k) {
       const int m = block + k;
-      reIn[k] = (m < nComp) ? accRe[m].v : zreg;
-      imIn[k] = (m < nComp) ? accIm[m].v : zreg;
+      reIn[k] = (m < nKeep) ? accRe[m].v : zreg;
+      imIn[k] = (m < nKeep) ? accIm[m].v : zreg;
     }
     transpose8(reIn, reOut);
     transpose8(imIn, imOut);

@@ -1025,6 +1025,32 @@ void localQlOnly(const NeighbourCSR &g, int orderL, const std::vector<double> &q
   }
 }
 
+// Power of one q_lm row. A mirrored row stores m = -l..0; each m > 0
+// has the same modulus as its partner, and the partners are added in
+// the same order as a full -l..l row.
+double rowPower(const double *row, int nComplex, bool mirror) {
+  if (!mirror) {
+    double sum = 0.0;
+    const int n = nComplex * 2;
+    for (int c = 0; c < n; ++c) {
+      sum += row[c] * row[c];
+    }
+    return sum;
+  }
+  double mag[8];
+  for (int s = 0; s < nComplex; ++s) {
+    mag[s] = row[2 * s] * row[2 * s] + row[2 * s + 1] * row[2 * s + 1];
+  }
+  double sum = 0.0;
+  for (int s = 0; s < nComplex; ++s) {
+    sum += mag[s];
+  }
+  for (int s = nComplex - 2; s >= 0; --s) {
+    sum += mag[s];
+  }
+  return sum;
+}
+
 bool rowLists(const int *nom, int k, int row, int target) {
   const int *base = nom + static_cast<std::size_t>(row) * static_cast<std::size_t>(k);
   for (int t = 0; t < k; ++t) {
@@ -1050,7 +1076,11 @@ SteinhardtQl cutoffSolid(
   result.ql.assign(static_cast<std::size_t>(n), 0.0);
   result.qlBar.assign(static_cast<std::size_t>(n), 0.0);
   const int nComp = 2 * orderL + 1;
-  const int width = 2 * nComp;
+  // m > 0 repeats the modulus of m < 0, so the averaged row keeps
+  // m = -l..0. The normalised w invariant reads every component.
+  const bool mirror = !invariants && (orderL == 4 || orderL == 6);
+  const int nKeep = mirror ? orderL + 1 : nComp;
+  const int width = 2 * nKeep;
   struct Scratch {
     std::vector<int> offsets, cols;
     std::vector<double> xyz, qlm;
@@ -1541,18 +1571,17 @@ SteinhardtQl cutoffSolid(
     if (rows) {
       double *row = scratch.qlm.data() +
                     static_cast<std::size_t>(begin) * static_cast<std::size_t>(width);
-      rows = seams::ylm::ylmSumRows4(orderL, dxs, dys, dzs, row, width);
+      rows = seams::ylm::ylmSumRows4(orderL, dxs, dys, dzs, row, width, nKeep);
       if (rows) {
         constexpr double inv = 0.25;
         for (int a = 0; a < 8; ++a) {
           double *dst = row + static_cast<std::size_t>(a) * static_cast<std::size_t>(width);
-          double sum = 0.0;
-          for (int m = 0; m < nComp; ++m) {
+          for (int m = 0; m < nKeep; ++m) {
             dst[2 * m] *= inv;
             dst[2 * m + 1] *= inv;
-            sum += dst[2 * m] * dst[2 * m] + dst[2 * m + 1] * dst[2 * m + 1];
           }
-          result.ql[static_cast<std::size_t>(begin + a)] = std::sqrt(prefactor * sum);
+          result.ql[static_cast<std::size_t>(begin + a)] =
+              std::sqrt(prefactor * rowPower(dst, nKeep, mirror));
         }
       }
     }
@@ -1581,11 +1610,11 @@ SteinhardtQl cutoffSolid(
       }
       seams::ylm::ylmBatch(orderL, xs, ys, zs, filled, re, im);
       for (int bond = 0; bond < filled; bond++) {
-        const double *yr = re + static_cast<std::size_t>(bond) * static_cast<std::size_t>(nComp);
-        const double *imag = im + static_cast<std::size_t>(bond) * static_cast<std::size_t>(nComp);
-        for (int m = 0; m < nComp; m++) {
+        const double *yr = re + static_cast<std::size_t>(bond) * nComp;
+        const double *yi = im + static_cast<std::size_t>(bond) * nComp;
+        for (int m = 0; m < nKeep; m++) {
           dst[2 * m] += yr[m];
-          dst[2 * m + 1] += imag[m];
+          dst[2 * m + 1] += yi[m];
         }
       }
       filled = 0;
@@ -1630,13 +1659,12 @@ SteinhardtQl cutoffSolid(
       continue;
     }
     const double inv = 1.0 / static_cast<double>(nUsed);
-    double sum = 0.0;
-    for (int m = 0; m < nComp; m++) {
+    for (int m = 0; m < nKeep; m++) {
       dst[2 * m] *= inv;
       dst[2 * m + 1] *= inv;
-      sum += dst[2 * m] * dst[2 * m] + dst[2 * m + 1] * dst[2 * m + 1];
     }
-    result.ql[static_cast<std::size_t>(i)] = std::sqrt(prefactor * sum);
+    result.ql[static_cast<std::size_t>(i)] =
+        std::sqrt(prefactor * rowPower(dst, nKeep, mirror));
     }
   }
   }
@@ -1668,12 +1696,11 @@ SteinhardtQl cutoffSolid(
         for (int c = 0; c < width; ++c) acc[c] += other[c];
       }
       const double inv = 1.0 / static_cast<double>(b - a + 1);
-      double sum = 0.0;
       for (int c = 0; c < width; ++c) {
         acc[c] *= inv;
-        sum += acc[c] * acc[c];
       }
-      result.qlBar[static_cast<std::size_t>(i)] = std::sqrt(prefactor * sum);
+      result.qlBar[static_cast<std::size_t>(i)] =
+          std::sqrt(prefactor * rowPower(acc, nKeep, mirror));
     }
   }
 #ifdef SEAMS_HAS_OPENMP
