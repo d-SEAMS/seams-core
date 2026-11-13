@@ -297,7 +297,14 @@ def worker(kind, cores, dump, lib_path):
         from ovito.modifiers import PolyhedralTemplateMatchingModifier
 
         def once():
-            return ovito_codes(pts, side, PolyhedralTemplateMatchingModifier(), 0)
+            # PTM cubic diamond is type 6 (ptm_template_dcub and alt1).
+            # Hexagonal diamond is type 7 (ptm_template_dhex and three
+            # alternates). Neither flag is in PTM_CHECK_DEFAULT, and OVITO
+            # leaves both off, so a bare modifier labels this ice Other.
+            mod = PolyhedralTemplateMatchingModifier(rmsd_cutoff=0.1)
+            for structure in mod.structures:
+                structure.enabled = structure.id in (6, 7)
+            return ovito_codes(pts, side, mod, 6)
 
         got, sink = time_calls(once)
     elif kind == "ovito-diamond":
@@ -429,7 +436,10 @@ def print_agreement(dump, lib_path, pts, side):
     print(f"mdapy-cubic={int(np.count_nonzero(mdapy_labels == 2))}")
     print(f"mdapy-other={int(np.count_nonzero(mdapy_labels != 2))}")
     print(f"ovito-chill={ovito_codes(pts, side, ChillPlusModifier(cutoff=3.5), 2)}")
-    print(f"ovito-ptm-other={ovito_codes(pts, side, PolyhedralTemplateMatchingModifier(), 0)}")
+    ptm = PolyhedralTemplateMatchingModifier(rmsd_cutoff=0.1)
+    for structure in ptm.structures:
+        structure.enabled = structure.id in (6, 7)
+    print(f"ovito-ptm-cubic={ovito_codes(pts, side, ptm, 6)}")
     print(f"ovito-diamond={ovito_codes(pts, side, IdentifyDiamondModifier(), 1)}")
     print(f"q-gap={max(gaps):.3e}")
     print(f"lib-rings6={int(rings[6])}")
@@ -499,7 +509,7 @@ def require_agreement(seams, dump, agreed):
         "mdapy-cubic": n,
         "mdapy-other": "0",
         "ovito-chill": n,
-        "ovito-ptm-other": n,
+        "ovito-ptm-cubic": n,
         "ovito-diamond": n,
         "lib-cages-cubic": n,
         "lib-cages-hex": "0",
@@ -601,8 +611,9 @@ def render(rows, cores_available, versions, agreed):
         "`seams_frame_chill_plus`, mdapy and OVITO. "
         "`seams symmetry` labels every molecule ice Ic, and OVITO's identify-diamond "
         "modifier labels every molecule cubic diamond. "
-        "Polyhedral template matching reports Other on every molecule; "
-        "its templates do not include cubic ice. "
+        "Polyhedral template matching with cubic and hexagonal diamond "
+        "(PTM types 6 and 7, the 16-neighbour templates and their alternates) "
+        "labels every molecule cubic diamond. "
         f"Local q4 and q6 from `seams_frame_q4_q6` and freud differ by at most {agreed['q-gap']}. "
         f"Primitive six-rings: the library and rings-statistics-matter both report {agreed['lib-rings6']}. "
         "`seams cages` and `seams_frame_cages` label every molecule cubic.",

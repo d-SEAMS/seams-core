@@ -4,7 +4,7 @@ Ice Ic, orthorhombic, one oxygen per molecule, one frame of 110592 molecules. Th
 
 mdapy 2.0.0, OVITO 3.17.2, freud 3.6.1, rings-statistics-matter 0.3.0. Measured in this session on this frame.
 
-CHILL+ labels every molecule cubic in `seams chill-plus`, `seams_frame_chill_plus`, mdapy and OVITO. `seams symmetry` labels every molecule ice Ic, and OVITO's identify-diamond modifier labels every molecule cubic diamond. Polyhedral template matching reports Other on every molecule; its templates do not include cubic ice. Local q4 and q6 from `seams_frame_q4_q6` and freud differ by at most 1.565e-07. Primitive six-rings: the library and rings-statistics-matter both report 221184. `seams cages` and `seams_frame_cages` label every molecule cubic.
+CHILL+ labels every molecule cubic in `seams chill-plus`, `seams_frame_chill_plus`, mdapy and OVITO. `seams symmetry` labels every molecule ice Ic, and OVITO's identify-diamond modifier labels every molecule cubic diamond. Polyhedral template matching with cubic and hexagonal diamond (PTM types 6 and 7) labels every molecule cubic diamond. The default modifier leaves both templates off and then reports Other. Local q4 and q6 from `seams_frame_q4_q6` and freud differ by at most 1.565e-07. Primitive six-rings: the library and rings-statistics-matter both report 221184. `seams cages` and `seams_frame_cages` label every molecule cubic.
 
 | command | molecules | cores | median (ms) | IQR (ms) |
 | --- | ---: | ---: | ---: | ---: |

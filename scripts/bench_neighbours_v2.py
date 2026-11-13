@@ -105,7 +105,12 @@ elif kind.startswith("mdapy-"):
             return int(np.sum(np.asarray(result.structure) > 0))
     else:
         from mdapy.identify import PolyhedralTemplateMatching
-        tool = PolyhedralTemplateMatching()
+        # Cubic diamond is DCUB and hexagonal diamond is DHEX. The default
+        # set is the close-packed templates, which do not match this ice.
+        try:
+            tool = PolyhedralTemplateMatching(structure=["dcub", "dhex"])
+        except TypeError:
+            tool = PolyhedralTemplateMatching()
         def once():
             result = tool.compute(system)
             return int(np.sum(np.asarray(result.structure) > 0))
@@ -141,7 +146,11 @@ elif kind.startswith("ovito-"):
         elif op == "diamond":
             pipe.modifiers.append(IdentifyDiamondModifier())
         else:
-            pipe.modifiers.append(PolyhedralTemplateMatchingModifier())
+            mod = PolyhedralTemplateMatchingModifier(rmsd_cutoff=0.1)
+            # PTM_MATCH_DCUB is 6 and PTM_MATCH_DHEX is 7. OVITO leaves both off.
+            for structure in mod.structures:
+                structure.enabled = structure.id in (6, 7)
+            pipe.modifiers.append(mod)
         out = pipe.compute()
         if op in ("symmetry", "diamond", "chill") and "Structure Type" in out.particles:
             return int(np.sum(np.asarray(out.particles["Structure Type"]) > 0))

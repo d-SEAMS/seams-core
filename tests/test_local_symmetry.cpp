@@ -12,6 +12,7 @@
 #include <atomic>
 #include <cmath>
 #include <cstdlib>
+#include <random>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -355,6 +356,32 @@ TEST_CASE("an ice Ic supercell is cubic at every oxygen", "[symmetry]") {
   REQUIRE(static_cast<int>(kind.size()) == big.rows());
   for (int label : kind) {
     REQUIRE(label == static_cast<int>(symm::Kind::iceIc));
+  }
+}
+
+TEST_CASE("ideal Ic, Ih and a gaussian displacement keep their labels", "[symmetry]") {
+  std::mt19937 rng(20261113);
+  std::normal_distribution<double> noise(0.0, 0.05);
+  const symm::Crystal cells[] = {symm::Crystal::iceIc, symm::Crystal::iceIh};
+  const int expect[] = {static_cast<int>(symm::Kind::iceIc),
+                        static_cast<int>(symm::Kind::iceIh)};
+  for (int which = 0; which < 2; ++which) {
+    const auto cell = symm::crystal(cells[which]);
+    std::vector<int> kind;
+    symm::classifyIce(cell.cartesian, cell.vectors, kind);
+    for (int label : kind) {
+      REQUIRE(label == expect[which]);
+    }
+    Eigen::MatrixXd moved = cell.cartesian;
+    for (int row = 0; row < moved.rows(); ++row) {
+      for (int axis = 0; axis < 3; ++axis) {
+        moved(row, axis) += noise(rng);
+      }
+    }
+    symm::classifyIce(moved, cell.vectors, kind);
+    for (int label : kind) {
+      REQUIRE(label == expect[which]);
+    }
   }
 }
 
