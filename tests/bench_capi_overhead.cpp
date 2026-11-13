@@ -8,7 +8,8 @@
  * timed apart from the analysis, again interleaved, as five cases:
  *   set_atoms fresh   set_atoms on a new handle (create and destroy untimed)
  *   set_atoms reuse   set_atoms on a handle that already holds a frame
- *   set_positions     set_positions on that handle, same atom count
+ *   set_positions     set_positions on a handle loaded once, as in a
+ *                     trajectory loop, same atom count
  *   cpp Cloud fresh   building a Cloud (destruction untimed)
  *   cpp Cloud refill  writing x, y, z and the label into a built Cloud
  * A trivial call (seams_system_natoms) gives the fixed cost per call.
@@ -154,6 +155,12 @@ void load_costs(const Lattice &lat, int reps) {
   }
   need(seams_system_set_atoms(kept, lat.xyz.data(), n, lat.box, 9, nullptr, nullptr),
        "set_atoms");
+  seams_system *moving = seams_system_create();
+  if (moving == nullptr) {
+    std::exit(1);
+  }
+  need(seams_system_set_atoms(moving, lat.xyz.data(), n, lat.box, 9, nullptr, nullptr),
+       "set_atoms");
   Cloud refill = cloud_of(lat);
   std::vector<double> fresh_c, reuse_c, pos_c, fresh_cpp, refill_cpp;
   int sink = 0;
@@ -175,7 +182,7 @@ void load_costs(const Lattice &lat, int reps) {
     const double b = seconds(t0);
 
     t0 = Clock::now();
-    need(seams_system_set_positions(kept, lat.xyz.data(), n, lat.box, 9), "set_positions");
+    need(seams_system_set_positions(moving, lat.xyz.data(), n, lat.box, 9), "set_positions");
     const double c = seconds(t0);
 
     double d = 0;
@@ -212,6 +219,7 @@ void load_costs(const Lattice &lat, int reps) {
   report("cpp Cloud refill", refill_cpp, refill_cpp, "cpp refill");
   report("set_positions", pos_c, refill_cpp, "cpp refill");
   seams_system_destroy(kept);
+  seams_system_destroy(moving);
 }
 
 void run(int k, int reps) {
