@@ -42,15 +42,17 @@ Python and C print the same census:
 .. figure:: figures/interface.png
    :alt: Interface slab with a colour legend, numbered basal layers, a layer-index axis, and a 1 nm bar.
 
-   v12 Tachyon raster of the interface slab. Liquid is blended at 0.40. The legend uses the shared palette, including the wine interfacial-clathrate oxygens. The numbers on the left are the layer index. The 1 nm bar uses the same type as the legend.
+   v12 Tachyon raster of the interface slab. Liquid is blended at 0.40. Each tick is the median height of one basal bin. Layers 0 to 7 are the hexagonal block, and their spacing is the spacing of those bins. Layer 8 is the single cubic oxygen. It sits in the liquid, about 23 angstrom above layer 7, so that gap is the assignment.
 
 What this tells you
 -------------------
 
 The slab is a hexagonal ice block against liquid. 352 molecules are
 hexagonal, 434 are liquid, and 49 are the interfacial shell. One
-molecule is cubic, so one of the nine basal layers is cubic-majority
-and the layer cubicity is 1/9. The nucleus in the first saved frame is
+molecule is cubic. The layer index gives it bin 8, a bin with no
+hexagonal neighbour, so that one molecule is a cubic-majority layer
+and the layer cubicity is 1/9. Its height is 47.6 angstrom, in the
+liquid, 22.7 angstrom above the last hexagonal bin. The nucleus in the first saved frame is
 mixed: 47 cubic and 62 hexagonal molecules in a liquid of 3589.
 Molecule cubicity is 47/109. Along x, two of the fourteen layers are
 cubic-majority, so the layer cubicity is 2/14. That mixed stacking is

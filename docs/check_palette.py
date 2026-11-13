@@ -9,9 +9,9 @@ from chill_palette import COLOUR, assert_distinct
 
 
 def main():
-    assert_distinct()
+    distance = assert_distinct()
     assert_distinct(COLOUR)
-    print("palette", len(COLOUR), "roles, no shared colour")
+    print(f"palette {len(COLOUR)} roles, closest CIEDE2000 {distance:.2f}")
     return 0
 
 

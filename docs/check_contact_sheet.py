@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail if a docs raster is under 1200 px on its long side."""
+"""Fail if a docs raster is under 1200 px on its short side."""
 
 import sys
 from pathlib import Path
@@ -15,9 +15,9 @@ def check(directory: Path):
         if not path.is_file():
             raise SystemExit(f"missing render {path}")
         image = Image.open(path)
-        long_side = max(image.size)
-        if long_side < 1200:
-            raise SystemExit(f"{name} is {image.size[0]}x{image.size[1]}, long side under 1200")
+        short_side = min(image.size)
+        if short_side < 1200:
+            raise SystemExit(f"{name} is {image.size[0]}x{image.size[1]}, short side under 1200")
         print(f"contact {name} {image.size[0]}x{image.size[1]}")
 
 
