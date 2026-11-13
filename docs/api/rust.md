@@ -23,7 +23,10 @@ let (six, fraction) = sys.six_ring_fraction(3.5)?;
 safe wrappers. `Neighbours`, `Rings`, `Cages`, and `Fingerprint` free their
 handles on drop. `bindings/rust/seams/tests/cpp_match.rs` checks those
 values against the C++ path on ice Ih, sI, the XYZ file, the CON file,
-and the triclinic sH dump.
+and the triclinic sH dump. On ice Ih it prints `rustcall hexagonal 128`,
+`rustcall q6bar 0.562448843702`, `rustcall vert 6 0`,
+`rustcall cages 128 0 0 0`, `rustcall knn 512`, and `rustcall sheet 256`.
+The sI signature prints `rustcall sig 2 40`.
 `System::count` is the number of points in the frame.
 `bindings/rust/seams/tests/ice.rs` is the `cargo test` that calls every
 safe wrapper. `meson test docs_api_rust` runs that test.

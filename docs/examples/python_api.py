@@ -215,6 +215,7 @@ def via_ctypes(libdir, xyz, edge):
         fail(lib, guest, "signature")
     if n_cages.value != 2 or n_atoms.value != 40:
         raise SystemExit("ctypes signature {} {}".format(n_cages.value, n_atoms.value))
+    print("python call sig {} {}".format(n_cages.value, n_atoms.value))
     lib.seams_system_destroy(guest)
     print("python api ok ctypes", lib.seams_version_string().decode())
 
@@ -236,6 +237,8 @@ def exercise(lib, sys_handle):
         fail(lib, sys_handle, "steinhardt")
     if sum(bar) / 8.0 <= 0.0:
         raise SystemExit("ctypes lechner-dellago")
+    print("python call q6bar {:.12g}".format(sum(bar) / 8.0))
+    print("python call cubic {}".format(counts[0]))
     cages = ctypes.c_void_p()
     if lib.seams_cages(sys_handle, 3.5, 0, 2, 4, 0, ctypes.byref(cages)) != 0:
         fail(lib, sys_handle, "cages")
@@ -245,6 +248,11 @@ def exercise(lib, sys_handle):
     n_both = ctypes.c_int()
     if lib.seams_cages_counts(cages, n_hex, n_cubic, n_water, n_both) != 0:
         fail(lib, cages, "cage counts")
+    print(
+        "python call cages {} {} {} {}".format(
+            n_hex.value, n_cubic.value, n_water.value, n_both.value
+        )
+    )
     lib.seams_cages_destroy(cages)
     knn = ctypes.c_void_p()
     if lib.seams_neighbours_knn(sys_handle, 4, 3.5, 0, 1, ctypes.byref(knn)) != 0:
@@ -253,9 +261,11 @@ def exercise(lib, sys_handle):
     cn = ctypes.c_double()
     if lib.seams_coordination(sys_handle, 3.5, 8, 0, 0, cn) != 0:
         fail(lib, sys_handle, "coordination")
+    print("python call cn {:.12g}".format(cn.value))
     n_bonds = ctypes.c_int()
     if lib.seams_hbonds(sys_handle, 3.5, 1, 2, 2.42, 30.0, n_bonds) != 0:
         fail(lib, sys_handle, "hbonds")
+    print("python call hbond {}".format(n_bonds.value))
     n_out = ctypes.c_size_t()
     r = (ctypes.c_double * 16)()
     g = (ctypes.c_double * 16)()
@@ -306,12 +316,14 @@ def exercise(lib, sys_handle):
     sheet = (ctypes.c_int * 7)()
     if lib.seams_monolayer(sys_handle, 3.5, 0, 6, 100.0, sheet, 7) != 0:
         fail(lib, sys_handle, "monolayer")
+    print("python call sheet {}".format(sheet[6]))
     rings = ctypes.c_void_p()
     if lib.seams_rings_find(sys_handle, 3.5, 0, 0, 6, ctypes.byref(rings)) != 0:
         fail(lib, sys_handle, "rings")
     atoms = (ctypes.c_int * 12)()
     if lib.seams_rings_vertices(rings, 0, atoms, 12, n_out) != 0 or n_out.value <= 0:
         fail(lib, rings, "vertices")
+    print("python call vert {} {}".format(n_out.value, atoms[0]))
     lib.seams_rings_destroy(rings)
     kinds = (ctypes.c_int * 8)()
     if lib.seams_site_table(sys_handle, b"1=waterO", kinds, 8) != 0:

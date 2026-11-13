@@ -7,7 +7,11 @@
 `bindings/fortran/test_seams.f90` is the program the language-front script
 compiles. It calls every `bind(C)` procedure in the module on a 64-atom
 cubic cell. `meson test docs_api_fortran` compiles that program with
-gfortran and runs it.
+gfortran and runs it. The run prints `fortran call cubic 64`,
+`fortran call q6 0.628539361055`, `fortran call cages 0 64 0 0`,
+`fortran call sig 0 0`, `fortran call cn 4.063492063492`,
+`fortran call hbond 0`, `fortran call sheet 128`,
+`fortran call vert 6 0`, and `fortran call read 128 46`.
 `docs/examples/minimal_fortran.f90` reads
 `input/traj/genice_sI.lammpstrj` and calls the same C entry points.
 `meson test docs_examples` runs it.

@@ -1432,6 +1432,17 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 120)
   test(
+    'docs_binding_tours',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'check_binding_tours.py',
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_api_lib, binding_oracle],
+    suite: 'docs',
+    timeout: 180)
+  test(
     'docs_api_rust',
     python3,
     args: [

@@ -44,7 +44,7 @@ positions and the nine-number box. `dseams.from_mdanalysis(universe)` reads
 `frames.py`. Set `SEAMS_LANG_LIB` to that shared library. The nanobind
 calls (`chill_plus`, `q4q6`, `neighbours`, `rings`, `Frame`) use `libseams`.
 
-`meson test docs_api_python` runs the eight-atom program below. It calls
+`meson test docs_api_python` runs the eight-atom program below. On that cell the ctypes path prints `python call cubic 8`, `python call q6bar 0.628539361055`, `python call cages 0 0 8 0`, `python call cn 4.57142857143`, `python call hbond 0`, `python call sheet 0`, and `python call vert 4 0`. The `512` signature on the sI guest frame prints `python call sig 2 40`. It calls
 `dseams.chill_plus` and `dseams.q4q6` when the nanobind module imports.
 The ctypes fallback calls those two and also `seams_system_read`,
 `seams_chill`, `seams_steinhardt`, `seams_cages`, `seams_signature_cages`,

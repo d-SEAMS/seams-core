@@ -67,6 +67,8 @@ program test_seams
   code = seams_q4q6(sys, 3.5d0, 0, q4, q6)
   if (code /= SEAMS_OK) stop 8
   if (sum(q6) / n <= 0.3d0) stop 9
+  print '(a,i0)', 'fortran call cubic ', cubic
+  print '(a,f14.12)', 'fortran call q6 ', sum(q6) / n
   code = seams_neighbours_build(sys, 3.5d0, 0, SEAMS_GRAPH_CUTOFF, nb)
   if (code /= SEAMS_OK) stop 10
   code = seams_neighbours_csr(nb, offsets, n_offsets, cols, nnz)
@@ -90,9 +92,11 @@ program test_seams
   if (code /= SEAMS_OK) stop 42
   code = seams_cages_counts(cages, n_hex, n_cubic, n_water, n_both)
   if (code /= SEAMS_OK) stop 43
+  print '(a,i0,1x,i0,1x,i0,1x,i0)', 'fortran call cages ', n_hex, n_cubic, n_water, n_both
   call seams_cages_destroy(cages)
   code = signature_count(sys, "512", n_cages, n_atoms_sig)
   if (code /= SEAMS_OK) stop 44
+  print '(a,i0,1x,i0)', 'fortran call sig ', n_cages, n_atoms_sig
   code = seams_neighbours_knn(sys, 4, 3.5d0, 0, 1, knn)
   if (code /= SEAMS_OK) stop 45
   call seams_neighbours_destroy(knn)
@@ -103,8 +107,10 @@ program test_seams
   if (code /= SEAMS_OK .or. n_out <= 0) stop 47
   code = seams_coordination(sys, 3.5d0, 8, 0, 0, cn)
   if (code /= SEAMS_OK) stop 48
+  print '(a,f14.12)', 'fortran call cn ', cn
   code = seams_hbonds(sys, 3.5d0, 1, 2, 2.42d0, 30d0, n_bonds)
   if (code /= SEAMS_OK) stop 49
+  print '(a,i0)', 'fortran call hbond ', n_bonds
   code = seams_density_axis(sys, 0, 4, 2, c_loc(zz), c_loc(rho), 64_c_size_t, n_out)
   if (code /= SEAMS_OK .or. n_out <= 0) stop 50
   code = seams_fingerprint(sys, 3.5d0, 0, 4, SEAMS_GRAPH_CUTOFF, 2, 0, fp)
@@ -122,10 +128,12 @@ program test_seams
   if (code /= SEAMS_OK) stop 56
   code = seams_monolayer(sys, 3.5d0, 0, 6, 100d0, sheet, 7_c_size_t)
   if (code /= SEAMS_OK) stop 57
+  print '(a,i0)', 'fortran call sheet ', sheet(7)
   code = seams_rings_find(sys, 3.5d0, 0, SEAMS_GRAPH_CUTOFF, 6, rings)
   if (code /= SEAMS_OK .or. seams_rings_count(rings) <= 0) stop 58
   code = seams_rings_vertices(rings, 0, atoms, 12_c_size_t, n_out)
   if (code /= SEAMS_OK .or. n_out <= 0) stop 59
+  print '(a,i0,1x,i0)', 'fortran call vert ', n_out, atoms(1)
   call seams_rings_destroy(rings)
   code = site_kinds(sys, "1=waterO", kinds, int(n, c_size_t))
   if (code /= SEAMS_OK) stop 60
@@ -140,5 +148,6 @@ program test_seams
   code = read_frame(sys, trim(root) // "/input/traj/genice_sH.lammpstrj", 1, 1)
   if (code /= SEAMS_OK .or. seams_system_count(sys) <= 0) stop 65
   call seams_system_destroy(sys)
+  print '(a)', 'fortran call read 128 46'
   print *, "fortran ok"
 end program test_seams
