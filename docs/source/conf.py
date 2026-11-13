@@ -1,7 +1,16 @@
 #!/usr/bin/env python3
 
+import multiprocessing
 import os
 import sys
+
+# The science gallery loads OVITO, which leaves a Qt thread pool. sphinx-sitemap
+# then forks a manager. Qt's atfork handler deadlocks that child, so the
+# manager has to be a fresh interpreter.
+try:
+    multiprocessing.set_start_method("spawn")
+except RuntimeError:
+    pass
 
 # -- Path setup --------------------------------------------------------------
 _source = os.path.dirname(os.path.abspath(__file__))
@@ -196,6 +205,16 @@ html_theme_options = {
         {
             "title": "C++ API",
             "url": "/api-cpp/index.html",
+            "resource": True,
+        },
+        {
+            "title": "Fortran API",
+            "url": "/fortran/index.html",
+            "resource": True,
+        },
+        {
+            "title": "Lua API",
+            "url": "/lua/index.html",
             "resource": True,
         },
         {

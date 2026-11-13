@@ -9,7 +9,8 @@ which is the same memory order as the C array.
 
 Build it with fpm from `bindings/fortran`, or with gfortran. Link
 `-lseams`. `FORD` reads `bindings/fortran/ford.md` and writes the
-native reference. The symbol list below is the same public surface.
+native reference. The book links that HTML at `/fortran/index.html`.
+The symbol list below is the same public surface.
 
 ```bash
 cd bindings/fortran

@@ -6,4 +6,4 @@ file = { "dseams.lua", "yoda.lua" }
 dir = "../../docs/ldoc"
 readme = "README.md"
 all = true
-style = true
+style = '!'

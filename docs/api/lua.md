@@ -14,8 +14,18 @@ A cloud, a neighbour list, a ring census, and a cage set are handles.
 `__gc` frees the C object. Lua 5.4 `__close` frees it at the end of a
 scope. `:close()` is the same call. Closing twice is safe.
 
-`ldoc bindings/lua/config.ld` writes the native reference.
-`bindings/lua/dseams-2.14.0-1.rockspec` is the rock. `busted` runs
+`ldoc bindings/lua/config.ld` writes the native reference. The book
+links that HTML at `/lua/index.html`.
+`bindings/lua/dseams-2.14.0-1.rockspec` is the rock. From
+`bindings/lua`:
+
+```bash
+luarocks make dseams-2.14.0-1.rockspec SEAMS_LIBDIR="$SEAMS_LIBDIR" SEAMS_INCDIR="$SEAMS_INCDIR"
+luarocks test dseams-2.14.0-1.rockspec
+```
+
+`SEAMS_LIBDIR` holds `libseams.so` and `SEAMS_INCDIR` holds the
+generated `seams_version.h`. `busted` runs
 `bindings/lua/spec/ownership_spec.lua`. `meson test lua_examples`
 runs the examples on both interpreters.
 
@@ -77,10 +87,10 @@ they no longer hold the C handle.
 ```
 
 ```{literalinclude} ../../../examples/fennel/cubic.fnl
-:language: lua
+:language: text
 ```
 
 ```{literalinclude} ../../../bindings/lua/seams.fnl
-:language: lua
+:language: text
 :lines: 1-40
 ```

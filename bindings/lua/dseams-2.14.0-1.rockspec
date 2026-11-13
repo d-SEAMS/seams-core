@@ -19,9 +19,18 @@ build = {
     dseams_core = {
       sources = { "dseams.c" },
       libraries = { "seams" },
-      incdirs = { "../../include" },
+      -- SEAMS_INCDIR is the build dir that holds seams_version.h.
+      -- SEAMS_LIBDIR is the directory that holds libseams.so.
+      incdirs = { "../../include", "$(SEAMS_INCDIR)" },
+      libdirs = { "$(SEAMS_LIBDIR)" },
     },
     dseams = "dseams.lua",
     yoda = "yoda.lua",
   },
+}
+test_dependencies = {
+  "busted",
+}
+test = {
+  type = "busted",
 }
