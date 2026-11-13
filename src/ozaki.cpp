@@ -245,7 +245,10 @@ int sliceWidthFor(int n) {
   return w;
 }
 
-__attribute__((optimize("fp-contract=off"))) double exactIntegerDot(
+#if defined(__GNUC__) && !defined(__clang__)
+__attribute__((optimize("fp-contract=off")))
+#endif
+double exactIntegerDot(
     const double *cx, const double *cy, int n) {
   double acc = 0.0;
   for (int i = 0; i < n; i++) {
