@@ -754,6 +754,11 @@ if get_option('with_cli')
     python3,
     args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check'],
     timeout: 60)
+  test(
+    'docs_trace_threads',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-trace'],
+    timeout: 60)
   tutorial_env = environment()
   tutorial_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
   test(

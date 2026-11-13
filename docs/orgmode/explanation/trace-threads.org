@@ -1,16 +1,16 @@
 #+TITLE: Signature-search thread controls
 #+OPTIONS: toc:nil num:nil
 
-Commit ~5982ddee~ on ~perf/trace-threads~ retimes the hydrate signature
-search at 1, 2, 4 and 8 threads. The census at every width is the
-one-thread census. This page is the controls that sitting uses. The
-raw lines are ~benchmarks/trace-threads.csv~ on that commit. They are
-not in this tree.
+Commit ~9896a478~ on ~perf/trace-threads~ retimes the hydrate signature
+search at 1, 2, 4 and 8 threads, after the pool and the row placement
+changed. The census at every width is the one-thread census. The rows
+are ~benchmarks/trace-threads.csv~. ~docs/render_sitting.py~ writes the
+tables, and ~meson test docs_trace_threads~ recomputes each median and
+type-7 interquartile range from ~samples_ms~.
 
 * The process
 
-~scripts/paper_stats.py~ on that commit builds the environment for one
-width \(n\):
+~scripts/paper_stats.py~ builds the environment for one width \(n\):
 
 | variable | value |
 |----------+-------|
@@ -25,35 +25,56 @@ The process is pinned with ~taskset -c 0~ when \(n = 1\), and with
 ~taskset -c 0-(n-1)~ otherwise. One warm-up is dropped. Eight repeats
 remain. The median of an even count is the mean of the two central
 samples. The interquartile range is the type-7 upper quartile minus
-the lower one. The log records ~lscpu~'s model name, the source commit,
-and ~Cpus_allowed_list~.
+the lower one. ~cores~ is the size of the affinity set. ~affinity~ is
+~Cpus_allowed_list~. The ~commit~ column is the source commit the
+sitting recorded.
 
-* Inside the library
+* One pool, then the search
 
 Each sample is one linkcell neighbour list, one depth-6 primitive-ring
 network, and one combined search of \(5^{12}\), \(5^{12}6^{2}\) and
-\(5^{12}6^{4}\). ~nneigh::neighListLinkcell~, added on that commit,
-sets the linkcell pool to ~omp_get_max_threads~ unless the cutoff walk
-was asked to stay serial or the caller is already inside an OpenMP
-region, in which case the pool is one thread. The cage index is merged
-from per-thread buckets in ring order, so a different team cannot
-reorder the published cages.
+\(5^{12}6^{4}\).
 
-On this tree the same knobs are ~seams_set_num_threads~ and
-~seams::adoptThreads~. ~adoptThreads~ widens the Linux affinity mask,
-sets ~OMP_WAIT_POLICY=PASSIVE~, and passes the OpenMP width to
-~lc_set_threads~ when linkcell is linked. A call that is already inside
-a parallel region keeps the linkcell pool at one thread.
-~seams::prepareCompute~ sets ~omp_set_dynamic(0)~ and does not force a
-passive wait, because a team that sleeps between calls wakes up on a
-spread of several milliseconds. ~teamFor~ stays on one thread below
-2048 atoms.
+Linkcell keeps one Rayon pool for the process. A later search with the
+same width reuses it. A different width drops that pool before the new
+one starts, so two widths never run together. Between searches the
+workers sleep on Rayon's idle condvar. That is the passive wait for
+the neighbour list. ~lc_set_threads~ chooses the width. Zero or one
+runs on the calling thread.
 
-~tests/test_trace_threads.cpp~ on that commit requires the closed-cage
-faces, and the hexagonal and double-diamond cages, to match the
-one-thread result. Membership is the sorted atom ids of each face, not
-the ring index.
+OpenMP is left on the active wait. ~seams::prepareCompute~, which the
+linkcell list calls, sets ~omp_set_dynamic(0)~ and does not set
+~OMP_WAIT_POLICY~. Forcing OpenMP passive as well made the next region
+wake on a spread of tens of milliseconds, which was the slow
+eight-thread sample.
+
+Below 4096 molecules the linkcell team is capped at four. A caller that
+asked for eight threads still gets four workers on those cells, because
+the list and the cage walk do not fill a wider team and the extra
+workers show up as a slow sample. Crystals at or above 4096 molecules
+keep the width the caller asked for. The ~threads~ column is the width
+that was requested. On sI \(2\times2\times2\) (368 molecules) and
+\(4\times4\times4\) (2944) the eight-thread median therefore sits next
+to the four-thread median.
+
+Neighbour rows are placed on the calling thread until the pair list
+reaches \(2^{20}\) pairs. The parallel sort forks a team that has just
+been idle through the linkcell search. Waking it costs more than
+writing the rows on the caller until the list is that large.
+~kParallelRowsMinAtoms~ (4096) still has to hold as well.
+
+The cage index is merged from per-thread buckets in ring order.
+~tests/test_trace_threads.cpp~ requires the closed-cage faces, and the
+hexagonal and double-diamond cages, to match the one-thread result.
+Membership is the sorted atom ids of each face, not the ring index.
+
+~seams_set_num_threads~ is the installed way to set the OpenMP width
+the next search reads. ~seams::adoptThreads~ is the other helper: it
+still asks for ~OMP_WAIT_POLICY=PASSIVE~ when a search hands the cores
+to Rayon. The signature path does not use that helper.
 
 #+begin_export rst
 :doc:`/stable/c` names ``seams_set_num_threads`` and ``seams_get_num_threads``.
+
+.. include:: trace-threads-tables.rst
 #+end_export

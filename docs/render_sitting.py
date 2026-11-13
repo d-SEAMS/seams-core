@@ -16,7 +16,9 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 CSV = ROOT / "benchmarks" / "rc3-sitting.csv"
+TRACE = ROOT / "benchmarks" / "trace-threads.csv"
 OUT = ROOT / "docs" / "source" / "explanation" / "performance-tables.rst"
+TRACE_OUT = ROOT / "docs" / "source" / "explanation" / "trace-threads-tables.rst"
 
 ORDER = ("neighbours", "q4", "q6", "CHILL+", "rings", "cages", "PTM", "king")
 
@@ -43,29 +45,58 @@ def summarize(samples):
     return count, median, quantile_linear(ordered, 0.75) - quantile_linear(ordered, 0.25)
 
 
-def load():
-    with CSV.open(newline="") as handle:
+def load(path):
+    with path.open(newline="") as handle:
         return list(csv.DictReader(handle))
 
 
-def check(rows):
+def check(rows, tolerance):
     errors = []
     for index, row in enumerate(rows, start=2):
         samples = [float(part) for part in row["samples_ms"].split()]
         count, median, iqr = summarize(samples)
         if int(row["n"]) != count:
             errors.append("line {}: n {} != {} samples".format(index, row["n"], count))
-        # samples_ms is already rounded to 0.001, so the recomputed
-        # summary can move by one stored unit from the original.
-        if abs(median - float(row["median_ms"])) > 1.5e-3:
+        # samples_ms is rounded, so the recomputed summary can move by
+        # one stored unit from the value written at full precision.
+        if abs(median - float(row["median_ms"])) > tolerance:
             errors.append("line {}: median {} != {:.6f}".format(index, row["median_ms"], median))
-        if abs(iqr - float(row["iqr_ms"])) > 1.5e-3:
+        if abs(iqr - float(row["iqr_ms"])) > tolerance:
             errors.append("line {}: iqr {} != {:.6f}".format(index, row["iqr_ms"], iqr))
     return errors
 
 
 def cell(text):
     return text.replace("\n", " ")
+
+
+def write_trace(rows, path):
+    grouped = {}
+    for row in rows:
+        grouped.setdefault(row["crystal"], []).append(row)
+    lines = [
+        ".. list-table::",
+        "   :header-rows: 0",
+        "",
+        "   * - These tables are written by ``docs/render_sitting.py`` from",
+        "       ``benchmarks/trace-threads.csv``. Edit the CSV, not this file.",
+        "",
+    ]
+    header = ("cell", "molecules", "threads", "cores", "n", "median_ms", "iqr_ms")
+    for name in sorted(grouped):
+        block = sorted(grouped[name], key=lambda row: (int(row["molecules"]), int(row["threads"])))
+        title = "signature cages, {}".format(name)
+        lines.append(title)
+        lines.append("^" * len(title))
+        lines.append("")
+        lines.append(".. csv-table::")
+        lines.append("   :header: " + ", ".join(header))
+        lines.append("")
+        for row in block:
+            lines.append("   " + ", ".join(cell(row[key]) for key in header))
+        lines.append("")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n")
 
 
 def write_tables(rows, path):
@@ -102,8 +133,19 @@ def write_tables(rows, path):
 
 
 def main(argv):
-    rows = load()
-    errors = check(rows)
+    if "--check-trace" in argv:
+        rows = load(TRACE)
+        errors = check(rows, 1.5e-4)
+        widths = sorted({int(row["threads"]) for row in rows})
+        if widths != [1, 2, 4, 8]:
+            errors.append("threads are {}, expected 1 2 4 8".format(widths))
+        if errors:
+            print("\n".join(errors), file=sys.stderr)
+            return 1
+        print("trace-threads csv ok", len(rows), "rows")
+        return 0
+    rows = load(CSV)
+    errors = check(rows, 1.5e-3)
     if errors:
         print("\n".join(errors), file=sys.stderr)
         return 1
@@ -111,7 +153,14 @@ def main(argv):
         print("sitting csv ok", len(rows), "rows")
         return 0
     write_tables(rows, OUT)
+    trace_rows = load(TRACE)
+    trace_errors = check(trace_rows, 1.5e-4)
+    if trace_errors:
+        print("\n".join(trace_errors), file=sys.stderr)
+        return 1
+    write_trace(trace_rows, TRACE_OUT)
     print("wrote", OUT.relative_to(ROOT), len(rows), "rows")
+    print("wrote", TRACE_OUT.relative_to(ROOT), len(trace_rows), "rows")
     return 0
 
 
