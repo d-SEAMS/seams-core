@@ -1496,7 +1496,7 @@ int seams_frame_signature_edge(seams_frame *frame, double cutoff, int type,
     }
     const auto foundOf = cage::findBySignatures(
         rings, idx, std::vector<cage::Signature>{signature}, {}, xyzPtr,
-        boxPtr, window);
+        boxPtr, window, &frame->cloud.boxLow);
     const auto &found = foundOf.at(0);
     std::set<int> atoms;
     for (const auto &cage_i : found) {

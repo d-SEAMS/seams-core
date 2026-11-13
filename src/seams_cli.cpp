@@ -1543,8 +1543,8 @@ int cmdCages(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
         xyzPtr = &xyz;
         boxPtr = &cloud.box;
       }
-      const auto foundOf =
-          cage::findBySignatures(rings, idx, sigs, rank, xyzPtr, boxPtr, window);
+      const auto foundOf = cage::findBySignatures(
+          rings, idx, sigs, rank, xyzPtr, boxPtr, window, &cloud.boxLow);
       for (size_t si = 0; si < sigs.size(); ++si) {
         const auto &sig = sigs[si];
         const auto &found = foundOf[si];

@@ -763,6 +763,18 @@ rule paper_chill:
         "benchmarks/paper-cells/tab-chill.csv",
 
 
+rule cage_h2h_v8:
+    input:
+        "scripts/cage_h2h_v8.py",
+        "scripts/paper_stats.py",
+        "bbdir-release/seams",
+        "bbdir-release/bindings/libseams_lang.so",
+    output:
+        "benchmarks/cage-h2h-v8.txt",
+    shell:
+        "python3 scripts/cage_h2h_v8.py --out benchmarks/cage-h2h-v8.txt"
+
+
 rule paper_cages:
     input:
         "benchmarks/paper-cells/tab-cages.csv",

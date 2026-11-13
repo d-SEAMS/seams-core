@@ -669,3 +669,76 @@ class H2HSession:
 
 H2HSession.time_session.repeat = 1
 H2HSession.time_session.number = 1
+
+
+class CageHeadToHead:
+    """GenIce sI unit cell against cycless and ClavisCage.
+
+    The scaled sitting, including sII, sH and the cells past 110592
+    molecules, is benchmarks/cage-h2h-v8.txt. cycless drops spanning
+    cycles. ClavisCage is TRACE at 0.35 nm. d-SEAMS is seams_frame_cages
+    and one cmdCages signature search. Below 2048 molecules the library
+    keeps a single thread.
+    """
+
+    params = [1, 8]
+    param_names = ["threads"]
+
+    def setup(self, threads):
+        import importlib.util
+
+        script = ROOT / "scripts" / "cage_h2h_v8.py"
+        spec = importlib.util.spec_from_file_location("cage_h2h_v8", script)
+        if spec is None or spec.loader is None:
+            raise NotImplementedError("cage head-to-head script is missing")
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        try:
+            pos, cell = module.generate("sI", (1, 1, 1))
+        except Exception as exc:
+            raise NotImplementedError("genice2 is required") from exc
+        dump = ROOT / "benchmarks" / "genice-frames" / "asv-sI.lammpstrj"
+        module.write_dump(dump, pos, cell)
+        os.environ["OMP_NUM_THREADS"] = str(threads)
+        os.environ["OMP_DYNAMIC"] = "FALSE"
+        os.environ["RAYON_NUM_THREADS"] = str(threads)
+        try:
+            self.bundle = module.prepare(dump)
+        except Exception as exc:
+            raise NotImplementedError("the release language library is required") from exc
+        self.mod = module
+        self.dump = dump
+        self._cycless = importlib.util.find_spec("cycless") is not None
+        self._clavis = importlib.util.find_spec("clavis_engine") is not None
+
+    def time_dseams_cages(self, threads):
+        self.bundle["dseams"].seeded()
+
+    def time_dseams_cmd(self, threads):
+        self.mod.cmd_signature(self.dump)
+
+    def time_cycless(self, threads):
+        if not self._cycless:
+            raise NotImplementedError("cycless is not installed")
+        from cycless.cycles import cycles_iter
+        from cycless.polyhed import polyhedra_iter
+
+        rings = [
+            [int(node) for node in ring]
+            for ring in cycles_iter(self.bundle["graph"], 8, pos=self.bundle["frac"])
+        ]
+        list(polyhedra_iter(rings, 22, quick=True))
+
+    def time_clavis(self, threads):
+        if not self._clavis:
+            raise NotImplementedError("clavis_engine is not installed")
+        import clavis_engine
+
+        clavis_engine.analyze_waters(
+            self.bundle["waters"], "[]", self.bundle["box"], "trace", 0.35, 35.0
+        )
+
+    def teardown(self, threads):
+        bundle = getattr(self, "bundle", None)
+        if bundle is not None:
+            bundle["dseams"].close()
