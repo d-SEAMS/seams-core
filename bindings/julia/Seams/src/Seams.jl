@@ -6,6 +6,12 @@ when it is not on the loader path.
 module Seams
 
 export System, version, set_num_threads, num_threads, set_ortho!, chill_plus, q4q6, six_rings
+export seams_system_count, seams_system_read, seams_chill, seams_steinhardt, seams_cages, seams_signature_cages
+export seams_neighbours_knn, seams_rdf, seams_running_cn, seams_coordination, seams_hbonds
+export seams_density_axis, seams_fingerprint, seams_contact_pairs, seams_domains, seams_prisms
+export seams_monolayer, seams_rings_vertices, seams_site_table
+
+include(joinpath(@__DIR__, "..", "..", "capi.jl"))
 
 const PUBLISHED = 0
 const OVITO = 1
@@ -28,21 +34,6 @@ version() = unsafe_string(ccall((:seams_version_string, _lib()), Ptr{Cchar}, ())
 set_num_threads(n::Integer) = _check(ccall((:seams_set_num_threads, _lib()), Cint, (Cint,), Cint(n)))
 
 num_threads() = Int(ccall((:seams_get_num_threads, _lib()), Cint, ()))
-
-mutable struct System
-    ptr::Ptr{Cvoid}
-    function System()
-        ptr = ccall((:seams_system_create, _lib()), Ptr{Cvoid}, ())
-        ptr == C_NULL && error("null system")
-        sys = new(ptr)
-        finalizer(sys) do s
-            s.ptr == C_NULL && return
-            ccall((:seams_system_destroy, _lib()), Cvoid, (Ptr{Cvoid},), s.ptr)
-            s.ptr = C_NULL
-        end
-        return sys
-    end
-end
 
 function set_ortho!(sys::System, xyz::AbstractMatrix{<:Real}, lengths::NTuple{3,Real})
     size(xyz, 1) == 3 || error("xyz is 3 by n")

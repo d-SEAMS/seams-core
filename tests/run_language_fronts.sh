@@ -90,24 +90,48 @@ if command -v gfortran >/dev/null 2>&1; then
   gfortran -J"$mod" -c "$root/bindings/fortran/seams.f90" -o "$mod/seams.o"
   gfortran -I"$mod" "$root/bindings/fortran/test_seams.f90" "$mod/seams.o" \
     -o "$mod/test_seams" -L"$lib" -lseams -Wl,-rpath,"$lib"
-  LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} "$mod/test_seams"
+  OMP_NUM_THREADS=1 LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} "$mod/test_seams" "$root"
   rm -rf "$mod"
 else
   note_missing gfortran
 fi
 
 if command -v cargo >/dev/null 2>&1; then
-  SEAMS_LIB_DIR=$lib LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
+  SEAMS_LIB_DIR=$lib \
+    SEAMS_CPP_ORACLE=$build/bindings/binding_oracle \
+    SEAMS_SOURCE_ROOT=$root \
+    OMP_NUM_THREADS=1 \
+    LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
     cargo test --manifest-path "$root/bindings/rust/Cargo.toml" -- --test-threads=1
 else
   note_missing cargo
 fi
 
+if ! command -v julia >/dev/null 2>&1 && [ -d "${HOME}/.local/julia" ]; then
+  for candidate in "${HOME}/.local/julia"/julia-*/bin/julia; do
+    if [ -x "$candidate" ]; then
+      PATH=$(dirname "$candidate"):$PATH
+      break
+    fi
+  done
+fi
 if command -v julia >/dev/null 2>&1; then
   (cd "$root/bindings/julia/Dseams" && \
     SEAMS_LANG_LIB=$lang/libseams_lang.so \
+    SEAMS_LIB=$lib/libseams.so \
+    SEAMS_CPP_ORACLE=$build/bindings/binding_oracle \
+    SEAMS_SOURCE_ROOT=$root \
     DSEAMS_ROOT=$root \
+    OMP_NUM_THREADS=1 \
     LD_LIBRARY_PATH=$lang:$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
+    julia --project=. test/runtests.jl)
+  (cd "$root/bindings/julia/Seams" && \
+    SEAMS_LIB=$lib/libseams.so \
+    SEAMS_CPP_ORACLE=$build/bindings/binding_oracle \
+    SEAMS_SOURCE_ROOT=$root \
+    DSEAMS_ROOT=$root \
+    OMP_NUM_THREADS=1 \
+    LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
     julia --project=. test/runtests.jl)
 else
   note_missing julia

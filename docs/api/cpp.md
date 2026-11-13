@@ -35,6 +35,13 @@ meson test -C build seams_lang_fixtures --print-errorlogs
 
 `bindings/cxx/test_lang.cpp` is the `seams_lang_fixtures` test. It calls
 every function in `seams_lang.h` on the in-tree trajectories.
+`include/seams.hpp` is the header-only RAII wrapper over `seams.h`.
+`seams::System`, `seams::Neighbours`, `seams::Rings`, `seams::Cages`, and
+`seams::Fingerprint` free their handles on destruction. A status other than
+`SEAMS_OK` throws `seams::Error`, and the message is `seams_handle_error`.
+`tests/test_seams_hpp.cpp` checks those calls against the C++ path on ice Ih,
+sI, the XYZ file, the CON file, and the triclinic sH dump.
+`meson test seams_hpp_match` runs that program.
 `meson test docs_api_cpp` compiles and runs the eight-atom program below.
 It calls `seams_set_num_threads`, `seams_chill_plus`, and `seams_q4q6`.
 

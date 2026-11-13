@@ -66,3 +66,8 @@ end
     tau = jump_tau90(frame, frame, 1.0)
     @test isnan(tau) || isfinite(tau)
 end
+
+@testset "seams.h matches the C++ path" begin
+    include(joinpath(@__DIR__, "..", "..", "cpp_match.jl"))
+    check_seams_against_cpp()
+end

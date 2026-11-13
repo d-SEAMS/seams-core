@@ -8,6 +8,22 @@ binding_oracle = executable(
   build_rpath: meson.project_build_root() / 'src',
 )
 
+seams_hpp_test = executable(
+  'test_seams_hpp',
+  files('../tests/test_seams_hpp.cpp'),
+  link_with: seams_api_lib,
+  include_directories: include_directories('../include'),
+  cpp_args: ['-I' + meson.project_build_root() / 'src'],
+)
+
+test(
+  'seams_hpp_match',
+  seams_hpp_test,
+  args: [binding_oracle.full_path(), meson.project_source_root()],
+  depends: [binding_oracle, seams_api_lib],
+  timeout: 180,
+)
+
 seams_lang = shared_library(
   'seams_lang',
   files('cxx/seams_lang.cpp'),
@@ -152,7 +168,7 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
       meson.project_build_root(),
     ],
     env: _front_env,
-    depends: [seams_lang, ydslib],
+    depends: [seams_lang, ydslib, seams_api_lib, binding_oracle],
     timeout: 600,
   )
   test(

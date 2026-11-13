@@ -153,4 +153,204 @@ Parameters: frame
 Units: labels are dimensionless codes
 
 Example: `docs/examples/minimal_julia.jl`
+### System
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_system_count
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_system_read
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_chill
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_steinhardt
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_cages
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_signature_cages
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_neighbours_knn
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_rdf
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_running_cn
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_coordination
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_hbonds
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_density_axis
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_fingerprint
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_contact_pairs
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_domains
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_prisms
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_monolayer
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_rings_vertices
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_site_table
+
+Purpose: Call into libseams through ccall.
+
+Parameters: see include/seams.h
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
 <!-- API_SYMBOLS_END -->
