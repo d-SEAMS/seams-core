@@ -19,7 +19,9 @@ from render_scenes import (
     annotate,
     cell_corners,
     centres_outside_outline,
+    connected_slab_top,
     display_label,
+    lower_ice_origin,
     marks_overlap,
     padded_frame,
     wrap_into_cell,
@@ -93,9 +95,23 @@ def check_brine_layout():
         _blank(path, frame, forward, up, 900)
         annotate(
             render, path, positions, forward, up, 900, cell_corners(origin, lengths), legend,
-            frame=frame, origin=origin, lengths=lengths, ice_z=ice_z,
+            frame=frame, origin=origin, lengths=lengths, ice_z=ice_z, pad_radius=radius,
         )
     print("brine annotation boxes are disjoint")
+
+
+def check_lower_ice_origin():
+    length = 51.939125
+    z_hex = np.concatenate([np.linspace(1.2, 30.5, 24), np.array([51.2, 52.4, 53.0])])
+    z_shell = np.array([51.0, 31.0, 49.5])
+    origin_z = lower_ice_origin(z_hex, z_shell, length)
+    wrapped = origin_z + np.mod(z_hex - origin_z, length)
+    if float(np.diff(np.sort(wrapped)).max()) > 8.0:
+        raise SystemExit("the ice slab is still split across the periodic boundary")
+    front = connected_slab_top(wrapped)
+    if np.any(wrapped > front + 1e-6):
+        raise SystemExit("hexagonal ice still sits above the growth front")
+    print(f"lower ice origin {origin_z:.3f} puts the slab under the front")
 
 
 def check_brine_wrap():
@@ -131,6 +147,17 @@ def check_brine_wrap():
         )
         if outside:
             raise SystemExit(f"{outside} brine centres project outside the cell outline")
+        hex_z = np.array([row[3] for row in kept if row[0] == "O" and row[4] == "hexagonal"])
+        shell_z = np.array([row[3] for row in kept if row[0] == "O" and row[4] == "interfacial"])
+        shifted = box_origin.copy()
+        shifted[2] = lower_ice_origin(hex_z, shell_z, float(box_lengths[2]))
+        moved = wrap_into_cell(points, shifted, box_lengths)
+        ice = np.array([moved[i, 2] for i, row in enumerate(kept) if row[0] == "O" and row[4] == "hexagonal"])
+        if float(np.diff(np.sort(ice)).max()) > 8.0:
+            raise SystemExit("the brine ice slab is still split by the periodic boundary")
+        front = connected_slab_top(ice)
+        if np.any(ice > front + 1e-6):
+            raise SystemExit("brine hexagonal ice sits above the growth front")
         print(f"brine frame centres stay inside the outline ({len(points)} atoms)")
     else:
         print("brine frame cache is absent; the shifted-cell wrap was checked")
@@ -138,6 +165,7 @@ def check_brine_wrap():
 
 def main():
     check_overlap_predicate()
+    check_lower_ice_origin()
     check_interface_layout()
     check_brine_layout()
     check_brine_wrap()
