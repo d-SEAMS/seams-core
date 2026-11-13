@@ -124,6 +124,31 @@ TEST_CASE("mixed-phase CHILL labels match the pre-change implementation", "[chil
     const std::vector<int> plus = readLabels(dir + name + ".chill_plus.txt");
     requireMatch(frame, chill, false);
     requireMatch(frame, plus, true);
+    seams_system *sys = seams_system_create();
+    REQUIRE(sys != nullptr);
+    std::vector<int> types(static_cast<std::size_t>(frame.n), 1);
+    std::vector<int> ids(static_cast<std::size_t>(frame.n));
+    for (int i = 0; i < frame.n; ++i) {
+      ids[static_cast<std::size_t>(i)] = i + 1;
+    }
+    REQUIRE(seams_system_set_frame(sys, frame.xyz.data(), frame.n, frame.box, types.data(),
+                                   ids.data()) == SEAMS_OK);
+    std::vector<int> ovito1(static_cast<std::size_t>(frame.n));
+    std::vector<int> ovito8(static_cast<std::size_t>(frame.n));
+    int ovitoCounts[9] = {};
+    REQUIRE(seams_set_num_threads(1) == SEAMS_OK);
+    REQUIRE(seams_chill_plus(sys, 3.5, 1, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_OVITO, ovito1.data(),
+                             ovitoCounts) == SEAMS_OK);
+    REQUIRE(seams_set_num_threads(8) == SEAMS_OK);
+    REQUIRE(seams_chill_plus(sys, 3.5, 1, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_OVITO, ovito8.data(),
+                             ovitoCounts) == SEAMS_OK);
+    REQUIRE(ovito8 == ovito1);
+    seams_system_destroy(sys);
+    if (std::string(name) == "stacking") {
+      REQUIRE(ovito1 == plus);
+    } else {
+      REQUIRE(ovito1 != plus);
+    }
     // The three frames are not a single phase. A regression that relabels
     // the interface, the stacking fault, or the melt changes this count.
     int classes = 0;

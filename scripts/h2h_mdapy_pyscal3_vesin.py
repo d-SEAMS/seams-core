@@ -7,9 +7,11 @@ thread count. The record is the core count. The host name is not written.
 
 Neighbour pairs are unordered and exclude the atom itself. q6 is the
 cutoff Steinhardt parameter and q6bar is the Lechner-Dellago average of
-q_lm, including the atom itself. CHILL and CHILL+ use the published
-thresholds on the 3.5 A shell. On this ice that shell is the four
-nearest neighbours.
+q_lm, including the atom itself. CHILL+ has two definitions. paper, the
+default, averages q_lm over the four closest neighbours. ovito averages
+q_lm over every neighbour inside 3.5 A. mdapy and the OVITO modifier are
+compared in ovito mode, atom for atom. On this ice the cutoff shell is
+already those four neighbours.
 """
 
 from __future__ import annotations
@@ -44,6 +46,28 @@ Q_ATOL = 1e-8
 SEAMS_GRAPH_CUTOFF = 0
 SEAMS_GRAPH_MUTUAL = 1
 SEAMS_CHILL_PUBLISHED = 0
+SEAMS_CHILL_OVITO = 1
+
+# d-SEAMS label index -> mdapy / OVITO class name.
+DSEAMS_AS_OVITO = {
+    0: "cubic_ice",
+    1: "hexagonal_ice",
+    2: "other",
+    3: "interfacial_ice",
+    4: "hydrate",
+    5: "interfacial_hydrate",
+    6: "other",
+    7: "other",
+    8: "other",
+}
+OVITO_CODE = {
+    0: "other",
+    1: "hexagonal_ice",
+    2: "cubic_ice",
+    3: "interfacial_ice",
+    4: "hydrate",
+    5: "interfacial_hydrate",
+}
 
 DSEAMS_ICE = (
     "cubic",
@@ -329,15 +353,43 @@ def dseams_chill(lib, sys, labels, counts):
     )
 
 
-def dseams_chill_plus(lib, sys, labels, counts):
+def dseams_chill_plus(lib, sys, labels, counts, rule=SEAMS_CHILL_PUBLISHED):
     require(
         lib,
         lib.seams_chill_plus(
-            sys, CUTOFF, 1, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED,
+            sys, CUTOFF, 1, SEAMS_GRAPH_CUTOFF, rule,
             labels, counts,
         ),
         "chill+",
     )
+
+
+def ovito_names(pos, lengths):
+    from ovito.data import DataCollection, Particles, SimulationCell
+    from ovito.modifiers import ChillPlusModifier
+    from ovito.pipeline import Pipeline, StaticSource
+
+    lx, ly, lz = lengths
+    data = DataCollection()
+    cell = SimulationCell(pbc=(True, True, True))
+    matrix = np.zeros((3, 4))
+    matrix[0, 0], matrix[1, 1], matrix[2, 2] = lx, ly, lz
+    cell[...] = matrix
+    data.objects.append(cell)
+    particles = Particles()
+    particles.create_property("Position", data=np.ascontiguousarray(pos, dtype=np.float64))
+    data.objects.append(particles)
+    pipe = Pipeline(source=StaticSource(data=data))
+    pipe.modifiers.append(ChillPlusModifier(cutoff=CUTOFF))
+    out = pipe.compute()
+    codes = np.asarray(out.particles["Structure Type"], dtype=np.int64)
+    return np.array([OVITO_CODE[int(v)] for v in codes])
+
+
+def require_atom_match(left, right, what: str) -> None:
+    if left.shape != right.shape or not np.array_equal(left, right):
+        n = int(np.count_nonzero(left != right)) if left.shape == right.shape else -1
+        raise SystemExit(f"{what}: {n} atoms differ")
 
 
 def histogram(labels: np.ndarray, names: tuple[str, ...]) -> str:
@@ -451,6 +503,59 @@ def explain_q(lines, echo, kind: str, tool: str, ref: np.ndarray, got: np.ndarra
     )
 
 
+def frame_system(lib, pos, lengths):
+    held = np.ascontiguousarray(pos, dtype=np.float64)
+    n = int(held.shape[0])
+    lx, ly, lz = lengths
+    box9 = (ctypes.c_double * 9)(0, 0, 0, lx, ly, lz, 0, 0, 0)
+    types = (ctypes.c_int * n)(*([1] * n))
+    ids = (ctypes.c_int * n)(*range(1, n + 1))
+    ptr = held.ctypes.data_as(ctypes.POINTER(ctypes.c_double))
+    sys = lib.seams_system_create()
+    require(lib, lib.seams_system_set_frame(sys, ptr, n, box9, types, ids), "set_frame")
+    return sys
+
+
+def check_mixed(lib, lines, echo) -> None:
+    """Ovito mode matches mdapy and the OVITO modifier on the mixed frames."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "mixed_phase_frames", ROOT / "scripts" / "mixed_phase_frames.py"
+    )
+    mixed = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mixed)
+    mdapy.set_num_threads(1)
+    for name, builder in mixed.FRAMES.items():
+        pos, lengths = builder()
+        n = int(pos.shape[0])
+        sys = frame_system(lib, pos, lengths)
+        labels = (ctypes.c_int * n)()
+        counts = (ctypes.c_int * 9)()
+        require(lib, lib.seams_set_num_threads(1), "threads")
+        dseams_chill_plus(lib, sys, labels, counts, SEAMS_CHILL_OVITO)
+        one = np.ctypeslib.as_array(labels).copy()
+        require(lib, lib.seams_set_num_threads(8), "threads")
+        dseams_chill_plus(lib, sys, labels, counts, SEAMS_CHILL_OVITO)
+        if not np.array_equal(one, np.ctypeslib.as_array(labels)):
+            raise SystemExit(f"mixed {name}: ovito mode changed with the thread count")
+        dseams_chill_plus(lib, sys, labels, counts, SEAMS_CHILL_PUBLISHED)
+        paper8 = np.ctypeslib.as_array(labels).copy()
+        require(lib, lib.seams_set_num_threads(1), "threads")
+        dseams_chill_plus(lib, sys, labels, counts, SEAMS_CHILL_PUBLISHED)
+        if not np.array_equal(paper8, np.ctypeslib.as_array(labels)):
+            raise SystemExit(f"mixed {name}: paper mode changed with the thread count")
+        ours = np.array([DSEAMS_AS_OVITO[int(v)] for v in one])
+        system = mdapy.System(pos, box=lengths)
+        ice = mdapy.identify.ChillPlus(cutoff=CUTOFF).compute(system)
+        md = np.array([tuple(ice.names)[int(v)] for v in np.asarray(ice.structure)])
+        real = ovito_names(pos, lengths)
+        require_atom_match(ours, md, f"mixed {name} d-SEAMS ovito vs mdapy")
+        require_atom_match(ours, real, f"mixed {name} d-SEAMS ovito vs OVITO")
+        lib.seams_system_destroy(sys)
+        emit(lines, echo, f"check mixed {name} ovito mode matches mdapy and OVITO on {n} oxygens")
+
+
 def run_session(echo: bool = False) -> list[str]:
     lib = load_seams(library_path())
     lines: list[str] = []
@@ -469,12 +574,18 @@ def run_session(echo: bool = False) -> list[str]:
     )
     emit(
         lines, echo,
-        "note mdapy ice identification is CHILL+ at the same 3.5 A cutoff; d-SEAMS keeps the published thresholds",
+        "note mdapy and OVITO CHILL+ are compared to d-SEAMS ovito mode, which sums q_lm over every neighbour inside 3.5 A",
+    )
+    emit(
+        lines, echo,
+        "note d-SEAMS paper mode sums q_lm over the four closest neighbours and is timed separately",
     )
     emit(
         lines, echo,
         "note an OpenMP team is paused before mdapy, pyscal3, and vesin so it does not stay in active wait",
     )
+
+    check_mixed(lib, lines, echo)
 
     for ncell in SIZES:
         pos, lengths = ice_positions(ncell)
@@ -590,14 +701,23 @@ def run_session(echo: bool = False) -> list[str]:
         dseams_chill(lib, sys, labels, counts)
         chill_labels = np.ctypeslib.as_array(labels).copy()
         emit(lines, echo, "check chill dseams " + histogram(chill_labels, DSEAMS_ICE))
-        dseams_chill_plus(lib, sys, labels, counts)
+        dseams_chill_plus(lib, sys, labels, counts, SEAMS_CHILL_PUBLISHED)
         plus_labels = np.ctypeslib.as_array(labels).copy()
-        emit(lines, echo, "check chill_plus dseams " + histogram(plus_labels, DSEAMS_ICE))
+        emit(lines, echo, "check chill_plus paper " + histogram(plus_labels, DSEAMS_ICE))
+        dseams_chill_plus(lib, sys, labels, counts, SEAMS_CHILL_OVITO)
+        ovito_mode = np.ctypeslib.as_array(labels).copy()
+        emit(lines, echo, "check chill_plus ovito " + histogram(ovito_mode, DSEAMS_ICE))
         park_openmp()
         mdapy.set_num_threads(1)
         ice = mdapy.identify.ChillPlus(cutoff=CUTOFF).compute(system)
         ice_labels = np.asarray(ice.structure, dtype=np.int64)
         emit(lines, echo, "check ice mdapy " + histogram(ice_labels, tuple(ice.names)))
+        ours = np.array([DSEAMS_AS_OVITO[int(v)] for v in ovito_mode])
+        md_names = np.array([tuple(ice.names)[int(v)] for v in ice_labels])
+        real = ovito_names(pos, lengths)
+        require_atom_match(ours, md_names, f"ice {n} d-SEAMS ovito vs mdapy")
+        require_atom_match(ours, real, f"ice {n} d-SEAMS ovito vs OVITO")
+        emit(lines, echo, f"check ice {n} ovito mode matches mdapy and OVITO on every oxygen")
         d_hex = int(np.count_nonzero(chill_labels == 1))
         p_hex = int(np.count_nonzero(plus_labels == 1))
         m_hex = int(np.count_nonzero(ice_labels == 1))
@@ -643,10 +763,13 @@ def run_session(echo: bool = False) -> list[str]:
         dseams_chill(lib, sys, labels8, counts)
         if not np.array_equal(chill_labels, np.ctypeslib.as_array(labels8)):
             raise SystemExit("d-SEAMS CHILL changed with the thread count")
-        dseams_chill_plus(lib, sys, labels8, counts)
+        dseams_chill_plus(lib, sys, labels8, counts, SEAMS_CHILL_PUBLISHED)
         if not np.array_equal(plus_labels, np.ctypeslib.as_array(labels8)):
-            raise SystemExit("d-SEAMS CHILL+ changed with the thread count")
-        emit(lines, echo, "check dseams threads 1 and 8 agree")
+            raise SystemExit("d-SEAMS CHILL+ paper mode changed with the thread count")
+        dseams_chill_plus(lib, sys, labels8, counts, SEAMS_CHILL_OVITO)
+        if not np.array_equal(ovito_mode, np.ctypeslib.as_array(labels8)):
+            raise SystemExit("d-SEAMS CHILL+ ovito mode changed with the thread count")
+        emit(lines, echo, "check dseams threads 1 and 8 agree for paper and ovito")
 
         q_buf = (ctypes.c_double * n)()
         bar_buf = (ctypes.c_double * n)()
@@ -679,13 +802,17 @@ def run_session(echo: bool = False) -> list[str]:
                 dseams_chill(lib, sys, lab_buf, cnt_buf)
 
             def chill_plus():
-                dseams_chill_plus(lib, sys, lab_buf, cnt_buf)
+                dseams_chill_plus(lib, sys, lab_buf, cnt_buf, SEAMS_CHILL_PUBLISHED)
+
+            def chill_plus_ovito():
+                dseams_chill_plus(lib, sys, lab_buf, cnt_buf, SEAMS_CHILL_OVITO)
 
             emit_time(lines, echo, n, "dseams", "cutoff", width, samples_of(cutoff))
             emit_time(lines, echo, n, "dseams", "knn", width, samples_of(knn))
             emit_time(lines, echo, n, "dseams", "q6", width, samples_of(q6))
             emit_time(lines, echo, n, "dseams", "chill", width, samples_of(chill))
-            emit_time(lines, echo, n, "dseams", "chill_plus", width, samples_of(chill_plus))
+            emit_time(lines, echo, n, "dseams", "chill_plus_paper", width, samples_of(chill_plus))
+            emit_time(lines, echo, n, "dseams", "chill_plus_ovito", width, samples_of(chill_plus_ovito))
 
         time_dseams(1)
         time_dseams(8)

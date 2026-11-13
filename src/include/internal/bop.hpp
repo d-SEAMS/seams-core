@@ -253,6 +253,14 @@ int chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                      const std::vector<int> &offsets, const std::vector<int> &cols,
                      bool keepBonds = true);
 
+//! OVITO Chill+ from a cutoff CSR. q_lm is the sum over every neighbour in
+//! the row, not the four closest. Edges are open and the Table 1 neighbour
+//! test is off, which is the Chill+ modifier. A crystal row still needs
+//! exactly four neighbours. Bond vectors are not stored. Returns the cubic
+//! count.
+int chillPlusOvitoFromCsr(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                          const std::vector<int> &offsets, const std::vector<int> &cols);
+
 //! Published CHILL labels from a cutoff CSR. Correlations are the four
 //! nearest neighbours in the list. Bond vectors are not stored. Returns
 //! the cubic count. Thresholds are chillRule().

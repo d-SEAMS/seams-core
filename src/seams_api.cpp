@@ -864,7 +864,7 @@ seams_status seams_chill_plus(seams_system *sys, double cutoff, int type, int gr
   try {
     use_threads();
     int typ = 1;
-    if (rule == SEAMS_CHILL_PUBLISHED &&
+    if ((rule == SEAMS_CHILL_PUBLISHED || rule == SEAMS_CHILL_OVITO) &&
         (graph == SEAMS_GRAPH_CUTOFF || graph == SEAMS_GRAPH_MUTUAL)) {
       // Labels are written onto the frame. The bond vectors are not: the
       // caller reads the label buffer. Skipping the frame copy keeps the
@@ -902,7 +902,11 @@ seams_status seams_chill_plus(seams_system *sys, double cutoff, int type, int gr
         listed = nneigh::orthoFullCsr(work, sub, cutoff, offsets, cols, false);
       }
       if (listed) {
-        chill::chillPlusFromCsr(work, offsets, cols, false);
+        if (rule == SEAMS_CHILL_OVITO) {
+          chill::chillPlusOvitoFromCsr(work, offsets, cols);
+        } else {
+          chill::chillPlusFromCsr(work, offsets, cols, false);
+        }
         const int n = work.nop;
         int counts[9] = {};
         for (int i = 0; i < n; ++i) {

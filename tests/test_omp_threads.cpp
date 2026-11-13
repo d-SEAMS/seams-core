@@ -273,6 +273,22 @@ TEST_CASE("CHILL labels match at one and eight threads on the three ice cells",
                              plus8.data(), plusCounts8) == SEAMS_OK);
     REQUIRE(plus8 == plus1);
     REQUIRE(plusCounts1[SEAMS_LABEL_HEXAGONAL] == ice.n);
+
+    std::vector<int> ov1(static_cast<std::size_t>(ice.n));
+    std::vector<int> ov8(static_cast<std::size_t>(ice.n));
+    int ovCounts1[9] = {};
+    int ovCounts8[9] = {};
+    REQUIRE(seams_set_num_threads(1) == SEAMS_OK);
+    REQUIRE(seams_chill_plus(sys, 3.5, 1, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_OVITO, ov1.data(),
+                             ovCounts1) == SEAMS_OK);
+    REQUIRE(seams_set_num_threads(8) == SEAMS_OK);
+    REQUIRE(seams_chill_plus(sys, 3.5, 1, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_OVITO, ov8.data(),
+                             ovCounts8) == SEAMS_OK);
+    REQUIRE(ov8 == ov1);
+    REQUIRE(ovCounts1[SEAMS_LABEL_HEXAGONAL] == ice.n);
+    for (int label = 0; label < 9; ++label) {
+      REQUIRE(ovCounts8[label] == ovCounts1[label]);
+    }
     seams_system_destroy(sys);
   }
 }

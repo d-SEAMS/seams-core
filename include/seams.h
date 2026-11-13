@@ -99,7 +99,13 @@ typedef enum seams_ring_symmetry {
   SEAMS_RING_OTHER = 11
 } seams_ring_symmetry;
 
-/** Published edges are inclusive. OVITO edges are open. */
+/**
+ * CHILL+ definition.
+ * PUBLISHED averages q_lm over the four closest neighbours (Nguyen and
+ * Molinero, equation 1) and uses inclusive edges.
+ * OVITO averages q_lm over every neighbour inside the cutoff, the Chill+
+ * modifier's 3.5 A shell, with that modifier's open edges.
+ */
 typedef enum seams_chill_rule {
   SEAMS_CHILL_PUBLISHED = 0,
   SEAMS_CHILL_OVITO = 1
@@ -471,8 +477,10 @@ SEAMS_API seams_status seams_chill(seams_system *sys, double cutoff, int type,
 /**
  * @brief CHILL+ labels.
  *
- * rule selects the published Nguyen and Molinero table or the OVITO
- * Chill+ modifier. counts9, when non-NULL, receives nine population
+ * rule selects the q_lm shell. SEAMS_CHILL_PUBLISHED, the default, is
+ * Nguyen and Molinero equation 1: the four closest neighbours. 
+ * SEAMS_CHILL_OVITO is every neighbour inside the cutoff, which is the
+ * OVITO Chill+ modifier. counts9, when non-NULL, receives nine population
  * counts. labels has one entry per atom in the frame; the length is
  * the frame count.
  *

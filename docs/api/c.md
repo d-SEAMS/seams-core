@@ -41,8 +41,9 @@ The self entry is omitted. `seams_neighbours_destroy` frees the handle.
 ## CHILL+
 
 `seams_chill_plus` writes one label per atom and, when `counts9` is not null, nine
-population counts. `rule` is `SEAMS_CHILL_PUBLISHED` (Nguyen and Molinero) or
-`SEAMS_CHILL_OVITO`. `seams_label_name` maps a label to cubic, hexagonal, water,
+population counts. `rule` is `SEAMS_CHILL_PUBLISHED` (four closest neighbours in
+q_lm, Nguyen and Molinero equation 1) or `SEAMS_CHILL_OVITO` (every neighbour
+inside the cutoff). `seams_label_name` maps a label to cubic, hexagonal, water,
 interfacial, clathrate, interClathrate, unclassified, reCubic, or reHex.
 
 ## q4 and q6

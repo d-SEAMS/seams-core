@@ -672,11 +672,14 @@ H2HSession.time_session.number = 1
 
 
 class H2HMdapyPyscal3Vesin:
-    """d-SEAMS, mdapy, pyscal3, and vesin in one process.
+    """d-SEAMS, mdapy, pyscal3, vesin, and OVITO in one process.
 
     Eight samples of a 3.5 A neighbour list, k=4 neighbours, q6 and q6bar,
-    and ice identification at 4096, 32768, and 110592 molecules. The
-    Snakemake rule writes the raw log and the core count.
+    and both CHILL+ definitions at 4096, 32768, and 110592 molecules.
+    paper averages q_lm over the four closest neighbours. ovito averages
+    q_lm over every neighbour inside the cutoff and is checked atom for
+    atom against mdapy and the OVITO modifier. The Snakemake rule writes
+    the raw log and the core count.
     """
 
     def setup(self):
@@ -695,8 +698,9 @@ class H2HMdapyPyscal3Vesin:
             import mdapy  # noqa: F401
             import pyscal3  # noqa: F401
             import vesin  # noqa: F401
+            import ovito  # noqa: F401
         except Exception as exc:
-            raise NotImplementedError("mdapy, pyscal3, and vesin are not importable") from exc
+            raise NotImplementedError("mdapy, pyscal3, vesin, and ovito are not importable") from exc
 
     def time_session(self):
         self._module.run_session()

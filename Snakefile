@@ -799,11 +799,14 @@ rule paper_cells:
         "python3 scripts/paper_cells_join.py benchmarks/paper-cells"
 
 
-# One process, eight samples, d-SEAMS, mdapy, pyscal3, and vesin. Core count, no host name.
+# One process, eight samples, d-SEAMS, mdapy, pyscal3, vesin, and OVITO.
+# CHILL+ is timed as paper (four closest) and ovito (every neighbour inside 3.5 A).
+# Core count, no host name.
 rule h2h_mdapy_pyscal3_vesin:
     output:
         "benchmarks/h2h-mdapy-pyscal3-vesin.txt",
     shell:
+        "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu "
         "python3 scripts/h2h_mdapy_pyscal3_vesin.py > {output}"
 
 
