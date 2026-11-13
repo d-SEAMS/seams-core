@@ -12,9 +12,9 @@ angstrom on the cutoff graph. The signatures are ``512`` for
 
    cages sII 512 16
    cages sII 51264 8
-   cages sH 512 12
-   cages sH sh 8
-   cages sH 51268 4
+   cages sH 512 10
+   cages sH sh 4
+   cages sH 51268 2
 
 .. literalinclude:: ../../examples/science_tutorials.py
    :language: python

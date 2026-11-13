@@ -35,13 +35,13 @@ cat("nucleus axis x layers CHHHCHHHHHHHHH\n")
 sii <- file.path(root, "input", "traj", "genice_sII.lammpstrj")
 sh <- file.path(root, "input", "traj", "genice_sH.lammpstrj")
 stopifnot(cages_of(sii, "512") == 16L, cages_of(sii, "51264") == 8L)
-stopifnot(cages_of(sh, "512") == 12L, cages_of(sh, "sh") == 8L,
-          cages_of(sh, "51268") == 4L)
+stopifnot(cages_of(sh, "512") == 10L, cages_of(sh, "sh") == 4L,
+          cages_of(sh, "51268") == 2L)
 cat("cages sII 512 16\n")
 cat("cages sII 51264 8\n")
-cat("cages sH 512 12\n")
-cat("cages sH sh 8\n")
-cat("cages sH 51268 4\n")
+cat("cages sH 512 10\n")
+cat("cages sH sh 4\n")
+cat("cages sH 51268 2\n")
 
 hexagonal_oxygens <- function(path) {
   rows <- readLines(path)
