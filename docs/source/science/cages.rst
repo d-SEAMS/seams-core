@@ -34,7 +34,7 @@ angstrom on the cutoff graph. The signatures are ``512`` for
 .. figure:: figures/sh.png
    :alt: sH cages. 5^12 is orange, the medium cage is yellow, and 5^12 6^8 is green.
 
-   sH. Orange is :math:`5^{12}`, yellow is :math:`4^{3}5^{6}6^{3}`, and green is :math:`5^{12}6^{8}`.
+   sH. Orange is :math:`5^{12}`, yellow is :math:`4^{3}5^{6}6^{3}`, and green is :math:`5^{12}6^{8}`. Each face is the ring placed on the images nearest the cage centre. A face is omitted when an edge reaches 3.5 angstrom or the planarity residual exceeds 0.35 angstrom.
 
 What this tells you
 -------------------

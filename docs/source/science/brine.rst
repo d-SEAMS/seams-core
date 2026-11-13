@@ -40,9 +40,9 @@ coefficient is the bulk-ice molality divided by the bulk-liquid molality.
    :end-before: static int cmd_brine
 
 .. figure:: figures/brine.png
-   :alt: 5 ns brine front. Hexagonal ice is orange, liquid is pale, sodium and chloride are spheres.
+   :alt: 5 ns brine front with a colour legend. Hexagonal ice is orange, liquid is grey, clathrate is light blue, interfacial clathrate is pink, sodium is violet, and chloride is black.
 
-   The 5 ns frame. Waters use the CHILL+ colours. Sodium and chloride are the larger spheres.
+   The 5 ns frame. Hydrogens are omitted. Four oxygens are clathrate (light blue) and 41 are interfacial clathrate (pink); the engine and the frame column agree. Sodium is violet and chloride is black, the colours from ``render_front.py`` at ``c2c7e46f``. The box outline and the 1 nm bar sit clear of the atoms.
 
 What this tells you
 -------------------
