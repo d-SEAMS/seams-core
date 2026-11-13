@@ -8,6 +8,14 @@
 GenIce sI cell and calls `steinhardt`, `chill_plus`, and `primitive_rings`.
 `meson test docs_examples` runs it.
 
+`docs/examples/core_counts.jl` checks Ice Ih (128 hexagonal, 256
+six-rings) and sII (136 clathrate, 144 five-rings, 16 six-rings).
+`meson test docs_core_counts` runs it.
+
+```{literalinclude} ../../../docs/examples/core_counts.jl
+:language: julia
+```
+
 ```{literalinclude} ../../../docs/examples/minimal_julia.jl
 :language: julia
 ```

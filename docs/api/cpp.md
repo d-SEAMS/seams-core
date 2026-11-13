@@ -14,6 +14,13 @@ GenIce sI cell with `seams_frame_read`, then calls
 `seams_frame_chill_plus`, and `seams_frame_rings`.
 `meson test docs_examples` runs it.
 
+`docs/examples/core_counts.cpp` is the same census on Ice Ih and sII.
+`meson test docs_core_counts` runs it.
+
+```{literalinclude} ../../../docs/examples/core_counts.cpp
+:language: cpp
+```
+
 ```{literalinclude} ../../../docs/examples/minimal_cpp.cpp
 :language: cpp
 ```

@@ -10,6 +10,14 @@ The methods are `positions.dseams_frame`, `chill_plus.dseams_frame`,
 `signature_cages.dseams_frame`, `symmetry.dseams_frame`,
 `steinhardt.dseams_frame`, and `q4_q6.dseams_frame`.
 
+`docs/examples/core_counts.R` checks Ice Ih (128 hexagonal, 256
+six-rings) and sII (136 clathrate, 144 five-rings, 16 six-rings).
+`meson test docs_core_counts` runs it.
+
+```{literalinclude} ../../../docs/examples/core_counts.R
+:language: r
+```
+
 Build the library, then install the package against it:
 
 ```bash

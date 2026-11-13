@@ -30,6 +30,21 @@ cell. `Frame.count` is the number of points.
 `input/traj/genice_sI.lammpstrj` and calls the C API for neighbours, q6,
 CHILL+, and rings. `meson test docs_examples` runs it.
 
+`docs/examples/core_counts.py` is the Ice Ih and sII census. Sphinx
+doctest and `meson test docs_core_counts` both run it. `SEAMS_LIBDIR`
+is the directory that holds `libseams.so`.
+
+```{eval-rst}
+.. doctest::
+
+   >>> import core_counts
+   >>> core_counts.check()
+   hexagonal 128
+   rings6 256
+   clathrate 136
+   rings5 144
+```
+
 ```{literalinclude} ../../../docs/examples/minimal_py.py
 :language: python
 ```

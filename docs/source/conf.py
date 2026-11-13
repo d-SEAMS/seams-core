@@ -46,8 +46,15 @@ def _write_gallery():
     spec = importlib.util.spec_from_file_location("render_gallery", script)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    if module.main([]) != 0:
-        raise SystemExit("science gallery failed")
+    try:
+        status = module.main([])
+    except SystemExit as exc:
+        status = exc.code if isinstance(exc.code, int) else 1
+    if status not in (0, None):
+        kept = os.path.isdir(os.path.join(_docs, "source", "tutorials", "gallery"))
+        if not kept:
+            raise SystemExit("science gallery failed")
+        print("sphinx: science gallery left as committed", file=sys.stderr)
 
 
 _write_gallery()
@@ -65,8 +72,14 @@ def _write_molecules():
     libdir = os.environ.get("SEAMS_LIBDIR", "")
     if libdir:
         argv.extend(["--libdir", libdir])
-    if module.main(argv) != 0:
-        raise SystemExit("molecule stills failed")
+    try:
+        status = module.main(argv)
+    except SystemExit as exc:
+        status = exc.code if isinstance(exc.code, int) else 1
+    if status not in (0, None):
+        if not os.path.isdir(os.path.join(_source, "tutorials", "molecules")):
+            raise SystemExit("molecule stills failed")
+        print("sphinx: molecule stills left as committed", file=sys.stderr)
 
 
 _write_molecules()
@@ -175,11 +188,15 @@ author = "Rohit Goswami, Amrita Goswami, Ruhila S"
 # -- General configuration ---------------------------------------------------
 extensions = [
     "myst_parser",
+    "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
     "sphinx_sitemap",
     "sphinx_design",
     "sphinxcontrib.mermaid",
 ]
+doctest_global_setup = "import sys\nsys.path.insert(0, {!r})\n".format(
+    os.path.join(_docs, "examples")
+)
 # doxyrest and the XML tree are produced by the docs task. A build from
 # the committed sources does not require them to already exist.
 if os.path.isfile(_xml_index) and os.path.isdir(_doxyrest):
@@ -205,10 +222,15 @@ html_theme = "shibuya"
 # doi.org is the citation link. These publishers answer the redirect with
 # 403 to the link checker, so a redirect onto them is ignored.
 linkcheck_ignore = [
+    # ACS returns 403 to the link checker.
     r"https://pubs\.acs\.org/.*",
+    # Wiley returns 403 to the link checker.
     r"https://onlinelibrary\.wiley\.com/.*",
+    # AIP returns 403 to the link checker.
     r"https://pubs\.aip\.org/.*",
+    # Taylor & Francis returns 403 to the link checker.
     r"https://www\.tandfonline\.com/.*",
+    # The dataset pages require a Hugging Face login.
     r"https://huggingface\.co/datasets/d-SEAMS/.*",
 ]
 html_static_path = ["_static"]

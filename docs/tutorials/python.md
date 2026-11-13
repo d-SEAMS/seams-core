@@ -2,7 +2,7 @@
 
 The nanobind module reads a C-contiguous NumPy array in place. This is the eight-atom diamond cell (nearest-neighbour spacing 2.75 Å). Every oxygen is cubic.
 
-`meson test python_dseams` runs this method. On the eight-atom cell `counts[0]` equals the atom count and every label is 0.
+`meson test python_dseams` runs this method. On the eight-atom cell `counts[0]` equals the atom count and every label is 0. `docs/examples/core_counts.py` checks Ice Ih and sII through `libseams`. Sphinx doctest and `meson test docs_core_counts` run it.
 
 ```{literalinclude} ../../../bindings/python/tests/test_dseams.py
 :language: python

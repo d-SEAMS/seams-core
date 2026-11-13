@@ -2,6 +2,13 @@
 
 `seams.h` is the stable API. This program labels one cubic-ice cell and prints the version the library was built with.
 
+`docs/examples/core_counts.c` checks Ice Ih and sII against the C core.
+`meson test docs_core_counts` runs it.
+
+```{literalinclude} ../../../docs/examples/core_counts.c
+:language: c
+```
+
 ```{literalinclude} ../../../docs/examples/ice.c
 :language: c
 ```
