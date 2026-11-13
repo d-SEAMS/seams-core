@@ -15,6 +15,12 @@
 #include <topo_one_dim.hpp>
 #include <neighbours.hpp>
 
+#include <utility>
+
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
+
 // -----------------------------------------------------------------------------------------------------
 // PRISM ALGORITHMS
 // -----------------------------------------------------------------------------------------------------
@@ -190,6 +196,30 @@ int ring::prismAnalysis(
  *  been classified as prisms. The indices are with respect to the input rings
  *  vector of vectors.
  */
+namespace {
+
+void notePrism(std::vector<ring::strucType> &ringType, std::vector<int> &listPrism, int which,
+               bool perfect) {
+  auto &kind = ringType[static_cast<std::size_t>(which)];
+  if (perfect) {
+    if (kind == ring::strucType::unclassified) {
+      kind = ring::strucType::Prism;
+      listPrism.push_back(which);
+    } else if (kind == ring::strucType::deformedPrism) {
+      kind = ring::strucType::mixedPrismRing;
+    }
+    return;
+  }
+  if (kind == ring::strucType::unclassified) {
+    kind = ring::strucType::deformedPrism;
+    listPrism.push_back(which);
+  } else if (kind == ring::strucType::Prism) {
+    kind = ring::strucType::mixedPrismRing;
+  }
+}
+
+} // namespace
+
 std::vector<int>
 ring::findPrisms(const std::vector<std::vector<int>> &rings,
                  std::vector<ring::strucType> &ringType, int &nPerfectPrisms,
@@ -197,142 +227,210 @@ ring::findPrisms(const std::vector<std::vector<int>> &rings,
                  molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  std::vector<double> &rmsdPerAtom, bool doShapeMatching) {
   std::vector<int> listPrism;
-  int totalRingNum = rings.size(); // Total number of rings
-  std::vector<int> basal1;         // First basal ring
-  std::vector<int> basal2;         // Second basal ring
-  bool cond1, cond2; // Conditions for rings to be basal (true) or not (false)
-  bool relaxedCond;  // Condition so that at least one bond exists between the
-                     // two basal rings
-  bool isAxialPair;  // Basal rings should be parallel in one dimension to
-                     // prevent overcounting
-  int ringSize = rings[0].size(); // Number of nodes in each ring
-  nImperfectPrisms = 0;          // Number of undeformed prisms
-  nPerfectPrisms = 0;            // Number of undeformed prisms
-  // Matrix for the reference ring for a given ringSize.
+  const int totalRingNum = static_cast<int>(rings.size());
+  nImperfectPrisms = 0;
+  nPerfectPrisms = 0;
+  if (totalRingNum == 0) {
+    return listPrism;
+  }
+  const int ringSize = static_cast<int>(rings[0].size());
+  // The reference polygon is only read by the deformed-prism matcher.
   Eigen::MatrixXd refPointSet(ringSize, 3);
+  if (doShapeMatching) {
+    refPointSet = pntToPnt::getPointSetRefRing(ringSize, nneigh::dumpAxialDim(yCloud));
+  }
 
-  // Get the reference ring point set for a given ring size.
-  // Get the axial dimension
-  int axialDim = nneigh::dumpAxialDim(yCloud);
-  refPointSet = pntToPnt::getPointSetRefRing(ringSize, axialDim);
-  //
+  // A strict basal pair puts a neighbour of basal1[0] on basal2. A relaxed
+  // pair, used only when shape matching is on, puts a neighbour of some
+  // atom of basal1 on basal2. Either way the partner is a ring through one
+  // of those neighbours, so the search never walks the other rings. The
+  // predicates below are the ones the all-pairs loop used to call, in the
+  // same (iring, jring) order, and they do not rewrite the ring vectors.
+  const int nAtoms = static_cast<int>(nList.size());
+  std::vector<int> off(static_cast<std::size_t>(nAtoms) + 1, 0);
+  for (int i = 0; i < totalRingNum; ++i) {
+    for (const int atom : rings[static_cast<std::size_t>(i)]) {
+      if (atom >= 0 && atom < nAtoms) {
+        ++off[static_cast<std::size_t>(atom) + 1];
+      }
+    }
+  }
+  for (int atom = 0; atom < nAtoms; ++atom) {
+    off[static_cast<std::size_t>(atom) + 1] += off[static_cast<std::size_t>(atom)];
+  }
+  std::vector<int> col(static_cast<std::size_t>(off[static_cast<std::size_t>(nAtoms)]));
+  std::vector<int> cursor(off.begin(), off.end() - 1);
+  for (int i = 0; i < totalRingNum; ++i) {
+    for (const int atom : rings[static_cast<std::size_t>(i)]) {
+      if (atom >= 0 && atom < nAtoms) {
+        col[static_cast<std::size_t>(cursor[static_cast<std::size_t>(atom)]++)] = i;
+      }
+    }
+  }
 
-  // Two loops through all the rings are required to find pairs of basal rings
-  for (int iring = 0; iring < totalRingNum - 1; iring++) {
-    cond1 = false;
-    cond2 = false;
-    basal1 = rings[iring]; // Assign iring to basal1
-    // Loop through the other rings to get a pair
-    for (int jring = iring + 1; jring < totalRingNum; jring++) {
-      basal2 = rings[jring]; // Assign jring to basal2
-      // ------------
-      // Put extra check for axial basal rings if shapeMatching is being done
-      if (doShapeMatching || ringSize == 4) {
-        isAxialPair = false; // init
-        isAxialPair =
-            ring::discardExtraTetragonBlocks(basal1, basal2, yCloud);
-        if (!isAxialPair) {
+  auto strictPair = [&](int iring, int jring) -> bool {
+    auto &basal1 = const_cast<std::vector<int> &>(rings[static_cast<std::size_t>(iring)]);
+    auto &basal2 = const_cast<std::vector<int> &>(rings[static_cast<std::size_t>(jring)]);
+    if (doShapeMatching || ringSize == 4) {
+      if (!ring::discardExtraTetragonBlocks(basal1, basal2, yCloud)) {
+        return false;
+      }
+    }
+    if (ring::hasCommonElements(basal1, basal2)) {
+      return false;
+    }
+    return ring::basalPrismConditions(nList, basal1, basal2);
+  };
+
+#ifdef SEAMS_HAS_OPENMP
+  // Shape matching writes RMSD in pair order, so that path stays serial.
+  // A strict pair only sets labels, and those labels do not depend on
+  // which perfect pair is noticed first.
+  if (!doShapeMatching && totalRingNum >= 1024 && !omp_in_parallel() &&
+      omp_get_max_threads() > 1) {
+    const int team = omp_get_max_threads();
+    std::vector<std::vector<std::pair<int, int>>> bags(static_cast<std::size_t>(team));
+#pragma omp parallel
+    {
+      const int tid = omp_get_thread_num();
+      auto &mine = bags[static_cast<std::size_t>(tid)];
+      std::vector<unsigned> seen(static_cast<std::size_t>(totalRingNum), 0);
+      unsigned generation = 1;
+      std::vector<int> candidates;
+      candidates.reserve(64);
+#pragma omp for schedule(static)
+      for (int iring = 0; iring < totalRingNum - 1; ++iring) {
+        if (generation == 0) {
+          std::fill(seen.begin(), seen.end(), 0);
+          generation = 1;
+        }
+        const unsigned gen = generation++;
+        const auto &basal1 = rings[static_cast<std::size_t>(iring)];
+        if (basal1.empty()) {
           continue;
         }
-      } // end of check for tetragonal prism blocks
-      // ------------
-      // Step one: Check to see if basal1 and basal2 have common
-      // elements or not. If they don't, then they cannot be basal rings
-      cond1 = ring::hasCommonElements(basal1, basal2);
-      if (cond1) {
+        candidates.clear();
+        const int atom = basal1[0];
+        if (atom >= 0 && atom < nAtoms) {
+          const auto &row = nList[static_cast<std::size_t>(atom)];
+          for (std::size_t n = 1; n < row.size(); ++n) {
+            const int nb = row[n];
+            if (nb < 0 || nb >= nAtoms) {
+              continue;
+            }
+            const int begin = off[static_cast<std::size_t>(nb)];
+            const int end = off[static_cast<std::size_t>(nb) + 1];
+            for (int k = begin; k < end; ++k) {
+              const int jring = col[static_cast<std::size_t>(k)];
+              if (jring <= iring || seen[static_cast<std::size_t>(jring)] == gen) {
+                continue;
+              }
+              seen[static_cast<std::size_t>(jring)] = gen;
+              candidates.push_back(jring);
+            }
+          }
+        }
+        for (const int jring : candidates) {
+          if (strictPair(iring, jring)) {
+            mine.emplace_back(iring, jring);
+          }
+        }
+      }
+    }
+    std::vector<std::pair<int, int>> pairs;
+    for (const auto &bag : bags) {
+      pairs.insert(pairs.end(), bag.begin(), bag.end());
+    }
+    std::sort(pairs.begin(), pairs.end());
+    for (const auto &pair : pairs) {
+      nPerfectPrisms += 1;
+      notePrism(ringType, listPrism, pair.first, true);
+      notePrism(ringType, listPrism, pair.second, true);
+    }
+    std::sort(listPrism.begin(), listPrism.end());
+    listPrism.erase(std::unique(listPrism.begin(), listPrism.end()), listPrism.end());
+    return listPrism;
+  }
+#endif
+
+  std::vector<unsigned> seen(static_cast<std::size_t>(totalRingNum), 0);
+  unsigned generation = 1;
+  std::vector<int> candidates;
+  candidates.reserve(64);
+  for (int iring = 0; iring < totalRingNum - 1; ++iring) {
+    if (generation == 0) {
+      std::fill(seen.begin(), seen.end(), 0);
+      generation = 1;
+    }
+    const unsigned gen = generation++;
+    auto &basal1 = const_cast<std::vector<int> &>(rings[static_cast<std::size_t>(iring)]);
+    if (basal1.empty()) {
+      continue;
+    }
+    candidates.clear();
+    const int atoms = doShapeMatching ? static_cast<int>(basal1.size()) : 1;
+    for (int a = 0; a < atoms; ++a) {
+      const int atom = basal1[static_cast<std::size_t>(a)];
+      if (atom < 0 || atom >= nAtoms) {
         continue;
       }
-      // -----------
-      // Step two and three: One of the elements of basal2 must be the nearest
-      // neighbour of the first (index0; l1) If m_k is the nearest neighbour of
-      // l1, m_{k+1} ... m_{k+(n-1)} must be neighbours of l_i+1 etc or l_i-1
-      cond2 = ring::basalPrismConditions(nList, basal1, basal2);
-      // If cond2 is false, the strict criteria for prisms has not been met
-      if (!cond2) {
-        // Skip if shape-matching is not desired
+      const auto &row = nList[static_cast<std::size_t>(atom)];
+      // The first entry is the atom itself when the row came from
+      // neighbourListByIndex. basalPrismConditions skips it too.
+      for (std::size_t n = 1; n < row.size(); ++n) {
+        const int nb = row[n];
+        if (nb < 0 || nb >= nAtoms) {
+          continue;
+        }
+        const int begin = off[static_cast<std::size_t>(nb)];
+        const int end = off[static_cast<std::size_t>(nb) + 1];
+        for (int k = begin; k < end; ++k) {
+          const int jring = col[static_cast<std::size_t>(k)];
+          if (jring <= iring || seen[static_cast<std::size_t>(jring)] == gen) {
+            continue;
+          }
+          seen[static_cast<std::size_t>(jring)] = gen;
+          candidates.push_back(jring);
+        }
+      }
+    }
+    std::sort(candidates.begin(), candidates.end());
+    for (const int jring : candidates) {
+      auto &basal2 = const_cast<std::vector<int> &>(rings[static_cast<std::size_t>(jring)]);
+      if (doShapeMatching || ringSize == 4) {
+        if (!ring::discardExtraTetragonBlocks(basal1, basal2, yCloud)) {
+          continue;
+        }
+      }
+      if (ring::hasCommonElements(basal1, basal2)) {
+        continue;
+      }
+      if (!ring::basalPrismConditions(nList, basal1, basal2)) {
         if (!doShapeMatching) {
           continue;
-        } // shape-matching not desired
-        //
-        // If shape-matching is to be done:
-        // Check for the reduced criteria fulfilment
-        relaxedCond = ring::relaxedPrismConditions(nList, basal1, basal2);
-        // Skip if relaxed criteria are not met
-        if (!relaxedCond) {
+        }
+        if (!ring::relaxedPrismConditions(nList, basal1, basal2)) {
           continue;
-        } // end of skipping if the prisms do not fulfil relaxed criteria
+        }
+        if (!match::matchPrism(yCloud, nList, refPointSet, basal1, basal2, rmsdPerAtom, false)) {
+          continue;
+        }
+        nImperfectPrisms += 1;
+        notePrism(ringType, listPrism, iring, false);
+        notePrism(ringType, listPrism, jring, false);
+        continue;
+      }
+      nPerfectPrisms += 1;
+      notePrism(ringType, listPrism, iring, true);
+      notePrism(ringType, listPrism, jring, true);
+      if (doShapeMatching) {
+        match::matchPrism(yCloud, nList, refPointSet, basal1, basal2, rmsdPerAtom, true);
+      }
+    }
+  }
 
-        // Do shape matching here
-        bool isDeformedPrism = match::matchPrism(
-            yCloud, nList, refPointSet, basal1, basal2, rmsdPerAtom, false);
-
-        // Success! The rings are basal rings of a deformed prism!
-        if (isDeformedPrism) {
-          //
-          // // Update the number of prism blocks
-          nImperfectPrisms += 1;
-          // Update iring
-          if (ringType[iring] == ring::strucType::unclassified) {
-            ringType[iring] = ring::strucType::deformedPrism;
-            listPrism.push_back(iring);
-          } else if (ringType[iring] == ring::strucType::Prism) {
-            ringType[iring] = ring::strucType::mixedPrismRing;
-          } // if it is deformed
-          // Update jring
-          if (ringType[jring] == ring::strucType::unclassified) {
-            ringType[jring] = ring::strucType::deformedPrism;
-            listPrism.push_back(jring);
-          } else if (ringType[jring] == ring::strucType::Prism) {
-            ringType[jring] = ring::strucType::mixedPrismRing;
-          } // if it is deformed
-        }   // end of update of ring types
-
-        // // Write outs
-        // // Now write out axial basal rings
-        // sout::writeBasalRingsPrism(basal1, basal2, nDeformedPrisms, nList,
-        //                            yCloud, true);
-      } // end of reduced criteria
-      // Strict criteria
-      else {
-        // Update the number of prism blocks
-        nPerfectPrisms += 1;
-        // Update iring
-        if (ringType[iring] == ring::strucType::unclassified) {
-          ringType[iring] = ring::strucType::Prism;
-          listPrism.push_back(iring);
-        } else if (ringType[iring] == ring::strucType::deformedPrism) {
-          ringType[iring] = ring::strucType::mixedPrismRing;
-        } // if it is deformed
-        // Update jring
-        if (ringType[jring] == ring::strucType::unclassified) {
-          ringType[jring] = ring::strucType::Prism;
-          listPrism.push_back(jring);
-        } else if (ringType[jring] == ring::strucType::deformedPrism) {
-          ringType[jring] = ring::strucType::mixedPrismRing;
-        } // if it is deformed
-        //
-        // Shape-matching to get the RMSD (if shape-matching is desired)
-        if (doShapeMatching) {
-          bool isKnownPrism = match::matchPrism(
-              yCloud, nList, refPointSet, basal1, basal2, rmsdPerAtom, true);
-        } // end of shape-matching to get rmsd
-        //
-        // // Now write out axial basal rings for convex hull calculations
-        // sout::writePrisms(basal1, basal2, *nPrisms, yCloud);
-        // // Write out prisms for shape-matching
-        // sout::writeBasalRingsPrism(basal1, basal2, *nPrisms, nList, yCloud,
-        //                            false);
-        // -----------
-      } // end of strict criteria
-
-    } // end of loop through rest of the rings to get the second basal ring
-  }   // end of loop through all rings for first basal ring
-
-  sort(listPrism.begin(), listPrism.end());
-  auto ip = std::unique(listPrism.begin(), listPrism.end());
-  // Resize peripheral rings to remove undefined terms
-  listPrism.resize(std::distance(listPrism.begin(), ip));
-
+  std::sort(listPrism.begin(), listPrism.end());
+  listPrism.erase(std::unique(listPrism.begin(), listPrism.end()), listPrism.end());
   return listPrism;
 }
 
