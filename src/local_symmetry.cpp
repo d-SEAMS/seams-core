@@ -1129,6 +1129,30 @@ SoaCols &soaCols() {
   return cols;
 }
 
+int seams_symmetry_classify_gates(const double *xyz, int n, const double *lattice9,
+                                  double shell_rmsd, double thermal_q, double bond_ratio,
+                                  int *labels) {
+  if (xyz == nullptr || lattice9 == nullptr || labels == nullptr || n < 1) {
+    return 1;
+  }
+  double lat[3][3];
+  for (int vec = 0; vec < 3; vec++) {
+    for (int comp = 0; comp < 3; comp++) {
+      lat[vec][comp] = lattice9[3 * vec + comp];
+    }
+  }
+  SoaCols &cols = soaCols();
+  cols.fit(static_cast<size_t>(n));
+  for (int i = 0; i < n; i++) {
+    cols.x[i] = xyz[3 * i];
+    cols.y[i] = xyz[3 * i + 1];
+    cols.z[i] = xyz[3 * i + 2];
+  }
+  symm::classifyIceArrays(cols.x, cols.y, cols.z, n, lat, labels, shell_rmsd, thermal_q,
+                          bond_ratio);
+  return 0;
+}
+
 int seams_symmetry_classify_tol(const double *xyz, int n, const double *lattice9,
                                 double shell_rmsd, int *labels) {
   if (xyz == nullptr || lattice9 == nullptr || labels == nullptr || n < 1) {

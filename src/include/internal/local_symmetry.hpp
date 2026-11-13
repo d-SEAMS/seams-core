@@ -2,6 +2,7 @@
 #define SEAMS_LOCAL_SYMMETRY_H_
 
 #include <mol_sys.hpp>
+#include <shell_hot.hpp>
 
 #include <Eigen/Core>
 #include <string>
@@ -91,11 +92,13 @@ inline constexpr double kShellRmsd = 0.15;
 // the scale-free residual ceiling. The label is the template with the lowest
 // residual after the bond-graph permutation of the tetrahedron.
 void classifyIce(const Eigen::MatrixXd &cartesian, const Eigen::Matrix3d &vectors,
-                 std::vector<int> &kind, double shellRmsd = kShellRmsd);
+                 std::vector<int> &kind, double shellRmsd = kShellRmsd,
+                 double thermalQ = kThermalQ, double bondRatio = kThermalBondRatio);
 
 // Column SoA coordinates. The canon shell is built once. kind is written in full.
 void classifyIceArrays(const double *x, const double *y, const double *z, int n, const double lat[3][3],
-                       int *kind, double shellRmsd = kShellRmsd);
+                       int *kind, double shellRmsd = kShellRmsd, double thermalQ = kThermalQ,
+                       double bondRatio = kThermalBondRatio);
 
 // Same labels as classifyIceArrays, packed from a point cloud. On ideal
 // cubic ice the codes match diamondFromCsr (0 hexagonal, 1 cubic, -1 other).

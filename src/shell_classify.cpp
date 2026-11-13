@@ -1998,7 +1998,8 @@ void topUpBonds(int self, double ci0, double ci1, double ci2, int ix0, int iy0, 
 }
 
 void classifyPrepared(const double *x, const double *y, const double *z, int n,
-                      const double lat[3][3], const CanonShell &canon, double gate, int *kind) {
+                      const double lat[3][3], const CanonShell &canon, double gate, int *kind,
+                      double thermalQ, double bondRatio) {
   if (n <= 0) {
     return;
   }
@@ -2405,7 +2406,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     double qEarly = -1.0;
     if (!(bMax <= bMin * 1.00001)) {
       qEarly = tetraQ(mine);
-      if (qEarly < kThermalQ) {
+      if (qEarly < thermalQ) {
         kind[i] = -1;
         continue;
       }
@@ -2446,7 +2447,8 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       // A wide second shell is not an FCC or HCP fingerprint. The fit still
       // sees a shell whose radius varies by less than 1.6.
       if (sHi > sLo * (1.45 * 1.45)) {
-        if (qEarly >= kThermalQ && bMax <= bMin * (kThermalBondRatio * kThermalBondRatio) &&
+        const double bondCut2 = bondRatio * bondRatio;
+        if (qEarly >= thermalQ && bMax <= bMin * bondCut2 &&
             sHi <= sLo * (1.6 * 1.6)) {
           kind[i] = -3;
         } else {
@@ -2463,7 +2465,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
         continue;
       }
       const double qNow = qEarly >= 0.0 ? qEarly : tetraQ(mine);
-      if (qNow < kThermalQ) {
+      if (qNow < thermalQ) {
         kind[i] = -1;
         continue;
       }
@@ -2477,7 +2479,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
         }
         continue;
       }
-      const bool tightBonds = bMax <= bMin * (kThermalBondRatio * kThermalBondRatio);
+      const bool tightBonds = bMax <= bMin * (bondRatio * bondRatio);
       double sMin = 1e300;
       double sMax = 0.0;
       for (int s = 0; s < 12; s++) {
@@ -2492,7 +2494,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       // -3: worth a fit, but only once a crystal neighbour is known.
       // The neighbour test, not a quenched-crystal q, keeps bulk liquid
       // out of Kabsch. Thermal ice sits below 0.95.
-      if (qNow >= kThermalQ && tightBonds && sMax <= sMin * (1.6 * 1.6)) {
+      if (qNow >= thermalQ && tightBonds && sMax <= sMin * (1.6 * 1.6)) {
         kind[i] = -3;
         continue;
       }

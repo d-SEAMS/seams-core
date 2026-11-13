@@ -41,7 +41,8 @@ inline constexpr double kThermalBondRatio = 1.20;
 // as ice Ih (0), ice Ic (1), ice Isd (2), or -1.
 // x, y, z are length n. Column-major coordinates, no interleaving copy.
 void classifyPrepared(const double *x, const double *y, const double *z, int n,
-                      const double lat[3][3], const CanonShell &canon, double gate, int *kind);
+                      const double lat[3][3], const CanonShell &canon, double gate, int *kind,
+                      double thermalQ = kThermalQ, double bondRatio = kThermalBondRatio);
 
 } // namespace symm
 
