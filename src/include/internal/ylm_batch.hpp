@@ -6,6 +6,12 @@
 namespace seams {
 namespace ylm {
 
+// Add up to eight l = 12 bonds into one interleaved q_lm row (real, imag).
+// n is 1..8. Shorter tails do not contribute. Same values as the scalar
+// solid harmonic.
+void ylm12AddBonds(const double *dx, const double *dy, const double *dz, int n,
+                   double *qlmInterleaved);
+
 // Bond-major output: component m of bond b is at b * (2 * orderL + 1) + m.
 // Host only. l is 3, 4 or 6.
 void ylmBatch(int orderL, const double *dx, const double *dy, const double *dz,

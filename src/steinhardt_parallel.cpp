@@ -175,76 +175,88 @@ void atomRange(int n, int rank, int nranks, int &begin, int &end) {
   end = begin + base + (rank < rem ? 1 : 0);
 }
 
-// Host-only l=12 Ylm. Associated Legendre with the same Condon-Shortley
-// pairing as ylmAllTrig (Y_{l,m} = (-1)^m Y_{l,-m}^*). The device header
-// keeps barRe[17] and no l=12 tables.
-void ylm12Host(double sinT, double cosT, double cphi, double sphi,
-               double *out) {
+
+#ifndef SEAMS_YLM_AVX512
+static const int kInvPow[13] = {0,1,1,2,2,3,3,4,4,5,5,6,6};
+static const int kOdd[13] = {0,1,0,1,0,1,0,1,0,1,0,1,0};
+inline double poly12(int m, double u) {
+  switch (m) {
+  case 0: return (((((((((((((676039.0/1024.0))*u + (-969969.0/512.0)))*u + (2078505.0/1024.0)))*u + (-255255.0/256.0)))*u + (225225.0/1024.0)))*u + (-9009.0/512.0)))*u + (231.0/1024.0));
+  case 1: return (((((((((((-2028117.0/256.0))*u + (4849845.0/256.0)))*u + (-2078505.0/128.0)))*u + (765765.0/128.0)))*u + (-225225.0/256.0)))*u + (9009.0/256.0));
+  case 2: return (((((((((((22309287.0/256.0))*u + (-43648605.0/256.0)))*u + (14549535.0/128.0)))*u + (-3828825.0/128.0)))*u + (675675.0/256.0)))*u + (-9009.0/256.0));
+  case 3: return (((((((((-111546435.0/128.0))*u + (43648605.0/32.0)))*u + (-43648605.0/64.0)))*u + (3828825.0/32.0)))*u + (-675675.0/128.0));
+  case 4: return (((((((((1003917915.0/128.0))*u + (-305540235.0/32.0)))*u + (218243025.0/64.0)))*u + (-11486475.0/32.0)))*u + (675675.0/128.0));
+  case 5: return (((((((-1003917915.0/16.0))*u + (916620705.0/16.0)))*u + (-218243025.0/16.0)))*u + (11486475.0/16.0));
+  case 6: return (((((((7027425405.0/16.0))*u + (-4583103525.0/16.0)))*u + (654729075.0/16.0)))*u + (-11486475.0/16.0));
+  case 7: return (((((-21082276215.0/8.0))*u + (4583103525.0/4.0)))*u + (-654729075.0/8.0));
+  case 8: return (((((105411381075.0/8.0))*u + (-13749310575.0/4.0)))*u + (654729075.0/8.0));
+  case 9: return (((-105411381075.0/2.0))*u + (13749310575.0/2.0));
+  case 10: return (((316234143225.0/2.0))*u + (-13749310575.0/2.0));
+  case 11: return (-316234143225.0/1.0);
+  case 12: return (316234143225.0/1.0);
+  }
+  return 0;
+}
+static const double N12[13] = {
+0x1.6914d24534248p+0,
+0x1.ce8de68045152p-4,
+0x1.2a30831ccebacp-7,
+0x1.858d9a150a366p-11,
+0x1.03b3bc0e06ceep-14,
+0x1.644eee6c0a626p-18,
+0x1.fbe126adfea51p-22,
+0x1.7c89c672387b3p-25,
+0x1.306e385b6062ap-28,
+0x1.09ba907bc0717p-31,
+0x1.05abee0d89849p-34,
+0x1.34a6a6c0c27bfp-37,
+0x1.f80662a8c8b52p-40
+};
+
+
+
+// l = 12 solid harmonic. q_m(z^2/r^2) / r^{12-m} times (y + i x)^m is the
+// same Condon-Shortley Y_12,m as the associated-Legendre form, with
+// phi = atan2(x, y). Even degree: one reciprocal of r^2, no square root.
+void ylm12Cartesian(double x, double y, double z, double *out) {
   constexpr int orderL = 12;
-  constexpr int nComp = 25;
-  constexpr double pi = 3.14159265358979323846;
-  for (int k = 0; k < nComp; k++) {
-    out[2 * k] = 0.0;
-    out[2 * k + 1] = 0.0;
+  const double r2 = x * x + y * y + z * z;
+  for (int k = 0; k < 50; ++k) {
+    out[k] = 0.0;
   }
-  double pmm = 1.0;
-  double fact = 1.0;
-  double pL[13];
-  for (int m = 0; m <= orderL; m++) {
-    double plm;
-    if (m == orderL) {
-      plm = pmm;
-    } else {
-      double pmm1 = cosT * (2.0 * static_cast<double>(m) + 1.0) * pmm;
-      if (m + 1 == orderL) {
-        plm = pmm1;
-      } else {
-        double plm2 = pmm;
-        double plm1 = pmm1;
-        for (int l = m + 2; l <= orderL; l++) {
-          const double pl =
-              ((2.0 * static_cast<double>(l) - 1.0) * cosT * plm1 -
-               (static_cast<double>(l + m) - 1.0) * plm2) /
-              static_cast<double>(l - m);
-          plm2 = plm1;
-          plm1 = pl;
-        }
-        plm = plm1;
-      }
-    }
-    pL[m] = plm;
-    if (m < orderL) {
-      pmm *= -fact * sinT;
-      fact += 2.0;
-    }
+  if (!(r2 > 0.0)) {
+    return;
   }
-  double pr[13];
-  double piIm[13];
-  pr[0] = 1.0;
-  piIm[0] = 0.0;
-  for (int k = 1; k <= orderL; k++) {
-    pr[k] = pr[k - 1] * cphi - piIm[k - 1] * sphi;
-    piIm[k] = pr[k - 1] * sphi + piIm[k - 1] * cphi;
-  }
-  for (int absM = 0; absM <= orderL; absM++) {
-    double ratio = 1.0;
-    for (int k = orderL - absM + 1; k <= orderL + absM; k++) {
-      ratio /= static_cast<double>(k);
+  const double u = (z * z) / r2;
+  const double invR2 = 1.0 / r2;
+  double invPow = 1.0;
+  int cur = 0;
+  double pr = 1.0;
+  double pi = 0.0;
+  for (int m = 0; m <= orderL; ++m) {
+    const int need = kInvPow[m];
+    while (cur < need) {
+      invPow *= invR2;
+      ++cur;
     }
-    const double norm =
-        std::sqrt((2.0 * orderL + 1.0) / (4.0 * pi) * ratio);
-    const double amp = norm * pL[absM];
-    const double nre = amp * pr[absM];
-    const double nim = -amp * piIm[absM];
-    const int ineg = orderL - absM;
-    out[2 * ineg] = nre;
-    out[2 * ineg + 1] = nim;
-    const double sign = (absM % 2 == 0) ? 1.0 : -1.0;
-    const int ipos = orderL + absM;
-    out[2 * ipos] = sign * amp * pr[absM];
-    out[2 * ipos + 1] = sign * amp * piIm[absM];
+    double amp = N12[m] * poly12(m, u) * invPow;
+    if (kOdd[m]) {
+      amp *= z;
+    }
+    const int ineg = orderL - m;
+    const int ipos = orderL + m;
+    out[2 * ineg] = amp * pr;
+    out[2 * ineg + 1] = -amp * pi;
+    const double sign = (m & 1) ? -1.0 : 1.0;
+    out[2 * ipos] = sign * amp * pr;
+    out[2 * ipos + 1] = sign * amp * pi;
+    const double npr = pr * y - pi * x;
+    const double npi = pr * x + pi * y;
+    pr = npr;
+    pi = npi;
   }
 }
+
 
 void qlmAddBond12(double dx, double dy, double dz, double *qlmInterleaved,
                   int row, int &nUsed) {
@@ -252,27 +264,8 @@ void qlmAddBond12(double dx, double dy, double dz, double *qlmInterleaved,
   if (r2 == 0.0) {
     return;
   }
-  const double r = std::sqrt(r2);
-  const double invr = 1.0 / r;
-  double cosT = dz * invr;
-  if (cosT > 1.0) {
-    cosT = 1.0;
-  } else if (cosT < -1.0) {
-    cosT = -1.0;
-  }
-  const double rho2 = dx * dx + dy * dy;
-  double sinT = 0.0;
-  double cphi = 1.0;
-  double sphi = 0.0;
-  if (rho2 != 0.0) {
-    const double rho = std::sqrt(rho2);
-    sinT = rho * invr;
-    const double invrho = 1.0 / rho;
-    cphi = dy * invrho;
-    sphi = dx * invrho;
-  }
   double ylm[50];
-  ylm12Host(sinT, cosT, cphi, sphi, ylm);
+  ylm12Cartesian(dx, dy, dz, ylm);
   constexpr int nComp = 25;
   for (int m = 0; m < nComp; m++) {
     qlmInterleaved[2 * (row + m)] += ylm[2 * m];
@@ -280,6 +273,7 @@ void qlmAddBond12(double dx, double dy, double dz, double *qlmInterleaved,
   }
   nUsed++;
 }
+#endif
 
 void runPass1Host12(const NeighbourCSR &g, int begin, int end,
                     std::vector<double> &qlm) {
@@ -297,12 +291,44 @@ void runPass1Host12(const NeighbourCSR &g, int begin, int end,
     const int j0 = g.offsets[static_cast<size_t>(i)];
     const int j1 = g.offsets[static_cast<size_t>(i) + 1];
     int nUsed = 0;
+#ifdef SEAMS_YLM_AVX512
+    double xs[8];
+    double ys[8];
+    double zs[8];
+    int filled = 0;
+    double *rowQ = qlm.data() + static_cast<std::size_t>(2 * row);
+    auto flush = [&]() {
+      if (filled == 0) {
+        return;
+      }
+      seams::ylm::ylm12AddBonds(xs, ys, zs, filled, rowQ);
+      filled = 0;
+    };
+    for (int p = j0; p < j1; p++) {
+      const double dx = g.dr[static_cast<size_t>(3 * p)];
+      const double dy = g.dr[static_cast<size_t>(3 * p + 1)];
+      const double dz = g.dr[static_cast<size_t>(3 * p + 2)];
+      if (dx * dx + dy * dy + dz * dz == 0.0) {
+        continue;
+      }
+      xs[filled] = dx;
+      ys[filled] = dy;
+      zs[filled] = dz;
+      ++filled;
+      ++nUsed;
+      if (filled == 8) {
+        flush();
+      }
+    }
+    flush();
+#else
     for (int p = j0; p < j1; p++) {
       qlmAddBond12(g.dr[static_cast<size_t>(3 * p)],
                    g.dr[static_cast<size_t>(3 * p + 1)],
                    g.dr[static_cast<size_t>(3 * p + 2)], qlm.data(), row,
                    nUsed);
     }
+#endif
     if (nUsed == 0) {
       continue;
     }

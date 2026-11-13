@@ -277,6 +277,94 @@ bool ylmLocalQlAvx(int orderL, const double *dx, const double *dy, const double 
   return true;
 }
 
+// l=12 solid harmonic, polynomial in u = z^2/r^2.
+template <class T>
+void ylm12Terms(T x, T y, T z, T u, T invR2, T *re, T *im) {
+  constexpr int orderL = 12;
+  T q[13];
+  q[0] = (((((((T(676039.0/1024.0))*u + T(-969969.0/512.0))*u + T(2078505.0/1024.0))*u + T(-255255.0/256.0))*u + T(225225.0/1024.0))*u + T(-9009.0/512.0))*u + T(231.0/1024.0));
+  q[1] = ((((((T(-2028117.0/256.0))*u + T(4849845.0/256.0))*u + T(-2078505.0/128.0))*u + T(765765.0/128.0))*u + T(-225225.0/256.0))*u + T(9009.0/256.0));
+  q[2] = ((((((T(22309287.0/256.0))*u + T(-43648605.0/256.0))*u + T(14549535.0/128.0))*u + T(-3828825.0/128.0))*u + T(675675.0/256.0))*u + T(-9009.0/256.0));
+  q[3] = (((((T(-111546435.0/128.0))*u + T(43648605.0/32.0))*u + T(-43648605.0/64.0))*u + T(3828825.0/32.0))*u + T(-675675.0/128.0));
+  q[4] = (((((T(1003917915.0/128.0))*u + T(-305540235.0/32.0))*u + T(218243025.0/64.0))*u + T(-11486475.0/32.0))*u + T(675675.0/128.0));
+  q[5] = ((((T(-1003917915.0/16.0))*u + T(916620705.0/16.0))*u + T(-218243025.0/16.0))*u + T(11486475.0/16.0));
+  q[6] = ((((T(7027425405.0/16.0))*u + T(-4583103525.0/16.0))*u + T(654729075.0/16.0))*u + T(-11486475.0/16.0));
+  q[7] = (((T(-21082276215.0/8.0))*u + T(4583103525.0/4.0))*u + T(-654729075.0/8.0));
+  q[8] = (((T(105411381075.0/8.0))*u + T(-13749310575.0/4.0))*u + T(654729075.0/8.0));
+  q[9] = ((T(-105411381075.0/2.0))*u + T(13749310575.0/2.0));
+  q[10] = ((T(316234143225.0/2.0))*u + T(-13749310575.0/2.0));
+  q[11] = (T(-316234143225.0/1.0));
+  q[12] = (T(316234143225.0/1.0));
+  T pr = T(1);
+  T pi = T(0);
+  T invPow = T(1);
+  int cur = 0;
+  static constexpr int needP[13] = {0,1,1,2,2,3,3,4,4,5,5,6,6};
+  static constexpr int odd[13] = {0,1,0,1,0,1,0,1,0,1,0,1,0};
+  static constexpr double N[13] = {
+0x1.6914d24534248p+0,
+0x1.ce8de68045152p-4,
+0x1.2a30831ccebacp-7,
+0x1.858d9a150a366p-11,
+0x1.03b3bc0e06ceep-14,
+0x1.644eee6c0a626p-18,
+0x1.fbe126adfea51p-22,
+0x1.7c89c672387b3p-25,
+0x1.306e385b6062ap-28,
+0x1.09ba907bc0717p-31,
+0x1.05abee0d89849p-34,
+0x1.34a6a6c0c27bfp-37,
+0x1.f80662a8c8b52p-40
+  };
+  for (int m = 0; m <= orderL; ++m) {
+    while (cur < needP[m]) { invPow = invPow * invR2; ++cur; }
+    T amp = T(N[m]) * q[m] * invPow;
+    if (odd[m]) amp = amp * z;
+    const int ineg = orderL - m;
+    const int ipos = orderL + m;
+    re[ineg] = amp * pr;
+    im[ineg] = -amp * pi;
+    const T sign = (m & 1) ? T(-1) : T(1);
+    re[ipos] = sign * amp * pr;
+    im[ipos] = sign * amp * pi;
+    const T npr = pr * y - pi * x;
+    const T npi = pr * x + pi * y;
+    pr = npr; pi = npi;
+  }
+}
+
+
+void ylm12AddBonds(const double *dx, const double *dy, const double *dz, int n,
+                   double *qlmInterleaved) {
+  if (n <= 0) {
+    return;
+  }
+  if (n > 8) {
+    n = 8;
+  }
+  const __mmask8 live = static_cast<__mmask8>((1u << n) - 1u);
+  const __m512d x0 = _mm512_maskz_loadu_pd(live, dx);
+  const __m512d y0 = _mm512_maskz_loadu_pd(live, dy);
+  const __m512d z0 = _mm512_maskz_loadu_pd(live, dz);
+  const __m512d r2 = _mm512_add_pd(
+      _mm512_add_pd(_mm512_mul_pd(x0, x0), _mm512_mul_pd(y0, y0)),
+      _mm512_mul_pd(z0, z0));
+  const __m512d zero = _mm512_setzero_pd();
+  const __m512d one = _mm512_set1_pd(1.0);
+  const __mmask8 ok = _mm512_mask_cmp_pd_mask(live, r2, zero, _CMP_GT_OQ);
+  const __m512d u = _mm512_mask_div_pd(zero, ok, _mm512_mul_pd(z0, z0), r2);
+  const __m512d invR2 = _mm512_mask_div_pd(zero, ok, one, r2);
+  V re[25];
+  V im[25];
+  ylm12Terms(V(x0), V(y0), V(z0), V(u), V(invR2), re, im);
+  for (int m = 0; m < 25; ++m) {
+    const __m512d rv = _mm512_mask_blend_pd(ok, zero, re[m].v);
+    const __m512d iv = _mm512_mask_blend_pd(ok, zero, im[m].v);
+    qlmInterleaved[2 * m] += _mm512_reduce_add_pd(rv);
+    qlmInterleaved[2 * m + 1] += _mm512_reduce_add_pd(iv);
+  }
+}
+
 void ylmBatchAvx512(int orderL, const double *dx, const double *dy,
                     const double *dz, int n, double *re, double *im) {
   const int nComp = 2 * orderL + 1;
