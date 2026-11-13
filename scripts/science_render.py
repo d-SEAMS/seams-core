@@ -729,39 +729,133 @@ def prepare_slab(pos, chill, box):
     return drawn, drawn_chill, bonds, forward, up
 
 
-def prepare_nucleus(pos, chill, extended, forward, up):
-    crystal = extended if extended is not None else np.isin(chill, [0, 1, 3])
-    # Drop a lone molecule that is not within 5 A of the Ih/Ic core.
-    core = crystal & np.isin(chill, [0, 1])
-    if np.any(core):
-        core_pts = pos[core]
-        near_core = np.zeros(pos.shape[0], dtype=bool)
-        for atom in np.flatnonzero(crystal):
-            delta = core_pts - pos[atom]
-            if float(np.min(np.einsum("ij,ij->i", delta, delta))) <= 6.0 ** 2:
-                near_core[atom] = True
-        crystal = crystal & near_core
-    liquid = np.zeros(pos.shape[0], dtype=bool)
-    if np.any(crystal):
-        ice_pts = pos[crystal]
-        for atom in np.flatnonzero(chill == 2):
-            delta = ice_pts - pos[atom]
-            if float(np.min(np.einsum("ij,ij->i", delta, delta))) <= 3.0 ** 2:
-                liquid[atom] = True
-    keep = crystal | liquid
-    drawn = pos[keep]
-    drawn_chill = chill[keep]
-    # Bonds only between cubic and hexagonal oxygens. Interfacial atoms
-    # stay a faint shell so they do not bury the lattice.
-    lattice = keep & np.isin(chill, [0, 1])
-    bonds = contained_bonds(pos, None, lattice)
-    remap = -np.ones(pos.shape[0], dtype=int)
-    remap[np.flatnonzero(keep)] = np.arange(int(keep.sum()))
-    if len(bonds):
-        bonds = np.stack([remap[bonds[:, 0]], remap[bonds[:, 1]]], axis=1)
-    # Faint liquid: rewrite the chill of liquid to stay class 2 and let scene
-    # transparency do the work. Mark them by returning a transparency vector.
-    return drawn, drawn_chill, bonds
+def ice_bonds(pos: np.ndarray, box: np.ndarray, mask: np.ndarray, cutoff: float = 3.5) -> np.ndarray:
+    """Minimum-image oxygen pairs inside the cutoff, at most four per water.
+
+    The four shortest contacts are kept. A fifth neighbour inside the
+    cutoff is dropped, and the result is checked.
+    """
+    chosen = np.flatnonzero(mask)
+    if chosen.size < 2:
+        return np.zeros((0, 2), dtype=np.int32)
+    pts = pos[chosen]
+    pairs: list[tuple[int, int, float]] = []
+    cut2 = cutoff * cutoff
+    cell = cutoff
+    shape = np.maximum(1, np.floor(box / cell).astype(int))
+    bins: dict[tuple[int, int, int], list[int]] = {}
+    keys = np.floor(pts / box * shape).astype(int) % shape
+    for index, key in enumerate(keys):
+        bins.setdefault(tuple(int(v) for v in key), []).append(index)
+    for index, key in enumerate(keys):
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                for dz in (-1, 0, 1):
+                    neighbour = (
+                        int((key[0] + dx) % shape[0]),
+                        int((key[1] + dy) % shape[1]),
+                        int((key[2] + dz) % shape[2]),
+                    )
+                    for other in bins.get(neighbour, []):
+                        if other <= index:
+                            continue
+                        delta = pts[other] - pts[index]
+                        delta -= box * np.round(delta / box)
+                        length2 = float(np.dot(delta, delta))
+                        if length2 <= cut2:
+                            pairs.append((index, other, length2))
+    pairs.sort(key=lambda item: item[2])
+    degree = np.zeros(chosen.size, dtype=int)
+    kept: list[tuple[int, int]] = []
+    for first, second, _length2 in pairs:
+        if degree[first] >= 4 or degree[second] >= 4:
+            continue
+        degree[first] += 1
+        degree[second] += 1
+        kept.append((int(chosen[first]), int(chosen[second])))
+    if degree.size and int(degree.max()) > 4:
+        raise SystemExit("a water molecule was given more than 4 bonds")
+    if not kept:
+        return np.zeros((0, 2), dtype=np.int32)
+    return np.array(kept, dtype=np.int32)
+
+
+def column_view(pos: np.ndarray, mask: np.ndarray, stacking: np.ndarray) -> np.ndarray:
+    """[11-20] in the basal plane: the direction the columns hide behind."""
+    stacking = unit(stacking)
+    hint = np.array([1.0, 0.0, 0.0]) if abs(float(stacking[0])) < 0.9 else np.array([0.0, 1.0, 0.0])
+    east = unit(np.cross(stacking, hint))
+    north = unit(np.cross(stacking, east))
+    pts = pos[mask]
+    centre = pts.mean(axis=0)
+    relative = pts - centre
+    best: tuple | None = None
+    for degree in np.linspace(0.0, 180.0, 180, endpoint=False):
+        theta = math.radians(float(degree))
+        view = math.cos(theta) * east + math.sin(theta) * north
+        depth = relative @ view
+        right = unit(np.cross(stacking, view))
+        horizontal = relative @ right
+        vertical = relative @ stacking
+        offsets = []
+        separations = []
+        for index in range(0, len(pts), 2):
+            delta_depth = np.abs(depth - depth[index])
+            plane = np.hypot(horizontal - horizontal[index], vertical - vertical[index])
+            near = (delta_depth > 2.2) & (delta_depth < 6.0)
+            if not np.any(near):
+                continue
+            partner = int(np.argmin(np.where(near, plane, 1e9)))
+            if plane[partner] < 1.3:
+                offsets.append(float(plane[partner]))
+                separations.append(float(delta_depth[partner]))
+        if len(offsets) < 12:
+            continue
+        median = float(np.median(offsets))
+        rank = (median, -len(offsets))
+        if best is None or rank < best[0]:
+            best = (rank, view, float(np.median(separations)))
+    if best is None:
+        return east
+    return unit(best[1])
+
+
+def nucleus_sheet(pos: np.ndarray, chill: np.ndarray, mask: np.ndarray, stacking: np.ndarray):
+    """Two [11-20] layers through the centre of mass. Liquid and interfacial water are left out."""
+    lattice = mask & np.isin(chill, [0, 1])
+    if int(lattice.sum()) < 8:
+        lattice = np.isin(chill, [0, 1])
+    view = column_view(pos, lattice, stacking)
+    centre = pos[lattice].mean(axis=0)
+    depth = (pos - centre) @ view
+    # The column repeat is the partner separation, about one lattice step.
+    relative = pos[lattice] - centre
+    stacking_u = unit(stacking)
+    right = unit(np.cross(stacking_u, view))
+    horizontal = relative @ right
+    vertical = relative @ stacking_u
+    along = relative @ view
+    separations = []
+    step = max(1, len(relative) // 80)
+    for index in range(0, len(relative), step):
+        delta_depth = np.abs(along - along[index])
+        plane = np.hypot(horizontal - horizontal[index], vertical - vertical[index])
+        near = (delta_depth > 2.2) & (delta_depth < 6.0) & (plane < 1.3)
+        if np.any(near):
+            separations.append(float(np.min(delta_depth[near])))
+    period = float(np.median(separations)) if separations else 4.5
+    period = float(np.clip(period, 3.6, 5.2))
+    layer = np.round(depth / period)
+    present, counts = np.unique(layer[lattice], return_counts=True)
+    order = np.argsort(np.abs(present) * 1000 - counts)
+    keep_layers = set(int(item) for item in present[order[:2]])
+    sheet = lattice & np.isin(layer, list(keep_layers))
+    print(
+        f"nucleus sheet layers {sorted(keep_layers)} period {period:.2f} A "
+        f"n {int(sheet.sum())} of {int(lattice.sum())}",
+        flush=True,
+    )
+    return sheet, view
 
 
 def render_molecule(pos, chill, bonds, forward, up, png, half_h, half_v, width_px, liquid_alpha, nucleus: bool = False):
@@ -929,6 +1023,30 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
 
     for offset, key, tag in ((0.0, "minimum", "minimum"), (nucleus_w + gap, "late", "late")):
         place(nuclei[key], nuc_x + offset, nuc_y, nucleus_w, nucleus_h)
+    # 10 Å on the nucleus panels. Both sheets share half_v, so the bar
+    # has the same length on each.
+    nucleus_angstrom_per_mm = (2.0 * nuclei["half_v"]) / nucleus_h
+    nucleus_bar_mm = 10.0 / nucleus_angstrom_per_mm
+    bar_x_mm = nuc_x + 1.2
+    bar_y_mm = nuc_y + 1.6
+    fig.add_artist(
+        plt.Line2D(
+            [bar_x_mm / width_mm, (bar_x_mm + nucleus_bar_mm) / width_mm],
+            [bar_y_mm / height_mm, bar_y_mm / height_mm],
+            transform=fig.transFigure,
+            color="black",
+            lw=1.1,
+            solid_capstyle="butt",
+        )
+    )
+    fig.text(
+        (bar_x_mm + nucleus_bar_mm + 0.6) / width_mm,
+        bar_y_mm / height_mm,
+        "10 Å",
+        fontsize=7,
+        ha="left",
+        va="center",
+    )
     letter("(b)", nuc_x, nuc_y + nucleus_h + 3.2)
     fig.text(
         (nuc_x + 0.5 * nucleus_w) / width_mm,
@@ -1031,25 +1149,31 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
         nchill, extended = label_positions(nbox, npos, work / label, "nucleation")
         if extended is None:
             extended = np.isin(nchill, [0, 1, 3])
+        raw = npos.copy()
         npos, _nbox = unwrap_cluster(npos, nbox, extended, HBOND_A)
-        loaded[label] = (npos, nchill, extended)
-    late_pos, late_chill, late_ext = loaded["late"]
+        loaded[label] = (npos, nchill, extended, raw, nbox)
+    late_pos, late_chill, late_ext, _late_raw, _late_box = loaded["late"]
     axis = stacking_axis(late_pos, late_chill, late_ext)
-    # Stacking planes edge-on: the axis is vertical in the picture, and the
-    # camera looks along the short in-plane direction so each layer is a stripe.
-    lattice = late_ext & np.isin(late_chill, [0, 1])
-    centred = late_pos[lattice] - late_pos[lattice].mean(axis=0)
-    flat = centred - np.outer(centred @ axis, axis)
-    _values, vectors = np.linalg.eigh(np.cov(flat.T))
-    long = unit(vectors[:, int(np.argmax(_values))])
-    view = unit(np.cross(axis, long))
-    for label, (npos, nchill, extended) in loaded.items():
-        clouds[label] = (npos, nchill, extended, view, axis)
-    # The late cluster fills about 70% of the panel. Both frames use that scale.
+    # [0001] is vertical, so the bands line up with panel (c). The camera
+    # looks along [11-20], through a two-layer sheet.
     prepared = {}
-    for label, (npos, nchill, extended, view, axis) in clouds.items():
-        drawn, drawn_chill, bonds = prepare_nucleus(npos, nchill, extended, view, axis)
+    for label, (npos, nchill, extended, raw, raw_box) in loaded.items():
+        sheet, view = nucleus_sheet(npos, nchill, extended, axis)
+        bonds = ice_bonds(raw, raw_box, sheet, 3.5)
+        if len(bonds):
+            straight = np.linalg.norm(npos[bonds[:, 1]] - npos[bonds[:, 0]], axis=1)
+            bonds = bonds[straight < 3.5]
+        degree = np.bincount(bonds.ravel(), minlength=npos.shape[0]) if len(bonds) else np.zeros(1, dtype=int)
+        if int(degree.max()) > 4:
+            raise SystemExit("a water molecule was given more than 4 bonds")
+        drawn = npos[sheet]
+        drawn_chill = nchill[sheet]
+        remap = -np.ones(npos.shape[0], dtype=int)
+        remap[np.flatnonzero(sheet)] = np.arange(int(sheet.sum()))
+        if len(bonds):
+            bonds = np.stack([remap[bonds[:, 0]], remap[bonds[:, 1]]], axis=1)
         prepared[label] = (drawn, drawn_chill, bonds, view, axis)
+        clouds[label] = (npos, nchill, extended, view, axis)
     def raw_half(label: str) -> tuple[float, float]:
         drawn, drawn_chill, _bonds, view_i, axis_i = prepared[label]
         cluster = drawn[np.isin(drawn_chill, [0, 1])]
@@ -1059,25 +1183,20 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
         half_v = float(np.max(np.abs(centred @ up_i))) + ATOM_RADIUS
         return half_h, half_v
 
-    # Each lattice fills about 70% of its panel. Both keep the late
-    # cluster's camera and that panel's aspect, so neither image is stretched.
+    # One scale for both sheets, so a single 10 Å bar is honest. The late
+    # sheet fills about 70% of the panel; the minimum sheet is smaller.
     late_h, late_v = raw_half("late")
     min_h, min_v = raw_half("minimum")
-    aspect = late_v / late_h
-
-    def frame_for(height: float, width: float) -> tuple[float, float]:
-        half_h = height / 0.70
-        half_v = width / 0.70
-        if half_v / half_h < aspect:
-            half_v = half_h * aspect
-        else:
-            half_h = half_v / aspect
-        return half_h, half_v
-
-    frames = {
-        "late": frame_for(late_h, late_v),
-        "minimum": frame_for(min_h, min_v),
-    }
+    aspect = late_v / max(late_h, 1e-6)
+    span_h = max(late_h, min_h)
+    span_v = max(late_v, min_v)
+    share_h = span_h / 0.70
+    share_v = span_v / 0.70
+    if share_v / share_h < aspect:
+        share_v = share_h * aspect
+    else:
+        share_h = share_v / aspect
+    frames = {"late": (share_h, share_v), "minimum": (share_h, share_v)}
     nucleus_px = int(round(48.0 / 25.4 * PRINT_DPI))
     images = {}
     stacks = {"hexagonality": {}}
@@ -1085,7 +1204,7 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
         images[label] = work / f"nucleus-{label}.png"
         share_h, share_v = frames[label]
         render_molecule(
-            drawn, drawn_chill, bonds, view, axis, images[label], share_h, share_v, nucleus_px, 0.18, nucleus=True
+            drawn, drawn_chill, bonds, view, axis, images[label], share_h, share_v, nucleus_px, 0.18, nucleus=False
         )
         npos, nchill, extended, _view, axis = clouds[label]
         stacks[label] = layer_kinds(npos, nchill, extended, axis)
