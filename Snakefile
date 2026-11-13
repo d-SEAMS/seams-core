@@ -624,6 +624,18 @@ rule paper_rings:
         "python3 scripts/paper_rings.py --out benchmarks/paper-cells"
 
 
+rule cage_h2h_v8:
+    input:
+        "scripts/cage_h2h_v8.py",
+        "scripts/paper_stats.py",
+        "bbdir-release/seams",
+        "bbdir-release/bindings/libseams_lang.so",
+    output:
+        "benchmarks/cage-h2h-v8.txt",
+    shell:
+        "python3 scripts/cage_h2h_v8.py --out benchmarks/cage-h2h-v8.txt"
+
+
 rule paper_cages:
     input:
         "scripts/paper_cages.py",

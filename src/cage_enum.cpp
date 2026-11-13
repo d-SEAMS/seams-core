@@ -5,6 +5,7 @@
 
 #include <cage_canon.hpp>
 #include <cage_enum.hpp>
+#include <generic.hpp>
 #include <ira_sofi.hpp>
 #include <number_parse.hpp>
 #include <topo_bulk.hpp>
@@ -33,15 +34,53 @@
 
 namespace {
 
+// Lengths plus the tilt factors, with the same bound correction as
+// makeFracBox. The origin cancels in a difference, but the bound
+// lengths do not: a LAMMPS triclinic dump stores the padded spans in
+// box[0..2] and xy, xz, yz after them.
+gen::FracBox faceMetric(const std::vector<double> *box,
+                        const std::vector<double> *boxLow) {
+  gen::FracBox b;
+  if (box == nullptr || box->size() < 6) {
+    return b;
+  }
+  b.ox = boxLow != nullptr && boxLow->size() > 0 ? (*boxLow)[0] : 0.0;
+  b.oy = boxLow != nullptr && boxLow->size() > 1 ? (*boxLow)[1] : 0.0;
+  b.oz = boxLow != nullptr && boxLow->size() > 2 ? (*boxLow)[2] : 0.0;
+  const double xy = (*box)[3];
+  const double xz = (*box)[4];
+  const double yz = (*box)[5];
+  const double xmin = std::min(std::min(0.0, xy), std::min(xz, xy + xz));
+  const double xmax = std::max(std::max(0.0, xy), std::max(xz, xy + xz));
+  const double ymin = std::min(0.0, yz);
+  const double ymax = std::max(0.0, yz);
+  b.lx = (*box)[0] - xmax + xmin;
+  b.ly = (*box)[1] - ymax + ymin;
+  b.lz = (*box)[2];
+  b.xy = xy;
+  b.xz = xz;
+  b.yz = yz;
+  b.ox -= xmin;
+  b.oy -= ymin;
+  b.triclinic = true;
+  b.ok = b.lx > 0.0 && b.ly > 0.0 && b.lz > 0.0;
+  return b;
+}
+
 // `lo` and `hi` are inclusive and use the coordinate units of `xyz`.
 // The reference oxygen-oxygen contacts sit near 2.74–2.81 when those
 // units are angstroms (mW 2.757, sI 2.771–2.805, sII 2.737–2.771).
+// An orthorhombic box wraps each axis. A tilted box uses the lattice
+// minimum image; wrapping the padded bounds drops faces whose contacts
+// cross the tilt.
 bool waterFace(const std::vector<int> &ring,
                const std::vector<std::array<double, 3>> &xyz,
-               const std::vector<double> *box, double lo, double hi) {
+               const std::vector<double> *box,
+               const std::vector<double> *boxLow, double lo, double hi) {
   const int n = static_cast<int>(ring.size());
+  const gen::FracBox tilted = faceMetric(box, boxLow);
   double len[3] = {0, 0, 0};
-  const bool ortho = box != nullptr && box->size() >= 3;
+  const bool ortho = !tilted.ok && box != nullptr && box->size() >= 3;
   if (ortho) {
     len[0] = (*box)[0];
     len[1] = (*box)[1];
@@ -54,15 +93,21 @@ bool waterFace(const std::vector<int> &ring,
         static_cast<size_t>(ib) >= xyz.size()) {
       return false;
     }
-    double d[3];
-    for (int k = 0; k < 3; ++k) {
-      d[k] = xyz[static_cast<size_t>(ia)][static_cast<size_t>(k)] -
-             xyz[static_cast<size_t>(ib)][static_cast<size_t>(k)];
-      if (ortho && len[k] > 0) {
-        d[k] -= len[k] * std::round(d[k] / len[k]);
+    const auto &a = xyz[static_cast<size_t>(ia)];
+    const auto &b = xyz[static_cast<size_t>(ib)];
+    double r = 0.0;
+    if (tilted.ok) {
+      r = std::sqrt(gen::fracDistSq(tilted, a[0], a[1], a[2], b[0], b[1], b[2]));
+    } else {
+      double d[3];
+      for (int k = 0; k < 3; ++k) {
+        d[k] = a[static_cast<size_t>(k)] - b[static_cast<size_t>(k)];
+        if (ortho && len[k] > 0) {
+          d[k] -= len[k] * std::round(d[k] / len[k]);
+        }
       }
+      r = std::sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
     }
-    const double r = std::sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
     if (r < lo || r > hi) {
       return false;
     }
@@ -638,7 +683,8 @@ struct ClosedSearch {
                const std::vector<char> *admit = nullptr,
                const std::vector<std::array<double, 3>> *xyz = nullptr,
                const std::vector<double> *box = nullptr,
-               const cage::EdgeWindow &window = {})
+               const cage::EdgeWindow &window = {},
+               const std::vector<double> *boxLow = nullptr)
       : spine(std::make_shared<Spine>()), rings(allRings), sigs(signatures),
         need(spine->need), facesOf(spine->facesOf), maxVerts(spine->maxVerts),
         maxEdges(spine->maxEdges), cand(spine->cand), ringSize(spine->ringSize),
@@ -704,7 +750,7 @@ struct ClosedSearch {
         continue;
       }
       if (window.enabled && xyz != nullptr &&
-          !waterFace(ring, *xyz, box, window.lo, window.hi)) {
+          !waterFace(ring, *xyz, box, boxLow, window.lo, window.hi)) {
         continue;
       }
       if (!distinctVertices(ring)) {
@@ -2128,7 +2174,8 @@ findBySignatures(const std::vector<std::vector<int>> &rings,
                  const std::vector<Signature> &signatures,
                  const std::vector<int> &atomRank,
                  const std::vector<std::array<double, 3>> *xyz,
-                 const std::vector<double> *box, const EdgeWindow &window) {
+                 const std::vector<double> *box, const EdgeWindow &window,
+                 const std::vector<double> *boxLow) {
   std::vector<std::vector<FoundCage>> out(signatures.size());
   std::vector<Signature> census;
   std::vector<std::vector<size_t>> askedAt;
@@ -2178,7 +2225,7 @@ findBySignatures(const std::vector<std::vector<int>> &rings,
     if (!any) {
       continue;
     }
-    ClosedSearch search(rings, chunk, nullptr, xyz, box, window);
+    ClosedSearch search(rings, chunk, nullptr, xyz, box, window, boxLow);
     search.run();
     for (size_t j = 0; j < chunk.size(); ++j) {
       for (const size_t i : askedAt[from + j]) {

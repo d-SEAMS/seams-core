@@ -118,7 +118,10 @@ std::string edgeWindowSpec(const EdgeWindow &window);
  *  findBySignature. Each list equals findBySignature on its entry.
  *  `window` keeps a face only when every minimum-image edge lies in
  *  [lo, hi]. A disabled window, or a null `xyz`, leaves that test out
- *  and the cage bound is the face census. */
+ *  and the cage bound is the face census. `box` is the cloud box
+ *  (three lengths, or lengths plus xy, xz, yz). `boxLow` is the dump
+ *  origin; a tilted cell uses it so a wrapped oxygen-oxygen contact is
+ *  measured on the lattice, not on the orthorhombic bounds. */
 std::vector<std::vector<FoundCage>>
 findBySignatures(const std::vector<std::vector<int>> &rings,
                  const std::vector<std::vector<int>> &nList,
@@ -126,7 +129,8 @@ findBySignatures(const std::vector<std::vector<int>> &rings,
                  const std::vector<int> &atomRank,
                  const std::vector<std::array<double, 3>> *xyz = nullptr,
                  const std::vector<double> *box = nullptr,
-                 const EdgeWindow &window = {});
+                 const EdgeWindow &window = {},
+                 const std::vector<double> *boxLow = nullptr);
 
 /** Connected face sets that stay inside the signature budget, have at
  *  least `minFaces` faces, and are not closed. Cups and incomplete

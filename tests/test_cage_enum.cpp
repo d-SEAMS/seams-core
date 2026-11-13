@@ -836,7 +836,7 @@ cagesForWindow(const CageCloud &cloud,
       cage::Signature::parse("51264"),
   };
   const auto found = cage::findBySignatures(rings, nList, sigs, {}, &xyz,
-                                            &cloud.box, window);
+                                            &cloud.box, window, &cloud.boxLow);
   std::vector<std::vector<std::vector<int>>> vertices(found.size());
   for (std::size_t i = 0; i < found.size(); ++i) {
     vertices[i].reserve(found[i].size());
@@ -897,4 +897,38 @@ TEST_CASE("default and disabled edge windows agree on the reference clathrates",
   const auto sii10 = replicateCloud(sii, 10, 10, 10);
   REQUIRE(sii10.nop == 1000 * sii.nop);
   expectWindowAgrees(sii10, 16000, 0, 8000);
+}
+
+TEST_CASE("tilted sH edge window keeps every hexagonal hydrate cage",
+          "[cage_enum]") {
+  CageCloud sh;
+  sh = sinp::readLammpsTrjO("traj/genice_sH.lammpstrj", 1, sh, 1);
+  REQUIRE(sh.nop == 136);
+  REQUIRE(sh.box.size() >= 6);
+  // Two 34-water sH cells: 6*2 dodecahedra, no 5^12 6^2, no 5^12 6^4.
+  // The tilt used to make the edge window wrap the padded bounds, which
+  // dropped the cages whose contacts cross that face.
+  expectWindowAgrees(sh, 12, 0, 0);
+
+  auto nList = nneigh::neighListO(3.5, sh, 1);
+  nList = nneigh::neighbourListByIndex(sh, nList);
+  const auto rings = ring::cageRings(primitive::ringNetwork(nList, 8), sh, 3.5);
+  std::vector<std::array<double, 3>> xyz(static_cast<std::size_t>(sh.nop));
+  for (int i = 0; i < sh.nop; ++i) {
+    const auto &p = sh.pts[static_cast<std::size_t>(i)];
+    xyz[static_cast<std::size_t>(i)] = {p.x, p.y, p.z};
+  }
+  const std::vector<cage::Signature> sigs = {
+      cage::Signature::parse("sh"),
+      cage::Signature::parse("51268"),
+  };
+  const auto on = cage::findBySignatures(rings, nList, sigs, {}, &xyz, &sh.box,
+                                         {}, &sh.boxLow);
+  const auto off = cage::findBySignatures(rings, nList, sigs, {}, &xyz, &sh.box,
+                                          cage::parseEdgeWindow("none"),
+                                          &sh.boxLow);
+  REQUIRE(on[0].size() == 8);
+  REQUIRE(on[1].size() == 4);
+  REQUIRE(off[0].size() == on[0].size());
+  REQUIRE(off[1].size() == on[1].size());
 }
