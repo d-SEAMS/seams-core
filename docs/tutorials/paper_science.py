@@ -44,13 +44,18 @@ def seams_env(libdir):
 def prepare_vulkan():
     if os.environ.get("VK_ICD_FILENAMES"):
         return
-    folder = Path("/usr/share/vulkan/icd.d")
-    if not folder.is_dir():
-        return
-    matches = sorted(folder.glob("lvp_icd*.json"))
-    if matches:
-        os.environ["VK_ICD_FILENAMES"] = str(matches[0])
-        os.environ["VK_DRIVER_FILES"] = str(matches[0])
+    folders = [Path("/usr/share/vulkan/icd.d")]
+    prefix = os.environ.get("CONDA_PREFIX")
+    if prefix:
+        folders.insert(0, Path(prefix) / "share" / "vulkan" / "icd.d")
+    for folder in folders:
+        if not folder.is_dir():
+            continue
+        matches = sorted(folder.glob("lvp_icd*.json"))
+        if matches:
+            os.environ["VK_ICD_FILENAMES"] = str(matches[0])
+            os.environ["VK_DRIVER_FILES"] = str(matches[0])
+            return
 
 
 def render(dump, png):
