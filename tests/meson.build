@@ -491,6 +491,14 @@ rings_ih_test = executable('test_rings_ih', 'test_rings_ih.cpp',
   build_rpath: _test_rpath)
 test('rings_ih', rings_ih_test, timeout: 180, env: _test_env)
 
+executable('bench_capi_overhead', 'bench_capi_overhead.cpp',
+  dependencies: [yds_dep],
+  link_with: seams_api_lib,
+  cpp_args: rings_ih_args,
+  link_args: _test_link_args,
+  include_directories: rings_ih_inc + [_incdirs],
+  build_rpath: _test_rpath)
+
 executable('bench_rings_ih', 'bench_rings_ih.cpp',
   link_with: seams_api_lib,
   cpp_args: rings_ih_args,
