@@ -708,3 +708,38 @@ class H2HMdapyPyscal3Vesin:
 
 H2HMdapyPyscal3Vesin.time_session.repeat = 1
 H2HMdapyPyscal3Vesin.time_session.number = 1
+
+
+class H2HFreudOvito:
+    """d-SEAMS, freud, and OVITO in one process.
+
+    Eight samples of a 3.5 A neighbour list, k=4 neighbours, q3 and q6,
+    ovito-mode CHILL+, and the diamond shell at 4096, 32768, and 110592
+    molecules, plus the mixed frames. The Snakemake rule writes the raw
+    log and the core count.
+    """
+
+    def setup(self):
+        import importlib.util
+
+        script = ROOT / "scripts" / "h2h_freud_ovito.py"
+        lib_path = ROOT / "bbdir-release" / "src" / "libseams.so"
+        if not lib_path.is_file():
+            raise NotImplementedError("bbdir-release/src/libseams.so is not built")
+        spec = importlib.util.spec_from_file_location("h2h_freud_ovito", script)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self._module = module
+        os.environ.setdefault("SEAMS_LIB", str(lib_path))
+        try:
+            import freud  # noqa: F401
+            import ovito  # noqa: F401
+        except Exception as exc:
+            raise NotImplementedError("freud and ovito are not importable") from exc
+
+    def time_session(self):
+        self._module.run_session()
+
+
+H2HFreudOvito.time_session.repeat = 1
+H2HFreudOvito.time_session.number = 1

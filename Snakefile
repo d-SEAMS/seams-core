@@ -810,6 +810,16 @@ rule h2h_mdapy_pyscal3_vesin:
         "python3 scripts/h2h_mdapy_pyscal3_vesin.py > {output}"
 
 
+# One process, eight samples, d-SEAMS, freud 3.6, and OVITO 3.17.
+# Ice cells and the mixed frames. Core count, no host name.
+rule h2h_freud_ovito:
+    output:
+        "benchmarks/h2h-freud-ovito.txt",
+    shell:
+        "LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu "
+        "python3 scripts/h2h_freud_ovito.py > {output}"
+
+
 # One process, eight samples, d-SEAMS, freud, and OVITO. Core count, no host name.
 rule h2h_session:
     output:
