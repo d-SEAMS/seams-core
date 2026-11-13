@@ -1,0 +1,16 @@
+file mW_cubic.lammpstrj
+frames 11
+mode cluster-q6
+frame 1 largest 4096
+frame 2 largest 4096
+frame 3 largest 4096
+frame 4 largest 4096
+frame 5 largest 4096
+frame 6 largest 4096
+frame 7 largest 4096
+frame 8 largest 4096
+frame 9 largest 4096
+frame 10 largest 4096
+frame 11 largest 4096
+max_largest 4096
+max_frame 11

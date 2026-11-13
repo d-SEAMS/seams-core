@@ -1,0 +1,38 @@
+command taskset -c 0 [path] time cluster-chill input/traj/tiny-selectionTest.lammpstrj 1 1 1 6
+loadavg 0.39 0.75 0.67 1/283 26581
+returncode 0
+stdout
+meta mode cluster-chill
+meta frame 1
+meta type 1
+meta warmup 1
+meta repeats 6
+meta threads 1
+meta cutoff 3.5
+repeat 1 path_ms 0.019063
+repeat 1 largest 0
+repeat 1 ice_like 0
+repeat 1 subset 0
+repeat 2 path_ms 0.014024
+repeat 2 largest 0
+repeat 2 ice_like 0
+repeat 2 subset 0
+repeat 3 path_ms 0.014139
+repeat 3 largest 0
+repeat 3 ice_like 0
+repeat 3 subset 0
+repeat 4 path_ms 0.012811
+repeat 4 largest 0
+repeat 4 ice_like 0
+repeat 4 subset 0
+repeat 5 path_ms 0.011569
+repeat 5 largest 0
+repeat 5 ice_like 0
+repeat 5 subset 0
+repeat 6 path_ms 0.010765
+repeat 6 largest 0
+repeat 6 ice_like 0
+repeat 6 subset 0
+meta sink 105
+
+stderr

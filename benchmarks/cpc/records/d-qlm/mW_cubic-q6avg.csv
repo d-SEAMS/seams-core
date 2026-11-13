@@ -1,0 +1,21 @@
+meta mode q6avg
+meta frame 1
+meta type 1
+meta warmup 1
+meta repeats 6
+meta threads 1
+meta cutoff 3.5
+count atoms 4096
+repeat 1 kernel_ms 3.935274
+repeat 1 path_ms 5.388371
+repeat 2 kernel_ms 3.913009
+repeat 2 path_ms 5.345194
+repeat 3 kernel_ms 3.830627
+repeat 3 path_ms 5.319241
+repeat 4 kernel_ms 3.826455
+repeat 4 path_ms 5.414989
+repeat 5 kernel_ms 3.820686
+repeat 5 path_ms 5.429416
+repeat 6 kernel_ms 3.824848
+repeat 6 path_ms 5.417606
+meta sink 57344

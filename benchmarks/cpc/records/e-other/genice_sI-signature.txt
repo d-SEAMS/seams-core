@@ -1,0 +1,7 @@
+nop 46 graph cutoff signature 5:12 cages 2 atoms 40
+nop 46 graph cutoff signature 5:12,6:2 cages 6 atoms 46
+nop 46 graph cutoff signature 5:12,6:4 cages 0 atoms 0
+median_ms 5.614400
+q1_ms 3.525176
+q3_ms 8.326841
+iqr_ms 4.801666

@@ -1169,6 +1169,12 @@ int cmdIons(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
   for (int n : census.ionsInCluster) {
     ionsInIce += n;
   }
+  int nCapped = 0;
+  int nBroken = 0;
+  for (const auto &shell : env.members) {
+    nCapped += static_cast<int>(site::cappedRings(sixS, shell, 6).size());
+    nBroken += static_cast<int>(site::brokenRings(idxS, shell, 6).size());
+  }
   os << colorizer.heading("nop") << " " << cloud.nop << " "
      << colorizer.longOption("ice") << " " << nIce << " "
      << colorizer.longOption("ions") << " " << env.ion.size() << " "
@@ -1178,7 +1184,9 @@ int cmdIons(std::ostream &os, FrameCarry &carry, Cloud &cloud, double cutoff,
      << colorizer.longOption("shell") << " " << meanShell << " "
      << colorizer.longOption("shell-ice") << " " << meanFraction << " "
      << colorizer.longOption("clusters") << " " << census.nClusters << " "
-     << colorizer.longOption("ions-in-ice") << " " << ionsInIce << "\n";
+     << colorizer.longOption("ions-in-ice") << " " << ionsInIce << " "
+     << colorizer.longOption("capped") << " " << nCapped << " "
+     << colorizer.longOption("broken") << " " << nBroken << "\n";
   return 0;
 }
 

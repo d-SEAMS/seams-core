@@ -1,0 +1,18 @@
+command taskset -c 0 [path] time cluster-q6 input/traj/dump-l.lammpstrj 59 1 0 1
+loadavg 0.28 0.74 0.66 1/280 25733
+returncode 0
+stdout
+meta mode cluster-q6
+meta frame 59
+meta type 1
+meta warmup 0
+meta repeats 1
+meta threads 1
+meta cutoff 3.5
+repeat 1 path_ms 3.095144
+repeat 1 largest 19
+repeat 1 ice_like 27
+repeat 1 subset 27
+meta sink 531
+
+stderr

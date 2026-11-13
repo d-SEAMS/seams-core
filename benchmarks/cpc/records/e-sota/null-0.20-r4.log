@@ -1,0 +1,7 @@
+command taskset -c 0 [path] cages --graph cutoff benchmarks/cpc/records/e-sota/frames/null-0.20.lammpstrj
+loadavg 0.14 0.92 0.71 1/282 22569
+returncode 0
+stdout
+nop 360 graph cutoff hexagonal 0 cubic 0 both 0 water 360
+
+stderr

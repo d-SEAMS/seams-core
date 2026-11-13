@@ -1,0 +1,21 @@
+host pairs draw n_water n_ion ice in_ice front liquid shell
+Ic 0 0 nop 216 ice 216 ions 0 in-ice 0 front 0 liquid 0 shell 0 shell-ice 0 clusters 1 ions-in-ice 0
+Ic 1 0 nop 216 ice 214 ions 2 in-ice 2 front 0 liquid 0 shell 4 shell-ice 1 clusters 1 ions-in-ice 2
+Ic 1 1 nop 216 ice 214 ions 2 in-ice 2 front 0 liquid 0 shell 4 shell-ice 1 clusters 1 ions-in-ice 2
+Ic 1 2 nop 216 ice 214 ions 2 in-ice 2 front 0 liquid 0 shell 4 shell-ice 1 clusters 1 ions-in-ice 2
+Ic 2 0 nop 216 ice 212 ions 4 in-ice 4 front 0 liquid 0 shell 4 shell-ice 1 clusters 1 ions-in-ice 4
+Ic 2 1 nop 216 ice 212 ions 4 in-ice 4 front 0 liquid 0 shell 4 shell-ice 1 clusters 1 ions-in-ice 4
+Ic 2 2 nop 216 ice 212 ions 4 in-ice 4 front 0 liquid 0 shell 4 shell-ice 1 clusters 1 ions-in-ice 4
+Ic 4 0 nop 216 ice 208 ions 8 in-ice 8 front 0 liquid 0 shell 3.5 shell-ice 1 clusters 1 ions-in-ice 8
+Ic 4 1 nop 216 ice 208 ions 8 in-ice 8 front 0 liquid 0 shell 4 shell-ice 1 clusters 1 ions-in-ice 8
+Ic 4 2 nop 216 ice 208 ions 8 in-ice 8 front 0 liquid 0 shell 3.75 shell-ice 1 clusters 1 ions-in-ice 8
+Ih 0 0 nop 360 ice 360 ions 0 in-ice 0 front 0 liquid 0 shell 0 shell-ice 0 clusters 1 ions-in-ice 0
+Ih 1 0 nop 360 ice 358 ions 2 in-ice 2 front 0 liquid 0 shell 4 shell-ice 1 clusters 1 ions-in-ice 2
+Ih 1 1 nop 360 ice 358 ions 2 in-ice 2 front 0 liquid 0 shell 4 shell-ice 1 clusters 1 ions-in-ice 2
+Ih 1 2 nop 360 ice 358 ions 2 in-ice 2 front 0 liquid 0 shell 4 shell-ice 1 clusters 1 ions-in-ice 2
+Ih 2 0 nop 360 ice 356 ions 4 in-ice 4 front 0 liquid 0 shell 4 shell-ice 1 clusters 1 ions-in-ice 4
+Ih 2 1 nop 360 ice 356 ions 4 in-ice 4 front 0 liquid 0 shell 4 shell-ice 1 clusters 1 ions-in-ice 4
+Ih 2 2 nop 360 ice 356 ions 4 in-ice 4 front 0 liquid 0 shell 4 shell-ice 1 clusters 1 ions-in-ice 4
+Ih 4 0 nop 360 ice 352 ions 8 in-ice 8 front 0 liquid 0 shell 3.75 shell-ice 1 clusters 1 ions-in-ice 8
+Ih 4 1 nop 360 ice 352 ions 8 in-ice 8 front 0 liquid 0 shell 3.75 shell-ice 1 clusters 1 ions-in-ice 8
+Ih 4 2 nop 360 ice 352 ions 8 in-ice 8 front 0 liquid 0 shell 4 shell-ice 1 clusters 1 ions-in-ice 8

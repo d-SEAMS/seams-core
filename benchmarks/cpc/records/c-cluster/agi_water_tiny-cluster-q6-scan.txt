@@ -1,0 +1,6 @@
+file agi_water_tiny.lammpstrj
+frames 1
+mode cluster-q6
+frame 1 largest 5
+max_largest 5
+max_frame 1

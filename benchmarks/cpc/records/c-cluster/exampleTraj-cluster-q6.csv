@@ -1,0 +1,32 @@
+meta mode cluster-q6
+meta frame 1
+meta type 2
+meta warmup 1
+meta repeats 6
+meta threads 1
+meta cutoff 3.5
+repeat 1 path_ms 0.461646
+repeat 1 largest 180
+repeat 1 ice_like 216
+repeat 1 subset 216
+repeat 2 path_ms 0.452878
+repeat 2 largest 180
+repeat 2 ice_like 216
+repeat 2 subset 216
+repeat 3 path_ms 0.443184
+repeat 3 largest 180
+repeat 3 ice_like 216
+repeat 3 subset 216
+repeat 4 path_ms 0.438422
+repeat 4 largest 180
+repeat 4 ice_like 216
+repeat 4 subset 216
+repeat 5 path_ms 0.441278
+repeat 5 largest 180
+repeat 5 ice_like 216
+repeat 5 subset 216
+repeat 6 path_ms 0.439235
+repeat 6 largest 180
+repeat 6 ice_like 216
+repeat 6 subset 216
+meta sink 3010

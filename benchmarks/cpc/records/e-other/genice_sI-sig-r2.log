@@ -1,0 +1,9 @@
+command taskset -c 0 [path] cages --graph cutoff --signature 512+51262+51264 input/traj/genice_sI.lammpstrj
+loadavg 0.21 0.92 0.71 8/282 22949
+returncode 0
+stdout
+nop 46 graph cutoff signature 5:12 cages 2 atoms 40
+nop 46 graph cutoff signature 5:12,6:2 cages 6 atoms 46
+nop 46 graph cutoff signature 5:12,6:4 cages 0 atoms 0
+
+stderr

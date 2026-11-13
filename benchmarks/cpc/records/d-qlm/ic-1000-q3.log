@@ -1,0 +1,27 @@
+command taskset -c 0 [path] time q3 benchmarks/cpc/frames/ic-1000.lammpstrj 1 1 1 6
+loadavg 0.14 0.92 0.71 8/282 22132
+returncode 0
+stdout
+meta mode q3
+meta frame 1
+meta type 1
+meta warmup 1
+meta repeats 6
+meta threads 1
+meta cutoff 3.5
+count atoms 1000
+repeat 1 kernel_ms 0.148548
+repeat 1 path_ms 0.415979
+repeat 2 kernel_ms 0.147857
+repeat 2 path_ms 0.363225
+repeat 3 kernel_ms 0.147091
+repeat 3 path_ms 0.361104
+repeat 4 kernel_ms 0.149504
+repeat 4 path_ms 0.349589
+repeat 5 kernel_ms 0.148051
+repeat 5 path_ms 0.343943
+repeat 6 kernel_ms 0.150761
+repeat 6 path_ms 0.343090
+meta sink 14000
+
+stderr

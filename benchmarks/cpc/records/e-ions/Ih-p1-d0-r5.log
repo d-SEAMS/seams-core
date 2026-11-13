@@ -1,0 +1,8 @@
+command taskset -c 0 [path] ions benchmarks/cpc/records/e-ions/frames/Ih-p1-d0.lammpstrj --ion-types 3,4 --type 1 --complete
+loadavg 0.21 0.92 0.71 2/282 22792
+returncode 0
+stdout
+nop 360 ice 358 ions 2 in-ice 2 front 0 liquid 0 shell 4 shell-ice 1 clusters 1 ions-in-ice 2
+
+stderr
+hint: more than two LAMMPS types; set --family (default waterIce)

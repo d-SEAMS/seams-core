@@ -1,0 +1,6 @@
+file nucleation_f1.lammpstrj
+frames 1
+mode cluster-chill
+frame 1 largest 155
+max_largest 155
+max_frame 1

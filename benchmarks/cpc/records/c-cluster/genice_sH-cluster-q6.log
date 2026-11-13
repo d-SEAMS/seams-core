@@ -1,0 +1,38 @@
+command taskset -c 0 [path] time cluster-q6 input/traj/genice_sH.lammpstrj 1 1 1 6
+loadavg 0.34 0.74 0.67 1/283 26488
+returncode 0
+stdout
+meta mode cluster-q6
+meta frame 1
+meta type 1
+meta warmup 1
+meta repeats 6
+meta threads 1
+meta cutoff 3.5
+repeat 1 path_ms 0.226540
+repeat 1 largest 4
+repeat 1 ice_like 39
+repeat 1 subset 39
+repeat 2 path_ms 0.190066
+repeat 2 largest 4
+repeat 2 ice_like 39
+repeat 2 subset 39
+repeat 3 path_ms 0.182696
+repeat 3 largest 4
+repeat 3 ice_like 39
+repeat 3 subset 39
+repeat 4 path_ms 0.179800
+repeat 4 largest 4
+repeat 4 ice_like 39
+repeat 4 subset 39
+repeat 5 path_ms 0.178838
+repeat 5 largest 4
+repeat 5 ice_like 39
+repeat 5 subset 39
+repeat 6 path_ms 0.178233
+repeat 6 largest 4
+repeat 6 ice_like 39
+repeat 6 subset 39
+meta sink 980
+
+stderr

@@ -1,0 +1,21 @@
+meta mode chill
+meta frame 1
+meta type 1
+meta warmup 1
+meta repeats 6
+meta threads 1
+meta cutoff 3.5
+count atoms 4096
+repeat 1 kernel_ms 1.609089
+repeat 1 path_ms 3.088945
+repeat 2 kernel_ms 1.607577
+repeat 2 path_ms 3.031728
+repeat 3 kernel_ms 1.688310
+repeat 3 path_ms 3.031477
+repeat 4 kernel_ms 1.606754
+repeat 4 path_ms 3.024324
+repeat 5 kernel_ms 1.676848
+repeat 5 path_ms 3.025486
+repeat 6 kernel_ms 1.605728
+repeat 6 path_ms 3.010160
+meta sink 57344

@@ -1,0 +1,8 @@
+class both dseams ovito recall_given_ovito jaccard
+overall 439 512 512 0.857422 0.857422
+cubic 1 1 1 1.000000 1.000000
+hexagonal 2 3 2 1.000000 0.666667
+other 416 439 465 0.894624 0.852459
+interfacial 12 17 25 0.480000 0.400000
+hydrate 0 10 1 0.000000 0.000000
+interfacial-hydrate 8 42 18 0.444444 0.153846

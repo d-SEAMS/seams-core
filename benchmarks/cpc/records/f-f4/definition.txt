@@ -1,0 +1,4 @@
+seams f4 is topoparam::rodgerF4 on the mutual four-nearest oxygen graph.
+exampleTraj keeps oxygen type 2 and hydrogen type 1, the pair used by tests/test_order_parameter.cpp.
+Oxygen-only genice sI has no H-O-O-H dihedral, so the mean is not a hydrate F4.
+tests/sota_f4_zeron.cpp reports Rodger F4 undefined on the oxygen-only mW lattices.

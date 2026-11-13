@@ -410,6 +410,13 @@ executable('bench_rings_incremental', 'bench_rings_incremental.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
+executable('bench_h2h_cpc', 'bench_h2h_cpc.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
 executable('bench_ring_ic', 'bench_ring_ic.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
@@ -646,6 +653,26 @@ test('neighbour_record', find_program('python3'),
   args: [files('neighbour_record.py')],
   workdir: meson.project_source_root(),
   timeout: 30)
+test('cpc_logs', find_program('python3'),
+  args: [files('test_cpc_logs.py')],
+  workdir: meson.project_source_root(),
+  timeout: 60)
+test('h2h_harness', find_program('python3'),
+  args: [files('test_h2h_harness.py'),
+         meson.project_build_root() / 'tests' / 'bench_h2h_cpc'],
+  workdir: meson.project_source_root(),
+  env: _test_env,
+  timeout: 120)
+test('tip4p_overhead', find_program('python3'),
+  args: [files('test_tip4p_overhead.py')],
+  workdir: meson.project_source_root(),
+  env: _test_env,
+  timeout: 180)
+test('ion_shell_rings', find_program('python3'),
+  args: [files('test_ion_shell_rings.py'), meson.project_build_root() / 'seams'],
+  workdir: meson.project_source_root(),
+  env: _test_env,
+  timeout: 120)
 test('docs_sources', find_program('python3'),
   args: [files('docs_sources.py')],
   workdir: meson.project_source_root(),

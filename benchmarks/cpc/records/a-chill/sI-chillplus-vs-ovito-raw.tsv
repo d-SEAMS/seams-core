@@ -1,0 +1,11 @@
+class both dseams ovito recall_given_ovito jaccard
+overall 46 46 46 1.000000 1.000000
+cubic 0 0 0 nan nan
+hexagonal 0 0 0 nan nan
+water 0 0 0 nan nan
+interfacial 0 0 0 nan nan
+clathrate 46 46 46 1.000000 1.000000
+interClathrate 0 0 0 nan nan
+unclassified 0 0 0 nan nan
+reCubic 0 0 0 nan nan
+reHex 0 0 0 nan nan

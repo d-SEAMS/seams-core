@@ -1,0 +1,27 @@
+command taskset -c 0 [path] time chillplus input/traj/mW_cubic.lammpstrj 1 1 1 6
+loadavg 0.20 0.98 0.72 1/297 21848
+returncode 0
+stdout
+meta mode chillplus
+meta frame 1
+meta type 1
+meta warmup 1
+meta repeats 6
+meta threads 1
+meta cutoff 3.5
+count atoms 4096
+repeat 1 kernel_ms 1.656023
+repeat 1 path_ms 3.024576
+repeat 2 kernel_ms 1.613984
+repeat 2 path_ms 3.117616
+repeat 3 kernel_ms 1.637977
+repeat 3 path_ms 3.018864
+repeat 4 kernel_ms 1.602681
+repeat 4 path_ms 3.019130
+repeat 5 kernel_ms 1.642233
+repeat 5 path_ms 3.052151
+repeat 6 kernel_ms 1.607586
+repeat 6 path_ms 3.024730
+meta sink 57344
+
+stderr

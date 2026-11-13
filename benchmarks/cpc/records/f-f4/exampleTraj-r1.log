@@ -1,0 +1,7 @@
+command taskset -c 0 [path] f4 input/traj/exampleTraj.lammpstrj --type 2 --htype 1
+loadavg 0.14 0.92 0.71 8/282 22174
+returncode 0
+stdout
+nop 750 f4 0.221753 n 250
+
+stderr

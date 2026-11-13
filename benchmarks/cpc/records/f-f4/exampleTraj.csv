@@ -1,0 +1,8 @@
+loadavg 0.14 0.92 0.71 8/282 22184
+stdout nop 750 f4 0.221753 n 250
+repeat 1 process_ms 12.117549
+repeat 2 process_ms 6.487309
+repeat 3 process_ms 4.173519
+repeat 4 process_ms 4.216042
+repeat 5 process_ms 4.124885
+repeat 6 process_ms 4.081053

@@ -1,0 +1,18 @@
+command taskset -c 0 [path] time cluster-chill input/traj/dump-bcc.lammpstrj 171 1 0 1
+loadavg 0.28 0.74 0.66 1/280 25538
+returncode 0
+stdout
+meta mode cluster-chill
+meta frame 171
+meta type 1
+meta warmup 0
+meta repeats 1
+meta threads 1
+meta cutoff 3.5
+repeat 1 path_ms 5.250001
+repeat 1 largest 46
+repeat 1 ice_like 46
+repeat 1 subset 46
+meta sink 478
+
+stderr

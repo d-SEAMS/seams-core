@@ -1,0 +1,27 @@
+command taskset -c 0 [path] time q6 input/traj/mW_cubic.lammpstrj 1 1 1 6
+loadavg 0.14 0.92 0.71 1/282 22156
+returncode 0
+stdout
+meta mode q6
+meta frame 1
+meta type 1
+meta warmup 1
+meta repeats 6
+meta threads 1
+meta cutoff 3.5
+count atoms 4096
+repeat 1 kernel_ms 0.920193
+repeat 1 path_ms 2.347707
+repeat 2 kernel_ms 0.907346
+repeat 2 path_ms 2.337205
+repeat 3 kernel_ms 0.914689
+repeat 3 path_ms 2.369617
+repeat 4 kernel_ms 0.907863
+repeat 4 path_ms 2.328755
+repeat 5 kernel_ms 0.955695
+repeat 5 path_ms 2.322541
+repeat 6 kernel_ms 0.905767
+repeat 6 path_ms 2.351187
+meta sink 57344
+
+stderr

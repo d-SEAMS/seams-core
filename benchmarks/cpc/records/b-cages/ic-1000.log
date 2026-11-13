@@ -1,0 +1,47 @@
+command taskset -c 0 [path] time cages benchmarks/cpc/frames/ic-1000.lammpstrj 1 1 1 6
+loadavg 0.14 0.92 0.71 9/282 22105
+returncode 0
+stdout
+meta mode cages
+meta frame 1
+meta type 1
+meta warmup 1
+meta repeats 6
+meta threads 1
+meta cutoff 3.5
+meta maxring 7
+count atoms 1000
+count rings 2000
+count six_rings 2000
+count hc_rings 0
+count ddc_rings 2000
+count ddc_equators 2000
+count hc_cages 0
+count ddc_cages 500
+repeat 1 rings_ms 0.917433
+repeat 1 hc_ms 1.134935
+repeat 1 ddc_ms 3.349877
+repeat 1 path_ms 5.402245
+repeat 2 rings_ms 0.929342
+repeat 2 hc_ms 1.139759
+repeat 2 ddc_ms 3.222539
+repeat 2 path_ms 5.291640
+repeat 3 rings_ms 0.926038
+repeat 3 hc_ms 1.132195
+repeat 3 ddc_ms 3.375466
+repeat 3 path_ms 5.433699
+repeat 4 rings_ms 0.950318
+repeat 4 hc_ms 1.148559
+repeat 4 ddc_ms 3.216542
+repeat 4 path_ms 5.315419
+repeat 5 rings_ms 0.986618
+repeat 5 hc_ms 1.176386
+repeat 5 ddc_ms 3.276866
+repeat 5 path_ms 5.439870
+repeat 6 rings_ms 0.970074
+repeat 6 hc_ms 1.134324
+repeat 6 ddc_ms 3.263388
+repeat 6 path_ms 5.367786
+meta sink 28500
+
+stderr
