@@ -28,6 +28,8 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Brine scoring keeps water oxygens, leaves ions out, and measures a Madrid-2019 freezing front.
 - Cage identification and the DDC search are faster, and a coplanar pair is not a prism.
 - Local q4 and q6 on the cutoff shell use the solid-harmonic kernel. `seams steinhardt` computes the degrees named by `--l` (default `4,6`). Each OpenMP thread owns a block of the linkcell cell cut. Primitive rings are timed on one thread against OVITO FindRings, and the literature head-to-head covers neighbours, q4, q6, diamond, rings and local symmetry.
+- A TIP4P/2005 ice/water slab is timed at strides of 0.01, 0.1 and 1 ps next to the mW strides of 0.1, 1 and 10 ps. Every transition stays inside the hop ball and the carried rings match a full search. The strict seeded graph is 8.3, 3.3 and 2.6 times a rebuild.
+- One sitting retimes neighbours, local q4 and q6, CHILL+, primitive rings, the shell symmetry label and hydrate cages at 110592 and 884736 molecules, on one thread and on eight. PLUMED 2.10.2 is built with the symfunc module. The raw lines are `benchmarks/rc3-sitting.csv`.
 
 ### Breaking
 
@@ -76,6 +78,9 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Fixed
 
+- A LAMMPS dump that is still being appended is kept, instead of being reported as truncated. The language fronts use the build's Python and skip a library mismatch.
+- The PLUMED q6 derivative is taken in nanometres. The finite-difference step is an angstrom, so the value passed to PLUMED is ten times the angstrom derivative. On a symmetry-broken eight-molecule cell the worst absolute error against an independent difference is 3.99e-11.
+- The PLUMED kernel linked into the collective variable is the one named by pkg-config, so an older kernel earlier on the linker path is not selected.
 - Accept a cup that fills the signature face count with dangling edges.
 - Evaluate Steinhardt l=12 qlBar on the host so the 25-component average does not overflow the device barRe[17] buffer.
 - Keep spherical-harmonic scratch local to each call so concurrent frames and changing thread counts do not share buffers.

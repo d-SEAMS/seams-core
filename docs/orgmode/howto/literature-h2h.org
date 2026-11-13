@@ -147,12 +147,11 @@ is 59.557 ms at one thread and 15.924 ms at eight, against TRACE at
 do not make TRACE faster. Ice Ih is 59.631 ms and 38.656 ms against
 260.930 ms and 259.011 ms.
 
-**PLUMED.** The rows in this section were not remeasured. conda-forge
-plumed 2.10.2, build nompi_hc139f64_100, installs and the Python module
-loads that kernel. Q4, Q6 and COORDINATIONNUMBER are not in the kernel:
-each =readInputLine= answers that the action is known only in the
-symfunc module, which this build does not enable. The numbers below are
-the previous sitting.
+**PLUMED.** The rows in this section are the previous sitting.
+conda-forge plumed 2.10.2 does not build the symfunc module, so Q4 and
+Q6 are absent from that kernel. The release candidate sitting further
+down builds PLUMED 2.10.2 with every module, including symfunc, and
+remeasures both orders.
 
 Q4, Q6 and COORDINATIONNUMBER. The neighbour weight is a
 steep rational switch cut at 3.5 Å. PLUMED stores the norm of the
@@ -174,3 +173,210 @@ The raw lines, including every sample, are
 =benchmarks/h2h-literature.txt=. The same run writes
 =benchmarks/h2h-literature.png= from the medians. The image is not
 stored in git.
+
+* Release candidate, one sitting
+
+=scripts/h2h_rc3_sitting.py= is the run. =snakemake rc3_sitting=
+regenerates it. =benchmarks/h2h_watch.py= class =Rc3Sitting= is one
+call of the same worker. One warm-up, then six timed calls. The
+median of the even sample is the mean of the two central values.
+The interquartile range is type 7. Eight cores, Intel Xeon family
+6 model 207, one thread per core, under KVM. The host name is not
+recorded. d-SEAMS is 2.14.0, built at =-O3=. vesin is 0.6.2, mdapy
+is 2.0.0, freud is 3.6.1, OVITO is 3.17.2, PLUMED is 2.10.2 with
+the symfunc module, rings-statistics-matter is 0.3.0, ClavisCage
+is 0.3.18 and fastatomstruct is 2.2.0.
+
+Ideal ice Ic, oxygen bond 2.75 Å, cutoff 3.5 Å. The q4 mean is
+0.50917508 and the q6 mean is 0.62853936. Six-rings are two per
+molecule. CHILL+ calls every molecule cubic. OVITO's polyhedral
+template match, with the two diamond templates enabled, labels
+every molecule, and the shell symmetry kernel does the same on
+this crystal.
+
+A one-thread rival is pinned to cpu 0. Eight threads use cpus
+0-7. Neighbour, CHILL+, ring and cage calls widen the process
+mask to every cpu the kernel still allows, so those one-thread
+rows record cores 0-7. The OpenMP width on those rows is still
+the requested one thread. q4 and q6 do not widen the mask.
+
+**The vesin gap.** The two published times are the same list.
+vesin 0.6.2, full list, cutoff 3.5 Å, cell list, the copy
+included, 442368 directed pairs, 110592 molecules, cpus 0-7,
+one warm-up dropped, six calls. =benchmarks/rc3-vesin-gap.txt=
+is the probe.
+
+| pool | median ms | IQR ms | pairs |
+|------+-----------+--------+-------|
+| n_threads=1 | 50.539 | 0.354 | 442368 |
+| n_threads=0 | 50.621 | 0.838 | 442368 |
+| n_threads=8 | 20.331 | 0.493 | 442368 |
+
+=n_threads=0= follows =OMP_NUM_THREADS=, which is 1 here, so the
+pool stays one thread while eight cpus are allowed. That is the
+50.7 ms sitting. An explicit pool of eight threads is 20.3 ms,
+the other sitting. A half list is 19.831 ms and only 221184
+pairs, so it is not the same answer. Leaving the copy out of the
+timer is 17.667 ms on the same 442368 pairs. A Fortran layout is
+19.216 ms. The automatic algorithm is 19.399 ms. The gap is the
+thread pool. It is not the cell list, the layout, or the warm-up.
+The table below uses the full list. One thread is 28.325 ms
+against 51.194 ms. Eight threads are 6.453 ms against 22.269 ms.
+
+**Numbers that this sitting does not match.** Primitive rings at
+110592 molecules and one thread are 88.959 ms against mdapy
+2276.747 ms. Both censuses are 221184 six-rings. The quoted
+0.12 s is not this median. The quoted 2.2 s is the mdapy median.
+Cutoff q6 against mdapy is 25.832 ms against 79.232 ms, and the
+largest absolute gap is 7.8e-16. At eight threads, and at
+884736 molecules, the gap stays under 1e-15. The quoted 89 ms
+against 7.7 s is not mdapy. Neighbours at one thread are 28.325 ms
+against 51.194 ms, both with 442368 pairs. The quoted 31 ms
+against 55 ms is the same comparison and not these medians.
+King's shortest paths in fastatomstruct are 24.865 ms at 1000
+molecules and 1813.620 ms at 10648. The quoted 25 ms matches the
+small cell. The quoted 2.0 s is 1.81 s here. d-SEAMS primitive
+rings on those cells are 1.019 ms and 8.972 ms, with the same
+six-ring census. A call that does not return inside 10 minutes
+is not a row. Every size through 110592 molecules did return. At
+110592 the one-thread median is 572.150 s and the eight-thread
+median is 66.414 s, both with the 221184 six-ring census.
+
+**Cages.** The frames are GenIce, not ice. Hydrogens are an
+ice-rule orientation of the four nearest oxygens, built before
+the timer. TRACE drops a ring that crosses the periodic
+boundary. On the sI unit cell (46 oxygens) d-SEAMS finds 2 of
+5^{12} and 6 of 5^{12}6^{2}, and TRACE finds 1 of 5^{12}. The
+2×2×2 replicate (368 oxygens) is the same crystal with the cages
+inside the cell: both codes find 16 and 48. On sII (136 oxygens)
+both find 16 of 5^{12} and 8 of 5^{12}6^{4}.
+
+**Where d-SEAMS is slower.** On no paired row. PLUMED q4 and q6
+do not change from one thread to eight. TRACE does not either.
+The sI unit-cell census is the disagreement above. The q6
+derivative, checked separately on a symmetry-broken
+eight-molecule cell, matches an independent nanometre difference
+to 3.99e-11.
+
+The non-heavy test suite was run three times on this build:
+128 passed, 2 expected failures, 1 skip, 0 failures. =seams_input=
+and =language_fronts= passed on each run.
+
+| code | version | molecules | operation | threads | cores | n | median ms | IQR ms |
+|------+---------+-----------+-----------+---------+-------+---+-----------+--------|
+| d-SEAMS | 2.14.0 | 110592 | neighbours | 1 | 0-7 | 6 | 28.325 | 0.440 |
+| vesin | 0.6.2 | 110592 | neighbours | 1 | 0 | 6 | 51.194 | 1.190 |
+| d-SEAMS | 2.14.0 | 110592 | q4 | 1 | 0 | 6 | 23.747 | 0.471 |
+| mdapy | 2.0.0 | 110592 | q4 | 1 | 0 | 6 | 64.687 | 1.094 |
+| freud | 3.6.1 | 110592 | q4 | 1 | 0 | 6 | 276.580 | 5.118 |
+| PLUMED | 2.10.2+symfunc | 110592 | q4 | 1 | 0 | 6 | 1310.025 | 43.492 |
+| d-SEAMS | 2.14.0 | 110592 | q6 | 1 | 0 | 6 | 25.832 | 1.264 |
+| mdapy | 2.0.0 | 110592 | q6 | 1 | 0 | 6 | 79.232 | 1.587 |
+| freud | 3.6.1 | 110592 | q6 | 1 | 0 | 6 | 362.326 | 1.594 |
+| PLUMED | 2.10.2+symfunc | 110592 | q6 | 1 | 0 | 6 | 1685.454 | 19.344 |
+| d-SEAMS | 2.14.0 | 110592 | CHILL+ | 1 | 0-7 | 6 | 24.102 | 0.308 |
+| mdapy | 2.0.0 | 110592 | CHILL+ | 1 | 0 | 6 | 61.938 | 0.226 |
+| OVITO | 3.17.2 | 110592 | CHILL+ | 1 | 0 | 6 | 622.424 | 3.316 |
+| d-SEAMS | 2.14.0 | 110592 | rings | 1 | 0-7 | 6 | 88.959 | 1.764 |
+| OVITO | 3.17.2 | 110592 | rings | 1 | 0 | 6 | 583.334 | 7.617 |
+| mdapy | 2.0.0 | 110592 | rings | 1 | 0 | 6 | 2276.747 | 13.477 |
+| rings-statistics-matter | 0.3.0 | 110592 | rings | 1 | 0 | 6 | 1151.862 | 46.483 |
+| d-SEAMS | 2.14.0 | 110592 | PTM | 1 | 0 | 6 | 30.475 | 1.072 |
+| OVITO | 3.17.2 | 110592 | PTM | 1 | 0 | 6 | 2790.624 | 78.803 |
+| d-SEAMS | 2.14.0 | 110592 | neighbours | 8 | 0-7 | 6 | 6.453 | 1.508 |
+| vesin | 0.6.2 | 110592 | neighbours | 8 | 0-7 | 6 | 22.269 | 1.481 |
+| d-SEAMS | 2.14.0 | 110592 | q4 | 8 | 0-7 | 6 | 6.094 | 1.114 |
+| mdapy | 2.0.0 | 110592 | q4 | 8 | 0-7 | 6 | 12.400 | 0.324 |
+| freud | 3.6.1 | 110592 | q4 | 8 | 0-7 | 6 | 51.302 | 7.021 |
+| PLUMED | 2.10.2+symfunc | 110592 | q4 | 8 | 0-7 | 6 | 1316.423 | 26.240 |
+| d-SEAMS | 2.14.0 | 110592 | q6 | 8 | 0-7 | 6 | 5.820 | 0.314 |
+| mdapy | 2.0.0 | 110592 | q6 | 8 | 0-7 | 6 | 14.572 | 0.478 |
+| freud | 3.6.1 | 110592 | q6 | 8 | 0-7 | 6 | 68.760 | 9.206 |
+| PLUMED | 2.10.2+symfunc | 110592 | q6 | 8 | 0-7 | 6 | 1680.281 | 29.897 |
+| d-SEAMS | 2.14.0 | 110592 | CHILL+ | 8 | 0-7 | 6 | 5.697 | 0.204 |
+| mdapy | 2.0.0 | 110592 | CHILL+ | 8 | 0-7 | 6 | 12.379 | 0.422 |
+| OVITO | 3.17.2 | 110592 | CHILL+ | 8 | 0-7 | 6 | 88.685 | 1.045 |
+| d-SEAMS | 2.14.0 | 110592 | rings | 8 | 0-7 | 6 | 33.441 | 0.481 |
+| OVITO | 3.17.2 | 110592 | rings | 8 | 0-7 | 6 | 354.605 | 17.902 |
+| mdapy | 2.0.0 | 110592 | rings | 8 | 0-7 | 6 | 375.967 | 3.766 |
+| rings-statistics-matter | 0.3.0 | 110592 | rings | 8 | 0-7 | 6 | 264.953 | 10.643 |
+| d-SEAMS | 2.14.0 | 110592 | PTM | 8 | 0-7 | 6 | 6.976 | 0.433 |
+| OVITO | 3.17.2 | 110592 | PTM | 8 | 0-7 | 6 | 370.341 | 1.536 |
+| d-SEAMS | 2.14.0 | 884736 | neighbours | 1 | 0-7 | 6 | 282.177 | 3.684 |
+| vesin | 0.6.2 | 884736 | neighbours | 1 | 0 | 6 | 1112.702 | 8.113 |
+| d-SEAMS | 2.14.0 | 884736 | q4 | 1 | 0 | 6 | 281.416 | 1.834 |
+| mdapy | 2.0.0 | 884736 | q4 | 1 | 0 | 6 | 807.101 | 31.111 |
+| freud | 3.6.1 | 884736 | q4 | 1 | 0 | 6 | 2358.091 | 42.023 |
+| PLUMED | 2.10.2+symfunc | 884736 | q4 | 1 | 0 | 6 | 10053.680 | 22.541 |
+| d-SEAMS | 2.14.0 | 884736 | q6 | 1 | 0 | 6 | 303.544 | 8.373 |
+| mdapy | 2.0.0 | 884736 | q6 | 1 | 0 | 6 | 921.574 | 18.237 |
+| freud | 3.6.1 | 884736 | q6 | 1 | 0 | 6 | 2973.372 | 73.450 |
+| PLUMED | 2.10.2+symfunc | 884736 | q6 | 1 | 0 | 6 | 12947.767 | 183.484 |
+| d-SEAMS | 2.14.0 | 884736 | CHILL+ | 1 | 0-7 | 6 | 263.592 | 4.488 |
+| mdapy | 2.0.0 | 884736 | CHILL+ | 1 | 0 | 6 | 744.487 | 12.129 |
+| OVITO | 3.17.2 | 884736 | CHILL+ | 1 | 0 | 6 | 4890.789 | 11.870 |
+| d-SEAMS | 2.14.0 | 884736 | rings | 1 | 0-7 | 6 | 765.181 | 7.280 |
+| OVITO | 3.17.2 | 884736 | rings | 1 | 0 | 6 | 4883.899 | 57.162 |
+| mdapy | 2.0.0 | 884736 | rings | 1 | 0 | 6 | 19221.718 | 42.226 |
+| rings-statistics-matter | 0.3.0 | 884736 | rings | 1 | 0 | 6 | 11504.451 | 100.097 |
+| d-SEAMS | 2.14.0 | 884736 | PTM | 1 | 0 | 6 | 287.530 | 4.957 |
+| OVITO | 3.17.2 | 884736 | PTM | 1 | 0 | 6 | 21304.364 | 33.420 |
+| d-SEAMS | 2.14.0 | 884736 | neighbours | 8 | 0-7 | 6 | 60.408 | 0.806 |
+| vesin | 0.6.2 | 884736 | neighbours | 8 | 0-7 | 6 | 196.866 | 20.430 |
+| d-SEAMS | 2.14.0 | 884736 | q4 | 8 | 0-7 | 6 | 53.025 | 2.946 |
+| mdapy | 2.0.0 | 884736 | q4 | 8 | 0-7 | 6 | 96.238 | 7.626 |
+| freud | 3.6.1 | 884736 | q4 | 8 | 0-7 | 6 | 431.376 | 11.656 |
+| PLUMED | 2.10.2+symfunc | 884736 | q4 | 8 | 0-7 | 6 | 10122.158 | 238.143 |
+| d-SEAMS | 2.14.0 | 884736 | q6 | 8 | 0-7 | 6 | 57.752 | 7.258 |
+| mdapy | 2.0.0 | 884736 | q6 | 8 | 0-7 | 6 | 107.347 | 8.477 |
+| freud | 3.6.1 | 884736 | q6 | 8 | 0-7 | 6 | 550.161 | 3.450 |
+| PLUMED | 2.10.2+symfunc | 884736 | q6 | 8 | 0-7 | 6 | 12818.837 | 42.484 |
+| d-SEAMS | 2.14.0 | 884736 | CHILL+ | 8 | 0-7 | 6 | 47.444 | 0.579 |
+| mdapy | 2.0.0 | 884736 | CHILL+ | 8 | 0-7 | 6 | 125.578 | 1.466 |
+| OVITO | 3.17.2 | 884736 | CHILL+ | 8 | 0-7 | 6 | 666.288 | 14.826 |
+| d-SEAMS | 2.14.0 | 884736 | rings | 8 | 0-7 | 6 | 301.039 | 29.359 |
+| OVITO | 3.17.2 | 884736 | rings | 8 | 0-7 | 6 | 2582.748 | 136.204 |
+| mdapy | 2.0.0 | 884736 | rings | 8 | 0-7 | 6 | 3361.913 | 85.508 |
+| rings-statistics-matter | 0.3.0 | 884736 | rings | 8 | 0-7 | 6 | 2665.750 | 77.960 |
+| d-SEAMS | 2.14.0 | 884736 | PTM | 8 | 0-7 | 6 | 51.470 | 1.333 |
+| OVITO | 3.17.2 | 884736 | PTM | 8 | 0-7 | 6 | 2849.382 | 16.947 |
+| d-SEAMS | 2.14.0 | 46 | cages | 1 | 0-7 | 6 | 0.682 | 0.061 |
+| ClavisCage | 0.3.18 | 46 | cages | 1 | 0 | 6 | 51.122 | 0.206 |
+| d-SEAMS | 2.14.0 | 46 | cages | 8 | 0-7 | 6 | 0.583 | 0.013 |
+| ClavisCage | 0.3.18 | 46 | cages | 8 | 0-7 | 6 | 51.206 | 0.941 |
+| d-SEAMS | 2.14.0 | 368 | cages | 1 | 0-7 | 6 | 4.829 | 0.135 |
+| ClavisCage | 0.3.18 | 368 | cages | 1 | 0 | 6 | 301.514 | 0.240 |
+| d-SEAMS | 2.14.0 | 368 | cages | 8 | 0-7 | 6 | 3.893 | 0.070 |
+| ClavisCage | 0.3.18 | 368 | cages | 8 | 0-7 | 6 | 302.471 | 1.124 |
+| d-SEAMS | 2.14.0 | 136 | cages | 1 | 0-7 | 6 | 1.805 | 0.237 |
+| ClavisCage | 0.3.18 | 136 | cages | 1 | 0 | 6 | 69.332 | 0.291 |
+| d-SEAMS | 2.14.0 | 136 | cages | 8 | 0-7 | 6 | 1.623 | 0.038 |
+| ClavisCage | 0.3.18 | 136 | cages | 8 | 0-7 | 6 | 69.657 | 0.243 |
+| d-SEAMS | 2.14.0 | 1000 | rings | 1 | 0 | 6 | 1.019 | 0.021 |
+| fastatomstruct | 2.2.0 | 1000 | king | 1 | 0 | 6 | 24.865 | 0.098 |
+| d-SEAMS | 2.14.0 | 4096 | rings | 1 | 0-7 | 6 | 3.499 | 0.061 |
+| fastatomstruct | 2.2.0 | 4096 | king | 1 | 0 | 6 | 289.722 | 1.096 |
+| d-SEAMS | 2.14.0 | 10648 | rings | 1 | 0-7 | 6 | 8.972 | 0.056 |
+| fastatomstruct | 2.2.0 | 10648 | king | 1 | 0 | 6 | 1813.620 | 9.916 |
+| d-SEAMS | 2.14.0 | 21952 | rings | 1 | 0-7 | 6 | 18.111 | 0.184 |
+| fastatomstruct | 2.2.0 | 21952 | king | 1 | 0 | 6 | 16849.495 | 160.385 |
+| d-SEAMS | 2.14.0 | 32768 | rings | 1 | 0-7 | 6 | 26.227 | 0.199 |
+| fastatomstruct | 2.2.0 | 32768 | king | 1 | 0 | 6 | 47798.094 | 300.283 |
+| d-SEAMS | 2.14.0 | 64000 | rings | 1 | 0-7 | 6 | 49.326 | 0.294 |
+| fastatomstruct | 2.2.0 | 64000 | king | 1 | 0 | 6 | 189511.480 | 2966.603 |
+| d-SEAMS | 2.14.0 | 110592 | rings | 1 | 0-7 | 6 | 86.531 | 1.036 |
+| fastatomstruct | 2.2.0 | 110592 | king | 1 | 0 | 6 | 572149.958 | 15966.181 |
+| d-SEAMS | 2.14.0 | 1000 | rings | 8 | 0-7 | 6 | 1.087 | 0.004 |
+| fastatomstruct | 2.2.0 | 1000 | king | 8 | 0-7 | 6 | 20.803 | 9.447 |
+| d-SEAMS | 2.14.0 | 4096 | rings | 8 | 0-7 | 6 | 1.131 | 0.019 |
+| fastatomstruct | 2.2.0 | 4096 | king | 8 | 0-7 | 6 | 109.916 | 5.925 |
+| d-SEAMS | 2.14.0 | 10648 | rings | 8 | 0-7 | 6 | 2.858 | 0.053 |
+| fastatomstruct | 2.2.0 | 10648 | king | 8 | 0-7 | 6 | 306.073 | 6.164 |
+| d-SEAMS | 2.14.0 | 21952 | rings | 8 | 0-7 | 6 | 5.736 | 0.074 |
+| fastatomstruct | 2.2.0 | 21952 | king | 8 | 0-7 | 6 | 2166.371 | 41.791 |
+| d-SEAMS | 2.14.0 | 32768 | rings | 8 | 0-7 | 6 | 8.816 | 0.165 |
+| fastatomstruct | 2.2.0 | 32768 | king | 8 | 0-7 | 6 | 5787.638 | 121.065 |
+| d-SEAMS | 2.14.0 | 64000 | rings | 8 | 0-7 | 6 | 16.147 | 0.520 |
+| fastatomstruct | 2.2.0 | 64000 | king | 8 | 0-7 | 6 | 20791.598 | 136.607 |
+| d-SEAMS | 2.14.0 | 110592 | rings | 8 | 0-7 | 6 | 32.665 | 0.343 |
+| fastatomstruct | 2.2.0 | 110592 | king | 8 | 0-7 | 6 | 66413.885 | 3570.251 |

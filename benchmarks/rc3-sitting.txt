@@ -1,0 +1,227 @@
+cores 8 warmup 1 n 6
+begin dseams-neighbours molecules=110592 threads=1
+row d-SEAMS neighbours mol=110592 t=1 cores=0-7 n=6 median=28.325 iqr=0.440 pairs=442368
+begin vesin-neighbours molecules=110592 threads=1
+row vesin neighbours mol=110592 t=1 cores=0 n=6 median=51.194 iqr=1.190 pairs=442368 full_list=1 algorithm=cell_list n_threads=1 copy=1
+begin dseams-q4 molecules=110592 threads=1
+row d-SEAMS q4 mol=110592 t=1 cores=0 n=6 median=23.747 iqr=0.471 mean=0.50917508
+begin mdapy-q4 molecules=110592 threads=1
+row mdapy q4 mol=110592 t=1 cores=0 n=6 median=64.687 iqr=1.094 mean=0.50917508 threads=1
+begin freud-q4 molecules=110592 threads=1
+row freud q4 mol=110592 t=1 cores=0 n=6 median=276.580 iqr=5.118 mean=0.50917506
+begin plumed-q4 molecules=110592 threads=1
+row PLUMED q4 mol=110592 t=1 cores=0 n=6 median=1310.025 iqr=43.492 mean=0.50917508 norm=sqrt(4pi/(2l+1))
+agree q4 mdapy max_abs=4.441e-16
+begin dseams-q6 molecules=110592 threads=1
+row d-SEAMS q6 mol=110592 t=1 cores=0 n=6 median=25.832 iqr=1.264 mean=0.62853936
+begin mdapy-q6 molecules=110592 threads=1
+row mdapy q6 mol=110592 t=1 cores=0 n=6 median=79.232 iqr=1.587 mean=0.62853936 threads=1
+begin freud-q6 molecules=110592 threads=1
+row freud q6 mol=110592 t=1 cores=0 n=6 median=362.326 iqr=1.594 mean=0.62853935
+begin plumed-q6 molecules=110592 threads=1
+row PLUMED q6 mol=110592 t=1 cores=0 n=6 median=1685.454 iqr=19.344 mean=0.62853936 norm=sqrt(4pi/(2l+1))
+agree q6 mdapy max_abs=7.772e-16
+begin dseams-chill molecules=110592 threads=1
+row d-SEAMS CHILL+ mol=110592 t=1 cores=0-7 n=6 median=24.102 iqr=0.308 cubic=110592
+begin mdapy-chill molecules=110592 threads=1
+row mdapy CHILL+ mol=110592 t=1 cores=0 n=6 median=61.938 iqr=0.226 cubic=110592
+begin ovito-chill molecules=110592 threads=1
+row OVITO CHILL+ mol=110592 t=1 cores=0 n=6 median=622.424 iqr=3.316 cubic=110592
+begin dseams-rings molecules=110592 threads=1
+row d-SEAMS rings mol=110592 t=1 cores=0-7 n=6 median=88.959 iqr=1.764 census=[0, 0, 0, 221184]
+begin ovito-rings molecules=110592 threads=1
+row OVITO rings mol=110592 t=1 cores=0 n=6 median=583.334 iqr=7.617 sink=[0, 0, 0, 221184]
+begin mdapy-rings molecules=110592 threads=1
+row mdapy rings mol=110592 t=1 cores=0 n=6 median=2276.747 iqr=13.477 census=[0, 0, 0, 221184]
+begin ringsstat-rings molecules=110592 threads=1
+row rings-statistics-matter rings mol=110592 t=1 cores=0 n=6 median=1151.862 iqr=46.483 census=[0, 0, 0, 221184]
+begin dseams-ptm molecules=110592 threads=1
+row d-SEAMS PTM mol=110592 t=1 cores=0 n=6 median=30.475 iqr=1.072 labelled=110592
+begin ovito-ptm molecules=110592 threads=1
+row OVITO PTM mol=110592 t=1 cores=0 n=6 median=2790.624 iqr=78.803 labelled=110592
+begin dseams-neighbours molecules=110592 threads=8
+row d-SEAMS neighbours mol=110592 t=8 cores=0-7 n=6 median=6.453 iqr=1.508 pairs=442368
+begin vesin-neighbours molecules=110592 threads=8
+row vesin neighbours mol=110592 t=8 cores=0-7 n=6 median=22.269 iqr=1.481 pairs=442368 full_list=1 algorithm=cell_list n_threads=8 copy=1
+begin dseams-q4 molecules=110592 threads=8
+row d-SEAMS q4 mol=110592 t=8 cores=0-7 n=6 median=6.094 iqr=1.114 mean=0.50917508
+begin mdapy-q4 molecules=110592 threads=8
+row mdapy q4 mol=110592 t=8 cores=0-7 n=6 median=12.400 iqr=0.324 mean=0.50917508 threads=8
+begin freud-q4 molecules=110592 threads=8
+row freud q4 mol=110592 t=8 cores=0-7 n=6 median=51.302 iqr=7.021 mean=0.50917506
+begin plumed-q4 molecules=110592 threads=8
+row PLUMED q4 mol=110592 t=8 cores=0-7 n=6 median=1316.423 iqr=26.240 mean=0.50917508 norm=sqrt(4pi/(2l+1))
+agree q4 mdapy max_abs=4.441e-16
+begin dseams-q6 molecules=110592 threads=8
+row d-SEAMS q6 mol=110592 t=8 cores=0-7 n=6 median=5.820 iqr=0.314 mean=0.62853936
+begin mdapy-q6 molecules=110592 threads=8
+row mdapy q6 mol=110592 t=8 cores=0-7 n=6 median=14.572 iqr=0.478 mean=0.62853936 threads=8
+begin freud-q6 molecules=110592 threads=8
+row freud q6 mol=110592 t=8 cores=0-7 n=6 median=68.760 iqr=9.206 mean=0.62853935
+begin plumed-q6 molecules=110592 threads=8
+row PLUMED q6 mol=110592 t=8 cores=0-7 n=6 median=1680.281 iqr=29.897 mean=0.62853936 norm=sqrt(4pi/(2l+1))
+agree q6 mdapy max_abs=7.772e-16
+begin dseams-chill molecules=110592 threads=8
+row d-SEAMS CHILL+ mol=110592 t=8 cores=0-7 n=6 median=5.697 iqr=0.204 cubic=110592
+begin mdapy-chill molecules=110592 threads=8
+row mdapy CHILL+ mol=110592 t=8 cores=0-7 n=6 median=12.379 iqr=0.422 cubic=110592
+begin ovito-chill molecules=110592 threads=8
+row OVITO CHILL+ mol=110592 t=8 cores=0-7 n=6 median=88.685 iqr=1.045 cubic=110592
+begin dseams-rings molecules=110592 threads=8
+row d-SEAMS rings mol=110592 t=8 cores=0-7 n=6 median=33.441 iqr=0.481 census=[0, 0, 0, 221184]
+begin ovito-rings molecules=110592 threads=8
+row OVITO rings mol=110592 t=8 cores=0-7 n=6 median=354.605 iqr=17.902 sink=[0, 0, 0, 221184]
+begin mdapy-rings molecules=110592 threads=8
+row mdapy rings mol=110592 t=8 cores=0-7 n=6 median=375.967 iqr=3.766 census=[0, 0, 0, 221184]
+begin ringsstat-rings molecules=110592 threads=8
+row rings-statistics-matter rings mol=110592 t=8 cores=0-7 n=6 median=264.953 iqr=10.643 census=[0, 0, 0, 221184]
+begin dseams-ptm molecules=110592 threads=8
+row d-SEAMS PTM mol=110592 t=8 cores=0-7 n=6 median=6.976 iqr=0.433 labelled=110592
+begin ovito-ptm molecules=110592 threads=8
+row OVITO PTM mol=110592 t=8 cores=0-7 n=6 median=370.341 iqr=1.536 labelled=110592
+begin dseams-neighbours molecules=884736 threads=1
+row d-SEAMS neighbours mol=884736 t=1 cores=0-7 n=6 median=282.177 iqr=3.684 pairs=3538944
+begin vesin-neighbours molecules=884736 threads=1
+row vesin neighbours mol=884736 t=1 cores=0 n=6 median=1112.702 iqr=8.113 pairs=3538944 full_list=1 algorithm=cell_list n_threads=1 copy=1
+begin dseams-q4 molecules=884736 threads=1
+row d-SEAMS q4 mol=884736 t=1 cores=0 n=6 median=281.416 iqr=1.834 mean=0.50917508
+begin mdapy-q4 molecules=884736 threads=1
+row mdapy q4 mol=884736 t=1 cores=0 n=6 median=807.101 iqr=31.111 mean=0.50917508 threads=1
+begin freud-q4 molecules=884736 threads=1
+row freud q4 mol=884736 t=1 cores=0 n=6 median=2358.091 iqr=42.023 mean=0.50917506
+begin plumed-q4 molecules=884736 threads=1
+row PLUMED q4 mol=884736 t=1 cores=0 n=6 median=10053.680 iqr=22.541 mean=0.50917508 norm=sqrt(4pi/(2l+1))
+agree q4 mdapy max_abs=4.441e-16
+begin dseams-q6 molecules=884736 threads=1
+row d-SEAMS q6 mol=884736 t=1 cores=0 n=6 median=303.544 iqr=8.373 mean=0.62853936
+begin mdapy-q6 molecules=884736 threads=1
+row mdapy q6 mol=884736 t=1 cores=0 n=6 median=921.574 iqr=18.237 mean=0.62853936 threads=1
+begin freud-q6 molecules=884736 threads=1
+row freud q6 mol=884736 t=1 cores=0 n=6 median=2973.372 iqr=73.450 mean=0.62853935
+begin plumed-q6 molecules=884736 threads=1
+row PLUMED q6 mol=884736 t=1 cores=0 n=6 median=12947.767 iqr=183.484 mean=0.62853936 norm=sqrt(4pi/(2l+1))
+agree q6 mdapy max_abs=8.882e-16
+begin dseams-chill molecules=884736 threads=1
+row d-SEAMS CHILL+ mol=884736 t=1 cores=0-7 n=6 median=263.592 iqr=4.488 cubic=884736
+begin mdapy-chill molecules=884736 threads=1
+row mdapy CHILL+ mol=884736 t=1 cores=0 n=6 median=744.487 iqr=12.129 cubic=884736
+begin ovito-chill molecules=884736 threads=1
+row OVITO CHILL+ mol=884736 t=1 cores=0 n=6 median=4890.789 iqr=11.870 cubic=884736
+begin dseams-rings molecules=884736 threads=1
+row d-SEAMS rings mol=884736 t=1 cores=0-7 n=6 median=765.181 iqr=7.280 census=[0, 0, 0, 1769472]
+begin ovito-rings molecules=884736 threads=1
+row OVITO rings mol=884736 t=1 cores=0 n=6 median=4883.899 iqr=57.162 sink=[0, 0, 0, 1769472]
+begin mdapy-rings molecules=884736 threads=1
+row mdapy rings mol=884736 t=1 cores=0 n=6 median=19221.718 iqr=42.226 census=[0, 0, 0, 1769472]
+begin ringsstat-rings molecules=884736 threads=1
+row rings-statistics-matter rings mol=884736 t=1 cores=0 n=6 median=11504.451 iqr=100.097 census=[0, 0, 0, 1769472]
+begin dseams-ptm molecules=884736 threads=1
+row d-SEAMS PTM mol=884736 t=1 cores=0 n=6 median=287.530 iqr=4.957 labelled=884736
+begin ovito-ptm molecules=884736 threads=1
+row OVITO PTM mol=884736 t=1 cores=0 n=6 median=21304.364 iqr=33.420 labelled=884736
+begin dseams-neighbours molecules=884736 threads=8
+row d-SEAMS neighbours mol=884736 t=8 cores=0-7 n=6 median=60.408 iqr=0.806 pairs=3538944
+begin vesin-neighbours molecules=884736 threads=8
+row vesin neighbours mol=884736 t=8 cores=0-7 n=6 median=196.866 iqr=20.430 pairs=3538944 full_list=1 algorithm=cell_list n_threads=8 copy=1
+begin dseams-q4 molecules=884736 threads=8
+row d-SEAMS q4 mol=884736 t=8 cores=0-7 n=6 median=53.025 iqr=2.946 mean=0.50917508
+begin mdapy-q4 molecules=884736 threads=8
+row mdapy q4 mol=884736 t=8 cores=0-7 n=6 median=96.238 iqr=7.626 mean=0.50917508 threads=8
+begin freud-q4 molecules=884736 threads=8
+row freud q4 mol=884736 t=8 cores=0-7 n=6 median=431.376 iqr=11.656 mean=0.50917506
+begin plumed-q4 molecules=884736 threads=8
+row PLUMED q4 mol=884736 t=8 cores=0-7 n=6 median=10122.158 iqr=238.143 mean=0.50917508 norm=sqrt(4pi/(2l+1))
+agree q4 mdapy max_abs=4.441e-16
+begin dseams-q6 molecules=884736 threads=8
+row d-SEAMS q6 mol=884736 t=8 cores=0-7 n=6 median=57.752 iqr=7.258 mean=0.62853936
+begin mdapy-q6 molecules=884736 threads=8
+row mdapy q6 mol=884736 t=8 cores=0-7 n=6 median=107.347 iqr=8.477 mean=0.62853936 threads=8
+begin freud-q6 molecules=884736 threads=8
+row freud q6 mol=884736 t=8 cores=0-7 n=6 median=550.161 iqr=3.450 mean=0.62853935
+begin plumed-q6 molecules=884736 threads=8
+row PLUMED q6 mol=884736 t=8 cores=0-7 n=6 median=12818.837 iqr=42.484 mean=0.62853936 norm=sqrt(4pi/(2l+1))
+agree q6 mdapy max_abs=8.882e-16
+begin dseams-chill molecules=884736 threads=8
+row d-SEAMS CHILL+ mol=884736 t=8 cores=0-7 n=6 median=47.444 iqr=0.579 cubic=884736
+begin mdapy-chill molecules=884736 threads=8
+row mdapy CHILL+ mol=884736 t=8 cores=0-7 n=6 median=125.578 iqr=1.466 cubic=884736
+begin ovito-chill molecules=884736 threads=8
+row OVITO CHILL+ mol=884736 t=8 cores=0-7 n=6 median=666.288 iqr=14.826 cubic=884736
+begin dseams-rings molecules=884736 threads=8
+row d-SEAMS rings mol=884736 t=8 cores=0-7 n=6 median=301.039 iqr=29.359 census=[0, 0, 0, 1769472]
+begin ovito-rings molecules=884736 threads=8
+row OVITO rings mol=884736 t=8 cores=0-7 n=6 median=2582.748 iqr=136.204 sink=[0, 0, 0, 1769472]
+begin mdapy-rings molecules=884736 threads=8
+row mdapy rings mol=884736 t=8 cores=0-7 n=6 median=3361.913 iqr=85.508 census=[0, 0, 0, 1769472]
+begin ringsstat-rings molecules=884736 threads=8
+row rings-statistics-matter rings mol=884736 t=8 cores=0-7 n=6 median=2665.750 iqr=77.960 census=[0, 0, 0, 1769472]
+begin dseams-ptm molecules=884736 threads=8
+row d-SEAMS PTM mol=884736 t=8 cores=0-7 n=6 median=51.470 iqr=1.333 labelled=884736
+begin ovito-ptm molecules=884736 threads=8
+row OVITO PTM mol=884736 t=8 cores=0-7 n=6 median=2849.382 iqr=16.947 labelled=884736
+begin dseams-cages frame=genice_sI threads=1
+row d-SEAMS cages mol=46 t=1 cores=0-7 median=0.682 512/51262/51264=(2, 6, 0)
+begin clavis-cages frame=genice_sI threads=1
+row ClavisCage cages mol=46 t=1 cores=0 median=51.122 512/51262/51264=(1, 0, 0)
+begin dseams-cages frame=genice_sI threads=8
+row d-SEAMS cages mol=46 t=8 cores=0-7 median=0.583 512/51262/51264=(2, 6, 0)
+begin clavis-cages frame=genice_sI threads=8
+row ClavisCage cages mol=46 t=8 cores=0-7 median=51.206 512/51262/51264=(1, 0, 0)
+begin dseams-cages frame=genice_sI_222 threads=1
+row d-SEAMS cages mol=368 t=1 cores=0-7 median=4.829 512/51262/51264=(16, 48, 0)
+begin clavis-cages frame=genice_sI_222 threads=1
+row ClavisCage cages mol=368 t=1 cores=0 median=301.514 512/51262/51264=(16, 48, 0)
+begin dseams-cages frame=genice_sI_222 threads=8
+row d-SEAMS cages mol=368 t=8 cores=0-7 median=3.893 512/51262/51264=(16, 48, 0)
+begin clavis-cages frame=genice_sI_222 threads=8
+row ClavisCage cages mol=368 t=8 cores=0-7 median=302.471 512/51262/51264=(16, 48, 0)
+begin dseams-cages frame=genice_sII threads=1
+row d-SEAMS cages mol=136 t=1 cores=0-7 median=1.805 512/51262/51264=(16, 0, 8)
+begin clavis-cages frame=genice_sII threads=1
+row ClavisCage cages mol=136 t=1 cores=0 median=69.332 512/51262/51264=(16, 0, 8)
+begin dseams-cages frame=genice_sII threads=8
+row d-SEAMS cages mol=136 t=8 cores=0-7 median=1.623 512/51262/51264=(16, 0, 8)
+begin clavis-cages frame=genice_sII threads=8
+row ClavisCage cages mol=136 t=8 cores=0-7 median=69.657 512/51262/51264=(16, 0, 8)
+begin king molecules=1000 threads=1
+row d-SEAMS rings mol=1000 t=1 cores=0 median=1.019 census=[0, 0, 0, 2000]
+row fastatomstruct king mol=1000 t=1 cores=0 median=24.865 census=[0, 0, 0, 2000]
+begin king molecules=4096 threads=1
+row d-SEAMS rings mol=4096 t=1 cores=0-7 median=3.499 census=[0, 0, 0, 8192]
+row fastatomstruct king mol=4096 t=1 cores=0 median=289.722 census=[0, 0, 0, 8192]
+begin king molecules=10648 threads=1
+row d-SEAMS rings mol=10648 t=1 cores=0-7 median=8.972 census=[0, 0, 0, 21296]
+row fastatomstruct king mol=10648 t=1 cores=0 median=1813.620 census=[0, 0, 0, 21296]
+begin king molecules=21952 threads=1
+row d-SEAMS rings mol=21952 t=1 cores=0-7 median=18.111 census=[0, 0, 0, 43904]
+row fastatomstruct king mol=21952 t=1 cores=0 median=16849.495 census=[0, 0, 0, 43904]
+begin king molecules=32768 threads=1
+row d-SEAMS rings mol=32768 t=1 cores=0-7 median=26.227 census=[0, 0, 0, 65536]
+row fastatomstruct king mol=32768 t=1 cores=0 median=47798.094 census=[0, 0, 0, 65536]
+begin king molecules=64000 threads=1
+row d-SEAMS rings mol=64000 t=1 cores=0-7 median=49.326 census=[0, 0, 0, 128000]
+row fastatomstruct king mol=64000 t=1 cores=0 median=189511.480 census=[0, 0, 0, 128000]
+begin king molecules=110592 threads=1
+row d-SEAMS rings mol=110592 t=1 cores=0-7 median=86.531 census=[0, 0, 0, 221184]
+row fastatomstruct king mol=110592 t=1 cores=0 median=572149.958 census=[0, 0, 0, 221184]
+begin king molecules=1000 threads=8
+row d-SEAMS rings mol=1000 t=8 cores=0-7 median=1.087 census=[0, 0, 0, 2000]
+row fastatomstruct king mol=1000 t=8 cores=0-7 median=20.803 census=[0, 0, 0, 2000]
+begin king molecules=4096 threads=8
+row d-SEAMS rings mol=4096 t=8 cores=0-7 median=1.131 census=[0, 0, 0, 8192]
+row fastatomstruct king mol=4096 t=8 cores=0-7 median=109.916 census=[0, 0, 0, 8192]
+begin king molecules=10648 threads=8
+row d-SEAMS rings mol=10648 t=8 cores=0-7 median=2.858 census=[0, 0, 0, 21296]
+row fastatomstruct king mol=10648 t=8 cores=0-7 median=306.073 census=[0, 0, 0, 21296]
+begin king molecules=21952 threads=8
+row d-SEAMS rings mol=21952 t=8 cores=0-7 median=5.736 census=[0, 0, 0, 43904]
+row fastatomstruct king mol=21952 t=8 cores=0-7 median=2166.371 census=[0, 0, 0, 43904]
+begin king molecules=32768 threads=8
+row d-SEAMS rings mol=32768 t=8 cores=0-7 median=8.816 census=[0, 0, 0, 65536]
+row fastatomstruct king mol=32768 t=8 cores=0-7 median=5787.638 census=[0, 0, 0, 65536]
+begin king molecules=64000 threads=8
+row d-SEAMS rings mol=64000 t=8 cores=0-7 median=16.147 census=[0, 0, 0, 128000]
+row fastatomstruct king mol=64000 t=8 cores=0-7 median=20791.598 census=[0, 0, 0, 128000]
+begin king molecules=110592 threads=8
+row d-SEAMS rings mol=110592 t=8 cores=0-7 median=32.665 census=[0, 0, 0, 221184]
+row fastatomstruct king mol=110592 t=8 cores=0-7 median=66413.885 census=[0, 0, 0, 221184]

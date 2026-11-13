@@ -287,8 +287,11 @@ rule related_watch:
         "scripts/h2h_protocol.py",
         "scripts/h2h_watch.py",
         "scripts/h2h_mdapy.py",
+        "scripts/h2h_mdapy_q6.py",
+        "scripts/h2h_mdapy_rings.py",
         "scripts/h2h_ovito.py",
         "scripts/h2h_fastatomstruct.py",
+        "scripts/h2h_vesin.py",
         "scripts/release_build.py",
         "benchmarks/h2h_watch.py",
     output:
@@ -298,6 +301,27 @@ rule related_watch:
         "\"$PY\" scripts/h2h_watch.py "
         "--python \"$PY\" "
         "--out benchmarks/h2h-watch.csv"
+
+
+# One sitting. Ideal ice Ic at 110592 and 884736 molecules, one thread
+# and eight, six timed calls after a warm-up. GenIce cages and the King
+# ladder are in the same run. benchmarks/h2h_watch.py is the one-call
+# Airspeed Velocity arm.
+rule rc3_sitting:
+    input:
+        "scripts/h2h_protocol.py",
+        "scripts/h2h_rc3_sitting.py",
+        "scripts/h2h_literature.py",
+        "scripts/release_build.py",
+        "bbdir-release/bindings/libseams_lang.so",
+    output:
+        "benchmarks/rc3-sitting.csv",
+        "benchmarks/rc3-sitting.txt",
+        "benchmarks/rc3-vesin-gap.txt",
+    shell:
+        "PY=\"${{H2H_PYTHON:-python3}}\"; "
+        "\"$PY\" scripts/h2h_rc3_sitting.py "
+        "--out {output[0]} --log {output[1]}"
 
 
 rule linkcell_scale:

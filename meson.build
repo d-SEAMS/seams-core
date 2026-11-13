@@ -667,7 +667,9 @@ endif
 
 # Nanobind module over libseams. A missing nanobind skips the import test.
 if get_option('with_python')
-  py_mod = import('python').find_installation(pure: false, required: false)
+  # The same python3 the tests invoke. Meson's own interpreter is not
+  # that program when a conda env is on PATH.
+  py_mod = import('python').find_installation('python3', pure: false, required: false)
   nanobind_dep = dependency('nanobind', required: false, allow_fallback: true)
   python_deps = []
   if py_mod.found() and nanobind_dep.found()

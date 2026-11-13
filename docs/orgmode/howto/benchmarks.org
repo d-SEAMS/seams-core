@@ -98,3 +98,81 @@ Medians, in milliseconds:
 | 110592 | 8 | 4.005 (0.198) | 11.119 (0.587) | 53.584 (6.095) | 4.235 (0.141) | 12.850 (0.584) | 60.758 (1.661) |
 | 884736 | 1 | 196.570 (4.052) | 393.679 (3.895) | 2165.338 (5.655) | 199.710 (1.506) | 483.699 (8.987) | 2848.587 (9.968) |
 | 884736 | 8 | 28.539 (0.404) | 71.276 (2.213) | 445.968 (27.198) | 29.970 (1.524) | 82.255 (3.036) | 504.070 (12.638) |
+
+* Production-stride ring update
+
+Both tables are 4096 molecules, 200 transitions, eight cores and eight
+OpenMP threads. One warm-up, then eight repetitions. The median is
+type-7. The carry time is the hop-ball update. The rebuild time is a
+full search of the same frame. Speedup is rebuild divided by carry.
+Every transition stayed inside the hop ball, and the carried rings
+matched the full search. The logs name no machine.
+
+The mW window is the growth trajectory at 208 K. The step is 10 fs, so
+strides of 10, 100 and 1000 steps are 0.1, 1 and 10 ps.
+=benchmarks/hop-stride-10.txt=, =benchmarks/hop-stride-100.txt= and
+=benchmarks/hop-stride-1000.txt= are the raw lines.
+=snakemake hop_stride= rebuilds them.
+
+| ps | graph | changed bonds | carry ms | rebuild ms | speedup |
+|----+-------+---------------+----------+------------+---------|
+| 0.1 | cutoff | 920 | 1.941 | 2.589 | 1.35 |
+| 0.1 | seeded-strict | 1214 | 0.812 | 1.529 | 1.89 |
+| 0.1 | seeded-union | 768 | 1.175 | 2.037 | 1.74 |
+| 0.1 | seeded | 1214 | 1.999 | 3.585 | 1.80 |
+| 1 | cutoff | 2044 | 2.399 | 2.557 | 1.07 |
+| 1 | seeded-strict | 1984 | 0.957 | 1.557 | 1.62 |
+| 1 | seeded-union | 1778 | 1.568 | 2.025 | 1.30 |
+| 1 | seeded | 1984 | 2.534 | 3.597 | 1.42 |
+| 10 | cutoff | 1430 | 1.195 | 2.075 | 1.48 |
+| 10 | seeded-strict | 1271 | 0.625 | 1.749 | 2.40 |
+| 10 | seeded-union | 1270 | 0.865 | 1.913 | 1.88 |
+| 10 | seeded | 1284 | 1.501 | 3.665 | 2.10 |
+
+The TIP4P/2005 slab is ice Ih against liquid water, equilibrated at
+252 K, the melting point of the model. The step is 2 fs, so strides of
+5, 50 and 500 steps are 0.01, 0.1 and 1 ps, an order of magnitude finer
+than the mW dumps. An oxygen moves farther in one picosecond than an mW
+site. The logs are =benchmarks/hop-stride-tip4p-5.txt=,
+=benchmarks/hop-stride-tip4p-50.txt= and
+=benchmarks/hop-stride-tip4p-500.txt=. =snakemake hop_stride= asks for
+them. =input/hop/regenerate_tip4p.py= writes the dumps.
+
+At 0.01, 0.1 and 1 ps every transition stayed inside the ball and the
+rings were identical to a full search. The seeded-strict graph is 8.3,
+3.3 and 2.6 times a rebuild.
+
+| ps | graph | changed bonds | carry ms | rebuild ms | speedup |
+|----+-------+---------------+----------+------------+---------|
+| 0.01 | cutoff | 130 | 0.525 | 1.483 | 2.88 |
+| 0.01 | seeded-strict | 104 | 0.168 | 1.377 | 8.31 |
+| 0.01 | seeded-union | 94 | 0.311 | 1.420 | 4.57 |
+| 0.01 | seeded | 106 | 0.478 | 2.806 | 5.88 |
+| 0.1 | cutoff | 870 | 1.422 | 1.506 | 1.06 |
+| 0.1 | seeded-strict | 484 | 0.422 | 1.391 | 3.28 |
+| 0.1 | seeded-union | 494 | 0.689 | 1.417 | 2.07 |
+| 0.1 | seeded | 502 | 1.118 | 2.826 | 2.52 |
+| 1 | cutoff | 1434 | 1.524 | 1.478 | 1.01 |
+| 1 | seeded-strict | 842 | 0.538 | 1.406 | 2.59 |
+| 1 | seeded-union | 926 | 0.874 | 1.389 | 1.60 |
+| 1 | seeded | 926 | 1.442 | 2.818 | 1.95 |
+
+* Release candidate sitting
+
+Neighbours, local q4 and q6, CHILL+, primitive rings, the shell
+symmetry label and GenIce cages were retimed in one sitting, at
+110592 and 884736 molecules, on one thread and on eight. Six calls
+after a warm-up. The host is an eight-core Intel Xeon, family 6
+model 207, and the name is not recorded. The table, the versions
+and the rows that do not match an earlier quoted time are in
+[[file:literature-h2h.org][Literature head-to-head]]. The raw lines are
+=benchmarks/rc3-sitting.csv= and =benchmarks/rc3-sitting.txt=.
+=snakemake rc3_sitting= regenerates them.
+
+The 20.3 ms and 50.7 ms vesin times are the same full list of
+442368 pairs. =n_threads=0= follows =OMP_NUM_THREADS=, which is 1
+in this environment, so the pool stays one thread and the median
+is 50.6 ms. An explicit pool of eight threads is 20.3 ms.
+=benchmarks/rc3-vesin-gap.txt= is that probe. A half list is a
+different pair count. The cell list, the copy and the layout move
+the eight-thread time by a few milliseconds.
