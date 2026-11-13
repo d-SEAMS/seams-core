@@ -45,6 +45,7 @@ A how-to solves a goal you already have. It is not a learning path.
    bindings
    versions
    benchmarks
+   paper-tables
    literature-h2h
    literature-reproduce
    neighbour-lists
