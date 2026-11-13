@@ -2830,4 +2830,114 @@ seams_status seams_brine_pockets(const seams_brine *front, int *n_pockets,
   return SEAMS_OK;
 }
 
+const char *seams_last_error_message(void) { return g_error.c_str(); }
+
+seams_status seams_system_natoms(const seams_system *sys, size_t *n) {
+  handle_guard guard(const_cast<seams_system *>(sys));
+  clear_error();
+  if (sys == nullptr || n == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or count is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  *n = static_cast<size_t>(sys->cloud.nop);
+  return SEAMS_OK;
+}
+
+seams_status seams_neighbours_nrows(const seams_neighbours *nb, size_t *n) {
+  handle_guard guard(const_cast<seams_neighbours *>(nb));
+  clear_error();
+  if (nb == nullptr || n == nullptr) {
+    return fail(SEAMS_ERR_NULL, "neighbours or count is null");
+  }
+  *n = static_cast<size_t>(nb->n);
+  return SEAMS_OK;
+}
+
+seams_status seams_rings_nrings(const seams_rings *rings, size_t *n) {
+  handle_guard guard(const_cast<seams_rings *>(rings));
+  clear_error();
+  if (rings == nullptr || n == nullptr) {
+    return fail(SEAMS_ERR_NULL, "rings or count is null");
+  }
+  *n = rings->rings.size();
+  return SEAMS_OK;
+}
+
+seams_status seams_chill_plus_n(seams_system *sys, double cutoff, int type, int graph,
+                                int rule, int *labels, size_t labels_len, int counts9[9]) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || labels == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or labels is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (!buffer_fits(labels_len, sys->cloud.nop)) {
+    return fail(SEAMS_ERR_RANGE, "label buffer is short");
+  }
+  return seams_chill_plus(sys, cutoff, type, graph, rule, labels, counts9);
+}
+
+seams_status seams_q4q6_n(seams_system *sys, double cutoff, int type, double *q4,
+                          size_t q4_len, double *q6, size_t q6_len) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system is null");
+  }
+  if (q4 == nullptr && q6 == nullptr) {
+    return fail(SEAMS_ERR_NULL, "q4 and q6 are both null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if ((q4 != nullptr && !buffer_fits(q4_len, sys->cloud.nop)) ||
+      (q6 != nullptr && !buffer_fits(q6_len, sys->cloud.nop))) {
+    return fail(SEAMS_ERR_RANGE, "q buffer is short");
+  }
+  return seams_q4q6(sys, cutoff, type, q4, q6);
+}
+
+seams_status seams_rings_labels_n(const seams_rings *rings, int *sizes, size_t sizes_len,
+                                  int *symmetry, size_t symmetry_len) {
+  handle_guard guard(const_cast<seams_rings *>(rings));
+  clear_error();
+  if (rings == nullptr) {
+    return fail(SEAMS_ERR_NULL, "rings handle is null");
+  }
+  if (sizes == nullptr && symmetry == nullptr) {
+    return fail(SEAMS_ERR_NULL, "sizes and symmetry are both null");
+  }
+  const size_t need = rings->rings.size();
+  if ((sizes != nullptr && sizes_len < need) ||
+      (symmetry != nullptr && symmetry_len < need)) {
+    return fail(SEAMS_ERR_RANGE, "ring label buffer is short");
+  }
+  return seams_rings_labels(rings, sizes, symmetry);
+}
+
+seams_status seams_rings_histogram_n(const seams_rings *rings, int *counts,
+                                     size_t counts_len) {
+  handle_guard guard(const_cast<seams_rings *>(rings));
+  clear_error();
+  if (rings == nullptr || counts == nullptr) {
+    return fail(SEAMS_ERR_NULL, "histogram output is null");
+  }
+  if (counts_len == 0) {
+    return fail(SEAMS_ERR_RANGE, "histogram length is empty");
+  }
+  for (size_t i = 0; i < counts_len; ++i) {
+    counts[i] = 0;
+  }
+  for (const auto &ring : rings->rings) {
+    if (ring.size() < counts_len) {
+      counts[ring.size()] += 1;
+    }
+  }
+  return SEAMS_OK;
+}
+
 } // extern "C"

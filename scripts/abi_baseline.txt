@@ -18,6 +18,7 @@ T seams_cages_labels
 T seams_cages_signature
 T seams_chill
 T seams_chill_plus
+T seams_chill_plus_n
 T seams_contact_pairs
 T seams_coordination
 T seams_density_axis
@@ -32,6 +33,7 @@ T seams_handle_error
 T seams_hbonds
 T seams_label_name
 T seams_last_error
+T seams_last_error_message
 T seams_monolayer
 T seams_neighbours_build
 T seams_neighbours_copy
@@ -39,9 +41,11 @@ T seams_neighbours_count
 T seams_neighbours_csr
 T seams_neighbours_destroy
 T seams_neighbours_knn
+T seams_neighbours_nrows
 T seams_path_nframes
 T seams_prisms
 T seams_q4q6
+T seams_q4q6_n
 T seams_q6bar
 T seams_ql
 T seams_rdf
@@ -50,7 +54,10 @@ T seams_rings_destroy
 T seams_rings_find
 T seams_rings_fraction
 T seams_rings_histogram
+T seams_rings_histogram_n
 T seams_rings_labels
+T seams_rings_labels_n
+T seams_rings_nrings
 T seams_rings_vertices
 T seams_ring_symmetry_name
 T seams_running_cn
@@ -62,6 +69,7 @@ T seams_steinhardt
 T seams_system_count
 T seams_system_create
 T seams_system_destroy
+T seams_system_natoms
 T seams_system_read
 T seams_system_set_atoms
 T seams_system_set_frame
