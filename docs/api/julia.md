@@ -4,6 +4,13 @@
 
 `meson test docs_api_julia` runs `docs/examples/julia_api.jl` with
 `SEAMS_LANG_LIB` pointed at `libseams_lang`.
+`docs/examples/minimal_julia.jl` reads the
+GenIce sI cell and calls `steinhardt`, `chill_plus`, and `primitive_rings`.
+`meson test docs_examples` runs it.
+
+```{literalinclude} ../../../docs/examples/minimal_julia.jl
+:language: julia
+```
 
 ```{literalinclude} ../../../docs/examples/julia_api.jl
 :language: julia

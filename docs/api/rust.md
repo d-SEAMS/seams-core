@@ -18,6 +18,15 @@ let (six, fraction) = sys.six_ring_fraction(3.5)?;
 `System::count` is the number of points in the frame.
 `bindings/rust/seams/tests/ice.rs` is the `cargo test` that calls every
 safe wrapper. `meson test docs_api_rust` runs that test.
+`docs/examples/minimal_rust.rs` reads the
+GenIce sI cell and calls `System::set_ortho`, `count`, `neighbour_degree`,
+`q4q6`, `chill_plus`, and `six_ring_fraction`. `meson test docs_examples`
+runs it.
+
+```{literalinclude} ../../../docs/examples/minimal_rust.rs
+:language: rust
+```
+
 `examples/ice.rs` prints the cubic count.
 
 ```{literalinclude} ../../../bindings/rust/seams/tests/ice.rs

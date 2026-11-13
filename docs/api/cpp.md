@@ -8,6 +8,16 @@ numbers: `ox, oy, oz, lx, ly, lz, xy, xz, yz`.
 (`seams_frame_*`). It is not required for a program that only needs
 `seams.h`.
 
+`docs/examples/minimal_cpp.cpp` reads the
+GenIce sI cell with `seams_frame_read`, then calls
+`seams_frame_neighbours`, `seams_frame_steinhardt`,
+`seams_frame_chill_plus`, and `seams_frame_rings`.
+`meson test docs_examples` runs it.
+
+```{literalinclude} ../../../docs/examples/minimal_cpp.cpp
+:language: cpp
+```
+
 Build:
 
 ```bash

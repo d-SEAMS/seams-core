@@ -8,6 +8,13 @@
 compiles. It calls every `bind(C)` procedure in the module on a 64-atom
 cubic cell. `meson test docs_api_fortran` compiles that program with
 gfortran and runs it.
+`docs/examples/minimal_fortran.f90` reads
+`input/traj/genice_sI.lammpstrj` and calls the same C entry points.
+`meson test docs_examples` runs it.
+
+```{literalinclude} ../../../docs/examples/minimal_fortran.f90
+:language: fortran
+```
 
 ```{literalinclude} ../../../bindings/fortran/test_seams.f90
 :language: fortran

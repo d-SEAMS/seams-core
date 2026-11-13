@@ -23,7 +23,16 @@ Ic, 2 stacking-disordered, and -1 otherwise.
 `box` is three lengths or nine LAMMPS numbers. `dseams.PUBLISHED` and
 `dseams.OVITO` select the CHILL+ rule. `dseams.CUTOFF` and `dseams.MUTUAL`
 select the graph. `dseams.set_num_threads` and `dseams.num_threads` match the
-C calls. `dseams.version` is the library version.
+C calls. `dseams.version` is the library version. `Frame.set_frame` stores one
+cell. `Frame.count` is the number of points.
+
+`docs/examples/minimal_py.py` reads
+`input/traj/genice_sI.lammpstrj` and calls the C API for neighbours, q6,
+CHILL+, and rings. `meson test docs_examples` runs it.
+
+```{literalinclude} ../../../docs/examples/minimal_py.py
+:language: python
+```
 
 `dseams.from_ase(atoms)` rotates an ASE cell into the LAMMPS frame and returns
 positions and the nine-number box. `dseams.from_mdanalysis(universe)` reads

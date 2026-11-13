@@ -7,3 +7,7 @@ license = "MIT"
 
 [dependencies]
 seams-sys = { path = "../seams-sys" }
+
+[[example]]
+name = "minimal"
+path = "../../../docs/examples/minimal_rust.rs"

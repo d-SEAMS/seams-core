@@ -7,7 +7,8 @@ A cell is nine numbers: `ox, oy, oz, lx, ly, lz, xy, xz, yz`. A zero tilt is ort
 ## Version and errors
 
 `seams_abi` returns 1. `seams_version_major`, `seams_version_minor`, `seams_version_patch`
-and `seams_version_string` identify the release. The build writes those
+and `seams_version_string` identify the release. The `seams_version` prefix
+is those four calls. The build writes those
 macros from the project version (2.14.0).
 
 `seams_status` is `SEAMS_OK`, `SEAMS_ERR_NULL`, `SEAMS_ERR_RANGE`, `SEAMS_ERR_BOX`,
@@ -65,6 +66,16 @@ fraction of atoms that sit on a ring; a size of zero counts every ring.
 `seams_set_num_threads(0)` restores the OpenMP width captured at first use
 (`omp_get_max_threads`), which is the library default. A negative width
 returns `SEAMS_ERR_RANGE`.
+
+## Runnable example
+
+`docs/examples/minimal_c.c` reads
+`input/traj/genice_sI.lammpstrj`, builds the cutoff neighbour list, and
+computes q6, CHILL+, and primitive rings. `meson test docs_examples` runs it.
+
+```{literalinclude} ../../../docs/examples/minimal_c.c
+:language: c
+```
 
 ## Examples
 
