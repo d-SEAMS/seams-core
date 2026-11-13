@@ -20,6 +20,17 @@ The module exports `SEAMS_OK`, `SEAMS_CHILL_PUBLISHED`, `SEAMS_CHILL_OVITO`,
 `seams_q4q6`, `seams_neighbours_build`, `seams_neighbours_destroy`,
 `seams_neighbours_csr`, `seams_rings_find`, `seams_rings_destroy`,
 `seams_rings_histogram`, and `seams_rings_fraction`.
+The same module also binds `seams_handle_error`, `seams_system_count`,
+`seams_system_read`, `seams_chill`, `seams_steinhardt`, `seams_cages`,
+`seams_cages_destroy`, `seams_cages_counts`, `seams_signature_cages`,
+`seams_neighbours_knn`, `seams_rdf`, `seams_running_cn`,
+`seams_coordination`, `seams_hbonds`, `seams_density_axis`,
+`seams_fingerprint`, `seams_fingerprint_destroy`, `seams_fingerprint_key`,
+`seams_fingerprint_rings`, `seams_contact_pairs`, `seams_domains`,
+`seams_prisms`, `seams_monolayer`, `seams_rings_count`,
+`seams_rings_vertices`, and `seams_site_table`. Fortran wrappers
+`read_frame`, `signature_count`, `site_kinds`, `pair_count`, and
+`domain_size` turn Fortran strings into the C buffers those calls take.
 
 ```{literalinclude} ../../../docs/examples/minimal_fortran.f90
 :language: fortran
@@ -27,7 +38,11 @@ The module exports `SEAMS_OK`, `SEAMS_CHILL_PUBLISHED`, `SEAMS_CHILL_OVITO`,
 
 ```{literalinclude} ../../../bindings/fortran/test_seams.f90
 :language: fortran
-:lines: 37-74
+:lines: 45-141
+```
+
+```{literalinclude} ../../../bindings/fortran/seams.f90
+:language: fortran
 ```
 
 <!-- API_SYMBOLS_BEGIN -->
@@ -261,6 +276,336 @@ Purpose: Return the version as text.
 Parameters: none
 
 Units: text
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### SEAMS_GRAPH_SEEDED
+
+Purpose: Cage graph of mutual seeds and union completions.
+
+Parameters: none
+
+Units: dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### c_chars
+
+Purpose: Copy a Fortran string into a null-terminated C buffer.
+
+Parameters: text
+
+Units: text
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### domain_size
+
+Purpose: Largest apolar domain for a site-table spec.
+
+Parameters: sys; spec; n_subset; largest; percolation
+
+Units: percolation is dimensionless; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### pair_count
+
+Purpose: Mutual nearest unlike contacts for a site-table spec.
+
+Parameters: sys; spec; n_pairs; n_cation; n_anion
+
+Units: dimensionless counts
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### read_frame
+
+Purpose: Read one trajectory frame into a handle.
+
+Parameters: sys; path; frame; type_filter
+
+Units: frame index is 1-based; coordinates in angstrom
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_cages
+
+Purpose: Hexagonal and double-diamond cage membership.
+
+Parameters: sys; cutoff; typ; graph; k; complete; out
+
+Units: cutoff in angstrom; handle
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_cages_counts
+
+Purpose: Disjoint hexagonal, cubic, water, and both counts.
+
+Parameters: cages; n_hex; n_cubic; n_water; n_both
+
+Units: dimensionless counts
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_cages_destroy
+
+Purpose: Free a cage-membership handle.
+
+Parameters: cages
+
+Units: handle
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_chill
+
+Purpose: Original CHILL labels and nine population counts.
+
+Parameters: sys; cutoff; typ; graph; rule; labels; labels_len; counts
+
+Units: cutoff in angstrom; codes are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_contact_pairs
+
+Purpose: Mutual nearest unlike contacts of a site table.
+
+Parameters: sys; spec; n_pairs; n_cation; n_anion
+
+Units: dimensionless counts
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_coordination
+
+Purpose: Coordination number integrated to rmax.
+
+Parameters: sys; rmax; bins; type_i; type_j; cn
+
+Units: rmax in angstrom; coordination is dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_density_axis
+
+Purpose: Number density along one cell axis.
+
+Parameters: sys; typ; bins; axis; z; rho; cap; n_out
+
+Units: density in inverse cubic angstrom; centres in angstrom
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_domains
+
+Purpose: Largest polar or apolar domain.
+
+Parameters: sys; cutoff; spec; subset; n_subset; largest; percolation
+
+Units: cutoff in angstrom; percolation is dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_fingerprint
+
+Purpose: Topological fingerprint of the bonded graph.
+
+Parameters: sys; cutoff; typ; k; graph; hops; colour_types; out
+
+Units: cutoff in angstrom; handle
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_fingerprint_destroy
+
+Purpose: Free a fingerprint handle.
+
+Parameters: fp
+
+Units: handle
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_fingerprint_key
+
+Purpose: Frame fingerprint text.
+
+Parameters: fp; buf; cap; n_out
+
+Units: text
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_fingerprint_rings
+
+Purpose: Primitive-ring census stored on the fingerprint.
+
+Parameters: fp; counts; counts_len
+
+Units: dimensionless counts
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_handle_error
+
+Purpose: Detail string stored on a handle.
+
+Parameters: handle
+
+Units: text
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_hbonds
+
+Purpose: Hydrogen-bond count.
+
+Parameters: sys; cutoff; oxygen_type; hydrogen_type; dist_cutoff; angle_cutoff; n_bonds
+
+Units: distances in angstrom; angle in degrees
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_monolayer
+
+Purpose: Primitive-ring histogram of a monolayer.
+
+Parameters: sys; cutoff; typ; max_depth; sheet_area; counts; counts_len
+
+Units: cutoff in angstrom; area in square angstrom
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_neighbours_knn
+
+Purpose: k-nearest neighbour list.
+
+Parameters: sys; k; cutoff; typ; mutual; out
+
+Units: cutoff in angstrom; k is a dimensionless count
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_prisms
+
+Purpose: Perfect and imperfect prism counts by ring size.
+
+Parameters: sys; cutoff; typ; perfect; imperfect; len
+
+Units: cutoff in angstrom; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_rdf
+
+Purpose: Partial radial distribution and the cell volume.
+
+Parameters: sys; rmax; bins; type_i; type_j; r; g; count; cap; n_out; volume
+
+Units: rmax in angstrom; volume in cubic angstrom
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_rings_count
+
+Purpose: Number of primitive rings.
+
+Parameters: rings
+
+Units: dimensionless count
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_rings_vertices
+
+Purpose: Atom indices of one ring.
+
+Parameters: rings; index; atoms; cap; n_out
+
+Units: dimensionless indices
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_running_cn
+
+Purpose: Running coordination number along the partial RDF.
+
+Parameters: sys; rmax; bins; type_i; type_j; r; cn; cap; n_out
+
+Units: rmax in angstrom; coordination is dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_signature_cages
+
+Purpose: Closed cages whose ring census matches a signature.
+
+Parameters: sys; cutoff; typ; graph; spec; n_cages; n_atoms
+
+Units: cutoff in angstrom; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_site_table
+
+Purpose: Per-atom site kind from a site-table spec.
+
+Parameters: sys; spec; kinds; len
+
+Units: dimensionless site codes
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_steinhardt
+
+Purpose: Local q_l and the Lechner-Dellago average.
+
+Parameters: sys; cutoff; typ; order_l; ql; ql_len; qlbar; qlbar_len
+
+Units: cutoff in angstrom; q_l is dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_system_count
+
+Purpose: Number of points in the frame.
+
+Parameters: sys
+
+Units: dimensionless count
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_system_read
+
+Purpose: Read one frame from a trajectory path.
+
+Parameters: sys; path; frame; type_filter
+
+Units: frame index is 1-based; coordinates in angstrom
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### signature_count
+
+Purpose: Closed-cage count for one signature on the cutoff graph.
+
+Parameters: sys; spec; n_cages; n_atoms
+
+Units: dimensionless counts
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### site_kinds
+
+Purpose: Per-atom site kind for a Fortran spec string.
+
+Parameters: sys; spec; kinds; n
+
+Units: dimensionless site codes
 
 Example: `docs/examples/minimal_fortran.f90`
 <!-- API_SYMBOLS_END -->

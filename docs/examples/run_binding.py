@@ -45,7 +45,8 @@ def run_fortran(build):
     )
     env = os.environ.copy()
     env["LD_LIBRARY_PATH"] = library_path(build)
-    subprocess.check_call([str(exe)], env=env)
+    env["OMP_NUM_THREADS"] = "1"
+    subprocess.check_call([str(exe), str(ROOT)], env=env)
 
 
 def run_rust(build):
@@ -55,6 +56,9 @@ def run_rust(build):
     env = os.environ.copy()
     env["SEAMS_LIB_DIR"] = str(build / "src")
     env["LD_LIBRARY_PATH"] = library_path(build)
+    env["SEAMS_CPP_ORACLE"] = str(build / "bindings" / "binding_oracle")
+    env["SEAMS_SOURCE_ROOT"] = str(ROOT)
+    env["OMP_NUM_THREADS"] = "1"
     subprocess.check_call(
         [
             cargo,
