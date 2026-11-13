@@ -69,6 +69,7 @@ test_sources = {
   'site': 'test_site.cpp',
   'wide_cell': 'test_wide_cell.cpp',
   'offset_limit': 'test_offset_limit.cpp',
+  'prism_empty': 'test_prism_empty.cpp',
 }
 
 if readcon_dep.found()

@@ -3731,16 +3731,19 @@ int prism3::findBulkPrisms(
 bool prism3::basalPrismConditions(const std::vector<std::vector<int>> &nList,
                                   std::vector<int> &basal1,
                                   std::vector<int> &basal2) {
+  if (basal1.empty() || basal2.empty() || basal1.size() != basal2.size()) {
+    return false;
+  }
   int l1 = basal1[0]; // first element of basal1 ring
   int ringSize =
       basal1.size(); // Size of the ring; each ring contains n elements
   int m_k;              // Atom ID of element in basal2
-  bool l1_neighbour;    // m_k is a neighbour of l1(true) or not (false)
+  bool l1_neighbour = false; // m_k is a neighbour of l1(true) or not (false)
 
   // isNeighbour is initialized to false for all basal2 elements; indication if
   // basal2 elements are neighbours of basal1
   std::vector<bool> isNeighbour(ringSize, false);
-  int kIndex;  // m_k index
+  int kIndex = 0; // m_k index
   int lAtomID; // atomID of the current element of basal1
   int kAtomID; // atomID of the current element of basal2
 
