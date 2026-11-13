@@ -59,12 +59,29 @@ class Frame(_core.Frame):
         super().set_frame(pos, _as_box(box))
 
 
+def _chill_rule(rule):
+    """paper is the four closest neighbours. ovito is the whole cutoff shell."""
+    if isinstance(rule, str):
+        name = rule.strip().lower().replace("_", "-")
+        if name in ("paper", "published", "chill+"):
+            return PUBLISHED
+        if name in ("ovito", "ovito-chill+"):
+            return OVITO
+        raise ValueError("rule is paper or ovito")
+    return rule
+
+
 def chill_plus(positions, box, rule=PUBLISHED, graph=CUTOFF, cutoff=3.5):
-    """CHILL+ labels and the nine population counts."""
+    """CHILL+ labels and the nine population counts.
+
+    ``rule`` is ``paper`` (``PUBLISHED``, the default) or ``ovito``.
+    Paper averages q_lm over the four closest neighbours. Ovito averages
+    q_lm over every neighbour inside the cutoff.
+    """
     pos = np.ascontiguousarray(positions, dtype=np.float64)
     frame = Frame()
     frame.set_frame(pos, _as_box(box))
-    return frame.chill_plus(cutoff, graph, rule)
+    return frame.chill_plus(cutoff, graph, _chill_rule(rule))
 
 
 def q4q6(positions, box, cutoff=3.5):

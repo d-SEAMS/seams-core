@@ -78,6 +78,12 @@ line below says otherwise.
 
 The call is in `docs/examples/c_api_tour.c`. The run prints:
 
+`seams_chill_plus` writes one label per atom and, when `counts9` is not null, nine
+population counts. `rule` is `SEAMS_CHILL_PUBLISHED` (four closest neighbours in
+q_lm, Nguyen and Molinero equation 1) or `SEAMS_CHILL_OVITO` (every neighbour
+inside the cutoff). `seams_label_name` maps a label to cubic, hexagonal, water,
+interfacial, clathrate, interClathrate, unclassified, reCubic, or reHex.
+
 ```
 capi seams_abi 1
 ```

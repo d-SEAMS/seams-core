@@ -685,6 +685,18 @@ test('omp_threads',
   env: _test_env,
   timeout: 120)
 
+test('chill_mixed',
+  executable('test_chill_mixed', 'test_chill_mixed.cpp',
+    dependencies: [yds_dep, catch2_dep],
+    link_with: seams_api_lib,
+    cpp_args: _args + ['-I' + meson.project_build_root() / 'src'],
+    link_args: _test_link_args,
+    include_directories: [_incdirs, include_directories('../include')],
+    build_rpath: _test_rpath),
+  workdir: meson.project_source_root(),
+  env: _test_env,
+  timeout: 120)
+
 dump_faults = shared_module('dump_faults', 'dump_faults_preload.c', name_prefix: 'lib')
 dump_fault_driver = executable('dump_fault_driver', 'dump_fault_driver.cpp',
   dependencies: [yds_dep],

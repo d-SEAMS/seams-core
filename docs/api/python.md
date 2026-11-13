@@ -20,8 +20,9 @@ counts closed polyhedra whose ring census matches `spec` and returns
 `(n_cages, n_atoms)`. `dseams.symmetry` is the shell label: 0 ice Ih, 1 ice
 Ic, 2 stacking-disordered, and -1 otherwise.
 
-`box` is three lengths or nine LAMMPS numbers. `dseams.PUBLISHED` and
-`dseams.OVITO` select the CHILL+ rule. `dseams.CUTOFF` and `dseams.MUTUAL`
+`box` is three lengths or nine LAMMPS numbers. `dseams.PUBLISHED` (`"paper"`)
+averages q_lm over the four closest neighbours. `dseams.OVITO` (`"ovito"`)
+averages q_lm over every neighbour inside the cutoff. `dseams.CUTOFF` and `dseams.MUTUAL`
 select the graph. `dseams.set_num_threads` and `dseams.num_threads` match the
 C calls. `dseams.version` is the library version. `Frame.set_frame` stores one
 cell. `Frame.count` is the number of points.
@@ -106,7 +107,7 @@ Example: `docs/examples/minimal_py.py`
 
 ### OVITO
 
-Purpose: CHILL+ rule id matching OVITO.
+Purpose: CHILL+ definition that averages q_lm over every neighbour inside the cutoff.
 
 Parameters: none
 
@@ -116,7 +117,7 @@ Example: `docs/examples/minimal_py.py`
 
 ### PUBLISHED
 
-Purpose: CHILL+ rule id of the 2015 paper.
+Purpose: CHILL+ definition that averages q_lm over the four closest neighbours.
 
 Parameters: none
 

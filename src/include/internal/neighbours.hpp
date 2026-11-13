@@ -531,7 +531,7 @@ std::vector<std::vector<int>> kNearestNeighbourList(
 //! atom-id rows are mapped back to indices.
 void kNearestCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
                  double candidateCutoff, int typeI, bool mutual, std::vector<int> &offsets,
-                 std::vector<int> &cols);
+                 std::vector<int> &cols, bool park = true);
 
 //! Packed nominations from the same search as kNearestNeighbourList.
 //! `xyz` is n by 3 and `nom` is n by k cloud indices, nearest first,

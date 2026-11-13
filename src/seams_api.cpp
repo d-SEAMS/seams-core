@@ -772,6 +772,38 @@ seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type,
   try {
     use_threads();
     int typ = 1;
+    if (graph == SEAMS_GRAPH_CUTOFF) {
+      // The cutoff list only reads coordinates. Copying the frame first
+      // duplicated every point, including its bond vectors, and that copy
+      // was slower than the search.
+      const Cloud &work = sys->cloud;
+      const std::vector<int> *sub = nullptr;
+      std::vector<int> subset;
+      if (type > 0) {
+        typ = type;
+        bool uniform = work.nop > 0;
+        for (int i = 0; i < work.nop && uniform; ++i) {
+          if (work.pts[static_cast<std::size_t>(i)].type != typ) {
+            uniform = false;
+          }
+        }
+        if (!uniform) {
+          subset.reserve(static_cast<std::size_t>(work.nop));
+          for (int i = 0; i < work.nop; ++i) {
+            if (work.pts[static_cast<std::size_t>(i)].type == typ) {
+              subset.push_back(i);
+            }
+          }
+          sub = &subset;
+        }
+      }
+      auto direct = std::make_unique<seams_neighbours>();
+      direct->n = work.nop;
+      if (nneigh::orthoFullCsr(work, sub, cutoff, direct->offsets, direct->cols, false)) {
+        *out = direct.release();
+        return SEAMS_OK;
+      }
+    }
     Cloud work = unified_copy(sys->cloud, type, typ);
     auto rows = bond_rows(work, cutoff, typ, graph);
     auto idx = nneigh::neighbourListByIndex(work, rows);
@@ -863,23 +895,49 @@ seams_status seams_chill_plus(seams_system *sys, double cutoff, int type, int gr
   try {
     use_threads();
     int typ = 1;
-    Cloud work = unified_copy(sys->cloud, type, typ);
-    if (rule == SEAMS_CHILL_PUBLISHED && graph == SEAMS_GRAPH_CUTOFF) {
+    if ((rule == SEAMS_CHILL_PUBLISHED || rule == SEAMS_CHILL_OVITO) &&
+        (graph == SEAMS_GRAPH_CUTOFF || graph == SEAMS_GRAPH_MUTUAL)) {
+      // Labels are written onto the frame. The bond vectors are not: the
+      // caller reads the label buffer. Skipping the frame copy keeps the
+      // same iceType values the copied frame used to carry out.
+      Cloud &work = sys->cloud;
+      if (type > 0) {
+        typ = type;
+      }
       std::vector<int> subset;
       const std::vector<int> *sub = nullptr;
-      if (type > 0) {
-        subset.reserve(static_cast<std::size_t>(work.nop));
-        for (int i = 0; i < work.nop; ++i) {
-          if (work.pts[static_cast<std::size_t>(i)].type == typ) {
-            subset.push_back(i);
+      if (graph == SEAMS_GRAPH_CUTOFF && type > 0) {
+        bool uniform = work.nop > 0;
+        for (int i = 0; i < work.nop && uniform; ++i) {
+          if (work.pts[static_cast<std::size_t>(i)].type != typ) {
+            uniform = false;
           }
         }
-        sub = &subset;
+        if (!uniform) {
+          subset.reserve(static_cast<std::size_t>(work.nop));
+          for (int i = 0; i < work.nop; ++i) {
+            if (work.pts[static_cast<std::size_t>(i)].type == typ) {
+              subset.push_back(i);
+            }
+          }
+          sub = &subset;
+        }
       }
       std::vector<int> offsets;
       std::vector<int> cols;
-      if (nneigh::orthoFullCsr(work, sub, cutoff, offsets, cols, false)) {
-        chill::chillPlusFromCsr(work, offsets, cols);
+      bool listed = false;
+      if (graph == SEAMS_GRAPH_MUTUAL) {
+        nneigh::kNearestCsr(work, 4, cutoff + 1.5, typ, true, offsets, cols, false);
+        listed = static_cast<int>(offsets.size()) == work.nop + 1;
+      } else {
+        listed = nneigh::orthoFullCsr(work, sub, cutoff, offsets, cols, false);
+      }
+      if (listed) {
+        if (rule == SEAMS_CHILL_OVITO) {
+          chill::chillPlusOvitoFromCsr(work, offsets, cols);
+        } else {
+          chill::chillPlusFromCsr(work, offsets, cols, false);
+        }
         const int n = work.nop;
         int counts[9] = {};
         for (int i = 0; i < n; ++i) {
@@ -900,6 +958,7 @@ seams_status seams_chill_plus(seams_system *sys, double cutoff, int type, int gr
         return SEAMS_OK;
       }
     }
+    Cloud work = unified_copy(sys->cloud, type, typ);
     auto rows = bond_rows(work, cutoff, typ, graph);
     const char *spec = rule == SEAMS_CHILL_OVITO ? "ovito-chill+" : "chill+";
     chill::applyChillPlus(work, rows, chill::chillPlusRule(spec), false);
@@ -1392,6 +1451,48 @@ seams_status seams_chill(seams_system *sys, double cutoff, int type, int graph, 
   try {
     use_threads();
     int typ = 1;
+    if (rule == SEAMS_CHILL_PUBLISHED &&
+        (graph == SEAMS_GRAPH_CUTOFF || graph == SEAMS_GRAPH_MUTUAL)) {
+      // Correlations stay in a flat table. The per-atom bond vectors are
+      // not built. iceType is written on the frame the caller already holds.
+      Cloud &work = sys->cloud;
+      if (type > 0) {
+        typ = type;
+      }
+      std::vector<int> offsets;
+      std::vector<int> cols;
+      bool listed = false;
+      if (graph == SEAMS_GRAPH_CUTOFF) {
+        const std::vector<int> *sub = nullptr;
+        std::vector<int> subset;
+        if (type > 0) {
+          bool uniform = work.nop > 0;
+          for (int i = 0; i < work.nop && uniform; ++i) {
+            if (work.pts[static_cast<std::size_t>(i)].type != typ) {
+              uniform = false;
+            }
+          }
+          if (!uniform) {
+            subset.reserve(static_cast<std::size_t>(work.nop));
+            for (int i = 0; i < work.nop; ++i) {
+              if (work.pts[static_cast<std::size_t>(i)].type == typ) {
+                subset.push_back(i);
+              }
+            }
+            sub = &subset;
+          }
+        }
+        listed = nneigh::orthoFullCsr(work, sub, cutoff, offsets, cols, false);
+      } else {
+        nneigh::kNearestCsr(work, 4, cutoff + 1.5, typ, true, offsets, cols, false);
+        listed = static_cast<int>(offsets.size()) == work.nop + 1;
+      }
+      if (listed) {
+        chill::chillFromCsr(work, offsets, cols);
+        write_ice_labels(work, type, labels, counts9);
+        return SEAMS_OK;
+      }
+    }
     Cloud work = unified_copy(sys->cloud, type, typ);
     auto rows = bond_rows(work, cutoff, typ, graph);
     if (rule == SEAMS_CHILL_OVITO) {

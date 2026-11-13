@@ -105,7 +105,10 @@ NB_MODULE(_core, m) {
                  nb::ndarray<nb::numpy, int>(labels, {static_cast<std::size_t>(n)}, owner),
                  nb::ndarray<nb::numpy, int>(copy, {9}, cowner));
            },
-           nb::arg("cutoff") = 3.5, nb::arg("graph") = 0, nb::arg("rule") = 0)
+           nb::arg("cutoff") = 3.5, nb::arg("graph") = 0, nb::arg("rule") = 0,
+           "CHILL+ labels. rule 0 (PUBLISHED) averages q_lm over the four "
+           "closest neighbours. rule 1 (OVITO) averages q_lm over every "
+           "neighbour inside the cutoff.")
       .def("q4q6",
            [](Frame &frame, double cutoff) {
              const int n = seams_system_count(frame.sys);

@@ -3104,25 +3104,31 @@ extern "C" void csrContinue(void *raw) {
 
 void nneigh::kNearestCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
                          double candidateCutoff, int typeI, bool mutual,
-                         std::vector<int> &offsets, std::vector<int> &cols) {
+                         std::vector<int> &offsets, std::vector<int> &cols, bool park) {
   seams::prepareCompute();
   [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
 #ifdef SEAMS_HAS_LINKCELL
   // The scan and the CSR merge share one Rayon pool, split into z-slabs.
   // An OpenMP team left in active wait by the previous region sits on
-  // those cores, so park it for this call. The next region creates its
-  // own team. A search already inside a parallel region stays on the
-  // caller and does not start a second pool.
+  // those cores, so park it for this call when the caller asks. A caller
+  // that classifies in OpenMP immediately afterwards leaves the team
+  // running: parking it makes that region pay the wake inside the same
+  // call. A search already inside a parallel region stays on the caller.
 #ifdef SEAMS_HAS_OPENMP
   if (omp_in_parallel()) {
     lc_set_threads(1);
   } else {
-    omp_pause_resource_all(omp_pause_soft);
+    if (park) {
+      omp_pause_resource_all(omp_pause_soft);
+    }
     lc_set_threads(seams::teamFor(yCloud.nop));
   }
 #else
+  (void)park;
   lc_set_threads(seams::teamFor(yCloud.nop));
 #endif
+#else
+  (void)park;
 #endif
   const int n = yCloud.nop;
   offsets.assign(static_cast<std::size_t>(std::max(n, 0)) + 1, 0);
