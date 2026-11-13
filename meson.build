@@ -1439,6 +1439,14 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 120)
   test(
+    'docs_science_render_copy',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'check_science_render.py',
+    ],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_science_tutorials',
     python3,
     args: [

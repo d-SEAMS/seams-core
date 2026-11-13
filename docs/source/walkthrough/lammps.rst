@@ -1,28 +1,28 @@
 LAMMPS
 ======
 
-``engines/lammps/ice.data`` is the 64-atom cubic cell the in-run hook
-reads. ``docs/examples/engine_walkthrough.py`` sends those coordinates
-through ``libseams`` at 3.5 angstrom.
+``engines/lammps/in.dseams`` installs ``fix ext`` as
+``external pf/callback 2 2`` and then ``run 8``. The hook in
+``engines/lammps/run_hook.cpp`` classifies the cell on step 0 and every
+second step after that, and adds the cubic count from each call.
+``engines/lammps/ice.data`` is the cell the deck reads.
 
 .. code-block:: text
 
-   lammps cubic 64 six-rings 128 q6 0.628539
+   lammps calls 5 stride 2 ice 320
 
-.. literalinclude:: ../../examples/engine_walkthrough.py
-   :language: python
-   :start-after: def read_lammps
-   :end-before: def read_gro
+Five calls times 64 cubic molecules is 320. When ``run_hook`` is in the
+build, the walkthrough runs that binary on the deck and requires the
+same line.
 
 .. figure:: figures/lammps.svg
-   :alt: LAMMPS cubic-ice census, 64 cubic molecules and 128 six-rings.
+   :alt: LAMMPS fix callback: 5 calls, stride 2, ice 320.
 
-   Census of ``engines/lammps/ice.data``.
+   The fix-external hook on ``in.dseams``.
 
 What this tells you
 -------------------
 
-Every molecule in the cubic cell is cubic ice. The ring histogram holds
-128 six-rings, two per molecule, and the mean local q6 is 0.628539.
-That is the number the hook is expected to print when ``run_hook`` is
-built against this data file.
+The callback fires five times across ``run 8`` because the stride is 2
+and step 0 is included. Each call sees 64 cubic molecules, so the hook
+accumulates ice 320. That total is the fix, not a single static frame.

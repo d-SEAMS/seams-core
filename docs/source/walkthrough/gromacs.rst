@@ -1,26 +1,28 @@
 GROMACS
 =======
 
-``engines/gromacs/ice.gro`` stores the same 64-atom cell in nanometres.
-The walkthrough converts the coordinates to angstrom and classifies them.
+``engines/gromacs/seams_ice.cpp`` reads a trajectory in
+``analyzeFrame`` and multiplies coordinates by 10, from nanometres to
+angstrom. ``engines/gromacs/ice.gro`` stores the second oxygen at
+0.1588 nm.
 
 .. code-block:: text
 
-   gromacs cubic 64 six-rings 128 q6 0.628539
+   gromacs atoms 64 scaled_A 1.5880 ice 64
 
-.. literalinclude:: ../../examples/engine_walkthrough.py
-   :language: python
-   :start-after: def read_gro
-   :end-before: def read_xyz
+The walkthrough checks that 0.1588 nm becomes 1.5880 angstrom before
+CHILL+, and that the converted cell is 64 cubic molecules. When
+``gmx-seams`` is built it also has to print ``gromacs frames 2 ice 128
+atoms 128``, because the tool reads the gro twice.
 
 .. figure:: figures/gromacs.svg
-   :alt: GROMACS cubic-ice census, 64 cubic molecules and 128 six-rings.
+   :alt: GROMACS trajectory read: 64 atoms, 0.1588 nm scaled to 1.588 angstrom.
 
-   Census of ``engines/gromacs/ice.gro``.
+   ``analyzeFrame`` converts the gro from nanometres.
 
 What this tells you
 -------------------
 
-After the nanometre-to-angstrom conversion the GROMACS frame is the
-LAMMPS cell. CHILL+ reports 64 cubic molecules, 128 six-rings, and mean
-q6 0.628539, so ``gmx-seams`` and the library are reading one structure.
+The trajectory hook's unit conversion is what makes 0.1588 nm an
+oxygen-oxygen contact. With that factor the frame is 64 cubic
+molecules.

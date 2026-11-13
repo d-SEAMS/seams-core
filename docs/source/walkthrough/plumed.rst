@@ -1,27 +1,29 @@
 PLUMED
 ======
 
-``engines/plumed/ice.xyz`` is the cubic cell in nanometres, the frame
-``plumed driver`` reads with ``engines/plumed/plumed.dat``. The
-walkthrough converts it to angstrom and classifies it.
+``engines/plumed/SeamsColvar.cpp`` is the ``SEAMS`` action.
+``engines/plumed/plumed.dat`` loads it on ``engines/plumed/ice.xyz``,
+restrains ``seams.q6``, and prints ``seams.ice`` and ``seams.ring``.
+Coordinates in the xyz file are nanometres. ``calculate`` multiplies
+by 10 before the library call. ``ice`` is the cubic fraction and
+``ring`` is the fraction of atoms on a primitive six-ring. Only ``q6``
+carries derivatives, which is why the deck can restrain it.
 
 .. code-block:: text
 
-   plumed cubic 64 six-rings 128 q6 0.628539
+   plumed ice 1.000000 ring 1.000000 hexagonal 0 six 128
 
-.. literalinclude:: ../../examples/engine_walkthrough.py
-   :language: python
-   :start-after: def read_xyz
-   :end-before: def diamond
+When ``plumed`` and ``libSeamsPlumed.so`` are both present, ``plumed
+driver`` has to print the same ice and ring fractions.
 
 .. figure:: figures/plumed.svg
-   :alt: PLUMED cubic-ice census, 64 cubic molecules and 128 six-rings.
+   :alt: PLUMED SEAMS action: ice fraction 1 and six-ring fraction 1.
 
-   Census of ``engines/plumed/ice.xyz``.
+   The action's ice and ring components.
 
 What this tells you
 -------------------
 
-The collective variable ``SEAMS`` on this frame should report 64 cubic
-molecules, 128 six-rings, and q6 0.628539. Those are the values printed
-into ``COLVAR`` when the plugin is loaded.
+Every atom is cubic and every atom sits on a six-ring, so both
+fractions are 1 and the hexagonal count stays 0. The restraint is
+legal only because ``q6`` is the component with derivatives.

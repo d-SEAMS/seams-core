@@ -368,64 +368,74 @@ def write_figure(stem: str, title: str, pairs, figures: Path):
     _bars(title, pairs, figures / f"{stem}.svg")
 
 
-def render_interface_v12(pos, chill, box, figures: Path):
-    """Paint the slab with the v12 rules from science_render.py.
+def _load_science_render(root: Path):
+    import importlib.util
 
-    Liquid is blended at 0.40. Basal layers are numbered by
-    display_layer_ids. The picture has no baked caption. Tachyon is
-    used when Vulkan starts; otherwise the same colours and guides are
-    written as SVG.
+    path = root / "scripts" / "science_render.py"
+    spec = importlib.util.spec_from_file_location("science_render_v12", path)
+    if spec is None or spec.loader is None:
+        raise SystemExit(f"cannot load {path}")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _ensure_display():
+    """Start Xvfb so OVITO's Qt platform can create a Vulkan instance."""
+    if os.environ.get("DISPLAY"):
+        return None
+    xvfb = shutil.which("Xvfb")
+    if xvfb is None:
+        return None
+    display = ":%d" % (20 + os.getpid() % 50)
+    proc = subprocess.Popen(
+        [xvfb, display, "-screen", "0", "1280x1024x24"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    os.environ["DISPLAY"] = display
+    os.environ["QT_QPA_PLATFORM"] = "xcb"
+    os.environ["LIBGL_ALWAYS_SOFTWARE"] = "1"
+    icd = "/usr/share/vulkan/icd.d/lvp_icd.json"
+    if os.path.isfile(icd):
+        os.environ["VK_ICD_FILENAMES"] = icd
+        os.environ["VK_DRIVER_FILES"] = icd
+    import time
+
+    time.sleep(0.4)
+    return proc
+
+
+def render_interface_v12(root: Path, pos, chill, box, figures: Path):
+    """Raster from scripts/science_render.py: Tachyon, liquid at 0.40, numbered guides.
+
+    The SVG stand-in is logged and, when DOCS_CI=1, fails the job.
     """
-    import science_render as render
-
-    forward, _spread = render.column_axis(pos, chill, box)
-    up = np.array([0.0, 0.0, 1.0])
-    centre, half_h, half_v, forward, _right, up = render.project(pos, forward, up)
-    png = figures / "interface-tachyon.png"
-    painted = False
+    server = _ensure_display()
+    png = figures / "interface.png"
     try:
-        render.render_molecule(pos, chill, None, forward, up, png, half_h, half_v, 480, 0.40, False)
+        render = _load_science_render(root)
+        forward, _spread = render.column_axis(pos, chill, box)
+        up = np.array([0.0, 0.0, 1.0])
+        _centre, half_h, half_v, forward, _right, up = render.project(pos, forward, up)
+        render.render_molecule(pos, chill, None, forward, up, png, half_h, half_v, 640, 0.40, False)
         ids = render.display_layer_ids(pos, np.isin(chill, [0, 1]), up)
         render.draw_layer_guides(png, pos, ids, forward, up, half_v)
-        painted = png.is_file() and png.stat().st_size > 0
+        if not png.is_file() or png.stat().st_size < 1000:
+            raise RuntimeError("renderer wrote no raster")
+        print(f"v12 raster {png.name} bytes {png.stat().st_size}")
     except Exception as exc:
-        print(f"v12 Tachyon render unavailable ({exc}); painting the same blend and guides")
-        painted = False
-    if painted:
-        return
-    width, height = 640, 480
-    ids = render.display_layer_ids(pos, np.isin(chill, [0, 1]), up)
-    vertical = (pos - centre) @ up
-    span = 2.0 * half_v
-
-    def xy_of(point):
-        offset = point - centre
-        x = (float(offset @ _right) / (2.0 * half_h) + 0.5) * (width - 80) + 40
-        y = (0.5 - float(offset @ up) / span) * (height - 40) + 20
-        return x, y
-
-    shapes = []
-    order = np.argsort(np.where(chill == 2, 0, 1))
-    for index in order:
-        x, y = xy_of(pos[index])
-        red, green, blue = render.CHILL.get(int(chill[index]), ("", (0.5, 0.5, 0.5)))[1]
-        opacity = 0.40 if int(chill[index]) == 2 else 1.0
-        shapes.append(
-            f'<circle cx="{x:.1f}" cy="{y:.1f}" r="4.2" fill="rgb({int(red*255)},{int(green*255)},{int(blue*255)})" fill-opacity="{opacity:.2f}"/>'
+        print(f"SVG fallback: v12 raster renderer failed: {exc}", file=sys.stderr)
+        (figures / "interface.svg").write_text(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="640" height="80">'
+            '<rect width="100%" height="100%" fill="white"/>'
+            '<text x="16" y="44" font-size="14">SVG fallback</text></svg>\n'
         )
-    guides = []
-    for layer in sorted({int(item) for item in ids if item >= 0}):
-        members = np.flatnonzero(ids == layer)
-        y = (0.5 - float(np.median(vertical[members])) / span) * (height - 40) + 20
-        guides.append(f'<line x1="36" y1="{y:.1f}" x2="{width-8}" y2="{y:.1f}" stroke="#a8a8a8" stroke-width="1"/>')
-        guides.append(f'<text x="8" y="{y+4:.1f}" font-size="12" fill="#464646">{layer}</text>')
-    (figures / "interface.svg").write_text(
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}">'
-        '<rect width="100%" height="100%" fill="white"/>'
-        + "".join(shapes)
-        + "".join(guides)
-        + "</svg>\n"
-    )
+        if os.environ.get("DOCS_CI") == "1":
+            raise SystemExit(1) from exc
+    finally:
+        if server is not None:
+            server.terminate()
 
 
 def expect(condition, message):
@@ -577,7 +587,7 @@ def main():
                     lo, hi = (float(item) for item in handle.readline().split()[:2])
                     edge.append(hi - lo)
                 break
-    render_interface_v12(pos, _labels, np.asarray(edge), figures)
+    render_interface_v12(root, pos, _labels, np.asarray(edge), figures)
 
     sii = signature(lib, traj / "genice_sII.lammpstrj", "512")
     sii_large = signature(lib, traj / "genice_sII.lammpstrj", "51264")

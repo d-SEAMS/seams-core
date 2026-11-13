@@ -1,3 +1,6 @@
+# Vendored from science/interface-nucleation bb1dbdbf25553174a47da6fa3f4be8f31238d7f0.
+# docs/check_science_render.py hashes every byte after the END-HEADER line.
+# END-HEADER
 #!/usr/bin/env python3
 # Copyright (c) d-SEAMS developers
 
