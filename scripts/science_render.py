@@ -41,7 +41,7 @@ CHILL = {
 ICE = {0, 1, 3, 4, 5}
 # One radius and one bond width for every panel. 85 mm is the CPC column.
 ATOM_RADIUS = 0.90
-BOND_WIDTH = 0.16
+BOND_WIDTH = 0.25
 HBOND_A = 3.2
 SLICE_A = 10.0
 COLUMN_MM = 85.0
@@ -289,11 +289,15 @@ def basis(forward: np.ndarray, up: np.ndarray):
     return forward, right, up
 
 
-def basal_forward(pos: np.ndarray, chill: np.ndarray, box: np.ndarray) -> np.ndarray:
-    """In-plane nearest-neighbour row of hexagonal ice.
+def _ice_points(pos: np.ndarray, chill: np.ndarray) -> np.ndarray:
+    return pos[np.isin(chill, [0, 1])]
 
-    That row is the basal [11-20] direction. Looking exactly along it
-    stacks each bilayer into columns instead of a doubled pair.
+
+def basal_forward(pos: np.ndarray, chill: np.ndarray, box: np.ndarray) -> np.ndarray:
+    """[11-20]: the in-plane nearest-neighbour direction of hexagonal ice.
+
+    The three bond azimuths are 60 degrees apart. Their mean, not the box
+    axis, is the view. Front and back oxygens of a column then coincide.
     """
     chosen = np.flatnonzero(chill == 1)
     pts = pos[chosen]
@@ -302,8 +306,8 @@ def basal_forward(pos: np.ndarray, chill: np.ndarray, box: np.ndarray) -> np.nda
     bins: dict[tuple[int, int, int], list[int]] = {}
     for index, key in enumerate(map(tuple, keys)):
         bins.setdefault(key, []).append(index)
-    total = np.zeros(2)
-    count = 0
+    angles = []
+    vectors = []
     for index, key in enumerate(map(tuple, keys)):
         for dx in (-1, 0, 1):
             for dy in (-1, 0, 1):
@@ -314,19 +318,29 @@ def basal_forward(pos: np.ndarray, chill: np.ndarray, box: np.ndarray) -> np.nda
                         delta = pts[other] - pts[index]
                         delta -= box * np.round(delta / box)
                         length = float(np.linalg.norm(delta))
-                        if not (2.4 < length < 3.15 and abs(delta[2]) < 1.0):
+                        if not (2.4 < length < 3.15 and abs(float(delta[2])) < 1.0):
                             continue
                         xy = delta[:2]
                         if xy[0] < 0.0:
                             xy = -xy
-                        angle = math.degrees(math.atan2(float(xy[1]), float(xy[0]))) % 180.0
-                        if angle < 12.0 or angle > 168.0:
-                            total += xy
-                            count += 1
-    if count < 8:
+                        angles.append(math.degrees(math.atan2(float(xy[1]), float(xy[0]))) % 180.0)
+                        vectors.append(xy)
+    if len(angles) < 8:
         return np.array([1.0, 0.0, 0.0])
-    direction = np.array([total[0], total[1], 0.0])
-    return unit(direction)
+    folded = np.array(angles) % 60.0
+    hist, edges = np.histogram(folded, bins=12, range=(0.0, 60.0))
+    centre = float(edges[int(np.argmax(hist))] + 2.5)
+    # The three [11-20] axes are this peak and the same peak plus 60 and 120.
+    members = []
+    for angle, xy in zip(angles, vectors):
+        delta = (angle - centre + 30.0) % 60.0 - 30.0
+        if abs(delta) <= 8.0:
+            members.append(xy)
+    if len(members) < 4:
+        radians = math.radians(centre)
+        return np.array([math.cos(radians), math.sin(radians), 0.0])
+    mean = np.mean(np.asarray(members), axis=0)
+    return unit(np.array([mean[0], mean[1], 0.0]))
 
 
 def stacking_axis(pos: np.ndarray, mask: np.ndarray) -> np.ndarray:
@@ -370,33 +384,114 @@ def stacking_axis(pos: np.ndarray, mask: np.ndarray) -> np.ndarray:
 
 
 def layer_kinds(pos: np.ndarray, chill: np.ndarray, mask: np.ndarray, axis: np.ndarray) -> list[int]:
-    """One CHILL+ class per 3.7 A bin along the stacking axis."""
+    """Ih (1) or Ic (0) for each 3.7 A bin. Interfacial molecules do not colour a layer."""
     pts = pos[mask]
     kinds = chill[mask]
     if pts.shape[0] == 0:
         return []
-    projection = pts @ axis
+    projection = pts @ unit(axis)
     bins = np.floor((projection - projection.min()) / 3.7).astype(int)
     letters = []
     for index in range(int(bins.max()) + 1):
         selected = kinds[bins == index]
-        if selected.size == 0:
+        hexagonal = int(np.sum(selected == 1))
+        cubic = int(np.sum(selected == 0))
+        if hexagonal + cubic == 0:
             continue
-        counts = {code: int(np.sum(selected == code)) for code in (1, 0, 3)}
-        winner = max(counts, key=counts.get)
-        if counts[winner] == 0:
-            continue
-        letters.append(winner)
+        letters.append(1 if hexagonal >= cubic else 0)
     return letters
 
 
-def slice_mask(pos: np.ndarray, chill: np.ndarray, forward: np.ndarray, crystal: np.ndarray) -> np.ndarray:
-    """Crystal in full, liquid-like classes only inside a 1 nm depth slice."""
+def hexagonality(chill: np.ndarray, mask: np.ndarray) -> float:
+    hexagonal = int(np.sum(mask & (chill == 1)))
+    cubic = int(np.sum(mask & (chill == 0)))
+    if hexagonal + cubic == 0:
+        return float("nan")
+    return hexagonal / float(hexagonal + cubic)
+
+
+def stacking_axis(pos: np.ndarray, chill: np.ndarray, mask: np.ndarray) -> np.ndarray:
+    """Direction whose 3.7 A bins are the purest Ih or Ic layers."""
+    pts = pos[mask]
+    if pts.shape[0] < 8:
+        return np.array([0.0, 0.0, 1.0])
+    candidates = []
+    covariance = np.cov(pts.T)
+    _values, vectors = np.linalg.eigh(covariance)
+    candidates.extend(list(vectors.T))
+    tensor = np.zeros((3, 3))
+    chosen = np.flatnonzero(mask)
+    cell = HBOND_A
+    keys = np.floor(pts / cell).astype(int)
+    bins: dict[tuple[int, int, int], list[int]] = {}
+    for index, key in enumerate(map(tuple, keys)):
+        bins.setdefault(key, []).append(index)
+    for index, key in enumerate(map(tuple, keys)):
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                for dz in (-1, 0, 1):
+                    for other in bins.get((key[0] + dx, key[1] + dy, key[2] + dz), []):
+                        if other <= index:
+                            continue
+                        delta = pts[other] - pts[index]
+                        length = float(np.linalg.norm(delta))
+                        if 0.0 < length <= HBOND_A:
+                            hat = delta / length
+                            tensor += np.outer(hat, hat)
+    if float(np.trace(tensor)) > 0.0:
+        _bond_values, bond_vectors = np.linalg.eigh(tensor)
+        candidates.extend(list(bond_vectors.T))
+    best_axis = np.array([0.0, 0.0, 1.0])
+    best_score = -1.0
+    for axis in candidates:
+        axis = unit(axis)
+        projection = pts @ axis
+        layers = np.floor((projection - projection.min()) / 3.7).astype(int)
+        owned = 0
+        total = 0
+        for layer in range(int(layers.max()) + 1):
+            selected = chill[chosen][layers == layer]
+            hexagonal = int(np.sum(selected == 1))
+            cubic = int(np.sum(selected == 0))
+            if hexagonal + cubic == 0:
+                continue
+            owned += max(hexagonal, cubic)
+            total += hexagonal + cubic
+        score = owned / float(total) if total else 0.0
+        if score > best_score:
+            best_score = score
+            best_axis = axis
+    if best_axis[2] < 0.0:
+        best_axis = -best_axis
+    return best_axis
+
+
+def bilayer_sheet(pos: np.ndarray, crystal: np.ndarray, forward: np.ndarray, box: np.ndarray) -> np.ndarray:
+    """Both oxygens of each puckered basal pair, about 2.8 A along [11-20].
+
+    Hydrogen-bond partners just outside that window are kept as well, so a
+    bond that crosses the slice boundary is not left dangling.
+    """
     depth = pos @ unit(forward)
-    centre = float(np.median(depth[crystal])) if np.any(crystal) else float(np.median(depth))
-    in_slice = np.abs(depth - centre) <= (0.5 * SLICE_A)
-    liquid_like = np.isin(chill, [2, 4, 5])
-    return crystal | (liquid_like & in_slice)
+    ice_depth = depth[crystal]
+    window = 2.8
+    best_lo = float(ice_depth.min()) if ice_depth.size else 0.0
+    best_n = -1
+    if ice_depth.size:
+        for lo in np.linspace(float(ice_depth.min()), float(ice_depth.max()) - window, 60):
+            count = int(np.sum((ice_depth >= lo) & (ice_depth < lo + window)))
+            if count > best_n:
+                best_n = count
+                best_lo = float(lo)
+    inside = crystal & (depth >= best_lo) & (depth < best_lo + window)
+    partners = minimum_image_pairs(pos, box, crystal, HBOND_A)
+    extra = np.zeros(pos.shape[0], dtype=bool)
+    for first, second in partners:
+        if inside[first]:
+            extra[second] = True
+        if inside[second]:
+            extra[first] = True
+    return inside | extra
 
 
 def contained_bonds(pos: np.ndarray, box: np.ndarray | None, mask: np.ndarray) -> np.ndarray:
@@ -530,7 +625,14 @@ def prepare_slab(pos, chill, box):
     forward = basal_forward(pos, chill, box)
     up = np.array([0.0, 0.0, 1.0])
     crystal = np.isin(chill, [0, 1, 3])
-    keep = slice_mask(pos, chill, forward, crystal)
+    sheet = bilayer_sheet(pos, crystal, forward, box)
+    ice_z = pos[np.isin(chill, [0, 1]), 2]
+    z_mid = float(np.median(ice_z)) if ice_z.size else 0.0
+    depth = pos @ unit(forward)
+    liquid = np.isin(chill, [2, 4, 5])
+    centre = float(np.median(depth[crystal])) if np.any(crystal) else float(np.median(depth))
+    in_slice = np.abs(depth - centre) <= 0.5 * SLICE_A
+    keep = sheet | (liquid & (pos[:, 2] > z_mid) & in_slice) | (liquid & (pos[:, 2] < z_mid) & in_slice)
     # Clathrate classes stay opaque; only true liquid is faint.
     faint = keep & (chill == 2)
     solid = keep & ~faint
@@ -539,8 +641,7 @@ def prepare_slab(pos, chill, box):
     # not use that order; transparency handles the liquid.
     drawn = pos[keep]
     drawn_chill = chill[keep]
-    bond_source = np.isin(chill, [0, 1, 3]) & keep
-    bonds = contained_bonds(pos, box, bond_source)
+    bonds = contained_bonds(pos, box, sheet)
     remap = -np.ones(pos.shape[0], dtype=int)
     remap[np.flatnonzero(keep)] = np.arange(int(keep.sum()))
     if len(bonds):
@@ -550,9 +651,23 @@ def prepare_slab(pos, chill, box):
 
 def prepare_nucleus(pos, chill, extended, forward, up):
     crystal = extended if extended is not None else np.isin(chill, [0, 1, 3])
-    depth = pos @ unit(forward)
-    centre = float(np.median(depth[crystal])) if np.any(crystal) else 0.0
-    liquid = (chill == 2) & (np.abs(depth - centre) <= 0.5 * SLICE_A)
+    # Drop a lone molecule that is not within 5 A of the Ih/Ic core.
+    core = crystal & np.isin(chill, [0, 1])
+    if np.any(core):
+        core_pts = pos[core]
+        near_core = np.zeros(pos.shape[0], dtype=bool)
+        for atom in np.flatnonzero(crystal):
+            delta = core_pts - pos[atom]
+            if float(np.min(np.einsum("ij,ij->i", delta, delta))) <= 6.0 ** 2:
+                near_core[atom] = True
+        crystal = crystal & near_core
+    liquid = np.zeros(pos.shape[0], dtype=bool)
+    if np.any(crystal):
+        ice_pts = pos[crystal]
+        for atom in np.flatnonzero(chill == 2):
+            delta = ice_pts - pos[atom]
+            if float(np.min(np.einsum("ij,ij->i", delta, delta))) <= 3.0 ** 2:
+                liquid[atom] = True
     keep = crystal | liquid
     drawn = pos[keep]
     drawn_chill = chill[keep]
@@ -758,10 +873,11 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
             axis.add_patch(
                 plt.Rectangle((column, row), 1.0, 0.72, facecolor=colour, edgecolor="white", lw=0.3)
             )
+        fraction = stacks["hexagonality"][name]
         fig.text(
             (bar_left - 1.2) / width_mm,
             (bar_bottom + 1.0 + (bar_h - 4.0) * (row + 0.36) / 1.9) / height_mm,
-            name,
+            f"{name}  {fraction:.2f}",
             fontsize=7,
             ha="right",
             va="center",
@@ -773,7 +889,7 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
     fig.text(
         (bar_left + bar_width) / width_mm,
         (bar_bottom + 0.2) / height_mm,
-        "stacking",
+        "layer index along [0001]",
         fontsize=7,
         ha="right",
         va="bottom",
@@ -790,15 +906,6 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
         frameon=False,
         fontsize=7,
         bbox_to_anchor=(0.5, 0.028),
-    )
-    fig.text(
-        0.5,
-        0.008,
-        "Sky blue: clathrate. Purple: interfacial clathrate.",
-        fontsize=6.5,
-        ha="center",
-        va="bottom",
-        color="#333333",
     )
     png.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(png, dpi=dpi)
@@ -828,31 +935,33 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
         if extended is None:
             extended = np.isin(nchill, [0, 1, 3])
         npos, _nbox = unwrap_cluster(npos, nbox, extended, HBOND_A)
-        axis = stacking_axis(npos, extended)
+        axis = stacking_axis(npos, nchill, extended)
         hint = np.array([1.0, 0.0, 0.0])
         if abs(float(np.dot(hint, axis))) > 0.85:
             hint = np.array([0.0, 1.0, 0.0])
         view = unit(np.cross(axis, hint))
         clouds[label] = (npos, nchill, extended, view, axis)
         axes[label] = axis
-    # Shared orthographic scale from the late cluster, which is the larger one.
-    halves = []
+    # The late cluster fills about 70% of the panel. Both frames use that scale.
     prepared = {}
     for label, (npos, nchill, extended, view, axis) in clouds.items():
         drawn, drawn_chill, bonds = prepare_nucleus(npos, nchill, extended, view, axis)
-        _c, half_h, half_v, view, _r, axis = project(drawn, view, axis)
-        prepared[label] = (drawn, drawn_chill, bonds, view, axis, half_h, half_v)
-        halves.append((half_h, half_v))
-    share_h = max(item[0] for item in halves)
-    share_v = max(item[1] for item in halves)
+        prepared[label] = (drawn, drawn_chill, bonds, view, axis)
+    late_pos, late_chill, _bonds, late_view, late_axis = prepared["late"]
+    cluster = late_pos[np.isin(late_chill, [0, 1, 3])]
+    late_forward, late_right, late_up = basis(late_view, late_axis)
+    centred = cluster - cluster.mean(axis=0)
+    share_h = (float(np.max(np.abs(centred @ late_right))) + ATOM_RADIUS) / 0.70
+    share_v = (float(np.max(np.abs(centred @ late_up))) + ATOM_RADIUS) / 0.70
     nucleus_px = int(round(48.0 / 25.4 * PRINT_DPI))
     images = {}
-    stacks = {}
-    for label, (drawn, drawn_chill, bonds, view, axis, _h, _v) in prepared.items():
+    stacks = {"hexagonality": {}}
+    for label, (drawn, drawn_chill, bonds, view, axis) in prepared.items():
         images[label] = work / f"nucleus-{label}.png"
-        render_molecule(drawn, drawn_chill, bonds, view, axis, images[label], share_h, share_v, nucleus_px, 0.12)
+        render_molecule(drawn, drawn_chill, bonds, view, axis, images[label], share_h, share_v, nucleus_px, 0.18)
         npos, nchill, extended, _view, axis = clouds[label]
         stacks[label] = layer_kinds(npos, nchill, extended, axis)
+        stacks["hexagonality"][label] = hexagonality(nchill, extended)
     nuclei = {"minimum": images["minimum"], "late": images["late"], "half_h": share_h, "half_v": share_v}
     for width, stem in ((170.0, "figure-170mm"), (85.0, "figure-85mm")):
         compose(slab, nuclei, stacks, width, out / f"{stem}.png", out / f"{stem}.pdf")
