@@ -1419,6 +1419,26 @@ if get_option('with_cli')
   binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
   binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'bindings')
   test(
+    'docs_binding_docstrings',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'check_binding_docstrings.py',
+    ],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_lang_ice',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_lang_ice.py',
+      meson.project_source_root(),
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_api_lib, seams_lang],
+    suite: 'docs',
+    timeout: 120)
+  test(
     'docs_capi_symbols',
     python3,
     args: [

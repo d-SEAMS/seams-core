@@ -5,11 +5,30 @@
 Julia front for the d-SEAMS engine. Calls `libseams_lang` with `ccall`.
 CxxWrap is not required. Set `SEAMS_LANG_LIB` to the shared library if it
 is not on the loader path.
+
+Ice Ih (`input/traj/ice1h.lammpstrj`, every atom) is 128 hexagonal waters
+and 256 primitive six-rings.
+
+The C API names re-exported here are System, seams_system_count,
+seams_system_read, seams_chill, seams_steinhardt, seams_cages,
+seams_signature_cages, seams_neighbours_knn, seams_rdf, seams_running_cn,
+seams_coordination, seams_hbonds, seams_density_axis, seams_fingerprint,
+seams_contact_pairs, seams_domains, seams_prisms, seams_monolayer,
+seams_rings_vertices, seams_site_table, SeamsError, ChillPlus,
+RingHistogram, CageScore, SteinhardtOrder, SignatureCages, and Q4Q6.
 """
 module Dseams
 
 using Libdl
 
+"""
+    ice_ih_path()
+
+Path of the committed Ice Ih dump, `input/traj/ice1h.lammpstrj`.
+"""
+ice_ih_path() = normpath(joinpath(@__DIR__, "..", "..", "..", "..", "input", "traj", "ice1h.lammpstrj"))
+
+export ice_ih_path
 export Frame, nop, nframes, read_frame, chill_plus, cages, primitive_rings, steinhardt, signature_cages, symmetry, jump_tau90, q4_q6
 export System, seams_system_count, seams_system_read, seams_chill, seams_steinhardt, seams_cages, seams_signature_cages
 export seams_neighbours_knn, seams_rdf, seams_running_cn, seams_coordination, seams_hbonds

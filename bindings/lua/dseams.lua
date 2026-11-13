@@ -2,6 +2,8 @@
 -- SPDX-License-Identifier: MIT
 --
 --- d-SEAMS Lua module.
+-- Ice Ih (`input/traj/ice1h.lammpstrj`, every atom) is 128 hexagonal
+-- waters and 256 primitive six-rings.
 -- `require("dseams")` is the table programs use. `require("yoda")` is
 -- the same table. Handles are metatables. `__gc` and Lua 5.4 `__close`
 -- free the underlying C object, and `:close()` does the same call.
@@ -166,12 +168,14 @@ function dseams.nframes(path)
   return core.nframes(path)
 end
 
+--- dseams.readLammpsTrj.
 dseams.readLammpsTrj = function(path, o)
   o = opts(o)
   o.all = true
   return dseams.read(path, o)
 end
 
+--- dseams.readLammpsTrjO.
 dseams.readLammpsTrjO = dseams.read
 
 local function rows_of(nb, cloud)
@@ -198,7 +202,9 @@ function dseams.neighbors(cloud, o)
   return rows_of(cloud._sys:neighbours(o.cutoff or 3.5, o.type or 0, graph_of(o.graph)), cloud)
 end
 
+--- dseams.neighbours.
 dseams.neighbours = dseams.neighbors
+--- dseams.neighListO.
 dseams.neighListO = dseams.neighbors
 
 --- k-nearest rows. o.mutual defaults to true.
@@ -208,6 +214,7 @@ function dseams.knn(cloud, o)
   return rows_of(cloud._sys:knn(o.k or 4, o.cutoff or 3.5, o.type or 0, mutual), cloud)
 end
 
+--- dseams.kNearestNeighbourList.
 dseams.kNearestNeighbourList = dseams.knn
 
 local function ice_result(labels, counts)
@@ -228,8 +235,11 @@ function dseams.chill_plus(cloud, o)
   return ice_result(labels, counts)
 end
 
+--- dseams.getIceTypePlus.
 dseams.getIceTypePlus = dseams.chill_plus
+--- dseams.getCorrelPlus.
 dseams.getCorrelPlus = dseams.chill_plus
+--- dseams.getIceTypePlusNoPrint.
 dseams.getIceTypePlusNoPrint = dseams.chill_plus
 
 --- Original CHILL labels, codes, and named population counts.
@@ -240,7 +250,9 @@ function dseams.chill(cloud, o)
   return ice_result(labels, counts)
 end
 
+--- dseams.getIceType.
 dseams.getIceType = dseams.chill
+--- dseams.getCorrel.
 dseams.getCorrel = dseams.chill
 
 --- Local q4 and q6 on the cutoff shell.
@@ -295,7 +307,9 @@ function dseams.ringNetwork(cloud, depth)
   return dseams.rings(cloud, depth)
 end
 
+--- dseams.bulkPrimitiveRings.
 dseams.bulkPrimitiveRings = dseams.rings
+--- dseams.getPrimitiveRings.
 dseams.getPrimitiveRings = function(cloud, depth)
   return dseams.ringNetwork(cloud, depth).vertices
 end
@@ -318,6 +332,7 @@ function dseams.cages(cloud, o)
   }
 end
 
+--- dseams.seededCageAffiliation.
 dseams.seededCageAffiliation = dseams.cages
 
 --- Hexagonal and double-diamond membership. The default graph is seeded.
@@ -328,6 +343,7 @@ function dseams.cages_by_signature(cloud, spec, o)
   return {n_cages = n_cages, n_atoms = n_atoms}
 end
 
+--- dseams.findBySignature.
 dseams.findBySignature = dseams.cages_by_signature
 
 --- Partial radial distribution. o.rmax defaults to 12.
@@ -338,6 +354,7 @@ function dseams.rdf(cloud, o)
   return {r = r, g = g, volume = volume}
 end
 
+--- dseams.calcRDF3D.
 dseams.calcRDF3D = dseams.rdf
 
 --- Running coordination along the partial RDF.
@@ -348,6 +365,7 @@ function dseams.running_cn(cloud, o)
   return {r = r, cn = cn}
 end
 
+--- dseams.calcRunningCN.
 dseams.calcRunningCN = dseams.running_cn
 
 --- Coordination number integrated to o.cutoff or o.rmax.
@@ -357,6 +375,7 @@ function dseams.cn(cloud, o)
     o.cutoff or o.rmax or 4.5, o.bins or 0, o.type_i or 0, o.type_j or 0)
 end
 
+--- dseams.calcCN.
 dseams.calcCN = dseams.cn
 
 --- Hydrogen-bond count. Distances are angstrom and the angle is degrees.
@@ -367,6 +386,7 @@ function dseams.hbonds(cloud, o)
     o.dist or 2.42, o.angle or 30.0)
 end
 
+--- dseams.getHbondNetwork.
 dseams.getHbondNetwork = dseams.hbonds
 
 --- Number density along x, y, or z.
@@ -378,6 +398,7 @@ function dseams.density(cloud, o)
   return {centres = z, rho = rho, axis = axis}
 end
 
+--- dseams.densityByType.
 dseams.densityByType = dseams.density
 
 --- Topological fingerprint key and ring census.
@@ -389,6 +410,7 @@ function dseams.fingerprint(cloud, o)
   return {key = key, rings = rings}
 end
 
+--- dseams.topologyFingerprint.
 dseams.topologyFingerprint = dseams.fingerprint
 
 --- Per-atom site kind for a site-table spec.
@@ -406,6 +428,7 @@ function dseams.pairs(cloud, o)
   return {count = n_pairs, n_cation = n_cation, n_anion = n_anion}
 end
 
+--- dseams.contactPairs.
 dseams.contactPairs = dseams.pairs
 
 --- Largest polar or apolar domain.
@@ -420,6 +443,7 @@ function dseams.domain(cloud, o)
   return {n = n_subset, largest = largest, percolation = percolation}
 end
 
+--- dseams.domainStats.
 dseams.domainStats = dseams.domain
 
 --- Perfect and imperfect prism counts.
@@ -442,9 +466,12 @@ function dseams.monolayer(cloud, o)
   return {counts = counts, by_size = by_size}
 end
 
+--- dseams.shapeMatching.
 dseams.shapeMatching = dseams.monolayer
 
+--- dseams.SEEDED.
 dseams.SEEDED = core.SEEDED
+--- dseams.WATER_O.
 dseams.WATER_O = core.WATER_O
 dseams["chill-plus"] = dseams.chill_plus
 dseams["ring-network"] = dseams.ringNetwork

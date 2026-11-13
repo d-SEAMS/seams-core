@@ -1,5 +1,6 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Seams = "b7e0c1a2-4d55-4a1e-9c3b-6f0a2e8d4c11"
 
 [compat]
 Documenter = "1"

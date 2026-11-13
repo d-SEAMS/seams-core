@@ -1,15 +1,28 @@
-# Copyright (c) d-SEAMS developers
-push!(LOAD_PATH, joinpath(@__DIR__, ".."))
+# Build the Seams manual and run every export's doctest.
+using Pkg
+
+docsdir = @__DIR__
+Pkg.activate(docsdir)
+Pkg.develop(PackageSpec(path = joinpath(docsdir, "..")))
+Pkg.instantiate()
+
+root = normpath(joinpath(docsdir, "..", "..", "..", ".."))
+lib = joinpath(root, "bbdir", "src", "libseams.so")
+if isfile(lib)
+    ENV["SEAMS_LIB"] = lib
+end
+engine = joinpath(root, "bbdir", "src")
+if isdir(engine)
+    ENV["LD_LIBRARY_PATH"] = engine * ":" * get(ENV, "LD_LIBRARY_PATH", "")
+end
 
 using Documenter
 using Seams
 
-makedocs(
+makedocs(;
     sitename = "Seams",
     modules = [Seams],
-    format = Documenter.HTML(prettyurls = false, ansicolor = true),
-    pages = ["Home" => "index.md"],
     checkdocs = :exports,
-    warnonly = [:missing_docs, :cross_references],
-    doctest = false,
+    doctest = true,
+    pages = ["index.md"],
 )

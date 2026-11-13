@@ -1,16 +1,29 @@
-# Copyright (c) d-SEAMS developers
-# Native reference. The Sphinx page is the how-to.
-push!(LOAD_PATH, joinpath(@__DIR__, ".."))
+# Build the Dseams manual and run every export's doctest.
+using Pkg
+
+docsdir = @__DIR__
+Pkg.activate(docsdir)
+Pkg.develop(PackageSpec(path = joinpath(docsdir, "..")))
+Pkg.instantiate()
+
+root = normpath(joinpath(docsdir, "..", "..", "..", ".."))
+lang = joinpath(root, "bbdir", "bindings", "libseams_lang.so")
+if isfile(lang)
+    ENV["SEAMS_LANG_LIB"] = lang
+end
+engine = joinpath(root, "bbdir", "src")
+if isdir(engine)
+    ENV["LD_LIBRARY_PATH"] = engine * ":" * joinpath(root, "bbdir", "bindings") *
+                             ":" * get(ENV, "LD_LIBRARY_PATH", "")
+end
 
 using Documenter
 using Dseams
 
-makedocs(
+makedocs(;
     sitename = "Dseams",
     modules = [Dseams],
-    format = Documenter.HTML(prettyurls = false, ansicolor = true),
-    pages = ["Home" => "index.md"],
     checkdocs = :exports,
-    warnonly = [:missing_docs, :cross_references],
-    doctest = false,
+    doctest = true,
+    pages = ["index.md"],
 )

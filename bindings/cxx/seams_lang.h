@@ -5,7 +5,24 @@
 extern "C" {
 #endif
 
-/* C ABI shared by the Python, R, and Julia fronts.
+/**
+ * @file seams_lang.h
+ * @brief C ABI shared by the Python, R, and Julia fronts.
+ *
+ * @defgroup lang_frame Frames
+ * @defgroup lang_order Order parameters
+ * @defgroup lang_rings Rings
+ * @defgroup lang_cages Cages
+ * @defgroup lang_more Further analyses
+ * @defgroup lang_errors Errors
+ *
+ * Ice Ih (`input/traj/ice1h.lammpstrj`, every atom) is 128 hexagonal
+ * waters and 256 primitive six-rings. docs/examples/lang_ice.c asserts
+ * both counts. meson test docs_lang_ice compiles and runs it.
+ *
+ * @example lang_ice.c
+ *
+ * C ABI shared by the Python, R, and Julia fronts.
  * The classifiers are the engine's. This file does not implement them.
  *
  * Ice labels, same order as molSys::atom_state_type:
@@ -25,49 +42,63 @@ extern "C" {
 
 typedef struct seams_frame seams_frame;
 
+/** @brief seams_lang_version. @ingroup lang_errors */
 const char *seams_lang_version(void);
+/** @brief seams_last_error. @ingroup lang_errors */
 const char *seams_last_error(void);
 
+/** @brief seams_path_nframes. @ingroup lang_frame */
 int seams_path_nframes(const char *path);
 
-/* Null when path is null or the file cannot be read.
- * seams_last_error() then names the reason. */
+/** Null when path is null or the file cannot be read.
+ * seams_last_error() then names the reason. @ingroup lang_frame */
 seams_frame *seams_frame_read(const char *path, int frame, int type_filter);
+/** @brief seams_frame. @ingroup lang_frame */
 seams_frame *seams_frame_from_arrays(const double *xyz, int n,
                                     const double *box9, const int *types,
                                     const int *ids);
+/** @brief seams_frame_free. @ingroup lang_frame */
 void seams_frame_free(seams_frame *frame);
 
+/** @brief seams_frame_nop. @ingroup lang_frame */
 int seams_frame_nop(const seams_frame *frame);
+/** @brief seams_frame_index. @ingroup lang_frame */
 int seams_frame_index(const seams_frame *frame);
+/** @brief seams_frame_box. @ingroup lang_frame */
 void seams_frame_box(const seams_frame *frame, double box9[9]);
+/** @brief seams_frame_positions. @ingroup lang_frame */
 const double *seams_frame_positions(const seams_frame *frame);
+/** @brief seams_frame_types. @ingroup lang_frame */
 const int *seams_frame_types(const seams_frame *frame);
+/** @brief seams_frame_ids. @ingroup lang_frame */
 const int *seams_frame_ids(const seams_frame *frame);
 
+/** @brief seams_frame_chill_plus. @ingroup lang_order */
 int seams_frame_chill_plus(seams_frame *frame, double cutoff, int type,
                            const char *graph, int *labels, int counts9[9]);
-/* rule NULL or "" is chill+. "ovito-chill+" is the OVITO 3.17.2 rule.
+/** rule NULL or "" is chill+. "ovito-chill+" is the OVITO 3.17.2 rule.
  * A YAML document or a Lua table fragment with a rule field is accepted.
- * Returns 1 when the rule name is unknown. */
+ * Returns 1 when the rule name is unknown. @ingroup lang_order */
 int seams_frame_chill_plus_rule(seams_frame *frame, double cutoff, int type,
                                 const char *graph, const char *rule,
                                 int *labels, int counts9[9]);
+/** @brief seams_frame_chill. @ingroup lang_order */
 int seams_frame_chill(seams_frame *frame, double cutoff, int type,
                       const char *graph, int *labels, int counts9[9]);
 
-/* counts[i] is the number of primitive rings of size i.
+/** counts[i] is the number of primitive rings of size i.
  * counts_len must be at least max_depth + 1. */
+/** @ingroup lang_rings */
 int seams_frame_rings(seams_frame *frame, double cutoff, int type,
                       const char *graph, int max_depth, int *counts,
                       int counts_len);
 
-/* Replace coordinates of a frame built by seams_frame_from_arrays.
- * n must be the atom count already stored. The box is nine LAMMPS numbers. */
+/** Replace coordinates of a frame built by seams_frame_from_arrays.
+ * n must be the atom count already stored. The box is nine LAMMPS numbers. @ingroup lang_frame */
 int seams_frame_set_positions(seams_frame *frame, const double *xyz, int n,
                              const double *box9);
 
-/* Phase times are seconds. reused is 1 when the wide neighbour list was
+/** Phase times are seconds. reused is 1 when the wide neighbour list was
  * kept from an earlier call. A null times pointer skips the record. */
 typedef struct seams_phase_times {
   double neighbours;
@@ -76,124 +107,136 @@ typedef struct seams_phase_times {
   int reused;
 } seams_phase_times;
 
-/* CHILL+ and primitive rings on one neighbour list.
+/** CHILL+ and primitive rings on one neighbour list.
  * skin > 0 builds that list at cutoff+skin and keeps it while every atom's
  * minimum-image displacement stays within skin/2. Bonds are the pairs
  * still inside cutoff, so the labels match a fresh cutoff list.
  * skin <= 0 builds a fresh cutoff list on every call. */
+/** @ingroup lang_rings */
 int seams_frame_chill_rings(seams_frame *frame, double cutoff, int type,
                            const char *graph, int max_ring, double skin,
                            int *labels, int counts9[9], int *ring_counts,
                            int ring_counts_len, seams_phase_times *times);
 
-/* Build the cutoff neighbour list and discard it. graph NULL means cutoff.
- * seams_frame_neighbour_pairs then returns the directed pairs of that list. */
+/** Build the cutoff neighbour list and discard it. graph NULL means cutoff.
+ * seams_frame_neighbour_pairs then returns the directed pairs of that list. @ingroup lang_order */
 int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
                            const char *graph);
+/** @brief seams_frame_neighbour_pairs. @ingroup lang_order */
 int seams_frame_neighbour_pairs(const seams_frame *frame);
 
-/* Local Steinhardt q_l on the cutoff shell. A null qlbar skips the
+/** Local Steinhardt q_l on the cutoff shell. A null qlbar skips the
  * Lechner-Dellago average; the local values do not use that pass. */
+/** @ingroup lang_order */
 int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
                            int order_l, double *ql, double *qlbar);
-/* graph is "mutual" (four nearest, the historical default) or "cutoff"
- * (the orthoFullCsr list, the same neighbours as `seams steinhardt`). */
+/** graph is "mutual" (four nearest, the historical default) or "cutoff"
+ * (the orthoFullCsr list, the same neighbours as `seams steinhardt`). @ingroup lang_order */
 int seams_frame_steinhardt_graph(seams_frame *frame, double cutoff, int type,
                                  int order_l, const char *graph, double *ql,
                                  double *qlbar);
 
-/* Normalised Steinhardt hat{w}_l for l = 4 or 6 on the cutoff shell.
- * Returns 1 on failure. */
+/** Normalised Steinhardt hat{w}_l for l = 4 or 6 on the cutoff shell.
+ * Returns 1 on failure. @ingroup lang_order */
 int seams_frame_wl(seams_frame *frame, double cutoff, int type, int order_l,
                    double *wl);
 
-/* Local q4 and q6 on the cutoff shell. Degrees 4 and 6 use the
+/** Local q4 and q6 on the cutoff shell. Degrees 4 and 6 use the
  * solid-harmonic kernel. q4bar and q6bar may be null, and a null
  * pointer skips that Lechner-Dellago average. Returns 1 on failure. */
+/** @ingroup lang_order */
 int seams_frame_q4_q6(seams_frame *frame, double cutoff, int type, double *q4,
                       double *q6, double *q4bar, double *q6bar);
 
-/* One cutoff list. Local q4, local q6, Lechner-Dellago q4-bar and
+/** One cutoff list. Local q4, local q6, Lechner-Dellago q4-bar and
  * q6-bar, and published CHILL+ labels. q4bar and q6bar may be null.
- * counts9 and labels may be null. Returns 1 on failure. */
+ * counts9 and labels may be null. Returns 1 on failure. @ingroup lang_order */
 int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
                             double *q4, double *q6, double *q4bar,
                             double *q6bar, int *labels, int counts9[9]);
 
-/* Normalised Steinhardt hat{w}_l for l = 4 or 6 on the cutoff shell.
- * Returns 1 on failure. */
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/** Repeated prototypes. The documented declarations are above. @ingroup lang_order */
 int seams_frame_wl(seams_frame *frame, double cutoff, int type, int order_l,
                    double *wl);
-
-/* One cutoff list. Local q4, local q6, Lechner-Dellago q4-bar and
- * q6-bar, and published CHILL+ labels. q4bar and q6bar may be null.
- * counts9 and labels may be null. Returns 1 on failure. */
+/** @brief seams_frame_q4_q6_chill. @ingroup lang_order */
 int seams_frame_q4_q6_chill(seams_frame *frame, double cutoff, int type,
                             double *q4, double *q6, double *q4bar,
                             double *q6bar, int *labels, int counts9[9]);
+#endif
 
+/** @brief seams_frame_cages. @ingroup lang_cages */
 int seams_frame_cages(seams_frame *frame, double cutoff, int type, int k,
                       const char *graph, int complete, int *per_atom,
                       int *n_hex, int *n_cubic, int *n_water, int *n_both);
 
-/* Ring-size census. spec is "512" or "5:12,6:2". graph is not seeded.
+/** Ring-size census. spec is "512" or "5:12,6:2". graph is not seeded.
  * The default face-edge window is 2.65,3.15 in the file's coordinate
  * units. seams_frame_signature_edge takes the same string as
  * --cage-edge: NULL or "" keeps that default, and "none" leaves the
  * cage bound to the face census. */
+/** @ingroup lang_cages */
 int seams_frame_signature(seams_frame *frame, double cutoff, int type,
                           const char *graph, const char *spec, int *n_cages,
                           int *n_atoms);
+/** @brief seams_frame_signature_edge. @ingroup lang_cages */
 int seams_frame_signature_edge(seams_frame *frame, double cutoff, int type,
                                const char *graph, const char *spec,
                                const char *edge, int *n_cages, int *n_atoms);
 
+/** @brief seams_frame_rdf_nbins. @ingroup lang_more */
 int seams_frame_rdf_nbins(double rmax, int nbins);
+/** @brief seams_frame_rdf. @ingroup lang_more */
 int seams_frame_rdf(const seams_frame *frame, double rmax, int nbins,
                     int type_i, int type_j, double *r, double *g, int *count,
                     double *volume);
 
+/** @brief seams_frame_rdf2d_nbin. @ingroup lang_more */
 int seams_frame_rdf2d_nbin(double cutoff, double binwidth);
-/* output_dir NULL skips the topoMonolayer/rdf.dat writer. */
+/** output_dir NULL skips the topoMonolayer/rdf.dat writer. @ingroup lang_more */
 int seams_frame_rdf2d(seams_frame *frame, double cutoff, double binwidth,
                       const char *output_dir, double *r, double *g);
 
+/** @brief seams_prism_row. */
 typedef struct seams_prism_row {
   int size;
   int perfect;
   int imperfect;
 } seams_prism_row;
 
-/* rows NULL asks for the row count in *n_rows (max_depth - 2). */
+/** rows NULL asks for the row count in *n_rows (max_depth - 2). @ingroup lang_more */
 int seams_frame_prisms(seams_frame *frame, double cutoff, int type,
                        int max_depth, const char *output_dir,
                        seams_prism_row *rows, int *n_rows);
 
+/** @brief seams_frame_monolayer. @ingroup lang_more */
 int seams_frame_monolayer(seams_frame *frame, double cutoff, int type,
                           int max_depth, double sheet_area,
                           const char *output_dir, int *counts, int counts_len);
 
-/* Keep water oxygens for later neighbours, CHILL, CHILL+, rings, cages
+/** Keep water oxygens for later neighbours, CHILL, CHILL+, rings, cages
  * and Steinhardt. type > 0 is that LAMMPS type. nmol > 0 keeps those
  * molecule ids as well. type == 0 and nmol == 0 infers the oxygen of
  * each multi-atom molecule. A missing type or molecule, or a selection
  * that keeps nothing, returns 1 and sets seams_last_error. Atoms that
  * are not selected stay in the frame and are left unclassified. */
+/** @ingroup lang_frame */
 int seams_frame_select(seams_frame *frame, int type, const int *mols, int nmol);
 
-/* Same as seams_frame_from_arrays, plus molecule ids. mols may be NULL. */
+/** Same as seams_frame_from_arrays, plus molecule ids. mols may be NULL. @ingroup lang_frame */
 seams_frame *seams_frame_from_species(const double *xyz, int n,
                                      const double *box9, const int *types,
                                      const int *ids, const int *mols);
 
-/* Per-atom ice label from the shell kernel. labels[i] is 0 ice-Ih,
+/** Per-atom ice label from the shell kernel. labels[i] is 0 ice-Ih,
  * 1 ice-Ic, 2 stacking-disordered, or -1. shell_rmsd is the scale-free
- * residual ceiling (0.12 is the production default). */
+ * residual ceiling (0.12 is the production default). @ingroup lang_more */
 int seams_frame_symmetry(seams_frame *frame, double shell_rmsd, int *labels);
 
-/* tau_90 of the H-H vectors between two frames. Writes quiet NaN when no
+/** tau_90 of the H-H vectors between two frames. Writes quiet NaN when no
  * water rotates by 90 degrees. oxygen_type and hydrogen_type select the
  * molecule. Returns 1 when a frame is missing. */
+/** @ingroup lang_more */
 int seams_frames_jump_tau90(const seams_frame *first, const seams_frame *second,
                             double dt, int oxygen_type, int hydrogen_type,
                             double *tau);

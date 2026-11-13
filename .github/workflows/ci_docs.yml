@@ -15,6 +15,15 @@ jobs:
         with:
           environments: docs
           cache-key: pixi-docs-
+      - name: Python numpydoc
+        run: pixi run -e docs python -m pip install numpydoc
+
+      - name: C++ and Lua API docs
+        run: |
+          sudo apt-get update && sudo apt-get install -y doxygen lua-ldoc lua5.2
+          doxygen docs/Doxyfile.lang
+          ldoc --fatalwarnings -c docs/config.ld bindings/lua/dseams.lua
+
       - run: pixi run -e docs docbld
 
       - name: Link check
@@ -27,7 +36,7 @@ jobs:
           cache-key: pixi-default-
 
       - name: Language runtimes
-        run: sudo apt-get update && sudo apt-get install -y lua5.4 liblua5.4-dev r-base-core gfortran
+        run: sudo apt-get update && sudo apt-get install -y lua5.4 liblua5.4-dev r-base-core gfortran pandoc devscripts texlive-latex-base texlive-latex-recommended texlive-fonts-recommended
 
       - uses: julia-actions/setup-julia@v2
         with:
@@ -36,7 +45,31 @@ jobs:
       - run: pixi run -e default setup
       - run: pixi run -e default build
       - name: Ice Ih and sII examples
-        run: pixi run -e default meson test -C bbdir docs_core_counts docs_capi_examples docs_capi_symbols --print-errorlogs
+        run: pixi run -e default meson test -C bbdir docs_core_counts docs_capi_examples docs_capi_symbols docs_binding_docstrings docs_lang_ice --print-errorlogs
+
+      - name: Julia Documenter
+        run: |
+          export SEAMS_LANG_LIB="$PWD/bbdir/bindings/libseams_lang.so"
+          export SEAMS_LIB="$PWD/bbdir/src/libseams.so"
+          export LD_LIBRARY_PATH="$PWD/bbdir/src:$PWD/bbdir/bindings${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+          julia --project=bindings/julia/Dseams/docs bindings/julia/Dseams/docs/make.jl
+          julia --project=bindings/julia/Seams/docs bindings/julia/Seams/docs/make.jl
+
+      - name: R CMD check
+        run: |
+          export DSEAMS_ROOT="$PWD"
+          export SEAMS_INCLUDE="$PWD/bindings/cxx"
+          export SEAMS_LIBDIR="$PWD/bbdir/bindings"
+          export LD_LIBRARY_PATH="$PWD/bbdir/src:$PWD/bbdir/bindings${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+          export TEXINPUTS="$PWD/docs/tex//:${TEXINPUTS:-}"
+          Rscript -e 'install.packages(c("cpp11","roxygen2","testthat","knitr","rmarkdown"), repos="https://cloud.r-project.org")'
+          R CMD build bindings/r/dseams
+          R CMD check --as-cran dseams_*.tar.gz
+          log=$(echo dseams.Rcheck/00check.log)
+          if grep -E 'Undocumented (code objects|arguments|datasets)' "$log"; then
+            echo "R check reported undocumented objects"
+            exit 1
+          fi
 
       - name: Python doctest
         run: |

@@ -103,6 +103,14 @@ docs/ldoc/
 docs/doctrees/
 docs/native-html/
 docs/doxygen-html/
+docs/lang-cpp/
+docs/lang-lua/
+docs/lang-julia/
+bindings/julia/Dseams/docs/build/
+bindings/julia/Dseams/docs/Manifest.toml
+bindings/julia/Seams/docs/build/
+bindings/julia/Seams/docs/Manifest.toml
+bindings/r/dseams.Rcheck/
 docs/source/*.rst
 docs/source/tutorials/gallery/
 docs/source/tutorials/gallery-captions.rst

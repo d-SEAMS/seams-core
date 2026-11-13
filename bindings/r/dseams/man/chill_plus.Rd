@@ -27,6 +27,9 @@ A data.frame with columns \code{atom}, \code{type}, \code{label}, \code{name}.
 The \code{counts} attribute is the nine-label histogram.
 }
 \description{
+Ice Ih (\code{input/traj/ice1h.lammpstrj}, every atom) is 128 hexagonal
+waters and 256 primitive six-rings.
+
 \code{graph = "cutoff"} (the default) bonds every pair closer than \code{cutoff},
 as \verb{seams chill-plus}, pydseamslib, and Julia do by default.
 \code{graph = "mutual"} keeps the mutual four nearest neighbours inside

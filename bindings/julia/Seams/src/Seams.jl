@@ -11,6 +11,16 @@ Handles are mutable structs with finalizers. A failing call throws
 `System`, `Neighbours`, `Rings`, and `CageSet` from the included C layer
 own their pointers. Result structs iterate in field order, so
 `labels, counts = chill_plus(sys)` still unpacks.
+
+Ice Ih (`input/traj/ice1h.lammpstrj`, every atom) is 128 hexagonal waters
+and 256 primitive six-rings.
+
+The C API names re-exported here are seams_system_count, seams_system_read,
+seams_chill, seams_steinhardt, seams_cages, seams_signature_cages,
+seams_neighbours_knn, seams_rdf, seams_running_cn, seams_coordination,
+seams_hbonds, seams_density_axis, seams_fingerprint, seams_contact_pairs,
+seams_domains, seams_prisms, seams_monolayer, seams_rings_vertices,
+seams_site_table, ChillLabels, Q4Q6Pair, and SixRings.
 """
 module Seams
 

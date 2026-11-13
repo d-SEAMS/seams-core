@@ -45,6 +45,15 @@ seams_system_count <- function(sys) {
   .Call(`_dseams_seams_r_count`, sys)
 }
 
+#' Set the OpenMP width used by the next analysis.
+#'
+#' @param n Thread count. Zero restores the library default.
+#' @return `NULL`, invisibly.
+#' @export
+seams_set_num_threads <- function(n) {
+  .Call(`_dseams_seams_r_threads`, as.integer(n))
+}
+
 #' Original CHILL population counts.
 #'
 #' @param sys A `dseams_system`.
@@ -54,11 +63,6 @@ seams_system_count <- function(sys) {
 #' @param rule `0` published, `1` OVITO.
 #' @return An integer vector of length 9, class `dseams_chill`.
 #'   Position `i` is the population of label `i - 1`.
-#' @export
-seams_set_num_threads <- function(n) {
-  .Call(`_dseams_seams_r_threads`, as.integer(n))
-}
-
 #' @export
 seams_chill <- function(sys, cutoff = 3.5, type = 0L, graph = 0L, rule = 0L) {
   out <- .Call(`_dseams_seams_r_chill`, sys, cutoff, as.integer(type), as.integer(graph), as.integer(rule))
