@@ -3,6 +3,7 @@
 .venv-paper/
 benchmarks/paper-cells/.sitting-large.jsonl
 benchmarks/paper-cells/.sitting-agree/
+benchmarks/paper-cells/*.pdf
 benchmarks/*.png
 /result
 /.ccls-cache/

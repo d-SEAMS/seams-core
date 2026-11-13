@@ -88,6 +88,9 @@ def emit(payload: dict) -> None:
 
 def skip(operation: str) -> bool:
     """True when a restarted worker has not yet reached --from-op."""
+    allow = os.environ.get("SITTING_ONLY", "")
+    if allow and operation not in set(allow.split(",")):
+        return True
     start = os.environ.get("SITTING_FROM", "")
     if not start or getattr(skip, "open", False):
         return False
@@ -596,6 +599,141 @@ def _rival_jobs(code: str, version: str, jobs, threads: int, thread_note: str) -
         gc.collect()
 
 
+def time_pyscal(xyz, side: float, threads: int) -> None:
+    import numpy as np
+    import pyscal3
+    from ase import Atoms
+    version = pyscal3.__version__
+    os.environ["PYSCAL_NUM_THREADS"] = str(threads)
+    pyscal3.set_num_threads(threads)
+    atoms = Atoms(
+        symbols=["O"] * len(xyz),
+        positions=np.ascontiguousarray(xyz),
+        cell=[side, side, side],
+        pbc=True,
+    )
+
+    def neighbours():
+        hold_affinity(threads)
+        pyscal3.set_num_threads(threads)
+        pyscal3.find_neighbors(atoms, method="cutoff", cutoff=CUTOFF)
+        rows = atoms.arrays["pyscal_neighbors"]
+        pairs = int(np.asarray(rows).size)
+        save_agree(threads, "pyscal3", "neighbours", [pairs])
+        return pairs
+
+    def q6():
+        hold_affinity(threads)
+        pyscal3.set_num_threads(threads)
+        pyscal3.find_neighbors(atoms, method="cutoff", cutoff=CUTOFF)
+        values = np.asarray(pyscal3.steinhardt_parameter(atoms, 6)[0], dtype=np.float64).reshape(-1)
+        save_agree(threads, "pyscal3", "q6", values)
+        return int(values.shape[0])
+
+    _rival_jobs(
+        "pyscal3", version,
+        [("neighbours", neighbours, "pairs"), ("q6", q6, "rows")],
+        threads, f"pyscal_threads={threads} PYSCAL_NUM_THREADS={threads}",
+    )
+
+
+def time_plumed(xyz, side: float, threads: int) -> None:
+    import math
+    import ctypes
+    import numpy as np
+    os.environ["PLUMED_NUM_THREADS"] = str(threads)
+    os.environ["OMP_NUM_THREADS"] = str(threads)
+    library = os.environ.get("PLUMED_LIB", "")
+    if not library:
+        raise RuntimeError("set PLUMED_LIB to libplumed.so")
+    kernel = library.replace("libplumed.so", "libplumedKernel.so")
+    ctypes.CDLL(kernel, mode=ctypes.RTLD_GLOBAL)
+    lib = ctypes.CDLL(library, mode=ctypes.RTLD_GLOBAL)
+    lib.plumed_create.restype = ctypes.c_void_p
+    lib.plumed_cmd.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_void_p]
+    handle = lib.plumed_create()
+    keep = []
+
+    def cmd(key, val=None):
+        if isinstance(val, str):
+            buf = ctypes.create_string_buffer(val.encode())
+            keep.append(buf)
+            lib.plumed_cmd(handle, key.encode(), ctypes.cast(buf, ctypes.c_void_p))
+        elif val is None:
+            lib.plumed_cmd(handle, key.encode(), None)
+        else:
+            lib.plumed_cmd(handle, key.encode(), val)
+
+    n = len(xyz)
+    positions = np.ascontiguousarray(xyz / 10.0)
+    box = np.zeros((3, 3))
+    box[0, 0] = box[1, 1] = box[2, 2] = side / 10.0
+    mass = np.ones(n)
+    charge = np.zeros(n)
+    forces = np.zeros_like(positions)
+    virial = np.zeros((3, 3))
+    cmd("setMDEngine", "python")
+    cmd("setNatoms", ctypes.byref(ctypes.c_int(n)))
+    cmd("setTimestep", ctypes.byref(ctypes.c_double(0.001)))
+    cmd("setKbT", ctypes.byref(ctypes.c_double(1.0)))
+    cmd("setLogFile", "/dev/null")
+    cmd("init")
+    cmd("readInputLine",
+        f"obs: Q6 SPECIES=1-{n} SWITCH={{RATIONAL R_0=0.35 D_MAX=0.35 NN=100 MM=200}}")
+    rank = np.zeros(1, dtype=np.intc)
+    cmd("getDataRank obs", rank.ctypes.data_as(ctypes.c_void_p))
+    shape = np.zeros(int(rank[0]), dtype=np.intc)
+    cmd("getDataShape obs", shape.ctypes.data_as(ctypes.c_void_p))
+    data = np.zeros(tuple(int(v) for v in shape) or (n,), dtype=np.float64)
+    cmd("setMemoryForData obs", data.ctypes.data_as(ctypes.c_void_p))
+    step = ctypes.c_int(1)
+    scale = math.sqrt(4.0 * math.pi / (2 * 6 + 1))
+
+    def run():
+        hold_affinity(threads)
+        step.value += 1
+        cmd("setStep", ctypes.byref(step))
+        cmd("setBox", box.ctypes.data_as(ctypes.c_void_p))
+        cmd("setPositions", positions.ctypes.data_as(ctypes.c_void_p))
+        cmd("setMasses", mass.ctypes.data_as(ctypes.c_void_p))
+        cmd("setCharges", charge.ctypes.data_as(ctypes.c_void_p))
+        cmd("setForces", forces.ctypes.data_as(ctypes.c_void_p))
+        cmd("setVirial", virial.ctypes.data_as(ctypes.c_void_p))
+        cmd("calc")
+        values = np.array(data, copy=True).reshape(-1) * scale
+        save_agree(threads, "PLUMED", "q6", values)
+        return int(values.shape[0])
+
+    _rival_jobs(
+        "PLUMED", "2.10.0", [("q6", run, "rows")], threads,
+        f"PLUMED_NUM_THREADS={threads}",
+    )
+
+
+def time_ovito_coord(xyz, side: float, threads: int) -> None:
+    import numpy as np
+    import ovito
+    from ovito.data import DataCollection
+    from ovito.modifiers import CoordinationAnalysisModifier
+    version = ".".join(str(part) for part in tuple(ovito.version)[:3])
+
+    def run():
+        hold_affinity(threads)
+        fresh = DataCollection()
+        fresh.create_cell(np.diag([side, side, side]), pbc=(True, True, True))
+        atoms = fresh.create_particles(count=len(xyz))
+        atoms.create_property("Position", data=xyz)
+        fresh.apply(CoordinationAnalysisModifier(cutoff=CUTOFF))
+        coord = np.asarray(fresh.particles["Coordination"], dtype=np.int32)
+        save_agree(threads, "OVITO", "coordination", coord)
+        return int(np.sum(coord))
+
+    _rival_jobs(
+        "OVITO", version, [("coordination", run, "sum")], threads,
+        f"OVITO_THREAD_COUNT={threads} CoordinationAnalysisModifier cutoff={CUTOFF}",
+    )
+
+
 def worker(args) -> int:
     try:
         os.sched_setaffinity(0, set(range(args.threads)))
@@ -631,6 +769,15 @@ def worker(args) -> int:
         return 0
     if key == "ovito":
         time_ovito(xyz, side, args.threads)
+        return 0
+    if key == "pyscal":
+        time_pyscal(xyz, side, args.threads)
+        return 0
+    if key == "plumed":
+        time_plumed(xyz, side, args.threads)
+        return 0
+    if key == "ovito-coord":
+        time_ovito_coord(xyz, side, args.threads)
         return 0
     raise RuntimeError(f"unknown code {key}")
 
@@ -747,10 +894,9 @@ def drive(code_key: str, threads: int, rival: bool, args, env) -> list[dict]:
 
 
 def _name(code_key: str) -> str:
-    for key, name, _rival in CODES:
-        if key == code_key:
-            return name
-    return code_key
+    names = {key: name for key, name, _rival in CODES}
+    names.update({"pyscal": "pyscal3", "plumed": "PLUMED", "ovito-coord": "OVITO"})
+    return names.get(code_key, code_key)
 
 
 OPS = {
@@ -760,6 +906,9 @@ OPS = {
     "vesin": ["neighbours"],
     "freud": ["neighbours", "q4", "q6"],
     "ovito": ["chill+", "q4", "q6", "ptm-default", "ptm-ice"],
+    "pyscal": ["neighbours", "q6"],
+    "plumed": ["q6"],
+    "ovito-coord": ["coordination"],
 }
 
 
@@ -864,6 +1013,8 @@ def main() -> int:
     parser.add_argument("--from-op", default="")
     parser.add_argument("--only", default="", help="comma-separated code keys")
     parser.add_argument("--widths", default="", help="comma-separated thread counts")
+    parser.add_argument("--extra", action="store_true",
+                        help="time pyscal3, PLUMED q6 and OVITO coordination and merge them in")
     args = parser.parse_args()
     if args.worker:
         return worker(args)
@@ -875,14 +1026,29 @@ def main() -> int:
         args.version = project_version()
     only = set(args.only.split(",")) if args.only else set()
     widths = tuple(int(part) for part in args.widths.split(",") if part) or WIDTHS
+    catalog = list(CODES)
+    if args.extra:
+        catalog = [
+            ("dseams", "d-SEAMS", False),
+            ("pyscal", "pyscal3", True),
+            ("plumed", "PLUMED", True),
+            ("ovito-coord", "OVITO", True),
+        ]
+    if args.extra:
+        agree = args.out / ".sitting-agree"
+        if agree.is_dir():
+            for path in agree.glob("*.npy"):
+                path.unlink()
     collected = []
     for threads in widths:
         affinity = stats.taskset_cores(threads)
-        for key, _name, rival in CODES:
+        for key, _name, rival in catalog:
             if only and key not in only:
                 continue
             print(f"threads {threads} code {key}", flush=True)
             env = rival_env(threads) if rival else stats.pin_env(threads)
+            if args.extra and key == "dseams":
+                env["SITTING_ONLY"] = "rings,q6,neighbours"
             prior = env.get("LD_LIBRARY_PATH", "")
             libs = sit.library_path(args.lib)
             system = "/usr/lib/x86_64-linux-gnu"
@@ -903,15 +1069,37 @@ def main() -> int:
                 f"threads {threads} code {key} rows "
                 f"{sum(1 for row in collected if row['threads'] == threads and row['code'] == _name)}",
                 flush=True)
-            write_outputs(args.out, collected, info)
+            if not args.extra:
+                write_outputs(args.out, collected, info)
     if not collected:
         raise SystemExit("the sitting produced no rows")
     problems = record_agreement(collected, args.out / ".sitting-agree")
+    if args.extra:
+        collected = merge_existing(args.out / "sitting-large.csv", collected)
     write_outputs(args.out, collected, info)
-    require_rival_scaling(collected)
+    require_rival_scaling([row for row in collected if row["code"] in {
+        "pyscal3", "PLUMED", "OVITO", "rings-statistics-matter", "mdapy", "vesin", "freud",
+    }])
     if problems:
         raise SystemExit("results do not match the rivals\n" + "\n".join(problems))
     return 0
+
+
+def merge_existing(path: Path, new_rows: list[dict]) -> list[dict]:
+    if not path.is_file():
+        return new_rows
+    old = list(csv.DictReader(path.open()))
+    index = {
+        (row["code"], row["operation"], str(row["threads"])): i
+        for i, row in enumerate(old)
+    }
+    for row in new_rows:
+        key = (row["code"], row["operation"], str(row["threads"]))
+        if key in index:
+            old[index[key]] = row
+        else:
+            old.append(row)
+    return old
 
 
 def _note(row: dict, text: str) -> None:
@@ -939,33 +1127,45 @@ def record_agreement(rows: list[dict], root: Path) -> None:
         ours = load(threads, "d-SEAMS", "q6")
         freud = load(threads, "freud", "q6")
         mdapy = load(threads, "mdapy", "q6")
-        if ours is not None and freud is not None and mdapy is not None:
-            gap_freud = float(np.max(np.abs(ours - freud)))
-            gap_mdapy = float(np.max(np.abs(ours - mdapy)))
-            text = (
-                f"agree_freud_max_abs={gap_freud:.3e} "
-                f"agree_mdapy_max_abs={gap_mdapy:.3e}"
-            )
-            for code in ("d-SEAMS", "freud", "mdapy"):
+        gaps = []
+        if ours is not None and freud is not None:
+            gaps.append(("freud", float(np.max(np.abs(ours - freud)))))
+        if ours is not None and mdapy is not None:
+            gaps.append(("mdapy", float(np.max(np.abs(ours - mdapy)))))
+        pyscal = load(threads, "pyscal3", "q6")
+        plumed = load(threads, "PLUMED", "q6")
+        if ours is not None and pyscal is not None:
+            gaps.append(("pyscal3", float(np.max(np.abs(ours - pyscal)))))
+        if ours is not None and plumed is not None:
+            gaps.append(("PLUMED", float(np.max(np.abs(ours - plumed)))))
+        if gaps:
+            text = " ".join(f"agree_{name}_max_abs={gap:.3e}" for name, gap in gaps)
+            codes = ["d-SEAMS"] + [name for name, _gap in gaps]
+            for code in codes:
                 row = by.get((threads, code, "q6"))
                 if row:
                     _note(row, text)
-            if gap_freud > 1e-4 or gap_mdapy > 1e-4:
-                problems.append(
-                    f"q6 threads {threads} freud {gap_freud:.3e} mdapy {gap_mdapy:.3e}"
-                )
+            for name, gap in gaps:
+                if gap > 1e-4:
+                    problems.append(f"q6 threads {threads} {name} {gap:.3e}")
         counts = []
-        names = ("d-SEAMS", "vesin", "freud")
+        names = ("d-SEAMS", "vesin", "freud", "pyscal3")
+        present = []
         for code in names:
             values = load(threads, code, "neighbours")
-            counts.append(None if values is None else int(np.asarray(values).reshape(-1)[0]))
-        if all(count is not None for count in counts):
-            text = "pairs=" + "/".join(str(count) for count in counts) + " agree=d-SEAMS/vesin/freud"
+            count = None if values is None else int(np.asarray(values).reshape(-1)[0])
+            if count is not None:
+                present.append(code)
+                counts.append(count)
+        if "d-SEAMS" in present and len(present) >= 2:
+            text = "pairs=" + "/".join(
+                f"{code}:{count}" for code, count in zip(present, counts)
+            )
             matched = len(set(counts)) == 1
+            text += " agree=" + ",".join(present) if matched else " disagree=" + ",".join(present)
             if not matched:
-                text = text.replace("agree=", "disagree=")
-                problems.append(f"neighbours threads {threads} {counts}")
-            for code in names:
+                problems.append(f"neighbours threads {threads} {list(zip(present, counts))}")
+            for code in present:
                 row = by.get((threads, code, "neighbours"))
                 if row:
                     _note(row, text)
@@ -992,6 +1192,18 @@ def record_agreement(rows: list[dict], root: Path) -> None:
                     _note(row, text)
             if matched != len(labels):
                 problems.append(f"classifier threads {threads} {matched}/{len(labels)}")
+        coord = load(threads, "OVITO", "coordination")
+        ours_pairs = load(threads, "d-SEAMS", "neighbours")
+        if coord is not None and ours_pairs is not None:
+            total = int(np.sum(coord))
+            pairs = int(np.asarray(ours_pairs).reshape(-1)[0])
+            text = f"coordination_sum={total} dseams_pairs={pairs}"
+            for code, operation in (("OVITO", "coordination"), ("d-SEAMS", "neighbours")):
+                row = by.get((threads, code, operation))
+                if row:
+                    _note(row, text)
+            if total != pairs:
+                problems.append(f"coordination threads {threads} {total} vs {pairs}")
         for code in ("d-SEAMS", "rings-statistics-matter"):
             row = by.get((threads, code, "rings"))
             if row and "six=1769472" in row.get("detail", ""):
