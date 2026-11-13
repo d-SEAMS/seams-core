@@ -1,0 +1,30 @@
+# Turn one trimmed dump frame into a LAMMPS restart.
+# The production deck writes step-*.restart itself. This input is for a
+# dump that already holds the frame: id, type, x, y, z, and the box.
+# Variables: data, dump, step, restart
+units           real
+atom_style      full
+boundary        p p p
+atom_modify     map yes
+read_data       ${data}
+
+pair_style      lj/cut/tip4p/long 1 2 1 1 0.1546 8.5
+pair_modify     tail no
+kspace_style    pppm/tip4p 1.0e-5
+pair_coeff      1 1 0.18520 3.1589
+pair_coeff      2 2 0.0 0.0
+pair_coeff      3 3 0.35190 2.2173668
+pair_coeff      4 4 0.018385 4.6990563
+pair_coeff      1 3 0.18963 2.6083754
+pair_coeff      1 4 0.014814 4.2386698
+pair_coeff      3 4 0.34391 3.0051231
+pair_coeff      2 3 0.0 0.0
+pair_coeff      2 4 0.0 0.0
+pair_coeff      1 2 0.0 0.0
+bond_style      harmonic
+bond_coeff      1 0.0 0.9572
+angle_style     harmonic
+angle_coeff     1 0.0 104.52
+
+read_dump       ${dump} ${step} x y z box yes replace yes
+write_restart   ${restart}

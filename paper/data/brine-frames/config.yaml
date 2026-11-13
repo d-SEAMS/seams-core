@@ -1,0 +1,11 @@
+# Hugging Face dataset d-SEAMS/brine-frames.
+# Clone it at this path, or pass dataset=/path/to/d-SEAMS/brine-frames.
+# Restarts are read from data/restarts/. Labelled frames are written to
+# data/frames/ and to paper/data/brine-frames/out/. Neither directory is
+# stored in git.
+dataset: d-SEAMS/brine-frames
+python: python3
+render_python: python3
+lmp: lmp
+seams: seams
+lib: libyodaLib.so
