@@ -57,8 +57,8 @@ PALETTE = {
     "unclassified": "#78909C",
     "reCubic": "#FF655D",
     "reHex": "#1E88E5",
-    "sodium": "#6A1B9A",
-    "chloride": "#2E7D32",
+    "sodium": "#AA00FF",
+    "chloride": "#00C853",
     "methane": "#F9A825",
     "THF": "#EF6C00",
     "hydrogen": "#90A4AE",
@@ -126,13 +126,13 @@ def atom_style(token):
     """Colour, radius and transparency. Oxygen is a 0.6 angstrom sphere."""
     colour = palette_rgb(token)
     if token == "water":
-        return colour, 0.36, 0.72
+        return colour, 0.28, 0.78
     if token == "hydrogen":
         return colour, 0.22, 0.0
     if token == "sodium":
-        return colour, 0.72, 0.0
+        return colour, 1.05, 0.0
     if token == "chloride":
-        return colour, 0.90, 0.0
+        return colour, 1.30, 0.0
     if token in ("methane", "THF"):
         return colour, 0.56, 0.0
     return colour, 0.60, 0.0
@@ -409,7 +409,7 @@ def legend_rows(names, colors):
     rows = []
     seen = set()
     for name, rgb in zip(names, colors):
-        if name in seen:
+        if not name or str(name).startswith("_") or name in seen:
             continue
         seen.add(name)
         rows.append((name, tuple(rgb)))
@@ -607,13 +607,14 @@ def _basal_fog(positions, colors, transparency, radii):
     for rank, members in enumerate(reversed(layers)):
         bilayer = rank // 2
         rear = rank % 2 == 1
-        fog = min(0.86, 0.58 * bilayer + (0.05 if rear else 0.0))
+        fog = min(0.42, 0.16 * bilayer + (0.04 if rear else 0.0))
         if fog <= 0.0:
             continue
         idx = np.asarray(members, dtype=int)
-        colors[idx] = colors[idx] * (1.0 - 0.35 * fog) + 0.35 * fog
-        transparency[idx] = np.clip(transparency[idx] + 0.80 * fog, 0.0, 0.88)
-        radii[idx] *= 1.0 - 0.22 * fog
+        # Stay blue. Mixing toward white is what blew the back spheres out.
+        colors[idx] = colors[idx] * (1.0 - 0.18 * fog)
+        transparency[idx] = np.clip(transparency[idx] + 0.22 * fog, 0.0, 0.28)
+        radii[idx] *= 1.0 - 0.06 * fog
     return colors, transparency, radii
 
 
@@ -635,6 +636,9 @@ def orient(positions, view, center):
     if view == "basal":
         pos = np.column_stack((pos[:, 0], pos[:, 2], pos[:, 1]))
         return _spin(pos, "x", 4.0)
+    if view == "channel":
+        # The ice c axis is y. The long cell axis z runs across the page.
+        return np.column_stack((pos[:, 2], pos[:, 0], pos[:, 1]))
     return pos
 
 
@@ -763,14 +767,14 @@ def cycles_job():
         tree.links.new(ao.outputs["Color"], tint.inputs["Color2"])
         tree.links.new(tint.outputs["Color"], colour_in)
         if rough is not None:
-            rough.default_value = 0.28
+            rough.default_value = 0.46
         if spec is not None:
-            spec.default_value = 0.40
+            spec.default_value = 0.16
         if coat is not None:
-            coat.default_value = 0.22
+            coat.default_value = 0.05
         emission = tree.nodes.new("ShaderNodeEmission")
         emission.inputs["Color"].default_value = (*linear, 1.0)
-        emission.inputs["Strength"].default_value = 0.12
+        emission.inputs["Strength"].default_value = 0.18
         added = tree.nodes.new("ShaderNodeAddShader")
         tree.links.new(principled.outputs["BSDF"], added.inputs[0])
         tree.links.new(emission.outputs["Emission"], added.inputs[1])
@@ -843,7 +847,7 @@ def cycles_job():
             return
         from mathutils import Matrix, Vector
 
-        ink = (0.16, 0.17, 0.19) if light else (0.82, 0.83, 0.86)
+        ink = tuple(float(v) for v in job["bond_rgb"]) if "bond_rgb" in job.files else ((0.42, 0.44, 0.47) if light else (0.78, 0.80, 0.82))
         material = glossy(name, ink, 1.0, 0.0)
         rough = material.node_tree.nodes.get("Principled BSDF")
         if rough is not None:
@@ -871,6 +875,7 @@ def cycles_job():
         if matrices:
             link_instances(name, bond_proto(name), material, matrices)
 
+    bond_radius = float(job["bond_radius"]) if "bond_radius" in job.files else 0.045
     bold = np.asarray(job["bold_bonds"], dtype=int) if "bold_bonds" in job.files else np.zeros((0, 2), dtype=int)
     if len(bonds) and len(bold):
         bold_key = {tuple(sorted((int(pair[0]), int(pair[1])))) for pair in bold}
@@ -878,15 +883,15 @@ def cycles_job():
             pair for pair in bonds
             if tuple(sorted((int(pair[0]), int(pair[1])))) not in bold_key
         ]
-        add_bond_set(thin_pairs, 0.07, "bonds")
-        add_bond_set(bold, 0.14, "cage-bonds")
+        add_bond_set(thin_pairs, bond_radius, "bonds")
+        add_bond_set(bold, bond_radius * 1.2, "cage-bonds")
     elif len(bonds):
-        add_bond_set(bonds, 0.08, "bonds")
+        add_bond_set(bonds, bond_radius, "bonds")
     for slot in range(mesh_count):
         vertices = np.asarray(job["mesh_vertices_{}".format(slot)], dtype=float)
         faces = [tuple(int(v) for v in face) for face in job["mesh_faces_{}".format(slot)]]
         colour = tuple(float(v) for v in job["mesh_color_{}".format(slot)])
-        material = glossy("cage", colour, 0.34, 0.94)
+        material = glossy("cage", colour, 0.22, 0.12)
         mesh = bpy.data.meshes.new("cage")
         mesh.from_pydata(vertices.tolist(), [], faces)
         mesh.update()
@@ -905,7 +910,7 @@ def cycles_job():
     if ortho:
         camera_data.type = "ORTHO"
         # The atom box fills about 92 percent of the limiting frame edge.
-        vertical = vertical / 0.92
+        vertical = vertical / 0.95
         camera_data.ortho_scale = vertical
         camera.location = target + Vector((0.0, 0.0, 40.0))
         camera_data.clip_start = 0.1
@@ -938,27 +943,9 @@ def cycles_job():
         obj.rotation_euler = direction.to_track_quat("-Z", "Y").to_euler()
         return obj
 
-    area("key", (float(centre[0]) - 9.0, float(centre[1]) + 11.0, float(high[2]) + 14.0), 2200.0, 12.0)
-    area("fill", (float(centre[0]) + 14.0, float(centre[1]) + 4.0, float(high[2]) + 18.0), 550.0, 30.0)
-    area("rim", (float(centre[0]) + 1.0, float(centre[1]) - 16.0, float(low[2]) + 5.0), 900.0, 6.0)
-    floor_z = float(low[2]) - 0.8
-    floor = bpy.data.meshes.new("ground")
-    extent = max(width, height, 12.0) * 8.0
-    floor.from_pydata(
-        [(-extent, -extent, floor_z), (extent, -extent, floor_z),
-         (extent, extent, floor_z), (-extent, extent, floor_z)],
-        [], [(0, 1, 2), (0, 2, 3)],
-    )
-    floor.update()
-    catcher = bpy.data.materials.new("ground")
-    catcher.use_nodes = True
-    catcher.node_tree.nodes.clear()
-    catcher_out = catcher.node_tree.nodes.new("ShaderNodeOutputMaterial")
-    diffuse = catcher.node_tree.nodes.new("ShaderNodeBsdfDiffuse")
-    diffuse.inputs["Color"].default_value = (1.0, 1.0, 1.0, 1.0)
-    catcher.node_tree.links.new(diffuse.outputs["BSDF"], catcher_out.inputs["Surface"])
-    ground = add_mesh("ground", floor, catcher)
-    ground.is_shadow_catcher = True
+    area("key", (float(centre[0]) - 9.0, float(centre[1]) + 11.0, float(high[2]) + 14.0), 1800.0, 18.0)
+    area("fill", (float(centre[0]) + 14.0, float(centre[1]) + 4.0, float(high[2]) + 18.0), 480.0, 36.0)
+    area("rim", (float(centre[0]) + 1.0, float(centre[1]) - 16.0, float(low[2]) + 5.0), 520.0, 10.0)
 
     world = bpy.data.worlds.new("studio")
     bpy.context.scene.world = world
@@ -990,7 +977,10 @@ def cycles_job():
         pass
     scene.cycles.max_bounces = 6
     scene.cycles.transmission_bounces = 6
-    scene.cycles.glossy_bounces = 3
+    scene.cycles.glossy_bounces = 2
+    for attr, value in (("sample_clamp_direct", 8.0), ("sample_clamp_indirect", 4.0)):
+        if hasattr(scene.cycles, attr):
+            setattr(scene.cycles, attr, value)
     if str(panel).startswith("witness"):
         scene.render.resolution_x = 640
         scene.render.resolution_y = 480
@@ -1013,7 +1003,7 @@ def cycles_job():
     return 0
 
 
-def cycles_launch(positions, colors, radii, transparency, bonds, meshes, background, panel="panel", samples=None, ortho=False, bold=None):
+def cycles_launch(positions, colors, radii, transparency, bonds, meshes, background, panel="panel", samples=None, ortho=False, bold=None, bond_radius=0.045, bond_rgb=None):
     """Render with Cycles in a fresh interpreter. None when bpy is absent."""
     import subprocess
     import tempfile
@@ -1038,6 +1028,8 @@ def cycles_launch(positions, colors, radii, transparency, bonds, meshes, backgro
         "samples": np.int32(int(os.environ.get("MOLECULES_SAMPLES", str(CYCLES_SAMPLES if samples is None else samples)))),
         "panel": np.array(str(panel)),
         "ortho": np.int32(1 if ortho else 0),
+        "bond_radius": np.float64(bond_radius),
+        "bond_rgb": np.asarray(bond_rgb if bond_rgb is not None else (0.42, 0.44, 0.47), dtype=np.float64),
     }
     if bold is not None and len(bold):
         payload["bold_bonds"] = np.asarray(bold, dtype=np.int32)
@@ -1088,12 +1080,13 @@ def cycles_launch(positions, colors, radii, transparency, bonds, meshes, backgro
                 pass
 
 
-def raytrace(positions, colors, radii, transparency, bonds, meshes, background, perspective, ortho=False, bold=None):
+def raytrace(positions, colors, radii, transparency, bonds, meshes, background, perspective, ortho=False, bold=None, bond_radius=0.045, bond_rgb=None):
     """Cycles when requested. Tachyon is only used when the engine is tachyon."""
     if RENDER_ENGINE == "cycles":
         drawn = cycles_launch(
             positions, colors, radii, transparency, bonds, meshes, background,
             panel=PANEL_NAME, ortho=ortho, bold=bold,
+            bond_radius=bond_radius, bond_rgb=bond_rgb,
         )
         if drawn is None:
             fail("Cycles was requested (--engine cycles) and did not produce a picture")
@@ -1236,81 +1229,101 @@ def _font(size):
     return ImageFont.load_default()
 
 
+def _contact_shadow(picture, light):
+    """A soft silhouette under the atoms. The page behind it stays white."""
+    import numpy as np
+    from PIL import Image, ImageFilter
+
+    array = np.asarray(picture.convert("RGB"))
+    if light:
+        mask = np.any(array < 246, axis=2)
+    else:
+        mask = np.any(array > 40, axis=2)
+    plate = Image.fromarray((mask.astype(np.uint8) * 255))
+    plate = plate.filter(ImageFilter.GaussianBlur(radius=7))
+    shade = (186, 188, 190) if light else (12, 12, 14)
+    shadow = Image.new("RGB", picture.size, shade)
+    return shadow, plate
+
+
 def compose(structure, legend, world_height, light):
-    """Centre the structure and park the legend in a strip along its foot."""
+    """Centre the structure. The legend is two rows across the panel."""
     from PIL import Image, ImageDraw
 
     bg = (255, 255, 255) if light else (22, 24, 28)
     ink = (25, 25, 28) if light else (236, 237, 239)
     picture, crop_rows, render_rows = crop_margin(structure, light)
-    font = _font(52)
-    caption = 86
+    font = _font(40)
+    row_h = 52
+    caption = 16 + row_h * 2
     avail_w = int(round(WIDTH * 0.94))
-    avail_h = int(round(HEIGHT * 0.94)) - caption
+    avail_h = int(round(HEIGHT * 0.96)) - caption
     scale = min(avail_w / float(picture.size[0]), avail_h / float(picture.size[1]))
     sized = (
         max(1, int(round(picture.size[0] * scale))),
         max(1, int(round(picture.size[1] * scale))),
     )
     picture = picture.resize(sized, Image.Resampling.LANCZOS)
-    # A narrow structure gets a wide caption so the ink bbox still fills the frame.
-    mol_fill = (sized[0] * (sized[1] + caption)) / float(WIDTH * HEIGHT)
-    strip_w = sized[0] if mol_fill >= 0.74 else max(sized[0], int(round(WIDTH * 0.92)))
-    block_h = sized[1] + caption
-    block = Image.new("RGB", (strip_w, block_h), bg)
-    left = (strip_w - sized[0]) // 2
-    block.paste(picture, (left, 0))
-    draw = ImageDraw.Draw(block)
+    canvas = Image.new("RGB", (WIDTH, HEIGHT), bg)
+    left = (WIDTH - sized[0]) // 2
+    top = max(12, (avail_h - sized[1]) // 2)
+    shadow, plate = _contact_shadow(picture, light)
+    shadow_layer = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
+    tint = Image.new("RGBA", picture.size, (186, 188, 190, 70) if light else (8, 8, 10, 90))
+    tint.putalpha(plate.point(lambda value: int(value * 0.45)))
+    shadow_layer.paste(tint, (left, top + 10), tint)
+    canvas = Image.alpha_composite(canvas.convert("RGBA"), shadow_layer).convert("RGB")
+    import numpy as np
+
+    opaque = np.any(np.asarray(picture.convert("RGB")) < 246, axis=2)
+    sprite = picture.convert("RGBA")
+    sprite.putalpha(Image.fromarray((opaque.astype(np.uint8) * 255)))
+    canvas.paste(sprite, (left, top), sprite)
+    draw = ImageDraw.Draw(canvas)
     bar = 0.0
     if world_height > 0 and crop_rows > 0 and render_rows > 0:
         world_crop = world_height * (crop_rows / float(render_rows))
         bar = 10.0 * sized[1] / world_crop
-    bar_x = 12
-    bar_y = sized[1] + 36
-    if bar > 8:
-        draw.line((bar_x, bar_y, bar_x + bar, bar_y), fill=ink, width=12)
-        draw.line((bar_x, bar_y - 14, bar_x, bar_y + 14), fill=ink, width=5)
-        draw.line((bar_x + bar, bar_y - 14, bar_x + bar, bar_y + 14), fill=ink, width=5)
-        label = "10 \u00c5"
-        label_w = draw.textlength(label, font=font)
-        draw.text((bar_x + bar + 14, bar_y - 30), label, fill=ink, font=font)
-        text_left = bar_x + bar + 14 + label_w + 28
-    else:
-        text_left = 12
     items = []
     for name, colour_rgb in legend:
         colour = tuple(int(max(0, min(255, round(channel * 255)))) for channel in colour_rgb)
-        text_w = draw.textlength(name, font=font)
-        items.append((name, colour, text_w))
-    row_h = 58
-    gap = 36
-    # Pack the legend to the right of the scale bar. If it does not reach the
-    # far end of a widened strip, pin the last item there so the bbox stays wide.
-    x = text_left
-    y = sized[1] + 8
-    placed = []
-    for name, colour, text_w in items:
-        need = 44 + text_w
-        if placed and x + need > strip_w - 8:
-            x = 12
-            y += row_h
-        placed.append((x, y, name, colour, text_w))
-        x += need + gap
-    if placed:
-        foot = max(item[1] for item in placed) + 52
-        if foot > block_h:
-            grown = Image.new("RGB", (strip_w, foot), bg)
-            grown.paste(block, (0, 0))
-            block = grown
-            block_h = foot
-            draw = ImageDraw.Draw(block)
-    for x, y, name, colour, _text_w in placed:
-        draw.rounded_rectangle((x, y + 6, x + 34, y + 40), radius=5, fill=colour, outline=ink, width=2)
-        draw.text((x + 42, y), name, fill=ink, font=font)
-    canvas = Image.new("RGB", (WIDTH, HEIGHT), bg)
-    ox = (WIDTH - strip_w) // 2
-    oy = (HEIGHT - block_h) // 2
-    canvas.paste(block, (ox, oy))
+        items.append((name, colour, draw.textlength(name, font=font)))
+    # Two rows, split as evenly as the text allows, each entry on one line.
+    if len(items) <= 1:
+        cuts = [items]
+    else:
+        best = 1
+        best_gap = 1.0e9
+        widths = [44 + text_w for _name, _colour, text_w in items]
+        for cut in range(1, len(items)):
+            gap = abs(sum(widths[:cut]) - sum(widths[cut:]))
+            if gap < best_gap:
+                best, best_gap = cut, gap
+        cuts = [items[:best], items[best:]]
+    y0 = top + sized[1] + 8
+    margin = 28
+    if bar > 8:
+        bar_y = y0 + 18
+        draw.line((margin, bar_y, margin + bar, bar_y), fill=ink, width=8)
+        draw.line((margin, bar_y - 10, margin, bar_y + 10), fill=ink, width=4)
+        draw.line((margin + bar, bar_y - 10, margin + bar, bar_y + 10), fill=ink, width=4)
+        draw.text((margin + bar + 10, bar_y - 22), "10 \u00c5", fill=ink, font=font)
+        legend_left = margin + bar + 10 + draw.textlength("10 \u00c5", font=font) + 24
+    else:
+        legend_left = margin
+    span = WIDTH - margin - legend_left
+    for row_index, row in enumerate(cuts):
+        if not row:
+            continue
+        y = y0 + row_index * row_h
+        gap = 36.0
+        need = [44 + text_w for _name, _colour, text_w in row]
+        row_w = sum(need) + gap * max(0, len(row) - 1)
+        x = float(legend_left) + max(0.0, (span - row_w) / 2.0)
+        for (name, colour, _text_w), width in zip(row, need):
+            draw.rounded_rectangle((x, y + 4, x + 28, y + 32), radius=4, fill=colour, outline=ink, width=2)
+            draw.text((x + 36, y), name, fill=ink, font=font)
+            x += width + gap
     return _seat(canvas, light)
 
 
@@ -1332,7 +1345,7 @@ def largest_cluster(frame, labels, shell=3.6):
     import numpy as np
     from scipy.spatial import cKDTree
 
-    crystal = np.array([i for i, label in enumerate(labels) if label in (0, 1, 7, 8)], dtype=int)
+    crystal = np.array([i for i, label in enumerate(labels) if label in (0, 1, 3, 7, 8)], dtype=int)
     if len(crystal) == 0:
         return central_slice(frame, labels, 400)
     tree = cKDTree(frame.xyz[crystal])
@@ -1480,7 +1493,7 @@ def ring_meshes(positions, rings):
     return meshes
 
 
-def finish(positions, colors, radii, transparency, names, bonds, meshes, view, center, perspective, bold=None, align=False):
+def finish(positions, colors, radii, transparency, names, bonds, meshes, view, center, perspective, bold=None, align=False, bond_radius=0.045, bond_rgb=None):
     import numpy as np
 
     positions = np.asarray(positions, dtype=float)
@@ -1529,11 +1542,6 @@ def finish(positions, colors, radii, transparency, names, bonds, meshes, view, c
             ]
             if len(positions) > 1:
                 colors, transparency, radii = _basal_fog(positions, colors, transparency, radii)
-                if len(bonds):
-                    bonds = [
-                        pair for pair in bonds
-                        if transparency[pair[0]] < 0.40 and transparency[pair[1]] < 0.40
-                    ]
             positions = _spin(positions, "x", 4.0)
             for mesh in meshes:
                 mesh["vertices"] = _spin(mesh["vertices"], "x", 4.0)
@@ -1556,17 +1564,25 @@ def finish(positions, colors, radii, transparency, names, bonds, meshes, view, c
         if label and label not in seen:
             legend.append((label, mesh["color"]))
             seen.add(label)
-    ortho = view == "basal"
+    positions = np.asarray(positions, dtype=float)
+    radii = np.asarray(radii, dtype=float)
+    for index, name in enumerate(names):
+        if name in ("methane", "THF"):
+            positions[index, 2] += 4.6 if name == "methane" else 2.2
+            radii[index] = max(float(radii[index]), 0.62 if name == "methane" else 0.50)
+        elif name == "_rim":
+            positions[index, 2] -= 0.25
+    ortho = view in ("basal", "channel") or bool(align)
     light_picture, world = raytrace(
         positions, colors, radii, transparency, bonds, meshes, (1, 1, 1), perspective,
-        ortho=ortho, bold=bold,
+        ortho=ortho, bold=bold, bond_radius=bond_radius, bond_rgb=bond_rgb,
     )
     if os.environ.get("MOLECULES_THEMES") == "light":
         dark_picture = light_picture
     else:
         dark_picture, _world = raytrace(
             positions, colors, radii, transparency, bonds, meshes, (0.09, 0.10, 0.12), perspective,
-            ortho=ortho, bold=bold,
+            ortho=ortho, bold=bold, bond_radius=bond_radius, bond_rgb=bond_rgb,
         )
     return (
         compose(light_picture, legend, world, True),
@@ -1582,20 +1598,19 @@ def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=
     kept_labels = []
     for index in range(len(frame.xyz)):
         kind = int(frame.types[index])
-        if ions and kind == 3:
-            colour, radius, alpha = atom_style("sodium")
-            colors.append(colour)
-            names.append("sodium")
-            radii.append(radius)
-            transparency.append(alpha)
+        if ions and kind in (3, 4):
+            token = "sodium" if kind == 3 else "chloride"
+            colour, radius, alpha = atom_style(token)
+            rim = (0.12, 0.12, 0.14)
+            colors.append(rim)
+            names.append("_rim")
+            radii.append(radius * 1.18)
+            transparency.append(0.0)
             heavy.append(False)
             kept_xyz.append(frame.xyz[index])
             kept_labels.append(int(labels[index]))
-            continue
-        if ions and kind == 4:
-            colour, radius, alpha = atom_style("chloride")
             colors.append(colour)
-            names.append("chloride")
+            names.append(token)
             radii.append(radius)
             transparency.append(alpha)
             heavy.append(False)
@@ -1604,15 +1619,6 @@ def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=
             continue
         label = int(labels[index])
         if cluster and label == 2:
-            colour, radius, alpha = atom_style("water")
-            alpha = 0.85
-            colors.append(colour)
-            names.append("water")
-            radii.append(0.42)
-            transparency.append(alpha)
-            heavy.append(False)
-            kept_xyz.append(frame.xyz[index])
-            kept_labels.append(label)
             continue
         if cluster and label not in (0, 1, 3, 7, 8):
             continue
@@ -1638,10 +1644,13 @@ def labelled_picture(frame, labels, view, liquid_clear, ions=False, perspective=
             pair for pair in bonds
             if not (int(kept_labels[pair[0]]) == 2 and int(kept_labels[pair[1]]) == 2)
         ]
+    if view == "channel":
+        radii = [value * (0.72 if name not in ("sodium", "chloride", "_rim") else 1.0) for value, name in zip(radii, names)]
+    bond_radius = 0.038 if view == "channel" else 0.050
     return finish(
         xyz, colors, radii, transparency, names, bonds, meshes or [],
         view, frame.xyz.mean(axis=0) if center is None else center, perspective,
-        align=cluster,
+        align=cluster, bond_radius=bond_radius,
     )
 
 
@@ -1870,30 +1879,96 @@ def genice_picture(lattice, rep, guests, cage_faces, hydrogens=True):
         cage_atoms = {remap[index] for index in cage_atoms if index in remap}
         oxygen_ids = [remap[index] for index in oxygen_ids if index in remap]
         water_colour = palette_rgb("water")
-        for slot, atom_index in enumerate(oxygen_ids):
-            if atom_index in cage_atoms:
-                radii[atom_index] = 0.42
-                transparency[atom_index] = 0.0
+        centres = [np.asarray(mesh["vertices"], dtype=float).mean(axis=0) for mesh in meshes]
+        near_cage = set()
+        if centres and oxygen_ids:
+            stacked = np.vstack(centres)
+            distance = np.linalg.norm(xyz[oxygen_ids, None, :] - stacked[None, :, :], axis=2).min(axis=1)
+            for atom_index, gap in zip(oxygen_ids, distance):
+                if float(gap) <= 6.4:
+                    near_cage.add(int(atom_index))
+        cage_atoms = {index for index in cage_atoms if index in near_cage}
+        guest_names = {"methane", "THF", "hydrogen"}
+        keep = [
+            index for index, name in enumerate(names)
+            if name in guest_names or index in near_cage
+        ]
+        remap = {old: new for new, old in enumerate(keep)}
+        xyz = xyz[keep]
+        colors = [colors[index] for index in keep]
+        names = [names[index] for index in keep]
+        radii = [radii[index] for index in keep]
+        transparency = [transparency[index] for index in keep]
+        cage_atoms = {remap[index] for index in cage_atoms if index in remap}
+        bonds = [
+            (remap[pair[0]], remap[pair[1]])
+            for pair in bonds
+            if pair[0] in remap and pair[1] in remap and remap[pair[0]] in cage_atoms and remap[pair[1]] in cage_atoms
+        ]
+        for index, name in enumerate(names):
+            if name in guest_names:
+                continue
+            if index in cage_atoms:
+                radii[index] = 0.32
+                transparency[index] = 0.0
             else:
-                radii[atom_index] = 0.22
-                transparency[atom_index] = 0.75
-            colors[atom_index] = water_colour
-            names[atom_index] = "water"
+                radii[index] = 0.24
+                transparency[index] = 0.35
+            colors[index] = water_colour
+            names[index] = "water"
         if len(extra):
             xyz = np.vstack([xyz, np.asarray(extra, dtype=float)])
             for _point in extra:
                 colors.append(water_colour)
                 names.append("water")
-                radii.append(0.42)
+                radii.append(0.32)
                 transparency.append(0.0)
-        bold = [
-            pair for pair in bonds
-            if pair[0] in cage_atoms and pair[1] in cage_atoms
-        ]
+        bold = list(bonds)
     return finish(
         xyz, colors, radii, transparency, names, bonds, meshes,
         "cage", xyz.mean(axis=0), False, bold=bold,
+        bond_radius=0.036, bond_rgb=(0.33, 0.35, 0.38),
     )
+
+
+def whole_hexagon_index(points):
+    """Atoms that sit on a closed six-ring. Edge fragments are left out."""
+    import numpy as np
+    from scipy.spatial import cKDTree
+
+    pts = np.asarray(points, dtype=float)
+    if len(pts) < 6:
+        return np.arange(len(pts))
+    tree = cKDTree(pts)
+    adj = [[] for _ in range(len(pts))]
+    for left, right in tree.query_pairs(3.25):
+        gap = float(np.linalg.norm(pts[left] - pts[right]))
+        if gap < 2.30:
+            continue
+        adj[left].append(int(right))
+        adj[right].append(int(left))
+    keep = np.zeros(len(pts), dtype=bool)
+    for start, firsts in enumerate(adj):
+        for second in firsts:
+            if second <= start:
+                continue
+            for third in adj[second]:
+                if third == start:
+                    continue
+                for fourth in adj[third]:
+                    if fourth in (start, second):
+                        continue
+                    for fifth in adj[fourth]:
+                        if fifth in (start, second, third):
+                            continue
+                        for sixth in adj[fifth]:
+                            if sixth in (second, third, fourth, fifth):
+                                continue
+                            if start in adj[sixth] and len({start, second, third, fourth, fifth, sixth}) == 6:
+                                keep[[start, second, third, fourth, fifth, sixth]] = True
+    if int(keep.sum()) < 12:
+        return np.arange(len(pts))
+    return np.where(keep)[0]
 
 
 def tile_frame(frame, labels, nx, ny, nz):
@@ -1916,6 +1991,15 @@ def tile_frame(frame, labels, nx, ny, nz):
     return Frame(np.vstack(pieces), np.concatenate(kinds), box), repeated
 
 
+def clip_axis(frame, labels, axis, low, high):
+    """Keep the slice of a long cell that still shows the lattice."""
+    import numpy as np
+
+    mask = (frame.xyz[:, axis] >= low) & (frame.xyz[:, axis] <= high)
+    index = np.where(mask)[0]
+    return frame.subset(index), [labels[int(i)] for i in index]
+
+
 def draw(library, scene):
     global PANEL_NAME
     PANEL_NAME = scene
@@ -1923,6 +2007,9 @@ def draw(library, scene):
         frame = read_dump(ROOT / "input/traj/ice1h.lammpstrj")
         labels = chill_labels(library, frame)
         frame, labels = tile_frame(frame, labels, 3, 1, 2)
+        kept = whole_hexagon_index(frame.xyz)
+        frame = frame.subset(kept)
+        labels = [labels[int(index)] for index in kept]
         return labelled_picture(frame, labels, "basal", False)
     if scene == "ice-ih-h":
         return genice_picture("1h", (2, 2, 1), [], False)
@@ -1933,11 +2020,13 @@ def draw(library, scene):
         return labelled_picture(frame, labels, "basal", False)
     if scene == "interface":
         frame = read_dump(ROOT / "input/traj/interface_f0.lammpstrj")
-        return labelled_picture(frame, chill_labels(library, frame), "front", True)
+        labels = chill_labels(library, frame)
+        frame, labels = clip_axis(frame, labels, 2, 0.0, 34.0)
+        return labelled_picture(frame, labels, "channel", True)
     if scene == "nucleation":
         frame = read_dump(ROOT / "input/traj/nucleation_three.lammpstrj", frame_index=1)
         labels = chill_labels(library, frame)
-        frame, labels, centre = largest_cluster(frame, labels, shell=7.2)
+        frame, labels, centre = largest_cluster(frame, labels, shell=0.0)
         return labelled_picture(
             frame, labels, "cage", True, perspective=False, center=centre, cluster=True,
         )
@@ -1948,7 +2037,8 @@ def draw(library, scene):
         labels = [2] * len(frame.xyz)
         for index, label in zip(oxygen, labelled):
             labels[index] = label
-        return labelled_picture(frame, labels, "front", True, ions=True)
+        frame, labels = clip_axis(frame, labels, 2, 8.0, 50.0)
+        return labelled_picture(frame, labels, "channel", True, ions=True)
     if scene == "rings":
         frame = read_dump(ROOT / "input/traj/genice_sI.lammpstrj")
         meshes = ring_meshes(frame.xyz, ring_lists(library, frame))
