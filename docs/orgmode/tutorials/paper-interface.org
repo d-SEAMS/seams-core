@@ -1,0 +1,38 @@
+#+TITLE: CHILL+ on an ice/water slab
+#+OPTIONS: toc:nil num:nil
+
+An interface is where a rule is easy to fool. The crystal half should
+be hexagonal ice. The liquid half should be water. The molecules in
+between are the ones where the published CHILL+ rule and the OVITO
+rule can part company, because they do not use the same neighbour test.
+
+The page builds that slab instead of reading a dump from the tree.
+GenIce supplies a 2 by 2 by 1 ice Ih cell, oxygen only, so the
+hydrogen disorder is not part of the label. A copy of that cell is
+shifted by one box length along z and shaken by less than an angstrom.
+The shake is why the upper half is liquid: the oxygens are no longer
+on lattice sites. OpenMM then minimises the stack for eight steps with
+the lower half restrained. The restraint is why the crystal survives
+the relax. The cutoff is 3.5 Å, the same shell CHILL+ will read, and
+it has to sit under half the shortest box edge or OpenMM refuses the
+periodic force.
+
+~meson test docs_paper_interface~ runs this and checks the two lines.
+The published rule prints
+
+#+begin_src text
+interface published hexagonal 68 interfacial 19 water 41
+#+end_src
+
+The OVITO rule prints
+
+#+begin_src text
+interface ovito hexagonal 68 interfacial 20 water 40
+#+end_src
+
+Both rules call 68 of the 128 oxygens hexagonal. They move one molecule
+between interfacial and water. That single molecule is the reason to
+name the rule when you quote an interface count. The layer stack is
+~HHHHH~: five crystal slabs and no cubic ice, so \(\phi_c\) is 0.
+OVITO draws the same oxygens, so you can see the slab the numbers
+came from. The test exits 77 when GenIce, OpenMM, or OVITO is absent.

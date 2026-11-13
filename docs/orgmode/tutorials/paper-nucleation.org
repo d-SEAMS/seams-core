@@ -1,0 +1,25 @@
+#+TITLE: Ice-likeness along a short nucleation run
+#+OPTIONS: toc:nil num:nil
+
+Ice-likeness here is the mean Lechner-Dellago \(\bar q_6\). A liquid
+sits near 0.2. A crystal sits near 0.5. A nucleus in a liquid pulls
+the mean up as it grows, which is why the score is the whole-frame
+average and not a single molecule.
+
+The trajectory has three frames and is built in the test. GenIce ice
+Ih is shaken into a liquid. The basal half of the original lattice is
+the nucleus. Frame 0 is the shaken liquid. Frame 1 puts half of that
+nucleus back on its lattice sites. Frame 2 puts the rest back. OpenMM
+relaxes each frame for two steps with those sites restrained, so the
+liquid can move and the nucleus cannot dissolve before you measure it.
+
+~meson test docs_paper_nucleation~ checks
+
+#+begin_src text
+nucleation frame 0 q6bar 0.276023
+nucleation frame 1 q6bar 0.320504
+nucleation frame 2 q6bar 0.334254
+#+end_src
+
+The mean rises at each stage. OVITO draws the last frame. The test
+exits 77 when GenIce, OpenMM, or OVITO is absent.

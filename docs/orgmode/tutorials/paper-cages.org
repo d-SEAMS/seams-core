@@ -1,0 +1,30 @@
+#+TITLE: Cage census of sI, sII and sH
+#+OPTIONS: toc:nil num:nil
+
+A clathrate cage is a closed polyhedron of primitive rings. The
+signature is the face list: \(5^{12}\) is twelve pentagons, and
+\(5^{12}6^{2}\) adds two hexagons. Counting those polyhedra is how you
+tell sI from sII from sH. GenIce builds the empty host. Guests would
+sit in the cages and are left out here, because the census is of the
+water rings.
+
+The test writes only the oxygen sites into a LAMMPS dump. Hydrogens
+and the massless site would change the neighbour list. sI and sII are
+orthogonal. sH is skewed, so the dump keeps the tilt. A window that
+measured bond lengths as if the box were a rectangle would drop the
+long faces. ~--cage-edge none~ is why every primitive ring stays
+eligible.
+
+~meson test docs_paper_cages~ checks
+
+#+begin_src text
+cages sI 2 6
+cages sII 16 8
+cages sH 6 4 2
+#+end_src
+
+sI, one cell, 46 waters: 2 of \(5^{12}\) and 6 of \(5^{12}6^{2}\).
+sII, 136 waters: 16 of \(5^{12}\) and 8 of \(5^{12}6^{4}\).
+sH, the GenIce HS3 cell, 68 waters: 6 of \(5^{12}\), 4 of
+\(4^{3}5^{6}6^{3}\), and 2 of \(5^{12}6^{8}\). OVITO draws the sI
+oxygens. The test exits 77 when GenIce or OVITO is absent.

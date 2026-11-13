@@ -1,0 +1,31 @@
+#+TITLE: Ice growing into brine
+#+OPTIONS: toc:nil num:nil
+
+The front is the height where the crystal slabs stop. CHILL+ labels
+the waters. Slabs of 3.7 Å along z are written as a stack: ~H~ for
+hexagonal, ~C~ for cubic, ~.~ for a slab that is neither. The front
+is the first slab that is not crystal, times 3.7 Å. Ions are not
+waters, so they stay out of that count. You still want them in the
+box, because the liquid they sit in is the brine the ice is growing
+into.
+
+Packmol places six waters, one sodium and one chloride above a fixed
+GenIce ice Ih block. OpenMM then relaxes three stages. At each later
+stage the nearest brine oxygen is moved onto the next lattice plane
+and restrained. That move is the growth step. The relax is why the
+ions and the leftover liquid can answer it, instead of staying where
+packmol left them.
+
+~meson test docs_paper_brine~ checks
+
+#+begin_src text
+brine frame 0 hexagonal 31 water 38 front 7.40
+brine frame 1 hexagonal 32 water 36 front 7.40
+brine frame 2 hexagonal 32 water 35 front 7.40
+#+end_src
+
+The front stays at 7.40 Å. The stack remains ~HH...~, so the new
+crystal has not filled another 3.7 Å slab. The hexagonal count still
+rises from 31 to 32, and the water count falls from 38 to 35. One
+molecule has joined the ice. OVITO draws the last frame. The test
+exits 77 when GenIce, packmol, OpenMM, or OVITO is absent.
