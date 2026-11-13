@@ -170,14 +170,24 @@ configure_file(
   install: true,
   install_dir: get_option('includedir'))
 
+_seams_map = files('libseams.map')
+_seams_api_link = _lib_link_args
+_seams_api_link_depends = []
+if host_machine.system() not in ['darwin', 'windows'] and \
+   meson.get_compiler('cpp').has_link_argument(
+     '-Wl,--version-script=' + (meson.current_source_dir() / 'libseams.map'))
+  _seams_api_link += ['-Wl,--version-script=' + (meson.current_source_dir() / 'libseams.map')]
+  _seams_api_link_depends += _seams_map
+endif
 seams_api_lib = shared_library(
   'seams',
   'seams_api.cpp',
   dependencies: yds_dep,
   include_directories: include_directories('../include'),
-  cpp_args: _args + ['-fvisibility=hidden',
-                     '-I' + meson.current_build_dir()],
-  link_args: _lib_link_args,
+  cpp_args: _args + ['-fvisibility=hidden', '-fvisibility-inlines-hidden',
+                     '-DSEAMS_BUILDING', '-I' + meson.current_build_dir()],
+  link_args: _seams_api_link,
+  link_depends: _seams_api_link_depends,
   install: true)
 
 install_headers(files('../include/seams.h', '../include/seams.hpp'))

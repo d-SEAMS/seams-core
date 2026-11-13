@@ -87,6 +87,7 @@ int main(int argc, char **argv) {
   seams_status bad = seams_chill_plus(empty, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED,
                                        scratch, NULL);
   printf("capi seams_last_error %s\n", seams_last_error());
+  printf("capi seams_last_error_message %s\n", seams_last_error_message());
   printf("capi seams_handle_error %s\n",
          strstr(seams_handle_error(empty), "no frame") ? "no-frame" : "other");
   seams_system_destroy(empty);
@@ -128,11 +129,17 @@ int main(int argc, char **argv) {
   need("read", seams_system_read(ih, ice, 1, 1), ih);
   const int n = seams_system_count(ih);
   printf("capi seams_system_read %d\n", n);
+  size_t natoms = 0;
+  need("natoms", seams_system_natoms(ih, &natoms), ih);
+  printf("capi seams_system_natoms %zu\n", natoms);
 
   seams_neighbours *nb = NULL;
   need("neigh", seams_neighbours_build(ih, 3.5, 1, SEAMS_GRAPH_CUTOFF, &nb), ih);
   printf("capi seams_neighbours_build %d\n", seams_neighbours_count(nb));
   printf("capi seams_neighbours_count %d\n", seams_neighbours_count(nb));
+  size_t rows = 0;
+  need("nrows", seams_neighbours_nrows(nb, &rows), nb);
+  printf("capi seams_neighbours_nrows %zu\n", rows);
   size_t n_off = 0, nnz = 0;
   need("copyq", seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz), nb);
   int *offsets = calloc(n_off, sizeof(int));
@@ -157,12 +164,19 @@ int main(int argc, char **argv) {
   need("plus",
        seams_chill_plus(ih, 3.5, 1, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels, counts9), ih);
   printf("capi seams_chill_plus hexagonal %d\n", counts9[SEAMS_LABEL_HEXAGONAL]);
+  need("plus_n",
+       seams_chill_plus_n(ih, 3.5, 1, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels, natoms,
+                          counts9),
+       ih);
+  printf("capi seams_chill_plus_n hexagonal %d\n", counts9[SEAMS_LABEL_HEXAGONAL]);
 
   double *q4 = calloc((size_t)n, sizeof(double));
   double *q6 = calloc((size_t)n, sizeof(double));
   double *q6bar = calloc((size_t)n, sizeof(double));
   need("q4q6", seams_q4q6(ih, 3.5, 1, q4, q6), ih);
   printf("capi seams_q4q6 %.6f\n", mean_of(q6, n));
+  need("q4q6_n", seams_q4q6_n(ih, 3.5, 1, q4, natoms, q6, natoms), ih);
+  printf("capi seams_q4q6_n %.6f\n", mean_of(q6, n));
   need("ql", seams_ql(ih, 3.5, 1, 6, SEAMS_GRAPH_CUTOFF, q6, (size_t)n, q6bar, (size_t)n), ih);
   printf("capi seams_ql %.6f\n", mean_of(q6bar, n));
   double mean = 0, median = 0;
@@ -176,14 +190,21 @@ int main(int argc, char **argv) {
   need("rings", seams_rings_find(ih, 3.5, 1, SEAMS_GRAPH_CUTOFF, 6, &rings), ih);
   printf("capi seams_rings_find %d\n", seams_rings_count(rings));
   printf("capi seams_rings_count %d\n", seams_rings_count(rings));
+  size_t nrings = 0;
+  need("nrings", seams_rings_nrings(rings, &nrings), rings);
+  printf("capi seams_rings_nrings %zu\n", nrings);
   int hist[13] = {0};
   need("hist", seams_rings_histogram(rings, hist, 13), rings);
   printf("capi seams_rings_histogram %d\n", hist[6]);
+  need("hist_n", seams_rings_histogram_n(rings, hist, 13), rings);
+  printf("capi seams_rings_histogram_n %d\n", hist[6]);
   int nr = seams_rings_count(rings);
   int *sizes = calloc((size_t)(nr > 0 ? nr : 1), sizeof(int));
   int *sym = calloc((size_t)(nr > 0 ? nr : 1), sizeof(int));
   need("rlab", seams_rings_labels(rings, sizes, sym), rings);
   printf("capi seams_rings_labels %d\n", nr > 0 ? sizes[0] : 0);
+  need("rlab_n", seams_rings_labels_n(rings, sizes, nrings, sym, nrings), rings);
+  printf("capi seams_rings_labels_n %d\n", nr > 0 ? sizes[0] : 0);
   size_t nv = 0;
   need("vq", seams_rings_vertices(rings, 0, NULL, 0, &nv), rings);
   int *verts = calloc(nv ? nv : 1, sizeof(int));

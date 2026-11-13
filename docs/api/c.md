@@ -39,9 +39,33 @@ process-global scratch, so those four calls do not overlap.
 | `SEAMS_ERR_NOMEM` | 6 | out of memory |
 | `SEAMS_ERR_INTERNAL` | 7 | internal error |
 
+No C API call aborts or exits the process. Every C++ exception is caught inside the
+library and returned as one of these codes.
+
+## Length-checked entry points
+
+The ABI 1 calls `seams_chill_plus`, `seams_q4q6`, and `seams_rings_labels` write into
+buffers without a length, and `seams_rings_histogram` takes an `int` length. New code
+calls `seams_chill_plus_n`, `seams_q4q6_n`, `seams_rings_labels_n`, and
+`seams_rings_histogram_n`, which take a `size_t` length for every buffer and return
+`SEAMS_ERR_RANGE` when one is short. `seams_system_natoms`, `seams_neighbours_nrows`,
+and `seams_rings_nrings` return their count through a `size_t` pointer and report a
+null or empty handle as a status. The older calls stay exported with the same
+behaviour.
+
+## Linking
+
+libseams is compiled with hidden visibility and a linker export list, so the only
+exported symbols are the `seams_*` functions in `seams.h`. `SEAMS_API` marks them.
+The library build defines `SEAMS_BUILDING`, which selects `dllexport` on Windows;
+consumers get `dllimport`. Define `SEAMS_STATIC` before including `seams.h` to link
+a static archive. `tests/capi_symbols.txt` is the exported list, and the
+`capi_symbols` test compares it with the header and the built library.
+
 ## seams_last_error and seams_handle_error
 
-`seams_last_error` is the detail of the last failing call on this thread. A later
+`seams_last_error_message` and its ABI 1 spelling `seams_last_error` return the same
+string. `seams_last_error` is the detail of the last failing call on this thread. A later
 successful call on the same thread clears it. The storage is thread-local.
 `seams_handle_error` is the copy stored on the handle that failed. That copy stays
 until the next call on that handle, or until destroy. Pass `NULL` and
@@ -192,6 +216,14 @@ The call is in `docs/examples/c_api_tour.c`. The run prints:
 capi seams_last_error system has no frame
 ```
 
+### seams_last_error_message
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_last_error_message system has no frame
+```
+
 ### seams_handle_error
 
 The call is in `docs/examples/c_api_tour.c`. The run prints:
@@ -296,6 +328,14 @@ The call is in `docs/examples/c_api_tour.c`. The run prints:
 capi seams_system_read 128
 ```
 
+### seams_system_natoms
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_system_natoms 128
+```
+
 ### seams_neighbours_build
 
 The call is in `docs/examples/c_api_tour.c`. The run prints:
@@ -310,6 +350,14 @@ The call is in `docs/examples/c_api_tour.c`. The run prints:
 
 ```
 capi seams_neighbours_count 128
+```
+
+### seams_neighbours_nrows
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_neighbours_nrows 128
 ```
 
 ### seams_neighbours_copy
@@ -348,12 +396,28 @@ capi seams_chill hexagonal 128
 capi seams_chill_plus hexagonal 128
 ```
 
+### seams_chill_plus_n
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_chill_plus_n hexagonal 128
+```
+
 ### seams_q4q6
 
 The call is in `docs/examples/c_api_tour.c`. The run prints:
 
 ```
 capi seams_q4q6 0.625855
+```
+
+### seams_q4q6_n
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_q4q6_n 0.625855
 ```
 
 ### seams_ql
@@ -396,6 +460,14 @@ The call is in `docs/examples/c_api_tour.c`. The run prints:
 capi seams_rings_count 256
 ```
 
+### seams_rings_nrings
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_rings_nrings 256
+```
+
 ### seams_rings_histogram
 
 The call is in `docs/examples/c_api_tour.c`. The run prints:
@@ -404,12 +476,28 @@ The call is in `docs/examples/c_api_tour.c`. The run prints:
 capi seams_rings_histogram 256
 ```
 
+### seams_rings_histogram_n
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_rings_histogram_n 256
+```
+
 ### seams_rings_labels
 
 The call is in `docs/examples/c_api_tour.c`. The run prints:
 
 ```
 capi seams_rings_labels 6
+```
+
+### seams_rings_labels_n
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_rings_labels_n 6
 ```
 
 ### seams_rings_vertices
@@ -651,6 +739,16 @@ Purpose: Public name in include/seams.h.
 Parameters: see the declaration in include/seams.h.
 
 Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### SEAMS_BUILDING
+
+Purpose: Defined only while libseams itself is compiled; selects dllexport on Windows.
+
+Parameters: none
+
+Units: none
 
 Example: `docs/examples/c_api_tour.c`
 
@@ -1154,6 +1252,16 @@ Units: as documented on that declaration.
 
 Example: `docs/examples/c_api_tour.c`
 
+### SEAMS_STATIC
+
+Purpose: Define before including seams.h when linking a static libseams.
+
+Parameters: none
+
+Units: none
+
+Example: `docs/examples/c_api_tour.c`
+
 ### SEAMS_VERSION_MAJOR
 
 Purpose: Public name in include/seams.h.
@@ -1384,6 +1492,16 @@ Units: as documented on that declaration.
 
 Example: `docs/examples/c_api_tour.c`
 
+### seams_chill_plus_n
+
+Purpose: CHILL+ labels into a caller buffer of checked length.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_chill_rule
 
 Purpose: Public name in include/seams.h.
@@ -1554,6 +1672,16 @@ Units: as documented on that declaration.
 
 Example: `docs/examples/c_api_tour.c`
 
+### seams_last_error_message
+
+Purpose: Thread-local detail of the last failing call; same string as seams_last_error.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_monolayer
 
 Purpose: Public name in include/seams.h.
@@ -1634,6 +1762,16 @@ Units: as documented on that declaration.
 
 Example: `docs/examples/c_api_tour.c`
 
+### seams_neighbours_nrows
+
+Purpose: Row count of a neighbour list, returned through a status.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_path_nframes
 
 Purpose: Public name in include/seams.h.
@@ -1657,6 +1795,16 @@ Example: `docs/examples/c_api_tour.c`
 ### seams_q4q6
 
 Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_q4q6_n
+
+Purpose: Local q4 and q6 into caller buffers of checked length.
 
 Parameters: see the declaration in include/seams.h.
 
@@ -1774,9 +1922,39 @@ Units: as documented on that declaration.
 
 Example: `docs/examples/c_api_tour.c`
 
+### seams_rings_histogram_n
+
+Purpose: Ring-size histogram into a size_t-length buffer.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_rings_labels
 
 Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_rings_labels_n
+
+Purpose: Size and symmetry of each ring into buffers of checked length.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_rings_nrings
+
+Purpose: Primitive ring count, returned through a status.
 
 Parameters: see the declaration in include/seams.h.
 
@@ -1907,6 +2085,16 @@ Example: `docs/examples/c_api_tour.c`
 ### seams_system_destroy
 
 Purpose: Public name in include/seams.h.
+
+Parameters: see the declaration in include/seams.h.
+
+Units: as documented on that declaration.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_system_natoms
+
+Purpose: Atom count of a frame, returned through a status.
 
 Parameters: see the declaration in include/seams.h.
 

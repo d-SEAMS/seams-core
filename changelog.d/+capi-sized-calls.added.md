@@ -1,0 +1,1 @@
+C API: `seams_last_error_message`, `seams_system_natoms`, `seams_neighbours_nrows`, `seams_rings_nrings`, and the length-checked `seams_chill_plus_n`, `seams_q4q6_n`, `seams_rings_labels_n`, and `seams_rings_histogram_n`. Every public declaration in `seams.h` now has a Doxygen block with parameters, ownership, thread safety, and an example.

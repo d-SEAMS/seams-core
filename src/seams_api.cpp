@@ -88,14 +88,29 @@ void *track(void *ptr) {
   return ptr;
 }
 
+/* Storing a message must not throw out of a C entry point. On a failed
+ * allocation the message is dropped and the status code still returns. */
+void set_error(const char *message) noexcept {
+  try {
+    g_error = message == nullptr ? "" : message;
+  } catch (...) {
+    g_error.clear();
+  }
+}
+
 /* NULL is a no-op. A second destroy records an error and does not free. */
-bool claim(void *ptr) {
+bool claim(void *ptr) noexcept {
   if (ptr == nullptr) {
     return false;
   }
-  std::lock_guard<std::mutex> lock(g_live_mu);
-  if (g_live.erase(ptr) == 0) {
-    g_error = "double destroy";
+  try {
+    std::lock_guard<std::mutex> lock(g_live_mu);
+    if (g_live.erase(ptr) == 0) {
+      set_error("double destroy");
+      return false;
+    }
+  } catch (...) {
+    set_error("handle registry is unavailable");
     return false;
   }
   return true;
@@ -114,13 +129,14 @@ struct handle_guard {
   handle_guard &operator=(const handle_guard &) = delete;
 };
 
-void note_error() {
+void note_error() noexcept {
   if (g_current == nullptr) {
     return;
   }
   try {
     g_current->error = g_error;
-  } catch (const std::bad_alloc &) {
+  } catch (...) {
+    g_current->error.clear();
   }
 }
 
@@ -137,23 +153,24 @@ int saved_omp_threads() {
 }
 #endif
 
-void clear_error() { g_error.clear(); }
+void clear_error() noexcept { g_error.clear(); }
 
-seams_status fail(seams_status code, const char *message) {
-  g_error = message == nullptr ? "" : message;
+seams_status fail(seams_status code, const char *message) noexcept {
+  set_error(message);
   note_error();
   return code;
 }
 
-void remember() {
+/* Call only from inside a catch handler. */
+void remember() noexcept {
   try {
     throw;
   } catch (const std::bad_alloc &) {
-    g_error = "out of memory";
+    set_error("out of memory");
   } catch (const std::exception &ex) {
-    g_error = ex.what();
+    set_error(ex.what());
   } catch (...) {
-    g_error = "unknown error";
+    set_error("unknown error");
   }
   note_error();
 }
@@ -654,8 +671,8 @@ seams_system *seams_system_create(void) {
     auto *sys = new seams_system();
     track(sys);
     return sys;
-  } catch (const std::bad_alloc &) {
-    g_error = "out of memory";
+  } catch (...) {
+    set_error("out of memory");
     return nullptr;
   }
 }
@@ -1276,7 +1293,14 @@ seams_status seams_rings_labels(const seams_rings *rings, int *sizes, int *symme
     return fail(SEAMS_ERR_NULL, "sizes and symmetry are both null");
   }
   if (symmetry != nullptr) {
-    refine_ring_labels(const_cast<seams_rings *>(rings));
+    try {
+      refine_ring_labels(const_cast<seams_rings *>(rings));
+    } catch (const std::bad_alloc &) {
+      return fail(SEAMS_ERR_NOMEM, "out of memory");
+    } catch (...) {
+      remember();
+      return SEAMS_ERR_INTERNAL;
+    }
   }
   for (std::size_t i = 0; i < rings->rings.size(); ++i) {
     if (sizes != nullptr) {
@@ -1299,7 +1323,12 @@ seams_status seams_rings_fraction(const seams_rings *rings, int size, double *fr
     *fraction = 0.0;
     return SEAMS_OK;
   }
-  std::vector<char> hit(static_cast<std::size_t>(rings->n_atoms), 0);
+  std::vector<char> hit;
+  try {
+    hit.assign(static_cast<std::size_t>(rings->n_atoms), 0);
+  } catch (...) {
+    return fail(SEAMS_ERR_NOMEM, "out of memory");
+  }
   for (const auto &ring : rings->rings) {
     if (size > 0 && static_cast<int>(ring.size()) != size) {
       continue;
@@ -1438,6 +1467,9 @@ seams_status seams_system_read(seams_system *sys, const char *path, int frame,
     return fail(SEAMS_ERR_RANGE, "frame index starts at 1");
   }
   try {
+    if (!gen::file_exists(path)) {
+      return fail(SEAMS_ERR_ARG, "cannot read path");
+    }
     Cloud cloud = sinp::openFrame(path, frame, type_filter);
     if (cloud.nop <= 0) {
       return fail(SEAMS_ERR_RANGE, "frame has no atoms");
@@ -1451,11 +1483,10 @@ seams_status seams_system_read(seams_system *sys, const char *path, int frame,
   } catch (const std::bad_alloc &) {
     return fail(SEAMS_ERR_NOMEM, "out of memory");
   } catch (const std::exception &ex) {
-    const std::string message = ex.what();
-    const bool past = message.find("past the last") != std::string::npos;
-    g_error = message.empty() ? "cannot read frame" : message;
-    note_error();
-    return past ? SEAMS_ERR_RANGE : SEAMS_ERR_ARG;
+    const char *what = ex.what();
+    const bool empty = what == nullptr || what[0] == '\0';
+    const bool past = !empty && std::strstr(what, "past the last") != nullptr;
+    return fail(past ? SEAMS_ERR_RANGE : SEAMS_ERR_ARG, empty ? "cannot read frame" : what);
   } catch (...) {
     remember();
     return SEAMS_ERR_INTERNAL;
@@ -2338,7 +2369,8 @@ seams_status seams_hbonds(seams_system *sys, double cutoff, int oxygen_type,
   if (!sys->ready) {
     return fail(SEAMS_ERR_STATE, "system has no frame");
   }
-  if (!(cutoff > 0.0) || !(dist_cutoff > 0.0) || !(angle_cutoff > 0.0)) {
+  if (!(cutoff > 0.0) || !(dist_cutoff > 0.0) || !(angle_cutoff > 0.0) ||
+      !std::isfinite(cutoff) || !std::isfinite(dist_cutoff) || !std::isfinite(angle_cutoff)) {
     return fail(SEAMS_ERR_RANGE, "cutoffs must be positive");
   }
   if (hydrogen_type <= 0) {
@@ -2540,6 +2572,9 @@ seams_status seams_fingerprint_rings(const seams_topo *fp, int *counts, size_t c
   if (fp == nullptr || counts == nullptr) {
     return fail(SEAMS_ERR_NULL, "fingerprint ring output is null");
   }
+  if (counts_len == 0) {
+    return fail(SEAMS_ERR_RANGE, "ring census length is empty");
+  }
   for (std::size_t i = 0; i < counts_len; ++i) {
     counts[i] = i < fp->ring_census.size() ? fp->ring_census[i] : 0;
   }
@@ -2721,7 +2756,8 @@ seams_status seams_monolayer(seams_system *sys, double cutoff, int type, int max
   if (max_depth < 3 || counts_len < static_cast<std::size_t>(max_depth) + 1) {
     return fail(SEAMS_ERR_RANGE, "monolayer needs max_depth >= 3 and a long counts buffer");
   }
-  if (!(cutoff > 0.0) || !(sheet_area > 0.0)) {
+  if (!(cutoff > 0.0) || !(sheet_area > 0.0) || !std::isfinite(cutoff) ||
+      !std::isfinite(sheet_area)) {
     return fail(SEAMS_ERR_RANGE, "cutoff and sheet area must be positive");
   }
   try {
@@ -2795,6 +2831,116 @@ seams_status seams_brine_pockets(const seams_brine *front, int *n_pockets,
   }
   if (reservoir_waters != nullptr) {
     *reservoir_waters = front->snapshot.pockets.reservoirWaters;
+  }
+  return SEAMS_OK;
+}
+
+const char *seams_last_error_message(void) { return g_error.c_str(); }
+
+seams_status seams_system_natoms(const seams_system *sys, size_t *n) {
+  handle_guard guard(const_cast<seams_system *>(sys));
+  clear_error();
+  if (sys == nullptr || n == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or count is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  *n = static_cast<size_t>(sys->cloud.nop);
+  return SEAMS_OK;
+}
+
+seams_status seams_neighbours_nrows(const seams_neighbours *nb, size_t *n) {
+  handle_guard guard(const_cast<seams_neighbours *>(nb));
+  clear_error();
+  if (nb == nullptr || n == nullptr) {
+    return fail(SEAMS_ERR_NULL, "neighbours or count is null");
+  }
+  *n = static_cast<size_t>(nb->n);
+  return SEAMS_OK;
+}
+
+seams_status seams_rings_nrings(const seams_rings *rings, size_t *n) {
+  handle_guard guard(const_cast<seams_rings *>(rings));
+  clear_error();
+  if (rings == nullptr || n == nullptr) {
+    return fail(SEAMS_ERR_NULL, "rings or count is null");
+  }
+  *n = rings->rings.size();
+  return SEAMS_OK;
+}
+
+seams_status seams_chill_plus_n(seams_system *sys, double cutoff, int type, int graph,
+                                int rule, int *labels, size_t labels_len, int counts9[9]) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr || labels == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system or labels is null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if (!buffer_fits(labels_len, sys->cloud.nop)) {
+    return fail(SEAMS_ERR_RANGE, "label buffer is short");
+  }
+  return seams_chill_plus(sys, cutoff, type, graph, rule, labels, counts9);
+}
+
+seams_status seams_q4q6_n(seams_system *sys, double cutoff, int type, double *q4,
+                          size_t q4_len, double *q6, size_t q6_len) {
+  handle_guard guard(sys);
+  clear_error();
+  if (sys == nullptr) {
+    return fail(SEAMS_ERR_NULL, "system is null");
+  }
+  if (q4 == nullptr && q6 == nullptr) {
+    return fail(SEAMS_ERR_NULL, "q4 and q6 are both null");
+  }
+  if (!sys->ready) {
+    return fail(SEAMS_ERR_STATE, "system has no frame");
+  }
+  if ((q4 != nullptr && !buffer_fits(q4_len, sys->cloud.nop)) ||
+      (q6 != nullptr && !buffer_fits(q6_len, sys->cloud.nop))) {
+    return fail(SEAMS_ERR_RANGE, "q buffer is short");
+  }
+  return seams_q4q6(sys, cutoff, type, q4, q6);
+}
+
+seams_status seams_rings_labels_n(const seams_rings *rings, int *sizes, size_t sizes_len,
+                                  int *symmetry, size_t symmetry_len) {
+  handle_guard guard(const_cast<seams_rings *>(rings));
+  clear_error();
+  if (rings == nullptr) {
+    return fail(SEAMS_ERR_NULL, "rings handle is null");
+  }
+  if (sizes == nullptr && symmetry == nullptr) {
+    return fail(SEAMS_ERR_NULL, "sizes and symmetry are both null");
+  }
+  const size_t need = rings->rings.size();
+  if ((sizes != nullptr && sizes_len < need) ||
+      (symmetry != nullptr && symmetry_len < need)) {
+    return fail(SEAMS_ERR_RANGE, "ring label buffer is short");
+  }
+  return seams_rings_labels(rings, sizes, symmetry);
+}
+
+seams_status seams_rings_histogram_n(const seams_rings *rings, int *counts,
+                                     size_t counts_len) {
+  handle_guard guard(const_cast<seams_rings *>(rings));
+  clear_error();
+  if (rings == nullptr || counts == nullptr) {
+    return fail(SEAMS_ERR_NULL, "histogram output is null");
+  }
+  if (counts_len == 0) {
+    return fail(SEAMS_ERR_RANGE, "histogram length is empty");
+  }
+  for (size_t i = 0; i < counts_len; ++i) {
+    counts[i] = 0;
+  }
+  for (const auto &ring : rings->rings) {
+    if (ring.size() < counts_len) {
+      counts[ring.size()] += 1;
+    }
   }
   return SEAMS_OK;
 }

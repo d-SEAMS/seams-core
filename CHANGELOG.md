@@ -37,6 +37,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Assign guests by ray-parity inside fan-triangulated cage faces, and count ions per ice cluster on the oxygen graph.
 - Bin CHILL+ cubic and hexagonal molecules into basal layers and emit cubicity Phi_c plus the H/C stacking string.
 - Build CHILL+, cages, seeded ions and k-NN on an explicit water-type mask (`--water-types`) so substrate and ions never enter the four-neighbour list. The flag loads the mixed dump; ice and cage counts are the water types only.
+- C API: `seams_last_error_message`, `seams_system_natoms`, `seams_neighbours_nrows`, `seams_rings_nrings`, and the length-checked `seams_chill_plus_n`, `seams_q4q6_n`, `seams_rings_labels_n`, and `seams_rings_histogram_n`. Every public declaration in `seams.h` now has a Doxygen block with parameters, ownership, thread safety, and an example.
 - Direct-coexistence mW growth is scored on basal and secondary-prism slabs of 8064 molecules at 1 bar.
   The 2015 CHILL+ thresholds are unchanged.
 - Each OpenMP thread owns a block of the linkcell weighted cell cut and writes the neighbour rows of those cells. The halo is painted in that owned walk. On 884736 molecules, eight threads build the neighbour rows in 5.72 times the one-thread time.
@@ -180,6 +181,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Accept a cup that fills the signature face count with dangling edges.
 - An orthorhombic displacement wraps every period, not one. Unfolded coordinates 16 apart in a 10 box are 4 apart, not 6.
 - Build the Sphinx book with warnings as errors from the committed sources. Doxygen XML and the C++ pages are optional, and each page is listed in one toctree.
+- C API: libseams exports only the `seams_*` functions in `seams.h` (hidden visibility plus a linker export list). No call aborts or exits: the MIS self-test throws instead of calling `exit`, every allocation in the wrappers is caught, a missing trajectory returns `SEAMS_ERR_ARG`, and infinite cutoffs are rejected by `seams_hbonds` and `seams_monolayer`.
 - Cage object counts no longer follow the wrapped coordinates. `findDDC` reports a maximum set of non-conflicting double-diamond cages, and both searches order rings by sorted atom indices plus the unwrapped shift of the cycle. A periodic translation or a permutation of the atoms leaves the count unchanged.
 - Cage search drops rings whose minimum-image lattice shifts wind through the periodic cell, and refuses a cutoff that can see two images of one pair. The R, Julia and C fronts keep the seeded label on the host rule when offload is requested. `seams cages` and the language fronts report disjoint hexagonal, cubic, both and water counts. `scripts/rerun_main_text.py` reruns the engine counts behind the main-text cage numbers and writes the archive hash.
 - Coordination and homopolar counts skip the leading self entry on an index neighbour row.

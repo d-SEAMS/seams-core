@@ -11,6 +11,7 @@
 #include <atomic>
 #include <mutex>
 #include <numeric>
+#include <stdexcept>
 #include <unordered_map>
 #include <vector>
 
@@ -1969,7 +1970,7 @@ void misSelfTest() {
         got.cover < brute) {
       std::fprintf(stderr, "mis-selftest FAIL n %d got %zu brute %d expect %d cover %d\n", n,
                    got.ids.size(), brute, expect, got.cover);
-      std::exit(1);
+      throw std::logic_error("mis-selftest failed");
     }
   };
   check({}, 1, 1);
@@ -1993,7 +1994,7 @@ void misSelfTest() {
     if (!path.solved || static_cast<int>(path.ids.size()) != wide / 2) {
       std::fprintf(stderr, "mis-selftest FAIL path %d solved %d got %zu\n", wide,
                    path.solved ? 1 : 0, path.ids.size());
-      std::exit(1);
+      throw std::logic_error("mis-selftest failed");
     }
   }
   std::fprintf(stderr, "mis-selftest ok\n");
