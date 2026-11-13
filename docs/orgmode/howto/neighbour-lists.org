@@ -108,7 +108,12 @@ The comparison columns used eight timed calls after one warmup.
 The median is the 5th of the 8 sorted samples. Times are milliseconds.
 The d-SEAMS columns are the later session recorded under the table.
 vesin is 0.6.2, freud is 3.6.1, matscipy is 1.3.1 with ASE 3.29.0.
-Every code returned ~4N~ pairs.
+Every code returned ~4N~ pairs. A later sitting, six calls and the
+language API, is in [[file:literature-h2h.org][Literature head-to-head]]. There the
+one-thread vesin pool is 51.194 ms and an explicit eight-thread pool
+is 22.269 ms, both full lists of 442368 pairs. A 50.7 ms time that
+was labelled as eight threads had =n_threads= left at 0 while
+=OMP_NUM_THREADS= was 1, so the pool stayed one thread.
 
 | molecules | threads | d-SEAMS CSR | d-SEAMS rows | vesin | freud | matscipy |
 |-----------+---------+-------------+--------------+-------+-------+----------|

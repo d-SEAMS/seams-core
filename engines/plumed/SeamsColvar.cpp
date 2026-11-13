@@ -128,7 +128,9 @@ void SeamsCV::calculate() {
         error("d-SEAMS rejected a displaced frame");
       }
       xyz[3 * i + d] += eps;
-      dq[i][d] = (q_plus - q_minus) / (2.0 * eps);
+      // eps is an angstrom step. PLUMED differentiates with respect to its
+      // internal nanometres, and one nanometre is ten angstroms.
+      dq[i][d] = (q_plus - q_minus) / (2.0 * eps) * to_angstrom;
     }
   }
   Value *vq = getPntrToComponent("q6");

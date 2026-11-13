@@ -130,6 +130,13 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
     'python/chill_plus.py',
     install_dir: get_option('datadir') / 'seams' / 'python',
   )
+  # DSEAMS_PYTHON is the interpreter found at configure time. The
+  # script also accepts the active conda prefix, and skips a mismatch.
+  _front_py = find_program('python3', 'python', required: false)
+  _front_env = environment()
+  if _front_py.found()
+    _front_env.set('DSEAMS_PYTHON', _front_py.full_path())
+  endif
   test(
     'language_fronts',
     find_program('sh', required: true),
@@ -137,6 +144,7 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
       meson.project_source_root() / 'tests' / 'run_language_fronts.sh',
       meson.project_build_root(),
     ],
+    env: _front_env,
     depends: [seams_lang, ydslib],
     timeout: 600,
   )

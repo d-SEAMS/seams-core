@@ -14,9 +14,13 @@ except ImportError:
 
 build = Path(os.environ.get("DSEAMS_BUILD", "build"))
 src = Path(os.environ.get("DSEAMS_SRC", Path(__file__).resolve().parents[2]))
-cores = list(build.rglob("_core*.so"))
+# A conda python and the extension must share a stable ABI tag. A module
+# built for another interpreter is a skip, not a failed import.
+tag = sys.implementation.cache_tag  # cpython-312
+cores = [path for path in build.rglob("_core*.so") if tag in path.name]
 if not cores:
-    print("dseams._core was not built")
+    built = [path.name for path in build.rglob("_core*.so")]
+    print(f"dseams._core was not built for {tag}; found {built or 'nothing'}")
     sys.exit(77)
 
 stage = build / "python-stage"

@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <atomic>
 #include <charconv>
+#include <chrono>
 #include <cmath>
 #include <cerrno>
 #include <cstddef>
@@ -801,6 +802,24 @@ bool dumpChangedDuringRead(int fd, const std::string &path,
   return atPath.st_ino != now.st_ino;
 }
 
+// A writer can append in the gap between the last byte and this check.
+// One short poll keeps that snapshot. A file that stays the same size
+// and inode through the poll is finished, and a short frame is an error.
+bool dumpStillGrowing(int fd, const std::string &path, const struct stat &opened) {
+  if (dumpChangedDuringRead(fd, path, opened)) {
+    return true;
+  }
+  const auto deadline =
+      std::chrono::steady_clock::now() + std::chrono::milliseconds(50);
+  while (std::chrono::steady_clock::now() < deadline) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    if (dumpChangedDuringRead(fd, path, opened)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Parse one snapshot. The session has already consumed ITEM: TIMESTEP.
 // Stop at the next ITEM: TIMESTEP and seek back so the live position sits
 // on that line, matching LAMMPS ReaderNative::read_time.
@@ -969,7 +988,7 @@ void parseLammpsFrameBody(
   // A read error is the stream state (errno on the owned descriptor),
   // not a finished short file. A stable size and inode is a finished file.
   if (nop >= 0 && nLines < nop && !streamReadFailed(file) &&
-      !(haveOpened && dumpChangedDuringRead(fd, path, opened))) {
+      !(haveOpened && dumpStillGrowing(fd, path, opened))) {
     throw std::runtime_error(
         "LAMMPS dump frame is truncated: expected " + std::to_string(nop) +
         " atoms, read " + std::to_string(nLines) + ".");
@@ -1226,6 +1245,18 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
     ++kept;
   }
   if (failed) {
+    // The snapshot was taken at st.st_size. An append or a replace during
+    // the copy changes that size or the inode. The atoms already parsed
+    // are the frame; falling through would open the grown file, see a
+    // stable short count, and report a finished truncated dump.
+    struct stat later {};
+    const bool moved = ::stat(filename.c_str(), &later) != 0 ||
+                       later.st_size != st.st_size || later.st_ino != st.st_ino;
+    if (moved && kept > 0) {
+      yCloud.nop = kept;
+      nextAt = static_cast<std::uint64_t>(p - begin);
+      return true;
+    }
     yCloud.pts.clear();
     yCloud.idIndexMap.clear();
     yCloud.box.clear();

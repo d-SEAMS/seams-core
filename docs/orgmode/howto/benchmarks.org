@@ -156,3 +156,23 @@ rings were identical to a full search. The seeded-strict graph is 8.3,
 | 1 | seeded-strict | 842 | 0.538 | 1.406 | 2.59 |
 | 1 | seeded-union | 926 | 0.874 | 1.389 | 1.60 |
 | 1 | seeded | 926 | 1.442 | 2.818 | 1.95 |
+
+* Release candidate sitting
+
+Neighbours, local q4 and q6, CHILL+, primitive rings, the shell
+symmetry label and GenIce cages were retimed in one sitting, at
+110592 and 884736 molecules, on one thread and on eight. Six calls
+after a warm-up. The host is an eight-core Intel Xeon, family 6
+model 207, and the name is not recorded. The table, the versions
+and the rows that do not match an earlier quoted time are in
+[[file:literature-h2h.org][Literature head-to-head]]. The raw lines are
+=benchmarks/rc3-sitting.csv= and =benchmarks/rc3-sitting.txt=.
+=snakemake rc3_sitting= regenerates them.
+
+The 20.3 ms and 50.7 ms vesin times are the same full list of
+442368 pairs. =n_threads=0= follows =OMP_NUM_THREADS=, which is 1
+in this environment, so the pool stays one thread and the median
+is 50.6 ms. An explicit pool of eight threads is 20.3 ms.
+=benchmarks/rc3-vesin-gap.txt= is that probe. A half list is a
+different pair count. The cell list, the copy and the layout move
+the eight-thread time by a few milliseconds.

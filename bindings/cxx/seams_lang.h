@@ -86,9 +86,11 @@ int seams_frame_chill_rings(seams_frame *frame, double cutoff, int type,
                            int *labels, int counts9[9], int *ring_counts,
                            int ring_counts_len, seams_phase_times *times);
 
-/* Build the cutoff neighbour list and discard it. graph NULL means cutoff. */
+/* Build the cutoff neighbour list and discard it. graph NULL means cutoff.
+ * seams_frame_neighbour_pairs then returns the directed pairs of that list. */
 int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
                            const char *graph);
+int seams_frame_neighbour_pairs(const seams_frame *frame);
 
 /* Local Steinhardt q_l on the cutoff shell. A null qlbar skips the
  * Lechner-Dellago average; the local values do not use that pass. */
