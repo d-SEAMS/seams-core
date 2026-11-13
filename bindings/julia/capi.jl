@@ -3,6 +3,13 @@
 
 using Libdl
 
+"""A failed `libseams` call. `message` is the text from `seams_handle_error`."""
+struct SeamsError <: Exception
+    message::String
+end
+
+Base.showerror(io::IO, err::SeamsError) = print(io, err.message)
+
 const _seams_dl = Ref{Ptr{Cvoid}}(C_NULL)
 
 function _seams_so()
@@ -20,14 +27,20 @@ function _seams_check(code::Integer, handle::Ptr{Cvoid}=C_NULL)
     if isempty(err)
         err = unsafe_string(ccall(_seams_sym(:seams_status_string), Ptr{Cchar}, (Cint,), Cint(code)))
     end
-    error(err)
+    throw(SeamsError(isempty(err) ? "dseams call failed" : err))
 end
 
+"""
+    System()
+
+One frame from `seams_system_create`. The finalizer calls `seams_system_destroy`.
+Neighbour, ring, and cage handles copied out of it stay valid after `System` is freed.
+"""
 mutable struct System
     ptr::Ptr{Cvoid}
     function System()
         ptr = ccall(_seams_sym(:seams_system_create), Ptr{Cvoid}, ())
-        ptr == C_NULL && error("null system")
+        ptr == C_NULL && throw(SeamsError("null system"))
         sys = new(ptr)
         finalizer(sys) do s
             s.ptr == C_NULL && return
@@ -38,6 +51,16 @@ mutable struct System
     end
 end
 
+function Base.show(io::IO, sys::System)
+    n = sys.ptr == C_NULL ? 0 : seams_system_count(sys)
+    print(io, "System(", n, " atoms)")
+end
+
+"""
+    seams_system_count(sys)
+
+Atom count stored on `sys`, or 0 when the handle is empty.
+"""
 function seams_system_count(sys::System)
     Int(ccall(_seams_sym(:seams_system_count), Cint, (Ptr{Cvoid},), sys.ptr))
 end
@@ -46,6 +69,12 @@ function _count(sys::System)
     seams_system_count(sys)
 end
 
+"""
+    seams_system_read(sys, path, frame=1, type_filter=-1)
+
+Read one frame into `sys`. `frame` is 1-based. A negative filter keeps every atom.
+The previous frame is kept when the call throws [`SeamsError`](@ref).
+"""
 function seams_system_read(sys::System, path::AbstractString, frame::Integer=1, type_filter::Integer=-1)
     _seams_check(ccall(_seams_sym(:seams_system_read), Cint,
                        (Ptr{Cvoid}, Cstring, Cint, Cint),
@@ -53,6 +82,12 @@ function seams_system_read(sys::System, path::AbstractString, frame::Integer=1, 
     return sys
 end
 
+"""
+    seams_chill(sys; cutoff=3.5, type=0, graph=0, rule=0)
+
+Original CHILL labels and nine population counts. `cutoff` is angstrom.
+`graph` 0 is cutoff, 1 is mutual. `rule` 0 is published, 1 is OVITO.
+"""
 function seams_chill(sys::System; cutoff::Real=3.5, type::Integer=0, graph::Integer=0, rule::Integer=0)
     n = _count(sys)
     labels = Vector{Int32}(undef, n)
@@ -63,6 +98,12 @@ function seams_chill(sys::System; cutoff::Real=3.5, type::Integer=0, graph::Inte
     return labels, counts
 end
 
+"""
+    seams_steinhardt(sys, order; cutoff=3.5, average=false)
+
+Local Steinhardt `q_l` on the cutoff shell. `order` is 3, 4, 6, 8, or 12.
+`average=true` also returns the Lechner-Dellago mean.
+"""
 function seams_steinhardt(sys::System, order::Integer; cutoff::Real=3.5, average::Bool=false)
     n = _count(sys)
     ql = Vector{Float64}(undef, n)
@@ -74,6 +115,11 @@ function seams_steinhardt(sys::System, order::Integer; cutoff::Real=3.5, average
     return ql, bar
 end
 
+"""
+    seams_cages(sys; cutoff=3.5, graph=2, k=4, complete=false)
+
+Disjoint cage counts `(n_hex, n_cubic, n_water, n_both)`. The cage handle is freed before return.
+"""
 function seams_cages(sys::System; cutoff::Real=3.5, graph::Integer=2, k::Integer=4, complete::Bool=false)
     out = Ref{Ptr{Cvoid}}(C_NULL)
     _seams_check(ccall(_seams_sym(:seams_cages), Cint,
@@ -93,6 +139,11 @@ function seams_cages(sys::System; cutoff::Real=3.5, graph::Integer=2, k::Integer
     return Int(n_hex[]), Int(n_cubic[]), Int(n_water[]), Int(n_both[])
 end
 
+"""
+    seams_signature_cages(sys, spec; cutoff=3.5, graph=0)
+
+Closed cages of one ring census. Returns `(n_cages, n_atoms)`.
+"""
 function seams_signature_cages(sys::System, spec::AbstractString; cutoff::Real=3.5, graph::Integer=0)
     n_cages = Ref{Csize_t}(0)
     n_atoms = Ref{Csize_t}(0)
@@ -102,6 +153,11 @@ function seams_signature_cages(sys::System, spec::AbstractString; cutoff::Real=3
     return Int(n_cages[]), Int(n_atoms[])
 end
 
+"""
+    seams_neighbours_knn(sys; k=4, cutoff=3.5, mutual=true)
+
+Number of neighbour-list columns. The handle is freed before return.
+"""
 function seams_neighbours_knn(sys::System; k::Integer=4, cutoff::Real=3.5, mutual::Bool=true)
     out = Ref{Ptr{Cvoid}}(C_NULL)
     _seams_check(ccall(_seams_sym(:seams_neighbours_knn), Cint,
@@ -119,6 +175,11 @@ function seams_neighbours_knn(sys::System; k::Integer=4, cutoff::Real=3.5, mutua
     return Int(nnz[])
 end
 
+"""
+    seams_rdf(sys; rmax=6.0, bins=8)
+
+Partial radial distribution. Returns `(r, g, volume)`. `r` is angstrom.
+"""
 function seams_rdf(sys::System; rmax::Real=6.0, bins::Integer=8)
     n_out = Ref{Csize_t}(0)
     volume = Ref{Float64}(0.0)
@@ -133,6 +194,11 @@ function seams_rdf(sys::System; rmax::Real=6.0, bins::Integer=8)
     return r, g, volume[]
 end
 
+"""
+    seams_running_cn(sys; rmax=6.0, bins=8)
+
+Running coordination number along the partial RDF.
+"""
 function seams_running_cn(sys::System; rmax::Real=6.0, bins::Integer=8)
     n_out = Ref{Csize_t}(0)
     _seams_check(ccall(_seams_sym(:seams_running_cn), Cint,
@@ -146,6 +212,11 @@ function seams_running_cn(sys::System; rmax::Real=6.0, bins::Integer=8)
     return cn
 end
 
+"""
+    seams_coordination(sys; rmax=3.5, bins=8)
+
+Coordination number integrated to `rmax` angstrom.
+"""
 function seams_coordination(sys::System; rmax::Real=3.5, bins::Integer=8)
     cn = Ref{Float64}(0.0)
     _seams_check(ccall(_seams_sym(:seams_coordination), Cint,
@@ -154,6 +225,11 @@ function seams_coordination(sys::System; rmax::Real=3.5, bins::Integer=8)
     return cn[]
 end
 
+"""
+    seams_hbonds(sys; cutoff=3.5, oxygen_type=1, hydrogen_type=2, dist=2.42, angle=30.0)
+
+Hydrogen-bond count. Distances are angstrom. `angle` is degrees.
+"""
 function seams_hbonds(sys::System; cutoff::Real=3.5, oxygen_type::Integer=1, hydrogen_type::Integer=2,
                       dist::Real=2.42, angle::Real=30.0)
     n_bonds = Ref{Cint}(0)
@@ -163,6 +239,11 @@ function seams_hbonds(sys::System; cutoff::Real=3.5, oxygen_type::Integer=1, hyd
     return Int(n_bonds[])
 end
 
+"""
+    seams_density_axis(sys; type=0, bins=4, axis=2)
+
+Number density along one cell axis. Returns the density column.
+"""
 function seams_density_axis(sys::System; type::Integer=0, bins::Integer=4, axis::Integer=2)
     n_out = Ref{Csize_t}(0)
     _seams_check(ccall(_seams_sym(:seams_density_axis), Cint,
@@ -176,6 +257,11 @@ function seams_density_axis(sys::System; type::Integer=0, bins::Integer=4, axis:
     return rho
 end
 
+"""
+    seams_fingerprint(sys; cutoff=3.5, hops=2)
+
+Frame-key length and the sum of the stored ring census. The handle is freed before return.
+"""
 function seams_fingerprint(sys::System; cutoff::Real=3.5, hops::Integer=2)
     out = Ref{Ptr{Cvoid}}(C_NULL)
     _seams_check(ccall(_seams_sym(:seams_fingerprint), Cint,
@@ -196,6 +282,11 @@ function seams_fingerprint(sys::System; cutoff::Real=3.5, hops::Integer=2)
     return Int(n_out[]), Int(sum(counts))
 end
 
+"""
+    seams_contact_pairs(sys, spec)
+
+Mutual nearest unlike contacts. Returns `(n_pairs, n_cation, n_anion)`.
+"""
 function seams_contact_pairs(sys::System, spec::AbstractString)
     n_pairs = Ref{Csize_t}(0)
     n_cation = Ref{Cint}(0)
@@ -206,6 +297,12 @@ function seams_contact_pairs(sys::System, spec::AbstractString)
     return Int(n_pairs[]), Int(n_cation[]), Int(n_anion[])
 end
 
+"""
+    seams_domains(sys, spec; cutoff=3.5, subset=0)
+
+Largest domain. `subset` 0 is apolar and 1 is polar.
+Returns `(n_subset, largest, percolation)`.
+"""
 function seams_domains(sys::System, spec::AbstractString; cutoff::Real=3.5, subset::Integer=0)
     n_subset = Ref{Cint}(0)
     largest = Ref{Cint}(0)
@@ -216,6 +313,11 @@ function seams_domains(sys::System, spec::AbstractString; cutoff::Real=3.5, subs
     return Int(n_subset[]), Int(largest[]), percolation[]
 end
 
+"""
+    seams_prisms(sys; cutoff=3.5)
+
+Perfect prism counts by ring size. Index 7 (1-based) is size 6.
+"""
 function seams_prisms(sys::System; cutoff::Real=3.5)
     perfect = zeros(Int32, 7)
     imperfect = zeros(Int32, 7)
@@ -225,6 +327,11 @@ function seams_prisms(sys::System; cutoff::Real=3.5)
     return perfect
 end
 
+"""
+    seams_monolayer(sys; cutoff=3.5, max_depth=6, sheet_area=100.0)
+
+Primitive-ring histogram of a monolayer. `sheet_area` is square angstrom.
+"""
 function seams_monolayer(sys::System; cutoff::Real=3.5, max_depth::Integer=6, sheet_area::Real=100.0)
     counts = zeros(Int32, max_depth + 1)
     _seams_check(ccall(_seams_sym(:seams_monolayer), Cint,
@@ -233,6 +340,11 @@ function seams_monolayer(sys::System; cutoff::Real=3.5, max_depth::Integer=6, sh
     return counts
 end
 
+"""
+    seams_rings_vertices(sys; cutoff=3.5, max_depth=6, index=0)
+
+Atom indices of one primitive ring. The ring handle is freed before return.
+"""
 function seams_rings_vertices(sys::System; cutoff::Real=3.5, max_depth::Integer=6, index::Integer=0)
     out = Ref{Ptr{Cvoid}}(C_NULL)
     _seams_check(ccall(_seams_sym(:seams_rings_find), Cint,
@@ -253,6 +365,11 @@ function seams_rings_vertices(sys::System; cutoff::Real=3.5, max_depth::Integer=
     end
 end
 
+"""
+    seams_site_table(sys, spec)
+
+Per-atom site kind from a site-table spec such as `"1=waterO"`.
+"""
 function seams_site_table(sys::System, spec::AbstractString)
     n = _count(sys)
     kinds = Vector{Int32}(undef, n)

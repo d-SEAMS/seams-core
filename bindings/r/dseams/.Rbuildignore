@@ -1,0 +1,6 @@
+^\.gitignore$
+^_pkgdown\.yml$
+^.*\.Rcheck$
+^src/.*\.o$
+^src/.*\.so$
+^src/Makevars$

@@ -19,11 +19,17 @@ read_frame <- function(path, frame = 1L, type = 0L) {
 
 #' Number of LAMMPS timesteps in a dump. An XYZ file counts as one.
 #' @param path Trajectory path.
+#' @return An integer count.
 #' @export
 nframes <- function(path) {
   nframes_(normalizePath(path, mustWork = TRUE))
 }
 
+#' Print the atom count of a frame.
+#'
+#' @param x A `dseams_frame`.
+#' @param ... Unused.
+#' @return `x`, invisibly.
 #' @export
 print.dseams_frame <- function(x, ...) {
   cat("dseams frame", x$frame, "nop", nop_(x$ptr), "\n", sep = " ")
@@ -32,11 +38,13 @@ print.dseams_frame <- function(x, ...) {
 
 #' Atom positions, one row per atom.
 #' @param frame A `dseams_frame`.
+#' @return A numeric matrix with columns `x`, `y`, and `z`, in angstrom.
 #' @export
 positions <- function(frame) {
   UseMethod("positions")
 }
 
+#' @rdname positions
 #' @export
 positions.dseams_frame <- function(frame) {
   n <- nop_(frame$ptr)
@@ -71,6 +79,7 @@ chill_plus <- function(frame, cutoff = 3.5, type = 0L, graph = "cutoff",
   UseMethod("chill_plus")
 }
 
+#' @rdname chill_plus
 #' @export
 chill_plus.dseams_frame <- function(frame, cutoff = 3.5, type = 0L,
                                     graph = "cutoff", rule = "chill+") {
@@ -95,6 +104,7 @@ cages <- function(frame, cutoff = 3.5, type = 0L, k = 4L, graph = "seeded") {
   UseMethod("cages")
 }
 
+#' @rdname cages
 #' @export
 cages.dseams_frame <- function(frame, cutoff = 3.5, type = 0L, k = 4L,
                                graph = "seeded") {
@@ -121,6 +131,9 @@ primitive_rings <- function(frame, cutoff = 3.5, type = 0L, graph = "mutual",
 #'
 #' @param frame A `dseams_frame`.
 #' @param spec Ring census such as `"512"` or `"5:12,6:2"`.
+#' @param cutoff Neighbour cutoff in angstrom.
+#' @param type LAMMPS type. 0 uses the first atom's type.
+#' @param graph `"cutoff"` or `"mutual"`.
 #' @return An integer vector `c(n_cages, n_atoms)`.
 #' @export
 signature_cages <- function(frame, spec = "512", cutoff = 3.5, type = 0L,
@@ -128,6 +141,7 @@ signature_cages <- function(frame, spec = "512", cutoff = 3.5, type = 0L,
   UseMethod("signature_cages")
 }
 
+#' @rdname signature_cages
 #' @export
 signature_cages.dseams_frame <- function(frame, spec = "512", cutoff = 3.5,
                                          type = 0L, graph = "cutoff") {
@@ -138,6 +152,10 @@ signature_cages.dseams_frame <- function(frame, spec = "512", cutoff = 3.5,
 #'
 #' Returns `dt` when any water's H-H vector rotates by at least 90 degrees,
 #' and `NaN` otherwise.
+#' @param first,second Two `dseams_frame` objects.
+#' @param dt Time step, in the caller's unit.
+#' @param oxygen_type,hydrogen_type LAMMPS species numbers.
+#' @return `dt` or `NaN`.
 #' @export
 jump_tau90 <- function(first, second, dt = 1, oxygen_type = 1L,
                        hydrogen_type = 2L) {
@@ -147,17 +165,21 @@ jump_tau90 <- function(first, second, dt = 1, oxygen_type = 1L,
 
 #' Shell symmetry label for every atom.
 #'
+#' @param frame A `dseams_frame`.
+#' @param shell_rmsd Scale-free residual ceiling.
 #' @return Integer codes: 0 ice Ih, 1 ice Ic, 2 stacking-disordered, -1 otherwise.
 #' @export
 symmetry <- function(frame, shell_rmsd = 0.12) {
   UseMethod("symmetry")
 }
 
+#' @rdname symmetry
 #' @export
 symmetry.dseams_frame <- function(frame, shell_rmsd = 0.12) {
   symmetry_(frame$ptr, shell_rmsd)
 }
 
+#' @rdname primitive_rings
 #' @export
 primitive_rings.dseams_frame <- function(frame, cutoff = 3.5, type = 0L,
                                          graph = "mutual", max_depth = 6L) {
@@ -186,6 +208,7 @@ steinhardt <- function(frame, order_l = 6L, cutoff = 3.5, type = 0L,
   UseMethod("steinhardt")
 }
 
+#' @rdname steinhardt
 #' @export
 steinhardt.dseams_frame <- function(frame, order_l = 6L, cutoff = 3.5, type = 0L,
                                     graph = NULL) {
@@ -209,6 +232,7 @@ q4_q6 <- function(frame, cutoff = 3.5, type = 0L) {
   UseMethod("q4_q6")
 }
 
+#' @rdname q4_q6
 #' @export
 q4_q6.dseams_frame <- function(frame, cutoff = 3.5, type = 0L) {
   out <- q4_q6_(frame$ptr, cutoff, as.integer(type))

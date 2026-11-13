@@ -101,6 +101,7 @@ docs/build/
 docs/ford/
 docs/ldoc/
 docs/doctrees/
+docs/native-html/
 docs/doxygen-html/
 docs/source/*.rst
 docs/source/tutorials/gallery/

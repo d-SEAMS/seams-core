@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "seams"
+version = "2.14.0"
+description = "ctypes bindings for the d-SEAMS C API in include/seams.h"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "Rohit Goswami", email = "rgoswami@ieee.org"}]
+dependencies = ["numpy>=1.24"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "mypy>=1.8", "pyright>=1.1"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+seams = ["py.typed"]
+
+[tool.pytest.ini_options]
+addopts = "--doctest-modules --import-mode=importlib"
+testpaths = ["tests/test_seams_package.py", "src/seams"]
+doctest_optionflags = ["NORMALIZE_WHITESPACE", "ELLIPSIS"]
+
+[tool.mypy]
+strict = true
+packages = ["seams"]
+mypy_path = "src"
+warn_unused_ignores = true
+
+[tool.pyright]
+include = ["src/seams"]
+typeCheckingMode = "strict"
+pythonVersion = "3.11"

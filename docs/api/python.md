@@ -1,24 +1,35 @@
 # Python
 
-The package `dseams` is a nanobind module over `seams.h`. NumPy arrays are
-C-contiguous and are read in place.
+Three packages call the same engine.
+
+`seams` is the ctypes package in `bindings/python`. It wraps `include/seams.h`.
+NumPy arrays go in and come back out. Results are frozen dataclasses.
+A failing call raises `seams.SeamsError`. `status` is the `seams_status`
+code and `message` is the Python copy of `seams_handle_error`.
+
+`dseams` is the in-tree nanobind module. It covers `chill_plus`, `q4q6`,
+neighbours, rings, and `Frame`. `pydseamslib` (`import pydseams`) is the
+trajectory package on PyPI. `seams.from_pydseams(frame)` copies
+`frame.positions` and `frame.box` into a `System` when an analysis lives
+only on the C API.
+
+Set `SEAMS_LIB` to `libseams.so`. Importing `seams` does not load the library.
+
+## Quickstart
 
 ```python
-import dseams
-labels, counts = dseams.chill_plus(positions, box)
-q4, q6 = dseams.q4q6(positions, box)
-offsets, cols = dseams.neighbours(positions, box)
-sizes, symmetry, hist, fraction = dseams.rings(positions, box)
-per_atom, (n_hex, n_cubic, n_water, n_both) = dseams.cages(positions, box)
-n_cages, n_atoms = dseams.signature_cages(positions, box, spec="512")
-shell = dseams.symmetry(positions, box)
+import numpy as np
+from seams import PUBLISHED, System, set_num_threads
+
+set_num_threads(1)
+with System() as sys:
+    sys.set_ortho(positions, (edge, edge, edge))
+    ice = sys.chill_plus(rule=PUBLISHED)
+    order = sys.q4q6()
+    print(int(ice.counts[0]), float(order.q6.mean()))
 ```
 
-`dseams.cages` is the six-ring ice score from `frames.cages`: a per-atom code
-and the hexagonal, cubic, water, and both counts. `dseams.signature_cages`
-counts closed polyhedra whose ring census matches `spec` and returns
-`(n_cages, n_atoms)`. `dseams.symmetry` is the shell label: 0 ice Ih, 1 ice
-Ic, 2 stacking-disordered, and -1 otherwise.
+`docs/examples/seams_ctypes_quick.py` runs that cell. The program prints:
 
 `box` is three lengths or nine LAMMPS numbers. `dseams.PUBLISHED` (`"paper"`)
 averages q_lm over the four closest neighbours. `dseams.OVITO` (`"ovito"`)
@@ -27,9 +38,85 @@ select the graph. `dseams.set_num_threads` and `dseams.num_threads` match the
 C calls. `dseams.version` is the library version. `Frame.set_frame` stores one
 cell. `Frame.count` is the number of points.
 
-`docs/examples/minimal_py.py` reads
-`input/traj/genice_sI.lammpstrj` and calls the C API for neighbours, q6,
-CHILL+, and rings. `meson test docs_examples` runs it.
+```
+version 2.14.0
+n 8
+cubic 8
+q6 0.628539
+degree 4
+six 0
+fraction 0.0
+cn 4.571429
+```
+
+Mean q6 is 0.628539 and each atom has four neighbours. This cell holds
+no primitive six-ring. It is thinner than twice the cutoff, so the
+cage census is refused and the script leaves that call out. A 2 by 2
+by 2 supercell, which `python_seams_ctypes` also runs, has a six-ring
+fraction above 0.5. `meson test python_seams_ctypes` runs the pytest
+file and the doctests.
+
+## Ownership
+
+`System`, `Neighbours`, `Rings`, `CageSet`, `Fingerprint`, and `Brine`
+are context managers. `close` frees the handle. A second `close` does
+nothing. `__del__` frees a handle that left the `with` block by an
+exception before `close`. Neighbour, ring, cage, fingerprint, and brine
+handles keep their own copies, so they stay valid after the `System`
+is closed. `Neighbours.copy` fills caller-owned NumPy arrays.
+`seams_neighbours_csr` is deprecated and is not wrapped.
+
+## Errors
+
+```python
+from seams import SeamsError, System
+
+with System() as sys:
+    try:
+        sys.chill_plus()
+    except SeamsError as err:
+        print(err.status, err.message)
+```
+
+An empty frame raises status 5 (`SEAMS_ERR_STATE`). The message is the
+handle string. A box that is neither 3 nor 9 numbers raises `ValueError`
+before the library is called.
+
+## Analyses
+
+| Call | Result |
+| --- | --- |
+| `chill`, `chill_plus` | `ChillResult.labels`, `counts` (length 9) |
+| `ql`, `steinhardt` | `OrderResult.ql`, `qlbar` |
+| `q4q6`, `q6bar` | `Q4Q6`, `Q6Bar` |
+| `neighbours`, `knn` | `Neighbours`, then `NeighbourCSR` |
+| `rings` | histogram, labels, vertices, fraction |
+| `cages`, `signature` | `CageCounts`, `Signature` |
+| `symmetry` | 0 Ih, 1 Ic, 2 stacking, -1 other |
+| `rdf`, `running_cn`, `coordination` | `Radial`, `RunningCN`, float |
+| `hbonds`, `density` | count, `Density` |
+| `fingerprint` | key text and ring census |
+| `contact_pairs`, `domains`, `prisms`, `monolayer`, `site_table` | dataclasses or arrays |
+| `brine` | fronts, rejection, profile, pockets |
+
+`CUTOFF` is 0, `MUTUAL` is 1, `SEEDED` is 2. `PUBLISHED` is 0, `OVITO` is 1.
+`q4q6`, `q6bar`, `ql`, and `steinhardt` share one process-global scratch
+buffer. `set_num_threads` is process-global too.
+
+## Native reference
+
+Docstrings are numpydoc. `sphinx.ext.napoleon` and `sphinx.ext.autodoc`
+render `seams` when the package imports, the same split rgpot uses
+between the narrative page and the generated API. The generated page is
+{doc}`seams_ctypes`. `mypy --strict` and `pyright` check
+`bindings/python/src/seams`. `py.typed` ships with the package.
+Doctests cover `as_box9` and `SeamsError`.
+
+The nanobind module and the language-binding examples stay below.
+
+```{literalinclude} ../../../docs/examples/seams_ctypes_quick.py
+:language: python
+```
 
 ```{literalinclude} ../../../docs/examples/minimal_py.py
 :language: python
@@ -56,6 +143,7 @@ The ctypes fallback calls those two and also `seams_system_read`,
 `meson test python_dseams` runs `bindings/python/tests/test_dseams.py`.
 `tests/test_frames_abi.py` is the `frames_abi` check inside
 `tests/run_language_fronts.sh` (`meson test language_fronts`).
+
 
 ```{literalinclude} ../../../docs/examples/python_api.py
 :language: python

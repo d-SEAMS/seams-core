@@ -30,7 +30,20 @@ if [ ! -f "${SEAMS_INCLUDE}/seams_lang.h" ]; then
   exit 1
 fi
 SEAMS_H_DIR="${DSEAMS_ROOT}/include"
-SEAMS_SO_DIR="${DSEAMS_ROOT}/build/src"
+SEAMS_SO_DIR=""
+for dir in \
+  "${DSEAMS_ROOT}/build/src" \
+  "${DSEAMS_ROOT}/bbdir/src" \
+  "${DSEAMS_ROOT}/bbdir-py/src"
+do
+  if [ -f "${dir}/seams_version.h" ] || [ -f "${dir}/libseams.so" ]; then
+    SEAMS_SO_DIR=$dir
+    break
+  fi
+done
+if [ -z "${SEAMS_SO_DIR}" ]; then
+  SEAMS_SO_DIR="${DSEAMS_ROOT}/build/src"
+fi
 cat > src/Makevars << EOF
 PKG_CFLAGS = -I${SEAMS_H_DIR} -I${SEAMS_SO_DIR}
 PKG_CXXFLAGS = -I${SEAMS_INCLUDE}

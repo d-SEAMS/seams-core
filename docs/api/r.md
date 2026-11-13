@@ -1,16 +1,9 @@
 # R
 
-d-SEAMS 2.14.0. The R package is `bindings/r/dseams`. It calls
-`libseams_lang` through cpp11. The exported frames are `read_frame`,
-`nframes`, `positions`, `chill_plus`, `cages`, `primitive_rings`,
-`signature_cages`, `symmetry`, `steinhardt`, `q4_q6`, and `jump_tau90`.
-`print` on a frame dispatches to `print.dseams_frame`.
-The methods are `positions.dseams_frame`, `chill_plus.dseams_frame`,
-`cages.dseams_frame`, `primitive_rings.dseams_frame`,
-`signature_cages.dseams_frame`, `symmetry.dseams_frame`,
-`steinhardt.dseams_frame`, and `q4_q6.dseams_frame`.
-
-Build the library, then install the package against it:
+The package is `bindings/r/dseams`. `libseams_lang` serves the frame
+generics. `libseams` serves `seams_system_new` and the analyses named
+`seams_*`. roxygen2 writes `man/` and `NAMESPACE`. pkgdown renders the
+package site from `_pkgdown.yml`.
 
 ```bash
 meson setup build -Dwith_tests=true
@@ -18,27 +11,66 @@ meson compile -C build
 DSEAMS_ROOT=$PWD R CMD INSTALL bindings/r/dseams
 ```
 
-CI runs the testthat file when `Rscript` is on `PATH` and
-`DSEAMS_ROOT` points at this tree. The meson target is `language_fronts`
-(`tests/run_language_fronts.sh`). A missing R skips that front.
-`docs/examples/minimal_r.R` reads the GenIce sI
-cell and calls `steinhardt`, `chill_plus`, and `primitive_rings`.
-`meson test docs_examples` runs it.
+`R CMD check` is the cleanliness check. It expects no errors and no
+warnings. `pkgdown::build_site()` writes the native HTML from the
+roxygen topics. The built site is linked from this book:
+
+```{raw} html
+<p><a href="../pkgdown/index.html">dseams pkgdown reference</a>,
+generated from the roxygen topics in <code>man/</code>.</p>
+```
+
+## Quickstart
+
+```r
+library(dseams)
+frame <- read_frame(path, type = 2L)
+ice <- chill_plus(frame)
+print(ice)
+summary(frame)
+```
+
+On `input/traj/exampleTraj.lammpstrj`, oxygen type 2, the cutoff shell
+has 9 interClathrate and 241 water. The mutual shell has 1 clathrate,
+7 interClathrate, and 242 water. Mean q3 is 0.374897. Six-rings at depth
+8 number 224.
+
+## S3 results
+
+`read_frame` returns class `dseams_frame`. `chill_plus` returns
+`dseams_ice`, `cages` returns `dseams_cages`, `primitive_rings` returns
+`dseams_rings`, `steinhardt` returns `dseams_steinhardt`, and `q4_q6`
+returns `dseams_q4_q6`. Each has `print` and `summary`. Cage counts are
+attributes `n_ih`, `n_ic`, `n_both`, and `n_water`, and they match
+`seams cages`.
+
+`seams_system_new` returns an external pointer of class `dseams_system`.
+The finalizer calls `seams_system_destroy`. `print` reports the atom
+count. Analysis helpers return the same vectors the C oracle checks,
+with a class so `print` can name the columns. `as.numeric` and `[[`
+keep the positions those tests use.
+
+## Errors
+
+A missing path stops in `normalizePath` before the library is called.
+An empty system stops with the text from `seams_handle_error`. The
+condition is an ordinary R error, so `tryCatch` and testthat
+`expect_error` see it.
+
+## Ownership
+
+The frame pointer inside `dseams_frame` is an external pointer freed by
+the C finalizer. Do not keep a copy of `frame$ptr` after the frame is
+collected. System, neighbour, ring, cage, and fingerprint handles used
+inside one `seams_*` helper are freed before that helper returns, except
+the system itself, which the caller created and the finalizer releases.
 
 ```{literalinclude} ../../../docs/examples/minimal_r.R
 :language: r
 ```
-`meson test docs_api_r` installs the package against `libseams_lang` and
-runs the script below.
 
 ```{literalinclude} ../../../docs/examples/r_api.R
 :language: r
-```
-
-`seams_lang_fixtures` is the C++ driver of `seams_lang.h`, not the R package.
-
-```bash
-DSEAMS_ROOT=$PWD meson test -C build language_fronts --print-errorlogs
 ```
 
 ```{literalinclude} ../../../bindings/r/dseams/tests/testthat/test-ice.R

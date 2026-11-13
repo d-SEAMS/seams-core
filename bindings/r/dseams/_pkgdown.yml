@@ -1,0 +1,34 @@
+url: https://docs.dseams.info/r/
+template:
+  bootstrap: 5
+destination: ../../docs/build/r
+
+reference:
+  - title: Frames
+    desc: A frame is an external pointer. The finalizer frees it.
+    contents:
+      - read_frame
+      - nframes
+      - positions
+      - print.dseams_frame
+      - summary.dseams_frame
+  - title: Ice and order
+    desc: Results are data frames. print and summary dispatch on the class.
+    contents:
+      - chill_plus
+      - cages
+      - primitive_rings
+      - signature_cages
+      - symmetry
+      - steinhardt
+      - q4_q6
+      - jump_tau90
+  - title: C API
+    desc: One system handle, then an analysis. Errors are stop() with the handle text.
+    contents:
+      - starts_with("seams_")
+  - title: Print and summary
+    desc: S3 methods for frames and for each result class.
+    contents:
+      - starts_with("print.")
+      - starts_with("summary.")
