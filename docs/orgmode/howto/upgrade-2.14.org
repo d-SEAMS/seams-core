@@ -73,10 +73,12 @@ that variable unset, so they were measured on one thread.
 
 * Threads
 
-~OMP_NUM_THREADS~ is still the OpenMP width. A per-atom walk below
-2048 atoms uses one thread (~seams::teamFor~). ~prepareCompute~ does
-not set ~OMP_WAIT_POLICY~. ~adoptThreads~ does set it to ~PASSIVE~,
-and pauses the OpenMP team, when the search hands the cores to Rayon.
+~OMP_NUM_THREADS~ is still the OpenMP width. ~seams::teamFor~ uses one
+thread below 2048 atoms and four threads below 8192 atoms when the
+width asked for is larger than four. ~prepareCompute~ does not set
+~OMP_WAIT_POLICY~, and ~adoptThreads~ leaves the OpenMP team running.
+The orthorhombic cutoff list is shared by published CHILL+ and cutoff
+q6. Each pair is counted once.
 
 * Deprecations and breaks
 

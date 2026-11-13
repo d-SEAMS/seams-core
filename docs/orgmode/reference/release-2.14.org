@@ -62,12 +62,18 @@ plugin.
 
 ~seams_set_num_threads~ sets the OpenMP width for the next call. Zero
 restores the width captured at first use. ~seams::teamFor~ returns one
-thread below 2048 atoms and the OpenMP width otherwise.
+thread below 2048 atoms, four threads below 8192 atoms when the caller
+asked for more than four, and the OpenMP width otherwise.
 ~seams::prepareCompute~ widens the affinity mask, calls
 ~omp_set_dynamic(0)~, and does not set ~OMP_WAIT_POLICY~.
-~seams::adoptThreads~ sets ~OMP_WAIT_POLICY=PASSIVE~ and pauses the
-OpenMP team before a search that hands the cores to Rayon, then sets
-the linkcell width with ~lc_set_threads~.
+~seams::adoptThreads~ leaves the OpenMP team running and sets the
+linkcell width with ~lc_set_threads~. The linkcell pool is one per
+process and its workers sleep between searches. Below 4096 molecules
+that pool is capped at four. The orthorhombic cutoff list is shared:
+each pair is counted once, even z layers together, a wrapping last
+layer alone, then the odd layers. Published CHILL+ and cutoff q6 read
+that list. A carried ring update enumerates changed sources with
+~sourceTeam~ and sorts and merges the kept rings with ~teamFor~.
 
 The signature-search and pool-audit sittings are the CSVs on
 [[file:../explanation/trace-threads.org][the thread-control page]].

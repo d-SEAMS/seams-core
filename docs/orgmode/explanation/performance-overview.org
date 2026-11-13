@@ -14,7 +14,7 @@ sitting. A later sitting sets it.
 | ~benchmarks/rc3-sitting.csv~ | The release-candidate head-to-head, one thread and eight |
 | ~benchmarks/trace-threads.csv~ | The hydrate signature search at 1, 2, 4 and 8 threads |
 | ~benchmarks/paper-cells/sitting-large.csv~ | Ice Ic at 884736 molecules, each code on its own thread control, recorded by ~f49f4cbb~ |
-| ~benchmarks/pool-audit.csv~ | The pool-sized kernels on ice Ic, recorded by ~3c1f5ef1~ |
+| ~benchmarks/pool-audit.csv~ | The pool-sized kernels on ice Ic, retimed at ~1c578c6f~ |
 
 The full tables are
 [[file:performance.org][the release-candidate sitting]],

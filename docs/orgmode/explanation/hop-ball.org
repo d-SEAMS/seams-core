@@ -37,13 +37,15 @@ edge within \(L - 1\) of a vertex changes. ~--rebuild~, a single frame,
 and a worker pool above one thread turn the carry off and call
 ~ringNetwork~ on every frame.
 
-When the carry stays on, the enumeration of the changed sources uses
-~sourceTeam~. It stays on the calling thread until those sources fill
-the workers, about 80 sources for each thread. A few hundred changed
-vertices are still one thread. That width is not ~teamFor~, which
-would also put a crystal of a few hundred molecules on one thread. The
-timed carried update is the hop kernel on
-[[file:trace-threads.org][the thread-control page]].
+When the carry stays on, enumerating the changed sources uses
+~sourceTeam~. That search stays on the calling thread until those
+sources fill the workers, about 80 sources for each thread. A few
+hundred changed vertices are still one thread. That width is not
+~teamFor~. After the new rings exist, the index sort, the drop scan,
+and the merge of the kept rings use ~teamFor~. Dropped ring buffers
+are kept for the next update. The timed carried update is the hop
+kernel on [[file:trace-threads.org][the thread-control page]], retimed
+in ~benchmarks/pool-audit.csv~ at ~1c578c6f~.
 
 ~seams_frame_chill_rings~ is the language call that can keep a neighbour
 list across frames when a skin is set. The ring carry itself is the

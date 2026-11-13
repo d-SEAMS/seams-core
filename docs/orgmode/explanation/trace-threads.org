@@ -73,8 +73,9 @@ the next search reads.
 
 * Every kernel
 
-Commit ~848426f9~ sizes the team on every kernel, and the sitting at
-~3c1f5ef1~ records it. The rows are ~benchmarks/pool-audit.csv~. Eight
+Commit ~848426f9~ sizes the team on every kernel. ~1c578c6f~ retimes
+the same eight kernels after the carried-ring and cutoff-list fixes
+in ~4b96e879~. The rows are ~benchmarks/pool-audit.csv~. Eight
 kernels run on ideal ice Ic: primitive rings, local and cutoff \(q_4\)
 and \(q_6\), CHILL+, the shell label, and one carried hop-ball update.
 The sizes are 4096, 32768, 110592 and 884736 molecules. Each size is
@@ -98,12 +99,25 @@ workers still sleep between searches. The OpenMP team is left running,
 so the next region does not pay the wake-up that used to move by tens
 of milliseconds.
 
-A carried ring update uses ~sourceTeam~, not ~teamFor~. The work is
-the changed sources. The update stays on the calling thread until
-those sources fill the workers, about 80 sources per thread. Fewer
-than that is a serial update, because the fork costs more than the
-search. ~teamFor~ is a different rule: it would also put a crystal of
-a few hundred molecules on one thread.
+Enumerating the changed ring sources uses ~sourceTeam~, not
+~teamFor~. That search stays on the calling thread until the sources
+fill the workers, about 80 sources per thread. Fewer than that is a
+serial enumeration, because the fork costs more than the search.
+~teamFor~ is a different rule: it would also put a crystal of a few
+hundred molecules on one thread. The sort of ring indices, the scan
+that drops rings meeting \(T\), and the merge of the rings that are
+kept use ~teamFor~ and run on several threads. Dropped ring buffers
+are kept and reused. They are not freed on the update.
+
+The orthorhombic cutoff list is one shared CSR. Each pair is counted
+once, from the atom with the lower slot, on the z layer that owns
+that atom. A layer writes its own atoms and the atoms in the next
+layer, so layers of one parity do not share an atom. Even layers run
+together. When the number of layers is odd, the last layer wraps onto
+layer 0 and runs only after the even layers have stopped. Odd layers
+run after that. One thread uses the same half stencil without a team.
+Published CHILL+ and cutoff \(q_6\) both read this list. The one-thread
+and several-thread pair lists match.
 
 The linkcell cap below 4096 molecules, and the row placement below
 \(2^{20}\) pairs, are the signature-search rules above. They are not

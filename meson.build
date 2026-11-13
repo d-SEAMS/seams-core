@@ -748,37 +748,44 @@ if get_option('with_cli')
     'docs_check',
     python3,
     args: [meson.project_source_root() / 'docs' / 'check_examples.py'],
+    suite: 'docs',
     timeout: 60)
   test(
     'docs_c_symbols',
     python3,
     args: ['-m', 'doctest', meson.project_source_root() / 'docs' / 'check_c_symbols.py'],
     workdir: meson.project_source_root() / 'docs',
+    suite: 'docs',
     timeout: 60)
   test(
     'docs_sitting',
     python3,
     args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check'],
+    suite: 'docs',
     timeout: 60)
   test(
     'docs_trace_threads',
     python3,
     args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-trace'],
+    suite: 'docs',
     timeout: 60)
   test(
     'docs_pool_audit',
     python3,
     args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-pool'],
+    suite: 'docs',
     timeout: 60)
   test(
     'docs_sitting_large',
     python3,
     args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-large'],
+    suite: 'docs',
     timeout: 60)
   test(
     'docs_h2h_threads',
     python3,
     args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-h2h'],
+    suite: 'docs',
     timeout: 60)
   tutorial_env = environment()
   tutorial_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
@@ -792,6 +799,7 @@ if get_option('with_cli')
       meson.project_build_root() / 'src',
     ],
     depends: [seams_exe],
+    suite: 'docs',
     timeout: 180)
   test(
     'docs_tutorial_interface',
@@ -804,6 +812,7 @@ if get_option('with_cli')
     ],
     env: tutorial_env,
     depends: [seams_exe],
+    suite: 'docs',
     timeout: 120)
   test(
     'docs_tutorial_nucleation',
@@ -815,6 +824,7 @@ if get_option('with_cli')
     ],
     env: tutorial_env,
     depends: [seams_api_lib],
+    suite: 'docs',
     timeout: 180)
   test(
     'docs_tutorial_brine',
@@ -826,6 +836,7 @@ if get_option('with_cli')
     ],
     env: tutorial_env,
     depends: [seams_api_lib],
+    suite: 'docs',
     timeout: 120)
   test(
     'docs_tutorial_insitu',
@@ -836,6 +847,7 @@ if get_option('with_cli')
       meson.project_build_root(),
     ],
     env: tutorial_env,
+    suite: 'docs',
     timeout: 180)
   test(
     'engines_tutorial',
@@ -846,6 +858,7 @@ if get_option('with_cli')
     ],
     env: tutorial_env,
     depends: [seams_api_lib],
+    suite: 'docs',
     timeout: 120)
   test(
     'seams_water_types_cutoff',
@@ -1140,6 +1153,7 @@ if get_option('with_cli')
     ],
     env: binding_env,
     depends: [seams_api_lib],
+    suite: 'docs',
     timeout: 60)
   test(
     'docs_api_fortran',
@@ -1151,6 +1165,7 @@ if get_option('with_cli')
     ],
     env: binding_env,
     depends: [seams_api_lib],
+    suite: 'docs',
     timeout: 120)
   test(
     'docs_api_rust',
@@ -1162,6 +1177,7 @@ if get_option('with_cli')
     ],
     env: binding_env,
     depends: [seams_api_lib],
+    suite: 'docs',
     timeout: 180)
   test(
     'docs_api_r',
@@ -1173,6 +1189,7 @@ if get_option('with_cli')
     ],
     env: binding_env,
     depends: [seams_lang],
+    suite: 'docs',
     timeout: 300)
   test(
     'docs_api_julia',
@@ -1184,5 +1201,6 @@ if get_option('with_cli')
     ],
     env: binding_env,
     depends: [seams_lang],
+    suite: 'docs',
     timeout: 180)
 endif

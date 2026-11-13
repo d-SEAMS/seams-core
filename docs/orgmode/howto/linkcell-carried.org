@@ -10,10 +10,13 @@ The list itself is
 * The cutoff list
 
 ~linkcell::pairs_within~ owns the cutoff list when the build links
-linkcell. vesin is the fallback. The orthorhombic list is one parallel
-cell sort: each thread counts, a prefix sum places the atoms, and the
-pairs are written into one CSR. The pair set does not depend on the
-thread count. q4, q6, CHILL+, and the ring census read that CSR.
+linkcell. vesin is the fallback. The orthorhombic list is one shared
+CSR. Each pair is written once, from the lower slot, on the z layer
+that owns that atom. Even layers run together. An odd last layer wraps
+onto layer 0, so it runs only after the even layers have stopped, and
+the odd layers run after that. One thread walks the same half stencil.
+The pair set does not depend on the thread count. Published CHILL+ and
+cutoff q6 read this list, as do q4 and the ring census.
 
 The half list keeps each pair on the lower index. The test that locks
 this is the Catch2 case ~half cutoff list is the lower index of the

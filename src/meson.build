@@ -206,7 +206,7 @@ docs_ice_example = executable(
   include_directories: include_directories('../include'),
   c_args: ['-I' + meson.current_build_dir()],
   link_args: ['-lm'])
-test('docs_ice_example', docs_ice_example, timeout: 60)
+test('docs_ice_example', docs_ice_example, suite: 'docs', timeout: 60)
 
 docs_api_cpp = executable(
   'docs_api_cpp',
@@ -215,4 +215,4 @@ docs_api_cpp = executable(
   include_directories: include_directories('../include'),
   cpp_args: ['-I' + meson.current_build_dir()],
   link_args: ['-lm'])
-test('docs_api_cpp', docs_api_cpp, timeout: 60)
+test('docs_api_cpp', docs_api_cpp, suite: 'docs', timeout: 60)
