@@ -18,6 +18,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 CSV = ROOT / "benchmarks" / "rc3-sitting.csv"
 TRACE = ROOT / "benchmarks" / "trace-threads.csv"
 POOL = ROOT / "benchmarks" / "pool-audit.csv"
+LARGE = ROOT / "benchmarks" / "paper-cells" / "sitting-large.csv"
+OVERVIEW_OUT = ROOT / "docs" / "source" / "explanation" / "performance-overview.rst"
 OUT = ROOT / "docs" / "source" / "explanation" / "performance-tables.rst"
 TRACE_OUT = ROOT / "docs" / "source" / "explanation" / "trace-threads-tables.rst"
 POOL_OUT = ROOT / "docs" / "source" / "explanation" / "pool-audit-tables.rst"
@@ -251,6 +253,124 @@ def write_h2h(rows, path):
     path.write_text("\n".join(lines) + "\n")
 
 
+def check_large(rows):
+    errors = check(rows, 1.5e-4)
+    if len(rows) != 88:
+        errors.append("sitting-large has {} rows, expected 88".format(len(rows)))
+    widths = sorted({int(row["threads"]) for row in rows})
+    if widths != [1, 2, 4, 8]:
+        errors.append("sitting-large threads are {}".format(widths))
+    sizes = sorted({row["molecules"] for row in rows})
+    if sizes != ["884736"]:
+        errors.append("sitting-large molecules are {}".format(sizes))
+    return errors
+
+
+def ratio_series(rows, fields):
+    grouped = {}
+    for row in rows:
+        key = tuple(row[field] for field in fields)
+        grouped.setdefault(key, {})[row["threads"]] = float(row["median_ms"])
+    series = []
+    for key in sorted(grouped):
+        widths = grouped[key]
+        if "1" not in widths or "8" not in widths or widths["8"] <= 0:
+            continue
+        ratio = widths["1"] / widths["8"]
+        if 0.95 <= ratio <= 1.05:
+            label = "flat"
+        elif ratio > 1:
+            label = "falls"
+        else:
+            label = "rises"
+        series.append(key + (widths["1"], widths["8"], ratio, label))
+    return series
+
+
+def append_ratio_table(lines, title, rows, fields):
+    lines.append(title)
+    lines.append("^" * len(title))
+    lines.append("")
+    header = list(fields) + ["t1_ms", "t8_ms", "ratio", "with_threads"]
+    lines.append(".. csv-table::")
+    lines.append("   :header: " + ", ".join(header))
+    lines.append("")
+    for item in ratio_series(rows, fields):
+        text = [str(part) for part in item[:-4]]
+        left, right, ratio, label = item[-4:]
+        text.extend(["{:.3f}".format(left), "{:.3f}".format(right), "{:.3f}".format(ratio), label])
+        lines.append("   " + ", ".join(text))
+    lines.append("")
+
+
+def write_overview(books, path):
+    lines = [
+        ".. list-table::",
+        "   :header-rows: 0",
+        "",
+        "   * - Written by ``docs/render_sitting.py`` from the four CSVs.",
+        "       ``ratio`` is the one-thread median divided by the eight-thread median.",
+        "       ``flat`` means that ratio is between 0.95 and 1.05.",
+        "",
+        "What each file holds",
+        "^^^^^^^^^^^^^^^^^^^^",
+        "",
+        ".. csv-table::",
+        "   :header: file, rows, threads, molecules",
+        "",
+    ]
+    for name, rows in books:
+        threads = " ".join(str(width) for width in sorted({int(row["threads"]) for row in rows}))
+        molecules = " ".join(sorted({row["molecules"] for row in rows}, key=int))
+        lines.append("   {}, {}, {}, {}".format(name, len(rows), threads, molecules))
+    lines.append("")
+    append_ratio_table(lines, "rc3 sitting, one thread against eight", books[0][1], ("code", "operation", "molecules"))
+    append_ratio_table(
+        lines,
+        "884736-molecule sitting, one thread against eight",
+        books[1][1],
+        ("code", "operation"),
+    )
+    append_ratio_table(
+        lines,
+        "signature search, one thread against eight",
+        books[2][1],
+        ("crystal", "cell", "molecules"),
+    )
+    append_ratio_table(
+        lines,
+        "pool-sized kernels, one thread against eight",
+        books[3][1],
+        ("kernel", "molecules"),
+    )
+    lines.append("Pool audit at 4096 molecules, four threads against eight")
+    lines.append("^" * len("Pool audit at 4096 molecules, four threads against eight"))
+    lines.append("")
+    lines.append(".. csv-table::")
+    lines.append("   :header: kernel, t4_ms, t8_ms, t8_over_t4")
+    lines.append("")
+    four = {}
+    eight = {}
+    for row in books[3][1]:
+        if row["molecules"] != "4096":
+            continue
+        if row["threads"] == "4":
+            four[row["kernel"]] = float(row["median_ms"])
+        elif row["threads"] == "8":
+            eight[row["kernel"]] = float(row["median_ms"])
+    for kernel in POOL_KERNELS:
+        if kernel not in four or kernel not in eight or eight[kernel] <= 0:
+            continue
+        lines.append(
+            "   {}, {:.3f}, {:.3f}, {:.3f}".format(
+                kernel, four[kernel], eight[kernel], eight[kernel] / four[kernel]
+            )
+        )
+    lines.append("")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n")
+
+
 def write_tables(rows, path):
     grouped = {}
     for row in rows:
@@ -292,6 +412,14 @@ def main(argv):
             print("\n".join(errors), file=sys.stderr)
             return 1
         print("h2h thread scaling ok", len(h2h_pairs(h2h_index(rows))), "rows")
+        return 0
+    if "--check-large" in argv:
+        rows = load(LARGE)
+        errors = check_large(rows)
+        if errors:
+            print("\n".join(errors), file=sys.stderr)
+            return 1
+        print("sitting-large csv ok", len(rows), "rows")
         return 0
     if "--check-pool" in argv:
         rows = load(POOL)
@@ -338,6 +466,20 @@ def main(argv):
         print("\n".join(pool_errors), file=sys.stderr)
         return 1
     write_pool(pool_rows, POOL_OUT)
+    large_rows = load(LARGE)
+    large_errors = check_large(large_rows)
+    if large_errors:
+        print("\n".join(large_errors), file=sys.stderr)
+        return 1
+    write_overview(
+        (
+            ("rc3-sitting.csv", rows),
+            ("sitting-large.csv", large_rows),
+            ("trace-threads.csv", trace_rows),
+            ("pool-audit.csv", pool_rows),
+        ),
+        OVERVIEW_OUT,
+    )
     print("wrote", OUT.relative_to(ROOT), len(rows), "rows")
     print("wrote", TRACE_OUT.relative_to(ROOT), len(trace_rows), "rows")
     return 0

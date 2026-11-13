@@ -1,0 +1,30 @@
+#+TITLE: Performance overview
+#+OPTIONS: toc:nil num:nil
+
+Four sittings sit next to each other. ~docs/render_sitting.py~ writes
+every number on this page from the CSVs when the book is built. A
+ratio is the one-thread median divided by the eight-thread median. The
+script marks a row flat when that ratio is between 0.95 and 1.05.
+
+| file | what it times |
+|------+---------------|
+| ~benchmarks/rc3-sitting.csv~ | The release-candidate head-to-head, one thread and eight |
+| ~benchmarks/trace-threads.csv~ | The hydrate signature search at 1, 2, 4 and 8 threads |
+| ~benchmarks/paper-cells/sitting-large.csv~ | Ice Ic at 884736 molecules, each code on its own thread control, recorded by ~f49f4cbb~ |
+| ~benchmarks/pool-audit.csv~ | The pool-sized kernels on ice Ic, recorded by ~3c1f5ef1~ |
+
+The full tables are
+[[file:performance.org][the release-candidate sitting]],
+[[file:trace-threads.org][the thread controls]], and
+[[file:../howto/literature-reproduce.org][the literature reproduction]].
+~meson test docs_sitting~, ~docs_trace_threads~, ~docs_pool_audit~, and
+~docs_sitting_large~ recompute the stored medians.
+
+The same operation name is not the same call across files. rc3 \(q_4\)
+is the guest's local parameter. The pool-audit file splits local and
+cutoff. The large-cell file names the call in its ~detail~ column. The
+tables keep the operation string the CSV stored.
+
+#+begin_export rst
+.. include:: performance-overview.rst
+#+end_export

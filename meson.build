@@ -765,6 +765,11 @@ if get_option('with_cli')
     args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-pool'],
     timeout: 60)
   test(
+    'docs_sitting_large',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-large'],
+    timeout: 60)
+  test(
     'docs_h2h_threads',
     python3,
     args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check-h2h'],
