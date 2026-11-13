@@ -1441,6 +1441,14 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_brine_cli',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'check_brine_cli.py',
+    ],
+    suite: 'docs',
+    timeout: 180)
+  test(
     'docs_figure_census',
     python3,
     args: [
