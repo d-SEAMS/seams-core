@@ -36,6 +36,15 @@ def prefix_of(build):
     raise SystemExit("meson prefix is missing")
 
 
+def project_version(build):
+    import json
+
+    info = json.loads(
+        subprocess.check_output(["meson", "introspect", "--projectinfo", str(build)], text=True)
+    )
+    return info["version"]
+
+
 def library_dirs(binary, env, search):
     """Add directories that hold shared libraries ldd cannot yet see."""
     missing = []
@@ -102,6 +111,23 @@ def main():
     sample = source / "input" / "traj" / "agi_water_tiny.lammpstrj"
     run([str(binary), str(sample)], env=env)
 
+    version = project_version(build)
+    modversion = subprocess.check_output(
+        [pkg_config, "--modversion", "seams"], env=env, text=True
+    ).strip()
+    if modversion != version:
+        raise SystemExit("pkg-config says {}, project is {}".format(modversion, version))
+    pinned = subprocess.run(
+        [pkg_config, "--exists", "seams >= " + version], env=env
+    )
+    if pinned.returncode != 0:
+        raise SystemExit("pkg-config --exists 'seams >= {}' failed".format(version))
+    find_check = source / "examples" / "c" / "find_check"
+    version_bin = work / "version-pkg"
+    run([cc, str(find_check / "version.c"), "-o", str(version_bin), *cflags, *libs], env=env)
+    env = library_dirs(version_bin, env, [stage, build])
+    run([str(version_bin), version], env=env)
+
     prefix = prefix_of(build)
     installed = stage / Path(prefix).relative_to("/")
     cmake_build = work / "cmake"
@@ -123,6 +149,26 @@ def main():
     cmake_bin = cmake_build / "quickstart"
     env = library_dirs(cmake_bin, env, [stage, build])
     run([str(cmake_bin), str(sample)], env=env)
+
+    find_build = work / "cmake-find"
+    if find_build.exists():
+        shutil.rmtree(find_build)
+    run(
+        [
+            "cmake",
+            "-S",
+            str(find_check),
+            "-B",
+            str(find_build),
+            "-DCMAKE_PREFIX_PATH=" + str(installed),
+            "-Dseams_DIR=" + str(configs[0].parent),
+            "-DSEAMS_EXPECT_VERSION=" + version,
+        ]
+    )
+    run(["cmake", "--build", str(find_build)])
+    find_bin = find_build / "version"
+    env = library_dirs(find_bin, env, [stage, build])
+    run([str(find_bin), version], env=env)
     print("installed C quickstart ok")
 
 
