@@ -23,6 +23,21 @@ def _write_sitting_tables():
 _write_sitting_tables()
 
 
+def _write_h2h():
+    """Fill the performance head-to-head from the benchmark CSVs."""
+    import importlib.util
+
+    script = os.path.join(_docs, "render_h2h.py")
+    spec = importlib.util.spec_from_file_location("render_h2h", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    if module.main(["--check"]) != 0:
+        raise SystemExit("performance head-to-head does not match the CSVs")
+
+
+_write_h2h()
+
+
 def _write_pool_v5():
     """Fill the pool-audit v5 tables before Sphinx reads the benchmarks page."""
     import importlib.util

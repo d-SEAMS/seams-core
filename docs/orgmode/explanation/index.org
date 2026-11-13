@@ -20,6 +20,7 @@ These pages are for understanding. They are not recipes.
 | [[file:trace-threads.org][Signature thread controls]] | Team size, the OpenMP wait, and the pool-audit kernels |
 | [[file:performance.org][Release-candidate sitting]] | Tables built from ~benchmarks/rc3-sitting.csv~ |
 | [[file:performance-overview.org][Performance overview]] | rc3, the signature search, the large cell, and the pool audit |
+| [[file:performance-h2h.org][Performance]] | Neighbours, rings, q6, CHILL+, cages, PTM, and linkcell scaling |
 | [[file:citation.org][Citation]] | What to cite |
 
 #+begin_export rst
@@ -41,5 +42,6 @@ These pages are for understanding. They are not recipes.
    trace-threads
    performance
    performance-overview
+   performance-h2h
    citation
 #+end_export

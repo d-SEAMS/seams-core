@@ -1,0 +1,69 @@
+#+TITLE: Migrate from d-SEAMS 1.x
+#+OPTIONS: toc:nil num:nil
+
+1.x was a Lua script plus ~yodaStruct -c lua_inputs/config.yml~.
+The config named the trajectory and switched analyses on. 2.14 is one
+~seams~ subcommand, or one call in ~seams.h~ / ~seams_lang.h~, for
+each of those switches. Lua stays in yodaStruct. This tree builds the
+engine, the command, and the C library.
+
+The same input is used on both sides of a row. ~docs/tutorials/test_migrate.py~
+runs that pair and requires the same counts. ~meson test docs_migrate~
+is that check. It exits when a count differs.
+
+* yodaStyle config
+
+| 1.x key | 2.14 command | 2.14 C call |
+|---------+--------------+-------------|
+| ~bulk.topologicalNetworkCriterion~ | ~seams cages~ | ~seams_frame_cages~ |
+| ~bulk.bondOrderParameters~ | ~seams steinhardt~ | ~seams_frame_steinhardt_graph~ |
+| ~topoOneDim~ | ~seams prisms~ | ~seams_frame_prisms~ |
+| ~topoTwoDim~ | ~seams_frame_monolayer~ | ~seams_frame_monolayer~ |
+
+~topoTwoDim~ has no separate subcommand. The monolayer census is
+~seams_frame_monolayer~. The test calls it twice on the mixed TIP4P
+dump and requires the same eight counts.
+
+* Lua and the older globals
+
+~require("dseams")~ and ~require("yoda")~ are the yodaStruct table.
+The globals below are the names ~example_lua/full_api~ registered.
+Each row is the 2.14 replacement.
+
+| 1.x | 2.14 command | 2.14 C call |
+|-----+--------------+-------------|
+| ~dseams.read~ / ~readLammpsTrjO~ / ~readLammpsTrj~ | ~seams read~ | ~seams_frame_read~ |
+| ~dseams.chill_plus~ / ~getIceTypePlus~ / ~getCorrelPlus~ | ~seams chill-plus~ | ~seams_frame_chill_plus~ |
+| ~dseams.chill~ / ~getIceType~ / ~getCorrel~ | ~seams chill~ | ~seams_frame_chill~ |
+| ~ringNetwork~ / ~bulkPrimitiveRings~ | ~seams rings~ | ~seams_frame_rings~ |
+| ~steinhardtQl~ / ~bulk.bondOrderParameters~ | ~seams steinhardt~ | ~seams_frame_steinhardt_graph~ |
+| ~dseams.cages~ / ~seededCageAffiliation~ / ~bulk.topologicalNetworkCriterion~ | ~seams cages~ | ~seams_frame_cages~ |
+| ~dseams.cages_by_signature~ / ~findBySignature~ | ~seams cages --signature~ | ~seams_frame_signature_edge~ |
+| ~dseams.neighbors~ / ~neighListO~ | ~seams_frame_neighbours~ | ~seams_neighbours_build~ |
+| ~kNearestNeighbourList~ / ~dseams.knn~ | ~seams_frame_neighbours~ | ~seams_neighbours_build~ |
+| ~dseams.rdf~ / ~calcRDF3D~ | ~seams rdf~ | ~seams_frame_rdf~ |
+| ~dseams prisms~ | ~seams prisms~ | ~seams_frame_prisms~ |
+| ~shapeMatching~ | ~seams_frame_monolayer~ | ~seams_frame_monolayer~ |
+| ~dseams.hbonds~ / ~getHbondNetwork~ | ~seams hbonds~ | ~seams hbonds~ |
+| ~dseams.cn~ / ~calcCN~ | ~seams cn~ | ~seams cn~ |
+| ~dseams.density~ / ~densityByType~ | ~seams density-z~ | ~seams density-z~ |
+| ~dseams.fingerprint~ / ~topologyFingerprint~ | ~seams fingerprint~ | ~seams fingerprint~ |
+| ~dseams.pairs~ / ~contactPairs~ | ~seams pairs~ | ~seams pairs~ |
+| ~dseams.domain~ / ~domainStats~ | ~seams domains~ | ~seams domains~ |
+
+Neighbours are the one row with two C calls and no text command.
+~seams_frame_neighbours~ counts the directed pairs on the language
+frame. ~seams_neighbours_build~ builds the same list through
+~seams.h~. The cutoff row uses graph ~cutoff~. The k-NN row uses
+graph ~mutual~. The test requires the two pair counts to be equal.
+
+Hydrogen bonds, coordination, the density profile, the topology key,
+contact pairs, and domains are the command itself. The test runs each
+command on ~input/traj/exampleTraj.lammpstrj~ and checks the printed
+line: 460 hydrogen bonds, coordination 9.144, the first density bin,
+89 fingerprint classes, pair count 0, and a polar domain of 750.
+
+CHILL+ and rings use the cubic cell ~input/traj/mW_cubic.lammpstrj~,
+type 1, cutoff 3.5 Å. The signature row uses ~input/traj/genice_sI.lammpstrj~
+with ~--cage-edge none~. A published CHILL+ count has to match
+~seams_frame_chill_plus~ on that file, name by name.
