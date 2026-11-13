@@ -1,0 +1,19 @@
+key value
+basal_source_axis y
+basal_axis z
+box_A 31.291355 36.146074 51.821436
+ice_oxygens_restrained yes
+analyzer oxygen
+model TIP4P/Ice
+citation Abascal 2005 JCP 122 234511
+temperature_K 230.0
+equil_K 320
+equil_ps 15.000
+prod_ps 383.200
+dump_ps 23.950000
+restraint_kJ_mol_nm2 2000
+n_ice 1024
+n_liquid 440
+n_frames 17
+cutoff_A 3.5
+equil_energy_kJ_mol -80512.994486
