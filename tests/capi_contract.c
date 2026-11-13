@@ -336,6 +336,34 @@ static void frame_io_contract(void) {
   }
   truth(cubic == g_n, "seams_chill_plus_n", "labels survive a position reload");
   truth(seams_handle_error(sys)[0] == '\0', "seams_handle_error", "non-const call clears the slot");
+
+  fn = "seams_system_set_positions";
+  for (size_t k = 0; k < 3 * n; ++k) {
+    xyz[k] = g_xyz[k] + 0.0625;
+  }
+  xyz[4] = INFINITY;
+  expect(seams_system_set_positions(sys, xyz, n, NULL, 0), SEAMS_ERR_ARG, fn,
+         "infinite coordinate after a reload");
+  expect(seams_system_positions(sys, out, 3 * n), SEAMS_OK, "seams_system_positions", "frame");
+  truth(memcmp(out, g_xyz, sizeof(double) * 3 * n) == 0, fn, "second failed reload keeps the frame");
+  xyz[4] = g_xyz[4] + 0.0625;
+  for (int r = 0; r < 3; ++r) {
+    expect(seams_system_set_positions(sys, r % 2 ? g_xyz : xyz, n, NULL, 0), SEAMS_OK, fn,
+           "repeated reloads");
+  }
+  expect(seams_system_positions(sys, out, 3 * n), SEAMS_OK, "seams_system_positions", "frame");
+  truth(memcmp(out, xyz, sizeof(double) * 3 * n) == 0, fn, "last of repeated reloads is stored");
+  int retyped[N_MAX];
+  for (int i = 0; i < g_n; ++i) {
+    retyped[i] = 1 + i % 3;
+  }
+  expect(seams_system_set_atoms(sys, g_xyz, n, g_box, 9, retyped, ids), SEAMS_OK,
+         "seams_system_set_atoms", "new types and ids");
+  expect(seams_system_set_positions(sys, xyz, n, NULL, 0), SEAMS_OK, fn, "after new types");
+  expect(seams_system_types(sys, got, n), SEAMS_OK, "seams_system_types", "after new types");
+  truth(memcmp(got, retyped, sizeof(int) * n) == 0, fn, "reload keeps the latest types");
+  expect(seams_system_ids(sys, got, n), SEAMS_OK, "seams_system_ids", "after new ids");
+  truth(memcmp(got, ids, sizeof(int) * n) == 0, fn, "reload keeps the latest ids");
   seams_system_destroy(sys);
 }
 

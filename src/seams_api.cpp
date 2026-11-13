@@ -289,6 +289,12 @@ struct seams_system : seams_object {
   std::unordered_map<int, int> spare_ids;
   std::vector<double> spare_box;
   std::vector<double> spare_low;
+  // set_positions writes the new coordinates here in the same pass that
+  // checks them, and swaps this with cloud.pts only when every value was
+  // finite. While staged_current is set, types and ids here match the
+  // frame; any load clears it.
+  decltype(Cloud::pts) staged;
+  bool staged_current = false;
 };
 
 struct seams_neighbours : seams_object {
@@ -783,6 +789,7 @@ seams_status seams_system_set_atoms(seams_system *sys, const double *xyz, size_t
       }
     }
     Cloud &cloud = sys->cloud;
+    sys->staged_current = false;
     cloud.pts.resize(n);
     // Nothing below allocates, so the frame is either the old one or the
     // whole new one.
@@ -1554,6 +1561,7 @@ seams_status seams_system_read(seams_system *sys, const char *path, int frame,
     }
     sys->cloud = std::move(cloud);
     sys->identity_ids = 0;
+    sys->staged_current = false;
     sys->ready = true;
     return SEAMS_OK;
   } catch (const std::bad_alloc &) {
@@ -3125,12 +3133,20 @@ seams_status seams_system_set_positions(seams_system *sys, const double *xyz, si
                                        box9[7], box9[8])) {
       return fail(SEAMS_ERR_BOX, "box edge lengths must be positive");
     }
-    if (!finite_coordinates(xyz, n)) {
-      return fail(SEAMS_ERR_ARG, "a coordinate is not finite");
+    auto &next = sys->staged;
+    if (!sys->staged_current) {
+      next = sys->cloud.pts;
+      sys->staged_current = true;
     }
-    auto &pts = sys->cloud.pts;
+    constexpr std::uint64_t exponent = 0x7ff0000000000000ULL;
+    std::uint64_t bad = 0;
     for (std::size_t i = 0; i < n; ++i) {
-      auto &point = pts[i];
+      std::uint64_t bits[3];
+      std::memcpy(bits, xyz + 3 * i, sizeof bits);
+      bad |= static_cast<std::uint64_t>((bits[0] & exponent) == exponent) |
+             static_cast<std::uint64_t>((bits[1] & exponent) == exponent) |
+             static_cast<std::uint64_t>((bits[2] & exponent) == exponent);
+      auto &point = next[i];
       point.x = xyz[3 * i];
       point.y = xyz[3 * i + 1];
       point.z = xyz[3 * i + 2];
@@ -3138,6 +3154,10 @@ seams_status seams_system_set_positions(seams_system *sys, const double *xyz, si
       point.inSlice = true;
       point.c_ij.clear();
     }
+    if (bad != 0) {
+      return fail(SEAMS_ERR_ARG, "a coordinate is not finite");
+    }
+    sys->cloud.pts.swap(next);
     if (box9 != nullptr) {
       sys->cloud.box.swap(sys->spare_box);
       sys->cloud.boxLow.swap(sys->spare_low);

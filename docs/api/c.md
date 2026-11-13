@@ -123,6 +123,11 @@ calls `seams_system_set_atoms` once and `seams_system_set_positions` for each la
 frame. There is no borrowed-pointer load. Every analysis reads the library's per-atom
 records, so a view onto caller memory would be copied on every analysis call instead
 of once per frame. A failed load or reload leaves the earlier frame in place.
+`seams_system_set_positions` keeps that guarantee by writing into a second set of
+per-atom records on the handle, checked in the same pass, and swapping it in at the
+end. The first reload after a load fills that set from the frame; later reloads
+cost about as much as writing the coordinates in place, at twice the per-atom
+memory.
 
 ## Threads
 

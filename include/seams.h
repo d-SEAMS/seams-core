@@ -2229,8 +2229,15 @@ SEAMS_API seams_status seams_rings_histogram_n(const seams_rings *rings, int *co
  * @brief Overwrite the coordinates, and optionally the cell, of the stored frame.
  *
  * Types and ids stay as stored. Per-atom labels written by an earlier
- * seams_chill() or seams_chill_plus() are reset. The input is checked in
- * full before anything is written, so on failure the frame is unchanged.
+ * seams_chill() or seams_chill_plus() are reset. On failure the frame is
+ * unchanged.
+ *
+ * The handle keeps a second set of per-atom records. Each call checks
+ * and writes the coordinates into that set in one pass, then swaps it
+ * with the stored frame when every value was finite. The first call
+ * after a load fills the second set from the frame; later calls do not,
+ * so a trajectory loop costs about as much as writing the coordinates
+ * in place. The second set doubles the per-atom memory of the handle.
  *
  * @param sys Frame handle with a stored frame.
  * @param xyz n times 3 Cartesian coordinates, Angstrom. Every value must
