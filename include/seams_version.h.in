@@ -13,4 +13,9 @@
 #define SEAMS_VERSION_PATCH @PATCH@
 #define SEAMS_VERSION_STRING "@STRING@"
 
+/* Packed as (major << 16) | (minor << 8) | patch. seams_version()
+ * returns this value. */
+#define SEAMS_VERSION_NUMBER \
+  ((SEAMS_VERSION_MAJOR << 16) | (SEAMS_VERSION_MINOR << 8) | SEAMS_VERSION_PATCH)
+
 #endif

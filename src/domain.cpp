@@ -14,6 +14,15 @@
 #include <linkcell.h>
 // The measured-weights library names this test lc_within_reach and
 // asks for coordinates. A nonzero return selects the geometric blocks.
+extern "C" int lc_halo_width(double cutoff, int images, const double *width, std::uint32_t *halo);
+extern "C" int lc_mesh_cut(const double *xyz, std::size_t n, const lc_cell *box, double cutoff,
+                           const void *mask, double hint, std::size_t parts, int order,
+                           double skin, int flags, int *nxyz, double *bin, int *assign,
+                           int *point, std::size_t assign_cap, std::size_t point_cap,
+                           std::size_t *ncell);
+extern "C" int lc_partition_weights(const int *nxyz, const std::uint64_t *weight,
+                                    std::size_t ncell, std::size_t parts, int balance,
+                                    double slack, int *assign);
 extern "C" __attribute__((weak)) int lc_owned_mask(const int *nxyz, const int *assign, std::size_t ncell,
                              const int *point_cell, std::size_t nop, int rank,
                              const std::uint32_t *hwidth, int *hit) {
