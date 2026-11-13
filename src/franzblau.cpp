@@ -782,7 +782,9 @@ struct alignas(64) RingScratch {
 // A dense ball has more shortest paths than this into one vertex. Pairing
 // them is quadratic in that count; the level walk below lists the same
 // primitive rings.
-constexpr int kPathCap = 48;
+// One extra shortest path is enough. Above that, pairing is slower than
+// the level walk on the frames that reach this cap.
+constexpr int kPathCap = 1;
 
 // One search's census and path cap. A null histogram means the rings are
 // stored. A zero cap is the pairing walk with no count against the cap.
@@ -901,20 +903,34 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
         bits.data() + static_cast<std::size_t>(u) * static_cast<std::size_t>(stride);
     return ((row[static_cast<unsigned>(v) >> 6] >> (static_cast<unsigned>(v) & 63u)) & 1ull) != 0ull;
   };
-  auto within2 = [&](int u, int v) {
-    if (adjacent(u, v)) {
-      return true;
-    }
-    const std::uint64_t *a =
+  // Distance at most 2: adjacent, or a shared neighbour. One row per vertex,
+  // so each later test is a bit read. The row includes the vertex itself
+  // when it has a neighbour; no query asks within2 of a vertex with itself.
+  std::vector<std::uint64_t> near2(bits.size(), 0);
+  for (int u = 0; u < nVertices; u++) {
+    std::uint64_t *dst =
+        near2.data() + static_cast<std::size_t>(u) * static_cast<std::size_t>(stride);
+    const std::uint64_t *self =
         bits.data() + static_cast<std::size_t>(u) * static_cast<std::size_t>(stride);
-    const std::uint64_t *b =
-        bits.data() + static_cast<std::size_t>(v) * static_cast<std::size_t>(stride);
     for (int w = 0; w < stride; w++) {
-      if ((a[w] & b[w]) != 0ull) {
-        return true;
+      dst[w] = self[w];
+    }
+    for (const int v : adjacency[static_cast<std::size_t>(u)]) {
+      if (v < 0 || v >= nVertices) {
+        continue;
+      }
+      const std::uint64_t *row =
+          bits.data() + static_cast<std::size_t>(v) * static_cast<std::size_t>(stride);
+      for (int w = 0; w < stride; w++) {
+        dst[w] |= row[w];
       }
     }
-    return false;
+  }
+  auto within2 = [&](int u, int v) {
+    const std::uint64_t *row =
+        near2.data() + static_cast<std::size_t>(u) * static_cast<std::size_t>(stride);
+    return ((row[static_cast<unsigned>(v) >> 6] >> (static_cast<unsigned>(v) & 63u)) &
+            1ull) != 0ull;
   };
   // The hop-2 oracle answers a shortcut of length 1 or 2. Other oracles
   // (and the legacy pair set) go through the shared predicate.
@@ -1159,6 +1175,8 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
       }
     }
     if (maxDepth >= 7) {
+      std::vector<std::pair<int, int>> lefts;
+      std::vector<std::pair<int, int>> rights;
       for (std::size_t pi = 0; pi < L3.size(); pi++) {
         const int p = L3[pi];
         const auto &ap = arms3[static_cast<std::size_t>(p)];
@@ -1171,8 +1189,29 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
             continue;
           }
           const auto &aq = arms3[static_cast<std::size_t>(q)];
-          for (const auto &left : ap) {
-            for (const auto &right : aq) {
+          // Tests that do not depend on the other arm. Applying them first
+          // drops every pair they would reject, and the rings that remain
+          // are emitted in the same order.
+          if (fast && minSize > 7) {
+            continue;
+          }
+          lefts.clear();
+          rights.clear();
+          for (const auto &arm : ap) {
+            if (fast && (adjacent(arm.first, p) || adjacent(arm.second, q) ||
+                         within2(arm.first, q))) {
+              continue;
+            }
+            lefts.push_back(arm);
+          }
+          for (const auto &arm : aq) {
+            if (fast && (adjacent(q, arm.first) || within2(p, arm.first))) {
+              continue;
+            }
+            rights.push_back(arm);
+          }
+          for (const auto &left : lefts) {
+            for (const auto &right : rights) {
               const int a = left.first;
               const int b = left.second;
               const int c = right.first;
@@ -1180,10 +1219,8 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
               if (a == c || b == d) {
                 continue;
               }
-              if (fast &&
-                  (minSize > 7 || adjacent(a, p) || adjacent(a, c) || adjacent(b, q) ||
-                   adjacent(p, d) || adjacent(q, c) || within2(a, q) || within2(a, d) ||
-                   within2(b, d) || within2(b, c) || within2(p, c))) {
+              if (fast && (adjacent(a, c) || adjacent(p, d) || within2(a, d) ||
+                           within2(b, d) || within2(b, c))) {
                 continue;
               }
               if (a < c) {
