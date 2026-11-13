@@ -413,14 +413,25 @@ void passFastStash(const double *xs, const double *ys, const double *zs,
   *overflowed = 0;
 #ifdef SEAMS_HAS_OPENMP
   if (ncz >= 2 && omp_get_max_threads() > 1) {
+    // A layer writes its own atoms and the next layer's. Layers of one
+    // parity therefore do not share an atom. When the length is odd the
+    // last layer's +z wraps onto layer 0, which is the same parity, so
+    // that layer runs alone after the others have stopped.
+    const int lastWraps = (ncz % 2) == 1;
+    const int nEven = ncz / 2;
 #pragma omp parallel for schedule(static)
-    for (int cz = 0; cz < ncz; cz += 2) {
-      halfZLayer(cz, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
+    for (int k = 0; k < nEven; ++k) {
+      halfZLayer(k * 2, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
                  counts, stash, overflowed);
     }
+    if (lastWraps) {
+      halfZLayer(ncz - 1, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
+                 counts, stash, overflowed);
+    }
+    const int nOdd = ncz / 2;
 #pragma omp parallel for schedule(static)
-    for (int cz = 1; cz < ncz; cz += 2) {
-      halfZLayer(cz, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
+    for (int k = 0; k < nOdd; ++k) {
+      halfZLayer(k * 2 + 1, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
                  counts, stash, overflowed);
     }
     return;
