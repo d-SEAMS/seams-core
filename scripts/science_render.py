@@ -34,7 +34,7 @@ CHILL = {
     0: ("cubic Ic", (0.000, 0.447, 0.698)),
     1: ("hexagonal Ih", (0.902, 0.624, 0.000)),
     3: ("interfacial", (0.941, 0.894, 0.259)),
-    2: ("liquid", (0.780, 0.780, 0.780)),
+    2: ("liquid", (0.900, 0.900, 0.900)),
     4: ("clathrate", (0.133, 0.533, 0.200)),
     5: ("interfacial clathrate", (0.533, 0.133, 0.333)),
 }
@@ -608,12 +608,25 @@ def contained_bonds(pos: np.ndarray, box: np.ndarray | None, mask: np.ndarray) -
     return np.array(kept, dtype=np.int32)
 
 
-def depth_cue(colours: np.ndarray, depth: np.ndarray, fade: float = 0.22) -> tuple[np.ndarray, np.ndarray]:
-    """Darken and report nearness. fade is how far the far atoms drop."""
+def depth_cue(
+    colours: np.ndarray,
+    depth: np.ndarray,
+    fade: float = 0.22,
+    tint: np.ndarray | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Report nearness. Far atoms darken, or blend toward a light tint.
+
+    The tint keeps the hue and lifts the far side toward the background.
+    It does not push the colour through black.
+    """
     span = float(depth.max() - depth.min())
     near = np.ones(len(depth)) if span < 1e-6 else 1.0 - (depth - depth.min()) / span
-    factor = (1.0 - fade) + fade * near
-    return colours * factor[:, None], near
+    if tint is None:
+        factor = (1.0 - fade) + fade * near
+        return colours * factor[:, None], near
+    amount = 0.55 + 0.45 * near
+    lifted = amount[:, None] * colours + (1.0 - amount[:, None]) * np.asarray(tint, dtype=float)
+    return lifted, near
 
 
 def scene(pos, chill, bonds, liquid_alpha: float, forward: np.ndarray):
@@ -861,6 +874,46 @@ def layer_rows(pos: np.ndarray, chill: np.ndarray, mask: np.ndarray, axis: np.nd
     return [] if best is None else best[1]
 
 
+def outlined_layers(pos: np.ndarray, mask: np.ndarray, axis: np.ndarray, shown: int) -> np.ndarray:
+    """Atoms in the first `shown` basal layers, the run outlined on panel (c)."""
+    chosen = np.flatnonzero(mask)
+    if shown <= 0 or chosen.size == 0:
+        return np.ones(pos.shape[0], dtype=bool)
+    projection = pos[chosen] @ unit(axis)
+    period = layer_period(projection)
+    bins = np.floor((projection - projection.min()) / period).astype(int)
+    order = [index for index in range(int(bins.min()), int(bins.max()) + 1) if np.any(bins == index)]
+    keep = set(order[:shown])
+    labels = -np.ones(pos.shape[0], dtype=int)
+    labels[chosen] = bins
+    return np.isin(labels, list(keep))
+
+
+def edge_on_view(pos: np.ndarray, mask: np.ndarray, axis: np.ndarray) -> np.ndarray:
+    """In-plane direction that lays the c-axis bands across the picture.
+
+    The camera looks along the short basal direction, so each stacking
+    layer is a horizontal band and the c-axis of panel (c) is vertical.
+    """
+    axis = unit(axis)
+    hint = np.array([1.0, 0.0, 0.0]) if abs(float(axis[0])) < 0.9 else np.array([0.0, 1.0, 0.0])
+    east = unit(np.cross(axis, hint))
+    north = unit(np.cross(axis, east))
+    pts = pos[mask]
+    relative = pts - pts.mean(axis=0)
+    best_width = -1.0
+    best = east
+    for degree in np.linspace(0.0, 180.0, 180, endpoint=False):
+        theta = math.radians(float(degree))
+        view = math.cos(theta) * east + math.sin(theta) * north
+        right = unit(np.cross(axis, view))
+        width = float(np.ptp(relative @ right))
+        if width > best_width:
+            best_width = width
+            best = view
+    return unit(best)
+
+
 def orient_nucleus(pos: np.ndarray, chill: np.ndarray, mask: np.ndarray):
     """Local c-axis vertical, view along [11-20], two layers through the centre.
 
@@ -905,11 +958,17 @@ def orient_nucleus(pos: np.ndarray, chill: np.ndarray, mask: np.ndarray):
         packed = pack(axis, view)
         best = packed if packed is not None else (0.0, [], unit(axis), unit(view), lattice)
     _score, rows, axis, view, sheet = best
-    # Tighten the view onto [11-20] without leaving the basal plane.
+    # Stay perpendicular to the c-axis. Prefer the in-plane direction that
+    # keeps the sheet's layer order aligned with panel (c).
     tightened = column_view(pos, sheet if int(sheet.sum()) > 12 else lattice, axis)
     repacked = pack(axis, tightened)
     if repacked is not None and repacked[0] + 0.02 >= best[0]:
         _score, rows, axis, view, sheet = repacked
+    else:
+        # The purity-maximising view is already perpendicular to the c-axis,
+        # so the layers of (c) are horizontal bands.
+        view = view - axis * float(view @ axis)
+        view = unit(view)
     if axis[2] < 0.0:
         axis = -axis
     print("nucleus c-axis", np.round(axis, 3), flush=True)
@@ -991,24 +1050,29 @@ def render_molecule(pos, chill, bonds, forward, up, png, half_h, half_v, width_p
     colours = np.array([CHILL.get(int(code), ("other", (0.5, 0.5, 0.5)))[1] for code in chill])
     # The nucleus fades the far side of the lattice so the near stacking
     # planes stay readable. The slab keeps a mild depth cue.
-    # Far atoms get darker, never lighter. On the nucleus they also shrink.
-    colours, near = depth_cue(colours, pos @ forward, 0.62 if nucleus else 0.22)
+    # The slab darkens slightly with depth. The nucleus blends far atoms
+    # toward the white page, so a far cubic stays blue rather than navy,
+    # and shrinks them.
+    if nucleus:
+        colours, near = depth_cue(colours, pos @ forward, tint=np.array([0.94, 0.94, 0.95]))
+    else:
+        colours, near = depth_cue(colours, pos @ forward, 0.22)
     particles.create_property("Color", data=np.clip(colours, 0.0, 1.0))
     liquid = np.isin(chill, [2])
     guest = np.isin(chill, [4, 5])
     transparency = np.zeros(pos.shape[0])
     transparency[liquid] = 1.0 - liquid_alpha
-    transparency[guest] = 0.15
+    transparency[guest] = 0.0
     radius = np.full(pos.shape[0], ATOM_RADIUS)
     if nucleus:
-        radius *= 0.55 + 0.45 * near
+        radius *= 0.58 + 0.42 * near
     particles.create_property("Transparency", data=transparency)
     particles.create_property("Radius", data=radius)
     if bonds is not None and len(bonds):
         bond_data = particles.create_bonds()
         bond_data.create_property("Topology", data=np.ascontiguousarray(bonds, dtype=np.int32))
-        bond_data.vis.width = BOND_WIDTH
-        bond_data.vis.color = (0.10, 0.10, 0.10)
+        bond_data.vis.width = 0.10 if nucleus else BOND_WIDTH
+        bond_data.vis.color = (0.62, 0.62, 0.62) if nucleus else (0.10, 0.10, 0.10)
         bond_data.vis.coloring_mode = BondsVis.ColoringMode.Uniform
     data.objects.append(particles)
     particles.vis.radius = ATOM_RADIUS
@@ -1251,7 +1315,7 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
     _centre, half_h, half_v, forward, _right, up = project(slab_pos, forward, up)
     slab_px = int(round(72.0 / 25.4 * PRINT_DPI))
     slab_png = work / "slab.png"
-    render_molecule(slab_pos, slab_chill, slab_bonds, forward, up, slab_png, half_h, half_v, slab_px, 0.42)
+    render_molecule(slab_pos, slab_chill, slab_bonds, forward, up, slab_png, half_h, half_v, slab_px, 0.40)
     slab = {"png": slab_png, "half_h": half_h, "half_v": half_v}
 
     n_frames = count_frames(nucleus_dump)
@@ -1273,19 +1337,36 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
     orient_rows = {}
     for label, (npos, nchill, extended, raw, raw_box) in loaded.items():
         sheet, view, axis, orient_rows[label] = orient_nucleus(npos, nchill, extended)
+        # Bonds only inside the outlined run of panel (c). Atoms with no
+        # bond in that run are strays and are not drawn.
+        kinds_now = layer_kinds(npos, nchill, extended, axis)
+        sheet_kinds = [kind for kind, _purity, count in orient_rows[label] if count >= 4]
+        shown_now = 0
+        for full_kind, sheet_kind in zip(kinds_now, sheet_kinds):
+            if full_kind != sheet_kind:
+                break
+            shown_now += 1
+        outlined = outlined_layers(npos, extended & np.isin(nchill, [0, 1]), axis, shown_now)
+        sheet = sheet & outlined
         bonds = ice_bonds(raw, raw_box, sheet, 3.5)
         if len(bonds):
             straight = np.linalg.norm(npos[bonds[:, 1]] - npos[bonds[:, 0]], axis=1)
             bonds = bonds[straight < 3.5]
-        degree = np.bincount(bonds.ravel(), minlength=npos.shape[0]) if len(bonds) else np.zeros(1, dtype=int)
-        if int(degree.max()) > 4:
+        degree = np.bincount(bonds.ravel(), minlength=npos.shape[0]) if len(bonds) else np.zeros(npos.shape[0], dtype=int)
+        if degree.size and int(degree.max()) > 4:
             raise SystemExit("a water molecule was given more than 4 bonds")
+        linked = degree > 0
+        sheet = sheet & linked
+        if len(bonds):
+            keep_bond = linked[bonds[:, 0]] & linked[bonds[:, 1]]
+            bonds = bonds[keep_bond]
         drawn = npos[sheet]
         drawn_chill = nchill[sheet]
         remap = -np.ones(npos.shape[0], dtype=int)
         remap[np.flatnonzero(sheet)] = np.arange(int(sheet.sum()))
         if len(bonds):
             bonds = np.stack([remap[bonds[:, 0]], remap[bonds[:, 1]]], axis=1)
+        print(f"  {label} drawn {int(sheet.sum())} bonds {len(bonds)}", flush=True)
         prepared[label] = (drawn, drawn_chill, bonds, view, axis)
         clouds[label] = (npos, nchill, extended, view, axis)
     def raw_half(label: str) -> tuple[float, float]:
