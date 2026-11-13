@@ -695,6 +695,11 @@ test('cycless_pentagon', find_program('python3'),
          meson.project_build_root() / 'src' / 'libseams.so'],
   workdir: meson.project_source_root(),
   timeout: 120)
+test('ovito_chill_atoms', find_program('python3'),
+  args: [files('test_ovito_chill_atoms.py'),
+         meson.project_build_root() / 'src' / 'libseams.so'],
+  workdir: meson.project_source_root(),
+  timeout: 180)
 test('ovito_ring_counts', find_program('python3'),
   args: [files('test_ovito_ring_counts.py'),
          meson.project_build_root() / 'tests' / 'bench_ring_ic'],

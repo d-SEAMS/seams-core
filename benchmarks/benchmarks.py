@@ -1050,3 +1050,48 @@ class H2HCages:
 
 H2HCages.time_check.repeat = 1
 H2HCages.time_check.number = 1
+
+
+class H2HPaperReview:
+    """One serial ring census. asv repeats it eight times."""
+
+    def setup(self):
+        import importlib.util
+
+        so = ROOT / "bbdir-release" / "src" / "libseams.so"
+        if not so.is_file():
+            raise NotImplementedError("bbdir-release/src/libseams.so is not built")
+        script = ROOT / "scripts" / "h2h_paper_review.py"
+        spec = importlib.util.spec_from_file_location("h2h_paper_review", script)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self._module = module
+        self._lib = module.load_seams(module.library_path())
+        module.bind_rings(self._lib)
+        self._lib.seams_set_num_threads(1)
+
+    def time_check(self):
+        import ctypes
+
+        pos, lengths = self._module.ice_positions(2)
+        held = self._module.frame_system(self._lib, pos, lengths)
+        rings = ctypes.c_void_p()
+        self._module.require(
+            self._lib,
+            self._lib.seams_rings_find(held, 3.5, 1, 0, 6, ctypes.byref(rings)),
+            "rings",
+        )
+        hist = (ctypes.c_int * 7)()
+        self._module.require(
+            self._lib,
+            self._lib.seams_rings_histogram(rings, hist, 7),
+            "histogram",
+        )
+        if int(hist[6]) <= 0:
+            raise RuntimeError("ice hexagon count")
+        self._lib.seams_rings_destroy(rings)
+        self._lib.seams_system_destroy(held)
+
+
+H2HPaperReview.time_check.repeat = 1
+H2HPaperReview.time_check.number = 8

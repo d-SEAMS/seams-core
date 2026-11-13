@@ -1815,6 +1815,57 @@ seams_status seams_q6bar(seams_system *sys, double cutoff, int type, double ice_
   }
 }
 
+// Cutoff graph as the CSR the ring search already uses, plus the index
+// rows the cage walk wants (self first, then neighbours). Skips the
+// atom-ID round trip in neighListO. Returns false when the box cannot
+// use that list or the frame mixes types.
+bool cutoff_csr_graph(const Cloud &work, double cutoff, int typ,
+                      std::vector<std::vector<int>> &idx,
+                      std::vector<std::vector<int>> &rings, int depth) {
+  if (work.nop <= 0) {
+    idx.clear();
+    rings.clear();
+    return true;
+  }
+  // The tilted cell list does not feed the same pairs as neighListO.
+  // Keep that builder for triclinic frames.
+  if (work.box.size() != 3) {
+    return false;
+  }
+  for (int i = 0; i < work.nop; ++i) {
+    if (work.pts[static_cast<std::size_t>(i)].type != typ) {
+      return false;
+    }
+  }
+  std::vector<int> offsets;
+  std::vector<int> cols;
+  if (!nneigh::orthoFullCsr(work, nullptr, cutoff, offsets, cols, false)) {
+    return false;
+  }
+  idx.assign(static_cast<std::size_t>(work.nop), {});
+  const int rows = static_cast<int>(offsets.size()) - 1;
+  for (int i = 0; i < work.nop && i < rows; ++i) {
+    const int a = offsets[static_cast<std::size_t>(i)];
+    const int b = offsets[static_cast<std::size_t>(i + 1)];
+    auto &row = idx[static_cast<std::size_t>(i)];
+    row.reserve(static_cast<std::size_t>(std::max(0, b - a) + 1));
+    row.push_back(i);
+    for (int k = a; k < b; ++k) {
+      row.push_back(cols[static_cast<std::size_t>(k)]);
+    }
+  }
+  // One thread is faster on the packed rows. A team is faster on the
+  // per-atom vectors, which is the layout the command uses.
+#ifdef SEAMS_HAS_OPENMP
+  const bool packed = omp_in_parallel() || omp_get_max_threads() <= 1;
+#else
+  const bool packed = true;
+#endif
+  rings = packed ? primitive::ringNetwork(offsets, cols, depth)
+                 : primitive::ringNetwork(idx, depth);
+  return true;
+}
+
 seams_status seams_cages_find(seams_system *sys, double cutoff, int type, int graph, int k,
                               int complete, seams_cage_set **out) {
   handle_guard guard(sys);
@@ -1874,8 +1925,14 @@ seams_status seams_cages_find(seams_system *sys, double cutoff, int type, int gr
         ddc[static_cast<std::size_t>(i)] = aff.ddc[static_cast<std::size_t>(i)];
       }
     } else {
-      auto rows = bond_rows(work, cutoff, typ, graph);
-      auto idx = nneigh::neighbourListByIndex(work, rows);
+      std::vector<std::vector<int>> idx;
+      std::vector<std::vector<int>> found_rings;
+      const bool csr = graph == SEAMS_GRAPH_CUTOFF &&
+                       cutoff_csr_graph(work, cutoff, typ, idx, found_rings, 6);
+      if (!csr) {
+        auto rows = bond_rows(work, cutoff, typ, graph);
+        idx = nneigh::neighbourListByIndex(work, rows);
+      }
       if (static_cast<int>(idx.size()) < n) {
         idx.resize(static_cast<std::size_t>(n));
       }
@@ -1887,7 +1944,10 @@ seams_status seams_cages_find(seams_system *sys, double cutoff, int type, int gr
           ddc[static_cast<std::size_t>(i)] = counts.atomDdc[static_cast<std::size_t>(i)] != 0;
         }
       } else {
-        auto six = six_of(ring::contractibleRings(primitive::ringNetwork(idx, 6), work));
+        if (!csr) {
+          found_rings = primitive::ringNetwork(idx, 6);
+        }
+        auto six = six_of(ring::contractibleRings(found_rings, work));
         flags_from_affiliation(n, six, ring::cageAffiliation(six, idx), hc, ddc);
       }
     }
@@ -1971,13 +2031,29 @@ seams_status seams_cages_signature(seams_system *sys, double cutoff, int type, i
   }
   try {
     use_threads();
-    int typ = 1;
-    Cloud work = unified_copy(sys->cloud, type, typ);
-    auto rows = bond_rows(work, cutoff, typ, graph);
-    auto idx = nneigh::neighbourListByIndex(work, rows);
+    // A type filter that keeps every atom is the frame itself. Copying the
+    // cloud copies its atom-id map, and that copy is what made the library
+    // call slower than the command on a wide run.
+    int typ = type > 0 ? type : 1;
+    Cloud copied;
+    const Cloud *held = &sys->cloud;
+    if (type <= 0) {
+      copied = unified_copy(sys->cloud, type, typ);
+      held = &copied;
+    }
+    const Cloud &work = *held;
     const auto signature = cage::Signature::parse(spec);
     const int depth = std::max(signature.maxRingSize(), 3);
-    const auto rings = ring::cageRings(primitive::ringNetwork(idx, depth), work, cutoff);
+    std::vector<std::vector<int>> idx;
+    std::vector<std::vector<int>> found_rings;
+    const bool csr = graph == SEAMS_GRAPH_CUTOFF &&
+                     cutoff_csr_graph(work, cutoff, typ, idx, found_rings, depth);
+    if (!csr) {
+      auto rows = bond_rows(work, cutoff, typ, graph);
+      idx = nneigh::neighbourListByIndex(work, rows);
+      found_rings = primitive::ringNetwork(idx, depth);
+    }
+    const auto rings = ring::cageRings(found_rings, work, cutoff);
     const auto window = cage::parseEdgeWindow("");
     std::vector<std::array<double, 3>> xyz(static_cast<std::size_t>(std::max(work.nop, 0)));
     for (int i = 0; i < work.nop; ++i) {
