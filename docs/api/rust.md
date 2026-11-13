@@ -14,7 +14,16 @@ let (six, fraction) = sys.six_ring_fraction(3.5)?;
 
 `set_frame` takes the nine-number cell, including a non-zero tilt.
 `seams::set_num_threads`, `seams::num_threads`, and `seams::version` match the C API.
-`seams::Error` carries the status `code` and the `message` from `seams_last_error`.
+`seams::Error` carries the status `code` and the `message` from `seams_handle_error`.
+`System::read` loads XYZ, CON, chemfiles, and triclinic dumps.
+`chill`, `steinhardt` (including the Lechner-Dellago average), `cages`,
+`signature_cages`, `knn`, `rdf`, `running_cn`, `coordination`, `hbonds`,
+`density_axis`, `fingerprint`, `contact_pairs`, `domains`, `prisms`,
+`monolayer`, `rings` with `vertices`, and `site_table` are the remaining
+safe wrappers. `Neighbours`, `Rings`, `Cages`, and `Fingerprint` free their
+handles on drop. `bindings/rust/seams/tests/cpp_match.rs` checks those
+values against the C++ path on ice Ih, sI, the XYZ file, the CON file,
+and the triclinic sH dump.
 `System::count` is the number of points in the frame.
 `bindings/rust/seams/tests/ice.rs` is the `cargo test` that calls every
 safe wrapper. `meson test docs_api_rust` runs that test.
@@ -165,6 +174,266 @@ Purpose: Library version text.
 Parameters: none
 
 Units: text
+
+Example: `docs/examples/minimal_rust.rs`
+
+### Neighbours
+
+Purpose: Owned neighbour-list handle.
+
+Parameters: none
+
+Units: handle
+
+Example: `docs/examples/minimal_rust.rs`
+
+### nnz
+
+Purpose: Number of neighbour pairs, omitting self.
+
+Parameters: self
+
+Units: dimensionless count
+
+Example: `docs/examples/minimal_rust.rs`
+
+### Rings
+
+Purpose: Owned primitive-ring handle.
+
+Parameters: none
+
+Units: handle
+
+Example: `docs/examples/minimal_rust.rs`
+
+### vertices
+
+Purpose: Atom indices of one ring.
+
+Parameters: index
+
+Units: dimensionless indices
+
+Example: `docs/examples/minimal_rust.rs`
+
+### Cages
+
+Purpose: Owned hexagonal and double-diamond membership.
+
+Parameters: none
+
+Units: handle
+
+Example: `docs/examples/minimal_rust.rs`
+
+### counts
+
+Purpose: Disjoint hexagonal, cubic, water, and both counts.
+
+Parameters: self
+
+Units: dimensionless counts
+
+Example: `docs/examples/minimal_rust.rs`
+
+### Fingerprint
+
+Purpose: Owned topological fingerprint.
+
+Parameters: none
+
+Units: handle
+
+Example: `docs/examples/minimal_rust.rs`
+
+### key
+
+Purpose: Frame fingerprint text.
+
+Parameters: self
+
+Units: text
+
+Example: `docs/examples/minimal_rust.rs`
+
+### rings
+
+Purpose: Primitive-ring census stored on a fingerprint, or a new ring handle.
+
+Parameters: cutoff; max_depth
+
+Units: cutoff in angstrom; sizes are dimensionless
+
+Example: `docs/examples/minimal_rust.rs`
+
+### read
+
+Purpose: Load one frame from a trajectory path.
+
+Parameters: path; frame; type_filter
+
+Units: frame index is 1-based; coordinates in angstrom
+
+Example: `docs/examples/minimal_rust.rs`
+
+### chill
+
+Purpose: Original CHILL labels and nine population counts.
+
+Parameters: cutoff; type_filter; graph; rule
+
+Units: cutoff in angstrom; codes are dimensionless
+
+Example: `docs/examples/minimal_rust.rs`
+
+### steinhardt
+
+Purpose: Local q_l and, on request, the Lechner-Dellago average.
+
+Parameters: cutoff; order; average
+
+Units: cutoff in angstrom; q_l is dimensionless
+
+Example: `docs/examples/minimal_rust.rs`
+
+### knn
+
+Purpose: k-nearest neighbour list.
+
+Parameters: k; cutoff; mutual
+
+Units: cutoff in angstrom; k is a dimensionless count
+
+Example: `docs/examples/minimal_rust.rs`
+
+### cages
+
+Purpose: Hexagonal and double-diamond cage membership.
+
+Parameters: cutoff; graph; k; complete
+
+Units: cutoff in angstrom; codes are dimensionless
+
+Example: `docs/examples/minimal_rust.rs`
+
+### signature_cages
+
+Purpose: Closed cages whose ring census matches a signature.
+
+Parameters: cutoff; graph; spec
+
+Units: cutoff in angstrom; counts are dimensionless
+
+Example: `docs/examples/minimal_rust.rs`
+
+### rdf
+
+Purpose: Partial radial distribution and the cell volume.
+
+Parameters: rmax; bins
+
+Units: rmax in angstrom; g is dimensionless; volume in cubic angstrom
+
+Example: `docs/examples/minimal_rust.rs`
+
+### running_cn
+
+Purpose: Running coordination number along the partial RDF.
+
+Parameters: rmax; bins
+
+Units: rmax in angstrom; coordination is dimensionless
+
+Example: `docs/examples/minimal_rust.rs`
+
+### coordination
+
+Purpose: Coordination number integrated to rmax.
+
+Parameters: rmax; bins
+
+Units: rmax in angstrom; coordination is dimensionless
+
+Example: `docs/examples/minimal_rust.rs`
+
+### hbonds
+
+Purpose: Hydrogen-bond count.
+
+Parameters: cutoff; oxygen_type; hydrogen_type; dist; angle
+
+Units: distances in angstrom; angle in degrees; count is dimensionless
+
+Example: `docs/examples/minimal_rust.rs`
+
+### density_axis
+
+Purpose: Number density along one cell axis.
+
+Parameters: type_filter; bins; axis
+
+Units: density in inverse cubic angstrom; centres in angstrom
+
+Example: `docs/examples/minimal_rust.rs`
+
+### fingerprint
+
+Purpose: Topological fingerprint of the bonded graph.
+
+Parameters: cutoff; hops
+
+Units: cutoff in angstrom; hops is a dimensionless depth
+
+Example: `docs/examples/minimal_rust.rs`
+
+### contact_pairs
+
+Purpose: Mutual nearest unlike contacts of a site table.
+
+Parameters: spec
+
+Units: dimensionless counts
+
+Example: `docs/examples/minimal_rust.rs`
+
+### domains
+
+Purpose: Largest polar or apolar domain.
+
+Parameters: cutoff; spec; subset
+
+Units: cutoff in angstrom; percolation is dimensionless
+
+Example: `docs/examples/minimal_rust.rs`
+
+### prisms
+
+Purpose: Perfect and imperfect prism counts by ring size.
+
+Parameters: cutoff
+
+Units: cutoff in angstrom; counts are dimensionless
+
+Example: `docs/examples/minimal_rust.rs`
+
+### monolayer
+
+Purpose: Primitive-ring histogram of a monolayer.
+
+Parameters: cutoff; max_depth; sheet_area
+
+Units: cutoff in angstrom; area in square angstrom
+
+Example: `docs/examples/minimal_rust.rs`
+
+### site_table
+
+Purpose: Per-atom site kind from a site-table spec.
+
+Parameters: spec
+
+Units: dimensionless site codes
 
 Example: `docs/examples/minimal_rust.rs`
 <!-- API_SYMBOLS_END -->

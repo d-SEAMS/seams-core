@@ -45,8 +45,13 @@ positions and the nine-number box. `dseams.from_mdanalysis(universe)` reads
 calls (`chill_plus`, `q4q6`, `neighbours`, `rings`, `Frame`) use `libseams`.
 
 `meson test docs_api_python` runs the eight-atom program below. It calls
-`dseams.chill_plus` and `dseams.q4q6` when the nanobind module imports, and
-the same `libseams` functions through ctypes otherwise.
+`dseams.chill_plus` and `dseams.q4q6` when the nanobind module imports.
+The ctypes fallback calls those two and also `seams_system_read`,
+`seams_chill`, `seams_steinhardt`, `seams_cages`, `seams_signature_cages`,
+`seams_neighbours_knn`, `seams_rdf`, `seams_running_cn`, `seams_coordination`,
+`seams_hbonds`, `seams_density_axis`, `seams_fingerprint`,
+`seams_contact_pairs`, `seams_domains`, `seams_prisms`, `seams_monolayer`,
+`seams_rings_vertices`, and `seams_site_table`.
 `meson test python_dseams` runs `bindings/python/tests/test_dseams.py`.
 `tests/test_frames_abi.py` is the `frames_abi` check inside
 `tests/run_language_fronts.sh` (`meson test language_fronts`).
