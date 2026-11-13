@@ -185,7 +185,11 @@ int main(int argc, char **argv) {
     hc = ring::findHC(six, ringType, idx, cages, index);
     ddc = ring::findDDC(six, ringType, hc, cages, index);
     f = cage::findBySignatures(kept, idx, sigs, rank, &xyz, &yCloud.box);
-    bestBoth = std::min(bestBoth, msSince(t0));
+    const double bothMs = msSince(t0);
+    bestBoth = std::min(bestBoth, bothMs);
+    // One line per repetition so a median can be taken. sample_ms stays
+    // the minimum, which is what earlier logs recorded.
+    std::cout << "both_sample_ms " << bothMs << "\n";
     finger = fingerprint(cages, f);
 
     t0 = std::chrono::steady_clock::now();

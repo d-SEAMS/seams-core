@@ -19,6 +19,5 @@ cp "$root/topol.top" "$root/md.mdp" "$work/"
     OMP_NUM_THREADS=1 GMX_MAXBACKUP=-1 \
     gmx mdrun -s ice.tpr -deffnm ice -nsteps 4 -ntmpi 1
 )
-env -u LIBRARY_PATH \
-  LD_LIBRARY_PATH="$libdir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
+env -u LIBRARY_PATH LD_LIBRARY_PATH="$libdir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
   "$tool" -f "$work/ice.xtc" -cutoff 3.5

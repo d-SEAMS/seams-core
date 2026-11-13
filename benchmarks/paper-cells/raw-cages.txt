@@ -1,0 +1,19 @@
+cores 8
+affinity 0-7
+threads 8
+warmup 1
+n 8
+census scripts/rerun_main_text.py
+archive argument is input/traj/genice_sI.lammpstrj; the release tarball is not in this checkout
+match	sI 512	expected 2	got 2	genice_sI.lammpstrj
+match	sI 51262	expected 6	got 6	genice_sI.lammpstrj
+match	sI 51264	expected 0	got 0	genice_sI.lammpstrj
+match	sI 51268	expected 0	got 0	genice_sI.lammpstrj
+match	sII 512	expected 16	got 16	genice_sII.lammpstrj
+match	sII 51264	expected 8	got 8	genice_sII.lammpstrj
+match	sII 51262	expected 0	got 0	genice_sII.lammpstrj
+match	sII 51268	expected 0	got 0	genice_sII.lammpstrj
+d-SEAMS sI molecules 46 clathrate 5:12=2 5:12,6:2=6 5:12,6:4=0 median_ms 0.244926 iqr_ms 0.018501 samples 0.232512 0.232541 0.241630 0.235660 0.248223 0.259067 0.251486 0.271645
+ClavisCage 0.3.18 TRACE 512=1 51262=0 51264=0 sI median_ms 51.695929 iqr_ms 0.197635 samples 51.748267 51.642648 51.770620 52.378343 51.643592 51.856540 51.076896 51.449918
+d-SEAMS sII molecules 136 clathrate 5:12=16 5:12,6:2=0 5:12,6:4=8 median_ms 0.405405 iqr_ms 0.008787 samples 0.404633 0.417333 0.405361 0.405449 0.392244 0.397628 0.409781 0.463679
+ClavisCage 0.3.18 TRACE 512=16 51262=0 51264=8 sII median_ms 69.833965 iqr_ms 0.914700 samples 69.348896 69.376946 73.787535 69.917642 70.115496 69.522708 71.257383 69.750288

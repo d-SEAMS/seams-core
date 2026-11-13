@@ -1,0 +1,20 @@
+date_utc 2026-11-12 01:46:11
+nproc 8
+warmup 1 then mean of 4, cutoff 3.5
+old is e943930a, new is the release walk plus the first-touch counts skip
+OLD threads=1 n=110592 tilt=0 pairs=442368 ms=24.5563 digest=647177f805d1e1c6
+NEW threads=1 n=110592 tilt=0 pairs=442368 ms=25.3337 digest=647177f805d1e1c6
+OLD threads=1 n=110592 tilt=1 pairs=442368 ms=24.717 digest=647177f805d1e1c6
+NEW threads=1 n=110592 tilt=1 pairs=442368 ms=24.7307 digest=647177f805d1e1c6
+OLD threads=1 n=884736 tilt=0 pairs=3538944 ms=230.071 digest=ba88eb7da3372fc6
+NEW threads=1 n=884736 tilt=0 pairs=3538944 ms=231.228 digest=ba88eb7da3372fc6
+OLD threads=1 n=884736 tilt=1 pairs=3538944 ms=294.983 digest=ba88eb7da3372fc6
+NEW threads=1 n=884736 tilt=1 pairs=3538944 ms=242.779 digest=ba88eb7da3372fc6
+OLD threads=8 n=110592 tilt=0 pairs=442368 ms=5.98655 digest=647177f805d1e1c6
+NEW threads=8 n=110592 tilt=0 pairs=442368 ms=6.50228 digest=647177f805d1e1c6
+OLD threads=8 n=110592 tilt=1 pairs=442368 ms=7.10739 digest=647177f805d1e1c6
+NEW threads=8 n=110592 tilt=1 pairs=442368 ms=6.45836 digest=647177f805d1e1c6
+OLD threads=8 n=884736 tilt=0 pairs=3538944 ms=31.3796 digest=ba88eb7da3372fc6
+NEW threads=8 n=884736 tilt=0 pairs=3538944 ms=32.2403 digest=ba88eb7da3372fc6
+OLD threads=8 n=884736 tilt=1 pairs=3538944 ms=42.4534 digest=ba88eb7da3372fc6
+NEW threads=8 n=884736 tilt=1 pairs=3538944 ms=33.4887 digest=ba88eb7da3372fc6

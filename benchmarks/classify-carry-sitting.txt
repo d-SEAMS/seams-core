@@ -1,0 +1,35 @@
+cores=8
+repeats=8 warmup=1 quantile=type-7
+ptm_cubic=PTM_MATCH_DCUB:6 templates=ptm_template_dcub,ptm_template_dcub_alt1 neighbours=16
+ptm_hexagonal=PTM_MATCH_DHEX:7 templates=ptm_template_dhex,alt1,alt2,alt3 neighbours=16
+ptm_default=PTM_CHECK_DEFAULT excludes DCUB and DHEX; OVITO leaves both disabled
+labels frame=ideal-Ic n=110592 label=1 count=110592
+symmetry threads=1 code=dseams molecules=110592 median_ms=24.7224 iqr_ms=0.6852 samples_ms=25.4986 24.9788 24.9921 24.6729 24.7720 24.3200 24.2277 23.8235
+symmetry threads=1 code=ptm molecules=110592 median_ms=2921.5990 iqr_ms=43.9128 samples_ms=2927.7901 2920.2309 2999.2025 2922.9670 2988.0137 2896.6142 2899.7062 2880.1395
+labels frame=gaussian-Ic n=110592 label=1 count=110592
+labels frame=ideal-Ih n=6912 label=0 count=6912
+labels frame=ideal-Ic n=110592 label=1 count=110592
+symmetry threads=8 code=dseams molecules=110592 median_ms=6.9923 iqr_ms=1.2486 samples_ms=7.8596 8.1082 7.6304 6.1427 6.4399 6.4365 7.0917 6.8929
+symmetry threads=8 code=ptm molecules=110592 median_ms=2764.4715 iqr_ms=76.6703 samples_ms=2920.5199 2870.9670 2774.3120 2793.5394 2754.6310 2738.3127 2729.9657 2723.3051
+labels frame=gaussian-Ic n=110592 label=1 count=110592
+labels frame=ideal-Ih n=6912 label=0 count=6912
+ql threads=8 molecules=1000 l=4 median_ms=0.1984 iqr_ms=0.0080 samples_ms=0.2292 0.1980 0.2046 0.1934 0.1987 0.1930 0.2003 0.1904
+ql threads=8 molecules=1000 l=6 median_ms=0.2055 iqr_ms=0.0217 samples_ms=0.2190 0.2198 0.2074 0.1974 0.2422 0.1976 0.1920 0.2036
+ql threads=8 molecules=10648 l=4 median_ms=0.8550 iqr_ms=0.4927 samples_ms=1.1233 0.8559 0.8350 0.8541 0.8413 14.4447 1.9596 0.8201
+ql threads=8 molecules=10648 l=6 median_ms=0.7991 iqr_ms=0.0454 samples_ms=0.9943 0.7879 0.7937 0.8434 0.8045 0.8230 0.7670 0.7456
+ql threads=8 molecules=110592 l=4 median_ms=6.3479 iqr_ms=0.6927 samples_ms=7.4610 6.5488 6.1471 6.7067 6.6949 6.0653 5.7362 5.8247
+ql threads=8 molecules=110592 l=6 median_ms=5.2447 iqr_ms=0.5531 samples_ms=5.3508 5.4636 5.7765 4.6859 5.7203 4.9658 5.1386 4.9776
+traj_sample 1 steady ringFull_ms 3.247 ringInc_ms 3.198 affilBatch_ms 1.698 affilInc_ms 1.781 allEqual yes
+traj_sample 2 steady ringFull_ms 3.295 ringInc_ms 3.219 affilBatch_ms 1.776 affilInc_ms 1.842 allEqual yes
+traj_sample 3 steady ringFull_ms 3.353 ringInc_ms 3.319 affilBatch_ms 1.862 affilInc_ms 1.883 allEqual yes
+traj_sample 4 steady ringFull_ms 3.242 ringInc_ms 3.291 affilBatch_ms 1.795 affilInc_ms 1.800 allEqual yes
+traj_sample 5 steady ringFull_ms 3.154 ringInc_ms 3.133 affilBatch_ms 1.711 affilInc_ms 1.789 allEqual yes
+traj_sample 6 steady ringFull_ms 3.110 ringInc_ms 3.100 affilBatch_ms 1.674 affilInc_ms 1.790 allEqual yes
+traj_sample 7 steady ringFull_ms 3.231 ringInc_ms 3.241 affilBatch_ms 1.741 affilInc_ms 1.828 allEqual yes
+traj_sample 8 steady ringFull_ms 3.208 ringInc_ms 3.176 affilBatch_ms 1.790 affilInc_ms 1.799 allEqual yes
+traj_median ring_full_ms=3.2365 ring_carry_ms=3.2085 ring_speedup=1.0087 cage_full_ms=1.7585 cage_carry_ms=1.7995 cage_speedup=0.9772 both_speedup=0.9974 identical=yes
+cages phase=sI molecules=46 dseams=(2, 6, 0) clavis=(1, 0, 0) identical=False dseams_median_ms=0.1624 note=TRACE cutoff 0.35 nm and angle 35 degrees. Hydrogens sit 0.96 A along an out-degree-2 orientation of the four nearest oxygen neighbours
+cages phase=sII molecules=136 dseams=(16, 0, 8) clavis=(16, 0, 8) identical=True dseams_median_ms=0.6969 note=TRACE cutoff 0.35 nm and angle 35 degrees. Hydrogens sit 0.96 A along an out-degree-2 orientation of the four nearest oxygen neighbours
+
+profile library-timer ideal-Ic n=110592 bonds_ms=8.580 label_ms=2.497 fit_ms=0.772 recover_ms=0.295 total_ms=12.144
+profile perf_event=no-samples

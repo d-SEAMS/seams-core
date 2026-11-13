@@ -404,7 +404,7 @@ bool orthoFullCsr(
     const std::vector<int> *subset, double rcutoff, std::vector<int> &offsets,
     std::vector<int> &cols, bool half = false,
     std::vector<std::vector<int>> *directRows = nullptr, const int *indexToID = nullptr,
-    bool *wroteRows = nullptr);
+    bool *wroteRows = nullptr, bool branchy = false);
 
 //! Same rows as neighListO, written into @a rows. A row keeps the capacity
 //! of the previous call, so a repeated frame does not allocate per atom.
@@ -477,6 +477,13 @@ std::vector<std::vector<int>> halfIdRowsFromCsr(
 //! when OpenMP is compiled, vesin cell list, brute-force fallback)
 //! You can only use this for neighbour lists with one type
 std::vector<std::vector<int>> neighListO(
+    double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+    int typeI);
+
+//! Cutoff rows from the threaded linkcell list. Empty when linkcell is not
+//! built or the call fails; the caller then uses neighListO. The width is
+//! the OpenMP team, and the OpenMP team is left running.
+std::vector<std::vector<int>> neighListLinkcell(
     double rcutoff, const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     int typeI);
 

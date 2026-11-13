@@ -74,7 +74,7 @@ pixi run build
 
 Either path produces ~libyodaLib~, ~libseams~, and the ~seams~ CLI.
 ~-Dwith_python=true~ (the Meson default) also builds ~import dseams~.
-Lua stays in yodaStruct.
+~-Dwith_lua=auto~ builds ~require("dseams")~ when Lua 5.4 or LuaJIT is present.
 
 * Read a frame
 

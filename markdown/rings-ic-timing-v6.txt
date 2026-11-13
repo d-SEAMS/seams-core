@@ -1,0 +1,73 @@
+cores 8
+samples 8
+warmup 1
+serial 1
+depth 10
+# one job at a time; online processors from /proc/cpuinfo
+# nucleation is the 6x6x6 tile, interface is the 16x8x8 tile
+
+# phase sample, nucleation, clocks on, not part of the medians below
+# 1 thread wall: balls 558.205 enum 13956.257 merge 0.869
+# 1 thread: levels 3378.925 paths 3052.442 pairs 7275.356 sort 113.428
+# 8 thread wall: balls 140.944 enum 2485.704 merge 54.892
+# 8 thread cpu sums: levels 3440.967 paths 3128.187 pairs 11624.876 sort 116.713
+
+sample tool dseams nucleation threads 1 total_ms 15210.039
+sample tool dseams nucleation threads 1 total_ms 15184.707
+sample tool dseams nucleation threads 1 total_ms 14978.759
+sample tool dseams nucleation threads 1 total_ms 14886.902
+sample tool dseams nucleation threads 1 total_ms 15138.925
+sample tool dseams nucleation threads 1 total_ms 15177.579
+sample tool dseams nucleation threads 1 total_ms 14974.359
+sample tool dseams nucleation threads 1 total_ms 14924.066
+summary tool dseams nucleation threads 1 median_ms 15138.925 rings 2201040 n4 193320 n5 606528 n6 736344 n7 426168 n8 77544 n9 14256 n10 432
+
+sample tool dseams nucleation threads 8 total_ms 2278.327
+sample tool dseams nucleation threads 8 total_ms 2214.270
+sample tool dseams nucleation threads 8 total_ms 2226.528
+sample tool dseams nucleation threads 8 total_ms 2152.146
+sample tool dseams nucleation threads 8 total_ms 2158.246
+sample tool dseams nucleation threads 8 total_ms 2144.033
+sample tool dseams nucleation threads 8 total_ms 2152.267
+sample tool dseams nucleation threads 8 total_ms 2149.306
+summary tool dseams nucleation threads 8 median_ms 2158.246 rings 2201040 n4 193320 n5 606528 n6 736344 n7 426168 n8 77544 n9 14256 n10 432
+
+sample tool ovito nucleation threads 8 total_ms 19649.542
+sample tool ovito nucleation threads 8 total_ms 20029.761
+sample tool ovito nucleation threads 8 total_ms 19589.742
+sample tool ovito nucleation threads 8 total_ms 20550.940
+sample tool ovito nucleation threads 8 total_ms 19511.238
+sample tool ovito nucleation threads 8 total_ms 19857.957
+sample tool ovito nucleation threads 8 total_ms 19335.809
+sample tool ovito nucleation threads 8 total_ms 19765.152
+summary tool ovito nucleation threads 8 median_ms 19765.152 n4 193320 n5 606528 n6 736344 n7 426168 n8 77544 n9 14256 n10 432
+
+sample tool dseams interface threads 1 total_ms 13822.662
+sample tool dseams interface threads 1 total_ms 13848.741
+sample tool dseams interface threads 1 total_ms 13836.252
+sample tool dseams interface threads 1 total_ms 13845.155
+sample tool dseams interface threads 1 total_ms 13939.187
+sample tool dseams interface threads 1 total_ms 13847.097
+sample tool dseams interface threads 1 total_ms 13835.025
+sample tool dseams interface threads 1 total_ms 13844.340
+summary tool dseams interface threads 1 median_ms 13845.155 rings 2228224 n4 192512 n5 386048 n6 1170432 n7 263168 n8 52224 n9 18432 n10 0
+
+sample tool dseams interface threads 8 total_ms 2002.056
+sample tool dseams interface threads 8 total_ms 2052.852
+sample tool dseams interface threads 8 total_ms 1971.358
+sample tool dseams interface threads 8 total_ms 1963.634
+sample tool dseams interface threads 8 total_ms 2072.213
+sample tool dseams interface threads 8 total_ms 1961.150
+sample tool dseams interface threads 8 total_ms 2009.639
+sample tool dseams interface threads 8 total_ms 2002.230
+summary tool dseams interface threads 8 median_ms 2002.230 rings 2228224 n4 192512 n5 386048 n6 1170432 n7 263168 n8 52224 n9 18432 n10 0
+
+sample tool ovito interface threads 8 total_ms 18007.004
+sample tool ovito interface threads 8 total_ms 18343.916
+sample tool ovito interface threads 8 total_ms 17917.663
+sample tool ovito interface threads 8 total_ms 18183.404
+sample tool ovito interface threads 8 total_ms 18974.620
+sample tool ovito interface threads 8 total_ms 18360.010
+sample tool ovito interface threads 8 total_ms 18849.993
+sample tool ovito interface threads 8 total_ms 17852.693
+summary tool ovito interface threads 8 median_ms 18343.916 n4 192512 n5 386048 n6 1170432 n7 263168 n8 52224 n9 18432 n10 0

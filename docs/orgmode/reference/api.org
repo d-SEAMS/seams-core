@@ -19,7 +19,7 @@ Four fronts, one engine (~libyodaLib~). Flags live on
 | Language ABI | this repo (~libseams_lang~) | ~seams_frame_read~ |
 | Python | this repo (~import dseams~) | ~dseams.chill_plus~ |
 | Python Frame | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseams.Frame~ from ~pydseams.read(...)~ |
-| Lua | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] | ~require("dseams")~ |
+| Lua | this repo (~bindings/lua~, ~seams.h~) | ~require("dseams")~ |
 | Compiled Python | PydSEAMSlib | ~pydseams.yoda~ (~_core~ and ~cyoda~ are aliases) |
 
 * Doxyrest wiring

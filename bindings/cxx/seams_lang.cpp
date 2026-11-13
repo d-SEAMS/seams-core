@@ -20,6 +20,8 @@
 #include <tum_offload.hpp>
 #include <water_select.hpp>
 
+#include <edge_set.hpp>
+
 #include <algorithm>
 #include <array>
 #include <charconv>
@@ -1160,10 +1162,18 @@ int seams_frame_q4_q6(seams_frame *frame, double cutoff, int type, double *q4,
   }
   try {
     const int typ = resolve_type(frame->cloud, type);
-    const auto a4 =
-        chill::steinhardtQlCutoff(frame->cloud, cutoff, 4, typ, q4bar != nullptr);
-    const auto a6 =
-        chill::steinhardtQlCutoff(frame->cloud, cutoff, 6, typ, q6bar != nullptr);
+    chill::SteinhardtQl a4;
+    chill::SteinhardtQl a6;
+    const bool bar4 = q4bar != nullptr;
+    const bool bar6 = q6bar != nullptr;
+    // The shared list is used when both degrees take the same average
+    // flag. A mixed request keeps each cutoff call, so a local column
+    // stays on the local kernel.
+    if (!(bar4 == bar6 &&
+          chill::steinhardtQ4Q6Cutoff(frame->cloud, cutoff, typ, bar4, a4, a6))) {
+      a4 = chill::steinhardtQlCutoff(frame->cloud, cutoff, 4, typ, bar4);
+      a6 = chill::steinhardtQlCutoff(frame->cloud, cutoff, 6, typ, bar6);
+    }
     const int n = frame->cloud.nop;
     if (static_cast<int>(a4.ql.size()) != n || static_cast<int>(a6.ql.size()) != n) {
       set_error("q4 and q6 were not computed");
@@ -1357,14 +1367,45 @@ int seams_frame_cages(seams_frame *frame, double cutoff, int type, int k,
       // seeded assignment stays on the host whatever SEAMS_OFFLOAD says.
       // The same rule as the CLI (GEM-6).
       auto graphs = nneigh::kNearestNeighbourPair(frame->cloud, k, cand, typ);
+      // The two nominations are often the same undirected graph. One ring
+      // search and one cage affiliation then match the pair of searches.
+      if (graphs.first == graphs.second) {
+        auto idx = nneigh::neighbourListByIndex(frame->cloud, graphs.first);
+        auto six = six_of(ring::contractibleRings(
+            primitive::ringNetwork(idx, 6), frame->cloud));
+        const auto once = ring::cageAffiliation(six, idx);
+        const auto aff = ring::seededCageAffiliation(six, once, six, once, idx,
+                                                     complete != 0);
+        const int m = std::min(n, static_cast<int>(aff.hc.size()));
+        for (int i = 0; i < m; ++i) {
+          hc[static_cast<std::size_t>(i)] = aff.hc[static_cast<std::size_t>(i)];
+          ddc[static_cast<std::size_t>(i)] = aff.ddc[static_cast<std::size_t>(i)];
+        }
+        tally_flags(hc, ddc);
+        return 0;
+      }
       auto idx_strict = nneigh::neighbourListByIndex(frame->cloud, graphs.first);
       auto idx_union = nneigh::neighbourListByIndex(frame->cloud, graphs.second);
-      auto six_strict = six_of(ring::contractibleRings(
-          primitive::ringNetwork(idx_strict, 6), frame->cloud));
-      auto six_union = six_of(ring::contractibleRings(
-          primitive::ringNetwork(idx_union, 6), frame->cloud));
-      const auto aff = ring::seededCageAffiliation(
-          six_strict, idx_strict, six_union, idx_union, complete != 0);
+      // The mutual and union lists are the same edges on a crystal whose
+      // shell is exactly k neighbours. One ring search and one affiliation
+      // then match the two-graph call, which is what the CLI does.
+      const bool sameGraph = seams::provenEqual(seams::edgeSetOf(idx_strict),
+                                                seams::edgeSetOf(idx_union));
+      ring::SeededAtomLabels aff;
+      if (sameGraph) {
+        auto six = six_of(ring::contractibleRings(
+            primitive::ringNetwork(idx_strict, 6), frame->cloud));
+        const auto once = ring::cageAffiliation(six, idx_strict);
+        aff = ring::seededCageAffiliation(six, once, six, once, idx_strict,
+                                          complete != 0);
+      } else {
+        auto six_strict = six_of(ring::contractibleRings(
+            primitive::ringNetwork(idx_strict, 6), frame->cloud));
+        auto six_union = six_of(ring::contractibleRings(
+            primitive::ringNetwork(idx_union, 6), frame->cloud));
+        aff = ring::seededCageAffiliation(six_strict, idx_strict, six_union,
+                                          idx_union, complete != 0);
+      }
       const int m = std::min(n, static_cast<int>(aff.hc.size()));
       for (int i = 0; i < m; ++i) {
         hc[static_cast<std::size_t>(i)] = aff.hc[static_cast<std::size_t>(i)];
@@ -1426,7 +1467,16 @@ int seams_frame_signature_edge(seams_frame *frame, double cutoff, int type,
     const int typ = resolve_type(frame->cloud, type);
     const std::string which =
         (graph == nullptr || graph[0] == '\0') ? "cutoff" : graph;
-    auto idx = index_graph(frame, cutoff, typ, which, 4);
+    std::vector<std::vector<int>> idx;
+    if (which == "cutoff") {
+      auto ids = nneigh::neighListLinkcell(cutoff, frame->cloud, typ);
+      if (ids.empty()) {
+        ids = nneigh::neighListO(cutoff, frame->cloud, typ);
+      }
+      idx = nneigh::neighbourListByIndex(frame->cloud, ids);
+    } else {
+      idx = index_graph(frame, cutoff, typ, which, 4);
+    }
     const auto signature = cage::Signature::parse(spec);
     const int depth = std::max(signature.maxRingSize(), 3);
     const auto rings = ring::cageRings(primitive::ringNetwork(idx, depth),

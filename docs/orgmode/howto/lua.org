@@ -1,0 +1,79 @@
+#+TITLE: Lua and Fennel
+#+OPTIONS: toc:nil num:nil
+
+~require("dseams")~ is the Lua module over =include/seams.h=.
+~require("yoda")~ is that same table. Fennel uses it with
+~(require :dseams)~. Lua 5.4 and LuaJIT both load the module.
+A system, a neighbour list, and a ring census are userdata.
+~__gc~ frees the handle, and Lua 5.4 ~__close~ frees it at the end
+of a scope. ~:close()~ does the same call. A status other than
+~SEAMS_OK~ is a Lua error whose text is ~seams_last_error~.
+
+Build it when the interpreter is present:
+
+#+begin_src bash
+meson setup build -Dwith_lua=auto
+meson compile -C build
+#+end_src
+
+~LUA_PATH~ points at ~bindings/lua~. ~LUA_CPATH~ points at the
+directory that holds ~dseams_core.so~. Reading, CHILL, Steinhardt
+parameters, cages, neighbour lists, the RDF, hydrogen bonds, density,
+the fingerprint, prisms, and the monolayer all call ~seams.h~.
+~meson test lua_examples~ runs the scripts below on Lua 5.4 and
+LuaJIT and checks each census against the C++ path.
+
+* Eight-atom cubic cell
+
+The cell is the one in =docs/examples/ice.c=. Every atom is cubic.
+
+#+begin_src lua
+# excerpt: examples/lua/ice.lua
+local cloud = dseams.system(xyz, box)
+local labels = dseams.chill_plus(cloud, {cutoff = 3.5, rule = dseams.PUBLISHED})
+assert(labels.counts.cubic == 8, labels.counts.cubic)
+#+end_src
+
+The script is =examples/lua/ice.lua=.
+
+* Read a dump
+
+~dseams.read~ calls ~seams_system_read~. It reads XYZ, CON, and
+chemfiles trajectories, including a triclinic LAMMPS dump. The mixed
+TIP4P dump keeps 250 oxygens when ~type~ is 2.
+=examples/lua/read.lua= is that check.
+=examples/lua/chill_plus.lua= loads =examples/chill-plus.lua= as the
+rule table and labels =input/traj/genice_sI.lammpstrj=.
+=examples/lua/neighbors.lua= is the cutoff rows.
+=examples/lua/steinhardt.lua= is local \(q_6\).
+=examples/lua/rings.lua= is ~ringNetwork~ on the oxygen frame.
+
+#+begin_src lua
+# excerpt: examples/lua/rings.lua
+local rings = dseams.ringNetwork(cloud, 8)
+#+end_src
+
+* Fennel: the interface and the rings tutorial
+
+The basal interface is =examples/fennel/interface.fnl=. The published
+rule on the cutoff list is ~dseams.chill-plus~. The rings tutorial
+frame is =examples/fennel/rings.fnl=.
+
+#+begin_src fennel
+# excerpt: examples/fennel/interface.fnl
+(local labels (dseams.chill-plus cloud {:cutoff 3.5 :type 1 :graph "cutoff" :rule dseams.PUBLISHED}))
+#+end_src
+
+#+begin_src fennel
+# excerpt: examples/fennel/rings.fnl
+(local rings (dseams.ring-network cloud 8))
+#+end_src
+
+The test compiles both files with Fennel and runs the Lua on each
+interpreter. The CHILL+ line and the ring histogram match
+~tests/lua_oracle.cpp~. That oracle also checks CHILL, Steinhardt
+orders 3, 4, 6, 8, and 12 (including the Lechner-Dellago average),
+cage counts, the cage signature, k-nearest neighbours, the RDF, the
+running coordination, hydrogen bonds, the density profile, the
+fingerprint, the site table, contact pairs, domains, prisms, the
+monolayer, and ring vertices against the C++ path.

@@ -1,0 +1,25 @@
+cores 8
+affinity 0-7
+warmup 1
+n 8
+rmsd_cutoff 0.1
+timing frame ideal ice Ic 110592
+default templates FCC HCP BCC
+ice templates cubic-diamond hex-diamond
+classifier labels every atom; ice-only PTM names only the two diamond structures
+time default threads 1 median_ms 1478.931163 iqr_ms 25.702183 samples 1460.657803 1489.783235 1456.468753 1485.261616 1462.854399 1487.415499 1472.600711 1492.680282
+time default threads 8 median_ms 214.415569 iqr_ms 6.885199 samples 215.178581 213.652556 217.948798 223.310076 219.174182 209.225351 212.084810 207.337396
+time ice threads 1 median_ms 2728.147686 iqr_ms 112.548290 samples 2731.310973 2721.551040 2851.024288 2724.984398 2843.944800 2710.494983 2827.132155 2700.809796
+time ice threads 8 median_ms 385.257976 iqr_ms 11.565945 samples 367.753953 376.872793 383.197078 378.434990 387.318875 391.941732 388.833270 399.127079
+frame ih orthogonal ice Ih, 3x3x3 brine cells molecules 432
+agree ih PTM Ih hex-diamond 432 of 432
+agree ih CHILL+ Ih hexagonal-ice 432 of 432
+frame ic ideal ice Ic, 24^3 conventional cells molecules 110592
+agree ic PTM Ic cubic-diamond 110592 of 110592
+agree ic CHILL+ Ic cubic-ice 110592 of 110592
+frame brine 230 K brine start, 1 mol/kg, seed 1330, ice oxygens 288, liquid oxygens 288 molecules 576
+agree brine PTM other Other 432 of 432
+agree brine PTM Ih hex-diamond 144 of 144
+agree brine CHILL+ other Other 360 of 432
+agree brine CHILL+ other hexagonal-ice 72 of 432
+agree brine CHILL+ Ih hexagonal-ice 144 of 144

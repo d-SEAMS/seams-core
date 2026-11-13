@@ -127,7 +127,7 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
     timeout: 180,
   )
   install_data(
-    'python/chill_plus.py',
+    ['python/chill_plus.py', 'python/symmetry.py'],
     install_dir: get_option('datadir') / 'seams' / 'python',
   )
   # DSEAMS_PYTHON is the interpreter found at configure time. The
@@ -169,6 +169,8 @@ endif
 # CxxWrap needs libcxxwrap_julia, which is a BinaryBuilder product and
 # is not part of the pixi or Nix closure. The Julia front that ships is
 # the ccall package under bindings/julia/Dseams.
+subdir('lua')
+
 cxxwrap_dep = dependency('libcxxwrap_julia', required: false)
 if cxxwrap_dep.found()
   message('libcxxwrap_julia found; the shipped Julia front is still ccall')

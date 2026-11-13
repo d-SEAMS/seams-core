@@ -11,6 +11,7 @@ ydslib_sources = files(
   'cluster.cpp',
   'domain.cpp',
   'franzblau.cpp',
+  'lc_threads.cpp',
   'gpu_residency.cpp',
   'gpu_batch.cpp',
   'generic.cpp',
@@ -22,6 +23,7 @@ ydslib_sources = files(
   'chill_offload.cpp',
   'chill_plus_scheme.cpp',
   'interface_order.cpp',
+  'science_front.cpp',
   'interface_wc.cpp',
   'topo_fingerprint.cpp',
   'tum_offload.cpp',
@@ -67,25 +69,23 @@ if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
 endif
 
 # The shell hot path has no Eigen, so AVX2 here does not fault in the allocator.
+# One shell_avx archive is linked into both the shell path and the Ylm path.
 _shell_link = []
+_ylm_link = []
 if cpp_id == 'gcc' or cpp_id == 'clang'
   _shell_avx = static_library('shell_avx', 'shell_classify.cpp',
     cpp_args: _args + ['-mavx2', '-mfma'],
     include_directories: _incdirs,
     dependencies: _deps)
   _shell_link += _shell_avx
-else
-  ydslib_sources += files('shell_classify.cpp')
-endif
-
-_ylm_link = []
-if cpp_id == 'gcc' or cpp_id == 'clang'
   _ylm_avx = static_library('ylm_avx512', 'ylm_cartesian_avx512.cpp',
     cpp_args: _args + ['-mavx512f', '-mavx512dq', '-mfma'],
     include_directories: _incdirs,
     dependencies: _deps)
-  _ylm_link += _ylm_avx
+  _ylm_link += [_ylm_avx, _shell_avx]
   _args += ['-DSEAMS_YLM_AVX512=1']
+else
+  ydslib_sources += files('shell_classify.cpp')
 endif
 
 ydslib = library('yodaLib',
@@ -190,6 +190,34 @@ pkgconfig.generate(
   version: meson.project_version(),
   extra_cflags: _public_defines)
 
+_include_ups = ''
+foreach _part : get_option('libdir').split('/')
+  _include_ups += '../'
+endforeach
+_include_ups += '../../'
+_seams_lib_file = 'libseams.so'
+if host_machine.system() == 'darwin'
+  _seams_lib_file = 'libseams.dylib'
+elif host_machine.system() == 'windows'
+  _seams_lib_file = 'seams.dll'
+endif
+_seams_cmake = configuration_data()
+_seams_cmake.set('VERSION', meson.project_version())
+_seams_cmake.set('SEAMS_INCLUDE_REL', _include_ups + get_option('includedir'))
+_seams_cmake.set('SEAMS_LIB_FILE', _seams_lib_file)
+configure_file(
+  input: '../cmake/seams-config.cmake.in',
+  output: 'seams-config.cmake',
+  configuration: _seams_cmake,
+  install: true,
+  install_dir: get_option('libdir') / 'cmake' / 'seams')
+configure_file(
+  input: '../cmake/seams-config-version.cmake.in',
+  output: 'seams-config-version.cmake',
+  configuration: _seams_cmake,
+  install: true,
+  install_dir: get_option('libdir') / 'cmake' / 'seams')
+
 seams_api_test = executable(
   'test_seams_api',
   files('../tests/test_seams_api.c'),
@@ -197,7 +225,11 @@ seams_api_test = executable(
   include_directories: include_directories('../include'),
   c_args: ['-I' + meson.current_build_dir()])
 
-test('seams_c_api', seams_api_test, timeout: 180)
+_capi_env = environment()
+_capi_env.set('SEAMS_SAMPLE', meson.project_source_root() / 'input' / 'traj' / 'agi_water_tiny.lammpstrj')
+_capi_env.set('SEAMS_XYZ', meson.project_source_root() / 'input' / 'xyz' / 'configuration.xyz')
+_capi_env.set('SEAMS_CON', meson.project_source_root() / 'input' / 'con' / 'tiny_multi_cuh2.con')
+test('seams_c_api', seams_api_test, timeout: 180, env: _capi_env)
 
 docs_ice_example = executable(
   'docs_ice_example',

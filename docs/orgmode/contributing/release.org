@@ -20,9 +20,9 @@ Python, R, Julia, Fortran, and Rust bindings live in ~bindings/~.
 ~-Dwith_python=true~ builds the nanobind module from the in-tree
 ~libseams~. ~-Dwith_lammps~, ~-Dwith_gromacs~, ~-Dwith_openmm~, and
 ~-Dwith_plumed~ are ~auto~: the hook is built when the library is
-found. ~-Dwith_lua=enabled~ is a Meson error that names
-[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]. Do not resurrect
-~yodaStruct -c~ or ~conf.yaml~.
+found. ~-Dwith_lua=auto~ builds ~require("dseams")~ from ~bindings/lua~
+when Lua 5.4 or LuaJIT is present. Leave ~yodaStruct -c~ and
+~conf.yaml~ in that historical front.
 
 * Checklist
 

@@ -375,6 +375,13 @@ def main():
     )
     require_tokens(
         corpus,
+        [howto / "lua.org"],
+        ["chill_plus", "ringNetwork", "chill-plus", "ring-network"],
+        errors,
+        "Lua how-to",
+    )
+    require_tokens(
+        corpus,
         [howto / "symmetry-classifier.org"],
         ["seams_frame_symmetry"],
         errors,

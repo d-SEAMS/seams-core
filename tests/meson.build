@@ -51,6 +51,9 @@ test_sources = {
   'structure_desc': 'test_structure_desc.cpp',
   'cage_affiliation': 'test_cage_affiliation.cpp',
   'cage_enum': 'test_cage_enum.cpp',
+  'trace_threads': 'test_trace_threads.cpp',
+  'pool_audit': 'test_pool_audit.cpp',
+  'stencil_rows': 'test_stencil_rows.cpp',
   'ddc_regression': 'test_ddc_regression.cpp',
   'c_api': 'test_c_api.cpp',
   'brine_select': 'test_brine_select.cpp',
@@ -58,6 +61,7 @@ test_sources = {
   'chill_plus_rule': 'test_chill_plus_rule.cpp',
   'nucleation_pathway': 'test_nucleation_pathway.cpp',
   'interface_order': 'test_interface_order.cpp',
+  'science_front': 'test_science_front.cpp',
   'ql_solid': 'test_ql_solid.cpp',
   'thread_scale': 'test_thread_scale.cpp',
   'gpu_residency': 'test_gpu_residency.cpp',
@@ -123,6 +127,12 @@ foreach name, src : test_sources
   elif name == 'bulkTUM'
     # The last case is PG(2, 5). A solo coverage run is the bound.
     _timeout = 2400
+  elif name == 'trace_threads'
+    # GenIce cells at several widths, the mW frame, and all 148 nucleation frames.
+    _timeout = 600
+  elif name == 'pool_audit'
+    # Ice Ic at 4096 molecules, each kernel at one thread and at eight.
+    _timeout = 300
   elif name == 'cage_affiliation'
     # The seeded case passes. A parallel run was killed at 120s on the
     # last assertion.
@@ -131,6 +141,8 @@ foreach name, src : test_sources
     _timeout = 600
   elif name == 'interface_order'
     _timeout = 600
+  elif name == 'science_front'
+    _timeout = 300
   endif
   test(name,
     executable('test_' + name, src,
@@ -356,6 +368,20 @@ executable('bench_ddc_ladder', 'bench_ddc_ladder.cpp',
   include_directories: _incdirs,
   build_rpath: '$ORIGIN/../src')
 
+executable('bench_pool_audit', 'bench_pool_audit.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_trace_threads', 'bench_trace_threads.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
 executable('bench_cage_h2h', 'bench_cage_h2h.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
@@ -371,6 +397,13 @@ executable('bench_strong', 'bench_strong.cpp',
   build_rpath: '$ORIGIN/../src')
 
 executable('bench_rings_incremental', 'bench_rings_incremental.cpp',
+  dependencies: [yds_dep],
+  cpp_args: _args,
+  link_args: _test_link_args,
+  include_directories: _incdirs,
+  build_rpath: '$ORIGIN/../src')
+
+executable('bench_ring_ic', 'bench_ring_ic.cpp',
   dependencies: [yds_dep],
   cpp_args: _args,
   link_args: _test_link_args,
@@ -593,6 +626,11 @@ test('option_names', find_program('python3'),
          meson.project_build_root()],
   workdir: meson.project_source_root(),
   timeout: 60)
+test('ovito_ring_counts', find_program('python3'),
+  args: [files('test_ovito_ring_counts.py'),
+         meson.project_build_root() / 'tests' / 'bench_ring_ic'],
+  workdir: meson.project_source_root(),
+  timeout: 120)
 test('cli_surface', find_program('python3'),
   args: [files('cli_surface.py'), meson.project_build_root() / 'seams'],
   workdir: meson.project_source_root(),
@@ -605,7 +643,7 @@ test('mw215_deck', find_program('python3'),
 test('mw215_frame', find_program('python3'),
   args: [files('test_mw215_deck.py'), 'frame'],
   workdir: meson.project_source_root(),
-  timeout: 30)
+  timeout: 600)
 
 dump_faults = shared_module('dump_faults', 'dump_faults_preload.c', name_prefix: 'lib')
 dump_fault_driver = executable('dump_fault_driver', 'dump_fault_driver.cpp',

@@ -20,7 +20,6 @@ MUTUAL = _core.MUTUAL
 version = _core.version
 set_num_threads = _core.set_num_threads
 num_threads = _core.num_threads
-Frame = _core.Frame
 
 
 def _frame_api():
@@ -50,6 +49,14 @@ def _as_box(box):
     if raw.size not in (3, 9):
         raise ValueError("box is 3 lengths or 9 LAMMPS cell numbers")
     return raw
+
+
+class Frame(_core.Frame):
+    """A frame whose box may be three lengths, nine LAMMPS numbers, or an array."""
+
+    def set_frame(self, positions, box):
+        pos = np.ascontiguousarray(positions, dtype=np.float64)
+        super().set_frame(pos, _as_box(box))
 
 
 def chill_plus(positions, box, rule=PUBLISHED, graph=CUTOFF, cutoff=3.5):

@@ -9,9 +9,11 @@
 
 #include <Eigen/Geometry>
 
+#include <array>
 #include <atomic>
 #include <cmath>
 #include <cstdlib>
+#include <random>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
@@ -358,6 +360,32 @@ TEST_CASE("an ice Ic supercell is cubic at every oxygen", "[symmetry]") {
   }
 }
 
+TEST_CASE("ideal Ic, Ih and a gaussian displacement keep their labels", "[symmetry]") {
+  std::mt19937 rng(20261113);
+  std::normal_distribution<double> noise(0.0, 0.05);
+  const symm::Crystal cells[] = {symm::Crystal::iceIc, symm::Crystal::iceIh};
+  const int expect[] = {static_cast<int>(symm::Kind::iceIc),
+                        static_cast<int>(symm::Kind::iceIh)};
+  for (int which = 0; which < 2; ++which) {
+    const auto cell = symm::crystal(cells[which]);
+    std::vector<int> kind;
+    symm::classifyIce(cell.cartesian, cell.vectors, kind);
+    for (int label : kind) {
+      REQUIRE(label == expect[which]);
+    }
+    Eigen::MatrixXd moved = cell.cartesian;
+    for (int row = 0; row < moved.rows(); ++row) {
+      for (int axis = 0; axis < 3; ++axis) {
+        moved(row, axis) += noise(rng);
+      }
+    }
+    symm::classifyIce(moved, cell.vectors, kind);
+    for (int label : kind) {
+      REQUIRE(label == expect[which]);
+    }
+  }
+}
+
 TEST_CASE("a periodic ice shell matches the same template as the ideal", "[symmetry]") {
   const auto ic = symm::crystal(symm::Crystal::iceIc);
   const auto ih = symm::crystal(symm::Crystal::iceIh);
@@ -646,4 +674,132 @@ TEST_CASE("shell kernel matches diamondFromCsr on ideal cubic ice", "[symmetry]"
   std::vector<int> shell;
   symm::classifyIceCloud(cloud, shell);
   REQUIRE(shell == diamond);
+}
+
+TEST_CASE("the equilibrated TIP4P interface keeps its thermal ice counts", "[symmetry]") {
+  // 4096 oxygens from the TIP4P/2005 ice/water slab after the hop
+  // equilibration (target 252 K). A minimisation of that restart and a
+  // 4 ps average both call the vibrating-frame misses crystal: 867 of
+  // the 903 CHILL+ hexagonal misses and all 491 PTM hex-diamond misses.
+  // The counts below are this classifier after the thermal gates, not a
+  // copy of CHILL+.
+  std::ifstream in;
+  for (const char *path : {"tests/data/tip4p252-oxygens.txt",
+                           "../tests/data/tip4p252-oxygens.txt"}) {
+    in.open(path);
+    if (in) {
+      break;
+    }
+    in.clear();
+  }
+  REQUIRE(in);
+  int n = 0;
+  double lx = 0, ly = 0, lz = 0;
+  in >> n >> lx >> ly >> lz;
+  REQUIRE(n == 4096);
+  Eigen::MatrixXd xyz(n, 3);
+  for (int i = 0; i < n; i++) {
+    in >> xyz(i, 0) >> xyz(i, 1) >> xyz(i, 2);
+  }
+  REQUIRE(in);
+  Eigen::Matrix3d box = Eigen::Matrix3d::Zero();
+  box(0, 0) = lx;
+  box(1, 1) = ly;
+  box(2, 2) = lz;
+  std::vector<int> kind;
+  symm::classifyIce(xyz, box, kind);
+  REQUIRE(static_cast<int>(kind.size()) == n);
+  int ih = 0, ic = 0, isd = 0, other = 0;
+  for (int label : kind) {
+    if (label == static_cast<int>(symm::Kind::iceIh)) {
+      ++ih;
+    } else if (label == static_cast<int>(symm::Kind::iceIc)) {
+      ++ic;
+    } else if (label == static_cast<int>(symm::Kind::iceIsd)) {
+      ++isd;
+    } else {
+      REQUIRE(label < 0);
+      ++other;
+    }
+  }
+  REQUIRE(ih == 1772);
+  REQUIRE(ic == 0);
+  REQUIRE(isd == 1);
+  REQUIRE(other == 2323);
+}
+
+namespace {
+
+std::array<int, 4> iceTally(const std::vector<int> &kind) {
+  int ih = 0, ic = 0, isd = 0, other = 0;
+  for (int label : kind) {
+    if (label == static_cast<int>(symm::Kind::iceIh)) {
+      ++ih;
+    } else if (label == static_cast<int>(symm::Kind::iceIc)) {
+      ++ic;
+    } else if (label == static_cast<int>(symm::Kind::iceIsd)) {
+      ++isd;
+    } else if (label < 0) {
+      ++other;
+    } else {
+      return {-1, -1, -1, -1};
+    }
+  }
+  return {ih, ic, isd, other};
+}
+
+} // namespace
+
+TEST_CASE("held-out thermal frames keep their ice counts", "[symmetry]") {
+  // First oxygen frame of each short run: mW slab at a 274 K setpoint,
+  // TIP4P/2005 slabs at 240 K and 260 K, the 230 K brine start, and bulk
+  // TIP4P/2005 liquid at 240 K with no ice seed. The trajectories stay
+  // out of git. The default gates are the ones scored on the 252 K slab.
+  // The second call is the previous residual 0.12, tetrahedral q 0.94
+  // and bond ratio 1.15.
+  struct Expect {
+    const char *file;
+    int n;
+    int ih, ic, isd, other;
+    int oldIh, oldIc, oldIsd, oldOther;
+  };
+  const Expect rows[] = {
+      {"holdout-mw274-oxygens.txt", 864, 368, 1, 0, 495, 226, 0, 0, 638},
+      {"holdout-tip4p240-oxygens.txt", 4096, 1676, 0, 0, 2420, 1288, 0, 0, 2808},
+      {"holdout-tip4p260-oxygens.txt", 4096, 1641, 0, 1, 2454, 1159, 0, 0, 2937},
+      {"holdout-brine230-oxygens.txt", 576, 144, 0, 0, 432, 144, 0, 0, 432},
+      {"holdout-tip4p-liquid240-oxygens.txt", 512, 0, 0, 0, 512, 0, 0, 0, 512},
+  };
+  for (const Expect &row : rows) {
+    std::ifstream in;
+    const std::string leaf = row.file;
+    const std::string candidates[] = {"tests/data/" + leaf, "../tests/data/" + leaf};
+    for (const std::string &path : candidates) {
+      in.open(path);
+      if (in) {
+        break;
+      }
+      in.clear();
+    }
+    REQUIRE(in);
+    int n = 0;
+    double lx = 0, ly = 0, lz = 0;
+    in >> n >> lx >> ly >> lz;
+    REQUIRE(n == row.n);
+    Eigen::MatrixXd xyz(n, 3);
+    for (int i = 0; i < n; i++) {
+      in >> xyz(i, 0) >> xyz(i, 1) >> xyz(i, 2);
+    }
+    REQUIRE(in);
+    Eigen::Matrix3d box = Eigen::Matrix3d::Zero();
+    box(0, 0) = lx;
+    box(1, 1) = ly;
+    box(2, 2) = lz;
+    std::vector<int> kind;
+    symm::classifyIce(xyz, box, kind);
+    REQUIRE(static_cast<int>(kind.size()) == n);
+    REQUIRE(iceTally(kind) == std::array<int, 4>{row.ih, row.ic, row.isd, row.other});
+    symm::classifyIce(xyz, box, kind, 0.12, 0.94, 1.15);
+    REQUIRE(iceTally(kind) == std::array<int, 4>{row.oldIh, row.oldIc, row.oldIsd, row.oldOther});
+  }
 }

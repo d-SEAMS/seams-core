@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 3.16)
+
+set(SEAMS_VERSION "@VERSION@")
+
+get_filename_component(_seams_here "${CMAKE_CURRENT_LIST_DIR}" ABSOLUTE)
+get_filename_component(SEAMS_INCLUDE_DIR "${_seams_here}/@SEAMS_INCLUDE_REL@" ABSOLUTE)
+set(SEAMS_LIBRARY "${_seams_here}/../../@SEAMS_LIB_FILE@")
+
+if(NOT TARGET seams::seams)
+  add_library(seams::seams SHARED IMPORTED)
+  set_target_properties(seams::seams PROPERTIES
+    IMPORTED_LOCATION "${SEAMS_LIBRARY}"
+    INTERFACE_INCLUDE_DIRECTORIES "${SEAMS_INCLUDE_DIR}"
+    IMPORTED_NO_SONAME TRUE)
+endif()
+
+set(SEAMS_FOUND TRUE)

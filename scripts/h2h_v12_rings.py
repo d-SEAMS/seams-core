@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Primitive rings against rings-statistics-matter 0.2.0 on ideal ice Ic.
+"""Primitive rings against rings-statistics-matter 0.2.0 and 0.3.0 on ideal ice Ic.
 
 One warm-up, six timed calls, median and type-7 interquartile range.
 One core is taskset -c 0. Eight cores are taskset -c 0-7. The ice is

@@ -1,0 +1,33 @@
+cores 8
+affinity 0-7
+threads 8
+molecules 110592
+warmup 1
+n 8
+build release -O3
+ql-eq seams_frame_steinhardt order 6, ql and qlbar, neighbour inside
+cli seams_frame_q4_q6 after the frame is loaded, q4 and q6 together
+lit seams_ql_cutoff order 6, neighbour inside the core call
+q6 eight threads median_ms 6.491073 iqr_ms 0.632734 samples 6.243989 7.493319 7.745197 5.902549 5.881260 6.557377 6.503237 6.478908
+cores 8
+affinity 0-7
+threads 8
+molecules 110592
+warmup 1
+n 8
+build release -O3
+ql-eq seams_frame_steinhardt order 6, ql and qlbar, neighbour inside
+cli seams_frame_q4_q6 after the frame is loaded, q4 and q6 together
+lit seams_ql_cutoff order 6, neighbour inside the core call
+library q4, q6 median_ms 11.572306 iqr_ms 0.522129 samples 14.300233 10.682756 11.749337 11.427003 11.680461 12.084623 10.963109 11.464150
+cores 8
+affinity 0-7
+threads 8
+molecules 110592
+warmup 1
+n 8
+build release -O3
+ql-eq seams_frame_steinhardt order 6, ql and qlbar, neighbour inside
+cli seams_frame_q4_q6 after the frame is loaded, q4 and q6 together
+lit seams_ql_cutoff order 6, neighbour inside the core call
+q6 eight threads median_ms 6.310121 iqr_ms 0.589397 samples 5.913800 7.002157 6.559808 7.399735 6.136731 6.271286 6.348957 5.882730

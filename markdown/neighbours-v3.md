@@ -76,9 +76,12 @@ has no CHILL+.
 
 The symmetry column is the diamond common-neighbour test on the 3.5 Å
 CSR. A cubic shell is the twelve outward bonds of the four nearest
-neighbours. It is not the template overlay. PTM has no cubic-ice
-template: on this crystal every structure code is 0, in mdapy and in
-OVITO, which is why those sinks are 0. Identify diamond and mdapy
+neighbours. It is not the template overlay. A default PTM run leaves
+cubic and hexagonal diamond off (`PTM_CHECK_DEFAULT` is FCC, HCP, ICO
+and BCC; OVITO also leaves both diamond templates off), so every
+structure code on this crystal is 0. With `ptm_template_dcub` (and its
+alternate) and `ptm_template_dhex` (and its three alternates) enabled,
+the same crystal is cubic diamond. Identify diamond and mdapy
 `DiamondStructure` label every molecule, and so does this kernel.
 
 | molecules | threads | d-SEAMS | mdapy diamond | OVITO identify diamond | mdapy PTM | OVITO PTM |

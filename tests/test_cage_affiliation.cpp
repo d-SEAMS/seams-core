@@ -1,9 +1,12 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <cage_affiliation.hpp>
+#include <edge_set.hpp>
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+
+#include "ice_ic.hpp"
 #include <order_parameter.hpp>
 #include <ring.hpp>
 #include <seams_input.hpp>
@@ -420,6 +423,68 @@ TEST_CASE("AffiliationUpdater equals batch across the mW trajectory",
   }
 }
 
+std::map<std::string, int> cageCensus(const ring::CageAffiliation &flags) {
+  std::map<std::string, int> census{{"rings", 0}, {"hc", 0}, {"ddc", 0}, {"both", 0}};
+  census["rings"] = static_cast<int>(flags.hc.size());
+  for (std::size_t i = 0; i < flags.hc.size(); ++i) {
+    const bool hc = flags.hc[i];
+    const bool ddc = i < flags.ddc.size() && flags.ddc[i];
+    census["hc"] += hc ? 1 : 0;
+    census["ddc"] += ddc ? 1 : 0;
+    census["both"] += (hc && ddc) ? 1 : 0;
+  }
+  return census;
+}
+
+TEST_CASE("cage census matches the rebuild on every frame", "[cage_affiliation]") {
+  ring::AffiliationUpdater updater;
+  nneigh::SkinNeighborList skin(3.5, 2.0, 1);
+  for (int frame = 1; frame <= 11; ++frame) {
+    molSys::PointCloud<molSys::Point<double>, double> yCloud;
+    yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", frame, yCloud, 1);
+    auto nList = skin.update(yCloud);
+    auto idx = nneigh::neighbourListByIndex(yCloud, nList);
+    auto six = sixMembered(primitive::ringNetwork(idx, 7));
+    const auto &carried = updater.update(six, idx);
+    const auto rebuilt = ring::cageAffiliation(six, idx);
+    INFO("frame " << frame);
+    REQUIRE(cageCensus(carried) == cageCensus(rebuilt));
+    REQUIRE(carried.hc == rebuilt.hc);
+    REQUIRE(carried.ddc == rebuilt.ddc);
+  }
+
+  // A bond removed on each step, so the census is not a copy of frame 1.
+  molSys::PointCloud<molSys::Point<double>, double> yCloud;
+  yCloud = sinp::readLammpsTrjO("traj/mW_cubic.lammpstrj", 1, yCloud, 1);
+  auto rows = nneigh::neighbourListByIndex(
+      yCloud, nneigh::neighListO(3.5, yCloud, 1));
+  ring::AffiliationUpdater churn;
+  for (int step = 0; step < 6; ++step) {
+    if (step > 0) {
+      for (int a = 0; a < static_cast<int>(rows.size()); ++a) {
+        if (rows[static_cast<std::size_t>(a)].size() > 2) {
+          const int b = rows[static_cast<std::size_t>(a)][1];
+          auto drop = [](std::vector<int> &row, int value) {
+            row.erase(std::remove(row.begin() + 1, row.end(), value), row.end());
+          };
+          drop(rows[static_cast<std::size_t>(a)], b);
+          if (b >= 0 && b < static_cast<int>(rows.size())) {
+            drop(rows[static_cast<std::size_t>(b)], a);
+          }
+          break;
+        }
+      }
+    }
+    auto six = sixMembered(primitive::ringNetwork(rows, 6));
+    const auto &carried = churn.update(six, rows);
+    const auto rebuilt = ring::cageAffiliation(six, rows);
+    INFO("step " << step);
+    REQUIRE(cageCensus(carried) == cageCensus(rebuilt));
+    REQUIRE(carried.hc == rebuilt.hc);
+    REQUIRE(carried.ddc == rebuilt.ddc);
+  }
+}
+
 TEST_CASE("AffiliationUpdater tracks synthetic topology churn exactly",
           "[cage_affiliation]") {
   molSys::PointCloud<molSys::Point<double>, double> yCloud;
@@ -592,13 +657,43 @@ TEST_CASE("AffiliationUpdater falls back when the ring set churns",
   REQUIRE(swept.ddc == expect.ddc);
   REQUIRE(churn.lastReclassified() == static_cast<int>(fresh.size()));
 
-  // skip once, store the batch, then a repeated frame classifies nothing.
-  churn.update(fresh, idx);
+  // The fallback starts a one-frame backoff. That frame is a warm sweep
+  // even though the graph did not change, and it still matches a rebuild.
+  const auto &backed = churn.update(fresh, idx);
+  REQUIRE(backed.hc == expect.hc);
+  REQUIRE(backed.ddc == expect.ddc);
   REQUIRE(churn.lastReclassified() == static_cast<int>(fresh.size()));
-  churn.update(fresh, idx);
-  REQUIRE(churn.lastReclassified() == static_cast<int>(fresh.size()));
-  churn.update(fresh, idx);
+
+  // The backoff has expired. The same graph carries.
+  const auto &carried = churn.update(fresh, idx);
+  REQUIRE(carried.hc == expect.hc);
+  REQUIRE(carried.ddc == expect.ddc);
   REQUIRE(churn.lastReclassified() == 0);
+}
+
+TEST_CASE("one seeded search matches two when the edge sets are the same",
+          "[cage_affiliation]") {
+  const auto ice = iceIc(512);
+  const auto graphs = nneigh::kNearestNeighbourPair(ice, 4, 5.0, 1);
+  const auto strict = nneigh::neighbourListByIndex(ice, graphs.first);
+  const auto uni = nneigh::neighbourListByIndex(ice, graphs.second);
+  REQUIRE(seams::provenEqual(seams::edgeSetOf(strict), seams::edgeSetOf(uni)));
+  const auto sixStrict = sixMembered(
+      ring::contractibleRings(primitive::ringNetwork(strict, 6), ice));
+  const auto sixUnion =
+      sixMembered(ring::contractibleRings(primitive::ringNetwork(uni, 6), ice));
+  const auto both =
+      ring::seededCageAffiliation(sixStrict, strict, sixUnion, uni, false);
+  const auto onceAff = ring::cageAffiliation(sixStrict, strict);
+  const auto once = ring::seededCageAffiliation(sixStrict, onceAff, sixStrict,
+                                                onceAff, strict, false);
+  REQUIRE(once.hc == both.hc);
+  REQUIRE(once.ddc == both.ddc);
+  int cubic = 0;
+  for (bool flag : once.ddc) {
+    cubic += flag ? 1 : 0;
+  }
+  REQUIRE(cubic == ice.nop);
 }
 
 TEST_CASE("cage membership is not a function of the four-neighbour star",
@@ -1537,4 +1632,54 @@ TEST_CASE("Affiliation reads a pivot past the cloud and a one-sided seed",
   REQUIRE(wideCount == 1024);
   REQUIRE(ring::cageAffiliation(hex, many).hc.size() == 1);
 #endif
+}
+
+TEST_CASE("one affiliation matches two searches on an equal seeded graph",
+          "[cage]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  const double a = 6.35;
+  const int n = 4;
+  const double L = n * a;
+  const double b[8][3] = {{0, 0, 0},         {0, 0.5, 0.5},     {0.5, 0, 0.5},
+                          {0.5, 0.5, 0},     {0.25, 0.25, 0.25}, {0.25, 0.75, 0.75},
+                          {0.75, 0.25, 0.75}, {0.75, 0.75, 0.25}};
+  cloud.nop = n * n * n * 8;
+  cloud.currentFrame = 1;
+  cloud.box = {L, L, L};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.pts.resize(static_cast<std::size_t>(cloud.nop));
+  int t = 0;
+  for (int ix = 0; ix < n; ++ix) {
+    for (int iy = 0; iy < n; ++iy) {
+      for (int iz = 0; iz < n; ++iz) {
+        for (int k = 0; k < 8; ++k, ++t) {
+          auto &p = cloud.pts[static_cast<std::size_t>(t)];
+          p.type = 1;
+          p.atomID = t + 1;
+          p.molID = p.atomID;
+          p.x = (ix + b[k][0]) * a;
+          p.y = (iy + b[k][1]) * a;
+          p.z = (iz + b[k][2]) * a;
+          cloud.idIndexMap[p.atomID] = t;
+        }
+      }
+    }
+  }
+  const auto graphs = nneigh::kNearestNeighbourPair(cloud, 4, 5.0, 1);
+  REQUIRE(graphs.first == graphs.second);
+  const auto idx = nneigh::neighbourListByIndex(cloud, graphs.first);
+  const auto six =
+      ring::contractibleRings(sixMembered(primitive::ringNetwork(idx, 6)), cloud);
+  const auto once = ring::cageAffiliation(six, idx);
+  const auto one =
+      ring::seededCageAffiliation(six, once, six, once, idx, false);
+  const auto two = ring::seededCageAffiliation(six, idx, six, idx, false);
+  REQUIRE(one.hc == two.hc);
+  REQUIRE(one.ddc == two.ddc);
+  int cubic = 0;
+  for (int i = 0; i < cloud.nop; ++i) {
+    cubic += one.ddc[static_cast<std::size_t>(i)] ? 1 : 0;
+    REQUIRE(!one.hc[static_cast<std::size_t>(i)]);
+  }
+  REQUIRE(cubic == cloud.nop);
 }

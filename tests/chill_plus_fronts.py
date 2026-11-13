@@ -143,9 +143,33 @@ def python(lib):
         so.seams_frame_free(frame)
 
 
-def r_front(env):
+def ensure_r_package(env, lib):
+    """Install the R package into the build tree when it is not already there."""
     if shutil.which("Rscript") is None:
         raise Missing("Rscript is not installed")
+    build = Path(lib).resolve().parents[1]
+    dest = build / "docs-r-lib"
+    dest.mkdir(parents=True, exist_ok=True)
+    env["R_LIBS_USER"] = str(dest)
+    env["DSEAMS_ROOT"] = str(ROOT)
+    env["SEAMS_INCLUDE"] = str(ROOT / "bindings" / "cxx")
+    env["SEAMS_LIBDIR"] = str(Path(lib).resolve().parent)
+    if (dest / "dseams").is_dir():
+        return
+    r_cmd = str(Path(shutil.which("Rscript")).with_name("R"))
+    done = subprocess.run(
+        [r_cmd, "CMD", "INSTALL", "-l", str(dest), str(ROOT / "bindings" / "r" / "dseams")],
+        capture_output=True,
+        text=True,
+        env=env,
+        check=False,
+    )
+    if done.returncode != 0:
+        raise RuntimeError(f"R install: {done.stdout}{done.stderr}")
+
+
+def r_front(env, lib):
+    ensure_r_package(env, lib)
     script = f"""
 suppressPackageStartupMessages(library(dseams))
 frame <- read_frame("{TIP}", type = 2L)
@@ -213,7 +237,7 @@ def main(argv):
 
     results = {"cli": cli(seams)}
     missing = []
-    for name, run in (("python", lambda: python(lib)), ("r", lambda: r_front(env)),
+    for name, run in (("python", lambda: python(lib)), ("r", lambda: r_front(env, lib)),
                       ("julia", lambda: julia_front(env))):
         try:
             results[name] = run()

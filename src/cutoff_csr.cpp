@@ -185,7 +185,7 @@ template <bool Write, bool Half>
 void passFast(const double *xs, const double *ys, const double *zs,
               const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
               const double *shx, const double *shy, const double *shz, double rc2,
-              int *counts, int *offsets, int *cols) {
+              int *counts, int *offsets, int *cols, bool branchy = false) {
   const int nCells = ncx * ncy * ncz;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (nCells >= 64)
@@ -199,6 +199,65 @@ void passFast(const double *xs, const double *ys, const double *zs,
     const int cz = c % ncz;
     const int cy = (c / ncz) % ncy;
     const int cx = c / (ncy * ncz);
+    // Interior cells have a zero image shift. The wrap tests stay on the
+    // boundary, which is the same shortcut as the orthorhombic stash.
+    if (!branchy && cx > 0 && cx + 1 < ncx && cy > 0 && cy + 1 < ncy && cz > 0 &&
+        cz + 1 < ncz) {
+      int begin[27];
+      int endn[27];
+      int nn = 0;
+      begin[nn] = b;
+      endn[nn] = e;
+      ++nn;
+      for (int ox = -1; ox <= 1; ++ox) {
+        for (int oy = -1; oy <= 1; ++oy) {
+          for (int oz = -1; oz <= 1; ++oz) {
+            if (ox == 0 && oy == 0 && oz == 0) {
+              continue;
+            }
+            const int ncid = ((cx + ox) * ncy + (cy + oy)) * ncz + (cz + oz);
+            const int jb = cellStart[ncid];
+            const int je = cellStart[ncid + 1];
+            if (jb == je) {
+              continue;
+            }
+            begin[nn] = jb;
+            endn[nn] = je;
+            ++nn;
+          }
+        }
+      }
+      for (int i = b; i < e; ++i) {
+        const int ii = ids[i];
+        const double xi = xs[i];
+        const double yi = ys[i];
+        const double zi = zs[i];
+        const int base = Write ? offsets[ii] : 0;
+        int n = 0;
+        for (int t = 0; t < nn; ++t) {
+          for (int j = begin[t]; j < endn[t]; ++j) {
+            if (j == i || (Half && ids[j] < ii)) {
+              continue;
+            }
+            const double dx = xi - xs[j];
+            const double dy = yi - ys[j];
+            const double dz = zi - zs[j];
+            if (dx * dx + dy * dy + dz * dz < rc2) {
+              if (Write) {
+                cols[base + n] = ids[j];
+              }
+              ++n;
+            }
+          }
+        }
+        if (Write) {
+          sortRow(cols + base, n);
+        } else {
+          counts[ii] = n;
+        }
+      }
+      continue;
+    }
     struct Nbr {
       int begin;
       int end;
@@ -284,120 +343,243 @@ void passFast(const double *xs, const double *ys, const double *zs,
   }
 }
 
-// Count pass that also keeps the neighbour ids. A shell longer than
-// kStashCap sets *overflowed and the caller repeats the geometry fill.
-void passFastStash(const double *xs, const double *ys, const double *zs,
-                   const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
-                   const double *shx, const double *shy, const double *shz, double rc2,
-                   int *counts, int *stash, int *overflowed) {
-  const int nCells = ncx * ncy * ncz;
-  *overflowed = 0;
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (nCells >= 64)
-#endif
-  for (int c = 0; c < nCells; ++c) {
-    const int b = cellStart[c];
-    const int e = cellStart[c + 1];
-    if (b == e) {
-      continue;
-    }
-    const int cz = c % ncz;
-    const int cy = (c / ncz) % ncy;
-    const int cx = c / (ncy * ncz);
-    struct Nbr {
-      int begin;
-      int end;
-      double sx, sy, sz;
-    };
-    Nbr nbr[27];
-    int nn = 0;
-    for (int ox = -1; ox <= 1; ++ox) {
-      int nx = cx + ox;
-      int ix = 0;
-      if (nx >= ncx) {
-        nx -= ncx;
-        ix = 1;
-      } else if (nx < 0) {
-        nx += ncx;
-        ix = -1;
+// One z layer of the half stencil. The pair is stored only on the atom
+// in this layer. A forward step in x reaches back one z layer, so two
+// layers of the same parity both touch the atoms between them; the
+// partner row is filled after those layers have stopped.
+void halfZLayer(int cz, const double *xs, const double *ys, const double *zs,
+                const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
+                const double *shx, const double *shy, const double *shz, double rc2,
+                int *counts, int *stash, int *overflowed) {
+  for (int cy = 0; cy < ncy; ++cy) {
+    for (int cx = 0; cx < ncx; ++cx) {
+      const int c = (cx * ncy + cy) * ncz + cz;
+      const int b = cellStart[c];
+      const int e = cellStart[c + 1];
+      if (b == e) {
+        continue;
       }
-      for (int oy = -1; oy <= 1; ++oy) {
-        int ny = cy + oy;
-        int iy = 0;
-        if (ny >= ncy) {
-          ny -= ncy;
-          iy = 1;
-        } else if (ny < 0) {
-          ny += ncy;
-          iy = -1;
-        }
-        const int row = nx * ncy + ny;
-        for (int oz = -1; oz <= 1; ++oz) {
-          int nz = cz + oz;
-          int iz = 0;
-          if (nz >= ncz) {
-            nz -= ncz;
-            iz = 1;
-          } else if (nz < 0) {
-            nz += ncz;
-            iz = -1;
-          }
-          const int ncid = row * ncz + nz;
+      // Interior cells have no periodic image. The thirteen forward
+      // neighbours are plain index steps, and the shift is zero.
+      if (cx > 0 && cx + 1 < ncx && cy > 0 && cy + 1 < ncy && cz > 0 && cz + 1 < ncz) {
+        struct Step {
+          int begin;
+          int end;
+        };
+        Step nbr[14];
+        int nn = 0;
+        nbr[nn++] = {b, e};
+        const int delta[13][3] = {
+            {1, -1, -1}, {1, -1, 0}, {1, -1, 1}, {1, 0, -1}, {1, 0, 0},
+            {1, 0, 1},   {1, 1, -1}, {1, 1, 0},  {1, 1, 1},  {0, 1, -1},
+            {0, 1, 0},   {0, 1, 1},   {0, 0, 1},
+        };
+        for (const auto &d : delta) {
+          const int ncid = ((cx + d[0]) * ncy + (cy + d[1])) * ncz + (cz + d[2]);
           const int jb = cellStart[ncid];
           const int je = cellStart[ncid + 1];
-          if (jb == je) {
-            continue;
-          }
-          const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
-          nbr[nn++] = {jb, je, shx[k], shy[k], shz[k]};
-        }
-      }
-    }
-    for (int i = b; i < e; ++i) {
-      const int ii = ids[i];
-      const double xi = xs[i];
-      const double yi = ys[i];
-      const double zi = zs[i];
-      int *row = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
-      int n = 0;
-      bool over = false;
-      for (int t = 0; t < nn; ++t) {
-        const Nbr nb = nbr[t];
-#pragma GCC unroll 1
-        for (int j = nb.begin; j < nb.end; ++j) {
-          if (j == i) {
-            continue;
-          }
-          const double dx = xi - xs[j] - nb.sx;
-          const double dy = yi - ys[j] - nb.sy;
-          const double dz = zi - zs[j] - nb.sz;
-          if (dx * dx + dy * dy + dz * dz < rc2) {
-            if (n < kStashCap) {
-              row[n] = ids[j];
-            } else {
-              over = true;
-            }
-            ++n;
+          if (jb != je) {
+            nbr[nn++] = {jb, je};
           }
         }
-      }
-      counts[ii] = n;
-      if (over) {
+        for (int i = b; i < e; ++i) {
+          const int ii = ids[i];
+          const double xi = xs[i];
+          const double yi = ys[i];
+          const double zi = zs[i];
+          int *rowI = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
+          for (int t = 0; t < nn; ++t) {
+            const int j0 = (t == 0) ? i + 1 : nbr[t].begin;
+            for (int j = j0; j < nbr[t].end; ++j) {
+              const double dx = xi - xs[j];
+              const double dy = yi - ys[j];
+              const double dz = zi - zs[j];
+              if (!(dx * dx + dy * dy + dz * dz < rc2)) {
+                continue;
+              }
+              const int jj = ids[j];
+              int &ni = counts[ii];
+              if (ni < kStashCap) {
+                rowI[ni] = jj;
+              } else {
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp atomic write
 #endif
-        *overflowed = 1;
+                *overflowed = 1;
+              }
+              ++ni;
+            }
+          }
+        }
+        continue;
+      }
+      struct Nbr {
+        int begin;
+        int end;
+        double sx, sy, sz;
+      };
+      Nbr nbr[14];
+      int nn = 0;
+      nbr[nn++] = {b, e, 0.0, 0.0, 0.0};
+      for (int ox = -1; ox <= 1; ++ox) {
+        for (int oy = -1; oy <= 1; ++oy) {
+          for (int oz = -1; oz <= 1; ++oz) {
+            if (!(ox > 0 || (ox == 0 && oy > 0) || (ox == 0 && oy == 0 && oz > 0))) {
+              continue;
+            }
+            int nx = cx + ox;
+            int ix = 0;
+            if (nx >= ncx) {
+              nx -= ncx;
+              ix = 1;
+            } else if (nx < 0) {
+              nx += ncx;
+              ix = -1;
+            }
+            int ny = cy + oy;
+            int iy = 0;
+            if (ny >= ncy) {
+              ny -= ncy;
+              iy = 1;
+            } else if (ny < 0) {
+              ny += ncy;
+              iy = -1;
+            }
+            int nz = cz + oz;
+            int iz = 0;
+            if (nz >= ncz) {
+              nz -= ncz;
+              iz = 1;
+            } else if (nz < 0) {
+              nz += ncz;
+              iz = -1;
+            }
+            const int ncid = (nx * ncy + ny) * ncz + nz;
+            const int jb = cellStart[ncid];
+            const int je = cellStart[ncid + 1];
+            if (jb == je) {
+              continue;
+            }
+            const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
+            nbr[nn++] = {jb, je, shx[k], shy[k], shz[k]};
+          }
+        }
+      }
+      for (int i = b; i < e; ++i) {
+        const int ii = ids[i];
+        const double xi = xs[i];
+        const double yi = ys[i];
+        const double zi = zs[i];
+        int *rowI = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
+        for (int t = 0; t < nn; ++t) {
+          const Nbr nb = nbr[t];
+          const int j0 = (t == 0) ? i + 1 : nb.begin;
+          for (int j = j0; j < nb.end; ++j) {
+            const double dx = xi - xs[j] - nb.sx;
+            const double dy = yi - ys[j] - nb.sy;
+            const double dz = zi - zs[j] - nb.sz;
+            if (!(dx * dx + dy * dy + dz * dz < rc2)) {
+              continue;
+            }
+            const int jj = ids[j];
+            int &ni = counts[ii];
+            if (ni < kStashCap) {
+              rowI[ni] = jj;
+            } else {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp atomic write
+#endif
+              *overflowed = 1;
+            }
+            ++ni;
+          }
+        }
       }
     }
   }
 }
 
-// One thread records each pair from the lower packed slot and writes both
-// ends. The full stencil visits every pair twice; this visit is once.
+// Copy each one-sided pair onto its partner. counts[] still holds the
+// one-sided lengths and is updated as the reverse rows grow.
+void mirrorStash(const int *ids, int nPacked, int *counts, int *stash, int *overflowed) {
+  std::vector<int> oneSided(static_cast<std::size_t>(nPacked));
+  for (int s = 0; s < nPacked; ++s) {
+    oneSided[static_cast<std::size_t>(s)] = counts[ids[s]];
+  }
+  for (int s = 0; s < nPacked; ++s) {
+    const int ii = ids[s];
+    const int n = oneSided[static_cast<std::size_t>(s)];
+    if (n <= 0) {
+      continue;
+    }
+    const int nUse = n < kStashCap ? n : kStashCap;
+    const int *row = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
+    for (int k = 0; k < nUse; ++k) {
+      const int jj = row[k];
+      int &nj = counts[jj];
+      if (nj < kStashCap) {
+        stash[static_cast<std::size_t>(jj) * static_cast<std::size_t>(kStashCap) +
+              static_cast<std::size_t>(nj)] = ii;
+      } else {
+        *overflowed = 1;
+      }
+      ++nj;
+    }
+  }
+}
+
 void passFastStashHalf(const double *xs, const double *ys, const double *zs,
                        const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
                        const double *shx, const double *shy, const double *shz, double rc2,
-                       int *counts, int *stash, int *overflowed) {
+                       int *counts, int *stash, int *overflowed, bool branchy = false);
+
+// Count pass that also keeps the neighbour ids. A shell longer than
+// kStashCap sets *overflowed and the caller repeats the geometry fill.
+// Several threads take the half stencil a z layer at a time. The full
+// stencil visited every pair twice and did not beat one thread. One pair
+// is recorded from the cell of its lower packed slot, and the fill sorts
+// the row so the CSR matches the one-thread half walk.
+
+void passFastStash(const double *xs, const double *ys, const double *zs,
+                   const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
+                   const double *shx, const double *shy, const double *shz, double rc2,
+                   int *counts, int *stash, int *overflowed) {
+  *overflowed = 0;
+#ifdef SEAMS_HAS_OPENMP
+  if (ncz >= 2 && omp_get_max_threads() > 1) {
+    // Each layer stores a pair only on its own atoms. The last layer's +z
+    // wraps onto layer 0 when the length is odd, which is the same parity,
+    // so that layer runs alone after the others have stopped.
+    const int lastWraps = (ncz % 2) == 1;
+    const int nEven = ncz / 2;
+#pragma omp parallel for schedule(static)
+    for (int k = 0; k < nEven; ++k) {
+      halfZLayer(k * 2, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
+                 counts, stash, overflowed);
+    }
+    if (lastWraps) {
+      halfZLayer(ncz - 1, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
+                 counts, stash, overflowed);
+    }
+    const int nOdd = ncz / 2;
+#pragma omp parallel for schedule(static)
+    for (int k = 0; k < nOdd; ++k) {
+      halfZLayer(k * 2 + 1, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
+                 counts, stash, overflowed);
+    }
+    mirrorStash(ids, cellStart[ncx * ncy * ncz], counts, stash, overflowed);
+    return;
+  }
+#endif
+  passFastStashHalf(xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2, counts,
+                    stash, overflowed);
+}
+
+
+void passFastStashHalf(const double *xs, const double *ys, const double *zs,
+                       const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
+                       const double *shx, const double *shy, const double *shz, double rc2,
+                       int *counts, int *stash, int *overflowed, bool branchy) {
   const int nCells = ncx * ncy * ncz;
   *overflowed = 0;
   for (int c = 0; c < nCells; ++c) {
@@ -409,6 +591,68 @@ void passFastStashHalf(const double *xs, const double *ys, const double *zs,
     const int cz = c % ncz;
     const int cy = (c / ncz) % ncy;
     const int cx = c / (ncy * ncz);
+    // An interior cell has no periodic image. The forward neighbours are
+    // index steps and the shift is zero, so the wrap tests stay on the
+    // boundary layer. branchy keeps those tests on every cell.
+    if (!branchy && cx > 0 && cx + 1 < ncx && cy > 0 && cy + 1 < ncy && cz > 0 &&
+        cz + 1 < ncz) {
+      int begin[14];
+      int end[14];
+      int nn = 0;
+      begin[nn] = b;
+      end[nn] = e;
+      ++nn;
+      const int delta[13][3] = {
+          {1, -1, -1}, {1, -1, 0}, {1, -1, 1}, {1, 0, -1}, {1, 0, 0},
+          {1, 0, 1},   {1, 1, -1}, {1, 1, 0},  {1, 1, 1},  {0, 1, -1},
+          {0, 1, 0},   {0, 1, 1},   {0, 0, 1},
+      };
+      for (const auto &d : delta) {
+        const int ncid = ((cx + d[0]) * ncy + (cy + d[1])) * ncz + (cz + d[2]);
+        const int jb = cellStart[ncid];
+        const int je = cellStart[ncid + 1];
+        if (jb != je) {
+          begin[nn] = jb;
+          end[nn] = je;
+          ++nn;
+        }
+      }
+      for (int i = b; i < e; ++i) {
+        const int ii = ids[i];
+        const double xi = xs[i];
+        const double yi = ys[i];
+        const double zi = zs[i];
+        int *rowI = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
+        for (int t = 0; t < nn; ++t) {
+          const int j0 = (t == 0) ? i + 1 : begin[t];
+          for (int j = j0; j < end[t]; ++j) {
+            const double dx = xi - xs[j];
+            const double dy = yi - ys[j];
+            const double dz = zi - zs[j];
+            if (!(dx * dx + dy * dy + dz * dz < rc2)) {
+              continue;
+            }
+            const int jj = ids[j];
+            int &ni = counts[ii];
+            int &nj = counts[jj];
+            if (ni < kStashCap) {
+              rowI[ni] = jj;
+            } else {
+              *overflowed = 1;
+            }
+            ++ni;
+            int *rowJ = stash + static_cast<std::size_t>(jj) * static_cast<std::size_t>(kStashCap);
+            if (nj < kStashCap) {
+              rowJ[nj] = ii;
+            } else {
+              *overflowed = 1;
+            }
+            ++nj;
+          }
+        }
+      }
+      continue;
+    }
     struct Nbr {
       int begin;
       int end;
@@ -632,7 +876,7 @@ template <bool Write>
 void passTilt(const double *xs, const double *ys, const double *zs, const int *ids,
               const int *cellStart, int ncx, int ncy, int ncz, int rx, int ry, int rz,
               const Tilt &h, double rc2, bool half, bool shifted, int *counts,
-              int *offsets, int *cols) {
+              int *offsets, int *cols, bool branchy = false) {
   const int nCells = ncx * ncy * ncz;
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (nCells >= 8)
@@ -654,6 +898,11 @@ void passTilt(const double *xs, const double *ys, const double *zs, const int *i
       const int cz = c % ncz;
       const int cy = (c / ncz) % ncy;
       const int cx = c / (ncy * ncz);
+      // A cell whose reach window stays inside the grid has no image shift.
+      // The while-wraps below are then dead branches, same as on an
+      // orthorhombic interior cell.
+      const bool deep = !branchy && cx >= rx && cx + rx < ncx && cy >= ry && cy + ry < ncy &&
+                        cz >= rz && cz + rz < ncz;
       for (int i = b; i < e; ++i) {
         const int ii = ids[i];
         found.clear();
@@ -665,35 +914,41 @@ void passTilt(const double *xs, const double *ys, const double *zs, const int *i
         for (int ox = -rx; ox <= rx; ++ox) {
           int nx = cx + ox;
           double ssx = 0.0;
-          while (nx >= ncx) {
-            nx -= ncx;
-            ssx += 1.0;
-          }
-          while (nx < 0) {
-            nx += ncx;
-            ssx -= 1.0;
+          if (!deep) {
+            while (nx >= ncx) {
+              nx -= ncx;
+              ssx += 1.0;
+            }
+            while (nx < 0) {
+              nx += ncx;
+              ssx -= 1.0;
+            }
           }
           for (int oy = -ry; oy <= ry; ++oy) {
             int ny = cy + oy;
             double ssy = 0.0;
-            while (ny >= ncy) {
-              ny -= ncy;
-              ssy += 1.0;
-            }
-            while (ny < 0) {
-              ny += ncy;
-              ssy -= 1.0;
+            if (!deep) {
+              while (ny >= ncy) {
+                ny -= ncy;
+                ssy += 1.0;
+              }
+              while (ny < 0) {
+                ny += ncy;
+                ssy -= 1.0;
+              }
             }
             for (int oz = -rz; oz <= rz; ++oz) {
               int nz = cz + oz;
               double ssz = 0.0;
-              while (nz >= ncz) {
-                nz -= ncz;
-                ssz += 1.0;
-              }
-              while (nz < 0) {
-                nz += ncz;
-                ssz -= 1.0;
+              if (!deep) {
+                while (nz >= ncz) {
+                  nz -= ncz;
+                  ssz += 1.0;
+                }
+                while (nz < 0) {
+                  nz += ncz;
+                  ssz -= 1.0;
+                }
               }
               const int ncid = (nx * ncy + ny) * ncz + nz;
               if (stamp[static_cast<std::size_t>(ncid)] == gen) {
@@ -742,7 +997,8 @@ void passTilt(const double *xs, const double *ys, const double *zs, const int *i
 
 bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                  const std::vector<int> *subset, double rcutoff,
-                 std::vector<int> &offsets, std::vector<int> &cols, bool half) {
+                 std::vector<int> &offsets, std::vector<int> &cols, bool half,
+                 bool branchy = false) {
   const gen::FracBox box = gen::makeFracBox(yCloud);
   if (!box.ok || !box.triclinic) {
     return false;
@@ -925,15 +1181,17 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
   if (shifted) {
     if (half) {
       passFast<false, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                            ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr);
+                            ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr,
+                            branchy);
     } else {
       passFast<false, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                             ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr);
+                             ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr,
+                             branchy);
     }
   } else {
     passTilt<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
                     reach[0], reach[1], reach[2], h, rc2, half, false, sc.counts.data(),
-                    nullptr, nullptr);
+                    nullptr, nullptr, branchy);
   }
   phase().count = msSince(tCount);
   const auto tPrefix = Clock::now();
@@ -950,15 +1208,17 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
     if (shifted) {
       if (half) {
         passFast<true, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                             ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data());
+                             ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data(),
+                             branchy);
       } else {
         passFast<true, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                              ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data());
+                              ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data(),
+                              branchy);
       }
     } else {
       passTilt<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
                      reach[0], reach[1], reach[2], h, rc2, half, false, nullptr, offsets.data(),
-                     cols.data());
+                     cols.data(), branchy);
     }
   }
   phase().fill = msSince(tFill);
@@ -1448,13 +1708,13 @@ bool orthoFullCsr(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const std::vector<int> *subset, double rcutoff, std::vector<int> &offsets,
     std::vector<int> &cols, bool half, std::vector<std::vector<int>> *directRows,
-    const int *indexToID, bool *wroteRows) {
+    const int *indexToID, bool *wroteRows, bool branchy) {
   const int nop = yCloud.nop;
   if (nop < 0 || !(rcutoff > 0.0)) {
     return false;
   }
   if (yCloud.box.size() >= 6) {
-    return tiltFullCsr(yCloud, subset, rcutoff, offsets, cols, half);
+    return tiltFullCsr(yCloud, subset, rcutoff, offsets, cols, half, branchy);
   }
   if (yCloud.box.size() != 3) {
     return false;
@@ -1677,11 +1937,12 @@ bool orthoFullCsr(
   if (fast) {
     if (half) {
       passFast<false, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                            ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr);
+                            ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr,
+                            branchy);
     } else if (maxThreads == 1) {
       passFastStashHalf(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                         ncell[2], shx, shy, shz, rc2, sc.counts.data(), sc.stash.data(),
-                        &sc.overflowed);
+                        &sc.overflowed, branchy);
     } else {
       passFastStash(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
                     shx, shy, shz, rc2, sc.counts.data(), sc.stash.data(), &sc.overflowed);
@@ -1711,10 +1972,12 @@ bool orthoFullCsr(
     } else if (fast) {
       if (half) {
         passFast<true, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                             ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data());
+                             ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data(),
+                             branchy);
       } else {
         passFast<true, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                              ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data());
+                              ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data(),
+                              branchy);
       }
     } else {
       passSafe<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],

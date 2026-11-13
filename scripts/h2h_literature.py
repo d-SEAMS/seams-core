@@ -414,11 +414,46 @@ class Engine:
         return summary, samples, count_512, others
 
 
-def hydrogen_waters(frame):
-    """Oxygens plus one hydrogen 0.96 A along each of the two nearest bonds.
+def _orient_donors(n, edges):
+    """Orient every edge. A 4-regular graph then has out-degree 2.
 
-    Coordinates are nanometres, which is the unit TRACE reads. The
-    returned fourth-neighbour distance is in angstroms.
+    Hierholzer's walk consumes each edge once. On a hydrogen-bond graph
+    that is a disjoint union of Eulerian components, each water donates
+    along half of its bonds.
+    """
+    remaining = [set() for _ in range(n)]
+    for i, j in edges:
+        if i == j:
+            continue
+        remaining[i].add(j)
+        remaining[j].add(i)
+    donors = [[] for _ in range(n)]
+    for start in range(n):
+        if not remaining[start]:
+            continue
+        stack = [start]
+        trail = []
+        while stack:
+            u = stack[-1]
+            if remaining[u]:
+                v = remaining[u].pop()
+                remaining[v].discard(u)
+                stack.append(v)
+            else:
+                trail.append(stack.pop())
+        trail.reverse()
+        for a, b in zip(trail, trail[1:]):
+            donors[a].append(b)
+    return donors
+
+
+def hydrogen_waters(frame):
+    """Oxygens plus hydrogens along an out-degree-2 orientation of the shell.
+
+    Coordinates are nanometres, which is the unit TRACE reads. Each oxygen
+    keeps up to four neighbours inside the cutoff. Those edges are oriented
+    so a 4-coordinated water donates two hydrogen bonds; the acceptor is the
+    other end. The returned fourth-neighbour distance is in angstroms.
     """
     import vesin
     pos = np.asarray(frame["positions"], dtype=np.float64)
@@ -430,28 +465,46 @@ def hydrogen_waters(frame):
         bond = np.asarray(vector, dtype=np.float64)
         buckets[int(atom)].append((float(np.linalg.norm(bond)), bond))
     fourth = []
-    waters = []
+    nearest = []
     for i, point in enumerate(pos):
         neigh = sorted(buckets[i], key=lambda item: item[0])
         if len(neigh) >= 4:
             fourth.append(neigh[3][0])
-        if len(neigh) >= 2:
-            hydrogens = [
-                point + bond / np.linalg.norm(bond) * 0.96 for _dist, bond in neigh[:2]
-            ]
-        elif len(neigh) == 1:
-            direction = neigh[0][1]
-            direction = direction / np.linalg.norm(direction) * 0.96
-            hydrogens = [point + direction, point - direction]
-        else:
-            hydrogens = [
-                point + np.array([0.96, 0.0, 0.0]),
-                point + np.array([0.0, 0.96, 0.0]),
-            ]
+        nearest.append(neigh[:4])
+    left_i, right_i, disp_i = vesin.NeighborList(cutoff=CUTOFF, full_list=False).compute(
+        points=pos, box=frame["lattice"], periodic=True, quantities="ijD", copy=True)
+    pair_vec = {}
+    for a, b, vector in zip(left_i, right_i, disp_i):
+        a = int(a)
+        b = int(b)
+        if a == b:
+            continue
+        pair_vec[(a, b)] = np.asarray(vector, dtype=np.float64)
+        pair_vec[(b, a)] = -np.asarray(vector, dtype=np.float64)
+    allowed = set()
+    for i in range(n):
+        order = sorted(
+            ((float(np.linalg.norm(pair_vec[(i, j)])), j) for j in range(n) if (i, j) in pair_vec),
+            key=lambda item: item[0])
+        for _dist, j in order[:4]:
+            allowed.add((min(i, j), max(i, j)))
+    donors = _orient_donors(n, allowed)
+    waters = []
+    for i, point in enumerate(pos):
+        directions = []
+        for j in donors[i][:2]:
+            bond = pair_vec.get((i, j))
+            if bond is None:
+                continue
+            directions.append(point + bond / np.linalg.norm(bond) * 0.96)
+        while len(directions) < 2:
+            directions.append(point + np.array([0.96 if len(directions) == 0 else 0.0,
+                                                0.0 if len(directions) == 0 else 0.96,
+                                                0.0]))
         waters.append({
             "oxygen": (point / 10.0).tolist(),
-            "hydrogen1": (np.asarray(hydrogens[0]) / 10.0).tolist(),
-            "hydrogen2": (np.asarray(hydrogens[1]) / 10.0).tolist(),
+            "hydrogen1": (np.asarray(directions[0]) / 10.0).tolist(),
+            "hydrogen2": (np.asarray(directions[1]) / 10.0).tolist(),
         })
     lengths = np.diag(np.asarray(frame["lattice"], dtype=np.float64))
     median_fourth = float(np.median(fourth)) if fourth else CUTOFF
@@ -477,7 +530,7 @@ def cage_setup(frame):
         return text, box_nm, cutoff_nm, "mutual", note
     note = (
         "TRACE cutoff 0.35 nm and angle 35 degrees. Hydrogens sit 0.96 A "
-        "along the two nearest oxygen-oxygen bonds"
+        "along an out-degree-2 orientation of the four nearest oxygen neighbours"
     )
     return text, box_nm, 0.35, "cutoff", note
 
@@ -945,6 +998,12 @@ def run_session(args, threads):
 
 def run_frame(engine, writer, handle, log, threads, cpus, frame, args, done):
     wanted = set(args.only.split(",")) if args.only else None
+    # sI and sII are the clathrate cage frames. The other operations stay
+    # on ice, the liquid and the TIP4P slab.
+    if frame["phase"] in ("sI", "sII"):
+        if wanted is not None and "cages" not in wanted:
+            return
+        wanted = {"cages"}
 
     def keep(name):
         return wanted is None or name in wanted
@@ -1152,7 +1211,9 @@ def run_frame(engine, writer, handle, log, threads, cpus, frame, args, done):
             except Exception as exc:
                 record_failure(writer, handle, log, threads, cpus, frame,
                                "coordination", "PLUMED", str(exc))
-    if keep("cages") and (
+    # Cage labels are the clathrate census. Ice Ic and ice Ih have no
+    # 5^12 cage, so that comparison runs on the GenIce sI and sII cells.
+    if keep("cages") and frame["phase"] in ("sI", "sII") and (
         not seen("cages", "d-SEAMS") or not seen("cages", "ClavisCage")
     ):
         ours = None

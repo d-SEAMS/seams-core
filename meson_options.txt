@@ -25,13 +25,13 @@ option('with_ira', type: 'feature', value: 'auto',
 option('with_spglib', type: 'feature', value: 'auto',
   description: 'Link spglib for space groups of crystalline regions')
 option('with_csm', type: 'feature', value: 'disabled',
-  description: 'Optional external GPL-2 continuous shape measure. Off by default and not linked')
+  description: 'GPL-2 continuous shape measure (Avnir). Off by default. When enabled, use csm_shape on PATH or build it if OpenBabel is present. Not linked')
 option('with_sphericart', type: 'feature', value: 'auto',
   description: 'Batch Cartesian Ylm for host Steinhardt via sphericart')
 option('with_nauty', type: 'feature', value: 'auto',
   description: 'Canonical cage certificates via nauty')
-option('with_lua', type: 'feature', value: 'disabled',
-  description: 'Unused. Lua is the dseams library in the yodaStruct repo')
+option('with_lua', type: 'feature', value: 'auto',
+  description: 'Build require("dseams") for Lua 5.4 and LuaJIT when the interpreter is found')
 
 option('with_chemfiles', type: 'feature', value: 'auto',
   description: 'Trajectory I/O via chemfiles (on when the library is found or can be fetched)')

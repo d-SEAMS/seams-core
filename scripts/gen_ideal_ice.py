@@ -190,8 +190,22 @@ def ideal_frames(sizes=SIZES):
     return frames
 
 
+def genice_frames(root=None):
+    """Unit cells GenIce wrote for the clathrate cage comparison."""
+    root = Path(root) if root is not None else ROOT
+    traj = root / "input" / "traj"
+    frames = []
+    for name, phase in (("genice_sI", "sI"), ("genice_sII", "sII")):
+        path = traj / f"{name}.lammpstrj"
+        if path.is_file():
+            frames.append(read_lammps_first(path, 1, name, phase))
+    return frames
+
+
 def campaign_frames(sizes=SIZES, root=None):
-    return ideal_frames(sizes) + liquid_frames(root)
+    known = tuple(n for n in sizes if n in IC_REPS)
+    ideal = ideal_frames(known) if known else []
+    return ideal + liquid_frames(root) + genice_frames(root)
 
 
 def main():

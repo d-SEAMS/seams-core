@@ -1,0 +1,21 @@
+cores 8
+model Intel(R) Xeon(R) Processor
+affinity 0-7
+n 8
+crystal ice Ic 884736 molecules, cutoff 3.5 A
+each sample is the third call in a fresh process
+full cutoff rings call interleaved against 9fcaab36
+phases are neighbour list, primitive rings depth 6
+hash 16968914358209379624
+threads 1 v5_total 669.596 v6_total 636.651 v5_search 506.626 v6_search 476.425
+v5_search_samples 509.932 506.846 505.105 507.873 503.892 506.406 504.589 507.008
+v6_search_samples 479.414 476.264 476.586 474.164 474.200 478.027 477.484 476.155
+threads 2 v5_total 401.872 v6_total 385.614 v5_search 292.250 v6_search 284.524
+v5_search_samples 294.448 298.024 288.735 292.093 290.334 292.567 292.093 292.407
+v6_search_samples 289.907 284.588 283.202 283.152 284.460 284.882 282.781 285.098
+threads 4 v5_total 237.901 v6_total 234.229 v5_search 169.435 v6_search 164.817
+v5_search_samples 170.900 166.720 167.583 171.158 170.005 169.861 166.953 169.010
+v6_search_samples 164.032 177.401 165.430 164.134 163.366 168.806 164.597 165.037
+threads 8 v5_total 153.593 v6_total 153.661 v5_search 106.241 v6_search 104.428
+v5_search_samples 109.205 105.544 105.306 106.159 106.323 105.793 108.044 106.470
+v6_search_samples 104.983 115.311 103.691 103.933 103.685 104.041 104.816 104.826

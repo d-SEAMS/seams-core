@@ -208,10 +208,14 @@ void binCutoffRows(std::size_t count, const Ends &ends,
                                subset[static_cast<std::size_t>(j)]};
   };
   int threads = 1;
-  // nvc++ -mp=gpu SIGSEGVs host parallel regions in libnvomp
+  // The parallel sort forks a team that has just been idle through the
+  // linkcell search. Waking it is several milliseconds on some samples
+  // and tens on others, which is slower than placing the rows on the
+  // calling thread. Keep the parallel path for a list that is large
+  // enough for that wake to be the smaller term.
 #if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-  if (!gSerialCutoff && nop >= kParallelRowsMinAtoms && !omp_in_parallel() &&
-      omp_get_max_threads() > 1) {
+  if (!gSerialCutoff && nop >= kParallelRowsMinAtoms && count >= (1u << 20) &&
+      !omp_in_parallel() && omp_get_max_threads() > 1) {
     threads = omp_get_max_threads();
   }
 #endif
@@ -263,8 +267,13 @@ void binCutoffRows(std::size_t count, const Ends &ends,
  */
 bool cutoffRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                 const std::vector<int> &subset, double rcutoff,
-                CutoffRows &out) {
-  seams::adoptThreads();
+                CutoffRows &out, bool handoff = true, double cellHint = 0.0) {
+  // The handoff pauses the OpenMP team so another pool can take the
+  // cores. The signature search keeps that team and only sets the
+  // linkcell width.
+  if (handoff) {
+    seams::adoptThreads();
+  }
   const size_t nSubset = subset.size();
   if (nSubset == 0) {
     out.first.assign(static_cast<std::size_t>(yCloud.nop) + 1, 0);
@@ -293,10 +302,13 @@ bool cutoffRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
         {box[0][0], box[0][1], box[0][2]}, {box[1][0], box[1][1], box[1][2]},
         {box[2][0], box[2][1], box[2][2]},
         {origin[0], origin[1], origin[2]});
-    const double hint = std::max(
-        rcutoff, std::cbrt(kAtomsPerLinkcellCell *
-                           nneigh::dumpVolume(yCloud.box, yCloud.boxLow) /
-                           static_cast<double>(nSubset)));
+    const double hinted = cellHint > 0.0
+                              ? cellHint
+                              : std::max(rcutoff,
+                                         std::cbrt(kAtomsPerLinkcellCell *
+                                                   nneigh::dumpVolume(yCloud.box, yCloud.boxLow) /
+                                                   static_cast<double>(nSubset)));
+    const double hint = hinted;
     // linkcell::pairs_within zeroes its vector on this thread before the
     // fill writes it; the C call fills a buffer nothing has touched
     const lc_cell raw = cell.raw();
@@ -1821,6 +1833,74 @@ bool nneigh::refillIndexRows(const molSys::PointCloud<molSys::Point<double>, dou
 }
 
 std::vector<std::vector<int>>
+nneigh::neighListLinkcell(
+    double rcutoff,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int typeI) {
+#ifndef SEAMS_HAS_LINKCELL
+  (void)rcutoff;
+  (void)yCloud;
+  (void)typeI;
+  return {};
+#else
+  if (!hasPeriodicBox(yCloud) || !(rcutoff > 0.0) || yCloud.nop <= 0) {
+    return {};
+  }
+  seams::prepareCompute();
+  int pool = 1;
+#ifdef SEAMS_HAS_OPENMP
+  if (!gSerialCutoff && !omp_in_parallel()) {
+    pool = std::max(1, omp_get_max_threads());
+  }
+#endif
+  // Eight threads loses to four below a few thousand molecules: the
+  // list and the cage walk do not have a full team of work, and the
+  // extra workers show up as a slow sample. Larger crystals keep the
+  // width the caller asked for.
+  if (yCloud.nop < 4096 && pool > 4) {
+    pool = 4;
+  }
+#ifdef SEAMS_HAS_OPENMP
+  if (!omp_in_parallel()) {
+    omp_set_num_threads(pool);
+  }
+#endif
+  lc_set_threads(pool);
+  const std::vector<int> indexToID = indexToIDTable(yCloud);
+  std::vector<int> typeIIndices;
+  typeIIndices.reserve(static_cast<std::size_t>(yCloud.nop));
+  for (int i = 0; i < yCloud.nop; i++) {
+    if (yCloud.pts[static_cast<std::size_t>(i)].type == typeI) {
+      typeIIndices.push_back(i);
+    }
+  }
+  if (typeIIndices.empty()) {
+    return {};
+  }
+  // Linkcell's buffered walk does not speed up on a large crystal: at
+  // 884736 molecules it stays near the one-thread time while the
+  // orthorhombic cell list does not. The rows are the same cutoff set,
+  // sorted, so the ring search does not depend on which builder ran.
+#ifdef SEAMS_HAS_OPENMP
+  const bool csrTeam = !gSerialCutoff && !omp_in_parallel() && pool > 1;
+#else
+  const bool csrTeam = false;
+#endif
+  if (csrTeam && (yCloud.box.size() == 3 || yCloud.box.size() >= 6)) {
+    std::vector<int> offsets;
+    std::vector<int> cols;
+    if (orthoFullCsr(yCloud, &typeIIndices, rcutoff, offsets, cols, false)) {
+      return idRowsFromCsr(yCloud, indexToID, offsets, cols);
+    }
+  }
+  CutoffRows rows;
+  if (!cutoffRows(yCloud, typeIIndices, rcutoff, rows, false, 0.0)) {
+    return {};
+  }
+  return rowsByID(rows, indexToID, yCloud.nop);
+#endif
+}
+
+std::vector<std::vector<int>>
 nneigh::neighListO(double rcutoff,
                    const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                    int typeI) {
@@ -2776,7 +2856,11 @@ std::vector<std::vector<int>>
 nneigh::kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     double candidateCutoff, int typeI, bool mutual) {
-  seams::adoptThreads();
+  seams::prepareCompute();
+  [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
+#ifdef SEAMS_HAS_LINKCELL
+  lc_set_threads(seams::teamFor(yCloud.nop));
+#endif
   if (yCloud.nop <= 0 || k <= 0) {
     return {};
   }
@@ -2831,6 +2915,10 @@ nneigh::kNearestNeighbourPair(
   if (yCloud.nop <= 0 || k <= 0) {
     return {{}, {}};
   }
+  seams::prepareCompute();
+#ifdef SEAMS_HAS_LINKCELL
+  lc_set_threads(seams::teamFor(yCloud.nop));
+#endif
   const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
   const auto nom = nominatePacked(yCloud, k, typeI, hint);
   std::vector<std::vector<int>> mutual;
@@ -2843,7 +2931,11 @@ std::vector<std::vector<int>>
 nneigh::kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     double candidateCutoff, const std::vector<int> &types, bool mutual) {
-  seams::adoptThreads();
+  seams::prepareCompute();
+  [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
+#ifdef SEAMS_HAS_LINKCELL
+  lc_set_threads(seams::teamFor(yCloud.nop));
+#endif
   if (yCloud.nop <= 0 || k <= 0 || types.empty()) {
     return {};
   }
@@ -2861,6 +2953,10 @@ nneigh::kNearestNeighbourPair(
   if (yCloud.nop <= 0 || k <= 0 || types.empty()) {
     return {{}, {}};
   }
+  seams::prepareCompute();
+#ifdef SEAMS_HAS_LINKCELL
+  lc_set_threads(seams::teamFor(yCloud.nop));
+#endif
   const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
   const auto nom = nominatePacked(yCloud, k, types.front(), hint, &types);
   std::vector<std::vector<int>> mutual;

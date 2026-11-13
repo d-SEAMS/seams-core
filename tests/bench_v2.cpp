@@ -127,6 +127,7 @@ int main(int argc, char **argv) {
   std::vector<double> samples(static_cast<std::size_t>(reps));
   int pairs = 0;
   int sink = 0;
+  int crystal = 0;
   std::uint64_t sum = 0;
   for (int r = 0; r < reps + 1; ++r) {
     auto t0 = std::chrono::steady_clock::now();
@@ -145,11 +146,14 @@ int main(int argc, char **argv) {
     } else if (mode == "symmetry") {
       std::vector<int> kind;
       symm::diamondFromCsr(cloud, offsets, cols, kind);
-      int labeled = 0;
+      // Every atom is labelled: 0 is ice Ih, 1 is ice Ic, 2 is
+      // stacking-disordered, and -1 is other. A test on kind > 0
+      // dropped the hexagonal label. crystal is the ice count.
+      crystal = 0;
       for (int v : kind) {
-        labeled += v > 0 ? 1 : 0;
+        crystal += v >= 0 ? 1 : 0;
       }
-      sink = labeled;
+      sink = static_cast<int>(kind.size());
     }
     auto t1 = std::chrono::steady_clock::now();
     if (r == 0) {
@@ -159,9 +163,9 @@ int main(int argc, char **argv) {
         std::chrono::duration<double, std::milli>(t1 - t0).count();
   }
   std::printf("mode=%s molecules=%d threads=%d pairs=%d checksum=%llu sink=%d "
-              "median_ms=%.4f samples_ms=",
+              "crystal=%d median_ms=%.4f samples_ms=",
               mode.c_str(), molecules, threads, pairs,
-              static_cast<unsigned long long>(sum), sink, median(samples));
+              static_cast<unsigned long long>(sum), sink, crystal, median(samples));
   for (int r = 0; r < reps; ++r) {
     std::printf("%s%.4f", r ? "," : "", samples[static_cast<std::size_t>(r)]);
   }

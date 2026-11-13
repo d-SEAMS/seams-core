@@ -13,6 +13,7 @@
 // with AVX2.
 
 #include <shell_hot.hpp>
+#include <thread_team.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -676,6 +677,19 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
     py[i] = 1.0e6;
     pz[i] = 1.0e6;
     r2[i] = 1.0e300;
+  }
+  for (int a = 0; a < 12; a++) {
+    const __m256d xa = _mm256_set1_pd(px[a]);
+    const __m256d ya = _mm256_set1_pd(py[a]);
+    const __m256d za = _mm256_set1_pd(pz[a]);
+    for (int b = 0; b < 12; b += 4) {
+      const __m256d dx = _mm256_sub_pd(xa, _mm256_load_pd(px + b));
+      const __m256d dy = _mm256_sub_pd(ya, _mm256_load_pd(py + b));
+      const __m256d dz = _mm256_sub_pd(za, _mm256_load_pd(pz + b));
+      const __m256d d2 = _mm256_add_pd(_mm256_mul_pd(dx, dx),
+                                      _mm256_add_pd(_mm256_mul_pd(dy, dy), _mm256_mul_pd(dz, dz)));
+      _mm256_storeu_pd(&pair[a][b], d2);
+    }
   }
   // (1 + sqrt(2)) / 2, the adaptive common-neighbour cutoff. It lies between
   // the first and second shells of the FCC/HCP cluster.
@@ -1998,10 +2012,15 @@ void topUpBonds(int self, double ci0, double ci1, double ci2, int ix0, int iy0, 
 }
 
 void classifyPrepared(const double *x, const double *y, const double *z, int n,
-                      const double lat[3][3], const CanonShell &canon, double gate, int *kind) {
+                      const double lat[3][3], const CanonShell &canon, double gate, int *kind,
+                      double thermalQ, double bondRatio) {
   if (n <= 0) {
     return;
   }
+  // The shell walk is OpenMP. A few thousand atoms do not feed eight
+  // threads, and this call does not start a second pool.
+  seams::prepareCompute();
+  [[maybe_unused]] const seams::TeamWidth team(n);
   const bool timed = symTime();
   const auto tAll = std::chrono::steady_clock::now();
   // Nine of the twelve second-neighbour signatures is the ambiguous band
@@ -2398,14 +2417,14 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       kind[i] = -1;
       continue;
     }
-    // Liquid is not tetrahedral. The gate is the tetrahedral order on the
-    // cutoff bonds. 0.94 sits under the lowest exact crystal on the training
-    // seeds, so a lower value does not open the second shell. Ideal ice has
-    // equal bonds and does not pay for q; the staggered test names it.
+    // Liquid is not tetrahedral. The gate only skips an obvious liquid
+    // before the second shell is read. Ideal ice has equal bonds and does
+    // not pay for q; the staggered test names it. kThermalQ is under the
+    // thermal-crystal body and above the liquid median.
     double qEarly = -1.0;
     if (!(bMax <= bMin * 1.00001)) {
       qEarly = tetraQ(mine);
-      if (qEarly < 0.94) {
+      if (qEarly < thermalQ) {
         kind[i] = -1;
         continue;
       }
@@ -2446,7 +2465,9 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       // A wide second shell is not an FCC or HCP fingerprint. The fit still
       // sees a shell whose radius varies by less than 1.6.
       if (sHi > sLo * (1.45 * 1.45)) {
-        if (qEarly >= 0.95 && bMax <= bMin * (1.15 * 1.15) && sHi <= sLo * (1.6 * 1.6)) {
+        const double bondCut2 = bondRatio * bondRatio;
+        if (qEarly >= thermalQ && bMax <= bMin * bondCut2 &&
+            sHi <= sLo * (1.6 * 1.6)) {
           kind[i] = -3;
         } else {
           kind[i] = -1;
@@ -2462,7 +2483,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
         continue;
       }
       const double qNow = qEarly >= 0.0 ? qEarly : tetraQ(mine);
-      if (qNow < 0.88) {
+      if (qNow < thermalQ) {
         kind[i] = -1;
         continue;
       }
@@ -2476,7 +2497,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
         }
         continue;
       }
-      const bool tightBonds = bMax <= bMin * (1.15 * 1.15);
+      const bool tightBonds = bMax <= bMin * (bondRatio * bondRatio);
       double sMin = 1e300;
       double sMax = 0.0;
       for (int s = 0; s < 12; s++) {
@@ -2489,7 +2510,9 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
         }
       }
       // -3: worth a fit, but only once a crystal neighbour is known.
-      if (qNow >= 0.95 && tightBonds && sMax <= sMin * (1.6 * 1.6)) {
+      // The neighbour test, not a quenched-crystal q, keeps bulk liquid
+      // out of Kabsch. Thermal ice sits below 0.95.
+      if (qNow >= thermalQ && tightBonds && sMax <= sMin * (1.6 * 1.6)) {
         kind[i] = -3;
         continue;
       }

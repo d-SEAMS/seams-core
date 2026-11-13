@@ -1,0 +1,39 @@
+archive_sha256 500f9c338bf4807ea0685acd15ead8492e4237c7d7f5380041683789a0d4c804
+archive input/traj/genice_sI.lammpstrj
+seams bbdir-release/seams
+seams_version seams 2.14.0
+source_commit 2914162cb8200dc1a5668a54d570130785ccef0c
+cpu_model Intel(R) Xeon(R) Processor
+cpu_cores 8
+affinity 0-7
+source_tree 923fdf1d49430426a42cfd10a42ec2873638cafa
+source_dirty no
+note the archive hash is the file passed to --archive; source_commit is the checkout the binary was built from
+
+match	mW DDC cages	expected 2048	got 2048	maximum packing n/2
+match	mW seeded hexagonal	expected 0	got 0	mW cubic
+match	mW seeded cubic	expected 4096	got 4096	mW cubic
+match	mW seeded both	expected 0	got 0	mW cubic
+match	mW seeded water	expected 0	got 0	mW cubic
+match	sI 512	expected 2	got 2	genice_sI.lammpstrj
+match	sI 51262	expected 6	got 6	genice_sI.lammpstrj
+match	sI 51264	expected 0	got 0	genice_sI.lammpstrj
+match	sI 51268	expected 0	got 0	genice_sI.lammpstrj
+match	sII 512	expected 16	got 16	genice_sII.lammpstrj
+match	sII 51264	expected 8	got 8	genice_sII.lammpstrj
+match	sII 51262	expected 0	got 0	genice_sII.lammpstrj
+match	sII 51268	expected 0	got 0	genice_sII.lammpstrj
+match	sH 512	expected 12	got 12	genice_sH.lammpstrj
+match	sH 51262	expected 0	got 0	genice_sH.lammpstrj
+match	sH 51264	expected 0	got 0	genice_sH.lammpstrj
+match	sH 51268	expected 4	got 4	genice_sH.lammpstrj
+match	sH sh	expected 8	got 8	genice_sH.lammpstrj
+match	nucleation frame 1 ih	expected 141	got 141	walks frame 1
+match	nucleation frame 1 ic	expected 98	got 98	walks frame 1
+match	nucleation frame 1 both	expected 41	got 41	walks frame 1
+not-rerun	nucleation frame 148	full nucleation.lammpstrj is not in this checkout (figshare 10.6084/m9.figshare.11448702); frame 1 was rerun
+not-rerun	Table 2 head-to-head	needs OVITO, freud, GenIce2, cycless and R.I.N.G.S. from prepare_h2h.sh; not installed here
+not-rerun	GPU batch	no NVIDIA GPU on this machine; the deposited record names no engine commit
+not-rerun	legacy seeding and brine campaign	starting liquids were not archived; the campaign cannot be regenerated
+
+mismatches 0

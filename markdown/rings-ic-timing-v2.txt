@@ -1,0 +1,170 @@
+# d-SEAMS hop and bitset balls, release -O3
+# depth 6 from the combined session; depth 8 and 10 after the packed bitset
+frame molecules 10648 depth 6 side 69.859383 min_degree 4 max_degree 4 edges 21296
+sample threads 1 molecules 10648 legacy_ms 8.829358 hop_ms 5.561289 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 8.461051 hop_ms 5.419695 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 7.901052 hop_ms 5.515955 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 7.855007 hop_ms 5.367571 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 7.780255 hop_ms 5.303936 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 8.002292 hop_ms 5.620741 legacy_rings 21296 hop_rings 21296
+summary threads 1 molecules 10648 legacy_median_ms 7.951672 hop_median_ms 5.467825 rings 21296 equal 1 used_balls 0
+sample threads 8 molecules 10648 legacy_ms 4.935670 hop_ms 3.830955 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 5.444910 hop_ms 4.675088 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 5.355798 hop_ms 5.124690 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 5.541061 hop_ms 5.010079 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 5.296524 hop_ms 4.959078 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 5.984293 hop_ms 5.118541 legacy_rings 21296 hop_rings 21296
+summary threads 8 molecules 10648 legacy_median_ms 5.400354 hop_median_ms 4.984578 rings 21296 equal 1 used_balls 0
+frame molecules 110592 depth 6 side 152.420471 min_degree 4 max_degree 4 edges 221184
+sample threads 1 molecules 110592 legacy_ms 87.403038 hop_ms 54.933928 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 83.509532 hop_ms 55.290102 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 79.468604 hop_ms 54.448562 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 79.251108 hop_ms 54.045090 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 80.005966 hop_ms 54.078154 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 77.952951 hop_ms 54.022899 legacy_rings 221184 hop_rings 221184
+summary threads 1 molecules 110592 legacy_median_ms 79.737285 hop_median_ms 54.263358 rings 221184 equal 1 used_balls 0
+sample threads 8 molecules 110592 legacy_ms 39.738747 hop_ms 33.722215 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 42.342108 hop_ms 37.861488 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 46.274377 hop_ms 44.665798 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 46.280399 hop_ms 49.907300 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 54.749324 hop_ms 49.243166 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 48.565619 hop_ms 45.166993 legacy_rings 221184 hop_rings 221184
+summary threads 8 molecules 110592 legacy_median_ms 46.277388 hop_median_ms 44.916396 rings 221184 equal 1 used_balls 0
+frame molecules 10648 depth 8 side 69.859383 min_degree 4 max_degree 4 edges 21296
+sample threads 1 molecules 10648 legacy_ms 20.654488 hop_ms 16.479486 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 20.904442 hop_ms 14.646039 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 20.311743 hop_ms 14.641647 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 20.372577 hop_ms 15.231831 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 20.162658 hop_ms 14.818593 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 20.760090 hop_ms 15.238597 legacy_rings 21296 hop_rings 21296
+summary threads 1 molecules 10648 legacy_median_ms 20.513533 hop_median_ms 15.025212 rings 21296 equal 1 used_balls 2
+sample threads 8 molecules 10648 legacy_ms 7.418030 hop_ms 9.101967 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 8.115629 hop_ms 8.961542 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 7.884118 hop_ms 9.320344 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 8.359289 hop_ms 9.010046 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 8.560395 hop_ms 8.987266 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 7.732840 hop_ms 9.431629 legacy_rings 21296 hop_rings 21296
+summary threads 8 molecules 10648 legacy_median_ms 7.999873 hop_median_ms 9.056007 rings 21296 equal 1 used_balls 2
+frame molecules 110592 depth 8 side 152.420471 min_degree 4 max_degree 4 edges 221184
+sample threads 1 molecules 110592 legacy_ms 208.468461 hop_ms 212.930358 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 208.403126 hop_ms 209.746494 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 208.245058 hop_ms 206.188693 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 212.735388 hop_ms 215.599232 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 207.523013 hop_ms 212.703986 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 209.538564 hop_ms 213.698909 legacy_rings 221184 hop_rings 221184
+summary threads 1 molecules 110592 legacy_median_ms 208.435793 hop_median_ms 212.817172 rings 221184 equal 1 used_balls 2
+sample threads 8 molecules 110592 legacy_ms 65.390550 hop_ms 97.255098 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 71.025317 hop_ms 105.090561 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 75.101765 hop_ms 107.031824 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 80.148958 hop_ms 113.472702 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 79.925071 hop_ms 102.325499 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 72.531201 hop_ms 97.602465 legacy_rings 221184 hop_rings 221184
+summary threads 8 molecules 110592 legacy_median_ms 73.816483 hop_median_ms 103.708030 rings 221184 equal 1 used_balls 2
+frame molecules 10648 depth 10 side 69.859383 min_degree 4 max_degree 4 edges 21296
+sample threads 1 molecules 10648 legacy_ms 110.403171 hop_ms 47.541745 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 110.194538 hop_ms 43.769771 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 111.199322 hop_ms 43.744050 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 110.296415 hop_ms 44.185866 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 112.080550 hop_ms 44.081569 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 110.109602 hop_ms 43.749428 legacy_rings 21296 hop_rings 21296
+summary threads 1 molecules 10648 legacy_median_ms 110.349793 hop_median_ms 43.925670 rings 21296 equal 1 used_balls 2
+sample threads 8 molecules 10648 legacy_ms 29.522109 hop_ms 17.116601 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 29.816982 hop_ms 18.824737 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 32.203729 hop_ms 18.631845 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 31.523298 hop_ms 18.690147 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 32.922704 hop_ms 18.512724 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 30.162625 hop_ms 19.378931 legacy_rings 21296 hop_rings 21296
+summary threads 8 molecules 10648 legacy_median_ms 30.842962 hop_median_ms 18.660996 rings 21296 equal 1 used_balls 2
+frame molecules 110592 depth 10 side 152.420471 min_degree 4 max_degree 4 edges 221184
+sample threads 1 molecules 110592 legacy_ms 995.089794 hop_ms 575.836582 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 997.125492 hop_ms 567.182943 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 996.919007 hop_ms 568.742701 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 1004.992668 hop_ms 562.889717 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 992.219157 hop_ms 582.961556 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 997.287654 hop_ms 600.081423 legacy_rings 221184 hop_rings 221184
+summary threads 1 molecules 110592 legacy_median_ms 997.022250 hop_median_ms 572.289642 rings 221184 equal 1 used_balls 2
+sample threads 8 molecules 110592 legacy_ms 231.858793 hop_ms 201.395318 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 235.872582 hop_ms 195.333077 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 239.072538 hop_ms 193.428433 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 235.851180 hop_ms 186.114233 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 238.436069 hop_ms 191.487329 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 239.774382 hop_ms 185.476960 legacy_rings 221184 hop_rings 221184
+summary threads 8 molecules 110592 legacy_median_ms 237.154325 hop_median_ms 192.457881 rings 221184 equal 1 used_balls 2
+
+# packed bitset retime, depth 8 and 10
+frame molecules 10648 depth 8 side 69.859383 min_degree 4 max_degree 4 edges 21296
+sample threads 1 molecules 10648 legacy_ms 21.029401 hop_ms 17.335213 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 20.622854 hop_ms 18.409777 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 21.060406 hop_ms 18.300343 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 20.306003 hop_ms 16.191932 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 20.378038 hop_ms 15.681983 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 20.212042 hop_ms 16.165286 legacy_rings 21296 hop_rings 21296
+summary threads 1 molecules 10648 legacy_median_ms 20.500446 hop_median_ms 16.763573 rings 21296 equal 1 used_balls 2
+sample threads 8 molecules 10648 legacy_ms 8.405000 hop_ms 8.036375 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 8.391721 hop_ms 10.114050 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 10.232927 hop_ms 8.754974 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 9.245229 hop_ms 8.268442 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 8.902648 hop_ms 9.867798 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 10.274696 hop_ms 9.614508 legacy_rings 21296 hop_rings 21296
+summary threads 8 molecules 10648 legacy_median_ms 9.073939 hop_median_ms 9.184741 rings 21296 equal 1 used_balls 2
+frame molecules 110592 depth 8 side 152.420471 min_degree 4 max_degree 4 edges 221184
+sample threads 1 molecules 110592 legacy_ms 213.253924 hop_ms 206.337554 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 207.335475 hop_ms 203.544239 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 215.028207 hop_ms 237.020663 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 219.222607 hop_ms 198.096784 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 210.675985 hop_ms 197.522811 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 211.250744 hop_ms 201.609170 legacy_rings 221184 hop_rings 221184
+summary threads 1 molecules 110592 legacy_median_ms 212.252334 hop_median_ms 202.576705 rings 221184 equal 1 used_balls 2
+sample threads 8 molecules 110592 legacy_ms 68.216261 hop_ms 83.510457 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 81.998869 hop_ms 94.894480 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 83.092508 hop_ms 90.294948 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 80.722412 hop_ms 91.220087 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 84.620299 hop_ms 90.536289 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 80.399112 hop_ms 90.627872 legacy_rings 221184 hop_rings 221184
+summary threads 8 molecules 110592 legacy_median_ms 81.360641 hop_median_ms 90.582080 rings 221184 equal 1 used_balls 2
+frame molecules 10648 depth 10 side 69.859383 min_degree 4 max_degree 4 edges 21296
+sample threads 1 molecules 10648 legacy_ms 111.731097 hop_ms 54.790080 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 110.352965 hop_ms 50.570279 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 110.036709 hop_ms 50.153332 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 110.911749 hop_ms 49.291309 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 109.860884 hop_ms 49.655580 legacy_rings 21296 hop_rings 21296
+sample threads 1 molecules 10648 legacy_ms 109.570037 hop_ms 50.225620 legacy_rings 21296 hop_rings 21296
+summary threads 1 molecules 10648 legacy_median_ms 110.194837 hop_median_ms 50.189476 rings 21296 equal 1 used_balls 2
+sample threads 8 molecules 10648 legacy_ms 29.853373 hop_ms 17.953117 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 30.571158 hop_ms 16.646901 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 30.529985 hop_ms 16.834221 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 30.853746 hop_ms 17.138975 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 31.221613 hop_ms 18.012490 legacy_rings 21296 hop_rings 21296
+sample threads 8 molecules 10648 legacy_ms 31.184395 hop_ms 17.805800 legacy_rings 21296 hop_rings 21296
+summary threads 8 molecules 10648 legacy_median_ms 30.712452 hop_median_ms 17.472387 rings 21296 equal 1 used_balls 2
+frame molecules 110592 depth 10 side 152.420471 min_degree 4 max_degree 4 edges 221184
+sample threads 1 molecules 110592 legacy_ms 1035.988296 hop_ms 633.154536 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 1010.777597 hop_ms 594.612022 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 993.997178 hop_ms 595.331170 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 1007.223644 hop_ms 619.741377 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 1029.083439 hop_ms 627.171049 legacy_rings 221184 hop_rings 221184
+sample threads 1 molecules 110592 legacy_ms 1025.280357 hop_ms 624.443035 legacy_rings 221184 hop_rings 221184
+summary threads 1 molecules 110592 legacy_median_ms 1018.028977 hop_median_ms 622.092206 rings 221184 equal 1 used_balls 2
+sample threads 8 molecules 110592 legacy_ms 235.560718 hop_ms 198.932332 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 245.374659 hop_ms 191.840837 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 257.789716 hop_ms 183.050644 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 254.701190 hop_ms 192.472946 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 255.876662 hop_ms 184.604860 legacy_rings 221184 hop_rings 221184
+sample threads 8 molecules 110592 legacy_ms 252.885078 hop_ms 187.699009 legacy_rings 221184 hop_rings 221184
+summary threads 8 molecules 110592 legacy_median_ms 253.793134 hop_median_ms 189.769923 rings 221184 equal 1 used_balls 2
+
+# SQQ 0.5.8 chordless find_rings, cycless.cycles_iter, OVITO FindRingsModifier
+# bonds or the neighbour graph are built before the timer; one thread
+foreign molecules 10648 building graph
+foreign molecules 10648 edges 21296
+sample tool sqq-0.5.8 molecules 10648 ms 1145.037478 rings 21296
+sample tool sqq-0.5.8 molecules 10648 ms 1147.908316 rings 21296
+sample tool cycless molecules 10648 ms 33507.187688 rings 21296
+sample tool cycless molecules 10648 ms 33032.266737 rings 21296
+sample tool ovito molecules 10648 ms 48.061850 rings 21296
+sample tool ovito molecules 10648 ms 39.636020 rings 21296
+foreign molecules 110592 building graph
+foreign molecules 110592 edges 221184
+sample tool sqq-0.5.8 molecules 110592 ms 12497.765895 rings 221184
+sample tool cycless molecules 110592 ms 353796.684531 rings 221184
+sample tool ovito molecules 110592 ms 572.484874 rings 221184

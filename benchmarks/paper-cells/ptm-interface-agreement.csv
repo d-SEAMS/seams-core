@@ -1,0 +1,17 @@
+frame,molecules,code,our_class,their_class,count,our_total
+tip4p-equilibrated-interface,4096,PTM,other,Other,2643,3134
+tip4p-equilibrated-interface,4096,PTM,other,hex-diamond,491,3134
+tip4p-equilibrated-interface,4096,PTM,Ih,Other,52,962
+tip4p-equilibrated-interface,4096,PTM,Ih,hex-diamond,910,962
+tip4p-equilibrated-interface,4096,CHILL+,other,Other,1856,3134
+tip4p-equilibrated-interface,4096,CHILL+,other,hexagonal-ice,903,3134
+tip4p-equilibrated-interface,4096,CHILL+,other,interfacial-ice,242,3134
+tip4p-equilibrated-interface,4096,CHILL+,other,hydrate,16,3134
+tip4p-equilibrated-interface,4096,CHILL+,other,interfacial-hydrate,117,3134
+tip4p-equilibrated-interface,4096,CHILL+,Ih,hexagonal-ice,959,962
+tip4p-equilibrated-interface,4096,CHILL+,Ih,interfacial-ice,3,962
+tip4p-equilibrated-interface,4096,CHILL+-extra-hexagonal,other,fewer-than-4-within-3.5,0,903
+tip4p-equilibrated-interface,4096,CHILL+-extra-hexagonal,other,four-nearest-outside-2.30-3.35,9,903
+tip4p-equilibrated-interface,4096,CHILL+-extra-hexagonal,other,tetrahedral-q-below-0.94,606,903
+tip4p-equilibrated-interface,4096,CHILL+-extra-hexagonal,other,no-crystal-neighbour,97,903
+tip4p-equilibrated-interface,4096,CHILL+-extra-hexagonal,other,passes-early-gates,191,903

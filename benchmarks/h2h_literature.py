@@ -96,11 +96,21 @@ class LiteratureSqq:
 
 
 class LiteratureClavis:
-    params = [[1, 8], [128, 4096, 110592]]
+    """TRACE cages on the GenIce sI (46) and sII (136) cells, not on ice."""
+
+    params = [[1, 8], [46, 136]]
     param_names = ["threads", "molecules"]
 
     def setup(self, threads, molecules):
-        self.cmd = _command("ClavisCage", "cages", threads, molecules)
+        phase = "sI" if molecules == 46 else "sII"
+        self.cmd = [
+            PY, str(ROOT / "scripts" / "h2h_literature.py"),
+            "--once", "ClavisCage", "cages",
+            "--threads", str(threads),
+            "--molecules", str(molecules),
+            "--phase", phase,
+            "--lib", LIB,
+        ]
 
     def time_call(self, threads, molecules):
         _run(self.cmd)

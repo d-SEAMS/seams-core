@@ -105,7 +105,12 @@ elif kind.startswith("mdapy-"):
             return int(np.sum(np.asarray(result.structure) > 0))
     else:
         from mdapy.identify import PolyhedralTemplateMatching
-        tool = PolyhedralTemplateMatching()
+        # Cubic diamond is DCUB and hexagonal diamond is DHEX. The default
+        # set is the close-packed templates, which do not match this ice.
+        try:
+            tool = PolyhedralTemplateMatching(structure=["dcub", "dhex"])
+        except TypeError:
+            tool = PolyhedralTemplateMatching()
         def once():
             result = tool.compute(system)
             return int(np.sum(np.asarray(result.structure) > 0))
@@ -141,7 +146,18 @@ elif kind.startswith("ovito-"):
         elif op == "diamond":
             pipe.modifiers.append(IdentifyDiamondModifier())
         else:
-            pipe.modifiers.append(PolyhedralTemplateMatchingModifier())
+            mod = PolyhedralTemplateMatchingModifier(rmsd_cutoff=0.1)
+            # ice: only cubic and hexagonal diamond. default: the modifier's
+            # own set (FCC, HCP, BCC), which names every atom and is not
+            # those two ice templates. The classifier writes a label for
+            # every atom either way.
+            which = os.environ.get("NEIGH_PTM", "ice")
+            if which == "ice":
+                for structure in mod.structures:
+                    structure.enabled = structure.id in (6, 7)
+            elif which != "default":
+                raise SystemExit("NEIGH_PTM is ice or default")
+            pipe.modifiers.append(mod)
         out = pipe.compute()
         if op in ("symmetry", "diamond", "chill") and "Structure Type" in out.particles:
             return int(np.sum(np.asarray(out.particles["Structure Type"]) > 0))
@@ -205,6 +221,18 @@ def main():
                 if mode == "symmetry":
                     jobs.append(("py", "mdapy-diamond", molecules, threads))
                     jobs.append(("py", "ovito-diamond", molecules, threads))
+    only = os.environ.get("NEIGH_ONLY", "")
+    if only:
+        mode, mol_s, thr_s = only.split(":")
+        molecules = int(mol_s)
+        threads = int(thr_s)
+        wanted = {mode, f"ovito-{mode}"}
+        jobs = [
+            job for job in jobs
+            if job[1] in wanted and job[2] == molecules and job[3] == threads
+        ]
+        if len(jobs) != 2:
+            raise SystemExit(f"NEIGH_ONLY={only} matched {len(jobs)} jobs")
     for who, kind, molecules, threads in jobs:
         cores = "0" if threads == 1 else f"0-{threads - 1}"
         if who == "dseams":

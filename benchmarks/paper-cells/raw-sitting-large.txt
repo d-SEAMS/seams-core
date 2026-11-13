@@ -1,0 +1,245 @@
+source_commit e7e496e9c62b732b881a2444e190241330c4c7ab
+cpu_model Intel Xeon Processor
+cpu_family 6
+cpu_model_id 207
+cpu_stepping 2
+cpu_flags avx2 avx512
+cpu_cache L1d 384 KiB (8 instances); L1i 256 KiB (8 instances); L2 16 MiB (8 instances); L3 320 MiB (1 instance)
+cpu_cores 8
+affinity 0-7
+cores 8
+lscpu
+Architecture: x86_64
+CPU(s): 8
+On-line CPU(s) list: 0-7
+Vendor ID: GenuineIntel
+Model name: Intel(R) Xeon(R) Processor
+CPU family: 6
+Model: 207
+Thread(s) per core: 1
+Core(s) per socket: 8
+Socket(s): 1
+BogoMIPS: 4800.00
+L1d cache: 384 KiB (8 instances)
+L1i cache: 256 KiB (8 instances)
+L2 cache: 16 MiB (8 instances)
+L3 cache: 320 MiB (1 instance)
+warmup 1
+n 8
+n_if_rival_call_exceeds_30s 6
+rival_call_limit_s 120
+molecules 884736
+ice Ic 48^3 conventional cells, eight times 24^3
+liquid TIP4P/ice, 4096 molecules melted at 300 K, replicated 6^3
+cutoff_A 3.5
+widths 1 2 4 8
+one sitting; each width and each code is one process
+host name is not recorded
+ice rings d-SEAMS threads 1 n 8 median_ms 662.186331 iqr_ms 7.709950 affinity 0 six=1769472 agree_six=1769472
+ice q4 d-SEAMS threads 1 n 8 median_ms 144.664134 iqr_ms 3.783138 affinity 0 seams_frame_steinhardt; local q only
+ice q6 d-SEAMS threads 1 n 8 median_ms 150.095376 iqr_ms 8.041119 affinity 0 seams_frame_steinhardt; local q only agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice q4+q6 d-SEAMS threads 1 n 8 median_ms 319.346342 iqr_ms 16.242020 affinity 0 seams_frame_q4_q6; both averages null
+ice neighbours d-SEAMS threads 1 n 8 median_ms 260.183255 iqr_ms 2.815435 affinity 0 seams_frame_neighbours cutoff pairs=3538944 pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy coordination_sum=3538944 dseams_pairs=3538944
+ice chill+ d-SEAMS threads 1 n 8 median_ms 235.590800 iqr_ms 2.241617 affinity 0 cubic=884736 cubic_dseams=884736 cubic_ovito=884736 chill_match=884736/884736
+ice classifier d-SEAMS threads 1 n 8 median_ms 204.001789 iqr_ms 11.493721 affinity 0 ice-Ic=884736 seams_symmetry_classify agree_ice_ic_cubic_diamond=884736/884736
+ice rings rings-statistics-matter threads 1 n 8 median_ms 11267.172605 iqr_ms 104.094082 affinity 0 six=1769472 maxlvl=8 num_threads=1 RAYON_NUM_THREADS=1 agree_six=1769472
+ice neighbours mdapy threads 1 n 8 median_ms 469.861689 iqr_ms 5.841553 affinity 0 pairs=3538944 mdapy_threads=1 MDAPY_NUM_THREADS=1 taichi=absent get_num_threads=1 pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+ice q4 mdapy threads 1 n 8 median_ms 698.390371 iqr_ms 36.044986 affinity 0 rows=884736 mdapy_threads=1 MDAPY_NUM_THREADS=1 taichi=absent get_num_threads=1
+ice q6 mdapy threads 1 n 8 median_ms 803.702180 iqr_ms 69.123959 affinity 0 rows=884736 mdapy_threads=1 MDAPY_NUM_THREADS=1 taichi=absent get_num_threads=1 agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice rings mdapy threads 1 n 8 median_ms 18678.338048 iqr_ms 36.697609 affinity 0 last_count=1769472 mdapy_threads=1 MDAPY_NUM_THREADS=1 taichi=absent get_num_threads=1
+ice chill+ mdapy threads 1 n 8 median_ms 580.057158 iqr_ms 7.947656 affinity 0 rows=884736 mdapy_threads=1 MDAPY_NUM_THREADS=1 taichi=absent get_num_threads=1
+ice neighbours vesin threads 1 n 8 median_ms 1083.309472 iqr_ms 2.522056 affinity 0 pairs=3538944 n_threads=1 algorithm=cell_list pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+ice neighbours freud threads 1 n 8 median_ms 1033.404578 iqr_ms 18.686047 affinity 0 pairs=3538944 freud_threads=1 TBB_NUM_THREADS=1 pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+ice q4 freud threads 1 n 8 median_ms 2164.249095 iqr_ms 8.713102 affinity 0 rows=884736 freud_threads=1 TBB_NUM_THREADS=1
+ice q6 freud threads 1 n 8 median_ms 2870.108465 iqr_ms 63.217702 affinity 0 rows=884736 freud_threads=1 TBB_NUM_THREADS=1 agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice chill+ OVITO threads 1 n 8 median_ms 4927.647161 iqr_ms 131.332798 affinity 0 rows=884736 OVITO_THREAD_COUNT=1 cubic_dseams=884736 cubic_ovito=884736 chill_match=884736/884736
+ice q4 OVITO threads 1 n 8 median_ms 393.774383 iqr_ms 4.137814 affinity 0 rows=884736 OVITO_THREAD_COUNT=1
+ice q6 OVITO threads 1 n 8 median_ms 476.740019 iqr_ms 3.014938 affinity 0 rows=884736 OVITO_THREAD_COUNT=1
+ice ptm-default OVITO threads 1 n 8 median_ms 11787.794985 iqr_ms 504.664867 affinity 0 rows=884736 OVITO_THREAD_COUNT=1 rmsd=0.1 templates=default
+ice ptm-ice OVITO threads 1 n 8 median_ms 21901.040638 iqr_ms 348.074319 affinity 0 rows=884736 OVITO_THREAD_COUNT=1 rmsd=0.1 templates=cubic+hexagonal-diamond agree_ice_ic_cubic_diamond=884736/884736
+ice neighbours pyscal3 threads 1 n 8 median_ms 708.701885 iqr_ms 19.232140 affinity 0 pairs=3538944 pyscal_threads=1 PYSCAL_NUM_THREADS=1 pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+ice q6 pyscal3 threads 1 n 8 median_ms 956.331838 iqr_ms 24.719940 affinity 0 rows=884736 pyscal_threads=1 PYSCAL_NUM_THREADS=1 agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice q6 PLUMED threads 1 n 8 median_ms 15780.364329 iqr_ms 129.367822 affinity 0 rows=884736 PLUMED_NUM_THREADS=1 agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice coordination OVITO threads 1 n 8 median_ms 287.170045 iqr_ms 4.191347 affinity 0 sum=3538944 OVITO_THREAD_COUNT=1 CoordinationAnalysisModifier cutoff=3.5 coordination_sum=3538944 dseams_pairs=3538944
+ice rings d-SEAMS threads 2 n 8 median_ms 505.691531 iqr_ms 2.180591 affinity 0-1 six=1769472 agree_six=1769472
+ice q4 d-SEAMS threads 2 n 8 median_ms 102.618623 iqr_ms 1.205131 affinity 0-1 seams_frame_steinhardt; local q only
+ice q6 d-SEAMS threads 2 n 8 median_ms 106.331635 iqr_ms 1.090903 affinity 0-1 seams_frame_steinhardt; local q only agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice q4+q6 d-SEAMS threads 2 n 8 median_ms 229.616490 iqr_ms 3.127563 affinity 0-1 seams_frame_q4_q6; both averages null
+ice neighbours d-SEAMS threads 2 n 8 median_ms 111.843062 iqr_ms 0.710481 affinity 0-1 seams_frame_neighbours cutoff pairs=3538944 pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy coordination_sum=3538944 dseams_pairs=3538944
+ice chill+ d-SEAMS threads 2 n 8 median_ms 145.024816 iqr_ms 2.426909 affinity 0-1 cubic=884736 cubic_dseams=884736 cubic_ovito=884736 chill_match=884736/884736
+ice classifier d-SEAMS threads 2 n 8 median_ms 141.623508 iqr_ms 4.470199 affinity 0-1 ice-Ic=884736 seams_symmetry_classify agree_ice_ic_cubic_diamond=884736/884736
+ice rings rings-statistics-matter threads 2 n 8 median_ms 6633.308637 iqr_ms 177.403009 affinity 0-1 six=1769472 maxlvl=8 num_threads=2 RAYON_NUM_THREADS=2 agree_six=1769472
+ice neighbours mdapy threads 2 n 8 median_ms 309.860069 iqr_ms 4.307266 affinity 0-1 pairs=3538944 mdapy_threads=2 MDAPY_NUM_THREADS=2 taichi=absent get_num_threads=2 pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+ice q4 mdapy threads 2 n 8 median_ms 391.563470 iqr_ms 5.272369 affinity 0-1 rows=884736 mdapy_threads=2 MDAPY_NUM_THREADS=2 taichi=absent get_num_threads=2
+ice q6 mdapy threads 2 n 8 median_ms 465.590425 iqr_ms 15.851303 affinity 0-1 rows=884736 mdapy_threads=2 MDAPY_NUM_THREADS=2 taichi=absent get_num_threads=2 agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice rings mdapy threads 2 n 8 median_ms 10185.177415 iqr_ms 264.167176 affinity 0-1 last_count=1769472 mdapy_threads=2 MDAPY_NUM_THREADS=2 taichi=absent get_num_threads=2
+ice chill+ mdapy threads 2 n 8 median_ms 332.859921 iqr_ms 2.152168 affinity 0-1 rows=884736 mdapy_threads=2 MDAPY_NUM_THREADS=2 taichi=absent get_num_threads=2
+ice neighbours vesin threads 2 n 8 median_ms 622.438480 iqr_ms 5.102668 affinity 0-1 pairs=3538944 n_threads=2 algorithm=cell_list pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+ice neighbours freud threads 2 n 8 median_ms 661.254477 iqr_ms 4.615480 affinity 0-1 pairs=3538944 freud_threads=2 TBB_NUM_THREADS=2 pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+ice q4 freud threads 2 n 8 median_ms 1419.674984 iqr_ms 84.838616 affinity 0-1 rows=884736 freud_threads=2 TBB_NUM_THREADS=2
+ice q6 freud threads 2 n 8 median_ms 1588.592745 iqr_ms 38.430809 affinity 0-1 rows=884736 freud_threads=2 TBB_NUM_THREADS=2 agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice chill+ OVITO threads 2 n 8 median_ms 2581.740603 iqr_ms 89.800118 affinity 0-1 rows=884736 OVITO_THREAD_COUNT=2 cubic_dseams=884736 cubic_ovito=884736 chill_match=884736/884736
+ice q4 OVITO threads 2 n 8 median_ms 217.174148 iqr_ms 0.787528 affinity 0-1 rows=884736 OVITO_THREAD_COUNT=2
+ice q6 OVITO threads 2 n 8 median_ms 258.950219 iqr_ms 1.378595 affinity 0-1 rows=884736 OVITO_THREAD_COUNT=2
+ice ptm-default OVITO threads 2 n 8 median_ms 6012.222311 iqr_ms 128.504652 affinity 0-1 rows=884736 OVITO_THREAD_COUNT=2 rmsd=0.1 templates=default
+ice ptm-ice OVITO threads 2 n 8 median_ms 11691.448047 iqr_ms 195.690409 affinity 0-1 rows=884736 OVITO_THREAD_COUNT=2 rmsd=0.1 templates=cubic+hexagonal-diamond agree_ice_ic_cubic_diamond=884736/884736
+ice neighbours pyscal3 threads 2 n 8 median_ms 425.184906 iqr_ms 6.443931 affinity 0-1 pairs=3538944 pyscal_threads=2 PYSCAL_NUM_THREADS=2 pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+ice q6 pyscal3 threads 2 n 8 median_ms 661.811874 iqr_ms 19.488420 affinity 0-1 rows=884736 pyscal_threads=2 PYSCAL_NUM_THREADS=2 agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice q6 PLUMED threads 2 n 8 median_ms 9122.932280 iqr_ms 77.942370 affinity 0-1 rows=884736 PLUMED_NUM_THREADS=2 agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice coordination OVITO threads 2 n 8 median_ms 145.636145 iqr_ms 4.055686 affinity 0-1 sum=3538944 OVITO_THREAD_COUNT=2 CoordinationAnalysisModifier cutoff=3.5 coordination_sum=3538944 dseams_pairs=3538944
+ice rings d-SEAMS threads 4 n 8 median_ms 322.999146 iqr_ms 1.878734 affinity 0-3 six=1769472 agree_six=1769472
+ice q4 d-SEAMS threads 4 n 8 median_ms 51.169583 iqr_ms 0.865751 affinity 0-3 seams_frame_steinhardt; local q only
+ice q6 d-SEAMS threads 4 n 8 median_ms 54.602033 iqr_ms 2.024695 affinity 0-3 seams_frame_steinhardt; local q only agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice q4+q6 d-SEAMS threads 4 n 8 median_ms 127.765430 iqr_ms 1.124273 affinity 0-3 seams_frame_q4_q6; both averages null
+ice neighbours d-SEAMS threads 4 n 8 median_ms 69.147587 iqr_ms 0.690359 affinity 0-3 seams_frame_neighbours cutoff pairs=3538944 pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy coordination_sum=3538944 dseams_pairs=3538944
+ice chill+ d-SEAMS threads 4 n 8 median_ms 74.371842 iqr_ms 1.321772 affinity 0-3 cubic=884736 cubic_dseams=884736 cubic_ovito=884736 chill_match=884736/884736
+ice classifier d-SEAMS threads 4 n 8 median_ms 76.617114 iqr_ms 1.671496 affinity 0-3 ice-Ic=884736 seams_symmetry_classify agree_ice_ic_cubic_diamond=884736/884736
+ice rings rings-statistics-matter threads 4 n 8 median_ms 3959.606700 iqr_ms 38.578481 affinity 0-3 six=1769472 maxlvl=8 num_threads=4 RAYON_NUM_THREADS=4 agree_six=1769472
+ice neighbours mdapy threads 4 n 8 median_ms 152.080077 iqr_ms 2.067547 affinity 0-3 pairs=3538944 mdapy_threads=4 MDAPY_NUM_THREADS=4 taichi=absent get_num_threads=4 pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+ice q4 mdapy threads 4 n 8 median_ms 194.412006 iqr_ms 1.443060 affinity 0-3 rows=884736 mdapy_threads=4 MDAPY_NUM_THREADS=4 taichi=absent get_num_threads=4
+ice q6 mdapy threads 4 n 8 median_ms 234.623919 iqr_ms 3.271774 affinity 0-3 rows=884736 mdapy_threads=4 MDAPY_NUM_THREADS=4 taichi=absent get_num_threads=4 agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice rings mdapy threads 4 n 8 median_ms 5536.567612 iqr_ms 23.633196 affinity 0-3 last_count=1769472 mdapy_threads=4 MDAPY_NUM_THREADS=4 taichi=absent get_num_threads=4
+ice chill+ mdapy threads 4 n 8 median_ms 140.905531 iqr_ms 2.226631 affinity 0-3 rows=884736 mdapy_threads=4 MDAPY_NUM_THREADS=4 taichi=absent get_num_threads=4
+ice neighbours vesin threads 4 n 8 median_ms 325.512818 iqr_ms 2.605657 affinity 0-3 pairs=3538944 n_threads=4 algorithm=cell_list pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+ice neighbours freud threads 4 n 8 median_ms 455.454320 iqr_ms 4.503258 affinity 0-3 pairs=3538944 freud_threads=4 TBB_NUM_THREADS=4 pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+ice q4 freud threads 4 n 8 median_ms 784.121438 iqr_ms 44.274944 affinity 0-3 rows=884736 freud_threads=4 TBB_NUM_THREADS=4
+ice q6 freud threads 4 n 8 median_ms 856.659648 iqr_ms 20.738859 affinity 0-3 rows=884736 freud_threads=4 TBB_NUM_THREADS=4 agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice chill+ OVITO threads 4 n 8 median_ms 1255.920414 iqr_ms 8.592690 affinity 0-3 rows=884736 OVITO_THREAD_COUNT=4 cubic_dseams=884736 cubic_ovito=884736 chill_match=884736/884736
+ice q4 OVITO threads 4 n 8 median_ms 115.909892 iqr_ms 4.356892 affinity 0-3 rows=884736 OVITO_THREAD_COUNT=4
+ice q6 OVITO threads 4 n 8 median_ms 138.717246 iqr_ms 0.890053 affinity 0-3 rows=884736 OVITO_THREAD_COUNT=4
+ice ptm-default OVITO threads 4 n 8 median_ms 2980.834942 iqr_ms 32.424211 affinity 0-3 rows=884736 OVITO_THREAD_COUNT=4 rmsd=0.1 templates=default
+ice ptm-ice OVITO threads 4 n 8 median_ms 5522.668476 iqr_ms 39.394348 affinity 0-3 rows=884736 OVITO_THREAD_COUNT=4 rmsd=0.1 templates=cubic+hexagonal-diamond agree_ice_ic_cubic_diamond=884736/884736
+ice neighbours pyscal3 threads 4 n 8 median_ms 235.857468 iqr_ms 1.198298 affinity 0-3 pairs=3538944 pyscal_threads=4 PYSCAL_NUM_THREADS=4 pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+ice q6 pyscal3 threads 4 n 8 median_ms 377.018574 iqr_ms 8.627343 affinity 0-3 rows=884736 pyscal_threads=4 PYSCAL_NUM_THREADS=4 agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice q6 PLUMED threads 4 n 8 median_ms 5127.090638 iqr_ms 66.380703 affinity 0-3 rows=884736 PLUMED_NUM_THREADS=4 agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice coordination OVITO threads 4 n 8 median_ms 85.381667 iqr_ms 3.358684 affinity 0-3 sum=3538944 OVITO_THREAD_COUNT=4 CoordinationAnalysisModifier cutoff=3.5 coordination_sum=3538944 dseams_pairs=3538944
+ice rings d-SEAMS threads 8 n 8 median_ms 246.607390 iqr_ms 2.603996 affinity 0-7 six=1769472 agree_six=1769472
+ice q4 d-SEAMS threads 8 n 8 median_ms 31.894543 iqr_ms 0.986766 affinity 0-7 seams_frame_steinhardt; local q only
+ice q6 d-SEAMS threads 8 n 8 median_ms 32.187543 iqr_ms 0.626499 affinity 0-7 seams_frame_steinhardt; local q only agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice q4+q6 d-SEAMS threads 8 n 8 median_ms 85.776343 iqr_ms 1.387195 affinity 0-7 seams_frame_q4_q6; both averages null
+ice neighbours d-SEAMS threads 8 n 8 median_ms 52.710161 iqr_ms 0.316257 affinity 0-7 seams_frame_neighbours cutoff pairs=3538944 pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy coordination_sum=3538944 dseams_pairs=3538944
+ice chill+ d-SEAMS threads 8 n 8 median_ms 45.687503 iqr_ms 0.632083 affinity 0-7 cubic=884736 cubic_dseams=884736 cubic_ovito=884736 chill_match=884736/884736
+ice classifier d-SEAMS threads 8 n 8 median_ms 48.498846 iqr_ms 1.722134 affinity 0-7 ice-Ic=884736 seams_symmetry_classify agree_ice_ic_cubic_diamond=884736/884736
+ice rings rings-statistics-matter threads 8 n 8 median_ms 2707.952381 iqr_ms 45.784786 affinity 0-7 six=1769472 maxlvl=8 num_threads=8 RAYON_NUM_THREADS=8 agree_six=1769472
+ice neighbours mdapy threads 8 n 8 median_ms 88.870961 iqr_ms 0.538289 affinity 0-7 pairs=3538944 mdapy_threads=8 MDAPY_NUM_THREADS=8 taichi=absent get_num_threads=8 pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+ice q4 mdapy threads 8 n 8 median_ms 111.528206 iqr_ms 1.200144 affinity 0-7 rows=884736 mdapy_threads=8 MDAPY_NUM_THREADS=8 taichi=absent get_num_threads=8
+ice q6 mdapy threads 8 n 8 median_ms 134.511059 iqr_ms 0.683849 affinity 0-7 rows=884736 mdapy_threads=8 MDAPY_NUM_THREADS=8 taichi=absent get_num_threads=8 agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice rings mdapy threads 8 n 8 median_ms 3447.120831 iqr_ms 94.535368 affinity 0-7 last_count=1769472 mdapy_threads=8 MDAPY_NUM_THREADS=8 taichi=absent get_num_threads=8
+ice chill+ mdapy threads 8 n 8 median_ms 93.155337 iqr_ms 3.026722 affinity 0-7 rows=884736 mdapy_threads=8 MDAPY_NUM_THREADS=8 taichi=absent get_num_threads=8
+ice neighbours vesin threads 8 n 8 median_ms 218.650587 iqr_ms 5.411048 affinity 0-7 pairs=3538944 n_threads=8 algorithm=cell_list pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+ice neighbours freud threads 8 n 8 median_ms 366.366447 iqr_ms 3.658027 affinity 0-7 pairs=3538944 freud_threads=8 TBB_NUM_THREADS=8 pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+ice q4 freud threads 8 n 8 median_ms 457.445690 iqr_ms 30.630557 affinity 0-7 rows=884736 freud_threads=8 TBB_NUM_THREADS=8
+ice q6 freud threads 8 n 8 median_ms 506.236844 iqr_ms 14.845789 affinity 0-7 rows=884736 freud_threads=8 TBB_NUM_THREADS=8 agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice chill+ OVITO threads 8 n 8 median_ms 652.481338 iqr_ms 10.180414 affinity 0-7 rows=884736 OVITO_THREAD_COUNT=8 cubic_dseams=884736 cubic_ovito=884736 chill_match=884736/884736
+ice q4 OVITO threads 8 n 8 median_ms 69.910496 iqr_ms 2.243650 affinity 0-7 rows=884736 OVITO_THREAD_COUNT=8
+ice q6 OVITO threads 8 n 8 median_ms 81.451371 iqr_ms 0.853625 affinity 0-7 rows=884736 OVITO_THREAD_COUNT=8
+ice ptm-default OVITO threads 8 n 8 median_ms 1585.135363 iqr_ms 34.661157 affinity 0-7 rows=884736 OVITO_THREAD_COUNT=8 rmsd=0.1 templates=default
+ice ptm-ice OVITO threads 8 n 8 median_ms 2856.861712 iqr_ms 22.979859 affinity 0-7 rows=884736 OVITO_THREAD_COUNT=8 rmsd=0.1 templates=cubic+hexagonal-diamond agree_ice_ic_cubic_diamond=884736/884736
+ice neighbours pyscal3 threads 8 n 8 median_ms 154.994385 iqr_ms 5.714955 affinity 0-7 pairs=3538944 pyscal_threads=8 PYSCAL_NUM_THREADS=8 pairs=d-SEAMS:3538944/vesin:3538944/freud:3538944/pyscal3:3538944/mdapy:3538944 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+ice q6 pyscal3 threads 8 n 8 median_ms 185.698144 iqr_ms 9.797548 affinity 0-7 rows=884736 pyscal_threads=8 PYSCAL_NUM_THREADS=8 agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice q6 PLUMED threads 8 n 8 median_ms 2864.697461 iqr_ms 66.352764 affinity 0-7 rows=884736 PLUMED_NUM_THREADS=8 agree_freud_max_abs=1.565e-07 agree_mdapy_max_abs=8.882e-16 agree_pyscal3_max_abs=6.661e-16 agree_PLUMED_max_abs=4.441e-16
+ice coordination OVITO threads 8 n 8 median_ms 58.378218 iqr_ms 2.629528 affinity 0-7 sum=3538944 OVITO_THREAD_COUNT=8 CoordinationAnalysisModifier cutoff=3.5 coordination_sum=3538944 dseams_pairs=3538944
+liquid rings d-SEAMS threads 1 n 8 median_ms 2942.270905 iqr_ms 22.955808 affinity 0 six=586008 agree_six=586008
+liquid q4 d-SEAMS threads 1 n 8 median_ms 286.448103 iqr_ms 1.675933 affinity 0 seams_frame_steinhardt; local q only
+liquid q6 d-SEAMS threads 1 n 8 median_ms 292.793704 iqr_ms 0.728177 affinity 0 seams_frame_steinhardt; local q only agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid q4+q6 d-SEAMS threads 1 n 8 median_ms 602.804103 iqr_ms 1.265489 affinity 0 seams_frame_q4_q6; both averages null
+liquid neighbours d-SEAMS threads 1 n 8 median_ms 358.812312 iqr_ms 4.186405 affinity 0 seams_frame_neighbours cutoff pairs=4473360 pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy coordination_sum=4473360 dseams_pairs=4473360
+liquid chill+ d-SEAMS threads 1 n 8 median_ms 388.617901 iqr_ms 1.941140 affinity 0 cubic=0 cubic_dseams=0 cubic_ovito=0 chill_match=830736/884736
+liquid classifier d-SEAMS threads 1 n 8 median_ms 231.571034 iqr_ms 1.257878 affinity 0 ice-Ic=0 seams_symmetry_classify crystal_dseams=0 crystal_ptm=0
+liquid rings rings-statistics-matter threads 1 n 6 median_ms 46036.911696 iqr_ms 77.316931 affinity 0 six=586008 maxlvl=8 num_threads=1 RAYON_NUM_THREADS=1; n=6 because a call exceeded 30 s agree_six=586008
+liquid neighbours mdapy threads 1 n 8 median_ms 771.801758 iqr_ms 3.058087 affinity 0 pairs=4473360 mdapy_threads=1 MDAPY_NUM_THREADS=1 taichi=absent get_num_threads=1 pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+liquid q4 mdapy threads 1 n 8 median_ms 971.259237 iqr_ms 27.356182 affinity 0 rows=884736 mdapy_threads=1 MDAPY_NUM_THREADS=1 taichi=absent get_num_threads=1
+liquid q6 mdapy threads 1 n 8 median_ms 1132.684926 iqr_ms 4.825046 affinity 0 rows=884736 mdapy_threads=1 MDAPY_NUM_THREADS=1 taichi=absent get_num_threads=1 agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid rings mdapy threads 1 n 8 median_ms 27579.639817 iqr_ms 171.815376 affinity 0 last_count=586008 mdapy_threads=1 MDAPY_NUM_THREADS=1 taichi=absent get_num_threads=1
+liquid chill+ mdapy threads 1 n 8 median_ms 939.828124 iqr_ms 26.927838 affinity 0 rows=884736 mdapy_threads=1 MDAPY_NUM_THREADS=1 taichi=absent get_num_threads=1
+liquid neighbours vesin threads 1 n 8 median_ms 1208.267331 iqr_ms 17.052754 affinity 0 pairs=4473360 n_threads=1 algorithm=cell_list pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+liquid neighbours freud threads 1 n 8 median_ms 1432.247512 iqr_ms 54.820640 affinity 0 pairs=4473360 freud_threads=1 TBB_NUM_THREADS=1 pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+liquid q4 freud threads 1 n 8 median_ms 2704.071672 iqr_ms 7.415644 affinity 0 rows=884736 freud_threads=1 TBB_NUM_THREADS=1
+liquid q6 freud threads 1 n 8 median_ms 3476.078759 iqr_ms 14.145887 affinity 0 rows=884736 freud_threads=1 TBB_NUM_THREADS=1 agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid chill+ OVITO threads 1 n 8 median_ms 6997.796508 iqr_ms 16.235724 affinity 0 rows=884736 OVITO_THREAD_COUNT=1 cubic_dseams=0 cubic_ovito=0 chill_match=830736/884736
+liquid q4 OVITO threads 1 n 8 median_ms 579.640534 iqr_ms 2.793886 affinity 0 rows=884736 OVITO_THREAD_COUNT=1
+liquid q6 OVITO threads 1 n 8 median_ms 678.297664 iqr_ms 4.267453 affinity 0 rows=884736 OVITO_THREAD_COUNT=1
+liquid ptm-default OVITO threads 1 n 8 median_ms 14735.477197 iqr_ms 119.019972 affinity 0 rows=884736 OVITO_THREAD_COUNT=1 rmsd=0.1 templates=default
+liquid ptm-ice OVITO threads 1 n 8 median_ms 23780.637982 iqr_ms 166.045132 affinity 0 rows=884736 OVITO_THREAD_COUNT=1 rmsd=0.1 templates=cubic+hexagonal-diamond crystal_dseams=0 crystal_ptm=0
+liquid neighbours pyscal3 threads 1 n 8 median_ms 5676.787871 iqr_ms 81.282883 affinity 0 pairs=4473360 pyscal_threads=1 PYSCAL_NUM_THREADS=1 pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+liquid q6 pyscal3 threads 1 n 8 median_ms 6518.489819 iqr_ms 329.088936 affinity 0 rows=884736 pyscal_threads=1 PYSCAL_NUM_THREADS=1 agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid q6 PLUMED threads 1 n 8 median_ms 14772.140906 iqr_ms 438.636259 affinity 0 rows=884736 PLUMED_NUM_THREADS=1 agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid coordination OVITO threads 1 n 8 median_ms 472.466991 iqr_ms 16.993577 affinity 0 sum=4473360 OVITO_THREAD_COUNT=1 CoordinationAnalysisModifier cutoff=3.5 coordination_sum=4473360 dseams_pairs=4473360
+liquid rings d-SEAMS threads 2 n 8 median_ms 1814.220889 iqr_ms 51.021953 affinity 0-1 six=586008 agree_six=586008
+liquid q4 d-SEAMS threads 2 n 8 median_ms 166.067812 iqr_ms 1.540288 affinity 0-1 seams_frame_steinhardt; local q only
+liquid q6 d-SEAMS threads 2 n 8 median_ms 166.131269 iqr_ms 6.112942 affinity 0-1 seams_frame_steinhardt; local q only agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid q4+q6 d-SEAMS threads 2 n 8 median_ms 368.866848 iqr_ms 22.673677 affinity 0-1 seams_frame_q4_q6; both averages null
+liquid neighbours d-SEAMS threads 2 n 8 median_ms 170.156044 iqr_ms 2.693297 affinity 0-1 seams_frame_neighbours cutoff pairs=4473360 pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy coordination_sum=4473360 dseams_pairs=4473360
+liquid chill+ d-SEAMS threads 2 n 8 median_ms 227.415725 iqr_ms 7.407150 affinity 0-1 cubic=0 cubic_dseams=0 cubic_ovito=0 chill_match=830736/884736
+liquid classifier d-SEAMS threads 2 n 8 median_ms 188.597390 iqr_ms 9.855316 affinity 0-1 ice-Ic=0 seams_symmetry_classify crystal_dseams=0 crystal_ptm=0
+liquid rings rings-statistics-matter threads 2 n 8 median_ms 26666.491281 iqr_ms 544.907665 affinity 0-1 six=586008 maxlvl=8 num_threads=2 RAYON_NUM_THREADS=2 agree_six=586008
+liquid neighbours mdapy threads 2 n 8 median_ms 429.869728 iqr_ms 2.277783 affinity 0-1 pairs=4473360 mdapy_threads=2 MDAPY_NUM_THREADS=2 taichi=absent get_num_threads=2 pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+liquid q4 mdapy threads 2 n 8 median_ms 564.521305 iqr_ms 4.611911 affinity 0-1 rows=884736 mdapy_threads=2 MDAPY_NUM_THREADS=2 taichi=absent get_num_threads=2
+liquid q6 mdapy threads 2 n 8 median_ms 650.003788 iqr_ms 7.289253 affinity 0-1 rows=884736 mdapy_threads=2 MDAPY_NUM_THREADS=2 taichi=absent get_num_threads=2 agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid rings mdapy threads 2 n 8 median_ms 16194.822290 iqr_ms 130.023604 affinity 0-1 last_count=586008 mdapy_threads=2 MDAPY_NUM_THREADS=2 taichi=absent get_num_threads=2
+liquid chill+ mdapy threads 2 n 8 median_ms 552.703437 iqr_ms 13.670375 affinity 0-1 rows=884736 mdapy_threads=2 MDAPY_NUM_THREADS=2 taichi=absent get_num_threads=2
+liquid neighbours vesin threads 2 n 8 median_ms 762.717040 iqr_ms 11.745353 affinity 0-1 pairs=4473360 n_threads=2 algorithm=cell_list pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+liquid neighbours freud threads 2 n 8 median_ms 1030.021888 iqr_ms 43.667224 affinity 0-1 pairs=4473360 freud_threads=2 TBB_NUM_THREADS=2 pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+liquid q4 freud threads 2 n 8 median_ms 1853.303502 iqr_ms 156.008630 affinity 0-1 rows=884736 freud_threads=2 TBB_NUM_THREADS=2
+liquid q6 freud threads 2 n 8 median_ms 2099.023623 iqr_ms 65.504597 affinity 0-1 rows=884736 freud_threads=2 TBB_NUM_THREADS=2 agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid chill+ OVITO threads 2 n 8 median_ms 3834.721861 iqr_ms 55.036084 affinity 0-1 rows=884736 OVITO_THREAD_COUNT=2 cubic_dseams=0 cubic_ovito=0 chill_match=830736/884736
+liquid q4 OVITO threads 2 n 8 median_ms 332.145158 iqr_ms 4.860698 affinity 0-1 rows=884736 OVITO_THREAD_COUNT=2
+liquid q6 OVITO threads 2 n 8 median_ms 382.303237 iqr_ms 4.449148 affinity 0-1 rows=884736 OVITO_THREAD_COUNT=2
+liquid ptm-default OVITO threads 2 n 8 median_ms 8274.600159 iqr_ms 496.794808 affinity 0-1 rows=884736 OVITO_THREAD_COUNT=2 rmsd=0.1 templates=default
+liquid ptm-ice OVITO threads 2 n 8 median_ms 13316.135075 iqr_ms 289.690604 affinity 0-1 rows=884736 OVITO_THREAD_COUNT=2 rmsd=0.1 templates=cubic+hexagonal-diamond crystal_dseams=0 crystal_ptm=0
+liquid neighbours pyscal3 threads 2 n 8 median_ms 5603.882828 iqr_ms 153.386654 affinity 0-1 pairs=4473360 pyscal_threads=2 PYSCAL_NUM_THREADS=2 pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+liquid q6 pyscal3 threads 2 n 8 median_ms 5480.306716 iqr_ms 378.482650 affinity 0-1 rows=884736 pyscal_threads=2 PYSCAL_NUM_THREADS=2 agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid q6 PLUMED threads 2 n 8 median_ms 9477.669487 iqr_ms 352.180986 affinity 0-1 rows=884736 PLUMED_NUM_THREADS=2 agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid coordination OVITO threads 2 n 8 median_ms 233.463579 iqr_ms 5.865690 affinity 0-1 sum=4473360 OVITO_THREAD_COUNT=2 CoordinationAnalysisModifier cutoff=3.5 coordination_sum=4473360 dseams_pairs=4473360
+liquid rings d-SEAMS threads 4 n 8 median_ms 998.383706 iqr_ms 29.223032 affinity 0-3 six=586008 agree_six=586008
+liquid q4 d-SEAMS threads 4 n 8 median_ms 77.947745 iqr_ms 0.543349 affinity 0-3 seams_frame_steinhardt; local q only
+liquid q6 d-SEAMS threads 4 n 8 median_ms 80.106488 iqr_ms 0.814230 affinity 0-3 seams_frame_steinhardt; local q only agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid q4+q6 d-SEAMS threads 4 n 8 median_ms 176.934671 iqr_ms 2.716631 affinity 0-3 seams_frame_q4_q6; both averages null
+liquid neighbours d-SEAMS threads 4 n 8 median_ms 90.548790 iqr_ms 3.518438 affinity 0-3 seams_frame_neighbours cutoff pairs=4473360 pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy coordination_sum=4473360 dseams_pairs=4473360
+liquid chill+ d-SEAMS threads 4 n 8 median_ms 110.300333 iqr_ms 1.275771 affinity 0-3 cubic=0 cubic_dseams=0 cubic_ovito=0 chill_match=830736/884736
+liquid classifier d-SEAMS threads 4 n 8 median_ms 97.179141 iqr_ms 3.084807 affinity 0-3 ice-Ic=0 seams_symmetry_classify crystal_dseams=0 crystal_ptm=0
+liquid rings rings-statistics-matter threads 4 n 8 median_ms 13185.890586 iqr_ms 433.594568 affinity 0-3 six=586008 maxlvl=8 num_threads=4 RAYON_NUM_THREADS=4 agree_six=586008
+liquid neighbours mdapy threads 4 n 8 median_ms 198.683425 iqr_ms 2.303761 affinity 0-3 pairs=4473360 mdapy_threads=4 MDAPY_NUM_THREADS=4 taichi=absent get_num_threads=4 pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+liquid q4 mdapy threads 4 n 8 median_ms 250.628014 iqr_ms 2.308852 affinity 0-3 rows=884736 mdapy_threads=4 MDAPY_NUM_THREADS=4 taichi=absent get_num_threads=4
+liquid q6 mdapy threads 4 n 8 median_ms 298.040358 iqr_ms 3.649716 affinity 0-3 rows=884736 mdapy_threads=4 MDAPY_NUM_THREADS=4 taichi=absent get_num_threads=4 agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid rings mdapy threads 4 n 8 median_ms 8009.372364 iqr_ms 17.513859 affinity 0-3 last_count=586008 mdapy_threads=4 MDAPY_NUM_THREADS=4 taichi=absent get_num_threads=4
+liquid chill+ mdapy threads 4 n 8 median_ms 265.714757 iqr_ms 2.906239 affinity 0-3 rows=884736 mdapy_threads=4 MDAPY_NUM_THREADS=4 taichi=absent get_num_threads=4
+liquid neighbours vesin threads 4 n 8 median_ms 378.252197 iqr_ms 10.716701 affinity 0-3 pairs=4473360 n_threads=4 algorithm=cell_list pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+liquid neighbours freud threads 4 n 8 median_ms 603.890094 iqr_ms 10.589945 affinity 0-3 pairs=4473360 freud_threads=4 TBB_NUM_THREADS=4 pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+liquid q4 freud threads 4 n 8 median_ms 907.548228 iqr_ms 56.902439 affinity 0-3 rows=884736 freud_threads=4 TBB_NUM_THREADS=4
+liquid q6 freud threads 4 n 8 median_ms 1040.515033 iqr_ms 7.456540 affinity 0-3 rows=884736 freud_threads=4 TBB_NUM_THREADS=4 agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid chill+ OVITO threads 4 n 8 median_ms 1805.621600 iqr_ms 17.508513 affinity 0-3 rows=884736 OVITO_THREAD_COUNT=4 cubic_dseams=0 cubic_ovito=0 chill_match=830736/884736
+liquid q4 OVITO threads 4 n 8 median_ms 165.699074 iqr_ms 4.842977 affinity 0-3 rows=884736 OVITO_THREAD_COUNT=4
+liquid q6 OVITO threads 4 n 8 median_ms 188.867081 iqr_ms 0.716456 affinity 0-3 rows=884736 OVITO_THREAD_COUNT=4
+liquid ptm-default OVITO threads 4 n 8 median_ms 3835.197904 iqr_ms 16.252276 affinity 0-3 rows=884736 OVITO_THREAD_COUNT=4 rmsd=0.1 templates=default
+liquid ptm-ice OVITO threads 4 n 8 median_ms 6077.989898 iqr_ms 31.866015 affinity 0-3 rows=884736 OVITO_THREAD_COUNT=4 rmsd=0.1 templates=cubic+hexagonal-diamond crystal_dseams=0 crystal_ptm=0
+liquid neighbours pyscal3 threads 4 n 8 median_ms 4754.237320 iqr_ms 93.143985 affinity 0-3 pairs=4473360 pyscal_threads=4 PYSCAL_NUM_THREADS=4 pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+liquid q6 pyscal3 threads 4 n 8 median_ms 5010.901699 iqr_ms 132.053808 affinity 0-3 rows=884736 pyscal_threads=4 PYSCAL_NUM_THREADS=4 agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid q6 PLUMED threads 4 n 8 median_ms 5653.948207 iqr_ms 321.456476 affinity 0-3 rows=884736 PLUMED_NUM_THREADS=4 agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid coordination OVITO threads 4 n 8 median_ms 142.570842 iqr_ms 16.790352 affinity 0-3 sum=4473360 OVITO_THREAD_COUNT=4 CoordinationAnalysisModifier cutoff=3.5 coordination_sum=4473360 dseams_pairs=4473360
+liquid rings d-SEAMS threads 8 n 8 median_ms 677.074304 iqr_ms 20.849573 affinity 0-7 six=586008 agree_six=586008
+liquid q4 d-SEAMS threads 8 n 8 median_ms 51.915775 iqr_ms 2.394840 affinity 0-7 seams_frame_steinhardt; local q only
+liquid q6 d-SEAMS threads 8 n 8 median_ms 53.166358 iqr_ms 6.388730 affinity 0-7 seams_frame_steinhardt; local q only agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid q4+q6 d-SEAMS threads 8 n 8 median_ms 123.122932 iqr_ms 0.741609 affinity 0-7 seams_frame_q4_q6; both averages null
+liquid neighbours d-SEAMS threads 8 n 8 median_ms 70.648930 iqr_ms 7.796123 affinity 0-7 seams_frame_neighbours cutoff pairs=4473360 pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy coordination_sum=4473360 dseams_pairs=4473360
+liquid chill+ d-SEAMS threads 8 n 8 median_ms 70.501937 iqr_ms 4.017953 affinity 0-7 cubic=0 cubic_dseams=0 cubic_ovito=0 chill_match=830736/884736
+liquid classifier d-SEAMS threads 8 n 8 median_ms 63.953679 iqr_ms 1.820939 affinity 0-7 ice-Ic=0 seams_symmetry_classify crystal_dseams=0 crystal_ptm=0
+liquid rings rings-statistics-matter threads 8 n 8 median_ms 7477.520378 iqr_ms 191.312714 affinity 0-7 six=586008 maxlvl=8 num_threads=8 RAYON_NUM_THREADS=8 agree_six=586008
+liquid neighbours mdapy threads 8 n 8 median_ms 112.968991 iqr_ms 1.158516 affinity 0-7 pairs=4473360 mdapy_threads=8 MDAPY_NUM_THREADS=8 taichi=absent get_num_threads=8 pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+liquid q4 mdapy threads 8 n 8 median_ms 148.270544 iqr_ms 0.931816 affinity 0-7 rows=884736 mdapy_threads=8 MDAPY_NUM_THREADS=8 taichi=absent get_num_threads=8
+liquid q6 mdapy threads 8 n 8 median_ms 178.442670 iqr_ms 4.018457 affinity 0-7 rows=884736 mdapy_threads=8 MDAPY_NUM_THREADS=8 taichi=absent get_num_threads=8 agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid rings mdapy threads 8 n 8 median_ms 5137.782209 iqr_ms 33.329875 affinity 0-7 last_count=586008 mdapy_threads=8 MDAPY_NUM_THREADS=8 taichi=absent get_num_threads=8
+liquid chill+ mdapy threads 8 n 8 median_ms 168.668110 iqr_ms 4.805550 affinity 0-7 rows=884736 mdapy_threads=8 MDAPY_NUM_THREADS=8 taichi=absent get_num_threads=8
+liquid neighbours vesin threads 8 n 8 median_ms 249.098881 iqr_ms 6.795855 affinity 0-7 pairs=4473360 n_threads=8 algorithm=cell_list pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+liquid neighbours freud threads 8 n 8 median_ms 562.501217 iqr_ms 11.928904 affinity 0-7 pairs=4473360 freud_threads=8 TBB_NUM_THREADS=8 pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+liquid q4 freud threads 8 n 8 median_ms 621.275455 iqr_ms 26.823395 affinity 0-7 rows=884736 freud_threads=8 TBB_NUM_THREADS=8
+liquid q6 freud threads 8 n 8 median_ms 693.877469 iqr_ms 11.550832 affinity 0-7 rows=884736 freud_threads=8 TBB_NUM_THREADS=8 agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid chill+ OVITO threads 8 n 8 median_ms 1035.080556 iqr_ms 25.850869 affinity 0-7 rows=884736 OVITO_THREAD_COUNT=8 cubic_dseams=0 cubic_ovito=0 chill_match=830736/884736
+liquid q4 OVITO threads 8 n 8 median_ms 99.272471 iqr_ms 2.021878 affinity 0-7 rows=884736 OVITO_THREAD_COUNT=8
+liquid q6 OVITO threads 8 n 8 median_ms 112.396025 iqr_ms 4.454614 affinity 0-7 rows=884736 OVITO_THREAD_COUNT=8
+liquid ptm-default OVITO threads 8 n 8 median_ms 2190.199007 iqr_ms 47.743594 affinity 0-7 rows=884736 OVITO_THREAD_COUNT=8 rmsd=0.1 templates=default
+liquid ptm-ice OVITO threads 8 n 8 median_ms 3494.724824 iqr_ms 129.723371 affinity 0-7 rows=884736 OVITO_THREAD_COUNT=8 rmsd=0.1 templates=cubic+hexagonal-diamond crystal_dseams=0 crystal_ptm=0
+liquid neighbours pyscal3 threads 8 n 8 median_ms 4853.308230 iqr_ms 79.623149 affinity 0-7 pairs=4473360 pyscal_threads=8 PYSCAL_NUM_THREADS=8 pairs=d-SEAMS:4473360/vesin:4473360/freud:4473360/pyscal3:4473360/mdapy:4473360 agree=d-SEAMS,vesin,freud,pyscal3,mdapy
+liquid q6 pyscal3 threads 8 n 8 median_ms 4845.223172 iqr_ms 254.819153 affinity 0-7 rows=884736 pyscal_threads=8 PYSCAL_NUM_THREADS=8 agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid q6 PLUMED threads 8 n 8 median_ms 3248.877521 iqr_ms 90.966881 affinity 0-7 rows=884736 PLUMED_NUM_THREADS=8 agree_freud_max_abs=1.525e-04 agree_mdapy_max_abs=2.431e-14 agree_pyscal3_max_abs=2.931e-14 agree_PLUMED_max_abs=1.679e-01 mean_q6=0.4510
+liquid coordination OVITO threads 8 n 8 median_ms 89.174368 iqr_ms 6.698092 affinity 0-7 sum=4473360 OVITO_THREAD_COUNT=8 CoordinationAnalysisModifier cutoff=3.5 coordination_sum=4473360 dseams_pairs=4473360
