@@ -1,0 +1,32 @@
+# Copyright (c) d-SEAMS developers
+# C API reference for include/seams.h. meson test capi_doxygen fails on any warning.
+PROJECT_NAME           = "d-SEAMS C API"
+PROJECT_NUMBER         = @VERSION@
+OUTPUT_DIRECTORY       = @OUTDIR@
+INPUT                  = @SRCDIR@/include/seams.h @BUILDDIR@/src/seams_version.h
+FILE_PATTERNS          = *.h
+RECURSIVE              = NO
+STRIP_FROM_PATH        = @SRCDIR@/include @BUILDDIR@/src
+OPTIMIZE_OUTPUT_FOR_C  = YES
+EXTRACT_ALL            = NO
+EXTRACT_STATIC         = YES
+SHOW_INCLUDE_FILES     = YES
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = YES
+PREDEFINED             = "SEAMS_API=" "SEAMS_DEPRECATED(msg)=" __DOXYGEN__
+QUIET                  = YES
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+WARN_IF_INCOMPLETE_DOC = YES
+WARN_NO_PARAMDOC       = YES
+WARN_AS_ERROR          = FAIL_ON_WARNINGS
+WARN_LOGFILE           = @OUTDIR@/warnings.log
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+GENERATE_LATEX         = NO
+GENERATE_XML           = NO
+GENERATE_MAN           = NO
+GENERATE_RTF           = NO
+HAVE_DOT               = NO

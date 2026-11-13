@@ -1650,6 +1650,24 @@ test(
   ],
   depends: [seams_api_lib],
   timeout: 60)
+_doxygen = find_program('doxygen', required: false)
+if _doxygen.found()
+  _doxy_data = configuration_data()
+  _doxy_data.set('VERSION', meson.project_version())
+  _doxy_data.set('SRCDIR', meson.project_source_root())
+  _doxy_data.set('BUILDDIR', meson.project_build_root())
+  _doxy_data.set('OUTDIR', meson.current_build_dir() / 'capi-doxygen')
+  _doxyfile = configure_file(
+    input: 'docs/Doxyfile.capi.in',
+    output: 'Doxyfile.capi',
+    configuration: _doxy_data)
+  test(
+    'capi_doxygen',
+    _doxygen,
+    args: [_doxyfile],
+    workdir: meson.current_build_dir(),
+    timeout: 120)
+endif
 
 test(
   'capi_abi',
