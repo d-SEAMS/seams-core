@@ -592,9 +592,8 @@ TEST_CASE("AffiliationUpdater falls back when the ring set churns",
   REQUIRE(swept.ddc == expect.ddc);
   REQUIRE(churn.lastReclassified() == static_cast<int>(fresh.size()));
 
-  // skip once, store the batch, then a repeated frame classifies nothing.
-  churn.update(fresh, idx);
-  REQUIRE(churn.lastReclassified() == static_cast<int>(fresh.size()));
+  // The sweep does not store pairs. The next frame rebuilds them, and the
+  // frame after that carries. Later frames are not forced onto the sweep.
   churn.update(fresh, idx);
   REQUIRE(churn.lastReclassified() == static_cast<int>(fresh.size()));
   churn.update(fresh, idx);

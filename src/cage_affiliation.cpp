@@ -974,21 +974,11 @@ ring::AffiliationUpdater::update(const std::vector<std::vector<int>> &rings,
     st.answersValid = false;
     return st.current;
   }
-  if (st.skip > 0) {
-    // A plain affiliation, keeping the sorted-row buffers for the next diff.
-    st.skip--;
-    st.current = ring::cageAffiliation(rings, nList);
-    st.lastReclassified = static_cast<int>(rings.size());
-    st.answersValid = false;
-    st.batchHot = false;
-    st.fillSorted(nList, st.incoming);
-    st.prevSortedRows.swap(st.incoming);
-    return st.current;
-  }
-  if (st.batchHot && st.prevSortedRows.size() == nList.size()) {
-    st.fastAffiliation(rings, nList);
-    return st.current;
-  }
+  // A previous frame no longer forces every later frame through the
+  // whole-frame sweep. Each frame carries the rings outside the regions
+  // that changed.
+  st.skip = 0;
+  st.batchHot = false;
   st.fillSorted(nList, st.incoming);
   auto &rows = st.incoming;
   if (!st.primed || st.prevSortedRows.size() != nList.size()) {
@@ -1009,36 +999,6 @@ ring::AffiliationUpdater::update(const std::vector<std::vector<int>> &rings,
       changedRow[static_cast<std::size_t>(a)] = 1;
       ++nChanged;
     }
-  }
-  // Every ring through a changed row is evaluated again: past the limit, go
-  // to batch before matching rings or building any index
-  std::size_t throughChanged = 0;
-  if (static_cast<double>(nChanged) * nR <=
-      static_cast<double>(batchLimit) * nAtoms) {
-    for (const auto &r : rings) {
-      for (const int a : r) {
-        if (a < 0 || a >= nAtoms || changedRow[static_cast<std::size_t>(a)]) {
-          ++throughChanged;
-          break;
-        }
-      }
-      if (throughChanged > batchLimit) {
-        break;
-      }
-    }
-  }
-  if (static_cast<double>(nChanged) * nR >
-          static_cast<double>(batchLimit) * nAtoms ||
-      throughChanged > batchLimit) {
-    // The batch pass stores every pair. On a frame this large the stored
-    // pairs are not reused, and building them is slower than cageAffiliation.
-    // The next frames skip the diff, the same back-off as a dirty-pair batch.
-    st.fellBack();
-    st.fastAffiliation(rings, nList);
-    st.prevSortedRows.swap(st.incoming);
-    st.answersValid = false;
-    st.batchHot = true;
-    return st.current;
   }
   if (!st.answersValid) {
     st.batch(rings, nList, rows);
@@ -1126,13 +1086,15 @@ ring::AffiliationUpdater::update(const std::vector<std::vector<int>> &rings,
     }
     dirtyEq[static_cast<std::size_t>(i)] = equatorial ? 1 : 0;
   }
+  // A dirty set larger than the fraction is one region that does not fit
+  // in the hop ball. The sweep of that frame is cheaper than remapping
+  // every stored pair, and the next frame still diffs: nothing is latched.
   if (dirtyPairs.size() > batchLimit) {
-    // The next frames skip the diff. The call has to run before the return.
-    st.fellBack();
     st.fastAffiliation(rings, nList);
     st.prevSortedRows.swap(st.incoming);
     st.answersValid = false;
-    st.batchHot = true;
+    st.batchHot = false;
+    st.skip = 0;
     return st.current;
   }
 
