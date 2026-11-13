@@ -127,7 +127,7 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
     timeout: 180,
   )
   install_data(
-    'python/chill_plus.py',
+    ['python/chill_plus.py', 'python/symmetry.py'],
     install_dir: get_option('datadir') / 'seams' / 'python',
   )
   # DSEAMS_PYTHON is the interpreter found at configure time. The

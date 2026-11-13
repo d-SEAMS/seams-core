@@ -678,6 +678,19 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
     pz[i] = 1.0e6;
     r2[i] = 1.0e300;
   }
+  for (int a = 0; a < 12; a++) {
+    const __m256d xa = _mm256_set1_pd(px[a]);
+    const __m256d ya = _mm256_set1_pd(py[a]);
+    const __m256d za = _mm256_set1_pd(pz[a]);
+    for (int b = 0; b < 12; b += 4) {
+      const __m256d dx = _mm256_sub_pd(xa, _mm256_load_pd(px + b));
+      const __m256d dy = _mm256_sub_pd(ya, _mm256_load_pd(py + b));
+      const __m256d dz = _mm256_sub_pd(za, _mm256_load_pd(pz + b));
+      const __m256d d2 = _mm256_add_pd(_mm256_mul_pd(dx, dx),
+                                      _mm256_add_pd(_mm256_mul_pd(dy, dy), _mm256_mul_pd(dz, dz)));
+      _mm256_storeu_pd(&pair[a][b], d2);
+    }
+  }
   // (1 + sqrt(2)) / 2, the adaptive common-neighbour cutoff. It lies between
   // the first and second shells of the FCC/HCP cluster.
   constexpr double kAdapt2 = 1.2071067811865475 * 1.2071067811865475;

@@ -2589,6 +2589,9 @@ int main(int argc, char *argv[]) {
       } catch (const std::exception &e) {
         os << colorizer.error(e.what()) << "\n";
         return 2;
+      } catch (...) {
+        os << colorizer.error(exceptionText()) << "\n";
+        return 2;
       }
     }
     if (cmd == "chill-plus" || cmd == "chill_plus") {
