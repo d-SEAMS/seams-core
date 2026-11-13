@@ -12,3 +12,4 @@ written at build time and are not stored in git.
    interface
    brine
    cages
+   gallery
