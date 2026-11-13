@@ -343,10 +343,10 @@ void passFast(const double *xs, const double *ys, const double *zs,
   }
 }
 
-// One z layer of the half stencil. Layers two apart do not write the
-// same atom: a layer records its own atoms and the atoms in the next
-// layer, and the next layer is the other parity. Even layers run
-// together, then odd layers.
+// One z layer of the half stencil. The pair is stored only on the atom
+// in this layer. A forward step in x reaches back one z layer, so two
+// layers of the same parity both touch the atoms between them; the
+// partner row is filled after those layers have stopped.
 void halfZLayer(int cz, const double *xs, const double *ys, const double *zs,
                 const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
                 const double *shx, const double *shy, const double *shz, double rc2,
@@ -399,7 +399,6 @@ void halfZLayer(int cz, const double *xs, const double *ys, const double *zs,
               }
               const int jj = ids[j];
               int &ni = counts[ii];
-              int &nj = counts[jj];
               if (ni < kStashCap) {
                 rowI[ni] = jj;
               } else {
@@ -409,16 +408,6 @@ void halfZLayer(int cz, const double *xs, const double *ys, const double *zs,
                 *overflowed = 1;
               }
               ++ni;
-              int *rowJ = stash + static_cast<std::size_t>(jj) * static_cast<std::size_t>(kStashCap);
-              if (nj < kStashCap) {
-                rowJ[nj] = ii;
-              } else {
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp atomic write
-#endif
-                *overflowed = 1;
-              }
-              ++nj;
             }
           }
         }
@@ -494,7 +483,6 @@ void halfZLayer(int cz, const double *xs, const double *ys, const double *zs,
             }
             const int jj = ids[j];
             int &ni = counts[ii];
-            int &nj = counts[jj];
             if (ni < kStashCap) {
               rowI[ni] = jj;
             } else {
@@ -504,19 +492,38 @@ void halfZLayer(int cz, const double *xs, const double *ys, const double *zs,
               *overflowed = 1;
             }
             ++ni;
-            int *rowJ = stash + static_cast<std::size_t>(jj) * static_cast<std::size_t>(kStashCap);
-            if (nj < kStashCap) {
-              rowJ[nj] = ii;
-            } else {
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp atomic write
-#endif
-              *overflowed = 1;
-            }
-            ++nj;
           }
         }
       }
+    }
+  }
+}
+
+// Copy each one-sided pair onto its partner. counts[] still holds the
+// one-sided lengths and is updated as the reverse rows grow.
+void mirrorStash(const int *ids, int nPacked, int *counts, int *stash, int *overflowed) {
+  std::vector<int> oneSided(static_cast<std::size_t>(nPacked));
+  for (int s = 0; s < nPacked; ++s) {
+    oneSided[static_cast<std::size_t>(s)] = counts[ids[s]];
+  }
+  for (int s = 0; s < nPacked; ++s) {
+    const int ii = ids[s];
+    const int n = oneSided[static_cast<std::size_t>(s)];
+    if (n <= 0) {
+      continue;
+    }
+    const int nUse = n < kStashCap ? n : kStashCap;
+    const int *row = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
+    for (int k = 0; k < nUse; ++k) {
+      const int jj = row[k];
+      int &nj = counts[jj];
+      if (nj < kStashCap) {
+        stash[static_cast<std::size_t>(jj) * static_cast<std::size_t>(kStashCap) +
+              static_cast<std::size_t>(nj)] = ii;
+      } else {
+        *overflowed = 1;
+      }
+      ++nj;
     }
   }
 }
@@ -540,10 +547,9 @@ void passFastStash(const double *xs, const double *ys, const double *zs,
   *overflowed = 0;
 #ifdef SEAMS_HAS_OPENMP
   if (ncz >= 2 && omp_get_max_threads() > 1) {
-    // A layer writes its own atoms and the next layer's. Layers of one
-    // parity therefore do not share an atom. When the length is odd the
-    // last layer's +z wraps onto layer 0, which is the same parity, so
-    // that layer runs alone after the others have stopped.
+    // Each layer stores a pair only on its own atoms. The last layer's +z
+    // wraps onto layer 0 when the length is odd, which is the same parity,
+    // so that layer runs alone after the others have stopped.
     const int lastWraps = (ncz % 2) == 1;
     const int nEven = ncz / 2;
 #pragma omp parallel for schedule(static)
@@ -561,6 +567,7 @@ void passFastStash(const double *xs, const double *ys, const double *zs,
       halfZLayer(k * 2 + 1, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
                  counts, stash, overflowed);
     }
+    mirrorStash(ids, cellStart[ncx * ncy * ncz], counts, stash, overflowed);
     return;
   }
 #endif
@@ -1069,13 +1076,7 @@ bool tiltFullCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
   sc.ids.resize(static_cast<std::size_t>(nSubset));
   sc.cellStart.assign(static_cast<std::size_t>(nCells) + 1, 0);
   sc.hist.assign(static_cast<std::size_t>(maxThreads) * static_cast<std::size_t>(nCells), 0);
-  // A full set writes every count from the cell that owns the atom.
-  // Zeroing those lines on this thread first only adds a fault.
-  if (sc.counts.size() != static_cast<std::size_t>(nop)) {
-    sc.counts.assign(static_cast<std::size_t>(nop), 0);
-  } else if (subset != nullptr) {
-    std::fill(sc.counts.begin(), sc.counts.end(), 0);
-  }
+  sc.counts.assign(static_cast<std::size_t>(nop), 0);
   const auto tBin = Clock::now();
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (!nested && nSubset >= 256)
@@ -1821,13 +1822,7 @@ bool orthoFullCsr(
   sc.cellStart.assign(static_cast<std::size_t>(nCells) + 1, 0);
   sc.hist.assign(static_cast<std::size_t>(maxThreads) * static_cast<std::size_t>(nCells),
                  0);
-  // A full set writes every count from the cell that owns the atom.
-  // Zeroing those lines on this thread first only adds a fault.
-  if (sc.counts.size() != static_cast<std::size_t>(nop)) {
-    sc.counts.assign(static_cast<std::size_t>(nop), 0);
-  } else if (subset != nullptr) {
-    std::fill(sc.counts.begin(), sc.counts.end(), 0);
-  }
+  sc.counts.assign(static_cast<std::size_t>(nop), 0);
 
   const auto tBin = Clock::now();
   int threads = 1;
