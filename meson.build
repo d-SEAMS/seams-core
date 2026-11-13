@@ -1208,6 +1208,21 @@ if get_option('with_cli')
     depends: [seams_api_lib, seams_lang, seams_exe],
     suite: 'docs',
     timeout: 300)
+  foreach _engine : ['gromacs', 'lammps', 'openmm', 'plumed', 'insitu']
+    test(
+      'docs_engine_' + _engine,
+      python3,
+      args: [
+        meson.project_source_root() / 'docs' / 'howto' / 'test_engines.py',
+        _engine,
+        meson.project_source_root(),
+        meson.project_build_root(),
+      ],
+      env: binding_env,
+      depends: [seams_lang],
+      suite: 'docs',
+      timeout: 180)
+  endforeach
   test(
     'docs_api_python',
     python3,

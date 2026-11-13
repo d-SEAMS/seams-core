@@ -1,5 +1,8 @@
 # PLUMED
 
+The thread count comes from `PLUMED_NUM_THREADS`. Set that variable
+before PLUMED starts. `OMP_NUM_THREADS` does not change the PLUMED team.
+
 `SEAMS` is a collective variable with three components.
 
 - `seams.q6` is the mean local q6. Its derivatives are a central difference, so
