@@ -1,0 +1,274 @@
+diff --git a/src/capi.rs b/src/capi.rs
+--- a/src/capi.rs	2026-11-13 15:05:12.221494445 +0000
++++ b/src/capi.rs	2026-11-13 15:03:57.017798711 +0000
+@@ -66,6 +66,88 @@
+     }
+ }
+ 
++/// Width stored by [`lc_set_threads`]. Zero means the caller did not
++/// choose, and the search keeps its default iterator.
++pub(crate) fn search_width() -> usize {
++    WANTED_THREADS.load(Ordering::Relaxed)
++}
++
++#[derive(Clone, Copy)]
++struct Continuation {
++    ctx: usize,
++    cb: usize,
++}
++
++/// A callback the in-flight search runs before its pool goes idle, so
++/// the CSR merge does not pay a second wake. Unset between searches.
++static CONTINUATION: Mutex<Option<Continuation>> = Mutex::new(None);
++
++fn run_continuation() {
++    let copied = {
++        let guard = CONTINUATION.lock().unwrap_or_else(|err| err.into_inner());
++        *guard
++    };
++    let Some(cont) = copied else {
++        return;
++    };
++    let cb: extern "C" fn(*mut std::ffi::c_void) = unsafe { std::mem::transmute(cont.cb) };
++    cb(cont.ctx as *mut std::ffi::c_void);
++}
++
++/// Run `cb` at the end of the next `lc_knearest`, still inside its pool.
++/// A null `cb` clears it. The search clears nothing by itself: the caller
++/// drops the hook when the call returns.
++#[no_mangle]
++pub extern "C" fn lc_set_continuation(
++    ctx: *mut std::ffi::c_void,
++    cb: Option<extern "C" fn(*mut std::ffi::c_void)>,
++) {
++    let mut guard = CONTINUATION.lock().unwrap_or_else(|err| err.into_inner());
++    *guard = cb.map(|cb| Continuation {
++        ctx: ctx as usize,
++        cb: cb as usize,
++    });
++}
++
++/// Run `cb(ctx, begin, end)` over disjoint spans of `0..n` on the pool
++/// selected by [`lc_set_threads`]. One thread runs the whole span on the
++/// caller. The spans cover `0..n` exactly once.
++#[no_mangle]
++pub extern "C" fn lc_for_slabs(
++    n: c_int,
++    ctx: *mut std::ffi::c_void,
++    cb: Option<extern "C" fn(*mut std::ffi::c_void, c_int, c_int)>,
++) {
++    let Some(cb) = cb else {
++        return;
++    };
++    if n <= 0 {
++        return;
++    }
++    let ctx_bits = ctx as usize;
++    let cb_bits = cb as usize;
++    with_threads(move || {
++        let call = |begin: c_int, end: c_int| {
++            let ctx = ctx_bits as *mut std::ffi::c_void;
++            let cb: extern "C" fn(*mut std::ffi::c_void, c_int, c_int) =
++                unsafe { std::mem::transmute(cb_bits) };
++            cb(ctx, begin, end);
++        };
++        let width = WANTED_THREADS.load(Ordering::Relaxed);
++        if width <= 1 {
++            call(0, n);
++            return;
++        }
++        rayon::broadcast(move |worker| {
++            let workers = worker.num_threads().max(1);
++            let t = worker.index();
++            let begin = (n as usize) * t / workers;
++            let end = (n as usize) * (t + 1) / workers;
++            call(begin as c_int, end as c_int);
++        });
++    });
++}
++
+ /// Periodic parallelepiped. Lattice vectors are a, b, c (same as vesin rows).
+ #[repr(C)]
+ #[derive(Clone, Copy, Debug)]
+@@ -304,11 +386,15 @@
+         Some(&mut d2_store[..])
+     };
+     let err = with_threads(|| {
+-        if n_frames == 1 {
++        let found = if n_frames == 1 {
+             crate::knearest_into_d2(pts, &sim, k, mask_vec.as_deref(), hint, nn, d2)
+         } else {
+             crate::knearest_into_many(pts, n, n_frames, &sim, k, mask_vec.as_deref(), hint, nn, d2)
++        };
++        if found.is_ok() {
++            run_continuation();
+         }
++        found
+     });
+     if let Err(e) = err {
+         set_error(&e.to_string());
+
+diff --git a/src/knearest.rs b/src/knearest.rs
+index eca163f..d469c68 100644
+--- a/src/knearest.rs
++++ b/src/knearest.rs
+@@ -579,21 +579,8 @@ fn dispatch<const MODE: u8>(
+         }
+     };
+     let ncell = mesh.offsets.len() - 1;
+-    #[cfg(feature = "parallel")]
+-    {
+-        use rayon::prelude::*;
+-        (0..ncell)
+-            .into_par_iter()
+-            .with_min_len(64)
+-            .for_each_init(crate::pop::JobTimer::new, |_timer, c| job(c));
+-    }
+-    #[cfg(not(feature = "parallel"))]
+-    {
+-        let _timer = crate::pop::JobTimer::new();
+-        for c in 0..ncell {
+-            job(c);
+-        }
+-    }
++    let span = (nx as usize).saturating_mul(ny as usize);
++    run_z_slabs(ncell, span, 64, |c| job(c));
+ }
+ 
+ /// Bins a side of the source blocks of [`dispatch_blocks`] for this mesh:
+@@ -750,29 +737,118 @@ fn dispatch_blocks<const MODE: u8>(
+             }
+         }
+     };
++    let span = (blocks[0] as usize).saturating_mul(blocks[1] as usize);
++    run_block_slabs(nblock, span, k, job);
++}
++
++/// One candidate list and one heap per worker, then the blocks of that
++/// worker's z-slab. See [`run_z_slabs`].
++fn run_block_slabs<F>(nblock: usize, z_span: usize, k: usize, job: F)
++where
++    F: Fn(&mut Candidates, &mut KHeap, usize) + Sync,
++{
+     #[cfg(feature = "parallel")]
+     {
+-        use rayon::prelude::*;
+-        (0..nblock).into_par_iter().with_min_len(8).for_each_init(
+-            || {
+-                (
+-                    crate::pop::JobTimer::new(),
+-                    Candidates::default(),
+-                    KHeap::new(k),
+-                )
+-            },
+-            |(_timer, cand, heap), blk| job(cand, heap, blk),
+-        );
++        let width = requested_threads();
++        if width != 1 {
++            if width > 1 {
++                let span = z_span.max(1);
++                rayon::broadcast(|ctx| {
++                    let _timer = crate::pop::JobTimer::new();
++                    let mut cand = Candidates::default();
++                    let mut heap = KHeap::new(k);
++                    let workers = ctx.num_threads().max(1);
++                    let t = ctx.index();
++                    let layers = nblock.saturating_add(span - 1) / span;
++                    let z0 = layers * t / workers;
++                    let z1 = layers * (t + 1) / workers;
++                    let begin = z0.saturating_mul(span);
++                    let end = z1.saturating_mul(span).min(nblock);
++                    for blk in begin..end {
++                        job(&mut cand, &mut heap, blk);
++                    }
++                });
++                return;
++            }
++            use rayon::prelude::*;
++            (0..nblock).into_par_iter().with_min_len(8).for_each_init(
++                || {
++                    (
++                        crate::pop::JobTimer::new(),
++                        Candidates::default(),
++                        KHeap::new(k),
++                    )
++                },
++                |(_timer, cand, heap), blk| job(cand, heap, blk),
++            );
++            return;
++        }
+     }
+-    #[cfg(not(feature = "parallel"))]
++    let _timer = crate::pop::JobTimer::new();
++    let mut cand = Candidates::default();
++    let mut heap = KHeap::new(k);
++    for blk in 0..nblock {
++        job(&mut cand, &mut heap, blk);
++    }
++}
++
++/// How many workers `lc_set_threads` asked for. Zero means the caller
++/// left the default iterator in place.
++fn requested_threads() -> usize {
++    #[cfg(feature = "capi")]
+     {
+-        let _timer = crate::pop::JobTimer::new();
+-        let mut cand = Candidates::default();
+-        let mut heap = KHeap::new(k);
+-        for blk in 0..nblock {
+-            job(&mut cand, &mut heap, blk);
++        crate::capi::search_width()
++    }
++    #[cfg(not(feature = "capi"))]
++    {
++        0
++    }
++}
++
++/// Visit `0..count` in spatial slabs.
++///
++/// The index is x-fastest, so `z_span` indices are one z layer. A width
++/// of one runs the layers on the calling thread. A wider pool gives each
++/// worker one contiguous run of layers and the AVX scan stays inside
++/// that worker. Width zero keeps the default Rayon iterator, chunked by
++/// `min_len`, which is what the Rust callers use.
++fn run_z_slabs<F>(count: usize, z_span: usize, min_len: usize, job: F)
++where
++    F: Fn(usize) + Sync,
++{
++    #[cfg(feature = "parallel")]
++    {
++        let width = requested_threads();
++        if width != 1 {
++            if width > 1 {
++                let span = z_span.max(1);
++                rayon::broadcast(|ctx| {
++                    let _timer = crate::pop::JobTimer::new();
++                    let workers = ctx.num_threads().max(1);
++                    let t = ctx.index();
++                    let layers = count.saturating_add(span - 1) / span;
++                    let z0 = layers * t / workers;
++                    let z1 = layers * (t + 1) / workers;
++                    let begin = z0.saturating_mul(span);
++                    let end = z1.saturating_mul(span).min(count);
++                    for index in begin..end {
++                        job(index);
++                    }
++                });
++                return;
++            }
++            use rayon::prelude::*;
++            (0..count)
++                .into_par_iter()
++                .with_min_len(min_len)
++                .for_each_init(crate::pop::JobTimer::new, |_timer, index| job(index));
++            return;
+         }
+     }
++    let _timer = crate::pop::JobTimer::new();
++    for index in 0..count {
++        job(index);
++    }
+ }
+ 
+ /// Fractional planes of the gathered bins, from `corner - 1` to `corner +

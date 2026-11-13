@@ -804,8 +804,7 @@ rule h2h_session:
     output:
         "benchmarks/h2h-session.txt",
     shell:
-        "OVITO_THREAD_COUNT=8 LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu "
-        "python3 scripts/h2h_session.py > {output}"
+        "OVITO_THREAD_COUNT=8 python3 scripts/h2h_session.py > {output}"
 
 
 # One process, eight samples. The record names the core count.

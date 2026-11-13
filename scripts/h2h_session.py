@@ -14,6 +14,8 @@ import ctypes
 import math
 import os
 import statistics
+import subprocess
+import sys
 import tempfile
 import time
 from pathlib import Path
@@ -23,6 +25,39 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 SAMPLES = 8
 SIZES = (8, 16, 24)  # orthorhombic cells: 4096, 32768, 110592 molecules
+
+
+def prefer_seams_loader() -> None:
+    """Keep libseams on the libgomp it was built for, and still find libGL.
+
+    Putting only the system library directory on LD_LIBRARY_PATH makes
+    this process load a different libgomp and libstdc++. The session
+    restarts once with the resolved libgomp directory first.
+    """
+    if os.environ.get("SEAMS_H2H_LOADER") == "1":
+        return
+    lib = library_path()
+    clean = os.environ.copy()
+    clean.pop("LD_LIBRARY_PATH", None)
+    try:
+        text = subprocess.check_output(["ldd", os.fspath(lib)], env=clean, text=True)
+    except (OSError, subprocess.CalledProcessError):
+        return
+    gomp = ""
+    for line in text.splitlines():
+        if "libgomp.so" in line and "=>" in line:
+            gomp = line.split("=>", 1)[1].strip().split()[0]
+            break
+    if not gomp:
+        return
+    parts = [str(Path(gomp).resolve().parent)]
+    system_gl = Path("/usr/lib/x86_64-linux-gnu")
+    if system_gl.is_dir():
+        parts.append(str(system_gl))
+    os.environ["LD_LIBRARY_PATH"] = ":".join(parts)
+    os.environ["SEAMS_H2H_LOADER"] = "1"
+    os.environ.setdefault("OVITO_THREAD_COUNT", "8")
+    os.execv(sys.executable, [sys.executable, *sys.argv])
 
 
 def library_path() -> Path:
@@ -282,6 +317,7 @@ def run_session() -> list[str]:
 
 
 def main() -> None:
+    prefer_seams_loader()
     for line in run_session():
         print(line)
 

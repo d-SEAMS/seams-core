@@ -2986,50 +2986,21 @@ void csrFromRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud
   }
 }
 
-}  // namespace
+struct CsrSlabs {
+  const std::vector<int> *nom = nullptr;
+  std::vector<int> *deg = nullptr;
+  std::vector<int> *cols = nullptr;
+  std::vector<int> *offsets = nullptr;
+  int n = 0;
+  int k = 0;
+  int done = 0;
+};
 
-void nneigh::kNearestCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
-                         double candidateCutoff, int typeI, bool mutual,
-                         std::vector<int> &offsets, std::vector<int> &cols) {
-  seams::prepareCompute();
-  [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
-#ifdef SEAMS_HAS_LINKCELL
-  // Eight Rayon workers do not beat this AVX scan: the block join costs
-  // as much as the walk, and those workers share the cores with the
-  // OpenMP team that fills the CSR. One worker runs the scan.
-  lc_set_threads(1);
-#endif
-  const int n = yCloud.nop;
-  offsets.assign(static_cast<std::size_t>(std::max(n, 0)) + 1, 0);
-  cols.clear();
-  if (n <= 0 || k <= 0) {
-    return;
-  }
-  const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
-  const auto nom = nominatePacked(yCloud, k, typeI, hint);
-  // The ragged atom-id rows allocate one vector per atom and then map
-  // every id back through the hash table. The mutual row is determined
-  // by the packed nominations: lower indices ascending, then the higher
-  // indices in nearest-first order. k above 64 keeps that row builder.
-  if (!mutual || k > 64) {
-    std::vector<std::vector<int>> rows;
-    fillGraphFromNom(yCloud, nom, k, mutual, rows);
-    csrFromRows(yCloud, rows, offsets, cols);
-    return;
-  }
-  // A joined worker, not an OpenMP region: the region would keep
-  // spinning after the fill and the next search would share its core
-  // with that wait. The worker exists only for this call.
-  const bool split =
-#ifdef SEAMS_HAS_OPENMP
-      n >= 65536 && !omp_in_parallel() && omp_get_max_threads() > 1
-#else
-      false
-#endif
-      ;
-  const int mid = split ? n / 2 : n;
-  std::vector<int> deg(static_cast<std::size_t>(n), 0);
-  auto degreeRange = [&](int begin, int end) {
+extern "C" void csrDegreeSlab(void *raw, int begin, int end) {
+  const auto *job = static_cast<const CsrSlabs *>(raw);
+  const int n = job->n;
+  const int k = job->k;
+  const std::vector<int> &nom = *job->nom;
   for (int i = begin; i < end; ++i) {
     int degree = 0;
     const int *row = nom.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(k);
@@ -3042,22 +3013,17 @@ void nneigh::kNearestCsr(const molSys::PointCloud<molSys::Point<double>, double>
         ++degree;
       }
     }
-    deg[static_cast<std::size_t>(i)] = degree;
+    (*job->deg)[static_cast<std::size_t>(i)] = degree;
   }
-  };
-  if (split) {
-    std::thread worker([&] { degreeRange(mid, n); });
-    degreeRange(0, mid);
-    worker.join();
-  } else {
-    degreeRange(0, n);
-  }
-  for (int i = 0; i < n; ++i) {
-    offsets[static_cast<std::size_t>(i) + 1] =
-        offsets[static_cast<std::size_t>(i)] + deg[static_cast<std::size_t>(i)];
-  }
-  cols.assign(static_cast<std::size_t>(offsets[static_cast<std::size_t>(n)]), 0);
-  auto fillRange = [&](int begin, int end) {
+}
+
+extern "C" void csrFillSlab(void *raw, int begin, int end) {
+  const auto *job = static_cast<const CsrSlabs *>(raw);
+  const int n = job->n;
+  const int k = job->k;
+  const std::vector<int> &nom = *job->nom;
+  const std::vector<int> &offsets = *job->offsets;
+  std::vector<int> &cols = *job->cols;
   for (int i = begin; i < end; ++i) {
     int low[64];
     int high[64];
@@ -3092,14 +3058,85 @@ void nneigh::kNearestCsr(const molSys::PointCloud<molSys::Point<double>, double>
       cols[static_cast<std::size_t>(cursor++)] = high[t];
     }
   }
-  };
-  if (split) {
-    std::thread worker([&] { fillRange(mid, n); });
-    fillRange(0, mid);
-    worker.join();
-  } else {
-    fillRange(0, n);
+}
+
+}  // namespace
+
+extern "C" void lc_for_slabs(int n, void *ctx, void (*fn)(void *, int, int));
+extern "C" void lc_set_continuation(void *ctx, void (*fn)(void *));
+
+extern "C" void csrContinue(void *raw) {
+  auto *job = static_cast<CsrSlabs *>(raw);
+  const int n = job->n;
+  lc_for_slabs(n, job, csrDegreeSlab);
+  auto &offsets = *job->offsets;
+  const auto &deg = *job->deg;
+  for (int i = 0; i < n; ++i) {
+    offsets[static_cast<std::size_t>(i) + 1] =
+        offsets[static_cast<std::size_t>(i)] + deg[static_cast<std::size_t>(i)];
   }
+  job->cols->assign(static_cast<std::size_t>(offsets[static_cast<std::size_t>(n)]), 0);
+  lc_for_slabs(n, job, csrFillSlab);
+  job->done = 1;
+}
+
+void nneigh::kNearestCsr(const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+                         double candidateCutoff, int typeI, bool mutual,
+                         std::vector<int> &offsets, std::vector<int> &cols) {
+  seams::prepareCompute();
+  [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
+#ifdef SEAMS_HAS_LINKCELL
+  // The scan and the CSR merge share one Rayon pool, split into z-slabs.
+  // An OpenMP team left in active wait by the previous region sits on
+  // those cores, so park it for this call. The next region creates its
+  // own team. A search already inside a parallel region stays on the
+  // caller and does not start a second pool.
+#ifdef SEAMS_HAS_OPENMP
+  if (omp_in_parallel()) {
+    lc_set_threads(1);
+  } else {
+    omp_pause_resource_all(omp_pause_soft);
+    lc_set_threads(seams::teamFor(yCloud.nop));
+  }
+#else
+  lc_set_threads(seams::teamFor(yCloud.nop));
+#endif
+#endif
+  const int n = yCloud.nop;
+  offsets.assign(static_cast<std::size_t>(std::max(n, 0)) + 1, 0);
+  cols.clear();
+  if (n <= 0 || k <= 0) {
+    return;
+  }
+  const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
+  // The mutual row is determined by the packed nominations: lower
+  // indices ascending, then the higher indices in nearest-first order.
+  // k above 64 keeps the row builder. The fast path merges the CSR on
+  // the same pool that wrote the nominations, before that pool sleeps.
+  if (mutual && k <= 64) {
+    std::vector<int> nom(static_cast<std::size_t>(n) * static_cast<std::size_t>(k), -1);
+    std::vector<int> deg(static_cast<std::size_t>(n), 0);
+    CsrSlabs job{&nom, &deg, &cols, &offsets, n, k, 0};
+#ifdef SEAMS_HAS_LINKCELL
+    struct DropContinuation {
+      ~DropContinuation() { lc_set_continuation(nullptr, nullptr); }
+    } drop;
+    lc_set_continuation(&job, csrContinue);
+    if (nominateByLinkcell(yCloud, k, typeI, hint, nom) && job.done) {
+      return;
+    }
+#endif
+  }
+  const auto nom = nominatePacked(yCloud, k, typeI, hint);
+  if (!mutual || k > 64) {
+    std::vector<std::vector<int>> rows;
+    fillGraphFromNom(yCloud, nom, k, mutual, rows);
+    csrFromRows(yCloud, rows, offsets, cols);
+    return;
+  }
+  std::vector<int> deg(static_cast<std::size_t>(n), 0);
+  CsrSlabs job{&nom, &deg, &cols, &offsets, n, k, 0};
+  csrContinue(&job);
 }
 
 void nneigh::kNearestPacked(
