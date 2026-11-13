@@ -677,8 +677,8 @@ class System(_Owned):
 
         Notes
         -----
-        This call shares a process-global scratch buffer with
-        :meth:`q4q6`, :meth:`q6bar`, and :meth:`steinhardt`.
+        The scratch belongs to the calling thread, so separate frames may
+        run this in separate threads.
         """
         n = self.count()
         ql, bar = _lib.api().ql(self._live(), float(cutoff), type, order, graph, n, average)

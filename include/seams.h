@@ -893,14 +893,12 @@ SEAMS_API seams_status seams_chill_plus(seams_system *sys, double cutoff, int ty
  * @par Handle access
  * Non-const only because the call clears the handle's error slot on
  * entry; it reads the frame and nothing else on the handle. The q_lm work
- * arrays are process-global, so this call must not overlap seams_ql(),
- * seams_q4q6(), seams_q6bar(), or seams_steinhardt() on any handle.
+ * arrays belong to the calling thread, so calls on different handles may
+ * run at the same time.
  * @par Ownership
  * The caller owns both arrays.
  * @par Thread safety
- * Exclusive use of sys. The spherical-harmonic scratch is
- * process-global, so this call does not run beside seams_q4q6() or
- * seams_q6bar().
+ * Exclusive use of sys. Any q call on another handle may run beside it.
  * @par Example
  * @code
  * seams_ql(sys, 3.5, 0, 6, SEAMS_GRAPH_CUTOFF, q6, n, q6bar, n);
@@ -926,13 +924,12 @@ SEAMS_API seams_status seams_ql(seams_system *sys, double cutoff, int type,
  * @par Handle access
  * Non-const only because the call clears the handle's error slot on
  * entry; it reads the frame and nothing else on the handle. The q_lm work
- * arrays are process-global, so this call must not overlap seams_ql(),
- * seams_q4q6(), seams_q6bar(), or seams_steinhardt() on any handle.
+ * arrays belong to the calling thread, so calls on different handles may
+ * run at the same time.
  * @par Ownership
  * The caller owns q4 and q6.
  * @par Thread safety
- * Exclusive use of sys. Shares the process-global scratch with
- * seams_ql() and seams_q6bar().
+ * Exclusive use of sys. Any q call on another handle may run beside it.
  * @par Example
  * @code
  * seams_q4q6(sys, 3.5, 0, q4, q6);
@@ -964,13 +961,12 @@ SEAMS_API seams_status seams_q4q6(seams_system *sys, double cutoff, int type,
  * @par Handle access
  * Non-const only because the call clears the handle's error slot on
  * entry; it reads the frame and nothing else on the handle. The q_lm work
- * arrays are process-global, so this call must not overlap seams_ql(),
- * seams_q4q6(), seams_q6bar(), or seams_steinhardt() on any handle.
+ * arrays belong to the calling thread, so calls on different handles may
+ * run at the same time.
  * @par Ownership
  * The caller owns q6bar.
  * @par Thread safety
- * Exclusive use of sys. Shares the process-global scratch with
- * seams_ql() and seams_q4q6().
+ * Exclusive use of sys. Any q call on another handle may run beside it.
  * @par Example
  * @code
  * double mean = 0, median = 0;
@@ -1551,13 +1547,12 @@ SEAMS_API seams_status seams_signature_cages(seams_system *sys, double cutoff, i
  * @par Handle access
  * Non-const only because the call clears the handle's error slot on
  * entry; it reads the frame and nothing else on the handle. The q_lm work
- * arrays are process-global, so this call must not overlap seams_ql(),
- * seams_q4q6(), seams_q6bar(), or seams_steinhardt() on any handle.
+ * arrays belong to the calling thread, so calls on different handles may
+ * run at the same time.
  * @par Ownership
  * The caller owns both arrays.
  * @par Thread safety
- * Exclusive use of sys. Shares the process-global scratch with
- * seams_ql(), seams_q4q6(), and seams_q6bar().
+ * Exclusive use of sys. Any q call on another handle may run beside it.
  * @par Example
  * @code
  * seams_steinhardt(sys, 3.5, 0, 6, q6, n, NULL, 0);
@@ -2152,13 +2147,12 @@ SEAMS_API seams_status seams_chill_plus_n(seams_system *sys, double cutoff, int 
  * @par Handle access
  * Non-const only because the call clears the handle's error slot on
  * entry; it reads the frame and nothing else on the handle. The q_lm work
- * arrays are process-global, so this call must not overlap seams_ql(),
- * seams_q4q6(), seams_q6bar(), or seams_steinhardt() on any handle.
+ * arrays belong to the calling thread, so calls on different handles may
+ * run at the same time.
  * @par Ownership
  * The caller owns q4 and q6.
  * @par Thread safety
- * Exclusive use of sys. Shares the process-global scratch with
- * seams_ql() and seams_q6bar().
+ * Exclusive use of sys. Any q call on another handle may run beside it.
  * @par Example
  * @code
  * seams_q4q6_n(sys, 3.5, 0, q4, n, q6, n);

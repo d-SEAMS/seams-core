@@ -1874,6 +1874,18 @@ test(
   env: _capi_env,
   timeout: 300)
 test(
+  'capi_q_threads',
+  executable(
+    'capi_q_threads',
+    files('tests/capi_q_threads.c'),
+    link_with: seams_api_lib,
+    include_directories: include_directories('include'),
+    c_args: ['-std=c11'] + _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
+    dependencies: dependency('threads'),
+    link_args: ['-lm']),
+  env: _capi_env,
+  timeout: 300)
+test(
   'capi_symbols',
   find_program('python3', required: true),
   args: [

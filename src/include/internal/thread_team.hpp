@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <mutex>
 
 // One width for OpenMP and Rayon. OpenMP already follows
 // OMP_NUM_THREADS. Linkcell's pool does not, so a process whose
@@ -28,13 +29,8 @@ extern "C" int lc_num_threads(void);
 
 namespace seams {
 
-inline void widenAffinity() {
+inline void widenAffinityOnce() {
 #ifdef __linux__
-  static int done = 0;
-  if (done) {
-    return;
-  }
-  done = 1;
   cpu_set_t trial;
   CPU_ZERO(&trial);
   if (sched_getaffinity(0, sizeof(trial), &trial) != 0) {
@@ -51,6 +47,13 @@ inline void widenAffinity() {
   }
 #else
 #endif
+}
+
+// Once per process. C API callers on several threads may arrive here
+// together.
+inline void widenAffinity() {
+  static std::once_flag once;
+  std::call_once(once, widenAffinityOnce);
 }
 
 inline void releaseTeam() {
@@ -152,6 +155,8 @@ struct TeamWidth {
           // bind would put the workers back on the whole allowed set,
           // so it is turned off before the team is created.
           static int bound = 0;
+          static std::mutex boundMu;
+          const std::lock_guard<std::mutex> lock(boundMu);
           if (bound != want) {
             setenv("OMP_PROC_BIND", "false", 1);
 #pragma omp parallel num_threads(want)

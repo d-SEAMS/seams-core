@@ -87,10 +87,10 @@ are the C enumerators as Rust enums.
 vertex indices. `Cages`, `Fingerprint`, and `Brine` are owned handles. Their
 destructors free the C object.
 
-A handle is `Send`. It is not `Sync`. The C library requires exclusive use of
-a handle, and the Steinhardt scratch is process-global, so two frames must
-not run `steinhardt`, `ql`, `q4q6`, or `q6bar` at the same time.
-`set_num_threads` is process-global as well.
+A handle is `Send`. It is not `Sync`: the C library requires exclusive use of
+a handle. Two frames on two threads may run `steinhardt`, `ql`, `q4q6`, or
+`q6bar` at the same time; the Steinhardt scratch belongs to the calling thread.
+`set_num_threads` is process-global.
 
 `cargo doc --manifest-path bindings/rust/Cargo.toml --no-deps` is the rustdoc.
 With `SEAMS_LIB_DIR` set and `sphinxcontrib-rust` installed, Sphinx renders

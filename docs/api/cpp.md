@@ -67,9 +67,10 @@ Methods that return a value are `[[nodiscard]]`. A method that reads a
 frame takes a non-const `System` because the C call clears the handle
 error. `count` is const.
 
-A handle requires exclusive use. The Steinhardt scratch inside the library
-is process-global, so two frames must not run `steinhardt`, `ql`, `q4q6`,
-or `q6bar` at the same time. `set_num_threads` is process-global.
+A handle requires exclusive use. Two frames on two threads may run
+`steinhardt`, `ql`, `q4q6`, or `q6bar` at the same time; the Steinhardt
+scratch inside the library belongs to the calling thread. `set_num_threads`
+is process-global.
 
 Doxygen comments on `seams.hpp` and `seams.h` feed the same doxyrest tree
 as the engine headers (`Doxyfile_seams.cfg`, the rgpot layout). The

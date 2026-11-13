@@ -100,8 +100,8 @@ before the library is called.
 | `brine` | fronts, rejection, profile, pockets |
 
 `CUTOFF` is 0, `MUTUAL` is 1, `SEEDED` is 2. `PUBLISHED` is 0, `OVITO` is 1.
-`q4q6`, `q6bar`, `ql`, and `steinhardt` share one process-global scratch
-buffer. `set_num_threads` is process-global too.
+`q4q6`, `q6bar`, `ql`, and `steinhardt` keep their scratch per calling thread, so
+separate frames may run them in separate threads. `set_num_threads` is process-global.
 
 ## Native reference
 

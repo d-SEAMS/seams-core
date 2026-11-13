@@ -20,9 +20,10 @@ filter keeps that species. `seams_system_count` is the number of points, or 0 fo
 null handle. Neighbour, ring, cage, brine, and fingerprint handles are separate
 objects. Destroying the frame does not free them.
 
-One thread uses a handle. Another thread may use a different handle at the same time.
-`seams_ql`, `seams_q4q6`, `seams_q6bar`, and `seams_steinhardt` share one
-process-global scratch, so those four calls do not overlap.
+One thread uses a handle. Another thread may use a different handle at the same time,
+including for `seams_ql`, `seams_q4q6`, `seams_q6bar`, and `seams_steinhardt`: their
+q_lm scratch belongs to the calling thread. `tests/capi_q_threads.c` runs them, and
+CHILL+, on eight handles in eight threads.
 
 ## Status codes
 
@@ -107,11 +108,10 @@ says why under "Handle access":
 - the loads replace the stored frame;
 - `seams_chill`, `seams_chill_plus`, and `seams_chill_plus_n` write CHILL+ labels into
   the stored frame;
-- `seams_ql`, `seams_q4q6`, `seams_q4q6_n`, `seams_q6bar`, and `seams_steinhardt` use
-  process-global q_lm scratch, so two of them must not overlap even on different
-  handles;
-- the others keep no scratch on the handle, and are non-const only because they clear
-  the error copy on entry, which is what lets `seams_handle_error` report that call.
+- the others, including `seams_ql`, `seams_q4q6`, `seams_q4q6_n`, `seams_q6bar`, and
+  `seams_steinhardt`, keep no scratch on the handle, and are non-const only because
+  they clear the error copy on entry, which is what lets `seams_handle_error` report
+  that call. The q_lm scratch of the q calls belongs to the calling thread.
 
 ## Reloading a frame
 

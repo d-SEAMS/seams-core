@@ -1033,7 +1033,11 @@ SteinhardtQl cutoffSolid(
     int geomType = 0;
     double geomCut = 0;
   };
-  static Scratch scratch;
+  // One per calling thread, so calls on different frames can overlap. The
+  // reference is what OpenMP regions below see, so the team shares the
+  // caller's buffers rather than each worker getting its own.
+  thread_local Scratch scratchStore;
+  Scratch &scratch = scratchStore;
   // The fast local q4/q6 kernel can skip the row. Every other degree
   // writes q_lm, including a local q3, so the row exists before that
   // loop. A wider buffer left by a higher degree is reused; growing is
@@ -1799,7 +1803,11 @@ SteinhardtQl steinhardtQlMutual(
     int k = -1;
     int orderL = -1;
   };
-  static Scratch scratch;
+  // One per calling thread, so calls on different frames can overlap. The
+  // reference is what OpenMP regions below see, so the team shares the
+  // caller's buffers rather than each worker getting its own.
+  thread_local Scratch scratchStore;
+  Scratch &scratch = scratchStore;
   if (scratch.n != n || scratch.k != k || scratch.orderL != orderL) {
     scratch.nkeep.assign(static_cast<std::size_t>(n), 0);
     scratch.neigh.assign(static_cast<std::size_t>(n) * static_cast<std::size_t>(k), -1);
@@ -2008,7 +2016,7 @@ const std::vector<std::vector<int>> &qRows(
       break;
     }
   }
-  static std::vector<std::vector<int>> window;
+  thread_local std::vector<std::vector<int>> window;
   if (nneigh::blockWindowRows(cloud, cutoff, single ? nullptr : &owned, window)) {
     return window;
   }

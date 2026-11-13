@@ -9,8 +9,8 @@
 //!
 //! Analyses with several knobs take an options struct. Neighbour lists and
 //! rings yield iterators. A handle may move to another thread ([`Send`]).
-//! It is not [`Sync`]: the C library requires exclusive use of a handle,
-//! and the Steinhardt scratch is process-global.
+//! It is not [`Sync`]: the C library requires exclusive use of a handle.
+//! Separate handles may run the Steinhardt calls on separate threads.
 //!
 //! # Quick example
 //!
