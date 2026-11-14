@@ -184,6 +184,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 ### Fixed
 
 - A LAMMPS dump that grows while it is read is kept. The language fronts follow the build Python and skip a library mismatch.
+- A plain build writes `bindings/lua/dseams_ffi.lua`, which the LuaJIT FFI tutorial and the Lua video tape load from the build directory. Only `meson test lua_examples` used to generate it, so the tape failed in a fresh build.
 - A tilted cell's cage edge window uses the lattice minimum image, so a GenIce sH dump keeps every 5^12, 4^3 5^6 6^3 and 5^12 6^8 cage. The head-to-head against ClavisCage and cycless is benchmarks/cage-h2h-v8.txt.
 - Accept a cup that fills the signature face count with dangling edges.
 - An orthorhombic displacement wraps every period, not one. Unfolded coordinates 16 apart in a 10 box are 4 apart, not 6.

@@ -121,6 +121,7 @@ ffi = custom_target(
   input: files('../../include/seams.h'),
   output: 'dseams_ffi.lua',
   command: [find_program('python3'), files('gen_ffi.py'), '@INPUT@', '@OUTPUT@'],
+  build_by_default: true,
 )
 
 lua_runners = []
