@@ -9,7 +9,9 @@ frame pointer and the buffers those calls fill.
 from __future__ import annotations
 
 import ctypes
+import ctypes.util
 import os
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -83,6 +85,19 @@ class _PrismRow(ctypes.Structure):
     )
 
 
+def _lang_library():
+    """``SEAMS_LANG_LIB``, else the copy installed with this package, else the loader's."""
+    path = os.environ.get("SEAMS_LANG_LIB")
+    if path:
+        return path
+    name = {"darwin": "libseams_lang.dylib", "win32": "seams_lang.dll"}.get(sys.platform, "libseams_lang.so")
+    here = Path(__file__).resolve().parent
+    for folder in (here, here.parent / ".pydseamslib.mesonpy.libs", Path(sys.prefix) / "lib"):
+        if (folder / name).is_file():
+            return str(folder / name)
+    return ctypes.util.find_library("seams_lang") or name
+
+
 _LIB = None
 
 
@@ -90,8 +105,7 @@ def _library():
     global _LIB
     if _LIB is not None:
         return _LIB
-    path = os.environ.get("SEAMS_LANG_LIB", "libseams_lang")
-    lib = ctypes.CDLL(path)
+    lib = ctypes.CDLL(_lang_library())
     lib.seams_last_error.restype = ctypes.c_char_p
     lib.seams_frame_read.restype = ctypes.c_void_p
     lib.seams_frame_read.argtypes = [ctypes.c_char_p, ctypes.c_int, ctypes.c_int]

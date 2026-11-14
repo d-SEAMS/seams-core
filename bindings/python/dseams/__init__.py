@@ -66,6 +66,8 @@ OVITO = _core.OVITO
 CUTOFF = _core.CUTOFF
 MUTUAL = _core.MUTUAL
 
+__version__ = _core.version()
+
 
 def version():
     """Engine version string.
