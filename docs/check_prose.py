@@ -2,7 +2,8 @@
 # Copyright (c) d-SEAMS developers
 """Fail when public docs use the filler this release does not.
 
-The scan is docs/**/*.md, docs/**/*.rst, README.md, and changelog.d.
+The scan is docs/**/*.md, docs/**/*.rst, docs/**/*.org, README.md, and
+changelog.d. docs/source/api is doxyrest output of C++ signatures.
 Command flags and fenced examples are left alone. A double hyphen with
 spaces on both sides, outside those examples, is punctuation.
 """
@@ -14,6 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 SKIP = {"build", "doctrees", "__pycache__"}
+GENERATED = DOCS / "source" / "api"
 WORDS = re.compile(
     r"\b(delve|delves|delving|leverage|leverages|leveraging|leveraged|"
     r"robust|seamless|underpin|underpins|underpinning|"
@@ -31,9 +33,9 @@ CARGO_SPLIT = re.compile(r" -- --")
 def pages():
     found = []
     for path in DOCS.rglob("*"):
-        if not path.is_file() or path.suffix not in {".md", ".rst"}:
+        if not path.is_file() or path.suffix not in {".md", ".rst", ".org"}:
             continue
-        if SKIP.intersection(path.relative_to(DOCS).parts):
+        if SKIP.intersection(path.relative_to(DOCS).parts) or path.is_relative_to(GENERATED):
             continue
         found.append(path)
     readme = ROOT / "README.md"
