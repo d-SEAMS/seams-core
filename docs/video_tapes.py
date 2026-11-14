@@ -230,7 +230,7 @@ def check_folder(folder, env, root, record, absent):
 
 def check_embeds(root):
     """A claim in embed.txt is an /$/embed/ iframe. No claim renders nothing."""
-    from video_page import players_rst, read_claim, slugs
+    from video_page import CLAIMS, players_rst, read_claim, slugs
 
     videos = root / "docs" / "videos"
     if (videos / "lua-fennel").exists():
@@ -248,6 +248,14 @@ def check_embeds(root):
         if not (folder / "captions.vtt").is_file():
             fail("{} is missing captions.vtt".format(slug))
         claim = read_claim(folder)
+        expected = CLAIMS.get(slug)
+        if expected is None:
+            if claim is not None:
+                fail("{} has a claim that was not supplied".format(slug))
+        else:
+            name, claim_id = expected.split(":", 1)
+            if claim != (name, claim_id):
+                fail("{} embed.txt is not {}".format(slug, expected))
         if claim is None:
             if "docs/videos/{}/captions.vtt".format(slug) in html:
                 fail("{} has no claim and should render nothing".format(slug))
@@ -266,10 +274,16 @@ def main():
     if len(args) != 5:
         fail("usage: video_tapes.py [--record] ROOT SEAMS LIBDIR LANGDIR BUILD")
     root, env = prepare(*args)
+    from video_page import CUTS, NOTES
     check_embeds(root)
-    folders = sorted(path for path in (root / "docs" / "videos").iterdir() if (path / "script.md").is_file())
-    if len(folders) != 21:
-        fail("expected 21 videos, found {}".format(len(folders)))
+    videos = root / "docs" / "videos"
+    names = sorted(path.name for path in videos.iterdir() if path.is_dir() and (path / "script.md").is_file())
+    if set(names) != set(CUTS) | set(NOTES):
+        fail("video folders are {}, cuts plus notes are {}".format(
+            ", ".join(names), ", ".join(sorted(set(CUTS) | set(NOTES)))))
+    if len(CUTS) != 19:
+        fail("expected 19 cuts, found {}".format(len(CUTS)))
+    folders = [videos / name for name in CUTS]
     absent = []
     for folder in folders:
         check_folder(folder, env, root, record, absent)

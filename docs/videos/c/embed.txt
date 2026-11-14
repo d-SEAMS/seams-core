@@ -1,2 +1,3 @@
 # Odysee claim, one line when the upload exists:
 # claim-name:full-claim-id
+dseams-c-api:2f7235016514160a792d2e416ba29c711d989b8b

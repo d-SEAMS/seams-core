@@ -1,4 +1,10 @@
 ## scene-01.tape
+nop 128 graph seeded signature 4:6,6:2 cages 64 atoms 128
+nop 128 graph seeded signature 6:7 cages 0 atoms 0
+## scene-02.tape
+nop 4096 graph seeded signature 4:6,6:2 cages 0 atoms 0
+nop 4096 graph seeded signature 6:7 cages 2048 atoms 4096
+## scene-03.tape
 cages full input sI molecules 368 frames 1 file sI-full.lammpstrj
 cages full sI 16 48
 cages full input sII molecules 544 frames 1 file sII-full.lammpstrj

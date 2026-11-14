@@ -5,7 +5,7 @@ Draft cues converted from captions.srt. Final wording and timing are recorded la
 
 1
 00:00:00.300 --> 00:00:12.180 line:95% align:center size:80%
-The brine frame is input/traj/nacl_front.lammpstrj, 873 atoms in 1 frame: 864 waters and 9 ions. Hexagonal is 352 and water is 434. docs_paper_brine_full asserts those lines.
+The brine tutorial prints three frames. Frame 0 is hexagonal 93, water 152, front 18.50. Frame 1 is hexagonal 160, water 86, front 25.90. Frame 2 is hexagonal 218, water 38, front 37.00.
 
 2
 00:00:12.550 --> 00:00:21.100 line:95% align:center size:80%

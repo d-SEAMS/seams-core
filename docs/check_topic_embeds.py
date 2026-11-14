@@ -14,7 +14,7 @@ from video_page import TOPICS, embed_rst, include_line, read_claim  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 VIDEOS = ROOT / "docs" / "videos"
-COMING = ("c", "r", "migrate")
+COMING = ("cages",)
 
 
 def fail(message):

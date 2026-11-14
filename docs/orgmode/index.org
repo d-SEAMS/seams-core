@@ -103,7 +103,8 @@ seams cages input/traj/ice1h.lammpstrj
 
 2.14.0 ships ~libseams~ (~seams.h~) and ~libseams_lang~ in this
 tree, with C, C++, Fortran, Rust, Python (~import dseams~), Julia, and
-R fronts, plus LAMMPS, GROMACS, OpenMM, PLUMED, and in-situ hooks.
+R fronts, plus LAMMPS, OpenMM, PLUMED, and the in-situ engine.
+~gmx-seams~ reads the trajectory after ~gmx mdrun~.
 Lua and Fennel ~require("dseams")~ are in this tree as well.
 The released Frame package stays separate:
 

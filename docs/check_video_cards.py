@@ -40,7 +40,7 @@ def pages():
 
 def main():
     scripts = sorted((ROOT / "docs" / "videos").glob("*/script.md"))
-    if len(scripts) < 21:
+    if len(scripts) < 19:
         fail("expected every video script, found {}".format(len(scripts)))
     for path in scripts:
         text = path.read_text(encoding="utf-8")

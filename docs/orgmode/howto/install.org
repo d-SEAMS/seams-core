@@ -4,6 +4,36 @@
 Get a ~seams~ binary, ~libyodaLib~, and ~libseams~. The nanobind
 module is built in this repository. ~-Dwith_lua=auto~ builds
 ~require("dseams")~ when Lua 5.4 or LuaJIT is present.
+This page is the 2.14.0 install: pip for the Frame package, conda-forge
+for the toolchain, and a source build for the engine.
+
+* pip
+
+#+begin_src bash
+pip install pydseamslib
+#+end_src
+
+That is the released Frame package, ~import pydseams~. The in-tree
+module is ~import dseams~, built by the source lines below.
+
+* conda
+
+conda-forge has no ~d-seams~ package. It does have the toolchain:
+
+#+begin_src bash
+conda install -c conda-forge meson ninja pkg-config eigen python numpy
+meson setup build -Dwith_python=true
+meson compile -C build
+#+end_src
+
+* source
+
+#+begin_src bash
+meson setup build && meson compile -C build
+#+end_src
+
+~-Dwith_python=true~ is the Meson default. The same two lines are the
+install when the compilers are already on ~PATH~.
 
 * pixi
 

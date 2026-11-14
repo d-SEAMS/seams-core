@@ -806,6 +806,144 @@ def brine_full(seams, libdir, out):
     publish(out, lines, copied, out / "brine-full.png")
 
 
+def brine_growth(seams, libdir, out):
+    """Three OpenMM frames of a growing ice front, then CHILL+ on each."""
+    mm, unit = openmm_modules()
+    ice, gro_box = genice_oxygens("1h", (2, 2, 2))
+    box = box_of(gro_box)
+    rng = random.Random(5)
+    layer = [point for point in ice if point[2] < box[2] * 0.5]
+
+    def jitter(zshift):
+        shifted = []
+        for x, y, z in layer:
+            shifted.append(
+                (
+                    x + rng.uniform(-0.6, 0.6),
+                    y + rng.uniform(-0.6, 0.6),
+                    z + zshift + rng.uniform(-0.4, 0.4),
+                )
+            )
+        return shifted
+
+    liquid = jitter(box[2]) + jitter(1.55 * box[2])
+    waters = [tuple(point) for point in ice] + liquid
+    ions = [
+        (2, 2.2, 2.2, box[2] * 2.05),
+        (3, 8.0, 3.0, box[2] * 2.12),
+        (2, 4.5, 9.0, box[2] * 2.18),
+        (3, 11.0, 6.5, box[2] * 2.22),
+    ]
+    everyone = waters + [(x, y, z) for _kind, x, y, z in ions]
+    tall = [box[0], box[1], box[2] * 2.4]
+    system = mm.System()
+    for _ in everyone:
+        system.addParticle(22.0 * unit.dalton)
+    system.setDefaultPeriodicBoxVectors(
+        (tall[0], 0, 0) * unit.angstrom,
+        (0, tall[1], 0) * unit.angstrom,
+        (0, 0, tall[2]) * unit.angstrom,
+    )
+    nb = mm.NonbondedForce()
+    nb.setNonbondedMethod(mm.NonbondedForce.CutoffPeriodic)
+    nb.setCutoffDistance(0.4 * unit.nanometer)
+    nb.setUseSwitchingFunction(True)
+    nb.setSwitchingDistance(0.32 * unit.nanometer)
+    for _ in waters:
+        nb.addParticle(0.0, 0.31 * unit.nanometer, 1.2 * unit.kilojoule_per_mole)
+    for kind, _x, _y, _z in ions:
+        charge = 0.3 if kind == 2 else -0.3
+        nb.addParticle(charge * unit.elementary_charge, 0.40 * unit.nanometer, 0.15 * unit.kilojoule_per_mole)
+    system.addForce(nb)
+
+    def spring(name, pairs):
+        hold = mm.CustomExternalForce("{}*((x-x0)^2+(y-y0)^2+(z-z0)^2)".format(name))
+        hold.addGlobalParameter(name, 0.0)
+        hold.addPerParticleParameter("x0")
+        hold.addPerParticleParameter("y0")
+        hold.addPerParticleParameter("z0")
+        for index, (x, y, z) in pairs:
+            hold.addParticle(index, [x * 0.1, y * 0.1, z * 0.1])
+        return hold
+
+    system.addForce(spring("kice", list(enumerate(ice))))
+    system.addForce(
+        spring("k1", [(len(ice) + index, (x, y, z + box[2])) for index, (x, y, z) in enumerate(layer)])
+    )
+    system.addForce(
+        spring(
+            "k2",
+            [(len(ice) + len(layer) + index, (x, y, z + 1.55 * box[2])) for index, (x, y, z) in enumerate(layer)],
+        )
+    )
+    integrator = mm.LangevinMiddleIntegrator(
+        240 * unit.kelvin, 5 / unit.picosecond, 0.001 * unit.picoseconds
+    )
+    integrator.setRandomNumberSeed(240)
+    context = mm.Context(system, integrator, reference_platform(mm))
+    context.setPositions([(x * 0.1, y * 0.1, z * 0.1) for x, y, z in everyone] * unit.nanometer)
+    context.setParameter("kice", 5.0e4)
+    context.setParameter("k1", 0.0)
+    context.setParameter("k2", 0.0)
+
+    def settle(name=None, value=0.0):
+        if name:
+            context.setParameter(name, value)
+        mm.LocalEnergyMinimizer.minimize(context, 5.0, 30)
+        integrator.step(800)
+
+    saved = []
+
+    def grab():
+        state = context.getState(getPositions=True).getPositions(asNumpy=True).value_in_unit(unit.angstrom)
+        oxygens = [tuple(float(v) for v in point) for point in state[: len(waters)]]
+        extras = []
+        for offset, (kind, _x, _y, _z) in enumerate(ions):
+            x, y, z = (float(v) for v in state[len(waters) + offset])
+            extras.append((kind, x, y, z))
+        saved.append((oxygens, tall, extras))
+
+    settle()
+    grab()
+    settle("k1", 4.0e4)
+    grab()
+    settle("k2", 4.0e4)
+    grab()
+    dump = out / "brine-growth.lammpstrj"
+    write_dump(dump, saved)
+    lines = []
+    for frame in range(3):
+        text = run_seams(
+            seams,
+            libdir,
+            [
+                "chill-plus",
+                str(dump),
+                "--type",
+                "1",
+                "--cutoff",
+                "3.5",
+                "--frame",
+                str(frame + 1),
+                "--last",
+                str(frame + 1),
+                "--layers",
+                "--axis",
+                "2",
+            ],
+        )
+        front, stack, _phi = stack_front(text)
+        found = counts(text)
+        lines.append(
+            "brine full frame {} hexagonal {} water {} front {} stack {}".format(
+                frame, found.get("hexagonal", 0), found.get("water", 0), front, stack
+            )
+        )
+    figure = out / "brine-growth-last.lammpstrj"
+    write_dump(figure, [saved[-1]])
+    publish(out, lines, figure, out / "brine-growth.png")
+
+
 def nucleation_full(seams, libdir, out):
     dump = nucleation_dump()
     text = run_seams(
@@ -856,6 +994,7 @@ def main():
         "cages-full": cages_full,
         "rings-full": rings_full,
         "brine-full": brine_full,
+        "brine-growth": brine_growth,
         "nucleation-full": nucleation_full,
     }
     if topic not in topics:

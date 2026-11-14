@@ -5,18 +5,16 @@ Set Height 1080
 Set Framerate 30
 Set Padding 0
 # lead 0.35
-# duration 15.30
+# duration 16.00
 # test docs_video_tapes
-# test docs_paper_cages_full
-# expect cages full sI 16 48
-# expect cages full sII 64 32
-# expect cages full sH 24 16 8
+# expect nop 128 graph seeded signature 4:6,6:2 cages 64 atoms 128
+# expect nop 128 graph seeded signature 6:7 cages 0 atoms 0
 Hide
 Type 'PS1='"'"'$ '"'"''
 Enter
 Show
 Sleep 350ms
-Type 'python3 docs/tutorials/paper_science.py cages-full "$SEAMS" "$SEAMS_LIBDIR" "$VIDEO_OUT/cages"'
+Type '"$SEAMS" cages input/traj/ice1h.lammpstrj --graph seeded --signature hc+ddc'
 Enter
 Sleep 1s
-Sleep 13950ms
+Sleep 14650ms

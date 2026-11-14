@@ -1,2 +1,3 @@
 # Odysee claim, one line when the upload exists:
 # claim-name:full-claim-id
+dseams-rings:cfb3b6687dd81847ecb005782df8cf5143617be5

@@ -1,7 +1,11 @@
 ## scene-01.tape
+brine full frame 0 hexagonal 93 water 152 front 18.50 stack HHHHH.......
+brine full frame 1 hexagonal 160 water 86 front 25.90 stack HHHHHHH.....
+brine full frame 2 hexagonal 218 water 38 front 37.00 stack HHHHHHHHHH..
+## scene-02.tape
+brine waters 864 ions 9
+
 brine full input molecules 873 frames 1 file-frames 1 file input/traj/nacl_front.lammpstrj
 brine full paper waters 864 ions 9 frames 1
 brine full waters 864 ions 9 hexagonal 352 water 434
-## scene-02.tape
-brine waters 864 ions 9
 ## scene-03.tape

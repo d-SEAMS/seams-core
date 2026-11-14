@@ -12,7 +12,53 @@ Tests: `docs_paper_cages_full`, `docs_video_tapes`.
 
 Picture: 1920x1080, 30 fps, crf 16, one vhs scene file per shot so the lead-in can be retimed. Each shot starts 0.35 s before the draft line. Captions are a `<track>`, in the empty lower band (`line:95%`), and are not burned in. A later mix uses `-c:a aac -aac_coder fast`.
 
-## Scene 1. sI and sII cages
+## Scene 1. Ice Ih hexagonal cages
+
+Lead-in: 0.35 s. Segment length: 16.00 s.
+
+Tests: `docs_video_tapes`.
+
+Commands:
+
+```bash
+"$SEAMS" cages input/traj/ice1h.lammpstrj --graph seeded --signature hc+ddc
+```
+
+Expected output (substrings the run must print):
+
+```text
+nop 128 graph seeded signature 4:6,6:2 cages 64 atoms 128
+nop 128 graph seeded signature 6:7 cages 0 atoms 0
+```
+
+Draft narration:
+
+Ice Ih with the seeded hc+ddc signature prints nop 128 graph seeded signature 4:6,6:2 cages 64 atoms 128, then nop 128 graph seeded signature 6:7 cages 0 atoms 0. The first line is 64 hexagonal cages. The second search finds no double-diamond cages.
+
+## Scene 2. Cubic double-diamond cages
+
+Lead-in: 0.30 s. Segment length: 16.00 s.
+
+Tests: `docs_video_tapes`.
+
+Commands:
+
+```bash
+"$SEAMS" cages input/traj/mW_cubic.lammpstrj --type 1 --signature hc+ddc
+```
+
+Expected output (substrings the run must print):
+
+```text
+nop 4096 graph seeded signature 4:6,6:2 cages 0 atoms 0
+nop 4096 graph seeded signature 6:7 cages 2048 atoms 4096
+```
+
+Draft narration:
+
+The cubic cell prints nop 4096 graph seeded signature 4:6,6:2 cages 0 atoms 0, then nop 4096 graph seeded signature 6:7 cages 2048 atoms 4096. Those 2048 cages are the double-diamond cages.
+
+## Scene 3. Clathrate cells
 
 Lead-in: 0.35 s. Segment length: 15.30 s.
 

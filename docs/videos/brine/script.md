@@ -21,20 +21,20 @@ Tests: `docs_video_tapes`, `docs_paper_brine_full`.
 Commands:
 
 ```bash
-python3 docs/tutorials/paper_science.py brine-full "$SEAMS" "$SEAMS_LIBDIR" "$VIDEO_OUT/brine"
+python3 docs/tutorials/paper_science.py brine-growth "$SEAMS" "$SEAMS_LIBDIR" "$VIDEO_OUT/brine"
 ```
 
 Expected output (substrings the run must print):
 
 ```text
-brine full input molecules 873 frames 1 file-frames 1 file input/traj/nacl_front.lammpstrj
-brine full paper waters 864 ions 9 frames 1
-brine full waters 864 ions 9 hexagonal 352 water 434
+brine full frame 0 hexagonal 93 water 152 front 18.50 stack HHHHH.......
+brine full frame 1 hexagonal 160 water 86 front 25.90 stack HHHHHHH.....
+brine full frame 2 hexagonal 218 water 38 front 37.00 stack HHHHHHHHHH..
 ```
 
 Draft narration:
 
-The brine frame is input/traj/nacl_front.lammpstrj, 873 atoms in 1 frame: 864 waters and 9 ions. Hexagonal is 352 and water is 434. docs_paper_brine_full asserts those lines.
+The brine tutorial prints three frames. Frame 0 is hexagonal 93, water 152, front 18.50. Frame 1 is hexagonal 160, water 86, front 25.90. Frame 2 is hexagonal 218, water 38, front 37.00.
 
 ## Scene 2. Temperature in the driver
 
@@ -46,12 +46,16 @@ Commands:
 
 ```bash
 python3 -c "import pathlib; text=pathlib.Path('docs/tutorials/paper_science.py').read_text(); assert 'brine full paper waters 864 ions 9 frames 1' in text; print('brine waters 864 ions 9')"
+python3 docs/tutorials/paper_science.py brine-full "$SEAMS" "$SEAMS_LIBDIR" "$VIDEO_OUT/brine"
 ```
 
 Expected output (substrings the run must print):
 
 ```text
 brine waters 864 ions 9
+brine full input molecules 873 frames 1 file-frames 1 file input/traj/nacl_front.lammpstrj
+brine full paper waters 864 ions 9 frames 1
+brine full waters 864 ions 9 hexagonal 352 water 434
 ```
 
 Draft narration:
