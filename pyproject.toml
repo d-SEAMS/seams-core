@@ -56,7 +56,9 @@ limited-api = true
 # The wheel is the C++ engine with OpenMP and nothing that needs the
 # network or a Rust toolchain at build time. Static subprojects and a
 # static libyodaLib leave libseams and libseams_lang self-contained.
+# Eigen always comes from its wrap so the sdist carries it.
 setup = [
+  "--force-fallback-for=eigen3",
   "-Dwith_python=true",
   "-Dwith_tests=false",
   "-Dwith_cli=false",

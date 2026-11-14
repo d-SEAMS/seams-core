@@ -22,6 +22,8 @@ endif
 
 host_system = host_machine.system()
 
+meson.add_dist_script(find_program('python3', 'python'), files('scripts/dist_strip_vcs.py'))
+
 # Global accumulator variables (eOn pattern)
 _args = []
 _link_args = []
