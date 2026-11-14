@@ -1,0 +1,133 @@
+schema_version: 1
+
+context:
+  version: "2.14.0"
+
+recipe:
+  name: seams-core-split
+  version: ${{ version }}
+
+source:
+  # The PyPI sdist carries the pinned subprojects (Eigen, vesin,
+  # nanobind, robin-map), so the build needs no network.
+  # sha256 is that of the uploaded 2.14.0 sdist; fill it in after the
+  # PyPI release and before opening the staged-recipes pull request.
+  url: https://pypi.org/packages/source/p/pydseamslib/pydseamslib-${{ version }}.tar.gz
+  sha256: 0000000000000000000000000000000000000000000000000000000000000000
+
+build:
+  number: 0
+  skip:
+    - win
+
+outputs:
+  - package:
+      name: libseams
+    build:
+      script: build-libseams.sh
+    requirements:
+      build:
+        - ${{ compiler('c') }}
+        - ${{ compiler('cxx') }}
+        - ${{ stdlib('c') }}
+        - meson >=1.3
+        - ninja
+        - pkg-config
+        - python *
+      host:
+        - eigen >=3.4.0
+        - if: linux
+          then: libgomp
+        - if: osx
+          then: llvm-openmp
+      run_exports:
+        - ${{ pin_subpackage('libseams', upper_bound='x.x') }}
+    tests:
+      - package_contents:
+          lib:
+            - seams
+            - seams_lang
+            - yodaLib
+          include:
+            - seams.h
+            - seams_version.h
+            - seams/seams_lang.h
+          bin:
+            - seams
+          files:
+            - lib/pkgconfig/seams.pc
+            - lib/pkgconfig/seams-core.pc
+            - lib/cmake/seams/seams-config.cmake
+      - files:
+          source:
+            - docs/examples/quickstart.c
+        requirements:
+          run:
+            - ${{ compiler('c') }}
+            - pkg-config
+        script:
+          - seams --version
+          - test "$(pkg-config --modversion seams)" = "${{ version }}"
+          - ${CC} ${CFLAGS} docs/examples/quickstart.c $(pkg-config --cflags --libs seams) -lm ${LDFLAGS} -Wl,-rpath,${PREFIX}/lib -o quickstart
+          - ./quickstart
+
+  - package:
+      name: pydseamslib
+    build:
+      script: build-pydseamslib.sh
+    requirements:
+      build:
+        - ${{ compiler('c') }}
+        - ${{ compiler('cxx') }}
+        - ${{ stdlib('c') }}
+        - meson >=1.3
+        - ninja
+        - pkg-config
+        - if: build_platform != target_platform
+          then:
+            - python
+            - cross-python_${{ target_platform }}
+      host:
+        - python
+        - pip
+        - meson-python >=0.18
+        - ${{ pin_subpackage('libseams', exact=True) }}
+      run:
+        - python
+        - numpy >=1.24
+        - ${{ pin_subpackage('libseams', exact=True) }}
+    tests:
+      - python:
+          imports:
+            - dseams
+            - pydseams
+            - pydseamslib
+          pip_check: true
+      - files:
+          source:
+            - bindings/python/tests/
+        requirements:
+          run:
+            - pytest
+        script:
+          - python -c "import dseams; print(dseams.__version__); assert dseams.__version__ == '${{ version }}'"
+          - python -m pytest -q -p no:cacheprovider --import-mode=importlib bindings/python/tests/test_dseams.py bindings/python/tests/installed_package.py
+
+about:
+  homepage: https://dseams.info
+  repository: https://github.com/d-SEAMS/seams-core
+  documentation: https://docs.dseams.info
+  license: MIT
+  license_file: LICENSE
+  summary: d-SEAMS structural analysis engine for molecular simulations of water and ice
+  description: |
+    d-SEAMS (Deferred Structural Elucidation Analysis for Molecular
+    Simulations) classifies ice, clathrates and interfaces in molecular
+    dynamics trajectories: CHILL+, Steinhardt order parameters, primitive
+    rings, cages, and shell symmetry. libseams is the C++ engine, its
+    stable C API (seams.h) and the seams CLI; pydseamslib is the Python
+    binding, imported as dseams.
+
+extra:
+  recipe-maintainers:
+    - HaoZeke
