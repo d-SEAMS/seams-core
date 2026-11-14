@@ -1,0 +1,1 @@
+The engine compiles on aarch64, Apple silicon, and musl. The AVX kernels are built for x86_64 only and other targets take the scalar paths, `backward.cpp` is skipped without `execinfo.h`, and `LinearFit::stderr` is now `slopeStdErr` because musl defines `stderr` as a macro.

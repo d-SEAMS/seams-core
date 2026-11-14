@@ -2,7 +2,6 @@
 
 ydslib_sources = files(
   'absOrientation.cpp',
-  'backward.cpp',
   'bond.cpp',
   'bop.cpp',
   'bulkTUM.cpp',
@@ -60,6 +59,12 @@ ydslib_sources = files(
   'topo_two_dim.cpp',
 )
 
+# backward-cpp's crash handler symbolizes with backtrace_symbols, which
+# musl does not provide. Without it a crash is an ordinary signal.
+if cppc.has_header('execinfo.h')
+  ydslib_sources += files('backward.cpp')
+endif
+
 # gpu_residency.cpp calls dlopen/dlsym. A shared library that leaves
 # those undefined forces every consumer to add -ldl itself.
 dl_dep = cppc.find_library('dl', required: false)
@@ -79,7 +84,7 @@ endif
 # One shell_avx archive is linked into both the shell path and the Ylm path.
 _shell_link = []
 _ylm_link = []
-if cpp_id == 'gcc' or cpp_id == 'clang'
+if (cpp_id == 'gcc' or cpp_id == 'clang') and host_machine.cpu_family() == 'x86_64'
   _shell_avx = static_library('shell_avx', 'shell_classify.cpp',
     cpp_args: _args + ['-mavx2', '-mfma'],
     include_directories: _incdirs,

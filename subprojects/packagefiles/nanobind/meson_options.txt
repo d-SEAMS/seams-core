@@ -1,3 +1,5 @@
 # Kept so `meson configure` does not copy the parent option list onto
 # this subproject. Without an options file the parent names are registered
 # again here, and the copies keep the file defaults.
+option('limited_api', type: 'string', value: '',
+  description: 'Python stable ABI version (3.12 or later) the library is compiled for; empty for the full API')

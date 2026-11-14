@@ -21,7 +21,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#if defined(__AVX2__)
 #include <immintrin.h>
+#endif
 #include <new>
 #include <cstddef>
 #include <memory>
@@ -643,6 +645,56 @@ bool __attribute__((noinline, cold)) hasStaggeredBond(const double envF[4][3], c
   return false;
 }
 
+#if defined(__AVX2__)
+// Squared distances from point a to the twelve shell points.
+inline void pairRow(const double *px, const double *py, const double *pz, int a, double *row) {
+  const __m256d xa = _mm256_set1_pd(px[a]);
+  const __m256d ya = _mm256_set1_pd(py[a]);
+  const __m256d za = _mm256_set1_pd(pz[a]);
+  for (int b = 0; b < 12; b += 4) {
+    const __m256d dx = _mm256_sub_pd(xa, _mm256_load_pd(px + b));
+    const __m256d dy = _mm256_sub_pd(ya, _mm256_load_pd(py + b));
+    const __m256d dz = _mm256_sub_pd(za, _mm256_load_pd(pz + b));
+    const __m256d d2 = _mm256_add_pd(_mm256_mul_pd(dx, dx),
+                                    _mm256_add_pd(_mm256_mul_pd(dy, dy), _mm256_mul_pd(dz, dz)));
+    _mm256_storeu_pd(row + b, d2);
+  }
+}
+
+// Bit b is set when both row[b] and r2[b] are below cut2.
+inline int withinMask(const double *row, const double *r2, double cut2) {
+  const __m256d cut = _mm256_set1_pd(cut2);
+  int mask = 0;
+  for (int b = 0; b < 12; b += 4) {
+    const __m256d pk = _mm256_loadu_pd(row + b);
+    const __m256d rk = _mm256_load_pd(r2 + b);
+    const __m256d ok = _mm256_and_pd(_mm256_cmp_pd(pk, cut, _CMP_LT_OQ),
+                                    _mm256_cmp_pd(rk, cut, _CMP_LT_OQ));
+    mask |= _mm256_movemask_pd(ok) << b;
+  }
+  return mask;
+}
+#else
+inline void pairRow(const double *px, const double *py, const double *pz, int a, double *row) {
+  for (int b = 0; b < 12; b++) {
+    const double dx = px[a] - px[b];
+    const double dy = py[a] - py[b];
+    const double dz = pz[a] - pz[b];
+    row[b] = dx * dx + (dy * dy + dz * dz);
+  }
+}
+
+inline int withinMask(const double *row, const double *r2, double cut2) {
+  int mask = 0;
+  for (int b = 0; b < 12; b++) {
+    if (row[b] < cut2 && r2[b] < cut2) {
+      mask |= 1 << b;
+    }
+  }
+  return mask;
+}
+#endif
+
 } // namespace
 
 // Second-shell diamond test on the four neighbours, the same split OVITO's
@@ -679,17 +731,7 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
     r2[i] = 1.0e300;
   }
   for (int a = 0; a < 12; a++) {
-    const __m256d xa = _mm256_set1_pd(px[a]);
-    const __m256d ya = _mm256_set1_pd(py[a]);
-    const __m256d za = _mm256_set1_pd(pz[a]);
-    for (int b = 0; b < 12; b += 4) {
-      const __m256d dx = _mm256_sub_pd(xa, _mm256_load_pd(px + b));
-      const __m256d dy = _mm256_sub_pd(ya, _mm256_load_pd(py + b));
-      const __m256d dz = _mm256_sub_pd(za, _mm256_load_pd(pz + b));
-      const __m256d d2 = _mm256_add_pd(_mm256_mul_pd(dx, dx),
-                                      _mm256_add_pd(_mm256_mul_pd(dy, dy), _mm256_mul_pd(dz, dz)));
-      _mm256_storeu_pd(&pair[a][b], d2);
-    }
+    pairRow(px, py, pz, a, pair[a]);
   }
   // (1 + sqrt(2)) / 2, the adaptive common-neighbour cutoff. It lies between
   // the first and second shells of the FCC/HCP cluster.
@@ -698,27 +740,9 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
   int n422 = 0;
   int nGood = 0;
   for (int j = 0; j < 12; j++) {
-    const __m256d xa = _mm256_set1_pd(px[j]);
-    const __m256d ya = _mm256_set1_pd(py[j]);
-    const __m256d za = _mm256_set1_pd(pz[j]);
-    for (int b = 0; b < 12; b += 4) {
-      const __m256d dx = _mm256_sub_pd(xa, _mm256_load_pd(px + b));
-      const __m256d dy = _mm256_sub_pd(ya, _mm256_load_pd(py + b));
-      const __m256d dz = _mm256_sub_pd(za, _mm256_load_pd(pz + b));
-      const __m256d d2 = _mm256_add_pd(_mm256_mul_pd(dx, dx),
-                                      _mm256_add_pd(_mm256_mul_pd(dy, dy), _mm256_mul_pd(dz, dz)));
-      _mm256_storeu_pd(&pair[j][b], d2);
-    }
+    pairRow(px, py, pz, j, pair[j]);
     const double cut2 = r2[j] * kAdapt2;
-    const __m256d cut = _mm256_set1_pd(cut2);
-    int mask = 0;
-    for (int b = 0; b < 12; b += 4) {
-      const __m256d pk = _mm256_loadu_pd(&pair[j][b]);
-      const __m256d rk = _mm256_load_pd(r2 + b);
-      const __m256d ok = _mm256_and_pd(_mm256_cmp_pd(pk, cut, _CMP_LT_OQ),
-                                      _mm256_cmp_pd(rk, cut, _CMP_LT_OQ));
-      mask |= _mm256_movemask_pd(ok) << b;
-    }
+    int mask = withinMask(pair[j], r2, cut2);
     mask &= ~(1 << j);
     const int nc = __builtin_popcount(static_cast<unsigned>(mask));
     int common[4];

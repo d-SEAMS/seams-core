@@ -4,21 +4,64 @@
 Get a ~seams~ binary, ~libyodaLib~, and ~libseams~. The nanobind
 module is built in this repository. ~-Dwith_lua=auto~ builds
 ~require("dseams")~ when Lua 5.4 or LuaJIT is present.
-This page is the 2.14.0 install: pip for the Frame package, conda-forge
-for the toolchain, and a source build for the engine.
+This page is the 2.14.0 install: pip or conda-forge for the Python
+module and the library, the conda-forge toolchain or a plain source
+build for the engine, and the native packages of the other fronts.
 
-* pip
+* Python from PyPI
 
 #+begin_src bash
-pip install pydseamslib
+python -m pip install pydseamslib
+python -c 'import dseams; print(dseams.__version__)'
 #+end_src
 
-That is the released Frame package, ~import pydseams~. The in-tree
-module is ~import dseams~, built by the source lines below.
+The distribution is ~pydseamslib~; the import is ~dseams~, the same
+module the source build below makes from the in-tree
+~bindings/python~. 2.14.0
+replaces the 2.11 wheels in place: ~pip install -U pydseamslib~
+upgrades them, and ~import pydseams~ and ~import pydseamslib~ still
+resolve to the same module. The 2.11 extension names
+~pydseams.yoda~ and ~cyoda~ are gone.
 
-* conda
+Wheels exist for Linux (manylinux_2_28 and musllinux_1_2, x86_64 and
+aarch64) and macOS 14 or later (arm64 and x86_64). CPython 3.10 and
+3.11 have their own wheels; one ~cp312-abi3~ wheel serves 3.12 and
+later. Windows has no wheel: the engine needs GCC or Clang.
 
-conda-forge has no ~d-seams~ package. It does have the toolchain:
+A wheel is the C++ engine with OpenMP (Linux) and vesin, plus
+~libseams_lang~ for ~dseams.cages~, ~dseams.symmetry~ and the
+~Frame~ helpers. The Rust backends (linkcell, minimage, readcon-core,
+readcon-db), chemfiles readers, BLAS and GPU paths are left out so the
+sdist builds with no network and no Rust toolchain. The x86_64 shell
+classifier needs AVX2.
+
+The sdist builds anywhere with a C++20 compiler:
+
+#+begin_src bash
+python -m pip install --no-binary pydseamslib pydseamslib
+#+end_src
+
+It carries Eigen 3.4.0, vesin, nanobind and robin-map, so the build
+fetches nothing beyond the Python build requirements (~meson-python~,
+~meson~, ~ninja~).
+
+* conda-forge
+
+#+begin_src bash
+conda install -c conda-forge pydseamslib   # Python, pulls libseams
+conda install -c conda-forge libseams      # library, headers, seams CLI
+#+end_src
+
+~libseams~ is the engine: ~libyodaLib~, ~libseams~ (~seams.h~),
+~libseams_lang~, the ~seams~ CLI, and the ~seams~ and ~seams-core~
+pkg-config and CMake files. ~pydseamslib~ is the ~dseams~ module
+linked against that library. The recipe is ~recipe/recipe.yaml~
+(rattler-build). It builds with ~-Dsystem_libseams=true~ for the
+Python output so the module does not carry a second engine. Until a
+conda-forge chemfiles passes the mmCIF probe below, the conda build
+leaves chemfiles off.
+
+conda-forge also carries the toolchain for a source build:
 
 #+begin_src bash
 conda install -c conda-forge meson ninja pkg-config eigen python numpy
@@ -26,14 +69,35 @@ meson setup build -Dwith_python=true
 meson compile -C build
 #+end_src
 
-* source
+* From source
 
 #+begin_src bash
 meson setup build && meson compile -C build
 #+end_src
 
 ~-Dwith_python=true~ is the Meson default. The same two lines are the
-install when the compilers are already on ~PATH~.
+install when the compilers are already on ~PATH~. A full checkout,
+install and Python module:
+
+#+begin_src bash
+git clone https://github.com/d-SEAMS/seams-core && cd seams-core
+meson setup bbdir -Dwith_tests=false
+meson compile -C bbdir
+meson install -C bbdir           # --prefix sets the destination
+python -m pip install .          # the dseams module, as on PyPI
+#+end_src
+
+~meson setup~ needs Eigen 3.4 or a network connection to fetch it, and
+fetches the optional subprojects whose options are ~auto~. Rust
+(~cargo~) is needed for linkcell, minimage and readcon. Options that
+only package builders use:
+
+| Option                    | Effect                                                         |
+|---------------------------+----------------------------------------------------------------|
+| ~-Dsystem_libseams=true~  | Build only the ~dseams~ module against an installed ~libseams~ |
+| ~-Dwith_blas=disabled~    | Do not link BLAS or LAPACK; nothing calls them yet             |
+| ~-Dwith_readcon=disabled~ | Leave out the readcon-core and readcon-db ~.con~ readers       |
+| ~--wrap-mode=nodownload~  | Fail instead of fetching a subproject                          |
 
 * pixi
 

@@ -17,6 +17,7 @@ project(
 py_mod = import('python')
 py = py_mod.find_installation()
 py_dep = py.dependency()
+limited_api = get_option('limited_api')
 
 robin_map_dep = dependency('tsl-robin-map', version: '>=1.4.0', required: false)
 if not robin_map_dep.found()
@@ -34,6 +35,11 @@ if compiler.get_argument_syntax() == 'msvc'
 endif
 
 freethreaded = py.get_variable('Py_GIL_DISABLED', 0) != 0
+if limited_api != ''
+  # nanobind's CMake pins the stable ABI at 3.12 whatever the interpreter.
+  # The module and this library must agree, or the object layouts differ.
+  dep_compile_args += ['-DPy_LIMITED_API=0x030C0000']
+endif
 if freethreaded
   dep_compile_args += ['-DNB_FREE_THREADED']
 endif
