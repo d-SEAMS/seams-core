@@ -423,7 +423,7 @@ getq6(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 
 //! 'Test' condition for classifying hexagonal ice using averaged q6 and q3
 //! Checks water
-//! According to https://!pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a
+//! According to https://pubs.rsc.org/en/content/articlehtml/2011/cp/c1cp22167a
 //! Gets c_ij and then classifies bond types according to the CHILL+ algorithm
 void
 reclassifyWater(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
