@@ -166,6 +166,13 @@ restores the library default. A negative width returns `SEAMS_ERR_RANGE`.
 `seams_set_num_threads` is process-global. Do not call it while another thread is
 inside `seams_get_num_threads`.
 
+## Documentation check
+
+`capi_docs_complete` checks that every function in `tests/capi_symbols.txt` has a
+doc comment in `seams.h` and that its section below carries the same text.
+`python3 docs/capi_docs.py --write include/seams.h tests/capi_symbols.txt docs/api/c.md`
+rewrites those sections from the header.
+
 ## What the tour runs
 
 The eight-atom cell is the diamond in `docs/examples/ice.c`. Every atom is cubic.

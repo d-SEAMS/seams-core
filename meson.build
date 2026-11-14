@@ -1951,6 +1951,21 @@ test(
   ],
   depends: [seams_api_lib],
   timeout: 60)
+_capi_docs_args = [
+  meson.project_source_root() / 'include' / 'seams.h',
+  meson.project_source_root() / 'tests' / 'capi_symbols.txt',
+  meson.project_source_root() / 'docs' / 'api' / 'c.md',
+]
+test(
+  'capi_docs_complete',
+  find_program('python3', required: true),
+  args: [meson.project_source_root() / 'docs' / 'capi_docs.py'] + _capi_docs_args,
+  timeout: 60)
+test(
+  'capi_docs_selftest',
+  find_program('python3', required: true),
+  args: [meson.project_source_root() / 'docs' / 'capi_docs_selftest.py'] + _capi_docs_args,
+  timeout: 60)
 _doxygen = find_program('doxygen', required: false)
 if _doxygen.found()
   _doxy_data = configuration_data()
