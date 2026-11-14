@@ -1,0 +1,1 @@
+`q4_q6_equal` compares per-atom and Lechner-Dellago q4 and q6 with freud and pyscal3 on ideal ice Ih, ideal ice Ic, and one liquid. OVITO 3.15 has no Steinhardt modifier, so that test no longer skips on it. pyscal3 matches to 1e-10. freud stores q_l as float32, and an empty shell is 0 here and NaN there.
