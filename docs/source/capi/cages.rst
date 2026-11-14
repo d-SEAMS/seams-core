@@ -4,7 +4,7 @@ Cages
 
 Hexagonal, cubic, and signature cages.
 
-Generated from the comments on the ``SEAMS_API`` declarations in ``include/seams.h``. This tree has 69 exports. ``meson test docs_capi_symbols`` fails if a declaration is missing from these pages, and ``meson test docs_capi_examples`` compiles the example when this page has one.
+Generated from the comments on the ``SEAMS_API`` declarations in ``include/seams.h``. This tree has 83 exports. ``meson test docs_capi_symbols`` fails if a declaration is missing from these pages, and ``meson test docs_capi_examples`` compiles the example when this page has one.
 
 .. literalinclude:: ../../../docs/examples/capi_cages.c
    :language: c
@@ -25,13 +25,13 @@ Hexagonal and double-diamond cage membership.
     Frame handle.
 
 ``cutoff``
-    Positive cutoff, Angstrom. The seeded graph uses cutoff + 1.5 as the candidate shell.
+    Positive finite cutoff, Angstrom. The seeded graph uses cutoff + 1.5 as the candidate shell.
 
 ``type``
     Species filter.
 
 ``graph``
-    SEAMS_GRAPH_CUTOFF, SEAMS_GRAPH_MUTUAL, or SEAMS_GRAPH_SEEDED.
+    ::SEAMS_GRAPH_CUTOFF, ::SEAMS_GRAPH_MUTUAL, or ::SEAMS_GRAPH_SEEDED.
 
 ``k``
     Neighbour count for the seeded graph. Zero selects 4.
@@ -42,9 +42,9 @@ Hexagonal and double-diamond cage membership.
 ``out``
     Receives a new handle. On failure \*out is NULL.
 
-Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
 
-Ownership: the caller frees \*out with seams_cages_destroy(). Thread safety: exclusive use of sys.
+@par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller frees \*out with seams_cages_destroy(). @par Thread safety Exclusive use of sys. @par Example @code seams_cage_set \*cages = NULL; if (seams_cages_find(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, 0, 0, &cages) == SEAMS_OK) { seams_cages_destroy(cages); } @endcode
 
 .. _capi-seams_cages_destroy:
 
@@ -59,9 +59,9 @@ seams_cages_destroy
 Free a cage-membership handle.
 
 ``cages``
-    Handle from seams_cages_find(), or NULL.
+    Handle from seams_cages_find() or seams_cages(), or NULL. NULL is ignored.
 
-Thread safety: the caller must not use cages after this returns.
+@par Ownership Releases the handle and its per-atom labels. @par Thread safety The caller must not use cages after this returns. @par Example @code seams_cages_destroy(cages); @endcode
 
 .. _capi-seams_cages_counts:
 
@@ -90,9 +90,11 @@ Disjoint cage population counts.
 ``n_both``
     Both cages, or NULL.
 
-Returns: SEAMS_OK, or SEAMS_ERR_NULL when cages is NULL. At least one count pointer must be non-NULL.
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL when cages is NULL or every count pointer is NULL.
 
-The four counts sum to the number of atoms the search kept. Thread safety: exclusive use of cages.
+The four counts sum to the number of atoms the search kept.
+
+@par Ownership The caller owns cages; the call borrows it. n_hex, n_cubic, n_water and n_both are caller storage that the call fills. The library keeps no pointer to any argument. @par Thread safety Read-only: may run alongside other const calls on cages, and not alongside a non-const call on cages. @par Example @code int hex = 0, cubic = 0; seams_cages_counts(cages, &hex, &cubic, NULL, NULL); @endcode
 
 .. _capi-seams_cages_labels:
 
@@ -110,14 +112,14 @@ Per-atom cage code.
     Cage handle.
 
 ``per_atom``
-    Caller buffer of seams_cage_label values, one per atom in the frame. Atoms the species filter dropped are SEAMS_CAGE_WATER.
+    Caller buffer of ::seams_cage_label values, one per atom in the frame. Atoms the species filter dropped are ::SEAMS_CAGE_WATER.
 
 ``len``
     Length of per_atom. Must be at least the frame count stored on the handle.
 
-Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE.
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE.
 
-Ownership: the caller owns per_atom. Thread safety: exclusive use of cages.
+@par Ownership The caller owns per_atom. @par Thread safety Read-only: may run alongside other const calls on cages, and not alongside a non-const call on cages. @par Example @code seams_cages_labels(cages, per_atom, n); @endcode
 
 .. _capi-seams_cages_signature:
 
@@ -135,13 +137,13 @@ Count closed cages whose ring census matches a signature.
     Frame handle.
 
 ``cutoff``
-    Positive cutoff, Angstrom.
+    Positive finite cutoff, Angstrom.
 
 ``type``
     Species filter.
 
 ``graph``
-    SEAMS_GRAPH_CUTOFF or SEAMS_GRAPH_MUTUAL.
+    ::SEAMS_GRAPH_CUTOFF or ::SEAMS_GRAPH_MUTUAL.
 
 ``spec``
     Signature text. Must be non-NULL.
@@ -152,11 +154,11 @@ Count closed cages whose ring census matches a signature.
 ``n_atoms``
     Receives the vertex count.
 
-Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
 
 spec is a census such as "512", "51262", or "51264", or the names "hc" and "ddc". n_cages is the number of closed cages. n_atoms is the number of distinct vertices in those cages.
 
-Thread safety: exclusive use of sys.
+@par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns sys; the call borrows it. spec is read during the call only. n_cages and n_atoms are caller storage that the call fills. The library keeps no pointer to any argument. @par Thread safety Exclusive use of sys. @par Example @code size_t n_cages = 0, n_atoms = 0; seams_cages_signature(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, "512", &n_cages, &n_atoms); @endcode
 
 .. _capi-seams_system_symmetry:
 
@@ -182,11 +184,11 @@ Per-atom ice shell label.
 ``labels_len``
     Must be at least the frame count.
 
-Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_INTERNAL, SEAMS_ERR_NOMEM.
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_INTERNAL, ::SEAMS_ERR_NOMEM.
 
 labels[i] is 0 for ice Ih, 1 for ice Ic, 2 for stacking disorder, or -1 when the shell does not match. A non-positive shell_rmsd selects the library ceiling (the scale-free second-shell residual, 0.15).
 
-Ownership: the caller owns labels. Thread safety: exclusive use of sys.
+@par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns labels. @par Thread safety Exclusive use of sys. @par Example @code seams_system_symmetry(sys, 0.0, labels, n); @endcode
 
 .. _capi-seams_cages:
 
@@ -200,10 +202,30 @@ seams_cages
 
 Hexagonal and double-diamond cages. Same search as seams_cages_find().
 
-``out``
-    Receives a seams_cage_set. The caller frees it with seams_cages_destroy().
+``sys``
+    Frame handle.
 
-Thread safety: exclusive use of sys.
+``cutoff``
+    Positive finite cutoff, Angstrom.
+
+``type``
+    Species filter.
+
+``graph``
+    ::SEAMS_GRAPH_CUTOFF, ::SEAMS_GRAPH_MUTUAL, or ::SEAMS_GRAPH_SEEDED.
+
+``k``
+    Neighbour count for the seeded graph. Zero selects 4.
+
+``complete``
+    Non-zero runs ring-adjacent completion on seeded labels.
+
+``out``
+    Receives a ::seams_cage_set. On failure \*out is NULL.
+
+Returns: Same codes as seams_cages_find().
+
+@par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller frees \*out with seams_cages_destroy(). @par Thread safety Exclusive use of sys. @par Example @code seams_cage_set \*cages = NULL; seams_cages(sys, 3.5, 0, SEAMS_GRAPH_SEEDED, 4, 1, &cages); seams_cages_destroy(cages); @endcode
 
 .. _capi-seams_signature_cages:
 
@@ -217,7 +239,30 @@ seams_signature_cages
 
 Closed cages of one ring census. Same search as seams_cages_signature().
 
-Thread safety: exclusive use of sys.
+``sys``
+    Frame handle.
+
+``cutoff``
+    Positive finite cutoff, Angstrom.
+
+``type``
+    Species filter.
+
+``graph``
+    ::SEAMS_GRAPH_CUTOFF or ::SEAMS_GRAPH_MUTUAL.
+
+``spec``
+    Signature text such as "512" or "hc". Must be non-NULL.
+
+``n_cages``
+    Receives the cage count.
+
+``n_atoms``
+    Receives the vertex count.
+
+Returns: Same codes as seams_cages_signature().
+
+@par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns sys; the call borrows it. spec is read during the call only. n_cages and n_atoms are caller storage that the call fills. The library keeps no pointer to any argument. @par Thread safety Exclusive use of sys. @par Example @code size_t n_cages = 0, n_atoms = 0; seams_signature_cages(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, "hc", &n_cages, &n_atoms); @endcode
 
 .. _capi-seams_prisms:
 
@@ -231,10 +276,29 @@ seams_prisms
 
 Perfect and imperfect prism counts by ring size.
 
-``perfect,``
-    imperfect Length at least 7. Index is the ring size. Sizes 3 through 6 are filled.
+``sys``
+    Frame handle.
 
-Thread safety: exclusive use of sys.
+``cutoff``
+    Positive finite cutoff, Angstrom.
+
+``type``
+    Species filter.
+
+``perfect``
+    Caller buffer. perfect[k] receives the perfect k-prisms.
+
+``imperfect``
+    Caller buffer. imperfect[k] receives the deformed k-prisms.
+
+``len``
+    Length of each buffer. At least 7, so that sizes 3 through 6 are filled.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+Rings come from the mutual four-nearest graph inside cutoff + 1.5.
+
+@par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns both buffers. @par Thread safety Exclusive use of sys. @par Example @code int perfect[7], imperfect[7]; seams_prisms(sys, 3.5, 0, perfect, imperfect, 7); @endcode
 
 .. _capi-seams_monolayer:
 
@@ -248,11 +312,28 @@ seams_monolayer
 
 Primitive-ring histogram of a monolayer.
 
+``sys``
+    Frame handle.
+
+``cutoff``
+    Positive finite cutoff, Angstrom.
+
+``type``
+    Species filter.
+
+``max_depth``
+    Largest ring size, at least 3.
+
 ``sheet_area``
     Sheet area, square Angstrom. Must be positive.
 
 ``counts``
-    counts[k] is the number of rings of size k. counts_len must be at least max_depth + 1.
+    counts[k] is the number of rings of size k.
 
-Thread safety: exclusive use of sys.
+``counts_len``
+    Must be at least max_depth + 1.
+
+Returns: ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE, ::SEAMS_ERR_RANGE, ::SEAMS_ERR_NOMEM, ::SEAMS_ERR_INTERNAL.
+
+@par Handle access Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle. @par Ownership The caller owns counts. @par Thread safety Exclusive use of sys. @par Example @code int counts[7]; seams_monolayer(sys, 3.5, 0, 6, 900.0, counts, 7); @endcode
 
