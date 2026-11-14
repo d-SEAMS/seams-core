@@ -30,20 +30,7 @@ def main():
     missing = [name for name in declared if name not in present]
     if missing:
         raise SystemExit("C API reference is missing:\n" + "\n".join(missing))
-    stale = sorted(
-        name
-        for name in (
-            "seams_chill_plus_n",
-            "seams_last_error_message",
-            "seams_neighbours_nrows",
-            "seams_q4q6_n",
-            "seams_rings_histogram_n",
-            "seams_rings_labels_n",
-            "seams_rings_nrings",
-            "seams_system_natoms",
-        )
-        if name in present
-    )
+    stale = sorted(set(re.findall(r"\b(seams_[A-Za-z0-9_]+)\(", book)) - set(declared))
     if stale:
         raise SystemExit("C API reference still names functions this header does not declare:\n" + "\n".join(stale))
     print("capi reference covers", len(declared), "exports from include/seams.h")
