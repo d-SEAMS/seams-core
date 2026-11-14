@@ -36,6 +36,7 @@ spack.yml
 subprojects/nanobind-*/
 subprojects/robin-map-*/
 subprojects/packagecache/
+subprojects/vesin/
 
 # Prerequisites
 *.d
