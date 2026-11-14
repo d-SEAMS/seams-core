@@ -408,6 +408,8 @@ def program_args(text, build):
         return []
     if "<repository root>" in text:
         return [str(ROOT)]
+    if 'Path(sys.argv[1]) if len(sys.argv) > 1 else root / "build"\n' in text:
+        return [str(build)]
     if "input/traj" in text and any(token in text for token in ("get_command_argument", "arg[1]", "ARGS[1]")):
         return [str(ROOT)]
     if "commandArgs" in text or ("get_command_argument" in text and "input/traj" not in text):
