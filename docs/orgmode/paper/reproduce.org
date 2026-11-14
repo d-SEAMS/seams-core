@@ -111,6 +111,13 @@ seams --frame 1 --last 148 cages --graph seeded nucleation.lammpstrj
 seams --rebuild --frame 1 --last 148 cages --graph seeded nucleation.lammpstrj
 #+end_src
 
+The same ~seams~ flags on the bundled multi-type frame:
+
+#+begin_src bash
+seams --frame 1 --last 148 cages --graph seeded input/traj/il_tiny.lammpstrj
+seams --rebuild --frame 1 --last 148 cages --graph seeded input/traj/il_tiny.lammpstrj
+#+end_src
+
 [[file:../reference/cli.org][seams CLI]] lists when the command line
 carries and when it rebuilds.
 

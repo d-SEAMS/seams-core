@@ -45,6 +45,13 @@ The default is ~2.65,3.15~ in the coordinate units of the file.
 | Lua | =dseams.cages_by_signature(frame, "512", {edge = "none"})= |
 | C | =seams_frame_signature_edge(frame, 3.5, 1, "cutoff", "512", "none", &n_cages, &n_atoms)= |
 
+The same CLI lines on bundled frames:
+
+#+begin_src bash
+seams chill-plus input/traj/exampleTraj.lammpstrj --type 2 --graph mutual
+seams cages input/traj/genice_sI.lammpstrj --type 1 --signature 512 --cage-edge none
+#+end_src
+
 A null C edge string keeps the default.
 Set the window to the heavy-atom contact range of the model.
 Widen it for a compressed cell or a guest that stretches a cage.

@@ -15,6 +15,15 @@ seams cages FILE --type 2
 seams rdf FILE --type 2 --cutoff 10
 #+end_src
 
+The same flags on the bundled multi-type frame:
+
+#+begin_src bash
+seams read input/traj/il_tiny.lammpstrj
+seams chill-plus input/traj/il_tiny.lammpstrj --cutoff 3.5 --type 2
+seams cages input/traj/il_tiny.lammpstrj --type 2
+seams rdf input/traj/il_tiny.lammpstrj --type 2 --cutoff 10
+#+end_src
+
 ~chill~ is the original CHILL rule. ~chill-plus~ is the published CHILL+ rule: exactly four neighbours inside the cutoff, q3 over the four nearest, and the Table 1 neighbour test.
 ~chill_plus~ is a CLI alias of ~chill-plus~.
 ~ovito-chill+~ is the OVITO 3.17.2 rule (exactly four neighbours inside the cutoff, q3 over the whole shell, neighbour test off).
@@ -40,6 +49,14 @@ seams cages FILE --graph seeded --water-types 1
 seams ions FILE --ion-types 3,4 --water-types 1
 #+end_src
 
+The same flags on the bundled multi-type frame:
+
+#+begin_src bash
+seams chill-plus input/traj/il_tiny.lammpstrj --water-types 1
+seams cages input/traj/il_tiny.lammpstrj --graph seeded --water-types 1
+seams ions input/traj/il_tiny.lammpstrj --ion-types 3,4 --water-types 1
+#+end_src
+
 ~--family~ defaults to ~waterIce~. ~chill~ / ~chill-plus~ / ~cages~
 refuse every other family. A triclinic dump uses the stored tilt;
 see [[file:sheared-cells.org][Sheared cells]].
@@ -47,6 +64,12 @@ see [[file:sheared-cells.org][Sheared cells]].
 #+begin_src bash
 seams chill-plus FILE --type 2
 seams cages input/traj/mW_cubic.lammpstrj --type 1
+#+end_src
+
+The same flags on the bundled multi-type frame:
+
+#+begin_src bash
+seams chill-plus input/traj/il_tiny.lammpstrj --type 2
 #+end_src
 
 * Frame range
@@ -58,6 +81,12 @@ via ~forEachLammpsFrame~ (~--jobs 1~ is serial).
 seams chill-plus FILE --frame 1 --last 10 --jobs 4
 #+end_src
 
+The same flags on the bundled multi-type frame:
+
+#+begin_src bash
+seams chill-plus input/traj/il_tiny.lammpstrj --frame 1 --last 10 --jobs 4
+#+end_src
+
 * Bond graph for cages
 
 #+begin_src bash
@@ -66,6 +95,16 @@ seams cages FILE --graph seeded --complete
 seams cages FILE --graph cutoff --cutoff 3.5
 seams cages FILE --graph knn -k 4
 seams cages FILE --graph knn-union -k 4
+#+end_src
+
+The same flags on the bundled multi-type frame:
+
+#+begin_src bash
+seams cages input/traj/il_tiny.lammpstrj --graph seeded
+seams cages input/traj/il_tiny.lammpstrj --graph seeded --complete
+seams cages input/traj/il_tiny.lammpstrj --graph cutoff --cutoff 3.5
+seams cages input/traj/il_tiny.lammpstrj --graph knn -k 4
+seams cages input/traj/il_tiny.lammpstrj --graph knn-union -k 4
 #+end_src
 
 ~seeded~ is the CLI default: mutual four-nearest seeds, union

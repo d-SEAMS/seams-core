@@ -20,6 +20,14 @@ seams chill-plus FILE --type 2
 seams cages FILE --type 2
 #+end_src
 
+The same flags on the bundled multi-type frame:
+
+#+begin_src bash
+seams read input/traj/il_tiny.lammpstrj
+seams chill-plus input/traj/il_tiny.lammpstrj --type 2
+seams cages input/traj/il_tiny.lammpstrj --type 2
+#+end_src
+
 * Unlike-type neighbours
 
 ~nneigh::neighListPair(rcut, cloud, typeI, typeJ)~ builds I-J
@@ -33,6 +41,14 @@ MIC as the ice neighbour lists.
 seams rdf FILE --pair-types 1,2 --cutoff 6.0
 seams rdf FILE --pair-types 1,2 --cutoff 6.0 --bins 60
 seams rdf FILE --type 2 --cutoff 6.0
+#+end_src
+
+The same flags on the bundled multi-type frame:
+
+#+begin_src bash
+seams rdf input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 6.0
+seams rdf input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 6.0 --bins 60
+seams rdf input/traj/il_tiny.lammpstrj --type 2 --cutoff 6.0
 #+end_src
 
 ~--pair-types I,J~ selects the pair. The default is ~I = J = --type~.
@@ -76,6 +92,13 @@ seams domains FILE --site '1=cationHead,2=anion,3=tail' --subset polar
 seams domains FILE --site '1=cationHead,2=anion,3=tail' --subset apolar
 #+end_src
 
+The same flags on the bundled multi-type frame:
+
+#+begin_src bash
+seams domains input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion,3=tail' --subset polar
+seams domains input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion,3=tail' --subset apolar
+#+end_src
+
 ~seams domains~ builds the mask from ~site::indicesOf~ and walks
 Stoddard's clusters on that subset. It does not run CHILL or
 ~q_6~. Neighbours are the dump-MIC cutoff list (~--cutoff~).
@@ -91,6 +114,14 @@ A slit or slab dump needs type-resolved \(\rho(z)\), not bulk CHILL.
 seams density-z FILE
 seams density-z FILE --type 1 --bins 80
 seams density-z FILE --type 2 --axis z
+#+end_src
+
+The same flags on the bundled multi-type frame:
+
+#+begin_src bash
+seams density-z input/traj/il_tiny.lammpstrj
+seams density-z input/traj/il_tiny.lammpstrj --type 1 --bins 80
+seams density-z input/traj/il_tiny.lammpstrj --type 2 --axis z
 #+end_src
 
 ~--type 0~ (default) histograms every atom. ~--type I~ keeps one
@@ -138,6 +169,18 @@ seams pairs FILE --site '1=cationHead,2=anion'
 seams domains FILE --site '1=cationHead,2=anion,3=tail' --subset polar
 seams density-z FILE --type 1 --bins 80
 seams chill FILE --family ionicLiquid   # exits 2
+#+end_src
+
+The same flags on the bundled multi-type frame:
+
+#+begin_src bash
+seams rdf input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 6.0
+seams cn input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 6.0
+seams cn input/traj/il_tiny.lammpstrj --ions --site '1=cationHead,2=anion'
+seams pairs input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion'
+seams domains input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion,3=tail' --subset polar
+seams density-z input/traj/il_tiny.lammpstrj --type 1 --bins 80
+seams chill input/traj/il_tiny.lammpstrj --family ionicLiquid   # exits 2
 #+end_src
 
 Flags and the rest of the surface live on

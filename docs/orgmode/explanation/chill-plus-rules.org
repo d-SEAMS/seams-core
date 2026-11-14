@@ -55,6 +55,14 @@ seams chill-plus water.lammpstrj --cutoff 3.5 --type 1 --rule ovito-chill+
 seams ovito-chill+ water.lammpstrj --cutoff 3.5 --type 1
 #+end_src
 
+The same flags on the bundled ice Ih frame:
+
+#+begin_src bash
+seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5 --type 1 --rule chill+
+seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5 --type 1 --rule ovito-chill+
+seams ovito-chill+ input/traj/ice1h.lammpstrj --cutoff 3.5 --type 1
+#+end_src
+
 The C call ~seams_chill_plus~ takes ~SEAMS_CHILL_PUBLISHED~ or
 ~SEAMS_CHILL_OVITO~. ~seams_frame_chill_plus_rule~ takes the strings
 ~chill+~ and ~ovito-chill+~.

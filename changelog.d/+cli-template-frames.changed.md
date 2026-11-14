@@ -1,0 +1,1 @@
+Documented seams lines that named FILE, dump.lammpstrj, or water.lammpstrj keep that template and gain a twin on input/traj/il_tiny.lammpstrj or ice1h.lammpstrj. The suite runs every twin, including the ionic-liquid commands and the chill line that exits 2.

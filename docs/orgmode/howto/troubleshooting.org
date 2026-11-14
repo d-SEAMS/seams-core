@@ -18,5 +18,12 @@
 | ~require("dseams")~ fails to load | ~LUA_CPATH~ misses ~dseams_core.so~ | Build with ~-Dwith_lua=auto~. ~LUA_PATH~ is ~bindings/lua~. ~LUA_CPATH~ is the directory of ~dseams_core.so~ |
 | Wrap pin / ~nodownload~ miss | Flake does not fetch wrap-git | Pins live in ~subprojects/~ (~linkcell~ 0.3.11, ~vesin~ v0.5.7, ~readcon-core~ 0.16.2, ~gpulite~). The flake uses ~mesonAutoFeatures=disabled~ and wrap ~nodownload~ |
 
+The two command shapes on bundled frames:
+
+#+begin_src bash
+seams read input/traj/ice1h.lammpstrj
+seams rdf input/traj/il_tiny.lammpstrj --pair-types 1,2
+#+end_src
+
 When you file an issue, include ~seams --version~, ~seams --features~,
 the command line, and a minimal dump.

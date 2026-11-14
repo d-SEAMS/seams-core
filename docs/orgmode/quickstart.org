@@ -140,6 +140,16 @@ Cage membership is not the CHILL+ star.
 | symmetry | ~seams symmetry FILE --type 1~ | [[file:howto/symmetry-classifier.org][Symmetry classifier]] |
 | neighbours | cutoff CSR, carried rings | [[file:howto/linkcell-carried.org][Linkcell and carried rings]] |
 
+The same commands on bundled frames:
+
+#+begin_src bash
+seams rings input/traj/exampleTraj.lammpstrj --type 2
+seams cages input/traj/exampleTraj.lammpstrj --type 2
+seams steinhardt input/traj/exampleTraj.lammpstrj --type 2
+seams chill-plus input/traj/exampleTraj.lammpstrj --type 2
+seams symmetry input/traj/mW_cubic.lammpstrj --type 1
+#+end_src
+
 * Python and Lua
 
 ~import dseams~ is the in-tree module over ~libseams~.

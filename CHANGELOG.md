@@ -113,6 +113,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
   flags ~inSlice~ and keeps every atom of the type;
   ~readLammpsTrjreduced~ drops atoms outside the slice. An axis with
   ~lo == hi~ is unconstrained.
+- Documented seams lines that named FILE, dump.lammpstrj, or water.lammpstrj keep that template and gain a twin on input/traj/il_tiny.lammpstrj or ice1h.lammpstrj. The suite runs every twin, including the ionic-liquid commands and the chill line that exits 2.
 - Every Python block in the docs runs in the suite, and a printed value is asserted. seams commands that name a frame in the tree run as well, and a quoted count in the following paragraph has to appear in the output.
 - Inside the one-image ball the in-plane RDF walks Rapaport cell pairs: cells span the cutoff across each face separation, a half stencil visits each neighbouring pair of cells once, and one lattice shift serves the pair. It replaces the packed grid and the vesin list; 8192 atoms at a 6 Å cutoff take 2.2 ms on one thread and 0.4 ms on eight.
 - Interior cells of the one-thread orthorhombic cutoff skip the periodic-shift branches. A parallel ring search writes each neighbour row, already sorted, into one array, so the walk after the cell list matches the walk after linkcell.

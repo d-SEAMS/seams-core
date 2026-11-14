@@ -15,6 +15,14 @@ Four fronts, one engine (~libyodaLib~). Flags live on
 | Front | Package | First call |
 |-------+---------+------------|
 | CLI | this repo (~seams~) | ~seams read FILE~, ~seams chill-plus FILE~, ~seams cages FILE~ |
+
+The same three calls on the bundled multi-type frame:
+
+#+begin_src bash
+seams read input/traj/il_tiny.lammpstrj
+seams chill-plus input/traj/il_tiny.lammpstrj
+seams cages input/traj/il_tiny.lammpstrj
+#+end_src
 | Stable C | this repo (~libseams~, ~seams.h~) | ~seams_system_create~ |
 | Language ABI | this repo (~libseams_lang~) | ~seams_frame_read~ |
 | Python | this repo (~import dseams~) | ~dseams.chill_plus~ |

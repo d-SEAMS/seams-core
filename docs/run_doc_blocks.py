@@ -158,17 +158,29 @@ def run_cli_block(build, script):
     env["PATH"] = str(build) + os.pathsep + env.get("PATH", "")
     lib = str(build / "src")
     env["LD_LIBRARY_PATH"] = lib + os.pathsep + env.get("LD_LIBRARY_PATH", "")
-    done = subprocess.run(
-        ["bash", "-c", script],
-        cwd=ROOT,
-        env=env,
-        text=True,
-        capture_output=True,
-        timeout=180,
-    )
-    if done.returncode != 0:
-        raise run_snippets.Fail((done.stderr or done.stdout)[-500:])
-    return done.stdout + done.stderr
+    collected = []
+    for line in script.splitlines():
+        expect = 0
+        if re.search(r"#\s*exits?\s+2\b", line):
+            expect = 2
+        command = line.split("#", 1)[0].strip()
+        if not command:
+            continue
+        done = subprocess.run(
+            ["bash", "-c", command],
+            cwd=ROOT,
+            env=env,
+            text=True,
+            capture_output=True,
+            timeout=180,
+        )
+        if done.returncode != expect:
+            raise run_snippets.Fail(
+                command + " exit " + str(done.returncode) + " " + (done.stderr or done.stdout)[-240:]
+            )
+        collected.append(done.stdout)
+        collected.append(done.stderr)
+    return "\n".join(collected)
 
 
 def main():
@@ -230,6 +242,37 @@ def main():
         output_dir.rmdir()
     elif output_dir.is_dir():
         shutil.rmtree(output_dir)
+    missing_twins = []
+    placeholder = re.compile(r"\b(?:FILE|dump\.lammpstrj|water\.lammpstrj)\b")
+    for path in pages():
+        text = path.read_text(encoding="utf-8")
+        concrete = []
+        for body in bash_blocks(text):
+            script = runnable_seams(body)
+            if script:
+                concrete.extend(script.splitlines())
+        for body in bash_blocks(text):
+            for line in logical_lines(body):
+                command = line.split("#", 1)[0].strip()
+                if not command.startswith("seams") or not placeholder.search(command):
+                    continue
+                if "mpiexec" in body:
+                    continue
+                key = placeholder.sub("PATH", re.sub(r"\s+", " ", command))
+                found_twin = False
+                for other in concrete:
+                    other_key = re.sub(
+                        r"input/traj/\S+",
+                        "PATH",
+                        re.sub(r"\s+", " ", other.split("#", 1)[0].strip()),
+                    )
+                    if other_key == key:
+                        found_twin = True
+                        break
+                if not found_twin:
+                    missing_twins.append(str(path.relative_to(ROOT)) + ": " + command)
+    if missing_twins:
+        failures.extend("no runnable twin for " + item for item in missing_twins)
     if failures:
         print("FAILED", len(failures))
         for item in failures:

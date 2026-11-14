@@ -21,6 +21,22 @@ seams density-z FILE
 seams domains FILE
 #+end_src
 
+The same commands on the bundled multi-type frame. ~pairs~ and ~domains~
+need ~--site~, so the runnable lines include it:
+
+#+begin_src bash
+seams read input/traj/il_tiny.lammpstrj
+seams chill input/traj/il_tiny.lammpstrj
+seams chill-plus input/traj/il_tiny.lammpstrj
+seams cages input/traj/il_tiny.lammpstrj
+seams rdf input/traj/il_tiny.lammpstrj
+seams cn input/traj/il_tiny.lammpstrj
+seams hbonds input/traj/il_tiny.lammpstrj
+seams pairs input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion'
+seams density-z input/traj/il_tiny.lammpstrj
+seams domains input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion,3=tail' --subset polar
+#+end_src
+
 A positional ~command~ and a positional ~file~ are required. Missing
 either, an unknown command, or a parse error exits 2.
 
@@ -227,6 +243,14 @@ seams cages FILE --graph seeded --water-types 1
 seams ions FILE --ion-types 3,4 --water-types 1
 #+end_src
 
+The same flags on the bundled multi-type frame:
+
+#+begin_src bash
+seams chill-plus input/traj/il_tiny.lammpstrj --water-types 1
+seams cages input/traj/il_tiny.lammpstrj --graph seeded --water-types 1
+seams ions input/traj/il_tiny.lammpstrj --ion-types 3,4 --water-types 1
+#+end_src
+
 * ~--pair-types~
 
 Used by ~rdf~ and ~cn~. The Argum form is ~I,J~ (one comma). A bad
@@ -297,6 +321,14 @@ Use a comma, a colon, or a slash. ~2.65-3.15~ is rejected.
 seams cages FILE --graph cutoff --signature 512
 seams cages FILE --graph cutoff --signature 512 --cage-edge none
 seams cages FILE --graph cutoff --signature 512 --cage-edge 2.4,3.4
+#+end_src
+
+The same flags on the bundled multi-type frame:
+
+#+begin_src bash
+seams cages input/traj/il_tiny.lammpstrj --graph cutoff --signature 512
+seams cages input/traj/il_tiny.lammpstrj --graph cutoff --signature 512 --cage-edge none
+seams cages input/traj/il_tiny.lammpstrj --graph cutoff --signature 512 --cage-edge 2.4,3.4
 #+end_src
 
 The same string is ~SEAMS_CAGE_EDGE~.
@@ -383,6 +415,12 @@ mpiexec -n 2 --map-by slot:PE=4 -x OMP_NUM_THREADS=4 -x RAYON_NUM_THREADS=1 \
   seams --jobs 4 --frame 1 --last 100 cages dump.lammpstrj
 #+end_src
 
+The same ~seams~ flags on the bundled multi-type frame, without ~mpiexec~:
+
+#+begin_src bash
+seams --jobs 4 --frame 1 --last 100 cages input/traj/il_tiny.lammpstrj
+#+end_src
+
 On a host without a libfabric network, Open MPI's ~ofi~ transport spends
 about a second probing at start-up; ~--mca btl ^ofi~ skips it. Ranks then
 matched ~--jobs~ on one 8-core node, beat it where frame cost steps or
@@ -461,6 +499,22 @@ seams pairs dump.lammpstrj --site '1=cationHead,2=anion'
 seams hbonds dump.lammpstrj --type 2 --htype 1
 seams hbonds dump.lammpstrj --donors
 seams chill dump.lammpstrj --family ionicLiquid
+#+end_src
+
+The ~dump.lammpstrj~ lines on the bundled multi-type frame:
+
+#+begin_src bash
+seams cages input/traj/il_tiny.lammpstrj --graph cutoff
+seams cages input/traj/il_tiny.lammpstrj --graph knn
+seams cages input/traj/il_tiny.lammpstrj --graph knn-union
+seams chill-plus input/traj/il_tiny.lammpstrj --frame 1 --last 50 --jobs 8
+seams rdf input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 10 --bins 100
+seams cn input/traj/il_tiny.lammpstrj --pair-types 1,2 --cutoff 4.5
+seams cn input/traj/il_tiny.lammpstrj --ions --site '1=cationHead,2=anion' --cutoff 6.0
+seams pairs input/traj/il_tiny.lammpstrj --site '1=cationHead,2=anion'
+seams hbonds input/traj/il_tiny.lammpstrj --type 2 --htype 1
+seams hbonds input/traj/il_tiny.lammpstrj --donors
+seams chill input/traj/il_tiny.lammpstrj --family ionicLiquid   # exits 2
 #+end_src
 
 Lua and Python are not this binary. See
