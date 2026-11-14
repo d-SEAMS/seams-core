@@ -8,6 +8,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -87,13 +88,11 @@ def require_census(text):
     print(text.strip())
 
 
-def run_gromacs(root, build):
+def run_gromacs(root, build, work):
     exe = built(build, "gmx-seams")
     if exe is None:
         skip("gromacs skipped: gmx-seams was not built")
     atoms, bounds = read_dump(root / "input" / "traj" / "ice1h.lammpstrj")
-    work = Path(build) / "docs-examples" / "gromacs"
-    work.mkdir(parents=True, exist_ok=True)
     gro = work / "ice1h.gro"
     lines = ["ice Ih", str(len(atoms))]
     for index, (x, y, z) in enumerate(atoms, 1):
@@ -113,13 +112,11 @@ def run_gromacs(root, build):
     require_census(text)
 
 
-def run_lammps(root, build):
+def run_lammps(root, build, work):
     exe = built(build, "run_hook")
     if exe is None:
         skip("lammps skipped: run_hook was not built")
     atoms, bounds = read_dump(root / "input" / "traj" / "ice1h.lammpstrj")
-    work = Path(build) / "docs-examples" / "lammps"
-    work.mkdir(parents=True, exist_ok=True)
     data = work / "ice1h.data"
     rows = [
         "LAMMPS data file from ice Ih",
@@ -204,7 +201,7 @@ def mean_q6(build, positions, box9):
     return sum(ql) / count
 
 
-def run_openmm(root, build):
+def run_openmm(root, build, work):
     if importlib.util.find_spec("openmm") is None:
         skip("openmm skipped: the OpenMM package was not found")
     import numpy as np
@@ -256,15 +253,13 @@ def run_openmm(root, build):
     require_census(text)
 
 
-def run_plumed(root, build):
+def run_plumed(root, build, work):
     if shutil.which("plumed") is None:
         skip("plumed skipped: plumed was not found")
     plugin = built(build, "libSeamsPlumed.so")
     if plugin is None:
         skip("plumed skipped: libSeamsPlumed.so was not built")
     atoms, bounds = read_dump(root / "input" / "traj" / "ice1h.lammpstrj")
-    work = Path(build) / "docs-examples" / "plumed"
-    work.mkdir(parents=True, exist_ok=True)
     lengths = [(hi - lo) / 10.0 for lo, hi in bounds]
     xyz = work / "ice1h.xyz"
     rows = [
@@ -309,7 +304,7 @@ def run_plumed(root, build):
     require_census(text)
 
 
-def run_insitu(root, build):
+def run_insitu(root, build, work):
     libpath = Path(build) / "bindings" / "libseams_lang.so"
     if not libpath.is_file():
         skip("insitu skipped: libseams_lang.so was not built")
@@ -358,13 +353,20 @@ def run_insitu(root, build):
 
 def main():
     engine, root, build = sys.argv[1], Path(sys.argv[2]), Path(sys.argv[3])
-    {
+    run = {
         "gromacs": run_gromacs,
         "lammps": run_lammps,
         "openmm": run_openmm,
         "plumed": run_plumed,
         "insitu": run_insitu,
-    }[engine](root, build)
+    }[engine]
+    # docs_engine_<engine> and the video tape run the same engine at once,
+    # and PLUMED keeps a numbered backup of every colvar it finds, 101 at
+    # most, so each run writes into a directory of its own.
+    base = build / "docs-examples"
+    base.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix=engine + "-", dir=base) as work:
+        run(root, build, Path(work))
 
 
 if __name__ == "__main__":
