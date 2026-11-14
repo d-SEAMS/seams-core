@@ -1257,27 +1257,81 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
         }
       }
     }
-    for (const int p : L3) {
-      const auto &ap = arms3[static_cast<std::size_t>(p)];
-      for (std::size_t i = 0; i < ap.size(); i++) {
-        for (std::size_t j = i + 1; j < ap.size(); j++) {
-          int a = ap[i].first;
-          int b = ap[i].second;
-          int a2 = ap[j].first;
-          int b2 = ap[j].second;
-          if (a == a2 || b == b2) {
-            continue;
+    if (!PerAtom && hist != nullptr && fast) {
+      // A six-ring fails for every arm pair that leaves the same second-shell
+      // vertex, or whose two second-shell vertices are adjacent. Group the
+      // arms by that vertex and drop those pairs before walking them.
+      thread_local std::vector<std::vector<int>> byB;
+      thread_local std::vector<int> usedB;
+      if (static_cast<int>(byB.size()) < nVertices) {
+        byB.resize(static_cast<std::size_t>(nVertices));
+      }
+      int c6 = 0;
+      for (const int p : L3) {
+        const auto &ap = arms3[static_cast<std::size_t>(p)];
+        usedB.clear();
+        for (const auto &arm : ap) {
+          auto &bucket = byB[static_cast<std::size_t>(arm.second)];
+          if (bucket.empty()) {
+            usedB.push_back(arm.second);
           }
-          if (a > a2) {
-            std::swap(a, a2);
-            std::swap(b, b2);
+          bucket.push_back(arm.first);
+        }
+        for (std::size_t i = 0; i < usedB.size(); i++) {
+          const int b = usedB[i];
+          const auto &as = byB[static_cast<std::size_t>(b)];
+          for (std::size_t j = i + 1; j < usedB.size(); j++) {
+            const int b2 = usedB[j];
+            if (adjacent(b, b2)) {
+              continue;
+            }
+            const auto &as2 = byB[static_cast<std::size_t>(b2)];
+            for (const int a : as) {
+              if (within2(a, b2)) {
+                continue;
+              }
+              for (const int a2 : as2) {
+                if (a == a2 || adjacent(a, a2) || within2(b, a2)) {
+                  continue;
+                }
+                c6++;
+              }
+            }
           }
-          ring[1] = a;
-          ring[2] = b;
-          ring[3] = p;
-          ring[4] = b2;
-          ring[5] = a2;
-          keep(ring, 6, 3);
+        }
+        for (const int b : usedB) {
+          byB[static_cast<std::size_t>(b)].clear();
+        }
+      }
+      if (c6 != 0 && 6 < static_cast<int>(hist->size())) {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp atomic
+#endif
+        (*hist)[6] += c6;
+      }
+    } else {
+      for (const int p : L3) {
+        const auto &ap = arms3[static_cast<std::size_t>(p)];
+        for (std::size_t i = 0; i < ap.size(); i++) {
+          for (std::size_t j = i + 1; j < ap.size(); j++) {
+            int a = ap[i].first;
+            int b = ap[i].second;
+            int a2 = ap[j].first;
+            int b2 = ap[j].second;
+            if (a == a2 || b == b2) {
+              continue;
+            }
+            if (a > a2) {
+              std::swap(a, a2);
+              std::swap(b, b2);
+            }
+            ring[1] = a;
+            ring[2] = b;
+            ring[3] = p;
+            ring[4] = b2;
+            ring[5] = a2;
+            keep(ring, 6, 3);
+          }
         }
       }
     }
@@ -1544,6 +1598,216 @@ bool ringOwnedBySource(const std::vector<int> &ring, int src,
   return true;
 }
 
+// A large sparse census. Each shortest path is the vertex plus a parent at
+// the previous level, so the pairs the path buffer would build can be
+// walked from those parents. A vertex with more than a handful of paths
+// falls back; the census is unchanged either way. Rings larger than 7 are
+// not counted here.
+template <typename Graph>
+__attribute__((noinline)) bool
+countSparseShells(const Graph &adjacency, const DistOracle &oracle, int src,
+                  int maxDepth, int minSize, RingScratch &scr, std::vector<int> *hist) {
+  if (!oracle.hop2 || minSize < 3 || maxDepth < 3 || hist == nullptr) {
+    return false;
+  }
+  const int nVertices = static_cast<int>(adjacency.size());
+  if (static_cast<int>(scr.pathFirst.size()) != nVertices) {
+    scr.pathFirst.assign(static_cast<std::size_t>(nVertices), 0);
+    scr.pathCount.assign(static_cast<std::size_t>(nVertices), 0);
+  }
+  if (scr.pathBuf.capacity() < 128) {
+    scr.pathBuf.reserve(128);
+  }
+  scr.pathBuf.clear();
+  scr.pathCount[src] = 1;
+  thread_local std::vector<int> nPar;
+  if (static_cast<int>(nPar.size()) != nVertices) {
+    nPar.assign(static_cast<std::size_t>(nVertices), 0);
+  }
+  constexpr int kMaxPaths = 16;
+  const bool want3 = minSize <= 3 && maxDepth >= 3;
+  const bool want4 = minSize <= 4 && maxDepth >= 4;
+  const bool want5 = minSize <= 5 && maxDepth >= 5;
+  const bool want6 = minSize <= 6 && maxDepth >= 6;
+  const bool want7 = minSize <= 7 && maxDepth >= 7;
+  // Same-level edges and vertices with two paths are the only places a ring
+  // can close. Recording them here keeps the count off the rest of the ball.
+  thread_local std::vector<int> multi;
+  thread_local std::vector<int> odds;
+  multi.clear();
+  odds.clear();
+  for (const int v : scr.touched) {
+    const int lv = scr.lvl[v];
+    if (lv < 1 || lv > 3) {
+      continue;
+    }
+    const int first = static_cast<int>(scr.pathBuf.size());
+    int count = 0;
+    int n = 0;
+    const bool wantOdd = (lv == 1 && want3) || (lv == 2 && want5) || (lv == 3 && want7);
+    for (const int w : adjacency[v]) {
+      if (w < 0 || w >= nVertices) {
+        continue;
+      }
+      const int lw = scr.lvl[w];
+      if (lw == lv - 1) {
+        scr.pathBuf.push_back(w);
+        ++n;
+        count += scr.pathCount[w];
+        if (count > kMaxPaths) {
+          return false;
+        }
+      } else if (wantOdd && w > v && lw == lv) {
+        odds.push_back(v);
+        odds.push_back(w);
+      }
+    }
+    scr.pathFirst[v] = first;
+    scr.pathCount[v] = count;
+    nPar[v] = n;
+    if (count >= 2 && ((lv == 2 && want4) || (lv == 3 && want6))) {
+      multi.push_back(v);
+    }
+  }
+  int c3 = 0;
+  int c4 = 0;
+  int c5 = 0;
+  int c6 = 0;
+  int c7 = 0;
+  // Same shortcut test as ringIsPrimitive, on a ring that already starts at
+  // the source. skipB is the antipode of an even ring, or -1 for an odd one.
+  auto shortcut = [&](const int *r, int k, int skipB) {
+    for (int i = 1; i < k; ++i) {
+      if (i == skipB) {
+        continue;
+      }
+      for (int j = i + 2; j < k; ++j) {
+        if (j == skipB) {
+          continue;
+        }
+        const int sep = j - i;
+        const int other = k - sep;
+        const int ringDist = sep < other ? sep : other;
+        if (ringDist <= 1) {
+          continue;
+        }
+        if (oracle.shorter(r[i], r[j], ringDist)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+  auto unique = [&](const int *r, int k) {
+    for (int i = 0; i < k; ++i) {
+      for (int j = i + 1; j < k; ++j) {
+        if (r[i] == r[j]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+  struct Arm {
+    int a;
+    int b;
+  };
+  auto fill = [&](int v, int lv, Arm *arms) -> int {
+    if (lv <= 1) {
+      arms[0] = Arm{v, -1};
+      return 1;
+    }
+    if (lv == 2) {
+      const int *ps = scr.pathBuf.data() + scr.pathFirst[v];
+      const int n = nPar[v];
+      for (int i = 0; i < n; ++i) {
+        arms[i] = Arm{ps[i], -1};
+      }
+      return n;
+    }
+    int n = 0;
+    const int *ps = scr.pathBuf.data() + scr.pathFirst[v];
+    const int np = nPar[v];
+    for (int i = 0; i < np; ++i) {
+      const int b = ps[i];
+      const int *as = scr.pathBuf.data() + scr.pathFirst[b];
+      const int na = nPar[b];
+      for (int j = 0; j < na; ++j) {
+        arms[n] = Arm{as[j], b};
+        ++n;
+      }
+    }
+    return n;
+  };
+
+  for (const int p : multi) {
+    const int lp = scr.lvl[p];
+    Arm armsP[kMaxPaths];
+    const int gotP = fill(p, lp, armsP);
+    for (int i = 0; i < gotP; ++i) {
+      for (int j = i + 1; j < gotP; ++j) {
+        if (lp == 2) {
+          int r[4] = {src, armsP[i].a, p, armsP[j].a};
+          if (unique(r, 4) && !shortcut(r, 4, 2)) {
+            ++c4;
+          }
+        } else {
+          int r[6] = {src, armsP[i].a, armsP[i].b, p, armsP[j].b, armsP[j].a};
+          if (unique(r, 6) && !shortcut(r, 6, 3)) {
+            ++c6;
+          }
+        }
+      }
+    }
+  }
+  for (std::size_t e = 0; e < odds.size(); e += 2) {
+    const int p = odds[e];
+    const int q = odds[e + 1];
+    const int lp = scr.lvl[p];
+    if (lp == 1) {
+      int r[3] = {src, p, q};
+      if (unique(r, 3) && !shortcut(r, 3, -1)) {
+        ++c3;
+      }
+      continue;
+    }
+    if (scr.pathCount[p] <= 0 || scr.pathCount[q] <= 0) {
+      continue;
+    }
+    Arm armsP[kMaxPaths];
+    Arm armsQ[kMaxPaths];
+    const int gotP = fill(p, lp, armsP);
+    const int gotQ = fill(q, lp, armsQ);
+    for (int i = 0; i < gotP; ++i) {
+      for (int j = 0; j < gotQ; ++j) {
+        if (lp == 2) {
+          int r[5] = {src, armsP[i].a, p, q, armsQ[j].a};
+          if (unique(r, 5) && !shortcut(r, 5, -1)) {
+            ++c5;
+          }
+        } else {
+          int r[7] = {src, armsP[i].a, armsP[i].b, p, q, armsQ[j].b, armsQ[j].a};
+          if (unique(r, 7) && !shortcut(r, 7, -1)) {
+            ++c7;
+          }
+        }
+      }
+    }
+  }
+
+  auto add = [&](int k, int c) {
+    if (c != 0 && k < static_cast<int>(hist->size())) {
+      (*hist)[static_cast<std::size_t>(k)] += c;
+    }
+  };
+  add(3, c3);
+  add(4, c4);
+  add(5, c5);
+  add(6, c6);
+  add(7, c7);
+  return true;
+}
+
 template <typename Graph, typename Out>
 void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
                          int src, int maxDepth, int maxLvl, RingScratch &scr,
@@ -1593,6 +1857,14 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
   if (profiling) {
     gPhase[phaseSlot].levels += millisSince(tLevels);
     tPaths = std::chrono::steady_clock::now();
+  }
+  // Ice is a large sparse census: each vertex has a handful of shortest
+  // paths, and copying every one of them is most of the search. The same
+  // pairs can be walked from the parent at the previous level.
+  if (call.cap == 0 && through == nullptr && nVertices > 4096 && call.hist != nullptr &&
+      call.perAtom == nullptr && !legacyPairs && maxDepth <= 7 && oracle.hop2 &&
+      countSparseShells<Graph>(adjacency, oracle, src, maxDepth, minSize, scr, call.hist)) {
+    return;
   }
   const int store = legacyPairs ? 0 : maxLvl;
   // A zero cap is the single neighbour walk. The count against the cap is
