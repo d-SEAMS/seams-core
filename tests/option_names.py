@@ -110,9 +110,16 @@ def main() -> int:
             return 1
     listed = configured_project_options(build_dir)
     root = Path("subprojects")
-    # nanobind and its header map are optional wraps. They are not seams
-    # projects and do not carry this tree's option file.
-    third_party = {"nanobind", "robin-map", "catch2"}
+    # Upstream wraps. They are not seams projects and do not carry this
+    # tree's option file.
+    third_party = {
+        "nanobind",
+        "robin-map",
+        "catch2",
+        "eigen",
+        "readcon-core",
+        "readcon-db",
+    }
     for project, options in sorted(listed.items()):
         if project in third_party:
             continue
