@@ -20,6 +20,7 @@ frame = ds.read("input/traj/exampleTraj.lammpstrj", atom_type=2)
 r, g = frame.rdf_2d("output", cutoff=6.0, binwidth=0.5)
 frame.monolayer_rings("output", sheet_area=1.0, max_depth=6)
 frame.find_prisms(output_dir="output", max_depth=4)
+assert len(r) == len(g) and len(r) > 0
 #+end_src
 
 ~sheet_area~ is the area the coverage fraction divides by.

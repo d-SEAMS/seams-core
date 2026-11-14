@@ -25,7 +25,10 @@ import pydseams as ds
 
 ice = ds.read("input/traj/mW_cubic.lammpstrj", frame=1, atom_type=1)
 print(ice.chill_plus().cubic, ice.cages().n_ic)
+assert ice.chill_plus().cubic == 4096 and ice.cages().n_ic == 4096
 
 guest = ds.read("input/traj/genice_sI.lammpstrj", atom_type=1)
 print(len(guest.cages_by_signature("512")))
+assert len(guest.cages_by_signature("512")) == 2
+assert guest.cages_by_signature("512").n_atoms == 40
 #+end_src

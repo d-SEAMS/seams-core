@@ -144,6 +144,8 @@ import pydseams as ds
 frame = ds.read("input/traj/exampleTraj.lammpstrj")
 print(frame.chill_plus())
 print(frame.cages())
+assert str(frame.chill_plus()) == "IceCounts(interClathrate=9, water=241)"
+assert str(frame.cages()) == "CageScore(n_ih=0, n_ic=0, n_water=250)"
 #+end_src
 
 ~Frame.chill_plus~ defaults to the cutoff list, as ~seams chill-plus~ does; ~frame.chill_plus(graph="mutual")~ is the mutual list.

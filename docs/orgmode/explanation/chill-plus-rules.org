@@ -71,5 +71,7 @@ Python is ~dseams.chill_plus~. ~dseams.PUBLISHED~ is the 2015 rule.
 
 #+begin_src python
 labels, counts = dseams.chill_plus(positions, box, rule=dseams.PUBLISHED)
+assert len(labels) == 8 and int(counts.sum()) == 8
 labels, counts = dseams.chill_plus(positions, box, rule=dseams.OVITO)
+assert len(labels) == 8 and int(counts.sum()) == 8
 #+end_src

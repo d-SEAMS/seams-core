@@ -28,7 +28,8 @@ RST_DIR = re.compile(
     re.M,
 )
 MD_INCLUDE = re.compile(r"```\{literalinclude\}\s+(\S+)")
-MD_FENCE = re.compile(r"```([A-Za-z0-9_+-]*)\n(.*?)```", re.S)
+# A language tag is required. A bare closing ``` would otherwise swallow the next fence.
+MD_FENCE = re.compile(r"```([A-Za-z0-9_+-]+)\n(.*?)```", re.S)
 EXCERPT = re.compile(r"^(?:#|//|!)\s*excerpt:\s*(\S+)\s*$")
 OPTIONAL = ("pydseams", "pydseamslib", "ase", "solvis")
 

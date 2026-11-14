@@ -1609,6 +1609,17 @@ if get_option('with_cli')
       timeout: 180)
   endforeach
   test(
+    'docs_doc_blocks',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'run_doc_blocks.py',
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_exe, seams_api_lib, seams_lang],
+    suite: 'docs',
+    timeout: 600)
+  test(
     'docs_api_python',
     python3,
     args: [

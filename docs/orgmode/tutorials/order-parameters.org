@@ -13,6 +13,9 @@ import pydseams as ds
 
 frame = ds.read("input/traj/exampleTraj.lammpstrj", atom_type=2)
 q3 = frame.steinhardt(3)
+assert len(q3["ql"]) == 250
+assert round(float(sum(q3["ql"]) / len(q3["ql"])), 6) == 0.374897
+assert round(float(sum(q3["ql_bar"]) / len(q3["ql_bar"])), 6) == 0.187542
 #+end_src
 
 ~q3["ql"]~ and ~q3["ql_bar"]~ are the per-atom arrays.

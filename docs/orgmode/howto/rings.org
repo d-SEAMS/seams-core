@@ -15,7 +15,7 @@ oxygen. ~--max-ring~ is the deepest ring (default 6).
 seams rings input/traj/exampleTraj.lammpstrj --type 2
 #+end_src
 
-On that mixed TIP4P frame the six-ring row is 224. The same argv is
+On that mixed TIP4P frame the six-ring line is `6 167`. The same argv is
 what ~tests/cli_surface.py~ runs:
 
 #+begin_src python

@@ -12,9 +12,28 @@ The nanobind module reads a C-contiguous NumPy array in place. This is the eight
 An ASE `Atoms` or an MDAnalysis universe becomes the same arrays:
 
 ```python
+import ase.io
+import dseams
+
+atoms = ase.io.read("input/traj/exampleTraj.lammpstrj", format="lammps-dump-text")
 pos, box = dseams.from_ase(atoms)
+
+
+class _Universe:
+    def __init__(self, positions, dimensions):
+        self.positions = positions
+        self.dimensions = dimensions
+        self.atoms = self
+
+    def select_atoms(self, selection):
+        return self
+
+
+universe = _Universe(atoms.get_positions(), atoms.cell.cellpar())
 pos, box = dseams.from_mdanalysis(universe)
 labels, counts = dseams.chill_plus(pos, box, rule=dseams.OVITO)
+assert len(labels) == len(atoms)
+assert int(counts.sum()) == len(atoms)
 ```
 
 ```bash

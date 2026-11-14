@@ -96,9 +96,9 @@ then run the Python and C programs on
 [[file:quickstart.org][the quick start]]. Both report 8 cubic molecules.
 
 #+begin_src bash
-seams read water.lammpstrj
-seams chill-plus water.lammpstrj --cutoff 3.5
-seams cages water.lammpstrj
+seams read input/traj/ice1h.lammpstrj
+seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5
+seams cages input/traj/ice1h.lammpstrj
 #+end_src
 
 2.14.0 ships ~libseams~ (~seams.h~) and ~libseams_lang~ in this

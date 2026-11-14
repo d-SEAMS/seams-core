@@ -1,0 +1,1 @@
+Every Python block in the docs runs in the suite, and a printed value is asserted. seams commands that name a frame in the tree run as well, and a quoted count in the following paragraph has to appear in the output.

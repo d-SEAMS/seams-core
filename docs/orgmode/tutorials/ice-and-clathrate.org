@@ -18,6 +18,8 @@ import pydseams as ds
 frame = ds.read("input/traj/exampleTraj.lammpstrj", atom_type=2)
 print(frame.chill_plus())
 print(frame.cages())
+assert str(frame.chill_plus()) == "IceCounts(interClathrate=9, water=241)"
+assert str(frame.cages()) == "CageScore(n_ih=0, n_ic=0, n_water=250)"
 #+end_src
 
 ~Frame.chill_plus~ uses the cutoff neighbour list.
@@ -44,7 +46,11 @@ The installed Python ~Frame.cages_by_signature~ takes the signature and an optio
 Lua passes cutoff and graph.
 
 #+begin_src python
+import pydseams as ds
+
+frame = ds.read("input/traj/genice_sI.lammpstrj", atom_type=1)
 found = frame.cages_by_signature("512")
+assert len(found) == 2 and found.n_atoms == 40
 found = frame.cages_by_signature("512", max_ring_size=6)
 found = frame.cages_by_signature("51262", max_ring_size=8)
 #+end_src

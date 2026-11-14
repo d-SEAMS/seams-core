@@ -16,9 +16,10 @@ from pydseams.band import ring_census
 
 frame = ds.read("input/traj/exampleTraj.lammpstrj", atom_type=2)
 print(ring_census(frame, max_size=8))
+assert ring_census(frame, max_size=8) == {3: 37, 4: 273, 5: 34, 6: 167}
 #+end_src
 
-On the 250 oxygens the census is 1 three-ring, 230 four-rings, 4 five-rings, and 192 six-rings.
+On the 250 oxygens the census is 37 three-rings, 273 four-rings, 34 five-rings, and 167 six-rings.
 The CLI CHILL+ graph is the mutual four-nearest list, so a census of that graph is a different number.
 
 #+begin_export rst

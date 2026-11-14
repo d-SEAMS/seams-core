@@ -16,6 +16,7 @@ frame = ds.read("input/traj/exampleTraj.lammpstrj")
 frame.chill_plus()
 frame.cages()
 system = frame.to_solvis()
+assert type(system).__name__ == "System"
 #+end_src
 
 ~system~ is a ~solvis.System~ on the same ~Atoms~ ~to_ase~

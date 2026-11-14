@@ -19,6 +19,8 @@ atoms.set_chemical_symbols(["O" if int(t) == 2 else "H" for t in atoms.arrays["t
 frame = ds.from_ase(atoms)
 print(frame.chill_plus())
 labelled = frame.to_ase()
+assert str(frame.chill_plus()) == "IceCounts(interClathrate=9, water=241)"
+assert len(labelled) == 250
 #+end_src
 
 ~from_ase~ needs an orthorhombic cell. The analysed species is oxygen
