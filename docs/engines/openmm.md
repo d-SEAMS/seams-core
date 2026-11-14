@@ -1,12 +1,22 @@
 # OpenMM
 
 There is one reporter, `DseamsReporter` in
-`adapters/python/dseams_insitu/openmm.py`. `describeNextReport` asks for
-positions every `interval` steps. `report` reads the context in angstrom
-and calls `InSitu.observe`.
+`adapters/python/dseams_insitu/openmm.py`.
+`DseamsReporter(engine, dump=None, interval=1, types=None)` asks
+`describeNextReport` for positions every `interval` steps. `types` selects
+which atoms are oxygens. `report` reads the context in angstrom and calls
+`InSitu.observe`. With a `dump` path each report appends a LAMMPS dump
+frame of the classified sites, keyed by 1-based particle index, with their
+CHILL+ labels. `seconds` and `calls` time the reports.
+
+`meson test openmm_e2e` runs 200 steps of a TIP4P/Ice ice Ic slab and
+liquid on the CPU platform with the reporter every 10 steps, then requires
+`seams chill-plus` on that dump to give the same label to every oxygen.
 
 `meson test openmm_reporter` runs `engines/openmm/test_reporter.py`.
-`meson test openmm_plugin` runs `engines/openmm/plugin.cpp`, which calls
+`meson test docs_engine_openmm` runs `DseamsReporter` on
+`input/traj/ice1h.lammpstrj`. `meson test openmm_plugin` runs
+`engines/openmm/plugin.cpp`, which calls
 `seams_chill_plus` after scaling OpenMM nanometres by 10.
 
 ```{literalinclude} ../../../engines/openmm/test_reporter.py
