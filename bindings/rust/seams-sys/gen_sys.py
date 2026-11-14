@@ -213,13 +213,15 @@ def render(header):
     lines.append("")
     lines.append('extern "C" {')
     for ret, name, params in functions_of(text):
+        # Clippy of the 1.85 MSRV toolchain rejects `-> ()` (clippy::unused_unit).
+        arrow = "" if ret == "()" else " -> {}".format(ret)
         if params:
             lines.append("    pub fn {}(".format(name))
             for pname, ptype in params:
                 lines.append("        {}: {},".format(rust_name(pname), ptype))
-            lines.append("    ) -> {};".format(ret))
+            lines.append("    ){};".format(arrow))
         else:
-            lines.append("    pub fn {}() -> {};".format(name, ret))
+            lines.append("    pub fn {}(){};".format(name, arrow))
     lines.append("}")
     lines.append("")
     return "\n".join(lines)

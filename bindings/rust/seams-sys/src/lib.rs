@@ -106,7 +106,7 @@ extern "C" {
     pub fn seams_system_create() -> *mut seams_system;
     pub fn seams_system_destroy(
         sys: *mut seams_system,
-    ) -> ();
+    );
     pub fn seams_system_set_atoms(
         sys: *mut seams_system,
         xyz: *const f64,
@@ -159,7 +159,7 @@ extern "C" {
     ) -> c_int;
     pub fn seams_neighbours_destroy(
         nb: *mut seams_neighbours,
-    ) -> ();
+    );
     pub fn seams_neighbours_count(
         nb: *const seams_neighbours,
     ) -> c_int;
@@ -237,7 +237,7 @@ extern "C" {
     ) -> c_int;
     pub fn seams_rings_destroy(
         rings: *mut seams_rings,
-    ) -> ();
+    );
     pub fn seams_rings_count(
         rings: *const seams_rings,
     ) -> c_int;
@@ -274,7 +274,7 @@ extern "C" {
     ) -> c_int;
     pub fn seams_cages_destroy(
         cages: *mut seams_cage_set,
-    ) -> ();
+    );
     pub fn seams_cages_counts(
         cages: *const seams_cage_set,
         n_hex: *mut c_int,
@@ -314,7 +314,7 @@ extern "C" {
     ) -> c_int;
     pub fn seams_brine_destroy(
         front: *mut seams_brine,
-    ) -> ();
+    );
     pub fn seams_brine_fronts(
         front: *const seams_brine,
         z_enter: *mut f64,
@@ -441,7 +441,7 @@ extern "C" {
     ) -> c_int;
     pub fn seams_fingerprint_destroy(
         fp: *mut seams_topo,
-    ) -> ();
+    );
     pub fn seams_fingerprint_key(
         fp: *const seams_topo,
         buf: *mut c_char,
