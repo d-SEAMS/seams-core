@@ -77,12 +77,15 @@ cargo fmt --manifest-path bindings/rust/Cargo.toml --all -- --check
 `System::read` loads XYZ, CON, chemfiles, and triclinic dumps.
 `chill`, `steinhardt` (including the Lechner-Dellago average), `cages`,
 `signature_cages`, `knn`, `rdf`, `running_cn`, `coordination`, `hbonds`,
-`density_axis`, `fingerprint`, `contact_pairs`, `domains`, `prisms`,
+`density`, `fingerprint`, `contact_pairs`, `domains`, `prisms`,
 `monolayer`, `rings` with `vertices`, and `site_table` are the remaining
 safe wrappers. `Neighbours`, `Rings`, `Cages`, and `Fingerprint` free their
 handles on drop. `bindings/rust/seams/tests/cpp_match.rs` checks those
 values against the C++ path on ice Ih, sI, the XYZ file, the CON file,
-and the triclinic sH dump. On ice Ih it prints `rustcall hexagonal 128`,
+and the triclinic sH dump. It needs `SEAMS_CPP_ORACLE`, the
+`binding_oracle` executable of a meson build, and `SEAMS_SOURCE_ROOT`;
+`meson test language_fronts` sets both, and a plain `cargo test`
+without them skips it. On ice Ih it prints `rustcall hexagonal 128`,
 `rustcall q6bar 0.562448843702`, `rustcall vert 6 0`,
 `rustcall cages 128 0 0 0`, `rustcall knn 512`, and `rustcall sheet 256`.
 The sI signature prints `rustcall sig 2 40`.

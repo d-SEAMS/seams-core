@@ -46,8 +46,11 @@ fn read(root: &str, path: &str, filter: i32) -> seams::System {
 
 #[test]
 fn analyses_match_the_cpp_path() {
+    let (Ok(_), Ok(root)) = (env::var("SEAMS_CPP_ORACLE"), env::var("SEAMS_SOURCE_ROOT")) else {
+        eprintln!("cpp_match skipped: SEAMS_CPP_ORACLE and SEAMS_SOURCE_ROOT are unset");
+        return;
+    };
     seams::set_num_threads(1).unwrap();
-    let root = env::var("SEAMS_SOURCE_ROOT").unwrap();
     let want = load();
 
     let mut ih = read(&root, "input/traj/ice1h.lammpstrj", -1);
