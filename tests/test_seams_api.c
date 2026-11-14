@@ -119,7 +119,11 @@ int main(void) {
   const int *cols = NULL;
   int n_offsets = 0;
   int nnz = 0;
+  /* ABI 1 callers still reach the deprecated borrow, so it stays tested. */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   expect(seams_neighbours_csr(nb, &offsets, &n_offsets, &cols, &nnz) == SEAMS_OK, "csr");
+#pragma GCC diagnostic pop
   expect(n_offsets == n + 1, "csr rows");
   expect(seams_neighbours_count(nb) == n, "neighbour rows");
   int degree_ok = 1;
