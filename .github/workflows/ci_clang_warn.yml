@@ -20,3 +20,26 @@ jobs:
         run: |
           pixi run bash -lc 'CC=clang CXX=clang++ meson setup build-clang-werror -Dwith_tests=false -Dwith_python=false'
           pixi run ninja -C build-clang-werror
+
+  # Every target, tests, benchmarks, bindings and engines included, under
+  # Clang 21 with -Dwerror=true, then the suite on that build. The heavy
+  # suite runs for hours and stays on the GCC jobs.
+  clang21-all:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-clang21-
+      - name: Install Clang 21, its OpenMP, Fortran and Lua
+        run: |
+          curl -fsSL -o "$RUNNER_TEMP/llvm.sh" https://apt.llvm.org/llvm.sh
+          sudo bash "$RUNNER_TEMP/llvm.sh" 21
+          sudo apt-get install -y libomp-21-dev gfortran lua5.4 liblua5.4-dev luajit libluajit-5.1-dev
+      - name: Build every target with warnings as errors
+        run: |
+          pixi run bash -lc 'CC=clang-21 CXX=clang++-21 meson setup build-clang21 -Dwerror=true -Dwith_tests=true -Dwith_lua=auto -Dwith_fortran=auto'
+          pixi run ninja -C build-clang21
+      - name: Test the Clang build
+        run: pixi run meson test -C build-clang21 --print-errorlogs --no-suite heavy
