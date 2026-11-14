@@ -251,6 +251,13 @@ def sdk_prefix():
     return Path(prefix) if prefix else None
 
 
+def compiler_includes():
+    folders = []
+    for name in ("CPATH", "CPLUS_INCLUDE_PATH", "C_INCLUDE_PATH"):
+        folders.extend(Path(part) for part in os.environ.get(name, "").split(os.pathsep) if part)
+    return list(dict.fromkeys(folders))
+
+
 def sdk_flags(text):
     flags = []
     rpaths = []
@@ -278,6 +285,14 @@ def sdk_flags(text):
             if folder.is_dir() and any(token in text for token in ("gromacs/", "plumed/", "OpenMM.h", "library.h")):
                 flags.append("-L" + str(folder))
                 rpaths.append(str(folder))
+    if "OpenMM.h" in text and "-lOpenMM" not in flags:
+        # Module systems put OpenMM on the compiler search paths, as
+        # engines/meson.build finds it, and leave LD_LIBRARY_PATH alone.
+        for include in compiler_includes():
+            lib = include.parent / "lib"
+            if (include / "OpenMM.h").is_file() and (lib / "libOpenMM.so").is_file():
+                flags.extend(["-L" + str(lib), "-lOpenMM"])
+                break
     seen = []
     for flag in flags:
         if flag.startswith("-L") and len(flag) > 2:
