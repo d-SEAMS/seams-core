@@ -132,25 +132,27 @@ NB_MODULE(_core, m) {
            [](Frame &frame, double cutoff, int graph) {
              seams_neighbours *nb = nullptr;
              check(seams_neighbours_build(frame.sys, cutoff, 0, graph, &nb));
-             const int *offsets = nullptr;
-             const int *cols = nullptr;
-             int n_offsets = 0;
-             int nnz = 0;
-             check(seams_neighbours_csr(nb, &offsets, &n_offsets, &cols, &nnz));
-             auto *off = new int[static_cast<std::size_t>(n_offsets)];
-             auto *col = new int[static_cast<std::size_t>(nnz > 0 ? nnz : 1)];
-             for (int i = 0; i < n_offsets; ++i) {
-               off[i] = offsets[i];
+             std::size_t n_offsets = 0;
+             std::size_t nnz = 0;
+             seams_status status =
+                 seams_neighbours_copy(nb, nullptr, 0, &n_offsets, nullptr, 0, &nnz);
+             if (status != SEAMS_OK) {
+               seams_neighbours_destroy(nb);
+               check(status);
              }
-             for (int i = 0; i < nnz; ++i) {
-               col[i] = cols[i];
-             }
+             auto *off = new int[n_offsets];
+             auto *col = new int[nnz > 0 ? nnz : 1];
+             status = seams_neighbours_copy(nb, off, n_offsets, &n_offsets, col, nnz, &nnz);
              seams_neighbours_destroy(nb);
+             if (status != SEAMS_OK) {
+               delete[] off;
+               delete[] col;
+               check(status);
+             }
              nb::capsule oo(off, [](void *p) noexcept { delete[] static_cast<int *>(p); });
              nb::capsule oc(col, [](void *p) noexcept { delete[] static_cast<int *>(p); });
-             return nb::make_tuple(
-                 nb::ndarray<nb::numpy, int>(off, {static_cast<std::size_t>(n_offsets)}, oo),
-                 nb::ndarray<nb::numpy, int>(col, {static_cast<std::size_t>(nnz)}, oc));
+             return nb::make_tuple(nb::ndarray<nb::numpy, int>(off, {n_offsets}, oo),
+                                   nb::ndarray<nb::numpy, int>(col, {nnz}, oc));
            },
            nb::arg("cutoff") = 3.5, nb::arg("graph") = 0)
       .def("rings", [](Frame &frame, double cutoff, int max_depth) {

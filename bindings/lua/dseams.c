@@ -405,18 +405,26 @@ static int nb_count(lua_State *L) {
 
 static int nb_csr(lua_State *L) {
   NeighbourBox *box = neighbour_box(L, 1);
-  const int *offsets = NULL;
-  const int *cols = NULL;
-  int n_offsets = 0;
-  int nnz = 0;
-  /* The CSR lives on the handle until it is closed. Copying it into a
-   * temporary and then into the Lua table walked the same integers twice. */
-  seams_status status = seams_neighbours_csr(box->nb, &offsets, &n_offsets, &cols, &nnz);
+  size_t n_offsets = 0;
+  size_t nnz = 0;
+  int *buf;
+  seams_status status = seams_neighbours_copy(box->nb, NULL, 0, &n_offsets, NULL, 0, &nnz);
   if (status != SEAMS_OK) {
     return raise_status(L, status);
   }
-  push_ints(L, offsets, n_offsets);
-  push_ints(L, cols, nnz);
+  /* One block holds the offsets followed by the columns. */
+  buf = (int *)malloc((n_offsets + nnz + 1) * sizeof(int));
+  if (buf == NULL) {
+    return luaL_error(L, "out of memory");
+  }
+  status = seams_neighbours_copy(box->nb, buf, n_offsets, &n_offsets, buf + n_offsets, nnz, &nnz);
+  if (status != SEAMS_OK) {
+    free(buf);
+    return raise_status(L, status);
+  }
+  push_ints(L, buf, (int)n_offsets);
+  push_ints(L, buf + n_offsets, (int)nnz);
+  free(buf);
   lua_pushinteger(L, (lua_Integer)nnz);
   return 3;
 }
