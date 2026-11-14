@@ -64,7 +64,7 @@ SEXP seams_r_count(SEXP ext) { return ScalarInteger(seams_system_count(sys_of(ex
 SEXP seams_r_threads(SEXP n) {
   int threads = Rf_asInteger(n);
   if (seams_set_num_threads(threads) != SEAMS_OK) {
-    error("%s", seams_last_error());
+    error("%s", seams_last_error_message());
   }
   return ScalarInteger(seams_get_num_threads());
 }

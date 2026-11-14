@@ -44,7 +44,26 @@ for name in $engine; do
     cp "$root/src/$name.cpp" "$dest/"
   fi
 done
-cp "$root/bindings/cxx/seams_lang.h" "$dest/"
+# seams_lang.cpp and seams_api.cpp share one shared object here, and both
+# define seams_last_error and seams_path_nframes (with different
+# signatures). The copied seams_lang.h renames the seams_lang pair, so
+# dseams.cpp reaches seams_lang and seams_call.c reaches the C API.
+awk '{ print } /^#define SEAMS_LANG_H_$/ {
+  print "#define seams_last_error seams_lang_last_error"
+  print "#define seams_path_nframes seams_lang_path_nframes"
+}' "$root/bindings/cxx/seams_lang.h" > "$dest/seams_lang.h"
+defs() {
+  sed -n 's/^[A-Za-z_][A-Za-z0-9_ *]*[ *]\(seams_[A-Za-z0-9_]*\)(.*/\1/p' "$1" | sort -u
+}
+renamed=$(sed -n 's/^#define \(seams_[A-Za-z0-9_]*\) seams_lang_.*/\1/p' "$dest/seams_lang.h")
+defs "$dest/seams_lang.cpp" | grep -vxF "$renamed" > "$dest/.lang_defs" || true
+defs "$dest/seams_api.cpp" > "$dest/.api_defs"
+clash=$(comm -12 "$dest/.lang_defs" "$dest/.api_defs")
+rm -f "$dest/.lang_defs" "$dest/.api_defs"
+if [ -n "$clash" ]; then
+  echo "vendor.sh: seams_lang.cpp and seams_api.cpp both define:" $clash >&2
+  exit 1
+fi
 cp "$root"/src/include/internal/*.h "$root"/src/include/internal/*.hpp "$dest/include/"
 cp "$root/LICENSE" "$dest/LICENSE"
 
