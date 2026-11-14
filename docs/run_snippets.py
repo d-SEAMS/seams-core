@@ -262,7 +262,7 @@ def sdk_flags(text):
     flags = []
     rpaths = []
     if shutil.which("pkg-config"):
-        for spec, needle in (("libgromacs", "gromacs/"), ("plumed", "plumed/")):
+        for spec, needle in (("libgromacs", "gromacs/"), ("plumed", "plumed/"), ("lammps", "library.h")):
             if needle not in text:
                 continue
             done = subprocess.run(
@@ -306,6 +306,19 @@ def sdk_flags(text):
         if flags[index] == "-L":
             rpaths.append(flags[index + 1])
         index += 1
+    # pkg-config leaves out -L for folders already on LIBRARY_PATH, so the
+    # library links and then has no runpath. Ask the compiler where it is.
+    compiler = shutil.which("cc")
+    for flag in flags:
+        if not flag.startswith("-l") or compiler is None:
+            continue
+        found = subprocess.run(
+            [compiler, "-print-file-name=lib{}.so".format(flag[2:])],
+            text=True,
+            capture_output=True,
+        ).stdout.strip()
+        if os.path.isabs(found) and os.path.isfile(found):
+            rpaths.append(os.path.dirname(os.path.realpath(found)))
     for folder in dict.fromkeys(rpaths):
         link = "-Wl,-rpath," + folder
         if link not in seen:
