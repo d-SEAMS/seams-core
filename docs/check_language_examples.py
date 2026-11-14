@@ -43,6 +43,10 @@ def main():
                 continue
             if lang in {"bash", "sh"}:
                 continue
+            if run_snippets.check_excerpt(body) is not None:
+                # Quoted source lines, matched against the file; not an example.
+                programs += 1
+                continue
             if lang == "python" and "assert " not in body and not body.lstrip().startswith(">>>"):
                 fail("Python example on " + name + " does not assert")
             if lang == "rust" and ("fn main" not in body or "assert" not in body):

@@ -37,6 +37,8 @@ with System() as sys:
     ice = sys.chill_plus(rule=PUBLISHED)
     order = sys.q4q6()
     print(int(ice.counts[0]), float(order.q6.mean()))
+    assert int(ice.counts[0]) == 8
+    assert abs(float(order.q6.mean()) - 0.628539) < 1e-6
 ```
 
 `docs/examples/seams_ctypes_quick.py` runs that cell. The program prints:
@@ -61,11 +63,20 @@ file and the doctests.
 
 ### `dseams`
 
-The same eight-atom cell through the nanobind module:
+The same eight sites through the nanobind module, in a box three cells
+wide so that the cage calls are not refused:
 
 ```python
+import math
+
 import dseams
-box = (edge, edge, edge)
+import numpy as np
+
+edge = 2.75 * 4.0 / math.sqrt(3.0)
+sites = ((0, 0, 0), (0.5, 0.5, 0), (0.5, 0, 0.5), (0, 0.5, 0.5),
+         (0.25, 0.25, 0.25), (0.75, 0.75, 0.25), (0.75, 0.25, 0.75), (0.25, 0.75, 0.75))
+positions = np.array([[x * edge, y * edge, z * edge] for x, y, z in sites])
+box = (3 * edge, 3 * edge, 3 * edge)
 labels, counts = dseams.chill_plus(positions, box)
 q4, q6 = dseams.q4q6(positions, box)
 offsets, cols = dseams.neighbours(positions, box)
@@ -114,6 +125,7 @@ with System() as sys:
         sys.chill_plus()
     except SeamsError as err:
         print(err.status, err.message)
+        assert err.status == 5
 ```
 
 An empty frame raises status 5 (`SEAMS_ERR_STATE`). The message is the
