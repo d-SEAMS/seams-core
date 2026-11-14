@@ -1,0 +1,1 @@
+Sanitized builds leave fatal signals to the sanitizer. The backward-cpp crash handler had replaced the ASan and libFuzzer handlers, so a fuzzer stopped with no report and no saved input; `capi_signal_owner` checks who owns `SIGABRT` in plain and sanitized builds.

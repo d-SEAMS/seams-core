@@ -1,0 +1,1 @@
+A MOL2 molecule whose counts line is empty no longer crashes `seams_path_nframes`. The vendored chemfiles 0.10.4 indexed the first count of an empty line; the build now applies `cmake/patches/chemfiles-0.10.4-mol2.patch` and refetches chemfiles when the patch set changes. Found by `capi_read_fuzzer`.

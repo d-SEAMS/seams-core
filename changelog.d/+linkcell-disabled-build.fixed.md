@@ -1,0 +1,1 @@
+`-Dwith_linkcell=disabled` builds and links again: the k-nearest neighbour list merges its rows on the OpenMP team instead of calling linkcell's slab walk, and the GPU batch helpers build under `-Werror` without linkcell.
