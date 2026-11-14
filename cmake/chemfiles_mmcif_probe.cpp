@@ -7,6 +7,10 @@
 // throws, and a write followed by a read in the same process segfaults
 // inside mmCIFFormat::read. Exit 0 only when the oxygen comes back at
 // (1, 2, 3) inside a 10 x 11 x 12 cell.
+//
+// It then counts the steps of a MOL2 molecule with an empty counts line.
+// 0.10.4 indexes the empty split and segfaults, so the probe dies; a
+// patched reader throws a format error, which passes.
 #include <chemfiles.hpp>
 
 #include <cmath>
@@ -44,9 +48,15 @@ int main(int argc, char **argv) {
         std::fabs(lengths[2] - 12.0) > 1e-3) {
       return 6;
     }
-    return 0;
   } catch (const std::exception &err) {
     std::cerr << err.what() << '\n';
     return 1;
   }
+  static const char mol2[] = "\n@<TRIPOS>MOLECULE\n";
+  try {
+    auto truncated = chemfiles::Trajectory::memory_reader(mol2, sizeof mol2 - 1, "MOL2");
+    (void)truncated.nsteps();
+  } catch (const std::exception &) {
+  }
+  return 0;
 }

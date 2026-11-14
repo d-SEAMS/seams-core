@@ -456,6 +456,11 @@ static void read_contract(const char *root) {
   truth(nframes == 77, fn, "failure leaves the output alone");
   expect(seams_path_nframes(path, &nframes), SEAMS_OK, fn, "count");
   truth(nframes >= 1, fn, "at least one frame");
+  snprintf(path, sizeof path, "%s/input/traj/mol2_empty_counts.mol2", root);
+  expect(seams_path_nframes(path, &nframes), SEAMS_ERR_ARG, fn, "MOL2 with no counts line");
+  expect(seams_system_read(sys, path, 1, -1), SEAMS_ERR_RANGE, "seams_system_read",
+         "MOL2 with no counts line");
+  truth(seams_system_count(sys) == n, "seams_system_read", "a failed MOL2 read keeps the frame");
   seams_system_destroy(sys);
 }
 

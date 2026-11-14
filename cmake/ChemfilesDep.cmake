@@ -51,7 +51,7 @@ if(SEAMS_WITH_CHEMFILES)
           set(_seams_chemfiles_system_ok TRUE)
         else()
           message(STATUS
-            "system chemfiles cannot read an mmCIF atom with no residue id (exit ${_seams_probe_run}); building patched 0.10.4")
+            "system chemfiles fails the mmCIF or MOL2 probe (exit ${_seams_probe_run}); building patched 0.10.4")
         endif()
       endif()
     endif()

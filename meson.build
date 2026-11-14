@@ -380,9 +380,9 @@ else
   # label_seq_id "." and omits label_entity_id. The reader dereferences
   # that missing column. Reading the written file throws, and a write
   # followed by a read in the same process segfaults inside
-  # mmCIFFormat::read. A library that cannot read
-  # cmake/mmcif_no_entity.mmcif is replaced by tag 0.10.4 plus
-  # cmake/patches/chemfiles-0.10.4-mmcif.patch.
+  # mmCIFFormat::read. The probe also counts the steps of a MOL2 molecule
+  # with an empty counts line, where 0.10.4 segfaults. A library that
+  # fails either is replaced by tag 0.10.4 plus cmake/patches/.
   _chemfiles_system_ok = false
   if chemfiles_dep.found()
     _mmcif_probe = meson.project_source_root() / 'cmake' / 'mmcif_no_entity.mmcif'
@@ -390,10 +390,10 @@ else
       fs.read(meson.project_source_root() / 'cmake' / 'chemfiles_mmcif_probe.cpp'),
       args: ['-DSEAMS_MMCIF_PROBE="' + _mmcif_probe + '"'],
       dependencies: chemfiles_dep,
-      name: 'chemfiles reads an mmCIF atom with no residue id')
+      name: 'chemfiles reads an mmCIF atom with no residue id and a truncated MOL2')
     _chemfiles_system_ok = _mmcif_run.compiled() and _mmcif_run.returncode() == 0
     if not _chemfiles_system_ok
-      message('system chemfiles cannot read an mmCIF atom with no residue id; building patched 0.10.4')
+      message('system chemfiles fails the mmCIF or MOL2 probe; building patched 0.10.4')
       # dependency() has no way to drop a found library. This name is
       # not a package. It clears the rejected system copy so the fetch
       # below is the one that gets linked.
