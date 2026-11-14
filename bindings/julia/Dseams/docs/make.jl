@@ -1,4 +1,9 @@
-# Build the Dseams manual and run every export's doctest.
+# Build the Dseams manual and run every doctest.
+#
+#   julia --project=docs docs/make.jl
+#
+# Before libseams_jll is registered, first run dev/develop_jll.jl in the
+# docs project (see its header).
 using Pkg
 
 docsdir = @__DIR__
@@ -6,24 +11,16 @@ Pkg.activate(docsdir)
 Pkg.develop(PackageSpec(path = joinpath(docsdir, "..")))
 Pkg.instantiate()
 
-root = normpath(joinpath(docsdir, "..", "..", "..", ".."))
-lang = joinpath(root, "bbdir", "bindings", "libseams_lang.so")
-if isfile(lang)
-    ENV["SEAMS_LANG_LIB"] = lang
-end
-engine = joinpath(root, "bbdir", "src")
-if isdir(engine)
-    ENV["LD_LIBRARY_PATH"] = engine * ":" * joinpath(root, "bbdir", "bindings") *
-                             ":" * get(ENV, "LD_LIBRARY_PATH", "")
-end
-
 using Documenter
 using Dseams
+
+DocMeta.setdocmeta!(Dseams, :DocTestSetup, :(using Dseams); recursive = true)
 
 makedocs(;
     sitename = "Dseams",
     modules = [Dseams],
     checkdocs = :exports,
     doctest = true,
-    pages = ["index.md"],
+    format = Documenter.HTML(; prettyurls = get(ENV, "CI", "") == "true"),
+    pages = ["Home" => "index.md", "API" => "api.md"],
 )

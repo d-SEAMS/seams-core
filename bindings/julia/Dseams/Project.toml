@@ -1,11 +1,22 @@
 name = "Dseams"
-uuid = "b7e4c1a2-6d58-4f0e-9a31-2c8e5d4f7a10"
+uuid = "9c873972-df43-4516-af5b-6352a89d4bea"
 version = "2.14.0"
-authors = ["Rohit Goswami <rgoswami@ieee.org>"]
+authors = ["Rohit Goswami <rgoswami@ieee.org>", "Amrita Goswami"]
 
 [deps]
 Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+Preferences = "21216c6a-2e73-6563-6e65-726566657250"
+libseams_jll = "7f1e8526-9a03-57ab-a5c6-46114804ed15"
 
 [compat]
-julia = "1.10"
 Libdl = "1"
+Preferences = "1.4"
+Test = "1"
+julia = "1.10"
+libseams_jll = "2.14.0"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]

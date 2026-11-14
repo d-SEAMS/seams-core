@@ -108,6 +108,7 @@ fi
 
 if command -v julia >/dev/null 2>&1; then
   (cd "$root/bindings/julia/Dseams" && \
+    julia --project=. dev/develop_jll.jl >/dev/null 2>&1 && \
     SEAMS_LANG_LIB=$lang/libseams_lang.so \
     DSEAMS_ROOT=$root \
     LD_LIBRARY_PATH=$lang:$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \

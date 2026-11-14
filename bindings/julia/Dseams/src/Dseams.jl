@@ -3,22 +3,39 @@
     Dseams
 
 Julia front for the d-SEAMS engine. Calls `libseams_lang` with `ccall`.
-CxxWrap is not required. Set `SEAMS_LANG_LIB` to the shared library if it
-is not on the loader path.
+
+The library comes from `libseams_jll`. A local build is used instead when
+the `SEAMS_LANG_LIB` environment variable or the `libseams_lang`
+preference names it; see [`Dseams.set_library!`](@ref).
 """
 module Dseams
 
 using Libdl
+using Preferences: load_preference, set_preferences!, delete_preferences!
+
+export Frame, nop, nframes, read_frame, neighbour_pairs, chill_plus, cages, primitive_rings, steinhardt, signature_cages, symmetry, jump_tau90, q4_q6
+
+const DATA = normpath(joinpath(@__DIR__, "..", "data"))
+
+"""
+    example_path(name)
+
+Path of a trajectory shipped with the package. `ice1h.lammpstrj` is a
+128-molecule ice Ih cell, `exampleTraj.lammpstrj` a TIP4P/ice frame and
+`nucleation_f1.lammpstrj` a frame of an mW nucleation run.
+"""
+function example_path(name::AbstractString)
+    path = joinpath(DATA, name)
+    isfile(path) || error("no example named $(repr(name)); see readdir(Dseams.DATA)")
+    path
+end
 
 """
     ice_ih_path()
 
-Path of the committed Ice Ih dump, `input/traj/ice1h.lammpstrj`.
+Path of the Ice Ih example, `example_path("ice1h.lammpstrj")`.
 """
-ice_ih_path() = normpath(joinpath(@__DIR__, "..", "..", "..", "..", "input", "traj", "ice1h.lammpstrj"))
-
-
-export Frame, nop, nframes, read_frame, neighbour_pairs, chill_plus, cages, primitive_rings, steinhardt, signature_cages, symmetry, jump_tau90, q4_q6
+ice_ih_path() = example_path("ice1h.lammpstrj")
 
 const ICE_NAMES = (
     "cubic",
@@ -32,8 +49,49 @@ const ICE_NAMES = (
     "reHex",
 )
 
-function _lib()
-    get(ENV, "SEAMS_LANG_LIB", "libseams_lang")
+const _JLL = Base.PkgId(Base.UUID("7f1e8526-9a03-57ab-a5c6-46114804ed15"), "libseams_jll")
+
+# The JLL is loaded only when no local build is named. Loading both would
+# put two libyodaLib with one soname in the process.
+function _jll_library()
+    jll = Base.require(_JLL)
+    Base.invokelatest(jll.is_available) || return "libseams_lang"
+    Base.invokelatest(getproperty, jll, :libseams_lang_path)
+end
+
+"""
+    library_path()
+
+The `libseams_lang` that Dseams opens: `ENV["SEAMS_LANG_LIB"]`, else the
+`libseams_lang` preference, else the one from `libseams_jll`. Where the
+JLL has no build, `"libseams_lang"` is looked up on the loader path.
+"""
+function library_path()
+    path = get(ENV, "SEAMS_LANG_LIB", "")
+    isempty(path) || return path
+    path = load_preference(@__MODULE__, "libseams_lang", "")
+    isempty(path) || return path
+    _jll_library()
+end
+
+"""
+    set_library!(path)
+    set_library!(nothing)
+
+Use the `libseams_lang` at `path` (for instance `build/bindings` of a
+seams-core checkout) instead of the one in `libseams_jll`, or go back to
+the JLL with `nothing`. Stored in `LocalPreferences.toml` of the active
+project; restart Julia to take effect.
+"""
+function set_library!(path::AbstractString)
+    isfile(path) || error("no file at $(repr(path))")
+    set_preferences!(@__MODULE__, "libseams_lang" => abspath(path); force = true)
+    @info "Dseams will use $(abspath(path)) after a restart"
+end
+
+function set_library!(::Nothing)
+    delete_preferences!(@__MODULE__, "libseams_lang"; force = true)
+    @info "Dseams will use libseams_jll after a restart"
 end
 
 # Julia 1.13 rejects a runtime library name inside ccall. The handle is
@@ -42,10 +100,26 @@ const _dl = Ref{Ptr{Cvoid}}(C_NULL)
 
 function _so()
     if _dl[] == C_NULL
-        _dl[] = dlopen(_lib())
+        _dl[] = dlopen(library_path())
     end
     _dl[]
 end
+
+"""
+    engine_version()
+
+Version of the engine behind the loaded `libseams_lang`.
+
+```jldoctest
+julia> using Dseams
+
+julia> VersionNumber(Dseams.engine_version()) >= v"2.14.0"
+true
+```
+"""
+engine_version() = unsafe_string(ccall(dlsym(_so(), :seams_lang_version), Ptr{Cchar}, ()))
+
+_need_file(path) = isfile(path) || error("no trajectory at $(repr(path))")
 
 function _check(code::Integer)
     code == 0 && return
@@ -93,6 +167,7 @@ julia> nframes(Dseams.ice_ih_path())
 ```
 """
 function nframes(path::AbstractString)
+    _need_file(path)
     n = ccall(dlsym(_so(), :seams_path_nframes), Cint, (Cstring,), path)
     n < 0 && _check(1)
     Int(n)
@@ -111,6 +186,7 @@ julia> nop(read_frame(Dseams.ice_ih_path(); type=-1))
 ```
 """
 function read_frame(path::AbstractString; frame::Integer = 1, type::Integer = 0)
+    _need_file(path)
     ptr = ccall(
         dlsym(_so(), :seams_frame_read),
         Ptr{Cvoid},
