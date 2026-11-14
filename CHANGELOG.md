@@ -47,7 +47,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
   The 2015 CHILL+ thresholds are unchanged.
 - Each OpenMP thread owns a block of the linkcell weighted cell cut and writes the neighbour rows of those cells. The halo is painted in that owned walk. On 884736 molecules, eight threads build the neighbour rows in 5.72 times the one-thread time.
 - Each language front reports rings, cages, signature cages and symmetry, and the binding CI runs those calls.
-- Eighteen recordings embed their Odysee claims. The cages cut has no player yet. Its transcript adds the ice Ih hexagonal-cage census and the cubic double-diamond census, and keeps the clathrate lines. The brine transcript again includes the three-frame front beside the nacl census. The GROMACS `overhead_s` timer is machine-dependent.
+- All nineteen recordings embed their Odysee claims. The cages transcript adds the ice Ih hexagonal-cage census and the cubic double-diamond census, and keeps the clathrate lines. The brine transcript again includes the three-frame front beside the nacl census. The GROMACS `overhead_s` timer is machine-dependent.
 - Enumerate cups and incomplete cages on the ring graph; closed signature counts stay the closed path.
 - Hexagonal channels are stacked six-ring prisms, not a raw six-ring count. Ice XXI (Lee et al. 2026, Z=152 BCT) also requires a tetrahedral 3.5 A graph and a primitive six-ring. Hydrogen MSD uses the minimum image. Glass labels use local-density windows for ice/LDA/MDA/HDA. `compute dseams` ships with `water.data` and `pair_style zero`.
 - Ice XXI library matches the Lee et al. 2026 I-42d oxygen cell (SI CIF, Z=152).

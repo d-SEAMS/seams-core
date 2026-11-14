@@ -42,7 +42,7 @@ BLURB = {
 }
 
 # The nineteen cuts. migrate and rings-cages keep their shot lists on disk
-# and are not gallery videos. Cages is a cut with no upload yet.
+# and are not gallery videos.
 CUTS = (
     "brine",
     "c",
@@ -85,11 +85,12 @@ CLAIMS = {
     "fortran": "dseams-fortran:e15a82c2f40ff1fdf10c89ff6c9f78b6b3fd583b",
     "lua": "dseams-lua:9a7ffc26dff9590174a707db848f5f5d6d7a737f",
     "brine": "dseams-brine:124a3a7fa52cdf7aff34ac00cfba6068e240a947",
+    "cages": "dseams-cages:1c258cea9384acd2e21eeec509c5eedc050d08db",
 }
 
 # Topic page, relative to the repo, and the recording that belongs on it.
 # lua-fennel is the lua slug. chill-interface is the interface slug.
-# cages has a cut and no claim yet. migrate and rings-cages are not cuts.
+# cages is a gallery video with no topic page. migrate and rings-cages are not cuts.
 TOPICS = {
     "cli": (
         "docs/orgmode/reference/cli.org",
