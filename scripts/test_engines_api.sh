@@ -28,10 +28,11 @@ gfortran -I"$mod" "$root/bindings/fortran/test_seams.f90" "$mod/seams.o" \
 # Julia 1.11 ccall suite, when julia is on PATH.
 if command -v julia >/dev/null 2>&1; then
   (cd "$root/bindings/julia/Dseams" && \
+    julia --project=. dev/develop_jll.jl && \
     SEAMS_LANG_LIB="$root/build/bindings/libseams_lang.so" \
     DSEAMS_ROOT="$root" \
     LD_LIBRARY_PATH="$root/build/bindings:$lib" \
-    julia --project=. -e 'using Pkg; Pkg.instantiate(); include("test/runtests.jl")')
+    julia --project=. test/runtests.jl)
 fi
 
 # Rust
