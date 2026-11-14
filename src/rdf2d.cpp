@@ -49,6 +49,25 @@ constexpr int kHalfStencil[13][3] = {
     {1, -1, 0}, {1, -1, 1}, {1, 0, -1}, {1, 0, 0},  {1, 0, 1},
     {1, 1, -1}, {1, 1, 0},  {1, 1, 1}};
 
+// The cell arrays take a few dozen bytes per atom. Kept per calling
+// thread, the next frame reuses their pages instead of faulting them in
+// again, which glibc's trimming of the freed block would otherwise force.
+struct CellScratch {
+  std::vector<int> cellOf;
+  std::vector<int> start;
+  std::vector<int> blockAt;
+  std::vector<int> locals;
+  std::vector<double> wrapped;
+  std::vector<double> px;
+  std::vector<double> py;
+  std::vector<double> pz;
+};
+
+CellScratch &cellScratch() {
+  thread_local CellScratch scratch;
+  return scratch;
+}
+
 bool histogramCellPairs(
     const gen::FracBox &frame,
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
@@ -77,69 +96,97 @@ bool histogramCellPairs(
   const double lx = frame.lx, ly = frame.ly, lz = frame.lz;
   const double xy = frame.xy, xz = frame.xz, yz = frame.yz;
 
-  std::vector<int> cellOf(static_cast<std::size_t>(n));
-  std::vector<double> wrapped(3 * static_cast<std::size_t>(n));
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (n >= 4096)
-#endif
-  for (int i = 0; i < n; i++) {
-    const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
-    const double fz = (p.z - frame.oz) / lz;
-    const double fy = (p.y - frame.oy - yz * fz) / ly;
-    const double fx = (p.x - frame.ox - xy * fy - xz * fz) / lx;
-    double s[3] = {fx - std::floor(fx), fy - std::floor(fy),
-                   fz - std::floor(fz)};
-    int idx[3];
-    for (int k = 0; k < 3; k++) {
-      if (s[k] >= 1.0) {
-        s[k] = 0.0;
-      }
-      idx[k] = std::min(static_cast<int>(s[k] * dims[k]), dims[k] - 1);
-    }
-    cellOf[static_cast<std::size_t>(i)] = (idx[0] * ny + idx[1]) * nz + idx[2];
-    wrapped[3 * static_cast<std::size_t>(i)] = lx * s[0] + xy * s[1] + xz * s[2];
-    wrapped[3 * static_cast<std::size_t>(i) + 1] = ly * s[1] + yz * s[2];
-    wrapped[3 * static_cast<std::size_t>(i) + 2] = lz * s[2];
-  }
-  std::vector<int> start(static_cast<std::size_t>(ncell) + 1, 0);
-  for (const int c : cellOf) {
-    start[static_cast<std::size_t>(c) + 1]++;
-  }
-  for (int c = 0; c < ncell; c++) {
-    start[static_cast<std::size_t>(c) + 1] += start[static_cast<std::size_t>(c)];
-  }
-  std::vector<int> fill(start.begin(), start.end() - 1);
-  std::vector<double> px(static_cast<std::size_t>(n));
-  std::vector<double> py(static_cast<std::size_t>(n));
-  std::vector<double> pz(static_cast<std::size_t>(n));
-  for (int i = 0; i < n; i++) {
-    const auto s = static_cast<std::size_t>(
-        fill[static_cast<std::size_t>(cellOf[static_cast<std::size_t>(i)])]++);
-    px[s] = wrapped[3 * static_cast<std::size_t>(i)];
-    py[s] = wrapped[3 * static_cast<std::size_t>(i) + 1];
-    pz[s] = wrapped[3 * static_cast<std::size_t>(i) + 2];
-  }
-
-  const double *X = px.data();
-  const double *Y = py.data();
-  const double *Z = pz.data();
-  const int *first = start.data();
   const double cut2 = cutoff * cutoff;
   const std::size_t stride = static_cast<std::size_t>(nbin + 15) / 16 * 16;
   int nthreads = 1;
 #ifdef SEAMS_HAS_OPENMP
-  if (n >= 512) {
+  if (n >= 512 && !omp_in_parallel()) {
     nthreads = omp_get_max_threads();
   }
 #endif
-  std::vector<int> locals(static_cast<std::size_t>(nthreads) * stride, 0);
+  CellScratch &scratch = cellScratch();
+  std::vector<int> &cellOf = scratch.cellOf;
+  std::vector<double> &wrapped = scratch.wrapped;
+  std::vector<int> &start = scratch.start;
+  std::vector<int> &blockAt = scratch.blockAt;
+  std::vector<double> &px = scratch.px;
+  std::vector<double> &py = scratch.py;
+  std::vector<double> &pz = scratch.pz;
+  std::vector<int> &locals = scratch.locals;
+  cellOf.resize(static_cast<std::size_t>(n));
+  wrapped.resize(3 * static_cast<std::size_t>(n));
+  start.assign(static_cast<std::size_t>(ncell) + 1, 0);
+  // Row t holds the cell counts of thread t's static block of atoms; after
+  // the scan it holds that block's first slot in each cell, so the scatter
+  // keeps the serial atom order inside every cell.
+  blockAt.assign(static_cast<std::size_t>(nthreads) * ncell, 0);
+  px.resize(static_cast<std::size_t>(n));
+  py.resize(static_cast<std::size_t>(n));
+  pz.resize(static_cast<std::size_t>(n));
+  locals.assign(static_cast<std::size_t>(nthreads) * stride, 0);
+  const double *X = px.data();
+  const double *Y = py.data();
+  const double *Z = pz.data();
+  const int *first = start.data();
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel num_threads(nthreads)
 #endif
   {
     int tid = 0;
+    int team = 1;
 #ifdef SEAMS_HAS_OPENMP
     tid = omp_get_thread_num();
+    team = omp_get_num_threads();
+#endif
+    const int lo = static_cast<int>(1LL * n * tid / team);
+    const int hi = static_cast<int>(1LL * n * (tid + 1) / team);
+    int *mine = blockAt.data() + static_cast<std::size_t>(tid) * ncell;
+    for (int i = lo; i < hi; i++) {
+      const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
+      const double fz = (p.z - frame.oz) / lz;
+      const double fy = (p.y - frame.oy - yz * fz) / ly;
+      const double fx = (p.x - frame.ox - xy * fy - xz * fz) / lx;
+      double s[3] = {fx - std::floor(fx), fy - std::floor(fy),
+                     fz - std::floor(fz)};
+      int idx[3];
+      for (int k = 0; k < 3; k++) {
+        if (s[k] >= 1.0) {
+          s[k] = 0.0;
+        }
+        idx[k] = std::min(static_cast<int>(s[k] * dims[k]), dims[k] - 1);
+      }
+      const int c = (idx[0] * ny + idx[1]) * nz + idx[2];
+      cellOf[static_cast<std::size_t>(i)] = c;
+      mine[c]++;
+      wrapped[3 * static_cast<std::size_t>(i)] = lx * s[0] + xy * s[1] + xz * s[2];
+      wrapped[3 * static_cast<std::size_t>(i) + 1] = ly * s[1] + yz * s[2];
+      wrapped[3 * static_cast<std::size_t>(i) + 2] = lz * s[2];
+    }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp barrier
+#pragma omp single
+#endif
+    {
+      int at = 0;
+      for (int c = 0; c < ncell; c++) {
+        start[static_cast<std::size_t>(c)] = at;
+        for (int t = 0; t < team; t++) {
+          int &slot = blockAt[static_cast<std::size_t>(t) * ncell + c];
+          const int count = slot;
+          slot = at;
+          at += count;
+        }
+      }
+      start[static_cast<std::size_t>(ncell)] = at;
+    }
+    for (int i = lo; i < hi; i++) {
+      const auto s = static_cast<std::size_t>(mine[cellOf[static_cast<std::size_t>(i)]]++);
+      px[s] = wrapped[3 * static_cast<std::size_t>(i)];
+      py[s] = wrapped[3 * static_cast<std::size_t>(i) + 1];
+      pz[s] = wrapped[3 * static_cast<std::size_t>(i) + 2];
+    }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp barrier
 #endif
     int *local = locals.data() + static_cast<std::size_t>(tid) * stride;
 #ifdef SEAMS_HAS_OPENMP
@@ -452,44 +499,24 @@ std::vector<double> rdf2::getSystemLengths(
     return {H[0][0], H[1][1], H[2][2]};
   }
 
-  std::vector<double> lengths; // Volume lengths
-  std::vector<double>
-      rMax; // Max of the coordinates {0 is for x, 1 is for y and 2 is for z}
-  std::vector<double>
-      rMin; // Min of the coordinates {0 is for x, 1 is for y and 2 is for z}
-  std::vector<double> r_iatom; // Current point coordinates
-  int dim = 3;
-
-  // Init
-  r_iatom.push_back(yCloud.pts[0].x);
-  r_iatom.push_back(yCloud.pts[0].y);
-  r_iatom.push_back(yCloud.pts[0].z);
-  rMin = r_iatom;
-  rMax = r_iatom;
-
-  // Loop through the entire PointCloud
-  for (int iatom = 1; iatom < yCloud.nop; iatom++) {
-    r_iatom[0] = yCloud.pts[static_cast<std::size_t>(iatom)].x; // x coordinate of iatom
-    r_iatom[1] = yCloud.pts[static_cast<std::size_t>(iatom)].y; // y coordinate of iatom
-    r_iatom[2] = yCloud.pts[static_cast<std::size_t>(iatom)].z; // z coordinate of iatom
-    // Loop through every dimension
-    for (int k = 0; k < dim; k++) {
-      // Update rMin
-      if (r_iatom[static_cast<std::size_t>(k)] < rMin[static_cast<std::size_t>(k)]) {
-        rMin[static_cast<std::size_t>(k)] = r_iatom[static_cast<std::size_t>(k)];
-      } // end of rMin update
-      // Update rMax
-      if (r_iatom[static_cast<std::size_t>(k)] > rMax[static_cast<std::size_t>(k)]) {
-        rMax[static_cast<std::size_t>(k)] = r_iatom[static_cast<std::size_t>(k)];
-      } // end of rMax update
-    }   // end of looping through every dimension
-  }     // end of loop through all the atoms
-
-  // Get the lengths
-  for (int k = 0; k < dim; k++) {
-    lengths.push_back(rMax[static_cast<std::size_t>(k)] - rMin[static_cast<std::size_t>(k)]);
-  } // end of updating lengths
-
+  const int nop = yCloud.nop;
+  double x0 = yCloud.pts[0].x, x1 = x0;
+  double y0 = yCloud.pts[0].y, y1 = y0;
+  double z0 = yCloud.pts[0].z, z1 = z0;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nop >= 16384 && !omp_in_parallel()) \
+    reduction(min : x0, y0, z0) reduction(max : x1, y1, z1)
+#endif
+  for (int iatom = 1; iatom < nop; iatom++) {
+    const auto &p = yCloud.pts[static_cast<std::size_t>(iatom)];
+    x0 = std::min(x0, p.x);
+    x1 = std::max(x1, p.x);
+    y0 = std::min(y0, p.y);
+    y1 = std::max(y1, p.y);
+    z0 = std::min(z0, p.z);
+    z1 = std::max(z1, p.z);
+  }
+  std::vector<double> lengths = {x1 - x0, y1 - y0, z1 - z0};
   return lengths;
 } // end of function
 
