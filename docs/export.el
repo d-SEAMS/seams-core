@@ -122,6 +122,9 @@
          :publishing-directory "./source/"
          :publishing-function org-rst-publish-to-rst
          :recursive t
+         ;; render_binding_overhead.py writes the RST page with its figure
+         ;; and tables. The Org copy is the prose only.
+         :exclude "binding-overhead\\.org\\'"
          :headline-levels 4
          :with-toc nil
          :section-numbers nil
