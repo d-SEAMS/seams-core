@@ -85,14 +85,21 @@ struct RingSearchIndex {
   //! is the ascending ring list of atom a. Empty when the index was not built.
   std::vector<int> ringOff;
   std::vector<int> ringCol;
+  //! Atoms the packed rows cover.
+  [[nodiscard]] int atomCount() const {
+    return ringOff.empty() ? 0 : static_cast<int>(ringOff.size()) - 1;
+  }
   std::vector<int> atomRank;
   //! Integer minimum-image winding of each ring. Empty if no box was supplied.
   std::vector<std::array<int, 3>> ringShift;
 };
 
-//! Builds the inverted atom-to-rings index used by the cage searches
+//! Builds the inverted atom-to-rings index used by the cage searches. With
+//! @a withRows false only the packed rows are filled, and
+//! ringsContainingAtom stays empty.
 [[nodiscard]] RingSearchIndex
-buildRingSearchIndex(const std::vector<std::vector<int>> &rings, int numAtoms);
+buildRingSearchIndex(const std::vector<std::vector<int>> &rings, int numAtoms,
+                     bool withRows = true);
 
 //! As buildRingSearchIndex, ranking the atoms by position (ring::positionRank)
 [[nodiscard]] RingSearchIndex buildRingSearchIndex(
@@ -111,6 +118,11 @@ positionRank(const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 //! Without a box every ring is kept
 [[nodiscard]] std::vector<std::vector<int>> contractibleRings(
     const std::vector<std::vector<int>> &rings,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+
+//! Same rings, compacted in place, so a kept ring is moved and not copied.
+[[nodiscard]] std::vector<std::vector<int>> contractibleRings(
+    std::vector<std::vector<int>> &&rings,
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud);
 
 //! Faces for a cage search: contractibleRings, after refusing a cutoff that

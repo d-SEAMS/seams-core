@@ -3088,9 +3088,21 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
     if (sizes.counts != nullptr) {
       countSizes(pools->data(), nFrom, use, sizes);
     } else {
+      // Copied by the team into slots fixed by a prefix sum, so the order
+      // is the ascending-source order of the serial search. One thread
+      // copying every ring made the merge the serial tail of the search.
+      std::vector<std::size_t> start(static_cast<std::size_t>(nFrom) + 1, 0);
       for (int k = 0; k < nFrom; k++) {
-        for (const auto &ring : (*pools)[static_cast<std::size_t>(k)]) {
-          rings.push_back(ring);
+        start[static_cast<std::size_t>(k) + 1] =
+            start[static_cast<std::size_t>(k)] + (*pools)[static_cast<std::size_t>(k)].size();
+      }
+      rings.resize(start[static_cast<std::size_t>(nFrom)]);
+#pragma omp parallel for schedule(static) num_threads(use)
+      for (int k = 0; k < nFrom; k++) {
+        auto &pool = (*pools)[static_cast<std::size_t>(k)];
+        std::size_t at = start[static_cast<std::size_t>(k)];
+        for (const auto &ring : pool) {
+          rings[at++].assign(ring.begin(), ring.end());
         }
       }
     }

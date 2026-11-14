@@ -1568,12 +1568,14 @@ int ring::topoBulkAnalysis(
  */
 ring::RingSearchIndex
 ring::buildRingSearchIndex(const std::vector<std::vector<int>> &rings,
-                           int numAtoms) {
+                           int numAtoms, bool withRows) {
   ring::RingSearchIndex index;
   if (numAtoms <= 0) {
     return index;
   }
-  index.ringsContainingAtom.resize(static_cast<std::size_t>(numAtoms));
+  if (withRows) {
+    index.ringsContainingAtom.resize(static_cast<std::size_t>(numAtoms));
+  }
   const int nRings = static_cast<int>(rings.size());
   int nThreads = 1;
 #ifdef SEAMS_HAS_OPENMP
@@ -1606,7 +1608,7 @@ ring::buildRingSearchIndex(const std::vector<std::vector<int>> &rings,
         }
       }
     }
-    for (int atom = 0; atom < numAtoms; atom++) {
+    for (int atom = 0; withRows && atom < numAtoms; atom++) {
       const int begin = index.ringOff[static_cast<std::size_t>(atom)];
       const int end = index.ringOff[static_cast<std::size_t>(atom) + 1];
       auto &row = index.ringsContainingAtom[static_cast<std::size_t>(atom)];
@@ -1682,9 +1684,9 @@ ring::buildRingSearchIndex(const std::vector<std::vector<int>> &rings,
     }
   }
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static) if (withRows)
 #endif
-  for (int atom = 0; atom < numAtoms; atom++) {
+  for (int atom = 0; atom < (withRows ? numAtoms : 0); atom++) {
     int n = 0;
     for (int t = 0; t < nThreads; t++) {
       n += counts[static_cast<std::size_t>(t)][static_cast<std::size_t>(atom)];
@@ -1846,6 +1848,28 @@ bool ringContracts(const gen::FracBox &box,
  *  floating sum against half the cell confuses a short lattice vector with
  *  noise once the cell is thin; the integers do not.
  */
+namespace {
+
+std::vector<char> contractibleMask(
+    const std::vector<std::vector<int>> &rings, const gen::FracBox &box,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  const int nAtoms = static_cast<int>(yCloud.pts.size());
+  const int nR = static_cast<int>(rings.size());
+  std::vector<char> keep(rings.size(), 0);
+  // Each ring reads only its own atoms.
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+#pragma omp parallel for schedule(static) if (nR >= 1024 && omp_get_max_threads() > 1 && \
+                                                  !omp_in_parallel())
+#endif
+  for (int i = 0; i < nR; ++i) {
+    keep[static_cast<std::size_t>(i)] =
+        ringContracts(box, yCloud, rings[static_cast<std::size_t>(i)], nAtoms) ? 1 : 0;
+  }
+  return keep;
+}
+
+} // namespace
+
 std::vector<std::vector<int>> ring::contractibleRings(
     const std::vector<std::vector<int>> &rings,
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
@@ -1853,29 +1877,9 @@ std::vector<std::vector<int>> ring::contractibleRings(
   if (!box.ok) {
     return rings;
   }
-  const int nAtoms = static_cast<int>(yCloud.pts.size());
+  const auto keep = contractibleMask(rings, box, yCloud);
   const int nR = static_cast<int>(rings.size());
-  std::vector<char> keep(rings.size(), 0);
-  // Each ring reads only its own atoms. The kept list stays in input order.
-#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-  const bool scale = nR >= 1024 && omp_get_max_threads() > 1 && !omp_in_parallel();
-#else
-  const bool scale = false;
-#endif
-  if (scale) {
-#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
-#pragma omp parallel for schedule(static)
-    for (int i = 0; i < nR; ++i) {
-      keep[static_cast<std::size_t>(i)] =
-          ringContracts(box, yCloud, rings[static_cast<std::size_t>(i)], nAtoms) ? 1 : 0;
-    }
-#endif
-  } else {
-    for (int i = 0; i < nR; ++i) {
-      keep[static_cast<std::size_t>(i)] =
-          ringContracts(box, yCloud, rings[static_cast<std::size_t>(i)], nAtoms) ? 1 : 0;
-    }
-  }
+  // The kept list stays in input order.
   std::vector<std::vector<int>> kept;
   kept.reserve(rings.size());
   for (int i = 0; i < nR; ++i) {
@@ -1884,6 +1888,28 @@ std::vector<std::vector<int>> ring::contractibleRings(
     }
   }
   return kept;
+}
+
+std::vector<std::vector<int>> ring::contractibleRings(
+    std::vector<std::vector<int>> &&rings,
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  const auto box = gen::makeFracBox(yCloud);
+  if (!box.ok) {
+    return std::move(rings);
+  }
+  const auto keep = contractibleMask(rings, box, yCloud);
+  std::size_t w = 0;
+  for (std::size_t i = 0; i < rings.size(); ++i) {
+    if (keep[i] == 0) {
+      continue;
+    }
+    if (w != i) {
+      rings[w] = std::move(rings[i]);
+    }
+    ++w;
+  }
+  rings.resize(w);
+  return std::move(rings);
 }
 
 std::vector<std::vector<int>> ring::cageRings(
@@ -2338,7 +2364,7 @@ bool ring::equatorialConditions(const std::vector<std::vector<int>> &rings,
     // Only the number of distinct molecules matters. A stamp over the frame
     // counts them without sorting the forty-two ids. A wide or negative id
     // falls back to the same count sort+unique would return.
-    const int nAtoms = static_cast<int>(index.ringsContainingAtom.size());
+    const int nAtoms = index.atomCount();
     int nUnique = 0;
     bool counted = nAtoms > 0;
     if (counted) {
@@ -2408,7 +2434,7 @@ bool ring::equatorialConditions(const std::vector<std::vector<int>> &rings,
   // when the seven rings span 14 molecules.
   if (prodEven > kTripleLoopProduct || prodOdd > kTripleLoopProduct) {
     return equatorialLarge(rings, R, T,
-                           static_cast<int>(index.ringsContainingAtom.size()),
+                           index.atomCount(),
                            peripheralUnion, chosen, rank, raw);
   }
   struct Chain {
@@ -2667,13 +2693,14 @@ bool ring::conditionOneDDC(const std::vector<std::vector<int>> &rings,
     const int atom = rings[static_cast<std::size_t>(iring)][static_cast<std::size_t>(m)]; // Atom index to be matched with
     int noOfCommonRings = 0;          // init to zero.
 
-    if (atom < 0 ||
-        static_cast<size_t>(atom) >= index.ringsContainingAtom.size()) {
+    if (atom < 0 || atom >= index.atomCount()) {
       return false;
     }
 
     // Every ring holding this atom, in ascending ring order
-    for (const int jring : index.ringsContainingAtom[static_cast<std::size_t>(atom)]) {
+    for (int c = index.ringOff[static_cast<size_t>(atom)];
+         c < index.ringOff[static_cast<size_t>(atom) + 1]; c++) {
+      const int jring = index.ringCol[static_cast<size_t>(c)];
       if (jring == iring) {
         continue;
       } // Skip for iring
