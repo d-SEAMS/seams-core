@@ -73,6 +73,12 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The binding-overhead session times each language wrapper of read, k-nearest neighbours, q6 with q6bar, CHILL, and primitive rings on ice Ih, and records the median and interquartile range.
 - The ice label is the residual of the seventeen-atom shell after the optimal rotation and scale. The shell is the four bonded neighbours and each of their bonded neighbours.
 - The ice label takes an eclipsed-cosine cutoff, and cage, ring and shell naming runs in parallel.
+- The in-tree Python package now has the documented Frame handle.
+  `pydseams.read`, `from_ase`, `to_ase`, `to_solvis`, `chill_plus`, `cages`,
+  `cages_by_signature`, `steinhardt`, `rdf_2d`, `monolayer_rings`,
+  `find_prisms`, and `pydseams.band.ring_census` call `libseams_lang`.
+  The tutorials keep those calls. `python_frame_parity` compares them with
+  pydseamslib 2.11.1 on the same dumps.
 - The installed C library reads frames from arrays and files. Callers can build neighbour lists and primitive rings, evaluate q3, q4, q6, and q6-bar, and run CHILL, CHILL+, cages, the shell classifier, and the brine front. `seams.pc` and `seams-config.cmake` ship with the library, and `examples/c` builds against that install.
 - The mW front speed was measured again under the other readings of L and tau, under Lechner-Dellago q6, on the three faces, and at a 5 fs step.
   The one-front speed is a quarter of Espinosa et al. Table I at both 240 K and 260 K, and it matches the primary-prism markers in Shi et al., J. Chem. Phys. 162, 054714 (2025), Figure 3.
