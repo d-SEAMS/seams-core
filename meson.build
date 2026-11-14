@@ -22,6 +22,22 @@ if _capi_san != 'none'
   add_project_link_arguments(_san_args, language: ['c', 'cpp'])
 endif
 
+# libFuzzer coverage for this project's code only. Subprojects stay
+# uninstrumented, since their examples link no sanitizer runtime.
+if get_option('capi_fuzz_coverage')
+  if meson.get_compiler('c').get_id() != 'clang' or meson.get_compiler('cpp').get_id() != 'clang'
+    error('capi_fuzz_coverage needs clang for C and C++')
+  endif
+  add_project_arguments('-fsanitize=fuzzer-no-link', language: ['c', 'cpp'])
+endif
+# Clang links a sanitizer runtime into executables only, so an
+# instrumented shared library leaves the runtime's symbols for the
+# executable to bind. -z undefs comes after b_lundef's --no-undefined and
+# allows that.
+if meson.get_compiler('cpp').get_id() == 'clang' and (_capi_san != 'none' or get_option('capi_fuzz_coverage'))
+  add_project_link_arguments('-Wl,-z,undefs', language: ['c', 'cpp'])
+endif
+
 host_system = host_machine.system()
 
 # Global accumulator variables (eOn pattern)
@@ -1960,9 +1976,9 @@ test(
 
 # libFuzzer harnesses. Under clang they are built with -fsanitize=fuzzer,
 # plus the capi_sanitize sanitizer, so libFuzzer gets coverage from the
-# harness; configure with c_args and cpp_args -fsanitize=fuzzer-no-link to
-# instrument libseams as well. Other compilers link a clang fuzzer runtime
-# from the usual Debian path, without coverage, when one is installed.
+# harness; capi_fuzz_coverage instruments libseams as well. Other
+# compilers link a clang fuzzer runtime from the usual Debian path,
+# without coverage, when one is installed.
 _fuzz_cc = meson.get_compiler('c')
 _fuzz_args = []
 if _fuzz_cc.get_id() == 'clang' and _fuzz_cc.has_argument('-fsanitize=fuzzer-no-link')
