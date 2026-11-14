@@ -3084,8 +3084,27 @@ extern "C" void csrFillSlab(void *raw, int begin, int end) {
 
 }  // namespace
 
+#ifdef SEAMS_HAS_LINKCELL
 extern "C" void lc_for_slabs(int n, void *ctx, void (*fn)(void *, int, int));
 extern "C" void lc_set_continuation(void *ctx, void (*fn)(void *));
+#else
+namespace {
+// Without the linkcell pool the slabs are split over the OpenMP team.
+// Each slab writes only its own rows.
+void lc_for_slabs(int n, void *ctx, void (*fn)(void *, int, int)) {
+#ifdef SEAMS_HAS_OPENMP
+  const int slabs = std::max(1, std::min(n, omp_get_max_threads()));
+#pragma omp parallel for schedule(static) if (slabs > 1 && !omp_in_parallel())
+  for (int s = 0; s < slabs; ++s) {
+    fn(ctx, static_cast<int>(static_cast<long long>(n) * s / slabs),
+       static_cast<int>(static_cast<long long>(n) * (s + 1) / slabs));
+  }
+#else
+  fn(ctx, 0, n);
+#endif
+}
+}  // namespace
+#endif
 
 extern "C" void csrContinue(void *raw) {
   auto *job = static_cast<CsrSlabs *>(raw);
