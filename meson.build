@@ -1795,7 +1795,7 @@ if get_option('with_cli')
           meson.project_build_root(),
         ],
         env: binding_env,
-        depends: [seams_api_lib, seams_lang],
+        depends: [seams_api_lib, seams_lang, binding_oracle],
         suite: 'docs',
         timeout: 300)
     endif

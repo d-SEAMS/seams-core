@@ -191,12 +191,19 @@ def base_env(build):
         env["SEAMS_LANG_LIB"] = str(lang)
     env["SEAMS_LIB_DIR"] = str(build / "src")
     env["SEAMS_LIBDIR"] = str(build / "src")
+    env["SEAMS_LIB"] = str(build / "src" / "libseams.so")
     env["SEAMS_BUILD"] = str(build)
+    oracle = build / "bindings" / "binding_oracle"
+    if oracle.is_file():
+        # The binding test suites that pages run compare against it.
+        env["SEAMS_CPP_ORACLE"] = str(oracle)
+        env["SEAMS_SOURCE_ROOT"] = str(ROOT)
     env["PYTHONPATH"] = os.pathsep.join(
         [
             str(stage_dseams(build)),
             str(DOCS / "examples"),
             str(ROOT / "bindings" / "python"),
+            str(ROOT / "bindings" / "python" / "src"),
             str(ROOT / "adapters" / "python"),
             str(ROOT / "scripts"),
             env.get("PYTHONPATH", ""),
@@ -346,7 +353,8 @@ def compile_c_family(build, env, source, out, extra=None):
     cmd.append("-lseams")
     cmd.extend(sdk_flags(text))
     if source.suffix != ".c":
-        cmd.insert(1, "-std=c++17")
+        # The project default; seams.hpp uses std::span.
+        cmd.insert(1, "-std=c++20")
     if out.suffix == ".so":
         cmd.insert(1, "-fPIC")
         cmd.insert(1, "-shared")
@@ -370,6 +378,8 @@ def program_args(text, build):
         return [str(seams)]
     if "SEAMS_BUILD" in text:
         return []
+    if "<repository root>" in text:
+        return [str(ROOT)]
     if "get_command_argument" in text and "input/traj" in text:
         return [str(ROOT)]
     if "commandArgs" in text or ("get_command_argument" in text and "input/traj" not in text):
@@ -456,6 +466,10 @@ def run_source(build, env, path):
         elif path.suffix in {".f90", ".F90"}:
             gfortran = which("gfortran")
             work = Path(tempfile.mkdtemp(prefix="seams-snippet-f90-"))
+            if "use seams" not in text and not re.search(r"^\s*program\b", text, re.M | re.I):
+                # A module such as seams_c.f90 has no main to link.
+                run([gfortran, "-J", str(work), "-c", str(path), "-o", str(work / "unit.o")], env)
+                return
             if "use seams" not in text:
                 exe = work / "snippet"
                 run(
@@ -475,10 +489,15 @@ def run_source(build, env, path):
                 )
                 run([str(exe), *program_args(text, build)], env)
                 return
-            run(
-                [gfortran, "-J", str(work), "-c", str(ROOT / "bindings" / "fortran" / "seams.f90"), "-o", str(work / "seams.o")],
-                env,
-            )
+            # Same order as fortran_lib_src in bindings/fortran/meson.build.
+            objects = []
+            for unit in ("seams_kinds", "seams_c", "seams_support", "seams", "seams_methods"):
+                obj = work / (unit + ".o")
+                run(
+                    [gfortran, "-J", str(work), "-c", str(ROOT / "bindings" / "fortran" / "src" / (unit + ".f90")), "-o", str(obj)],
+                    env,
+                )
+                objects.append(str(obj))
             if "program " not in text:
                 run([gfortran, "-J", str(work), "-c", str(path), "-o", str(work / "unit.o")], env)
                 return
@@ -489,7 +508,7 @@ def run_source(build, env, path):
                     "-I",
                     str(work),
                     str(path),
-                    str(work / "seams.o"),
+                    *objects,
                     "-o",
                     str(exe),
                     "-L" + str(build / "src"),
@@ -781,10 +800,16 @@ def run_julia_text(build, env, body):
             lines.append(line)
     work = Path(tempfile.mkdtemp(prefix="seams-snippet-jl-"))
     script = work / "snippet.jl"
-    script.write_text("using Dseams\n" + "\n".join(lines) + "\n", encoding="utf-8")
+    # Seams and Dseams export the same verbs, so a Seams block must not
+    # also load Dseams or the unqualified calls become ambiguous.
+    module = "Seams" if re.search(r"^\s*using Seams\b", body, re.M) else "Dseams"
+    prelude = "" if module == "Seams" else "using Dseams\n"
+    script.write_text(prelude + "\n".join(lines) + "\n", encoding="utf-8")
+    project = ROOT / "bindings" / "julia" / module
     local = dict(env)
-    local["JULIA_LOAD_PATH"] = str(ROOT / "bindings" / "julia" / "Dseams") + os.pathsep
-    run([julia, "--startup-file=no", "--project=" + str(ROOT / "bindings" / "julia" / "Dseams"), str(script)], local)
+    local["JULIA_LOAD_PATH"] = str(project) + os.pathsep
+    local["SEAMS_LIB"] = str(build / "src" / "libseams.so")
+    run([julia, "--startup-file=no", "--project=" + str(project), str(script)], local)
 
 
 def run_lua_text(build, env, body):
@@ -938,6 +963,12 @@ def execute_page(path, build):
                 continue
             if lang == "rust":
                 run_rust_text(build, env, body)
+                ran += 1
+                continue
+            if lang in {"fortran", "f90"}:
+                source = Path(tempfile.mkdtemp(prefix="seams-snippet-f90-")) / "snippet.f90"
+                source.write_text(body if body.endswith("\n") else body + "\n", encoding="utf-8")
+                run_source(build, env, source)
                 ran += 1
                 continue
             raise Fail("unhandled " + lang)
