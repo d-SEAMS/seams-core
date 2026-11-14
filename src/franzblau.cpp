@@ -899,6 +899,7 @@ bool shortestPathsFrom(const Graph &adjacency, int src, RingScratch &scr, int mi
 //! two shortest arms to an antipode, or an odd edge between one level, in
 //! the canonical orientation, kept by the same shortcut test.
 template <typename Graph, typename Out, bool PerAtom>
+__attribute__((hot))
 void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
                         int src, int maxDepth, int minSize, bool legacy,
                         const std::vector<int> &lvl, Out &out,
@@ -1841,6 +1842,40 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
   }
 }
 
+#ifdef SEAMS_HAS_OPENMP
+// Kept out of the one-thread search. A pool per atom on ice is empty,
+// and walking it is slower than searching; one scratch pool per thread
+// is enough because a census does not read the lists back.
+template <typename Graph>
+__attribute__((noinline, cold)) void
+sparseCensusTeam(const Graph &adjacency, const DistOracle &oracle,
+                 const std::vector<int> &from, int maxDepth, int maxLvl,
+                 bool legacy, bool skipOdd, int minSize, std::vector<int> *hist,
+                 RingCall call, int nThreads) {
+  const int nFrom = static_cast<int>(from.size());
+  std::vector<std::vector<int>> threadHists(
+      static_cast<std::size_t>(nThreads), std::vector<int>(hist->size(), 0));
+#pragma omp parallel num_threads(nThreads)
+  {
+    thread_local RingScratch scratch;
+    RingPool scratchPool;
+    RingCall local = call;
+    local.hist = &threadHists[static_cast<std::size_t>(omp_get_thread_num())];
+#pragma omp for schedule(guided)
+    for (int k = 0; k < nFrom; k++) {
+      enumerateFromSource(adjacency, oracle, from[static_cast<std::size_t>(k)], maxDepth,
+                          maxLvl, scratch, scratchPool, nullptr, legacy, skipOdd, minSize,
+                          local);
+    }
+  }
+  for (const auto &h : threadHists) {
+    for (std::size_t i = 0; i < hist->size(); i++) {
+      (*hist)[i] += h[i];
+    }
+  }
+}
+#endif
+
 } // namespace
 
 /**
@@ -2455,6 +2490,7 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
   oracle.meet4 = meet;
   const int nFrom = static_cast<int>(from.size());
 
+  bool sparseCensus = false;
 #ifdef SEAMS_HAS_OPENMP
   // One thread writes straight into the output vector. The parallel
   // collector gives every source its own ring list, and on one thread
@@ -2469,7 +2505,25 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
   const int sourceUse = (serial && denseCensus) ? team : use;
   const bool parallelSources =
       !omp_in_parallel() && sourceUse > 1 && (!serial || denseCensus);
+  // A sparse census never stores a ring. One scratch pool per thread
+  // replaces a pool per atom; ice would otherwise walk those empty lists
+  // after the search. A dense frame keeps a pool per source.
+  sparseCensus = parallelSources && hist != nullptr && perAtom == nullptr &&
+                 call.cap == 0 && !legacy && hopOnly;
   if (parallelSources) {
+    if (sparseCensus) {
+      const auto enumStart = std::chrono::steady_clock::now();
+      sparseCensusTeam(adjacency, oracle, from, maxDepth, maxLvl, legacy, skipOdd,
+                       minSize, hist, call, sourceUse);
+      gRingSplit.enumerate_ms = millisSince(enumStart);
+      gRingSplit.merge_ms = 0;
+      balls.clear();
+      std::vector<int>().swap(adjacency.cols);
+      std::vector<std::size_t>().swap(adjacency.first);
+      noteRate();
+      emitProfile();
+      return rings;
+    }
     // Sources are independent given the shared read-only balls; per-source
     // collection keeps the output identical to the serial ascending-source
     // order
