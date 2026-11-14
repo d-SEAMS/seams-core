@@ -380,7 +380,7 @@ def program_args(text, build):
         return []
     if "<repository root>" in text:
         return [str(ROOT)]
-    if "get_command_argument" in text and "input/traj" in text:
+    if "input/traj" in text and any(token in text for token in ("get_command_argument", "arg[1]", "ARGS[1]")):
         return [str(ROOT)]
     if "commandArgs" in text or ("get_command_argument" in text and "input/traj" not in text):
         return [str(FIXTURE)]
