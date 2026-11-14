@@ -78,7 +78,7 @@ struct RejectionCoefficient {
 struct LinearFit {
   double slope = 0;
   double intercept = 0;
-  double stderr = 0; ///< standard error of the slope
+  double slopeStderr = 0; ///< standard error of the slope
   int n = 0;
 };
 

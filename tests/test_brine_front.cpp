@@ -124,11 +124,11 @@ TEST_CASE("ordinary least squares reports the slope and its standard error", "[b
   REQUIRE(exact.n == 4);
   REQUIRE_THAT(exact.slope, WithinAbs(2.0, 1e-12));
   REQUIRE_THAT(exact.intercept, WithinAbs(0.0, 1e-12));
-  REQUIRE_THAT(exact.stderr, WithinAbs(0.0, 1e-12));
+  REQUIRE_THAT(exact.slopeStderr, WithinAbs(0.0, 1e-12));
 
   const auto noisy = site::linearFit({0, 1, 2}, {0, 0, 1});
   REQUIRE_THAT(noisy.slope, WithinAbs(0.5, 1e-12));
-  REQUIRE_THAT(noisy.stderr, WithinAbs(1.0 / std::sqrt(12.0), 1e-12));
+  REQUIRE_THAT(noisy.slopeStderr, WithinAbs(1.0 / std::sqrt(12.0), 1e-12));
 }
 
 TEST_CASE("a liquid cluster inside the ice is a brine pocket and holds its ion", "[brine]") {

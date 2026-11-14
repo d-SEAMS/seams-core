@@ -249,7 +249,7 @@ int main(int argc, char **argv) {
     }
     const auto fit = site::linearFit(timeNs, thickness);
     const double front = fit.slope / 2.0;
-    const double frontErr = fit.stderr / 2.0;
+    const double frontErr = fit.slopeStderr / 2.0;
     double kMean = 0;
     for (double k : kValue) {
       kMean += k;
