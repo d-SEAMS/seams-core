@@ -1,0 +1,55 @@
+#+TITLE: Comparisons
+#+OPTIONS: toc:nil num:nil
+
+Head-to-head results that are already in this tree. Each link is the
+page that records the numbers. The suite tests named here are the ones
+that recompute them.
+
+* OVITO
+
+[[file:explanation/ovito-findrings.org][OVITO FindRings]] is a subset of
+the primitive-ring census. On K2,3, d-SEAMS reports three chordless
+4-rings and FindRings reports two. On the 864-atom interface frame at
+3.5 Å every d-SEAMS ring through size 10 is primitive, and each OVITO
+bin is no larger than that census. ~meson test ovito_ring_counts~ and
+the K2,3 case in ~tests/test_franzblau_extra.cpp~ recompute both.
+
+OVITO 3.15 has no Steinhardt modifier. Local \(q_4\) and \(q_6\), and
+the Lechner-Dellago averages, are compared with freud and pyscal3
+instead. ~meson test q4_q6_equal~ runs that comparison.
+
+CHILL+ and the neighbour list against OVITO are rows of the
+[[file:explanation/performance-h2h.org][performance tables]].
+
+* freud
+
+~meson test q4_q6_equal~ compares per-atom \(q_4\) and \(q_6\), the
+Lechner-Dellago averages, and the mean of each, on ideal ice Ih, ideal
+ice Ic, and one liquid. The neighbour rule is the same in all three
+codes: a pair counts when its minimum-image distance is strictly below
+3.5 Å. pyscal3 matches to \(10^{-10}\). freud stores \(q_l\) as
+float32, so a crystal agrees to a few units in the last place and a
+disordered shell keeps a larger residual. An empty shell is 0 in
+d-SEAMS and NaN in freud and pyscal3.
+
+The same cutoff \(q_6\) on the large sitting, and the published
+literature numbers, are in the
+[[file:explanation/performance-h2h.org][performance tables]] and
+[[file:howto/literature-reproduce.org][the literature reproduction]].
+
+* SQQ
+
+SQQ ring times are a row of the
+[[file:explanation/performance-h2h.org][performance tables]] and of
+[[file:howto/literature-h2h.org][the literature codes]]. The benchmark
+CSVs under ~benchmarks/~ are the source of those cells.
+~docs/render_h2h.py --check~ fails when a cell is missing from its CSV.
+
+* PLUMED
+
+The colvar is [[file:howto/engine-plumed.org][the PLUMED engine]]. Its
+\(q_6\) on the large sitting is a row of the
+[[file:explanation/performance-h2h.org][performance tables]]: on the
+liquid the gap is the rational switch, not the hard cutoff. The
+literature reproduction records the same comparison next to freud.
+~meson test docs_engine_plumed~ runs the engine page.

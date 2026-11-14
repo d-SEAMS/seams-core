@@ -185,6 +185,12 @@ framework.
    explanation/index
 
 .. toctree::
+   :maxdepth: 1
+   :caption: Comparisons
+
+   comparisons
+
+.. toctree::
    :maxdepth: 2
    :caption: Reference
 
