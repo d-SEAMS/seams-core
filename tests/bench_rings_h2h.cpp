@@ -1,10 +1,15 @@
 /*
-** Ring search only, on a cutoff graph built before the timer.
+** Ring search against a cutoff graph.
 **
 **   bench_rings_h2h [--repl] TRAJ frame atomType cutoff maxRing [reps warmup]
 **
-** One-shot prints one sample_ms line per timed call. --repl builds the
-** graph, prints a ready line, then answers each "go" with one sample.
+** One-shot prints one sample_ms line per timed call. Those samples are
+** the ring search on a graph built before the timer.
+**
+** --repl builds the graph, prints a ready line, then answers each line:
+**   go    ring search on the graph built before the timer
+**   in    neighbour list, index, and ring search inside one timer
+**   quit  stop
 */
 
 #include <franzblau.hpp>
@@ -133,11 +138,20 @@ int main(int argc, char **argv) {
       if (line[0] == 'q') {
         break;
       }
-      if (line[0] != 'g') {
+      const bool inside = line[0] == 'i';
+      if (line[0] != 'g' && !inside) {
         continue;
       }
       const auto t0 = Clock::now();
-      rings = primitive::ringNetwork(idx, maxRing);
+      if (inside) {
+        // The published inside row is this whole call. Building the
+        // list before t0 made that row a second copy of the prebuilt search.
+        const auto built = nneigh::neighListO(cutoff, cloud, typeI);
+        const auto builtIdx = nneigh::neighbourListByIndex(cloud, built);
+        rings = primitive::ringNetwork(builtIdx, maxRing);
+      } else {
+        rings = primitive::ringNetwork(idx, maxRing);
+      }
       const auto t1 = Clock::now();
       if (rings.size() != expect) {
         std::fprintf(stderr, "ring count changed\n");
