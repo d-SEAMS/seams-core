@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -24,10 +25,15 @@ here = Path(__file__).resolve().parent
 deck = here / "plumed.dat"
 xyz = here / "ice.xyz"
 text = deck.read_text().replace("./libSeamsPlumed.so", str(plugin))
-work = here / "plumed.driver.dat"
-colvar = here / "colvar"
-work.write_text(text)
-try:
+# PLUMED writes colvar and its bck.* backups beside the deck. Another build
+# tree, or a --repeat copy, runs this test at the same time.
+scratch = build.resolve() / "plumed-driver"
+scratch.mkdir(parents=True, exist_ok=True)
+with tempfile.TemporaryDirectory(prefix=f"{os.getpid()}-", dir=scratch) as name:
+    work_dir = Path(name)
+    work = work_dir / "plumed.driver.dat"
+    colvar = work_dir / "colvar"
+    work.write_text(text)
     env = os.environ.copy()
     env["PLUMED_NUM_THREADS"] = env.get("PLUMED_NUM_THREADS", "1")
     # Preloading libasan into this plumed binary dies with SIGILL inside
@@ -43,7 +49,7 @@ try:
         check=False,
         capture_output=True,
         text=True,
-        cwd=here,
+        cwd=work_dir,
         env=env,
     )
     if done.returncode != 0:
@@ -67,6 +73,3 @@ try:
         sys.exit(f"seams.ice is {ice}, expected 1")
     print(done.stdout)
     print("seams.ice", ice)
-finally:
-    work.unlink(missing_ok=True)
-    colvar.unlink(missing_ok=True)
