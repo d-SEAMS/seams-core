@@ -368,6 +368,7 @@ if minimage_dep.found()
 endif
 
 chemfiles_libdir = ''
+_chem_vendored = false
 chemfiles_opt = get_option('with_chemfiles')
 # A disabled option must win over a chemfiles.pc on PKG_CONFIG_PATH.
 # Otherwise the native frame counters never run.
@@ -442,9 +443,12 @@ else
     # rpath entry is never consulted. Give the patched library its own
     # soname so the loader cannot satisfy it with the unpatched copy.
     _chem_real = chem_prefix / 'lib' / 'libchemfiles.so.0.10.4'
+    _chem_soname_now = ''
     if fs.exists(_chem_real)
+      _chem_soname_now = 'libchemfiles.so.0.10'
       patchelf = find_program('patchelf', required: false)
       if patchelf.found()
+        _chem_soname_now = 'libseams-chemfiles.so.0.10'
         _chem_soname = run_command(patchelf, '--print-soname', _chem_real,
                                    check: false).stdout().strip()
         if _chem_soname != 'libseams-chemfiles.so.0.10'
@@ -465,6 +469,14 @@ else
           compile_args: ['-I' + chem_prefix / 'include', '-DSEAMS_CHEMFILES_PATCHED=1'],
           dependencies: chemfiles_dep)
         chemfiles_libdir = chem_prefix / 'lib'
+        _chem_vendored = true
+        # The installed libyodaLib finds this copy through its $ORIGIN
+        # rpath, under the soname it was linked against.
+        if _chem_soname_now != ''
+          install_data(_chem_real, rename: _chem_soname_now,
+                       install_dir: get_option('libdir'),
+                       install_mode: 'rwxr-xr-x')
+        endif
       endif
     endif
   endif
@@ -477,7 +489,10 @@ if chemfiles_dep.found()
   if probed_libdir != ''
     chemfiles_libdir = probed_libdir
   endif
-  if chemfiles_libdir != ''
+  # The vendored copy sits in the build tree. Meson puts that directory on
+  # the build rpath and strips it at install, so only a system chemfiles
+  # needs its directory recorded here.
+  if chemfiles_libdir != '' and not _chem_vendored
     _link_args += ['-Wl,-rpath,' + chemfiles_libdir]
   endif
 endif

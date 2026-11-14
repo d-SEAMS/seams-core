@@ -386,8 +386,9 @@ if plumed_opt.allowed()
       # PLUMED's LOAD dlopens this; without an rpath libplumedKernel.so
       # resolves only through LD_LIBRARY_PATH. Clang's libomp is in the
       # same position: the loader does not search the LLVM library directory.
+      # $ORIGIN finds libseams installed beside the plugin.
       build_rpath: _omp_libdir != '' ? plumed_libdir + ':' + _omp_libdir : plumed_libdir,
-      install_rpath: _omp_libdir != '' ? plumed_libdir + ':' + _omp_libdir : plumed_libdir,
+      install_rpath: '$ORIGIN:' + (_omp_libdir != '' ? plumed_libdir + ':' + _omp_libdir : plumed_libdir),
       install: true)
   elif plumed_opt.enabled()
     error('with_plumed is enabled but PLUMED was not found')

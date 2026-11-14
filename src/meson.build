@@ -114,6 +114,7 @@ ydslib = library('yodaLib',
   link_args: _lib_link_args,
   include_directories: _incdirs,
   build_rpath: _readcondb_rpath != '' ? _readcondb_rpath : meson.current_build_dir(),
+  install_rpath: '$ORIGIN',
   install: true)
 
 _linkto += ydslib
@@ -207,6 +208,7 @@ seams_api_lib = shared_library(
   cpp_args: _seams_api_args,
   link_args: _seams_api_link,
   link_depends: _seams_api_link_depends,
+  install_rpath: '$ORIGIN',
   install: true)
 
 _abidiff = find_program('abidiff', required: false)

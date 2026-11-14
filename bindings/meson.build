@@ -30,6 +30,7 @@ seams_lang = shared_library(
   dependencies: [yds_dep],
   include_directories: include_directories('cxx'),
   cpp_args: ['-DSEAMS_LANG_VERSION="' + meson.project_version() + '"'],
+  install_rpath: '$ORIGIN',
   install: true,
 )
 
