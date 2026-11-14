@@ -27,7 +27,7 @@ stage = build / "python-stage"
 pkg = stage / "dseams"
 pkg.mkdir(parents=True, exist_ok=True)
 root = src / "bindings" / "python"
-for name in ("__init__.py", "__main__.py"):
+for name in ("__init__.py", "__main__.py", "userframe.py"):
     shutil.copy(root / "dseams" / name, pkg / name)
 shutil.copy(root / "frames.py", pkg / "frames.py")
 for so in cores:

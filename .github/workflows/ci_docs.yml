@@ -64,18 +64,23 @@ jobs:
       - name: Ice Ih, language APIs, and science tutorials
         run: DOCS_CI=1 pixi run -e default meson test -C bbdir docs_core_counts docs_capi_examples docs_capi_symbols docs_binding_docstrings docs_lang_ice docs_science_render_copy docs_science_tutorials docs_engine_walkthrough --print-errorlogs
 
-      - name: Frame package for the pydseams snippets
+      - name: In-tree Frame package
         run: |
-          pixi run -e default python -m pip install 'pydseamslib[ase,solvis]' || true
-          pixi run -e default python -c 'import pydseams'
+          pixi run -e default python -m pip install pytest solvis-tools
+          dest="${RUNNER_TEMP}/pydseams211"
+          pixi run -e default python -m pip install --target "$dest" 'pydseamslib==2.11.1'
+          echo "PYDSEAMS211=$dest" >> "$GITHUB_ENV"
+          py="$(pixi run -e default python -c 'import sys; print(sys.executable)')"
+          echo "PYDSEAMS211_PYTHON=$py" >> "$GITHUB_ENV"
 
-      - name: Every documented language snippet
+      - name: Frame parity and every documented language snippet
         run: |
           set -euo pipefail
           mapfile -t names < <(pixi run -e default meson test -C bbdir --list | awk -F: '/docs_snippet_/ {print $NF}')
           test "${#names[@]}" -gt 0
           # libseams and the engine SDKs are on the rpath. The loader path stays unset.
-          env -u LD_LIBRARY_PATH pixi run -e default meson test -C bbdir --print-errorlogs --no-rebuild "${names[@]}"
+          # PYDSEAMS211 is only the parity oracle. Snippets import the in-tree package.
+          env -u LD_LIBRARY_PATH pixi run -e default meson test -C bbdir --print-errorlogs --no-rebuild python_frame_parity "${names[@]}"
 
       - run: pixi run -e docs docbld
 
