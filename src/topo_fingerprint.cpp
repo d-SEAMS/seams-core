@@ -442,8 +442,8 @@ std::vector<std::vector<int>> adjacencyInBall(const Rows &rows) {
   return adj;
 }
 
-FrameFingerprint fingerprint(const Rows &rows, int hops, int maxRingSize,
-                             const std::vector<int> &colors) {
+FrameFingerprint fingerprintChoose(const Rows &rows, int hops, int maxRingSize,
+                                   const std::vector<int> &colors, int which) {
   FrameFingerprint out;
   out.hops = hops;
   const int n = static_cast<int>(rows.size());
@@ -457,17 +457,19 @@ FrameFingerprint fingerprint(const Rows &rows, int hops, int maxRingSize,
   // A hop ball that is the whole frame is the same graph from every atom.
   // The refinement only moves the distinguished root. Ice is far larger
   // than this and keeps the per-atom ball.
+  // which: 0 auto, 1 shared ball, 2 one ball per atom.
 #ifndef SEAMS_HAS_NAUTY
   int maxDeg = 0;
-  if (n > 1 && n <= 4096) {
+  if (which != 2 && n > 1 && n <= 4096) {
     for (const auto &row : rows) {
       maxDeg = std::max(maxDeg, static_cast<int>(row.size()) - 1);
     }
   }
   // Only a very dense frame can have every hop ball equal the whole graph.
-  const bool shared = maxDeg > 100 && ballCoversAll(rows, hops);
+  const bool shared =
+      which == 1 || (which != 2 && maxDeg > 100 && ballCoversAll(rows, hops));
 #else
-  const bool shared = false;
+  const bool shared = which == 1;
 #endif
   if (shared) {
     const auto adj = adjacencyInBall(rows);
@@ -509,6 +511,16 @@ FrameFingerprint fingerprint(const Rows &rows, int hops, int maxRingSize,
   }
   out.key = hex(h);
   return out;
+}
+
+FrameFingerprint fingerprint(const Rows &rows, int hops, int maxRingSize,
+                             const std::vector<int> &colors) {
+  return fingerprintChoose(rows, hops, maxRingSize, colors, 0);
+}
+
+FrameFingerprint fingerprintPaths(const Rows &rows, int hops, int maxRingSize,
+                                  const std::vector<int> &colors, int which) {
+  return fingerprintChoose(rows, hops, maxRingSize, colors, which);
 }
 
 namespace {
