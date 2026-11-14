@@ -61,8 +61,12 @@ ydslib_sources = files(
 
 # backward-cpp's crash handler symbolizes with backtrace_symbols, which
 # musl does not provide. Without it a crash is an ordinary signal.
+# It goes into the executables, never libyodaLib: its static
+# SignalHandling replaces the SIGSEGV handler of whatever process loads
+# the library, and Julia's GC safepoints fault on purpose.
+backward_src = []
 if cppc.has_header('execinfo.h')
-  ydslib_sources += files('backward.cpp')
+  backward_src = files('backward.cpp')
 endif
 
 # gpu_residency.cpp calls dlopen/dlsym. A shared library that leaves

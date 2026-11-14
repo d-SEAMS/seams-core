@@ -718,7 +718,7 @@ if host_system == 'linux'
 endif
 science_front_exe = executable(
   'science-front',
-  files('scripts/science_front.cpp'),
+  files('scripts/science_front.cpp') + backward_src,
   dependencies: [yds_dep],
   include_directories: _incdirs,
   cpp_args: _args,
@@ -729,7 +729,7 @@ science_front_exe = executable(
 
 nucleation_pathway_exe = executable(
   'nucleation-pathway',
-  files('scripts/nucleation_pathway.cpp'),
+  files('scripts/nucleation_pathway.cpp') + backward_src,
   dependencies: [yds_dep],
   include_directories: _incdirs,
   cpp_args: _args,
@@ -772,7 +772,7 @@ if get_option('with_cli')
   endif
   seams_exe = executable(
     'seams',
-    files('src/seams_cli.cpp'),
+    files('src/seams_cli.cpp') + backward_src,
     dependencies: [yds_dep],
     include_directories: _incdirs,
     cpp_args: _args + ['-DSEAMS_VERSION="' + meson.project_version() + '"'],
@@ -781,7 +781,7 @@ if get_option('with_cli')
     install: true)
   brine_front_exe = executable(
     'brine_front',
-    files('src/brine_front_main.cpp'),
+    files('src/brine_front_main.cpp') + backward_src,
     dependencies: [yds_dep],
     include_directories: _incdirs,
     cpp_args: _args,
