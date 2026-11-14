@@ -14,6 +14,8 @@ import ase.io
 import pydseams as ds
 
 atoms = ase.io.read("input/traj/exampleTraj.lammpstrj", format="lammps-dump-text")
+# The dump stores LAMMPS types, not element symbols. Type 2 is oxygen.
+atoms.set_chemical_symbols(["O" if int(t) == 2 else "H" for t in atoms.arrays["type"]])
 frame = ds.from_ase(atoms)
 print(frame.chill_plus())
 labelled = frame.to_ase()

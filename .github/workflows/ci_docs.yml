@@ -64,6 +64,19 @@ jobs:
       - name: Ice Ih, language APIs, and science tutorials
         run: DOCS_CI=1 pixi run -e default meson test -C bbdir docs_core_counts docs_capi_examples docs_capi_symbols docs_binding_docstrings docs_lang_ice docs_science_render_copy docs_science_tutorials docs_engine_walkthrough --print-errorlogs
 
+      - name: Frame package for the pydseams snippets
+        run: |
+          pixi run -e default python -m pip install 'pydseamslib[ase,solvis]' || true
+          pixi run -e default python -c 'import pydseams'
+
+      - name: Every documented language snippet
+        run: |
+          set -euo pipefail
+          mapfile -t names < <(pixi run -e default meson test -C bbdir --list | awk -F: '/docs_snippet_/ {print $NF}')
+          test "${#names[@]}" -gt 0
+          # libseams and the engine SDKs are on the rpath. The loader path stays unset.
+          env -u LD_LIBRARY_PATH pixi run -e default meson test -C bbdir --print-errorlogs --no-rebuild "${names[@]}"
+
       - run: pixi run -e docs docbld
 
       - name: Link check

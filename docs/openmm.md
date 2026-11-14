@@ -87,10 +87,9 @@ The reporter takes that engine, an unused dump name, the step interval,
 and a type array with 1 on the atoms that enter the classifier.
 
 ```python
-from dseams_insitu import DseamsReporter, InSitu
-
-engine = InSitu(os.environ["SEAMS_LANG_LIB"])
-simulation.reporters.append(DseamsReporter(engine, "unused", interval=6, types=oxygen))
+# excerpt: engines/openmm/test_reporter.py
+from dseams_insitu.engine import InSitu
+from dseams_insitu.openmm import DseamsReporter
 ```
 
 `engine.frames` then holds the step, the oxygen coordinates, the cell,
