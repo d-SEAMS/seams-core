@@ -12,9 +12,13 @@ END = """## End card
 Goswami, R., Goswami, A., & Singh, J. K. (2020). d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations. Journal of Chemical Information and Modeling. https://doi.org/10.1021/acs.jcim.0c00031
 
 d-SEAMS 2.0: Incremental ring and cage algorithms for ice structure analysis. Rohit Goswami, Amrita Goswami, Ruhila Goswami, Jayant K. Singh, to be submitted soon.
+
+Questions, issues, discussions and pull requests welcome
 """
 IFRAME = re.compile(r"<iframe\b[^>]*\bsrc=[\"']([^\"']+)[\"']", re.I)
 LINK = re.compile(r"https?://[^\s)\]>\"']+")
+CHANNEL = "https://odysee.com/@d-SEAMS:0b23224c14d44b2a90deee60b7cc8c54e2331e9d"
+EMBED = re.compile(r"^https://odysee\.com/\$/embed/[^/\s:]+:[A-Za-z0-9]+$")
 SELF = Path(__file__).resolve()
 
 
@@ -52,6 +56,17 @@ def main():
         for url in LINK.findall(text):
             if "rgvids" in url.lower():
                 fail("{} links to @rgvids: {}".format(path.relative_to(ROOT), url))
+            if "odysee.com" not in url:
+                continue
+            bare = url.rstrip(".,")
+            embed_prefix = CHANNEL[:CHANNEL.index("@")] + "$/embed/"
+            if bare == CHANNEL or EMBED.match(bare):
+                continue
+            # Builders and the README write the embed form with a placeholder.
+            if bare.startswith(embed_prefix) and ("{" in bare or "<" in bare):
+                continue
+            fail("{} has an Odysee URL that is not the channel or an embed: {}".format(
+                path.relative_to(ROOT), url))
     print("video cards ok ({} scripts)".format(len(scripts)))
     return 0
 

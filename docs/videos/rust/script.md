@@ -4,7 +4,7 @@ Shot list for a silent picture track. Draft narration is below and in narration.
 
 Pixi environment: seams-core (`pixi run build` in pixi.toml). The compiler and the language tool are on PATH.
 
-Input data: `input/traj/ice1h.lammpstrj`, `input/traj/genice_sI.lammpstrj`.
+Input data: `input/traj/ice1h.lammpstrj`.
 
 Prompt on the terminal shots is `$ `. Commands use the build through `$SEAMS`, `$SEAMS_BUILD`, `$SEAMS_BUILD_SRC`, `$SEAMS_LIBDIR`, `$SEAMS_LANGDIR`, and `$VIDEO_OUT`.
 
@@ -133,27 +133,28 @@ Local q6 on the same cutoff prints q6 0.625855. Published CHILL+ then prints hex
 
 Lead-in: 0.45 s. Segment length: 17.90 s.
 
-Tests: `docs_video_tapes`, `docs_engine_openmm`, `docs_examples`.
+Tests: `docs_video_tapes`, `docs_engine_openmm`.
 
 Commands:
 
 ```bash
-SEAMS_LIB_DIR="$SEAMS_BUILD_SRC" cargo run --offline --quiet --manifest-path bindings/rust/Cargo.toml --example minimal -- input/traj/genice_sI.lammpstrj
+SEAMS_LIB_DIR="$SEAMS_BUILD_SRC" cargo run --offline --quiet --manifest-path bindings/rust/Cargo.toml --example ice_ih -- input/traj/ice1h.lammpstrj
 ```
 
 Expected output (substrings the run must print):
 
 ```text
-rust example ok
-q6 0.595
+rust ice nop 128 q6 0.625855 hexagonal 128 rings 256
 ```
 
 Draft narration:
 
-The Rust example is cargo run --example minimal on input/traj/genice_sI.lammpstrj. It prints rust example ok and q6 0.595. docs_examples locks that q6 0.595 line. The ice Ih cell beside it remains nop 128, q6 0.625855, hexagonal 128, rings 256.
+The Rust example is cargo run --example ice_ih on input/traj/ice1h.lammpstrj. It prints rust ice nop 128 q6 0.625855 hexagonal 128 rings 256.
 
 ## End card
 
 Goswami, R., Goswami, A., & Singh, J. K. (2020). d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations. Journal of Chemical Information and Modeling. https://doi.org/10.1021/acs.jcim.0c00031
 
 d-SEAMS 2.0: Incremental ring and cage algorithms for ice structure analysis. Rohit Goswami, Amrita Goswami, Ruhila Goswami, Jayant K. Singh, to be submitted soon.
+
+Questions, issues, discussions and pull requests welcome

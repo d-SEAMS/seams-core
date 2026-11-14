@@ -5,17 +5,17 @@ Set Height 1080
 Set Framerate 30
 Set Padding 0
 # lead 0.30
-# duration 17.33
+# duration 22.00
 # test docs_video_tapes
-# test docs_engine_gromacs
 # test gromacs_mdrun
-# expect gromacs hexagonal 128 six-rings 256 q6 0.625855
+# expect gromacs frames 5 ice 320 atoms 320
+# expect gromacs hexagonal 0 six-rings 128 q6 0.628519
 Hide
 Type 'PS1='"'"'$ '"'"''
 Enter
 Show
 Sleep 300ms
-Type 'python3 docs/howto/test_engines.py gromacs . "$SEAMS_BUILD"'
+Type 'engines/gromacs/run_mdrun.sh "$SEAMS_BUILD/engines/gmx-seams" "$SEAMS_BUILD_SRC"'
 Enter
 Sleep 1s
-Sleep 16030ms
+Sleep 20700ms

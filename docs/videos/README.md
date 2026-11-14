@@ -18,4 +18,5 @@ that task is on the path and the interpreter can import chemparseplot.
 
 The PNG files are not committed. Odysee hosts the finished recordings.
 `docs/videos/<slug>/embed.txt` is where the claim id goes once the
-upload exists.
+upload exists. Until that line is present, the docs render no player
+for the slug.

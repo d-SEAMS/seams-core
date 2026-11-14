@@ -91,6 +91,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
   Equation 2 is unchanged.
 - The mW one-front speed was measured on the basal, primary-prism and secondary-prism faces from 220 K to 265 K.
   A Wilson-Frenkel curve is fit to the count-slope estimator on each face.
+- The rings recording uses the 250-oxygen exampleTraj census and the ice Ih six-ring count. The Rust recording prints the ice Ih census. The GROMACS recording runs gmx-seams after gmx mdrun. A slug with no Odysee claim renders no player. End cards invite questions, issues, discussions, and pull requests. The Python pages show dseams.Frame next to pydseams.
 - The secondary-prism speed is reported under equation 2 and under the solid-count slope, on the 4000-molecule cell.
   The 2015 CHILL+ thresholds are unchanged.
 - The videos gallery and the README link the d-SEAMS Odysee channel. Every `docs/videos/<slug>/script.md` end card cites Goswami, Goswami, and Singh 2020 and names the 2.0 paper as to be submitted soon.

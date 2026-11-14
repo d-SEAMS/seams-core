@@ -3,7 +3,7 @@
 """Topic pages use the same embed.txt claim as the gallery.
 
 An iframe src is https://odysee.com/$/embed/<claim-name>:<claim-id>.
-A slug with no claim says video coming soon. Claim ids are not invented.
+A slug with no claim renders nothing. Claim ids are not invented.
 """
 
 import sys
@@ -29,20 +29,18 @@ def main():
         folder = VIDEOS / slug
         if not (folder / "script.md").is_file():
             fail("missing video slug {}".format(slug))
-        if not (folder / "embed.txt").is_file():
-            fail("{} has no embed.txt".format(slug))
         claim = read_claim(folder)
         html = embed_rst(slug, claim)
-        if "https://odysee.com/@" in html or "/watch" in html:
+        if "odysee.com/@" in html or "/watch" in html:
             fail("{} uses a watch URL".format(slug))
         if claim is None:
-            if "video coming soon" not in html or "<iframe" in html or "odysee.com" in html:
-                fail("{} should say video coming soon".format(slug))
+            if html or "video coming soon" in html or "odysee.com" in html:
+                fail("{} should render nothing".format(slug))
         else:
             src = "https://odysee.com/$/embed/{}:{}".format(claim[0], claim[1])
             if '/$/embed/' not in src or 'src="{}"'.format(src) not in html:
                 fail("{} iframe src does not match embed.txt".format(slug))
-            if "https://odysee.com/" in html.replace("https://odysee.com/$/embed/", ""):
+            if "odysee.com/" in html.replace("odysee.com/$/embed/", ""):
                 fail("{} has an Odysee URL that is not /$/embed/".format(slug))
         needle = include_line(slug)
         for page in pages:

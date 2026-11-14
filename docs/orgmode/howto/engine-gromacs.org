@@ -38,3 +38,18 @@ gromacs hexagonal 128 six-rings 256 q6 0.625855
 That cell has 128 molecules. The cubic count on the same line is 0.
 The call exits 0 when the census succeeds. ~meson test docs_engine_gromacs~
 exits 77 when ~gmx-seams~ was not built.
+
+~engines/gromacs/run_mdrun.sh~ is a different path. It writes a short
+frozen ~.tpr~, runs ~gmx mdrun -nsteps 4~, and then runs ~gmx-seams~ on
+the ~.xtc~ that mdrun wrote. ~gmx-seams~ is post-processing after
+~gmx mdrun~. It is a separate process, and it is not an in-process hook.
+On the 64-molecule cubic cell a real run printed:
+
+#+begin_src text
+gromacs frames 5 ice 320 atoms 320 overhead_s 9.362406e-04
+gromacs hexagonal 0 six-rings 128 q6 0.628519
+#+end_src
+
+~ice 320~ is the cubic total over 5 frames of 64 atoms.
+~hexagonal~, ~six-rings~, and ~q6~ are the last frame.
+~overhead_s~ is the timer from that run.

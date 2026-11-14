@@ -8,4 +8,4 @@ Primitive rings use that list. The histogram is 6 256, and the summary is rings 
 
 Local q6 on the same cutoff prints q6 0.625855. Published CHILL+ then prints hexagonal 128. Every water is hexagonal. I want the Rust result to show the same two figures before I trust the wrapper.
 
-The Rust example is cargo run --example minimal on input/traj/genice_sI.lammpstrj. It prints rust example ok and q6 0.595. docs_examples locks that q6 0.595 line. The ice Ih cell beside it remains nop 128, q6 0.625855, hexagonal 128, rings 256.
+The Rust example is cargo run --example ice_ih on input/traj/ice1h.lammpstrj. It prints rust ice nop 128 q6 0.625855 hexagonal 128 rings 256.

@@ -134,6 +134,9 @@ def library_path(build):
     parts = [
         str(build / "src"),
         str(build / "bindings"),
+        str(build / "chemfiles-prefix" / "lib"),
+        str(build / "subprojects" / "readcon-core"),
+        str(build / "subprojects" / "readcon-db"),
         str(build / "subprojects" / "readcon-core" / "cargo-target" / "release"),
         str(build / "subprojects" / "readcon-db" / "cargo-target" / "release"),
     ]

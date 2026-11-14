@@ -3,8 +3,12 @@
 """Build the videos page from per-slug Odysee claim files.
 
 docs/videos/<slug>/embed.txt holds one line, claim-name:full-claim-id,
-when that recording has been uploaded. A file with only comments means
-the upload is not available yet. Claim ids are never invented here.
+when that recording has been uploaded. A missing file, or a file with
+only comments, renders no player. Claim ids are never invented here.
+
+Odysee documents autoplay=true and t= on the embed URL. It does not
+document a query parameter that hides related videos or autoplay-next,
+so the iframe src is the bare /$/embed/ URL.
 """
 
 from __future__ import annotations
@@ -33,7 +37,7 @@ BLURB = {
     "lua": "Lua and Fennel.",
     "migrate": "Migrate from 1.x.",
     "openmm": "OpenMM on ice Ih.",
-    "rings": "Primitive rings on the mW cell.",
+    "rings": "Primitive rings on exampleTraj, then ice Ih.",
     "cages": "sI, sII, and sH cages.",
 }
 
@@ -112,25 +116,27 @@ def iframe(name, claim_id):
 
 
 def block(slug, claim):
+    if claim is None:
+        return ""
     blurb = BLURB.get(slug, slug)
     transcript = (
         '<p>Transcript: <a href="../_static/captions/{}.vtt">'
         "docs/videos/{}/captions.vtt</a></p>"
     ).format(slug, slug)
-    if claim is None:
-        body = "<p><strong>video coming soon</strong></p>\n   " + transcript
-    else:
-        body = (
-            iframe(claim[0], claim[1])
-            + "\n   <p>Captions are burned into the upload.</p>\n   "
-            + transcript
-        )
+    body = (
+        iframe(claim[0], claim[1])
+        + "\n   <p>Captions are burned into the upload.</p>\n   "
+        + transcript
+    )
     return "   {}\n   <p>{}</p>".format(body, blurb)
 
 
 def embed_rst(slug, claim):
-    """One player, the same claim rule as the gallery."""
-    return ".. raw:: html\n\n{}\n".format(block(slug, claim))
+    """One player, or an empty page when embed.txt has no claim."""
+    body = block(slug, claim)
+    if not body:
+        return ""
+    return ".. raw:: html\n\n{}\n".format(body)
 
 
 def include_line(slug):
@@ -148,7 +154,9 @@ def write_topic_embeds(videos, dest):
 def players_rst(videos):
     parts = [".. raw:: html", ""]
     for slug in slugs(videos):
-        parts.append(block(slug, read_claim(videos / slug)))
+        body = block(slug, read_claim(videos / slug))
+        if body:
+            parts.append(body)
     parts.append("")
     return "\n".join(parts)
 

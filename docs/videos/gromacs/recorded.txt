@@ -1,3 +1,17 @@
 ## scene-01.tape
-gromacs frames 1 ice 0 atoms 128 overhead_s 2.777046e-03
-gromacs hexagonal 128 six-rings 256 q6 0.625855
+Setting the LD random seed to -340272258
+
+Generated 1 of the 1 non-bonded parameter combinations
+
+Generated 1 of the 1 1-4 parameter combinations
+
+Excluding 1 bonded neighbours molecule type 'ICE'
+
+Taking velocities from 'ice.gro', all velocities are zero
+Analysing residue names:
+There are:    64      Other residues
+Analysing residues not classified as Protein/DNA/RNA/Water and splitting into groups...
+
+This run will generate roughly 0 Mb of data
+gromacs frames 5 ice 320 atoms 320 overhead_s 8.988452e-04
+gromacs hexagonal 0 six-rings 128 q6 0.628519

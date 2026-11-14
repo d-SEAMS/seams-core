@@ -11,3 +11,7 @@ seams-sys = { path = "../seams-sys" }
 [[example]]
 name = "minimal"
 path = "../../../docs/examples/minimal_rust.rs"
+
+[[example]]
+name = "ice_ih"
+path = "../../../docs/examples/ice_ih_rust.rs"

@@ -8,15 +8,13 @@ Set Padding 0
 # duration 17.90
 # test docs_video_tapes
 # test docs_engine_openmm
-# test docs_examples
-# expect rust example ok
-# expect q6 0.595
+# expect rust ice nop 128 q6 0.625855 hexagonal 128 rings 256
 Hide
 Type 'PS1='"'"'$ '"'"''
 Enter
 Show
 Sleep 450ms
-Type 'SEAMS_LIB_DIR="$SEAMS_BUILD_SRC" cargo run --offline --quiet --manifest-path bindings/rust/Cargo.toml --example minimal -- input/traj/genice_sI.lammpstrj'
+Type 'SEAMS_LIB_DIR="$SEAMS_BUILD_SRC" cargo run --offline --quiet --manifest-path bindings/rust/Cargo.toml --example ice_ih -- input/traj/ice1h.lammpstrj'
 Enter
 Sleep 1s
 Sleep 16450ms

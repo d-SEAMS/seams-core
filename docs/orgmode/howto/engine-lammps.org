@@ -30,6 +30,14 @@ the callback. The hook prints:
 lammps hexagonal 128 six-rings 256 q6 0.625855
 #+end_src
 
+~engines/lammps/in.dseams~ is the longer run. The fix line is
+~fix ext all external pf/callback 2 2~. With ~run 8~ and ~thermo 2~
+the callback fires 5 times on the 64-atom cubic cell. The hook prints
+~lammps calls 5 stride 2 ice 320~ and, for the last call,
+~lammps hexagonal 0 six-rings 128 q6 0.628539~. The 320 cubic labels
+are 5 calls of 64 atoms. ~q6 0.628539~ is that last call. The name on
+the fix line is ~pf/callback~.
+
 ~engines/lammps/compute_dseams.cpp~ is the copy-in compute. This build
 does not compile it. ~meson test docs_engine_lammps~ exits 77 when
 ~run_hook~ was not built.

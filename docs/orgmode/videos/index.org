@@ -7,9 +7,8 @@ Odysee. The channel page is
 [[https://odysee.com/@d-SEAMS:0b23224c14d44b2a90deee60b7cc8c54e2331e9d][d-SEAMS on Odysee]].
 =docs/videos/<slug>/embed.txt= holds one line,
 =claim-name:full-claim-id=, after that upload exists. Until the line is
-there, the page says video coming soon. Captions are burned into the
-upload. The VTT file in =docs/videos/<slug>/= stays available as the
-transcript.
+there, that slug renders no player and no Odysee URL. Captions are burned
+into the upload. The VTT file in =docs/videos/<slug>/= stays in the tree.
 
 A later mix of narration audio uses ffmpeg with =-c:a aac -aac_coder fast=.
 

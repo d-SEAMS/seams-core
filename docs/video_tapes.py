@@ -42,6 +42,10 @@ def stable(text):
     text = re.sub(r"(?m)^((?:Pair|Neigh|Comm|Output|Modify|Other)\s+\|).*$", r"\1 TIME", text)
     # LAMMPS notes an unset OMP_NUM_THREADS; the thread count line follows.
     text = re.sub(r"(?m)^OMP_NUM_THREADS environment is not set\..*\n", "", text)
+    # gmx grompp draws a quote and a seed, and mdrun's timer row moves.
+    text = re.sub(r"Setting the LD random seed to \S+", "Setting the LD random seed to SEED", text)
+    text = re.sub(r"GROMACS reminds you:.*", "GROMACS reminds you: QUOTE", text)
+    text = re.sub(r"(?m)^[ \t]*Time:.*", "       Time: TIME", text)
     return text
 
 
@@ -92,7 +96,14 @@ def prepare(root, seams, libdir, langdir, build):
     env["SEAMS_INCLUDE"] = str(root / "bindings" / "cxx")
     env["R_LIBS_USER"] = str(build / "docs-r-lib")
     env["LD_LIBRARY_PATH"] = os.pathsep.join(
-        [str(libdir), str(langdir), env.get("LD_LIBRARY_PATH", "")]
+        [
+            str(libdir),
+            str(langdir),
+            str(build / "chemfiles-prefix" / "lib"),
+            str(build / "subprojects" / "readcon-core"),
+            str(build / "subprojects" / "readcon-db"),
+            env.get("LD_LIBRARY_PATH", ""),
+        ]
     )
     if not env.get("FENNEL_LUA"):
         for candidate in ("/usr/local/share/fennel.lua", "/usr/share/lua/5.4/fennel.lua"):
@@ -218,7 +229,7 @@ def check_folder(folder, env, root, record, absent):
 
 
 def check_embeds(root):
-    """Odysee claims come from embed.txt. Missing claims stay a coming-soon note."""
+    """A claim in embed.txt is an /$/embed/ iframe. No claim renders nothing."""
     from video_page import players_rst, read_claim, slugs
 
     videos = root / "docs" / "videos"
@@ -228,24 +239,24 @@ def check_embeds(root):
     if "huggingface.co/datasets/d-SEAMS/docs-videos" in page:
         fail("videos page still points at the old dataset")
     html = players_rst(videos)
-    if "huggingface.co" in html:
-        fail("video player html still names huggingface")
+    if "huggingface.co" in html or "video coming soon" in html:
+        fail("video player html still has a placeholder")
+    if "odysee.com" in html.replace("odysee.com/$/embed/", ""):
+        fail("video player html has an Odysee URL that is not /$/embed/")
     for slug in slugs(videos):
         folder = videos / slug
-        if not (folder / "embed.txt").is_file():
-            fail("{} is missing embed.txt".format(slug))
         if not (folder / "captions.vtt").is_file():
             fail("{} is missing captions.vtt".format(slug))
         claim = read_claim(folder)
-        if "docs/videos/{}/captions.vtt".format(slug) not in html:
-            fail("{} transcript link is missing".format(slug))
         if claim is None:
-            if "video coming soon" not in html:
-                fail("coming soon note is missing")
+            if "docs/videos/{}/captions.vtt".format(slug) in html:
+                fail("{} has no claim and should render nothing".format(slug))
         else:
             src = "https://odysee.com/$/embed/{}:{}".format(claim[0], claim[1])
             if src not in html:
                 fail("{} iframe is missing".format(slug))
+            if "docs/videos/{}/captions.vtt".format(slug) not in html:
+                fail("{} transcript link is missing".format(slug))
     print("video embeds ok")
 
 

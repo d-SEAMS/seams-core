@@ -156,3 +156,5 @@ The R example is docs/examples/minimal_r.R on input/traj/genice_sI.lammpstrj, wi
 Goswami, R., Goswami, A., & Singh, J. K. (2020). d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations. Journal of Chemical Information and Modeling. https://doi.org/10.1021/acs.jcim.0c00031
 
 d-SEAMS 2.0: Incremental ring and cage algorithms for ice structure analysis. Rohit Goswami, Amrita Goswami, Ruhila Goswami, Jayant K. Singh, to be submitted soon.
+
+Questions, issues, discussions and pull requests welcome

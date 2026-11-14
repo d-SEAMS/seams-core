@@ -15,4 +15,4 @@ nop 128 q6 0.625855 q6bar 0.562449
 
 nop 128 hexagonal 128
 ## scene-06.tape
-rust example ok 2.14.0 q6 0.595
+rust ice nop 128 q6 0.625855 hexagonal 128 rings 256

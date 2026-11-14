@@ -18,6 +18,57 @@ meson compile -C build
 ~subprojects/nanobind.wrap~. The default ~pixi run setup~ leaves
 ~with_python~ at its Meson default, which is true.
 
+~import dseams~ is that module. ~Frame.set_frame~ stores coordinates.
+~from_ase~ returns positions and a LAMMPS cell. ~neighbours~, ~rings~,
+~q4q6~, and ~chill_plus~ are the calls in the Python recording. The
+released Frame package on the [[file:../reference/python-frame.org][Python Frame]] page stays ~pydseams~.
+
+#+begin_src python
+>>> import numpy as np
+>>> import dseams
+>>> def ice():
+...     xyz, edges, reading = [], [], False
+...     handle = open("input/traj/ice1h.lammpstrj")
+...     try:
+...         while True:
+...             line = handle.readline()
+...             if line == "":
+...                 break
+...             if line.startswith("ITEM: BOX BOUNDS"):
+...                 edges = []
+...                 for _ in range(3):
+...                     lo, hi = handle.readline().split()[:2]
+...                     edges.append(float(hi) - float(lo))
+...             elif line.startswith("ITEM: ATOMS"):
+...                 reading = True
+...             elif reading:
+...                 parts = line.split()
+...                 if len(parts) < 5:
+...                     break
+...                 xyz.append([float(v) for v in parts[2:5]])
+...     finally:
+...         handle.close()
+...     return xyz, edges
+>>> xyz, edges = ice()
+>>> frame = dseams.Frame()
+>>> frame.set_frame(np.asarray(xyz), np.asarray(edges))
+>>> frame.count()
+128
+>>> int(frame.neighbours(3.5)[0][-1])
+512
+>>> int(frame.rings(3.5, 6)[2][6])
+256
+>>> round(float(frame.q4q6(3.5)[1].mean()), 6)
+0.625855
+>>> int(frame.chill_plus()[1][1])
+128
+>>> from ase import Atoms
+>>> pos, box = dseams.from_ase(Atoms(symbols=["O"] * len(xyz), positions=xyz, cell=edges, pbc=True))
+>>> frame.set_frame(pos, box)
+>>> int(frame.chill_plus()[1][1])
+128
+#+end_src
+
 * R
 
 #+begin_src bash
@@ -70,7 +121,7 @@ The Python checks live in PydSEAMSlib.
 * Recordings
 
 The language recordings use the same embed.txt as the videos page.
-A page without a claim says video coming soon.
+A page without a claim includes no player.
 
 ** C++
 

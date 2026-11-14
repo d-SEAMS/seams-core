@@ -1,3 +1,3 @@
 1
-00:00:00,300 --> 00:00:17,180
-docs_engine_gromacs writes a one-frame gro from the ice Ih dump and runs gmx-seams with cutoff 3.5. The census line is gromacs hexagonal 128 six-rings 256 q6 0.625855. gromacs_mdrun then takes a short frozen trajectory through the same tool.
+00:00:00,300 --> 00:00:22,000
+engines/gromacs/run_mdrun.sh runs gmx grompp, then gmx mdrun for 4 steps, then gmx-seams on the xtc mdrun wrote. The census line is gromacs frames 5 ice 320 atoms 320. ice 320 is the cubic total over 5 frames of 64. The last frame is gromacs hexagonal 0 six-rings 128 q6 0.628519. hexagonal, six-rings, and q6 are last-frame values. gmx-seams is post-processing after mdrun.
