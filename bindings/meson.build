@@ -98,8 +98,33 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
     endif
   endif
   _rscript = find_program('Rscript', required: false)
+  r_docs_lib = []
   if _rscript.found()
     chill_env.prepend('PATH', _fs.parent(_rscript.full_path()))
+    _r = find_program(_fs.parent(_rscript.full_path()) / 'R', required: false)
+    if _r.found()
+      r_docs_lib = custom_target(
+        'docs-r-lib',
+        output: 'docs-r-lib.stamp',
+        command: [
+          find_program('python3', required: true),
+          files('r/install_docs_lib.py'),
+          _r,
+          meson.project_source_root(),
+          meson.project_build_root(),
+          _fs.parent(seams_lang.full_path()),
+          '@OUTPUT@',
+        ],
+        depends: [seams_lang],
+        depend_files: files(
+          'r/dseams/DESCRIPTION', 'r/dseams/NAMESPACE', 'r/dseams/configure',
+          'r/dseams/R/capi.R', 'r/dseams/R/cpp11.R', 'r/dseams/R/dseams-package.R',
+          'r/dseams/R/dseams.R', 'r/dseams/R/s3.R',
+          'r/dseams/src/cpp11.cpp', 'r/dseams/src/dseams.cpp', 'r/dseams/src/seams_call.c',
+        ),
+        build_by_default: true,
+      )
+    endif
   endif
   _r_libs = get_option('r_libs_user')
   if _r_libs != ''
@@ -114,7 +139,7 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
       seams_lang.full_path(),
     ],
     env: chill_env,
-    depends: [seams_exe, seams_lang],
+    depends: [seams_exe, seams_lang, r_docs_lib],
     timeout: 600,
   )
   test(

@@ -1379,6 +1379,7 @@ if get_option('with_cli')
 endif
 
 subdir('bindings')
+_r_docs_lib = get_variable('r_docs_lib', [])
 
 if get_option('with_cli')
   # check_installed.py installs with --no-rebuild, because a rebuild here
@@ -1477,7 +1478,7 @@ if get_option('with_cli')
       meson.project_build_root(),
     ],
     env: tutorial_env,
-    depends: [seams_exe, seams_api_lib, seams_lang],
+    depends: [seams_exe, seams_api_lib, seams_lang] + _r_docs_lib,
     suite: 'docs',
     timeout: 600)
   test(
@@ -1648,7 +1649,7 @@ if get_option('with_cli')
       meson.project_build_root(),
     ],
     env: binding_env,
-    depends: [seams_api_lib, seams_lang],
+    depends: [seams_api_lib, seams_lang] + _r_docs_lib,
     suite: 'docs',
     timeout: 300)
   test(
@@ -1660,7 +1661,7 @@ if get_option('with_cli')
       meson.project_build_root(),
     ],
     env: binding_env,
-    depends: [seams_api_lib, seams_lang, seams_exe],
+    depends: [seams_api_lib, seams_lang, seams_exe] + _r_docs_lib,
     suite: 'docs',
     timeout: 300)
   foreach _engine : ['gromacs', 'lammps', 'openmm', 'plumed', 'insitu']
@@ -1715,7 +1716,7 @@ if get_option('with_cli')
       meson.project_build_root(),
     ],
     env: binding_env,
-    depends: [seams_api_lib],
+    depends: [seams_api_lib] + _r_docs_lib,
     suite: 'docs',
     timeout: 120)
   test(
@@ -1738,7 +1739,7 @@ if get_option('with_cli')
       meson.project_build_root(),
     ],
     env: binding_env,
-    depends: [seams_api_lib, binding_oracle],
+    depends: [seams_api_lib, binding_oracle] + _r_docs_lib,
     suite: 'docs',
     timeout: 180)
   test(
@@ -1750,7 +1751,7 @@ if get_option('with_cli')
       meson.project_build_root(),
     ],
     env: binding_env,
-    depends: [seams_lang],
+    depends: [seams_lang] + _r_docs_lib,
     suite: 'docs',
     timeout: 300)
   foreach _lang : ['c', 'cpp', 'python', 'rust', 'julia', 'lua', 'fortran', 'r']
@@ -1763,7 +1764,7 @@ if get_option('with_cli')
         meson.project_build_root(),
       ],
       env: binding_env,
-      depends: [seams_api_lib, seams_lang],
+      depends: [seams_api_lib, seams_lang] + _r_docs_lib,
       suite: 'docs',
       timeout: 180)
   endforeach
@@ -1776,7 +1777,7 @@ if get_option('with_cli')
       meson.project_build_root(),
     ],
     env: binding_env,
-    depends: [seams_api_lib, seams_lang],
+    depends: [seams_api_lib, seams_lang] + _r_docs_lib,
     suite: 'docs',
     timeout: 300)
   _snippet_list = run_command(
@@ -1795,7 +1796,7 @@ if get_option('with_cli')
           meson.project_build_root(),
         ],
         env: binding_env,
-        depends: [seams_api_lib, seams_lang, binding_oracle],
+        depends: [seams_api_lib, seams_lang, binding_oracle] + _r_docs_lib,
         suite: 'docs',
         timeout: 300)
     endif
@@ -1809,7 +1810,7 @@ if get_option('with_cli')
       meson.project_build_root(),
     ],
     env: binding_env,
-    depends: [seams_lang],
+    depends: [seams_lang] + _r_docs_lib,
     suite: 'docs',
     timeout: 180)
 endif

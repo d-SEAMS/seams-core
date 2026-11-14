@@ -6,7 +6,9 @@ that calls ``meson install`` without ``--no-rebuild``, ``meson compile``
 or ``ninja`` on that directory can relink libyodaLib.so or libseams.so
 while another test has it mapped. This check fails when a test script
 does that, and when c_api_installed installs a target that meson test
-would not have built first.
+would not have built first. A test that reads BUILD/docs-r-lib has to
+depend on the docs-r-lib target, so no test installs the R package
+while another test loads it.
 
 usage: check_no_rebuild.py SOURCE_ROOT BUILD_DIR
 """
@@ -20,6 +22,7 @@ from pathlib import Path
 
 CALL = re.compile(r"""["']?\bmeson["']?\s*,?\s*["']?(install|compile)\b|["']ninja["']|\bninja\s+-C\b""")
 INSTALL_TEST = "c_api_installed"
+R_LIB = "docs-r-lib"
 
 
 def call_problems(text):
@@ -124,6 +127,24 @@ def install_problems(build, targets, tests):
     return sorted(set(missing))
 
 
+def r_lib_problems(targets, tests, source):
+    """Tests whose scripts read docs-r-lib without depending on its target."""
+    ids = [target["id"] for target in targets if target["name"] == R_LIB]
+    if not ids:
+        return []
+    missing = []
+    for test in tests:
+        if ids[0] in test["depends"]:
+            continue
+        for script in test_scripts([test], source):
+            if script == Path(__file__).resolve():
+                continue
+            if R_LIB in script.read_text(encoding="utf-8", errors="replace"):
+                missing.append(test["name"])
+                break
+    return sorted(set(missing))
+
+
 def main():
     if len(sys.argv) != 3:
         raise SystemExit(__doc__)
@@ -140,6 +161,8 @@ def main():
             failures.append(f"{rel}:{number} rebuilds the tree under {', '.join(sorted(set(names)))}: {line}")
     for name in install_problems(build, targets, tests):
         failures.append(f"{INSTALL_TEST} installs {name} but does not depend on it")
+    for name in r_lib_problems(targets, tests, source):
+        failures.append(f"{name} reads {R_LIB} but does not depend on it")
     if failures:
         print("\n".join(failures))
         return 1
