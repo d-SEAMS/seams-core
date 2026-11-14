@@ -142,6 +142,22 @@ those sizes. The set costs about 72 bytes per atom, 15 to 18% of the resident
 memory of a process that has loaded an ice frame of 0.1 to 0.9 million molecules
 and run CHILL+ on it.
 
+For large frames staged mode is the zero-overhead path. Once the input no longer
+fits in L2, the default check costs a full second read of it, and staging is the
+only way to read it once. The times below are per reload in a trajectory loop: the
+median of 21 batches of 100 calls on one thread, from `bench_capi_overhead`. The
+direct write is the C++ loop that writes x, y, z and the label into a built frame.
+
+| molecules | direct write | default | staged |
+| --- | --- | --- | --- |
+| 4096 | 0.0068 ms | 0.0070 ms (+2.3%) | 0.0072 ms (+4.4%) |
+| 110592 | 0.3882 ms | 0.4067 ms (+4.8%) | 0.3664 ms (-5.6%) |
+| 884736 | 3.1568 ms | 3.5415 ms (+12.2%) | 3.1939 ms (+1.2%) |
+
+Each interquartile range is at most 2.2% of its median. A loop over frames of a
+million atoms or more should call `seams_system_stage_positions(sys, 1)` once after
+the first `seams_system_set_atoms`, if the extra 72 bytes per atom fit.
+
 ## Threads
 
 `seams_set_num_threads(1)` selects one OpenMP thread. `seams_set_num_threads(0)`
