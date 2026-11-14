@@ -942,33 +942,6 @@ std::vector<DdcFixture> repeatedWitnessFixtures() {
   };
 }
 
-// tum::device::ddcFrom over every ring of an explicit ring list
-std::vector<int> deviceDdc(const std::vector<std::vector<int>> &rings,
-                           int nAtoms) {
-  const int nRings = static_cast<int>(rings.size());
-  const int maxPer = tum::device::kRowCap;
-  std::vector<int> ringAtoms;
-  for (const auto &r : rings) {
-    ringAtoms.insert(ringAtoms.end(), r.begin(), r.end());
-  }
-  std::vector<int> count(static_cast<std::size_t>(nAtoms), 0);
-  std::vector<int> through(static_cast<std::size_t>(nAtoms) * maxPer, -1);
-  for (int r = 0; r < nRings; ++r) {
-    for (const int a : rings[static_cast<std::size_t>(r)]) {
-      const auto ai = static_cast<std::size_t>(a);
-      through[static_cast<std::size_t>(a * maxPer + count[ai]++)] = r;
-    }
-  }
-  std::vector<int> hc(static_cast<std::size_t>(nRings), 0);
-  std::vector<int> ddc(static_cast<std::size_t>(nRings), 0);
-  for (int r = 0; r < nRings; ++r) {
-    tum::device::ddcFrom(r, &nRings, ringAtoms.data(), count.data(),
-                         through.data(), hc.data(), nAtoms, maxPer,
-                         ddc.data());
-  }
-  return ddc;
-}
-
 } // namespace
 
 TEST_CASE("DDC needs six distinct peripheral rings", "[cage_affiliation]") {
