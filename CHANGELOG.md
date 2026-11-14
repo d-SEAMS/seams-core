@@ -11,7 +11,6 @@ by [towncrier](https://towncrier.readthedocs.io/).
 <!-- towncrier release notes start -->
 
 ## [2.14.0] - 2026-11-13
-
 ### Added
 
 - A Reproduce the paper catalog lists each seams-core figure and table with the command, the input frame, the printed numbers, and the Snakemake rule or asv class. Small rows run in the suite. Full rows run when `-Dpaper_full=true`. Each head-to-head names its committed CSV.
@@ -52,6 +51,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
   OpenMM uses a reporter.
   Chemfiles reads the saved trajectory.
 - Local q4 and q6 on the cutoff shell use the solid-harmonic kernel from `seams steinhardt`, `seams_q4_q6`, and the Python, R, and Julia `q4_q6` fronts.
+- Meson options `-Dwith_blas`, `-Dwith_readcon`, and `-Dsystem_libseams`. The last builds only the `dseams` module against an installed `libseams`.
 - Name 51264, 51268 and sH cages, and report a per-cage occupancy histogram.
 - One sitting pairs ice Ic at 884736 molecules with freud, mdapy, vesin, OVITO PTM and CHILL+, and rings-statistics-matter, at 1, 2, 4 and 8 threads. The detail column records the agreement check on that frame. The rings row is the cutoff list and the ring search together. The pool-audit rings kernel is ringNetwork alone.
 - One sitting retimes neighbours, q4, q6, CHILL+, rings, symmetry and hydrate cages at 110592 and 884736 molecules on one thread and on eight. The raw lines are benchmarks/rc3-sitting.csv.
@@ -88,6 +88,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The videos gallery and the README link the d-SEAMS Odysee channel. Every `docs/videos/<slug>/script.md` end card cites Goswami, Goswami, and Singh 2020 and names the 2.0 paper as to be submitted soon.
 - Under mpiexec, an MPI build of `seams` shares a LAMMPS dump's `--frame`/`--last` frames among the ranks in serpentine rounds (`sinp::forEachLammpsFrame` takes a part and a part count), and rank 0 prints every frame in order. Other readers stay on rank 0, `--per-atom` needs a single rank, ranks that differ in arguments, directory or `SEAMS_` settings are refused, `OMP_NUM_THREADS` and `RAYON_NUM_THREADS` default to 1 on a launch of several ranks, and a run without a launcher, or with `SEAMS_MPI=0`, never starts MPI. `chill::setSteinhardtAtomSplit(false)` keeps `steinhardtQl` from splitting atoms over ranks that hold different frames, and a dump frame cut short keeps the atoms it read, with its warning on stderr. With Open MPI's libfabric probe skipped (`--mca btl ^ofi`), eight ranks match eight `--jobs` workers on one node for `cages` over 32 frames of 32768-atom ice (4.2 against 4.3 s), and keep load balance 0.99 where frame cost steps or alternates along the run (2.6 s against 2.8 and 3.1 s for `--jobs`; contiguous blocks reach 0.59 on the step). On two four-core core sets standing in for nodes, with MPI over TCP only, eight ranks take 4.4 s against 8.7 s for threads on one, at POP parallel efficiency 0.98 (release builds).
 - Update topology keys only on the hop-ball of atoms whose neighbourhood changed.
+- Wheels for CPython 3.10, 3.11, and 3.12 and later (one `cp312-abi3` wheel) on manylinux_2_28, musllinux_1_2, and macOS, built by cibuildwheel from an sdist that carries Eigen, vesin, nanobind, and robin-map and so builds with no network. A tag publishes them through PyPI trusted publishing. `recipe/recipe.yaml` builds `libseams` and `pydseamslib` for conda-forge with rattler-build.
 - `bench_rings_h2h` times primitive rings against OVITO FindRings with the cutoff graph outside the timer. A small-graph test checks that census against a brute-force cycle list.
 - `interface_order wc` reports a Willard-Chandler width on the crystal centre of mass.
   `input/interface/campaign.py` grows the shipped mW slab at several temperatures and seeds.
@@ -136,6 +137,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The C API version macros come from the project version at build time. This release is 2.14.0.
 - The Comparisons pages are rendered from the vendored head-to-head CSVs. ClavisCage TRACE records the cage-by-cage census, including the seven periodic-wrap cages it drops on the 46-molecule sI cell, and the serial TRACE times against d-SEAMS at one and eight threads. SQQ records the exact edge and ring match on the 4096-molecule TIP4P/2005 frame, and the chordless-census and whole-tool ratios. A timed row names the version, the thread count, the repeat count and the core count.
 - The Comparisons tables name HaoZeke/seams-core and the benchmark branch, with a GitHub link, instead of a local remote. The long census and timing tables sit in collapsible blocks under a short per-cell summary. The C, C++, Python, Fortran, Julia, R, Rust, and Lua examples are programs or asserted snippets the docs suite runs.
+- The Python binding is released on PyPI as `pydseamslib` 2.14.0, the distribution name of the 2.11 wheels, so `pip install -U pydseamslib` upgrades them in place. The import is `dseams`; `import pydseams` and `import pydseamslib` still work as compatibility imports. The 2.11 extension names `pydseams.yoda` and `cyoda` are gone.
 - The SOAP power spectrum evaluates each neighbour's spherical harmonics once and reuses them for every radial function, since its basis is a product of the two; the values are unchanged. On 8192 atoms at water density with nMax 8, lMax 6 and a 6 Å cutoff, `soapSpectrumAll` goes from 831 to 199 ms on one thread (release builds).
 - The carried ring update sorts ring indices and merges the kept rings in parallel, and it keeps dropped ring buffers instead of freeing them on the update. The orthorhombic cutoff list counts each pair once, a z layer at a time, so several threads beat the single-thread walk. One-thread and several-thread results still match.
 - The clathrate face-edge window is `SEAMS_CAGE_EDGE` and `--cage-edge`, default `2.65,3.15` in the coordinate units of the file. `none` turns the window off, and the cage bound is then the face census alone. `seams_frame_signature_edge` takes the same string. Python is `frame.cages_by_signature("512", edge="none")` and Lua is `dseams.cages_by_signature(frame, "512", {edge = "none"})`.
@@ -218,6 +220,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The PLUMED q6 derivative is expressed per nanometre. A 0.001 angstrom step matched an independent difference to 3.99e-11 on a shifted eight-molecule cell.
 - The brine, interface, nucleation, and rings picture tracks now show the paper-frame transcripts: 873 atoms with hexagonal 352 and water 434, the 864-molecule interface, 148 nucleation frames, and the 11-frame mW cell. `docs_video_tapes` fails when `recorded.txt` disagrees with the tape output or a spoken number is absent from that transcript.
 - The cutoff neighbour list sizes its row buffer from the pairs found. A shell denser than the ideal-gas estimate no longer writes past that buffer.
+- The engine compiles on aarch64, Apple silicon, and musl. The AVX kernels are built for x86_64 only and other targets take the scalar paths, `backward.cpp` is skipped without `execinfo.h`, and `LinearFit::stderr` is now `slopeStdErr` because musl defines `stderr` as a macro.
 - The landing-page and architecture diagrams quote labels that contain a slash or a quote, so Mermaid 11 draws the suite stack.
 - The multi-thread cutoff list records neighbour ids during the count walk, and the linkcell pool is sized to the OpenMP width.
 - The nucleation notebook rule declares ``figshare-incremental.json``
@@ -230,6 +233,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The ring search no longer clears the level field over every lower index for each source, a pass quadratic in the frame: on one thread `bench_strong`'s ring stage grew about threefold with each doubling of the frame, to 16.9 s at 262144 atoms, and now doubles.
 - Use linkcell 0.3.10 and minimage 0.1.4 without a downstream source patch. The with_linkcell and with_minimage options can require these dependencies.
 - Use the one-cell neighbour stencil from two cells per edge, so a short box is not left on the general walk.
+- `-Dwith_cli=false` configures again; `seams_lang_fixtures` referenced the CLI target unconditionally, so `pip install .` failed.
 - `cages --signature` counts a face set as a cage only when its faces tile a sphere: every vertex lies on at least three faces that close around it, and V - E + F = 2. Rings whose minimum-image bonds add up to a lattice vector wind through the periodic cell, bound no face, and are dropped first (`ring::contractibleRings`). On frame 1 of the figshare mW nucleation run (4096 molecules, 3.5 Å cutoff) the search found 3 5¹²6², 20 5¹²6⁴, 270 5¹²6⁸ and 143 4³5⁶6³ cages in the liquid; it now finds none. On the GenIce sI unit cell it found 90 5¹²6², 4248 5¹²6⁴ and 218305 5¹²6⁸; it now finds 2 5¹² and 6 5¹²6².
 - `tests/check_invariance` exits 2 when the trajectory cannot be read, the frame holds no atom of the requested type, or the graph has no six-ring. It used to compare empty results, print PASS and exit 0. The meson tests `invariance_missing_input` and `invariance_empty_frame` expect that failure.
 - q4 and q6 build the multi-thread cutoff list in one pass again, instead of copying each linkcell block.

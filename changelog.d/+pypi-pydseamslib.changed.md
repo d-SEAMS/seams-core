@@ -1,0 +1,1 @@
+The Python binding is released on PyPI as `pydseamslib` 2.14.0, the distribution name of the 2.11 wheels, so `pip install -U pydseamslib` upgrades them in place. The import is `dseams`; `import pydseams` and `import pydseamslib` still work as compatibility imports. The 2.11 extension names `pydseams.yoda` and `cyoda` are gone.
