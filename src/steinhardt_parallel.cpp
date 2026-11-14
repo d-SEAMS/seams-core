@@ -8,6 +8,7 @@
 // the Open Source Initiative.
 //-----------------------------------------------------------------------------------
 
+#include <cpu_features.hpp>
 #include <chrono>
 
 #include <bop.hpp>
@@ -1262,8 +1263,7 @@ SteinhardtQl cutoffSolid(
     }
   }
 #if defined(SEAMS_YLM_AVX512)
-  const bool simd8 = quad && __builtin_cpu_supports("avx512f") &&
-                     __builtin_cpu_supports("avx512dq");
+  const bool simd8 = quad && seams::cpu::features().avx512dq;
 #else
   const bool simd8 = false;
   (void)quad;
@@ -1479,7 +1479,7 @@ SteinhardtQl cutoffSolid(
       }
     }
 #if defined(SEAMS_YLM_AVX512)
-    if (rows && !__builtin_cpu_supports("avx512f")) {
+    if (rows && !seams::cpu::features().avx512f) {
       rows = false;
     }
     if (rows) {

@@ -39,6 +39,8 @@ jobs:
 
       - run: pixi run -e default setup
       - run: pixi run -e default build
+      - name: Julia project for the snippets
+        run: julia --project=bindings/julia/Dseams bindings/julia/Dseams/dev/develop_jll.jl
 
       - name: Cache the brine frames and the renderer wheels
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
@@ -92,6 +94,7 @@ jobs:
           export SEAMS_LANG_LIB="$PWD/bbdir/bindings/libseams_lang.so"
           export SEAMS_LIB="$PWD/bbdir/src/libseams.so"
           export LD_LIBRARY_PATH="$PWD/bbdir/src:$PWD/bbdir/bindings${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+          julia --project=bindings/julia/Dseams/docs bindings/julia/Dseams/dev/develop_jll.jl
           julia --project=bindings/julia/Dseams/docs bindings/julia/Dseams/docs/make.jl
           julia --project=bindings/julia/Seams/docs bindings/julia/Seams/docs/make.jl
 
@@ -102,7 +105,7 @@ jobs:
           export SEAMS_LIBDIR="$PWD/bbdir/bindings"
           export LD_LIBRARY_PATH="$PWD/bbdir/src:$PWD/bbdir/bindings${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
           export TEXINPUTS="$PWD/docs/tex//:${TEXINPUTS:-}"
-          Rscript -e 'install.packages(c("cpp11","roxygen2","testthat","knitr","rmarkdown"), repos="https://cloud.r-project.org")'
+          Rscript -e 'install.packages(c("cpp11","RcppEigen","roxygen2","testthat","knitr","rmarkdown"), repos="https://cloud.r-project.org")'
           R CMD build bindings/r/dseams
           R CMD check --as-cran dseams_*.tar.gz
           log=$(echo dseams.Rcheck/00check.log)

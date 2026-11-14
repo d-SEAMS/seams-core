@@ -1,6 +1,7 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
-Dseams = "b7e4c1a2-6d58-4f0e-9a31-2c8e5d4f7a10"
+Dseams = "9c873972-df43-4516-af5b-6352a89d4bea"
+libseams_jll = "7f1e8526-9a03-57ab-a5c6-46114804ed15"
 
 [compat]
 Documenter = "1"

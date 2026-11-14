@@ -74,6 +74,7 @@ output/
 .gdb_history
 *.lammpstrj
 !input/traj/*.lammpstrj
+!bindings/julia/Dseams/data/*.lammpstrj
 # Campaign frames, logs, and generated figures stay out of git.
 si4-data/
 si5-data/

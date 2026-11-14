@@ -8,29 +8,57 @@ vignette: >
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>", eval = FALSE)
-root <- Sys.getenv("DSEAMS_ROOT", unset = "")
-tip <- file.path(root, "input", "traj", "exampleTraj.lammpstrj")
-knitr::opts_chunk$set(eval = root != "" && file.exists(tip))
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+dseams::dseams_threads(1L)
 ```
 
-This vignette classifies the in-tree mixed TIP4P dump. The engine has
-to be on the link line (`SEAMS_LIBDIR`) and `DSEAMS_ROOT` has to point
-at a seams-core checkout. Without those, the chunks stay unevaluated.
+dseams reads a trajectory frame into the d-SEAMS engine and returns the
+results as data frames. Three small dumps ship with the package:
 
 ```{r}
 library(dseams)
-tip <- file.path(Sys.getenv("DSEAMS_ROOT"), "input", "traj", "exampleTraj.lammpstrj")
-frame <- read_frame(tip, type = 2L)
+dseams_example()
+```
+
+## A perfect crystal
+
+`ice1h.lammpstrj` is a 2x2x2 ice Ih cell with 128 oxygen sites. Every
+water is hexagonal ice under CHILL+, and the hydrogen-bond network is
+made of six-membered rings only:
+
+```{r}
+ice1h <- read_frame(dseams_example("ice1h.lammpstrj"), type = -1L)
+ice1h
+table(chill_plus(ice1h)$name)
+primitive_rings(ice1h, graph = "cutoff", max_depth = 6L)
+```
+
+## A mixed frame
+
+`exampleTraj.lammpstrj` is one frame of a TIP4P system. Type 2 is oxygen.
+
+```{r}
+frame <- read_frame(dseams_example("exampleTraj.lammpstrj"), type = 2L)
 ice <- chill_plus(frame)
 table(ice$name)
 table(chill_plus(frame, graph = "mutual")$name)
-head(primitive_rings(frame, max_depth = 6L))
-head(steinhardt(frame, order_l = 3L))
 ```
 
 `graph = "cutoff"`, the default, is the distance list. `graph = "mutual"`
-is the mutual four-neighbour list. On this dump the default and the cutoff
-list give 9 interClathrate and 241 water, and the mutual list gives
-1 clathrate, 7 interClathrate, and 242 water. The
-columns are a data.frame, so the usual subsetting works.
+is the mutual four-neighbour list. On this dump the cutoff list gives 9
+interClathrate and 241 water, and the mutual list gives 1 clathrate, 7
+interClathrate, and 242 water.
+
+The ring census and the Steinhardt parameters come back the same way:
+
+```{r}
+primitive_rings(frame, max_depth = 6L)
+q3 <- steinhardt(frame, order_l = 3L)
+summary(q3$ql)
+```
+
+Each result is a data.frame, so the usual subsetting works:
+
+```{r}
+head(ice[ice$name != "water", ])
+```

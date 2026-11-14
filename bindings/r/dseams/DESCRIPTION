@@ -2,26 +2,41 @@ Package: dseams
 Type: Package
 Title: Ice Classification and Ring Statistics for Molecular Simulations
 Version: 2.14.0
-Authors@R: person("Rohit", "Goswami", email = "rgoswami@ieee.org",
-                  role = c("aut", "cre"),
-                  comment = c(ORCID = "0000-0002-2393-6242"))
-Description: S3 bindings to the d-SEAMS engine. Frames come back as
-    data.frames for ice-type labels, primitive-ring censuses, and
-    bond-orientational order parameters. The classifiers are libyodaLib;
-    this package does not reimplement them.
+Authors@R: c(
+    person("Rohit", "Goswami", email = "rgoswami@ieee.org",
+           role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0002-2393-8056")),
+    person("Amrita", "Goswami", role = "aut",
+           comment = c(ORCID = "0000-0001-8706-2383")),
+    person("Ruhila", "S", role = "ctb"),
+    person("d-SEAMS core team", role = "cph",
+           comment = "seams-core engine sources bundled in src/seams")
+    )
+Description: Structural analysis of water and ice in molecular dynamics
+    trajectories, using the 'd-SEAMS' engine (Goswami, Goswami and Singh
+    (2020) <doi:10.1021/acs.jcim.0c00031>). Reads 'LAMMPS' dumps and
+    'XYZ' files and returns data frames of 'CHILL+' ice labels
+    (Nguyen and Molinero (2015) <doi:10.1021/jp510289t>), primitive
+    ring counts (Franzblau (1991) <doi:10.1103/PhysRevB.44.4925>),
+    hexagonal and double-diamond cages, and Steinhardt bond-orientational
+    order parameters (Steinhardt, Nelson and Ronchetti (1983)
+    <doi:10.1103/PhysRevB.28.784>). The engine is compiled from bundled
+    C++ sources.
 License: MIT + file LICENSE
-Encoding: UTF-8
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
-LinkingTo: cpp11
-SystemRequirements: libseams_lang and libyodaLib from a seams-core build
-    (pkg-config seams-lang, or SEAMS_LIBDIR and SEAMS_INCLUDE)
-Suggests:
-    testthat (>= 3.0.0),
-    knitr,
-    rmarkdown
-VignetteBuilder: knitr
-NeedsCompilation: yes
-Config/testthat/edition: 3
-URL: https://docs.dseams.info
+URL: https://docs.dseams.info, https://github.com/d-SEAMS/seams-core
 BugReports: https://github.com/d-SEAMS/seams-core/issues
+Encoding: UTF-8
+Depends:
+    R (>= 4.2.0)
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+LinkingTo:
+    cpp11 (>= 0.4.0),
+    RcppEigen (>= 0.3.4.0.0)
+VignetteBuilder: knitr
+SystemRequirements: C++20
+Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
+Config/roxygen2/version: 8.1.0

@@ -37,6 +37,9 @@
 // - g++/clang++ -lbfd ...
 // #define BACKWARD_HAS_BFD 1
 
+// The stack walk needs <execinfo.h>, which musl does not have; there the
+// crash handler is left out.
+#if !defined(__linux__) || __has_include(<execinfo.h>)
 #include "backward.hpp"
 
 namespace backward {
@@ -44,3 +47,4 @@ namespace backward {
 backward::SignalHandling sh;
 
 } // namespace backward
+#endif

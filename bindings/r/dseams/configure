@@ -1,35 +1,69 @@
 #!/bin/sh
-# Point the compile at a seams-core build. The engine is not a CRAN
-# system library, so the paths are explicit.
-# DSEAMS_ROOT=$PWD R CMD INSTALL bindings/r/dseams
-# finds seams_lang.h and libseams_lang.so from that checkout.
-if [ -n "${DSEAMS_ROOT:-}" ]; then
-  if [ -z "${SEAMS_INCLUDE:-}" ]; then
+# Write src/Makevars from src/Makevars.in.
+#
+# The engine is compiled from src/seams. A source tarball already holds
+# those files. In a seams-core checkout tools/vendor.sh copies them from
+# the checkout, so nothing is fetched over the network.
+#
+# To link an engine that is already built instead, set SEAMS_LIBDIR to the
+# directory of libseams_lang and SEAMS_INCLUDE to the directory of
+# seams_lang.h (DSEAMS_ROOT/bindings/cxx when DSEAMS_ROOT is set).
+
+: "${R_HOME:=$(R RHOME)}"
+if [ ! -x "${R_HOME}/bin/R" ]; then
+  echo "configure: could not find R under R_HOME=${R_HOME}" >&2
+  exit 1
+fi
+
+version=$(sed -n 's/^Version:[[:space:]]*//p' DESCRIPTION)
+
+# The example data in inst/extdata are copied together with the sources,
+# and are needed even when an external engine is linked.
+vendored=yes
+if [ ! -f src/seams/seams_lang.cpp ] || [ ! -f inst/extdata/ice1h.lammpstrj ]; then
+  if [ ! -f tools/vendor.sh ] || ! sh tools/vendor.sh; then
+    vendored=no
+  fi
+fi
+
+if [ -n "${SEAMS_LIBDIR:-}" ]; then
+  if [ -z "${SEAMS_INCLUDE:-}" ] && [ -n "${DSEAMS_ROOT:-}" ]; then
     SEAMS_INCLUDE="${DSEAMS_ROOT}/bindings/cxx"
   fi
-  if [ -z "${SEAMS_LIBDIR:-}" ]; then
-    for dir in \
-      "${DSEAMS_ROOT}/build/bindings" \
-      "${DSEAMS_ROOT}/bbdir/bindings" \
-      "${DSEAMS_ROOT}/bbdir-py/bindings" \
-      "${DSEAMS_ROOT}/build-eng/bindings"
-    do
-      if [ -f "${dir}/libseams_lang.so" ] || [ -f "${dir}/libseams_lang.dylib" ]; then
-        SEAMS_LIBDIR=$dir
-        break
-      fi
-    done
+  if [ -z "${SEAMS_INCLUDE:-}" ] || [ ! -f "${SEAMS_INCLUDE}/seams_lang.h" ]; then
+    echo "configure: SEAMS_LIBDIR is set, but seams_lang.h is not in SEAMS_INCLUDE='${SEAMS_INCLUDE:-}'" >&2
+    exit 1
+  fi
+  echo "configure: linking libseams_lang from ${SEAMS_LIBDIR}"
+  SEAMS_CPPFLAGS="-I${SEAMS_INCLUDE}"
+  SEAMS_LIBS="-L${SEAMS_LIBDIR} -lseams_lang -Wl,-rpath,${SEAMS_LIBDIR}"
+  OPENMP_CXXFLAGS=""
+  ENGINE_OBJECTS=""
+else
+  if [ "${vendored}" != yes ]; then
+    echo "configure: src/seams is missing and this is not a seams-core checkout." >&2
+    echo "configure: build the source package with 'sh tools/vendor.sh' first." >&2
+    exit 1
+  fi
+  SEAMS_CPPFLAGS="-I. -Iseams -Iseams/include -DSEAMS_LANG_VERSION='\"${version}\"'"
+  SEAMS_LIBS=""
+  ENGINE_OBJECTS='$(SEAMS_OBJECTS)'
+  # An empty SHLIB_OPENMP_CXXFLAGS (Apple clang, for one) builds the
+  # engine loops single-threaded.
+  openmp=$(sed -n 's/^SHLIB_OPENMP_CXXFLAGS[[:space:]]*=[[:space:]]*//p' \
+    "${R_HOME}/etc${R_ARCH}/Makeconf")
+  if [ -n "${openmp}" ]; then
+    echo "configure: OpenMP via ${openmp}"
+    SEAMS_CPPFLAGS="${SEAMS_CPPFLAGS} -DSEAMS_HAS_OPENMP=1"
+    OPENMP_CXXFLAGS='$(SHLIB_OPENMP_CXXFLAGS)'
+  else
+    echo "configure: no OpenMP; the engine runs single-threaded"
+    OPENMP_CXXFLAGS=""
   fi
 fi
-if [ -z "${SEAMS_INCLUDE:-}" ] || [ -z "${SEAMS_LIBDIR:-}" ]; then
-  echo "Set DSEAMS_ROOT to a seams-core checkout, or set SEAMS_INCLUDE (directory of seams_lang.h) and SEAMS_LIBDIR (directory of libseams_lang.so)." >&2
-  exit 1
-fi
-if [ ! -f "${SEAMS_INCLUDE}/seams_lang.h" ]; then
-  echo "seams_lang.h is not in ${SEAMS_INCLUDE}" >&2
-  exit 1
-fi
-cat > src/Makevars << EOF
-PKG_CXXFLAGS = -I${SEAMS_INCLUDE}
-PKG_LIBS = -L${SEAMS_LIBDIR} -lseams_lang -Wl,-rpath,${SEAMS_LIBDIR}
-EOF
+
+sed -e "s|@SEAMS_CPPFLAGS@|${SEAMS_CPPFLAGS}|" \
+  -e "s|@SEAMS_LIBS@|${SEAMS_LIBS}|" \
+  -e "s|@OPENMP_CXXFLAGS@|${OPENMP_CXXFLAGS}|g" \
+  -e "s|@ENGINE_OBJECTS@|${ENGINE_OBJECTS}|" \
+  src/Makevars.in > src/Makevars

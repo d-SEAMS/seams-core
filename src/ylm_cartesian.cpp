@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 //-----------------------------------------------------------------------------------
 
+#include <cpu_features.hpp>
 #include <ylm_batch.hpp>
 
 #include <cstddef>
@@ -39,7 +40,7 @@ bool ylmLocalQl(int orderL, const double *dx, const double *dy, const double *dz
     return false;
   }
 #if defined(SEAMS_YLM_AVX512)
-  if (__builtin_cpu_supports("avx512f") && __builtin_cpu_supports("avx512dq")) {
+  if (seams::cpu::features().avx512dq) {
     return ylmLocalQlAvx(orderL, dx, dy, dz, nbonds, nUsed, prefactor, ql);
   }
 #endif
@@ -81,7 +82,7 @@ void ylmBatch(int orderL, const double *dx, const double *dy, const double *dz,
     return;
   }
 #if defined(SEAMS_YLM_AVX512)
-  if (__builtin_cpu_supports("avx512f") && __builtin_cpu_supports("avx512dq")) {
+  if (seams::cpu::features().avx512dq) {
     ylmBatchAvx512(orderL, dx, dy, dz, n, re, im);
     return;
   }

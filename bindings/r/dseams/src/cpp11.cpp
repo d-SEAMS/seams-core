@@ -48,6 +48,13 @@ extern "C" SEXP _dseams_rings_(SEXP ptr, SEXP cutoff, SEXP type, SEXP graph, SEX
   END_CPP11
 }
 // dseams.cpp
+cpp11::data_frame steinhardt_(SEXP ptr, double cutoff, int type, int order_l, std::string graph);
+extern "C" SEXP _dseams_steinhardt_(SEXP ptr, SEXP cutoff, SEXP type, SEXP order_l, SEXP graph) {
+  BEGIN_CPP11
+    return cpp11::as_sexp(steinhardt_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(ptr), cpp11::as_cpp<cpp11::decay_t<double>>(cutoff), cpp11::as_cpp<cpp11::decay_t<int>>(type), cpp11::as_cpp<cpp11::decay_t<int>>(order_l), cpp11::as_cpp<cpp11::decay_t<std::string>>(graph)));
+  END_CPP11
+}
+// dseams.cpp
 cpp11::data_frame q4_q6_(SEXP ptr, double cutoff, int type);
 extern "C" SEXP _dseams_q4_q6_(SEXP ptr, SEXP cutoff, SEXP type) {
   BEGIN_CPP11
@@ -55,12 +62,13 @@ extern "C" SEXP _dseams_q4_q6_(SEXP ptr, SEXP cutoff, SEXP type) {
   END_CPP11
 }
 // dseams.cpp
-cpp11::data_frame steinhardt_(SEXP ptr, double cutoff, int type, int order_l, std::string graph);
-extern "C" SEXP _dseams_steinhardt_(SEXP ptr, SEXP cutoff, SEXP type, SEXP order_l, SEXP graph) {
+cpp11::data_frame cages_(SEXP ptr, double cutoff, int type, int k, std::string graph);
+extern "C" SEXP _dseams_cages_(SEXP ptr, SEXP cutoff, SEXP type, SEXP k, SEXP graph) {
   BEGIN_CPP11
-    return cpp11::as_sexp(steinhardt_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(ptr), cpp11::as_cpp<cpp11::decay_t<double>>(cutoff), cpp11::as_cpp<cpp11::decay_t<int>>(type), cpp11::as_cpp<cpp11::decay_t<int>>(order_l), cpp11::as_cpp<cpp11::decay_t<std::string>>(graph)));
+    return cpp11::as_sexp(cages_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(ptr), cpp11::as_cpp<cpp11::decay_t<double>>(cutoff), cpp11::as_cpp<cpp11::decay_t<int>>(type), cpp11::as_cpp<cpp11::decay_t<int>>(k), cpp11::as_cpp<cpp11::decay_t<std::string>>(graph)));
   END_CPP11
 }
+// dseams.cpp
 double jump_tau90_(SEXP first, SEXP second, double dt, int oxygen_type, int hydrogen_type);
 extern "C" SEXP _dseams_jump_tau90_(SEXP first, SEXP second, SEXP dt, SEXP oxygen_type, SEXP hydrogen_type) {
   BEGIN_CPP11
@@ -74,33 +82,53 @@ extern "C" SEXP _dseams_signature_cages_(SEXP ptr, SEXP cutoff, SEXP type, SEXP 
     return cpp11::as_sexp(signature_cages_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(ptr), cpp11::as_cpp<cpp11::decay_t<double>>(cutoff), cpp11::as_cpp<cpp11::decay_t<int>>(type), cpp11::as_cpp<cpp11::decay_t<std::string>>(graph), cpp11::as_cpp<cpp11::decay_t<std::string>>(spec)));
   END_CPP11
 }
+// dseams.cpp
 cpp11::integers symmetry_(SEXP ptr, double shell_rmsd);
 extern "C" SEXP _dseams_symmetry_(SEXP ptr, SEXP shell_rmsd) {
   BEGIN_CPP11
     return cpp11::as_sexp(symmetry_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(ptr), cpp11::as_cpp<cpp11::decay_t<double>>(shell_rmsd)));
   END_CPP11
 }
-cpp11::data_frame cages_(SEXP ptr, double cutoff, int type, int k, std::string graph);
-extern "C" SEXP _dseams_cages_(SEXP ptr, SEXP cutoff, SEXP type, SEXP k, SEXP graph) {
+// dseams.cpp
+void set_threads_(int n);
+extern "C" SEXP _dseams_set_threads_(SEXP n) {
   BEGIN_CPP11
-    return cpp11::as_sexp(cages_(cpp11::as_cpp<cpp11::decay_t<SEXP>>(ptr), cpp11::as_cpp<cpp11::decay_t<double>>(cutoff), cpp11::as_cpp<cpp11::decay_t<int>>(type), cpp11::as_cpp<cpp11::decay_t<int>>(k), cpp11::as_cpp<cpp11::decay_t<std::string>>(graph)));
+    set_threads_(cpp11::as_cpp<cpp11::decay_t<int>>(n));
+    return R_NilValue;
+  END_CPP11
+}
+// dseams.cpp
+int get_threads_();
+extern "C" SEXP _dseams_get_threads_() {
+  BEGIN_CPP11
+    return cpp11::as_sexp(get_threads_());
+  END_CPP11
+}
+// dseams.cpp
+std::string lang_version_();
+extern "C" SEXP _dseams_lang_version_() {
+  BEGIN_CPP11
+    return cpp11::as_sexp(lang_version_());
   END_CPP11
 }
 
 extern "C" {
 static const R_CallMethodDef CallEntries[] = {
-    {"_dseams_cages_",      (DL_FUNC) &_dseams_cages_,      5},
-    {"_dseams_chill_plus_", (DL_FUNC) &_dseams_chill_plus_, 5},
-    {"_dseams_nframes_",    (DL_FUNC) &_dseams_nframes_,    1},
-    {"_dseams_nop_",        (DL_FUNC) &_dseams_nop_,        1},
-    {"_dseams_positions_",  (DL_FUNC) &_dseams_positions_,  1},
-    {"_dseams_q4_q6_",      (DL_FUNC) &_dseams_q4_q6_,      3},
-    {"_dseams_read_frame_", (DL_FUNC) &_dseams_read_frame_, 3},
-    {"_dseams_rings_",      (DL_FUNC) &_dseams_rings_,      5},
+    {"_dseams_cages_",           (DL_FUNC) &_dseams_cages_,           5},
+    {"_dseams_chill_plus_",      (DL_FUNC) &_dseams_chill_plus_,      5},
+    {"_dseams_get_threads_",     (DL_FUNC) &_dseams_get_threads_,     0},
+    {"_dseams_jump_tau90_",      (DL_FUNC) &_dseams_jump_tau90_,      5},
+    {"_dseams_lang_version_",    (DL_FUNC) &_dseams_lang_version_,    0},
+    {"_dseams_nframes_",         (DL_FUNC) &_dseams_nframes_,         1},
+    {"_dseams_nop_",             (DL_FUNC) &_dseams_nop_,             1},
+    {"_dseams_positions_",       (DL_FUNC) &_dseams_positions_,       1},
+    {"_dseams_q4_q6_",           (DL_FUNC) &_dseams_q4_q6_,           3},
+    {"_dseams_read_frame_",      (DL_FUNC) &_dseams_read_frame_,      3},
+    {"_dseams_rings_",           (DL_FUNC) &_dseams_rings_,           5},
+    {"_dseams_set_threads_",     (DL_FUNC) &_dseams_set_threads_,     1},
     {"_dseams_signature_cages_", (DL_FUNC) &_dseams_signature_cages_, 5},
-    {"_dseams_jump_tau90_", (DL_FUNC) &_dseams_jump_tau90_, 5},
-    {"_dseams_steinhardt_", (DL_FUNC) &_dseams_steinhardt_, 5},
-    {"_dseams_symmetry_",   (DL_FUNC) &_dseams_symmetry_,   2},
+    {"_dseams_steinhardt_",      (DL_FUNC) &_dseams_steinhardt_,      5},
+    {"_dseams_symmetry_",        (DL_FUNC) &_dseams_symmetry_,        2},
     {NULL, NULL, 0}
 };
 }

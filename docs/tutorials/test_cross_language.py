@@ -86,7 +86,7 @@ def test_julia_cubic_count():
             julia,
             f"--project={ROOT / 'bindings' / 'julia' / 'Dseams'}",
             "-e",
-            'using Pkg; Pkg.instantiate(); include("test/runtests.jl")',
+            'include("dev/develop_jll.jl"); include("test/runtests.jl")',
         ],
         check=False,
         capture_output=True,

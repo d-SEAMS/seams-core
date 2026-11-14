@@ -38,7 +38,9 @@
 #include <thread>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <ext/stdio_filebuf.h>
+#ifdef _WIN32
+#include <io.h>
+#endif
 #include <unordered_map>
 
 #ifdef SEAMS_HAS_OPENMP
@@ -130,18 +132,127 @@ bool parseDumpInt(std::string_view line, int &out) {
   return parsed.ec == std::errc{};
 }
 
-// One POSIX descriptor. The stream reads that descriptor and nothing else.
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
+int openForRead(const std::string &path) {
+  return ::open(path.c_str(), O_RDONLY | O_BINARY);
+}
+
+std::int64_t seekFd(int fd, std::int64_t off, int whence) {
+#ifdef _WIN32
+  return ::_lseeki64(fd, off, whence);
+#else
+  return static_cast<std::int64_t>(::lseek(fd, static_cast<off_t>(off), whence));
+#endif
+}
+
+// pread where there is one. The Windows descriptors here are private to
+// the caller, so a seek and a read do the same.
+std::int64_t readAt(int fd, char *buf, std::size_t n, std::uint64_t off) {
+#ifdef _WIN32
+  if (seekFd(fd, static_cast<std::int64_t>(off), SEEK_SET) < 0) {
+    return -1;
+  }
+  const unsigned int chunk =
+      static_cast<unsigned int>(std::min<std::size_t>(n, 1u << 30));
+  return ::_read(fd, buf, chunk);
+#else
+  return ::pread(fd, buf, n, static_cast<off_t>(off));
+#endif
+}
+
+// A buffered, seekable read of one descriptor, which it closes. It reads
+// no further than the end of the file at that moment, so a dump that is
+// still being written is followed, and a descriptor that cannot seek to
+// its end (a /proc file: size 0, endless content) reads as empty.
+class FdReadBuf : public std::streambuf {
+public:
+  explicit FdReadBuf(int fd) : fd_(fd), buf_(1 << 16) {
+    setg(buf_.data(), buf_.data(), buf_.data());
+  }
+  ~FdReadBuf() override {
+    if (fd_ >= 0) {
+      ::close(fd_);
+    }
+  }
+  FdReadBuf(const FdReadBuf &) = delete;
+  FdReadBuf &operator=(const FdReadBuf &) = delete;
+
+protected:
+  int_type underflow() override {
+    if (gptr() < egptr()) {
+      return traits_type::to_int_type(*gptr());
+    }
+    const std::int64_t size = seekFd(fd_, 0, SEEK_END);
+    if (size <= end_ || seekFd(fd_, end_, SEEK_SET) != end_) {
+      return traits_type::eof();
+    }
+    const std::int64_t want =
+        std::min(static_cast<std::int64_t>(buf_.size()), size - end_);
+    std::int64_t n = -1;
+    do {
+      n = ::read(fd_, buf_.data(), static_cast<unsigned int>(want));
+    } while (n < 0 && errno == EINTR);
+    if (n <= 0) {
+      return traits_type::eof();
+    }
+    end_ += n;
+    setg(buf_.data(), buf_.data(), buf_.data() + n);
+    return traits_type::to_int_type(*gptr());
+  }
+
+  pos_type seekoff(off_type off, std::ios_base::seekdir dir,
+                   std::ios_base::openmode which) override {
+    if (!(which & std::ios_base::in)) {
+      return pos_type(off_type(-1));
+    }
+    const std::int64_t here = end_ - (egptr() - gptr());
+    if (dir == std::ios_base::cur) {
+      if (off == 0) {
+        return pos_type(here);
+      }
+      return seekpos(pos_type(here + off), which);
+    }
+    if (dir == std::ios_base::end) {
+      const std::int64_t r = seekFd(fd_, off, SEEK_END);
+      return r < 0 ? pos_type(off_type(-1)) : reset(r);
+    }
+    return seekpos(pos_type(off), which);
+  }
+
+  pos_type seekpos(pos_type sp, std::ios_base::openmode which) override {
+    if (!(which & std::ios_base::in)) {
+      return pos_type(off_type(-1));
+    }
+    const std::int64_t r = seekFd(fd_, static_cast<std::int64_t>(sp), SEEK_SET);
+    return r < 0 ? pos_type(off_type(-1)) : reset(r);
+  }
+
+private:
+  pos_type reset(std::int64_t at) {
+    end_ = at;
+    setg(buf_.data(), buf_.data(), buf_.data());
+    return pos_type(at);
+  }
+
+  int fd_;
+  std::vector<char> buf_;
+  std::int64_t end_ = 0;
+};
+
+// One descriptor. The stream reads that descriptor and nothing else.
 class OwnedFdStream {
 public:
-  explicit OwnedFdStream(int fd)
-      : fd_(fd), buf_(fd, std::ios::in | std::ios::binary), in_(&buf_) {}
+  explicit OwnedFdStream(int fd) : fd_(fd), buf_(fd), in_(&buf_) {}
   std::istream &stream() { return in_; }
   int descriptor() const { return fd_; }
   bool failed() const { return in_.bad(); }
 
 private:
   int fd_;
-  __gnu_cxx::stdio_filebuf<char> buf_;
+  FdReadBuf buf_;
   std::istream in_;
 };
 
@@ -174,7 +285,7 @@ struct LammpsDumpSession {
     if (ec) {
       return false;
     }
-    const int raw = ::open(filename.c_str(), O_RDONLY);
+    const int raw = openForRead(filename);
     if (raw < 0) {
       return false;
     }
@@ -200,7 +311,7 @@ struct LammpsDumpSession {
   // replaces it before the pages are read. pread stops at the bytes
   // that still belong to this descriptor.
   bool mmapIndexAll() {
-    const int fd = ::open(path.c_str(), O_RDONLY);
+    const int fd = openForRead(path);
     if (fd < 0) {
       return false;
     }
@@ -213,8 +324,7 @@ struct LammpsDumpSession {
     std::vector<char> bytes(nbytes);
     std::size_t got = 0;
     while (got < nbytes) {
-      const ssize_t n = ::pread(fd, bytes.data() + got, nbytes - got,
-                               static_cast<off_t>(got));
+      const std::int64_t n = readAt(fd, bytes.data() + got, nbytes - got, got);
       if (n < 0) {
         if (errno == EINTR) {
           continue;
@@ -1025,7 +1135,7 @@ bool openCloneAt(const std::string &filename, int frame, CloneRead &out) {
     }
     off = sess->offsets[static_cast<std::size_t>(frame - 1)];
   }
-  const int raw = ::open(filename.c_str(), O_RDONLY);
+  const int raw = openForRead(filename);
   if (raw < 0) {
     return false;
   }
@@ -1093,7 +1203,7 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
   if (keep == LammpsKeep::TypeInSlice) {
     return false;
   }
-  const int fd = ::open(filename.c_str(), O_RDONLY);
+  const int fd = openForRead(filename);
   if (fd < 0) {
     return false;
   }
@@ -1111,8 +1221,7 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
   std::vector<char> bytes(nbytes);
   std::size_t got = 0;
   while (got < nbytes) {
-    const ssize_t nread = ::pread(fd, bytes.data() + got, nbytes - got,
-                                  static_cast<off_t>(got));
+    const std::int64_t nread = readAt(fd, bytes.data() + got, nbytes - got, got);
     if (nread < 0) {
       if (errno == EINTR) {
         continue;

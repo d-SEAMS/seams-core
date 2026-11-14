@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <vector>
 
 #include <cpp11.hpp>
@@ -7,6 +8,10 @@
 #include <cpp11/strings.hpp>
 
 #include "seams_lang.h"
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 using namespace cpp11::literals;
 
@@ -261,3 +266,24 @@ cpp11::integers symmetry_(SEXP ptr, double shell_rmsd) {
   }
   return labels;
 }
+
+[[cpp11::register]]
+void set_threads_(int n) {
+#ifdef _OPENMP
+  omp_set_num_threads(n < 1 ? 1 : n);
+#else
+  (void)n;
+#endif
+}
+
+[[cpp11::register]]
+int get_threads_() {
+#ifdef _OPENMP
+  return omp_get_max_threads();
+#else
+  return 1;
+#endif
+}
+
+[[cpp11::register]]
+std::string lang_version_() { return seams_lang_version(); }

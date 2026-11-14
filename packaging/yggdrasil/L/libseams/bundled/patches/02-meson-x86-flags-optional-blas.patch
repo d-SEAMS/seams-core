@@ -1,0 +1,38 @@
+diff --git a/meson.build b/meson.build
+index 0ac7b84a..1ac10874 100644
+--- a/meson.build
++++ b/meson.build
+@@ -82,10 +82,16 @@ if flexiblas_dep.found()
+     endif
+   endif
+ else
+-  blas_dep = cppc.find_library('blas', required: true)
+-  lapack_dep = cppc.find_library('lapack', required: true)
+-  _deps += [blas_dep, lapack_dep]
+-  blas_backend = 'blas+lapack'
++  # The engine makes no BLAS or LAPACK call of its own; Eigen does the
++  # linear algebra. A toolchain without either library still builds.
++  blas_dep = cppc.find_library('blas', required: false)
++  lapack_dep = cppc.find_library('lapack', required: false)
++  if blas_dep.found() and lapack_dep.found()
++    _deps += [blas_dep, lapack_dep]
++    blas_backend = 'blas+lapack'
++  else
++    blas_backend = 'none'
++  endif
+ endif
+ 
+ # Shared-memory parallelism. libstdc++ routes std::execution::par through TBB,
+diff --git a/src/meson.build b/src/meson.build
+index bef9191e..661858a8 100644
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -79,7 +79,7 @@ endif
+ # One shell_avx archive is linked into both the shell path and the Ylm path.
+ _shell_link = []
+ _ylm_link = []
+-if cpp_id == 'gcc' or cpp_id == 'clang'
++if (cpp_id == 'gcc' or cpp_id == 'clang') and host_machine.cpu_family() == 'x86_64'
+   _shell_avx = static_library('shell_avx', 'shell_classify.cpp',
+     cpp_args: _args + ['-mavx2', '-mfma'],
+     include_directories: _incdirs,
