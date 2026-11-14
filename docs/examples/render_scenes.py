@@ -435,7 +435,7 @@ def render_brine(render, rows, path, box, width=1400):
                 shown = "water"
             colours.append(BRINE_COLOUR.get(shown, BRINE_COLOUR["unclassified"]))
             radii.append(BRINE_RADIUS["O"] if shown != "water" else BRINE_RADIUS["water"])
-            present.add("liquid" if shown == "water" else ("interf. clathrate" if shown == "interClathrate" else shown))
+            present.add("liquid" if shown == "water" else ("interclathrate" if shown == "interClathrate" else shown))
             drawn_liquid.append(shown == "water")
     colours = np.vstack(colours)
     radii = np.asarray(radii)
@@ -484,8 +484,7 @@ def present_cage(render, path, origin, vectors, legend, title, forward, up, fram
     centre, half_h, half_v, forward, right, up = _camera(render, frame, forward, up)
     raw = Image.open(path).convert("RGB")
     font = _legend_font(LEGEND_FONT_PX)
-    swatch = 32
-    row_h = 52
+    swatch, row_h = legend_metrics(font)
 
     def raw_pix(point):
         offset = np.asarray(point, dtype=float) - centre
@@ -493,14 +492,29 @@ def present_cage(render, path, origin, vectors, legend, title, forward, up, fram
         y = (0.5 - float(np.dot(offset, up)) / (2.0 * half_v)) * raw.height
         return x, y
 
-    # The camera already includes every vertex plus pad_radius. Do not crop:
-    # a crop from the projected vertices was cutting faces that render
-    # outside that projection.
-    image = raw
-    crop_x0 = crop_y0 = 0
-    margin_px = float(pad_radius) * raw.width / (2.0 * half_h)
+    # Crop to the drawn cages plus the same 2 A margin. Vertices and the
+    # cell corners stay inside that crop, and the assert still measures
+    # the margin in pixels of that 2 A.
+    pad = int(np.ceil(float(pad_radius) * raw.width / (2.0 * half_h)))
+    arr = np.asarray(raw)
+    ink = np.where(np.any(arr < 240, axis=2))
+    if ink[0].size:
+        cx0, cy0 = int(ink[1].min()), int(ink[0].min())
+        cx1, cy1 = int(ink[1].max()) + 1, int(ink[0].max()) + 1
+    else:
+        cx0, cy0, cx1, cy1 = 0, 0, raw.width, raw.height
+    geom = [raw_pix(point) for point in cage_points] + [raw_pix(point) for point in corners]
+    vx = [point[0] for point in geom]
+    vy = [point[1] for point in geom]
+    crop_x0 = max(0, int(np.floor(min(cx0, min(vx)) - pad)))
+    crop_y0 = max(0, int(np.floor(min(cy0, min(vy)) - pad)))
+    crop_x1 = min(raw.width, int(np.ceil(max(cx1, max(vx)) + pad)))
+    crop_y1 = min(raw.height, int(np.ceil(max(cy1, max(vy)) + pad)))
+    image = raw.crop((crop_x0, crop_y0, crop_x1, crop_y1))
+    margin_px = float(pad)
     left, right_margin, top = 24, 24, 8
-    margin = 24 + row_h * 2 + LEGEND_FONT_PX + 48
+    # Title, one legend row, and the 1 nm label under the bar.
+    margin = 8 + row_h + LEGEND_FONT_PX + 28 + LEGEND_FONT_PX + 24
     canvas = Image.new("RGB", (image.width + left + right_margin, image.height + top + margin), (255, 255, 255))
     canvas.paste(image, (left, top))
     draw = ImageDraw.Draw(canvas)
@@ -547,11 +561,11 @@ def present_cage(render, path, origin, vectors, legend, title, forward, up, fram
     ten = project(centre + 10.0 * right)
     origin_px = project(centre)
     assert_nanometre_bar(bar, abs(ten[0] - origin_px[0]), 10.0)
-    bar_y = legend_bottom + 28
+    bar_y = legend_bottom + max(28, int(LEGEND_FONT_PX * 0.75))
     bar_x = left + 16
     draw.line([(bar_x, bar_y), (bar_x + bar, bar_y)], fill=(20, 20, 20), width=6)
     marks.append(("1 nm bar", (bar_x, bar_y - 4, bar_x + bar, bar_y + 4)))
-    add_text("1 nm", (bar_x + bar + 14, bar_y - LEGEND_FONT_PX / 2.0), "1 nm")
+    add_text("1 nm", (bar_x + bar + 14, text_origin_y(font, "1 nm", bar_y)), "1 nm")
     projected_vertices = [project(point) for point in cage_points]
     assert_projected_inside(canvas.width, canvas.height, projected_vertices, margin_px)
     require_disjoint(marks)
@@ -611,6 +625,48 @@ def text_bbox(font, xy, text):
     left, top, right, bottom = font.getbbox(text)
     x, y = xy
     return (x + left, y + top, x + right, y + bottom)
+
+
+def text_origin_y(font, text, center):
+    """Text origin that centres the glyph box on ``center``."""
+    _left, top, _right, bottom = font.getbbox(text)
+    return float(center) - 0.5 * (top + bottom)
+
+
+def legend_metrics(font):
+    """Swatch and row height that clear the legend glyphs.
+
+    The row has to clear a descender. A fixed 52 px row collides once the
+    print-size check raises the font above 44 px.
+    """
+    sample = max(font.getbbox(text)[3] for text in ("Hg", "liquid", "growth front"))
+    swatch = max(32, int(round(sample * 0.72)))
+    return swatch, int(sample + 16)
+
+
+def place_text(draw, marks, font, name, xy, text, nudge=0.0):
+    """Draw ``text`` at ``xy``, stepping by ``nudge`` until the box is clear.
+
+    A zero nudge leaves the label where it was requested. The growth-front
+    label uses that so it stays on the front; a region label steps away
+    from the front when its span is shorter than the glyph.
+    """
+    x, y = xy
+    for _ in range(48):
+        box = text_bbox(font, (x, y), text)
+        if not any(
+            box[0] < other[2] and other[0] < box[2] and box[1] < other[3] and other[1] < box[3]
+            for _other, other in marks
+        ):
+            marks.append((name, box))
+            draw.text((x, y), text, font=font, fill=(20, 20, 20))
+            return
+        if nudge == 0.0:
+            break
+        y += nudge
+    box = text_bbox(font, (x, y), text)
+    marks.append((name, box))
+    draw.text((x, y), text, font=font, fill=(20, 20, 20))
 
 
 def legend_groups(labels, font, swatch, max_width):
@@ -777,8 +833,7 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
     centre, half_h, half_v, forward, right, up = _camera(render, frame if frame is not None else positions, forward, up)
     raw = Image.open(path).convert("RGB")
     font = _legend_font(LEGEND_FONT_PX)
-    swatch = 32
-    row_h = 52
+    swatch, row_h = legend_metrics(font)
 
     def raw_pix(point):
         offset = np.asarray(point, dtype=float) - centre
@@ -869,10 +924,24 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
         # Screen y grows downward: the brine span is the upper one.
         stroke_bracket(draw, bracket_x, y_top, y_front - gap)
         stroke_bracket(draw, bracket_x, y_front + gap, y_ice)
-        add_text("brine", (bracket_x + 14, 0.5 * (y_top + y_front) - LEGEND_FONT_PX / 2.0), "brine")
-        add_text("ice Ih", (bracket_x + 14, 0.5 * (y_front + y_ice) - LEGEND_FONT_PX / 2.0), "ice Ih")
         dashed_hline(draw, x_left, x_right, y_front)
-        add_text("growth front", (bracket_x + 200, y_front - LEGEND_FONT_PX / 2.0), "growth front")
+        # Same column as the bracket labels. The front keeps the gap; a
+        # short span steps its region label away so the boxes stay apart.
+        label_x = bracket_x + 14
+        place_text(
+            draw, marks, font, "growth front",
+            (label_x, text_origin_y(font, "growth front", y_front)), "growth front",
+        )
+        place_text(
+            draw, marks, font, "brine",
+            (label_x, text_origin_y(font, "brine", 0.5 * (y_top + y_front))), "brine",
+            nudge=-4.0,
+        )
+        place_text(
+            draw, marks, font, "ice Ih",
+            (label_x, text_origin_y(font, "ice Ih", 0.5 * (y_front + y_ice))), "ice Ih",
+            nudge=4.0,
+        )
     legend_bottom = image.height + top
     y = image.height + top + 16
     for group in groups:
@@ -887,11 +956,11 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
             x += swatch + 16 + text_w + 18
         y += row_h
     bar = 10.0 * raw.width / (2.0 * half_h)
-    bar_y = legend_bottom + 28
+    bar_y = legend_bottom + max(28, int(LEGEND_FONT_PX * 0.75))
     bar_x = left + 16
     draw.line([(bar_x, bar_y), (bar_x + bar, bar_y)], fill=(20, 20, 20), width=6)
     marks.append(("1 nm bar", (bar_x, bar_y - 4, bar_x + bar, bar_y + 4)))
-    add_text("1 nm", (bar_x + bar + 14, bar_y - LEGEND_FONT_PX / 2.0), "1 nm")
+    add_text("1 nm", (bar_x + bar + 14, text_origin_y(font, "1 nm", bar_y)), "1 nm")
     if pad_radius is not None:
         margin_px = max(2.0, float(sphere_pad) * 0.5)
         assert_projected_inside(canvas.width, canvas.height, [project(point) for point in positions], margin_px)
@@ -1040,8 +1109,7 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
     )
     raw = Image.open(path).convert("RGB")
     font = _legend_font(LEGEND_FONT_PX)
-    swatch = 32
-    row_h = 52
+    swatch, row_h = legend_metrics(font)
     left, right_margin, top = 220, 720, 8
     shown_legend = [(display_label(label), colour) for label, colour in (legend or ())]
     groups = [shown_legend] if shown_legend else []
@@ -1127,10 +1195,24 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
     gap = 28
     stroke_bracket(draw, bracket_x, y_top_cell, y_front - gap)
     stroke_bracket(draw, bracket_x, y_front + gap, y_ice)
-    add_text("liquid", (bracket_x + 14, 0.5 * (y_top_cell + y_front) - LEGEND_FONT_PX / 2.0), "liquid")
-    add_text("ice Ih", (bracket_x + 14, 0.5 * (y_front + y_ice) - LEGEND_FONT_PX / 2.0), "ice Ih")
     dashed_hline(draw, x_left, x_right, y_front)
-    add_text("growth front", (bracket_x + 200, y_front - LEGEND_FONT_PX / 2.0), "growth front")
+    # Same column as the bracket labels. The front keeps the gap; a
+    # short span steps its region label away so the boxes stay apart.
+    label_x = bracket_x + 14
+    place_text(
+        draw, marks, font, "growth front",
+        (label_x, text_origin_y(font, "growth front", y_front)), "growth front",
+    )
+    place_text(
+        draw, marks, font, "liquid",
+        (label_x, text_origin_y(font, "liquid", 0.5 * (y_top_cell + y_front))), "liquid",
+        nudge=-4.0,
+    )
+    place_text(
+        draw, marks, font, "ice Ih",
+        (label_x, text_origin_y(font, "ice Ih", 0.5 * (y_front + y_ice))), "ice Ih",
+        nudge=4.0,
+    )
 
     legend_bottom = image.height + top
     y = image.height + top + 16
@@ -1149,11 +1231,11 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
     # The horizontal edge is the cell's y length when the camera looks down x.
     assert_nanometre_bar(bar, x_right - x_left, float(lengths[1]))
     assert_nanometre_bar(bar, abs(y_bottom - y_top), float(lengths[2]))
-    bar_y = legend_bottom + 28
+    bar_y = legend_bottom + max(28, int(LEGEND_FONT_PX * 0.75))
     bar_x = x_left
     draw.line([(bar_x, bar_y), (bar_x + bar, bar_y)], fill=(20, 20, 20), width=6)
     marks.append(("1 nm bar", (bar_x, bar_y - 4, bar_x + bar, bar_y + 4)))
-    add_text("1 nm", (bar_x + bar + 14, bar_y - LEGEND_FONT_PX / 2.0), "1 nm")
+    add_text("1 nm", (bar_x + bar + 14, text_origin_y(font, "1 nm", bar_y)), "1 nm")
     assert_projected_inside(canvas.width, canvas.height, [pix(point) for point in positions], max(2.0, float(pad) * 0.5))
     require_disjoint(marks)
     canvas.save(path)
@@ -1206,7 +1288,7 @@ def render_interface(render, positions, labels, origin, lengths, path, width=Non
     blended[veil] = 0.18 * liquid_image[veil] + 0.82 * ice[veil]
     Image.fromarray(np.clip(blended, 0, 255).astype(np.uint8)).save(path)
     ids, _centres = basal_bilayers(positions, labels, basal)
-    names = {0: "cubic", 1: "hexagonal", 2: "liquid", 3: "interfacial", 4: "clathrate", 5: "interf. clathrate"}
+    names = {0: "cubic", 1: "hexagonal", 2: "liquid", 3: "interfacial", 4: "clathrate", 5: "interclathrate"}
     present = {names[int(code)] for code in shown if int(code) in names}
     legend = [item for item in BRINE_LEGEND if item[0] in present]
     _present_interface(

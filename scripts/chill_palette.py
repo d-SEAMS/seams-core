@@ -57,7 +57,7 @@ LEGEND = (
     ("interfacial", INTERFACIAL),
     ("liquid", WATER),
     ("clathrate", CLATHRATE),
-    ("interf. clathrate", INTER_CLATHRATE),
+    ("interclathrate", INTER_CLATHRATE),
     ("Na+", SODIUM),
     ("Cl-", CHLORIDE),
 )
