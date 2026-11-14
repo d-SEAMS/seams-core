@@ -394,6 +394,7 @@ endif
 _readcon_kind = get_option('default_library') == 'static' ? 'static' : 'shared'
 readcon_dep = dependency('readcon-core', version: '>=0.16.2', required: false,
                          fallback: ['readcon-core', 'readcon_dep'],
+                         include_type: 'system',
                          default_options: ['default_library=' + _readcon_kind])
 if readcon_dep.found()
   _deps += [readcon_dep]
@@ -406,6 +407,7 @@ endif
 # libreadcon_core.
 readcondb_dep = dependency('readcon-db', version: '>=0.1.8', required: false,
                            fallback: ['readcon-db', 'readcon_dep'],
+                           include_type: 'system',
                            default_options: [
                              'default_library=' + _readcon_kind,
                              'with_tests=false',
