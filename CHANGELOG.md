@@ -116,6 +116,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
   flags ~inSlice~ and keeps every atom of the type;
   ~readLammpsTrjreduced~ drops atoms outside the slice. An axis with
   ~lo == hi~ is unconstrained.
+- Each function section of the C API page now carries its full `seams.h` documentation: purpose, every parameter, return codes, ownership, thread safety, and the header example. `docs/capi_docs.py --write` rewrites those sections from the header, and `docs/render_c_api.py` uses the same renderer. Every function that takes or returns a pointer now says in `seams.h` who owns each argument and how long the library holds it.
 - Inside the one-image ball the in-plane RDF walks Rapaport cell pairs: cells span the cutoff across each face separation, a half stencil visits each neighbouring pair of cells once, and one lattice shift serves the pair. It replaces the packed grid and the vesin list; 8192 atoms at a 6 Å cutoff take 2.2 ms on one thread and 0.4 ms on eight.
 - Interior cells of the one-thread orthorhombic cutoff skip the periodic-shift branches. A parallel ring search writes each neighbour row, already sorted, into one array, so the walk after the cell list matches the walk after linkcell.
 - MPI ring analyses can reduce ring counts and per-atom ring types with `seams::domain::reduceRings`, which keeps each rank on its own domain and sends only owned atoms to the root instead of gathering every ring on every rank.
