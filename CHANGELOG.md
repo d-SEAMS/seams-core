@@ -65,6 +65,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - TIP4P/2005 ring updates at 0.01, 0.1 and 1 ps stay inside the hop ball and match a full search. The strict seeded graph is 8.3, 3.3 and 2.6 times a rebuild.
 - The 884736-molecule sitting adds pyscal3 neighbours and q6, PLUMED q6 with PLUMED_NUM_THREADS set to the row width, and OVITO coordination. Those rows agree with d-SEAMS on the same ice Ic frame. scripts/plot_sitting_large_time.py draws time against threads and does not store the PDF.
 - The PLUMED SEAMS collective variable reports q6, the CHILL+ ice fraction and the six-ring fraction, and a restraint can bias q6.
+- The Python Frame reference runs `read`, `steinhardt`, `ring_census`, `rdf_2d`, `monolayer_rings`, `find_prisms`, `to_ase`, and `to_solvis` on ice Ih and shows each result.
 - The Rust, Fortran, and Python ctypes bindings call the analyses `seams.h` now exports, including frame reading, CHILL, Steinhardt parameters, cages, neighbour lists, the RDF, hydrogen bonds, density, the fingerprint, prisms, and the monolayer.
 - The ice label is the residual of the seventeen-atom shell after the optimal rotation and scale. The shell is the four bonded neighbours and each of their bonded neighbours.
 - The ice label takes an eclipsed-cosine cutoff, and cage, ring and shell naming runs in parallel.
@@ -141,6 +142,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The hydrate signature search scales with threads. The cutoff list is the threaded linkcell list, built on one reused worker pool, and crystals under a few thousand molecules stay at four threads so a wider team does not slow them down. Neighbour rows are placed on the calling thread until the pair list is large enough that a parallel sort is the smaller cost. The cage index is merged from per-thread buckets in ring order. Census and cage membership match the one-thread result.
 - The ice cage search counts distinct atoms in a small buffer and builds only the least ring reading.
 - The in-plane RDF builds an explicit grid whose cells are the cutoff and bins packed coordinates from the neighbouring cells. Each thread keeps its own histogram until the frame finishes.
+- The landing page hides the root toctree and replaces that dump with cards for Tutorials, How-to, the language reference, the engines, Comparisons, and the paper reproductions. The suite-stack diagram fills the article column.
 - The linkcell wrap pin is 3700ea3 (0.3.5).
 - The linkcell wrap tracks v0.3.9 and the minimage wrap tracks v0.1.4. The linkcell patch builds that crate against the minimage wrap checked out beside it.
 - The minimage wrap pin is v0.1.2. Distances use mi_displacement_euclidean, and a failed call keeps the in-tree formula.
@@ -211,6 +213,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The nucleation notebook rule declares ``figshare-incremental.json``
   as an output. A later ``test -s`` stamp cannot see a side-effect
   file because Snakemake deletes declared outputs before the job.
+- The opt-in paper runs print the molecule count, the frame count, and the file they read, next to the size the paper states. Rings reads frame 1 of the 11-frame 4096-molecule mW dump. The interface and brine runs read the shipped 864-water frames. Nucleation reads the figshare trajectory, 148 frames of 4096 molecules.
 - The reproducibility DAG builds yodaStruct as ``require("dseams")`` and
   runs the five figshare deposits through that library. There is no
   in-tree ``yodaStruct`` binary.

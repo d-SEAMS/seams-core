@@ -5,6 +5,7 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 
 | page | what it names |
 |------+---------------|
+| [[file:python-frame.org][Python Frame]] | ~read~, ~to_ase~, ~to_solvis~, ~rdf_2d~, ~monolayer_rings~, ~find_prisms~, ~ring_census~, ~steinhardt~ |
 | [[file:cli.org][seams CLI]] | ~seams~ subcommands, flags, colors |
 | [[file:data-formats.org][data formats]] | LAMMPS dump, XYZ, chemfiles, ~.con~ |
 | [[file:walk-compare.org][walk_compare]] | ~tests/walk_compare~ inputs and columns |
@@ -21,6 +22,7 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 .. toctree::
    :maxdepth: 1
 
+   python-frame
    cli
    data-formats
    walk-compare

@@ -1,0 +1,89 @@
+#+TITLE: Python Frame
+#+OPTIONS: toc:nil num:nil
+
+~pydseams.read~ returns a ~Frame~. Each call below is the example the
+suite runs, and the line under it is the output. The frame is
+~input/traj/ice1h.lammpstrj~, 128 oxygens.
+
+* read
+
+#+begin_src python
+>>> import pydseams
+>>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> frame.n_atoms
+128
+#+end_src
+
+* steinhardt
+
+#+begin_src python
+>>> import pydseams
+>>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> q = frame.steinhardt(6)
+>>> len(q["ql"])
+128
+>>> round(sum(q["ql"]) / len(q["ql"]), 6)
+0.625855
+#+end_src
+
+* ring_census
+
+#+begin_src python
+>>> import pydseams
+>>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> frame.ring_census(6)
+{6: 256}
+#+end_src
+
+* rdf_2d
+
+#+begin_src python
+>>> import tempfile
+>>> import pydseams
+>>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> radius, values = frame.rdf_2d(tempfile.mkdtemp(), cutoff=6.0, binwidth=0.5)
+>>> len(radius)
+12
+>>> round(max(values), 6)
+1.814601
+#+end_src
+
+* monolayer_rings
+
+#+begin_src python
+>>> import tempfile
+>>> import pydseams
+>>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> sheet = frame.monolayer_rings(tempfile.mkdtemp(), sheet_area=1.0, max_depth=6)
+>>> sheet[6]["count"]
+256
+#+end_src
+
+* find_prisms
+
+#+begin_src python
+>>> import tempfile
+>>> import pydseams
+>>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> frame.find_prisms(output_dir=tempfile.mkdtemp(), max_depth=4)
+[{'size': 3, 'perfect': 0, 'imperfect': 0}, {'size': 4, 'perfect': 0, 'imperfect': 0}]
+#+end_src
+
+* to_ase
+
+#+begin_src python
+>>> import pydseams
+>>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> atoms = frame.to_ase()
+>>> len(atoms)
+128
+#+end_src
+
+* to_solvis
+
+#+begin_src python
+>>> import pydseams
+>>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
+>>> type(frame.to_solvis()).__name__
+'System'
+#+end_src
