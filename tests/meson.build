@@ -64,6 +64,7 @@ test_sources = {
   'science_front': 'test_science_front.cpp',
   'ql_solid': 'test_ql_solid.cpp',
   'thread_scale': 'test_thread_scale.cpp',
+  'thread_invariance': 'test_thread_invariance.cpp',
   'gpu_residency': 'test_gpu_residency.cpp',
   'config': 'test_config.cpp',
   'site': 'test_site.cpp',
