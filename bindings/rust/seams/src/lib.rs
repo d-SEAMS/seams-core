@@ -38,6 +38,12 @@
 #![deny(missing_docs)]
 
 pub use seams_sys as ffi;
+
+/// The crate README, compiled and run by `cargo test` as doctests.
+#[cfg(doctest)]
+#[doc = include_str!("../README.md")]
+struct ReadmeDoctests;
+
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_char, c_int, c_void};
 

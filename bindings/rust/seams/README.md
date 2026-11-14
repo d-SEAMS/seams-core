@@ -26,12 +26,8 @@ fn main() -> Result<(), seams::Error> {
     }
     let mut sys = seams::System::new()?;
     sys.set_ortho(&xyz, a, a, a)?;
-    let (labels, _counts) = sys.chill_plus(
-        3.5,
-        seams::ffi::SEAMS_GRAPH_CUTOFF,
-        seams::ffi::SEAMS_CHILL_PUBLISHED,
-    )?;
-    assert_eq!(labels.len(), 8);
+    let ice = sys.chill_plus(&seams::ChillOptions::default())?;
+    assert_eq!(ice.labels.len(), 8);
     Ok(())
 }
 ```
