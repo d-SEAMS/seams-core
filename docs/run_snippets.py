@@ -171,7 +171,8 @@ def stage_dseams(build):
     if not built:
         built = [path for path in package.glob("_core*.so") if path.is_file()]
     tag = sys.implementation.cache_tag
-    matched = [path for path in built if tag in path.name]
+    abi3 = sys.version_info >= (3, 12)
+    matched = [path for path in built if tag in path.name or (abi3 and ".abi3." in path.name)]
     if matched:
         built = matched
     if built:

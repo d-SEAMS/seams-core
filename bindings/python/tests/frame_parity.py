@@ -25,7 +25,13 @@ def _stage_extension():
     if not build.is_dir():
         return None
     tag = sys.implementation.cache_tag
-    cores = [path for path in build.rglob("_core*.so") if tag in path.name and path.is_file()]
+    # A limited-API build names the module _core.abi3.so; CPython 3.12+ loads it.
+    abi3 = sys.version_info >= (3, 12)
+    cores = [
+        path
+        for path in build.rglob("_core*.so")
+        if (tag in path.name or (abi3 and ".abi3." in path.name)) and path.is_file()
+    ]
     if not cores:
         return None
     stage = build / "pythonpath"

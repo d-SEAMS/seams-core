@@ -17,7 +17,14 @@ src = Path(os.environ.get("DSEAMS_SRC", Path(__file__).resolve().parents[2]))
 # A conda python and the extension must share a stable ABI tag. A module
 # built for another interpreter is a skip, not a failed import.
 tag = sys.implementation.cache_tag  # cpython-312
-cores = [path for path in build.rglob("_core*.so") if tag in path.name]
+# With python.allow_limited_api (the Meson default) the module is
+# _core.abi3.so, which any CPython from 3.12 loads.
+abi3 = sys.version_info >= (3, 12)
+cores = [
+    path
+    for path in build.rglob("_core*.so")
+    if tag in path.name or (abi3 and ".abi3." in path.name)
+]
 if not cores:
     built = [path.name for path in build.rglob("_core*.so")]
     print(f"dseams._core was not built for {tag}; found {built or 'nothing'}")
