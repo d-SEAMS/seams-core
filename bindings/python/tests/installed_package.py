@@ -51,6 +51,71 @@ def test_lang_library_resolves():
     assert path.endswith((".so", ".dylib", ".dll")), path
 
 
+def test_frame_api_parity():
+    """pydseamslib.Frame is the in-tree Frame; pydseams.Frame agrees on cubic ice."""
+    import pydseams
+    import pydseamslib
+    from dseams import userframe
+
+    assert pydseamslib.Frame is dseams.Frame
+    assert pydseams.Frame is userframe.Frame
+    for name in (
+        "chill_plus",
+        "cages",
+        "cages_by_signature",
+        "steinhardt",
+        "ring_census",
+        "rdf_2d",
+        "monolayer_rings",
+        "find_prisms",
+    ):
+        assert callable(getattr(pydseams.Frame, name)), name
+    for name in ("set_frame", "count", "chill_plus", "q4q6", "neighbours", "rings"):
+        assert callable(getattr(dseams.Frame, name)), name
+
+    pos, box = diamond(nrep=2)
+    core = dseams.Frame()
+    core.set_frame(pos, box)
+    labels, counts = core.chill_plus()
+    assert int(counts[0]) == len(pos)
+    assert np.all(labels == 0)
+
+    path = _write_dump(pos, box[0])
+    legacy = pydseams.read(path, all_atoms=True)
+    try:
+        named = legacy.chill_plus()
+    finally:
+        legacy.close()
+        import os
+
+        os.unlink(path)
+    assert named["cubic"] == int(counts[0])
+
+
+def _write_dump(pos, length):
+    import os
+    import tempfile
+
+    fd, path = tempfile.mkstemp(suffix=".lammpstrj")
+    os.close(fd)
+    lines = [
+        "ITEM: TIMESTEP",
+        "0",
+        "ITEM: NUMBER OF ATOMS",
+        str(len(pos)),
+        "ITEM: BOX BOUNDS pp pp pp",
+        f"0 {length}",
+        f"0 {length}",
+        f"0 {length}",
+        "ITEM: ATOMS id type x y z",
+    ]
+    for i, (x, y, z) in enumerate(pos, start=1):
+        lines.append(f"{i} 1 {x:.8f} {y:.8f} {z:.8f}")
+    with open(path, "w", encoding="utf-8") as handle:
+        handle.write("\n".join(lines) + "\n")
+    return path
+
+
 def test_cubic_ice_shell_and_cages():
     pos, box = diamond()
     labels = dseams.symmetry(pos, box)

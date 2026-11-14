@@ -39,3 +39,30 @@ conda-forge or build from source with those enabled. See the
 [installation guide](https://docs.dseams.info/install).
 
 MIT licensed.
+
+## Which name ships
+
+PyPI publishes one distribution, `pydseamslib`. The module you import is
+`dseams`, and its source is `bindings/python/dseams` in this repository.
+There is no second PyPI project named `dseams`.
+
+| Name | What it is |
+| --- | --- |
+| `pydseamslib` | The PyPI distribution, and a compatibility module that re-exports `dseams` |
+| `dseams` | The import name. `pydseamslib.Frame is dseams.Frame` |
+| `bindings/python/dseams` | The in-tree sources of that import |
+| `pydseams` | The 2.11 compatibility import (`read`, `from_ase`, and its `Frame`) |
+
+## Frame API
+
+`dseams.Frame` is the nanobind handle on a `seams_system`: `set_frame`,
+`count`, `chill_plus`, `q4q6`, `neighbours`, and `rings`.
+
+`pydseams.Frame` (`dseams.userframe.Frame`) is the 2.11 object. It is a
+different class. It reads a trajectory through `libseams_lang` and exposes
+`chill_plus`, `cages`, `steinhardt`, `ring_census`, `rdf_2d`,
+`monolayer_rings`, and `find_prisms`.
+
+The two classes are not interchangeable. On the same coordinates their
+CHILL+ cubic count matches. `tests/installed_package.py` checks the
+identity `pydseamslib.Frame is dseams.Frame` and that count.
