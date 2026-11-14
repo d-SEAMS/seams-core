@@ -23,6 +23,7 @@
 #include <thread_team.hpp>
 #include <water_select.hpp>
 
+#include <chrono>
 #include <cmath>
 #include <cstring>
 #include <exception>
@@ -173,6 +174,13 @@ int seams_chill_plus_rule(const double *xyz, int n, const double *box,
 namespace {
 
 thread_local std::string g_c_error;
+thread_local double g_stages[4] = {0.0, 0.0, 0.0, 0.0};
+
+using StageClock = std::chrono::steady_clock;
+
+double secondsBetween(StageClock::time_point a, StageClock::time_point b) {
+  return std::chrono::duration<double>(b - a).count();
+}
 
 void note_c_error(const std::string &message) { g_c_error = message; }
 
@@ -572,25 +580,32 @@ int seams_cutoff_csr(const double *xyz, int n, const double *box9, double cutoff
     return 1;
   }
   try {
+    const auto t0 = StageClock::now();
     const Cloud &cloud = frameCloud(xyz, n, box9);
+    const auto t1 = StageClock::now();
     std::vector<int> &off = frameScratch().off;
     std::vector<int> &col = frameScratch().col;
     if (!nneigh::orthoFullCsr(cloud, nullptr, cutoff, off, col, false)) {
       return 1;
     }
+    const auto t2 = StageClock::now();
     const int count = static_cast<int>(col.size());
     *n_cols = count;
     if (static_cast<int>(off.size()) != n + 1) {
       return 1;
     }
     copyInts(off.data(), offsets, n + 1);
-    if (cols == nullptr) {
-      return 0;
+    if (cols != nullptr) {
+      if (cols_cap < count) {
+        return 2;
+      }
+      copyInts(col.data(), cols, count);
     }
-    if (cols_cap < count) {
-      return 2;
-    }
-    copyInts(col.data(), cols, count);
+    const auto t3 = StageClock::now();
+    g_stages[0] = secondsBetween(t0, t1);
+    g_stages[1] = secondsBetween(t1, t2);
+    g_stages[2] = 0.0;
+    g_stages[3] = secondsBetween(t2, t3);
     return 0;
   } catch (const std::exception &) {
     return 1;
@@ -608,8 +623,11 @@ int seams_ql_cutoff(const double *xyz, int n, const double *box9, double cutoff,
     return 1;
   }
   try {
+    const auto t0 = StageClock::now();
     const Cloud &cloud = frameCloud(xyz, n, box9);
+    const auto t1 = StageClock::now();
     const auto result = chill::steinhardtQlCutoff(cloud, cutoff, order_l, 1, false);
+    const auto t2 = StageClock::now();
     if (static_cast<int>(result.ql.size()) != n) {
       return 1;
     }
@@ -620,9 +638,25 @@ int seams_ql_cutoff(const double *xyz, int n, const double *box9, double cutoff,
     for (int i = 0; i < n; i++) {
       ql[i] = src[i];
     }
+    const auto t3 = StageClock::now();
+    const auto &kernel = chill::lastQlCutoffStages();
+    const double inside = secondsBetween(t1, t2);
+    g_stages[0] = secondsBetween(t0, t1);
+    g_stages[1] = kernel.set ? kernel.list : 0.0;
+    g_stages[2] = kernel.set ? inside - kernel.list : inside;
+    g_stages[3] = secondsBetween(t2, t3);
     return 0;
   } catch (const std::exception &) {
     return 1;
+  }
+}
+
+void seams_c_last_stages(double seconds[4]) {
+  if (seconds == nullptr) {
+    return;
+  }
+  for (int i = 0; i < 4; i++) {
+    seconds[i] = g_stages[i];
   }
 }
 

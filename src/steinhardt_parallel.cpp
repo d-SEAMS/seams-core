@@ -1709,8 +1709,14 @@ SteinhardtQl cutoffSolid(
   if (q6out != nullptr && !wroteLocal) {
     q6out->clear();
   }
+  const auto tEnd = std::chrono::steady_clock::now();
+  {
+    auto &stages = lastQlCutoffStages();
+    stages.list = std::chrono::duration<double>(tCsr - t0).count();
+    stages.ql = std::chrono::duration<double>(tEnd - tCsr).count();
+    stages.set = true;
+  }
   if (timing) {
-    const auto tEnd = std::chrono::steady_clock::now();
     const auto ms = [](auto a, auto b) {
       return std::chrono::duration<double, std::milli>(b - a).count();
     };
@@ -1751,9 +1757,15 @@ bool steinhardtQ4Q6Cutoff(
   return true;
 }
 
+QlCutoffStages &lastQlCutoffStages() {
+  thread_local QlCutoffStages stages;
+  return stages;
+}
+
 SteinhardtQl steinhardtQlCutoff(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
     int orderL, int typeI, bool average, bool invariants) {
+  lastQlCutoffStages() = {};
   if ((orderL == 3 || orderL == 4 || orderL == 6) &&
       (yCloud.box.size() == 3 || yCloud.box.size() >= 6) && yCloud.nop > 0 &&
       cutoff > 0.0) {

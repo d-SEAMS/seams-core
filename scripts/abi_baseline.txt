@@ -130,6 +130,7 @@ T seams_last_error
 T seams_path_nframes
 ### libyodaLib.so
 T seams_c_error
+T seams_c_last_stages
 T seams_chill_plus_flat
 T seams_chill_plus_graph
 T seams_chill_plus_graph_lammps

@@ -117,6 +117,12 @@ int seams_cutoff_csr(const double *xyz, int n, const double *box9, double cutoff
 /* Local Steinhardt q_l on that cutoff list. order_l is 3, 4, 6, 8, or 12. */
 int seams_ql_cutoff(const double *xyz, int n, const double *box9, double cutoff,
                     int order_l, double *ql);
+/* Wall seconds of the last successful seams_cutoff_csr or seams_ql_cutoff
+ * call on the calling thread. seconds[0] builds the point cloud from xyz,
+ * [1] the cutoff list, [2] q_l, [3] copies into the caller's arrays.
+ * seams_cutoff_csr has no q_l stage. For order 8 or 12, seams_ql_cutoff
+ * counts the list inside [2] and leaves [1] at 0. */
+void seams_c_last_stages(double seconds[4]);
 /* Diamond common-neighbour labels. 1 cubic, 0 hexagonal, -1 otherwise. */
 int seams_diamond_cna(const double *xyz, int n, const double *box9, double cutoff,
                       int *labels);

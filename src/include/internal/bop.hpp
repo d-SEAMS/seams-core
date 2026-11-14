@@ -500,6 +500,17 @@ steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     double cutoff, int orderL, int typeI, bool average, bool invariants = false);
 
+//! Wall seconds of the last steinhardtQlCutoff call on this thread: the
+//! cutoff list, then q_l and any average from it. @c set is false when
+//! that call took a path that does not time the two apart (orders 8 and
+//! 12, or a cell the solid-harmonic kernel declines).
+struct QlCutoffStages {
+  double list = 0.0;
+  double ql = 0.0;
+  bool set = false;
+};
+QlCutoffStages &lastQlCutoffStages();
+
 //! Local q4 and q6 from one cutoff list. Same values as two
 //! steinhardtQlCutoff calls with averaging off. Returns false when the
 //! shared shell cannot be built.
