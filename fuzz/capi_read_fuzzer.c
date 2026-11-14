@@ -16,9 +16,12 @@ static const char *k_ext[] = {"xyz", "lammpstrj", "dump", "gro", "pdb", "dcd",
                               "xtc",  "nc",        "cif",  "mmcif", "mol2", "sdf",
                               "smi",  "con",       "data", "lmp"};
 
+/* The readers map these files, so a second process truncating the same name
+ * raises SIGBUS here. -fork jobs and parallel test runs share the working
+ * directory, so every process writes names of its own. */
 static void write_all(const char *bytes, size_t n, char paths[][64]) {
   for (size_t i = 0; i < sizeof k_ext / sizeof k_ext[0]; ++i) {
-    snprintf(paths[i], 64, "capi-fuzz-%d.%s", (int)i, k_ext[i]);
+    snprintf(paths[i], 64, "capi-fuzz-%ld-%d.%s", (long)getpid(), (int)i, k_ext[i]);
     FILE *out = fopen(paths[i], "wb");
     if (out == NULL) {
       paths[i][0] = '\0';
