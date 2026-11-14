@@ -1653,6 +1653,32 @@ if get_option('with_cli')
     depends: [seams_lang],
     suite: 'docs',
     timeout: 300)
+  foreach _lang : ['c', 'cpp', 'python', 'rust', 'julia', 'lua', 'fortran', 'r']
+    test(
+      'docs_lang_' + _lang,
+      python3,
+      args: [
+        meson.project_source_root() / 'docs' / 'examples' / 'run_lang_tasks.py',
+        _lang,
+        meson.project_build_root(),
+      ],
+      env: binding_env,
+      depends: [seams_api_lib, seams_lang],
+      suite: 'docs',
+      timeout: 180)
+  endforeach
+  test(
+    'docs_lang_parity',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'examples' / 'run_lang_tasks.py',
+      'parity',
+      meson.project_build_root(),
+    ],
+    env: binding_env,
+    depends: [seams_api_lib, seams_lang],
+    suite: 'docs',
+    timeout: 300)
   test(
     'docs_api_julia',
     python3,
