@@ -1,20 +1,14 @@
 #!/usr/bin/env python3
-"""Fail if an exported C API symbol is missing from the reference.
-
-``docs/capi/symbols.txt`` is the expansion of ``seams_*`` in
-``src/libseams.map`` on capi/polish-2.14 (0127f41e) against
-``include/seams.h``. When this tree grows an explicit map, those names
-are checked too.
-"""
+"""Fail if a SEAMS_API declaration is missing from the generated reference."""
 
 import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-PAGES = ROOT / "docs" / "source" / "capi"
-SYMBOLS = ROOT / "docs" / "capi" / "symbols.txt"
-MAP = ROOT / "src" / "libseams.map"
+sys.path.insert(0, str(ROOT / "docs"))
+
+from render_capi import HEADER, OUT, SYMBOLS, parse_header  # noqa: E402
 
 
 def names_in(text):
@@ -22,28 +16,38 @@ def names_in(text):
 
 
 def main():
-    wanted = [line.strip() for line in SYMBOLS.read_text().splitlines() if line.strip()]
-    if len(wanted) != 77 or len(set(wanted)) != 77:
-        raise SystemExit("symbols.txt must list 77 unique seams_* functions")
-    book = "\n".join(path.read_text(encoding="utf-8") for path in PAGES.glob("*.rst"))
+    declared = [record["name"] for record in parse_header(HEADER.read_text(encoding="utf-8"))]
+    if len(declared) != len(set(declared)):
+        raise SystemExit("include/seams.h declares a SEAMS_API name twice")
+    listed = [line.strip() for line in SYMBOLS.read_text(encoding="utf-8").splitlines() if line.strip()]
+    if sorted(listed) != sorted(declared) or len(listed) != len(set(listed)):
+        raise SystemExit(
+            "docs/capi/symbols.txt is not the SEAMS_API list in include/seams.h. "
+            "Run python3 docs/render_capi.py."
+        )
+    book = "\n".join(path.read_text(encoding="utf-8") for path in OUT.glob("*.rst"))
     present = names_in(book)
-    missing = [name for name in wanted if name not in present]
+    missing = [name for name in declared if name not in present]
     if missing:
         raise SystemExit("C API reference is missing:\n" + "\n".join(missing))
-    if MAP.is_file():
-        explicit = [
-            name
-            for name in names_in(MAP.read_text(encoding="utf-8"))
-            if name != "seams_"
-        ]
-        # A wildcard map ("seams_*") yields the token seams_ only after the
-        # star is stripped by the pattern above, so an explicit list is
-        # anything that is a full function name.
-        explicit = [name for name in explicit if not name.endswith("_")]
-        absent = [name for name in explicit if name not in present]
-        if absent:
-            raise SystemExit("libseams.map symbols missing from the reference:\n" + "\n".join(absent))
-    print("capi reference covers", len(wanted), "exports")
+    stale = sorted(
+        name
+        for name in (
+            "seams_chill_plus_n",
+            "seams_last_error_message",
+            "seams_neighbours_nrows",
+            "seams_q4q6_n",
+            "seams_rings_histogram_n",
+            "seams_rings_labels_n",
+            "seams_rings_nrings",
+            "seams_system_natoms",
+        )
+        if name in present
+    )
+    if stale:
+        raise SystemExit("C API reference still names functions this header does not declare:\n" + "\n".join(stale))
+    print("capi reference covers", len(declared), "exports from include/seams.h")
+    return 0
 
 
 if __name__ == "__main__":
