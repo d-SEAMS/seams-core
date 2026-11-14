@@ -293,7 +293,7 @@ def main() -> int:
               flush=True)
 
     with open(args.out / "scaling.csv", "w", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()))
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     (args.out / "raw-scaling.txt").write_text("\n".join(raw_lines) + "\n")
