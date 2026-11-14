@@ -421,3 +421,10 @@ bench/local/
 
 docs/_build/
 __pycache__/
+
+# Language packages
+bindings/rust/target/
+bindings/rust/seams-sys/vendor/
+*.crate
+*.rock
+lua_modules/

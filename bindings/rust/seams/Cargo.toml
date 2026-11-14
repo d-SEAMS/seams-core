@@ -1,13 +1,37 @@
 [package]
-name = "seams"
+name = "dseams"
 version = "2.14.0"
 edition = "2021"
-description = "Safe wrapper for the d-SEAMS C API"
+rust-version = "1.85"
+description = "Safe Rust wrapper for the d-SEAMS C API: ice, clathrate and ring analysis of molecular simulations"
+authors = ["Rohit Goswami <rgoswami@ieee.org>"]
 license = "MIT"
+homepage = "https://dseams.info"
+repository = "https://github.com/d-SEAMS/seams-core"
+documentation = "https://docs.rs/dseams"
+readme = "README.md"
+keywords = ["molecular-dynamics", "ice", "chemistry", "clathrate", "simulation"]
+categories = ["science", "api-bindings"]
+include = [
+  "/src/**",
+  "/tests/ice.rs",
+  "/examples/**",
+  "/README.md",
+  "/LICENSE",
+]
+
+[lib]
+name = "seams"
+
+[features]
+system = ["dseams-sys/system"]
 
 [dependencies]
-seams-sys = { path = "../seams-sys" }
+dseams-sys = { version = "=2.14.0", path = "../seams-sys" }
 
 [[example]]
 name = "minimal"
-path = "../../../docs/examples/minimal_rust.rs"
+path = "examples/minimal.rs"
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]

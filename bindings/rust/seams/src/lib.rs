@@ -1,7 +1,11 @@
 /* Copyright (c) d-SEAMS developers */
 //! Safe calls into the d-SEAMS C API.
+//!
+//! The crates.io package is `dseams`; the library keeps the name `seams`,
+//! so code says `use seams::System`. The raw constants (graph and CHILL
+//! variants) are re-exported as [`ffi`].
 
-use seams_sys as ffi;
+pub use seams_sys as ffi;
 use std::ffi::{CStr, CString};
 use std::os::raw::{c_int, c_void};
 
