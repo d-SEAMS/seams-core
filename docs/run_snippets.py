@@ -897,13 +897,11 @@ def execute_page(path, build):
                 if "tests" in excerpt.parts and excerpt.suffix in {".c", ".cpp", ".h", ".hpp", ".py"}:
                     ran += 1
                     continue
-                if excerpt.name == "bench_cli_fast.py" and not (ROOT / "build" / "seams").is_file():
-                    link = ROOT / "build"
-                    if not link.exists() and (build / "seams").is_file():
-                        link.symlink_to(build)
-                if excerpt.name == "bench_cli_fast.py" and not (ROOT / "build" / "seams").is_file():
+                if excerpt.name == "bench_cli_fast.py":
+                    # check_excerpt found the quoted line. The driver is a
+                    # timing run that rewrites markdown/cli-fast-paths.md,
+                    # so a snippet test must not execute it.
                     ran += 1
-                    skips.append("bench driver looks for build/seams")
                     continue
                 run_source(build, env, excerpt)
                 ran += 1
