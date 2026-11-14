@@ -60,6 +60,13 @@ ydslib_sources = files(
   'topo_two_dim.cpp',
 )
 
+# gpu_residency.cpp calls dlopen/dlsym. A shared library that leaves
+# those undefined forces every consumer to add -ldl itself.
+dl_dep = cppc.find_library('dl', required: false)
+if dl_dep.found()
+  _deps += dl_dep
+endif
+
 _lib_link_args = _link_args
 # nvc++ records the output path (src/libyodaLib.so) as DT_NEEDED.
 # The Catch2 tests run with workdir input/, so that relative name

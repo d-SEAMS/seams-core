@@ -69,14 +69,20 @@ def main():
     if not libs_on_disk:
         raise SystemExit("install did not produce libseams.so")
     libdir = libs_on_disk[0].parent
+    prefix = prefix_of(build)
+    installed = stage / Path(prefix).relative_to("/")
     env = os.environ.copy()
     env["PKG_CONFIG_PATH"] = str(pc.parent)
-    env["PKG_CONFIG_SYSROOT_DIR"] = str(stage)
+    # A multiarch libdir makes pkg-config relocate prefix to .../lib,
+    # and PKG_CONFIG_SYSROOT_DIR then prepends the destdir a second time.
+    # Name the destdir prefix explicitly and do not set a sysroot.
+    env.pop("PKG_CONFIG_SYSROOT_DIR", None)
+    define = "--define-variable=prefix=" + str(installed)
     cflags = subprocess.check_output(
-        ["pkg-config", "--cflags", "seams"], env=env, text=True
+        ["pkg-config", define, "--cflags", "seams"], env=env, text=True
     ).split()
     libs = subprocess.check_output(
-        ["pkg-config", "--libs", "seams"], env=env, text=True
+        ["pkg-config", define, "--libs", "seams"], env=env, text=True
     ).split()
     binary = work / "quickstart-pkg"
     cc = os.environ.get("CC", "cc")
@@ -91,8 +97,6 @@ def main():
     sample = source / "input" / "traj" / "agi_water_tiny.lammpstrj"
     run([str(binary), str(sample)], env=env)
 
-    prefix = prefix_of(build)
-    installed = stage / Path(prefix).relative_to("/")
     cmake_build = work / "cmake"
     if cmake_build.exists():
         shutil.rmtree(cmake_build)

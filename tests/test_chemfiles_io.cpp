@@ -821,3 +821,18 @@ TEST_CASE("dump molecule ids follow the LAMMPS atom id", "[chemfiles]") {
   REQUIRE(laterNs.pts[0].molID == 4);
   fs::remove_all(dir);
 }
+
+TEST_CASE("openFrame keeps the reduced sH edge, not the dump span", "[chemfiles]") {
+  // BOX BOUNDS is the bounding box. xy = -6.2106057 pads x, so the
+  // edge is 24.8424228 rather than the 31.053 span of the bounds.
+  Cloud cloud = sinp::openFrame("traj/genice_sH.lammpstrj", 1, 1);
+  REQUIRE(cloud.nop == 136);
+  double cell[3][3];
+  double origin[3];
+  nneigh::dumpBoundsToH(cloud.box, cloud.boxLow, cell, origin);
+  REQUIRE_THAT(cell[0][0], Catch::Matchers::WithinAbs(24.8424228, 1e-6));
+  REQUIRE_THAT(cell[1][1], Catch::Matchers::WithinAbs(10.7570846, 1e-6));
+  REQUIRE_THAT(cell[2][2], Catch::Matchers::WithinAbs(20.1312910, 1e-6));
+  REQUIRE_THAT(cell[1][0], Catch::Matchers::WithinAbs(-6.2106057, 1e-6));
+  REQUIRE_THAT(origin[0], Catch::Matchers::WithinAbs(0.0, 1e-6));
+}

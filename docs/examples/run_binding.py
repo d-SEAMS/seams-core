@@ -26,7 +26,8 @@ def run_fortran(build):
     lib = build / "src"
     work = Path(tempfile.mkdtemp(prefix="seams-fortran-"))
     subprocess.check_call(
-        [gfortran, "-J", str(work), "-c", str(ROOT / "bindings/fortran/seams.f90"), "-o", str(work / "seams.o")]
+        [gfortran, "-J", str(work), "-c", str(ROOT / "bindings/fortran/seams.f90"), "-o", str(work / "seams.o")],
+        cwd=work,
     )
     exe = work / "test_seams"
     subprocess.check_call(
@@ -40,8 +41,10 @@ def run_fortran(build):
             str(exe),
             "-L" + str(lib),
             "-lseams",
+            "-ldl",
             "-Wl,-rpath," + str(lib),
-        ]
+        ],
+        cwd=work,
     )
     env = os.environ.copy()
     env["LD_LIBRARY_PATH"] = library_path(build)
@@ -87,22 +90,36 @@ def rscript():
     raise SystemExit("Rscript is not on PATH")
 
 
-def run_r(build):
+def install_r_package(build):
+    """Install bindings/r/dseams once. Parallel tests share the library dir."""
+    import fcntl
+
     script = rscript()
     r_cmd = str(Path(script).with_name("R"))
-    dest = build / "docs-r-lib"
+    dest = Path(build) / "docs-r-lib"
     dest.mkdir(parents=True, exist_ok=True)
     env = os.environ.copy()
     env["DSEAMS_ROOT"] = str(ROOT)
     env["SEAMS_INCLUDE"] = str(ROOT / "bindings/cxx")
-    env["SEAMS_LIBDIR"] = str(build / "bindings")
-    env["LD_LIBRARY_PATH"] = library_path(build)
+    env["SEAMS_LIBDIR"] = str(Path(build) / "bindings")
+    env["LD_LIBRARY_PATH"] = library_path(Path(build))
+    env["R_LIBS"] = str(dest)
     env["R_LIBS_USER"] = str(dest)
-    if not (dest / "dseams").is_dir():
-        subprocess.check_call(
-            [r_cmd, "CMD", "INSTALL", "-l", str(dest), str(ROOT / "bindings/r/dseams")],
-            env=env,
-        )
+    with open(dest / ".install.lock", "a", encoding="utf-8") as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX)
+        stale = dest / "00LOCK-dseams"
+        if stale.exists():
+            shutil.rmtree(stale, ignore_errors=True)
+        if not (dest / "dseams" / "DESCRIPTION").is_file():
+            subprocess.check_call(
+                [r_cmd, "CMD", "INSTALL", "-l", str(dest), str(ROOT / "bindings/r/dseams")],
+                env=env,
+            )
+    return script, env
+
+
+def run_r(build):
+    script, env = install_r_package(build)
     subprocess.check_call([script, str(ROOT / "docs/examples/r_api.R")], env=env)
 
 

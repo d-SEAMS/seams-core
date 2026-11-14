@@ -22,7 +22,10 @@ CACHE = (
 
 def main():
     if not CACHE.is_file():
-        raise SystemExit(f"brine frame is missing: {CACHE}")
+        # The 230 K frames are fetched into docs/.cache and are not in the
+        # checkout. A clone without that download has nothing to draw.
+        print(f"brine frame is not in this checkout: {CACHE.name}", file=sys.stderr)
+        raise SystemExit(77)
     with tempfile.TemporaryDirectory() as tmp:
         for width_mm in (85.0, 170.0):
             out = Path(tmp) / f"brine-{int(width_mm)}.png"

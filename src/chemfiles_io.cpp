@@ -554,6 +554,22 @@ sinp::openFrame(const std::string &filename, int frame, int typeI,
         " is past the last frame in this file");
   }
   if (!chemfilesUnreadable) {
+    if (dumpFile) {
+      // Chemfiles reports the bound span as lattice length a and the
+      // tilt as the cell angle. setBoxFromLengthsAngles then treats
+      // that span as an edge and pads it again, so the recovered lx
+      // is the span (31.05 A on genice sH, not the 24.84 A edge).
+      // The native BOX BOUNDS parser stores the span and the tilt once.
+      try {
+        molSys::PointCloud<molSys::Point<double>, double> native;
+        native = readLammpsTrj(filename, frame, native);
+        if (native.box.size() >= 3) {
+          cloud.box = std::move(native.box);
+          cloud.boxLow = std::move(native.boxLow);
+        }
+      } catch (const std::exception &) {
+      }
+    }
     return cloud;
   }
   {

@@ -526,6 +526,7 @@ def run_c(root: Path, build: Path, mode: str, extra: list[str]):
                 str(root / "docs" / "examples" / "science_tutorials.c"),
                 "-L" + src,
                 "-lseams",
+                "-ldl",
                 "-Wl,-rpath," + src,
                 "-lm",
                 "-o",

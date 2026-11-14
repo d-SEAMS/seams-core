@@ -225,9 +225,17 @@ def cached(build, key, work):
     stamp = build / "docs-snippet-cache" / key
     if stamp.is_file():
         return True
-    work()
     stamp.parent.mkdir(parents=True, exist_ok=True)
-    stamp.write_text("ok\n", encoding="utf-8")
+    # Two pages can include the same file. Without the lock both render
+    # the science figures and one sees a half-written png.
+    import fcntl
+
+    with open(stamp.with_suffix(".lock"), "a", encoding="utf-8") as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX)
+        if stamp.is_file():
+            return True
+        work()
+        stamp.write_text("ok\n", encoding="utf-8")
     return False
 
 
@@ -244,6 +252,29 @@ def sdk_prefix():
     return Path(prefix) if prefix else None
 
 
+def pkgconfig_env():
+    """conda-forge GROMACS ships libgromacs.pc under lib.AVX2_256, not lib."""
+    env = os.environ.copy()
+    prefix = sdk_prefix()
+    extra = []
+    if prefix is not None:
+        for folder in (
+            prefix / "lib" / "pkgconfig",
+            prefix / "lib.AVX2_256" / "pkgconfig",
+            prefix / "lib.AVX_256" / "pkgconfig",
+            prefix / "lib.SSE2" / "pkgconfig",
+            prefix / "share" / "pkgconfig",
+        ):
+            if folder.is_dir():
+                extra.append(str(folder))
+    current = env.get("PKG_CONFIG_PATH", "")
+    if current:
+        extra.append(current)
+    if extra:
+        env["PKG_CONFIG_PATH"] = os.pathsep.join(extra)
+    return env
+
+
 def sdk_flags(text):
     flags = []
     rpaths = []
@@ -255,6 +286,7 @@ def sdk_flags(text):
                 ["pkg-config", "--cflags", "--libs", spec],
                 text=True,
                 capture_output=True,
+                env=pkgconfig_env(),
             )
             if done.returncode == 0:
                 flags.extend(done.stdout.split())
@@ -309,7 +341,7 @@ def which(name):
     return found
 
 
-def compile_c_family(build, env, source, out, extra=None):
+def compile_c_family(build, env, source, out, extra=None, more_sources=None):
     compiler = which("c++" if source.suffix in {".cpp", ".cxx", ".cc"} else "cc")
     if source.suffix == ".c":
         compiler = which("cc")
@@ -329,9 +361,12 @@ def compile_c_family(build, env, source, out, extra=None):
     if extra:
         cmd.extend(extra)
     text = source.read_text(encoding="utf-8", errors="replace")
+    sources = [str(source)]
+    if more_sources:
+        sources.extend(str(path) for path in more_sources)
     cmd.extend(
         [
-            str(source),
+            *sources,
             "-o",
             str(out),
             "-L" + str(build / "src"),
@@ -344,6 +379,10 @@ def compile_c_family(build, env, source, out, extra=None):
     if "seams_lang.h" in text or "seams_frame_" in text or source.suffix != ".c":
         cmd.extend(["-lseams_lang", "-lstdc++"])
     cmd.append("-lseams")
+    if sys.platform.startswith("linux"):
+        # libseams calls dlopen. The link fails with "DSO missing" unless
+        # the executable names libdl.
+        cmd.append("-ldl")
     cmd.extend(sdk_flags(text))
     if source.suffix != ".c":
         cmd.insert(1, "-std=c++17")
@@ -374,6 +413,10 @@ def program_args(text, build):
         return [str(ROOT)]
     if "commandArgs" in text or ("get_command_argument" in text and "input/traj" not in text):
         return [str(FIXTURE)]
+    # Lua examples take the repository as arg[1] and join /input/.
+    # A frame path there becomes "<dump>/input/traj/..." and the read fails.
+    if ("arg[1]" in text or "ARGS[1]" in text) and "/input/" in text:
+        return [str(ROOT)]
     if "arg[1]" in text or "ARGS[1]" in text:
         return [str(FIXTURE)]
     if "argv[2]" in text and "libseams" in text:
@@ -413,7 +456,13 @@ def run_source(build, env, path):
             work = Path(tempfile.mkdtemp(prefix="seams-snippet-"))
             if not re.search(r"\bint\s+main\s*\(", text):
                 library = work / "snippet.so"
-                compile_c_family(build, env, path, library)
+                more = []
+                if "addPlainComponent" in text:
+                    # The one-argument PLUMED wrappers live in their own
+                    # translation unit so they do not see the two-argument
+                    # header declaration.
+                    more.append(ROOT / "engines" / "plumed" / "plumed_components.cpp")
+                compile_c_family(build, env, path, library, more_sources=more)
                 import ctypes
                 ctypes.CDLL(str(library))
                 return
@@ -456,6 +505,11 @@ def run_source(build, env, path):
         elif path.suffix in {".f90", ".F90"}:
             gfortran = which("gfortran")
             work = Path(tempfile.mkdtemp(prefix="seams-snippet-f90-"))
+            # seams.f90 is the module. It does not use itself and it has no
+            # program, so linking it looks for a main that is not there.
+            if re.search(r"(?m)^\s*module\s+\w+", text) and not re.search(r"(?m)^\s*program\s+\w+", text):
+                run([gfortran, "-c", str(path), "-o", str(work / "unit.o")], env, cwd=work)
+                return
             if "use seams" not in text:
                 exe = work / "snippet"
                 run(
@@ -478,9 +532,10 @@ def run_source(build, env, path):
             run(
                 [gfortran, "-J", str(work), "-c", str(ROOT / "bindings" / "fortran" / "seams.f90"), "-o", str(work / "seams.o")],
                 env,
+                cwd=work,
             )
-            if "program " not in text:
-                run([gfortran, "-J", str(work), "-c", str(path), "-o", str(work / "unit.o")], env)
+            if not re.search(r"(?m)^\s*program\s+\w+", text):
+                run([gfortran, "-J", str(work), "-c", str(path), "-o", str(work / "unit.o")], env, cwd=work)
                 return
             exe = work / "snippet"
             run(
@@ -494,9 +549,11 @@ def run_source(build, env, path):
                     str(exe),
                     "-L" + str(build / "src"),
                     "-lseams",
+                    "-ldl",
                     "-Wl,-rpath," + str(build / "src"),
                 ],
                 env,
+                cwd=work,
             )
             run([str(exe), *program_args(text, build)], env)
         elif path.suffix == ".jl":

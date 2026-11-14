@@ -150,22 +150,30 @@ def ensure_r_package(env, lib):
     build = Path(lib).resolve().parents[1]
     dest = build / "docs-r-lib"
     dest.mkdir(parents=True, exist_ok=True)
+    env["R_LIBS"] = str(dest)
     env["R_LIBS_USER"] = str(dest)
     env["DSEAMS_ROOT"] = str(ROOT)
     env["SEAMS_INCLUDE"] = str(ROOT / "bindings" / "cxx")
     env["SEAMS_LIBDIR"] = str(Path(lib).resolve().parent)
-    if (dest / "dseams").is_dir():
-        return
-    r_cmd = str(Path(shutil.which("Rscript")).with_name("R"))
-    done = subprocess.run(
-        [r_cmd, "CMD", "INSTALL", "-l", str(dest), str(ROOT / "bindings" / "r" / "dseams")],
-        capture_output=True,
-        text=True,
-        env=env,
-        check=False,
-    )
-    if done.returncode != 0:
-        raise RuntimeError(f"R install: {done.stdout}{done.stderr}")
+    import fcntl
+
+    with open(dest / ".install.lock", "a", encoding="utf-8") as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX)
+        if (dest / "dseams" / "DESCRIPTION").is_file():
+            return
+        stale = dest / "00LOCK-dseams"
+        if stale.exists():
+            shutil.rmtree(stale, ignore_errors=True)
+        r_cmd = str(Path(shutil.which("Rscript")).with_name("R"))
+        done = subprocess.run(
+            [r_cmd, "CMD", "INSTALL", "-l", str(dest), str(ROOT / "bindings" / "r" / "dseams")],
+            capture_output=True,
+            text=True,
+            env=env,
+            check=False,
+        )
+        if done.returncode != 0:
+            raise RuntimeError(f"R install: {done.stdout}{done.stderr}")
 
 
 def r_front(env, lib):

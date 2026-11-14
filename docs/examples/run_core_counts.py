@@ -110,17 +110,8 @@ def run_r(build, env):
     sys.path.insert(0, str(ROOT / "docs/examples"))
     import run_binding
 
-    script = run_binding.rscript()
-    r_cmd = str(Path(script).with_name("R"))
-    dest = build / "docs-r-lib"
-    dest.mkdir(parents=True, exist_ok=True)
-    r_env = env.copy()
-    r_env["DSEAMS_ROOT"] = str(ROOT)
-    r_env["SEAMS_INCLUDE"] = str(ROOT / "bindings/cxx")
-    r_env["SEAMS_LIBDIR"] = str(build / "bindings")
-    r_env["R_LIBS_USER"] = str(dest)
-    if not (dest / "dseams").is_dir():
-        run([r_cmd, "CMD", "INSTALL", "-l", str(dest), str(ROOT / "bindings/r/dseams")], env=r_env)
+    script, r_env = run_binding.install_r_package(build)
+    r_env = {**env, **r_env}
     run([script, str(ROOT / "docs/examples/core_counts.R")], env=r_env)
 
 

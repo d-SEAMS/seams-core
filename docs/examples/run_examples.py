@@ -21,7 +21,9 @@ import check_examples  # noqa: E402
 
 FIXTURE = "input/traj/genice_sI.lammpstrj"
 EXAMPLES = {
-    "c": "docs/examples/minimal_c.c",
+    # The C page cites the tour, which calls every exported function.
+    # minimal_c.c is the short quickstart and does not name the macros.
+    "c": "docs/examples/c_api_tour.c",
     "cxx": "docs/examples/minimal_cpp.cpp",
     "python": "docs/examples/minimal_py.py",
     "rust": "docs/examples/minimal_rust.rs",
@@ -214,18 +216,7 @@ def run_julia(build, fixture):
 
 
 def run_r(build, fixture):
-    script = binding_helpers().rscript()
-    r_cmd = str(Path(script).with_name("R"))
-    dest = build / "docs-r-lib"
-    dest.mkdir(parents=True, exist_ok=True)
-    env = os.environ.copy()
-    env["DSEAMS_ROOT"] = str(ROOT)
-    env["SEAMS_INCLUDE"] = str(ROOT / "bindings/cxx")
-    env["SEAMS_LIBDIR"] = str(build / "bindings")
-    env["LD_LIBRARY_PATH"] = library_path(build)
-    env["R_LIBS_USER"] = str(dest)
-    if not (dest / "dseams").is_dir():
-        run([r_cmd, "CMD", "INSTALL", "-l", str(dest), str(ROOT / "bindings/r/dseams")], env=env)
+    script, env = binding_helpers().install_r_package(build)
     run([script, str(ROOT / "docs/examples/minimal_r.R"), fixture], env=env)
 
 

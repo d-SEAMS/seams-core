@@ -19,6 +19,8 @@ python = "3.12.*"
 nanobind = ">=2.14"
 numpy = ">=1.24"
 pip = "*"
+# linkcell, readcon and the Rust binding need cargo on PATH.
+rust = ">=1.80"
 meson-python = ">=0.16"
 pytest = ">=8.0"
 lcov = ">=1.16"
@@ -217,3 +219,7 @@ mesa-lavapipe = ">=26.3.0,<27"
 [pypi-dependencies]
 ovito = ">=3.12.0, <4"
 genice2 = ">=2.2.13.3, <3"
+solvis-tools = ">=0.1.5, <0.2"
+# 23.11 is the draft the changelog was written against. 26.x drops the
+# blank line under the version heading and the towncrier check fails.
+towncrier = "==23.11.0"
