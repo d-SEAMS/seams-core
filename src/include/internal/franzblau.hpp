@@ -119,6 +119,12 @@ struct Graph {
 std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,
                                           int maxDepth);
 
+//! Per-atom primitive-ring counts, without storing the rings.
+//! `counts[atom * (maxDepth + 1) + size]` is how many rings of that size
+//! contain the atom.
+std::vector<int> atomRingSizeCounts(const std::vector<std::vector<int>> &nList,
+                                    int maxDepth);
+
 //! Primitive rings whose size is at least @a minDepth and at most
 //! @a maxDepth. ringNetwork(nList, maxDepth) is minDepth 3.
 std::vector<std::vector<int>> ringNetwork(const std::vector<std::vector<int>> &nList,

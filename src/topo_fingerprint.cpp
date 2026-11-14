@@ -44,23 +44,11 @@ void fillRingCensus(std::vector<int> &census,
   if (rows.empty() || maxRingSize < 3) {
     return;
   }
-  int maxDeg = 0;
-  for (const auto &row : rows) {
-    maxDeg = std::max(maxDeg, static_cast<int>(row.size()) - 1);
-  }
-  // A dense ball has more primitive rings than it is worth storing. The
-  // census is the only thing the frame key reads.
-  if (maxDeg > 24) {
-    census = primitive::ringCensusCounts(rows, maxRingSize);
-    if (static_cast<int>(census.size()) < maxRingSize + 1) {
-      census.resize(static_cast<std::size_t>(maxRingSize) + 1, 0);
-    }
-    return;
-  }
-  for (const auto &ring : primitive::ringNetwork(rows, maxRingSize)) {
-    if (ring.size() <= static_cast<std::size_t>(maxRingSize)) {
-      census[ring.size()] += 1;
-    }
+  // The frame key reads the census, not the ring list. Count while
+  // searching so a sparse frame does not store every ring either.
+  census = primitive::ringCensusCounts(rows, maxRingSize);
+  if (static_cast<int>(census.size()) < maxRingSize + 1) {
+    census.resize(static_cast<std::size_t>(maxRingSize) + 1, 0);
   }
 }
 

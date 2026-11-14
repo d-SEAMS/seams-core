@@ -11,6 +11,9 @@
 #include <queue>
 #include <set>
 #include <thread>
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
 
 namespace primitive {
 std::vector<std::vector<int>>
@@ -580,6 +583,65 @@ TEST_CASE("RingUpdater matches ringNetwork element by element on every frame",
       REQUIRE(updater.lastChangedBonds() > 0);
     }
   }
+}
+
+TEST_CASE("atom ring counts match the stored rings", "[franzblau]") {
+  constexpr int n = 72;
+  constexpr int half = 9;
+  constexpr int depth = 5;
+  std::vector<std::vector<int>> rows(static_cast<std::size_t>(n));
+  for (int i = 0; i < n; i++) {
+    auto &row = rows[static_cast<std::size_t>(i)];
+    row.push_back(i);
+    for (int d = 1; d <= half; d++) {
+      row.push_back((i + d) % n);
+      row.push_back((i + n - d) % n);
+    }
+  }
+  const auto rings = primitive::ringNetwork(rows, depth);
+  const auto counts = primitive::atomRingSizeCounts(rows, depth);
+  const int stride = depth + 1;
+  std::vector<std::map<int, int>> tally(static_cast<std::size_t>(n));
+  for (const auto &ring : rings) {
+    const int sz = static_cast<int>(ring.size());
+    for (const int a : ring) {
+      tally[static_cast<std::size_t>(a)][sz] += 1;
+    }
+  }
+  for (int a = 0; a < n; a++) {
+    for (int sz = 0; sz <= depth; sz++) {
+      const int got = counts[static_cast<std::size_t>(a) * static_cast<std::size_t>(stride) +
+                             static_cast<std::size_t>(sz)];
+      const auto it = tally[static_cast<std::size_t>(a)].find(sz);
+      const int expect = it == tally[static_cast<std::size_t>(a)].end() ? 0 : it->second;
+      REQUIRE(got == expect);
+    }
+  }
+}
+
+TEST_CASE("a dense listing on several threads matches one thread", "[franzblau]") {
+  constexpr int n = 72;
+  constexpr int half = 9;
+  std::vector<std::vector<int>> rows(static_cast<std::size_t>(n));
+  for (int i = 0; i < n; i++) {
+    auto &row = rows[static_cast<std::size_t>(i)];
+    row.push_back(i);
+    for (int d = 1; d <= half; d++) {
+      row.push_back((i + d) % n);
+      row.push_back((i + n - d) % n);
+    }
+  }
+#ifdef SEAMS_HAS_OPENMP
+  const int prev = omp_get_max_threads();
+  omp_set_num_threads(1);
+  const auto serial = primitive::ringNetwork(rows, 5);
+  omp_set_num_threads(std::min(prev, 4));
+  const auto parallel = primitive::ringNetwork(rows, 5);
+  omp_set_num_threads(prev);
+  REQUIRE(parallel == serial);
+#else
+  REQUIRE_FALSE(primitive::ringNetwork(rows, 5).empty());
+#endif
 }
 
 TEST_CASE("ringNetwork keeps one copy of a repeated edge", "[franzblau]") {

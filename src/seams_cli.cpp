@@ -1063,8 +1063,40 @@ int cmdFingerprint(std::ostream &os, FrameCarry &carry, Cloud &cloud,
     for (int i = 0; i < cloud.nop && static_cast<std::size_t>(i) < species.size(); ++i) {
       species[static_cast<std::size_t>(i)] = cloud.pts[static_cast<std::size_t>(i)].type;
     }
-    const auto &rings = carry.rings(GraphSlot::single, rows, std::max(hops, 6));
-    const auto table = cage::formerRows(rows, rings, species, -1);
+    // by-atom prints a size count per atom. The search tallies those
+    // counts and does not store the rings.
+    const int depth = std::max(hops, 6);
+    const auto counted = primitive::atomRingSizeCounts(rows, depth);
+    const int stride = depth + 1;
+    std::vector<cage::FormerRow> table;
+    table.reserve(rows.size());
+    for (int i = 0; i < static_cast<int>(rows.size()); ++i) {
+      cage::FormerRow row;
+      row.index = i;
+      row.species = static_cast<std::size_t>(i) < species.size()
+                        ? species[static_cast<std::size_t>(i)]
+                        : 0;
+      for (const int nb : rows[static_cast<std::size_t>(i)]) {
+        if (nb == i) {
+          continue;
+        }
+        row.coord += 1;
+        if (nb < 0 || static_cast<std::size_t>(nb) >= species.size()) {
+          continue;
+        }
+        if (species[static_cast<std::size_t>(nb)] == row.species) {
+          row.homopolar += 1;
+        }
+      }
+      for (int sz = 3; sz <= depth; ++sz) {
+        const int c = counted[static_cast<std::size_t>(i) * static_cast<std::size_t>(stride) +
+                              static_cast<std::size_t>(sz)];
+        if (c != 0) {
+          row.rings.emplace(sz, c);
+        }
+      }
+      table.push_back(std::move(row));
+    }
     os << "\n";
     for (const auto &row : table) {
       os << "atom " << row.index << " species " << row.species << " coord " << row.coord
