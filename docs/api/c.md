@@ -1,4 +1,4 @@
-# C API
+# C
 
 `seams.h` is ABI 1 of libseams. A handle is opaque. Coordinates are Angstrom.
 A cell is nine numbers: `ox, oy, oz, lx, ly, lz, xy, xz, yz`. A zero tilt is orthorhombic.

@@ -1,4 +1,4 @@
-#+TITLE: Explanation
+#+TITLE: Concepts
 #+OPTIONS: toc:nil num:nil
 
 These pages are for understanding. They are not recipes.
@@ -26,30 +26,3 @@ These pages are for understanding. They are not recipes.
 | [[file:performance-h2h.org][Performance]] | Neighbours, rings, q6, CHILL+, cages, PTM, and linkcell scaling |
 | [[file:performance-range.org][Performance, 4096 to 110592]] | Neighbour and ring rows, with the stored interval, n, and DNF |
 | [[file:citation.org][Citation]] | What to cite |
-
-#+begin_export rst
-.. toctree::
-   :maxdepth: 1
-
-   architecture
-   c-api
-   chill-plus-vs-cages
-   chill-plus-rules
-   interface-order
-   ring-completion
-   primitive-rings
-   ovito-findrings
-   linkcell-scaling
-   rings-one-thread
-   topological-network
-   symmetry
-   trace-assembly
-   stacking-disorder
-   hop-ball
-   trace-threads
-   performance
-   performance-overview
-   performance-h2h
-   performance-range
-   citation
-#+end_export

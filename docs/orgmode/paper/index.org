@@ -18,12 +18,3 @@ The records live under =results/reference/= of the reproducibility
 package, [[https://github.com/d-SEAMS/dseams2_repro][dseams2_repro]].
 Each record holds its =run.sh=, its raw output and a =provenance.txt=
 with the archive checksum and the machine.
-
-#+begin_export rst
-.. toctree::
-   :maxdepth: 1
-
-   versions
-   benchmarks
-   reproduce
-#+end_export

@@ -147,11 +147,4 @@ Commit subjects follow ~fileName: description of change~. See
 
 The three-repo cut (~libyodaLib~ / ~seams~, then the PydSEAMSlib
 and yodaStruct wraps) is [[file:release.org][Release process]].
-
-#+begin_export rst
-.. toctree::
-   :maxdepth: 1
-
-   release
-   lean
-#+end_export
+The checked statements are [[file:lean.org][Lean proofs]].

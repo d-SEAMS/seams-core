@@ -125,27 +125,15 @@ Build with a Nix flake (~nix build~, ~nix develop~) or with
 #+begin_export rst
 .. mermaid::
 
-   flowchart TB
-     subgraph engine["seams-core"]
-       LIB[libyodaLib]
-       API[libseams]
-       CLI[seams CLI]
-     end
-     subgraph fronts["Front ends"]
-       PY[pydseams Frame]
-       DS[import dseams]
-       LUA["require('dseams')"]
-     end
-     LC[linkcell]
-     DUMP["LAMMPS, XYZ, chemfiles, con"] --> LIB
-     LC --> LIB
-     LIB --> API
-     API --> CLI
-     API --> DS
-     LIB --> PY
-     LIB --> LUA
-     CLI --> OUT[stdout counts]
-     PY --> ASE["ASE and solvis extras"]
+   flowchart TD
+     DUMP["LAMMPS and XYZ<br/>chemfiles and con"] --> LIB[libyodaLib]
+     LC[linkcell] --> LIB
+     LIB --> API[libseams]
+     API --> CLI["seams command"]
+     CLI --> OUT["stdout counts"]
+     API --> LANG["C, C++ and Fortran<br/>Julia, R and Lua"]
+     LIB --> PY["Python Frame"]
+     PY --> ASE["ASE and solvis"]
 #+end_export
 
 * Documentation structure
@@ -198,67 +186,126 @@ framework.
 
 .. toctree::
    :hidden:
-   :maxdepth: 2
-   :caption: Getting Started
+   :maxdepth: 1
+   :caption: Getting started
 
    quickstart
-
-.. toctree::
-   :hidden:
-   :maxdepth: 2
-   :caption: Tutorials
-
-   tutorials/index
-
-.. toctree::
-   :hidden:
-   :maxdepth: 1
-   :caption: Videos
-
+   howto/install
    videos/index
 
 .. toctree::
    :hidden:
-   :maxdepth: 2
+   :maxdepth: 1
+   :caption: Tutorials
+
+   tutorials/index
+   tutorials/clathrate
+   tutorials/interface
+   tutorials/nucleation
+   tutorials/brine
+   tutorials/insitu-run
+   tutorials/bulk-ice
+   tutorials/ice-and-clathrate
+   tutorials/rings
+   tutorials/order-parameters
+   tutorials/confined-water
+   tutorials/nanotube
+   tutorials/paper-figures
+   tutorials/paper-interface
+   tutorials/paper-cages
+   tutorials/paper-rings
+   tutorials/paper-brine
+   tutorials/paper-nucleation
+   tutorials/gallery
+   science/index
+   science/interface
+   science/brine
+   science/cages
+   science/gallery
+   fronts/index
+   fronts/c
+   fronts/cpp
+   fronts/fortran
+   fronts/julia
+   fronts/lua
+   fronts/python
+   fronts/r
+   fronts/rust
+   fronts/engines
+   fronts/gromacs
+   fronts/insitu
+   fronts/lammps
+   fronts/openmm
+   fronts/plumed
+
+.. toctree::
+   :hidden:
+   :maxdepth: 1
    :caption: How-to
 
    howto/index
-
-.. toctree::
-   :hidden:
-   :maxdepth: 2
-   :caption: Explanation
-
-   explanation/index
+   howto/upgrade-2.14
+   howto/migrate-1x
+   howto/bindings
+   howto/lua
+   howto/versions
+   howto/benchmarks
+   howto/paper-tables
+   howto/neighbour-lists
+   howto/openmp-offload
+   howto/classify-cli
+   howto/rings
+   howto/cages-trace
+   howto/q4-q6
+   howto/chill-plus
+   howto/cutoff-padding
+   howto/symmetry-classifier
+   howto/linkcell-carried
+   howto/sheared-cells
+   howto/ionic-liquid
+   howto/ase-integration
+   howto/solvis
+   howto/confined-ice
+   howto/science-front
+   howto/from-trajectory
+   howto/engine-gromacs
+   howto/engine-lammps
+   howto/engine-openmm
+   howto/engine-plumed
+   howto/engine-insitu
+   howto/faq
+   howto/troubleshooting
+   walkthrough/index
 
 .. toctree::
    :hidden:
    :maxdepth: 1
-   :caption: Comparisons
-
-   comparisons
-
-.. toctree::
-   :hidden:
-   :maxdepth: 2
    :caption: Reference
 
    reference/index
-   changelog
-
-.. toctree::
-   :hidden:
-   :maxdepth: 2
-   :caption: d-SEAMS 2.0 paper
-
-   paper/index
-
-.. toctree::
-   :hidden:
-   :maxdepth: 1
-   :caption: Stable API
-
+   reference/python-frame
+   reference/cli
+   reference/data-formats
+   reference/walk-compare
+   reference/api
+   reference/nix
+   reference/cross-language
+   reference/glossary
+   reference/release-2.14
    stable/index
+   stable/c
+   stable/cpp
+   stable/python
+   stable/fortran
+   stable/julia
+   stable/r
+   stable/lua
+   stable/rust
+   stable/cli
+   stable/science
+   capi/index
+   lang/index
+   api/index
 
 .. toctree::
    :hidden:
@@ -266,20 +313,63 @@ framework.
    :caption: Engines
 
    engines/index
+   engines/lammps
+   engines/gromacs
+   engines/openmm
+   engines/plumed
+   engines/insitu
 
 .. toctree::
    :hidden:
    :maxdepth: 1
-   :caption: Language tutorials
+   :caption: Comparisons
 
-   fronts/index
+   comparisons
+   explanation/ovito-findrings
+   explanation/performance-h2h
+   howto/literature-h2h
+   howto/literature-reproduce
+   howto/reproduce-h2h
 
 .. toctree::
    :hidden:
-   :maxdepth: 2
-   :caption: Development
+   :maxdepth: 1
+   :caption: Explanation
 
+   explanation/index
+   explanation/architecture
+   explanation/c-api
+   explanation/chill-plus-vs-cages
+   explanation/chill-plus-rules
+   explanation/interface-order
+   explanation/ring-completion
+   explanation/primitive-rings
+   explanation/linkcell-scaling
+   explanation/rings-one-thread
+   explanation/topological-network
+   explanation/symmetry
+   explanation/trace-assembly
+   explanation/stacking-disorder
+   explanation/hop-ball
+   explanation/trace-threads
+   explanation/performance
+   explanation/performance-overview
+   explanation/performance-range
+   paper/index
+   paper/versions
+   paper/benchmarks
+   paper/reproduce
+
+.. toctree::
+   :hidden:
+   :maxdepth: 1
+   :caption: Project
+
+   changelog
    contributing/index
+   contributing/release
+   contributing/lean
+   explanation/citation
 #+end_export
 
 The in-book C++ pages under =api/= are Doxygen via doxyrest. A sibling

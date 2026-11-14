@@ -1,4 +1,4 @@
-#+TITLE: Tutorials
+#+TITLE: Worked examples
 #+OPTIONS: toc:nil num:nil
 
 A tutorial is a learning path. You finish it with a skill, not a
@@ -37,27 +37,3 @@ the docs suite.
 The Python files under =docs/tutorials= are the runs. CI executes
 them. The pages here say what you are doing and what number you
 should see.
-
-#+begin_export rst
-.. toctree::
-   :maxdepth: 1
-
-   clathrate
-   interface
-   nucleation
-   brine
-   insitu-run
-   bulk-ice
-   ice-and-clathrate
-   rings
-   order-parameters
-   confined-water
-   nanotube
-   paper-figures
-   paper-interface
-   paper-cages
-   paper-rings
-   paper-brine
-   paper-nucleation
-   gallery
-#+end_export

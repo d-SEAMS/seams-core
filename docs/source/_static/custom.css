@@ -1,9 +1,71 @@
-/* Suite-stack diagram: the SVG fills the article column. */
+/* Suite-stack diagram: full column, labels at body size, readable on dark. */
 article .mermaid svg,
 article pre.mermaid svg {
   width: 100%;
   max-width: 100%;
   height: auto;
+}
+
+article pre.mermaid .nodeLabel,
+article pre.mermaid foreignObject .nodeLabel,
+article pre.mermaid foreignObject div,
+article pre.mermaid foreignObject p {
+  font-size: 18px !important;
+  line-height: 1.35 !important;
+  color: #102220 !important;
+}
+
+/* Shibuya inverts mermaid SVGs in dark mode, which turns the node
+   fill pale. Paint the nodes ourselves and leave the filter off. */
+html.dark pre.mermaid > svg,
+html.dark article pre.mermaid svg {
+  filter: none !important;
+}
+
+html.dark article pre.mermaid .nodeLabel,
+html.dark article pre.mermaid foreignObject .nodeLabel,
+html.dark article pre.mermaid foreignObject div,
+html.dark article pre.mermaid .edgeLabel {
+  color: #f4fffc !important;
+  fill: #f4fffc !important;
+}
+
+html.dark article pre.mermaid .node rect,
+html.dark article pre.mermaid .node .label-container,
+html.dark article pre.mermaid .cluster rect {
+  fill: #16302e !important;
+  stroke: #8fd0c6 !important;
+}
+
+html.dark article pre.mermaid .edgePath path,
+html.dark article pre.mermaid .flowchart-link {
+  stroke: #8fd0c6 !important;
+}
+
+article img,
+.dseams-hero-logo {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 480px) {
+  article pre,
+  article .highlight,
+  article table.docutils {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  /* Keep diagram labels at body size; the figure scrolls sideways. */
+  article pre.mermaid {
+    overflow-x: auto;
+  }
+
+  article pre.mermaid svg {
+    width: 680px !important;
+    max-width: none !important;
+    height: auto !important;
+  }
 }
 
 /* Homepage hero: full cage mark; swap light/dark via Shibuya color-mode

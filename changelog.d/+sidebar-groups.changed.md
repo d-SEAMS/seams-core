@@ -1,0 +1,1 @@
+The documentation sidebar is eight groups: Getting started, Tutorials, How-to, Reference (every language and the C API), Engines, Comparisons, Explanation (the paper and the architecture), and Project. The suite-stack diagram is a top-down figure with body-sized labels in light and dark theme.

@@ -1,11 +1,8 @@
-Engines
-=======
+Engine builds
+=============
 
-.. toctree::
-   :maxdepth: 1
-
-   gromacs
-   insitu
-   lammps
-   openmm
-   plumed
+- :doc:`gromacs`
+- :doc:`insitu`
+- :doc:`lammps`
+- :doc:`openmm`
+- :doc:`plumed`

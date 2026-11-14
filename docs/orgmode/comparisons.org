@@ -1,4 +1,4 @@
-#+TITLE: Comparisons
+#+TITLE: Head-to-head
 #+OPTIONS: toc:nil num:nil
 
 Head-to-head results that are already in this tree. Each link is the

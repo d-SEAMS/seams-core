@@ -190,7 +190,7 @@ def _stage_markdown_book():
 
     groups = (
         ("api", "stable", "Stable API"),
-        ("engines", "engines", "Engines"),
+        ("engines", "engines", "Engine builds"),
         ("tutorials", "fronts", "Language tutorials"),
     )
     for src_name, dest_name, title in groups:
@@ -202,8 +202,11 @@ def _stage_markdown_book():
             (dest / page.name).write_text(page.read_text(encoding="utf-8"), encoding="utf-8")
             names.append(page.stem)
         underline = "=" * len(title)
-        body = [title, underline, "", ".. toctree::", "   :maxdepth: 1", ""]
-        body.extend("   {}".format(name) for name in names)
+        # The sidebar toctree lives on the landing page. A second toctree
+        # here would put every page in two trees.
+        body = [title, underline, ""]
+        for name in names:
+            body.append("- :doc:`{}`".format(name))
         body.append("")
         (dest / "index.rst").write_text("\n".join(body), encoding="utf-8")
 
@@ -444,7 +447,16 @@ html_favicon = "_static/dSeamsLogo.ico"
 
 # Mermaid: default CDN; diagrams via ``.. mermaid::`` from Org RST export.
 mermaid_version = "11.4.0"
-mermaid_init_js = "mermaid.initialize({startOnLoad:true, theme:'neutral'});"
+mermaid_height = "auto"
+mermaid_init_js = (
+    'import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11.4.0/dist/mermaid.esm.min.mjs";'
+    "mermaid.initialize({startOnLoad:false, theme:'base', "
+    "flowchart:{htmlLabels:true, padding:16, nodeSpacing:30, rankSpacing:36}, "
+    "themeVariables:{fontSize:'18px', fontFamily:'Inter, sans-serif', "
+    "primaryColor:'#b7e4d8', primaryTextColor:'#102220', primaryBorderColor:'#0c5c56', "
+    "lineColor:'#0c5c56', secondaryColor:'#d5efe8', tertiaryColor:'#ffffff', "
+    "background:'#ffffff'}});"
+)
 
 html_context = {
     "source_type": "github",

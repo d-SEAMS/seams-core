@@ -1,4 +1,4 @@
-#+TITLE: How-to
+#+TITLE: Tasks
 #+OPTIONS: toc:nil num:nil
 
 A how-to solves a goal you already have. It is not a learning path.
@@ -39,44 +39,3 @@ A how-to solves a goal you already have. It is not a learning path.
 | [[file:engine-insitu.org][In-situ CHILL+]] | Labels and the ring histogram from ~libseams_lang~ |
 | [[file:faq.org][FAQ]] | Short answers |
 | [[file:troubleshooting.org][Troubleshooting]] | Symptom, cause, fix |
-
-#+begin_export rst
-.. toctree::
-   :maxdepth: 1
-
-   upgrade-2.14
-   migrate-1x
-   install
-   bindings
-   lua
-   versions
-   benchmarks
-   paper-tables
-   literature-h2h
-   literature-reproduce
-   reproduce-h2h
-   neighbour-lists
-   openmp-offload
-   classify-cli
-   rings
-   cages-trace
-   q4-q6
-   chill-plus
-   cutoff-padding
-   symmetry-classifier
-   linkcell-carried
-   sheared-cells
-   ionic-liquid
-   ase-integration
-   solvis
-   confined-ice
-   science-front
-   from-trajectory
-   engine-gromacs
-   engine-lammps
-   engine-openmm
-   engine-plumed
-   engine-insitu
-   faq
-   troubleshooting
-#+end_export

@@ -29,29 +29,13 @@ A Lua toolchain is not required to build the engine.
 #+begin_export rst
 .. mermaid::
 
-   flowchart TB
-     subgraph engine["seams-core"]
-       LIB[libyodaLib]
-       API[libseams]
-       CLI[seams CLI]
-     end
-     subgraph fronts["Front ends"]
-       PY[pydseams Frame]
-       DS[import dseams]
-       LUA["require('dseams')"]
-     end
-     LC["linkcell k-NN"]
-     VE["vesin cutoff"]
-     GPU["gpulite TUM batch"]
-     DUMP["LAMMPS / XYZ / chemfiles / con"] --> LIB
-     LC --> LIB
-     VE --> LIB
-     GPU --> LIB
-     LIB --> API
-     API --> CLI
-     API --> DS
-     LIB --> PY
-     LIB --> LUA
+   flowchart TD
+     DUMP["LAMMPS and XYZ<br/>chemfiles and con"] --> LIB[libyodaLib]
+     NB["linkcell, vesin<br/>or gpulite"] --> LIB
+     LIB --> API[libseams]
+     API --> CLI["seams command"]
+     API --> LANG["C, C++ and Fortran<br/>Julia, R and Lua"]
+     LIB --> PY["Python Frame"]
 #+end_export
 
 * Why ~yoda~
