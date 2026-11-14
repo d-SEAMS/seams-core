@@ -152,13 +152,14 @@ def write_topic_embeds(videos, dest):
 
 
 def players_rst(videos):
-    parts = [".. raw:: html", ""]
+    bodies = []
     for slug in slugs(videos):
         body = block(slug, read_claim(videos / slug))
         if body:
-            parts.append(body)
-    parts.append("")
-    return "\n".join(parts)
+            bodies.append(body)
+    if not bodies:
+        return ""
+    return ".. raw:: html\n\n" + "\n".join(bodies) + "\n"
 
 
 def write_players(videos, dest):
