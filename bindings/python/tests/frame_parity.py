@@ -6,8 +6,10 @@ PYDSEAMS211_PYTHON to its interpreter. The comparison never puts that
 tree on this process's import path.
 """
 
+import atexit
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -19,12 +21,28 @@ ROOT = Path(os.environ.get("DSEAMS_SRC", Path(__file__).resolve().parents[3]))
 TRAJ = ROOT / "input" / "traj"
 
 
+def _stage(core):
+    """A dseams package beside the built _core, so the import never waits on python_dseams."""
+    stage = Path(tempfile.mkdtemp(prefix="dseams-parity-"))
+    atexit.register(shutil.rmtree, stage, True)
+    package = stage / "dseams"
+    package.mkdir()
+    source = ROOT / "bindings" / "python"
+    for path in (source / "dseams").glob("*.py"):
+        (package / path.name).symlink_to(path)
+    (package / "frames.py").symlink_to(source / "frames.py")
+    (package / core.name).symlink_to(core)
+    return stage
+
+
 def _ours():
     os.environ.pop("DSEAMS_DOC_BUILD", None)
-    os.environ["PYTHONPATH"] = str(ROOT / "bindings" / "python") + os.pathsep + os.environ.get(
-        "PYTHONPATH", ""
-    )
-    sys.path.insert(0, str(ROOT / "bindings" / "python"))
+    paths = [str(ROOT / "bindings" / "python")]
+    core = os.environ.get("DSEAMS_CORE", "")
+    if core:
+        paths.insert(0, str(_stage(Path(core))))
+    os.environ["PYTHONPATH"] = os.pathsep.join(paths + [os.environ.get("PYTHONPATH", "")])
+    sys.path[:0] = paths
     import pydseams as ds
     from pydseams.band import ring_census
 

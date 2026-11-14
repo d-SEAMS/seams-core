@@ -183,6 +183,11 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
   _parity_env.set('SEAMS_LANG_LIB', seams_lang.full_path())
   _parity_env.set('DSEAMS_SRC', meson.project_source_root())
   _parity_env.set('PYTHONPATH', meson.project_source_root() / 'bindings' / 'python')
+  _parity_depends = [seams_lang]
+  if is_variable('dseams_core')
+    _parity_env.set('DSEAMS_CORE', dseams_core.full_path())
+    _parity_depends += dseams_core
+  endif
   test(
     'python_frame_parity',
     find_program('python3', required: true),
@@ -191,7 +196,7 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
       meson.project_source_root() / 'bindings' / 'python' / 'tests' / 'frame_parity.py',
     ],
     env: _parity_env,
-    depends: [seams_lang],
+    depends: _parity_depends,
     timeout: 600,
   )
   test(
