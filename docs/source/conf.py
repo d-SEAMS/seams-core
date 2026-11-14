@@ -286,9 +286,10 @@ def _stage_ctypes_autodoc():
         )
     with open(page, "w", encoding="utf-8") as handle:
         handle.write(body)
+    # The landing toctree holds this page; the index lists it like the rest.
     if os.path.isfile(index):
         with open(index, "a", encoding="utf-8") as handle:
-            handle.write("   seams_ctypes\n")
+            handle.write("- :doc:`seams_ctypes`\n")
 
 
 def _native_page(folder, title, detail):

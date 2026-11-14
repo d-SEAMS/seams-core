@@ -297,11 +297,13 @@ framework.
    stable/c
    stable/cpp
    stable/python
+   stable/seams_ctypes
    stable/fortran
    stable/julia
    stable/r
    stable/lua
    stable/rust
+   crates/seams/lib
    stable/cli
    stable/science
    capi/index
