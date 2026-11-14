@@ -694,7 +694,12 @@ int seams_version_patch(void) { return SEAMS_VERSION_PATCH; }
 const char *seams_version_string(void) { return SEAMS_VERSION_STRING; }
 
 const char *seams_status_string(seams_status status) {
-  switch (status) {
+  // A C caller may pass any int. In C++ a value past the enumerators is not
+  // a seams_status, so the switch reads the bits as an int.
+  static_assert(sizeof(seams_status) == sizeof(int), "seams_status is an int");
+  int code = 0;
+  std::memcpy(&code, &status, sizeof code);
+  switch (code) {
   case SEAMS_OK:
     return "ok";
   case SEAMS_ERR_NULL:
