@@ -158,6 +158,18 @@ def _library():
         ctypes.POINTER(ctypes.c_int),
         ctypes.POINTER(ctypes.c_int),
     ]
+    lib.seams_frame_signature_vertices.restype = ctypes.c_int
+    lib.seams_frame_signature_vertices.argtypes = [
+        ctypes.c_void_p,
+        ctypes.c_double,
+        ctypes.c_int,
+        ctypes.c_char_p,
+        ctypes.c_char_p,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+    ]
     lib.seams_frame_steinhardt.restype = ctypes.c_int
     lib.seams_frame_steinhardt.argtypes = [
         ctypes.c_void_p,
@@ -231,6 +243,9 @@ class Frame:
         self._labels = None
         self._cages = None
         self._owned = True
+        # pydseamslib 2.11.1 uses the hydrogen-bond list for rings when
+        # the dump is type-2 oxygen. Other frames stay on the cutoff list.
+        self._bonded = "cutoff"
 
     def close(self):
         if self._owned and self._ptr:
@@ -315,28 +330,59 @@ class Frame:
     def cages_by_signature(self, signature, max_ring_size=None):
         """Closed cages of one ring census.
 
-        The C API returns the cage count and the number of distinct
-        vertices, not one vertex list per cage. The list length is the
-        cage count so ``len`` matches the documented print. ``n_atoms``
-        is the vertex count.
+        Each dict has ``signature`` and ``vertices`` (atom indices of
+        that cage). ``n_atoms`` on the list is the number of distinct
+        vertices across the cages.
         """
         del max_ring_size  # the C search picks the depth from the signature
+        lib = _library()
         n_cages = ctypes.c_int()
         n_atoms = ctypes.c_int()
-        code = _library().seams_frame_signature(
+        spec = str(signature).encode()
+        code = lib.seams_frame_signature(
             self._ptr,
             ctypes.c_double(self.cutoff),
             ctypes.c_int(0),
             b"cutoff",
-            str(signature).encode(),
+            spec,
             ctypes.byref(n_cages),
             ctypes.byref(n_atoms),
         )
-        _check(_library(), code)
-        found = [
-            {"signature": str(signature), "vertices": [], "n_atoms": int(n_atoms.value)}
-            for _ in range(int(n_cages.value))
-        ]
+        _check(lib, code)
+        found = []
+        for cage_index in range(int(n_cages.value)):
+            n_vertices = ctypes.c_int()
+            code = lib.seams_frame_signature_vertices(
+                self._ptr,
+                ctypes.c_double(self.cutoff),
+                ctypes.c_int(0),
+                b"cutoff",
+                spec,
+                cage_index,
+                None,
+                0,
+                ctypes.byref(n_vertices),
+            )
+            _check(lib, code)
+            buf = (ctypes.c_int * int(n_vertices.value))()
+            code = lib.seams_frame_signature_vertices(
+                self._ptr,
+                ctypes.c_double(self.cutoff),
+                ctypes.c_int(0),
+                b"cutoff",
+                spec,
+                cage_index,
+                buf,
+                int(n_vertices.value),
+                ctypes.byref(n_vertices),
+            )
+            _check(lib, code)
+            found.append(
+                {
+                    "signature": str(signature),
+                    "vertices": [int(buf[i]) for i in range(int(n_vertices.value))],
+                }
+            )
         found_n = int(n_atoms.value)
 
         class _Found(list):
@@ -362,15 +408,21 @@ class Frame:
         _check(_library(), code)
         return {"ql": ql.tolist(), "ql_bar": qlbar.tolist()}
 
-    def ring_census(self, max_size=8):
-        """Primitive rings by size. ``counts[i]`` from seams_frame_rings."""
+    def ring_census(self, max_size=8, graph=None):
+        """Primitive rings by size. ``counts[i]`` from seams_frame_rings.
+
+        ``graph`` is ``"hbond"`` or ``"cutoff"``. The default is the
+        frame's bonded list: hydrogen bonds for a type-2 oxygen dump,
+        and the cutoff list otherwise.
+        """
+        which = self._bonded if graph is None else graph
         depth = int(max_size)
         counts = np.zeros(depth + 1, dtype=np.int32)
         code = _library().seams_frame_rings(
             self._ptr,
             ctypes.c_double(self.cutoff),
             ctypes.c_int(0),
-            b"cutoff",
+            str(which).encode(),
             ctypes.c_int(depth),
             counts.ctypes.data_as(ctypes.POINTER(ctypes.c_int)),
             ctypes.c_int(counts.size),
@@ -493,7 +545,11 @@ def read(filename, frame=1, atom_type=None, all_atoms=False, **kwargs):
     else:
         filt = int(atom_type)
     ptr = _library().seams_frame_read(os.fsencode(filename), int(frame), filt)
-    return Frame._adopt(ptr)
+    out = Frame._adopt(ptr)
+    # 2.11.1 sets bonded="hbond" when the analysed species is LAMMPS type 2.
+    if filt == 2:
+        out._bonded = "hbond"
+    return out
 
 
 def _select_mask(atoms, select):

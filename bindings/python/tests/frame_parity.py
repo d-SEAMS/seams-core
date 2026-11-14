@@ -166,13 +166,15 @@ def test_frame_matches_pydseamslib_211():
         oracle["cages"]["n_water"],
     )
     assert cages.n_water == 250
-    # Default 2.11.1 ring_census follows bonded="hbond" whenever the file
-    # still names hydrogens. The page describes the cutoff neighbour list.
-    # Forcing bonded="cutoff" on 2.11.1 reproduces seams_frame_rings.
+    # Default ring_census is the hydrogen-bond list, the same list
+    # pydseamslib 2.11.1 uses for a type-2 dump. The cutoff graph is
+    # a different census and is requested by name.
     census = ring_census(frame, max_size=8)
-    assert census == {int(k): v for k, v in oracle["rings_cutoff"].items()}
-    assert census == {3: 37, 4: 273, 5: 34, 6: 167}
-    assert {int(k): v for k, v in oracle["rings_default"].items()} == {3: 1, 4: 230, 5: 4, 6: 192}
+    assert census == {int(k): v for k, v in oracle["rings_default"].items()}
+    assert census == {3: 1, 4: 230, 5: 4, 6: 192}
+    cutoff_census = frame.ring_census(8, graph="cutoff")
+    assert cutoff_census == {int(k): v for k, v in oracle["rings_cutoff"].items()}
+    assert cutoff_census == {3: 37, 4: 273, 5: 34, 6: 167}
     for ell in (3, 4, 6):
         sample = frame.steinhardt(ell)
         other = oracle["steinhardt"][str(ell)]

@@ -186,6 +186,12 @@ int seams_frame_signature(seams_frame *frame, double cutoff, int type,
 int seams_frame_signature_edge(seams_frame *frame, double cutoff, int type,
                                const char *graph, const char *spec,
                                const char *edge, int *n_cages, int *n_atoms);
+/** Atom indices of one matched cage, sorted. vertices may be NULL to
+ * query the length. cap is the buffer length. @ingroup lang_cages */
+int seams_frame_signature_vertices(seams_frame *frame, double cutoff, int type,
+                                   const char *graph, const char *spec,
+                                   int cage_index, int *vertices, int cap,
+                                   int *n_vertices);
 
 /** @brief seams_frame_rdf_nbins. @ingroup lang_more */
 int seams_frame_rdf_nbins(double rmax, int nbins);

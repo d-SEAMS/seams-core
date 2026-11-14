@@ -1,6 +1,7 @@
 // Copyright (c) d-SEAMS developers
 #include "seams_lang.h"
 
+#include <bond.hpp>
 #include <bop.hpp>
 #include <chill_plus_scheme.hpp>
 #include <cage_affiliation.hpp>
@@ -271,6 +272,9 @@ struct seams_frame {
   // Empty, or one entry per kept water oxygen. A list shorter than nop
   // means later analyses run on that subset and leave ions unclassified.
   std::vector<int> oxygen_index;
+  // Dump the frame was read from. Hydrogen-bond rings re-read type 1
+  // from this path; an arrays frame has no path.
+  std::string source_path;
 
   void sync_arrays() {
     const int n = cloud.nop;
@@ -375,6 +379,7 @@ seams_frame *seams_frame_read(const char *path, int frame, int type_filter) {
     if (out->cloud.currentFrame <= 0) {
       out->cloud.currentFrame = frame > 0 ? frame : 1;
     }
+    out->source_path = path;
     out->sync_arrays();
     return owned.release();
   } catch (...) {
@@ -953,6 +958,27 @@ int seams_frame_rings(seams_frame *frame, double cutoff, int type,
   try {
     const int typ = resolve_type(frame->cloud, type);
     const std::string which = graph == nullptr ? "mutual" : graph;
+    if (which == "hbond") {
+      if (frame->source_path.empty()) {
+        set_error("hydrogen-bond rings need a trajectory path");
+        return 1;
+      }
+      // pydseamslib 2.11.1: a type-2 oxygen dump uses H type 1, the
+      // 2.42 A acceptor-H distance, and a 30 degree O-O-H angle.
+      auto ids = nneigh::neighListO(cutoff, frame->cloud, typ);
+      auto hb = bond::populateHbonds(frame->source_path, frame->cloud, ids,
+                                     frame->cloud.currentFrame, 1);
+      auto idx = nneigh::neighbourListByIndex(frame->cloud, hb);
+      const auto rings = primitive::ringNetwork(idx, max_depth);
+      std::fill(counts, counts + counts_len, 0);
+      for (const auto &ring : rings) {
+        const int size = static_cast<int>(ring.size());
+        if (size >= 0 && size < counts_len) {
+          counts[size] += 1;
+        }
+      }
+      return 0;
+    }
     if (which == "cutoff") {
       std::vector<int> subset;
       const std::vector<int> *sub = nullptr;
@@ -1453,6 +1479,54 @@ int seams_frame_cages(seams_frame *frame, double cutoff, int type, int k,
   }
 }
 
+namespace {
+
+std::vector<std::vector<int>>
+signature_vertex_lists(seams_frame *frame, double cutoff, int type,
+                       const char *graph, const char *spec, const char *edge) {
+  const int typ = resolve_type(frame->cloud, type);
+  const std::string which =
+      (graph == nullptr || graph[0] == '\0') ? "cutoff" : graph;
+  std::vector<std::vector<int>> idx;
+  if (which == "cutoff") {
+    auto ids = nneigh::neighListLinkcell(cutoff, frame->cloud, typ);
+    if (ids.empty()) {
+      ids = nneigh::neighListO(cutoff, frame->cloud, typ);
+    }
+    idx = nneigh::neighbourListByIndex(frame->cloud, ids);
+  } else {
+    idx = index_graph(frame, cutoff, typ, which, 4);
+  }
+  const auto signature = cage::Signature::parse(spec);
+  const int depth = std::max(signature.maxRingSize(), 3);
+  const auto rings = ring::cageRings(primitive::ringNetwork(idx, depth),
+                                     frame->cloud, cutoff);
+  const auto window = cage::parseEdgeWindow(edge == nullptr ? "" : edge);
+  std::vector<std::array<double, 3>> xyz;
+  const std::vector<std::array<double, 3>> *xyzPtr = nullptr;
+  const std::vector<double> *boxPtr = nullptr;
+  if (window.enabled) {
+    xyz.resize(static_cast<std::size_t>(frame->cloud.nop));
+    for (int i = 0; i < frame->cloud.nop; ++i) {
+      const auto &p = frame->cloud.pts[static_cast<std::size_t>(i)];
+      xyz[static_cast<std::size_t>(i)] = {p.x, p.y, p.z};
+    }
+    xyzPtr = &xyz;
+    boxPtr = &frame->cloud.box;
+  }
+  const auto foundOf = cage::findBySignatures(
+      rings, idx, std::vector<cage::Signature>{signature}, {}, xyzPtr, boxPtr,
+      window, &frame->cloud.boxLow);
+  std::vector<std::vector<int>> lists;
+  lists.reserve(foundOf.at(0).size());
+  for (const auto &cage_i : foundOf.at(0)) {
+    lists.push_back(cage_i.vertices);
+  }
+  return lists;
+}
+
+} // namespace
+
 int seams_frame_signature(seams_frame *frame, double cutoff, int type,
                           const char *graph, const char *spec, int *n_cages,
                           int *n_atoms) {
@@ -1470,46 +1544,45 @@ int seams_frame_signature_edge(seams_frame *frame, double cutoff, int type,
     return 1;
   }
   try {
-    const int typ = resolve_type(frame->cloud, type);
-    const std::string which =
-        (graph == nullptr || graph[0] == '\0') ? "cutoff" : graph;
-    std::vector<std::vector<int>> idx;
-    if (which == "cutoff") {
-      auto ids = nneigh::neighListLinkcell(cutoff, frame->cloud, typ);
-      if (ids.empty()) {
-        ids = nneigh::neighListO(cutoff, frame->cloud, typ);
-      }
-      idx = nneigh::neighbourListByIndex(frame->cloud, ids);
-    } else {
-      idx = index_graph(frame, cutoff, typ, which, 4);
-    }
-    const auto signature = cage::Signature::parse(spec);
-    const int depth = std::max(signature.maxRingSize(), 3);
-    const auto rings = ring::cageRings(primitive::ringNetwork(idx, depth),
-                                       frame->cloud, cutoff);
-    const auto window = cage::parseEdgeWindow(edge == nullptr ? "" : edge);
-    std::vector<std::array<double, 3>> xyz;
-    const std::vector<std::array<double, 3>> *xyzPtr = nullptr;
-    const std::vector<double> *boxPtr = nullptr;
-    if (window.enabled) {
-      xyz.resize(static_cast<std::size_t>(frame->cloud.nop));
-      for (int i = 0; i < frame->cloud.nop; ++i) {
-        const auto &p = frame->cloud.pts[static_cast<std::size_t>(i)];
-        xyz[static_cast<std::size_t>(i)] = {p.x, p.y, p.z};
-      }
-      xyzPtr = &xyz;
-      boxPtr = &frame->cloud.box;
-    }
-    const auto foundOf = cage::findBySignatures(
-        rings, idx, std::vector<cage::Signature>{signature}, {}, xyzPtr,
-        boxPtr, window, &frame->cloud.boxLow);
-    const auto &found = foundOf.at(0);
+    const auto lists =
+        signature_vertex_lists(frame, cutoff, type, graph, spec, edge);
     std::set<int> atoms;
-    for (const auto &cage_i : found) {
-      atoms.insert(cage_i.vertices.begin(), cage_i.vertices.end());
+    for (const auto &verts : lists) {
+      atoms.insert(verts.begin(), verts.end());
     }
-    *n_cages = static_cast<int>(found.size());
+    *n_cages = static_cast<int>(lists.size());
     *n_atoms = static_cast<int>(atoms.size());
+    return 0;
+  } catch (...) {
+    remember_exception();
+    return 1;
+  }
+}
+
+int seams_frame_signature_vertices(seams_frame *frame, double cutoff, int type,
+                                   const char *graph, const char *spec,
+                                   int cage_index, int *vertices, int cap,
+                                   int *n_vertices) {
+  clear_error();
+  if (frame == nullptr || spec == nullptr || n_vertices == nullptr) {
+    set_error("signature vertices need a frame, a census, and a length");
+    return 1;
+  }
+  try {
+    const auto lists =
+        signature_vertex_lists(frame, cutoff, type, graph, spec, nullptr);
+    if (cage_index < 0 || cage_index >= static_cast<int>(lists.size())) {
+      set_error("cage index is outside the signature match");
+      return 1;
+    }
+    const auto &verts = lists[static_cast<std::size_t>(cage_index)];
+    *n_vertices = static_cast<int>(verts.size());
+    if (vertices != nullptr) {
+      const int nwrite = std::min(cap, *n_vertices);
+      for (int i = 0; i < nwrite; ++i) {
+        vertices[i] = verts[static_cast<std::size_t>(i)];
+      }
+    }
     return 0;
   } catch (...) {
     remember_exception();
