@@ -1,3 +1,11 @@
+/* Suite-stack diagram: the SVG fills the article column. */
+article .mermaid svg,
+article pre.mermaid svg {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
 /* Homepage hero: full cage mark; swap light/dark via Shibuya color-mode
    classes (html.light / html.dark). Fallback: prefers-color-scheme. */
 

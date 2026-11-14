@@ -154,43 +154,92 @@ This documentation follows the [[https://diataxis.fr/][Diataxis]]
 framework.
 
 #+begin_export rst
+.. grid:: 1 2 3 3
+   :gutter: 2
+
+   .. grid-item-card:: Tutorials
+      :link: tutorials/index
+      :link-type: doc
+
+      Ice, clathrates, brine, and nucleation, each with a runnable check.
+
+   .. grid-item-card:: How-to
+      :link: howto/index
+      :link-type: doc
+
+      Cutoff, neighbours, CHILL+, rings, and the engine builds.
+
+   .. grid-item-card:: Reference
+      :link: reference/python-frame
+      :link-type: doc
+
+      :doc:`Python <reference/python-frame>`, :doc:`C <capi/index>`,
+      :doc:`C++ <stable/cpp>`, :doc:`Julia <stable/julia>`,
+      :doc:`R <stable/r>`, :doc:`Lua <stable/lua>`.
+
+   .. grid-item-card:: Engines
+      :link: engines/index
+      :link-type: doc
+
+      :doc:`LAMMPS <engines/lammps>`, :doc:`GROMACS <engines/gromacs>`,
+      :doc:`OpenMM <engines/openmm>`, :doc:`PLUMED <engines/plumed>`.
+
+   .. grid-item-card:: Comparisons
+      :link: comparisons
+      :link-type: doc
+
+      OVITO, freud, SQQ, and PLUMED, next to the tests that recompute them.
+
+   .. grid-item-card:: Paper reproductions
+      :link: paper/index
+      :link-type: doc
+
+      The 2.0 paper's versions, benchmark tables, and rerun steps.
+
 .. toctree::
+   :hidden:
    :maxdepth: 2
    :caption: Getting Started
 
    quickstart
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
    :caption: Tutorials
 
    tutorials/index
 
 .. toctree::
+   :hidden:
    :maxdepth: 1
    :caption: Videos
 
    videos/index
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
    :caption: How-to
 
    howto/index
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
    :caption: Explanation
 
    explanation/index
 
 .. toctree::
+   :hidden:
    :maxdepth: 1
    :caption: Comparisons
 
    comparisons
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
    :caption: Reference
 
@@ -198,30 +247,35 @@ framework.
    changelog
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
    :caption: d-SEAMS 2.0 paper
 
    paper/index
 
 .. toctree::
+   :hidden:
    :maxdepth: 1
    :caption: Stable API
 
    stable/index
 
 .. toctree::
+   :hidden:
    :maxdepth: 1
    :caption: Engines
 
    engines/index
 
 .. toctree::
+   :hidden:
    :maxdepth: 1
    :caption: Language tutorials
 
    fronts/index
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
    :caption: Development
 

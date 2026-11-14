@@ -217,10 +217,11 @@ def _link_capi():
     if not os.path.isfile(index):
         return
     text = open(index, encoding="utf-8").read()
-    if "capi/index" in text:
+    if "\n   capi/index\n" in text:
         return
     extra = (
         "\n.. toctree::\n"
+        "   :hidden:\n"
         "   :maxdepth: 2\n"
         "   :caption: C API\n"
         "\n"
@@ -243,6 +244,7 @@ def _link_lang():
         return
     extra = (
         "\n.. toctree::\n"
+        "   :hidden:\n"
         "   :maxdepth: 2\n"
         "   :caption: Language APIs\n"
         "\n"
@@ -265,6 +267,7 @@ def _link_science():
         return
     extra = (
         "\n.. toctree::\n"
+        "   :hidden:\n"
         "   :maxdepth: 2\n"
         "   :caption: Science tutorials\n"
         "\n"
@@ -331,6 +334,7 @@ def _link_walkthrough():
         return
     extra = (
         "\n.. toctree::\n"
+        "   :hidden:\n"
         "   :maxdepth: 2\n"
         "   :caption: Engine walkthroughs\n"
         "\n"
