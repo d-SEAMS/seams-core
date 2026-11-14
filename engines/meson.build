@@ -172,6 +172,17 @@ if openmm_opt.allowed()
       if fs.is_absolute(_openmm_so) and fs.is_file(_openmm_so)
         openmm_rpath = fs.parent(_openmm_so)
       endif
+      # clang links from LIBRARY_PATH but -print-file-name does not search it.
+      _openmm_py = find_program('python3', required: false)
+      if openmm_rpath == '' and _openmm_py.found()
+        openmm_rpath = run_command(_openmm_py, '-c',
+          'import os\n' +
+          'for part in os.environ.get("LIBRARY_PATH", "").split(os.pathsep):\n' +
+          '    if part and os.path.isfile(os.path.join(part, "libOpenMM.so")):\n' +
+          '        print(part)\n' +
+          '        break\n',
+          check: false).stdout().strip()
+      endif
     endif
     openmm_plugin = executable(
       'seams_openmm',
