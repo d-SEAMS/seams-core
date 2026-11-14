@@ -26,6 +26,10 @@ program test_high
   integer(seams_int), allocatable :: perfect(:), imperfect(:), sheet(:), fp_counts(:)
   character(len=512) :: root
   integer :: nroot
+  ! fpm test passes no argument and runs from the manifest directory.
+  character(len=5), parameter :: roots(3) = [character(len=5) :: ".", "..", "../.."]
+  logical :: found
+  integer :: up
   character(len=:), allocatable :: version, key, err
 
   fcc = reshape([0.0_seams_real, 0.0_seams_real, 0.0_seams_real, &
@@ -94,8 +98,17 @@ program test_high
   call rings%vertices(1_seams_int, atoms, stat=stat, errmsg=err)
   if (stat /= SEAMS_OK .or. size(atoms) <= 0) stop 19
   call rings%close()
-  if (command_argument_count() < 1) stop 30
-  call get_command_argument(1, root, nroot)
+  if (command_argument_count() >= 1) then
+    call get_command_argument(1, root, nroot)
+  else
+    found = .false.
+    do up = 1, size(roots)
+      inquire(file=trim(roots(up)) // "/input/traj/ice1h.lammpstrj", exist=found)
+      if (found) exit
+    end do
+    if (.not. found) stop 30
+    root = roots(up)
+  end if
   call frame%chill(labels, counts, stat=stat, errmsg=err)
   if (stat /= SEAMS_OK) stop 40
   call frame%steinhardt(6_seams_int, q4, q6, stat=stat, errmsg=err)

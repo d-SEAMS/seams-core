@@ -15,6 +15,10 @@ program test_seams
   integer :: ii, jj, kk, f, s, cursor
   character(len=512) :: root
   integer :: nroot
+  ! fpm test passes no argument and runs from the manifest directory.
+  character(len=5), parameter :: roots(3) = [character(len=5) :: ".", "..", "../.."]
+  logical :: found
+  integer :: up
   integer(c_int) :: n_bonds, n_hex, n_cubic, n_water, n_both
   integer(c_int) :: perfect(7), imperfect(7), sheet(7), kinds(64), fp_counts(13), atoms(12)
   real(c_double), target :: qr(64), qbar(64), rr(64), gg(64), zz(64), rho(64)
@@ -81,8 +85,17 @@ program test_seams
   code = seams_rings_fraction(rings, 6, fraction)
   if (code /= SEAMS_OK .or. fraction <= 0.5d0) stop 13
   call seams_rings_destroy(rings)
-  if (command_argument_count() < 1) stop 30
-  call get_command_argument(1, root, nroot)
+  if (command_argument_count() >= 1) then
+    call get_command_argument(1, root, nroot)
+  else
+    found = .false.
+    do up = 1, size(roots)
+      inquire(file=trim(roots(up)) // "/input/traj/ice1h.lammpstrj", exist=found)
+      if (found) exit
+    end do
+    if (.not. found) stop 30
+    root = roots(up)
+  end if
   code = seams_chill(sys, 3.5d0, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels, &
                      int(n, c_size_t), counts)
   if (code /= SEAMS_OK) stop 40
