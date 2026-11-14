@@ -745,17 +745,6 @@ bool ringIsPrimitive(const DistOracle &oracle, const std::vector<int> &ring,
   return ok;
 }
 
-//! Append v if absent; ring sizes are tiny, so a scan beats a set
-inline bool pushUniqueMember(std::vector<int> &ring, int v) {
-  for (const int x : ring) {
-    if (x == v) {
-      return false;
-    }
-  }
-  ring.push_back(v);
-  return true;
-}
-
 
 /**
  * @brief Reusable scratch for the per-source ring enumeration.
@@ -1407,64 +1396,6 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
   return adjacency;
 }
 
-
-static PackedRows packRows(const std::vector<std::vector<int>> &nList) {
-  const int nVertices = static_cast<int>(nList.size());
-  int use = 1;
-#ifdef SEAMS_HAS_OPENMP
-  if (!omp_in_parallel()) {
-    use = std::max(1, omp_get_max_threads());
-  }
-#endif
-  if (use > 1) {
-    const int fit = nVertices / 80;
-    if (fit < use) {
-      use = std::max(fit, 1);
-    }
-  }
-  if (use > 1) {
-    return teamNeighbourRows(nList, nVertices, use);
-  }
-  std::vector<std::vector<int>> uniq(static_cast<std::size_t>(nVertices));
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (!omp_in_parallel())
-#endif
-  for (int i = 0; i < nVertices; i++) {
-    if (nList[static_cast<std::size_t>(i)].size() <= 1) {
-      continue;
-    }
-    auto &row = uniq[static_cast<std::size_t>(i)];
-    row.reserve(nList[static_cast<std::size_t>(i)].size() - 1);
-    for (std::size_t k = 1; k < nList[static_cast<std::size_t>(i)].size(); k++) {
-      const int j = nList[static_cast<std::size_t>(i)][k];
-      if (j < 0 || j >= nVertices || j == i) {
-        continue;
-      }
-      if (std::find(row.begin(), row.end(), j) == row.end()) {
-        row.push_back(j);
-      }
-    }
-  }
-  PackedRows adjacency;
-  adjacency.first.assign(static_cast<std::size_t>(nVertices) + 1, 0);
-  for (int i = 0; i < nVertices; i++) {
-    adjacency.first[static_cast<std::size_t>(i) + 1] =
-        adjacency.first[static_cast<std::size_t>(i)] + uniq[static_cast<std::size_t>(i)].size();
-  }
-  adjacency.cols.resize(adjacency.first[static_cast<std::size_t>(nVertices)]);
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (!omp_in_parallel())
-#endif
-  for (int i = 0; i < nVertices; i++) {
-    const auto &row = uniq[static_cast<std::size_t>(i)];
-    if (!row.empty()) {
-      std::copy(row.begin(), row.end(),
-                adjacency.cols.begin() +
-                    static_cast<std::ptrdiff_t>(adjacency.first[static_cast<std::size_t>(i)]));
-    }
-  }
-  return adjacency;
-}
 
 static std::vector<std::vector<int>>
 searchRings(const std::vector<std::vector<int>> &nList, int maxDepth,

@@ -1070,67 +1070,6 @@ struct Grid {
   std::vector<double> pz;
 };
 
-void invert3(const double M[3][3], double inv[3][3]) {
-  const double a = M[0][0], b = M[0][1], c = M[0][2];
-  const double d = M[1][0], e = M[1][1], f = M[1][2];
-  const double g = M[2][0], h = M[2][1], i = M[2][2];
-  const double det = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
-  const double s = 1.0 / det;
-  inv[0][0] = s * (e * i - f * h);
-  inv[0][1] = s * (c * h - b * i);
-  inv[0][2] = s * (b * f - c * e);
-  inv[1][0] = s * (f * g - d * i);
-  inv[1][1] = s * (a * i - c * g);
-  inv[1][2] = s * (c * d - a * f);
-  inv[2][0] = s * (d * h - e * g);
-  inv[2][1] = s * (b * g - a * h);
-  inv[2][2] = s * (a * e - b * d);
-}
-
-int eclipsedStored(const double c[3], const double nb[][3], int nNb, double cosine) {
-  int first[4];
-  int nFirst = 0;
-  int order[48];
-  double dd[48];
-  const int m = std::min(nNb, 48);
-  for (int i = 0; i < m; i++) {
-    order[i] = i;
-    dd[i] = dist2(c, nb[i]);
-  }
-  for (int a = 0; a < 4 && a < m; a++) {
-    int best = a;
-    for (int b = a + 1; b < m; b++) {
-      if (dd[b] < dd[best]) {
-        best = b;
-      }
-    }
-    std::swap(dd[a], dd[best]);
-    std::swap(order[a], order[best]);
-    if (dd[a] >= kBondLo * kBondLo && dd[a] <= kBondHi * kBondHi) {
-      first[nFirst++] = order[a];
-    }
-  }
-  if (nFirst < 4) {
-    return -1;
-  }
-  double pts[1 + 16][3];
-  pts[0][0] = c[0];
-  pts[0][1] = c[1];
-  pts[0][2] = c[2];
-  int idx[16];
-  const int keep = std::min(nNb, 16);
-  for (int i = 0; i < keep; i++) {
-    pts[i + 1][0] = nb[i][0];
-    pts[i + 1][1] = nb[i][1];
-    pts[i + 1][2] = nb[i][2];
-  }
-  // Rebuild first indices into pts[], where center is 0 and neighbors start at 1.
-  // nearest4 on this compact cloud.
-  int firstPts[4];
-  nearest4(pts, 1 + keep, 0, firstPts);
-  return eclipsedCountPts(pts, 1 + keep, 0, firstPts, cosine, nullptr);
-}
-
 } // namespace
 
 namespace symm {
