@@ -1,0 +1,28 @@
+citHeader("To cite dseams in publications use:")
+
+bibentry(
+  bibtype = "Article",
+  title = "d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations",
+  author = c(
+    person(given = "Amrita", family = "Goswami"),
+    person(given = "Rohit", family = "Goswami"),
+    person(given = "Ruhila", family = "S")
+  ),
+  journal = "Journal of Chemical Information and Modeling",
+  year = 2020,
+  volume = 60,
+  number = 4,
+  pages = "2169--2177",
+  doi = "10.1021/acs.jcim.0c00031"
+)
+
+bibentry(
+  bibtype = "Manual",
+  title = "dseams: Ice Classification and Ring Statistics for Molecular Simulations",
+  author = person(given = "Rohit", family = "Goswami",
+                  email = "rgoswami@ieee.org"),
+  year = 2026,
+  note = "R package version 2.14.0",
+  url = "https://docs.dseams.info",
+  doi = "10.1021/acs.jcim.0c00031"
+)

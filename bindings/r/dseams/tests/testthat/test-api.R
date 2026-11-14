@@ -49,5 +49,40 @@ test_that("threads can be set and read back", {
 })
 
 test_that("the engine version is the package version", {
-  expect_identical(dseams_version(), as.character(utils::packageVersion("dseams")))
+  expect_identical(
+    dseams_version(),
+    as.character(utils::packageVersion("dseams"))
+  )
+})
+
+test_that(".onLoad honours the thread option and the core limit", {
+  ns <- asNamespace("dseams")
+  lib <- find.package("dseams")
+  old_opt <- getOption("dseams.threads")
+  old_env <- Sys.getenv("_R_CHECK_LIMIT_CORES_", unset = NA)
+  on.exit({
+    options(dseams.threads = old_opt)
+    if (is.na(old_env)) {
+      Sys.unsetenv("_R_CHECK_LIMIT_CORES_")
+    } else {
+      Sys.setenv("_R_CHECK_LIMIT_CORES_" = old_env)
+    }
+    ns$.onLoad(lib, "dseams")
+  }, add = TRUE)
+
+  options(dseams.threads = 1L)
+  ns$.onLoad(lib, "dseams")
+  expect_identical(dseams_threads(), 1L)
+
+  options(dseams.threads = NULL)
+  Sys.setenv("_R_CHECK_LIMIT_CORES_" = "TRUE")
+  ns$.onLoad(lib, "dseams")
+  expect_lte(dseams_threads(), 2L)
+
+  Sys.setenv("_R_CHECK_LIMIT_CORES_" = "FALSE")
+  ns$.onLoad(lib, "dseams")
+
+  Sys.unsetenv("_R_CHECK_LIMIT_CORES_")
+  ns$.onLoad(lib, "dseams")
+  expect_gte(dseams_threads(), 1L)
 })

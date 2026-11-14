@@ -17,9 +17,9 @@ engine's console output and `exit` go through `src/dseams_r_io.cpp` to
 * checking CRAN incoming feasibility ... NOTE
   New submission
 
-Checked with `R CMD check --as-cran` on R 4.5.3 (x86_64 Linux, GCC 14,
-`-g -O2 -Wall -pedantic`). The R-CMD-check workflow in the repository
-also checks Ubuntu (R release and devel), macOS and Windows.
+Checked with `R CMD check --as-cran` on R 4.6.2 (x86_64 Linux, GCC 13,
+`-g -O2`). The R-CMD-check workflow in the repository also checks Ubuntu
+(R release and devel), macOS and Windows.
 
 The examples and tests run with at most two threads when
 `_R_CHECK_LIMIT_CORES_` is set.

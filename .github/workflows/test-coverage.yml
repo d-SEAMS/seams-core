@@ -1,0 +1,38 @@
+name: test-coverage
+on:
+  push:
+    branches: [main]
+    paths:
+      - "bindings/r/**"
+      - "bindings/cxx/**"
+      - "src/**"
+      - ".github/workflows/test-coverage.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "bindings/r/**"
+      - "bindings/cxx/**"
+      - "src/**"
+      - ".github/workflows/test-coverage.yml"
+  workflow_dispatch:
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    env:
+      R_KEEP_PKG_SOURCE: yes
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          use-public-rspm: true
+      - name: Copy the engine into the package
+        run: sh bindings/r/dseams/tools/vendor.sh
+      - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          working-directory: bindings/r/dseams
+          extra-packages: any::covr
+          needs: coverage
+      - name: Report R coverage
+        run: |
+          Rscript -e 'cov <- covr::package_coverage("bindings/r/dseams"); print(cov); cat(covr::percent_coverage(cov), "\n")'

@@ -45,7 +45,12 @@ read_frame <- function(path, frame = 1L, type = 0L) {
   path <- normalizePath(path, mustWork = TRUE)
   ptr <- read_frame_(path, as.integer(frame), as.integer(type))
   structure(
-    list(ptr = ptr, path = path, frame = as.integer(frame), type = as.integer(type)),
+    list(
+      ptr = ptr,
+      path = path,
+      frame = as.integer(frame),
+      type = as.integer(type)
+    ),
     class = "dseams_frame"
   )
 }
@@ -191,7 +196,9 @@ primitive_rings <- function(frame, cutoff = 3.5, type = 0L, graph = "mutual",
 #' @export
 primitive_rings.dseams_frame <- function(frame, cutoff = 3.5, type = 0L,
                                          graph = "mutual", max_depth = 6L) {
-  out <- rings_(frame$ptr, cutoff, as.integer(type), graph, as.integer(max_depth))
+  out <- rings_(
+    frame$ptr, cutoff, as.integer(type), graph, as.integer(max_depth)
+  )
   class(out) <- c("dseams_rings", "data.frame")
   out
 }
@@ -293,10 +300,12 @@ steinhardt <- function(frame, order_l = 6L, cutoff = 3.5, type = 0L,
 
 #' @rdname steinhardt
 #' @export
-steinhardt.dseams_frame <- function(frame, order_l = 6L, cutoff = 3.5, type = 0L,
-                                    graph = NULL) {
+steinhardt.dseams_frame <- function(
+    frame, order_l = 6L, cutoff = 3.5, type = 0L, graph = NULL) {
   graph_arg <- if (is.null(graph)) "" else as.character(graph)
-  out <- steinhardt_(frame$ptr, cutoff, as.integer(type), as.integer(order_l), graph_arg)
+  out <- steinhardt_(
+    frame$ptr, cutoff, as.integer(type), as.integer(order_l), graph_arg
+  )
   class(out) <- c("dseams_steinhardt", "data.frame")
   out
 }
