@@ -7,10 +7,11 @@ The 148-frame mW trajectory is figshare
 frames, timesteps 15677000, 15678000 and 15679000, 468 kB.
 ~meson test docs_tutorial_nucleation~ labels each frame and grows the
 largest crystal cluster. ~meson test docs_frame_tutorials~ runs the
-same three frames in CI (~--small~). The public Hugging Face pin
-~d-SEAMS/brine-front-230K~ at
-~4828e33ecf419c70643b2d466bfa4f283b4138dc~ does not contain this
-trajectory, so the shipped file is the frame the test reads.
+same three frames in CI (~--small~). Without ~--small~, the runner
+tries ~d-SEAMS/nucleation-frames~ at the pinned revision and uses this
+file when that fetch does not return it.
+~scripts/hf_dataset_prepare.py~ packs the dump for that dataset and
+does not upload it.
 
 Crystal atoms are cubic, hexagonal, reCubic and reHex. Two crystal
 atoms share a cluster when the cutoff list joins them. The cubic and

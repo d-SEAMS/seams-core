@@ -40,6 +40,24 @@ SHOW = (
     "n",
     *TIME_KEYS,
     "verdict",
+    "source_commit",
+    "ratio_vs_dseams",
+    "ratio_lo",
+    "ratio_hi",
+)
+RATIO_FILE = BENCH / "paper-numbers" / "sitting-large.csv"
+RATIO_OPS = {"classifier", "ptm-default", "ptm-ice", "ira"}
+RATIO_SHOW = (
+    "code",
+    "operation",
+    "phase",
+    "molecules",
+    "threads",
+    "n",
+    "source_commit",
+    "ratio_vs_dseams",
+    "ratio_lo",
+    "ratio_hi",
 )
 HEADER = {
     "competitor": "competitor",
@@ -61,6 +79,10 @@ HEADER = {
     "other_median_ms": "other median ms",
     "other_min_ms": "other min ms",
     "verdict": "verdict",
+    "source_commit": "commit",
+    "ratio_vs_dseams": "ratio of medians",
+    "ratio_lo": "ratio lo",
+    "ratio_hi": "ratio hi",
 }
 NUMBER = re.compile(r"\d+(?:\.\d+)?(?:[eE][+-]?\d+)?")
 
@@ -72,6 +94,10 @@ def read_csv(path):
 
 def operation_of(row):
     return (row.get("operation") or row.get("variant") or "").lower()
+
+
+def ratio_row(row):
+    return operation_of(row) in RATIO_OPS
 
 
 def wanted(row):
@@ -107,9 +133,9 @@ def cell(row, key):
     return raw
 
 
-def table(path, rows):
+def table(path, rows, show=SHOW):
     columns = []
-    for key in SHOW:
+    for key in show:
         if not any(key in row for row in rows):
             continue
         filled = any((row.get(key) or "").strip() for row in rows)
@@ -144,6 +170,11 @@ def sections():
             continue
         text, columns, body = table(path, rows)
         built.append((path, rows, text, columns, body))
+    if RATIO_FILE.is_file():
+        rows = [row for row in read_csv(RATIO_FILE) if ratio_row(row)]
+        if rows:
+            text, columns, body = table(RATIO_FILE, rows, show=RATIO_SHOW)
+            built.append((RATIO_FILE, rows, text, columns, body))
     if not built:
         raise SystemExit("no neighbour or ring rows between 4096 and 110592")
     return built
