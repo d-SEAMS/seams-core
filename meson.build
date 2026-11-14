@@ -82,10 +82,16 @@ if flexiblas_dep.found()
     endif
   endif
 else
-  blas_dep = cppc.find_library('blas', required: true)
-  lapack_dep = cppc.find_library('lapack', required: true)
-  _deps += [blas_dep, lapack_dep]
-  blas_backend = 'blas+lapack'
+  # The engine makes no BLAS or LAPACK call of its own; Eigen does the
+  # linear algebra. A toolchain without either library still builds.
+  blas_dep = cppc.find_library('blas', required: false)
+  lapack_dep = cppc.find_library('lapack', required: false)
+  if blas_dep.found() and lapack_dep.found()
+    _deps += [blas_dep, lapack_dep]
+    blas_backend = 'blas+lapack'
+  else
+    blas_backend = 'none'
+  endif
 endif
 
 # Shared-memory parallelism. libstdc++ routes std::execution::par through TBB,
