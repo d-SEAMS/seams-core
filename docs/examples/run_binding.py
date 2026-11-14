@@ -121,6 +121,7 @@ def install_r_package(build):
                     r_cmd,
                     "CMD",
                     "INSTALL",
+                    "--preclean",
                     "--no-build-vignettes",
                     "-l",
                     str(dest),
