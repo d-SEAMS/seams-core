@@ -2792,6 +2792,80 @@ void fillGraphFromNom(
     const std::vector<int> &nom, int k, bool mutual,
     std::vector<std::vector<int>> &out) {
   const int n = yCloud.nop;
+#if defined(SEAMS_HAS_OPENMP) && !defined(SEAMS_HAS_OFFLOAD)
+  if (n >= 4096 && k > 0 && omp_get_max_threads() > 1 && !omp_in_parallel()) {
+    // The serial fill appends edge (i, j) of nomination slot i * k + t to
+    // rows i and j in slot order. A row therefore holds its own accepted
+    // slots and the accepted slots naming it, merged by slot. Each thread
+    // builds whole rows from those two sorted lists.
+    const std::size_t slots = static_cast<std::size_t>(n) * static_cast<std::size_t>(k);
+    std::vector<char> accepted(slots, 0);
+#pragma omp parallel for schedule(static)
+    for (int i = 0; i < n; i++) {
+      for (int t = 0; t < k; t++) {
+        const std::size_t s = static_cast<std::size_t>(i) * static_cast<std::size_t>(k) +
+                              static_cast<std::size_t>(t);
+        const int j = nom[s];
+        if (j < 0 || j >= n || j == i) {
+          continue;
+        }
+        const bool listed = listsPacked(nom, n, k, j, i);
+        accepted[s] = mutual ? (i < j && listed) : (i < j || !listed);
+      }
+    }
+    std::vector<int> inOff(static_cast<std::size_t>(n) + 1, 0);
+    for (std::size_t s = 0; s < slots; s++) {
+      if (accepted[s] != 0) {
+        ++inOff[static_cast<std::size_t>(nom[s]) + 1];
+      }
+    }
+    for (int i = 0; i < n; i++) {
+      inOff[static_cast<std::size_t>(i) + 1] += inOff[static_cast<std::size_t>(i)];
+    }
+    std::vector<int> inSlot(static_cast<std::size_t>(inOff[static_cast<std::size_t>(n)]));
+    {
+      std::vector<int> cursor(inOff.begin(), inOff.end() - 1);
+      for (std::size_t s = 0; s < slots; s++) {
+        if (accepted[s] != 0) {
+          inSlot[static_cast<std::size_t>(cursor[static_cast<std::size_t>(nom[s])]++)] =
+              static_cast<int>(s);
+        }
+      }
+    }
+    out.assign(static_cast<std::size_t>(n), {});
+#pragma omp parallel for schedule(static)
+    for (int r = 0; r < n; r++) {
+      const std::size_t own = static_cast<std::size_t>(r) * static_cast<std::size_t>(k);
+      int nOwn = 0;
+      for (int t = 0; t < k; t++) {
+        nOwn += accepted[own + static_cast<std::size_t>(t)] != 0 ? 1 : 0;
+      }
+      const int b = inOff[static_cast<std::size_t>(r)];
+      const int e = inOff[static_cast<std::size_t>(r) + 1];
+      auto &row = out[static_cast<std::size_t>(r)];
+      row.reserve(static_cast<std::size_t>(1 + nOwn + (e - b)));
+      row.push_back(yCloud.pts[static_cast<std::size_t>(r)].atomID);
+      int t = 0;
+      int c = b;
+      while (t < k || c < e) {
+        const std::size_t mine = own + static_cast<std::size_t>(t);
+        if (t < k && accepted[mine] == 0) {
+          ++t;
+          continue;
+        }
+        if (t < k && (c >= e || mine < static_cast<std::size_t>(inSlot[static_cast<std::size_t>(c)]))) {
+          row.push_back(yCloud.pts[static_cast<std::size_t>(nom[mine])].atomID);
+          ++t;
+        } else {
+          const int from = inSlot[static_cast<std::size_t>(c)] / k;
+          row.push_back(yCloud.pts[static_cast<std::size_t>(from)].atomID);
+          ++c;
+        }
+      }
+    }
+    return;
+  }
+#endif
   std::vector<int> deg(static_cast<std::size_t>(n), 0);
   for (int i = 0; i < n; i++) {
     for (int t = 0; t < k; t++) {
