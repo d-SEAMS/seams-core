@@ -915,6 +915,14 @@ def compile_statements(build, env, lang, body):
         compile_c_family(build, env, source, exe)
         run([str(exe)], env)
         return
+    if lang in {"cpp", "c++", "cxx"} and re.search(r"\bseams::(System|Error|Status)\b", body):
+        # Statements on the seams.hpp wrapper run inside a main.
+        source = work / "snippet.cpp"
+        source.write_text('#include "seams.hpp"\nint main() {\n' + body + "\n  return 0;\n}\n", encoding="utf-8")
+        exe = work / "snippet"
+        compile_c_family(build, env, source, exe)
+        run([str(exe)], env)
+        return
     if lang in {"cpp", "c++", "cxx"}:
         header = None
         folded = " ".join(body.split())
