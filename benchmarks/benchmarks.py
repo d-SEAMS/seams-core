@@ -604,3 +604,47 @@ class HopStride:
 
     def time_carry(self, model, stride, graph):
         _run(self.cmd)
+
+
+class OmpScaling:
+    """Cutoff neighbours, q4, q6 and rings at 1, 2, 4 and 8 threads.
+
+    Ideal ice Ic, 110592 molecules, through the C API, with the neighbour
+    list built inside every call. setup narrows the process to cpus
+    0 .. threads-1 and sets the OpenMP width; a width above the allowed
+    cpus is skipped. The one-process-per-row sitting with mdapy and
+    pyscal3 is scripts/omp_scaling.py (Snakemake rule omp_scaling).
+    """
+
+    params = (["neighbours", "q4", "q6", "rings"], [1, 2, 4, 8])
+    param_names = ["operation", "threads"]
+
+    def setup(self, operation, threads):
+        import ctypes
+        if threads > len(os.sched_getaffinity(0)) and threads > 1:
+            raise NotImplementedError(f"{threads} threads need {threads} cpus")
+        lib_path = os.environ.get(
+            "SEAMS_CORE_LIB", str(ROOT / "bbdir-release" / "src" / "libyodaLib.so"))
+        if not Path(lib_path).is_file():
+            raise NotImplementedError("libyodaLib.so is not built")
+        os.environ.setdefault("OMP_DYNAMIC", "FALSE")
+        os.environ["RAYON_NUM_THREADS"] = str(threads)
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import omp_scaling
+        self._saved = os.sched_getaffinity(0)
+        os.sched_setaffinity(0, set(range(threads)))
+        self._call = omp_scaling.dseams_call(lib_path, operation)
+        ctypes.CDLL("libgomp.so.1").omp_set_num_threads(threads)
+        self._call()
+
+    def time_call(self, operation, threads):
+        self._call()
+
+    def teardown(self, operation, threads):
+        saved = getattr(self, "_saved", None)
+        if saved:
+            os.sched_setaffinity(0, saved)
+
+
+OmpScaling.time_call.number = 1
+OmpScaling.time_call.repeat = (8, 10, 30.0)
