@@ -380,13 +380,13 @@ int main(int argc, char **argv) {
     }
     double lat[3][3] = {{frame.box[3], 0, 0}, {frame.box[6], frame.box[4], 0},
                         {frame.box[7], frame.box[8], frame.box[5]}};
-    std::vector<int> kind(static_cast<std::size_t>(cloud.nop), -1);
-    symm::classifyIceArrays(x.data(), y.data(), z.data(), cloud.nop, lat, kind.data(), 0.12);
+    std::vector<int> iceKind(static_cast<std::size_t>(cloud.nop), -1);
+    symm::classifyIceArrays(x.data(), y.data(), z.data(), cloud.nop, lat, iceKind.data(), 0.12);
     int ih = 0;
     int ic = 0;
     int isd = 0;
     int other = 0;
-    for (int label : kind) {
+    for (int label : iceKind) {
       if (label == 0) {
         ++ih;
       } else if (label == 1) {
@@ -618,7 +618,7 @@ int main(int argc, char **argv) {
       oxygen.boxLow = work.boxLow;
       oxygen.pts.resize(water.size());
       for (int k = 0; k < oxygen.nop; ++k) {
-        oxygen.pts[static_cast<std::size_t>(k)] = work.pts[static_cast<std::size_t>(water[k])];
+        oxygen.pts[static_cast<std::size_t>(k)] = work.pts[static_cast<std::size_t>(water[static_cast<std::size_t>(k)])];
         oxygen.pts[static_cast<std::size_t>(k)].type = 1;
         oxygen.pts[static_cast<std::size_t>(k)].atomID = k + 1;
         oxygen.idIndexMap[k + 1] = k;
@@ -630,7 +630,7 @@ int main(int argc, char **argv) {
         chill::chillPlusFromCsr(oxygen, offsets, cols);
       }
       for (int k = 0; k < oxygen.nop; ++k) {
-        labels[static_cast<std::size_t>(water[k])] =
+        labels[static_cast<std::size_t>(water[static_cast<std::size_t>(k)])] =
             static_cast<int>(oxygen.pts[static_cast<std::size_t>(k)].iceType);
       }
     }
