@@ -1,0 +1,58 @@
+name: R-CMD-check
+on:
+  push:
+    branches: [main]
+    paths:
+      - "bindings/r/**"
+      - "bindings/cxx/**"
+      - "src/**"
+      - ".github/workflows/r-cmd-check.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "bindings/r/**"
+      - "bindings/cxx/**"
+      - "src/**"
+      - ".github/workflows/r-cmd-check.yml"
+  workflow_dispatch:
+
+jobs:
+  R-CMD-check:
+    name: ${{ matrix.config.os }} (R ${{ matrix.config.r }})
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - { os: ubuntu-latest, r: release }
+          - { os: ubuntu-latest, r: devel }
+          - { os: macos-latest, r: release }
+          - { os: windows-latest, r: release }
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      R_KEEP_PKG_SOURCE: yes
+      _R_CHECK_FORCE_SUGGESTS_: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: r-lib/actions/setup-pandoc@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+      - uses: r-lib/actions/setup-r@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          r-version: ${{ matrix.config.r }}
+          use-public-rspm: true
+      - uses: r-lib/actions/setup-tinytex@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+      # The source package carries a copy of the engine sources and the
+      # example data; R CMD build takes them from the checkout.
+      - name: Copy the engine into the package
+        shell: bash
+        run: sh bindings/r/dseams/tools/vendor.sh
+      - uses: r-lib/actions/setup-r-dependencies@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          working-directory: bindings/r/dseams
+          extra-packages: any::rcmdcheck
+          needs: check
+      - uses: r-lib/actions/check-r-package@f9a764fea8d5c63df6ef9a5c7795bf7deb5d7e05 # v2
+        with:
+          working-directory: bindings/r/dseams
+          args: 'c("--no-manual", "--as-cran")'
+          error-on: '"warning"'
+          upload-snapshots: true

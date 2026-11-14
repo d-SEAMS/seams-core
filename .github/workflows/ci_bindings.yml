@@ -46,7 +46,7 @@ jobs:
           export R_LIBS_USER="$HOME/R/library"
           mkdir -p "$R_LIBS_USER"
           echo "R_LIBS_USER=$R_LIBS_USER" >> "$GITHUB_ENV"
-          Rscript -e 'lib <- Sys.getenv("R_LIBS_USER"); dir.create(lib, recursive = TRUE, showWarnings = FALSE); install.packages(c("cpp11", "testthat"), lib = lib, repos = "https://cloud.r-project.org"); for (p in c("cpp11", "testthat")) if (!requireNamespace(p, lib.loc = lib, quietly = TRUE)) quit(status = 1)'
+          Rscript -e 'lib <- Sys.getenv("R_LIBS_USER"); dir.create(lib, recursive = TRUE, showWarnings = FALSE); install.packages(c("cpp11", "RcppEigen", "testthat"), lib = lib, repos = "https://cloud.r-project.org"); for (p in c("cpp11", "RcppEigen", "testthat")) if (!requireNamespace(p, lib.loc = lib, quietly = TRUE)) quit(status = 1)'
       - name: Install the R package
         run: |
           export R_LIBS_USER="${R_LIBS_USER:-$HOME/R/library}"
@@ -70,7 +70,7 @@ jobs:
           export DSEAMS_ROOT="$PWD"
           export SEAMS_LANG_LIB="$PWD/bbdir-py/bindings/libseams_lang.so"
           export LD_LIBRARY_PATH="$PWD/bbdir-py/bindings:$PWD/bbdir-py/src:${LD_LIBRARY_PATH:-}"
-          julia --project=bindings/julia/Dseams -e 'using Pkg; Pkg.instantiate()'
+          julia --project=bindings/julia/Dseams bindings/julia/Dseams/dev/develop_jll.jl
           julia --project=bindings/julia/Dseams bindings/julia/Dseams/test/runtests.jl
       - name: Install pydseamslib with chill_plus(graph=)
         run: pixi run python -m pip install "pydseamslib @ git+https://github.com/d-SEAMS/PydSEAMSlib@${PYDSEAMSLIB_REF:-main}"

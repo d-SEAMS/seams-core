@@ -1,0 +1,32 @@
+# Asks JuliaRegistrator to register bindings/julia/Dseams at the chosen
+# commit. Run by hand (Actions > Register Dseams) once libseams_jll with
+# the same version is in General and the commit's Project.toml carries the
+# version to register.
+name: Register Dseams
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Commit to register (the Project.toml version there is used)
+        required: true
+        default: main
+
+permissions:
+  contents: write
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.ref }}
+      - name: Comment on the commit
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          sha=$(git rev-parse HEAD)
+          version=$(sed -n 's/^version = "\(.*\)"/\1/p' bindings/julia/Dseams/Project.toml)
+          echo "registering Dseams ${version} at ${sha}"
+          gh api "repos/${GITHUB_REPOSITORY}/commits/${sha}/comments" \
+            -f body="@JuliaRegistrator register subdir=bindings/julia/Dseams"
