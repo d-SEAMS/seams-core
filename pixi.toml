@@ -221,6 +221,8 @@ julia = ">=1.10"
 r-base = ">=4.4"
 r-cpp11 = ">=0.4"
 r-testthat = ">=3.2"
+# The Lua video tape loads require("dseams") from LuaJIT.
+luajit = ">=2.1"
 
 [pypi-dependencies]
 ovito = ">=3.12.0, <4"
