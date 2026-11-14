@@ -1,4 +1,4 @@
-# CHILL+ on the 2048-water interface
+# CHILL+ on the paper interface frame
 
 Shot list for a silent picture track. Draft narration is below and in narration.txt. Final wording, edit, and caption timing are recorded later.
 
@@ -14,7 +14,7 @@ Picture: 1920x1080, 30 fps, crf 16, one vhs scene file per shot so the lead-in c
 
 ## Scene 1. Run the tutorial
 
-Lead-in: 0.30 s. Segment length: 24.42 s.
+Lead-in: 0.30 s. Segment length: 12.33 s.
 
 Tests: `docs_video_tapes`, `docs_paper_interface_full`.
 
@@ -27,15 +27,15 @@ python3 docs/tutorials/paper_science.py interface-full "$SEAMS" "$SEAMS_LIBDIR" 
 Expected output (substrings the run must print):
 
 ```text
-interface full waters 2048
-interface full published hexagonal 840 interfacial 8 water 1131 clathrate 16 interClathrate 53
-interface full ovito hexagonal 807 interfacial 43 water 1140 clathrate 17 interClathrate 41
-interface full phi-c 0
+interface full input molecules 864 frames 1 file-frames 1 file input/traj/interface_f0.lammpstrj
+interface full paper molecules 864 frames 1
+interface full published hexagonal 352 interfacial 49 water 434 clathrate 3 interClathrate 25
+interface full stack HHHHHHHH....C.
 ```
 
 Draft narration:
 
-This is the full interface tutorial. The driver prints interface full waters 2048. Published CHILL+ is hexagonal 840, interfacial 8, water 1131, clathrate 16, and interClathrate 53. The OVITO rule on the same frame is hexagonal 807, interfacial 43, water 1140, clathrate 17, and interClathrate 41. phi-c is 0. docs_paper_interface_full asserts each of those lines.
+The paper frame is input/traj/interface_f0.lammpstrj, 864 molecules and 1 frame. Published CHILL+ is hexagonal 352 and water 434. The stack is HHHHHHHH....C. docs_paper_interface_full asserts those lines.
 
 ## Scene 2. Hold the report
 

@@ -7,13 +7,21 @@ The same names with a -full suffix are the longer runs.
 Exit 77 when the engine that topic needs is absent.
 """
 
+import hashlib
 import math
 import os
 import random
 import shutil
 import subprocess
 import sys
+import urllib.request
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+NUCLEATION_URL = "https://ndownloader.figshare.com/files/20418309"
+NUCLEATION_MD5 = "c28fc209a2854d2ba49e8f9b55accbe8"
+NUCLEATION_FRAMES = 148
+NUCLEATION_MOLECULES = 4096
 
 
 def skip(message):
@@ -596,6 +604,48 @@ def nucleation(seams, libdir, out):
     render(dump, out / "nucleation.png")
 
 
+def dump_census(path):
+    """Return (frame count, atoms in the first frame)."""
+    frames = []
+    lines = Path(path).read_text().splitlines()
+    index = 0
+    while index < len(lines):
+        if lines[index].startswith("ITEM: NUMBER OF ATOMS"):
+            frames.append(int(lines[index + 1]))
+            index += 2
+            continue
+        index += 1
+    if not frames:
+        raise SystemExit("no frames in {}".format(path))
+    return len(frames), frames[0]
+
+
+def rel_input(path):
+    return Path(path).resolve().relative_to(ROOT).as_posix()
+
+
+def input_line(topic, path, frames_read):
+    frames, atoms = dump_census(path)
+    return "{} full input molecules {} frames {} file-frames {} file {}".format(
+        topic, atoms, frames_read, frames, rel_input(path)
+    )
+
+
+def nucleation_dump():
+    """The deposited 148-frame mW trajectory. It is not committed."""
+    dest = ROOT / "docs" / ".cache" / "figshare-11448702" / "nucleation.lammpstrj"
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    if not dest.is_file() or hashlib.md5(dest.read_bytes()).hexdigest() != NUCLEATION_MD5:
+        urllib.request.urlretrieve(NUCLEATION_URL, dest)
+    got = hashlib.md5(dest.read_bytes()).hexdigest()
+    if got != NUCLEATION_MD5:
+        raise SystemExit("nucleation md5 {} != {}".format(got, NUCLEATION_MD5))
+    frames, atoms = dump_census(dest)
+    if frames != NUCLEATION_FRAMES or atoms != NUCLEATION_MOLECULES:
+        raise SystemExit("nucleation dump is {} frames of {}".format(frames, atoms))
+    return dest
+
+
 def publish(out, lines, dump, png):
     render(dump, png)
     text = "\n".join(lines) + "\n"
@@ -641,54 +691,7 @@ def label_line(prefix, found, names):
 
 
 def interface_full(seams, libdir, out):
-    mm, unit = openmm_modules()
-    crystal, gro_box = genice_oxygens("1h", (4, 4, 4))
-    length = box_of(gro_box)
-    rng = random.Random(11)
-    liquid = [
-        (
-            rng.uniform(0.5, length[0] - 0.5),
-            rng.uniform(0.5, length[1] - 0.5),
-            length[2] + rng.uniform(1.0, length[2] - 1.0),
-        )
-        for _ in crystal
-    ]
-    pts = list(crystal) + liquid
-    tall = [length[0], length[1], length[2] * 2.0]
-    system = mm.System()
-    for _ in pts:
-        system.addParticle(18.015 * unit.dalton)
-    system.setDefaultPeriodicBoxVectors(
-        (tall[0], 0, 0) * unit.angstrom,
-        (0, tall[1], 0) * unit.angstrom,
-        (0, 0, tall[2]) * unit.angstrom,
-    )
-    force = mm.NonbondedForce()
-    force.setNonbondedMethod(mm.NonbondedForce.CutoffPeriodic)
-    force.setCutoffDistance(0.35 * unit.nanometer)
-    for _ in pts:
-        force.addParticle(0.0, 0.3165 * unit.nanometer, 2.0 * unit.kilojoule_per_mole)
-    system.addForce(force)
-    hold = mm.CustomExternalForce("k*((x-x0)^2+(y-y0)^2+(z-z0)^2)")
-    hold.addGlobalParameter("k", 5.0e4)
-    hold.addPerParticleParameter("x0")
-    hold.addPerParticleParameter("y0")
-    hold.addPerParticleParameter("z0")
-    for index, (x, y, z) in enumerate(crystal):
-        hold.addParticle(index, [x * 0.1, y * 0.1, z * 0.1])
-    system.addForce(hold)
-    integrator = mm.LangevinMiddleIntegrator(
-        240 * unit.kelvin, 1 / unit.picosecond, 0.002 * unit.picoseconds
-    )
-    integrator.setRandomNumberSeed(240)
-    context = mm.Context(system, integrator, reference_platform(mm))
-    context.setPositions([(x * 0.1, y * 0.1, z * 0.1) for x, y, z in pts] * unit.nanometer)
-    mm.LocalEnergyMinimizer.minimize(context, 10.0, 40)
-    integrator.step(400)
-    raw = context.getState(getPositions=True).getPositions(asNumpy=True).value_in_unit(unit.angstrom)
-    relaxed = [tuple(float(v) for v in point) for point in raw]
-    dump = out / "interface-full.lammpstrj"
-    write_dump(dump, [(relaxed, tall, [])])
+    dump = ROOT / "input" / "traj" / "interface_f0.lammpstrj"
     published_text = run_seams(
         seams,
         libdir,
@@ -702,7 +705,8 @@ def interface_full(seams, libdir, out):
     _front, stack, phi = stack_front(published_text)
     names = ("hexagonal", "interfacial", "water", "clathrate", "interClathrate")
     lines = [
-        "interface full waters {}".format(len(relaxed)),
+        input_line("interface", dump, 1),
+        "interface full paper molecules 864 frames 1",
         label_line("interface full published", published, names),
         label_line("interface full ovito", ovito, names),
         "interface full phi-c {}".format(phi),
@@ -731,16 +735,29 @@ def cages_full(seams, libdir, out):
         for line in text.splitlines():
             if " cages " in line:
                 numbers.append(line.split(" cages ")[1].split()[0])
+        lines.append(
+            "cages full input {} molecules {} frames 1 file {}-full.lammpstrj".format(
+                name, len(oxygens), name
+            )
+        )
         lines.append("cages full {} {}".format(name, " ".join(numbers)))
+    lines.extend(
+        [
+            "cages full paper unit sI molecules 46 cages 2 6",
+            "cages full paper unit sII molecules 136 cages 16 8",
+            "cages full paper unit sH molecules 68 cages 6 4 2",
+        ]
+    )
     publish(out, lines, out / "sI-full.lammpstrj", out / "cages-full.png")
 
 
 def rings_full(seams, libdir, out):
-    oxygens, gro_box = genice_oxygens("1h", (8, 8, 4))
-    cell = gro_box[:3]
-    dump = out / "rings-full.lammpstrj"
-    write_dump(dump, [(oxygens, cell, [])])
-    text = run_seams(seams, libdir, ["rings", str(dump), "--type", "1", "--cutoff", "3.5", "--max", "8"])
+    dump = ROOT / "input" / "traj" / "mW_cubic.lammpstrj"
+    text = run_seams(
+        seams,
+        libdir,
+        ["rings", str(dump), "--type", "1", "--cutoff", "3.5", "--max", "8", "--frame", "1", "--last", "1"],
+    )
     nop = "0"
     total = "0"
     histogram = []
@@ -752,6 +769,8 @@ def rings_full(seams, libdir, out):
         elif len(parts) == 2 and parts[0].isdigit():
             histogram.append("{} {}".format(parts[0], parts[1]))
     lines = [
+        input_line("rings", dump, 1),
+        "rings full paper molecules 4096 frames 1 rings 8192",
         "rings full nop {} rings {}".format(nop, total),
         "rings full histogram {}".format(" ".join(histogram)),
     ]
@@ -759,194 +778,56 @@ def rings_full(seams, libdir, out):
 
 
 def brine_full(seams, libdir, out):
-    mm, unit = openmm_modules()
-    ice, gro_box = genice_oxygens("1h", (2, 2, 2))
-    box = box_of(gro_box)
-    rng = random.Random(5)
-    layer = [point for point in ice if point[2] < box[2] * 0.5]
-
-    def jitter(zshift):
-        shifted = []
-        for x, y, z in layer:
-            shifted.append(
-                (
-                    x + rng.uniform(-0.6, 0.6),
-                    y + rng.uniform(-0.6, 0.6),
-                    z + zshift + rng.uniform(-0.4, 0.4),
-                )
-            )
-        return shifted
-
-    liquid = jitter(box[2]) + jitter(1.55 * box[2])
-    waters = [tuple(point) for point in ice] + liquid
-    ions = [
-        (2, 2.2, 2.2, box[2] * 2.05),
-        (3, 8.0, 3.0, box[2] * 2.12),
-        (2, 4.5, 9.0, box[2] * 2.18),
-        (3, 11.0, 6.5, box[2] * 2.22),
+    dump = ROOT / "input" / "traj" / "nacl_front.lammpstrj"
+    text = run_seams(
+        seams,
+        libdir,
+        ["chill-plus", str(dump), "--type", "1", "--cutoff", "3.5", "--layers", "--axis", "2"],
+    )
+    found = counts(text)
+    lines = [
+        input_line("brine", dump, 1),
+        "brine full paper waters 864 ions 9 frames 1",
+        "brine full waters 864 ions 9 hexagonal {} water {}".format(
+            found.get("hexagonal", 0), found.get("water", 0)
+        ),
     ]
-    everyone = waters + [(x, y, z) for _kind, x, y, z in ions]
-    tall = [box[0], box[1], box[2] * 2.4]
-    system = mm.System()
-    for _ in everyone:
-        system.addParticle(22.0 * unit.dalton)
-    system.setDefaultPeriodicBoxVectors(
-        (tall[0], 0, 0) * unit.angstrom,
-        (0, tall[1], 0) * unit.angstrom,
-        (0, 0, tall[2]) * unit.angstrom,
-    )
-    nb = mm.NonbondedForce()
-    nb.setNonbondedMethod(mm.NonbondedForce.CutoffPeriodic)
-    nb.setCutoffDistance(0.4 * unit.nanometer)
-    nb.setUseSwitchingFunction(True)
-    nb.setSwitchingDistance(0.32 * unit.nanometer)
-    for _ in waters:
-        nb.addParticle(0.0, 0.31 * unit.nanometer, 1.2 * unit.kilojoule_per_mole)
-    for kind, _x, _y, _z in ions:
-        charge = 0.3 if kind == 2 else -0.3
-        nb.addParticle(charge * unit.elementary_charge, 0.40 * unit.nanometer, 0.15 * unit.kilojoule_per_mole)
-    system.addForce(nb)
-
-    def spring(name, pairs):
-        hold = mm.CustomExternalForce("{}*((x-x0)^2+(y-y0)^2+(z-z0)^2)".format(name))
-        hold.addGlobalParameter(name, 0.0)
-        hold.addPerParticleParameter("x0")
-        hold.addPerParticleParameter("y0")
-        hold.addPerParticleParameter("z0")
-        for index, (x, y, z) in pairs:
-            hold.addParticle(index, [x * 0.1, y * 0.1, z * 0.1])
-        return hold
-
-    system.addForce(spring("kice", list(enumerate(ice))))
-    system.addForce(
-        spring("k1", [(len(ice) + index, (x, y, z + box[2])) for index, (x, y, z) in enumerate(layer)])
-    )
-    system.addForce(
-        spring(
-            "k2",
-            [(len(ice) + len(layer) + index, (x, y, z + 1.55 * box[2])) for index, (x, y, z) in enumerate(layer)],
-        )
-    )
-    integrator = mm.LangevinMiddleIntegrator(
-        240 * unit.kelvin, 5 / unit.picosecond, 0.001 * unit.picoseconds
-    )
-    integrator.setRandomNumberSeed(240)
-    context = mm.Context(system, integrator, reference_platform(mm))
-    context.setPositions([(x * 0.1, y * 0.1, z * 0.1) for x, y, z in everyone] * unit.nanometer)
-    context.setParameter("kice", 5.0e4)
-    context.setParameter("k1", 0.0)
-    context.setParameter("k2", 0.0)
-
-    def settle(name=None, value=0.0):
-        if name:
-            context.setParameter(name, value)
-        mm.LocalEnergyMinimizer.minimize(context, 5.0, 30)
-        integrator.step(800)
-
-    saved = []
-
-    def grab():
-        state = context.getState(getPositions=True).getPositions(asNumpy=True).value_in_unit(unit.angstrom)
-        oxygens = [tuple(float(v) for v in point) for point in state[: len(waters)]]
-        extras = []
-        for offset, (kind, _x, _y, _z) in enumerate(ions):
-            x, y, z = (float(v) for v in state[len(waters) + offset])
-            extras.append((kind, x, y, z))
-        saved.append((oxygens, tall, extras))
-
-    settle()
-    grab()
-    settle("k1", 4.0e4)
-    grab()
-    settle("k2", 4.0e4)
-    grab()
-    dump = out / "brine-full.lammpstrj"
-    write_dump(dump, saved)
-    lines = []
-    for frame in range(3):
-        text = run_seams(
-            seams,
-            libdir,
-            [
-                "chill-plus",
-                str(dump),
-                "--type",
-                "1",
-                "--cutoff",
-                "3.5",
-                "--frame",
-                str(frame + 1),
-                "--last",
-                str(frame + 1),
-                "--layers",
-                "--axis",
-                "2",
-            ],
-        )
-        front, stack, _phi = stack_front(text)
-        found = counts(text)
-        lines.append(
-            "brine full frame {} hexagonal {} water {} front {} stack {}".format(
-                frame, found.get("hexagonal", 0), found.get("water", 0), front, stack
-            )
-        )
-    figure = out / "brine-full-last.lammpstrj"
-    write_dump(figure, [saved[-1]])
-    publish(out, lines, figure, out / "brine-full.png")
+    publish(out, lines, dump, out / "brine-full.png")
 
 
 def nucleation_full(seams, libdir, out):
-    crystal, gro_box = genice_oxygens("1h", (4, 4, 4))
-    length = box_of(gro_box)
-    rng = random.Random(19)
-    liquid = []
-    for x, y, z in crystal:
-        liquid.append(
-            (
-                min(max(x + rng.uniform(-1.6, 1.6), 0.3), length[0] - 0.3),
-                min(max(y + rng.uniform(-1.6, 1.6), 0.3), length[1] - 0.3),
-                min(max(z + rng.uniform(-1.6, 1.6), 0.3), length[2] - 0.3),
-            )
-        )
-    basal = [index for index, (_x, _y, z) in enumerate(crystal) if z < length[2] * 0.5]
-    current = list(liquid)
-    frames = []
-    for stage, count in enumerate((0, len(basal) // 2, len(crystal))):
-        restored = list(range(len(crystal))) if count == len(crystal) else basal[:count]
-        for index in restored:
-            current[index] = tuple(crystal[index])
-        current = list(openmm_relax(current, length, 2 if stage == 0 else 8, restored, stiffness=1.0e5))
-        frames.append((list(current), length, []))
-    dump = out / "nucleation-full.lammpstrj"
-    write_dump(dump, frames)
-    lines = []
-    for frame in range(3):
-        text = run_seams(
-            seams,
-            libdir,
-            [
-                "steinhardt",
-                str(dump),
-                "--type",
-                "1",
-                "--cutoff",
-                "3.5",
-                "--l",
-                "6",
-                "--frame",
-                str(frame + 1),
-                "--last",
-                str(frame + 1),
-            ],
-        )
-        q6bar = "nan"
-        for line in text.splitlines():
-            if " q6bar " in line:
-                q6bar = line.split(" q6bar ", 1)[1].split()[0]
-        lines.append("nucleation full frame {} q6bar {}".format(frame, q6bar))
-    figure = out / "nucleation-full-last.lammpstrj"
-    write_dump(figure, [frames[-1]])
-    publish(out, lines, figure, out / "nucleation-full.png")
+    dump = nucleation_dump()
+    text = run_seams(
+        seams,
+        libdir,
+        [
+            "steinhardt",
+            str(dump),
+            "--type",
+            "1",
+            "--cutoff",
+            "3.5",
+            "--l",
+            "6",
+            "--frame",
+            "1",
+            "--last",
+            str(NUCLEATION_FRAMES),
+        ],
+    )
+    rows = [line for line in text.splitlines() if line.startswith("nop ")]
+    if len(rows) != NUCLEATION_FRAMES:
+        raise SystemExit("nucleation steinhardt lines {}".format(len(rows)))
+    def q6bar(line):
+        return line.split(" q6bar ", 1)[1].split()[0]
+    lines = [
+        input_line("nucleation", dump, NUCLEATION_FRAMES),
+        "nucleation full paper molecules 4096 frames 148",
+        "nucleation full frame 1 q6bar {}".format(q6bar(rows[0])),
+        "nucleation full frame 148 q6bar {}".format(q6bar(rows[-1])),
+        "nucleation full lines {}".format(len(rows)),
+    ]
+    publish(out, lines, ROOT / "input" / "traj" / "nucleation_f1.lammpstrj", out / "nucleation-full.png")
 
 
 def main():

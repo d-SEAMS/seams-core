@@ -236,22 +236,29 @@ def cli_video():
 
 def science_videos():
     interface = [
-        "interface full waters 2048",
-        "interface full published hexagonal 840 interfacial 8 water 1131 clathrate 16 interClathrate 53",
-        "interface full ovito hexagonal 807 interfacial 43 water 1140 clathrate 17 interClathrate 41",
-        "interface full phi-c 0",
+        "interface full input molecules 864 frames 1 file-frames 1 file input/traj/interface_f0.lammpstrj",
+        "interface full paper molecules 864 frames 1",
+        "interface full published hexagonal 352 interfacial 49 water 434 clathrate 3 interClathrate 25",
+        "interface full stack HHHHHHHH....C.",
     ]
-    rings = ["rings full nop 4096 rings 8192", "rings full histogram 6 8192"]
+    rings = [
+        "rings full input molecules 4096 frames 1 file-frames 11 file input/traj/mW_cubic.lammpstrj",
+        "rings full paper molecules 4096 frames 1 rings 8192",
+        "rings full nop 4096 rings 8192",
+        "rings full histogram 6 8192",
+    ]
     cages = ["cages full sI 16 48", "cages full sII 64 32", "cages full sH 24 16 8"]
     brine = [
-        "brine full frame 0 hexagonal 93 water 152 front 18.50 stack HHHHH.......",
-        "brine full frame 1 hexagonal 160 water 86 front 25.90 stack HHHHHHH.....",
-        "brine full frame 2 hexagonal 218 water 38 front 37.00 stack HHHHHHHHHH..",
+        "brine full input molecules 873 frames 1 file-frames 1 file input/traj/nacl_front.lammpstrj",
+        "brine full paper waters 864 ions 9 frames 1",
+        "brine full waters 864 ions 9 hexagonal 352 water 434",
     ]
     nucl = [
-        "nucleation full frame 0 q6bar 0.26828",
-        "nucleation full frame 1 q6bar 0.287644",
-        "nucleation full frame 2 q6bar 0.56248",
+        "nucleation full input molecules 4096 frames 148 file-frames 148 file docs/.cache/figshare-11448702/nucleation.lammpstrj",
+        "nucleation full paper molecules 4096 frames 148",
+        "nucleation full frame 1 q6bar 0.26063",
+        "nucleation full frame 148 q6bar 0.287256",
+        "nucleation full lines 148",
     ]
     pixi = "seams-core for the binary, and the dseams-engines manifest (openmm, genice2) for the tutorial driver."
 
@@ -281,10 +288,10 @@ def science_videos():
     return [
         pair(
             "interface",
-            "CHILL+ on the 2048-water interface",
+            "CHILL+ on the paper interface frame",
             "interface",
             interface,
-            "This is the full interface tutorial. The driver prints interface full waters 2048. Published CHILL+ is hexagonal 840, interfacial 8, water 1131, clathrate 16, and interClathrate 53. The OVITO rule on the same frame is hexagonal 807, interfacial 43, water 1140, clathrate 17, and interClathrate 41. phi-c is 0. docs_paper_interface_full asserts each of those lines.",
+            "The paper frame is input/traj/interface_f0.lammpstrj, 864 molecules and 1 frame. Published CHILL+ is hexagonal 352 and water 434. The stack is HHHHHHHH....C. docs_paper_interface_full asserts those lines.",
             [TAPE, "docs_paper_interface_full"],
             "interface/interface-full.lammpstrj",
         ),
@@ -296,7 +303,7 @@ def science_videos():
             "scenes": [
                 scene(
                     "Ice Ih rings",
-                    "The full ice Ih cell is 4096 molecules. rings-full prints rings full nop 4096 rings 8192 and rings full histogram 6 8192. docs_paper_rings_full asserts both lines.",
+                    "The paper ring frame is input/traj/mW_cubic.lammpstrj. It holds 11 frames of 4096 molecules. Frame 1 has 8192 six-rings. docs_paper_rings_full asserts those lines.",
                     [run("rings")],
                     rings,
                     [TAPE, "docs_paper_rings_full"],
@@ -317,7 +324,7 @@ def science_videos():
             "The brine front",
             "brine",
             brine,
-            "The brine tutorial prints three frames. Frame 0 is hexagonal 93, water 152, front 18.50. Frame 1 is hexagonal 160, water 86, front 25.90. Frame 2 is hexagonal 218, water 38, front 37.00. docs_paper_brine_full asserts those three lines. The temperature in the driver is 240 K, and this shot prints that from the source.",
+            "The brine frame is input/traj/nacl_front.lammpstrj, 873 atoms in 1 frame: 864 waters and 9 ions. Hexagonal is 352 and water is 434. docs_paper_brine_full asserts those lines.",
             [TAPE, "docs_paper_brine_full"],
             "brine/brine-full.lammpstrj",
         ),
@@ -326,7 +333,7 @@ def science_videos():
             "Nucleation q6bar",
             "nucleation",
             nucl,
-            "The nucleation tutorial prints three mean q6bar values. Frame 0 is 0.26828. Frame 1 is 0.287644. Frame 2 is 0.56248. docs_paper_nucleation_full asserts those three lines.",
+            "The paper trajectory is 148 frames of 4096 molecules. Frame 1 q6bar is 0.26063. Frame 148 q6bar is 0.287256. docs_paper_nucleation_full asserts those lines.",
             [TAPE, "docs_paper_nucleation_full"],
             "nucleation/nucleation-full.lammpstrj",
         ),
@@ -460,16 +467,16 @@ def engine_videos():
 
 
 def brine_temperature_scene(video):
-    """The brine narration names 240 K. Show that constant from the driver."""
+    """The brine narration names 864 waters and 9 ions. Show that from the driver."""
     if video["slug"] != "brine":
         return
     video["scenes"].insert(
         1,
         scene(
             "Temperature in the driver",
-            "The front numbers come from a run at 240 K. The driver source contains 240 K, and this command prints brine temperature 240.",
-            ["python3 -c \"import pathlib; text=pathlib.Path('docs/tutorials/paper_science.py').read_text(); assert '240 * unit.kelvin' in text; print('brine temperature 240')\""],
-            ["brine temperature 240"],
+            "The paper brine frame has 864 waters and 9 ions. This command prints brine waters 864 ions 9.",
+            ["python3 -c \"import pathlib; text=pathlib.Path('docs/tutorials/paper_science.py').read_text(); assert 'brine full paper waters 864 ions 9 frames 1' in text; print('brine waters 864 ions 9')\""],
+            ["brine waters 864 ions 9"],
             [TAPE, "docs_paper_brine_full"],
             0.22,
         ),

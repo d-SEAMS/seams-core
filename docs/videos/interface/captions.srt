@@ -1,7 +1,7 @@
 1
-00:00:00,300 --> 00:00:24,270
-This is the full interface tutorial. The driver prints interface full waters 2048. Published CHILL+ is hexagonal 840, interfacial 8, water 1131, clathrate 16, and interClathrate 53. The OVITO rule on the same frame is hexagonal 807, interfacial 43, water 1140, clathrate 17, and interClathrate 41. phi-c is 0. docs_paper_interface_full asserts each of those lines.
+00:00:00,300 --> 00:00:12,180
+The paper frame is input/traj/interface_f0.lammpstrj, 864 molecules and 1 frame. Published CHILL+ is hexagonal 352 and water 434. The stack is HHHHHHHH....C. docs_paper_interface_full asserts those lines.
 
 2
-00:00:24,670 --> 00:00:40,720
+00:00:12,580 --> 00:00:28,630
 I leave the report on screen. The numbers above are the ones the test locks. The picture track keeps a blank band under the text so a later caption can sit there without covering a count.

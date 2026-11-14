@@ -4,9 +4,9 @@ NOTE
 Draft cues converted from captions.srt. Final wording and timing are recorded later.
 
 1
-00:00:00.300 --> 00:00:12.180 line:95% align:center size:80%
-The full ice Ih cell is 4096 molecules. rings-full prints rings full nop 4096 rings 8192 and rings full histogram 6 8192. docs_paper_rings_full asserts both lines.
+00:00:00.300 --> 00:00:10.520 line:95% align:center size:80%
+The paper ring frame is input/traj/mW_cubic.lammpstrj. It holds 11 frames of 4096 molecules. Frame 1 has 8192 six-rings. docs_paper_rings_full asserts those lines.
 
 2
-00:00:12.680 --> 00:00:27.480 line:95% align:center size:80%
+00:00:11.020 --> 00:00:25.820 line:95% align:center size:80%
 cages-full prints cages full sI 16 48, cages full sII 64 32, and cages full sH 24 16 8. The first two are the sI and sII clusters. docs_paper_cages_full asserts all three lines.

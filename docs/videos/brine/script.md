@@ -14,7 +14,7 @@ Picture: 1920x1080, 30 fps, crf 16, one vhs scene file per shot so the lead-in c
 
 ## Scene 1. Run the tutorial
 
-Lead-in: 0.30 s. Segment length: 24.00 s.
+Lead-in: 0.30 s. Segment length: 12.33 s.
 
 Tests: `docs_video_tapes`, `docs_paper_brine_full`.
 
@@ -27,36 +27,36 @@ python3 docs/tutorials/paper_science.py brine-full "$SEAMS" "$SEAMS_LIBDIR" "$VI
 Expected output (substrings the run must print):
 
 ```text
-brine full frame 0 hexagonal 93 water 152 front 18.50 stack HHHHH.......
-brine full frame 1 hexagonal 160 water 86 front 25.90 stack HHHHHHH.....
-brine full frame 2 hexagonal 218 water 38 front 37.00 stack HHHHHHHHHH..
+brine full input molecules 873 frames 1 file-frames 1 file input/traj/nacl_front.lammpstrj
+brine full paper waters 864 ions 9 frames 1
+brine full waters 864 ions 9 hexagonal 352 water 434
 ```
 
 Draft narration:
 
-The brine tutorial prints three frames. Frame 0 is hexagonal 93, water 152, front 18.50. Frame 1 is hexagonal 160, water 86, front 25.90. Frame 2 is hexagonal 218, water 38, front 37.00. docs_paper_brine_full asserts those three lines. The temperature in the driver is 240 K, and this shot prints that from the source.
+The brine frame is input/traj/nacl_front.lammpstrj, 873 atoms in 1 frame: 864 waters and 9 ions. Hexagonal is 352 and water is 434. docs_paper_brine_full asserts those lines.
 
 ## Scene 2. Temperature in the driver
 
-Lead-in: 0.22 s. Segment length: 11.00 s.
+Lead-in: 0.22 s. Segment length: 8.92 s.
 
 Tests: `docs_video_tapes`, `docs_paper_brine_full`.
 
 Commands:
 
 ```bash
-python3 -c "import pathlib; text=pathlib.Path('docs/tutorials/paper_science.py').read_text(); assert '240 * unit.kelvin' in text; print('brine temperature 240')"
+python3 -c "import pathlib; text=pathlib.Path('docs/tutorials/paper_science.py').read_text(); assert 'brine full paper waters 864 ions 9 frames 1' in text; print('brine waters 864 ions 9')"
 ```
 
 Expected output (substrings the run must print):
 
 ```text
-brine temperature 240
+brine waters 864 ions 9
 ```
 
 Draft narration:
 
-The front numbers come from a run at 240 K. The driver source contains 240 K, and this command prints brine temperature 240.
+The paper brine frame has 864 waters and 9 ions. This command prints brine waters 864 ions 9.
 
 ## Scene 3. Hold the report
 

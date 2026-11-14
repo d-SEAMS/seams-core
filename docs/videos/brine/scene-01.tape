@@ -5,12 +5,12 @@ Set Height 1080
 Set Framerate 30
 Set Padding 0
 # lead 0.30
-# duration 24.00
+# duration 12.33
 # test docs_video_tapes
 # test docs_paper_brine_full
-# expect brine full frame 0 hexagonal 93 water 152 front 18.50 stack HHHHH.......
-# expect brine full frame 1 hexagonal 160 water 86 front 25.90 stack HHHHHHH.....
-# expect brine full frame 2 hexagonal 218 water 38 front 37.00 stack HHHHHHHHHH..
+# expect brine full input molecules 873 frames 1 file-frames 1 file input/traj/nacl_front.lammpstrj
+# expect brine full paper waters 864 ions 9 frames 1
+# expect brine full waters 864 ions 9 hexagonal 352 water 434
 # still brine/brine-full.lammpstrj
 Hide
 Type 'PS1='"'"'$ '"'"''
@@ -20,4 +20,4 @@ Sleep 300ms
 Type 'python3 docs/tutorials/paper_science.py brine-full "$SEAMS" "$SEAMS_LIBDIR" "$VIDEO_OUT/brine"'
 Enter
 Sleep 1s
-Sleep 22700ms
+Sleep 11030ms

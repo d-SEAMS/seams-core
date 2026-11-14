@@ -1,7 +1,7 @@
 1
-00:00:00,300 --> 00:00:11,770
-The nucleation tutorial prints three mean q6bar values. Frame 0 is 0.26828. Frame 1 is 0.287644. Frame 2 is 0.56248. docs_paper_nucleation_full asserts those three lines.
+00:00:00,300 --> 00:00:10,930
+The paper trajectory is 148 frames of 4096 molecules. Frame 1 q6bar is 0.26063. Frame 148 q6bar is 0.287256. docs_paper_nucleation_full asserts those lines.
 
 2
-00:00:12,170 --> 00:00:28,220
+00:00:11,330 --> 00:00:27,380
 I leave the report on screen. The numbers above are the ones the test locks. The picture track keeps a blank band under the text so a later caption can sit there without covering a count.

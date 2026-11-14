@@ -46,7 +46,9 @@ cages full sII 64 32
 cages full sH 24 16 8
 #+end_src
 
-Eight sI cells hold 16 of \(5^{12}\) and 48 of \(5^{12}6^{2}\). Four
+The run prints 368, 544 and 272 waters, which are eight sI cells and
+four sII and sH cells. The paper unit cells are 46, 136 and 68
+waters. Eight sI cells hold 16 of \(5^{12}\) and 48 of \(5^{12}6^{2}\). Four
 sII cells hold 64 of \(5^{12}\) and 32 of \(5^{12}6^{4}\). Four sH
 cells hold 24 of \(5^{12}\), 16 of \(4^{3}5^{6}6^{3}\), and 8 of
 \(5^{12}6^{8}\). Each number is the unit-cell count times the number

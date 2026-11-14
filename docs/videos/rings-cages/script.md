@@ -14,7 +14,7 @@ Picture: 1920x1080, 30 fps, crf 16, one vhs scene file per shot so the lead-in c
 
 ## Scene 1. Ice Ih rings
 
-Lead-in: 0.30 s. Segment length: 12.33 s.
+Lead-in: 0.30 s. Segment length: 10.67 s.
 
 Tests: `docs_video_tapes`, `docs_paper_rings_full`.
 
@@ -27,13 +27,15 @@ python3 docs/tutorials/paper_science.py rings-full "$SEAMS" "$SEAMS_LIBDIR" "$VI
 Expected output (substrings the run must print):
 
 ```text
+rings full input molecules 4096 frames 1 file-frames 11 file input/traj/mW_cubic.lammpstrj
+rings full paper molecules 4096 frames 1 rings 8192
 rings full nop 4096 rings 8192
 rings full histogram 6 8192
 ```
 
 Draft narration:
 
-The full ice Ih cell is 4096 molecules. rings-full prints rings full nop 4096 rings 8192 and rings full histogram 6 8192. docs_paper_rings_full asserts both lines.
+The paper ring frame is input/traj/mW_cubic.lammpstrj. It holds 11 frames of 4096 molecules. Frame 1 has 8192 six-rings. docs_paper_rings_full asserts those lines.
 
 ## Scene 2. sI and sII cages
 

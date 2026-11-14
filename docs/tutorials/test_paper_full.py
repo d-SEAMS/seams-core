@@ -9,30 +9,41 @@ from pathlib import Path
 
 EXPECT = {
     "interface": [
-        "interface full waters 2048",
-        "interface full published hexagonal 840 interfacial 8 water 1131 clathrate 16 interClathrate 53",
-        "interface full ovito hexagonal 807 interfacial 43 water 1140 clathrate 17 interClathrate 41",
-        "interface full phi-c 0",
-        "interface full stack HHHHHHHHHH..........",
+        "interface full input molecules 864 frames 1 file-frames 1 file input/traj/interface_f0.lammpstrj",
+        "interface full paper molecules 864 frames 1",
+        "interface full published hexagonal 352 interfacial 49 water 434 clathrate 3 interClathrate 25",
+        "interface full ovito hexagonal 346 interfacial 57 water 437 clathrate 3 interClathrate 20",
+        "interface full phi-c 0.00283286",
+        "interface full stack HHHHHHHH....C.",
     ],
     "cages": [
+        "cages full input sI molecules 368 frames 1 file sI-full.lammpstrj",
+        "cages full input sII molecules 544 frames 1 file sII-full.lammpstrj",
+        "cages full input sH molecules 272 frames 1 file sH-full.lammpstrj",
         "cages full sI 16 48",
         "cages full sII 64 32",
         "cages full sH 24 16 8",
+        "cages full paper unit sI molecules 46 cages 2 6",
+        "cages full paper unit sII molecules 136 cages 16 8",
+        "cages full paper unit sH molecules 68 cages 6 4 2",
     ],
     "rings": [
+        "rings full input molecules 4096 frames 1 file-frames 11 file input/traj/mW_cubic.lammpstrj",
+        "rings full paper molecules 4096 frames 1 rings 8192",
         "rings full nop 4096 rings 8192",
         "rings full histogram 6 8192",
     ],
     "brine": [
-        "brine full frame 0 hexagonal 93 water 152 front 18.50 stack HHHHH.......",
-        "brine full frame 1 hexagonal 160 water 86 front 25.90 stack HHHHHHH.....",
-        "brine full frame 2 hexagonal 218 water 38 front 37.00 stack HHHHHHHHHH..",
+        "brine full input molecules 873 frames 1 file-frames 1 file input/traj/nacl_front.lammpstrj",
+        "brine full paper waters 864 ions 9 frames 1",
+        "brine full waters 864 ions 9 hexagonal 352 water 434",
     ],
     "nucleation": [
-        "nucleation full frame 0 q6bar 0.26828",
-        "nucleation full frame 1 q6bar 0.287644",
-        "nucleation full frame 2 q6bar 0.56248",
+        "nucleation full input molecules 4096 frames 148 file-frames 148 file docs/.cache/figshare-11448702/nucleation.lammpstrj",
+        "nucleation full paper molecules 4096 frames 148",
+        "nucleation full frame 1 q6bar 0.26063",
+        "nucleation full frame 148 q6bar 0.287256",
+        "nucleation full lines 148",
     ],
 }
 FIGURE = {

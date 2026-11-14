@@ -14,7 +14,7 @@ Picture: 1920x1080, 30 fps, crf 16, one vhs scene file per shot so the lead-in c
 
 ## Scene 1. Run the tutorial
 
-Lead-in: 0.30 s. Segment length: 11.92 s.
+Lead-in: 0.30 s. Segment length: 11.08 s.
 
 Tests: `docs_video_tapes`, `docs_paper_nucleation_full`.
 
@@ -27,14 +27,16 @@ python3 docs/tutorials/paper_science.py nucleation-full "$SEAMS" "$SEAMS_LIBDIR"
 Expected output (substrings the run must print):
 
 ```text
-nucleation full frame 0 q6bar 0.26828
-nucleation full frame 1 q6bar 0.287644
-nucleation full frame 2 q6bar 0.56248
+nucleation full input molecules 4096 frames 148 file-frames 148 file docs/.cache/figshare-11448702/nucleation.lammpstrj
+nucleation full paper molecules 4096 frames 148
+nucleation full frame 1 q6bar 0.26063
+nucleation full frame 148 q6bar 0.287256
+nucleation full lines 148
 ```
 
 Draft narration:
 
-The nucleation tutorial prints three mean q6bar values. Frame 0 is 0.26828. Frame 1 is 0.287644. Frame 2 is 0.56248. docs_paper_nucleation_full asserts those three lines.
+The paper trajectory is 148 frames of 4096 molecules. Frame 1 q6bar is 0.26063. Frame 148 q6bar is 0.287256. docs_paper_nucleation_full asserts those lines.
 
 ## Scene 2. Hold the report
 

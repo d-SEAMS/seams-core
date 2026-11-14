@@ -31,20 +31,19 @@ draws the 16 oxygens. The test exits 77 when GenIce or OVITO is absent.
 
 * Full run
 
-The 16-oxygen cell is where a chord still makes a four-ring. Bulk ice
-Ih is the other census: two six-rings per molecule, and nothing else
-up to size 8. =snakemake -s docs/tutorials/Snakefile rings= builds a
-GenIce ice Ih cell of 8 by 8 by 4, 4096 molecules, and asks ~seams
-rings~ for every primitive ring of size 8 or smaller.
+The paper's ring census is one frame of
+~input/traj/mW_cubic.lammpstrj~. The dump holds 11 frames of 4096
+molecules. The test reads frame 1. The paper states 4096 molecules
+and 8192 six-rings.
 
 =meson test --suite slow docs_paper_rings_full= checks
 
 #+begin_src text
+rings full input molecules 4096 frames 1 file-frames 11 file input/traj/mW_cubic.lammpstrj
+rings full paper molecules 4096 frames 1 rings 8192
 rings full nop 4096 rings 8192
 rings full histogram 6 8192
 #+end_src
 
-The histogram has one bin: 8192 six-rings, two per molecule. Sizes
-4, 5, 7 and 8 have count 0. That is the bulk census. OVITO draws
-the 4096 oxygens. The test exits 77 when GenIce, OVITO, or Snakemake
-is absent.
+The histogram has one bin: 8192 six-rings. OVITO draws that frame.
+The test exits 77 when OVITO or Snakemake is absent.
