@@ -19,6 +19,10 @@ julia --project=@bb -e 'using Pkg; Pkg.add("BinaryBuilder")'
 julia --project=@bb build_tarballs.jl --verbose --deploy=local x86_64-linux-gnu-cxx11
 ```
 
+The audit step of the BinaryBuilder 0.6.6 release has no riscv64 entry and
+stops on that platform after it builds; Yggdrasil's CI runs a newer
+BinaryBuilder. Locally, list the other platforms explicitly.
+
 `--deploy=local` writes the JLL to `~/.julia/dev/libseams_jll`. To test
 Dseams against it:
 
