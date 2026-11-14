@@ -18,6 +18,7 @@ auto-executables = false
 auto-tests = false
 auto-examples = false
 link = ["seams"]
+module-naming = "seams"
 
 [library]
 source-dir = "src"
