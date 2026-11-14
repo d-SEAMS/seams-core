@@ -33,6 +33,9 @@
 #include <omp.h>
 #endif
 
+int countFourShell(const std::vector<int> &L2, const std::uint64_t *shellArms,
+                   const std::uint64_t *shellAdj, int lwords);
+
 namespace {
 
 std::atomic<std::uint64_t> gPrimCycles{0};
@@ -1072,6 +1075,12 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
     }
   }
   if (maxDepth >= 4 && !L2.empty()) {
+    // The shell rows answer both censuses. count4 stays on only when those
+    // rows will be built, so skipping the pair walk cannot drop a four-ring.
+    const bool countShell =
+        !PerAtom && hist != nullptr && fast && minSize <= 5 && !L1.empty();
+    const bool count4 = countShell && minSize <= 4;
+    const bool count5 = countShell;
     std::vector<std::vector<int>> arms2(static_cast<std::size_t>(nVertices));
     for (const int b : L2) {
       auto &arms = arms2[static_cast<std::size_t>(b)];
@@ -1079,6 +1088,9 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
         if (adjacent(a, b)) {
           arms.push_back(a);
         }
+      }
+      if (count4) {
+        continue;
       }
       for (std::size_t i = 0; i < arms.size(); i++) {
         for (std::size_t j = i + 1; j < arms.size(); j++) {
@@ -1106,14 +1118,13 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
         }
       }
     }
-    const bool count5 = !PerAtom && hist != nullptr && fast && minSize <= 5 && !L1.empty();
     std::vector<int> rank1;
     std::vector<std::uint64_t> shellAdj;
     std::vector<std::uint64_t> shellArms;
     std::vector<std::uint64_t> rightBits;
     std::vector<std::uint64_t> leftBits;
     int lwords = 0;
-    if (count5) {
+    if (countShell) {
       // Neighbour bits of the first shell only. A full-frame row is several
       // times wider, and every arm sits in this shell.
       const int nL1 = static_cast<int>(L1.size());
@@ -1151,6 +1162,17 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
         }
       }
     }
+    if (count4) {
+      // A four-ring is two arms that are not adjacent. The arm bit row
+      // already lists those arms.
+      const int c4 = countFourShell(L2, shellArms.data(), shellAdj.data(), lwords);
+      if (c4 != 0 && 4 < static_cast<int>(hist->size())) {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp atomic
+#endif
+        (*hist)[4] += c4;
+      }
+    }
     if (maxDepth >= 5 && count5) {
       // |{(a,c)}| with the three shortcut tests, without listing rings.
       // a is an arm of p that is not an arm of q, so the bit row already
@@ -1174,8 +1196,8 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
           for (int w = 0; w < lwords; w++) {
             rightBits[static_cast<std::size_t>(w)] = qArms[w] & ~pArms[w];
             leftBits[static_cast<std::size_t>(w)] = pArms[w] & ~qArms[w];
-            pc += __builtin_popcountll(rightBits[static_cast<std::size_t>(w)]);
-            lc += __builtin_popcountll(leftBits[static_cast<std::size_t>(w)]);
+            pc += std::popcount(rightBits[static_cast<std::size_t>(w)]);
+            lc += std::popcount(leftBits[static_cast<std::size_t>(w)]);
           }
           if (pc == 0 || lc == 0) {
             continue;
@@ -1195,7 +1217,7 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
                   shellAdj.data() + static_cast<std::size_t>(ra) * static_cast<std::size_t>(lwords);
               int cut = 0;
               for (int k = 0; k < lwords; k++) {
-                cut += __builtin_popcountll(ba[k] & other[k]);
+                cut += std::popcount(ba[k] & other[k]);
               }
               c5 += otherN - cut;
             }
@@ -2276,6 +2298,42 @@ static void countSizes(RingPool *pools, int nPools, int use, SizeCounts sizes) {
       sizes.counts[i] += static_cast<int>(local[static_cast<std::size_t>(i)]);
     }
   }
+}
+
+// A four-ring census. The adjacent pairs among one vertex's arms are a
+// popcount of the shell rows, so the pair walk is not repeated.
+int countFourShell(const std::vector<int> &L2, const std::uint64_t *shellArms,
+                   const std::uint64_t *shellAdj, int lwords) {
+  int c4 = 0;
+  for (const int b : L2) {
+    const std::uint64_t *arms =
+        shellArms + static_cast<std::size_t>(b) * static_cast<std::size_t>(lwords);
+    int n = 0;
+    for (int w = 0; w < lwords; w++) {
+      n += std::popcount(arms[w]);
+    }
+    if (n < 2) {
+      continue;
+    }
+    int cuts = 0;
+    for (int w = 0; w < lwords; w++) {
+      std::uint64_t word = arms[w];
+      const int base = w << 6;
+      while (word != 0) {
+        const int ra = base + std::countr_zero(word);
+        word &= word - 1;
+        const std::uint64_t *ba =
+            shellAdj + static_cast<std::size_t>(ra) * static_cast<std::size_t>(lwords);
+        int hit = 0;
+        for (int k = 0; k < lwords; k++) {
+            hit += std::popcount(ba[k] & arms[k]);
+        }
+        cuts += hit;
+      }
+    }
+    c4 += n * (n - 1) / 2 - cuts / 2;
+  }
+  return c4;
 }
 
 [[gnu::noinline]] PackedRows vectorNeighbourRows(

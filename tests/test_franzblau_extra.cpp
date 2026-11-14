@@ -355,6 +355,50 @@ TEST_CASE("two ring searches at once keep their own rings", "[franzblau]") {
   }
 }
 
+TEST_CASE("four-ring census matches the arm-pair walk", "[franzblau]") {
+  // An induced 4-cycle, plus a clique hung off one of its vertices so the
+  // maximum degree exceeds 16 and the search takes the level walk. Depth 4
+  // never builds the five-ring census; depth 7 does.
+  const int n = 21;
+  std::vector<std::vector<int>> rows(static_cast<std::size_t>(n));
+  for (int i = 0; i < n; i++) {
+    rows[static_cast<std::size_t>(i)].push_back(i);
+  }
+  auto link = [&](int a, int b) {
+    rows[static_cast<std::size_t>(a)].push_back(b);
+    rows[static_cast<std::size_t>(b)].push_back(a);
+  };
+  link(0, 1);
+  link(1, 2);
+  link(2, 3);
+  link(3, 0);
+  for (int a = 4; a < n; a++) {
+    link(0, a);
+    for (int b = a + 1; b < n; b++) {
+      link(a, b);
+    }
+  }
+  auto tally4 = [](const std::vector<std::vector<int>> &rings) {
+    int count = 0;
+    for (const auto &ring : rings) {
+      if (ring.size() == 4) {
+        count++;
+      }
+    }
+    return count;
+  };
+  for (const int maxDepth : {4, 5, 7}) {
+    INFO("maxDepth " << maxDepth);
+    const auto census = primitive::ringCensusCounts(rows, maxDepth);
+    const auto paired = primitive::ringNetwork(rows, maxDepth);
+    const auto legacy = primitive::ringNetworkBalls(rows, maxDepth);
+    REQUIRE(static_cast<int>(census.size()) > 4);
+    REQUIRE(census[4] > 0);
+    REQUIRE(census[4] == tally4(paired));
+    REQUIRE(census[4] == tally4(legacy));
+  }
+}
+
 TEST_CASE("cropped dump-l rings match the pairing walk and the filtered search",
           "[franzblau]") {
   // The first atoms of the dense frame, in the original box. Small enough
