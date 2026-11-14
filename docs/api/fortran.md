@@ -16,6 +16,26 @@ gfortran and runs it. The run prints `fortran call cubic 64`,
 `input/traj/genice_sI.lammpstrj` and calls the same C entry points.
 `meson test docs_examples` runs it.
 
+The module is also the fpm package `dseams`. It links an installed
+libseams, so tell fpm where that is before `fpm build` or `fpm test`
+(`bindings/fortran/test/check_dseams.f90`):
+
+```bash
+export FPM_LDFLAGS="$(pkg-config --libs-only-L seams) -Wl,-rpath,$(pkg-config --variable=libdir seams)"
+```
+
+fpm takes a git dependency's manifest from the repository root, which
+is why `fpm.toml` there points at `bindings/fortran`. A project depends
+on it with
+
+```toml
+[dependencies]
+dseams = { git = "https://github.com/d-SEAMS/seams-core", tag = "v2.14.0" }
+```
+
+`bindings/fortran/examples/downstream` is such a project, with a path
+dependency.
+
 The module exports `SEAMS_OK`, `SEAMS_CHILL_PUBLISHED`, `SEAMS_CHILL_OVITO`,
 `SEAMS_GRAPH_CUTOFF`, `SEAMS_GRAPH_MUTUAL`, `SEAMS_LABEL_CUBIC`,
 `seams_version_string`, `seams_last_error`, `seams_set_num_threads`,

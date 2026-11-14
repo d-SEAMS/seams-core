@@ -1,0 +1,46 @@
+# C++ translation units behind the C API (include/seams.h), relative to
+# the repository root. This is the link closure of src/seams_api.cpp over
+# libyodaLib built with Eigen and OpenMP and no optional backend.
+# build.rs compiles this list; vendor.py copies it into vendor/.
+src/seams_api.cpp
+src/absOrientation.cpp
+src/bond.cpp
+src/bop.cpp
+src/brine_front.cpp
+src/cage_affiliation.cpp
+src/cage_canon.cpp
+src/cage_enum.cpp
+src/cage_pack.cpp
+src/chemfiles_io.cpp
+src/chill_plus_scheme.cpp
+src/cluster.cpp
+src/cutoff_csr.cpp
+src/density.cpp
+src/diamond_cna.cpp
+src/franzblau.cpp
+src/generic.cpp
+src/ira_sofi.cpp
+src/local_symmetry.cpp
+src/mol_sys.cpp
+src/neighbours.cpp
+src/order_parameter.cpp
+src/ozaki.cpp
+src/pntCorrespondence.cpp
+src/rdf.cpp
+src/ring.cpp
+src/seams_c_api.cpp
+src/seams_input.cpp
+src/seams_output.cpp
+src/shapeMatch.cpp
+src/shell_kernel.cpp
+src/site.cpp
+src/steinhardt_parallel.cpp
+src/topo_bulk.cpp
+src/topo_fingerprint.cpp
+src/topo_one_dim.cpp
+src/tum_offload.cpp
+src/water_select.cpp
+src/ylm_cartesian.cpp
+# Compiled on their own with the instruction-set flags meson gives them.
+avx2: src/shell_classify.cpp
+avx512: src/ylm_cartesian_avx512.cpp

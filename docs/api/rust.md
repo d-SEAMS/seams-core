@@ -3,6 +3,22 @@
 `seams-sys` is the raw FFI crate. `seams` is the safe wrapper. Build both with
 `SEAMS_LIB_DIR` pointing at the directory that contains `libseams.so`.
 
+On crates.io the packages are `dseams-sys` and `dseams`, because `seams`
+there is an unrelated project. The library names stay `seams_sys` and
+`seams`, so the code below is unchanged:
+
+```toml
+[dependencies]
+dseams = "2.14.0"
+```
+
+Without `SEAMS_LIB_DIR`, `dseams-sys` compiles a bundled copy of the C API
+and Eigen with the `cc` crate (x86_64, a C++20 compiler with OpenMP). That
+copy reads LAMMPS dumps and XYZ. The `system` feature links an installed
+libseams through pkg-config instead, with every reader it was built with.
+`python3 bindings/rust/seams-sys/vendor.py` fills `seams-sys/vendor/`
+before `cargo package`.
+
 ```rust
 fn main() -> Result<(), seams::Error> {
     let a = 2.75 * 4.0 / 3.0_f64.sqrt();

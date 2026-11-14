@@ -37,6 +37,11 @@ good (4,2,1) patterns.
 Python, R, and Julia wrap rings, cages, signature cages, and the shell
 symmetry label on ~libseams_lang~.
 The book builds from the committed Org sources.
+The Python module is released on PyPI as ~pydseamslib~ (import
+~dseams~), with wheels for Linux and macOS and a conda-forge recipe
+for ~libseams~ and ~pydseamslib~. The Rust crates are ~dseams-sys~
+and ~dseams~, the Fortran module is the fpm package ~dseams~, and the
+Lua module is the LuaRocks rock ~dseams~.
 
 * 2.13.0
 

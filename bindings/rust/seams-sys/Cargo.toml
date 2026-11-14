@@ -1,9 +1,43 @@
 [package]
-name = "seams-sys"
+name = "dseams-sys"
 version = "2.14.0"
 edition = "2021"
-description = "Raw FFI for the d-SEAMS C API"
-license = "MIT"
+rust-version = "1.85"
+description = "Raw FFI for the d-SEAMS C API, with a bundled build of libseams"
+authors = ["Rohit Goswami <rgoswami@ieee.org>"]
+# The crate code and d-SEAMS are MIT. vendor/eigen is Eigen 3.4.0: MPL-2.0,
+# with AlignedBox.h under BSD-3-Clause and BFloat16.h under Apache-2.0.
+license = "MIT AND MPL-2.0 AND BSD-3-Clause AND Apache-2.0"
+homepage = "https://dseams.info"
+repository = "https://github.com/d-SEAMS/seams-core"
+documentation = "https://docs.rs/dseams-sys"
+readme = "README.md"
+keywords = ["molecular-dynamics", "ice", "chemistry", "ffi", "simulation"]
+categories = ["external-ffi-bindings", "science"]
 links = "seams"
+build = "build.rs"
+include = [
+  "/src/**",
+  "/build.rs",
+  "/sources.txt",
+  "/README.md",
+  "/LICENSE",
+  "/vendor/**",
+]
+
+[lib]
+name = "seams_sys"
+
+[features]
+# Link an installed libseams found through pkg-config instead of the
+# bundled build. Needed for the .con and chemfiles readers.
+system = []
 
 [dependencies]
+
+[build-dependencies]
+cc = { version = "1.2", features = ["parallel"] }
+pkg-config = "0.3.27"
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]

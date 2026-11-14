@@ -1,0 +1,283 @@
+name: Packages
+# Build, test and package the Fortran (fpm), Rust (crates.io) and
+# Lua/Fennel (LuaRocks) packages the way a downstream user would.
+# Nothing here publishes: cargo publish runs with --dry-run and fpm
+# publish only prints its upload data.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  SEAMS_PREFIX: ${{ github.workspace }}/../seams-prefix
+  LUAROCKS_VERSION: "3.12.2"
+  LUAROCKS_SHA256: b0e0c85205841ddd7be485f53d6125766d18a81d226588d2366931e9a1484492
+
+jobs:
+  versions:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Package versions follow meson.build
+        run: |
+          python3 - <<'EOF'
+          import pathlib, re, sys
+          root = pathlib.Path(".")
+          want = re.search(r"version: '([^']+)'", (root / "meson.build").read_text()).group(1)
+          found = {
+              "bindings/rust/seams-sys/Cargo.toml": r'(?m)^version = "([^"]+)"',
+              "bindings/rust/seams/Cargo.toml": r'(?m)^version = "([^"]+)"',
+              "bindings/fortran/fpm.toml": r'(?m)^version = "([^"]+)"',
+              "fpm.toml": r'(?m)^version = "([^"]+)"',
+          }
+          bad = []
+          for path, pattern in found.items():
+              got = re.search(pattern, (root / path).read_text()).group(1)
+              if got != want:
+                  bad.append(f"{path}: {got}")
+          if not (root / f"bindings/lua/dseams-{want}-1.rockspec").is_file():
+              bad.append(f"bindings/lua/dseams-{want}-1.rockspec is missing")
+          sys.exit("meson.build is {}; {}".format(want, "; ".join(bad)) if bad else 0)
+          EOF
+
+  libseams:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++ ninja-build pkg-config libeigen3-dev libflexiblas-dev
+          pipx install meson
+      - name: Build and install libseams
+        run: |
+          meson setup build-pkg --buildtype=release --prefix="$SEAMS_PREFIX" --libdir=lib \
+            -Dwith_python=false -Dwith_tests=false -Dwith_lua=disabled -Dwith_chemfiles=disabled \
+            -Dwith_lammps=disabled -Dwith_gromacs=disabled -Dwith_openmm=disabled \
+            -Dwith_plumed=disabled -Dwith_gpulite=disabled
+          ninja -C build-pkg
+          meson install -C build-pkg
+          tar -C "$SEAMS_PREFIX" -czf libseams-prefix.tar.gz .
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: libseams-prefix
+          path: libseams-prefix.tar.gz
+          retention-days: 3
+
+  rust:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Toolchains
+        run: |
+          rustup toolchain install stable --profile minimal --component clippy
+          rustup toolchain install 1.85.0 --profile minimal
+      - name: Vendor the C++ sources and Eigen into dseams-sys
+        run: python3 bindings/rust/seams-sys/vendor.py
+      - name: Test with the bundled libseams
+        working-directory: bindings/rust
+        env:
+          OMP_NUM_THREADS: "1"
+        run: |
+          cargo +stable test --test ice --examples
+          cargo +stable run --example minimal -- ../../input/traj/genice_sI.lammpstrj
+      - name: Clippy and rustdoc
+        working-directory: bindings/rust
+        run: |
+          cargo +stable clippy --all-targets -- -D warnings
+          RUSTDOCFLAGS="-D warnings" cargo +stable doc --no-deps
+          DOCS_RS=1 RUSTDOCFLAGS="-D warnings" cargo +stable doc --no-deps
+      - name: Minimum supported Rust
+        working-directory: bindings/rust
+        run: cargo +1.85.0 build --all-targets
+      # vendor/ is generated and gitignored, so cargo sees it as uncommitted.
+      - name: Package and dry-run publish
+        working-directory: bindings/rust
+        run: |
+          cargo +stable package --allow-dirty -p dseams-sys -p dseams
+          cargo +stable publish --dry-run --allow-dirty -p dseams-sys -p dseams
+      - name: Use the .crate files from a new project
+        env:
+          OMP_NUM_THREADS: "1"
+        run: |
+          work="$RUNNER_TEMP/fresh"
+          mkdir -p "$work/crates"
+          for crate in bindings/rust/target/package/*.crate; do
+            tar -xzf "$crate" -C "$work/crates"
+          done
+          cd "$work"
+          cargo +stable new --vcs none app
+          cd app
+          cat >> Cargo.toml <<'EOF'
+          dseams = "2.14.0"
+
+          [patch.crates-io]
+          dseams = { path = "../crates/dseams-2.14.0" }
+          dseams-sys = { path = "../crates/dseams-sys-2.14.0" }
+          EOF
+          cat > src/main.rs <<'EOF'
+          fn main() -> Result<(), seams::Error> {
+              let a = 2.75 * 4.0 / 3.0_f64.sqrt();
+              let sites = [
+                  (0.0, 0.0, 0.0), (0.5, 0.5, 0.0), (0.5, 0.0, 0.5), (0.0, 0.5, 0.5),
+                  (0.25, 0.25, 0.25), (0.75, 0.75, 0.25), (0.75, 0.25, 0.75), (0.25, 0.75, 0.75),
+              ];
+              let mut xyz = Vec::new();
+              for (x, y, z) in sites {
+                  xyz.extend([x * a, y * a, z * a]);
+              }
+              let mut sys = seams::System::new()?;
+              sys.set_ortho(&xyz, a, a, a)?;
+              let (_labels, counts) = sys.chill_plus(
+                  3.5,
+                  seams::ffi::SEAMS_GRAPH_CUTOFF,
+                  seams::ffi::SEAMS_CHILL_PUBLISHED,
+              )?;
+              assert_eq!(counts[0], 8);
+              println!("dseams {} cubic {}", seams::version(), counts[0]);
+              Ok(())
+          }
+          EOF
+          cargo +stable run --release
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: crates
+          path: bindings/rust/target/package/*.crate
+          retention-days: 7
+
+  rust-system:
+    needs: libseams
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: libseams-prefix
+      - name: Unpack libseams
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libflexiblas3 libgomp1
+          mkdir -p "$SEAMS_PREFIX"
+          tar -xzf libseams-prefix.tar.gz -C "$SEAMS_PREFIX"
+      - name: Test against the installed libseams (feature system)
+        working-directory: bindings/rust
+        run: |
+          export PKG_CONFIG_PATH="$SEAMS_PREFIX/lib/pkgconfig"
+          export LD_LIBRARY_PATH="$SEAMS_PREFIX/lib"
+          OMP_NUM_THREADS=1 cargo test --features system --test ice
+
+  fortran:
+    needs: libseams
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: libseams-prefix
+      - name: Toolchain and libseams
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gfortran pkg-config libflexiblas3 libgomp1
+          pipx install fpm
+          mkdir -p "$SEAMS_PREFIX"
+          tar -xzf libseams-prefix.tar.gz -C "$SEAMS_PREFIX"
+          # libseams.so has no RUNPATH to libyodaLib.so beside it.
+          echo "LD_LIBRARY_PATH=$SEAMS_PREFIX/lib" >> "$GITHUB_ENV"
+          echo "FPM_LDFLAGS=-L$SEAMS_PREFIX/lib -Wl,-rpath,$SEAMS_PREFIX/lib" >> "$GITHUB_ENV"
+          echo "OMP_NUM_THREADS=1" >> "$GITHUB_ENV"
+      - name: fpm test (bindings/fortran)
+        working-directory: bindings/fortran
+        run: fpm test
+      - name: fpm test (repository root, the git dependency manifest)
+        run: fpm test
+      - name: Downstream project with a path dependency
+        working-directory: bindings/fortran/examples/downstream
+        run: fpm run
+      - name: Old gfortran path still builds the module and its test
+        run: |
+          work="$RUNNER_TEMP/gfortran"
+          mkdir -p "$work"
+          gfortran -J"$work" -c bindings/fortran/seams.f90 -o "$work/seams.o"
+          gfortran -I"$work" bindings/fortran/test_seams.f90 "$work/seams.o" -o "$work/test_seams" \
+            -L"$SEAMS_PREFIX/lib" -lseams -Wl,-rpath,"$SEAMS_PREFIX/lib"
+          "$work/test_seams" "$PWD"
+      # fpm publish archives fpm_model.json before writing it (fpm 0.12,
+      # 0.13), so dump the model first. --show-upload-data does not upload.
+      - name: Registry upload data
+        working-directory: bindings/fortran
+        run: |
+          fpm build --dump fpm_model.json
+          fpm publish --show-upload-data
+          rm fpm_model.json
+
+  lua:
+    needs: libseams
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        lua: [lua5.4, luajit]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: libseams-prefix
+      - name: Lua, LuaRocks and libseams
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libflexiblas3 libgomp1
+          mkdir -p "$SEAMS_PREFIX"
+          tar -xzf libseams-prefix.tar.gz -C "$SEAMS_PREFIX"
+          root="$RUNNER_TEMP/lua-root"
+          mkdir -p "$root/bin"
+          if [ "${{ matrix.lua }}" = lua5.4 ]; then
+            sudo apt-get install -y lua5.4 liblua5.4-dev
+            lua=lua5.4 pc=lua5.4
+            flags="--lua-version=5.4 --with-lua-interpreter=lua5.4"
+          else
+            sudo apt-get install -y luajit libluajit-5.1-dev
+            lua=luajit pc=luajit
+            flags="--lua-version=5.1 --with-lua-interpreter=luajit"
+          fi
+          ln -s "$(command -v "$lua")" "$root/bin/$lua"
+          incdir=$(pkg-config --cflags-only-I "$pc" | sed 's/^-I//; s/ .*//')
+          test -f "$incdir/lua.h"
+          ln -s "$incdir" "$root/include"
+          curl -fsSL -o luarocks.tar.gz "https://luarocks.github.io/luarocks/releases/luarocks-$LUAROCKS_VERSION.tar.gz"
+          echo "$LUAROCKS_SHA256  luarocks.tar.gz" | sha256sum -c -
+          tar -xzf luarocks.tar.gz
+          (cd "luarocks-$LUAROCKS_VERSION" && ./configure --prefix="$RUNNER_TEMP/luarocks" --with-lua="$root" $flags && make && make install)
+          # A private root holds one interpreter, so LuaRocks cannot pick another.
+          echo "LUAROCKS=$RUNNER_TEMP/luarocks/bin/luarocks --lua-dir=$root" >> "$GITHUB_ENV"
+          echo "LD_LIBRARY_PATH=$SEAMS_PREFIX/lib" >> "$GITHUB_ENV"
+          echo "OMP_NUM_THREADS=1" >> "$GITHUB_ENV"
+      - name: luarocks make, test and pack
+        run: |
+          tree="$RUNNER_TEMP/rocks"
+          $LUAROCKS --tree "$tree" make bindings/lua/dseams-2.14.0-1.rockspec \
+            SEAMS_DIR="$SEAMS_PREFIX" SEAMS_LIBDIR="$SEAMS_PREFIX/lib"
+          $LUAROCKS --tree "$tree" install fennel
+          eval "$($LUAROCKS --tree "$tree" path)"
+          $LUAROCKS --tree "$tree" test bindings/lua/dseams-2.14.0-1.rockspec
+          mkdir -p rocks
+          (cd rocks && $LUAROCKS --tree "$tree" pack dseams 2.14.0-1)
+      - name: Install the packed rock into a new tree
+        run: |
+          tree="$RUNNER_TEMP/fresh"
+          $LUAROCKS --tree "$tree" install rocks/dseams-2.14.0-1.*.rock \
+            SEAMS_DIR="$SEAMS_PREFIX" SEAMS_LIBDIR="$SEAMS_PREFIX/lib"
+          $LUAROCKS --tree "$tree" install fennel
+          eval "$($LUAROCKS --tree "$tree" path)"
+          cd "$RUNNER_TEMP"
+          $($LUAROCKS config variables.LUA) "$GITHUB_WORKSPACE/bindings/lua/test_rock.lua" "$GITHUB_WORKSPACE"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: rock-${{ matrix.lua }}
+          path: rocks/*.rock
+          retention-days: 7

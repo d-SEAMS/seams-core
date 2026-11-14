@@ -115,6 +115,14 @@ Python module is `import dseams`. The released Frame package is
 [yodaStruct](https://github.com/d-SEAMS/yodaStruct)
 (`require("dseams")`).
 
+From 2.14.0 this repository also builds the native packages:
+`pip install pydseamslib` (the PyPI name of the 2.11 wheels, now
+`import dseams`), the conda-forge `libseams` and `pydseamslib`
+recipe, the crates `dseams-sys` and `dseams`, the fpm package
+`dseams`, and the LuaRocks rock `dseams`. R and Julia install from
+`bindings/r/dseams` and `bindings/julia/Dseams`. Each line is in
+`docs/orgmode/howto/install.org`.
+
 ```bash
 pixi run setup && pixi run build && pixi run test
 ./bbdir/seams read input/traj/exampleTraj.lammpstrj

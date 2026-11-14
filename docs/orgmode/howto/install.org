@@ -99,6 +99,78 @@ only package builders use:
 | ~-Dwith_readcon=disabled~ | Leave out the readcon-core and readcon-db ~.con~ readers       |
 | ~--wrap-mode=nodownload~  | Fail instead of fetching a subproject                          |
 
+* Rust from crates.io
+
+#+begin_src toml
+[dependencies]
+dseams = "2.14.0"
+#+end_src
+
+The crates are ~dseams-sys~ (raw FFI) and ~dseams~ (the safe wrapper),
+because ~seams~ on crates.io is an unrelated project. The library
+names stay ~seams_sys~ and ~seams~, so ~use seams::System~ is
+unchanged. By default ~dseams-sys~ compiles a bundled copy of the C
+API and Eigen with the ~cc~ crate (x86_64, a C++20 compiler with
+OpenMP); that copy reads LAMMPS dumps and XYZ. The ~system~ feature
+links an installed ~libseams~ through pkg-config instead, with every
+reader it was built with. In this tree, ~SEAMS_LIB_DIR~ points both
+crates at a build:
+
+#+begin_src bash
+SEAMS_LIB_DIR="$PWD/bbdir/src" cargo test --manifest-path bindings/rust/Cargo.toml
+#+end_src
+
+* Fortran with fpm
+
+The Fortran module is the fpm package ~dseams~. It links an installed
+~libseams~:
+
+#+begin_src toml
+[dependencies]
+dseams = { git = "https://github.com/d-SEAMS/seams-core", tag = "v2.14.0" }
+#+end_src
+
+#+begin_src bash
+export FPM_LDFLAGS="$(pkg-config --libs-only-L seams) -Wl,-rpath,$(pkg-config --variable=libdir seams)"
+fpm test
+#+end_src
+
+fpm reads a git dependency's manifest from the repository root, so the
+root ~fpm.toml~ points at ~bindings/fortran~.
+~bindings/fortran/examples/downstream~ is a project with a path
+dependency on it.
+
+* Lua with LuaRocks
+
+~bindings/lua/dseams-2.14.0-1.rockspec~ compiles ~dseams_core~ against
+an installed ~libseams~ and installs ~dseams.lua~, ~yoda.lua~ and
+~dseams_fnl.fnl~ for Lua 5.1 to 5.4 and LuaJIT:
+
+#+begin_src bash
+luarocks make bindings/lua/dseams-2.14.0-1.rockspec SEAMS_DIR="$prefix" SEAMS_LIBDIR="$(pkg-config --variable=libdir seams)"
+luarocks test bindings/lua/dseams-2.14.0-1.rockspec
+#+end_src
+
+~-Dwith_lua=auto~ in the Meson build is the other route to
+~require("dseams")~.
+
+* R and Julia
+
+R and Julia install from this checkout; there is no CRAN or General
+registry package. Build the library first. R:
+
+#+begin_src bash
+DSEAMS_ROOT=$PWD R CMD INSTALL bindings/r/dseams
+#+end_src
+
+Julia's ~bindings/julia/Dseams~ calls ~libseams_lang~ and
+~bindings/julia/Seams~ calls ~libseams~:
+
+#+begin_src bash
+export SEAMS_LANG_LIB="$PWD/bbdir/bindings/libseams_lang.so" DSEAMS_ROOT="$PWD"
+julia --project=bindings/julia/Dseams -e 'using Dseams'
+#+end_src
+
 * pixi
 
 #+begin_src bash
