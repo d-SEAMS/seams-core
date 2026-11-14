@@ -374,7 +374,8 @@ else
     _chem_stamp = chem_prefix / 'seams-patches.txt'
     _chem_current = fs.exists(chem_prefix / 'lib' / 'libchemfiles.so') and fs.exists(_chem_stamp)
     if _chem_current
-      _chem_current = fs.read(_chem_stamp).strip() == _chem_patch_text
+      # fs.read() refuses a path in the build tree.
+      _chem_current = run_command('cat', _chem_stamp, check: false).stdout().strip() == _chem_patch_text
     endif
     if cmake_bin.found() and not _chem_current
       run_command('rm', '-rf', meson.project_build_root() / 'chemfiles-fetch', chem_prefix,
