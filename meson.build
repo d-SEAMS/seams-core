@@ -919,6 +919,13 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_snippet_harness',
+    python3,
+    args: ['-m', 'doctest', meson.project_source_root() / 'docs' / 'run_snippets.py'],
+    workdir: meson.project_source_root() / 'docs',
+    suite: 'docs',
+    timeout: 60)
+  test(
     'rust_sys_declarations',
     python3,
     args: ['-m', 'doctest', meson.project_source_root() / 'bindings' / 'rust' / 'seams-sys' / 'gen_sys.py'],

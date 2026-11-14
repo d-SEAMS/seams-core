@@ -768,6 +768,82 @@ def is_prototype(body):
     return "(" in text and (" " in head or "*" in head or "::" in head)
 
 
+C_TYPES = r"(?:const\s+)?(?:unsigned\s+)?(?:int|size_t|double|char|float|seams_\w+)\b"
+
+
+def c_declared(body):
+    """Names a C fragment declares itself.
+
+    >>> sorted(c_declared("size_t n_cages = 0, n_atoms = 0;\\nseams_rings_destroy(rings);"))
+    ['n_atoms', 'n_cages']
+    >>> sorted(c_declared("int *off = malloc(n * sizeof *off), *cols = NULL;"))
+    ['cols', 'off']
+    """
+    names = set()
+    for stmt in re.split(r"[;{}]", body):
+        match = re.match(r"\s*" + C_TYPES + r"(.*)", stmt, re.S)
+        if match is None:
+            continue
+        depth = 0
+        outside = []
+        for ch in match.group(1):
+            if ch == "(":
+                depth += 1
+            elif ch == ")":
+                depth -= 1
+            elif depth == 0:
+                outside.append(ch)
+        for part in "".join(outside).split(","):
+            name = re.match(r"[\s*]*(?:const\s+)?\**\s*([A-Za-z_]\w*)", part)
+            if name:
+                names.add(name.group(1))
+    return names
+
+
+# What a header example may use without declaring: an 8-atom cubic ice cell
+# in sys, buffers of the atom count, and handles built from sys.
+C_BUFFERS = [
+    ("n", "  size_t n = 8;"),
+    ("xyz", "  double *xyz = doc_cell;"),
+    ("labels", "  int labels_buf[8192] = {0};\n  int *labels = labels_buf;"),
+    ("counts", "  int counts[9] = {0};"),
+    ("box9", "  const double box9[9] = {0, 0, 0, a, a, a, 0, 0, 0};"),
+    ("frame0", "  const double *frame0 = doc_cell;"),
+    ("frames", "  const double *frames[2] = {doc_cell, doc_cell};"),
+    ("nframes", "  size_t nframes = 2;"),
+] + [(name, "  int {}[8192] = {{0}};".format(name)) for name in ("ice", "per_atom", "kinds", "ids", "types", "sizes", "symmetry")] + [
+    (name, "  double {}[8192] = {{0}};".format(name)) for name in ("q4", "q6", "q6bar")
+]
+C_HANDLES = [
+    ("nb", "seams_neighbours", "seams_neighbours_build(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, &nb)", "seams_neighbours_destroy"),
+    ("rings", "seams_rings", "seams_rings_find(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6, &rings)", "seams_rings_destroy"),
+    ("cages", "seams_cage_set", "seams_cages_find(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, 0, 0, &cages)", "seams_cages_destroy"),
+    ("fp", "seams_topo", "seams_fingerprint(sys, 3.5, 0, 4, SEAMS_GRAPH_CUTOFF, 2, 0, &fp)", "seams_fingerprint_destroy"),
+    ("front", "seams_brine", "seams_brine_analyse(sys, front_ice, 8, 1, 2, 0, 2, &front)", "seams_brine_destroy"),
+]
+
+
+def c_context(body, predeclared):
+    """Declarations and cleanup for the names a C fragment uses but does not declare."""
+    declared = c_declared(body)
+
+    def wanted(name):
+        return name not in declared and re.search(r"\b" + name + r"\b", body) is not None
+
+    context = [line for name, line in C_BUFFERS if wanted(name)]
+    cleanup = []
+    for name, ctype, make, destroy in C_HANDLES:
+        if not predeclared or not wanted(name):
+            continue
+        if name == "front":
+            context.append("  int front_ice[8] = {0};")
+        context.append("  {} *{} = NULL;".format(ctype, name))
+        context.append("  (void){};".format(make))
+        if destroy + "(" + name not in body:
+            cleanup.append("  {}({});".format(destroy, name))
+    return context, cleanup
+
+
 def compile_statements(build, env, lang, body):
     work = Path(tempfile.mkdtemp(prefix="seams-snippet-src-"))
     if lang == "c":
@@ -777,7 +853,7 @@ def compile_statements(build, env, lang, body):
         frame = ""
         if uses_frame and "seams_frame *frame" not in body:
             frame = "seams_frame *frame = seams_frame_read(path, 1, -1);\n"
-        sysline = "" if not predeclared else "seams_system *sys = seams_system_create();\n  seams_system_set_ortho(sys, xyz, 8, 0, 0, 0, a, a, a, NULL, NULL);\n"
+        sysline = "" if not predeclared else "seams_system *sys = seams_system_create();\n  seams_system_set_ortho(sys, doc_cell, 8, 0, 0, 0, a, a, a, NULL, NULL);\n"
         owned = "sys" if predeclared or "seams_system *sys" in body else "0"
         mixed = "seams_frame_" in body and ("seams_system_" in body or "seams_chill_plus(" in body or "seams_rings_" in body or "seams_q4" in body)
         header = "seams.h" if mixed or "seams_frame_" not in body else "seams_lang.h"
@@ -791,6 +867,7 @@ def compile_statements(build, env, lang, body):
                     "int seams_frame_chill_plus_rule(seams_frame *frame, double cutoff, int type, const char *graph, const char *rule, int *labels, int counts9[9]);",
                 ]
             )
+        context, cleanup = c_context(body, predeclared)
         source.write_text(
             "\n".join(
                 [
@@ -805,17 +882,17 @@ def compile_statements(build, env, lang, body):
                     "  const double s[8][3] = {"
                     "    {0, 0, 0}, {0.5, 0.5, 0}, {0.5, 0, 0.5}, {0, 0.5, 0.5},"
                     "    {0.25, 0.25, 0.25}, {0.75, 0.75, 0.25}, {0.75, 0.25, 0.75}, {0.25, 0.75, 0.75}};"
-                    "  double xyz[24];",
-                    "  int labels[8192];",
-                    "  int counts[9] = {0};",
+                    "  double doc_cell[24];",
                     "  for (int i = 0; i < 8; i++) {",
-                    "    xyz[3 * i] = s[i][0] * a;",
-                    "    xyz[3 * i + 1] = s[i][1] * a;",
-                    "    xyz[3 * i + 2] = s[i][2] * a;",
+                    "    doc_cell[3 * i] = s[i][0] * a;",
+                    "    doc_cell[3 * i + 1] = s[i][1] * a;",
+                    "    doc_cell[3 * i + 2] = s[i][2] * a;",
                     "  }",
                     sysline,
                     frame,
+                    *context,
                     body,
+                    *cleanup,
                     "  if (frame) seams_frame_free(frame);" if uses_frame and "seams_frame_free" not in body else "  (void)path;",
                     "  if (" + owned + ") seams_system_destroy(sys);" if "seams_system_destroy" not in body else "",
                     "  return 0;",
