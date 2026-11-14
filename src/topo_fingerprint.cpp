@@ -12,7 +12,6 @@ std::vector<int> ringCensusCounts(const std::vector<std::vector<int>> &nList, in
 }
 
 #include <algorithm>
-#include <iomanip>
 #include <limits>
 #include <sstream>
 #include <stdexcept>
@@ -79,15 +78,19 @@ std::uint64_t hashString(const std::string &s) {
 namespace topo {
 
 std::string hex(std::uint64_t value) {
-  std::ostringstream out;
-  out << std::hex << std::setw(16) << std::setfill('0') << value;
-  return out.str();
+  static constexpr char kDigits[] = "0123456789abcdef";
+  std::string out(16, '0');
+  for (int i = 15; i >= 0; --i) {
+    out[static_cast<std::size_t>(i)] = kDigits[value & 0xfu];
+    value >>= 4;
+  }
+  return out;
 }
 
-std::vector<int> hopNeighbourhood(const Rows &rows, int atom, int hops) {
-  std::vector<int> order;
+void hopNeighbourhoodInto(const Rows &rows, int atom, int hops, std::vector<int> &order) {
+  order.clear();
   if (atom < 0 || atom >= static_cast<int>(rows.size())) {
-    return order;
+    return;
   }
   // One stamp for the walk. The visit order is the neighbour-row order,
   // the same order a map of first sightings produces.
@@ -126,6 +129,11 @@ std::vector<int> hopNeighbourhood(const Rows &rows, int atom, int hops) {
       order.push_back(u);
     }
   }
+}
+
+std::vector<int> hopNeighbourhood(const Rows &rows, int atom, int hops) {
+  std::vector<int> order;
+  hopNeighbourhoodInto(rows, atom, hops, order);
   return order;
 }
 
@@ -155,7 +163,22 @@ std::uint64_t wlHash(const std::vector<std::vector<int>> &adjacency, int root,
       for (int j : adjacency[static_cast<std::size_t>(i)]) {
         bag.push_back(color[static_cast<std::size_t>(j)]);
       }
-      std::sort(bag.begin(), bag.end());
+      // Neighbourhoods on a sparse frame are a handful of colors. An
+      // insertion sort of that bag is the refinement; a long bag still
+      // uses the general sort.
+      if (bag.size() <= 16) {
+        for (std::size_t a = 1; a < bag.size(); a++) {
+          const std::uint64_t v = bag[a];
+          std::size_t b = a;
+          while (b > 0 && bag[b - 1] > v) {
+            bag[b] = bag[b - 1];
+            --b;
+          }
+          bag[b] = v;
+        }
+      } else {
+        std::sort(bag.begin(), bag.end());
+      }
       std::uint64_t h = mix(kOffset, color[static_cast<std::size_t>(i)]);
       for (std::uint64_t c : bag) {
         h = mix(h, c);
@@ -271,12 +294,14 @@ struct LocalGraph {
   std::vector<std::pair<int, int>> edges;
 };
 
-LocalGraph buildLocalGraph(const Rows &rows, int atom, int hops,
-                           const std::vector<int> &colors) {
-  LocalGraph g;
-  g.atoms = hopNeighbourhood(rows, atom, hops);
+void fillLocalGraph(LocalGraph &g, const Rows &rows, int atom, int hops,
+                    const std::vector<int> &colors) {
+  g.edges.clear();
+  g.localColors.clear();
+  hopNeighbourhoodInto(rows, atom, hops, g.atoms);
   if (g.atoms.empty()) {
-    return g;
+    g.adjacency.clear();
+    return;
   }
   // Local index of each atom in this ball. The stamp is the call, so a
   // neighbour outside the ball is simply unmarked.
@@ -304,7 +329,7 @@ LocalGraph buildLocalGraph(const Rows &rows, int atom, int hops,
   for (int i = 0; i < n; i++) {
     const auto &row = rows[static_cast<std::size_t>(g.atoms[static_cast<std::size_t>(i)])];
     auto &adj = g.adjacency[static_cast<std::size_t>(i)];
-    adj.reserve(row.empty() ? 0 : row.size() - 1);
+    adj.clear();
     for (std::size_t m = 1; m < row.size(); m++) {
       const int u = row[m];
       if (u < 0 || u >= nRows || seen[static_cast<std::size_t>(u)] != epoch) {
@@ -328,11 +353,9 @@ LocalGraph buildLocalGraph(const Rows &rows, int atom, int hops,
       g.localColors.push_back(colors[static_cast<std::size_t>(a)]);
     }
   }
-  return g;
 }
 
-LocalKey localKeyFromGraph(const LocalGraph &g, int hops,
-                            std::uint64_t *refinement) {
+LocalKey localKeyFromGraph(LocalGraph &g, int hops, std::uint64_t *refinement) {
   LocalKey out;
   if (g.atoms.empty()) {
     out.method = "wl";
@@ -342,11 +365,28 @@ LocalKey localKeyFromGraph(const LocalGraph &g, int hops,
     }
     return out;
   }
-  auto edges = g.edges;
-  std::sort(edges.begin(), edges.end());
-  edges.erase(std::unique(edges.begin(), edges.end()), edges.end());
+  // A crystal repeats one rooted ball. The refinement depends only on that
+  // adjacency and the vertex colors, so a repeat is the key already hashed.
+  struct Memo {
+    int hops = -1;
+    std::vector<std::vector<int>> adjacency;
+    std::vector<int> colors;
+    LocalKey key;
+    std::uint64_t refined = 0;
+    bool ready = false;
+  };
+  thread_local Memo memo;
+  if (memo.ready && memo.hops == hops && memo.colors == g.localColors &&
+      memo.adjacency == g.adjacency) {
+    if (refinement != nullptr) {
+      *refinement = memo.refined;
+    }
+    return memo.key;
+  }
+  std::sort(g.edges.begin(), g.edges.end());
+  g.edges.erase(std::unique(g.edges.begin(), g.edges.end()), g.edges.end());
   out.vertices = static_cast<int>(g.atoms.size());
-  out.edges = static_cast<int>(edges.size());
+  out.edges = static_cast<int>(g.edges.size());
   // The frame key is this refinement even when the local key is a
   // certificate, so it is hashed once and handed back to the caller.
   const std::uint64_t refined =
@@ -356,9 +396,9 @@ LocalKey localKeyFromGraph(const LocalGraph &g, int hops,
   }
   const bool colored = !g.localColors.empty();
   const int n = static_cast<int>(g.atoms.size());
-  const std::string cert = colored
-                               ? cage::canonicalCertificateColored(n, edges, g.localColors, 0)
-                               : cage::canonicalCertificateRooted(n, edges, 0);
+  const std::string cert =
+      colored ? cage::canonicalCertificateColored(n, g.edges, g.localColors, 0)
+               : cage::canonicalCertificateRooted(n, g.edges, 0);
   if (!cert.empty()) {
     out.method = "nauty";
     std::string tagged = cert;
@@ -374,16 +414,28 @@ LocalKey localKeyFromGraph(const LocalGraph &g, int hops,
       }
     }
     out.key = hex(hashString(tagged));
-    return out;
+  } else {
+    out.method = "wl";
+    out.key = hex(refined);
   }
-  out.method = "wl";
-  out.key = hex(refined);
+  memo.ready = true;
+  memo.hops = hops;
+  memo.adjacency = g.adjacency;
+  memo.colors = g.localColors;
+  memo.key = out;
+  memo.refined = refined;
   return out;
 }
 
+LocalKey localKeyRefined(const Rows &rows, int atom, int hops,
+                        const std::vector<int> &colors, std::uint64_t *refined) {
+  thread_local LocalGraph g;
+  fillLocalGraph(g, rows, atom, hops, colors);
+  return localKeyFromGraph(g, hops, refined);
+}
+
 LocalKey localKey(const Rows &rows, int atom, int hops, const std::vector<int> &colors) {
-  return localKeyFromGraph(buildLocalGraph(rows, atom, hops, colors), hops,
-                           nullptr);
+  return localKeyRefined(rows, atom, hops, colors, nullptr);
 }
 
 bool ballCoversAll(const Rows &rows, int hops) {
@@ -489,14 +541,25 @@ FrameFingerprint fingerprintChoose(const Rows &rows, int hops, int maxRingSize,
       out.classes[key] += 1;
     }
   } else {
+    out.atomKeys.resize(static_cast<std::size_t>(n));
+    // Each atom's ball is independent. The class histogram is filled
+    // afterwards so the counts stay in atom order, and the recorded
+    // method is the last atom's, as a serial walk leaves it.
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (n >= 256 && !omp_in_parallel() && \
+                                              omp_get_max_threads() > 1)
+#endif
     for (int i = 0; i < n; i++) {
-      const LocalGraph g = buildLocalGraph(rows, i, hops, colors);
       std::uint64_t refined = 0;
-      LocalKey lk = localKeyFromGraph(g, hops, &refined);
-      out.method = lk.method;
-      out.classes[lk.key] += 1;
-      out.atomKeys.push_back(std::move(lk.key));
+      LocalKey lk = localKeyRefined(rows, i, hops, colors, &refined);
+      if (i + 1 == n) {
+        out.method = lk.method;
+      }
+      out.atomKeys[static_cast<std::size_t>(i)] = std::move(lk.key);
       wl[static_cast<std::size_t>(i)] = refined;
+    }
+    for (const auto &key : out.atomKeys) {
+      out.classes[key] += 1;
     }
   }
   out.wlAtom = wl;
@@ -565,9 +628,8 @@ FrameFingerprint incrementalFingerprint(const FrameFingerprint &prev,
   out.colored = colors.size() == rows.size() && !rows.empty();
   out.classes.clear();
   for (int i : dirty) {
-    const LocalGraph g = buildLocalGraph(rows, i, hops, colors);
     std::uint64_t refined = 0;
-    LocalKey lk = localKeyFromGraph(g, hops, &refined);
+    LocalKey lk = localKeyRefined(rows, i, hops, colors, &refined);
     out.method = lk.method;
     out.atomKeys[static_cast<std::size_t>(i)] = std::move(lk.key);
     out.wlAtom[static_cast<std::size_t>(i)] = refined;

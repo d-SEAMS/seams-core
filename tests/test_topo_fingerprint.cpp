@@ -98,6 +98,22 @@ TEST_CASE("every atom of a diamond lattice carries the same local key", "[topo]"
   REQUIRE(lk.method == (cage::nautyAvailable() ? "nauty" : "wl"));
 }
 
+TEST_CASE("a different ball does not reuse the previous local key", "[fingerprint]") {
+  const auto rows = diamondRows(3);
+  const auto first = topo::localKey(rows, 0, 2);
+  auto broken = rows;
+  const int v = broken[0][1];
+  broken[0].erase(broken[0].begin() + 1);
+  auto &row = broken[static_cast<std::size_t>(v)];
+  row.erase(std::find(row.begin() + 1, row.end(), 0));
+  const auto second = topo::localKey(broken, 0, 2);
+  REQUIRE(second.key != first.key);
+  const auto again = topo::localKey(rows, 1, 2);
+  REQUIRE(again.key == first.key);
+  REQUIRE(again.vertices == first.vertices);
+  REQUIRE(again.edges == first.edges);
+}
+
 TEST_CASE("the frame key is independent of atom numbering", "[topo]") {
   const auto rows = diamondRows(3);
   std::vector<int> perm(rows.size());
