@@ -88,6 +88,12 @@ void forEachLammpsFrame(
 
 //! Function for reading in a specified frame (frame number and not timestep
 //! value)
+//! One id/type/x/y/z frame of the default oxygen selection: type 2 when
+//! any atom has that type, otherwise type 1. Returns false for any other
+//! column layout, leaving the cloud untouched by a successful read.
+bool readDefaultOxygen(const std::string &filename, int frame,
+                       molSys::PointCloud<molSys::Point<double>, double> &yCloud);
+
 molSys::PointCloud<molSys::Point<double>, double>
 readLammpsTrj(std::string filename, int targetFrame,
               molSys::PointCloud<molSys::Point<double>, double> &yCloud,

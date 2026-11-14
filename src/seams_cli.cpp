@@ -120,6 +120,12 @@ Cloud load(const std::string &path, int frame, int typeI) {
   if (typeI > 0) {
     return sinp::readLammpsTrjO(path, frame, cloud, typeI);
   }
+  // Default oxygen is type 2 when that type is present, otherwise type 1.
+  // On id/type/x/y/z that choice is one pass. A type-1 crystal used to be
+  // parsed twice. Any other layout keeps the two reads.
+  if (sinp::readDefaultOxygen(path, frame, cloud)) {
+    return cloud;
+  }
   cloud = sinp::readLammpsTrjO(path, frame, cloud, 2);
   if (cloud.nop > 0) {
     return cloud;

@@ -1230,7 +1230,8 @@ bool parseLooseInt(const char *&p, const char *end, int &out) {
 // 1e5-atom dump does not rehash and does not cross the iostream per line.
 bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
                           molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                          int typeFilter, LammpsKeep keep, std::uint64_t &nextAt) {
+                          int typeFilter, LammpsKeep keep, std::uint64_t &nextAt,
+                          bool *sawType2 = nullptr) {
   if (keep == LammpsKeep::TypeInSlice) {
     return false;
   }
@@ -1406,6 +1407,11 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
         failed = true;
         break;
       }
+      // The default oxygen choice is decided in this pass. A type-1
+      // crystal never parses the frame a second time.
+      if (sawType2 != nullptr && row.typ == 2) {
+        *sawType2 = true;
+      }
       if (filter && row.typ != typeFilter) {
         continue;
       }
@@ -1518,6 +1524,41 @@ void loadLammpsFrame(
  * @param[in] coordHigh Contains the upper limits of the slice, if a slice is to
  *  be created
  */
+bool sinp::readDefaultOxygen(
+    const std::string &filename, int frame,
+    molSys::PointCloud<molSys::Point<double>, double> &yCloud) {
+  auto sess = sessionFor(filename);
+  if (sess == nullptr) {
+    return false;
+  }
+  std::unique_lock<std::mutex> lock(sess->mu, std::try_to_lock);
+  if (!lock.owns_lock() || !sess->positionAt(frame)) {
+    return false;
+  }
+  const std::uint64_t frameAt = sess->offsets[static_cast<std::size_t>(frame - 1)];
+  bool saw2 = false;
+  std::uint64_t nextAt = 0;
+  yCloud = molSys::clearPointCloud(yCloud);
+  if (!parseMappedIdTypeXyz(filename, frameAt, yCloud, 1, LammpsKeep::Type, nextAt, &saw2)) {
+    return false;
+  }
+  if (!saw2) {
+    sess->stream().clear();
+    sess->stream().seekg(static_cast<std::streamoff>(nextAt));
+    yCloud.currentFrame = frame;
+    return true;
+  }
+  yCloud = molSys::clearPointCloud(yCloud);
+  nextAt = 0;
+  if (!parseMappedIdTypeXyz(filename, frameAt, yCloud, 2, LammpsKeep::Type, nextAt, nullptr)) {
+    return false;
+  }
+  sess->stream().clear();
+  sess->stream().seekg(static_cast<std::streamoff>(nextAt));
+  yCloud.currentFrame = frame;
+  return true;
+}
+
 molSys::PointCloud<molSys::Point<double>, double>
 sinp::readLammpsTrj(std::string filename, int targetFrame,
                     molSys::PointCloud<molSys::Point<double>, double> &yCloud,
