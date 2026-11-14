@@ -6,8 +6,12 @@ slab, and the nucleation frame. Neighbour rows, local q4 and q6, the
 Lechner-Dellago q6-bar, CHILL+ labels, diamond labels, the RDF, and the
 coordination are read from libseams through ctypes.
 
-A missing freud or ovito import is a failed run. The numeric match is
-1e-6 where both sides are float64. A looser residual is recorded only
+A missing freud or ovito import is a failed run. OVITO 3.15.5, the
+locked linux-64 wheel, has no SteinhardtParametersModifier; without it
+the per-atom q4, q6 and q6-bar are compared with a float64 sum of
+scipy's spherical harmonics over freud's cutoff rows, self included in
+the q6-bar mean, and the record keys say numpy instead of ovito. The
+numeric match is 1e-6 where both sides are float64. A looser residual is recorded only
 where the other library's own storage or cutoff is the cause, and the
 analytic block names which convention that is.
 """
@@ -34,13 +38,17 @@ try:
         CoordinationAnalysisModifier,
         CreateBondsModifier,
         PolyhedralTemplateMatchingModifier,
-        SteinhardtParametersModifier,
     )
     from ovito.pipeline import Pipeline, StaticSource
     from scipy.special import sph_harm_y
 except ImportError as exc:
     sys.stderr.write(f"freud or ovito is not installed ({exc})\n")
     raise SystemExit(1)
+try:
+    from ovito.modifiers import SteinhardtParametersModifier
+except ImportError:
+    SteinhardtParametersModifier = None
+Q_REFERENCE = "numpy" if SteinhardtParametersModifier is None else "ovito"
 
 CUTOFF = 3.5
 K_NEIGH = 4
@@ -308,6 +316,41 @@ def steinhardt_column(pts: np.ndarray, box: np.ndarray, order: int, averaged: bo
     key = "Smooth Steinhardt" if averaged else "Steinhardt"
     column = np.asarray(out.particles[key], dtype=np.float64)
     return np.ascontiguousarray(column[:, -1])
+
+
+def cell_matrix(box: np.ndarray) -> np.ndarray:
+    lx, ly, lz = [float(v) for v in box[3:6]]
+    xy, xz, yz = [float(v) for v in box[6:9]]
+    return np.array([[lx, xy, xz], [0.0, ly, yz], [0.0, 0.0, lz]], dtype=np.float64)
+
+
+def numpy_column(
+    pts: np.ndarray, box: np.ndarray, rows: list[tuple[int, ...]], order: int, averaged: bool
+) -> np.ndarray:
+    """Float64 q_l on the given rows. An empty row is NaN."""
+    n = len(pts)
+    counts = np.array([len(row) for row in rows], dtype=np.int64)
+    centre = np.repeat(np.arange(n), counts)
+    other = np.fromiter((j for row in rows for j in row), dtype=np.int64, count=int(counts.sum()))
+    cell = cell_matrix(box)
+    delta = np.asarray(pts, dtype=np.float64)[other] - np.asarray(pts, dtype=np.float64)[centre]
+    delta -= np.round(np.linalg.solve(cell, delta.T).T) @ cell.T
+    radius = np.linalg.norm(delta, axis=1)
+    theta = np.arccos(np.clip(delta[:, 2] / radius, -1.0, 1.0))
+    phi = np.arctan2(delta[:, 1], delta[:, 0])
+    qlm = np.zeros((n, 2 * order + 1), dtype=np.complex128)
+    for column, moment in enumerate(range(-order, order + 1)):
+        np.add.at(qlm[:, column], centre, sph_harm_y(order, moment, theta, phi))
+    live = counts > 0
+    qlm[live] /= counts[live, None]
+    if averaged:
+        total = qlm.copy()
+        np.add.at(total, centre, qlm[other])
+        qlm = total / (counts + 1)[:, None]
+    pref = 4.0 * math.pi / (2.0 * order + 1.0)
+    q = np.sqrt(pref * np.sum(np.abs(qlm) ** 2, axis=1))
+    q[~live] = np.nan
+    return q
 
 
 def chill_labels(pts: np.ndarray, box: np.ndarray) -> np.ndarray:
@@ -585,13 +628,16 @@ def compare_frame(lib: ctypes.CDLL, name: str, pts: np.ndarray, box: np.ndarray)
     order4.compute((freud_box(box), pts), neighbors=neigh)
     order6.compute((freud_box(box), pts), neighbors=neigh)
     order6b.compute((freud_box(box), pts), neighbors=neigh)
-    record["q4_ovito"] = max_abs(q4a, steinhardt_column(pts, box, 4, False))
-    record["q6_ovito"] = max_abs(q6a, steinhardt_column(pts, box, 6, False))
-    record["q6bar_ovito"] = max_abs(q6ba, steinhardt_column(pts, box, 6, True))
+    for key, order, averaged, mine in (("q4", 4, False, q4a), ("q6", 6, False, q6a), ("q6bar", 6, True, q6ba)):
+        if SteinhardtParametersModifier is None:
+            reference = numpy_column(pts, box, ball_rows, order, averaged)
+        else:
+            reference = steinhardt_column(pts, box, order, averaged)
+        record[f"{key}_{Q_REFERENCE}"] = max_abs(mine, reference)
     record["q4_freud"] = max_abs(q4a, order4.ql)
     record["q6_freud"] = max_abs(q6a, order6.ql)
     record["q6bar_freud"] = max_abs(q6ba, order6b.ql)
-    for key in ("q4_ovito", "q6_ovito", "q6bar_ovito"):
+    for key in (f"q4_{Q_REFERENCE}", f"q6_{Q_REFERENCE}", f"q6bar_{Q_REFERENCE}"):
         expect(record[key] <= ABS_TOL, f"{name} {key} {record[key]:.3e}")
     for key in ("q4_freud", "q6_freud", "q6bar_freud"):
         expect(record[key] <= FREUD_Q_TOL, f"{name} {key} {record[key]:.3e}")
@@ -710,12 +756,15 @@ def analytic_ql(lib: ctypes.CDLL, pts: np.ndarray, box: np.ndarray) -> None:
     status_ok(lib, lib.seams_ql(handle, CUTOFF, 0, 6, 0, q6, n, None, 0), "analytic q6")
     lib.seams_system_destroy(handle)
     seams = float(np.ctypeslib.as_array(q6)[populated])
-    ovito = float(steinhardt_column(pts, box, 6, False)[populated])
+    ovito = math.nan
+    if SteinhardtParametersModifier is not None:
+        ovito = float(steinhardt_column(pts, box, 6, False)[populated])
     op = freud.order.Steinhardt(l=6)
     op.compute((freud_box(box), pts), neighbors={"r_max": CUTOFF, "exclude_ii": True})
     fr = float(np.asarray(op.ql, dtype=np.float64)[populated])
     expect(abs(seams - analytic) <= ABS_TOL, f"analytic q6 seams {abs(seams - analytic):.3e}")
-    expect(abs(ovito - analytic) <= ABS_TOL, f"analytic q6 ovito {abs(ovito - analytic):.3e}")
+    if SteinhardtParametersModifier is not None:
+        expect(abs(ovito - analytic) <= ABS_TOL, f"analytic q6 ovito {abs(ovito - analytic):.3e}")
     expect(abs(fr - rounded) <= abs(fr - analytic) + 1e-8, "freud q6 is not the float32 sum")
     print(
         f"analytic q6 atom {populated} value {analytic:.8f} "
@@ -892,6 +941,9 @@ def print_record(record: dict) -> None:
         "q4_ovito",
         "q6_ovito",
         "q6bar_ovito",
+        "q4_numpy",
+        "q6_numpy",
+        "q6bar_numpy",
         "q4_freud",
         "q6_freud",
         "q6bar_freud",
