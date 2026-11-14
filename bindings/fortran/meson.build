@@ -50,6 +50,19 @@ if get_option('with_tests')
     env: fortran_env,
     timeout: 180,
   )
+  one_file = executable(
+    'test_fortran_one_file',
+    files('seams.f90', 'test/test_high.f90'),
+    link_with: seams_api_lib,
+    pie: true,
+  )
+  test(
+    'fortran_one_file',
+    one_file,
+    args: [meson.project_source_root()],
+    env: fortran_env,
+    timeout: 180,
+  )
   cubic = executable(
     'fortran_cubic',
     files('example/cubic.f90') + fortran_lib_src,

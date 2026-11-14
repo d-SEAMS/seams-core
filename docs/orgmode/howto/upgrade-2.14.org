@@ -21,8 +21,9 @@ the program reads a trajectory path or keeps a frame across calls.
 * Fortran
 
 ~bindings/fortran/seams.f90~ is a new module ~seams~. Compile it with
-the program and link ~libseams~. Every procedure is ~bind(C)~ to the
-symbol in ~seams.h~.
+the program and link ~libseams~. That one file compiles every module in
+~bindings/fortran/src~: ~seams~ has derived types with final procedures,
+and in ~seams_c~ every procedure is ~bind(C)~ to the symbol in ~seams.h~.
 
 * Python
 
