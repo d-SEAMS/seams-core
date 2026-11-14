@@ -1285,6 +1285,7 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
       std::vector<int> dSlot(static_cast<std::size_t>(nVertices), -1);
       std::vector<int> touchedD;
       std::vector<std::vector<int>> byD;
+      int c7 = 0;
       for (std::size_t pi = 0; pi < L3.size(); pi++) {
         const int p = L3[pi];
         const auto &ap = arms3[static_cast<std::size_t>(p)];
@@ -1320,7 +1321,8 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
           }
           if (!PerAtom && hist != nullptr && fast) {
             // Arms that share the far vertex fail or pass together on every
-            // test that does not look at the near vertex.
+            // test that does not look at the near vertex. The hits are a
+            // plain total: one add per source, not one atomic per ring.
             byD.clear();
             touchedD.clear();
             for (const auto &right : rights) {
@@ -1347,10 +1349,7 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
                     continue;
                   }
                   if (7 < static_cast<int>(hist->size())) {
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp atomic
-#endif
-                    (*hist)[7]++;
+                    c7++;
                   }
                 }
               }
@@ -1396,6 +1395,12 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
             }
           }
         }
+      }
+      if (hist != nullptr && c7 != 0 && 7 < static_cast<int>(hist->size())) {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp atomic
+#endif
+        (*hist)[7] += c7;
       }
     }
   }
