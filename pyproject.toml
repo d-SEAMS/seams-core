@@ -112,3 +112,7 @@ inherit.config-settings = "append"
 # libc++ in the engine needs floating-point std::to_chars (macOS 13.3);
 # 14.0 matches the 2.11 wheels.
 environment = { MACOSX_DEPLOYMENT_TARGET = "14.0" }
+
+[tool.cibuildwheel.windows]
+# clang-cl keeps __attribute__((target)) and __int128. cl.exe has neither.
+environment = { CC = "clang-cl", CXX = "clang-cl" }
