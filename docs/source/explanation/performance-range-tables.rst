@@ -418,3 +418,20 @@ Source file ``benchmarks/weak-scale.csv``.
    :header: operation, molecules, median ms, iqr ms
 
    rings, 110592, 104.151116, 1.241848
+
+sitting-large.csv
+-----------------
+
+Source file ``benchmarks/paper-numbers/sitting-large.csv``.
+
+.. csv-table::
+   :header: code, operation, phase, molecules, threads, n, commit, ratio of medians, ratio lo, ratio hi
+
+   d-SEAMS, classifier, ice, 884736, 1, 8, 59f0546323e9e39ab7075b65969bbfd9ed4280bb, , , 
+   OVITO, ptm-default, ice, 884736, 1, 8, 59f0546323e9e39ab7075b65969bbfd9ed4280bb, 52.892981, 52.740725, 53.368794
+   OVITO, ptm-ice, ice, 884736, 1, 8, 59f0546323e9e39ab7075b65969bbfd9ed4280bb, 99.305741, 99.051522, 99.742695
+   d-SEAMS, classifier, ice, 884736, 8, 8, 59f0546323e9e39ab7075b65969bbfd9ed4280bb, , , 
+   OVITO, ptm-default, ice, 884736, 8, 8, 59f0546323e9e39ab7075b65969bbfd9ed4280bb, 34.017069, 33.544214, 34.218919
+   OVITO, ptm-ice, ice, 884736, 8, 8, 59f0546323e9e39ab7075b65969bbfd9ed4280bb, 61.501961, 60.646205, 61.943213
+   IRA, ira, ice, 884736, 1, 8, 59f0546323e9e39ab7075b65969bbfd9ed4280bb, 911.577773, 909.435954, 916.108057
+   IRA, ira, ice, 884736, 8, 8, 59f0546323e9e39ab7075b65969bbfd9ed4280bb, 564.352711, 557.764924, 568.865337

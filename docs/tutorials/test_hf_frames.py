@@ -7,11 +7,14 @@
 * ``input/traj/nucleation_three.lammpstrj``
 * ``input/traj/nacl_front.lammpstrj``
 
-Without ``--small``, brine is downloaded from the pinned Hugging Face
-dataset ``d-SEAMS/brine-front-230K`` at
-``4828e33ecf419c70643b2d466bfa4f283b4138dc`` and checked by sha256.
-Interface and nucleation stay on the shipped frames: that dataset does
-not contain them.
+Without ``--small``, each tutorial tries a pinned Hugging Face revision
+and uses the shipped frame when that fetch does not return the file.
+Brine is ``d-SEAMS/brine-front-230K`` at
+``4828e33ecf419c70643b2d466bfa4f283b4138dc``. Interface is
+``d-SEAMS/interface-frames`` and nucleation is
+``d-SEAMS/nucleation-frames``. Those two revisions are empty until the
+datasets are uploaded, so the fetch falls back to the in-tree dumps.
+``scripts/hf_dataset_prepare.py`` packs those dumps and does not upload them.
 
     python docs/tutorials/test_hf_frames.py --small ROOT SEAMS LIBDIR
 """
@@ -27,6 +30,17 @@ PIN_REV = "4828e33ecf419c70643b2d466bfa4f283b4138dc"
 PIN_FILE = "data/frames/T230_m20_r0_tend.xyz"
 PIN_SHA256 = "dcbc05f81f321b45195d259cd4c22e69340f9c1ae57d93c47a74c995c58dd05d"
 PIN_URL = "https://huggingface.co/datasets/{}/resolve/{}/{}".format(PIN_REPO, PIN_REV, PIN_FILE)
+
+# Empty until the packed datasets are uploaded. A set revision is fetched;
+# any failure uses the shipped dump.
+INTERFACE_REPO = "d-SEAMS/interface-frames"
+INTERFACE_REV = ""
+INTERFACE_REMOTE = "data/frames/interface_f0.lammpstrj"
+INTERFACE_LOCAL = "input/traj/interface_f0.lammpstrj"
+NUCLEATION_REPO = "d-SEAMS/nucleation-frames"
+NUCLEATION_REV = ""
+NUCLEATION_REMOTE = "data/frames/nucleation_three.lammpstrj"
+NUCLEATION_LOCAL = "input/traj/nucleation_three.lammpstrj"
 
 
 def run_small(root, seams, libdir):
@@ -46,6 +60,29 @@ def run_small(root, seams, libdir):
     finally:
         sys.argv = saved
     print("small frames ok", PIN_REV)
+
+
+def fetch_pinned(root, repo, rev, remote, local):
+    """Return a local path. A missing revision or a failed fetch uses ``local``."""
+    shipped = root / local
+    if not shipped.is_file():
+        raise SystemExit("missing shipped frame {}".format(shipped))
+    if not rev:
+        print("{} revision is not pinned; using {}".format(repo, local))
+        return shipped
+    dest = root / "docs" / ".cache" / repo.split("/", 1)[1] / rev / Path(remote).name
+    url = "https://huggingface.co/datasets/{}/resolve/{}/{}".format(repo, rev, remote)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        urllib.request.urlretrieve(url, dest)
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        print("{} fetch failed ({}); using {}".format(repo, exc, local))
+        return shipped
+    if dest.stat().st_size < 32:
+        print("{} fetch was empty; using {}".format(repo, local))
+        return shipped
+    print("{} pin {}".format(repo, dest))
+    return dest
 
 
 def fetch_brine(root):
@@ -76,6 +113,14 @@ def main(argv):
     if small:
         print("hf frame tutorials small mode")
         return 0
+    for repo, rev, remote, local in (
+        (INTERFACE_REPO, INTERFACE_REV, INTERFACE_REMOTE, INTERFACE_LOCAL),
+        (NUCLEATION_REPO, NUCLEATION_REV, NUCLEATION_REMOTE, NUCLEATION_LOCAL),
+    ):
+        fetched = fetch_pinned(root, repo, rev, remote, local)
+        shipped = root / local
+        if fetched.resolve() != shipped.resolve():
+            print("{} fetched {}; the checked frame stays {}".format(repo, fetched, local))
     fetch_brine(root)
     print("hf frame tutorials full mode")
     return 0
