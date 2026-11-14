@@ -1,7 +1,8 @@
 ## scene-01.tape
-interface full waters 2048
-interface full published hexagonal 840 interfacial 8 water 1131 clathrate 16 interClathrate 53
-interface full ovito hexagonal 807 interfacial 43 water 1140 clathrate 17 interClathrate 41
-interface full phi-c 0
-interface full stack HHHHHHHHHH..........
+interface full input molecules 864 frames 1 file-frames 1 file input/traj/interface_f0.lammpstrj
+interface full paper molecules 864 frames 1
+interface full published hexagonal 352 interfacial 49 water 434 clathrate 3 interClathrate 25
+interface full ovito hexagonal 346 interfacial 57 water 437 clathrate 3 interClathrate 20
+interface full phi-c 0.00283286
+interface full stack HHHHHHHH....C.
 ## scene-02.tape

@@ -30,6 +30,18 @@ def present(number, text):
     return re.search(r"(?<![\d.])" + re.escape(number) + r"(?![\d.])", text) is not None
 
 
+def stable(text):
+    """Drop run-to-run timers. The census lines stay exact."""
+    text = re.sub(r"overhead_s \S+", "overhead_s TIME", text)
+    text = re.sub(r"Loop time of \S+", "Loop time of TIME", text)
+    text = re.sub(r"Performance:.*", "Performance: TIME", text)
+    text = re.sub(r"[\d.]+% CPU use.*", "CPU TIME", text)
+    text = re.sub(r"Total wall time:.*", "Total wall time: TIME", text)
+    text = re.sub(r"read_data CPU = \S+ seconds", "read_data CPU = TIME", text)
+    text = re.sub(r"(?m)^((?:Pair|Neigh|Comm|Output|Modify|Other)\s+\|).*$", r"\1 TIME", text)
+    return text
+
+
 def clean(text):
     kept = []
     for line in text.splitlines():
@@ -133,7 +145,6 @@ def check_folder(folder, env, root, record):
             timing = block.splitlines()[1]
             if timing not in vtt:
                 fail("{} vtt was not converted from srt ({})".format(folder.name, timing))
-    combined = []
     recorded = []
     for item in parsed:
         if not 0.2 <= item["lead"] <= 0.45:
@@ -152,15 +163,18 @@ def check_folder(folder, env, root, record):
         for expect in item["expects"]:
             if expect not in text:
                 fail("{} {} missing {!r}\n{}".format(folder.name, item["name"], expect, text[-500:]))
-        combined.append(text)
         recorded.append("## {}\n{}".format(item["name"], clean(text)))
-    blob = "\n".join(combined)
-    missing = [number for number in tokens(narration) if not present(number, blob)]
-    if missing:
-        fail("{} narration numbers missing from the run: {}".format(folder.name, ", ".join(missing)))
+    got = "\n".join(recorded).rstrip() + "\n"
+    path = folder / "recorded.txt"
     if record:
-        (folder / "recorded.txt").write_text("\n".join(recorded).rstrip() + "\n")
-    print(folder.name, "scenes", len(parsed), "ok")
+        path.write_text(got)
+    have = path.read_text() if path.is_file() else ""
+    if stable(have) != stable(got):
+        fail("{} recorded.txt does not match the tape output".format(folder.name))
+    missing = [number for number in tokens(narration) if not present(number, path.read_text())]
+    if missing:
+        fail("{} narration numbers missing from recorded.txt: {}".format(folder.name, ", ".join(missing)))
+    print(folder.name, "scenes", len(parsed), "recorded ok")
 
 
 def check_embeds(root):
@@ -203,8 +217,8 @@ def main():
     root, env = prepare(*args)
     check_embeds(root)
     folders = sorted(path for path in (root / "docs" / "videos").iterdir() if (path / "script.md").is_file())
-    if len(folders) < 14:
-        fail("expected 14 videos, found {}".format(len(folders)))
+    if len(folders) != 18:
+        fail("expected 18 videos, found {}".format(len(folders)))
     for folder in folders:
         check_folder(folder, env, root, record)
 

@@ -1,5 +1,5 @@
 ## scene-01.tape
-LAMMPS (23 Jun 2022 - Update 1)
+LAMMPS (29 Aug 2024)
   using 1 OpenMP thread(s) per MPI task
 Reading data file ...
   orthogonal box = (0 0 0) to (12.701706 12.701706 12.701706)
@@ -7,10 +7,19 @@ Reading data file ...
   reading atoms ...
   64 atoms
   read_data CPU = 0.000 seconds
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Your simulation uses code contributions which should be cited:
+- Type Label Framework: https://doi.org/10.1021/acs.jpcb.3c08419
+The log file lists these citations in BibTeX format.
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
 WARNING: No fixes with time integration, atoms won't move (src/verlet.cpp:60)
 Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
 Neighbor list info ...
-  update every 1 steps, delay 10 steps, check yes
+  update: every = 1 steps, delay = 0 steps, check = yes
   max neighbors/atom: 2000, page size: 100000
   master list distance cutoff = 10
   ghost atom cutoff = 10
@@ -32,20 +41,20 @@ Per MPI rank memory allocation (min/avg/max) = 3.48 | 3.48 | 3.48 Mbytes
          4   0             -12.429495      0             -12.429495      61403.087    
          6   0             -12.429495      0             -12.429495      61403.087    
          8   0             -12.429495      0             -12.429495      61403.087    
-Loop time of 0.0303491 on 1 procs for 8 steps with 64 atoms
+Loop time of 0.00417705 on 1 procs for 8 steps with 64 atoms
 
-Performance: 22.775 ns/day, 1.054 hours/ns, 263.599 timesteps/s
-100.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+Performance: 165.476 ns/day, 0.145 hours/ns, 1915.229 timesteps/s, 122.575 katom-step/s
+96.5% CPU use with 1 MPI tasks x 1 OpenMP threads
 
 MPI task timing breakdown:
 Section |  min time  |  avg time  |  max time  |%varavg| %total
 ---------------------------------------------------------------
-Pair    | 0.0002017  | 0.0002017  | 0.0002017  |   0.0 |  0.66
+Pair    | 0.00026029 | 0.00026029 | 0.00026029 |   0.0 |  6.23
 Neigh   | 0          | 0          | 0          |   0.0 |  0.00
-Comm    | 2.5684e-05 | 2.5684e-05 | 2.5684e-05 |   0.0 |  0.08
-Output  | 3.5536e-05 | 3.5536e-05 | 3.5536e-05 |   0.0 |  0.12
-Modify  | 0.030078   | 0.030078   | 0.030078   |   0.0 | 99.11
-Other   |            | 7.855e-06  |            |       |  0.03
+Comm    | 1.8047e-05 | 1.8047e-05 | 1.8047e-05 |   0.0 |  0.43
+Output  | 1.3933e-05 | 1.3933e-05 | 1.3933e-05 |   0.0 |  0.33
+Modify  | 0.003879   | 0.003879   | 0.003879   |   0.0 | 92.87
+Other   |            | 5.727e-06  |            |       |  0.14
 
 Nlocal:             64 ave          64 max          64 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
@@ -59,10 +68,10 @@ Ave neighs/atom = 61
 Neighbor list builds = 0
 Dangerous builds = 0
 Total wall time: 0:00:00
-lammps calls 5 stride 2 ice 320 overhead_s 7.774101e-03
+lammps calls 5 stride 2 ice 320 overhead_s 1.095109e-03
 lammps hexagonal 0 six-rings 128 q6 0.628539
 ## scene-02.tape
-LAMMPS (23 Jun 2022 - Update 1)
+LAMMPS (29 Aug 2024)
   using 1 OpenMP thread(s) per MPI task
 Reading data file ...
   orthogonal box = (0 0 0) to (15.645678 14.707145 18.073037)
@@ -70,10 +79,19 @@ Reading data file ...
   reading atoms ...
   128 atoms
   read_data CPU = 0.000 seconds
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
+Your simulation uses code contributions which should be cited:
+- Type Label Framework: https://doi.org/10.1021/acs.jpcb.3c08419
+The log file lists these citations in BibTeX format.
+
+CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE
+
 WARNING: No fixes with time integration, atoms won't move (src/verlet.cpp:60)
 Generated 0 of 0 mixed pair_coeff terms from geometric mixing rule
 Neighbor list info ...
-  update every 1 steps, delay 10 steps, check yes
+  update: every = 1 steps, delay = 0 steps, check = yes
   max neighbors/atom: 2000, page size: 100000
   master list distance cutoff = 10
   ghost atom cutoff = 10
@@ -91,9 +109,9 @@ Setting up Verlet run ...
 Per MPI rank memory allocation (min/avg/max) = 3.476 | 3.476 | 3.476 Mbytes
    Step          Temp          E_pair         E_mol          TotEng         Press     
          0   0             -27.280774      0             -27.280774      53903.075    
-Loop time of 9.01e-07 on 1 procs for 0 steps with 128 atoms
+Loop time of 5.5e-07 on 1 procs for 0 steps with 128 atoms
 
-111.0% CPU use with 1 MPI tasks x 1 OpenMP threads
+0.0% CPU use with 1 MPI tasks x 1 OpenMP threads
 
 MPI task timing breakdown:
 Section |  min time  |  avg time  |  max time  |%varavg| %total
@@ -103,7 +121,7 @@ Neigh   | 0          | 0          | 0          |   0.0 |  0.00
 Comm    | 0          | 0          | 0          |   0.0 |  0.00
 Output  | 0          | 0          | 0          |   0.0 |  0.00
 Modify  | 0          | 0          | 0          |   0.0 |  0.00
-Other   |            | 9.01e-07   |            |       |100.00
+Other   |            | 5.5e-07    |            |       |100.00
 
 Nlocal:            128 ave         128 max         128 min
 Histogram: 1 0 0 0 0 0 0 0 0 0
@@ -117,5 +135,5 @@ Ave neighs/atom = 62.34375
 Neighbor list builds = 0
 Dangerous builds = 0
 Total wall time: 0:00:00
-lammps calls 1 stride 1 ice 0 overhead_s 2.428118e-02
+lammps calls 1 stride 1 ice 0 overhead_s 2.848229e-03
 lammps hexagonal 128 six-rings 256 q6 0.625855
