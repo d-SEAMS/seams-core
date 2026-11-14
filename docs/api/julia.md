@@ -32,7 +32,7 @@ six-rings) and sII (136 clathrate, 144 five-rings, 16 six-rings).
 
 ```{literalinclude} ../../../bindings/julia/Dseams/test/runtests.jl
 :language: julia
-:lines: 14-37,57-67
+:lines: 27-50,68-71,82-86
 ```
 
 ```{literalinclude} ../../../bindings/julia/Seams/test/runtests.jl

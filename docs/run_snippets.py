@@ -588,13 +588,15 @@ def run_source(build, env, path):
             if not script:
                 raise Skip("Rscript is not on PATH")
             local = dict(env)
-            if "library(dseams)" in text:
+            # The package's own tests leave library(dseams) to tests/testthat.R.
+            package_test = path.resolve().is_relative_to(ROOT / "bindings" / "r" / "dseams" / "tests")
+            if "library(dseams)" in text or package_test:
                 sys.path.insert(0, str(ROOT / "docs" / "examples"))
                 import run_binding
 
                 script, renv = run_binding.install_r_package(build)
                 local.update(renv)
-            if "testthat" in text or "skip_if" in text:
+            if "testthat" in text or "skip_if" in text or package_test:
                 probe = subprocess.run(
                     [script, "-e", 'quit(status=if (requireNamespace("testthat", quietly=TRUE)) 0 else 1)'],
                     env=local,
@@ -603,7 +605,8 @@ def run_source(build, env, path):
                 )
                 if probe.returncode != 0:
                     raise Skip("testthat is not installed")
-                run([script, "-e", "testthat::test_file('" + str(path) + "', stop_on_failure=TRUE)"], local)
+                attach = "library(dseams); " if package_test else ""
+                run([script, "-e", attach + "testthat::test_file('" + str(path) + "', stop_on_failure=TRUE)"], local)
                 return
             run([script, str(path), *program_args(text, build)], local)
         elif path.suffix == ".rs":

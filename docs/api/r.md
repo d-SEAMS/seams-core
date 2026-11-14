@@ -60,7 +60,7 @@ DSEAMS_ROOT=$PWD meson test -C build language_fronts --print-errorlogs
 
 ```{literalinclude} ../../../bindings/r/dseams/tests/testthat/test-ice.R
 :language: r
-:lines: 9-36,77-91
+:lines: 22-49,84-102
 ```
 
 <!-- API_SYMBOLS_BEGIN -->
