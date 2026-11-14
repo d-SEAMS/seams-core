@@ -28,6 +28,7 @@
 #include <ozaki.hpp>
 #include <ylm_batch.hpp>
 #include <algorithm>
+#include <memory>
 #include <chrono>
 #include <cmath>
 #include <complex>
@@ -819,7 +820,16 @@ static void classifyBondsLeftFp64(
   const int keepMax = rule.coordinationNumber;
   const gen::FracBox frame = gen::makeFracBox(yCloud);
 
+  const bool wide =
+#ifdef SEAMS_HAS_OPENMP
+      nop >= 16384 && omp_get_max_threads() > 1 && !omp_in_parallel();
+#else
+      false;
+#endif
   int maxId = 0;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) reduction(max : maxId) if (wide)
+#endif
   for (int i = 0; i < nop; i++) {
     maxId = std::max(maxId, yCloud.pts[static_cast<std::size_t>(i)].atomID);
   }
@@ -850,35 +860,47 @@ static void classifyBondsLeftFp64(
     double x, y, z;
   };
   std::vector<Xyz> xyz(static_cast<std::size_t>(nop));
+  // Zeroed by the loop below rather than by the constructor, so the team
+  // and not the calling thread writes the pages.
+  std::unique_ptr<double[]> qAtomStore(new double[static_cast<std::size_t>(nop) * kRealL3]);
+  std::unique_ptr<double[]> qNormStore(new double[static_cast<std::size_t>(nop)]);
+  double *const qAtom = qAtomStore.get();
+  double *const qNorm = qNormStore.get();
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (wide)
+#endif
   for (int i = 0; i < nop; i++) {
     auto &p = yCloud.pts[static_cast<std::size_t>(i)];
     xyz[static_cast<std::size_t>(i)] = {p.x, p.y, p.z};
     p.c_ij.clear();
+    std::fill_n(qAtom + static_cast<std::size_t>(i) * kRealL3, kRealL3, 0.0);
+    qNorm[i] = 0.0;
   }
-  std::vector<double> qAtom(static_cast<std::size_t>(nop) * kRealL3, 0.0);
-  std::vector<double> qNorm(static_cast<std::size_t>(nop), 0.0);
   const bool fixedKeep = keepMax > 0;
-  // One thread walks atoms in order, so a whole cutoff shell is one
-  // buffer instead of a vector per atom.
-  const bool serialShell =
-      !fixedKeep &&
-#ifdef SEAMS_HAS_OPENMP
-      omp_get_max_threads() <= 1
-#else
-      true
-#endif
-      ;
+  // A whole cutoff shell is kept in one buffer, each atom at an offset
+  // sized by its candidate count. A vector per atom was allocated on the
+  // team and then freed on the calling thread.
   std::vector<int> chosen;
-  std::vector<std::vector<int>> ragged;
   std::vector<int> flat;
-  std::vector<int> flatAt(static_cast<std::size_t>(nop) + 1, 0);
+  std::vector<int> flatAt;
   std::vector<int> nkeep(static_cast<std::size_t>(nop), 0);
   if (fixedKeep) {
     chosen.assign(static_cast<std::size_t>(nop) * static_cast<std::size_t>(keepMax), -1);
-  } else if (!serialShell) {
-    ragged.resize(static_cast<std::size_t>(nop));
   } else {
-    flat.reserve(static_cast<std::size_t>(nop) * 8);
+    flatAt.assign(static_cast<std::size_t>(nop) + 1, 0);
+    for (int i = 0; i < nop; i++) {
+      int cap = 0;
+      if (csrOff != nullptr && csrCols != nullptr) {
+        if (static_cast<int>(csrOff->size()) > i + 1) {
+          cap = (*csrOff)[static_cast<std::size_t>(i) + 1] - (*csrOff)[static_cast<std::size_t>(i)];
+        }
+      } else if (static_cast<std::size_t>(i) < nList.size() &&
+                 !nList[static_cast<std::size_t>(i)].empty()) {
+        cap = static_cast<int>(nList[static_cast<std::size_t>(i)].size()) - 1;
+      }
+      flatAt[static_cast<std::size_t>(i) + 1] = flatAt[static_cast<std::size_t>(i)] + cap;
+    }
+    flat.assign(static_cast<std::size_t>(flatAt[static_cast<std::size_t>(nop)]), -1);
   }
 
   const bool useAvx = hostHasAvx2Fma();
@@ -955,10 +977,8 @@ static void classifyBondsLeftFp64(
         if (fixedKeep) {
           chosen[static_cast<std::size_t>(iatom) * static_cast<std::size_t>(keepMax) +
                  static_cast<std::size_t>(j)] = jatom;
-        } else if (serialShell) {
-          flat.push_back(jatom);
         } else {
-          ragged[static_cast<std::size_t>(iatom)].push_back(jatom);
+          flat[static_cast<std::size_t>(flatAt[static_cast<std::size_t>(iatom)] + j)] = jatom;
         }
         xs[batch] = candidates[j].x;
         ys[batch] = candidates[j].y;
@@ -972,27 +992,18 @@ static void classifyBondsLeftFp64(
         }
       }
     }
-    double *dst = qAtom.data() + static_cast<std::size_t>(iatom) * kRealL3;
+    double *dst = qAtom + static_cast<std::size_t>(iatom) * kRealL3;
     for (int channel = 0; channel < kRealL3; ++channel) {
       dst[channel] = acc[channel];
     }
     qNorm[static_cast<std::size_t>(iatom)] = useAvx ? realL3Dot(acc, acc) : realL3DotScalar(acc, acc);
-  }
-  if (serialShell) {
-    for (int i = 0; i < nop; i++) {
-      flatAt[static_cast<std::size_t>(i + 1)] =
-          flatAt[static_cast<std::size_t>(i)] + nkeep[static_cast<std::size_t>(i)];
-    }
   }
   const auto neighbourAt = [&](int atom, int slot) {
     if (fixedKeep) {
       return chosen[static_cast<std::size_t>(atom) * static_cast<std::size_t>(keepMax) +
                     static_cast<std::size_t>(slot)];
     }
-    if (serialShell) {
-      return flat[static_cast<std::size_t>(flatAt[static_cast<std::size_t>(atom)] + slot)];
-    }
-    return ragged[static_cast<std::size_t>(atom)][static_cast<std::size_t>(slot)];
+    return flat[static_cast<std::size_t>(flatAt[static_cast<std::size_t>(atom)] + slot)];
   };
 
   // c_ij from the real l = 3 inner product. Norms were formed once per atom.
@@ -1007,7 +1018,7 @@ static void classifyBondsLeftFp64(
     if (keep <= 0) {
       continue;
     }
-    const double *qI = qAtom.data() + static_cast<std::size_t>(iatom) * kRealL3;
+    const double *qI = qAtom + static_cast<std::size_t>(iatom) * kRealL3;
     const double normI = qNorm[static_cast<std::size_t>(iatom)];
     auto &bonds = yCloud.pts[static_cast<std::size_t>(iatom)].c_ij;
     bonds.reserve(static_cast<std::size_t>(keep));
@@ -1016,7 +1027,7 @@ static void classifyBondsLeftFp64(
       if (jatom < 0) {
         continue;
       }
-      const double *qJ = qAtom.data() + static_cast<std::size_t>(jatom) * kRealL3;
+      const double *qJ = qAtom + static_cast<std::size_t>(jatom) * kRealL3;
       const double dot = useAvx ? realL3Dot(qI, qJ) : realL3DotScalar(qI, qJ);
       const double cij = correlationOf(dot, normI, qNorm[static_cast<std::size_t>(jatom)]);
       molSys::Result temp_cij;
@@ -1224,6 +1235,11 @@ void chill::getIceTypeNoPrint(
   molSys::bond_type bondType;
   int nnumNeighbours; // Number of nearest neighbours
 
+  // An atom's label reads the bonds of its neighbours and writes only its
+  // own iceType, so atoms are independent.
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (yCloud.nop >= 16384 && omp_get_max_threads() > 1 && !omp_in_parallel()) reduction(+ : ih, ic, water, interIce, total) private(num_staggrd, num_eclipsd, na, bondType, nnumNeighbours)
+#endif
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
     // if(yCloud.pts[iatom].type!=typeO){continue;}
     // if this is a slice and the particle is not in the slice
