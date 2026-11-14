@@ -712,7 +712,9 @@ def interface_full(seams, libdir, out):
         "interface full phi-c {}".format(phi),
         "interface full stack {}".format(stack),
     ]
-    publish(out, lines, dump, out / "interface-full.png")
+    copied = out / "interface-full.lammpstrj"
+    shutil.copy(dump, copied)
+    publish(out, lines, copied, out / "interface-full.png")
 
 
 def cages_full(seams, libdir, out):
@@ -774,7 +776,9 @@ def rings_full(seams, libdir, out):
         "rings full nop {} rings {}".format(nop, total),
         "rings full histogram {}".format(" ".join(histogram)),
     ]
-    publish(out, lines, dump, out / "rings-full.png")
+    copied = out / "rings-full.lammpstrj"
+    shutil.copy(dump, copied)
+    publish(out, lines, copied, out / "rings-full.png")
 
 
 def brine_full(seams, libdir, out):
@@ -792,7 +796,9 @@ def brine_full(seams, libdir, out):
             found.get("hexagonal", 0), found.get("water", 0)
         ),
     ]
-    publish(out, lines, dump, out / "brine-full.png")
+    copied = out / "brine-full.lammpstrj"
+    shutil.copy(dump, copied)
+    publish(out, lines, copied, out / "brine-full.png")
 
 
 def nucleation_full(seams, libdir, out):
@@ -827,7 +833,9 @@ def nucleation_full(seams, libdir, out):
         "nucleation full frame 148 q6bar {}".format(q6bar(rows[-1])),
         "nucleation full lines {}".format(len(rows)),
     ]
-    publish(out, lines, ROOT / "input" / "traj" / "nucleation_f1.lammpstrj", out / "nucleation-full.png")
+    copied = out / "nucleation-full.lammpstrj"
+    shutil.copy(dump, copied)
+    publish(out, lines, copied, out / "nucleation-full.png")
 
 
 def main():
