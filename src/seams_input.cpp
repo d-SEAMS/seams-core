@@ -61,6 +61,17 @@ bool declaredAtomsOk(int nop) {
 #endif
 
 namespace {
+// A header atom count is untrusted. Every atom line takes at least
+// minLineBytes, so reserving more than the unread bytes can hold
+// allocates gigabytes for a few-byte file.
+std::size_t atomsThatFit(int nop, long long bytesLeft, std::size_t minLineBytes) {
+  if (nop <= 0) {
+    return 0;
+  }
+  const auto left = static_cast<std::size_t>(std::max(bytesLeft, 0LL));
+  return std::min(static_cast<std::size_t>(nop), left / minLineBytes + 1);
+}
+
 /**
  * @details Record the ID-to-index entry for the most recently appended point.
  *  A duplicate atom ID means the input is corrupt (two atoms cannot share an
@@ -817,8 +828,14 @@ molSys::PointCloud<molSys::Point<double>, double> sinp::readXYZ(std::string file
       xyzFile->close();
       throw;
     }
-    // Reserve memory for atom coordinates using nop read in
-    yCloud.pts.reserve(static_cast<std::size_t>(nop));
+    struct stat st {};
+    const auto at = static_cast<long long>(xyzFile->tellg());
+    const long long left =
+        ::stat(filename.c_str(), &st) == 0 && at >= 0
+            ? static_cast<long long>(st.st_size) - at
+            : 0;
+    // "0 0 0" and its newline.
+    yCloud.pts.reserve(atomsThatFit(nop, left, 6));
     yCloud.nop = nop;
     // Run this until EOF or you reach the next timestep
     std::map<std::string, int> elementType;
@@ -1013,8 +1030,13 @@ void parseLammpsFrameBody(
         if (!declaredAtomsOk(nop)) {
           throw std::runtime_error("declared atom count is past the reader limit");
         }
-        yCloud.pts.reserve(static_cast<std::size_t>(nop));
-        yCloud.idIndexMap.reserve(static_cast<std::size_t>(nop));
+        const auto at = static_cast<long long>(file.tellg());
+        const long long left =
+            haveOpened && at >= 0 ? static_cast<long long>(opened.st_size) - at : 0;
+        // The fewest columns a dump can carry is "x y z".
+        const std::size_t hint = atomsThatFit(nop, left, 6);
+        yCloud.pts.reserve(hint);
+        yCloud.idIndexMap.reserve(hint);
         if (keep == LammpsKeep::All) {
           yCloud.nop = nop;
         }
@@ -1337,12 +1359,17 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
   }
   yCloud.pts.clear();
   yCloud.idIndexMap.clear();
-  yCloud.idIndexMap.reserve(static_cast<std::size_t>(nop));
   yCloud.box = {span[0], span[1], span[2]};
   yCloud.boxLow = {low[0], low[1], low[2]};
   const bool filter = keep != LammpsKeep::All;
   int kept = 0;
-  bool failed = false;
+  // "1 1 0 0 0" and its newline. A count the bytes cannot hold is a
+  // truncated frame, found here before the per-line arrays are sized.
+  bool failed = atomsThatFit(nop, end - p + 1, 10) < static_cast<std::size_t>(nop);
+  if (failed) {
+    nop = 0;
+  }
+  yCloud.idIndexMap.reserve(static_cast<std::size_t>(nop));
   // One pointer per atom line, then the numbers are parsed with no
   // per-line string. The lines are independent, so the team splits them.
   std::vector<const char *> lineAt(static_cast<std::size_t>(nop));

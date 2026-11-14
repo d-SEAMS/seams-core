@@ -466,9 +466,11 @@ DumpIdIndex scanDumpIds(const std::string &path) {
   int natoms = 0;
   int idCol = -1;
   int got = 0;
-  int unique = 0;
   bool atoms = false;
   bool tilted = false;
+  // Ids in [1, natoms], one per row read. The header count is untrusted,
+  // so the bitmap is sized only once the rows have shown it is real.
+  std::vector<int> ids;
   std::vector<char> seenId;
   // The characters live in a buffer this function mallocs and frees.
   // A std::string grown by iostream would be allocated in libstdc++ and
@@ -507,7 +509,17 @@ DumpIdIndex scanDumpIds(const std::string &path) {
       return;
     }
     out.oneToN.resize(static_cast<std::size_t>(seen) + 1, 0);
-    const bool ok = natoms > 0 && unique == natoms && !tilted;
+    bool ok = natoms > 0 && ids.size() == static_cast<std::size_t>(natoms) && !tilted;
+    if (ok) {
+      seenId.assign(static_cast<std::size_t>(natoms) + 1, 0);
+      for (const int id : ids) {
+        if (seenId[static_cast<std::size_t>(id)] != 0) {
+          ok = false;
+          break;
+        }
+        seenId[static_cast<std::size_t>(id)] = 1;
+      }
+    }
     out.oneToN[static_cast<std::size_t>(seen)] = ok ? 1 : 0;
   };
   auto nextLine = [&]() {
@@ -530,7 +542,7 @@ DumpIdIndex scanDumpIds(const std::string &path) {
       natoms = 0;
       idCol = -1;
       got = 0;
-      unique = 0;
+      ids.clear();
       tilted = false;
       seenId.clear();
       continue;
@@ -579,8 +591,7 @@ DumpIdIndex scanDumpIds(const std::string &path) {
       }
       atoms = true;
       got = 0;
-      unique = 0;
-      seenId.assign(static_cast<std::size_t>(std::max(natoms, 0)) + 1, 0);
+      ids.clear();
       continue;
     }
     if (!atoms || got >= natoms) {
@@ -616,11 +627,8 @@ DumpIdIndex scanDumpIds(const std::string &path) {
     std::memcpy(idText, idStart, idChars);
     idText[idChars] = '\0';
     const int id = std::atoi(idText);
-    // NUMBER OF ATOMS can follow the ATOMS header, so natoms may exceed seenId.
-    if (id >= 1 && id <= natoms && static_cast<std::size_t>(id) < seenId.size() &&
-        seenId[static_cast<std::size_t>(id)] == 0) {
-      seenId[static_cast<std::size_t>(id)] = 1;
-      unique += 1;
+    if (id >= 1 && id <= natoms) {
+      ids.push_back(id);
     }
   }
   finish();

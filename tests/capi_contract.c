@@ -19,6 +19,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if defined(__linux__)
+#include <sys/resource.h>
+#endif
 
 #define N_MAX 1024
 #define N_COVER 256
@@ -433,6 +436,33 @@ static void finite_scan_contract(void) {
   seams_system_destroy(sys);
 }
 
+static long peak_rss_mb(void) {
+#if defined(__linux__)
+  struct rusage use;
+  if (getrusage(RUSAGE_SELF, &use) == 0) {
+    return use.ru_maxrss / 1024;
+  }
+#endif
+  return 0;
+}
+
+/* Each file declares 99999999 atoms and holds at most one. The readers
+ * used to size their buffers from that count, gigabytes for a few bytes. */
+static void past_eof_contract(seams_system *sys, const char *root) {
+  static const char *const files[] = {"xyz_count_past_eof.xyz", "dump_count_past_eof.lammpstrj"};
+  for (size_t i = 0; i < sizeof files / sizeof files[0]; ++i) {
+    char path[4096];
+    snprintf(path, sizeof path, "%s/input/traj/%s", root, files[i]);
+    const long before = peak_rss_mb();
+    expect(seams_system_read(sys, path, 1, -1), SEAMS_ERR_ARG, "seams_system_read",
+           "atom count past the end of the file");
+    expect(seams_system_read(sys, path, 1, 1), SEAMS_ERR_ARG, "seams_system_read",
+           "atom count past the end of the file, one type");
+    truth(peak_rss_mb() - before < 256, "seams_system_read",
+          "atom count past the end of the file allocates for the atoms present");
+  }
+}
+
 static void read_contract(const char *root) {
   char path[4096];
   snprintf(path, sizeof path, "%s/input/traj/agi_water_tiny.lammpstrj", root);
@@ -461,6 +491,7 @@ static void read_contract(const char *root) {
   expect(seams_system_read(sys, path, 1, -1), SEAMS_ERR_RANGE, "seams_system_read",
          "MOL2 with no counts line");
   truth(seams_system_count(sys) == n, "seams_system_read", "a failed MOL2 read keeps the frame");
+  past_eof_contract(sys, root);
   seams_system_destroy(sys);
 }
 
