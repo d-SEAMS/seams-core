@@ -11,6 +11,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 <!-- towncrier release notes start -->
 
 ## [2.14.0] - 2026-11-13
+
 ### Added
 
 - A Reproduce the paper catalog lists each seams-core figure and table with the command, the input frame, the printed numbers, and the Snakemake rule or asv class. Small rows run in the suite. Full rows run when `-Dpaper_full=true`. Each head-to-head names its committed CSV.
