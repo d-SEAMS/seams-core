@@ -631,6 +631,9 @@ SEAMS_API seams_status seams_system_read(seams_system *sys, const char *path,
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_RANGE,
  *         ::SEAMS_ERR_ARG, ::SEAMS_ERR_INTERNAL. *nframes is unchanged on
  *         failure.
+ * @par Ownership
+ * path is read during the call only. nframes is caller storage that the call
+ * fills. The library keeps no pointer to any argument.
  * @par Thread safety
  * Safe for distinct paths.
  * @par Example
@@ -648,6 +651,9 @@ SEAMS_API seams_status seams_path_nframes(const char *path, size_t *nframes);
  *
  * @param sys Frame handle, or NULL.
  * @return The atom count, or 0 when sys is NULL or holds no frame.
+ * @par Ownership
+ * The caller owns sys; the call borrows it. The library keeps no pointer to
+ * any argument.
  * @par Thread safety
  * Read-only: may run alongside other const calls on sys, and not
  * alongside a non-const call on sys.
@@ -721,6 +727,9 @@ SEAMS_API void seams_neighbours_destroy(seams_neighbours *nb);
  *
  * @param nb Neighbour handle, or NULL.
  * @return The row count, or 0 when nb is NULL.
+ * @par Ownership
+ * The caller owns nb; the call borrows it. The library keeps no pointer to
+ * any argument.
  * @par Thread safety
  * Read-only: may run alongside other const calls on nb, and not
  * alongside a non-const call on nb.
@@ -1037,6 +1046,9 @@ SEAMS_API void seams_rings_destroy(seams_rings *rings);
  *
  * @param rings Ring handle, or NULL.
  * @return The ring count, or 0 when rings is NULL.
+ * @par Ownership
+ * The caller owns rings; the call borrows it. The library keeps no pointer to
+ * any argument.
  * @par Thread safety
  * Read-only: may run alongside other const calls on rings, and not
  * alongside a non-const call on rings.
@@ -1126,6 +1138,9 @@ SEAMS_API seams_status seams_rings_vertices(const seams_rings *rings, int index,
  * @param size Ring size to count. Zero counts atoms that sit on any ring.
  * @param fraction Receives a value in [0, 1].
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_NOMEM.
+ * @par Ownership
+ * The caller owns rings; the call borrows it. fraction is caller storage that
+ * the call fills. The library keeps no pointer to any argument.
  * @par Thread safety
  * Read-only: may run alongside other const calls on rings, and not
  * alongside a non-const call on rings.
@@ -1208,6 +1223,10 @@ SEAMS_API void seams_cages_destroy(seams_cage_set *cages);
  * @param n_both Both cages, or NULL.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL when cages is NULL or every
  *         count pointer is NULL.
+ * @par Ownership
+ * The caller owns cages; the call borrows it. n_hex, n_cubic, n_water and
+ * n_both are caller storage that the call fills. The library keeps no pointer
+ * to any argument.
  * @par Thread safety
  * Read-only: may run alongside other const calls on cages, and not
  * alongside a non-const call on cages.
@@ -1263,6 +1282,10 @@ SEAMS_API seams_status seams_cages_labels(const seams_cage_set *cages, int *per_
  * Non-const only because the call clears the handle's error slot on
  * entry, so seams_handle_error() reports this call. It reads the frame
  * and keeps no scratch on the handle.
+ * @par Ownership
+ * The caller owns sys; the call borrows it. spec is read during the call
+ * only. n_cages and n_atoms are caller storage that the call fills. The
+ * library keeps no pointer to any argument.
  * @par Thread safety
  * Exclusive use of sys.
  * @par Example
@@ -1379,6 +1402,10 @@ SEAMS_API void seams_brine_destroy(seams_brine *front);
  * @param found Receives 1 when both crossings exist, otherwise 0, or NULL.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL when front is NULL or every
  *         output pointer is NULL.
+ * @par Ownership
+ * The caller owns front; the call borrows it. z_enter, z_exit, thickness and
+ * found are caller storage that the call fills. The library keeps no pointer
+ * to any argument.
  * @par Thread safety
  * Read-only: may run alongside other const calls on front, and not
  * alongside a non-const call on front.
@@ -1405,6 +1432,10 @@ SEAMS_API seams_status seams_brine_fronts(const seams_brine *front, double *z_en
  *        ice bulk does not, otherwise 0, or NULL.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL when front is NULL or every
  *         output pointer is NULL.
+ * @par Ownership
+ * The caller owns front; the call borrows it. c_ice, c_liquid, k and defined
+ * are caller storage that the call fills. The library keeps no pointer to any
+ * argument.
  * @par Thread safety
  * Read-only: may run alongside other const calls on front, and not
  * alongside a non-const call on front.
@@ -1456,6 +1487,10 @@ SEAMS_API seams_status seams_brine_profile(const seams_brine *front, double *z_m
  *        reservoir, or NULL.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL when front is NULL or both
  *         output pointers are NULL.
+ * @par Ownership
+ * The caller owns front; the call borrows it. n_pockets and reservoir_waters
+ * are caller storage that the call fills. The library keeps no pointer to any
+ * argument.
  * @par Thread safety
  * Read-only: may run alongside other const calls on front, and not
  * alongside a non-const call on front.
@@ -1518,6 +1553,10 @@ SEAMS_API seams_status seams_cages(seams_system *sys, double cutoff, int type, i
  * Non-const only because the call clears the handle's error slot on
  * entry, so seams_handle_error() reports this call. It reads the frame
  * and keeps no scratch on the handle.
+ * @par Ownership
+ * The caller owns sys; the call borrows it. spec is read during the call
+ * only. n_cages and n_atoms are caller storage that the call fills. The
+ * library keeps no pointer to any argument.
  * @par Thread safety
  * Exclusive use of sys.
  * @par Example
@@ -1676,6 +1715,9 @@ SEAMS_API seams_status seams_running_cn(seams_system *sys, double rmax, int bins
  * Non-const only because the call clears the handle's error slot on
  * entry, so seams_handle_error() reports this call. It reads the frame
  * and keeps no scratch on the handle.
+ * @par Ownership
+ * The caller owns sys; the call borrows it. cn is caller storage that the
+ * call fills. The library keeps no pointer to any argument.
  * @par Thread safety
  * Exclusive use of sys.
  * @par Example
@@ -1704,6 +1746,9 @@ SEAMS_API seams_status seams_coordination(seams_system *sys, double rmax, int bi
  * Non-const only because the call clears the handle's error slot on
  * entry, so seams_handle_error() reports this call. It reads the frame
  * and keeps no scratch on the handle.
+ * @par Ownership
+ * The caller owns sys; the call borrows it. n_bonds is caller storage that
+ * the call fills. The library keeps no pointer to any argument.
  * @par Thread safety
  * Exclusive use of sys.
  * @par Example
@@ -1882,6 +1927,10 @@ SEAMS_API seams_status seams_fingerprint_rings(const seams_topo *fp, int *counts
  * Non-const only because the call clears the handle's error slot on
  * entry, so seams_handle_error() reports this call. It reads the frame
  * and keeps no scratch on the handle.
+ * @par Ownership
+ * The caller owns sys; the call borrows it. site_spec is read during the call
+ * only. n_pairs, n_cation and n_anion are caller storage that the call fills.
+ * The library keeps no pointer to any argument.
  * @par Thread safety
  * Exclusive use of sys.
  * @par Example
@@ -1910,6 +1959,10 @@ SEAMS_API seams_status seams_contact_pairs(seams_system *sys, const char *site_s
  * Non-const only because the call clears the handle's error slot on
  * entry, so seams_handle_error() reports this call. It reads the frame
  * and keeps no scratch on the handle.
+ * @par Ownership
+ * The caller owns sys; the call borrows it. site_spec is read during the call
+ * only. n_subset, largest and percolation are caller storage that the call
+ * fills. The library keeps no pointer to any argument.
  * @par Thread safety
  * Exclusive use of sys.
  * @par Example
@@ -2048,6 +2101,9 @@ SEAMS_API const char *seams_last_error_message(void);
  * @return ::SEAMS_OK, ::SEAMS_ERR_NULL when sys or n is NULL, or
  *         ::SEAMS_ERR_STATE when sys holds no frame. *n is unchanged on
  *         failure.
+ * @par Ownership
+ * The caller owns sys; the call borrows it. n is caller storage that the call
+ * fills. The library keeps no pointer to any argument.
  * @par Thread safety
  * Read-only: may run alongside other const calls on sys, and not
  * alongside a non-const call on sys.
@@ -2064,6 +2120,9 @@ SEAMS_API seams_status seams_system_natoms(const seams_system *sys, size_t *n);
  * @param nb Neighbour handle.
  * @param n Receives the row count.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL when nb or n is NULL.
+ * @par Ownership
+ * The caller owns nb; the call borrows it. n is caller storage that the call
+ * fills. The library keeps no pointer to any argument.
  * @par Thread safety
  * Read-only: may run alongside other const calls on nb, and not
  * alongside a non-const call on nb.
@@ -2080,6 +2139,9 @@ SEAMS_API seams_status seams_neighbours_nrows(const seams_neighbours *nb, size_t
  * @param rings Ring handle.
  * @param n Receives the ring count.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL when rings or n is NULL.
+ * @par Ownership
+ * The caller owns rings; the call borrows it. n is caller storage that the
+ * call fills. The library keeps no pointer to any argument.
  * @par Thread safety
  * Read-only: may run alongside other const calls on rings, and not
  * alongside a non-const call on rings.
