@@ -1051,6 +1051,49 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
         }
       }
     }
+    const bool count5 = hist != nullptr && fast && minSize <= 5 && !L1.empty();
+    std::vector<int> rank1;
+    std::vector<std::uint64_t> shellAdj;
+    std::vector<std::uint64_t> shellArms;
+    std::vector<std::uint64_t> rightBits;
+    int lwords = 0;
+    if (count5) {
+      // Neighbour bits of the first shell only. A full-frame row is several
+      // times wider, and every arm sits in this shell.
+      const int nL1 = static_cast<int>(L1.size());
+      lwords = (nL1 + 63) >> 6;
+      rank1.assign(static_cast<std::size_t>(nVertices), -1);
+      for (int i = 0; i < nL1; i++) {
+        rank1[static_cast<std::size_t>(L1[static_cast<std::size_t>(i)])] = i;
+      }
+      shellAdj.assign(static_cast<std::size_t>(nL1) * static_cast<std::size_t>(lwords), 0);
+      shellArms.assign(static_cast<std::size_t>(nVertices) * static_cast<std::size_t>(lwords), 0);
+      rightBits.assign(static_cast<std::size_t>(lwords), 0);
+      for (int i = 0; i < nL1; i++) {
+        const int a = L1[static_cast<std::size_t>(i)];
+        std::uint64_t *row =
+            shellAdj.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(lwords);
+        for (const int b : adjacency[static_cast<std::size_t>(a)]) {
+          if (b < 0 || b >= nVertices) {
+            continue;
+          }
+          const int rb = rank1[static_cast<std::size_t>(b)];
+          if (rb >= 0) {
+            row[static_cast<unsigned>(rb) >> 6] |= 1ull << (static_cast<unsigned>(rb) & 63u);
+          }
+        }
+      }
+      for (const int b : L2) {
+        std::uint64_t *row =
+            shellArms.data() + static_cast<std::size_t>(b) * static_cast<std::size_t>(lwords);
+        for (const int a : arms2[static_cast<std::size_t>(b)]) {
+          const int ra = rank1[static_cast<std::size_t>(a)];
+          if (ra >= 0) {
+            row[static_cast<unsigned>(ra) >> 6] |= 1ull << (static_cast<unsigned>(ra) & 63u);
+          }
+        }
+      }
+    }
     if (maxDepth >= 5) {
       for (std::size_t pi = 0; pi < L2.size(); pi++) {
         const int p = L2[pi];
@@ -1064,37 +1107,35 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
             continue;
           }
           const auto &aq = arms2[static_cast<std::size_t>(q)];
-          if (hist != nullptr && fast && minSize <= 5) {
+          if (count5) {
             // |{(a,c)}| with the three shortcut tests, without listing rings.
-            std::uint64_t right[64];
-            const int words = stride;
-            for (int w = 0; w < words; w++) {
-              right[w] = 0;
-            }
+            // a is an arm of p, so it is disjoint from the right-hand set.
+            const std::uint64_t *pArms =
+                shellArms.data() + static_cast<std::size_t>(p) * static_cast<std::size_t>(lwords);
+            const std::uint64_t *qArms =
+                shellArms.data() + static_cast<std::size_t>(q) * static_cast<std::size_t>(lwords);
             int pc = 0;
-            for (const int c : aq) {
-              if (adjacent(p, c)) {
-                continue;
-              }
-              right[static_cast<unsigned>(c) >> 6] |=
-                  1ull << (static_cast<unsigned>(c) & 63u);
-              pc++;
+            for (int w = 0; w < lwords; w++) {
+              rightBits[static_cast<std::size_t>(w)] = qArms[w] & ~pArms[w];
+              pc += __builtin_popcountll(rightBits[static_cast<std::size_t>(w)]);
+            }
+            if (pc == 0) {
+              continue;
             }
             for (const int a : ap) {
-              if (adjacent(a, q)) {
+              const int ra = rank1[static_cast<std::size_t>(a)];
+              if (ra < 0 ||
+                  ((qArms[static_cast<unsigned>(ra) >> 6] >> (static_cast<unsigned>(ra) & 63u)) &
+                   1ull) != 0ull) {
                 continue;
               }
-              const int self =
-                  static_cast<int>((right[static_cast<unsigned>(a) >> 6] >>
-                                    (static_cast<unsigned>(a) & 63u)) &
-                                   1ull);
               const std::uint64_t *ba =
-                  bits.data() + static_cast<std::size_t>(a) * static_cast<std::size_t>(stride);
+                  shellAdj.data() + static_cast<std::size_t>(ra) * static_cast<std::size_t>(lwords);
               int cut = 0;
-              for (int w = 0; w < words; w++) {
-                cut += __builtin_popcountll(ba[w] & right[w]);
+              for (int w = 0; w < lwords; w++) {
+                cut += __builtin_popcountll(ba[w] & rightBits[static_cast<std::size_t>(w)]);
               }
-              c5 += pc - self - cut;
+              c5 += pc - cut;
             }
             continue;
           }
@@ -1177,6 +1218,9 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
     if (maxDepth >= 7) {
       std::vector<std::pair<int, int>> lefts;
       std::vector<std::pair<int, int>> rights;
+      std::vector<int> dSlot(static_cast<std::size_t>(nVertices), -1);
+      std::vector<int> touchedD;
+      std::vector<std::vector<int>> byD;
       for (std::size_t pi = 0; pi < L3.size(); pi++) {
         const int p = L3[pi];
         const auto &ap = arms3[static_cast<std::size_t>(p)];
@@ -1210,38 +1254,80 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
             }
             rights.push_back(arm);
           }
-          for (const auto &left : lefts) {
+          if (hist != nullptr && fast) {
+            // Arms that share the far vertex fail or pass together on every
+            // test that does not look at the near vertex.
+            byD.clear();
+            touchedD.clear();
             for (const auto &right : rights) {
+              const int d = right.second;
+              int slot = dSlot[static_cast<std::size_t>(d)];
+              if (slot < 0) {
+                slot = static_cast<int>(byD.size());
+                dSlot[static_cast<std::size_t>(d)] = slot;
+                byD.emplace_back();
+                touchedD.push_back(d);
+              }
+              byD[static_cast<std::size_t>(slot)].push_back(right.first);
+            }
+            for (const auto &left : lefts) {
               const int a = left.first;
               const int b = left.second;
-              const int c = right.first;
-              const int d = right.second;
-              if (a == c || b == d) {
-                continue;
+              for (int slot = 0; slot < static_cast<int>(byD.size()); slot++) {
+                const int d = touchedD[static_cast<std::size_t>(slot)];
+                if (d == b || adjacent(p, d) || within2(a, d) || within2(b, d)) {
+                  continue;
+                }
+                for (const int c : byD[static_cast<std::size_t>(slot)]) {
+                  if (c == a || adjacent(a, c) || within2(b, c)) {
+                    continue;
+                  }
+                  if (7 < static_cast<int>(hist->size())) {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp atomic
+#endif
+                    (*hist)[7]++;
+                  }
+                }
               }
-              if (fast && (adjacent(a, c) || adjacent(p, d) || within2(a, d) ||
-                           within2(b, d) || within2(b, c))) {
-                continue;
-              }
-              if (a < c) {
-                ring[1] = a;
-                ring[2] = b;
-                ring[3] = p;
-                ring[4] = q;
-                ring[5] = d;
-                ring[6] = c;
-              } else {
-                ring[1] = c;
-                ring[2] = d;
-                ring[3] = q;
-                ring[4] = p;
-                ring[5] = b;
-                ring[6] = a;
-              }
-              if (fast) {
-                record(ring, 7);
-              } else {
-                keep(ring, 7, -1);
+            }
+            for (const int d : touchedD) {
+              dSlot[static_cast<std::size_t>(d)] = -1;
+            }
+          } else {
+            for (const auto &left : lefts) {
+              for (const auto &right : rights) {
+                const int a = left.first;
+                const int b = left.second;
+                const int c = right.first;
+                const int d = right.second;
+                if (a == c || b == d) {
+                  continue;
+                }
+                if (fast && (adjacent(a, c) || adjacent(p, d) || within2(a, d) ||
+                             within2(b, d) || within2(b, c))) {
+                  continue;
+                }
+                if (a < c) {
+                  ring[1] = a;
+                  ring[2] = b;
+                  ring[3] = p;
+                  ring[4] = q;
+                  ring[5] = d;
+                  ring[6] = c;
+                } else {
+                  ring[1] = c;
+                  ring[2] = d;
+                  ring[3] = q;
+                  ring[4] = p;
+                  ring[5] = b;
+                  ring[6] = a;
+                }
+                if (fast) {
+                  record(ring, 7);
+                } else {
+                  keep(ring, 7, -1);
+                }
               }
             }
           }
@@ -2239,7 +2325,13 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
   // that list of lists costs more than the search. The directing step
   // clears levels only inside the ball this source touched, so the
   // search stays linear in the number of vertices.
-  const bool parallelSources = !serial && !omp_in_parallel() && use > 1;
+  // A dense census is worth a team below the sparse cutoff: that path
+  // only counts. Storing every ring of a small dense ball stays on one
+  // thread. One thread still writes straight into the output vector.
+  const bool denseCensus = hist != nullptr && call.cap > 0 && nFrom >= 64;
+  const int sourceUse = (serial && denseCensus) ? team : use;
+  const bool parallelSources =
+      !omp_in_parallel() && sourceUse > 1 && (!serial || denseCensus);
   if (parallelSources) {
     // Sources are independent given the shared read-only balls; per-source
     // collection keeps the output identical to the serial ascending-source
@@ -2262,7 +2354,7 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
       perSource[static_cast<std::size_t>(k)].reset();
     }
     auto *pools = &perSource;
-#pragma omp parallel num_threads(use)
+#pragma omp parallel num_threads(sourceUse)
     {
       // Kept by each worker for the next search, so the level and path
       // tables are not faulted in again on every call.
