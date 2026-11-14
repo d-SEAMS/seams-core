@@ -453,6 +453,12 @@ linkcheck_ignore = [
     r"https://pubs\.aip\.org/.*",
     # Taylor & Francis returns 403 to the link checker.
     r"https://www\.tandfonline\.com/.*",
+    # APS returns 403 to the link checker.
+    r"https://journals\.aps\.org/.*",
+    # RSC returns 403 to the link checker.
+    r"https://pubs\.rsc\.org/.*",
+    # ScienceDirect returns 403 to the link checker.
+    r"https://www\.sciencedirect\.com/.*",
     # The dataset pages require a Hugging Face login.
     r"https://huggingface\.co/datasets/d-SEAMS/.*",
 ]
