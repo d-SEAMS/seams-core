@@ -1940,6 +1940,17 @@ test(
   ],
   depends: [seams_api_lib],
   timeout: 60)
+test(
+  'capi_symbols_selftest',
+  find_program('python3', required: true),
+  args: [
+    meson.project_source_root() / 'tests' / 'capi_symbols_selftest.py',
+    meson.project_source_root() / 'include' / 'seams.h',
+    meson.project_source_root() / 'tests' / 'capi_symbols.txt',
+    seams_api_lib.full_path(),
+  ],
+  depends: [seams_api_lib],
+  timeout: 60)
 _doxygen = find_program('doxygen', required: false)
 if _doxygen.found()
   _doxy_data = configuration_data()

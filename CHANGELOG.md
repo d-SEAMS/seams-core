@@ -227,6 +227,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Use linkcell 0.3.10 and minimage 0.1.4 without a downstream source patch. The with_linkcell and with_minimage options can require these dependencies.
 - Use the one-cell neighbour stencil from two cells per edge, so a short box is not left on the general walk.
 - `cages --signature` counts a face set as a cage only when its faces tile a sphere: every vertex lies on at least three faces that close around it, and V - E + F = 2. Rings whose minimum-image bonds add up to a lattice vector wind through the periodic cell, bound no face, and are dropped first (`ring::contractibleRings`). On frame 1 of the figshare mW nucleation run (4096 molecules, 3.5 Å cutoff) the search found 3 5¹²6², 20 5¹²6⁴, 270 5¹²6⁸ and 143 4³5⁶6³ cages in the liquid; it now finds none. On the GenIce sI unit cell it found 90 5¹²6², 4248 5¹²6⁴ and 218305 5¹²6⁸; it now finds 2 5¹² and 6 5¹²6².
+- `capi_symbols`, which holds the exported functions of `libseams` to `tests/capi_symbols.txt`, reads the exports with `readelf` when `nm` is missing and reports a skip when neither exists; it used to pass without checking. `capi_symbols_selftest` proves that the check rejects an unlisted export and a listed function the library no longer exports, and that `nm` and `readelf` agree.
 - `seams_rings_find` classifies prisms from the neighbour index instead of
   an all-pairs scan, and the ice Ih stacking-plane pass runs across
   threads. Ring lists and labels on the 4096- and 32768-molecule cells
