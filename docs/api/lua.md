@@ -17,6 +17,20 @@ the C module `dseams_core`. Hyphenated keys (`chill-plus`,
 `ring-network`, `cages-by-signature`, `running-cn`, `site-table`,
 `set-num-threads`) are the same functions, for Fennel callers.
 
+`bindings/lua/dseams-2.14.0-1.rockspec` is the LuaRocks package. It
+compiles `dseams_core` against an installed libseams and installs
+`dseams.lua`, `yoda.lua`, and `dseams_fnl.fnl` (the kebab-case table for
+Fennel). From the repository root:
+
+```bash
+luarocks make bindings/lua/dseams-2.14.0-1.rockspec SEAMS_DIR="$prefix" SEAMS_LIBDIR="$(pkg-config --variable=libdir seams)"
+luarocks test bindings/lua/dseams-2.14.0-1.rockspec
+```
+
+Fennel finds `dseams_fnl` once its path includes the rock tree:
+`fennel.path = package.path:gsub("%.lua", ".fnl") .. ";" .. fennel.path`.
+`bindings/lua/test_rock.lua` is the `luarocks test` script.
+
 ## Handles
 
 `dseams.system(xyz, box, types, ids)` calls `seams_system_create` and,
