@@ -126,6 +126,38 @@ six-rings) and sII (136 clathrate, 144 five-rings, 16 six-rings).
 
 ## Symbol reference
 
+### CageScore
+
+Purpose: Hexagonal and double-diamond membership.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### ChillPlus
+
+Purpose: CHILL+ labels, per-atom names, and the nine-label histogram.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
 ### Frame
 
 Purpose: One frame read from a dump or built in memory.
@@ -139,6 +171,38 @@ Ownership: The finalizer calls seams_frame_free.
 Errors: Error when the pointer is null.
 
 Units: object
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Q4Q6
+
+Purpose: Local and averaged q4 and q6.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### RingHistogram
+
+Purpose: Primitive-ring histogram.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
 
 Example: `docs/examples/minimal_julia.jl`
 
@@ -157,6 +221,22 @@ Errors: None.
 Units: cutoff and coordinates in angstrom when the call takes them
 
 Example: `bindings/julia/Seams/test/runtests.jl`
+
+### Seams.ChillLabels
+
+Purpose: CHILL+ labels and the nine population counts.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
 
 ### Seams.MUTUAL
 
@@ -205,6 +285,54 @@ Errors: None.
 Units: cutoff and coordinates in angstrom when the call takes them
 
 Example: `bindings/julia/Seams/test/runtests.jl`
+
+### Seams.Q4Q6Pair
+
+Purpose: Local q4 and q6.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.SeamsError
+
+Purpose: A failed `libseams` call.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.SixRings
+
+Purpose: Six-ring count and the fraction of atoms on a six-ring.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
 
 ### Seams.System
 
@@ -270,6 +398,310 @@ Units: cutoff and coordinates in angstrom when the call takes them
 
 Example: `bindings/julia/Seams/test/runtests.jl`
 
+### Seams.seams_cages
+
+Purpose: Disjoint cage counts `(n_hex, n_cubic, n_water, n_both)`.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.seams_chill
+
+Purpose: Original CHILL labels and nine population counts.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.seams_contact_pairs
+
+Purpose: Mutual nearest unlike contacts.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.seams_coordination
+
+Purpose: Coordination number integrated to `rmax` angstrom.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.seams_density_axis
+
+Purpose: Number density along one cell axis.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.seams_domains
+
+Purpose: Largest domain.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.seams_fingerprint
+
+Purpose: Frame-key length and the sum of the stored ring census.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.seams_hbonds
+
+Purpose: Hydrogen-bond count.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.seams_monolayer
+
+Purpose: Primitive-ring histogram of a monolayer.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.seams_neighbours_knn
+
+Purpose: Number of neighbour-list columns.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.seams_prisms
+
+Purpose: Perfect prism counts by ring size.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.seams_rdf
+
+Purpose: Partial radial distribution.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.seams_rings_vertices
+
+Purpose: Atom indices of one primitive ring.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.seams_running_cn
+
+Purpose: Running coordination number along the partial RDF.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.seams_signature_cages
+
+Purpose: Closed cages of one ring census.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.seams_site_table
+
+Purpose: Per-atom site kind from a site-table spec such as `"1=waterO"`.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.seams_steinhardt
+
+Purpose: Local Steinhardt `q_l` on the cutoff shell.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.seams_system_count
+
+Purpose: Atom count stored on `sys`, or 0 when the handle is empty.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### Seams.seams_system_read
+
+Purpose: Read one frame into `sys`.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
 ### Seams.set_num_threads
 
 Purpose: Request n worker threads.
@@ -333,6 +765,70 @@ Errors: None.
 Units: cutoff and coordinates in angstrom when the call takes them
 
 Example: `bindings/julia/Seams/test/runtests.jl`
+
+### SeamsError
+
+Purpose: A failed `libseams` call.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### SignatureCages
+
+Purpose: Closed cages of one ring census.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### SteinhardtOrder
+
+Purpose: Local Steinhardt `ql` and the Lechner-Dellago `qlbar`.
+
+Parameters: none
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_julia.jl`
+
+### System
+
+Purpose: One frame from `seams_system_create`.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
 
 ### cages
 
@@ -494,6 +990,310 @@ Units: frame index is dimensionless; coordinates are angstrom
 
 Example: `docs/examples/minimal_julia.jl`
 
+### seams_cages
+
+Purpose: Disjoint cage counts `(n_hex, n_cubic, n_water, n_both)`.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_chill
+
+Purpose: Original CHILL labels and nine population counts.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_contact_pairs
+
+Purpose: Mutual nearest unlike contacts.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_coordination
+
+Purpose: Coordination number integrated to `rmax` angstrom.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_density_axis
+
+Purpose: Number density along one cell axis.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_domains
+
+Purpose: Largest domain.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_fingerprint
+
+Purpose: Frame-key length and the sum of the stored ring census.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_hbonds
+
+Purpose: Hydrogen-bond count.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_monolayer
+
+Purpose: Primitive-ring histogram of a monolayer.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_neighbours_knn
+
+Purpose: Number of neighbour-list columns.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_prisms
+
+Purpose: Perfect prism counts by ring size.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_rdf
+
+Purpose: Partial radial distribution.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_rings_vertices
+
+Purpose: Atom indices of one primitive ring.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_running_cn
+
+Purpose: Running coordination number along the partial RDF.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_signature_cages
+
+Purpose: Closed cages of one ring census.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_site_table
+
+Purpose: Per-atom site kind from a site-table spec such as `"1=waterO"`.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_steinhardt
+
+Purpose: Local Steinhardt `q_l` on the cutoff shell.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_system_count
+
+Purpose: Atom count stored on `sys`, or 0 when the handle is empty.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
+### seams_system_read
+
+Purpose: Read one frame into `sys`.
+
+Parameters: see include/seams.h
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/julia_api.jl`
+
 ### signature_cages
 
 Purpose: Closed cages matching a ring-census spec.
@@ -541,206 +1341,6 @@ Errors: Error() with the text of seams_last_error when the status is not zero.
 Units: labels are dimensionless codes
 
 Example: `docs/examples/minimal_julia.jl`
-### System
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_system_count
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_system_read
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_chill
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_steinhardt
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_cages
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_signature_cages
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_neighbours_knn
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_rdf
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_running_cn
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_coordination
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_hbonds
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_density_axis
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_fingerprint
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_contact_pairs
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_domains
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_prisms
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_monolayer
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_rings_vertices
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
-### seams_site_table
-
-Purpose: Call into libseams through ccall.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/julia_api.jl`
-
 <!-- API_SYMBOLS_END -->
 
 

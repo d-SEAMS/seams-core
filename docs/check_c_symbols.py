@@ -129,19 +129,31 @@ def rust_symbols():
 
 
 def fortran_symbols():
-    """Parameters and procedures exported by the Fortran module."""
-    text = (ROOT / "bindings" / "fortran" / "src" / "seams.f90").read_text()
-    names = set(re.findall(r"parameter :: ([A-Z0-9_]+)", text))
-    names.update(re.findall(r"(?:function|subroutine) ([a-z0-9_]+)\(", text))
+    """Parameters and procedures of the Fortran modules ``seams`` and ``seams_c``.
+
+    >>> "seams_set_num_threads" in fortran_symbols()
+    True
+    """
+    names = set()
+    for unit in ("seams.f90", "seams_c.f90"):
+        text = (ROOT / "bindings" / "fortran" / "src" / unit).read_text()
+        names.update(re.findall(r"parameter :: ([A-Z0-9_]+)", text))
+        names.update(re.findall(r"(?:function|subroutine) ([a-z0-9_]+)\(", text))
     return sorted(names)
 
 
 def _julia_export(path):
+    """Names from every ``export`` line, not only the first.
+
+    >>> names = _julia_export(ROOT / "bindings" / "julia" / "Dseams" / "src" / "Dseams.jl")
+    >>> "Frame" in names, "seams_site_table" in names
+    (True, True)
+    """
     text = path.read_text()
-    match = re.search(r"^export (.+)$", text, re.M)
-    if match is None:
-        return []
-    return [part.strip() for part in match.group(1).split(",") if part.strip()]
+    names = []
+    for line in re.findall(r"^export (.+)$", text, re.M):
+        names.extend(part.strip() for part in line.split(",") if part.strip())
+    return names
 
 
 def julia_symbols():
@@ -177,9 +189,15 @@ def rust_sys_symbols():
 
 
 def r_symbols():
-    """Functions marked @export in the R package."""
-    text = (ROOT / "bindings" / "r" / "dseams" / "R" / "dseams.R").read_text()
-    return sorted(re.findall(r"#' @export\n([A-Za-z0-9_.]+) <- function", text))
+    """Functions marked @export in any file of the R package.
+
+    >>> "seams_system_read" in r_symbols()
+    True
+    """
+    names = set()
+    for source in sorted((ROOT / "bindings" / "r" / "dseams" / "R").glob("*.R")):
+        names.update(re.findall(r"#' @export\n([A-Za-z0-9_.]+) <- function", source.read_text()))
+    return sorted(names)
 
 
 def missing_public_symbols():

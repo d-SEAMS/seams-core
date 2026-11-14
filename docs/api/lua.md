@@ -215,7 +215,6 @@ they no longer hold the C handle.
 
 <!-- API_SYMBOLS_BEGIN -->
 
-
 ## Symbol reference
 
 ### CUTOFF
@@ -1290,3 +1289,4 @@ Units: cutoff and coordinates in angstrom when the call takes them
 
 Example: `docs/examples/minimal_lua.lua`
 <!-- API_SYMBOLS_END -->
+

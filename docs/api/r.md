@@ -324,6 +324,38 @@ Units: cutoff in angstrom; counts are dimensionless
 
 Example: `docs/examples/minimal_r.R`
 
+### print.dseams_cages
+
+Purpose: Print cage counts.
+
+Parameters: x; ...
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_r.R`
+
+### print.dseams_chill
+
+Purpose: Print CHILL population counts.
+
+Parameters: x; ...
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_r.R`
+
 ### print.dseams_frame
 
 Purpose: Print the atom count of a frame.
@@ -337,6 +369,86 @@ Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C fra
 Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
 
 Units: dimensionless count
+
+Example: `docs/examples/minimal_r.R`
+
+### print.dseams_ice
+
+Purpose: Print CHILL+ labels.
+
+Parameters: x; ...
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_r.R`
+
+### print.dseams_q4_q6
+
+Purpose: Print q4 and q6.
+
+Parameters: x; ...
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_r.R`
+
+### print.dseams_rings
+
+Purpose: Print a ring histogram.
+
+Parameters: x; ...
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_r.R`
+
+### print.dseams_steinhardt
+
+Purpose: Print Steinhardt parameters.
+
+Parameters: x; ...
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_r.R`
+
+### print.dseams_system
+
+Purpose: Print a system handle.
+
+Parameters: x; ...
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: as named by the parameters
 
 Example: `docs/examples/minimal_r.R`
 
@@ -387,6 +499,342 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 Units: frame index is dimensionless; coordinates are angstrom
 
 Example: `docs/examples/minimal_r.R`
+
+### seams_cages
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_chill
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_contact_pairs
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_coordination
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_density_axis
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_domains
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_fingerprint
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_hbonds
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_monolayer
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_neighbours_knn
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_prisms
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_rdf
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_rings_vertices
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_running_cn
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_set_num_threads
+
+Purpose: Set the OpenMP width used by the next analysis.
+
+Parameters: n
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_r.R`
+
+### seams_signature_cages
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_site_table
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_steinhardt
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_system_count
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_system_new
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
+
+### seams_system_read
+
+Purpose: Call into libseams through the C shim.
+
+Parameters: see include/seams.h
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: angstrom where a length is involved; otherwise dimensionless
+
+Example: `docs/examples/r_api.R`
 
 ### signature_cages
 
@@ -452,6 +900,134 @@ Units: order parameter is dimensionless
 
 Example: `docs/examples/minimal_r.R`
 
+### summary.dseams_cages
+
+Purpose: Summary of cage names.
+
+Parameters: object; ...
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_r.R`
+
+### summary.dseams_chill
+
+Purpose: Summary of CHILL population counts.
+
+Parameters: object; ...
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_r.R`
+
+### summary.dseams_frame
+
+Purpose: Summary of one frame.
+
+Parameters: object; ...
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_r.R`
+
+### summary.dseams_ice
+
+Purpose: Summary of CHILL+ labels.
+
+Parameters: object; ...
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_r.R`
+
+### summary.dseams_q4_q6
+
+Purpose: Summary of q4 and q6.
+
+Parameters: object; ...
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_r.R`
+
+### summary.dseams_rings
+
+Purpose: Summary of a ring histogram.
+
+Parameters: object; ...
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_r.R`
+
+### summary.dseams_steinhardt
+
+Purpose: Summary of Steinhardt parameters.
+
+Parameters: object; ...
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_r.R`
+
+### summary.dseams_system
+
+Purpose: Summary of a system handle.
+
+Parameters: object; ...
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_r.R`
+
 ### symmetry
 
 Purpose: Shell labels for a dump path.
@@ -483,206 +1059,6 @@ Errors: The binding stops with the text of seams_last_error when the status is n
 Units: dimensionless label codes
 
 Example: `docs/examples/minimal_r.R`
-### seams_system_new
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_system_read
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_system_count
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_chill
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_steinhardt
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_cages
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_signature_cages
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_neighbours_knn
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_rdf
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_running_cn
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_coordination
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_hbonds
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_density_axis
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_fingerprint
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_contact_pairs
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_domains
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_prisms
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_monolayer
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_rings_vertices
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
-### seams_site_table
-
-Purpose: Call into libseams through the C shim.
-
-Parameters: see include/seams.h
-
-Units: angstrom where a length is involved; otherwise dimensionless
-
-Example: `docs/examples/r_api.R`
-
 <!-- API_SYMBOLS_END -->
 
 

@@ -233,7 +233,7 @@ public API.
 
 ### Axis
 
-Purpose: Axis
+Purpose: Cell axis.
 
 Parameters: none
 
@@ -243,13 +243,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### BondOptions
 
-Purpose: BondOptions
+Purpose: Knobs for a hydrogen-bond count.
 
 Parameters: none
 
@@ -259,13 +259,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### Brine
 
-Purpose: Brine
+Purpose: Owned planar ice-front measurement.
 
 Parameters: none
 
@@ -275,13 +275,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### BrineFronts
 
-Purpose: BrineFronts
+Purpose: The two planar crossings of an ice slab.
 
 Parameters: none
 
@@ -291,13 +291,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### BrineOptions
 
-Purpose: BrineOptions
+Purpose: Knobs for a planar ice front.
 
 Parameters: none
 
@@ -307,7 +307,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -329,7 +329,7 @@ Example: `docs/examples/minimal_rust.rs`
 
 ### CageCounts
 
-Purpose: CageCounts
+Purpose: Disjoint cage populations.
 
 Parameters: none
 
@@ -339,13 +339,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### CageLabel
 
-Purpose: CageLabel
+Purpose: Per-atom cage membership.
 
 Parameters: none
 
@@ -355,13 +355,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### CageOptions
 
-Purpose: CageOptions
+Purpose: Knobs for hexagonal and double-diamond cages.
 
 Parameters: none
 
@@ -371,7 +371,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -393,7 +393,7 @@ Example: `docs/examples/minimal_rust.rs`
 
 ### ChillOptions
 
-Purpose: ChillOptions
+Purpose: Knobs for CHILL and CHILL+.
 
 Parameters: none
 
@@ -403,13 +403,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### ChillRule
 
-Purpose: ChillRule
+Purpose: CHILL+ threshold table.
 
 Parameters: none
 
@@ -419,13 +419,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### Classification
 
-Purpose: Classification
+Purpose: CHILL or CHILL+ labels and the nine population counts.
 
 Parameters: none
 
@@ -435,13 +435,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### Contacts
 
-Purpose: Contacts
+Purpose: Mutual nearest unlike contacts of a site table.
 
 Parameters: none
 
@@ -451,13 +451,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### DensityOptions
 
-Purpose: DensityOptions
+Purpose: Knobs for the axial number density.
 
 Parameters: none
 
@@ -467,13 +467,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### DensityProfile
 
-Purpose: DensityProfile
+Purpose: Number density along one cell axis.
 
 Parameters: none
 
@@ -483,13 +483,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### Distribution
 
-Purpose: Distribution
+Purpose: Partial radial distribution.
 
 Parameters: none
 
@@ -499,13 +499,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### DistributionOptions
 
-Purpose: DistributionOptions
+Purpose: Knobs for a partial RDF, its running coordination, or the integral.
 
 Parameters: none
 
@@ -515,13 +515,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### DomainOptions
 
-Purpose: DomainOptions
+Purpose: Knobs for a domain search.
 
 Parameters: none
 
@@ -531,13 +531,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### DomainReport
 
-Purpose: DomainReport
+Purpose: Largest polar or apolar domain.
 
 Parameters: none
 
@@ -547,13 +547,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### DomainSubset
 
-Purpose: DomainSubset
+Purpose: Domain subset.
 
 Parameters: none
 
@@ -563,7 +563,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -601,7 +601,7 @@ Example: `docs/examples/minimal_rust.rs`
 
 ### FingerprintOptions
 
-Purpose: FingerprintOptions
+Purpose: Knobs for a topological fingerprint.
 
 Parameters: none
 
@@ -611,13 +611,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### Graph
 
-Purpose: Graph
+Purpose: Neighbour graph.
 
 Parameters: none
 
@@ -627,13 +627,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### KnnOptions
 
-Purpose: KnnOptions
+Purpose: Knobs for a k-nearest neighbour list.
 
 Parameters: none
 
@@ -643,13 +643,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### Label
 
-Purpose: Label
+Purpose: CHILL and CHILL+ atom label.
 
 Parameters: none
 
@@ -659,13 +659,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### NeighbourOptions
 
-Purpose: NeighbourOptions
+Purpose: Knobs for a neighbour list.
 
 Parameters: none
 
@@ -675,13 +675,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### NeighbourPair
 
-Purpose: NeighbourPair
+Purpose: One directed neighbour pair.
 
 Parameters: none
 
@@ -691,13 +691,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### NeighbourPairs
 
-Purpose: NeighbourPairs
+Purpose: Iterator of directed neighbour pairs.
 
 Parameters: none
 
@@ -707,7 +707,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -729,7 +729,7 @@ Example: `docs/examples/minimal_rust.rs`
 
 ### OrderOptions
 
-Purpose: OrderOptions
+Purpose: Knobs for q_l on a named graph.
 
 Parameters: none
 
@@ -739,13 +739,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### Pockets
 
-Purpose: Pockets
+Purpose: Brine pockets trapped in the ice.
 
 Parameters: none
 
@@ -755,13 +755,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### PrismCensus
 
-Purpose: PrismCensus
+Purpose: Perfect and imperfect prism counts by ring size.
 
 Parameters: none
 
@@ -771,13 +771,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### PrismOptions
 
-Purpose: PrismOptions
+Purpose: Knobs for prism stacks.
 
 Parameters: none
 
@@ -787,13 +787,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### Q4Q6
 
-Purpose: Q4Q6
+Purpose: Local q4 and q6 on the cutoff shell.
 
 Parameters: none
 
@@ -803,13 +803,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### Q6Bar
 
-Purpose: Q6Bar
+Purpose: Lechner-Dellago q6-bar and the ice count above a cut.
 
 Parameters: none
 
@@ -819,13 +819,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### Q6BarOptions
 
-Purpose: Q6BarOptions
+Purpose: Knobs for the q6-bar ice summary.
 
 Parameters: none
 
@@ -835,13 +835,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### Rejection
 
-Purpose: Rejection
+Purpose: Molal rejection coefficient.
 
 Parameters: none
 
@@ -851,13 +851,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### RingIter
 
-Purpose: RingIter
+Purpose: Iterator of primitive rings.
 
 Parameters: none
 
@@ -867,13 +867,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### RingOptions
 
-Purpose: RingOptions
+Purpose: Knobs for primitive rings.
 
 Parameters: none
 
@@ -883,13 +883,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### RingSymmetry
 
-Purpose: RingSymmetry
+Purpose: Primitive-ring symmetry class.
 
 Parameters: none
 
@@ -899,7 +899,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -921,7 +921,7 @@ Example: `docs/examples/minimal_rust.rs`
 
 ### RunningCoordination
 
-Purpose: RunningCoordination
+Purpose: Running coordination number along a partial RDF.
 
 Parameters: none
 
@@ -931,13 +931,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### SheetOptions
 
-Purpose: SheetOptions
+Purpose: Knobs for a monolayer ring histogram.
 
 Parameters: none
 
@@ -947,13 +947,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### SignatureMatch
 
-Purpose: SignatureMatch
+Purpose: Closed cages whose ring census matches a signature.
 
 Parameters: none
 
@@ -963,13 +963,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### SignatureOptions
 
-Purpose: SignatureOptions
+Purpose: Knobs for a signature cage census.
 
 Parameters: none
 
@@ -979,13 +979,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### SiteKind
 
-Purpose: SiteKind
+Purpose: Site-table kind.
 
 Parameters: none
 
@@ -995,13 +995,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### Status
 
-Purpose: Status
+Purpose: Status codes.
 
 Parameters: none
 
@@ -1011,13 +1011,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### Steinhardt
 
-Purpose: Steinhardt
+Purpose: Local Steinhardt parameter, and the average when it was requested.
 
 Parameters: none
 
@@ -1027,13 +1027,13 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### SteinhardtOptions
 
-Purpose: SteinhardtOptions
+Purpose: Knobs for a local Steinhardt parameter on the cutoff shell.
 
 Parameters: none
 
@@ -1043,7 +1043,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -1065,9 +1065,9 @@ Example: `docs/examples/minimal_rust.rs`
 
 ### abi
 
-Purpose: Abi
+Purpose: ABI number compiled into this library.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1075,15 +1075,15 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### atom
 
-Purpose: Atom
+Purpose: Local key of one atom.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1091,15 +1091,15 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### brine
 
-Purpose: Brine
+Purpose: Planar ice front from an ice assignment.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1107,7 +1107,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -1161,9 +1161,9 @@ Example: `docs/examples/minimal_rust.rs`
 
 ### code
 
-Purpose: Code
+Purpose: Status integer.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1171,7 +1171,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -1241,9 +1241,9 @@ Example: `docs/examples/minimal_rust.rs`
 
 ### degrees
 
-Purpose: Degrees
+Purpose: Degree of each atom.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1251,15 +1251,15 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### density
 
-Purpose: Density
+Purpose: Number density along one cell axis.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1267,15 +1267,15 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### diamond8
 
-Purpose: Diamond8
+Purpose: Eight-atom cubic diamond used by the crate examples.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1283,7 +1283,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -1321,9 +1321,9 @@ Example: `docs/examples/minimal_rust.rs`
 
 ### fraction
 
-Purpose: Fraction
+Purpose: Fraction of atoms that sit on a ring of one size.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1331,15 +1331,15 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### fronts
 
-Purpose: Fronts
+Purpose: The two planar crossings.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1347,7 +1347,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -1369,9 +1369,9 @@ Example: `docs/examples/minimal_rust.rs`
 
 ### histogram
 
-Purpose: Histogram
+Purpose: Histogram of ring size.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1379,15 +1379,15 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### iter
 
-Purpose: Iter
+Purpose: Walk the rings.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1395,7 +1395,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -1433,9 +1433,9 @@ Example: `docs/examples/minimal_rust.rs`
 
 ### label_name
 
-Purpose: Label_name
+Purpose: Short name of a CHILL+ label.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1443,15 +1443,15 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### labels
 
-Purpose: Labels
+Purpose: One cage code per atom.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1459,15 +1459,15 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### message
 
-Purpose: Message
+Purpose: Detail text.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1475,7 +1475,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -1513,9 +1513,9 @@ Example: `docs/examples/minimal_rust.rs`
 
 ### neighbours
 
-Purpose: Neighbours
+Purpose: Cutoff or mutual neighbour list.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1523,15 +1523,15 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### new
 
-Purpose: New
+Purpose: Allocate an empty frame.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1539,15 +1539,15 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### nframes
 
-Purpose: Nframes
+Purpose: Count frames in a trajectory path.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1555,7 +1555,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -1579,7 +1579,7 @@ Example: `docs/examples/minimal_rust.rs`
 
 Purpose: OpenMP width the next call will use.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: The value named in the purpose.
 
@@ -1593,9 +1593,9 @@ Example: `docs/examples/minimal_rust.rs`
 
 ### pairs
 
-Purpose: Pairs
+Purpose: Directed pairs.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1603,15 +1603,15 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### pockets
 
-Purpose: Pockets
+Purpose: Pockets trapped in the ice, and the liquid reservoir.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1619,15 +1619,15 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### prisms
 
-Purpose: Prisms
+Purpose: Perfect and imperfect prism counts by ring size.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1635,15 +1635,15 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### profile
 
-Purpose: Profile
+Purpose: Concentration profile along the front axis.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1651,7 +1651,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -1673,9 +1673,9 @@ Example: `docs/examples/minimal_rust.rs`
 
 ### q6bar
 
-Purpose: Q6bar
+Purpose: Q6-bar, its mean and median, and the ice count above the cut.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1683,15 +1683,15 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### ql
 
-Purpose: Ql
+Purpose: Local q_l on a named graph.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1699,7 +1699,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -1737,9 +1737,9 @@ Example: `docs/examples/minimal_rust.rs`
 
 ### rejection
 
-Purpose: Rejection
+Purpose: Molal rejection coefficient.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1747,15 +1747,15 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### ring_symmetry_name
 
-Purpose: Ring_symmetry_name
+Purpose: Short name of a ring-symmetry code.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1763,7 +1763,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -1801,9 +1801,9 @@ Example: `docs/examples/minimal_rust.rs`
 
 ### set_atoms
 
-Purpose: Set_atoms
+Purpose: Store points, a cell, and optional species and ids.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1811,7 +1811,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -1913,9 +1913,9 @@ Example: `docs/examples/minimal_rust.rs`
 
 ### size
 
-Purpose: Size
+Purpose: Number of primitive rings.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1923,15 +1923,15 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
 ### status
 
-Purpose: Status
+Purpose: Status when the failure came from the library and the code is known.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1939,7 +1939,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -1961,9 +1961,9 @@ Example: `docs/examples/minimal_rust.rs`
 
 ### symmetry
 
-Purpose: Symmetry
+Purpose: Per-atom ice-shell label.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: Result of the value, or Err(Error).
 
@@ -1971,7 +1971,7 @@ Ownership: Returned Vec and String values are owned by the caller. Handles retur
 
 Errors: Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.
 
-Units: as named by the parameters
+Units: named in the rustdoc on this item. Lengths are angstroms.
 
 Example: `docs/examples/minimal_rust.rs`
 
@@ -1979,7 +1979,7 @@ Example: `docs/examples/minimal_rust.rs`
 
 Purpose: Library version text.
 
-Parameters: none
+Parameters: named in the rustdoc on this item.
 
 Returns: The value named in the purpose.
 
