@@ -1,14 +1,14 @@
 name: test-coverage
 on:
   push:
-    branches: [main]
+    branches: [main, "release/**", "pkg/**"]
     paths:
       - "bindings/r/**"
       - "bindings/cxx/**"
       - "src/**"
       - ".github/workflows/test-coverage.yml"
   pull_request:
-    branches: [main]
+    branches: [main, "release/**", "pkg/**"]
     paths:
       - "bindings/r/**"
       - "bindings/cxx/**"
