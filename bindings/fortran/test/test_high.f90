@@ -18,7 +18,7 @@ program test_high
   type(seams_topo) :: fp
   real(seams_real) :: fcc(3, 4), basis(3, 2)
   integer :: ii, jj, kk, f, s, placed
-  integer(seams_int), allocatable :: offsets(:), columns(:), kinds(:)
+  integer(seams_int), allocatable :: columns(:), kinds(:)
   real(seams_real), allocatable :: rr(:), gg(:), zz(:), rho(:)
   integer(seams_int) :: n_cages, n_atoms_sig, n_pairs, n_cation, n_anion
   integer(seams_int) :: n_subset, largest

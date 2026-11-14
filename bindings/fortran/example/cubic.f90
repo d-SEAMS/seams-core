@@ -66,7 +66,7 @@ program cubic
   block
     integer(seams_int) :: n_hex, n_cubic, n_water, n_both, n_cages, n_sig
     integer(seams_int) :: n_pairs, n_cation, n_anion, n_subset, largest, n_bonds
-    integer(seams_int), allocatable :: cage_labels(:), kinds(:), perfect(:), imperfect(:), sheet(:)
+    integer(seams_int), allocatable :: kinds(:), perfect(:), imperfect(:), sheet(:)
     integer(seams_int), allocatable :: sym_labels(:), fp_counts(:)
     real(seams_real) :: q6_mean, q6_median, percolation, volume, z_enter, z_exit, thickness
     real(seams_real), allocatable :: ql(:), qlbar(:), rr(:), gg(:), zz(:), rho(:)
