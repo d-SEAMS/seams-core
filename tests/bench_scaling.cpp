@@ -46,7 +46,7 @@ Cloud makeCloud(int nAtoms, int typeI) {
   cloud.currentFrame = 1;
   cloud.box = {boxLength, boxLength, boxLength};
   cloud.boxLow = {0.0, 0.0, 0.0};
-  cloud.pts.reserve(nAtoms);
+  cloud.pts.reserve(static_cast<std::size_t>(nAtoms));
 
   // Deterministic jitter, so that repeated runs compare like with like
   unsigned long long state = 88172645463325252ULL;

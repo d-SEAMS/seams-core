@@ -52,7 +52,8 @@ Cloud iceIc(int repetitions) {
       {0.25, 0.25, 0.25}, {0.75, 0.75, 0.25}, {0.75, 0.25, 0.75}, {0.25, 0.75, 0.75}};
   Cloud cloud;
   cloud.side = repetitions * lattice;
-  cloud.xyz.reserve(static_cast<std::size_t>(8) * repetitions * repetitions * repetitions);
+  const auto reps = static_cast<std::size_t>(repetitions);
+  cloud.xyz.reserve(8 * reps * reps * reps);
   for (int ix = 0; ix < repetitions; ix++) {
     for (int iy = 0; iy < repetitions; iy++) {
       for (int iz = 0; iz < repetitions; iz++) {
@@ -71,7 +72,8 @@ std::vector<std::vector<int>> bondsOf(const Cloud &cloud) {
   const double side = cloud.side;
   const int nCell = std::max(1, static_cast<int>(side / kCutoff));
   const double cell = side / nCell;
-  std::vector<std::vector<int>> cells(static_cast<std::size_t>(nCell) * nCell * nCell);
+  const auto nCells = static_cast<std::size_t>(nCell);
+  std::vector<std::vector<int>> cells(nCells * nCells * nCells);
   auto cellOf = [&](double x) {
     int c = static_cast<int>(x / cell);
     if (c < 0) {
@@ -86,7 +88,7 @@ std::vector<std::vector<int>> bondsOf(const Cloud &cloud) {
     const int cx = cellOf(cloud.xyz[static_cast<std::size_t>(i)][0]);
     const int cy = cellOf(cloud.xyz[static_cast<std::size_t>(i)][1]);
     const int cz = cellOf(cloud.xyz[static_cast<std::size_t>(i)][2]);
-    cells[(cx * nCell + cy) * nCell + cz].push_back(i);
+    cells[static_cast<std::size_t>((cx * nCell + cy) * nCell + cz)].push_back(i);
   }
   const double cut2 = kCutoff * kCutoff;
   std::vector<std::vector<int>> nList(static_cast<std::size_t>(n));
@@ -101,13 +103,13 @@ std::vector<std::vector<int>> bondsOf(const Cloud &cloud) {
           const int nx = (cx + dx + nCell) % nCell;
           const int ny = (cy + dy + nCell) % nCell;
           const int nz = (cz + dz + nCell) % nCell;
-          for (const int j : cells[(nx * nCell + ny) * nCell + nz]) {
+          for (const int j : cells[static_cast<std::size_t>((nx * nCell + ny) * nCell + nz)]) {
             if (j <= i) {
               continue;
             }
             const auto &pj = cloud.xyz[static_cast<std::size_t>(j)];
             double r2 = 0;
-            for (int a = 0; a < 3; a++) {
+            for (std::size_t a = 0; a < 3; a++) {
               double d = pi[a] - pj[a];
               if (d > side / 2) {
                 d -= side;
@@ -336,8 +338,8 @@ int main(int argc, char **argv) {
       }
       std::cout << " edges " << edges << "\n";
       if (listEdges) {
-        const int n = static_cast<int>(offsets.size()) - 1;
-        for (int i = 0; i < n; i++) {
+        const int nRows = static_cast<int>(offsets.size()) - 1;
+        for (int i = 0; i < nRows; i++) {
           for (int k = offsets[static_cast<std::size_t>(i)];
                k < offsets[static_cast<std::size_t>(i) + 1]; k++) {
             const int j = cols[static_cast<std::size_t>(k)];
@@ -368,8 +370,8 @@ int main(int argc, char **argv) {
       const auto nList = bondsOf(ice);
       const auto reference = primitive::ringNetwork(nList, maxDepth);
       const int n = cloud.nop;
-      const int threads[] = {1, 8};
-      for (const int thr : threads) {
+      const int e2eThreads[] = {1, 8};
+      for (const int thr : e2eThreads) {
         if (onlyThreads != 0 && thr != onlyThreads) {
           continue;
         }

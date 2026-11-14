@@ -57,7 +57,8 @@ int main(int argc, char **argv) {
   auto listDDC = ring::findDDC(sixRings, ringType, listHC, cageList, index);
   auto listMixed = ring::findMixedRings(sixRings, ringType, listDDC, listHC);
 
-  std::vector<cage::iceType> atomTypes(yCloud.nop, cage::iceType::dummy);
+  std::vector<cage::iceType> atomTypes(static_cast<size_t>(yCloud.nop),
+                                       cage::iceType::dummy);
   ring::getAtomTypesTopoBulk(sixRings, ringType, atomTypes);
 
   int numHC = 0, numDDC = 0, mixedRings = 0, prismaticRings = 0, basalRings = 0;
@@ -71,7 +72,7 @@ int main(int argc, char **argv) {
   }
   file << "x,y,z,icetype\n";
   int counts[4] = {0, 0, 0, 0};
-  for (int i = 0; i < yCloud.nop; i++) {
+  for (size_t i = 0; i < static_cast<size_t>(yCloud.nop); i++) {
     int code = 0;
     switch (atomTypes[i]) {
     case cage::iceType::hc:
@@ -110,10 +111,12 @@ int main(int argc, char **argv) {
         if (ringIdx < 0 || ringIdx >= static_cast<int>(sixRings.size())) {
           continue;
         }
-        for (size_t v = 0; v < sixRings[ringIdx].size(); v++) {
-          const int a = sixRings[ringIdx][v];
-          cageFile << r << "," << v << "," << a << "," << yCloud.pts[a].x << ","
-                   << yCloud.pts[a].y << "," << yCloud.pts[a].z << "\n";
+        const auto &ringAtoms = sixRings[static_cast<size_t>(ringIdx)];
+        for (size_t v = 0; v < ringAtoms.size(); v++) {
+          const int a = ringAtoms[v];
+          const auto &pt = yCloud.pts[static_cast<size_t>(a)];
+          cageFile << r << "," << v << "," << a << "," << pt.x << ","
+                   << pt.y << "," << pt.z << "\n";
         }
       }
       emitted = 1;
