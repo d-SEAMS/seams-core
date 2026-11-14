@@ -134,10 +134,10 @@ Build with a Nix flake (~nix build~, ~nix develop~) or with
      subgraph fronts["Front ends"]
        PY[pydseams Frame]
        DS[import dseams]
-       LUA["require(\"dseams\")"]
+       LUA["require('dseams')"]
      end
      LC[linkcell]
-     DUMP[LAMMPS / XYZ / chemfiles / con] --> LIB
+     DUMP["LAMMPS, XYZ, chemfiles, con"] --> LIB
      LC --> LIB
      LIB --> API
      API --> CLI
@@ -145,7 +145,7 @@ Build with a Nix flake (~nix build~, ~nix develop~) or with
      LIB --> PY
      LIB --> LUA
      CLI --> OUT[stdout counts]
-     PY --> ASE[ASE / solvis extras]
+     PY --> ASE["ASE and solvis extras"]
 #+end_export
 
 * Documentation structure

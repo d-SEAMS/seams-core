@@ -38,7 +38,7 @@ A Lua toolchain is not required to build the engine.
      subgraph fronts["Front ends"]
        PY[pydseams Frame]
        DS[import dseams]
-       LUA["require(\"dseams\")"]
+       LUA["require('dseams')"]
      end
      LC["linkcell k-NN"]
      VE["vesin cutoff"]

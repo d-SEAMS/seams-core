@@ -101,6 +101,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 ### Changed
 
 - A threaded cutoff neighbour list on an orthorhombic cell uses the scaling cell list instead of linkcell's buffered walk. The rows stay the same sorted cutoff set, so the ring search matches the one-thread list.
+- An empty Steinhardt shell is 0. The harmonic row stays zero and is not divided by the neighbour count, so freud and pyscal3 store NaN for that same atom. A NaN switch is not added: it would enter every mean and every CHILL+ label, and a neighbour count of zero already names the shell.
 - Below half the narrowest face separation the cutoff list skips minimage's pair reduction, which only sorted there, and sorts its rows on every thread; `getNewNeighbourListByIndex` and `neighListO` fill their rows in parallel, and `neighListO` takes the cutoff list first at every thread count. On `bench_strong`'s 65536-atom frame the index list goes from 25.8 to 13.9 ms on one thread and from 22.7 to 7.8 ms on eight (release builds).
 - CHILL and CHILL+ default to the mutual four-nearest graph. vesin still owns cutoff pairs; linkcell still owns k-nearest.
 - CHILL and CHILL+ use one default neighbour list on every front: the cutoff list (pairs closer than `cutoff`, 3.5 Å by default). The mutual four-nearest list is `graph = "mutual"` under that name everywhere: `seams chill` and `seams chill-plus --graph mutual`, R `chill_plus(graph = "mutual")`, Julia `chill_plus(; graph = "mutual")`, pydseamslib `Frame.chill_plus(graph="mutual")`, the C ABI `seams_chill_plus_graph`, and the LAMMPS `compute dseams ... graph mutual`. `seams chill`, R, Julia, `seams_chill_plus`, and `compute dseams` used the mutual list by default before. `tests/chill_plus_fronts.py` checks that the CLI, Python, R, and Julia agree on `exampleTraj.lammpstrj` with both lists.
@@ -205,6 +206,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The C API builds q4 and q6 from one cutoff shell and does not fill an atom-index map on that path.
 - The PLUMED q6 derivative is expressed per nanometre. A 0.001 angstrom step matched an independent difference to 3.99e-11 on a shifted eight-molecule cell.
 - The cutoff neighbour list sizes its row buffer from the pairs found. A shell denser than the ideal-gas estimate no longer writes past that buffer.
+- The landing-page and architecture diagrams quote labels that contain a slash or a quote, so Mermaid 11 draws the suite stack.
 - The multi-thread cutoff list records neighbour ids during the count walk, and the linkcell pool is sized to the OpenMP width.
 - The nucleation notebook rule declares ``figshare-incremental.json``
   as an output. A later ``test -s`` stamp cannot see a side-effect
