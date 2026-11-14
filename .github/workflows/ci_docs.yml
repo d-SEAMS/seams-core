@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main]
 
+# The gh-pages deploy pushes with GITHUB_TOKEN. The repository default
+# token is contents: read, which is the 403 on `git push origin gh-pages`.
+permissions:
+  contents: write
+
 jobs:
   build-docs:
     runs-on: ubuntu-latest
