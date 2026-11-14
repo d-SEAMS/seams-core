@@ -38,3 +38,20 @@ The installed name is ~seams_q4q6~.
 
 Python is ~dseams.q4q6~. R and Julia ~Dseams~ export ~q4_q6~. The
 ~Seams~ Julia package and the Rust wrapper export ~q4q6~.
+
+* Empty shells
+
+An atom with no neighbour inside the cutoff has no bond in the sum.
+The kernel leaves that spherical-harmonic row at zero and does not
+divide by the neighbour count, so the local \(q_l\) and the
+Lechner-Dellago average are both 0. freud and pyscal3 divide by that
+count and store NaN.
+
+0 is the value of the empty accumulator. Writing NaN from a switch
+would put a non-number into every mean, into CHILL+, and into the
+nucleation \(\bar q_6\). The neighbour list already names the empty
+shell: a count of zero is that atom. There is no NaN option.
+
+~meson test q4_q6_equal~ checks the split on a liquid frame. The atom
+with an empty shell is 0 here and NaN in freud and pyscal3. Every atom
+that has a shell matches pyscal3 to \(10^{-10}\).

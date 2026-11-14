@@ -126,7 +126,9 @@ int seams_frame_neighbours(seams_frame *frame, double cutoff, int type,
 int seams_frame_neighbour_pairs(const seams_frame *frame);
 
 /** Local Steinhardt q_l on the cutoff shell. A null qlbar skips the
- * Lechner-Dellago average; the local values do not use that pass. */
+ * Lechner-Dellago average; the local values do not use that pass.
+ * An empty shell is 0: the harmonic row stays zero and is not divided
+ * by the neighbour count. freud and pyscal3 store NaN for that atom. */
 /** @ingroup lang_order */
 int seams_frame_steinhardt(seams_frame *frame, double cutoff, int type,
                            int order_l, double *ql, double *qlbar);
@@ -143,7 +145,8 @@ int seams_frame_wl(seams_frame *frame, double cutoff, int type, int order_l,
 
 /** Local q4 and q6 on the cutoff shell. Degrees 4 and 6 use the
  * solid-harmonic kernel. q4bar and q6bar may be null, and a null
- * pointer skips that Lechner-Dellago average. Returns 1 on failure. */
+ * pointer skips that Lechner-Dellago average. An empty shell is 0
+ * for both the local value and the average. Returns 1 on failure. */
 /** @ingroup lang_order */
 int seams_frame_q4_q6(seams_frame *frame, double cutoff, int type, double *q4,
                       double *q6, double *q4bar, double *q6bar);

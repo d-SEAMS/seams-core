@@ -30,7 +30,10 @@ codes: a pair counts when its minimum-image distance is strictly below
 3.5 Å. pyscal3 matches to \(10^{-10}\). freud stores \(q_l\) as
 float32, so a crystal agrees to a few units in the last place and a
 disordered shell keeps a larger residual. An empty shell is 0 in
-d-SEAMS and NaN in freud and pyscal3.
+d-SEAMS and NaN in freud and pyscal3. The
+[[file:howto/q4-q6.org][q4 and q6 how-to]] records why that 0 stays:
+the empty accumulator is the result, and a NaN switch would enter
+every mean and every CHILL+ label.
 
 The same cutoff \(q_6\) on the large sitting, and the published
 literature numbers, are in the
