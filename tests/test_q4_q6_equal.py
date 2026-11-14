@@ -1,11 +1,20 @@
-"""Per-atom q4 and q6 against OVITO and freud.
+"""Per-atom and averaged q4 and q6 against freud and pyscal3.
 
-Ideal ice Ic and one noisy liquid, at one thread and at eight. The
-library call leaves the averaged buffer null, so this is the local
-sum. OVITO 3.17 is float64 and must agree to 1e-10. freud 3.6 stores
-q_l as float32: on ice that is a few ulps, and on a disordered shell
-the float32 sum sits near 1e-5. An empty shell is NaN in freud and 0
-here and in OVITO.
+OVITO 3.15.5 has no SteinhardtParametersModifier, so this comparison
+does not call OVITO. The three codes use the same rule: a neighbour
+is a pair whose minimum-image distance is strictly below 3.5 Å.
+Ideal ice Ih is input/traj/ice1h.lammpstrj. Ideal ice Ic is the
+diamond cell at a 2.75 Å bond. The liquid is that cell with Gaussian
+noise of 0.9 Å, seed 91001.
+
+pyscal3 is float64. Local q_l and the Lechner-Dellago average, and
+the mean of each over atoms that have a shell, must agree to 1e-10.
+
+freud 3.6 stores q_l as float32. On the two ideal crystals the gap is
+at most eight units in the last place of that float32 value. On the liquid
+the spherical-harmonic sum is accumulated in float32, so the residual
+is larger. The test prints that residual and requires it to stay
+under 2e-5. An empty shell is 0 here and NaN in freud and pyscal3.
 """
 
 from __future__ import annotations
@@ -15,6 +24,7 @@ import math
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 try:
     import numpy as np
@@ -23,16 +33,11 @@ except ImportError:
     raise SystemExit(77)
 
 try:
-    from ovito.data import DataCollection, Particles, SimulationCell
-    from ovito.pipeline import Pipeline, StaticSource
     import freud
+    import pyscal3
+    from ase import Atoms
 except ImportError:
-    sys.stderr.write("ovito or freud is not installed\n")
-    raise SystemExit(77)
-try:
-    from ovito.modifiers import SteinhardtParametersModifier
-except ImportError:
-    sys.stderr.write("this OVITO build has no SteinhardtParametersModifier\n")
+    sys.stderr.write("freud, pyscal3, or ase is not installed\n")
     raise SystemExit(77)
 
 LIB = os.environ.get("SEAMS_LANG_LIB")
@@ -41,9 +46,13 @@ if not LIB:
     raise SystemExit(77)
 
 CUTOFF = 3.5
-OVITO_TOL = 1e-10
-# A few units in the last place of freud's float32 q_l.
-FREUD_ULP = 3
+PYSCAL_TOL = 1e-10
+# Units in the last place of freud's float32 q_l on a crystal.
+FREUD_ULP = 8
+# float32 accumulation of a disordered shell. Not a 1e-10 comparison.
+FREUD_LIQUID = 2e-5
+ROOT = Path(__file__).resolve().parents[1]
+IH_DUMP = ROOT / "input" / "traj" / "ice1h.lammpstrj"
 
 
 def ice_ic(cells, bond=2.75):
@@ -53,19 +62,45 @@ def ice_ic(cells, bond=2.75):
     basis = np.vstack([fcc, fcc + 0.25])
     ijk = np.stack(np.meshgrid(*[np.arange(cells)] * 3, indexing="ij"), -1).reshape(-1, 3)
     pts = (ijk[:, None, :] + basis).reshape(-1, 3) * lattice
-    return np.ascontiguousarray(pts % side), float(side)
+    return np.ascontiguousarray(pts % side), (float(side), float(side), float(side))
 
 
 def liquid(cells):
-    pts, side = ice_ic(cells)
+    pts, edges = ice_ic(cells)
     rng = np.random.default_rng(91001)
-    return np.ascontiguousarray(np.mod(pts + rng.normal(0.0, 0.9, pts.shape), side)), side
+    noisy = np.mod(pts + rng.normal(0.0, 0.9, pts.shape), edges[0])
+    return np.ascontiguousarray(noisy), edges
 
 
-def seams_ql(lib, pts, side, order, averaged):
+def ice_ih():
+    lines = IH_DUMP.read_text().splitlines()
+    index = 0
+    while "BOX BOUNDS" not in lines[index]:
+        index += 1
+    index += 1
+    edges = []
+    for _ in range(3):
+        lo, hi = (float(part) for part in lines[index].split()[:2])
+        edges.append(hi - lo)
+        index += 1
+    while not lines[index].startswith("ITEM: ATOMS"):
+        index += 1
+    columns = {name: col for col, name in enumerate(lines[index].split()[2:])}
+    index += 1
+    pts = []
+    while index < len(lines) and lines[index] and not lines[index].startswith("ITEM"):
+        parts = lines[index].split()
+        pts.append([float(parts[columns[axis]]) for axis in "xyz"])
+        index += 1
+    return np.ascontiguousarray(pts, dtype=np.float64), tuple(edges)
+
+
+def seams_ql(lib, pts, edges, order):
     n = len(pts)
     xyz = np.ascontiguousarray(pts, dtype=np.float64).reshape(-1)
-    box = (ctypes.c_double * 9)(0, 0, 0, side, side, side, 0, 0, 0)
+    ox, oy, oz = 0.0, 0.0, 0.0
+    lx, ly, lz = edges
+    box = (ctypes.c_double * 9)(ox, oy, oz, lx, ly, lz, 0.0, 0.0, 0.0)
     types = (ctypes.c_int * n)(*([1] * n))
     ids = (ctypes.c_int * n)(*range(1, n + 1))
     frame = lib.seams_frame_from_arrays(
@@ -73,77 +108,108 @@ def seams_ql(lib, pts, side, order, averaged):
     if not frame:
         raise RuntimeError("frame")
     ql = (ctypes.c_double * n)()
-    bar = None if not averaged else (ctypes.c_double * n)()
+    bar = (ctypes.c_double * n)()
     try:
         if lib.seams_frame_steinhardt(frame, CUTOFF, 1, order, ql, bar) != 0:
             raise RuntimeError("steinhardt")
-        return np.ctypeslib.as_array(ql).copy()
+        return np.ctypeslib.as_array(ql).copy(), np.ctypeslib.as_array(bar).copy()
     finally:
         lib.seams_frame_free(frame)
 
 
-def ovito_ql(pts, side, order):
-    data = DataCollection()
-    cell = SimulationCell(pbc=(True, True, True))
-    cell[:, :3] = np.diag([side, side, side])
-    data.objects.append(cell)
-    part = Particles()
-    part.create_property("Position", data=pts)
-    data.objects.append(part)
-    pipe = Pipeline(source=StaticSource(data=data))
-    mod = SteinhardtParametersModifier(cutoff=CUTOFF, max_l=order, compute_averaged=False)
-    mod.neighbor_mode = SteinhardtParametersModifier.NeighborMode.Cutoff
-    pipe.modifiers.append(mod)
-    out = pipe.compute()
-    arr = np.asarray(out.particles["Steinhardt"], dtype=np.float64)
-    return np.ascontiguousarray(arr[:, -1])
-
-
-def freud_ql(pts, side, order):
+def freud_ql(pts, edges, order, averaged):
     freud.parallel.set_num_threads(int(os.environ.get("OMP_NUM_THREADS", "1")))
-    box = freud.box.Box.cube(side)
-    op = freud.order.Steinhardt(l=order, average=False)
+    box = freud.box.Box(*edges)
+    op = freud.order.Steinhardt(l=order, average=averaged)
     op.compute((box, pts), neighbors={"r_max": CUTOFF})
     return np.asarray(op.ql, dtype=np.float64).copy()
 
 
+def pyscal_ql(pts, edges, order, averaged):
+    if hasattr(pyscal3, "set_num_threads"):
+        pyscal3.set_num_threads(int(os.environ.get("OMP_NUM_THREADS", "1")))
+    atoms = Atoms(
+        symbols=["H"] * len(pts),
+        positions=np.ascontiguousarray(pts, dtype=np.float64),
+        cell=list(edges),
+        pbc=True,
+    )
+    pyscal3.find_neighbors(atoms, method="cutoff", cutoff=CUTOFF)
+    values = pyscal3.steinhardt_parameter(atoms, order, averaged=averaged)
+    return np.asarray(values[0], dtype=np.float64).copy()
+
+
+def live_gap(ours, theirs):
+    mask = np.isfinite(ours) & np.isfinite(theirs)
+    if not np.any(mask):
+        raise SystemExit("no shell is finite in both codes")
+    return float(np.max(np.abs(ours[mask] - theirs[mask]))), mask
+
+
+def freud_gap(name, kind, ours, theirs):
+    """Return a note. Crystal gaps are float32 ulps. Liquid gaps are the float32 sum."""
+    gap, mask = live_gap(ours, theirs)
+    if name == "liquid":
+        if gap > FREUD_LIQUID:
+            raise SystemExit(
+                f"liquid {kind} freud residual {gap:.3e} is past the float32 accumulation bound"
+            )
+        return f"freud {kind} {gap:.3e} (float32 sum)"
+    rounded = ours[mask].astype(np.float32)
+    ulp = np.spacing(rounded).astype(np.float64)
+    steps = float(np.max(np.abs(theirs[mask] - rounded.astype(np.float64)) / ulp))
+    if steps > FREUD_ULP:
+        raise SystemExit(f"{name} {kind} freud {steps:.2f} ulp, gap {gap:.3e}")
+    return f"freud {kind} {steps:.2f} ulp"
+
+
+def check_order(lib, name, pts, edges, order):
+    local, bar = seams_ql(lib, pts, edges, order)
+    py_local = pyscal_ql(pts, edges, order, averaged=False)
+    py_bar = pyscal_ql(pts, edges, order, averaged=True)
+    fr_local = freud_ql(pts, edges, order, averaged=False)
+    fr_bar = freud_ql(pts, edges, order, averaged=True)
+
+    empty = ~np.isfinite(fr_local)
+    if not np.array_equal(empty, ~np.isfinite(py_local)):
+        raise SystemExit(f"{name} l={order} empty shells differ between freud and pyscal3")
+    if np.any(empty):
+        if float(np.max(np.abs(local[empty]))) != 0.0 or float(np.max(np.abs(bar[empty]))) != 0.0:
+            raise SystemExit(f"{name} l={order} empty shell is not 0")
+        if np.any(np.isfinite(py_bar[empty])) or np.any(np.isfinite(fr_bar[empty])):
+            raise SystemExit(f"{name} l={order} averaged empty shell is finite")
+        print(
+            f"{name} l={order} empty {int(empty.sum())}: "
+            "d-SEAMS writes 0, freud and pyscal3 write NaN"
+        )
+
+    d_local, live = live_gap(local, py_local)
+    d_bar, live_bar = live_gap(bar, py_bar)
+    if d_local > PYSCAL_TOL or d_bar > PYSCAL_TOL:
+        raise SystemExit(f"{name} l={order} pyscal3 local {d_local:.3e} bar {d_bar:.3e}")
+    mean_local = abs(float(np.mean(local[live])) - float(np.mean(py_local[live])))
+    mean_bar = abs(float(np.mean(bar[live_bar])) - float(np.mean(py_bar[live_bar])))
+    if mean_local > PYSCAL_TOL or mean_bar > PYSCAL_TOL:
+        raise SystemExit(f"{name} l={order} mean local {mean_local:.3e} bar {mean_bar:.3e}")
+
+    note_local = freud_gap(name, "q", local, fr_local)
+    note_bar = freud_gap(name, "qbar", bar, fr_bar)
+    print(
+        f"{name} n={len(pts)} l={order} threads={os.environ.get('OMP_NUM_THREADS')} "
+        f"pyscal3 q {d_local:.3e} qbar {d_bar:.3e} "
+        f"mean {mean_local:.3e} {mean_bar:.3e} {note_local} {note_bar}"
+    )
+
+
 def check(lib):
-    frames = (("ice",) + ice_ic(7), ("liquid",) + liquid(7))
-    for name, pts, side in frames:
+    frames = (
+        ("Ih",) + ice_ih(),
+        ("Ic",) + ice_ic(4),
+        ("liquid",) + liquid(4),
+    )
+    for name, pts, edges in frames:
         for order in (4, 6):
-            local = seams_ql(lib, pts, side, order, averaged=False)
-            full = seams_ql(lib, pts, side, order, averaged=True)
-            ov = ovito_ql(pts, side, order)
-            fr = freud_ql(pts, side, order)
-            d_ov = float(np.max(np.abs(local - ov)))
-            d_full = float(np.max(np.abs(local - full)))
-            if d_ov > OVITO_TOL or d_full > OVITO_TOL:
-                raise SystemExit(
-                    f"{name} l={order} ovito {d_ov:.3e} local-vs-bar {d_full:.3e}")
-            # freud's q_l is float32, and an empty shell is NaN there.
-            # OVITO and this library write 0 for that shell.
-            empty = ~np.isfinite(fr)
-            if np.any(empty) and float(np.max(np.abs(local[empty]))) != 0.0:
-                raise SystemExit(f"{name} l={order} empty shell is not 0")
-            if np.any(empty) and float(np.max(np.abs(ov[empty]))) > OVITO_TOL:
-                raise SystemExit(f"{name} l={order} ovito empty shell")
-            live = ~empty
-            if name == "ice":
-                rounded = local[live].astype(np.float32)
-                ulp = np.spacing(rounded).astype(np.float64)
-                steps = float(np.max(np.abs(fr[live] - rounded.astype(np.float64)) / ulp))
-                if steps > FREUD_ULP:
-                    raise SystemExit(f"{name} l={order} freud {steps:.2f} ulp")
-                freud_note = f"freud_ulp {steps:.2f}"
-            else:
-                # freud accumulates q_l in float32. On a disordered shell that
-                # residual is about 1e-5, which is not a 1e-10 comparison.
-                d_fr = float(np.max(np.abs(local[live] - fr[live])))
-                if d_fr > 2e-5:
-                    raise SystemExit(f"{name} l={order} freud {d_fr:.3e}")
-                freud_note = f"freud {d_fr:.3e}"
-            print(f"{name} n={len(pts)} l={order} threads={os.environ.get('OMP_NUM_THREADS')} "
-                  f"ovito {d_ov:.3e} {freud_note} empty {int(empty.sum())}")
+            check_order(lib, name, pts, edges, order)
 
 
 def load():
@@ -166,11 +232,8 @@ def main():
         for threads in ("1", "8"):
             env = os.environ.copy()
             env["OMP_NUM_THREADS"] = threads
-            env["OVITO_THREAD_COUNT"] = threads
             env["QL_EQUAL_CHILD"] = "1"
             done = subprocess.run([sys.executable, __file__], env=env)
-            if done.returncode == 77:
-                raise SystemExit(77)
             if done.returncode != 0:
                 raise SystemExit(done.returncode)
         return
