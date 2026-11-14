@@ -44,6 +44,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Each OpenMP thread owns a block of the linkcell weighted cell cut and writes the neighbour rows of those cells. The halo is painted in that owned walk. On 884736 molecules, eight threads build the neighbour rows in 5.72 times the one-thread time.
 - Each language front reports rings, cages, signature cages and symmetry, and the binding CI runs those calls.
 - Enumerate cups and incomplete cages on the ring graph; closed signature counts stay the closed path.
+- Every target also builds under GCC 15 in release mode with `-Dwerror=true`, and a `gcc15-all` CI job next to `clang21-all` builds that configuration and runs the suite on it.
 - Every target, tests, benchmarks, bindings, engines and subproject examples included, builds under Clang 21 with `-Dwerror=true`, and a CI job builds that configuration and runs the suite on it.
 - Fortran callers use a `seams` module of derived types with final procedures, allocatable results, and an optional `stat`/`errmsg` pair, and Lua callers get a Fennel module, a rockspec, and LDoc comments. The numbers match the existing tests.
 - Hexagonal channels are stacked six-ring prisms, not a raw six-ring count. Ice XXI (Lee et al. 2026, Z=152 BCT) also requires a tetrahedral 3.5 A graph and a primitive six-ring. Hydrogen MSD uses the minimum image. Glass labels use local-density windows for ice/LDA/MDA/HDA. `compute dseams` ships with `water.data` and `pair_style zero`.

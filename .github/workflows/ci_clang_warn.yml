@@ -1,4 +1,4 @@
-name: Clang warnings
+name: Compiler warnings
 on:
   push:
     branches: [main, modernize]
@@ -23,7 +23,7 @@ jobs:
 
   # Every target, tests, benchmarks, bindings and engines included, under
   # Clang 21 with -Dwerror=true, then the suite on that build. The heavy
-  # suite runs for hours and stays on the GCC jobs.
+  # suite runs for hours and stays on the main CI job.
   clang21-all:
     runs-on: ubuntu-latest
     steps:
@@ -43,3 +43,25 @@ jobs:
           pixi run ninja -C build-clang21
       - name: Test the Clang build
         run: pixi run meson test -C build-clang21 --print-errorlogs --no-suite heavy
+
+  # The same full build under GCC 15. Release, since -Warray-bounds and
+  # the other flow warnings only fire with the optimiser on.
+  gcc15-all:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-gcc15-
+      - name: Install GCC 15, Fortran and Lua
+        run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y gcc-15 g++-15 gfortran-15 lua5.4 liblua5.4-dev luajit libluajit-5.1-dev
+      - name: Build every target with warnings as errors
+        run: |
+          pixi run bash -lc 'CC=gcc-15 CXX=g++-15 FC=gfortran-15 meson setup build-gcc15 --buildtype=release -Dwerror=true -Dwith_tests=true -Dwith_lua=auto -Dwith_fortran=auto'
+          pixi run ninja -C build-gcc15
+      - name: Test the GCC build
+        run: pixi run meson test -C build-gcc15 --print-errorlogs --no-suite heavy
