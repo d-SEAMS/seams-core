@@ -42,8 +42,9 @@ LABEL_NAME = {
     7: "reCubic",
     8: "reHex",
 }
-ION_COLOR = {2: (0.84, 0.37, 0.00), 3: (0.00, 0.45, 0.70)}
-ION_NAME = {2: "sodium", 3: "chloride"}
+# nacl_front.lammpstrj: type 3 is chloride, type 4 is sodium.
+ION_COLOR = {3: (0.00, 0.45, 0.70), 4: (0.84, 0.37, 0.00)}
+ION_NAME = {3: "chloride", 4: "sodium"}
 FIGURE_WIDTH = 2400
 FIGURE_HEIGHT = 1800
 
