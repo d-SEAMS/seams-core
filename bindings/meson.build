@@ -44,13 +44,15 @@ seams_lang_test = executable(
   link_args: ['-ldl'],
 )
 
-test(
-  'seams_lang_fixtures',
-  seams_lang_test,
-  args: [meson.project_source_root(), seams_exe.full_path()],
-  depends: [seams_exe],
-  timeout: 180,
-)
+if get_option('with_cli')
+  test(
+    'seams_lang_fixtures',
+    seams_lang_test,
+    args: [meson.project_source_root(), seams_exe.full_path()],
+    depends: [seams_exe],
+    timeout: 180,
+  )
+endif
 
 seams_frames_test = executable(
   'test_lang_frames',

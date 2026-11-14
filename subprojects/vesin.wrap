@@ -1,6 +1,6 @@
 [wrap-git]
 url = https://github.com/Luthaf/vesin.git
-revision = v0.5.7
+revision = 56a790f90d5831904fcc1fd16ad28798a29788ba
 depth = 1
 patch_directory = vesin
 

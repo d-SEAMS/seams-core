@@ -1,6 +1,6 @@
 [wrap-git]
 url = https://github.com/lode-org/minimage.git
-revision = v0.1.4
+revision = ce6dfb175f32459de1ee06dfeb70e8a718f61876
 depth = 1
 
 [provide]

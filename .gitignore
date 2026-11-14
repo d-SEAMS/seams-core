@@ -421,3 +421,4 @@ bench/local/
 
 docs/_build/
 __pycache__/
+subprojects/eigen-*/

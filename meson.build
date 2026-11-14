@@ -11,6 +11,15 @@ project('seams-core', ['cpp', 'c'],
   default_options: ['warning_level=2', 'cpp_std=c++20', 'b_ndebug=if-release'],
   meson_version: '>=1.3.0')
 
+# Only the Python module, linked against an installed libseams of this
+# version. Packagers that ship the library and the module separately use
+# this so the module does not carry a second copy of the engine.
+if get_option('system_libseams')
+  dseams_api_dep = dependency('seams', version: '=' + meson.project_version())
+  subdir('bindings/python')
+  subdir_done()
+endif
+
 host_system = host_machine.system()
 
 # Global accumulator variables (eOn pattern)
@@ -64,8 +73,12 @@ _deps += [eigen_dep]
 # Prefer FlexiBLAS (one wrapper for BLAS and LAPACK). The conda-forge
 # ABI packages still provide libblas/liblapack; those are the fallback
 # when pkg-config does not find FlexiBLAS.
-flexiblas_dep = dependency('flexiblas', required: false)
-if not flexiblas_dep.found()
+# No source calls BLAS or LAPACK today; disabling them keeps the wheel
+# from grafting a BLAS it never uses.
+blas_opt = get_option('with_blas')
+blas_backend = 'none'
+flexiblas_dep = dependency('flexiblas', required: blas_opt.disabled() ? blas_opt : false)
+if not flexiblas_dep.found() and not blas_opt.disabled()
   flexiblas_dep = cppc.find_library('flexiblas', required: false)
 endif
 if flexiblas_dep.found()
@@ -81,11 +94,13 @@ if flexiblas_dep.found()
       _link_args += ['-Wl,-rpath,' + _fb_dir, '-Wl,-rpath-link,' + _fb_dir]
     endif
   endif
-else
-  blas_dep = cppc.find_library('blas', required: true)
-  lapack_dep = cppc.find_library('lapack', required: true)
-  _deps += [blas_dep, lapack_dep]
-  blas_backend = 'blas+lapack'
+elif not blas_opt.disabled()
+  blas_dep = cppc.find_library('blas', required: blas_opt)
+  lapack_dep = cppc.find_library('lapack', required: blas_opt)
+  if blas_dep.found() and lapack_dep.found()
+    _deps += [blas_dep, lapack_dep]
+    blas_backend = 'blas+lapack'
+  endif
 endif
 
 # Shared-memory parallelism. libstdc++ routes std::execution::par through TBB,
@@ -224,7 +239,7 @@ if hwy_dep.found()
 endif
 
 gpulite_opt = get_option('with_gpulite')
-gpulite_dep = dependency('gpulite', required: false,
+gpulite_dep = dependency('gpulite', required: gpulite_opt.disabled() ? gpulite_opt : false,
                          fallback: ['gpulite', 'gpulite_dep'])
 if gpulite_opt.enabled() and not gpulite_dep.found()
   error('with_gpulite=enabled but gpulite was not found')
@@ -359,7 +374,8 @@ endif
 # embeds it and a shared engine ships it alongside; a shared reader under a
 # static engine would point consumers at a build-directory path.
 _readcon_kind = get_option('default_library') == 'static' ? 'static' : 'shared'
-readcon_dep = dependency('readcon-core', version: '>=0.16.2', required: false,
+readcon_opt = get_option('with_readcon')
+readcon_dep = dependency('readcon-core', version: '>=0.16.2', required: readcon_opt,
                          fallback: ['readcon-core', 'readcon_dep'],
                          default_options: ['default_library=' + _readcon_kind])
 if readcon_dep.found()
@@ -371,7 +387,8 @@ endif
 # the same readcon-core pin. The db crate vendors its own core for its
 # internal parse; seams never frees that handle with this build's
 # libreadcon_core.
-readcondb_dep = dependency('readcon-db', version: '>=0.1.8', required: false,
+readcondb_dep = dependency('readcon-db', version: '>=0.1.8',
+                           required: readcon_opt.disabled() ? readcon_opt : false,
                            fallback: ['readcon-db', 'readcon_dep'],
                            default_options: [
                              'default_library=' + _readcon_kind,
@@ -702,7 +719,8 @@ science_front_exe = executable(
   cpp_args: _args,
   link_args: nucleation_link,
   build_rpath: meson.current_build_dir() / 'src',
-  install: true)
+  install: true,
+  install_tag: 'bin')
 
 nucleation_pathway_exe = executable(
   'nucleation-pathway',
@@ -712,7 +730,8 @@ nucleation_pathway_exe = executable(
   cpp_args: _args,
   link_args: nucleation_link,
   build_rpath: meson.current_build_dir() / 'src',
-  install: true)
+  install: true,
+  install_tag: 'bin')
 
 # Timing driver (bench/analyse.cpp). Outputs stay out of the tree.
 subdir('bench')
@@ -724,31 +743,10 @@ endif
 
 # Nanobind module over libseams. A missing nanobind skips the import test.
 if get_option('with_python')
-  # The same python3 the tests invoke. Meson's own interpreter is not
-  # that program when a conda env is on PATH.
-  py_mod = import('python').find_installation('python3', pure: false, required: false)
-  nanobind_dep = dependency('nanobind', required: false, allow_fallback: true)
-  python_deps = []
-  if py_mod.found() and nanobind_dep.found()
-    dseams_core = py_mod.extension_module(
-      '_core',
-      files('bindings/python/dseams/_core.cpp'),
-      dependencies: [nanobind_dep],
-      link_with: seams_api_lib,
-      include_directories: include_directories('include', 'src'),
-      install: true,
-      subdir: 'dseams')
-    py_mod.install_sources(
-      files(
-        'bindings/python/dseams/__init__.py',
-        'bindings/python/dseams/__main__.py',
-        'bindings/python/dseams/userframe.py',
-        'bindings/python/frames.py',
-      ),
-      subdir: 'dseams',
-      pure: true)
-    python_deps += dseams_core
-  endif
+  dseams_api_dep = declare_dependency(
+    link_with: seams_api_lib,
+    include_directories: include_directories('include', 'src'))
+  subdir('bindings/python')
   python3_dseams = find_program('python3', required: true)
   dseams_env = environment()
   dseams_env.set('DSEAMS_BUILD', meson.project_build_root())

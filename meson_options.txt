@@ -43,3 +43,9 @@ option('r_libs_user', type: 'string', value: '',
   description: 'R_LIBS_USER for the CHILL+ front. Empty leaves R to discover it')
 option('paper_full', type: 'boolean', value: false,
   description: 'Run the full paper Snakemake tutorials. Off by default; those tests exit 77 until this is enabled')
+option('with_blas', type: 'feature', value: 'auto',
+  description: 'Link FlexiBLAS, or BLAS and LAPACK. Nothing calls them yet; disabled for the PyPI wheels')
+option('with_readcon', type: 'feature', value: 'auto',
+  description: 'Build the readcon-core and readcon-db .con readers (Rust, needs cargo and crates.io)')
+option('system_libseams', type: 'boolean', value: false,
+  description: 'Build only the dseams Python module against an installed libseams (pkg-config seams)')
