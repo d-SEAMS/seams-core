@@ -171,6 +171,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The minimage wrap pin is v0.1.2. Distances use mi_displacement_euclidean, and a failed call keeps the in-tree formula.
 - The one-thread carried ring update copies and sorts its rings directly again. Several threads still sort indices and merge in parallel. A team narrower than the process is bound once to that many cores of the allowed set. Interior cells of the orthorhombic cutoff skip the periodic-shift arithmetic. One-thread and several-thread results still match.
 - The one-thread ring search packs sorted neighbour rows in one pass, and interior cells of a triclinic cutoff skip the image-wrap branches. Both stencils keep the same directed pairs as the branchy walk.
+- The orthorhombic cutoff list, cutoff q_l and the primitive ring census scale with OpenMP threads. Each thread fills its own CSR rows from a slot-balanced cell range, the C API reuses per-thread frame buffers, and the ring census counts sizes per thread without gathering the rings. On 110592-molecule ice Ic in `bench/omp-scaling`, 8 threads run the cutoff list 4.8 times, q4 5.8 times, q6 5.9 times and rings 6.1 times faster than 1 thread, and the 1-thread times are no slower than before. The CSR, q_l and ring counts are identical at 1, 2, 4 and 8 threads.
 - The orthorhombic cutoff neighbour list is built by a parallel cell sort.
   Each thread counts its atoms, a prefix sum places them, and the pairs are
   written straight into one CSR. The same buffers are reused on the next frame.
