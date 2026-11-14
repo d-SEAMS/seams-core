@@ -6,6 +6,10 @@ nine ions added. Type 1 is water. Types 3 and 4 are chloride and
 sodium. One chloride sits in a slab that CHILL+ calls fully
 crystalline. The other eight ions sit in liquid slabs.
 ~meson test docs_tutorial_brine~ checks that split.
+~meson test docs_frame_tutorials~ runs that file in CI (~--small~).
+Without ~--small~, ~docs/tutorials/test_hf_frames.py~ downloads
+~data/frames/T230_m20_r0_tend.xyz~ from ~d-SEAMS/brine-front-230K~ at
+~4828e33ecf419c70643b2d466bfa4f283b4138dc~ and checks its sha256.
 
 CHILL+ is run on the water alone, so an ion is not given an ice
 label. Each ion is then counted in the 3.7 Å slab that contains it.

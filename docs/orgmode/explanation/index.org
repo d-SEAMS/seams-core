@@ -23,6 +23,7 @@ These pages are for understanding. They are not recipes.
 | [[file:performance.org][Release-candidate sitting]] | Tables built from ~benchmarks/rc3-sitting.csv~ |
 | [[file:performance-overview.org][Performance overview]] | rc3, the signature search, the large cell, and the pool audit |
 | [[file:performance-h2h.org][Performance]] | Neighbours, rings, q6, CHILL+, cages, PTM, and linkcell scaling |
+| [[file:performance-range.org][Performance, 4096 to 110592]] | Neighbour and ring rows, with the stored interval, n, and DNF |
 | [[file:citation.org][Citation]] | What to cite |
 
 #+begin_export rst
@@ -47,5 +48,6 @@ These pages are for understanding. They are not recipes.
    performance
    performance-overview
    performance-h2h
+   performance-range
    citation
 #+end_export

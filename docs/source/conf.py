@@ -38,6 +38,21 @@ def _write_h2h():
 _write_h2h()
 
 
+def _write_performance_range():
+    """Fill the 4096 to 110592 neighbour and ring tables from the CSVs."""
+    import importlib.util
+
+    script = os.path.join(_docs, "render_performance_range.py")
+    spec = importlib.util.spec_from_file_location("render_performance_range", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    if module.main(["--check"]) != 0:
+        raise SystemExit("performance range does not match the CSVs")
+
+
+_write_performance_range()
+
+
 def _write_science_gallery():
     """Fill the four-figure page from the shared census CSV."""
     import importlib.util
