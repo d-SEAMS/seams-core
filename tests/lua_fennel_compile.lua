@@ -6,9 +6,15 @@ local compiler, source_path = arg[1], arg[2]
 local saved = arg
 -- "--compile" with no files installs the module and leaves the CLI.
 arg = {"--compile"}
-dofile(compiler)
+local returned = dofile(compiler)
 arg = saved
-local fennel = require("fennel")
+-- share/lua/5.4/fennel.lua, which meson also accepts, is the library
+-- form: it returns the module instead of preloading it.
+local found, fennel = pcall(require, "fennel")
+if not found then
+  assert(type(returned) == "table", fennel)
+  fennel = returned
+end
 local source = assert(io.open(source_path))
 local text = source:read("*a")
 source:close()
