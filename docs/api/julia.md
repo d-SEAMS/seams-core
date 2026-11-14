@@ -48,15 +48,219 @@ Purpose: One frame read from a dump or built in memory.
 
 Parameters: none
 
+Returns: A Frame.
+
+Ownership: The finalizer calls seams_frame_free.
+
+Errors: Error when the pointer is null.
+
 Units: object
 
 Example: `docs/examples/minimal_julia.jl`
+
+### Seams.CUTOFF
+
+Purpose: Graph code of the cutoff neighbour list.
+
+Parameters: none
+
+Returns: The integer 0.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: cutoff and coordinates in angstrom when the call takes them
+
+Example: `bindings/julia/Seams/test/runtests.jl`
+
+### Seams.MUTUAL
+
+Purpose: Graph code of the mutual four-nearest list.
+
+Parameters: none
+
+Returns: The integer 1.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: cutoff and coordinates in angstrom when the call takes them
+
+Example: `bindings/julia/Seams/test/runtests.jl`
+
+### Seams.OVITO
+
+Purpose: CHILL+ rule code used by OVITO.
+
+Parameters: none
+
+Returns: The integer 1.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: cutoff and coordinates in angstrom when the call takes them
+
+Example: `bindings/julia/Seams/test/runtests.jl`
+
+### Seams.PUBLISHED
+
+Purpose: CHILL+ rule code of the 2015 paper.
+
+Parameters: none
+
+Returns: The integer 0.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: cutoff and coordinates in angstrom when the call takes them
+
+Example: `bindings/julia/Seams/test/runtests.jl`
+
+### Seams.System
+
+Purpose: Empty system from seams_system_create. Positions are added with set_ortho!.
+
+Parameters: none
+
+Returns: A System.
+
+Ownership: The finalizer calls seams_system_destroy.
+
+Errors: Error when seams_system_create returns NULL.
+
+Units: cutoff and coordinates in angstrom when the call takes them
+
+Example: `bindings/julia/Seams/test/runtests.jl`
+
+### Seams.chill_plus
+
+Purpose: CHILL+ labels and the nine-bin census.
+
+Parameters: sys; cutoff; graph; rule
+
+Returns: A pair of vectors, labels and counts.
+
+Ownership: The caller owns the vectors. The System still owns the frame.
+
+Errors: Error with seams_last_error text when the status is not SEAMS_OK.
+
+Units: cutoff and coordinates in angstrom when the call takes them
+
+Example: `bindings/julia/Seams/test/runtests.jl`
+
+### Seams.num_threads
+
+Purpose: Worker threads the engine is using.
+
+Parameters: none
+
+Returns: An Int.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: cutoff and coordinates in angstrom when the call takes them
+
+Example: `bindings/julia/Seams/test/runtests.jl`
+
+### Seams.q4q6
+
+Purpose: Local q4 and q6.
+
+Parameters: sys; cutoff
+
+Returns: A pair of vectors, q4 and q6.
+
+Ownership: The caller owns the vectors.
+
+Errors: Error with seams_last_error text when the status is not SEAMS_OK.
+
+Units: cutoff and coordinates in angstrom when the call takes them
+
+Example: `bindings/julia/Seams/test/runtests.jl`
+
+### Seams.set_num_threads
+
+Purpose: Request n worker threads.
+
+Parameters: n
+
+Returns: Nothing.
+
+Ownership: No allocation.
+
+Errors: Error with seams_last_error text when the status is not SEAMS_OK.
+
+Units: cutoff and coordinates in angstrom when the call takes them
+
+Example: `bindings/julia/Seams/test/runtests.jl`
+
+### Seams.set_ortho!
+
+Purpose: Store an orthogonal cell. xyz is 3 by n.
+
+Parameters: sys; xyz; lengths
+
+Returns: The same System.
+
+Ownership: The System still owns the C frame.
+
+Errors: Error when xyz is not 3 by n, or when the C status is not SEAMS_OK.
+
+Units: cutoff and coordinates in angstrom when the call takes them
+
+Example: `bindings/julia/Seams/test/runtests.jl`
+
+### Seams.six_rings
+
+Purpose: Number of primitive six-rings and their fraction.
+
+Parameters: sys; cutoff
+
+Returns: A pair, the six-ring count and the fraction.
+
+Ownership: The temporary ring set is freed with seams_rings_destroy before the function returns.
+
+Errors: Error with seams_last_error text when the status is not SEAMS_OK.
+
+Units: cutoff and coordinates in angstrom when the call takes them
+
+Example: `bindings/julia/Seams/test/runtests.jl`
+
+### Seams.version
+
+Purpose: Engine version string from seams_version_string.
+
+Parameters: none
+
+Returns: A String.
+
+Ownership: Julia owns the string. The C pointer is not freed.
+
+Errors: None.
+
+Units: cutoff and coordinates in angstrom when the call takes them
+
+Example: `bindings/julia/Seams/test/runtests.jl`
 
 ### cages
 
 Purpose: Hexagonal and double-diamond cage counts.
 
 Parameters: frame; cutoff
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
 
 Units: cutoff in angstrom; counts are dimensionless
 
@@ -68,7 +272,29 @@ Purpose: CHILL+ label of each atom.
 
 Parameters: frame; cutoff
 
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
 Units: cutoff in angstrom; labels are dimensionless codes
+
+Example: `docs/examples/minimal_julia.jl`
+
+### ice_ih_path
+
+Purpose: Path of the committed Ice Ih dump, input/traj/ice1h.lammpstrj.
+
+Parameters: none
+
+Returns: The absolute path string.
+
+Ownership: Julia owns the string.
+
+Errors: None.
+
+Units: cutoff and coordinates in angstrom when the call takes them
 
 Example: `docs/examples/minimal_julia.jl`
 
@@ -78,17 +304,13 @@ Purpose: Time for an H-H vector to rotate 90 degrees between two frames.
 
 Parameters: first; second; dt
 
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
 Units: dt and the result in the caller's time unit
-
-Example: `docs/examples/minimal_julia.jl`
-
-### nframes
-
-Purpose: Number of frames in a trajectory path.
-
-Parameters: path
-
-Units: dimensionless count
 
 Example: `docs/examples/minimal_julia.jl`
 
@@ -98,7 +320,29 @@ Purpose: Directed pairs in the neighbour list.
 
 Parameters: frame; cutoff; type; graph
 
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
 Units: cutoff in angstrom; the count is dimensionless
+
+Example: `docs/examples/minimal_julia.jl`
+
+### nframes
+
+Purpose: Number of frames in a trajectory path.
+
+Parameters: path
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
+Units: dimensionless count
 
 Example: `docs/examples/minimal_julia.jl`
 
@@ -107,6 +351,12 @@ Example: `docs/examples/minimal_julia.jl`
 Purpose: Number of atoms in a frame.
 
 Parameters: frame
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
 
 Units: dimensionless count
 
@@ -118,6 +368,12 @@ Purpose: Histogram of primitive rings.
 
 Parameters: frame; cutoff; max_ring
 
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
 Units: cutoff in angstrom; bin k is a dimensionless ring count
 
 Example: `docs/examples/minimal_julia.jl`
@@ -127,6 +383,12 @@ Example: `docs/examples/minimal_julia.jl`
 Purpose: Local q4 and q6.
 
 Parameters: frame; cutoff
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
 
 Units: cutoff in angstrom; q4 and q6 are dimensionless
 
@@ -138,6 +400,12 @@ Purpose: Read one frame from a dump.
 
 Parameters: path; frame; type
 
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
 Units: frame index is dimensionless; coordinates are angstrom
 
 Example: `docs/examples/minimal_julia.jl`
@@ -147,6 +415,12 @@ Example: `docs/examples/minimal_julia.jl`
 Purpose: Closed cages matching a ring-census spec.
 
 Parameters: frame; cutoff; spec
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
 
 Units: cutoff in angstrom; spec is text
 
@@ -158,6 +432,12 @@ Purpose: Mean local Steinhardt q_l.
 
 Parameters: frame; cutoff; order_l
 
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
+
 Units: cutoff in angstrom; ql is dimensionless
 
 Example: `docs/examples/minimal_julia.jl`
@@ -167,6 +447,12 @@ Example: `docs/examples/minimal_julia.jl`
 Purpose: Shell label for Ih, Ic, or stacking disorder.
 
 Parameters: frame
+
+Returns: The Julia value named in the purpose.
+
+Ownership: Returned arrays are owned by Julia. A Frame is freed by its finalizer.
+
+Errors: Error() with the text of seams_last_error when the status is not zero.
 
 Units: labels are dimensionless codes
 

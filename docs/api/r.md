@@ -64,6 +64,12 @@ Purpose: Cage counts for a dump path.
 
 Parameters: path; frame; cutoff
 
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
 Units: cutoff in angstrom; frame index is dimensionless
 
 Example: `docs/examples/minimal_r.R`
@@ -73,6 +79,12 @@ Example: `docs/examples/minimal_r.R`
 Purpose: Cage counts for a frame object.
 
 Parameters: frame; cutoff
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
 
 Units: cutoff in angstrom; counts are dimensionless
 
@@ -84,6 +96,12 @@ Purpose: CHILL+ labels for a dump path.
 
 Parameters: path; frame; cutoff
 
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
 Units: cutoff in angstrom
 
 Example: `docs/examples/minimal_r.R`
@@ -93,6 +111,12 @@ Example: `docs/examples/minimal_r.R`
 Purpose: CHILL+ labels for a frame object.
 
 Parameters: frame; cutoff
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
 
 Units: cutoff in angstrom; labels are dimensionless codes
 
@@ -104,6 +128,12 @@ Purpose: Rotation time of H-H vectors between two frames.
 
 Parameters: first; second; dt
 
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
 Units: dt and the result in the caller's time unit
 
 Example: `docs/examples/minimal_r.R`
@@ -113,6 +143,12 @@ Example: `docs/examples/minimal_r.R`
 Purpose: Number of frames in a trajectory path.
 
 Parameters: path
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
 
 Units: dimensionless count
 
@@ -124,6 +160,12 @@ Purpose: Coordinates of a dump frame.
 
 Parameters: path; frame
 
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
 Units: angstrom
 
 Example: `docs/examples/minimal_r.R`
@@ -133,6 +175,12 @@ Example: `docs/examples/minimal_r.R`
 Purpose: Coordinates stored on a frame object.
 
 Parameters: frame
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
 
 Units: angstrom
 
@@ -144,6 +192,12 @@ Purpose: Ring histogram for a dump path.
 
 Parameters: path; frame; cutoff
 
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
 Units: cutoff in angstrom
 
 Example: `docs/examples/minimal_r.R`
@@ -153,6 +207,12 @@ Example: `docs/examples/minimal_r.R`
 Purpose: Ring histogram for a frame object.
 
 Parameters: frame; cutoff
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
 
 Units: cutoff in angstrom; counts are dimensionless
 
@@ -164,6 +224,12 @@ Purpose: Print the atom count of a frame.
 
 Parameters: frame
 
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
 Units: dimensionless count
 
 Example: `docs/examples/minimal_r.R`
@@ -173,6 +239,12 @@ Example: `docs/examples/minimal_r.R`
 Purpose: Local q4 and q6 for a dump path.
 
 Parameters: path; frame; cutoff
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
 
 Units: cutoff in angstrom; q4 and q6 are dimensionless
 
@@ -184,6 +256,12 @@ Purpose: Local q4 and q6 for a frame object.
 
 Parameters: frame; cutoff
 
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
 Units: cutoff in angstrom; q4 and q6 are dimensionless
 
 Example: `docs/examples/minimal_r.R`
@@ -193,6 +271,12 @@ Example: `docs/examples/minimal_r.R`
 Purpose: Read one frame from a dump.
 
 Parameters: path; frame; type
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
 
 Units: frame index is dimensionless; coordinates are angstrom
 
@@ -204,6 +288,12 @@ Purpose: Closed cages for a dump path.
 
 Parameters: path; frame; spec
 
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
 Units: spec is text; cutoff used by the call is in angstrom
 
 Example: `docs/examples/minimal_r.R`
@@ -213,6 +303,12 @@ Example: `docs/examples/minimal_r.R`
 Purpose: Closed cages for a frame object.
 
 Parameters: frame; spec
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
 
 Units: spec is text
 
@@ -224,6 +320,12 @@ Purpose: Mean local q_l for a dump path.
 
 Parameters: path; frame; order_l
 
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
 Units: order parameter is dimensionless
 
 Example: `docs/examples/minimal_r.R`
@@ -233,6 +335,12 @@ Example: `docs/examples/minimal_r.R`
 Purpose: Mean local q_l for a frame object.
 
 Parameters: frame; order_l
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
 
 Units: order parameter is dimensionless
 
@@ -244,6 +352,12 @@ Purpose: Shell labels for a dump path.
 
 Parameters: path; frame
 
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
+
 Units: dimensionless label codes
 
 Example: `docs/examples/minimal_r.R`
@@ -253,6 +367,12 @@ Example: `docs/examples/minimal_r.R`
 Purpose: Shell labels for a frame object.
 
 Parameters: frame
+
+Returns: The data frame, vector, or count named in the purpose.
+
+Ownership: R owns the returned vectors. A dseams_frame finalizer frees the C frame.
+
+Errors: The binding stops with the text of seams_last_error when the status is not SEAMS_OK.
 
 Units: dimensionless label codes
 

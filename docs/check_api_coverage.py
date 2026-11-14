@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 
 import check_c_symbols
+import run_snippets
 
 ROOT = Path(__file__).resolve().parents[1]
 API = ROOT / "docs" / "api"
@@ -20,6 +21,7 @@ PAGES = {
     "fortran": "fortran.md",
     "julia": "julia.md",
     "r": "r.md",
+    "lua": "lua.md",
 }
 EXAMPLES = {
     "c": "docs/examples/c_api_tour.c",
@@ -29,7 +31,9 @@ EXAMPLES = {
     "fortran": "docs/examples/minimal_fortran.f90",
     "julia": "docs/examples/minimal_julia.jl",
     "r": "docs/examples/minimal_r.R",
+    "lua": "docs/examples/minimal_lua.lua",
 }
+FIELDS = ("Purpose", "Parameters", "Returns", "Ownership", "Errors", "Units")
 
 
 def groups():
@@ -41,6 +45,7 @@ def groups():
         "fortran": check_c_symbols.fortran_symbols(),
         "julia": check_c_symbols.julia_symbols(),
         "r": check_c_symbols.r_symbols(),
+        "lua": check_c_symbols.lua_symbols(),
     }
 
 
@@ -74,25 +79,31 @@ def problems():
             errors.append("{} has no symbol reference block".format(page.name))
             continue
         have = sections(body)
-        example = EXAMPLES[lang]
-        if not (ROOT / example).is_file():
-            errors.append("missing example {}".format(example))
+        if not run_snippets.snippets_of(page):
+            errors.append("{} has no executed example".format(page.name))
         for name in names:
             block = have.get(name)
             if block is None:
-                errors.append("{}: {} has no section".format(lang, name))
+                errors.append("undocumented {} {}".format(lang, name))
                 continue
-            purpose = re.search(r"^Purpose: \S.*$", block, re.M)
-            parameters = re.search(r"^Parameters: \S.*$", block, re.M)
-            units = re.search(r"^Units: \S.*$", block, re.M)
-            if purpose is None:
-                errors.append("{}: {} needs a one-line purpose".format(lang, name))
-            if parameters is None:
-                errors.append("{}: {} needs parameters".format(lang, name))
-            if units is None:
-                errors.append("{}: {} needs units".format(lang, name))
-            if example not in block:
-                errors.append("{}: {} needs a link to {}".format(lang, name, example))
+            for label in FIELDS:
+                if re.search(r"^" + label + r": \S.*$", block, re.M) is None:
+                    errors.append("{}: {} needs {}".format(lang, name, label))
+            example = re.search(r"^Example: `([^`]+)`", block, re.M)
+            if example is None or not (ROOT / example.group(1)).is_file():
+                errors.append("{}: {} needs an example file that exists".format(lang, name))
+        for name in have:
+            if name not in names:
+                errors.append("documented symbol does not exist: {}: {}".format(lang, name))
+    c_page = sections(reference_body(API / PAGES["c"]))
+    for name in check_c_symbols.rust_sys_symbols():
+        block = c_page.get(name)
+        if block is None:
+            errors.append("undocumented rust-sys {}".format(name))
+            continue
+        for label in FIELDS:
+            if re.search(r"^" + label + r": \S.*$", block, re.M) is None:
+                errors.append("rust-sys {} needs {} on the C page".format(name, label))
     return errors
 
 
@@ -102,7 +113,9 @@ def main():
         print("\n".join(errors), file=sys.stderr)
         return 1
     count = sum(len(names) for names in groups().values())
-    print("api coverage ok ({} symbols)".format(count))
+    count += len(check_c_symbols.rust_sys_symbols())
+    undocumented = [item for item in errors if item.startswith("undocumented")]
+    print("api coverage ok ({} symbols, {} undocumented)".format(count, len(undocumented)))
     return 0
 
 

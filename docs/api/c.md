@@ -649,1384 +649,2227 @@ capi seams_site_table 250
 
 ### SEAMS_ABI
 
-Purpose: Public name in include/seams.h.
+Purpose: ABI number compiled into this header. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The macro value (1).
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_CAGE_BOTH
 
-Purpose: Public name in include/seams.h.
+Purpose: Both cages. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 3.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_CAGE_CUBIC
 
-Purpose: Public name in include/seams.h.
+Purpose: Double-diamond cage only. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 2.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_CAGE_HEX
 
-Purpose: Public name in include/seams.h.
+Purpose: Hexagonal cage only. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 1.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_CAGE_WATER
 
-Purpose: Public name in include/seams.h.
+Purpose: In neither cage. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 0.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_CHILL_OVITO
 
-Purpose: Public name in include/seams.h.
+Purpose: Published edges are inclusive. OVITO edges are open. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 1.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_CHILL_PUBLISHED
 
-Purpose: Public name in include/seams.h.
+Purpose: Published edges are inclusive. OVITO edges are open. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 0.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_DEPRECATED
 
-Purpose: Public name in include/seams.h.
+Purpose: Mark a shipped declaration and name its replacement. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: message
 
-Units: as documented on that declaration.
+Returns: The macro value (attribute).
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_ERR_ARG
 
-Purpose: Public name in include/seams.h.
+Purpose: A caller argument is the wrong shape. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 4.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_ERR_BOX
 
-Purpose: Public name in include/seams.h.
+Purpose: The cell is missing or has no volume. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 3.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_ERR_INTERNAL
 
-Purpose: Public name in include/seams.h.
+Purpose: The library hit an internal failure. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 7.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_ERR_NOMEM
 
-Purpose: Public name in include/seams.h.
+Purpose: An allocation failed. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 6.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_ERR_NULL
 
-Purpose: Public name in include/seams.h.
+Purpose: A required pointer is null. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 1.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_ERR_RANGE
 
-Purpose: Public name in include/seams.h.
+Purpose: A number is outside the accepted range. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 2.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_ERR_STATE
 
-Purpose: Public name in include/seams.h.
+Purpose: The handle has no frame yet. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 5.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_GRAPH_CUTOFF
 
-Purpose: Public name in include/seams.h.
+Purpose: Neighbour graph. Seeded is a cage graph: mutual seeds, union completions. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 0.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_GRAPH_MUTUAL
 
-Purpose: Public name in include/seams.h.
+Purpose: Neighbour graph. Seeded is a cage graph: mutual seeds, union completions. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 1.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_GRAPH_SEEDED
 
-Purpose: Public name in include/seams.h.
+Purpose: Neighbour graph. Seeded is a cage graph: mutual seeds, union completions. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 2.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_LABEL_CLATHRATE
 
-Purpose: Public name in include/seams.h.
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 4.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_LABEL_CUBIC
 
-Purpose: Public name in include/seams.h.
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 0.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_LABEL_HEXAGONAL
 
-Purpose: Public name in include/seams.h.
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 1.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_LABEL_INTERCLATHRATE
 
-Purpose: Public name in include/seams.h.
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 5.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_LABEL_INTERFACIAL
 
-Purpose: Public name in include/seams.h.
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 3.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_LABEL_RECUBIC
 
-Purpose: Public name in include/seams.h.
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 7.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_LABEL_REHEX
 
-Purpose: Public name in include/seams.h.
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 8.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_LABEL_UNCLASSIFIED
 
-Purpose: Public name in include/seams.h.
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 6.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_LABEL_WATER
 
-Purpose: Public name in include/seams.h.
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 2.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_OK
 
-Purpose: Public name in include/seams.h.
+Purpose: The call succeeded. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 0.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_BOTH_BASAL
 
-Purpose: Public name in include/seams.h.
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 4.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_BOTH_PRISMATIC
 
-Purpose: Public name in include/seams.h.
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 5.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_DDC
 
-Purpose: Public name in include/seams.h.
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 1.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_DEFORMED_PRISM
 
-Purpose: Public name in include/seams.h.
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 7.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_HC_BASAL
 
-Purpose: Public name in include/seams.h.
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 2.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_HC_PRISMATIC
 
-Purpose: Public name in include/seams.h.
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 3.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_HEXAGON
 
-Purpose: Public name in include/seams.h.
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 10.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_MIXED_PRISM
 
-Purpose: Public name in include/seams.h.
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 8.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_OTHER
 
-Purpose: Public name in include/seams.h.
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 11.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_PENTAGON
 
-Purpose: Public name in include/seams.h.
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 9.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_PRISM
 
-Purpose: Public name in include/seams.h.
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 6.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_RING_UNCLASSIFIED
 
-Purpose: Public name in include/seams.h.
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 0.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_SITE_ACCEPTOR
 
-Purpose: Public name in include/seams.h.
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 5.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_SITE_ANION
 
-Purpose: Public name in include/seams.h.
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 2.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_SITE_APOLAR
 
-Purpose: Public name in include/seams.h.
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 7.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_SITE_CATION
 
-Purpose: Public name in include/seams.h.
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 1.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_SITE_DONOR_H
 
-Purpose: Public name in include/seams.h.
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 4.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_SITE_POLAR
 
-Purpose: Public name in include/seams.h.
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 6.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_SITE_SOLVENT
 
-Purpose: Public name in include/seams.h.
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 10.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_SITE_TAIL
 
-Purpose: Public name in include/seams.h.
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 3.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_SITE_UNSPECIFIED
 
-Purpose: Public name in include/seams.h.
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 0.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_SITE_WATER_H
 
-Purpose: Public name in include/seams.h.
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 9.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_SITE_WATER_O
 
-Purpose: Public name in include/seams.h.
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumerator value 8.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless code
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_VERSION_MAJOR
 
-Purpose: Public name in include/seams.h.
+Purpose: Major component of this release. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The macro value (integer).
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_VERSION_MINOR
 
-Purpose: Public name in include/seams.h.
+Purpose: Minor component of this release. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The macro value (integer).
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_VERSION_NUMBER
 
-Purpose: Public name in include/seams.h.
+Purpose: Packed version, (major << 16) | (minor << 8) | patch. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The macro value (integer).
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_VERSION_PATCH
 
-Purpose: Public name in include/seams.h.
+Purpose: Patch component of this release. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The macro value (integer).
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### SEAMS_VERSION_STRING
 
-Purpose: Public name in include/seams.h.
+Purpose: Release text written by the build. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The macro value (text).
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: text
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_abi
 
-Purpose: Public name in include/seams.h.
+Purpose: ABI number compiled into this library. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: SEAMS_ABI, which is 1.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_brine
 
-Purpose: Public name in include/seams.h.
+Purpose: One planar ice/brine front measurement. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The opaque type.
+
+Ownership: The caller creates the object and frees it with the matching destroy function.
+
+Errors: None. This is a type.
+
+Units: handle
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_brine_analyse
 
-Purpose: Public name in include/seams.h.
+Purpose: Planar ice/brine front from an ice assignment. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; ice; n_ice; water_type; ion_type; n_bins; axis; out
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Ownership: The caller frees *out with seams_brine_destroy().
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_brine_destroy
 
-Purpose: Public name in include/seams.h.
+Purpose: Free a brine-front handle. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: front
 
-Units: as documented on that declaration.
+Returns: Nothing.
+
+Ownership: Frees the caller-owned handle. delete of a null pointer is a no-op.
+
+Errors: None.
+
+Units: handle
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_brine_fronts
 
-Purpose: Public name in include/seams.h.
+Purpose: The two planar crossings of the ice slab. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: front; z_enter; z_exit; thickness; found
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL when front is NULL.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_brine_pockets
 
-Purpose: Public name in include/seams.h.
+Purpose: Brine pockets trapped in the ice, excluding the liquid reservoir. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: front; n_pockets; reservoir_waters
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL when front is NULL.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_brine_profile
 
-Purpose: Public name in include/seams.h.
+Purpose: Concentration profile along the front axis. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: front; z_mid; molality; ice_fraction; cap; n_out
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK when every non-NULL column was filled, or when every column pointer was NULL and n_out was written.
+
+Ownership: The caller owns the columns.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_brine_rejection
 
-Purpose: Public name in include/seams.h.
+Purpose: Molal rejection coefficient k = c_ice / c_liquid. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: front; c_ice; c_liquid; k; defined
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL when front is NULL.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_cage_label
 
-Purpose: Public name in include/seams.h.
+Purpose: Per-atom cage membership from the hexagonal and double-diamond search. The four codes are disjoint. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumeration type.
+
+Ownership: No allocation.
+
+Errors: None. This is a type.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_cage_set
 
-Purpose: Public name in include/seams.h.
+Purpose: Hexagonal and double-diamond membership for one frame. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The opaque type.
+
+Ownership: The caller creates the object and frees it with the matching destroy function.
+
+Errors: None. This is a type.
+
+Units: handle
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_cages
 
-Purpose: Public name in include/seams.h.
+Purpose: Hexagonal and double-diamond cages. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; cutoff; type; graph; k; complete; out
 
-Units: as documented on that declaration.
+Returns: Seams_status. SEAMS_OK (0) is success.
+
+Ownership: On success the caller owns the new seams_cage_set and frees it with the matching destroy function. Buffers the caller passed stay with the caller.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_cages_counts
 
-Purpose: Public name in include/seams.h.
+Purpose: Disjoint cage population counts. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: cages; n_hex; n_cubic; n_water; n_both
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL when cages is NULL.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_cages_destroy
 
-Purpose: Public name in include/seams.h.
+Purpose: Free a cage-membership handle. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: cages
 
-Units: as documented on that declaration.
+Returns: Nothing.
+
+Ownership: Frees the caller-owned handle. delete of a null pointer is a no-op.
+
+Errors: None.
+
+Units: handle
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_cages_find
 
-Purpose: Public name in include/seams.h.
+Purpose: Hexagonal and double-diamond cage membership. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; cutoff; type; graph; k; complete; out
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Ownership: The caller frees *out with seams_cages_destroy().
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_cages_labels
 
-Purpose: Public name in include/seams.h.
+Purpose: Per-atom cage code. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: cages; per_atom; len
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE.
+
+Ownership: The caller owns per_atom.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_cages_signature
 
-Purpose: Public name in include/seams.h.
+Purpose: Count closed cages whose ring census matches a signature. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; cutoff; type; graph; spec; n_cages; n_atoms
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_chill
 
-Purpose: Public name in include/seams.h.
+Purpose: Original CHILL labels, published or OVITO edges. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; cutoff; type; graph; rule; labels; labels_len; counts9
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Ownership: The caller owns labels and counts9.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_chill_plus
 
-Purpose: Public name in include/seams.h.
+Purpose: CHILL+ labels. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; cutoff; type; graph; rule; labels; counts9
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Ownership: The caller owns labels and counts9.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_chill_rule
 
-Purpose: Public name in include/seams.h.
+Purpose: Published edges are inclusive. OVITO edges are open. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumeration type.
+
+Ownership: No allocation.
+
+Errors: None. This is a type.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_contact_pairs
 
-Purpose: Public name in include/seams.h.
+Purpose: Mutual nearest unlike contacts of a site table. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; site_spec; n_pairs; n_cation; n_anion
 
-Units: as documented on that declaration.
+Returns: Seams_status. SEAMS_OK (0) is success.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_coordination
 
-Purpose: Public name in include/seams.h.
+Purpose: Coordination number integrated to rmax. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; rmax; bins; type_i; type_j; cn
 
-Units: as documented on that declaration.
+Returns: Seams_status. SEAMS_OK (0) is success.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_density_axis
 
-Purpose: Public name in include/seams.h.
+Purpose: Number density along one cell axis. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; type; bins; axis; z; rho; cap; n_out
 
-Units: as documented on that declaration.
+Returns: Seams_status. SEAMS_OK (0) is success.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_domains
 
-Purpose: Public name in include/seams.h.
+Purpose: Largest domain of a polar or apolar site subset. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; cutoff; site_spec; subset; n_subset; largest; percolation
 
-Units: as documented on that declaration.
+Returns: Seams_status. SEAMS_OK (0) is success.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_fingerprint
 
-Purpose: Public name in include/seams.h.
+Purpose: Topological fingerprint of the bonded graph. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; cutoff; type; k; graph; hops; colour_types; out
 
-Units: as documented on that declaration.
+Returns: Seams_status. SEAMS_OK (0) is success.
+
+Ownership: On success the caller owns the new seams_topo and frees it with the matching destroy function. Buffers the caller passed stay with the caller.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_fingerprint_atom
 
-Purpose: Public name in include/seams.h.
+Purpose: Local key of one atom. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: fp; index; buf; cap; n_out
 
-Units: as documented on that declaration.
+Returns: Seams_status. SEAMS_OK (0) is success.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_fingerprint_destroy
 
-Purpose: Public name in include/seams.h.
+Purpose: Free a fingerprint. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: fp
 
-Units: as documented on that declaration.
+Returns: Nothing.
+
+Ownership: Frees the caller-owned handle. delete of a null pointer is a no-op.
+
+Errors: None.
+
+Units: handle
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_fingerprint_key
 
-Purpose: Public name in include/seams.h.
+Purpose: Frame key text. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: fp; buf; cap; n_out
 
-Units: as documented on that declaration.
+Returns: Seams_status. SEAMS_OK (0) is success.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_fingerprint_rings
 
-Purpose: Public name in include/seams.h.
+Purpose: Primitive-ring census stored on the fingerprint. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: fp; counts; counts_len
 
-Units: as documented on that declaration.
+Returns: Seams_status. SEAMS_OK (0) is success.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_get_num_threads
 
-Purpose: Public name in include/seams.h.
+Purpose: Team width the next analysis call will request. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: A positive count.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_graph
 
-Purpose: Public name in include/seams.h.
+Purpose: Neighbour graph. Seeded is a cage graph: mutual seeds, union completions. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumeration type.
+
+Ownership: No allocation.
+
+Errors: None. This is a type.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_handle_error
 
-Purpose: Public name in include/seams.h.
+Purpose: Detail string stored on a handle. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: handle
 
-Units: as documented on that declaration.
+Returns: The handle's string, or the thread-local string when handle is NULL.
+
+Ownership: The library owns the string. The caller does not free it.
+
+Errors: None.
+
+Units: text
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_hbonds
 
-Purpose: Public name in include/seams.h.
+Purpose: Hydrogen-bond count on one frame. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; cutoff; oxygen_type; hydrogen_type; dist_cutoff; angle_cutoff; n_bonds
 
-Units: as documented on that declaration.
+Returns: Seams_status. SEAMS_OK (0) is success.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_label
 
-Purpose: Public name in include/seams.h.
+Purpose: CHILL and CHILL+ atom labels. Matches molSys::atom_state_type. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumeration type.
+
+Ownership: No allocation.
+
+Errors: None. This is a type.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_label_name
 
-Purpose: Public name in include/seams.h.
+Purpose: Name of a CHILL label. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: label
 
-Units: as documented on that declaration.
+Returns: Static string.
+
+Ownership: The library owns the string. The caller does not free it.
+
+Errors: None.
+
+Units: text
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_lammps_bounds
+
+Purpose: Fill ox, oy, oz, lx, ly, lz, xy, xz, yz from LAMMPS box bounds. Declared in include/seams_lammps_box.h.
+
+Parameters: lo; hi; tilt; box9
+
+Returns: Nothing. The nine cell numbers are written to box9.
+
+Ownership: The caller owns lo, hi, tilt, and box9. The function does not allocate.
+
+Errors: None. The caller supplies three-vectors and a nine-number buffer.
+
+Units: lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_last_error
 
-Purpose: Public name in include/seams.h.
+Purpose: Thread-local detail of the last failing call on this thread. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: Pointer to a thread-local string.
+
+Ownership: The library owns the string. The caller does not free it.
+
+Errors: None.
+
+Units: text
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_monolayer
 
-Purpose: Public name in include/seams.h.
+Purpose: Primitive-ring histogram of a monolayer. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; cutoff; type; max_depth; sheet_area; counts; counts_len
 
-Units: as documented on that declaration.
+Returns: Seams_status. SEAMS_OK (0) is success.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_neighbours
 
-Purpose: Public name in include/seams.h.
+Purpose: One neighbour list owned by the caller, built from a frame. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The opaque type.
+
+Ownership: The caller creates the object and frees it with the matching destroy function.
+
+Errors: None. This is a type.
+
+Units: handle
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_neighbours_build
 
-Purpose: Public name in include/seams.h.
+Purpose: Build a cutoff or mutual neighbour list. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; cutoff; type; graph; out
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Ownership: The caller frees *out with seams_neighbours_destroy().
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_neighbours_copy
 
-Purpose: Public name in include/seams.h.
+Purpose: Copy the neighbour CSR into caller buffers. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: nb; offsets; offsets_cap; n_offsets; cols; cols_cap; nnz
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK when every non-NULL buffer was filled, or when both buffers were NULL and the lengths were written.
+
+Ownership: The caller owns the buffers.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_neighbours_count
 
-Purpose: Public name in include/seams.h.
+Purpose: Number of neighbour rows. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: nb
 
-Units: as documented on that declaration.
+Returns: The row count, or 0 when nb is NULL.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_neighbours_csr
 
-Purpose: Public name in include/seams.h.
+Purpose: Borrow the neighbour list as CSR. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: nb; offsets; n_offsets; cols; nnz
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL.
+
+Ownership: The pointers are owned by nb and remain valid until seams_neighbours_destroy(nb).
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_neighbours_destroy
 
-Purpose: Public name in include/seams.h.
+Purpose: Free a neighbour list. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: nb
 
-Units: as documented on that declaration.
+Returns: Nothing.
+
+Ownership: Frees the caller-owned handle. delete of a null pointer is a no-op.
+
+Errors: None.
+
+Units: handle
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_neighbours_knn
 
-Purpose: Public name in include/seams.h.
+Purpose: K-nearest neighbour list. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; k; cutoff; type; mutual; out
 
-Units: as documented on that declaration.
+Returns: Seams_status. SEAMS_OK (0) is success.
+
+Ownership: On success the caller owns the new seams_neighbours and frees it with the matching destroy function. Buffers the caller passed stay with the caller.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_path_nframes
 
-Purpose: Public name in include/seams.h.
+Purpose: Number of frames in a trajectory path. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: path; nframes
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_INTERNAL.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_prisms
 
-Purpose: Public name in include/seams.h.
+Purpose: Perfect and imperfect prism counts by ring size. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; cutoff; type; perfect; imperfect; len
 
-Units: as documented on that declaration.
+Returns: Seams_status. SEAMS_OK (0) is success.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_q4q6
 
-Purpose: Public name in include/seams.h.
+Purpose: Local q4 and q6 on the cutoff shell. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; cutoff; type; q4; q6
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Ownership: The caller owns q4 and q6.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_q6bar
 
-Purpose: Public name in include/seams.h.
+Purpose: Lechner-Dellago q6-bar and the ice count above a cut. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; cutoff; type; ice_cut; q6bar; q6bar_len; mean; median; n_ice
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Ownership: The caller owns q6bar.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_ql
 
-Purpose: Public name in include/seams.h.
+Purpose: Local Steinhardt q_l, and the Lechner-Dellago average on request. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; cutoff; type; order_l; graph; ql; ql_len; qlbar; qlbar_len
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Ownership: The caller owns both arrays.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_rdf
 
-Purpose: Public name in include/seams.h.
+Purpose: Partial radial distribution. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; rmax; bins; type_i; type_j; r; g; count; cap; n_out; volume
 
-Units: as documented on that declaration.
+Returns: Seams_status. SEAMS_OK (0) is success.
+
+Ownership: The caller owns every buffer. A NULL buffer with a length pointer queries the required count and returns SEAMS_OK. A short buffer returns SEAMS_ERR_RANGE and writes nothing.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_ring_symmetry
 
-Purpose: Public name in include/seams.h.
+Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumeration type.
+
+Ownership: No allocation.
+
+Errors: None. This is a type.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_ring_symmetry_name
 
-Purpose: Public name in include/seams.h.
+Purpose: Name of a ring-symmetry code. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: symmetry
 
-Units: as documented on that declaration.
+Returns: Static string.
+
+Ownership: The library owns the string. The caller does not free it.
+
+Errors: None.
+
+Units: text
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings
 
-Purpose: Public name in include/seams.h.
+Purpose: One primitive-ring set owned by the caller. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The opaque type.
+
+Ownership: The caller creates the object and frees it with the matching destroy function.
+
+Errors: None. This is a type.
+
+Units: handle
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings_count
 
-Purpose: Public name in include/seams.h.
+Purpose: Number of primitive rings. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: rings
 
-Units: as documented on that declaration.
+Returns: The ring count, or 0 when rings is NULL.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings_destroy
 
-Purpose: Public name in include/seams.h.
+Purpose: Free a ring set. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: rings
 
-Units: as documented on that declaration.
+Returns: Nothing.
+
+Ownership: Frees the caller-owned handle. delete of a null pointer is a no-op.
+
+Errors: None.
+
+Units: handle
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings_find
 
-Purpose: Public name in include/seams.h.
+Purpose: Primitive rings (Franzblau) up to a maximum size. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; cutoff; type; graph; max_depth; out
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Ownership: The caller frees *out with seams_rings_destroy().
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings_fraction
 
-Purpose: Public name in include/seams.h.
+Purpose: Fraction of atoms that sit on a ring. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: rings; size; fraction
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings_histogram
 
-Purpose: Public name in include/seams.h.
+Purpose: Count primitive rings by size. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: rings; counts; counts_len
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE.
+
+Ownership: The caller owns counts.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings_labels
 
-Purpose: Public name in include/seams.h.
+Purpose: Size and symmetry of each ring. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: rings; sizes; symmetry
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL.
+
+Ownership: The caller owns both arrays.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings_vertices
 
-Purpose: Public name in include/seams.h.
+Purpose: Atom indices of one ring. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: rings; index; atoms; cap; n_out
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE.
+
+Ownership: The caller owns atoms.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_running_cn
 
-Purpose: Public name in include/seams.h.
+Purpose: Running coordination number along the partial RDF. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; rmax; bins; type_i; type_j; r; cn; cap; n_out
 
-Units: as documented on that declaration.
+Returns: Seams_status. SEAMS_OK (0) is success.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_set_num_threads
 
-Purpose: Public name in include/seams.h.
+Purpose: Set the OpenMP team used by later analysis calls. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: n
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_RANGE when n is negative.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_signature_cages
 
-Purpose: Public name in include/seams.h.
+Purpose: Closed cages of one ring census. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; cutoff; type; graph; spec; n_cages; n_atoms
 
-Units: as documented on that declaration.
+Returns: Seams_status. SEAMS_OK (0) is success.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_site_kind
 
-Purpose: Public name in include/seams.h.
+Purpose: Site kind. Values match the engine's site table. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumeration type.
+
+Ownership: No allocation.
+
+Errors: None. This is a type.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_site_table
 
-Purpose: Public name in include/seams.h.
+Purpose: Per-atom site kind from a site-table spec. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; spec; kinds; len
 
-Units: as documented on that declaration.
+Returns: Seams_status. SEAMS_OK (0) is success.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_status
 
-Purpose: Public name in include/seams.h.
+Purpose: Status codes. Zero is success. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The enumeration type.
+
+Ownership: No allocation.
+
+Errors: None. This is a type.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_status_string
 
-Purpose: Public name in include/seams.h.
+Purpose: Short name of a status code. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: status
 
-Units: as documented on that declaration.
+Returns: Pointer to a static string.
+
+Ownership: The library owns the string. The caller does not free it.
+
+Errors: None.
+
+Units: text
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_steinhardt
 
-Purpose: Public name in include/seams.h.
+Purpose: Local Steinhardt q_l on the cutoff shell, and the average on request. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; cutoff; type; order_l; ql; ql_len; qlbar; qlbar_len
 
-Units: as documented on that declaration.
+Returns: Seams_status. SEAMS_OK (0) is success.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: cutoff and lengths in angstrom
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_system
 
-Purpose: Public name in include/seams.h.
+Purpose: One frame. The caller creates and destroys it. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The opaque type.
+
+Ownership: The caller creates the object and frees it with the matching destroy function.
+
+Errors: None. This is a type.
+
+Units: handle
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_count
 
-Purpose: Public name in include/seams.h.
+Purpose: Number of points in the frame. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys
 
-Units: as documented on that declaration.
+Returns: The atom count, or 0 when sys is NULL or holds no frame.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_create
 
-Purpose: Public name in include/seams.h.
+Purpose: Allocate an empty frame. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: A new handle, or NULL when allocation fails.
+
+Ownership: The caller owns the handle and frees it with the matching destroy function.
+
+Errors: NULL. seams_last_error() then reads 'out of memory'.
+
+Units: handle
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_destroy
 
-Purpose: Public name in include/seams.h.
+Purpose: Free a frame. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys
 
-Units: as documented on that declaration.
+Returns: Nothing.
+
+Ownership: Frees the caller-owned handle. delete of a null pointer is a no-op.
+
+Errors: None.
+
+Units: handle
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_read
 
-Purpose: Public name in include/seams.h.
+Purpose: Read one frame from a trajectory file. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; path; frame; type_filter
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Ownership: The library copies the frame out of the file.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_set_atoms
 
-Purpose: Public name in include/seams.h.
+Purpose: Store points and a general cell. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; xyz; n; box9; box_len; types; ids
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
+
+Ownership: The library copies the arrays.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_set_frame
 
-Purpose: Public name in include/seams.h.
+Purpose: Store points and a general LAMMPS cell. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; xyz; n; box9; types; ids
 
-Units: as documented on that declaration.
+Returns: Same codes as seams_system_set_atoms().
+
+Ownership: The library copies the arrays.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_set_ortho
 
-Purpose: Public name in include/seams.h.
+Purpose: Store points and an orthorhombic cell. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; xyz; n; ox; oy; oz; lx; ly; lz; types; ids
 
-Units: as documented on that declaration.
+Returns: Same codes as seams_system_set_frame().
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_symmetry
 
-Purpose: Public name in include/seams.h.
+Purpose: Per-atom ice shell label. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: sys; shell_rmsd; labels; labels_len
 
-Units: as documented on that declaration.
+Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_INTERNAL, SEAMS_ERR_NOMEM.
+
+Ownership: The caller owns labels.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Units: as named by the parameters
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_topo
 
-Purpose: Public name in include/seams.h.
+Purpose: Topological fingerprint of one bonded frame. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The opaque type.
+
+Ownership: The caller creates the object and frees it with the matching destroy function.
+
+Errors: None. This is a type.
+
+Units: handle
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_version
 
-Purpose: Public name in include/seams.h.
+Purpose: Packed release number. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: SEAMS_VERSION_NUMBER, (major << 16) | (minor << 8) | patch.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_version_major
 
-Purpose: Public name in include/seams.h.
+Purpose: Major version. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The integer result.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_version_minor
 
-Purpose: Public name in include/seams.h.
+Purpose: Minor version. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The integer result.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_version_patch
 
-Purpose: Public name in include/seams.h.
+Purpose: Patch version. Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: The integer result.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
 
 Example: `docs/examples/c_api_tour.c`
 
 ### seams_version_string
 
-Purpose: Public name in include/seams.h.
+Purpose: Version text, for example "2.14.0". Declared in include/seams.h.
 
-Parameters: see the declaration in include/seams.h.
+Parameters: none
 
-Units: as documented on that declaration.
+Returns: Pointer to a static string.
+
+Ownership: The library owns the string. The caller does not free it.
+
+Errors: None.
+
+Units: text
 
 Example: `docs/examples/c_api_tour.c`
-
 <!-- API_SYMBOLS_END -->
 
 The program those lines come from:

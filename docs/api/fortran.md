@@ -59,6 +59,12 @@ Purpose: CHILL+ rule used by OVITO.
 
 Parameters: none
 
+Returns: The integer parameter.
+
+Ownership: No allocation.
+
+Errors: None.
+
 Units: dimensionless code
 
 Example: `docs/examples/minimal_fortran.f90`
@@ -68,6 +74,12 @@ Example: `docs/examples/minimal_fortran.f90`
 Purpose: CHILL+ rule from the 2015 paper.
 
 Parameters: none
+
+Returns: The integer parameter.
+
+Ownership: No allocation.
+
+Errors: None.
 
 Units: dimensionless code
 
@@ -79,6 +91,12 @@ Purpose: Neighbour graph of pairs inside the cutoff.
 
 Parameters: none
 
+Returns: The integer parameter.
+
+Ownership: No allocation.
+
+Errors: None.
+
 Units: dimensionless code
 
 Example: `docs/examples/minimal_fortran.f90`
@@ -89,7 +107,29 @@ Purpose: Mutual four-nearest neighbour graph.
 
 Parameters: none
 
+Returns: The integer parameter.
+
+Ownership: No allocation.
+
+Errors: None.
+
 Units: dimensionless code
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### SEAMS_GRAPH_SEEDED
+
+Purpose: Cage graph of mutual seeds and union completions.
+
+Parameters: none
+
+Returns: The integer parameter.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: dimensionless
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -98,6 +138,12 @@ Example: `docs/examples/minimal_fortran.f90`
 Purpose: CHILL+ cubic-ice label. Fortran arrays of labels are 1-based, so clathrate is counts(5).
 
 Parameters: none
+
+Returns: The integer parameter.
+
+Ownership: No allocation.
+
+Errors: None.
 
 Units: dimensionless code 0
 
@@ -109,187 +155,13 @@ Purpose: The call succeeded.
 
 Parameters: none
 
+Returns: The integer parameter.
+
+Ownership: No allocation.
+
+Errors: None.
+
 Units: dimensionless status code
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### seams_chill_plus
-
-Purpose: Write one CHILL+ label per atom.
-
-Parameters: sys; cutoff; type; graph; rule; labels; counts
-
-Units: cutoff in angstrom; counts are dimensionless
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### seams_get_num_threads
-
-Purpose: Report the OpenMP width the next call will use.
-
-Parameters: none
-
-Units: dimensionless thread count
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### seams_last_error
-
-Purpose: Return the thread-local error detail.
-
-Parameters: none
-
-Units: text
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### seams_neighbours_build
-
-Purpose: Build a cutoff or mutual neighbour list.
-
-Parameters: sys; cutoff; type; graph; out
-
-Units: cutoff in angstrom
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### seams_neighbours_csr
-
-Purpose: Return the neighbour list as CSR.
-
-Parameters: nb; offsets; n_offsets; cols; nnz
-
-Units: dimensionless indices
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### seams_neighbours_destroy
-
-Purpose: Free a neighbour-list handle.
-
-Parameters: nb
-
-Units: handle
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### seams_q4q6
-
-Purpose: Write local q4 and q6.
-
-Parameters: sys; cutoff; type; q4; q6
-
-Units: cutoff in angstrom; q4 and q6 are dimensionless
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### seams_rings_destroy
-
-Purpose: Free a ring-set handle.
-
-Parameters: rings
-
-Units: handle
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### seams_rings_find
-
-Purpose: Find primitive rings up to a maximum size.
-
-Parameters: sys; cutoff; type; graph; max_depth; out
-
-Units: cutoff in angstrom; max_depth is a dimensionless ring size
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### seams_rings_fraction
-
-Purpose: Fraction of atoms on a ring of one size.
-
-Parameters: rings; size; fraction
-
-Units: dimensionless fraction
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### seams_rings_histogram
-
-Purpose: Count primitive rings by size.
-
-Parameters: rings; counts; counts_len
-
-Units: dimensionless counts
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### seams_set_num_threads
-
-Purpose: Set the OpenMP width for the next call.
-
-Parameters: n
-
-Units: dimensionless thread count
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### seams_system_create
-
-Purpose: Allocate an empty frame handle.
-
-Parameters: none
-
-Units: handle
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### seams_system_destroy
-
-Purpose: Free a frame handle.
-
-Parameters: sys
-
-Units: handle
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### seams_system_set_frame
-
-Purpose: Store points and a nine-number cell.
-
-Parameters: sys; xyz; n; box; types; ids
-
-Units: coordinates and box lengths in angstrom
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### seams_system_set_ortho
-
-Purpose: Store points and an orthorhombic cell.
-
-Parameters: sys; xyz; n; ox; oy; oz; lx; ly; lz; types; ids
-
-Units: origin and edge lengths in angstrom
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### seams_version_string
-
-Purpose: Return the version as text.
-
-Parameters: none
-
-Units: text
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### SEAMS_GRAPH_SEEDED
-
-Purpose: Cage graph of mutual seeds and union completions.
-
-Parameters: none
-
-Units: dimensionless
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -298,6 +170,12 @@ Example: `docs/examples/minimal_fortran.f90`
 Purpose: Copy a Fortran string into a null-terminated C buffer.
 
 Parameters: text
+
+Returns: An allocatable C string, including the trailing null.
+
+Ownership: The caller owns the allocation.
+
+Errors: An allocation failure stops the program.
 
 Units: text
 
@@ -309,6 +187,12 @@ Purpose: Largest apolar domain for a site-table spec.
 
 Parameters: sys; spec; n_subset; largest; percolation
 
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
 Units: percolation is dimensionless; counts are dimensionless
 
 Example: `docs/examples/minimal_fortran.f90`
@@ -318,6 +202,12 @@ Example: `docs/examples/minimal_fortran.f90`
 Purpose: Mutual nearest unlike contacts for a site-table spec.
 
 Parameters: sys; spec; n_pairs; n_cation; n_anion
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: dimensionless counts
 
@@ -329,6 +219,12 @@ Purpose: Read one trajectory frame into a handle.
 
 Parameters: sys; path; frame; type_filter
 
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
 Units: frame index is 1-based; coordinates in angstrom
 
 Example: `docs/examples/minimal_fortran.f90`
@@ -338,6 +234,12 @@ Example: `docs/examples/minimal_fortran.f90`
 Purpose: Hexagonal and double-diamond cage membership.
 
 Parameters: sys; cutoff; typ; graph; k; complete; out
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: cutoff in angstrom; handle
 
@@ -349,6 +251,12 @@ Purpose: Disjoint hexagonal, cubic, water, and both counts.
 
 Parameters: cages; n_hex; n_cubic; n_water; n_both
 
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
 Units: dimensionless counts
 
 Example: `docs/examples/minimal_fortran.f90`
@@ -358,6 +266,12 @@ Example: `docs/examples/minimal_fortran.f90`
 Purpose: Free a cage-membership handle.
 
 Parameters: cages
+
+Returns: Nothing.
+
+Ownership: Frees the c_ptr the caller owns.
+
+Errors: None.
 
 Units: handle
 
@@ -369,7 +283,29 @@ Purpose: Original CHILL labels and nine population counts.
 
 Parameters: sys; cutoff; typ; graph; rule; labels; labels_len; counts
 
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
 Units: cutoff in angstrom; codes are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_chill_plus
+
+Purpose: Write one CHILL+ label per atom.
+
+Parameters: sys; cutoff; type; graph; rule; labels; counts
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: cutoff in angstrom; counts are dimensionless
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -378,6 +314,12 @@ Example: `docs/examples/minimal_fortran.f90`
 Purpose: Mutual nearest unlike contacts of a site table.
 
 Parameters: sys; spec; n_pairs; n_cation; n_anion
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: dimensionless counts
 
@@ -389,6 +331,12 @@ Purpose: Coordination number integrated to rmax.
 
 Parameters: sys; rmax; bins; type_i; type_j; cn
 
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
 Units: rmax in angstrom; coordination is dimensionless
 
 Example: `docs/examples/minimal_fortran.f90`
@@ -398,6 +346,12 @@ Example: `docs/examples/minimal_fortran.f90`
 Purpose: Number density along one cell axis.
 
 Parameters: sys; typ; bins; axis; z; rho; cap; n_out
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: density in inverse cubic angstrom; centres in angstrom
 
@@ -409,6 +363,12 @@ Purpose: Largest polar or apolar domain.
 
 Parameters: sys; cutoff; spec; subset; n_subset; largest; percolation
 
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
 Units: cutoff in angstrom; percolation is dimensionless
 
 Example: `docs/examples/minimal_fortran.f90`
@@ -418,6 +378,12 @@ Example: `docs/examples/minimal_fortran.f90`
 Purpose: Topological fingerprint of the bonded graph.
 
 Parameters: sys; cutoff; typ; k; graph; hops; colour_types; out
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: cutoff in angstrom; handle
 
@@ -429,6 +395,12 @@ Purpose: Free a fingerprint handle.
 
 Parameters: fp
 
+Returns: Nothing.
+
+Ownership: Frees the c_ptr the caller owns.
+
+Errors: None.
+
 Units: handle
 
 Example: `docs/examples/minimal_fortran.f90`
@@ -438,6 +410,12 @@ Example: `docs/examples/minimal_fortran.f90`
 Purpose: Frame fingerprint text.
 
 Parameters: fp; buf; cap; n_out
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: text
 
@@ -449,7 +427,29 @@ Purpose: Primitive-ring census stored on the fingerprint.
 
 Parameters: fp; counts; counts_len
 
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
 Units: dimensionless counts
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_get_num_threads
+
+Purpose: Report the OpenMP width the next call will use.
+
+Parameters: none
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: dimensionless thread count
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -458,6 +458,12 @@ Example: `docs/examples/minimal_fortran.f90`
 Purpose: Detail string stored on a handle.
 
 Parameters: handle
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: text
 
@@ -469,7 +475,29 @@ Purpose: Hydrogen-bond count.
 
 Parameters: sys; cutoff; oxygen_type; hydrogen_type; dist_cutoff; angle_cutoff; n_bonds
 
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
 Units: distances in angstrom; angle in degrees
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_last_error
+
+Purpose: Return the thread-local error detail.
+
+Parameters: none
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: text
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -479,15 +507,75 @@ Purpose: Primitive-ring histogram of a monolayer.
 
 Parameters: sys; cutoff; typ; max_depth; sheet_area; counts; counts_len
 
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
 Units: cutoff in angstrom; area in square angstrom
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_neighbours_build
+
+Purpose: Build a cutoff or mutual neighbour list.
+
+Parameters: sys; cutoff; type; graph; out
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: cutoff in angstrom
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_neighbours_csr
+
+Purpose: Return the neighbour list as CSR.
+
+Parameters: nb; offsets; n_offsets; cols; nnz
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: dimensionless indices
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_neighbours_destroy
+
+Purpose: Free a neighbour-list handle.
+
+Parameters: nb
+
+Returns: Nothing.
+
+Ownership: Frees the c_ptr the caller owns.
+
+Errors: None.
+
+Units: handle
 
 Example: `docs/examples/minimal_fortran.f90`
 
 ### seams_neighbours_knn
 
-Purpose: k-nearest neighbour list.
+Purpose: K-nearest neighbour list.
 
 Parameters: sys; k; cutoff; typ; mutual; out
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: cutoff in angstrom; k is a dimensionless count
 
@@ -499,7 +587,29 @@ Purpose: Perfect and imperfect prism counts by ring size.
 
 Parameters: sys; cutoff; typ; perfect; imperfect; len
 
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
 Units: cutoff in angstrom; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_q4q6
+
+Purpose: Write local q4 and q6.
+
+Parameters: sys; cutoff; type; q4; q6
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: cutoff in angstrom; q4 and q6 are dimensionless
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -508,6 +618,12 @@ Example: `docs/examples/minimal_fortran.f90`
 Purpose: Partial radial distribution and the cell volume.
 
 Parameters: sys; rmax; bins; type_i; type_j; r; g; count; cap; n_out; volume
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: rmax in angstrom; volume in cubic angstrom
 
@@ -519,7 +635,77 @@ Purpose: Number of primitive rings.
 
 Parameters: rings
 
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
 Units: dimensionless count
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_rings_destroy
+
+Purpose: Free a ring-set handle.
+
+Parameters: rings
+
+Returns: Nothing.
+
+Ownership: Frees the c_ptr the caller owns.
+
+Errors: None.
+
+Units: handle
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_rings_find
+
+Purpose: Find primitive rings up to a maximum size.
+
+Parameters: sys; cutoff; type; graph; max_depth; out
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: cutoff in angstrom; max_depth is a dimensionless ring size
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_rings_fraction
+
+Purpose: Fraction of atoms on a ring of one size.
+
+Parameters: rings; size; fraction
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: dimensionless fraction
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_rings_histogram
+
+Purpose: Count primitive rings by size.
+
+Parameters: rings; counts; counts_len
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: dimensionless counts
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -528,6 +714,12 @@ Example: `docs/examples/minimal_fortran.f90`
 Purpose: Atom indices of one ring.
 
 Parameters: rings; index; atoms; cap; n_out
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: dimensionless indices
 
@@ -539,7 +731,29 @@ Purpose: Running coordination number along the partial RDF.
 
 Parameters: sys; rmax; bins; type_i; type_j; r; cn; cap; n_out
 
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
 Units: rmax in angstrom; coordination is dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_set_num_threads
+
+Purpose: Set the OpenMP width for the next call.
+
+Parameters: n
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: dimensionless thread count
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -548,6 +762,12 @@ Example: `docs/examples/minimal_fortran.f90`
 Purpose: Closed cages whose ring census matches a signature.
 
 Parameters: sys; cutoff; typ; graph; spec; n_cages; n_atoms
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: cutoff in angstrom; counts are dimensionless
 
@@ -559,6 +779,12 @@ Purpose: Per-atom site kind from a site-table spec.
 
 Parameters: sys; spec; kinds; len
 
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
 Units: dimensionless site codes
 
 Example: `docs/examples/minimal_fortran.f90`
@@ -568,6 +794,12 @@ Example: `docs/examples/minimal_fortran.f90`
 Purpose: Local q_l and the Lechner-Dellago average.
 
 Parameters: sys; cutoff; typ; order_l; ql; ql_len; qlbar; qlbar_len
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: cutoff in angstrom; q_l is dimensionless
 
@@ -579,7 +811,45 @@ Purpose: Number of points in the frame.
 
 Parameters: sys
 
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
 Units: dimensionless count
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_system_create
+
+Purpose: Allocate an empty frame handle.
+
+Parameters: none
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: handle
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_system_destroy
+
+Purpose: Free a frame handle.
+
+Parameters: sys
+
+Returns: Nothing.
+
+Ownership: Frees the c_ptr the caller owns.
+
+Errors: None.
+
+Units: handle
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -589,7 +859,61 @@ Purpose: Read one frame from a trajectory path.
 
 Parameters: sys; path; frame; type_filter
 
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
 Units: frame index is 1-based; coordinates in angstrom
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_system_set_frame
+
+Purpose: Store points and a nine-number cell.
+
+Parameters: sys; xyz; n; box; types; ids
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: coordinates and box lengths in angstrom
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_system_set_ortho
+
+Purpose: Store points and an orthorhombic cell.
+
+Parameters: sys; xyz; n; ox; oy; oz; lx; ly; lz; types; ids
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: origin and edge lengths in angstrom
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_version_string
+
+Purpose: Return the version as text.
+
+Parameters: none
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: text
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -598,6 +922,12 @@ Example: `docs/examples/minimal_fortran.f90`
 Purpose: Closed-cage count for one signature on the cutoff graph.
 
 Parameters: sys; spec; n_cages; n_atoms
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: dimensionless counts
 
@@ -608,6 +938,12 @@ Example: `docs/examples/minimal_fortran.f90`
 Purpose: Per-atom site kind for a Fortran spec string.
 
 Parameters: sys; spec; kinds; n
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: dimensionless site codes
 

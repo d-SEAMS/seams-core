@@ -1,0 +1,1 @@
+Every public symbol of the C headers, the in-tree `dseams` package (including Frame methods), and the C++, Rust, Fortran, Julia, R, and Lua bindings is listed in the reference pages with its parameters, return value, ownership, and error behaviour. `docs_api_coverage` fails when a public symbol is missing from that list or a listed symbol is not in the binding.

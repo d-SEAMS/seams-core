@@ -101,6 +101,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Changed
 
+- Every public symbol of the C headers, the in-tree `dseams` package (including Frame methods), and the C++, Rust, Fortran, Julia, R, and Lua bindings is listed in the reference pages with its parameters, return value, ownership, and error behaviour. `docs_api_coverage` fails when a public symbol is missing from that list or a listed symbol is not in the binding.
 - A threaded cutoff neighbour list on an orthorhombic cell uses the scaling cell list instead of linkcell's buffered walk. The rows stay the same sorted cutoff set, so the ring search matches the one-thread list.
 - An empty Steinhardt shell is 0. The harmonic row stays zero and is not divided by the neighbour count, so freud and pyscal3 store NaN for that same atom. A NaN switch is not added: it would enter every mean and every CHILL+ label, and a neighbour count of zero already names the shell.
 - Below half the narrowest face separation the cutoff list skips minimage's pair reduction, which only sorted there, and sorts its rows on every thread; `getNewNeighbourListByIndex` and `neighListO` fill their rows in parallel, and `neighListO` takes the cutoff list first at every thread count. On `bench_strong`'s 65536-atom frame the index list goes from 25.8 to 13.9 ms on one thread and from 22.7 to 7.8 ms on eight (release builds).

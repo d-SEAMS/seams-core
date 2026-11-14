@@ -64,6 +64,12 @@ Purpose: Opaque frame used by the language bindings.
 
 Parameters: none
 
+Returns: The type itself.
+
+Ownership: No allocation. This is a type.
+
+Errors: None.
+
 Units: handle
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -73,6 +79,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Copy the nine LAMMPS cell numbers.
 
 Parameters: frame; box9
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
 
 Units: lengths in angstrom
 
@@ -84,6 +96,12 @@ Purpose: Score hexagonal and double-diamond cage membership.
 
 Parameters: frame; cutoff; type; k; graph; complete; per_atom; n_hex; n_cubic; n_water; n_both
 
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
 Units: cutoff in angstrom; coordinates in angstrom; k is a dimensionless neighbour count
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -93,6 +111,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Write one original CHILL label per atom.
 
 Parameters: frame; cutoff; type; graph; labels; counts9
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
 
 Units: cutoff in angstrom; coordinates in angstrom
 
@@ -104,6 +128,12 @@ Purpose: Write one CHILL+ label per atom.
 
 Parameters: frame; cutoff; type; graph; labels; counts9
 
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
 Units: cutoff in angstrom; coordinates in angstrom
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -113,6 +143,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Write CHILL+ labels for a named rule.
 
 Parameters: frame; cutoff; type; graph; rule; labels; counts9
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
 
 Units: cutoff in angstrom; coordinates in angstrom; rule is text
 
@@ -124,6 +160,12 @@ Purpose: Run CHILL+ and primitive rings on one neighbour list.
 
 Parameters: frame; cutoff; type; graph; max_ring; skin; labels; counts9; ring_counts; ring_counts_len; times
 
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
 Units: cutoff in angstrom; coordinates in angstrom; skin in angstrom; phase times in seconds
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -133,6 +175,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Free a language-binding frame.
 
 Parameters: frame
+
+Returns: Nothing.
+
+Ownership: Frees the caller-owned frame. A null pointer is a no-op.
+
+Errors: None.
 
 Units: handle
 
@@ -144,6 +192,12 @@ Purpose: Build a frame from coordinates and a cell.
 
 Parameters: xyz; n; box9; types; ids
 
+Returns: A new seams_frame, or NULL when the call cannot build one.
+
+Ownership: The caller owns the frame and frees it with seams_frame_free.
+
+Errors: NULL. seams_last_error() names the reason.
+
 Units: coordinates and box lengths in angstrom
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -153,6 +207,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Build a frame and keep molecule ids.
 
 Parameters: xyz; n; box9; types; ids; mols
+
+Returns: A new seams_frame, or NULL when the call cannot build one.
+
+Ownership: The caller owns the frame and frees it with seams_frame_free.
+
+Errors: NULL. seams_last_error() names the reason.
 
 Units: coordinates and box lengths in angstrom
 
@@ -164,6 +224,12 @@ Purpose: Pointer to the atom ids stored on the frame.
 
 Parameters: frame
 
+Returns: A pointer into the frame.
+
+Ownership: The frame owns the memory. It stays valid until seams_frame_free or a call that replaces the coordinates.
+
+Errors: NULL when the frame is null.
+
 Units: dimensionless ids
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -173,6 +239,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Return the frame index that was read.
 
 Parameters: frame
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
 
 Units: dimensionless index, 1-based in the file
 
@@ -184,6 +256,12 @@ Purpose: Count rings in sheets of a given area.
 
 Parameters: frame; cutoff; type; max_depth; sheet_area; output_dir; counts; counts_len
 
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
 Units: cutoff in angstrom; coordinates in angstrom; sheet_area in square angstrom
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -193,6 +271,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Return the number of directed neighbour pairs.
 
 Parameters: frame
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
 
 Units: dimensionless count
 
@@ -204,6 +288,12 @@ Purpose: Build the neighbour list and discard the rows.
 
 Parameters: frame; cutoff; type; graph
 
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
 Units: cutoff in angstrom; coordinates in angstrom
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -213,6 +303,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Return the number of atoms in the frame.
 
 Parameters: frame
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
 
 Units: dimensionless count
 
@@ -224,6 +320,12 @@ Purpose: Pointer to the coordinates stored on the frame.
 
 Parameters: frame
 
+Returns: A pointer into the frame.
+
+Ownership: The frame owns the memory. It stays valid until seams_frame_free or a call that replaces the coordinates.
+
+Errors: NULL when the frame is null.
+
 Units: angstrom
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -233,6 +335,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Count perfect and imperfect prism stacks.
 
 Parameters: frame; cutoff; type; max_depth; output_dir; rows; n_rows
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
 
 Units: cutoff in angstrom; coordinates in angstrom
 
@@ -244,6 +352,12 @@ Purpose: Write local and averaged q4 and q6.
 
 Parameters: frame; cutoff; type; q4; q6; q4bar; q6bar
 
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
 Units: cutoff in angstrom; coordinates in angstrom; order parameters are dimensionless
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -253,6 +367,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Write q4, q6, and CHILL+ from one cutoff list.
 
 Parameters: frame; cutoff; type; q4; q6; q4bar; q6bar; labels; counts9
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
 
 Units: cutoff in angstrom; coordinates in angstrom; order parameters are dimensionless
 
@@ -264,6 +384,12 @@ Purpose: Radial distribution of one type pair.
 
 Parameters: frame; rmax; nbins; type_i; type_j; r; g; count; volume
 
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
 Units: rmax and r in angstrom; g is dimensionless; volume in cubic angstrom
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -273,6 +399,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Two-dimensional radial distribution in a monolayer.
 
 Parameters: frame; cutoff; binwidth; output_dir; r; g
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
 
 Units: cutoff, binwidth, and r in angstrom; g is dimensionless
 
@@ -284,6 +416,12 @@ Purpose: Number of bins in the monolayer RDF.
 
 Parameters: cutoff; binwidth
 
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
 Units: cutoff and binwidth in angstrom; result is a dimensionless count
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -293,6 +431,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Number of bins in the bulk RDF.
 
 Parameters: rmax; nbins
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
 
 Units: rmax in angstrom; nbins is a dimensionless count
 
@@ -304,6 +448,12 @@ Purpose: Read one frame from a trajectory path.
 
 Parameters: path; frame; type_filter
 
+Returns: A new seams_frame, or NULL when the call cannot build one.
+
+Ownership: The caller owns the frame and frees it with seams_frame_free.
+
+Errors: NULL. seams_last_error() names the reason.
+
 Units: frame index is dimensionless; coordinates in the file are angstrom
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -313,6 +463,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Histogram of primitive rings.
 
 Parameters: frame; cutoff; type; graph; max_depth; counts; counts_len
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
 
 Units: cutoff in angstrom; coordinates in angstrom; counts[k] is a dimensionless ring count
 
@@ -324,6 +480,12 @@ Purpose: Keep selected oxygens for later classifiers.
 
 Parameters: frame; type; mols; nmol
 
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
 Units: type and molecule ids are dimensionless
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -333,6 +495,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Replace coordinates on an array-built frame.
 
 Parameters: frame; xyz; n; box9
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
 
 Units: coordinates and box lengths in angstrom
 
@@ -344,6 +512,12 @@ Purpose: Count closed cages whose ring census matches a spec.
 
 Parameters: frame; cutoff; type; graph; spec; n_cages; n_atoms
 
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
 Units: cutoff in angstrom; coordinates in angstrom; n_cages and n_atoms are dimensionless
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -353,6 +527,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Same cage census with an explicit face-edge window.
 
 Parameters: frame; cutoff; type; graph; spec; edge; n_cages; n_atoms
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
 
 Units: cutoff in angstrom; coordinates in angstrom; edge lengths in angstrom
 
@@ -364,6 +544,12 @@ Purpose: Local Steinhardt q_l on the cutoff shell.
 
 Parameters: frame; cutoff; type; order_l; ql; qlbar
 
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
 Units: cutoff in angstrom; coordinates in angstrom; ql is dimensionless
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -373,6 +559,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Local Steinhardt q_l on a named graph.
 
 Parameters: frame; cutoff; type; order_l; graph; ql; qlbar
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
 
 Units: cutoff in angstrom; coordinates in angstrom; ql is dimensionless
 
@@ -384,6 +576,12 @@ Purpose: Per-atom shell label for Ih, Ic, or stacking disorder.
 
 Parameters: frame; shell_rmsd; labels
 
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
 Units: shell_rmsd is a dimensionless residual; labels are dimensionless codes
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -393,6 +591,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Pointer to the atom types stored on the frame.
 
 Parameters: frame
+
+Returns: A pointer into the frame.
+
+Ownership: The frame owns the memory. It stays valid until seams_frame_free or a call that replaces the coordinates.
+
+Errors: NULL when the frame is null.
 
 Units: dimensionless types
 
@@ -404,6 +608,12 @@ Purpose: Normalised Steinhardt w_l for degree 4 or 6.
 
 Parameters: frame; cutoff; type; order_l; wl
 
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
 Units: cutoff in angstrom; coordinates in angstrom; wl is dimensionless
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -413,6 +623,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Time for an H-H vector to rotate 90 degrees.
 
 Parameters: first; second; dt; oxygen_type; hydrogen_type; tau
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
 
 Units: dt and tau in the caller's time unit; types are dimensionless
 
@@ -424,6 +640,12 @@ Purpose: Version string of the language-binding library.
 
 Parameters: none
 
+Returns: A pointer to library text.
+
+Ownership: The library owns the string. The caller does not free it.
+
+Errors: None.
+
 Units: text
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -433,6 +655,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: Return the thread-local error detail.
 
 Parameters: none
+
+Returns: A pointer to library text.
+
+Ownership: The library owns the string. The caller does not free it.
+
+Errors: None.
 
 Units: text
 
@@ -444,6 +672,12 @@ Purpose: Count frames in a trajectory path.
 
 Parameters: path
 
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
 Units: dimensionless count
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -454,6 +688,12 @@ Purpose: Seconds spent in neighbours, CHILL+, and rings.
 
 Parameters: neighbours; chill; rings; reused
 
+Returns: The type itself.
+
+Ownership: No allocation. This is a type.
+
+Errors: None.
+
 Units: times in seconds; reused is 0 or 1
 
 Example: `docs/examples/minimal_cpp.cpp`
@@ -463,6 +703,12 @@ Example: `docs/examples/minimal_cpp.cpp`
 Purpose: One row of a prism stack: size, perfect, imperfect.
 
 Parameters: size; perfect; imperfect
+
+Returns: The type itself.
+
+Ownership: No allocation. This is a type.
+
+Errors: None.
 
 Units: dimensionless counts
 

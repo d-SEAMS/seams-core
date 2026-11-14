@@ -101,6 +101,12 @@ Purpose: Graph id of the cutoff neighbour list.
 
 Parameters: none
 
+Returns: The integer code.
+
+Ownership: No allocation.
+
+Errors: None.
+
 Units: dimensionless
 
 Example: `docs/examples/minimal_py.py`
@@ -111,7 +117,109 @@ Purpose: One stored cell and the classifiers that read it.
 
 Parameters: none
 
+Returns: A Frame object.
+
+Ownership: The object owns its seams_system and frees it when the object is destroyed.
+
+Errors: None on construction. Later methods raise RuntimeError with seams_last_error text.
+
 Units: object
+
+Example: `docs/examples/minimal_py.py`
+
+### Frame.chill_plus
+
+Purpose: CHILL+ labels and the nine population counts for the atoms on a dseams.Frame.
+
+Parameters: self; cutoff; graph; rule
+
+Returns: A pair of NumPy arrays, labels and counts.
+
+Ownership: The caller owns the returned arrays. The frame still owns the seams_system.
+
+Errors: RuntimeError whose text is seams_last_error.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/examples/minimal_py.py`
+
+### Frame.count
+
+Purpose: Return the number of points stored on a dseams.Frame.
+
+Parameters: self
+
+Returns: The atom count.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/examples/minimal_py.py`
+
+### Frame.neighbours
+
+Purpose: CSR neighbour list of a dseams.Frame, self entries omitted.
+
+Parameters: self; cutoff; graph
+
+Returns: A pair of NumPy arrays, offsets and columns.
+
+Ownership: The caller owns the returned arrays. The temporary C neighbour list is freed inside the call.
+
+Errors: RuntimeError whose text is seams_last_error.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/examples/minimal_py.py`
+
+### Frame.q4q6
+
+Purpose: Local q4 and q6 on the cutoff shell of a dseams.Frame.
+
+Parameters: self; cutoff
+
+Returns: A pair of NumPy arrays, q4 and q6.
+
+Ownership: The caller owns the returned arrays.
+
+Errors: RuntimeError whose text is seams_last_error.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/examples/minimal_py.py`
+
+### Frame.rings
+
+Purpose: Ring sizes, symmetry labels, a size histogram, and the six-ring fraction.
+
+Parameters: self; cutoff; max_depth
+
+Returns: Sizes, symmetry, histogram, and the six-ring fraction.
+
+Ownership: The caller owns the returned arrays. The C ring set is freed inside the call.
+
+Errors: RuntimeError whose text is seams_last_error.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/examples/minimal_py.py`
+
+### Frame.set_frame
+
+Purpose: Store positions and a cell on a dseams.Frame.
+
+Parameters: positions; box
+
+Returns: Nothing.
+
+Ownership: The frame copies the coordinates into the seams_system it owns.
+
+Errors: ValueError when box is not 3 lengths or 9 LAMMPS numbers. RuntimeError with seams_last_error text when the C call fails.
+
+Units: coordinates and cutoff in angstrom
 
 Example: `docs/examples/minimal_py.py`
 
@@ -120,6 +228,12 @@ Example: `docs/examples/minimal_py.py`
 Purpose: Graph id of the mutual neighbour list.
 
 Parameters: none
+
+Returns: The integer code.
+
+Ownership: No allocation.
+
+Errors: None.
 
 Units: dimensionless
 
@@ -131,6 +245,12 @@ Purpose: CHILL+ rule id matching OVITO.
 
 Parameters: none
 
+Returns: The integer code.
+
+Ownership: No allocation.
+
+Errors: None.
+
 Units: dimensionless
 
 Example: `docs/examples/minimal_py.py`
@@ -140,6 +260,12 @@ Example: `docs/examples/minimal_py.py`
 Purpose: CHILL+ rule id of the 2015 paper.
 
 Parameters: none
+
+Returns: The integer code.
+
+Ownership: No allocation.
+
+Errors: None.
 
 Units: dimensionless
 
@@ -151,6 +277,12 @@ Purpose: Score hexagonal and double-diamond cage membership.
 
 Parameters: positions; box; or a Frame
 
+Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
+
+Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
+
+Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
+
 Units: coordinates and cutoff in angstrom; counts are dimensionless
 
 Example: `docs/examples/minimal_py.py`
@@ -160,6 +292,12 @@ Example: `docs/examples/minimal_py.py`
 Purpose: Label each atom with CHILL+.
 
 Parameters: positions; box; rule; graph; cutoff
+
+Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
+
+Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
+
+Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
 
 Units: coordinates and cutoff in angstrom
 
@@ -171,6 +309,12 @@ Purpose: Number of points stored on a Frame.
 
 Parameters: frame
 
+Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
+
+Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
+
+Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
+
 Units: dimensionless count
 
 Example: `docs/examples/minimal_py.py`
@@ -180,6 +324,12 @@ Example: `docs/examples/minimal_py.py`
 Purpose: Turn an ASE atoms object into positions and a LAMMPS cell.
 
 Parameters: atoms
+
+Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
+
+Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
+
+Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
 
 Units: positions and box lengths in angstrom
 
@@ -191,6 +341,12 @@ Purpose: Turn an MDAnalysis universe into positions and a LAMMPS cell.
 
 Parameters: universe; select
 
+Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
+
+Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
+
+Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
+
 Units: positions in angstrom; angles inside the universe are degrees
 
 Example: `docs/examples/minimal_py.py`
@@ -200,6 +356,12 @@ Example: `docs/examples/minimal_py.py`
 Purpose: Cutoff or mutual neighbour list as CSR.
 
 Parameters: positions; box; cutoff; graph
+
+Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
+
+Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
+
+Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
 
 Units: coordinates and cutoff in angstrom
 
@@ -211,6 +373,12 @@ Purpose: OpenMP width the next call will use.
 
 Parameters: none
 
+Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
+
+Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
+
+Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
+
 Units: dimensionless thread count
 
 Example: `docs/examples/minimal_py.py`
@@ -220,6 +388,12 @@ Example: `docs/examples/minimal_py.py`
 Purpose: Local q4 and q6 on the cutoff shell.
 
 Parameters: positions; box; cutoff
+
+Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
+
+Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
+
+Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
 
 Units: coordinates and cutoff in angstrom; q4 and q6 are dimensionless
 
@@ -231,6 +405,12 @@ Purpose: Primitive-ring sizes, symmetry, histogram, and fraction.
 
 Parameters: positions; box; cutoff; max_depth
 
+Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
+
+Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
+
+Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
+
 Units: coordinates and cutoff in angstrom; max_depth is a dimensionless ring size
 
 Example: `docs/examples/minimal_py.py`
@@ -240,6 +420,12 @@ Example: `docs/examples/minimal_py.py`
 Purpose: Store one cell on a Frame.
 
 Parameters: frame; positions; box
+
+Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
+
+Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
+
+Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
 
 Units: coordinates and cutoff in angstrom
 
@@ -251,6 +437,12 @@ Purpose: Set the OpenMP width for the next call.
 
 Parameters: n
 
+Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
+
+Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
+
+Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
+
 Units: dimensionless thread count; 0 restores the library default
 
 Example: `docs/examples/minimal_py.py`
@@ -260,6 +452,12 @@ Example: `docs/examples/minimal_py.py`
 Purpose: Count closed cages matching a ring-census spec.
 
 Parameters: positions; box; spec
+
+Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
+
+Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
+
+Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
 
 Units: coordinates and cutoff in angstrom; spec is text such as 512
 
@@ -271,15 +469,411 @@ Purpose: Shell label for Ih, Ic, stacking disorder, or other.
 
 Parameters: positions; box
 
+Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
+
+Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
+
+Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
+
 Units: coordinates and cutoff in angstrom; labels are dimensionless codes
 
 Example: `docs/examples/minimal_py.py`
+
+### userframe.CageScore
+
+Purpose: Boolean membership of the hexagonal and double-diamond cages.
+
+Parameters: hc; ddc
+
+Returns: A CageScore.
+
+Ownership: The caller owns the object.
+
+Errors: None.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.CageScore.n_both
+
+Purpose: Number of atoms in both cages.
+
+Parameters: self
+
+Returns: The count.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.CageScore.n_ic
+
+Purpose: Number of atoms in the double-diamond cage.
+
+Parameters: self
+
+Returns: The count.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.CageScore.n_ih
+
+Purpose: Number of atoms in the hexagonal cage.
+
+Parameters: self
+
+Returns: The count.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.CageScore.n_water
+
+Purpose: Number of atoms in neither cage.
+
+Parameters: self
+
+Returns: The count.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.Frame
+
+Purpose: One configuration whose classifiers call libseams_lang.
+
+Parameters: ptr; symbols; cutoff
+
+Returns: A Frame.
+
+Ownership: The object owns the seams_frame pointer. close() or deletion calls seams_frame_free.
+
+Errors: RuntimeError when ptr is null.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.Frame.box
+
+Purpose: Cell stored on the frame.
+
+Parameters: self
+
+Returns: Three edge lengths, or nine LAMMPS numbers when a tilt is set.
+
+Ownership: The caller owns the returned array.
+
+Errors: None.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.Frame.cages
+
+Purpose: Hexagonal and double-diamond membership from seams_frame_cages.
+
+Parameters: self; seeded; k; ring_adjacent
+
+Returns: A CageScore.
+
+Ownership: The caller owns the score. The frame keeps the same object.
+
+Errors: RuntimeError whose text is seams_last_error.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.Frame.cages_by_signature
+
+Purpose: Closed cages of one ring census.
+
+Parameters: self; signature; max_ring_size
+
+Returns: A list whose length is the cage count. n_atoms is the vertex count.
+
+Ownership: The caller owns the list. The C call does not return one vertex list per cage.
+
+Errors: RuntimeError whose text is seams_last_error.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.Frame.chill_plus
+
+Purpose: Published CHILL+ histogram for this frame.
+
+Parameters: self; graph
+
+Returns: An IceCounts mapping of label name to population.
+
+Ownership: The caller owns the dictionary. Labels are also stored on the frame.
+
+Errors: RuntimeError whose text is seams_last_error.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.Frame.close
+
+Purpose: Free the libseams_lang frame.
+
+Parameters: self
+
+Returns: Nothing.
+
+Ownership: Frees the pointer this Frame owns. A second call is a no-op.
+
+Errors: None.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.Frame.find_prisms
+
+Purpose: Prism census from seams_frame_prisms.
+
+Parameters: self; output_dir; max_depth; shape_matching
+
+Returns: A list of size, perfect, and imperfect rows.
+
+Ownership: The caller owns the list.
+
+Errors: RuntimeError whose text is seams_last_error.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.Frame.monolayer_rings
+
+Purpose: Quasi-2D ring counts from seams_frame_monolayer.
+
+Parameters: self; output_dir; sheet_area; max_depth
+
+Returns: A dictionary of size to count and coverage.
+
+Ownership: The caller owns the dictionary. The call writes topoMonolayer under output_dir.
+
+Errors: RuntimeError whose text is seams_last_error.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.Frame.n_atoms
+
+Purpose: Number of atoms on the frame.
+
+Parameters: self
+
+Returns: The count from seams_frame_nop.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.Frame.positions
+
+Purpose: Copy of the coordinates stored on the frame.
+
+Parameters: self
+
+Returns: An (n, 3) NumPy array in angstrom.
+
+Ownership: The caller owns the copy. The frame keeps its own buffer.
+
+Errors: None.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.Frame.rdf_2d
+
+Purpose: In-plane g(r) from seams_frame_rdf2d.
+
+Parameters: self; output_dir; cutoff; binwidth
+
+Returns: Radius and g(r) lists.
+
+Ownership: The caller owns the lists. The call also writes under output_dir.
+
+Errors: RuntimeError whose text is seams_last_error.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.Frame.ring_census
+
+Purpose: Primitive rings by size from seams_frame_rings.
+
+Parameters: self; max_size
+
+Returns: A dictionary of size to count, empty sizes omitted.
+
+Ownership: The caller owns the dictionary.
+
+Errors: RuntimeError whose text is seams_last_error.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.Frame.steinhardt
+
+Purpose: Local q_l and the Lechner-Dellago average from seams_frame_steinhardt.
+
+Parameters: self; order_l
+
+Returns: A dictionary with ql and ql_bar lists.
+
+Ownership: The caller owns the dictionary.
+
+Errors: RuntimeError whose text is seams_last_error.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.Frame.to_ase
+
+Purpose: ASE Atoms for this frame.
+
+Parameters: self
+
+Returns: An ASE Atoms object. Ice labels and cage flags are arrays when those calls have run.
+
+Ownership: The caller owns the Atoms object.
+
+Errors: ImportError when ASE is not installed.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.Frame.to_solvis
+
+Purpose: Solvis System built from to_ase.
+
+Parameters: self; expand_box
+
+Returns: A solvis System.
+
+Ownership: The caller owns the System.
+
+Errors: ImportError when solvis-tools is not installed.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.IceCounts
+
+Purpose: CHILL+ population counts keyed by label name.
+
+Parameters: mapping of name to count
+
+Returns: An IceCounts dictionary.
+
+Ownership: The caller owns the dictionary.
+
+Errors: None.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.from_ase
+
+Purpose: Frame for one ASE species. Coordinates go through seams_frame_from_arrays.
+
+Parameters: atoms; select; cutoff; bonded
+
+Returns: A userframe.Frame.
+
+Ownership: The caller owns the Frame.
+
+Errors: TypeError when atoms has no positions. ValueError when the selection matches nothing.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.read
+
+Purpose: Read one frame with seams_frame_read. pydseams.read is this function.
+
+Parameters: filename; frame; atom_type; all_atoms
+
+Returns: A userframe.Frame.
+
+Ownership: The caller owns the Frame and frees it with close() or by dropping it.
+
+Errors: RuntimeError whose text is seams_last_error.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
+
+### userframe.to_solvis
+
+Purpose: Call to_solvis on a frame.
+
+Parameters: frame; expand_box
+
+Returns: The solvis System returned by the frame.
+
+Ownership: The caller owns the System.
+
+Errors: ImportError when solvis-tools is not installed.
+
+Units: coordinates and cutoff in angstrom
+
+Example: `docs/source/reference/python-frame.rst`
 
 ### version
 
 Purpose: Library version text.
 
 Parameters: none
+
+Returns: The arrays or counts named in the purpose. NumPy arrays are owned by the caller.
+
+Ownership: A Frame owns its seams_system and frees it on destruction. Input arrays are read in place when they are already C-contiguous.
+
+Errors: RuntimeError with seams_last_error text. ValueError when a box is not 3 lengths or 9 LAMMPS numbers.
 
 Units: text
 
