@@ -97,12 +97,15 @@ runs it.
 The eight-atom cubic cell is `seams::diamond8`. CHILL+ labels every atom cubic.
 
 ```rust
-let (xyz, edge) = seams::diamond8();
-seams::set_num_threads(1)?;
-let mut system = seams::System::new()?;
-system.set_ortho(&xyz, edge, edge, edge)?;
-let ice = system.chill_plus(&seams::ChillOptions::default())?;
-assert_eq!(ice.counts[seams::Label::Cubic as usize], 8);
+fn main() -> Result<(), seams::Error> {
+    let (xyz, edge) = seams::diamond8();
+    seams::set_num_threads(1)?;
+    let mut system = seams::System::new()?;
+    system.set_ortho(&xyz, edge, edge, edge)?;
+    let ice = system.chill_plus(&seams::ChillOptions::default())?;
+    assert_eq!(ice.counts[seams::Label::Cubic as usize], 8);
+    Ok(())
+}
 ```
 
 `docs/examples/minimal_rust.rs` reads the GenIce sI cell (46 atoms, all
@@ -214,9 +217,12 @@ path. `code()` is the status integer. `Display` prints the message and the
 status name.
 
 ```rust
-let mut system = seams::System::new()?;
-let err = system.chill_plus(&seams::ChillOptions::default()).unwrap_err();
-assert_eq!(err.status(), Some(seams::Status::State));
+fn main() -> Result<(), seams::Error> {
+    let mut system = seams::System::new()?;
+    let err = system.chill_plus(&seams::ChillOptions::default()).unwrap_err();
+    assert_eq!(err.status(), Some(seams::Status::State));
+    Ok(())
+}
 ```
 
 `System`, `Neighbours`, `Rings`, `Cages`, `Fingerprint`, and `Brine` own
