@@ -308,6 +308,28 @@ TEST_CASE("a numeric dump guesses type 2 and then type 1", "[chemfiles]") {
   fs::remove(path);
 }
 
+TEST_CASE("an atom count after the ATOMS header stays inside the id scan",
+          "[chemfiles]") {
+  // capi_read_fuzzer: the id table was sized before NUMBER OF ATOMS grew.
+  const auto late = dseams_test::freshFile("dseams_chem_late_count.lammpstrj");
+  {
+    std::ofstream out(late);
+    out << "ITEM: BOX BOUNDS pp pp pp\n0 10\n0 10\n0 10\n"
+           "ITEM: ATOMS id type x y z\n"
+           "ITEM: NUMBER OF ATOMS\n4\n"
+           "3 1 1.0 1.0 1.0\n4 1 2.0 2.0 2.0\n";
+  }
+  for (const int frame : {1, 2}) {
+    for (const int type : {-1, 0, 1}) {
+      try {
+        (void)sinp::openFrame(late.string(), frame, type);
+      } catch (const std::exception &) {
+      }
+    }
+  }
+  fs::remove(late);
+}
+
 TEST_CASE("a range walks every chemfiles step and skips CON", "[chemfiles]") {
   const auto path = dseams_test::freshFile("dseams_chem_range.xyz");
   {

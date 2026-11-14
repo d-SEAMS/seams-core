@@ -508,7 +508,9 @@ DumpIdIndex scanDumpIds(const std::string &path) {
       continue;
     }
     const int id = std::atoi(fields[static_cast<std::size_t>(idCol)].c_str());
-    if (id >= 1 && id <= natoms && seenId[static_cast<std::size_t>(id)] == 0) {
+    // NUMBER OF ATOMS can follow the ATOMS header, so natoms may exceed seenId.
+    if (id >= 1 && id <= natoms && static_cast<std::size_t>(id) < seenId.size() &&
+        seenId[static_cast<std::size_t>(id)] == 0) {
       seenId[static_cast<std::size_t>(id)] = 1;
       unique += 1;
     }
