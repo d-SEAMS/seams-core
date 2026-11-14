@@ -36,7 +36,7 @@ EXAMPLES = {
     "r": "docs/examples/minimal_r.R",
     "lua": "docs/examples/minimal_lua.lua",
 }
-FRAME_EXAMPLE = "docs/source/reference/python-frame.rst"
+FRAME_EXAMPLE = "docs/orgmode/reference/python-frame.org"
 SEAMS_JL_EXAMPLE = "bindings/julia/Seams/test/runtests.jl"
 STATUS = (
     "SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, "

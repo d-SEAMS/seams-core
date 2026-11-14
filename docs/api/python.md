@@ -493,7 +493,7 @@ Errors: None.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.CageScore.n_both
 
@@ -509,7 +509,7 @@ Errors: None.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.CageScore.n_ic
 
@@ -525,7 +525,7 @@ Errors: None.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.CageScore.n_ih
 
@@ -541,7 +541,7 @@ Errors: None.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.CageScore.n_water
 
@@ -557,7 +557,7 @@ Errors: None.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.Frame
 
@@ -573,7 +573,7 @@ Errors: RuntimeError when ptr is null.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.Frame.box
 
@@ -589,7 +589,7 @@ Errors: None.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.Frame.cages
 
@@ -605,7 +605,7 @@ Errors: RuntimeError whose text is seams_last_error.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.Frame.cages_by_signature
 
@@ -621,7 +621,7 @@ Errors: RuntimeError whose text is seams_last_error.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.Frame.chill_plus
 
@@ -637,7 +637,7 @@ Errors: RuntimeError whose text is seams_last_error.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.Frame.close
 
@@ -653,7 +653,7 @@ Errors: None.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.Frame.find_prisms
 
@@ -669,7 +669,7 @@ Errors: RuntimeError whose text is seams_last_error.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.Frame.monolayer_rings
 
@@ -685,7 +685,7 @@ Errors: RuntimeError whose text is seams_last_error.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.Frame.n_atoms
 
@@ -701,7 +701,7 @@ Errors: None.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.Frame.positions
 
@@ -717,7 +717,7 @@ Errors: None.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.Frame.rdf_2d
 
@@ -733,7 +733,7 @@ Errors: RuntimeError whose text is seams_last_error.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.Frame.ring_census
 
@@ -749,7 +749,7 @@ Errors: RuntimeError whose text is seams_last_error.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.Frame.steinhardt
 
@@ -765,7 +765,7 @@ Errors: RuntimeError whose text is seams_last_error.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.Frame.to_ase
 
@@ -781,7 +781,7 @@ Errors: ImportError when ASE is not installed.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.Frame.to_solvis
 
@@ -797,7 +797,7 @@ Errors: ImportError when solvis-tools is not installed.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.IceCounts
 
@@ -813,7 +813,7 @@ Errors: None.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.from_ase
 
@@ -829,7 +829,7 @@ Errors: TypeError when atoms has no positions. ValueError when the selection mat
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.read
 
@@ -845,7 +845,7 @@ Errors: RuntimeError whose text is seams_last_error.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### userframe.to_solvis
 
@@ -861,7 +861,7 @@ Errors: ImportError when solvis-tools is not installed.
 
 Units: coordinates and cutoff in angstrom
 
-Example: `docs/source/reference/python-frame.rst`
+Example: `docs/orgmode/reference/python-frame.org`
 
 ### version
 
