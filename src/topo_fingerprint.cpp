@@ -377,8 +377,11 @@ LocalKey localKeyFromGraph(LocalGraph &g, int hops, std::uint64_t *refinement) {
   out.edges = static_cast<int>(g.edges.size());
   // The frame key is this refinement even when the local key is a
   // certificate, so it is hashed once and handed back to the caller.
+  // The wide refinement counts repeated colors instead of sorting
+  // every neighbour list. It is the same hash; a dense ball has a
+  // long list at every vertex.
   const std::uint64_t refined =
-      wlHash(g.adjacency, 0, hops + 2, g.localColors);
+      wlHashWide(g.adjacency, 0, hops + 2, g.localColors);
   if (refinement != nullptr) {
     *refinement = refined;
   }
