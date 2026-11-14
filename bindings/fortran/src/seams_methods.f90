@@ -384,7 +384,7 @@ contains
       call check_status(code, raw, stat, errmsg)
       return
     end if
-    if (present(q6bar)) q6bar = qbuf
+    if (present(q6bar)) call move_alloc(qbuf, q6bar)
     if (present(mean)) mean = mean_b
     if (present(median)) median = median_b
     if (present(n_ice)) n_ice = int(ice_b, seams_int)
