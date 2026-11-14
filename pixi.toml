@@ -215,6 +215,12 @@ libxkbcommon = ">=1.13.2,<2"
 glib = ">=2.88.3,<3"
 libvulkan-loader = ">=1.4.357.0,<2"
 mesa-lavapipe = ">=26.3.0,<27"
+# Language fronts. The conda packages are linux-64; other platforms
+# keep the tests that exit 77 when julia or Rscript is absent.
+julia = ">=1.10"
+r-base = ">=4.4"
+r-cpp11 = ">=0.4"
+r-testthat = ">=3.2"
 
 [pypi-dependencies]
 ovito = ">=3.12.0, <4"
@@ -223,3 +229,4 @@ solvis-tools = ">=0.1.5, <0.2"
 # 23.11 is the draft the changelog was written against. 26.x drops the
 # blank line under the version heading and the towncrier check fails.
 towncrier = "==23.11.0"
+chemparseplot = ">=1.8, <2"
