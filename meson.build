@@ -144,13 +144,16 @@ if openmp_dep_ok
     _deps += [openmp_dep]
     _args += ['-DSEAMS_HAS_OPENMP=1']
     openmp_found = true
-    # Clang links libomp by name from its own target directory, which the
-    # loader does not search; without a runpath there every library and
-    # test fails to start unless LD_LIBRARY_PATH names it.
+    # Clang links libomp by name from its own library directory, such as
+    # lib/x86_64-unknown-linux-gnu of an EESSI LLVM or /usr/lib/llvm-21/lib
+    # of apt.llvm.org, which the loader does not search; without a runpath
+    # there every library and test fails to start unless LD_LIBRARY_PATH
+    # names it. A runpath to a directory the loader searches anyway is
+    # harmless.
     if cpp_id == 'clang'
       _omp_so = run_command(cppc.cmd_array() + ['-print-file-name=libomp.so'],
                             check: false).stdout().strip()
-      if _omp_so.startswith('/') and not _omp_so.startswith('/usr/') and import('fs').exists(_omp_so)
+      if _omp_so.startswith('/') and import('fs').exists(_omp_so)
         _deps += [declare_dependency(
           link_args: ['-Wl,-rpath,' + import('fs').parent(_omp_so)])]
       endif
