@@ -1392,7 +1392,7 @@ if get_option('with_cli')
   if is_variable('lua_mod_targets')
     _installed_targets += lua_mod_targets
   endif
-  foreach _optional : ['run_hook', 'openmm_plugin', 'seams_plumed']
+  foreach _optional : ['run_hook', 'gmx_seams', 'openmm_plugin', 'seams_plumed']
     if is_variable(_optional)
       _installed_targets += get_variable(_optional)
     endif
