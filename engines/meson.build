@@ -163,6 +163,16 @@ if openmm_opt.allowed()
     error('with_openmm is enabled but libOpenMM was not found')
   endif
   if openmm_dep.found()
+    # A library found on LIBRARY_PATH links as -lOpenMM with no runpath,
+    # and the test then cannot load it. Ask the compiler where it is.
+    openmm_rpath = ''
+    if openmm_dep.type_name() == 'library'
+      _openmm_so = run_command(cppc.cmd_array() + ['-print-file-name=libOpenMM.so'],
+                               check: false).stdout().strip()
+      if fs.is_absolute(_openmm_so) and fs.is_file(_openmm_so)
+        openmm_rpath = fs.parent(_openmm_so)
+      endif
+    endif
     openmm_plugin = executable(
       'seams_openmm',
       files('openmm/plugin.cpp'),
@@ -170,6 +180,7 @@ if openmm_opt.allowed()
       link_with: seams_api_lib,
       include_directories: seams_inc,
       cpp_args: _args + seams_api_args,
+      build_rpath: openmm_rpath,
       install: true)
     test('openmm_plugin', openmm_plugin, timeout: 120)
   endif
