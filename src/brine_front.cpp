@@ -390,7 +390,7 @@ LinearFit linearFit(const std::vector<double> &time, const std::vector<double> &
     sse += residual * residual;
   }
   const double variance = sse / static_cast<double>(n - 2);
-  fit.stderr = std::sqrt(variance / ssxx);
+  fit.slopeStdErr = std::sqrt(variance / ssxx);
   return fit;
 }
 
