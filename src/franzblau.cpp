@@ -14,6 +14,7 @@
 
 #include <algorithm>
 #include <atomic>
+#include <bit>
 #include <chrono>
 #include <cstdint>
 #include <iterator>
@@ -1150,10 +1151,11 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
     }
     if (maxDepth >= 5 && count5) {
       // |{(a,c)}| with the three shortcut tests, without listing rings.
+      // a is an arm of p that is not an arm of q, so the bit row already
+      // names those arms. Walking the bits skips the arms both vertices share.
       for (std::size_t pi = 0; pi < L2.size(); pi++) {
         const int p = L2[pi];
-        const auto &ap = arms2[static_cast<std::size_t>(p)];
-        if (ap.empty()) {
+        if (arms2[static_cast<std::size_t>(p)].empty()) {
           continue;
         }
         const std::uint64_t *pArms =
@@ -1173,20 +1175,20 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
           if (pc == 0) {
             continue;
           }
-          for (const int a : ap) {
-            const int ra = rank1[static_cast<std::size_t>(a)];
-            if (ra < 0 ||
-                ((qArms[static_cast<unsigned>(ra) >> 6] >> (static_cast<unsigned>(ra) & 63u)) &
-                 1ull) != 0ull) {
-              continue;
+          for (int w = 0; w < lwords; w++) {
+            std::uint64_t word = pArms[w] & ~qArms[w];
+            const int base = w << 6;
+            while (word != 0) {
+              const int ra = base + std::countr_zero(word);
+              word &= word - 1;
+              const std::uint64_t *ba =
+                  shellAdj.data() + static_cast<std::size_t>(ra) * static_cast<std::size_t>(lwords);
+              int cut = 0;
+              for (int k = 0; k < lwords; k++) {
+                cut += __builtin_popcountll(ba[k] & rightBits[static_cast<std::size_t>(k)]);
+              }
+              c5 += pc - cut;
             }
-            const std::uint64_t *ba =
-                shellAdj.data() + static_cast<std::size_t>(ra) * static_cast<std::size_t>(lwords);
-            int cut = 0;
-            for (int w = 0; w < lwords; w++) {
-              cut += __builtin_popcountll(ba[w] & rightBits[static_cast<std::size_t>(w)]);
-            }
-            c5 += pc - cut;
           }
         }
       }
