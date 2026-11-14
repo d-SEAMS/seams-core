@@ -424,8 +424,24 @@ LocalKey localKeyFromGraph(LocalGraph &g, int hops, std::uint64_t *refinement) {
   return out;
 }
 
+LocalKey flatNeighbourKey(const Rows &rows, int atom, int hops, const std::vector<int> &colors,
+                         std::uint64_t *refined);
+
 LocalKey localKeyRefined(const Rows &rows, int atom, int hops,
                         const std::vector<int> &colors, std::uint64_t *refined) {
+  // A large crystal on one thread repeats one small ball. The flat image
+  // for that ball lives in its own unit so this search, and the team that
+  // shares it, stay the code they were tuned as. A team does not build the
+  // packed rows: that walk would finish before the team starts.
+#ifdef SEAMS_HAS_OPENMP
+  const bool flat = static_cast<int>(rows.size()) > 4096 && omp_get_max_threads() <= 1 &&
+                    !omp_in_parallel();
+#else
+  const bool flat = static_cast<int>(rows.size()) > 4096;
+#endif
+  if (flat) {
+    return flatNeighbourKey(rows, atom, hops, colors, refined);
+  }
   thread_local LocalGraph g;
   fillLocalGraph(g, rows, atom, hops, colors);
   return localKeyFromGraph(g, hops, refined);

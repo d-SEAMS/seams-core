@@ -25,6 +25,7 @@ ydslib_sources = files(
   'science_front.cpp',
   'interface_wc.cpp',
   'topo_fingerprint.cpp',
+  'topo_neighbour_key.cpp',
   'tum_offload.cpp',
   'mol_sys.cpp',
   'sphericart_ylm.cpp',
