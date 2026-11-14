@@ -231,25 +231,15 @@ def rscript():
 
 
 def lang_r(build, env):
-    script = rscript()
-    env = dict(env)
-    lib = build / "docs-r-lib"
-    if lib.is_dir():
-        env["DSEAMS_R_LIB"] = str(lib)
-    probe = subprocess.run(
-        [script, "-e", "cat(requireNamespace('dseams', quietly=TRUE))"],
-        env={
-            **env,
-            "R_LIBS": str(lib) + os.pathsep + env.get("R_LIBS", "") if lib.is_dir() else env.get("R_LIBS", ""),
-        },
-        text=True,
-        capture_output=True,
-    )
-    if probe.returncode != 0 or probe.stdout.strip() != "TRUE":
-        raise Skip("the R package is not installed")
-    if lib.is_dir():
-        env["R_LIBS"] = str(lib) + os.pathsep + env.get("R_LIBS", "")
-    text = run([script, str(EXAMPLES / "lang_tasks.R")], env)
+    if shutil.which("Rscript") is None:
+        raise Skip("Rscript is not on PATH")
+    sys.path.insert(0, str(ROOT / "docs" / "examples"))
+    import run_binding
+
+    script, renv = run_binding.install_r_package(build)
+    merged = dict(env)
+    merged.update(renv)
+    text = run([script, str(EXAMPLES / "lang_tasks.R")], merged)
     sys.stdout.write(text)
 
 

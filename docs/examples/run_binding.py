@@ -112,7 +112,15 @@ def install_r_package(build):
             shutil.rmtree(stale, ignore_errors=True)
         if not (dest / "dseams" / "DESCRIPTION").is_file():
             subprocess.check_call(
-                [r_cmd, "CMD", "INSTALL", "-l", str(dest), str(ROOT / "bindings/r/dseams")],
+                [
+                    r_cmd,
+                    "CMD",
+                    "INSTALL",
+                    "--no-build-vignettes",
+                    "-l",
+                    str(dest),
+                    str(ROOT / "bindings/r/dseams"),
+                ],
                 env=env,
             )
     return script, env

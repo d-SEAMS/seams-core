@@ -24,11 +24,15 @@ except ImportError:
 
 try:
     from ovito.data import DataCollection, Particles, SimulationCell
-    from ovito.modifiers import SteinhardtParametersModifier
     from ovito.pipeline import Pipeline, StaticSource
     import freud
 except ImportError:
     sys.stderr.write("ovito or freud is not installed\n")
+    raise SystemExit(77)
+try:
+    from ovito.modifiers import SteinhardtParametersModifier
+except ImportError:
+    sys.stderr.write("this OVITO build has no SteinhardtParametersModifier\n")
     raise SystemExit(77)
 
 LIB = os.environ.get("SEAMS_LANG_LIB")

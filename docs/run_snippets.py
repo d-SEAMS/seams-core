@@ -569,18 +569,25 @@ def run_source(build, env, path):
             script = shutil.which("Rscript")
             if not script:
                 raise Skip("Rscript is not on PATH")
+            local = dict(env)
+            if "library(dseams)" in text:
+                sys.path.insert(0, str(ROOT / "docs" / "examples"))
+                import run_binding
+
+                script, renv = run_binding.install_r_package(build)
+                local.update(renv)
             if "testthat" in text or "skip_if" in text:
                 probe = subprocess.run(
                     [script, "-e", 'quit(status=if (requireNamespace("testthat", quietly=TRUE)) 0 else 1)'],
-                    env=env,
+                    env=local,
                     capture_output=True,
                     text=True,
                 )
                 if probe.returncode != 0:
                     raise Skip("testthat is not installed")
-                run([script, "-e", "testthat::test_file('" + str(path) + "', stop_on_failure=TRUE)"], env)
+                run([script, "-e", "testthat::test_file('" + str(path) + "', stop_on_failure=TRUE)"], local)
                 return
-            run([script, str(path), *program_args(text, build)], env)
+            run([script, str(path), *program_args(text, build)], local)
         elif path.suffix == ".rs":
             which("cargo")
             local = dict(env)

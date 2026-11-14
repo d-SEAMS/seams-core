@@ -166,7 +166,7 @@ def ensure_r_package(env, lib):
             shutil.rmtree(stale, ignore_errors=True)
         r_cmd = str(Path(shutil.which("Rscript")).with_name("R"))
         done = subprocess.run(
-            [r_cmd, "CMD", "INSTALL", "-l", str(dest), str(ROOT / "bindings" / "r" / "dseams")],
+            [r_cmd, "CMD", "INSTALL", "--no-build-vignettes", "-l", str(dest), str(ROOT / "bindings" / "r" / "dseams")],
             capture_output=True,
             text=True,
             env=env,
