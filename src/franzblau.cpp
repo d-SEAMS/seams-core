@@ -893,6 +893,59 @@ bool shortestPathsFrom(const Graph &adjacency, int src, RingScratch &scr, int mi
   return true;
 }
 
+// Adjacency and "within two steps", packed as bit rows. They depend only
+// on the graph. A dense frame gives each thread one copy for the sources
+// it owns, instead of building the rows again for every atom.
+struct ChordBits {
+  int n = 0;
+  int stride = 0;
+  std::vector<std::uint64_t> bits;
+  std::vector<std::uint64_t> near;
+};
+
+// Zero means the caller did not ask for a shared build, so each source
+// fills its own rows. A search of a dense frame bumps this once; each
+// thread then fills one copy and reuses it for the sources it owns.
+std::atomic<int> gChordEpoch{0};
+
+template <typename Graph>
+void fillChordBits(const Graph &adjacency, ChordBits &out) {
+  const int nVertices = static_cast<int>(adjacency.size());
+  const int stride = (nVertices + 63) >> 6;
+  out.n = nVertices;
+  out.stride = stride;
+  out.bits.assign(static_cast<std::size_t>(nVertices) * static_cast<std::size_t>(stride), 0);
+  for (int u = 0; u < nVertices; u++) {
+    std::uint64_t *row =
+        out.bits.data() + static_cast<std::size_t>(u) * static_cast<std::size_t>(stride);
+    for (const int v : adjacency[static_cast<std::size_t>(u)]) {
+      if (v >= 0 && v < nVertices) {
+        row[static_cast<unsigned>(v) >> 6] |= 1ull << (static_cast<unsigned>(v) & 63u);
+      }
+    }
+  }
+  out.near.assign(out.bits.size(), 0);
+  for (int u = 0; u < nVertices; u++) {
+    std::uint64_t *dst =
+        out.near.data() + static_cast<std::size_t>(u) * static_cast<std::size_t>(stride);
+    const std::uint64_t *self =
+        out.bits.data() + static_cast<std::size_t>(u) * static_cast<std::size_t>(stride);
+    for (int w = 0; w < stride; w++) {
+      dst[w] = self[w];
+    }
+    for (const int v : adjacency[static_cast<std::size_t>(u)]) {
+      if (v < 0 || v >= nVertices) {
+        continue;
+      }
+      const std::uint64_t *row =
+          out.bits.data() + static_cast<std::size_t>(v) * static_cast<std::size_t>(stride);
+      for (int w = 0; w < stride; w++) {
+        dst[w] |= row[w];
+      }
+    }
+  }
+}
+
 //! Primitive rings from one source when a vertex has too many shortest paths
 //! to pair. Levels are the breadth-first distances (vertices below the source
 //! already cleared). A ring is the same one the pairing walk would emit:
@@ -908,48 +961,27 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
   if (maxDepth < 3 || nVertices <= 0) {
     return;
   }
-  const int stride = (nVertices + 63) >> 6;
-  std::vector<std::uint64_t> bits(
-      static_cast<std::size_t>(nVertices) * static_cast<std::size_t>(stride), 0);
-  for (int u = 0; u < nVertices; u++) {
-    std::uint64_t *row = bits.data() + static_cast<std::size_t>(u) * static_cast<std::size_t>(stride);
-    for (const int v : adjacency[static_cast<std::size_t>(u)]) {
-      if (v >= 0 && v < nVertices) {
-        row[static_cast<unsigned>(v) >> 6] |= 1ull << (static_cast<unsigned>(v) & 63u);
-      }
-    }
+  thread_local ChordBits store;
+  thread_local int storeEpoch = 0;
+  const int epoch = gChordEpoch.load(std::memory_order_relaxed);
+  if (epoch == 0 || storeEpoch != epoch || store.n != nVertices) {
+    fillChordBits(adjacency, store);
+    storeEpoch = epoch;
   }
+  const int stride = store.stride;
+  const std::uint64_t *bitData = store.bits.data();
+  const std::uint64_t *nearData = store.near.data();
   auto adjacent = [&](int u, int v) {
     const std::uint64_t *row =
-        bits.data() + static_cast<std::size_t>(u) * static_cast<std::size_t>(stride);
+        bitData + static_cast<std::size_t>(u) * static_cast<std::size_t>(stride);
     return ((row[static_cast<unsigned>(v) >> 6] >> (static_cast<unsigned>(v) & 63u)) & 1ull) != 0ull;
   };
   // Distance at most 2: adjacent, or a shared neighbour. One row per vertex,
   // so each later test is a bit read. The row includes the vertex itself
   // when it has a neighbour; no query asks within2 of a vertex with itself.
-  std::vector<std::uint64_t> near2(bits.size(), 0);
-  for (int u = 0; u < nVertices; u++) {
-    std::uint64_t *dst =
-        near2.data() + static_cast<std::size_t>(u) * static_cast<std::size_t>(stride);
-    const std::uint64_t *self =
-        bits.data() + static_cast<std::size_t>(u) * static_cast<std::size_t>(stride);
-    for (int w = 0; w < stride; w++) {
-      dst[w] = self[w];
-    }
-    for (const int v : adjacency[static_cast<std::size_t>(u)]) {
-      if (v < 0 || v >= nVertices) {
-        continue;
-      }
-      const std::uint64_t *row =
-          bits.data() + static_cast<std::size_t>(v) * static_cast<std::size_t>(stride);
-      for (int w = 0; w < stride; w++) {
-        dst[w] |= row[w];
-      }
-    }
-  }
   auto within2 = [&](int u, int v) {
     const std::uint64_t *row =
-        near2.data() + static_cast<std::size_t>(u) * static_cast<std::size_t>(stride);
+        nearData + static_cast<std::size_t>(u) * static_cast<std::size_t>(stride);
     return ((row[static_cast<unsigned>(v) >> 6] >> (static_cast<unsigned>(v) & 63u)) &
             1ull) != 0ull;
   };
@@ -2386,6 +2418,16 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
     if (sources.empty() || (v < static_cast<int>(sources.size()) && sources[static_cast<std::size_t>(v)])) {
       from.push_back(v);
     }
+  }
+  // One bit image per thread, not one per source and not one shared by
+  // the team. A shared image is reread from every core; a fresh image
+  // per source repeats the same walk hundreds of times.
+  if (cap > 0 && nVertices > 0 && nVertices <= 4096) {
+    int next = gChordEpoch.load(std::memory_order_relaxed) + 1;
+    if (next == 0) {
+      next = 1;
+    }
+    gChordEpoch.store(next, std::memory_order_relaxed);
   }
   BoundedBalls balls;
   BitBalls bits;
