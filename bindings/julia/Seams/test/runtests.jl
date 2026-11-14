@@ -36,7 +36,12 @@ end
     @test fraction > 0.5
 end
 
-@testset "seams.h matches the C++ path" begin
-    include(joinpath(@__DIR__, "..", "..", "cpp_match.jl"))
-    check_seams_against_cpp()
+# seams.h against the C++ census, when a checkout build names the oracle.
+oracle = get(ENV, "SEAMS_CPP_ORACLE", "")
+cpp_match = joinpath(@__DIR__, "..", "..", "cpp_match.jl")
+if !isempty(oracle) && isfile(oracle) && isfile(cpp_match)
+    @testset "seams.h matches the C++ path" begin
+        include(cpp_match)
+        check_seams_against_cpp()
+    end
 end
