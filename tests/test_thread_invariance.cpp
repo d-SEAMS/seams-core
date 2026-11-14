@@ -1,23 +1,32 @@
-// Copyright (c) d-SEAMS developers
-// The cutoff neighbour list, local Steinhardt q_l and the ring census at
-// one, two, four and eight OpenMP threads. Every width must return the
-// one-thread arrays exactly: the same CSR entries in the same order, and
-// the same q_l bits.
+// The cutoff neighbour list, local Steinhardt q_l, the ring census, CHILL
+// and CHILL+, the shell match, rings with their symmetry codes, cages,
+// prisms, the monolayer census and the 2D RDF at one, two, four and eight
+// OpenMP threads. Every width must return the one-thread arrays exactly:
+// the same CSR entries in the same order, the same labels, rings and
+// counts, and the same floating-point bits.
 
 #include <catch2/catch_test_macros.hpp>
 
 #include <bop.hpp>
+#include <cage_affiliation.hpp>
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <rdf2d.hpp>
+#include <seams.h>
 #include <seams_c_api.h>
+#include <topo_bulk.hpp>
+#include <topo_one_dim.hpp>
 
 #include "ice_ic.hpp"
 
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
+#include <memory>
+#include <utility>
 #include <vector>
 
 #ifdef SEAMS_HAS_OPENMP
@@ -29,6 +38,11 @@ namespace {
 using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
 
 constexpr int kWidths[] = {1, 2, 4, 8};
+
+// The library narrows a call's team when the machine looks contended, and
+// meson runs these tests beside others. Every width below must be the
+// width asked for.
+const bool kFixedWidth = setenv("SEAMS_FAIR_WIDTH", "0", 1) == 0;
 
 struct Width {
   int saved = 1;
@@ -215,6 +229,175 @@ std::vector<double> box9Of(const Cloud &cloud) {
           cloud.box[2], 0.0,             0.0,             0.0};
 }
 
+// Honeycomb sheets stacked straight up, 2.75 A bonds in and between the
+// sheets. Each hexagon and each square between two sheets is a prism face
+// or base, and no other pair is inside 3.5 A.
+Cloud stackedHoneycomb(int nx, int ny, int nz) {
+  const double bond = 2.75;
+  const double a = bond * std::sqrt(3.0);
+  const double basis[4][2] = {
+      {0.0, 0.0}, {0.5 * a, 0.5 * bond}, {0.5 * a, 1.5 * bond}, {0.0, 2.0 * bond}};
+  Cloud cloud;
+  cloud.currentFrame = 1;
+  cloud.box = {nx * a, ny * 3.0 * bond, nz * bond};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  for (int iz = 0; iz < nz; ++iz) {
+    for (int ix = 0; ix < nx; ++ix) {
+      for (int iy = 0; iy < ny; ++iy) {
+        for (const auto &site : basis) {
+          molSys::Point<double> point;
+          point.x = ix * a + site[0];
+          point.y = iy * 3.0 * bond + site[1];
+          point.z = iz * bond;
+          point.type = 1;
+          point.atomID = static_cast<int>(cloud.pts.size()) + 1;
+          point.molID = point.atomID;
+          cloud.idIndexMap[point.atomID] = static_cast<int>(cloud.pts.size());
+          cloud.pts.push_back(point);
+        }
+      }
+    }
+  }
+  cloud.nop = static_cast<int>(cloud.pts.size());
+  return cloud;
+}
+
+std::vector<std::vector<int>> indexRows(const Cloud &cloud, double rc) {
+  return nneigh::neighbourListByIndex(cloud, nneigh::neighListO(rc, cloud, 1));
+}
+
+std::vector<std::vector<int>> ofSize(const std::vector<std::vector<int>> &rings,
+                                     std::size_t size) {
+  std::vector<std::vector<int>> out;
+  for (const auto &ring : rings) {
+    if (ring.size() == size) {
+      out.push_back(ring);
+    }
+  }
+  return out;
+}
+
+// One frame handle of the stable C API.
+struct System {
+  seams_system *handle = seams_system_create();
+  explicit System(const Cloud &cloud, const std::vector<int> *types = nullptr) {
+    set(cloud, types);
+  }
+  ~System() { seams_system_destroy(handle); }
+  System(const System &) = delete;
+  System &operator=(const System &) = delete;
+  void set(const Cloud &cloud, const std::vector<int> *types = nullptr) {
+    const auto xyz = flatXyz(cloud);
+    REQUIRE(seams_system_set_ortho(handle, xyz.data(), cloud.nop, cloud.boxLow[0],
+                                   cloud.boxLow[1], cloud.boxLow[2], cloud.box[0],
+                                   cloud.box[1], cloud.box[2],
+                                   types == nullptr ? nullptr : types->data(),
+                                   nullptr) == SEAMS_OK);
+  }
+};
+
+struct Labels {
+  std::vector<int> labels;
+  std::vector<int> counts;
+  bool operator==(const Labels &) const = default;
+};
+
+enum class Chill { published, ovito, plusPublished, plusOvito };
+
+Labels chillOf(seams_system *sys, int n, Chill kind, int type) {
+  Labels out;
+  out.labels.assign(static_cast<std::size_t>(n), -7);
+  out.counts.assign(9, -1);
+  const int rule = (kind == Chill::ovito || kind == Chill::plusOvito) ? SEAMS_CHILL_OVITO
+                                                                      : SEAMS_CHILL_PUBLISHED;
+  if (kind == Chill::plusPublished || kind == Chill::plusOvito) {
+    REQUIRE(seams_chill_plus(sys, 3.5, type, SEAMS_GRAPH_CUTOFF, rule, out.labels.data(),
+                             out.counts.data()) == SEAMS_OK);
+  } else {
+    REQUIRE(seams_chill(sys, 3.5, type, SEAMS_GRAPH_CUTOFF, rule, out.labels.data(),
+                        out.labels.size(), out.counts.data()) == SEAMS_OK);
+  }
+  return out;
+}
+
+struct RingSet {
+  std::vector<int> sizes;
+  std::vector<int> symmetry;
+  std::vector<int> vertices;
+  std::vector<int> histogram;
+  bool operator==(const RingSet &) const = default;
+};
+
+RingSet ringsOf(seams_system *sys, int type) {
+  seams_rings *rings = nullptr;
+  REQUIRE(seams_rings_find(sys, 3.5, type, SEAMS_GRAPH_CUTOFF, 6, &rings) == SEAMS_OK);
+  const int count = seams_rings_count(rings);
+  RingSet out;
+  out.sizes.assign(static_cast<std::size_t>(count), -1);
+  out.symmetry.assign(static_cast<std::size_t>(count), -9);
+  REQUIRE(seams_rings_labels(rings, out.sizes.data(), out.symmetry.data()) == SEAMS_OK);
+  out.histogram.assign(7, -1);
+  REQUIRE(seams_rings_histogram(rings, out.histogram.data(), 7) == SEAMS_OK);
+  int atoms[16];
+  for (int i = 0; i < count; ++i) {
+    std::size_t got = 0;
+    REQUIRE(seams_rings_vertices(rings, i, atoms, 16, &got) == SEAMS_OK);
+    out.vertices.insert(out.vertices.end(), atoms, atoms + got);
+  }
+  seams_rings_destroy(rings);
+  return out;
+}
+
+struct CageSet {
+  std::vector<int> counts;
+  std::vector<int> perAtom;
+  bool operator==(const CageSet &) const = default;
+};
+
+CageSet cagesOf(seams_system *sys, int n, int type) {
+  seams_cage_set *cages = nullptr;
+  REQUIRE(seams_cages_find(sys, 3.5, type, SEAMS_GRAPH_CUTOFF, 4, 0, &cages) == SEAMS_OK);
+  CageSet out;
+  out.counts.assign(4, -1);
+  REQUIRE(seams_cages_counts(cages, &out.counts[0], &out.counts[1], &out.counts[2],
+                             &out.counts[3]) == SEAMS_OK);
+  out.perAtom.assign(static_cast<std::size_t>(n), -1);
+  REQUIRE(seams_cages_labels(cages, out.perAtom.data(), out.perAtom.size()) == SEAMS_OK);
+  seams_cages_destroy(cages);
+  return out;
+}
+
+std::vector<int> prismsOf(seams_system *sys, int type) {
+  std::vector<int> perfect(7, -1);
+  std::vector<int> imperfect(7, -1);
+  REQUIRE(seams_prisms(sys, 3.5, type, perfect.data(), imperfect.data(), 7) == SEAMS_OK);
+  perfect.insert(perfect.end(), imperfect.begin(), imperfect.end());
+  return perfect;
+}
+
+std::vector<int> monolayerOf(seams_system *sys, const Cloud &cloud, int type) {
+  std::vector<int> counts(7, -1);
+  REQUIRE(seams_monolayer(sys, 3.5, type, 6, cloud.box[0] * cloud.box[1], counts.data(),
+                          counts.size()) == SEAMS_OK);
+  return counts;
+}
+
+int distinctLabels(const std::vector<int> &labels) {
+  std::vector<int> seen(labels);
+  std::sort(seen.begin(), seen.end());
+  return static_cast<int>(std::unique(seen.begin(), seen.end()) - seen.begin());
+}
+
+// Every type-2 atom is a fifth of the frame, so a species filter drops
+// atoms from the middle of the arrays.
+std::vector<int> everyFifthType2(int n) {
+  std::vector<int> types(static_cast<std::size_t>(n), 1);
+  for (int i = 2; i < n; i += 5) {
+    types[static_cast<std::size_t>(i)] = 2;
+  }
+  return types;
+}
+
 } // namespace
 
 TEST_CASE("the cutoff CSR of ice Ic is the same at every width", "[thread_invariance]") {
@@ -390,4 +573,237 @@ TEST_CASE("the C API reuses its frame buffers across frames of different sizes",
     REQUIRE(seams_ql_cutoff(xyz.data(), n, box9.data(), 3.5, 6, q6.data()) == 0);
     requireSameBits(q6, qlAt(8, fresh, 3.5, 6, 1, false).ql);
   }
+}
+
+TEST_CASE("CHILL and CHILL+ labels and counts are the same at every width",
+          "[thread_invariance][c_api]") {
+  REQUIRE(kFixedWidth);
+  const Cloud warm = jittered(iceIc(32768), 0.8, 21);
+  const auto types = everyFifthType2(warm.nop);
+  System plain(warm);
+  System mixed(warm, &types);
+  for (const Chill kind : {Chill::published, Chill::ovito, Chill::plusPublished,
+                           Chill::plusOvito}) {
+    for (const auto &[sys, type] : {std::pair{plain.handle, 0}, std::pair{mixed.handle, 1}}) {
+      Labels serial;
+      {
+        const Width team(1);
+        serial = chillOf(sys, warm.nop, kind, type);
+      }
+      REQUIRE(distinctLabels(serial.labels) >= 2);
+      for (const int width : kWidths) {
+        INFO("kind " << static_cast<int>(kind) << " type " << type << " width " << width);
+        const Width team(width);
+        REQUIRE(chillOf(sys, warm.nop, kind, type) == serial);
+      }
+    }
+  }
+}
+
+TEST_CASE("the shell match keeps its labels at every width", "[thread_invariance][c_api]") {
+  REQUIRE(kFixedWidth);
+  const Cloud warm = jittered(iceIc(32768), 0.8, 22);
+  const auto xyz = flatXyz(warm);
+  const double lattice9[9] = {warm.box[0], 0.0, 0.0, 0.0, warm.box[1], 0.0,
+                              0.0,         0.0, 0.0 + warm.box[2]};
+  System sys(warm);
+  std::vector<int> serialApi;
+  std::vector<int> serialFlat;
+  for (const int width : kWidths) {
+    INFO("width " << width);
+    const Width team(width);
+    std::vector<int> api(static_cast<std::size_t>(warm.nop), -9);
+    REQUIRE(seams_system_symmetry(sys.handle, 0.0, api.data(), api.size()) == SEAMS_OK);
+    std::vector<int> flat(static_cast<std::size_t>(warm.nop), -9);
+    REQUIRE(seams_symmetry_classify(xyz.data(), warm.nop, lattice9, flat.data()) == 0);
+    if (width == 1) {
+      serialApi = api;
+      serialFlat = flat;
+      REQUIRE(distinctLabels(api) >= 2);
+    }
+    REQUIRE(api == serialApi);
+    REQUIRE(flat == serialFlat);
+  }
+}
+
+TEST_CASE("rings, their symmetry codes and the cage planes are the same at every width",
+          "[thread_invariance][c_api]") {
+  REQUIRE(kFixedWidth);
+  const Cloud warm = jittered(iceIc(32768), 0.8, 23);
+  System sys(warm);
+  RingSet serialSet;
+  {
+    const Width team(1);
+    serialSet = ringsOf(sys.handle, 0);
+  }
+  REQUIRE(serialSet.histogram[6] > 0);
+  REQUIRE(distinctLabels(serialSet.symmetry) >= 2);
+
+  const auto idx = indexRows(warm, 3.5);
+  std::vector<std::vector<int>> serialRings;
+  {
+    const Width team(1);
+    serialRings = primitive::ringNetwork(idx, 6);
+  }
+  const auto six = ofSize(serialRings, 6);
+  REQUIRE(six.size() > 2048);
+  const auto wantAff = ring::cageAffiliation(six, idx);
+  const auto wantPlanes = ring::stackingPlanes(six, idx);
+  const auto contractible = ring::contractibleRings(serialRings, warm);
+  REQUIRE(ring::contractibleRings(std::vector<std::vector<int>>(serialRings), warm) ==
+          contractible);
+  for (const int width : kWidths) {
+    INFO("width " << width);
+    const Width team(width);
+    REQUIRE(ringsOf(sys.handle, 0) == serialSet);
+    REQUIRE(primitive::ringNetwork(idx, 6) == serialRings);
+    const auto aff = ring::cageAffiliation(six, idx);
+    REQUIRE(aff.hc == wantAff.hc);
+    REQUIRE(aff.ddc == wantAff.ddc);
+    const auto planes = ring::stackingPlanes(six, idx);
+    REQUIRE(planes.basal == wantPlanes.basal);
+    REQUIRE(planes.equatorial == wantPlanes.equatorial);
+  }
+}
+
+TEST_CASE("cages and their per-atom codes are the same at every width",
+          "[thread_invariance][c_api]") {
+  REQUIRE(kFixedWidth);
+  const Cloud cold = jittered(iceIc(32768), 0.3, 24);
+  const Cloud warm = jittered(iceIc(32768), 0.8, 25);
+  for (const Cloud *cloud : {&cold, &warm}) {
+    System sys(*cloud);
+    CageSet serial;
+    {
+      const Width team(1);
+      serial = cagesOf(sys.handle, cloud->nop, 0);
+    }
+    REQUIRE(serial.counts[1] + serial.counts[3] > 0);
+    for (const int width : kWidths) {
+      INFO("width " << width);
+      const Width team(width);
+      REQUIRE(cagesOf(sys.handle, cloud->nop, 0) == serial);
+    }
+  }
+}
+
+TEST_CASE("prisms are the same at every width", "[thread_invariance][c_api]") {
+  REQUIRE(kFixedWidth);
+  for (const double amplitude : {0.0, 0.2}) {
+    INFO("jitter " << amplitude);
+    Cloud stack = jittered(stackedHoneycomb(12, 10, 16), amplitude, 26);
+    const auto idx = indexRows(stack, 3.5);
+    std::vector<std::vector<int>> rings;
+    {
+      const Width team(1);
+      rings = primitive::ringNetwork(idx, 6);
+    }
+    System sys(stack);
+    std::vector<int> serialApi;
+    {
+      const Width team(1);
+      serialApi = prismsOf(sys.handle, 0);
+    }
+    for (const std::size_t size : {std::size_t{4}, std::size_t{6}}) {
+      const auto group = ofSize(rings, size);
+      REQUIRE(group.size() >= 2048);
+      std::vector<ring::strucType> serialKind;
+      std::vector<int> serialList;
+      int serialPerfect = -1;
+      for (const int width : kWidths) {
+        INFO("size " << size << " width " << width);
+        const Width team(width);
+        std::vector<ring::strucType> kind(group.size());
+        std::vector<double> rmsd(static_cast<std::size_t>(stack.nop), -1.0);
+        int perfect = 0;
+        int imperfect = 0;
+        auto list =
+            ring::findPrisms(group, kind, perfect, imperfect, idx, stack, rmsd, false);
+        if (width == 1) {
+          serialKind = kind;
+          serialList = list;
+          serialPerfect = perfect;
+          // Squares stacked on squares share a bond, so only the
+          // hexagons pair into prisms.
+          REQUIRE((size == 4 || perfect > 0));
+        }
+        REQUIRE(perfect == serialPerfect);
+        REQUIRE(list == serialList);
+        REQUIRE(kind == serialKind);
+      }
+    }
+    for (const int width : kWidths) {
+      INFO("width " << width);
+      const Width team(width);
+      REQUIRE(prismsOf(sys.handle, 0) == serialApi);
+    }
+  }
+}
+
+TEST_CASE("the monolayer census, the 2D RDF and k-nearest rows are the same at every width",
+          "[thread_invariance][c_api]") {
+  REQUIRE(kFixedWidth);
+  const Cloud warm = jittered(iceIc(32768), 0.8, 27);
+  System sys(warm);
+  std::vector<int> serialCensus;
+  std::vector<int> serialHistogram;
+  std::vector<double> serialLengths;
+  std::vector<std::vector<int>> serialMutual;
+  std::vector<std::vector<int>> serialAll;
+  for (const int width : kWidths) {
+    INFO("width " << width);
+    const Width team(width);
+    const auto census = monolayerOf(sys.handle, warm, 0);
+    const auto histogram = rdf2::sampleRDF_AA(warm, 8.0, 0.05, 160);
+    const auto lengths = rdf2::getSystemLengths(warm);
+    const auto mutual = nneigh::kNearestNeighbourList(warm, 4, 5.0, 1, true);
+    const auto all = nneigh::kNearestNeighbourList(warm, 4, 5.0, 1, false);
+    if (width == 1) {
+      serialCensus = census;
+      serialHistogram = histogram;
+      serialLengths = lengths;
+      serialMutual = mutual;
+      serialAll = all;
+      REQUIRE(census[6] > 0);
+      REQUIRE(std::count_if(histogram.begin(), histogram.end(), [](int v) { return v > 0; }) >
+              10);
+    }
+    REQUIRE(census == serialCensus);
+    REQUIRE(histogram == serialHistogram);
+    requireSameBits(lengths, serialLengths);
+    REQUIRE(mutual == serialMutual);
+    REQUIRE(all == serialAll);
+  }
+}
+
+TEST_CASE("one frame handle gives each kernel the frame a fresh handle would",
+          "[thread_invariance][c_api]") {
+  // The handle keeps one filtered copy of the frame between calls. A new
+  // species filter, a new frame, or a kernel that does not use the copy
+  // in between must not leak into the next call.
+  REQUIRE(kFixedWidth);
+  const Cloud warm = jittered(iceIc(32768), 0.8, 28);
+  const Cloud small = jittered(iceIc(13824), 0.8, 29);
+  const auto types = everyFifthType2(warm.nop);
+  const auto smallTypes = everyFifthType2(small.nop);
+  const Width team(8);
+  System reused(warm, &types);
+  const auto fresh = [](const Cloud &cloud, const std::vector<int> &kinds) {
+    return std::make_unique<System>(cloud, &kinds);
+  };
+  REQUIRE(chillOf(reused.handle, warm.nop, Chill::plusPublished, 1) ==
+          chillOf(fresh(warm, types)->handle, warm.nop, Chill::plusPublished, 1));
+  REQUIRE(cagesOf(reused.handle, warm.nop, 0) == cagesOf(fresh(warm, types)->handle, warm.nop, 0));
+  REQUIRE(chillOf(reused.handle, warm.nop, Chill::published, 2) ==
+          chillOf(fresh(warm, types)->handle, warm.nop, Chill::published, 2));
+  std::vector<int> labels(static_cast<std::size_t>(warm.nop), -9);
+  REQUIRE(seams_system_symmetry(reused.handle, 0.0, labels.data(), labels.size()) == SEAMS_OK);
+  REQUIRE(ringsOf(reused.handle, 1) == ringsOf(fresh(warm, types)->handle, 1));
+  REQUIRE(prismsOf(reused.handle, 1) == prismsOf(fresh(warm, types)->handle, 1));
+  REQUIRE(monolayerOf(reused.handle, warm, 1) == monolayerOf(fresh(warm, types)->handle, warm, 1));
+  reused.set(small, &smallTypes);
+  REQUIRE(chillOf(reused.handle, small.nop, Chill::plusOvito, 1) ==
+          chillOf(fresh(small, smallTypes)->handle, small.nop, Chill::plusOvito, 1));
+  REQUIRE(cagesOf(reused.handle, small.nop, 1) ==
+          cagesOf(fresh(small, smallTypes)->handle, small.nop, 1));
 }

@@ -128,6 +128,9 @@ if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
   _test_link_args += ['-Wl,--end-group']
 endif
 
+# seams.h and the seams_version.h generated beside libseams.
+_api_incdirs = [include_directories('../include', '../src')]
+
 foreach name, src : test_sources
   # meson allows no nested ternary; the long-running suites get more time
   _timeout = 120
@@ -157,9 +160,10 @@ foreach name, src : test_sources
   test(name,
     executable('test_' + name, src,
       dependencies: [yds_dep, catch2_dep],
+      link_with: name == 'thread_invariance' ? [seams_api_lib] : [],
       cpp_args: _args,
       link_args: _test_link_args,
-      include_directories: _incdirs,
+      include_directories: name == 'thread_invariance' ? _incdirs + _api_incdirs : _incdirs,
       build_rpath: _test_rpath),
     workdir: meson.project_source_root() / 'input',
     env: _test_env,
