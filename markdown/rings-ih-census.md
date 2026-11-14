@@ -27,7 +27,10 @@ also counts squares and extra hexagons. Those cycles wind the periodic
 cell. They are not in the primitive census. OVITO FindRings does the
 same on that narrow cell (32 squares and 384 hexagons). At 4096
 molecules the box is wide enough, and FindRings counts the 8192
-primitive hexagons.
+primitive hexagons (OVITO 3.17.2). OVITO 3.15.5 reports 6815 of them,
+each one of the primitive hexagons; `tests/test_rings_ih_external.py`
+checks that every reported ring is primitive, and the full count from
+3.17 on.
 
 The prism pass used to compare every pair of hexagons. A neighbour
 index visits only the rings that can pass the basal test, which is the
