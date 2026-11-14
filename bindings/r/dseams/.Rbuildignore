@@ -2,5 +2,10 @@
 ^src/.*\.so$
 ^src/.*\.dll$
 ^src/Makevars$
+^\.gitignore$
 ^\.Rhistory$
 ^\.RData$
+^.*\.Rproj$
+^\.Rproj\.user$
+^cran-comments\.md$
+^LICENSE\.md$

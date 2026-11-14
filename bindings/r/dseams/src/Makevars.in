@@ -1,0 +1,46 @@
+CXX_STD = CXX20
+
+PKG_CPPFLAGS = @SEAMS_CPPFLAGS@
+PKG_CXXFLAGS = @OPENMP_CXXFLAGS@
+PKG_LIBS = @OPENMP_CXXFLAGS@ @SEAMS_LIBS@
+
+# Engine translation units copied by tools/vendor.sh. Keep one per line:
+# vendor.sh reads this block, and Makevars.win must list the same files.
+SEAMS_OBJECTS = \
+  seams/seams_lang.o \
+  seams/absOrientation.o \
+  seams/bond.o \
+  seams/bop.o \
+  seams/cage_affiliation.o \
+  seams/cage_canon.o \
+  seams/cage_enum.o \
+  seams/cage_pack.o \
+  seams/chemfiles_io.o \
+  seams/chill_plus_scheme.o \
+  seams/cutoff_csr.o \
+  seams/franzblau.o \
+  seams/generic.o \
+  seams/ira_sofi.o \
+  seams/local_symmetry.o \
+  seams/mol_sys.o \
+  seams/neighbours.o \
+  seams/order_parameter.o \
+  seams/ozaki.o \
+  seams/pntCorrespondence.o \
+  seams/rdf.o \
+  seams/rdf2d.o \
+  seams/ring.o \
+  seams/seams_input.o \
+  seams/seams_output.o \
+  seams/shapeMatch.o \
+  seams/shell_classify.o \
+  seams/shell_kernel.o \
+  seams/steinhardt_parallel.o \
+  seams/topo_bulk.o \
+  seams/topo_one_dim.o \
+  seams/topo_two_dim.o \
+  seams/tum_offload.o \
+  seams/water_select.o \
+  seams/ylm_cartesian.o
+
+OBJECTS = cpp11.o dseams.o dseams_r_io.o @ENGINE_OBJECTS@

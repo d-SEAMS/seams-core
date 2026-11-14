@@ -1,10 +1,23 @@
-library(dseams)
+ice1h <- dseams_example("ice1h.lammpstrj")
+tip <- dseams_example("exampleTraj.lammpstrj")
+nuc <- dseams_example("nucleation_f1.lammpstrj")
 
-root <- Sys.getenv("DSEAMS_ROOT", unset = "")
-tip <- file.path(root, "input", "traj", "exampleTraj.lammpstrj")
-cubic <- file.path(root, "input", "traj", "mW_cubic.lammpstrj")
-
-skip_if(root == "" || !file.exists(tip), "DSEAMS_ROOT is not set")
+test_that("ice Ih is 128 hexagonal waters and 256 six-rings", {
+  frame <- read_frame(ice1h, type = -1L)
+  expect_s3_class(frame, "dseams_frame")
+  expect_equal(nframes(ice1h), 1L)
+  expect_equal(dim(positions(frame)), c(128L, 3L))
+  ice <- chill_plus(frame, graph = "cutoff")
+  expect_equal(sum(ice$name == "hexagonal"), 128L)
+  expect_equal(attr(ice, "counts")[[2]], 128L)
+  rings <- primitive_rings(frame, graph = "cutoff", max_depth = 6L)
+  expect_equal(rings$n[rings$size == 6L], 256L)
+  q <- q4_q6(frame)
+  expect_equal(nrow(q), 128L)
+  expect_true(all(is.finite(q$q6)))
+  expect_length(symmetry(frame), 128L)
+  expect_true(is.nan(jump_tau90(frame, frame, dt = 1)))
+})
 
 test_that("CHILL+ on the mixed TIP4P frame matches the CLI", {
   frame <- read_frame(tip, type = 2L)
@@ -36,36 +49,30 @@ test_that("CHILL+ on the mixed TIP4P frame matches the CLI", {
   expect_false(abs(got - 0.389362) < 1e-4)
 })
 
-test_that("seeded cages under SEAMS_OFFLOAD match the host and the CLI", {
-  nuc <- file.path(root, "input", "traj", "nucleation_f1.lammpstrj")
-  skip_if(!file.exists(nuc))
+test_that("seeded cages under SEAMS_OFFLOAD match the host", {
   frame <- read_frame(nuc, type = 1L)
+  saved_offload <- Sys.getenv("SEAMS_OFFLOAD", unset = NA)
+  on.exit(if (is.na(saved_offload)) Sys.unsetenv("SEAMS_OFFLOAD") else
+    Sys.setenv(SEAMS_OFFLOAD = saved_offload), add = TRUE)
   Sys.unsetenv("SEAMS_OFFLOAD")
   host <- cages(frame, graph = "seeded")
   Sys.setenv(SEAMS_OFFLOAD = "1")
   off <- cages(frame, graph = "seeded")
   Sys.unsetenv("SEAMS_OFFLOAD")
   expect_identical(off$cage, host$cage)
-  expect_equal(attr(off, "n_ih"), attr(host, "n_ih"))
-  expect_equal(attr(off, "n_ic"), attr(host, "n_ic"))
-  expect_equal(attr(off, "n_both"), attr(host, "n_both"))
-  expect_equal(attr(off, "n_water"), attr(host, "n_water"))
+  for (key in c("n_ih", "n_ic", "n_both", "n_water")) {
+    expect_equal(attr(off, key), attr(host, key))
+  }
   n <- attr(host, "n_ih") + attr(host, "n_ic") + attr(host, "n_both") +
     attr(host, "n_water")
   expect_equal(n, nrow(host))
   expect_gt(attr(host, "n_both"), 0L)
+
+  # SEAMS_BIN is a seams CLI from the same engine version.
   bin <- Sys.getenv("SEAMS_BIN", unset = "")
-  skip_if(bin == "" || !file.exists(bin))
-  # R prepends its own lib directories to LD_LIBRARY_PATH. The engine is
-  # linked against the toolchain libc, so those prefixes are removed for
-  # this one call.
-  saved_ld <- Sys.getenv("LD_LIBRARY_PATH", unset = "")
-  parts <- strsplit(saved_ld, ":", fixed = TRUE)[[1]]
-  parts <- parts[!grepl("^/usr/lib", parts)]
-  Sys.setenv(LD_LIBRARY_PATH = paste(parts, collapse = ":"))
+  skip_if(bin == "" || !file.exists(bin), "SEAMS_BIN is not set")
   line <- system2(bin, c("cages", nuc, "--graph", "seeded", "--cutoff", "3.5"),
                   stdout = TRUE)
-  Sys.setenv(LD_LIBRARY_PATH = saved_ld)
   parts <- strsplit(line[[length(line)]], " +")[[1]]
   # nop N graph seeded hexagonal H cubic C both B water W
   expect_equal(as.integer(parts[[6]]), attr(host, "n_ih"))
@@ -75,7 +82,11 @@ test_that("seeded cages under SEAMS_OFFLOAD match the host and the CLI", {
 })
 
 test_that("cubic ice is 4096 cubic and 4096 double-diamond", {
-  skip_if(!file.exists(cubic))
+  # mW_cubic.lammpstrj (1.4 MB) is not shipped; DSEAMS_ROOT is a
+  # seams-core checkout.
+  root <- Sys.getenv("DSEAMS_ROOT", unset = "")
+  cubic <- file.path(root, "input", "traj", "mW_cubic.lammpstrj")
+  skip_if(root == "" || !file.exists(cubic), "DSEAMS_ROOT is not set")
   frame <- read_frame(cubic, type = 1L)
   ice <- chill_plus(frame)
   expect_equal(sum(ice$name == "cubic"), 4096L)

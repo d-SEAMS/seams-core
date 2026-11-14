@@ -1,0 +1,11 @@
+#!/bin/sh
+# src/Makevars.win is static. A source tarball carries src/seams; in a
+# seams-core checkout tools/vendor.sh copies it from the checkout.
+if [ ! -f src/seams/seams_lang.cpp ]; then
+  if [ -f tools/vendor.sh ] && sh tools/vendor.sh; then
+    :
+  else
+    echo "configure.win: src/seams is missing and this is not a seams-core checkout." >&2
+    exit 1
+  fi
+fi
