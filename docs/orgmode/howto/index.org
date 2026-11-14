@@ -22,6 +22,7 @@ A how-to solves a goal you already have. It is not a learning path.
 | [[file:cages-trace.org][Cages and TRACE]] | HC/DDC, a signature, and the timed TRACE comparison |
 | [[file:q4-q6.org][Local q4 and q6]] | ~seams steinhardt~ and ~seams_q4q6~ |
 | [[file:chill-plus.org][CHILL+]] | Cutoff list, mutual list, OVITO rule |
+| [[file:cutoff-padding.org][Choosing a cutoff and padding]] | Open-face padding against the bulk-liquid gate and the interface layers |
 | [[file:symmetry-classifier.org][Symmetry classifier]] | ~seams symmetry~ and ~seams_frame_symmetry~ |
 | [[file:linkcell-carried.org][Linkcell and carried rings]] | The cutoff CSR and the hop-ball update |
 | [[file:sheared-cells.org][Sheared cells]] | Triclinic dump: bound spans are not edge lengths; recover H |
@@ -61,6 +62,7 @@ A how-to solves a goal you already have. It is not a learning path.
    cages-trace
    q4-q6
    chill-plus
+   cutoff-padding
    symmetry-classifier
    linkcell-carried
    sheared-cells

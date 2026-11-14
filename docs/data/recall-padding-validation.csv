@@ -1,0 +1,662 @@
+record,lane,temperature_K,frame,layer,z_lo_A,molecules,chill_ice,dseams_off,dseams_on,fp_off,fp_on,kind_changed,agree_off,agree_on,padding,rep,seconds,cores_online,cores_affinity,cores_used,source
+liquid,mw-bulk,230,2,-1,0.000000,4096,4,0,0,0,0,0,4092,4092,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,230,3,-1,0.000000,4096,13,0,0,0,0,0,4083,4083,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,230,4,-1,0.000000,4096,12,0,0,0,0,0,4084,4084,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,230,5,-1,0.000000,4096,14,0,0,0,0,0,4082,4082,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,230,6,-1,0.000000,4096,8,0,0,0,0,0,4088,4088,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,230,7,-1,0.000000,4096,8,0,0,0,0,0,4088,4088,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,230,8,-1,0.000000,4096,16,0,0,0,0,0,4080,4080,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,230,9,-1,0.000000,4096,13,0,0,0,0,0,4083,4083,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,230,10,-1,0.000000,4096,10,0,0,0,0,0,4086,4086,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,230,11,-1,0.000000,4096,10,0,0,0,0,0,4086,4086,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,300,2,-1,0.000000,4096,2,0,0,0,0,0,4094,4094,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,300,3,-1,0.000000,4096,2,0,0,0,0,0,4094,4094,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,300,4,-1,0.000000,4096,2,0,0,0,0,0,4094,4094,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,300,5,-1,0.000000,4096,1,0,0,0,0,0,4095,4095,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,300,6,-1,0.000000,4096,3,0,0,0,0,0,4093,4093,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,300,7,-1,0.000000,4096,1,0,0,0,0,0,4095,4095,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,300,8,-1,0.000000,4096,3,0,0,0,0,0,4093,4093,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,300,9,-1,0.000000,4096,1,0,0,0,0,0,4095,4095,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,300,10,-1,0.000000,4096,0,0,0,0,0,0,4096,4096,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+liquid,mw-bulk,300,11,-1,0.000000,4096,4,0,0,0,0,0,4092,4092,,,,,,,"mW bulk liquid, 4096 molecules, 2000-step 350 K melt, 100 ps hold, seed 20261114, ten frames after the thermostat switch"
+frame,tip4p-basal,230,8,-1,0.000000,1464,922,800,842,3,4,42,1336,1376,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,0,0.000000,14,0,0,0,0,0,0,14,14,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,1,2.000000,128,79,20,33,2,2,13,65,78,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,2,4.000000,3,3,3,3,0,0,0,3,3,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,3,6.000000,125,125,124,124,0,0,0,124,124,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,4,8.000000,43,43,43,43,0,0,0,43,43,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,5,10.000000,85,85,85,85,0,0,0,85,85,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,6,12.000000,64,64,64,64,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,7,14.000000,64,64,64,64,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,8,16.000000,67,67,67,67,0,0,0,67,67,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,9,18.000000,61,61,61,61,0,0,0,61,61,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,10,20.000000,122,122,122,122,0,0,0,122,122,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,11,22.000000,6,6,6,6,0,0,0,6,6,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,12,24.000000,128,128,127,127,0,0,0,127,127,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,13,26.000000,1,1,0,0,0,0,0,0,0,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,14,28.000000,127,73,14,43,1,2,29,66,93,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,15,30.000000,20,0,0,0,0,0,0,20,20,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,16,32.000000,31,0,0,0,0,0,0,31,31,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,17,34.000000,21,0,0,0,0,0,0,21,21,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,18,36.000000,27,0,0,0,0,0,0,27,27,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,19,38.000000,34,1,0,0,0,0,0,33,33,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,20,40.000000,38,0,0,0,0,0,0,38,38,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,21,42.000000,60,0,0,0,0,0,0,60,60,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,22,44.000000,65,0,0,0,0,0,0,65,65,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,23,46.000000,52,0,0,0,0,0,0,52,52,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,24,48.000000,40,0,0,0,0,0,0,40,40,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,8,25,50.000000,38,0,0,0,0,0,0,38,38,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+frame,tip4p-basal,230,16,-1,0.000000,1464,919,830,853,2,2,23,1371,1394,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,0,0.000000,16,0,0,0,0,0,0,16,16,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,1,2.000000,128,87,41,43,1,1,2,80,82,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,2,4.000000,3,3,3,3,0,0,0,3,3,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,3,6.000000,125,125,125,125,0,0,0,125,125,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,4,8.000000,41,41,41,41,0,0,0,41,41,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,5,10.000000,87,87,87,87,0,0,0,87,87,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,6,12.000000,63,63,63,63,0,0,0,63,63,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,7,14.000000,65,65,65,65,0,0,0,65,65,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,8,16.000000,67,67,67,67,0,0,0,67,67,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,9,18.000000,61,61,61,61,0,0,0,61,61,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,10,20.000000,116,116,116,116,0,0,0,116,116,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,11,22.000000,12,12,12,12,0,0,0,12,12,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,12,24.000000,128,128,128,128,0,0,0,128,128,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,14,28.000000,128,64,21,42,1,1,21,83,104,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,15,30.000000,18,0,0,0,0,0,0,18,18,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,16,32.000000,34,0,0,0,0,0,0,34,34,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,17,34.000000,19,0,0,0,0,0,0,19,19,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,18,36.000000,31,0,0,0,0,0,0,31,31,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,19,38.000000,24,0,0,0,0,0,0,24,24,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,20,40.000000,29,0,0,0,0,0,0,29,29,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,21,42.000000,32,0,0,0,0,0,0,32,32,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,22,44.000000,33,0,0,0,0,0,0,33,33,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,23,46.000000,70,0,0,0,0,0,0,70,70,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,24,48.000000,52,0,0,0,0,0,0,52,52,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,16,25,50.000000,82,0,0,0,0,0,0,82,82,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+frame,tip4p-basal,230,24,-1,0.000000,1464,941,848,858,0,0,10,1371,1381,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,0,0.000000,14,0,0,0,0,0,0,14,14,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,1,2.000000,128,97,51,52,0,0,1,82,83,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,2,4.000000,4,4,4,4,0,0,0,4,4,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,3,6.000000,124,124,124,124,0,0,0,124,124,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,4,8.000000,53,53,53,53,0,0,0,53,53,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,5,10.000000,75,75,75,75,0,0,0,75,75,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,6,12.000000,64,64,64,64,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,7,14.000000,64,64,64,64,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,8,16.000000,69,69,69,69,0,0,0,69,69,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,9,18.000000,59,59,59,59,0,0,0,59,59,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,10,20.000000,116,116,116,116,0,0,0,116,116,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,11,22.000000,12,12,12,12,0,0,0,12,12,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,12,24.000000,128,128,128,128,0,0,0,128,128,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,14,28.000000,128,75,29,38,0,0,9,82,91,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,15,30.000000,23,0,0,0,0,0,0,23,23,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,16,32.000000,37,0,0,0,0,0,0,37,37,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,17,34.000000,17,0,0,0,0,0,0,17,17,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,18,36.000000,30,0,0,0,0,0,0,30,30,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,19,38.000000,14,0,0,0,0,0,0,14,14,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,20,40.000000,27,0,0,0,0,0,0,27,27,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,21,42.000000,28,0,0,0,0,0,0,28,28,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,22,44.000000,37,0,0,0,0,0,0,37,37,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,23,46.000000,54,0,0,0,0,0,0,54,54,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,24,48.000000,74,0,0,0,0,0,0,74,74,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,24,25,50.000000,85,1,0,0,0,0,0,84,84,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+frame,tip4p-basal,230,32,-1,0.000000,1464,934,859,874,2,2,15,1385,1400,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,0,0.000000,16,0,0,0,0,0,0,16,16,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,1,2.000000,128,89,65,65,1,1,0,102,102,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,3,6.000000,128,128,128,128,0,0,0,128,128,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,4,8.000000,44,44,44,44,0,0,0,44,44,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,5,10.000000,84,84,84,84,0,0,0,84,84,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,6,12.000000,64,64,63,63,0,0,0,63,63,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,7,14.000000,64,64,64,64,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,8,16.000000,68,68,68,68,0,0,0,68,68,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,9,18.000000,60,60,60,60,0,0,0,60,60,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,10,20.000000,116,116,116,116,0,0,0,116,116,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,11,22.000000,12,12,12,12,0,0,0,12,12,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,12,24.000000,128,128,128,128,0,0,0,128,128,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,13,26.000000,1,0,0,0,0,0,0,1,1,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,14,28.000000,127,73,26,41,1,1,15,78,93,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,15,30.000000,33,0,0,0,0,0,0,33,33,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,16,32.000000,28,0,0,0,0,0,0,28,28,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,17,34.000000,21,0,0,0,0,0,0,21,21,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,18,36.000000,21,0,0,0,0,0,0,21,21,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,19,38.000000,21,0,0,0,0,0,0,21,21,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,20,40.000000,17,0,0,0,0,0,0,17,17,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,21,42.000000,35,0,0,0,0,0,0,35,35,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,22,44.000000,32,0,0,0,0,0,0,32,32,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,23,46.000000,70,0,0,0,0,0,0,70,70,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,24,48.000000,59,0,0,0,0,0,0,59,59,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,32,25,50.000000,87,4,1,1,0,0,0,84,84,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+frame,tip4p-basal,230,40,-1,0.000000,1464,946,860,873,1,1,13,1376,1389,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,0,0.000000,16,0,0,0,0,0,0,16,16,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,1,2.000000,128,99,64,64,1,1,0,91,91,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,3,6.000000,128,128,128,128,0,0,0,128,128,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,4,8.000000,45,45,45,45,0,0,0,45,45,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,5,10.000000,83,83,83,83,0,0,0,83,83,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,6,12.000000,64,64,64,64,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,7,14.000000,64,64,64,64,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,8,16.000000,70,70,70,70,0,0,0,70,70,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,9,18.000000,58,58,58,58,0,0,0,58,58,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,10,20.000000,117,117,117,117,0,0,0,117,117,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,11,22.000000,11,11,11,11,0,0,0,11,11,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,12,24.000000,127,127,127,127,0,0,0,127,127,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,13,26.000000,1,1,1,1,0,0,0,1,1,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,14,28.000000,128,72,26,39,0,0,13,82,95,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,15,30.000000,18,0,0,0,0,0,0,18,18,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,16,32.000000,43,0,0,0,0,0,0,43,43,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,17,34.000000,24,0,0,0,0,0,0,24,24,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,18,36.000000,20,0,0,0,0,0,0,20,20,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,19,38.000000,25,0,0,0,0,0,0,25,25,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,20,40.000000,18,0,0,0,0,0,0,18,18,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,21,42.000000,27,0,0,0,0,0,0,27,27,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,22,44.000000,33,0,0,0,0,0,0,33,33,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,23,46.000000,72,0,0,0,0,0,0,72,72,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,24,48.000000,56,0,0,0,0,0,0,56,56,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,40,25,50.000000,88,7,2,2,0,0,0,83,83,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+frame,tip4p-basal,230,48,-1,0.000000,1464,946,854,872,1,2,18,1370,1386,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,0,0.000000,14,0,0,0,0,0,0,14,14,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,1,2.000000,128,100,61,61,0,0,0,89,89,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,2,4.000000,2,2,2,2,0,0,0,2,2,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,3,6.000000,126,126,126,126,0,0,0,126,126,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,4,8.000000,47,47,47,47,0,0,0,47,47,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,5,10.000000,81,81,81,81,0,0,0,81,81,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,6,12.000000,64,64,64,64,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,7,14.000000,64,64,64,64,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,8,16.000000,68,68,68,68,0,0,0,68,68,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,9,18.000000,60,60,60,60,0,0,0,60,60,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,10,20.000000,117,117,117,117,0,0,0,117,117,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,11,22.000000,11,11,11,11,0,0,0,11,11,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,12,24.000000,128,128,128,128,0,0,0,128,128,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,13,26.000000,1,1,0,1,0,0,1,0,1,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,14,28.000000,127,71,25,42,1,2,17,79,94,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,15,30.000000,24,0,0,0,0,0,0,24,24,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,16,32.000000,40,1,0,0,0,0,0,39,39,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,17,34.000000,25,0,0,0,0,0,0,25,25,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,18,36.000000,15,0,0,0,0,0,0,15,15,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,19,38.000000,27,0,0,0,0,0,0,27,27,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,20,40.000000,21,0,0,0,0,0,0,21,21,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,21,42.000000,27,0,0,0,0,0,0,27,27,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,22,44.000000,32,0,0,0,0,0,0,32,32,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,23,46.000000,64,0,0,0,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,24,48.000000,67,0,0,0,0,0,0,67,67,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,48,25,50.000000,84,5,0,0,0,0,0,79,79,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+frame,tip4p-basal,230,56,-1,0.000000,1464,936,863,877,1,2,14,1389,1401,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,0,0.000000,15,0,0,0,0,0,0,15,15,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,1,2.000000,128,98,71,71,0,0,0,101,101,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,2,4.000000,1,1,1,1,0,0,0,1,1,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,3,6.000000,127,127,127,127,0,0,0,127,127,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,4,8.000000,47,47,47,47,0,0,0,47,47,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,5,10.000000,81,81,81,81,0,0,0,81,81,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,6,12.000000,64,64,64,64,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,7,14.000000,64,64,64,64,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,8,16.000000,65,65,65,65,0,0,0,65,65,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,9,18.000000,63,63,63,63,0,0,0,63,63,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,10,20.000000,112,112,112,112,0,0,0,112,112,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,11,22.000000,16,16,16,16,0,0,0,16,16,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,12,24.000000,128,128,127,127,0,0,0,127,127,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,13,26.000000,1,0,0,0,0,0,0,1,1,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,14,28.000000,127,64,24,38,1,2,14,85,97,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,15,30.000000,23,0,0,0,0,0,0,23,23,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,16,32.000000,37,1,0,0,0,0,0,36,36,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,17,34.000000,23,0,0,0,0,0,0,23,23,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,18,36.000000,21,0,0,0,0,0,0,21,21,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,19,38.000000,24,0,0,0,0,0,0,24,24,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,20,40.000000,26,0,0,0,0,0,0,26,26,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,21,42.000000,24,0,0,0,0,0,0,24,24,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,22,44.000000,36,0,0,0,0,0,0,36,36,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,23,46.000000,68,0,0,0,0,0,0,68,68,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,24,48.000000,51,0,0,0,0,0,0,51,51,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,56,25,50.000000,92,5,1,1,0,0,0,88,88,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+frame,tip4p-basal,230,64,-1,0.000000,1464,943,857,869,1,1,12,1376,1388,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,0,0.000000,13,0,0,0,0,0,0,13,13,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,1,2.000000,128,101,66,68,0,0,2,93,95,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,2,4.000000,1,1,1,1,0,0,0,1,1,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,3,6.000000,127,127,127,127,0,0,0,127,127,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,4,8.000000,45,45,45,45,0,0,0,45,45,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,5,10.000000,83,83,83,83,0,0,0,83,83,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,6,12.000000,64,64,64,64,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,7,14.000000,64,64,64,64,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,8,16.000000,69,69,69,69,0,0,0,69,69,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,9,18.000000,59,59,59,59,0,0,0,59,59,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,10,20.000000,111,111,111,111,0,0,0,111,111,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,11,22.000000,17,17,17,17,0,0,0,17,17,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,12,24.000000,128,128,128,128,0,0,0,128,128,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,13,26.000000,2,1,0,0,0,0,0,1,1,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,14,28.000000,126,67,22,32,1,1,10,79,89,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,15,30.000000,29,1,0,0,0,0,0,28,28,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,16,32.000000,38,0,0,0,0,0,0,38,38,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,17,34.000000,21,0,0,0,0,0,0,21,21,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,18,36.000000,22,0,0,0,0,0,0,22,22,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,19,38.000000,18,0,0,0,0,0,0,18,18,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,20,40.000000,23,0,0,0,0,0,0,23,23,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,21,42.000000,25,0,0,0,0,0,0,25,25,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,22,44.000000,38,0,0,0,0,0,0,38,38,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,23,46.000000,66,0,0,0,0,0,0,66,66,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,24,48.000000,50,0,0,0,0,0,0,50,50,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,64,25,50.000000,97,5,1,1,0,0,0,93,93,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+frame,tip4p-basal,230,72,-1,0.000000,1464,951,869,884,2,2,15,1378,1393,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,0,0.000000,14,0,0,0,0,0,0,14,14,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,1,2.000000,128,104,74,74,0,0,0,98,98,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,2,4.000000,2,2,2,2,0,0,0,2,2,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,3,6.000000,126,126,126,126,0,0,0,126,126,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,4,8.000000,46,46,46,46,0,0,0,46,46,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,5,10.000000,82,82,82,82,0,0,0,82,82,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,6,12.000000,64,64,64,64,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,7,14.000000,64,64,64,64,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,8,16.000000,69,69,69,69,0,0,0,69,69,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,9,18.000000,59,59,59,59,0,0,0,59,59,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,10,20.000000,116,116,116,116,0,0,0,116,116,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,11,22.000000,12,12,12,12,0,0,0,12,12,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,12,24.000000,128,128,128,128,0,0,0,128,128,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,14,28.000000,128,75,27,42,2,2,15,76,91,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,15,30.000000,30,0,0,0,0,0,0,30,30,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,16,32.000000,37,0,0,0,0,0,0,37,37,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,17,34.000000,18,0,0,0,0,0,0,18,18,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,18,36.000000,23,0,0,0,0,0,0,23,23,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,19,38.000000,22,0,0,0,0,0,0,22,22,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,20,40.000000,24,0,0,0,0,0,0,24,24,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,21,42.000000,25,0,0,0,0,0,0,25,25,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,22,44.000000,34,0,0,0,0,0,0,34,34,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,23,46.000000,64,0,0,0,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,24,48.000000,54,0,0,0,0,0,0,54,54,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,72,25,50.000000,95,4,0,0,0,0,0,91,91,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+frame,tip4p-basal,230,80,-1,0.000000,1464,952,851,867,0,0,16,1363,1379,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,0,0.000000,15,0,0,0,0,0,0,15,15,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,1,2.000000,128,103,60,60,0,0,0,85,85,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,2,4.000000,2,2,2,2,0,0,0,2,2,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,3,6.000000,126,126,126,126,0,0,0,126,126,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,4,8.000000,55,55,55,55,0,0,0,55,55,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,5,10.000000,73,73,73,73,0,0,0,73,73,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,6,12.000000,64,64,64,64,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,7,14.000000,64,64,64,64,0,0,0,64,64,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,8,16.000000,66,66,66,66,0,0,0,66,66,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,9,18.000000,62,62,62,62,0,0,0,62,62,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,10,20.000000,115,115,115,115,0,0,0,115,115,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,11,22.000000,13,13,13,13,0,0,0,13,13,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,12,24.000000,128,128,128,128,0,0,0,128,128,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,14,28.000000,128,76,23,39,0,0,16,75,91,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,15,30.000000,27,0,0,0,0,0,0,27,27,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,16,32.000000,37,1,0,0,0,0,0,36,36,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,17,34.000000,23,0,0,0,0,0,0,23,23,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,18,36.000000,23,0,0,0,0,0,0,23,23,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,19,38.000000,21,0,0,0,0,0,0,21,21,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,20,40.000000,23,0,0,0,0,0,0,23,23,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,21,42.000000,23,0,0,0,0,0,0,23,23,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,22,44.000000,35,0,0,0,0,0,0,35,35,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,23,46.000000,63,0,0,0,0,0,0,63,63,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,24,48.000000,59,0,0,0,0,0,0,59,59,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+layer,tip4p-basal,230,80,25,50.000000,91,4,0,0,0,0,0,87,87,,,,,,,"TIP4P/Ice basal oxygen dump at 230 K, ten frames"
+frame,T230_m0_r0_t0,230,1,-1,0.000000,1536,776,743,745,0,1,2,1503,1503,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,0,0.000000,64,53,46,47,0,1,1,57,56,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,1,2.000000,64,64,63,63,0,0,0,63,63,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,2,4.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,3,6.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,5,10.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,6,12.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,7,14.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,8,16.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,9,18.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,10,20.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,11,22.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,12,24.000000,64,54,52,53,0,0,1,62,63,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,13,26.000000,7,3,0,0,0,0,0,4,4,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,14,28.000000,66,10,1,1,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,15,30.000000,61,1,0,0,0,0,0,60,60,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,16,32.000000,54,1,0,0,0,0,0,53,53,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,17,34.000000,66,2,0,0,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,18,36.000000,53,0,0,0,0,0,0,53,53,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,19,38.000000,56,0,0,0,0,0,0,56,56,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,20,40.000000,59,0,0,0,0,0,0,59,59,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,21,42.000000,56,0,0,0,0,0,0,56,56,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,22,44.000000,60,0,0,0,0,0,0,60,60,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,23,46.000000,57,0,0,0,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,24,48.000000,48,0,0,0,0,0,0,48,48,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,25,50.000000,62,2,0,0,0,0,0,60,60,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t0,230,1,26,52.000000,63,10,5,5,0,0,0,58,58,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+frame,T230_m0_r0_t1,230,1,-1,0.000000,1536,844,511,511,2,2,0,1199,1199,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,0,0.000000,62,56,31,31,0,0,0,37,37,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,1,2.000000,62,59,38,38,1,1,0,39,39,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,2,4.000000,53,53,32,32,0,0,0,32,32,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,3,6.000000,49,49,36,36,0,0,0,36,36,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,4,8.000000,34,34,25,25,0,0,0,25,25,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,5,10.000000,61,61,44,44,0,0,0,44,44,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,6,12.000000,63,63,43,43,0,0,0,43,43,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,7,14.000000,64,64,39,39,0,0,0,39,39,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,8,16.000000,64,64,45,45,0,0,0,45,45,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,9,18.000000,64,64,49,49,0,0,0,49,49,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,10,20.000000,59,58,35,35,0,0,0,36,36,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,11,22.000000,54,51,27,27,0,0,0,30,30,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,12,24.000000,48,40,19,19,0,0,0,27,27,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,13,26.000000,44,24,14,14,1,1,0,32,32,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,14,28.000000,61,17,5,5,0,0,0,49,49,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,15,30.000000,61,7,1,1,0,0,0,55,55,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,16,32.000000,61,2,0,0,0,0,0,59,59,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,17,34.000000,57,1,0,0,0,0,0,56,56,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,18,36.000000,56,1,0,0,0,0,0,55,55,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,19,38.000000,62,0,0,0,0,0,0,62,62,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,20,40.000000,53,0,0,0,0,0,0,53,53,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,21,42.000000,63,1,0,0,0,0,0,62,62,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,22,44.000000,59,0,0,0,0,0,0,59,59,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,23,46.000000,49,0,0,0,0,0,0,49,49,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,24,48.000000,53,4,0,0,0,0,0,49,49,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,25,50.000000,56,26,5,5,0,0,0,35,35,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t1,230,1,26,52.000000,64,45,23,23,0,0,0,42,42,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+frame,T230_m0_r0_t2,230,1,-1,0.000000,1536,832,539,539,0,0,0,1243,1243,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,0,0.000000,63,57,33,33,0,0,0,39,39,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,1,2.000000,60,60,45,45,0,0,0,45,45,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,2,4.000000,46,46,32,32,0,0,0,32,32,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,3,6.000000,43,43,31,31,0,0,0,31,31,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,4,8.000000,50,50,39,39,0,0,0,39,39,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,5,10.000000,58,58,48,48,0,0,0,48,48,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,6,12.000000,64,64,46,46,0,0,0,46,46,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,7,14.000000,64,64,51,51,0,0,0,51,51,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,8,16.000000,64,64,49,49,0,0,0,49,49,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,9,18.000000,64,64,55,55,0,0,0,55,55,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,10,20.000000,61,61,43,43,0,0,0,43,43,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,11,22.000000,47,45,23,23,0,0,0,25,25,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,12,24.000000,41,32,12,12,0,0,0,21,21,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,13,26.000000,52,31,9,9,0,0,0,30,30,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,14,28.000000,66,16,1,1,0,0,0,51,51,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,15,30.000000,60,2,0,0,0,0,0,58,58,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,16,32.000000,54,0,0,0,0,0,0,54,54,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,17,34.000000,64,0,0,0,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,18,36.000000,61,1,0,0,0,0,0,60,60,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,19,38.000000,56,0,0,0,0,0,0,56,56,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,20,40.000000,63,0,0,0,0,0,0,63,63,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,21,42.000000,56,1,0,0,0,0,0,55,55,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,22,44.000000,68,0,0,0,0,0,0,68,68,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,23,46.000000,54,5,0,0,0,0,0,49,49,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,24,48.000000,51,10,3,3,0,0,0,44,44,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,25,50.000000,44,20,4,4,0,0,0,28,28,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_t2,230,1,26,52.000000,62,38,15,15,0,0,0,39,39,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+frame,T230_m0_r0_tend,230,1,-1,0.000000,1536,856,577,577,1,1,0,1255,1255,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,0,0.000000,64,58,40,40,0,0,0,46,46,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,1,2.000000,63,63,47,47,0,0,0,47,47,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,2,4.000000,63,63,52,52,0,0,0,52,52,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,3,6.000000,46,46,31,31,0,0,0,31,31,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,4,8.000000,38,38,26,26,0,0,0,26,26,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,5,10.000000,46,45,33,33,0,0,0,34,34,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,6,12.000000,64,63,49,49,0,0,0,50,50,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,7,14.000000,64,64,49,49,0,0,0,49,49,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,8,16.000000,64,64,47,47,0,0,0,47,47,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,9,18.000000,64,64,46,46,0,0,0,46,46,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,10,20.000000,64,64,45,45,0,0,0,45,45,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,11,22.000000,53,53,39,39,0,0,0,39,39,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,12,24.000000,35,35,24,24,0,0,0,24,24,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,13,26.000000,48,41,22,22,0,0,0,29,29,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,14,28.000000,61,22,7,7,1,1,0,44,44,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,15,30.000000,60,3,0,0,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,16,32.000000,62,1,0,0,0,0,0,61,61,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,17,34.000000,57,0,0,0,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,18,36.000000,63,0,0,0,0,0,0,63,63,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,19,38.000000,57,0,0,0,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,20,40.000000,60,1,0,0,0,0,0,59,59,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,21,42.000000,56,0,0,0,0,0,0,56,56,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,22,44.000000,58,0,0,0,0,0,0,58,58,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,23,46.000000,48,0,0,0,0,0,0,48,48,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,24,48.000000,55,3,0,0,0,0,0,52,52,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,25,50.000000,59,22,4,4,0,0,0,41,41,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m0_r0_tend,230,1,26,52.000000,64,43,16,16,0,0,0,37,37,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+frame,T230_m20_r0_t0,230,1,-1,0.000000,1496,734,693,706,2,4,13,1451,1460,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,0,0.000000,64,38,27,28,2,2,1,49,50,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,1,2.000000,64,64,61,62,0,0,1,61,62,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,2,4.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,3,6.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,5,10.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,6,12.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,7,14.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,8,16.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,9,18.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,10,20.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,11,22.000000,64,64,61,64,0,0,3,61,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,12,24.000000,64,40,30,38,0,2,8,54,58,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,13,26.000000,6,0,0,0,0,0,0,6,6,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,14,28.000000,68,6,1,1,0,0,0,63,63,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,15,30.000000,56,0,0,0,0,0,0,56,56,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,16,32.000000,52,0,0,0,0,0,0,52,52,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,17,34.000000,57,0,0,0,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,18,36.000000,51,1,0,0,0,0,0,50,50,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,19,38.000000,61,0,0,0,0,0,0,61,61,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,20,40.000000,48,1,0,0,0,0,0,47,47,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,21,42.000000,61,0,0,0,0,0,0,61,61,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,22,44.000000,51,0,0,0,0,0,0,51,51,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,23,46.000000,50,0,0,0,0,0,0,50,50,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,24,48.000000,52,0,0,0,0,0,0,52,52,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,25,50.000000,53,0,0,0,0,0,0,53,53,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t0,230,1,26,52.000000,62,8,1,1,0,0,0,55,55,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+frame,T230_m20_r0_t1,230,1,-1,0.000000,1496,698,420,426,0,0,6,1218,1224,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,0,0.000000,54,30,12,13,0,0,1,36,37,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,1,2.000000,47,41,18,19,0,0,1,24,25,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,2,4.000000,37,36,15,18,0,0,3,16,19,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,3,6.000000,56,55,36,36,0,0,0,37,37,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,4,8.000000,61,61,41,41,0,0,0,41,41,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,5,10.000000,64,64,42,42,0,0,0,42,42,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,6,12.000000,64,64,49,49,0,0,0,49,49,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,7,14.000000,64,64,57,57,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,8,16.000000,64,64,47,47,0,0,0,47,47,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,9,18.000000,53,53,33,33,0,0,0,33,33,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,10,20.000000,43,43,27,27,0,0,0,27,27,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,11,22.000000,48,45,26,26,0,0,0,29,29,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,12,24.000000,54,47,16,17,0,0,1,23,24,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,13,26.000000,61,17,1,1,0,0,0,45,45,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,14,28.000000,62,4,0,0,0,0,0,58,58,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,15,30.000000,56,0,0,0,0,0,0,56,56,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,16,32.000000,58,1,0,0,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,17,34.000000,63,1,0,0,0,0,0,62,62,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,18,36.000000,59,0,0,0,0,0,0,59,59,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,19,38.000000,70,1,0,0,0,0,0,69,69,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,20,40.000000,43,0,0,0,0,0,0,43,43,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,21,42.000000,66,0,0,0,0,0,0,66,66,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,22,44.000000,58,0,0,0,0,0,0,58,58,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,23,46.000000,60,0,0,0,0,0,0,60,60,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,24,48.000000,63,2,0,0,0,0,0,61,61,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t1,230,1,25,50.000000,68,5,0,0,0,0,0,63,63,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+frame,T230_m20_r0_t2,230,1,-1,0.000000,1496,698,447,447,2,2,0,1241,1241,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,0,0.000000,57,38,15,15,0,0,0,34,34,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,1,2.000000,40,35,16,16,0,0,0,21,21,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,2,4.000000,42,36,15,15,1,1,0,19,19,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,3,6.000000,53,51,31,31,0,0,0,33,33,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,4,8.000000,63,63,47,47,0,0,0,47,47,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,5,10.000000,64,64,51,51,0,0,0,51,51,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,6,12.000000,64,64,48,48,0,0,0,48,48,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,7,14.000000,64,63,54,54,0,0,0,55,55,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,8,16.000000,61,61,49,49,0,0,0,49,49,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,9,18.000000,55,53,45,45,0,0,0,47,47,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,10,20.000000,34,34,21,21,0,0,0,21,21,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,11,22.000000,49,45,30,30,0,0,0,34,34,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,12,24.000000,60,40,21,21,1,1,0,39,39,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,13,26.000000,63,23,3,3,0,0,0,43,43,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,14,28.000000,61,4,0,0,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,15,30.000000,65,0,0,0,0,0,0,65,65,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,16,32.000000,53,0,0,0,0,0,0,53,53,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,17,34.000000,71,0,0,0,0,0,0,71,71,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,18,36.000000,57,0,0,0,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,19,38.000000,56,0,0,0,0,0,0,56,56,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,20,40.000000,59,0,0,0,0,0,0,59,59,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,21,42.000000,66,0,0,0,0,0,0,66,66,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,22,44.000000,58,0,0,0,0,0,0,58,58,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,23,46.000000,56,1,0,0,0,0,0,55,55,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,24,48.000000,58,6,0,0,0,0,0,52,52,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_t2,230,1,25,50.000000,67,17,1,1,0,0,0,51,51,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+frame,T230_m20_r0_tend,230,1,-1,0.000000,1496,741,479,481,2,2,2,1230,1232,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,0,0.000000,56,46,22,23,0,0,1,32,33,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,1,2.000000,39,36,20,20,0,0,0,23,23,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,2,4.000000,49,49,38,38,0,0,0,38,38,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,3,6.000000,51,51,39,39,0,0,0,39,39,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,4,8.000000,59,59,42,42,0,0,0,42,42,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,5,10.000000,64,64,46,46,0,0,0,46,46,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,6,12.000000,64,64,45,45,0,0,0,45,45,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,7,14.000000,64,64,49,49,0,0,0,49,49,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,8,16.000000,64,64,49,49,0,0,0,49,49,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,9,18.000000,59,59,42,42,0,0,0,42,42,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,10,20.000000,45,45,33,33,0,0,0,33,33,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,11,22.000000,43,41,22,22,0,0,0,24,24,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,12,24.000000,50,40,19,19,0,0,0,29,29,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,13,26.000000,63,32,9,9,0,0,0,40,40,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,14,28.000000,59,8,0,0,0,0,0,51,51,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,15,30.000000,62,1,0,0,0,0,0,61,61,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,16,32.000000,64,0,0,0,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,17,34.000000,56,0,0,0,0,0,0,56,56,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,18,36.000000,60,0,0,0,0,0,0,60,60,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,19,38.000000,61,0,0,0,0,0,0,61,61,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,20,40.000000,58,0,0,0,0,0,0,58,58,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,21,42.000000,54,0,0,0,0,0,0,54,54,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,22,44.000000,64,0,0,0,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,23,46.000000,55,0,0,0,0,0,0,55,55,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,24,48.000000,64,0,0,0,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m20_r0_tend,230,1,25,50.000000,69,18,4,5,2,2,1,51,52,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+frame,T230_m40_r0_t0,230,1,-1,0.000000,1456,707,671,687,3,5,16,1414,1426,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,0,0.000000,64,38,21,28,0,2,7,47,50,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,1,2.000000,64,64,61,64,0,0,3,61,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,2,4.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,3,6.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,5,10.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,6,12.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,7,14.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,8,16.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,9,18.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,10,20.000000,64,64,64,64,0,0,0,64,64,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,11,22.000000,64,64,59,63,0,0,4,59,63,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,12,24.000000,64,26,18,20,3,3,2,50,52,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,13,26.000000,6,0,0,0,0,0,0,6,6,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,14,28.000000,68,0,0,0,0,0,0,68,68,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,15,30.000000,55,0,0,0,0,0,0,55,55,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,16,32.000000,44,0,0,0,0,0,0,44,44,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,17,34.000000,56,0,0,0,0,0,0,56,56,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,18,36.000000,48,0,0,0,0,0,0,48,48,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,19,38.000000,52,0,0,0,0,0,0,52,52,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,20,40.000000,46,0,0,0,0,0,0,46,46,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,21,42.000000,51,0,0,0,0,0,0,51,51,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,22,44.000000,57,0,0,0,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,23,46.000000,47,0,0,0,0,0,0,47,47,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,24,48.000000,48,0,0,0,0,0,0,48,48,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,25,50.000000,50,0,0,0,0,0,0,50,50,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t0,230,1,26,52.000000,60,3,0,0,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+frame,T230_m40_r0_t1,230,1,-1,0.000000,1456,664,408,413,2,2,5,1196,1201,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,0,0.000000,35,17,2,2,0,0,0,20,20,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,1,2.000000,37,22,8,8,0,0,0,23,23,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,2,4.000000,53,49,24,25,1,1,1,26,27,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,3,6.000000,61,59,48,49,1,1,1,48,49,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,4,8.000000,64,63,50,50,0,0,0,51,51,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,5,10.000000,64,64,45,45,0,0,0,45,45,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,6,12.000000,64,64,51,51,0,0,0,51,51,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,7,14.000000,64,64,44,44,0,0,0,44,44,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,8,16.000000,52,52,37,37,0,0,0,37,37,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,9,18.000000,36,36,22,22,0,0,0,22,22,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,10,20.000000,42,42,28,28,0,0,0,28,28,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,11,22.000000,62,62,33,33,0,0,0,33,33,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,12,24.000000,65,48,13,15,0,0,2,30,32,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,13,26.000000,65,11,0,1,0,0,1,54,55,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,14,28.000000,60,0,0,0,0,0,0,60,60,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,15,30.000000,51,0,0,0,0,0,0,51,51,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,16,32.000000,67,0,0,0,0,0,0,67,67,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,17,34.000000,56,0,0,0,0,0,0,56,56,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,18,36.000000,61,0,0,0,0,0,0,61,61,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,19,38.000000,48,0,0,0,0,0,0,48,48,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,20,40.000000,55,0,0,0,0,0,0,55,55,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,21,42.000000,63,0,0,0,0,0,0,63,63,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,22,44.000000,58,0,0,0,0,0,0,58,58,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,23,46.000000,53,0,0,0,0,0,0,53,53,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,24,48.000000,56,2,0,0,0,0,0,54,54,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t1,230,1,25,50.000000,64,9,3,3,0,0,0,58,58,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+frame,T230_m40_r0_t2,230,1,-1,0.000000,1456,682,369,375,0,0,6,1143,1149,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,0,0.000000,43,24,7,8,0,0,1,26,27,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,1,2.000000,45,37,10,13,0,0,3,18,21,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,2,4.000000,43,43,19,19,0,0,0,19,19,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,3,6.000000,58,58,31,31,0,0,0,31,31,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,4,8.000000,64,64,36,36,0,0,0,36,36,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,5,10.000000,64,62,46,46,0,0,0,48,48,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,6,12.000000,64,64,45,45,0,0,0,45,45,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,7,14.000000,64,64,44,44,0,0,0,44,44,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,8,16.000000,62,62,47,47,0,0,0,47,47,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,9,18.000000,48,48,32,32,0,0,0,32,32,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,10,20.000000,39,39,18,18,0,0,0,18,18,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,11,22.000000,53,50,21,21,0,0,0,24,24,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,12,24.000000,56,42,12,12,0,0,0,26,26,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,13,26.000000,63,14,1,3,0,0,2,50,52,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,14,28.000000,60,3,0,0,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,15,30.000000,54,0,0,0,0,0,0,54,54,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,16,32.000000,55,0,0,0,0,0,0,55,55,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,17,34.000000,58,0,0,0,0,0,0,58,58,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,18,36.000000,63,0,0,0,0,0,0,63,63,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,19,38.000000,49,0,0,0,0,0,0,49,49,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,20,40.000000,56,0,0,0,0,0,0,56,56,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,21,42.000000,60,0,0,0,0,0,0,60,60,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,22,44.000000,57,0,0,0,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,23,46.000000,57,0,0,0,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,24,48.000000,57,1,0,0,0,0,0,56,56,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_t2,230,1,25,50.000000,64,7,0,0,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+frame,T230_m40_r0_tend,230,1,-1,0.000000,1456,667,414,415,0,0,1,1203,1204,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,0,0.000000,24,11,5,5,0,0,0,18,18,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,1,2.000000,43,22,6,6,0,0,0,27,27,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,2,4.000000,54,50,18,18,0,0,0,22,22,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,3,6.000000,64,64,39,39,0,0,0,39,39,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,4,8.000000,64,64,46,46,0,0,0,46,46,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,5,10.000000,64,64,51,51,0,0,0,51,51,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,6,12.000000,64,64,46,46,0,0,0,46,46,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,7,14.000000,63,63,44,44,0,0,0,44,44,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,8,16.000000,56,56,40,40,0,0,0,40,40,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,9,18.000000,40,40,30,30,0,0,0,30,30,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,10,20.000000,41,41,29,29,0,0,0,29,29,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,11,22.000000,57,57,40,40,0,0,0,40,40,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,12,24.000000,64,46,18,19,0,0,1,36,37,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,13,26.000000,65,16,2,2,0,0,0,51,51,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,14,28.000000,59,2,0,0,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,15,30.000000,53,0,0,0,0,0,0,53,53,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,16,32.000000,67,0,0,0,0,0,0,67,67,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,17,34.000000,53,0,0,0,0,0,0,53,53,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,18,36.000000,61,0,0,0,0,0,0,61,61,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,19,38.000000,58,0,0,0,0,0,0,58,58,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,20,40.000000,57,0,0,0,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,21,42.000000,57,0,0,0,0,0,0,57,57,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,22,44.000000,59,0,0,0,0,0,0,59,59,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,23,46.000000,63,0,0,0,0,0,0,63,63,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,24,48.000000,43,0,0,0,0,0,0,43,43,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+layer,T230_m40_r0_tend,230,1,25,50.000000,63,7,0,0,0,0,0,56,56,,,,,,,d-SEAMS/brine-front-230K oxygen rows
+time,classify,,,,,4096,,,,,,,,,0,1,0.000398,8,8,8,300 K bulk-liquid frame
+time,classify,,,,,4096,,,,,,,,,1,1,0.000389,8,8,8,300 K bulk-liquid frame
+time,classify,,,,,4096,,,,,,,,,0,2,0.000375,8,8,8,300 K bulk-liquid frame
+time,classify,,,,,4096,,,,,,,,,1,2,0.000370,8,8,8,300 K bulk-liquid frame
+time,classify,,,,,4096,,,,,,,,,0,3,0.000365,8,8,8,300 K bulk-liquid frame
+time,classify,,,,,4096,,,,,,,,,1,3,0.000367,8,8,8,300 K bulk-liquid frame
+time,classify,,,,,4096,,,,,,,,,0,4,0.000379,8,8,8,300 K bulk-liquid frame
+time,classify,,,,,4096,,,,,,,,,1,4,0.000384,8,8,8,300 K bulk-liquid frame
+time,classify,,,,,4096,,,,,,,,,0,5,0.000366,8,8,8,300 K bulk-liquid frame
+time,classify,,,,,4096,,,,,,,,,1,5,0.000375,8,8,8,300 K bulk-liquid frame
+time,classify,,,,,4096,,,,,,,,,0,6,0.000362,8,8,8,300 K bulk-liquid frame
+time,classify,,,,,4096,,,,,,,,,1,6,0.000367,8,8,8,300 K bulk-liquid frame
+time,classify,,,,,4096,,,,,,,,,0,7,0.000391,8,8,8,300 K bulk-liquid frame
+time,classify,,,,,4096,,,,,,,,,1,7,0.000396,8,8,8,300 K bulk-liquid frame
+time,classify,,,,,4096,,,,,,,,,0,8,0.000398,8,8,8,300 K bulk-liquid frame
+time,classify,,,,,4096,,,,,,,,,1,8,0.000371,8,8,8,300 K bulk-liquid frame
+time,classify,,,,,110592,,,,,,,,,0,1,0.039944,8,8,8,3x3x3 tile of the 300 K bulk-liquid frame
+time,classify,,,,,110592,,,,,,,,,1,1,0.036897,8,8,8,3x3x3 tile of the 300 K bulk-liquid frame
+time,classify,,,,,110592,,,,,,,,,0,2,0.041904,8,8,8,3x3x3 tile of the 300 K bulk-liquid frame
+time,classify,,,,,110592,,,,,,,,,1,2,0.039008,8,8,8,3x3x3 tile of the 300 K bulk-liquid frame
+time,classify,,,,,110592,,,,,,,,,0,3,0.040180,8,8,8,3x3x3 tile of the 300 K bulk-liquid frame
+time,classify,,,,,110592,,,,,,,,,1,3,0.035358,8,8,8,3x3x3 tile of the 300 K bulk-liquid frame
+time,classify,,,,,110592,,,,,,,,,0,4,0.034795,8,8,8,3x3x3 tile of the 300 K bulk-liquid frame
+time,classify,,,,,110592,,,,,,,,,1,4,0.018831,8,8,8,3x3x3 tile of the 300 K bulk-liquid frame
+time,classify,,,,,110592,,,,,,,,,0,5,0.009178,8,8,8,3x3x3 tile of the 300 K bulk-liquid frame
+time,classify,,,,,110592,,,,,,,,,1,5,0.028915,8,8,8,3x3x3 tile of the 300 K bulk-liquid frame
+time,classify,,,,,110592,,,,,,,,,0,6,0.028953,8,8,8,3x3x3 tile of the 300 K bulk-liquid frame
+time,classify,,,,,110592,,,,,,,,,1,6,0.038089,8,8,8,3x3x3 tile of the 300 K bulk-liquid frame
+time,classify,,,,,110592,,,,,,,,,0,7,0.020041,8,8,8,3x3x3 tile of the 300 K bulk-liquid frame
+time,classify,,,,,110592,,,,,,,,,1,7,0.025629,8,8,8,3x3x3 tile of the 300 K bulk-liquid frame
+time,classify,,,,,110592,,,,,,,,,0,8,0.031073,8,8,8,3x3x3 tile of the 300 K bulk-liquid frame
+time,classify,,,,,110592,,,,,,,,,1,8,0.015290,8,8,8,3x3x3 tile of the 300 K bulk-liquid frame
+summary,mw-bulk,230,10,,,40960,108,0,0,0,0,0,40852,40852,,,,,,,sum of the ten hold frames
+summary,mw-bulk,300,10,,,40960,19,0,0,0,0,0,40941,40941,,,,,,,sum of the ten hold frames
+summary,tip4p-basal,230,10,,,14640,9390,8491,8669,13,16,178,13715,13887,,,,,,,sum of the ten basal frames
+summary,T230_m0_r0_t0,230,1,,,1536,776,743,745,0,1,2,1503,1503,,,,,,,one pinned brine frame
+summary,T230_m0_r0_t1,230,1,,,1536,844,511,511,2,2,0,1199,1199,,,,,,,one pinned brine frame
+summary,T230_m0_r0_t2,230,1,,,1536,832,539,539,0,0,0,1243,1243,,,,,,,one pinned brine frame
+summary,T230_m0_r0_tend,230,1,,,1536,856,577,577,1,1,0,1255,1255,,,,,,,one pinned brine frame
+summary,T230_m20_r0_t0,230,1,,,1496,734,693,706,2,4,13,1451,1460,,,,,,,one pinned brine frame
+summary,T230_m20_r0_t1,230,1,,,1496,698,420,426,0,0,6,1218,1224,,,,,,,one pinned brine frame
+summary,T230_m20_r0_t2,230,1,,,1496,698,447,447,2,2,0,1241,1241,,,,,,,one pinned brine frame
+summary,T230_m20_r0_tend,230,1,,,1496,741,479,481,2,2,2,1230,1232,,,,,,,one pinned brine frame
+summary,T230_m40_r0_t0,230,1,,,1456,707,671,687,3,5,16,1414,1426,,,,,,,one pinned brine frame
+summary,T230_m40_r0_t1,230,1,,,1456,664,408,413,2,2,5,1196,1201,,,,,,,one pinned brine frame
+summary,T230_m40_r0_t2,230,1,,,1456,682,369,375,0,0,6,1143,1149,,,,,,,one pinned brine frame
+summary,T230_m40_r0_tend,230,1,,,1456,667,414,415,0,0,1,1203,1204,,,,,,,one pinned brine frame
+gate,mw-bulk,,,,,,,,,0,0,,,,,,,,,,padding adds no false positive on the bulk liquid; the open-face completion stays on
+suite,ctest,,,,,,,,,,,,,,,,,,,,"meson test: 120 ok, 2 expected fail, 12 skipped, 0 fail"
+suite,pytest,,,,,,,,,,,,,,,,,,,,"38 passed, 6 skipped"

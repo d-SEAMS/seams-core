@@ -1,0 +1,27 @@
+#+TITLE: Choosing a cutoff and padding
+#+OPTIONS: toc:nil num:nil ^:nil
+
+The neighbour cutoff is the ~--cutoff~ of ~seams chill-plus~.
+Open-face padding is the second-shell completion in the shell
+classifier. The validation compares that completion off and on.
+CHILL+ stays the published rule.
+
+Leave the completion on when the bulk-liquid gate records no added
+false positive. On an interface, read the layers whose label changed
+before treating the extra shell labels as ice. The classify timings
+are the same bulk liquid with the completion off and on.
+
+A false positive is a non-negative shell label on an atom CHILL+ does
+not call cubic or hexagonal. ~dseams_off~ and ~fp_off~ are the
+classifier with the completion off. ~dseams_on~ and ~fp_on~ are the
+same frame with it on.
+
+The rows are the cells of ~docs/data/recall-padding-validation.csv~.
+That file is ~data/recall-padding-validation.csv~ written by
+~scripts/recall_padding.py~ on ~science/interface-nucleation~ at
+~6ec9c283~. Sphinx fills the tables from the file. A number that is
+not a cell of that file is not written.
+
+#+begin_export rst
+.. include:: cutoff-padding-tables.rst
+#+end_export
