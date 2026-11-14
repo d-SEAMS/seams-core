@@ -58,6 +58,7 @@ generated from the roxygen topics in <code>man/</code>.</p>
 
 ```r
 library(dseams)
+path <- system.file("extdata", "exampleTraj.lammpstrj", package = "dseams")
 frame <- read_frame(path, type = 2L)
 ice <- chill_plus(frame)
 print(ice)
