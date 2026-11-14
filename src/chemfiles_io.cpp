@@ -22,6 +22,7 @@
 #include <chrono>
 #include <cstdlib>
 #include <cstring>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <mutex>
@@ -380,7 +381,7 @@ bool startsWith(const std::string &line, const char *prefix) {
 
 struct DumpIdIndex {
   off_t bytes = -1;
-  timespec mtime {};
+  std::filesystem::file_time_type mtime{};
   std::vector<char> oneToN;
 };
 
@@ -394,7 +395,8 @@ DumpIdIndex scanDumpIds(const std::string &path) {
     return out;
   }
   out.bytes = st.st_size;
-  out.mtime = st.st_mtim;
+  std::error_code ec;
+  out.mtime = std::filesystem::last_write_time(path, ec);
   std::ifstream in(path);
   const auto t0 = std::chrono::steady_clock::now();
   int seen = 0;
@@ -486,11 +488,12 @@ bool dumpFrameIsOneToN(const std::string &path, int frame) {
   }
   struct stat st {};
   const bool exists = stat(path.c_str(), &st) == 0;
+  std::error_code ec;
+  const auto mtime = std::filesystem::last_write_time(path, ec);
   std::lock_guard<std::mutex> lock(gDumpIdMu);
   auto it = gDumpIds.find(path);
   const bool fresh = exists && it != gDumpIds.end() && it->second.bytes == st.st_size &&
-                     it->second.mtime.tv_sec == st.st_mtim.tv_sec &&
-                     it->second.mtime.tv_nsec == st.st_mtim.tv_nsec;
+                     !ec && it->second.mtime == mtime;
   if (!fresh) {
     gDumpIds[path] = scanDumpIds(path);
     it = gDumpIds.find(path);
