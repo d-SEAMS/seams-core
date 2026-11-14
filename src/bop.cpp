@@ -12,6 +12,7 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
+#include <cpu_features.hpp>
 #include <chrono>
 
 #include <bop.hpp>
@@ -354,7 +355,7 @@ __attribute__((target("fma"))) double realL3Dot(const double *a, const double *b
 }
 
 bool hostHasAvx2Fma() {
-  return __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
+  return seams::cpu::features().avx2 && seams::cpu::features().fma;
 }
 #else
 // Without x86 SIMD the dispatch below always takes the scalar branch;

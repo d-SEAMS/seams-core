@@ -1,3 +1,4 @@
+#include <cpu_features.hpp>
 #include <ozaki.hpp>
 
 #include <algorithm>
@@ -513,9 +514,46 @@ void packRealImag(const std::complex<double> *z, int n, std::vector<double> &re,
 }
 
 #if defined(__x86_64__)
-__attribute__((target("avx512f,avx512bw,avx512vnni"))) bool int8GemmVnni(
-    int m, int n, int k, const signed char *A, int lda, const signed char *B,
-    int ldb, int *C, int ldc) {
+// Clang does not give an OpenMP region the target attribute of the
+// function around it, so the AVX-512 work of one row is its own function.
+__attribute__((target("avx512f,avx512bw,avx512vnni"))) void vnniRow(
+    int i, int n, int kp, int np, const uint8_t *Au, const int8_t *Bp,
+    const int32_t *colSum, int *C, int ldc) {
+  std::vector<int32_t> row(static_cast<std::size_t>(np), 0);
+  for (int j0 = 0; j0 < n; j0 += 16) {
+    __m512i acc = _mm512_setzero_si512();
+    for (int t = 0; t < kp; t += 4) {
+      uint32_t a4 = 0;
+      std::memcpy(&a4, Au + static_cast<std::size_t>(i) * kp + t, 4);
+      const __m512i va = _mm512_set1_epi32(static_cast<int>(a4));
+      alignas(64) int8_t packed[64];
+      for (int lane = 0; lane < 4; lane++) {
+        for (int c = 0; c < 16; c++) {
+          const int j = j0 + c;
+          int8_t b = 0;
+          if (j < np && t + lane < kp) {
+            b = Bp[static_cast<std::size_t>(t + lane) * np + j];
+          }
+          packed[c * 4 + lane] = b;
+        }
+      }
+      const __m512i vb = _mm512_load_si512(packed);
+      acc = _mm512_dpbusd_epi32(acc, va, vb);
+    }
+    alignas(64) int32_t tmp[16];
+    _mm512_store_si512(tmp, acc);
+    for (int c = 0; c < 16 && j0 + c < n; c++) {
+      const int j = j0 + c;
+      row[static_cast<std::size_t>(j)] = tmp[c] - 128 * colSum[j];
+    }
+  }
+  for (int j = 0; j < n; j++) {
+    C[i * ldc + j] += row[static_cast<std::size_t>(j)];
+  }
+}
+
+bool int8GemmVnni(int m, int n, int k, const signed char *A, int lda,
+                  const signed char *B, int ldb, int *C, int ldc) {
   if (!vnniAvailable()) {
     return false;
   }
@@ -544,39 +582,7 @@ __attribute__((target("avx512f,avx512bw,avx512vnni"))) bool int8GemmVnni(
 #pragma omp parallel for schedule(static) if (m >= 32)
 #endif
   for (int i = 0; i < m; i++) {
-    std::vector<int32_t> row(static_cast<std::size_t>(np), 0);
-    for (int j0 = 0; j0 < n; j0 += 16) {
-      __m512i acc = _mm512_setzero_si512();
-      for (int t = 0; t < kp; t += 4) {
-        uint32_t a4 = 0;
-        std::memcpy(&a4, Au.data() + static_cast<std::size_t>(i) * kp + t, 4);
-        const __m512i va = _mm512_set1_epi32(static_cast<int>(a4));
-        alignas(64) int8_t packed[64];
-        for (int lane = 0; lane < 4; lane++) {
-          for (int c = 0; c < 16; c++) {
-            const int j = j0 + c;
-            int8_t b = 0;
-            if (j < np && t + lane < kp) {
-              b = Bp[static_cast<std::size_t>(t + lane) * np + j];
-            }
-            packed[c * 4 + lane] = b;
-          }
-        }
-        const __m512i vb = _mm512_load_si512(packed);
-        acc = _mm512_dpbusd_epi32(acc, va, vb);
-      }
-      alignas(64) int32_t tmp[16];
-      _mm512_store_si512(tmp, acc);
-      for (int c = 0; c < 16 && j0 + c < n; c++) {
-        const int j = j0 + c;
-        const int32_t corrected =
-            tmp[c] - 128 * colSum[static_cast<std::size_t>(j)];
-        row[static_cast<std::size_t>(j)] = corrected;
-      }
-    }
-    for (int j = 0; j < n; j++) {
-      C[i * ldc + j] += row[static_cast<std::size_t>(j)];
-    }
+    vnniRow(i, n, kp, np, Au.data(), Bp.data(), colSum.data(), C, ldc);
   }
   return true;
 }
@@ -684,30 +690,35 @@ bool int8GemmAmx(int, int, int, const signed char *, int, const signed char *, i
 }
 #endif
 
-__attribute__((target("avx512f,fma"))) void gemmAvx512Rows(
-    int m, int n, int k, const double *A, int lda, const double *B, int ldb,
+__attribute__((target("avx512f,fma"))) void gemmAvx512Row(
+    int i, int n, int k, const double *A, int lda, const double *B, int ldb,
     double *C, int ldc) {
+  int j = 0;
+  for (; j + 8 <= n; j += 8) {
+    __m512d acc = _mm512_setzero_pd();
+    for (int t = 0; t < k; t++) {
+      const __m512d b = _mm512_loadu_pd(B + static_cast<std::ptrdiff_t>(t) * ldb + j);
+      acc = _mm512_fmadd_pd(_mm512_set1_pd(A[static_cast<std::ptrdiff_t>(i) * lda + t]), b, acc);
+    }
+    _mm512_storeu_pd(C + static_cast<std::ptrdiff_t>(i) * ldc + j, acc);
+  }
+  for (; j < n; j++) {
+    double acc = 0.0;
+    for (int t = 0; t < k; t++) {
+      acc += A[static_cast<std::ptrdiff_t>(i) * lda + t] *
+             B[static_cast<std::ptrdiff_t>(t) * ldb + j];
+    }
+    C[static_cast<std::ptrdiff_t>(i) * ldc + j] = acc;
+  }
+}
+
+void gemmAvx512Rows(int m, int n, int k, const double *A, int lda,
+                    const double *B, int ldb, double *C, int ldc) {
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (m >= 32)
 #endif
   for (int i = 0; i < m; i++) {
-    int j = 0;
-    for (; j + 8 <= n; j += 8) {
-      __m512d acc = _mm512_setzero_pd();
-      for (int t = 0; t < k; t++) {
-        const __m512d b = _mm512_loadu_pd(B + static_cast<std::ptrdiff_t>(t) * ldb + j);
-        acc = _mm512_fmadd_pd(_mm512_set1_pd(A[static_cast<std::ptrdiff_t>(i) * lda + t]), b, acc);
-      }
-      _mm512_storeu_pd(C + static_cast<std::ptrdiff_t>(i) * ldc + j, acc);
-    }
-    for (; j < n; j++) {
-      double acc = 0.0;
-      for (int t = 0; t < k; t++) {
-        acc += A[static_cast<std::ptrdiff_t>(i) * lda + t] *
-               B[static_cast<std::ptrdiff_t>(t) * ldb + j];
-      }
-      C[static_cast<std::ptrdiff_t>(i) * ldc + j] = acc;
-    }
+    gemmAvx512Row(i, n, k, A, lda, B, ldb, C, ldc);
   }
 }
 #endif
@@ -818,7 +829,7 @@ bool amxAvailable() {
 
 bool vnniAvailable() {
 #if defined(__x86_64__)
-  return __builtin_cpu_supports("avx512vnni");
+  return seams::cpu::features().avx512vnni;
 #else
   return false;
 #endif
@@ -1049,7 +1060,7 @@ namespace {
 void fp64Gemm(int m, int n, int k, const double *A, int lda, const double *B,
               int ldb, double *C, int ldc) {
 #if defined(__x86_64__)
-  if (__builtin_cpu_supports("avx512f")) {
+  if (seams::cpu::features().avx512f) {
     gemmAvx512Rows(m, n, k, A, lda, B, ldb, C, ldc);
     return;
   }
