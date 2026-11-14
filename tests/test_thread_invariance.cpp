@@ -657,12 +657,13 @@ TEST_CASE("rings, their symmetry codes and the cage planes are the same at every
     const Width team(width);
     REQUIRE(ringsOf(sys.handle, 0) == serialSet);
     REQUIRE(primitive::ringNetwork(idx, 6) == serialRings);
-    const auto aff = ring::cageAffiliation(six, idx);
-    REQUIRE(aff.hc == wantAff.hc);
-    REQUIRE(aff.ddc == wantAff.ddc);
-    const auto planes = ring::stackingPlanes(six, idx);
-    REQUIRE(planes.basal == wantPlanes.basal);
-    REQUIRE(planes.equatorial == wantPlanes.equatorial);
+    const auto both = ring::cagePlanes(six, idx);
+    REQUIRE(both.affiliation.hc == wantAff.hc);
+    REQUIRE(both.affiliation.ddc == wantAff.ddc);
+    REQUIRE(both.planes.basal == wantPlanes.basal);
+    REQUIRE(both.planes.equatorial == wantPlanes.equatorial);
+    REQUIRE(ring::cageAffiliation(six, idx).hc == wantAff.hc);
+    REQUIRE(ring::stackingPlanes(six, idx).equatorial == wantPlanes.equatorial);
   }
 }
 
