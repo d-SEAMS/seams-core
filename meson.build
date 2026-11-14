@@ -742,6 +742,7 @@ if get_option('with_python')
       files(
         'bindings/python/dseams/__init__.py',
         'bindings/python/dseams/__main__.py',
+        'bindings/python/dseams/userframe.py',
         'bindings/python/frames.py',
       ),
       subdir: 'dseams',

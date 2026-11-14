@@ -142,6 +142,41 @@ def library_path(build):
     return os.pathsep.join(parts)
 
 
+def stage_dseams(build):
+    """Point imports at the in-tree package and the built nanobind module."""
+    stage = build / "pythonpath"
+    package = ROOT / "bindings" / "python" / "dseams"
+    dest = stage / "dseams"
+    dest.mkdir(parents=True, exist_ok=True)
+    for src in package.glob("*.py"):
+        link = dest / src.name
+        if not link.exists():
+            link.symlink_to(src)
+    frames = ROOT / "bindings" / "python" / "frames.py"
+    staged_frames = dest / "frames.py"
+    if frames.is_file() and not staged_frames.exists():
+        staged_frames.symlink_to(frames)
+    pyd = ROOT / "bindings" / "python" / "pydseams"
+    pdest = stage / "pydseams"
+    pdest.mkdir(parents=True, exist_ok=True)
+    for src in pyd.glob("*.py"):
+        link = pdest / src.name
+        if not link.exists():
+            link.symlink_to(src)
+    built = [path for path in build.rglob("_core*.so") if path.is_file()]
+    if not built:
+        built = [path for path in package.glob("_core*.so") if path.is_file()]
+    tag = sys.implementation.cache_tag
+    matched = [path for path in built if tag in path.name]
+    if matched:
+        built = matched
+    if built:
+        so = dest / built[0].name
+        if not so.exists():
+            so.symlink_to(built[0])
+    return stage
+
+
 def base_env(build):
     env = os.environ.copy()
     env.pop("DSEAMS_DOC_BUILD", None)
@@ -159,6 +194,7 @@ def base_env(build):
     env["SEAMS_BUILD"] = str(build)
     env["PYTHONPATH"] = os.pathsep.join(
         [
+            str(stage_dseams(build)),
             str(DOCS / "examples"),
             str(ROOT / "bindings" / "python"),
             str(ROOT / "adapters" / "python"),
@@ -255,32 +291,15 @@ def sdk_flags(text):
     return seen
 
 
-def python_bins():
-    found = []
-    for name in (sys.executable, shutil.which("python3"), shutil.which("python3.12"), shutil.which("python3.11")):
-        if name and name not in found:
-            found.append(name)
-    return found
-
-
 def python_with(module, env):
-    for exe in python_bins():
-        local = dict(env)
-        extra = os.environ.get("PYDSEAMS_PYTHONPATH", "")
-        if extra and exe != sys.executable:
-            local["PYTHONPATH"] = extra + os.pathsep + local.get("PYTHONPATH", "")
-        probe = subprocess.run([exe, "-c", "import " + module], env=local, capture_output=True, text=True)
-        if probe.returncode == 0:
-            return exe
-    return None
-
-
-def launch_env(exe, env):
-    local = dict(env)
-    extra = os.environ.get("PYDSEAMS_PYTHONPATH", "")
-    if extra and exe != sys.executable:
-        local["PYTHONPATH"] = extra + os.pathsep + local.get("PYTHONPATH", "")
-    return local
+    """True when this interpreter imports ``module`` from the snippet path."""
+    probe = subprocess.run(
+        [sys.executable, "-c", "import " + module],
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+    return sys.executable if probe.returncode == 0 else None
 
 
 def which(name):
@@ -417,12 +436,12 @@ def run_source(build, env, path):
             if "import pydseams" in text or "from pydseams" in text:
                 exe = python_with("pydseams", env)
                 if exe is None:
-                    raise Skip("pydseams is not installed")
+                    raise Fail("in-tree pydseams did not import")
             elif re.search(r"(?<![A-Za-z_])import dseams\b", text) or re.search(r"(?<![A-Za-z_])from dseams\b", text):
                 exe = python_with("dseams._core", env)
                 if exe is None:
                     raise Skip("the Python extension is not built")
-            run([exe, str(path), *program_args(text, build)], launch_env(exe, env))
+            run([exe, str(path), *program_args(text, build)], env)
         elif path.suffix == ".lua":
             lua = shutil.which("lua5.4") or shutil.which("lua")
             if not lua:
@@ -717,6 +736,8 @@ def run_python(build, env, chunks):
         ):
             found = python_with(name.split(".")[0], env)
             if found is None:
+                if name.startswith("pydseams"):
+                    raise Fail("in-tree pydseams did not import")
                 raise Skip(name + " is not installed")
             if name.startswith("pydseams"):
                 exe = found
@@ -744,7 +765,7 @@ def run_python(build, env, chunks):
         + "\n",
         encoding="utf-8",
     )
-    run([exe, str(script)], launch_env(exe, env))
+    run([exe, str(script)], env)
 
 
 def run_julia_text(build, env, body):

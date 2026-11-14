@@ -163,6 +163,21 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
     depends: [seams_lang],
     timeout: 120,
   )
+  _parity_env = environment()
+  _parity_env.set('SEAMS_LANG_LIB', seams_lang.full_path())
+  _parity_env.set('DSEAMS_SRC', meson.project_source_root())
+  _parity_env.set('PYTHONPATH', meson.project_source_root() / 'bindings' / 'python')
+  test(
+    'python_frame_parity',
+    find_program('python3', required: true),
+    args: [
+      '-m', 'pytest', '-q',
+      meson.project_source_root() / 'bindings' / 'python' / 'tests' / 'frame_parity.py',
+    ],
+    env: _parity_env,
+    depends: [seams_lang],
+    timeout: 600,
+  )
   test(
     'symmetry_ctypes',
     find_program('python3', required: true),
