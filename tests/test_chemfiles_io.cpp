@@ -330,6 +330,19 @@ TEST_CASE("an atom count after the ATOMS header stays inside the id scan",
   fs::remove(late);
 }
 
+#ifdef SEAMS_CHEMFILES_PATCHED
+TEST_CASE("a MOL2 molecule with no counts line is an error", "[chemfiles]") {
+  // capi_read_fuzzer: chemfiles 0.10.4 read counts[0] of an empty split.
+  const auto mol2 = dseams_test::freshFile("dseams_chem_no_counts.mol2");
+  {
+    std::ofstream out(mol2);
+    out << "@<TRIPOS>MOLECULE\nwater\n\n@<TRIPOS>ATOM\n";
+  }
+  REQUIRE(sinp::chemfilesSteps(mol2.string()) == -1);
+  fs::remove(mol2);
+}
+#endif
+
 TEST_CASE("a range walks every chemfiles step and skips CON", "[chemfiles]") {
   const auto path = dseams_test::freshFile("dseams_chem_range.xyz");
   {

@@ -344,7 +344,21 @@ else
   if not chemfiles_dep.found()
     chem_prefix = meson.project_build_root() / 'chemfiles-prefix'
     cmake_bin = find_program('cmake', required: chemfiles_opt)
-    if cmake_bin.found() and not fs.exists(chem_prefix / 'lib' / 'libchemfiles.so')
+    # The prefix records the patches it was built with. A changed patch
+    # set refetches the source, since the patch step runs only on a fetch.
+    _chem_patch_ids = []
+    foreach _patch : ['chemfiles-0.10.4-mmcif.patch', 'chemfiles-0.10.4-mol2.patch']
+      _chem_patch_ids += [_patch + ' ' + fs.hash(meson.project_source_root() / 'cmake' / 'patches' / _patch, 'sha256')]
+    endforeach
+    _chem_patch_text = '\n'.join(_chem_patch_ids)
+    _chem_stamp = chem_prefix / 'seams-patches.txt'
+    _chem_current = fs.exists(chem_prefix / 'lib' / 'libchemfiles.so') and fs.exists(_chem_stamp)
+    if _chem_current
+      _chem_current = fs.read(_chem_stamp).strip() == _chem_patch_text
+    endif
+    if cmake_bin.found() and not _chem_current
+      run_command('rm', '-rf', meson.project_build_root() / 'chemfiles-fetch', chem_prefix,
+                  check: true)
       run_command(cmake_bin, '-S', meson.project_source_root() / 'cmake',
                   '-B', meson.project_build_root() / 'chemfiles-fetch',
                   '-DCMAKE_BUILD_TYPE=Release',
@@ -357,6 +371,8 @@ else
                   '--parallel', check: true)
       run_command(cmake_bin, '--install',
                   meson.project_build_root() / 'chemfiles-fetch',
+                  check: true)
+      run_command('sh', '-c', 'printf "%s\\n" "$1" > "$2"', 'sh', _chem_patch_text, _chem_stamp,
                   check: true)
     endif
     # The conda driver puts its lib directory first on the RPATH, and
@@ -384,7 +400,7 @@ else
                                         required: chemfiles_opt)
       if chemfiles_dep.found()
         chemfiles_dep = declare_dependency(
-          compile_args: ['-I' + chem_prefix / 'include'],
+          compile_args: ['-I' + chem_prefix / 'include', '-DSEAMS_CHEMFILES_PATCHED=1'],
           dependencies: chemfiles_dep)
         chemfiles_libdir = chem_prefix / 'lib'
       endif

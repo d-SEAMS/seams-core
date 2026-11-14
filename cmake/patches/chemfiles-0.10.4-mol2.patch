@@ -1,0 +1,25 @@
+# Copyright (c) d-SEAMS developers
+diff --git a/src/formats/MOL2.cpp b/src/formats/MOL2.cpp
+index 0bced0f..a7af440 100644
+--- a/src/formats/MOL2.cpp
++++ b/src/formats/MOL2.cpp
+@@ -66,6 +66,9 @@ void MOL2Format::read_next(Frame& frame) {
+ 
+     line = file_.readline();
+     auto counts = split(line, ' ');
++    if (counts.empty()) {
++        throw format_error("missing the number of atoms for MOL2 in line '{}'", line);
++    }
+ 
+     auto n_atoms = parse<size_t>(counts[0]);
+     size_t n_bonds = 0;
+@@ -228,6 +231,9 @@ optional<uint64_t> MOL2Format::forward() {
+     file_.readline();
+     auto line = file_.readline();
+     auto counts = split(line, ' ');
++    if (counts.empty()) {
++        throw format_error("missing the number of atoms for MOL2 in line '{}'", line);
++    }
+ 
+     size_t n_atoms = 0;
+     size_t n_bonds = 0;
