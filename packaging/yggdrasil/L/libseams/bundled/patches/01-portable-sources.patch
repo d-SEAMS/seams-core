@@ -1,0 +1,623 @@
+diff --git a/src/bop.cpp b/src/bop.cpp
+index 2d3b0db6..78e66d19 100644
+--- a/src/bop.cpp
++++ b/src/bop.cpp
+@@ -29,7 +29,10 @@
+ #include <cmath>
+ #include <complex>
+ #include <cstdlib>
++#if defined(__x86_64__) || defined(__i386__)
+ #include <immintrin.h>
++#define SEAMS_BOP_X86 1
++#endif
+ #include <iostream>
+ #include <mutex>
+ #include <numbers>
+@@ -290,6 +293,7 @@ void addRealYlm3Scalar(double x, double y, double z, const std::array<double, 4>
+   acc[6] += norm[3] * (x * (3.0 * y2 - x2)) * inv;
+ }
+ 
++#ifdef SEAMS_BOP_X86
+ // Four bonds side by side. Hardware fma is a per-lane instruction; the
+ // channels are then added in bond order so the sum matches the scalar loop.
+ __attribute__((target("avx2,fma"))) void realYlm3Accumulate(const double *x, const double *y,
+@@ -349,6 +353,27 @@ __attribute__((target("fma"))) double realL3Dot(const double *a, const double *b
+   return dot;
+ }
+ 
++bool hostHasAvx2Fma() {
++  return __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
++}
++#else
++// Without x86 SIMD the dispatch below always takes the scalar branch;
++// these keep the call sites well-formed.
++double realL3DotScalar(const double *a, const double *b);
++
++void realYlm3Accumulate(const double *x, const double *y, const double *z, int nBond,
++                        double *acc) {
++  const auto &norm = normQ3();
++  for (int bond = 0; bond < nBond; ++bond) {
++    addRealYlm3Scalar(x[bond], y[bond], z[bond], norm, acc);
++  }
++}
++
++double realL3Dot(const double *a, const double *b) { return realL3DotScalar(a, b); }
++
++bool hostHasAvx2Fma() { return false; }
++#endif
++
+ double realL3DotScalar(const double *a, const double *b) {
+   double dot = a[0] * b[0];
+   for (int channel = 1; channel < kRealL3; ++channel) {
+@@ -765,7 +790,7 @@ static void classifyBondsLeftFp64(
+     flat.reserve(static_cast<std::size_t>(nop) * 8);
+   }
+ 
+-  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
++  const bool useAvx = hostHasAvx2Fma();
+ #ifdef SEAMS_HAS_OPENMP
+ #pragma omp parallel for schedule(static) if (nop >= 16384 && omp_get_max_threads() > 1)
+ #endif
+@@ -1384,7 +1409,7 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
+   const double hy = 0.5 * Ly;
+   const double hz = 0.5 * Lz;
+   const auto &norm = normQ3();
+-  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
++  const bool useAvx = hostHasAvx2Fma();
+   const chill::BondClassifier rule = chill::chillPlusRule();
+   const auto tWalk = std::chrono::steady_clock::now();
+ #ifdef SEAMS_HAS_OPENMP
+@@ -1715,7 +1740,7 @@ bool chill::q4q6ChillPlus(
+   constexpr double pi = 3.14159265358979323846;
+   const double pre4 = 4.0 * pi / 9.0;
+   const double pre6 = 4.0 * pi / 13.0;
+-  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
++  const bool useAvx = hostHasAvx2Fma();
+   const auto &norm = normQ3();
+ #ifdef SEAMS_HAS_OPENMP
+ #pragma omp parallel for schedule(static) if (parallel)
+@@ -2242,7 +2267,7 @@ bool chill::chillPlusPublishedCutoff(
+   const auto tCsr = std::chrono::steady_clock::now();
+   const gen::FracBox frame = gen::makeFracBox(yCloud);
+   const auto &norm = normQ3();
+-  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
++  const bool useAvx = hostHasAvx2Fma();
+   const chill::BondClassifier rule = chill::chillPlusRule();
+ #ifdef SEAMS_HAS_OPENMP
+ #pragma omp parallel for schedule(static) if (n >= 256)
+@@ -2463,7 +2488,7 @@ int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &y
+     return 0;
+   }
+   const gen::FracBox frame = gen::makeFracBox(yCloud);
+-  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
++  const bool useAvx = hostHasAvx2Fma();
+   const auto &norm = normQ3();
+   const chill::BondClassifier rule = chill::chillPlusRule();
+   std::vector<double> q(static_cast<std::size_t>(n) * kRealL3, 0.0);
+@@ -3224,7 +3249,7 @@ void chill::bondOrder(const molSys::PointCloud<molSys::Point<double>, double> &y
+     xyz[static_cast<std::size_t>(i)] = {p.x, p.y, p.z};
+   }
+   const gen::FracBox frame = gen::makeFracBox(yCloud);
+-  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
++  const bool useAvx = hostHasAvx2Fma();
+   const bool fixedKeep = keepMax > 0;
+ #ifdef SEAMS_HAS_OPENMP
+   const double orderT0 = omp_get_wtime();
+@@ -3325,7 +3350,7 @@ void chill::correlFromOrder(molSys::PointCloud<molSys::Point<double>, double> &y
+                             const std::vector<char> *which, bool closed) {
+   const int nop = yCloud.nop;
+   const int keepMax = order.keepMax;
+-  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
++  const bool useAvx = hostHasAvx2Fma();
+   const auto neighbourAt = [&](int atom, int slot) {
+     if (keepMax > 0) {
+       return order.chosen[static_cast<std::size_t>(atom) * static_cast<std::size_t>(keepMax) +
+diff --git a/src/brine_front.cpp b/src/brine_front.cpp
+index 8d6843fb..73262319 100644
+--- a/src/brine_front.cpp
++++ b/src/brine_front.cpp
+@@ -390,7 +390,7 @@ LinearFit linearFit(const std::vector<double> &time, const std::vector<double> &
+     sse += residual * residual;
+   }
+   const double variance = sse / static_cast<double>(n - 2);
+-  fit.stderr = std::sqrt(variance / ssxx);
++  fit.slopeStderr = std::sqrt(variance / ssxx);
+   return fit;
+ }
+ 
+diff --git a/src/brine_front_main.cpp b/src/brine_front_main.cpp
+index 903f099e..a88b6393 100644
+--- a/src/brine_front_main.cpp
++++ b/src/brine_front_main.cpp
+@@ -249,7 +249,7 @@ int main(int argc, char **argv) {
+     }
+     const auto fit = site::linearFit(timeNs, thickness);
+     const double front = fit.slope / 2.0;
+-    const double frontErr = fit.stderr / 2.0;
++    const double frontErr = fit.slopeStderr / 2.0;
+     double kMean = 0;
+     for (double k : kValue) {
+       kMean += k;
+diff --git a/src/chemfiles_io.cpp b/src/chemfiles_io.cpp
+index 1b0ba26b..65b1965f 100644
+--- a/src/chemfiles_io.cpp
++++ b/src/chemfiles_io.cpp
+@@ -22,6 +22,7 @@
+ #include <chrono>
+ #include <cstdlib>
+ #include <cstring>
++#include <filesystem>
+ #include <fstream>
+ #include <iostream>
+ #include <mutex>
+@@ -380,7 +381,7 @@ bool startsWith(const std::string &line, const char *prefix) {
+ 
+ struct DumpIdIndex {
+   off_t bytes = -1;
+-  timespec mtime {};
++  std::filesystem::file_time_type mtime{};
+   std::vector<char> oneToN;
+ };
+ 
+@@ -394,7 +395,8 @@ DumpIdIndex scanDumpIds(const std::string &path) {
+     return out;
+   }
+   out.bytes = st.st_size;
+-  out.mtime = st.st_mtim;
++  std::error_code ec;
++  out.mtime = std::filesystem::last_write_time(path, ec);
+   std::ifstream in(path);
+   const auto t0 = std::chrono::steady_clock::now();
+   int seen = 0;
+@@ -486,11 +488,12 @@ bool dumpFrameIsOneToN(const std::string &path, int frame) {
+   }
+   struct stat st {};
+   const bool exists = stat(path.c_str(), &st) == 0;
++  std::error_code ec;
++  const auto mtime = std::filesystem::last_write_time(path, ec);
+   std::lock_guard<std::mutex> lock(gDumpIdMu);
+   auto it = gDumpIds.find(path);
+   const bool fresh = exists && it != gDumpIds.end() && it->second.bytes == st.st_size &&
+-                     it->second.mtime.tv_sec == st.st_mtim.tv_sec &&
+-                     it->second.mtime.tv_nsec == st.st_mtim.tv_nsec;
++                     !ec && it->second.mtime == mtime;
+   if (!fresh) {
+     gDumpIds[path] = scanDumpIds(path);
+     it = gDumpIds.find(path);
+diff --git a/src/franzblau.cpp b/src/franzblau.cpp
+index 7acacb1a..08a1ecf9 100644
+--- a/src/franzblau.cpp
++++ b/src/franzblau.cpp
+@@ -58,11 +58,19 @@ int sourceTeam(int sources) {
+ #endif
+ }
+ 
++// Profiling ticks: TSC cycles on x86, steady-clock nanoseconds elsewhere.
+ std::uint64_t readTsc() {
++#if defined(__x86_64__) || defined(__i386__)
+   unsigned lo = 0;
+   unsigned hi = 0;
+   __asm__ volatile("rdtsc" : "=a"(lo), "=d"(hi));
+   return (static_cast<std::uint64_t>(hi) << 32) | lo;
++#else
++  return static_cast<std::uint64_t>(
++      std::chrono::duration_cast<std::chrono::nanoseconds>(
++          std::chrono::steady_clock::now().time_since_epoch())
++          .count());
++#endif
+ }
+ 
+ struct RingSplitTimes {
+diff --git a/src/include/internal/brine_front.hpp b/src/include/internal/brine_front.hpp
+index 5c53c0ba..ba9bed2a 100644
+--- a/src/include/internal/brine_front.hpp
++++ b/src/include/internal/brine_front.hpp
+@@ -78,7 +78,7 @@ struct RejectionCoefficient {
+ struct LinearFit {
+   double slope = 0;
+   double intercept = 0;
+-  double stderr = 0; ///< standard error of the slope
++  double slopeStderr = 0; ///< standard error of the slope
+   int n = 0;
+ };
+ 
+diff --git a/src/ozaki.cpp b/src/ozaki.cpp
+index de70ffda..9ad97a89 100644
+--- a/src/ozaki.cpp
++++ b/src/ozaki.cpp
+@@ -11,6 +11,8 @@
+ 
+ #if defined(__x86_64__)
+ #include <immintrin.h>
++#endif
++#if defined(__x86_64__) && defined(__linux__)
+ #include <sys/syscall.h>
+ #include <unistd.h>
+ #endif
+@@ -22,6 +24,9 @@
+ namespace seams::product {
+ namespace {
+ 
++// __int128 is a GCC/Clang extension; the typedef keeps -pedantic quiet.
++__extension__ typedef __int128 i128;
++
+ std::atomic<int> gMode{-1};
+ std::atomic<int> gReduction{-1};
+ 
+@@ -84,7 +89,7 @@ bool finitePair(double a, double b) {
+   return std::isfinite(a) && std::isfinite(b);
+ }
+ 
+-#if defined(__x86_64__)
++#if defined(__x86_64__) && defined(__linux__)
+ #ifndef ARCH_REQ_XCOMP_PERM
+ #define ARCH_REQ_XCOMP_PERM 0x1023
+ #endif
+@@ -176,7 +181,7 @@ int symMod(int32_t a, int32_t m) {
+   return r;
+ }
+ 
+-__int128 remCentered(__int128 s, __uint128_t M) {
++i128 remCentered(i128 s, __uint128_t M) {
+   const __uint128_t half = M / 2;
+   __uint128_t u;
+   if (s >= 0) {
+@@ -186,12 +191,12 @@ __int128 remCentered(__int128 s, __uint128_t M) {
+     u = neg == 0 ? 0 : M - neg;
+   }
+   if (u > half) {
+-    return static_cast<__int128>(u - M);
++    return static_cast<i128>(u - M);
+   }
+-  return static_cast<__int128>(u);
++  return static_cast<i128>(u);
+ }
+ 
+-double roundI128(__int128 v, int extraExp) {
++double roundI128(i128 v, int extraExp) {
+   if (v == 0) {
+     return 0.0;
+   }
+@@ -470,11 +475,11 @@ RealDot dotOzakiII(const double *x, const double *y, int n) {
+     }
+     residues[static_cast<std::size_t>(t)] = symMod(acc, m);
+   }
+-  __int128 acc = 0;
++  i128 acc = 0;
+   for (int t = 0; t < modCount; t++) {
+-    const __int128 term =
+-        static_cast<__int128>(residues[static_cast<std::size_t>(t)]) *
+-        static_cast<__int128>(table.weight[t]);
++    const i128 term =
++        static_cast<i128>(residues[static_cast<std::size_t>(t)]) *
++        static_cast<i128>(table.weight[t]);
+     acc = remCentered(acc + term, table.modulus);
+   }
+   out.value = roundI128(acc, -(ex + ey));
+@@ -576,6 +581,7 @@ __attribute__((target("avx512f,avx512bw,avx512vnni"))) bool int8GemmVnni(
+   return true;
+ }
+ 
++#if defined(__linux__)
+ __attribute__((target("amx-tile,amx-int8"))) bool int8GemmAmx(
+     int m, int n, int k, const signed char *A, int lda, const signed char *B,
+     int ldb, int *C, int ldc) {
+@@ -670,6 +676,13 @@ __attribute__((target("amx-tile,amx-int8"))) bool int8GemmAmx(
+   std::free(raw);
+   return true;
+ }
++#else
++// AMX tiles need the Linux arch_prctl permission request.
++bool int8GemmAmx(int, int, int, const signed char *, int, const signed char *, int, int *,
++                 int) {
++  return false;
++}
++#endif
+ 
+ __attribute__((target("avx512f,fma"))) void gemmAvx512Rows(
+     int m, int n, int k, const double *A, int lda, const double *B, int ldb,
+@@ -795,7 +808,7 @@ const char *reductionName(Reduction r) {
+ }
+ 
+ bool amxAvailable() {
+-#if defined(__x86_64__)
++#if defined(__x86_64__) && defined(__linux__)
+   static const bool ok = requestAmx();
+   return ok;
+ #else
+@@ -1089,7 +1102,7 @@ GemmInfo gemmOzakiII(int m, int n, int k, const double *A, int lda, const double
+       Bp[static_cast<std::size_t>(t) * n + j] = scaled[static_cast<std::size_t>(t)];
+     }
+   }
+-  std::vector<__int128> acc(static_cast<std::size_t>(m) * n, 0);
++  std::vector<i128> acc(static_cast<std::size_t>(m) * n, 0);
+   std::vector<signed char> Ai(static_cast<std::size_t>(m) * k);
+   std::vector<signed char> Bi(static_cast<std::size_t>(k) * n);
+   std::vector<int> partial(static_cast<std::size_t>(m) * n, 0);
+@@ -1122,8 +1135,8 @@ GemmInfo gemmOzakiII(int m, int n, int k, const double *A, int lda, const double
+                        : (use == Int8Backend::Vnni ? "ozaki-ii-vnni" : "ozaki-ii-scalar");
+     for (int i = 0; i < m * n; i++) {
+       const int r = symMod(partial[static_cast<std::size_t>(i)], modulus);
+-      const __int128 term =
+-          static_cast<__int128>(r) * static_cast<__int128>(table.weight[mod]);
++      const i128 term =
++          static_cast<i128>(r) * static_cast<i128>(table.weight[mod]);
+       acc[static_cast<std::size_t>(i)] =
+           remCentered(acc[static_cast<std::size_t>(i)] + term, table.modulus);
+     }
+diff --git a/src/seams_input.cpp b/src/seams_input.cpp
+index acd77c7f..bb4b6acb 100644
+--- a/src/seams_input.cpp
++++ b/src/seams_input.cpp
+@@ -38,7 +38,9 @@
+ #include <thread>
+ #include <sys/stat.h>
+ #include <unistd.h>
+-#include <ext/stdio_filebuf.h>
++#ifdef _WIN32
++#include <io.h>
++#endif
+ #include <unordered_map>
+ 
+ #ifdef SEAMS_HAS_OPENMP
+@@ -130,18 +132,127 @@ bool parseDumpInt(std::string_view line, int &out) {
+   return parsed.ec == std::errc{};
+ }
+ 
+-// One POSIX descriptor. The stream reads that descriptor and nothing else.
++#ifndef O_BINARY
++#define O_BINARY 0
++#endif
++
++int openForRead(const std::string &path) {
++  return ::open(path.c_str(), O_RDONLY | O_BINARY);
++}
++
++std::int64_t seekFd(int fd, std::int64_t off, int whence) {
++#ifdef _WIN32
++  return ::_lseeki64(fd, off, whence);
++#else
++  return static_cast<std::int64_t>(::lseek(fd, static_cast<off_t>(off), whence));
++#endif
++}
++
++// pread where there is one. The Windows descriptors here are private to
++// the caller, so a seek and a read do the same.
++std::int64_t readAt(int fd, char *buf, std::size_t n, std::uint64_t off) {
++#ifdef _WIN32
++  if (seekFd(fd, static_cast<std::int64_t>(off), SEEK_SET) < 0) {
++    return -1;
++  }
++  const unsigned int chunk =
++      static_cast<unsigned int>(std::min<std::size_t>(n, 1u << 30));
++  return ::_read(fd, buf, chunk);
++#else
++  return ::pread(fd, buf, n, static_cast<off_t>(off));
++#endif
++}
++
++// A buffered, seekable read of one descriptor, which it closes. It reads
++// no further than the end of the file at that moment, so a dump that is
++// still being written is followed, and a descriptor that cannot seek to
++// its end (a /proc file: size 0, endless content) reads as empty.
++class FdReadBuf : public std::streambuf {
++public:
++  explicit FdReadBuf(int fd) : fd_(fd), buf_(1 << 16) {
++    setg(buf_.data(), buf_.data(), buf_.data());
++  }
++  ~FdReadBuf() override {
++    if (fd_ >= 0) {
++      ::close(fd_);
++    }
++  }
++  FdReadBuf(const FdReadBuf &) = delete;
++  FdReadBuf &operator=(const FdReadBuf &) = delete;
++
++protected:
++  int_type underflow() override {
++    if (gptr() < egptr()) {
++      return traits_type::to_int_type(*gptr());
++    }
++    const std::int64_t size = seekFd(fd_, 0, SEEK_END);
++    if (size <= end_ || seekFd(fd_, end_, SEEK_SET) != end_) {
++      return traits_type::eof();
++    }
++    const std::int64_t want =
++        std::min(static_cast<std::int64_t>(buf_.size()), size - end_);
++    std::int64_t n = -1;
++    do {
++      n = ::read(fd_, buf_.data(), static_cast<unsigned int>(want));
++    } while (n < 0 && errno == EINTR);
++    if (n <= 0) {
++      return traits_type::eof();
++    }
++    end_ += n;
++    setg(buf_.data(), buf_.data(), buf_.data() + n);
++    return traits_type::to_int_type(*gptr());
++  }
++
++  pos_type seekoff(off_type off, std::ios_base::seekdir dir,
++                   std::ios_base::openmode which) override {
++    if (!(which & std::ios_base::in)) {
++      return pos_type(off_type(-1));
++    }
++    const std::int64_t here = end_ - (egptr() - gptr());
++    if (dir == std::ios_base::cur) {
++      if (off == 0) {
++        return pos_type(here);
++      }
++      return seekpos(pos_type(here + off), which);
++    }
++    if (dir == std::ios_base::end) {
++      const std::int64_t r = seekFd(fd_, off, SEEK_END);
++      return r < 0 ? pos_type(off_type(-1)) : reset(r);
++    }
++    return seekpos(pos_type(off), which);
++  }
++
++  pos_type seekpos(pos_type sp, std::ios_base::openmode which) override {
++    if (!(which & std::ios_base::in)) {
++      return pos_type(off_type(-1));
++    }
++    const std::int64_t r = seekFd(fd_, static_cast<std::int64_t>(sp), SEEK_SET);
++    return r < 0 ? pos_type(off_type(-1)) : reset(r);
++  }
++
++private:
++  pos_type reset(std::int64_t at) {
++    end_ = at;
++    setg(buf_.data(), buf_.data(), buf_.data());
++    return pos_type(at);
++  }
++
++  int fd_;
++  std::vector<char> buf_;
++  std::int64_t end_ = 0;
++};
++
++// One descriptor. The stream reads that descriptor and nothing else.
+ class OwnedFdStream {
+ public:
+-  explicit OwnedFdStream(int fd)
+-      : fd_(fd), buf_(fd, std::ios::in | std::ios::binary), in_(&buf_) {}
++  explicit OwnedFdStream(int fd) : fd_(fd), buf_(fd), in_(&buf_) {}
+   std::istream &stream() { return in_; }
+   int descriptor() const { return fd_; }
+   bool failed() const { return in_.bad(); }
+ 
+ private:
+   int fd_;
+-  __gnu_cxx::stdio_filebuf<char> buf_;
++  FdReadBuf buf_;
+   std::istream in_;
+ };
+ 
+@@ -174,7 +285,7 @@ struct LammpsDumpSession {
+     if (ec) {
+       return false;
+     }
+-    const int raw = ::open(filename.c_str(), O_RDONLY);
++    const int raw = openForRead(filename);
+     if (raw < 0) {
+       return false;
+     }
+@@ -200,7 +311,7 @@ struct LammpsDumpSession {
+   // replaces it before the pages are read. pread stops at the bytes
+   // that still belong to this descriptor.
+   bool mmapIndexAll() {
+-    const int fd = ::open(path.c_str(), O_RDONLY);
++    const int fd = openForRead(path);
+     if (fd < 0) {
+       return false;
+     }
+@@ -213,8 +324,7 @@ struct LammpsDumpSession {
+     std::vector<char> bytes(nbytes);
+     std::size_t got = 0;
+     while (got < nbytes) {
+-      const ssize_t n = ::pread(fd, bytes.data() + got, nbytes - got,
+-                               static_cast<off_t>(got));
++      const std::int64_t n = readAt(fd, bytes.data() + got, nbytes - got, got);
+       if (n < 0) {
+         if (errno == EINTR) {
+           continue;
+@@ -1025,7 +1135,7 @@ bool openCloneAt(const std::string &filename, int frame, CloneRead &out) {
+     }
+     off = sess->offsets[static_cast<std::size_t>(frame - 1)];
+   }
+-  const int raw = ::open(filename.c_str(), O_RDONLY);
++  const int raw = openForRead(filename);
+   if (raw < 0) {
+     return false;
+   }
+@@ -1093,7 +1203,7 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
+   if (keep == LammpsKeep::TypeInSlice) {
+     return false;
+   }
+-  const int fd = ::open(filename.c_str(), O_RDONLY);
++  const int fd = openForRead(filename);
+   if (fd < 0) {
+     return false;
+   }
+@@ -1111,8 +1221,7 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
+   std::vector<char> bytes(nbytes);
+   std::size_t got = 0;
+   while (got < nbytes) {
+-    const ssize_t nread = ::pread(fd, bytes.data() + got, nbytes - got,
+-                                  static_cast<off_t>(got));
++    const std::int64_t nread = readAt(fd, bytes.data() + got, nbytes - got, got);
+     if (nread < 0) {
+       if (errno == EINTR) {
+         continue;
+diff --git a/src/shell_classify.cpp b/src/shell_classify.cpp
+index 0b15e424..4b6afdca 100644
+--- a/src/shell_classify.cpp
++++ b/src/shell_classify.cpp
+@@ -21,7 +21,9 @@
+ #include <cstdio>
+ #include <cstdlib>
+ #include <cstring>
++#if defined(__AVX2__)
+ #include <immintrin.h>
++#endif
+ #include <new>
+ #include <cstddef>
+ #include <memory>
+@@ -678,6 +680,7 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
+     pz[i] = 1.0e6;
+     r2[i] = 1.0e300;
+   }
++#if defined(__AVX2__)
+   for (int a = 0; a < 12; a++) {
+     const __m256d xa = _mm256_set1_pd(px[a]);
+     const __m256d ya = _mm256_set1_pd(py[a]);
+@@ -691,6 +694,16 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
+       _mm256_storeu_pd(&pair[a][b], d2);
+     }
+   }
++#else
++  for (int a = 0; a < 12; a++) {
++    for (int b = 0; b < 12; b++) {
++      const double dx = px[a] - px[b];
++      const double dy = py[a] - py[b];
++      const double dz = pz[a] - pz[b];
++      pair[a][b] = dx * dx + (dy * dy + dz * dz);
++    }
++  }
++#endif
+   // (1 + sqrt(2)) / 2, the adaptive common-neighbour cutoff. It lies between
+   // the first and second shells of the FCC/HCP cluster.
+   constexpr double kAdapt2 = 1.2071067811865475 * 1.2071067811865475;
+@@ -698,6 +711,9 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
+   int n422 = 0;
+   int nGood = 0;
+   for (int j = 0; j < 12; j++) {
++    const double cut2 = r2[j] * kAdapt2;
++    int mask = 0;
++#if defined(__AVX2__)
+     const __m256d xa = _mm256_set1_pd(px[j]);
+     const __m256d ya = _mm256_set1_pd(py[j]);
+     const __m256d za = _mm256_set1_pd(pz[j]);
+@@ -709,9 +725,7 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
+                                       _mm256_add_pd(_mm256_mul_pd(dy, dy), _mm256_mul_pd(dz, dz)));
+       _mm256_storeu_pd(&pair[j][b], d2);
+     }
+-    const double cut2 = r2[j] * kAdapt2;
+     const __m256d cut = _mm256_set1_pd(cut2);
+-    int mask = 0;
+     for (int b = 0; b < 12; b += 4) {
+       const __m256d pk = _mm256_loadu_pd(&pair[j][b]);
+       const __m256d rk = _mm256_load_pd(r2 + b);
+@@ -719,6 +733,13 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
+                                       _mm256_cmp_pd(rk, cut, _CMP_LT_OQ));
+       mask |= _mm256_movemask_pd(ok) << b;
+     }
++#else
++    for (int b = 0; b < 12; b++) {
++      if (pair[j][b] < cut2 && r2[b] < cut2) {
++        mask |= 1 << b;
++      }
++    }
++#endif
+     mask &= ~(1 << j);
+     const int nc = __builtin_popcount(static_cast<unsigned>(mask));
+     int common[4];
