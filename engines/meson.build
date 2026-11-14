@@ -72,7 +72,9 @@ endif
 gromacs_opt = get_option('with_gromacs')
 if gromacs_opt.allowed()
   gromacs_rpath = ''
-  gromacs_dep = dependency('libgromacs', required: false)
+  # System include, so the -Werror conversions of a clang build stop at
+  # this project's code and not in the GROMACS headers.
+  gromacs_dep = dependency('libgromacs', required: false, include_type: 'system')
   if gromacs_dep.found()
     gromacs_rpath = gromacs_dep.get_variable('libdir', default_value: '')
   endif
