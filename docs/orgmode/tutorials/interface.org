@@ -4,6 +4,11 @@
 One frame of a basal interface is ~input/traj/interface_f0.lammpstrj~,
 864 molecules, 35 kB. ~meson test docs_tutorial_interface~ labels it
 with CHILL+ and reads the profile along the long box edge.
+~meson test docs_frame_tutorials~ runs this frame together with the
+nucleation and brine tutorials. ~--small~ is the CI mode. The public
+Hugging Face pin ~d-SEAMS/brine-front-230K~ at
+~4828e33ecf419c70643b2d466bfa4f283b4138dc~ holds the brine frames.
+This interface frame ships in the tree.
 
 The published rule on the cutoff list prints
 

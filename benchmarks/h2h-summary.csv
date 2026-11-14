@@ -1,0 +1,105 @@
+competitor,operation,molecules,threads,cores,cpus,n,dseams_median_ms,dseams_min_ms,other_median_ms,other_min_ms,ratio,verdict,agreement,version,cpu_model
+pyscal3,chill_plus,,1,8,0,0,,,,,,absent,pyscal3 has no CHILL+,2.14.0/4.1.0,Intel Xeon Processor
+vesin,neighbours,4096,1,8,0,8,0.2405,0.2211,1.7229,1.6855,7.1631,WIN,pairs 8192 equal,2.14.0/0.6.2,Intel Xeon Processor
+freud,neighbours,4096,1,8,0,8,0.2828,0.2235,2.9522,2.9203,10.4378,WIN,pairs 8192 equal,2.14.0/3.6.1,Intel Xeon Processor
+mdapy,q6,4096,1,8,0,8,0.7298,0.6568,4.6456,4.5669,6.3658,WIN,q6_max_abs 4.441e-16 q6bar_max_abs 4.441e-16,2.14.0/2.0.0,Intel Xeon Processor
+pyscal3,q6,4096,1,8,0,8,0.7334,0.6628,3.5342,3.4388,4.8189,WIN,q6_max_abs 5.551e-16 q6bar_max_abs 5.551e-16,2.14.0/4.1.0,Intel Xeon Processor
+mdapy,chill_plus,4096,1,8,0,8,0.6996,0.6573,2.6535,2.6215,3.7929,WIN,labels 4096 equal q6_max_abs 4.441e-16,2.14.0/2.0.0,Intel Xeon Processor
+OVITO,cna,4096,1,8,0,0,,,,,,absent,adaptive CNA has no diamond structure and does not match the ice labels,2.14.0,Intel Xeon Processor
+PTM,ptm,4096,1,8,0,0,,,,,,absent,the standalone polyhedral-template-matching library is not linked,2.14.0,Intel Xeon Processor
+ClavisCage,chill_plus,4096,1,8,0,0,,,,,,absent,ClavisCage is not installed; the clavis package here is unrelated,2.14.0,Intel Xeon Processor
+freud,rings,4096,1,8,0,0,,,,,,absent,freud has no primitive-ring finder,2.14.0,Intel Xeon Processor
+SQQ,cages,4096,1,8,0,0,,,,,,absent,SQQ counts hydrate cages and does not finish an ice frame of this size,0.5.8,Intel Xeon Processor
+OVITO,rings,4096,1,8,0,8,4.4726,4.3544,16.3037,16.1385,3.6452,WIN,hexagons 8192 equal,2.14.0/3.17.2,Intel Xeon Processor
+OVITO,ptm,4096,1,8,0,8,0.7490,0.7066,105.5038,105.2243,140.8648,WIN,hexagonal 4096 equal,2.14.0/3.17.2,Intel Xeon Processor
+OVITO,identify_diamond,4096,1,8,0,8,0.7500,0.7046,4.9377,4.8777,6.5836,WIN,hexagonal 4096 equal,2.14.0/3.17.2,Intel Xeon Processor
+PLUMED,q6,4096,1,8,0,8,0.7196,0.6670,112.0986,110.4834,155.7826,WIN,q6_max_abs 2.220e-16,2.14.0/2.10.0,Intel Xeon Processor
+rings-statistics-matter,rings,4096,1,8,0,8,4.5710,4.4193,56.7086,56.5039,12.4063,WIN,hexagons 8192 equal,2.14.0/0.3.0,Intel Xeon Processor
+cycless,rings,4096,1,8,0,8,5.3182,4.7102,12360.2390,12297.0691,2324.1212,WIN,hexagons 8192 equal; cycles_iter has no thread argument,2.14.0/0.7,Intel Xeon Processor
+IRA,shape,4096,1,8,0,8,0.8796,0.7085,1302.6598,1299.5333,1480.9221,WIN,hexagonal 4096 equal,2.14.0/2.2.0,Intel Xeon Processor
+vesin,neighbours,110592,1,8,0,8,6.5809,6.5205,45.9799,45.9158,6.9869,WIN,pairs 221184 equal,2.14.0/0.6.2,Intel Xeon Processor
+freud,neighbours,110592,1,8,0,8,6.6529,6.4517,92.0855,91.8780,13.8414,WIN,pairs 221184 equal,2.14.0/3.6.1,Intel Xeon Processor
+mdapy,q6,110592,1,8,0,8,18.9007,18.7380,108.3703,108.0504,5.7337,WIN,q6_max_abs 1.776e-15 q6bar_max_abs 1.776e-15,2.14.0/2.0.0,Intel Xeon Processor
+pyscal3,q6,110592,1,8,0,8,18.9790,18.8969,101.2266,100.3869,5.3336,WIN,q6_max_abs 2.442e-15 q6bar_max_abs 2.442e-15,2.14.0/4.1.0,Intel Xeon Processor
+mdapy,chill_plus,110592,1,8,0,8,18.8238,18.7206,57.0741,56.6763,3.0320,WIN,labels 110592 equal q6_max_abs 1.776e-15,2.14.0/2.0.0,Intel Xeon Processor
+OVITO,cna,110592,1,8,0,0,,,,,,absent,adaptive CNA has no diamond structure and does not match the ice labels,2.14.0,Intel Xeon Processor
+PTM,ptm,110592,1,8,0,0,,,,,,absent,the standalone polyhedral-template-matching library is not linked,2.14.0,Intel Xeon Processor
+ClavisCage,chill_plus,110592,1,8,0,0,,,,,,absent,ClavisCage is not installed; the clavis package here is unrelated,2.14.0,Intel Xeon Processor
+freud,rings,110592,1,8,0,0,,,,,,absent,freud has no primitive-ring finder,2.14.0,Intel Xeon Processor
+SQQ,cages,110592,1,8,0,0,,,,,,absent,SQQ counts hydrate cages and does not finish an ice frame of this size,0.5.8,Intel Xeon Processor
+cycless,rings,110592,1,8,0,0,,,,,,absent,cycles_iter takes 12 s on 4096 molecules; this size is not in the sitting,0.7,Intel Xeon Processor
+IRA,shape,110592,1,8,0,0,,,,,,absent,one IRA match is 0.37 ms per atom; this frame is outside the sitting,2.2.0,Intel Xeon Processor
+OVITO,rings,110592,1,8,0,8,120.1195,111.6069,514.3150,504.3069,4.2817,WIN,hexagons 221184 equal,2.14.0/3.17.2,Intel Xeon Processor
+OVITO,ptm,110592,1,8,0,8,25.3133,21.2381,2901.4837,2898.4232,114.6230,WIN,hexagonal 110592 equal,2.14.0/3.17.2,Intel Xeon Processor
+OVITO,identify_diamond,110592,1,8,0,8,20.7062,20.4675,136.3043,135.8360,6.5828,WIN,hexagonal 110592 equal,2.14.0/3.17.2,Intel Xeon Processor
+PLUMED,q6,110592,1,8,0,8,24.6976,19.2691,2789.2947,2777.7099,112.9379,WIN,q6_max_abs 5.551e-16,2.14.0/2.10.0,Intel Xeon Processor
+rings-statistics-matter,rings,110592,1,8,0,8,115.5423,111.8927,1337.2163,1334.0759,11.5734,WIN,hexagons 221184 equal,2.14.0/0.3.0,Intel Xeon Processor
+vesin,neighbours,884736,1,8,0,8,90.8304,67.7748,1134.2150,1126.6325,12.4872,WIN,pairs 1769472 equal,2.14.0/0.6.2,Intel Xeon Processor
+freud,neighbours,884736,1,8,0,8,102.5608,69.1798,951.2067,922.5765,9.2746,WIN,pairs 1769472 equal,2.14.0/3.6.1,Intel Xeon Processor
+mdapy,q6,884736,1,8,0,8,241.0265,224.0700,1086.4462,1059.9664,4.5076,WIN,q6_max_abs 2.331e-15 q6bar_max_abs 2.331e-15,2.14.0/2.0.0,Intel Xeon Processor
+pyscal3,q6,884736,1,8,0,8,241.1456,220.8588,933.0199,920.8833,3.8691,WIN,q6_max_abs 3.220e-15 q6bar_max_abs 3.220e-15,2.14.0/4.1.0,Intel Xeon Processor
+mdapy,chill_plus,884736,1,8,0,8,217.9781,177.3262,670.1541,588.0123,3.0744,WIN,labels 884736 equal q6_max_abs 2.331e-15,2.14.0/2.0.0,Intel Xeon Processor
+OVITO,cna,884736,1,8,0,0,,,,,,absent,adaptive CNA has no diamond structure and does not match the ice labels,2.14.0,Intel Xeon Processor
+PTM,ptm,884736,1,8,0,0,,,,,,absent,the standalone polyhedral-template-matching library is not linked,2.14.0,Intel Xeon Processor
+ClavisCage,chill_plus,884736,1,8,0,0,,,,,,absent,ClavisCage is not installed; the clavis package here is unrelated,2.14.0,Intel Xeon Processor
+freud,rings,884736,1,8,0,0,,,,,,absent,freud has no primitive-ring finder,2.14.0,Intel Xeon Processor
+SQQ,cages,884736,1,8,0,0,,,,,,absent,SQQ counts hydrate cages and does not finish an ice frame of this size,0.5.8,Intel Xeon Processor
+cycless,rings,884736,1,8,0,0,,,,,,absent,cycles_iter takes 12 s on 4096 molecules; this size is not in the sitting,0.7,Intel Xeon Processor
+IRA,shape,884736,1,8,0,0,,,,,,absent,one IRA match is 0.37 ms per atom; this frame is outside the sitting,2.2.0,Intel Xeon Processor
+OVITO,rings,884736,1,8,0,0,,,,,,absent,one FindRings or PTM sample at 884736 molecules does not finish in the sitting,2.14.0,Intel Xeon Processor
+OVITO,ptm,884736,1,8,0,0,,,,,,absent,one FindRings or PTM sample at 884736 molecules does not finish in the sitting,2.14.0,Intel Xeon Processor
+OVITO,identify_diamond,884736,1,8,0,8,251.0017,235.1904,1143.1189,1118.2965,4.5542,WIN,hexagonal 884736 equal,2.14.0/3.17.2,Intel Xeon Processor
+PLUMED,q6,884736,1,8,0,0,,,,,,absent,one serial Q6 sample at 884736 molecules does not finish in the sitting,2.14.0,Intel Xeon Processor
+rings-statistics-matter,rings,884736,1,8,0,8,1045.0718,1012.4426,13160.7319,13086.4782,12.5931,WIN,hexagons 1769472 equal,2.14.0/0.3.0,Intel Xeon Processor
+pyscal3,chill_plus,,8,8,0-7,0,,,,,,absent,pyscal3 has no CHILL+,2.14.0/4.1.0,Intel Xeon Processor
+vesin,neighbours,4096,8,8,0-7,8,0.3550,0.3061,0.6662,0.6552,1.8763,WIN,pairs 8192 equal,2.14.0/0.6.2,Intel Xeon Processor
+freud,neighbours,4096,8,8,0-7,8,0.4625,0.4281,0.8829,0.8598,1.9088,WIN,pairs 8192 equal,2.14.0/3.6.1,Intel Xeon Processor
+mdapy,q6,4096,8,8,0-7,8,0.6851,0.5211,0.9850,0.9307,1.4377,WIN,q6_max_abs 4.441e-16 q6bar_max_abs 4.441e-16,2.14.0/2.0.0,Intel Xeon Processor
+pyscal3,q6,4096,8,8,0-7,8,0.5530,0.5206,2.0049,1.9039,3.6253,WIN,q6_max_abs 5.551e-16 q6bar_max_abs 5.551e-16,2.14.0/4.1.0,Intel Xeon Processor
+mdapy,chill_plus,4096,8,8,0-7,8,0.6529,0.4781,0.7249,0.6814,1.1102,WIN,labels 4096 equal q6_max_abs 4.441e-16,2.14.0/2.0.0,Intel Xeon Processor
+OVITO,cna,4096,8,8,0-7,0,,,,,,absent,adaptive CNA has no diamond structure and does not match the ice labels,2.14.0,Intel Xeon Processor
+PTM,ptm,4096,8,8,0-7,0,,,,,,absent,the standalone polyhedral-template-matching library is not linked,2.14.0,Intel Xeon Processor
+ClavisCage,chill_plus,4096,8,8,0-7,0,,,,,,absent,ClavisCage is not installed; the clavis package here is unrelated,2.14.0,Intel Xeon Processor
+freud,rings,4096,8,8,0-7,0,,,,,,absent,freud has no primitive-ring finder,2.14.0,Intel Xeon Processor
+SQQ,cages,4096,8,8,0-7,0,,,,,,absent,SQQ counts hydrate cages and does not finish an ice frame of this size,0.5.8,Intel Xeon Processor
+OVITO,rings,4096,8,8,0-7,8,2.6381,2.3272,20.2235,17.0025,7.6659,WIN,hexagons 8192 equal,2.14.0/3.17.2,Intel Xeon Processor
+OVITO,ptm,4096,8,8,0-7,8,0.6484,0.3914,28.1351,27.6666,43.3942,WIN,hexagonal 4096 equal,2.14.0/3.17.2,Intel Xeon Processor
+OVITO,identify_diamond,4096,8,8,0-7,8,0.4824,0.3824,1.6691,1.5942,3.4601,WIN,hexagonal 4096 equal,2.14.0/3.17.2,Intel Xeon Processor
+PLUMED,q6,4096,8,8,0-7,8,0.9997,0.5434,118.7027,116.5060,118.7328,WIN,q6_max_abs 2.220e-16,2.14.0/2.10.0,Intel Xeon Processor
+rings-statistics-matter,rings,4096,8,8,0-7,8,2.6536,2.2551,13.1972,12.3345,4.9734,WIN,hexagons 8192 equal,2.14.0/0.3.0,Intel Xeon Processor
+cycless,rings,4096,8,8,0-7,8,3.9386,2.5989,12335.0615,12201.0078,3131.8359,WIN,hexagons 8192 equal; cycles_iter has no thread argument,2.14.0/0.7,Intel Xeon Processor
+IRA,shape,4096,8,8,0-7,8,0.8143,0.4019,1289.1836,1285.8297,1583.2337,WIN,hexagonal 4096 equal,2.14.0/2.2.0,Intel Xeon Processor
+vesin,neighbours,110592,8,8,0-7,8,5.1524,4.8285,23.2954,23.2154,4.5212,WIN,pairs 221184 equal,2.14.0/0.6.2,Intel Xeon Processor
+freud,neighbours,110592,8,8,0-7,8,5.3426,4.8427,33.5703,33.0576,6.2835,WIN,pairs 221184 equal,2.14.0/3.6.1,Intel Xeon Processor
+mdapy,q6,110592,8,8,0-7,8,7.1177,6.8897,17.1511,16.9262,2.4096,WIN,q6_max_abs 1.776e-15 q6bar_max_abs 1.776e-15,2.14.0/2.0.0,Intel Xeon Processor
+pyscal3,q6,110592,8,8,0-7,8,7.0844,6.9551,20.9903,20.8235,2.9629,WIN,q6_max_abs 2.442e-15 q6bar_max_abs 2.442e-15,2.14.0/4.1.0,Intel Xeon Processor
+mdapy,chill_plus,110592,8,8,0-7,8,7.9163,6.6960,11.2989,11.2084,1.4273,WIN,labels 110592 equal q6_max_abs 1.776e-15,2.14.0/2.0.0,Intel Xeon Processor
+OVITO,cna,110592,8,8,0-7,0,,,,,,absent,adaptive CNA has no diamond structure and does not match the ice labels,2.14.0,Intel Xeon Processor
+PTM,ptm,110592,8,8,0-7,0,,,,,,absent,the standalone polyhedral-template-matching library is not linked,2.14.0,Intel Xeon Processor
+ClavisCage,chill_plus,110592,8,8,0-7,0,,,,,,absent,ClavisCage is not installed; the clavis package here is unrelated,2.14.0,Intel Xeon Processor
+freud,rings,110592,8,8,0-7,0,,,,,,absent,freud has no primitive-ring finder,2.14.0,Intel Xeon Processor
+SQQ,cages,110592,8,8,0-7,0,,,,,,absent,SQQ counts hydrate cages and does not finish an ice frame of this size,0.5.8,Intel Xeon Processor
+cycless,rings,110592,8,8,0-7,0,,,,,,absent,cycles_iter takes 12 s on 4096 molecules; this size is not in the sitting,0.7,Intel Xeon Processor
+IRA,shape,110592,8,8,0-7,0,,,,,,absent,one IRA match is 0.37 ms per atom; this frame is outside the sitting,2.2.0,Intel Xeon Processor
+OVITO,rings,110592,8,8,0-7,8,50.3024,46.4745,313.2018,277.7882,6.2264,WIN,hexagons 221184 equal,2.14.0/3.17.2,Intel Xeon Processor
+OVITO,ptm,110592,8,8,0-7,8,7.8854,7.2543,386.4352,383.6094,49.0067,WIN,hexagonal 110592 equal,2.14.0/3.17.2,Intel Xeon Processor
+OVITO,identify_diamond,110592,8,8,0-7,8,7.7791,7.3890,30.5171,29.4613,3.9230,WIN,hexagonal 110592 equal,2.14.0/3.17.2,Intel Xeon Processor
+PLUMED,q6,110592,8,8,0-7,8,10.8492,8.1090,3055.4726,3012.0138,281.6320,WIN,q6_max_abs 5.551e-16,2.14.0/2.10.0,Intel Xeon Processor
+rings-statistics-matter,rings,110592,8,8,0-7,8,47.3394,46.2321,307.6510,300.8376,6.4988,WIN,hexagons 221184 equal,2.14.0/0.3.0,Intel Xeon Processor
+vesin,neighbours,884736,8,8,0-7,8,45.7526,42.3455,221.9878,219.4892,4.8519,WIN,pairs 1769472 equal,2.14.0/0.6.2,Intel Xeon Processor
+freud,neighbours,884736,8,8,0-7,8,50.1912,43.6469,349.0794,331.6750,6.9550,WIN,pairs 1769472 equal,2.14.0/3.6.1,Intel Xeon Processor
+mdapy,q6,884736,8,8,0-7,8,71.7216,63.6554,158.9653,156.4471,2.2164,WIN,q6_max_abs 2.331e-15 q6bar_max_abs 2.331e-15,2.14.0/2.0.0,Intel Xeon Processor
+pyscal3,q6,884736,8,8,0-7,8,72.8993,63.2511,190.2606,187.4327,2.6099,WIN,q6_max_abs 3.220e-15 q6bar_max_abs 3.220e-15,2.14.0/4.1.0,Intel Xeon Processor
+mdapy,chill_plus,884736,8,8,0-7,8,67.0622,61.1570,112.8698,110.1328,1.6831,WIN,labels 884736 equal q6_max_abs 2.331e-15,2.14.0/2.0.0,Intel Xeon Processor
+OVITO,cna,884736,8,8,0-7,0,,,,,,absent,adaptive CNA has no diamond structure and does not match the ice labels,2.14.0,Intel Xeon Processor
+PTM,ptm,884736,8,8,0-7,0,,,,,,absent,the standalone polyhedral-template-matching library is not linked,2.14.0,Intel Xeon Processor
+ClavisCage,chill_plus,884736,8,8,0-7,0,,,,,,absent,ClavisCage is not installed; the clavis package here is unrelated,2.14.0,Intel Xeon Processor
+freud,rings,884736,8,8,0-7,0,,,,,,absent,freud has no primitive-ring finder,2.14.0,Intel Xeon Processor
+SQQ,cages,884736,8,8,0-7,0,,,,,,absent,SQQ counts hydrate cages and does not finish an ice frame of this size,0.5.8,Intel Xeon Processor
+cycless,rings,884736,8,8,0-7,0,,,,,,absent,cycles_iter takes 12 s on 4096 molecules; this size is not in the sitting,0.7,Intel Xeon Processor
+IRA,shape,884736,8,8,0-7,0,,,,,,absent,one IRA match is 0.37 ms per atom; this frame is outside the sitting,2.2.0,Intel Xeon Processor
+OVITO,rings,884736,8,8,0-7,0,,,,,,absent,one FindRings or PTM sample at 884736 molecules does not finish in the sitting,2.14.0,Intel Xeon Processor
+OVITO,ptm,884736,8,8,0-7,0,,,,,,absent,one FindRings or PTM sample at 884736 molecules does not finish in the sitting,2.14.0,Intel Xeon Processor
+OVITO,identify_diamond,884736,8,8,0-7,8,66.0581,54.1061,293.0441,263.3223,4.4362,WIN,hexagonal 884736 equal,2.14.0/3.17.2,Intel Xeon Processor
+PLUMED,q6,884736,8,8,0-7,0,,,,,,absent,one serial Q6 sample at 884736 molecules does not finish in the sitting,2.14.0,Intel Xeon Processor
+rings-statistics-matter,rings,884736,8,8,0-7,8,486.5032,464.7533,2982.5913,2885.1262,6.1307,WIN,hexagons 1769472 equal,2.14.0/0.3.0,Intel Xeon Processor
