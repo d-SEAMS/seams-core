@@ -28,6 +28,10 @@
 #include <string>
 #include <vector>
 
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
+
 int seams_chill_plus_flat(const double *xyz, int n, const double *box, int *labels) {
   return seams_chill_plus_graph(xyz, n, box, 3.5, nullptr, labels);
 }
@@ -323,6 +327,9 @@ typeOneCopy(const molSys::PointCloud<molSys::Point<double>, double> &cloud) {
 
 using Cloud = molSys::PointCloud<molSys::Point<double>, double>;
 
+// Below this many atoms a team costs more than the loop it splits.
+constexpr int kParallelFrame = 2048;
+
 Cloud cloudOf(const double *xyz, int n, const double *box9) {
   Cloud cloud;
   cloud.nop = n;
@@ -343,6 +350,61 @@ Cloud cloudOf(const double *xyz, int n, const double *box9) {
     throw std::invalid_argument("box edges are not positive");
   }
   return cloud;
+}
+
+// Frame buffers of the calling thread. The cloud's points and the CSR keep
+// their storage between calls, so a repeated frame of the same size touches
+// no fresh pages.
+struct FrameScratch {
+  Cloud cloud;
+  std::vector<int> off;
+  std::vector<int> col;
+};
+
+FrameScratch &frameScratch() {
+  thread_local FrameScratch scratch;
+  return scratch;
+}
+
+// The same cloud as cloudOf, written into the thread's buffer. Callers
+// only read it.
+const Cloud &frameCloud(const double *xyz, int n, const double *box9) {
+  Cloud &cloud = frameScratch().cloud;
+  if (!nneigh::setBoxFromLammpsEdges(cloud.box, cloud.boxLow, box9[0], box9[1],
+                                    box9[2], box9[3], box9[4], box9[5], box9[6],
+                                    box9[7], box9[8])) {
+    throw std::invalid_argument("box edges are not positive");
+  }
+  cloud.nop = n;
+  cloud.currentFrame = 1;
+  cloud.idIndexMap.clear();
+  cloud.pts.resize(static_cast<std::size_t>(n));
+  molSys::Point<double> *pts = cloud.pts.data();
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (n >= kParallelFrame && !omp_in_parallel())
+#endif
+  for (int i = 0; i < n; i++) {
+    auto &p = pts[i];
+    p.x = xyz[3 * i];
+    p.y = xyz[3 * i + 1];
+    p.z = xyz[3 * i + 2];
+    p.type = 1;
+    p.atomID = i + 1;
+    p.molID = i + 1;
+    p.c_ij.clear();
+    p.iceType = molSys::atom_state_type::unclassified;
+    p.inSlice = true;
+  }
+  return cloud;
+}
+
+void copyInts(const int *src, int *dst, int count) {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (count >= kParallelFrame && !omp_in_parallel())
+#endif
+  for (int i = 0; i < count; i++) {
+    dst[i] = src[i];
+  }
 }
 
 bool badFrame(const double *xyz, int n, const double *box9, double cutoff) {
@@ -500,9 +562,9 @@ int seams_cutoff_csr(const double *xyz, int n, const double *box9, double cutoff
     return 1;
   }
   try {
-    auto cloud = cloudOf(xyz, n, box9);
-    std::vector<int> off;
-    std::vector<int> col;
+    const Cloud &cloud = frameCloud(xyz, n, box9);
+    std::vector<int> &off = frameScratch().off;
+    std::vector<int> &col = frameScratch().col;
     if (!nneigh::orthoFullCsr(cloud, nullptr, cutoff, off, col, false)) {
       return 1;
     }
@@ -511,18 +573,14 @@ int seams_cutoff_csr(const double *xyz, int n, const double *box9, double cutoff
     if (static_cast<int>(off.size()) != n + 1) {
       return 1;
     }
-    for (int i = 0; i < n + 1; i++) {
-      offsets[i] = off[static_cast<std::size_t>(i)];
-    }
+    copyInts(off.data(), offsets, n + 1);
     if (cols == nullptr) {
       return 0;
     }
     if (cols_cap < count) {
       return 2;
     }
-    for (int i = 0; i < count; i++) {
-      cols[i] = col[static_cast<std::size_t>(i)];
-    }
+    copyInts(col.data(), cols, count);
     return 0;
   } catch (const std::exception &) {
     return 1;
@@ -539,13 +597,17 @@ int seams_ql_cutoff(const double *xyz, int n, const double *box9, double cutoff,
     return 1;
   }
   try {
-    auto cloud = cloudOf(xyz, n, box9);
+    const Cloud &cloud = frameCloud(xyz, n, box9);
     const auto result = chill::steinhardtQlCutoff(cloud, cutoff, order_l, 1, false);
     if (static_cast<int>(result.ql.size()) != n) {
       return 1;
     }
+    const double *src = result.ql.data();
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (n >= kParallelFrame && !omp_in_parallel())
+#endif
     for (int i = 0; i < n; i++) {
-      ql[i] = result.ql[static_cast<std::size_t>(i)];
+      ql[i] = src[i];
     }
     return 0;
   } catch (const std::exception &) {
@@ -597,22 +659,13 @@ int seams_primitive_rings(const double *xyz, int n, const double *box9,
     return 1;
   }
   try {
-    auto cloud = cloudOf(xyz, n, box9);
-    std::vector<int> off;
-    std::vector<int> col;
+    const Cloud &cloud = frameCloud(xyz, n, box9);
+    std::vector<int> &off = frameScratch().off;
+    std::vector<int> &col = frameScratch().col;
     if (!nneigh::orthoFullCsr(cloud, nullptr, cutoff, off, col, false)) {
       return 1;
     }
-    const auto rings = primitive::ringNetwork(off, col, max_depth);
-    for (int i = 0; i < counts_len; i++) {
-      counts[i] = 0;
-    }
-    for (const auto &ring : rings) {
-      const int size = static_cast<int>(ring.size());
-      if (size >= 0 && size < counts_len) {
-        counts[size] += 1;
-      }
-    }
+    primitive::ringSizeCounts(off, col, max_depth, counts, counts_len);
     return 0;
   } catch (const std::exception &) {
     return 1;
