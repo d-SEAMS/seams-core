@@ -798,6 +798,12 @@ if get_option('with_cli')
 
   python3 = find_program('python3', required: true)
   test(
+    'docs_language_examples',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_language_examples.py'],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_c_api_tour',
     python3,
     args: [

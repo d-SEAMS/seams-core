@@ -72,6 +72,11 @@ def main():
     missing = [row for row in lines if row not in page]
     if missing:
         fail("docs/api/c.md is missing:\n" + "\n".join(missing))
+    documented = re.findall(r"(?m)^capi \S.*$", page)
+    extra = [row for row in documented if row not in lines]
+    if extra:
+        fail("docs/api/c.md quotes lines the tour did not print:\n" + "\n".join(extra[:20]))
+    print("c api documented lines {}".format(len(documented)))
     quiet = [name for name in functions if "capi " + name not in run.stdout]
     if quiet:
         fail("tour did not print " + " ".join(quiet))

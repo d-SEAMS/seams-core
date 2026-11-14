@@ -4,12 +4,37 @@
 `SEAMS_LIB_DIR` pointing at the directory that contains `libseams.so`.
 
 ```rust
-let mut sys = seams::System::new()?;
-sys.set_ortho(&xyz, lx, ly, lz)?;
-let (labels, counts) = sys.chill_plus(3.5, seams_sys::SEAMS_GRAPH_CUTOFF, seams_sys::SEAMS_CHILL_PUBLISHED)?;
-let (q4, q6) = sys.q4q6(3.5)?;
-let degree = sys.neighbour_degree(3.5)?;
-let (six, fraction) = sys.six_ring_fraction(3.5)?;
+fn main() -> Result<(), seams::Error> {
+    let a = 2.75 * 4.0 / 3.0_f64.sqrt();
+    let sites = [
+        (0.0, 0.0, 0.0),
+        (0.5, 0.5, 0.0),
+        (0.5, 0.0, 0.5),
+        (0.0, 0.5, 0.5),
+        (0.25, 0.25, 0.25),
+        (0.75, 0.75, 0.25),
+        (0.75, 0.25, 0.75),
+        (0.25, 0.75, 0.75),
+    ];
+    let mut xyz = Vec::new();
+    for (x, y, z) in sites {
+        xyz.extend([x * a, y * a, z * a]);
+    }
+    let edge = 3.0 * a;
+    let mut sys = seams::System::new()?;
+    sys.set_ortho(&xyz, edge, edge, edge)?;
+    let (labels, counts) = sys.chill_plus(3.5, seams_sys::SEAMS_GRAPH_CUTOFF, seams_sys::SEAMS_CHILL_PUBLISHED)?;
+    let (q4, q6) = sys.q4q6(3.5)?;
+    let degree = sys.neighbour_degree(3.5)?;
+    let (six, _fraction) = sys.six_ring_fraction(3.5)?;
+    assert_eq!(labels.len(), 8);
+    assert_eq!(counts.iter().sum::<i32>(), 8);
+    assert_eq!(q4.len(), 8);
+    assert_eq!(q6.len(), 8);
+    assert_eq!(degree.len(), 8);
+    assert!(six >= 0);
+    Ok(())
+}
 ```
 
 `set_frame` takes the nine-number cell, including a non-zero tilt.

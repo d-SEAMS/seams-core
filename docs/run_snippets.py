@@ -901,35 +901,31 @@ def run_r_text(build, env, body):
 
 
 def run_rust_text(build, env, body):
-    which("rustc")
-    if "seams::" in body:
-        which("cargo")
-        local = dict(env)
-        local["SEAMS_LIB_DIR"] = str(build / "src")
-        work = Path(tempfile.mkdtemp(prefix="seams-snippet-rs-"))
-        # The documented calls are the safe wrapper. Compile them as a
-        # cargo example would; here they run inside a tiny test binary
-        # linked the same way as bindings/rust/seams/examples.
-        example = ROOT / "bindings" / "rust" / "seams" / "examples"
-        # Do not write into the crate. rustc cannot see the crate without
-        # cargo, so require the snippet's symbols by running the ice test,
-        # which calls the same methods, when the snippet is the overview.
-        run(
+    which("cargo")
+    if "fn main" not in body or "assert" not in body:
+        raise Fail("Rust example must be a complete main that asserts its result")
+    work = Path(tempfile.mkdtemp(prefix="seams-snippet-rs-"))
+    (work / "src").mkdir()
+    (work / "Cargo.toml").write_text(
+        "\n".join(
             [
-                "cargo",
-                "test",
-                "--offline",
-                "--manifest-path",
-                str(ROOT / "bindings" / "rust" / "Cargo.toml"),
-                "--test",
-                "ice",
-                "--",
-                "--test-threads=1",
-            ],
-            local,
-        )
-        return
-    raise Fail("Rust snippet is not wrapped by the seams crate")
+                "[package]",
+                'name = "seams_doc_example"',
+                'version = "0.0.0"',
+                'edition = "2021"',
+                "",
+                "[dependencies]",
+                'seams = {{ path = "{}" }}'.format(ROOT / "bindings" / "rust" / "seams"),
+                'seams-sys = {{ path = "{}" }}'.format(ROOT / "bindings" / "rust" / "seams-sys"),
+                "",
+            ]
+        ),
+        encoding="utf-8",
+    )
+    (work / "src" / "main.rs").write_text(body if body.endswith("\n") else body + "\n", encoding="utf-8")
+    local = dict(env)
+    local["SEAMS_LIB_DIR"] = str(build / "src")
+    run(["cargo", "run", "--offline", "--quiet", "--manifest-path", str(work / "Cargo.toml")], local)
 
 
 def run_doctest(env, body):

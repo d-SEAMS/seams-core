@@ -1,3 +1,3 @@
-h2h-summary.csv and h2h-clavis-cages.csv are copied from hz/bench/h2h-mdapy-pyscal3-vesin 323bfd3872e726b3fa384a67c6b1bedf627ce6a0.
-h2h-sqq.csv and h2h-sqq-agree.csv are copied from hz/bench/h2h-sqq c7f71310f27c5ce62d11e97fd82f9757fa4e8628.
+h2h-summary.csv and h2h-clavis-cages.csv are copied from HaoZeke/seams-core branch bench/h2h-mdapy-pyscal3-vesin at 323bfd3872e726b3fa384a67c6b1bedf627ce6a0 (https://github.com/HaoZeke/seams-core/blob/323bfd3872e726b3fa384a67c6b1bedf627ce6a0/benchmarks/h2h-summary.csv).
+h2h-sqq.csv and h2h-sqq-agree.csv are copied from HaoZeke/seams-core branch bench/h2h-sqq at c7f71310f27c5ce62d11e97fd82f9757fa4e8628 (https://github.com/HaoZeke/seams-core/blob/c7f71310f27c5ce62d11e97fd82f9757fa4e8628/benchmarks/h2h-sqq.csv).
 docs/render_comparisons.py writes the Comparisons tables from these files.

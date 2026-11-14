@@ -35,6 +35,14 @@ def read_csv(name):
     return rows
 
 
+def indent_block(text):
+    return "\n".join(("   " + line) if line else "" for line in text.rstrip().splitlines())
+
+
+def dropdown(title, body):
+    return ".. dropdown:: {}\n\n{}\n".format(title, indent_block(body))
+
+
 def emit_table(headers, records):
     buffer = io.StringIO()
     writer = csv.writer(buffer, lineterminator="\n")
@@ -109,6 +117,7 @@ def summary_tables(rows):
                 row["agreement"],
             ]
         )
+    short = [record[:-1] for record in records]
     body = [
         "Head-to-head summary",
         "--------------------",
@@ -116,9 +125,11 @@ def summary_tables(rows):
         SOURCE,
         "",
         "Each row is one record of ``h2h-summary.csv``. "
-        "The version, thread count, repeat count ``n`` and core count are the CSV columns.",
+        "The version, thread count, repeat count ``n`` and core count are the CSV columns. "
+        "The agreement text for every row is in the block below.",
         "",
-        emit_table(headers, records),
+        emit_table(headers[:-1], short),
+        dropdown("Full head-to-head records, including the agreement text", emit_table(headers, records)),
     ]
     return "\n".join(body)
 
@@ -134,6 +145,11 @@ def clavis_tables(rows):
     census_rows = []
     notes = []
     for row in rows:
+        parsed_row = census(row["agreement"])
+        summary = "; ".join(
+            "{} both {} d-SEAMS-only {} TRACE-only {}".format(sig, both, only_us, only_trace)
+            for sig, both, only_us, only_trace in parsed_row
+        )
         time_rows.append(
             [
                 row["version"],
@@ -144,6 +160,7 @@ def clavis_tables(rows):
                 row["dseams_median_ms"],
                 row["other_median_ms"],
                 row["ratio"],
+                summary,
             ]
         )
         for signature, both, only_us, only_trace in census(row["agreement"]):
@@ -199,8 +216,8 @@ def clavis_tables(rows):
         "",
         SOURCE,
         "",
-        "Times are the median milliseconds in ``h2h-clavis-cages.csv``. "
-        "The cage counts are parsed from that file's agreement column.",
+        "One row per cell. The agreement column is the cage census parsed from "
+        "``h2h-clavis-cages.csv``. The signature-by-signature rows are in the block below.",
         "",
     ]
     body.extend(notes)
@@ -216,24 +233,28 @@ def clavis_tables(rows):
                 "d-SEAMS ms",
                 "TRACE ms",
                 "ratio",
+                "agreement",
             ],
             time_rows,
         )
     )
     body.append(
-        emit_table(
-            [
-                "version",
-                "molecules",
-                "threads",
-                "cores",
-                "n",
-                "signature",
-                "both",
-                "d-SEAMS only",
-                "TRACE only",
-            ],
-            census_rows,
+        dropdown(
+            "Full cage-by-cage census",
+            emit_table(
+                [
+                    "version",
+                    "molecules",
+                    "threads",
+                    "cores",
+                    "n",
+                    "signature",
+                    "both",
+                    "d-SEAMS only",
+                    "TRACE only",
+                ],
+                census_rows,
+            ),
         )
     )
     return "\n".join(body)
@@ -344,8 +365,8 @@ def sqq_tables(timing, agree):
             whole_8["cores"],
         ),
         "",
-        "Agreement. The version is the build named on every timing row. "
-        "This census is not itself a timed run.",
+        "Agreement on the TIP4P/2005 frame. The version is the build named on every timing row. "
+        "This census is not itself a timed run. The other frames are in the block below.",
         "",
         emit_table(
             [
@@ -358,9 +379,22 @@ def sqq_tables(timing, agree):
                 "both",
                 "agreement",
             ],
-            agree_rows,
+            [row for row in agree_rows if row[1] == TIP4P],
         ),
-        "Timing. Every row names the version, the thread count, the repeat count and the core count.",
+        dropdown("Full SQQ agreement", emit_table(
+            [
+                "version",
+                "frame",
+                "molecules",
+                "quantity",
+                "d-SEAMS",
+                "SQQ",
+                "both",
+                "agreement",
+            ],
+            agree_rows,
+        )),
+        "Timing on the TIP4P/2005 frame. Every row names the version, the thread count, the repeat count and the core count.",
         "",
         emit_table(
             [
@@ -375,8 +409,23 @@ def sqq_tables(timing, agree):
                 "SQQ ms",
                 "SQQ/d-SEAMS",
             ],
-            time_rows,
+            [row for row in time_rows if row[1] == TIP4P],
         ),
+        dropdown("Full SQQ timings", emit_table(
+            [
+                "version",
+                "frame",
+                "molecules",
+                "operation",
+                "threads",
+                "cores",
+                "n",
+                "d-SEAMS ms",
+                "SQQ ms",
+                "SQQ/d-SEAMS",
+            ],
+            time_rows,
+        )),
     ]
     return "\n".join(body)
 
@@ -399,6 +448,8 @@ def main(argv):
     }
     for name, text in pages.items():
         reject_hosts(text)
+        if "hz/" in text:
+            raise SystemExit("{} still names the local remote".format(name))
         for needle in ("323bfd3872e726b3fa384a67c6b1bedf627ce6a0", "c7f71310f27c5ce62d11e97fd82f9757fa4e8628"):
             require(text, needle, name)
         (OUT / name).write_text(text, encoding="utf-8")

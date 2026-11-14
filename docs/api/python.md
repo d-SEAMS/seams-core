@@ -12,6 +12,12 @@ sizes, symmetry, hist, fraction = dseams.rings(positions, box)
 per_atom, (n_hex, n_cubic, n_water, n_both) = dseams.cages(positions, box)
 n_cages, n_atoms = dseams.signature_cages(positions, box, spec="512")
 shell = dseams.symmetry(positions, box)
+assert len(labels) == 8 and int(counts.sum()) == 8
+assert len(q4) == 8 and len(q6) == 8
+assert len(offsets) == 9
+assert n_hex + n_cubic + n_water + n_both == 8
+assert (n_cages, n_atoms) == (0, 0)
+assert len(shell) == 8
 ```
 
 `dseams.cages` is the six-ring ice score from `frames.cages`: a per-atom code
