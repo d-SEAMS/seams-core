@@ -35,6 +35,17 @@ int main(int argc, char **argv) {
   if (seams_frame_rings(frame, 3.5, 0, "cutoff", 6, rings, 7) != 0) {
     return 1;
   }
+  int n_cages = 0;
+  int n_sig_atoms = 0;
+  int n_vertices = 0;
+  if (seams_frame_signature(frame, 3.5, 0, "cutoff", "512", &n_cages, &n_sig_atoms) != 0) {
+    return 1;
+  }
+  if (n_cages > 0 &&
+      seams_frame_signature_vertices(frame, 3.5, 0, "cutoff", "512", 0, nullptr, 0,
+                                     &n_vertices) != 0) {
+    return 1;
+  }
   if (counts[4] != 46 || rings[5] != 48 || rings[6] != 54 || mean <= 0.5) {
     return 1;
   }

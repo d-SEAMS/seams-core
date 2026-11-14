@@ -212,6 +212,7 @@ def cxx_rows():
     add("seams_frame_set_positions", "Replace coordinates on an array-built frame.", "frame; xyz; n; box9", "coordinates and box lengths in angstrom")
     add("seams_frame_signature", "Count closed cages whose ring census matches a spec.", "frame; cutoff; type; graph; spec; n_cages; n_atoms", cut + "; n_cages and n_atoms are dimensionless")
     add("seams_frame_signature_edge", "Same cage census with an explicit face-edge window.", "frame; cutoff; type; graph; spec; edge; n_cages; n_atoms", cut + "; edge lengths in angstrom")
+    add("seams_frame_signature_vertices", "Atom indices of one matched cage, sorted.", "frame; cutoff; type; graph; spec; cage_index; vertices; cap; n_vertices", cut + "; cage_index, cap, and n_vertices are dimensionless")
     add("seams_frame_steinhardt", "Local Steinhardt q_l on the cutoff shell.", "frame; cutoff; type; order_l; ql; qlbar", cut + "; ql is dimensionless")
     add("seams_frame_steinhardt_graph", "Local Steinhardt q_l on a named graph.", "frame; cutoff; type; order_l; graph; ql; qlbar", cut + "; ql is dimensionless")
     add("seams_frame_symmetry", "Per-atom shell label for Ih, Ic, or stacking disorder.", "frame; shell_rmsd; labels", "shell_rmsd is a dimensionless residual; labels are dimensionless codes")

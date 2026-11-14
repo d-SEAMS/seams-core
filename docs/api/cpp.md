@@ -639,6 +639,22 @@ Units: cutoff in angstrom; coordinates in angstrom; edge lengths in angstrom
 
 Example: `docs/examples/minimal_cpp.cpp`
 
+### seams_frame_signature_vertices
+
+Purpose: Atom indices of one matched cage, sorted.
+
+Parameters: frame; cutoff; type; graph; spec; cage_index; vertices; cap; n_vertices
+
+Returns: Zero on success. A non-zero value is the seams_status code.
+
+Ownership: The caller owns every buffer it passed. The frame stays with its owner. vertices may be null when the call only asks for the length.
+
+Errors: A non-zero code. seams_last_error() holds the detail.
+
+Units: cutoff in angstrom; cage_index, cap, and n_vertices are dimensionless
+
+Example: `docs/examples/minimal_cpp.cpp`
+
 ### seams_frame_steinhardt
 
 Purpose: Local Steinhardt q_l on the cutoff shell.
