@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """One-thread and eight-thread ring search against OVITO FindRings.
 
-The cutoff graph is built before the timer on both sides. d-SEAMS times
-primitive::ringNetwork. OVITO times FindRingsModifier on bonds from
-CreateBondsModifier(cutoff). A fresh OVITO pipeline is used for every
-sample so the modifier does not return a cached frame.
+One driver run times both placements. Prebuilt builds the cutoff graph
+before the timer and then times the ring search. Inside starts the timer
+before the neighbour list: d-SEAMS times neighListO, the index, and
+ringNetwork as one call, and OVITO times CreateBondsModifier plus
+FindRingsModifier on a fresh pipeline.
 
 Eight timed calls after two warmups, interleaved, in one driver run.
 The median of an even sample is the mean of the two central values.
@@ -94,9 +95,10 @@ class DseamsRepl:
         hist_at = parts.index("hist")
         self.hist = parse_hist(" ".join(parts[hist_at + 1:]))
 
-    def sample(self) -> float:
+    def sample(self, mode: str = "prebuilt") -> float:
         assert self.proc.stdin is not None and self.proc.stdout is not None
-        self.proc.stdin.write("go\n")
+        word = "in\n" if mode == "inside" else "go\n"
+        self.proc.stdin.write(word)
         self.proc.stdin.flush()
         line = self.proc.stdout.readline().strip()
         if not line.startswith("ms "):
@@ -138,9 +140,10 @@ class OvitoRepl:
         self.hist = {int(k): int(v) for k, v in payload["hist"].items()}
         self.version = str(payload["version"])
 
-    def sample(self) -> float:
+    def sample(self, mode: str = "prebuilt") -> float:
         assert self.proc.stdin is not None and self.proc.stdout is not None
-        self.proc.stdin.write("go\n")
+        word = "in\n" if mode == "inside" else "go\n"
+        self.proc.stdin.write(word)
         self.proc.stdin.flush()
         line = self.proc.stdout.readline().strip()
         if not line.startswith("ms "):
@@ -187,14 +190,23 @@ def ovito_worker_main(traj: str) -> None:
     for line in sys.stdin:
         if line.startswith("q"):
             break
-        if not line.startswith("g"):
-            continue
-        ring_pipe = Pipeline(source=StaticSource(data=bonded))
-        ring_pipe.modifiers.append(FindRingsModifier(maximum_ring_size=MAX_RING))
         import time
-        t0 = time.perf_counter()
-        ring_pipe.compute()
-        t1 = time.perf_counter()
+        inside = line.startswith("i")
+        if not line.startswith("g") and not inside:
+            continue
+        if inside:
+            pipe = Pipeline(source=StaticSource(data=data))
+            pipe.modifiers.append(CreateBondsModifier(cutoff=CUTOFF))
+            pipe.modifiers.append(FindRingsModifier(maximum_ring_size=MAX_RING))
+            t0 = time.perf_counter()
+            pipe.compute()
+            t1 = time.perf_counter()
+        else:
+            ring_pipe = Pipeline(source=StaticSource(data=bonded))
+            ring_pipe.modifiers.append(FindRingsModifier(maximum_ring_size=MAX_RING))
+            t0 = time.perf_counter()
+            ring_pipe.compute()
+            t1 = time.perf_counter()
         sys.stdout.write(f"ms {(t1 - t0) * 1000.0:.6f}\n")
         sys.stdout.flush()
 
@@ -226,20 +238,31 @@ def run_dataset(bench: str, python: str, name: str, traj: str, molecules: int,
             raise SystemExit(
                 f"{name} census differs d-SEAMS {dseams.hist} OVITO {ovito.hist}"
             )
-        samples = {"dseams": [], "ovito": []}
+        modes = ("prebuilt", "inside")
+        samples = {mode: {"dseams": [], "ovito": []} for mode in modes}
         for i in range(WARMUP + REPEATS):
             order = ("dseams", "ovito") if i % 2 == 0 else ("ovito", "dseams")
             for tool in order:
-                ms = dseams.sample() if tool == "dseams" else ovito.sample()
-                if i >= WARMUP:
-                    samples[tool].append(ms)
+                for mode in modes:
+                    worker = dseams if tool == "dseams" else ovito
+                    ms = worker.sample(mode)
+                    if i >= WARMUP:
+                        samples[mode][tool].append(ms)
+        placed = {}
+        for mode in modes:
+            placed[mode] = {
+                "dseams_ms": samples[mode]["dseams"],
+                "ovito_ms": samples[mode]["ovito"],
+                "dseams_median_ms": median(samples[mode]["dseams"]),
+                "ovito_median_ms": median(samples[mode]["ovito"]),
+                "calls": len(samples[mode]["dseams"]),
+            }
         return {
             "molecules": molecules,
+            "cores": "0" if threads == 1 else "0-7",
             "census": {str(k): v for k, v in sorted(dseams.hist.items())},
-            "dseams_ms": samples["dseams"],
-            "ovito_ms": samples["ovito"],
-            "dseams_median_ms": median(samples["dseams"]),
-            "ovito_median_ms": median(samples["ovito"]),
+            "prebuilt": placed["prebuilt"],
+            "inside": placed["inside"],
             "ovito_version": ovito.version,
         }
     finally:
@@ -270,8 +293,10 @@ def main() -> None:
         "warmup": WARMUP,
         "median": "mean of the two central samples",
         "timing": (
-            "cutoff graph built before the timer; "
-            "d-SEAMS ringNetwork; OVITO FindRings on a fresh pipeline"
+            "prebuilt: cutoff graph before the timer; "
+            "inside: neighbour list and ring search in one timer; "
+            "d-SEAMS neighListO plus ringNetwork; "
+            "OVITO CreateBondsModifier plus FindRings"
         ),
         "threads": {},
     }
@@ -284,17 +309,40 @@ def main() -> None:
                 arm[name] = run_dataset(
                     args.bench, args.python, name, traj, molecules, threads)
                 row = arm[name]
-                print(
-                    f"[rings] {name} t{threads} "
-                    f"dseams {row['dseams_median_ms']:.4f} "
-                    f"ovito {row['ovito_median_ms']:.4f} "
-                    f"census {row['census']}",
-                    flush=True,
-                )
+                for mode in ("prebuilt", "inside"):
+                    arm_row = row[mode]
+                    print(
+                        f"[rings] {name} t{threads} {mode} "
+                        f"dseams {arm_row['dseams_median_ms']:.4f} "
+                        f"ovito {arm_row['ovito_median_ms']:.4f} "
+                        f"census {row['census']}",
+                        flush=True,
+                    )
             record["threads"][str(threads)] = arm
     text = json.dumps(record, indent=2) + "\n"
     Path(args.json_path).write_text(text, encoding="utf-8")
     print(f"Wrote {args.json_path}")
+    csv_path = Path(args.json_path).with_suffix(".csv")
+    lines = [
+        "molecules,threads,cores,nproc,variant,code,n,median_ms,cpu_model,note"
+    ]
+    for threads, arm in record["threads"].items():
+        for name, row in arm.items():
+            for mode, variant in (("prebuilt", "rings"), ("inside", "bonds_and_rings")):
+                placed = row[mode]
+                for code, key in (("d-SEAMS", "dseams_median_ms"), ("OVITO", "ovito_median_ms")):
+                    note = (
+                        "neighbour list inside the timer"
+                        if mode == "inside"
+                        else "graph built before the timer"
+                    )
+                    lines.append(
+                        f"{row['molecules']},{threads},{row['cores']},"
+                        f"{record['nproc']},{variant},{code},{placed['calls']},"
+                        f"{placed[key]:.4f},{record['cpu_model']},{note}"
+                    )
+    csv_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    print(f"Wrote {csv_path}")
 
 
 if __name__ == "__main__":
