@@ -199,6 +199,21 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
     depends: _parity_depends,
     timeout: 600,
   )
+  _tip4p_env = environment()
+  _tip4p_env.set('SEAMS_LANG_LIB', seams_lang.full_path())
+  _tip4p_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+  if chemfiles_libdir != ''
+    _tip4p_env.prepend('LD_LIBRARY_PATH', chemfiles_libdir)
+  endif
+  test(
+    'tip4p_overhead',
+    find_program('python3', required: true),
+    args: [meson.project_source_root() / 'tests' / 'test_tip4p_overhead.py'],
+    workdir: meson.project_source_root(),
+    env: _tip4p_env,
+    depends: [seams_lang],
+    timeout: 180,
+  )
   test(
     'symmetry_ctypes',
     find_program('python3', required: true),

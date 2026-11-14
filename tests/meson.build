@@ -679,11 +679,6 @@ test('h2h_harness', find_program('python3'),
   workdir: meson.project_source_root(),
   env: _test_env,
   timeout: 120)
-test('tip4p_overhead', find_program('python3'),
-  args: [files('test_tip4p_overhead.py')],
-  workdir: meson.project_source_root(),
-  env: _test_env,
-  timeout: 180)
 test('ion_shell_rings', find_program('python3'),
   args: [files('test_ion_shell_rings.py'), meson.project_build_root() / 'seams'],
   workdir: meson.project_source_root(),
