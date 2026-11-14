@@ -1,6 +1,10 @@
 #+TITLE: Nucleation
 #+OPTIONS: toc:nil num:nil
 
+#+begin_export rst
+.. include:: ../videos/embeds/nucleation.rst
+#+end_export
+
 The 148-frame mW trajectory is figshare
 [[https://doi.org/10.6084/m9.figshare.11448702.v1][10.6084/m9.figshare.11448702.v1]].
 ~input/traj/nucleation_three.lammpstrj~ is its first three

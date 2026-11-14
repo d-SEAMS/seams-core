@@ -66,3 +66,38 @@ meson test -C bbdir seams_lang_fixtures
 
 The Python checks live in PydSEAMSlib.
 =docs/tutorials= reruns one cubic-ice count against an installed ~pydseamslib~.
+
+* Recordings
+
+The language recordings use the same embed.txt as the videos page.
+A page without a claim says video coming soon.
+
+** C++
+
+#+begin_export rst
+.. include:: ../videos/embeds/cpp.rst
+#+end_export
+
+** Fortran
+
+#+begin_export rst
+.. include:: ../videos/embeds/fortran.rst
+#+end_export
+
+** Python
+
+#+begin_export rst
+.. include:: ../videos/embeds/python.rst
+#+end_export
+
+** Rust
+
+#+begin_export rst
+.. include:: ../videos/embeds/rust.rst
+#+end_export
+
+** Julia
+
+#+begin_export rst
+.. include:: ../videos/embeds/julia.rst
+#+end_export

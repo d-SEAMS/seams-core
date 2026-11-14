@@ -32,6 +32,44 @@ BLURB = {
     "plumed": "PLUMED driver.",
     "lua": "Lua and Fennel.",
     "migrate": "Migrate from 1.x.",
+    "openmm": "OpenMM on ice Ih.",
+    "rings": "Primitive rings on the mW cell.",
+    "cages": "sI, sII, and sH cages.",
+}
+
+# Topic page, relative to the repo, and the recording that belongs on it.
+# lua-fennel is the lua slug. chill-interface is the interface slug.
+# c, r, and migrate have no recording yet.
+TOPICS = {
+    "cli": (
+        "docs/orgmode/reference/cli.org",
+        "docs/orgmode/howto/classify-cli.org",
+    ),
+    "cpp": ("docs/orgmode/howto/bindings.org",),
+    "python": (
+        "docs/orgmode/howto/bindings.org",
+        "docs/orgmode/reference/python-frame.org",
+    ),
+    "fortran": ("docs/orgmode/howto/bindings.org",),
+    "rust": ("docs/orgmode/howto/bindings.org",),
+    "julia": ("docs/orgmode/howto/bindings.org",),
+    "lua": ("docs/orgmode/howto/lua.org",),
+    "lammps": ("docs/orgmode/howto/engine-lammps.org",),
+    "gromacs": ("docs/orgmode/howto/engine-gromacs.org",),
+    "openmm": ("docs/orgmode/howto/engine-openmm.org",),
+    "plumed": ("docs/orgmode/howto/engine-plumed.org",),
+    "insitu": (
+        "docs/orgmode/howto/engine-insitu.org",
+        "docs/orgmode/tutorials/insitu-run.org",
+    ),
+    "interface": (
+        "docs/orgmode/tutorials/interface.org",
+        "docs/orgmode/howto/chill-plus.org",
+    ),
+    "rings": ("docs/orgmode/tutorials/rings.org",),
+    "cages": ("docs/orgmode/howto/cages-trace.org",),
+    "brine": ("docs/orgmode/tutorials/brine.org",),
+    "nucleation": ("docs/orgmode/tutorials/nucleation.org",),
 }
 
 
@@ -88,6 +126,23 @@ def block(slug, claim):
             + transcript
         )
     return "   {}\n   <p>{}</p>".format(body, blurb)
+
+
+def embed_rst(slug, claim):
+    """One player, the same claim rule as the gallery."""
+    return ".. raw:: html\n\n{}\n".format(block(slug, claim))
+
+
+def include_line(slug):
+    return ".. include:: ../videos/embeds/{}.rst".format(slug)
+
+
+def write_topic_embeds(videos, dest):
+    dest.mkdir(parents=True, exist_ok=True)
+    for slug in TOPICS:
+        claim = read_claim(videos / slug)
+        (dest / (slug + ".rst")).write_text(embed_rst(slug, claim))
+    return dest
 
 
 def players_rst(videos):

@@ -1,6 +1,10 @@
 #+TITLE: Python Frame
 #+OPTIONS: toc:nil num:nil
 
+#+begin_export rst
+.. include:: ../videos/embeds/python.rst
+#+end_export
+
 ~pydseams.read~ returns a ~Frame~. Each call below is the example the
 suite runs, and the line under it is the output. The frame is
 ~input/traj/ice1h.lammpstrj~, 128 oxygens.

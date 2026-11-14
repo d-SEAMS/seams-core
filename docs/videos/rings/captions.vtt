@@ -1,0 +1,8 @@
+WEBVTT
+
+NOTE
+Draft cues converted from captions.srt. Final wording and timing are recorded later.
+
+1
+00:00:00.300 --> 00:00:10.520 line:95% align:center size:80%
+The paper ring frame is input/traj/mW_cubic.lammpstrj. It holds 11 frames of 4096 molecules. Frame 1 has 8192 six-rings. docs_paper_rings_full asserts those lines.

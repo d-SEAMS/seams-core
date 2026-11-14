@@ -1,6 +1,10 @@
 #+TITLE: LAMMPS
 #+OPTIONS: toc:nil num:nil
 
+#+begin_export rst
+.. include:: ../videos/embeds/lammps.rst
+#+end_export
+
 The build below used conda-forge LAMMPS 2022.06.23. The serial binary
 reports 23 Jun 2022, Update 1. The compiler and Eigen stay on the path.
 The same prefix holds GROMACS 2026.3, OpenMM 8.6.0, and PLUMED 2.10.1.

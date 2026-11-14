@@ -1,6 +1,10 @@
 #+TITLE: Lua and Fennel
 #+OPTIONS: toc:nil num:nil
 
+#+begin_export rst
+.. include:: ../videos/embeds/lua.rst
+#+end_export
+
 ~require("dseams")~ is the Lua module over =include/seams.h=.
 ~require("yoda")~ is that same table. Fennel uses it with
 ~(require :dseams)~. Lua 5.4 and LuaJIT both load the module.

@@ -1,6 +1,10 @@
 #+TITLE: CHILL+
 #+OPTIONS: toc:nil num:nil
 
+#+begin_export rst
+.. include:: ../videos/embeds/interface.rst
+#+end_export
+
 Label every oxygen with the published CHILL+ star, or with the OVITO
 rule. The two scores disagree with cage membership for the reason in
 [[file:../explanation/chill-plus-vs-cages.org][CHILL+ versus cages]].

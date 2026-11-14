@@ -1,0 +1,5 @@
+## scene-01.tape
+rings full input molecules 4096 frames 1 file-frames 11 file input/traj/mW_cubic.lammpstrj
+rings full paper molecules 4096 frames 1 rings 8192
+rings full nop 4096 rings 8192
+rings full histogram 6 8192

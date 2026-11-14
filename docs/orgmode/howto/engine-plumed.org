@@ -1,6 +1,10 @@
 #+TITLE: PLUMED
 #+OPTIONS: toc:nil num:nil
 
+#+begin_export rst
+.. include:: ../videos/embeds/plumed.rst
+#+end_export
+
 The thread count comes from ~PLUMED_NUM_THREADS~. Set that variable
 before PLUMED starts. ~OMP_NUM_THREADS~ does not change the PLUMED team.
 In PLUMED 2.10 ~getNumThreads~ reads only ~PLUMED_NUM_THREADS~.

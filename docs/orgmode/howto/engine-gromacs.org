@@ -1,6 +1,10 @@
 #+TITLE: GROMACS
 #+OPTIONS: toc:nil num:nil
 
+#+begin_export rst
+.. include:: ../videos/embeds/gromacs.rst
+#+end_export
+
 The build below used conda-forge GROMACS 2026.3, with the compiler and
 Eigen already on the path. The same prefix also holds LAMMPS 2022.06.23,
 OpenMM 8.6.0, and PLUMED 2.10.1.

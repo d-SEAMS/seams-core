@@ -1,6 +1,10 @@
 #+TITLE: Primitive rings
 #+OPTIONS: toc:nil num:nil
 
+#+begin_export rst
+.. include:: ../videos/embeds/rings.rst
+#+end_export
+
 A primitive ring is a cycle that survives the Franzblau shortest-path test.
 For every pair of vertices on the cycle, a shortest path between them lies on the cycle.
 Distances are read on the whole graph, and only then are levels below the source cleared.

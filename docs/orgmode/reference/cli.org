@@ -1,6 +1,10 @@
 #+TITLE: seams CLI
 #+OPTIONS: toc:nil num:nil
 
+#+begin_export rst
+.. include:: ../videos/embeds/cli.rst
+#+end_export
+
 The engine command is ~seams~. The parser is Argum (the same parser as
 eonclient). Help, errors, ice-type counts, and ~--features~ are
 colorized through Argum's ~environmentColorStatus~.

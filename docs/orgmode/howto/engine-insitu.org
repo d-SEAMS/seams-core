@@ -1,6 +1,10 @@
 #+TITLE: In-situ CHILL+
 #+OPTIONS: toc:nil num:nil
 
+#+begin_export rst
+.. include:: ../videos/embeds/insitu.rst
+#+end_export
+
 ~InSitu~ in ~adapters/python/dseams_insitu/engine.py~ is the in-run
 classifier. ~analyse~ and ~observe~ take positions and a box.
 ~analyse_file~ reads a LAMMPS dump. Both paths call

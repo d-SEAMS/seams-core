@@ -143,6 +143,7 @@ def _write_video_players():
     videos = pathlib.Path(_docs) / "videos"
     dest = pathlib.Path(_source) / "videos" / "players.rst"
     module.write_players(videos, dest)
+    module.write_topic_embeds(videos, pathlib.Path(_source) / "videos" / "embeds")
     static = os.path.join(_source, "_static", "captions")
     os.makedirs(static, exist_ok=True)
     for name in os.listdir(videos):

@@ -1,6 +1,10 @@
 #+TITLE: Run in situ
 #+OPTIONS: toc:nil num:nil
 
+#+begin_export rst
+.. include:: ../videos/embeds/insitu.rst
+#+end_export
+
 The cubic cell is ~engines/lammps/ice.data~, 64 atoms. LAMMPS
 reads it from ~engines/lammps/in.dseams~ and calls ~seams_chill_plus~
 from ~fix external~ on every second step. OpenMM builds an

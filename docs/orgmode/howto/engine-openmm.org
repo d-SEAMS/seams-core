@@ -1,6 +1,10 @@
 #+TITLE: OpenMM
 #+OPTIONS: toc:nil num:nil
 
+#+begin_export rst
+.. include:: ../videos/embeds/openmm.rst
+#+end_export
+
 The build below used conda-forge OpenMM 8.6.0. ~openmm.Platform.getOpenMMVersion~
 reports 8.6. The compiler and Eigen stay on the path. The same prefix
 holds GROMACS 2026.3, LAMMPS 2022.06.23, and PLUMED 2.10.1. Configure

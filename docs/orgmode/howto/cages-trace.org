@@ -1,6 +1,10 @@
 #+TITLE: Cages and TRACE
 #+OPTIONS: toc:nil num:nil
 
+#+begin_export rst
+.. include:: ../videos/embeds/cages.rst
+#+end_export
+
 Ask which molecules sit in a complete ice cage, or which polyhedra
 match a ring-size signature. TRACE, as run by ClavisCage, answers a
 different cage question. This page is the pair of commands and the

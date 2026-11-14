@@ -1,6 +1,10 @@
 #+TITLE: Brine and NaCl
 #+OPTIONS: toc:nil num:nil
 
+#+begin_export rst
+.. include:: ../videos/embeds/brine.rst
+#+end_export
+
 ~input/traj/nacl_front.lammpstrj~ is the 864-molecule interface with
 nine ions added. Type 1 is water. Types 3 and 4 are chloride and
 sodium. One chloride sits in a slab that CHILL+ calls fully

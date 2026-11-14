@@ -1,6 +1,10 @@
 #+TITLE: Classify a dump
 #+OPTIONS: toc:nil num:nil
 
+#+begin_export rst
+.. include:: ../videos/embeds/cli.rst
+#+end_export
+
 You have a LAMMPS water dump and want counts. Flags and the full
 surface live on [[file:../reference/cli.org][seams CLI]]. Measured
 numbers for the in-tree mixed frame live in

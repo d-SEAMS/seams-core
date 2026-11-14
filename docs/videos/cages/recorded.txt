@@ -1,0 +1,10 @@
+## scene-01.tape
+cages full input sI molecules 368 frames 1 file sI-full.lammpstrj
+cages full sI 16 48
+cages full input sII molecules 544 frames 1 file sII-full.lammpstrj
+cages full sII 64 32
+cages full input sH molecules 272 frames 1 file sH-full.lammpstrj
+cages full sH 24 16 8
+cages full paper unit sI molecules 46 cages 2 6
+cages full paper unit sII molecules 136 cages 16 8
+cages full paper unit sH molecules 68 cages 6 4 2

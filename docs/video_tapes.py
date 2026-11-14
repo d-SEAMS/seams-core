@@ -217,8 +217,8 @@ def main():
     root, env = prepare(*args)
     check_embeds(root)
     folders = sorted(path for path in (root / "docs" / "videos").iterdir() if (path / "script.md").is_file())
-    if len(folders) != 18:
-        fail("expected 18 videos, found {}".format(len(folders)))
+    if len(folders) != 21:
+        fail("expected 21 videos, found {}".format(len(folders)))
     for folder in folders:
         check_folder(folder, env, root, record)
 
