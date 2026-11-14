@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """The paper brine CLI writes a png at the requested millimetre width."""
 
+import io
 import sys
 import tempfile
+from contextlib import redirect_stdout
 from pathlib import Path
 
 from PIL import Image
@@ -21,15 +23,20 @@ CACHE = (
 def main():
     if not CACHE.is_file():
         raise SystemExit(f"brine frame is missing: {CACHE}")
-    width_mm = 40.0
-    expected = render_brine.panel_width_px(width_mm)
     with tempfile.TemporaryDirectory() as tmp:
-        out = Path(tmp) / "brine.png"
-        render_brine.main(["--xyz", str(CACHE), "--out", str(out), "--width-mm", str(width_mm)])
-        image = Image.open(out)
-        if image.width < expected or image.height < expected:
-            raise SystemExit(f"{image.size} is smaller than the {expected} px panel")
-    print(f"brine cli wrote a figure wider than the {expected} px panel")
+        for width_mm in (85.0, 170.0):
+            out = Path(tmp) / f"brine-{int(width_mm)}.png"
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                render_brine.main(["--xyz", str(CACHE), "--out", str(out), "--width-mm", str(width_mm)])
+            image = Image.open(out)
+            if image.width < render_brine.panel_width_px(width_mm) or image.height < 32:
+                raise SystemExit(f"{width_mm:g} mm figure is only {image.size}")
+            line = buf.getvalue().strip().splitlines()[-1]
+            points = float(line.split("legend", 1)[1].split()[0])
+            if points < 7.0:
+                raise SystemExit(f"{width_mm:g} mm legend is {points:.2f} pt")
+            print(f"{width_mm:g} mm {image.size} legend {points:.2f} pt")
     return 0
 
 

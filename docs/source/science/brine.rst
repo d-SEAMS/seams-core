@@ -51,7 +51,8 @@ Paper Fig 18 and SI Figs 25-26 call the same renderer:
    python docs/examples/render_brine.py --xyz T230_m20_r0_tend.xyz --out brine.png --width-mm 85
 
 ``--width-mm`` is the atom panel at 300 ppi. ``--out`` is the png, which
-also includes the depth axis and the legend.
+also includes the depth axis and the legend. The legend is at least 7 pt
+when that png is printed at the width passed to ``--width-mm``.
 
 What this tells you
 -------------------
