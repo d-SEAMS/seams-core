@@ -194,6 +194,26 @@ def functions_of(text):
     return found
 
 
+def declaration(ret, name, params):
+    """One extern declaration; ``ret`` is None for a C function returning void.
+
+    Clippy of the 1.85 MSRV toolchain rejects ``-> ()`` (clippy::unused_unit).
+
+    >>> declaration(None, "seams_system_destroy", [("sys", "*mut seams_system")])
+    ['    pub fn seams_system_destroy(', '        sys: *mut seams_system,', '    );']
+    >>> declaration("c_int", "seams_abi", [])
+    ['    pub fn seams_abi() -> c_int;']
+    """
+    arrow = "" if ret is None else " -> {}".format(ret)
+    if not params:
+        return ["    pub fn {}(){};".format(name, arrow)]
+    lines = ["    pub fn {}(".format(name)]
+    for pname, ptype in params:
+        lines.append("        {}: {},".format(rust_name(pname), ptype))
+    lines.append("    ){};".format(arrow))
+    return lines
+
+
 def render(header):
     text = body_of(strip_comments(header))
     lines = [
@@ -215,15 +235,7 @@ def render(header):
     lines.append("")
     lines.append('extern "C" {')
     for ret, name, params in functions_of(text):
-        # Clippy of the 1.85 MSRV toolchain rejects `-> ()` (clippy::unused_unit).
-        arrow = "" if ret == "()" else " -> {}".format(ret)
-        if params:
-            lines.append("    pub fn {}(".format(name))
-            for pname, ptype in params:
-                lines.append("        {}: {},".format(rust_name(pname), ptype))
-            lines.append("    ){};".format(arrow))
-        else:
-            lines.append("    pub fn {}(){};".format(name, arrow))
+        lines.extend(declaration(ret, name, params))
     lines.append("}")
     lines.append("")
     return "\n".join(lines)

@@ -918,6 +918,12 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 60)
   test(
+    'rust_sys_declarations',
+    python3,
+    args: ['-m', 'doctest', meson.project_source_root() / 'bindings' / 'rust' / 'seams-sys' / 'gen_sys.py'],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_api_coverage',
     python3,
     args: [meson.project_source_root() / 'docs' / 'check_api_coverage.py'],

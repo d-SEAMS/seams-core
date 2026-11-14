@@ -94,7 +94,7 @@ extern "C" {
     pub fn seams_set_num_threads(n: c_int) -> c_int;
     pub fn seams_get_num_threads() -> c_int;
     pub fn seams_system_create() -> *mut seams_system;
-    pub fn seams_system_destroy(sys: *mut seams_system) -> None;
+    pub fn seams_system_destroy(sys: *mut seams_system);
     pub fn seams_system_set_atoms(
         sys: *mut seams_system,
         xyz: *const f64,
@@ -140,7 +140,7 @@ extern "C" {
         graph: c_int,
         out: *mut *mut seams_neighbours,
     ) -> c_int;
-    pub fn seams_neighbours_destroy(nb: *mut seams_neighbours) -> None;
+    pub fn seams_neighbours_destroy(nb: *mut seams_neighbours);
     pub fn seams_neighbours_count(nb: *const seams_neighbours) -> c_int;
     pub fn seams_neighbours_csr(
         nb: *const seams_neighbours,
@@ -214,7 +214,7 @@ extern "C" {
         max_depth: c_int,
         out: *mut *mut seams_rings,
     ) -> c_int;
-    pub fn seams_rings_destroy(rings: *mut seams_rings) -> None;
+    pub fn seams_rings_destroy(rings: *mut seams_rings);
     pub fn seams_rings_count(rings: *const seams_rings) -> c_int;
     pub fn seams_rings_histogram(
         rings: *const seams_rings,
@@ -247,7 +247,7 @@ extern "C" {
         complete: c_int,
         out: *mut *mut seams_cage_set,
     ) -> c_int;
-    pub fn seams_cages_destroy(cages: *mut seams_cage_set) -> None;
+    pub fn seams_cages_destroy(cages: *mut seams_cage_set);
     pub fn seams_cages_counts(
         cages: *const seams_cage_set,
         n_hex: *mut c_int,
@@ -285,7 +285,7 @@ extern "C" {
         axis: c_int,
         out: *mut *mut seams_brine,
     ) -> c_int;
-    pub fn seams_brine_destroy(front: *mut seams_brine) -> None;
+    pub fn seams_brine_destroy(front: *mut seams_brine);
     pub fn seams_brine_fronts(
         front: *const seams_brine,
         z_enter: *mut f64,
@@ -410,7 +410,7 @@ extern "C" {
         colour_types: c_int,
         out: *mut *mut seams_topo,
     ) -> c_int;
-    pub fn seams_fingerprint_destroy(fp: *mut seams_topo) -> None;
+    pub fn seams_fingerprint_destroy(fp: *mut seams_topo);
     pub fn seams_fingerprint_key(
         fp: *const seams_topo,
         buf: *mut c_char,
