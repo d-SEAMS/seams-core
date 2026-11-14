@@ -77,7 +77,7 @@ def main():
     if stage.exists():
         shutil.rmtree(stage)
     work.mkdir(parents=True, exist_ok=True)
-    run(["meson", "install", "-C", str(build), "--destdir", str(stage)])
+    run(["meson", "install", "-C", str(build), "--no-rebuild", "--destdir", str(stage)])
 
     pc_files = list(stage.rglob("seams.pc"))
     configs = list(stage.rglob("seams-config.cmake"))

@@ -897,17 +897,6 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 60)
   test(
-    'c_api_installed',
-    python3,
-    args: [
-      meson.project_source_root() / 'examples' / 'c' / 'check_installed.py',
-      meson.project_build_root(),
-      meson.project_source_root(),
-    ],
-    suite: 'docs',
-    depends: [seams_api_lib, ydslib],
-    timeout: 600)
-  test(
     'docs_sitting',
     python3,
     args: [meson.project_source_root() / 'docs' / 'render_sitting.py', '--check'],
@@ -1392,6 +1381,37 @@ endif
 subdir('bindings')
 
 if get_option('with_cli')
+  # check_installed.py installs with --no-rebuild, because a rebuild here
+  # would relink libyodaLib and libseams under the tests that load them.
+  # Every installed target is therefore built before the test starts.
+  _installed_targets = [seams_api_lib, ydslib, seams_lang, seams_exe, brine_front_exe,
+                        science_front_exe, nucleation_pathway_exe]
+  if is_variable('python_deps')
+    _installed_targets += python_deps
+  endif
+  if is_variable('lua_mod_targets')
+    _installed_targets += lua_mod_targets
+  endif
+  test(
+    'c_api_installed',
+    python3,
+    args: [
+      meson.project_source_root() / 'examples' / 'c' / 'check_installed.py',
+      meson.project_build_root(),
+      meson.project_source_root(),
+    ],
+    suite: 'docs',
+    depends: _installed_targets,
+    timeout: 600)
+  test(
+    'tests_do_not_rebuild',
+    python3,
+    args: [
+      meson.project_source_root() / 'tests' / 'check_no_rebuild.py',
+      meson.project_source_root(),
+      meson.project_build_root(),
+    ],
+    timeout: 120)
   test(
     'docs_migrate',
     python3,
