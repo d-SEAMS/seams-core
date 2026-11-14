@@ -145,6 +145,9 @@ def library_path(build):
 def base_env(build):
     env = os.environ.copy()
     env.pop("DSEAMS_DOC_BUILD", None)
+    # The engines and libseams carry an rpath. A leftover loader path
+    # must not be what makes a snippet resolve.
+    env.pop("LD_LIBRARY_PATH", None)
     env["DSEAMS_ROOT"] = str(ROOT)
     env["LD_LIBRARY_PATH"] = library_path(build)
     env["OMP_NUM_THREADS"] = "1"
@@ -158,6 +161,7 @@ def base_env(build):
         [
             str(DOCS / "examples"),
             str(ROOT / "bindings" / "python"),
+            str(ROOT / "adapters" / "python"),
             str(ROOT / "scripts"),
             env.get("PYTHONPATH", ""),
         ]
@@ -189,6 +193,94 @@ def cached(build, key, work):
     stamp.parent.mkdir(parents=True, exist_ok=True)
     stamp.write_text("ok\n", encoding="utf-8")
     return False
+
+
+def sdk_prefix():
+    if shutil.which("pkg-config"):
+        done = subprocess.run(
+            ["pkg-config", "--variable=prefix", "libgromacs"],
+            text=True,
+            capture_output=True,
+        )
+        if done.returncode == 0 and done.stdout.strip():
+            return Path(done.stdout.strip())
+    prefix = os.environ.get("CONDA_PREFIX", "")
+    return Path(prefix) if prefix else None
+
+
+def sdk_flags(text):
+    flags = []
+    rpaths = []
+    if shutil.which("pkg-config"):
+        for spec, needle in (("libgromacs", "gromacs/"), ("plumed", "plumed/")):
+            if needle not in text:
+                continue
+            done = subprocess.run(
+                ["pkg-config", "--cflags", "--libs", spec],
+                text=True,
+                capture_output=True,
+            )
+            if done.returncode == 0:
+                flags.extend(done.stdout.split())
+    prefix = sdk_prefix()
+    if prefix is not None:
+        include = prefix / "include"
+        if "library.h" in text and (include / "lammps" / "library.h").is_file():
+            flags.extend(["-I", str(include / "lammps"), "-llammps"])
+        if "OpenMM.h" in text and (include / "OpenMM.h").is_file():
+            flags.append("-lOpenMM")
+        if "plumed/" in text and (prefix / "lib" / "libplumedKernel.so").is_file():
+            flags.append("-lplumedKernel")
+        for folder in (prefix / "lib", prefix / "lib.AVX2_256"):
+            if folder.is_dir() and any(token in text for token in ("gromacs/", "plumed/", "OpenMM.h", "library.h")):
+                flags.append("-L" + str(folder))
+                rpaths.append(str(folder))
+    seen = []
+    for flag in flags:
+        if flag.startswith("-L") and len(flag) > 2:
+            rpaths.append(flag[2:])
+        elif flag == "-L":
+            continue
+        if flag not in seen:
+            seen.append(flag)
+    index = 0
+    while index < len(flags) - 1:
+        if flags[index] == "-L":
+            rpaths.append(flags[index + 1])
+        index += 1
+    for folder in dict.fromkeys(rpaths):
+        link = "-Wl,-rpath," + folder
+        if link not in seen:
+            seen.append(link)
+    return seen
+
+
+def python_bins():
+    found = []
+    for name in (sys.executable, shutil.which("python3"), shutil.which("python3.12"), shutil.which("python3.11")):
+        if name and name not in found:
+            found.append(name)
+    return found
+
+
+def python_with(module, env):
+    for exe in python_bins():
+        local = dict(env)
+        extra = os.environ.get("PYDSEAMS_PYTHONPATH", "")
+        if extra and exe != sys.executable:
+            local["PYTHONPATH"] = extra + os.pathsep + local.get("PYTHONPATH", "")
+        probe = subprocess.run([exe, "-c", "import " + module], env=local, capture_output=True, text=True)
+        if probe.returncode == 0:
+            return exe
+    return None
+
+
+def launch_env(exe, env):
+    local = dict(env)
+    extra = os.environ.get("PYDSEAMS_PYTHONPATH", "")
+    if extra and exe != sys.executable:
+        local["PYTHONPATH"] = extra + os.pathsep + local.get("PYTHONPATH", "")
+    return local
 
 
 def which(name):
@@ -233,17 +325,20 @@ def compile_c_family(build, env, source, out, extra=None):
     if "seams_lang.h" in text or "seams_frame_" in text or source.suffix != ".c":
         cmd.extend(["-lseams_lang", "-lstdc++"])
     cmd.append("-lseams")
+    cmd.extend(sdk_flags(text))
     if source.suffix != ".c":
         cmd.insert(1, "-std=c++17")
+    if out.suffix == ".so":
+        cmd.insert(1, "-fPIC")
+        cmd.insert(1, "-shared")
     try:
         run(cmd, env)
     except Fail as exc:
-        text = str(exc)
-        external = any(
-            token in text
-            for token in ("gromacs/", "openmm/", "plumed/", "lammps/", "catch.hpp", "gmx::", "PLMD", "OpenMM")
+        message = str(exc)
+        missing = "No such file or directory" in message and any(
+            token in message for token in ("gromacs/", "OpenMM.h", "library.h", "plumed/")
         )
-        if external:
+        if missing:
             raise Skip("the snippet's toolchain headers are not installed") from exc
         raise
 
@@ -297,27 +392,37 @@ def run_source(build, env, path):
                 run([str(built), *args], env)
                 return
             work = Path(tempfile.mkdtemp(prefix="seams-snippet-"))
+            if not re.search(r"\bint\s+main\s*\(", text):
+                library = work / "snippet.so"
+                compile_c_family(build, env, path, library)
+                import ctypes
+                ctypes.CDLL(str(library))
+                return
             exe = work / "snippet"
             compile_c_family(build, env, path, exe)
-            if "main" not in text:
-                return
             args = program_args(text, build)
             if path.name == "science_tutorials.c":
                 page_name = os.environ.get("SNIPPET_PAGE", "")
                 mode = "brine" if "brine" in page_name else "cages" if "cage" in page_name else "interface"
                 args = [mode]
-            run([str(exe), *args], env)
+            cwd = ROOT
+            if "usage: run_hook" in text:
+                args = [str(path.parent / "in.dseams")]
+                cwd = path.parent
+            if "TrajectoryAnalysisCommandLineRunner" in text:
+                args = ["-f", str(ROOT / "engines" / "gromacs" / "ice.gro")]
+            run([str(exe), *args], env, cwd=cwd)
         elif path.suffix == ".py":
-            if "import dseams" in text or "from dseams" in text:
-                probe = subprocess.run(
-                    [sys.executable, "-c", "import dseams, dseams._core"],
-                    env=env,
-                    text=True,
-                    capture_output=True,
-                )
-                if probe.returncode != 0:
+            exe = sys.executable
+            if "import pydseams" in text or "from pydseams" in text:
+                exe = python_with("pydseams", env)
+                if exe is None:
+                    raise Skip("pydseams is not installed")
+            elif re.search(r"(?<![A-Za-z_])import dseams\b", text) or re.search(r"(?<![A-Za-z_])from dseams\b", text):
+                exe = python_with("dseams._core", env)
+                if exe is None:
                     raise Skip("the Python extension is not built")
-            run([sys.executable, str(path), *program_args(text, build)], env)
+            run([exe, str(path), *program_args(text, build)], launch_env(exe, env))
         elif path.suffix == ".lua":
             lua = shutil.which("lua5.4") or shutil.which("lua")
             if not lua:
@@ -548,9 +653,14 @@ def compile_statements(build, env, lang, body):
         compile_c_family(build, env, source, exe)
         run([str(exe)], env)
         return
+    if lang in {"cpp", "c++", "cxx"} and re.search(r"\bint\s+main\s*\(", body):
+        source = work / "snippet.cpp"
+        source.write_text(body if body.endswith("\n") else body + "\n", encoding="utf-8")
+        exe = work / "snippet"
+        compile_c_family(build, env, source, exe)
+        run([str(exe)], env)
+        return
     if lang in {"cpp", "c++", "cxx"}:
-        if "OpenMPVars" in body or "PLUMED" in body:
-            raise Skip("PLUMED headers are not in this tree")
         header = None
         folded = " ".join(body.split())
         for candidate in (ROOT / "src").rglob("*.h*"):
@@ -600,26 +710,24 @@ def run_python(build, env, chunks):
     work = Path(tempfile.mkdtemp(prefix="seams-snippet-py-"))
     script = work / "snippet.py"
     body = "\n".join(chunks)
-    if any(name in body for name in OPTIONAL):
-        for name in OPTIONAL:
-            if name in body:
-                probe = subprocess.run([sys.executable, "-c", "import " + name.split(".")[0]], env=env, capture_output=True, text=True)
-                if probe.returncode != 0:
-                    raise Skip(name + " is not installed")
-    if "import dseams" in body or "from dseams" in body:
-        probe = subprocess.run(
-            [sys.executable, "-c", "import dseams._core"],
-            env=env,
-            capture_output=True,
-            text=True,
-        )
-        if probe.returncode != 0:
+    exe = sys.executable
+    for name in OPTIONAL:
+        if re.search(r"(?<![A-Za-z_])import " + re.escape(name) + r"\b", body) or re.search(
+            r"(?<![A-Za-z_])from " + re.escape(name) + r"\b", body
+        ):
+            found = python_with(name.split(".")[0], env)
+            if found is None:
+                raise Skip(name + " is not installed")
+            if name.startswith("pydseams"):
+                exe = found
+    plain = body.replace("pydseams", "")
+    if "dseams." in plain or "import dseams" in plain or "from dseams" in plain:
+        found = python_with("dseams._core", env)
+        if found is None:
             raise Skip("the Python extension is not built")
+        exe = found
     prelude = ""
-    if "dseams." in body and "import dseams" not in body and "from dseams" not in body:
-        probe = subprocess.run([sys.executable, "-c", "import dseams._core"], env=env, capture_output=True, text=True)
-        if probe.returncode != 0:
-            raise Skip("the Python extension is not built")
+    if "dseams." in plain and "import dseams" not in plain and "from dseams" not in plain:
         prelude = "import dseams\n"
     script.write_text(
         prelude
@@ -630,13 +738,13 @@ def run_python(build, env, chunks):
         "sites = ((0, 0, 0), (0.5, 0.5, 0), (0.5, 0, 0.5), (0, 0.5, 0.5),\n"
         "         (0.25, 0.25, 0.25), (0.75, 0.75, 0.25), (0.75, 0.25, 0.75), (0.25, 0.75, 0.75))\n"
         "positions = np.array([[x * a, y * a, z * a] for x, y, z in sites], dtype=float)\n"
-        "box = np.array([a, a, a], dtype=float)\n"
+        "box = np.array([3 * a, 3 * a, 3 * a], dtype=float)\n"
         "root = os.environ['DSEAMS_ROOT']\n"
         + body
         + "\n",
         encoding="utf-8",
     )
-    run([sys.executable, str(script)], env)
+    run([exe, str(script)], launch_env(exe, env))
 
 
 def run_julia_text(build, env, body):

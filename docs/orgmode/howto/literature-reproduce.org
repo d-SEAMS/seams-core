@@ -39,23 +39,23 @@ inequalities against the CSV.
 
 The PLUMED rows in this sitting were measured on one thread because
 ~PLUMED_NUM_THREADS~ was unset. The driver set ~OMP_NUM_THREADS~ and
-left ~PLUMED_NUM_THREADS~ alone. In PLUMED 2.10.2,
-~src/tools/OpenMP.cpp~ stores the width at one and ~getNumThreads~
-reads ~PLUMED_NUM_THREADS~. That is why the ~threads=1~ column and the
-~threads=8~ column of these rows are the same one-thread measurement.
+left ~PLUMED_NUM_THREADS~ alone. The installed header
+~plumed/tools/OpenMP.h~ exposes ~PLMD::OpenMP::getNumThreads~, which
+returns one thread when that variable is unset. That is why the
+~threads=1~ column and the ~threads=8~ column of these rows are the
+same one-thread measurement.
 ~benchmarks/paper-cells/sitting-large.csv~ sets
 ~PLUMED_NUM_THREADS~ to the width of the row, and that q6 time falls
 from one thread to eight. These rc3 rows are not that measurement.
 
 #+begin_src cpp
-unsigned getNumThreads() {
-  if(!OpenMPVars::get().nt_env_set) {
-    if(std::getenv("PLUMED_NUM_THREADS")) {
-      Tools::convert(std::getenv("PLUMED_NUM_THREADS"),OpenMPVars::get().num_threads);
-    }
-    OpenMPVars::get().nt_env_set = true;
-  }
-  return OpenMPVars::get().num_threads;
+#include "plumed/tools/OpenMP.h"
+#include <cstdio>
+
+int main() {
+  unsigned threads = PLMD::OpenMP::getNumThreads();
+  std::printf("plumed threads %u\n", threads);
+  return threads == 0 ? 1 : 0;
 }
 #+end_src
 

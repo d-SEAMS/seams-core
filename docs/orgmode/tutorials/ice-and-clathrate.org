@@ -37,22 +37,23 @@ Both the cutoff list and the mutual four-neighbour list label every site cubic, 
 
 The default face-edge window is ~2.65,3.15~ in the coordinate units of the file.
 These dumps are angstroms, and that window covers the oxygen-oxygen contacts of the reference cells.
-Set ~edge~ to the heavy-atom contact range of the model, and widen it for a compressed cell or a guest that stretches a cage.
-A nanometre file uses ~0.265,0.315~.
+The CLI ~--cage-edge~ and ~seams_frame_signature_edge~ take that window.
 ~none~ turns the window off: every ring the neighbour list already accepted can be a face, and the cage bound is the face census alone.
 On sI, sII, the sI 2×2×2 cell and the sII 10×10×10 cell the default and ~none~ return the same cages.
+The installed Python ~Frame.cages_by_signature~ takes the signature and an optional ~max_ring_size~.
+Lua passes cutoff and graph.
 
 #+begin_src python
 found = frame.cages_by_signature("512")
-found = frame.cages_by_signature("512", edge="none")
-found = frame.cages_by_signature("512", edge="2.4,3.4")
+found = frame.cages_by_signature("512", max_ring_size=6)
+found = frame.cages_by_signature("51262", max_ring_size=8)
 #+end_src
 
 #+begin_src lua
 local dseams = require("dseams")
 local found = dseams.cages_by_signature(frame, "512")
-found = dseams.cages_by_signature(frame, "512", {edge = "none"})
-found = dseams.cages_by_signature(frame, "512", {edge = "2.4,3.4"})
+found = dseams.cages_by_signature(frame, "512", {cutoff = 3.5, graph = "cutoff"})
+found = dseams.cages_by_signature(frame, "51262", {cutoff = 3.5, graph = "cutoff"})
 #+end_src
 
 The CLI spelling is ~--cage-edge~ and ~SEAMS_CAGE_EDGE~.
