@@ -1679,6 +1679,27 @@ if get_option('with_cli')
     depends: [seams_api_lib, seams_lang],
     suite: 'docs',
     timeout: 300)
+  _snippet_list = run_command(
+    python3,
+    meson.project_source_root() / 'docs' / 'run_snippets.py',
+    '--list',
+    check: true).stdout().strip().split('\n')
+  foreach _page : _snippet_list
+    if _page != ''
+      test(
+        'docs_snippet_' + _page,
+        python3,
+        args: [
+          meson.project_source_root() / 'docs' / 'run_snippets.py',
+          _page,
+          meson.project_build_root(),
+        ],
+        env: binding_env,
+        depends: [seams_api_lib, seams_lang],
+        suite: 'docs',
+        timeout: 300)
+    endif
+  endforeach
   test(
     'docs_api_julia',
     python3,
