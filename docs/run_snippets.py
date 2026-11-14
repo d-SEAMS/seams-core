@@ -285,6 +285,15 @@ def sdk_flags(text):
             if folder.is_dir() and any(token in text for token in ("gromacs/", "plumed/", "OpenMM.h", "library.h")):
                 flags.append("-L" + str(folder))
                 rpaths.append(str(folder))
+    if "plumed/" in text and "-lplumedKernel" not in flags and shutil.which("cc"):
+        # The kernel symbols, such as PLMD::OpenMP, are in libplumedKernel.
+        kernel = subprocess.run(
+            [shutil.which("cc"), "-print-file-name=libplumedKernel.so"],
+            text=True,
+            capture_output=True,
+        ).stdout.strip()
+        if os.path.isabs(kernel) and os.path.isfile(kernel):
+            flags.extend(["-L" + os.path.dirname(kernel), "-lplumedKernel"])
     if "OpenMM.h" in text and "-lOpenMM" not in flags:
         # Module systems put OpenMM on the compiler search paths, as
         # engines/meson.build finds it, and leave LD_LIBRARY_PATH alone.
