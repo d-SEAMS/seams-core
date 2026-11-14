@@ -798,6 +798,9 @@ def semantics(lang, name, purpose, parameters):
             "Error.code is the seams_status. Error.message is seams_handle_error when the call had a handle, otherwise seams_last_error.",
         )
     if lang == "fortran":
+        kind = _fortran_module_kind(name)
+        if kind is not None:
+            return _fortran_module_semantics(name, kind)
         if name == "c_chars":
             return (
                 "An allocatable C string, including the trailing null.",
@@ -881,7 +884,68 @@ def _example(block, lang, name):
     return EXAMPLES[lang]
 
 
+FORTRAN_STAT = (
+    "With stat present, stat receives the seams_status and errmsg the "
+    "seams_handle_error text. Without stat or errmsg a failure stops the "
+    "program with that text."
+)
+
+
+def _fortran_module_kind(name):
+    """``function`` or ``subroutine`` for a procedure of module ``seams``, else None.
+
+    The ``seams_c`` bindings return a status; the ``seams`` procedures take
+    optional ``stat`` and ``errmsg`` and own their handles.
+    """
+    text = (ROOT / "bindings" / "fortran" / "src" / "seams.f90").read_text()
+    match = re.search(r"^\s*(?:module\s+|impure\s+|elemental\s+)*(function|subroutine)\s+" + re.escape(name) + r"\b", text, re.M | re.I)
+    return match.group(1).lower() if match else None
+
+
+def _fortran_module_semantics(name, kind):
+    if name.endswith("_assign"):
+        return (
+            "Nothing. The left side shares the right side's C object.",
+            "Both variables hold one C object. close() or the last final procedure frees it.",
+            "None.",
+        )
+    if name.endswith("_final"):
+        return ("Nothing.", "Frees the C object when no other variable shares it.", "None.")
+    if name.endswith("_close"):
+        return ("Nothing.", "Frees the C object. A second call does nothing.", "None.")
+    if kind == "function":
+        return (
+            "The value named in the purpose.",
+            "Allocatable results are owned by the caller. A returned handle is freed by close() or its final procedure.",
+            FORTRAN_STAT,
+        )
+    return (
+        "Nothing. The results are the intent(out) arguments.",
+        "Allocatable intent(out) arrays are owned by the caller.",
+        FORTRAN_STAT,
+    )
+
+
+HEADER_RENDERED = "The tour call is in `docs/examples/c_api_tour.c`."
+
+
+def _complete_header_section(name, old, lang):
+    """Add the missing contract lines to a section docs/capi_docs.py rendered from seams.h."""
+    purpose = _field(old, "Purpose")
+    parameters = _field(old, "Parameters")
+    returns, ownership, errors = semantics(lang, name, purpose, parameters)
+    body = old.strip("\n")
+    for label, text in (("Ownership", ownership), ("Errors", errors)):
+        if not re.search(r"^" + label + r": \S", body, re.M):
+            body += "\n\n{}: {}".format(label, text[:1].upper() + text[1:])
+    if not re.search(r"^Example: `", body, re.M):
+        body += "\n\nExample: `{}`".format(_example(old, lang, name))
+    return "### {}\n\n{}\n".format(name, body)
+
+
 def render_section(name, old, lang, record):
+    if lang == "c" and HEADER_RENDERED in old:
+        return _complete_header_section(name, old, lang)
     purpose = _field(old, "Purpose")
     parameters = _field(old, "Parameters")
     units = _field(old, "Units")

@@ -456,7 +456,7 @@ Example: `docs/examples/minimal_fortran.f90`
 
 ### SEAMS_LABEL_CLATHRATE
 
-Purpose: SEAMS_LABEL_CLATHRATE
+Purpose: CHILL clathrate. The population is counts(5).
 
 Parameters: none
 
@@ -466,7 +466,7 @@ Ownership: No allocation.
 
 Errors: None.
 
-Units: as named by the parameters
+Units: dimensionless code
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -488,7 +488,7 @@ Example: `docs/examples/minimal_fortran.f90`
 
 ### SEAMS_LABEL_HEXAGONAL
 
-Purpose: SEAMS_LABEL_HEXAGONAL
+Purpose: CHILL hexagonal ice.
 
 Parameters: none
 
@@ -498,13 +498,13 @@ Ownership: No allocation.
 
 Errors: None.
 
-Units: as named by the parameters
+Units: dimensionless code
 
 Example: `docs/examples/minimal_fortran.f90`
 
 ### SEAMS_LABEL_INTERCLATHRATE
 
-Purpose: SEAMS_LABEL_INTERCLATHRATE
+Purpose: CHILL interfacial clathrate.
 
 Parameters: none
 
@@ -514,13 +514,13 @@ Ownership: No allocation.
 
 Errors: None.
 
-Units: as named by the parameters
+Units: dimensionless code
 
 Example: `docs/examples/minimal_fortran.f90`
 
 ### SEAMS_LABEL_INTERFACIAL
 
-Purpose: SEAMS_LABEL_INTERFACIAL
+Purpose: CHILL interfacial ice.
 
 Parameters: none
 
@@ -530,13 +530,13 @@ Ownership: No allocation.
 
 Errors: None.
 
-Units: as named by the parameters
+Units: dimensionless code
 
 Example: `docs/examples/minimal_fortran.f90`
 
 ### SEAMS_LABEL_RECUBIC
 
-Purpose: SEAMS_LABEL_RECUBIC
+Purpose: CHILL reclassified cubic ice.
 
 Parameters: none
 
@@ -546,13 +546,13 @@ Ownership: No allocation.
 
 Errors: None.
 
-Units: as named by the parameters
+Units: dimensionless code
 
 Example: `docs/examples/minimal_fortran.f90`
 
 ### SEAMS_LABEL_REHEX
 
-Purpose: SEAMS_LABEL_REHEX
+Purpose: CHILL reclassified hexagonal ice.
 
 Parameters: none
 
@@ -562,13 +562,13 @@ Ownership: No allocation.
 
 Errors: None.
 
-Units: as named by the parameters
+Units: dimensionless code
 
 Example: `docs/examples/minimal_fortran.f90`
 
 ### SEAMS_LABEL_UNCLASSIFIED
 
-Purpose: SEAMS_LABEL_UNCLASSIFIED
+Purpose: CHILL atom that matched no class.
 
 Parameters: none
 
@@ -578,13 +578,13 @@ Ownership: No allocation.
 
 Errors: None.
 
-Units: as named by the parameters
+Units: dimensionless code
 
 Example: `docs/examples/minimal_fortran.f90`
 
 ### SEAMS_LABEL_WATER
 
-Purpose: SEAMS_LABEL_WATER
+Purpose: CHILL liquid water.
 
 Parameters: none
 
@@ -594,7 +594,7 @@ Ownership: No allocation.
 
 Errors: None.
 
-Units: as named by the parameters
+Units: dimensionless code
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -616,1137 +616,113 @@ Example: `docs/examples/minimal_fortran.f90`
 
 ### brine_assign
 
-Purpose: Brine_assign
+Purpose: Share a brine front.
 
-Parameters: none
+Parameters: optional stat and errmsg; see the procedure
 
-Returns: Integer(c_int) status. SEAMS_OK is zero.
+Returns: Nothing. The left side shares the right side's C object.
 
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+Ownership: Both variables hold one C object. close() or the last final procedure frees it.
 
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+Errors: None.
 
-Units: as named by the parameters
+Units: angstrom where a length is taken; counts are dimensionless
 
 Example: `docs/examples/minimal_fortran.f90`
 
 ### brine_close
 
-Purpose: Brine_close
+Purpose: Release one owner's reference to a brine front.
 
-Parameters: none
+Parameters: optional stat and errmsg; see the procedure
 
-Returns: Integer(c_int) status. SEAMS_OK is zero.
+Returns: Nothing.
 
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+Ownership: Frees the C object. A second call does nothing.
 
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+Errors: None.
 
-Units: as named by the parameters
+Units: angstrom where a length is taken; counts are dimensionless
 
 Example: `docs/examples/minimal_fortran.f90`
 
 ### brine_final
 
-Purpose: Brine_final
+Purpose: Release one owner's reference to a brine front.
 
-Parameters: none
+Parameters: optional stat and errmsg; see the procedure
 
-Returns: Integer(c_int) status. SEAMS_OK is zero.
+Returns: Nothing.
 
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+Ownership: Frees the C object when no other variable shares it.
 
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+Errors: None.
 
-Units: as named by the parameters
+Units: angstrom where a length is taken; counts are dimensionless
 
 Example: `docs/examples/minimal_fortran.f90`
 
 ### brine_fronts
 
-Purpose: Brine_fronts
+Purpose: The two planar crossings of the ice slab.
 
-Parameters: none
+Parameters: optional stat and errmsg; see the procedure
 
-Returns: Integer(c_int) status. SEAMS_OK is zero.
+Returns: Nothing. The results are the intent(out) arguments.
 
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+Ownership: Allocatable intent(out) arrays are owned by the caller.
 
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
 
-Units: as named by the parameters
+Units: angstrom where a length is taken; counts are dimensionless
 
 Example: `docs/examples/minimal_fortran.f90`
 
 ### brine_pockets
 
-Purpose: Brine_pockets
+Purpose: Brine pockets and the liquid reservoir.
 
-Parameters: none
+Parameters: optional stat and errmsg; see the procedure
 
-Returns: Integer(c_int) status. SEAMS_OK is zero.
+Returns: Nothing. The results are the intent(out) arguments.
 
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+Ownership: Allocatable intent(out) arrays are owned by the caller.
 
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
 
-Units: as named by the parameters
+Units: angstrom where a length is taken; counts are dimensionless
 
 Example: `docs/examples/minimal_fortran.f90`
 
 ### brine_profile
 
-Purpose: Brine_profile
+Purpose: Concentration profile along the front axis.
 
-Parameters: none
+Parameters: optional stat and errmsg; see the procedure
 
-Returns: Integer(c_int) status. SEAMS_OK is zero.
+Returns: Nothing. The results are the intent(out) arguments.
 
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+Ownership: Allocatable intent(out) arrays are owned by the caller.
 
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
 
-Units: as named by the parameters
+Units: angstrom where a length is taken; counts are dimensionless
 
 Example: `docs/examples/minimal_fortran.f90`
 
 ### brine_rejection
 
-Purpose: Brine_rejection
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### cage_assign
-
-Purpose: Cage_assign
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### cage_close
-
-Purpose: Cage_close
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### cage_counts
-
-Purpose: Cage_counts
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### cage_final
-
-Purpose: Cage_final
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### cage_labels
-
-Purpose: Cage_labels
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_assign
-
-Purpose: Frame_assign
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_brine
-
-Purpose: Frame_brine
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_cages
-
-Purpose: Frame_cages
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_chill
-
-Purpose: Frame_chill
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_chill_plus
-
-Purpose: Frame_chill_plus
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_close
-
-Purpose: Frame_close
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_contact_pairs
-
-Purpose: Frame_contact_pairs
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_coordination
-
-Purpose: Coordination number integrated to rmax.
+Purpose: Molal rejection coefficient.
 
 Parameters: optional stat and errmsg; see the procedure
 
-Returns: Integer(c_int) status. SEAMS_OK is zero.
+Returns: Nothing. The results are the intent(out) arguments.
 
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+Ownership: Allocatable intent(out) arrays are owned by the caller.
 
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
 
-Units: rmax in angstrom; coordination is dimensionless
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_count
-
-Purpose: Frame_count
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_density
-
-Purpose: Frame_density
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_domains
-
-Purpose: Frame_domains
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_final
-
-Purpose: Release one owner's reference to a frame.
-
-Parameters: optional stat and errmsg; see the procedure
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: dimensionless site codes
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_fingerprint
-
-Purpose: Frame_fingerprint
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_hbonds
-
-Purpose: Frame_hbonds
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_knn
-
-Purpose: Frame_knn
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_monolayer
-
-Purpose: Frame_monolayer
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_neighbours
-
-Purpose: Frame_neighbours
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_prisms
-
-Purpose: Frame_prisms
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_q4q6
-
-Purpose: Frame_q4q6
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_q6bar
-
-Purpose: Frame_q6bar
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_ql
-
-Purpose: Frame_ql
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_rdf
-
-Purpose: Frame_rdf
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_read
-
-Purpose: Frame_read
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_rings
-
-Purpose: Frame_rings
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_running_cn
-
-Purpose: Frame_running_cn
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_set_frame
-
-Purpose: Frame_set_frame
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_set_ortho
-
-Purpose: Frame_set_ortho
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_signature
-
-Purpose: Frame_signature
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_site_kinds
-
-Purpose: Frame_site_kinds
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_steinhardt
-
-Purpose: Frame_steinhardt
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### frame_symmetry
-
-Purpose: Frame_symmetry
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### label_name
-
-Purpose: Label_name
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### neighbour_assign
-
-Purpose: Neighbour_assign
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### neighbour_close
-
-Purpose: Neighbour_close
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### neighbour_columns
-
-Purpose: Neighbour_columns
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### neighbour_count
-
-Purpose: Neighbour_count
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### neighbour_final
-
-Purpose: Neighbour_final
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### neighbour_offsets
-
-Purpose: Neighbour_offsets
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### new_frame
-
-Purpose: New_frame
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### num_threads
-
-Purpose: Num_threads
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### path_nframes
-
-Purpose: Path_nframes
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### ring_assign
-
-Purpose: Ring_assign
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### ring_close
-
-Purpose: Ring_close
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### ring_count
-
-Purpose: Ring_count
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### ring_final
-
-Purpose: Ring_final
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### ring_fraction
-
-Purpose: Ring_fraction
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### ring_histogram
-
-Purpose: Ring_histogram
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### ring_sizes
-
-Purpose: Ring_sizes
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### ring_symmetry
-
-Purpose: Ring_symmetry
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### ring_vertices
-
-Purpose: Ring_vertices
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### set_num_threads
-
-Purpose: Set_num_threads
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### status_text
-
-Purpose: Status_text
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### topo_assign
-
-Purpose: Topo_assign
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### topo_atom_key
-
-Purpose: Topo_atom_key
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### topo_close
-
-Purpose: Topo_close
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### topo_final
-
-Purpose: Topo_final
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### topo_key
-
-Purpose: Topo_key
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### topo_rings
-
-Purpose: Topo_rings
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
-
-Example: `docs/examples/minimal_fortran.f90`
-
-### version_text
-
-Purpose: Version_text
-
-Parameters: none
-
-Returns: Integer(c_int) status. SEAMS_OK is zero.
-
-Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
-
-Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
-
-Units: as named by the parameters
+Units: angstrom where a length is taken; counts are dimensionless
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -1766,6 +742,86 @@ Units: text
 
 Example: `docs/examples/minimal_fortran.f90`
 
+### cage_assign
+
+Purpose: Share a cage set.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The left side shares the right side's C object.
+
+Ownership: Both variables hold one C object. close() or the last final procedure frees it.
+
+Errors: None.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### cage_close
+
+Purpose: Release one owner's reference to a cage set.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing.
+
+Ownership: Frees the C object. A second call does nothing.
+
+Errors: None.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### cage_counts
+
+Purpose: Disjoint cage population counts.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### cage_final
+
+Purpose: Release one owner's reference to a cage set.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing.
+
+Ownership: Frees the C object when no other variable shares it.
+
+Errors: None.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### cage_labels
+
+Purpose: One cage code per atom.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
 ### domain_size
 
 Purpose: Largest apolar domain for a site-table spec.
@@ -1779,6 +835,646 @@ Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. 
 Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: percolation is dimensionless; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_assign
+
+Purpose: Share a frame. The last finalizer destroys it.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The left side shares the right side's C object.
+
+Ownership: Both variables hold one C object. close() or the last final procedure frees it.
+
+Errors: None.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_brine
+
+Purpose: Planar ice front from an ice assignment.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: The value named in the purpose.
+
+Ownership: Allocatable results are owned by the caller. A returned handle is freed by close() or its final procedure.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_cages
+
+Purpose: Hexagonal and double-diamond cage membership.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: The value named in the purpose.
+
+Ownership: Allocatable results are owned by the caller. A returned handle is freed by close() or its final procedure.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_chill
+
+Purpose: Original CHILL labels and nine population counts.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_chill_plus
+
+Purpose: CHILL+ labels and nine population counts.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_close
+
+Purpose: Release one owner's reference to a frame.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing.
+
+Ownership: Frees the C object. A second call does nothing.
+
+Errors: None.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_contact_pairs
+
+Purpose: Mutual nearest unlike contacts of a site table.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_coordination
+
+Purpose: Coordination number integrated to rmax.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: The value named in the purpose.
+
+Ownership: Allocatable results are owned by the caller. A returned handle is freed by close() or its final procedure.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: rmax in angstrom; coordination is dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_count
+
+Purpose: Number of points in the frame.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: The value named in the purpose.
+
+Ownership: Allocatable results are owned by the caller. A returned handle is freed by close() or its final procedure.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_density
+
+Purpose: Number density along one cell axis.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_domains
+
+Purpose: Largest polar or apolar domain.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_final
+
+Purpose: Release one owner's reference to a frame.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing.
+
+Ownership: Frees the C object when no other variable shares it.
+
+Errors: None.
+
+Units: dimensionless site codes
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_fingerprint
+
+Purpose: Topological fingerprint of the bonded graph.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: The value named in the purpose.
+
+Ownership: Allocatable results are owned by the caller. A returned handle is freed by close() or its final procedure.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_hbonds
+
+Purpose: Hydrogen-bond count.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: The value named in the purpose.
+
+Ownership: Allocatable results are owned by the caller. A returned handle is freed by close() or its final procedure.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_knn
+
+Purpose: Build a k-nearest neighbour list.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: The value named in the purpose.
+
+Ownership: Allocatable results are owned by the caller. A returned handle is freed by close() or its final procedure.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_monolayer
+
+Purpose: Primitive-ring histogram of a monolayer.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_neighbours
+
+Purpose: Build a cutoff or mutual neighbour list.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: The value named in the purpose.
+
+Ownership: Allocatable results are owned by the caller. A returned handle is freed by close() or its final procedure.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_prisms
+
+Purpose: Perfect and imperfect prism counts by ring size.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_q4q6
+
+Purpose: Local q4 and q6 on the cutoff shell.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_q6bar
+
+Purpose: Lechner-Dellago q6-bar and the ice count above a cut.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_ql
+
+Purpose: Local q_l and, on request, its neighbour average.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_rdf
+
+Purpose: Partial radial distribution.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_read
+
+Purpose: Read one 1-based frame from a trajectory path.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_rings
+
+Purpose: Find primitive rings up to a maximum size.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: The value named in the purpose.
+
+Ownership: Allocatable results are owned by the caller. A returned handle is freed by close() or its final procedure.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_running_cn
+
+Purpose: Running coordination number along the partial RDF.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_set_frame
+
+Purpose: Store points and a nine-number LAMMPS cell.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_set_ortho
+
+Purpose: Store points in an orthorhombic cell. xyz has shape (3, n).
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_signature
+
+Purpose: Count closed cages of one ring census.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_site_kinds
+
+Purpose: Per-atom site kind from a site-table spec.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_steinhardt
+
+Purpose: Local q_l on the cutoff shell, with the average on request.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### frame_symmetry
+
+Purpose: Per-atom ice shell label.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### label_name
+
+Purpose: Name of a CHILL label code.
+
+Parameters: see the type-bound procedure
+
+Returns: The value named in the purpose.
+
+Ownership: Allocatable results are owned by the caller. A returned handle is freed by close() or its final procedure.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: text
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### neighbour_assign
+
+Purpose: Share a neighbour list.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The left side shares the right side's C object.
+
+Ownership: Both variables hold one C object. close() or the last final procedure frees it.
+
+Errors: None.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### neighbour_close
+
+Purpose: Release one owner's reference to a neighbour list.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing.
+
+Ownership: Frees the C object. A second call does nothing.
+
+Errors: None.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### neighbour_columns
+
+Purpose: CSR columns copied into an allocatable array.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### neighbour_count
+
+Purpose: Number of neighbour rows.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: The value named in the purpose.
+
+Ownership: Allocatable results are owned by the caller. A returned handle is freed by close() or its final procedure.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### neighbour_final
+
+Purpose: Release one owner's reference to a neighbour list.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing.
+
+Ownership: Frees the C object when no other variable shares it.
+
+Errors: None.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### neighbour_offsets
+
+Purpose: CSR offsets copied into an allocatable array.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### new_frame
+
+Purpose: Allocate an empty frame. The caller owns the result.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: The value named in the purpose.
+
+Ownership: Allocatable results are owned by the caller. A returned handle is freed by close() or its final procedure.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### num_threads
+
+Purpose: Width the next analysis will request.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: The value named in the purpose.
+
+Ownership: Allocatable results are owned by the caller. A returned handle is freed by close() or its final procedure.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -1798,6 +1494,22 @@ Units: dimensionless counts
 
 Example: `docs/examples/minimal_fortran.f90`
 
+### path_nframes
+
+Purpose: Number of frames in a trajectory path.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: The value named in the purpose.
+
+Ownership: Allocatable results are owned by the caller. A returned handle is freed by close() or its final procedure.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
 ### read_frame
 
 Purpose: Read one trajectory frame into a handle.
@@ -1811,6 +1523,262 @@ Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. 
 Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: frame index is 1-based; coordinates in angstrom
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### ring_assign
+
+Purpose: Share a ring set.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The left side shares the right side's C object.
+
+Ownership: Both variables hold one C object. close() or the last final procedure frees it.
+
+Errors: None.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### ring_close
+
+Purpose: Release one owner's reference to a ring set.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing.
+
+Ownership: Frees the C object. A second call does nothing.
+
+Errors: None.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### ring_count
+
+Purpose: Number of primitive rings.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: The value named in the purpose.
+
+Ownership: Allocatable results are owned by the caller. A returned handle is freed by close() or its final procedure.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### ring_final
+
+Purpose: Release one owner's reference to a ring set.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing.
+
+Ownership: Frees the C object when no other variable shares it.
+
+Errors: None.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### ring_fraction
+
+Purpose: Fraction of atoms on a ring. Size 0 counts every ring.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### ring_histogram
+
+Purpose: Ring counts by size. Index k is rings of size k.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### ring_sizes
+
+Purpose: Size of each ring.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### ring_symmetry
+
+Purpose: Symmetry code of each ring.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### ring_vertices
+
+Purpose: Atom indices of one ring. The index is 1-based.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_abi
+
+Purpose: ABI number compiled into this library.
+
+Parameters: none
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_brine_analyse
+
+Purpose: Planar ice/brine front from an ice assignment.
+
+Parameters: sys; ice; n_ice; water_type; ion_type; n_bins; axis; out
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_brine_destroy
+
+Purpose: Free a brine-front handle.
+
+Parameters: front
+
+Returns: Nothing.
+
+Ownership: Frees the c_ptr the caller owns.
+
+Errors: None.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_brine_fronts
+
+Purpose: The two planar crossings of the ice slab.
+
+Parameters: front; z_enter; z_exit; thickness; found
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_brine_pockets
+
+Purpose: Brine pockets trapped in the ice, excluding the liquid reservoir.
+
+Parameters: front; n_pockets; reservoir_waters
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_brine_profile
+
+Purpose: Concentration profile along the front axis.
+
+Parameters: front; z_mid; molality; ice_fraction; cap; n_out
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_brine_rejection
+
+Purpose: Molal rejection coefficient k = c_ice / c_liquid.
+
+Parameters: front; c_ice; c_liquid; k; defined
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -1859,6 +1827,22 @@ Ownership: Frees the c_ptr the caller owns.
 Errors: None.
 
 Units: handle
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_cages_labels
+
+Purpose: Per-atom cage code.
+
+Parameters: cages; per_atom; len
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -1974,6 +1958,22 @@ Units: cutoff in angstrom; handle
 
 Example: `docs/examples/minimal_fortran.f90`
 
+### seams_fingerprint_atom
+
+Purpose: Local key of one atom. Same buffer rule as seams_fingerprint_key().
+
+Parameters: fp; index; buf; cap; n_out
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
 ### seams_fingerprint_destroy
 
 Purpose: Free a fingerprint handle.
@@ -2070,6 +2070,22 @@ Units: distances in angstrom; angle in degrees
 
 Example: `docs/examples/minimal_fortran.f90`
 
+### seams_label_name
+
+Purpose: Name of a CHILL label.
+
+Parameters: label
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
 ### seams_last_error
 
 Purpose: Return the thread-local error detail.
@@ -2115,6 +2131,38 @@ Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. 
 Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: cutoff in angstrom
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_neighbours_copy
+
+Purpose: Copy the neighbour CSR into caller buffers.
+
+Parameters: nb; offsets; offsets_cap; n_offsets; cols; cols_cap; nnz
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_neighbours_count
+
+Purpose: Number of neighbour rows, as an int.
+
+Parameters: nb
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -2166,6 +2214,22 @@ Units: cutoff in angstrom; k is a dimensionless count
 
 Example: `docs/examples/minimal_fortran.f90`
 
+### seams_path_nframes
+
+Purpose: Number of frames in a trajectory path.
+
+Parameters: path; nframes
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
 ### seams_prisms
 
 Purpose: Perfect and imperfect prism counts by ring size.
@@ -2198,6 +2262,38 @@ Units: cutoff in angstrom; q4 and q6 are dimensionless
 
 Example: `docs/examples/minimal_fortran.f90`
 
+### seams_q6bar
+
+Purpose: Lechner-Dellago q6-bar and the ice count above a cut.
+
+Parameters: sys; cutoff; typ; ice_cut; q6bar; q6bar_len; mean; median; n_ice
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_ql
+
+Purpose: Local Steinhardt q_l, and the Lechner-Dellago average on request.
+
+Parameters: sys; cutoff; typ; order_l; graph; ql; ql_len; qlbar; qlbar_len
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
 ### seams_rdf
 
 Purpose: Partial radial distribution and the cell volume.
@@ -2211,6 +2307,22 @@ Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. 
 Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: rmax in angstrom; volume in cubic angstrom
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_ring_symmetry_name
+
+Purpose: Name of a ring-symmetry code.
+
+Parameters: symmetry
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -2294,6 +2406,22 @@ Units: dimensionless counts
 
 Example: `docs/examples/minimal_fortran.f90`
 
+### seams_rings_labels
+
+Purpose: Size and symmetry of each ring, without buffer lengths.
+
+Parameters: rings; sizes; symmetry
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
 ### seams_rings_vertices
 
 Purpose: Atom indices of one ring.
@@ -2371,6 +2499,22 @@ Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. 
 Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: dimensionless site codes
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_status_string
+
+Purpose: Short name of a status code.
+
+Parameters: status
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -2454,6 +2598,22 @@ Units: frame index is 1-based; coordinates in angstrom
 
 Example: `docs/examples/minimal_fortran.f90`
 
+### seams_system_set_atoms
+
+Purpose: Store points and a general cell. Lengths are size_t.
+
+Parameters: sys; xyz; n; box9; box_len; types; ids
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
 ### seams_system_set_frame
 
 Purpose: Store points and a nine-number cell.
@@ -2486,6 +2646,86 @@ Units: origin and edge lengths in angstrom
 
 Example: `docs/examples/minimal_fortran.f90`
 
+### seams_system_symmetry
+
+Purpose: Per-atom ice shell label.
+
+Parameters: sys; shell_rmsd; labels; labels_len
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_version
+
+Purpose: Packed release number.
+
+Parameters: none
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_version_major
+
+Purpose: Major version of the library at run time.
+
+Parameters: none
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_version_minor
+
+Purpose: Minor version of the library at run time.
+
+Parameters: none
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### seams_version_patch
+
+Purpose: Patch version of the library at run time.
+
+Parameters: none
+
+Returns: Integer(c_int) status. SEAMS_OK is zero.
+
+Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. Allocatable character buffers from c_chars are owned by the caller.
+
+Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
+
+Units: as named by the parameters
+
+Example: `docs/examples/minimal_fortran.f90`
+
 ### seams_version_string
 
 Purpose: Return the version as text.
@@ -2499,6 +2739,22 @@ Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. 
 Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
 Units: text
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### set_num_threads
+
+Purpose: Set the OpenMP width. Zero restores the default.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -2534,6 +2790,133 @@ Units: dimensionless site codes
 
 Example: `docs/examples/minimal_fortran.f90`
 
+### status_text
+
+Purpose: Name of a status code.
+
+Parameters: see the type-bound procedure
+
+Returns: The value named in the purpose.
+
+Ownership: Allocatable results are owned by the caller. A returned handle is freed by close() or its final procedure.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: text
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### topo_assign
+
+Purpose: Share a fingerprint.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The left side shares the right side's C object.
+
+Ownership: Both variables hold one C object. close() or the last final procedure frees it.
+
+Errors: None.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### topo_atom_key
+
+Purpose: Local key of one atom. The index is 1-based.
+
+Parameters: see the type-bound procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: text
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### topo_close
+
+Purpose: Release one owner's reference to a fingerprint.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing.
+
+Ownership: Frees the C object. A second call does nothing.
+
+Errors: None.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### topo_final
+
+Purpose: Release one owner's reference to a fingerprint.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing.
+
+Ownership: Frees the C object when no other variable shares it.
+
+Errors: None.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### topo_key
+
+Purpose: Frame key of a fingerprint.
+
+Parameters: see the type-bound procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: text
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### topo_rings
+
+Purpose: Primitive-ring census stored on a fingerprint.
+
+Parameters: optional stat and errmsg; see the procedure
+
+Returns: Nothing. The results are the intent(out) arguments.
+
+Ownership: Allocatable intent(out) arrays are owned by the caller.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: angstrom where a length is taken; counts are dimensionless
+
+Example: `docs/examples/minimal_fortran.f90`
+
+### version_text
+
+Purpose: Library version text.
+
+Parameters: see the type-bound procedure
+
+Returns: The value named in the purpose.
+
+Ownership: Allocatable results are owned by the caller. A returned handle is freed by close() or its final procedure.
+
+Errors: With stat present, stat receives the seams_status and errmsg the seams_handle_error text. Without stat or errmsg a failure stops the program with that text.
+
+Units: text
+
+Example: `docs/examples/minimal_fortran.f90`
 <!-- API_SYMBOLS_END -->
 
 
