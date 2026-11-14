@@ -13,7 +13,7 @@ Libdl = "1"
 Preferences = "1.4"
 Test = "1"
 julia = "1.10"
-libseams_jll = "2.14.0"
+libseams_jll = "=2.14.0"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

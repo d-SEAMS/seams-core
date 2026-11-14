@@ -22,3 +22,11 @@ chill_plus(f; graph = "cutoff").counts["hexagonal"]   # 128
 `docs/` has the manual (`julia --project=docs docs/make.jl`), including
 how to use a local engine build instead of the JLL and how Dseams relates
 to the `Seams` example next to it.
+
+## Registering
+
+`Project.toml` is ready for Registrator (`uuid`, `version`, and
+`[compat]`, with `libseams_jll` held at `=2.14.0`). General can resolve
+that dependency only after `libseams_jll` is registered from the
+Yggdrasil recipe in `packaging/yggdrasil`. Until then, `dev/develop_jll.jl`
+develops the stand-in JLL or a local `--deploy=local` build.
