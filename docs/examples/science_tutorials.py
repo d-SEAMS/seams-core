@@ -557,7 +557,7 @@ def _expect_languages(text, frames):
         "nucleus cubic 47",
         "CHHHCHHHHHHHHH",
         "cages sII 512 16",
-        "cages sH 51268 2",
+        "cages sH 51268 4",
     ):
         expect(line in text, text)
     if frames is not None:
@@ -580,7 +580,7 @@ def run_julia(root: Path, libdir: Path, frames):
     text = proc.stdout
     # Julia 1.13 can fault in ijl_process_events after the script has
     # printed. The census is the result; a later teardown signal is not.
-    if proc.returncode != 0 and "cages sH 512 10" not in text:
+    if proc.returncode != 0 and "cages sH 512 12" not in text:
         raise subprocess.CalledProcessError(proc.returncode, args, output=text, stderr=proc.stderr)
     _expect_languages(text, frames)
     print("julia tutorials ok")
@@ -674,12 +674,12 @@ def main():
     sh_small = signature(lib, traj / "genice_sH.lammpstrj", "512")
     sh_medium = signature(lib, traj / "genice_sH.lammpstrj", "sh")
     sh_large = signature(lib, traj / "genice_sH.lammpstrj", "51268")
-    expect((sii, sii_large, sh_small, sh_medium, sh_large) == (16, 8, 10, 4, 2), "cages")
+    expect((sii, sii_large, sh_small, sh_medium, sh_large) == (16, 8, 12, 8, 4), "cages")
     print("cages sII 512 16")
     print("cages sII 51264 8")
-    print("cages sH 512 10")
-    print("cages sH sh 4")
-    print("cages sH 51268 2")
+    print("cages sH 512 12")
+    print("cages sH sh 8")
+    print("cages sH 51268 4")
     render_hosts(root, lib, figures)
 
     cache = root / "docs" / ".cache" / "brine-front-230K" / BRINE_REV
@@ -717,9 +717,9 @@ def main():
         for line in (
             "cages sII 512 16",
             "cages sII 51264 8",
-            "cages sH 512 10",
-            "cages sH sh 4",
-            "cages sH 51268 2",
+            "cages sH 512 12",
+            "cages sH sh 8",
+            "cages sH 51268 4",
         ):
             expect(line in c_cages, c_cages)
         if frames is not None:
