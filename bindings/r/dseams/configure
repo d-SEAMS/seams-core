@@ -30,8 +30,12 @@ if [ ! -f "${SEAMS_INCLUDE}/seams_lang.h" ]; then
   exit 1
 fi
 SEAMS_H_DIR="${DSEAMS_ROOT}/include"
-SEAMS_SO_DIR=""
+SEAMS_SO_DIR="${SEAMS_SO_DIR:-}"
+# libseams and seams_version.h sit in src/ of the build that holds
+# SEAMS_LIBDIR, whatever that build directory is called.
 for dir in \
+  "${SEAMS_SO_DIR}" \
+  "$(dirname "${SEAMS_LIBDIR}")/src" \
   "${DSEAMS_ROOT}/build/src" \
   "${DSEAMS_ROOT}/bbdir/src" \
   "${DSEAMS_ROOT}/bbdir-py/src"
