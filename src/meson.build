@@ -2,7 +2,6 @@
 
 ydslib_sources = files(
   'absOrientation.cpp',
-  'backward.cpp',
   'bond.cpp',
   'bop.cpp',
   'bulkTUM.cpp',
@@ -59,6 +58,12 @@ ydslib_sources = files(
   'topo_one_dim.cpp',
   'topo_two_dim.cpp',
 )
+
+# backward-cpp's crash handler symbolizes with backtrace_symbols, which
+# musl does not provide. Without it a crash is an ordinary signal.
+if cppc.has_header('execinfo.h')
+  ydslib_sources += files('backward.cpp')
+endif
 
 # gpu_residency.cpp calls dlopen/dlsym. A shared library that leaves
 # those undefined forces every consumer to add -ldl itself.
