@@ -1,5 +1,7 @@
 // Copyright (c) d-SEAMS developers
 // Reads one dump under LD_PRELOAD. The mode is argv[1]: eintr, eio, fstat.
+#include "fresh_temp.hpp"
+
 #include <mol_sys.hpp>
 #include <seams_input.hpp>
 
@@ -25,9 +27,8 @@ int main(int argc, char **argv) {
     return 2;
   }
   const std::string mode = argv[1];
-  const auto dir = fs::temp_directory_path() / "dseams-dump-fault";
-  fs::remove_all(dir);
-  fs::create_directories(dir);
+  // The three modes run as parallel tests of one binary.
+  const auto dir = dseams_test::freshDir();
   const auto dump = dir / "fault.lammpstrj";
   if (mode == "eintr" || mode == "eio") {
     writeDump(dump, 2, 2);
