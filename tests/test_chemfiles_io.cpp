@@ -387,6 +387,22 @@ TEST_CASE("a triclinic cell is stored with three tilt factors", "[chemfiles]") {
   fs::remove(pdb);
 }
 
+TEST_CASE("a tilted dump keeps the LAMMPS cell edge", "[chemfiles]") {
+  // BOX BOUNDS on genice_sH is the bounding box padded by xy = -6.2106057.
+  // The edge is 24.8424228; the 31.053 bound span is not a cell length.
+  Cloud cloud = sinp::openFrame("traj/genice_sH.lammpstrj", 1, 1);
+  REQUIRE(cloud.nop == 136);
+  REQUIRE(cloud.box.size() >= 6);
+  double cell[3][3];
+  double origin[3];
+  nneigh::dumpBoundsToH(cloud.box, cloud.boxLow, cell, origin);
+  REQUIRE_THAT(cell[0][0], Catch::Matchers::WithinAbs(24.8424228, 1e-6));
+  REQUIRE_THAT(cell[1][1], Catch::Matchers::WithinAbs(10.7570846, 1e-6));
+  REQUIRE_THAT(cell[2][2], Catch::Matchers::WithinAbs(20.1312910, 1e-6));
+  REQUIRE_THAT(cell[1][0], Catch::Matchers::WithinAbs(-6.2106057, 1e-6));
+  REQUIRE_THAT(origin[0], Catch::Matchers::WithinAbs(0.0, 1e-6));
+}
+
 TEST_CASE("a dcd uses the sibling pdb names", "[chemfiles]") {
   const auto root = dseams_test::freshDir();
   const auto dcd = root / "dseams_chem_names.dcd";
