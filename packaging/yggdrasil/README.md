@@ -31,9 +31,19 @@ julia --project=ENV bindings/julia/Dseams/dev/develop_jll.jl ~/.julia/dev/libsea
 julia --project=ENV -e 'using Pkg; Pkg.develop(path="bindings/julia/Dseams"); Pkg.test("Dseams")'
 ```
 
+## The source pin
+
+`build_tarballs.jl` sets `v2_14_0_tag_sha`. That constant is the stand-in
+for the v2.14.0 tag. It is the release-candidate commit
+`c1efa8c734214e9117cb77e89258bc9fdd214a6c`. After the tag is created,
+replace the constant with `git rev-parse v2.14.0` when the tag points
+somewhere else, then open the Yggdrasil pull request. Register
+`libseams_jll` before Dseams: the General registry resolves
+`libseams_jll` when Registrator runs.
+
 ## The patches
 
-`bundled/patches` holds the seams-core changes made after the pinned
-commit that the cross builds need (non-x86 hosts, musl, libc++, optional
-BLAS). Once a seams-core release contains them, point the `GitSource` at
-that release's commit and delete the patches.
+`bundled/patches` records the portability diff that is already contained
+in `v2_14_0_tag_sha` (non-x86 hosts, musl, libc++, optional BLAS). The
+recipe does not apply those patches. They stay in the tree as the record
+of that diff.

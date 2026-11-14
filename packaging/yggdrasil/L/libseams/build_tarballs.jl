@@ -8,14 +8,17 @@ include(joinpath(YGGDRASIL_DIR, "platforms", "macos_sdks.jl"))
 name = "libseams"
 version = v"2.14.0"
 
-# seams-core 2.14.0 (release branch head). BinaryBuilder refuses GitHub's
-# generated archives, and the project publishes no release tarball, so the
-# tree is pinned by commit. Once v2.14.0 is tagged on d-SEAMS/seams-core,
-# point the URL there; the commit stays the same.
+# BinaryBuilder refuses GitHub's generated archives, and seams-core publishes
+# no release tarball, so the tree is pinned by commit. v2.14.0 is not tagged.
+# v2_14_0_tag_sha is the stand-in for that tag: the release-candidate commit
+# on origin/release/2.14-merge. When the tag exists, replace this value with
+# `git rev-parse v2.14.0` if the tag is a different commit. The portable
+# sources, optional-BLAS meson logic, and non-x86 guards are already in this
+# commit, so bundled/patches is not applied.
+const v2_14_0_tag_sha = "c1efa8c734214e9117cb77e89258bc9fdd214a6c"
+
 sources = [
-    GitSource("https://github.com/HaoZeke/seams-core.git",
-              "18820a224dfebbaf0c327f99f28d8c453f84a221"),
-    DirectorySource("./bundled"),
+    GitSource("https://github.com/HaoZeke/seams-core.git", v2_14_0_tag_sha),
 ]
 
 # The engine core, its stable C API (libseams), and the C ABI of the R and
@@ -24,9 +27,6 @@ sources = [
 # that have no JLL yet.
 script = raw"""
 cd ${WORKSPACE}/srcdir/seams-core
-for p in ${WORKSPACE}/srcdir/patches/*.patch; do
-    atomic_patch -p1 "${p}"
-done
 
 meson setup build \
     --cross-file="${MESON_TARGET_TOOLCHAIN}" \
@@ -49,9 +49,15 @@ meson setup build \
     -Dwith_sphericart=disabled \
     -Dwith_nauty=disabled \
     -Dwith_lua=disabled \
+    -Dwith_blas=disabled \
     -Dwith_chemfiles=disabled \
+    -Dwith_readcon=disabled \
     -Dwith_linkcell=disabled \
-    -Dwith_minimage=disabled
+    -Dwith_minimage=disabled \
+    -Dwith_spglib=disabled \
+    -Dwith_sphericart=disabled \
+    -Dwith_nauty=disabled \
+    -Dwith_csm=disabled
 ninja -C build -j${nproc} src/libyodaLib.${dlext} src/libseams.${dlext} bindings/libseams_lang.${dlext} seams${exeext}
 
 install -Dvm 755 build/src/libyodaLib.${dlext} "${libdir}/libyodaLib.${dlext}"
