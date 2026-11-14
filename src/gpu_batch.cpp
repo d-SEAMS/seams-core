@@ -625,12 +625,13 @@ struct Workspace {
   }
 };
 
-Workspace &workspace() {
+// Only the linkcell GPU path below takes these.
+[[maybe_unused]] Workspace &workspace() {
   static Workspace w;
   return w;
 }
 
-double msSince(std::chrono::steady_clock::time_point t0) {
+[[maybe_unused]] double msSince(std::chrono::steady_clock::time_point t0) {
   return std::chrono::duration<double, std::milli>(
              std::chrono::steady_clock::now() - t0)
       .count();
