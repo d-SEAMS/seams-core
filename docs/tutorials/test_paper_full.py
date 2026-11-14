@@ -53,6 +53,13 @@ def snakemake_bin():
 
 def main():
     topic, root, seams, libdir, build = sys.argv[1:6]
+    # Off unless the build asked for the long Snakemake paper rules.
+    if os.environ.get("SEAMS_PAPER_FULL") != "1":
+        print(
+            "full paper runs are opt-in: meson setup -Dpaper_full=true",
+            file=sys.stderr,
+        )
+        raise SystemExit(77)
     program = snakemake_bin()
     if not program:
         print("snakemake is absent")

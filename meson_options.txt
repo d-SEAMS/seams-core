@@ -41,3 +41,5 @@ option('julia_wrap', type: 'string', value: '',
   description: 'Directory to prepend to PATH so the Julia front is found')
 option('r_libs_user', type: 'string', value: '',
   description: 'R_LIBS_USER for the CHILL+ front. Empty leaves R to discover it')
+option('paper_full', type: 'boolean', value: false,
+  description: 'Run the full paper Snakemake tutorials. Off by default; those tests exit 77 until this is enabled')

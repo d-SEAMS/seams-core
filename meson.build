@@ -954,6 +954,12 @@ if get_option('with_cli')
       timeout: 300)
   endforeach
   # Full paper runs. Suite slow only, so `meson test --suite docs` stays fast.
+  # Off unless -Dpaper_full=true. The script then exits 77 and says so.
+  paper_env = environment()
+  paper_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+  if get_option('paper_full')
+    paper_env.set('SEAMS_PAPER_FULL', '1')
+  endif
   foreach _paper : ['interface', 'cages', 'rings', 'brine', 'nucleation']
     test(
       'docs_paper_' + _paper + '_full',
@@ -966,7 +972,7 @@ if get_option('with_cli')
         meson.project_build_root() / 'src',
         meson.project_build_root(),
       ],
-      env: tutorial_env,
+      env: paper_env,
       depends: [seams_exe],
       suite: 'slow',
       timeout: 900)
