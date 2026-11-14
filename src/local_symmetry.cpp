@@ -22,6 +22,10 @@
 #include <string>
 #include <vector>
 
+#ifdef SEAMS_HAS_OPENMP
+#include <omp.h>
+#endif
+
 #ifdef SEAMS_HAS_SPGLIB
 #include <spglib.h>
 #endif
@@ -1173,10 +1177,16 @@ int seams_symmetry_classify_tol(const double *xyz, int n, const double *lattice9
   }
   SoaCols &cols = soaCols();
   cols.fit(static_cast<size_t>(n));
+  double *cx = cols.x;
+  double *cy = cols.y;
+  double *cz = cols.z;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (n >= 16384 && !omp_in_parallel())
+#endif
   for (int i = 0; i < n; i++) {
-    cols.x[i] = xyz[3 * i];
-    cols.y[i] = xyz[3 * i + 1];
-    cols.z[i] = xyz[3 * i + 2];
+    cx[i] = xyz[3 * i];
+    cy[i] = xyz[3 * i + 1];
+    cz[i] = xyz[3 * i + 2];
   }
   symm::classifyIceArrays(cols.x, cols.y, cols.z, n, lat, labels, shell_rmsd);
   return 0;

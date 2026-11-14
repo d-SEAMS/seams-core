@@ -1876,19 +1876,65 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   }
   // Atoms packed by cell, which is the layout of the orthorhombic neighbour list.
   View<int> cellStart{mem.cellStart};
-  for (int i = 0; i < n; i++) {
-    ++cellStart[static_cast<size_t>(bin[static_cast<size_t>(i)]) + 1];
-  }
-  for (int c = 0; c < ncell; c++) {
-    cellStart[static_cast<size_t>(c) + 1] += cellStart[static_cast<size_t>(c)];
-  }
-  View<int> fill{mem.fill};
-  std::memcpy(fill.p, cellStart.p, static_cast<size_t>(ncell) * sizeof(int));
   View<Packed> packed{mem.packed};
-  for (int i = 0; i < n; i++) {
-    const int slot = fill[static_cast<size_t>(bin[static_cast<size_t>(i)])]++;
-    packed[static_cast<size_t>(slot)] = Packed{px[static_cast<size_t>(i)], py[static_cast<size_t>(i)],
-                                               pz[static_cast<size_t>(i)], i};
+#ifdef SEAMS_HAS_OPENMP
+  const int sortTeam = (n >= 16384 && !omp_in_parallel()) ? omp_get_max_threads() : 1;
+#else
+  const int sortTeam = 1;
+#endif
+  if (sortTeam > 1) {
+#ifdef SEAMS_HAS_OPENMP
+    // A counting sort on the team. Thread t takes the t-th block of atoms,
+    // and its slots in a cell follow those of the lower blocks, so each
+    // cell holds its atoms in ascending order as the serial fill does.
+    thread_local std::vector<int> slotStore;
+    slotStore.assign(static_cast<size_t>(sortTeam) * static_cast<size_t>(ncell), 0);
+    int *slots = slotStore.data();
+#pragma omp parallel num_threads(sortTeam)
+    {
+      const int t = omp_get_thread_num();
+      const int nt = omp_get_num_threads();
+      const int lo = static_cast<int>(static_cast<long long>(n) * t / nt);
+      const int hi = static_cast<int>(static_cast<long long>(n) * (t + 1) / nt);
+      int *mine = slots + static_cast<size_t>(t) * static_cast<size_t>(ncell);
+      for (int i = lo; i < hi; i++) {
+        ++mine[bin[static_cast<size_t>(i)]];
+      }
+#pragma omp barrier
+#pragma omp single
+      {
+        for (int c = 0; c < ncell; c++) {
+          int at = cellStart[static_cast<size_t>(c)];
+          for (int u = 0; u < nt; u++) {
+            int &k = slots[static_cast<size_t>(u) * static_cast<size_t>(ncell) + static_cast<size_t>(c)];
+            const int count = k;
+            k = at;
+            at += count;
+          }
+          cellStart[static_cast<size_t>(c) + 1] = at;
+        }
+      }
+      for (int i = lo; i < hi; i++) {
+        const int slot = mine[bin[static_cast<size_t>(i)]]++;
+        packed[static_cast<size_t>(slot)] = Packed{px[static_cast<size_t>(i)], py[static_cast<size_t>(i)],
+                                                   pz[static_cast<size_t>(i)], i};
+      }
+    }
+#endif
+  } else {
+    for (int i = 0; i < n; i++) {
+      ++cellStart[static_cast<size_t>(bin[static_cast<size_t>(i)]) + 1];
+    }
+    for (int c = 0; c < ncell; c++) {
+      cellStart[static_cast<size_t>(c) + 1] += cellStart[static_cast<size_t>(c)];
+    }
+    View<int> fill{mem.fill};
+    std::memcpy(fill.p, cellStart.p, static_cast<size_t>(ncell) * sizeof(int));
+    for (int i = 0; i < n; i++) {
+      const int slot = fill[static_cast<size_t>(bin[static_cast<size_t>(i)])]++;
+      packed[static_cast<size_t>(slot)] = Packed{px[static_cast<size_t>(i)], py[static_cast<size_t>(i)],
+                                                 pz[static_cast<size_t>(i)], i};
+    }
   }
   const int span = 2 * reach + 1;
   const int nImage = span * span * span;
@@ -1905,6 +1951,9 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     double *cy = mem.cy;
     double *cz = mem.cz;
     int *cid = mem.cid;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (n >= 16384 && threads > 1)
+#endif
     for (int s = 0; s < n; s++) {
       const Packed &p = packed[static_cast<size_t>(s)];
       cx[s] = p.x;
@@ -2274,7 +2323,11 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   // The fit is only for a shell that already touches a labeled crystal.
   // Bulk liquid has a high q and would otherwise all enter Kabsch.
   const bool wideBox = la > 12.0 && lb > 12.0 && lc > 12.0;
-  for (int round = 0; round < 4; round++) {
+  // A round that relabels nothing leaves the next round the same input, so
+  // the later rounds would relabel nothing either.
+  bool changed = true;
+  for (int round = 0; round < 4 && changed; round++) {
+    changed = false;
     for (int i = 0; i < n; i++) {
       if (kind[i] != -3) {
         continue;
@@ -2292,6 +2345,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       double fx[12];
       double fy[12];
       double fz[12];
+      changed = true;
       if (!gatherTwelve(i, mine, bonds.get(), nbon.data(), wideBox, fx, fy, fz)) {
         kind[i] = -1;
         continue;
