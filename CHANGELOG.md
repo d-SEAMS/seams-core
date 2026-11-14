@@ -14,6 +14,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 ### Added
 
+- A Reproduce the paper catalog lists each seams-core figure and table with the command, the input frame, the printed numbers, and the Snakemake rule or asv class. Small rows run in the suite. Full rows run when `-Dpaper_full=true`. Each head-to-head names its committed CSV.
 - A nucleation-pathway census reports primitive rings by size, both CHILL+ rules, Lechner-Dellago q6-bar, and diamond symmetry labels on every frame.
   The CHILL+ staggered and eclipsed edges are unchanged.
   Largest-cluster size and the Ic/Ih fraction are recorded for each definition.

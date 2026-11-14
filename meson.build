@@ -966,6 +966,20 @@ if get_option('with_cli')
   if get_option('paper_full')
     paper_env.set('SEAMS_PAPER_FULL', '1')
   endif
+  test(
+    'docs_paper_reproduce',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'check_paper_reproduce.py',
+      meson.project_source_root(),
+      seams_exe.full_path(),
+      meson.project_build_root() / 'src',
+      meson.project_build_root(),
+    ],
+    env: tutorial_env,
+    depends: [seams_exe],
+    suite: 'docs',
+    timeout: 900)
   foreach _paper : ['interface', 'cages', 'rings', 'brine', 'nucleation']
     test(
       'docs_paper_' + _paper + '_full',
@@ -983,6 +997,21 @@ if get_option('with_cli')
       suite: 'slow',
       timeout: 900)
   endforeach
+  test(
+    'docs_paper_reproduce_full',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'check_paper_reproduce.py',
+      '--full',
+      meson.project_source_root(),
+      seams_exe.full_path(),
+      meson.project_build_root() / 'src',
+      meson.project_build_root(),
+    ],
+    env: paper_env,
+    depends: [seams_exe],
+    suite: 'slow',
+    timeout: 900)
   test(
     'docs_towncrier',
     python3,

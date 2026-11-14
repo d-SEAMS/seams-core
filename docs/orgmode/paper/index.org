@@ -13,6 +13,7 @@ and the steps that install the release and rerun the records.
 | [[file:versions.org][Versions]] | engine, front ends, dependency pins, comparison codes, machines |
 | [[file:benchmarks.org][Benchmarks]] | every timing table of the paper and its supplement, with its record |
 | [[file:reproduce.org][Reproduce]] | install the release, rerun each record, check the Lean development |
+| [[file:reproduce.org::*Reproduce the paper][Reproduce the paper]] | every seams-core figure and table, with the command, the frame, the printed numbers, and the Snakemake rule or asv class |
 
 The records live under =results/reference/= of the reproducibility
 package, [[https://github.com/d-SEAMS/dseams2_repro][dseams2_repro]].

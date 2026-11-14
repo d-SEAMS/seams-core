@@ -146,3 +146,58 @@ Lean name and file.
 elan toolchain install leanprover/lean4:v4.15.0
 lake build
 #+end_src
+
+* Reproduce the paper
+
+Each row is one figure or table that seams-core produces for the
+d-SEAMS 2.0 paper. =small= rows run in =meson test docs_paper_reproduce=.
+=full= rows run in =meson test docs_paper_reproduce_full= when the build
+is configured with =-Dpaper_full=true=. The command is =paper <topic>=,
+which is =docs/tutorials/paper_science.py=, or a =seams= invocation.
+The expected cell is the text that command prints. The regenerator
+cell is the Snakemake rule or asv class that rebuilds the full record.
+A comparison also names the committed head-to-head CSV, and the last
+cell is a phrase that file contains.
+
+The small ring, cage, interface, brine, and nucleation rows are the
+unit-cell and three-frame drivers. The full rows read
+=input/traj/mW_cubic.lammpstrj= (11 frames, frame 1 scored), the
+GenIce repeats, =input/traj/interface_f0.lammpstrj=,
+=input/traj/nacl_front.lammpstrj=, and the 148-frame figshare
+nucleation trajectory. Head-to-head rows run the same census on
+=input/traj/ice1h.lammpstrj= (128 molecules, 256 six-rings, q6
+0.625855) or =input/traj/genice_sI.lammpstrj= (2 cages of \(5^{12}\),
+40 vertices). The CSV phrase is the 4096-molecule agreement, not a
+second timing.
+
+# BEGIN PAPER_REPRODUCE
+| entry | size | input | command | expect | regenerator | csv | csv_expect |
+|-------+------+-------+---------+--------+-------------+-----+------------|
+| rings-unit | small | GenIce ice Ih, 16 oxygens, cutoff 3.5 angstrom | paper rings | rings primitive 4 24 6 32 | docs/tutorials/Snakefile:rule rings: | | |
+| rings-paper | full | input/traj/mW_cubic.lammpstrj frame 1 of 11, 4096 molecules | paper rings-full | rings full histogram 6 8192 && file input/traj/mW_cubic.lammpstrj | Snakefile:rule paper_rings: | | |
+| cages-unit | small | GenIce sI, sII, and sH unit cells | paper cages | cages sI 2 6 && cages sII 16 8 && cages sH 6 4 2 | docs/tutorials/Snakefile:rule cages: | | |
+| cages-paper | full | GenIce repeats, 368, 544, and 272 waters | paper cages-full | cages full sI 16 48 && cages full sII 64 32 && cages full sH 24 16 8 | Snakefile:rule paper_cages: | | |
+| chill-interface | small | generated 128-oxygen ice and water slab | paper interface | interface published hexagonal 68 interfacial 19 water 41 && interface ovito hexagonal 68 interfacial 20 water 40 | docs/tutorials/Snakefile:rule interface: | | |
+| chill-interface-paper | full | input/traj/interface_f0.lammpstrj, 864 molecules | paper interface-full | interface full published hexagonal 352 interfacial 49 water 434 clathrate 3 interClathrate 25 && interface full stack HHHHHHHH....C. | docs/tutorials/Snakefile:rule interface: | | |
+| brine-growth | small | three-stage GenIce block plus a packmol brine | paper brine | brine frame 0 hexagonal 31 water 38 front 7.40 && brine frame 2 hexagonal 32 water 35 front 7.40 | docs/tutorials/Snakefile:rule brine: | | |
+| brine-paper | full | input/traj/nacl_front.lammpstrj, 873 atoms, 864 waters, 9 ions | paper brine-full | brine full waters 864 ions 9 hexagonal 352 water 434 | docs/tutorials/Snakefile:rule brine: | | |
+| nucleation-short | small | three built frames | paper nucleation | nucleation frame 0 q6bar 0.276023 && nucleation frame 2 q6bar 0.334254 | docs/tutorials/Snakefile:rule nucleation: | | |
+| nucleation-paper | full | figshare 11448702, 148 frames of 4096 | paper nucleation-full | nucleation full frame 1 q6bar 0.26063 && nucleation full frame 148 q6bar 0.287256 | docs/tutorials/Snakefile:rule nucleation: | | |
+| h2h-ovito-rings | small | input/traj/ice1h.lammpstrj | seams rings input/traj/ice1h.lammpstrj --type 1 --cutoff 3.5 --max 6 | nop 128 rings 256 && 6 256 | Snakefile:rule literature_h2h: | docs/data/comparisons/h2h-summary.csv | hexagons 8192 equal |
+| h2h-ovito-diamond | small | input/traj/ice1h.lammpstrj | seams chill-plus input/traj/ice1h.lammpstrj --type 1 --cutoff 3.5 | nop 128 hexagonal 128 | Snakefile:rule literature_h2h: | docs/data/comparisons/h2h-summary.csv | OVITO,identify_diamond,4096 |
+| h2h-ptm | small | input/traj/ice1h.lammpstrj | seams chill-plus input/traj/ice1h.lammpstrj --type 1 --cutoff 3.5 | hexagonal 128 | Snakefile:rule paper_ptm: | docs/data/comparisons/h2h-summary.csv | PTM,ptm,4096 |
+| h2h-ira | small | input/traj/ice1h.lammpstrj | seams chill-plus input/traj/ice1h.lammpstrj --type 1 --cutoff 3.5 | hexagonal 128 | benchmarks/h2h_literature.py:class LiteratureIra | docs/data/comparisons/h2h-summary.csv | IRA,shape,4096 |
+| h2h-pyscal3-q6 | small | input/traj/ice1h.lammpstrj | seams steinhardt input/traj/ice1h.lammpstrj --type 1 --cutoff 3.5 --l 6 --frame 1 --last 1 | q6 0.625855 | benchmarks/h2h_literature.py:class LiteraturePyscal3 | docs/data/comparisons/h2h-summary.csv | pyscal3,q6,4096 |
+| h2h-mdapy-q6 | small | input/traj/ice1h.lammpstrj | seams steinhardt input/traj/ice1h.lammpstrj --type 1 --cutoff 3.5 --l 6 --frame 1 --last 1 | q6 0.625855 | benchmarks/h2h_literature.py:class LiteratureMdapy | docs/data/comparisons/h2h-summary.csv | mdapy,q6,4096 |
+| h2h-mdapy-chill | small | input/traj/ice1h.lammpstrj | seams chill-plus input/traj/ice1h.lammpstrj --type 1 --cutoff 3.5 | hexagonal 128 | benchmarks/h2h_literature.py:class LiteratureMdapy | docs/data/comparisons/h2h-summary.csv | mdapy,chill_plus,4096 |
+| h2h-vesin | small | input/traj/ice1h.lammpstrj | seams rings input/traj/ice1h.lammpstrj --type 1 --cutoff 3.5 --max 6 | nop 128 rings 256 | benchmarks/h2h_literature.py:class LiteratureVesin | docs/data/comparisons/h2h-summary.csv | vesin,neighbours,4096 |
+| h2h-freud | small | input/traj/ice1h.lammpstrj | seams rings input/traj/ice1h.lammpstrj --type 1 --cutoff 3.5 --max 6 | nop 128 rings 256 | Snakefile:rule literature_h2h: | docs/data/comparisons/h2h-summary.csv | freud,neighbours,4096 |
+| h2h-sqq | small | input/traj/ice1h.lammpstrj | seams rings input/traj/ice1h.lammpstrj --type 1 --cutoff 3.5 --max 6 | 6 256 | benchmarks/h2h_literature.py:class LiteratureSqq | docs/data/comparisons/h2h-sqq.csv | d-SEAMS primitive 3-6 vs SQQ |
+| h2h-sqq-edges | small | input/traj/ice1h.lammpstrj | seams rings input/traj/ice1h.lammpstrj --type 1 --cutoff 3.5 --max 6 | nop 128 rings 256 | benchmarks/h2h_literature.py:class LiteratureSqq | docs/data/comparisons/h2h-sqq-agree.csv | O-O edges,8192,8192,8192 |
+| h2h-clavis | small | input/traj/genice_sI.lammpstrj | seams cages input/traj/genice_sI.lammpstrj --type 1 --cutoff 3.5 --signature 512 | cages 2 atoms 40 | benchmarks/h2h_literature.py:class LiteratureClavis | docs/data/comparisons/h2h-clavis-cages.csv | 512 both 1 |
+| timing-rings | small | input/traj/ice1h.lammpstrj | seams rings input/traj/ice1h.lammpstrj --type 1 --cutoff 3.5 --max 6 | 6 256 | Snakefile:rule paper_rings: | | |
+| timing-chill | small | input/traj/ice1h.lammpstrj | seams chill-plus input/traj/ice1h.lammpstrj --type 1 --cutoff 3.5 | hexagonal 128 | Snakefile:rule paper_chill: | | |
+| timing-neighbours | small | input/traj/ice1h.lammpstrj | seams rings input/traj/ice1h.lammpstrj --type 1 --cutoff 3.5 --max 6 | nop 128 rings 256 | Snakefile:rule paper_neighbours: | | |
+| timing-q6 | small | input/traj/ice1h.lammpstrj | seams steinhardt input/traj/ice1h.lammpstrj --type 1 --cutoff 3.5 --l 6 --frame 1 --last 1 | q6 0.625855 | Snakefile:rule paper_q6: | | |
+| timing-cages | small | input/traj/genice_sI.lammpstrj | seams cages input/traj/genice_sI.lammpstrj --type 1 --cutoff 3.5 --signature 512 | cages 2 atoms 40 | Snakefile:rule paper_cages: | | |
+# END PAPER_REPRODUCE
