@@ -63,6 +63,10 @@ def main():
     out = work / topic
     if out.exists():
         shutil.rmtree(out)
+    # The five topics run as parallel tests. Each keeps its own .snakemake,
+    # because snakemake migrates and locks that folder at start.
+    state = work / ("snakemake-" + topic)
+    state.mkdir(exist_ok=True)
     env = os.environ.copy()
     env["SEAMS"] = seams
     env["SEAMS_LIBDIR"] = libdir
@@ -84,7 +88,7 @@ def main():
         capture_output=True,
         text=True,
         env=env,
-        cwd=str(work),
+        cwd=str(state),
     )
     blob = done.stdout + "\n" + done.stderr
     if done.returncode != 0:
