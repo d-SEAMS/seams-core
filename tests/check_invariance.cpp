@@ -52,7 +52,7 @@ std::vector<std::vector<int>> keys(const Rings &six,
   std::vector<std::vector<int>> out;
   out.reserve(ids.size());
   for (const int i : ids) {
-    out.push_back(key(six[i]));
+    out.push_back(key(six[static_cast<std::size_t>(i)]));
   }
   std::sort(out.begin(), out.end());
   return out;
@@ -82,8 +82,8 @@ Result evaluate(const Rings &six, const Rings &nList,
       ddcIds.push_back(static_cast<int>(i));
     }
     for (const int a : six[i]) {
-      c.atomHc[a] |= aff.hc[i] ? 1 : 0;
-      c.atomDdc[a] |= aff.ddc[i] ? 1 : 0;
+      c.atomHc[static_cast<std::size_t>(a)] |= aff.hc[i] ? 1 : 0;
+      c.atomDdc[static_cast<std::size_t>(a)] |= aff.ddc[i] ? 1 : 0;
     }
   }
   c.hcRings = static_cast<int>(hcIds.size());
@@ -115,24 +115,24 @@ Result evaluate(const Rings &six, const Rings &nList,
 // Rewrites the atom-keyed fields of a result on a relabelled frame in the
 // original labels
 void mapBack(Result &c, const std::vector<int> &perm) {
-  const int n = static_cast<int>(perm.size());
+  const std::size_t n = perm.size();
   std::vector<int> inverse(n);
-  for (int a = 0; a < n; a++) {
-    inverse[perm[a]] = a;
+  for (std::size_t a = 0; a < n; a++) {
+    inverse[static_cast<std::size_t>(perm[a])] = static_cast<int>(a);
   }
   auto remap = [&](std::vector<std::vector<int>> &ks) {
     for (auto &k : ks) {
       for (int &a : k) {
-        a = inverse[a];
+        a = inverse[static_cast<std::size_t>(a)];
       }
       std::sort(k.begin(), k.end());
     }
     std::sort(ks.begin(), ks.end());
   };
   std::vector<int> hc(n), ddc(n);
-  for (int a = 0; a < n; a++) {
-    hc[a] = c.atomHc[perm[a]];
-    ddc[a] = c.atomDdc[perm[a]];
+  for (std::size_t a = 0; a < n; a++) {
+    hc[a] = c.atomHc[static_cast<std::size_t>(perm[a])];
+    ddc[a] = c.atomDdc[static_cast<std::size_t>(perm[a])];
   }
   c.atomHc = std::move(hc);
   c.atomDdc = std::move(ddc);
@@ -239,17 +239,17 @@ int main(int argc, char **argv) {
   runVariants("atom positions", rank, ref);
 
   // Relabel the frame and enumerate its rings afresh
-  const int n = static_cast<int>(idx.size());
+  const std::size_t n = idx.size();
   std::vector<int> perm(n);
   std::iota(perm.begin(), perm.end(), 0);
   std::mt19937 rng(seed);
   std::shuffle(perm.begin(), perm.end(), rng);
   Rings pidx(n);
-  for (int a = 0; a < n; a++) {
-    auto &row = pidx[perm[a]];
+  for (std::size_t a = 0; a < n; a++) {
+    auto &row = pidx[static_cast<std::size_t>(perm[a])];
     row.push_back(perm[a]);
     for (std::size_t k = 1; k < idx[a].size(); k++) {
-      row.push_back(perm[idx[a][k]]);
+      row.push_back(perm[static_cast<std::size_t>(idx[a][k])]);
     }
   }
   Rings psix;
@@ -259,14 +259,14 @@ int main(int argc, char **argv) {
     }
   }
   std::vector<int> inverse(n);
-  for (int a = 0; a < n; a++) {
-    inverse[perm[a]] = a;
+  for (std::size_t a = 0; a < n; a++) {
+    inverse[static_cast<std::size_t>(perm[a])] = static_cast<int>(a);
   }
   Rings back;
   for (const auto &r : psix) {
     std::vector<int> o;
     for (const int a : r) {
-      o.push_back(inverse[a]);
+      o.push_back(inverse[static_cast<std::size_t>(a)]);
     }
     back.push_back(key(o));
   }
@@ -279,8 +279,8 @@ int main(int argc, char **argv) {
   const bool sameRings = back == orig;
 
   auto pcloud = cloud;
-  for (int a = 0; a < n; a++) {
-    pcloud.pts[perm[a]] = cloud.pts[a];
+  for (std::size_t a = 0; a < n; a++) {
+    pcloud.pts[static_cast<std::size_t>(perm[a])] = cloud.pts[a];
   }
   Result pc = evaluate(psix, pidx, ring::positionRank(pcloud));
   mapBack(pc, perm);

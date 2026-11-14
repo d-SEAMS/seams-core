@@ -296,8 +296,8 @@ TEST_CASE("relOrderHC orders HC basal rings", "[pntCorrespondence]") {
   // Get the basal rings from the cage
   auto &cage = cageList[0];
   REQUIRE(cage.rings.size() >= 2);
-  auto basal1 = rings[cage.rings[0]];
-  auto basal2 = rings[cage.rings[1]];
+  auto basal1 = rings[static_cast<std::size_t>(cage.rings[0])];
+  auto basal2 = rings[static_cast<std::size_t>(cage.rings[1])];
 
   std::vector<int> matchedBasal1, matchedBasal2;
   int ret = pntToPnt::relOrderHC(cloud, basal1, basal2, nList, matchedBasal1,
@@ -319,8 +319,8 @@ TEST_CASE("changeHexCageOrder fills Eigen matrix for HC matching",
   ring::findHC(rings, ringType, nList, cageList);
 
   REQUIRE(cageList.size() == 1);
-  auto basal1 = rings[cageList[0].rings[0]];
-  auto basal2 = rings[cageList[0].rings[1]];
+  auto basal1 = rings[static_cast<std::size_t>(cageList[0].rings[0])];
+  auto basal2 = rings[static_cast<std::size_t>(cageList[0].rings[1])];
 
   std::vector<int> matchedBasal1, matchedBasal2;
   pntToPnt::relOrderHC(cloud, basal1, basal2, nList, matchedBasal1,

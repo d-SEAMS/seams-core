@@ -186,7 +186,7 @@ TEST_CASE("primitive census matches brute-force cycles", "[ring][census]") {
     const int cube[12][2] = {{0, 1}, {1, 2}, {2, 3}, {3, 0}, {4, 5}, {5, 6},
                              {6, 7}, {7, 4}, {0, 4}, {1, 5}, {2, 6}, {3, 7}};
     for (const auto &e : cube) {
-      edges[e[0]].push_back(e[1]);
+      edges[static_cast<std::size_t>(e[0])].push_back(e[1]);
     }
     auto adj = undirected(edges);
     expectSameCensus(adj, 4);

@@ -113,7 +113,7 @@ TEST_CASE("neighbourListByIndex converts ID list to index list",
   REQUIRE(nListByIdx.size() == 4);
 
   // Since atomID == index in this test cloud, the lists should be identical
-  for (int i = 0; i < 4; i++) {
+  for (std::size_t i = 0; i < 4; i++) {
     REQUIRE(nListByIdx[i].size() == nListByID[i].size());
   }
 }
@@ -269,10 +269,11 @@ TEST_CASE("neighbour list matches minimum image for a tight box",
       INFO("box = " << boxLength << ", atom " << iatom);
 
       // Row header is the particle itself
-      REQUIRE(nList[iatom].size() >= 1);
-      REQUIRE(nList[iatom][0] == iatom);
+      const auto &row = nList[static_cast<std::size_t>(iatom)];
+      REQUIRE(row.size() >= 1);
+      REQUIRE(row[0] == iatom);
 
-      std::vector<int> got(nList[iatom].begin() + 1, nList[iatom].end());
+      std::vector<int> got(row.begin() + 1, row.end());
       std::sort(got.begin(), got.end());
 
       // No duplicates, and never the particle itself
@@ -387,8 +388,8 @@ TEST_CASE("neighList same type does not self-include or double-count",
   auto nList = nneigh::neighList(1.5, cloud, 1, 1);
   REQUIRE(nList.size() == 4);
   for (int i = 0; i < 4; i++) {
-    REQUIRE(nList[i][0] == i);
-    auto neigh = nList[i];
+    REQUIRE(nList[static_cast<std::size_t>(i)][0] == i);
+    auto neigh = nList[static_cast<std::size_t>(i)];
     std::sort(neigh.begin() + 1, neigh.end());
     REQUIRE(std::adjacent_find(neigh.begin() + 1, neigh.end()) == neigh.end());
     REQUIRE(std::find(neigh.begin() + 1, neigh.end(), i) == neigh.end());
@@ -925,9 +926,9 @@ TEST_CASE("cell-list neighbours match the minimum image on a tilted frame",
   for (int i = 0; i < n; i++) {
     for (int j = i + 1; j < n; j++) {
       if (gen::periodicDistSq(frame, cloud, i, j) <= cutoff * cutoff) {
-        wantFull[i].push_back(j + 1);
-        wantFull[j].push_back(i + 1);
-        wantHalf[i].push_back(j + 1);
+        wantFull[static_cast<std::size_t>(i)].push_back(j + 1);
+        wantFull[static_cast<std::size_t>(j)].push_back(i + 1);
+        wantHalf[static_cast<std::size_t>(i)].push_back(j + 1);
       }
     }
   }

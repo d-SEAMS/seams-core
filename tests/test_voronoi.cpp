@@ -57,13 +57,14 @@ TEST_CASE("Voronoi cell of simple cubic is a cube", "[voronoi]") {
   auto cells = chill::voronoiFacetWeights(cloud, 2.2 * a);
 
   for (int i = 0; i < cloud.nop; i++) {
-    REQUIRE(cells[i].certified);
-    REQUIRE(cells[i].neighbours.size() == 6);
-    for (const double w : cells[i].weights) {
+    const auto &cell = cells[static_cast<std::size_t>(i)];
+    REQUIRE(cell.certified);
+    REQUIRE(cell.neighbours.size() == 6);
+    for (const double w : cell.weights) {
       REQUIRE_THAT(w, Catch::Matchers::WithinAbs(1.0 / 6.0, 1e-9));
     }
     double sum = 0.0;
-    for (const double w : cells[i].weights) {
+    for (const double w : cell.weights) {
       sum += w;
     }
     REQUIRE_THAT(sum, Catch::Matchers::WithinAbs(1.0, 1e-12));
@@ -82,12 +83,14 @@ TEST_CASE("the exactness certificate repairs an undersized cutoff",
   auto reference = chill::voronoiFacetWeights(cloud, 2.2 * a);
 
   for (int i = 0; i < cloud.nop; i++) {
-    REQUIRE(tight[i].certified);
-    REQUIRE(tight[i].neighbours == reference[i].neighbours);
-    REQUIRE(tight[i].weights.size() == reference[i].weights.size());
-    for (size_t k = 0; k < tight[i].weights.size(); k++) {
-      REQUIRE_THAT(tight[i].weights[k],
-                   Catch::Matchers::WithinAbs(reference[i].weights[k], 1e-9));
+    const auto &tightCell = tight[static_cast<std::size_t>(i)];
+    const auto &refCell = reference[static_cast<std::size_t>(i)];
+    REQUIRE(tightCell.certified);
+    REQUIRE(tightCell.neighbours == refCell.neighbours);
+    REQUIRE(tightCell.weights.size() == refCell.weights.size());
+    for (size_t k = 0; k < tightCell.weights.size(); k++) {
+      REQUIRE_THAT(tightCell.weights[k],
+                   Catch::Matchers::WithinAbs(refCell.weights[k], 1e-9));
     }
   }
 }
@@ -100,9 +103,10 @@ TEST_CASE("Voronoi cell of FCC is a rhombic dodecahedron", "[voronoi]") {
   auto cells = chill::voronoiFacetWeights(cloud, 1.2 * a);
 
   for (int i = 0; i < cloud.nop; i++) {
-    REQUIRE(cells[i].certified);
-    REQUIRE(cells[i].neighbours.size() == 12);
-    for (const double w : cells[i].weights) {
+    const auto &cell = cells[static_cast<std::size_t>(i)];
+    REQUIRE(cell.certified);
+    REQUIRE(cell.neighbours.size() == 12);
+    for (const double w : cell.weights) {
       REQUIRE_THAT(w, Catch::Matchers::WithinAbs(1.0 / 12.0, 1e-9));
     }
   }
@@ -115,14 +119,15 @@ TEST_CASE("Voronoi cell of BCC has eight large and six small facets",
   auto cells = chill::voronoiFacetWeights(cloud, 1.4 * a);
 
   for (int i = 0; i < cloud.nop; i++) {
-    REQUIRE(cells[i].neighbours.size() == 14);
-    auto w = cells[i].weights;
+    const auto &cell = cells[static_cast<std::size_t>(i)];
+    REQUIRE(cell.neighbours.size() == 14);
+    auto w = cell.weights;
     std::sort(w.begin(), w.end());
     // six squares (toward the second shell), then eight hexagons
-    for (int k = 0; k < 6; k++) {
+    for (std::size_t k = 0; k < 6; k++) {
       REQUIRE_THAT(w[k], Catch::Matchers::WithinAbs(w[0], 1e-9));
     }
-    for (int k = 6; k < 14; k++) {
+    for (std::size_t k = 6; k < 14; k++) {
       REQUIRE_THAT(w[k], Catch::Matchers::WithinAbs(w[13], 1e-9));
     }
     REQUIRE(w[13] > w[0]);
@@ -144,8 +149,9 @@ TEST_CASE("weighted Steinhardt reproduces FCC references under equal weights",
   for (const auto &c : cases) {
     auto q = chill::steinhardtQlVoronoi(cloud, 1.2 * a, c.l);
     for (int i = 0; i < cloud.nop; i++) {
-      REQUIRE_THAT(q.ql[i], Catch::Matchers::WithinAbs(c.reference, 1e-4));
-      REQUIRE_THAT(q.qlBar[i], Catch::Matchers::WithinAbs(q.ql[i], 1e-9));
+      const auto ui = static_cast<std::size_t>(i);
+      REQUIRE_THAT(q.ql[ui], Catch::Matchers::WithinAbs(c.reference, 1e-4));
+      REQUIRE_THAT(q.qlBar[ui], Catch::Matchers::WithinAbs(q.ql[ui], 1e-9));
     }
   }
 }
@@ -162,9 +168,10 @@ TEST_CASE("weighted q6 on BCC differs from naive fourteen-neighbour q6",
   REQUIRE(weighted.ql[0] > 0.0);
   // Uniform environment: the average still coincides with the local value
   for (int i = 0; i < cloud.nop; i++) {
-    REQUIRE_THAT(weighted.qlBar[i],
-                 Catch::Matchers::WithinAbs(weighted.ql[i], 1e-9));
-    REQUIRE_THAT(weighted.ql[i],
+    const auto ui = static_cast<std::size_t>(i);
+    REQUIRE_THAT(weighted.qlBar[ui],
+                 Catch::Matchers::WithinAbs(weighted.ql[ui], 1e-9));
+    REQUIRE_THAT(weighted.ql[ui],
                  Catch::Matchers::WithinAbs(weighted.ql[0], 1e-9));
   }
 }

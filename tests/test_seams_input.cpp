@@ -507,11 +507,11 @@ TEST_CASE("readChemfiles matches the hand-rolled LAMMPS reader", "[seams_input]"
 
     REQUIRE(hand.nop > 0);
     REQUIRE(chem.nop == hand.nop);
-    for (int k = 0; k < 3; k++) {
+    for (std::size_t k = 0; k < 3; k++) {
       REQUIRE_THAT(chem.box[k],
                    Catch::Matchers::WithinAbs(hand.box[k], 1e-9));
     }
-    for (int i = 0; i < hand.nop; i++) {
+    for (std::size_t i = 0; i < static_cast<std::size_t>(hand.nop); i++) {
       REQUIRE(chem.pts[i].atomID == hand.pts[i].atomID);
       REQUIRE(chem.pts[i].type == hand.pts[i].type);
       REQUIRE_THAT(chem.pts[i].x,
@@ -2144,7 +2144,7 @@ TEST_CASE("dump lines cover the field scanner", "[seams_input]") {
   cloud = sinp::readLammpsTrj(follow.string(), 1, cloud);
   REQUIRE(cloud.nop == 1);
   {
-    const auto stamp = fs::last_write_time(follow);
+    const auto followStamp = fs::last_write_time(follow);
     std::fstream io(follow, std::ios::in | std::ios::out | std::ios::binary);
     std::string bytes((std::istreambuf_iterator<char>(io)), {});
     const auto at = bytes.find("\nITEM: TIMESTEP\n1\n");
@@ -2154,7 +2154,7 @@ TEST_CASE("dump lines cover the field scanner", "[seams_input]") {
     io.seekp(static_cast<std::streamoff>(pos));
     io << "XXXX: TIMESTEP";
     io.close();
-    fs::last_write_time(follow, stamp);
+    fs::last_write_time(follow, followStamp);
   }
   cloud = sinp::readLammpsTrj(follow.string(), 2, cloud);
   REQUIRE(cloud.nop == 0);

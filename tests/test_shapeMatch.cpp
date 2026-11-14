@@ -24,7 +24,8 @@ TEST_CASE("updateRMSDRing sets RMSD for unassigned atoms", "[shapeMatch]") {
   REQUIRE(ret == 0);
   // All atoms in the ring should have the RMSD value
   for (int idx : basalRing) {
-    REQUIRE_THAT(rmsdPerAtom[idx], Catch::Matchers::WithinAbs(0.42, 1e-10));
+    REQUIRE_THAT(rmsdPerAtom[static_cast<std::size_t>(idx)],
+                 Catch::Matchers::WithinAbs(0.42, 1e-10));
   }
   // Other atoms should remain -1
   REQUIRE_THAT(rmsdPerAtom[5], Catch::Matchers::WithinAbs(-1.0, 1e-10));
@@ -54,7 +55,8 @@ TEST_CASE("updateRMSDRing with startingIndex wraps around", "[shapeMatch]") {
   match::updateRMSDRing(basalRing, 2, 1.0, rmsdPerAtom);
 
   for (int idx : basalRing) {
-    REQUIRE_THAT(rmsdPerAtom[idx], Catch::Matchers::WithinAbs(1.0, 1e-10));
+    REQUIRE_THAT(rmsdPerAtom[static_cast<std::size_t>(idx)],
+                 Catch::Matchers::WithinAbs(1.0, 1e-10));
   }
 }
 

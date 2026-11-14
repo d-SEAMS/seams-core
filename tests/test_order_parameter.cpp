@@ -29,9 +29,9 @@ makeCloud(const std::vector<std::array<double, 3>> &coords,
     p.type = 1;
     p.atomID = i;
     p.molID = 0;
-    p.x = coords[i][0];
-    p.y = coords[i][1];
-    p.z = coords[i][2];
+    p.x = coords[static_cast<std::size_t>(i)][0];
+    p.y = coords[static_cast<std::size_t>(i)][1];
+    p.z = coords[static_cast<std::size_t>(i)][2];
     cloud.pts.push_back(p);
     cloud.idIndexMap[i] = i;
   }

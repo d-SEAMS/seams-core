@@ -80,7 +80,7 @@ SCENARIO(
       fullGraph = primitive::countAllRingsFromIndex(nList, maxDepth);
       THEN("The number of rings should be 2 for this case.") {
         // Find the number of rings inside the graph object
-        nRings = fullGraph.rings.size();  // Number of rings
+        nRings = static_cast<int>(fullGraph.rings.size());  // Number of rings
         REQUIRE(nRings == 2);             // Evaluate condition
       }
     }  // End of getting all the rings (non-primitive included)
@@ -169,14 +169,14 @@ SCENARIO(
       fullGraph = primitive::countAllRingsFromIndex(nList, maxDepth);
       THEN("The number of primitive rings should be 5 for this case.") {
         // Find the number of rings inside the graph object
-        nAllRings =
-            fullGraph.rings.size();  // Number of rings after backtracking
+        nAllRings = static_cast<int>(
+            fullGraph.rings.size());  // Number of rings after backtracking
         // The number of all rings from backtracking should be 8
         REQUIRE(nAllRings == 8);
         // Get rid of all non-SP rings
         primitive::removeNonSPrings(fullGraph);
         // Get the number of primitive rings
-        nPrimitiveRings = fullGraph.rings.size();
+        nPrimitiveRings = static_cast<int>(fullGraph.rings.size());
         // For this case, the number of primitive rings should be 5
         REQUIRE(nPrimitiveRings == 5);  // Evaluate condition
       }

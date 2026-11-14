@@ -173,13 +173,13 @@ TEST_CASE("Ozaki-II GEMM matches MPFR inside the certificate", "[ozaki]") {
                            seams::product::Mode::OzakiII, bound.data(),
                            seams::product::Int8Backend::Scalar);
   REQUIRE(info.ok);
-  for (int i = 0; i < m; i++) {
-    for (int j = 0; j < n; j++) {
+  for (std::size_t i = 0; i < m; i++) {
+    for (std::size_t j = 0; j < n; j++) {
       std::vector<double> row(k);
       std::vector<double> col(k);
-      for (int t = 0; t < k; t++) {
-        row[static_cast<std::size_t>(t)] = A[i * k + t];
-        col[static_cast<std::size_t>(t)] = B[t * n + j];
+      for (std::size_t t = 0; t < k; t++) {
+        row[t] = A[i * k + t];
+        col[t] = B[t * n + j];
       }
       const double err = mpfrAbsErr(row.data(), col.data(), k, C[i * n + j]);
       REQUIRE(err <= bound[i * n + j]);

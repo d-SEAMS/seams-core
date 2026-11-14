@@ -125,7 +125,7 @@ denseNull(int n, const std::array<double, 3> &box, std::mt19937_64 &rng) {
     const int start = std::max(0, static_cast<int>(pos.size()) - 400);
     for (int i = start; i < static_cast<int>(pos.size()); i++) {
       double d2 = 0.0;
-      for (int k = 0; k < 3; k++) {
+      for (std::size_t k = 0; k < 3; k++) {
         double d = std::abs(cand[k] - pos[static_cast<std::size_t>(i)][k]);
         d = std::min(d, box[k] - d);
         d2 += d * d;
@@ -152,7 +152,7 @@ jitter(const std::vector<std::array<double, 3>> &pos,
   std::normal_distribution<double> g(0.0, sigma);
   auto out = pos;
   for (auto &p : out) {
-    for (int k = 0; k < 3; k++) {
+    for (std::size_t k = 0; k < 3; k++) {
       p[k] = wrapLen(p[k] + g(rng), box[k]);
     }
   }

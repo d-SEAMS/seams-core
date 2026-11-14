@@ -376,9 +376,9 @@ TEST_CASE("a triclinic cell is stored with three tilt factors", "[chemfiles]") {
 
   const auto pdb = dseams_test::freshFile("dseams_chem_res.pdb");
   {
-    std::ofstream out(pdb);
-    out << "ATOM      1  OW  SOL     7       1.000   2.000   3.000  1.00  0.00\n"
-        << "END\n";
+    std::ofstream pdbOut(pdb);
+    pdbOut << "ATOM      1  OW  SOL     7       1.000   2.000   3.000  1.00  0.00\n"
+           << "END\n";
   }
   Cloud residue;
   residue = sinp::openFrame(pdb.string(), 1, -1);

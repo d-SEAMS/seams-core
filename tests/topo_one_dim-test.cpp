@@ -104,7 +104,7 @@ SCENARIO("Test the prism identification scheme for a single tetragonal prism.",
     iPoint.z = 2.75;   // z
     yCloud.pts.push_back(iPoint);
     // Update nop
-    yCloud.nop = yCloud.pts.size();
+    yCloud.nop = static_cast<int>(yCloud.pts.size());
     // Update the unordered map
     for (int iatom = 0; iatom < yCloud.nop; iatom++) {
       yCloud.idIndexMap[iatom] = iatom;
@@ -210,8 +210,8 @@ TEST_CASE("assignPrismType assigns atom types for known prism list",
                                      nList, yCloud, rmsdPerAtom, false);
 
   // Now assign prism types
-  std::vector<int> atomTypes(yCloud.nop, 1); // 1 = dummy
-  std::vector<ring::strucType> atomState(yCloud.nop);
+  std::vector<int> atomTypes(static_cast<std::size_t>(yCloud.nop), 1); // 1 = dummy
+  std::vector<ring::strucType> atomState(static_cast<std::size_t>(yCloud.nop));
 
   int ret = ring::assignPrismType(rings, listPrism, 4, ringType, atomTypes,
                                    atomState);
@@ -220,7 +220,7 @@ TEST_CASE("assignPrismType assigns atom types for known prism list",
   // At least some atoms should be classified as prism type (not dummy)
   bool hasNonDummy = false;
   for (int i = 0; i < yCloud.nop; i++) {
-    if (atomTypes[i] != 1) hasNonDummy = true;
+    if (atomTypes[static_cast<std::size_t>(i)] != 1) hasNonDummy = true;
   }
   REQUIRE(hasNonDummy);
 }

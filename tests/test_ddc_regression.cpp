@@ -151,8 +151,8 @@ struct CageRun {
 
 std::uint64_t fnv1a(const std::string &text) {
   std::uint64_t hash = 14695981039346656037ULL;
-  for (unsigned char byte : text) {
-    hash ^= byte;
+  for (const char ch : text) {
+    hash ^= static_cast<unsigned char>(ch);
     hash *= 1099511628211ULL;
   }
   return hash;
@@ -283,8 +283,8 @@ TEST_CASE("ideal ice keeps its cages and the DDC search stays linear",
     // Clique ids are four 16-bit digits. Five digits of the same ranks,
     // or a copy of every conflict row, is past these bounds.
     REQUIRE(run.copies == 0);
-    REQUIRE(run.digits <= static_cast<std::uint64_t>(16) * want.molecules);
-    REQUIRE(run.buckets <= static_cast<std::uint64_t>(8) * want.molecules);
+    REQUIRE(run.digits <= 16 * static_cast<std::uint64_t>(want.molecules));
+    REQUIRE(run.buckets <= 8 * static_cast<std::uint64_t>(want.molecules));
   }
   for (const Expect &want : hexagonal) {
     const int cells = static_cast<int>(std::lround(std::cbrt(want.molecules / 8.0)));

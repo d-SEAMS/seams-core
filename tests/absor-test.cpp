@@ -196,7 +196,7 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
     iPoint.z = 10.5340004;     // z
     targetCloud.pts.push_back(iPoint);
     // Update nop
-    targetCloud.nop = targetCloud.pts.size();
+    targetCloud.nop = static_cast<int>(targetCloud.pts.size());
     // box lengths
     targetCloud.box.push_back(50);  // x box length
     targetCloud.box.push_back(50);  // y box length
@@ -230,7 +230,8 @@ SCENARIO("Test the shape-matching of a perfect HC rotated by 30 degrees",
     // Get the re-ordered matched basal rings, ordered with respect to each
     // other
 
-    pntToPnt::relOrderHC(targetCloud, rings[iring], rings[jring], nList,
+    pntToPnt::relOrderHC(targetCloud, rings[static_cast<std::size_t>(iring)],
+                         rings[static_cast<std::size_t>(jring)], nList,
                          matchedBasal1, matchedBasal2);
     //
     // --------------------------
@@ -414,7 +415,7 @@ SCENARIO("Test the shape-matching of a perfect DDC rotated by 30 degrees",
     iPoint.z = 27.073;      // z
     targetCloud.pts.push_back(iPoint);
     // Update nop
-    targetCloud.nop = targetCloud.pts.size();
+    targetCloud.nop = static_cast<int>(targetCloud.pts.size());
     // box lengths
     targetCloud.box.push_back(50);  // x box length
     targetCloud.box.push_back(50);  // y box length
