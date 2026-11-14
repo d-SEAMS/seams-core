@@ -421,6 +421,7 @@ std::string trimSymbol(const char *text) {
   return s;
 }
 
+#ifdef SEAMS_HAS_SPGLIB
 Eigen::Vector3d fracOf(const Eigen::Matrix3d &vectors, const Eigen::Vector3d &cart) {
   Eigen::Vector3d f = vectors.transpose().inverse() * cart;
   for (int k = 0; k < 3; k++) {
@@ -428,6 +429,7 @@ Eigen::Vector3d fracOf(const Eigen::Matrix3d &vectors, const Eigen::Vector3d &ca
   }
   return f;
 }
+#endif
 
 void writeFracCrystal(symm::Lattice &cell, const Eigen::MatrixXd &frac) {
   cell.cartesian.resize(frac.rows(), 3);

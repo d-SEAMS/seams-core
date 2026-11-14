@@ -18,6 +18,7 @@
 #include <iralib_interf.h>
 #endif
 
+#ifdef SEAMS_HAS_IRA
 namespace {
 
 void flatten(const Eigen::MatrixXd &pts, std::vector<double> &coords,
@@ -32,7 +33,6 @@ void flatten(const Eigen::MatrixXd &pts, std::vector<double> &coords,
   }
 }
 
-#ifdef SEAMS_HAS_IRA
 // ira_mod.py fills rotation[i][j] from the flat buffer in C row-major order.
 Eigen::Matrix3d rotationFromC(const double *rmat) {
   Eigen::Matrix3d R;
@@ -48,9 +48,9 @@ void fillQuat(const Eigen::Matrix3d &R, std::vector<double> &quat) {
   const Eigen::Quaterniond q(R);
   quat = {q.w(), q.x(), q.y(), q.z()};
 }
-#endif
 
 } // namespace
+#endif
 
 namespace ira {
 

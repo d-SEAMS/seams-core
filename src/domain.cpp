@@ -182,6 +182,7 @@ bool shareFromAssign(const Cloud &cloud, int rank, const std::vector<int> &assig
   return true;
 }
 
+#ifdef SEAMS_HAS_MPI
 void linkcellSends(const Cloud &cloud, const Share &share, const std::vector<int> &assign,
                    const std::vector<int> &nbrs, std::vector<std::vector<int>> &sendAt) {
   sendAt.assign(nbrs.size(), {});
@@ -205,6 +206,7 @@ void linkcellSends(const Cloud &cloud, const Share &share, const std::vector<int
     }
   }
 }
+#endif
 #endif
 
 } // namespace
