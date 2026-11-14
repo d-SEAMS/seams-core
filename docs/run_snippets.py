@@ -933,8 +933,8 @@ def run_rust_text(build, env, body):
                 'edition = "2021"',
                 "",
                 "[dependencies]",
-                'seams = {{ path = "{}" }}'.format(ROOT / "bindings" / "rust" / "seams"),
-                'seams-sys = {{ path = "{}" }}'.format(ROOT / "bindings" / "rust" / "seams-sys"),
+                'seams = {{ package = "dseams", path = "{}" }}'.format(ROOT / "bindings" / "rust" / "seams"),
+                'seams-sys = {{ package = "dseams-sys", path = "{}" }}'.format(ROOT / "bindings" / "rust" / "seams-sys"),
                 "",
             ]
         ),
