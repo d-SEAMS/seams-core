@@ -79,7 +79,7 @@ endif
 # One shell_avx archive is linked into both the shell path and the Ylm path.
 _shell_link = []
 _ylm_link = []
-if cpp_id == 'gcc' or cpp_id == 'clang'
+if (cpp_id == 'gcc' or cpp_id == 'clang') and host_machine.cpu_family() == 'x86_64'
   _shell_avx = static_library('shell_avx', 'shell_classify.cpp',
     cpp_args: _args + ['-mavx2', '-mfma'],
     include_directories: _incdirs,

@@ -29,7 +29,9 @@
 #include <cmath>
 #include <complex>
 #include <cstdlib>
+#if defined(__x86_64__) || defined(__i386__)
 #include <immintrin.h>
+#endif
 #include <iostream>
 #include <mutex>
 #include <numbers>
@@ -290,6 +292,9 @@ void addRealYlm3Scalar(double x, double y, double z, const std::array<double, 4>
   acc[6] += norm[3] * (x * (3.0 * y2 - x2)) * inv;
 }
 
+#if defined(__x86_64__) || defined(__i386__)
+bool hasAvx2Fma() { return __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma"); }
+
 // Four bonds side by side. Hardware fma is a per-lane instruction; the
 // channels are then added in bond order so the sum matches the scalar loop.
 __attribute__((target("avx2,fma"))) void realYlm3Accumulate(const double *x, const double *y,
@@ -348,6 +353,24 @@ __attribute__((target("fma"))) double realL3Dot(const double *a, const double *b
   }
   return dot;
 }
+#else
+// Other architectures take the scalar loops; these only keep the call sites compiling.
+bool hasAvx2Fma() { return false; }
+
+void realYlm3Accumulate(const double *x, const double *y, const double *z, int nBond, double *acc) {
+  for (int bond = 0; bond < nBond; ++bond) {
+    addRealYlm3Scalar(x[bond], y[bond], z[bond], normQ3(), acc);
+  }
+}
+
+double realL3Dot(const double *a, const double *b) {
+  double dot = a[0] * b[0];
+  for (int channel = 1; channel < kRealL3; ++channel) {
+    dot = __builtin_fma(2.0 * a[channel], b[channel], dot);
+  }
+  return dot;
+}
+#endif
 
 double realL3DotScalar(const double *a, const double *b) {
   double dot = a[0] * b[0];
@@ -765,7 +788,7 @@ static void classifyBondsLeftFp64(
     flat.reserve(static_cast<std::size_t>(nop) * 8);
   }
 
-  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
+  const bool useAvx = hasAvx2Fma();
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (nop >= 16384 && omp_get_max_threads() > 1)
 #endif
@@ -1384,7 +1407,7 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
   const double hy = 0.5 * Ly;
   const double hz = 0.5 * Lz;
   const auto &norm = normQ3();
-  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
+  const bool useAvx = hasAvx2Fma();
   const chill::BondClassifier rule = chill::chillPlusRule();
   const auto tWalk = std::chrono::steady_clock::now();
 #ifdef SEAMS_HAS_OPENMP
@@ -1715,7 +1738,7 @@ bool chill::q4q6ChillPlus(
   constexpr double pi = 3.14159265358979323846;
   const double pre4 = 4.0 * pi / 9.0;
   const double pre6 = 4.0 * pi / 13.0;
-  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
+  const bool useAvx = hasAvx2Fma();
   const auto &norm = normQ3();
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (parallel)
@@ -2242,7 +2265,7 @@ bool chill::chillPlusPublishedCutoff(
   const auto tCsr = std::chrono::steady_clock::now();
   const gen::FracBox frame = gen::makeFracBox(yCloud);
   const auto &norm = normQ3();
-  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
+  const bool useAvx = hasAvx2Fma();
   const chill::BondClassifier rule = chill::chillPlusRule();
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel for schedule(static) if (n >= 256)
@@ -2463,7 +2486,7 @@ int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &y
     return 0;
   }
   const gen::FracBox frame = gen::makeFracBox(yCloud);
-  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
+  const bool useAvx = hasAvx2Fma();
   const auto &norm = normQ3();
   const chill::BondClassifier rule = chill::chillPlusRule();
   std::vector<double> q(static_cast<std::size_t>(n) * kRealL3, 0.0);
@@ -3224,7 +3247,7 @@ void chill::bondOrder(const molSys::PointCloud<molSys::Point<double>, double> &y
     xyz[static_cast<std::size_t>(i)] = {p.x, p.y, p.z};
   }
   const gen::FracBox frame = gen::makeFracBox(yCloud);
-  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
+  const bool useAvx = hasAvx2Fma();
   const bool fixedKeep = keepMax > 0;
 #ifdef SEAMS_HAS_OPENMP
   const double orderT0 = omp_get_wtime();
@@ -3325,7 +3348,7 @@ void chill::correlFromOrder(molSys::PointCloud<molSys::Point<double>, double> &y
                             const std::vector<char> *which, bool closed) {
   const int nop = yCloud.nop;
   const int keepMax = order.keepMax;
-  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
+  const bool useAvx = hasAvx2Fma();
   const auto neighbourAt = [&](int atom, int slot) {
     if (keepMax > 0) {
       return order.chosen[static_cast<std::size_t>(atom) * static_cast<std::size_t>(keepMax) +
