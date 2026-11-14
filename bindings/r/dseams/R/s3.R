@@ -71,8 +71,16 @@ summary.dseams_cages <- function(object, ...) {
 #' @return `x`, invisibly.
 #' @export
 print.dseams_rings <- function(x, ...) {
-  base::print(x[, c("size", "n")])
+  base::print(ring_table(x))
   invisible(x)
+}
+
+# Subsetting keeps the dseams_rings class, which would print through
+# print.dseams_rings again.
+ring_table <- function(x) {
+  rows <- x[, c("size", "n")]
+  class(rows) <- "data.frame"
+  rows
 }
 
 #' Summary of a ring histogram.
@@ -82,7 +90,7 @@ print.dseams_rings <- function(x, ...) {
 #' @return `object`, invisibly.
 #' @export
 summary.dseams_rings <- function(object, ...) {
-  base::print(object[, c("size", "n")])
+  base::print(ring_table(object))
   invisible(object)
 }
 

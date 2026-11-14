@@ -22,3 +22,11 @@ test_that("summary methods print the frame", {
   expect_output(print(ice), "CHILL\\+")
   expect_output(summary(ice), "water")
 })
+
+test_that("a ring census prints and summarises", {
+  rings <- primitive_rings(read_frame(dseams_example("ice1h.lammpstrj"), type = -1L),
+                           graph = "cutoff", max_depth = 6L)
+  expect_s3_class(rings, "dseams_rings")
+  expect_output(print(rings), "size")
+  expect_output(summary(rings), "size")
+})
