@@ -5,30 +5,40 @@ using Libdl
 
 const LIB = get(ENV, "SEAMS_LIB", "libseams")
 
+# Julia 1.13 rejects a runtime library name inside ccall.
+const _dl = Ref{Ptr{Cvoid}}(C_NULL)
+
+function _so()
+    if _dl[] == C_NULL
+        _dl[] = dlopen(LIB)
+    end
+    _dl[]
+end
+
 function chill_file(path)
-    sys = ccall((:seams_system_create, LIB), Ptr{Cvoid}, ())
-    code = ccall((:seams_system_read, LIB), Cint, (Ptr{Cvoid}, Cstring, Cint, Cint), sys, path, 1, -1)
+    sys = ccall(dlsym(_so(), :seams_system_create), Ptr{Cvoid}, ())
+    code = ccall(dlsym(_so(), :seams_system_read), Cint, (Ptr{Cvoid}, Cstring, Cint, Cint), sys, path, 1, -1)
     code == 0 || error("read $path")
-    n = ccall((:seams_system_count, LIB), Cint, (Ptr{Cvoid},), sys)
+    n = ccall(dlsym(_so(), :seams_system_count), Cint, (Ptr{Cvoid},), sys)
     labels = Vector{Cint}(undef, n)
     counts = Vector{Cint}(undef, 9)
-    code = ccall((:seams_chill_plus, LIB), Cint,
+    code = ccall(dlsym(_so(), :seams_chill_plus), Cint,
                  (Ptr{Cvoid}, Cdouble, Cint, Cint, Cint, Ptr{Cint}, Ptr{Cint}),
                  sys, 3.5, 0, 0, 0, labels, counts)
-    ccall((:seams_system_destroy, LIB), Cvoid, (Ptr{Cvoid},), sys)
+    ccall(dlsym(_so(), :seams_system_destroy), Cvoid, (Ptr{Cvoid},), sys)
     code == 0 || error("chill+ $path")
     Int.(labels), Int.(counts)
 end
 
 function cages_of(path, spec)
-    sys = ccall((:seams_system_create, LIB), Ptr{Cvoid}, ())
-    ccall((:seams_system_read, LIB), Cint, (Ptr{Cvoid}, Cstring, Cint, Cint), sys, path, 1, -1) == 0 || error(path)
+    sys = ccall(dlsym(_so(), :seams_system_create), Ptr{Cvoid}, ())
+    ccall(dlsym(_so(), :seams_system_read), Cint, (Ptr{Cvoid}, Cstring, Cint, Cint), sys, path, 1, -1) == 0 || error(path)
     n_cages = Ref{Csize_t}(0)
     n_atoms = Ref{Csize_t}(0)
-    ccall((:seams_cages_signature, LIB), Cint,
+    ccall(dlsym(_so(), :seams_cages_signature), Cint,
           (Ptr{Cvoid}, Cdouble, Cint, Cint, Cstring, Ptr{Csize_t}, Ptr{Csize_t}),
           sys, 3.5, 0, 0, spec, n_cages, n_atoms) == 0 || error(spec)
-    ccall((:seams_system_destroy, LIB), Cvoid, (Ptr{Cvoid},), sys)
+    ccall(dlsym(_so(), :seams_system_destroy), Cvoid, (Ptr{Cvoid},), sys)
     Int(n_cages[])
 end
 
@@ -100,7 +110,7 @@ function layer_score(projection, period)
 end
 
 root = ARGS[1]
-ccall((:seams_set_num_threads, LIB), Cint, (Cint,), 1)
+ccall(dlsym(_so(), :seams_set_num_threads), Cint, (Cint,), 1)
 iface = joinpath(root, "input", "traj", "interface_f0.lammpstrj")
 labels, counts = chill_file(iface)
 stack = layer_string(read_dump(iface), labels, 3)
@@ -162,3 +172,8 @@ else
     println("brine t0 hexagonal 733")
     println("brine tend hexagonal 741")
 end
+
+# Julia 1.13 faults in ijl_process_events while it unloads the OpenMP
+# runtime that libseams opened. The census is already printed.
+flush(stdout)
+ccall(:exit, Cvoid, (Cint,), 0)
