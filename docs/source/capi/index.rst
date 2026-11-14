@@ -2,7 +2,7 @@ C API
 =====
 
 
-Every function exported by ``src/libseams.map`` (the ``seams_*`` version script) on ``capi/polish-2.14``. The concrete list is the 77 ``SEAMS_API`` functions in ``include/seams.h`` at ``0127f41e``. ``meson test docs_capi_symbols`` fails if one of them is absent from these pages.
+Every ``SEAMS_API`` function in ``include/seams.h``. The list is generated from that header, so a function that is not declared there is not documented here. ``meson test docs_capi_symbols`` reads the header again and fails if one of those declarations is absent from these pages.
 
 .. toctree::
    :maxdepth: 1

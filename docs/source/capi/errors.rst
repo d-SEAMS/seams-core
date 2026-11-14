@@ -4,9 +4,7 @@ Errors
 
 Status codes, the thread-local last error, and version strings.
 
-Generated from the Doxygen XML of ``include/seams.h`` at ``capi/polish-2.14`` commit ``0127f41efc3f44cefdcf532bdea3bba36b05176d``. The C sources of that branch are not part of this docs tree.
-
-``meson test docs_capi_examples`` compiles and runs this example.
+Generated from the comments on the ``SEAMS_API`` declarations in ``include/seams.h``. This tree has 69 exports. ``meson test docs_capi_symbols`` fails if a declaration is missing from these pages, and ``meson test docs_capi_examples`` compiles the example when this page has one.
 
 .. literalinclude:: ../../../docs/examples/capi_errors.c
    :language: c
@@ -23,7 +21,9 @@ seams_abi
 
 ABI number compiled into this library.
 
-SEAMS_ABI, which is 1. Thread safety Pure. Example if(seams_abi()!=SEAMS_ABI){return1;}
+Returns: SEAMS_ABI, which is 1.
+
+Thread safety: pure.
 
 .. _capi-seams_version:
 
@@ -37,7 +37,9 @@ seams_version
 
 Packed release number.
 
-SEAMS_VERSION_NUMBER, (major << 16) | (minor << 8) | patch. Thread safety Pure. Example if(seams_version()<((2<<16)|(14<<8))){return1;}
+Returns: SEAMS_VERSION_NUMBER, (major << 16) | (minor << 8) | patch.
+
+Thread safety: pure.
 
 .. _capi-seams_version_major:
 
@@ -49,9 +51,7 @@ seams_version_major
 
    int seams_version_major(void)
 
-Major version of the library at run time.
-
-SEAMS_VERSION_MAJOR of the build. Thread safety Pure. Example intmajor=seams_version_major();
+@brief Major version. Thread safety: pure.
 
 .. _capi-seams_version_minor:
 
@@ -63,9 +63,7 @@ seams_version_minor
 
    int seams_version_minor(void)
 
-Minor version of the library at run time.
-
-SEAMS_VERSION_MINOR of the build. Thread safety Pure. Example intminor=seams_version_minor();
+@brief Minor version. Thread safety: pure.
 
 .. _capi-seams_version_patch:
 
@@ -77,9 +75,7 @@ seams_version_patch
 
    int seams_version_patch(void)
 
-Patch version of the library at run time.
-
-SEAMS_VERSION_PATCH of the build. Thread safety Pure. Example intpatch=seams_version_patch();
+@brief Patch version. Thread safety: pure.
 
 .. _capi-seams_version_string:
 
@@ -89,11 +85,13 @@ seams_version_string
 
 .. code-block:: c
 
-   const char * seams_version_string(void)
+   const char *seams_version_string(void)
 
 Version text, for example "2.14.0".
 
-Pointer to a static string. Never NULL. Ownership The caller does not free it. Thread safety Pure. Example printf("d-SEAMS%s\\n",seams_version_string());
+Returns: Pointer to a static string. The caller does not free it.
+
+Thread safety: pure.
 
 .. _capi-seams_status_string:
 
@@ -103,11 +101,16 @@ seams_status_string
 
 .. code-block:: c
 
-   const char * seams_status_string(seams_status status)
+   const char *seams_status_string(seams_status status)
 
 Short name of a status code.
 
-status A seams_status value. Pointer to a static string. Unknown codes return "unknown status". Ownership The caller does not free it. Thread safety Pure. Example fprintf(stderr,"%s\\n",seams_status_string(SEAMS_ERR_BOX));
+``status``
+    A seams_status value.
+
+Returns: Pointer to a static string. Unknown codes return "unknown status".
+
+Thread safety: pure.
 
 .. _capi-seams_last_error:
 
@@ -117,25 +120,15 @@ seams_last_error
 
 .. code-block:: c
 
-   const char * seams_last_error(void)
+   const char *seams_last_error(void)
 
 Thread-local detail of the last failing call on this thread.
 
-ABI 1 spelling of seams_last_error_message(). Both return the same string. Pointer to a thread-local string. Never NULL. Ownership Owned by the library. Valid until the next call on this thread that sets or clears the error. Thread safety The storage is thread-local. Example if(seams_system_set_atoms(sys,xyz,n,box9,9,NULL,NULL)!=SEAMS_OK){ fprintf(stderr,"%s\\n",seams_last_error()); }
+Returns: Pointer to a thread-local string. Never NULL. The caller does not free it.
 
-.. _capi-seams_last_error_message:
+The string is empty after a successful call on this thread. It is owned by the library and remains valid until the next call on this thread that sets or clears the error. Prefer seams_handle_error() when the failing call had a handle: that copy survives a later call on another handle.
 
-seams_last_error_message
-------------------------
-
-
-.. code-block:: c
-
-   const char * seams_last_error_message(void)
-
-Thread-local detail of the last failing call on this thread.
-
-The string is empty after a successful call on this thread. Prefer seams_handle_error() when the failing call had a handle: that copy survives a later call on another handle. seams_last_error() is the ABI 1 spelling and returns the same string. Pointer to a thread-local string. Never NULL. Ownership Owned by the library. Valid until the next call on this thread that sets or clears the error. Thread safety The storage is thread-local. Example seams_statusrc=seams_system_natoms(NULL,NULL); fprintf(stderr,"%s:%s\\n",seams_status_string(rc),seams_last_error_message());
+Thread safety: the storage is thread-local.
 
 .. _capi-seams_handle_error:
 
@@ -145,11 +138,16 @@ seams_handle_error
 
 .. code-block:: c
 
-   const char * seams_handle_error(const void *handle)
+   const char *seams_handle_error(const void *handle)
 
 Detail string stored on a handle.
 
-handle A seams_system, seams_neighbours, seams_rings, seams_cage_set, seams_topo, or seams_brine, or NULL. The handle's string, or the thread-local string when handle is NULL. Never NULL. Ownership Owned by the handle. Valid until the next call on that handle or until destroy. Thread safety Reading a handle requires that no other thread is inside a call on that same handle. Example if(seams_chill_plus_n(sys,3.5,0,SEAMS_GRAPH_CUTOFF,SEAMS_CHILL_PUBLISHED, labels,n,NULL)!=SEAMS_OK){ fprintf(stderr,"%s\\n",seams_handle_error(sys)); }
+``handle``
+    A seams_system, seams_neighbours, seams_rings, seams_cage_set, seams_topo, or seams_brine, or NULL.
+
+Returns: The handle's string, or the thread-local string when handle is NULL. Never NULL. The caller does not free it. The handle string stays valid until the next call on that handle or until destroy.
+
+Thread safety: reading a handle requires that no other thread is inside a call on that same handle.
 
 .. _capi-seams_label_name:
 
@@ -159,11 +157,16 @@ seams_label_name
 
 .. code-block:: c
 
-   const char * seams_label_name(int label)
+   const char *seams_label_name(int label)
 
 Name of a CHILL label.
 
-label A seams_label value. Static string. Unknown codes return "unknown". Ownership The caller does not free it. Thread safety Pure. Example printf("%s\\n",seams_label_name(SEAMS_LABEL_HEXAGONAL));
+``label``
+    A seams_label value.
+
+Returns: Static string. Unknown codes return "unknown".
+
+Thread safety: pure.
 
 .. _capi-seams_set_num_threads:
 
@@ -177,7 +180,12 @@ seams_set_num_threads
 
 Set the OpenMP team used by later analysis calls.
 
-n Positive width, or 0 to restore the width captured at first use. A negative width is rejected. SEAMS_OK, or SEAMS_ERR_RANGE when n is negative, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL. Thread safety Process-global. Do not call it concurrently with analysis. The stored width is then read by every handle. Example seams_set_num_threads(1);
+``n``
+    Positive width, or 0 to restore the width captured at first use. A negative width is rejected.
+
+Returns: SEAMS_OK, or SEAMS_ERR_RANGE when n is negative.
+
+Thread safety: process-global. Do not call it concurrently with analysis. The stored width is then read by every handle.
 
 .. _capi-seams_get_num_threads:
 
@@ -191,5 +199,7 @@ seams_get_num_threads
 
 Team width the next analysis call will request.
 
-A positive count. After seams_set_num_threads(0) this is the saved default, which is omp_get_max_threads() when OpenMP is linked and 1 otherwise. Thread safety Observes the process-global width. Do not call it concurrently with seams_set_num_threads(). Example intwidth=seams_get_num_threads();
+Returns: A positive count. After seams_set_num_threads(0) this is the saved default, which is omp_get_max_threads() when OpenMP is linked and 1 otherwise.
+
+Thread safety: observes the process-global width. Do not call it concurrently with seams_set_num_threads().
 

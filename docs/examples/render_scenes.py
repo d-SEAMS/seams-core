@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import ctypes
 import sys
-from collections import defaultdict
+from collections import defaultdict, deque
 from pathlib import Path
 
 import numpy as np
@@ -225,14 +225,6 @@ def _mic(point, target, shifts):
     return point + min(shifts, key=lambda shift: np.linalg.norm(point + shift - target))
 
 
-def cage_centre(atom_ids, positions, vectors):
-    """Mean of each atom's image nearest a seed atom."""
-    shifts = _shifts(vectors)
-    seed = positions[atom_ids[0]]
-    placed = [_mic(positions[atom], seed, shifts) for atom in atom_ids]
-    return np.mean(placed, axis=0)
-
-
 def face_metrics(coords):
     """Longest edge and the largest distance from the best-fit plane."""
     rolled = np.roll(coords, -1, axis=0)
@@ -244,34 +236,74 @@ def face_metrics(coords):
     return longest, residual
 
 
-def drawn_ring(cycle, positions, centre, vectors):
-    """Place one ring on the images nearest the cage centre.
+def unwrap_cage(faces, cycles, positions, vectors):
+    """Place every cage atom by walking its bonds.
 
-    A face whose longest edge reaches 3.5 angstrom, or whose planarity
-    residual exceeds 0.35 angstrom, is not drawn. A non-planar ring is
-    split into triangles from its first vertex, and only the triangles
-    that pass the same tests are kept.
+    Minimum image against the cage centre folds a ring on the far side of
+    a cage that is longer than half the shortest cell edge. The folded
+    bond is about one cell edge, the face is dropped, and the surface
+    mesh then caps the hole with a thin spike. Walking each bond keeps
+    the hydrogen-bond length.
     """
     shifts = _shifts(vectors)
-    coords = np.vstack([_mic(positions[atom], centre, shifts) for atom in cycle])
-    longest, residual = face_metrics(coords)
-    if longest < MAX_FACE_EDGE and residual <= MAX_PLANARITY:
-        return [coords], [(longest, residual)]
-    kept = []
-    stats = []
-    for index in range(1, len(coords) - 1):
-        triangle = coords[[0, index, index + 1]]
-        edge, _flat = face_metrics(triangle)
-        if edge < MAX_FACE_EDGE:
-            kept.append(triangle)
-            stats.append((edge, 0.0))
-    return kept, stats
+    adjacency = defaultdict(set)
+    atoms = []
+    seen = set()
+    for face in faces:
+        cycle = cycles[face]
+        for index, atom in enumerate(cycle):
+            nxt = cycle[(index + 1) % len(cycle)]
+            adjacency[atom].add(nxt)
+            adjacency[nxt].add(atom)
+            if atom not in seen:
+                seen.add(atom)
+                atoms.append(atom)
+    if not atoms:
+        raise RuntimeError("a cage has no atoms")
+    placed = {atoms[0]: np.asarray(positions[atoms[0]], dtype=float).copy()}
+    pending = deque([atoms[0]])
+    while pending:
+        current = pending.popleft()
+        for nxt in adjacency[current]:
+            if nxt in placed:
+                continue
+            placed[nxt] = _mic(positions[nxt], placed[current], shifts)
+            pending.append(nxt)
+    if len(placed) != len(atoms):
+        raise RuntimeError("a cage atom is not connected by a ring bond")
+    edges = []
+    for face in faces:
+        cycle = cycles[face]
+        coords = np.vstack([placed[atom] for atom in cycle])
+        edges.extend(np.linalg.norm(np.roll(coords, -1, axis=0) - coords, axis=1).tolist())
+    centre = np.mean([placed[atom] for atom in atoms], axis=0)
+    return placed, centre, np.asarray(edges, dtype=float)
+
+
+def assert_cage_edges(edge_sets, factor=1.5):
+    """Fail when a drawn face has an edge longer than ``factor`` times the cage median.
+
+    The median is the hydrogen-bond length of that cage. A periodic image
+    left on the wrong side of the cell is several times longer.
+    """
+    if not edge_sets:
+        raise RuntimeError("no cage edges were drawn")
+    for edges in edge_sets:
+        lengths = np.asarray(edges, dtype=float)
+        if lengths.size == 0:
+            raise RuntimeError("a cage was drawn with no edges")
+        median = float(np.median(lengths))
+        longest = float(lengths.max())
+        if not median > 0.0 or longest > factor * median:
+            raise RuntimeError(
+                f"cage edge {longest:.3f} A is longer than {factor:g} times the median {median:.3f} A"
+            )
 
 
 def cage_meshes(cycles, groups, positions, vectors):
     """One vertex array and triangle list per colour index.
 
-    Each ring is unwrapped onto the images nearest the cage centre.
+    Each cage is unwrapped along its bonds before any face is drawn.
     The returned stats are ``(longest edge, planarity residual)`` for
     every polygon that is actually drawn.
     """
@@ -279,20 +311,24 @@ def cage_meshes(cycles, groups, positions, vectors):
     reference = None
     shifts = _shifts(vectors)
     stats = []
+    edge_sets = []
     for faces, colour in groups:
-        atoms = sorted({atom for face in faces for atom in cycles[face]})
-        centre = cage_centre(atoms, positions, vectors)
+        placed, centre, edges = unwrap_cage(faces, cycles, positions, vectors)
+        assert_cage_edges([edges])
+        edge_sets.append(edges)
         polygons = []
         for face in faces:
-            pieces, piece_stats = drawn_ring(cycles[face], positions, centre, vectors)
-            for coords in pieces:
-                normal = np.cross(coords[1] - coords[0], coords[2] - coords[0])
-                if float(np.dot(normal, coords.mean(axis=0) - centre)) < 0.0:
-                    coords = coords[::-1]
-                polygons.append(coords)
-            stats.extend(piece_stats)
-        if not polygons:
-            continue
+            coords = np.vstack([placed[atom] for atom in cycles[face]])
+            longest, residual = face_metrics(coords)
+            if longest >= MAX_FACE_EDGE or residual > MAX_PLANARITY:
+                raise RuntimeError(
+                    f"cage face edge {longest:.3f} A residual {residual:.3f} A cannot be drawn"
+                )
+            normal = np.cross(coords[1] - coords[0], coords[2] - coords[0])
+            if float(np.dot(normal, coords.mean(axis=0) - centre)) < 0.0:
+                coords = coords[::-1]
+            polygons.append(coords)
+            stats.append((longest, residual))
         cage_centre_now = np.mean([poly.mean(axis=0) for poly in polygons], axis=0)
         if reference is None:
             reference = cage_centre_now
@@ -311,7 +347,7 @@ def cage_meshes(cycles, groups, positions, vectors):
                 for index in range(1, len(polygon) - 1):
                     triangles.append([base, base + index, base + index + 1])
         meshes.append((np.asarray(vertices, dtype=float), triangles, colour))
-    return meshes, stats
+    return meshes, stats, edge_sets
 
 
 def assert_drawn_faces(stats):
@@ -363,6 +399,9 @@ def tachyon_scene(render, path, positions, colours, radii, meshes, forward, up, 
         mesh.vis.surface_color = (float(red), float(green), float(blue))
         mesh.vis.surface_transparency = 0.08
         mesh.vis.highlight_edges = False
+        # A missing face used to be closed by a cap. Those caps are the
+        # thin spikes. The cage is already a closed polyhedron.
+        mesh.vis.show_cap = False
         mesh.vis.cap_color = mesh.vis.surface_color
         data.objects.append(mesh)
     pipeline = Pipeline(source=StaticSource(data=data))
@@ -588,8 +627,9 @@ def render_host(render, lib, dump, path, kinds, width=1700):
             seen.add(colour)
             legend.append(CAGE_LEGEND[colour])
     origin, vectors = _box_cell(dump)
-    meshes, stats = cage_meshes(cycles, groups, positions, vectors)
+    meshes, stats, edge_sets = cage_meshes(cycles, groups, positions, vectors)
     assert_drawn_faces(stats)
+    assert_cage_edges(edge_sets)
     corners = np.vstack([vertices for vertices, _faces, _colour in meshes])
     colours = np.tile(np.array((0.96, 0.96, 0.96)), (len(corners), 1))
     radii = np.full(len(corners), 0.22)

@@ -1465,6 +1465,24 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_cage_edges',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'check_cage_edges.py',
+    ],
+    env: binding_env,
+    depends: [seams_api_lib],
+    suite: 'docs',
+    timeout: 120)
+  test(
+    'docs_engine_pages',
+    python3,
+    args: [
+      meson.project_source_root() / 'docs' / 'check_engine_pages.py',
+    ],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_sh_cell',
     python3,
     args: [
