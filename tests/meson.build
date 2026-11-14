@@ -1,13 +1,14 @@
 # d-SEAMS tests (Catch2 v3)
 
 # Prefer an installed Catch2 that actually links. A copy built against a
-# newer libc, or without PIE, is replaced by the wrap.
+# newer libc, or without PIE, is replaced by the wrap, which only the tests
+# use and so is not installed with d-SEAMS.
 catch2_dep = dependency('catch2-with-main', required: false)
 if not catch2_dep.found() or not cppc.links(
     '#include <catch2/catch_test_macros.hpp>\nTEST_CASE("link") {}\n',
     dependencies: catch2_dep,
     name: 'installed catch2 links')
-  catch2_dep = subproject('catch2', default_options: ['tests=false']).get_variable(
+  catch2_dep = subproject('catch2', default_options: ['tests=false', 'install=false']).get_variable(
     'catch2_with_main_dep')
 endif
 
