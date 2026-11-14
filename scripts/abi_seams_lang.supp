@@ -1,0 +1,7 @@
+# libseams_lang exports C++ symbols from the core library as well; only the
+# seams_* C functions declared in seams_lang.h are its ABI.
+[suppress_function]
+  symbol_name_not_regexp = ^seams_
+
+[suppress_variable]
+  symbol_name_not_regexp = ^seams_

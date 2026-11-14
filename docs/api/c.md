@@ -74,6 +74,14 @@ read. Without
 `abidiff`, or with an older one, `capi_abi` still checks the exported names, says
 the type step was skipped, and passes.
 
+The 2.13.0 release had no libseams. Its C interface was `seams_lang.h` in
+libseams_lang, which the R and Julia packages still use. `capi_abi_2_13` builds
+libseams_lang with debug info and compares its `seams_*` functions with the 2.13.0
+corpus in `scripts/abi_2.13.0_seams_lang.abi`. Functions added since 2.13.0 pass,
+and a removed function or a changed signature fails. `capi_abi_2_13_selftest`
+edits copies of the corpus to prove the comparison catches both. Without
+`abidiff`, both tests are skipped.
+
 ## seams_last_error and seams_handle_error
 
 `seams_last_error_message` and its ABI 1 spelling `seams_last_error` return the same

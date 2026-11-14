@@ -2091,6 +2091,29 @@ test(
   env: _abi_env,
   depends: _abi_depends,
   timeout: 300)
+_lang_abi_env = environment()
+_lang_abi_depends = []
+if _abidiff.found()
+  _lang_abi_env.set('SEAMS_ABIDIFF', _abidiff.full_path())
+  _lang_abi_depends += seams_lang_abi_lib
+endif
+foreach _mode : ['check', 'selftest']
+  test(
+    _mode == 'check' ? 'capi_abi_2_13' : 'capi_abi_2_13_selftest',
+    find_program('python3', required: true),
+    args: [
+      meson.project_source_root() / 'scripts' / 'abi_check_lang.py',
+      _mode,
+      meson.project_source_root() / 'scripts' / 'abi_2.13.0_seams_lang.abi',
+      meson.project_source_root() / 'scripts' / 'abi_seams_lang.supp',
+      meson.project_source_root() / 'bindings' / 'cxx',
+      meson.current_build_dir() / 'bindings' / 'abi' / 'libseams_lang.so',
+      meson.current_build_dir() / 'abi-2.13-' + _mode,
+    ],
+    env: _lang_abi_env,
+    depends: _lang_abi_depends,
+    timeout: 300)
+endforeach
 
 # libFuzzer harnesses. Under clang they are built with -fsanitize=fuzzer,
 # plus the capi_sanitize sanitizer, so libFuzzer gets coverage from the

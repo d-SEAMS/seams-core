@@ -33,6 +33,10 @@ seams_lang = shared_library(
   install: true,
 )
 
+if _abidiff.found()
+  subdir('abi')
+endif
+
 seams_lang_dep = declare_dependency(
   link_with: seams_lang,
   include_directories: include_directories('cxx'),
