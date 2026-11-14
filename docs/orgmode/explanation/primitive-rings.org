@@ -37,8 +37,9 @@ hexagon as well, because no edge joins two non-consecutive vertices of
 the hexagon. The primitive search, and OVITO FindRings on this bond
 list, both reject the hexagon and keep the pentagons.
 
-~tests/test_ring_hop.cpp~ is that fixture. The same rule is what the
-depth-10 census matches against OVITO at ring sizes 4 through 10.
+~tests/test_ring_hop.cpp~ is that fixture. A depth-10 census is the
+primitive set. OVITO FindRings is a subset of it; the K2,3 counterexample
+is on [[file:ovito-findrings.org][Primitive rings and OVITO FindRings]].
 
 * The shortest-path statement
 

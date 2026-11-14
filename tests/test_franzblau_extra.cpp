@@ -5,12 +5,16 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstddef>
+#include <map>
+#include <queue>
 #include <set>
 #include <utility>
 #include <vector>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
 #include <ring.hpp>
+#include <seams_input.hpp>
 
 #include <vector>
 
@@ -390,6 +394,114 @@ TEST_CASE("ringNetwork keeps one copy of a repeated edge", "[franzblau]") {
   const auto rings = primitive::ringNetwork(nList, 6, {});
   REQUIRE(rings.size() == 1);
   REQUIRE(rings[0].size() == 3);
+}
+
+namespace {
+
+// Shorter arc longer than the breadth-first distance: the ring is not primitive.
+int nonPrimitive(const std::vector<std::vector<int>> &adj,
+                 const std::vector<std::vector<int>> &rings) {
+  auto dist = [&](int src, int limit) {
+    std::vector<int> seen(adj.size(), -1);
+    std::queue<int> wait;
+    seen[static_cast<std::size_t>(src)] = 0;
+    wait.push(src);
+    while (!wait.empty()) {
+      const int u = wait.front();
+      wait.pop();
+      if (seen[static_cast<std::size_t>(u)] == limit) {
+        continue;
+      }
+      for (int v : adj[static_cast<std::size_t>(u)]) {
+        if (seen[static_cast<std::size_t>(v)] >= 0) {
+          continue;
+        }
+        seen[static_cast<std::size_t>(v)] = seen[static_cast<std::size_t>(u)] + 1;
+        wait.push(v);
+      }
+    }
+    return seen;
+  };
+  int bad = 0;
+  for (const auto &ring : rings) {
+    const int length = static_cast<int>(ring.size());
+    bool ok = true;
+    for (int i = 0; i < length && ok; i++) {
+      const auto reached = dist(ring[static_cast<std::size_t>(i)], length / 2);
+      for (int j = i + 1; j < length; j++) {
+        const int arc = std::min(j - i, length - (j - i));
+        const int d = reached[static_cast<std::size_t>(ring[static_cast<std::size_t>(j)])];
+        if (d < 0 || d < arc) {
+          ok = false;
+          break;
+        }
+      }
+    }
+    if (!ok) {
+      bad += 1;
+    }
+  }
+  return bad;
+}
+
+} // namespace
+
+TEST_CASE("K2,3 has three primitive 4-rings", "[franzblau]") {
+  // Parts {0, 3} and {1, 2, 4}. Six edges, no chord, three 4-cycles.
+  // OVITO FindRings reports two of them. tests/test_ovito_ring_counts.py
+  // is that comparison. This case only needs the primitive side.
+  // Each row starts with its own index, the same layout neighListO uses.
+  const std::vector<std::vector<int>> adj = {
+      {0, 1, 2, 4}, {1, 0, 3}, {2, 0, 3}, {3, 1, 2, 4}, {4, 0, 3},
+  };
+  const auto rings = primitive::ringNetwork(adj, 4);
+  REQUIRE(rings.size() == 3);
+  for (const auto &ring : rings) {
+    REQUIRE(ring.size() == 4);
+  }
+  REQUIRE(nonPrimitive(adj, rings) == 0);
+}
+
+TEST_CASE("the interface frame rings are primitive on the 3.5 A graph", "[franzblau]") {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  cloud = sinp::readLammpsTrj("traj/interface_f0.lammpstrj", 1, cloud);
+  REQUIRE(cloud.nop == 864);
+  const auto rows = nneigh::neighListO(3.5, cloud, 1);
+  const auto indexed = nneigh::neighbourListByIndex(cloud, rows);
+  std::vector<std::vector<int>> adj(indexed.size());
+  std::size_t bonds = 0;
+  for (std::size_t i = 0; i < indexed.size(); i++) {
+    for (int j : indexed[i]) {
+      if (j == static_cast<int>(i)) {
+        continue;
+      }
+      adj[i].push_back(j);
+      if (static_cast<int>(i) < j) {
+        bonds += 1;
+      }
+    }
+  }
+  REQUIRE(bonds == 1929u);
+  // ringNetwork reads the owning index from the front of each row.
+  std::vector<std::vector<int>> nList(adj.size());
+  for (std::size_t i = 0; i < adj.size(); i++) {
+    nList[i].push_back(static_cast<int>(i));
+    nList[i].insert(nList[i].end(), adj[i].begin(), adj[i].end());
+  }
+  const auto rings = primitive::ringNetwork(nList, 10);
+  std::map<int, int> hist;
+  for (const auto &ring : rings) {
+    hist[static_cast<int>(ring.size())] += 1;
+  }
+  REQUIRE(hist[3] == 142);
+  REQUIRE(hist[4] == 188);
+  REQUIRE(hist[5] == 377);
+  REQUIRE(hist[6] == 1143);
+  REQUIRE(hist[7] == 257);
+  REQUIRE(hist[8] == 54);
+  REQUIRE(hist[9] == 52);
+  REQUIRE(hist[10] == 449);
+  REQUIRE(nonPrimitive(adj, rings) == 0);
 }
 
 TEST_CASE("populateGraphFromNListID skips a missing id and keeps the other vertices",

@@ -1,0 +1,1 @@
+Primitive rings are the Franzblau shortest-path census. OVITO FindRings is a subset: K2,3 has three chordless 4-rings and FindRings reports two, and every ring on the 864-atom interface frame at 3.5 Å is primitive.

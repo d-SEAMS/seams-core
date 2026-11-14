@@ -282,9 +282,12 @@ def main() -> None:
     if bad or mismatch:
         print("non-primitive {} size mismatch {}".format(bad, mismatch), file=sys.stderr)
         raise SystemExit(1)
-    if theirs[4] >= ours[4]:
-        print("OVITO no longer drops a primitive 4-ring: {}".format(theirs), file=sys.stderr)
+    # FindRings is a subset of the primitive census, not the same histogram.
+    over = [s for s in SIZES if theirs[s] > ours[s]]
+    if over:
+        print("OVITO exceeds the primitive census at {}".format(over), file=sys.stderr)
         print("dseams {}".format(ours), file=sys.stderr)
+        print("ovito  {}".format(theirs), file=sys.stderr)
         raise SystemExit(1)
     print(
         "same bonds",

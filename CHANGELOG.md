@@ -55,6 +55,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - One sitting retimes neighbours, q4, q6, CHILL+, rings, symmetry and hydrate cages at 110592 and 884736 molecules on one thread and on eight. The raw lines are benchmarks/rc3-sitting.csv.
 - OpenMP target offload of the TUM ice score: hop-bound primitive six-rings and HC/DDC cage affiliation. `SEAMS_OFFLOAD=1` cage counts match the host on mW cubic, including `seams cages --graph seeded` (union 4-NN graph). Device CHILL+ is not this path.
 - Orthorhombic frames are cut by linkcell's weighted recursive coordinate bisection of the cell grid. The halo is the stencil painted while walking the cells a rank owns, and the same cut is reused on the next frame of that size. Neighbour rows, CHILL+, q6 and primitive rings keep their scratch across that repeat, and the ring search answers a length-2 shortcut that passes below the source.
+- Primitive rings are the Franzblau shortest-path census. OVITO FindRings is a subset: K2,3 has three chordless 4-rings and FindRings reports two, and every ring on the 864-atom interface frame at 3.5 Å is primitive.
 - Python, Julia, Rust and Fortran call the C API. Python reads NumPy arrays in place and accepts ASE and MDAnalysis frames. Julia uses ccall. Rust splits the raw FFI from the safe crate. Fortran binds the same symbols with iso_c_binding.
 - R (`bindings/r/dseams`) and Julia (`bindings/julia/Dseams`) call
   `libseams_lang`. Python stays `pydseamslib`. The executable tutorials

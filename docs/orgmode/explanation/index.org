@@ -12,6 +12,7 @@ These pages are for understanding. They are not recipes.
 | [[file:interface-order.org][Interface and confined ice]] | Where the 2015 rule and the OVITO rule part |
 | [[file:ring-completion.org][Ring-adjacent completion]] | ~ringAdjacentCompletion~ and the seeded flag |
 | [[file:primitive-rings.org][Primitive rings and the full graph]] | Distances on the whole graph, then levels below the source |
+| [[file:ovito-findrings.org][Primitive rings and OVITO FindRings]] | K2,3 has three primitive 4-rings; FindRings reports two |
 | [[file:linkcell-scaling.org][Linkcell strong scaling]] | The weighted cell bisection, its halo, and the measured speedups |
 | [[file:rings-one-thread.org][Rings on one thread]] | ~ringNetwork~ against OVITO FindRings |
 | [[file:topological-network.org][Topological network criteria]] | The formulae the classifiers use |
@@ -37,6 +38,7 @@ These pages are for understanding. They are not recipes.
    interface-order
    ring-completion
    primitive-rings
+   ovito-findrings
    linkcell-scaling
    rings-one-thread
    topological-network
