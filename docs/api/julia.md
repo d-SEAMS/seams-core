@@ -151,6 +151,16 @@ Units: dt and the result in the caller's time unit
 
 Example: `docs/examples/minimal_julia.jl`
 
+### neighbour_pairs
+
+Purpose: Number of directed pairs in the neighbour list.
+
+Parameters: frame; cutoff; type; graph
+
+Units: cutoff in angstrom; the count is dimensionless and omits self
+
+Example: `docs/examples/minimal_julia.jl`
+
 ### nframes
 
 Purpose: Number of frames in a trajectory path.

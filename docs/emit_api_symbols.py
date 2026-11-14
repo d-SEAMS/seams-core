@@ -467,6 +467,7 @@ def other_rows():
             ("cages", "Hexagonal and double-diamond cage counts.", "frame; cutoff", "cutoff in angstrom; counts are dimensionless"),
             ("chill_plus", "CHILL+ label of each atom.", "frame; cutoff", "cutoff in angstrom; labels are dimensionless codes"),
             ("jump_tau90", "Time for an H-H vector to rotate 90 degrees between two frames.", "first; second; dt", "dt and the result in the caller's time unit"),
+            ("neighbour_pairs", "Number of directed pairs in the neighbour list.", "frame; cutoff; type; graph", "cutoff in angstrom; the count is dimensionless and omits self"),
             ("nframes", "Number of frames in a trajectory path.", "path", "dimensionless count"),
             ("nop", "Number of atoms in a frame.", "frame", "dimensionless count"),
             ("primitive_rings", "Histogram of primitive rings.", "frame; cutoff; max_ring", "cutoff in angstrom; bin k is a dimensionless ring count"),
