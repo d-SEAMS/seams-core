@@ -4,6 +4,7 @@
 
 import csv
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -38,11 +39,21 @@ ALIASES = {
 
 
 def pages():
+    """Tracked pages only. Generated rst is gitignored and must not fail this check."""
+    listed = subprocess.run(
+        ["git", "ls-files", "-z", "--", "docs"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+    )
     found = []
-    for path in DOCS.rglob("*"):
-        if not path.is_file() or path.suffix not in {".org", ".md", ".rst"}:
+    for raw in listed.stdout.split(b"\0"):
+        if not raw:
             continue
-        if SKIP.intersection(path.relative_to(DOCS).parts):
+        path = ROOT / raw.decode()
+        if path.suffix not in {".org", ".md", ".rst"}:
+            continue
+        if SKIP.intersection(path.relative_to(ROOT).parts):
             continue
         found.append(path)
     return found
@@ -181,6 +192,10 @@ def as_number(text):
 
 
 def close_enough(cell, raw):
+    # Renderers write DNF for a blank time or an absent/DNF verdict.
+    if cell == "DNF":
+        token = raw.strip().lower()
+        return token in {"", "dnf", "absent"} or token.startswith("dnf")
     if re.fullmatch(r"-?\d+", cell):
         return int(cell) == int(float(raw))
     if raw == "":

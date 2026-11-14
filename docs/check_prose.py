@@ -8,6 +8,7 @@ spaces on both sides, outside those examples, is punctuation.
 """
 
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -29,17 +30,23 @@ CARGO_SPLIT = re.compile(r" -- --")
 
 
 def pages():
+    """Tracked pages only. Generated rst is gitignored and must not fail this check."""
+    listed = subprocess.run(
+        ["git", "ls-files", "-z", "--", "docs", "README.md", "changelog.d"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+    )
     found = []
-    for path in DOCS.rglob("*"):
-        if not path.is_file() or path.suffix not in {".md", ".rst"}:
+    for raw in listed.stdout.split(b"\0"):
+        if not raw:
             continue
-        if SKIP.intersection(path.relative_to(DOCS).parts):
+        path = ROOT / raw.decode()
+        if path.suffix not in {".md", ".rst"}:
+            continue
+        if SKIP.intersection(path.relative_to(ROOT).parts):
             continue
         found.append(path)
-    readme = ROOT / "README.md"
-    if readme.is_file():
-        found.append(readme)
-    found.extend(sorted((ROOT / "changelog.d").glob("*.md")))
     return found
 
 

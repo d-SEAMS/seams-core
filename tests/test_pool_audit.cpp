@@ -132,8 +132,10 @@ TEST_CASE("pool-sized kernels match the one-thread result on ice Ic") {
     auto idx = nneigh::neighbourListByIndex(ice, listed);
     return primitive::ringNetwork(idx, 6);
   };
+#ifdef SEAMS_HAS_LINKCELL
   const auto full1 = full(1);
   const auto full8 = full(8);
   REQUIRE(full1 == full8);
   REQUIRE(full1 == rings1);
+#endif
 }

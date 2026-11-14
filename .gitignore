@@ -92,6 +92,7 @@ bin/
 build/
 markdown/cli-fast-plots/
 # docs/source/*.rst is generated from orgmode, but track orgmode + conf.py
+# Nested exports and CSV tables are the same kind of generated page.
 docs/build/
 docs/doctrees/
 docs/doxygen-html/
@@ -107,6 +108,7 @@ docs/source/science/figures/
 docs/source/walkthrough/figures/
 docs/.cache/
 docs/source/*.rst
+docs/source/**/*.rst
 docs/source/tutorials/gallery/
 docs/source/tutorials/gallery-captions.rst
 docs/source/tutorials/molecules/

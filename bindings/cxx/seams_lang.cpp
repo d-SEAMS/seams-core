@@ -139,10 +139,12 @@ int countXyzFrames(const std::string &path) {
     const char *last = first + line.size();
     const auto parsed = std::from_chars(first, last, n);
     if (parsed.ec != std::errc{} || parsed.ptr != last || n < 0) {
-      return -1;
+      // A later trailer is not another frame. A first line that is not
+      // a count means this is not a counted xyz.
+      return frames > 0 ? frames : 0;
     }
     if (!std::getline(in, line)) {
-      return -1;
+      return frames > 0 ? frames : -1;
     }
     for (int i = 0; i < n; ++i) {
       if (!std::getline(in, line)) {
@@ -345,8 +347,12 @@ int seams_path_nframes(const char *path) {
       if (frames > 0) {
         return frames;
       }
+      if (frames < 0) {
+        set_error("unreadable trajectory");
+        return -1;
+      }
       // A readable file that is not a counted xyz block is still one
-      // native frame. configuration.xyz is a count, a box, and coordinates.
+      // native frame.
       return 1;
     }
     return sinp::nLammpsFrames(path);

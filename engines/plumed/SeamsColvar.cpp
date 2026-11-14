@@ -16,6 +16,10 @@
 
 namespace PLMD {
 
+class ActionWithValue;
+void addPlainComponent(ActionWithValue *self, const std::string &name);
+void addDerivativeComponent(ActionWithValue *self, const std::string &name);
+
 class SeamsCV : public Colvar {
  public:
   static void registerKeywords(Keywords &keys);
@@ -47,15 +51,16 @@ SeamsCV::SeamsCV(const ActionOptions &ao) : PLUMED_COLVAR_INIT(ao), cutoff_(3.5)
   parse("CUTOFF", cutoff_);
   checkRead();
   requestAtoms(atoms);
-  addComponentWithDerivatives("q6");
+  // The one-argument library symbols. See plumed_components.cpp.
+  addDerivativeComponent(this, "q6");
   componentIsNotPeriodic("q6");
-  addComponent("ice");
+  addPlainComponent(this, "ice");
   componentIsNotPeriodic("ice");
-  addComponent("ring");
+  addPlainComponent(this, "ring");
   componentIsNotPeriodic("ring");
-  addComponent("hexagonal");
+  addPlainComponent(this, "hexagonal");
   componentIsNotPeriodic("hexagonal");
-  addComponent("six");
+  addPlainComponent(this, "six");
   componentIsNotPeriodic("six");
 }
 

@@ -19,12 +19,44 @@ ROOT = Path(os.environ.get("DSEAMS_SRC", Path(__file__).resolve().parents[3]))
 TRAJ = ROOT / "input" / "traj"
 
 
+def _stage_extension():
+    """The nanobind module lives in the build tree, not beside the sources."""
+    build = Path(os.environ.get("DSEAMS_BUILD", ""))
+    if not build.is_dir():
+        return None
+    tag = sys.implementation.cache_tag
+    cores = [path for path in build.rglob("_core*.so") if tag in path.name and path.is_file()]
+    if not cores:
+        return None
+    stage = build / "pythonpath"
+    dest = stage / "dseams"
+    dest.mkdir(parents=True, exist_ok=True)
+    package = ROOT / "bindings" / "python" / "dseams"
+    for src in package.glob("*.py"):
+        link = dest / src.name
+        if not link.exists():
+            link.symlink_to(src)
+    so = dest / cores[0].name
+    if not so.exists():
+        so.symlink_to(cores[0])
+    pyd = ROOT / "bindings" / "python" / "pydseams"
+    pdest = stage / "pydseams"
+    pdest.mkdir(parents=True, exist_ok=True)
+    for src in pyd.glob("*.py"):
+        link = pdest / src.name
+        if not link.exists():
+            link.symlink_to(src)
+    return stage
+
+
 def _ours():
     os.environ.pop("DSEAMS_DOC_BUILD", None)
-    os.environ["PYTHONPATH"] = str(ROOT / "bindings" / "python") + os.pathsep + os.environ.get(
-        "PYTHONPATH", ""
-    )
-    sys.path.insert(0, str(ROOT / "bindings" / "python"))
+    parts = [str(ROOT / "bindings" / "python")]
+    staged = _stage_extension()
+    if staged is not None:
+        parts.insert(0, str(staged))
+    os.environ["PYTHONPATH"] = os.pathsep.join(parts + [os.environ.get("PYTHONPATH", "")])
+    sys.path[:0] = parts
     import pydseams as ds
     from pydseams.band import ring_census
 

@@ -62,6 +62,8 @@ def _missing(names, blob):
 def cxx_symbols():
     """Functions and constants in the C++ language header."""
     text = (ROOT / "bindings" / "cxx" / "seams_lang.h").read_text()
+    # @file seams_lang.h is a filename, not a callable.
+    text = re.sub(r"\bseams_[A-Za-z0-9_]+\.h\b", " ", text)
     found = set(re.findall(r"\bseams_[A-Za-z0-9_]+\b", text))
     found.update(re.findall(r"\bSEAMS_[A-Z0-9_]+\b", text))
     return sorted(name for name in found if not name.endswith("_H_"))

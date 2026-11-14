@@ -89,6 +89,8 @@ int main(void) {
 
 def check_lang():
     libdir = os.environ.get("SEAMS_LIBDIR")
+    if libdir and not (Path(libdir) / "libseams_lang.so").is_file():
+        libdir = None
     if not libdir:
         candidates = [ROOT / "bbdir" / "bindings"]
         candidates.extend(Path(item) for item in os.environ.get("LD_LIBRARY_PATH", "").split(":") if item)

@@ -4,6 +4,7 @@
 
 import os
 import pathlib
+import shutil
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -16,10 +17,17 @@ def main() -> int:
     if len(sys.argv) > 1 and sys.argv[1] == "frame":
         if not FRAME.is_file():
             # The liquid dump is produced by the deck, not stored in git.
+            if shutil.which("lmp") is None:
+                sys.stderr.write("lmp is not on PATH\n")
+                return 77
             sys.path.insert(0, str(ROOT / "input" / "mw215"))
             from regenerate import generate
 
-            generate(8)
+            try:
+                generate(8)
+            except FileNotFoundError as exc:
+                sys.stderr.write("lmp is not runnable: {}\n".format(exc))
+                return 77
         if FRAME.stat().st_size < 1000:
             sys.stderr.write("frame is empty\n")
             return 1

@@ -42,7 +42,17 @@ def run_lammps(root, build):
     env = os.environ.copy()
     lib = str(Path(build) / "src")
     env["LD_LIBRARY_PATH"] = lib + os.pathsep + env.get("LD_LIBRARY_PATH", "")
-    text = subprocess.check_output([str(hook), str(deck)], env=env, text=True, cwd=root / "engines" / "lammps")
+    try:
+        text = subprocess.check_output(
+            [str(hook), str(deck)], env=env, text=True, cwd=root / "engines" / "lammps",
+            stderr=subprocess.STDOUT,
+        )
+    except subprocess.CalledProcessError as exc:
+        detail = exc.output or ""
+        if exc.returncode == 127 or "cannot open shared object file" in detail:
+            print("lammps skipped: {}".format(detail.strip().splitlines()[-1] if detail.strip() else "library not found"))
+            return False
+        raise
     # "lammps calls N stride 2 ice M"
     parts = text.split()
     calls = int(parts[parts.index("calls") + 1])

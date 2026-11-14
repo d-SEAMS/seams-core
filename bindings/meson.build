@@ -166,6 +166,7 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
   _parity_env = environment()
   _parity_env.set('SEAMS_LANG_LIB', seams_lang.full_path())
   _parity_env.set('DSEAMS_SRC', meson.project_source_root())
+  _parity_env.set('DSEAMS_BUILD', meson.project_build_root())
   _parity_env.set('PYTHONPATH', meson.project_source_root() / 'bindings' / 'python')
   test(
     'python_frame_parity',

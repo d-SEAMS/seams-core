@@ -92,6 +92,16 @@ Units: dimensionless count
 
 Example: `docs/examples/minimal_julia.jl`
 
+### neighbour_pairs
+
+Purpose: Directed pairs in the neighbour list.
+
+Parameters: frame; cutoff; type; graph
+
+Units: cutoff in angstrom; the count is dimensionless
+
+Example: `docs/examples/minimal_julia.jl`
+
 ### nop
 
 Purpose: Number of atoms in a frame.

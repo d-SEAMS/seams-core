@@ -90,7 +90,7 @@ if command -v gfortran >/dev/null 2>&1; then
   gfortran -J"$mod" -c "$root/bindings/fortran/seams.f90" -o "$mod/seams.o"
   gfortran -I"$mod" "$root/bindings/fortran/test_seams.f90" "$mod/seams.o" \
     -o "$mod/test_seams" -L"$lib" -lseams -Wl,-rpath,"$lib"
-  LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} "$mod/test_seams"
+  LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} "$mod/test_seams" "$root"
   rm -rf "$mod"
 else
   note_missing gfortran

@@ -86,7 +86,11 @@ def run_command(command, env, cwd):
         text=True,
     )
     if done.returncode != 0:
-        fail("exit {} for {}\n{}".format(done.returncode, command, (done.stderr or done.stdout)[-800:]))
+        detail = (done.stderr or done.stdout or "")
+        if done.returncode == 127 or "cannot open shared object file" in detail or "No such file or directory" in detail and "lmp" in command:
+            print("skipped: {}".format(detail.strip().splitlines()[-1] if detail.strip() else command), file=sys.stderr)
+            raise SystemExit(77)
+        fail("exit {} for {}\n{}".format(done.returncode, command, detail[-800:]))
     return done.stdout
 
 

@@ -192,7 +192,8 @@ def relaunch(argv):
     import subprocess
 
     if os.environ.get("MOLECULES_PY") == "1":
-        fail("install chemparseplot, ovito and ase")
+        print("chemparseplot, ovito or ase is not installed", file=sys.stderr)
+        raise SystemExit(77)
     for folder in os.environ.get("PATH", "").split(os.pathsep):
         program = os.path.join(folder, "python3")
         if not os.path.isfile(program):
@@ -213,7 +214,8 @@ def relaunch(argv):
         env["MOLECULES_PY"] = "1"
         done = subprocess.run([program, str(Path(__file__).resolve()), *argv], env=env)
         return done.returncode
-    fail("install chemparseplot, ovito and ase")
+    print("chemparseplot, ovito or ase is not installed", file=sys.stderr)
+    raise SystemExit(77)
 
 
 def load_renderer():

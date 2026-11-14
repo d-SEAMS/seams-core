@@ -12,6 +12,14 @@
 
 #ifdef SEAMS_HAS_LINKCELL
 #include <linkcell.h>
+extern "C" int lc_mesh_cut(const double *xyz, std::size_t n, const lc_cell *box, double cutoff,
+                           const void *mask, double hint, std::size_t parts, int method,
+                           double slack, int flags, int *nxyz, double *width, int *assign,
+                           int *point_cell, std::size_t assign_n, std::size_t point_n,
+                           std::size_t *ncell);
+extern "C" int lc_halo_width(double cutoff, int images, const double *bin, std::uint32_t *out);
+extern "C" int lc_partition_weights(const int *nxyz, const std::uint64_t *weight, std::size_t ncell,
+                                    std::size_t parts, int method, double slack, int *assign);
 // The measured-weights library names this test lc_within_reach and
 // asks for coordinates. A nonzero return selects the geometric blocks.
 extern "C" __attribute__((weak)) int lc_owned_mask(const int *nxyz, const int *assign, std::size_t ncell,

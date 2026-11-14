@@ -26,7 +26,7 @@ multiplies by 10 so PLUMED sees a per-nanometre derivative.
 
 ```{literalinclude} ../../../engines/plumed/SeamsColvar.cpp
 :language: cpp
-:lines: 73-86
+:lines: 78-96
 ```
 
 PLUMED stores positions in nanometres. `getPosition` and `getBox` are those

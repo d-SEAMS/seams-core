@@ -39,7 +39,8 @@ def prepare_ovito() -> bool:
         import ovito  # noqa: F401
 
         return True
-    except ImportError:
+    except Exception as exc:
+        print("ovito is not usable: {}".format(exc), file=sys.stderr)
         return False
 
 

@@ -52,6 +52,30 @@ if lammps_opt.allowed()
                            args: lammps_args, required: false)
       error('liblammps was found but library.h is not on the include path')
     endif
+    lammps_rpath = ''
+    if lammps_dep.type_name() == 'pkgconfig'
+      lammps_rpath = lammps_dep.get_variable('libdir', default_value: '')
+    endif
+    if lammps_rpath == ''
+      lammps_lib_py = find_program('python3', required: false)
+      if lammps_lib_py.found()
+        lammps_lib_where = run_command(lammps_lib_py, '-c',
+          'import os, pathlib\n' +
+          'prefix = os.environ.get("CONDA_PREFIX", "")\n' +
+          'if not prefix:\n' +
+          '    raise SystemExit(1)\n' +
+          'root = pathlib.Path(prefix)\n' +
+          'for folder in (root / "lib", root / "lib64"):\n' +
+          '    if (folder / "liblammps.so").is_file() or (folder / "liblammps.so.0").is_file():\n' +
+          '        print(folder)\n' +
+          '        raise SystemExit(0)\n' +
+          'raise SystemExit(1)\n',
+          check: false)
+        if lammps_lib_where.returncode() == 0 and lammps_lib_where.stdout().strip() != ''
+          lammps_rpath = lammps_lib_where.stdout().strip()
+        endif
+      endif
+    endif
     run_hook = executable(
       'run_hook',
       files('lammps/run_hook.cpp'),
@@ -59,11 +83,13 @@ if lammps_opt.allowed()
       link_with: seams_api_lib,
       include_directories: lammps_incs,
       cpp_args: _args + lammps_args + seams_api_args,
+      build_rpath: lammps_rpath,
+      install_rpath: lammps_rpath,
       install: true)
     test(
       'lammps_hook',
-      run_hook,
-      args: ['in.dseams'],
+      find_program('skip_missing_lib.sh'),
+      args: [run_hook.full_path(), 'in.dseams'],
       workdir: meson.project_source_root() / 'engines/lammps',
       timeout: 120)
   endif
@@ -161,6 +187,30 @@ if openmm_opt.allowed()
     error('with_openmm is enabled but libOpenMM was not found')
   endif
   if openmm_dep.found()
+    openmm_rpath = ''
+    if openmm_dep.type_name() == 'pkgconfig'
+      openmm_rpath = openmm_dep.get_variable('libdir', default_value: '')
+    endif
+    if openmm_rpath == ''
+      openmm_lib_py = find_program('python3', required: false)
+      if openmm_lib_py.found()
+        openmm_lib_where = run_command(openmm_lib_py, '-c',
+          'import os, pathlib\n' +
+          'prefix = os.environ.get("CONDA_PREFIX", "")\n' +
+          'if not prefix:\n' +
+          '    raise SystemExit(1)\n' +
+          'root = pathlib.Path(prefix)\n' +
+          'for folder in (root / "lib", root / "lib64"):\n' +
+          '    if (folder / "libOpenMM.so").is_file():\n' +
+          '        print(folder)\n' +
+          '        raise SystemExit(0)\n' +
+          'raise SystemExit(1)\n',
+          check: false)
+        if openmm_lib_where.returncode() == 0 and openmm_lib_where.stdout().strip() != ''
+          openmm_rpath = openmm_lib_where.stdout().strip()
+        endif
+      endif
+    endif
     openmm_plugin = executable(
       'seams_openmm',
       files('openmm/plugin.cpp'),
@@ -168,8 +218,14 @@ if openmm_opt.allowed()
       link_with: seams_api_lib,
       include_directories: seams_inc,
       cpp_args: _args + seams_api_args,
+      build_rpath: openmm_rpath,
+      install_rpath: openmm_rpath,
       install: true)
-    test('openmm_plugin', openmm_plugin, timeout: 120)
+    test(
+      'openmm_plugin',
+      find_program('skip_missing_lib.sh'),
+      args: [openmm_plugin.full_path()],
+      timeout: 120)
   endif
 endif
 
@@ -219,13 +275,36 @@ if plumed_opt.allowed()
     if not plumed_header
       error('PLUMED was found but plumed/core/Colvar.h is not usable, so libSeamsPlumed.so cannot be built')
     endif
+    # CPATH is searched before an -isystem copy of the same directory, so a
+    # second PLUMED prefix can supply the headers while this library is linked.
+    # A distinct -I of the prefix that owns the library is searched first.
+    plumed_incdir = ''
+    if plumed_dep.found() and plumed_dep.type_name() == 'pkgconfig'
+      plumed_incdir = plumed_dep.get_variable('includedir', default_value: '')
+    endif
+    if plumed_incdir == '' and plumed_prog.found()
+      info = run_command(plumed_prog, 'info', '--include-dir', check: false)
+      if info.returncode() == 0
+        plumed_incdir = info.stdout().strip()
+      endif
+    endif
+    plumed_cpp = []
+    if plumed_incdir != ''
+      # A symlink of the prefix include is the same directory as -isystem,
+      # and GCC drops that -I. A directory that only holds the plumed tree
+      # stays distinct and is searched before CPATH.
+      plumed_link = meson.project_build_root() / 'plumed-include'
+      run_command('mkdir', '-p', plumed_link, check: false)
+      run_command('ln', '-sfn', plumed_incdir / 'plumed', plumed_link / 'plumed', check: false)
+      plumed_cpp = ['-I' + plumed_link]
+    endif
     seams_plumed = shared_library(
       'SeamsPlumed',
-      files('plumed/SeamsColvar.cpp'),
+      files('plumed/SeamsColvar.cpp', 'plumed/plumed_components.cpp'),
       dependencies: plumed_probe_deps,
       link_with: seams_api_lib,
       include_directories: plumed_incs,
-      cpp_args: _args + seams_api_args,
+      cpp_args: _args + seams_api_args + plumed_cpp,
       name_prefix: 'lib',
       install: true)
   elif plumed_opt.enabled()
