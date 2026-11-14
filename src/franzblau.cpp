@@ -39,8 +39,8 @@ double gTscPerMs = 0;
 // Ring enumeration wants about 80 sources per thread, and a team is
 // not started until those sources fill every worker. A few hundred
 // changed vertices are still a serial update: the fork costs more
-// than the search. This is not teamFor, which would also drop a
-// crystal of a few hundred molecules onto one thread.
+// than the search. This is not teamFor, which keeps the requested
+// width whatever the frame size.
 int sourceTeam(int sources) {
 #ifdef SEAMS_HAS_OPENMP
   if (omp_in_parallel()) {

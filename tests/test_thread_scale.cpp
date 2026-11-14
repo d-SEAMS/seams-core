@@ -21,16 +21,19 @@
 #endif
 
 #if defined(SEAMS_HAS_OPENMP) && defined(__linux__)
-// First in the file: TeamWidth binds a narrowed team once per process.
-TEST_CASE("a team narrowed from eight to four leaves the caller's cpus alone", "[thread]") {
+// First in the file: TeamWidth would bind a narrowed team once per process.
+// teamFor keeps the width the caller asked for, so a small frame still
+// gets eight threads and the caller's cpu mask is never rebound.
+TEST_CASE("a team on a small frame keeps the requested width and the caller's cpus", "[thread]") {
   cpu_set_t before;
   REQUIRE(sched_getaffinity(0, sizeof(before), &before) == 0);
   const int saved = omp_get_max_threads();
   omp_set_num_threads(8);
   {
     const seams::TeamWidth team(4096);
-    REQUIRE(omp_get_max_threads() == 4);
+    REQUIRE(omp_get_max_threads() == 8);
   }
+  REQUIRE(omp_get_max_threads() == 8);
   omp_set_num_threads(saved);
   cpu_set_t after;
   REQUIRE(sched_getaffinity(0, sizeof(after), &after) == 0);
