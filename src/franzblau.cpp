@@ -58,11 +58,19 @@ int sourceTeam(int sources) {
 #endif
 }
 
+// Profiling ticks: TSC cycles on x86, steady-clock nanoseconds elsewhere.
 std::uint64_t readTsc() {
+#if defined(__x86_64__) || defined(__i386__)
   unsigned lo = 0;
   unsigned hi = 0;
   __asm__ volatile("rdtsc" : "=a"(lo), "=d"(hi));
   return (static_cast<std::uint64_t>(hi) << 32) | lo;
+#else
+  return static_cast<std::uint64_t>(
+      std::chrono::duration_cast<std::chrono::nanoseconds>(
+          std::chrono::steady_clock::now().time_since_epoch())
+          .count());
+#endif
 }
 
 struct RingSplitTimes {

@@ -21,7 +21,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#if defined(__AVX2__)
 #include <immintrin.h>
+#endif
 #include <new>
 #include <cstddef>
 #include <memory>
@@ -678,6 +680,7 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
     pz[i] = 1.0e6;
     r2[i] = 1.0e300;
   }
+#if defined(__AVX2__)
   for (int a = 0; a < 12; a++) {
     const __m256d xa = _mm256_set1_pd(px[a]);
     const __m256d ya = _mm256_set1_pd(py[a]);
@@ -691,6 +694,16 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
       _mm256_storeu_pd(&pair[a][b], d2);
     }
   }
+#else
+  for (int a = 0; a < 12; a++) {
+    for (int b = 0; b < 12; b++) {
+      const double dx = px[a] - px[b];
+      const double dy = py[a] - py[b];
+      const double dz = pz[a] - pz[b];
+      pair[a][b] = dx * dx + (dy * dy + dz * dz);
+    }
+  }
+#endif
   // (1 + sqrt(2)) / 2, the adaptive common-neighbour cutoff. It lies between
   // the first and second shells of the FCC/HCP cluster.
   constexpr double kAdapt2 = 1.2071067811865475 * 1.2071067811865475;
@@ -698,6 +711,9 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
   int n422 = 0;
   int nGood = 0;
   for (int j = 0; j < 12; j++) {
+    const double cut2 = r2[j] * kAdapt2;
+    int mask = 0;
+#if defined(__AVX2__)
     const __m256d xa = _mm256_set1_pd(px[j]);
     const __m256d ya = _mm256_set1_pd(py[j]);
     const __m256d za = _mm256_set1_pd(pz[j]);
@@ -709,9 +725,7 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
                                       _mm256_add_pd(_mm256_mul_pd(dy, dy), _mm256_mul_pd(dz, dz)));
       _mm256_storeu_pd(&pair[j][b], d2);
     }
-    const double cut2 = r2[j] * kAdapt2;
     const __m256d cut = _mm256_set1_pd(cut2);
-    int mask = 0;
     for (int b = 0; b < 12; b += 4) {
       const __m256d pk = _mm256_loadu_pd(&pair[j][b]);
       const __m256d rk = _mm256_load_pd(r2 + b);
@@ -719,6 +733,13 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
                                       _mm256_cmp_pd(rk, cut, _CMP_LT_OQ));
       mask |= _mm256_movemask_pd(ok) << b;
     }
+#else
+    for (int b = 0; b < 12; b++) {
+      if (pair[j][b] < cut2 && r2[b] < cut2) {
+        mask |= 1 << b;
+      }
+    }
+#endif
     mask &= ~(1 << j);
     const int nc = __builtin_popcount(static_cast<unsigned>(mask));
     int common[4];

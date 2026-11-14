@@ -11,6 +11,8 @@
 
 #if defined(__x86_64__)
 #include <immintrin.h>
+#endif
+#if defined(__x86_64__) && defined(__linux__)
 #include <sys/syscall.h>
 #include <unistd.h>
 #endif
@@ -21,6 +23,9 @@
 
 namespace seams::product {
 namespace {
+
+// __int128 is a GCC/Clang extension; the typedef keeps -pedantic quiet.
+__extension__ typedef __int128 i128;
 
 std::atomic<int> gMode{-1};
 std::atomic<int> gReduction{-1};
@@ -84,7 +89,7 @@ bool finitePair(double a, double b) {
   return std::isfinite(a) && std::isfinite(b);
 }
 
-#if defined(__x86_64__)
+#if defined(__x86_64__) && defined(__linux__)
 #ifndef ARCH_REQ_XCOMP_PERM
 #define ARCH_REQ_XCOMP_PERM 0x1023
 #endif
@@ -176,7 +181,7 @@ int symMod(int32_t a, int32_t m) {
   return r;
 }
 
-__int128 remCentered(__int128 s, __uint128_t M) {
+i128 remCentered(i128 s, __uint128_t M) {
   const __uint128_t half = M / 2;
   __uint128_t u;
   if (s >= 0) {
@@ -186,12 +191,12 @@ __int128 remCentered(__int128 s, __uint128_t M) {
     u = neg == 0 ? 0 : M - neg;
   }
   if (u > half) {
-    return static_cast<__int128>(u - M);
+    return static_cast<i128>(u - M);
   }
-  return static_cast<__int128>(u);
+  return static_cast<i128>(u);
 }
 
-double roundI128(__int128 v, int extraExp) {
+double roundI128(i128 v, int extraExp) {
   if (v == 0) {
     return 0.0;
   }
@@ -470,11 +475,11 @@ RealDot dotOzakiII(const double *x, const double *y, int n) {
     }
     residues[static_cast<std::size_t>(t)] = symMod(acc, m);
   }
-  __int128 acc = 0;
+  i128 acc = 0;
   for (int t = 0; t < modCount; t++) {
-    const __int128 term =
-        static_cast<__int128>(residues[static_cast<std::size_t>(t)]) *
-        static_cast<__int128>(table.weight[t]);
+    const i128 term =
+        static_cast<i128>(residues[static_cast<std::size_t>(t)]) *
+        static_cast<i128>(table.weight[t]);
     acc = remCentered(acc + term, table.modulus);
   }
   out.value = roundI128(acc, -(ex + ey));
@@ -576,6 +581,7 @@ __attribute__((target("avx512f,avx512bw,avx512vnni"))) bool int8GemmVnni(
   return true;
 }
 
+#if defined(__linux__)
 __attribute__((target("amx-tile,amx-int8"))) bool int8GemmAmx(
     int m, int n, int k, const signed char *A, int lda, const signed char *B,
     int ldb, int *C, int ldc) {
@@ -670,6 +676,13 @@ __attribute__((target("amx-tile,amx-int8"))) bool int8GemmAmx(
   std::free(raw);
   return true;
 }
+#else
+// AMX tiles need the Linux arch_prctl permission request.
+bool int8GemmAmx(int, int, int, const signed char *, int, const signed char *, int, int *,
+                 int) {
+  return false;
+}
+#endif
 
 __attribute__((target("avx512f,fma"))) void gemmAvx512Rows(
     int m, int n, int k, const double *A, int lda, const double *B, int ldb,
@@ -795,7 +808,7 @@ const char *reductionName(Reduction r) {
 }
 
 bool amxAvailable() {
-#if defined(__x86_64__)
+#if defined(__x86_64__) && defined(__linux__)
   static const bool ok = requestAmx();
   return ok;
 #else
@@ -1089,7 +1102,7 @@ GemmInfo gemmOzakiII(int m, int n, int k, const double *A, int lda, const double
       Bp[static_cast<std::size_t>(t) * n + j] = scaled[static_cast<std::size_t>(t)];
     }
   }
-  std::vector<__int128> acc(static_cast<std::size_t>(m) * n, 0);
+  std::vector<i128> acc(static_cast<std::size_t>(m) * n, 0);
   std::vector<signed char> Ai(static_cast<std::size_t>(m) * k);
   std::vector<signed char> Bi(static_cast<std::size_t>(k) * n);
   std::vector<int> partial(static_cast<std::size_t>(m) * n, 0);
@@ -1122,8 +1135,8 @@ GemmInfo gemmOzakiII(int m, int n, int k, const double *A, int lda, const double
                        : (use == Int8Backend::Vnni ? "ozaki-ii-vnni" : "ozaki-ii-scalar");
     for (int i = 0; i < m * n; i++) {
       const int r = symMod(partial[static_cast<std::size_t>(i)], modulus);
-      const __int128 term =
-          static_cast<__int128>(r) * static_cast<__int128>(table.weight[mod]);
+      const i128 term =
+          static_cast<i128>(r) * static_cast<i128>(table.weight[mod]);
       acc[static_cast<std::size_t>(i)] =
           remCentered(acc[static_cast<std::size_t>(i)] + term, table.modulus);
     }
