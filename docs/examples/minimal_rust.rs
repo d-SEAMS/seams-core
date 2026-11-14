@@ -23,7 +23,10 @@ fn read_dump(path: &str) -> (Vec<f64>, [f64; 3]) {
             let mut parts = line.split_whitespace();
             let lo: f64 = parts.next().unwrap().parse().unwrap();
             let hi: f64 = parts.next().unwrap().parse().unwrap();
-            let tilt: f64 = parts.next().and_then(|item| item.parse().ok()).unwrap_or(0.0);
+            let tilt: f64 = parts
+                .next()
+                .and_then(|item| item.parse().ok())
+                .unwrap_or(0.0);
             // Recovered after all three rows. Store the bound span and
             // the tilt, then convert once the third row arrives.
             edges[axis] = hi - lo;
