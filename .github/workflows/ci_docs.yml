@@ -15,8 +15,9 @@ jobs:
         with:
           environments: docs
           cache-key: pixi-docs-
-      - name: Python numpydoc
-        run: pixi run -e docs python -m pip install numpydoc
+      - name: Python numpydoc and FORD
+        # docbld runs ford for the Fortran reference; the docs env does not carry it.
+        run: pixi run -e docs python -m pip install numpydoc ford
 
       - name: C++ and Lua API docs
         run: |
