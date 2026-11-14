@@ -109,7 +109,7 @@ contains
     character(len=:), allocatable, intent(out) :: key
     integer(seams_int), intent(out), optional :: stat
     character(len=:), allocatable, intent(out), optional :: errmsg
-    integer(c_size_t) :: n
+    integer(c_size_t) :: n, cap
     integer(c_int) :: code
     character(kind=c_char), allocatable, target :: buf(:)
     if (index < 0_c_int) then
@@ -123,10 +123,11 @@ contains
       return
     end if
     allocate(buf(int(n) + 1))
+    cap = n + 1_c_size_t
     if (index < 0_c_int) then
-      code = seams_fingerprint_key(raw, c_loc(buf), n + 1_c_size_t, n)
+      code = seams_fingerprint_key(raw, c_loc(buf), cap, n)
     else
-      code = seams_fingerprint_atom(raw, index, c_loc(buf), n + 1_c_size_t, n)
+      code = seams_fingerprint_atom(raw, index, c_loc(buf), cap, n)
     end if
     if (code /= SEAMS_OK) then
       call check_status(code, raw, stat, errmsg)
@@ -476,7 +477,7 @@ contains
 
   module procedure frame_rdf
     type(c_ptr) :: raw, count_ptr, volume_ptr
-    integer(c_size_t) :: n
+    integer(c_size_t) :: n, cap
     integer(c_int) :: code
     real(seams_real), allocatable, target :: rbuf(:), gbuf(:)
     integer(seams_int), allocatable, target :: cbuf(:)
@@ -498,9 +499,10 @@ contains
     end if
     volume_ptr = c_null_ptr
     if (present(volume)) volume_ptr = c_loc(volume_b)
+    cap = n
     code = seams_rdf(raw, opt_real(rmax, 6.0_seams_real), opt_int(bins, 0_seams_int), &
       opt_int(type_i, 0_seams_int), opt_int(type_j, 0_seams_int), c_loc(rbuf), c_loc(gbuf), &
-      count_ptr, n, n, volume_ptr)
+      count_ptr, cap, n, volume_ptr)
     if (code /= SEAMS_OK) then
       call check_status(code, raw, stat, errmsg)
       return
@@ -514,7 +516,7 @@ contains
 
   module procedure frame_running_cn
     type(c_ptr) :: raw
-    integer(c_size_t) :: n
+    integer(c_size_t) :: n, cap
     integer(c_int) :: code
     real(seams_real), allocatable, target :: rbuf(:), cbuf(:)
     raw = open_raw(self%box, stat, errmsg, "frame")
@@ -527,8 +529,9 @@ contains
       return
     end if
     allocate(rbuf(n), cbuf(n))
+    cap = n
     code = seams_running_cn(raw, opt_real(rmax, 6.0_seams_real), opt_int(bins, 0_seams_int), &
-      opt_int(type_i, 0_seams_int), opt_int(type_j, 0_seams_int), c_loc(rbuf), c_loc(cbuf), n, n)
+      opt_int(type_i, 0_seams_int), opt_int(type_j, 0_seams_int), c_loc(rbuf), c_loc(cbuf), cap, n)
     if (code /= SEAMS_OK) then
       call check_status(code, raw, stat, errmsg)
       return
@@ -574,7 +577,7 @@ contains
 
   module procedure frame_density
     type(c_ptr) :: raw
-    integer(c_size_t) :: n
+    integer(c_size_t) :: n, cap
     integer(c_int) :: code
     real(seams_real), allocatable, target :: zbuf(:), rbuf(:)
     raw = open_raw(self%box, stat, errmsg, "frame")
@@ -586,8 +589,9 @@ contains
       return
     end if
     allocate(zbuf(n), rbuf(n))
+    cap = n
     code = seams_density_axis(raw, opt_int(typ, 0_seams_int), opt_int(bins, 0_seams_int), &
-      opt_int(axis, 2_seams_int), c_loc(zbuf), c_loc(rbuf), n, n)
+      opt_int(axis, 2_seams_int), c_loc(zbuf), c_loc(rbuf), cap, n)
     if (code /= SEAMS_OK) then
       call check_status(code, raw, stat, errmsg)
       return
@@ -767,7 +771,7 @@ contains
     integer(seams_int), intent(out), optional :: stat
     character(len=:), allocatable, intent(out), optional :: errmsg
     type(c_ptr) :: raw, off_ptr, col_ptr
-    integer(c_size_t) :: n_off, nnz
+    integer(c_size_t) :: n_off, nnz, off_cap, col_cap
     integer(c_int) :: code
     integer(c_int), allocatable, target :: off_buf(:), col_buf(:)
     raw = open_raw(self%box, stat, errmsg, "neighbours")
@@ -786,7 +790,9 @@ contains
       allocate(col_buf(nnz))
       col_ptr = c_loc(col_buf)
     end if
-    code = seams_neighbours_copy(raw, off_ptr, n_off, n_off, col_ptr, nnz, nnz)
+    off_cap = n_off
+    col_cap = nnz
+    code = seams_neighbours_copy(raw, off_ptr, off_cap, n_off, col_ptr, col_cap, nnz)
     if (code /= SEAMS_OK) then
       call check_status(code, raw, stat, errmsg)
       return
@@ -1028,7 +1034,7 @@ contains
   end procedure brine_rejection
   module procedure brine_profile
     type(c_ptr) :: raw
-    integer(c_size_t) :: n
+    integer(c_size_t) :: n, cap
     integer(c_int) :: code
     real(seams_real), allocatable, target :: zbuf(:), mbuf(:), fbuf(:)
     raw = open_raw(self%box, stat, errmsg, "brine")
@@ -1039,7 +1045,8 @@ contains
       return
     end if
     allocate(zbuf(n), mbuf(n), fbuf(n))
-    code = seams_brine_profile(raw, c_loc(zbuf), c_loc(mbuf), c_loc(fbuf), n, n)
+    cap = n
+    code = seams_brine_profile(raw, c_loc(zbuf), c_loc(mbuf), c_loc(fbuf), cap, n)
     if (code /= SEAMS_OK) then
       call check_status(code, raw, stat, errmsg)
       return

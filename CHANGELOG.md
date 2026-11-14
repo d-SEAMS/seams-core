@@ -207,6 +207,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - SOAP now fills every l through lMax. classifyBonds reuses a Ylm buffer. Fingerprint builds one hop graph per atom.
 - The 2D RDF histogram, `nearestUnlike`, and `shellSeparation` trust the fractional wrap only below half the narrowest face separation of a tilted cell. Half an edge or half a bound span let a pair inside the cutoff wrap to a longer image and drop out, and let the RDF grid put a pair two cells apart.
 - The C API builds q4 and q6 from one cutoff shell and does not fill an atom-index map on that path.
+- The Fortran methods that size a buffer and then fill it (`rdf`, `running_cn`, `density`, `brine_profile`, the fingerprint keys and the neighbour columns) pass the capacity in its own variable. They passed one variable as both the by-value capacity and the `intent(out)` length, which leaves the capacity undefined on entry.
 - The PLUMED q6 derivative is expressed per nanometre. A 0.001 angstrom step matched an independent difference to 3.99e-11 on a shifted eight-molecule cell.
 - The cutoff neighbour list sizes its row buffer from the pairs found. A shell denser than the ideal-gas estimate no longer writes past that buffer.
 - The cutoff neighbour search clamps its cell count and stencil reach before converting them to integers. A cell edge many orders of magnitude shorter or longer than the cutoff overflowed both, which is undefined behaviour and in practice left the reach at one cell. Found by `capi_reload_fuzzer` under UBSan.

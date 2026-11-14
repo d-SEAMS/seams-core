@@ -1,0 +1,1 @@
+The Fortran methods that size a buffer and then fill it (`rdf`, `running_cn`, `density`, `brine_profile`, the fingerprint keys and the neighbour columns) pass the capacity in its own variable. They passed one variable as both the by-value capacity and the `intent(out)` length, which leaves the capacity undefined on entry.
