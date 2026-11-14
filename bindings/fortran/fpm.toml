@@ -1,0 +1,31 @@
+name = "dseams"
+version = "2.14.0"
+license = "MIT"
+author = "Rohit Goswami"
+maintainer = "rgoswami@ieee.org"
+copyright = "Copyright 2018--present, d-SEAMS core team"
+description = "Fortran interface to the d-SEAMS C API (ice, clathrate and ring analysis)"
+homepage = "https://dseams.info"
+categories = ["scientific"]
+keywords = ["molecular-dynamics", "ice", "clathrate", "chemistry"]
+
+# The module binds include/seams.h through iso_c_binding and links an
+# installed libseams (meson install, conda, Nix or Spack). Point fpm at it:
+#   export FPM_LDFLAGS="$(pkg-config --libs-only-L seams) -Wl,-rpath,$(pkg-config --variable=libdir seams)"
+# The repository-root fpm.toml is the same package for git dependencies.
+[build]
+auto-executables = false
+auto-tests = false
+auto-examples = false
+link = ["seams"]
+
+[library]
+source-dir = "src"
+
+[[test]]
+name = "check_dseams"
+source-dir = "test"
+main = "check_dseams.f90"
+
+[install]
+library = true

@@ -1,0 +1,33 @@
+# fpm reads a git dependency's manifest from the repository root, so this
+# file makes the Fortran interface usable as
+#   dseams = { git = "https://github.com/d-SEAMS/seams-core", tag = "v2.14.0" }
+# bindings/fortran/fpm.toml is the same package for local work and the
+# fpm registry. Keep the two in step.
+name = "dseams"
+version = "2.14.0"
+license = "MIT"
+author = "Rohit Goswami"
+maintainer = "rgoswami@ieee.org"
+copyright = "Copyright 2018--present, d-SEAMS core team"
+description = "Fortran interface to the d-SEAMS C API (ice, clathrate and ring analysis)"
+homepage = "https://dseams.info"
+categories = ["scientific"]
+keywords = ["molecular-dynamics", "ice", "clathrate", "chemistry"]
+
+[build]
+auto-executables = false
+auto-tests = false
+auto-examples = false
+link = ["seams"]
+
+[library]
+source-dir = "bindings/fortran/src"
+include-dir = []
+
+[[test]]
+name = "check_dseams"
+source-dir = "bindings/fortran/test"
+main = "check_dseams.f90"
+
+[install]
+library = true

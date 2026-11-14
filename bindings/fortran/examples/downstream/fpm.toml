@@ -1,0 +1,14 @@
+name = "dseams_downstream"
+version = "0.1.0"
+license = "MIT"
+description = "A project that depends on the dseams fpm package"
+
+[build]
+auto-tests = false
+auto-examples = false
+
+[dependencies]
+dseams = { path = "../.." }
+# From git or the registry instead:
+# dseams = { git = "https://github.com/d-SEAMS/seams-core", tag = "v2.14.0" }
+# dseams = "2.14.0"
