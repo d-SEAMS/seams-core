@@ -258,6 +258,24 @@ def compiler_includes():
     return list(dict.fromkeys(folders))
 
 
+def library_file(name):
+    """The shared library the linker would take for ``name``, or None."""
+    compiler = shutil.which("cc")
+    if compiler is not None:
+        found = subprocess.run(
+            [compiler, "-print-file-name=" + name],
+            text=True,
+            capture_output=True,
+        ).stdout.strip()
+        if os.path.isabs(found) and os.path.isfile(found):
+            return found
+    # clang links from LIBRARY_PATH but -print-file-name does not search it.
+    for part in os.environ.get("LIBRARY_PATH", "").split(os.pathsep):
+        if part and os.path.isfile(os.path.join(part, name)):
+            return os.path.join(part, name)
+    return None
+
+
 def sdk_flags(text):
     flags = []
     rpaths = []
@@ -285,14 +303,10 @@ def sdk_flags(text):
             if folder.is_dir() and any(token in text for token in ("gromacs/", "plumed/", "OpenMM.h", "library.h")):
                 flags.append("-L" + str(folder))
                 rpaths.append(str(folder))
-    if "plumed/" in text and "-lplumedKernel" not in flags and shutil.which("cc"):
+    if "plumed/" in text and "-lplumedKernel" not in flags:
         # The kernel symbols, such as PLMD::OpenMP, are in libplumedKernel.
-        kernel = subprocess.run(
-            [shutil.which("cc"), "-print-file-name=libplumedKernel.so"],
-            text=True,
-            capture_output=True,
-        ).stdout.strip()
-        if os.path.isabs(kernel) and os.path.isfile(kernel):
+        kernel = library_file("libplumedKernel.so")
+        if kernel:
             flags.extend(["-L" + os.path.dirname(kernel), "-lplumedKernel"])
     if "OpenMM.h" in text and "-lOpenMM" not in flags:
         # Module systems put OpenMM on the compiler search paths, as
@@ -316,18 +330,20 @@ def sdk_flags(text):
             rpaths.append(flags[index + 1])
         index += 1
     # pkg-config leaves out -L for folders already on LIBRARY_PATH, so the
-    # library links and then has no runpath. Ask the compiler where it is.
-    compiler = shutil.which("cc")
+    # library links and then has no runpath.
     for flag in flags:
-        if not flag.startswith("-l") or compiler is None:
+        if not flag.startswith("-l"):
             continue
-        found = subprocess.run(
-            [compiler, "-print-file-name=lib{}.so".format(flag[2:])],
-            text=True,
-            capture_output=True,
-        ).stdout.strip()
-        if os.path.isabs(found) and os.path.isfile(found):
+        found = library_file("lib{}.so".format(flag[2:]))
+        if found:
             rpaths.append(os.path.dirname(os.path.realpath(found)))
+    if "-fopenmp" in flags:
+        # clang's -fopenmp links libomp from its own folder, which the loader does not search.
+        for runtime in ("libomp.so", "libgomp.so"):
+            found = library_file(runtime)
+            if found:
+                rpaths.append(os.path.dirname(os.path.realpath(found)))
+                break
     for folder in dict.fromkeys(rpaths):
         link = "-Wl,-rpath," + folder
         if link not in seen:
