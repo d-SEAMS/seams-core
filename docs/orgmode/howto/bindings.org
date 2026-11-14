@@ -123,6 +123,12 @@ The Python checks live in PydSEAMSlib.
 The language recordings use the same embed.txt as the videos page.
 A page without a claim includes no player.
 
+** C
+
+#+begin_export rst
+.. include:: ../videos/embeds/c.rst
+#+end_export
+
 ** C++
 
 #+begin_export rst
@@ -151,4 +157,10 @@ A page without a claim includes no player.
 
 #+begin_export rst
 .. include:: ../videos/embeds/julia.rst
+#+end_export
+
+** R
+
+#+begin_export rst
+.. include:: ../videos/embeds/r.rst
 #+end_export

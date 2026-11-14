@@ -90,13 +90,15 @@ CLAIMS = {
 
 # Topic page, relative to the repo, and the recording that belongs on it.
 # lua-fennel is the lua slug. chill-interface is the interface slug.
-# cages is a gallery video with no topic page. migrate and rings-cages are not cuts.
+# migrate and rings-cages are not cuts.
 TOPICS = {
     "cli": (
         "docs/orgmode/reference/cli.org",
         "docs/orgmode/howto/classify-cli.org",
     ),
+    "c": ("docs/orgmode/howto/bindings.org",),
     "cpp": ("docs/orgmode/howto/bindings.org",),
+    "r": ("docs/orgmode/howto/bindings.org",),
     "python": (
         "docs/orgmode/howto/bindings.org",
         "docs/orgmode/reference/python-frame.org",
