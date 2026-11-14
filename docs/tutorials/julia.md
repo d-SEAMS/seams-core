@@ -10,18 +10,21 @@ The cubic mW dump is ice Ic. CHILL+ labels all 4096 oxygens cubic. `docs/example
 
 ```{literalinclude} ../../../bindings/julia/Dseams/test/runtests.jl
 :language: julia
-:lines: 57-62
+:lines: 82-86
 ```
 
 ```bash
 export DSEAMS_ROOT=$PWD
 export SEAMS_LANG_LIB=$PWD/build/bindings/libseams_lang.so
 export LD_LIBRARY_PATH=$PWD/build/bindings:$PWD/build/src
-julia --project=bindings/julia/Dseams -e 'using Pkg; Pkg.instantiate()'
+julia --project=bindings/julia/Dseams bindings/julia/Dseams/dev/develop_jll.jl
 julia --project=bindings/julia/Dseams bindings/julia/Dseams/test/runtests.jl
 ```
 
 The suite checks the mixed TIP4P frame, seeded cages, and that cubic count of 4096.
+The cubic dump is in `input/traj`, so that block runs only with `DSEAMS_ROOT` set.
+`Dseams` and `libseams_jll` are not in the General registry yet, so `Pkg.instantiate()` alone cannot resolve the JLL.
+`dev/develop_jll.jl` develops the stand-in in `bindings/julia/Dseams/dev/libseams_jll`, which has no binaries, and instantiates; `SEAMS_LANG_LIB` names the engine.
 
 
 ## Structure still

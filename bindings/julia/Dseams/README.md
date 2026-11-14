@@ -4,6 +4,15 @@ Julia front for the [d-SEAMS](https://docs.dseams.info) engine: CHILL+,
 primitive rings, ice cages, Steinhardt parameters and shell symmetry on
 LAMMPS trajectories. The engine comes from `libseams_jll`.
 
+Dseams and `libseams_jll` are not in the General registry yet. From a
+seams-core checkout, develop the stand-in JLL and name a local build of
+`libseams_lang`:
+
+```sh
+julia --project=bindings/julia/Dseams bindings/julia/Dseams/dev/develop_jll.jl
+export SEAMS_LANG_LIB=$PWD/build/bindings/libseams_lang.so
+```
+
 ```julia
 using Dseams
 f = read_frame(Dseams.ice_ih_path(); type = -1)

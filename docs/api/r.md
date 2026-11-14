@@ -18,13 +18,22 @@ six-rings) and sII (136 clathrate, 144 five-rings, 16 six-rings).
 :language: r
 ```
 
-Build the library, then install the package against it:
+`dseams` is not on CRAN yet and installs from this checkout. With only
+`DSEAMS_ROOT` set, `configure` runs `tools/vendor.sh` and the package
+compiles its own copy of the engine. To install the package against a
+built library instead, also name `libseams_lang` and `seams_lang.h`:
 
 ```bash
 meson setup build -Dwith_tests=true
 meson compile -C build
 DSEAMS_ROOT=$PWD R CMD INSTALL bindings/r/dseams
+SEAMS_LIBDIR=$PWD/build/bindings SEAMS_INCLUDE=$PWD/bindings/cxx R CMD INSTALL --preclean bindings/r/dseams
 ```
+
+`--preclean` clears the objects the first install left in `src`, which
+`R CMD INSTALL` would otherwise reuse. `R CMD build bindings/r/dseams` makes a source tarball that carries the
+engine and installs with no checkout; `R CMD check --as-cran` on it
+leaves the one NOTE for a new submission.
 
 CI runs the testthat file when `Rscript` is on `PATH` and
 `DSEAMS_ROOT` points at this tree. The meson target is `language_fronts`

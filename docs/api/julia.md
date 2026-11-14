@@ -2,6 +2,8 @@
 
 `bindings/julia/Dseams` is the package CI runs. It calls `libseams_lang`. Point `SEAMS_LANG_LIB` at that shared library and `DSEAMS_ROOT` at the checkout. `bindings/julia/Seams` is the thin `libseams` example.
 
+`Dseams` and its engine package `libseams_jll` are not in the General registry yet, so `Pkg.add("Dseams")` does not work. `bindings/julia/Dseams/dev/develop_jll.jl` develops a stand-in `libseams_jll` with no binaries, and `SEAMS_LANG_LIB` or `Dseams.set_library!` names a local `libseams_lang`. `packaging/yggdrasil/L/libseams` is the Yggdrasil recipe for the JLL.
+
 `meson test docs_api_julia` runs `docs/examples/julia_api.jl` with
 `SEAMS_LANG_LIB` pointed at `libseams_lang`.
 `docs/examples/minimal_julia.jl` reads the

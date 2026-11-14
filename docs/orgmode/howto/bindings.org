@@ -75,12 +75,15 @@ released Frame package on the [[file:../reference/python-frame.org][Python Frame
 export SEAMS_INCLUDE="$PWD/bindings/cxx"
 export SEAMS_LIBDIR="$PWD/bbdir/bindings"
 export LD_LIBRARY_PATH="$SEAMS_LIBDIR:$PWD/bbdir/src${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-R CMD INSTALL bindings/r/dseams
+R CMD INSTALL --preclean bindings/r/dseams
 #+end_src
 
-The package needs ~cpp11~.
-~configure~ refuses to run without the two paths.
-The engine is not a CRAN system library, so this is a source package you build against a seams-core checkout.
+The package needs ~cpp11~ and ~RcppEigen~.
+With ~SEAMS_LIBDIR~ and ~SEAMS_INCLUDE~ set, it links that ~libseams_lang~; ~configure~ stops if ~seams_lang.h~ is not in ~SEAMS_INCLUDE~.
+~--preclean~ runs ~cleanup~ first, as ~R CMD INSTALL~ builds the directory in place and would reuse objects from an earlier install of the other kind.
+Without them, ~configure~ runs ~tools/vendor.sh~ and the package compiles its own copy of the engine, so ~R CMD INSTALL bindings/r/dseams~ works with no Meson build.
+The engine is not a CRAN system library, and ~dseams~ is not on CRAN yet, so this is a source package you build from a seams-core checkout.
+~R CMD build bindings/r/dseams~ makes a source tarball that carries the engine and installs without the checkout.
 
 * Julia
 
@@ -91,9 +94,15 @@ The front that ships is ~ccall~:
 #+begin_src bash
 export SEAMS_LANG_LIB="$PWD/bbdir/bindings/libseams_lang.so"
 export DSEAMS_ROOT="$PWD"
-julia --project=bindings/julia/Dseams -e 'using Pkg; Pkg.instantiate()'
+julia --project=bindings/julia/Dseams bindings/julia/Dseams/dev/develop_jll.jl
 julia --project=bindings/julia/Dseams bindings/julia/Dseams/test/runtests.jl
 #+end_src
+
+~Dseams~ and ~libseams_jll~ are not in the General registry yet, so
+~Pkg.instantiate()~ alone cannot resolve the JLL.
+~dev/develop_jll.jl~ develops the stand-in in ~dev/libseams_jll~, which
+has no binaries, and then instantiates; ~SEAMS_LANG_LIB~ names the
+engine. ~packaging/yggdrasil/L/libseams~ is the recipe for the real JLL.
 
 * Lua and Fennel
 

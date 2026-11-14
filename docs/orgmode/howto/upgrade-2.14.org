@@ -40,12 +40,18 @@ checkout. ~Dseams~ now exports ~chill_plus~, ~cages~,
 ~primitive_rings~, ~steinhardt~, ~signature_cages~, ~symmetry~,
 ~q4_q6~, and ~jump_tau90~. ~chill_plus~ defaults ~graph~ to ~"cutoff"~.
 ~Seams~ is the new thin wrapper over ~libseams~.
+~Dseams~ now depends on ~libseams_jll~, which is not in the General
+registry yet; run ~dev/develop_jll.jl~ in place of ~Pkg.instantiate()~
+before the first ~using Dseams~.
 
 * R
 
-~R CMD INSTALL~ still needs ~DSEAMS_ROOT~, or ~SEAMS_INCLUDE~ and
-~SEAMS_LIBDIR~, so the package finds ~seams_lang.h~ and
-~libseams_lang~. The new calls are ~signature_cages~, ~symmetry~,
+~R CMD INSTALL bindings/r/dseams~ no longer needs ~DSEAMS_ROOT~, or
+~SEAMS_INCLUDE~ and ~SEAMS_LIBDIR~: in a checkout ~configure~ runs
+~tools/vendor.sh~ and the package compiles its own copy of the engine.
+~SEAMS_INCLUDE~ and ~SEAMS_LIBDIR~ still make it link a built
+~libseams_lang~ and find ~seams_lang.h~, and ~DSEAMS_ROOT~ still names
+the checkout. ~dseams~ is not on CRAN yet. The new calls are ~signature_cages~, ~symmetry~,
 ~q4_q6~, ~jump_tau90~, and ~steinhardt~ on the cutoff shell.
 
 * Rust

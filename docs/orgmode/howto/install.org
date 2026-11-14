@@ -156,20 +156,56 @@ luarocks test bindings/lua/dseams-2.14.0-1.rockspec
 
 * R and Julia
 
-R and Julia install from this checkout; there is no CRAN or General
-registry package. Build the library first. R:
+R and Julia install from this checkout. ~dseams~ is not on CRAN, and
+~Dseams~ and ~libseams_jll~ are not in the Julia General registry yet,
+so ~install.packages("dseams")~ and ~Pkg.add("Dseams")~ do not work.
+
+The R package compiles its own copy of the engine and needs no Meson
+build. ~configure~ runs ~tools/vendor.sh~, which copies the engine
+sources and the example data out of the checkout:
+
+#+begin_src bash
+Rscript -e 'install.packages(c("cpp11", "RcppEigen"))'
+R CMD INSTALL bindings/r/dseams
+#+end_src
+
+~R CMD build bindings/r/dseams~ writes ~dseams_2.14.0.tar.gz~, a source
+package that installs without the checkout. ~DSEAMS_ROOT~ points
+~tools/vendor.sh~ at another checkout:
 
 #+begin_src bash
 DSEAMS_ROOT=$PWD R CMD INSTALL bindings/r/dseams
 #+end_src
 
-Julia's ~bindings/julia/Dseams~ calls ~libseams_lang~ and
-~bindings/julia/Seams~ calls ~libseams~:
+To link a built ~libseams_lang~ instead of compiling the engine again,
+build the library first and name it:
 
 #+begin_src bash
+SEAMS_LIBDIR="$PWD/bbdir/bindings" SEAMS_INCLUDE="$PWD/bindings/cxx" R CMD INSTALL --preclean bindings/r/dseams
+#+end_src
+
+~R CMD INSTALL~ builds the directory in place, so ~--preclean~ runs
+~cleanup~ first; without it, objects left by the other mode are reused.
+
+Julia's ~bindings/julia/Dseams~ calls ~libseams_lang~ and
+~bindings/julia/Seams~ calls ~libseams~. Dseams takes its engine from
+~libseams_jll~. Until that is registered, ~dev/develop_jll.jl~ develops
+a stand-in JLL with no binaries, and the engine is a local build named
+by ~SEAMS_LANG_LIB~:
+
+#+begin_src bash
+julia --project=bindings/julia/Dseams bindings/julia/Dseams/dev/develop_jll.jl
 export SEAMS_LANG_LIB="$PWD/bbdir/bindings/libseams_lang.so" DSEAMS_ROOT="$PWD"
 julia --project=bindings/julia/Dseams -e 'using Dseams'
+julia --project=bindings/julia/Dseams -e 'using Pkg; Pkg.test()'
 #+end_src
+
+~Dseams.set_library!~ stores the path as a preference instead.
+~DSEAMS_ROOT~ adds the tests that compare with files in the checkout.
+~packaging/yggdrasil/L/libseams~ is the recipe for ~libseams_jll~;
+~julia build_tarballs.jl --deploy=local~ builds it, and
+~develop_jll.jl~ with that path develops the result in place of the
+stand-in.
 
 * pixi
 

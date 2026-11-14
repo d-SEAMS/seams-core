@@ -26,8 +26,12 @@ registered.
 ## The engine library
 
 `libseams_jll` provides the engine for Linux (glibc and musl; x86_64,
-aarch64, powerpc64le, riscv64) and macOS. To use a local build of
-seams-core instead, name its `libseams_lang`:
+aarch64, powerpc64le, riscv64) and macOS once the recipe in
+`packaging/yggdrasil/L/libseams` is merged into Yggdrasil. Neither it nor
+Dseams is in the General registry yet. Until then `dev/develop_jll.jl`
+develops a stand-in `libseams_jll` with no binaries, and the engine is a
+local build. To use a local build of seams-core, name its
+`libseams_lang`:
 
 ```julia
 Dseams.set_library!("/path/to/seams-core/build/bindings/libseams_lang.so")

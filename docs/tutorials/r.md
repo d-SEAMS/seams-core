@@ -11,8 +11,14 @@ R CMD INSTALL bindings/r/dseams
 Rscript -e 'library(dseams); print(packageVersion("dseams"))'
 ```
 
-The vignette is evaluated when `DSEAMS_ROOT` is set. CI runs the same
-library through:
+`dseams` is not on CRAN yet. `R CMD INSTALL` compiles the package's own
+copy of the engine, which `tools/vendor.sh` copies out of the checkout
+`DSEAMS_ROOT` names; `SEAMS_LIBDIR` and `SEAMS_INCLUDE` link the
+`build/bindings` library instead.
+
+The vignette runs on the example dumps in `inst/extdata`, which ship with
+the package. With `DSEAMS_ROOT` set, the testthat suite also checks the
+cubic dump in `input/traj`. CI runs the same library through:
 
 ```bash
 DSEAMS_ROOT=$PWD meson test -C build language_fronts --print-errorlogs
