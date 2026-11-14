@@ -138,17 +138,22 @@ program test_high
   call frame%site_kinds("1=waterO", kinds, stat=stat, errmsg=err)
   if (stat /= SEAMS_OK) stop 60
   call frame%read(trim(root) // "/input/traj/ice1h.lammpstrj", stat=stat, errmsg=err)
-  if (stat /= SEAMS_OK .or. frame%count() /= 128) stop 61
+  if (stat /= SEAMS_OK) stop 61
+  if (frame%count() /= 128) stop 61
   call frame%read(trim(root) // "/input/traj/genice_sI.lammpstrj", type_filter=1_seams_int, &
     stat=stat, errmsg=err)
-  if (stat /= SEAMS_OK .or. frame%count() /= 46) stop 62
+  if (stat /= SEAMS_OK) stop 62
+  if (frame%count() /= 46) stop 62
   call frame%read(trim(root) // "/input/xyz/configuration.xyz", stat=stat, errmsg=err)
-  if (stat /= SEAMS_OK .or. frame%count() <= 0) stop 63
+  if (stat /= SEAMS_OK) stop 63
+  if (frame%count() <= 0) stop 63
   call frame%read(trim(root) // "/input/con/tiny_multi_cuh2.con", stat=stat, errmsg=err)
-  if (stat /= SEAMS_OK .or. frame%count() <= 0) stop 64
+  if (stat /= SEAMS_OK) stop 64
+  if (frame%count() <= 0) stop 64
   call frame%read(trim(root) // "/input/traj/genice_sH.lammpstrj", type_filter=1_seams_int, &
     stat=stat, errmsg=err)
-  if (stat /= SEAMS_OK .or. frame%count() <= 0) stop 65
+  if (stat /= SEAMS_OK) stop 65
+  if (frame%count() <= 0) stop 65
   call frame%close()
   print *, "fortran high ok"
 end program test_high

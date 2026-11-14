@@ -87,7 +87,8 @@ program test_seams
                      int(n, c_size_t), counts)
   if (code /= SEAMS_OK) stop 40
   code = seams_steinhardt(sys, 3.5d0, 0, 6, qr, int(n, c_size_t), qbar, int(n, c_size_t))
-  if (code /= SEAMS_OK .or. .not. c_associated(seams_handle_error(sys))) stop 41
+  if (code /= SEAMS_OK) stop 41
+  if (.not. c_associated(seams_handle_error(sys))) stop 41
   code = seams_cages(sys, 3.5d0, 0, SEAMS_GRAPH_SEEDED, 4, 0, cages)
   if (code /= SEAMS_OK) stop 42
   code = seams_cages_counts(cages, n_hex, n_cubic, n_water, n_both)
@@ -130,7 +131,8 @@ program test_seams
   if (code /= SEAMS_OK) stop 57
   print '(a,i0)', 'fortran call sheet ', sheet(7)
   code = seams_rings_find(sys, 3.5d0, 0, SEAMS_GRAPH_CUTOFF, 6, rings)
-  if (code /= SEAMS_OK .or. seams_rings_count(rings) <= 0) stop 58
+  if (code /= SEAMS_OK) stop 58
+  if (seams_rings_count(rings) <= 0) stop 58
   code = seams_rings_vertices(rings, 0, atoms, 12_c_size_t, n_out)
   if (code /= SEAMS_OK .or. n_out <= 0) stop 59
   print '(a,i0,1x,i0)', 'fortran call vert ', n_out, atoms(1)
@@ -138,15 +140,20 @@ program test_seams
   code = site_kinds(sys, "1=waterO", kinds, int(n, c_size_t))
   if (code /= SEAMS_OK) stop 60
   code = read_frame(sys, trim(root) // "/input/traj/ice1h.lammpstrj", 1, -1)
-  if (code /= SEAMS_OK .or. seams_system_count(sys) /= 128) stop 61
+  if (code /= SEAMS_OK) stop 61
+  if (seams_system_count(sys) /= 128) stop 61
   code = read_frame(sys, trim(root) // "/input/traj/genice_sI.lammpstrj", 1, 1)
-  if (code /= SEAMS_OK .or. seams_system_count(sys) /= 46) stop 62
+  if (code /= SEAMS_OK) stop 62
+  if (seams_system_count(sys) /= 46) stop 62
   code = read_frame(sys, trim(root) // "/input/xyz/configuration.xyz", 1, -1)
-  if (code /= SEAMS_OK .or. seams_system_count(sys) <= 0) stop 63
+  if (code /= SEAMS_OK) stop 63
+  if (seams_system_count(sys) <= 0) stop 63
   code = read_frame(sys, trim(root) // "/input/con/tiny_multi_cuh2.con", 1, -1)
-  if (code /= SEAMS_OK .or. seams_system_count(sys) <= 0) stop 64
+  if (code /= SEAMS_OK) stop 64
+  if (seams_system_count(sys) <= 0) stop 64
   code = read_frame(sys, trim(root) // "/input/traj/genice_sH.lammpstrj", 1, 1)
-  if (code /= SEAMS_OK .or. seams_system_count(sys) <= 0) stop 65
+  if (code /= SEAMS_OK) stop 65
+  if (seams_system_count(sys) <= 0) stop 65
   call seams_system_destroy(sys)
   print '(a)', 'fortran call read 128 46'
   print *, "fortran ok"
