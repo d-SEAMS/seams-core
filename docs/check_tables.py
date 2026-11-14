@@ -183,6 +183,9 @@ def as_number(text):
 def close_enough(cell, raw):
     if re.fullmatch(r"-?\d+", cell):
         return int(cell) == int(float(raw))
+    if cell == "DNF":
+        # render_performance_range.py writes a blank time as DNF.
+        return raw in {"", "DNF"}
     if raw == "":
         return False
     got = as_number(cell)
