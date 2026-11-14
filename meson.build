@@ -1813,6 +1813,10 @@ if _capi_san == 'thread'
   # fails when q6 at 1, 2, 4 and 8 threads disagrees.
   _capi_env.set('TSAN_OPTIONS', 'halt_on_error=0:exitcode=0')
 endif
+if _capi_san.contains('address')
+  _capi_env.set('LSAN_OPTIONS',
+                'suppressions=' + meson.project_source_root() / 'fuzz' / 'lsan.supp')
+endif
 _capi_args = [
   meson.project_source_root(),
   capi_cpp_ref.full_path(),
