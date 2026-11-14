@@ -41,3 +41,23 @@ python3 bench/measure.py \
 was copied out of the build tree and still needs the build's
 shared libraries. The timed region is one full analysis after one
 warmup, on one thread.
+
+## C API thread scaling
+
+`capi_thread_scale` calls `seams_cutoff_csr` and `seams_ql_cutoff` on
+24×24×24 conventional cells of ice Ic (110592 oxygens, cutoff 3.5 Å, q6)
+at 1, 2, 4 and 8 OpenMP threads. Each width must return the one-thread
+bytes. `seams_c_last_stages` splits every call into point-cloud
+conversion, cutoff-list build, q_l and copy-out; `other_ms` is argument
+checks and freeing the temporaries. `capi_thread_scale.txt` here is the
+median of 21 calls per width from a release tree:
+
+```bash
+./build/capi_thread_scale bench/capi_thread_scale.txt 24 21
+```
+
+At 8 threads the cutoff-list build is the larger part of both calls
+(about 74% of `seams_cutoff_csr`, 60% of `seams_ql_cutoff`) and speeds up
+only 2.2× over one thread. The q_l stage speeds up 5.4× and is under a
+fifth of the time. The point-cloud conversion is serial, so it stays
+near 0.8 ms at every width and becomes 15–18% of the 8-thread time.

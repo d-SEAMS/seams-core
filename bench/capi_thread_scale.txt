@@ -1,0 +1,15 @@
+ice Ic 24^3 cells, 110592 oxygens, 442368 pairs, cutoff 3.50 A, q6
+omp_get_num_procs 8, median of 21 calls after one untimed call
+outputs at 2, 4 and 8 threads equal the one-thread bytes
+seams_cutoff_csr threads  total_ms  cloud_ms  build_ms     ql_ms   copy_ms  other_ms  speedup
+seams_cutoff_csr       1      8.53      0.77      7.40      0.00      0.13      0.22     1.00
+seams_cutoff_csr       2      6.90      0.83      5.71      0.00      0.13      0.23     1.24
+seams_cutoff_csr       4      5.43      0.84      4.23      0.00      0.14      0.22     1.57
+seams_cutoff_csr       8      4.49      0.81      3.31      0.00      0.14      0.23     1.90
+seams_ql_cutoff  threads  total_ms  cloud_ms  build_ms     ql_ms   copy_ms  other_ms  speedup
+seams_ql_cutoff        1     14.08      0.79      7.38      5.65      0.05      0.22     1.00
+seams_ql_cutoff        2      9.81      0.83      5.69      3.02      0.05      0.23     1.44
+seams_ql_cutoff        4      6.86      0.82      4.04      1.69      0.05      0.27     2.05
+seams_ql_cutoff        8      5.51      0.82      3.28      1.04      0.05      0.31     2.56
+seams_cutoff_csr at 8 threads: cloud 18.0% build 73.8% ql 0.0% copy 3.1%
+seams_ql_cutoff at 8 threads: cloud 14.9% build 59.6% ql 18.8% copy 1.0%
