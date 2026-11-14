@@ -268,7 +268,9 @@ molSys::PointCloud<molSys::Point<double>, double> jitteredTubes(double jitter, u
   const double side = 2.75;
   const int layers = 10;
   std::mt19937 rng(seed);
-  std::normal_distribution<double> noise(0.0, jitter);
+  // normal_distribution needs a positive stddev, and the first case is 0.
+  std::normal_distribution<double> unit(0.0, 1.0);
+  auto noise = [&](std::mt19937 &g) { return jitter * unit(g); };
   double x0 = 0.0;
   int id = 0;
   for (int n : {4, 5, 6, 3}) {
