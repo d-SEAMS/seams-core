@@ -18,6 +18,9 @@ fortran_lib_src = files(
   'src/seams_methods.f90',
 )
 
+# The executables link through the C++ compiler because of libseams.
+# Clang links a PIE by default where GCC may not, so the Fortran objects
+# are built position-independent to match whichever links them.
 if get_option('with_tests')
   fortran_env = environment()
   fortran_env.set('OMP_NUM_THREADS', '1')
@@ -25,6 +28,7 @@ if get_option('with_tests')
     'test_fortran_capi',
     files('test_seams.f90', 'src/seams_c.f90'),
     link_with: seams_api_lib,
+    pie: true,
   )
   test(
     'fortran_capi',
@@ -37,6 +41,7 @@ if get_option('with_tests')
     'test_fortran_high',
     files('test/test_high.f90') + fortran_lib_src,
     link_with: seams_api_lib,
+    pie: true,
   )
   test(
     'fortran_high',
@@ -49,6 +54,7 @@ if get_option('with_tests')
     'fortran_cubic',
     files('example/cubic.f90') + fortran_lib_src,
     link_with: seams_api_lib,
+    pie: true,
   )
   test('fortran_cubic', cubic, env: fortran_env, timeout: 180)
 endif
