@@ -8,6 +8,7 @@ waters and 256 primitive six-rings. Every page below asserts those counts.
 .. toctree::
    :maxdepth: 1
 
+   tasks
    python
    julia
    r

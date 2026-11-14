@@ -28,7 +28,7 @@ Path of the committed Ice Ih dump, `input/traj/ice1h.lammpstrj`.
 """
 ice_ih_path() = normpath(joinpath(@__DIR__, "..", "..", "..", "..", "input", "traj", "ice1h.lammpstrj"))
 
-export Frame, nop, nframes, read_frame, chill_plus, cages, primitive_rings, steinhardt, signature_cages, symmetry, jump_tau90, q4_q6
+export Frame, nop, nframes, read_frame, neighbour_pairs, chill_plus, cages, primitive_rings, steinhardt, signature_cages, symmetry, jump_tau90, q4_q6
 export System, seams_system_count, seams_system_read, seams_chill, seams_steinhardt, seams_cages, seams_signature_cages
 export seams_neighbours_knn, seams_rdf, seams_running_cn, seams_coordination, seams_hbonds
 export seams_density_axis, seams_fingerprint, seams_contact_pairs, seams_domains, seams_prisms
@@ -274,6 +274,25 @@ function cages(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, k::Integer =
     # Disjoint counters, the same four numbers `seams cages` prints.
     # cage is 0 water, 1 hexagonal only, 2 double-diamond only, 3 both.
     CageScore(per, Int(n_hex[]), Int(n_cubic[]), Int(n_water[]), Int(n_both[]))
+end
+
+"""
+    neighbour_pairs(frame; cutoff=3.5, type=0, graph="cutoff")
+
+Directed pairs in the neighbour list. The self entry is omitted.
+"""
+function neighbour_pairs(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, graph::AbstractString = "cutoff")
+    code = ccall(
+        dlsym(_so(), :seams_frame_neighbours),
+        Cint,
+        (Ptr{Cvoid}, Cdouble, Cint, Cstring),
+        frame.ptr,
+        Cdouble(cutoff),
+        Cint(type),
+        graph,
+    )
+    _check(code)
+    Int(ccall(dlsym(_so(), :seams_frame_neighbour_pairs), Cint, (Ptr{Cvoid},), frame.ptr))
 end
 
 """
