@@ -169,6 +169,21 @@ def _write_release_notes():
 _write_release_notes()
 
 
+def _write_padding():
+    """Fill the cutoff-and-padding how-to from the validation CSV."""
+    import importlib.util
+
+    script = os.path.join(_docs, "render_padding.py")
+    spec = importlib.util.spec_from_file_location("render_padding", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    if module.main([]) != 0:
+        raise SystemExit("cutoff and padding tables do not match the CSV")
+
+
+_write_padding()
+
+
 def _stage_markdown_book():
     """Copy the language pages into the Sphinx tree so myst renders them."""
     import pathlib
