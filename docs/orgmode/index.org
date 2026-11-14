@@ -176,7 +176,7 @@ framework.
       :link: comparisons
       :link-type: doc
 
-      OVITO, freud, SQQ, and PLUMED, next to the tests that recompute them.
+      OVITO, freud, ClavisCage TRACE, SQQ, and PLUMED, next to the tests that recompute them.
 
    .. grid-item-card:: Paper reproductions
       :link: paper/index
@@ -325,6 +325,8 @@ framework.
    :caption: Comparisons
 
    comparisons
+   explanation/clavis-trace
+   explanation/sqq
    explanation/ovito-findrings
    explanation/performance-h2h
    howto/literature-h2h

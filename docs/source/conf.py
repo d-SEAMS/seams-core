@@ -38,6 +38,21 @@ def _write_h2h():
 _write_h2h()
 
 
+def _write_comparisons():
+    """Fill the Comparisons tables from the vendored benchmark CSVs."""
+    import importlib.util
+
+    script = os.path.join(_docs, "render_comparisons.py")
+    spec = importlib.util.spec_from_file_location("render_comparisons", script)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    if module.main(["--check"]) != 0:
+        raise SystemExit("Comparisons tables do not match the vendored CSVs")
+
+
+_write_comparisons()
+
+
 def _write_performance_range():
     """Fill the 4096 to 110592 neighbour and ring tables from the CSVs."""
     import importlib.util

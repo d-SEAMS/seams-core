@@ -1,0 +1,3 @@
+h2h-summary.csv and h2h-clavis-cages.csv are copied from hz/bench/h2h-mdapy-pyscal3-vesin 323bfd3872e726b3fa384a67c6b1bedf627ce6a0.
+h2h-sqq.csv and h2h-sqq-agree.csv are copied from hz/bench/h2h-sqq c7f71310f27c5ce62d11e97fd82f9757fa4e8628.
+docs/render_comparisons.py writes the Comparisons tables from these files.

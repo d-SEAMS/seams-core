@@ -1,0 +1,13 @@
+#+TITLE: SQQ
+#+OPTIONS: toc:nil num:nil
+
+SQQ against d-SEAMS. The census and the ratios are written from the
+vendored CSVs at build time. A timing row names the version, the
+thread count, the repeat count and the core count. On the TIP4P/2005
+frame the edges and the rings are the exact-match rows. The chordless
+census is the like-for-like ratio. CHILL+ against SQQ's ice stage is
+the whole-tool ratio.
+
+#+begin_export rst
+.. include:: sqq-tables.rst
+#+end_export

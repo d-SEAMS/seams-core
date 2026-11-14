@@ -5,6 +5,15 @@ Head-to-head results that are already in this tree. Each link is the
 page that records the numbers. The suite tests named here are the ones
 that recompute them.
 
+The summary table is written at build time from the CSVs under
+~docs/data/comparisons/~. Those files are copies of the benchmark
+commits named above the table. A timed row names the comparator
+version, the thread count, the repeat count and the core count.
+
+#+begin_export rst
+.. include:: explanation/comparisons-summary-tables.rst
+#+end_export
+
 * OVITO
 
 [[file:explanation/ovito-findrings.org][OVITO FindRings]] is a subset of
@@ -47,6 +56,8 @@ SQQ ring times are a row of the
 [[file:howto/literature-h2h.org][the literature codes]]. The benchmark
 CSVs under ~benchmarks/~ are the source of those cells.
 ~docs/render_h2h.py --check~ fails when a cell is missing from its CSV.
+The vendored SQQ census and the chordless and whole-tool ratios are on
+[[file:explanation/sqq.org][the SQQ page]].
 
 * PLUMED
 
@@ -56,3 +67,9 @@ The colvar is [[file:howto/engine-plumed.org][the PLUMED engine]]. Its
 liquid the gap is the rational switch, not the hard cutoff. The
 literature reproduction records the same comparison next to freud.
 ~meson test docs_engine_plumed~ runs the engine page.
+
+* ClavisCage TRACE
+
+[[file:explanation/clavis-trace.org][ClavisCage TRACE]] is the cage
+census and the serial TRACE timing against d-SEAMS at one and eight
+threads. The cells are the vendored ClavisCage CSV, not a typed table.
