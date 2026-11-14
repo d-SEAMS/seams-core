@@ -1,6 +1,8 @@
 /* Who owns SIGABRT once libseams is loaded.
- * A plain build keeps the backward-cpp stack trace. A sanitized build leaves
- * the signal alone, so the sanitizer and libFuzzer see the crash.
+ * libseams installs no handler in either build: the host process (Julia, R,
+ * Python, a sanitizer or libFuzzer) keeps its own. The backward-cpp stack
+ * trace lives in the seams executables, which leave the signal to the
+ * sanitizer in a sanitized build.
  * Usage: capi_signal_owner plain|sanitized
  */
 #define _POSIX_C_SOURCE 200809L
@@ -26,12 +28,12 @@ int main(int argc, char **argv) {
   }
   const int installed = (now.sa_flags & SA_SIGINFO) ? now.sa_sigaction != NULL
                                                     : now.sa_handler != SIG_DFL;
-  if (strcmp(argv[1], "sanitized") == 0 && installed) {
-    fprintf(stderr, "a sanitized libseams installed a SIGABRT handler\n");
-    return 1;
+  if (strcmp(argv[1], "plain") != 0 && strcmp(argv[1], "sanitized") != 0) {
+    fprintf(stderr, "usage: capi_signal_owner plain|sanitized\n");
+    return 2;
   }
-  if (strcmp(argv[1], "plain") == 0 && !installed) {
-    fprintf(stderr, "libseams did not install the stack trace handler\n");
+  if (installed) {
+    fprintf(stderr, "a %s libseams installed a SIGABRT handler\n", argv[1]);
     return 1;
   }
   printf("SIGABRT %s\n", installed ? "handled" : "default");
