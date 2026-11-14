@@ -64,7 +64,9 @@ fn eigen_include(root: &Path) -> Vec<PathBuf> {
         .probe("eigen3")
     {
         Ok(lib) => lib.include_paths,
-        Err(e) => panic!("Eigen >= 3.4.0 not found (vendor/eigen, EIGEN3_INCLUDE_DIR, pkg-config): {e}"),
+        Err(e) => {
+            panic!("Eigen >= 3.4.0 not found (vendor/eigen, EIGEN3_INCLUDE_DIR, pkg-config): {e}")
+        }
     }
 }
 
@@ -101,7 +103,10 @@ fn build_vendored() {
     let mut core = Vec::new();
     let mut avx2 = Vec::new();
     let mut avx512 = Vec::new();
-    for line in fs::read_to_string(manifest.join("sources.txt")).unwrap().lines() {
+    for line in fs::read_to_string(manifest.join("sources.txt"))
+        .unwrap()
+        .lines()
+    {
         let line = line.trim();
         if line.is_empty() || line.starts_with('#') {
             continue;
@@ -144,11 +149,16 @@ fn build_vendored() {
     simd.flag("-mavx2").flag("-mfma").files(&avx2);
     objects.extend(simd.compile_intermediates());
     let mut wide = base();
-    wide.flag("-mavx512f").flag("-mavx512dq").flag("-mfma").files(&avx512);
+    wide.flag("-mavx512f")
+        .flag("-mavx512dq")
+        .flag("-mfma")
+        .files(&avx512);
     objects.extend(wide.compile_intermediates());
 
     let mut lib = base();
-    lib.define("SEAMS_YLM_AVX512", "1").files(&core).objects(&objects);
+    lib.define("SEAMS_YLM_AVX512", "1")
+        .files(&core)
+        .objects(&objects);
     let compiler = lib.get_compiler();
     lib.compile("seams_bundled");
 
