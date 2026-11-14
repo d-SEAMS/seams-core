@@ -179,6 +179,10 @@ inside `seams_get_num_threads`.
 Each program below covers one family and checks its own results on
 `input/traj/ice1h.lammpstrj`. `meson test capi_example_<family>` compiles it as C11
 with `-Wall -Wextra -Wpedantic -Werror` and runs it. The argument is the repository root.
+`capi_installed_examples` installs the build into a staging directory and builds all
+six out of tree against that install, once with the flags from `pkg-config seams` and
+once with `find_package(seams)` and `docs/examples/c/CMakeLists.txt`. Each binary must
+load the installed `libseams.so` and pass.
 
 Neighbours, `docs/examples/c/neighbours.c`:
 

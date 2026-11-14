@@ -1969,6 +1969,17 @@ foreach _family : ['neighbours', 'rings', 'chill_plus', 'q4q6', 'cages', 'errors
     timeout: 300)
 endforeach
 test(
+  'capi_installed_examples',
+  find_program('python3', required: true),
+  args: [
+    meson.project_source_root() / 'docs' / 'examples' / 'c' / 'check_installed.py',
+    meson.project_build_root(),
+    meson.project_source_root(),
+  ],
+  env: {'CC': ' '.join(meson.get_compiler('c').cmd_array())},
+  depends: [seams_api_lib, ydslib],
+  timeout: 600)
+test(
   'capi_const_threads',
   executable(
     'capi_const_threads',
