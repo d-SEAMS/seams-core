@@ -635,10 +635,12 @@ TEST_CASE("a dense listing on several threads matches one thread", "[franzblau]"
   const int prev = omp_get_max_threads();
   omp_set_num_threads(1);
   const auto serial = primitive::ringNetwork(rows, 5);
-  omp_set_num_threads(std::min(prev, 4));
-  const auto parallel = primitive::ringNetwork(rows, 5);
+  for (int threads : {2, 8}) {
+    omp_set_num_threads(threads);
+    const auto parallel = primitive::ringNetwork(rows, 5);
+    REQUIRE(parallel == serial);
+  }
   omp_set_num_threads(prev);
-  REQUIRE(parallel == serial);
 #else
   REQUIRE_FALSE(primitive::ringNetwork(rows, 5).empty());
 #endif

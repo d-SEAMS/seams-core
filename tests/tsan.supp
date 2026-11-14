@@ -1,8 +1,0 @@
-# GCC's libgomp does not publish an OpenMP team join to ThreadSanitizer.
-# searchRings and RingUpdater::fastEnumerate read a RingPool's ring count
-# on the calling thread only after the team has returned. The worker that
-# enumerated that source wrote the count. The one-thread and several-thread
-# ring lists compare equal, so the join does order the two accesses. Each
-# source has its own pool; the counters are not shared.
-race:searchRings
-race:fastEnumerate
