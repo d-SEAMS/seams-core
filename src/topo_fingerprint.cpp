@@ -328,9 +328,6 @@ void fillLocalGraph(LocalGraph &g, const Rows &rows, int atom, int hops,
         continue;
       }
       adj.push_back(j);
-      if (i < j) {
-        g.edges.emplace_back(i, j);
-      }
     }
     std::sort(adj.begin(), adj.end());
   }
@@ -370,6 +367,15 @@ LocalKey localKeyFromGraph(LocalGraph &g, int hops, std::uint64_t *refinement) {
       *refinement = memo.refined;
     }
     return memo.key;
+  }
+  if (g.edges.empty()) {
+    for (int i = 0; i < static_cast<int>(g.adjacency.size()); i++) {
+      for (const int j : g.adjacency[static_cast<std::size_t>(i)]) {
+        if (i < j) {
+          g.edges.emplace_back(i, j);
+        }
+      }
+    }
   }
   std::sort(g.edges.begin(), g.edges.end());
   g.edges.erase(std::unique(g.edges.begin(), g.edges.end()), g.edges.end());
