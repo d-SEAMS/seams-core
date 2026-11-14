@@ -195,6 +195,7 @@ def check_folder(folder, env, root, record, absent):
             if timing not in vtt:
                 fail("{} vtt was not converted from srt ({})".format(folder.name, timing))
     recorded = []
+    held = False
     for item in parsed:
         if not 0.2 <= item["lead"] <= 0.45:
             fail("{} {} lead {:.2f} is outside 0.20-0.45".format(folder.name, item["name"], item["lead"]))
@@ -208,8 +209,16 @@ def check_folder(folder, env, root, record, absent):
             for command in item["commands"]:
                 if leaked(command):
                     fail("{} command contains a local path".format(folder.name))
-                stdout.append(run_command(command, env, root))
+                try:
+                    stdout.append(run_command(command, env, root))
+                except SystemExit:
+                    if held and "test -s" in command:
+                        raise Absent(
+                            "rendered report was not produced because an earlier scene was skipped"
+                        )
+                    raise
         except Absent as exc:
+            held = True
             absent.append("{} {}: {}".format(folder.name, item["name"], exc))
             continue
         text = "\n".join(stdout)

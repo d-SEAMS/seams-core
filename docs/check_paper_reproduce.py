@@ -74,6 +74,9 @@ def run(cmd, cwd, env):
     done = subprocess.run(cmd, cwd=str(cwd), env=env, capture_output=True, text=True)
     if done.returncode != 0:
         detail = (done.stdout or "") + (done.stderr or "")
+        if done.returncode == 77:
+            print(detail.strip(), file=sys.stderr)
+            raise SystemExit(77)
         fail("exit {} for {}\n{}".format(done.returncode, " ".join(cmd), detail[-800:]))
     return done.stdout
 

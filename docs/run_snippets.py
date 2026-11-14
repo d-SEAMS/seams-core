@@ -225,6 +225,8 @@ def run(cmd, env, cwd=ROOT):
     done = subprocess.run(cmd, env=env, cwd=cwd, text=True, capture_output=True)
     if done.returncode != 0:
         tail = (done.stderr + done.stdout)[-1200:]
+        if done.returncode == 77:
+            raise Skip(tail.strip().splitlines()[-1] if tail.strip() else "skipped")
         if "PackageNotFoundError" in tail or "No package metadata was found" in tail:
             raise Skip("an optional package named by the snippet is not installed")
         if "usage: science_tutorials brine" in tail:
@@ -470,8 +472,11 @@ def compile_c_family(build, env, source, out, extra=None, more_sources=None):
         run(cmd, env)
     except Fail as exc:
         message = str(exc)
-        missing = "No such file or directory" in message and any(
+        missing = any(
             token in message for token in ("gromacs/", "OpenMM.h", "library.h", "plumed/")
+        ) and any(
+            phrase in message
+            for phrase in ("No such file or directory", "file not found", "fatal error")
         )
         if missing:
             raise Skip("the snippet's toolchain headers are not installed") from exc

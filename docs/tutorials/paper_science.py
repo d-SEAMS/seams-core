@@ -103,14 +103,23 @@ def render(dump, png):
         try:
             view = Viewport(type=Viewport.Type.Ortho)
             view.zoom_all()
-            view.render_image(
-                filename=str(png), size=(480, 360), background=(1, 1, 1),
-                renderer=TachyonRenderer(),
-            )
+            try:
+                view.render_image(
+                    filename=str(png), size=(480, 360), background=(1, 1, 1),
+                    renderer=TachyonRenderer(),
+                )
+            except RuntimeError as exc:
+                if "Vulkan" not in str(exc):
+                    raise
+                skip("the ovito vulkan renderer is not available")
         finally:
             pipeline.remove_from_scene()
-        if png.is_file() and 0 < png.stat().st_size <= 300 * 1024:
+        if png.is_file() and png.stat().st_size > 300 * 1024:
+            raise SystemExit("figure {} is missing or larger than 300 KB".format(png.name))
+        if png.is_file() and png.stat().st_size > 0:
             return
+    except SystemExit:
+        raise
     except Exception:
         pass
     if not _ovito_note:

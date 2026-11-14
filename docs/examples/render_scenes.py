@@ -420,13 +420,19 @@ def tachyon_scene(render, path, positions, colours, radii, meshes, forward, up, 
             direct_light_intensity=0.8,
         )
         path.parent.mkdir(parents=True, exist_ok=True)
-        view.render_image(
-            filename=str(path),
-            size=(width, height),
-            renderer=renderer,
-            background=(1.0, 1.0, 1.0),
-            frame=0,
-        )
+        try:
+            view.render_image(
+                filename=str(path),
+                size=(width, height),
+                renderer=renderer,
+                background=(1.0, 1.0, 1.0),
+                frame=0,
+            )
+        except RuntimeError as exc:
+            if "Vulkan" not in str(exc):
+                raise
+            print("the ovito vulkan renderer is not available", file=sys.stderr)
+            raise SystemExit(77) from exc
     finally:
         pipeline.remove_from_scene()
 
