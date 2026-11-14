@@ -46,7 +46,11 @@ constexpr int kMaxDeclaredAtoms = 8000000;
 bool declaredAtomsOk(int nop) {
   return nop >= 0 && nop <= kMaxDeclaredAtoms;
 }
+#if defined(_WIN32) && !defined(__MINGW32__)
+#include <io.h>
+#else
 #include <unistd.h>
+#endif
 #ifdef _WIN32
 #include <io.h>
 #endif
@@ -146,7 +150,19 @@ bool parseDumpInt(std::string_view line, int &out) {
 #endif
 
 int openForRead(const std::string &path) {
+#if defined(_WIN32) && !defined(__MINGW32__)
+  return _open(path.c_str(), _O_RDONLY | _O_BINARY);
+#else
   return ::open(path.c_str(), O_RDONLY | O_BINARY);
+#endif
+}
+
+void closeFd(int fd) {
+#if defined(_WIN32) && !defined(__MINGW32__)
+  _close(fd);
+#else
+  ::close(fd);
+#endif
 }
 
 std::int64_t seekFd(int fd, std::int64_t off, int whence) {
@@ -183,7 +199,11 @@ public:
   }
   ~FdReadBuf() override {
     if (fd_ >= 0) {
+#if defined(_WIN32) && !defined(__MINGW32__)
+      _close(fd_);
+#else
       ::close(fd_);
+#endif
     }
   }
   FdReadBuf(const FdReadBuf &) = delete;
@@ -202,7 +222,11 @@ protected:
         std::min(static_cast<std::int64_t>(buf_.size()), size - end_);
     std::int64_t n = -1;
     do {
+#if defined(_WIN32) && !defined(__MINGW32__)
+      n = _read(fd_, buf_.data(), static_cast<unsigned int>(want));
+#else
       n = ::read(fd_, buf_.data(), static_cast<unsigned int>(want));
+#endif
     } while (n < 0 && errno == EINTR);
     if (n <= 0) {
       return traits_type::eof();
@@ -326,7 +350,7 @@ struct LammpsDumpSession {
     }
     struct stat st {};
     if (::fstat(fd, &st) != 0 || st.st_size <= 0) {
-      ::close(fd);
+      closeFd(fd);
       return false;
     }
     const auto nbytes = static_cast<std::size_t>(st.st_size);
@@ -338,7 +362,7 @@ struct LammpsDumpSession {
         if (errno == EINTR) {
           continue;
         }
-        ::close(fd);
+        closeFd(fd);
         return false;
       }
       if (n == 0) {
@@ -346,7 +370,7 @@ struct LammpsDumpSession {
       }
       got += static_cast<std::size_t>(n);
     }
-    ::close(fd);
+    closeFd(fd);
     offsets.clear();
     const char *const begin = bytes.data();
     const char *const end = begin + got;
@@ -1221,12 +1245,12 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
   }
   struct stat st {};
   if (::stat(filename.c_str(), &st) != 0 || st.st_size <= 0) {
-    ::close(fd);
+    closeFd(fd);
     return false;
   }
   const auto nbytes = static_cast<std::size_t>(st.st_size);
   if (frameAt >= nbytes) {
-    ::close(fd);
+    closeFd(fd);
     return false;
   }
   // pread, not mmap: a writer that truncates the dump faults an mmap with SIGBUS.
@@ -1238,7 +1262,7 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
       if (errno == EINTR) {
         continue;
       }
-      ::close(fd);
+      closeFd(fd);
       return false;
     }
     if (nread == 0) {
@@ -1246,7 +1270,7 @@ bool parseMappedIdTypeXyz(const std::string &filename, std::uint64_t frameAt,
     }
     got += static_cast<std::size_t>(nread);
   }
-  ::close(fd);
+  closeFd(fd);
   if (got <= frameAt) {
     return false;
   }

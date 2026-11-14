@@ -26,15 +26,28 @@ inline bool parseExactDouble(std::string_view text, double &out) {
       return false;
     }
   }
+#if defined(_WIN32)
+  // MinGW and MSVC spell the C-locale converter this way. newlocale
+  // is not in their headers. The grammar stays the one strtod_l uses.
+  static const _locale_t loc = _create_locale(LC_ALL, "C");
+  if (loc == nullptr) {
+    return false;
+  }
+#else
   static const locale_t loc =
       newlocale(LC_ALL_MASK, "C", static_cast<locale_t>(nullptr));
   if (loc == static_cast<locale_t>(nullptr)) {
     return false;
   }
+#endif
   const std::string token(text);
   char *end = nullptr;
   errno = 0;
+#if defined(_WIN32)
+  const double value = _strtod_l(token.c_str(), &end, loc);
+#else
   const double value = strtod_l(token.c_str(), &end, loc);
+#endif
   if (end != token.c_str() + token.size()) {
     return false;
   }

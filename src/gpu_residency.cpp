@@ -1,6 +1,8 @@
 #include <gpu_residency.hpp>
 
+#ifdef SEAMS_HAS_GPULITE
 #include <dlfcn.h>
+#endif
 
 #include <algorithm>
 #include <cstdint>

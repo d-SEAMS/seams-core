@@ -59,8 +59,13 @@ int sourceTeam(int sources) {
 }
 
 // Profiling ticks: TSC cycles on x86, steady-clock nanoseconds elsewhere.
+#if defined(_MSC_VER) && !defined(__clang__) && (defined(_M_X64) || defined(_M_IX86))
+#include <intrin.h>
+#endif
 std::uint64_t readTsc() {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(_MSC_VER) && !defined(__clang__) && (defined(_M_X64) || defined(_M_IX86))
+  return __rdtsc();
+#elif defined(__x86_64__) || defined(__i386__)
   unsigned lo = 0;
   unsigned hi = 0;
   __asm__ volatile("rdtsc" : "=a"(lo), "=d"(hi));

@@ -12,6 +12,7 @@
 // If not, see <https://opensource.org/licenses/MIT>.
 //-----------------------------------------------------------------------------------
 
+#include <compiler_compat.hpp>
 #include <cpu_features.hpp>
 #include <chrono>
 
@@ -31,7 +32,7 @@
 #include <cmath>
 #include <complex>
 #include <cstdlib>
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(SEAMS_HOST_X86) && defined(SEAMS_GNU_TARGET)
 #include <immintrin.h>
 #define SEAMS_BOP_X86 1
 #endif
@@ -298,7 +299,7 @@ void addRealYlm3Scalar(double x, double y, double z, const std::array<double, 4>
 #ifdef SEAMS_BOP_X86
 // Four bonds side by side. Hardware fma is a per-lane instruction; the
 // channels are then added in bond order so the sum matches the scalar loop.
-__attribute__((target("avx2,fma"))) void realYlm3Accumulate(const double *x, const double *y,
+SEAMS_TARGET("avx2,fma") void realYlm3Accumulate(const double *x, const double *y,
                                                            const double *z, int nBond, double *acc) {
   const auto &norm = normQ3();
   int bond = 0;
@@ -347,7 +348,7 @@ __attribute__((target("avx2,fma"))) void realYlm3Accumulate(const double *x, con
   }
 }
 
-__attribute__((target("fma"))) double realL3Dot(const double *a, const double *b) {
+SEAMS_TARGET("fma") double realL3Dot(const double *a, const double *b) {
   double dot = a[0] * b[0];
   for (int channel = 1; channel < kRealL3; ++channel) {
     dot = __builtin_fma(2.0 * a[channel], b[channel], dot);
