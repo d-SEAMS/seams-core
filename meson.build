@@ -2171,15 +2171,16 @@ if _fuzz_args.length() > 0
   ]
     _fuzz_exe = custom_target(
       _fuzz[1],
+      input: files('fuzz' / (_fuzz[1] + '.c'), 'fuzz' / 'glibc_isoc23.c'),
       output: _fuzz[1],
       command: _fuzz_cc.cmd_array() + _fuzz_bindir + [
         _fuzz_cc.get_id() == 'clang-cl' ? '/std:c11' : '-std=c11', '-g', '-O1',
         '-I' + meson.project_source_root() / 'include',
         '-I' + meson.current_build_dir() / 'src',
-        meson.project_source_root() / 'fuzz' / (_fuzz[1] + '.c'),
         # The Debian libFuzzer archive is built against the host glibc.
         # A conda gcc links an older libc, which has no __isoc23_strto*.
-        meson.project_source_root() / 'fuzz' / 'glibc_isoc23.c',
+        # @INPUT@ is the fuzzer source and that shim, so either edit rebuilds.
+        '@INPUT@',
         '-o', '@OUTPUT@',
         seams_api_lib.full_path(),
       ] + _fuzz_args + [
