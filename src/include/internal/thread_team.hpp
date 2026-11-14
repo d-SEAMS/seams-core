@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <cstring>
 #include <mutex>
 
 // One width for OpenMP and Rayon. OpenMP already follows
@@ -176,6 +177,116 @@ struct TeamWidth {
   }
   TeamWidth(const TeamWidth &) = delete;
   TeamWidth &operator=(const TeamWidth &) = delete;
+};
+
+// Team width for one library call on a machine other processes share.
+// When their threads hold the cores, a full-width team waits at each fork
+// that follows serial work for workers the scheduler has parked, a slice
+// at a time, and a call of a few milliseconds grows tenfold. A narrower
+// team leaves cores free and does not wait. One small region at entry,
+// after the caller's own gap, takes microseconds on an idle machine and
+// milliseconds on a contended one. Two slow entries in a row halve the
+// team; at most once a second a narrowed team tries twice its width
+// again. Results do not depend on the width. SEAMS_FAIR_WIDTH=0 keeps
+// the requested width.
+struct FairState {
+  std::mutex lock;
+  int base = 0;
+  int granted = 0;
+  int slow = 0;
+  double tried = 0.0;
+};
+
+inline FairState &fairState() {
+  static FairState state;
+  return state;
+}
+
+inline bool fairEnabled() {
+  static const bool on = [] {
+    const char *flag = std::getenv("SEAMS_FAIR_WIDTH");
+    return flag == nullptr || std::strcmp(flag, "0") != 0;
+  }();
+  return on;
+}
+
+class FairWidth {
+public:
+  explicit FairWidth(bool adopt = false) {
+#ifdef SEAMS_HAS_OPENMP
+    if (depth()++ == 0 && !omp_in_parallel() && fairEnabled()) {
+      choose();
+    }
+#endif
+    if (adopt) {
+      adoptThreads();
+    }
+  }
+  ~FairWidth() {
+#ifdef SEAMS_HAS_OPENMP
+    if (set_) {
+      omp_set_num_threads(asked_);
+    }
+    --depth();
+#endif
+  }
+  FairWidth(const FairWidth &) = delete;
+  FairWidth &operator=(const FairWidth &) = delete;
+
+private:
+  static constexpr double kSlowFork = 250.0e-6;
+  static constexpr double kRetry = 1.0;
+  int asked_ = 1;
+  bool set_ = false;
+
+  static int &depth() {
+    thread_local int level = 0;
+    return level;
+  }
+
+#ifdef SEAMS_HAS_OPENMP
+  static double forkSeconds(int width) {
+    const double start = omp_get_wtime();
+#pragma omp parallel num_threads(width)
+    {
+      [[maybe_unused]] volatile int touch = omp_get_thread_num();
+    }
+    return omp_get_wtime() - start;
+  }
+
+  void choose() {
+    asked_ = std::max(1, omp_get_max_threads());
+    if (asked_ < 2) {
+      return;
+    }
+    FairState &state = fairState();
+    const std::lock_guard<std::mutex> hold(state.lock);
+    if (state.base != asked_) {
+      state.base = asked_;
+      state.granted = asked_;
+      state.slow = 0;
+      state.tried = 0.0;
+    }
+    const double now = omp_get_wtime();
+    int width = state.granted;
+    if (width < state.base && now - state.tried >= kRetry) {
+      width = std::min(state.base, 2 * width);
+      state.tried = now;
+    }
+    if (forkSeconds(width) <= kSlowFork) {
+      state.slow = 0;
+      state.granted = width;
+    } else if (width == state.granted && ++state.slow >= 2 && width > 1) {
+      state.granted = std::max(1, width / 2);
+      state.slow = 0;
+      state.tried = now;
+    }
+    if (state.granted != asked_) {
+      omp_set_num_threads(state.granted);
+      set_ = true;
+    }
+  }
+#endif
 };
 
 } // namespace seams

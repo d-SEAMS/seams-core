@@ -201,13 +201,13 @@ void remember() noexcept {
   note_error();
 }
 
-void use_threads() {
+seams::FairWidth use_threads() {
 #ifdef SEAMS_HAS_OPENMP
   if (g_threads > 0) {
     omp_set_num_threads(g_threads);
   }
 #endif
-  seams::adoptThreads();
+  return seams::FairWidth(true);
 }
 
 bool finite_box(const double *box9) {
@@ -979,7 +979,7 @@ seams_status seams_neighbours_build(seams_system *sys, double cutoff, int type,
     return fail(SEAMS_ERR_ARG, "graph is cutoff or mutual");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     int typ = 1;
     if (graph == SEAMS_GRAPH_CUTOFF) {
       // The cutoff list only reads coordinates. Copying the frame first
@@ -1102,7 +1102,7 @@ seams_status seams_chill_plus(seams_system *sys, double cutoff, int type, int gr
     return fail(SEAMS_ERR_ARG, "rule is published or ovito");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     int typ = 1;
     if ((rule == SEAMS_CHILL_PUBLISHED || rule == SEAMS_CHILL_OVITO) &&
         (graph == SEAMS_GRAPH_CUTOFF ||
@@ -1217,7 +1217,7 @@ seams_status seams_q4q6(seams_system *sys, double cutoff, int type, double *q4,
     return fail(SEAMS_ERR_RANGE, "cutoff must be positive");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     int typ = 1;
     Cloud work = unified_copy(sys->cloud, type, typ);
     const int n = work.nop;
@@ -1267,7 +1267,7 @@ seams_status seams_rings_find(seams_system *sys, double cutoff, int type, int gr
     return fail(SEAMS_ERR_RANGE, "cutoff must be positive");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     int typ = 1;
     Cloud work = unified_copy(sys->cloud, type, typ);
     std::vector<std::vector<int>> idx;
@@ -1708,7 +1708,7 @@ seams_status seams_chill(seams_system *sys, double cutoff, int type, int graph, 
     return fail(SEAMS_ERR_ARG, "rule is published or ovito");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     int typ = 1;
     if (rule == SEAMS_CHILL_PUBLISHED &&
         (graph == SEAMS_GRAPH_CUTOFF ||
@@ -1825,7 +1825,7 @@ seams_status seams_ql(seams_system *sys, double cutoff, int type, int order_l, i
     return fail(SEAMS_ERR_RANGE, "qlbar buffer is short");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     int typ = 1;
     Cloud work = unified_copy(sys->cloud, type, typ);
     chill::SteinhardtQl result;
@@ -1886,7 +1886,7 @@ seams_status seams_q6bar(seams_system *sys, double cutoff, int type, double ice_
     return fail(SEAMS_ERR_RANGE, "q6bar buffer is short");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     int typ = 1;
     Cloud work = unified_copy(sys->cloud, type, typ);
     const auto result = chill::steinhardtQlCutoff(work, cutoff, 6, typ, true);
@@ -2008,7 +2008,7 @@ seams_status seams_cages_find(seams_system *sys, double cutoff, int type, int gr
     return fail(SEAMS_ERR_RANGE, "neighbour count is negative");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     int typ = 1;
     Cloud work = unified_copy(sys->cloud, type, typ);
     const int n = work.nop;
@@ -2148,7 +2148,7 @@ static seams_status signature_with_edge(seams_system *sys, double cutoff, int ty
     return fail(SEAMS_ERR_ARG, "graph is cutoff or mutual");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     // A type filter that keeps every atom is the frame itself. Copying the
     // cloud copies its atom-id map, and that copy is what made the library
     // call slower than the command on a wide run.
@@ -2221,7 +2221,7 @@ seams_status seams_system_symmetry(seams_system *sys, double shell_rmsd, int *la
     return SEAMS_OK;
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     std::vector<double> xyz(static_cast<std::size_t>(n) * 3);
     for (int i = 0; i < n; ++i) {
       const auto &point = sys->cloud.pts[static_cast<std::size_t>(i)];
@@ -2274,7 +2274,7 @@ seams_status seams_brine_analyse(seams_system *sys, const int *ice, size_t n_ice
     return fail(SEAMS_ERR_RANGE, "axis is 0, 1, or 2");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     const int n = sys->cloud.nop;
     std::vector<bool> ice_flag(static_cast<std::size_t>(n), false);
     std::vector<int> waters;
@@ -2444,7 +2444,7 @@ seams_status seams_neighbours_knn(seams_system *sys, int k, double cutoff, int t
     return fail(SEAMS_ERR_RANGE, "cutoff must be positive");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     int typ = 1;
     const Cloud *src = &sys->cloud;
     Cloud owned;
@@ -2499,7 +2499,7 @@ seams_status seams_rdf(seams_system *sys, double rmax, int bins, int type_i, int
     return fail(SEAMS_ERR_RANGE, "rmax must be positive");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     const auto gr = partial_of(sys->cloud, rmax, bins, type_i, type_j);
     *n_out = gr.r.size();
     if (volume != nullptr) {
@@ -2547,7 +2547,7 @@ seams_status seams_running_cn(seams_system *sys, double rmax, int bins, int type
     return fail(SEAMS_ERR_RANGE, "rmax must be positive");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     const auto gr = partial_of(sys->cloud, rmax, bins, type_i, type_j);
     const double rho = gr.volume > 0.0 ? static_cast<double>(gr.nJ) / gr.volume : 0.0;
     const auto series = rdf::runningCN(gr, rho);
@@ -2591,7 +2591,7 @@ seams_status seams_coordination(seams_system *sys, double rmax, int bins, int ty
     return fail(SEAMS_ERR_RANGE, "rmax must be positive");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     const auto gr = partial_of(sys->cloud, rmax, bins, type_i, type_j);
     const double rho = gr.volume > 0.0 ? static_cast<double>(gr.nJ) / gr.volume : 0.0;
     *cn = rdf::coordinationNumber(gr, rmax, rho);
@@ -2625,7 +2625,7 @@ seams_status seams_hbonds(seams_system *sys, double cutoff, int oxygen_type,
     return fail(SEAMS_ERR_ARG, "hydrogen type must be positive");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     Cloud heavy;
     Cloud hydro;
     heavy.box = sys->cloud.box;
@@ -2749,7 +2749,7 @@ seams_status seams_fingerprint(seams_system *sys, double cutoff, int type, int k
     k = 4;
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     int typ = 1;
     Cloud work = unified_copy(sys->cloud, type, typ);
     std::vector<std::vector<int>> rows;
@@ -2898,7 +2898,7 @@ seams_status seams_domains(seams_system *sys, double cutoff, const char *site_sp
     return fail(SEAMS_ERR_ARG, "subset is 0 (apolar) or 1 (polar)");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     const auto table = site::parseSiteSpec(site_spec);
     std::vector<bool> mask(static_cast<std::size_t>(sys->cloud.nop), false);
     for (const int index : site::indicesOf(sys->cloud, table, kind)) {
@@ -2953,7 +2953,7 @@ seams_status seams_prisms(seams_system *sys, double cutoff, int type, int *perfe
     return fail(SEAMS_ERR_RANGE, "cutoff must be positive");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     int typ = 1;
     Cloud work = unified_copy(sys->cloud, type, typ);
     auto rows = nneigh::kNearestNeighbourList(work, 4, cutoff + 1.5, typ, true);
@@ -3009,7 +3009,7 @@ seams_status seams_monolayer(seams_system *sys, double cutoff, int type, int max
     return fail(SEAMS_ERR_RANGE, "cutoff and sheet area must be positive");
   }
   try {
-    use_threads();
+    const auto fair = use_threads();
     int typ = 1;
     Cloud work = unified_copy(sys->cloud, type, typ);
     auto rows = bond_rows(work, cutoff, typ, SEAMS_GRAPH_CUTOFF);

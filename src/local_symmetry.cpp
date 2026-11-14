@@ -10,6 +10,7 @@
 
 #include <ira_sofi.hpp>
 #include <seams_c_api.h>
+#include <thread_team.hpp>
 
 #include <Eigen/Dense>
 
@@ -1143,6 +1144,7 @@ SoaCols &soaCols() {
 int seams_symmetry_classify_gates(const double *xyz, int n, const double *lattice9,
                                   double shell_rmsd, double thermal_q, double bond_ratio,
                                   int *labels) {
+  const seams::FairWidth fair;
   if (xyz == nullptr || lattice9 == nullptr || labels == nullptr || n < 1) {
     return 1;
   }
@@ -1166,6 +1168,7 @@ int seams_symmetry_classify_gates(const double *xyz, int n, const double *lattic
 
 int seams_symmetry_classify_tol(const double *xyz, int n, const double *lattice9,
                                 double shell_rmsd, int *labels) {
+  const seams::FairWidth fair;
   if (xyz == nullptr || lattice9 == nullptr || labels == nullptr || n < 1) {
     return 1;
   }

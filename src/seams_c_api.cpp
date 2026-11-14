@@ -20,6 +20,7 @@
 #include <franzblau.hpp>
 #include <mol_sys.hpp>
 #include <neighbours.hpp>
+#include <thread_team.hpp>
 #include <water_select.hpp>
 
 #include <cmath>
@@ -33,6 +34,7 @@
 #endif
 
 int seams_chill_plus_flat(const double *xyz, int n, const double *box, int *labels) {
+  const seams::FairWidth fair;
   return seams_chill_plus_graph(xyz, n, box, 3.5, nullptr, labels);
 }
 
@@ -123,6 +125,7 @@ int writeQ4Q6(molSys::PointCloud<molSys::Point<double>, double> &cloud,
 
 int seams_chill_plus_graph(const double *xyz, int n, const double *box,
                            double cutoff, const char *graph, int *labels) {
+  const seams::FairWidth fair;
   if (xyz == nullptr || box == nullptr || labels == nullptr || n <= 0 ||
       !(cutoff > 0.0)) {
     return 1;
@@ -144,6 +147,7 @@ int seams_chill_plus_graph(const double *xyz, int n, const double *box,
 int seams_chill_plus_rule(const double *xyz, int n, const double *box,
                           double cutoff, const char *graph, const char *rule,
                           int *labels) {
+  const seams::FairWidth fair;
   if (xyz == nullptr || box == nullptr || labels == nullptr || n <= 0 ||
       !(cutoff > 0.0)) {
     return 1;
@@ -234,6 +238,7 @@ const char *seams_c_error(void) { return g_c_error.c_str(); }
 int seams_chill_plus_graph_lammps(const double *xyz, int n,
                                   const double *box9, double cutoff,
                                   const char *graph, int *labels) {
+  const seams::FairWidth fair;
   if (xyz == nullptr || box9 == nullptr || labels == nullptr || n <= 0 ||
       !(cutoff > 0.0)) {
     return 1;
@@ -419,6 +424,7 @@ int seams_chill_plus_species(const double *xyz, int n, const double *box9,
                              int n_mol_ids, double cutoff, const char *graph,
                              int *labels, int *ion_ice, int *ion_liquid,
                              double *ion_front) {
+  const seams::FairWidth fair;
   if (labels == nullptr) {
     note_c_error("labels are required");
     return 1;
@@ -482,6 +488,7 @@ int seams_oxygen_cutoff_degree(const double *xyz, int n, const double *box9,
                                int oxygen_type, int mol_mode,
                                const int *mol_ids, int n_mol_ids, double cutoff,
                                int *degree) {
+  const seams::FairWidth fair;
   if (degree == nullptr) {
     note_c_error("degree is required");
     return 1;
@@ -526,6 +533,7 @@ int seams_oxygen_cutoff_degree(const double *xyz, int n, const double *box9,
 
 int seams_q4_q6(const double *xyz, int n, const double *box, double cutoff,
                 double *q4, double *q6, double *q4bar, double *q6bar) {
+  const seams::FairWidth fair;
   if (xyz == nullptr || box == nullptr || q4 == nullptr || q6 == nullptr ||
       n <= 0 || !(cutoff > 0.0)) {
     return 1;
@@ -542,6 +550,7 @@ int seams_q4_q6(const double *xyz, int n, const double *box, double cutoff,
 int seams_q4_q6_lammps(const double *xyz, int n, const double *box9,
                        double cutoff, double *q4, double *q6, double *q4bar,
                        double *q6bar) {
+  const seams::FairWidth fair;
   if (xyz == nullptr || box9 == nullptr || q4 == nullptr || q6 == nullptr ||
       n <= 0 || !(cutoff > 0.0)) {
     return 1;
@@ -558,6 +567,7 @@ int seams_q4_q6_lammps(const double *xyz, int n, const double *box9,
 
 int seams_cutoff_csr(const double *xyz, int n, const double *box9, double cutoff,
                      int *offsets, int *cols, int cols_cap, int *n_cols) {
+  const seams::FairWidth fair;
   if (badFrame(xyz, n, box9, cutoff) || offsets == nullptr || n_cols == nullptr) {
     return 1;
   }
@@ -589,6 +599,7 @@ int seams_cutoff_csr(const double *xyz, int n, const double *box9, double cutoff
 
 int seams_ql_cutoff(const double *xyz, int n, const double *box9, double cutoff,
                     int order_l, double *ql) {
+  const seams::FairWidth fair;
   if (badFrame(xyz, n, box9, cutoff) || ql == nullptr) {
     return 1;
   }
@@ -617,6 +628,7 @@ int seams_ql_cutoff(const double *xyz, int n, const double *box9, double cutoff,
 
 int seams_diamond_cna(const double *xyz, int n, const double *box9, double cutoff,
                       int *labels) {
+  const seams::FairWidth fair;
   if (badFrame(xyz, n, box9, cutoff) || labels == nullptr) {
     return 1;
   }
@@ -654,6 +666,7 @@ int seams_diamond_cna(const double *xyz, int n, const double *box9, double cutof
 
 int seams_primitive_rings(const double *xyz, int n, const double *box9,
                           double cutoff, int max_depth, int *counts, int counts_len) {
+  const seams::FairWidth fair;
   if (badFrame(xyz, n, box9, cutoff) || counts == nullptr || max_depth < 3 ||
       counts_len < max_depth + 1) {
     return 1;

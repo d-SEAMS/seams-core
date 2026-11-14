@@ -15,6 +15,7 @@
 #include <ring.hpp>
 #include <seams_c_api.h>
 #include <seams_input.hpp>
+#include <thread_team.hpp>
 #include <topo_bulk.hpp>
 #include <topo_one_dim.hpp>
 #include <topo_two_dim.hpp>
@@ -1654,6 +1655,7 @@ int seams_frame_rdf2d_nbin(double cutoff, double binwidth) {
 
 int seams_frame_rdf2d(seams_frame *frame, double cutoff, double binwidth,
                       const char *output_dir, double *r, double *g) {
+  const seams::FairWidth fair;
   clear_error();
   if (frame == nullptr || r == nullptr || g == nullptr) {
     set_error("rdf2d needs a frame and r, g buffers");
