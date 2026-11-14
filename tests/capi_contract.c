@@ -452,7 +452,7 @@ static void past_eof_contract(seams_system *sys, const char *root) {
   static const char *const files[] = {"xyz_count_past_eof.xyz", "dump_count_past_eof.lammpstrj"};
   for (size_t i = 0; i < sizeof files / sizeof files[0]; ++i) {
     char path[4096];
-    snprintf(path, sizeof path, "%s/input/traj/%s", root, files[i]);
+    snprintf(path, sizeof path, "%s/tests/fixtures/malformed/%s", root, files[i]);
     const long before = peak_rss_mb();
     expect(seams_system_read(sys, path, 1, -1), SEAMS_ERR_ARG, "seams_system_read",
            "atom count past the end of the file");
@@ -486,7 +486,7 @@ static void read_contract(const char *root) {
   truth(nframes == 77, fn, "failure leaves the output alone");
   expect(seams_path_nframes(path, &nframes), SEAMS_OK, fn, "count");
   truth(nframes >= 1, fn, "at least one frame");
-  snprintf(path, sizeof path, "%s/input/traj/mol2_empty_counts.mol2", root);
+  snprintf(path, sizeof path, "%s/tests/fixtures/malformed/mol2_empty_counts.mol2", root);
   expect(seams_path_nframes(path, &nframes), SEAMS_ERR_ARG, fn, "MOL2 with no counts line");
   expect(seams_system_read(sys, path, 1, -1), SEAMS_ERR_RANGE, "seams_system_read",
          "MOL2 with no counts line");
