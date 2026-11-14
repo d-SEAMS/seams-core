@@ -56,7 +56,10 @@
 #ifndef SEAMS_SANITIZED
 namespace backward {
 
-backward::SignalHandling sh;
+// Never destroyed. The handlers stay installed until the process ends, and
+// a signal raised after static destruction (a sanitizer abort at exit) would
+// otherwise read the freed alternate stack.
+backward::SignalHandling &sh = *new backward::SignalHandling;
 
 } // namespace backward
 #endif // SEAMS_SANITIZED
