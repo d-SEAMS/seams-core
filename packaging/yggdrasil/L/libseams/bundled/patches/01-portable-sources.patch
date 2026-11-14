@@ -1,8 +1,35 @@
+diff --git a/src/backward.cpp b/src/backward.cpp
+index c240b94c..4dcd392e 100644
+--- a/src/backward.cpp
++++ b/src/backward.cpp
+@@ -37,6 +37,9 @@
+ // - g++/clang++ -lbfd ...
+ // #define BACKWARD_HAS_BFD 1
+ 
++// The stack walk needs <execinfo.h>, which musl does not have; there the
++// crash handler is left out.
++#if !defined(__linux__) || __has_include(<execinfo.h>)
+ #include "backward.hpp"
+ 
+ namespace backward {
+@@ -44,3 +47,4 @@ namespace backward {
+ backward::SignalHandling sh;
+ 
+ } // namespace backward
++#endif
 diff --git a/src/bop.cpp b/src/bop.cpp
-index 2d3b0db6..78e66d19 100644
+index 2d3b0db6..320ea37f 100644
 --- a/src/bop.cpp
 +++ b/src/bop.cpp
-@@ -29,7 +29,10 @@
+@@ -12,6 +12,7 @@
+ // If not, see <https://opensource.org/licenses/MIT>.
+ //-----------------------------------------------------------------------------------
+ 
++#include <cpu_features.hpp>
+ #include <chrono>
+ 
+ #include <bop.hpp>
+@@ -29,7 +30,10 @@
  #include <cmath>
  #include <complex>
  #include <cstdlib>
@@ -13,7 +40,7 @@ index 2d3b0db6..78e66d19 100644
  #include <iostream>
  #include <mutex>
  #include <numbers>
-@@ -290,6 +293,7 @@ void addRealYlm3Scalar(double x, double y, double z, const std::array<double, 4>
+@@ -290,6 +294,7 @@ void addRealYlm3Scalar(double x, double y, double z, const std::array<double, 4>
    acc[6] += norm[3] * (x * (3.0 * y2 - x2)) * inv;
  }
  
@@ -21,12 +48,12 @@ index 2d3b0db6..78e66d19 100644
  // Four bonds side by side. Hardware fma is a per-lane instruction; the
  // channels are then added in bond order so the sum matches the scalar loop.
  __attribute__((target("avx2,fma"))) void realYlm3Accumulate(const double *x, const double *y,
-@@ -349,6 +353,27 @@ __attribute__((target("fma"))) double realL3Dot(const double *a, const double *b
+@@ -349,6 +354,27 @@ __attribute__((target("fma"))) double realL3Dot(const double *a, const double *b
    return dot;
  }
  
 +bool hostHasAvx2Fma() {
-+  return __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
++  return seams::cpu::features().avx2 && seams::cpu::features().fma;
 +}
 +#else
 +// Without x86 SIMD the dispatch below always takes the scalar branch;
@@ -49,7 +76,7 @@ index 2d3b0db6..78e66d19 100644
  double realL3DotScalar(const double *a, const double *b) {
    double dot = a[0] * b[0];
    for (int channel = 1; channel < kRealL3; ++channel) {
-@@ -765,7 +790,7 @@ static void classifyBondsLeftFp64(
+@@ -765,7 +791,7 @@ static void classifyBondsLeftFp64(
      flat.reserve(static_cast<std::size_t>(nop) * 8);
    }
  
@@ -58,7 +85,7 @@ index 2d3b0db6..78e66d19 100644
  #ifdef SEAMS_HAS_OPENMP
  #pragma omp parallel for schedule(static) if (nop >= 16384 && omp_get_max_threads() > 1)
  #endif
-@@ -1384,7 +1409,7 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
+@@ -1384,7 +1410,7 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
    const double hy = 0.5 * Ly;
    const double hz = 0.5 * Lz;
    const auto &norm = normQ3();
@@ -67,7 +94,7 @@ index 2d3b0db6..78e66d19 100644
    const chill::BondClassifier rule = chill::chillPlusRule();
    const auto tWalk = std::chrono::steady_clock::now();
  #ifdef SEAMS_HAS_OPENMP
-@@ -1715,7 +1740,7 @@ bool chill::q4q6ChillPlus(
+@@ -1715,7 +1741,7 @@ bool chill::q4q6ChillPlus(
    constexpr double pi = 3.14159265358979323846;
    const double pre4 = 4.0 * pi / 9.0;
    const double pre6 = 4.0 * pi / 13.0;
@@ -76,7 +103,7 @@ index 2d3b0db6..78e66d19 100644
    const auto &norm = normQ3();
  #ifdef SEAMS_HAS_OPENMP
  #pragma omp parallel for schedule(static) if (parallel)
-@@ -2242,7 +2267,7 @@ bool chill::chillPlusPublishedCutoff(
+@@ -2242,7 +2268,7 @@ bool chill::chillPlusPublishedCutoff(
    const auto tCsr = std::chrono::steady_clock::now();
    const gen::FracBox frame = gen::makeFracBox(yCloud);
    const auto &norm = normQ3();
@@ -85,7 +112,7 @@ index 2d3b0db6..78e66d19 100644
    const chill::BondClassifier rule = chill::chillPlusRule();
  #ifdef SEAMS_HAS_OPENMP
  #pragma omp parallel for schedule(static) if (n >= 256)
-@@ -2463,7 +2488,7 @@ int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &y
+@@ -2463,7 +2489,7 @@ int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &y
      return 0;
    }
    const gen::FracBox frame = gen::makeFracBox(yCloud);
@@ -94,7 +121,7 @@ index 2d3b0db6..78e66d19 100644
    const auto &norm = normQ3();
    const chill::BondClassifier rule = chill::chillPlusRule();
    std::vector<double> q(static_cast<std::size_t>(n) * kRealL3, 0.0);
-@@ -3224,7 +3249,7 @@ void chill::bondOrder(const molSys::PointCloud<molSys::Point<double>, double> &y
+@@ -3224,7 +3250,7 @@ void chill::bondOrder(const molSys::PointCloud<molSys::Point<double>, double> &y
      xyz[static_cast<std::size_t>(i)] = {p.x, p.y, p.z};
    }
    const gen::FracBox frame = gen::makeFracBox(yCloud);
@@ -103,7 +130,7 @@ index 2d3b0db6..78e66d19 100644
    const bool fixedKeep = keepMax > 0;
  #ifdef SEAMS_HAS_OPENMP
    const double orderT0 = omp_get_wtime();
-@@ -3325,7 +3350,7 @@ void chill::correlFromOrder(molSys::PointCloud<molSys::Point<double>, double> &y
+@@ -3325,7 +3351,7 @@ void chill::correlFromOrder(molSys::PointCloud<molSys::Point<double>, double> &y
                              const std::vector<char> *which, bool closed) {
    const int nop = yCloud.nop;
    const int keepMax = order.keepMax;
@@ -221,11 +248,80 @@ index 5c53c0ba..ba9bed2a 100644
    int n = 0;
  };
  
+diff --git a/src/include/internal/cpu_features.hpp b/src/include/internal/cpu_features.hpp
+new file mode 100644
+index 00000000..4653795c
+--- /dev/null
++++ b/src/include/internal/cpu_features.hpp
+@@ -0,0 +1,58 @@
++// Copyright (c) d-SEAMS developers
++#pragma once
++
++// x86 feature checks. __builtin_cpu_supports needs __cpu_model from
++// compiler-rt or libgcc, which some macOS toolchains do not link. CPUID
++// can trap to the hypervisor, so the answers are read once.
++
++#if defined(__x86_64__) || defined(__i386__)
++#include <cpuid.h>
++#endif
++
++namespace seams::cpu {
++
++struct Features {
++  bool avx2 = false;
++  bool fma = false;
++  bool avx512f = false;
++  bool avx512dq = false;
++  bool avx512vnni = false;
++};
++
++inline Features detectFeatures() {
++  Features out;
++#if defined(__x86_64__) || defined(__i386__)
++  unsigned a = 0, b = 0, c = 0, d = 0;
++  if (!__get_cpuid(1, &a, &b, &c, &d)) {
++    return out;
++  }
++  const bool osxsave = (c & (1u << 27)) != 0;
++  const bool avx = (c & (1u << 28)) != 0;
++  const bool fma = (c & (1u << 12)) != 0;
++  if (!osxsave || !avx) {
++    return out;
++  }
++  unsigned xlo = 0, xhi = 0;
++  __asm__ volatile("xgetbv" : "=a"(xlo), "=d"(xhi) : "c"(0));
++  (void)xhi;
++  // The OS saves the YMM state (bits 1, 2) and the ZMM state (bits 5-7).
++  const bool ymm = (xlo & 0x6u) == 0x6u;
++  const bool zmm = ymm && (xlo & 0xe0u) == 0xe0u;
++  if (!__get_cpuid_count(7, 0, &a, &b, &c, &d)) {
++    return out;
++  }
++  out.fma = ymm && fma;
++  out.avx2 = ymm && (b & (1u << 5)) != 0;
++  out.avx512f = zmm && (b & (1u << 16)) != 0;
++  out.avx512dq = out.avx512f && (b & (1u << 17)) != 0;
++  out.avx512vnni = out.avx512f && (c & (1u << 11)) != 0;
++#endif
++  return out;
++}
++
++inline const Features &features() {
++  static const Features cached = detectFeatures();
++  return cached;
++}
++
++} // namespace seams::cpu
 diff --git a/src/ozaki.cpp b/src/ozaki.cpp
-index de70ffda..9ad97a89 100644
+index de70ffda..cc7f90e3 100644
 --- a/src/ozaki.cpp
 +++ b/src/ozaki.cpp
-@@ -11,6 +11,8 @@
+@@ -1,3 +1,4 @@
++#include <cpu_features.hpp>
+ #include <ozaki.hpp>
+ 
+ #include <algorithm>
+@@ -11,6 +12,8 @@
  
  #if defined(__x86_64__)
  #include <immintrin.h>
@@ -234,7 +330,7 @@ index de70ffda..9ad97a89 100644
  #include <sys/syscall.h>
  #include <unistd.h>
  #endif
-@@ -22,6 +24,9 @@
+@@ -22,6 +25,9 @@
  namespace seams::product {
  namespace {
  
@@ -244,7 +340,7 @@ index de70ffda..9ad97a89 100644
  std::atomic<int> gMode{-1};
  std::atomic<int> gReduction{-1};
  
-@@ -84,7 +89,7 @@ bool finitePair(double a, double b) {
+@@ -84,7 +90,7 @@ bool finitePair(double a, double b) {
    return std::isfinite(a) && std::isfinite(b);
  }
  
@@ -253,7 +349,7 @@ index de70ffda..9ad97a89 100644
  #ifndef ARCH_REQ_XCOMP_PERM
  #define ARCH_REQ_XCOMP_PERM 0x1023
  #endif
-@@ -176,7 +181,7 @@ int symMod(int32_t a, int32_t m) {
+@@ -176,7 +182,7 @@ int symMod(int32_t a, int32_t m) {
    return r;
  }
  
@@ -262,7 +358,7 @@ index de70ffda..9ad97a89 100644
    const __uint128_t half = M / 2;
    __uint128_t u;
    if (s >= 0) {
-@@ -186,12 +191,12 @@ __int128 remCentered(__int128 s, __uint128_t M) {
+@@ -186,12 +192,12 @@ __int128 remCentered(__int128 s, __uint128_t M) {
      u = neg == 0 ? 0 : M - neg;
    }
    if (u > half) {
@@ -278,7 +374,7 @@ index de70ffda..9ad97a89 100644
    if (v == 0) {
      return 0.0;
    }
-@@ -470,11 +475,11 @@ RealDot dotOzakiII(const double *x, const double *y, int n) {
+@@ -470,11 +476,11 @@ RealDot dotOzakiII(const double *x, const double *y, int n) {
      }
      residues[static_cast<std::size_t>(t)] = symMod(acc, m);
    }
@@ -294,7 +390,95 @@ index de70ffda..9ad97a89 100644
      acc = remCentered(acc + term, table.modulus);
    }
    out.value = roundI128(acc, -(ex + ey));
-@@ -576,6 +581,7 @@ __attribute__((target("avx512f,avx512bw,avx512vnni"))) bool int8GemmVnni(
+@@ -508,9 +514,46 @@ void packRealImag(const std::complex<double> *z, int n, std::vector<double> &re,
+ }
+ 
+ #if defined(__x86_64__)
+-__attribute__((target("avx512f,avx512bw,avx512vnni"))) bool int8GemmVnni(
+-    int m, int n, int k, const signed char *A, int lda, const signed char *B,
+-    int ldb, int *C, int ldc) {
++// Clang does not give an OpenMP region the target attribute of the
++// function around it, so the AVX-512 work of one row is its own function.
++__attribute__((target("avx512f,avx512bw,avx512vnni"))) void vnniRow(
++    int i, int n, int kp, int np, const uint8_t *Au, const int8_t *Bp,
++    const int32_t *colSum, int *C, int ldc) {
++  std::vector<int32_t> row(static_cast<std::size_t>(np), 0);
++  for (int j0 = 0; j0 < n; j0 += 16) {
++    __m512i acc = _mm512_setzero_si512();
++    for (int t = 0; t < kp; t += 4) {
++      uint32_t a4 = 0;
++      std::memcpy(&a4, Au + static_cast<std::size_t>(i) * kp + t, 4);
++      const __m512i va = _mm512_set1_epi32(static_cast<int>(a4));
++      alignas(64) int8_t packed[64];
++      for (int lane = 0; lane < 4; lane++) {
++        for (int c = 0; c < 16; c++) {
++          const int j = j0 + c;
++          int8_t b = 0;
++          if (j < np && t + lane < kp) {
++            b = Bp[static_cast<std::size_t>(t + lane) * np + j];
++          }
++          packed[c * 4 + lane] = b;
++        }
++      }
++      const __m512i vb = _mm512_load_si512(packed);
++      acc = _mm512_dpbusd_epi32(acc, va, vb);
++    }
++    alignas(64) int32_t tmp[16];
++    _mm512_store_si512(tmp, acc);
++    for (int c = 0; c < 16 && j0 + c < n; c++) {
++      const int j = j0 + c;
++      row[static_cast<std::size_t>(j)] = tmp[c] - 128 * colSum[j];
++    }
++  }
++  for (int j = 0; j < n; j++) {
++    C[i * ldc + j] += row[static_cast<std::size_t>(j)];
++  }
++}
++
++bool int8GemmVnni(int m, int n, int k, const signed char *A, int lda,
++                  const signed char *B, int ldb, int *C, int ldc) {
+   if (!vnniAvailable()) {
+     return false;
+   }
+@@ -539,43 +582,12 @@ __attribute__((target("avx512f,avx512bw,avx512vnni"))) bool int8GemmVnni(
+ #pragma omp parallel for schedule(static) if (m >= 32)
+ #endif
+   for (int i = 0; i < m; i++) {
+-    std::vector<int32_t> row(static_cast<std::size_t>(np), 0);
+-    for (int j0 = 0; j0 < n; j0 += 16) {
+-      __m512i acc = _mm512_setzero_si512();
+-      for (int t = 0; t < kp; t += 4) {
+-        uint32_t a4 = 0;
+-        std::memcpy(&a4, Au.data() + static_cast<std::size_t>(i) * kp + t, 4);
+-        const __m512i va = _mm512_set1_epi32(static_cast<int>(a4));
+-        alignas(64) int8_t packed[64];
+-        for (int lane = 0; lane < 4; lane++) {
+-          for (int c = 0; c < 16; c++) {
+-            const int j = j0 + c;
+-            int8_t b = 0;
+-            if (j < np && t + lane < kp) {
+-              b = Bp[static_cast<std::size_t>(t + lane) * np + j];
+-            }
+-            packed[c * 4 + lane] = b;
+-          }
+-        }
+-        const __m512i vb = _mm512_load_si512(packed);
+-        acc = _mm512_dpbusd_epi32(acc, va, vb);
+-      }
+-      alignas(64) int32_t tmp[16];
+-      _mm512_store_si512(tmp, acc);
+-      for (int c = 0; c < 16 && j0 + c < n; c++) {
+-        const int j = j0 + c;
+-        const int32_t corrected =
+-            tmp[c] - 128 * colSum[static_cast<std::size_t>(j)];
+-        row[static_cast<std::size_t>(j)] = corrected;
+-      }
+-    }
+-    for (int j = 0; j < n; j++) {
+-      C[i * ldc + j] += row[static_cast<std::size_t>(j)];
+-    }
++    vnniRow(i, n, kp, np, Au.data(), Bp.data(), colSum.data(), C, ldc);
+   }
    return true;
  }
  
@@ -302,7 +486,7 @@ index de70ffda..9ad97a89 100644
  __attribute__((target("amx-tile,amx-int8"))) bool int8GemmAmx(
      int m, int n, int k, const signed char *A, int lda, const signed char *B,
      int ldb, int *C, int ldc) {
-@@ -670,6 +676,13 @@ __attribute__((target("amx-tile,amx-int8"))) bool int8GemmAmx(
+@@ -670,31 +682,43 @@ __attribute__((target("amx-tile,amx-int8"))) bool int8GemmAmx(
    std::free(raw);
    return true;
  }
@@ -314,9 +498,58 @@ index de70ffda..9ad97a89 100644
 +}
 +#endif
  
- __attribute__((target("avx512f,fma"))) void gemmAvx512Rows(
-     int m, int n, int k, const double *A, int lda, const double *B, int ldb,
-@@ -795,7 +808,7 @@ const char *reductionName(Reduction r) {
+-__attribute__((target("avx512f,fma"))) void gemmAvx512Rows(
+-    int m, int n, int k, const double *A, int lda, const double *B, int ldb,
++__attribute__((target("avx512f,fma"))) void gemmAvx512Row(
++    int i, int n, int k, const double *A, int lda, const double *B, int ldb,
+     double *C, int ldc) {
++  int j = 0;
++  for (; j + 8 <= n; j += 8) {
++    __m512d acc = _mm512_setzero_pd();
++    for (int t = 0; t < k; t++) {
++      const __m512d b = _mm512_loadu_pd(B + static_cast<std::ptrdiff_t>(t) * ldb + j);
++      acc = _mm512_fmadd_pd(_mm512_set1_pd(A[static_cast<std::ptrdiff_t>(i) * lda + t]), b, acc);
++    }
++    _mm512_storeu_pd(C + static_cast<std::ptrdiff_t>(i) * ldc + j, acc);
++  }
++  for (; j < n; j++) {
++    double acc = 0.0;
++    for (int t = 0; t < k; t++) {
++      acc += A[static_cast<std::ptrdiff_t>(i) * lda + t] *
++             B[static_cast<std::ptrdiff_t>(t) * ldb + j];
++    }
++    C[static_cast<std::ptrdiff_t>(i) * ldc + j] = acc;
++  }
++}
++
++void gemmAvx512Rows(int m, int n, int k, const double *A, int lda,
++                    const double *B, int ldb, double *C, int ldc) {
+ #ifdef SEAMS_HAS_OPENMP
+ #pragma omp parallel for schedule(static) if (m >= 32)
+ #endif
+   for (int i = 0; i < m; i++) {
+-    int j = 0;
+-    for (; j + 8 <= n; j += 8) {
+-      __m512d acc = _mm512_setzero_pd();
+-      for (int t = 0; t < k; t++) {
+-        const __m512d b = _mm512_loadu_pd(B + static_cast<std::ptrdiff_t>(t) * ldb + j);
+-        acc = _mm512_fmadd_pd(_mm512_set1_pd(A[static_cast<std::ptrdiff_t>(i) * lda + t]), b, acc);
+-      }
+-      _mm512_storeu_pd(C + static_cast<std::ptrdiff_t>(i) * ldc + j, acc);
+-    }
+-    for (; j < n; j++) {
+-      double acc = 0.0;
+-      for (int t = 0; t < k; t++) {
+-        acc += A[static_cast<std::ptrdiff_t>(i) * lda + t] *
+-               B[static_cast<std::ptrdiff_t>(t) * ldb + j];
+-      }
+-      C[static_cast<std::ptrdiff_t>(i) * ldc + j] = acc;
+-    }
++    gemmAvx512Row(i, n, k, A, lda, B, ldb, C, ldc);
+   }
+ }
+ #endif
+@@ -795,7 +819,7 @@ const char *reductionName(Reduction r) {
  }
  
  bool amxAvailable() {
@@ -325,7 +558,25 @@ index de70ffda..9ad97a89 100644
    static const bool ok = requestAmx();
    return ok;
  #else
-@@ -1089,7 +1102,7 @@ GemmInfo gemmOzakiII(int m, int n, int k, const double *A, int lda, const double
+@@ -805,7 +829,7 @@ bool amxAvailable() {
+ 
+ bool vnniAvailable() {
+ #if defined(__x86_64__)
+-  return __builtin_cpu_supports("avx512vnni");
++  return seams::cpu::features().avx512vnni;
+ #else
+   return false;
+ #endif
+@@ -1036,7 +1060,7 @@ namespace {
+ void fp64Gemm(int m, int n, int k, const double *A, int lda, const double *B,
+               int ldb, double *C, int ldc) {
+ #if defined(__x86_64__)
+-  if (__builtin_cpu_supports("avx512f")) {
++  if (seams::cpu::features().avx512f) {
+     gemmAvx512Rows(m, n, k, A, lda, B, ldb, C, ldc);
+     return;
+   }
+@@ -1089,7 +1113,7 @@ GemmInfo gemmOzakiII(int m, int n, int k, const double *A, int lda, const double
        Bp[static_cast<std::size_t>(t) * n + j] = scaled[static_cast<std::size_t>(t)];
      }
    }
@@ -334,7 +585,7 @@ index de70ffda..9ad97a89 100644
    std::vector<signed char> Ai(static_cast<std::size_t>(m) * k);
    std::vector<signed char> Bi(static_cast<std::size_t>(k) * n);
    std::vector<int> partial(static_cast<std::size_t>(m) * n, 0);
-@@ -1122,8 +1135,8 @@ GemmInfo gemmOzakiII(int m, int n, int k, const double *A, int lda, const double
+@@ -1122,8 +1146,8 @@ GemmInfo gemmOzakiII(int m, int n, int k, const double *A, int lda, const double
                         : (use == Int8Backend::Vnni ? "ozaki-ii-vnni" : "ozaki-ii-scalar");
      for (int i = 0; i < m * n; i++) {
        const int r = symMod(partial[static_cast<std::size_t>(i)], modulus);
@@ -621,3 +872,64 @@ index 0b15e424..4b6afdca 100644
      mask &= ~(1 << j);
      const int nc = __builtin_popcount(static_cast<unsigned>(mask));
      int common[4];
+diff --git a/src/steinhardt_parallel.cpp b/src/steinhardt_parallel.cpp
+index 540de5ea..903a6db2 100644
+--- a/src/steinhardt_parallel.cpp
++++ b/src/steinhardt_parallel.cpp
+@@ -8,6 +8,7 @@
+ // the Open Source Initiative.
+ //-----------------------------------------------------------------------------------
+ 
++#include <cpu_features.hpp>
+ #include <chrono>
+ 
+ #include <bop.hpp>
+@@ -1262,8 +1263,7 @@ SteinhardtQl cutoffSolid(
+     }
+   }
+ #if defined(SEAMS_YLM_AVX512)
+-  const bool simd8 = quad && __builtin_cpu_supports("avx512f") &&
+-                     __builtin_cpu_supports("avx512dq");
++  const bool simd8 = quad && seams::cpu::features().avx512dq;
+ #else
+   const bool simd8 = false;
+   (void)quad;
+@@ -1479,7 +1479,7 @@ SteinhardtQl cutoffSolid(
+       }
+     }
+ #if defined(SEAMS_YLM_AVX512)
+-    if (rows && !__builtin_cpu_supports("avx512f")) {
++    if (rows && !seams::cpu::features().avx512f) {
+       rows = false;
+     }
+     if (rows) {
+diff --git a/src/ylm_cartesian.cpp b/src/ylm_cartesian.cpp
+index 8c690c01..66beed61 100644
+--- a/src/ylm_cartesian.cpp
++++ b/src/ylm_cartesian.cpp
+@@ -3,6 +3,7 @@
+ // SPDX-License-Identifier: MIT
+ //-----------------------------------------------------------------------------------
+ 
++#include <cpu_features.hpp>
+ #include <ylm_batch.hpp>
+ 
+ #include <cstddef>
+@@ -39,7 +40,7 @@ bool ylmLocalQl(int orderL, const double *dx, const double *dy, const double *dz
+     return false;
+   }
+ #if defined(SEAMS_YLM_AVX512)
+-  if (__builtin_cpu_supports("avx512f") && __builtin_cpu_supports("avx512dq")) {
++  if (seams::cpu::features().avx512dq) {
+     return ylmLocalQlAvx(orderL, dx, dy, dz, nbonds, nUsed, prefactor, ql);
+   }
+ #endif
+@@ -81,7 +82,7 @@ void ylmBatch(int orderL, const double *dx, const double *dy, const double *dz,
+     return;
+   }
+ #if defined(SEAMS_YLM_AVX512)
+-  if (__builtin_cpu_supports("avx512f") && __builtin_cpu_supports("avx512dq")) {
++  if (seams::cpu::features().avx512dq) {
+     ylmBatchAvx512(orderL, dx, dy, dz, n, re, im);
+     return;
+   }
