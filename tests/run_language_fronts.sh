@@ -97,7 +97,10 @@ else
 fi
 
 if command -v cargo >/dev/null 2>&1; then
-  SEAMS_LIB_DIR=$lib LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
+  # The docs jobs also run cargo test in this tree. One lock keeps the
+  # target directory from being rebuilt under a live test.
+  flock "$root/bindings/rust/.cargo-test.lock" \
+    env SEAMS_LIB_DIR=$lib LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
     cargo test --manifest-path "$root/bindings/rust/Cargo.toml" -- --test-threads=1
 else
   note_missing cargo

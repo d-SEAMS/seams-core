@@ -62,19 +62,24 @@ def run_rust(build):
     env["SEAMS_CPP_ORACLE"] = str(build / "bindings" / "binding_oracle")
     env["SEAMS_SOURCE_ROOT"] = str(ROOT)
     env["OMP_NUM_THREADS"] = "1"
-    subprocess.check_call(
-        [
-            cargo,
-            "test",
-            "--offline",
-            "--manifest-path",
-            str(ROOT / "bindings/rust/Cargo.toml"),
-            "--",
-            "--test-threads=1",
-        ],
-        env=env,
-        cwd=ROOT,
-    )
+    lock = ROOT / "bindings" / "rust" / ".cargo-test.lock"
+    import fcntl
+
+    with open(lock, "a", encoding="utf-8") as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX)
+        subprocess.check_call(
+            [
+                cargo,
+                "test",
+                "--offline",
+                "--manifest-path",
+                str(ROOT / "bindings/rust/Cargo.toml"),
+                "--",
+                "--test-threads=1",
+            ],
+            env=env,
+            cwd=ROOT,
+        )
 
 
 def rscript():

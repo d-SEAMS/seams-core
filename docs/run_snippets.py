@@ -593,11 +593,18 @@ def run_source(build, env, path):
             local = dict(env)
             local["SEAMS_LIB_DIR"] = str(build / "src")
             manifest = str(ROOT / "bindings" / "rust" / "seams" / "Cargo.toml")
+            # language_fronts and the API page also cargo-test this tree.
+            cargo_lock = ROOT / "bindings" / "rust" / ".cargo-test.lock"
+            def cargo(cmd):
+                import fcntl
+                with open(cargo_lock, "a", encoding="utf-8") as handle:
+                    fcntl.flock(handle, fcntl.LOCK_EX)
+                    run(cmd, local)
             if path.parent.name == "tests":
-                run(["cargo", "test", "--offline", "--manifest-path", manifest, "--test", path.stem, "--", "--test-threads=1"], local)
+                cargo(["cargo", "test", "--offline", "--manifest-path", manifest, "--test", path.stem, "--", "--test-threads=1"])
             elif "use seams::" in text:
                 example = "minimal" if path.name == "minimal_rust.rs" else path.stem
-                run(["cargo", "run", "--offline", "--quiet", "--manifest-path", manifest, "--example", example, "--", *program_args(text, build)], local)
+                cargo(["cargo", "run", "--offline", "--quiet", "--manifest-path", manifest, "--example", example, "--", *program_args(text, build)])
             else:
                 which("rustc")
                 work = Path(tempfile.mkdtemp(prefix="seams-snippet-rs-"))

@@ -2,8 +2,12 @@ name = "Seams"
 uuid = "b7e0c1a2-4d55-4a1e-9c3b-6f0a2e8d4c11"
 version = "2.14.0"
 
+[deps]
+Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"
+
 [compat]
 julia = "1.9"
+Libdl = "1"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
