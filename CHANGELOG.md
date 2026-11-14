@@ -217,7 +217,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Cage object counts no longer follow the wrapped coordinates. `findDDC` reports a maximum set of non-conflicting double-diamond cages, and both searches order rings by sorted atom indices plus the unwrapped shift of the cycle. A periodic translation or a permutation of the atoms leaves the count unchanged.
 - Cage search drops rings whose minimum-image lattice shifts wind through the periodic cell, and refuses a cutoff that can see two images of one pair. The R, Julia and C fronts keep the seeded label on the host rule when offload is requested. `seams cages` and the language fronts report disjoint hexagonal, cubic, both and water counts. `scripts/rerun_main_text.py` reruns the engine counts behind the main-text cage numbers and writes the archive hash.
 - Coordination and homopolar counts skip the leading self entry on an index neighbour row.
-- Engine end-to-end checks load the plugin from the build tree. A copy staged under an install destdir is left alone.
+- Engine checks load the plugin from the build tree. A copy staged under an install destdir is left alone.
 - Evaluate Steinhardt l=12 qlBar on the host so the 25-component average does not overflow the device barRe[17] buffer.
 - Host OpenMP cell-list loops no longer fork under nvc++ `-mp=gpu`, so `[bulkTUM][offload]` reaches `usedDevice`.
 - In OpenMP builds the threaded neighbour rows gave an atom missing from `idIndexMap` its neighbours' IDs as a row header, and gave its partners -1. That atom now keeps an empty row.

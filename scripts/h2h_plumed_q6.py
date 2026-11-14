@@ -185,7 +185,10 @@ def main():
     lmp = os.environ.get("LMP") or shutil.which("lmp")
     if not lmp:
         sys.exit("lmp (or $LMP) was not found")
-    plugins = sorted(Path(args.build).rglob("libSeamsPlumed.so"))
+    plugins = sorted(
+        path for path in Path(args.build).rglob("libSeamsPlumed.so")
+        if path.is_file() and not any("destdir" in part for part in path.parts)
+    )
     if not plugins:
         sys.exit(f"libSeamsPlumed.so was not built under {args.build}")
     plugin = plugins[0]

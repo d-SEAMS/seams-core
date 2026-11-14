@@ -13,13 +13,16 @@ import sys
 import tempfile
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from e2e_common import find_build_file  # noqa: E402
+
 if shutil.which("plumed") is None:
     print("plumed is not installed")
     sys.exit(77)
 
 build = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("build")
-plugins = sorted(build.rglob("libSeamsPlumed.so"))
-if not plugins:
+plugin = find_build_file(build, "libSeamsPlumed.so")
+if plugin is None:
     sys.exit("plumed is installed but libSeamsPlumed.so was not built")
 
 here = Path(__file__).resolve().parent
@@ -32,7 +35,7 @@ PRINT ARG=seams.q6,seams.ice,seams.ring FILE=colvar STRIDE=1 FMT=%.15g
 def run(units):
     with tempfile.TemporaryDirectory(prefix="dseams-units-") as tmp:
         work = Path(tmp)
-        (work / "plumed.dat").write_text(DECK.format(units=units, plugin=plugins[0]))
+        (work / "plumed.dat").write_text(DECK.format(units=units, plugin=plugin))
         env = dict(os.environ, PLUMED_NUM_THREADS="1")
         done = subprocess.run(
             ["plumed", "driver", "--plumed", "plumed.dat", "--ixyz", str(here / "ice.xyz")],

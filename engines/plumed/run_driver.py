@@ -7,20 +7,23 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from e2e_common import find_build_file  # noqa: E402
+
 if shutil.which("plumed") is None:
     print("plumed is not installed")
     sys.exit(77)
 
 build = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("build")
-plugins = list(build.rglob("libSeamsPlumed.so"))
-if not plugins:
+plugin = find_build_file(build, "libSeamsPlumed.so")
+if plugin is None:
     print("plumed is installed but libSeamsPlumed.so was not built")
     sys.exit(1)
 
 here = Path(__file__).resolve().parent
 deck = here / "plumed.dat"
 xyz = here / "ice.xyz"
-text = deck.read_text().replace("./libSeamsPlumed.so", str(plugins[0]))
+text = deck.read_text().replace("./libSeamsPlumed.so", str(plugin))
 work = here / "plumed.driver.dat"
 colvar = here / "colvar"
 work.write_text(text)
