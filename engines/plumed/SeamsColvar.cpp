@@ -106,15 +106,15 @@ void SeamsCV::calculate() {
   const unsigned n = getNumberOfAtoms();
   std::vector<double> xyz(3 * static_cast<std::size_t>(n));
   for (unsigned i = 0; i < n; ++i) {
-    const Vector p = getPosition(i);
+    const Vector p = getPosition(static_cast<int>(i));
     xyz[3 * i] = p[0] * to_angstrom;
     xyz[3 * i + 1] = p[1] * to_angstrom;
     xyz[3 * i + 2] = p[2] * to_angstrom;
   }
   const Tensor box = getBox();
   double raw[3][3];
-  for (int a = 0; a < 3; ++a) {
-    for (int b = 0; b < 3; ++b) {
+  for (unsigned a = 0; a < 3; ++a) {
+    for (unsigned b = 0; b < 3; ++b) {
       raw[a][b] = box(a, b) * to_angstrom;
     }
   }
