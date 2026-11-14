@@ -22,7 +22,10 @@ endif
 
 host_system = host_machine.system()
 
-meson.add_dist_script(find_program('python3', 'python'), files('scripts/dist_strip_vcs.py'))
+_dist_python = find_program('python3', 'python', required: false)
+if _dist_python.found()
+  meson.add_dist_script(_dist_python, files('scripts/dist_strip_vcs.py'))
+endif
 
 # Global accumulator variables (eOn pattern)
 _args = []
