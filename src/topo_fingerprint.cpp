@@ -13,6 +13,7 @@ std::vector<int> ringCensusCounts(const std::vector<std::vector<int>> &nList, in
 
 #include <algorithm>
 #include <limits>
+#include <numeric>
 #include <sstream>
 #include <stdexcept>
 #include <unordered_set>
@@ -240,6 +241,62 @@ std::uint64_t wlHashWide(const std::vector<std::vector<int>> &adjacency, int roo
         std::uint64_t h = mix(kOffset, color[static_cast<std::size_t>(i)]);
         for (const std::uint64_t c : bag) {
           h = mix(h, c);
+        }
+        next[static_cast<std::size_t>(i)] = h;
+      }
+    } else if (n >= 400) {
+      // The mix of a vertex is fixed by its own color and the neighbour
+      // counts. A dense crystal repeats that signature, so the long mix
+      // runs once per signature. A smaller ball does not repay the grouping.
+      thread_local std::vector<int> grid;
+      thread_local std::vector<int> ord;
+      const int cols = std::max(nColors, 1);
+      grid.assign(static_cast<std::size_t>(n) * static_cast<std::size_t>(cols), 0);
+      if (nColors > 0) {
+        for (int i = 0; i < n; i++) {
+          int *row = grid.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(cols);
+          for (const int j : adjacency[static_cast<std::size_t>(i)]) {
+            row[colorId[static_cast<std::size_t>(j)]]++;
+          }
+        }
+      }
+      ord.resize(static_cast<std::size_t>(n));
+      std::iota(ord.begin(), ord.end(), 0);
+      std::sort(ord.begin(), ord.end(), [&](int a, int b) {
+        const int ca = colorId[static_cast<std::size_t>(a)];
+        const int cb = colorId[static_cast<std::size_t>(b)];
+        if (ca != cb) {
+          return ca < cb;
+        }
+        const int *ra = grid.data() + static_cast<std::size_t>(a) * static_cast<std::size_t>(cols);
+        const int *rb = grid.data() + static_cast<std::size_t>(b) * static_cast<std::size_t>(cols);
+        return std::lexicographical_compare(ra, ra + cols, rb, rb + cols);
+      });
+      auto same = [&](int a, int b) {
+        if (colorId[static_cast<std::size_t>(a)] != colorId[static_cast<std::size_t>(b)]) {
+          return false;
+        }
+        const int *ra = grid.data() + static_cast<std::size_t>(a) * static_cast<std::size_t>(cols);
+        const int *rb = grid.data() + static_cast<std::size_t>(b) * static_cast<std::size_t>(cols);
+        return std::equal(ra, ra + cols, rb);
+      };
+      for (int k = 0; k < n; k++) {
+        const int i = ord[static_cast<std::size_t>(k)];
+        if (k > 0 && same(i, ord[static_cast<std::size_t>(k - 1)])) {
+          next[static_cast<std::size_t>(i)] =
+              next[static_cast<std::size_t>(ord[static_cast<std::size_t>(k - 1)])];
+          continue;
+        }
+        std::uint64_t h = mix(kOffset, color[static_cast<std::size_t>(i)]);
+        if (nColors > 0) {
+          const int *row = grid.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(cols);
+          for (int c = 0; c < nColors; c++) {
+            const std::uint64_t col = palette[static_cast<std::size_t>(c)];
+            const int copies = row[c];
+            for (int t = 0; t < copies; t++) {
+              h = mix(h, col);
+            }
+          }
         }
         next[static_cast<std::size_t>(i)] = h;
       }
