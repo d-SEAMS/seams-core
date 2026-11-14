@@ -246,6 +246,23 @@ def render_function(fn):
     return out
 
 
+CARRIED = ("Ownership: ", "Errors: ", "Example: `")
+
+
+def carried_lines(old_part, rendered):
+    """Contract lines of the old section that the header rendering lacks.
+
+    docs/write_api_contracts.py writes Ownership, Errors, and the example
+    file that docs/check_api_coverage.py requires of every symbol.
+    """
+    kept = []
+    for line in old_part.splitlines():
+        for prefix in CARRIED:
+            if line.startswith(prefix) and not any(row.startswith(prefix) for row in rendered.splitlines()):
+                kept.append(line + "\n")
+    return "\n".join(kept) + ("\n" if kept else "")
+
+
 def rewrite_page(page_text, funcs, names):
     """Replace the sections of the listed functions inside the symbol block."""
     head, rest = page_text.split(BEGIN, 1)
@@ -257,7 +274,8 @@ def rewrite_page(page_text, funcs, names):
         title = part[4:].partition("\n")[0].strip() if part.startswith("### ") else None
         fn = funcs.get(title) if title in names else None
         if fn is not None and fn.documented:
-            out.append("\n".join(render_function(fn)) + "\n")
+            rendered = "\n".join(render_function(fn)) + "\n"
+            out.append(rendered + carried_lines(part, rendered))
             seen.add(title)
         else:
             out.append(part)
@@ -265,7 +283,7 @@ def rewrite_page(page_text, funcs, names):
         fn = funcs.get(name)
         if name not in seen and fn is not None and fn.documented:
             out.append("\n".join(render_function(fn)) + "\n")
-    return head + BEGIN + "".join(out) + END + tail
+    return head + BEGIN + "".join(out).rstrip() + "\n" + END + tail
 
 
 def listed_names(path):

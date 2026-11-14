@@ -1871,6 +1871,12 @@ if (seams_abi() != SEAMS_ABI) { return 1; }
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Ownership: No allocation.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_brine
 
 Purpose: One planar ice/brine front measurement. Declared in include/seams.h.
@@ -1929,6 +1935,10 @@ if (seams_brine_analyse(sys, ice, n, 1, 2, 0, 2, &front) == SEAMS_OK) {
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_brine_destroy
 
 Purpose: Free a brine-front handle.
@@ -1956,6 +1966,10 @@ seams_brine_destroy(front);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_brine_fronts
 
@@ -1993,6 +2007,10 @@ seams_brine_fronts(front, NULL, NULL, &thick, &found);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_brine_pockets
 
 Purpose: Brine pockets trapped in the ice, excluding the liquid reservoir.
@@ -2023,6 +2041,10 @@ seams_brine_pockets(front, &pockets, NULL);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_brine_profile
 
@@ -2060,6 +2082,10 @@ seams_brine_profile(front, NULL, NULL, NULL, 0, &bins);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_brine_rejection
 
 Purpose: Molal rejection coefficient k = c_ice / c_liquid.
@@ -2095,6 +2121,10 @@ seams_brine_rejection(front, NULL, NULL, &k, &defined);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_cage_label
 
@@ -2166,6 +2196,10 @@ seams_cages_destroy(cages);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_cages_counts
 
 Purpose: Disjoint cage population counts.
@@ -2201,6 +2235,10 @@ seams_cages_counts(cages, &hex, &cubic, NULL, NULL);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_cages_destroy
 
 Purpose: Free a cage-membership handle.
@@ -2228,6 +2266,10 @@ seams_cages_destroy(cages);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_cages_find
 
@@ -2268,6 +2310,10 @@ if (seams_cages_find(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, 0, 0, &cages) == SEAMS_OK)
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_cages_labels
 
 Purpose: Per-atom cage code.
@@ -2297,6 +2343,10 @@ seams_cages_labels(cages, per_atom, n);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_cages_signature
 
@@ -2336,6 +2386,10 @@ seams_cages_signature(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, "512", &n_cages, &n_atoms
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_chill
 
@@ -2377,6 +2431,10 @@ seams_chill(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels, n, c
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_chill_plus
 
 Purpose: CHILL+ labels, without a buffer length.
@@ -2414,6 +2472,10 @@ seams_chill_plus(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED, labels,
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_chill_plus_n
 
@@ -2455,6 +2517,10 @@ seams_chill_plus_n(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED,
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_chill_rule
 
@@ -2509,6 +2575,10 @@ seams_contact_pairs(sys, "1=cationHead,2=anion", &pairs, NULL, NULL);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_coordination
 
 Purpose: Coordination number integrated to rmax.
@@ -2544,6 +2614,10 @@ seams_coordination(sys, 3.5, 0, 1, 1, &cn);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_density_axis
 
@@ -2586,6 +2660,10 @@ seams_density_axis(sys, 0, 50, 2, z, rho, 50, &bins);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_domains
 
 Purpose: Largest domain of a polar or apolar site subset.
@@ -2622,6 +2700,10 @@ seams_domains(sys, 5.0, "1=cationHead,2=anion,3=tail", 0, NULL, &largest, NULL);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_fingerprint
 
@@ -2662,6 +2744,10 @@ seams_fingerprint_destroy(fp);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_fingerprint_atom
 
 Purpose: Local key of one atom. Same buffer rule as seams_fingerprint_key().
@@ -2696,6 +2782,10 @@ seams_fingerprint_atom(fp, 0, key, sizeof key, &len);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_fingerprint_destroy
 
 Purpose: Free a fingerprint.
@@ -2723,6 +2813,10 @@ seams_fingerprint_destroy(fp);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_fingerprint_key
 
@@ -2758,6 +2852,10 @@ seams_fingerprint_key(fp, key, len + 1, &len);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_fingerprint_rings
 
 Purpose: Primitive-ring census stored on the fingerprint.
@@ -2789,6 +2887,10 @@ seams_fingerprint_rings(fp, census, 13);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_get_num_threads
 
 Purpose: Team width the next analysis call will request.
@@ -2812,6 +2914,12 @@ int width = seams_get_num_threads();
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_graph
 
@@ -2860,6 +2968,10 @@ if (seams_chill_plus_n(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, SEAMS_CHILL_PUBLISHED,
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_hbonds
 
 Purpose: Hydrogen-bond count on one frame.
@@ -2896,6 +3008,10 @@ seams_hbonds(sys, 3.5, 1, 2, 2.4, 30.0, &n_bonds);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_label
 
@@ -2940,6 +3056,10 @@ printf("%s\n", seams_label_name(SEAMS_LABEL_HEXAGONAL));
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_lammps_bounds
 
@@ -2994,6 +3114,10 @@ if (seams_system_set_atoms(sys, xyz, n, box9, 9, NULL, NULL) != SEAMS_OK) {
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_last_error_message
 
 Purpose: Thread-local detail of the last failing call on this thread.
@@ -3022,6 +3146,10 @@ fprintf(stderr, "%s: %s\n", seams_status_string(rc), seams_last_error_message())
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_monolayer
 
@@ -3059,6 +3187,10 @@ seams_monolayer(sys, 3.5, 0, 6, 900.0, counts, 7);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_neighbours
 
@@ -3113,6 +3245,10 @@ if (seams_neighbours_build(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, &nb) == SEAMS_OK) {
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_neighbours_copy
 
 Purpose: Copy the neighbour CSR into caller buffers.
@@ -3150,6 +3286,10 @@ seams_neighbours_copy(nb, off, n_off, &n_off, cols, nnz, &nnz);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_neighbours_count
 
 Purpose: Number of neighbour rows, as an int.
@@ -3179,6 +3319,10 @@ int rows = seams_neighbours_count(nb);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_neighbours_csr
 
@@ -3216,6 +3360,10 @@ seams_neighbours_csr(nb, &off, &n_off, &cols, &nnz);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_neighbours_destroy
 
 Purpose: Free a neighbour list.
@@ -3243,6 +3391,10 @@ seams_neighbours_destroy(nb);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_neighbours_knn
 
@@ -3281,6 +3433,10 @@ seams_neighbours_destroy(nb);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_neighbours_nrows
 
 Purpose: Number of neighbour rows.
@@ -3311,6 +3467,10 @@ seams_neighbours_nrows(nb, &rows);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_path_nframes
 
 Purpose: Number of frames in a trajectory path.
@@ -3340,6 +3500,10 @@ seams_status rc = seams_path_nframes("ice.lammpstrj", &nframes);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_prisms
 
@@ -3379,6 +3543,10 @@ seams_prisms(sys, 3.5, 0, perfect, imperfect, 7);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_q4q6
 
 Purpose: Local q4 and q6 on the cutoff shell, without buffer lengths.
@@ -3415,6 +3583,10 @@ seams_q4q6(sys, 3.5, 0, q4, q6);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_q4q6_n
 
 Purpose: Local q4 and q6 on the cutoff shell into buffers of known length.
@@ -3450,6 +3622,10 @@ seams_q4q6_n(sys, 3.5, 0, q4, n, q6, n);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_q6bar
 
@@ -3493,6 +3669,10 @@ seams_q6bar(sys, 3.5, 0, 0.36, NULL, 0, &mean, &median, &n_ice);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_ql
 
 Purpose: Local Steinhardt q_l, and the Lechner-Dellago average on request.
@@ -3532,6 +3712,10 @@ seams_ql(sys, 3.5, 0, 6, SEAMS_GRAPH_CUTOFF, q6, n, q6bar, n);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_rdf
 
@@ -3576,6 +3760,10 @@ seams_rdf(sys, 8.0, 80, 0, 0, NULL, NULL, NULL, 0, &bins, NULL);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_ring_symmetry
 
 Purpose: Ring topology. Size classes are used when a six-ring is not a cage face. Declared in include/seams.h.
@@ -3619,6 +3807,10 @@ printf("%s\n", seams_ring_symmetry_name(SEAMS_RING_DDC));
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings
 
@@ -3666,6 +3858,10 @@ int nr = seams_rings_count(rings);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_rings_destroy
 
 Purpose: Free a ring set.
@@ -3693,6 +3889,10 @@ seams_rings_destroy(rings);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings_find
 
@@ -3732,6 +3932,10 @@ if (seams_rings_find(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6, &rings) == SEAMS_OK) {
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_rings_fraction
 
 Purpose: Fraction of atoms that sit on a ring.
@@ -3762,6 +3966,10 @@ seams_rings_fraction(rings, 6, &f6);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings_histogram
 
@@ -3796,6 +4004,10 @@ seams_rings_histogram(rings, hist, 13);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_rings_histogram_n
 
 Purpose: Count primitive rings by size into a buffer of known length.
@@ -3826,6 +4038,10 @@ seams_rings_histogram_n(rings, hist, 13);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings_labels
 
@@ -3858,6 +4074,10 @@ seams_rings_labels(rings, sizes, symmetry);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings_labels_n
 
@@ -3894,6 +4114,10 @@ seams_rings_labels_n(rings, NULL, 0, sym, nr);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_rings_nrings
 
 Purpose: Number of primitive rings.
@@ -3923,6 +4147,10 @@ seams_rings_nrings(rings, &nr);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_rings_vertices
 
@@ -3957,6 +4185,10 @@ seams_rings_vertices(rings, 0, atoms, 12, &len);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_running_cn
 
@@ -3998,6 +4230,10 @@ seams_running_cn(sys, 8.0, 80, 0, 0, r, cn, 80, &bins);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_set_num_threads
 
 Purpose: Set the OpenMP team used by later analysis calls.
@@ -4023,6 +4259,12 @@ seams_set_num_threads(1);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Ownership: The caller owns every buffer it passes. This call does not allocate a handle the caller must free.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_signature_cages
 
@@ -4060,6 +4302,10 @@ seams_signature_cages(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, "hc", &n_cages, &n_atoms)
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_site_kind
 
@@ -4110,6 +4356,10 @@ seams_site_table(sys, "1=cationHead,2=anion", kinds, n);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_status
 
 Purpose: Status codes. Zero is success. Declared in include/seams.h.
@@ -4154,6 +4404,10 @@ fprintf(stderr, "%s\n", seams_status_string(SEAMS_ERR_BOX));
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_steinhardt
 
 Purpose: Local Steinhardt q_l on the cutoff shell, and the average on request.
@@ -4192,6 +4446,10 @@ seams_steinhardt(sys, 3.5, 0, 6, q6, n, NULL, 0);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_system
 
@@ -4240,6 +4498,10 @@ seams_system_box(sys, cell, 9);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_system_count
 
 Purpose: Number of points in the frame, as an int.
@@ -4270,6 +4532,10 @@ int n = seams_system_count(sys);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_system_create
 
 Purpose: Allocate an empty frame.
@@ -4297,6 +4563,10 @@ seams_system_destroy(sys);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: NULL. seams_last_error() then reads 'out of memory'.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_destroy
 
@@ -4326,6 +4596,10 @@ sys = NULL;
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_ids
 
@@ -4357,6 +4631,10 @@ seams_system_ids(sys, ids, n);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_system_natoms
 
 Purpose: Number of points in the frame.
@@ -4386,6 +4664,10 @@ if (seams_system_natoms(sys, &n) == SEAMS_OK) { labels = malloc(n * sizeof *labe
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_positions
 
@@ -4420,6 +4702,10 @@ seams_system_positions(sys, xyz, 3 * n);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_system_read
 
 Purpose: Read one frame from a trajectory file.
@@ -4452,6 +4738,10 @@ seams_status rc = seams_system_read(sys, "ice.lammpstrj", 1, -1);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_set_atoms
 
@@ -4493,6 +4783,10 @@ seams_status rc = seams_system_set_atoms(sys, xyz, 2, box9, 9, NULL, NULL);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_system_set_frame
 
 Purpose: Store points and a general LAMMPS cell, with an int count.
@@ -4529,6 +4823,10 @@ seams_status rc = seams_system_set_frame(sys, xyz, 2, box9, NULL, NULL);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_set_ortho
 
@@ -4569,6 +4867,10 @@ seams_status rc = seams_system_set_ortho(sys, xyz, 2, 0, 0, 0, 10, 10, 10, NULL,
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_system_set_positions
 
@@ -4611,6 +4913,10 @@ for (size_t f = 1; f < nframes; ++f) {
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_system_stage_positions
 
 Purpose: Trade memory for a single pass in seams_system_set_positions().
@@ -4647,6 +4953,10 @@ for (size_t f = 1; f < nframes; ++f) {
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_system_symmetry
 
 Purpose: Per-atom ice shell label.
@@ -4682,6 +4992,10 @@ seams_system_symmetry(sys, 0.0, labels, n);
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_system_types
 
 Purpose: Copy the stored atom types out.
@@ -4711,6 +5025,10 @@ seams_system_types(sys, types, n);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_topo
 
@@ -4752,6 +5070,12 @@ if (seams_version() < ((2 << 16) | (14 << 8))) { return 1; }
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Ownership: No allocation.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_version_major
 
 Purpose: Major version of the library at run time.
@@ -4775,6 +5099,12 @@ int major = seams_version_major();
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_version_minor
 
@@ -4800,6 +5130,12 @@ int minor = seams_version_minor();
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Ownership: No allocation.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
 ### seams_version_patch
 
 Purpose: Patch version of the library at run time.
@@ -4823,6 +5159,12 @@ int patch = seams_version_patch();
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
+
+Ownership: No allocation.
+
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
 
 ### seams_version_string
 
@@ -4850,6 +5192,9 @@ printf("d-SEAMS %s\n", seams_version_string());
 
 The tour call is in `docs/examples/c_api_tour.c`.
 
+Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
 <!-- API_SYMBOLS_END -->
 
 The program those lines come from:

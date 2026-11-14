@@ -85,6 +85,15 @@ def main(argv):
         if message not in errors:
             failures.append("{} passed; got {}".format(label, errors[:3]))
 
+    # --write must keep the contract lines docs/check_api_coverage.py needs.
+    funcs = capi_docs.functions(header)
+    rewritten = capi_docs.page_sections(capi_docs.rewrite_page(page, funcs, names))
+    for prefix in ("Ownership: ", "Errors: ", "Example: `"):
+        if prefix in section and prefix not in rewritten.get(VICTIM, ""):
+            failures.append("--write dropped the {!r} line of {}".format(prefix.strip(), VICTIM))
+    if capi_docs.rewrite_page(page, funcs, names) != page:
+        failures.append("--write changes a page it already wrote")
+
     if failures:
         print("\n".join(failures), file=sys.stderr)
         return 1
