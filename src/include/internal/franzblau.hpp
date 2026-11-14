@@ -142,6 +142,12 @@ std::vector<std::vector<int>> ringNetwork(const std::vector<int> &offsets,
                                           const std::vector<int> &cols, int maxDepth,
                                           const std::vector<char> &sources = {});
 
+//! Ring sizes of the same search as ringNetwork(offsets, cols, maxDepth).
+//! counts[s] is the number of primitive rings of size s, for s below
+//! countsLen. The rings themselves are not gathered.
+void ringSizeCounts(const std::vector<int> &offsets, const std::vector<int> &cols,
+                    int maxDepth, int *counts, int countsLen);
+
 //! The same ring set, built with a bounded ball at every vertex and a
 //! primitivity test of every pair. ringNetwork leaves that table out when
 //! the largest ring is at most 7, because a strict shortcut is then a walk
