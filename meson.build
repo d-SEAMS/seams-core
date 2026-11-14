@@ -1949,6 +1949,20 @@ test(
     link_args: ['-lm']),
   env: _capi_env,
   timeout: 300)
+# GCC marks only ASan and TSan builds; clang reports every sanitizer.
+_signal_mode = (_capi_san.contains('address') or _capi_san.contains('thread') or
+                (cppc.get_id() == 'clang' and _capi_san != 'none')) ? 'sanitized' : 'plain'
+test(
+  'capi_signal_owner',
+  executable(
+    'capi_signal_owner',
+    files('tests/capi_signal_owner.c'),
+    link_with: seams_api_lib,
+    include_directories: include_directories('include'),
+    c_args: ['-std=c11'] + _capi_warn + ['-I' + meson.current_build_dir() / 'src']),
+  args: [_signal_mode],
+  env: _capi_env,
+  timeout: 60)
 test(
   'capi_q_threads',
   executable(
