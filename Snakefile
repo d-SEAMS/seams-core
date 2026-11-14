@@ -778,23 +778,30 @@ rule paper_sitting_large:
         "python3 scripts/paper_sitting_large.py --out benchmarks/paper-cells"
 
 
-# Neighbours, q4, q6 and rings on 110592-molecule ice Ic at 1, 2, 4 and 8
-# threads, one taskset process per row, with mdapy and pyscal3 q4/q6 at 8.
-# OMP_SCALING_BEFORE names a second libyodaLib.so (for example the parent
-# commit's build) to time in the same sitting, and OMP_SCALING_BEFORE_COMMIT
-# its commit.
+# Every d-SEAMS kernel on 110592- and 884736-molecule ice Ic at 1, 2, 4 and
+# 8 threads, one taskset process per row, with mdapy and pyscal3 q4/q6 at 8;
+# then the 8-thread rows again beside scripts/omp_spinner.c, an idle
+# resident 8-thread OpenMP team. OMP_SCALING_BEFORE names a second
+# libyodaLib.so (for example the parent commit's build, with libseams.so
+# beside it and libseams_lang.so in ../bindings) to time in the same
+# sitting, and OMP_SCALING_BEFORE_COMMIT and OMP_SCALING_BEFORE_TREE its
+# commit and tree.
 rule omp_scaling:
     input:
         "scripts/omp_scaling.py",
+        "scripts/omp_spinner.c",
         "scripts/paper_stats.py",
         "scripts/h2h_protocol.py",
         "bbdir-release/src/libyodaLib.so",
+        "bbdir-release/src/libseams.so",
+        "bbdir-release/bindings/libseams_lang.so",
     output:
         "bench/omp-scaling/scaling.csv",
         "bench/omp-scaling/raw-scaling.txt",
     params:
         before=(f"--before {os.environ['OMP_SCALING_BEFORE']} "
-                f"--before-commit {os.environ.get('OMP_SCALING_BEFORE_COMMIT', '')}")
+                f"--before-commit {os.environ.get('OMP_SCALING_BEFORE_COMMIT', '')} "
+                f"--before-tree {os.environ.get('OMP_SCALING_BEFORE_TREE', '')}")
         if os.environ.get("OMP_SCALING_BEFORE") else "",
     shell:
         "python3 scripts/omp_scaling.py --out bench/omp-scaling --repeats 10 {params.before}"

@@ -128,6 +128,25 @@ def source_commit(root) -> str:
     return done.stdout.strip()
 
 
+def source_tree(root) -> str:
+    """Tree of HEAD, which a re-stamped commit keeps."""
+    import subprocess
+    done = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "HEAD^{tree}"],
+        check=True, text=True, capture_output=True)
+    return done.stdout.strip()
+
+
+def worktree_state(root, paths: tuple[str, ...]) -> str:
+    """'clean' when no tracked file under paths differs from HEAD."""
+    import subprocess
+    done = subprocess.run(
+        ["git", "-C", str(root), "status", "--porcelain", "--untracked-files=no", "--",
+         *paths],
+        check=True, text=True, capture_output=True)
+    return "clean" if not done.stdout.strip() else "modified"
+
+
 def machine(root) -> dict[str, str]:
     """Commit and the lscpu identity of the CPU. The host name is not read."""
     cores, affinity = cores_now()
