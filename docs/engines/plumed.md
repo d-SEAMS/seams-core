@@ -16,7 +16,9 @@ before PLUMED starts. `OMP_NUM_THREADS` does not change the PLUMED team.
 - `seams.hexagonal` is the CHILL+ hexagonal count.
 - `seams.six` is the primitive six-ring count.
 
-`meson test plumed_driver` runs `engines/plumed/plumed.dat`. The collective
+`meson test plumed_driver` runs `engines/plumed/plumed.dat`, and
+`meson test docs_engine_plumed` runs the same `SEAMS` line on
+`input/traj/ice1h.lammpstrj`. The collective
 variable calls `seams_q4q6` and `seams_rings_find` after scaling internal
 nanometres to angstroms. The q6 derivative uses a 0.001 angstrom step and
 multiplies by 10 so PLUMED sees a per-nanometre derivative.
