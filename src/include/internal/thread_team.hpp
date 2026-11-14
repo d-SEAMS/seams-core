@@ -184,11 +184,12 @@ struct TeamWidth {
 // that follows serial work for workers the scheduler has parked, a slice
 // at a time, and a call of a few milliseconds grows tenfold. A narrower
 // team leaves cores free and does not wait. One small region at entry,
-// after the caller's own gap, takes microseconds on an idle machine and
-// milliseconds on a contended one. Two slow entries in a row halve the
-// team; at most once a second a narrowed team tries twice its width
-// again. Results do not depend on the width. SEAMS_FAIR_WIDTH=0 keeps
-// the requested width.
+// after the caller's own gap, takes at most a few hundred microseconds on
+// an idle machine, where sleeping workers wake, and milliseconds on a
+// contended one. Two slow entries in a row halve the team, down to a
+// quarter of the requested width; at most once a second a narrowed team
+// tries twice its width again. Results do not depend on the width.
+// SEAMS_FAIR_WIDTH=0 keeps the requested width.
 struct FairState {
   std::mutex lock;
   int base = 0;
@@ -234,7 +235,7 @@ public:
   FairWidth &operator=(const FairWidth &) = delete;
 
 private:
-  static constexpr double kSlowFork = 250.0e-6;
+  static constexpr double kSlowFork = 1.0e-3;
   static constexpr double kRetry = 1.0;
   int asked_ = 1;
   bool set_ = false;
@@ -267,6 +268,7 @@ private:
       state.slow = 0;
       state.tried = 0.0;
     }
+    const int floor = std::max(1, state.base / 4);
     const double now = omp_get_wtime();
     int width = state.granted;
     if (width < state.base && now - state.tried >= kRetry) {
@@ -276,8 +278,8 @@ private:
     if (forkSeconds(width) <= kSlowFork) {
       state.slow = 0;
       state.granted = width;
-    } else if (width == state.granted && ++state.slow >= 2 && width > 1) {
-      state.granted = std::max(1, width / 2);
+    } else if (width == state.granted && ++state.slow >= 2 && width > floor) {
+      state.granted = std::max(floor, width / 2);
       state.slow = 0;
       state.tried = now;
     }
