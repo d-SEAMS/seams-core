@@ -17,6 +17,7 @@
 #include <thread_team.hpp>
 
 #include <algorithm>
+#include <bit>
 #include <chrono>
 #include <cmath>
 #include <cstdio>
@@ -740,7 +741,7 @@ int diamondCna(const double *sx, const double *sy, const double *sz, int ambiguo
     const double cut2 = r2[j] * kAdapt2;
     int mask = withinMask(pair[j], r2, cut2);
     mask &= ~(1 << j);
-    const int nc = __builtin_popcount(static_cast<unsigned>(mask));
+    const int nc = std::popcount(static_cast<unsigned>(mask));
     int common[4];
     if (nc == 4) {
       int slot = 0;

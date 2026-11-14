@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <chrono>
 #include <cstdint>
 #include <cstdio>
@@ -172,7 +173,7 @@ struct Bits {
   [[nodiscard]] int count() const {
     int n = 0;
     for (const std::uint64_t word : w) {
-      n += __builtin_popcountll(word);
+      n += std::popcount(word);
     }
     return n;
   }
@@ -203,7 +204,7 @@ struct Bits {
   [[nodiscard]] int first() const {
     for (std::size_t i = 0; i < w.size(); i++) {
       if (w[i]) {
-        return static_cast<int>(i) * 64 + __builtin_ctzll(w[i]);
+        return static_cast<int>(i) * 64 + std::countr_zero(w[i]);
       }
     }
     return -1;

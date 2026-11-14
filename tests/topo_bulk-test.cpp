@@ -10,6 +10,7 @@
 
 // Standard
 #include <algorithm>
+#include <bit>
 #include <cmath>
 #include <cstdint>
 #include <filesystem>
@@ -941,7 +942,7 @@ int bruteIndependent(int n, const std::vector<std::pair<int, int>> &edges) {
       }
     }
     if (ok) {
-      best = std::max(best, __builtin_popcount(static_cast<unsigned>(mask)));
+      best = std::max(best, std::popcount(static_cast<unsigned>(mask)));
     }
   }
   return best;
