@@ -60,6 +60,63 @@ jobs:
             fi
           done
 
+  # Each engine plugin against the conda-forge engine of the default pixi
+  # environment, then its engine-e2e tests: a short ice/liquid run labelled
+  # in situ and checked frame by frame against the CLI. A skip fails the job.
+  engine-e2e:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - engine: lammps
+            options: -Dwith_lammps=enabled
+            tests: lammps_hook lammps_e2e lammps_e2e_np2 lammps_select lammps_select_np2
+          - engine: plumed
+            options: -Dwith_plumed=enabled
+            tests: plumed_driver plumed_units plumed_e2e
+          - engine: gromacs
+            options: -Dwith_gromacs=enabled -Dwith_plumed=enabled
+            tests: gromacs_mdrun gromacs_e2e gromacs_plumed_e2e
+          - engine: openmm
+            options: -Dwith_openmm=enabled
+            tests: openmm_reporter openmm_plugin openmm_e2e
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: default
+          cache-key: pixi-engine-e2e-
+      - name: Build the ${{ matrix.engine }} plugin and run its engine tests
+        env:
+          ENGINE: ${{ matrix.engine }}
+          OPTIONS: ${{ matrix.options }}
+          TESTS: ${{ matrix.tests }}
+        run: |
+          set -euo pipefail
+          pixi run bash -c '
+            set -euo pipefail
+            export PKG_CONFIG_PATH="$CONDA_PREFIX/lib/pkgconfig:$CONDA_PREFIX/lib.AVX2_256/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+            export LIBRARY_PATH="$CONDA_PREFIX/lib:$CONDA_PREFIX/lib.AVX2_256${LIBRARY_PATH:+:$LIBRARY_PATH}"
+            export CPATH="$CONDA_PREFIX/include${CPATH:+:$CPATH}"
+            export OMPI_MCA_rmaps_base_oversubscribe=1
+            extra=""
+            if [ "$ENGINE" = lammps ]; then
+              # conda-forge LAMMPS ships library.h only; compute dseams needs
+              # the class headers of the same release.
+              extra="-Dlammps_src_include=$(sh scripts/fetch_lammps_headers.sh "$RUNNER_TEMP/lammps-src")"
+            fi
+            meson setup build-e2e --buildtype=release -Dwith_tests=true $OPTIONS $extra
+            ninja -C build-e2e -j4
+            meson test -C build-e2e --print-errorlogs $TESTS | tee build-e2e/e2e-tests.txt
+            for name in $TESTS; do
+              if ! grep -E "seams-core:${name}[[:space:]]+OK" build-e2e/e2e-tests.txt >/dev/null; then
+                echo "${name} did not pass" >&2
+                exit 1
+              fi
+            done
+          '
+
   docs-engine-howtos:
     runs-on: ubuntu-latest
     steps:

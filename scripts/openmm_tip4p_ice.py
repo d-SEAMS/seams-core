@@ -420,7 +420,7 @@ def main(argv):
         large[threads] = simulation
     large_engine = InSitu(library, skin=0.0)
     large_reporter = DseamsReporter(
-        large_engine, str(OUT / "large.dump"), interval=LARGE_INTERVAL, types=large["kinds"]
+        large_engine, interval=LARGE_INTERVAL, types=large["kinds"]
     )
 
     def rewind_large(simulation):

@@ -1,0 +1,7 @@
+engine,version,steps,frames,label_agreement,insitu_s_per_frame
+lammps,2 Aug 2023 - Update 2,200,21,86016/86016,3.188530e-03
+lammps-np2,2 Aug 2023 - Update 2,200,21,86016/86016,2.480897e-03
+plumed,2.9.2,200,21,86016/86016,3.668088e-02
+gromacs,2024.3-EasyBuild_5.2.0_PLUMED_2.9.2,200,21,34650/34650,9.488849e-03
+gromacs-plumed,2024.3-EasyBuild_5.2.0_PLUMED_2.9.2,200,21,34650/34650,9.120636e-03
+openmm,8.5.2,200,20,33660/33660,1.803161e-03

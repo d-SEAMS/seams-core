@@ -101,6 +101,7 @@ if command -v cargo >/dev/null 2>&1; then
   # target directory from being rebuilt under a live test.
   flock "$root/bindings/rust/.cargo-test.lock" \
     env SEAMS_LIB_DIR=$lib LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
+    SEAMS_SOURCE_ROOT="$root" SEAMS_CPP_ORACLE="$lang/binding_oracle" \
     cargo test --manifest-path "$root/bindings/rust/Cargo.toml" -- --test-threads=1
 else
   note_missing cargo

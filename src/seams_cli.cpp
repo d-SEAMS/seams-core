@@ -910,6 +910,9 @@ std::vector<std::vector<int>> sixRings(const std::vector<std::vector<int>> &ring
 // indexed like `cloud.pts`; missing entries write 0.
 void writePerAtomDump(const std::string &path, const Cloud &cloud, const std::string &column,
                       const std::vector<int> &values) {
+  // --jobs workers append to one file; a frame block must not interleave.
+  static std::mutex appendMu;
+  std::lock_guard<std::mutex> lock(appendMu);
   std::ofstream out(path, std::ios::app);
   if (!out) {
     throw std::runtime_error("cannot write per-atom dump " + path);
@@ -1297,6 +1300,20 @@ int cmdCluster(std::ostream &os, Cloud &cloud, double cutoff, int typeI) {
   return 0;
 }
 
+// The label column is the seams_label integer, the same table the C API
+// and the engine hooks report.
+void writeLabelDump(const std::string &path, const Cloud &cloud) {
+  if (path.empty()) {
+    return;
+  }
+  std::vector<int> values(static_cast<std::size_t>(cloud.nop));
+  for (int i = 0; i < cloud.nop; ++i) {
+    values[static_cast<std::size_t>(i)] =
+        static_cast<int>(cloud.pts[static_cast<std::size_t>(i)].iceType);
+  }
+  writePerAtomDump(path, cloud, "label", values);
+}
+
 // CHILL and CHILL+ read one graph: cutoff (the default) or mutual. The
 // cages default (seeded) falls back to cutoff.
 std::vector<std::vector<int>>
@@ -1319,7 +1336,8 @@ int cmdChillPlus(std::ostream &os, FrameCarry &carry, Cloud &cloud,
                  const std::string &graphName, const std::string &ruleSpec,
                  bool layers = false,
                  bool tumLayers = false, int axis = 2, double layerWidth = 3.7,
-                 const std::vector<int> &waterTypes = {}) {
+                 const std::vector<int> &waterTypes = {},
+                 const std::string &perAtomPath = {}) {
   if (cloud.nop == 0) {
     printCounts(os, cloud);
     return 0;
@@ -1343,6 +1361,7 @@ int cmdChillPlus(std::ostream &os, FrameCarry &carry, Cloud &cloud,
   }
   chill::clearIceTypesExcept(cloud, waterTypes);
   printCounts(os, cloud, waterTypes);
+  writeLabelDump(perAtomPath, cloud);
   if (layers) {
     const auto st = topoparam::layerCubicity(cloud, axis, layerWidth);
     os << colorizer.longOption("phi-c") << " " << st.phiC << " "
@@ -1363,7 +1382,8 @@ int cmdChillPlus(std::ostream &os, FrameCarry &carry, Cloud &cloud,
 
 int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
              const std::string &graphName,
-             const std::vector<int> &waterTypes = {}) {
+             const std::vector<int> &waterTypes = {},
+             const std::string &perAtomPath = {}) {
   if (cloud.nop == 0) {
     printCounts(os, cloud);
     return 0;
@@ -1374,6 +1394,7 @@ int cmdChill(std::ostream &os, Cloud &cloud, double cutoff, int typeI,
   chill::getIceTypeNoPrint(cloud, nList, false);
   chill::clearIceTypesExcept(cloud, waterTypes);
   printCounts(os, cloud, waterTypes);
+  writeLabelDump(perAtomPath, cloud);
   return 0;
 }
 
@@ -2148,8 +2169,9 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--per-atom")
                  .argName("FILE")
-                 .help("cages|fingerprint|ions: append a LAMMPS dump frame with one extra "
-                       "per-atom column (cage, class or label, state) for OVITO or VMD")
+                 .help("chill|chill-plus|cages|fingerprint|ions: append a LAMMPS dump frame "
+                       "with one extra per-atom column (label, cage, class or state) "
+                       "for OVITO or VMD")
                  .handler([&](std::string_view value) {
                    perAtomPath = std::string(value);
                  }));
@@ -2619,7 +2641,8 @@ int main(int argc, char *argv[]) {
       try {
         const int rc =
             cmdChillPlus(os, carry, cloud, cutoff, typeI, graph, chillRule,
-                         layersFlag, tumLayersFlag, densAxis, 3.7, waterTypes);
+                         layersFlag, tumLayersFlag, densAxis, 3.7, waterTypes,
+                         perAtomPath);
         if (rc == 0 && !brineIons.empty()) {
           const auto report = water::ionFront(cloud, brineIons);
           os << "ion-ice " << report.ice << " ion-liquid " << report.liquid
@@ -2633,7 +2656,7 @@ int main(int argc, char *argv[]) {
     }
     if (cmd == "chill") {
       try {
-        const int rc = cmdChill(os, cloud, cutoff, typeI, graph, waterTypes);
+        const int rc = cmdChill(os, cloud, cutoff, typeI, graph, waterTypes, perAtomPath);
         if (rc == 0 && !brineIons.empty()) {
           const auto report = water::ionFront(cloud, brineIons);
           os << "ion-ice " << report.ice << " ion-liquid " << report.liquid

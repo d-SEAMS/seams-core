@@ -22,7 +22,8 @@ by 10 on the way into `seams_chill_plus`. The box conversion is
 
 ```{literalinclude} ../../../engines/gromacs/seams_ice.cpp
 :language: cpp
-:lines: 44-62
+:start-at: void analyzeFrame
+:end-before: void finishAnalysis
 ```
 
 `ice.gro` is two frames of the 64-atom cubic cell. The tool prints

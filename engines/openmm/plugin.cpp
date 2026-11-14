@@ -8,6 +8,7 @@
 #include "OpenMM.h"
 #include "seams.h"
 
+#include <cmath>
 #include <cstdio>
 #include <vector>
 

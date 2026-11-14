@@ -158,16 +158,22 @@ struct TeamWidth {
           // requested directly and eight narrowed to four. OpenMP's own
           // bind would put the workers back on the whole allowed set,
           // so it is turned off before the team is created.
+          // Thread 0 is the caller and stays on its own mask: a pinned
+          // caller hands its one cpu to every OpenMP worker and Rayon
+          // thread it creates later, and the next eight-thread region
+          // then runs five threads on that cpu.
           static int bound = 0;
           if (bound != want) {
             setenv("OMP_PROC_BIND", "false", 1);
 #pragma omp parallel num_threads(want)
             {
               const int tid = omp_get_thread_num();
-              cpu_set_t mask;
-              CPU_ZERO(&mask);
-              CPU_SET(cpus[tid < ncpu ? tid : 0], &mask);
-              sched_setaffinity(0, sizeof(mask), &mask);
+              if (tid != 0) {
+                cpu_set_t mask;
+                CPU_ZERO(&mask);
+                CPU_SET(cpus[tid < ncpu ? tid : 0], &mask);
+                sched_setaffinity(0, sizeof(mask), &mask);
+              }
             }
             bound = want;
           }

@@ -16,6 +16,27 @@
 #ifdef SEAMS_HAS_OPENMP
 #include <omp.h>
 #endif
+#ifdef __linux__
+#include <sched.h>
+#endif
+
+#if defined(SEAMS_HAS_OPENMP) && defined(__linux__)
+// First in the file: TeamWidth binds a narrowed team once per process.
+TEST_CASE("a team narrowed from eight to four leaves the caller's cpus alone", "[thread]") {
+  cpu_set_t before;
+  REQUIRE(sched_getaffinity(0, sizeof(before), &before) == 0);
+  const int saved = omp_get_max_threads();
+  omp_set_num_threads(8);
+  {
+    const seams::TeamWidth team(4096);
+    REQUIRE(omp_get_max_threads() == 4);
+  }
+  omp_set_num_threads(saved);
+  cpu_set_t after;
+  REQUIRE(sched_getaffinity(0, sizeof(after), &after) == 0);
+  REQUIRE(CPU_EQUAL(&before, &after));
+}
+#endif
 
 namespace {
 

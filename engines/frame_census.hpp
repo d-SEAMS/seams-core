@@ -6,6 +6,7 @@
 
 #include "seams.h"
 
+#include <utility>
 #include <vector>
 
 struct FrameCensus {
@@ -14,6 +15,7 @@ struct FrameCensus {
   int cubic = 0;
   double q6 = 0.0;
   bool ok = false;
+  std::vector<int> labels;
 };
 
 inline FrameCensus frame_census(const double *xyz, int n, const double *box9, double cutoff) {
@@ -57,6 +59,7 @@ inline FrameCensus frame_census(const double *xyz, int n, const double *box9, do
   out.cubic = counts[SEAMS_LABEL_CUBIC];
   out.six = hist[6];
   out.q6 = sum / static_cast<double>(n);
+  out.labels = std::move(labels);
   out.ok = true;
   return out;
 }

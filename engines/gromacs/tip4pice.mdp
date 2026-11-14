@@ -1,0 +1,25 @@
+; Copyright (c) d-SEAMS developers
+; TIP4P/Ice slab and liquid below the model's 270 K melting point.
+integrator = md
+dt = 0.002
+nsteps = 200
+nstxout = 10
+nstvout = 0
+nstfout = 0
+nstlog = 10
+nstenergy = 10
+cutoff-scheme = Verlet
+pbc = xyz
+coulombtype = PME
+rcoulomb = 0.9
+rvdw = 0.9
+vdw-modifier = Potential-shift
+tcoupl = v-rescale
+tc-grps = System
+tau-t = 0.5
+ref-t = 250
+gen-vel = yes
+gen-temp = 250
+gen-seed = 2014
+pcoupl = no
+constraints = none

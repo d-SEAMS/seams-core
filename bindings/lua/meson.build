@@ -11,6 +11,10 @@ if not lua54_dep.found()
   lua54_dep = dependency('lua-5.4', required: false)
 endif
 if not lua54_dep.found()
+  # conda-forge and Homebrew name the 5.4 package lua.
+  lua54_dep = dependency('lua', version: ['>=5.4', '<5.5'], required: false)
+endif
+if not lua54_dep.found()
   lua54_lib = cc.find_library('lua5.4', required: false, dirs: ['/usr/lib/x86_64-linux-gnu'])
   if lua54_lib.found() and cc.has_header('lua.h', args: ['-I/usr/include/lua5.4'])
     lua54_dep = declare_dependency(
@@ -71,7 +75,7 @@ endif
 
 fs = import('fs')
 fennel_lua = ''
-foreach candidate : ['/usr/local/share/fennel.lua', '/usr/share/lua/5.4/fennel.lua']
+foreach candidate : [get_option('fennel_lua'), '/usr/local/share/fennel.lua', '/usr/share/lua/5.4/fennel.lua']
   if fennel_lua == '' and fs.exists(candidate)
     fennel_lua = candidate
   endif
@@ -106,6 +110,7 @@ ffi = custom_target(
   input: files('../../include/seams.h'),
   output: 'dseams_ffi.lua',
   command: [find_program('python3'), files('gen_ffi.py'), '@INPUT@', '@OUTPUT@'],
+  build_by_default: true,
 )
 
 lua_runners = []

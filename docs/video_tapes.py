@@ -4,6 +4,7 @@
 
 import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -39,6 +40,8 @@ def stable(text):
     text = re.sub(r"Total wall time:.*", "Total wall time: TIME", text)
     text = re.sub(r"read_data CPU = \S+ seconds", "read_data CPU = TIME", text)
     text = re.sub(r"(?m)^((?:Pair|Neigh|Comm|Output|Modify|Other)\s+\|).*$", r"\1 TIME", text)
+    # LAMMPS notes an unset OMP_NUM_THREADS; the thread count line follows.
+    text = re.sub(r"(?m)^OMP_NUM_THREADS environment is not set\..*\n", "", text)
     return text
 
 
@@ -51,6 +54,11 @@ def clean(text):
     return "\n".join(kept).strip()
 
 
+def lua_is_54(program):
+    done = subprocess.run([program, "-v"], capture_output=True, text=True)
+    return "Lua 5.4" in done.stdout + done.stderr
+
+
 def prepare(root, seams, libdir, langdir, build):
     root = Path(root)
     build = Path(build)
@@ -58,7 +66,13 @@ def prepare(root, seams, libdir, langdir, build):
     out.mkdir(parents=True, exist_ok=True)
     shim = build / "video-bin"
     shim.mkdir(parents=True, exist_ok=True)
-    for name, target in (("seams", seams), ("python3", sys.executable)):
+    links = [("seams", seams), ("python3", sys.executable)]
+    # The lua tapes type lua5.4, the Debian name. conda-forge and Homebrew
+    # install the same interpreter as lua.
+    lua = shutil.which("lua")
+    if not shutil.which("lua5.4") and lua and lua_is_54(lua):
+        links.append(("lua5.4", lua))
+    for name, target in links:
         link = shim / name
         if link.is_symlink() or link.exists():
             link.unlink()
@@ -88,6 +102,10 @@ def prepare(root, seams, libdir, langdir, build):
     return root, env
 
 
+class Absent(Exception):
+    """A step exited 77: its engine or input frame is not on this machine."""
+
+
 def run_command(command, env, cwd):
     done = subprocess.run(
         command,
@@ -99,6 +117,9 @@ def run_command(command, env, cwd):
     )
     if done.returncode != 0:
         detail = (done.stderr or done.stdout or "")
+        if done.returncode == 77:
+            lines = (done.stdout + done.stderr).strip().splitlines()
+            raise Absent("{}: {}".format(command, lines[-1] if lines else "exit 77"))
         if done.returncode == 127 or "cannot open shared object file" in detail or "No such file or directory" in detail and "lmp" in command:
             print("skipped: {}".format(detail.strip().splitlines()[-1] if detail.strip() else command), file=sys.stderr)
             raise SystemExit(77)
@@ -121,7 +142,7 @@ def scenes_of(folder):
     return parsed
 
 
-def check_folder(folder, env, root, record):
+def check_folder(folder, env, root, record, absent):
     parsed = scenes_of(folder)
     narration = (folder / "narration.txt").read_text().strip()
     paragraphs = [part.strip() for part in re.split(r"\n\s*\n", narration) if part.strip()]
@@ -155,20 +176,39 @@ def check_folder(folder, env, root, record):
             if name not in script:
                 fail("{} script.md does not name {}".format(folder.name, name))
         stdout = []
-        for command in item["commands"]:
-            if leaked(command):
-                fail("{} command contains a local path".format(folder.name))
-            stdout.append(run_command(command, env, root))
+        try:
+            for command in item["commands"]:
+                if leaked(command):
+                    fail("{} command contains a local path".format(folder.name))
+                stdout.append(run_command(command, env, root))
+        except Absent as exc:
+            absent.append("{} {}: {}".format(folder.name, item["name"], exc))
+            continue
         text = "\n".join(stdout)
         for expect in item["expects"]:
             if expect not in text:
                 fail("{} {} missing {!r}\n{}".format(folder.name, item["name"], expect, text[-500:]))
         recorded.append("## {}\n{}".format(item["name"], clean(text)))
-    got = "\n".join(recorded).rstrip() + "\n"
     path = folder / "recorded.txt"
+    have = path.read_text() if path.is_file() else ""
+    if len(recorded) < len(parsed):
+        # A skipped scene leaves the transcript partial: each scene that ran
+        # still matches its own section, the narration, which quotes the
+        # skipped scene too, is not checked, and --record does not rewrite it.
+        sections = {}
+        for block in re.split(r"(?m)^(?=## )", have):
+            if block.startswith("## "):
+                sections[block.splitlines()[0]] = block.rstrip() + "\n"
+        for block in recorded:
+            head = block.splitlines()[0]
+            if stable(sections.get(head, "")) != stable(block.rstrip() + "\n"):
+                fail("{} recorded.txt does not match the tape output for {}".format(folder.name, head[3:]))
+        print(folder.name, "scenes", len(recorded), "of", len(parsed), "ran")
+        return
+    got = "\n".join(recorded).rstrip() + "\n"
     if record:
         path.write_text(got)
-    have = path.read_text() if path.is_file() else ""
+        have = got
     if stable(have) != stable(got):
         fail("{} recorded.txt does not match the tape output".format(folder.name))
     missing = [number for number in tokens(narration) if not present(number, path.read_text())]
@@ -219,8 +259,13 @@ def main():
     folders = sorted(path for path in (root / "docs" / "videos").iterdir() if (path / "script.md").is_file())
     if len(folders) != 21:
         fail("expected 21 videos, found {}".format(len(folders)))
+    absent = []
     for folder in folders:
-        check_folder(folder, env, root, record)
+        check_folder(folder, env, root, record, absent)
+    if absent:
+        for line in absent:
+            print("skipped:", line)
+        raise SystemExit(77)
 
 
 if __name__ == "__main__":

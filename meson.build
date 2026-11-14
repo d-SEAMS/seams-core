@@ -795,6 +795,8 @@ if get_option('with_cli')
   test('seams_version', seams_exe, args: ['--version'])
   test('seams_features', seams_exe, args: ['--features'])
   test('seams_print_config', seams_exe, args: ['--print-config'])
+  # In-situ engine runs checked frame by frame against this CLI.
+  subdir('engines/e2e')
 
   python3 = find_program('python3', required: true)
   test(
@@ -906,6 +908,9 @@ if get_option('with_cli')
     timeout: 60)
   tutorial_env = environment()
   tutorial_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+  if get_option('fennel_lua') != ''
+    tutorial_env.set('FENNEL_LUA', get_option('fennel_lua'))
+  endif
   test(
     'docs_quickstart_py',
     python3,

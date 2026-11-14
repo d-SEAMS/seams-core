@@ -15,6 +15,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 ### Added
 
 - A Reproduce the paper catalog lists each seams-core figure and table with the command, the input frame, the printed numbers, and the Snakemake rule or asv class. Small rows run in the suite. Full rows run when `-Dpaper_full=true`. Each head-to-head names its committed CSV.
+- A linux-64 pixi environment, `cycles`, holds Python 3.13 and `bpy` 5.3 for the Cycles molecule stills. `pixi install -e cycles` is enough: `render_molecules.py` finds that interpreter without `MOLECULES_BPY`. `docs_render_molecules` exits 77 only when no interpreter imports `bpy`. The environment adds lock entries and leaves the default environment's solve alone.
 - A nucleation-pathway census reports primitive rings by size, both CHILL+ rules, Lechner-Dellago q6-bar, and diamond symmetry labels on every frame.
   The CHILL+ staggered and eclipsed edges are unchanged.
   Largest-cluster size and the Ic/Ih fraction are recorded for each definition.
@@ -39,6 +40,9 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Assign guests by ray-parity inside fan-triangulated cage faces, and count ions per ice cluster on the oxygen graph.
 - Bin CHILL+ cubic and hexagonal molecules into basal layers and emit cubicity Phi_c plus the H/C stacking string.
 - Build CHILL+, cages, seeded ions and k-NN on an explicit water-type mask (`--water-types`) so substrate and ions never enter the four-neighbour list. The flag loads the mixed dump; ice and cage counts are the water types only.
+- CI builds each engine plugin against the conda-forge engine and runs its `engines-e2e` tests, with LAMMPS on one and two ranks; a skip fails the job.
+  The PLUMED checks take the `libplumedKernel.so` beside `plumed` when `PLUMED_KERNEL` is unset, and `gromacs_plumed_e2e` reads the action log from `PLUMED.OUT` under GROMACS 2025 and later.
+  C and Fortran snippets link against the patched chemfiles meson builds when the system one is rejected.
 - Direct-coexistence mW growth is scored on basal and secondary-prism slabs of 8064 molecules at 1 bar.
   The 2015 CHILL+ thresholds are unchanged.
 - Each OpenMP thread owns a block of the linkcell weighted cell cut and writes the neighbour rows of those cells. The halo is painted in that owned walk. On 884736 molecules, eight threads build the neighbour rows in 5.72 times the one-thread time.
@@ -52,6 +56,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
   OpenMM uses a reporter.
   Chemfiles reads the saved trajectory.
 - Local q4 and q6 on the cutoff shell use the solid-harmonic kernel from `seams steinhardt`, `seams_q4_q6`, and the Python, R, and Julia `q4_q6` fronts.
+- Meson builds `compute dseams` as `dseamsplugin.so` for LAMMPS `plugin load` when the LAMMPS class headers are installed. The compute takes `cutoff`, `graph cutoff|mutual` and `rule published|ovito`, and logs its call count and seconds per call when LAMMPS deletes it.
 - Name 51264, 51268 and sH cages, and report a per-cage occupancy histogram.
 - One sitting pairs ice Ic at 884736 molecules with freud, mdapy, vesin, OVITO PTM and CHILL+, and rings-statistics-matter, at 1, 2, 4 and 8 threads. The detail column records the agreement check on that frame. The rings row is the cutoff list and the ring search together. The pool-audit rings kernel is ringNetwork alone.
 - One sitting retimes neighbours, q4, q6, CHILL+, rings, symmetry and hydrate cages at 110592 and 884736 molecules on one thread and on eight. The raw lines are benchmarks/rc3-sitting.csv.
@@ -67,8 +72,11 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - TIP4P/2005 ring updates at 0.01, 0.1 and 1 ps stay inside the hop ball and match a full search. The strict seeded graph is 8.3, 3.3 and 2.6 times a rebuild.
 - The 884736-molecule sitting adds pyscal3 neighbours and q6, PLUMED q6 with PLUMED_NUM_THREADS set to the row width, and OVITO coordination. Those rows agree with d-SEAMS on the same ice Ic frame. scripts/plot_sitting_large_time.py draws time against threads and does not store the PDF.
 - The PLUMED SEAMS collective variable reports q6, the CHILL+ ice fraction and the six-ring fraction, and a restraint can bias q6.
+- The PLUMED `SEAMS` action takes `MODE=all|q6|q6bar` and `DUMP=file`. `MODE=q6` and `MODE=q6bar` compute only the mean local q6 or the mean q6-bar, without CHILL+ or the ring search. `DUMP` appends the coordinates handed to d-SEAMS and the per-atom value, plus the CHILL+ label under `MODE=all`.
 - The Python Frame reference runs `read`, `steinhardt`, `ring_census`, `rdf_2d`, `monolayer_rings`, `find_prisms`, `to_ase`, and `to_solvis` on ice Ih and shows each result.
 - The Rust, Fortran, and Python ctypes bindings call the analyses `seams.h` now exports, including frame reading, CHILL, Steinhardt parameters, cages, neighbour lists, the RDF, hydrogen bonds, density, the fingerprint, prisms, and the monolayer.
+- The Snakemake rule `h2h_plumed_q6` runs PLUMED's `Q6`, `LOCAL_AVERAGE` and `LOCAL_Q6` and d-SEAMS `q6` and `q6bar` through `SEAMS` in `plumed driver` on the same mW ice/liquid frames at 4096 and 110592 molecules, serial and with 8 threads, and writes the per-atom agreement and the seconds per frame to `benchmarks/h2h-plumed-q6.csv`. The asv benchmark `h2h_plumed_q6` times the same decks.
+- The default pixi environment carries PUC Lua 5.4 beside LuaJIT on linux-64, so `docs_core_counts`, `docs_examples` and the Lua docs pages run. Meson finds the 5.4 module through the `lua` pkg-config name that conda-forge and Homebrew use, and `dseams_ffi.lua` is built by default. The lua video tape runs `lua5.4`; `docs/video_tapes.py` links that name to a 5.4 `lua` when only `lua` is on `PATH`. `-Dfennel_lua=FILE` names the Fennel compiler, and `scripts/fetch_fennel.sh DEST` fetches the 1.5.3 release and checks its sha256.
 - The ice label is the residual of the seventeen-atom shell after the optimal rotation and scale. The shell is the four bonded neighbours and each of their bonded neighbours.
 - The ice label takes an eclipsed-cosine cutoff, and cage, ring and shell naming runs in parallel.
 - The in-tree Python package now has the documented Frame handle.
@@ -88,6 +96,8 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The videos gallery and the README link the d-SEAMS Odysee channel. Every `docs/videos/<slug>/script.md` end card cites Goswami, Goswami, and Singh 2020 and names the 2.0 paper as to be submitted soon.
 - Under mpiexec, an MPI build of `seams` shares a LAMMPS dump's `--frame`/`--last` frames among the ranks in serpentine rounds (`sinp::forEachLammpsFrame` takes a part and a part count), and rank 0 prints every frame in order. Other readers stay on rank 0, `--per-atom` needs a single rank, ranks that differ in arguments, directory or `SEAMS_` settings are refused, `OMP_NUM_THREADS` and `RAYON_NUM_THREADS` default to 1 on a launch of several ranks, and a run without a launcher, or with `SEAMS_MPI=0`, never starts MPI. `chill::setSteinhardtAtomSplit(false)` keeps `steinhardtQl` from splitting atoms over ranks that hold different frames, and a dump frame cut short keeps the atoms it read, with its warning on stderr. With Open MPI's libfabric probe skipped (`--mca btl ^ofi`), eight ranks match eight `--jobs` workers on one node for `cages` over 32 frames of 32768-atom ice (4.2 against 4.3 s), and keep load balance 0.99 where frame cost steps or alternates along the run (2.6 s against 2.8 and 3.1 s for `--jobs`; contiguous blocks reach 0.59 on the step). On two four-core core sets standing in for nodes, with MPI over TCP only, eight ranks take 4.4 s against 8.7 s for threads on one, at POP parallel efficiency 0.98 (release builds).
 - Update topology keys only on the hop-ball of atoms whose neighbourhood changed.
+- `-Dlammps_src_include=DIR` builds `compute dseams` against conda-forge LAMMPS, which installs `library.h` without the class headers. `scripts/fetch_lammps_headers.sh DEST` checks out `src` of the release that `lmp` reports and prints the directory.
+- `DseamsReporter` writes its `dump` argument: each report appends a LAMMPS dump frame of the classified sites with their CHILL+ labels. `seconds` and `calls` time the reports. Callers that passed a placeholder name now pass nothing.
 - `bench_rings_h2h` times primitive rings against OVITO FindRings with the cutoff graph outside the timer. A small-graph test checks that census against a brute-force cycle list.
 - `interface_order wc` reports a Willard-Chandler width on the crystal centre of mass.
   `input/interface/campaign.py` grows the shipped mW slab at several temperatures and seeds.
@@ -95,7 +105,9 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - `interface_order` compares the Nguyen and Molinero 2015 CHILL+ rule with the OVITO 3.17.2 rule on one frame or a short trajectory.
   The thresholds are unchanged.
   A square, pentagonal or hexagonal nanotube is labelled by its prism blocks, and a honeycomb sheet by its polygon or bilayer rings.
+- `meson test --suite engines-e2e` runs each engine for 200 steps on ice and liquid (mW in LAMMPS and in LAMMPS with `fix plumed`, TIP4P/Ice in GROMACS, in `gmx mdrun -plumed` and in OpenMM), dumps the coordinates d-SEAMS classified in the run with their labels, and requires `seams chill-plus` to give the same label to every site of every frame. An engine that is not found is a skip. The Snakemake rule `engines_e2e` writes `data/engines-e2e.csv`.
 - `require("dseams")` is a Lua 5.4 and LuaJIT module over `seams.h`, with userdata handles and a Fennel wrapper on the same module. Reading, CHILL, Steinhardt parameters, cages, neighbour lists, the RDF, hydrogen bonds, density, the fingerprint, prisms, and the monolayer call that header.
+- `seams chill` and `seams chill-plus` take `--per-atom FILE` and append a LAMMPS dump frame with a `label` column, the CHILL or CHILL+ class of each site. Workers under `--jobs` append whole frames.
 - `seams::domain` splits a periodic frame over ranks: cells ordered along a Hilbert curve are cut into runs of equal atom count, and each rank also holds every atom within a halo of its own. `domain::rings` finds the primitive rings whose lowest-indexed member a rank owns from its share alone, `primitive::ringNetwork` takes a mask of the sources to enumerate from, and `domain::gatherRings` collects every rank's rings on every MPI rank in the order `ringNetwork` lists them. On one eight-core node threads still win (a 65536-atom frame takes 58 ms on one rank of eight threads and 67 ms on eight single-thread ranks), and every rank rebuilding the whole list costs 72 ms of 251 at 262144 atoms on eight ranks; `bench_strong` reports it as `domain/ms` in MPI builds, and CI runs the gather under `mpiexec`.
 - science::layersOf bins published CHILL+, the shell label and q6 along the interface normal. science::criticalSize is the mean size of the band around the smallest largest cluster. That number is an upper bound when the minimum falls in the first two frames. It is not a committor.
 - seams rings prints the primitive-ring census by size. seams prisms counts perfect and imperfect prisms of size 3 to 6. seams cluster prints the largest domain, the subset, and whether it percolates.
@@ -129,7 +141,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
   `seams --mol 1,5-12` keeps those molecule ids.
   A type or molecule that is not in the frame is an error.
   On a LAMMPS dump with multi-atom molecules and no `--type`, the same choice replaces the old preference for type 2, which labelled hydrogens or sodium.
-  `compute dseams` takes `type I` and `mol water`. A mixed frame that sets neither is an error.
+  `compute dseams`, as the LAMMPS plugin and as the copy-in style in `extras/lammps`, takes `type I` and `mol water` and scores only those oxygens; the other atoms it is given read 6. A group of several types that sets neither is an error.
   CHILL+ then reports `ion-ice`, `ion-liquid` and `ion-front` when ions remain in the frame.
 - Pair distances use the fractional wrap below half the narrowest face separation, and call the Euclidean image only past that. The in-plane RDF bins the cell-list distance inside that ball, and the direct loop runs in parallel.
 - Release builds define NDEBUG, so the libstdc++ assertions that meson adds when b_ndebug is false no longer run in them. The closed-cage search on the sI 2x2x2 crystal takes 13.2 ms instead of 16.0 ms, with the same output.
@@ -162,6 +174,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
   written straight into one CSR. The same buffers are reused on the next frame.
   The pair set does not depend on the thread count.
   q_l reads that CSR. The neighbour average is skipped when only q_l is requested.
+- The prism search without shape matching, which `seams_rings_find` and `seams_prisms` run, pairs each ring only with the rings that hold a neighbour of its first atom, the pairs the basal test can accept. On the 21 in-situ frames of 4096 mW molecules from `engines/lammps/in.mw.lmp`, `seams_rings_find` on one thread went from 0.672 to 0.0333 s per frame (median of 8), with the same rings, cages and prism counts. `bench/seams_ring_frames` times it on a LAMMPS dump.
 - The ring search builds each source's shortest paths once, in breadth-first order into one buffer, keeps the graph in two packed arrays, and moves the per-source results out on every thread. With the fix above, `bench_strong`'s ring stage at 65536 atoms goes from 1408 to 265 ms on one thread and from 190 to 40 ms on eight (release builds), and lists the same rings in the same order.
 - The seeded cage binding searches one graph when the mutual and union edge sets match. A dirty cage frame starts the backoff before it returns, so the following frames are warm sweeps instead of another diff.
 - The seeded cage call searches once when the mutual and union edge sets match. fellBack() runs before a dirty frame returns, so the following frames are warm sweeps.
@@ -195,6 +208,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 ### Fixed
 
 - A LAMMPS dump that grows while it is read is kept. The language fronts follow the build Python and skip a library mismatch.
+- A call that narrows the OpenMP team below the caller's width, such as `seams_prisms` on a few thousand molecules at eight threads, pinned the calling thread to one cpu for the rest of the process. Every OpenMP worker and Rayon thread created afterwards inherited that cpu, so on 21 frames of 4096 mW molecules `seams_rings_find` after `seams_prisms` took 0.590 s per frame at eight threads instead of 0.0182 s. The caller now keeps its mask; one thread is unchanged at 0.035 s.
 - A chemfiles LAMMPS dump keeps the reduced cell edge. The bound span was being padded by the tilt a second time, so genice sH reported 31.05 Å instead of 24.84 Å. OVITO FindRings is compared as a subset of the primitive-ring census: K2,3 has three chordless 4-rings and FindRings reports two.
 - Accept a cup that fills the signature face count with dangling edges.
 - An orthorhombic displacement wraps every period, not one. Unfolded coordinates 16 apart in a 10 box are 4 apart, not 6.
@@ -215,7 +229,9 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - SOAP now fills every l through lMax. classifyBonds reuses a Ylm buffer. Fingerprint builds one hop graph per atom.
 - The 2D RDF histogram, `nearestUnlike`, and `shellSeparation` trust the fractional wrap only below half the narrowest face separation of a tilted cell. Half an edge or half a bound span let a pair inside the cutoff wrap to a longer image and drop out, and let the RDF grid put a pair two cells apart.
 - The C API builds q4 and q6 from one cutoff shell and does not fill an atom-index map on that path.
+- The PLUMED `SEAMS` action scaled positions and the box by 10 whatever PLUMED's length unit, so under `UNITS LENGTH=A` it saw a cell a hundred times too large: on the ideal 64-molecule cell `seams.ice` was 0 and `seams.q6` 0 instead of 1 and 0.6285. It now reads the unit from PLUMED. `meson test plumed_units` is the regression.
 - The PLUMED q6 derivative is expressed per nanometre. A 0.001 angstrom step matched an independent difference to 3.99e-11 on a shifted eight-molecule cell.
+- The `recorded.txt` check of `docs_video_tapes` ignores the note LAMMPS prints when `OMP_NUM_THREADS` is unset, as it is under `meson test`, so the lammps transcript matches with or without that variable. The `using 1 OpenMP thread(s)` line after it is still compared.
 - The brine, interface, nucleation, and rings picture tracks now show the paper-frame transcripts: 873 atoms with hexagonal 352 and water 434, the 864-molecule interface, 148 nucleation frames, and the 11-frame mW cell. `docs_video_tapes` fails when `recorded.txt` disagrees with the tape output or a spoken number is absent from that transcript.
 - The cutoff neighbour list sizes its row buffer from the pairs found. A shell denser than the ideal-gas estimate no longer writes past that buffer.
 - The landing-page and architecture diagrams quote labels that contain a slash or a quote, so Mermaid 11 draws the suite stack.
@@ -224,6 +240,8 @@ by [towncrier](https://towncrier.readthedocs.io/).
   as an output. A later ``test -s`` stamp cannot see a side-effect
   file because Snakemake deletes declared outputs before the job.
 - The opt-in paper runs print the molecule count, the frame count, and the file they read, next to the size the paper states. Rings reads frame 1 of the 11-frame 4096-molecule mW dump. The interface and brine runs read the shipped 864-water frames. Nucleation reads the figshare trajectory, 148 frames of 4096 molecules.
+- The paper tutorials, the science figures and the gallery render with Tachyon under Qt's `offscreen` platform, so no display, OpenGL context or `libxcb-cursor0` is needed. The science tutorials no longer start Xvfb with `QT_QPA_PLATFORM=xcb`, which aborted the process where `libxcb-cursor0` is absent. The `pixi-suite` CI job keeps the locked OVITO 3.15.5 wheel, which matches the locked PySide6 6.9.3; the OVITO 3.17.2 wheel it installed over it needs PySide6 6.12 and `import ovito` failed. `docs_science_tutorials` holds a lock while it writes `docs/source/science/figures`, as the science snippet pages already do.
+- The primitive ring search no longer crashes on a vertex with more than 48 neighbours when it searches by hops alone, as it does up to six-membered rings. Such a row fell through to the distance table that only the longer search builds; `seams_rings_find` over every atom of `input/traj/dump-bcc` was one case.
 - The reproducibility DAG builds yodaStruct as ``require("dseams")`` and
   runs the five figshare deposits through that library. There is no
   in-tree ``yodaStruct`` binary.
@@ -231,6 +249,12 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - Use linkcell 0.3.10 and minimage 0.1.4 without a downstream source patch. The with_linkcell and with_minimage options can require these dependencies.
 - Use the one-cell neighbour stencil from two cells per edge, so a short box is not left on the general walk.
 - `cages --signature` counts a face set as a cage only when its faces tile a sphere: every vertex lies on at least three faces that close around it, and V - E + F = 2. Rings whose minimum-image bonds add up to a lattice vector wind through the periodic cell, bound no face, and are dropped first (`ring::contractibleRings`). On frame 1 of the figshare mW nucleation run (4096 molecules, 3.5 Å cutoff) the search found 3 5¹²6², 20 5¹²6⁴, 270 5¹²6⁸ and 143 4³5⁶6³ cages in the liquid; it now finds none. On the GenIce sI unit cell it found 90 5¹²6², 4248 5¹²6⁴ and 218305 5¹²6⁸; it now finds 2 5¹² and 6 5¹²6².
+- `compute dseams` on several MPI ranks classified each rank's own atoms as a separate cell, so atoms near a subdomain boundary lost neighbours. On two ranks, 8312 of 86016 labels over 21 frames of 4096-molecule mW ice and liquid differed from `seams chill-plus` on the same dump. The compute now gathers every atom to rank 0, classifies the whole cell once, and returns each rank its labels; all 86016 match. `meson test lammps_e2e_np2` is the regression.
+- `docs_brine_cli` fetches the 230 K brine frame itself, through the same checked download as the science tutorials, and no longer skips on a clone where no other test has fetched it yet. The download takes a lock and lands through a `.part` file, so tests that start together do not read a partial frame.
+- `docs_video_tapes` treats a step that exits 77 as an absent engine or frame. That scene is skipped, each scene of the folder that ran still has to match its own section of `recorded.txt`, the narration check of that folder is left out, and the remaining tapes still run; the test then exits 77 with the reasons. Any other exit is still a failure.
+- `gmx-seams` classified every site of the trajectory, which for TIP4P/Ice put hydrogens and virtual sites into the CHILL+ graph. `-select` now picks the sites (`-s topol.tpr -select 'name OW'`), `-dump` writes the classified frames with their labels, and molecules are no longer made whole before classification. The `gromacs_legacy_include` option builds it against GROMACS 2023 and later, which install neither the trajectory-analysis headers nor `libgromacs_export.h`.
+- `language_fronts` gives `cargo test` the `SEAMS_SOURCE_ROOT` and `SEAMS_CPP_ORACLE` that the Rust `cpp_match` tests read, and builds `binding_oracle` first.
+- `libSeamsPlumed.so`, `run_hook` and `seams_openmm` carry an rpath to `libplumedKernel.so`, `liblammps.so` and `libOpenMM.so`. Without `LD_LIBRARY_PATH`, PLUMED's `LOAD` failed with "libplumedKernel.so: cannot open shared object file" and the two drivers did not start.
 - `tests/check_invariance` exits 2 when the trajectory cannot be read, the frame holds no atom of the requested type, or the graph has no six-ring. It used to compare empty results, print PASS and exit 0. The meson tests `invariance_missing_input` and `invariance_empty_frame` expect that failure.
 - q4 and q6 build the multi-thread cutoff list in one pass again, instead of copying each linkcell block.
 

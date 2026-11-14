@@ -13,25 +13,22 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "docs" / "examples"))
 
 import render_brine  # noqa: E402
-
-CACHE = (
-    ROOT / "docs" / ".cache" / "brine-front-230K"
-    / "4828e33ecf419c70643b2d466bfa4f283b4138dc" / "T230_m20_r0_tend.xyz"
-)
+from science_tutorials import BRINE_REV, fetch_brine  # noqa: E402
 
 
 def main():
-    if not CACHE.is_file():
-        # The 230 K frames are fetched into docs/.cache and are not in the
-        # checkout. A clone without that download has nothing to draw.
-        print(f"brine frame is not in this checkout: {CACHE.name}", file=sys.stderr)
+    # The 230 K frames are not in the checkout; science_tutorials fetches
+    # them into docs/.cache and checks their sha256.
+    frames = fetch_brine(ROOT / "docs" / ".cache" / "brine-front-230K" / BRINE_REV)
+    if frames is None:
         raise SystemExit(77)
+    frame = frames[1]
     with tempfile.TemporaryDirectory() as tmp:
         for width_mm in (85.0, 170.0):
             out = Path(tmp) / f"brine-{int(width_mm)}.png"
             buf = io.StringIO()
             with redirect_stdout(buf):
-                render_brine.main(["--xyz", str(CACHE), "--out", str(out), "--width-mm", str(width_mm)])
+                render_brine.main(["--xyz", str(frame), "--out", str(out), "--width-mm", str(width_mm)])
             image = Image.open(out)
             if image.width < render_brine.panel_width_px(width_mm) or image.height < 32:
                 raise SystemExit(f"{width_mm:g} mm figure is only {image.size}")

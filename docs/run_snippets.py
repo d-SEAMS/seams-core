@@ -342,6 +342,16 @@ def which(name):
     return found
 
 
+def vendored_links(build):
+    """-rpath-link for the patched chemfiles meson builds into the build tree.
+
+    A cross-prefixed ld such as conda's does not follow libyodaLib.so's RPATH
+    to libseams-chemfiles.so, so the snippet link has to name the folder.
+    """
+    lib = build / "chemfiles-prefix" / "lib"
+    return ["-Wl,-rpath-link," + str(lib)] if lib.is_dir() else []
+
+
 def compile_c_family(build, env, source, out, extra=None, more_sources=None):
     compiler = which("c++" if source.suffix in {".cpp", ".cxx", ".cc"} else "cc")
     if source.suffix == ".c":
@@ -384,6 +394,7 @@ def compile_c_family(build, env, source, out, extra=None, more_sources=None):
         # libseams calls dlopen. The link fails with "DSO missing" unless
         # the executable names libdl.
         cmd.append("-ldl")
+    cmd.extend(vendored_links(build))
     cmd.extend(sdk_flags(text))
     if source.suffix != ".c":
         cmd.insert(1, "-std=c++17")
@@ -525,6 +536,7 @@ def run_source(build, env, path):
                         "-lseams",
                         "-Wl,-rpath," + str(build / "bindings"),
                         "-Wl,-rpath," + str(build / "src"),
+                        *vendored_links(build),
                     ],
                     env,
                 )
@@ -552,6 +564,7 @@ def run_source(build, env, path):
                     "-lseams",
                     "-ldl",
                     "-Wl,-rpath," + str(build / "src"),
+                    *vendored_links(build),
                 ],
                 env,
                 cwd=work,

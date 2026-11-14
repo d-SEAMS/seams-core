@@ -303,7 +303,7 @@ def main():
         )
         simulation.context.setPositions(pos * unit.angstrom)
         engine = InSitu()
-        simulation.reporters.append(DseamsReporter(engine, "unused", interval=1))
+        simulation.reporters.append(DseamsReporter(engine, interval=1))
         simulation.step(2)
         if len(engine.frames) != 2 or n != 8:
             raise SystemExit(f"openmm frames {len(engine.frames)} atoms {n}")

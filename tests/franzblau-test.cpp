@@ -2,6 +2,7 @@
 #include <franzblau.hpp>
 
 // Standard
+#include <algorithm>
 #include <iostream>
 
 #include <catch2/catch_test_macros.hpp>
@@ -183,3 +184,40 @@ SCENARIO(
     }  // End of getting all the rings (non-primitive included)
   }    // End of given
 } // End of scenario
+
+// A ring through a vertex with more than 48 neighbours. Up to six-membered
+// rings the search keeps no distance table, and the primitivity test used
+// to read that missing table for a long row.
+TEST_CASE("A hexagon through a vertex of degree 62 is one primitive ring", "[ring]") {
+  const int hexagon = 6;
+  const int pendants = 60;
+  const int n = hexagon + pendants;
+  std::vector<std::vector<int>> nb(n);
+  auto bond = [&](int a, int b) {
+    nb[a].push_back(b);
+    nb[b].push_back(a);
+  };
+  for (int i = 0; i < hexagon; ++i) {
+    bond(i, (i + 1) % hexagon);
+  }
+  // The hub is ring position 1: the search does not test its source.
+  for (int p = hexagon; p < n; ++p) {
+    bond(1, p);
+  }
+  std::vector<std::vector<int>> nList(n);
+  std::vector<int> offsets{0};
+  std::vector<int> cols;
+  for (int i = 0; i < n; ++i) {
+    std::sort(nb[i].begin(), nb[i].end());
+    nList[i].push_back(i);
+    nList[i].insert(nList[i].end(), nb[i].begin(), nb[i].end());
+    cols.insert(cols.end(), nb[i].begin(), nb[i].end());
+    offsets.push_back(static_cast<int>(cols.size()));
+  }
+  const std::vector<std::vector<int>> want{{0, 1, 2, 3, 4, 5}};
+  REQUIRE(primitive::ringNetwork(nList, 6) == want);
+  REQUIRE(primitive::ringNetwork(nList, 6, primitive::RingRows::Vectors) == want);
+  REQUIRE(primitive::ringNetwork(nList, 6, primitive::RingRows::Packed) == want);
+  REQUIRE(primitive::ringNetwork(offsets, cols, 6) == want);
+  REQUIRE(primitive::ringNetworkBalls(nList, 6) == want);
+}

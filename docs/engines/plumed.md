@@ -17,23 +17,23 @@ before PLUMED starts. `OMP_NUM_THREADS` does not change the PLUMED team.
 - `seams.six` is the primitive six-ring count.
 
 `meson test plumed_driver` runs `engines/plumed/plumed.dat`. The collective
-variable calls `seams_q4q6` and `seams_rings_find` after scaling internal
-nanometres to angstroms. The q6 derivative uses a 0.001 angstrom step and
-multiplies by 10 so PLUMED sees a per-nanometre derivative.
+variable calls `seams_q4q6` and `seams_rings_find` after scaling PLUMED
+lengths to angstroms. The q6 derivative uses a 0.001 angstrom step and is
+converted to PLUMED's length unit.
 
 ```{literalinclude} ../../../engines/plumed/plumed.dat
 ```
 
 ```{literalinclude} ../../../engines/plumed/SeamsColvar.cpp
 :language: cpp
-:lines: 78-96
+:start-at: bool SeamsCV::score
+:end-before: void SeamsCV::writeDump
 ```
 
-PLUMED stores positions in nanometres. `getPosition` and `getBox` are those
-internal nanometres, and the plugin multiplies both by 10 before calling
-d-SEAMS. `CUTOFF` is angstroms. `ice.xyz` is the cubic cell in nanometres, so
-the driver reads it in the default length unit. Do not set `UNITS LENGTH=A`
-on this deck: that flag does not change `getPosition`, and it would disagree
-with the file. Load `libSeamsPlumed.so` with `LOAD` before `SEAMS`.
+`getPosition` and `getBox` are in PLUMED's internal length unit, nanometres
+unless `UNITS LENGTH` changes it. The plugin converts both to angstroms, so
+`UNITS LENGTH=A` and the default agree. `CUTOFF` is angstroms. `ice.xyz` is
+the cubic cell in nanometres, so the driver reads it in the default MD
+length unit. Load `libSeamsPlumed.so` with `LOAD` before `SEAMS`.
 On the ideal cell q6 is high, the ice fraction is 1, and the ring fraction is
 positive. The restraint biases `seams.q6` only.

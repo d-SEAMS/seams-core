@@ -1,0 +1,1 @@
+`libSeamsPlumed.so`, `run_hook` and `seams_openmm` carry an rpath to `libplumedKernel.so`, `liblammps.so` and `libOpenMM.so`. Without `LD_LIBRARY_PATH`, PLUMED's `LOAD` failed with "libplumedKernel.so: cannot open shared object file" and the two drivers did not start.

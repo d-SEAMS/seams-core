@@ -83,8 +83,12 @@ slower on 4096 molecules and 0.033% slower on 32768. The one-thread
 32768 gap is inside the spread of the bare runs.
 
 Set `SEAMS_LANG_LIB` to `libseams_lang` before constructing `InSitu`.
-The reporter takes that engine, an unused dump name, the step interval,
-and a type array with 1 on the atoms that enter the classifier.
+The reporter takes that engine, an optional dump path, the step
+interval, and a type array with 1 on the atoms that enter the
+classifier. With a dump path, each report appends a LAMMPS dump frame
+of the classified sites and their CHILL+ labels, which
+`seams chill-plus` reads back. `engines/openmm/e2e_tip4pice.py` checks
+those labels against the CLI.
 
 ```python
 # excerpt: engines/openmm/test_reporter.py

@@ -663,7 +663,8 @@ struct DistOracle {
     }
     if (hop2 && ringDist <= 3) {
       // A ring distance of 2 is a chord, and a chord is an edge. A row
-      // longer than 48 neighbours is cheaper to answer from the ball.
+      // longer than 48 neighbours is cheaper to answer from the ball, when
+      // there is one; the hop-only search builds none.
       const auto row = (*adj)[static_cast<std::size_t>(u)];
       int seen = 0;
       bool capped = false;
@@ -671,7 +672,7 @@ struct DistOracle {
         if (w == v) {
           return true;
         }
-        if (++seen == 48) {
+        if (++seen == 48 && (balls != nullptr || bits != nullptr)) {
           capped = true;
           break;
         }

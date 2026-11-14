@@ -2,11 +2,16 @@
 
 There is one reporter, `DseamsReporter` in
 `adapters/python/dseams_insitu/openmm.py`.
-`DseamsReporter(engine, dump, interval=1, types=None)` asks
-`describeNextReport` for positions every `interval` steps. `dump` is the
-trajectory path the reporter was constructed with. `types` selects which
-atoms are oxygens. `report` reads the context in angstrom and calls
-`InSitu.observe`.
+`DseamsReporter(engine, dump=None, interval=1, types=None)` asks
+`describeNextReport` for positions every `interval` steps. `types` selects
+which atoms are oxygens. `report` reads the context in angstrom and calls
+`InSitu.observe`. With a `dump` path each report appends a LAMMPS dump
+frame of the classified sites, keyed by 1-based particle index, with their
+CHILL+ labels. `seconds` and `calls` time the reports.
+
+`meson test openmm_e2e` runs 200 steps of a TIP4P/Ice ice Ic slab and
+liquid on the CPU platform with the reporter every 10 steps, then requires
+`seams chill-plus` on that dump to give the same label to every oxygen.
 
 `meson test openmm_reporter` runs `engines/openmm/test_reporter.py`.
 `meson test docs_engine_openmm` runs `DseamsReporter` on
@@ -21,7 +26,8 @@ atoms are oxygens. `report` reads the context in angstrom and calls
 
 ```{literalinclude} ../../../engines/openmm/plugin.cpp
 :language: cpp
-:lines: 46-56
+:start-at: const auto &pos = state.getPositions();
+:end-before: ice += counts[0];
 ```
 
 `engines/openmm/test_reporter.py` builds an 8-atom cubic cell, a zero

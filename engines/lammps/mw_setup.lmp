@@ -1,0 +1,28 @@
+# mW ice Ic in the lower half of the cell, liquid in the upper half.
+# Needs the variables cells and melt. The ice half is held while the
+# upper half melts at 450 K; the caller then runs the whole cell at 260 K.
+units real
+atom_style atomic
+boundary p p p
+lattice diamond 6.26
+region box block 0 ${cells} 0 ${cells} 0 ${cells}
+create_box 1 box
+create_atoms 1 box
+mass 1 18.015
+pair_style sw
+pair_coeff * * mW.sw mW
+neighbor 2.0 bin
+neigh_modify every 1 delay 0 check yes
+
+variable half equal ${cells}/2
+region top block INF INF INF INF ${half} INF
+group liquid region top
+velocity liquid create 450.0 4928459 dist gaussian
+timestep 10.0
+thermo 500
+fix melt liquid nvt temp 450.0 450.0 1000.0
+run ${melt}
+unfix melt
+
+velocity all create 260.0 87287 dist gaussian
+fix prod all nvt temp 260.0 260.0 1000.0

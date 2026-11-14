@@ -8,8 +8,11 @@
 #include <topo_one_dim.hpp>
 
 // Standard
+#include <algorithm>
+#include <cmath>
 #include <filesystem>
 #include <iostream>
+#include <random>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -253,4 +256,109 @@ TEST_CASE("rmAxialTranslations wraps through dump H not bound span",
   REQUIRE_THAT(cloud.pts[1].x, Catch::Matchers::WithinAbs(19.488675134594813, 1e-10));
   REQUIRE_THAT(cloud.pts[1].y, Catch::Matchers::WithinAbs(0.5, 1e-12));
   REQUIRE_THAT(cloud.pts[1].z, Catch::Matchers::WithinAbs(1.0, 1e-12));
+}
+
+// findPrisms without shape matching tests only the rings that hold a
+// neighbour of each first basal atom. The all-pairs loop below is the
+// definition; both must give the same counts, ring types and prism list.
+namespace {
+
+molSys::PointCloud<molSys::Point<double>, double> jitteredTubes(double jitter, unsigned seed) {
+  molSys::PointCloud<molSys::Point<double>, double> cloud;
+  const double side = 2.75;
+  const int layers = 10;
+  std::mt19937 rng(seed);
+  std::normal_distribution<double> noise(0.0, jitter);
+  double x0 = 0.0;
+  int id = 0;
+  for (int n : {4, 5, 6, 3}) {
+    const double r = side / (2.0 * std::sin(M_PI / n));
+    const double cx = x0 + r + 4.0;
+    for (int k = 0; k < layers; ++k) {
+      for (int j = 0; j < n; ++j) {
+        const double a = 2.0 * M_PI * j / n;
+        molSys::Point<double> p;
+        p.type = 1;
+        p.atomID = id;
+        p.x = cx + r * std::cos(a) + noise(rng);
+        p.y = 10.0 + r * std::sin(a) + noise(rng);
+        p.z = std::fmod(k * side + noise(rng) + layers * side, layers * side);
+        cloud.pts.push_back(p);
+        cloud.idIndexMap[id] = id;
+        ++id;
+      }
+    }
+    x0 = cx + r + 4.0;
+  }
+  cloud.nop = id;
+  cloud.box = {x0 + 2.0, 20.0, layers * side};
+  cloud.boxLow = {0.0, 0.0, 0.0};
+  cloud.currentFrame = 1;
+  return cloud;
+}
+
+struct PrismResult {
+  std::vector<int> list;
+  std::vector<ring::strucType> types;
+  int perfect = 0;
+};
+
+PrismResult allPairs(const std::vector<std::vector<int>> &rings,
+                     const std::vector<std::vector<int>> &nList,
+                     molSys::PointCloud<molSys::Point<double>, double> &cloud) {
+  PrismResult out;
+  out.types.assign(rings.size(), ring::strucType::unclassified);
+  for (std::size_t i = 0; i + 1 < rings.size(); ++i) {
+    for (std::size_t j = i + 1; j < rings.size(); ++j) {
+      std::vector<int> a = rings[i], b = rings[j];
+      if (a.size() == 4 && !ring::discardExtraTetragonBlocks(a, b, cloud)) continue;
+      if (ring::hasCommonElements(a, b)) continue;
+      if (!ring::basalPrismConditions(nList, a, b)) continue;
+      out.perfect += 1;
+      for (std::size_t k : {i, j}) {
+        if (out.types[k] == ring::strucType::unclassified) {
+          out.types[k] = ring::strucType::Prism;
+          out.list.push_back(static_cast<int>(k));
+        }
+      }
+    }
+  }
+  std::sort(out.list.begin(), out.list.end());
+  out.list.erase(std::unique(out.list.begin(), out.list.end()), out.list.end());
+  return out;
+}
+
+}  // namespace
+
+TEST_CASE("findPrisms matches the all-pairs prism search on jittered nanotubes", "[topo]") {
+  int prisms = 0;
+  for (double jitter : {0.0, 0.1, 0.25, 0.4}) {
+    auto cloud = jitteredTubes(jitter, 11u);
+    auto withSelf = nneigh::neighbourListByIndex(cloud, nneigh::neighListO(3.5, cloud, 1));
+    // The C API passes rows without the atom in front.
+    std::vector<std::vector<int>> noSelf;
+    for (const auto &row : withSelf) noSelf.emplace_back(row.begin() + 1, row.end());
+    const auto all = primitive::ringNetwork(withSelf, 6);
+    for (const auto *nList : {&withSelf, &noSelf}) {
+      for (std::size_t size = 3; size <= 6; ++size) {
+        std::vector<std::vector<int>> rings;
+        for (const auto &r : all) {
+          if (r.size() == size) rings.push_back(r);
+        }
+        if (rings.empty()) continue;
+        const PrismResult want = allPairs(rings, *nList, cloud);
+        std::vector<ring::strucType> types(rings.size(), ring::strucType::unclassified);
+        std::vector<double> rmsd(cloud.nop, -1.0);
+        int perfect = -1, imperfect = -1;
+        const auto list =
+            ring::findPrisms(rings, types, perfect, imperfect, *nList, cloud, rmsd, false);
+        REQUIRE(list == want.list);
+        REQUIRE(types == want.types);
+        REQUIRE(perfect == want.perfect);
+        REQUIRE(imperfect == 0);
+        prisms += perfect;
+      }
+    }
+  }
+  REQUIRE(prisms > 0);
 }

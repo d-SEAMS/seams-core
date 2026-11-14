@@ -68,20 +68,25 @@ def prepare_vulkan():
 
 
 def render(dump, png):
+    """Tachyon draws in software, so no display or OpenGL context is needed."""
     prepare_vulkan()
+    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
     try:
         import warnings
 
         warnings.filterwarnings("ignore", message=".*OVITO.*PyPI")
         from ovito.io import import_file
-        from ovito.vis import Viewport
+        from ovito.vis import TachyonRenderer, Viewport
     except ImportError:
         skip("ovito is absent")
     pipeline = import_file(str(dump))
     pipeline.add_to_scene()
     view = Viewport(type=Viewport.Type.Ortho)
     view.zoom_all()
-    view.render_image(filename=str(png), size=(480, 360), background=(1, 1, 1))
+    view.render_image(
+        filename=str(png), size=(480, 360), background=(1, 1, 1),
+        renderer=TachyonRenderer(),
+    )
     if not png.is_file() or png.stat().st_size > 300 * 1024:
         raise SystemExit("figure {} is missing or larger than 300 KB".format(png.name))
 

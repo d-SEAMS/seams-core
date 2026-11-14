@@ -1,0 +1,1 @@
+Meson builds `compute dseams` as `dseamsplugin.so` for LAMMPS `plugin load` when the LAMMPS class headers are installed. The compute takes `cutoff`, `graph cutoff|mutual` and `rule published|ovito`, and logs its call count and seconds per call when LAMMPS deletes it.

@@ -243,7 +243,7 @@ def run_openmm(root, build):
     simulation = app.Simulation(topology, system, integrator, platform)
     simulation.context.setPositions(pos * unit.angstrom)
     engine = InSitu()
-    simulation.reporters.append(DseamsReporter(engine, "unused", interval=1))
+    simulation.reporters.append(DseamsReporter(engine, interval=1))
     simulation.step(1)
     if len(engine.frames) != 1:
         raise SystemExit("openmm frames {}".format(len(engine.frames)))

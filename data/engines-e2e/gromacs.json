@@ -1,0 +1,1 @@
+{"atom_frames": 34650, "dump_vs_trr_max_abs_A": 4.999923706350273e-05, "engine": "gromacs", "frames": 21, "insitu_s_per_frame": 0.009488849, "label_agreement": "34650/34650", "labels": {"0": 12046, "1": 65, "2": 18505, "3": 2677, "4": 158, "5": 1199}, "steps": 200, "system": "TIP4P/Ice ice Ic slab and liquid, 1650 molecules", "version": "2024.3-EasyBuild_5.2.0_PLUMED_2.9.2"}

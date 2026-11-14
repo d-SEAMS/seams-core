@@ -6,6 +6,12 @@ option('with_lammps', type: 'feature', value: 'auto',
   description: 'Build the LAMMPS hook when liblammps is found')
 option('with_gromacs', type: 'feature', value: 'auto',
   description: 'Build the GROMACS analysis tool when libgromacs is found')
+option('gromacs_legacy_include', type: 'string', value: '',
+  description: 'api/legacy/include of the GROMACS source that matches libgromacs. GROMACS 2023 and later do not install the trajectory-analysis headers')
+option('lammps_src_include', type: 'string', value: '',
+  description: 'src of the LAMMPS source that matches liblammps, for the compute dseams plugin. conda-forge installs library.h without the class headers')
+option('fennel_lua', type: 'string', value: '',
+  description: 'fennel.lua compiler for the Lua tests and the lua video tape. scripts/fetch_fennel.sh fetches one; the distro paths are tried when empty')
 option('with_openmm', type: 'feature', value: 'auto',
   description: 'Build the OpenMM plugin when libOpenMM is found')
 option('with_plumed', type: 'feature', value: 'auto',

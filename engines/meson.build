@@ -18,35 +18,35 @@ if lammps_opt.allowed()
     error('with_lammps is enabled but liblammps was not found')
   endif
   if lammps_dep.found()
-    # run_hook.cpp includes "library.h". conda-forge keeps that header in
-    # include/lammps, next to the pkg-config includedir.
+    # run_hook.cpp includes "library.h". conda-forge and EESSI keep the
+    # headers in include/lammps, one level below the include path.
     lammps_incs = [seams_inc, include_directories('lammps')]
-    lammps_header_arg = ''
-    if not cppc.has_header('library.h', dependencies: lammps_dep, required: false)
-      lammps_py = find_program('python3', required: false)
-      if lammps_py.found()
-        lammps_where = run_command(lammps_py, '-c',
-          'import os, pathlib, sys\n' +
-          'roots = []\n' +
-          'prefix = os.environ.get("CONDA_PREFIX", "")\n' +
-          'if prefix:\n' +
-          '    roots.append(pathlib.Path(prefix))\n' +
-          'roots.extend((pathlib.Path("/usr"), pathlib.Path("/usr/local")))\n' +
-          'for root in roots:\n' +
-          '    header = root / "include" / "lammps" / "library.h"\n' +
-          '    if header.is_file():\n' +
-          '        print(header.parent)\n' +
-          '        raise SystemExit(0)\n' +
-          'raise SystemExit(1)\n',
-          check: false)
-        if lammps_where.returncode() == 0 and lammps_where.stdout().strip() != ''
-          # cpp_args, not include_directories: a pixi env lives inside the
-          # source tree, and Meson rejects that absolute include dir.
-          lammps_header_arg = '-I' + lammps_where.stdout().strip()
-        endif
+    lammps_header_dir = ''
+    lammps_py = find_program('python3', required: false)
+    if lammps_py.found()
+      lammps_where = run_command(lammps_py, '-c',
+        'import os, pathlib, sys\n' +
+        'dirs = []\n' +
+        'for var in ("CPLUS_INCLUDE_PATH", "CPATH"):\n' +
+        '    dirs.extend(pathlib.Path(p) for p in os.environ.get(var, "").split(os.pathsep) if p)\n' +
+        'prefix = os.environ.get("CONDA_PREFIX", "")\n' +
+        'if prefix:\n' +
+        '    dirs.append(pathlib.Path(prefix) / "include")\n' +
+        'dirs.extend((pathlib.Path("/usr/include"), pathlib.Path("/usr/local/include")))\n' +
+        'for root in dirs:\n' +
+        '    header = root / "lammps" / "library.h"\n' +
+        '    if header.is_file():\n' +
+        '        print(header.parent)\n' +
+        '        raise SystemExit(0)\n' +
+        'raise SystemExit(1)\n',
+        check: false)
+      if lammps_where.returncode() == 0
+        lammps_header_dir = lammps_where.stdout().strip()
       endif
     endif
-    lammps_args = lammps_header_arg != '' ? [lammps_header_arg] : []
+    # cpp_args, not include_directories: a pixi env lives inside the
+    # source tree, and Meson rejects that absolute include dir.
+    lammps_args = lammps_header_dir != '' ? ['-I' + lammps_header_dir] : []
     if not cppc.has_header('library.h', dependencies: lammps_dep,
                            include_directories: lammps_incs,
                            args: lammps_args, required: false)
@@ -76,6 +76,14 @@ if lammps_opt.allowed()
         endif
       endif
     endif
+    if lammps_rpath == '' and lammps_header_dir != ''
+      lammps_prefix = fs.parent(fs.parent(lammps_header_dir))
+      foreach sub : ['lib64', 'lib']
+        if lammps_rpath == '' and fs.exists(lammps_prefix / sub / 'liblammps.so')
+          lammps_rpath = lammps_prefix / sub
+        endif
+      endforeach
+    endif
     run_hook = executable(
       'run_hook',
       files('lammps/run_hook.cpp'),
@@ -92,6 +100,36 @@ if lammps_opt.allowed()
       args: [run_hook.full_path(), 'in.dseams'],
       workdir: meson.project_source_root() / 'engines/lammps',
       timeout: 120)
+    # compute dseams as a `plugin load` module. The LAMMPS class headers
+    # include mpi.h, from the MPI library or from the serial STUBS.
+    # The host lmp already holds libmpi, so the module takes the headers only.
+    lammps_mpi = dependency('mpi', language: 'cpp', required: false)
+    lammps_plugin_deps = [lammps_dep]
+    if lammps_mpi.found()
+      lammps_plugin_deps += lammps_mpi.partial_dependency(compile_args: true, includes: true)
+    endif
+    lammps_plugin_args = lammps_args
+    if get_option('lammps_src_include') != ''
+      lammps_plugin_args += ['-I' + get_option('lammps_src_include')]
+    endif
+    # check_header compiles the include, so a src tree without fmt/ fails here.
+    if cppc.check_header('compute.h', dependencies: lammps_plugin_deps,
+                         include_directories: lammps_incs, args: lammps_plugin_args,
+                         required: false)
+      lammps_plugin = shared_module(
+        'dseamsplugin',
+        files('lammps/compute_dseams.cpp', 'lammps/plugin_dseams.cpp'),
+        dependencies: lammps_plugin_deps,
+        link_with: seams_api_lib,
+        include_directories: lammps_incs,
+        cpp_args: _args + lammps_plugin_args + seams_api_args,
+        name_prefix: '',
+        build_rpath: lammps_rpath,
+        install_rpath: lammps_rpath,
+        install: true)
+    else
+      message('LAMMPS class headers are not installed; set lammps_src_include to build compute dseams')
+    endif
   endif
 endif
 
@@ -158,14 +196,30 @@ if gromacs_opt.allowed()
       endif
     endif
   endif
-  if gromacs_dep.found()
+  gromacs_args = []
+  if gromacs_dep.found() and get_option('gromacs_legacy_include') != ''
+    gromacs_args += ['-I' + get_option('gromacs_legacy_include'),
+      '-I' + (meson.current_source_dir() / 'gromacs' / 'compat')]
+  endif
+  gromacs_header = gromacs_dep.found() and cppc.has_header(
+    'gromacs/trajectoryanalysis/analysismodule.h', dependencies: gromacs_dep,
+    args: gromacs_args, required: false)
+  if gromacs_dep.found() and not gromacs_header
+    if gromacs_opt.enabled()
+      error('libgromacs was found without its trajectory-analysis headers; set gromacs_legacy_include')
+    endif
+    message('libgromacs has no trajectory-analysis headers; set gromacs_legacy_include to build gmx-seams')
+  endif
+  if gromacs_header
     gmx_seams = executable(
       'gmx-seams',
       files('gromacs/seams_ice.cpp'),
       dependencies: [gromacs_dep],
       link_with: seams_api_lib,
       include_directories: [seams_inc, include_directories('.')],
-      cpp_args: _args + seams_api_args,
+      cpp_args: _args + seams_api_args + gromacs_args,
+      # GROMACS 2024 headers call ssize() unqualified, ambiguous with std::ssize.
+      override_options: ['cpp_std=c++17'],
       build_rpath: gromacs_rpath,
       install_rpath: gromacs_rpath,
       install: true)
@@ -187,6 +241,7 @@ if openmm_opt.allowed()
     error('with_openmm is enabled but libOpenMM was not found')
   endif
   if openmm_dep.found()
+    # The test runs the driver without LD_LIBRARY_PATH.
     openmm_rpath = ''
     if openmm_dep.type_name() == 'pkgconfig'
       openmm_rpath = openmm_dep.get_variable('libdir', default_value: '')
@@ -196,13 +251,15 @@ if openmm_opt.allowed()
       if openmm_lib_py.found()
         openmm_lib_where = run_command(openmm_lib_py, '-c',
           'import os, pathlib\n' +
-          'prefix = os.environ.get("CONDA_PREFIX", "")\n' +
-          'if not prefix:\n' +
-          '    raise SystemExit(1)\n' +
-          'root = pathlib.Path(prefix)\n' +
-          'for folder in (root / "lib", root / "lib64"):\n' +
-          '    if (folder / "libOpenMM.so").is_file():\n' +
-          '        print(folder)\n' +
+          'dirs = []\n' +
+          'for var in ("CONDA_PREFIX", "OPENMM_DIR"):\n' +
+          '    if os.environ.get(var):\n' +
+          '        dirs += [pathlib.Path(os.environ[var]) / "lib", pathlib.Path(os.environ[var]) / "lib64"]\n' +
+          'for var in ("LIBRARY_PATH", "LD_RUN_PATH"):\n' +
+          '    dirs.extend(pathlib.Path(p) for p in os.environ.get(var, "").split(os.pathsep) if p)\n' +
+          'for root in dirs:\n' +
+          '    if (root / "libOpenMM.so").is_file():\n' +
+          '        print(root)\n' +
           '        raise SystemExit(0)\n' +
           'raise SystemExit(1)\n',
           check: false)
@@ -306,6 +363,10 @@ if plumed_opt.allowed()
       include_directories: plumed_incs,
       cpp_args: _args + seams_api_args + plumed_cpp,
       name_prefix: 'lib',
+      # PLUMED's LOAD dlopens this; without an rpath libplumedKernel.so
+      # resolves only through LD_LIBRARY_PATH.
+      build_rpath: plumed_libdir,
+      install_rpath: plumed_libdir,
       install: true)
   elif plumed_opt.enabled()
     error('with_plumed is enabled but PLUMED was not found')

@@ -152,7 +152,7 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
       meson.project_build_root(),
     ],
     env: _front_env,
-    depends: [seams_lang, ydslib],
+    depends: [seams_lang, ydslib, binding_oracle],
     timeout: 600,
   )
   test(

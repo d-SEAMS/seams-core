@@ -1,0 +1,5 @@
+# Lengths in angstrom, so PLUMED hands LAMMPS coordinates over unscaled.
+UNITS LENGTH=A
+LOAD FILE=@PLUGIN@
+seams: SEAMS ATOMS=1-@NATOMS@ CUTOFF=3.5 DUMP=insitu.lammpstrj
+PRINT ARG=seams.q6,seams.ice,seams.ring STRIDE=@EVERY@ FILE=colvar

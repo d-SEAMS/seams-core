@@ -309,23 +309,35 @@ def brine_frame(lib, path: Path):
 
 
 def fetch_brine(cache: Path):
+    """The frames, fetched once. Several docs tests read them at the same time."""
+    import fcntl
+
     cache.mkdir(parents=True, exist_ok=True)
+    with open(cache / ".fetch.lock", "a", encoding="utf-8") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        return _fetch_brine(cache)
+
+
+def _fetch_brine(cache: Path):
     paths = []
     for name, digest in BRINE_FILES.items():
         dest = cache / Path(name).name
         if dest.is_file() and hashlib.sha256(dest.read_bytes()).hexdigest() == digest:
             paths.append(dest)
             continue
+        part = dest.with_name(dest.name + ".part")
         try:
-            urllib.request.urlretrieve(BRINE_URL + "/" + name, dest)
+            urllib.request.urlretrieve(BRINE_URL + "/" + name, part)
         except (urllib.error.URLError, TimeoutError, OSError) as exc:
+            part.unlink(missing_ok=True)
             print(f"{SKIP}: {exc}")
             return None
-        got = hashlib.sha256(dest.read_bytes()).hexdigest()
+        got = hashlib.sha256(part.read_bytes()).hexdigest()
         if got != digest:
-            dest.unlink(missing_ok=True)
+            part.unlink(missing_ok=True)
             print(f"{SKIP}: checksum mismatch for {name}")
             return None
+        part.replace(dest)
         paths.append(dest)
     return paths
 
@@ -381,29 +393,14 @@ def _load_science_render(root: Path):
 
 
 def _ensure_display():
-    """Start Xvfb so OVITO's Qt platform can create a Vulkan instance."""
-    if os.environ.get("DISPLAY"):
-        return None
-    xvfb = shutil.which("Xvfb")
-    if xvfb is None:
-        return None
-    display = ":%d" % (20 + os.getpid() % 50)
-    proc = subprocess.Popen(
-        [xvfb, display, "-screen", "0", "1280x1024x24"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-    os.environ["DISPLAY"] = display
-    os.environ["QT_QPA_PLATFORM"] = "xcb"
-    os.environ["LIBGL_ALWAYS_SOFTWARE"] = "1"
-    icd = "/usr/share/vulkan/icd.d/lvp_icd.json"
-    if os.path.isfile(icd):
-        os.environ["VK_ICD_FILENAMES"] = icd
-        os.environ["VK_DRIVER_FILES"] = icd
-    import time
+    """Give Qt a platform without a display: Tachyon draws in software.
 
-    time.sleep(0.4)
-    return proc
+    Qt's xcb plugin aborts the process without libxcb-cursor0, so an
+    Xvfb display is no use on a runner that lacks it.
+    """
+    if not os.environ.get("DISPLAY"):
+        os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    return None
 
 
 def render_interface_v12(root: Path, pos, chill, box, figures: Path):
@@ -615,6 +612,18 @@ def run_r(root: Path, build: Path, libdir: Path, frames):
 def main():
     root = Path(sys.argv[1] if len(sys.argv) > 1 else Path(__file__).resolve().parents[2])
     build = Path(sys.argv[2]) if len(sys.argv) > 2 else Path(os.environ.get("SEAMS_BUILD", root / "bbdir"))
+    # docs_science_tutorials and the science snippet pages write the same
+    # figures; a reader between two writers sees a half-written png.
+    import fcntl
+
+    lock_dir = build if build.is_dir() else root / "docs" / ".cache"
+    lock_dir.mkdir(parents=True, exist_ok=True)
+    with open(lock_dir / "science-figures.lock", "a", encoding="utf-8") as handle:
+        fcntl.flock(handle, fcntl.LOCK_EX)
+        return tutorials(root, build)
+
+
+def tutorials(root: Path, build: Path):
     libdir = Path(os.environ.get("SEAMS_LIBDIR", str(build / "src")))
     lib = _lib(libdir)
     traj = root / "input" / "traj"

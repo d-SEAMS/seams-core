@@ -16,7 +16,8 @@ and calls `InSitu.observe`.
 
 ```{literalinclude} ../../../engines/openmm/plugin.cpp
 :language: cpp
-:lines: 46-56
+:start-at: const auto &pos = state.getPositions();
+:end-before: ice += counts[0];
 ```
 
 `engines/openmm/test_reporter.py` builds an 8-atom cubic cell, a zero

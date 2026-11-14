@@ -5,6 +5,8 @@
 #include "gromacs/fileio/trxio.h"
 #include "gromacs/options/basicoptions.h"
 #include "gromacs/options/ioptionscontainer.h"
+#include "gromacs/selection/selection.h"
+#include "gromacs/selection/selectionoption.h"
 #include "gromacs/trajectory/trajectoryframe.h"
 #include "gromacs/trajectoryanalysis/analysismodule.h"
 #include "gromacs/trajectoryanalysis/analysissettings.h"
@@ -15,9 +17,11 @@
 #include "../frame_census.hpp"
 #include "../triclinic_box.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <string>
 #include <vector>
 
 namespace {
@@ -27,24 +31,42 @@ class SeamsIce : public gmx::TrajectoryAnalysisModule {
   void initOptions(gmx::IOptionsContainer *options, gmx::TrajectoryAnalysisSettings *settings) override {
     static const char *const help[] = {
         "CHILL+ on a trajectory. Coordinates are converted from nm to Angstrom.",
-        "analyzeFrame is the in-run hook used for every frame."};
+        "analyzeFrame is the in-run hook used for every frame.",
+        "-select picks the sites that are classified. A multi-site water",
+        "model needs its oxygens only, for example -s topol.tpr -select 'name OW'.",
+        "-dump appends one LAMMPS dump frame per analysed frame with the",
+        "coordinates handed to d-SEAMS, in Angstrom, and the CHILL+ label."};
     settings->setHelpText(help);
+    // Making molecules whole would move sites away from the coordinates mdrun wrote.
+    settings->setRmPBC(false);
     options->addOption(
         gmx::DoubleOption("cutoff").store(&cutoffA_).defaultValue(3.5).description("Cutoff in Angstrom"));
+    options->addOption(gmx::SelectionOption("select")
+                           .store(&sel_)
+                           .defaultSelectionText("all")
+                           .onlyAtoms()
+                           .description("Sites to classify"));
+    options->addOption(
+        gmx::StringOption("dump").store(&dump_).description("LAMMPS dump of the classified frames"));
   }
 
   void initAnalysis(const gmx::TrajectoryAnalysisSettings &, const gmx::TopologyInformation &) override {}
 
-  void analyzeFrame(int, const t_trxframe &fr, t_pbc *, gmx::TrajectoryAnalysisModuleData *) override {
-    if (!fr.bX || !fr.bBox || fr.natoms <= 0) {
+  void analyzeFrame(int, const t_trxframe &fr, t_pbc *, gmx::TrajectoryAnalysisModuleData *pdata) override {
+    if (!fr.bX || !fr.bBox) {
       return;
     }
-    const int n = fr.natoms;
+    const gmx::Selection &sel = pdata->parallelSelection(sel_);
+    const int n = sel.posCount();
+    if (n <= 0) {
+      return;
+    }
     std::vector<double> xyz(static_cast<std::size_t>(n) * 3);
     for (int i = 0; i < n; ++i) {
-      xyz[static_cast<std::size_t>(3 * i)] = static_cast<double>(fr.x[i][0]) * 10.0;
-      xyz[static_cast<std::size_t>(3 * i + 1)] = static_cast<double>(fr.x[i][1]) * 10.0;
-      xyz[static_cast<std::size_t>(3 * i + 2)] = static_cast<double>(fr.x[i][2]) * 10.0;
+      const auto &x = sel.position(i).x();
+      xyz[static_cast<std::size_t>(3 * i)] = static_cast<double>(x[0]) * 10.0;
+      xyz[static_cast<std::size_t>(3 * i + 1)] = static_cast<double>(x[1]) * 10.0;
+      xyz[static_cast<std::size_t>(3 * i + 2)] = static_cast<double>(x[2]) * 10.0;
     }
     double raw[3][3];
     for (int a = 0; a < 3; ++a) {
@@ -63,6 +85,10 @@ class SeamsIce : public gmx::TrajectoryAnalysisModule {
     if (!census.ok) {
       failed_ = true;
       return;
+    }
+    if (!dump_.empty()) {
+      writeDump(fr.bStep ? static_cast<long long>(fr.step) : frames_ - 1, sel, xyz, box9,
+                census.labels);
     }
     ice_ += census.cubic;
     atoms_ += n;
@@ -84,6 +110,32 @@ class SeamsIce : public gmx::TrajectoryAnalysisModule {
   }
 
  private:
+  void writeDump(long long step, const gmx::Selection &sel, const std::vector<double> &xyz,
+                 const double box9[9], const std::vector<int> &labels) {
+    FILE *fp = std::fopen(dump_.c_str(), frames_ == 1 ? "w" : "a");
+    if (fp == nullptr) {
+      std::fprintf(stderr, "cannot write %s\n", dump_.c_str());
+      std::exit(1);
+    }
+    const int n = sel.posCount();
+    const double xy = box9[6], xz = box9[7], yz = box9[8];
+    const double xlo = box9[0] + std::min({0.0, xy, xz, xy + xz});
+    const double xhi = box9[0] + box9[3] + std::max({0.0, xy, xz, xy + xz});
+    const double ylo = box9[1] + std::min(0.0, yz), yhi = box9[1] + box9[4] + std::max(0.0, yz);
+    std::fprintf(fp, "ITEM: TIMESTEP\n%lld\nITEM: NUMBER OF ATOMS\n%d\n", step, n);
+    std::fprintf(fp, "ITEM: BOX BOUNDS xy xz yz pp pp pp\n%.17g %.17g %.17g\n%.17g %.17g %.17g\n"
+                     "%.17g %.17g %.17g\n",
+                 xlo, xhi, xy, ylo, yhi, xz, box9[2], box9[2] + box9[5], yz);
+    std::fprintf(fp, "ITEM: ATOMS id type x y z label\n");
+    for (int i = 0; i < n; ++i) {
+      std::fprintf(fp, "%d 1 %.17g %.17g %.17g %d\n", sel.position(i).atomIndices()[0] + 1,
+                   xyz[3 * i], xyz[3 * i + 1], xyz[3 * i + 2], labels[i]);
+    }
+    std::fclose(fp);
+  }
+
+  gmx::Selection sel_;
+  std::string dump_;
   double cutoffA_ = 3.5;
   int frames_ = 0;
   int ice_ = 0;

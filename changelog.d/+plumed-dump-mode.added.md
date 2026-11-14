@@ -1,0 +1,1 @@
+The PLUMED `SEAMS` action takes `MODE=all|q6|q6bar` and `DUMP=file`. `MODE=q6` and `MODE=q6bar` compute only the mean local q6 or the mean q6-bar, without CHILL+ or the ring search. `DUMP` appends the coordinates handed to d-SEAMS and the per-atom value, plus the CHILL+ label under `MODE=all`.

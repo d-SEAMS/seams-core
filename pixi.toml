@@ -58,6 +58,18 @@ ira = { features = ["ira"] }
 sphericart = { features = ["sphericart"] }
 nauty = { features = ["nauty"] }
 repro = { features = ["repro"] }
+cycles = { features = ["cycles"], no-default-feature = true }
+
+[feature.cycles]
+# bpy wheels follow Blender's Python, 3.13 from Blender 5.1. The molecule
+# stills run Cycles from this interpreter through MOLECULES_BPY.
+platforms = ["linux-64"]
+
+[feature.cycles.dependencies]
+python = "3.13.*"
+
+[feature.cycles.pypi-dependencies]
+bpy = ">=5.1,<5.4"
 
 [feature.ira]
 platforms = ["linux-64"]
@@ -223,6 +235,8 @@ r-cpp11 = ">=0.4"
 r-testthat = ">=3.2"
 # The Lua video tape loads require("dseams") from LuaJIT.
 luajit = ">=2.1"
+# The docs Lua tests and the example counts run under PUC Lua 5.4.
+lua = ">=5.4,<5.5"
 
 [pypi-dependencies]
 ovito = ">=3.12.0, <4"

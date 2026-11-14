@@ -217,6 +217,73 @@ ring::findPrisms(const std::vector<std::vector<int>> &rings,
   refPointSet = pntToPnt::getPointSetRefRing(ringSize, axialDim);
   //
 
+  // Without shape matching a pair counts only when basal2 holds a neighbour
+  // of basal1[0] (basalPrismConditions reads nList[l1] from its second
+  // entry). Visiting just the rings that hold such a neighbour, in
+  // ascending jring order, keeps every count and ring type of the full
+  // pair loop.
+  if (!doShapeMatching) {
+    std::vector<std::vector<int>> ringsOf(nList.size());
+    for (int iring = 0; iring < totalRingNum; iring++) {
+      for (int atom : rings[iring]) {
+        if (atom >= 0 && atom < static_cast<int>(ringsOf.size())) {
+          ringsOf[atom].push_back(iring);
+        }
+      }
+    }
+    std::vector<int> candidates;
+    for (int iring = 0; iring < totalRingNum - 1; iring++) {
+      const int l1 = rings[iring][0];
+      candidates.clear();
+      if (l1 >= 0 && l1 < static_cast<int>(nList.size()) && nList[l1].size() > 1) {
+        for (auto nb = nList[l1].begin() + 1; nb != nList[l1].end(); ++nb) {
+          if (*nb < 0 || *nb >= static_cast<int>(ringsOf.size())) {
+            continue;
+          }
+          for (int jring : ringsOf[*nb]) {
+            if (jring > iring) {
+              candidates.push_back(jring);
+            }
+          }
+        }
+      }
+      if (candidates.empty()) {
+        continue;
+      }
+      std::sort(candidates.begin(), candidates.end());
+      candidates.erase(std::unique(candidates.begin(), candidates.end()), candidates.end());
+      basal1 = rings[iring];
+      for (int jring : candidates) {
+        basal2 = rings[jring];
+        if (ringSize == 4 && !ring::discardExtraTetragonBlocks(basal1, basal2, yCloud)) {
+          continue;
+        }
+        if (ring::hasCommonElements(basal1, basal2)) {
+          continue;
+        }
+        if (!ring::basalPrismConditions(nList, basal1, basal2)) {
+          continue;
+        }
+        nPerfectPrisms += 1;
+        if (ringType[iring] == ring::strucType::unclassified) {
+          ringType[iring] = ring::strucType::Prism;
+          listPrism.push_back(iring);
+        } else if (ringType[iring] == ring::strucType::deformedPrism) {
+          ringType[iring] = ring::strucType::mixedPrismRing;
+        }
+        if (ringType[jring] == ring::strucType::unclassified) {
+          ringType[jring] = ring::strucType::Prism;
+          listPrism.push_back(jring);
+        } else if (ringType[jring] == ring::strucType::deformedPrism) {
+          ringType[jring] = ring::strucType::mixedPrismRing;
+        }
+      }
+    }
+    sort(listPrism.begin(), listPrism.end());
+    listPrism.erase(std::unique(listPrism.begin(), listPrism.end()), listPrism.end());
+    return listPrism;
+  }
+
   // Two loops through all the rings are required to find pairs of basal rings
   for (int iring = 0; iring < totalRingNum - 1; iring++) {
     cond1 = false;

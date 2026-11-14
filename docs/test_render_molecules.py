@@ -83,7 +83,11 @@ def check(module):
 
 
 def main():
-    check(load())
+    module = load()
+    check(module)
+    if module.cycles_python() is None:
+        print("no Python here imports bpy; pixi install -e cycles provides one")
+        return 77
     colour = subprocess.run(
         [sys.executable, str(SCRIPT), "--check-colour", "--engine", "cycles"],
         check=False,

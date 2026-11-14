@@ -14,3 +14,13 @@ seams_bench = executable(
   build_rpath: meson.project_build_root() / 'src',
   install: false,
 )
+
+# seams_rings_find per frame through the public C API (bench/ring_frames.cpp).
+seams_ring_frames = executable(
+  'seams_ring_frames',
+  files('ring_frames.cpp'),
+  link_with: seams_api_lib,
+  include_directories: include_directories('../include'),
+  cpp_args: ['-I' + meson.project_build_root() / 'src'],
+  install: false,
+)

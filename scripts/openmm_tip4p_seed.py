@@ -508,7 +508,7 @@ def main(argv):
         restore(sim, state)
         engine = InSitu(library, skin=0.0)
         engine.keep_frames = False
-        reporter = DseamsReporter(engine, "unused", interval=TIME_INTERVAL, types=kinds)
+        reporter = DseamsReporter(engine, interval=TIME_INTERVAL, types=kinds)
         spent = run_steps(sim, TIME_STEPS, reporter)
         reports = max(engine.profile["reports"], 1)
         extra = spent - bare
@@ -536,7 +536,7 @@ def main(argv):
     dump_path = OUT / "oxygens.lammpstrj"
     with dump_path.open("w") as handle:
         reporter = CensusReporter(
-            engine, "unused", INTERVAL, kinds, say, handle
+            engine, None, INTERVAL, kinds, say, handle
         )
         t0 = time.perf_counter()
         sim.reporters.clear()

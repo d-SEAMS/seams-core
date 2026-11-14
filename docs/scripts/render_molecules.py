@@ -876,6 +876,7 @@ def cycles_python():
     if chosen:
         programs.append(chosen)
     programs.append(sys.executable)
+    programs.append(str(ROOT / ".pixi" / "envs" / "cycles" / "bin" / "python"))
     for folder in os.environ.get("PATH", "").split(os.pathsep):
         for name in ("python3.13", "python3"):
             programs.append(os.path.join(folder, name))

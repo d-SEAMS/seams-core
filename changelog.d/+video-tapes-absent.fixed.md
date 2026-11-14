@@ -1,0 +1,1 @@
+`docs_video_tapes` treats a step that exits 77 as an absent engine or frame. That scene is skipped, each scene of the folder that ran still has to match its own section of `recorded.txt`, the narration check of that folder is left out, and the remaining tapes still run; the test then exits 77 with the reasons. Any other exit is still a failure.

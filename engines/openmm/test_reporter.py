@@ -56,7 +56,7 @@ def main():
     simulation = app.Simulation(topology, system, integrator, platform)
     simulation.context.setPositions(pos_a * unit.angstrom)
     engine = InSitu()
-    reporter = DseamsReporter(engine, "unused", interval=1)
+    reporter = DseamsReporter(engine, interval=1)
     simulation.reporters.append(reporter)
     simulation.step(2)
     if len(engine.frames) < 2:
