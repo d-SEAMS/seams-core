@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "docs" / "scripts" / "render_molecules.py"
 
 # The deck colours. They come from scripts/chill_palette.py.
-sys.path.insert(0, str(ROOT.parent / "scripts"))
+sys.path.insert(0, str(ROOT / "scripts"))
 from chill_palette import COLOUR
 
 
