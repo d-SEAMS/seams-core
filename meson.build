@@ -1898,6 +1898,19 @@ test(
   ],
   env: _capi_env,
   timeout: 300)
+foreach _family : ['neighbours', 'rings', 'chill_plus', 'q4q6', 'cages', 'errors']
+  test(
+    'capi_example_' + _family,
+    executable(
+      'capi_example_' + _family,
+      files('docs/examples/c/' + _family + '.c'),
+      link_with: seams_api_lib,
+      include_directories: include_directories('include'),
+      c_args: ['-std=c11'] + _capi_warn + ['-I' + meson.current_build_dir() / 'src']),
+    args: _family == 'errors' ? [] : [meson.project_source_root()],
+    env: _capi_env,
+    timeout: 300)
+endforeach
 test(
   'capi_const_threads',
   executable(

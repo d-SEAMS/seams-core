@@ -166,6 +166,48 @@ restores the library default. A negative width returns `SEAMS_ERR_RANGE`.
 `seams_set_num_threads` is process-global. Do not call it while another thread is
 inside `seams_get_num_threads`.
 
+## Examples by family
+
+Each program below covers one family and checks its own results on
+`input/traj/ice1h.lammpstrj`. `meson test capi_example_<family>` compiles it as C11
+with `-Wall -Wextra -Wpedantic -Werror` and runs it. The argument is the repository root.
+
+Neighbours, `docs/examples/c/neighbours.c`:
+
+```{literalinclude} ../../../docs/examples/c/neighbours.c
+:language: c
+```
+
+Rings, `docs/examples/c/rings.c`:
+
+```{literalinclude} ../../../docs/examples/c/rings.c
+:language: c
+```
+
+CHILL+, `docs/examples/c/chill_plus.c`:
+
+```{literalinclude} ../../../docs/examples/c/chill_plus.c
+:language: c
+```
+
+q4 and q6, `docs/examples/c/q4q6.c`:
+
+```{literalinclude} ../../../docs/examples/c/q4q6.c
+:language: c
+```
+
+Cages, `docs/examples/c/cages.c`:
+
+```{literalinclude} ../../../docs/examples/c/cages.c
+:language: c
+```
+
+Errors, `docs/examples/c/errors.c`, needs no input file:
+
+```{literalinclude} ../../../docs/examples/c/errors.c
+:language: c
+```
+
 ## Documentation check
 
 `capi_docs_complete` checks that every function in `tests/capi_symbols.txt` has a
