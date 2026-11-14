@@ -628,6 +628,35 @@ void flags_from_affiliation(int n, const std::vector<std::vector<int>> &six,
   }
 }
 
+seams_status copy_text(const std::string &text, char *buf, size_t cap, size_t *n_out) {
+  if (n_out == nullptr) {
+    return fail(SEAMS_ERR_NULL, "text length is null");
+  }
+  *n_out = text.size();
+  if (buf == nullptr) {
+    return SEAMS_OK;
+  }
+  if (cap < text.size() + 1) {
+    return fail(SEAMS_ERR_RANGE, "buffer is short");
+  }
+  if (!text.empty()) {
+    std::memcpy(buf, text.data(), text.size());
+  }
+  buf[text.size()] = '\0';
+  return SEAMS_OK;
+}
+
+rdf::PartialRdf partial_of(const Cloud &cloud, double rmax, int bins, int type_i, int type_j) {
+  int bins_used = bins;
+  if (bins_used <= 0) {
+    bins_used = std::max(1, static_cast<int>(std::lround(rmax / 0.1)));
+  }
+  int typ = 1;
+  Cloud work = unified_copy(cloud, type_i, typ);
+  const int j = type_j > 0 ? type_j : typ;
+  return rdf::partialRdf(work, typ, j, rmax, bins_used);
+}
+
 } // namespace
 
 extern "C" {
@@ -2354,39 +2383,6 @@ seams_status seams_steinhardt(seams_system *sys, double cutoff, int type, int or
   return seams_ql(sys, cutoff, type, order_l, SEAMS_GRAPH_CUTOFF, ql, ql_len, qlbar,
                   qlbar_len);
 }
-
-namespace {
-
-seams_status copy_text(const std::string &text, char *buf, size_t cap, size_t *n_out) {
-  if (n_out == nullptr) {
-    return fail(SEAMS_ERR_NULL, "text length is null");
-  }
-  *n_out = text.size();
-  if (buf == nullptr) {
-    return SEAMS_OK;
-  }
-  if (cap < text.size() + 1) {
-    return fail(SEAMS_ERR_RANGE, "buffer is short");
-  }
-  if (!text.empty()) {
-    std::memcpy(buf, text.data(), text.size());
-  }
-  buf[text.size()] = '\0';
-  return SEAMS_OK;
-}
-
-rdf::PartialRdf partial_of(const Cloud &cloud, double rmax, int bins, int type_i, int type_j) {
-  int bins_used = bins;
-  if (bins_used <= 0) {
-    bins_used = std::max(1, static_cast<int>(std::lround(rmax / 0.1)));
-  }
-  int typ = 1;
-  Cloud work = unified_copy(cloud, type_i, typ);
-  const int j = type_j > 0 ? type_j : typ;
-  return rdf::partialRdf(work, typ, j, rmax, bins_used);
-}
-
-} // namespace
 
 seams_status seams_neighbours_knn(seams_system *sys, int k, double cutoff, int type,
                                   int mutual, seams_neighbours **out) {
