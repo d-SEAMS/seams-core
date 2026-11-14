@@ -903,7 +903,7 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
     // stays, because a shortcut through it still decides primitivity.
     for (const int v : scr.touched) {
       if (v < src && (*through)[static_cast<std::size_t>(v)]) {
-        scr.lvl[v] = -1;
+        scr.lvl[static_cast<std::size_t>(v)] = -1;
       }
     }
   }
