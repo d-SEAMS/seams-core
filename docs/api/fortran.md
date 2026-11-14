@@ -25,13 +25,26 @@ Both use the 64-atom cubic cell and the same trajectory counts.
 ## Quickstart
 
 ```fortran
-use seams
-type(seams_frame) :: frame
-real(seams_real) :: xyz(3, n)
-frame = new_frame()
-call frame%set_ortho(xyz, lx, ly, lz)
-call frame%chill_plus(labels, counts)
-call frame%close()
+program quickstart
+  use seams
+  implicit none
+  integer, parameter :: n = 8
+  type(seams_frame) :: frame
+  real(seams_real) :: xyz(3, n), lx, ly, lz
+  integer(seams_int), allocatable :: labels(:), counts(:)
+  ! The eight-site cubic diamond cell, edge 6.35 angstrom.
+  lx = 2.75_seams_real * 4 / sqrt(3.0_seams_real)
+  ly = lx
+  lz = lx
+  xyz = lx * reshape(real([0.0, 0.0, 0.0, 0.25, 0.25, 0.25, 0.5, 0.5, 0.0, &
+    0.75, 0.75, 0.25, 0.5, 0.0, 0.5, 0.75, 0.25, 0.75, 0.0, 0.5, 0.5, &
+    0.25, 0.75, 0.75], seams_real), [3, n])
+  frame = new_frame()
+  call frame%set_ortho(xyz, lx, ly, lz)
+  call frame%chill_plus(labels, counts)
+  call frame%close()
+  if (counts(1) /= n) error stop "every site is cubic"
+end program quickstart
 ```
 
 `labels` and `counts` are allocatable. `counts(1)` is cubic ice,
@@ -54,8 +67,23 @@ code is stored and the program continues. `errmsg` receives the detail
 from `seams_handle_error`.
 
 ```fortran
-call frame%set_ortho(xyz, lx, ly, lz, stat=stat, errmsg=err)
-if (stat /= SEAMS_OK) print *, err
+program errors
+  use seams
+  implicit none
+  type(seams_frame) :: frame
+  real(seams_real) :: xyz(3, 1), lx, ly, lz
+  integer(seams_int) :: stat
+  character(len=:), allocatable :: err
+  xyz = 0
+  lx = -1
+  ly = 1
+  lz = 1
+  frame = new_frame()
+  call frame%set_ortho(xyz, lx, ly, lz, stat=stat, errmsg=err)
+  if (stat /= SEAMS_OK) print *, err
+  if (stat == SEAMS_OK) error stop "a negative edge is rejected"
+  call frame%close()
+end program errors
 ```
 
 ## Cubic ice

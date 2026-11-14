@@ -13,6 +13,7 @@ with `Base.show`. A failing call throws `SeamsError`. The message is
 
 ```julia
 using Dseams
+path = joinpath(ENV["DSEAMS_ROOT"], "input", "traj", "exampleTraj.lammpstrj")
 frame = read_frame(path; type = 2)
 ice = chill_plus(frame)
 println(ice)
@@ -28,10 +29,16 @@ is 9 interClathrate and 241 water. The mutual shell is 1 clathrate,
 
 ```julia
 using Seams
+a = 2.75 * 4 / sqrt(3)
+fcc = ((0.0, 0.0, 0.0), (0.5, 0.5, 0.0), (0.5, 0.0, 0.5), (0.0, 0.5, 0.5))
+basis = ((0.0, 0.0, 0.0), (0.25, 0.25, 0.25))
+sites = [((i, j, k) .+ f .+ b) .* a for i in 0:1, j in 0:1, k in 0:1, f in fcc, b in basis]
+xyz = reduce(hcat, collect.(vec(sites)))
+edge = 2a
 set_num_threads(1)
 sys = System()
 set_ortho!(sys, xyz, (edge, edge, edge))
-labels, counts = chill_plus(sys; rule = PUBLISHED)
+labels, counts = chill_plus(sys; rule = Seams.PUBLISHED)
 q4, q6 = q4q6(sys)
 six, fraction = six_rings(sys)
 ```

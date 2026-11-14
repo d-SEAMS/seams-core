@@ -18,8 +18,15 @@ Set `SEAMS_LIB` to `libseams.so`. Importing `seams` does not load the library.
 ## Quickstart
 
 ```python
+import math
+
 import numpy as np
 from seams import PUBLISHED, System, set_num_threads
+
+edge = 2.75 * 4.0 / math.sqrt(3.0)
+fcc = ((0, 0, 0), (0.5, 0.5, 0), (0.5, 0, 0.5), (0, 0.5, 0.5))
+basis = ((0, 0, 0), (0.25, 0.25, 0.25))
+positions = np.array([[(s + b) * edge for s, b in zip(shift, site)] for shift in fcc for site in basis])
 
 set_num_threads(1)
 with System() as sys:
