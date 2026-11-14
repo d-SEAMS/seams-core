@@ -25,7 +25,11 @@ def skip(why):
 
 
 def find_build_file(build, name):
-    hits = sorted(p for p in Path(build).rglob(name) if p.is_file())
+    """The built file, not a copy under an install destdir."""
+    hits = sorted(
+        p for p in Path(build).rglob(name)
+        if p.is_file() and not any("destdir" in part for part in p.parts)
+    )
     return hits[0] if hits else None
 
 
