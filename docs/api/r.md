@@ -131,6 +131,54 @@ Units: cutoff in angstrom; labels are dimensionless codes
 
 Example: `docs/examples/minimal_r.R`
 
+### dseams_example
+
+Purpose: Path of a trajectory shipped in the package's `inst/extdata`: `ice1h.lammpstrj`, `exampleTraj.lammpstrj` or `nucleation_f1.lammpstrj`. With no name it lists them.
+
+Parameters: name (file name, or `NULL` to list the files)
+
+Returns: A file path, or the file names when name is NULL.
+
+Ownership: R owns the returned character vector.
+
+Errors: The binding stops with "no example named" when name is not one of the shipped files.
+
+Units: none; returns a file path or file names
+
+Example: `docs/examples/minimal_r.R`
+
+### dseams_threads
+
+Purpose: Report the engine thread count, or set it for later calls from this R session. Under `_R_CHECK_LIMIT_CORES_` the package starts with at most two threads; the option `dseams.threads` sets the starting count.
+
+Parameters: n (number of threads, or `NULL` to only query)
+
+Returns: The thread count in effect after the call.
+
+Ownership: No allocation.
+
+Errors: The binding stops when n is not one positive integer.
+
+Units: dimensionless thread count; 1 when the package was built without OpenMP
+
+Example: `docs/examples/minimal_r.R`
+
+### dseams_version
+
+Purpose: Version string of the seams-core engine the package was built with or linked against.
+
+Parameters: none
+
+Returns: The engine version string.
+
+Ownership: R owns the returned character vector.
+
+Errors: None.
+
+Units: none; returns a version string
+
+Example: `docs/examples/minimal_r.R`
+
 ### jump_tau90
 
 Purpose: Rotation time of H-H vectors between two frames.

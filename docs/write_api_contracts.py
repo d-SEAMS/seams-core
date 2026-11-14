@@ -833,6 +833,24 @@ def semantics(lang, name, purpose, parameters):
             "error() with the text of seams_last_error when the status is not zero.",
         )
     if lang == "r":
+        if name == "dseams_example":
+            return (
+                "A file path, or the file names when name is NULL.",
+                "R owns the returned character vector.",
+                "The binding stops with \"no example named\" when name is not one of the shipped files.",
+            )
+        if name == "dseams_threads":
+            return (
+                "The thread count in effect after the call.",
+                "No allocation.",
+                "The binding stops when n is not one positive integer.",
+            )
+        if name == "dseams_version":
+            return (
+                "The engine version string.",
+                "R owns the returned character vector.",
+                "None.",
+            )
         return (
             "The data frame, vector, or count named in the purpose.",
             "R owns the returned vectors. A dseams_frame finalizer frees the C frame.",
