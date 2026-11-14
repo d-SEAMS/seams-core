@@ -548,7 +548,7 @@ TEST_CASE("AffiliationUpdater matches batch when every neighbour row changes",
   auto emptyRows = idx;
   for (auto &row : emptyRows) {
     if (!row.empty()) {
-      row.resize(1);
+      row.erase(row.begin() + 1, row.end());
     }
   }
   const auto &incremental = updater.update(six, emptyRows);
