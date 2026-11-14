@@ -150,3 +150,9 @@ fortran example ok
 Draft narration:
 
 The Fortran example in the tree is the minimal Fortran program, run on input/traj/genice_sI.lammpstrj after compiling the Fortran module. It prints fortran example ok. The ice Ih census I just read, nop 128 and q6 0.625855 and hexagonal 128 and rings 256, is the same library.
+
+## End card
+
+Goswami, R., Goswami, A., & Singh, J. K. (2020). d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations. Journal of Chemical Information and Modeling. https://doi.org/10.1021/acs.jcim.0c00031
+
+d-SEAMS 2.0: Incremental ring and cage algorithms for ice structure analysis. Rohit Goswami, Amrita Goswami, Ruhila Goswami, Jayant K. Singh, to be submitted soon.

@@ -3,7 +3,9 @@
 
 Silent picture tracks for the bindings and the tutorials. Each recording
 is a terminal session at 1920 by 1080. Finished recordings are hosted on
-Odysee. =docs/videos/<slug>/embed.txt= holds one line,
+Odysee. The channel page is
+[[https://odysee.com/@d-SEAMS:0b23224c14d44b2a90deee60b7cc8c54e2331e9d][d-SEAMS on Odysee]].
+=docs/videos/<slug>/embed.txt= holds one line,
 =claim-name:full-claim-id=, after that upload exists. Until the line is
 there, the page says video coming soon. Captions are burned into the
 upload. The VTT file in =docs/videos/<slug>/= stays available as the

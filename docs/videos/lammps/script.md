@@ -56,3 +56,9 @@ lammps hexagonal 128 six-rings 256 q6 0.625855
 Draft narration:
 
 docs_engine_lammps writes a data file from the ice Ih dump and runs the same hook for one step. The census line is lammps hexagonal 128 six-rings 256 q6 0.625855.
+
+## End card
+
+Goswami, R., Goswami, A., & Singh, J. K. (2020). d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations. Journal of Chemical Information and Modeling. https://doi.org/10.1021/acs.jcim.0c00031
+
+d-SEAMS 2.0: Incremental ring and cage algorithms for ice structure analysis. Rohit Goswami, Amrita Goswami, Ruhila Goswami, Jayant K. Singh, to be submitted soon.

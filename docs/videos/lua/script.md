@@ -56,3 +56,9 @@ lua5.4 tests/lua_fennel_compile.lua "$FENNEL_LUA" examples/fennel/interface.fnl 
 ```
 
 Expected: `interface chill 1 352 434 49 3 25 0 0 0`.
+
+## End card
+
+Goswami, R., Goswami, A., & Singh, J. K. (2020). d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations. Journal of Chemical Information and Modeling. https://doi.org/10.1021/acs.jcim.0c00031
+
+d-SEAMS 2.0: Incremental ring and cage algorithms for ice structure analysis. Rohit Goswami, Amrita Goswami, Ruhila Goswami, Jayant K. Singh, to be submitted soon.

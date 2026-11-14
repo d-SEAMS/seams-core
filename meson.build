@@ -1425,6 +1425,12 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 900)
   test(
+    'docs_video_cards',
+    python3,
+    args: [meson.project_source_root() / 'docs' / 'check_video_cards.py'],
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_topic_embeds',
     python3,
     args: [meson.project_source_root() / 'docs' / 'check_topic_embeds.py'],

@@ -150,3 +150,9 @@ nop 128 pairs 512 q6 0.625855 hexagonal 128 rings 256
 Draft narration:
 
 The C++ program is docs/videos/cpp/ice.cpp, through seams_lang.h. seams_frame_read loads the dump, and the calls are neighbours, steinhardt on the cutoff graph, chill_plus, and rings. The line is nop 128 pairs 512 q6 0.625855 hexagonal 128 rings 256. pairs 512 is the directed neighbour count, four per water.
+
+## End card
+
+Goswami, R., Goswami, A., & Singh, J. K. (2020). d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations. Journal of Chemical Information and Modeling. https://doi.org/10.1021/acs.jcim.0c00031
+
+d-SEAMS 2.0: Incremental ring and cage algorithms for ice structure analysis. Rohit Goswami, Amrita Goswami, Ruhila Goswami, Jayant K. Singh, to be submitted soon.

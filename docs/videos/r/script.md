@@ -150,3 +150,9 @@ r example ok
 Draft narration:
 
 The R example is docs/examples/minimal_r.R on input/traj/genice_sI.lammpstrj, with the dseams package installed from bindings/r/dseams. It prints r example ok. The ice Ih census from seams is still nop 128, q6 0.625855, hexagonal 128, and rings 256.
+
+## End card
+
+Goswami, R., Goswami, A., & Singh, J. K. (2020). d-SEAMS: Deferred Structural Elucidation Analysis for Molecular Simulations. Journal of Chemical Information and Modeling. https://doi.org/10.1021/acs.jcim.0c00031
+
+d-SEAMS 2.0: Incremental ring and cage algorithms for ice structure analysis. Rohit Goswami, Amrita Goswami, Ruhila Goswami, Jayant K. Singh, to be submitted soon.

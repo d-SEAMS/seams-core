@@ -341,6 +341,12 @@ The libraries used are:
 - [nanoflann](https://github.com/jlblancoc/nanoflann) to calculate nearest neighbors
 - [icecream-cpp](https://github.com/renatoGarcia/icecream-cpp) for pretty-printing and debugging
 
+# docs/videos
+
+Picture tracks for the bindings and the tutorials are in `docs/videos`.
+The channel page is [d-SEAMS on Odysee](https://odysee.com/@d-SEAMS:0b23224c14d44b2a90deee60b7cc8c54e2331e9d).
+A player on a docs page uses `https://odysee.com/$/embed/<claim-name>:<claim-id>` after `embed.txt` names that claim.
+
 # Language fronts
 
 The nanobind module `dseams._core` is built from the in-tree `libseams`
