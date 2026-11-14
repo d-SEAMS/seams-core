@@ -79,7 +79,8 @@ _ovito_note = False
 def render(dump, png):
     global _ovito_note
     prepare_vulkan()
-    os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    # Qt's offscreen platform cannot create the Vulkan instance OVITO draws with.
+    os.environ.setdefault("QT_QPA_PLATFORM", "ovitoheadless")
     try:
         import warnings
 
