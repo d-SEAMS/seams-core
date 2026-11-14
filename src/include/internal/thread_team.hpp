@@ -10,9 +10,8 @@
 // even when OpenMP was given several. lc_set_threads is read by the
 // next linkcell search.
 //
-// OMP_PROC_BIND pins the calling thread before Rayon starts its pool,
-// and the workers then inherit that single cpu. The mask is widened to
-// every cpu the kernel still allows, once, before the pool is created.
+// A taskset or a cpuset stays in force. The pool is not moved onto a cpu
+// outside the mask the process inherited.
 // The pool is built once and its workers sleep between searches. The
 // OpenMP team is not paused: a pause makes the next region pay a
 // wake-up that moves by tens of milliseconds.
@@ -30,23 +29,8 @@ extern "C" int lc_num_threads(void);
 namespace seams {
 
 inline void widenAffinityOnce() {
-#ifdef __linux__
-  cpu_set_t trial;
-  CPU_ZERO(&trial);
-  if (sched_getaffinity(0, sizeof(trial), &trial) != 0) {
-    return;
-  }
-  for (int cpu = 0; cpu < CPU_SETSIZE; ++cpu) {
-    if (CPU_ISSET(cpu, &trial)) {
-      continue;
-    }
-    CPU_SET(cpu, &trial);
-    if (sched_setaffinity(0, sizeof(trial), &trial) != 0) {
-      CPU_CLR(cpu, &trial);
-    }
-  }
-#else
-#endif
+  // A taskset or a cpuset stays in force. Adding every cpu the kernel
+  // would still allow undoes that mask.
 }
 
 // Once per process. C API callers on several threads may arrive here
