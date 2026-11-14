@@ -2,6 +2,7 @@
 # frame ice Ic molecules=110592 cutoff=3.5 max_ring=6
 # warmup=1 repeats=10 taskset=0..width-1 one process per row
 # source_commit 8665efa51d66ab95124d700f308932d9a9c1e437
+# source_tree f36d64c09dcf698ebdc931466f6398e55623ccc2
 # cpu_model Intel Xeon Processor
 # cpu_family 6
 # cpu_model_id 207
@@ -11,7 +12,9 @@
 # cpu_cores 8
 # affinity 0-7
 # build before commit 310b1319
+# build before tree fe17dafd60286355290a8d8223d9b4a4138c7325
 # build after commit 8665efa51d66ab95124d700f308932d9a9c1e437
+# build after tree f36d64c09dcf698ebdc931466f6398e55623ccc2
 dseams before neighbours threads=1 cores=1 affinity=0 pairs=442368 samples_ms 14.358856 11.880965 11.673185 11.662668 11.567323 11.562691 11.611924 11.574578 11.591197 11.715509
 dseams after neighbours threads=1 cores=1 affinity=0 pairs=442368 samples_ms 11.827260 10.817983 10.225113 10.241971 10.332286 10.194748 10.148430 10.126068 10.134752 10.393274
 dseams before neighbours threads=2 cores=2 affinity=0-1 pairs=442368 samples_ms 10.377664 8.378259 8.262965 8.274175 8.176747 8.076427 8.228939 8.116884 8.218529 8.765222
