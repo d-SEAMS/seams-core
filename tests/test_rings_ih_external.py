@@ -159,6 +159,13 @@ def _ensure_gl():
     # OVITO's PySide6 looks up libGL by name. A system copy outside the
     # default loader path is enough; the process has to start again so
     # the loader sees it.
+    # An interpreter that already loads OVITO keeps its own loader path.
+    try:
+        import ovito  # noqa: F401
+
+        return
+    except ImportError:
+        pass
     gl = "/usr/lib/x86_64-linux-gnu"
     lib = os.path.join(gl, "libGL.so.1")
     if not os.path.isfile(lib) or os.environ.get("SEAMS_OVITO_LIBS") == "1":
