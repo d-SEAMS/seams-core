@@ -345,8 +345,48 @@ void choosePlan(int width) {
   gRescan = false;
 }
 
+// A host that bound the team (OMP_PROC_BIND, OMP_PLACES, ...) has pinned
+// the caller to its first place, and a Rayon pool started from there would
+// put every worker on that one cpu. Hand linkcell the cpus the host gave
+// the team instead, once per width. No cpu outside those places is used.
+void shareHostPlaces() {
+#ifdef SEAMS_HAS_OPENMP
+  static int sharedWidth = 0;
+  const int width = std::max(1, omp_get_max_threads());
+  if (width < 2 || width == sharedWidth || omp_in_parallel()) {
+    return;
+  }
+  sharedWidth = width;
+  cpu_set_t places;
+  CPU_ZERO(&places);
+#pragma omp parallel num_threads(width)
+  {
+    cpu_set_t mine;
+    CPU_ZERO(&mine);
+    if (sched_getaffinity(0, sizeof(mine), &mine) == 0) {
+#pragma omp critical(seams_host_places)
+      CPU_OR(&places, &places, &mine);
+    }
+  }
+  int cpus[kMaxCpu];
+  int n = 0;
+  for (int cpu = 0; cpu < CPU_SETSIZE && n < kMaxCpu; ++cpu) {
+    if (CPU_ISSET(cpu, &places)) {
+      cpus[n++] = cpu;
+    }
+  }
+  if (n > 1) {
+    lc_set_places(cpus, n);
+  }
+#endif
+}
+
 void applyPin() {
-  if (pinOptOut() || hostOwnsAffinity()) {
+  if (pinOptOut()) {
+    return;
+  }
+  if (hostOwnsAffinity()) {
+    shareHostPlaces();
     return;
   }
   captureAllowed();
