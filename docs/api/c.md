@@ -2856,6 +2856,7 @@ size_t len = 0;
 seams_fingerprint_key(fp, NULL, 0, &len);
 char *key = malloc(len + 1);
 seams_fingerprint_key(fp, key, len + 1, &len);
+free(key);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
@@ -3290,6 +3291,8 @@ size_t n_off = 0, nnz = 0;
 seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz);
 int *off = malloc(n_off * sizeof *off), *cols = malloc(nnz * sizeof *cols);
 seams_neighbours_copy(nb, off, n_off, &n_off, cols, nnz, &nnz);
+free(off);
+free(cols);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
@@ -4118,6 +4121,7 @@ size_t nr = 0;
 seams_rings_nrings(rings, &nr);
 int *sym = malloc(nr * sizeof *sym);
 seams_rings_labels_n(rings, NULL, 0, sym, nr);
+free(sym);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
@@ -4668,7 +4672,10 @@ Example:
 
 ```c
 size_t n = 0;
-if (seams_system_natoms(sys, &n) == SEAMS_OK) { labels = malloc(n * sizeof *labels); }
+if (seams_system_natoms(sys, &n) == SEAMS_OK) {
+  labels = malloc(n * sizeof *labels);
+  free(labels);
+}
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
@@ -4706,6 +4713,7 @@ size_t n = 0;
 seams_system_natoms(sys, &n);
 double *xyz = malloc(3 * n * sizeof *xyz);
 seams_system_positions(sys, xyz, 3 * n);
+free(xyz);
 ```
 
 The tour call is in `docs/examples/c_api_tour.c`.
