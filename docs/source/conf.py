@@ -449,6 +449,34 @@ def _stage_native_html():
         _native_page(r_dest, "dseams", "Rscript is not on PATH. The roxygen topics are in man/.")
 
 
+def _ensure_root_index():
+    """Give Sphinx a landing page when the Org export has not run yet.
+
+    The book export writes this file. Linkcheck still walks every page
+    the staging steps have already copied.
+    """
+    index = os.path.join(_source, "index.rst")
+    if os.path.isfile(index):
+        return
+    sections = (
+        "stable/index",
+        "engines/index",
+        "fronts/index",
+        "capi/index",
+        "lang/index",
+        "science/index",
+        "walkthrough/index",
+        "api/index",
+    )
+    present = [name for name in sections if os.path.isfile(os.path.join(_source, name + ".rst"))]
+    lines = ["d-SEAMS", "=======", "", ".. toctree::", "   :maxdepth: 2", ""]
+    for name in present:
+        lines.append("   " + name)
+    lines.append("")
+    with open(index, "w", encoding="utf-8") as handle:
+        handle.write("\n".join(lines))
+
+
 def _link_capi():
     """Point the generated book at the committed C API section."""
     index = os.path.join(_source, "index.rst")
@@ -472,6 +500,7 @@ def _link_capi():
 _stage_markdown_book()
 _stage_ctypes_autodoc()
 _stage_native_html()
+_ensure_root_index()
 _link_capi()
 
 
@@ -559,6 +588,81 @@ def _write_png_stub(png):
     blob += chunk(b"IEND", b"")
     with open(png, "wb") as handle:
         handle.write(blob)
+
+
+def _toctree_docnames():
+    """Docnames already named by a ``.. toctree::`` entry."""
+    included = set()
+    for dirpath, dirnames, filenames in os.walk(_source):
+        dirnames[:] = [name for name in dirnames if name not in {"_static", "_templates"}]
+        for filename in filenames:
+            if not filename.endswith(".rst"):
+                continue
+            parent = os.path.relpath(dirpath, _source)
+            parent = "" if parent == "." else parent.replace(os.sep, "/")
+            lines = open(os.path.join(dirpath, filename), encoding="utf-8", errors="replace")
+            in_tree = False
+            for raw in lines:
+                if raw.strip() == ".. toctree::":
+                    in_tree = True
+                    continue
+                if not in_tree:
+                    continue
+                if raw.strip() == "":
+                    continue
+                if not raw.startswith("   "):
+                    in_tree = False
+                    continue
+                entry = raw.strip()
+                if entry.startswith(":"):
+                    continue
+                name = entry.split()[0].lstrip("/")
+                if parent:
+                    name = parent + "/" + name
+                included.add(name)
+    return included
+
+
+def _include_orphan_pages():
+    """Put every staged page in one toctree so linkcheck reads its links.
+
+    Section indexes list some pages with ``:doc:`` only. Those pages are
+    still part of the book, and a warning-as-error build would stop
+    before the URL check.
+    """
+    index = os.path.join(_source, "index.rst")
+    if not os.path.isfile(index):
+        return
+    start = ".. linkcheck-pages-start"
+    end = ".. linkcheck-pages-end"
+    text = open(index, encoding="utf-8").read()
+    if start in text and end in text:
+        text = text[: text.index(start)] + text[text.index(end) + len(end) :]
+        text = text.rstrip() + "\n"
+        with open(index, "w", encoding="utf-8") as handle:
+            handle.write(text)
+    included = _toctree_docnames()
+    skip_prefixes = ("science/figures/", "xml/", "doxygen-include/")
+    orphans = []
+    for dirpath, dirnames, filenames in os.walk(_source):
+        dirnames[:] = [name for name in dirnames if name not in {"_static", "_templates"}]
+        for filename in filenames:
+            if not filename.endswith((".rst", ".md")):
+                continue
+            rel = os.path.relpath(os.path.join(dirpath, filename), _source).replace(os.sep, "/")
+            if rel == "index.rst" or rel.startswith(skip_prefixes):
+                continue
+            docname = os.path.splitext(rel)[0]
+            if docname not in included:
+                orphans.append(docname)
+    if not orphans:
+        return
+    lines = [text.rstrip(), "", start, "", ".. toctree::", "   :hidden:", "   :maxdepth: 1", ""]
+    for docname in sorted(orphans):
+        lines.append("   " + docname)
+    lines.extend(["", end, ""])
+    with open(index, "w", encoding="utf-8") as handle:
+        handle.write("\n".join(lines))
 
 
 _link_science()
@@ -665,6 +769,8 @@ if not os.path.isfile(_api_index):
             "These pages are filled by Doxygen and Doxyrest.\n"
             "Until that step has run, the header map is the API page.\n"
         )
+
+_include_orphan_pages()
 
 # -- Project information -----------------------------------------------------
 project = "d-SEAMS"
