@@ -1,0 +1,24 @@
+# Python and matplotlib frames from capi_crosscheck.
+#
+# The test prints "capi crosscheck ok" and then LeakSanitizer reports
+# 5734 bytes in 103 allocations. The stacks stay in CPython and in
+# matplotlib/_image. A seams, libyodaLib, or dseams frame is not listed.
+#
+# Shared libpython, when the interpreter is loaded as that library:
+leak:libpython*
+# CPython 3.12 Objects/obmalloc.c, the 1024-byte direct leak:
+#   #1 _PyMem_RawCalloc
+#   #2 PyMem_RawCalloc
+#   #3 _PyObject_Calloc
+leak:_PyMem_RawCalloc
+leak:PyMem_RawCalloc
+leak:_PyObject_Calloc
+# matplotlib/_image pybind11 records. The module path contains
+# matplotlib, which covers:
+#   pybind11::cpp_function::make_function_record
+#   pybind11::cpp_function::initialize_generic
+#   pybind11::detail::process_attribute<pybind11::arg>::init
+#   std::vector<pybind11::detail::argument_record>::_M_realloc_append
+# pybind11_exec__image is the _image module initializer.
+leak:*matplotlib*
+leak:pybind11_exec__image

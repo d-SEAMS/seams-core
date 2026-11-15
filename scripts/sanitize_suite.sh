@@ -49,9 +49,52 @@ fi
 if [ -n "${LD_PRELOAD:-}" ]; then
   export ASAN_TEST_PRELOAD=${LD_PRELOAD%%:*}
 fi
-# LeakSanitizer stays on. scripts/lsan.supp names only unsanitized
-# hosts (CPython, NumPy, Qt, OVITO, OpenMM). A seams frame is not listed.
-export LSAN_OPTIONS="suppressions=$root/scripts/lsan.supp${LSAN_OPTIONS:+:$LSAN_OPTIONS}"
+# LeakSanitizer stays on and honors one suppressions= file. A second
+# suppressions= key replaces the first. scripts/lsan.supp names unsanitized
+# hosts (CPython, NumPy, Qt, OVITO, OpenMM). ci/lsan-python.supp names the
+# Python and matplotlib frames capi_crosscheck leaves behind. An incoming
+# suppressions= file is appended, and any other LSAN_OPTIONS keys are kept.
+# A seams frame is not listed.
+mkdir -p "$build"
+_lsan_combined=$build/lsan-combined.supp
+{
+  cat "$root/scripts/lsan.supp"
+  printf '\n'
+  cat "$root/ci/lsan-python.supp"
+  printf '\n'
+} > "$_lsan_combined"
+_lsan_rest=
+if [ -n "${LSAN_OPTIONS:-}" ]; then
+  _lsan_ifs=$IFS
+  IFS=:
+  for _lsan_item in $LSAN_OPTIONS; do
+    case $_lsan_item in
+      suppressions=*)
+        _lsan_file=${_lsan_item#suppressions=}
+        if [ -f "$root/$_lsan_file" ]; then
+          _lsan_file=$root/$_lsan_file
+        fi
+        if [ ! -f "$_lsan_file" ]; then
+          echo "lsan suppressions file not found: $_lsan_file" >&2
+          exit 1
+        fi
+        # The two files above are already in the combined list.
+        if [ "$_lsan_file" = "$root/scripts/lsan.supp" ] || [ "$_lsan_file" = "$root/ci/lsan-python.supp" ]; then
+          continue
+        fi
+        cat "$_lsan_file" >> "$_lsan_combined"
+        printf '\n' >> "$_lsan_combined"
+        ;;
+      '')
+        ;;
+      *)
+        _lsan_rest="${_lsan_rest:+$_lsan_rest:}$_lsan_item"
+        ;;
+    esac
+  done
+  IFS=$_lsan_ifs
+fi
+export LSAN_OPTIONS="suppressions=$_lsan_combined${_lsan_rest:+:$_lsan_rest}"
 # The dev profile is unoptimized. opt-level 1 keeps the tests inside
 # the cargo-test limit once the compiler itself is not sanitized.
 export CARGO_PROFILE_DEV_OPT_LEVEL=1

@@ -18,7 +18,11 @@ jobs:
       # scripts/sanitize_suite.sh is the same configure and the whole meson
       # suite. AddressSanitizer and UndefinedBehaviorSanitizer together.
       # Julia and R cannot host that runtime; the Python front is in the suite.
+      # ci/lsan-python.supp is folded in with scripts/lsan.supp. LeakSanitizer
+      # keeps a single suppressions= file, so the script merges them.
       - run: pixi run scripts/sanitize_suite.sh
+        env:
+          LSAN_OPTIONS: suppressions=ci/lsan-python.supp
 
   tsan-openmp:
     runs-on: ubuntu-latest
