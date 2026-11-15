@@ -2,8 +2,8 @@
 """Primitive rings against OVITO FindRings.
 
 Both sides see the same cutoff graph. d-SEAMS counts Franzblau primitive
-rings. K2,3 has three chordless 4-rings, and FindRings counts those three.
-On a larger frame FindRings must not exceed that primitive census.
+rings. K2,3 has three chordless 4-rings. FindRings returns a basis of
+two of them. On a larger frame FindRings must not exceed that census.
 Exit 77 only when OVITO cannot be imported.
 """
 
@@ -264,10 +264,10 @@ def main() -> None:
             raise SystemExit(1)
         ours = summary_counts(bench(bench_bin, dump, 4, []))
         theirs, obonds = ovito_histogram(pts, lo, hi, 4)
-        if ours[4] != 3 or obonds != 6 or theirs[4] != 3:
+        if ours[4] != 3 or obonds != 6 or theirs[4] != 2:
             print("K2,3 dseams n4 {} ovito n4 {} bonds {}".format(ours[4], theirs[4], obonds), file=sys.stderr)
             raise SystemExit(1)
-        print("K2,3 primitive 4-rings 3, OVITO FindRings 3, bonds 6")
+        print("K2,3 primitive 4-rings 3, OVITO FindRings 2, bonds 6")
 
     dump = os.path.abspath(DUMP)
     pts, lo, hi = load_frame(dump)
