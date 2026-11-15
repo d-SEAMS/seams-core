@@ -2843,11 +2843,14 @@ int main(int argc, char *argv[]) {
       (jobs == 1 || frameSource(file) != FrameSource::dump)) {
     walkCarry = std::make_unique<FrameCarry>(true);
   }
+  // A truncated frame throws on the rank that reads it. Returning
+  // before the gather leaves the other rank blocked in MPI_Gatherv.
+  std::string frameError;
   try {
     forEachInputFrame(file, lo, hi, typeFilter, jobs, processFrame, part, parts);
   } catch (...) {
-    std::cerr << colorizer.error(exceptionText()) << "\n";
-    return 2;
+    frameError = exceptionText();
+    std::cerr << colorizer.error(frameError) << "\n";
   }
 #ifdef SEAMS_HAS_MPI
   if (ranks.size > 1 &&
@@ -2871,6 +2874,9 @@ int main(int argc, char *argv[]) {
     if (rc == 0 && outputStatus[i] != 0) {
       rc = outputStatus[i];
     }
+  }
+  if (!frameError.empty()) {
+    return 2;
   }
   return rc;
 }

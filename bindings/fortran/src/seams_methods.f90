@@ -774,6 +774,7 @@ contains
     integer(c_size_t) :: n_off, nnz, off_cap, col_cap
     integer(c_int) :: code
     integer(c_int), allocatable, target :: off_buf(:), col_buf(:)
+    integer :: i
     raw = open_raw(self%box, stat, errmsg, "neighbours")
     if (.not. c_associated(raw)) return
     code = seams_neighbours_copy(raw, c_null_ptr, 0_c_size_t, n_off, c_null_ptr, 0_c_size_t, nnz)
@@ -794,14 +795,26 @@ contains
     col_cap = nnz
     code = seams_neighbours_copy(raw, off_ptr, off_cap, n_off, col_ptr, col_cap, nnz)
     if (code /= SEAMS_OK) then
+      if (allocated(off_buf)) deallocate(off_buf)
+      if (allocated(col_buf)) deallocate(col_buf)
       call check_status(code, raw, stat, errmsg)
       return
     end if
+    ! int() on the whole array builds a temporary that LeakSanitizer
+    ! still sees after the assignment. Copy one element at a time.
     if (which == 0) then
-      values = int(off_buf, seams_int)
+      allocate(values(size(off_buf)))
+      do i = 1, size(off_buf)
+        values(i) = int(off_buf(i), seams_int)
+      end do
     else
-      values = int(col_buf, seams_int)
+      allocate(values(size(col_buf)))
+      do i = 1, size(col_buf)
+        values(i) = int(col_buf(i), seams_int)
+      end do
     end if
+    if (allocated(off_buf)) deallocate(off_buf)
+    if (allocated(col_buf)) deallocate(col_buf)
     call check_status(code, raw, stat, errmsg)
   end subroutine neighbour_column
 

@@ -34,4 +34,13 @@ meson setup "$build" $reconfigure \
   -Dwith_cli=true \
   "$@"
 ninja -C "$build"
+# Python, Lua, and the engine hosts are not linked with the sanitizer.
+# A sanitized libseams loaded into them aborts with "ASan runtime does
+# not come first" unless this runtime is already mapped.
+if [ -z "${LD_PRELOAD:-}" ]; then
+  asan=$(${CC:-cc} -print-file-name=libasan.so 2>/dev/null || true)
+  if [ -n "$asan" ] && [ "$asan" != "libasan.so" ] && [ -f "$asan" ]; then
+    export LD_PRELOAD="$asan"
+  fi
+fi
 meson test -C "$build" --print-errorlogs

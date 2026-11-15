@@ -574,7 +574,6 @@ void sinp::forEachLammpsFrame(
   const int count = static_cast<int>(frames.size());
 
   std::mutex errorMu;
-  std::atomic<bool> failed{false};
   std::string error;
 #ifdef SEAMS_HAS_OPENMP
   const int threads = nThreads > 0 ? nThreads : omp_get_max_threads();
@@ -582,9 +581,6 @@ void sinp::forEachLammpsFrame(
     if (threads > 1 && count > 1)
 #endif
   for (int k = 0; k < count; ++k) {
-    if (failed.load()) {
-      continue;
-    }
     const int frame = frames[static_cast<std::size_t>(k)];
     try {
       molSys::PointCloud<molSys::Point<double>, double> cloud;
@@ -599,7 +595,6 @@ void sinp::forEachLammpsFrame(
       if (error.empty()) {
         error = ex.what();
       }
-      failed.store(true);
     }
   }
   if (!error.empty()) {

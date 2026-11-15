@@ -80,8 +80,11 @@ same(["--strict-input", "--type", "99", "--frame", "1", "--last", "11", "read",
       dump], 11, rc=2)
 same(["--frame", "1", "--last", "4", "read", dump], 4, extra={"FORCE_COLOR": "1"})
 
-# A last frame cut short keeps the atoms it has and warns on stderr once, as
-# only the rank dealt that frame reads it
+# input/traj/mW_cubic.lammpstrj is 11 complete frames of 4096 atoms.
+# This test cuts that file on purpose: lines[:last ITEM: ATOMS + 3] keeps
+# frames 1-10 whole and leaves frame 11 with its header and two atom lines.
+# A finished short frame is an error, so both ranks print ten records and
+# the truncation message, and both join the gather.
 with tempfile.TemporaryDirectory() as tmp:
     short = os.path.join(tmp, "short.lammpstrj")
     with open(dump) as f:
@@ -89,10 +92,10 @@ with tempfile.TemporaryDirectory() as tmp:
     atoms = max(i for i, line in enumerate(lines) if line.startswith("ITEM: ATOMS"))
     with open(short, "w") as f:
         f.writelines(lines[:atoms + 3])
-    serial, mpi = same(["--frame", "1", "--last", "20", "read", short], 11)
-    warning = "Atoms didn't get filled in properly."
-    check("short frame warns once", '"nop 2 frame 11 ' in serial.stdout and
-          serial.stderr.count(warning) == 1 and mpi.stderr.count(warning) == 1)
+    serial, mpi = same(["--frame", "1", "--last", "20", "read", short], 10, rc=2)
+    note = "LAMMPS dump frame is truncated:"
+    check("short frame errors once", serial.stderr.count(note) == 1 and
+          mpi.stderr.count(note) == 1)
 
 with tempfile.TemporaryDirectory() as tmp:
     out = os.path.join(tmp, "cages.dump")
