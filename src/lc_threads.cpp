@@ -203,6 +203,23 @@ int ownRunning() {
   return running < 1 ? 1 : running;
 }
 
+// The two counts are separate snapshots. A wide team whose workers wait
+// out time slices drops in and out of the run queue between them, so one
+// sample can read our own workers as somebody else's: beside two busy
+// threads, ten runnable with six of them ours read as four others, and
+// the team ran unplaced at full width for a second. Our count is read on
+// both sides of the global one, and the lower of two such samples is kept.
+int othersRunning() {
+  int others = 1 << 30;
+  for (int pass = 0; pass < 2; ++pass) {
+    const int before = ownRunning();
+    const int running = procsRunning();
+    const int after = ownRunning();
+    others = std::min(others, std::max(0, running - std::max(before, after)));
+  }
+  return others;
+}
+
 bool readStatus(const char *path, char *buf, int cap) {
   const int fd = open(path, O_RDONLY);
   if (fd < 0) {
@@ -316,7 +333,6 @@ void choosePlan(int width) {
   if (gAllowedN < 2) {
     return;
   }
-  const int running = procsRunning();
   int owners[64];
   int nowners = 0;
   // One status file per process, and only when a plan is being built.
@@ -339,7 +355,7 @@ void choosePlan(int width) {
       }
   }
   if (nids < 2) {
-    const int others = std::max(0, running - ownRunning());
+    const int others = othersRunning();
     // Other runnable threads hold half the mask or more. A worker tied to
     // one of those cpus waits for that cpu's time slice at every barrier,
     // and so do the regions that place and restore the team: a 2 ms call
