@@ -1143,6 +1143,28 @@ def cycles_job():
         tree.links.new(emission.outputs["Emission"], output.inputs["Surface"])
         return material
 
+    def sheet(name, rgb, alpha):
+        """Flat translucent polygon. No refraction, so stacked rings stay cheap."""
+        material = bpy.data.materials.new(name)
+        material.use_nodes = True
+        tree = material.node_tree
+        tree.nodes.clear()
+        output = tree.nodes.new("ShaderNodeOutputMaterial")
+        emission = tree.nodes.new("ShaderNodeEmission")
+        emission.inputs["Color"].default_value = (*srgb_to_linear(rgb), 1.0)
+        emission.inputs["Strength"].default_value = 1.0
+        transparent = tree.nodes.new("ShaderNodeBsdfTransparent")
+        mix = tree.nodes.new("ShaderNodeMixShader")
+        mix.inputs["Fac"].default_value = float(alpha)
+        tree.links.new(transparent.outputs["BSDF"], mix.inputs[1])
+        tree.links.new(emission.outputs["Emission"], mix.inputs[2])
+        tree.links.new(mix.outputs["Shader"], output.inputs["Surface"])
+        if hasattr(material, "surface_render_method"):
+            material.surface_render_method = "BLENDED"
+        elif hasattr(material, "blend_method"):
+            material.blend_method = "BLEND"
+        return material
+
     def add_mesh(name, mesh, material):
         obj = bpy.data.objects.new(name, mesh)
         bpy.context.scene.collection.objects.link(obj)
@@ -1264,7 +1286,11 @@ def cycles_job():
         key = "mesh_alpha_{}".format(slot)
         if key in job.files:
             face = float(job[key])
-        material = glossy("cage", colour, face, 0.35)
+        # A Principled surface on every stacked ring does not finish
+        # 256 samples of this panel. The sheet is the same flat colour
+        # the atoms use, mixed with transparency so the polygon stays
+        # see-through.
+        material = sheet("cage", colour, face)
         mesh = bpy.data.meshes.new("cage")
         mesh.from_pydata(vertices.tolist(), [], faces)
         mesh.update()
@@ -2084,7 +2110,27 @@ def cage_meshes(oxygens, guests, box):
     return meshes, extra, highlighted
 
 
-def ring_meshes(positions, rings):
+def unwrap_ring(points, lengths):
+    """Walk the ring through the nearest periodic image of each edge.
+
+    Atom coordinates are stored inside the box, so a ring that crosses a
+    face would otherwise be drawn as a sheet the size of the cell. That
+    sheet covers the picture and the path tracer spends the sample on it.
+    """
+    import numpy as np
+
+    if lengths is None:
+        return np.asarray(points, dtype=float)
+    lengths = np.asarray(lengths, dtype=float)
+    out = np.array(points, dtype=float, copy=True)
+    for index in range(1, len(out)):
+        delta = out[index] - out[index - 1]
+        delta -= lengths * np.round(delta / np.where(lengths > 0.0, lengths, 1.0))
+        out[index] = out[index - 1] + delta
+    return out
+
+
+def ring_meshes(positions, rings, box_lengths=None):
     """Filled polygons. Six-rings are orange and every other ring is blue."""
     import numpy as np
 
@@ -2097,7 +2143,12 @@ def ring_meshes(positions, rings):
             continue
         key = "hexagonal ring" if size == 6 else "other ring"
         bucket = buckets[key]
-        points = np.asarray(positions)[list(indices)]
+        points = unwrap_ring(np.asarray(positions)[list(indices)], box_lengths)
+        # A cycle that winds around the periodic box does not close in
+        # the unwrapped embedding. Filling it draws a sheet across the
+        # cell. The cage faces close on a bond.
+        if float(np.linalg.norm(points[0] - points[-1])) > 3.5:
+            continue
         centre = points.mean(axis=0)
         normal = np.cross(points[1] - points[0], points[min(2, len(points) - 1)] - points[0])
         length = float(np.linalg.norm(normal)) or 1.0
@@ -3232,7 +3283,9 @@ def draw(library, scene):
         return labelled_picture(frame, labels, "slab", False, ions=True, slab=True)
     if scene == "rings":
         frame = read_dump(ROOT / "input/traj/genice_sI.lammpstrj")
-        meshes = ring_meshes(frame.xyz, ring_lists(library, frame))
+        meshes = ring_meshes(
+            frame.xyz, ring_lists(library, frame), frame.box9[3:6],
+        )
         return labelled_picture(
             frame, chill_labels(library, frame), "cage", False, perspective=False, meshes=meshes,
         )
@@ -3244,7 +3297,7 @@ def draw(library, scene):
             span = float(frame.xyz[ids, 2].max() - frame.xyz[ids, 2].min())
             if span > 1.4:
                 upright.append((size, ids))
-        meshes = ring_meshes(frame.xyz, upright)
+        meshes = ring_meshes(frame.xyz, upright, frame.box9[3:6])
         for mesh in meshes:
             mesh["legend"] = "prism face"
             mesh["color"] = palette_rgb("cubic")
