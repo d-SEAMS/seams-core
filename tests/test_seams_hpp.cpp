@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <iostream>
 #include <map>
 #include <sstream>
@@ -15,8 +16,14 @@
 namespace {
 
 std::map<std::string, std::vector<double>> load_oracle(const std::string &oracle, const std::string &root) {
-  const std::string command = "OMP_NUM_THREADS=1 \"" + oracle + "\" \"" + root + "\"";
+  const std::string command = "\"" + oracle + "\" \"" + root + "\"";
+#if defined(_WIN32)
+  _putenv_s("OMP_NUM_THREADS", "1");
+  FILE *pipe = _popen(command.c_str(), "r");
+#else
+  setenv("OMP_NUM_THREADS", "1", 1);
   FILE *pipe = popen(command.c_str(), "r");
+#endif
   if (pipe == nullptr) {
     throw std::runtime_error("oracle failed to start");
   }
@@ -25,7 +32,11 @@ std::map<std::string, std::vector<double>> load_oracle(const std::string &oracle
   while (fgets(buf, sizeof(buf), pipe) != nullptr) {
     text += buf;
   }
+#if defined(_WIN32)
+  const int status = _pclose(pipe);
+#else
   const int status = pclose(pipe);
+#endif
   if (status != 0) {
     throw std::runtime_error("oracle failed");
   }

@@ -14,10 +14,12 @@
 #include <seams.h>
 
 #include <math.h>
-#include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#if !defined(_WIN32)
+#include <pthread.h>
+#endif
 
 #define NTHREADS 8
 #define ROUNDS 20
@@ -37,7 +39,70 @@ struct job {
 };
 
 static struct job g_jobs[NTHREADS];
-static pthread_barrier_t g_start;
+
+/* macOS has no pthread_barrier. A mutex and a condition variable is the
+ * same rendezvous: every thread waits until all eight have arrived. */
+#if defined(_WIN32)
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <process.h>
+struct start_barrier {
+  CRITICAL_SECTION mu;
+  CONDITION_VARIABLE cv;
+  unsigned count;
+  unsigned total;
+};
+static void barrier_init(struct start_barrier *barrier, unsigned total) {
+  InitializeCriticalSection(&barrier->mu);
+  InitializeConditionVariable(&barrier->cv);
+  barrier->count = 0;
+  barrier->total = total;
+}
+static void barrier_wait(struct start_barrier *barrier) {
+  EnterCriticalSection(&barrier->mu);
+  barrier->count += 1;
+  if (barrier->count == barrier->total) {
+    WakeAllConditionVariable(&barrier->cv);
+  } else {
+    while (barrier->count < barrier->total) {
+      SleepConditionVariableCS(&barrier->cv, &barrier->mu, INFINITE);
+    }
+  }
+  LeaveCriticalSection(&barrier->mu);
+}
+static void barrier_destroy(struct start_barrier *barrier) { DeleteCriticalSection(&barrier->mu); }
+#else
+struct start_barrier {
+  pthread_mutex_t mu;
+  pthread_cond_t cv;
+  unsigned count;
+  unsigned total;
+};
+static void barrier_init(struct start_barrier *barrier, unsigned total) {
+  pthread_mutex_init(&barrier->mu, NULL);
+  pthread_cond_init(&barrier->cv, NULL);
+  barrier->count = 0;
+  barrier->total = total;
+}
+static void barrier_wait(struct start_barrier *barrier) {
+  pthread_mutex_lock(&barrier->mu);
+  barrier->count += 1;
+  if (barrier->count == barrier->total) {
+    pthread_cond_broadcast(&barrier->cv);
+  } else {
+    while (barrier->count < barrier->total) {
+      pthread_cond_wait(&barrier->cv, &barrier->mu);
+    }
+  }
+  pthread_mutex_unlock(&barrier->mu);
+}
+static void barrier_destroy(struct start_barrier *barrier) {
+  pthread_cond_destroy(&barrier->cv);
+  pthread_mutex_destroy(&barrier->mu);
+}
+#endif
+
+static struct start_barrier g_start;
 
 static void ice_ic(int seed, double *xyz, double *box) {
   const int nrep = 4;
@@ -99,7 +164,7 @@ static void *worker(void *arg) {
     return NULL;
   }
   mine->sys = ref->sys;
-  pthread_barrier_wait(&g_start);
+  barrier_wait(&g_start);
   for (int r = 0; r < ROUNDS; ++r) {
     if (!run(mine)) {
       fprintf(stderr, "call failed: %s\n", seams_last_error_message());
@@ -117,6 +182,13 @@ static void *worker(void *arg) {
   free(mine);
   return NULL;
 }
+
+#if defined(_WIN32)
+static unsigned __stdcall win_worker(void *arg) {
+  worker(arg);
+  return 0;
+}
+#endif
 
 int main(void) {
   static double xyz[3 * NATOMS];
@@ -141,21 +213,37 @@ int main(void) {
     return 1;
   }
 
+  barrier_init(&g_start, NTHREADS);
+#if defined(_WIN32)
+  HANDLE threads[NTHREADS];
+  for (int t = 0; t < NTHREADS; ++t) {
+    threads[t] = (HANDLE)_beginthreadex(NULL, 0, win_worker, &g_jobs[t], 0, NULL);
+    if (threads[t] == NULL) {
+      fprintf(stderr, "thread start failed\n");
+      return 1;
+    }
+  }
+#else
   pthread_t threads[NTHREADS];
-  pthread_barrier_init(&g_start, NULL, NTHREADS);
   for (int t = 0; t < NTHREADS; ++t) {
     if (pthread_create(&threads[t], NULL, worker, &g_jobs[t]) != 0) {
       fprintf(stderr, "pthread_create failed\n");
       return 1;
     }
   }
+#endif
   long total = 0;
   for (int t = 0; t < NTHREADS; ++t) {
+#if defined(_WIN32)
+    WaitForSingleObject(threads[t], INFINITE);
+    CloseHandle(threads[t]);
+#else
     pthread_join(threads[t], NULL);
+#endif
     total += g_jobs[t].bad;
     seams_system_destroy(g_jobs[t].sys);
   }
-  pthread_barrier_destroy(&g_start);
+  barrier_destroy(&g_start);
   printf("capi_q_threads: %d threads x %d rounds, %d atoms each, %ld mismatches\n", NTHREADS,
          ROUNDS, NATOMS, total);
   return total == 0 ? 0 : 1;

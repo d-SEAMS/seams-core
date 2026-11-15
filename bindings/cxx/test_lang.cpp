@@ -8,8 +8,12 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include <dlfcn.h>
 #include <vector>
+#if defined(_WIN32)
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
 
 namespace {
 
@@ -17,17 +21,24 @@ using ArmFn = void (*)(int, int);
 using LiveFn = long (*)();
 using ResetFn = void (*)();
 
+void *process_symbol(const char *name) {
+#if defined(_WIN32)
+  return reinterpret_cast<void *>(GetProcAddress(GetModuleHandleA(nullptr), name));
+#else
+  return dlsym(RTLD_DEFAULT, name);
+#endif
+}
 ArmFn fault_arm() {
-  return reinterpret_cast<ArmFn>(dlsym(RTLD_DEFAULT, "seams_test_arm"));
+  return reinterpret_cast<ArmFn>(process_symbol("seams_test_arm"));
 }
 LiveFn fault_live() {
-  return reinterpret_cast<LiveFn>(dlsym(RTLD_DEFAULT, "seams_test_live"));
+  return reinterpret_cast<LiveFn>(process_symbol("seams_test_live"));
 }
 LiveFn fault_peak() {
-  return reinterpret_cast<LiveFn>(dlsym(RTLD_DEFAULT, "seams_test_peak"));
+  return reinterpret_cast<LiveFn>(process_symbol("seams_test_peak"));
 }
 ResetFn fault_reset() {
-  return reinterpret_cast<ResetFn>(dlsym(RTLD_DEFAULT, "seams_test_reset_peak"));
+  return reinterpret_cast<ResetFn>(process_symbol("seams_test_reset_peak"));
 }
 
 int fail(const std::string &message) {
@@ -271,7 +282,11 @@ int main(int argc, char **argv) {
   if (argc > 2) {
     const std::string cmd = std::string(argv[2]) + " cages " + nucleation +
                             " --graph seeded --cutoff 3.5";
+#if defined(_WIN32)
+    FILE *pipe = _popen(cmd.c_str(), "r");
+#else
     FILE *pipe = popen(cmd.c_str(), "r");
+#endif
     if (pipe == nullptr) {
       return fail("cli pipe");
     }
@@ -280,7 +295,11 @@ int main(int argc, char **argv) {
     while (fgets(buf, sizeof buf, pipe) != nullptr) {
       line += buf;
     }
+#if defined(_WIN32)
+    const int rc = _pclose(pipe);
+#else
     const int rc = pclose(pipe);
+#endif
     if (rc != 0) {
       std::cerr << line;
       return fail("cli cages");
