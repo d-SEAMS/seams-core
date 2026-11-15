@@ -2,7 +2,7 @@
 """Write the figure records that Snakemake keeps out of git.
 
 Hydrate coordinates take oxygen from the GenIce dumps and place one
-methane carbon at each cage centre. The nucleation host record and the
+methane carbon at each cage center. The nucleation host record and the
 campaign manifest are the measurement records the statistics read.
 """
 import base64

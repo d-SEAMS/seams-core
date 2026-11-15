@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Read the GenIce sI cell through the C++ language header. */
 #include "seams_lang.h"
 

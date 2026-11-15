@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Neighbours: build the 3.5 A list of hexagonal ice and copy it out as CSR.
  * Usage: neighbours <repository root> */
 #include "seams.h"

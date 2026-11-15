@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Read input/traj/genice_sI.lammpstrj, then neighbours, q6, CHILL+, rings. */
 #include "seams.h"
 #include "seams_lammps_box.h"

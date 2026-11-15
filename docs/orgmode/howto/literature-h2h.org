@@ -261,7 +261,7 @@ The 884736-molecule sitting sets the variable. TRACE does not change
 from one thread to eight.
 The sI unit-cell census is the disagreement above. The q6
 derivative, checked separately on a symmetry-broken
-eight-molecule cell, matches an independent nanometre difference
+eight-molecule cell, matches an independent nanometer difference
 to 3.99e-11.
 
 The table is ~benchmarks/rc3-sitting.csv~: code, version, molecules, operation, threads, cores, n, median, and the type-7 interquartile range.

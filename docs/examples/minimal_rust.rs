@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 //! Read the GenIce sI cell through the safe seams crate.
 use seams::{num_threads, set_num_threads, version, System};
 use std::env;

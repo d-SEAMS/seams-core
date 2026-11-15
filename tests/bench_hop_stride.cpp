@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /*
 ** This file is part of d-SEAMS.
 **

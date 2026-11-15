@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """One-thread and eight-thread ring search against OVITO FindRings.
 
 One driver run times both placements. Prebuilt builds the cutoff graph

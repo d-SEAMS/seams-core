@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """One process: d-SEAMS, mdapy, pyscal3, and vesin on the same ice Ih cells.
 
 Eight samples at 4096, 32768, and 110592 oxygen molecules. d-SEAMS, mdapy,

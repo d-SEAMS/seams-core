@@ -395,7 +395,7 @@ function dseams.density(cloud, o)
   local axis = o.axis or 2
   if axis == "x" then axis = 0 elseif axis == "y" then axis = 1 elseif axis == "z" then axis = 2 end
   local z, rho = cloud._sys:density(o.type or 0, o.bins or 0, axis)
-  return {centres = z, rho = rho, axis = axis}
+  return {centers = z, rho = rho, axis = axis}
 end
 
 --- dseams.densityByType.
@@ -406,7 +406,7 @@ function dseams.fingerprint(cloud, o)
   o = opts(o)
   local key, rings = cloud._sys:fingerprint(
     o.cutoff or 3.5, o.type or 0, o.k or 4, graph_of(o.graph), o.hops or 2,
-    o.colours and 1 or 0)
+    o.colors and 1 or 0)
   return {key = key, rings = rings}
 end
 

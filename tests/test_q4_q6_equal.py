@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 """Per-atom and averaged q4 and q6 against freud and pyscal3.
 
 OVITO 3.15.5 has no SteinhardtParametersModifier, so this comparison

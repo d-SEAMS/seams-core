@@ -36,8 +36,8 @@ rest sit in other components.
 #+begin_export rst
 .. figure:: molecules/nucleation/overlay-web.png
    :width: 480px
-   :alt: Nucleation frame coloured by published CHILL+.
+   :alt: Nucleation frame colored by published CHILL+.
 
-   Nucleation frame coloured by published CHILL+. ``python docs/scripts/render_molecules.py --slug nucleation`` writes the 2400 by 1800 still.
+   Nucleation frame colored by published CHILL+. ``python docs/scripts/render_molecules.py --slug nucleation`` writes the 2400 by 1800 still.
 #+end_export
 

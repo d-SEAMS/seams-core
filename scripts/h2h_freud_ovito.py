@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """One process: d-SEAMS, freud, and OVITO on ice and the mixed frames.
 
 Eight samples at one thread and at eight. The record is the core count.

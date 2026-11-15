@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /*
 ** Ring search against a cutoff graph.
 **

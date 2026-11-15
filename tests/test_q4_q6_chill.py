@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 """The fused q4/q6/CHILL+ wrapper matches ideal ice, including q-bar."""
 
 import math

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Head-to-head on the brine frames.
 
 Serial, one core, one thread. One warm-up, then at least six timed calls.

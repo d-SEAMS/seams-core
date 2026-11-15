@@ -135,7 +135,7 @@ RAW = {
         ("seams_coordination", "Coordination number integrated to rmax.", "sys; rmax; bins; type_i; type_j; cn", "rmax in angstrom; cn is dimensionless"),
         ("seams_density_axis", "Number density along one cell axis.", "sys; type; bins; axis; z; rho; cap; n_out", "z in angstrom; rho is number density"),
         ("seams_domains", "Largest polar or apolar domain.", "sys; cutoff; site_spec; subset; n_subset; largest; percolation", "cutoff in angstrom; percolation is dimensionless"),
-        ("seams_fingerprint", "Topological fingerprint of the bonded graph.", "sys; cutoff; type; k; graph; hops; colour_types; out", "cutoff in angstrom; hops is a dimensionless depth"),
+        ("seams_fingerprint", "Topological fingerprint of the bonded graph.", "sys; cutoff; type; k; graph; hops; color_types; out", "cutoff in angstrom; hops is a dimensionless depth"),
         ("seams_fingerprint_atom", "Local key of one atom.", "fp; index; buf; cap; n_out", "text"),
         ("seams_fingerprint_destroy", "Free a fingerprint handle.", "fp", "handle"),
         ("seams_fingerprint_key", "Frame key of a fingerprint.", "fp; buf; cap; n_out", "text"),
@@ -217,7 +217,7 @@ def cxx_rows():
     add("seams_frame_steinhardt_graph", "Local Steinhardt q_l on a named graph.", "frame; cutoff; type; order_l; graph; ql; qlbar", cut + "; ql is dimensionless")
     add("seams_frame_symmetry", "Per-atom shell label for Ih, Ic, or stacking disorder.", "frame; shell_rmsd; labels", "shell_rmsd is a dimensionless residual; labels are dimensionless codes")
     add("seams_frame_types", "Pointer to the atom types stored on the frame.", "frame", "dimensionless types")
-    add("seams_frame_wl", "Normalised Steinhardt w_l for degree 4 or 6.", "frame; cutoff; type; order_l; wl", cut + "; wl is dimensionless")
+    add("seams_frame_wl", "Normalized Steinhardt w_l for degree 4 or 6.", "frame; cutoff; type; order_l; wl", cut + "; wl is dimensionless")
     add("seams_frames_jump_tau90", "Time for an H-H vector to rotate 90 degrees.", "first; second; dt; oxygen_type; hydrogen_type; tau", "dt and tau in the caller's time unit; types are dimensionless")
     add("seams_lang_version", "Version string of the language-binding library.", "none", "text")
     add("seams_last_error", "Return the thread-local error detail.", "none", "text")

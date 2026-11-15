@@ -255,7 +255,7 @@ def main():
         ["cages", "input/traj/nucleation_f1.lammpstrj", "--type", "1", "--per-atom", cages_atom],
         ["cages", ice, "--type", "1", "--per-atom", cages_atom],
         ["cages", ice, "--type", "1", "--graph", "cutoff", "--water-types", "1"],
-        ["fingerprint", ice, "--type", "1", "--hops", "1", "--colour-types"],
+        ["fingerprint", ice, "--type", "1", "--hops", "1", "--color-types"],
         ["fingerprint", ice, "--type", "1", "--hops", "1", "--per-atom", classes],
         ["fingerprint", ice, "--type", "1", "--graph", "mutual", "--hops", "1"],
         ["ions", tip, "--ion-types", "1", "--ion-cutoff", "3.0",

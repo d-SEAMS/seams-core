@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 root <- Sys.getenv("DSEAMS_ROOT", unset = "")
 oracle <- Sys.getenv("SEAMS_CPP_ORACLE", unset = "")
 stopifnot(nzchar(root), nzchar(oracle))

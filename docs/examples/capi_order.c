@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Published CHILL+ marks every Ice Ih oxygen hexagonal. */
 #include "seams.h"
 

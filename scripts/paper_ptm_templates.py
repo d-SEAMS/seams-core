@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """PTM template sets, and per-atom agreement with the symmetry labels.
 
 The classifier writes ice Ih, ice Ic, stacking-disordered ice, or other
@@ -11,7 +12,7 @@ the 230 K brine start frame.
 
 The brine frame is the starting coordinates of input/brine/grow.py at
 230 K and 1 mol/kg (seed 1330, three by three by two ice cells), before
-minimisation or dynamics. Oxygens only. Ions are not labelled.
+minimisation or dynamics. Oxygens only. Ions are not labeled.
 CHILL+ is compared where a class exists on both sides: ice Ih with
 hexagonal ice, ice Ic with cubic ice, and other with Other.
 """

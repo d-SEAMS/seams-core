@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """One sitting of the hydrate signature search at 1, 2, 4 and 8 threads.
 
 The cells are GenIce sI and sII replicated 2x2x2, 4x4x4, 6x6x6 and 8x8x8.

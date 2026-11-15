@@ -4,7 +4,7 @@
 """Regenerate homogeneous mW quenches and census the saved frames.
 
 The dumps are large and stay outside the git work tree. Summaries written
-by nucleation-pathway are the artefact that is small enough to keep.
+by nucleation-pathway are the artifact that is small enough to keep.
 
 n=46 is 97336 molecules. n=100 is 1000000 molecules. n=16 is 4096.
 The deck is input/nucleation/in.homogeneous. The integrator step is

@@ -272,15 +272,15 @@ def main(argv):
             if labels is not None and labels != by_graph["cutoff"]["labels"]:
                 failures.append(f"{front}: default labels are not the cutoff labels")
     for graph in GRAPHS:
-        labelled = [
+        labeled = [
             front
             for front, by_graph in results.items()
             if graph in by_graph and by_graph[graph]["labels"] is not None
         ]
-        for front in labelled[1:]:
-            if results[front][graph]["labels"] != results[labelled[0]][graph]["labels"]:
+        for front in labeled[1:]:
+            if results[front][graph]["labels"] != results[labeled[0]][graph]["labels"]:
                 failures.append(
-                    f"{front} {graph}: labels differ from {labelled[0]}"
+                    f"{front} {graph}: labels differ from {labeled[0]}"
                 )
 
     for line in missing:

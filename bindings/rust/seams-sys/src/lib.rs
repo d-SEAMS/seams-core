@@ -417,7 +417,7 @@ extern "C" {
         k: c_int,
         graph: c_int,
         hops: c_int,
-        colour_types: c_int,
+        color_types: c_int,
         out: *mut *mut seams_topo,
     ) -> c_int;
     pub fn seams_fingerprint_destroy(fp: *mut seams_topo);

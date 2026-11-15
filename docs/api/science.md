@@ -20,7 +20,7 @@ label, q6 and q6-bar along one box edge. `axis` is 0, 1 or 2. A
 negative axis uses the longest edge. The default bin width is 1 Å.
 Empty bins between ice planes are filled before the front is fit.
 `Layers::n` is the number of molecules. `Layers::rows` is one
-`LayerRow` per bin: the bin centre, the occupancy, the cubic,
+`LayerRow` per bin: the bin center, the occupancy, the cubic,
 hexagonal, interfacial and liquid counts, the shell counts, and the
 mean q6 and q6-bar.
 

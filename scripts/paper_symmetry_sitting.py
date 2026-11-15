@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """One sitting of the symmetry classifier against both PTM template sets.
 
 Ideal ice Ic, 110592 molecules, one and eight threads. bench_v2 mode

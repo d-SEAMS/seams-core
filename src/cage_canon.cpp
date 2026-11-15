@@ -37,7 +37,7 @@ void collectAtoms(const std::vector<std::vector<int>> &rings,
 
 std::string densenautyCertificate(int n, const std::vector<std::pair<int, int>> &edges,
                                   int root = -1,
-                                  const std::vector<int> &colours = {}) {
+                                  const std::vector<int> &colors = {}) {
   if (n <= 0 || n > MAXN) {
     return {};
   }
@@ -51,17 +51,17 @@ std::string densenautyCertificate(int n, const std::vector<std::pair<int, int>> 
   std::vector<int> lab(static_cast<size_t>(n), 0);
   std::vector<int> ptn(static_cast<size_t>(n), 0);
   std::vector<int> orbits(static_cast<size_t>(n), 0);
-  const bool coloured = static_cast<int>(colours.size()) == n;
-  if ((root >= 0 && root < n) || coloured) {
-    // colour cells in order: {root} first, then every other vertex sorted
-    // by colour; ptn marks the end of a cell with 0 and the inside with 1
+  const bool colored = static_cast<int>(colors.size()) == n;
+  if ((root >= 0 && root < n) || colored) {
+    // color cells in order: {root} first, then every other vertex sorted
+    // by color; ptn marks the end of a cell with 0 and the inside with 1
     options.defaultptn = FALSE;
-    std::vector<std::pair<int, int>> order;  // (colour, vertex)
+    std::vector<std::pair<int, int>> order;  // (color, vertex)
     for (int v = 0; v < n; v++) {
       if (v == root) {
         continue;
       }
-      order.emplace_back(coloured ? colours[static_cast<size_t>(v)] : 0, v);
+      order.emplace_back(colored ? colors[static_cast<size_t>(v)] : 0, v);
     }
     std::sort(order.begin(), order.end());
     int pos = 0;
@@ -203,11 +203,11 @@ std::string canonicalCertificateRooted(int n,
 
 std::string canonicalCertificateColoured(int n,
                                          const std::vector<std::pair<int, int>> &edges,
-                                         const std::vector<int> &colours, int root) {
+                                         const std::vector<int> &colors, int root) {
 #ifndef SEAMS_HAS_NAUTY
   (void)n;
   (void)edges;
-  (void)colours;
+  (void)colors;
   (void)root;
   return {};
 #else
@@ -221,7 +221,7 @@ std::string canonicalCertificateColoured(int n,
   }
   std::sort(local.begin(), local.end());
   local.erase(std::unique(local.begin(), local.end()), local.end());
-  return densenautyCertificate(n, local, root, colours);
+  return densenautyCertificate(n, local, root, colors);
 #endif
 }
 

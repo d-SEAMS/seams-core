@@ -4,7 +4,7 @@ PLUMED
 ``engines/plumed/SeamsColvar.cpp`` is the ``SEAMS`` action.
 ``engines/plumed/plumed.dat`` loads it on ``engines/plumed/ice.xyz``,
 restrains ``seams.q6``, and prints ``seams.ice`` and ``seams.ring``.
-Coordinates in the xyz file are nanometres. ``calculate`` multiplies
+Coordinates in the xyz file are nanometers. ``calculate`` multiplies
 by 10 before the library call. ``ice`` is the cubic fraction and
 ``ring`` is the fraction of atoms on a primitive six-ring. Only ``q6``
 carries derivatives, which is why the deck can restrain it.

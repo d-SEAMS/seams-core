@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Direct-coexistence slabs for Madrid-2019 + TIP4P/2005.
 
 The geometry follows Lamas, Vega and Noya, J. Chem. Phys. 156, 134503

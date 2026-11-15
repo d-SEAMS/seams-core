@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """OpenMP scaling of the cutoff neighbour list, q4, q6 and the ring census.
 
 Ideal ice Ic, 110592 molecules, cutoff 3.5 A, rings up to six. Every

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Release-build head-to-head.
 
 d-SEAMS is tests/bench_watch from a meson -Dbuildtype=release tree,

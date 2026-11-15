@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /*
 ** Time one hydrate signature search: the threaded linkcell neighbour
 ** list, one depth-6 ring network, and one closed-cage search of 5^12,

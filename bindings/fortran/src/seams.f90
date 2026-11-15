@@ -441,13 +441,13 @@ module seams
       character(len=:), allocatable, intent(out), optional :: errmsg
     end subroutine
 
-    module function frame_fingerprint(self, cutoff, typ, k, graph, hops, colours, stat, errmsg) &
+    module function frame_fingerprint(self, cutoff, typ, k, graph, hops, colors, stat, errmsg) &
         result(fp)
       class(seams_frame), intent(inout) :: self
       type(seams_topo) :: fp
       real(seams_real), intent(in), optional :: cutoff
       integer(seams_int), intent(in), optional :: typ, k, graph, hops
-      logical, intent(in), optional :: colours
+      logical, intent(in), optional :: colors
       integer(seams_int), intent(out), optional :: stat
       character(len=:), allocatable, intent(out), optional :: errmsg
     end function

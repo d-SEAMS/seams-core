@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 # Build the Seams manual and run every export's doctest.
 using Pkg
 

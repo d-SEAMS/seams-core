@@ -197,7 +197,7 @@ struct WillardChandler {
 
 //! Instantaneous interface of Willard and Chandler, J. Phys. Chem. B 114,
 //! 1954 (2010). xi is their Gaussian width. The surface is the set of
-//! rays from the crystal centre of mass on which the coarse density
+//! rays from the crystal center of mass on which the coarse density
 //! crosses the midpoint of the core and the outer liquid.
 [[nodiscard]] WillardChandler willardChandler(
     molSys::PointCloud<molSys::Point<double>, double> cloud, double xi = 2.4);

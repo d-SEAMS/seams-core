@@ -2024,6 +2024,6 @@ Example: `docs/examples/minimal_rust.rs`
 :alt: Molecule still for this front
 :width: 480px
 
-Ice Ih coloured by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug rust` writes the 2400 by 1800 PNG.
+Ice Ih colored by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug rust` writes the 2400 by 1800 PNG.
 ```
 

@@ -466,7 +466,7 @@ double tetraQ(const Bond *mine) {
 }
 
 // True when one of the three grouped seconds on bond `a` is eclipsed.
-// The cosine is compared as a square, so the bond and the reference are not normalised.
+// The cosine is compared as a square, so the bond and the reference are not normalized.
 // Ideal eclipsed is 1 and ideal staggered is 0.5. Thermal staggered bonds stay at or below 0.90.
 bool armEclipsed(const double envF[4][3], const double envS[12][3], int a) {
   const double ux = envF[a][0];
@@ -700,7 +700,7 @@ inline int withinMask(const double *row, const double *r2, double cut2) {
 // diamond are an HCP shell (one bond eclipsed). A clean shell is a single
 // radius. Anything wider falls through to the full fit.
 // Maras, Trushin, Stukowski, Albe and Nordlund, Comput. Phys. Commun. 205, 13 (2016),
-// Appendix A. The centre and its twelve second neighbours are tested as an FCC
+// Appendix A. The center and its twelve second neighbours are tested as an FCC
 // cluster (cubic diamond, ice Ic) or an HCP cluster (hexagonal diamond, ice Ih).
 // Each pair uses the adaptive cutoff (1 + sqrt(2)) / 2 times that pair's length.
 // A shell is not rejected because its radius varies. Twelve (4,2,1) signatures
@@ -2150,7 +2150,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       kind[i] = -1;
       continue;
     }
-    // First shell only. A bond far from the diamond length is not a centre,
+    // First shell only. A bond far from the diamond length is not a center,
     // so the second shell is not read.
     double bMin = 1e300;
     double bMax = 0.0;
@@ -2239,7 +2239,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
       }
       if ((cna == 3 || cna == 4) && qNow >= 0.97) {
         // Six cubic signatures are the liquid false positives on the training
-        // seeds. Those shells still go to the fit; eight or more are labelled here.
+        // seeds. Those shells still go to the fit; eight or more are labeled here.
         if (cna == 3 && n421 < 8) {
           kind[i] = -3;
         } else {
@@ -2271,7 +2271,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
     }
   }
   const auto tLabel = std::chrono::steady_clock::now();
-  // The fit is only for a shell that already touches a labelled crystal.
+  // The fit is only for a shell that already touches a labeled crystal.
   // Bulk liquid has a high q and would otherwise all enter Kabsch.
   const bool wideBox = la > 12.0 && lb > 12.0 && lc > 12.0;
   for (int round = 0; round < 4; round++) {

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Time seams against mdapy, OVITO, freud and rings-statistics-matter.
 
 One ice Ic frame. The CLI is a fresh process per sample. The library and

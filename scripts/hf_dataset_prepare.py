@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Pack interface and nucleation frames for a Hugging Face dataset upload.
 
 Writes a local directory for ``d-SEAMS/interface-frames`` and

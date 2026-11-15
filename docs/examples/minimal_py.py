@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Read the GenIce sI cell, then neighbours, q6, CHILL+, and rings."""
 
 import ctypes

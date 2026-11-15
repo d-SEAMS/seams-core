@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 # Make libseams_jll resolvable in the active project before it is in the
 # General registry, then instantiate. A project that depends on Dseams
 # (docs/, for one) gets this checkout of Dseams too.

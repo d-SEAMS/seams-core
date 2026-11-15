@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """One sitting: symmetry against PTM, q4/q6, carried cages, GenIce cages.
 
 Eight samples after one warm-up. The median of an even count is the mean

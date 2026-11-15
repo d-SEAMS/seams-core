@@ -147,7 +147,7 @@ Concentration profile along the front axis.
     Brine handle.
 
 ``z_mid``
-    Bin centres, or NULL to skip the column.
+    Bin centers, or NULL to skip the column.
 
 ``molality``
     Bin molalities, or NULL to skip the column.
@@ -220,7 +220,7 @@ Partial radial distribution.
     Second species. Zero and negative reuse the type_i species.
 
 ``r``
-    Bin centres, or NULL to query.
+    Bin centers, or NULL to query.
 
 ``g``
     g(r) per bin, or NULL to query.
@@ -271,7 +271,7 @@ Running coordination number along the partial RDF.
     Counted species, as in seams_rdf().
 
 ``r``
-    Bin centres, Angstrom, or NULL to query.
+    Bin centers, Angstrom, or NULL to query.
 
 ``cn``
     Running coordination number, or NULL to query.
@@ -382,7 +382,7 @@ Number density along one cell axis.
     0, 1, or 2.
 
 ``z``
-    Bin centres, or NULL to query.
+    Bin centers, or NULL to query.
 
 ``rho``
     Density per bin, or NULL to query.
@@ -430,7 +430,7 @@ Topological fingerprint of the bonded graph.
     Neighbourhood depth. Zero selects 2.
 
 ``colour_types``
-    Non-zero colours vertices by LAMMPS type.
+    Non-zero colors vertices by LAMMPS type.
 
 ``out``
     Receives a ::seams_topo. On failure \*out is NULL.

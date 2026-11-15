@@ -183,15 +183,15 @@ TEST_CASE("hop neighbourhoods grow by one shell per hop", "[topo]") {
   REQUIRE(topo::hopNeighbourhood(rows, 5, 2)[0] == 5);
 }
 
-TEST_CASE("vertex colours split the classes and travel with a permutation", "[topo]") {
+TEST_CASE("vertex colors split the classes and travel with a permutation", "[topo]") {
   const auto rows = diamondRows(3);
   const int n = static_cast<int>(rows.size());
   // the two sublattices of the diamond cell are the two species of zincblende
-  std::vector<int> colours(static_cast<std::size_t>(n));
+  std::vector<int> colors(static_cast<std::size_t>(n));
   for (int i = 0; i < n; i++) {
-    colours[static_cast<std::size_t>(i)] = (i % 8 < 4) ? 1 : 2;
+    colors[static_cast<std::size_t>(i)] = (i % 8 < 4) ? 1 : 2;
   }
-  const auto fp = topo::fingerprint(rows, 2, 7, colours);
+  const auto fp = topo::fingerprint(rows, 2, 7, colors);
   REQUIRE(fp.classes.size() == 2);
   for (const auto &kv : fp.classes) {
     REQUIRE(kv.second == n / 2);
@@ -204,7 +204,7 @@ TEST_CASE("vertex colours split the classes and travel with a permutation", "[to
   std::vector<int> permColours(static_cast<std::size_t>(n));
   for (int i = 0; i < n; i++) {
     permColours[static_cast<std::size_t>(perm[static_cast<std::size_t>(i)])] =
-        colours[static_cast<std::size_t>(i)];
+        colors[static_cast<std::size_t>(i)];
   }
   const auto fq = topo::fingerprint(permute(rows, perm), 2, 7, permColours);
   REQUIRE(fq.key == fp.key);
@@ -223,10 +223,10 @@ TEST_CASE("a key library names the atoms it was built from and no others", "[top
   const auto back = topo::readLibrary(text);
   REQUIRE(back.method == fp.method);
   REQUIRE(back.hops == 2);
-  REQUIRE_FALSE(back.coloured);
+  REQUIRE_FALSE(back.colored);
   REQUIRE(back.labelOf == lib.labelOf);
   REQUIRE(text.rfind("# method ", 0) == 0);
-  REQUIRE(text.find(" colours 0\n") != std::string::npos);
+  REQUIRE(text.find(" colors 0\n") != std::string::npos);
   std::vector<int> perm(rows.size());
   std::iota(perm.begin(), perm.end(), 0);
   std::mt19937 rng(5);
@@ -297,18 +297,18 @@ TEST_CASE("a shallower library names what a defect hides from the deeper one", "
   const auto swapped = topo::matchLibraries(broken, {deep, shallow});
   REQUIRE(swapped.labels == both.labels);
   REQUIRE(swapped.depth == both.depth);
-  // two libraries at one depth, or a coloured library against plain keys, are refused
+  // two libraries at one depth, or a colored library against plain keys, are refused
   REQUIRE_THROWS_AS(topo::matchLibraries(broken, {deep, deep}), std::invalid_argument);
-  std::vector<int> colours(static_cast<std::size_t>(n), 1);
+  std::vector<int> colors(static_cast<std::size_t>(n), 1);
   topo::KeyLibrary tinted;
-  topo::addToLibrary(tinted, topo::fingerprint(rows, 2, 7, colours), "diamond");
-  REQUIRE(tinted.coloured);
-  REQUIRE(topo::readLibrary(topo::writeLibrary(tinted)).coloured);
+  topo::addToLibrary(tinted, topo::fingerprint(rows, 2, 7, colors), "diamond");
+  REQUIRE(tinted.colored);
+  REQUIRE(topo::readLibrary(topo::writeLibrary(tinted)).colored);
   REQUIRE_THROWS_AS(topo::matchLibrary(topo::fingerprint(rows, 2, 7), tinted), std::invalid_argument);
   REQUIRE_THROWS_AS(topo::matchLibraries(rows, {tinted}), std::invalid_argument);
-  REQUIRE(topo::matchLibraries(rows, {tinted}, 7, colours).matched == n);
-  // a header written without the colours field reads as uncoloured
+  REQUIRE(topo::matchLibraries(rows, {tinted}, 7, colors).matched == n);
+  // a header written without the colors field reads as uncolored
   const auto legacy = topo::readLibrary("# method wl hops 2\nabc diamond\n");
-  REQUIRE_FALSE(legacy.coloured);
+  REQUIRE_FALSE(legacy.colored);
   REQUIRE(legacy.hops == 2);
 }

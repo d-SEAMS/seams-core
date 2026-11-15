@@ -8,7 +8,7 @@ theorem and the ~lake~ build.
 
 The Lean file states that the all-but-one closure is the least fixed
 point above the seed, that it is empty on an empty seed, and that
-every added vertex sits on a ring whose other vertices are labelled.
+every added vertex sits on a ring whose other vertices are labeled.
 It also shows that an edge-sharing rule is not sound on a five-vertex
 instance. ~lake~ type-checks that closure on Lean 4.15.0 with Mathlib
 v4.15.0 (pins in =lean-toolchain= and =lakefile.toml=). Install

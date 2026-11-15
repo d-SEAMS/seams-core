@@ -186,7 +186,7 @@ struct BondClassifier {
 
 //! Staggered, eclipsed, or out of range. @a closed selects inclusive edges
 //! (c <= staggeredMax, eclipsedMin <= c <= eclipsedMax), the Nguyen and
-//! Molinero rule and the 2.13 behaviour. Open edges match OVITO 3.17.2
+//! Molinero rule and the 2.13 behavior. Open edges match OVITO 3.17.2
 //! (c < staggeredMax, eclipsedMin < c < eclipsedMax). The flag is an
 //! argument so BondClassifier stays three doubles and one int. A caller
 //! that passes the struct by value does not carry a fifth field.
@@ -473,7 +473,7 @@ bool isInterfacial(molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 struct SteinhardtQl {
   std::vector<double> ql;    //! Local @f$q_l(i)@f$
   std::vector<double> qlBar; //! Averaged @f$\bar{q}_l(i)@f$
-  std::vector<double> wl;    //! Normalised @f$\hat{w}_l@f$, empty unless requested
+  std::vector<double> wl;    //! Normalized @f$\hat{w}_l@f$, empty unless requested
 };
 
 //! Local and neighbour-averaged Steinhardt parameters of degree 3, 4, 6,
@@ -494,7 +494,7 @@ steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
 //! Neighbours are orthoFullCsr, not a four-nearest rebuild, and the
 //! kernel reads that CSR directly. Lechner-Dellago @f$\bar{q}_l@f$ is
 //! filled only when @a average is true. Otherwise `qlBar` stays zero.
-//! @a invariants fills @c wl with the normalised Steinhardt
+//! @a invariants fills @c wl with the normalized Steinhardt
 //! @f$\hat{w}_l@f$ for l = 4 or 6.
 [[nodiscard]] SteinhardtQl steinhardtQlCutoff(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud,

@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* C++ path for the C API suite. Reads one frame file and prints the
  * same keys the C and Python drivers print. The calls are the library
  * functions, not the C wrappers.
@@ -585,12 +586,12 @@ int main(int argc, char **argv) {
     ki("domain_n", domain.subset);
     ki("domain_largest", domain.largest);
     kd("domain_p", domain.percolation);
-    std::vector<int> colours;
-    colours.reserve(static_cast<std::size_t>(work.nop));
+    std::vector<int> colors;
+    colors.reserve(static_cast<std::size_t>(work.nop));
     for (int i = 0; i < work.nop; ++i) {
-      colours.push_back(work.pts[static_cast<std::size_t>(i)].type);
+      colors.push_back(work.pts[static_cast<std::size_t>(i)].type);
     }
-    const auto fp = topo::fingerprint(monoIdx, 2, 7, colours);
+    const auto fp = topo::fingerprint(monoIdx, 2, 7, colors);
     ki("fp_len", static_cast<int>(fp.key.size()));
     int census = 0;
     for (int count : fp.ringCensus) {

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Cutoff CHILL+ against ClavisCage 0.3.18 on ideal ice Ic.
 
 One warm-up, six timed calls, median and type-7 interquartile range.

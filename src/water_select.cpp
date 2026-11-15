@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 // SPDX-License-Identifier: MIT
 
 #include <water_select.hpp>

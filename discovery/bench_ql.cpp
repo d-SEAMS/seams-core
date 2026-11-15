@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 // Time q4 and q6 on ideal ice Ic. One warm-up, then the repeats.
 // Build: g++ -O3 -std=c++20 discovery/bench_ql.cpp -Ibindings/cxx
 //        -L${SEAMS_BEFORE}/bindings -lseams_lang -o bench_ql

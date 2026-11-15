@@ -145,9 +145,9 @@ ceiling is the scale-free second-shell residual 0.15. sI and the
 liquid are unlabeled by both.
 
 =seams_rdf= normalises a like-species histogram by N(N-1)/2.
-OVITO and freud's exact mode normalise the directed histogram by N^2.
+OVITO and freud's exact mode normalize the directed histogram by N^2.
 The histograms differ by N/(N-1). Multiplying the d-SEAMS values by
-(N-1)/N matches OVITO below 1e-14, including the bin centres.
+(N-1)/N matches OVITO below 1e-14, including the bin centers.
 On ice Ic the raw integral at 3.5 Å is 4.0635 and the scaled integral
 is 4, the neighbour degree. Freud refuses an r_max past half the
 shortest edge. d-SEAMS still bins minimum-image distances on a 10 Å

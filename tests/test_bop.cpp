@@ -416,7 +416,7 @@ TEST_CASE("a fifth neighbour inside the cutoff is not cubic ice", "[bop]") {
   // Ideal ice Ic, then one extra atom 3.3 Å from molecule 0, opposite a
   // lattice neighbour. The four nearest stay at 2.75 Å. The cutoff shell
   // grows to five. The old bond count, taken after the list was cut to
-  // four, labelled molecule 0 cubic. OVITO 3.17.2 labels that shell other.
+  // four, labeled molecule 0 cubic. OVITO 3.17.2 labels that shell other.
   const double bond = 2.75;
   const double cell = bond * 4.0 / std::sqrt(3.0);
   const int nrep = 2;

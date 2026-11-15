@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """OVITO-rule CHILL+ against OVITO 3.17 ChillPlusModifier, every atom.
 
 Exit 77 when OVITO cannot be imported. The published four-neighbour

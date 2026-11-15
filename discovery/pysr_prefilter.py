@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Search a cheap CHILL+ pre-filter and score it on held-out seeds.
 
 The target labels are the published cutoff rule (Nguyen and Molinero),

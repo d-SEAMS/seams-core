@@ -131,8 +131,8 @@ atoms.set_chemical_symbols(["O" if int(t) == 2 else "H" for t in atoms.arrays["t
 ase_frame = ds.from_ase(atoms)
 out["ase_n"] = int(ase_frame.n_atoms)
 out["ase_chill"] = dict(ase_frame.chill_plus())
-labelled = ase_frame.to_ase()
-out["ase_symbols"] = int((labelled.symbols == "O").sum())
+labeled = ase_frame.to_ase()
+out["ase_symbols"] = int((labeled.symbols == "O").sum())
 system = frame.to_solvis()
 out["solvis"] = type(system).__name__
 print(json.dumps(out))
@@ -221,8 +221,8 @@ def test_frame_matches_pydseamslib_211():
     assert ase_ice.water == 241
     assert oracle["ase_chill"]["interClathrate"] == 12
     assert oracle["ase_chill"]["water"] == 238
-    labelled = ase_frame.to_ase()
-    assert int((labelled.symbols == "O").sum()) == oracle["ase_symbols"]
-    assert "ice_type" in labelled.arrays
+    labeled = ase_frame.to_ase()
+    assert int((labeled.symbols == "O").sum()) == oracle["ase_symbols"]
+    assert "ice_type" in labeled.arrays
     system = frame.to_solvis()
     assert type(system).__name__ == oracle["solvis"]

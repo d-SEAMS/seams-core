@@ -21,7 +21,7 @@ meson compile -C build
 meson test -C build docs_engine_gromacs --print-errorlogs
 #+end_src
 
-~gmx-seams~ reads a trajectory in nanometres, multiplies coordinates and
+~gmx-seams~ reads a trajectory in nanometers, multiplies coordinates and
 the box by 10, and classifies the frame. On
 ~input/traj/ice1h.lammpstrj~ the test writes a one-frame ~.gro~ and runs:
 

@@ -10,7 +10,7 @@ Quartiles are Hyndman-Fan type 7. The log keeps every sample. The CSV keeps
 the median and the interquartile range.
 
 GenIce writes an ice Ih cell when that size is not already on disk. Oxygen
-sites are kept and converted from nanometres to angstroms, the same reduction
+sites are kept and converted from nanometers to angstroms, the same reduction
 as input/traj/ice1h.lammpstrj. Raw logs and those cells stay out of git.
 """
 

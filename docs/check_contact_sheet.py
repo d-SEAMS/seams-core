@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Fail if a docs raster is under 1200 px on its short side."""
 
 import os

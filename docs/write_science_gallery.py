@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Write the science-figure page from the shared census CSV."""
 
 import csv

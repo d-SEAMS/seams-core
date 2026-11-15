@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Front velocity against temperature from coexistence CSVs.
 
 Each CSV is one trajectory written by front_csv.py. The ordinary

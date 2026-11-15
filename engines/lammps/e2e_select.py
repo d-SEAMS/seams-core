@@ -139,7 +139,7 @@ def main():
         ):
             offline = e2e.offline_labels(cli, dump, 1, 3.5, work, extra=flags)[0][1]
             if set(offline) != oxygens:
-                sys.exit(f"seams chill-plus {' '.join(flags)} labelled atoms other than the oxygens")
+                sys.exit(f"seams chill-plus {' '.join(flags)} labeled atoms other than the oxygens")
             mine = columns[column]
             for i in sorted(types):
                 want = offline[i] if i in oxygens else (-1 if column == "c_ox" else UNCLASSIFIED)

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Performance tables for neighbours and rings, 4096 to 110592 molecules.
 
 Every cell is a field of benchmarks/*.csv from

@@ -180,7 +180,7 @@ std::vector<Eigen::Matrix3d> tetrahedralGroup() {
 Eigen::MatrixXd cage51264() {
   // One seed from each Td orbit of the 5^12 6^4 graph: the apex on a
   // threefold axis, a hexagon corner, and an edge site. The other vertices
-  // are the images under the tetrahedral group. Seeds are the centred
+  // are the images under the tetrahedral group. Seeds are the centered
   // equal-edge embedding of that graph.
   const Eigen::Vector3d seeds[3] = {
       {2.74568415, 2.74568415, 2.74568415},

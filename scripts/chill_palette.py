@@ -1,6 +1,7 @@
-"""One colour for each role, shared by the docs and the paper figures.
+# Copyright (c) d-SEAMS developers
+"""One color for each role, shared by the docs and the paper figures.
 
-A colour is an sRGB triple in 0..1. reCubic is cubic and reHex is
+A color is an sRGB triple in 0..1. reCubic is cubic and reHex is
 hexagonal, so those two names may repeat a triple. Every other name
 has its own triple. Water is not sodium, and chloride is not clathrate.
 """
@@ -35,7 +36,7 @@ CHILL = {
     5: ("interfacial clathrate", INTER_CLATHRATE),
 }
 
-COLOUR = {
+COLOR = {
     "cubic": CUBIC,
     "hexagonal": HEXAGONAL,
     "interfacial": INTERFACIAL,
@@ -66,11 +67,11 @@ LEGEND = (
 ALIASES = {"reCubic": "cubic", "reHex": "hexagonal"}
 
 
-def _lab(colour: tuple[float, float, float]) -> tuple[float, float, float]:
+def _lab(color: tuple[float, float, float]) -> tuple[float, float, float]:
     def channel(value: float) -> float:
         return value / 12.92 if value <= 0.04045 else ((value + 0.055) / 1.055) ** 2.4
 
-    linear = tuple(channel(float(value)) for value in colour)
+    linear = tuple(channel(float(value)) for value in color)
     matrix = (
         (0.4124564, 0.3575761, 0.1804375),
         (0.2126729, 0.7151522, 0.0721750),
@@ -143,9 +144,9 @@ def ciede2000(left: tuple[float, float, float], right: tuple[float, float, float
     )
 
 
-def closest_roles(colours: dict | None = None) -> tuple[float, str, str]:
+def closest_roles(colors: dict | None = None) -> tuple[float, str, str]:
     """Smallest CIEDE2000 between two different roles."""
-    chosen = COLOUR if colours is None else colours
+    chosen = COLOR if colors is None else colors
     names = list(chosen)
     best = (float("inf"), "", "")
     for index, left in enumerate(names):
@@ -159,12 +160,12 @@ def closest_roles(colours: dict | None = None) -> tuple[float, str, str]:
     return best
 
 
-def assert_distinct(colours: dict | None = None, minimum: float = 20.0) -> float:
+def assert_distinct(colors: dict | None = None, minimum: float = 20.0) -> float:
     """Fail when two roles share a triple or sit closer than ``minimum``."""
-    chosen = COLOUR if colours is None else colours
+    chosen = COLOR if colors is None else colors
     seen: dict[tuple[float, float, float], str] = {}
-    for name, colour in chosen.items():
-        key = tuple(round(float(channel), 5) for channel in colour)
+    for name, color in chosen.items():
+        key = tuple(round(float(channel), 5) for channel in color)
         role = ALIASES.get(name, name)
         if key in seen and seen[key] != role:
             raise AssertionError(f"{name} and {seen[key]} share {key}")

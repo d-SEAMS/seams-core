@@ -81,7 +81,7 @@ The samples are `benchmarks/h2h-watch.csv`. `snakemake related_watch` regenerate
 
 ## Matched cases added in v2
 
-pyscal3 4.1.0 exports `steinhardt_parameter` and `diamond_structure`. It has no CHILL+ and no ring census, so those two operations are not a matched case. The Palmer library at commit `ee8a3cb` does not link: `CHILL_mod` imports `gen_cluster_nb_list`, `gen_cluster_ID_list`, `get_largest_cluster` and `single_linkage_cluster_by_Jeremy`, and none of those symbols is in `single_linkage_cluster.f90`. OVITO 3.17.2 from PyPI ran `ChillPlusModifier` and `FindRingsModifier` with no licence prompt once `libGL` was on the loader path.
+pyscal3 4.1.0 exports `steinhardt_parameter` and `diamond_structure`. It has no CHILL+ and no ring census, so those two operations are not a matched case. The Palmer library at commit `ee8a3cb` does not link: `CHILL_mod` imports `gen_cluster_nb_list`, `gen_cluster_ID_list`, `get_largest_cluster` and `single_linkage_cluster_by_Jeremy`, and none of those symbols is in `single_linkage_cluster.f90`. OVITO 3.17.2 from PyPI ran `ChillPlusModifier` and `FindRingsModifier` with no license prompt once `libGL` was on the loader path.
 
 Same protocol, ideal ice Ic, cutoff 3.5 Å, rings of at most six. OVITO's ring timer includes `CreateBondsModifier`. matscipy uses `ring_statistics(..., maxlength=7)`, which counts rings of size at most six. cycless is `pairlist.pairs_iter` plus `cycles_iter`. Agreement is 1 wherever both codes returned a result: every CHILL+ label is cubic, and both ring censuses are two six-rings per molecule.
 

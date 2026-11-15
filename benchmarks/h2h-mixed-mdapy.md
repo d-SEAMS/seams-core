@@ -12,7 +12,7 @@ averages the spherical harmonic over the four closest neighbours:
 
     q_lm(i) = (1/4) sum_{j=1}^{4} Y_lm(r_ij)
 
-Equation (2) is the normalised correlation of that vector,
+Equation (2) is the normalized correlation of that vector,
 
     c(i,j) = sum_m q_lm(i) q_lm(j)*
              / sqrt( (sum_m |q_lm(i)|^2) (sum_m |q_lm(j)|^2) )

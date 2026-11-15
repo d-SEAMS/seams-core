@@ -125,28 +125,28 @@ bool isIonType(const Args &args, int type) {
   return std::find(args.ionTypes.begin(), args.ionTypes.end(), type) != args.ionTypes.end();
 }
 
-struct Labelled {
+struct Labeled {
   std::vector<bool> ice;
   std::vector<int> waters;
   std::vector<int> ions;
 };
 
-Labelled labelFrame(Cloud &cloud, const Args &args) {
+Labeled labelFrame(Cloud &cloud, const Args &args) {
   sortById(cloud);
   auto nList = nneigh::neighListO(args.cutoff, cloud, args.waterType);
   chill::applyChillPlus(cloud, nList, chill::ChillPlusRule::Published, false);
-  Labelled labelled;
-  labelled.ice.assign(static_cast<std::size_t>(cloud.nop), false);
+  Labeled labeled;
+  labeled.ice.assign(static_cast<std::size_t>(cloud.nop), false);
   for (int i = 0; i < cloud.nop; ++i) {
     const auto &point = cloud.pts[static_cast<std::size_t>(i)];
     if (point.type == args.waterType) {
-      labelled.waters.push_back(i);
-      labelled.ice[static_cast<std::size_t>(i)] = crystal(point.iceType);
+      labeled.waters.push_back(i);
+      labeled.ice[static_cast<std::size_t>(i)] = crystal(point.iceType);
     } else if (isIonType(args, point.type)) {
-      labelled.ions.push_back(i);
+      labeled.ions.push_back(i);
     }
   }
-  return labelled;
+  return labeled;
 }
 
 double medianOf(std::vector<double> values) {
@@ -191,9 +191,9 @@ int main(int argc, char **argv) {
         timedCloud = cloud;
         haveTimed = true;
       }
-      auto labelled = labelFrame(cloud, args);
+      auto labeled = labelFrame(cloud, args);
       const auto snap =
-          site::analyseFront(cloud, labelled.ice, labelled.waters, labelled.ions, options);
+          site::analyseFront(cloud, labeled.ice, labeled.waters, labeled.ions, options);
       const double tNs = static_cast<double>(used) * args.every * args.dtPs / 1000.0;
       timeNs.push_back(tNs);
       thickness.push_back(snap.fronts.thickness);
@@ -216,15 +216,15 @@ int main(int argc, char **argv) {
       if (!args.labels.empty() && used == 0) {
         std::ofstream labels(args.labels);
         labels << "# index atom x y z chill crystal\n";
-        for (int water : labelled.waters) {
+        for (int water : labeled.waters) {
           const auto &point = cloud.pts[static_cast<std::size_t>(water)];
           labels << water << " " << point.atomID << " " << point.x << " " << point.y << " " << point.z
                  << " " << static_cast<int>(point.iceType) << " "
-                 << (labelled.ice[static_cast<std::size_t>(water)] ? 1 : 0) << "\n";
+                 << (labeled.ice[static_cast<std::size_t>(water)] ? 1 : 0) << "\n";
         }
       }
       const int nCrystal = static_cast<int>(
-          std::count(labelled.ice.begin(), labelled.ice.end(), true));
+          std::count(labeled.ice.begin(), labeled.ice.end(), true));
       std::cout << "frame " << used << " t_ns " << tNs << " n_crystal " << nCrystal
                 << " thickness " << snap.fronts.thickness
                 << " z_enter " << snap.fronts.zEnter << " z_exit " << snap.fronts.zExit
@@ -318,8 +318,8 @@ int main(int argc, char **argv) {
       for (int i = 0; i < args.timeRepeats; ++i) {
         Cloud again = timedCloud;
         const auto started = std::chrono::steady_clock::now();
-        auto labelled = labelFrame(again, args);
-        (void)site::analyseFront(again, labelled.ice, labelled.waters, labelled.ions, options);
+        auto labeled = labelFrame(again, args);
+        (void)site::analyseFront(again, labeled.ice, labeled.waters, labeled.ions, options);
         const auto finished = std::chrono::steady_clock::now();
         const double ms =
             std::chrono::duration<double, std::milli>(finished - started).count();

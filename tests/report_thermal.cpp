@@ -249,7 +249,7 @@ void analyze(const Frame &frame, const std::string &path) {
     std::cout << "sequence";
     for (const auto &item : layers) {
       const auto &c = item.second;
-      const int labelled = c[0] + c[1] + c[2];
+      const int labeled = c[0] + c[1] + c[2];
       int winner = 3;
       int best = c[3];
       for (int s = 0; s < 3; s++) {
@@ -266,7 +266,7 @@ void analyze(const Frame &frame, const std::string &path) {
       } else if (winner == 2) {
         token = "d";
       }
-      const bool mixed = labelled > 0 && best * 4 < labelled * 3;
+      const bool mixed = labeled > 0 && best * 4 < labeled * 3;
       std::cout << " " << item.first << ":" << (mixed ? "m" : "") << token << "(Ih=" << c[0]
                 << ",Ic=" << c[1] << ",Isd=" << c[2] << ",other=" << c[3] << ")";
     }

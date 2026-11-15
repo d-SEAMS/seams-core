@@ -6,7 +6,7 @@
 
 """Offscreen OVITO renders of the basal slab and the nucleus.
 
-Tachyon ray-traces the oxygens. CHILL+ colours follow the published
+Tachyon ray-traces the oxygens. CHILL+ colors follow the published
 Nguyen-Molinero classes written by science-front (the chill column).
 Liquid molecules on the nucleus views are faint, and oxygen-oxygen
 contacts inside the largest ice cluster are drawn as bonds.
@@ -28,7 +28,7 @@ from pathlib import Path
 
 import numpy as np
 
-# Published CHILL+ classes live in scripts/chill_palette.py so a colour
+# Published CHILL+ classes live in scripts/chill_palette.py so a color
 # is one role in every figure. The cutoffs are not refit.
 _SCRIPTS = Path(__file__).resolve().parent
 if str(_SCRIPTS) not in sys.path:
@@ -270,8 +270,8 @@ def unwrap_cluster(pos: np.ndarray, box: np.ndarray, mask: np.ndarray, cutoff: f
         if int(atom) not in seen:
             placed[int(atom)] = pos[int(atom)]
             seen.add(int(atom))
-    centre = placed[index].mean(axis=0)
-    placed[index] -= centre
+    center = placed[index].mean(axis=0)
+    placed[index] -= center
     origin = pos[seed]
     anchor = placed[seed]
     for atom in range(pos.shape[0]):
@@ -339,11 +339,11 @@ def basal_forward(pos: np.ndarray, chill: np.ndarray, box: np.ndarray) -> np.nda
         return np.array([1.0, 0.0, 0.0])
     folded = np.array(angles) % 60.0
     hist, edges = np.histogram(folded, bins=12, range=(0.0, 60.0))
-    centre = float(edges[int(np.argmax(hist))] + 2.5)
+    center = float(edges[int(np.argmax(hist))] + 2.5)
     # The three [11-20] axes are this peak and the same peak plus 60 and 120.
     members = []
     for angle, xy in zip(angles, vectors):
-        delta = (angle - centre + 30.0) % 60.0 - 30.0
+        delta = (angle - center + 30.0) % 60.0 - 30.0
         if abs(delta) <= 8.0:
             members.append(xy)
     # Average only one of the three [11-20] axes. Folding all three
@@ -351,7 +351,7 @@ def basal_forward(pos: np.ndarray, chill: np.ndarray, box: np.ndarray) -> np.nda
     best_count = -1
     best_mean = np.array([1.0, 0.0])
     for shift in (0.0, 60.0, 120.0):
-        target = (centre + shift) % 180.0
+        target = (center + shift) % 180.0
         picked = []
         for angle, xy in zip(angles, vectors):
             delta = (angle - target + 90.0) % 180.0 - 90.0
@@ -444,9 +444,9 @@ def layer_period(projection: np.ndarray) -> float:
     """Basal repeat along a stacking axis, from the strongest density wave."""
     best_score = -1.0
     best = 3.6
-    centred = projection - float(np.mean(projection))
+    centered = projection - float(np.mean(projection))
     for period in np.linspace(3.30, 4.05, 16):
-        wave = np.exp(1j * (2.0 * np.pi / float(period)) * centred)
+        wave = np.exp(1j * (2.0 * np.pi / float(period)) * centered)
         score = float(np.abs(np.mean(wave)))
         if score > best_score:
             best_score = score
@@ -455,7 +455,7 @@ def layer_period(projection: np.ndarray) -> float:
 
 
 def layer_kinds(pos: np.ndarray, chill: np.ndarray, mask: np.ndarray, axis: np.ndarray) -> list[int]:
-    """Ih (1) or Ic (0) for each basal layer. Interfacial molecules do not colour a layer."""
+    """Ih (1) or Ic (0) for each basal layer. Interfacial molecules do not color a layer."""
     chosen = np.flatnonzero(mask & np.isin(chill, [0, 1]))
     if chosen.size == 0:
         return []
@@ -570,8 +570,8 @@ def bilayer_sheet(pos: np.ndarray, crystal: np.ndarray, forward: np.ndarray, box
         _forward, right, up = basis(unit(forward), np.array([0.0, 0.0, 1.0]))
         horizontal = pos @ right
         vertical = pos @ up
-        centre = float(np.median(depth[inside]))
-        order = np.flatnonzero(extra)[np.argsort(np.abs(depth[extra] - centre))]
+        center = float(np.median(depth[inside]))
+        order = np.flatnonzero(extra)[np.argsort(np.abs(depth[extra] - center))]
         kept = list(np.flatnonzero(inside))
         for atom in order:
             plane = np.hypot(horizontal[kept] - horizontal[atom], vertical[kept] - vertical[atom])
@@ -619,7 +619,7 @@ def contained_bonds(pos: np.ndarray, box: np.ndarray | None, mask: np.ndarray) -
 
 
 def depth_cue(
-    colours: np.ndarray,
+    colors: np.ndarray,
     depth: np.ndarray,
     fade: float = 0.22,
     tint: np.ndarray | None = None,
@@ -627,15 +627,15 @@ def depth_cue(
     """Report nearness. Far atoms darken, or blend toward a light tint.
 
     The tint keeps the hue and lifts the far side toward the background.
-    It does not push the colour through black.
+    It does not push the color through black.
     """
     span = float(depth.max() - depth.min())
     near = np.ones(len(depth)) if span < 1e-6 else 1.0 - (depth - depth.min()) / span
     if tint is None:
         factor = (1.0 - fade) + fade * near
-        return colours * factor[:, None], near
+        return colors * factor[:, None], near
     amount = 0.55 + 0.45 * near
-    lifted = amount[:, None] * colours + (1.0 - amount[:, None]) * np.asarray(tint, dtype=float)
+    lifted = amount[:, None] * colors + (1.0 - amount[:, None]) * np.asarray(tint, dtype=float)
     return lifted, near
 
 
@@ -654,9 +654,9 @@ def scene(pos, chill, bonds, liquid_alpha: float, forward: np.ndarray):
     data.objects.append(cell)
     particles = Particles()
     particles.create_property("Position", data=np.ascontiguousarray(pos, dtype=np.float64))
-    colours = np.array([CHILL.get(int(code), ("other", (0.5, 0.5, 0.5)))[1] for code in chill])
-    colours, _near = depth_cue(colours, pos @ unit(forward))
-    particles.create_property("Color", data=np.clip(colours, 0.0, 1.0))
+    colors = np.array([CHILL.get(int(code), ("other", (0.5, 0.5, 0.5)))[1] for code in chill])
+    colors, _near = depth_cue(colors, pos @ unit(forward))
+    particles.create_property("Color", data=np.clip(colors, 0.0, 1.0))
     liquid = np.isin(chill, [2, 4, 5])
     transparency = np.where(liquid, 1.0 - liquid_alpha, 0.0)
     particles.create_property("Transparency", data=transparency.astype(np.float64))
@@ -681,16 +681,16 @@ def project(pos: np.ndarray, forward: np.ndarray, up: np.ndarray):
     margin = ATOM_RADIUS + 0.5 * BOND_WIDTH + 2.2
     h_lo, h_hi = float(horizontal.min()) - margin, float(horizontal.max()) + margin
     v_lo, v_hi = float(vertical.min()) - margin, float(vertical.max()) + margin
-    centre = origin + right * (0.5 * (h_lo + h_hi)) + up * (0.5 * (v_lo + v_hi))
-    return centre, 0.5 * (h_hi - h_lo), 0.5 * (v_hi - v_lo), forward, right, up
+    center = origin + right * (0.5 * (h_lo + h_hi)) + up * (0.5 * (v_lo + v_hi))
+    return center, 0.5 * (h_hi - h_lo), 0.5 * (v_hi - v_lo), forward, right, up
 
 
 def render_view(pos, chill, bonds, forward, up, png: Path, half_h: float, half_v: float, width_px: int):
     from ovito.vis import TachyonRenderer, Viewport
 
     forward, _right, up = basis(forward, up)
-    centre, _own_h, _own_v, forward, _right, up = project(pos, forward, up)
-    # The caller passes the shared frame so panels share a scale. Re-centre
+    center, _own_h, _own_v, forward, _right, up = project(pos, forward, up)
+    # The caller passes the shared frame so panels share a scale. Re-center
     # on this cloud so a smaller cluster is not pushed against the edge.
     height_px = max(int(round(width_px * half_v / half_h)), 32)
     pipeline = scene(pos, chill, bonds, 0.0, forward)
@@ -701,7 +701,7 @@ def render_view(pos, chill, bonds, forward, up, png: Path, half_h: float, half_v
     try:
         view.camera_dir = tuple(float(v) for v in forward)
         view.camera_up = tuple(float(v) for v in up)
-        view.camera_pos = centre - forward * (6.0 * max(half_h, half_v))
+        view.camera_pos = center - forward * (6.0 * max(half_h, half_v))
         view.fov = float(half_v)
         renderer = TachyonRenderer(
             shadows=True,
@@ -817,8 +817,8 @@ def column_view(pos: np.ndarray, mask: np.ndarray, stacking: np.ndarray) -> np.n
     east = unit(np.cross(stacking, hint))
     north = unit(np.cross(stacking, east))
     pts = pos[mask]
-    centre = pts.mean(axis=0)
-    relative = pts - centre
+    center = pts.mean(axis=0)
+    relative = pts - center
     best: tuple | None = None
     for degree in np.linspace(0.0, 180.0, 180, endpoint=False):
         theta = math.radians(float(degree))
@@ -862,11 +862,11 @@ def layer_rows(pos: np.ndarray, chill: np.ndarray, mask: np.ndarray, axis: np.nd
         return []
     projection = pos[chosen] @ axis
     kinds = chill[chosen]
-    centred = projection - float(projection.mean())
+    centered = projection - float(projection.mean())
     best: tuple | None = None
     for period in np.linspace(3.30, 4.05, 16):
         for shift in np.linspace(0.0, float(period), 8, endpoint=False):
-            bins = np.floor((centred - shift) / float(period)).astype(int)
+            bins = np.floor((centered - shift) / float(period)).astype(int)
             rows = []
             for index in range(int(bins.min()), int(bins.max()) + 1):
                 selected = kinds[bins == index]
@@ -925,19 +925,19 @@ def edge_on_view(pos: np.ndarray, mask: np.ndarray, axis: np.ndarray) -> np.ndar
 
 
 def orient_nucleus(pos: np.ndarray, chill: np.ndarray, mask: np.ndarray):
-    """Local c-axis vertical, view along [11-20], two layers through the centre.
+    """Local c-axis vertical, view along [11-20], two layers through the center.
 
     The axis is this nucleus's own, chosen so the sheet's horizontal layers
     are as pure as the CHILL+ labels allow.
     """
     lattice = mask & np.isin(chill, [0, 1])
-    centre = pos[lattice].mean(axis=0)
+    center = pos[lattice].mean(axis=0)
 
     def pack(axis: np.ndarray, view: np.ndarray):
         axis = unit(axis)
         view = view - axis * float(view @ axis)
         view = unit(view)
-        depth = (pos - centre) @ view
+        depth = (pos - center) @ view
         sheet = lattice & (np.abs(depth) <= 4.6)
         rows = layer_rows(pos, chill, sheet, axis)
         if len(rows) < 2:
@@ -988,22 +988,22 @@ def orient_nucleus(pos: np.ndarray, chill: np.ndarray, mask: np.ndarray):
     if weak:
         print(
             "  CHILL+ mixes both classes inside "
-            f"{len(weak)} basal layer(s); purity stays the label, not a recolouring",
+            f"{len(weak)} basal layer(s); purity stays the label, not a recoloring",
             flush=True,
         )
     return sheet, view, axis, rows
 
 
 def nucleus_sheet(pos: np.ndarray, chill: np.ndarray, mask: np.ndarray, stacking: np.ndarray):
-    """Two [11-20] layers through the centre of mass. Liquid and interfacial water are left out."""
+    """Two [11-20] layers through the center of mass. Liquid and interfacial water are left out."""
     lattice = mask & np.isin(chill, [0, 1])
     if int(lattice.sum()) < 8:
         lattice = np.isin(chill, [0, 1])
     view = column_view(pos, lattice, stacking)
-    centre = pos[lattice].mean(axis=0)
-    depth = (pos - centre) @ view
+    center = pos[lattice].mean(axis=0)
+    depth = (pos - center) @ view
     # The column repeat is the partner separation, about one lattice step.
-    relative = pos[lattice] - centre
+    relative = pos[lattice] - center
     stacking_u = unit(stacking)
     right = unit(np.cross(stacking_u, view))
     horizontal = relative @ right
@@ -1058,18 +1058,18 @@ def layer_band(pos: np.ndarray, layer_ids: np.ndarray, axis: np.ndarray, period:
     keep = np.zeros(pos.shape[0], dtype=bool)
     for layer in sorted({int(item) for item in layer_ids if item >= 0}):
         members = np.flatnonzero(layer_ids == layer)
-        centre = float(projection[members].mean())
-        keep[members] = np.abs(projection[members] - centre) <= half
+        center = float(projection[members].mean())
+        keep[members] = np.abs(projection[members] - center) <= half
     return keep, half
 
 
 def draw_layer_guides(png: Path, pos: np.ndarray, layer_ids: np.ndarray, kinds: list[int], forward, up, half_v: float, band_half: float) -> None:
-    """Tint each basal band in its panel (c) colour and rule it at the mean height."""
+    """Tint each basal band in its panel (c) color and rule it at the mean height."""
     from PIL import Image, ImageDraw, ImageFont
 
     image = Image.open(png).convert("RGBA")
     forward, _right, up = basis(forward, up)
-    centre, _h, _v, forward, _right, up = project(pos, forward, up)
+    center, _h, _v, forward, _right, up = project(pos, forward, up)
     height = image.height
     # The nucleus image is already at print scale. 7 pt at 600 dpi is 58 px.
     font_px = max(28, int(round(7.0 * PRINT_DPI / 72.0)))
@@ -1079,7 +1079,7 @@ def draw_layer_guides(png: Path, pos: np.ndarray, layer_ids: np.ndarray, kinds: 
         font = ImageFont.load_default()
         font_px = 14
     present = sorted({int(item) for item in layer_ids if item >= 0})
-    vertical = (pos - centre) @ up
+    vertical = (pos - center) @ up
     span = 2.0 * half_v
     # Cover the spheres, then stop at the gap before the neighbouring layer
     # so the bands stay separate.
@@ -1111,8 +1111,8 @@ def draw_layer_guides(png: Path, pos: np.ndarray, layer_ids: np.ndarray, kinds: 
         if not 0 <= y < height:
             continue
         kind = kinds[layer] if 0 <= layer < len(kinds) else None
-        colour = CHILL.get(kind, ("", (0.75, 0.75, 0.75)))[1]
-        rgb = tuple(int(round(255.0 * channel)) for channel in colour)
+        color = CHILL.get(kind, ("", (0.75, 0.75, 0.75)))[1]
+        rgb = tuple(int(round(255.0 * channel)) for channel in color)
         bands.rectangle((0, y_hi, image.width, y_lo), fill=rgb + (46,))
         placed.append((layer, y))
     image = Image.alpha_composite(image, overlay)
@@ -1138,7 +1138,7 @@ def _paint(pos, chill, bonds, forward, up, png, half_h, half_v, width_px, liquid
         solid = ~np.isin(chill, [2])
         if np.any(solid):
             focus = pos[solid]
-    centre, _h, _v, forward, _right, up = project(focus, forward, up)
+    center, _h, _v, forward, _right, up = project(focus, forward, up)
     height_px = max(int(round(width_px * half_v / max(half_h, 1e-6))), 32)
     data = DataCollection()
     lo = pos.min(axis=0) - 6.0
@@ -1150,12 +1150,12 @@ def _paint(pos, chill, bonds, forward, up, png, half_h, half_v, width_px, liquid
     data.objects.append(cell)
     particles = Particles()
     particles.create_property("Position", data=np.ascontiguousarray(pos, dtype=np.float64))
-    colours = np.array([CHILL.get(int(code), ("other", (0.5, 0.5, 0.5)))[1] for code in chill])
+    colors = np.array([CHILL.get(int(code), ("other", (0.5, 0.5, 0.5)))[1] for code in chill])
     if nucleus:
-        colours, near = depth_cue(colours, pos @ forward, tint=np.array([0.94, 0.94, 0.95]))
+        colors, near = depth_cue(colors, pos @ forward, tint=np.array([0.94, 0.94, 0.95]))
     else:
-        colours, near = depth_cue(colours, pos @ forward, 0.22)
-    particles.create_property("Color", data=np.clip(colours, 0.0, 1.0))
+        colors, near = depth_cue(colors, pos @ forward, 0.22)
+    particles.create_property("Color", data=np.clip(colors, 0.0, 1.0))
     liquid = np.isin(chill, [2])
     guest = np.isin(chill, [4, 5])
     transparency = np.zeros(pos.shape[0])
@@ -1182,7 +1182,7 @@ def _paint(pos, chill, bonds, forward, up, png, half_h, half_v, width_px, liquid
     try:
         view.camera_dir = tuple(float(v) for v in forward)
         view.camera_up = tuple(float(v) for v in up)
-        view.camera_pos = centre - forward * (8.0 * max(half_h, half_v))
+        view.camera_pos = center - forward * (8.0 * max(half_h, half_v))
         view.fov = float(half_v)
         renderer = TachyonRenderer(
             shadows=True,
@@ -1366,7 +1366,7 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
         ha="center",
         va="bottom",
     )
-    # The bar sits at the right of the column. The minimum title is centred
+    # The bar sits at the right of the column. The minimum title is centered
     # on the narrower sheet, so a bar on the left runs through that word.
     bar_x = right_x + max(0.0, right_w - bar_mm - 9.0)
     scale_bar(bar_x, late_y - 3.4, False, "10 Å")
@@ -1388,8 +1388,8 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
         kinds = stacks[name]
         shown = int(stacks["shown"][name])
         for column, kind in enumerate(kinds):
-            colour = CHILL.get(kind, ("", (0.5, 0.5, 0.5)))[1]
-            axis.add_patch(plt.Rectangle((column, row), 1.0, 0.72, facecolor=colour, edgecolor="white", lw=0.3))
+            color = CHILL.get(kind, ("", (0.5, 0.5, 0.5)))[1]
+            axis.add_patch(plt.Rectangle((column, row), 1.0, 0.72, facecolor=color, edgecolor="white", lw=0.3))
         if shown > 0:
             axis.add_patch(
                 plt.Rectangle((0.0, row), shown, 0.72, fill=False, edgecolor="black", lw=0.9, zorder=3)
@@ -1417,8 +1417,8 @@ def compose(slab, nuclei, stacks, width_mm: float, png: Path, pdf: Path) -> None
     )
 
     handles = [
-        plt.Line2D([0], [0], marker="o", color="none", markerfacecolor=colour, markeredgecolor="none", markersize=5, label=name)
-        for _code, (name, colour) in CHILL.items()
+        plt.Line2D([0], [0], marker="o", color="none", markerfacecolor=color, markeredgecolor="none", markersize=5, label=name)
+        for _code, (name, color) in CHILL.items()
     ]
     fig.legend(
         handles=handles,
@@ -1459,7 +1459,7 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
         npos, _nbox = unwrap_cluster(npos, nbox, extended, HBOND_A)
         loaded[label] = (npos, nchill, extended, raw, nbox)
     # Each nucleus keeps its own c-axis. That axis is vertical and the
-    # camera looks along the local [11-20], through two layers at the centre.
+    # camera looks along the local [11-20], through two layers at the center.
     prepared = {}
     orient_rows = {}
     for label, (npos, nchill, extended, raw, raw_box) in loaded.items():
@@ -1511,9 +1511,9 @@ def build(interface_dump: Path, interface_frame: int, nucleus_dump: Path, min_fr
         drawn, drawn_chill, _bonds, view_i, axis_i, _ids, _kinds, _band = prepared[label]
         cluster = drawn[np.isin(drawn_chill, [0, 1])]
         _forward_i, right_i, up_i = basis(view_i, axis_i)
-        centred = cluster - cluster.mean(axis=0)
-        half_h = float(np.max(np.abs(centred @ right_i))) + ATOM_RADIUS
-        half_v = float(np.max(np.abs(centred @ up_i))) + ATOM_RADIUS
+        centered = cluster - cluster.mean(axis=0)
+        half_h = float(np.max(np.abs(centered @ right_i))) + ATOM_RADIUS
+        half_v = float(np.max(np.abs(centered @ up_i))) + ATOM_RADIUS
         return half_h, half_v
 
     # Both sheets use the slab's angstrom scale, so one 10 A bar serves (b).

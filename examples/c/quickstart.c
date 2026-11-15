@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 #include "seams.h"
 
 #include <math.h>

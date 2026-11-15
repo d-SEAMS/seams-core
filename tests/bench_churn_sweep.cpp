@@ -10,7 +10,7 @@
 ** Per-frame cost of RingUpdater and AffiliationUpdater against the batch
 ** passes as a function of how much of a frame changes. Frame A of a
 ** trajectory is the reference; in each test frame the molecules within a
-** radius of the box centre take their frame-B positions and the rest keep
+** radius of the box center take their frame-B positions and the rest keep
 ** their frame-A ones. The updaters alternate between A and the test frame,
 ** so every timed update sees the same change; each time is the median of the
 ** repetitions. Every incremental result is checked against the batch one.

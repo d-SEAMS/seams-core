@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Same Ice Ih and sII census as core_counts.c, through seams.h. */
 #include "seams.h"
 #include "seams_lammps_box.h"

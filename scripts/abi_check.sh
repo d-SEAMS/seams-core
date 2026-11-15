@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (c) d-SEAMS developers
 # Compare the exported C ABI with the committed baseline.
 # The baseline was taken against main 2dbefa97. A difference is an
 # unannounced break and fails the job. Pass "write" to refresh it.

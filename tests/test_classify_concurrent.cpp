@@ -54,7 +54,7 @@ void flatten(const Eigen::MatrixXd &xyz, std::vector<double> &raw, double lattic
 }
 
 // Raw cosine used by idealKind: the second-shell bond against another
-// first-shell bond, with no projection. points() stores the centre, the
+// first-shell bond, with no projection. points() stores the center, the
 // four first neighbours, then three seconds of each first neighbour.
 void rawSquares(const Eigen::MatrixXd &shell, double out[4]) {
   REQUIRE(shell.rows() == 17);

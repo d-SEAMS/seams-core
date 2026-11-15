@@ -1,3 +1,4 @@
+! Copyright (c) d-SEAMS developers
 ! Read the GenIce sI cell, then neighbours, q6, CHILL+, and rings.
 program minimal_fortran
   use seams

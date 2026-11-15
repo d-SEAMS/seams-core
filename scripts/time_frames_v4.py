@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Serial timings. One thread, eight samples after one warm-up.
 
 The header records the online core count and not a host name.

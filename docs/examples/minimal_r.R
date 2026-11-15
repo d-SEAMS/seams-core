@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 # Read the GenIce sI cell, then the cutoff shell, q6, CHILL+, and rings.
 path <- commandArgs(trailingOnly = TRUE)[1]
 stopifnot(nzchar(path))

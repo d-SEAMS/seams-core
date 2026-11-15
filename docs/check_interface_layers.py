@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Interface ticks are crystalline basal bilayers.
 
 The two puckered halves of a bilayer share one index. A bin with fewer
 than half the oxygens of the fullest bilayer is not indexed, so the
 stray cubic oxygen and the interfacial shell have no layer number.
-The numbered centres are about 3.67 angstrom apart.
+The numbered centers are about 3.67 angstrom apart.
 """
 
 import sys
@@ -22,16 +23,16 @@ from render_scenes import basal_bilayers, centres_outside_outline, wrap_into_cel
 
 def check_layers(positions: np.ndarray, labels: np.ndarray):
     basal = np.asarray(render.stacking_axis(positions, labels, np.isin(labels, [1])), dtype=float)
-    ids, centres = basal_bilayers(positions, labels, basal)
-    if len(centres) < 4:
-        raise SystemExit(f"interface has {len(centres)} bilayers")
-    gaps = np.diff(centres)
+    ids, centers = basal_bilayers(positions, labels, basal)
+    if len(centers) < 4:
+        raise SystemExit(f"interface has {len(centers)} bilayers")
+    gaps = np.diff(centers)
     mean = float(np.mean(gaps))
     if abs(mean - 3.67) > 0.25:
         raise SystemExit(f"bilayer spacing {mean:.3f} A is not about 3.67 A")
     if float(np.max(np.abs(gaps - mean))) > 0.4:
         raise SystemExit(f"bilayer gaps are uneven: {np.round(gaps, 3)}")
-    counts = [int(np.sum(ids == layer)) for layer in range(len(centres))]
+    counts = [int(np.sum(ids == layer)) for layer in range(len(centers))]
     fullest = max(counts)
     if min(counts) < 0.5 * fullest:
         raise SystemExit(f"a numbered bilayer is below half of {fullest}: {counts}")
@@ -41,36 +42,36 @@ def check_layers(positions: np.ndarray, labels: np.ndarray):
         raise SystemExit("cubic or interfacial oxygen was indexed")
     # The tick is the median of the indexed members.
     projection = positions @ (basal / np.linalg.norm(basal))
-    for layer, centre in enumerate(centres):
+    for layer, center in enumerate(centers):
         members = np.flatnonzero(ids == layer)
         drawn = float(np.median(projection[members]))
-        if abs(drawn - centre) > 1e-9:
+        if abs(drawn - center) > 1e-9:
             raise SystemExit(f"layer {layer} tick {drawn} is not the bilayer median")
     forward = np.array([-1.0, 0.0, 0.0])
     up = np.array([0.0, 0.0, 1.0])
     _forward, right, _up = render.basis(forward, up)
     horiz = [
         float(np.median(positions[ids == layer] @ right))
-        for layer in range(len(centres))
+        for layer in range(len(centers))
     ]
     if any(horiz[i] >= horiz[i + 1] for i in range(len(horiz) - 1)):
         raise SystemExit(f"bilayer index does not ascend left to right: {np.round(horiz, 2)}")
     print(
-        f"interface bilayers {len(centres)} spacing {mean:.3f} A "
+        f"interface bilayers {len(centers)} spacing {mean:.3f} A "
         f"counts {counts}"
     )
-    return centres
+    return centers
 
 
 def check_wrapped(raw, origin, lengths):
     before = centres_outside_outline(raw, origin, lengths)
     if before == 0:
-        raise SystemExit("the interface dump has no centre outside the cell")
+        raise SystemExit("the interface dump has no center outside the cell")
     wrapped = wrap_into_cell(raw, origin, lengths)
     after = centres_outside_outline(wrapped, origin, lengths)
     if after:
-        raise SystemExit(f"{after} wrapped centres project outside the cell outline")
-    print(f"wrapped {before} outside centres into the cell")
+        raise SystemExit(f"{after} wrapped centers project outside the cell outline")
+    print(f"wrapped {before} outside centers into the cell")
 
 
 def main():

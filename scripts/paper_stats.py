@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Median and interquartile range for one paper-cell sitting.
 
 An even sample count uses the mean of the two central samples. The

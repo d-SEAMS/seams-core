@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 root <- Sys.getenv("DSEAMS_ROOT", unset = "")
 stopifnot(nzchar(root))
 library(dseams)

@@ -557,9 +557,9 @@ class Api:
         )
         return z, rho
 
-    def fingerprint(self, ptr: int, cutoff: float, type_: int, k: int, graph: int, hops: int, colour: int) -> int:
+    def fingerprint(self, ptr: int, cutoff: float, type_: int, k: int, graph: int, hops: int, color: int) -> int:
         slot = _P()
-        code = int(self._fn("seams_fingerprint")(ptr, cutoff, type_, k, graph, hops, colour, ctypes.byref(slot)))
+        code = int(self._fn("seams_fingerprint")(ptr, cutoff, type_, k, graph, hops, color, ctypes.byref(slot)))
         return self._out_handle(code, ptr, slot)
 
     def _key(self, ptr: int, fn: str, index: int | None) -> str:

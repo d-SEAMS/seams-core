@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Run the in-situ hook inside LAMMPS or OpenMM.
 
 Exit 77 when neither library is available, which meson records as a

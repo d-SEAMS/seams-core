@@ -258,10 +258,10 @@ int main() {
       }
     }
     Eigen::Matrix3d box = ic.vectors * static_cast<double>(nrep);
-    int labelled = 0;
+    int labeled = 0;
     std::string name;
     report("ice-ic-shells-216", repeat(kRepeats, [&] {
-             labelled = 0;
+             labeled = 0;
              for (int i = 0; i < big.rows(); i++) {
                const Eigen::MatrixXd shell = symm::iceShell(big, box, i);
                if (shell.rows() != 17) {
@@ -269,12 +269,12 @@ int main() {
                }
                const symm::Overlay hit = symm::best(shell);
                if (hit.status == 0) {
-                 labelled++;
+                 labeled++;
                  name = hit.name;
                }
              }
            }));
-    std::cout << "ice-ic-shells labelled " << labelled << " as " << name << "\n";
+    std::cout << "ice-ic-shells labeled " << labeled << " as " << name << "\n";
   }
 #else
   std::cout << "space-group off\ndirect-spglib off\n";

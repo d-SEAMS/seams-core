@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """GenIce sI and sII cage census, then d-SEAMS and ClavisCage times.
 
 The census is whatever scripts/rerun_main_text.py prints for the two

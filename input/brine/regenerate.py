@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Build NaCl brine frames with TIP4P/2005.
 
 Madrid-2019 uses scaled ion charges. Joung-Cheatham uses the full

@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 """Tilted ice Ih and replicated sH cells.
 
 Ice Ih is the orthorhombic generator with a LAMMPS tilt (xy, xz, yz).

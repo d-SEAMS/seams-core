@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* libFuzzer harness for seams_system_read and seams_path_nframes.
  * Each input is written once per trajectory extension the readers accept.
  */

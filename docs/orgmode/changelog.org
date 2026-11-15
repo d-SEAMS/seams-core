@@ -132,7 +132,7 @@ engine's per-atom decision for OVITO or VMD.
 Topology keys (~topo::localKey~, ~topo::fingerprint~, nauty
 certificate or Weisfeiler-Leman hash), key libraries
 (~seams fingerprint --emit-library~, ~--library~), ions read against
-the cage assignment (~seams ions~), vertex colours by species, the
+the cage assignment (~seams ions~), vertex colors by species, the
 embedded CON reader, and a refusal of CON and chemfiles input when
 their reader is absent. The CLI preserves frame order for parallel
 LAMMPS ranges, dispatches ranges for XYZ, chemfiles, and readcon

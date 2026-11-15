@@ -57,7 +57,7 @@ TEST_CASE("an ion whose shell is all ice is in ice", "[ions]") {
   REQUIRE(env.nLiquid == 0);
 }
 
-TEST_CASE("an ion with no labelled neighbour is in liquid, a mixed shell is at the front",
+TEST_CASE("an ion with no labeled neighbour is in liquid, a mixed shell is at the front",
           "[ions]") {
   const auto cloud = lattice({0, 13});
   std::vector<bool> ice(static_cast<std::size_t>(cloud.nop), false);

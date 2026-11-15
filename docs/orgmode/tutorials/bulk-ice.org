@@ -2,7 +2,7 @@
 #+OPTIONS: toc:nil num:nil
 
 You classify one in-tree frame two ways: CHILL+ (a four-neighbour staggered/eclipsed star per oxygen) and topological cages (HC/DDC membership).
-The result is a labelled oxygen set and a reason the two scores disagree.
+The result is a labeled oxygen set and a reason the two scores disagree.
 
 * Prerequisites
 

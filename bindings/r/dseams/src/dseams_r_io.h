@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 #ifndef DSEAMS_R_IO_H_
 #define DSEAMS_R_IO_H_
 

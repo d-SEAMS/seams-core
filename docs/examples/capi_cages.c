@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Every Ice Ih oxygen is in a hexagonal cage and not a cubic one. */
 #include "seams.h"
 

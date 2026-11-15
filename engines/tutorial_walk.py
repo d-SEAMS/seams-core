@@ -3,7 +3,7 @@
 """Classify the bundled eight-atom cell the way the engine plugins do.
 
 LAMMPS ``run_hook`` reads positions in angstroms and calls
-``seams_chill_plus``. The OpenMM plugin stores nanometres and multiplies
+``seams_chill_plus``. The OpenMM plugin stores nanometers and multiplies
 by 10 before the same call. This script does both conversions on
 ``engines/tutorial/ice.data`` and requires every label to be cubic.
 ``meson test engines_tutorial`` runs it against the build's libseams.
@@ -104,9 +104,9 @@ def chill_plus(lib, xyz, length):
 
 
 def openmm_angstroms(xyz):
-    """The plugin reads OpenMM nanometres and multiplies by 10."""
-    nanometres = [value / 10.0 for value in xyz]
-    return [value * 10.0 for value in nanometres]
+    """The plugin reads OpenMM nanometers and multiplies by 10."""
+    nanometers = [value / 10.0 for value in xyz]
+    return [value * 10.0 for value in nanometers]
 
 
 def main():

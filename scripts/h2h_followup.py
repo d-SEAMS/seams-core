@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Recorded-loss rerun, carried rings, and an independent CHILL+ reference.
 
 One session. Serial calls use core 0. Eight-thread calls use cores 0-7.
@@ -10,7 +11,7 @@ fresh bench_stages process, the neighbour list built before the timer.
 The frames are genice_sH (136), mW cubic (4096) and that cell replicated
 3x3x3 (110592). This script times that boundary again.
 
-The 40.6 ms vs 36.1 ms symmetry pair is not a labelled median in the
+The 40.6 ms vs 36.1 ms symmetry pair is not a labeled median in the
 tree. The nearest identify-diamond record is benchmarks/logs/symmetry-v20-session.txt
 on ideal ice of 110592 molecules: the d-SEAMS kernel is 21.743 ms and
 identify-diamond is 36.564 ms. The same three frames are timed here.
@@ -127,7 +128,7 @@ def main() -> None:
         flush=True,
     )
     print(
-        "recorded symmetry pair 40.6 vs 36.1 is not a labelled median; "
+        "recorded symmetry pair 40.6 vs 36.1 is not a labeled median; "
         "nearest is symmetry-v20 ideal-110592 kernel 21.743 "
         "identify-diamond 36.564",
         flush=True,

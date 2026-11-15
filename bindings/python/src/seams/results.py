@@ -147,7 +147,7 @@ class Radial:
     Notes
     -----
     r : numpy.ndarray
-        Bin centres, angstrom.
+        Bin centers, angstrom.
     g : numpy.ndarray
         Dimensionless g(r).
     count : numpy.ndarray
@@ -279,7 +279,7 @@ class BrineProfile:
     Notes
     -----
     z_mid : numpy.ndarray
-        Bin centres, angstrom.
+        Bin centers, angstrom.
     molality : numpy.ndarray
         mol/kg.
     ice_fraction : numpy.ndarray

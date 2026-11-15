@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """End-to-end neighbours plus rings, and disordered-frame counts.
 
 The timer covers the neighbour build and the ring search. Ice Ic is the

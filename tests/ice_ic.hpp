@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 #pragma once
 
 // Ideal ice Ic, the 8-atom cubic cell tiled on a cube. The oxygen bond

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Ideal ice Ih and Ic, plus the liquid frames already in the tree.
 
 The oxygen bond is 2.75 A, the same length as the local-symmetry cell.

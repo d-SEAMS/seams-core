@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* The system libclang_rt.fuzzer archive is built on the runner's glibc.
  * glibc 2.38 redirects strto* to __isoc23_strto* in its headers, so that
  * archive references those symbols. The pixi gcc links an older libc that

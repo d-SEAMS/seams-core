@@ -266,11 +266,11 @@ The cage labels of the comparator campaign use ring completion, and the nucleati
 Each equator with its six peripheral rings is a candidate cage of two adamantane units.
 Two candidates conflict when they share an adamantane unit, and since a unit has four faces and lies in at most four candidates, a candidate has at most six conflicts.
 The packing splits the graph of conflicts into connected components, takes every candidate without a conflict and treats the components in the order of their lowest candidate.
-A component is the line graph of a bipartite graph $H$ when its conflicts split into one clique per adamantane unit and the units can be coloured with two colours so that the two units of each candidate differ.
+A component is the line graph of a bipartite graph $H$ when its conflicts split into one clique per adamantane unit and the units can be colored with two colors so that the two units of each candidate differ.
 The cages of such a component are a matching in $H$, whose vertices are the units and whose edges are the candidates.
 For a four-regular $H$, an Euler split gives a perfect matching~\cite{gabow1976euler}.
 For any other bipartite $H$, augmenting paths grow a greedy matching, taken in the order of the candidates, into a maximum matching~\cite{kuhn1955hungarian}.
-An alternating breadth-first search from the unmatched units of one colour then gives a vertex cover of the same size, made of the units of that colour that the search does not reach and the units of the other colour that it reaches.
+An alternating breadth-first search from the unmatched units of one color then gives a vertex cover of the same size, made of the units of that color that the search does not reach and the units of the other color that it reaches.
 By K\"onig's theorem, the cover certifies that the matching is maximum~\cite{konig1931graphs}.
 A component that is not such a line graph is solved by a branch and bound for the largest set of candidates without conflicts, bounded by a greedy partition of the candidates into cliques~\cite{tomita2003maxclique}.
 The search keeps one bit per candidate, so the set grows with the component and no component is dropped.
@@ -430,7 +430,7 @@ The first run shared the machine with another job and gave bimodal times on the 
 \subsection{Updates and the nucleation trajectory}
 \label{sec:s-updates}
 
-We took frames \dsv{set@sweep@a} and \dsv{set@sweep@b} of the nucleation trajectory, both of \dsv{c@nop} molecules, and replaced the positions of frame \dsv{set@sweep@a} within a sphere at the centre of the cell by those of frame \dsv{set@sweep@b}.
+We took frames \dsv{set@sweep@a} and \dsv{set@sweep@b} of the nucleation trajectory, both of \dsv{c@nop} molecules, and replaced the positions of frame \dsv{set@sweep@a} within a sphere at the center of the cell by those of frame \dsv{set@sweep@b}.
 The radius of the sphere runs over \dsv{set@radii}, and a last frame replaces every position.
 The updates of the rings of up to six members and of their cage labels on the cutoff graph alternate between frame \dsv{set@sweep@a} and the spliced frame, so every call carries them across the same changed bonds.
 The full searches run from the start on the spliced frame.

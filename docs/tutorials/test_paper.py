@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Run one paper tutorial and check the numbers it prints."""
 
 import subprocess

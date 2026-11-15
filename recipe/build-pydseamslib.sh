@@ -1,4 +1,5 @@
 #!/bin/bash
+# Copyright (c) d-SEAMS developers
 set -euxo pipefail
 
 # system_libseams builds only the extension, linked against the

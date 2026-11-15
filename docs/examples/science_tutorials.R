@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 # Science tutorials in R. Same numbers as science_tutorials.py.
 # Usage: Rscript science_tutorials.R ROOT WRAPPER.so
 

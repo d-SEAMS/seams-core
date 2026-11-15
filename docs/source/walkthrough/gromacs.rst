@@ -2,7 +2,7 @@ GROMACS
 =======
 
 ``engines/gromacs/seams_ice.cpp`` reads a trajectory in
-``analyzeFrame`` and multiplies coordinates by 10, from nanometres to
+``analyzeFrame`` and multiplies coordinates by 10, from nanometers to
 angstrom. ``engines/gromacs/ice.gro`` stores the second oxygen at
 0.1588 nm.
 
@@ -18,7 +18,7 @@ atoms 128``, because the tool reads the gro twice.
 .. figure:: figures/gromacs.svg
    :alt: GROMACS trajectory read: 64 atoms, 0.1588 nm scaled to 1.588 angstrom.
 
-   ``analyzeFrame`` converts the gro from nanometres.
+   ``analyzeFrame`` converts the gro from nanometers.
 
 What this tells you
 -------------------

@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 """Compiler the snippet tests must use.
 
 Meson puts the C and C++ compilers that built the library, and the OpenMP

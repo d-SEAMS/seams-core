@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (c) d-SEAMS developers
 # chemfiles 0.10.4 vendors fmt 6. fmt's fallback char8_t is an enum in
 # namespace fmt. libc++ 19 leaves std::char_traits incomplete for that
 # type, so basic_string_view<char8_t> does not instantiate. Count and

@@ -117,7 +117,7 @@ struct AngularTerms {
 };
 
 /**
- * @brief Normalisation constants @f$N_{lm}@f$ of the Condon-Shortley spherical
+ * @brief Normalization constants @f$N_{lm}@f$ of the Condon-Shortley spherical
  *  harmonics, for @f$m \geq 0@f$.
  * @details Held as function-local statics so that the square roots are
  *  evaluated once for the lifetime of the process rather than per call.
@@ -169,7 +169,7 @@ const std::array<double, 7> &normQ6() {
 
 /**
  * @brief The associated-Legendre amplitude of @f$Y_{lm}@f$ stripped of its
- *  normalisation and azimuthal phase.
+ *  normalization and azimuthal phase.
  * @param[in] orderL Degree @f@f$; 3, 4 or 6.
  * @param[in] absM Absolute order @f$|m|@f$.
  * @param[in] terms Precomputed powers of the polar angle.
@@ -287,7 +287,7 @@ harmonicPair(int orderL, int absM, const AngularTerms &terms) {
 
 // Real l = 3 harmonics, one row per bond. Channels are
 // (Y_30, A_1 cos phi, A_1 sin phi, A_2 cos 2phi, A_2 sin 2phi,
-//  A_3 cos 3phi, A_3 sin 3phi), with A_m the normalised associated
+//  A_3 cos 3phi, A_3 sin 3phi), with A_m the normalized associated
 //  Legendre value. The correlation multiplies every |m| > 0 channel
 //  by two, which is the complex inner product of the conjugate pair.
 //  Bonds are evaluated in structure-of-arrays groups so the polynomial
@@ -715,7 +715,7 @@ std::complex<double> sph::lookupTableQ3(int m, std::array<double, 2> angles) {
 /**
  * @details Calculates @f$Q_4@f$ from the shared trigonometric terms.
  *  @f$q_4@f$ paired with @f$q_6@f$ is the standard discriminator between
- *  close-packed and body-centred environments.
+ *  close-packed and body-centered environments.
  * @param[in] angles The azimuth and polar angles for a particular particle
  * @return a complex vector of length @f$9@f$, ordered @f$m = -4 \ldots 4@f$
  */
@@ -801,7 +801,7 @@ std::complex<double> sph::lookupTableQ6(int m, std::array<double, 2> angles) {
 /**
  * @details The bond-correlation engine shared by every rule set. Averages the
  *  l=3 spherical harmonics over the rule's nearest-neighbour count, forms the
- *  normalised correlation @f$c_{ij}@f$ for the same bonds, and classifies
+ *  normalized correlation @f$c_{ij}@f$ for the same bonds, and classifies
  *  each bond against the rule's thresholds (boundaries inclusive). getCorrel
  *  and getCorrelPlus call this with the CHILL and CHILL+ water rules; other
  *  materials pass their own registered rules.
@@ -2695,7 +2695,7 @@ int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &y
     }
   }
   // Bonds are complete before the neighbour test reads them. The published
-  // interfacial row looks at a neighbour's staggered count; labelling in
+  // interfacial row looks at a neighbour's staggered count; labeling in
   // the bond loop would see a neighbour that had not been written yet.
   int cubic = 0;
 #ifdef SEAMS_HAS_OPENMP

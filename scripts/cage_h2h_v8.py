@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Cage head-to-head on GenIce sI, sII and sH.
 
 Frames are written under benchmarks/genice-frames and are not tracked.
@@ -240,7 +241,7 @@ def clavis_waters(pos: np.ndarray, cell: np.ndarray, edges, vecs) -> str:
 
 
 def clavis_box(cell: np.ndarray) -> list[float]:
-    """Nanometres. Six values when the cell is tilted, else three."""
+    """Nanometers. Six values when the cell is tilted, else three."""
     length = np.array([cell[0, 0], cell[1, 1], cell[2, 2]]) / 10.0
     tilt = np.array([cell[1, 0], cell[2, 0], cell[2, 1]]) / 10.0
     if np.any(np.abs(tilt) > 1e-8):

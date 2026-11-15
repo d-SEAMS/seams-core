@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 //! Ice Ih census through the safe seams crate.
 use seams::{ChillOptions, Label, System};
 use std::env;

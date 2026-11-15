@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Regenerate the Sollya minimax coefficients used by the kernels.
 
 Sollya fpminimax builds a polynomial with binary64 coefficients.

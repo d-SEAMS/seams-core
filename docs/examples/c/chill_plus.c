@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* CHILL+: per-atom ice labels and the nine class counts.
  * Usage: chill_plus <repository root> */
 #include "seams.h"

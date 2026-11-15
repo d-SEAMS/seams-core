@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Madrid-2019 ice/brine trajectories. Frames stay in the run directory.
 
 The deck is TIP4P/2005 plus the Madrid-2019 NaCl parameters

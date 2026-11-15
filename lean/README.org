@@ -7,9 +7,9 @@ The statements live in =DseamsProofs/Completion.lean=.
 * Theorems
 
 Vertices ~V~ are a finite type. ~R~ is a finite family of rings
-(finite sets of vertices). ~L~ is a labelled set. One ~step~ labels
+(finite sets of vertices). ~L~ is a labeled set. One ~step~ labels
 every vertex ~v~ for which some ring ~r~ in ~R~ contains ~v~ and has
-every other vertex labelled. That is the all-but-one rule.
+every other vertex labeled. That is the all-but-one rule.
 
 | theorem | claim |
 |---------+-------|
@@ -21,7 +21,7 @@ every other vertex labelled. That is the all-but-one rule.
 | ~edgeRule_not_sound~ | the edge-sharing rule labels a vertex the all-but-one rule leaves unlabelled |
 
 Least-fixed-point uniqueness implies that the C++ frontier walk and a
-round-by-round pass over every ring produce the same labelled set.
+round-by-round pass over every ring produce the same labeled set.
 
 * Outside the model
 

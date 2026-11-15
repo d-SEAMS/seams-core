@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Block means of a direct-coexistence log and, if a dump exists, of CHILL+.
 
 The LAMMPS timestep is 2 fs. Production starts at the last reset, which

@@ -158,4 +158,4 @@ The \(q_4\) and \(q_6\) means are this kernel.
 The Python wrapper is ~q4_q6_chill~ in =bindings/python/chill_plus.py=. It returns ~q4~, ~q6~, ~q4bar~, ~q6bar~, ~labels~ and ~counts~. ~SEAMS_LANG_LIB~ selects ~libseams_lang~. Nucleation analysis reads ~q6bar~.
 ~none~ leaves the cage bound to the face census.
 Choose the window as the heavy-atom contact range of the model, and widen it for a compressed cell or a guest that stretches a cage.
-A nanometre file uses ~0.265,0.315~.
+A nanometer file uses ~0.265,0.315~.

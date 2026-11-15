@@ -55,7 +55,7 @@ seams cages input/traj/genice_sI.lammpstrj --type 1 --signature 512 --cage-edge 
 A null C edge string keeps the default.
 Set the window to the heavy-atom contact range of the model.
 Widen it for a compressed cell or a guest that stretches a cage.
-A nanometre file uses ~0.265,0.315~.
+A nanometer file uses ~0.265,0.315~.
 
 =tests/chill_plus_fronts.py= (Meson test ~chill_plus_fronts_agree~) runs all four fronts on that dump with both lists.
 It checks the histograms on all four and the per-atom labels on Python, R, and Julia.

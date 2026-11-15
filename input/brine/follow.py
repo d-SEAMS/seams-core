@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """After the 245/255 K pair exits, write their CSVs and start the next pass.
 
 Next pass: 235 K, 250 K, and a second 245 K seed. Frames stay in the run directory.

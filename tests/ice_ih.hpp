@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 #pragma once
 
 // Ideal ice Ih, eight oxygens in the orthorhombic cell of

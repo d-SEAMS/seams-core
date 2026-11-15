@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 # Build the Dseams manual and run every doctest.
 #
 #   julia --project=docs docs/make.jl

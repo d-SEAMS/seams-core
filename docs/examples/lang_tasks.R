@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 # Neighbours, rings, and CHILL+ from R.
 # The package returns positions, the ring table, and the label column.
 # Directed cutoff pairs are counted from those positions with the

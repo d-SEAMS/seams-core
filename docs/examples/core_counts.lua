@@ -1,3 +1,4 @@
+-- Copyright (c) d-SEAMS developers
 -- Ice Ih and sII census through require("dseams").
 -- Ice Ih: 128 hexagonal, 256 six-rings.
 -- sII: 136 clathrate, 144 five-rings, 16 six-rings.

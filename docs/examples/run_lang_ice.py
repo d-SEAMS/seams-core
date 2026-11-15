@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Compile and run the C++ language-front Ice Ih census.
 
 Usage: run_lang_ice.py ROOT BUILD

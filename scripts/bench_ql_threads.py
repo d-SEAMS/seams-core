@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 """Head-to-head local q4 and q6 against OVITO and freud.
 
 Ideal ice Ic and one liquid made by shifting that crystal with a normal

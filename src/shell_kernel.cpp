@@ -636,7 +636,7 @@ bool matchIce(const double env[][3], int n, const double templ[][3], int perm[kM
   }
   int tf[4];
   nearest4(templ, n, 0, tf);
-  // Template atom 0 is the centre by construction. tf should be 1..4.
+  // Template atom 0 is the center by construction. tf should be 1..4.
   double best = 1e300;
   double best5 = 1e300;
   int bestPerm[kMaxN];

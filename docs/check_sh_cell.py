@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Every lammpstrj reader recovers the genice sH cell edge and tilts.
 
 The dump bound span on x is 31.05 angstrom. The cell edge is

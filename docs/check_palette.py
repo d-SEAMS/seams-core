@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
-"""No colour in the shared palette may mean two roles."""
+# Copyright (c) d-SEAMS developers
+"""No color in the shared palette may mean two roles."""
 
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from chill_palette import COLOUR, assert_distinct
+from chill_palette import COLOR, assert_distinct
 
 
 def main():
     distance = assert_distinct()
-    assert_distinct(COLOUR)
-    print(f"palette {len(COLOUR)} roles, closest CIEDE2000 {distance:.2f}")
+    assert_distinct(COLOR)
+    print(f"palette {len(COLOR)} roles, closest CIEDE2000 {distance:.2f}")
     return 0
 
 

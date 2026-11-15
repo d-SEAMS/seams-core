@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* R-callable wrappers for the science tutorials. Compiled in the build tree. */
 #include "seams.h"
 

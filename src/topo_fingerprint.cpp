@@ -80,17 +80,17 @@ std::vector<int> hopNeighbourhood(const Rows &rows, int atom, int hops) {
 }
 
 std::uint64_t wlHash(const std::vector<std::vector<int>> &adjacency, int root,
-                     int rounds, const std::vector<int> &colours) {
+                     int rounds, const std::vector<int> &colors) {
   const int n = static_cast<int>(adjacency.size());
-  const bool coloured = static_cast<int>(colours.size()) == n;
-  std::vector<std::uint64_t> colour(static_cast<std::size_t>(n));
+  const bool colored = static_cast<int>(colors.size()) == n;
+  std::vector<std::uint64_t> color(static_cast<std::size_t>(n));
   for (int i = 0; i < n; i++) {
     const std::uint64_t deg = static_cast<std::uint64_t>(adjacency[static_cast<std::size_t>(i)].size());
     std::uint64_t h = mix(kOffset, deg + (i == root ? 0x9e3779b97f4a7c15ULL : 0ULL));
-    if (coloured) {
-      h = mix(h, static_cast<std::uint64_t>(static_cast<std::int64_t>(colours[static_cast<std::size_t>(i)])) + 1ULL);
+    if (colored) {
+      h = mix(h, static_cast<std::uint64_t>(static_cast<std::int64_t>(colors[static_cast<std::size_t>(i)])) + 1ULL);
     }
-    colour[static_cast<std::size_t>(i)] = h;
+    color[static_cast<std::size_t>(i)] = h;
   }
   std::vector<std::uint64_t> next(static_cast<std::size_t>(n));
   std::vector<std::uint64_t> bag;
@@ -98,22 +98,22 @@ std::uint64_t wlHash(const std::vector<std::vector<int>> &adjacency, int root,
     for (int i = 0; i < n; i++) {
       bag.clear();
       for (int j : adjacency[static_cast<std::size_t>(i)]) {
-        bag.push_back(colour[static_cast<std::size_t>(j)]);
+        bag.push_back(color[static_cast<std::size_t>(j)]);
       }
       std::sort(bag.begin(), bag.end());
-      std::uint64_t h = mix(kOffset, colour[static_cast<std::size_t>(i)]);
+      std::uint64_t h = mix(kOffset, color[static_cast<std::size_t>(i)]);
       for (std::uint64_t c : bag) {
         h = mix(h, c);
       }
       next[static_cast<std::size_t>(i)] = h;
     }
-    colour.swap(next);
+    color.swap(next);
   }
-  std::vector<std::uint64_t> all(colour.begin(), colour.end());
+  std::vector<std::uint64_t> all(color.begin(), color.end());
   std::sort(all.begin(), all.end());
   std::uint64_t h = mix(kOffset, static_cast<std::uint64_t>(n));
   if (root >= 0 && root < n) {
-    h = mix(h, colour[static_cast<std::size_t>(root)]);
+    h = mix(h, color[static_cast<std::size_t>(root)]);
   }
   for (std::uint64_t c : all) {
     h = mix(h, c);
@@ -129,7 +129,7 @@ struct LocalGraph {
 };
 
 LocalGraph buildLocalGraph(const Rows &rows, int atom, int hops,
-                           const std::vector<int> &colours) {
+                           const std::vector<int> &colors) {
   LocalGraph g;
   g.atoms = hopNeighbourhood(rows, atom, hops);
   if (g.atoms.empty()) {
@@ -158,11 +158,11 @@ LocalGraph buildLocalGraph(const Rows &rows, int atom, int hops,
     }
     std::sort(adj.begin(), adj.end());
   }
-  const bool coloured = colours.size() == rows.size() && !rows.empty();
-  if (coloured) {
+  const bool colored = colors.size() == rows.size() && !rows.empty();
+  if (colored) {
     g.localColours.reserve(g.atoms.size());
     for (int a : g.atoms) {
-      g.localColours.push_back(colours[static_cast<std::size_t>(a)]);
+      g.localColours.push_back(colors[static_cast<std::size_t>(a)]);
     }
   }
   return g;
@@ -180,15 +180,15 @@ LocalKey localKeyFromGraph(const LocalGraph &g, int hops) {
   edges.erase(std::unique(edges.begin(), edges.end()), edges.end());
   out.vertices = static_cast<int>(g.atoms.size());
   out.edges = static_cast<int>(edges.size());
-  const bool coloured = !g.localColours.empty();
+  const bool colored = !g.localColours.empty();
   const int n = static_cast<int>(g.atoms.size());
-  const std::string cert = coloured
+  const std::string cert = colored
                                ? cage::canonicalCertificateColoured(n, edges, g.localColours, 0)
                                : cage::canonicalCertificateRooted(n, edges, 0);
   if (!cert.empty()) {
     out.method = "nauty";
     std::string tagged = cert;
-    if (coloured) {
+    if (colored) {
       std::vector<int> sorted(g.localColours);
       std::sort(sorted.begin(), sorted.end());
       tagged += "|";
@@ -207,24 +207,24 @@ LocalKey localKeyFromGraph(const LocalGraph &g, int hops) {
   return out;
 }
 
-LocalKey localKey(const Rows &rows, int atom, int hops, const std::vector<int> &colours) {
-  return localKeyFromGraph(buildLocalGraph(rows, atom, hops, colours), hops);
+LocalKey localKey(const Rows &rows, int atom, int hops, const std::vector<int> &colors) {
+  return localKeyFromGraph(buildLocalGraph(rows, atom, hops, colors), hops);
 }
 
 FrameFingerprint fingerprint(const Rows &rows, int hops, int maxRingSize,
-                             const std::vector<int> &colours) {
+                             const std::vector<int> &colors) {
   FrameFingerprint out;
   out.hops = hops;
   const int n = static_cast<int>(rows.size());
-  const bool coloured = colours.size() == rows.size() && !rows.empty();
-  out.coloured = coloured;
+  const bool colored = colors.size() == rows.size() && !rows.empty();
+  out.colored = colored;
   out.atomKeys.reserve(static_cast<std::size_t>(n));
   // The frame key is built from the refinement hash in every build so that
   // a nauty host and a plain host name the same frame the same way; the
   // per-atom keys carry the exact certificate when it exists.
   std::vector<std::uint64_t> wl(static_cast<std::size_t>(n));
   for (int i = 0; i < n; i++) {
-    const LocalGraph g = buildLocalGraph(rows, i, hops, colours);
+    const LocalGraph g = buildLocalGraph(rows, i, hops, colors);
     LocalKey lk = localKeyFromGraph(g, hops);
     out.method = lk.method;
     out.classes[lk.key] += 1;
@@ -275,11 +275,11 @@ FrameFingerprint incrementalFingerprint(const FrameFingerprint &prev,
                                         const Rows &rows,
                                         const std::vector<int> &dirtyAtoms,
                                         int hops, int maxRingSize,
-                                        const std::vector<int> &colours) {
+                                        const std::vector<int> &colors) {
   const int n = static_cast<int>(rows.size());
   if (n == 0 || static_cast<int>(prev.atomKeys.size()) != n ||
       prev.hops != hops || prev.wlAtom.size() != rows.size()) {
-    return fingerprint(rows, hops, maxRingSize, colours);
+    return fingerprint(rows, hops, maxRingSize, colors);
   }
   std::unordered_set<int> dirty;
   for (int a : dirtyAtoms) {
@@ -292,10 +292,10 @@ FrameFingerprint incrementalFingerprint(const FrameFingerprint &prev,
   }
   FrameFingerprint out = prev;
   out.hops = hops;
-  out.coloured = colours.size() == rows.size() && !rows.empty();
+  out.colored = colors.size() == rows.size() && !rows.empty();
   out.classes.clear();
   for (int i : dirty) {
-    const LocalGraph g = buildLocalGraph(rows, i, hops, colours);
+    const LocalGraph g = buildLocalGraph(rows, i, hops, colors);
     LocalKey lk = localKeyFromGraph(g, hops);
     out.method = lk.method;
     out.atomKeys[static_cast<std::size_t>(i)] = std::move(lk.key);
@@ -321,9 +321,9 @@ void addToLibrary(KeyLibrary &lib, const FrameFingerprint &fp, const std::string
   if (lib.labelOf.empty()) {
     lib.method = fp.method;
     lib.hops = fp.hops;
-    lib.coloured = fp.coloured;
-  } else if (lib.method != fp.method || lib.hops != fp.hops || lib.coloured != fp.coloured) {
-    throw std::invalid_argument("key library mixes methods, hop counts or colourings");
+    lib.colored = fp.colored;
+  } else if (lib.method != fp.method || lib.hops != fp.hops || lib.colored != fp.colored) {
+    throw std::invalid_argument("key library mixes methods, hop counts or colorings");
   }
   for (const auto &kv : fp.classes) {
     auto it = lib.labelOf.find(kv.first);
@@ -360,8 +360,8 @@ void addToLibrary(KeyLibrary &lib, const FrameFingerprint &fp, const std::string
 
 std::string writeLibrary(const KeyLibrary &lib) {
   std::ostringstream out;
-  out << "# method " << lib.method << " hops " << lib.hops << " colours "
-      << (lib.coloured ? 1 : 0) << "\n";
+  out << "# method " << lib.method << " hops " << lib.hops << " colors "
+      << (lib.colored ? 1 : 0) << "\n";
   for (const auto &kv : lib.labelOf) {
     out << kv.first << " " << kv.second << "\n";
   }
@@ -384,10 +384,10 @@ KeyLibrary readLibrary(const std::string &text) {
           head >> lib.method;
         } else if (word == "hops") {
           head >> lib.hops;
-        } else if (word == "colours") {
+        } else if (word == "colors") {
           int flag = 0;
           head >> flag;
-          lib.coloured = flag != 0;
+          lib.colored = flag != 0;
         }
       }
       continue;
@@ -403,9 +403,9 @@ KeyLibrary readLibrary(const std::string &text) {
 }
 
 LibraryMatch matchLibrary(const FrameFingerprint &fp, const KeyLibrary &lib) {
-  if (fp.method != lib.method || fp.hops != lib.hops || fp.coloured != lib.coloured) {
+  if (fp.method != lib.method || fp.hops != lib.hops || fp.colored != lib.colored) {
     throw std::invalid_argument(
-        "fingerprint and library differ in method, hops or colouring");
+        "fingerprint and library differ in method, hops or coloring");
   }
   LibraryMatch out;
   out.labels.reserve(fp.atomKeys.size());
@@ -424,7 +424,7 @@ LibraryMatch matchLibrary(const FrameFingerprint &fp, const KeyLibrary &lib) {
 }
 
 LibraryMatch matchLibraries(const Rows &rows, const std::vector<KeyLibrary> &libs,
-                            int maxRingSize, const std::vector<int> &colours) {
+                            int maxRingSize, const std::vector<int> &colors) {
   if (libs.empty()) {
     throw std::invalid_argument("no key library to match against");
   }
@@ -444,18 +444,18 @@ LibraryMatch matchLibraries(const Rows &rows, const std::vector<KeyLibrary> &lib
   out.labels.assign(rows.size(), std::string());
   out.depth.assign(rows.size(), 0);
   for (const KeyLibrary *lib : order) {
-    if (lib->coloured != (colours.size() == rows.size() && !rows.empty())) {
+    if (lib->colored != (colors.size() == rows.size() && !rows.empty())) {
       throw std::invalid_argument(
-          "fingerprint and library differ in method or colouring");
+          "fingerprint and library differ in method or coloring");
     }
     for (std::size_t a = 0; a < rows.size(); ++a) {
       if (!out.labels[a].empty()) {
         continue;
       }
-      const LocalKey lk = localKey(rows, static_cast<int>(a), lib->hops, colours);
+      const LocalKey lk = localKey(rows, static_cast<int>(a), lib->hops, colors);
       if (lk.method != lib->method) {
         throw std::invalid_argument(
-            "fingerprint and library differ in method or colouring");
+            "fingerprint and library differ in method or coloring");
       }
       const auto it = lib->labelOf.find(lk.key);
       if (it != lib->labelOf.end()) {

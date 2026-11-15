@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 // Neighbours, rings, and CHILL+ through the C++ language front.
 // Frame owns the seams_frame pointer and frees it on every exit.
 #include "seams_lang.h"

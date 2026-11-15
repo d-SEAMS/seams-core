@@ -3,7 +3,7 @@
 **
 ** SPDX-License-Identifier: MIT
 **
-** Order and labelling invariance of the cage predicates on one frame. The
+** Order and labeling invariance of the cage predicates on one frame. The
 ** batch affiliation and the findHC + findDDC cage objects are evaluated on
 ** the ring list as enumerated and reversed, with every ring rotated by one,
 ** reversed, or rotated by two and reversed, and on a randomly relabelled
@@ -290,7 +290,7 @@ int main(int argc, char **argv) {
   // that is canonical for the new labels. The count is the invariant: it
   // is the size of a maximum non-conflicting set.
   // listHC/listDDC are the rings touched by one maximum packing. A second
-  // labelling can select another packing of the same size, so those lists
+  // labeling can select another packing of the same size, so those lists
   // need not match. The object counts are the invariant.
   const bool sameCounts = pc.cages == ref.cages && pc.hcCages == ref.hcCages &&
                           pc.ddcCages == ref.ddcCages;

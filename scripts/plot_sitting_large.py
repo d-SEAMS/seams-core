@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Strong scaling of the 884736-molecule sitting.
 
 Speedup is the one-thread median divided by the median at that width.

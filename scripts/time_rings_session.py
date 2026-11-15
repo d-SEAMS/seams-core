@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """One session: d-SEAMS, SQQ 0.5.8, OVITO FindRings, and cycless.
 
 Ice Ic is built in memory (the same cell as scripts/gen_ice_ic.py). The

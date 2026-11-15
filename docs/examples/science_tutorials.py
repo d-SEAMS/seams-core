@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Science tutorials: interface, brine front, and hydrate cages.
 
 Python and the C program in science_tutorials.c both call libseams.
@@ -160,9 +161,9 @@ def layer_period(projection: np.ndarray) -> float:
     """Basal repeat, the same scan as science_render.layer_period."""
     best_score = -1.0
     best = 3.6
-    centred = projection - float(np.mean(projection))
+    centered = projection - float(np.mean(projection))
     for period in np.linspace(3.30, 4.05, 16):
-        wave = np.exp(1j * (2.0 * math.pi / float(period)) * centred)
+        wave = np.exp(1j * (2.0 * math.pi / float(period)) * centered)
         score = float(np.abs(np.mean(wave)))
         if score > best_score:
             best_score = score
@@ -171,8 +172,8 @@ def layer_period(projection: np.ndarray) -> float:
 
 
 def layer_score(projection: np.ndarray, period: float) -> float:
-    centred = projection - float(np.mean(projection))
-    wave = np.exp(1j * (2.0 * math.pi / period) * centred)
+    centered = projection - float(np.mean(projection))
+    wave = np.exp(1j * (2.0 * math.pi / period) * centered)
     return float(np.abs(np.mean(wave)))
 
 

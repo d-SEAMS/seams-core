@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Carried-cage times on the 0.1, 1 and 10 ps mW strides, and on the
 148-frame nucleation trajectory, in one sitting.
 

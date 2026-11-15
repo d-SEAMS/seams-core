@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* One neighbour-list row per Ice Ih oxygen. */
 #include "seams.h"
 

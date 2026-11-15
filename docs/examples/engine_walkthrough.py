@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """One walkthrough for each engine hook, on that engine's own input.
 
 LAMMPS: fix external callback in engines/lammps/in.dseams (stride 2, run 8).
-GROMACS: analyzeFrame nanometre-to-angstrom read of engines/gromacs/ice.gro.
+GROMACS: analyzeFrame nanometer-to-angstrom read of engines/gromacs/ice.gro.
 OpenMM: DseamsReporter for two steps of the reporter's 8-atom cell.
 PLUMED: SEAMS action components on engines/plumed/ice.xyz.
 

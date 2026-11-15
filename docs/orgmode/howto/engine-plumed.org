@@ -32,8 +32,8 @@ A ~RESTRAINT~ can bias ~seams.q6~. The other four components have no
 derivatives. A ~PRINT~ of ~seams.q6~ leaves the derivative array empty,
 so the central difference runs only when a ~RESTRAINT~ has allocated it.
 
-PLUMED stores positions in nanometres. The plugin multiplies positions
-and the box by 10. The docs test writes an xyz, in nanometres, from
+PLUMED stores positions in nanometers. The plugin multiplies positions
+and the box by 10. The docs test writes an xyz, in nanometers, from
 ~input/traj/ice1h.lammpstrj~ and runs ~plumed driver~. The colvar line
 is mean q6, the hexagonal count, and the six-ring count:
 

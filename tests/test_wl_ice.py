@@ -1,4 +1,5 @@
-"""q-bar and normalised w on ice Ih, ice Ic and a liquid, against pyscal3."""
+# Copyright (c) d-SEAMS developers
+"""q-bar and normalized w on ice Ih, ice Ic and a liquid, against pyscal3."""
 
 import ctypes
 import math

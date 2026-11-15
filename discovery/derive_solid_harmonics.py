@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Cartesian solid harmonics for the Steinhardt and CHILL+ kernels.
 
 The code's azimuth is phi = atan2(x, y), so

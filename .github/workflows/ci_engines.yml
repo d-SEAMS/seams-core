@@ -71,7 +71,7 @@ jobs:
           done
 
   # Each engine plugin against the conda-forge engine of the default pixi
-  # environment, then its engine-e2e tests: a short ice/liquid run labelled
+  # environment, then its engine-e2e tests: a short ice/liquid run labeled
   # in situ and checked frame by frame against the CLI. A skip fails the job.
   engine-e2e:
     runs-on: ubuntu-latest

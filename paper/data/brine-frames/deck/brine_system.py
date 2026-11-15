@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Build a direct-coexistence ice/brine box for LAMMPS.
 
 TIP4P/2005 water with the Madrid 2019 scaled-charge ions (Zeron, Abascal

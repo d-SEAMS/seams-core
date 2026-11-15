@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 //-----------------------------------------------------------------------------------
 // d-SEAMS - Deferred Structural Elucidation Analysis for Molecular Simulations
 // SPDX-License-Identifier: MIT

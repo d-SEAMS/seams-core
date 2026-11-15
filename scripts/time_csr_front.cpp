@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 // One-session timing of the cutoff CSR kernels and the language front.
 // Prints medians only. No host name.
 

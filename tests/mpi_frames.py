@@ -11,7 +11,7 @@ import sys
 import tempfile
 
 mpiexec, seams, dump, con = sys.argv[1:5]
-# Colour allowed but not forced, so a rank writing it into piped output
+# Color allowed but not forced, so a rank writing it into piped output
 # differs from serial
 base = dict(os.environ, TERM="xterm-256color")
 for name in ("NO_COLOR", "FORCE_COLOR", "CLICOLOR", "CLICOLOR_FORCE",

@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Per-function contract of the stable C API, compiled as C11.
  *
  * Every function in seams.h is called with bad input here: NULL pointers,

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Run one language example of the ice Ih census.
 
 Exit status 77 means the compiler or the binding is not on this machine.

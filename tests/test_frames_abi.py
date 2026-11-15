@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 """Rings, cages, signature cages, and symmetry agree on one ideal lattice."""
 
 import math

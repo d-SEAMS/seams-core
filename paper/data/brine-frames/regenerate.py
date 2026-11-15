@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Regenerate the 230 K ice/brine front frames from the campaign deck.
 
 The deck is the one that wrote results/brine/T230_m{0,20,40}_r0 in the
@@ -373,7 +374,7 @@ def ions_in_liquid(oxygens, ice_flags, ions, length, cutoff=3.5):
     n_ice = n_front = n_liq = 0
     cut2 = cutoff * cutoff
     for ion in ions:
-        labelled = 0
+        labeled = 0
         in_shell = 0
         for oxy, flag in zip(oxygens, ice_flags):
             acc = 0.0
@@ -383,10 +384,10 @@ def ions_in_liquid(oxygens, ice_flags, ions, length, cutoff=3.5):
                 acc += d * d
             if acc < cut2:
                 in_shell += 1
-                labelled += 1 if flag else 0
-        if in_shell > 0 and labelled == in_shell:
+                labeled += 1 if flag else 0
+        if in_shell > 0 and labeled == in_shell:
             n_ice += 1
-        elif labelled > 0:
+        elif labeled > 0:
             n_front += 1
         else:
             n_liq += 1
@@ -531,7 +532,7 @@ def dump_restart(lmp: str, restart: Path, dump: Path) -> None:
     does not integrate. The scratch directory keeps the deck's restart.a
     and end.restart away from the dataset.
     """
-    # One directory per labelled frame, so concurrent loadings do not share it.
+    # One directory per labeled frame, so concurrent loadings do not share it.
     scratch = dump.parent
     scratch.mkdir(parents=True, exist_ok=True)
     dump.unlink(missing_ok=True)
@@ -607,7 +608,7 @@ def frame_from_restart(
 
 
 def frames(restarts: Path, out: Path, frames_dir: Path | None, lmp: str, seams: str, lib_path: str) -> None:
-    """Write the twelve labelled frames from step restarts only."""
+    """Write the twelve labeled frames from step restarts only."""
     out.mkdir(parents=True, exist_ok=True)
     for pairs in PAIRS:
         tag = f"T230_m{pairs}_r0"
@@ -882,8 +883,8 @@ def main() -> None:
     parser.add_argument("--restarts", type=Path)
     parser.add_argument("--restart", type=Path)
     parser.add_argument("--out", type=Path)
-    parser.add_argument("--publish", type=Path, help="copy one labelled frame to this path")
-    parser.add_argument("--frames-dir", type=Path, help="copy the twelve labelled frames into this directory")
+    parser.add_argument("--publish", type=Path, help="copy one labeled frame to this path")
+    parser.add_argument("--frames-dir", type=Path, help="copy the twelve labeled frames into this directory")
     parser.add_argument("--step", type=int)
     parser.add_argument("--genice", default="")
     parser.add_argument("--lmp", default="")

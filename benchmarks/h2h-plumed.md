@@ -10,7 +10,7 @@ Every timed comparison wins on the median and on the minimum. At one core and 11
 
 ## In-tree colvar
 
-`engines/plumed/SeamsColvar.cpp` builds as a PLUMED action named SEAMS. The shared library is produced next to the release build and is not part of the tree. PLUMED passes nanometres; the action scales positions and the cell to angstroms and calls the C API. Derivatives stay off unless a restraint allocates them. The raw log is benchmarks/h2h-plumed-plugin.txt.
+`engines/plumed/SeamsColvar.cpp` builds as a PLUMED action named SEAMS. The shared library is produced next to the release build and is not part of the tree. PLUMED passes nanometers; the action scales positions and the cell to angstroms and calls the C API. Derivatives stay off unless a restraint allocates them. The raw log is benchmarks/h2h-plumed-plugin.txt.
 
 On the same three ice cells the mean q6, the CHILL+ cubic fraction, the primitive six-ring fraction, the hexagonal count and the six-ring count match the C API. The largest mean-q6 gap is 5.4e-13 at 110592 molecules. Ideal ice is entirely hexagonal, so the cubic fraction is 0 and every molecule sits on a six-ring.
 

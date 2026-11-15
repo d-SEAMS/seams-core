@@ -52,7 +52,7 @@ calls `seams_chill_plus_n`, `seams_q4q6_n`, `seams_rings_labels_n`, and
 `SEAMS_ERR_RANGE` when one is short. `seams_system_natoms`, `seams_neighbours_nrows`,
 and `seams_rings_nrings` return their count through a `size_t` pointer and report a
 null or empty handle as a status. The older calls stay exported with the same
-behaviour.
+behavior.
 
 ## Linking
 
@@ -2067,7 +2067,7 @@ seams_status seams_brine_profile(const seams_brine *front, double *z_mid, double
 Parameters: `front`, `z_mid`, `molality`, `ice_fraction`, `cap`, `n_out`.
 
 - `front`: Brine handle.
-- `z_mid`: Bin centres, or NULL to skip the column.
+- `z_mid`: Bin centers, or NULL to skip the column.
 - `molality`: Bin molalities, or NULL to skip the column.
 - `ice_fraction`: Bin ice fractions, or NULL to skip the column.
 - `cap`: Capacity of each non-NULL column.
@@ -2643,7 +2643,7 @@ Parameters: `sys`, `type`, `bins`, `axis`, `z`, `rho`, `cap`, `n_out`.
 - `type`: Species filter. Zero keeps every atom.
 - `bins`: Bin count. Zero selects about one bin per 0.1 Angstrom.
 - `axis`: 0, 1, or 2.
-- `z`: Bin centres, or NULL to query.
+- `z`: Bin centers, or NULL to query.
 - `rho`: Density per bin, or NULL to query.
 - `cap`: Capacity of each non-NULL column.
 - `n_out`: Receives the bin count.
@@ -2718,10 +2718,10 @@ Example: `docs/examples/c_api_tour.c`
 Purpose: Topological fingerprint of the bonded graph.
 
 ```c
-seams_status seams_fingerprint(seams_system *sys, double cutoff, int type, int k, int graph, int hops, int colour_types, seams_topo **out);
+seams_status seams_fingerprint(seams_system *sys, double cutoff, int type, int k, int graph, int hops, int color_types, seams_topo **out);
 ```
 
-Parameters: `sys`, `cutoff`, `type`, `k`, `graph`, `hops`, `colour_types`, `out`.
+Parameters: `sys`, `cutoff`, `type`, `k`, `graph`, `hops`, `color_types`, `out`.
 
 - `sys`: Frame handle.
 - `cutoff`: Positive finite cutoff, Angstrom.
@@ -2729,7 +2729,7 @@ Parameters: `sys`, `cutoff`, `type`, `k`, `graph`, `hops`, `colour_types`, `out`
 - `k`: Neighbour count for the mutual graph. Zero selects 4.
 - `graph`: SEAMS_GRAPH_CUTOFF or SEAMS_GRAPH_MUTUAL.
 - `hops`: Neighbourhood depth. Zero selects 2.
-- `colour_types`: Non-zero colours vertices by LAMMPS type.
+- `color_types`: Non-zero colors vertices by LAMMPS type.
 - `out`: Receives a ::seams_topo. On failure *out is NULL.
 
 Returns: SEAMS_OK, or SEAMS_ERR_NULL, SEAMS_ERR_STATE, SEAMS_ERR_RANGE, SEAMS_ERR_ARG, SEAMS_ERR_NOMEM, SEAMS_ERR_INTERNAL.
@@ -3742,7 +3742,7 @@ Parameters: `sys`, `rmax`, `bins`, `type_i`, `type_j`, `r`, `g`, `count`, `cap`,
 - `bins`: Bin count. Zero selects about rmax / 0.1.
 - `type_i`: First species. Zero and negative keep every atom of a single-species frame, or every atom as one species otherwise.
 - `type_j`: Second species. Zero and negative reuse the type_i species.
-- `r`: Bin centres, or NULL to query.
+- `r`: Bin centers, or NULL to query.
 - `g`: g(r) per bin, or NULL to query.
 - `count`: Pair count per bin, or NULL to query.
 - `cap`: Capacity of each non-NULL column.
@@ -4213,7 +4213,7 @@ Parameters: `sys`, `rmax`, `bins`, `type_i`, `type_j`, `r`, `cn`, `cap`, `n_out`
 - `bins`: Bin count. Zero selects about rmax / 0.1.
 - `type_i`: Central species, as in seams_rdf().
 - `type_j`: Counted species, as in seams_rdf().
-- `r`: Bin centres, Angstrom, or NULL to query.
+- `r`: Bin centers, Angstrom, or NULL to query.
 - `cn`: Running coordination number, or NULL to query.
 - `cap`: Capacity of each non-NULL column.
 - `n_out`: Receives the bin count.
@@ -5261,6 +5261,6 @@ The program those lines come from:
 :alt: Molecule still for this front
 :width: 480px
 
-Ice Ih coloured by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug c` writes the 2400 by 1800 PNG.
+Ice Ih colored by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug c` writes the 2400 by 1800 PNG.
 ```
 

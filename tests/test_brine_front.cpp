@@ -47,7 +47,7 @@ int addPoint(Cloud &cloud, double x, double y, double z, int type) {
 
 } // namespace
 
-TEST_CASE("front crossings and the rejection coefficient on a labelled slab", "[brine]") {
+TEST_CASE("front crossings and the rejection coefficient on a labeled slab", "[brine]") {
   auto cloud = emptyCloud(10, 10, 10);
   std::vector<bool> ice;
   std::vector<int> waters;

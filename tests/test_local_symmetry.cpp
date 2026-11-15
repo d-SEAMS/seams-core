@@ -276,7 +276,7 @@ TEST_CASE("template names add what CHILL+ does not say", "[symmetry]") {
   REQUIRE(symm::best(ih).name == "ice-Ih");
   REQUIRE(symm::best(isd).name == "ice-Isd");
   // CHILL+ has cubic, hexagonal, water, interfacial, clathrate. It has no
-  // stacking-fault id. The fault shell is not labelled hexagonal.
+  // stacking-fault id. The fault shell is not labeled hexagonal.
   REQUIRE(centreIh == 1);
   REQUIRE(centreIsd != 1);
   REQUIRE(centreIsd != 0);

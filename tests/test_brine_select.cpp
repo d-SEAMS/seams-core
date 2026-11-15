@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 #include <catch2/catch_test_macros.hpp>
 
 #include <bop.hpp>
@@ -84,7 +85,7 @@ TEST_CASE("untyped CHILL+ labels an ion, selection leaves it unclassified",
   REQUIRE(seams_chill_plus_graph_lammps(oxygen.data(), nOx, kBox9, 3.5, "cutoff",
                                         oxLabels.data()) == 0);
   // The old in-situ path treats every coordinate as water. The ion, 2 A
-  // from the centre, is inside the 3.5 A shell and receives a water label.
+  // from the center, is inside the 3.5 A shell and receives a water label.
   REQUIRE(seams_chill_plus_graph_lammps(mixed.data(), nAll, kBox9, 3.5, "cutoff",
                                         oldLabels.data()) == 0);
   REQUIRE(oldLabels[5] != 6);

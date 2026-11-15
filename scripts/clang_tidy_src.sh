@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Copyright (c) d-SEAMS developers
 # Run the checked-in clang-tidy configuration on the C++ sources.
 # Usage: scripts/clang_tidy_src.sh <build-dir>
 # The build directory must contain compile_commands.json.

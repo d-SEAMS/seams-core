@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """One session of the block cut and the linkcell cell-grid cut.
 
 Strong scaling uses 110592 and 884736 molecules at 1, 2, 4 and 8 ranks.
@@ -60,7 +61,7 @@ OP_LABEL = {"neigh": "neighbours", "chill": "CHILL+", "q6": "$q_6$", "rings": "r
 STRONG = ((24, 24, 24, 110592), (48, 48, 48, 884736))
 WEAK = ((1, 24, 24, 24), (2, 24, 24, 48), (4, 24, 48, 48), (8, 48, 48, 48))
 REPS = 12
-COLOURS = {"neigh": "#0072B2", "chill": "#D55E00", "q6": "#009E73", "rings": "#CC79A7"}
+COLORS = {"neigh": "#0072B2", "chill": "#D55E00", "q6": "#009E73", "rings": "#CC79A7"}
 
 
 def quantile_linear(ordered, q):
@@ -481,7 +482,7 @@ def write_figure(rows):
                     marker=marker,
                     ms=3.5,
                     ls=style,
-                    color=COLOURS[op],
+                    color=COLORS[op],
                     lw=1.2,
                     label=label,
                 )
@@ -519,7 +520,7 @@ def write_figure(rows):
                 x0,
                 float(block["median_ms"]),
                 width=0.8,
-                color=COLOURS[op],
+                color=COLORS[op],
                 alpha=0.35,
                 yerr=whisker(block),
                 error_kw={"ecolor": "#333333", "lw": 0.6, "capsize": 2},
@@ -528,7 +529,7 @@ def write_figure(rows):
                 x0 + 0.8,
                 float(cell["median_ms"]),
                 width=0.8,
-                color=COLOURS[op],
+                color=COLORS[op],
                 yerr=whisker(cell),
                 error_kw={"ecolor": "#333333", "lw": 0.6, "capsize": 2},
             )

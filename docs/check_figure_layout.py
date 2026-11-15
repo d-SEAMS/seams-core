@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Annotation boxes do not overlap, and wrapped centres stay inside the cell."""
+# Copyright (c) d-SEAMS developers
+"""Annotation boxes do not overlap, and wrapped centers stay inside the cell."""
 
 import sys
 import tempfile
@@ -122,10 +123,10 @@ def check_brine_wrap():
     raw = np.array([[-0.4, 1.0, 5.0], [10.2, 3.0, 8.0], [1.0, 2.0, 3.0], [4.0, -0.2, 22.0]])
     before = centres_outside_outline(raw, origin, lengths, forward, up)
     if before == 0:
-        raise SystemExit("the shifted brine centres were already inside the outline")
+        raise SystemExit("the shifted brine centers were already inside the outline")
     after = centres_outside_outline(wrap_into_cell(raw, origin, lengths), origin, lengths, forward, up)
     if after:
-        raise SystemExit(f"{after} wrapped brine centres project outside the cell outline")
+        raise SystemExit(f"{after} wrapped brine centers project outside the cell outline")
     cache = (
         ROOT / "docs" / ".cache" / "brine-front-230K"
         / "4828e33ecf419c70643b2d466bfa4f283b4138dc" / "T230_m20_r0_tend.xyz"
@@ -146,7 +147,7 @@ def check_brine_wrap():
             up,
         )
         if outside:
-            raise SystemExit(f"{outside} brine centres project outside the cell outline")
+            raise SystemExit(f"{outside} brine centers project outside the cell outline")
         hex_z = np.array([row[3] for row in kept if row[0] == "O" and row[4] == "hexagonal"])
         shell_z = np.array([row[3] for row in kept if row[0] == "O" and row[4] == "interfacial"])
         shifted = box_origin.copy()
@@ -159,8 +160,8 @@ def check_brine_wrap():
         if np.any(ice > front + 1e-6):
             raise SystemExit("brine hexagonal ice sits above the growth front")
         if np.any(moved[:, 2] < float(np.min(ice)) - 1e-6):
-            raise SystemExit("a centre sits below the lower ice surface")
-        print(f"brine frame centres stay inside the outline ({len(points)} atoms)")
+            raise SystemExit("a center sits below the lower ice surface")
+        print(f"brine frame centers stay inside the outline ({len(points)} atoms)")
     else:
         print("brine frame cache is absent; the shifted-cell wrap was checked")
 

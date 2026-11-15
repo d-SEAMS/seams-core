@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Run the minimal examples and require each public symbol to name one.
 
 Usage: run_examples.py ROOT BUILD

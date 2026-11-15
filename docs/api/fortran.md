@@ -1922,7 +1922,7 @@ Ownership: A c_ptr from seams_system_create is freed with seams_system_destroy. 
 
 Errors: A non-zero seams_status. seams_last_error and seams_handle_error hold the detail.
 
-Units: density in inverse cubic angstrom; centres in angstrom
+Units: density in inverse cubic angstrom; centers in angstrom
 
 Example: `docs/examples/minimal_fortran.f90`
 
@@ -1946,7 +1946,7 @@ Example: `docs/examples/minimal_fortran.f90`
 
 Purpose: Topological fingerprint of the bonded graph.
 
-Parameters: sys; cutoff; typ; k; graph; hops; colour_types; out
+Parameters: sys; cutoff; typ; k; graph; hops; color_types; out
 
 Returns: Integer(c_int) status. SEAMS_OK is zero.
 
@@ -2926,6 +2926,6 @@ Example: `docs/examples/minimal_fortran.f90`
 :alt: Molecule still for this front
 :width: 480px
 
-Ice Ih coloured by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug fortran` writes the 2400 by 1800 PNG.
+Ice Ih colored by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug fortran` writes the 2400 by 1800 PNG.
 ```
 

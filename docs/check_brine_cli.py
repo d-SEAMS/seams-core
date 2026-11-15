@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """The paper brine CLI writes a png at the requested millimetre width."""
 
 import io

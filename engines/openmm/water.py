@@ -31,7 +31,7 @@ def _platform():
 
 
 def build_simulation(box_nm=2.0, seed=1, threads=1):
-    """TIP4P/Ew waters in a cubic box of edge ``box_nm`` nanometres."""
+    """TIP4P/Ew waters in a cubic box of edge ``box_nm`` nanometers."""
     forcefield = ForceField("tip4pew.xml")
     modeller = Modeller(Topology(), [])
     modeller.addSolvent(

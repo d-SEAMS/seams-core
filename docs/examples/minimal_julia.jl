@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 # Read the GenIce sI cell: neighbours via steinhardt, then q6, CHILL+, rings.
 using Dseams
 using Statistics

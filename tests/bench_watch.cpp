@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 // Release-only timer for the related-work watch.
 // One warm-up, then the requested number of calls. The frame load is
 // outside the timer. CHILL+ is seams_chill_plus (four mutual neighbours).

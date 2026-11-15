@@ -2,7 +2,7 @@
 # Copyright (c) d-SEAMS developers
 """Draw the science gallery from the slow paper tutorials.
 
-Images are written when the docs are built. OVITO colours the atoms
+Images are written when the docs are built. OVITO colors the atoms
 when it imports. Matplotlib's 3D axes are the fallback. Nothing here
 is meant to be committed.
 """
@@ -19,7 +19,7 @@ IMAGE_DIR = ROOT / "docs" / "source" / "tutorials" / "gallery"
 CAPTIONS = ROOT / "docs" / "source" / "tutorials" / "gallery-captions.rst"
 RUNS = ROOT / "docs" / "build" / "gallery-runs"
 
-# Okabe-Ito, so the CHILL+ classes stay distinct for the common colour-vision deficiencies.
+# Okabe-Ito, so the CHILL+ classes stay distinct for the common color-vision deficiencies.
 LABEL_COLOR = {
     0: (0.00, 0.45, 0.70),
     1: (0.90, 0.62, 0.00),
@@ -322,12 +322,12 @@ def compose_figure(atom_png, dest, legend, scale_a, world_height, atom_size):
 def legend_for(colors, names):
     found = []
     seen = set()
-    for colour, name in zip(colors, names):
-        key = (name, tuple(round(float(channel), 3) for channel in colour))
+    for color, name in zip(colors, names):
+        key = (name, tuple(round(float(channel), 3) for channel in color))
         if name in seen:
             continue
         seen.add(name)
-        found.append((name, colour))
+        found.append((name, color))
     return found
 
 
@@ -587,7 +587,7 @@ def build(seams, libdir, langdir):
             ["gallery-interface.png"],
             " ".join(
                 [
-                    "The picture is the 864-molecule paper frame, coloured by published CHILL+.",
+                    "The picture is the 864-molecule paper frame, colored by published CHILL+.",
                     published.replace("interface full published ", "Published CHILL+ reports ") + ".",
                     ovito.replace("interface full ovito ", "The OVITO rule reports ") + ".",
                     "Hexagonal ice is orange and liquid water is sky blue. The interfacial shell is where the two rules part.",
@@ -625,7 +625,7 @@ def build(seams, libdir, langdir):
             ["gallery-nucleation.png"],
             " ".join(
                 [
-                    "Each molecule is coloured by its own q6bar on frame 2 of the 148-frame paper trajectory.",
+                    "Each molecule is colored by its own q6bar on frame 2 of the 148-frame paper trajectory.",
                     "Dark blue is liquid-like and yellow is ice-like.",
                     first(q_lines, "nucleation full frame 1 ").replace("nucleation full ", "") + ".",
                     first(q_lines, "nucleation full frame 148 ").replace("nucleation full ", "") + ".",

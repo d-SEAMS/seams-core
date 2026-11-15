@@ -31,7 +31,7 @@ Even l needs no square root. With phi = atan2(x, y),
 
 and S_lm is a polynomial. For l = 4 and l = 6, r^l is a power of
 r^2 = x^2 + y^2 + z^2. l = 3 still divides by r^2 * sqrt(r^2). The
-polynomials are in `solid_ylm.hpp`. Bonds are not normalised first.
+polynomials are in `solid_ylm.hpp`. Bonds are not normalized first.
 
 The frame path keeps the nomination in one n by k index array and the
 coordinates in one n by 3 buffer. Each atom's mutual neighbours, the
@@ -365,7 +365,7 @@ The two estimates do not agree, and neither series waits and then
 runs away, so the inflection is the middle of the steady growth
 rather than a resolved barrier.
 
-Normalised \(\hat w_l\) is the Steinhardt contraction of \(q_{lm}\)
+Normalized \(\hat w_l\) is the Steinhardt contraction of \(q_{lm}\)
 with the Wigner 3j symbol \((l\,l\,l; m_1 m_2 m_3)\), divided by
 \((\sum_m |q_{lm}|^2)^{3/2}\). `seams_frame_wl` writes it for \(l = 4\)
 and \(l = 6\). On ideal ice Ic every molecule has

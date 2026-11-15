@@ -1,7 +1,7 @@
 cores 8 affinity 8
 samples 8
 recorded rings source paper/tex/figures/data/ring-head2head.json git c5da2d9f one thread fresh bench_stages graph outside the timer type-7 median orth-1e5 864.701 vs 511.024 orth-4k 31.617 vs 15.831 tri-136 1.078 vs 0.697
-recorded symmetry pair 40.6 vs 36.1 is not a labelled median; nearest is symmetry-v20 ideal-110592 kernel 21.743 identify-diamond 36.564
+recorded symmetry pair 40.6 vs 36.1 is not a labeled median; nearest is symmetry-v20 ideal-110592 kernel 21.743 identify-diamond 36.564
 [rings] tri-136 threads 1
 [rings] tri-136 t1 dseams 0.2603 ovito 0.5508 census {'4': 12, '5': 120, '6': 68}
 [rings] orth-4k threads 1

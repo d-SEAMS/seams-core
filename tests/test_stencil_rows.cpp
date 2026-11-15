@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /*
 ** The interior-cell stencil and the packed ring rows.
 ** Orthorhombic and triclinic cells with atoms on every face and corner
@@ -68,7 +69,7 @@ Cloud facesAndCorners(bool tilt) {
   place(cloud, 6.0, length - 0.2, 6.0);
   place(cloud, 6.0, 6.0, 0.2);
   place(cloud, 6.0, 6.0, length - 0.2);
-  // Interior of the centre cell. These pairs never cross a periodic face.
+  // Interior of the center cell. These pairs never cross a periodic face.
   place(cloud, 6.0, 6.0, 6.0);
   place(cloud, 7.1, 6.2, 6.1);
   place(cloud, 6.2, 7.2, 6.3);

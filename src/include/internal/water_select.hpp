@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 // SPDX-License-Identifier: MIT
 #ifndef SEAMS_WATER_SELECT_H_
 #define SEAMS_WATER_SELECT_H_
@@ -68,7 +69,7 @@ std::vector<IonSite> collectIons(
     const molSys::PointCloud<molSys::Point<double>, double> &cloud,
     const Selection &selection);
 
-/** oxygen is the labelled water subset. front is the nearest ice oxygen,
+/** oxygen is the labeled water subset. front is the nearest ice oxygen,
  *  in the box units, or -1 when no ion sits next to ice. */
 IonReport ionFront(
     const molSys::PointCloud<molSys::Point<double>, double> &oxygen,

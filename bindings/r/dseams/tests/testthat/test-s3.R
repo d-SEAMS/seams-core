@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 library(dseams)
 
 test_that("a missing path is an R error", {

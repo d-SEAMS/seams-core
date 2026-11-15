@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Time 1 mol/kg NaCl, 50k oxygens, at 1 and 8 threads.
 
 Release -O3. One warm-up, then six timed calls. The median of an even

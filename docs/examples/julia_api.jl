@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 using Dseams
 
 root = get(ENV, "DSEAMS_ROOT", "")

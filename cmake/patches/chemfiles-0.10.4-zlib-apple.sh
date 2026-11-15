@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (c) d-SEAMS developers
 # chemfiles 0.10.4 vendors zlib 1.2.11. That zutil.h treats
 # TARGET_OS_MAC as classic Mac OS and replaces fdopen with NULL.
 # Apple's SDK defines TARGET_OS_MAC on macOS, which does have fdopen,

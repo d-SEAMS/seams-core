@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """SQQ rejects the triclinic sH dump and a triclinic box mode.
 
 Exit 77 when SQQ is not installed. The orthorhombic sI dump is accepted

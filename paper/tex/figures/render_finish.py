@@ -144,15 +144,15 @@ def lonsdaleite(repetitions):
 
 def nanotube(sides):
     radius = BOND_A / (2.0 * math.sin(math.pi / sides))
-    centre = TUBE_BOX_A / 2.0
+    center = TUBE_BOX_A / 2.0
     points = []
     for layer in range(TUBE_LAYERS):
         for vertex in range(sides):
             angle = 2.0 * math.pi * vertex / sides
             points.append(
                 (
-                    centre + radius * math.cos(angle),
-                    centre + radius * math.sin(angle),
+                    center + radius * math.cos(angle),
+                    center + radius * math.sin(angle),
                     (layer + 0.5) * PRISM_HEIGHT_A,
                 )
             )
@@ -338,26 +338,26 @@ def bond_ring_size(edges, rings):
 
 
 def view_centre(points, box):
-    centre = []
+    center = []
     for axis in range(3):
         lo, hi = box[axis]
         coords = [point[axis] for point in points]
         span = max(coords) - min(coords)
         length = hi - lo
         if span < 0.8 * length:
-            centre.append(sum(coords) / len(coords))
+            center.append(sum(coords) / len(coords))
         else:
-            centre.append(0.5 * (lo + hi))
-    return centre
+            center.append(0.5 * (lo + hi))
+    return center
 
 
-def project_point(point, centre, box):
+def project_point(point, center, box):
     azimuth = math.radians(32.0)
     elevation = math.radians(18.0)
     # The bond endpoint is the short image, so a second wrap would throw it
     # across the cell. Coordinates stay where the caller placed them.
     del box
-    vector = tuple(point[axis] - centre[axis] for axis in range(3))
+    vector = tuple(point[axis] - center[axis] for axis in range(3))
     x, y, z = vector
     xz = x * math.cos(azimuth) + z * math.sin(azimuth)
     zz = -x * math.sin(azimuth) + z * math.cos(azimuth)
@@ -369,8 +369,8 @@ def project_point(point, centre, box):
 def draw_structure(draw, origin, size, points, box, edges, edge_colour, atom_colour, label, fonts):
     left, top = origin
     width, height = size
-    centre = view_centre(points, box)
-    projected = [project_point(point, centre, box) for point in points]
+    center = view_centre(points, box)
+    projected = [project_point(point, center, box) for point in points]
     xs = [item[0] for item in projected]
     ys = [item[1] for item in projected]
     span = max(max(xs) - min(xs), max(ys) - min(ys), 1.0)
@@ -388,11 +388,11 @@ def draw_structure(draw, origin, size, points, box, edges, edge_colour, atom_col
     pixels = [pixel(item) for item in projected]
     radius = max(2.0, min(7.0, 0.22 * BOND_A * scale))
     for a, b in edges:
-        colour = edge_colour(a, b)
+        color = edge_colour(a, b)
         delta = pair_vector(points[b], points[a], box)
         end = tuple(points[a][axis] + delta[axis] for axis in range(3))
-        end_px = pixel(project_point(end, centre, box))
-        draw.line([pixels[a], end_px], fill=colour, width=2 if radius > 3.5 else 1)
+        end_px = pixel(project_point(end, center, box))
+        draw.line([pixels[a], end_px], fill=color, width=2 if radius > 3.5 else 1)
     for index in order:
         x, y = pixels[index]
         fill = atom_colour(index)
@@ -428,10 +428,10 @@ def slab(points, box, axis, thickness):
 
 
 def constant_colour(name):
-    colour = RUHI[name]
+    color = RUHI[name]
 
     def paint(*_args):
-        return colour
+        return color
 
     return paint
 
@@ -650,24 +650,24 @@ def draw_ring_plot(record, stats):
     slot = (right - left) / len(names)
     bar_w = 28
     for index, name in enumerate(names):
-        centre = left + (index + 0.5) * slot
+        center = left + (index + 0.5) * slot
         atoms = record["datasets"][name]["n_atoms"]
-        for arm_index, (arm, _caption, colour) in enumerate(arms):
+        for arm_index, (arm, _caption, color) in enumerate(arms):
             median, q1, q3, _iqr = stats[name][arm]
-            x = centre + (arm_index - 0.5) * (bar_w + 8)
+            x = center + (arm_index - 0.5) * (bar_w + 8)
             y_med = y_of(median)
-            draw.rectangle([x - bar_w / 2, y_med, x + bar_w / 2, bottom], fill=RUHI[colour])
+            draw.rectangle([x - bar_w / 2, y_med, x + bar_w / 2, bottom], fill=RUHI[color])
             draw.line([(x, y_of(q1)), (x, y_of(q3))], fill=RUHI["black"], width=3)
             draw.line([(x - 8, y_of(q1)), (x + 8, y_of(q1))], fill=RUHI["black"], width=2)
             draw.line([(x - 8, y_of(q3)), (x + 8, y_of(q3))], fill=RUHI["black"], width=2)
-        draw.text((centre - 70, bottom + 16), f"{name}", fill=RUHI["black"], font=label)
-        draw.text((centre - 70, bottom + 42), f"{atoms} atoms", fill=RUHI["black"], font=small)
+        draw.text((center - 70, bottom + 16), f"{name}", fill=RUHI["black"], font=label)
+        draw.text((center - 70, bottom + 42), f"{atoms} atoms", fill=RUHI["black"], font=small)
     draw.text((left, 28), "Ring stage, median and type 7 interquartile range", fill=RUHI["black"], font=title)
     draw.text((24, 420), "ms", fill=RUHI["black"], font=label)
     legend_x = 1020
-    for index, (_arm, caption, colour) in enumerate(arms):
+    for index, (_arm, caption, color) in enumerate(arms):
         y = 120 + index * 48
-        draw.rectangle([legend_x, y, legend_x + 28, y + 28], fill=RUHI[colour])
+        draw.rectangle([legend_x, y, legend_x + 28, y + 28], fill=RUHI[color])
         draw.text((legend_x + 40, y + 2), caption, fill=RUHI["black"], font=small)
     image.save(FIG / "ringperf.png", "PNG")
 

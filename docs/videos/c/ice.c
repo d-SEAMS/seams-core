@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Ice Ih census through seams.h. Input default: input/traj/ice1h.lammpstrj. */
 #include "seams.h"
 

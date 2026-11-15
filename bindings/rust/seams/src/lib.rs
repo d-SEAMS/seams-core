@@ -911,8 +911,8 @@ pub struct FingerprintOptions {
     pub graph: Graph,
     /// Neighbourhood depth. Zero selects 2.
     pub hops: i32,
-    /// Colour vertices by LAMMPS type.
-    pub colour_types: bool,
+    /// Color vertices by LAMMPS type.
+    pub color_types: bool,
 }
 
 impl Default for FingerprintOptions {
@@ -923,7 +923,7 @@ impl Default for FingerprintOptions {
             k: 4,
             graph: Graph::Cutoff,
             hops: 2,
-            colour_types: false,
+            color_types: false,
         }
     }
 }
@@ -1127,7 +1127,7 @@ pub struct Q6Bar {
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct Distribution {
-    /// Bin centres, angstroms.
+    /// Bin centers, angstroms.
     pub radius: Vec<f64>,
     /// g(r), dimensionless.
     pub g: Vec<f64>,
@@ -1149,7 +1149,7 @@ pub struct Distribution {
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct RunningCoordination {
-    /// Bin centres, angstroms.
+    /// Bin centers, angstroms.
     pub radius: Vec<f64>,
     /// Running coordination, dimensionless.
     pub coordination: Vec<f64>,
@@ -1247,7 +1247,7 @@ pub struct PrismCensus {
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct DensityProfile {
-    /// Bin centres, angstroms.
+    /// Bin centers, angstroms.
     pub coordinate: Vec<f64>,
     /// Number density.
     pub density: Vec<f64>,
@@ -1297,7 +1297,7 @@ pub struct Rejection {
 /// ```
 #[derive(Debug, Clone, PartialEq)]
 pub struct BrineProfile {
-    /// Bin centres, angstroms.
+    /// Bin centers, angstroms.
     pub coordinate: Vec<f64>,
     /// mol/kg.
     pub molality: Vec<f64>,
@@ -2816,7 +2816,7 @@ impl System {
                     options.k,
                     options.graph as c_int,
                     options.hops,
-                    i32::from(options.colour_types),
+                    i32::from(options.color_types),
                     &mut out,
                 )
             },

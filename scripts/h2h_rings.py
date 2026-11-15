@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Primitive rings against rings-statistics-matter, cycless, and OVITO.
 
 Franzblau shortest-path rings up to size 6. Ice Ih at 4096, 32768 and

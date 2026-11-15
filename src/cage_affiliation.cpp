@@ -1566,9 +1566,9 @@ ring::ringAdjacentCompletion(const SeededAtomLabels &labels,
       }
     }
   }
-  // A ring with every vertex but one labelled is a cage ring with a
+  // A ring with every vertex but one labeled is a cage ring with a
   // vacancy in the label, not a liquid ring at the interface: a liquid
-  // six-ring touching a nucleus has at most a few labelled vertices.
+  // six-ring touching a nucleus has at most a few labeled vertices.
   // Requiring all but one keeps the completion from walking into the
   // liquid, where a single shared edge would let it flood.
   auto complete = [&](std::vector<bool> &flag) {

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """GenIce sI, sII and sH cage census.
 
 sI is 2 of 5^12 and 6 of 5^12 6^2. sII is 16 and 8. The bundled sH

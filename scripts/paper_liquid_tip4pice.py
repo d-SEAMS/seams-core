@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Write oxygen coordinates for a TIP4P/ice liquid.
 
 The nonbonded parameters are the TIP4P/ice force field shipped with

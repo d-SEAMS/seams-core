@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Fail when an exported binding symbol has no docstring.
 
 Julia exports, R NAMESPACE exports, Lua ``dseams.*`` functions, Python

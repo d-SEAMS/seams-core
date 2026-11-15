@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Build the five paper tutorials from GenIce, packmol, or a short OpenMM run.
 
 Usage: paper_science.py TOPIC SEAMS LIBDIR OUTDIR

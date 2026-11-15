@@ -42,12 +42,12 @@ unit.
 :end-before: void SeamsCV::writeDump
 ```
 
-`getPosition` and `getBox` are in PLUMED's internal length unit, nanometres
+`getPosition` and `getBox` are in PLUMED's internal length unit, nanometers
 unless `UNITS LENGTH` changes it. The plugin reads that unit and converts
 both to angstroms before calling d-SEAMS, so `UNITS LENGTH=A` and the
 default give the same result; `meson test plumed_units` checks that on
 `ice.xyz`. `CUTOFF` is always angstroms. `ice.xyz` is the cubic cell in
-nanometres, so the driver reads it in the default MD length unit. Load
+nanometers, so the driver reads it in the default MD length unit. Load
 `libSeamsPlumed.so` with `LOAD` before `SEAMS`.
 On the ideal cell q6 is high, the ice fraction is 1, and the ring fraction is
 positive. The restraint biases `seams.q6` only.

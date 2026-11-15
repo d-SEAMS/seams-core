@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Write a small per-frame CSV from a coexistence dump.
 
 Frames stay where they are. The CSV is the series of ice thickness

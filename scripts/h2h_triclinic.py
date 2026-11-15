@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Tilted ice Ih and sH against freud, OVITO and mdapy.
 
 Pinned ABAB, 20 samples. Cutoff pairs, k nearest neighbours, q6, both

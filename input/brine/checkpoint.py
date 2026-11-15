@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Copy coexistence frames out of the run directory every 0.25 ns.
 
 Dumps and restart files land in data/brine-front/, which is gitignored.

@@ -80,13 +80,13 @@ def lonsdaleite(repetitions):
 
 def nanotube(sides):
     radius = BOND_A / (2.0 * math.sin(math.pi / sides))
-    centre = TUBE_BOX_A / 2.0
+    center = TUBE_BOX_A / 2.0
     points = []
     for layer in range(TUBE_LAYERS):
         for vertex in range(sides):
             angle = 2.0 * math.pi * vertex / sides
-            points.append((centre + radius * math.cos(angle),
-                           centre + radius * math.sin(angle),
+            points.append((center + radius * math.cos(angle),
+                           center + radius * math.sin(angle),
                            (layer + 0.5) * PRISM_HEIGHT_A))
     return points, (TUBE_BOX_A, TUBE_BOX_A, TUBE_LAYERS * PRISM_HEIGHT_A)
 

@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 #ifndef SEAMS_MINIMAX_COEFF_H_
 #define SEAMS_MINIMAX_COEFF_H_
 

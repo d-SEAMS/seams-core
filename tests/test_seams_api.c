@@ -193,13 +193,13 @@ int main(void) {
   int *sizes = calloc((size_t)nr, sizeof(int));
   int *sym = calloc((size_t)nr, sizeof(int));
   expect(seams_rings_labels(rings, sizes, sym) == SEAMS_OK, "symmetry");
-  int labelled = 0;
+  int labeled = 0;
   for (int i = 0; i < nr; i++) {
     if (sizes[i] == 6 && sym[i] != SEAMS_RING_OTHER) {
-      labelled += 1;
+      labeled += 1;
     }
   }
-  expect(labelled == hist[6], "every six-ring has a symmetry label");
+  expect(labeled == hist[6], "every six-ring has a symmetry label");
   double fraction = 0.0;
   expect(seams_rings_fraction(rings, 6, &fraction) == SEAMS_OK, "fraction");
   expect(fraction > 0.5, "most atoms sit on a six-ring");

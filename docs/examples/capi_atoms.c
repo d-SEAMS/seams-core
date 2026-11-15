@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Read Ice Ih and require 128 atoms. */
 #include "seams.h"
 

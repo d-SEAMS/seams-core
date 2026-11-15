@@ -5,7 +5,7 @@ The engine names a local environment as ice Ih, ice Ic, stacking-disordered ice,
 The per-atom ice label is the production path.
 Cage and ring names, the point group, and the space group are the same templates asked one cluster at a time.
 
-* What is labelled
+* What is labeled
 
 A crystal oxygen is ice Ih (0), ice Ic (1), or stacking-disordered ice (2).
 Anything else is -1.
@@ -13,7 +13,7 @@ Only those two diamond structures count as crystal when the same frame is scored
 The first-neighbour and second-neighbour tags from identify diamond are not crystal, and polyhedral template matching counts only cubic diamond and hexagonal diamond.
 
 The seventeen-atom shell is the central oxygen, its four nearest neighbours, and the twelve neighbours of those four.
-That is the shell polyhedral template matching uses for diamond (Larsen, Schmidt and Schiøtz, /Modelling and Simulation in Materials Science and Engineering/ 24, 055007, 2016, [[https://doi.org/10.1088/0965-0393/24/5/055007][10.1088/0965-0393/24/5/055007]]).
+That is the shell polyhedral template matching uses for diamond (Larsen, Schmidt and Schiøtz, /Modeling and Simulation in Materials Science and Engineering/ 24, 055007, 2016, [[https://doi.org/10.1088/0965-0393/24/5/055007][10.1088/0965-0393/24/5/055007]]).
 
 * Neighbours
 
@@ -28,7 +28,7 @@ A frame with more than sixteen accepted pairs per atom still keeps the nearer ne
 Eight threads scan the full stencil and write one end.
 The coordinate columns and the bond rows are allocated once and reused on the next frame of the same size.
 
-A centre whose four bonds do not all lie between 2.30 Å and 3.35 Å does not open a second shell.
+A center whose four bonds do not all lie between 2.30 Å and 3.35 Å does not open a second shell.
 
 * Tetrahedral order
 
@@ -47,7 +47,7 @@ An exact cubic signature, twelve (4,2,1) patterns, is ice Ic.
 An exact hexagonal signature, six (4,2,1) and six (4,2,2), is ice Ih.
 A partial cubic signature with at least eight (4,2,1) patterns and q at least 0.97 is ice Ic.
 A partial hexagonal signature with q at least 0.97 is ice Ih.
-Six (4,2,1) patterns are not labelled here: on the training seeds that count is the liquid false positive, and the shell is passed to the fit instead.
+Six (4,2,1) patterns are not labeled here: on the training seeds that count is the liquid false positive, and the shell is passed to the fit instead.
 An ideal shell, equal bonds and one second-shell radius, is named from the raw cosine of each second-shell bond with another first-shell bond and does not build this signature.
 The bond vectors are not projected.
 On the ideal cell that cosine is exactly 1/3 for a staggered arm and exactly 7/9 for an eclipsed arm.
@@ -59,7 +59,7 @@ One eclipsed arm and three staggered arms are ice Ih.
 
 A shell is fitted only when it already has one crystal neighbour, q is at least 0.95, the four bonds differ by at most 15 percent, and the second-shell radius varies by at most a factor 1.6.
 The residual is scale-free.
-Both clouds are centred, the optimal rotation is a quaternion (Horn, /Journal of the Optical Society of America A/ 4, 629, 1987, [[https://doi.org/10.1364/JOSAA.4.000629][10.1364/JOSAA.4.000629]]; Coutsias, Seok and Dill, /Journal of Computational Chemistry/ 25, 1849, 2004, [[https://doi.org/10.1002/jcc.20110][10.1002/jcc.20110]]), and the residual is divided by the template radius, which is the normalisation Larsen, Schmidt and Schiøtz use.
+Both clouds are centered, the optimal rotation is a quaternion (Horn, /Journal of the Optical Society of America A/ 4, 629, 1987, [[https://doi.org/10.1364/JOSAA.4.000629][10.1364/JOSAA.4.000629]]; Coutsias, Seok and Dill, /Journal of Computational Chemistry/ 25, 1849, 2004, [[https://doi.org/10.1002/jcc.20110][10.1002/jcc.20110]]), and the residual is divided by the template radius, which is the normalization Larsen, Schmidt and Schiøtz use.
 Zero is a perfect shape.
 The ceiling is 0.12.
 
@@ -80,7 +80,7 @@ The tests read the labels from the fit, before that filter.
 * Cutoffs, in symbols
 
 The tetrahedral order of the four bonds is the Errington–Debenedetti
-invariant. With \(\theta_{jk}\) the angle at the centre between
+invariant. With \(\theta_{jk}\) the angle at the center between
 neighbours \(j\) and \(k\),
 
 \[
@@ -89,7 +89,7 @@ q = 1 - \frac{3}{8}
 \left(\cos\theta_{jk} + \frac{1}{3}\right)^{2}.
 \]
 
-A centre opens a second shell only when all four bonds lie in
+A center opens a second shell only when all four bonds lie in
 \([2.30, 3.35]\,\text{Å}\) and \(q \ge 0.94\). A shell that opens and
 then measures \(q < 0.88\) is liquid. An exact cubic fingerprint is
 twelve \((4,2,1)\) patterns. An exact hexagonal fingerprint is six
@@ -97,10 +97,10 @@ twelve \((4,2,1)\) patterns. An exact hexagonal fingerprint is six
 least eight \((4,2,1)\) patterns and \(q \ge 0.97\). The same threshold
 on \(q\) keeps a partial hexagonal fingerprint.
 
-The fit runs only when the centre already has one crystal neighbour,
+The fit runs only when the center already has one crystal neighbour,
 \(q \ge 0.95\), the four bond lengths differ by at most 15 percent, and
 the second-shell radius varies by at most a factor \(1.6\). Both clouds
-are centred. The residual is the root-mean-square distance after the
+are centered. The residual is the root-mean-square distance after the
 optimal rotation, divided by the template radius. The production ceiling
 is \(0.12\):
 
@@ -165,7 +165,7 @@ Set ~SEAMS_CORE_LIB~ to the built library.
 
 ~with_ira~ is a feature option, ~auto~ by default.
 When libira links, the matcher can use IRA and SOFI.
-IRA is the Apache-2.0 option of its dual licence, and it is not required to build.
+IRA is the Apache-2.0 option of its dual license, and it is not required to build.
 
 ~with_csm~ is a feature option, ~disabled~ by default.
 The continuous shape measure program is GPL-2.0.
@@ -292,7 +292,7 @@ Where both methods call the molecule itself crystal, hexagonal stays with hexago
 
 IRA and SOFI are linked in this build.
 The matcher backend is IRA.
-SOFI is asked for the point group of the same 17-atom shell the ice templates use: the centre, its four neighbours between 2.15 Å and 3.5 Å, and three further neighbours of each of those four, in the minimum image.
+SOFI is asked for the point group of the same 17-atom shell the ice templates use: the center, its four neighbours between 2.15 Å and 3.5 Å, and three further neighbours of each of those four, in the minimum image.
 A shell that cannot be filled is left unmatched (68 molecules on the slab, 377 on nucleation frame 1).
 IRA returns a nearest ice template for every complete shell, because the only 17-atom templates are the three ice shells.
 On both frames every kernel crystal molecule is given that same template.
@@ -356,7 +356,7 @@ Per-atom times are the median divided by the atom count.
 | 93003, 13553 | 8 | 0.151 | 4.713 |
 | ideal ice Ic, 110592 | 8 | 0.071 | 3.536 |
 
-The classify workspace, the coordinate columns and the canonical shell are one copy per calling thread, so two frames can be labelled at once.
+The classify workspace, the coordinate columns and the canonical shell are one copy per calling thread, so two frames can be labeled at once.
 A later sitting on the same eight cores timed the C call again, two warm-ups and then eight samples.
 One thread, microseconds per atom: 91001 0.401, 92002 0.362, 93003 0.376, ideal ice Ic 0.215.
 Eight threads: 0.169, 0.137, 0.137, and the ideal cell remeasured at 0.071.
@@ -374,6 +374,6 @@ Its median is 391.012 ms, its interquartile range is 4.280 ms, and that is 3.536
 The kernel is faster per atom.
 
 The one-thread template-matching samples, milliseconds, are 63.493 64.348 65.309 71.131 81.903 72.515 68.933 63.321, then 64.195 62.642 65.019 63.439 64.351 61.660 62.748 61.902, then 64.377 62.895 63.863 63.724 63.622 64.526 63.316 63.037, and on the ideal cell 411.364 406.241 396.372 399.726 407.844 396.695 399.634 415.364.
-The ideal cell is 24×24×24 ice Ic, 110592 molecules, and every atom is labelled cubic.
+The ideal cell is 24×24×24 ice Ic, 110592 molecules, and every atom is labeled cubic.
 The one-thread kernel on that cell is 24.262 24.381 23.859 24.137 24.262 24.060 24.121 24.174.
 At eight threads the ideal kernel is 7.661 7.767 7.790 7.792 7.816 7.906 8.012 8.862 and template matching is 394.550 390.626 390.898 400.186 389.956 395.303 391.127 377.933.

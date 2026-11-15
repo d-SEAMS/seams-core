@@ -137,7 +137,7 @@ SeamsCV::~SeamsCV() {
 }
 
 double SeamsCV::lengthToAngstrom() {
-  // getPosition and getBox are in PLUMED's length unit, in nanometres.
+  // getPosition and getBox are in PLUMED's length unit, in nanometers.
 #if PLUMED_VERSION_MAJOR > 2 || (PLUMED_VERSION_MAJOR == 2 && PLUMED_VERSION_MINOR >= 10)
   const double nm = getUnits().getLength();
 #else

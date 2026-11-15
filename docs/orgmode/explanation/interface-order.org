@@ -113,7 +113,7 @@ The crystal radius, read outward from the shell of highest crystal
 fraction to the 0.5 crossing, is 6.44 Å under both rules.
 The 10-90 width of that crystal front is 4.97 Å under both rules.
 The solid radius is 9.37 Å (2015) and 9.35 Å (OVITO).
-The 10-90 width of the solid front, measured from the centre of mass,
+The 10-90 width of the solid front, measured from the center of mass,
 is 13.0 Å under the 2015 rule and 22.6 Å under OVITO.
 The OVITO solid fraction is still about 0.10 in the outer liquid, so
 that width is the slow decay of interfacial labels through the
@@ -122,7 +122,7 @@ liquid, not a thicker crystal.
 The same frame has an instantaneous surface in the sense of Willard
 and Chandler, J. Phys. Chem. B 114, 1954 (2010).
 The coarse-graining Gaussian has their width, ξ = 2.4 Å.
-Rays leave the centre of mass of the 2015 crystal.
+Rays leave the center of mass of the 2015 crystal.
 The surface on a ray is where the coarse density crosses the midpoint
 of the core and the outer liquid.
 280 of 288 rays cross.
@@ -132,7 +132,7 @@ The 10-90 width of the coarse density, measured along the local
 normal of that surface, is 3.52 Å.
 On the same coordinate the 2015 solid fraction has a 10-90 width of
 3.07 Å and the OVITO solid fraction has 3.18 Å.
-The 13.0 Å and 22.6 Å widths are the centre-of-mass profiles.
+The 13.0 Å and 22.6 Å widths are the center-of-mass profiles.
 They fold in the 5.02 Å roughness of the surface and, for OVITO, the
 interfacial labels in the outer liquid.
 Neither is the intrinsic width.

@@ -4,7 +4,7 @@ Ice/liquid interface and nucleation
 The interface dump is ``input/traj/interface_f0.lammpstrj``, 864 waters
 in a cell 23 by 22 by 53 angstrom. The nucleus is frame 1 of the mW
 trajectory released with the paper (``input/traj/nucleation_f1.lammpstrj``,
-4096 atoms, timestep 15677000). Both are labelled with published CHILL+
+4096 atoms, timestep 15677000). Both are labeled with published CHILL+
 at 3.5 angstrom on the cutoff graph.
 
 Layer cubicity is the cubic share of the basal layers. The period, the
@@ -42,7 +42,7 @@ Python and C print the same census:
 .. figure:: figures/interface.png
    :alt: Primary prism face of the interface slab. Basal bilayers are vertical, growth runs up the page, and the cell is a rectangle.
 
-   This is the primary prism face :math:`(10\bar{1}0)`. The basal planes stand perpendicular to the interface, so the bilayers are vertical, and growth runs along z. The orthographic camera looks straight down x. The vertical axis reads ``depth from lower ice surface (nm)``, the same axis as the brine figure, and the cell origin is the lowest hexagonal oxygen. Brackets with end ticks mark the liquid and the ice, with a gap between them. A dashed line across the cell is the growth front. The 1 nm bar is the on-screen length of 10 angstrom along the cell edge. The picture is clipped to one sphere radius outside the cell on every side. Liquid is radius 0.50 at 18 percent opacity. CHILL+ on the whole cell is 49 interfacial, 25 interfacial clathrate, 3 clathrate and 1 cubic. The picture keeps those colours only within 1.5 nm of the growth front. Farther from the front, everything except the hexagonal crystal is drawn as liquid. The classifier itself is unchanged. The legend is one row, in the same order as the brine figure.
+   This is the primary prism face :math:`(10\bar{1}0)`. The basal planes stand perpendicular to the interface, so the bilayers are vertical, and growth runs along z. The orthographic camera looks straight down x. The vertical axis reads ``depth from lower ice surface (nm)``, the same axis as the brine figure, and the cell origin is the lowest hexagonal oxygen. Brackets with end ticks mark the liquid and the ice, with a gap between them. A dashed line across the cell is the growth front. The 1 nm bar is the on-screen length of 10 angstrom along the cell edge. The picture is clipped to one sphere radius outside the cell on every side. Liquid is radius 0.50 at 18 percent opacity. CHILL+ on the whole cell is 49 interfacial, 25 interfacial clathrate, 3 clathrate and 1 cubic. The picture keeps those colors only within 1.5 nm of the growth front. Farther from the front, everything except the hexagonal crystal is drawn as liquid. The classifier itself is unchanged. The legend is one row, in the same order as the brine figure.
 
 What this tells you
 -------------------

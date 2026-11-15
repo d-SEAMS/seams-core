@@ -7,7 +7,7 @@ LAMMPS `run_hook` takes the coordinates LAMMPS already stores in angstroms and c
 ```{literalinclude} ../../../engines/tutorial/in.dseams
 ```
 
-The OpenMM plugin reads nanometres. It multiplies positions by 10 before the same call. The tutorial test builds those nanometres from the data file, scales them back, and requires the same eight cubic labels.
+The OpenMM plugin reads nanometers. It multiplies positions by 10 before the same call. The tutorial test builds those nanometers from the data file, scales them back, and requires the same eight cubic labels.
 
 ```{literalinclude} ../../../engines/tutorial_walk.py
 :language: python

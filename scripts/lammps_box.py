@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 """LAMMPS dump bounds to the cell edge.
 
 A triclinic dump stores the bounding box, not the cell edges.

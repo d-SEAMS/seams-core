@@ -138,7 +138,7 @@ int seams_frame_steinhardt_graph(seams_frame *frame, double cutoff, int type,
                                  int order_l, const char *graph, double *ql,
                                  double *qlbar);
 
-/** Normalised Steinhardt hat{w}_l for l = 4 or 6 on the cutoff shell.
+/** Normalized Steinhardt hat{w}_l for l = 4 or 6 on the cutoff shell.
  * Returns 1 on failure. @ingroup lang_order */
 int seams_frame_wl(seams_frame *frame, double cutoff, int type, int order_l,
                    double *wl);

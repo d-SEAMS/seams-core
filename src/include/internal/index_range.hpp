@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 #ifndef SEAMS_INDEX_RANGE_H_
 #define SEAMS_INDEX_RANGE_H_
 

@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (c) d-SEAMS developers
 # Run an engine program. Exit 77 when its shared library is not installed.
 set -u
 if [ "$#" -lt 1 ]; then

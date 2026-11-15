@@ -737,7 +737,7 @@ Example: `docs/examples/minimal_cpp.cpp`
 
 ### seams_frame_wl
 
-Purpose: Normalised Steinhardt w_l for degree 4 or 6.
+Purpose: Normalized Steinhardt w_l for degree 4 or 6.
 
 Parameters: frame; cutoff; type; order_l; wl
 
@@ -855,6 +855,6 @@ Example: `docs/examples/minimal_cpp.cpp`
 :alt: Molecule still for this front
 :width: 480px
 
-Ice Ih coloured by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug cpp` writes the 2400 by 1800 PNG.
+Ice Ih colored by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug cpp` writes the 2400 by 1800 PNG.
 ```
 

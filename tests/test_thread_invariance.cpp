@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 // The cutoff neighbour list, local Steinhardt q_l and the ring census at
 // one, two, four and eight OpenMP threads. Every width must return the
 // one-thread arrays exactly: the same CSR entries in the same order, and

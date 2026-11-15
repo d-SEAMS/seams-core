@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 test_that("examples are listed and resolved", {
   files <- dseams_example()
   expect_true(all(c("ice1h.lammpstrj", "exampleTraj.lammpstrj") %in% files))

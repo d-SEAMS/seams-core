@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Release head-to-head on the fast tree, one core and eight cores.
 
 CHILL+ against mdapy and OVITO. Rings against OVITO Find rings, matscipy

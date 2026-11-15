@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Time against threads for the 884736-molecule sitting.
 
 The vertical axis is logarithmic. Each operation is its own panel and

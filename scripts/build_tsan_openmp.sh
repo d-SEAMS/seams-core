@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (c) d-SEAMS developers
 # Build LLVM's OpenMP runtime with OMPT and Archer.
 #
 # Archer publishes the runtime's barriers to ThreadSanitizer. The

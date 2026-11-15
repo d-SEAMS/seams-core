@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Primitive rings against rings-statistics-matter 0.3.0 on ideal ice Ic.
 
 One warm-up, six timed calls, median and type-7 interquartile range.

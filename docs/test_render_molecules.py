@@ -11,16 +11,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "docs" / "scripts" / "render_molecules.py"
 
-# The deck colours. They come from scripts/chill_palette.py.
+# The deck colors. They come from scripts/chill_palette.py.
 sys.path.insert(0, str(ROOT / "scripts"))
-from chill_palette import COLOUR
+from chill_palette import COLOR
 
 
-def _hex(colour):
-    return "#{:02X}{:02X}{:02X}".format(*(int(round(channel * 255)) for channel in colour))
+def _hex(color):
+    return "#{:02X}{:02X}{:02X}".format(*(int(round(channel * 255)) for channel in color))
 
 
-EXPECTED = {name: _hex(COLOUR[name]) for name in (
+EXPECTED = {name: _hex(COLOR[name]) for name in (
     "hexagonal", "cubic", "interfacial", "clathrate", "interClathrate", "water",
 )}
 
@@ -47,14 +47,14 @@ def load():
 
 
 def check(module):
-    for name, colour in EXPECTED.items():
+    for name, color in EXPECTED.items():
         if name not in module.PALETTE:
             fail("palette has no {}".format(name))
-        if module.PALETTE[name].upper() != colour.upper():
-            fail("{} is {}, expected {}".format(name, module.PALETTE[name], colour))
+        if module.PALETTE[name].upper() != color.upper():
+            fail("{} is {}, expected {}".format(name, module.PALETTE[name], color))
         style = module.atom_style(name)
         if style[0] != module.palette_rgb(name):
-            fail("{} colour does not come from the palette".format(name))
+            fail("{} color does not come from the palette".format(name))
     if module.PALETTE["reCubic"].upper() != EXPECTED["cubic"]:
         fail("reCubic drifted from cubic")
     if module.PALETTE["reHex"].upper() != EXPECTED["hexagonal"]:
@@ -98,12 +98,12 @@ def main():
     if module.cycles_python() is None:
         print("no Python here imports bpy; pixi install -e cycles provides one")
         return 77
-    colour = subprocess.run(
-        [sys.executable, str(SCRIPT), "--check-colour", "--engine", "cycles"],
+    color = subprocess.run(
+        [sys.executable, str(SCRIPT), "--check-color", "--engine", "cycles"],
         check=False,
     )
-    if colour.returncode != 0:
-        return colour.returncode
+    if color.returncode != 0:
+        return color.returncode
     args = list(sys.argv[1:])
     if "--engine" not in args:
         args = ["--engine", "cycles", *args]

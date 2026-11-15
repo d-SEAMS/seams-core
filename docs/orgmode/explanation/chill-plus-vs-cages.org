@@ -59,7 +59,7 @@ Pool-audit ~ac510645~ records the fix in ~18588dac~. The seeded cage call search
 * Ring-adjacent completion
 
 ~ring::seededCageAffiliation~ takes a fifth argument, ~ringAdjacentCompletion~, default ~false~.
-When the flag is ~true~, the accepted labels pass through ~ring::ringAdjacentCompletion~: a permissive six-ring with all but one vertex labelled fills that last vertex, iterated to a fixed point.
+When the flag is ~true~, the accepted labels pass through ~ring::ringAdjacentCompletion~: a permissive six-ring with all but one vertex labeled fills that last vertex, iterated to a fixed point.
 Hexagonal cage (HC) flags and double-diamond cage (DDC) flags run as two walks.
 
 ~seams cages --complete~ sets the flag.

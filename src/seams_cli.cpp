@@ -907,7 +907,7 @@ std::vector<std::vector<int>> sixRings(const std::vector<std::vector<int>> &ring
 // for the rooted neighbourhood within `hops` bonds, the histogram of keys,
 // the primitive ring census, and a frame key over all of it.
 // One LAMMPS dump frame with an extra per-atom column, so OVITO, VMD or a
-// script can colour a trajectory by what the engine decided. `values` is
+// script can color a trajectory by what the engine decided. `values` is
 // indexed like `cloud.pts`; missing entries write 0.
 void writePerAtomDump(const std::string &path, const Cloud &cloud, const std::string &column,
                       const std::vector<int> &values) {
@@ -932,7 +932,7 @@ void writePerAtomDump(const std::string &path, const Cloud &cloud, const std::st
 
 int cmdFingerprint(std::ostream &os, FrameCarry &carry, Cloud &cloud,
                    double cutoff, int typeI, int k,
-                   const std::string &graphName, int hops, bool colourTypes,
+                   const std::string &graphName, int hops, bool colorTypes,
                    const std::string &libraryPath, const std::string &emitLabel,
                    const std::string &perAtomPath = {}, bool byAtom = false) {
   if (cloud.nop == 0) {
@@ -954,15 +954,15 @@ int cmdFingerprint(std::ostream &os, FrameCarry &carry, Cloud &cloud,
     nList = nneigh::kNearestNeighbourList(cloud, k, cand, typ, mutual);
   }
   const auto rows = nneigh::neighbourListByIndex(cloud, nList);
-  std::vector<int> colours;
-  if (colourTypes) {
-    colours.reserve(static_cast<std::size_t>(cloud.nop));
+  std::vector<int> colors;
+  if (colorTypes) {
+    colors.reserve(static_cast<std::size_t>(cloud.nop));
     for (int i = 0; i < cloud.nop; ++i) {
-      colours.push_back(cloud.pts[static_cast<std::size_t>(i)].type);
+      colors.push_back(cloud.pts[static_cast<std::size_t>(i)].type);
     }
-    colours.resize(rows.size(), 0);
+    colors.resize(rows.size(), 0);
   }
-  const auto fp = topo::fingerprint(rows, hops, 7, colours);
+  const auto fp = topo::fingerprint(rows, hops, 7, colors);
   if (!emitLabel.empty()) {
     topo::KeyLibrary lib;
     topo::addToLibrary(lib, fp, emitLabel);
@@ -993,7 +993,7 @@ int cmdFingerprint(std::ostream &os, FrameCarry &carry, Cloud &cloud,
       libs.push_back(topo::readLibrary(buf.str()));
     }
     const auto match = libs.size() == 1 ? topo::matchLibrary(fp, libs.front())
-                                        : topo::matchLibraries(rows, libs, 7, colours);
+                                        : topo::matchLibraries(rows, libs, 7, colors);
     if (!perAtomPath.empty()) {
       // label index in sorted order of the labels seen, 0 for unmatched
       std::vector<std::string> labels;
@@ -1927,7 +1927,7 @@ int main(int argc, char *argv[]) {
   std::string guestTypesFlag;
   double guestRadius = 4.0;
   std::string perAtomPath;
-  bool colourTypes = false;
+  bool colorTypes = false;
   std::string libraryPath;
   std::string emitLabel;
   int hops = 2;
@@ -2187,7 +2187,7 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--guest-radius")
                  .argName("R")
-                 .help("cages --signature: a guest belongs to the nearest cage centre "
+                 .help("cages --signature: a guest belongs to the nearest cage center "
                        "within R (default 4.0)")
                  .handler([&](std::string_view value) {
                    guestRadius = parseFloatingPoint<double>(value);
@@ -2231,10 +2231,10 @@ int main(int argc, char *argv[]) {
                        "cages on the ring graph")
                  .handler([&]() { incompleteFlag = true; }));
 
-  parser.add(Option("--colour-types")
-                 .help("fingerprint: colour vertices by LAMMPS type, so species "
+  parser.add(Option("--color-types")
+                 .help("fingerprint: color vertices by LAMMPS type, so species "
                        "never match across types")
-                 .handler([&]() { colourTypes = true; }));
+                 .handler([&]() { colorTypes = true; }));
 
   parser.add(Option("--library")
                  .argName("FILE")
@@ -2255,7 +2255,7 @@ int main(int argc, char *argv[]) {
 
   parser.add(Option("--hops")
                  .argName("N")
-                 .help("fingerprint: bonds from the centre in each local key (default 2)")
+                 .help("fingerprint: bonds from the center in each local key (default 2)")
                  .handler([&](std::string_view value) {
                    hops = parseIntegral<int>(value);
                  }));
@@ -2699,7 +2699,7 @@ int main(int argc, char *argv[]) {
     if (cmd == "fingerprint") {
       try {
         return cmdFingerprint(os, carry, cloud, cutoff, typeI, k, graph, hops,
-                              colourTypes,
+                              colorTypes,
                               libraryPath, emitLabel, perAtomPath, byAtomFlag);
       } catch (...) {
         os << colorizer.error(exceptionText()) << "\n";

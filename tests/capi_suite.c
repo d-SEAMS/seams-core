@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Pure C11 proof of the stable C API. Compiled as C and linked to libseams. */
 #define _POSIX_C_SOURCE 200809L
 

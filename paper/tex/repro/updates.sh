@@ -1,5 +1,5 @@
 N=nucleation.lammpstrj
-# The sweep moves the molecules near the box centre of frame FRAME_A to their
+# The sweep moves the molecules near the box center of frame FRAME_A to their
 # positions in frame FRAME_B, on the graph of cutoff CUTOFF angstrom over the
 # atoms of type ATOM_TYPE, and times CALLS calls of each update.
 FRAME_A=147

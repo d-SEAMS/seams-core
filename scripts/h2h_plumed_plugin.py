@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """In-tree PLUMED SEAMS colvar against the d-SEAMS C API.
 
 The colvar is engines/plumed/SeamsColvar.cpp. Pass the built shared
-library as the first argument. PLUMED stores coordinates in nanometres
+library as the first argument. PLUMED stores coordinates in nanometers
 and the colvar scales them to angstroms before calling d-SEAMS. The
 timed call is one SEAMS evaluation with no restraint, so the finite
 difference derivatives stay off. Pinned ABAB, 20 samples, on ice Ih at

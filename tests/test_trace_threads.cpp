@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 // The closed-cage search and the hexagonal-cage assembly must return the
 // same cages at one thread and at a full team. Membership is the sorted
 // atom ids of each face, not the ring index, so a reordering of the ring

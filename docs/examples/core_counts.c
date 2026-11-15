@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Ice Ih and sII counts from the C core.
  *
  * input/traj/ice1h.lammpstrj: 128 waters, all hexagonal, 256 six-rings.

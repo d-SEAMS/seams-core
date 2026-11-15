@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Neighbours, rings, and CHILL+ through the C API.
  * The caller owns every buffer and every handle, and every call
  * returns a status code. */

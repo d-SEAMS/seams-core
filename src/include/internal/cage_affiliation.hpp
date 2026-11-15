@@ -189,12 +189,12 @@ struct SeededAtomLabels {
  *  The walk repeats until a fixed point. HC and DDC complete on
  *  separate flag vectors.
  *
- *  A liquid ring that only touches a nucleus has at most a few labelled
+ *  A liquid ring that only touches a nucleus has at most a few labeled
  *  vertices, so the all-but-one rule cannot walk into the liquid. An
- *  empty seed stays empty: no ring then has five labelled vertices.
+ *  empty seed stays empty: no ring then has five labeled vertices.
  *
  *  The result is the least fixed point above the seed. Visiting order
- *  does not change the labelled set. lean/DseamsProofs/Completion.lean
+ *  does not change the labeled set. lean/DseamsProofs/Completion.lean
  *  states that claim. Catch2 covers the C++ identity on a crystal, the
  *  refill of a single vacancy, and the structural zero.
  * @param[in] labels Seeded per-atom flags.

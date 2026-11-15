@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Per-replica composition, CHILL+ census and ice front of the 230 K brine frames.
 
-The frames are the labelled extended-XYZ files of the Hugging Face
+The frames are the labeled extended-XYZ files of the Hugging Face
 dataset d-SEAMS/brine-front-230K, read at one pinned revision. fetch
 downloads them by revision and checks them against the dataset's
 SHA256SUMS. Nothing is uploaded.

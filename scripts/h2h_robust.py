@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Interleaved ABAB timings for cutoff, kNN, q6 and CHILL+.
 
 Pin the process before launch (taskset -c 0 for one thread, taskset -c 0-7

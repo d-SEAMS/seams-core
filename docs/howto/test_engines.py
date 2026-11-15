@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Run one engine how-to on input/traj/ice1h.lammpstrj. Exit 77 if it is absent."""
 
 import ctypes

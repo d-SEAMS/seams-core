@@ -38,7 +38,7 @@
 namespace rdf {
 
 struct PartialRdf {
-  std::vector<double> r;    //! Bin centres
+  std::vector<double> r;    //! Bin centers
   std::vector<double> g;    //! g_IJ at each bin
   std::vector<int> count;   //! Unordered pair counts
   double rmax{0.0};

@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""The vendored renderer stays the bb1dbdbf body plus the shared palette.
+# Copyright (c) d-SEAMS developers
+"""The vendored renderer stays the shared-palette body.
 
-The palette import and the triclinic cell read are the only edits.
-docs/check_sh_cell.py and docs/check_palette.py lock those two edits.
+The palette import, the triclinic cell read, and the American spelling
+of that body are the edits. docs/check_sh_cell.py and
+docs/check_palette.py lock the first two.
 """
 
 import hashlib
@@ -12,9 +14,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "scripts" / "science_render.py"
 MARKER = b"# END-HEADER\n"
-# sha256 of the body after the palette import and the triclinic cell read.
-# The renderer underneath is still bb1dbdbf25553174a47da6fa3f4be8f31238d7f0.
-EXPECTED = "122aff01ddd900e6f654675a728c5235157ffc45d733c0bbff9eac21f3dc8a70"
+# sha256 of the body after the palette import, the triclinic cell read,
+# and the American spelling of that body.
+EXPECTED = "3baea759676b85fc7784c1126fac6910914830b504c8d949f3c82d73fc2f7738"
 
 
 def main():

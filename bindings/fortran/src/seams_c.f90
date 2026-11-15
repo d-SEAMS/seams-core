@@ -346,12 +346,12 @@ module seams_c
     end function
 
   !> Topological fingerprint of the bonded graph.
-    function seams_fingerprint(sys, cutoff, typ, k, graph, hops, colour_types, out) &
+    function seams_fingerprint(sys, cutoff, typ, k, graph, hops, color_types, out) &
         bind(C, name="seams_fingerprint")
       import :: c_ptr, c_int, c_double
       type(c_ptr), value :: sys
       real(c_double), value :: cutoff
-      integer(c_int), value :: typ, k, graph, hops, colour_types
+      integer(c_int), value :: typ, k, graph, hops, color_types
       type(c_ptr), intent(out) :: out
       integer(c_int) :: seams_fingerprint
     end function

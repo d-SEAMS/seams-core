@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Ring counts on ideal ice Ih, where other codes use the same rings.
 
 seams_rings_find returns each Franzblau primitive ring once. On this

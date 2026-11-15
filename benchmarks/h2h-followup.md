@@ -29,7 +29,7 @@ The ring census matches on every frame (sH 12/120/68 of sizes 4/5/6, cubic ice 8
 
 ## Symmetry, 40.6 ms vs 36.1 ms
 
-That pair is not a labelled median in `benchmarks/` or the paper data. The nearest identify-diamond record is `benchmarks/logs/symmetry-v20-session.txt`, ideal ice, 110592 molecules, one thread: d-SEAMS kernel 21.743 ms, identify-diamond 36.564 ms. On this host the same classifier against identify-diamond on the cubic frames above is a win: 4096 molecules, one thread, 1.750 / 1.664 vs 5.560 / 5.274; 110592 molecules, one thread, 62.650 / 59.515 vs 171.670 / 167.184. Eight threads win as well. No symmetry threshold was changed.
+That pair is not a labeled median in `benchmarks/` or the paper data. The nearest identify-diamond record is `benchmarks/logs/symmetry-v20-session.txt`, ideal ice, 110592 molecules, one thread: d-SEAMS kernel 21.743 ms, identify-diamond 36.564 ms. On this host the same classifier against identify-diamond on the cubic frames above is a win: 4096 molecules, one thread, 1.750 / 1.664 vs 5.560 / 5.274; 110592 molecules, one thread, 62.650 / 59.515 vs 171.670 / 167.184. Eight threads win as well. No symmetry threshold was changed.
 
 ## Carried rings
 

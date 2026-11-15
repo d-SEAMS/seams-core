@@ -17,7 +17,7 @@ liquid on the CPU platform with the reporter every 10 steps, then requires
 `meson test docs_engine_openmm` runs `DseamsReporter` on
 `input/traj/ice1h.lammpstrj`. `meson test openmm_plugin` runs
 `engines/openmm/plugin.cpp`, which calls
-`seams_chill_plus` after scaling OpenMM nanometres by 10.
+`seams_chill_plus` after scaling OpenMM nanometers by 10.
 
 ```{literalinclude} ../../../engines/openmm/test_reporter.py
 :language: python

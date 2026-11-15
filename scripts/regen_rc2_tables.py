@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Fill the neighbour, CHILL+, ring and literature tables from a sitting log.
 
 The timers stay in scripts/bench_neighbours_v2.py and scripts/h2h_literature.py.

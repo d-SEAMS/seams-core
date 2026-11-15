@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """End-to-end diamond classifier against two-template PTM.
 
 One sitting. Ideal ice Ic, 110592 molecules, eight threads, one warm-up
@@ -113,7 +114,7 @@ def main() -> int:
         if len(item["samples"]) != args.repeats:
             raise SystemExit(f"{kind} wrote {len(item['samples'])} samples")
         if item["sink"] != MOLECULES:
-            raise SystemExit(f"{kind} labelled {item['sink']} of {MOLECULES}")
+            raise SystemExit(f"{kind} labeled {item['sink']} of {MOLECULES}")
         summary = stats.summarize(item["samples"])
         rows.append(row_for(cell, item, summary, cores, affinity))
         print(f"{cell} {summary['median_ms']:.4f} ms iqr {summary['iqr_ms']:.4f}", flush=True)

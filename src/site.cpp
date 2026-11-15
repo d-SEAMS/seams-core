@@ -321,7 +321,7 @@ ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
       continue;
     }
     int shell = 0;
-    int labelled = 0;
+    int labeled = 0;
     std::vector<int> members;
     for (int j = 0; j < n; j++) {
       if (j == i || isIon[static_cast<std::size_t>(j)]) {
@@ -338,14 +338,14 @@ ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
       ++shell;
       members.push_back(j);
       if (static_cast<std::size_t>(j) < iceFlag.size() && iceFlag[static_cast<std::size_t>(j)]) {
-        ++labelled;
+        ++labeled;
       }
     }
     IonState state = IonState::liquid;
-    if (shell > 0 && labelled == shell) {
+    if (shell > 0 && labeled == shell) {
       state = IonState::ice;
       ++out.nIce;
-    } else if (labelled > 0) {
+    } else if (labeled > 0) {
       state = IonState::front;
       ++out.nFront;
     } else {
@@ -353,7 +353,7 @@ ionEnvironment(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     }
     out.ion.push_back(i);
     out.shell.push_back(shell);
-    out.iceFraction.push_back(shell > 0 ? static_cast<double>(labelled) / shell : 0.0);
+    out.iceFraction.push_back(shell > 0 ? static_cast<double>(labeled) / shell : 0.0);
     out.state.push_back(state);
     out.members.push_back(std::move(members));
   }
@@ -504,10 +504,10 @@ guestOccupancy(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                const std::vector<int> &guestIndices, double radius) {
   GuestOccupancy out;
   out.guestsPerCage.assign(cages.size(), 0);
-  std::vector<std::array<double, 3>> centres;
-  centres.reserve(cages.size());
+  std::vector<std::array<double, 3>> centers;
+  centers.reserve(cages.size());
   for (const auto &cage : cages) {
-    centres.push_back(periodicCentroid(yCloud, cage));
+    centers.push_back(periodicCentroid(yCloud, cage));
   }
   const double r2max = radius * radius;
   for (int g : guestIndices) {
@@ -517,8 +517,8 @@ guestOccupancy(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
     const auto &p = yCloud.pts[static_cast<std::size_t>(g)];
     int best = -1;
     double bestSq = r2max;
-    for (std::size_t c = 0; c < centres.size(); c++) {
-      const auto dr = minImage(yCloud, p.x, p.y, p.z, centres[c][0], centres[c][1], centres[c][2]);
+    for (std::size_t c = 0; c < centers.size(); c++) {
+      const auto dr = minImage(yCloud, p.x, p.y, p.z, centers[c][0], centers[c][1], centers[c][2]);
       const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
       if (d2 <= bestSq) {
         bestSq = d2;
@@ -736,10 +736,10 @@ pointInFacesTrace(const molSys::PointCloud<molSys::Point<double>, double> &yClou
   if (verts.empty()) {
     return out;
   }
-  const Vec3 centre = centreOpt != nullptr ? *centreOpt : periodicCentroid(yCloud, verts);
+  const Vec3 center = centreOpt != nullptr ? *centreOpt : periodicCentroid(yCloud, verts);
   auto unwrap = [&](double x, double y, double z) {
-    const auto dr = minImage(yCloud, x, y, z, centre[0], centre[1], centre[2]);
-    return Vec3{centre[0] + dr[0], centre[1] + dr[1], centre[2] + dr[2]};
+    const auto dr = minImage(yCloud, x, y, z, center[0], center[1], center[2]);
+    return Vec3{center[0] + dr[0], center[1] + dr[1], center[2] + dr[2]};
   };
 
   // Fan each face from its own centroid, in the frame unwrapped about c_F.
@@ -762,7 +762,7 @@ pointInFacesTrace(const molSys::PointCloud<molSys::Point<double>, double> &yClou
       for (int k = 0; k < 3; k++) {
         m[static_cast<std::size_t>(k)] += poly.back()[static_cast<std::size_t>(k)];
       }
-      radius = std::max(radius, std::sqrt(distSq(poly.back(), centre)));
+      radius = std::max(radius, std::sqrt(distSq(poly.back(), center)));
     }
     const double inv = 1.0 / static_cast<double>(poly.size());
     m = {m[0] * inv, m[1] * inv, m[2] * inv};
@@ -777,7 +777,7 @@ pointInFacesTrace(const molSys::PointCloud<molSys::Point<double>, double> &yClou
   const Vec3 g = unwrap(guest[0], guest[1], guest[2]);
   const double tol = kInsideRelTol * radius;
   const double tolSq = tol * tol;
-  const double gc = std::sqrt(distSq(g, centre));
+  const double gc = std::sqrt(distSq(g, center));
   // Every triangle lies in the ball of radius `radius` about c_F.
   if (gc > radius + tol) {
     return out;
@@ -840,8 +840,8 @@ pointInFacesTrace(const molSys::PointCloud<molSys::Point<double>, double> &yClou
 bool pointInFaces(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                   const std::vector<std::vector<int>> &rings,
                   const std::vector<int> &faces, const std::array<double, 3> &guest,
-                  const std::array<double, 3> *centre) {
-  return pointInFacesTrace(yCloud, rings, faces, guest, centre).inside;
+                  const std::array<double, 3> *center) {
+  return pointInFacesTrace(yCloud, rings, faces, guest, center).inside;
 }
 
 GuestOccupancy
@@ -851,8 +851,8 @@ guestOccupancyInside(const molSys::PointCloud<molSys::Point<double>, double> &yC
                      const std::vector<int> &guestIndices) {
   GuestOccupancy out;
   out.guestsPerCage.assign(cageFaces.size(), 0);
-  std::vector<std::array<double, 3>> centres;
-  centres.reserve(cageFaces.size());
+  std::vector<std::array<double, 3>> centers;
+  centers.reserve(cageFaces.size());
   std::vector<std::vector<int>> cageVerts(cageFaces.size());
   for (std::size_t c = 0; c < cageFaces.size(); c++) {
     std::unordered_set<int> uniq;
@@ -866,7 +866,7 @@ guestOccupancyInside(const molSys::PointCloud<molSys::Point<double>, double> &yC
     }
     cageVerts[c].assign(uniq.begin(), uniq.end());
     std::sort(cageVerts[c].begin(), cageVerts[c].end());
-    centres.push_back(periodicCentroid(yCloud, cageVerts[c]));
+    centers.push_back(periodicCentroid(yCloud, cageVerts[c]));
   }
   for (int g : guestIndices) {
     if (g < 0 || g >= yCloud.nop) {
@@ -877,11 +877,11 @@ guestOccupancyInside(const molSys::PointCloud<molSys::Point<double>, double> &yC
     int best = -1;
     double bestSq = std::numeric_limits<double>::infinity();
     for (std::size_t c = 0; c < cageFaces.size(); c++) {
-      if (!pointInFaces(yCloud, rings, cageFaces[c], gp, &centres[c])) {
+      if (!pointInFaces(yCloud, rings, cageFaces[c], gp, &centers[c])) {
         continue;
       }
-      const auto dr = minImage(yCloud, p.x, p.y, p.z, centres[c][0],
-                               centres[c][1], centres[c][2]);
+      const auto dr = minImage(yCloud, p.x, p.y, p.z, centers[c][0],
+                               centers[c][1], centers[c][2]);
       const double d2 = dr[0] * dr[0] + dr[1] * dr[1] + dr[2] * dr[2];
       if (d2 <= bestSq) {
         bestSq = d2;

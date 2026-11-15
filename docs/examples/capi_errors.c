@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* A missing path stores a thread-local error and a non-OK status. */
 #include "seams.h"
 

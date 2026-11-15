@@ -61,7 +61,7 @@ def main():
         height = half - 0.2
         liquid = app.Modeller(app.Topology(), [])
         liquid.addSolvent(ff, model="tip4pew", boxSize=openmm.Vec3(lx, ly, height) * unit.nanometer)
-        # addSolvent centres its box on the origin.
+        # addSolvent centers its box on the origin.
         lifted = [openmm.Vec3(p.x + lx / 2, p.y + ly / 2, p.z + height / 2 + half + 0.1)
                   for p in liquid.positions.value_in_unit(unit.nanometer)]
         model = app.Modeller(pdb.topology, pdb.positions)

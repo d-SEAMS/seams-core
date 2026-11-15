@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (c) d-SEAMS developers
 # Ubuntu 24.04 has no libflexiblas-dev. Later Ubuntu releases do. Install
 # the distro package when it exists, and otherwise build FlexiBLAS 3.4.4
 # with the netlib backend it ships, into /usr/local.

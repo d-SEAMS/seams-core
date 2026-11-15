@@ -385,10 +385,10 @@ def worker(kind, molecules, threads, frame_path, calls=0):
         detail = f"census={last}"
     elif kind == "dseams-ptm":
         samples, last, version = seams.symmetry(pos, side)
-        detail = f"labelled={last}"
+        detail = f"labeled={last}"
     elif kind == "ovito-ptm":
         samples, last, version = ovito_mod(pos, side, threads, "ptm")
-        detail = f"labelled={last}"
+        detail = f"labeled={last}"
     elif kind == "dseams-cages":
         samples, last, version = seams.cages(pos, side)
         detail = f"512/51262/51264={last}"
@@ -752,7 +752,7 @@ def ice_rule_waters(pos, side):
     The four nearest oxygens are a symmetric graph on these crystals.
     An Eulerian circuit orients each water toward two of them, which is
     an ice rule. Each hydrogen sits 0.96 A along that bond. Coordinates
-    in the JSON are nanometres.
+    in the JSON are nanometers.
     """
     import numpy as np
     from vesin import NeighborList

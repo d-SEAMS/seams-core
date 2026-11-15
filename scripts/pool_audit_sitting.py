@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """One sitting of the pool-sized kernels at 1, 2, 4 and 8 threads.
 
 Ice Ic at 4096, 32768, 110592 and 884736 molecules is built in the

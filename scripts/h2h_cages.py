@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Cage census: d-SEAMS cmdCages against SQQ 0.5.8.
 
 ClavisCage's clavis_engine module is not on PyPI (the package named

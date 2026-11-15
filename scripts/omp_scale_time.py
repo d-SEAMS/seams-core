@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Time the C API at one thread and at eight, in one process.
 
 Eight samples follow one warm-up. The record is the core count of the

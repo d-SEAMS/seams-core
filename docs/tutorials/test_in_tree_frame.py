@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 """The tutorial job imports the in-tree 2.14 frame.
 
 PyPI ``pydseamslib`` 2.11.1 has no ``graph`` argument and labels the mixed

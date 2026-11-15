@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Interleaved, order-flipped comparison of two seams_bench binaries.
 
 Each round runs one binary then the other. Even rounds start with the

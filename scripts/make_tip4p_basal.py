@@ -171,7 +171,7 @@ def virtual_weights() -> tuple[float, float]:
 
 def forcefield_xml() -> str:
     weight_o, weight_h = virtual_weights()
-    # OpenMM XML lengths are nanometres and energies are kJ/mol.
+    # OpenMM XML lengths are nanometers and energies are kJ/mol.
     return f"""<?xml version="1.0"?>
 <ForceField>
  <AtomTypes>

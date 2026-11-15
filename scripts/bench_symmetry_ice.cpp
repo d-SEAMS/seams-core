@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 // Time classifyIce on ideal ice Ic. Release build of the symmetry kernel.
 // One warm-up, six calls. Prints one line of samples and the label census.
 

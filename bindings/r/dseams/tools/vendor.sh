@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (c) d-SEAMS developers
 # Copy the engine sources that libseams_lang needs into src/seams, and the
 # example dumps into inst/extdata, so that `R CMD build` makes a source
 # package which compiles with no seams-core checkout and no network.

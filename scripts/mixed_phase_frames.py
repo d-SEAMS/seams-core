@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Mixed-phase oxygen frames for the CHILL regression.
 
 Three cells, written as LAMMPS dumps:
@@ -98,8 +99,8 @@ def melted() -> tuple[np.ndarray, tuple[float, float, float]]:
     """Ice Ih with molecules inside a sphere replaced by a random melt."""
     pos, lengths = ice_ih(4, 4, 4)
     lx, ly, lz = lengths
-    centre = np.array((0.35 * lx, 0.40 * ly, 0.55 * lz))
-    delta = pos - centre
+    center = np.array((0.35 * lx, 0.40 * ly, 0.55 * lz))
+    delta = pos - center
     box = np.array(lengths)
     delta -= box * np.round(delta / box)
     inside = np.linalg.norm(delta, axis=1) < 8.0
@@ -110,7 +111,7 @@ def melted() -> tuple[np.ndarray, tuple[float, float, float]]:
     direction /= np.linalg.norm(direction, axis=1)[:, None]
     radius = 8.0 * np.cbrt(rng.random(n_melt))
     pos = pos.copy()
-    pos[inside] = centre + direction * radius[:, None]
+    pos[inside] = center + direction * radius[:, None]
     pos[:, 0] %= lx
     pos[:, 1] %= ly
     pos[:, 2] %= lz
@@ -456,7 +457,7 @@ def mdapy_report(path: Path, lib) -> None:
         "",
         "    q_lm(i) = (1/4) sum_{j=1}^{4} Y_lm(r_ij)",
         "",
-        "Equation (2) is the normalised correlation of that vector,",
+        "Equation (2) is the normalized correlation of that vector,",
         "",
         "    c(i,j) = sum_m q_lm(i) q_lm(j)*",
         "             / sqrt( (sum_m |q_lm(i)|^2) (sum_m |q_lm(j)|^2) )",

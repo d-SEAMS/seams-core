@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Rings: primitive rings of hexagonal ice, their size histogram and the
  * six-ring fraction.
  * Usage: rings <repository root> */

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Primitive rings against OVITO FindRings.
 
 Both sides see the same cutoff graph. d-SEAMS counts Franzblau primitive

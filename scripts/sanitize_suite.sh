@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (c) d-SEAMS developers
 # Re-run the suite under AddressSanitizer and UndefinedBehaviorSanitizer.
 #
 #   scripts/sanitize_suite.sh

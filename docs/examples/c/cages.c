@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Cages: the hexagonal and double-diamond cage census of hexagonal ice.
  * Usage: cages <repository root> */
 #include "seams.h"

@@ -353,7 +353,7 @@ Graph relabel(const Graph &nList, const std::vector<int> &perm) {
   return out;
 }
 
-// Points then lines of PG(2, q), q prime, as normalised vectors of GF(q)^3
+// Points then lines of PG(2, q), q prime, as normalized vectors of GF(q)^3
 Graph leviGraph(int q) {
   std::vector<std::array<int, 3>> v;
   for (int a = 0; a < q; ++a) {

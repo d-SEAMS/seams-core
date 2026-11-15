@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Run science-front on the small interface frame and the mW census.
 
 Exit 77 when src/science_front.cpp is not in the tree or the

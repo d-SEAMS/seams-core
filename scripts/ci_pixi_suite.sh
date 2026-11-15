@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (c) d-SEAMS developers
 # Build the linux-64 pixi stack and run the full Meson suite.
 # A failure or a skip exits non-zero. Expected failures stay allowed.
 set -eu

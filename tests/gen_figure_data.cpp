@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 
   // Also emit the ring membership of one double-diamond cage, so a figure can
   // show the unit the search actually identifies rather than only a bulk
-  // colouring. A DDC is stored as its equatorial ring followed by six
+  // coloring. A DDC is stored as its equatorial ring followed by six
   // peripheral rings.
   {
     std::ofstream cageFile(out + ".cage");

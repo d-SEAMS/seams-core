@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (c) d-SEAMS developers
 # Fetch the Fennel compiler, one Lua file, for meson -Dfennel_lua.
 # conda-forge does not package Fennel. Prints the file path.
 # usage: scripts/fetch_fennel.sh DEST

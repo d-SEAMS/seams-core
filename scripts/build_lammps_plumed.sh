@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (c) d-SEAMS developers
 # Build LAMMPS against the PLUMED already on PATH and install it under DEST.
 #
 # conda-forge LAMMPS is linked to PLUMED 2.9 only. A 2.10 kernel has to be

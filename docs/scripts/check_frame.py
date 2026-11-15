@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # Copyright (c) d-SEAMS developers
-"""Fail when a still leaves the structure small or off centre."""
+"""Fail when a still leaves the structure small or off center."""
 
 import sys
 from pathlib import Path
@@ -20,7 +20,7 @@ def measure(path):
     box_h = int(ys.max() - ys.min() + 1)
     fill = (box_w * box_h) / float(width * height)
     # The caption sits in the bottom band. Centroid is the drawing, so a
-    # scale bar on the left does not drag the structure off centre.
+    # scale bar on the left does not drag the structure off center.
     band = max(1, int(height * 0.78))
     drawing = mask.copy()
     drawing[band:, :] = False
@@ -28,14 +28,14 @@ def measure(path):
     if len(dxs) == 0:
         dxs, dys = xs, ys
         band = height
-    # Box centre, not the ink mean. A liquid on one side must not count as off-centre.
+    # Box center, not the ink mean. A liquid on one side must not count as off-center.
     dx = float((dxs.min() + dxs.max()) / 2.0 / width - 0.5)
     dy = float((dys.min() + dys.max()) / 2.0 / band - 0.5)
     return fill, dx, dy, _clipped_highlights(image)
 
 
 def _clipped_highlights(image):
-    """Near-white pixels sitting on a coloured atom, not the page or a ring hole."""
+    """Near-white pixels sitting on a colored atom, not the page or a ring hole."""
     white = np.all(image >= 250, axis=2)
     chroma = image.max(axis=2) - image.min(axis=2)
     colored = chroma > 16

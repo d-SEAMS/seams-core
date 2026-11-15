@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (c) d-SEAMS developers
 # Fetch the class headers of the LAMMPS release that lmp (or $LMP) reports,
 # for meson -Dlammps_src_include. Prints the src directory.
 # usage: scripts/fetch_lammps_headers.sh DEST

@@ -19,7 +19,7 @@ protocol seams and ovito: OMP_PROC_BIND=close OMP_PLACES=cores OMP_WAIT_POLICY=A
 protocol mdapy and pyscal3: threads set in the library, no proc bind
 samples 8 after 2 warm-ups; neighbour build is inside every timed call
 ideal ice Ic, cutoff 3.5
-qbar is the Lechner-Dellago average. w is the normalised hat w_l
+qbar is the Lechner-Dellago average. w is the normalized hat w_l
 OVITO 3.17.2 Steinhardt modifier has averaged q and does not write w
 mdapy 2.0.0 SteinhardtParameters has averaged q and does not write w
 pyscal3 4.1.0 writes both

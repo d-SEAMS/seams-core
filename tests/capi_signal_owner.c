@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Who owns SIGABRT once libseams is loaded.
  * libseams installs no handler in either build: the host process (Julia, R,
  * Python, a sanitizer or libFuzzer) keeps its own. The backward-cpp stack

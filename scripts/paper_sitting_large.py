@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """One sitting at 884736 molecules on two frames.
 
 The first frame is ice Ic, eight times the 110592 cell. The second is

@@ -250,7 +250,7 @@ struct Q6Bar {
  * @ingroup seams_cpp
  */
 struct Distribution {
-  std::vector<double> radius; /**< Bin centres, Angstrom. */
+  std::vector<double> radius; /**< Bin centers, Angstrom. */
   std::vector<double> g;      /**< g(r), dimensionless. */
   std::vector<int> count;     /**< Pair count in each bin. */
   double volume = 0;          /**< Cell volume, cubic Angstrom. */
@@ -261,7 +261,7 @@ struct Distribution {
  * @ingroup seams_cpp
  */
 struct RunningCoordination {
-  std::vector<double> radius;       /**< Bin centres, Angstrom. */
+  std::vector<double> radius;       /**< Bin centers, Angstrom. */
   std::vector<double> coordination; /**< Running coordination, dimensionless. */
 };
 
@@ -321,7 +321,7 @@ struct PrismCensus {
  * @ingroup seams_cpp
  */
 struct DensityProfile {
-  std::vector<double> coordinate; /**< Bin centres, Angstrom. */
+  std::vector<double> coordinate; /**< Bin centers, Angstrom. */
   std::vector<double> density;    /**< Number density. */
 };
 
@@ -352,7 +352,7 @@ struct Rejection {
  * @ingroup seams_cpp
  */
 struct BrineProfile {
-  std::vector<double> coordinate;    /**< Bin centres, Angstrom. */
+  std::vector<double> coordinate;    /**< Bin centers, Angstrom. */
   std::vector<double> molality;      /**< mol/kg. */
   std::vector<double> ice_fraction;  /**< Dimensionless. */
 };
@@ -508,7 +508,7 @@ struct FingerprintOptions {
   int k = 4;                    /**< Neighbour count on the bonded graph. */
   Graph graph = Graph::Cutoff;  /**< Neighbour graph. */
   int hops = 2;                 /**< Neighbourhood depth. Zero selects 2. */
-  bool colour_types = false;    /**< Colour vertices by LAMMPS type. */
+  bool color_types = false;    /**< Color vertices by LAMMPS type. */
 };
 
 /**
@@ -1201,7 +1201,7 @@ class System : public detail::Handle<seams_system, seams_system_destroy> {
     seams_topo *out = nullptr;
     detail::check(seams_fingerprint(get(), options.cutoff, options.species, options.k,
                                     static_cast<int>(options.graph), options.hops,
-                                    options.colour_types ? 1 : 0, &out),
+                                    options.color_types ? 1 : 0, &out),
                   get());
     return Fingerprint(out);
   }

@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Ice Ih census through seams_lang.h. */
 #include "seams_lang.h"
 

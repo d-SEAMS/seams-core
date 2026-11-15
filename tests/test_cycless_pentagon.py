@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """The interface pentagon cycless misses is in the d-SEAMS census."""
 
 from __future__ import annotations

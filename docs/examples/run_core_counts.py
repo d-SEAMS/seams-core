@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Compile and run the Ice Ih and sII examples.
 
 Usage: run_core_counts.py ROOT BUILD

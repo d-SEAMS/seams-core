@@ -80,14 +80,14 @@ Table parseSiteSpec(std::string_view spec);
 
 /// Ions read against a per-atom ice assignment. Ions are not part of the
 /// hydrogen-bond network; the assignment is computed on the water and each
-/// ion is classed by its first water shell: every shell molecule labelled
+/// ion is classed by its first water shell: every shell molecule labeled
 /// is `ice`, none is `liquid`, otherwise `front`. An ion with an empty shell
 /// is liquid.
 enum class IonState { liquid = 0, front = 1, ice = 2 };
 struct IonEnvironment {
   std::vector<int> ion;            ///< cloud indices of the ions, in input order
   std::vector<int> shell;          ///< water molecules within the cutoff
-  std::vector<double> iceFraction; ///< labelled share of that shell
+  std::vector<double> iceFraction; ///< labeled share of that shell
   std::vector<IonState> state;
   std::vector<std::vector<int>> members;  ///< per ion, the shell molecules (cloud indices)
   int nIce = 0;
@@ -137,16 +137,16 @@ std::vector<std::vector<int>> brokenRings(const std::vector<std::vector<int>> &n
                                           int maxRingSize);
 
 /// Guests read against enumerated cages. A cage is a set of vertex atoms;
-/// its centre is the periodic centroid of the vertices. A guest (methane,
+/// its center is the periodic centroid of the vertices. A guest (methane,
 /// THF, an ion, any atom outside the network) sits in the cage whose
-/// centre is nearest to it when that centre is within `radius`; a guest
-/// with no centre within `radius` is free. This is the occupancy of a
+/// center is nearest to it when that center is within `radius`; a guest
+/// with no center within `radius` is free. This is the occupancy of a
 /// clathrate hydrate (fraction of 5^12 and 5^12 6^2 cages filled) and the
 /// test of whether an ion sits inside the network rather than at a vertex.
 struct GuestOccupancy {
   std::vector<int> guestsPerCage;        ///< per cage, guests inside
   std::vector<int> cageOfGuest;          ///< per guest in input order, cage index or -1
-  std::vector<double> centreDistance;    ///< per guest, distance to its cage centre (-1 when free)
+  std::vector<double> centreDistance;    ///< per guest, distance to its cage center (-1 when free)
   int occupied = 0;                      ///< cages with at least one guest
   int multiply = 0;                      ///< cages with more than one guest
   int free = 0;                          ///< guests in no cage
@@ -180,7 +180,7 @@ struct InsideTrace {
 };
 
 /// The inside predicate for one cage. The face vertices and the guest are
-/// unwrapped about c_F (`centre`, or the periodic centroid of the distinct
+/// unwrapped about c_F (`center`, or the periodic centroid of the distinct
 /// face vertices when null) and each face is fan-triangulated from its own
 /// centroid. The guest is inside when it lies on a triangle within
 /// `kInsideRelTol`; otherwise a ray is cast along the first direction of
@@ -192,12 +192,12 @@ InsideTrace
 pointInFacesTrace(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                   const std::vector<std::vector<int>> &rings,
                   const std::vector<int> &faces, const std::array<double, 3> &guest,
-                  const std::array<double, 3> *centre = nullptr);
+                  const std::array<double, 3> *center = nullptr);
 
 bool pointInFaces(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
                   const std::vector<std::vector<int>> &rings,
                   const std::vector<int> &faces, const std::array<double, 3> &guest,
-                  const std::array<double, 3> *centre = nullptr);
+                  const std::array<double, 3> *center = nullptr);
 
 /// Occupancy by the inside predicate (`pointInFaces`) on every cage. Among
 /// cages that contain the guest the nearest centroid wins. `rings` is

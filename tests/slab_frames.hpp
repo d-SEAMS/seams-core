@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 // Tiled interface frames shared by the rank benchmark and the MPI tests.
 // Ice is eight molecules per cubic cell. The sI cell is the 46-water
 // genice frame. The upper half of z is shifted by a fixed generator so

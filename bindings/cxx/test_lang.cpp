@@ -1100,7 +1100,7 @@ int main(int argc, char **argv) {
     }
     if (selected[5] != 6) {
       seams_frame_free(mixed);
-      return fail("brine ion stayed labelled");
+      return fail("brine ion stayed labeled");
     }
     int ringCounts[7] = {};
     if (seams_frame_rings(mixed, 3.5, 1, "cutoff", 6, ringCounts, 7) != 0) {

@@ -197,7 +197,7 @@ A frame gives the positions of $n$ water molecules in a periodic cell, each repr
 The bond graph $G=(V,E)$ has one vertex per molecule and an edge, called a bond, between two molecules whose oxygen atoms lie within the cutoff $r_c=\qty{\dsv{set@cutoff}}{\angstrom}$ under the minimum image convention, as in earlier topological analyses~\cite{goswami2020dseams,moore2010chill}.
 A cutoff graph admits interstitial molecules and misses stretched bonds, so we also build two graphs from the four nearest neighbours of each molecule.
 The mutual graph joins two molecules when each is among the four nearest neighbours of the other, and the union graph joins them when either is.
-Seeded labels take the cage labels of the mutual graph as seeds and accept a cage label of the union graph only when its cluster of labelled molecules contains a seed.
+Seeded labels take the cage labels of the mutual graph as seeds and accept a cage label of the union graph only when its cluster of labeled molecules contains a seed.
 The extra bonds of the union graph then count only where they extend a structure of the mutual graph.
 We call this pair of graphs the seeded graph, the default of the cage labels, and every result below names its graph.
 
@@ -717,7 +717,7 @@ The same rings build the prism blocks of confined ice and the clathrate cages (S
 \subsection{Cost of the update}
 \label{sec:churn}
 
-To control the number of changed bonds, we took two consecutive frames of the nucleation trajectory of Section~\ref{sec:nucleation} and replaced the positions of the earlier frame inside a sphere at the centre of the cell with those of the later one (Section~\sref{sec:s-updates}).
+To control the number of changed bonds, we took two consecutive frames of the nucleation trajectory of Section~\ref{sec:nucleation} and replaced the positions of the earlier frame inside a sphere at the center of the cell with those of the later one (Section~\sref{sec:s-updates}).
 Growing the sphere raises the number of changed bonds, and Figure~\ref{fig:churn} times both updates against their full searches.
 With three changed bonds on a frame of a nucleation run, the ring update is \dsv{hl@ringgain} times faster than a full search (Table~\ref{tab:update}).
 The cage-label update, which compares every neighbour row, gains less than a factor of two at any change.
@@ -827,7 +827,7 @@ Every molecule of the hexagonal lattice lies on hexagonal cages, and every molec
 \includegraphics[width=85mm]{figures/brine_front}
 \caption{\textbf{A 230 K TIP4P/2005 ice front against Madrid-2019 brine.}
 (a) The 20-pair cell at the start of production, after the liquid half was melted at 400 K and quenched, and the same cell after 5 ns.
-Water oxygens are coloured by the d-SEAMS CHILL+ label: hexagonal orange, cubic blue, interfacial green, liquid grey, clathrate light blue and interfacial clathrate pink.
+Water oxygens are colored by the d-SEAMS CHILL+ label: hexagonal orange, cubic blue, interfacial green, liquid gray, clathrate light blue and interfacial clathrate pink.
 Sodium is violet and chloride is black, and both sit in the liquid.
 (b) Hexagonal and cubic molecules and the ice thickness at 5 ns against the NaCl loading, one marker per replica.
 The thickness is the distance between the two half-crystal crossings of a 20-bin profile along $z$.
@@ -1047,7 +1047,7 @@ With such an update, the LAMMPS compute that assigns CHILL+ labels during a run 
 
 \textbf{Rohit Goswami:} Conceptualization, Methodology, Software, Formal analysis, Writing (original draft), Writing (review and editing).
 \textbf{Amrita Goswami:} Conceptualization (the original cage-membership assignment, the topological criteria for confined ice, and the matching of seeded clusters and topological units), Methodology, Software, Writing (review and editing).
-\textbf{Ruhila Goswami:} Software (PydSEAMSlib, the Python bindings), Visualization (colour palette), Writing (review and editing).
+\textbf{Ruhila Goswami:} Software (PydSEAMSlib, the Python bindings), Visualization (color palette), Writing (review and editing).
 \textbf{Jayant K. Singh:} Writing (review and editing).
 
 \section*{Declaration of competing interest}
@@ -1060,7 +1060,7 @@ We thank our families, pets and plants for their patience and support throughout
 
 \section*{Data and code availability}
 
-The program is seams-core under the MIT licence at \url{https://github.com/d-SEAMS/seams-core}, and its releases are archived on Zenodo under the concept DOI \href{https://doi.org/10.5281/zenodo.3874291}{10.5281/zenodo.3874291}~\cite{seamscore2026}.
+The program is seams-core under the MIT license at \url{https://github.com/d-SEAMS/seams-core}, and its releases are archived on Zenodo under the concept DOI \href{https://doi.org/10.5281/zenodo.3874291}{10.5281/zenodo.3874291}~\cite{seamscore2026}.
 The version comparison, the update measurements and the main comparator campaign are the records stored at commit \texttt{\seqsplit{66617588258baf1f41895676966fae94a9075c08}}, whose \texttt{src} tree is \texttt{cb10f6d6} (Section~\sref{sec:s-machines}).
 The one-thread neighbour samples were measured on commit \texttt{\seqsplit{140a557e7c9b619a668343ac118bc4dff50c38bd}}.
 The version DOI for 2.12.0 is \DOIPENDING.

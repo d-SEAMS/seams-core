@@ -9,7 +9,7 @@ carry `@srrstats` tags.
 ## Categories that do not apply
 
 The category standards are for software whose purpose is statistical
-inference or statistical modelling:
+inference or statistical modeling:
 
 - Bayesian
 - regression and supervised learning
@@ -40,7 +40,7 @@ does that work:
 | G1.2 Life cycle | Version 2.14.0. `NEWS.md` records this as the first CRAN submission of a stable engine binding |
 | G1.4 roxygen2 | Every exported function is documented with roxygen2, and each has an example |
 | G5.0, G5.1, G5.4 Known data | `inst/extdata` ships the ice Ih cell. Tests require 128 hexagonal waters and 256 primitive six-rings |
-| G5.2 Error behaviour | Tests cover a missing file, a file that is not a dump, an unknown CHILL+ rule, an unknown example name, and a non-positive thread count |
+| G5.2 Error behavior | Tests cover a missing file, a file that is not a dump, an unknown CHILL+ rule, an unknown example name, and a non-positive thread count |
 | G5.3 Finite results | The ice Ih test requires finite `q6` |
 | G2.0, G2.1 Input checks | `dseams_threads()` rejects a non-positive count. `dseams_example()` rejects an unknown name. `jump_tau90()` requires `dseams_frame` objects |
 

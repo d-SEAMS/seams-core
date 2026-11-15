@@ -465,7 +465,7 @@ def engine_videos():
             "scenes": [
                 scene(
                     "Driver on ice Ih",
-                    "PLUMED_NUM_THREADS is set to one thread before plumed driver starts. docs_engine_plumed loads libSeamsPlumed.so, writes an xyz in nanometres, and prints plumed hexagonal 128 six-rings 256 q6 0.625855. plumed_driver checks the cubic cell the same way.",
+                    "PLUMED_NUM_THREADS is set to one thread before plumed driver starts. docs_engine_plumed loads libSeamsPlumed.so, writes an xyz in nanometers, and prints plumed hexagonal 128 six-rings 256 q6 0.625855. plumed_driver checks the cubic cell the same way.",
                     ['PLUMED_NUM_THREADS=1 python3 docs/howto/test_engines.py plumed . "$SEAMS_BUILD"'],
                     ["plumed " + census],
                     [TAPE, "docs_engine_plumed", "plumed_driver"],

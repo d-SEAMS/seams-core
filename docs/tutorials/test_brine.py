@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Ions per layer on a growing ice front.
 
 Water is the interface frame. Nine ions were added: one chloride in a

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Head-to-head of d-SEAMS against mdapy, pyscal3, vesin, IRA, SQQ,
 ClavisCage and PLUMED.
 
@@ -450,7 +451,7 @@ def _orient_donors(n, edges):
 def hydrogen_waters(frame):
     """Oxygens plus hydrogens along an out-degree-2 orientation of the shell.
 
-    Coordinates are nanometres, which is the unit TRACE reads. Each oxygen
+    Coordinates are nanometers, which is the unit TRACE reads. Each oxygen
     keeps up to four neighbours inside the cutoff. Those edges are oriented
     so a 4-coordinated water donates two hydrogen bonds; the acceptor is the
     other end. The returned fourth-neighbour distance is in angstroms.

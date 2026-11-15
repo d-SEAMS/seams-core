@@ -1,7 +1,7 @@
 A running molecular dynamics calculation can call the in-situ engine on
 each frame it chooses.
 The engine reports the primitive ring census.
-It also reports the published common neighbour ice labelling (CHILL)
+It also reports the published common neighbour ice labeling (CHILL)
 labels.
 The cage flags cover hexagonal and double-diamond cages.
 LAMMPS, GROMACS, OpenMM, i-PI, and the Atomic Simulation Environment

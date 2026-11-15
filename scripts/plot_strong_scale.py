@@ -21,7 +21,7 @@ H2H = ROOT / "benchmarks" / "h2h-parallel.csv"
 OUT = ROOT / "paper" / "tex" / "figures"
 
 # Okabe-Ito
-COLOURS = {
+COLORS = {
     "neigh": "#0072B2",
     "chill": "#D55E00",
     "q6": "#009E73",
@@ -63,7 +63,7 @@ def main():
                 continue
             xs = [int(r["ranks"]) for r in series]
             ys = [float(r["speedup"]) for r in series]
-            ax.plot(xs, ys, marker="o", color=COLOURS[op], label=LABELS[op], lw=1.4)
+            ax.plot(xs, ys, marker="o", color=COLORS[op], label=LABELS[op], lw=1.4)
         ax.set_xlabel("Ranks (1 thread each)")
         ax.set_ylabel("Speedup vs 1 rank")
         ax.set_title(title)

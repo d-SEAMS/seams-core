@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Paper-review losses: rings, symmetry, library cages, CHILL+ matrices.
 
 Pinned ABAB, 8 samples. Serial is one core. Eight threads are cores

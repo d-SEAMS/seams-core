@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Write one CSV per paper table from benchmarks/paper-cells/sitting.csv.
 
 The sitting is the only timing source. These files are selections of

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """C API against freud and OVITO.
 
 The six frames are ice Ih, ice Ic, sI, the TIP4P/ice liquid, the brine
@@ -343,22 +344,22 @@ def numpy_column(
     """Float64 q_l on the given rows. An empty row is NaN."""
     n = len(pts)
     counts = np.array([len(row) for row in rows], dtype=np.int64)
-    centre = np.repeat(np.arange(n), counts)
+    center = np.repeat(np.arange(n), counts)
     other = np.fromiter((j for row in rows for j in row), dtype=np.int64, count=int(counts.sum()))
     cell = cell_matrix(box)
-    delta = np.asarray(pts, dtype=np.float64)[other] - np.asarray(pts, dtype=np.float64)[centre]
+    delta = np.asarray(pts, dtype=np.float64)[other] - np.asarray(pts, dtype=np.float64)[center]
     delta -= np.round(np.linalg.solve(cell, delta.T).T) @ cell.T
     radius = np.linalg.norm(delta, axis=1)
     theta = np.arccos(np.clip(delta[:, 2] / radius, -1.0, 1.0))
     phi = np.arctan2(delta[:, 1], delta[:, 0])
     qlm = np.zeros((n, 2 * order + 1), dtype=np.complex128)
     for column, moment in enumerate(range(-order, order + 1)):
-        np.add.at(qlm[:, column], centre, sph_harm_y(order, moment, theta, phi))
+        np.add.at(qlm[:, column], center, sph_harm_y(order, moment, theta, phi))
     live = counts > 0
     qlm[live] /= counts[live, None]
     if averaged:
         total = qlm.copy()
-        np.add.at(total, centre, qlm[other])
+        np.add.at(total, center, qlm[other])
         qlm = total / (counts + 1)[:, None]
     pref = 4.0 * math.pi / (2.0 * order + 1.0)
     q = np.sqrt(pref * np.sum(np.abs(qlm) ** 2, axis=1))
@@ -914,7 +915,7 @@ def analytic_rdf(lib: ctypes.CDLL, pts: np.ndarray, box: np.ndarray) -> None:
     lib.seams_system_destroy(handle)
     scaled = float(cn.value) * (n - 1) / n
     expect(abs(scaled - degree) <= ABS_TOL, f"scaled cn {scaled} degree {degree}")
-    expect(abs(float(cn.value) - degree) > 1e-3, "rdf normalisation already matched N^2")
+    expect(abs(float(cn.value) - degree) > 1e-3, "rdf normalization already matched N^2")
     small = np.array(
         [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]],
         dtype=np.float64,

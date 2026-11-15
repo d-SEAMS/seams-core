@@ -70,7 +70,7 @@ A conflict row wider than the inline eight spills to the heap.
 A component the line packing does not cover is solved by the exact search.
 The seeded variant takes a strict graph for the seeds and a permissive graph for the completions.
 An atom on the permissive graph is kept only when its component contains a seed.
-=--complete= then fills a six-ring that is missing one labelled vertex.
+=--complete= then fills a six-ring that is missing one labeled vertex.
 That walk is the least fixed point of the all-but-one rule; see the ring-completion page.
 
 * Confined ice

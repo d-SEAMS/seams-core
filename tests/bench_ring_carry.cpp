@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /*
 ** Carried rings against a full search when the old full-pass rules would
 ** have fired. A tetrahedral cell is searched once, then a fixed share of

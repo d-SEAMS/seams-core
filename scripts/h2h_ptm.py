@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """OVITO polyhedral template matching against d-SEAMS symmetry.
 
 No remote branch carries bc-035d2d78's PTM/IRA tree. This session is

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Held-out check of the thermal symmetry gates.
 
 The gates 0.85, 1.20 and 0.15 were chosen on the TIP4P/2005 slab at
@@ -8,7 +9,7 @@ written for the quench and for the 4 ps average:
 
 - majority: at least two of the new-gate classifier, PTM diamond and
   CHILL+ hexagonal-or-cubic. The classifier votes, so those precision
-  and recall figures favour the new gates.
+  and recall figures favor the new gates.
 - both: PTM diamond and CHILL+ hexagonal-or-cubic agree. Neither gate
   set votes. both_precision and both_recall are against that truth.
 - loo: each method is scored against agreement of the other two, so it
@@ -26,7 +27,7 @@ the new gates raise recall on every held-out slab and keep precision at
 or above 0.99. The extra ice labels sit in the first neighbour shell of
 majority crystal. Bulk TIP4P/2005 at 240 K with no seed is entirely
 other, including after a minimise. The gates were left as they are.
-No CHILL+-labelled brine coordinate frame is stored in the tree; the
+No CHILL+-labeled brine coordinate frame is stored in the tree; the
 brine row is the 230 K start built by the growth deck. The mW atoms
 the new gates miss are broken out in raw-symmetry-mw-misses.txt. That
 probe does not change the gates.

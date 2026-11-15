@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Each engine page names the flags the source actually accepts.
 
 The pages are docs/source/engines. The flags are read from the engine

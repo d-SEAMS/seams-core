@@ -4,7 +4,7 @@
 // Copyright (c) d-SEAMS developers
 // SPDX-License-Identifier: MIT
 
-// Normalised third-order invariant hat{w}_l for l = 4 and l = 6.
+// Normalized third-order invariant hat{w}_l for l = 4 and l = 6.
 // hat{w}_l contracts q_lm with the Wigner 3j symbol (l l l; m1 m2 m3)
 // and divides by (sum_m |q_lm|^2)^(3/2). The q_lm row is interleaved
 // real, imag with magnetic index m + l.

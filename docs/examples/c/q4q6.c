@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* q4 and q6: per-atom Steinhardt parameters, then the averaged q6 with its
  * mean, median and ice count.
  * Usage: q4q6 <repository root> */

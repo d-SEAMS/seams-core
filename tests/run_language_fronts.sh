@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (c) d-SEAMS developers
 # Run the language fronts against the build tree.
 # Exit 77 when a toolchain is absent, unless SEAMS_REQUIRE_LANG=1.
 set -e

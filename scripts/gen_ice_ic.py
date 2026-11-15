@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Oxygen sites of ideal ice Ic.
 
 The conventional cubic cell holds eight molecules. The lattice constant is

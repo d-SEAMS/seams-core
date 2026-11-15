@@ -255,7 +255,7 @@ def write_pages(rows):
         "# Binding overhead\n\n"
         "Ice Ih at 4096, 32768, and 110592 molecules. "
         "GenIce builds a missing cell. The oxygen sites are kept and scaled "
-        "from nanometres to angstroms.\n\n"
+        "from nanometers to angstroms.\n\n"
         + body + "\n" + tables + "\n\n"
         "The figure is drawn when the docs are built. "
         "It is the median ratio to the direct C call.\n",
@@ -267,7 +267,7 @@ def write_pages(rows):
         "================\n\n"
         "Ice Ih at 4096, 32768, and 110592 molecules. "
         "GenIce builds a missing cell. The oxygen sites are kept and scaled "
-        "from nanometres to angstroms.\n\n"
+        "from nanometers to angstroms.\n\n"
         + body + "\n\n"
         ".. figure:: ../_static/binding-overhead.png\n"
         "   :alt: Median time of each binding divided by the direct C call\n\n"

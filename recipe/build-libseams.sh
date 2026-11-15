@@ -1,4 +1,5 @@
 #!/bin/bash
+# Copyright (c) d-SEAMS developers
 set -euxo pipefail
 
 # conda-forge's compiler activation sets MESON_ARGS (prefix, libdir,

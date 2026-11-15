@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """A cage face may not keep an edge longer than 1.5 times that cage's median.
 
 The synthetic case is the periodic-image spike: one edge of a cell length
@@ -74,9 +75,9 @@ def check_structures():
         positions = _positions(dump)
         _origin, vectors = _box_cell(dump)
         groups = []
-        for _label, need, colour, limit in kinds:
+        for _label, need, color, limit in kinds:
             for faces in find_cages(cycles, need, limit):
-                groups.append((faces, colour))
+                groups.append((faces, color))
         _meshes, _stats, edge_sets = cage_meshes(cycles, groups, positions, vectors)
         longest = max(float(np.max(edges)) for edges in edge_sets)
         print(f"{name} cages {len(edge_sets)} longest edge {longest:.3f} A")

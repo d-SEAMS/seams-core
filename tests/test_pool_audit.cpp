@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /*
 ** The pool-sized kernels match the one-thread result on ice Ic.
 ** Primitive rings, local and cutoff q4 and q6, CHILL+, the shell

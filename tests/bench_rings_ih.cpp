@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 // Time seams_rings_find on ideal ice Ih.
 //
 //   bench_rings_ih --session [--reps 8] [--warmup 1]

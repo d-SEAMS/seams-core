@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Rebuild the 200 ps mW nucleation seeds.
 
 A 12x12x12 ice Ic cell (13824 molecules) is melted for 40 ps at 500 K.
-The 300 molecules nearest the centre are put back, liquid within 2.4 A of
+The 300 molecules nearest the center are put back, liquid within 2.4 A of
 that core is dropped, and the core is held fixed while the rest runs at
 220 K for 200 ps. Velocity seeds are 91001, 92002 and 93003. LAMMPS is
 the 22 Jul 2025 binary, pair_style sw, timestep 5 fs. Frames are not

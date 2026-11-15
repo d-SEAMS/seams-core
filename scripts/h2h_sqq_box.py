@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Show SQQ rejecting the triclinic sH cell.
 
 The rejection is the library's own error. An orthorhombic sI dump is

@@ -129,7 +129,7 @@ int main(int argc, char **argv) {
     const Eigen::MatrixXd xyz = iceIc(rep, box);
     const int molecules = static_cast<int>(xyz.rows());
     std::vector<double> samples;
-    int labelled = 0;
+    int labeled = 0;
     for (int i = 0; i < kWarm + kN; i++) {
       std::vector<int> kind;
       const auto t0 = std::chrono::steady_clock::now();
@@ -138,14 +138,14 @@ int main(int argc, char **argv) {
       if (i >= kWarm) {
         samples.push_back(dt);
       }
-      labelled = 0;
+      labeled = 0;
       for (int k : kind) {
         if (k == static_cast<int>(symm::Kind::iceIc)) {
-          labelled++;
+          labeled++;
         }
       }
     }
-    std::cout << "kernel_ice_ic labelled " << labelled << " of " << molecules << "\n";
+    std::cout << "kernel_ice_ic labeled " << labeled << " of " << molecules << "\n";
     report("kernel", molecules, threads, samples);
 
 #ifdef SEAMS_HAS_IRA

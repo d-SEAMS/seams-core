@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /*
 ** Time one kernel on ideal ice Ic. The crystal is built in memory.
 ** rings, q4-local, q6-local, q4-cutoff, q6-cutoff, chill, symmetry, hop.

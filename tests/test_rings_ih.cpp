@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 // Census of seams_rings_find on ideal ice Ih.
 //
 // The fingerprints and symmetry counts are the output of the all-pairs

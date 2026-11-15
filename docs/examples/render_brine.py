@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Render the brine front for paper Fig 18 and SI Figs 25-26.
 
 The picture is the science-tutorial brine figure: ice seated on the
-lower surface, depth in nanometres, and the shared CHILL+ palette.
+lower surface, depth in nanometers, and the shared CHILL+ palette.
 ``--width-mm`` is the atom-panel width at 300 ppi. The file written to
 ``--out`` is wider, because the depth axis and the legend sit outside
 the panel. The legend is raised until it is at least 7 pt when that
@@ -68,7 +69,7 @@ def write_figure(render, rows, box, out, width_mm, ppi=PPI):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--xyz", type=Path, required=True, help="labelled brine xyz frame")
+    parser.add_argument("--xyz", type=Path, required=True, help="labeled brine xyz frame")
     parser.add_argument("--out", type=Path, required=True, help="png path to write")
     parser.add_argument("--width-mm", type=float, required=True, help="atom panel width, and the print width used for the 7 pt check")
     parser.add_argument("--ppi", type=float, default=PPI, help="pixels per inch used to size the atom panel")

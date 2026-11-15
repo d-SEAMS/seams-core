@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 # Science tutorials in Julia. Same numbers as science_tutorials.py.
 # Usage: julia science_tutorials.jl ROOT [brine_t0 brine_tend]
 

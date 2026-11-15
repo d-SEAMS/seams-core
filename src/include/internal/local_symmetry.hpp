@@ -37,7 +37,7 @@ inline constexpr int kTemplateCount = 8;
 const char *name(Kind kind);
 
 // Ideal oxygen coordinates, rows are atoms, angstrom. The first row of an
-// ice shell is the central oxygen. Cage and ring templates are centred.
+// ice shell is the central oxygen. Cage and ring templates are centered.
 Eigen::MatrixXd points(Kind kind);
 
 struct Overlay {
@@ -78,7 +78,7 @@ void matchAll(const std::vector<Eigen::MatrixXd> &environments, std::vector<Over
 // as eclipsed.
 inline constexpr double kEclipsedCosine = 0.90;
 
-// Scale-free ceiling on the second-shell residual. Both clouds are centred,
+// Scale-free ceiling on the second-shell residual. Both clouds are centered,
 // then the RMSD is taken after the optimal rotation and the optimal scale
 // and divided by the template's root-mean-square radius (Horn 1987; Larsen,
 // Schmidt, Schiotz 2016). Zero is a perfect shape. 0.12 is the quenched mW

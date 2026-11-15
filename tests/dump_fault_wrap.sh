@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (c) d-SEAMS developers
 # The fault library has to be preloaded, and libasan has to stay ahead of
 # it. Meson's test environment would replace LD_PRELOAD with only the
 # fault library, and the driver then aborts before main.

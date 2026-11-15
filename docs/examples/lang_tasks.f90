@@ -1,3 +1,4 @@
+! Copyright (c) d-SEAMS developers
 ! Neighbours, rings, and CHILL+ from Fortran.
 ! Every call is a status code. The frame pointer is released on the
 ! way out, including the error paths.

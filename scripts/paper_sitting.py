@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """One sitting for every timing the paper quotes at 110592 molecules.
 
 Ideal ice Ic, 24**3 cells, cutoff 3.5 A. One warm-up and eight calls
@@ -582,7 +583,7 @@ def time_symmetry(threads: int, version: str) -> None:
     binary = ROOT / "bbdir-release/tests/bench_v2"
     samples, sink, crystal = sym.time_classifier(binary, threads, REPEATS)
     if sink != MOLECULES:
-        raise RuntimeError(f"classifier labelled {sink} of {MOLECULES}")
+        raise RuntimeError(f"classifier labeled {sink} of {MOLECULES}")
     emit({
         "phase": "ice", "operation": "classifier", "code": "d-SEAMS",
         "version": version, "molecules": MOLECULES, "threads": threads,

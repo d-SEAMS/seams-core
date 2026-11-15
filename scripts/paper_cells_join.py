@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Assemble one CSV per shared paper table from the producer fragments."""
 
 from __future__ import annotations

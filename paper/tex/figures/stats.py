@@ -288,7 +288,7 @@ def _is_float(text):
 
 
 def relative(m, lo, hi):
-    """Half-width of the larger side of an interval, percent of the centre."""
+    """Half-width of the larger side of an interval, percent of the center."""
     return sig(100.0 * max(hi - m, m - lo) / m, 2)
 
 

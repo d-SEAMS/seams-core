@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Ground truth for thermal misses on the TIP4P/2005 interface.
 
 The instantaneous equil frame defines two miss sets: oxygens the

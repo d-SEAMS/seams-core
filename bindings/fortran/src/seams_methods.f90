@@ -613,7 +613,7 @@ contains
     if (.not. c_associated(raw)) return
     code = seams_fingerprint(raw, opt_real(cutoff, 3.5_seams_real), opt_int(typ, 0_seams_int), &
       opt_int(k, 4_seams_int), opt_int(graph, SEAMS_GRAPH_CUTOFF), opt_int(hops, 2_seams_int), &
-      opt_flag(colours, .false.), out)
+      opt_flag(colors, .false.), out)
     if (code /= SEAMS_OK) then
       call check_status(code, raw, stat, errmsg)
       return

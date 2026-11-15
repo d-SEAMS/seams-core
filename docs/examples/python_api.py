@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Eight-atom CHILL+ and q4/q6 through dseams, or through libseams."""
 
 import ctypes

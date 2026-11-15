@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """q4, q6 and cutoff neighbour lists on ideal ice Ic.
 
 q4 and q6 at 110592 molecules against freud Steinhardt, pyscal3 and

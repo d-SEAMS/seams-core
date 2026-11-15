@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Largest ice cluster and the cubic and hexagonal fractions.
 
 The file is the first three frames of the 148-frame mW nucleation

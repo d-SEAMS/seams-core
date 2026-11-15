@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """One process: d-SEAMS, freud, and OVITO on the same ice Ih cells.
 
 Eight samples of knn, q6, and read at 4096, 32768, and 110592 molecules.

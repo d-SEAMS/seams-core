@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Symmetry head-to-head on ideal ice Ic, 110592 molecules.
 
 The d-SEAMS column is classifyIce from the feat/symmetry kernel

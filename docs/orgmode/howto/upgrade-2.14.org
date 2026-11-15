@@ -70,9 +70,9 @@ The default for LAMMPS and GROMACS is auto.
 | engine | what to change |
 |--------+----------------|
 | LAMMPS | The hook reads angstroms. ~engines/lammps/in.dseams~ is the deck. The copy-in compute lives under ~extras/lammps~. |
-| GROMACS | ~gmx-seams~ reads the lower-triangle cell and scales nanometres to angstroms before CHILL+. |
-| OpenMM | One ~DseamsReporter~. Positions are nanometres and are multiplied by 10. ~InSitu.observe~ is the same classification. |
-| PLUMED | The ~SEAMS~ collective variable scales internal nanometres to angstroms and returns a q6 derivative per nanometre. |
+| GROMACS | ~gmx-seams~ reads the lower-triangle cell and scales nanometers to angstroms before CHILL+. |
+| OpenMM | One ~DseamsReporter~. Positions are nanometers and are multiplied by 10. ~InSitu.observe~ is the same classification. |
+| PLUMED | The ~SEAMS~ collective variable scales internal nanometers to angstroms and returns a q6 derivative per nanometer. |
 
 A head-to-head that times PLUMED's own symfunc has to set
 ~PLUMED_NUM_THREADS~. The rows in ~benchmarks/rc3-sitting.csv~ left

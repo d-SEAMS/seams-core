@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Ice Ih census through the language-front ABI.
  *
  * input/traj/ice1h.lammpstrj, every atom: 128 hexagonal, 256 six-rings.

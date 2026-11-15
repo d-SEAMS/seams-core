@@ -130,11 +130,11 @@ def axis_box(title: str, xlabel: str, ylabel: str, curves: list[tuple[str, str, 
             f'<text x="{x:.1f}" y="{top+height+18}" text-anchor="middle" font-family="sans-serif" font-size="11">{tick:.0f}</text>'
         )
     legend_x = left + 12
-    for name, colour, points in curves:
+    for name, color, points in curves:
         path = polyline(points, x0, x1, y0, y1, left, top, width, height)
-        parts.append(f'<polyline fill="none" stroke="{colour}" stroke-width="2" points="{path}"/>')
+        parts.append(f'<polyline fill="none" stroke="{color}" stroke-width="2" points="{path}"/>')
         parts.append(
-            f'<line x1="{legend_x}" y1="56" x2="{legend_x+22}" y2="56" stroke="{colour}" stroke-width="2"/>'
+            f'<line x1="{legend_x}" y1="56" x2="{legend_x+22}" y2="56" stroke="{color}" stroke-width="2"/>'
         )
         parts.append(
             f'<text x="{legend_x+26}" y="60" font-family="sans-serif" font-size="11">{name}</text>'

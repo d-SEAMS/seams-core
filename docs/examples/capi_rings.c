@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Ice Ih has 256 primitive six-rings at 3.5 angstroms. */
 #include "seams.h"
 

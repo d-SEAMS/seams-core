@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Run docs/examples/quickstart.py against dseams or libseams."""
 
 import ctypes

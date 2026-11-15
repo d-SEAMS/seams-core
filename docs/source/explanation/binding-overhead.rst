@@ -1,7 +1,7 @@
 Binding overhead
 ================
 
-Ice Ih at 4096, 32768, and 110592 molecules. GenIce builds a missing cell. The oxygen sites are kept and scaled from nanometres to angstroms.
+Ice Ih at 4096, 32768, and 110592 molecules. GenIce builds a missing cell. The oxygen sites are kept and scaled from nanometers to angstroms.
 
 The run used 8 cores of Intel(R) Xeon(R) Processor. No host name is recorded. One process per binding stayed open for both thread widths. The serial phase set OMP_NUM_THREADS and PLUMED_NUM_THREADS to 1. The threaded phase set both to 8 and called seams_set_num_threads. Each cell below is the median of 8 repeats after one warmup, in milliseconds, with the interquartile range in parentheses.
 

@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (c) d-SEAMS developers
 # Run one cargo test binary with the sanitizer runtime already mapped.
 # rustc must not see this preload: cc1 then leak-checks itself and the
 # cargo-test budget expires during the compile. The parent cargo wrapper

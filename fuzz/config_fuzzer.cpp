@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* libFuzzer harness for seams::cfg dotenv parsing. */
 #include <seams_config.hpp>
 

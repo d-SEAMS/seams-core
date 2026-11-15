@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """SQQ 0.5.8 shortest-path rings on ideal ice Ic.
 
 Oxygen-only SOL residues, O-O cutoff 0.35 nm, ring sizes 4-6.

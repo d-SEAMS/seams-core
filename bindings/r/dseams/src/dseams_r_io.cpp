@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 #include "dseams_r_io.h"
 
 #include <cstdarg>

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Dry-run the brine-frame rules and require every labelled frame.
+# Copyright (c) d-SEAMS developers
+"""Dry-run the brine-frame rules and require every labeled frame.
 
 snakemake -n has to resolve all twelve
 paper/data/brine-frames/out/T230_m{0,20,40}_r0_{t0,t1,t2,tend}.xyz targets.

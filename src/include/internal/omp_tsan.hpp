@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 #pragma once
 
 // libgomp's barrier does not publish a happens-before that ThreadSanitizer

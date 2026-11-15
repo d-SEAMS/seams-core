@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* libFuzzer harness for seams_system_set_atoms / set_frame / set_ortho.
  * A rejected frame must return a status and a message, never abort.
  */

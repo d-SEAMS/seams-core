@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """CHILL+ layer profile and the ice front on one interface frame."""
 
 import ctypes

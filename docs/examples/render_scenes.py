@@ -1,8 +1,9 @@
+# Copyright (c) d-SEAMS developers
 """Tachyon scenes for the brine front and the hydrate cages.
 
-Waters use the CHILL+ colours from scripts/science_render.py. Sodium
+Waters use the CHILL+ colors from scripts/science_render.py. Sodium
 and chloride are extra spheres. Cage faces are polyhedra in those same
-colours: 5^12 is hexagonal orange, 5^12 6^4 is cubic blue, the sH
+colors: 5^12 is hexagonal orange, 5^12 6^4 is cubic blue, the sH
 medium cage is interfacial yellow, and 5^12 6^8 is clathrate green.
 """
 
@@ -19,10 +20,10 @@ import numpy as np
 _SCRIPTS = Path(__file__).resolve().parents[2] / "scripts"
 if str(_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS))
-from chill_palette import CHLORIDE, CLATHRATE, COLOUR, CUBIC, HEXAGONAL, INTERFACIAL, LEGEND, SODIUM
+from chill_palette import CHLORIDE, CLATHRATE, COLOR, CUBIC, HEXAGONAL, INTERFACIAL, LEGEND, SODIUM
 from lammps_box import cell_from_bounds
 
-# Face-size census of each cage, and the CHILL+ colour index it borrows.
+# Face-size census of each cage, and the CHILL+ color index it borrows.
 CAGE_KINDS = (
     ("512", {5: 12}, 1),
     ("51264", {5: 12, 6: 4}, 0),
@@ -31,8 +32,8 @@ CAGE_KINDS = (
 )
 NA = np.array(SODIUM)
 CL = np.array(CHLORIDE)
-BRINE_COLOUR = {name: np.array(colour) for name, colour in COLOUR.items()}
-BRINE_LEGEND = tuple((label, np.array(colour)) for label, colour in LEGEND)
+BRINE_COLOUR = {name: np.array(color) for name, color in COLOR.items()}
+BRINE_LEGEND = tuple((label, np.array(color)) for label, color in LEGEND)
 # Drawn oxygen is 0.90 for a 1.4 Å oxygen. Sodium and chloride use that
 # same scale at 1.0 Å and 1.8 Å. Liquid stays the small veil.
 _OXYGEN_A = 1.4
@@ -204,7 +205,7 @@ def _box_cell(path):
     raise RuntimeError(f"no box in {path}")
 
 
-# Cage colour index to the shared palette. The symbols match the paper.
+# Cage color index to the shared palette. The symbols match the paper.
 CAGE_LEGEND = {
     0: (r"$5^{12}6^{4}$", np.array(CUBIC)),
     1: (r"$5^{12}$", np.array(HEXAGONAL)),
@@ -230,17 +231,17 @@ def face_metrics(coords):
     """Longest edge and the largest distance from the best-fit plane."""
     rolled = np.roll(coords, -1, axis=0)
     longest = float(np.linalg.norm(rolled - coords, axis=1).max())
-    centred = coords - coords.mean(axis=0)
-    _u, _s, vh = np.linalg.svd(centred, full_matrices=False)
+    centered = coords - coords.mean(axis=0)
+    _u, _s, vh = np.linalg.svd(centered, full_matrices=False)
     normal = vh[-1]
-    residual = float(np.abs(centred @ normal).max())
+    residual = float(np.abs(centered @ normal).max())
     return longest, residual
 
 
 def unwrap_cage(faces, cycles, positions, vectors):
     """Place every cage atom by walking its bonds.
 
-    Minimum image against the cage centre folds a ring on the far side of
+    Minimum image against the cage center folds a ring on the far side of
     a cage that is longer than half the shortest cell edge. The folded
     bond is about one cell edge, the face is dropped, and the surface
     mesh then caps the hole with a thin spike. Walking each bond keeps
@@ -277,8 +278,8 @@ def unwrap_cage(faces, cycles, positions, vectors):
         cycle = cycles[face]
         coords = np.vstack([placed[atom] for atom in cycle])
         edges.extend(np.linalg.norm(np.roll(coords, -1, axis=0) - coords, axis=1).tolist())
-    centre = np.mean([placed[atom] for atom in atoms], axis=0)
-    return placed, centre, np.asarray(edges, dtype=float)
+    center = np.mean([placed[atom] for atom in atoms], axis=0)
+    return placed, center, np.asarray(edges, dtype=float)
 
 
 def assert_cage_edges(edge_sets, factor=1.5):
@@ -302,7 +303,7 @@ def assert_cage_edges(edge_sets, factor=1.5):
 
 
 def cage_meshes(cycles, groups, positions, vectors):
-    """One vertex array and triangle list per colour index.
+    """One vertex array and triangle list per color index.
 
     Each cage is unwrapped along its bonds before any face is drawn.
     The returned stats are ``(longest edge, planarity residual)`` for
@@ -313,8 +314,8 @@ def cage_meshes(cycles, groups, positions, vectors):
     shifts = _shifts(vectors)
     stats = []
     edge_sets = []
-    for faces, colour in groups:
-        placed, centre, edges = unwrap_cage(faces, cycles, positions, vectors)
+    for faces, color in groups:
+        placed, center, edges = unwrap_cage(faces, cycles, positions, vectors)
         assert_cage_edges([edges])
         edge_sets.append(edges)
         polygons = []
@@ -326,7 +327,7 @@ def cage_meshes(cycles, groups, positions, vectors):
                     f"cage face edge {longest:.3f} A residual {residual:.3f} A cannot be drawn"
                 )
             normal = np.cross(coords[1] - coords[0], coords[2] - coords[0])
-            if float(np.dot(normal, coords.mean(axis=0) - centre)) < 0.0:
+            if float(np.dot(normal, coords.mean(axis=0) - center)) < 0.0:
                 coords = coords[::-1]
             polygons.append(coords)
             stats.append((longest, residual))
@@ -336,9 +337,9 @@ def cage_meshes(cycles, groups, positions, vectors):
             delta = np.zeros(3)
         else:
             delta = min(shifts, key=lambda shift: np.linalg.norm(cage_centre_now + shift - reference))
-        by_colour[colour].append([poly + delta for poly in polygons])
+        by_colour[color].append([poly + delta for poly in polygons])
     meshes = []
-    for colour, cages in by_colour.items():
+    for color, cages in by_colour.items():
         vertices = []
         triangles = []
         for cage in cages:
@@ -347,7 +348,7 @@ def cage_meshes(cycles, groups, positions, vectors):
                 vertices.extend(polygon)
                 for index in range(1, len(polygon) - 1):
                     triangles.append([base, base + index, base + index + 1])
-        meshes.append((np.asarray(vertices, dtype=float), triangles, colour))
+        meshes.append((np.asarray(vertices, dtype=float), triangles, color))
     return meshes, stats, edge_sets
 
 
@@ -361,8 +362,8 @@ def assert_drawn_faces(stats):
 
 
 def _camera(render, positions, forward, up):
-    centre, half_h, half_v, forward, right, up = render.project(positions, forward, up)
-    return centre, half_h, half_v, forward, right, up
+    center, half_h, half_v, forward, right, up = render.project(positions, forward, up)
+    return center, half_h, half_v, forward, right, up
 
 
 def _conda_libegl():
@@ -383,14 +384,14 @@ def _conda_libegl():
             return
 
 
-def tachyon_scene(render, path, positions, colours, radii, meshes, forward, up, width, frame=None):
+def tachyon_scene(render, path, positions, colors, radii, meshes, forward, up, width, frame=None):
     """One Tachyon frame. Settings match science_render._paint."""
     _conda_libegl()
     from ovito.data import DataCollection, Particles, SimulationCell, SurfaceMesh
     from ovito.pipeline import Pipeline, StaticSource
     from ovito.vis import TachyonRenderer, Viewport
 
-    centre, half_h, half_v, forward, _right, up = _camera(render, frame if frame is not None else positions, forward, up)
+    center, half_h, half_v, forward, _right, up = _camera(render, frame if frame is not None else positions, forward, up)
     height = max(int(round(width * half_v / max(half_h, 1e-6))), 32)
     data = DataCollection()
     low = positions.min(axis=0) - 6.0
@@ -401,7 +402,7 @@ def tachyon_scene(render, path, positions, colours, radii, meshes, forward, up, 
     cell.vis.enabled = False
     data.objects.append(cell)
     tinted, near = render.depth_cue(
-        colours, positions @ forward, fade=0.38, tint=np.array((0.94, 0.94, 0.96))
+        colors, positions @ forward, fade=0.38, tint=np.array((0.94, 0.94, 0.96))
     )
     radii = np.asarray(radii, dtype=np.float64) * (0.84 + 0.16 * near)
     particles = Particles()
@@ -411,11 +412,11 @@ def tachyon_scene(render, path, positions, colours, radii, meshes, forward, up, 
     particles.create_property("Transparency", data=np.zeros(len(positions)))
     data.objects.append(particles)
     particles.vis.radius = float(np.median(radii))
-    for vertices, faces, colour in meshes:
+    for vertices, faces, color in meshes:
         mesh = SurfaceMesh()
         mesh.create_vertices(np.ascontiguousarray(vertices, dtype=np.float64))
         mesh.create_faces(faces)
-        red, green, blue = render.CHILL[colour][1]
+        red, green, blue = render.CHILL[color][1]
         mesh.vis.surface_color = (float(red), float(green), float(blue))
         mesh.vis.surface_transparency = 0.08
         mesh.vis.highlight_edges = False
@@ -430,7 +431,7 @@ def tachyon_scene(render, path, positions, colours, radii, meshes, forward, up, 
     try:
         view.camera_dir = tuple(float(value) for value in forward)
         view.camera_up = tuple(float(value) for value in up)
-        view.camera_pos = centre - forward * (8.0 * max(half_h, half_v))
+        view.camera_pos = center - forward * (8.0 * max(half_h, half_v))
         view.fov = float(half_v)
         renderer = TachyonRenderer(
             shadows=True,
@@ -477,32 +478,32 @@ def render_brine(render, rows, path, box, width=1400):
         [positions[i, 2] for i, row in enumerate(kept) if row[0] == "O" and row[4] == "hexagonal"]
     )
     front = connected_slab_top(ice_z)
-    colours = []
+    colors = []
     radii = []
     present = set()
     drawn_liquid = []
     for index, (species, _x, _y, _z, label) in enumerate(kept):
         if species == "Na":
-            colours.append(NA)
+            colors.append(NA)
             radii.append(BRINE_RADIUS["Na"])
             present.add("Na+")
             drawn_liquid.append(False)
         elif species == "Cl":
-            colours.append(CL)
+            colors.append(CL)
             radii.append(BRINE_RADIUS["Cl"])
             present.add("Cl-")
             drawn_liquid.append(False)
         else:
             # CHILL+ is unchanged. Only the picture fades classes more than
-            # 1.5 nm from the growth front into liquid grey. Ions stay.
+            # 1.5 nm from the growth front into liquid gray. Ions stay.
             shown = label
             if shown != "hexagonal" and abs(float(positions[index, 2]) - front) > 15.0:
                 shown = "water"
-            colours.append(BRINE_COLOUR.get(shown, BRINE_COLOUR["unclassified"]))
+            colors.append(BRINE_COLOUR.get(shown, BRINE_COLOUR["unclassified"]))
             radii.append(BRINE_RADIUS["O"] if shown != "water" else BRINE_RADIUS["water"])
             present.add("liquid" if shown == "water" else ("interclathrate" if shown == "interClathrate" else shown))
             drawn_liquid.append(shown == "water")
-    colours = np.vstack(colours)
+    colors = np.vstack(colors)
     radii = np.asarray(radii)
     liquid = np.asarray(drawn_liquid, dtype=bool)
     solid = ~liquid
@@ -511,11 +512,11 @@ def render_brine(render, rows, path, box, width=1400):
     forward = np.array([0.0, 1.0, 0.0])
     up = np.array([0.0, 0.0, 1.0])
     pad_radius = float(np.max(radii))
-    # The viewport is wider than the crop so a sphere centred on the cell
+    # The viewport is wider than the crop so a sphere centered on the cell
     # edge, including the top edge, is drawn whole.
     frame = padded_frame(positions, origin, lengths, forward, up, pad_radius + 1.0)
-    tachyon_scene(render, ice_png, positions[solid], colours[solid], radii[solid], [], forward, up, width, frame=frame)
-    tachyon_scene(render, liq_png, positions[liquid], colours[liquid], radii[liquid], [], forward, up, width, frame=frame)
+    tachyon_scene(render, ice_png, positions[solid], colors[solid], radii[solid], [], forward, up, width, frame=frame)
+    tachyon_scene(render, liq_png, positions[liquid], colors[liquid], radii[liquid], [], forward, up, width, frame=frame)
     from PIL import Image
 
     ice = np.asarray(Image.open(ice_png).convert("RGB"), dtype=np.float32)
@@ -546,13 +547,13 @@ def present_cage(render, path, origin, vectors, legend, title, forward, up, fram
     from PIL import Image, ImageDraw
 
     corners = _cell_corners(origin, vectors)
-    centre, half_h, half_v, forward, right, up = _camera(render, frame, forward, up)
+    center, half_h, half_v, forward, right, up = _camera(render, frame, forward, up)
     raw = Image.open(path).convert("RGB")
     font = _legend_font(LEGEND_FONT_PX)
     swatch, row_h = legend_metrics(font)
 
     def raw_pix(point):
-        offset = np.asarray(point, dtype=float) - centre
+        offset = np.asarray(point, dtype=float) - center
         x = (float(np.dot(offset, right)) / (2.0 * half_h) + 0.5) * raw.width
         y = (0.5 - float(np.dot(offset, up)) / (2.0 * half_v)) * raw.height
         return x, y
@@ -610,12 +611,12 @@ def present_cage(render, path, origin, vectors, legend, title, forward, up, fram
     marks[-1] = (title, marks[-1][1])
     y += row_h
     x = left + 16
-    for label, colour in legend:
+    for label, color in legend:
         glyph = mathtext_image(label, LEGEND_FONT_PX)
         if x + swatch + 16 + glyph.width > canvas.width - 8:
             x = left + 16
             y += row_h
-        rgb = tuple(int(round(channel * 255)) for channel in colour)
+        rgb = tuple(int(round(channel * 255)) for channel in color)
         draw.rectangle([x, y, x + swatch, y + swatch], fill=rgb, outline=(30, 30, 30))
         marks.append((f"swatch {label}", (x, y, x + swatch, y + swatch)))
         canvas.paste(glyph, (int(x + swatch + 10), int(y)), glyph)
@@ -623,8 +624,8 @@ def present_cage(render, path, origin, vectors, legend, title, forward, up, fram
         legend_bottom = max(legend_bottom, y + max(swatch, glyph.height))
         x += swatch + 16 + glyph.width + 18
     bar = 10.0 * raw.width / (2.0 * half_h)
-    ten = project(centre + 10.0 * right)
-    origin_px = project(centre)
+    ten = project(center + 10.0 * right)
+    origin_px = project(center)
     assert_nanometre_bar(bar, abs(ten[0] - origin_px[0]), 10.0)
     bar_y = legend_bottom + max(28, int(LEGEND_FONT_PX * 0.75))
     bar_x = left + 16
@@ -644,26 +645,26 @@ def render_host(render, lib, dump, path, kinds, width=1700):
     expected = []
     legend = []
     seen = set()
-    for _name, need, colour, limit in kinds:
+    for _name, need, color, limit in kinds:
         facesets = find_cages(cycles, need, limit)
         expected.append(len(facesets))
         for faces in facesets:
-            groups.append((faces, colour))
-        if colour not in seen and colour in CAGE_LEGEND:
-            seen.add(colour)
-            legend.append(CAGE_LEGEND[colour])
+            groups.append((faces, color))
+        if color not in seen and color in CAGE_LEGEND:
+            seen.add(color)
+            legend.append(CAGE_LEGEND[color])
     origin, vectors = _box_cell(dump)
     meshes, stats, edge_sets = cage_meshes(cycles, groups, positions, vectors)
     assert_drawn_faces(stats)
     assert_cage_edges(edge_sets)
     corners = np.vstack([vertices for vertices, _faces, _colour in meshes])
-    colours = np.tile(np.array((0.96, 0.96, 0.96)), (len(corners), 1))
+    colors = np.tile(np.array((0.96, 0.96, 0.96)), (len(corners), 1))
     radii = np.full(len(corners), 0.22)
     forward = np.array([0.55, 0.35, 0.76])
     up = np.array([0.0, 0.0, 1.0])
     # Two angstroms past every vertex, in the view plane, before projection.
     frame = screen_frame(corners, forward, up, 2.0)
-    tachyon_scene(render, path, corners, colours, radii, meshes, forward, up, width, frame=frame)
+    tachyon_scene(render, path, corners, colors, radii, meshes, forward, up, width, frame=frame)
     title = {"sii": "sII", "sh": "sH"}.get(path.stem, path.stem)
     present_cage(render, path, origin, vectors, legend, title, forward, up, frame, corners, pad_radius=2.0)
     return expected
@@ -694,7 +695,7 @@ def text_bbox(font, xy, text):
 
 
 def text_origin_y(font, text, center):
-    """Text origin that centres the glyph box on ``center``."""
+    """Text origin that centers the glyph box on ``center``."""
     _left, top, _right, bottom = font.getbbox(text)
     return float(center) - 0.5 * (top + bottom)
 
@@ -888,7 +889,7 @@ def require_disjoint(marks):
 
 
 def annotate(render, path, positions, forward, up, width, corners, legend=None, layer_title=None, frame=None, origin=None, lengths=None, ice_z=None, pad_radius=None):
-    """Box outline, a 1 nm bar, and the colour legend under the atoms.
+    """Box outline, a 1 nm bar, and the color legend under the atoms.
 
     The bar is below the legend. When ``ice_z`` is given, a bracket marks
     the ice, a depth axis runs up the cell, and an arrow marks the growth
@@ -896,13 +897,13 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
     """
     from PIL import Image, ImageDraw
 
-    centre, half_h, half_v, forward, right, up = _camera(render, frame if frame is not None else positions, forward, up)
+    center, half_h, half_v, forward, right, up = _camera(render, frame if frame is not None else positions, forward, up)
     raw = Image.open(path).convert("RGB")
     font = _legend_font(LEGEND_FONT_PX)
     swatch, row_h = legend_metrics(font)
 
     def raw_pix(point):
-        offset = np.asarray(point, dtype=float) - centre
+        offset = np.asarray(point, dtype=float) - center
         x = (float(np.dot(offset, right)) / (2.0 * half_h) + 0.5) * raw.width
         y = (0.5 - float(np.dot(offset, up)) / (2.0 * half_v)) * raw.height
         return x, y
@@ -915,7 +916,7 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
         image, (crop_x0, crop_y0) = clip_to_padded_cell(
             raw, raw_pix, cell_corners(origin, lengths), sphere_pad
         )
-    labels = [(display_label(label), colour) for label, colour in (legend or ())]
+    labels = [(display_label(label), color) for label, color in (legend or ())]
     left = 220 if ice_z is not None else (110 if layer_title else 0)
     right_margin = 720 if ice_z is not None else 0
     # The legend starts at left+16 and must end before the canvas edge.
@@ -959,7 +960,7 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
 
         x_left = min(point[0] for point in projected)
         x_right = max(point[0] for point in projected)
-        # Depth, in nanometres, from the lower ice surface. The interface
+        # Depth, in nanometers, from the lower ice surface. The interface
         # figure numbers its basal layers; this slab is viewed along that
         # stack, so the visible axis is the growth direction.
         step = 10.0
@@ -1012,9 +1013,9 @@ def annotate(render, path, positions, forward, up, width, corners, legend=None, 
     y = image.height + top + 16
     for group in groups:
         x = left + 16
-        for label, colour in group:
+        for label, color in group:
             text_w = float(font.getlength(label))
-            rgb = tuple(int(round(channel * 255)) for channel in colour)
+            rgb = tuple(int(round(channel * 255)) for channel in color)
             draw.rectangle([x, y, x + swatch, y + swatch], fill=rgb, outline=(30, 30, 30))
             marks.append((f"swatch {label}", (x, y, x + swatch, y + swatch)))
             add_text(f"legend {label}", (x + swatch + 10, y), label)
@@ -1038,7 +1039,7 @@ def basal_bilayers(positions, labels, axis, gap=0.8):
     """Index crystalline basal bilayers along ``axis``.
 
     A gap larger than ``gap`` angstrom starts a new sheet. Two sheets
-    whose centres are closer than 2.2 angstrom are the puckered halves
+    whose centers are closer than 2.2 angstrom are the puckered halves
     of one bilayer and share an index. A bilayer is numbered only when
     it holds at least half the oxygens of the fullest one. Cubic and
     interfacial oxygens stay at -1.
@@ -1057,19 +1058,19 @@ def basal_bilayers(positions, labels, axis, gap=0.8):
     sheets = [sheet for sheet in np.split(ordered, breaks) if len(sheet)]
     merged = []
     for sheet in sheets:
-        centre = float(np.median(projection[sheet]))
-        if merged and centre - merged[-1][0] < 2.2:
+        center = float(np.median(projection[sheet]))
+        if merged and center - merged[-1][0] < 2.2:
             members = np.concatenate([merged[-1][1], sheet])
             merged[-1] = (float(np.median(projection[members])), members)
         else:
-            merged.append((centre, sheet))
+            merged.append((center, sheet))
     fullest = max(len(members) for _centre, members in merged)
     kept = [item for item in merged if len(item[1]) >= 0.5 * fullest]
-    centres = []
+    centers = []
     for index, (_centre, members) in enumerate(kept):
         ids[members] = index
-        centres.append(float(np.median(projection[members])))
-    return ids, centres
+        centers.append(float(np.median(projection[members])))
+    return ids, centers
 
 
 def wrap_into_cell(positions, origin, lengths):
@@ -1091,7 +1092,7 @@ def cell_corners(origin, lengths):
 
 
 def padded_frame(positions, origin, lengths, forward, up, radius):
-    """Centres plus the cell corners pushed out by one sphere radius."""
+    """Centers plus the cell corners pushed out by one sphere radius."""
     import science_render as science
 
     _forward, right, up_axis = science.basis(np.asarray(forward, dtype=float), np.asarray(up, dtype=float))
@@ -1136,7 +1137,7 @@ def lower_ice_origin(z_hex, z_shell, length_z, gap=8.0):
 
 
 def centres_outside_outline(positions, origin, lengths, forward=None, up=None):
-    """How many atom centres project outside the orthographic cell rectangle."""
+    """How many atom centers project outside the orthographic cell rectangle."""
     import science_render as science
 
     if forward is None:
@@ -1170,18 +1171,18 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
     del ids
     from PIL import Image, ImageDraw
 
-    centre, half_h, half_v, forward, right, up = _camera(
+    center, half_h, half_v, forward, right, up = _camera(
         render, frame if frame is not None else positions, forward, up
     )
     raw = Image.open(path).convert("RGB")
     font = _legend_font(LEGEND_FONT_PX)
     swatch, row_h = legend_metrics(font)
     left, right_margin, top = 220, 720, 8
-    shown_legend = [(display_label(label), colour) for label, colour in (legend or ())]
+    shown_legend = [(display_label(label), color) for label, color in (legend or ())]
     groups = [shown_legend] if shown_legend else []
     legend_rows = 1
     def raw_pix(point):
-        offset = np.asarray(point, dtype=float) - centre
+        offset = np.asarray(point, dtype=float) - center
         x = (float(np.dot(offset, right)) / (2.0 * half_h) + 0.5) * raw.width
         y = (0.5 - float(np.dot(offset, up)) / (2.0 * half_v)) * raw.height
         return x, y
@@ -1284,9 +1285,9 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
     y = image.height + top + 16
     for group in groups:
         x = left + 16
-        for label, colour in group:
+        for label, color in group:
             text_w = float(font.getlength(label))
-            rgb = tuple(int(round(channel * 255)) for channel in colour)
+            rgb = tuple(int(round(channel * 255)) for channel in color)
             draw.rectangle([x, y, x + swatch, y + swatch], fill=rgb, outline=(30, 30, 30))
             marks.append((f"swatch {label}", (x, y, x + swatch, y + swatch)))
             add_text(f"legend {label}", (x + swatch + 10, y), label)
@@ -1319,15 +1320,15 @@ def render_interface(render, positions, labels, origin, lengths, path, width=Non
     origin[2] = lower_ice_origin(hex_z, [], float(lengths[2]))
     positions = wrap_into_cell(positions, origin, lengths)
     if np.any(positions[:, 2] < float(np.min(positions[np.asarray(labels) == 1, 2])) - 1e-6):
-        raise RuntimeError("an interface centre sits below the lower ice surface")
+        raise RuntimeError("an interface center sits below the lower ice surface")
     shown = np.array(labels, copy=True)
     ice_z = positions[shown == 1, 2]
     front = float(np.percentile(ice_z, 98)) if ice_z.size else float(origin[2])
     # CHILL+ is left as the engine computed it. Only the picture fades
-    # classes more than 1.5 nm from the growth front into liquid grey.
+    # classes more than 1.5 nm from the growth front into liquid gray.
     far = np.abs(positions[:, 2] - front) > 15.0
     shown[far & (shown != 1)] = 2
-    colours = np.array([render.CHILL.get(int(code), ("", (0.5, 0.5, 0.5)))[1] for code in shown])
+    colors = np.array([render.CHILL.get(int(code), ("", (0.5, 0.5, 0.5)))[1] for code in shown])
     radii = np.where(shown == 2, BRINE_RADIUS["water"], 0.85)
     liquid = shown == 2
     basal = np.asarray(render.stacking_axis(positions, labels, np.isin(labels, [1])), dtype=float)
@@ -1343,8 +1344,8 @@ def render_interface(render, positions, labels, origin, lengths, path, width=Non
         width = short if half_h <= half_v else int(np.ceil(short * half_h / max(half_v, 1e-6)))
     ice_png = path.with_name(path.stem + "-ice.png")
     liq_png = path.with_name(path.stem + "-liq.png")
-    tachyon_scene(render, ice_png, positions[~liquid], colours[~liquid], radii[~liquid], [], forward, up, width, frame=frame)
-    tachyon_scene(render, liq_png, positions[liquid], colours[liquid], radii[liquid], [], forward, up, width, frame=frame)
+    tachyon_scene(render, ice_png, positions[~liquid], colors[~liquid], radii[~liquid], [], forward, up, width, frame=frame)
+    tachyon_scene(render, liq_png, positions[liquid], colors[liquid], radii[liquid], [], forward, up, width, frame=frame)
     from PIL import Image
 
     ice = np.asarray(Image.open(ice_png).convert("RGB"), dtype=np.float32)

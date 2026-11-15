@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (c) d-SEAMS developers
 # Read the GenIce sI cell with the seams CLI.
 # Usage: minimal_cli.sh SEAMS FIXTURE
 set -eu

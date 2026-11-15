@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 // Internal
 #include <franzblau.hpp>
 

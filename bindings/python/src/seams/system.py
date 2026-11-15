@@ -994,7 +994,7 @@ class System(_Owned):
         k: int = 4,
         graph: int = CUTOFF,
         hops: int = 2,
-        colour_types: bool = False,
+        color_types: bool = False,
     ) -> Fingerprint:
         """Topological fingerprint of the bonded graph.
 
@@ -1010,15 +1010,15 @@ class System(_Owned):
             ``CUTOFF`` or ``MUTUAL``.
         hops : int
             Neighbourhood depth. Zero selects 2.
-        colour_types : bool
-            Colour vertices by LAMMPS type.
+        color_types : bool
+            Color vertices by LAMMPS type.
 
         Returns
         -------
         Fingerprint
         """
         ptr = _lib.api().fingerprint(
-            self._live(), float(cutoff), type, k, graph, hops, 1 if colour_types else 0
+            self._live(), float(cutoff), type, k, graph, hops, 1 if color_types else 0
         )
         return Fingerprint(ptr, _lib.api().destroy_fingerprint)
 

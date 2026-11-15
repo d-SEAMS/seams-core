@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 #ifndef SEAMS_LAMMPS_BOX_H
 #define SEAMS_LAMMPS_BOX_H
 

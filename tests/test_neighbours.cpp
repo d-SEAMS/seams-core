@@ -1172,7 +1172,7 @@ TEST_CASE("water-type mask keeps Ag out of the 4-NN list", "[neighbours]") {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
   cloud.box = {20.0, 20.0, 20.0};
   cloud.boxLow = {0.0, 0.0, 0.0};
-  // Five waters in a plus, Ag sitting closer to the centre than one water.
+  // Five waters in a plus, Ag sitting closer to the center than one water.
   const double coords[6][3] = {{0, 0, 0},
                                {3, 0, 0},
                                {-3, 0, 0},

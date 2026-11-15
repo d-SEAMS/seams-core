@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Second head-to-head: OVITO 3.17.2, matscipy 1.3.1 and cycless 0.7.
 
 Same protocol as scripts/h2h_watch.py. Ideal ice Ic, one core, one

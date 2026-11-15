@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """No test rebuilds the tree that the other tests are loading.
 
 meson test runs tests in parallel against one build directory. A test

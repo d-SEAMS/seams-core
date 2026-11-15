@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Fail if a SEAMS_API declaration is missing from the generated reference."""
 
 import re

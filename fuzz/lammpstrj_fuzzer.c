@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* libFuzzer harness for the LAMMPS dump reader behind seams_system_read. */
 #define _POSIX_C_SOURCE 200809L
 

@@ -1455,7 +1455,7 @@ SEAMS_API seams_status seams_brine_rejection(const seams_brine *front, double *c
  * z_mid is Angstrom. molality is mol/kg. ice_fraction is dimensionless.
  *
  * @param front Brine handle.
- * @param z_mid Bin centres, or NULL to skip the column.
+ * @param z_mid Bin centers, or NULL to skip the column.
  * @param molality Bin molalities, or NULL to skip the column.
  * @param ice_fraction Bin ice fractions, or NULL to skip the column.
  * @param cap Capacity of each non-NULL column.
@@ -1679,7 +1679,7 @@ SEAMS_API seams_status seams_neighbours_knn(seams_system *sys, int k, double cut
  * @param type_i First species. Zero and negative keep every atom of a
  *        single-species frame, or every atom as one species otherwise.
  * @param type_j Second species. Zero and negative reuse the type_i species.
- * @param r Bin centres, or NULL to query.
+ * @param r Bin centers, or NULL to query.
  * @param g g(r) per bin, or NULL to query.
  * @param count Pair count per bin, or NULL to query.
  * @param cap Capacity of each non-NULL column.
@@ -1712,7 +1712,7 @@ SEAMS_API seams_status seams_rdf(seams_system *sys, double rmax, int bins, int t
  * @param bins Bin count. Zero selects about rmax / 0.1.
  * @param type_i Central species, as in seams_rdf().
  * @param type_j Counted species, as in seams_rdf().
- * @param r Bin centres, Angstrom, or NULL to query.
+ * @param r Bin centers, Angstrom, or NULL to query.
  * @param cn Running coordination number, or NULL to query.
  * @param cap Capacity of each non-NULL column.
  * @param n_out Receives the bin count.
@@ -1806,7 +1806,7 @@ SEAMS_API seams_status seams_hbonds(seams_system *sys, double cutoff, int oxygen
  * @param type Species filter. Zero keeps every atom.
  * @param bins Bin count. Zero selects about one bin per 0.1 Angstrom.
  * @param axis 0, 1, or 2.
- * @param z Bin centres, or NULL to query.
+ * @param z Bin centers, or NULL to query.
  * @param rho Density per bin, or NULL to query.
  * @param cap Capacity of each non-NULL column.
  * @param n_out Receives the bin count.
@@ -1838,7 +1838,7 @@ SEAMS_API seams_status seams_density_axis(seams_system *sys, int type, int bins,
  * @param k Neighbour count for the mutual graph. Zero selects 4.
  * @param graph ::SEAMS_GRAPH_CUTOFF or ::SEAMS_GRAPH_MUTUAL.
  * @param hops Neighbourhood depth. Zero selects 2.
- * @param colour_types Non-zero colours vertices by LAMMPS type.
+ * @param color_types Non-zero colors vertices by LAMMPS type.
  * @param out Receives a ::seams_topo. On failure *out is NULL.
  * @return ::SEAMS_OK, or ::SEAMS_ERR_NULL, ::SEAMS_ERR_STATE,
  *         ::SEAMS_ERR_RANGE, ::SEAMS_ERR_ARG, ::SEAMS_ERR_NOMEM,
@@ -1859,7 +1859,7 @@ SEAMS_API seams_status seams_density_axis(seams_system *sys, int type, int bins,
  * @endcode
  */
 SEAMS_API seams_status seams_fingerprint(seams_system *sys, double cutoff, int type, int k,
-                                         int graph, int hops, int colour_types,
+                                         int graph, int hops, int color_types,
                                          seams_topo **out);
 
 /**

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """PLUMED 2.10 COORDINATIONNUMBER and Q6 against d-SEAMS.
 
 The switch is a step at 3.5 A, the same strict cutoff as the neighbour

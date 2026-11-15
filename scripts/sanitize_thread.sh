@@ -1,4 +1,5 @@
 #!/bin/sh
+# Copyright (c) d-SEAMS developers
 # ThreadSanitizer suite for the OpenMP tests.
 #
 #   scripts/sanitize_thread.sh

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Workers for the classify/carry sitting. stdout is the log lines."""
 
 from __future__ import annotations

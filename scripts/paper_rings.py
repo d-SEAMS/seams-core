@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """rings-statistics-matter 0.3.0 against d-SEAMS at 110592 molecules.
 
 tab:rings-214 times the library call in process: two warm-ups, then

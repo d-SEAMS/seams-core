@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Write the C API book from the comments in include/seams.h.
 
 The pages list every SEAMS_API function in this tree. A name that is

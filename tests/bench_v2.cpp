@@ -146,7 +146,7 @@ int main(int argc, char **argv) {
     } else if (mode == "symmetry") {
       std::vector<int> kind;
       symm::diamondFromCsr(cloud, offsets, cols, kind);
-      // Every atom is labelled: 0 is ice Ih, 1 is ice Ic, 2 is
+      // Every atom is labeled: 0 is ice Ih, 1 is ice Ic, 2 is
       // stacking-disordered, and -1 is other. A test on kind > 0
       // dropped the hexagonal label. crystal is the ice count.
       crystal = 0;

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Neighbours, rings, and CHILL+ from Python.
 
 The frame is a context manager. Labels, the ring histogram, and the

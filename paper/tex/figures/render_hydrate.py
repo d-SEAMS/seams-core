@@ -50,8 +50,8 @@ def main():
         _graph, edges = neighbour_graph(points, box, CUTOFF)
         label = "(a) structure I" if index == 0 else "(b) structure II"
 
-        def edge_colour(_a, _b, colour=RUHI["bond"]):
-            return colour
+        def edge_colour(_a, _b, color=RUHI["bond"]):
+            return color
 
         def atom_colour(atom, kinds=species):
             return RUHI["teal"] if kinds[atom] == "C" else RUHI["oxygen"]

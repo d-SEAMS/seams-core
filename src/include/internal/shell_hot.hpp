@@ -10,7 +10,7 @@
 namespace symm {
 
 // One ideal shell, three templates. first[k][a] is the a-th tetrahedron
-// vertex of template k, relative to the centre. arm[k][a] is the three
+// vertex of template k, relative to the center. arm[k][a] is the three
 // second-shell atoms on that bond, ordered by azimuth.
 struct CanonShell {
   double first[3][4][3];
@@ -21,7 +21,7 @@ struct CanonShell {
   double pts[3][17][3];
 };
 
-// Seventeen oxygens: the centre, the tetrahedron, and the twelve outer atoms.
+// Seventeen oxygens: the center, the tetrahedron, and the twelve outer atoms.
 struct Shell17 {
   double p[17][3];
 };

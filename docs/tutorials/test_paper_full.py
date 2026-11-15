@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Run one full paper tutorial through its Snakemake rule and check the report."""
 
 import os

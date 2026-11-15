@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Compare published CHILL+ crystal labels with freud's Steinhardt q6.
 
 freud  does not implement CHILL+. On one frame the oxygen q6 values are

@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* libFuzzer harness for seams_system_set_atoms, seams_system_set_positions
  * and seams_system_stage_positions.
  *

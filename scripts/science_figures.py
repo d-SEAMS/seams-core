@@ -80,7 +80,7 @@ def snapshot(path: Path) -> None:
     lateral = coords[(axis + 1) % 3]
     labels = column(header, rows, "chill").astype(int)
     fig, ax = plt.subplots(figsize=(7.0, 4.4))
-    for code, (name, colour) in CHILL.items():
+    for code, (name, color) in CHILL.items():
         mask = labels == code
         if not np.any(mask):
             continue
@@ -88,7 +88,7 @@ def snapshot(path: Path) -> None:
             lateral[mask],
             normal[mask],
             s=8,
-            c=colour,
+            c=color,
             linewidths=0,
             label=name,
             rasterized=True,
@@ -162,8 +162,8 @@ def clusters(path: Path) -> None:
         ("n_q6", "q6-bar", "#009E73"),
         ("n_shell", "shell label", "#CC79A7"),
     )
-    for name, label, colour in series:
-        ax.plot(frame, column(header, rows, name), color=colour, label=label)
+    for name, label, color in series:
+        ax.plot(frame, column(header, rows, name), color=color, label=label)
     for row in summary_rows:
         if row[0] != "chill_extended":
             continue
@@ -261,7 +261,7 @@ def nucleus(path: Path) -> None:
         (axes[0], x, y, "x (A)", "y (A)"),
         (axes[1], x, z, "x (A)", "z (A)"),
     ):
-        for code, (name, colour) in CHILL.items():
+        for code, (name, color) in CHILL.items():
             mask = labels == code
             if not np.any(mask):
                 continue
@@ -270,7 +270,7 @@ def nucleus(path: Path) -> None:
                 lateral[mask],
                 normal[mask],
                 s=10,
-                c=colour,
+                c=color,
                 linewidths=0.4,
                 edgecolors=edge,
                 label=name,

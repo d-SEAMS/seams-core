@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 //! Neighbours, rings, and CHILL+ from Rust.
 //! Each library call is a `Result`. The histograms are iterators.
 

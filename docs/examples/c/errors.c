@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Errors: status codes, the thread-local message and the copy kept on the
  * handle that failed.
  * Usage: errors */

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Nucleation, interface, and brine tutorials.
 
 ``--small`` is the CI mode. It runs the shipped frames:

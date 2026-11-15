@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /* Science tutorials beside docs/examples/science_tutorials.py.
  *
  * interface: CHILL+ and layer cubicity on the committed slab and nucleus.

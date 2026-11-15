@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Labels and times on the 200 ps mW nucleation frames.
 
 Kernel classifyIce, OVITO PTM with the diamond templates, OVITO identify

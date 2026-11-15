@@ -14,7 +14,7 @@ neighbours inside `R + 1.5`, as `seams chill-plus --graph mutual` does.
 `type I` scores water oxygens of LAMMPS type I and leaves every other
 type unclassified. `mol water` keeps the oxygen of each multi-atom
 molecule. A mixed frame that sets neither is an error, rather than
-labelling ions as water. A single-type frame is unchanged.
+labeling ions as water. A single-type frame is unchanged.
 
 The dump column is the same integer table as `seams chill-plus`
 (0 cubic, 1 hexagonal, 2 water, 3 interfacial, 4 clathrate,

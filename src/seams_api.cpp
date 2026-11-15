@@ -2697,7 +2697,7 @@ seams_status seams_density_axis(seams_system *sys, int type, int bins, int axis,
 }
 
 seams_status seams_fingerprint(seams_system *sys, double cutoff, int type, int k, int graph,
-                               int hops, int colour_types, seams_topo **out) {
+                               int hops, int color_types, seams_topo **out) {
   handle_guard guard(sys);
   clear_error();
   if (out == nullptr) {
@@ -2733,14 +2733,14 @@ seams_status seams_fingerprint(seams_system *sys, double cutoff, int type, int k
       rows = nneigh::kNearestNeighbourList(work, k, cutoff + 1.5, typ, true);
     }
     auto idx = nneigh::neighbourListByIndex(work, rows);
-    std::vector<int> colours;
-    if (colour_types != 0) {
-      colours.reserve(static_cast<std::size_t>(work.nop));
+    std::vector<int> colors;
+    if (color_types != 0) {
+      colors.reserve(static_cast<std::size_t>(work.nop));
       for (int i = 0; i < work.nop; ++i) {
-        colours.push_back(work.pts[static_cast<std::size_t>(i)].type);
+        colors.push_back(work.pts[static_cast<std::size_t>(i)].type);
       }
     }
-    const auto fp = topo::fingerprint(idx, hops, 7, colours);
+    const auto fp = topo::fingerprint(idx, hops, 7, colors);
     auto handle = std::make_unique<seams_topo>();
     handle->frame_key = fp.key;
     handle->method = fp.method;

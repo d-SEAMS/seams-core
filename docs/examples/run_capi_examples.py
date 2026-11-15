@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Compile and run the six C API group examples.
 
 Usage: run_capi_examples.py ROOT BUILD

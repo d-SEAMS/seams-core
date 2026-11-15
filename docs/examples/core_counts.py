@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 """CHILL+ and ring counts for Ice Ih and sII, through libseams.
 
 ``SEAMS_LIBDIR`` is the directory that holds ``libseams.so``. The numbers

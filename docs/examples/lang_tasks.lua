@@ -1,3 +1,4 @@
+-- Copyright (c) d-SEAMS developers
 -- Neighbours, rings, and CHILL+ from Lua.
 local dseams = require("dseams")
 

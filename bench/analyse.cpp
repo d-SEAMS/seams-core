@@ -1,3 +1,4 @@
+// Copyright (c) d-SEAMS developers
 /*
 ** Timed driver for the four bulk analyses on one cubic-ice frame.
 **

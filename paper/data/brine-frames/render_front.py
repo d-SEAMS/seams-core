@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
+# Copyright (c) d-SEAMS developers
 """Figure of the 230 K ice/brine front, at CPC single-column width.
 
 Panel (a) is two OVITO renders of the 20-pair cell: the frame at the
 start of production, after the liquid half has been melted and quenched,
-and the frame at 5 ns. Water oxygens are coloured by the d-SEAMS CHILL+
-label. Na and Cl are drawn as larger spheres of their own colours.
+and the frame at 5 ns. Water oxygens are colored by the d-SEAMS CHILL+
+label. Na and Cl are drawn as larger spheres of their own colors.
 Hydrogens are omitted so the ions remain visible in the liquid. The
 legend sits under the renders.
 
@@ -13,7 +14,7 @@ counts and the ice thickness against the NaCl loading. Each replica is
 one marker. A bar spans the replicas when at least two have the frame.
 A loading with no frames in the dataset is marked, not plotted.
 
-The CHILL+ colours are the palette of scripts/science_render.py. The
+The CHILL+ colors are the palette of scripts/science_render.py. The
 figure is 85 mm wide. OVITO renders the panels at 300 ppi and matplotlib
 lays out the PDF.
 
@@ -39,13 +40,13 @@ REPO = HERE.parents[2]
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(REPO / "scripts"))
 import regenerate as deck  # noqa: E402
-from chill_palette import COLOUR, LEGEND as _LEGEND  # noqa: E402
+from chill_palette import COLOR, LEGEND as _LEGEND  # noqa: E402
 
-NA = COLOUR["sodium"]
-CL = COLOUR["chloride"]
+NA = COLOR["sodium"]
+CL = COLOR["chloride"]
 LEGEND = tuple(
-    (("Na$^+$", NA) if label == "Na+" else ("Cl$^-$", CL) if label == "Cl-" else (label, colour))
-    for label, colour in _LEGEND
+    (("Na$^+$", NA) if label == "Na+" else ("Cl$^-$", CL) if label == "Cl-" else (label, color))
+    for label, color in _LEGEND
 )
 RADIUS = {"O": 1.05, "Na": 1.55, "Cl": 1.75}
 PPI = 300
@@ -62,16 +63,16 @@ def select(atoms, labels):
             continue
         if typ == 1:
             name = deck.CHILL[labels[i]]
-            colour = COLOUR.get(name, COLOUR["unclassified"])
+            color = COLOR.get(name, COLOR["unclassified"])
             radius = RADIUS["O"]
         elif typ == 3:
-            colour, radius = NA, RADIUS["Na"]
+            color, radius = NA, RADIUS["Na"]
         elif typ == 4:
-            colour, radius = CL, RADIUS["Cl"]
+            color, radius = CL, RADIUS["Cl"]
         else:
             continue
         pos.append((x, y, z))
-        col.append(colour)
+        col.append(color)
         rad.append(radius)
     return (
         np.asarray(pos, dtype=np.float64),
@@ -127,7 +128,7 @@ def render_panel(path, origin, length, pos, col, rad, size):
 
 
 def parse_xyz(path):
-    """Read one labelled frame written by regenerate.write_xyz."""
+    """Read one labeled frame written by regenerate.write_xyz."""
     lines = path.read_text().splitlines()
     if len(lines) < 3:
         raise SystemExit(f"empty frame {path}")
@@ -162,7 +163,7 @@ def panel_b(fig, rect_left, rect_right, legend_y, rows):
     absent = sorted({r["replica"] for r in rows} - set(replicas))
     offsets = {name: (i - (len(replicas) - 1) / 2.0) * 1.4 for i, name in enumerate(replicas)}
 
-    def series(ax, column, colour, label):
+    def series(ax, column, color, label):
         for pairs in PAIRS:
             values = [
                 (r["replica"], float(r[column]))
@@ -172,14 +173,14 @@ def panel_b(fig, rect_left, rect_right, legend_y, rows):
             if len(values) >= 2:
                 lo = min(v for _n, v in values)
                 hi = max(v for _n, v in values)
-                ax.plot([pairs, pairs], [lo, hi], color=colour, lw=2.4, alpha=0.45, solid_capstyle="butt")
+                ax.plot([pairs, pairs], [lo, hi], color=color, lw=2.4, alpha=0.45, solid_capstyle="butt")
             for name, value in values:
                 ax.plot(
                     pairs + offsets[name], value, MARKERS.get(name, "D"), ms=4.5,
-                    mfc=colour, mec="black", mew=0.5, ls="none",
+                    mfc=color, mec="black", mew=0.5, ls="none",
                 )
         if label:
-            handles.append(plt.Line2D([], [], marker="s", ms=5, mfc=colour, mec="black", mew=0.5, ls="none",
+            handles.append(plt.Line2D([], [], marker="s", ms=5, mfc=color, mec="black", mew=0.5, ls="none",
                                       label=label))
 
     handles = []
@@ -286,12 +287,12 @@ def main() -> None:
     parser.add_argument("--end-step", type=int, default=2_500_000)
     args = parser.parse_args()
     if args.xyz:
-        labelled = [parse_xyz(path) for path in args.xyz]
-        labelled.sort(key=lambda frame: frame[0])
-        start = labelled[0]
-        end = min(labelled, key=lambda frame: abs(frame[0] - args.end_step))
+        labeled = [parse_xyz(path) for path in args.xyz]
+        labeled.sort(key=lambda frame: frame[0])
+        start = labeled[0]
+        end = min(labeled, key=lambda frame: abs(frame[0] - args.end_step))
         if end[0] < args.end_step - 20_000:
-            raise SystemExit(f"5 ns frame is missing; last step is {labelled[-1][0]}")
+            raise SystemExit(f"5 ns frame is missing; last step is {labeled[-1][0]}")
         panels_in = [start, end]
     elif args.dump:
         if not args.lib:
