@@ -33,7 +33,26 @@ def present(number, text):
 
 
 def stable(text):
-    """Drop run-to-run timers. The census lines stay exact."""
+    """Drop run-to-run timers and the LAMMPS release banner. The census lines stay exact."""
+    text = re.sub(r"LAMMPS \([^)]*\)", "LAMMPS (VERSION)", text)
+    text = re.sub(
+        r"using \d+ OpenMP thread\(s\) per MPI task",
+        "using N OpenMP thread(s) per MPI task",
+        text,
+    )
+    text = re.sub(
+        r"Per MPI rank memory allocation \(min/avg/max\) = .*",
+        "Per MPI rank memory allocation (min/avg/max) = MEM",
+        text,
+    )
+    text = re.sub(
+        r"CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE\n"
+        r".*?"
+        r"CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE-CITE\n",
+        "CITE BLOCK\n",
+        text,
+        flags=re.S,
+    )
     text = re.sub(r"overhead_s \S+", "overhead_s TIME", text)
     text = re.sub(r"Loop time of \S+", "Loop time of TIME", text)
     text = re.sub(r"Performance:.*", "Performance: TIME", text)
