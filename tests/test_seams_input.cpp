@@ -700,12 +700,14 @@ std::vector<int> fdsForPath(const std::string &path) {
   return ids;
 }
 
+#ifdef SEAMS_HAS_READCON
 std::string conText(const char *cell, const char *angles, const char *ids) {
   return std::string("Random Number Seed\n{\"con_spec_version\":2}\n") + cell +
          "\n" + angles +
          "\n0 0\n218 0 1\n1\n2\n63.546000\nCu\nCoordinates of Component 1\n" +
          ids;
 }
+#endif
 
 } // namespace
 
