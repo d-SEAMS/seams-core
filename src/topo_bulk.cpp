@@ -1618,7 +1618,11 @@ ring::buildRingSearchIndex(const std::vector<std::vector<int>> &rings,
 #pragma omp parallel
 #endif
   {
+#ifdef SEAMS_HAS_OPENMP
     const int tid = omp_get_thread_num();
+#else
+    const int tid = 0;
+#endif
     counts[static_cast<std::size_t>(tid)].assign(static_cast<std::size_t>(numAtoms), 0);
     auto &count = counts[static_cast<std::size_t>(tid)];
 #ifdef SEAMS_HAS_OPENMP
@@ -1656,7 +1660,11 @@ ring::buildRingSearchIndex(const std::vector<std::vector<int>> &rings,
 #pragma omp parallel
 #endif
   {
+#ifdef SEAMS_HAS_OPENMP
     const int tid = omp_get_thread_num();
+#else
+    const int tid = 0;
+#endif
     auto &cursor = head[static_cast<std::size_t>(tid)];
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp for schedule(static)
