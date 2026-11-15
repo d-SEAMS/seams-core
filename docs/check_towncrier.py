@@ -26,7 +26,7 @@ def draft():
             "--version",
             "2.14.0",
             "--date",
-            "2026-11-13",
+            "2026-11-15",
         ],
         cwd=str(ROOT),
         check=False,
