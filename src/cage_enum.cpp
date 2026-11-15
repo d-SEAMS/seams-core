@@ -36,6 +36,18 @@
 
 namespace {
 
+// Thread `t` of `team` walks slots [n * t / team, n * (t + 1) / team).
+// The owner of slot `i` is the largest such `t` whose slice starts at or
+// before `i`, which is ((i + 1) * team - 1) / n. `i * team / n` is not
+// that inverse unless `team` divides `n`.
+inline int sliceOwner(int i, int n, int team) {
+  return static_cast<int>(((static_cast<long long>(i) + 1) * team - 1) / n);
+}
+
+} // namespace
+
+namespace {
+
 // Lengths plus the tilt factors, with the same bound correction as
 // makeFracBox. The origin cancels in a difference, but the bound
 // lengths do not: a LAMMPS triclinic dump stores the padded spans in
@@ -888,6 +900,10 @@ struct ClosedSearch {
       std::vector<Bucket> buckets(static_cast<std::size_t>(indexTeam));
       std::vector<std::vector<int>> edgeMap(static_cast<std::size_t>(indexTeam));
       std::vector<std::vector<int>> wedgeMap(static_cast<std::size_t>(indexTeam));
+      // The team OpenMP grants may be smaller than indexTeam; the remap
+      // below uses the size each region ran with.
+      int edgeTeam = 1;
+      int wedgeTeam = 1;
 #if defined(SEAMS_HAS_OPENMP)
 #pragma omp parallel num_threads(indexTeam)
 #endif
@@ -901,6 +917,9 @@ struct ClosedSearch {
 #endif
         const int c0 = static_cast<int>((static_cast<long long>(nCand) * tid) / team);
         const int c1 = static_cast<int>((static_cast<long long>(nCand) * (tid + 1)) / team);
+        if (tid == 0) {
+          edgeTeam = team;
+        }
         FlatId local;
         local.reset(std::max(c1 - c0, 1) * 8);
         std::vector<int> stamp(static_cast<std::size_t>(maxV) + 1, 0);
@@ -957,7 +976,7 @@ struct ClosedSearch {
         const int i = cand[static_cast<std::size_t>(ci)];
         const int sz = ringSize[static_cast<std::size_t>(i)];
         const auto &ring = rings[static_cast<std::size_t>(i)];
-        const int tid = static_cast<int>((static_cast<long long>(ci) * indexTeam) / nCand);
+        const int tid = sliceOwner(ci, nCand, edgeTeam);
         const auto &map = edgeMap[static_cast<std::size_t>(tid)];
         int *eCol = ringEdges.col.data() + ringEdges.off[static_cast<std::size_t>(i)];
         int *vCol = ringVerts.col.data() + ringVerts.off[static_cast<std::size_t>(i)];
@@ -980,6 +999,9 @@ struct ClosedSearch {
 #endif
         const int c0 = static_cast<int>((static_cast<long long>(nCand) * tid) / team);
         const int c1 = static_cast<int>((static_cast<long long>(nCand) * (tid + 1)) / team);
+        if (tid == 0) {
+          wedgeTeam = team;
+        }
         FlatId local;
         local.reset(std::max(c1 - c0, 1) * 8);
         auto &bucket = buckets[static_cast<std::size_t>(tid)];
@@ -1019,7 +1041,7 @@ struct ClosedSearch {
         const int i = cand[static_cast<std::size_t>(ci)];
         const int sz = ringSize[static_cast<std::size_t>(i)];
         int *wCol = ringWedges.col.data() + ringWedges.off[static_cast<std::size_t>(i)];
-        const int tid = static_cast<int>((static_cast<long long>(ci) * indexTeam) / nCand);
+        const int tid = sliceOwner(ci, nCand, wedgeTeam);
         const auto &map = wedgeMap[static_cast<std::size_t>(tid)];
         for (int k = 0; k < sz; ++k) {
           wCol[k] = map[static_cast<std::size_t>(wCol[k])];
