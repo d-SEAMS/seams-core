@@ -127,6 +127,20 @@ def prepare(root, seams, libdir, langdir, build):
             if Path(candidate).is_file():
                 env["FENNEL_LUA"] = candidate
                 break
+    if not env.get("FENNEL_LUA"):
+        dest = build / "fennel"
+        fetched = subprocess.run(
+            ["sh", str(root / "scripts" / "fetch_fennel.sh"), str(dest)],
+            capture_output=True,
+            text=True,
+        )
+        if fetched.returncode != 0:
+            detail = (fetched.stderr or fetched.stdout or "").strip()
+            fail("could not fetch the Fennel compiler: {}".format(detail))
+        path = fetched.stdout.strip().splitlines()[-1]
+        if not path or not Path(path).is_file():
+            fail("Fennel fetch did not print a compiler path")
+        env["FENNEL_LUA"] = path
     return root, env
 
 
