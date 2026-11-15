@@ -5,7 +5,6 @@
 import os
 import re
 import shlex
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -78,11 +77,6 @@ def clean(text):
     return "\n".join(kept).strip()
 
 
-def lua_is_54(program):
-    done = subprocess.run([program, "-v"], capture_output=True, text=True)
-    return "Lua 5.4" in done.stdout + done.stderr
-
-
 def prepare(root, seams, libdir, langdir, build):
     root = Path(root)
     build = Path(build)
@@ -91,11 +85,6 @@ def prepare(root, seams, libdir, langdir, build):
     shim = build / "video-bin"
     shim.mkdir(parents=True, exist_ok=True)
     links = [("seams", seams), ("python3", sys.executable)]
-    # The lua tapes type lua5.4, the Debian name. conda-forge and Homebrew
-    # install the same interpreter as lua.
-    lua = shutil.which("lua")
-    if not shutil.which("lua5.4") and lua and lua_is_54(lua):
-        links.append(("lua5.4", lua))
     for name, target in links:
         link = shim / name
         if link.is_symlink() or link.exists():
@@ -120,7 +109,6 @@ def prepare(root, seams, libdir, langdir, build):
     env["SEAMS_LANG_LIB"] = str(Path(langdir) / "libseams_lang.so")
     env["SEAMS_LIB_DIR"] = str(libdir)
     env["SEAMS_INCLUDE"] = str(root / "bindings" / "cxx")
-    env["R_LIBS_USER"] = str(build / "docs-r-lib")
     env["LD_LIBRARY_PATH"] = os.pathsep.join(
         [
             str(libdir),
@@ -131,36 +119,10 @@ def prepare(root, seams, libdir, langdir, build):
             env.get("LD_LIBRARY_PATH", ""),
         ]
     )
-    if not env.get("FENNEL_LUA"):
-        candidates = [
-            "/usr/local/share/fennel.lua",
-            "/usr/share/lua/5.4/fennel.lua",
-        ]
-        conda = env.get("CONDA_PREFIX", "")
-        if conda:
-            candidates.append(str(Path(conda) / "share" / "lua" / "5.4" / "fennel.lua"))
-        lua = shutil.which("lua5.4") or shutil.which("lua")
-        if lua:
-            candidates.append(str(Path(lua).resolve().parents[1] / "share" / "lua" / "5.4" / "fennel.lua"))
-        for candidate in candidates:
-            if Path(candidate).is_file():
-                env["FENNEL_LUA"] = candidate
-                break
-    if not env.get("FENNEL_LUA"):
-        dest = build / "fennel"
-        fetched = subprocess.run(
-            ["sh", str(root / "scripts" / "fetch_fennel.sh"), str(dest)],
-            capture_output=True,
-            text=True,
-        )
-        if fetched.returncode != 0:
-            detail = (fetched.stderr or fetched.stdout or "").strip()
-            fail("could not fetch the Fennel compiler: {}".format(detail))
-        path = fetched.stdout.strip().splitlines()[-1]
-        if not path or not Path(path).is_file():
-            fail("Fennel fetch did not print a compiler path")
-        env["FENNEL_LUA"] = path
     return root, env
+
+
+MOVED_TAPES = ("fortran", "julia", "lua", "r", "rust")
 
 
 class Absent(Exception):
@@ -342,7 +304,12 @@ def main():
             ", ".join(names), ", ".join(sorted(set(CUTS) | set(NOTES)))))
     if len(CUTS) != 19:
         fail("expected 19 cuts, found {}".format(len(CUTS)))
-    folders = [videos / name for name in CUTS]
+    # The Fortran, Julia, Lua, R and Rust recordings stay on the docs pages,
+    # but their tapes build and run sources that moved to the binding
+    # repositories (dseams-fortran, Dseams.jl, yodaStruct, dseams-r,
+    # dseams-rs). Those repositories replay them; this tree checks only
+    # their embeds above.
+    folders = [videos / name for name in CUTS if name not in MOVED_TAPES]
     absent = []
     for folder in folders:
         check_folder(folder, env, root, record, absent)

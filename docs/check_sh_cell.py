@@ -23,7 +23,6 @@ import render_scenes
 import science_render
 import core_counts
 import render_molecules
-import minimal_py
 
 DUMP = ROOT / "input" / "traj" / "genice_sH.lammpstrj"
 LX, LY, LZ = 24.8424228, 10.7570846, 20.1312910
@@ -132,11 +131,6 @@ def main():
     check_box(box[0:3], box[3:6], box[6:9], "core_counts")
     frame = render_molecules.read_dump(DUMP)
     check_box(frame.box9[0:3], frame.box9[3:6], frame.box9[6:9], "render_molecules")
-    _points, edges = minimal_py.read_dump(DUMP)
-    close(edges[0], LX, "minimal_py lx")
-    close(edges[1], LY, "minimal_py ly")
-    close(edges[2], LZ, "minimal_py lz")
-    print(f"minimal_py lx {edges[0]:.7f}")
     check_header()
     check_lang()
     print("sH cell ok")
