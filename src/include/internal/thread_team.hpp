@@ -218,10 +218,13 @@ bool placementHeld();
 // widenAffinity before a load-narrowed width can make it skip, so the
 // masks it saves and restores are the widened ones. Placement adds no cpu
 // outside the host mask. One host thread holds the placement at a time;
-// a call from another thread meanwhile runs unplaced.
+// a call from another thread meanwhile runs unplaced. With team false only
+// linkcell's pool is placed: the plan and its width apply, and no OpenMP
+// region runs to pin or restore the workers, for a call that starts no
+// OpenMP team.
 class PinSession {
 public:
-  PinSession();
+  explicit PinSession(bool team = true);
   ~PinSession();
   PinSession(const PinSession &) = delete;
   PinSession &operator=(const PinSession &) = delete;

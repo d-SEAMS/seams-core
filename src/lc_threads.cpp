@@ -460,7 +460,7 @@ void shareHostPlaces() {
 #endif
 }
 
-void applyPin() {
+void applyPin(bool team) {
   if (pinOptOut()) {
     return;
   }
@@ -500,7 +500,7 @@ void applyPin() {
   if (gNarrow > 0) {
 #ifdef SEAMS_HAS_OPENMP
     gSavedOmp = width;
-    if (gNarrow < width) {
+    if (team && gNarrow < width) {
       omp_set_num_threads(gNarrow);
       gRestoreOmp = true;
       if (askedWidth() == 0) {
@@ -533,24 +533,26 @@ void applyPin() {
   }
 #endif
   gUse = use;
+  if (team) {
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel num_threads(gUse)
 #endif
-  {
+    {
 #ifdef SEAMS_HAS_OPENMP
-    const int tid = omp_get_thread_num();
+      const int tid = omp_get_thread_num();
 #else
-    const int tid = 0;
+      const int tid = 0;
 #endif
-    if (tid < kMaxCpu && sched_getaffinity(0, sizeof(gSaved[tid]), &gSaved[tid]) == 0) {
-      cpu_set_t one;
-      CPU_ZERO(&one);
-      CPU_SET(gPlan[tid % gPlanN], &one);
-      sched_setaffinity(0, sizeof(one), &one);
+      if (tid < kMaxCpu && sched_getaffinity(0, sizeof(gSaved[tid]), &gSaved[tid]) == 0) {
+        cpu_set_t one;
+        CPU_ZERO(&one);
+        CPU_SET(gPlan[tid % gPlanN], &one);
+        sched_setaffinity(0, sizeof(one), &one);
+      }
     }
   }
   lc_set_places(gPlan, gPlanN);
-  gPinned = true;
+  gPinned = team;
   gApplied = true;
   gBegan = monoNow();
 }
@@ -607,7 +609,7 @@ bool placementHeld() {
 #endif
 }
 
-PinSession::PinSession() : outer_(pinDepth()++ == 0) {
+PinSession::PinSession(bool team) : outer_(pinDepth()++ == 0) {
   if (outer_) {
     widenAffinity();
     bool idle = false;
@@ -616,7 +618,9 @@ PinSession::PinSession() : outer_(pinDepth()++ == 0) {
   if (outer_) {
     holdsPlacement() = true;
 #ifdef __linux__
-    applyPin();
+    applyPin(team);
+#else
+    (void)team;
 #endif
   }
 }
