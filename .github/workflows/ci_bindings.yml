@@ -107,6 +107,7 @@ jobs:
       - name: Install the R package
         run: |
           export R_LIBS_USER="${R_LIBS_USER:-$HOME/R/library}"
+          export DSEAMS_ROOT="$PWD"
           export SEAMS_INCLUDE="$PWD/bindings/cxx"
           export SEAMS_LIBDIR="$PWD/bbdir-py/bindings"
           export LD_LIBRARY_PATH="$SEAMS_LIBDIR:$PWD/bbdir-py/src:${LD_LIBRARY_PATH:-}"

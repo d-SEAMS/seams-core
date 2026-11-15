@@ -31,7 +31,7 @@ if [ -n "${SEAMS_LIBDIR:-}" ]; then
     SEAMS_INCLUDE="${DSEAMS_ROOT}/bindings/cxx"
   fi
   if [ -z "${SEAMS_INCLUDE:-}" ] || [ ! -f "${SEAMS_INCLUDE}/seams_lang.h" ]; then
-    echo "configure: SEAMS_LIBDIR is set, but seams_lang.h is not in SEAMS_INCLUDE='${SEAMS_INCLUDE:-}'" >&2
+    echo "configure: SEAMS_LIBDIR is set, but seams_lang.h is not in SEAMS_INCLUDE='${SEAMS_INCLUDE:-}'; set SEAMS_INCLUDE or DSEAMS_ROOT" >&2
     exit 1
   fi
   # seams_call.c binds include/seams.h. libseams and the generated
