@@ -103,7 +103,6 @@ double gProfPaths = 0;
 double gProfPairs = 0;
 double gProfTestMs = 0;
 double gProfOdd = 0;
-bool gSkipOdd = false;
 long long gProfPathPairs = 0;
 long long gProfTestN = 0;
 long long gProfOddPairs = 0;
@@ -885,7 +884,7 @@ template <typename Graph, typename Out>
 void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
                          int src, int maxDepth, int maxLvl, RingScratch &scr,
                          Out &out, const std::vector<char> *through = nullptr,
-                         bool legacyPairs = false) {
+                         bool legacyPairs = false, bool skipOdd = false) {
   const int nVertices = static_cast<int>(adjacency.size());
   if (static_cast<int>(scr.lvl.size()) != nVertices) {
     scr.lvl.assign(static_cast<std::size_t>(nVertices), -1);
@@ -1125,7 +1124,7 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
     }
   odd_part:
     // Odd rings: an antipodal edge between two vertices at the same level
-    if (!gSkipOdd && 2 * lp + 1 <= maxDepth) {
+    if (!skipOdd && 2 * lp + 1 <= maxDepth) {
       for (const int q : adjacency[static_cast<std::size_t>(p)]) {
         if (q <= p || q >= nVertices || scr.lvl[static_cast<std::size_t>(q)] != lp) {
           continue;
@@ -1646,7 +1645,9 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
   }
   BoundedBalls balls;
   BitBalls bits;
-  gSkipOdd = false;
+  // Per search, not process-global: concurrent searches on other graphs
+  // must not change which ring parities this one enumerates.
+  bool skipOdd = false;
   if (!legacy) {
     std::vector<char> color(static_cast<std::size_t>(nVertices), -1);
     std::vector<int> queue;
@@ -1675,7 +1676,7 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
         }
       }
     }
-    gSkipOdd = bipartite;
+    skipOdd = bipartite;
   }
   const auto ballStart = std::chrono::steady_clock::now();
   if (hopOnly) {
@@ -1781,12 +1782,12 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
         if (gSourceWorkPtr == nullptr) {
           enumerateFromSource(adjacency, oracle, from[static_cast<std::size_t>(k)], maxDepth, maxLvl,
                               scratch, (*pools)[static_cast<std::size_t>(k)],
-                              nullptr, legacy);
+                              nullptr, legacy, skipOdd);
         } else {
           const auto srcStart = std::chrono::steady_clock::now();
           enumerateFromSource(adjacency, oracle, from[static_cast<std::size_t>(k)], maxDepth, maxLvl,
                               scratch, (*pools)[static_cast<std::size_t>(k)],
-                              nullptr, legacy);
+                              nullptr, legacy, skipOdd);
           const int src = from[static_cast<std::size_t>(k)];
           if (src >= 0 && src < nVertices) {
             gSourceWorkPtr[src] +=
@@ -1829,7 +1830,7 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
     for (const int src : from) {
       pool.reset();
       enumerateFromSource(adjacency, oracle, src, maxDepth, maxLvl, scratch, pool,
-                          nullptr, legacy);
+                          nullptr, legacy, skipOdd);
       for (const auto &ring : pool) {
         const std::size_t size = ring.size();
         if (size < static_cast<std::size_t>(sizes.len)) {
@@ -1840,13 +1841,13 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
   } else if (gSourceWorkPtr == nullptr) {
     for (const int src : from) {
       enumerateFromSource(adjacency, oracle, src, maxDepth, maxLvl, scratch,
-                          rings, nullptr, legacy);
+                          rings, nullptr, legacy, skipOdd);
     }
   } else {
     for (const int src : from) {
       const auto srcStart = std::chrono::steady_clock::now();
       enumerateFromSource(adjacency, oracle, src, maxDepth, maxLvl, scratch,
-                          rings, nullptr, legacy);
+                          rings, nullptr, legacy, skipOdd);
       if (src >= 0 && src < nVertices) {
         gSourceWorkPtr[src] += std::chrono::duration<double, std::micro>(
                                    std::chrono::steady_clock::now() - srcStart)
@@ -2526,7 +2527,7 @@ struct primitive::RingUpdater::Impl {
   // into the flattened buffer that keeps each ring's allocation.
   template <typename Graph> void fastEnumerate(const Graph &adj) {
     const int nVertices = static_cast<int>(adj.size());
-    gSkipOdd = skipsOddRings(adj);
+    const bool skipOdd = skipsOddRings(adj);
     if (hopOnly) {
       ballsRefreshed = 0;
       ballsStale = false;
@@ -2563,7 +2564,8 @@ struct primitive::RingUpdater::Impl {
         for (int src = 0; src < nVertices; src++) {
           bySource[static_cast<std::size_t>(src)].reset();
           enumerateFromSource(adj, oracle, src, maxDepth, maxLvl, scratch,
-                              bySource[static_cast<std::size_t>(src)]);
+                              bySource[static_cast<std::size_t>(src)], nullptr,
+                              false, skipOdd);
         }
       }
     } else
@@ -2575,7 +2577,8 @@ struct primitive::RingUpdater::Impl {
       for (int src = 0; src < nVertices; src++) {
         bySource[static_cast<std::size_t>(src)].reset();
         enumerateFromSource(adj, oracle, src, maxDepth, maxLvl, scratches[0],
-                            bySource[static_cast<std::size_t>(src)]);
+                            bySource[static_cast<std::size_t>(src)], nullptr, false,
+                            skipOdd);
       }
     }
 
@@ -2613,7 +2616,7 @@ struct primitive::RingUpdater::Impl {
                const std::vector<char> &inT) {
     const int n = static_cast<int>(T.size());
     const int nVertices = static_cast<int>(adj.size());
-    gSkipOdd = skipsOddRings(adj);
+    const bool skipOdd = skipsOddRings(adj);
     if (static_cast<int>(bySource.size()) != nVertices) {
       bySource.assign(static_cast<std::size_t>(nVertices), {});
     }
@@ -2643,7 +2646,7 @@ struct primitive::RingUpdater::Impl {
           RingPool &pool = bySource[static_cast<std::size_t>(src)];
           pool.reset();
           enumerateFromSource(adj, oracle, src, maxDepth, maxLvl, scratch, pool,
-                              &inT);
+                              &inT, false, skipOdd);
         }
       }
     } else
@@ -2661,7 +2664,7 @@ struct primitive::RingUpdater::Impl {
         RingPool &pool = bySource[static_cast<std::size_t>(src)];
         pool.reset();
         enumerateFromSource(adj, oracle, src, maxDepth, maxLvl, scratches[0], pool,
-                            &inT);
+                            &inT, false, skipOdd);
       }
     }
     if (nThreads <= 1) {
