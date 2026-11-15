@@ -375,25 +375,6 @@ function neighbour_pairs(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, gr
 end
 
 """
-    neighbour_pairs(frame; cutoff=3.5, type=0, graph="cutoff")
-
-Directed pairs in the neighbour list. The self entry is omitted.
-"""
-function neighbour_pairs(frame::Frame; cutoff::Real = 3.5, type::Integer = 0, graph::AbstractString = "cutoff")
-    code = ccall(
-        dlsym(_so(), :seams_frame_neighbours),
-        Cint,
-        (Ptr{Cvoid}, Cdouble, Cint, Cstring),
-        frame.ptr,
-        Cdouble(cutoff),
-        Cint(type),
-        graph,
-    )
-    _check(code)
-    Int(ccall(dlsym(_so(), :seams_frame_neighbour_pairs), Cint, (Ptr{Cvoid},), frame.ptr))
-end
-
-"""
     primitive_rings(frame; cutoff=3.5, type=0, graph="mutual", max_depth=6)
 
 Histogram of primitive rings. Index with the ring size: `rings[6]`.
