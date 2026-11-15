@@ -87,7 +87,9 @@ makes that stall the common case, so the library does not set
 
 ~seams::PinSession~ places the team for the enclosing call and restores
 each worker's previous affinity when the call returns. Workers do not
-stay pinned. ~SEAMS_PIN=0~ skips placement. Placement adds no cpu
+stay pinned. A lone team narrower than the mask is not placed: it has
+free cpus to move to, and a pinned worker would wait out anything else
+that lands on its cpu. ~SEAMS_PIN=0~ skips placement. Placement adds no cpu
 outside the host mask. A caller already bound to one cpu, or a process whose
 ~OMP_PROC_BIND~, ~OMP_PLACES~, ~GOMP_CPU_AFFINITY~ or ~KMP_AFFINITY~
 chooses places, is left to that choice. ~KMP_AFFINITY=none~ and

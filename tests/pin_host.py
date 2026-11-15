@@ -15,6 +15,7 @@ import subprocess
 import sys
 import tempfile
 import textwrap
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -43,7 +44,8 @@ def child_env(**extra: str) -> dict[str, str]:
                 "OMP_DISPLAY_ENV", "SEAMS_PIN", "SEAMS_FAIR_WIDTH", "GOMP_CPU_AFFINITY",
                 "KMP_AFFINITY"):
         env.pop(key, None)
-    env["OMP_NUM_THREADS"] = "8"
+    # Placement pins a lone team only when it fills the mask.
+    env["OMP_NUM_THREADS"] = str(max(8, len(os.sched_getaffinity(0))))
     env["OPENBLAS_NUM_THREADS"] = "1"
     env["MKL_NUM_THREADS"] = "1"
     lib_dir = str(LIB.resolve().parent)
@@ -156,6 +158,17 @@ def one(env: dict[str, str], prefix: list[str] | None = None) -> tuple[set[int],
     return parse_pin(run_worker(WORKER, env, prefix))
 
 
+def one_placed(env: dict[str, str], prefix: list[str] | None = None) -> tuple[set[int], set[str]]:
+    # A lone process beside other runnable threads is left unplaced on
+    # purpose. Look again before failing.
+    for _ in range(8):
+        singles, after = one(env, prefix)
+        if len(singles) >= 2:
+            break
+        time.sleep(0.5)
+    return singles, after
+
+
 def concurrent(n: int) -> list[set[int]]:
     env = child_env()
     env["SEAMS_ROOT"] = str(ROOT)
@@ -194,12 +207,18 @@ def main() -> int:
     if not LIB.is_file():
         raise SystemExit(f"library missing: {LIB}")
     base = child_env()
-    singles, after = one(base)
+    singles, after = one_placed(base)
     print(f"solo singles={sorted(singles)} after={sorted(after)}", flush=True)
     if len(singles) < 2:
         raise SystemExit(f"solo run did not pin a team: {singles}")
     if not any("-" in item or "," in item for item in after):
         raise SystemExit(f"affinity was not restored: {after}")
+
+    if len(os.sched_getaffinity(0)) > 2:
+        singles, after = one(child_env(OMP_NUM_THREADS="2"))
+        print(f"2 threads singles={sorted(singles)} after={sorted(after)}", flush=True)
+        if len(singles) >= 2:
+            raise SystemExit(f"pinned a team narrower than the mask: {singles}")
 
     two = concurrent(2)
     assert_disjoint(two, "2 processes")
@@ -209,7 +228,7 @@ def main() -> int:
     # Narrower process mask. Eight requested threads must stay inside it.
     narrow_env = child_env()
     narrow_env["SEAMS_ROOT"] = str(ROOT)
-    singles, after = one(narrow_env, ["taskset", "-c", "0-3"])
+    singles, after = one_placed(narrow_env, ["taskset", "-c", "0-3"])
     print(f"taskset 0-3 singles={sorted(singles)} after={sorted(after)}", flush=True)
     if not singles or not singles <= {0, 1, 2, 3}:
         raise SystemExit(f"left the taskset mask: {singles}")

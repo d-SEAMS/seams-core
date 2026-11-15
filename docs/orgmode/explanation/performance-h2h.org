@@ -18,9 +18,9 @@ CSV tokens.
 The figure is an SVG of median
 time against thread count, ice and liquid side by side.
 
-With only ~OMP_NUM_THREADS~ set, the library places each worker on one
-cpu of the host mask for the call and restores that affinity
-afterwards. ~SEAMS_PIN=0~ leaves placement to the host. A narrower
+With only ~OMP_NUM_THREADS~ set and a team as wide as the host mask,
+the library places each worker on one cpu of that mask for the call and
+restores that affinity afterwards. ~SEAMS_PIN=0~ leaves placement to the host. A narrower
 mask, ~OMP_PLACES~, ~GOMP_CPU_AFFINITY~, ~KMP_AFFINITY~, or a caller
 already bound to one cpu is respected, and placement adds no cpu
 outside the launch mask.
