@@ -795,6 +795,8 @@ SEAMS_API seams_status seams_neighbours_csr(const seams_neighbours *nb,
  * seams_neighbours_copy(nb, NULL, 0, &n_off, NULL, 0, &nnz);
  * int *off = malloc(n_off * sizeof *off), *cols = malloc(nnz * sizeof *cols);
  * seams_neighbours_copy(nb, off, n_off, &n_off, cols, nnz, &nnz);
+ * free(off);
+ * free(cols);
  * @endcode
  */
 SEAMS_API seams_status seams_neighbours_copy(const seams_neighbours *nb,
@@ -1895,6 +1897,7 @@ SEAMS_API void seams_fingerprint_destroy(seams_topo *fp);
  * seams_fingerprint_key(fp, NULL, 0, &len);
  * char *key = malloc(len + 1);
  * seams_fingerprint_key(fp, key, len + 1, &len);
+ * free(key);
  * @endcode
  */
 SEAMS_API seams_status seams_fingerprint_key(const seams_topo *fp, char *buf, size_t cap,
@@ -2146,7 +2149,10 @@ SEAMS_API const char *seams_last_error_message(void);
  * @par Example
  * @code
  * size_t n = 0;
- * if (seams_system_natoms(sys, &n) == SEAMS_OK) { labels = malloc(n * sizeof *labels); }
+ * if (seams_system_natoms(sys, &n) == SEAMS_OK) {
+ *   labels = malloc(n * sizeof *labels);
+ *   free(labels);
+ * }
  * @endcode
  */
 SEAMS_API seams_status seams_system_natoms(const seams_system *sys, size_t *n);
@@ -2281,6 +2287,7 @@ SEAMS_API seams_status seams_q4q6_n(seams_system *sys, double cutoff, int type, 
  * seams_rings_nrings(rings, &nr);
  * int *sym = malloc(nr * sizeof *sym);
  * seams_rings_labels_n(rings, NULL, 0, sym, nr);
+ * free(sym);
  * @endcode
  */
 SEAMS_API seams_status seams_rings_labels_n(const seams_rings *rings, int *sizes,
@@ -2441,6 +2448,7 @@ SEAMS_API seams_status seams_system_box(const seams_system *sys, double *box9,
  * seams_system_natoms(sys, &n);
  * double *xyz = malloc(3 * n * sizeof *xyz);
  * seams_system_positions(sys, xyz, 3 * n);
+ * free(xyz);
  * @endcode
  */
 SEAMS_API seams_status seams_system_positions(const seams_system *sys, double *xyz,

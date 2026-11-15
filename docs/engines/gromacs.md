@@ -19,7 +19,7 @@ by 10 on the way into `seams_chill_plus`. The box conversion is
 
 ```{literalinclude} ../../../engines/gromacs/run_mdrun.sh
 :language: bash
-:lines: 16-23
+:lines: 21-28
 ```
 
 ```{literalinclude} ../../../engines/gromacs/seams_ice.cpp
