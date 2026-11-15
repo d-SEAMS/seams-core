@@ -55,8 +55,9 @@ namespace {
 
 // The four nearest neighbours live in a fixed array. GCC 14 and 15 outline
 // the OpenMP loop and then treat std::sort's runtime end as unbounded, so
-// the introsort is reported as a walk off Near[4]. Sort only a prefix that
-// has been clamped to that array.
+// the introsort is reported as a walk off Near[4]. Insertion-sort only a
+// prefix clamped to that array. The comparator breaks ties on the atom
+// index, so the order is the same as the previous sort.
 template <typename Near>
 void sortNearest(Near *best, int keep) {
   if (keep > 4) {
@@ -3119,16 +3120,27 @@ void assignIceTypePlus(
     const std::vector<std::vector<int>> &nList, bool isSlice, bool neighbourTest,
     int &ih, int &ic, int &interIce, int &water, int &clath, int &interClath,
     int &total) {
-  ih = ic = water = interIce = total = 0;
-  clath = interClath = 0;
-  int num_staggrd, num_eclipsd, na;
-  molSys::bond_type bondType;
-  int nnumNeighbours;
+  // The counters are references to the caller's locals. An OpenMP
+  // reduction of a reference privatizes the reference, and every thread
+  // still increments the same int. The sums are real locals.
+  int ihSum = 0;
+  int icSum = 0;
+  int waterSum = 0;
+  int interSum = 0;
+  int totalSum = 0;
+  int clathSum = 0;
+  int interClathSum = 0;
 
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1) reduction(+ : ih, ic, water, interIce, total, clath, interClath) private(num_staggrd, num_eclipsd, na, bondType, nnumNeighbours)
+#pragma omp parallel for schedule(static) if (omp_get_max_threads() > 1) \
+    reduction(+ : ihSum, icSum, waterSum, interSum, totalSum, clathSum, interClathSum)
 #endif
   for (int iatom = 0; iatom < yCloud.nop; iatom++) {
+    int num_staggrd = 0;
+    int num_eclipsd = 0;
+    int na = 0;
+    molSys::bond_type bondType;
+    int nnumNeighbours = 0;
     // if(yCloud.pts[iatom].type!=typeO){continue;}
     // if this is a slice and the particle is not in the slice
     // then skip
@@ -3137,13 +3149,11 @@ void assignIceTypePlus(
         continue;
       }
     }
-    total++; // Update the total number of atoms considered. Change this to a
-             // check for slices
+    totalSum++; // Update the total number of atoms considered. Change this to a
+                // check for slices
     // c_ij is the bond list after the nearest-neighbour cut. The crystal
     // test below counts the cutoff row itself, before that cut.
     nnumNeighbours = static_cast<int>(yCloud.pts[static_cast<std::size_t>(iatom)].c_ij.size());
-    num_staggrd = num_eclipsd = na =
-        0; // init to zero before loop through neighbours
     // Loop through the bond cij and get the number of staggered, eclipsed bonds
     for (int j = 0; j < nnumNeighbours; j++) {
       bondType = yCloud.pts[static_cast<std::size_t>(iatom)].c_ij[static_cast<std::size_t>(j)].classifier;
@@ -3168,12 +3178,12 @@ void assignIceTypePlus(
       // Cubic ice
       if (num_eclipsd == 0 && num_staggrd == 4) {
         yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::cubic;
-        ic++;
+        icSum++;
       }
       // Hexagonal
       else if (num_eclipsd == 1 && num_staggrd == 3) {
         yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::hexagonal;
-        ih++;
+        ihSum++;
       }
       // Interfacial. The published rule applies Table 1's neighbour
       // test. ovito-chill+ labels two staggered bonds, or three
@@ -3184,29 +3194,36 @@ void assignIceTypePlus(
                    : (num_staggrd == 2 ||
                       (num_staggrd == 3 && num_eclipsd == 0))) {
         yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::interfacial;
-        interIce++;
+        interSum++;
       }
       // Clathrate
       else if (num_eclipsd == 4 && num_staggrd == 0) {
         yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::clathrate;
-        clath++;
+        clathSum++;
       }
       // Interfacial clathrate
       else if (num_eclipsd == 3) {
         yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::interClathrate;
-        interClath++;
+        interClathSum++;
       }
       // Water
       else {
         yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::water;
-        water++;
+        waterSum++;
       }
     } else {
       yCloud.pts[static_cast<std::size_t>(iatom)].iceType = molSys::atom_state_type::water;
-      water++;
+      waterSum++;
     }
 
   } // End of loop through every iatom
+  ih = ihSum;
+  ic = icSum;
+  water = waterSum;
+  interIce = interSum;
+  total = totalSum;
+  clath = clathSum;
+  interClath = interClathSum;
 }
 } // namespace
 

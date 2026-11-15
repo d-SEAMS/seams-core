@@ -16,6 +16,7 @@
 #include "seams.h"
 
 #include <bond.hpp>
+#include <cpu_features.hpp>
 #include <bop.hpp>
 #include <brine_front.hpp>
 #include <cluster.hpp>
@@ -270,13 +271,13 @@ __attribute__((target("avx2"))) bool finite_scan_avx2(const double *v, std::size
 
 bool finite_coordinates(const double *xyz, std::size_t n_atoms) {
 #if defined(__x86_64__) && (defined(__GNUC__) || defined(__clang__))
-  static const int width = __builtin_cpu_supports("avx512f") ? 2
-                           : __builtin_cpu_supports("avx2")  ? 1
-                                                             : 0;
-  if (width == 2) {
+  // __builtin_cpu_supports needs libgcc's __cpu_model, which the macOS
+  // and Windows wheels do not link. The CPUID helper is the same check.
+  const auto &cpu = seams::cpu::features();
+  if (cpu.avx512f) {
     return finite_scan_avx512(xyz, 3 * n_atoms);
   }
-  if (width == 1) {
+  if (cpu.avx2) {
     return finite_scan_avx2(xyz, 3 * n_atoms);
   }
 #endif

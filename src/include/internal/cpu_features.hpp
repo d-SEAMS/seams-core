@@ -16,6 +16,15 @@
 #include <intrin.h>
 #elif defined(__x86_64__) || defined(__i386__)
 #include <cpuid.h>
+// Clang-cl defines both _MSC_VER and __clang__, so it takes this branch.
+// cpuid.h's __cpuid macro then rejects the function declaration in the
+// MSVC <intrin.h> that <chrono> includes.
+#ifdef __cpuid
+#undef __cpuid
+#endif
+#ifdef __cpuidex
+#undef __cpuidex
+#endif
 #endif
 
 namespace seams::cpu {

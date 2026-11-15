@@ -215,7 +215,7 @@ void SeamsCV::writeDump(const std::vector<double> &xyz, const double box9[9]) {
   std::fprintf(fp, "ITEM: ATOMS id type x y z %s%s\n", value, mode_ == Mode::all ? " label" : "");
   for (std::size_t i = 0; i < static_cast<std::size_t>(n); ++i) {
     const std::size_t at = i * std::size_t{3};
-    std::fprintf(fp, "%d 1 %.17g %.17g %.17g %.17g",
+    std::fprintf(fp, "%u 1 %.17g %.17g %.17g %.17g",
                  getAbsoluteIndex(static_cast<int>(i)).serial(), xyz[at], xyz[at + 1],
                  xyz[at + 2], peratom_[i]);
     if (mode_ == Mode::all) {
