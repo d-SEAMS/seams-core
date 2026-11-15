@@ -117,7 +117,7 @@ jobs:
           export R_LIBS_USER="${R_LIBS_USER:-$HOME/R/library}"
           export DSEAMS_ROOT="$PWD"
           export LD_LIBRARY_PATH="$PWD/bbdir-py/bindings:$PWD/bbdir-py/src:${LD_LIBRARY_PATH:-}"
-          Rscript -e 'testthat::test_file("bindings/r/dseams/tests/testthat/test-ice.R", stop_on_failure=TRUE)'
+          Rscript -e 'testthat::test_file("bindings/r/dseams/tests/testthat/test-ice.R", package="dseams", load_package="installed", stop_on_failure=TRUE)'
       - name: Install Julia
         run: |
           curl -fsSL -o "$RUNNER_TEMP/julia.tar.gz" https://julialang-s3.julialang.org/bin/linux/x64/1.11/julia-1.11.6-linux-x86_64.tar.gz
