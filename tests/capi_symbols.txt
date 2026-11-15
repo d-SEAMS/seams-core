@@ -61,6 +61,7 @@ seams_rings_vertices
 seams_running_cn
 seams_set_num_threads
 seams_signature_cages
+seams_signature_cages_edge
 seams_site_table
 seams_status_string
 seams_steinhardt

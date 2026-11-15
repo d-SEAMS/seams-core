@@ -2103,8 +2103,9 @@ seams_status seams_cages_labels(const seams_cage_set *cages, int *per_atom, size
   return SEAMS_OK;
 }
 
-seams_status seams_cages_signature(seams_system *sys, double cutoff, int type, int graph,
-                                   const char *spec, size_t *n_cages, size_t *n_atoms) {
+static seams_status signature_with_edge(seams_system *sys, double cutoff, int type, int graph,
+                                        const char *spec, const char *edge, size_t *n_cages,
+                                        size_t *n_atoms) {
   handle_guard guard(sys);
   clear_error();
   if (sys == nullptr || spec == nullptr || n_cages == nullptr || n_atoms == nullptr) {
@@ -2144,7 +2145,7 @@ seams_status seams_cages_signature(seams_system *sys, double cutoff, int type, i
       found_rings = primitive::ringNetwork(idx, depth);
     }
     const auto rings = ring::cageRings(found_rings, work, cutoff);
-    const auto window = cage::parseEdgeWindow("");
+    const auto window = cage::parseEdgeWindow(edge == nullptr ? "" : edge);
     std::vector<std::array<double, 3>> xyz(static_cast<std::size_t>(std::max(work.nop, 0)));
     for (int i = 0; i < work.nop; ++i) {
       const auto &point = work.pts[static_cast<std::size_t>(i)];
@@ -2373,9 +2374,20 @@ seams_status seams_cages(seams_system *sys, double cutoff, int type, int graph, 
   return seams_cages_find(sys, cutoff, type, graph, k, complete, out);
 }
 
+seams_status seams_cages_signature(seams_system *sys, double cutoff, int type, int graph,
+                                   const char *spec, size_t *n_cages, size_t *n_atoms) {
+  return signature_with_edge(sys, cutoff, type, graph, spec, nullptr, n_cages, n_atoms);
+}
+
 seams_status seams_signature_cages(seams_system *sys, double cutoff, int type, int graph,
                                    const char *spec, size_t *n_cages, size_t *n_atoms) {
-  return seams_cages_signature(sys, cutoff, type, graph, spec, n_cages, n_atoms);
+  return signature_with_edge(sys, cutoff, type, graph, spec, nullptr, n_cages, n_atoms);
+}
+
+seams_status seams_signature_cages_edge(seams_system *sys, double cutoff, int type, int graph,
+                                        const char *spec, const char *edge, size_t *n_cages,
+                                        size_t *n_atoms) {
+  return signature_with_edge(sys, cutoff, type, graph, spec, edge, n_cages, n_atoms);
 }
 
 seams_status seams_steinhardt(seams_system *sys, double cutoff, int type, int order_l,

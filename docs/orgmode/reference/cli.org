@@ -289,7 +289,12 @@ lz~ for \(A_\perp\), not bound spans. The in-plane sampler remains
 
 * ~--graph~
 
-Used only by ~cages~.
+~chill~ and ~chill-plus~ take ~cutoff~ or ~mutual~.
+The default is ~cutoff~: every pair closer than ~--cutoff~.
+The stored configuration name of that default is ~seeded~, and those two commands map ~seeded~ onto the cutoff list.
+~--graph mutual~ keeps the mutual four nearest neighbours, with candidates inside ~--cutoff + 1.5~.
+
+~cages~ does not make that mapping.
 
 | value | graph |
 |-------+-------|

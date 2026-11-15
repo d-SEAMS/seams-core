@@ -47,6 +47,7 @@ seams_cages_signature
 seams_system_symmetry
 seams_cages
 seams_signature_cages
+seams_signature_cages_edge
 seams_prisms
 seams_monolayer
 seams_abi

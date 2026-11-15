@@ -758,7 +758,7 @@ Example: `docs/orgmode/reference/python-frame.org`
 
 Purpose: Closed cages of one ring census.
 
-Parameters: self; signature; max_ring_size
+Parameters: self; signature; max_ring_size; edge
 
 Returns: A list whose length is the cage count. n_atoms is the vertex count.
 

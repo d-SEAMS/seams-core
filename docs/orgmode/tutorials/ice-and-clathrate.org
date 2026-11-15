@@ -22,13 +22,13 @@ assert str(frame.chill_plus()) == "IceCounts(interClathrate=9, water=241)"
 assert str(frame.cages()) == "CageScore(n_ih=0, n_ic=0, n_water=250)"
 #+end_src
 
-~Frame.chill_plus~ uses the cutoff neighbour list.
+~Frame.chill_plus~ and ~seams chill-plus~ both use the cutoff neighbour list.
 ~IceCounts(interClathrate=9, water=241)~.
 ~CageScore(n_ih=0, n_ic=0, n_water=250)~.
+The CLI prints ~interClathrate 9 water 241~.
+No cage is complete, so the cage score's water count is 250.
 
-~seams chill-plus~ on the same file uses the mutual four-neighbour list and prints ~clathrate 1 interClathrate 7 water 242~.
-The cage score matches the CLI.
-The CHILL+ histogram does not match the CLI.
+~frame.chill_plus(graph="mutual")~ and ~seams chill-plus --graph mutual~ use the mutual four-neighbour list and print ~clathrate 1 interClathrate 7 water 242~.
 
 * Cubic ice and an sI cage
 
@@ -42,14 +42,17 @@ These dumps are angstroms, and that window covers the oxygen-oxygen contacts of 
 The CLI ~--cage-edge~ and ~seams_frame_signature_edge~ take that window.
 ~none~ turns the window off: every ring the neighbour list already accepted can be a face, and the cage bound is the face census alone.
 On sI, sII, the sI 2×2×2 cell and the sII 10×10×10 cell the default and ~none~ return the same cages.
-The installed Python ~Frame.cages_by_signature~ takes the signature and an optional ~max_ring_size~.
-Lua passes cutoff and graph.
+The installed Python ~Frame.cages_by_signature~ takes the signature, an optional ~max_ring_size~, and an optional ~edge~.
+~edge="none"~ is the CLI ~--cage-edge none~.
+Lua passes cutoff, graph, and edge.
 
 #+begin_src python
 import pydseams as ds
 
 frame = ds.read("input/traj/genice_sI.lammpstrj", atom_type=1)
 found = frame.cages_by_signature("512")
+assert len(found) == 2 and found.n_atoms == 40
+found = frame.cages_by_signature("512", edge="none")
 assert len(found) == 2 and found.n_atoms == 40
 found = frame.cages_by_signature("512", max_ring_size=6)
 found = frame.cages_by_signature("51262", max_ring_size=8)
@@ -58,7 +61,7 @@ found = frame.cages_by_signature("51262", max_ring_size=8)
 #+begin_src lua
 local dseams = require("dseams")
 local found = dseams.cages_by_signature(frame, "512")
-found = dseams.cages_by_signature(frame, "512", {cutoff = 3.5, graph = "cutoff"})
+found = dseams.cages_by_signature(frame, "512", {cutoff = 3.5, graph = "cutoff", edge = "none"})
 found = dseams.cages_by_signature(frame, "51262", {cutoff = 3.5, graph = "cutoff"})
 #+end_src
 

@@ -130,6 +130,10 @@ nop_line("tri", frame, {all = true})
 
 local guest = dseams.read(root .. "/input/traj/genice_sI.lammpstrj", {type = 1})
 local signed = dseams.cages_by_signature(guest, "512", {cutoff = 3.5, graph = "cutoff"})
+local open_edge = dseams.cages_by_signature(guest, "512", {cutoff = 3.5, graph = "cutoff", edge = "none"})
+local tight = dseams.cages_by_signature(guest, "512", {cutoff = 3.5, graph = "cutoff", edge = "1,2"})
+assert(open_edge.n_cages == signed.n_cages and open_edge.n_atoms == signed.n_atoms)
+assert(tight.n_cages == 0)
 guest:close()
 io.write(string.format("si sig %d %d\n", signed.n_cages, signed.n_atoms))
 

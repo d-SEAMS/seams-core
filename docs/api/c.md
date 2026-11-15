@@ -755,6 +755,14 @@ The call is in `docs/examples/c_api_tour.c`. The run prints:
 capi seams_signature_cages 2 40
 ```
 
+### seams_signature_cages_edge
+
+The call is in `docs/examples/c_api_tour.c`. The run prints:
+
+```
+capi seams_signature_cages_edge 2 40
+```
+
 ### seams_system_symmetry
 
 The call is in `docs/examples/c_api_tour.c`. The run prints:
@@ -5193,6 +5201,50 @@ printf("d-SEAMS %s\n", seams_version_string());
 The tour call is in `docs/examples/c_api_tour.c`.
 
 Errors: None.
+
+Example: `docs/examples/c_api_tour.c`
+
+### seams_signature_cages_edge
+
+Purpose: Closed cages of one ring census with an explicit face-edge window.
+
+Same search as seams_signature_cages(). edge NULL or "" keeps the default window 2.65,3.15 in the coordinate units of the file. "none" leaves the cage bound to the face census.
+
+```c
+seams_status seams_signature_cages_edge(seams_system *sys, double cutoff, int type, int graph, const char *spec, const char *edge, size_t *n_cages, size_t *n_atoms);
+```
+
+Parameters: `sys`, `cutoff`, `type`, `graph`, `spec`, `edge`, `n_cages`, `n_atoms`.
+
+- `sys`: Frame handle.
+- `cutoff`: Positive finite cutoff, Angstrom.
+- `type`: Species filter.
+- `graph`: SEAMS_GRAPH_CUTOFF or SEAMS_GRAPH_MUTUAL.
+- `spec`: Signature text such as "512" or "hc". Must be non-NULL.
+- `edge`: Face-edge window, or NULL. "none" turns the window off.
+- `n_cages`: Receives the cage count.
+- `n_atoms`: Receives the vertex count.
+
+Returns: Same codes as seams_cages_signature().
+
+Handle access: Non-const only because the call clears the handle's error slot on entry, so seams_handle_error() reports this call. It reads the frame and keeps no scratch on the handle.
+
+Ownership: The caller owns sys; the call borrows it. spec and edge are read during the call only. n_cages and n_atoms are caller storage that the call fills. The library keeps no pointer to any argument.
+
+Thread safety: Exclusive use of sys.
+
+Units: as given for each parameter above.
+
+Example:
+
+```c
+size_t n_cages = 0, n_atoms = 0;
+seams_signature_cages_edge(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, "512", "none", &n_cages, &n_atoms);
+```
+
+The tour call is in `docs/examples/c_api_tour.c`.
+
+Errors: SEAMS_ERR_NULL, SEAMS_ERR_RANGE, SEAMS_ERR_BOX, SEAMS_ERR_ARG, SEAMS_ERR_STATE, SEAMS_ERR_NOMEM, or SEAMS_ERR_INTERNAL. seams_last_error() holds the detail, and seams_handle_error(handle) when the call took a handle.
 
 Example: `docs/examples/c_api_tour.c`
 <!-- API_SYMBOLS_END -->

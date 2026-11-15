@@ -335,11 +335,11 @@ end
 --- dseams.seededCageAffiliation.
 dseams.seededCageAffiliation = dseams.cages
 
---- Hexagonal and double-diamond membership. The default graph is seeded.
+--- Closed cages of one ring census. o.edge nil keeps 2.65,3.15. "none" turns the window off.
 function dseams.cages_by_signature(cloud, spec, o)
   o = opts(o)
   local n_cages, n_atoms = cloud._sys:signature(
-    o.cutoff or 3.5, o.type or 0, graph_of(o.graph), spec)
+    o.cutoff or 3.5, o.type or 0, graph_of(o.graph), spec, o.edge)
   return {n_cages = n_cages, n_atoms = n_atoms}
 end
 

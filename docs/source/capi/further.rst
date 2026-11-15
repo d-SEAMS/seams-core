@@ -4,7 +4,7 @@ Further analyses
 
 Brine fronts, topology, and the remaining exports.
 
-Generated from the comments on the ``SEAMS_API`` declarations in ``include/seams.h``. This tree has 83 exports. ``meson test docs_capi_symbols`` fails if a declaration is missing from these pages, and ``meson test docs_capi_examples`` compiles the example when this page has one.
+Generated from the comments on the ``SEAMS_API`` declarations in ``include/seams.h``. This tree has 84 exports. ``meson test docs_capi_symbols`` fails if a declaration is missing from these pages, and ``meson test docs_capi_examples`` compiles the example when this page has one.
 
 .. _capi-seams_brine_analyse:
 

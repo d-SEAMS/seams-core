@@ -1563,6 +1563,14 @@ int seams_frame_signature_vertices(seams_frame *frame, double cutoff, int type,
                                    const char *graph, const char *spec,
                                    int cage_index, int *vertices, int cap,
                                    int *n_vertices) {
+  return seams_frame_signature_vertices_edge(frame, cutoff, type, graph, spec, nullptr,
+                                             cage_index, vertices, cap, n_vertices);
+}
+
+int seams_frame_signature_vertices_edge(seams_frame *frame, double cutoff, int type,
+                                        const char *graph, const char *spec,
+                                        const char *edge, int cage_index, int *vertices,
+                                        int cap, int *n_vertices) {
   clear_error();
   if (frame == nullptr || spec == nullptr || n_vertices == nullptr) {
     set_error("signature vertices need a frame, a census, and a length");
@@ -1570,7 +1578,7 @@ int seams_frame_signature_vertices(seams_frame *frame, double cutoff, int type,
   }
   try {
     const auto lists =
-        signature_vertex_lists(frame, cutoff, type, graph, spec, nullptr);
+        signature_vertex_lists(frame, cutoff, type, graph, spec, edge);
     if (cage_index < 0 || cage_index >= static_cast<int>(lists.size())) {
       set_error("cage index is outside the signature match");
       return 1;

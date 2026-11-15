@@ -319,6 +319,12 @@ int main(void) {
   expect(seams_signature_cages(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, "512", &n_sig, &n_sig_atoms) ==
              SEAMS_OK,
          "signature cages");
+  size_t n_edge = 0;
+  size_t n_edge_atoms = 0;
+  expect(seams_signature_cages_edge(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, "512", "", &n_edge,
+                                    &n_edge_atoms) == SEAMS_OK,
+         "signature edge default");
+  expect(n_edge == n_sig && n_edge_atoms == n_sig_atoms, "empty edge matches the default window");
 
   int *shell = calloc((size_t)n, sizeof(int));
   expect(seams_system_symmetry(sys, 0.0, shell, (size_t)n) == SEAMS_OK, "symmetry");

@@ -270,6 +270,13 @@ int main(int argc, char **argv) {
   need("sig2", seams_signature_cages(guest, 3.5, 1, SEAMS_GRAPH_CUTOFF, "512", &n_cages, &n_atoms),
        guest);
   printf("capi seams_signature_cages %zu %zu\n", n_cages, n_atoms);
+  n_cages = 0;
+  n_atoms = 0;
+  need("sig-edge",
+       seams_signature_cages_edge(guest, 3.5, 1, SEAMS_GRAPH_CUTOFF, "512", "none", &n_cages,
+                                  &n_atoms),
+       guest);
+  printf("capi seams_signature_cages_edge %zu %zu\n", n_cages, n_atoms);
 
   int *shell = calloc((size_t)n, sizeof(int));
   need("sym", seams_system_symmetry(ih, 0, shell, (size_t)n), ih);

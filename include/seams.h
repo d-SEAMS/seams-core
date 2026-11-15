@@ -1570,6 +1570,42 @@ SEAMS_API seams_status seams_signature_cages(seams_system *sys, double cutoff, i
                                              size_t *n_atoms);
 
 /**
+ * @brief Closed cages of one ring census with an explicit face-edge window.
+ *
+ * Same search as seams_signature_cages(). edge NULL or "" keeps the default
+ * window 2.65,3.15 in the coordinate units of the file. "none" leaves the
+ * cage bound to the face census.
+ *
+ * @param sys Frame handle.
+ * @param cutoff Positive finite cutoff, Angstrom.
+ * @param type Species filter.
+ * @param graph ::SEAMS_GRAPH_CUTOFF or ::SEAMS_GRAPH_MUTUAL.
+ * @param spec Signature text such as "512" or "hc". Must be non-NULL.
+ * @param edge Face-edge window, or NULL. "none" turns the window off.
+ * @param n_cages Receives the cage count.
+ * @param n_atoms Receives the vertex count.
+ * @return Same codes as seams_cages_signature().
+ * @par Handle access
+ * Non-const only because the call clears the handle's error slot on
+ * entry, so seams_handle_error() reports this call. It reads the frame
+ * and keeps no scratch on the handle.
+ * @par Ownership
+ * The caller owns sys; the call borrows it. spec and edge are read during
+ * the call only. n_cages and n_atoms are caller storage that the call fills.
+ * The library keeps no pointer to any argument.
+ * @par Thread safety
+ * Exclusive use of sys.
+ * @par Example
+ * @code
+ * size_t n_cages = 0, n_atoms = 0;
+ * seams_signature_cages_edge(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, "512", "none", &n_cages, &n_atoms);
+ * @endcode
+ */
+SEAMS_API seams_status seams_signature_cages_edge(seams_system *sys, double cutoff, int type,
+                                                  int graph, const char *spec, const char *edge,
+                                                  size_t *n_cages, size_t *n_atoms);
+
+/**
  * @brief Local Steinhardt q_l on the cutoff shell, and the average on request.
  *
  * This is seams_ql() with the cutoff graph.

@@ -4,7 +4,7 @@ Neighbours
 
 Build a neighbour list and read it back.
 
-Generated from the comments on the ``SEAMS_API`` declarations in ``include/seams.h``. This tree has 83 exports. ``meson test docs_capi_symbols`` fails if a declaration is missing from these pages, and ``meson test docs_capi_examples`` compiles the example when this page has one.
+Generated from the comments on the ``SEAMS_API`` declarations in ``include/seams.h``. This tree has 84 exports. ``meson test docs_capi_symbols`` fails if a declaration is missing from these pages, and ``meson test docs_capi_examples`` compiles the example when this page has one.
 
 .. literalinclude:: ../../../docs/examples/capi_neighbours.c
    :language: c

@@ -192,6 +192,12 @@ int seams_frame_signature_vertices(seams_frame *frame, double cutoff, int type,
                                    const char *graph, const char *spec,
                                    int cage_index, int *vertices, int cap,
                                    int *n_vertices);
+/** Same indices with the face-edge window of seams_frame_signature_edge.
+ * NULL or "" keeps 2.65,3.15. "none" leaves the window off. @ingroup lang_cages */
+int seams_frame_signature_vertices_edge(seams_frame *frame, double cutoff, int type,
+                                        const char *graph, const char *spec,
+                                        const char *edge, int cage_index, int *vertices,
+                                        int cap, int *n_vertices);
 
 /** @brief seams_frame_rdf_nbins. @ingroup lang_more */
 int seams_frame_rdf_nbins(double rmax, int nbins);

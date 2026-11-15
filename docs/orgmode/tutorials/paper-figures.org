@@ -14,8 +14,8 @@ Python is ~pip install pydseamslib~.
 | mixed frame | =exampleTraj.lammpstrj=, type 2 | cutoff CHILL+ versus cages | 9 interfacial clathrate, no complete cage |
 
 The R and Julia fronts also report 4096 cubic on the first row.
-They call ~libseams_lang~ with the mutual four-neighbour list.
-On this lattice that list and the cutoff list agree.
+They call ~libseams_lang~ with the cutoff neighbour list, the same default as ~Frame.chill_plus~.
+On this lattice that list and the mutual four-neighbour list agree.
 
 The nucleation, nanotube, monolayer, and in-plane RDF figures need the figshare dumps.
 Point the same functions at those files.

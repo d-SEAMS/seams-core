@@ -502,7 +502,7 @@ def python_extra():
         ),
         "userframe.Frame.cages_by_signature": (
             "Closed cages of one ring census.",
-            "self; signature; max_ring_size",
+            "self; signature; max_ring_size; edge",
             "A list whose length is the cage count. n_atoms is the vertex count.",
             "The caller owns the list. The C call does not return one vertex list per cage.",
             "RuntimeError whose text is seams_last_error.",

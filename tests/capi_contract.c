@@ -624,6 +624,12 @@ static seams_status p_signature_cages(seams_system *sys, double cutoff, size_t l
   return seams_signature_cages(sys, cutoff, 0, g_graph, "ddc", g_null_out ? NULL : &n_cages,
                                g_null_out ? NULL : &n_atoms);
 }
+static seams_status p_signature_cages_edge(seams_system *sys, double cutoff, size_t len) {
+  (void)len;
+  size_t n_cages = 0, n_atoms = 0;
+  return seams_signature_cages_edge(sys, cutoff, 0, g_graph, "512", "", g_null_out ? NULL : &n_cages,
+                                    g_null_out ? NULL : &n_atoms);
+}
 static seams_status p_brine(seams_system *sys, double cutoff, size_t len) {
   (void)cutoff;
   seams_brine *front = NULL;
@@ -746,6 +752,7 @@ static void analysis_contract(void) {
   probe("seams_cages", p_cages, C | O | G, 0);
   probe("seams_cages_signature", p_cages_signature, C | O | G, 0);
   probe("seams_signature_cages", p_signature_cages, C | O | G, 0);
+  probe("seams_signature_cages_edge", p_signature_cages_edge, C | O | G, 0);
   probe("seams_brine_analyse", p_brine, L | O, 0);
   probe("seams_rdf", p_rdf, C | L | O, 20);
   probe("seams_running_cn", p_running_cn, C | L | O, 20);

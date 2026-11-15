@@ -745,10 +745,11 @@ static int sys_signature(lua_State *L) {
   SystemBox *box = system_box(L, 1);
   size_t n_cages = 0;
   size_t n_atoms = 0;
-  check_ok(L, seams_signature_cages(box->sys, luaL_checknumber(L, 2),
-                                    (int)luaL_checkinteger(L, 3),
-                                    (int)luaL_checkinteger(L, 4), luaL_checkstring(L, 5),
-                                    &n_cages, &n_atoms));
+  const char *edge = luaL_optstring(L, 6, "");
+  check_ok(L, seams_signature_cages_edge(box->sys, luaL_checknumber(L, 2),
+                                         (int)luaL_checkinteger(L, 3),
+                                         (int)luaL_checkinteger(L, 4), luaL_checkstring(L, 5),
+                                         edge, &n_cages, &n_atoms));
   lua_pushinteger(L, (lua_Integer)n_cages);
   lua_pushinteger(L, (lua_Integer)n_atoms);
   return 2;

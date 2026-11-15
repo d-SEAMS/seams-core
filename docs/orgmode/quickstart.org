@@ -153,8 +153,8 @@ seams symmetry input/traj/mW_cubic.lammpstrj --type 1
 * Python and Lua
 
 ~import dseams~ is the in-tree module over ~libseams~.
-The Frame package is [[https://github.com/d-SEAMS/PydSEAMSlib][pydseams]]
-(~pip install pydseamslib~, compiled module ~yoda~).
+The Frame package ships in this tree as ~pydseamslib~
+(~pip install pydseamslib~, import ~pydseams~).
 ~require("dseams")~ is the in-tree Lua and Fennel module over the same
 header. The 1.x Lua library remains
 [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]].

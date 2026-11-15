@@ -331,6 +331,16 @@ extern "C" {
         n_cages: *mut usize,
         n_atoms: *mut usize,
     ) -> c_int;
+    pub fn seams_signature_cages_edge(
+        sys: *mut seams_system,
+        cutoff: f64,
+        r#type: c_int,
+        graph: c_int,
+        spec: *const c_char,
+        edge: *const c_char,
+        n_cages: *mut usize,
+        n_atoms: *mut usize,
+    ) -> c_int;
     pub fn seams_steinhardt(
         sys: *mut seams_system,
         cutoff: f64,

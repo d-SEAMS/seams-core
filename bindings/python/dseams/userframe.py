@@ -158,11 +158,35 @@ def _library():
         ctypes.POINTER(ctypes.c_int),
         ctypes.POINTER(ctypes.c_int),
     ]
+    lib.seams_frame_signature_edge.restype = ctypes.c_int
+    lib.seams_frame_signature_edge.argtypes = [
+        ctypes.c_void_p,
+        ctypes.c_double,
+        ctypes.c_int,
+        ctypes.c_char_p,
+        ctypes.c_char_p,
+        ctypes.c_char_p,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.POINTER(ctypes.c_int),
+    ]
     lib.seams_frame_signature_vertices.restype = ctypes.c_int
     lib.seams_frame_signature_vertices.argtypes = [
         ctypes.c_void_p,
         ctypes.c_double,
         ctypes.c_int,
+        ctypes.c_char_p,
+        ctypes.c_char_p,
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+        ctypes.c_int,
+        ctypes.POINTER(ctypes.c_int),
+    ]
+    lib.seams_frame_signature_vertices_edge.restype = ctypes.c_int
+    lib.seams_frame_signature_vertices_edge.argtypes = [
+        ctypes.c_void_p,
+        ctypes.c_double,
+        ctypes.c_int,
+        ctypes.c_char_p,
         ctypes.c_char_p,
         ctypes.c_char_p,
         ctypes.c_int,
@@ -327,55 +351,100 @@ class Frame:
         self._cages = CageScore(hc, ddc)
         return self._cages
 
-    def cages_by_signature(self, signature, max_ring_size=None):
+    def cages_by_signature(self, signature, max_ring_size=None, edge=None):
         """Closed cages of one ring census.
 
         Each dict has ``signature`` and ``vertices`` (atom indices of
         that cage). ``n_atoms`` on the list is the number of distinct
         vertices across the cages.
+
+        ``edge`` is the face-edge window. ``None`` keeps ``2.65,3.15``
+        in the coordinate units of the file. ``"none"`` leaves the cage
+        bound to the face census, the same string as ``--cage-edge``.
         """
         del max_ring_size  # the C search picks the depth from the signature
         lib = _library()
         n_cages = ctypes.c_int()
         n_atoms = ctypes.c_int()
         spec = str(signature).encode()
-        code = lib.seams_frame_signature(
-            self._ptr,
-            ctypes.c_double(self.cutoff),
-            ctypes.c_int(0),
-            b"cutoff",
-            spec,
-            ctypes.byref(n_cages),
-            ctypes.byref(n_atoms),
-        )
+        edge_bytes = None if edge is None else str(edge).encode()
+        if edge_bytes is None:
+            code = lib.seams_frame_signature(
+                self._ptr,
+                ctypes.c_double(self.cutoff),
+                ctypes.c_int(0),
+                b"cutoff",
+                spec,
+                ctypes.byref(n_cages),
+                ctypes.byref(n_atoms),
+            )
+        else:
+            code = lib.seams_frame_signature_edge(
+                self._ptr,
+                ctypes.c_double(self.cutoff),
+                ctypes.c_int(0),
+                b"cutoff",
+                spec,
+                edge_bytes,
+                ctypes.byref(n_cages),
+                ctypes.byref(n_atoms),
+            )
         _check(lib, code)
         found = []
         for cage_index in range(int(n_cages.value)):
             n_vertices = ctypes.c_int()
-            code = lib.seams_frame_signature_vertices(
-                self._ptr,
-                ctypes.c_double(self.cutoff),
-                ctypes.c_int(0),
-                b"cutoff",
-                spec,
-                cage_index,
-                None,
-                0,
-                ctypes.byref(n_vertices),
-            )
+            if edge_bytes is None:
+                code = lib.seams_frame_signature_vertices(
+                    self._ptr,
+                    ctypes.c_double(self.cutoff),
+                    ctypes.c_int(0),
+                    b"cutoff",
+                    spec,
+                    cage_index,
+                    None,
+                    0,
+                    ctypes.byref(n_vertices),
+                )
+            else:
+                code = lib.seams_frame_signature_vertices_edge(
+                    self._ptr,
+                    ctypes.c_double(self.cutoff),
+                    ctypes.c_int(0),
+                    b"cutoff",
+                    spec,
+                    edge_bytes,
+                    cage_index,
+                    None,
+                    0,
+                    ctypes.byref(n_vertices),
+                )
             _check(lib, code)
             buf = (ctypes.c_int * int(n_vertices.value))()
-            code = lib.seams_frame_signature_vertices(
-                self._ptr,
-                ctypes.c_double(self.cutoff),
-                ctypes.c_int(0),
-                b"cutoff",
-                spec,
-                cage_index,
-                buf,
-                int(n_vertices.value),
-                ctypes.byref(n_vertices),
-            )
+            if edge_bytes is None:
+                code = lib.seams_frame_signature_vertices(
+                    self._ptr,
+                    ctypes.c_double(self.cutoff),
+                    ctypes.c_int(0),
+                    b"cutoff",
+                    spec,
+                    cage_index,
+                    buf,
+                    int(n_vertices.value),
+                    ctypes.byref(n_vertices),
+                )
+            else:
+                code = lib.seams_frame_signature_vertices_edge(
+                    self._ptr,
+                    ctypes.c_double(self.cutoff),
+                    ctypes.c_int(0),
+                    b"cutoff",
+                    spec,
+                    edge_bytes,
+                    cage_index,
+                    buf,
+                    int(n_vertices.value),
+                    ctypes.byref(n_vertices),
+                )
             _check(lib, code)
             found.append(
                 {
