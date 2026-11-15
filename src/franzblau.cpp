@@ -33,6 +33,9 @@
 #include <omp.h>
 #endif
 
+void countSourceShell2(const std::size_t *rowFirst, const int *cols, int nVertices,
+                       int src, int maxDepth, int maxLvl, int minSize, int cap,
+                       std::vector<int> *hist, int epoch);
 int countFourShell(const std::vector<int> &L2, const std::uint64_t *shellArms,
                    const std::uint64_t *shellAdj, int lwords);
 
@@ -1971,6 +1974,27 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
                          bool legacyPairs = false, bool skipOdd = false,
                          int minSize = 3, RingCall call = {}) {
   const int nVertices = static_cast<int>(adjacency.size());
+  // A two-word shell counts in its own file. The three-word instantiation
+  // does not take this branch, and keeps the code it was tuned with.
+  if constexpr (ShellWords != 3) {
+    if (call.hist != nullptr && call.perAtom == nullptr && through == nullptr &&
+        !legacyPairs && maxDepth <= 7 && nVertices > 0 && nVertices <= 4096) {
+      int maxDeg = 0;
+      for (int i = 0; i < nVertices; i++) {
+        const int deg = static_cast<int>(adjacency.first[static_cast<std::size_t>(i + 1)] -
+                                         adjacency.first[static_cast<std::size_t>(i)]);
+        if (deg > maxDeg) {
+          maxDeg = deg;
+        }
+      }
+      if (((maxDeg + 63) >> 6) == 2) {
+        countSourceShell2(adjacency.first.data(), adjacency.cols.data(), nVertices, src,
+                          maxDepth, maxLvl, minSize, call.cap, call.hist,
+                          gChordEpoch.load(std::memory_order_relaxed));
+        return;
+      }
+    }
+  }
   if (static_cast<int>(scr.lvl.size()) != nVertices) {
     scr.lvl.assign(static_cast<std::size_t>(nVertices), -1);
     scr.touched.clear();
