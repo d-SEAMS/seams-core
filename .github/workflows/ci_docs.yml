@@ -161,6 +161,9 @@ jobs:
           # PYDSEAMS211 is only the parity oracle. Snippets import the in-tree package.
           env -u LD_LIBRARY_PATH pixi run -e default meson test -C bbdir --print-errorlogs --no-rebuild python_frame_parity "${names[@]}"
 
+      - name: Export the org book
+        run: pixi run -e docs mkrst
+
       - name: Link check
         run: pixi run -e docs sphinx-build -W --keep-going -j 2 -b linkcheck -d docs/doctrees docs/source docs/linkcheck
 
@@ -179,6 +182,9 @@ jobs:
             echo "R check reported undocumented objects"
             exit 1
           fi
+
+      - name: Export the org book for doctest
+        run: pixi run -e docs mkrst
 
       - name: Python doctest
         run: |

@@ -387,12 +387,9 @@ def _stage_native_html():
         env["SEAMS_LANG_LIB"] = os.path.join(root, "bbdir", "bindings", "libseams_lang.so")
         env["SEAMS_LIB"] = os.path.join(root, "bbdir", "src", "libseams.so")
         for name, project in pairs:
-            prepared = subprocess.run(
-                [julia, "--project=" + project, "-e", "using Pkg; Pkg.instantiate()"],
-                cwd=root,
-                env=env,
-                check=False,
-            )
+            # make.jl develops the local package (and libseams_jll for
+            # Dseams) before instantiate. A bare instantiate looks the
+            # unregistered packages up in General and fails.
             built_docs = subprocess.run(
                 [julia, "--project=" + project, os.path.join(project, "make.jl")],
                 cwd=root,
@@ -403,9 +400,7 @@ def _stage_native_html():
             index = os.path.join(built, "index.html")
             dest = os.path.join(native, name)
             if _publish_build() and (
-                prepared.returncode != 0
-                or built_docs.returncode != 0
-                or not os.path.isfile(index)
+                built_docs.returncode != 0 or not os.path.isfile(index)
             ):
                 raise SystemExit("Documenter failed for " + name)
             if os.path.isfile(index):
@@ -607,6 +602,52 @@ def _walkthrough_stubs():
 
 _link_walkthrough()
 _walkthrough_stubs()
+
+
+def _stub_unread_images():
+    """linkcheck and doctest do not draw the molecule stills.
+
+    The pages still name the pictures. A readable file keeps ``-W`` from
+    failing the book on an image that this builder is not supposed to render.
+    """
+    if _sphinx_builder() not in ("linkcheck", "doctest"):
+        return
+    import pathlib
+    import re
+
+    source = pathlib.Path(_source).resolve()
+    pattern = re.compile(r"(?<![\w/])((?:\.\./)*[A-Za-z0-9_./-]+\.(?:png|svg|jpg))")
+    wanted = set()
+    for page in source.rglob("*"):
+        if page.suffix.lower() not in {".md", ".rst"}:
+            continue
+        try:
+            body = page.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        for match in pattern.findall(body):
+            target = (page.parent / match).resolve()
+            try:
+                target.relative_to(source)
+            except ValueError:
+                continue
+            wanted.add(target)
+    for target in sorted(wanted):
+        if target.is_file():
+            continue
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if target.suffix.lower() == ".png":
+            _write_png_stub(str(target))
+        elif target.suffix.lower() == ".svg":
+            target.write_text(
+                '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>\n',
+                encoding="utf-8",
+            )
+        else:
+            target.write_bytes(b"")
+
+
+_stub_unread_images()
 os.environ["DSEAMS_DOC_BUILD"] = "1"
 sys.path.insert(0, os.path.abspath(os.path.join(_docs, "..", "bindings", "python")))
 _doxyrest = os.path.abspath(os.path.join(_source, "../../subprojects/doxyrest/sphinx"))

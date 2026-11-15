@@ -96,7 +96,7 @@ jobs:
       # The locked OVITO wheel matches the locked PySide6 and Qt; a newer
       # wheel needs a newer Qt and import ovito fails.
       - name: Install Snakemake into the pixi interpreter
-        run: pixi run python -m pip install 'snakemake>=8'
+        run: pixi run python -m pip install 'snakemake>=8' 'sqq==0.5.8'
       - name: Install EGL for OVITO
         run: sudo apt-get update && sudo apt-get install -y libegl1 libglvnd0
       - name: Build and run the full suite

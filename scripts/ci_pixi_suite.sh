@@ -20,6 +20,7 @@ meson setup build --buildtype=release \
   -Dwith_tests=true -Dwith_python=true -Dwith_cli=true \
   -Dwith_gromacs=enabled -Dwith_lammps=enabled \
   -Dwith_openmm=enabled -Dwith_plumed=enabled \
+  -Dpaper_full=true \
   -Dlammps_src_include="$lammps_src" -Dfennel_lua="$fennel" \
   ${SEAMS_MESON_ARGS:-}
 ninja -C build -j2
