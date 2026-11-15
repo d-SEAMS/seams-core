@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
 # Copyright (c) d-SEAMS developers
-"""Run the minimal examples and require each public symbol to name one.
+"""Run the C, C++ and CLI minimal examples and require each public symbol to name one.
 
 Usage: run_examples.py ROOT BUILD
-ROOT is the source tree. BUILD is the meson build tree.
+ROOT is the source tree. BUILD is the meson build tree. The Python, Rust,
+Fortran, Julia, R and Lua minimal examples live in the binding
+repositories.
 """
 
-import importlib.util
 import os
 import re
-import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "docs"))
-from toolchain import c_compiler, cxx_compiler, fortran_compiler, gfortran_link, link_command  # noqa: E402
+from toolchain import c_compiler, cxx_compiler, link_command  # noqa: E402
 
 import check_c_symbols as symbols  # noqa: E402
 import check_examples  # noqa: E402
@@ -27,11 +27,6 @@ EXAMPLES = {
     # minimal_c.c is the short quickstart and does not name the macros.
     "c": "docs/examples/c_api_tour.c",
     "cxx": "docs/examples/minimal_cpp.cpp",
-    "python": "docs/examples/minimal_py.py",
-    "rust": "docs/examples/minimal_rust.rs",
-    "fortran": "docs/examples/minimal_fortran.f90",
-    "julia": "docs/examples/minimal_julia.jl",
-    "r": "docs/examples/minimal_r.R",
 }
 
 
@@ -66,11 +61,6 @@ def require_example_links():
     groups = {
         "c": symbols.c_header_symbols(),
         "cxx": symbols.cxx_symbols(),
-        "python": symbols.python_symbols(),
-        "rust": symbols.rust_symbols(),
-        "fortran": symbols.fortran_symbols(),
-        "julia": symbols.julia_symbols(),
-        "r": symbols.r_symbols(),
     }
     blobs = page_blobs()
     missing = []
@@ -132,151 +122,10 @@ def compile_and_run(build):
         )
     )
     run([str(cpp_bin), fixture], env=env)
-    run(
-        [sys.executable, str(ROOT / "docs/examples/minimal_py.py"), fixture, str(build / "src")],
-        env=env,
-    )
     seams = build / "seams"
     if not seams.is_file():
         raise SystemExit("seams CLI was not built")
     run(["sh", str(ROOT / "docs/examples/minimal_cli.sh"), str(seams), fixture], env=env)
-    gfortran = fortran_compiler()
-    objects = []
-    for name in ("seams_kinds.f90", "seams_c.f90", "seams_support.f90", "seams.f90", "seams_methods.f90"):
-        obj = work / name.replace(".f90", ".o")
-        run(
-            [
-                gfortran,
-                "-J",
-                str(work),
-                "-I",
-                str(work),
-                "-c",
-                str(ROOT / "bindings/fortran/src" / name),
-                "-o",
-                str(obj),
-            ]
-        )
-        objects.append(str(obj))
-    f_bin = work / "minimal_fortran"
-    main_obj = work / "minimal_fortran.o"
-    run(
-        [
-            gfortran,
-            "-I",
-            str(work),
-            "-c",
-            str(ROOT / "docs/examples/minimal_fortran.f90"),
-            "-o",
-            str(main_obj),
-        ]
-    )
-    run(
-        link_command(
-            cxx,
-            [
-                str(main_obj),
-                *objects,
-                "-o",
-                str(f_bin),
-                "-L" + str(build / "src"),
-                "-lseams",
-                *gfortran_link(),
-                "-Wl,-rpath," + str(build / "src"),
-            ],
-        )
-    )
-    run([str(f_bin), fixture], env=env)
-    cargo = shutil.which("cargo")
-    if cargo is None:
-        raise SystemExit("cargo is not on PATH")
-    rust_env = env.copy()
-    rust_env["SEAMS_LIB_DIR"] = str(build / "src")
-    run(
-        [
-            cargo,
-            "fetch",
-            "--manifest-path",
-            str(ROOT / "bindings/rust/Cargo.toml"),
-        ],
-        env=rust_env,
-        cwd=ROOT,
-    )
-    run(
-        [
-            cargo,
-            "run",
-            "--offline",
-            "--quiet",
-            "--manifest-path",
-            str(ROOT / "bindings/rust/Cargo.toml"),
-            "--example",
-            "minimal",
-            "--",
-            fixture,
-        ],
-        env=rust_env,
-        cwd=ROOT,
-    )
-
-
-def binding_helpers():
-    path = ROOT / "docs" / "examples" / "run_binding.py"
-    spec = importlib.util.spec_from_file_location("run_binding", path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-def run_julia(build, fixture):
-    julia = binding_helpers().julia_bin()
-    sys.path.insert(0, str(ROOT / "bindings" / "julia"))
-    from instantiate import ensure
-
-    env = os.environ.copy()
-    ensure(julia, env)
-    env["DSEAMS_ROOT"] = str(ROOT)
-    env["SEAMS_LANG_LIB"] = str(build / "bindings" / "libseams_lang.so")
-    env["LD_LIBRARY_PATH"] = library_path(build)
-    run(
-        [
-            julia,
-            "--project=" + str(ROOT / "bindings/julia/Dseams"),
-            str(ROOT / "docs/examples/minimal_julia.jl"),
-            fixture,
-        ],
-        env=env,
-        cwd=ROOT,
-    )
-
-
-def run_r(build, fixture):
-    script, env = binding_helpers().install_r_package(build)
-    run([script, str(ROOT / "docs/examples/minimal_r.R"), fixture], env=env)
-
-
-def run_lua(build, fixture):
-    lua = shutil.which("lua5.4") or shutil.which("lua")
-    if lua is None:
-        raise SystemExit("lua is not on PATH")
-    sys.path.insert(0, str(ROOT / "docs"))
-    from lua_module import cpath_for
-
-    env = os.environ.copy()
-    env["LUA_PATH"] = str(ROOT / "bindings" / "lua") + "/?.lua;;"
-    env["LUA_CPATH"] = cpath_for(build, lua)
-    env["LD_LIBRARY_PATH"] = library_path(build)
-    env["OMP_NUM_THREADS"] = "1"
-    done = subprocess.run(
-        [lua, str(ROOT / "docs/examples/minimal_lua.lua"), fixture],
-        env=env,
-        cwd=ROOT,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-    )
-    if done.returncode != 0 or "lua clathrate 46" not in done.stdout:
-        raise SystemExit("lua example failed\n{}".format(done.stdout[-800:]))
 
 
 def main():
@@ -284,11 +133,7 @@ def main():
         raise SystemExit("usage: run_examples.py ROOT BUILD")
     build = Path(sys.argv[2])
     require_example_links()
-    fixture = str(ROOT / FIXTURE)
     compile_and_run(build)
-    run_julia(build, fixture)
-    run_r(build, fixture)
-    run_lua(build, fixture)
     print("docs examples ok")
 
 

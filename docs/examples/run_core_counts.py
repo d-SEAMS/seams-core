@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 # Copyright (c) d-SEAMS developers
-"""Compile and run the Ice Ih and sII examples.
+"""Compile and run the Ice Ih and sII examples in C, C++ and ctypes Python.
+
+The Lua, Julia and R copies of this census live in the binding
+repositories.
 
 Usage: run_core_counts.py ROOT BUILD
 """
 
 import os
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -17,7 +19,7 @@ from toolchain import c_compiler, cxx_compiler, link_command  # noqa: E402
 
 
 def library_path(build):
-    parts = [str(build / "src"), str(build / "bindings")]
+    parts = [str(build / "src")]
     current = os.environ.get("LD_LIBRARY_PATH")
     if current:
         parts.append(current)
@@ -80,51 +82,6 @@ def run_python(env):
     run([sys.executable, str(ROOT / "docs/examples/core_counts.py")], env=env)
 
 
-def run_lua(build, env):
-    lua = shutil.which("lua5.4") or shutil.which("lua")
-    if lua is None:
-        raise SystemExit("lua is not on PATH")
-    sys.path.insert(0, str(ROOT / "docs"))
-    from lua_module import cpath_for
-
-    lua_env = env.copy()
-    lua_env["LUA_PATH"] = str(ROOT / "bindings" / "lua") + "/?.lua;;"
-    lua_env["LUA_CPATH"] = cpath_for(build, lua)
-    run([lua, str(ROOT / "docs/examples/core_counts.lua")], env=lua_env)
-
-
-def run_julia(build, env):
-    sys.path.insert(0, str(ROOT / "docs/examples"))
-    import run_binding
-
-    julia = run_binding.julia_bin()
-    sys.path.insert(0, str(ROOT / "bindings" / "julia"))
-    from instantiate import ensure
-
-    ensure(julia, env)
-    julia_env = env.copy()
-    julia_env["DSEAMS_ROOT"] = str(ROOT)
-    julia_env["SEAMS_LANG_LIB"] = str(build / "bindings" / "libseams_lang.so")
-    run_binding.ensure_dseams(julia, julia_env)
-    run(
-        [
-            julia,
-            "--project=" + str(ROOT / "bindings/julia/Dseams"),
-            str(ROOT / "docs/examples/core_counts.jl"),
-        ],
-        env=julia_env,
-    )
-
-
-def run_r(build, env):
-    sys.path.insert(0, str(ROOT / "docs/examples"))
-    import run_binding
-
-    script, r_env = run_binding.install_r_package(build)
-    r_env = {**env, **r_env}
-    run([script, str(ROOT / "docs/examples/core_counts.R")], env=r_env)
-
-
 def main():
     if len(sys.argv) != 3:
         raise SystemExit("usage: run_core_counts.py ROOT BUILD")
@@ -134,9 +91,6 @@ def main():
     env["SEAMS_LIBDIR"] = str(build / "src")
     compile_c_family(build, env)
     run_python(env)
-    run_lua(build, env)
-    run_julia(build, env)
-    run_r(build, env)
     print("core counts ok")
 
 
