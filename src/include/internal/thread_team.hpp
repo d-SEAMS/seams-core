@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <exception>
+#include <initializer_list>
 #include <mutex>
 #include <vector>
 
@@ -30,6 +31,9 @@
 #endif
 #ifdef __linux__
 #include <sched.h>
+#endif
+#ifdef __GLIBC__
+#include <malloc.h>
 #endif
 
 extern "C" void lc_set_threads(int n);
@@ -72,6 +76,42 @@ inline void widenAffinity() {
     }
   }
   sched_setaffinity(0, sizeof(mask), &mask);
+#endif
+}
+
+// glibc hands the top of the heap back to the kernel past M_TRIM_THRESHOLD
+// and serves blocks above M_MMAP_THRESHOLD with fresh mappings. Both start
+// low and move with the allocation pattern, so the buffers one call freed
+// were faulted in again by the next call, by an amount that changed from
+// run to run. glibc has no per-library heap and these settings hold for
+// the whole process. SEAMS_MALLOC_TUNE=0 leaves them alone, and so does a
+// malloc setting the caller already made through MALLOC_*_ or
+// GLIBC_TUNABLES.
+inline void tuneHeap() {
+#ifdef __GLIBC__
+  static const bool tuned = [] {
+    const char *opt = std::getenv("SEAMS_MALLOC_TUNE");
+    if (opt != nullptr && (std::strcmp(opt, "0") == 0 || std::strcmp(opt, "off") == 0 ||
+                           std::strcmp(opt, "no") == 0)) {
+      return false;
+    }
+    for (const char *key : {"MALLOC_TRIM_THRESHOLD_", "MALLOC_MMAP_THRESHOLD_",
+                            "MALLOC_TOP_PAD_", "MALLOC_MMAP_MAX_"}) {
+      if (std::getenv(key) != nullptr) {
+        return false;
+      }
+    }
+    const char *tunables = std::getenv("GLIBC_TUNABLES");
+    if (tunables != nullptr && std::strstr(tunables, "glibc.malloc.") != nullptr) {
+      return false;
+    }
+    // 32 MiB is the largest mmap threshold glibc accepts on a 64-bit target.
+    const int mmapAt = sizeof(void *) >= 8 ? 32 << 20 : 4 << 20;
+    mallopt(M_MMAP_THRESHOLD, mmapAt);
+    mallopt(M_TRIM_THRESHOLD, 256 << 20);
+    return true;
+  }();
+  (void)tuned;
 #endif
 }
 
@@ -170,6 +210,7 @@ inline void prepareCompute() {
   // wait policy to active: with another runnable thread that spin sits in
   // the barrier for the whole stall. PinSession places the workers.
   widenAffinity();
+  tuneHeap();
 #ifdef SEAMS_HAS_OPENMP
   omp_set_dynamic(0);
 #endif
@@ -330,6 +371,7 @@ class FairWidth {
 public:
   explicit FairWidth(bool adopt = false)
       : placed_() {
+    tuneHeap();
 #ifdef SEAMS_HAS_OPENMP
     if (depth()++ == 0 && !omp_in_parallel() && fairEnabled()) {
       choose();

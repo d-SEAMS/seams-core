@@ -84,6 +84,15 @@ the table. Keys: ~SEAMS_FRAME~ / ~LAST~ / ~JOBS~ / ~TYPE~ /
 ~LINKCELL_TPP~ / ~BLOCK~, ~YODA_FENNEL_PATH~ / ~YODA_LUA_PATH~.
 Analysis choice is not this table.
 
+On glibc the first library call raises the heap trim threshold to
+256 MiB and the mmap threshold to 32 MiB. With the defaults, the
+buffers one call freed went back to the kernel and were faulted in
+again by the next call, and the same call varied by 10 to 30 percent
+between runs. glibc has one heap per process, so the setting holds
+for the caller too. ~SEAMS_MALLOC_TUNE=0~ in the process environment
+leaves malloc untouched. A caller that already set ~MALLOC_*_~ or a
+~glibc.malloc~ tunable keeps its own values.
+
 * Ice score and the CHILL+ star
 
 Two classifiers live in ~libyodaLib~. They answer different questions
