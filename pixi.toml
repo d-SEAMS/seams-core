@@ -62,6 +62,10 @@ lcov --remove bbdir-cov/meson-logs/coverage.info \
 """, depends-on = ["coverage-build"] }
 
 [environments]
+# linux-64-glibc239 is the plumed210 feature's platform. Keeping it off
+# the default environment means a glibc 2.39 runner still installs the
+# glibc 2.28 baseline unless a job names plumed210.
+default = { platforms = ["linux-64", "osx-64", "osx-arm64"] }
 docs = { features = ["docs"] }
 formalanalysis = { features = ["formalanalysis"] }
 mpi = { features = ["mpi"] }

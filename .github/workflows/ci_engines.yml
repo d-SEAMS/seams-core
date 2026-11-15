@@ -218,18 +218,18 @@ path = glob.glob(os.environ["CONDA_PREFIX"] + "/conda-meta/sysroot_linux-64-*.js
 version = json.load(open(path))["version"]
 print("sysroot_linux-64", version)
 major, minor = (int(part) for part in version.split(".")[:2])
-if (major, minor) < (2, 38):
-    sys.exit("sysroot %s is below 2.38" % version)
+if (major, minor) < (2, 39):
+    sys.exit("sysroot %s is below 2.39" % version)
 '
       - name: Build LAMMPS against PLUMED 2.10 and run both engine paths
         run: |
           set -euo pipefail
           pixi run -e plumed210 --platform linux-64-glibc239 bash -lc '
             set -euo pipefail
-            export PKG_CONFIG_PATH="$CONDA_PREFIX/lib/pkgconfig:$CONDA_PREFIX/lib.AVX2_256/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
-            export LIBRARY_PATH="$CONDA_PREFIX/lib:$CONDA_PREFIX/lib.AVX2_256${LIBRARY_PATH:+:$LIBRARY_PATH}"
-            export CPATH="$CONDA_PREFIX/include${CPATH:+:$CPATH}"
             prefix="$PWD/.lammps-plumed210"
+            export PKG_CONFIG_PATH="$CONDA_PREFIX/lib/pkgconfig:$CONDA_PREFIX/lib.AVX2_256/pkgconfig${PKG_CONFIG_PATH:+:$PKG_CONFIG_PATH}"
+            export LIBRARY_PATH="$prefix/lib:$CONDA_PREFIX/lib:$CONDA_PREFIX/lib.AVX2_256${LIBRARY_PATH:+:$LIBRARY_PATH}"
+            export CPATH="$prefix/include:$CONDA_PREFIX/include${CPATH:+:$CPATH}"
             # Warm cache: the script returns the header dir without compiling.
             src=$(sh scripts/build_lammps_plumed.sh "$prefix")
             export PATH="$prefix/bin:$PATH"
