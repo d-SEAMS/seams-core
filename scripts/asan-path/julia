@@ -1,0 +1,27 @@
+#!/bin/sh
+# Julia's LLVM JIT deletes a string it allocated with malloc. That is
+# inside jl_init_llvm, before any seams call. Preloading libasan aborts
+# the process there. The runtime is mapped when Julia loads libseams.
+here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+unset LD_PRELOAD
+case ":${ASAN_OPTIONS:-}:" in
+  *verify_asan_link_order*) ;;
+  *) ASAN_OPTIONS="verify_asan_link_order=0${ASAN_OPTIONS:+:$ASAN_OPTIONS}" ;;
+esac
+export ASAN_OPTIONS
+found=
+old_ifs=$IFS
+IFS=:
+for dir in $PATH; do
+  [ "$dir" = "$here" ] && continue
+  if [ -x "$dir/julia" ]; then
+    found=$dir/julia
+    break
+  fi
+done
+IFS=$old_ifs
+if [ -z "$found" ]; then
+  echo "julia is not on PATH" >&2
+  exit 1
+fi
+exec "$found" "$@"

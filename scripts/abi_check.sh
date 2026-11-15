@@ -16,6 +16,8 @@
 #     --no-load-undefined-interfaces -o scripts/abi_baseline.abi libseams.so
 # and the abi-instr path cut to src/seams_api.cpp.
 set -eu
+# nm and abidiff read the library. They abort when libasan is preloaded.
+unset LD_PRELOAD
 build=${1:?build directory}
 baseline=${2:?baseline file}
 mode=${3:-check}
