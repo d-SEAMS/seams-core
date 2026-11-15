@@ -1,0 +1,18 @@
+# Publishers return 403 to the link checker. Sphinx linkcheck ignores the same hosts.
+https://pubs\.acs\.org/
+https://onlinelibrary\.wiley\.com/
+https://pubs\.aip\.org/
+https://www\.tandfonline\.com/
+https://journals\.aps\.org/
+https://pubs\.rsc\.org/
+https://www\.sciencedirect\.com/
+
+# doi.org follows the redirect onto those publishers, which then return 403.
+https://doi\.org/10\.1021/
+https://doi\.org/10\.1002/
+https://doi\.org/10\.1063/
+https://doi\.org/10\.1080/
+
+# The Wilf notes host returns 403, including to a browser user agent.
+https://www\.math\.upenn\.edu/~wilf/
+https://www2\.math\.upenn\.edu/~wilf/

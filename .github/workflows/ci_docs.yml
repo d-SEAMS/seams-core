@@ -16,6 +16,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Mermaid syntax
+        run: python3 docs/check_mermaid.py
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           environments: docs
@@ -44,7 +46,7 @@ jobs:
           version: "1.10"
 
       - run: pixi run -e default setup
-      - run: pixi run -e default build
+      - run: pixi run -e default ninja -j2 -C bbdir
       - name: Julia project for the snippets
         run: julia --project=bindings/julia/Dseams bindings/julia/Dseams/dev/develop_jll.jl
 
@@ -92,8 +94,25 @@ jobs:
 
       - run: pixi run -e docs docbld
 
+      - name: Lychee
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          fail: true
+          args: >-
+            --no-progress
+            --include-fragments=full
+            --index-files index.html
+            --root-dir ${{ github.workspace }}/docs/build
+            --remap "https://docs.dseams.info file://${{ github.workspace }}/docs/build"
+            --max-retries 2
+            --timeout 30
+            --max-concurrency 4
+            --extensions html
+            docs/build
+          token: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Link check
-        run: pixi run -e docs sphinx-build -W --keep-going -b linkcheck -d docs/doctrees docs/source docs/linkcheck
+        run: pixi run -e docs sphinx-build -W --keep-going -j 2 -b linkcheck -d docs/doctrees docs/source docs/linkcheck
 
       - name: Julia Documenter
         run: |
@@ -124,7 +143,7 @@ jobs:
         run: |
           export SEAMS_LIBDIR="$PWD/bbdir/src"
           export LD_LIBRARY_PATH="$PWD/bbdir/src:$PWD/bbdir/bindings${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-          pixi run -e docs sphinx-build -W --keep-going -b doctest -d docs/doctrees docs/source docs/doctest
+          pixi run -e docs sphinx-build -W --keep-going -j 2 -b doctest -d docs/doctrees docs/source docs/doctest
 
       - name: Deploy to GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -132,3 +151,17 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/build
+
+      - name: Deploy to Netlify
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        run: |
+          set -euo pipefail
+          if [ -z "${NETLIFY_AUTH_TOKEN}" ] || [ -z "${NETLIFY_SITE_ID}" ]; then
+            echo "docs.dseams.info is served by Netlify."
+            echo "Add repository secrets NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID."
+            exit 1
+          fi
+          npx --yes netlify-cli@27.19.0 deploy --prod --dir=docs/build

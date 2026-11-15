@@ -774,6 +774,39 @@ def _skip_attributes(app, what, name, obj, skip, options):
     return skip
 
 
+def _relative_rst_links(app, doctree, docname):
+    """Org export writes ``file.org`` as ``name.rst``. Publish those as HTML."""
+    from docutils import nodes
+
+    for node in doctree.findall(nodes.reference):
+        uri = node.get("refuri")
+        if not uri or "://" in uri or uri.startswith(("#", "mailto:")):
+            continue
+        path, sep, frag = uri.partition("#")
+        if not path.endswith(".rst"):
+            continue
+        node["refuri"] = path[:-4] + ".html" + (sep + frag if sep else "")
+
+
+def _edit_org_source(app, pagename, templatename, context, doctree):
+    """Edit links name the Org source. Generated ``.rst`` is not in git."""
+
+    def edit_source_link(filename):
+        if not isinstance(filename, str) or not filename.endswith(".rst"):
+            return None
+        root = os.path.abspath(os.path.join(app.srcdir, "..", ".."))
+        rel = os.path.join("docs", "orgmode", filename[:-4] + ".org")
+        if not os.path.isfile(os.path.join(root, rel)):
+            return None
+        # HaoZeke/seams-core is the public tree that contains these Org files.
+        # d-SEAMS/seams-core main does not yet have the videos pages.
+        return "https://github.com/HaoZeke/seams-core/blob/main/" + rel
+
+    context["edit_source_link"] = edit_source_link
+
+
 def setup(app):
+    app.connect("doctree-resolved", _relative_rst_links)
+    app.connect("html-page-context", _edit_org_source)
     app.connect("build-finished", _copy_caption_tracks)
     app.connect("autodoc-skip-member", _skip_attributes)

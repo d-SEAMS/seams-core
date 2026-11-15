@@ -143,6 +143,7 @@ description = "Apply temporary fixes for documentation"
 depends-on = ["setup-doxyrest"]
 cmd = """
 cp scripts/patches/doxyrest/doxyrest.py subprojects/doxyrest/sphinx/doxyrest.py &&
+cp scripts/patches/doxyrest/doxyrest-shibuya.css subprojects/doxyrest/sphinx/css/doxyrest-shibuya.css &&
 patch -p1 -N -s < scripts/patches/doxyrest/enum_class_fix.patch || true
 """
 
@@ -158,7 +159,7 @@ cmd = "python3 ../../scripts/doxygen_version_header.py && doxygen Doxyfile_seams
 
 [feature.docs.tasks.sphinxbld]
 depends-on = ["mkrst", "doxybuild"]
-cmd = "sphinx-build -W --keep-going -b html -d docs/doctrees docs/source/ docs/build"
+cmd = "sphinx-build -W --keep-going -j 2 -b html -d docs/doctrees docs/source/ docs/build"
 
 [feature.docs.tasks.fetch-doxyyoda]
 description = "Download the doxyYoda 0.2.2 HTML theme"
@@ -190,8 +191,13 @@ description = "Copy FORD and LDoc HTML into the Sphinx publish tree"
 depends-on = ["sphinxbld", "ford", "ldoc"]
 cmd = "rm -rf docs/build/fortran docs/build/lua && cp -R docs/ford docs/build/fortran && cp -R docs/ldoc docs/build/lua"
 
-[feature.docs.tasks.docbld]
+[feature.docs.tasks.fix-built-links]
+description = "Repair generated anchor ids the HTML checker follows"
 depends-on = ["sphinxbld", "install-doxyhtml", "install-binding-docs"]
+cmd = "python3 docs/fix_built_links.py"
+
+[feature.docs.tasks.docbld]
+depends-on = ["fix-built-links"]
 
 [feature.docs.tasks.docdel]
 cwd = "docs"
