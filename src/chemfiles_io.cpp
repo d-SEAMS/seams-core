@@ -20,6 +20,7 @@
 #include <cctype>
 #include <cmath>
 #include <chrono>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <filesystem>
@@ -403,9 +404,9 @@ namespace {
 // edge of a tilted cell without removing the tilt padding, so those
 // frames stay on the native reader too. The file is walked once and kept.
 
-bool startsWith(const std::string &line, const char *prefix) {
+bool startsWith(const char *line, const char *prefix) {
   const auto n = std::char_traits<char>::length(prefix);
-  return line.size() >= n && line.compare(0, n, prefix) == 0;
+  return std::strncmp(line, prefix, n) == 0;
 }
 
 struct DumpIdIndex {
@@ -426,7 +427,13 @@ DumpIdIndex scanDumpIds(const std::string &path) {
   out.bytes = st.st_size;
   std::error_code ec;
   out.mtime = std::filesystem::last_write_time(path, ec);
-  std::ifstream in(path);
+  // getline and operator>> allocate inside libstdc++. A host that loads
+  // this library after that runtime (Julia) then frees those buffers
+  // with the sanitizer allocator. Read and split the line here instead.
+  std::FILE *in = std::fopen(path.c_str(), "r");
+  if (in == nullptr) {
+    return out;
+  }
   const auto t0 = std::chrono::steady_clock::now();
   int seen = 0;
   int natoms = 0;
@@ -436,7 +443,38 @@ DumpIdIndex scanDumpIds(const std::string &path) {
   bool atoms = false;
   bool tilted = false;
   std::vector<char> seenId;
-  std::string line;
+  // The characters live in a buffer this function mallocs and frees.
+  // A std::string grown by iostream would be allocated in libstdc++ and
+  // freed by the sanitizer build of this function.
+  struct DumpLine {
+    char *data = nullptr;
+    std::size_t len = 0;
+    std::size_t cap = 0;
+    void clear() {
+      len = 0;
+      if (data != nullptr) {
+        data[0] = '\0';
+      }
+    }
+    void push(char ch) {
+      if (len + 1 >= cap) {
+        const std::size_t next = cap == 0 ? 128 : cap * 2;
+        char *grown = static_cast<char *>(std::realloc(data, next));
+        if (grown == nullptr) {
+          return;
+        }
+        data = grown;
+        cap = next;
+      }
+      data[len++] = ch;
+      data[len] = '\0';
+    }
+    const char *c_str() const { return data != nullptr ? data : ""; }
+    ~DumpLine() { std::free(data); }
+    DumpLine() = default;
+    DumpLine(const DumpLine &) = delete;
+    DumpLine &operator=(const DumpLine &) = delete;
+  } line;
   auto finish = [&]() {
     if (seen <= 0) {
       return;
@@ -445,8 +483,20 @@ DumpIdIndex scanDumpIds(const std::string &path) {
     const bool ok = natoms > 0 && unique == natoms && !tilted;
     out.oneToN[static_cast<std::size_t>(seen)] = ok ? 1 : 0;
   };
-  while (std::getline(in, line)) {
-    if (startsWith(line, "ITEM: TIMESTEP")) {
+  auto nextLine = [&]() {
+    line.clear();
+    int ch = std::fgetc(in);
+    if (ch == EOF) {
+      return false;
+    }
+    while (ch != EOF && ch != '\n') {
+      line.push(static_cast<char>(ch));
+      ch = std::fgetc(in);
+    }
+    return true;
+  };
+  while (nextLine()) {
+    if (startsWith(line.c_str(), "ITEM: TIMESTEP")) {
       finish();
       seen += 1;
       atoms = false;
@@ -458,34 +508,44 @@ DumpIdIndex scanDumpIds(const std::string &path) {
       seenId.clear();
       continue;
     }
-    if (startsWith(line, "ITEM: BOX BOUNDS")) {
-      if (line.find("xy") != std::string::npos) {
-        for (int axis = 0; axis < 3 && std::getline(in, line); ++axis) {
-          std::istringstream bounds(line);
+    if (startsWith(line.c_str(), "ITEM: BOX BOUNDS")) {
+      if (std::strstr(line.c_str(), "xy") != nullptr) {
+        for (int axis = 0; axis < 3 && nextLine(); ++axis) {
           double lo = 0.0;
           double hi = 0.0;
           double tilt = 0.0;
-          if (bounds >> lo >> hi >> tilt && tilt != 0.0) {
+          if (std::sscanf(line.c_str(), "%lf %lf %lf", &lo, &hi, &tilt) == 3 && tilt != 0.0) {
             tilted = true;
           }
         }
       }
       continue;
     }
-    if (startsWith(line, "ITEM: NUMBER OF ATOMS")) {
-      if (std::getline(in, line)) {
+    if (startsWith(line.c_str(), "ITEM: NUMBER OF ATOMS")) {
+      if (nextLine()) {
         natoms = std::atoi(line.c_str());
       }
       continue;
     }
-    if (startsWith(line, "ITEM: ATOMS")) {
+    if (startsWith(line.c_str(), "ITEM: ATOMS")) {
       idCol = -1;
-      std::istringstream head(line);
-      std::string tok;
-      head >> tok >> tok;
+      const char *cursor = line.c_str();
+      auto nextField = [&](const char *&p, const char *&start) {
+        while (*p == ' ' || *p == '\t' || *p == '\r') {
+          ++p;
+        }
+        start = p;
+        while (*p != '\0' && *p != ' ' && *p != '\t' && *p != '\r') {
+          ++p;
+        }
+        return p != start;
+      };
+      const char *field = nullptr;
+      (void)nextField(cursor, field);
+      (void)nextField(cursor, field);
       int col = 0;
-      while (head >> tok) {
-        if (tok == "id") {
+      while (nextField(cursor, field)) {
+        if (cursor - field == 2 && field[0] == 'i' && field[1] == 'd') {
           idCol = col;
         }
         col += 1;
@@ -499,17 +559,36 @@ DumpIdIndex scanDumpIds(const std::string &path) {
     if (!atoms || got >= natoms) {
       continue;
     }
-    std::istringstream row(line);
-    std::vector<std::string> fields;
-    std::string tok;
-    while (row >> tok) {
-      fields.push_back(tok);
+    const char *field = line.c_str();
+    int fieldCount = 0;
+    const char *idStart = nullptr;
+    const char *idEnd = nullptr;
+    while (*field != '\0') {
+      while (*field == ' ' || *field == '\t' || *field == '\r') {
+        ++field;
+      }
+      if (*field == '\0') {
+        break;
+      }
+      const char *start = field;
+      while (*field != '\0' && *field != ' ' && *field != '\t' && *field != '\r') {
+        ++field;
+      }
+      if (fieldCount == idCol) {
+        idStart = start;
+        idEnd = field;
+      }
+      fieldCount += 1;
     }
     got += 1;
-    if (idCol < 0 || idCol >= static_cast<int>(fields.size())) {
+    if (idStart == nullptr) {
       continue;
     }
-    const int id = std::atoi(fields[static_cast<std::size_t>(idCol)].c_str());
+    char idText[32];
+    const std::size_t idChars = std::min(sizeof(idText) - 1, static_cast<std::size_t>(idEnd - idStart));
+    std::memcpy(idText, idStart, idChars);
+    idText[idChars] = '\0';
+    const int id = std::atoi(idText);
     // NUMBER OF ATOMS can follow the ATOMS header, so natoms may exceed seenId.
     if (id >= 1 && id <= natoms && static_cast<std::size_t>(id) < seenId.size() &&
         seenId[static_cast<std::size_t>(id)] == 0) {
@@ -518,6 +597,7 @@ DumpIdIndex scanDumpIds(const std::string &path) {
     }
   }
   finish();
+  std::fclose(in);
   const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
                       std::chrono::steady_clock::now() - t0)
                       .count();
