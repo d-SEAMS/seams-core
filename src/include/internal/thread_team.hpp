@@ -85,110 +85,37 @@ inline void releaseTeam() {
 // and freeze the team size, and leave the workers asleep only under
 // the passive wait policy.
 
-// CPUs the process may use, captured before this thread is pinned.
-// Linkcell's pool reads the same list so its workers do not inherit one cpu.
-struct Places {
-  int cpu[256] = {};
-  int n = 0;
-  bool known = false;
+// True while the outermost PinSession has pinned this process's team.
+// A narrowed team must not pin those workers again onto the caller's cpu.
+bool placementHeld();
+
+// Pins the OpenMP team for the enclosing call, then puts every worker's
+// affinity back. SEAMS_PIN=0 does nothing. A host that already chose
+// places (OMP_PROC_BIND, OMP_PLACES, GOMP_CPU_AFFINITY, KMP_AFFINITY), or
+// a caller whose mask is a single cpu, is left alone. When several
+// processes share the mask, each keeps a disjoint slice and the team is
+// narrowed to that slice. The outermost session calls widenAffinity
+// before a load-narrowed width can make it skip, so the masks it saves
+// and restores are the widened ones. Placement adds no cpu outside the
+// host mask.
+class PinSession {
+public:
+  PinSession();
+  ~PinSession();
+  PinSession(const PinSession &) = delete;
+  PinSession &operator=(const PinSession &) = delete;
+
+private:
+  bool outer_ = false;
 };
-
-inline Places &places() {
-  static Places found;
-  return found;
-}
-
-inline bool runtimeBinds() {
-  const char *bind = std::getenv("OMP_PROC_BIND");
-  if (bind == nullptr || bind[0] == '\0') {
-    return false;
-  }
-  return std::strcmp(bind, "false") != 0 && std::strcmp(bind, "FALSE") != 0;
-}
-
-inline void rememberPlaces() {
-  Places &found = places();
-  if (found.known) {
-    return;
-  }
-  found.known = true;
-#ifdef __linux__
-  cpu_set_t allowed;
-  if (sched_getaffinity(0, sizeof(allowed), &allowed) == 0) {
-    for (int cpu = 0; cpu < CPU_SETSIZE && found.n < 256; ++cpu) {
-      if (CPU_ISSET(cpu, &allowed)) {
-        found.cpu[found.n++] = cpu;
-      }
-    }
-  }
-#endif
-  lc_set_places(found.cpu, found.n);
-}
-
-// An unbound team leaves every worker free to migrate. Under any other
-// runnable thread the barrier then waits out a stalled worker, and a call
-// that is a few milliseconds on a pinned team stretches past 50 ms. Active
-// spinning makes that stall the common case. Pin each worker, including the
-// caller, to its own allowed cpu when the runtime was not asked to bind.
-// The pin sticks for the life of the worker thread.
-inline void placeTeam() {
-  rememberPlaces();
-  if (runtimeBinds()) {
-    return;
-  }
-#ifdef SEAMS_HAS_OPENMP
-  if (omp_in_parallel()) {
-    return;
-  }
-  const int width = std::max(1, omp_get_max_threads());
-#else
-  const int width = 1;
-#endif
-  if (width < 2) {
-    return;
-  }
-  Places &found = places();
-  if (found.n < 1) {
-    return;
-  }
-  // widenAffinity runs after the first pin and puts the caller back on the
-  // whole mask. Workers keep the pin from the region below; the caller is
-  // put back on cpu 0 every time so the next region does not migrate.
-#ifdef __linux__
-  cpu_set_t caller;
-  CPU_ZERO(&caller);
-  CPU_SET(found.cpu[0], &caller);
-  sched_setaffinity(0, sizeof(caller), &caller);
-#endif
-  static int placed = 0;
-  if (placed == width) {
-    return;
-  }
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel num_threads(width)
-  {
-#ifdef __linux__
-    const int tid = omp_get_thread_num();
-    cpu_set_t mask;
-    CPU_ZERO(&mask);
-    CPU_SET(found.cpu[tid % found.n], &mask);
-    sched_setaffinity(0, sizeof(mask), &mask);
-#else
-    (void)found;
-#endif
-  }
-#endif
-  placed = width;
-}
 
 inline void prepareCompute() {
   // Linkcell's pool sleeps on a condvar between searches. Forcing OpenMP
   // passive as well made the next region wake on a spread of tens of
   // milliseconds, which is the slow 8-thread sample. Do not switch the
   // wait policy to active: with another runnable thread that spin sits in
-  // the barrier for the whole stall. Place the workers instead.
+  // the barrier for the whole stall. PinSession places the workers.
   widenAffinity();
-  placeTeam();
 #ifdef SEAMS_HAS_OPENMP
   omp_set_dynamic(0);
 #endif
@@ -265,7 +192,7 @@ struct TeamWidth {
             cpus[ncpu++] = cpu;
           }
         }
-        if (ncpu > 0) {
+        if (ncpu > 0 && !placementHeld()) {
           // Once per process. Repeating the bind on a call of a few
           // hundred microseconds was the whole gap between four threads
           // requested directly and eight narrowed to four. OpenMP's own
@@ -274,7 +201,9 @@ struct TeamWidth {
           // Thread 0 is the caller and stays on its own mask: a pinned
           // caller hands its one cpu to every OpenMP worker and Rayon
           // thread it creates later, and the next eight-thread region
-          // then runs five threads on that cpu.
+          // then runs five threads on that cpu. A live PinSession already
+          // placed the team; binding again would stack that narrower
+          // team on the caller's cpu.
           static int bound = 0;
           static std::mutex boundMu;
           const std::lock_guard<std::mutex> lock(boundMu);
@@ -345,12 +274,8 @@ inline bool fairEnabled() {
 
 class FairWidth {
 public:
-  explicit FairWidth(bool adopt = false) {
-    // Widen before the places are recorded, then place before the probe
-    // fork. An unbound probe is itself the stall, and the guard would
-    // then narrow a team that only needed a cpu each.
-    widenAffinity();
-    placeTeam();
+  explicit FairWidth(bool adopt = false)
+      : placed_() {
 #ifdef SEAMS_HAS_OPENMP
     if (depth()++ == 0 && !omp_in_parallel() && fairEnabled()) {
       choose();
@@ -372,6 +297,8 @@ public:
   FairWidth &operator=(const FairWidth &) = delete;
 
 private:
+  // Constructed before the constructor body, so the probe fork is placed.
+  PinSession placed_;
 #ifdef SEAMS_HAS_OPENMP
   static constexpr double kSlowFork = 1.0e-3;
   static constexpr double kRetry = 1.0;

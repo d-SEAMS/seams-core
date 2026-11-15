@@ -275,6 +275,7 @@ bool cutoffRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
   // cores. The signature search keeps that team and only sets the
   // linkcell width.
   if (handoff) {
+    const seams::PinSession placed;
     seams::adoptThreads();
   }
   const size_t nSubset = subset.size();
@@ -1110,6 +1111,7 @@ bool nneigh::blockWindowRows(
   (void)originW;
   return false;
 #else
+  const seams::PinSession placed;
   seams::adoptThreads();
   // Not thread_local: the fill below is shared by the team. A thread-local
   // buffer would be empty on every worker and the write would fault.
@@ -1873,6 +1875,7 @@ nneigh::neighListLinkcell(
   if (!hasPeriodicBox(yCloud) || !(rcutoff > 0.0) || yCloud.nop <= 0) {
     return {};
   }
+  const seams::PinSession placed;
   seams::prepareCompute();
   int pool = 1;
 #ifdef SEAMS_HAS_OPENMP
@@ -1935,6 +1938,7 @@ nneigh::neighListO(double rcutoff,
   // The cutoff rows are an OpenMP walk. Pausing that team here makes the
   // next region pay a wake-up, and an unsized Rayon pool would spin beside
   // it. Record the OpenMP width for linkcell and leave the team running.
+  const seams::PinSession placed;
   seams::prepareCompute();
 #ifdef SEAMS_HAS_OPENMP
   const int pool = (gSerialCutoff || omp_in_parallel()) ? 1 : std::max(1, omp_get_max_threads());
@@ -3031,6 +3035,7 @@ std::vector<std::vector<int>>
 nneigh::kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     double candidateCutoff, int typeI, bool mutual) {
+  const seams::PinSession placed;
   seams::prepareCompute();
   [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
 #ifdef SEAMS_HAS_LINKCELL
@@ -3275,6 +3280,7 @@ void nneigh::kNearestPacked(
   // The q path calls this and then an OpenMP harmonic. Pausing the team
   // here makes the next parallel region pay a wake-up, which is the
   // several-millisecond swing on a few thousand atoms.
+  const seams::PinSession placed;
   seams::prepareCompute();
 #ifdef SEAMS_HAS_LINKCELL
   lc_set_threads(seams::teamFor(yCloud.nop));
@@ -3312,6 +3318,7 @@ nneigh::kNearestNeighbourPair(
   if (yCloud.nop <= 0 || k <= 0) {
     return {{}, {}};
   }
+  const seams::PinSession placed;
   seams::prepareCompute();
 #ifdef SEAMS_HAS_LINKCELL
   lc_set_threads(seams::teamFor(yCloud.nop));
@@ -3328,6 +3335,7 @@ std::vector<std::vector<int>>
 nneigh::kNearestNeighbourList(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     double candidateCutoff, const std::vector<int> &types, bool mutual) {
+  const seams::PinSession placed;
   seams::prepareCompute();
   [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
 #ifdef SEAMS_HAS_LINKCELL
@@ -3350,6 +3358,7 @@ nneigh::kNearestNeighbourPair(
   if (yCloud.nop <= 0 || k <= 0 || types.empty()) {
     return {{}, {}};
   }
+  const seams::PinSession placed;
   seams::prepareCompute();
 #ifdef SEAMS_HAS_LINKCELL
   lc_set_threads(seams::teamFor(yCloud.nop));

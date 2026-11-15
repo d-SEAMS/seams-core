@@ -2718,6 +2718,7 @@ static PackedRows csrRows(const std::vector<int> &offsets, const std::vector<int
 std::vector<std::vector<int>>
 primitive::ringNetwork(const std::vector<int> &offsets, const std::vector<int> &cols,
                        int maxDepth, const std::vector<char> &sources) {
+  const seams::PinSession placed;
   seams::adoptThreads();
   if (offsets.size() < 2) {
     return {};
@@ -2732,6 +2733,7 @@ void primitive::ringSizeCounts(const std::vector<int> &offsets, const std::vecto
   for (int i = 0; i < countsLen; i++) {
     counts[i] = 0;
   }
+  const seams::PinSession placed;
   seams::adoptThreads();
   if (offsets.size() < 2 || countsLen <= 0) {
     return;
@@ -2752,6 +2754,7 @@ static std::vector<std::vector<int>>
 searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &sources,
              bool legacy, SizeCounts sizes, int minSize, std::vector<int> *hist,
              int forcedCap, int *perAtom, int perStride) {
+  const seams::PinSession placed;
   seams::adoptThreads();
   gProfile = false;
   if (const char *prof = std::getenv("SEAMS_RING_PROFILE")) {

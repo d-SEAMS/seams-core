@@ -77,6 +77,30 @@ Membership is the sorted atom ids of each face, not the ring index.
 ~seams_set_num_threads~ is the installed way to set the OpenMP width
 the next search reads.
 
+* Placement when the host does not bind
+
+An unbound team leaves every worker free to migrate. A barrier then
+waits for a worker the scheduler has parked, and a call of a few
+milliseconds stretches by tens of milliseconds. Forcing an active spin
+makes that stall the common case, so the library does not set
+~OMP_WAIT_POLICY~.
+
+~seams::PinSession~ places the team for the enclosing call and restores
+each worker's previous affinity when the call returns. Workers do not
+stay pinned. ~SEAMS_PIN=0~ skips placement. Placement adds no cpu
+outside the host mask. A caller already bound to one cpu, or a process whose
+~OMP_PROC_BIND~, ~OMP_PLACES~, ~GOMP_CPU_AFFINITY~ or ~KMP_AFFINITY~
+chooses places, is left to that choice. ~KMP_AFFINITY=none~ and
+~KMP_AFFINITY=disabled~ do not count as a choice.
+
+Several copies of the same program that share a parent, and another
+copy that is on a cpu, divide the mask. Each keeps a disjoint slice and
+the team is narrowed to that slice, so two eight-thread processes on
+eight cpus do not both pin worker ~i~ to cpu ~i~. Linkcell's pool reads
+the same slice (~lc_set_places~) instead of inheriting the caller's
+single cpu. A pool that has already started keeps the cpus it was built
+with.
+
 * Every kernel
 
 Commit ~848426f9~ sizes the team on every kernel. ~caeb71f8~ puts the

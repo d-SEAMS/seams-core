@@ -1874,6 +1874,7 @@ void classifyPrepared(const double *x, const double *y, const double *z, int n,
   }
   // The shell walk is OpenMP. A few thousand atoms do not feed eight
   // threads, and this call does not start a second pool.
+  const seams::PinSession placed;
   seams::prepareCompute();
   [[maybe_unused]] const seams::TeamWidth team(n);
   const bool timed = symTime();

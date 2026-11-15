@@ -940,6 +940,7 @@ SteinhardtQl steinhardtQl(const molSys::PointCloud<molSys::Point<double>, double
                           const std::vector<std::vector<int>> &nList, int orderL) {
   // OpenMP only. adoptThreads would pause the team and start a Rayon
   // pool this harmonic never uses.
+  const seams::PinSession placed;
   seams::prepareCompute();
   [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
   SteinhardtQl result;

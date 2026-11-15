@@ -812,6 +812,7 @@ static void classifyBondsLeftFp64(
     const std::vector<std::vector<int>> &nList, const chill::BondClassifier &rule,
     bool isSlice, const std::vector<int> *csrOff = nullptr,
     const std::vector<int> *csrCols = nullptr, bool closed = true) {
+  const seams::PinSession placed;
   seams::prepareCompute();
   [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
   constexpr int l = 3;
@@ -1406,6 +1407,7 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
   // search can have the cores, and that pause is what split the
   // eight-thread samples into a fast group near 8 ms and a slow group
   // near 12 ms.
+  const seams::PinSession placed;
   seams::prepareCompute();
   // The scratch is shared with the OpenMP team. A second frame running
   // in another worker waits, instead of writing that team's rows.
@@ -1780,6 +1782,7 @@ bool chill::q4q6ChillPlus(
   q6.assign(static_cast<std::size_t>(n), 0.0);
   q4bar.assign(static_cast<std::size_t>(n), 0.0);
   q6bar.assign(static_cast<std::size_t>(n), 0.0);
+  const seams::PinSession placed;
   seams::prepareCompute();
   const bool tilt = yCloud.box.size() >= 6;
   const gen::FracBox frac = gen::makeFracBox(yCloud);
@@ -2099,6 +2102,7 @@ bool chill::chillPlusPublishedCutoff(
   if (n <= 0 || !(cutoff > 0.0) || yCloud.box.size() < 3) {
     return false;
   }
+  const seams::PinSession placed;
   seams::prepareCompute();
   [[maybe_unused]] const seams::TeamWidth team(n);
 #ifdef SEAMS_HAS_LINKCELL
@@ -3630,6 +3634,7 @@ void chill::bondOrder(const molSys::PointCloud<molSys::Point<double>, double> &y
                       const std::vector<std::vector<int>> &nList,
                       const BondClassifier &rule, BondOrder &order,
                       const std::vector<char> *which, bool fresh) {
+  const seams::PinSession placed;
   seams::prepareCompute();
   [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
   const int nop = yCloud.nop;
