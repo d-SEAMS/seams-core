@@ -8,8 +8,7 @@ A how-to solves a goal you already have. It is not a learning path.
 | [[file:upgrade-2.14.org][Upgrade from 2.13]] | API, engines, threads, and the remaining ~--types~ alias |
 | [[file:migrate-1x.org][Migrate from 1.x]] | Lua and ~yodaStruct -c~ mapped onto ~seams~ and the C API |
 | [[file:install.org][Install the engine]] | Get a ~seams~ binary |
-| [[file:bindings.org][Language fronts]] | Python, R, and Julia against ~libseams_lang~ |
-| [[file:lua.org][Lua and Fennel]] | ~require("dseams")~ over ~seams.h~ |
+| [[file:bindings.org][Language bindings]] | Python, Lua, R, Julia, Rust, and Fortran, each in its own repository |
 | [[file:versions.org][Version pins]] | The five files that must agree |
 | [[file:benchmarks.org][Benchmarks]] | Which driver to time, and what to record |
 | [[file:literature-h2h.org][Literature head-to-head]] | mdapy, pyscal3, vesin, IRA and SQQ on ideal ice |
@@ -27,8 +26,7 @@ A how-to solves a goal you already have. It is not a learning path.
 | [[file:linkcell-carried.org][Linkcell and carried rings]] | The cutoff CSR and the hop-ball update |
 | [[file:sheared-cells.org][Sheared cells]] | Triclinic dump: bound spans are not edge lengths; recover H |
 | [[file:ionic-liquid.org][Ionic-liquid dumps]] | Keep one species with ~--type~; unlike-pair ~seams rdf --pair-types I,J~; confined \(\rho(z)\) |
-| [[file:ase-integration.org][ASE]] | Pointer to the pydseams ASE howto |
-| [[file:solvis.org][View a classified frame]] | solvis via pydseams, not OVITO |
+| [[https://d-seams.github.io/PydSEAMSlib/][ASE and solvis]] | In the PydSEAMSlib documentation |
 | [[file:confined-ice.org][Confined ice]] | Nanotube and monolayer classification |
 | [[file:science-front.org][Basal profiles and nucleation]] | Layer profile on one frame, and the critical-size census |
 | [[file:from-trajectory.org][From a trajectory to the ice front]] | CHILL+, rings, and the front on a dump in ~input/traj/~ |

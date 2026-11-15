@@ -106,7 +106,7 @@ TOPICS = {
     "fortran": ("docs/orgmode/howto/bindings.org",),
     "rust": ("docs/orgmode/howto/bindings.org",),
     "julia": ("docs/orgmode/howto/bindings.org",),
-    "lua": ("docs/orgmode/howto/lua.org",),
+    "lua": ("docs/orgmode/howto/bindings.org",),
     "lammps": ("docs/orgmode/howto/engine-lammps.org",),
     "gromacs": ("docs/orgmode/howto/engine-gromacs.org",),
     "openmm": ("docs/orgmode/howto/engine-openmm.org",),

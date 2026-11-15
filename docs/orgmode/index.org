@@ -57,7 +57,7 @@
 
 d-SEAMS 2.14 reads a molecular-dynamics trajectory and names the ice in it.
 ~libseams~ is the library: CHILL+, cages, primitive rings, and \(q_6\) share one cutoff neighbour list.
-The ~seams~ command and the C, C++, Python, Fortran, Julia, Rust, and R fronts call that library.
+The ~seams~ command, the C and C++ APIs, and the language bindings call that library.
 
 Install the engine with one line.
 
@@ -102,19 +102,22 @@ seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5
 seams cages input/traj/ice1h.lammpstrj
 #+end_src
 
-2.14.0 ships ~libseams~ (~seams.h~) and ~libseams_lang~ in this
-tree, with C, C++, Fortran, Rust, Python (~import dseams~), Julia, and
-R fronts, plus LAMMPS, OpenMM, PLUMED, and the in-situ engine.
+2.14.0 ships ~libseams~ (~seams.h~), ~libseams_lang~, the C and C++
+APIs, and the LAMMPS, OpenMM, PLUMED, and in-situ engines.
 ~gmx-seams~ reads the trajectory after ~gmx mdrun~.
-Lua and Fennel ~require("dseams")~ are in this tree as well.
-The released Frame package stays separate:
+Each language binding is its own repository, released with the same
+version against this tag:
 
-- Python Frame: ~pydseams~ ([[https://d-seams.github.io/PydSEAMSlib/][Python docs]],
-  [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]), compiled
-  module ~yoda~
-- Lua/Fennel: ~dseams~ ([[https://d-seams.github.io/yodaStruct/][Lua docs]],
-  [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]),
-  ~require("dseams")~
+- Python: ~pydseamslib~ (~import dseams~, ~import pydseams~),
+  [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]
+- Lua and Fennel: LuaRocks ~dseams~, [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]
+- R: ~dseams~, [[https://github.com/d-SEAMS/dseams-r][dseams-r]]
+- Julia: ~Dseams~, [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]]
+- Rust: ~dseams-sys~ and ~dseams~, [[https://github.com/d-SEAMS/dseams-rs][dseams-rs]]
+- Fortran: fpm ~dseams~, [[https://github.com/d-SEAMS/dseams-fortran][dseams-fortran]]
+
+[[file:contributing/repositories.org][The repository map]] says what
+lives where.
 
 The header *Ecosystem* menu on every page jumps between the engine,
 the bindings, and linkcell.
@@ -133,9 +136,7 @@ Build with a Nix flake (~nix build~, ~nix develop~) or with
      LIB --> API[libseams]
      API --> CLI["seams command"]
      CLI --> OUT["stdout counts"]
-     API --> LANG["C, C++ and Fortran<br/>Julia, R and Lua"]
-     LIB --> PY["Python Frame"]
-     PY --> ASE["ASE and solvis"]
+     API --> LANG["C and C++ here<br/>Python, Lua, R, Julia,<br/>Rust, Fortran repositories"]
 #+end_export
 
 * Documentation structure
@@ -160,12 +161,12 @@ framework.
       Cutoff, neighbours, CHILL+, rings, and the engine builds.
 
    .. grid-item-card:: Reference
-      :link: reference/python-frame
+      :link: reference/index
       :link-type: doc
 
-      :doc:`Python <reference/python-frame>`, :doc:`C <capi/index>`,
-      :doc:`C++ <stable/cpp>`, :doc:`Julia <stable/julia>`,
-      :doc:`R <stable/r>`, :doc:`Lua <stable/lua>`.
+      :doc:`C <capi/index>`, :doc:`C++ <stable/cpp>`,
+      :doc:`CLI <reference/cli>`, and the
+      :doc:`language bindings <howto/bindings>`.
 
    .. grid-item-card:: Engines
       :link: engines/index
@@ -255,7 +256,6 @@ framework.
    howto/upgrade-2.14
    howto/migrate-1x
    howto/bindings
-   howto/lua
    howto/versions
    howto/benchmarks
    howto/paper-tables
@@ -271,8 +271,6 @@ framework.
    howto/linkcell-carried
    howto/sheared-cells
    howto/ionic-liquid
-   howto/ase-integration
-   howto/solvis
    howto/confined-ice
    howto/science-front
    howto/from-trajectory
@@ -400,7 +398,7 @@ rules that write them.
 * Related projects
 
 - [[https://d-seams.github.io/PydSEAMSlib/][pydseams]] :: Python Frame API on ~yoda~
-- [[https://d-seams.github.io/yodaStruct/][1.x Lua library]] :: the previous ~require("dseams")~. This tree ships that call as the Lua and Fennel front.
+- [[https://d-seams.github.io/yodaStruct/][yodaStruct]] :: the Lua and Fennel binding, ~require("dseams")~
 - [[https://github.com/d-SEAMS/linkcell][linkcell]] :: periodic linked-cell k-nearest neighbours
 - [[https://dseams.info][dseams.info]] :: project site
 

@@ -1,27 +1,33 @@
-#+TITLE: Build the language fronts
+#+TITLE: Use a language binding
 #+OPTIONS: toc:nil num:nil
 
-The nanobind module =dseams._core= is built in this repository when
-nanobind is found. R and Julia call =libseams_lang=, which is built
-with the engine and does not reimplement the classifiers. The released
-Frame package remains [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
-The Lua module in this tree is [[file:lua.org][require("dseams")]].
+This repository builds the engine, the C API =libseams= (=include/seams.h=),
+the C ABI =libseams_lang= (=bindings/cxx/seams_lang.h=) and the ~seams~
+command. :doc:`/stable/c` and :doc:`/stable/cpp` document those. Every other language is its own repository with its
+own documentation, tests and releases:
+
+| Language     | Repository                                               | Package                          | Links          |
+|--------------+----------------------------------------------------------+----------------------------------+----------------|
+| Python       | [[https://github.com/d-SEAMS/PydSEAMSlib][d-SEAMS/PydSEAMSlib]]       | ~pydseamslib~ (~import dseams~, ~import pydseams~) | =libseams=, =libseams_lang= |
+| Lua, Fennel  | [[https://github.com/d-SEAMS/yodaStruct][d-SEAMS/yodaStruct]]         | LuaRocks ~dseams~                | =libseams=     |
+| R            | [[https://github.com/d-SEAMS/dseams-r][d-SEAMS/dseams-r]]             | ~dseams~                         | =libseams_lang= |
+| Julia        | [[https://github.com/d-SEAMS/Dseams.jl][d-SEAMS/Dseams.jl]]           | ~Dseams~, ~libseams_jll~         | =libseams=, =libseams_lang= |
+| Rust         | [[https://github.com/d-SEAMS/dseams-rs][d-SEAMS/dseams-rs]]           | crates ~dseams-sys~, ~dseams~    | =libseams=     |
+| Fortran      | [[https://github.com/d-SEAMS/dseams-fortran][d-SEAMS/dseams-fortran]] | fpm ~dseams~                     | =libseams=     |
+
+A binding release carries the seams-core version it was built against, so
+~pydseamslib==2.14.0~ calls the 2.14.0 engine. Each repository's README
+gives its install command. [[file:../contributing/repositories.org][The
+repository map]] describes how the bindings pin and test against a
+seams-core tag, the release order, and how to develop a binding against a
+local seams-core checkout.
 
 * Python
 
-#+begin_src bash
-meson setup build -Dwith_python=true
-meson compile -C build
-#+end_src
-
-~dseams._core~ links the in-tree ~libseams~. A missing nanobind uses
-~subprojects/nanobind.wrap~. The default ~pixi run setup~ leaves
-~with_python~ at its Meson default, which is true.
-
-~import dseams~ is that module. ~Frame.set_frame~ stores coordinates.
-~from_ase~ returns positions and a LAMMPS cell. ~neighbours~, ~rings~,
-~q4q6~, and ~chill_plus~ are the calls in the Python recording. The
-released Frame package on the [[file:../reference/python-frame.org][Python Frame]] page stays ~pydseams~.
+~pip install 'pydseamslib==2.14.0'~ installs ~import dseams~ (array
+calls into the engine) and ~import pydseams~ (the Frame API on the
+[[file:../reference/python-frame.org][Python Frame]] page). The cubic ice
+frame in this tree gives the counts the other languages and the CLI print:
 
 #+begin_src python
 >>> import numpy as np
@@ -69,63 +75,23 @@ released Frame package on the [[file:../reference/python-frame.org][Python Frame
 128
 #+end_src
 
-* R
+* What the bindings share
 
-#+begin_src bash
-export SEAMS_INCLUDE="$PWD/bindings/cxx"
-export SEAMS_LIBDIR="$PWD/bbdir/bindings"
-export LD_LIBRARY_PATH="$SEAMS_LIBDIR:$PWD/bbdir/src${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-R CMD INSTALL --preclean bindings/r/dseams
-#+end_src
-
-The package needs ~cpp11~ and ~RcppEigen~.
-With ~SEAMS_LIBDIR~ and ~SEAMS_INCLUDE~ set, it links that ~libseams_lang~; ~configure~ stops if ~seams_lang.h~ is not in ~SEAMS_INCLUDE~.
-~--preclean~ runs ~cleanup~ first, as ~R CMD INSTALL~ builds the directory in place and would reuse objects from an earlier install of the other kind.
-Without them, ~configure~ runs ~tools/vendor.sh~ and the package compiles its own copy of the engine, so ~R CMD INSTALL bindings/r/dseams~ works with no Meson build.
-The engine is not a CRAN system library, and ~dseams~ is not on CRAN yet, so this is a source package you build from a seams-core checkout.
-~R CMD build bindings/r/dseams~ makes a source tarball that carries the engine and installs without the checkout.
-
-* Julia
-
-CxxWrap is not linked.
-~libcxxwrap_julia~ is not in the pixi or Nix closure, and building it pulls a Julia sysimage into the link.
-The front that ships is ~ccall~:
-
-#+begin_src bash
-export SEAMS_LANG_LIB="$PWD/bbdir/bindings/libseams_lang.so"
-export DSEAMS_ROOT="$PWD"
-julia --project=bindings/julia/Dseams bindings/julia/Dseams/dev/develop_jll.jl
-julia --project=bindings/julia/Dseams bindings/julia/Dseams/test/runtests.jl
-#+end_src
-
-~Dseams~ and ~libseams_jll~ are not in the General registry yet, so
-~Pkg.instantiate()~ alone cannot resolve the JLL.
-~dev/develop_jll.jl~ develops the stand-in in ~dev/libseams_jll~, which
-has no binaries, and then instantiates; ~SEAMS_LANG_LIB~ names the
-engine. ~packaging/yggdrasil/L/libseams~ is the recipe for the real JLL.
-
-* Lua and Fennel
-
-~-Dwith_lua=auto~ builds ~dseams_core.so~ for Lua 5.4 and for LuaJIT.
-~require("dseams")~ and ~(require :dseams)~ call ~seams.h~.
-The how-to is [[file:lua.org][Lua and Fennel]].
-~meson test lua_examples~ runs the example scripts.
-
-* q4 and q6
-
-The cutoff-shell solid-harmonic kernel is ~seams_q4q6~ in ~seams.h~ and ~seams_frame_q4_q6~ in =libseams_lang=. The flat name ~seams_q4_q6~ lives in ~src/include/internal/seams_c_api.h~ and is not installed.
-Python is ~q4_q6~ in =bindings/python/chill_plus.py= (~SEAMS_LANG_LIB= selects the library).
-R and Julia export ~q4_q6~.
-The CLI command is ~seams steinhardt~. ~--l~ names the degrees (default ~4,6~). ~--l 3,12~ asks for the hydrate pair.
+The classifiers run in the engine; no binding reimplements one. The
+cutoff-shell solid-harmonic kernel is ~seams_q4q6~ in ~seams.h~ and
+~seams_frame_q4_q6~ in =libseams_lang=; the flat name ~seams_q4_q6~ lives in
+~src/include/internal/seams_c_api.h~ and is not installed. The CLI command
+is ~seams steinhardt~. ~--l~ names the degrees (default ~4,6~). ~--l 3,12~
+asks for the hydrate pair.
 
 * Tests
 
 #+begin_src bash
-meson test -C bbdir seams_lang_fixtures
+meson test -C bbdir seams_lang_fixtures seams_lang_frames
 #+end_src
 
-The Python checks live in PydSEAMSlib.
-=docs/tutorials= reruns one cubic-ice count against an installed ~pydseamslib~.
+These check the C ABI the bindings link. Each binding repository runs its
+own suite against a seams-core tag.
 
 * Recordings
 
@@ -172,4 +138,10 @@ A page without a claim includes no player.
 
 #+begin_export rst
 .. include:: ../videos/embeds/r.rst
+#+end_export
+
+** Lua and Fennel
+
+#+begin_export rst
+.. include:: ../videos/embeds/lua.rst
 #+end_export
