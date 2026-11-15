@@ -1,9 +1,9 @@
 #+TITLE: Changelog
 #+OPTIONS: toc:nil num:nil
 
-The C++ engine is this repository. Python is ~pydseams~
-([[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]]). Lua is
-~require("dseams")~ ([[https://github.com/d-SEAMS/yodaStruct][yodaStruct]]).
+The C++ engine, ~libseams~, ~libseams_lang~ and the ~seams~ CLI are this
+repository. Each language binding is its own repository; the
+[[file:contributing/repositories.org][repository map]] lists them.
 
 The release history is [[file:../../CHANGELOG.md][CHANGELOG.md]]
 (Keep a Changelog, assembled by towncrier). This page is the
@@ -16,19 +16,22 @@ We cut 2.14.0 from tag v2.13.0. The bullets are
 
 ~seams.h~ is ABI 1. A frame carries an orthorhombic or triclinic
 cell, and we return neighbours, both CHILL+ rules, q4 and q6,
-primitive rings, and ring symmetry labels. C, C++, Python, Fortran,
-Julia, Rust, and Lua call that header.
+primitive rings, and ring symmetry labels. C and C++ call that header
+here, and the Python, Fortran, Julia, Rust, R and Lua bindings call it
+from their own repositories.
 ~seams_set_num_threads(0)~ restores the OpenMP width we captured at
 first use. ~seams_system_set_positions~ overwrites the coordinates
 of a stored frame, and the const readers copy the frame back out.
 
-Python on PyPI is ~pydseamslib~ 2.14.0. The import is ~dseams~.
-Wheels cover Linux and macOS. ~recipe/recipe.yaml~ builds ~libseams~
-and ~pydseamslib~ for conda-forge. The Rust crates are ~dseams-sys~
-and ~dseams~. The Fortran module is the fpm package ~dseams~. The
-Lua module is the LuaRocks rock ~dseams~, and ~require("dseams")~
-loads the module built for that interpreter. R installs from
-~bindings/r/dseams~ and Julia from ~bindings/julia/Dseams~.
+2.14.0 moves every language binding to its own repository, released
+with the same version against this tag. Python on PyPI is
+~pydseamslib~ 2.14.0 from PydSEAMSlib (~import dseams~ and
+~import pydseams~). The Rust crates ~dseams-sys~ and ~dseams~ come from
+dseams-rs, the fpm package ~dseams~ from dseams-fortran, the LuaRocks
+rock ~dseams~ from yodaStruct, the R package ~dseams~ from dseams-r,
+and Julia ~Dseams~ from Dseams.jl. This repository releases conda
+~libseams~ from ~recipe/recipe.yaml~ and the Yggdrasil recipe for
+~libseams_jll~.
 
 LAMMPS, GROMACS, and OpenMM call the library on the frames a running
 calculation chooses. We report the primitive ring census, the
