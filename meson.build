@@ -919,6 +919,19 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 60)
   test(
+    'docs_llms_txt',
+    python3,
+    args: [meson.project_source_root() / 'scripts' / 'gen_llms_txt.py', '--check'],
+    suite: 'docs',
+    timeout: 60)
+  test(
+    'docs_llms_txt_selftest',
+    python3,
+    args: ['-m', 'doctest', meson.project_source_root() / 'scripts' / 'gen_llms_txt.py'],
+    workdir: meson.project_source_root() / 'scripts',
+    suite: 'docs',
+    timeout: 60)
+  test(
     'docs_c_symbols',
     python3,
     args: ['-m', 'doctest', meson.project_source_root() / 'docs' / 'check_c_symbols.py'],
