@@ -159,9 +159,12 @@ jobs:
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
         run: |
           set -euo pipefail
-          if [ -z "${NETLIFY_AUTH_TOKEN}" ] || [ -z "${NETLIFY_SITE_ID}" ]; then
-            echo "docs.dseams.info is served by Netlify."
-            echo "Add repository secrets NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID."
+          if [ -z "${NETLIFY_AUTH_TOKEN}" ]; then
+            echo "Skipping Netlify deploy: NETLIFY_AUTH_TOKEN is not set."
+            exit 0
+          fi
+          if [ -z "${NETLIFY_SITE_ID}" ]; then
+            echo "NETLIFY_AUTH_TOKEN is set but NETLIFY_SITE_ID is empty."
             exit 1
           fi
           npx --yes netlify-cli@27.19.0 deploy --prod --dir=docs/build
