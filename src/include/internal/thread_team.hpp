@@ -206,6 +206,21 @@ inline void releaseTeam() {
 // narrowed team must not pin those workers again onto the caller's cpu.
 bool placementHeld();
 
+// Team width for a request of `base` threads from the load other
+// processes put on the caller's cpus, or 0 where that load cannot be
+// read. The first look counts their runnable threads. Later looks
+// average the cpu time they took over at least 0.1 s, from /proc/stat
+// less this process's own cpu time, and reuse the width in between.
+// Half the cpus busy or more gives half of base; fewer busy cpus give
+// the free ones, never below half of base; none gives base. A width
+// probe cannot tell this: workers still spinning from the last region
+// answer at once on a contended machine, and the call then waits.
+int loadWidth(int base);
+
+// Whether other processes keep half of the caller's cpus busy or more,
+// by the same look as loadWidth. False where the load cannot be read.
+bool othersHoldHalf();
+
 // Pins the OpenMP team for the enclosing call, then puts every worker's
 // affinity back. SEAMS_PIN=0 does nothing. A host that already chose
 // places (OMP_PROC_BIND, OMP_PLACES, GOMP_CPU_AFFINITY, KMP_AFFINITY), or
@@ -380,12 +395,14 @@ struct TeamWidth {
 // When their threads hold the cores, a full-width team waits at each fork
 // that follows serial work for workers the scheduler has parked, a slice
 // at a time, and a call of a few milliseconds grows tenfold. A narrower
-// team leaves cores free and does not wait. One small region at entry,
-// after the caller's own gap, takes at most a few hundred microseconds on
-// an idle machine, where sleeping workers wake, and milliseconds on a
-// contended one. Two slow entries in a row halve the team, down to a
-// quarter of the requested width; at most once a second a narrowed team
-// tries twice its width again. Results do not depend on the width.
+// team leaves cores free and does not wait. On Linux the width follows
+// the load other processes put on the caller's cpus (loadWidth). Where
+// that load cannot be read, one small region at entry, after the
+// caller's own gap, takes at most a few hundred microseconds on an idle
+// machine, where sleeping workers wake, and milliseconds on a contended
+// one. Two slow entries in a row halve the team, down to a quarter of
+// the requested width; at most once a second a narrowed team tries
+// twice its width again. Results do not depend on the width.
 // SEAMS_FAIR_WIDTH=0 keeps the requested width.
 struct FairState {
   std::mutex lock;
@@ -395,10 +412,11 @@ struct FairState {
   double tried = 0.0;
 };
 
-inline FairState &fairState() {
-  static FairState state;
-  return state;
-}
+// One state and one nesting depth per process, defined in one library:
+// inline copies gave libseams and libyodaLib one each, and a FairWidth
+// nested across the two narrowed the team twice.
+FairState &fairState();
+int &fairDepth();
 
 inline bool fairEnabled() {
   static const bool on = [] {
@@ -454,10 +472,7 @@ private:
   bool set_ = false;
   bool marked_ = false;
 
-  static int &depth() {
-    thread_local int level = 0;
-    return level;
-  }
+  static int &depth() { return fairDepth(); }
 
   static double forkSeconds(int width) {
     const double start = omp_get_wtime();
@@ -481,6 +496,23 @@ private:
       state.slow = 0;
       state.tried = 0.0;
     }
+    const int loaded = loadWidth(state.base);
+    if (loaded > 0) {
+      state.granted = loaded;
+    } else {
+      probe(state);
+    }
+    if (state.granted != asked_) {
+      omp_set_num_threads(state.granted);
+      set_ = true;
+      if (askedWidth() == 0) {
+        askedWidth() = asked_;
+        marked_ = true;
+      }
+    }
+  }
+
+  static void probe(FairState &state) {
     const int floor = std::max(1, state.base / 4);
     const double now = omp_get_wtime();
     int width = state.granted;
@@ -497,14 +529,6 @@ private:
       state.granted = std::max(floor, width / 2);
       state.slow = 0;
       state.tried = now;
-    }
-    if (state.granted != asked_) {
-      omp_set_num_threads(state.granted);
-      set_ = true;
-      if (askedWidth() == 0) {
-        askedWidth() = asked_;
-        marked_ = true;
-      }
     }
   }
 #endif

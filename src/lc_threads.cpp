@@ -136,6 +136,7 @@ double monoNow() {
 double gBegan = 0.0;
 double gBusyAt = -1.0e9;
 int gNarrow = 0;
+bool gCrowded = false;
 bool gPinned = false;
 bool gMarked = false;
 constexpr double kCalm = 1.0;
@@ -218,6 +219,19 @@ int othersRunning() {
     const int running = procsRunning();
     const int after = ownRunning();
     others = std::min(others, std::max(0, running - std::max(before, after)));
+  }
+  return others;
+}
+
+// othersRunning, the lowest of three looks 2 ms apart. On an idle machine
+// one look in a few read a thread that was runnable for a moment, or one
+// of our own workers between two counts, and the team stayed narrowed to
+// seven of eight cpus until the next look.
+int othersSteady(int first) {
+  int others = first;
+  for (int again = 0; again < 2 && others > 0; ++again) {
+    usleep(2000);
+    others = std::min(others, othersRunning());
   }
   return others;
 }
@@ -328,6 +342,84 @@ void scanOthers(int *owners, int *nowners) {
   closedir(proc);
 }
 
+// The cpus the caller's team may use: every OpenMP place under a host
+// binding, which has already pinned this thread to one of them, and the
+// mask the first call saw otherwise.
+const cpu_set_t &teamCpus() {
+  static cpu_set_t cpus;
+  static const bool known = [] {
+    CPU_ZERO(&cpus);
+#ifdef SEAMS_HAS_OPENMP
+    if (omp_get_proc_bind() != omp_proc_bind_false) {
+      for (int p = 0; p < omp_get_num_places(); ++p) {
+        int ids[kMaxCpu];
+        const int n = std::min(omp_get_place_num_procs(p), kMaxCpu);
+        omp_get_place_proc_ids(p, ids);
+        for (int i = 0; i < n; ++i) {
+          if (ids[i] >= 0 && ids[i] < CPU_SETSIZE) {
+            CPU_SET(ids[i], &cpus);
+          }
+        }
+      }
+    }
+#endif
+    if (CPU_COUNT(&cpus) == 0) {
+      captureAllowed();
+      for (int i = 0; i < gAllowedN; ++i) {
+        CPU_SET(gAllowed[i], &cpus);
+      }
+    }
+    return true;
+  }();
+  (void)known;
+  return cpus;
+}
+
+// Seconds the cpus in `cpus` spent busy, from the per-cpu lines of
+// /proc/stat. Time stolen by the hypervisor counts as busy.
+bool busySeconds(const cpu_set_t &cpus, double &seconds) {
+  static const double tick = static_cast<double>(sysconf(_SC_CLK_TCK));
+  FILE *file = std::fopen("/proc/stat", "r");
+  if (file == nullptr || !(tick > 0.0)) {
+    if (file != nullptr) {
+      std::fclose(file);
+    }
+    return false;
+  }
+  char line[512];
+  long long busy = 0;
+  int seen = 0;
+  while (std::fgets(line, sizeof(line), file) != nullptr) {
+    if (std::strncmp(line, "cpu", 3) != 0) {
+      break;
+    }
+    if (line[3] < '0' || line[3] > '9') {
+      continue;
+    }
+    char *at = line + 3;
+    const long cpu = std::strtol(at, &at, 10);
+    if (cpu < 0 || cpu >= CPU_SETSIZE || !CPU_ISSET(static_cast<int>(cpu), &cpus)) {
+      continue;
+    }
+    long long field[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    for (long long &value : field) {
+      value = std::strtoll(at, &at, 10);
+    }
+    // user nice system idle iowait irq softirq steal
+    busy += field[0] + field[1] + field[2] + field[5] + field[6] + field[7];
+    ++seen;
+  }
+  std::fclose(file);
+  seconds = static_cast<double>(busy) / tick;
+  return seen > 0;
+}
+
+double processSeconds() {
+  timespec ts{};
+  clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &ts);
+  return static_cast<double>(ts.tv_sec) + static_cast<double>(ts.tv_nsec) * 1.0e-9;
+}
+
 void choosePlan(int width) {
   (void)width;
   gPlanN = 0;
@@ -357,7 +449,13 @@ void choosePlan(int width) {
       }
   }
   if (nids < 2) {
-    const int others = othersRunning();
+    // Only a look that would narrow a full team is taken again, so a
+    // crowded process does not sleep on the timed call that looks.
+    int others = othersRunning();
+    if (others > 0 && !gCrowded) {
+      others = othersSteady(others);
+    }
+    gCrowded = others > 0;
     // Other runnable threads hold half the mask or more. A worker tied to
     // one of those cpus waits for that cpu's time slice at every barrier,
     // and so do the regions that place and restore the team: a 2 ms call
@@ -601,12 +699,87 @@ int &askedWidth() {
   return width;
 }
 
+FairState &fairState() {
+  static FairState state;
+  return state;
+}
+
+int &fairDepth() {
+  thread_local int level = 0;
+  return level;
+}
+
 bool placementHeld() {
 #ifdef __linux__
   return holdsPlacement() && gApplied;
 #else
   return false;
 #endif
+}
+
+// Cpus' worth of load other processes put on teamCpus(), or -1 where it
+// cannot be read or the caller has a single cpu. The first look counts
+// their runnable threads (othersSteady); later looks average over at
+// least 0.1 s.
+static double othersLoad(int &ncpu) {
+#ifdef __linux__
+  static std::mutex lock;
+  static bool looked = false;
+  static double lastAt = 0.0;
+  static double lastBusy = 0.0;
+  static double lastOwn = 0.0;
+  static double others = 0.0;
+  const cpu_set_t &cpus = teamCpus();
+  ncpu = CPU_COUNT(&cpus);
+  if (ncpu < 2) {
+    return -1.0;
+  }
+  const std::lock_guard<std::mutex> hold(lock);
+  const double now = monoNow();
+  if (!looked || now - lastAt >= 0.1) {
+    double busy = 0.0;
+    if (!busySeconds(cpus, busy)) {
+      return -1.0;
+    }
+    const double own = processSeconds();
+    if (looked) {
+      others = std::max(0.0, (busy - lastBusy) - (own - lastOwn)) / (now - lastAt);
+    } else {
+      others = static_cast<double>(othersSteady(othersRunning()));
+      looked = true;
+    }
+    lastAt = now;
+    lastBusy = busy;
+    lastOwn = own;
+  }
+  return others;
+#else
+  ncpu = 0;
+  return -1.0;
+#endif
+}
+
+int loadWidth(int base) {
+  int ncpu = 0;
+  if (base < 2) {
+    return 0;
+  }
+  const double others = othersLoad(ncpu);
+  if (others < 0.0) {
+    return 0;
+  }
+  const int half = std::max(1, base / 2);
+  if (2.0 * others >= static_cast<double>(ncpu)) {
+    return half;
+  }
+  const int busyCpus = static_cast<int>(others + 0.5);
+  return std::max(half, std::min(base, ncpu - busyCpus));
+}
+
+bool othersHoldHalf() {
+  int ncpu = 0;
+  const double others = othersLoad(ncpu);
+  return others >= 0.0 && 2.0 * others >= static_cast<double>(ncpu);
 }
 
 PinSession::PinSession(bool team) : outer_(pinDepth()++ == 0) {
