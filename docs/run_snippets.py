@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
 # Copyright (c) d-SEAMS developers
-"""Run every documented Python, C, C++, Rust, Julia, Lua, Fortran, and R snippet.
+"""Run every documented Python, C and C++ snippet.
 
-One Meson test is docs_snippet_<page>. A missing compiler or an unbuilt
-binding exits 77. A snippet that does not match the current API fails.
+One Meson test is docs_snippet_<page>. A missing compiler exits 77. A
+snippet that does not match the current API fails.
+
+Python snippets import ``dseams`` and ``pydseams`` from the installed
+pydseamslib package, built from d-SEAMS/PydSEAMSlib. Nothing in this tree
+is put on the import path for them. When the package is missing the page
+fails and names the pip line that installs it.
+
+Rust, Julia, Lua, Fortran and R examples live in the binding repositories.
+A page here that still carries one fails with the repository it belongs in.
 """
 
 from __future__ import annotations
@@ -22,6 +30,17 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 FIXTURE = ROOT / "input" / "traj" / "genice_sI.lammpstrj"
 LANGS = {"python", "py", "c", "cpp", "c++", "cxx", "rust", "julia", "lua", "fortran", "f90", "r"}
+# Fences and includes in these languages are found so that a page carrying
+# one fails; the examples belong to the binding repositories.
+MOVED = {
+    "rust": "https://github.com/d-SEAMS/dseams-rs",
+    "julia": "https://github.com/d-SEAMS/Dseams.jl",
+    "lua": "https://github.com/d-SEAMS/yodaStruct",
+    "fortran": "https://github.com/d-SEAMS/dseams-fortran",
+    "f90": "https://github.com/d-SEAMS/dseams-fortran",
+    "r": "https://github.com/d-SEAMS/dseams-r",
+}
+MOVED_SUFFIX = {".rs": "rust", ".jl": "julia", ".lua": "lua", ".f90": "fortran", ".r": "r"}
 ORG_SRC = re.compile(r"#\+begin_src\s+([^\s]+)[^\n]*\n(.*?)#\+end_src", re.S | re.I)
 RST_DIR = re.compile(
     r"^\.\.\s+(literalinclude|code-block|code|doctest)::[ \t]*([^\n]*)\n((?:[ \t].*\n|\n)*)",
@@ -31,7 +50,23 @@ MD_INCLUDE = re.compile(r"```\{literalinclude\}\s+(\S+)")
 # A language tag is required. A bare closing ``` would otherwise swallow the next fence.
 MD_FENCE = re.compile(r"```([A-Za-z0-9_+-]+)\n(.*?)```", re.S)
 EXCERPT = re.compile(r"^(?:#|//|!)\s*excerpt:\s*(\S+)\s*$")
-OPTIONAL = ("pydseams", "pydseamslib", "ase", "solvis")
+OPTIONAL = ("ase", "solvis")
+BINDING = ("dseams", "pydseams")
+
+
+def project_version():
+    """The seams-core version, which pydseamslib releases share.
+
+    >>> project_version().count(".")
+    2
+    """
+    text = (ROOT / "meson.build").read_text(encoding="utf-8")
+    match = re.search(r"^\s*version:\s*'([^']+)'", text, re.M)
+    return match.group(1) if match else "unknown"
+
+
+def install_hint():
+    return "install it with: pip install pydseamslib=={}".format(project_version())
 
 
 class Skip(Exception):
@@ -146,42 +181,6 @@ def library_path(build):
     return os.pathsep.join(parts)
 
 
-def stage_dseams(build):
-    """Point imports at the in-tree package and the built nanobind module."""
-    stage = build / "pythonpath"
-    package = ROOT / "bindings" / "python" / "dseams"
-    dest = stage / "dseams"
-    dest.mkdir(parents=True, exist_ok=True)
-    for src in package.glob("*.py"):
-        link = dest / src.name
-        if not link.exists():
-            link.symlink_to(src)
-    frames = ROOT / "bindings" / "python" / "frames.py"
-    staged_frames = dest / "frames.py"
-    if frames.is_file() and not staged_frames.exists():
-        staged_frames.symlink_to(frames)
-    pyd = ROOT / "bindings" / "python" / "pydseams"
-    pdest = stage / "pydseams"
-    pdest.mkdir(parents=True, exist_ok=True)
-    for src in pyd.glob("*.py"):
-        link = pdest / src.name
-        if not link.exists():
-            link.symlink_to(src)
-    built = [path for path in build.rglob("_core*.so") if path.is_file()]
-    if not built:
-        built = [path for path in package.glob("_core*.so") if path.is_file()]
-    tag = sys.implementation.cache_tag
-    abi3 = sys.version_info >= (3, 12)
-    matched = [path for path in built if tag in path.name or (abi3 and ".abi3." in path.name)]
-    if matched:
-        built = matched
-    if built:
-        so = dest / built[0].name
-        if not so.exists():
-            so.symlink_to(built[0])
-    return stage
-
-
 def base_env(build):
     env = os.environ.copy()
     env.pop("DSEAMS_DOC_BUILD", None)
@@ -205,19 +204,12 @@ def base_env(build):
         env["SEAMS_SOURCE_ROOT"] = str(ROOT)
     env["PYTHONPATH"] = os.pathsep.join(
         [
-            str(stage_dseams(build)),
             str(DOCS / "examples"),
-            str(ROOT / "bindings" / "python"),
-            str(ROOT / "bindings" / "python" / "src"),
             str(ROOT / "adapters" / "python"),
             str(ROOT / "scripts"),
             env.get("PYTHONPATH", ""),
         ]
     )
-    rlib = build / "docs-r-lib"
-    if rlib.is_dir():
-        env["R_LIBS"] = str(rlib) + os.pathsep + env.get("R_LIBS", "")
-        env["DSEAMS_R_LIB"] = str(rlib)
     return env
 
 
@@ -401,6 +393,30 @@ def python_with(module, env):
     return sys.executable if probe.returncode == 0 else None
 
 
+def imports_of(text, names):
+    """The names from ``names`` that ``text`` imports.
+
+    >>> imports_of("import dseams\\nfrom pydseams import read", BINDING)
+    ['dseams', 'pydseams']
+    >>> imports_of("from dseams_insitu.engine import InSitu", BINDING)
+    []
+    """
+    found = []
+    for name in names:
+        pattern = r"(?<![A-Za-z_.])(?:import|from)\s+" + re.escape(name) + r"(?![A-Za-z0-9_])"
+        if re.search(pattern, text):
+            found.append(name)
+    return found
+
+
+def binding_python(text, env):
+    """The interpreter for a snippet, failing when it needs pydseamslib and it is absent."""
+    for name in imports_of(text, BINDING):
+        if python_with(name, env) is None:
+            raise Fail("{} is not importable; {}".format(name, install_hint()))
+    return sys.executable
+
+
 def which(name):
     found = shutil.which(name)
     if not found:
@@ -519,7 +535,14 @@ def program_args(text, build):
     return []
 
 
+def moved_message(lang, what):
+    return "{} is {} code; it belongs in {} and this page links there".format(what, lang, MOVED[lang])
+
+
 def run_source(build, env, path):
+    moved = MOVED_SUFFIX.get(path.suffix.lower())
+    if moved:
+        raise Fail(moved_message(moved, path.name))
     text = path.read_text(encoding="utf-8", errors="replace")
     key = hashlib.sha1(text.encode()).hexdigest()
 
@@ -570,176 +593,8 @@ def run_source(build, env, path):
                 args = ["-f", str(ROOT / "engines" / "gromacs" / "ice.gro")]
             run([str(exe), *args], env, cwd=cwd)
         elif path.suffix == ".py":
-            exe = sys.executable
-            if "import pydseams" in text or "from pydseams" in text:
-                exe = python_with("pydseams", env)
-                if exe is None:
-                    raise Fail("in-tree pydseams did not import")
-            elif re.search(r"(?<![A-Za-z_])import dseams\b", text) or re.search(r"(?<![A-Za-z_])from dseams\b", text):
-                exe = python_with("dseams._core", env)
-                if exe is None:
-                    raise Skip("the Python extension is not built")
+            exe = binding_python(text, env)
             run([exe, str(path), *program_args(text, build)], env)
-        elif path.suffix == ".lua":
-            lua = shutil.which("lua5.4") or shutil.which("lua")
-            if not lua:
-                raise Skip("lua is not on PATH")
-            from lua_module import cpath_for
-
-            try:
-                cpath = cpath_for(build, lua)
-            except SystemExit as err:
-                raise Skip(str(err)) from err
-            local = dict(env)
-            local["LUA_CPATH"] = cpath
-            local["LUA_PATH"] = str(ROOT / "bindings" / "lua" / "?.lua") + ";;"
-            run([lua, str(path), *program_args(text, build)], local)
-        elif path.suffix in {".f90", ".F90"}:
-            from toolchain import cxx_compiler, fortran_compiler, gfortran_link, link_command
-
-            gfortran = fortran_compiler()
-            linker = cxx_compiler()
-            work = Path(tempfile.mkdtemp(prefix="seams-snippet-f90-"))
-            is_program = re.search(r"(?m)^\s*program\s+\w+", text) is not None
-            if "use seams" not in text and is_program:
-                exe = work / "snippet"
-                obj = work / "snippet.o"
-                run([gfortran, "-c", str(path), "-o", str(obj)], env)
-                run(
-                    link_command(
-                        linker,
-                        [
-                            str(obj),
-                            "-o",
-                            str(exe),
-                            "-L" + str(build / "bindings"),
-                            "-L" + str(build / "src"),
-                            "-lseams_lang",
-                            "-lseams",
-                            *gfortran_link(),
-                            "-Wl,-rpath," + str(build / "bindings"),
-                            "-Wl,-rpath," + str(build / "src"),
-                            *vendored_links(build),
-                        ],
-                    ),
-                    env,
-                )
-                run([str(exe), *program_args(text, build)], env)
-                return
-            # Same order as fortran_lib_src in bindings/fortran/meson.build.
-            objects = []
-            for unit in ("seams_kinds", "seams_c", "seams_support", "seams", "seams_methods"):
-                obj = work / (unit + ".o")
-                run(
-                    [gfortran, "-J", str(work), "-c", str(ROOT / "bindings" / "fortran" / "src" / (unit + ".f90")), "-o", str(obj)],
-                    env,
-                    cwd=work,
-                )
-                objects.append(str(obj))
-            if not is_program:
-                # A module or submodule has no main to link.
-                run([gfortran, "-J", str(work), "-c", str(path), "-o", str(work / "unit.o")], env, cwd=work)
-                return
-            exe = work / "snippet"
-            main_obj = work / "snippet.o"
-            run([gfortran, "-I", str(work), "-c", str(path), "-o", str(main_obj)], env, cwd=work)
-            run(
-                link_command(
-                    linker,
-                    [
-                        str(main_obj),
-                        *objects,
-                        "-o",
-                        str(exe),
-                        "-L" + str(build / "src"),
-                        "-lseams",
-                        *gfortran_link(),
-                        "-ldl",
-                        "-Wl,-rpath," + str(build / "src"),
-                        *vendored_links(build),
-                    ],
-                ),
-                env,
-                cwd=work,
-            )
-            run([str(exe), *program_args(text, build)], env)
-        elif path.suffix == ".jl":
-            julia = which("julia")
-            if not (build / "bindings" / "libseams_lang.so").is_file():
-                raise Skip("libseams_lang.so was not built")
-            project = ROOT / "bindings" / "julia" / ("Seams" if "/Seams/" in str(path) else "Dseams")
-            local = dict(env)
-            local["JULIA_LOAD_PATH"] = str(project) + os.pathsep
-            local["SEAMS_LIB"] = str(build / "src" / "libseams.so")
-            run([julia, "--startup-file=no", "--project=" + str(project), str(path), *program_args(text, build)], local)
-        elif path.suffix == ".R":
-            script = shutil.which("Rscript")
-            if not script:
-                raise Skip("Rscript is not on PATH")
-            local = dict(env)
-            # The package's own tests leave library(dseams) to tests/testthat.R.
-            package_test = path.resolve().is_relative_to(ROOT / "bindings" / "r" / "dseams" / "tests")
-            if "library(dseams)" in text or package_test:
-                sys.path.insert(0, str(ROOT / "docs" / "examples"))
-                import run_binding
-
-                script, renv = run_binding.install_r_package(build)
-                local.update(renv)
-            if "testthat" in text or "skip_if" in text or package_test:
-                probe = subprocess.run(
-                    [script, "-e", 'quit(status=if (requireNamespace("testthat", quietly=TRUE)) 0 else 1)'],
-                    env=local,
-                    capture_output=True,
-                    text=True,
-                )
-                if probe.returncode != 0:
-                    raise Skip("testthat is not installed")
-                attach = "library(dseams); " if package_test else ""
-                run([script, "-e", attach + "testthat::test_file('" + str(path) + "', stop_on_failure=TRUE)"], local)
-                return
-            run([script, str(path), *program_args(text, build)], local)
-        elif path.suffix == ".rs":
-            which("cargo")
-            local = dict(env)
-            local["SEAMS_LIB_DIR"] = str(build / "src")
-            manifest = str(ROOT / "bindings" / "rust" / "seams" / "Cargo.toml")
-            # language_fronts and the API page also cargo-test this tree.
-            cargo_lock = ROOT / "bindings" / "rust" / ".cargo-test.lock"
-            def cargo(cmd):
-                import fcntl
-                with open(cargo_lock, "a", encoding="utf-8") as handle:
-                    fcntl.flock(handle, fcntl.LOCK_EX)
-                    run(cmd, local)
-            cargo(["cargo", "fetch", "--manifest-path", str(ROOT / "bindings/rust/Cargo.toml")])
-            if path.parent.name == "tests":
-                cargo(["cargo", "test", "--offline", "--manifest-path", manifest, "--test", path.stem, "--", "--test-threads=1"])
-            elif "use seams::" in text:
-                example = "minimal" if path.name == "minimal_rust.rs" else path.stem
-                cargo(["cargo", "run", "--offline", "--quiet", "--manifest-path", manifest, "--example", example, "--", *program_args(text, build)])
-            else:
-                which("rustc")
-                work = Path(tempfile.mkdtemp(prefix="seams-snippet-rs-"))
-                exe = work / "snippet"
-                run(
-                    [
-                        "rustc",
-                        "--edition",
-                        "2021",
-                        "-o",
-                        str(exe),
-                        str(path),
-                        "-L",
-                        str(build / "bindings"),
-                        "-L",
-                        str(build / "src"),
-                        "-C",
-                        "link-arg=-Wl,-rpath," + str(build / "bindings"),
-                        "-C",
-                        "link-arg=-Wl,-rpath," + str(build / "src"),
-                    ],
-                    local,
-                )
-                run([str(exe), *program_args(text, build)], local)
         else:
             raise Skip("no runner for " + path.suffix)
 
@@ -997,26 +852,14 @@ def run_python(build, env, chunks):
     script = work / "snippet.py"
     body = "\n".join(chunks)
     exe = sys.executable
-    for name in OPTIONAL:
-        if re.search(r"(?<![A-Za-z_])import " + re.escape(name) + r"\b", body) or re.search(
-            r"(?<![A-Za-z_])from " + re.escape(name) + r"\b", body
-        ):
-            found = python_with(name.split(".")[0], env)
-            if found is None:
-                if name.startswith("pydseams"):
-                    raise Fail("in-tree pydseams did not import")
-                raise Skip(name + " is not installed")
-            if name.startswith("pydseams"):
-                exe = found
-    plain = body.replace("pydseams", "")
-    if "dseams." in plain or "import dseams" in plain or "from dseams" in plain:
-        found = python_with("dseams._core", env)
-        if found is None:
-            raise Skip("the Python extension is not built")
-        exe = found
     prelude = ""
-    if "dseams." in plain and "import dseams" not in plain and "from dseams" not in plain:
+    plain = body.replace("pydseams", "")
+    if re.search(r"(?<![A-Za-z_])dseams\.", plain) and not imports_of(plain, ("dseams",)):
         prelude = "import dseams\n"
+    exe = binding_python(prelude + body, env)
+    for name in imports_of(body, OPTIONAL):
+        if python_with(name, env) is None:
+            raise Skip(name + " is not installed")
     script.write_text(
         prelude
         + "import math\n"
@@ -1035,119 +878,11 @@ def run_python(build, env, chunks):
     run([exe, str(script)], env)
 
 
-def run_julia_text(build, env, body):
-    julia = which("julia")
-    if not (build / "bindings" / "libseams_lang.so").is_file():
-        raise Skip("libseams_lang.so was not built")
-    lines = []
-    for line in body.splitlines():
-        stripped = line.strip()
-        if "==" in stripped and not stripped.startswith("@") and not stripped.startswith("#"):
-            lines.append("@assert (" + stripped + ")")
-        else:
-            lines.append(line)
-    work = Path(tempfile.mkdtemp(prefix="seams-snippet-jl-"))
-    script = work / "snippet.jl"
-    # Seams and Dseams export the same verbs, so a Seams block must not
-    # also load Dseams or the unqualified calls become ambiguous.
-    module = "Seams" if re.search(r"^\s*using Seams\b", body, re.M) else "Dseams"
-    prelude = "" if module == "Seams" else "using Dseams\n"
-    script.write_text(prelude + "\n".join(lines) + "\n", encoding="utf-8")
-    project = ROOT / "bindings" / "julia" / module
-    local = dict(env)
-    if module == "Dseams":
-        sys.path.insert(0, str(ROOT / "bindings" / "julia"))
-        from instantiate import ensure
-
-        ensure(julia, local)
-    local["JULIA_LOAD_PATH"] = str(project) + os.pathsep
-    local["SEAMS_LIB"] = str(build / "src" / "libseams.so")
-    run([julia, "--startup-file=no", "--project=" + str(project), str(script)], local)
-
-
-def run_lua_text(build, env, body):
-    if body.strip().startswith("--") and not any(line.strip() and not line.strip().startswith("--") for line in body.splitlines()):
-        raise Fail("Lua snippet is only a comment")
-    lua = shutil.which("lua5.4") or shutil.which("lua")
-    if not lua:
-        raise Skip("lua is not on PATH")
-    from lua_module import cpath_for
-
-    try:
-        cpath = cpath_for(build, lua)
-    except SystemExit as err:
-        raise Skip(str(err)) from err
-    work = Path(tempfile.mkdtemp(prefix="seams-snippet-lua-"))
-    script = work / "snippet.lua"
-    prelude = 'local dseams = require("dseams")\nlocal root = os.getenv("DSEAMS_ROOT")\n'
-    if "frame" in body and "local frame" not in body and "dseams.read" not in body:
-        prelude += 'local frame = dseams.read(root .. "/input/traj/genice_sI.lammpstrj", {type = 1})\n'
-    script.write_text(prelude + body + "\n", encoding="utf-8")
-    local = dict(env)
-    local["LUA_CPATH"] = cpath
-    local["LUA_PATH"] = str(ROOT / "bindings" / "lua" / "?.lua") + ";;"
-    run([lua, str(script)], local)
-
-
-def run_r_text(build, env, body):
-    script = which("Rscript")
-    work = Path(tempfile.mkdtemp(prefix="seams-snippet-r-"))
-    path = work / "snippet.R"
-    path.write_text(
-        'root <- Sys.getenv("DSEAMS_ROOT")\n'
-        'lib <- Sys.getenv("DSEAMS_R_LIB", "")\n'
-        "if (nzchar(lib)) .libPaths(c(lib, .libPaths()))\n"
-        "suppressPackageStartupMessages(library(dseams))\n"
-        + body
-        + "\n",
-        encoding="utf-8",
-    )
-    try:
-        run([script, str(path)], env)
-    except Fail as exc:
-        if "there is no package called" in str(exc):
-            raise Skip("the R package is not installed") from exc
-        raise
-
-
-def run_rust_text(build, env, body):
-    which("cargo")
-    if "assert" not in body:
-        raise Fail("Rust example must assert its result")
-    if "fn main" not in body:
-        # A fragment such as the error example runs inside a main that
-        # returns the crate's Result, as a rustdoc example would.
-        indented = "".join("    " + line if line.strip() else line for line in body.splitlines(True))
-        body = "fn main() -> Result<(), seams::Error> {\n" + indented.rstrip("\n") + "\n    Ok(())\n}\n"
-    work = Path(tempfile.mkdtemp(prefix="seams-snippet-rs-"))
-    (work / "src").mkdir()
-    (work / "Cargo.toml").write_text(
-        "\n".join(
-            [
-                "[package]",
-                'name = "seams_doc_example"',
-                'version = "0.0.0"',
-                'edition = "2021"',
-                "",
-                "[dependencies]",
-                'seams = {{ package = "dseams", path = "{}" }}'.format(ROOT / "bindings" / "rust" / "seams"),
-                'seams-sys = {{ package = "dseams-sys", path = "{}" }}'.format(ROOT / "bindings" / "rust" / "seams-sys"),
-                "",
-            ]
-        ),
-        encoding="utf-8",
-    )
-    (work / "src" / "main.rs").write_text(body if body.endswith("\n") else body + "\n", encoding="utf-8")
-    local = dict(env)
-    local["SEAMS_LIB_DIR"] = str(build / "src")
-    run(
-        ["cargo", "fetch", "--manifest-path", str(ROOT / "bindings/rust/Cargo.toml")],
-        local,
-    )
-    run(["cargo", "run", "--offline", "--quiet", "--manifest-path", str(work / "Cargo.toml")], local)
-
-
 def run_doctest(env, body):
+    binding_python(body, env)
+    for name in imports_of(body, OPTIONAL):
+        if python_with(name, env) is None:
+            raise Skip(name + " is not installed")
     work = Path(tempfile.mkdtemp(prefix="seams-snippet-doc-"))
     path = work / "snippet.txt"
     path.write_text(body if body.endswith("\n") else body + "\n", encoding="utf-8")
@@ -1172,9 +907,13 @@ def execute_page(path, build):
                     continue
                 if suffix not in {".c", ".cpp", ".cxx", ".cc", ".py", ".rs", ".jl", ".lua", ".f90", ".r"}:
                     continue
+                if suffix in MOVED_SUFFIX:
+                    raise Fail(moved_message(MOVED_SUFFIX[suffix], lang))
                 run_source(build, env, target)
                 ran += 1
                 continue
+            if lang in MOVED:
+                raise Fail(moved_message(lang, "a " + lang + " block"))
             excerpt = check_excerpt(body)
             if excerpt is not None:
                 # The lines are in a file the suite already builds. Recompiling
@@ -1208,28 +947,6 @@ def execute_page(path, build):
                 continue
             if lang == "c":
                 compile_statements(build, env, "c", body)
-                ran += 1
-                continue
-            if lang == "julia":
-                run_julia_text(build, env, body)
-                ran += 1
-                continue
-            if lang == "lua":
-                run_lua_text(build, env, body)
-                ran += 1
-                continue
-            if lang == "r":
-                run_r_text(build, env, body)
-                ran += 1
-                continue
-            if lang == "rust":
-                run_rust_text(build, env, body)
-                ran += 1
-                continue
-            if lang in {"fortran", "f90"}:
-                source = Path(tempfile.mkdtemp(prefix="seams-snippet-f90-")) / "snippet.f90"
-                source.write_text(body if body.endswith("\n") else body + "\n", encoding="utf-8")
-                run_source(build, env, source)
                 ran += 1
                 continue
             raise Fail("unhandled " + lang)
