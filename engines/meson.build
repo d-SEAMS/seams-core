@@ -221,7 +221,10 @@ if gromacs_opt.allowed()
       include_directories: [seams_inc, include_directories('.')],
       cpp_args: _args + seams_api_args + gromacs_args,
       # GROMACS 2024 headers call ssize() unqualified, ambiguous with std::ssize.
-      override_options: ['cpp_std=c++17'],
+      # An instrumented executable makes libgromacs call a null pointer
+      # from gmx_fio_open. The seams library this tool links stays
+      # instrumented; this translation unit does not.
+      override_options: ['cpp_std=c++17', 'b_sanitize=none'],
       build_rpath: gromacs_rpath,
       install_rpath: gromacs_rpath,
       install: true)

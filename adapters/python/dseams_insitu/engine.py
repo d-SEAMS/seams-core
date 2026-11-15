@@ -141,6 +141,20 @@ class InSitu:
         raw[8] = c[1]
         return raw
 
+    def close(self):
+        """Free the frame this engine owns."""
+        frame = self._frame
+        self._frame = None
+        self._frame_n = 0
+        if frame is not None:
+            self.lib.seams_frame_free(ctypes.c_void_p(frame))
+
+    def __del__(self):
+        try:
+            self.close()
+        except Exception:
+            return
+
     def reset_profile(self):
         for key in self.profile:
             self.profile[key] = 0

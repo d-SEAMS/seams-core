@@ -51,3 +51,4 @@ except ValueError:
 else:
     sys.exit("a length-4 box was accepted")
 print("insitu atoms", labels.shape[0], "cubic", int(np.sum(labels == 0)))
+engine.close()

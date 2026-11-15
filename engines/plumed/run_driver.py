@@ -30,6 +30,14 @@ work.write_text(text)
 try:
     env = os.environ.copy()
     env["PLUMED_NUM_THREADS"] = env.get("PLUMED_NUM_THREADS", "1")
+    # Preloading libasan into this plumed binary dies with SIGILL inside
+    # the runtime, before the plugin is opened. The plugin is linked to
+    # libasan, so the runtime arrives when plumed dlopens it. That order
+    # is what verify_asan_link_order accepts.
+    env.pop("LD_PRELOAD", None)
+    asan = env.get("ASAN_OPTIONS", "")
+    if "verify_asan_link_order" not in asan:
+        env["ASAN_OPTIONS"] = "verify_asan_link_order=0" + ((":" + asan) if asan else "")
     done = subprocess.run(
         ["plumed", "driver", "--plumed", str(work), "--ixyz", str(xyz)],
         check=False,

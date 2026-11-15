@@ -68,6 +68,7 @@ def main():
             print("openmm labels", labels, file=sys.stderr)
             return 1
     print(f"openmm calls {len(engine.frames)} ice {n * len(engine.frames)}")
+    engine.close()
     return 0
 
 
