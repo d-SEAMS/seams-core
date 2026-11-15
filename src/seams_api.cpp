@@ -1511,13 +1511,18 @@ void refine_ring_labels(const seams_rings *rings) {
         six_at.push_back(static_cast<int>(i));
       }
     }
-    std::vector<std::vector<int>> six = gather_rows(rings->rings, six_at);
-    if (!six.empty()) {
+    const bool allSix = six_at.size() == rings->rings.size();
+    std::vector<std::vector<int>> six;
+    if (!allSix) {
+      six = gather_rows(rings->rings, six_at);
+    }
+    const auto &sixRows = allSix ? rings->rings : six;
+    if (!sixRows.empty()) {
       try {
-        const auto both = ring::cagePlanes(six, idx);
+        const auto both = ring::cagePlanes(sixRows, idx);
         const auto &aff = both.affiliation;
         const auto &planes = both.planes;
-        for (std::size_t k = 0; k < six.size(); ++k) {
+        for (std::size_t k = 0; k < sixRows.size(); ++k) {
           const bool hc = k < aff.hc.size() && aff.hc[k];
           const bool ddc = k < aff.ddc.size() && aff.ddc[k];
           const bool basal = k < planes.basal.size() && planes.basal[k];
@@ -1556,13 +1561,16 @@ void refine_ring_labels(const seams_rings *rings) {
         if (at[size].empty()) {
           continue;
         }
-        bySize[size] = gather_rows(rings->rings, at[size]);
-        std::vector<ring::strucType> kind(bySize[size].size(), ring::strucType::unclassified);
+        const bool whole = at[size].size() == rings->rings.size();
+        if (!whole) {
+          bySize[size] = gather_rows(rings->rings, at[size]);
+        }
+        const auto &group = whole ? rings->rings : bySize[size];
+        std::vector<ring::strucType> kind(group.size(), ring::strucType::unclassified);
         std::vector<double> rmsd(static_cast<std::size_t>(std::max(rings->cloud.nop, 0)), -1.0);
         int perfect = 0;
         int imperfect = 0;
-        ring::findPrisms(bySize[size], kind, perfect, imperfect, idx, rings->cloud, rmsd,
-                         false);
+        ring::findPrisms(group, kind, perfect, imperfect, idx, rings->cloud, rmsd, false);
         for (std::size_t k = 0; k < kind.size(); ++k) {
           int code = -1;
           if (kind[k] == ring::strucType::Prism) {

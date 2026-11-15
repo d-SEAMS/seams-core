@@ -89,7 +89,7 @@ struct FrameContext {
   ring::RingSearchIndex index;
   // Ring atoms in ascending order, ring i at sortedAtoms[sortedOff[i]].
   std::vector<int> sortedOff;
-  std::vector<int> sortedAtoms;
+  std::vector<int, seams::FilledByTeam<int>> sortedAtoms;
   mutable std::vector<std::vector<int>> basalCand;
   mutable std::vector<char> basalReady;
   mutable std::vector<std::vector<int>> adjRings;
@@ -101,7 +101,7 @@ struct FrameContext {
   std::vector<ring::strucType> scratchType;
   // Ring atoms in one block, six per ring, when every ring has length 6.
   // The basal search reads these atoms for every candidate.
-  std::vector<int> flat6;
+  std::vector<int, seams::FilledByTeam<int>> flat6;
   bool allHex = false;
   // Kept across warm prepares so the inverted index is not allocated again.
   std::vector<int> refillCount;

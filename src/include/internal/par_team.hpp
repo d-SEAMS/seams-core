@@ -3,6 +3,8 @@
 
 #include <algorithm>
 #include <iterator>
+#include <memory>
+#include <new>
 #include <utility>
 #include <vector>
 
@@ -11,6 +13,22 @@
 #endif
 
 namespace seams {
+
+// Leaves new elements uninitialised. The team fills these buffers, and a
+// zeroing resize on one thread touched every page first.
+template <class T> struct FilledByTeam : std::allocator<T> {
+  template <class U> struct rebind {
+    using other = FilledByTeam<U>;
+  };
+  FilledByTeam() = default;
+  template <class U> FilledByTeam(const FilledByTeam<U> &) noexcept {}
+  template <class U> void construct(U *p) noexcept {
+    ::new (static_cast<void *>(p)) U;
+  }
+  template <class U, class... Args> void construct(U *p, Args &&...args) {
+    ::new (static_cast<void *>(p)) U(std::forward<Args>(args)...);
+  }
+};
 
 inline int teamThreads() {
 #ifdef SEAMS_HAS_OPENMP
