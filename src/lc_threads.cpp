@@ -13,6 +13,7 @@
 #include <thread_team.hpp>
 
 #include <algorithm>
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
@@ -61,6 +62,16 @@ namespace {
 int &pinDepth() {
   thread_local int depth = 0;
   return depth;
+}
+
+// The plan and the saved masks below belong to the process. A call that
+// arrives from a second host thread while one holds them would rebuild
+// the plan under the first thread's team, so it runs unplaced instead.
+std::atomic<bool> gHeld{false};
+
+bool &holdsPlacement() {
+  thread_local bool held = false;
+  return held;
 }
 
 bool envSet(const char *name) {
@@ -432,7 +443,7 @@ void restorePin() {
 
 bool placementHeld() {
 #ifdef __linux__
-  return gApplied && pinDepth() > 0;
+  return holdsPlacement() && gApplied;
 #else
   return false;
 #endif
@@ -441,6 +452,11 @@ bool placementHeld() {
 PinSession::PinSession() : outer_(pinDepth()++ == 0) {
   if (outer_) {
     widenAffinity();
+    bool idle = false;
+    outer_ = gHeld.compare_exchange_strong(idle, true, std::memory_order_acquire);
+  }
+  if (outer_) {
+    holdsPlacement() = true;
 #ifdef __linux__
     applyPin();
 #endif
@@ -452,6 +468,8 @@ PinSession::~PinSession() {
 #ifdef __linux__
     restorePin();
 #endif
+    holdsPlacement() = false;
+    gHeld.store(false, std::memory_order_release);
   }
   --pinDepth();
 }

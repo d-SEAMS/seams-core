@@ -179,8 +179,8 @@ inline void releaseTeam() {
 // and freeze the team size, and leave the workers asleep only under
 // the passive wait policy.
 
-// True while the outermost PinSession has pinned this process's team.
-// A narrowed team must not pin those workers again onto the caller's cpu.
+// True while this thread's outermost PinSession has pinned its team. A
+// narrowed team must not pin those workers again onto the caller's cpu.
 bool placementHeld();
 
 // Pins the OpenMP team for the enclosing call, then puts every worker's
@@ -191,7 +191,8 @@ bool placementHeld();
 // narrowed to that slice. The outermost session calls widenAffinity
 // before a load-narrowed width can make it skip, so the masks it saves
 // and restores are the widened ones. Placement adds no cpu outside the
-// host mask.
+// host mask. One host thread holds the placement at a time; a call from
+// another thread meanwhile runs unplaced.
 class PinSession {
 public:
   PinSession();
