@@ -127,4 +127,12 @@ program cubic
   end block
   call rings%close()
   call frame%close()
+  ! The main program does not run finalizers before LeakSanitizer.
+  if (allocated(labels)) deallocate(labels)
+  if (allocated(counts)) deallocate(counts)
+  if (allocated(hist)) deallocate(hist)
+  if (allocated(q4)) deallocate(q4)
+  if (allocated(q6)) deallocate(q6)
+  if (allocated(columns)) deallocate(columns)
+  if (allocated(version)) deallocate(version)
 end program cubic
