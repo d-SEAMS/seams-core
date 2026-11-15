@@ -1,0 +1,72 @@
+# Copyright (c) d-SEAMS developers
+# Open, read, and destroy a frame inside this library. The caller only
+# borrows the frame for the visit. Destroying it here uses the same
+# allocator that built it, including when a sanitizer is mapped later.
+diff --git a/src/Trajectory.cpp b/src/Trajectory.cpp
+index 1111111..2222222 100644
+--- a/src/Trajectory.cpp
++++ b/src/Trajectory.cpp
+@@ -17,6 +17,8 @@
+ #include "chemfiles/Topology.hpp"
+ #include "chemfiles/FormatFactory.hpp"
+ #include "chemfiles/Configuration.hpp"
++#include "chemfiles/Error.hpp"
++#include "chemfiles/Selection.hpp"
+ #include "chemfiles/FormatMetadata.hpp"
+ #include "chemfiles/files/MemoryBuffer.hpp"
+ 
+@@ -277,3 +279,52 @@ optional<span<const char>> Trajectory::memory_buffer() const {
+ 
+     return span<const char>(buffer_->data(), buffer_->data() + buffer_->size());
+ }
++
++namespace chemfiles {
++
++int __attribute__((visibility("default"))) seams_with_frame(const std::string& path, const std::string& format,
++                     size_t step, const std::string& topology,
++                     const std::string& selection, bool read, bool empty_xyz,
++                     int (*visit)(const Frame& frame, const size_t* ids, size_t nids, void* user),
++                     void* user, std::string& error, size_t& nsteps) {
++    try {
++        Trajectory trajectory(path, 'r', format);
++        nsteps = trajectory.nsteps();
++        if (!read) {
++            return 0;
++        }
++        if (empty_xyz && nsteps == 0) {
++            error = "XYZ read failed: the file has no frames";
++            return 6;
++        }
++        if (nsteps > 0 && step >= nsteps) {
++            return 2;
++        }
++        if (!topology.empty()) {
++            trajectory.set_topology(topology);
++        }
++        Frame frame = trajectory.read_step(step);
++        const size_t* ids = nullptr;
++        size_t nids = static_cast<size_t>(-1);
++        std::vector<size_t> picked;
++        if (!selection.empty()) {
++            Selection chosen(selection);
++            picked = chosen.list(frame);
++            ids = picked.data();
++            nids = picked.size();
++        }
++        if (visit == nullptr) {
++            return 0;
++        }
++        return visit(frame, ids, nids, user);
++    } catch (const SelectionError& err) {
++        error = err.what();
++        return 3;
++    } catch (const Error& err) {
++        error = err.what();
++        return 4;
++    } catch (const std::exception& err) {
++        error = err.what();
++        return 5;
++    }
++}
++
++} // namespace chemfiles

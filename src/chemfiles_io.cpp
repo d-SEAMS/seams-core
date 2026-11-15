@@ -178,18 +178,33 @@ bool mmcifHasData(const std::string &filename) {
          chunk.find("_cell.") != std::string::npos;
 }
 
+// Defined in the vendored chemfiles library. The trajectory, the frame,
+// and a selection list are created and destroyed there, so their free
+// uses the allocator that allocated them.
+namespace chemfiles {
+int seams_with_frame(const std::string &path, const std::string &format,
+                     std::size_t step, const std::string &topology,
+                     const std::string &selection, bool read, bool empty_xyz,
+                     int (*visit)(const Frame &frame, const std::size_t *ids,
+                                  std::size_t nids, void *user),
+                     void *user, std::string &error, std::size_t &nsteps);
+}
+
 int sinp::chemfilesSteps(const std::string &filename) {
   if (!mmcifHasData(filename)) {
     chemfilesError = "mmCIF file has no data_ block";
     return -1;
   }
-  try {
-    chemfiles::Trajectory trajectory(filename, 'r', forcedFormat(filename));
-    return static_cast<int>(trajectory.nsteps());
-  } catch (...) {
-    chemfilesError = currentExceptionText();
+  std::string error;
+  std::size_t nsteps = 0;
+  const int rc = chemfiles::seams_with_frame(
+      filename, forcedFormat(filename), 0, "", "", false, false, nullptr,
+      nullptr, error, nsteps);
+  if (rc != 0) {
+    chemfilesError = error.empty() ? currentExceptionText() : error;
     return -1;
   }
+  return static_cast<int>(nsteps);
 }
 
 molSys::PointCloud<molSys::Point<double>, double>
@@ -202,57 +217,27 @@ sinp::readChemfiles(std::string filename, int targetFrame,
   return readChemfiles(std::move(filename), yCloud, request);
 }
 
-molSys::PointCloud<molSys::Point<double>, double>
-sinp::readChemfiles(std::string filename,
-                    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
-                    const ChemfilesRead &request) {
-  chemfilesUnreadable = false;
-  chemfilesError.clear();
-  yCloud = molSys::clearPointCloud(yCloud);
-  if (request.frame < 1) {
-    return yCloud;
-  }
-  if (!mmcifHasData(filename)) {
-    chemfilesUnreadable = true;
-    chemfilesError = "mmCIF file has no data_ block";
-    return yCloud;
-  }
-  try {
-    chemfiles::Trajectory trajectory(filename, 'r', forcedFormat(filename));
-    // A DCD has coordinates and a cell, not atom names. A sibling PDB
-    // carries the names the host used to choose the analysed species.
-    if (extensionIs(filename, "xyz") && trajectory.nsteps() == 0) {
-      throw std::runtime_error("XYZ read failed: the file has no frames");
-    }
-    if (extensionOf(filename) == "dcd") {
-      // The suffix check already found a dot.
-      const auto dot = filename.find_last_of('.');
-      const auto pdb = filename.substr(0, dot) + ".pdb";
-      std::ifstream probe(pdb);
-      if (probe) {
-        trajectory.set_topology(pdb);
-      }
-    }
-    if (trajectory.nsteps() > 0 &&
-        static_cast<std::size_t>(request.frame) > trajectory.nsteps()) {
-      framePastEnd = true;
-      yCloud = molSys::clearPointCloud(yCloud);
-      return yCloud;
-    }
-    auto frame =
-        trajectory.read_step(static_cast<std::size_t>(request.frame - 1));
-    applyCell(yCloud, frame.cell());
+struct ChemVisit {
+  const sinp::ChemfilesRead *request;
+  molSys::PointCloud<molSys::Point<double>, double> *cloud;
+};
+
+int visitChemFrame(const chemfiles::Frame &frame, const std::size_t *ids,
+                   std::size_t nids, void *user) {
+  auto *ctx = static_cast<ChemVisit *>(user);
+  const sinp::ChemfilesRead &request = *ctx->request;
+  auto &yCloud = *ctx->cloud;
+  applyCell(yCloud, frame.cell());
     const auto &topology = frame.topology();
     const auto positions = frame.positions();
     const std::size_t n = frame.size();
 
     std::vector<char> wanted(n, 1);
-    if (!request.selection.empty()) {
+    if (nids != static_cast<std::size_t>(-1)) {
       std::fill(wanted.begin(), wanted.end(), 0);
-      const chemfiles::Selection selection(request.selection);
-      for (const std::size_t index : selection.list(frame)) {
-        if (index < n) {
-          wanted[index] = 1;
+      for (std::size_t k = 0; k < nids; ++k) {
+        if (ids[k] < n) {
+          wanted[ids[k]] = 1;
         }
       }
     }
@@ -329,18 +314,60 @@ sinp::readChemfiles(std::string filename,
     }
     yCloud.nop = static_cast<int>(yCloud.pts.size());
     yCloud.currentFrame = request.frame;
+    return 0;
+}
+
+molSys::PointCloud<molSys::Point<double>, double>
+sinp::readChemfiles(std::string filename,
+                    molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                    const ChemfilesRead &request) {
+  chemfilesUnreadable = false;
+  chemfilesError.clear();
+  yCloud = molSys::clearPointCloud(yCloud);
+  if (request.frame < 1) {
     return yCloud;
-  } catch (const chemfiles::SelectionError &error) {
-    std::cerr << "chemfiles selection on " << filename << ": " << error.what()
-              << "\n";
-    yCloud = molSys::clearPointCloud(yCloud);
-    return yCloud;
-  } catch (const chemfiles::Error &error) {
+  }
+  if (!mmcifHasData(filename)) {
     chemfilesUnreadable = true;
-    chemfilesError = error.what();
+    chemfilesError = "mmCIF file has no data_ block";
+    return yCloud;
+  }
+  std::string topology;
+  if (extensionOf(filename) == "dcd") {
+    const auto dot = filename.find_last_of('.');
+    const auto pdb = filename.substr(0, dot) + ".pdb";
+    std::ifstream probe(pdb);
+    if (probe) {
+      topology = pdb;
+    }
+  }
+  ChemVisit ctx{&request, &yCloud};
+  std::string error;
+  std::size_t nsteps = 0;
+  const int rc = chemfiles::seams_with_frame(
+      filename, forcedFormat(filename),
+      static_cast<std::size_t>(request.frame - 1), topology, request.selection,
+      true, extensionIs(filename, "xyz"), visitChemFrame, &ctx, error, nsteps);
+  if (rc == 6) {
+    throw std::runtime_error(error);
+  }
+  if (rc == 2) {
+    framePastEnd = true;
     yCloud = molSys::clearPointCloud(yCloud);
     return yCloud;
   }
+  if (rc == 3) {
+    std::cerr << "chemfiles selection on " << filename << ": " << error << "\n";
+    yCloud = molSys::clearPointCloud(yCloud);
+    return yCloud;
+  }
+  if (rc != 0) {
+    chemfilesUnreadable = true;
+    chemfilesError = error;
+    yCloud = molSys::clearPointCloud(yCloud);
+    return yCloud;
+  }
+  return yCloud;
 }
 
 bool sinp::forEachChemfilesFrame(
