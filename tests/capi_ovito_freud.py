@@ -28,6 +28,15 @@ from pathlib import Path
 os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("RAYON_NUM_THREADS", "1")
 os.environ.setdefault("OVITO_THREAD_COUNT", "1")
+# The PyPI OVITO wheel dlopens libEGL from the conda prefix, which is
+# not on the wheel's own loader path.
+_conda = os.environ.get("CONDA_PREFIX", "")
+if _conda:
+    _lib = os.path.join(_conda, "lib")
+    if os.path.isfile(os.path.join(_lib, "libEGL.so.1")):
+        _current = os.environ.get("LD_LIBRARY_PATH", "")
+        if _lib not in _current.split(os.pathsep):
+            os.environ["LD_LIBRARY_PATH"] = _lib + (os.pathsep + _current if _current else "")
 
 try:
     import freud

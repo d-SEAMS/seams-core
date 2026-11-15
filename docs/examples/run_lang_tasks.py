@@ -170,8 +170,17 @@ def lang_julia(build, env):
     if "SEAMS_LANG_LIB" not in env:
         raise Skip("libseams_lang.so was not built")
     env = dict(env)
-    env["JULIA_LOAD_PATH"] = str(ROOT / "bindings" / "julia" / "Dseams") + os.pathsep
-    text = run([julia, "--startup-file=no", str(EXAMPLES / "lang_tasks.jl")], env)
+    project = ROOT / "bindings" / "julia" / "Dseams"
+    # JULIA_LOAD_PATH loads the source and not the project depot, so
+    # Preferences is missing. instantiate.ensure runs develop_jll under a lock.
+    sys.path.insert(0, str(ROOT / "bindings" / "julia"))
+    from instantiate import ensure
+
+    ensure(julia, env)
+    text = run(
+        [julia, "--startup-file=no", "--project=" + str(project), str(EXAMPLES / "lang_tasks.jl")],
+        env,
+    )
     sys.stdout.write(text)
 
 

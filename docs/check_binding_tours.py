@@ -85,6 +85,11 @@ def rust(build, env):
     child["LD_LIBRARY_PATH"] = os.pathsep.join(
         [str(build / "src"), str(build / "bindings"), child.get("LD_LIBRARY_PATH", "")]
     )
+    run(
+        [cargo, "fetch", "--manifest-path", str(REPO / "bindings/rust/Cargo.toml")],
+        child,
+        REPO,
+    )
     return run(
         [
             cargo, "test", "--offline", "--manifest-path", str(REPO / "bindings/rust/Cargo.toml"),

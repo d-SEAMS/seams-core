@@ -696,6 +696,7 @@ def run_source(build, env, path):
                 with open(cargo_lock, "a", encoding="utf-8") as handle:
                     fcntl.flock(handle, fcntl.LOCK_EX)
                     run(cmd, local)
+            cargo(["cargo", "fetch", "--manifest-path", str(ROOT / "bindings/rust/Cargo.toml")])
             if path.parent.name == "tests":
                 cargo(["cargo", "test", "--offline", "--manifest-path", manifest, "--test", path.stem, "--", "--test-threads=1"])
             elif "use seams::" in text:
@@ -1125,6 +1126,10 @@ def run_rust_text(build, env, body):
     (work / "src" / "main.rs").write_text(body if body.endswith("\n") else body + "\n", encoding="utf-8")
     local = dict(env)
     local["SEAMS_LIB_DIR"] = str(build / "src")
+    run(
+        ["cargo", "fetch", "--manifest-path", str(ROOT / "bindings/rust/Cargo.toml")],
+        local,
+    )
     run(["cargo", "run", "--offline", "--quiet", "--manifest-path", str(work / "Cargo.toml")], local)
 
 

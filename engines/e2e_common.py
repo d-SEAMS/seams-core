@@ -40,6 +40,23 @@ def seams_cli(build):
     return str(cli)
 
 
+def launch_env(argv):
+    """Process environment for an engine run.
+
+    Hosted runners advertise Azure MANA devices that cannot open a UCX
+    queue. Open MPI then aborts inside MPI_Bcast. The TCP BTL does not
+    touch that device. A one-rank run leaves the caller's transport alone.
+    """
+    env = dict(os.environ, OMP_NUM_THREADS="1")
+    names = {Path(arg).name for arg in argv[:2]}
+    if names & {"mpirun", "mpiexec"}:
+        env.setdefault("UCX_TLS", "tcp,self,sm")
+        env.setdefault("OMPI_MCA_pml", "ob1")
+        env.setdefault("OMPI_MCA_btl", "^openib")
+        env.setdefault("OMPI_MCA_rmaps_base_oversubscribe", "1")
+    return env
+
+
 def which(name, env_var=None):
     """Engine executable from env_var, else PATH. None when absent."""
     path = os.environ.get(env_var, "") if env_var else ""

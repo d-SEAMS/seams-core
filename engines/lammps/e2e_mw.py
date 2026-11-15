@@ -50,7 +50,7 @@ def main():
         work = Path(tmp)
         for name in ("in.mw.lmp", "mw_setup.lmp", "mW.sw"):
             shutil.copy(HERE / name, work)
-        env = dict(os.environ, OMP_NUM_THREADS="1")
+        env = e2e.launch_env(launch)
         cmd = launch + [
             "-var", "plugin", str(plugin), "-var", "cells", str(args.cells),
             "-var", "steps", str(args.steps), "-var", "every", str(args.every),

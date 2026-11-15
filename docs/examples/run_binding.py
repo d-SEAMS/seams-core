@@ -87,6 +87,13 @@ def run_rust(build):
     with open(lock, "a", encoding="utf-8") as handle:
         fcntl.flock(handle, fcntl.LOCK_EX)
         manifest = str(ROOT / "bindings/rust/Cargo.toml")
+        # clippy --offline needs the crates named by Cargo.lock in the
+        # local registry. The sanitizer job does not fetch them earlier.
+        subprocess.check_call(
+            [cargo, "fetch", "--manifest-path", manifest],
+            env=env,
+            cwd=ROOT,
+        )
         subprocess.check_call(
             [cargo, "fmt", "--check", "--manifest-path", manifest, "--all"],
             env=env,
@@ -179,6 +186,21 @@ def julia_bin():
     raise SystemExit("julia is not on PATH")
 
 
+def ensure_dseams(julia, env):
+    """Install Preferences and the local JLL for this checkout.
+
+    Dseams.jl loads Preferences. A project that has never been instantiated
+    has the dependency in Project.toml and not in the depot, so `using
+    Dseams` fails before any seams call.
+    """
+    project = ROOT / "bindings" / "julia" / "Dseams"
+    subprocess.check_call(
+        [julia, "--project=" + str(project), str(project / "dev" / "develop_jll.jl")],
+        env=env,
+        cwd=ROOT,
+    )
+
+
 def run_julia(build):
     julia = julia_bin()
     sys.path.insert(0, str(ROOT / "bindings" / "julia"))
@@ -189,6 +211,7 @@ def run_julia(build):
     env["DSEAMS_ROOT"] = str(ROOT)
     env["SEAMS_LANG_LIB"] = str(build / "bindings" / "libseams_lang.so")
     env["LD_LIBRARY_PATH"] = library_path(build)
+    ensure_dseams(julia, env)
     subprocess.check_call(
         [julia, "--project=" + str(ROOT / "bindings/julia/Dseams"), str(ROOT / "docs/examples/julia_api.jl")],
         env=env,

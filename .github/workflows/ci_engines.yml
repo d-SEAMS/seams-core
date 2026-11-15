@@ -92,6 +92,10 @@ jobs:
           ENGINE: ${{ matrix.engine }}
           OPTIONS: ${{ matrix.options }}
           TESTS: ${{ matrix.tests }}
+          # Hosted runners advertise MANA devices Open MPI's UCX PML cannot open.
+          UCX_TLS: tcp,self,sm
+          OMPI_MCA_pml: ob1
+          OMPI_MCA_btl: ^openib
         run: |
           set -euo pipefail
           pixi run bash -c '

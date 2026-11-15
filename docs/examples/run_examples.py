@@ -180,6 +180,16 @@ def compile_and_run(build):
     run(
         [
             cargo,
+            "fetch",
+            "--manifest-path",
+            str(ROOT / "bindings/rust/Cargo.toml"),
+        ],
+        env=rust_env,
+        cwd=ROOT,
+    )
+    run(
+        [
+            cargo,
             "run",
             "--offline",
             "--quiet",

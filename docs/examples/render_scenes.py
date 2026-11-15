@@ -9,6 +9,7 @@ medium cage is interfacial yellow, and 5^12 6^8 is clathrate green.
 from __future__ import annotations
 
 import ctypes
+import os
 import sys
 from collections import defaultdict, deque
 from pathlib import Path
@@ -364,8 +365,23 @@ def _camera(render, positions, forward, up):
     return centre, half_h, half_v, forward, right, up
 
 
+def _conda_libegl():
+    # The PyPI OVITO wheel dlopens libEGL. A conda prefix has that library
+    # and does not put it on the loader path of a wheel built for PyPI.
+    prefix = os.environ.get("CONDA_PREFIX", "")
+    if not prefix:
+        return
+    lib = os.path.join(prefix, "lib")
+    if not os.path.isfile(os.path.join(lib, "libEGL.so.1")):
+        return
+    current = os.environ.get("LD_LIBRARY_PATH", "")
+    if lib not in current.split(os.pathsep):
+        os.environ["LD_LIBRARY_PATH"] = lib + (os.pathsep + current if current else "")
+
+
 def tachyon_scene(render, path, positions, colours, radii, meshes, forward, up, width, frame=None):
     """One Tachyon frame. Settings match science_render._paint."""
+    _conda_libegl()
     from ovito.data import DataCollection, Particles, SimulationCell, SurfaceMesh
     from ovito.pipeline import Pipeline, StaticSource
     from ovito.vis import TachyonRenderer, Viewport

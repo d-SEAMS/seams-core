@@ -82,7 +82,7 @@ def run(launch, work, plugin, computes, columns, style="full"):
     for stale in ("frame.lammpstrj", "log.lammps"):
         (work / stale).unlink(missing_ok=True)
     done = subprocess.run(launch + ["-in", "in.select.lmp", "-log", "log.lammps"], cwd=work,
-                          env=dict(os.environ, OMP_NUM_THREADS="1"),
+                          env=e2e.launch_env(launch),
                           capture_output=True, text=True)
     log = (work / "log.lammps").read_text() if (work / "log.lammps").is_file() else ""
     return done.returncode, done.stdout + done.stderr + log
