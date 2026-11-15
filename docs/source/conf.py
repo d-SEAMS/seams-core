@@ -96,6 +96,26 @@ def _docs_ci():
     return os.environ.get("DOCS_CI") == "1"
 
 
+def _sphinx_builder():
+    """The -b name. Sphinx defaults to html when the flag is absent."""
+    argv = sys.argv
+    if "-b" in argv:
+        index = argv.index("-b")
+        if index + 1 < len(argv):
+            return argv[index + 1]
+    return "html"
+
+
+def _publish_build():
+    """DOCS_CI fails the book when a generated page is missing.
+
+    linkcheck and doctest read the sources that job builds. They do not
+    render molecule stills or the native API HTML, so a missing picture
+    stays a publish error and is not an error for those builders.
+    """
+    return _docs_ci() and _sphinx_builder() not in ("linkcheck", "doctest")
+
+
 def _write_gallery():
     """Draw the science gallery from the slow tutorial runs."""
     import importlib.util
@@ -109,6 +129,9 @@ def _write_gallery():
     except SystemExit as exc:
         status = exc.code if isinstance(exc.code, int) else 1
     if status in (0, None):
+        return
+    if _sphinx_builder() in ("linkcheck", "doctest"):
+        print("sphinx: science gallery is not part of this builder", file=sys.stderr)
         return
     kept = os.path.isdir(os.path.join(_source, "tutorials", "gallery"))
     if _docs_ci() or not kept:
@@ -136,6 +159,9 @@ def _write_molecules():
     except SystemExit as exc:
         status = exc.code if isinstance(exc.code, int) else 1
     if status in (0, None):
+        return
+    if _sphinx_builder() in ("linkcheck", "doctest"):
+        print("sphinx: molecule stills are not part of this builder", file=sys.stderr)
         return
     pictures = os.path.join(_source, "tutorials", "molecules")
     if _docs_ci() or not os.path.isdir(pictures):
@@ -376,7 +402,7 @@ def _stage_native_html():
             built = os.path.join(project, "build")
             index = os.path.join(built, "index.html")
             dest = os.path.join(native, name)
-            if _docs_ci() and (
+            if _publish_build() and (
                 prepared.returncode != 0
                 or built_docs.returncode != 0
                 or not os.path.isfile(index)
@@ -390,7 +416,7 @@ def _stage_native_html():
             else:
                 _native_page(dest, name, "Documenter did not write this build.")
     else:
-        if _docs_ci():
+        if _publish_build():
             raise SystemExit("julia is not on PATH")
         print("julia is absent; Documenter pages are placeholders")
         for name, _project in pairs:
@@ -417,12 +443,12 @@ def _stage_native_html():
             check=False,
         )
         if done.returncode != 0 or not os.path.isfile(os.path.join(r_dest, "index.html")):
-            if _docs_ci():
+            if _publish_build():
                 raise SystemExit("pkgdown did not write the R API pages")
             print("pkgdown did not build; the roxygen page is a placeholder")
             _native_page(r_dest, "dseams", "pkgdown did not build. The roxygen topics are in man/.")
     else:
-        if _docs_ci():
+        if _publish_build():
             raise SystemExit("Rscript is not on PATH")
         print("Rscript is absent; the pkgdown page is a placeholder")
         _native_page(r_dest, "dseams", "Rscript is not on PATH. The roxygen topics are in man/.")
