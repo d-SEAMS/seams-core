@@ -388,6 +388,207 @@ std::uint64_t wlHashWide(const std::vector<std::vector<int>> &adjacency, int roo
   return h;
 }
 
+// The ball under 400 vertices. A wide palette is counted, not sorted:
+// sorting each neighbour list costs more than the count. The hash matches
+// the bag sort.
+std::uint64_t wlHashCount(const std::vector<std::vector<int>> &adjacency, int root,
+                         int rounds, const std::vector<int> &colors) {
+  const int n = static_cast<int>(adjacency.size());
+  const bool colored = static_cast<int>(colors.size()) == n;
+  thread_local std::vector<std::uint64_t> color;
+  thread_local std::vector<std::uint64_t> next;
+  thread_local std::vector<std::uint64_t> all;
+  thread_local std::vector<std::uint64_t> palette;
+  thread_local std::vector<int> colorId;
+  thread_local std::vector<int> counts;
+  thread_local std::vector<std::pair<std::uint64_t, int>> order;
+  color.resize(static_cast<std::size_t>(n));
+  next.resize(static_cast<std::size_t>(n));
+  bool uniform = n >= 2 && root >= 0 && root < n;
+  const std::size_t deg0 = adjacency.empty() ? 0 : adjacency[0].size();
+  const int paint0 = colored ? colors[0] : 0;
+  for (int i = 0; i < n; i++) {
+    const std::size_t deg = adjacency[static_cast<std::size_t>(i)].size();
+    if (deg != deg0) {
+      uniform = false;
+    }
+    if (colored && colors[static_cast<std::size_t>(i)] != paint0) {
+      uniform = false;
+    }
+    std::uint64_t h = mix(kOffset, static_cast<std::uint64_t>(deg) +
+                                       (i == root ? 0x9e3779b97f4a7c15ULL : 0ULL));
+    if (colored) {
+      h = mix(h, static_cast<std::uint64_t>(
+                     static_cast<std::int64_t>(colors[static_cast<std::size_t>(i)])) +
+                     1ULL);
+    }
+    color[static_cast<std::size_t>(i)] = h;
+  }
+  for (int r = 0; r < rounds; r++) {
+    // Every non-root starts on one color, so the first round is the root's
+    // neighbour list: one hash for the root, one for its neighbours, one for
+    // the rest. Later rounds still walk the edges.
+    if (r == 0 && uniform) {
+      const std::uint64_t common = color[static_cast<std::size_t>(root == 0 ? 1 : 0)];
+      const std::uint64_t rooted = color[static_cast<std::size_t>(root)];
+      thread_local std::vector<int> hits;
+      hits.assign(static_cast<std::size_t>(n), 0);
+      bool simple = true;
+      for (const int j : adjacency[static_cast<std::size_t>(root)]) {
+        if (j < 0 || j >= n || ++hits[static_cast<std::size_t>(j)] > 1) {
+          simple = false;
+          break;
+        }
+      }
+      if (simple) {
+        const int deg = static_cast<int>(deg0);
+        auto sprinkle = [](std::uint64_t h, std::uint64_t col, int copies) {
+          for (int t = 0; t < copies; t++) {
+            h = mix(h, col);
+          }
+          return h;
+        };
+        const std::uint64_t hFar = sprinkle(mix(kOffset, common), common, deg);
+        std::uint64_t hTouch = mix(kOffset, common);
+        if (rooted < common) {
+          hTouch = sprinkle(mix(hTouch, rooted), common, deg - 1);
+        } else if (common < rooted) {
+          hTouch = sprinkle(hTouch, common, deg - 1);
+          hTouch = mix(hTouch, rooted);
+        } else {
+          hTouch = hFar;
+        }
+        const std::uint64_t hRoot = sprinkle(mix(kOffset, rooted), common, deg);
+        for (int i = 0; i < n; i++) {
+          if (i == root) {
+            next[static_cast<std::size_t>(i)] = hRoot;
+          } else if (hits[static_cast<std::size_t>(i)] != 0) {
+            next[static_cast<std::size_t>(i)] = hTouch;
+          } else {
+            next[static_cast<std::size_t>(i)] = hFar;
+          }
+        }
+        color.swap(next);
+        continue;
+      }
+    }
+    order.resize(static_cast<std::size_t>(n));
+    for (int i = 0; i < n; i++) {
+      order[static_cast<std::size_t>(i)] = {color[static_cast<std::size_t>(i)], i};
+    }
+    std::sort(order.begin(), order.end());
+    palette.clear();
+    colorId.resize(static_cast<std::size_t>(n));
+    for (int i = 0; i < n; i++) {
+      if (palette.empty() || palette.back() != order[static_cast<std::size_t>(i)].first) {
+        palette.push_back(order[static_cast<std::size_t>(i)].first);
+      }
+      colorId[static_cast<std::size_t>(order[static_cast<std::size_t>(i)].second)] =
+          static_cast<int>(palette.size()) - 1;
+    }
+    const int nColors = static_cast<int>(palette.size());
+    if (nColors > 64 && n >= 400) {
+      thread_local std::vector<std::uint64_t> bag;
+      for (int i = 0; i < n; i++) {
+        bag.clear();
+        for (const int j : adjacency[static_cast<std::size_t>(i)]) {
+          bag.push_back(color[static_cast<std::size_t>(j)]);
+        }
+        std::sort(bag.begin(), bag.end());
+        std::uint64_t h = mix(kOffset, color[static_cast<std::size_t>(i)]);
+        for (const std::uint64_t c : bag) {
+          h = mix(h, c);
+        }
+        next[static_cast<std::size_t>(i)] = h;
+      }
+    } else if (n >= 400) {
+      // The mix of a vertex is fixed by its own color and the neighbour
+      // counts. A dense crystal repeats that signature, so the long mix
+      // runs once per signature. A smaller ball does not repay the grouping.
+      thread_local std::vector<int> grid;
+      thread_local std::vector<int> ord;
+      const int cols = std::max(nColors, 1);
+      grid.assign(static_cast<std::size_t>(n) * static_cast<std::size_t>(cols), 0);
+      if (nColors > 0) {
+        for (int i = 0; i < n; i++) {
+          int *row = grid.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(cols);
+          for (const int j : adjacency[static_cast<std::size_t>(i)]) {
+            row[colorId[static_cast<std::size_t>(j)]]++;
+          }
+        }
+      }
+      ord.resize(static_cast<std::size_t>(n));
+      std::iota(ord.begin(), ord.end(), 0);
+      std::sort(ord.begin(), ord.end(), [&](int a, int b) {
+        const int ca = colorId[static_cast<std::size_t>(a)];
+        const int cb = colorId[static_cast<std::size_t>(b)];
+        if (ca != cb) {
+          return ca < cb;
+        }
+        const int *ra = grid.data() + static_cast<std::size_t>(a) * static_cast<std::size_t>(cols);
+        const int *rb = grid.data() + static_cast<std::size_t>(b) * static_cast<std::size_t>(cols);
+        return std::lexicographical_compare(ra, ra + cols, rb, rb + cols);
+      });
+      auto same = [&](int a, int b) {
+        if (colorId[static_cast<std::size_t>(a)] != colorId[static_cast<std::size_t>(b)]) {
+          return false;
+        }
+        const int *ra = grid.data() + static_cast<std::size_t>(a) * static_cast<std::size_t>(cols);
+        const int *rb = grid.data() + static_cast<std::size_t>(b) * static_cast<std::size_t>(cols);
+        return std::equal(ra, ra + cols, rb);
+      };
+      for (int k = 0; k < n; k++) {
+        const int i = ord[static_cast<std::size_t>(k)];
+        if (k > 0 && same(i, ord[static_cast<std::size_t>(k - 1)])) {
+          next[static_cast<std::size_t>(i)] =
+              next[static_cast<std::size_t>(ord[static_cast<std::size_t>(k - 1)])];
+          continue;
+        }
+        std::uint64_t h = mix(kOffset, color[static_cast<std::size_t>(i)]);
+        if (nColors > 0) {
+          const int *row = grid.data() + static_cast<std::size_t>(i) * static_cast<std::size_t>(cols);
+          for (int c = 0; c < nColors; c++) {
+            const std::uint64_t col = palette[static_cast<std::size_t>(c)];
+            const int copies = row[c];
+            for (int t = 0; t < copies; t++) {
+              h = mix(h, col);
+            }
+          }
+        }
+        next[static_cast<std::size_t>(i)] = h;
+      }
+    } else {
+      counts.assign(static_cast<std::size_t>(std::max(nColors, 0)), 0);
+      for (int i = 0; i < n; i++) {
+        std::fill(counts.begin(), counts.end(), 0);
+        for (const int j : adjacency[static_cast<std::size_t>(i)]) {
+          counts[static_cast<std::size_t>(colorId[static_cast<std::size_t>(j)])]++;
+        }
+        std::uint64_t h = mix(kOffset, color[static_cast<std::size_t>(i)]);
+        for (int c = 0; c < nColors; c++) {
+          const std::uint64_t col = palette[static_cast<std::size_t>(c)];
+          const int copies = counts[static_cast<std::size_t>(c)];
+          for (int t = 0; t < copies; t++) {
+            h = mix(h, col);
+          }
+        }
+        next[static_cast<std::size_t>(i)] = h;
+      }
+    }
+    color.swap(next);
+  }
+  all.assign(color.begin(), color.begin() + n);
+  std::sort(all.begin(), all.end());
+  std::uint64_t h = mix(kOffset, static_cast<std::uint64_t>(n));
+  if (root >= 0 && root < n) {
+    h = mix(h, color[static_cast<std::size_t>(root)]);
+  }
+  for (const std::uint64_t c : all) {
+    h = mix(h, c);
+  }
+  return h;
+}
+
 struct LocalGraph {
   std::vector<int> atoms;
   std::vector<std::vector<int>> adjacency;
@@ -499,8 +700,12 @@ LocalKey localKeyFromGraph(LocalGraph &g, int hops, std::uint64_t *refinement) {
   // The wide refinement counts repeated colors instead of sorting
   // every neighbour list. It is the same hash; a dense ball has a
   // long list at every vertex.
+  // Under 400 vertices a wide palette is counted. A larger ball keeps
+  // the bag sort used for a dense shared frame.
+  const int ballN = static_cast<int>(g.adjacency.size());
   const std::uint64_t refined =
-      wlHashWide(g.adjacency, 0, hops + 2, g.localColors);
+      ballN < 400 ? wlHashCount(g.adjacency, 0, hops + 2, g.localColors)
+                  : wlHashWide(g.adjacency, 0, hops + 2, g.localColors);
   if (refinement != nullptr) {
     *refinement = refined;
   }
