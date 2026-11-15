@@ -209,9 +209,10 @@ bool placementHeld();
 // Pins the OpenMP team for the enclosing call, then puts every worker's
 // affinity back. SEAMS_PIN=0 does nothing. A host that already chose
 // places (OMP_PROC_BIND, OMP_PLACES, GOMP_CPU_AFFINITY, KMP_AFFINITY), or
-// a caller whose mask is a single cpu, is left alone. When several
-// processes share the mask, each keeps a disjoint slice and the team is
-// narrowed to that slice. Beside a few busy threads the team narrows to
+// a caller whose mask is a single cpu, is left alone. A lone team
+// narrower than the mask is not pinned. When several processes share the
+// mask, each keeps a disjoint slice and the team is narrowed to that
+// slice. Beside a few busy threads the team narrows to
 // the free cpus and is not pinned; when other threads hold half the mask
 // it is left to the scheduler and FairWidth. The outermost session calls
 // widenAffinity before a load-narrowed width can make it skip, so the

@@ -204,14 +204,16 @@ int ownRunning() {
 }
 
 // The two counts are separate snapshots. A wide team whose workers wait
-// out time slices drops in and out of the run queue between them, so one
-// sample can read our own workers as somebody else's: beside two busy
+// out time slices drops in and out of the run queue between them, so a
+// look can read our own workers as somebody else's: beside two busy
 // threads, ten runnable with six of them ours read as four others, and
-// the team ran unplaced at full width for a second. Our count is read on
-// both sides of the global one, and the lower of two such samples is kept.
+// the team ran unplaced at full width for the next second. Our count is
+// read on both sides of the machine count and the larger kept. A thread
+// that is runnable only for a moment would narrow the team as well, so
+// the lower of two looks decides.
 int othersRunning() {
   int others = 1 << 30;
-  for (int pass = 0; pass < 2; ++pass) {
+  for (int look = 0; look < 2; ++look) {
     const int before = ownRunning();
     const int running = procsRunning();
     const int after = ownRunning();
@@ -513,6 +515,13 @@ void applyPin() {
     return;
   }
   if (gPlanN < 1) {
+    return;
+  }
+  // A team narrower than the mask has free cpus to move to, and a worker
+  // tied to one cpu waits out whatever else lands there. Beside a thread
+  // that ran 5 ms in every 10 on one cpu, 4-thread q6 took 6.1 ms pinned
+  // and 4.4 ms left to the scheduler, as on an idle machine.
+  if (gParts == 1 && width < gPlanN) {
     return;
   }
   const int use = std::min(width, gPlanN);
