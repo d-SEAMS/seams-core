@@ -643,7 +643,12 @@ void fillLocalGraph(LocalGraph &g, const Rows &rows, int atom, int hops,
       }
       adj.push_back(j);
     }
-    std::sort(adj.begin(), adj.end());
+    // A repeated crystal ball matches only when the rows are ordered. A long
+    // row in a disordered ball does not repeat, and sorting it costs more
+    // than the match it would find.
+    if (adj.size() <= 16) {
+      std::sort(adj.begin(), adj.end());
+    }
   }
   const bool colored = colors.size() == rows.size() && !rows.empty();
   if (colored) {
