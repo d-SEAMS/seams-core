@@ -22,3 +22,15 @@ leak:_PyObject_Calloc
 # pybind11_exec__image is the _image module initializer.
 leak:*matplotlib*
 leak:pybind11_exec__image
+# python_dseams, after the tests print OK. Fast unwinding stops at
+# default_calloc, so the PyArray_NewFromDescr suppression never sees
+# its frame. A slow unwind of the same 168 bytes / 3 allocations is
+# only NumPy and CPython:
+#   #1 default_calloc            numpy/_core/_multiarray_umath
+#   #2 PyDataMem_UserNEW_ZEROED  numpy/_core/_multiarray_umath
+#   #3 PyArray_NewFromDescr_int  numpy/_core/_multiarray_umath
+#   #4 PyArray_Zeros_int         numpy/_core/_multiarray_umath
+#   #5 array_zeros               numpy/_core/_multiarray_umath
+#   #6 _PyEval_EvalFrameDefault  Python/bytecodes.c
+# No seams, libyodaLib, or dseams frame.
+leak:default_calloc
