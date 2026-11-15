@@ -560,6 +560,7 @@ def main() -> int:
             run(busy, "contended")
 
     with open(args.out / "scaling.csv", "w", newline="") as handle:
+        handle.write(f"# source_tree {stats.source_tree(ROOT)}\n")
         writer = csv.DictWriter(handle, fieldnames=list(rows[0].keys()), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
