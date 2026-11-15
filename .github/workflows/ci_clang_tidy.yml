@@ -21,6 +21,6 @@ jobs:
       - name: Install clang-tidy and Clang OpenMP
         run: sudo apt-get update && sudo apt-get install -y clang clang-tidy libomp-dev
       - name: Export compile commands
-        run: pixi run meson setup build-tidy -Dwith_tests=false -Dwith_python=false
+        run: pixi run meson setup build-tidy -Dwith_tests=false
       - name: Run clang-tidy
         run: bash scripts/clang_tidy_src.sh build-tidy

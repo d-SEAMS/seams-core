@@ -237,8 +237,7 @@ configure_offload() {
   fi
   if meson setup "$BUILD" --buildtype=debugoptimized \
     -Dwith_openmp_offload=enabled \
-    -Dwith_python=false \
-    -Dwith_lua=disabled \
+ \
     -Dwith_mpi=disabled \
     -Dwith_gpulite=disabled \
     -Dcatch2:tests=false \

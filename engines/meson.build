@@ -399,7 +399,6 @@ if python3_engines.found() and get_option('with_tests')
   openmm_env = environment()
   openmm_env.set('DSEAMS_BUILD', meson.project_build_root())
   openmm_env.set('DSEAMS_SRC', meson.project_source_root())
-  openmm_env.set('PYTHONPATH', meson.project_build_root() / 'python-stage')
   test(
     'openmm_reporter',
     python3_engines,

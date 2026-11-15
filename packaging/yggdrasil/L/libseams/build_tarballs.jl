@@ -35,7 +35,6 @@ meson setup build \
     --wrap-mode=nodownload \
     -Ddefault_library=shared \
     -Dwith_tests=false \
-    -Dwith_python=false \
     -Dwith_cli=true \
     -Dwith_lammps=disabled \
     -Dwith_gromacs=disabled \
@@ -49,7 +48,6 @@ meson setup build \
     -Dwith_csm=disabled \
     -Dwith_sphericart=disabled \
     -Dwith_nauty=disabled \
-    -Dwith_lua=disabled \
     -Dwith_blas=disabled \
     -Dwith_chemfiles=disabled \
     -Dwith_readcon=disabled \

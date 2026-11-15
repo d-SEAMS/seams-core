@@ -33,7 +33,6 @@ meson setup "$build" $reconfigure \
   --buildtype=debugoptimized \
   -Db_sanitize=address,undefined \
   -Dwith_tests=true \
-  -Dwith_python=true \
   -Dwith_cli=true \
   "$@"
 ninja -C "$build"

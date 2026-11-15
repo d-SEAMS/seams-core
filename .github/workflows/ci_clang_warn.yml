@@ -22,7 +22,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y clang libomp-dev
       - name: Build with the warning set as errors
         run: |
-          pixi run bash -lc 'CC=clang CXX=clang++ meson setup build-clang-werror -Dwith_tests=false -Dwith_python=false'
+          pixi run bash -lc 'CC=clang CXX=clang++ meson setup build-clang-werror -Dwith_tests=false'
           pixi run ninja -C build-clang-werror
 
   # Every target, tests, benchmarks, bindings and engines included, under
@@ -43,7 +43,7 @@ jobs:
           sudo apt-get install -y libomp-21-dev gfortran lua5.4 liblua5.4-dev luajit libluajit-5.1-dev
       - name: Build every target with warnings as errors
         run: |
-          pixi run bash -lc 'CC=clang-21 CXX=clang++-21 meson setup build-clang21 -Dwerror=true -Dwith_tests=true -Dwith_lua=auto -Dwith_fortran=auto'
+          pixi run bash -lc 'CC=clang-21 CXX=clang++-21 meson setup build-clang21 -Dwerror=true -Dwith_tests=true'
           pixi run ninja -C build-clang21
       - name: Test the Clang build
         run: pixi run meson test -C build-clang21 --print-errorlogs --no-suite heavy
@@ -65,7 +65,7 @@ jobs:
           sudo apt-get install -y gcc-15 g++-15 gfortran-15 lua5.4 liblua5.4-dev luajit libluajit-5.1-dev
       - name: Build every target with warnings as errors
         run: |
-          pixi run bash -lc 'CC=gcc-15 CXX=g++-15 FC=gfortran-15 meson setup build-gcc15 --buildtype=release -Dwerror=true -Dwith_tests=true -Dwith_lua=auto -Dwith_fortran=auto'
+          pixi run bash -lc 'CC=gcc-15 CXX=g++-15 FC=gfortran-15 meson setup build-gcc15 --buildtype=release -Dwerror=true -Dwith_tests=true'
           pixi run ninja -C build-gcc15
       - name: Test the GCC build
         run: pixi run meson test -C build-gcc15 --print-errorlogs --no-suite heavy

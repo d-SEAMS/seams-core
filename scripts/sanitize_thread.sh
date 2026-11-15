@@ -76,7 +76,6 @@ fi
 meson setup "$build" $reconfigure \
   --buildtype=debugoptimized \
   -Dwith_tests=true \
-  -Dwith_python=false \
   -Dwith_cli=true \
   -Db_sanitize=thread \
   -Db_asneeded=false \

@@ -19,11 +19,11 @@ lammps_src=$(sh scripts/fetch_lammps_headers.sh "$scratch/lammps-src")
 fennel=$(sh scripts/fetch_fennel.sh "$scratch/fennel")
 
 meson setup build --buildtype=release \
-  -Dwith_tests=true -Dwith_python=true -Dwith_cli=true \
+  -Dwith_tests=true -Dwith_cli=true \
   -Dwith_gromacs=enabled -Dwith_lammps=enabled \
   -Dwith_openmm=enabled -Dwith_plumed=enabled \
   -Dpaper_full=true \
-  -Dlammps_src_include="$lammps_src" -Dfennel_lua="$fennel" \
+  -Dlammps_src_include="$lammps_src" \
   ${SEAMS_MESON_ARGS:-}
 ninja -C build -j2
 

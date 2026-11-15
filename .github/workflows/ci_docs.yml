@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
-          environments: docs default cycles figures site-julia site-r
+          environments: docs default cycles figures
           cache-key: pixi-docs-
       - name: Build libseams and seams
         run: |
@@ -42,9 +42,6 @@ jobs:
           echo "DISPLAY=:99" >> "$GITHUB_ENV"
           echo "QT_QPA_PLATFORM=xcb" >> "$GITHUB_ENV"
           echo "LIBGL_ALWAYS_SOFTWARE=1" >> "$GITHUB_ENV"
-      - name: Julia libraries for Documenter
-        run: |
-          pixi run -e site-julia julia --project=bindings/julia/Dseams/docs bindings/julia/Dseams/dev/develop_jll.jl
       - name: Publish the book
         env:
           DOCS_CI: "1"
@@ -53,7 +50,7 @@ jobs:
           SEAMS_LANGDIR: ${{ github.workspace }}/bbdir/bindings
           MOLECULES_BPY: ${{ github.workspace }}/.pixi/envs/cycles/bin/python
         run: |
-          export PATH="${{ github.workspace }}/.pixi/envs/figures/bin:${{ github.workspace }}/.pixi/envs/site-julia/bin:${{ github.workspace }}/.pixi/envs/site-r/bin:${PATH}"
+          export PATH="${{ github.workspace }}/.pixi/envs/figures/bin:${PATH}"
           pixi run -e docs docbld
       - name: Mermaid render
         run: python3 docs/check_mermaid.py
@@ -95,15 +92,13 @@ jobs:
         with:
           environments: docs
           cache-key: pixi-docs-
-      - name: Python numpydoc and FORD
-        # docbld runs ford for the Fortran reference. The docs env carries both.
-        run: pixi run -e docs python -m pip install numpydoc ford
+      - name: Python numpydoc
+        run: pixi run -e docs python -m pip install numpydoc
 
-      - name: C++ and Lua API docs
+      - name: C++ API docs
         run: |
-          sudo apt-get update && sudo apt-get install -y doxygen lua-ldoc lua5.2
+          sudo apt-get update && sudo apt-get install -y doxygen
           doxygen docs/Doxyfile.lang
-          ldoc --fatalwarnings -c docs/config.ld bindings/lua/dseams.lua
 
       - name: Build the library the examples call
         uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
@@ -111,18 +106,11 @@ jobs:
           environments: default
           cache-key: pixi-default-
 
-      - name: Language runtimes
-        run: sudo apt-get update && sudo apt-get install -y lua5.4 liblua5.4-dev r-base-core gfortran pandoc devscripts texlive-latex-base texlive-latex-recommended texlive-fonts-recommended texlive-fonts-extra xvfb libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-xkb1 libxkbcommon-x11-0 mesa-vulkan-drivers libgl1-mesa-dri
-
-      - uses: julia-actions/setup-julia@v2
-        with:
-          version: "1.10"
+      - name: Docs runtimes
+        run: sudo apt-get update && sudo apt-get install -y pandoc devscripts texlive-latex-base texlive-latex-recommended texlive-fonts-recommended texlive-fonts-extra xvfb libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-xkb1 libxkbcommon-x11-0 mesa-vulkan-drivers libgl1-mesa-dri
 
       - run: pixi run -e default setup
       - run: pixi run -e default ninja -j2 -C bbdir
-      - name: Julia project for the snippets
-        run: julia --project=bindings/julia/Dseams bindings/julia/Dseams/dev/develop_jll.jl
-
       - name: Cache the brine frames and the renderer wheels
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
@@ -144,48 +132,22 @@ jobs:
           echo "VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/lvp_icd.json" >> "$GITHUB_ENV"
           echo "VK_DRIVER_FILES=/usr/share/vulkan/icd.d/lvp_icd.json" >> "$GITHUB_ENV"
 
-      - name: Ice Ih, language APIs, and science tutorials
-        run: DOCS_CI=1 pixi run -e default meson test -C bbdir docs_core_counts docs_capi_examples docs_capi_symbols docs_binding_docstrings docs_lang_ice docs_science_render_copy docs_science_tutorials docs_engine_walkthrough --print-errorlogs
+      - name: Ice Ih, the C and C++ APIs, and science tutorials
+        run: DOCS_CI=1 pixi run -e default meson test -C bbdir docs_core_counts docs_capi_examples docs_capi_symbols docs_lang_ice docs_science_render_copy docs_science_tutorials docs_engine_walkthrough --print-errorlogs
 
-      - name: In-tree Frame package
-        run: |
-          pixi run -e default python -m pip install pytest solvis-tools
-          dest="${RUNNER_TEMP}/pydseams211"
-          pixi run -e default python -m pip install --target "$dest" 'pydseamslib==2.11.1'
-          echo "PYDSEAMS211=$dest" >> "$GITHUB_ENV"
-          py="$(pixi run -e default python -c 'import sys; print(sys.executable)')"
-          echo "PYDSEAMS211_PYTHON=$py" >> "$GITHUB_ENV"
-
-      - name: Frame parity and every documented language snippet
+      - name: Every documented snippet
         run: |
           set -euo pipefail
           mapfile -t names < <(pixi run -e default meson test -C bbdir --list | awk -F: '/docs_snippet_/ {print $NF}')
           test "${#names[@]}" -gt 0
           # libseams and the engine SDKs are on the rpath. The loader path stays unset.
-          # PYDSEAMS211 is only the parity oracle. Snippets import the in-tree package.
-          env -u LD_LIBRARY_PATH pixi run -e default meson test -C bbdir --print-errorlogs --no-rebuild python_frame_parity "${names[@]}"
+          env -u LD_LIBRARY_PATH pixi run -e default meson test -C bbdir --print-errorlogs --no-rebuild "${names[@]}"
 
       - name: Export the org book
         run: pixi run -e docs mkrst
 
       - name: Link check
         run: pixi run -e docs sphinx-build -W --keep-going -j 2 -b linkcheck -d docs/doctrees docs/source docs/linkcheck
-
-      - name: R CMD check
-        run: |
-          export DSEAMS_ROOT="$PWD"
-          export SEAMS_INCLUDE="$PWD/bindings/cxx"
-          export SEAMS_LIBDIR="$PWD/bbdir/bindings"
-          export LD_LIBRARY_PATH="$PWD/bbdir/src:$PWD/bbdir/bindings${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-          export TEXINPUTS="$PWD/docs/tex//:${TEXINPUTS:-}"
-          Rscript -e 'install.packages(c("cpp11","RcppEigen","roxygen2","testthat","knitr","rmarkdown"), repos="https://cloud.r-project.org")'
-          R CMD build bindings/r/dseams
-          R CMD check --as-cran dseams_*.tar.gz
-          log=$(echo dseams.Rcheck/00check.log)
-          if grep -E 'Undocumented (code objects|arguments|datasets)' "$log"; then
-            echo "R check reported undocumented objects"
-            exit 1
-          fi
 
       - name: Export the org book for doctest
         run: pixi run -e docs mkrst

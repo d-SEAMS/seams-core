@@ -9,7 +9,7 @@ Emscripten, when the host has `emcc`:
 
 ```
 meson setup bwasm --cross-file wasm/emscripten.ini \
-  -Dwith_tests=false -Dwith_cli=false -Dwith_python=false \
+  -Dwith_tests=false -Dwith_cli=false \
   -Dwith_openmp_offload=disabled -Dwith_mpi=disabled
 meson compile -C bwasm
 ```

@@ -68,7 +68,7 @@ def setup_release() -> Path:
         subprocess.run(
             [meson, "setup", str(BUILD), str(ROOT),
              "-Dbuildtype=release", "-Doptimization=3",
-             "-Dwith_python=false", "-Dwith_tests=true"],
+             "-Dwith_tests=true"],
             check=True,
         )
     else:

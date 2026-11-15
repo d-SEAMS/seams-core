@@ -82,7 +82,7 @@ fi
 
 log "configuring tip"
 run meson setup build-tip --buildtype=release \
-  -Dwith_python=false -Dwith_tests=true \
+  -Dwith_tests=true \
   > "$OUT_DIR/tip-setup.log" 2>&1
 run meson compile -C build-tip >> "$OUT_DIR/tip-setup.log" 2>&1
 run meson configure build-tip > "$OUT_DIR/tip-config.txt" 2>&1 || true
@@ -105,7 +105,7 @@ if [[ -f $BASE_TREE/meson.build ]]; then
   (
     cd "$BASE_TREE"
     run meson setup build-base --buildtype=release \
-      -Dwith_python=false -Dwith_tests=false \
+      -Dwith_tests=false \
       > "$OUT_DIR/base-setup.log" 2>&1
     run meson compile -C build-base >> "$OUT_DIR/base-setup.log" 2>&1
   )
