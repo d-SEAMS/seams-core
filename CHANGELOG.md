@@ -10,7 +10,7 @@ by [towncrier](https://towncrier.readthedocs.io/).
 
 <!-- towncrier release notes start -->
 
-## [2.14.0] - 2026-11-13
+## [2.14.0] - 2026-11-15
 
 ### Added
 
@@ -157,8 +157,8 @@ by [towncrier](https://towncrier.readthedocs.io/).
 - The ice cage search counts distinct atoms in a small buffer and builds only the least ring reading.
 - The in-plane RDF builds an explicit grid whose cells are the cutoff and bins packed coordinates from the neighbouring cells. Each thread keeps its own histogram until the frame finishes.
 - The landing page hides the root toctree and replaces that dump with cards for Tutorials, How-to, the language reference, the engines, Comparisons, and the paper reproductions. The suite-stack diagram fills the article column.
-- The linkcell wrap pin is 3700ea3 (0.3.5).
-- The minimage wrap pin is v0.1.2. Distances use mi_displacement_euclidean, and a failed call keeps the in-tree formula.
+- The linkcell wrap names the v0.4.0 tag and carries no patches.
+- The minimage wrap names the v0.1.4 tag. Distances use mi_displacement_euclidean, and a failed call keeps the in-tree formula.
 - The one-thread carried ring update copies and sorts its rings directly again. Several threads still sort indices and merge in parallel. A team narrower than the process is bound once to that many cores of the allowed set. Interior cells of the orthorhombic cutoff skip the periodic-shift arithmetic. One-thread and several-thread results still match.
 - The one-thread ring search packs sorted neighbour rows in one pass, and interior cells of a triclinic cutoff skip the image-wrap branches. Both stencils keep the same directed pairs as the branchy walk.
 - The orthorhombic cutoff list, cutoff q_l and the primitive ring census scale with OpenMP threads. Each thread fills its own CSR rows from a slot-balanced cell range, the C API reuses per-thread frame buffers, and the ring census counts sizes per thread without gathering the rings. On 110592-molecule ice Ic in `bench/omp-scaling`, 8 threads run the cutoff list 4.8 times, q4 5.8 times, q6 5.9 times and rings 6.1 times faster than 1 thread, and the 1-thread times are no slower than before. The CSR, q_l and ring counts are identical at 1, 2, 4 and 8 threads.
