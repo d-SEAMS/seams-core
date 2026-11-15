@@ -80,7 +80,8 @@ seams rdf "$dump" --pair-types 1,1 --cutoff 6 --bins 4
 seams prisms "$dump" --type 1
 #+end_src
 
-The [[file:howto/migrate-1x.org][1.x migration]], the
+The [[file:videos/index.org][videos]], the
+[[file:howto/migrate-1x.org][1.x migration]], the
 [[file:explanation/performance-h2h.org][performance tables]], and the
 [[file:reference/release-2.14.org][2.14.0 notes]] are the rest of this
 release.
@@ -183,7 +184,13 @@ framework.
       :link: paper/index
       :link-type: doc
 
-      The 2.0 paper's versions, benchmark tables, and rerun steps.
+      Versions, benchmark files, and rerun steps for seams-core 2.14.0.
+
+   .. grid-item-card:: Videos
+      :link: videos/index
+      :link-type: doc
+
+      Odysee recordings of the bindings and the tutorials.
 
 .. toctree::
    :hidden:
@@ -385,9 +392,10 @@ doxyYoda HTML tree (inline source, treeview) is at
 
 * d-SEAMS 2.0 paper
 
-The paper describes seams-core v2.12.0. Its component versions,
-current benchmark tables and rerun steps are under
-[[file:paper/index.org][d-SEAMS 2.0 paper]].
+seams-core 2.14.0 records for the v2 engine paper are under
+[[file:paper/index.org][d-SEAMS 2.0 paper]]: the pins, the files in
+=benchmarks/paper-cells/=, =bench/=, and =data/=, and the Snakemake
+rules that write them.
 
 * Related projects
 

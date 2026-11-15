@@ -170,7 +170,7 @@ def block(slug, claim):
         return ""
     blurb = BLURB.get(slug, slug)
     transcript = (
-        '<p>Transcript: <a href="../_static/captions/{}.vtt">'
+        '<p>Transcript: <a href="/_static/captions/{}.vtt">'
         "docs/videos/{}/captions.vtt</a></p>"
     ).format(slug, slug)
     body = (

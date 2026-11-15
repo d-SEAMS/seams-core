@@ -1,121 +1,97 @@
 #+TITLE: Reproduce
 #+OPTIONS: toc:nil num:nil ^:nil
 
-Install the release that the d-SEAMS 2.0 paper describes, rerun its
-records and check its Lean development. [[file:versions.org][Versions]]
-lists what each step pins, and [[file:benchmarks.org][Benchmarks]]
-lists what each record measured.
+Install seams-core 2.14.0 and regenerate the benchmark files in this
+repository. [[file:versions.org][Versions]] lists the pins.
+[[file:benchmarks.org][Benchmarks]] names each record.
+[[file:../howto/install.org][Install the engine]] is the full install.
+[[file:../explanation/citation.org][Citation]] says how to cite the
+2020 JCIM paper and the v2 engine paper.
 
-* Install the release
+* Install this tree
 
-The engine builds with pixi and Meson, or with the Nix flake.
+The meson project version is 2.14.0. ~seams --version~ prints that
+string. The same string is the pin on
+[[file:../howto/versions.org][Version pins]].
 
 #+begin_src bash
 git clone https://github.com/d-SEAMS/seams-core
-cd seams-core && git checkout v2.12.0
+cd seams-core
 pixi run setup && pixi run build && pixi run test
+#+end_src
+
+A hand build of the same tree:
+
+#+begin_src bash
+meson setup bbdir --buildtype=release
+meson compile -C bbdir -j2
 ./bbdir/seams read input/traj/exampleTraj.lammpstrj
-nix build        # ./result/bin/seams; runs the Catch2 suite
 #+end_src
 
-[[file:../howto/install.org][Install the engine]] covers the pixi
-environments and the flake in full.
+The install page covers Python from PyPI (~pydseamslib~, import
+~dseams~) and the Lua repository. The LAMMPS sources in this tree are
+=extras/lammps/compute_dseams.cpp= and =compute_dseams.h=.
+=extras/lammps/README.md= describes the compute. The PLUMED module is
+[[https://github.com/d-SEAMS/dseams-plumed][dseams-plumed]].
 
-PydSEAMSlib installs from PyPI and loads with ~import pydseamslib~. It
-needs Python 3.11 or later.
+* Regenerate the records
+
+The root =Snakefile= writes the files under =benchmarks/paper-cells/=
+and =bench/omp-scaling/=. The release binary those rules call is
+=bbdir-release/seams= and =bbdir-release/src/libyodaLib.so=.
+Two jobs:
 
 #+begin_src bash
-pip install pydseamslib
+snakemake -j2 benchmarks/paper-cells/sitting.csv
+snakemake -j2 benchmarks/paper-cells/tab-rings-214.csv
+snakemake -j2 benchmarks/paper-cells/tab-ql-eq.csv
+snakemake -j2 benchmarks/paper-cells/tab-neighbours.csv
+snakemake -j2 benchmarks/paper-cells/tab-chill.csv
+snakemake -j2 benchmarks/paper-cells/tab-cages.csv
+snakemake -j2 benchmarks/paper-cells/tab-cli.csv
+snakemake -j2 benchmarks/paper-cells/tab-lit.csv
+snakemake -j2 benchmarks/paper-cells/tab-hop-stride.csv
+snakemake -j2 benchmarks/paper-cells/tab-sym-eq.csv
+snakemake -j2 benchmarks/paper-cells/symmetry-vs-ptm.csv
+snakemake -j2 benchmarks/paper-cells/ptm-ice.csv
+snakemake -j2 benchmarks/paper-cells/rerun-main/report.txt
+snakemake -j2 bench/omp-scaling/scaling.csv
+snakemake -j2 data/engines-e2e.csv
 #+end_src
 
-The Lua library builds from the
-[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] repository with
-Meson.
+=paper_tables= writes the =tab-*= selections from =sitting.csv=.
+=paper_rerun= (=scripts/rerun_main_text.py=) writes
+=benchmarks/paper-cells/rerun-main/report.txt=.
+=omp_scaling= (=scripts/omp_scaling.py=) writes
+=bench/omp-scaling/scaling.csv=.
+=engines_e2e= (=scripts/engines_e2e.py=) writes =data/engines-e2e.csv=.
+[[file:../howto/paper-tables.org][Paper tables]] lists the table targets.
+
+=bench/README.md= times =seams_bench=. The executable is
+=bbdir-rel/bench/seams_bench=.
 
 #+begin_src bash
-meson setup bbdir --wrap-mode=nofallback && meson compile -C bbdir
-LUA_PATH="$PWD/lua/?.lua;;" LUA_CPATH="$PWD/bbdir/?.so;;" lua script.lua
+meson setup bbdir-rel --buildtype=release -Ddebug=true -Dwith_tests=true
+meson compile -C bbdir-rel -j2 seams_bench
+OMP_NUM_THREADS=1 ./bbdir-rel/bench/seams_bench --case all --reps 1
 #+end_src
 
-The device-resident batch is the Meson feature ~with_gpulite~, built
-when CUDA and NVRTC are found.
-
-The LAMMPS compute is the two sources
-~extras/lammps/compute_dseams.cpp~ and ~compute_dseams.h~, which call
-only the C header ~seams_c_api.h~. After ~pixi run install~, copy them
-into the =src= directory of LAMMPS, put ~$CONDA_PREFIX/include/seams~
-on its include path and link it to ~libyodaLib~ in
-~$CONDA_PREFIX/lib~.
-
-The PLUMED module builds with ~pixi run build~ in the
-[[https://github.com/d-SEAMS/dseams-plumed][dseams-plumed]]
-repository. Its ~tests/driver_check.py~ runs ~plumed driver~ with
-~DSEAMS_CAGES~ over a LAMMPS dump and compares the per-frame counts
-with a ~walk_compare~ table.
-
-* Rerun the records
-
-The reproducibility package pins OVITO, freud, GenIce2 and cycless in
-its pixi lock next to the engine. genice2-cage is installed with pip.
-R.I.N.G.S. is built from the SourceForge archive of rings-code 1.3.5.
+The tutorial rules live in =docs/tutorials/Snakefile=. A rule name is
+=interface=, =cages=, =rings=, =brine=, or =nucleation=.
 
 #+begin_src bash
-pip install genice2-cage==2.5.2
-tar xzf rings-code-v1.3.5.tar.gz && cd rings-code-v1.3.5
-./configure FC=gfortran && make
+snakemake -j2 -s docs/tutorials/Snakefile rings
 #+end_src
 
-The whole campaign runs from one Snakemake workflow, on an exclusive
-Slurm node or on any machine.
+* Carried frames
+
+The Meson test =seams_carried_frames_match_rebuild= runs
+=tests/cli_carry.py=. It compares the JSON of a carried range with
+~--rebuild~, ~SEAMS_CARRY=0~, and ~--jobs 2~ on
+=input/traj/mW_cubic.lammpstrj= and =input/traj/dump-l.lammpstrj=.
 
 #+begin_src bash
-git clone https://github.com/d-SEAMS/dseams2_repro
-cd dseams2_repro
-pixi run prep && pixi run submit   # exclusive Slurm node
-pixi run run-local                 # any machine
-#+end_src
-
-The three cloud-VM timing records each have a =run.sh=.
-
-#+begin_src bash
-R=results/reference
-bash $R/bench-2026-10-31/run.sh SRC BUILD BASE_TREE BASE_BUILD 3 ARCHIVE
-BEFORE=1 bash $R/cli-carry-2026-10-31/run.sh SRC BUILD 3 ARCHIVE
-bash $R/h2h-2026-10-31/run.sh
-#+end_src
-
-Here ~SRC~ is the unpacked program-files archive ~ARCHIVE~ and ~BUILD~
-its Meson release build, and ~BASE_TREE~ and ~BASE_BUILD~ are the
-baseline commit ~1c8efa38~ and its build. The ~3~ is the pinned core.
-Each =run.sh= refuses a source tree that differs from the archive.
-The carry record takes the session count as a fifth argument, five by
-default, and with ~BEFORE=1~ it also times the build without the
-back-off by reversing its =backoff.patch=.
-
-The head-to-head =run.sh= reads ~ARCHIVE~, ~H2H_SEAMS~ (the ~seams~
-binary of that archive) and ~PYDSEAMS~ (a PydSEAMSlib built on the same
-archive). It and =rings_mw.sh=, which runs the mW R.I.N.G.S. row,
-call =h2h.py=, and =compare_table.py= prints the rows of the table.
-Each record writes =raw/= and a =provenance.txt= with the archive
-checksum and the machine.
-
-* Check the carried walk
-
-The Meson test compares the JSON output of a carried range with
-~--rebuild~, ~SEAMS_CARRY=0~ and ~--jobs 2~. By hand, the two runs
-below print the same lines.
-
-#+begin_src bash
-meson test -C build seams_carried_frames_match_rebuild
-seams --frame 1 --last 148 cages --graph seeded nucleation.lammpstrj
-seams --rebuild --frame 1 --last 148 cages --graph seeded nucleation.lammpstrj
-#+end_src
-
-The same ~seams~ flags on the bundled multi-type frame:
-
-#+begin_src bash
-seams --frame 1 --last 148 cages --graph seeded input/traj/il_tiny.lammpstrj
-seams --rebuild --frame 1 --last 148 cages --graph seeded input/traj/il_tiny.lammpstrj
+meson test -C bbdir -j2 seams_carried_frames_match_rebuild
 #+end_src
 
 [[file:../reference/cli.org][seams CLI]] lists when the command line
@@ -123,29 +99,22 @@ carries and when it rebuilds.
 
 * Run the tests
 
-~meson test~ and ~nix build~ run the Catch2 suite together with
-~check_device_host~, ~check_invariance~ and ~gpu_kernels_host~. The
-property tests use Hypothesis and run in the
-[[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] repository.
-
 #+begin_src bash
-meson test -C bbdir
-pip install ".[test,ase]"
-python -m pytest tests
+meson test -C bbdir -j2
 #+end_src
 
 * Check the Lean development
 
-The =lean/= folder of the supplementary archive (=lean.zip=) holds the
-library ~DSeams~, thirteen files in =lean/DSeams/=, with no other
-library. From that folder the two commands below check every
-declaration. =lean/README.md= lists each theorem's supplement number,
-Lean name and file.
+=lean/lean-toolchain= pins ~leanprover/lean4:v4.15.0~.
+=lean/lakefile.toml= requires Mathlib ~v4.15.0~.
+=lean/README.org= lists the theorems. From =lean/=:
 
 #+begin_src bash
 elan toolchain install leanprover/lean4:v4.15.0
 lake build
 #+end_src
+
+[[file:../contributing/lean.org][Lean proofs]] is the same development.
 
 * Reproduce the paper
 
