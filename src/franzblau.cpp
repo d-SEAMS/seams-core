@@ -1409,6 +1409,10 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
       }
     }
     if (maxDepth >= 7) {
+      // The arms of one level-3 vertex are stored grouped by their near
+      // vertex, and the left filter keeps that order. A run shares every
+      // test that does not look at the far vertex. The three-word shell
+      // keeps the per-arm walk; that instantiation is the dense frame.
       std::vector<std::pair<int, int>> lefts;
       std::vector<std::pair<int, int>> rights;
       std::vector<int> dSlot(static_cast<std::size_t>(nVertices), -1);
@@ -1452,39 +1456,118 @@ void enumerateChordless(const Graph &adjacency, const DistOracle &oracle,
             // Arms that share the far vertex fail or pass together on every
             // test that does not look at the near vertex. The hits are a
             // plain total: one add per source, not one atomic per ring.
-            byD.clear();
-            touchedD.clear();
-            for (const auto &right : rights) {
-              const int d = right.second;
-              int slot = dSlot[static_cast<std::size_t>(d)];
-              if (slot < 0) {
-                slot = static_cast<int>(byD.size());
-                dSlot[static_cast<std::size_t>(d)] = slot;
-                byD.emplace_back();
-                touchedD.push_back(d);
+            if constexpr (ShellWords != 3) {
+              thread_local std::vector<int> slotOf;
+              thread_local std::vector<int> usedD;
+              thread_local std::vector<std::vector<int>> bucket;
+              thread_local std::vector<int> keptC;
+              if (static_cast<int>(slotOf.size()) != nVertices) {
+                slotOf.assign(static_cast<std::size_t>(nVertices), -1);
               }
-              byD[static_cast<std::size_t>(slot)].push_back(right.first);
-            }
-            for (const auto &left : lefts) {
-              const int a = left.first;
-              const int b = left.second;
-              for (int slot = 0; slot < static_cast<int>(byD.size()); slot++) {
-                const int d = touchedD[static_cast<std::size_t>(slot)];
-                if (d == b || adjacent(p, d) || within2(a, d) || within2(b, d)) {
-                  continue;
+              usedD.clear();
+              for (const auto &right : rights) {
+                const int d = right.second;
+                int slot = slotOf[static_cast<std::size_t>(d)];
+                if (slot < 0) {
+                  slot = static_cast<int>(usedD.size());
+                  slotOf[static_cast<std::size_t>(d)] = slot;
+                  if (slot == static_cast<int>(bucket.size())) {
+                    bucket.emplace_back();
+                  }
+                  bucket[static_cast<std::size_t>(slot)].clear();
+                  usedD.push_back(d);
                 }
-                for (const int c : byD[static_cast<std::size_t>(slot)]) {
-                  if (c == a || adjacent(a, c) || within2(b, c)) {
+                bucket[static_cast<std::size_t>(slot)].push_back(right.first);
+              }
+              const bool record7 = 7 < static_cast<int>(hist->size());
+              for (std::size_t i0 = 0; i0 < lefts.size();) {
+                const int b = lefts[i0].second;
+                std::size_t i1 = i0 + 1;
+                while (i1 < lefts.size() && lefts[i1].second == b) {
+                  ++i1;
+                }
+                for (int slot = 0; slot < static_cast<int>(usedD.size()); slot++) {
+                  const int d = usedD[static_cast<std::size_t>(slot)];
+                  if (d == b || adjacent(p, d) || within2(b, d)) {
                     continue;
                   }
-                  if (7 < static_cast<int>(hist->size())) {
-                    c7++;
+                  const auto &cs = bucket[static_cast<std::size_t>(slot)];
+                  if (i1 == i0 + 1) {
+                    const int a = lefts[i0].first;
+                    if (within2(a, d)) {
+                      continue;
+                    }
+                    for (const int c : cs) {
+                      if (c == a || adjacent(a, c) || within2(b, c)) {
+                        continue;
+                      }
+                      if (record7) {
+                        c7++;
+                      }
+                    }
+                  } else {
+                    keptC.clear();
+                    for (const int c : cs) {
+                      if (!within2(b, c)) {
+                        keptC.push_back(c);
+                      }
+                    }
+                    for (std::size_t k = i0; k < i1; k++) {
+                      const int a = lefts[k].first;
+                      if (within2(a, d)) {
+                        continue;
+                      }
+                      for (const int c : keptC) {
+                        if (c == a || adjacent(a, c)) {
+                          continue;
+                        }
+                        if (record7) {
+                          c7++;
+                        }
+                      }
+                    }
+                  }
+                }
+                i0 = i1;
+              }
+              for (const int d : usedD) {
+                slotOf[static_cast<std::size_t>(d)] = -1;
+              }
+            } else {
+              byD.clear();
+              touchedD.clear();
+              for (const auto &right : rights) {
+                const int d = right.second;
+                int slot = dSlot[static_cast<std::size_t>(d)];
+                if (slot < 0) {
+                  slot = static_cast<int>(byD.size());
+                  dSlot[static_cast<std::size_t>(d)] = slot;
+                  byD.emplace_back();
+                  touchedD.push_back(d);
+                }
+                byD[static_cast<std::size_t>(slot)].push_back(right.first);
+              }
+              for (const auto &left : lefts) {
+                const int a = left.first;
+                const int b = left.second;
+                for (int slot = 0; slot < static_cast<int>(byD.size()); slot++) {
+                  const int d = touchedD[static_cast<std::size_t>(slot)];
+                  if (d == b || adjacent(p, d) || within2(a, d) || within2(b, d)) {
+                    continue;
+                  }
+                  for (const int c : byD[static_cast<std::size_t>(slot)]) {
+                    if (c == a || adjacent(a, c) || within2(b, c)) {
+                      continue;
+                    }
+                    if (7 < static_cast<int>(hist->size())) {
+                      c7++;
+                    }
                   }
                 }
               }
-            }
-            for (const int d : touchedD) {
-              dSlot[static_cast<std::size_t>(d)] = -1;
+              for (const int d : touchedD) {
+                dSlot[static_cast<std::size_t>(d)] = -1;
+              }
             }
           } else {
             for (const auto &left : lefts) {
