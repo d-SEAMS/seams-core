@@ -1,10 +1,13 @@
 #+TITLE: Contributing
 #+OPTIONS: toc:nil num:nil ^:nil
 
-This repository is the C++ engine (~libyodaLib~) and the ~seams~ CLI.
-Python bindings are [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]].
-Lua/Fennel is [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]].
-Do not add a language binding here.
+This repository is the C++ engine (~libyodaLib~), the C API ~libseams~,
+the C ABI ~libseams_lang~, the ~seams~ CLI and the engine drivers. Each
+language binding (Python, Lua and Fennel, R, Julia, Rust, Fortran) is its
+own repository. [[file:repositories.org][The repository map]] says what
+lives where, how each binding pins and tests against a seams-core tag, the
+release order, and how to develop seams-core and a binding together. Do
+not add a language binding here.
 
 Documentation is authored in ~docs/orgmode/~ and exported with
 ~docs/export.el~ (ox-rst) before Sphinx. Run ~pixi run -e docs docbld~
@@ -28,8 +31,6 @@ pixi provides a compiler, Eigen, BLAS/LAPACK, Catch2, Meson, Ninja,
 Highway and chemfiles. Optional pixi features add IRA, sphericart,
 nauty, MPI, the docs stack, and the Coq/SymPy proofs.
 
-~-Dwith_python=true~ builds the in-tree nanobind module.
-~-Dwith_lua=auto~ builds the in-tree Lua module when Lua 5.4 or LuaJIT is present.
 
 * Clone and build
 
@@ -46,8 +47,8 @@ pixi run build
 pixi run test
 #+end_src
 
-~pixi run setup~ configures ~bbdir/~ with tests, the ~seams~ CLI, and
-the nanobind module (~-Dwith_tests=true~). ~pixi run build~ compiles
+~pixi run setup~ configures ~bbdir/~ with tests and the ~seams~ CLI
+(~-Dwith_tests=true~). ~pixi run build~ compiles
 ~libyodaLib~, ~libseams~, and ~seams~. ~pixi run test~ runs the suite.
 
 Nix:
@@ -158,12 +159,14 @@ Docs deploy from
 to ~gh-pages~, which Netlify serves at https://docs.dseams.info.
 ~.github/workflows/ci_docs.yml~ has two jobs.
 ~build-deploy~ checks out the tree, builds ~libseams~ and ~seams~,
-and runs ~DOCS_CI=1 pixi run -e docs docbld~. That build draws the
-molecule stills and the science gallery, and it writes the Julia
-and R API pages. Mermaid, lychee, and the sitemap check read
+installs ~pydseamslib~ from the matching PydSEAMSlib tag, and runs
+~DOCS_CI=1 pixi run -e docs docbld~. That build draws the molecule
+stills and the science gallery and copies =llms.txt= to the site
+root. Mermaid, lychee, and the sitemap check read
 ~docs/build~. Those three are what stand in front of the publish.
 The job then pushes ~docs/build~ with ~GITHUB_TOKEN~ on that
 upstream ~main~ push. A fork push does not publish the site.
-The tutorial, language, frame, snippet, linkcheck, doctest, and
-R CMD check commands run in ~verify~. They still fail the workflow
+The tutorial, C and C++, snippet, linkcheck, and doctest commands
+run in ~verify~, with the Python snippets against the installed
+~pydseamslib~. They still fail the workflow
 when they fail. They do not block the publish.

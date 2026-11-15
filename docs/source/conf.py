@@ -284,201 +284,6 @@ def _stage_markdown_book():
         (dest / "index.rst").write_text("\n".join(body), encoding="utf-8")
 
 
-def _stage_ctypes_autodoc():
-    """Pull numpydoc into the book.
-
-    rgpot keeps the narrative page and the generated API apart. This page
-    is the generated half. A missing import still leaves a page so the
-    how-to link resolves.
-    """
-    stable = os.path.join(_source, "stable")
-    page = os.path.join(stable, "seams_ctypes.rst")
-    index = os.path.join(stable, "index.rst")
-    try:
-        import seams  # noqa: F401
-    except Exception:
-        body = (
-            "ctypes reference\n"
-            "================\n"
-            "\n"
-            "The ``seams`` package did not import in this build.\n"
-            "The how-to is :doc:`python`.\n"
-        )
-    else:
-        body = (
-            "ctypes reference\n"
-            "================\n"
-            "\n"
-            "Generated from the numpydoc strings on ``seams``.\n"
-            "The how-to is :doc:`python`.\n"
-            "\n"
-            ".. automodule:: seams\n"
-            "   :members:\n"
-            "   :undoc-members:\n"
-            "   :show-inheritance:\n"
-        )
-    with open(page, "w", encoding="utf-8") as handle:
-        handle.write(body)
-    # The landing toctree holds this page; the index lists it like the rest.
-    if os.path.isfile(index):
-        with open(index, "a", encoding="utf-8") as handle:
-            handle.write("- :doc:`seams_ctypes`\n")
-
-
-def _native_page(folder, title, detail):
-    """One HTML page so a language link resolves when the tool is absent."""
-    os.makedirs(folder, exist_ok=True)
-    index = os.path.join(folder, "index.html")
-    if os.path.isfile(index):
-        return
-    with open(index, "w", encoding="utf-8") as handle:
-        handle.write("<!DOCTYPE html><title>{}</title><p>{}</p>\n".format(title, detail))
-
-
-def _use_ca_bundle():
-    """Point Julia and R at a CA bundle from this environment."""
-    prefix = os.environ.get("CONDA_PREFIX", "")
-    candidates = []
-    if prefix:
-        candidates.append(os.path.join(prefix, "ssl", "cert.pem"))
-    candidates.append("/etc/ssl/certs/ca-certificates.crt")
-    for path in candidates:
-        if path and os.path.isfile(path):
-            os.environ["SSL_CERT_FILE"] = path
-            os.environ["JULIA_SSL_CA_ROOTS_PATH"] = path
-            os.environ["REQUESTS_CA_BUNDLE"] = path
-            return path
-    return ""
-
-
-def _stage_native_html():
-    """Copy Documenter and pkgdown HTML next to the Sphinx book.
-
-    The language pages link at these paths. A missing tool writes one
-    page and does not stop the book, unless DOCS_CI=1, which publishes
-    only real API pages.
-    """
-    import glob
-    import shutil
-    import subprocess
-
-    _use_ca_bundle()
-    native = os.path.join(_docs, "native-html")
-    os.makedirs(native, exist_ok=True)
-    root = os.path.abspath(os.path.join(_docs, ".."))
-
-    def _prefix_tool(env_name, program):
-        """The site-julia and site-r prefixes hold Documenter and pkgdown.
-
-        pixi puts the docs environment first on PATH. That copy of Julia
-        is newer than the Documenter prefix, and that copy of R has no
-        pkgdown.
-        """
-        candidate = os.path.join(root, ".pixi", "envs", env_name, "bin", program)
-        if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
-            return candidate
-        return ""
-
-    julia = _prefix_tool("site-julia", "julia") or shutil.which("julia")
-    if not julia:
-        matches = sorted(glob.glob(os.path.join(root, "bbdir", "julia-*", "bin", "julia")))
-        julia = matches[-1] if matches else ""
-    pairs = (
-        ("julia-dseams", os.path.join(root, "bindings", "julia", "Dseams", "docs")),
-        ("julia-seams", os.path.join(root, "bindings", "julia", "Seams", "docs")),
-    )
-    def _use_prefix(env, program):
-        """Point conda and PATH at the prefix that owns this binary.
-
-        A docs-env JULIA_DEPOT_PATH holds a registry archive the
-        Documenter Julia cannot unpack.
-        """
-        prefix = os.path.dirname(os.path.dirname(program))
-        if not os.path.isdir(os.path.join(prefix, "conda-meta")):
-            return
-        env["CONDA_PREFIX"] = prefix
-        env["PATH"] = os.path.join(prefix, "bin") + os.pathsep + env.get("PATH", "")
-        depot = os.path.join(prefix, "share", "julia")
-        if os.path.isdir(depot):
-            env["JULIA_DEPOT_PATH"] = depot + os.pathsep
-
-    if julia:
-        env = os.environ.copy()
-        _use_prefix(env, julia)
-        # Only the engine libraries. A broader loader path pulls the wrong
-        # libssl into Julia and the registry download aborts.
-        env["LD_LIBRARY_PATH"] = os.pathsep.join(
-            [
-                os.path.join(root, "bbdir", "bindings"),
-                os.path.join(root, "bbdir", "src"),
-            ]
-        )
-        env["SEAMS_LANG_LIB"] = os.path.join(root, "bbdir", "bindings", "libseams_lang.so")
-        env["SEAMS_LIB"] = os.path.join(root, "bbdir", "src", "libseams.so")
-        for name, project in pairs:
-            # make.jl develops the local package (and libseams_jll for
-            # Dseams) before instantiate. A bare instantiate looks the
-            # unregistered packages up in General and fails.
-            built_docs = subprocess.run(
-                [julia, "--project=" + project, os.path.join(project, "make.jl")],
-                cwd=root,
-                env=env,
-                check=False,
-            )
-            built = os.path.join(project, "build")
-            index = os.path.join(built, "index.html")
-            dest = os.path.join(native, name)
-            if _publish_build() and (
-                built_docs.returncode != 0 or not os.path.isfile(index)
-            ):
-                raise SystemExit("Documenter failed for " + name)
-            if os.path.isfile(index):
-                if os.path.isdir(dest):
-                    shutil.rmtree(dest)
-                shutil.copytree(built, dest)
-                shutil.rmtree(built, ignore_errors=True)
-            else:
-                _native_page(dest, name, "Documenter did not write this build.")
-    else:
-        if _publish_build():
-            raise SystemExit("julia is not on PATH")
-        print("julia is absent; Documenter pages are placeholders")
-        for name, _project in pairs:
-            _native_page(os.path.join(native, name), name, "Julia is not on PATH.")
-    # The package site is served at /r/, the url in _pkgdown.yml.
-    r_dest = os.path.join(native, "r")
-    rscript = _prefix_tool("site-r", "Rscript") or shutil.which("Rscript")
-    if rscript:
-        env = os.environ.copy()
-        _use_prefix(env, rscript)
-        libs = env.get("R_LIBS_USER", os.path.join(root, "bbdir", "rlib"))
-        env["R_LIBS_USER"] = libs
-        env["DSEAMS_ROOT"] = root
-        env["SEAMS_INCLUDE"] = os.path.join(root, "bindings", "cxx")
-        env["SEAMS_LIBDIR"] = os.path.join(root, "bbdir", "bindings")
-        env["SEAMS_H_DIR"] = os.path.join(root, "include")
-        done = subprocess.run(
-            [
-                rscript,
-                "-e",
-                "pkgdown::build_site('bindings/r/dseams', override=list(destination='%s'))" % r_dest,
-            ],
-            cwd=root,
-            env=env,
-            check=False,
-        )
-        if done.returncode != 0 or not os.path.isfile(os.path.join(r_dest, "index.html")):
-            if _publish_build():
-                raise SystemExit("pkgdown did not write the R API pages")
-            print("pkgdown did not build; the roxygen page is a placeholder")
-            _native_page(r_dest, "dseams", "pkgdown did not build. The roxygen topics are in man/.")
-    else:
-        if _publish_build():
-            raise SystemExit("Rscript is not on PATH")
-        print("Rscript is absent; the pkgdown page is a placeholder")
-        _native_page(r_dest, "dseams", "Rscript is not on PATH. The roxygen topics are in man/.")
-
-
 def _ensure_root_index():
     """Give Sphinx a landing page when the Org export has not run yet.
 
@@ -528,8 +333,6 @@ def _link_capi():
 
 
 _stage_markdown_book()
-_stage_ctypes_autodoc()
-_stage_native_html()
 _ensure_root_index()
 _link_capi()
 
@@ -840,42 +643,6 @@ if os.path.isfile(_xml_index) and os.path.isdir(_doxyrest):
     breathe_projects = {"seams": os.path.join(_source, "xml")}
     breathe_default_project = "seams"
 
-# Rust API pages. sphinxcontrib-rust (the same extension rgpot uses) renders
-# rustdoc into the book when the safe crate can link libseams. Without that
-# library, or without the extension, a short page keeps the toctree valid.
-_rust_page = os.path.join(_source, "crates", "seams", "lib.rst")
-_seams_lib_dir = os.environ.get("SEAMS_LIB_DIR", "")
-_rust_ready = False
-if _seams_lib_dir:
-    try:
-        import importlib
-
-        importlib.import_module("sphinxcontrib_rust")
-        _rust_ready = True
-    except ImportError:
-        _rust_ready = False
-if _rust_ready:
-    extensions.append("sphinxcontrib_rust")
-    rust_crates = {
-        "seams": os.path.abspath(os.path.join(_source, "../../bindings/rust/seams")),
-    }
-    rust_doc_dir = os.path.join(_source, "crates")
-    rust_rustdoc_fmt = "rst"
-    rust_generate_mode = "always"
-else:
-    os.makedirs(os.path.dirname(_rust_page), exist_ok=True)
-    if not os.path.isfile(_rust_page):
-        with open(_rust_page, "w", encoding="utf-8") as _rust_stub:
-            _rust_stub.write(
-                "Rust API\n"
-                "========\n"
-                "\n"
-                "The safe crate is ``seams``. ``seams-sys`` is the raw FFI crate.\n"
-                "``cargo doc --manifest-path bindings/rust/Cargo.toml --no-deps``\n"
-                "writes the rustdoc. Set ``SEAMS_LIB_DIR`` and install\n"
-                "``sphinxcontrib-rust`` to render those pages in this book.\n"
-            )
-
 templates_path = ["_templates"]
 exclude_patterns = ["science/figures/**"]
 # A warning is a failed book. Sphinx stops instead of publishing it.
@@ -911,7 +678,8 @@ linkcheck_ignore = [
     r"https://huggingface\.co/datasets/d-SEAMS/.*",
 ]
 html_static_path = ["_static"]
-html_extra_path = [os.path.join(_docs, "native-html")]
+# llms.txt at the site root: a plain-text map of the published pages.
+html_extra_path = [os.path.join(os.path.dirname(_docs), "llms.txt")]
 html_css_files = ["custom.css"]
 html_js_files = []
 html_favicon = "_static/dSeamsLogo.ico"
@@ -954,16 +722,6 @@ html_theme_options = {
             "resource": True,
         },
         {
-            "title": "Fortran API",
-            "url": "/fortran/index.html",
-            "resource": True,
-        },
-        {
-            "title": "Lua API",
-            "url": "/lua/index.html",
-            "resource": True,
-        },
-        {
             "title": "Ecosystem",
             "children": [
                 {
@@ -973,15 +731,39 @@ html_theme_options = {
                     "external": True,
                 },
                 {
-                    "title": "pydseams",
+                    "title": "PydSEAMSlib (Python)",
                     "url": "https://d-seams.github.io/PydSEAMSlib/",
-                    "summary": "Python Frame API on yoda",
+                    "summary": "pydseamslib: import dseams and import pydseams",
                     "external": True,
                 },
                 {
-                    "title": "dseams (Lua)",
+                    "title": "yodaStruct (Lua, Fennel)",
                     "url": "https://d-seams.github.io/yodaStruct/",
-                    "summary": "require(\"dseams\") and Fennel",
+                    "summary": "require(\"dseams\")",
+                    "external": True,
+                },
+                {
+                    "title": "dseams-r (R)",
+                    "url": "https://github.com/d-SEAMS/dseams-r",
+                    "summary": "The R package dseams",
+                    "external": True,
+                },
+                {
+                    "title": "Dseams.jl (Julia)",
+                    "url": "https://github.com/d-SEAMS/Dseams.jl",
+                    "summary": "The Julia package Dseams",
+                    "external": True,
+                },
+                {
+                    "title": "dseams-rs (Rust)",
+                    "url": "https://github.com/d-SEAMS/dseams-rs",
+                    "summary": "The crates dseams-sys and dseams",
+                    "external": True,
+                },
+                {
+                    "title": "dseams-fortran (Fortran)",
+                    "url": "https://github.com/d-SEAMS/dseams-fortran",
+                    "summary": "The fpm package dseams",
                     "external": True,
                 },
                 {
