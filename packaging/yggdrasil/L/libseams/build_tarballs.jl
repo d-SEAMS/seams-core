@@ -1,3 +1,4 @@
+# Copyright (c) d-SEAMS developers
 # Note that this script can accept some limited command-line arguments, run
 # `julia build_tarballs.jl --help` to see a usage message.
 using BinaryBuilder, Pkg
@@ -18,7 +19,7 @@ version = v"2.14.0"
 const v2_14_0_tag_sha = "c1efa8c734214e9117cb77e89258bc9fdd214a6c"
 
 sources = [
-    GitSource("https://github.com/HaoZeke/seams-core.git", v2_14_0_tag_sha),
+    GitSource("https://github.com/d-SEAMS/seams-core.git", v2_14_0_tag_sha),
 ]
 
 # The engine core, its stable C API (libseams), and the C ABI of the R and

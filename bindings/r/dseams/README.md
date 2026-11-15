@@ -8,12 +8,12 @@ order parameters.
 ## Installation
 
 The development version is the `bindings/r/dseams` directory of
-[seams-core](https://github.com/HaoZeke/seams-core). `configure` copies the
+[seams-core](https://github.com/d-SEAMS/seams-core). `configure` copies the
 engine sources from that checkout, so the install does not download them.
 
 ```r
 # install.packages("remotes")
-remotes::install_github("HaoZeke/seams-core", subdir = "bindings/r/dseams")
+remotes::install_github("d-SEAMS/seams-core", subdir = "bindings/r/dseams")
 ```
 
 From a seams-core checkout:

@@ -3,5 +3,5 @@
 # registry pull request is opened. fpm reads fpm.toml at the repository
 # root (the same package as bindings/fortran/fpm.toml).
 [dseams]
-"2.14.0" = {git = "https://github.com/HaoZeke/seams-core", tag = "v2.14.0"}
-"latest" = {git = "https://github.com/HaoZeke/seams-core"}
+"2.14.0" = {git = "https://github.com/d-SEAMS/seams-core", tag = "v2.14.0"}
+"latest" = {git = "https://github.com/d-SEAMS/seams-core"}

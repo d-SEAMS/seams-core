@@ -1,7 +1,7 @@
 # Contributing to dseams
 
 The R package lives in `bindings/r/dseams` of
-[seams-core](https://github.com/HaoZeke/seams-core). The repository
+[seams-core](https://github.com/d-SEAMS/seams-core). The repository
 [contributing guide](https://github.com/d-SEAMS/seams-core/blob/main/CONTRIBUTING.md)
 and the [code of conduct](CODE_OF_CONDUCT.md) apply here.
 

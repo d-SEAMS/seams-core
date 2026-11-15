@@ -22,7 +22,7 @@ Below, please enter values for (1) submitting author GitHub handle (replacing "@
 Submitting Author Name: Rohit Goswami
 Submitting Author Github Handle: <!--author1-->@HaoZeke<!--end-author1-->
 Other Package Authors Github handles: (comma separated, delete if none) <!--author-others--><!--end-author-others-->
-Repository:  <!--repourl-->https://github.com/HaoZeke/seams-core/tree/pkg/native-2.14<!--end-repourl-->
+Repository:  <!--repourl-->https://github.com/d-SEAMS/seams-core/tree/pkg/native-2.14<!--end-repourl-->
 Version submitted: 2.14.0
 Submission type: <!--submission-type-->Standard<!--end-submission-type-->
 Editor: <!--editor--> TBD <!--end-editor-->

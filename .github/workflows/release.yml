@@ -4,6 +4,7 @@ on:
     tags: ["v*"]
 jobs:
   release:
+    if: github.repository == 'd-SEAMS/seams-core'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -26,4 +27,4 @@ jobs:
           body = text[start:] if nxt < 0 else text[start:start + 1 + nxt]
           pathlib.Path("release-notes.md").write_text(body.strip() + "\n")
           PY
-          gh release create "$TAG_NAME" --repo "${{ github.repository }}" --title "$TAG_NAME" --notes-file release-notes.md
+          gh release create "$TAG_NAME" --repo d-SEAMS/seams-core --title "$TAG_NAME" --notes-file release-notes.md
