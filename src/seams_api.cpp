@@ -41,6 +41,7 @@
 #include <readcon-core.hpp>
 #endif
 #include <site.hpp>
+#include <team_run.hpp>
 #include <thread_team.hpp>
 #include <topo_bulk.hpp>
 #include <topo_one_dim.hpp>
@@ -2406,16 +2407,15 @@ seams_status seams_system_symmetry(seams_system *sys, double shell_rmsd, int *la
   try {
     const auto fair = use_threads();
     std::vector<double> xyz(static_cast<std::size_t>(n) * 3);
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (n >= 16384 && !omp_in_parallel())
-#endif
-    for (int i = 0; i < n; ++i) {
-      const auto &point = sys->cloud.pts[static_cast<std::size_t>(i)];
-      const std::size_t base = static_cast<std::size_t>(i) * 3;
-      xyz[base] = point.x;
-      xyz[base + 1] = point.y;
-      xyz[base + 2] = point.z;
-    }
+    seams::team::forRange(static_cast<std::size_t>(n), 8192,
+                          [&](std::size_t from, std::size_t to, int) {
+                            for (std::size_t i = from; i < to; ++i) {
+                              const auto &point = sys->cloud.pts[i];
+                              xyz[i * 3] = point.x;
+                              xyz[i * 3 + 1] = point.y;
+                              xyz[i * 3 + 2] = point.z;
+                            }
+                          });
     double lattice[9];
     lattice_from_cloud(sys->cloud, lattice);
     const double ceiling =
