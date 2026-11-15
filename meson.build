@@ -106,7 +106,11 @@ endif
 m_dep = cppc.find_library('m', required: false)
 _deps += m_dep
 
-eigen_dep = dependency('eigen3', version: '>=3.4.0', required: true)
+# The wheel build falls back to the Eigen subproject. Its headers are
+# not this project's sources, so -Werror=sign-conversion stays on our
+# code and does not fire inside Eigen.
+eigen_dep = dependency('eigen3', version: '>=3.4.0', include_type: 'system',
+                       required: true)
 _deps += [eigen_dep]
 
 # Prefer FlexiBLAS (one wrapper for BLAS and LAPACK). The conda-forge
@@ -367,7 +371,8 @@ else
     # The prefix records the patches it was built with. A changed patch
     # set refetches the source, since the patch step runs only on a fetch.
     _chem_patch_ids = []
-    foreach _patch : ['chemfiles-0.10.4-mmcif.patch', 'chemfiles-0.10.4-mol2.patch']
+    foreach _patch : ['chemfiles-0.10.4-mmcif.patch', 'chemfiles-0.10.4-mol2.patch',
+                      'chemfiles-0.10.4-zlib-apple.sh']
       _chem_patch_ids += [_patch + ' ' + fs.hash(meson.project_source_root() / 'cmake' / 'patches' / _patch, 'sha256')]
     endforeach
     _chem_patch_text = '\n'.join(_chem_patch_ids)
@@ -2197,6 +2202,9 @@ if _fuzz_args.length() > 0
         '-I' + meson.project_source_root() / 'include',
         '-I' + meson.current_build_dir() / 'src',
         meson.project_source_root() / 'fuzz' / (_fuzz[1] + '.c'),
+        # The Debian libFuzzer archive is built against the host glibc.
+        # A conda gcc links an older libc, which has no __isoc23_strto*.
+        meson.project_source_root() / 'fuzz' / 'glibc_isoc23.c',
         '-o', '@OUTPUT@',
         seams_api_lib.full_path(),
       ] + _fuzz_args + [
