@@ -1,0 +1,27 @@
+# Hosts that are not built with the sanitizer. Each pattern is a frame
+# from a leak stack that does not enter seams or linkcell.
+#
+# CPython 3.12, Objects/obmalloc.c _PyObject_Malloc / dictobject.c:
+#   #1 _PyMem_RawMalloc Objects/obmalloc.c
+#   #5 new_keys_object Objects/dictobject.c
+leak:_PyObject_Malloc
+leak:_PyMem_RawMalloc
+leak:PyUnicode_New
+# NumPy, numpy/_core/_multiarray_umath:
+#   #1 PyUFunc_FromFuncAndDataAndSignatureAndIdentity
+#   #1 PyDataMem_UserNEW
+leak:PyUFunc_FromFuncAndData
+leak:PyDataMem_UserNEW
+# PySide6 / shiboken, imported by OVITO:
+#   #1 Shiboken::Conversions::createConverter libshiboken6
+#   #1 PySide::Signal::registerSignals libpyside6
+#   #1 qRegisterResourceData libQt6Core.so.6
+leak:libshiboken6
+leak:libpyside6
+leak:libQt6Core
+# OVITO's own pybind module:
+#   #1 pybind11::cpp_function::initialize_generic ovito_bindings.so
+leak:ovito_bindings.so
+# OpenMM registers serializers from a static initializer:
+#   #1 registerSerializationProxies libOpenMM.so
+leak:libOpenMM.so

@@ -1460,15 +1460,14 @@ void loadLammpsFrame(
     std::array<double, 3> coordHigh) {
   yCloud = molSys::clearPointCloud(yCloud);
   if (!gen::file_exists(filename)) {
-    std::cout
-        << "Fatal Error: The file does not exist or you gave the wrong path.\n";
+    std::cout << "Fatal Error: " << filename
+              << " does not exist or you gave the wrong path.\n";
     yCloud.currentFrame = targetFrame;
     return;
   }
   auto sess = sessionFor(filename);
   if (sess == nullptr) {
-    std::cout
-        << "Fatal Error: The file does not exist or you gave the wrong path.\n";
+    std::cout << "Fatal Error: could not open " << filename << ".\n";
     yCloud.currentFrame = targetFrame;
     return;
   }

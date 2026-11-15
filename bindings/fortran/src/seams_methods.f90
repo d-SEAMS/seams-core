@@ -593,11 +593,13 @@ contains
     code = seams_density_axis(raw, opt_int(typ, 0_seams_int), opt_int(bins, 0_seams_int), &
       opt_int(axis, 2_seams_int), c_loc(zbuf), c_loc(rbuf), cap, n)
     if (code /= SEAMS_OK) then
+      deallocate(zbuf, rbuf)
       call check_status(code, raw, stat, errmsg)
       return
     end if
     z = zbuf
     rho = rbuf
+    deallocate(zbuf, rbuf)
     call check_status(code, raw, stat, errmsg)
   end procedure frame_density
 
@@ -672,11 +674,13 @@ contains
     code = seams_prisms(raw, opt_real(cutoff, 3.5_seams_real), opt_int(typ, 0_seams_int), &
       perfect_b, imperfect_b, 7_c_size_t)
     if (code /= SEAMS_OK) then
+      deallocate(perfect_b, imperfect_b)
       call check_status(code, raw, stat, errmsg)
       return
     end if
     perfect = perfect_b
     imperfect = imperfect_b
+    deallocate(perfect_b, imperfect_b)
     call check_status(code, raw, stat, errmsg)
   end procedure frame_prisms
 
@@ -692,10 +696,12 @@ contains
     code = seams_monolayer(raw, opt_real(cutoff, 3.5_seams_real), opt_int(typ, 0_seams_int), &
       depth, sheet_area, buf, int(size(buf), c_size_t))
     if (code /= SEAMS_OK) then
+      deallocate(buf)
       call check_status(code, raw, stat, errmsg)
       return
     end if
     counts = buf
+    deallocate(buf)
     call check_status(code, raw, stat, errmsg)
   end procedure frame_monolayer
 
@@ -844,10 +850,12 @@ contains
     buf = 0_seams_int
     code = seams_rings_histogram(raw, buf, int(size(buf), c_int))
     if (code /= SEAMS_OK) then
+      deallocate(buf)
       call check_status(code, raw, stat, errmsg)
       return
     end if
     counts = buf
+    deallocate(buf)
     call check_status(code, raw, stat, errmsg)
   end procedure ring_histogram
   module procedure ring_fraction

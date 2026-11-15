@@ -102,6 +102,7 @@ def load_lang(libdir, langdir):
     )
     lang = CDLL(str(Path(langdir) / "libseams_lang.so"))
     api = CDLL(str(Path(libdir) / "libseams.so"))
+    lang.seams_last_error.restype = c_char_p
     lang.seams_frame_read.restype = c_void_p
     lang.seams_frame_read.argtypes = [c_char_p, c_int, c_int]
     lang.seams_frame_free.argtypes = [c_void_p]
@@ -141,9 +142,19 @@ def cloud(lang, path, frame, type_filter):
 
     handle = lang.seams_frame_read(str(path).encode(), frame, type_filter)
     if not handle:
-        raise SystemExit("could not read {} frame {}".format(path.name, frame))
+        reason = lang.seams_last_error()
+        detail = reason.decode() if reason else "read failed"
+        raise SystemExit("could not read {} frame {}: {}".format(path, frame, detail))
     count = lang.seams_frame_nop(handle)
-    positions = np.ctypeslib.as_array(lang.seams_frame_positions(handle), shape=(count, 3)).copy()
+    raw = lang.seams_frame_positions(handle)
+    if count <= 0 or not raw:
+        present = path.is_file()
+        raise SystemExit(
+            "no atoms in {} frame {} ({})".format(
+                path, frame, "file is missing" if not present else "the frame is empty",
+            )
+        )
+    positions = np.ctypeslib.as_array(raw, shape=(count, 3)).copy()
     types = np.ctypeslib.as_array(lang.seams_frame_types(handle), shape=(count,)).copy()
     return handle, positions, types
 

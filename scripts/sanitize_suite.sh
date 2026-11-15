@@ -43,4 +43,11 @@ if [ -z "${LD_PRELOAD:-}" ]; then
     export LD_PRELOAD="$asan"
   fi
 fi
+# LeakSanitizer stays on. scripts/lsan.supp names only unsanitized
+# hosts (CPython, NumPy, Qt, OVITO, OpenMM). A seams frame is not listed.
+export LSAN_OPTIONS="suppressions=$root/scripts/lsan.supp${LSAN_OPTIONS:+:$LSAN_OPTIONS}"
+# cargo test builds the dev profile, which is unoptimized. Linking that
+# profile into this suite does not finish inside the cargo-test limit.
+export CARGO_PROFILE_DEV_OPT_LEVEL=1
+export CARGO_PROFILE_TEST_OPT_LEVEL=1
 meson test -C "$build" --print-errorlogs

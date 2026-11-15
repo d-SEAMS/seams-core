@@ -168,5 +168,21 @@ program test_high
   if (stat /= SEAMS_OK) stop 65
   if (frame%count() <= 0) stop 65
   call frame%close()
+  if (allocated(q4)) deallocate(q4)
+  if (allocated(q6)) deallocate(q6)
+  if (allocated(labels)) deallocate(labels)
+  if (allocated(counts)) deallocate(counts)
+  if (allocated(hist)) deallocate(hist)
+  if (allocated(atoms)) deallocate(atoms)
+  if (allocated(columns)) deallocate(columns)
+  if (allocated(kinds)) deallocate(kinds)
+  if (allocated(rr)) deallocate(rr)
+  if (allocated(gg)) deallocate(gg)
+  if (allocated(zz)) deallocate(zz)
+  if (allocated(rho)) deallocate(rho)
+  if (allocated(perfect)) deallocate(perfect)
+  if (allocated(imperfect)) deallocate(imperfect)
+  if (allocated(sheet)) deallocate(sheet)
+  if (allocated(fp_counts)) deallocate(fp_counts)
   print *, "fortran high ok"
 end program test_high
