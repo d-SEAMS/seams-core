@@ -1,0 +1,1 @@
+An unbound 8-thread team no longer stalls when another thread is runnable. Workers take one allowed cpu each unless `OMP_PROC_BIND` is already set, and linkcell's pool keeps that cpu list instead of inheriting the caller's pin. With only `OMP_NUM_THREADS=8`, neighbours and q6 on 110592-molecule ice Ic stay near the bound sitting and ahead of the 12 ms and 17 ms rival times.

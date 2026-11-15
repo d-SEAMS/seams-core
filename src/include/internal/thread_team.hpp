@@ -32,6 +32,7 @@
 
 extern "C" void lc_set_threads(int n);
 extern "C" int lc_num_threads(void);
+extern "C" void lc_set_places(const int *cpus, int n);
 
 namespace seams {
 
@@ -83,12 +84,111 @@ inline void releaseTeam() {
 // that moves by several milliseconds from call to call. Widen the mask
 // and freeze the team size, and leave the workers asleep only under
 // the passive wait policy.
+
+// CPUs the process may use, captured before this thread is pinned.
+// Linkcell's pool reads the same list so its workers do not inherit one cpu.
+struct Places {
+  int cpu[256] = {};
+  int n = 0;
+  bool known = false;
+};
+
+inline Places &places() {
+  static Places found;
+  return found;
+}
+
+inline bool runtimeBinds() {
+  const char *bind = std::getenv("OMP_PROC_BIND");
+  if (bind == nullptr || bind[0] == '\0') {
+    return false;
+  }
+  return std::strcmp(bind, "false") != 0 && std::strcmp(bind, "FALSE") != 0;
+}
+
+inline void rememberPlaces() {
+  Places &found = places();
+  if (found.known) {
+    return;
+  }
+  found.known = true;
+#ifdef __linux__
+  cpu_set_t allowed;
+  if (sched_getaffinity(0, sizeof(allowed), &allowed) == 0) {
+    for (int cpu = 0; cpu < CPU_SETSIZE && found.n < 256; ++cpu) {
+      if (CPU_ISSET(cpu, &allowed)) {
+        found.cpu[found.n++] = cpu;
+      }
+    }
+  }
+#endif
+  lc_set_places(found.cpu, found.n);
+}
+
+// An unbound team leaves every worker free to migrate. Under any other
+// runnable thread the barrier then waits out a stalled worker, and a call
+// that is a few milliseconds on a pinned team stretches past 50 ms. Active
+// spinning makes that stall the common case. Pin each worker, including the
+// caller, to its own allowed cpu when the runtime was not asked to bind.
+// The pin sticks for the life of the worker thread.
+inline void placeTeam() {
+  rememberPlaces();
+  if (runtimeBinds()) {
+    return;
+  }
+#ifdef SEAMS_HAS_OPENMP
+  if (omp_in_parallel()) {
+    return;
+  }
+  const int width = std::max(1, omp_get_max_threads());
+#else
+  const int width = 1;
+#endif
+  if (width < 2) {
+    return;
+  }
+  Places &found = places();
+  if (found.n < 1) {
+    return;
+  }
+  // widenAffinity runs after the first pin and puts the caller back on the
+  // whole mask. Workers keep the pin from the region below; the caller is
+  // put back on cpu 0 every time so the next region does not migrate.
+#ifdef __linux__
+  cpu_set_t caller;
+  CPU_ZERO(&caller);
+  CPU_SET(found.cpu[0], &caller);
+  sched_setaffinity(0, sizeof(caller), &caller);
+#endif
+  static int placed = 0;
+  if (placed == width) {
+    return;
+  }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel num_threads(width)
+  {
+#ifdef __linux__
+    const int tid = omp_get_thread_num();
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    CPU_SET(found.cpu[tid % found.n], &mask);
+    sched_setaffinity(0, sizeof(mask), &mask);
+#else
+    (void)found;
+#endif
+  }
+#endif
+  placed = width;
+}
+
 inline void prepareCompute() {
-  // Linkcell sleeps between searches. Forcing a passive OpenMP wait
-  // on top of that made the next region late by tens of milliseconds,
-  // which dominated a k-nearest call of about a millisecond. Leave the
-  // wait policy the process was started with.
+  // Linkcell's pool sleeps on a condvar between searches. Forcing OpenMP
+  // passive as well made the next region wake on a spread of tens of
+  // milliseconds, which is the slow 8-thread sample. Do not switch the
+  // wait policy to active: with another runnable thread that spin sits in
+  // the barrier for the whole stall. Place the workers instead.
   widenAffinity();
+  placeTeam();
 #ifdef SEAMS_HAS_OPENMP
   omp_set_dynamic(0);
 #endif
@@ -246,6 +346,11 @@ inline bool fairEnabled() {
 class FairWidth {
 public:
   explicit FairWidth(bool adopt = false) {
+    // Widen before the places are recorded, then place before the probe
+    // fork. An unbound probe is itself the stall, and the guard would
+    // then narrow a team that only needed a cpu each.
+    widenAffinity();
+    placeTeam();
 #ifdef SEAMS_HAS_OPENMP
     if (depth()++ == 0 && !omp_in_parallel() && fairEnabled()) {
       choose();

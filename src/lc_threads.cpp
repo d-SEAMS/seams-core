@@ -22,6 +22,11 @@
 #include <linkcell.h>
 #endif
 
+extern "C" __attribute__((weak)) void lc_set_places(const int *cpus, int n) {
+  (void)cpus;
+  (void)n;
+}
+
 extern "C" __attribute__((weak)) void lc_set_threads(int n) {
 #ifdef SEAMS_HAS_OPENMP
   if (n > 0) {
