@@ -28,6 +28,50 @@ namespace {
 // __int128 is a GCC/Clang extension; the typedef keeps -pedantic quiet.
 __extension__ typedef __int128 i128;
 
+// clang-cl lowers a 128-bit / or % to __udivti3 and __umodti3. Those live
+// in compiler-rt, which lld-link does not pull into a DLL. Shifts and
+// subtracts stay in the instruction stream, so the Windows wheel links.
+struct DivMod128 {
+  __uint128_t quot;
+  __uint128_t rem;
+};
+
+int topBit128(__uint128_t value) {
+  if (value == 0) {
+    return -1;
+  }
+  const uint64_t hi = static_cast<uint64_t>(value >> 64);
+  if (hi != 0) {
+    return 127 - __builtin_clzll(hi);
+  }
+  return 63 - __builtin_clzll(static_cast<uint64_t>(value));
+}
+
+DivMod128 divmod128(__uint128_t n, __uint128_t d) {
+  if (d == 0) {
+    return {~__uint128_t{0}, n};
+  }
+  if (n < d) {
+    return {0, n};
+  }
+  const int shift = topBit128(n) - topBit128(d);
+  __uint128_t quot = 0;
+  __uint128_t rem = n;
+  __uint128_t probe = d << shift;
+  for (int i = shift; i >= 0; --i) {
+    if (rem >= probe) {
+      rem -= probe;
+      quot |= __uint128_t{1} << i;
+    }
+    probe >>= 1;
+  }
+  return {quot, rem};
+}
+
+__uint128_t udiv128(__uint128_t n, __uint128_t d) { return divmod128(n, d).quot; }
+
+__uint128_t umod128(__uint128_t n, __uint128_t d) { return divmod128(n, d).rem; }
+
 std::atomic<int> gMode{-1};
 std::atomic<int> gReduction{-1};
 
@@ -121,7 +165,7 @@ CrtTable makeCrt() {
   CrtTable t;
   t.modulus = 1;
   for (uint32_t m : cand) {
-    if (t.modulus > (~__uint128_t{0}) / m) {
+    if (t.modulus > udiv128(~__uint128_t{0}, m)) {
       break;
     }
     const __uint128_t next = t.modulus * m;
@@ -153,11 +197,11 @@ CrtTable makeCrt() {
     return t0;
   };
   for (int i = 0; i < t.s; i++) {
-    const __uint128_t Mi = t.modulus / t.m[i];
-    const int64_t yi = inv(static_cast<int64_t>(Mi % t.m[i]), t.m[i]);
+    const __uint128_t Mi = udiv128(t.modulus, t.m[i]);
+    const int64_t yi = inv(static_cast<int64_t>(umod128(Mi, t.m[i])), t.m[i]);
     t.weight[i] = Mi * static_cast<__uint128_t>(yi);
   }
-  __uint128_t lim = t.modulus / 2 - 1;
+  __uint128_t lim = (t.modulus >> 1) - 1;
   int bits = 0;
   while (bits < 120 && (__uint128_t{1} << bits) <= lim) {
     ++bits;
@@ -183,12 +227,12 @@ int symMod(int32_t a, int32_t m) {
 }
 
 i128 remCentered(i128 s, __uint128_t M) {
-  const __uint128_t half = M / 2;
+  const __uint128_t half = M >> 1;
   __uint128_t u;
   if (s >= 0) {
-    u = static_cast<__uint128_t>(s) % M;
+    u = umod128(static_cast<__uint128_t>(s), M);
   } else {
-    const __uint128_t neg = static_cast<__uint128_t>(-s) % M;
+    const __uint128_t neg = umod128(static_cast<__uint128_t>(-s), M);
     u = neg == 0 ? 0 : M - neg;
   }
   if (u > half) {
