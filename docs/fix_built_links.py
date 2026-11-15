@@ -16,6 +16,17 @@ ROOT = Path(__file__).resolve().parents[1]
 BUILD = ROOT / "docs" / "build"
 FORD_MARK = "/docs/ford/"
 INDEX_HREF = re.compile(r'href="#(index_[^"]+)"')
+# LDoc writes `<a name = "symbol">`. The link checker matches fragments to id.
+NAME_ANCHOR = re.compile(
+    r"<a\b([^>]*?)\bname\s*=\s*([\"'])([^\"']+)\2([^>]*)>",
+    re.IGNORECASE,
+)
+# Documenter appends #Lstart-Lend. GitHub's static HTML has no such id, and a
+# commit that is not on the remote 404s. The file on main is the published source.
+SOURCE_LINE = re.compile(
+    r"(https://github\.com/HaoZeke/seams-core/blob/)[0-9a-f]{40}"
+    r"(/[^\"'#\s<>]+)#L\d+(?:-L\d+)?"
+)
 
 
 def rewrite(tree, old, new):
@@ -47,6 +58,43 @@ def add_missing_index_ids(tree):
             return 'id="{0}" href="#{0}"'.format(frag)
 
         updated = INDEX_HREF.sub(repl, text)
+        if updated != text:
+            path.write_text(updated, encoding="utf-8")
+            changed += 1
+    return changed
+
+
+def add_name_ids(tree):
+    """Give each named anchor an id so a fragment link resolves."""
+    if not tree.is_dir():
+        return 0
+    changed = 0
+    for path in tree.rglob("*.html"):
+        text = path.read_text(encoding="utf-8", errors="replace")
+
+        def repl(match):
+            pre, quote, name, post = match.groups()
+            if re.search(r"\bid\s*=", pre + post, re.IGNORECASE):
+                return match.group(0)
+            return "<a{0} name={1}{2}{1} id={1}{2}{1}{3}>".format(
+                pre, quote, name, post
+            )
+
+        updated = NAME_ANCHOR.sub(repl, text)
+        if updated != text:
+            path.write_text(updated, encoding="utf-8")
+            changed += 1
+    return changed
+
+
+def publish_source_lines(tree):
+    """Point Documenter line links at the file on main, without a fragment."""
+    if not tree.is_dir():
+        return 0
+    changed = 0
+    for path in tree.rglob("*.html"):
+        text = path.read_text(encoding="utf-8", errors="replace")
+        updated = SOURCE_LINE.sub(r"\1main\2", text)
         if updated != text:
             path.write_text(updated, encoding="utf-8")
             changed += 1
@@ -85,9 +133,11 @@ def main():
     anchors = add_missing_index_ids(BUILD / "api-cpp")
     fortran = rewrite(BUILD / "fortran", "#moduleprocedure-", "#proc-")
     paths = relativize_ford(BUILD / "fortran")
+    lua = add_name_ids(BUILD / "lua")
+    sources = publish_source_lines(BUILD)
     print(
-        "built links: api-cpp {} anchors {} fortran {} paths {}".format(
-            api, anchors, fortran, paths
+        "built links: api-cpp {} anchors {} fortran {} paths {} lua {} sources {}".format(
+            api, anchors, fortran, paths, lua, sources
         )
     )
     return 0
