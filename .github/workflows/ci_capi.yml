@@ -5,6 +5,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci_capi-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
 jobs:
   capi-asan:
     runs-on: ubuntu-latest

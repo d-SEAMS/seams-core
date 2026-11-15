@@ -19,6 +19,10 @@ env:
   LUAROCKS_VERSION: "3.12.2"
   LUAROCKS_SHA256: b0e0c85205841ddd7be485f53d6125766d18a81d226588d2366931e9a1484492
 
+concurrency:
+  group: ci_packages-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
 jobs:
   versions:
     runs-on: ubuntu-24.04

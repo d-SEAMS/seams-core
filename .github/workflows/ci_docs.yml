@@ -16,6 +16,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: ci_docs-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
 jobs:
   build-deploy:
     runs-on: ubuntu-latest

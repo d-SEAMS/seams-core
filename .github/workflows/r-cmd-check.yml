@@ -16,6 +16,10 @@ on:
       - ".github/workflows/r-cmd-check.yml"
   workflow_dispatch:
 
+concurrency:
+  group: r-cmd-check-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
 jobs:
   R-CMD-check:
     name: ${{ matrix.config.os }} (R ${{ matrix.config.r }})

@@ -5,6 +5,10 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci_clang_warn-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
 jobs:
   clang-warnings:
     runs-on: ubuntu-latest
