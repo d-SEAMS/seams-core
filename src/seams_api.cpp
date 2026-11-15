@@ -284,6 +284,30 @@ bool finite_coordinates(const double *xyz, std::size_t n_atoms) {
   return finite_scan<8>(xyz, 3 * n_atoms);
 }
 
+// The mutual k-nearest fast path searches `typ` on the frame as held.
+// With `type <= 0` that matches `unified_copy` only when every atom has
+// one positive type; a mixed frame takes the copied path instead.
+bool mutual_fast_type(const Cloud &cloud, int type, int &typ) {
+  if (type > 0) {
+    typ = type;
+    return true;
+  }
+  if (cloud.nop <= 0) {
+    return false;
+  }
+  const int first = cloud.pts[0].type;
+  if (first <= 0) {
+    return false;
+  }
+  for (int i = 1; i < cloud.nop; ++i) {
+    if (cloud.pts[static_cast<std::size_t>(i)].type != first) {
+      return false;
+    }
+  }
+  typ = first;
+  return true;
+}
+
 Cloud unified_copy(const Cloud &cloud, int type, int &typ) {
   Cloud work = cloud;
   if (type > 0) {
@@ -1081,7 +1105,8 @@ seams_status seams_chill_plus(seams_system *sys, double cutoff, int type, int gr
     use_threads();
     int typ = 1;
     if ((rule == SEAMS_CHILL_PUBLISHED || rule == SEAMS_CHILL_OVITO) &&
-        (graph == SEAMS_GRAPH_CUTOFF || graph == SEAMS_GRAPH_MUTUAL)) {
+        (graph == SEAMS_GRAPH_CUTOFF ||
+         (graph == SEAMS_GRAPH_MUTUAL && mutual_fast_type(sys->cloud, type, typ)))) {
       // Labels are written onto the frame. The bond vectors are not: the
       // caller reads the label buffer. Skipping the frame copy keeps the
       // same iceType values the copied frame used to carry out.
@@ -1686,7 +1711,8 @@ seams_status seams_chill(seams_system *sys, double cutoff, int type, int graph, 
     use_threads();
     int typ = 1;
     if (rule == SEAMS_CHILL_PUBLISHED &&
-        (graph == SEAMS_GRAPH_CUTOFF || graph == SEAMS_GRAPH_MUTUAL)) {
+        (graph == SEAMS_GRAPH_CUTOFF ||
+         (graph == SEAMS_GRAPH_MUTUAL && mutual_fast_type(sys->cloud, type, typ)))) {
       // Correlations stay in a flat table. The per-atom bond vectors are
       // not built. iceType is written on the frame the caller already holds.
       Cloud &work = sys->cloud;
