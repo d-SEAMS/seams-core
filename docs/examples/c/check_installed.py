@@ -4,8 +4,9 @@
 
 Usage: check_installed.py BUILD SOURCE
 
-Installs BUILD into BUILD/capi-family-destdir, then builds every example in
-docs/examples/c twice, once with the flags `pkg-config seams` reports and
+Installs BUILD into a fresh directory under BUILD/install-stages, then
+builds every example in docs/examples/c twice, once with the flags
+`pkg-config seams` reports and
 once with CMake's find_package(seams), and runs each binary against the
 installed library. CC names the C compiler.
 """
@@ -13,7 +14,6 @@ installed library. CC names the C compiler.
 import importlib.util
 import os
 import shlex
-import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -52,11 +52,10 @@ def main(argv):
     build = Path(argv[1]).resolve()
     source = Path(argv[2]).resolve()
     help_mod = helpers(source)
-    stage = build / "capi-family-destdir"
-    work = build / "capi-family-work"
-    for path in (stage, work):
-        shutil.rmtree(path, ignore_errors=True)
-    work.mkdir(parents=True)
+    base = help_mod.scratch(build, "capi-family")
+    stage = base / "destdir"
+    work = base / "work"
+    work.mkdir()
     subprocess.check_call(
         ["meson", "install", "-C", str(build), "--no-rebuild", "--quiet", "--destdir", str(stage)]
     )
