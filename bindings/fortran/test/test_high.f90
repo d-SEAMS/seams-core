@@ -184,5 +184,8 @@ program test_high
   if (allocated(imperfect)) deallocate(imperfect)
   if (allocated(sheet)) deallocate(sheet)
   if (allocated(fp_counts)) deallocate(fp_counts)
+  if (allocated(key)) deallocate(key)
+  if (allocated(version)) deallocate(version)
+  if (allocated(err)) deallocate(err)
   print *, "fortran high ok"
 end program test_high

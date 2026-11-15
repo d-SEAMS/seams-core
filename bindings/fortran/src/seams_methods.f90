@@ -130,11 +130,14 @@ contains
       code = seams_fingerprint_atom(raw, index, c_loc(buf), cap, n)
     end if
     if (code /= SEAMS_OK) then
+      deallocate(buf)
       call check_status(code, raw, stat, errmsg)
       key = ""
       return
     end if
     key = copy_key(buf, int(n))
+    ! c_loc on this buffer keeps gfortran from freeing it on return.
+    deallocate(buf)
     call check_status(code, raw, stat, errmsg)
   end subroutine take_key
 

@@ -35,5 +35,5 @@ classifies through `seams_frame_chill_rings`.
 
 ```{literalinclude} ../../../adapters/python/dseams_insitu/engine.py
 :language: python
-:lines: 199-205
+:lines: 213-220
 ```

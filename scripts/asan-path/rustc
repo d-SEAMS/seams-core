@@ -1,0 +1,21 @@
+#!/bin/sh
+# rustc under libasan spends the language-task limit inside the compiler.
+# The test binary is run by the caller, which still has the preload.
+here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+unset LD_PRELOAD
+found=
+old_ifs=$IFS
+IFS=:
+for dir in $PATH; do
+  [ "$dir" = "$here" ] && continue
+  if [ -x "$dir/rustc" ]; then
+    found=$dir/rustc
+    break
+  fi
+done
+IFS=$old_ifs
+if [ -z "$found" ]; then
+  echo "rustc is not on PATH" >&2
+  exit 1
+fi
+exec "$found" "$@"

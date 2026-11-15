@@ -56,4 +56,17 @@ export LSAN_OPTIONS="suppressions=$root/scripts/lsan.supp${LSAN_OPTIONS:+:$LSAN_
 # the cargo-test limit once the compiler itself is not sanitized.
 export CARGO_PROFILE_DEV_OPT_LEVEL=1
 export CARGO_PROFILE_TEST_OPT_LEVEL=1
+# Tests compile snippets with $CC. That driver must not be preloaded.
+if [ -n "${CC:-}" ]; then
+  export REAL_CC=$CC
+  export CC=$root/scripts/asan-path/cc
+fi
+if [ -n "${CXX:-}" ]; then
+  export REAL_CXX=$CXX
+  export CXX=$root/scripts/asan-path/c++
+fi
+if [ -n "${FC:-}" ]; then
+  export REAL_FC=$FC
+  export FC=$root/scripts/asan-path/gfortran
+fi
 meson test -C "$build" --print-errorlogs

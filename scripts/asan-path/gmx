@@ -1,0 +1,21 @@
+#!/bin/sh
+# gmx is not a seams binary. libasan preloaded into it aborts or makes
+# libgromacs jump to address zero.
+here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+unset LD_PRELOAD
+found=
+old_ifs=$IFS
+IFS=:
+for dir in $PATH; do
+  [ "$dir" = "$here" ] && continue
+  if [ -x "$dir/gmx" ]; then
+    found=$dir/gmx
+    break
+  fi
+done
+IFS=$old_ifs
+if [ -z "$found" ]; then
+  echo "gmx is not on PATH" >&2
+  exit 1
+fi
+exec "$found" "$@"

@@ -1,0 +1,21 @@
+#!/bin/sh
+here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+real=${REAL_FC:-}
+if [ -z "$real" ]; then
+  old_ifs=$IFS
+  IFS=:
+  for dir in $PATH; do
+    [ "$dir" = "$here" ] && continue
+    if [ -x "$dir/gfortran" ]; then
+      real=$dir/gfortran
+      break
+    fi
+  done
+  IFS=$old_ifs
+fi
+if [ -z "$real" ]; then
+  echo "gfortran is not on PATH" >&2
+  exit 1
+fi
+unset LD_PRELOAD
+exec "$real" "$@"

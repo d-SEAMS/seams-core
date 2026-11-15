@@ -123,6 +123,12 @@ def main():
         e2e.skip("gmx-seams was not built (set gromacs_legacy_include for GROMACS 2023+)")
     env = dict(os.environ, GMX_MAXBACKUP="-1", GMX_SUPPRESS_DUMP="1",
                OMP_NUM_THREADS=str(args.threads), PLUMED_NUM_THREADS="1")
+    # gmx and the unsanitized gmx-seams both die if libasan is preloaded.
+    # libseams maps the runtime when the tool starts.
+    env.pop("LD_PRELOAD", None)
+    if "verify_asan_link_order" not in env.get("ASAN_OPTIONS", ""):
+        env["ASAN_OPTIONS"] = "verify_asan_link_order=0" + (
+            ":" + env["ASAN_OPTIONS"] if env.get("ASAN_OPTIONS") else "")
     plugin = None
     if args.plumed:
         kernel = e2e.plumed_kernel()

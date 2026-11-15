@@ -24,6 +24,11 @@ leak:PyUnicode_New
 leak:PyUFunc_FromFuncAndData
 leak:PyDataMem_UserNEW
 leak:NpyString_new_allocator
+# NumPy array construction, docs and python fronts, no seams frame:
+#   #1 PyArray_NewFromDescr_int _multiarray_umath
+#   #1 PyArray_IntpConverter _multiarray_umath
+leak:PyArray_NewFromDescr
+leak:PyArray_IntpConverter
 # PySide6 / shiboken, imported by OVITO:
 #   #1 Shiboken::Conversions::createConverter libshiboken6
 #   #1 PySide::Signal::registerSignals libpyside6

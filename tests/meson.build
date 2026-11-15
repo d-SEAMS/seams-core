@@ -760,18 +760,22 @@ dump_fault_driver = executable('dump_fault_driver', 'dump_fault_driver.cpp',
   include_directories: _incdirs,
   link_args: _test_link_args,
   build_rpath: _test_rpath)
+_fault_wrap = find_program('dump_fault_wrap.sh')
 _fault_eintr = environment()
 _fault_eintr.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
-_fault_eintr.prepend('LD_PRELOAD', dump_faults.full_path())
 _fault_eintr.set('DUMP_PREAD_EINTR', '1')
 _fault_eio = environment()
 _fault_eio.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
-_fault_eio.prepend('LD_PRELOAD', dump_faults.full_path())
 _fault_eio.set('DUMP_PREAD_EIO', '1')
 _fault_fstat = environment()
 _fault_fstat.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
-_fault_fstat.prepend('LD_PRELOAD', dump_faults.full_path())
 _fault_fstat.set('DUMP_FSTAT_EIO', '1')
-test('dump_index_eintr', dump_fault_driver, args: ['eintr'], env: _fault_eintr, depends: dump_faults)
-test('dump_index_eio', dump_fault_driver, args: ['eio'], env: _fault_eio, depends: dump_faults)
-test('dump_fstat_keeps_atoms', dump_fault_driver, args: ['fstat'], env: _fault_fstat, depends: dump_faults)
+test('dump_index_eintr', _fault_wrap,
+  args: [dump_faults.full_path(), dump_fault_driver, 'eintr'],
+  env: _fault_eintr, depends: dump_faults)
+test('dump_index_eio', _fault_wrap,
+  args: [dump_faults.full_path(), dump_fault_driver, 'eio'],
+  env: _fault_eio, depends: dump_faults)
+test('dump_fstat_keeps_atoms', _fault_wrap,
+  args: [dump_faults.full_path(), dump_fault_driver, 'fstat'],
+  env: _fault_fstat, depends: dump_faults)

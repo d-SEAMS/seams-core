@@ -1,0 +1,26 @@
+#!/bin/sh
+# This plumed binary takes an illegal instruction inside libasan when the
+# runtime is preloaded. The plugin is linked to libasan and maps it itself.
+here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+unset LD_PRELOAD
+case ":${ASAN_OPTIONS:-}:" in
+  *verify_asan_link_order*) ;;
+  *) ASAN_OPTIONS="verify_asan_link_order=0${ASAN_OPTIONS:+:$ASAN_OPTIONS}" ;;
+esac
+export ASAN_OPTIONS
+found=
+old_ifs=$IFS
+IFS=:
+for dir in $PATH; do
+  [ "$dir" = "$here" ] && continue
+  if [ -x "$dir/plumed" ]; then
+    found=$dir/plumed
+    break
+  fi
+done
+IFS=$old_ifs
+if [ -z "$found" ]; then
+  echo "plumed is not on PATH" >&2
+  exit 1
+fi
+exec "$found" "$@"

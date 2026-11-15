@@ -37,6 +37,10 @@ def run(units):
         work = Path(tmp)
         (work / "plumed.dat").write_text(DECK.format(units=units, plugin=plugin))
         env = dict(os.environ, PLUMED_NUM_THREADS="1")
+        env.pop("LD_PRELOAD", None)
+        if "verify_asan_link_order" not in env.get("ASAN_OPTIONS", ""):
+            env["ASAN_OPTIONS"] = "verify_asan_link_order=0" + (
+                ":" + env["ASAN_OPTIONS"] if env.get("ASAN_OPTIONS") else "")
         done = subprocess.run(
             ["plumed", "driver", "--plumed", "plumed.dat", "--ixyz", str(here / "ice.xyz")],
             cwd=work, env=env, capture_output=True, text=True)
