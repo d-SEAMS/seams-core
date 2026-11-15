@@ -1,2 +1,0 @@
-#!/bin/sh
-rm -f src/Makevars src/*.o src/*.so src/*.dll src/seams/*.o

@@ -1,7 +1,5 @@
 option('with_tests', type: 'boolean', value: true,
   description: 'Build Catch2 C++ tests')
-option('with_python', type: 'boolean', value: true,
-  description: 'Build the nanobind dseams module when Python and nanobind are found')
 option('with_lammps', type: 'feature', value: 'auto',
   description: 'Build the LAMMPS hook when liblammps is found')
 option('with_gromacs', type: 'feature', value: 'auto',
@@ -10,8 +8,6 @@ option('gromacs_legacy_include', type: 'string', value: '',
   description: 'api/legacy/include of the GROMACS source that matches libgromacs. GROMACS 2023 and later do not install the trajectory-analysis headers')
 option('lammps_src_include', type: 'string', value: '',
   description: 'src of the LAMMPS source that matches liblammps, for the compute dseams plugin. conda-forge installs library.h without the class headers')
-option('fennel_lua', type: 'string', value: '',
-  description: 'fennel.lua compiler for the Lua tests and the lua video tape. scripts/fetch_fennel.sh fetches one; the distro paths are tried when empty')
 option('with_openmm', type: 'feature', value: 'auto',
   description: 'Build the OpenMM plugin when libOpenMM is found')
 option('with_plumed', type: 'feature', value: 'auto',
@@ -36,27 +32,17 @@ option('with_sphericart', type: 'feature', value: 'auto',
   description: 'Batch Cartesian Ylm for host Steinhardt via sphericart')
 option('with_nauty', type: 'feature', value: 'auto',
   description: 'Canonical cage certificates via nauty')
-option('with_lua', type: 'feature', value: 'auto',
-  description: 'Build require("dseams") for Lua 5.4 and LuaJIT when the interpreter is found')
-option('with_fortran', type: 'feature', value: 'auto',
-  description: 'Build the Fortran module when a Fortran compiler is found')
 
 option('with_chemfiles', type: 'feature', value: 'auto',
   description: 'Trajectory I/O via chemfiles (on when the library is found or can be fetched)')
 option('with_linkcell', type: 'feature', value: 'auto', description: 'Periodic linked-cell neighbour search')
 option('with_minimage', type: 'feature', value: 'auto', description: 'Euclidean minimum-image geometry')
-option('julia_wrap', type: 'string', value: '',
-  description: 'Directory to prepend to PATH so the Julia front is found')
-option('r_libs_user', type: 'string', value: '',
-  description: 'R_LIBS_USER for the CHILL+ front. Empty leaves R to discover it')
 option('paper_full', type: 'boolean', value: false,
   description: 'Run the full paper Snakemake tutorials. Off by default; those tests exit 77 until this is enabled')
 option('with_blas', type: 'feature', value: 'auto',
   description: 'Link FlexiBLAS, or BLAS and LAPACK. Nothing calls them yet; disabled for the PyPI wheels')
 option('with_readcon', type: 'feature', value: 'auto',
   description: 'Build the readcon-core and readcon-db .con readers (Rust, needs cargo and crates.io)')
-option('system_libseams', type: 'boolean', value: false,
-  description: 'Build only the dseams Python module against an installed libseams (pkg-config seams)')
 option('capi_sanitize', type: 'combo',
   choices: ['none', 'address', 'undefined', 'address,undefined', 'thread'], value: 'none',
   description: 'Sanitizer for the C API suite and the libraries it calls')

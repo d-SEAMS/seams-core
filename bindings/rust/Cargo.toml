@@ -1,3 +1,0 @@
-[workspace]
-members = ["seams-sys", "seams"]
-resolver = "2"

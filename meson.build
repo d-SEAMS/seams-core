@@ -38,15 +38,6 @@ if meson.get_compiler('cpp').get_id() == 'clang' and (_capi_san != 'none' or get
   add_project_link_arguments('-Wl,-z,undefs', language: ['c', 'cpp'])
 endif
 
-# Only the Python module, linked against an installed libseams of this
-# version. Packagers that ship the library and the module separately use
-# this so the module does not carry a second copy of the engine.
-if get_option('system_libseams')
-  dseams_api_dep = dependency('seams', version: '=' + meson.project_version())
-  subdir('bindings/python')
-  subdir_done()
-endif
-
 host_system = host_machine.system()
 
 _dist_python = find_program('python3', 'python', required: false)
@@ -213,12 +204,6 @@ endif
 # sysroot cannot resolve the host compiler's GLIBC and libomp symbols.
 _snippet_cc = meson.get_compiler('c').cmd_array()[0]
 _snippet_cxx = cppc.cmd_array()[0]
-_snippet_fc = ''
-if not get_option('with_fortran').disabled()
-  if add_languages('fortran', required: false, native: false)
-    _snippet_fc = meson.get_compiler('fortran').cmd_array()[0]
-  endif
-endif
 _snippet_omp = []
 if openmp_found
   if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
@@ -235,9 +220,6 @@ endif
 _snippet_env = environment()
 _snippet_env.set('CC', _snippet_cc)
 _snippet_env.set('CXX', _snippet_cxx)
-if _snippet_fc != ''
-  _snippet_env.set('FC', _snippet_fc)
-endif
 if _snippet_omp.length() > 0
   _snippet_env.set('SEAMS_OPENMP_LINK', ' '.join(_snippet_omp))
 endif
@@ -857,25 +839,6 @@ if get_option('with_tests')
   subdir('tests')
 endif
 
-# Nanobind module over libseams. A missing nanobind skips the import test.
-if get_option('with_python')
-  dseams_api_dep = declare_dependency(
-    link_with: seams_api_lib,
-    include_directories: include_directories('include', 'src'))
-  subdir('bindings/python')
-  python3_dseams = find_program('python3', required: true)
-  dseams_env = environment()
-  dseams_env.set('DSEAMS_BUILD', meson.project_build_root())
-  dseams_env.set('DSEAMS_SRC', meson.project_source_root())
-  test(
-    'python_dseams',
-    python3_dseams,
-    args: [meson.project_source_root() / 'bindings/python/run_unittest.py'],
-    env: dseams_env,
-    depends: python_deps,
-    timeout: 180)
-endif
-
 if get_option('with_cli')
   seams_cli_link = _link_args
   if host_machine.system() == 'linux'
@@ -963,12 +926,6 @@ if get_option('with_cli')
     suite: 'docs',
     timeout: 60)
   test(
-    'rust_sys_declarations',
-    python3,
-    args: ['-m', 'doctest', meson.project_source_root() / 'bindings' / 'rust' / 'seams-sys' / 'gen_sys.py'],
-    suite: 'docs',
-    timeout: 60)
-  test(
     'docs_api_coverage',
     python3,
     args: [meson.project_source_root() / 'docs' / 'check_api_coverage.py'],
@@ -1020,14 +977,8 @@ if get_option('with_cli')
   tutorial_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
   tutorial_env.set('CC', _snippet_cc)
   tutorial_env.set('CXX', _snippet_cxx)
-  if _snippet_fc != ''
-    tutorial_env.set('FC', _snippet_fc)
-  endif
   if _snippet_omp.length() > 0
     tutorial_env.set('SEAMS_OPENMP_LINK', ' '.join(_snippet_omp))
-  endif
-  if get_option('fennel_lua') != ''
-    tutorial_env.set('FENNEL_LUA', get_option('fennel_lua'))
   endif
   test(
     'docs_quickstart_py',
@@ -1503,7 +1454,6 @@ if get_option('with_cli')
 endif
 
 subdir('bindings')
-_r_docs_lib = get_variable('r_docs_lib', [])
 
 if get_option('with_cli')
   # check_installed.py installs with --no-rebuild, because a rebuild here
@@ -1511,12 +1461,6 @@ if get_option('with_cli')
   # Every installed target is therefore built before the test starts.
   _installed_targets = [seams_api_lib, ydslib, seams_lang, seams_exe, brine_front_exe,
                         science_front_exe, nucleation_pathway_exe]
-  if is_variable('python_deps')
-    _installed_targets += python_deps
-  endif
-  if is_variable('lua_mod_targets')
-    _installed_targets += lua_mod_targets
-  endif
   foreach _optional : ['run_hook', 'lammps_plugin', 'gmx_seams', 'openmm_plugin', 'seams_plumed']
     if is_variable(_optional)
       _installed_targets += get_variable(_optional)
@@ -1615,7 +1559,7 @@ if get_option('with_cli')
       meson.project_build_root(),
     ],
     env: tutorial_env,
-    depends: [seams_exe, seams_api_lib, seams_lang] + _r_docs_lib,
+    depends: [seams_exe, seams_api_lib, seams_lang],
     suite: 'docs',
     timeout: 600)
   test(
@@ -1637,9 +1581,6 @@ if get_option('with_cli')
   binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'bindings')
   binding_env.set('CC', _snippet_cc)
   binding_env.set('CXX', _snippet_cxx)
-  if _snippet_fc != ''
-    binding_env.set('FC', _snippet_fc)
-  endif
   if _snippet_omp.length() > 0
     binding_env.set('SEAMS_OPENMP_LINK', ' '.join(_snippet_omp))
   endif
@@ -1794,7 +1735,7 @@ if get_option('with_cli')
       meson.project_build_root(),
     ],
     env: binding_env,
-    depends: [seams_api_lib, seams_lang] + _r_docs_lib,
+    depends: [seams_api_lib, seams_lang],
     suite: 'docs',
     timeout: 300)
   test(
@@ -1806,7 +1747,7 @@ if get_option('with_cli')
       meson.project_build_root(),
     ],
     env: binding_env,
-    depends: [seams_api_lib, seams_lang, seams_exe] + _r_docs_lib,
+    depends: [seams_api_lib, seams_lang, seams_exe],
     suite: 'docs',
     timeout: 300)
   foreach _engine : ['gromacs', 'lammps', 'openmm', 'plumed', 'insitu']
@@ -1835,82 +1776,11 @@ if get_option('with_cli')
     depends: [seams_exe, seams_api_lib, seams_lang],
     suite: 'docs',
     timeout: 600)
-  test(
-    'docs_api_python',
-    python3,
-    args: [
-      meson.project_source_root() / 'docs' / 'examples' / 'python_api.py',
-      meson.project_build_root() / 'src',
-    ],
-    env: binding_env,
-    depends: [seams_api_lib],
-    suite: 'docs',
-    timeout: 60)
   _ctypes_env = environment()
   _ctypes_env.set('PYTHONPATH', meson.project_source_root() / 'bindings' / 'python' / 'src')
   _ctypes_env.set('SEAMS_LIB', seams_api_lib.full_path())
   _ctypes_env.set('DSEAMS_ROOT', meson.project_source_root())
-  test(
-    'python_seams_ctypes',
-    python3,
-    args: [
-      '-m', 'pytest', '-q',
-      meson.project_source_root() / 'bindings' / 'python' / 'tests' / 'test_seams_package.py',
-      '--doctest-modules',
-      meson.project_source_root() / 'bindings' / 'python' / 'src' / 'seams',
-    ],
-    env: _ctypes_env,
-    depends: [seams_api_lib],
-    suite: 'docs',
-    timeout: 180)
-  test(
-    'docs_api_fortran',
-    python3,
-    args: [
-      meson.project_source_root() / 'docs' / 'examples' / 'run_binding.py',
-      'fortran',
-      meson.project_build_root(),
-    ],
-    env: binding_env,
-    depends: [seams_api_lib] + _r_docs_lib,
-    suite: 'docs',
-    timeout: 120)
-  test(
-    'docs_binding_tours',
-    python3,
-    args: [
-      meson.project_source_root() / 'docs' / 'check_binding_tours.py',
-      meson.project_build_root(),
-    ],
-    env: binding_env,
-    depends: [seams_api_lib, binding_oracle],
-    suite: 'docs',
-    timeout: 180)
-  test(
-    'docs_api_rust',
-    python3,
-    args: [
-      meson.project_source_root() / 'docs' / 'examples' / 'run_binding.py',
-      'rust',
-      meson.project_build_root(),
-    ],
-    env: binding_env,
-    depends: [seams_api_lib, binding_oracle] + _r_docs_lib,
-    suite: 'docs',
-    timeout: 180)
-  test(
-    'docs_api_r',
-    python3,
-    args: [
-      meson.project_source_root() / 'docs' / 'examples' / 'run_binding.py',
-      'r',
-      meson.project_build_root(),
-    ],
-    env: binding_env,
-    depends: [seams_lang] + _r_docs_lib,
-    suite: 'docs',
-    timeout: 300)
-  foreach _lang : ['c', 'cpp', 'python', 'rust', 'julia', 'lua', 'fortran', 'r']
+  foreach _lang : ['c', 'cpp']
     test(
       'docs_lang_' + _lang,
       python3,
@@ -1920,22 +1790,10 @@ if get_option('with_cli')
         meson.project_build_root(),
       ],
       env: binding_env,
-      depends: [seams_api_lib, seams_lang] + _r_docs_lib,
+      depends: [seams_api_lib, seams_lang],
       suite: 'docs',
       timeout: 180)
   endforeach
-  test(
-    'docs_lang_parity',
-    python3,
-    args: [
-      meson.project_source_root() / 'docs' / 'examples' / 'run_lang_tasks.py',
-      'parity',
-      meson.project_build_root(),
-    ],
-    env: binding_env,
-    depends: [seams_api_lib, seams_lang] + _r_docs_lib,
-    suite: 'docs',
-    timeout: 300)
   _snippet_list = run_command(
     python3,
     meson.project_source_root() / 'docs' / 'run_snippets.py',
@@ -1952,7 +1810,7 @@ if get_option('with_cli')
           meson.project_build_root(),
         ],
         env: binding_env,
-        depends: [seams_api_lib, seams_lang, binding_oracle] + _r_docs_lib,
+        depends: [seams_api_lib, seams_lang, binding_oracle],
         suite: 'docs',
         timeout: 300)
     endif
@@ -1962,21 +1820,8 @@ if get_option('with_cli')
     python3,
     args: ['-m', 'doctest', meson.project_source_root() / 'docs' / 'run_snippets.py'],
     workdir: meson.project_source_root() / 'docs',
-    depends: _r_docs_lib,
     suite: 'docs',
     timeout: 60)
-  test(
-    'docs_api_julia',
-    python3,
-    args: [
-      meson.project_source_root() / 'docs' / 'examples' / 'run_binding.py',
-      'julia',
-      meson.project_build_root(),
-    ],
-    env: binding_env,
-    depends: [seams_lang] + _r_docs_lib,
-    suite: 'docs',
-    timeout: 180)
 endif
 
 # C API proof. Sanitizers and valgrind are separate configure options.
