@@ -25,9 +25,9 @@ seams cages input/traj/il_tiny.lammpstrj
 #+end_src
 | Stable C | this repo (~libseams~, ~seams.h~) | ~seams_system_create~ |
 | Language ABI | this repo (~libseams_lang~) | ~seams_frame_read~ |
-| Python | this repo (~import dseams~) | ~dseams.chill_plus~ |
+| Python | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] (~import dseams~) | ~dseams.chill_plus~ |
 | Python Frame | [[https://github.com/d-SEAMS/PydSEAMSlib][PydSEAMSlib]] | ~pydseams.Frame~ from ~pydseams.read(...)~ |
-| Lua | this repo (~bindings/lua~, ~seams.h~) | ~require("dseams")~ |
+| Lua | [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] (~seams.h~) | ~require("dseams")~ |
 | Compiled Python | PydSEAMSlib | ~pydseams.yoda~ (~_core~ and ~cyoda~ are aliases) |
 
 * Doxyrest wiring
@@ -147,7 +147,7 @@ Both return 0 on success.
 ~q4~ and ~q6~ are required.
 A null ~q4bar~ or ~q6bar~ skips that average.
 
-Python ~q4_q6~ in =bindings/python/chill_plus.py=, R ~q4_q6~, and Julia ~q4_q6~ call ~seams_frame_q4_q6~.
+The Python, R and Julia ~q4_q6~ wrappers in their binding repositories call ~seams_frame_q4_q6~.
 ~seams steinhardt~ prints the means of the degrees named by ~--l~ (default \(q_4\) and \(q_6\)) and of each Lechner-Dellago average.
 The \(q_4\) and \(q_6\) means are this kernel.
 
@@ -155,7 +155,7 @@ The \(q_4\) and \(q_6\) means are this kernel.
 
 ~seams_frame_q4_q6_chill~ in =bindings/cxx/seams_lang.h= builds one cutoff list and, on that pass, the local Steinhardt \(q_4\) and \(q_6\), the Lechner-Dellago averages \(\bar q_4\) and \(\bar q_6\), and the published CHILL+ labels. The averages are the same neighbour mean of \(q_{lm}\) as ~steinhardtQlCutoff~ with averaging on. ~q4bar~ and ~q6bar~ may be null. Labels use the published closed edges, not ~ovito-chill+~.
 
-The Python wrapper is ~q4_q6_chill~ in =bindings/python/chill_plus.py=. It returns ~q4~, ~q6~, ~q4bar~, ~q6bar~, ~labels~ and ~counts~. ~SEAMS_LANG_LIB~ selects ~libseams_lang~. Nucleation analysis reads ~q6bar~.
+The Python wrapper ~q4_q6_chill~ in pydseamslib returns ~q4~, ~q6~, ~q4bar~, ~q6bar~, ~labels~ and ~counts~. ~SEAMS_LANG_LIB~ selects ~libseams_lang~. Nucleation analysis reads ~q6bar~.
 ~none~ leaves the cage bound to the face census.
 Choose the window as the heavy-atom contact range of the model, and widen it for a compressed cell or a guest that stretches a cage.
 A nanometer file uses ~0.265,0.315~.

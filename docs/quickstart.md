@@ -10,8 +10,8 @@ meson compile -C build test_seams_api docs_ice_example
 meson test -C build docs_check seams_c_api docs_ice_example --print-errorlogs
 ```
 
-`libseams.so` exports `seams.h`. The language fronts and the engine hooks link
-that library and do not include the C++ headers.
+`libseams.so` exports `seams.h`. The language bindings and the engine hooks
+link that library (or `libseams_lang`) and do not include the C++ headers.
 
 ```bash
 export SEAMS_LIB_DIR=$PWD/build/src
@@ -19,14 +19,15 @@ export LD_LIBRARY_PATH=$SEAMS_LIB_DIR:$LD_LIBRARY_PATH
 export SEAMS_LIB=$SEAMS_LIB_DIR/libseams.so
 ```
 
-Pages for each front, with the 2.14.0 build command and the test CI runs:
+Pages for each front. C, C++ and the engines are built and tested here;
+the other language pages link to the binding repositories, each released
+with the same version against the seams-core tag:
 
 | front | install | tutorial |
 | --- | --- | --- |
 | C | [api/c.md](api/c.md) | [tutorials/c.md](tutorials/c.md) |
 | C++ | [api/cpp.md](api/cpp.md) | [tutorials/cpp.md](tutorials/cpp.md) |
 | Fortran | [api/fortran.md](api/fortran.md) | [tutorials/fortran.md](tutorials/fortran.md) |
-| Lua | [api/lua.md](api/lua.md) | [api/lua.md](api/lua.md) |
 | Rust | [api/rust.md](api/rust.md) | [tutorials/rust.md](tutorials/rust.md) |
 | Python | [api/python.md](api/python.md) | [tutorials/python.md](tutorials/python.md) |
 | Julia | [api/julia.md](api/julia.md) | [tutorials/julia.md](tutorials/julia.md) |
@@ -38,14 +39,11 @@ Pages for each front, with the 2.14.0 build command and the test CI runs:
 | PLUMED | [engines/plumed.md](engines/plumed.md) | [tutorials/plumed.md](tutorials/plumed.md) |
 | in-situ | [engines/insitu.md](engines/insitu.md) | [tutorials/insitu.md](tutorials/insitu.md) |
 
-Then run one front:
+Then run the C and CLI fronts on a bundled frame:
 
 ```bash
-python -m dseams
-cargo run --manifest-path bindings/rust/Cargo.toml --example ice
-gfortran -Jbuild/fmod -c bindings/fortran/src/seams_c.f90 -o build/fmod/seams_c.o
-gfortran -Ibuild/fmod bindings/fortran/test_seams.f90 build/fmod/seams_c.o -L$SEAMS_LIB_DIR -lseams
-julia --project=bindings/julia/Dseams bindings/julia/Dseams/test/runtests.jl
+./build/src/docs_ice_example
+./build/seams chill-plus input/traj/ice1h.lammpstrj --cutoff 3.5 --type 1
 ```
 
 A frame is a coordinate array and a cell. Orthorhombic boxes pass three

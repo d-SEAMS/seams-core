@@ -4,8 +4,9 @@
 1.x was a Lua script plus ~yodaStruct -c lua_inputs/config.yml~.
 The config named the trajectory and switched analyses on. 2.14 is one
 ~seams~ subcommand, or one call in ~seams.h~ / ~seams_lang.h~, for
-each of those switches. ~require("dseams")~ in this tree calls
-~seams.h~. The names below are that module.
+each of those switches. ~require("dseams")~ from
+[[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] calls ~seams.h~.
+The names below are that module.
 
 The same input is used on both sides of a row. ~docs/tutorials/test_migrate.py~
 runs that pair and requires the same counts. ~meson test docs_migrate~

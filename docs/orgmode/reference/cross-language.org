@@ -3,7 +3,9 @@
 
 The task is CHILL+ on frame 1 of =input/traj/mW_cubic.lammpstrj=, LAMMPS type 1.
 The result is 4096 cubic sites.
-=docs/tutorials/test_cross_language.py= runs the fronts.
+The CLI and Python rows run here (=docs/tutorials/test_cross_language.py=
+runs the Python leg); the R and Julia rows run in their binding
+repositories.
 
 | language | call | cubic |
 |----------+------+-------|
@@ -16,8 +18,8 @@ Python is ~pip install 'pydseamslib==2.14.0'~.
 The import is ~pydseams~.
 ~import pydseamslib~ is the same package.
 The package name the d-SEAMS paper should use is ~pydseamslib~.
-R is =bindings/r/dseams=.
-Julia is =bindings/julia/Dseams= and calls =libseams_lang= with =ccall=.
+R is the ~dseams~ package from [[https://github.com/d-SEAMS/dseams-r][dseams-r]].
+Julia is ~Dseams~ from [[https://github.com/d-SEAMS/Dseams.jl][Dseams.jl]], which calls =libseams_lang= with =ccall=.
 
 Every front defaults to the cutoff neighbour list (~graph = "cutoff"~, pairs closer than ~cutoff~, 3.5 Å).
 ~graph = "mutual"~ is the mutual four-nearest list with candidates inside ~cutoff + 1.5~, under the same name on every front.

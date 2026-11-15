@@ -72,8 +72,7 @@ against `ringNetwork`.
 ## Rerun
 
 ```
-meson setup bbdir-release --buildtype=release -Doptimization=3 -Dwith_tests=true \
-  -Dwith_python=false
+meson setup bbdir-release --buildtype=release -Doptimization=3 -Dwith_tests=true
 ninja -C bbdir-release -j2 tests/bench_rings_h2h
 python3 scripts/rings_one_thread.py \
   --bench bbdir-release/tests/bench_rings_h2h \

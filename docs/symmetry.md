@@ -55,7 +55,7 @@ C, in `seams_c_api.h`:
 - `seams_symmetry_classify` and `seams_symmetry_classify_tol` take row-major coordinates and three lattice rows, and write the same labels.
 - `seams_symmetry_match`, `seams_symmetry_template`, `seams_symmetry_crystal`, `seams_symmetry_point_group`, `seams_symmetry_space_group` and `seams_symmetry_backend` cover one cluster.
 
-Python, `bindings/python/symmetry.py`, loads `libyodaLib` through ctypes. Set `SEAMS_CORE_LIB` to the built library. `classify(cartesian, lattice, shell_rmsd=0.12)` is the per-atom label.
+Python is `dseams.symmetry(positions, box, shell_rmsd=0.12)` in pydseamslib (d-SEAMS/PydSEAMSlib), the per-atom label from `seams_frame_symmetry`.
 
 ## Build options
 
