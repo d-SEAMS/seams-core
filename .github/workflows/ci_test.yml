@@ -29,6 +29,11 @@ jobs:
           sudo tar -xf MacOSX11.0.sdk.tar.xz -C /opt
           echo "SDKROOT=/opt/MacOSX11.0.sdk" >> "$GITHUB_ENV"
           echo "CONDA_BUILD_SYSROOT=/opt/MacOSX11.0.sdk" >> "$GITHUB_ENV"
+      # OVITO's Python module loads libEGL.so.1. The pixi env ships libegl,
+      # and the Ubuntu runner still needs the system loader names.
+      - name: Install EGL for OVITO
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libegl1 libglvnd0
       - run: pixi run setup
       - run: pixi run build
       - run: pixi run test
@@ -58,6 +63,8 @@ jobs:
           environments: default
           cache-key: pixi-default-
           cache-write: false
+      - name: Install EGL for OVITO
+        run: sudo apt-get update && sudo apt-get install -y libegl1 libglvnd0
       - run: pixi run coverage-setup
       - run: pixi run coverage-build
       - run: pixi run coverage-run
@@ -81,5 +88,7 @@ jobs:
       # wheel needs a newer Qt and import ovito fails.
       - name: Install Snakemake into the pixi interpreter
         run: pixi run python -m pip install 'snakemake>=8'
+      - name: Install EGL for OVITO
+        run: sudo apt-get update && sudo apt-get install -y libegl1 libglvnd0
       - name: Build and run the full suite
         run: pixi run bash scripts/ci_pixi_suite.sh
