@@ -22,6 +22,58 @@
 #define NTHREADS 8
 #define ROUNDS 200
 
+/* macOS libpthread does not implement POSIX barriers. The same
+ * mutex and condition variable are the barrier. */
+#ifndef PTHREAD_BARRIER_SERIAL_THREAD
+#define PTHREAD_BARRIER_SERIAL_THREAD 1
+typedef struct {
+  pthread_mutex_t mu;
+  pthread_cond_t cv;
+  unsigned waiting;
+  unsigned trip;
+  unsigned generation;
+} pthread_barrier_t;
+
+static int pthread_barrier_init(pthread_barrier_t *barrier, const void *attr, unsigned count) {
+  (void)attr;
+  barrier->waiting = 0;
+  barrier->trip = count;
+  barrier->generation = 0;
+  if (pthread_mutex_init(&barrier->mu, NULL) != 0) {
+    return 1;
+  }
+  if (pthread_cond_init(&barrier->cv, NULL) != 0) {
+    pthread_mutex_destroy(&barrier->mu);
+    return 1;
+  }
+  return 0;
+}
+
+static int pthread_barrier_wait(pthread_barrier_t *barrier) {
+  pthread_mutex_lock(&barrier->mu);
+  const unsigned generation = barrier->generation;
+  barrier->waiting += 1;
+  if (barrier->waiting == barrier->trip) {
+    barrier->waiting = 0;
+    barrier->generation += 1;
+    pthread_cond_broadcast(&barrier->cv);
+    pthread_mutex_unlock(&barrier->mu);
+    return PTHREAD_BARRIER_SERIAL_THREAD;
+  }
+  while (generation == barrier->generation) {
+    pthread_cond_wait(&barrier->cv, &barrier->mu);
+  }
+  pthread_mutex_unlock(&barrier->mu);
+  return 0;
+}
+
+static int pthread_barrier_destroy(pthread_barrier_t *barrier) {
+  pthread_cond_destroy(&barrier->cv);
+  pthread_mutex_destroy(&barrier->mu);
+  return 0;
+}
+#endif
+
 static int g_n = 0;
 static double g_xyz[3 * 4096];
 static int g_types[4096];

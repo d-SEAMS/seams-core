@@ -16,7 +16,10 @@ if [ ! -f "$src/openmp/CMakeLists.txt" ]; then
   rm -rf "$src"
   git clone --depth 1 --filter=blob:none --sparse --branch llvmorg-18.1.8 \
     https://github.com/llvm/llvm-project.git "$src"
-  git -C "$src" sparse-checkout set openmp
+  # Standalone openmp looks for LLVMCheckCompilerLinkerFlag in
+  # ../cmake/Modules. A checkout of only openmp leaves that include
+  # missing and cmake stops with an unknown command.
+  git -C "$src" sparse-checkout set openmp cmake/Modules
 fi
 build=$src/build
 rm -rf "$build"
