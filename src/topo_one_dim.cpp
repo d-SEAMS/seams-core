@@ -217,6 +217,96 @@ void notePrism(std::vector<ring::strucType> &ringType, std::vector<int> &listPri
   }
 }
 
+//! Atom-to-ring CSR: the rings through atom a are col[off[a]..off[a + 1]),
+//! in ascending ring order. Large ring sets count and place on the team:
+//! thread t owns a contiguous block of rings, so the slices come out in the
+//! order the serial build gives.
+void atomRings(const std::vector<std::vector<int>> &rings, int nAtoms,
+               std::vector<int> &off, std::vector<int> &col) {
+  const int nRings = static_cast<int>(rings.size());
+  const auto at = [](int i) { return static_cast<std::size_t>(i); };
+  off.assign(at(nAtoms) + 1, 0);
+  int team = 1;
+#ifdef SEAMS_HAS_OPENMP
+  if (nRings >= 2048 && !omp_in_parallel()) {
+    team = omp_get_max_threads();
+  }
+#endif
+  if (team > 1) {
+#ifdef SEAMS_HAS_OPENMP
+    std::vector<int> blockAt(at(team) * at(nAtoms), 0);
+#pragma omp parallel num_threads(team)
+    {
+      const int tid = omp_get_thread_num();
+      const int width = omp_get_num_threads();
+      const int lo = static_cast<int>(1LL * nRings * tid / width);
+      const int hi = static_cast<int>(1LL * nRings * (tid + 1) / width);
+      int *mine = blockAt.data() + at(tid) * at(nAtoms);
+      for (int iring = lo; iring < hi; iring++) {
+        for (const int atom : rings[at(iring)]) {
+          if (atom >= 0 && atom < nAtoms) {
+            ++mine[atom];
+          }
+        }
+      }
+#pragma omp barrier
+#pragma omp for schedule(static)
+      for (int atom = 0; atom < nAtoms; atom++) {
+        int total = 0;
+        for (int t = 0; t < width; t++) {
+          total += blockAt[at(t) * at(nAtoms) + at(atom)];
+        }
+        off[at(atom) + 1] = total;
+      }
+#pragma omp single
+      {
+        for (int atom = 0; atom < nAtoms; atom++) {
+          off[at(atom) + 1] += off[at(atom)];
+        }
+        col.resize(at(off[at(nAtoms)]));
+      }
+#pragma omp for schedule(static)
+      for (int atom = 0; atom < nAtoms; atom++) {
+        int next = off[at(atom)];
+        for (int t = 0; t < width; t++) {
+          int &slot = blockAt[at(t) * at(nAtoms) + at(atom)];
+          const int count = slot;
+          slot = next;
+          next += count;
+        }
+      }
+      for (int iring = lo; iring < hi; iring++) {
+        for (const int atom : rings[at(iring)]) {
+          if (atom >= 0 && atom < nAtoms) {
+            col[at(mine[atom]++)] = iring;
+          }
+        }
+      }
+    }
+#endif
+    return;
+  }
+  for (int iring = 0; iring < nRings; ++iring) {
+    for (const int atom : rings[at(iring)]) {
+      if (atom >= 0 && atom < nAtoms) {
+        ++off[at(atom) + 1];
+      }
+    }
+  }
+  for (int atom = 0; atom < nAtoms; ++atom) {
+    off[at(atom) + 1] += off[at(atom)];
+  }
+  col.resize(at(off[at(nAtoms)]));
+  std::vector<int> nextSlot(off.begin(), off.end() - 1);
+  for (int iring = 0; iring < nRings; ++iring) {
+    for (const int atom : rings[at(iring)]) {
+      if (atom >= 0 && atom < nAtoms) {
+        col[at(nextSlot[at(atom)]++)] = iring;
+      }
+    }
+  }
+}
+
 } // namespace
 
 std::vector<int>
@@ -246,94 +336,9 @@ ring::findPrisms(const std::vector<std::vector<int>> &rings,
   // predicates below are the ones the all-pairs loop used to call, in the
   // same (iring, jring) order, and they do not rewrite the ring vectors.
   const int nAtoms = static_cast<int>(nList.size());
-  std::vector<int> off(static_cast<std::size_t>(nAtoms) + 1, 0);
+  std::vector<int> off;
   std::vector<int> col;
-  int indexTeam = 1;
-#ifdef SEAMS_HAS_OPENMP
-  if (totalRingNum >= 2048 && !omp_in_parallel()) {
-    indexTeam = omp_get_max_threads();
-  }
-#endif
-  if (indexTeam > 1) {
-#ifdef SEAMS_HAS_OPENMP
-    // Row t counts, then places, the rings of thread t's contiguous
-    // block, so every atom's slice lists its rings in ascending order.
-    std::vector<int> blockAt(static_cast<std::size_t>(indexTeam) *
-                                 static_cast<std::size_t>(nAtoms),
-                             0);
-#pragma omp parallel num_threads(indexTeam)
-    {
-      const int tid = omp_get_thread_num();
-      const int width = omp_get_num_threads();
-      const int lo = static_cast<int>(1LL * totalRingNum * tid / width);
-      const int hi = static_cast<int>(1LL * totalRingNum * (tid + 1) / width);
-      int *mine = blockAt.data() + static_cast<std::size_t>(tid) * static_cast<std::size_t>(nAtoms);
-      for (int i = lo; i < hi; ++i) {
-        for (const int atom : rings[static_cast<std::size_t>(i)]) {
-          if (atom >= 0 && atom < nAtoms) {
-            ++mine[atom];
-          }
-        }
-      }
-#pragma omp barrier
-#pragma omp for schedule(static)
-      for (int atom = 0; atom < nAtoms; ++atom) {
-        int total = 0;
-        for (int t = 0; t < width; ++t) {
-          total += blockAt[static_cast<std::size_t>(t) * static_cast<std::size_t>(nAtoms) +
-                           static_cast<std::size_t>(atom)];
-        }
-        off[static_cast<std::size_t>(atom) + 1] = total;
-      }
-#pragma omp single
-      {
-        for (int atom = 0; atom < nAtoms; ++atom) {
-          off[static_cast<std::size_t>(atom) + 1] += off[static_cast<std::size_t>(atom)];
-        }
-        col.resize(static_cast<std::size_t>(off[static_cast<std::size_t>(nAtoms)]));
-      }
-#pragma omp for schedule(static)
-      for (int atom = 0; atom < nAtoms; ++atom) {
-        int at = off[static_cast<std::size_t>(atom)];
-        for (int t = 0; t < width; ++t) {
-          int &slot = blockAt[static_cast<std::size_t>(t) * static_cast<std::size_t>(nAtoms) +
-                              static_cast<std::size_t>(atom)];
-          const int count = slot;
-          slot = at;
-          at += count;
-        }
-      }
-      int *dst = col.data();
-      for (int i = lo; i < hi; ++i) {
-        for (const int atom : rings[static_cast<std::size_t>(i)]) {
-          if (atom >= 0 && atom < nAtoms) {
-            dst[mine[atom]++] = i;
-          }
-        }
-      }
-    }
-#endif
-  } else {
-    for (int i = 0; i < totalRingNum; ++i) {
-      for (const int atom : rings[static_cast<std::size_t>(i)]) {
-        if (atom >= 0 && atom < nAtoms) {
-          ++off[static_cast<std::size_t>(atom) + 1];
-        }
-      }
-    }
-    for (int atom = 0; atom < nAtoms; ++atom) {
-      off[static_cast<std::size_t>(atom) + 1] += off[static_cast<std::size_t>(atom)];
-    }
-    col.resize(static_cast<std::size_t>(off[static_cast<std::size_t>(nAtoms)]));
-    std::vector<int> cursor(off.begin(), off.end() - 1);
-    for (int i = 0; i < totalRingNum; ++i) {
-      for (const int atom : rings[static_cast<std::size_t>(i)]) {
-        if (atom >= 0 && atom < nAtoms) {
-          col[static_cast<std::size_t>(cursor[static_cast<std::size_t>(atom)]++)] = i;
-        }
-      }
-    }
-  }
+  atomRings(rings, nAtoms, off, col);
 
   auto strictPair = [&](int iring, int jring) -> bool {
     auto &basal1 = const_cast<std::vector<int> &>(rings[static_cast<std::size_t>(iring)]);
