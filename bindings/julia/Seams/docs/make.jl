@@ -3,8 +3,14 @@ using Pkg
 
 docsdir = @__DIR__
 Pkg.activate(docsdir)
-Pkg.develop(PackageSpec(path = joinpath(docsdir, "..")))
-Pkg.instantiate()
+proj = Pkg.project().path
+cd(docsdir) do
+    Pkg.develop(PackageSpec(; path = relpath(joinpath(docsdir, ".."), docsdir)))
+    Pkg.instantiate()
+end
+text = read(proj, String)
+stripped = replace(text, r"^\[sources\]\n(?:[^\[\n].*\n|\n)*"m => "")
+stripped == text || write(proj, stripped)
 
 root = normpath(joinpath(docsdir, "..", "..", "..", ".."))
 lib = joinpath(root, "bbdir", "src", "libseams.so")

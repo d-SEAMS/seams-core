@@ -136,9 +136,7 @@ jobs:
           julia --project=bindings/julia/Seams -e 'using Pkg; Pkg.instantiate(); Pkg.test()'
       - name: Documenter
         run: |
-          julia --project=bindings/julia/Dseams/docs -e 'using Pkg; Pkg.instantiate()'
           julia --project=bindings/julia/Dseams/docs bindings/julia/Dseams/docs/make.jl
-          julia --project=bindings/julia/Seams/docs -e 'using Pkg; Pkg.instantiate()'
           julia --project=bindings/julia/Seams/docs bindings/julia/Seams/docs/make.jl
       - name: ctypes package
         run: |

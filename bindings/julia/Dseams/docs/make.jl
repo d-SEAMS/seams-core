@@ -8,8 +8,20 @@ using Pkg
 
 docsdir = @__DIR__
 Pkg.activate(docsdir)
-Pkg.develop(PackageSpec(path = joinpath(docsdir, "..")))
-Pkg.instantiate()
+# libseams_jll is not in General. Develop the checkout stand-in, which
+# has no binaries, so Dseams opens SEAMS_LANG_LIB instead of a registry
+# artifact. Relative paths keep the tracked project free of [sources].
+proj = Pkg.project().path
+cd(docsdir) do
+    Pkg.develop([
+        PackageSpec(; path = relpath(joinpath(docsdir, "..", "dev", "libseams_jll"), docsdir)),
+        PackageSpec(; path = relpath(joinpath(docsdir, ".."), docsdir)),
+    ])
+    Pkg.instantiate()
+end
+text = read(proj, String)
+stripped = replace(text, r"^\[sources\]\n(?:[^\[\n].*\n|\n)*"m => "")
+stripped == text || write(proj, stripped)
 
 using Documenter
 using Dseams
