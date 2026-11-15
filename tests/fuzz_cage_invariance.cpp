@@ -450,6 +450,13 @@ int main(int argc, char **argv) {
       }
       std::atomic<int> bad{0};
       auto runRange = [&](int begin, int end) {
+        // The pool is the parallelism. OpenMP's default is per thread and
+        // is not copied into a std::thread, so each trial was starting
+        // another full team. One team inside a trial, on every core the
+        // pool already occupies, is what made a sanitizer run take hours.
+#ifdef SEAMS_HAS_OPENMP
+        omp_set_num_threads(1);
+#endif
         for (int t = begin; t < end && bad.load() == 0; t++) {
           std::mt19937 rng(20261101u + static_cast<unsigned>(frames) * 9973u +
                            static_cast<unsigned>(t) * 10007u);
