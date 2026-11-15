@@ -25,12 +25,10 @@ meson = ">=1.3.0"
 ninja = ">=1.13.2,<2"
 pkgconfig = ">=1.5.5,<2"
 python = "3.12.*"
-nanobind = ">=2.14"
 numpy = ">=1.24"
 pip = "*"
-# linkcell, readcon and the Rust binding need cargo on PATH.
+# linkcell and readcon need cargo on PATH.
 rust = ">=1.80"
-meson-python = ">=0.16"
 pytest = ">=8.0"
 lcov = ">=1.16"
 libhwy = ">=1.3.0"
@@ -74,10 +72,6 @@ repro = { features = ["repro"] }
 cycles = { features = ["cycles"], no-default-feature = true }
 # Renderer for the published stills. bpy stays in the cycles env (Python 3.13).
 figures = { features = ["figures"], no-default-feature = true }
-# Julia and R do not share the docs solve (pcre2). Documenter and pkgdown
-# run from these prefixes, which docbld finds on PATH.
-site-julia = { features = ["site-julia"], no-default-feature = true }
-site-r = { features = ["site-r"], no-default-feature = true }
 crosscheck = { features = ["crosscheck"] }
 abi = { features = ["abi"] }
 # PLUMED 2.10 with the 2.39 sysroot. The default environment keeps
@@ -103,31 +97,6 @@ numpy = ">=1.24"
 catch2 = ">=3.6.0,<4"
 plumed = ">=2.10,<2.11"
 openmm = ">=8.6.1,<9"
-
-[feature.site-julia]
-platforms = ["linux-64"]
-
-[feature.site-julia.dependencies]
-julia = ">=1.10,<1.12"
-ca-certificates = ">=2025"
-# Julia 1.10.4's Downloads.jl calls curl_multi_assign from a socket
-# callback that libcurl 8.10 and newer run during curl_multi_cleanup.
-# The call returns CURLM_BAD_HANDLE and libcurl aborts. conda's libcurl
-# is the one on the loader path, so it has to predate that change.
-libcurl = ">=8.4,<8.10"
-
-[feature.site-r]
-platforms = ["linux-64"]
-
-[feature.site-r.dependencies]
-r-base = ">=4.4,<4.6"
-r-pkgdown = ">=2.1"
-r-roxygen2 = ">=7"
-r-cpp11 = ">=0.4"
-r-rcppeigen = ">=0.3"
-r-knitr = ">=1.45"
-r-rmarkdown = ">=2.25"
-ca-certificates = ">=2025"
 
 [feature.figures]
 # chemparseplot, OVITO and ase share this interpreter. Sphinx relaunches
@@ -211,8 +180,6 @@ emacs = ">=30"
 graphviz = ">=12"
 doxygen = ">=1.17,<2"
 doxyrest = ">=2.1"
-# Lua 5.4 build, matching doxyrest. LDoc is installed with luarocks.
-luarocks = ">=3.11,<3.13"
 ca-certificates = ">=2025"
 
 [feature.docs.pypi-dependencies]
@@ -224,7 +191,6 @@ myst-parser = ">=4.0, <5"
 sphinxcontrib-mermaid = ">=1.0, <2"
 breathe = ">=4.35"
 numpydoc = ">=1.8, <2"
-ford = ">=7, <8"
 
 [feature.docs.tasks.setup-doxyrest]
 description = "Clones the doxyrest dependency into the subprojects directory"
@@ -269,28 +235,9 @@ description = "Copy doxyYoda HTML into the Sphinx publish tree"
 depends-on = ["sphinxbld", "doxyhtml"]
 cmd = "rm -rf docs/build/api-cpp && cp -R docs/doxygen-html/html docs/build/api-cpp"
 
-[feature.docs.tasks.ford]
-description = "FORD HTML for the Fortran bindings"
-cmd = "ford bindings/fortran/ford.md"
-
-[feature.docs.tasks.setup-ldoc]
-description = "Install LDoc into the docs environment"
-cmd = "test -x $CONDA_PREFIX/bin/ldoc || luarocks --lua-version 5.4 install --tree $CONDA_PREFIX ldoc"
-
-[feature.docs.tasks.ldoc]
-description = "LDoc HTML for the Lua bindings"
-cwd = "bindings/lua"
-depends-on = ["setup-ldoc"]
-cmd = "ldoc ."
-
-[feature.docs.tasks.install-binding-docs]
-description = "Copy FORD and LDoc HTML into the Sphinx publish tree"
-depends-on = ["sphinxbld", "ford", "ldoc"]
-cmd = "rm -rf docs/build/fortran docs/build/lua && cp -R docs/ford docs/build/fortran && cp -R docs/ldoc docs/build/lua"
-
 [feature.docs.tasks.fix-built-links]
 description = "Repair generated anchor ids the HTML checker follows"
-depends-on = ["sphinxbld", "install-doxyhtml", "install-binding-docs"]
+depends-on = ["sphinxbld", "install-doxyhtml"]
 cmd = "python3 docs/fix_built_links.py"
 
 [feature.docs.tasks.docbld]
@@ -303,8 +250,6 @@ cmd = """
 rm -rf build
 rm -rf doctrees
 rm -rf doxygen-html
-rm -rf ford
-rm -rf ldoc
 rm -rf source/xml
 rm -rf source/api
 rm -rf source/contributing
@@ -364,17 +309,6 @@ libxkbcommon = ">=1.13.2,<2"
 glib = ">=2.88.3,<3"
 libvulkan-loader = ">=1.4.357.0,<2"
 mesa-lavapipe = ">=26.3.0,<27"
-# Language fronts. The conda packages are linux-64; other platforms
-# keep the tests that exit 77 when julia or Rscript is absent.
-julia = ">=1.10"
-r-base = ">=4.4"
-r-cpp11 = ">=0.4"
-r-rcppeigen = ">=0.3.4"
-r-testthat = ">=3.2"
-# The Lua video tape loads require("dseams") from LuaJIT.
-luajit = ">=2.1"
-# The docs Lua tests and the example counts run under PUC Lua 5.4.
-lua = ">=5.4,<5.5"
 
 [pypi-dependencies]
 freud-analysis = ">=3.6.1,<4"
