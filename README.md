@@ -18,7 +18,10 @@
 
 \brief The C++ core of d-SEAMS, a molecular dynamics trajectory analysis engine.
 
-This repository is the C++ engine (`libyodaLib`) and the `seams` CLI.
+This repository is the C++ engine (`libyodaLib`), its C API `libseams`
+(`include/seams.h`), the C ABI `libseams_lang` that the language bindings
+link (`bindings/cxx/seams_lang.h`), the `seams` CLI, and the engine
+drivers.
 
 ```bash
 seams read water.lammpstrj
@@ -26,12 +29,21 @@ seams chill-plus water.lammpstrj --cutoff 3.5
 seams cages water.lammpstrj
 ```
 
-Language and engine fronts are listed in [docs/quickstart.md](docs/quickstart.md):
+C and C++ are documented here, as are the GROMACS, LAMMPS, OpenMM, PLUMED
+and in-situ engine drivers. Each other language binding is its own
+repository, released with the same version against the seams-core tag:
 
-- Languages: C, C++, Fortran, Rust, Python, Julia, R
-- Engines: GROMACS, LAMMPS, OpenMM, PLUMED, in-situ
+| Language | Repository | Package |
+|----------|------------|---------|
+| Python | [d-SEAMS/PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib) | `pydseamslib` on PyPI (`import dseams`, `import pydseams`) |
+| Lua, Fennel | [d-SEAMS/yodaStruct](https://github.com/d-SEAMS/yodaStruct) | LuaRocks `dseams` (`require("dseams")`) |
+| R | [d-SEAMS/dseams-r](https://github.com/d-SEAMS/dseams-r) | `dseams` |
+| Julia | [d-SEAMS/Dseams.jl](https://github.com/d-SEAMS/Dseams.jl) | `Dseams`, over `libseams_jll` |
+| Rust | [d-SEAMS/dseams-rs](https://github.com/d-SEAMS/dseams-rs) | crates `dseams-sys`, `dseams` |
+| Fortran | [d-SEAMS/dseams-fortran](https://github.com/d-SEAMS/dseams-fortran) | fpm `dseams` |
 
-Lua/Fennel stays in [yodaStruct](https://github.com/d-SEAMS/yodaStruct).
+`docs/orgmode/contributing/repositories.org` says what lives where and how
+to develop seams-core and a binding together.
 
 Periodic k-nearest neighbour search is
 [linkcell](https://github.com/d-SEAMS/linkcell).
@@ -109,19 +121,12 @@ The corresponding `bibtex` entry is:
 # Compilation
 
 The live builds are `pixi` + meson, or the Nix flake. This repository
-builds `libyodaLib`, `libseams`, and the `seams` CLI. The in-tree
-Python module is `import dseams`. The released Frame package is
-[PydSEAMSlib](https://github.com/d-SEAMS/PydSEAMSlib). Lua is
-[yodaStruct](https://github.com/d-SEAMS/yodaStruct)
-(`require("dseams")`).
-
-From 2.14.0 this repository also builds the native packages:
-`pip install 'pydseamslib==2.14.0'` (the PyPI name of the 2.11 wheels, now
-`import dseams`), the conda-forge `libseams` and `pydseamslib`
-recipe, the crates `dseams-sys` and `dseams`, the fpm package
-`dseams`, and the LuaRocks rock `dseams`. R and Julia install from
-`bindings/r/dseams` and `bindings/julia/Dseams`. Each line is in
-`docs/orgmode/howto/install.org`.
+builds `libyodaLib`, `libseams`, `libseams_lang`, and the `seams` CLI.
+The package it releases is conda-forge `libseams` (`recipe/`); the Julia
+`libseams_jll` is built from `packaging/yggdrasil`. The language packages
+(`pydseamslib`, the crates, the fpm package, the LuaRocks rock, the R and
+Julia packages) are built and released by their own repositories, listed
+above. `docs/orgmode/howto/install.org` has every install line.
 
 ```bash
 pixi run setup && pixi run build && pixi run test
@@ -355,13 +360,10 @@ Picture tracks for the bindings and the tutorials are in `docs/videos`.
 The channel page is [d-SEAMS on Odysee](https://odysee.com/@d-SEAMS:0b23224c14d44b2a90deee60b7cc8c54e2331e9d).
 A player on a docs page uses `https://odysee.com/$/embed/<claim-name>:<claim-id>` after `embed.txt` names that claim.
 
-# Language fronts
+# Language bindings
 
-The nanobind module `dseams._core` is built from the in-tree `libseams`
-when nanobind is found (`-Dwith_python=true`, the default). A missing
-nanobind uses `subprojects/nanobind.wrap`.
-
-`libseams_lang` is built with the engine for the R package
-(`bindings/r/dseams`) and the Julia package
-(`bindings/julia/Dseams`). `bindings/julia/Seams` is the thin `libseams`
-example. The how-to is `docs/orgmode/howto/bindings.org`.
+`libseams_lang` is built with the engine. The Python, R and Julia
+`Dseams` bindings link it; the Lua, Rust, Fortran and Julia `Seams`
+bindings link `libseams`. The bindings themselves live in the
+repositories in the table at the top. The how-to is
+`docs/orgmode/howto/bindings.org`.
