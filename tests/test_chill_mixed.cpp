@@ -2,7 +2,9 @@
 #include <catch2/catch_test_macros.hpp>
 #include <seams.h>
 
+#include <array>
 #include <fstream>
+#include <thread>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -162,4 +164,150 @@ TEST_CASE("mixed-phase CHILL labels match the pre-change implementation", "[chil
     }
     REQUIRE(classes >= 2);
   }
+}
+
+namespace {
+
+std::vector<int> labelsWithTypes(const Frame &frame, const std::vector<int> &types, bool plus) {
+  seams_system *sys = seams_system_create();
+  REQUIRE(sys != nullptr);
+  std::vector<int> ids(static_cast<std::size_t>(frame.n));
+  for (int i = 0; i < frame.n; ++i) {
+    ids[static_cast<std::size_t>(i)] = i + 1;
+  }
+  REQUIRE(seams_system_set_frame(sys, frame.xyz.data(), frame.n, frame.box, types.data(),
+                                 ids.data()) == SEAMS_OK);
+  std::vector<int> got(static_cast<std::size_t>(frame.n));
+  int counts[9] = {};
+  if (plus) {
+    REQUIRE(seams_chill_plus(sys, 3.5, 0, SEAMS_GRAPH_MUTUAL, SEAMS_CHILL_PUBLISHED, got.data(),
+                             counts) == SEAMS_OK);
+  } else {
+    REQUIRE(seams_chill(sys, 3.5, 0, SEAMS_GRAPH_MUTUAL, SEAMS_CHILL_PUBLISHED, got.data(),
+                        got.size(), counts) == SEAMS_OK);
+  }
+  seams_system_destroy(sys);
+  return got;
+}
+
+}  // namespace
+
+TEST_CASE("mutual-graph CHILL with type 0 does not depend on the type numbers",
+          "[chill][mutual][types]") {
+  const Frame frame = readDump("tests/fixtures/mixed/interface.lammpstrj");
+  const std::size_t n = static_cast<std::size_t>(frame.n);
+  const std::vector<int> ones(n, 1);
+  const std::vector<int> twos(n, 2);
+  std::vector<int> mixed(n, 1);
+  for (std::size_t i = 1; i < n; i += 2) {
+    mixed[i] = 2;
+  }
+  REQUIRE(seams_set_num_threads(1) == SEAMS_OK);
+  for (const bool plus : {false, true}) {
+    const std::vector<int> reference = labelsWithTypes(frame, ones, plus);
+    bool varied = false;
+    for (int label : reference) {
+      varied = varied || label != reference[0];
+    }
+    REQUIRE(varied);
+    // Every atom of type 2: the same single-species frame.
+    REQUIRE(labelsWithTypes(frame, twos, plus) == reference);
+    // Mixed numbers with type 0 search every atom, as the copied path does.
+    REQUIRE(labelsWithTypes(frame, mixed, plus) == reference);
+  }
+}
+
+namespace {
+
+// Diamond lattice (cubic ice oxygens): nearest neighbours 2.75 A apart,
+// the second shell 4.5 A away. The 3.5 A ring graph is bipartite.
+Frame diamondFrame() {
+  const double a = 6.35;
+  const int cells = 3;
+  const std::array<std::array<double, 3>, 8> basis = {{{0, 0, 0},
+                                                       {0, 0.5, 0.5},
+                                                       {0.5, 0, 0.5},
+                                                       {0.5, 0.5, 0},
+                                                       {0.25, 0.25, 0.25},
+                                                       {0.25, 0.75, 0.75},
+                                                       {0.75, 0.25, 0.75},
+                                                       {0.75, 0.75, 0.25}}};
+  Frame frame;
+  for (int ix = 0; ix < cells; ++ix) {
+    for (int iy = 0; iy < cells; ++iy) {
+      for (int iz = 0; iz < cells; ++iz) {
+        for (const auto &b : basis) {
+          frame.xyz.push_back((ix + b[0]) * a);
+          frame.xyz.push_back((iy + b[1]) * a);
+          frame.xyz.push_back((iz + b[2]) * a);
+        }
+      }
+    }
+  }
+  frame.n = static_cast<int>(frame.xyz.size() / 3);
+  frame.box[3] = frame.box[4] = frame.box[5] = cells * a;
+  return frame;
+}
+
+std::array<int, 13> ringHistogram(seams_system *sys) {
+  seams_rings *rings = nullptr;
+  REQUIRE(seams_rings_find(sys, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6, &rings) == SEAMS_OK);
+  std::array<int, 13> hist = {};
+  REQUIRE(seams_rings_histogram(rings, hist.data(), 13) == SEAMS_OK);
+  seams_rings_destroy(rings);
+  return hist;
+}
+
+seams_system *loaded(const Frame &frame) {
+  seams_system *sys = seams_system_create();
+  REQUIRE(sys != nullptr);
+  REQUIRE(seams_system_set_frame(sys, frame.xyz.data(), frame.n, frame.box, nullptr, nullptr) ==
+          SEAMS_OK);
+  return sys;
+}
+
+}  // namespace
+
+TEST_CASE("concurrent ring searches keep their own odd rings", "[rings][threads]") {
+  const Frame crystal = diamondFrame();
+  const Frame melt = readDump("tests/fixtures/mixed/melted.lammpstrj");
+  seams_system *a = loaded(crystal);
+  seams_system *b = loaded(melt);
+  REQUIRE(seams_set_num_threads(2) == SEAMS_OK);
+  const std::array<int, 13> crystalRef = ringHistogram(a);
+  const std::array<int, 13> meltRef = ringHistogram(b);
+  REQUIRE(crystalRef[6] > 0);
+  REQUIRE(crystalRef[5] == 0);
+  REQUIRE(meltRef[5] > 0);
+  // Distinct handles may be used from distinct threads at once.
+  std::vector<std::array<int, 13>> crystalRuns(40);
+  std::vector<std::array<int, 13>> meltRuns(40);
+  std::thread ta([&] {
+    for (auto &h : crystalRuns) {
+      seams_rings *rings = nullptr;
+      if (seams_rings_find(a, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6, &rings) == SEAMS_OK) {
+        seams_rings_histogram(rings, h.data(), 13);
+        seams_rings_destroy(rings);
+      }
+    }
+  });
+  std::thread tb([&] {
+    for (auto &h : meltRuns) {
+      seams_rings *rings = nullptr;
+      if (seams_rings_find(b, 3.5, 0, SEAMS_GRAPH_CUTOFF, 6, &rings) == SEAMS_OK) {
+        seams_rings_histogram(rings, h.data(), 13);
+        seams_rings_destroy(rings);
+      }
+    }
+  });
+  ta.join();
+  tb.join();
+  for (const auto &h : crystalRuns) {
+    REQUIRE(h == crystalRef);
+  }
+  for (const auto &h : meltRuns) {
+    REQUIRE(h == meltRef);
+  }
+  seams_system_destroy(a);
+  seams_system_destroy(b);
 }
