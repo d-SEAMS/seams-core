@@ -11,7 +11,7 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 ## Getting started
 
 - [Quickstart](https://docs.dseams.info/quickstart.html): Install the engine, then classify one cubic cell.
-- [Install the engine](https://docs.dseams.info/howto/install.html): Get a seams binary, libyodaLib, and libseams.
+- [Install the engine](https://docs.dseams.info/howto/install.html): Get a seams binary, libyodaLib, libseams, and libseams_lang.
 - [Videos](https://docs.dseams.info/videos/index.html): Silent picture tracks for the bindings and the tutorials.
 
 ## Tutorials
@@ -136,7 +136,7 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 ## Explanation
 
 - [Concepts](https://docs.dseams.info/explanation/index.html): These pages are for understanding.
-- [Repositories](https://docs.dseams.info/explanation/architecture.html): d-SEAMS 2.14 is one C++ library plus the stable ABI that the in-tree fronts call.
+- [Repositories](https://docs.dseams.info/explanation/architecture.html): d-SEAMS 2.14 is one C++ library plus the stable C API and C ABI that the language bindings call.
 - [The C API](https://docs.dseams.info/explanation/c-api.html): include/seams.h is ABI 1 of libseams.
 - [CHILL+ versus cages](https://docs.dseams.info/explanation/chill-plus-vs-cages.html): Two classifiers live in libyodaLib.
 - [CHILL+: the published rule and the OVITO rule](https://docs.dseams.info/explanation/chill-plus-rules.html): Nguyen and Molinero, J. Phys. Chem. B 2015, 119, 9369, equation 1 averages q_3 over the four nearest neighbours of a shell that already holds four neighbours inside the cutoff.
@@ -162,7 +162,7 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 
 ## Project
 
-- [Changelog](https://docs.dseams.info/changelog.html): The C++ engine is this repository.
+- [Changelog](https://docs.dseams.info/changelog.html): The C++ engine, libseams, libseams_lang and the seams CLI are this repository.
 - [Contributing](https://docs.dseams.info/contributing/index.html): This repository is the C++ engine (libyodaLib), the C API libseams, the C ABI libseams_lang, the seams CLI and the engine drivers.
 - [Repository map](https://docs.dseams.info/contributing/repositories.html): d-SEAMS is seven repositories.
 - [Release process](https://docs.dseams.info/contributing/release.html): This is the maintainer cut. .github/workflows/release.yml only runs gh release create when a v* tag is pushed.
