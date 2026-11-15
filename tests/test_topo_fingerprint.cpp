@@ -201,12 +201,12 @@ TEST_CASE("vertex colors split the classes and travel with a permutation", "[top
   std::iota(perm.begin(), perm.end(), 0);
   std::mt19937 rng(11);
   std::shuffle(perm.begin(), perm.end(), rng);
-  std::vector<int> permColours(static_cast<std::size_t>(n));
+  std::vector<int> permColors(static_cast<std::size_t>(n));
   for (int i = 0; i < n; i++) {
-    permColours[static_cast<std::size_t>(perm[static_cast<std::size_t>(i)])] =
+    permColors[static_cast<std::size_t>(perm[static_cast<std::size_t>(i)])] =
         colors[static_cast<std::size_t>(i)];
   }
-  const auto fq = topo::fingerprint(permute(rows, perm), 2, 7, permColours);
+  const auto fq = topo::fingerprint(permute(rows, perm), 2, 7, permColors);
   REQUIRE(fq.key == fp.key);
   REQUIRE(fq.classes == fp.classes);
   // the local key of an atom and of its image agree

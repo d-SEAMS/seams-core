@@ -42,7 +42,7 @@ RUHI = {
     "white": (255, 255, 255),
     "bond": (40, 40, 40),
 }
-RING_COLOUR = {4: "sky", 5: "sunshine", 6: "teal"}
+RING_COLOR = {4: "sky", 5: "sunshine", 6: "teal"}
 
 
 def run_text(args):
@@ -366,7 +366,7 @@ def project_point(point, center, box):
     return xz, yy, depth
 
 
-def draw_structure(draw, origin, size, points, box, edges, edge_colour, atom_colour, label, fonts):
+def draw_structure(draw, origin, size, points, box, edges, edge_color, atom_color, label, fonts):
     left, top = origin
     width, height = size
     center = view_centre(points, box)
@@ -388,14 +388,14 @@ def draw_structure(draw, origin, size, points, box, edges, edge_colour, atom_col
     pixels = [pixel(item) for item in projected]
     radius = max(2.0, min(7.0, 0.22 * BOND_A * scale))
     for a, b in edges:
-        color = edge_colour(a, b)
+        color = edge_color(a, b)
         delta = pair_vector(points[b], points[a], box)
         end = tuple(points[a][axis] + delta[axis] for axis in range(3))
         end_px = pixel(project_point(end, center, box))
         draw.line([pixels[a], end_px], fill=color, width=2 if radius > 3.5 else 1)
     for index in order:
         x, y = pixels[index]
-        fill = atom_colour(index)
+        fill = atom_color(index)
         draw.ellipse(
             [x - radius, y - radius, x + radius, y + radius],
             fill=fill,
@@ -427,7 +427,7 @@ def slab(points, box, axis, thickness):
     return kept, box
 
 
-def constant_colour(name):
+def constant_color(name):
     color = RUHI[name]
 
     def paint(*_args):
@@ -478,8 +478,8 @@ def systems(log):
                 points,
                 box,
                 edges,
-                constant_colour("bond"),
-                constant_colour("oxygen"),
+                constant_color("bond"),
+                constant_color("oxygen"),
                 label,
             )
         )
@@ -507,12 +507,12 @@ def classify(log):
             f"rings {len(rings)} bond_sizes {counts}"
         )
 
-        def edge_colour(a, b, sizes=sizes):
+        def edge_color(a, b, sizes=sizes):
             key = (a, b) if a < b else (b, a)
-            return RUHI[RING_COLOUR.get(sizes.get(key, 0), "black")]
+            return RUHI[RING_COLOR.get(sizes.get(key, 0), "black")]
 
         panels.append(
-            (points, box, edges, edge_colour, constant_colour("oxygen"), label)
+            (points, box, edges, edge_color, constant_color("oxygen"), label)
         )
     panel_figure(panels, 2, FIG / "classify.png", (640, 520))
     log.append("wrote paper/tex/figures/classify.png")

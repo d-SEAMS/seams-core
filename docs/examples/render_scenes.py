@@ -309,7 +309,7 @@ def cage_meshes(cycles, groups, positions, vectors):
     The returned stats are ``(longest edge, planarity residual)`` for
     every polygon that is actually drawn.
     """
-    by_colour = defaultdict(list)
+    by_color = defaultdict(list)
     reference = None
     shifts = _shifts(vectors)
     stats = []
@@ -337,9 +337,9 @@ def cage_meshes(cycles, groups, positions, vectors):
             delta = np.zeros(3)
         else:
             delta = min(shifts, key=lambda shift: np.linalg.norm(cage_centre_now + shift - reference))
-        by_colour[color].append([poly + delta for poly in polygons])
+        by_color[color].append([poly + delta for poly in polygons])
     meshes = []
-    for color, cages in by_colour.items():
+    for color, cages in by_color.items():
         vertices = []
         triangles = []
         for cage in cages:
@@ -657,7 +657,7 @@ def render_host(render, lib, dump, path, kinds, width=1700):
     meshes, stats, edge_sets = cage_meshes(cycles, groups, positions, vectors)
     assert_drawn_faces(stats)
     assert_cage_edges(edge_sets)
-    corners = np.vstack([vertices for vertices, _faces, _colour in meshes])
+    corners = np.vstack([vertices for vertices, _faces, _color in meshes])
     colors = np.tile(np.array((0.96, 0.96, 0.96)), (len(corners), 1))
     radii = np.full(len(corners), 0.22)
     forward = np.array([0.55, 0.35, 0.76])
@@ -744,7 +744,7 @@ def legend_groups(labels, font, swatch, max_width):
     """
     if not labels:
         return []
-    widths = [swatch + 16.0 + float(font.getlength(label)) + 18.0 for label, _colour in labels]
+    widths = [swatch + 16.0 + float(font.getlength(label)) + 18.0 for label, _color in labels]
     if sum(widths) <= max_width:
         return [list(labels)]
     best = None
@@ -1196,7 +1196,7 @@ def _present_interface(render, path, positions, labels, origin, lengths, forward
     groups = [shown_legend] if shown_legend else []
     legend_rows = 1
     legend_width = 16.0
-    for label, _colour in shown_legend:
+    for label, _color in shown_legend:
         legend_width += swatch + 16.0 + float(font.getlength(label)) + 18.0
     right_margin = max(right_margin, int(legend_width - image.width) + 48)
     bottom = 120 + row_h * legend_rows

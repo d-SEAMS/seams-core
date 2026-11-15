@@ -201,7 +201,7 @@ std::string canonicalCertificateRooted(int n,
 #endif
 }
 
-std::string canonicalCertificateColoured(int n,
+std::string canonicalCertificateColored(int n,
                                          const std::vector<std::pair<int, int>> &edges,
                                          const std::vector<int> &colors, int root) {
 #ifndef SEAMS_HAS_NAUTY

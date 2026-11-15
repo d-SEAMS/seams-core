@@ -2249,7 +2249,7 @@ def finish(positions, colors, radii, transparency, names, bonds, meshes, view, c
                 for mesh in meshes
             ]
     legend = legend_rows(names, colors)
-    seen = {name for name, _colour in legend}
+    seen = {name for name, _color in legend}
     for mesh in meshes:
         label = mesh.get("legend")
         if label and label not in seen:
@@ -2751,7 +2751,7 @@ def side_by_side_cages(meshes, xyz, names, colors, radii, transparency, residue_
     import numpy as np
 
     guest_names = {"methane", "THF", "ring O", "hydrogen"}
-    water_colour = palette_rgb("water")
+    water_color = palette_rgb("water")
     xyz = np.asarray(xyz, dtype=float)
     centers = [
         np.asarray(mesh["shell"] if "shell" in mesh else mesh["vertices"], dtype=float).mean(axis=0)
@@ -2822,7 +2822,7 @@ def side_by_side_cages(meshes, xyz, names, colors, radii, transparency, residue_
         start = len(out_pos)
         for point in waters:
             out_pos.append(point)
-            out_col.append(water_colour)
+            out_col.append(water_color)
             out_name.append("water")
             out_rad.append(ATOM_RADIUS)
             out_alpha.append(0.0)
@@ -3345,7 +3345,7 @@ def with_symbols(self, symbols):
 Frame.with_symbols = with_symbols
 
 
-def check_colour(token="hexagonal"):
+def check_color(token="hexagonal"):
     """Render one sphere and require the center pixel to match the palette."""
     color = palette_rgb(token)
     drawn = cycles_launch(
@@ -3442,11 +3442,11 @@ def main(argv):
     args = parser.parse_args(argv)
     global RENDER_ENGINE
     RENDER_ENGINE = args.engine
-    if args.check_colour:
+    if args.check_color:
         if args.engine != "cycles":
             fail("the color check requires --engine cycles")
         for token in ("hexagonal", "interfacial", "cubic"):
-            check_colour(token)
+            check_color(token)
         return 0
     if not args.out:
         fail("arguments are required: --out")

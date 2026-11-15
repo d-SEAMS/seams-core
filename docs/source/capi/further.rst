@@ -407,7 +407,7 @@ seams_fingerprint
 
 .. code-block:: c
 
-   seams_status seams_fingerprint(seams_system *sys, double cutoff, int type, int k, int graph, int hops, int colour_types, seams_topo **out)
+   seams_status seams_fingerprint(seams_system *sys, double cutoff, int type, int k, int graph, int hops, int color_types, seams_topo **out)
 
 Topological fingerprint of the bonded graph.
 
@@ -429,7 +429,7 @@ Topological fingerprint of the bonded graph.
 ``hops``
     Neighbourhood depth. Zero selects 2.
 
-``colour_types``
+``color_types``
     Non-zero colors vertices by LAMMPS type.
 
 ``out``
