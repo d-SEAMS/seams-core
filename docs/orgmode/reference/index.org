@@ -16,4 +16,4 @@ Lookup pages for the engine. Tutorials and how-tos live elsewhere.
 | [[file:glossary.org][glossary]] | Engine terms |
 | [[file:../explanation/performance.org][Sitting tables]] | Medians from ~benchmarks/rc3-sitting.csv~ |
 | [[file:../explanation/trace-threads.org][Thread controls]] | ~OMP_NUM_THREADS~, ~taskset~, ~lc_set_threads~ |
-| [[file:release-2.14.org][2.14.0 release notes]] | API, engines, threads, and deprecations since ~2dbefa97~ |
+| [[file:release-2.14.org][2.14.0 release notes]] | API, engines, threads, and deprecations since v2.13.0 |

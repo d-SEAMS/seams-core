@@ -91,7 +91,7 @@ Simulations) classifies ice in molecular-dynamics trajectories. This
 repository is the C++ engine (~libyodaLib~) and the ~seams~ CLI.
 
 The first classification is five lines. Install with
-~pip install pydseamslib~ for the Frame package, with conda-forge's
+~pip install 'pydseamslib==2.14.0'~ for the Frame package, with conda-forge's
 Meson toolchain, or with ~meson setup build && meson compile -C build~,
 then run the Python and C programs on
 [[file:quickstart.org][the quick start]]. Both report 8 cubic molecules.

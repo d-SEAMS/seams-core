@@ -11,37 +11,45 @@ narrative cut used in the book.
 
 * 2.14.0
 
-A versioned C API (~seams.h~, ~libseams~) and the Fortran, Python,
-Julia, and Rust fronts call it. LAMMPS, GROMACS, OpenMM, and PLUMED
-drivers call the same library. ~with_lammps~ and ~with_gromacs~
-default to auto. A found library whose plugin cannot be built is an
-error.
-~seams_set_num_threads(0)~ restores the OpenMP width captured at first use.
-~--water-types~ keeps every named type on the cutoff list, cross pairs
-included, and ~seams ions~ counts each of those types in the shell.
-~linkcell::pairs_within~ owns the cutoff list. vesin is the fallback
-when linkcell is not built.
-The cutoff list covers restricted triclinic boxes, and the orthorhombic
-list is a parallel cell sort.
-CHILL+ on that list counts a crystal row with four neighbours inside
-the cutoff. On the mixed TIP4P fixture the tested counts are
-interClathrate 9 and water 241 for the default and the cutoff list.
-The mutual list is clathrate 1, interClathrate 7 and water 242.
-~ovito-chill+~ averages q3 on the full shell.
-~--pair-types~ names the site-site pair. ~--types~ remains a deprecated
-exact alias and prints a warning.
-Local symmetry names an ice shell, a hydrate cage, or a ring, with an
-optional IRA, SOFI, or spglib report.
-A partial diamond signature keeps a shell that can still reach eight
-good (4,2,1) patterns.
-Python, R, and Julia wrap rings, cages, signature cages, and the shell
-symmetry label on ~libseams_lang~.
-The book builds from the committed Org sources.
-The Python module is released on PyPI as ~pydseamslib~ (import
-~dseams~), with wheels for Linux and macOS and a conda-forge recipe
-for ~libseams~ and ~pydseamslib~. The Rust crates are ~dseams-sys~
-and ~dseams~, the Fortran module is the fpm package ~dseams~, and the
-Lua module is the LuaRocks rock ~dseams~.
+We cut 2.14.0 from tag v2.13.0. The bullets are
+[[file:../../CHANGELOG.md][CHANGELOG.md]]. This is the short form.
+
+~seams.h~ is ABI 1. A frame carries an orthorhombic or triclinic
+cell, and we return neighbours, both CHILL+ rules, q4 and q6,
+primitive rings, and ring symmetry labels. C, C++, Python, Fortran,
+Julia, Rust, and Lua call that header.
+~seams_set_num_threads(0)~ restores the OpenMP width we captured at
+first use. ~seams_system_set_positions~ overwrites the coordinates
+of a stored frame, and the const readers copy the frame back out.
+
+Python on PyPI is ~pydseamslib~ 2.14.0. The import is ~dseams~.
+Wheels cover Linux and macOS. ~recipe/recipe.yaml~ builds ~libseams~
+and ~pydseamslib~ for conda-forge. The Rust crates are ~dseams-sys~
+and ~dseams~. The Fortran module is the fpm package ~dseams~. The
+Lua module is the LuaRocks rock ~dseams~, and ~require("dseams")~
+loads the module built for that interpreter. R installs from
+~bindings/r/dseams~ and Julia from ~bindings/julia/Dseams~.
+
+LAMMPS, GROMACS, and OpenMM call the library on the frames a running
+calculation chooses. We report the primitive ring census, the
+published CHILL labels, and the hexagonal and double-diamond cage
+flags. Live analysis does not use PLUMED, and ~-Dplumed=enabled~
+errors. The PLUMED ~SEAMS~ action is separate: it reports q6, the
+CHILL+ ice fraction, and the six-ring fraction.
+
+The cutoff list covers restricted triclinic boxes. The orthorhombic
+list is a parallel cell sort, and each OpenMP thread owns a block of
+the linkcell cut. On ~input/traj/exampleTraj.lammpstrj~ (oxygen, type
+2) the cutoff list is 9 interClathrate and 241 water. The mutual
+list is 1 clathrate, 7 interClathrate, and 242 water.
+~--pair-types~ names the site-site pair. Neighbour, CHILL+, ring,
+and cage calls can keep water oxygens by type and leave ions out.
+
+We name an ice shell from the residual of the seventeen-atom shell
+after rotation and scale, and we can attach an IRA, SOFI, or spglib
+report. The book is this Org tree. The videos page links the
+d-SEAMS Odysee channel, and a player is the embed URL of one of our
+claims.
 
 * 2.13.0
 

@@ -5,7 +5,7 @@ Deferred Structural Elucidation Analysis for Molecular Simulations engine.
 The distribution is `pydseamslib`; the package you import is `dseams`.
 
 ```bash
-pip install pydseamslib
+pip install 'pydseamslib==2.14.0'
 ```
 
 ```python

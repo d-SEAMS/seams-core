@@ -4,7 +4,7 @@
 The 2020 JCIM figures are drawn from figshare project 73545.
 This page is the same calls on the dumps that are in the tree.
 The runnable copy is =docs/tutorials/test_paper_figures.py=.
-Python is ~pip install pydseamslib~.
+Python is ~pip install 'pydseamslib==2.14.0'~.
 
 | figure | dump in this tree | call | result |
 |--------+-------------------+------+--------|

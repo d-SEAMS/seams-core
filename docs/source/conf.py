@@ -366,7 +366,20 @@ def _stage_native_html():
     native = os.path.join(_docs, "native-html")
     os.makedirs(native, exist_ok=True)
     root = os.path.abspath(os.path.join(_docs, ".."))
-    julia = shutil.which("julia")
+
+    def _prefix_tool(env_name, program):
+        """The site-julia and site-r prefixes hold Documenter and pkgdown.
+
+        pixi puts the docs environment first on PATH. That copy of Julia
+        is newer than the Documenter prefix, and that copy of R has no
+        pkgdown.
+        """
+        candidate = os.path.join(root, ".pixi", "envs", env_name, "bin", program)
+        if os.path.isfile(candidate) and os.access(candidate, os.X_OK):
+            return candidate
+        return ""
+
+    julia = _prefix_tool("site-julia", "julia") or shutil.which("julia")
     if not julia:
         matches = sorted(glob.glob(os.path.join(root, "bbdir", "julia-*", "bin", "julia")))
         julia = matches[-1] if matches else ""
@@ -374,8 +387,24 @@ def _stage_native_html():
         ("julia-dseams", os.path.join(root, "bindings", "julia", "Dseams", "docs")),
         ("julia-seams", os.path.join(root, "bindings", "julia", "Seams", "docs")),
     )
+    def _use_prefix(env, program):
+        """Point conda and PATH at the prefix that owns this binary.
+
+        A docs-env JULIA_DEPOT_PATH holds a registry archive the
+        Documenter Julia cannot unpack.
+        """
+        prefix = os.path.dirname(os.path.dirname(program))
+        if not os.path.isdir(os.path.join(prefix, "conda-meta")):
+            return
+        env["CONDA_PREFIX"] = prefix
+        env["PATH"] = os.path.join(prefix, "bin") + os.pathsep + env.get("PATH", "")
+        depot = os.path.join(prefix, "share", "julia")
+        if os.path.isdir(depot):
+            env["JULIA_DEPOT_PATH"] = depot + os.pathsep
+
     if julia:
         env = os.environ.copy()
+        _use_prefix(env, julia)
         # Only the engine libraries. A broader loader path pulls the wrong
         # libssl into Julia and the registry download aborts.
         env["LD_LIBRARY_PATH"] = os.pathsep.join(
@@ -418,9 +447,10 @@ def _stage_native_html():
             _native_page(os.path.join(native, name), name, "Julia is not on PATH.")
     # The package site is served at /r/, the url in _pkgdown.yml.
     r_dest = os.path.join(native, "r")
-    rscript = shutil.which("Rscript")
+    rscript = _prefix_tool("site-r", "Rscript") or shutil.which("Rscript")
     if rscript:
         env = os.environ.copy()
+        _use_prefix(env, rscript)
         libs = env.get("R_LIBS_USER", os.path.join(root, "bbdir", "rlib"))
         env["R_LIBS_USER"] = libs
         env["DSEAMS_ROOT"] = root
@@ -776,6 +806,8 @@ _include_orphan_pages()
 project = "d-SEAMS"
 copyright = "2019-2026, d-SEAMS core team"
 author = "Rohit Goswami, Amrita Goswami, Ruhila S"
+version = "2.14.0"
+release = "2.14.0"
 
 # -- General configuration ---------------------------------------------------
 extensions = [

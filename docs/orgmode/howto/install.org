@@ -11,7 +11,7 @@ build for the engine, and the native packages of the other fronts.
 * Python from PyPI
 
 #+begin_src bash
-python -m pip install pydseamslib
+python -m pip install 'pydseamslib==2.14.0'
 python -c 'import dseams; print(dseams.__version__)'
 #+end_src
 
@@ -48,8 +48,8 @@ fetches nothing beyond the Python build requirements (~meson-python~,
 * conda-forge
 
 #+begin_src bash
-conda install -c conda-forge pydseamslib   # Python, pulls libseams
-conda install -c conda-forge libseams      # library, headers, seams CLI
+conda install -c conda-forge 'pydseamslib=2.14.0'   # Python, pulls libseams
+conda install -c conda-forge 'libseams=2.14.0'      # library, headers, seams CLI
 #+end_src
 
 ~libseams~ is the engine: ~libyodaLib~, ~libseams~ (~seams.h~),

@@ -135,7 +135,7 @@ The in-tree module is ~import dseams~ (~-Dwith_python=true~, the Meson default).
 The Frame package the paper uses is separate:
 
 #+begin_src bash
-pip install pydseamslib
+pip install 'pydseamslib==2.14.0'
 #+end_src
 
 #+begin_src python
@@ -170,7 +170,7 @@ Lua is [[https://d-seams.github.io/yodaStruct/][require("dseams")]].
 - Unknown command, exit 2: the binary is ~seams~, not ~yodaStruct~.
   Commands are ~read~, ~chill~, ~chill-plus~, and ~cages~.
 - ~ModuleNotFoundError: pydseams~: that name is the released Frame package.
-  ~pip install pydseamslib~. The in-tree module is ~import dseams~.
+  ~pip install 'pydseamslib==2.14.0'~. The in-tree module is ~import dseams~.
 - Lua ~require("dseams")~: that module lives in yodaStruct.
 
 * Next steps

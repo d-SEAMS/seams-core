@@ -88,6 +88,7 @@ seams-core cut:
 | ~docs/orgmode/changelog.org~ | new section from ~CHANGELOG.md~ |
 | ~nix/package.nix~ | ~version~ |
 | ~docs/source/Doxyfile_seams.cfg~ | ~PROJECT_NUMBER~ |
+| ~docs/source/conf.py~ | ~version~ and ~release~ |
 
 Front ends, after the engine tag exists:
 

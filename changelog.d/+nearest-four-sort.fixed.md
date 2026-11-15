@@ -1,0 +1,1 @@
+The four nearest bonds are ordered by an insertion sort of that bounded count. GCC 15 no longer inlines `std::sort` past the end of the stack array once OpenMP outlines the loop, and the order is unchanged. AVX dispatch uses the CPUID helper, which exists on aarch64.

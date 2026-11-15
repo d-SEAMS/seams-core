@@ -1,7 +1,7 @@
 #+TITLE: Upgrade from 2.13 to 2.14
 #+OPTIONS: toc:nil num:nil
 
-~2dbefa97~ is the 2.13 tree these notes start from (~v2.13.0-85-g2dbefa97~).
+These notes start from tag v2.13.0 (~7f310225~).
 The release notes are
 [[file:../reference/release-2.14.org][2.14.0]].
 Rebuild the engine, then relink anything that should call ~libseams~.
@@ -96,7 +96,17 @@ that bind stays for the process.
 * Deprecations and breaks
 
 ~--types~ remains the deprecated alias of ~--pair-types~ and still
-warns. The log from ~2dbefa97~ does not add another deprecation.
+warns. We add no other deprecation in 2.14.0.
+
+The fingerprint options use the American spelling, and the old names
+are not accepted. ~seams fingerprint --colour-types~ is
+~--color-types~. In Fortran, the ~frame_fingerprint~ keyword
+~colours~ is ~colors~, and ~seams_fingerprint~ takes ~color_types~.
+Python ~fingerprint(color_types=...)~, Rust
+~FingerprintOptions::color_types~, and the Lua ~colors~ field follow
+the same rename. A key library header reads ~colors~, so a 2.13
+library file with ~colours 1~ loads without type colors. Change that
+word to ~colors~ to keep them.
 
 CHILL and CHILL+ on the default name ~seeded~ now score the cutoff
 list. Pass ~mutual~ for the four-nearest graph. ~seams cages~ still

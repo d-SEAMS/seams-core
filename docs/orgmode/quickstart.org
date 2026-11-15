@@ -11,7 +11,7 @@ pip installs the Frame package. The five lines use the in-tree module,
 which Meson builds.
 
 #+begin_src bash
-pip install pydseamslib
+pip install 'pydseamslib==2.14.0'
 #+end_src
 
 conda-forge has no ~d-seams~ package. It does have the toolchain, and
@@ -154,7 +154,7 @@ seams symmetry input/traj/mW_cubic.lammpstrj --type 1
 
 ~import dseams~ is the in-tree module over ~libseams~.
 The Frame package ships in this tree as ~pydseamslib~
-(~pip install pydseamslib~, import ~pydseams~).
+(~pip install 'pydseamslib==2.14.0'~, import ~pydseams~).
 ~require("dseams")~ is the in-tree Lua and Fennel module over the same
 header. The 1.x Lua library remains
 [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]].
