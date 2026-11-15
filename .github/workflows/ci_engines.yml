@@ -213,14 +213,14 @@ jobs:
             *) echo "plumed210 expected PLUMED 2.10, got $ver" >&2; exit 1 ;;
           esac
           pixi run -e plumed210 --platform linux-64-glibc239 python3 -c '
-import glob, json, os, sys
-path = glob.glob(os.environ["CONDA_PREFIX"] + "/conda-meta/sysroot_linux-64-*.json")[0]
-version = json.load(open(path))["version"]
-print("sysroot_linux-64", version)
-major, minor = (int(part) for part in version.split(".")[:2])
-if (major, minor) < (2, 39):
-    sys.exit("sysroot %s is below 2.39" % version)
-'
+          import glob, json, os, sys
+          path = glob.glob(os.environ["CONDA_PREFIX"] + "/conda-meta/sysroot_linux-64-*.json")[0]
+          version = json.load(open(path))["version"]
+          print("sysroot_linux-64", version)
+          major, minor = (int(part) for part in version.split(".")[:2])
+          if (major, minor) < (2, 39):
+              sys.exit("sysroot %s is below 2.39" % version)
+          '
       - name: Build LAMMPS against PLUMED 2.10 and run both engine paths
         run: |
           set -euo pipefail
