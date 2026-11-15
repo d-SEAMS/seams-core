@@ -10,6 +10,7 @@
 // Standard
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <filesystem>
 #include <iostream>
 #include <random>
@@ -350,7 +351,7 @@ TEST_CASE("findPrisms matches the all-pairs prism search on jittered nanotubes",
         if (rings.empty()) continue;
         const PrismResult want = allPairs(rings, *nList, cloud);
         std::vector<ring::strucType> types(rings.size(), ring::strucType::unclassified);
-        std::vector<double> rmsd(cloud.nop, -1.0);
+        std::vector<double> rmsd(static_cast<std::size_t>(cloud.nop), -1.0);
         int perfect = -1, imperfect = -1;
         const auto list =
             ring::findPrisms(rings, types, perfect, imperfect, *nList, cloud, rmsd, false);
