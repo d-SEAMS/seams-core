@@ -1,5 +1,7 @@
+===========================
 Performance, 4096 to 110592
-============================
+===========================
+
 
 Neighbour lists and primitive rings against freud, OVITO, mdapy,
 pyscal3, vesin, IRA, PTM, cycless, and every other code that has a
