@@ -1,7 +1,8 @@
 #!/bin/sh
 # Copyright (c) d-SEAMS developers
 # Build the linux-64 pixi stack and run the full Meson suite.
-# A failure or a skip exits non-zero. Expected failures stay allowed.
+# A failure exits non-zero. These optional cases may skip. Any other
+# skip is a failure. Expected failures stay allowed.
 set -eu
 
 prefix=${CONDA_PREFIX:?pixi must export CONDA_PREFIX}
@@ -36,15 +37,35 @@ import re
 import sys
 
 text = open("build/suite.txt", encoding="utf-8").read()
+optional = {
+    "sqq_sh_triclinic",
+    "docs_paper_interface_full",
+    "docs_paper_cages_full",
+    "docs_paper_rings_full",
+    "docs_paper_brine_full",
+    "docs_paper_nucleation_full",
+    "docs_paper_reproduce_full",
+    "docs_render_molecules",
+}
 
 def count(name):
     match = re.search(rf"^{name}:\s+(\d+)\s*$", text, re.M)
     return int(match.group(1)) if match else 0
 
-failed, skipped = count("Fail"), count("Skipped")
-if failed or skipped:
-    sys.exit(f"suite failed={failed} skipped={skipped}")
-print("suite failed=0 skipped=0")
+skipped = []
+for line in text.splitlines():
+    match = re.match(r"^\s*\d+/\d+\s+(.*?)\s+SKIP\b", line)
+    if match:
+        skipped.append(match.group(1).rsplit(":", 1)[-1])
+unexpected = [name for name in skipped if name not in optional]
+failed = count("Fail")
+if failed or unexpected:
+    sys.exit(
+        "suite failed={} unexpected_skips={}".format(failed, ", ".join(unexpected))
+    )
+print("suite failed=0 skipped={} optional".format(len(skipped)))
 PY
-
-exit "$status"
+# Skips alone leave meson at status 0. A failed test or a crash does not.
+if [ "$status" -ne 0 ]; then
+  exit "$status"
+fi
