@@ -255,13 +255,13 @@ def workflow_problems():
         if secret in text:
             problems.append("ci_docs.yml still references " + secret)
     block = (
-        "  build-docs:\n"
+        "  build-deploy:\n"
         "    runs-on: ubuntu-latest\n"
         "    permissions:\n"
         "      contents: write\n"
     )
     if block not in text:
-        problems.append("build-docs is missing permissions: contents: write")
+        problems.append("build-deploy is missing permissions: contents: write")
     if "python3 docs/check_mermaid.py" not in text:
         problems.append("Mermaid check is missing")
     if "lycheeverse/lychee-action@" not in text:

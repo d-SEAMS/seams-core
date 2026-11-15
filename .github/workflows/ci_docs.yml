@@ -11,26 +11,88 @@ on:
 # https://docs.dseams.info. The push uses GITHUB_TOKEN. The repository
 # default token is contents: read, which is the 403 on
 # `git push origin gh-pages`.
+# build-deploy publishes. verify runs the same tutorial and language
+# checks and does not hold that publish.
 permissions:
   contents: write
 
 jobs:
-  build-docs:
+  build-deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: Mermaid syntax
+      - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
+        with:
+          environments: docs default cycles figures site-julia site-r
+          cache-key: pixi-docs-
+      - name: Build libseams and seams
+        run: |
+          pixi run -e default setup
+          pixi run -e default ninja -j2 -C bbdir
+      - name: Xvfb
+        run: |
+          sudo apt-get update && sudo apt-get install -y xvfb
+          Xvfb :99 -screen 0 1280x1024x24 >/dev/null 2>&1 &
+          echo "DISPLAY=:99" >> "$GITHUB_ENV"
+          echo "QT_QPA_PLATFORM=xcb" >> "$GITHUB_ENV"
+          echo "LIBGL_ALWAYS_SOFTWARE=1" >> "$GITHUB_ENV"
+      - name: Julia libraries for Documenter
+        run: |
+          pixi run -e site-julia julia --project=bindings/julia/Dseams/docs bindings/julia/Dseams/dev/develop_jll.jl
+      - name: Publish the book
+        env:
+          DOCS_CI: "1"
+          SEAMS: ${{ github.workspace }}/bbdir/seams
+          SEAMS_LIBDIR: ${{ github.workspace }}/bbdir/src
+          SEAMS_LANGDIR: ${{ github.workspace }}/bbdir/bindings
+          MOLECULES_BPY: ${{ github.workspace }}/.pixi/envs/cycles/bin/python
+        run: |
+          export PATH="${{ github.workspace }}/.pixi/envs/figures/bin:${{ github.workspace }}/.pixi/envs/site-julia/bin:${{ github.workspace }}/.pixi/envs/site-r/bin:${PATH}"
+          pixi run -e docs docbld
+      - name: Mermaid render
         run: python3 docs/check_mermaid.py
+      - name: Lychee
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          fail: true
+          args: >-
+            --no-progress
+            --include-fragments=full
+            --index-files index.html
+            --root-dir ${{ github.workspace }}/docs/build
+            --remap "https://docs.dseams.info file://${{ github.workspace }}/docs/build"
+            --max-retries 2
+            --timeout 30
+            --max-concurrency 4
+            --extensions html
+            docs/build
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Sitemap mapper
         run: python3 docs/check_sitemap.py --self-test
+      - name: Sitemap
+        run: python3 docs/check_sitemap.py
+      # Upstream main only. Netlify reads this gh-pages tree and serves
+      # docs.dseams.info. A CNAME file in the tree would fight that site.
+      # peaceiris still writes .nojekyll.
+      - name: Deploy to GitHub Pages
+        if: github.repository == 'd-SEAMS/seams-core' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build
+
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           environments: docs
           cache-key: pixi-docs-
       - name: Python numpydoc and FORD
-        # docbld runs ford for the Fortran reference; the docs env does not carry it.
+        # docbld runs ford for the Fortran reference. The docs env carries both.
         run: pixi run -e docs python -m pip install numpydoc ford
 
       - name: C++ and Lua API docs
@@ -99,39 +161,8 @@ jobs:
           # PYDSEAMS211 is only the parity oracle. Snippets import the in-tree package.
           env -u LD_LIBRARY_PATH pixi run -e default meson test -C bbdir --print-errorlogs --no-rebuild python_frame_parity "${names[@]}"
 
-      - run: pixi run -e docs docbld
-
-      - name: Sitemap
-        run: python3 docs/check_sitemap.py
-
-      - name: Lychee
-        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
-        with:
-          fail: true
-          args: >-
-            --no-progress
-            --include-fragments=full
-            --index-files index.html
-            --root-dir ${{ github.workspace }}/docs/build
-            --remap "https://docs.dseams.info file://${{ github.workspace }}/docs/build"
-            --max-retries 2
-            --timeout 30
-            --max-concurrency 4
-            --extensions html
-            docs/build
-          token: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Link check
         run: pixi run -e docs sphinx-build -W --keep-going -j 2 -b linkcheck -d docs/doctrees docs/source docs/linkcheck
-
-      - name: Julia Documenter
-        run: |
-          export SEAMS_LANG_LIB="$PWD/bbdir/bindings/libseams_lang.so"
-          export SEAMS_LIB="$PWD/bbdir/src/libseams.so"
-          export LD_LIBRARY_PATH="$PWD/bbdir/src:$PWD/bbdir/bindings${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-          julia --project=bindings/julia/Dseams/docs bindings/julia/Dseams/dev/develop_jll.jl
-          julia --project=bindings/julia/Dseams/docs bindings/julia/Dseams/docs/make.jl
-          julia --project=bindings/julia/Seams/docs bindings/julia/Seams/docs/make.jl
 
       - name: R CMD check
         run: |
@@ -154,13 +185,3 @@ jobs:
           export SEAMS_LIBDIR="$PWD/bbdir/src"
           export LD_LIBRARY_PATH="$PWD/bbdir/src:$PWD/bbdir/bindings${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
           pixi run -e docs sphinx-build -W --keep-going -j 2 -b doctest -d docs/doctrees docs/source docs/doctest
-
-      # Upstream main only. Netlify reads this gh-pages tree and serves
-      # docs.dseams.info. A CNAME file in the tree would fight that site.
-      # peaceiris still writes .nojekyll.
-      - name: Deploy to GitHub Pages
-        if: github.repository == 'd-SEAMS/seams-core' && github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/build

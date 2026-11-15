@@ -10,6 +10,8 @@ Documentation is authored in ~docs/orgmode/~ and exported with
 ~docs/export.el~ (ox-rst) before Sphinx. Run ~pixi run -e docs docbld~
 to export, run doxyrest, build the Shibuya site, and write the sibling
 doxyYoda C++ tree to =docs/build/api-cpp/=.
+That command is also what publishes the site. The Deployment
+section below names the two Docs jobs.
 
 * Prerequisites
 
@@ -154,5 +156,14 @@ The checked statements are [[file:lean.org][Lean proofs]].
 Docs deploy from
 [[https://github.com/d-SEAMS/seams-core][d-SEAMS/seams-core]] ~main~
 to ~gh-pages~, which Netlify serves at https://docs.dseams.info.
-~.github/workflows/ci_docs.yml~ publishes ~docs/build~ on that
-push. A fork push does not publish the site.
+~.github/workflows/ci_docs.yml~ has two jobs.
+~build-deploy~ checks out the tree, builds ~libseams~ and ~seams~,
+and runs ~DOCS_CI=1 pixi run -e docs docbld~. That build draws the
+molecule stills and the science gallery, and it writes the Julia
+and R API pages. Mermaid, lychee, and the sitemap check read
+~docs/build~. Those three are what stand in front of the publish.
+The job then pushes ~docs/build~ with ~GITHUB_TOKEN~ on that
+upstream ~main~ push. A fork push does not publish the site.
+The tutorial, language, frame, snippet, linkcheck, doctest, and
+R CMD check commands run in ~verify~. They still fail the workflow
+when they fail. They do not block the publish.

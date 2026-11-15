@@ -138,7 +138,10 @@ def render(dump, png):
     except SystemExit:
         raise
     except Exception:
-        pass
+        if os.environ.get("DOCS_CI") == "1":
+            raise
+    if os.environ.get("DOCS_CI") == "1":
+        raise SystemExit("ovito did not draw {}".format(png.name))
     if not _ovito_note:
         print("ovito did not start; figure paths were still written")
         _ovito_note = True

@@ -92,6 +92,10 @@ def _write_science_gallery():
 _write_science_gallery()
 
 
+def _docs_ci():
+    return os.environ.get("DOCS_CI") == "1"
+
+
 def _write_gallery():
     """Draw the science gallery from the slow tutorial runs."""
     import importlib.util
@@ -104,11 +108,12 @@ def _write_gallery():
         status = module.main([])
     except SystemExit as exc:
         status = exc.code if isinstance(exc.code, int) else 1
-    if status not in (0, None):
-        kept = os.path.isdir(os.path.join(_docs, "source", "tutorials", "gallery"))
-        if not kept:
-            raise SystemExit("science gallery failed")
-        print("sphinx: science gallery left as committed", file=sys.stderr)
+    if status in (0, None):
+        return
+    kept = os.path.isdir(os.path.join(_source, "tutorials", "gallery"))
+    if _docs_ci() or not kept:
+        raise SystemExit("science gallery failed")
+    print("sphinx: science gallery left as committed", file=sys.stderr)
 
 
 _write_gallery()
@@ -130,10 +135,12 @@ def _write_molecules():
         status = module.main(argv)
     except SystemExit as exc:
         status = exc.code if isinstance(exc.code, int) else 1
-    if status not in (0, None):
-        if not os.path.isdir(os.path.join(_source, "tutorials", "molecules")):
-            raise SystemExit("molecule stills failed")
-        print("sphinx: molecule stills left as committed", file=sys.stderr)
+    if status in (0, None):
+        return
+    pictures = os.path.join(_source, "tutorials", "molecules")
+    if _docs_ci() or not os.path.isdir(pictures):
+        raise SystemExit("molecule stills failed")
+    print("sphinx: molecule stills left as committed", file=sys.stderr)
 
 
 _write_molecules()
@@ -302,17 +309,34 @@ def _native_page(folder, title, detail):
         handle.write("<!DOCTYPE html><title>{}</title><p>{}</p>\n".format(title, detail))
 
 
+def _use_ca_bundle():
+    """Point Julia and R at a CA bundle from this environment."""
+    prefix = os.environ.get("CONDA_PREFIX", "")
+    candidates = []
+    if prefix:
+        candidates.append(os.path.join(prefix, "ssl", "cert.pem"))
+    candidates.append("/etc/ssl/certs/ca-certificates.crt")
+    for path in candidates:
+        if path and os.path.isfile(path):
+            os.environ["SSL_CERT_FILE"] = path
+            os.environ["JULIA_SSL_CA_ROOTS_PATH"] = path
+            os.environ["REQUESTS_CA_BUNDLE"] = path
+            return path
+    return ""
+
+
 def _stage_native_html():
     """Copy Documenter and pkgdown HTML next to the Sphinx book.
 
     The language pages link at these paths. A missing tool writes one
-    page and does not stop the book, the same way a missing C++ index
-    still leaves the Reference toctree resolvable.
+    page and does not stop the book, unless DOCS_CI=1, which publishes
+    only real API pages.
     """
     import glob
     import shutil
     import subprocess
 
+    _use_ca_bundle()
     native = os.path.join(_docs, "native-html")
     os.makedirs(native, exist_ok=True)
     root = os.path.abspath(os.path.join(_docs, ".."))
@@ -326,6 +350,16 @@ def _stage_native_html():
     )
     if julia:
         env = os.environ.copy()
+        # Only the engine libraries. A broader loader path pulls the wrong
+        # libssl into Julia and the registry download aborts.
+        env["LD_LIBRARY_PATH"] = os.pathsep.join(
+            [
+                os.path.join(root, "bbdir", "bindings"),
+                os.path.join(root, "bbdir", "src"),
+            ]
+        )
+        env["SEAMS_LANG_LIB"] = os.path.join(root, "bbdir", "bindings", "libseams_lang.so")
+        env["SEAMS_LIB"] = os.path.join(root, "bbdir", "src", "libseams.so")
         for name, project in pairs:
             subprocess.run(
                 [julia, "--project=" + project, "-e", "using Pkg; Pkg.instantiate()"],
@@ -347,8 +381,12 @@ def _stage_native_html():
                 shutil.copytree(built, dest)
                 shutil.rmtree(built, ignore_errors=True)
             else:
+                if _docs_ci():
+                    raise SystemExit("Documenter did not write " + name)
                 _native_page(dest, name, "Documenter did not write this build.")
     else:
+        if _docs_ci():
+            raise SystemExit("julia is not on PATH")
         print("julia is absent; Documenter pages are placeholders")
         for name, _project in pairs:
             _native_page(os.path.join(native, name), name, "Julia is not on PATH.")
@@ -358,7 +396,10 @@ def _stage_native_html():
         env = os.environ.copy()
         libs = env.get("R_LIBS_USER", os.path.join(root, "bbdir", "rlib"))
         env["R_LIBS_USER"] = libs
-        env.setdefault("DSEAMS_ROOT", root)
+        env["DSEAMS_ROOT"] = root
+        env["SEAMS_INCLUDE"] = os.path.join(root, "bindings", "cxx")
+        env["SEAMS_LIBDIR"] = os.path.join(root, "bbdir", "bindings")
+        env["SEAMS_H_DIR"] = os.path.join(root, "include")
         done = subprocess.run(
             [
                 rscript,
@@ -370,9 +411,13 @@ def _stage_native_html():
             check=False,
         )
         if done.returncode != 0 or not os.path.isfile(os.path.join(r_dest, "index.html")):
+            if _docs_ci():
+                raise SystemExit("pkgdown did not write the R API pages")
             print("pkgdown did not build; the roxygen page is a placeholder")
             _native_page(r_dest, "dseams", "pkgdown did not build. The roxygen topics are in man/.")
     else:
+        if _docs_ci():
+            raise SystemExit("Rscript is not on PATH")
         print("Rscript is absent; the pkgdown page is a placeholder")
         _native_page(r_dest, "dseams", "Rscript is not on PATH. The roxygen topics are in man/.")
 

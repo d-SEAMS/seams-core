@@ -61,8 +61,54 @@ sphericart = { features = ["sphericart"] }
 nauty = { features = ["nauty"] }
 repro = { features = ["repro"] }
 cycles = { features = ["cycles"], no-default-feature = true }
+# Renderer for the published stills. bpy stays in the cycles env (Python 3.13).
+figures = { features = ["figures"], no-default-feature = true }
+# Julia and R do not share the docs solve (pcre2). Documenter and pkgdown
+# run from these prefixes, which docbld finds on PATH.
+site-julia = { features = ["site-julia"], no-default-feature = true }
+site-r = { features = ["site-r"], no-default-feature = true }
 crosscheck = { features = ["crosscheck"] }
 abi = { features = ["abi"] }
+
+[feature.site-julia]
+platforms = ["linux-64"]
+
+[feature.site-julia.dependencies]
+julia = ">=1.10,<1.12"
+ca-certificates = ">=2025"
+
+[feature.site-r]
+platforms = ["linux-64"]
+
+[feature.site-r.dependencies]
+r-base = ">=4.4,<4.6"
+r-pkgdown = ">=2.1"
+r-roxygen2 = ">=7"
+r-cpp11 = ">=0.4"
+r-rcppeigen = ">=0.3"
+r-knitr = ">=1.45"
+r-rmarkdown = ">=2.25"
+ca-certificates = ">=2025"
+
+[feature.figures]
+# chemparseplot, OVITO and ase share this interpreter. Sphinx relaunches
+# the stills here. libglvnd supplies EGL so OVITO does not need a host driver.
+platforms = ["linux-64"]
+
+[feature.figures.dependencies]
+python = "3.12.*"
+numpy = ">=1.24"
+pillow = ">=10"
+matplotlib = ">=3.8"
+openmm = ">=8"
+libglvnd = ">=1.7"
+ase = ">=3.22"
+pip = "*"
+
+[feature.figures.pypi-dependencies]
+chemparseplot = ">=1.9,<2"
+genice2 = ">=2.2"
+ovito = ">=3.12,<3.18"
 
 [feature.cycles]
 # bpy wheels follow Blender's Python, 3.13 from Blender 5.1. The molecule
@@ -126,6 +172,9 @@ emacs = ">=30"
 graphviz = ">=12"
 doxygen = ">=1.17,<2"
 doxyrest = ">=2.1"
+# Lua 5.4 build, matching doxyrest. LDoc is installed with luarocks.
+luarocks = ">=3.11,<3.13"
+ca-certificates = ">=2025"
 
 [feature.docs.pypi-dependencies]
 shibuya = ">=2025.12, <2027"
@@ -135,6 +184,8 @@ sphinx-design = ">=0.6, <1"
 myst-parser = ">=4.0, <5"
 sphinxcontrib-mermaid = ">=1.0, <2"
 breathe = ">=4.35"
+numpydoc = ">=1.8, <2"
+ford = ">=7, <8"
 
 [feature.docs.tasks.setup-doxyrest]
 description = "Clones the doxyrest dependency into the subprojects directory"
@@ -183,9 +234,14 @@ cmd = "rm -rf docs/build/api-cpp && cp -R docs/doxygen-html/html docs/build/api-
 description = "FORD HTML for the Fortran bindings"
 cmd = "ford bindings/fortran/ford.md"
 
+[feature.docs.tasks.setup-ldoc]
+description = "Install LDoc into the docs environment"
+cmd = "test -x $CONDA_PREFIX/bin/ldoc || luarocks --lua-version 5.4 install --tree $CONDA_PREFIX ldoc"
+
 [feature.docs.tasks.ldoc]
 description = "LDoc HTML for the Lua bindings"
 cwd = "bindings/lua"
+depends-on = ["setup-ldoc"]
 cmd = "ldoc ."
 
 [feature.docs.tasks.install-binding-docs]

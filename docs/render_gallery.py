@@ -50,8 +50,9 @@ FIGURE_HEIGHT = 1800
 
 
 def have_stack(program):
+    """OpenMM draws the tutorials. OVITO has to import in that same interpreter."""
     probe = subprocess.run(
-        [program, "-c", "import openmm, numpy"],
+        [program, "-c", "import openmm, numpy, ovito"],
         check=False,
         capture_output=True,
     )

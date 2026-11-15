@@ -1357,6 +1357,10 @@ def cycles_job():
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"
     scene.cycles.device = "CPU"
+    # Blender 5 dropped CyclesRenderSettings.threads. The render slot
+    # is what Cycles still reads, and AUTO would also use every core.
+    scene.render.threads_mode = "FIXED"
+    scene.render.threads = os.cpu_count() or 1
     scene.cycles.samples = int(job["samples"])
     scene.cycles.use_denoising = True
     try:
