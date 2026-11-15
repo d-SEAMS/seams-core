@@ -1,8 +1,7 @@
 name: Packages
-# Build, test and package the Fortran (fpm), Rust (crates.io) and
-# Lua/Fennel (LuaRocks) packages the way a downstream user would.
-# Nothing here publishes: cargo publish runs with --dry-run and fpm
-# publish only prints its upload data.
+# Build and install libseams the way a downstream package would, and keep
+# the install prefix as an artifact. The language packages build against
+# an installed libseams in their own repositories. Nothing here publishes.
 on:
   push:
     branches: [main]
@@ -16,8 +15,6 @@ permissions:
 
 env:
   SEAMS_PREFIX: ${{ github.workspace }}/../seams-prefix
-  LUAROCKS_VERSION: "3.12.2"
-  LUAROCKS_SHA256: b0e0c85205841ddd7be485f53d6125766d18a81d226588d2366931e9a1484492
 
 concurrency:
   group: ci_packages-${{ github.ref }}
