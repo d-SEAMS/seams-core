@@ -29,6 +29,7 @@ jobs:
           export SEAMS_CPP_ORACLE="$PWD/bbdir-rust/bindings/binding_oracle"
           export SEAMS_SOURCE_ROOT="$PWD"
           export OMP_NUM_THREADS=1
+          cargo fetch --manifest-path bindings/rust/Cargo.toml
           cargo fmt --manifest-path bindings/rust/Cargo.toml --all -- --check
           cargo clippy --offline --manifest-path bindings/rust/Cargo.toml --all-targets -- -D warnings
           cargo test --offline --manifest-path bindings/rust/Cargo.toml -- --test-threads=1
@@ -79,7 +80,7 @@ jobs:
           curl -fsSL -o "$RUNNER_TEMP/chemfiles.tar.gz" https://github.com/chemfiles/chemfiles/archive/refs/tags/0.10.4.tar.gz
           tar -xzf "$RUNNER_TEMP/chemfiles.tar.gz" -C "$RUNNER_TEMP"
           patch -d "$RUNNER_TEMP/chemfiles-0.10.4" -p1 < cmake/patches/chemfiles-0.10.4-mmcif.patch
-          cmake -S "$RUNNER_TEMP/chemfiles-0.10.4" -B "$RUNNER_TEMP/chemfiles-build" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DBUILD_SHARED_LIBS=ON
+          cmake -S "$RUNNER_TEMP/chemfiles-0.10.4" -B "$RUNNER_TEMP/chemfiles-build" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local -DBUILD_SHARED_LIBS=ON -DCMAKE_POLICY_VERSION_MINIMUM=3.5
           cmake --build "$RUNNER_TEMP/chemfiles-build" -j2
           sudo cmake --install "$RUNNER_TEMP/chemfiles-build"
           sudo ldconfig
