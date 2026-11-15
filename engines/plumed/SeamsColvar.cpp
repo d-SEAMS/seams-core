@@ -39,6 +39,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstddef>
 #include <cstdio>
 #include <string>
 #include <vector>
@@ -212,9 +213,11 @@ void SeamsCV::writeDump(const std::vector<double> &xyz, const double box9[9]) {
   }
   const char *value = mode_ == Mode::q6bar ? "q6bar" : "q6";
   std::fprintf(fp, "ITEM: ATOMS id type x y z %s%s\n", value, mode_ == Mode::all ? " label" : "");
-  for (unsigned i = 0; i < n; ++i) {
-    std::fprintf(fp, "%d 1 %.17g %.17g %.17g %.17g", getAbsoluteIndex(i).serial(), xyz[3 * i],
-                 xyz[3 * i + 1], xyz[3 * i + 2], peratom_[i]);
+  for (std::size_t i = 0; i < static_cast<std::size_t>(n); ++i) {
+    const std::size_t at = i * std::size_t{3};
+    std::fprintf(fp, "%d 1 %.17g %.17g %.17g %.17g",
+                 getAbsoluteIndex(static_cast<int>(i)).serial(), xyz[at], xyz[at + 1],
+                 xyz[at + 2], peratom_[i]);
     if (mode_ == Mode::all) {
       std::fprintf(fp, " %d", labels_[i]);
     }
