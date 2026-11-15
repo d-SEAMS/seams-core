@@ -608,12 +608,24 @@ contains
 
   module procedure frame_fingerprint
     type(c_ptr) :: raw, out
-    integer(c_int) :: code
+    integer(c_int) :: code, color_flag
+    logical :: colored
+    if (present(colors) .and. present(colours)) then
+      if (colors .neqv. colours) then
+        call check_status(int(SEAMS_ERR_ARG, c_int), c_null_ptr, stat, errmsg, &
+          "colors and colours disagree")
+        return
+      end if
+    end if
+    colored = .false.
+    if (present(colors)) colored = colors
+    if (present(colours)) colored = colours
+    color_flag = merge(1_c_int, 0_c_int, colored)
     raw = open_raw(self%box, stat, errmsg, "frame")
     if (.not. c_associated(raw)) return
     code = seams_fingerprint(raw, opt_real(cutoff, 3.5_seams_real), opt_int(typ, 0_seams_int), &
       opt_int(k, 4_seams_int), opt_int(graph, SEAMS_GRAPH_CUTOFF), opt_int(hops, 2_seams_int), &
-      opt_flag(colors, .false.), out)
+      color_flag, out)
     if (code /= SEAMS_OK) then
       call check_status(code, raw, stat, errmsg)
       return

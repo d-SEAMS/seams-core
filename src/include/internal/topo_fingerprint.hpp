@@ -106,7 +106,8 @@ struct KeyLibrary {
 void addToLibrary(KeyLibrary &lib, const FrameFingerprint &fp, const std::string &label);
 
 /// Text form: a header line `# method M hops H colors C` (C is 0 or 1;
-/// a header without it means uncolored), then `key label` lines.
+/// `colours` is the deprecated alias of `colors`; a header without
+/// either word means uncolored), then `key label` lines.
 std::string writeLibrary(const KeyLibrary &lib);
 KeyLibrary readLibrary(const std::string &text);
 

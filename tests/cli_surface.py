@@ -138,6 +138,22 @@ def main():
     if "deprecated" in paired.stderr:
         sys.stderr.write("pair-types warning\n" + paired.stderr)
         return 1
+    help_run = run(seams, ["--help"])
+    help_text = _plain(help_run.stdout)
+    if (help_run.returncode != 0 or "--color-types" not in help_text
+            or "--colour-types" in help_text):
+        sys.stderr.write("colour-types help\n" + help_text + help_run.stderr)
+        return 1
+    colored = run(seams, ["fingerprint", ice, "--type", "1", "--hops", "1", "--color-types"])
+    british = run(seams, ["fingerprint", ice, "--type", "1", "--hops", "1", "--colour-types"])
+    plain = run(seams, ["fingerprint", ice, "--type", "1", "--hops", "1"])
+    if (colored.returncode != 0 or british.returncode != 0 or plain.returncode != 0
+            or colored.stdout != british.stdout or colored.stderr != british.stderr
+            or colored.stdout == plain.stdout):
+        sys.stderr.write(
+            "colour-types alias\n" + colored.stdout + british.stdout + plain.stdout
+            + colored.stderr + british.stderr + plain.stderr)
+        return 1
     if os.environ.get("SEAMS_HAS_CHEMFILES", "0") != "1":
         for args in (
             ["read", "missing-cli.pdb"],

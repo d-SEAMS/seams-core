@@ -441,13 +441,15 @@ module seams
       character(len=:), allocatable, intent(out), optional :: errmsg
     end subroutine
 
-    module function frame_fingerprint(self, cutoff, typ, k, graph, hops, colors, stat, errmsg) &
+    !> `colors` partitions keys by atom type. `colours` is the deprecated
+    !> spelling of that keyword. Giving both different values is an error.
+    module function frame_fingerprint(self, cutoff, typ, k, graph, hops, colors, colours, stat, errmsg) &
         result(fp)
       class(seams_frame), intent(inout) :: self
       type(seams_topo) :: fp
       real(seams_real), intent(in), optional :: cutoff
       integer(seams_int), intent(in), optional :: typ, k, graph, hops
-      logical, intent(in), optional :: colors
+      logical, intent(in), optional :: colors, colours
       integer(seams_int), intent(out), optional :: stat
       character(len=:), allocatable, intent(out), optional :: errmsg
     end function

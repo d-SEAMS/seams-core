@@ -96,17 +96,22 @@ that bind stays for the process.
 * Deprecations and breaks
 
 ~--types~ remains the deprecated alias of ~--pair-types~ and still
-warns. We add no other deprecation in 2.14.0.
+warns.
 
-The fingerprint options use the American spelling, and the old names
-are not accepted. ~seams fingerprint --colour-types~ is
-~--color-types~. In Fortran, the ~frame_fingerprint~ keyword
-~colours~ is ~colors~, and ~seams_fingerprint~ takes ~color_types~.
-Python ~fingerprint(color_types=...)~, Rust
+The fingerprint options use the American spelling. ~seams fingerprint
+--color-types~ is the name help shows. ~--colour-types~ is still
+accepted, as a hidden deprecated alias of that same option, so it
+does not appear in help and does not warn. In Fortran,
+~frame_fingerprint~ takes ~colors~. ~colours~ is still accepted, as
+an optional deprecated keyword with the same meaning. Giving both
+keywords different values is an error. ~seams_fingerprint~ takes
+~color_types~. Python ~fingerprint(color_types=...)~, Rust
 ~FingerprintOptions::color_types~, and the Lua ~colors~ field follow
-the same rename. A key library header reads ~colors~, so a 2.13
-library file with ~colours 1~ loads without type colors. Change that
-word to ~colors~ to keep them.
+the same rename and do not accept the old names. A key library writes
+~colors~ in its header. The reader still accepts ~colours~ as a
+deprecated alias of that word, so a 2.13 library file with
+~colours 1~ keeps its type colors. The library has no warning channel,
+so that read is silent.
 
 CHILL and CHILL+ on the default name ~seeded~ now score the cutoff
 list. Pass ~mutual~ for the four-nearest graph. ~seams cages~ still

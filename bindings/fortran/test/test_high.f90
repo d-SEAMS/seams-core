@@ -30,7 +30,7 @@ program test_high
   character(len=5), parameter :: roots(3) = [character(len=5) :: ".", "..", "../.."]
   logical :: found
   integer :: up
-  character(len=:), allocatable :: version, key, err
+  character(len=:), allocatable :: version, key, key_colored, key_alias, err
 
   fcc = reshape([0.0_seams_real, 0.0_seams_real, 0.0_seams_real, &
     0.5_seams_real, 0.5_seams_real, 0.0_seams_real, &
@@ -139,6 +139,25 @@ program test_high
   if (stat /= SEAMS_OK .or. len(key) <= 0) stop 52
   call fp%rings(fp_counts, stat=stat, errmsg=err)
   if (stat /= SEAMS_OK) stop 53
+  fp = frame%fingerprint(colors=.true., stat=stat, errmsg=err)
+  if (stat /= SEAMS_OK) stop 70
+  call fp%key(key_colored, stat=stat, errmsg=err)
+  if (stat /= SEAMS_OK .or. len(key_colored) <= 0 .or. key_colored == key) stop 71
+  fp = frame%fingerprint(colours=.true., stat=stat, errmsg=err)
+  if (stat /= SEAMS_OK) stop 72
+  call fp%key(key_alias, stat=stat, errmsg=err)
+  if (stat /= SEAMS_OK .or. key_alias /= key_colored) stop 73
+  fp = frame%fingerprint(colors=.true., colours=.true., stat=stat, errmsg=err)
+  if (stat /= SEAMS_OK) stop 74
+  call fp%key(key_alias, stat=stat, errmsg=err)
+  if (stat /= SEAMS_OK .or. key_alias /= key_colored) stop 75
+  fp = frame%fingerprint(colors=.false., colours=.false., stat=stat, errmsg=err)
+  if (stat /= SEAMS_OK) stop 76
+  call fp%key(key_alias, stat=stat, errmsg=err)
+  if (stat /= SEAMS_OK .or. key_alias /= key) stop 77
+  fp = frame%fingerprint(colors=.true., colours=.false., stat=stat, errmsg=err)
+  if (stat /= SEAMS_ERR_ARG) stop 78
+  if (.not. allocated(err) .or. index(err, "disagree") == 0) stop 79
   call fp%close()
   call frame%contact_pairs("1=cationHead", n_pairs, n_cation, n_anion, stat=stat, errmsg=err)
   if (stat /= SEAMS_OK) stop 54
@@ -185,6 +204,8 @@ program test_high
   if (allocated(sheet)) deallocate(sheet)
   if (allocated(fp_counts)) deallocate(fp_counts)
   if (allocated(key)) deallocate(key)
+  if (allocated(key_colored)) deallocate(key_colored)
+  if (allocated(key_alias)) deallocate(key_alias)
   if (allocated(version)) deallocate(version)
   if (allocated(err)) deallocate(err)
   print *, "fortran high ok"

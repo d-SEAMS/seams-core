@@ -312,3 +312,38 @@ TEST_CASE("a shallower library names what a defect hides from the deeper one", "
   REQUIRE_FALSE(legacy.colored);
   REQUIRE(legacy.hops == 2);
 }
+
+TEST_CASE("a 2.13 library header colours loads the same type colors", "[topo]") {
+  const auto rows = diamondRows(3);
+  const int n = static_cast<int>(rows.size());
+  std::vector<int> colors(static_cast<std::size_t>(n));
+  for (int i = 0; i < n; i++) {
+    colors[static_cast<std::size_t>(i)] = (i % 2) + 1;
+  }
+  const auto fp = topo::fingerprint(rows, 2, 7, colors);
+  topo::KeyLibrary lib;
+  topo::addToLibrary(lib, fp, "diamond");
+  REQUIRE(lib.colored);
+  const auto modern = topo::writeLibrary(lib);
+  REQUIRE(modern.find(" colors 1\n") != std::string::npos);
+  REQUIRE(modern.find("colours") == std::string::npos);
+  auto legacy = modern;
+  const auto at = legacy.find(" colors ");
+  REQUIRE(at != std::string::npos);
+  legacy.replace(at, std::string(" colors ").size(), " colours ");
+  REQUIRE(legacy.find(" colours 1\n") != std::string::npos);
+  const auto fromColors = topo::readLibrary(modern);
+  const auto fromColours = topo::readLibrary(legacy);
+  REQUIRE(fromColors.colored);
+  REQUIRE(fromColours.method == fromColors.method);
+  REQUIRE(fromColours.hops == fromColors.hops);
+  REQUIRE(fromColours.colored);
+  REQUIRE(fromColours.labelOf == fromColors.labelOf);
+  const auto matchedColors = topo::matchLibrary(fp, fromColors);
+  const auto matchedColours = topo::matchLibrary(fp, fromColours);
+  REQUIRE(matchedColours.matched == matchedColors.matched);
+  REQUIRE(matchedColours.labels == matchedColors.labels);
+  REQUIRE(matchedColours.counts == matchedColors.counts);
+  REQUIRE(matchedColours.depth == matchedColors.depth);
+  REQUIRE(matchedColours.matched == n);
+}

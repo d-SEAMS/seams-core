@@ -1818,7 +1818,8 @@ namespace Argum {
     public:
         template<StringConvertibleOf<CharType> First, StringConvertibleOf<CharType>... Rest>
         BasicOptionNames(First && first, Rest && ...rest):
-            m_values{makeString(std::forward<First>(first)), makeString(std::forward<Rest>(rest))...} {
+            m_values{makeString(std::forward<First>(first)), makeString(std::forward<Rest>(rest))...},
+            m_shown(m_values.size()) {
         }
 
         auto main() const -> const StringType & {
@@ -1829,9 +1830,19 @@ namespace Argum {
             return this->m_values;
         }
 
+        // Names help prints. Hidden aliases stay in all() so they parse,
+        // and stay out of this span. Usage prints main() only.
+        auto visible() const -> std::span<const StringType> {
+            return std::span<const StringType>(this->m_values.data(), this->m_shown);
+        }
+
+        auto addHidden(StringViewType name) -> void {
+            this->m_values.push_back(makeString(name));
+        }
 
     private:
         std::vector<StringType> m_values;
+        std::size_t m_shown = 0;
     };
 
     ARGUM_DECLARE_FRIENDLY_NAMES(OptionNames)
@@ -3799,6 +3810,15 @@ namespace Argum {
             return std::move(static_cast<BasicOption *>(this)->help(str));
         }
 
+        // Extra name for this same option. It parses and does not appear in help.
+        auto alias(StringViewType name) & -> BasicOption & {
+            this->m_names.addHidden(name);
+            return *this;
+        }
+        auto alias(StringViewType name) && -> BasicOption && {
+            return std::move(static_cast<BasicOption *>(this)->alias(name));
+        }
+
         auto formatSyntax(const BasicParser<CharType> & parser,
                           const Colorizer & colorizer = {}) const -> StringType {
             constexpr auto space = CharConstants::space;
@@ -3875,9 +3895,9 @@ namespace Argum {
                 return ret;
             };
 
-            auto & all = this->m_names.all();
-            auto first = all.begin();
-            auto last = all.end();
+            auto shown = this->m_names.visible();
+            auto first = shown.begin();
+            auto last = shown.end();
         
             StringType ret = handleName(*first);
             ++first;

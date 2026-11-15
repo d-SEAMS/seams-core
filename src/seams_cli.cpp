@@ -2231,7 +2231,10 @@ int main(int argc, char *argv[]) {
                        "cages on the ring graph")
                  .handler([&]() { incompleteFlag = true; }));
 
+  // --colour-types is the 2.13 name of this option. alias() keeps the
+  // handler and leaves the old spelling out of help.
   parser.add(Option("--color-types")
+                 .alias("--colour-types")
                  .help("fingerprint: color vertices by LAMMPS type, so species "
                        "never match across types")
                  .handler([&]() { colorTypes = true; }));

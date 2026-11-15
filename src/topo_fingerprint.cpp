@@ -384,7 +384,9 @@ KeyLibrary readLibrary(const std::string &text) {
           head >> lib.method;
         } else if (word == "hops") {
           head >> lib.hops;
-        } else if (word == "colors") {
+        } else if (word == "colors" || word == "colours") {
+          // `colours` is the 2.13 spelling. The library has no
+          // deprecation-warning channel, so the alias is silent.
           int flag = 0;
           head >> flag;
           lib.colored = flag != 0;
