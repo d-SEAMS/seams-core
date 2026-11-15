@@ -145,7 +145,10 @@ def run_python_block(build, env, body):
         if target is None:
             return
         try:
-            if "tests" not in target.parts:
+            # The quoted line is already checked. The bench driver is a
+            # timing run that rewrites markdown/cli-fast-paths.md, so this
+            # test must not execute it. execute_page uses the same rule.
+            if "tests" not in target.parts and target.name != "bench_cli_fast.py":
                 run_snippets.run_source(build, env, target)
         except run_snippets.Skip:
             return
