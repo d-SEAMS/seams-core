@@ -76,6 +76,8 @@ jobs:
         with:
           environments: crosscheck
           cache-key: pixi-capi-crosscheck-
+      # ovito's Python module loads libEGL.so.1.
+      - run: sudo apt-get update && sudo apt-get install -y libegl1
       - run: pixi run -e crosscheck meson setup build-crosscheck -Dwith_tests=true -Dwith_python=false
       - run: pixi run -e crosscheck ninja -C build-crosscheck src/libseams.so
       - run: pixi run -e crosscheck meson test -C build-crosscheck --print-errorlogs capi_crosscheck
