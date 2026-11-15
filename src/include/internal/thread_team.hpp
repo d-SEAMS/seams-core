@@ -123,6 +123,29 @@ inline int teamWidth() {
 #endif
 }
 
+// The OpenMP width the caller asked for, while a busy machine has
+// narrowed the team for this call (FairWidth, or PinSession beside a few
+// busy threads); zero otherwise. Defined in one library: an inline copy
+// would give libseams and libyodaLib a variable each.
+int &askedWidth();
+
+// Rayon width for a team of `team`. Linkcell's pool steals work, so a
+// worker the scheduler parks holds up only the job it is on. Narrowed
+// with the OpenMP team beside an 8-thread spinner, the 110592-molecule
+// k-nearest search ran on two to four workers at half a cpu each and
+// took 16 to 36 ms instead of 8 to 18. The
+// pool keeps the width asked for; a slice PinSession took for another
+// copy of the program is not a narrowing and still applies.
+inline int poolWidth(int team) {
+#ifdef SEAMS_HAS_OPENMP
+  const int asked = askedWidth();
+  if (asked > team && team == omp_get_max_threads()) {
+    return asked;
+  }
+#endif
+  return team;
+}
+
 // Runs `search` on the calling thread while the other OpenMP threads of
 // the team sleep on a condition variable. After a parallel region the
 // workers spin in the default wait policy, for milliseconds on cores
@@ -239,7 +262,7 @@ inline void adoptThreads() {
     n = 1;
   }
 #ifdef SEAMS_HAS_LINKCELL
-  lc_set_threads(n);
+  lc_set_threads(poolWidth(n));
 #else
   (void)n;
 #endif
@@ -252,6 +275,17 @@ inline int teamFor(int n) {
 #ifdef SEAMS_HAS_OPENMP
   (void)n;
   return std::max(1, omp_get_max_threads());
+#else
+  (void)n;
+  return 1;
+#endif
+}
+
+// teamFor for linkcell's pool, on the width before any narrowing.
+inline int poolFor(int n) {
+#ifdef SEAMS_HAS_OPENMP
+  (void)n;
+  return std::max(1, poolWidth(omp_get_max_threads()));
 #else
   (void)n;
   return 1;
@@ -389,6 +423,9 @@ public:
     if (set_) {
       omp_set_num_threads(asked_);
     }
+    if (marked_) {
+      askedWidth() = 0;
+    }
     --depth();
 #endif
   }
@@ -403,6 +440,7 @@ private:
   static constexpr double kRetry = 1.0;
   int asked_ = 1;
   bool set_ = false;
+  bool marked_ = false;
 
   static int &depth() {
     thread_local int level = 0;
@@ -449,6 +487,10 @@ private:
     if (state.granted != asked_) {
       omp_set_num_threads(state.granted);
       set_ = true;
+      if (askedWidth() == 0) {
+        askedWidth() = asked_;
+        marked_ = true;
+      }
     }
   }
 #endif

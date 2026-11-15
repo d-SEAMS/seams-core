@@ -14,6 +14,7 @@
 #include <index_range.hpp>
 #include <neighbours.hpp>
 #include <omp_tsan.hpp>
+#include <thread_team.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -2244,7 +2245,7 @@ bool orthoFullCsr(
   // An unsized Rayon pool keeps a worker on every cpu. Size it to this
   // OpenMP width before the stencil so those workers are not a second team.
   // Inside a live team the pool stays at one: the team already owns the cpus.
-  lc_set_threads(nested ? 1 : maxThreads);
+  lc_set_threads(nested ? 1 : seams::poolWidth(maxThreads));
 #endif
   Scratch &sc = nested ? local : scratch();
   auto grow = [](auto &v, std::size_t n) {

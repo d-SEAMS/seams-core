@@ -2106,7 +2106,7 @@ bool chill::chillPlusPublishedCutoff(
   seams::prepareCompute();
   [[maybe_unused]] const seams::TeamWidth team(n);
 #ifdef SEAMS_HAS_LINKCELL
-  lc_set_threads(seams::teamFor(n));
+  lc_set_threads(seams::poolFor(n));
 #endif
   const bool timing = std::getenv("SEAMS_CHILL_TIME") != nullptr;
   const auto t0 = std::chrono::steady_clock::now();

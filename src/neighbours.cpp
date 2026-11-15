@@ -1885,19 +1885,21 @@ nneigh::neighListLinkcell(
     pool = std::max(1, omp_get_max_threads());
   }
 #endif
+  int wide = seams::poolWidth(pool);
   // Eight threads loses to four below a few thousand molecules: the
   // list and the cage walk do not have a full team of work, and the
   // extra workers show up as a slow sample. Larger crystals keep the
   // width the caller asked for.
-  if (yCloud.nop < 4096 && pool > 4) {
-    pool = 4;
+  if (yCloud.nop < 4096) {
+    pool = std::min(pool, 4);
+    wide = std::min(wide, 4);
   }
 #ifdef SEAMS_HAS_OPENMP
   if (!omp_in_parallel()) {
     omp_set_num_threads(pool);
   }
 #endif
-  lc_set_threads(pool);
+  lc_set_threads(wide);
   const std::vector<int> indexToID = indexToIDTable(yCloud);
   std::vector<int> typeIIndices;
   typeIIndices.reserve(static_cast<std::size_t>(yCloud.nop));
@@ -1948,7 +1950,7 @@ nneigh::neighListO(double rcutoff,
   const int pool = 1;
 #endif
 #ifdef SEAMS_HAS_LINKCELL
-  lc_set_threads(pool);
+  lc_set_threads(seams::poolWidth(pool));
 #else
   (void)pool;
 #endif
@@ -3043,7 +3045,7 @@ nneigh::kNearestNeighbourList(
   seams::prepareCompute();
   [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
 #ifdef SEAMS_HAS_LINKCELL
-  lc_set_threads(seams::teamFor(yCloud.nop));
+  lc_set_threads(seams::poolFor(yCloud.nop));
 #endif
   if (yCloud.nop <= 0 || k <= 0) {
     return {};
@@ -3231,11 +3233,11 @@ void nneigh::kNearestCsr(const molSys::PointCloud<molSys::Point<double>, double>
     if (park) {
       omp_pause_resource_all(omp_pause_soft);
     }
-    lc_set_threads(seams::teamFor(yCloud.nop));
+    lc_set_threads(seams::poolFor(yCloud.nop));
   }
 #else
   (void)park;
-  lc_set_threads(seams::teamFor(yCloud.nop));
+  lc_set_threads(seams::poolFor(yCloud.nop));
 #endif
 #else
   (void)park;
@@ -3287,7 +3289,7 @@ void nneigh::kNearestPacked(
   const seams::PinSession placed;
   seams::prepareCompute();
 #ifdef SEAMS_HAS_LINKCELL
-  lc_set_threads(seams::teamFor(yCloud.nop));
+  lc_set_threads(seams::poolFor(yCloud.nop));
 #endif
   const int n = yCloud.nop;
   nom.assign(static_cast<std::size_t>(std::max(n, 0)) * static_cast<std::size_t>(std::max(k, 0)),
@@ -3325,7 +3327,7 @@ nneigh::kNearestNeighbourPair(
   const seams::PinSession placed;
   seams::prepareCompute();
 #ifdef SEAMS_HAS_LINKCELL
-  lc_set_threads(seams::teamFor(yCloud.nop));
+  lc_set_threads(seams::poolFor(yCloud.nop));
 #endif
   const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
   const auto nom = nominatePacked(yCloud, k, typeI, hint);
@@ -3343,7 +3345,7 @@ nneigh::kNearestNeighbourList(
   seams::prepareCompute();
   [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
 #ifdef SEAMS_HAS_LINKCELL
-  lc_set_threads(seams::teamFor(yCloud.nop));
+  lc_set_threads(seams::poolFor(yCloud.nop));
 #endif
   if (yCloud.nop <= 0 || k <= 0 || types.empty()) {
     return {};
@@ -3365,7 +3367,7 @@ nneigh::kNearestNeighbourPair(
   const seams::PinSession placed;
   seams::prepareCompute();
 #ifdef SEAMS_HAS_LINKCELL
-  lc_set_threads(seams::teamFor(yCloud.nop));
+  lc_set_threads(seams::poolFor(yCloud.nop));
 #endif
   const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
   const auto nom = nominatePacked(yCloud, k, types.front(), hint, &types);

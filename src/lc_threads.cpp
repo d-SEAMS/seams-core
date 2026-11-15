@@ -137,6 +137,7 @@ double gBegan = 0.0;
 double gBusyAt = -1.0e9;
 int gNarrow = 0;
 bool gPinned = false;
+bool gMarked = false;
 constexpr double kCalm = 1.0;
 
 void captureAllowed() {
@@ -484,6 +485,10 @@ void applyPin() {
     if (gNarrow < width) {
       omp_set_num_threads(gNarrow);
       gRestoreOmp = true;
+      if (askedWidth() == 0) {
+        askedWidth() = width;
+        gMarked = true;
+      }
     }
 #endif
     gPinned = false;
@@ -554,11 +559,20 @@ void restorePin() {
     gRestoreOmp = false;
   }
 #endif
+  if (gMarked) {
+    askedWidth() = 0;
+    gMarked = false;
+  }
   gApplied = false;
 }
 #endif
 
 } // namespace
+
+int &askedWidth() {
+  thread_local int width = 0;
+  return width;
+}
 
 bool placementHeld() {
 #ifdef __linux__
