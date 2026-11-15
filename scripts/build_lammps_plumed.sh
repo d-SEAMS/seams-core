@@ -27,10 +27,19 @@ case $ver in
 esac
 
 src=${LAMMPS_SRC:-$dest/src}
+headers="$src/src"
 tag=${LAMMPS_TAG:-stable_22Jul2025_update1}
+stamp="$dest/.lammps-tag"
+# A restored CI cache already has this install. Rebuild when the tag
+# or the binary is missing. Build logs stay on stderr so the only
+# stdout is the header directory.
+if [ -x "$dest/bin/lmp" ] && [ -f "$headers/library.h" ] && [ -f "$stamp" ] && [ "$(cat "$stamp")" = "$tag" ]; then
+  printf '%s\n' "$headers"
+  exit 0
+fi
 if [ ! -f "$src/cmake/CMakeLists.txt" ]; then
   rm -rf "$src"
-  git clone --depth 1 --branch "$tag" https://github.com/lammps/lammps.git "$src"
+  git clone --depth 1 --branch "$tag" https://github.com/lammps/lammps.git "$src" >&2
 fi
 
 # runtime mode dlopens libplumedKernel.so from PLUMED_KERNEL. MANYBODY is
@@ -46,8 +55,9 @@ cmake -S "$src/cmake" -B "$dest/build" \
   -D PKG_MANYBODY=yes \
   -D PKG_PLUMED=yes \
   -D DOWNLOAD_PLUMED=no \
-  -D PLUMED_MODE=runtime
-cmake --build "$dest/build" --parallel "${NPROC:-$(nproc)}"
-cmake --install "$dest/build"
+  -D PLUMED_MODE=runtime >&2
+cmake --build "$dest/build" --parallel "${NPROC:-$(nproc)}" >&2
+cmake --install "$dest/build" >&2
 test -x "$dest/bin/lmp"
-printf '%s\n' "$src/src"
+printf '%s\n' "$tag" > "$stamp"
+printf '%s\n' "$headers"

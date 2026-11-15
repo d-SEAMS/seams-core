@@ -183,11 +183,25 @@ jobs:
   # and runs the LAMMPS and OpenMM paths.
   plumed-210:
     runs-on: ubuntu-latest
+    env:
+      # Same default as scripts/build_lammps_plumed.sh. The cache key
+      # names it so a tag change cannot reuse another LAMMPS build.
+      LAMMPS_TAG: stable_22Jul2025_update1
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
+          environments: plumed210
           cache-key: pixi-plumed210-
+      - name: Cache the source-built LAMMPS
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            .lammps-plumed210/bin
+            .lammps-plumed210/lib
+            .lammps-plumed210/src
+            .lammps-plumed210/.lammps-tag
+          key: lammps-plumed210-${{ env.LAMMPS_TAG }}-${{ hashFiles('scripts/build_lammps_plumed.sh') }}
       - name: Install PLUMED 2.10 and the glibc 2.39 sysroot
         run: |
           set -euo pipefail
@@ -216,6 +230,7 @@ if (major, minor) < (2, 38):
             export LIBRARY_PATH="$CONDA_PREFIX/lib:$CONDA_PREFIX/lib.AVX2_256${LIBRARY_PATH:+:$LIBRARY_PATH}"
             export CPATH="$CONDA_PREFIX/include${CPATH:+:$CPATH}"
             prefix="$PWD/.lammps-plumed210"
+            # Warm cache: the script returns the header dir without compiling.
             src=$(sh scripts/build_lammps_plumed.sh "$prefix")
             export PATH="$prefix/bin:$PATH"
             export LD_LIBRARY_PATH="$prefix/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
