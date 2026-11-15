@@ -105,9 +105,12 @@ def main():
         [pkg_config, define, "--libs", "seams"], env=env, text=True
     ).split()
     binary = work / "quickstart-pkg"
-    cc = os.environ.get("CC", "cc")
+    cc = os.environ.get("CC", "").strip()
+    if not cc:
+        raise SystemExit("CC is unset. The test environment must name the compiler meson used.")
+    omp = os.environ.get("SEAMS_OPENMP_LINK", "").split()
     run(
-        [cc, str(source / "examples" / "c" / "quickstart.c"), "-o", str(binary), *cflags, *libs, "-lm"],
+        [cc, str(source / "examples" / "c" / "quickstart.c"), "-o", str(binary), *cflags, *libs, "-lm", *omp],
         env=env,
     )
     compile_env = dict(env)

@@ -15,6 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "docs"))
+from toolchain import c_compiler, cxx_compiler, fortran_compiler, gfortran_link, link_command  # noqa: E402
 
 import check_c_symbols as symbols  # noqa: E402
 import check_examples  # noqa: E402
@@ -89,43 +90,45 @@ def compile_and_run(build):
     fixture = str(ROOT / FIXTURE)
     env = os.environ.copy()
     env["LD_LIBRARY_PATH"] = library_path(build)
-    cc = shutil.which("cc") or shutil.which("gcc")
-    cxx = shutil.which("c++") or shutil.which("g++")
-    if cc is None or cxx is None:
-        raise SystemExit("cc and c++ are required")
+    cc = c_compiler()
+    cxx = cxx_compiler()
     c_bin = work / "minimal_c"
     run(
-        [
+        link_command(
             cc,
-            "-I",
-            str(ROOT / "include"),
-            "-I",
-            str(build / "src"),
-            str(ROOT / "docs/examples/minimal_c.c"),
-            "-L" + str(build / "src"),
-            "-lseams",
-            "-Wl,-rpath," + str(build / "src"),
-            "-o",
-            str(c_bin),
-        ]
+            [
+                "-I",
+                str(ROOT / "include"),
+                "-I",
+                str(build / "src"),
+                str(ROOT / "docs/examples/minimal_c.c"),
+                "-L" + str(build / "src"),
+                "-lseams",
+                "-Wl,-rpath," + str(build / "src"),
+                "-o",
+                str(c_bin),
+            ],
+        )
     )
     run([str(c_bin), fixture], env=env)
     cpp_bin = work / "minimal_cpp"
     run(
-        [
+        link_command(
             cxx,
-            "-I",
-            str(ROOT / "bindings/cxx"),
-            str(ROOT / "docs/examples/minimal_cpp.cpp"),
-            "-L" + str(build / "src"),
-            "-L" + str(build / "bindings"),
-            "-lseams_lang",
-            "-lseams",
-            "-Wl,-rpath," + str(build / "src"),
-            "-Wl,-rpath," + str(build / "bindings"),
-            "-o",
-            str(cpp_bin),
-        ]
+            [
+                "-I",
+                str(ROOT / "bindings/cxx"),
+                str(ROOT / "docs/examples/minimal_cpp.cpp"),
+                "-L" + str(build / "src"),
+                "-L" + str(build / "bindings"),
+                "-lseams_lang",
+                "-lseams",
+                "-Wl,-rpath," + str(build / "src"),
+                "-Wl,-rpath," + str(build / "bindings"),
+                "-o",
+                str(cpp_bin),
+            ],
+        )
     )
     run([str(cpp_bin), fixture], env=env)
     run(
@@ -136,9 +139,7 @@ def compile_and_run(build):
     if not seams.is_file():
         raise SystemExit("seams CLI was not built")
     run(["sh", str(ROOT / "docs/examples/minimal_cli.sh"), str(seams), fixture], env=env)
-    gfortran = shutil.which("gfortran")
-    if gfortran is None:
-        raise SystemExit("gfortran is not on PATH")
+    gfortran = fortran_compiler()
     objects = []
     for name in ("seams_kinds.f90", "seams_c.f90", "seams_support.f90", "seams.f90", "seams_methods.f90"):
         obj = work / name.replace(".f90", ".o")
@@ -157,19 +158,32 @@ def compile_and_run(build):
         )
         objects.append(str(obj))
     f_bin = work / "minimal_fortran"
+    main_obj = work / "minimal_fortran.o"
     run(
         [
             gfortran,
             "-I",
             str(work),
+            "-c",
             str(ROOT / "docs/examples/minimal_fortran.f90"),
-            *objects,
             "-o",
-            str(f_bin),
-            "-L" + str(build / "src"),
-            "-lseams",
-            "-Wl,-rpath," + str(build / "src"),
+            str(main_obj),
         ]
+    )
+    run(
+        link_command(
+            cxx,
+            [
+                str(main_obj),
+                *objects,
+                "-o",
+                str(f_bin),
+                "-L" + str(build / "src"),
+                "-lseams",
+                *gfortran_link(),
+                "-Wl,-rpath," + str(build / "src"),
+            ],
+        )
     )
     run([str(f_bin), fixture], env=env)
     cargo = shutil.which("cargo")

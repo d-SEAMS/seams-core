@@ -9,6 +9,9 @@ if e2e_py.found()
   e2e_build = meson.project_build_root()
   e2e_env = environment()
   e2e_env.set('SEAMS_CLI', seams_exe.full_path())
+  if _omp_libdir != ''
+    e2e_env.prepend('LD_LIBRARY_PATH', _omp_libdir)
+  endif
   e2e_deps = [seams_exe, seams_api_lib]
   foreach name : ['lammps_plugin', 'gmx_seams', 'seams_plumed']
     if is_variable(name)

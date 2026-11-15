@@ -85,18 +85,30 @@ else
   note_missing python
 fi
 
-if command -v gfortran >/dev/null 2>&1; then
+if [ -n "${FC:-}" ] && [ -n "${CXX:-}" ]; then
   mod=$(mktemp -d)
-  gfortran -J"$mod" -c "$root/bindings/fortran/src/seams_kinds.f90" -o "$mod/seams_kinds.o"
-  gfortran -J"$mod" -I"$mod" -c "$root/bindings/fortran/src/seams_c.f90" -o "$mod/seams_c.o"
-  gfortran -J"$mod" -I"$mod" -c "$root/bindings/fortran/src/seams_support.f90" -o "$mod/seams_support.o"
-  gfortran -J"$mod" -I"$mod" -c "$root/bindings/fortran/src/seams.f90" -o "$mod/seams.o"
-  gfortran -J"$mod" -I"$mod" -c "$root/bindings/fortran/src/seams_methods.f90" -o "$mod/seams_methods.o"
-  gfortran -I"$mod" "$root/bindings/fortran/test_seams.f90" "$mod/seams_c.o" \
-    -o "$mod/test_seams" -L"$lib" -lseams -Wl,-rpath,"$lib"
-  gfortran -I"$mod" "$root/bindings/fortran/test/test_high.f90" \
+  "$FC" -J"$mod" -c "$root/bindings/fortran/src/seams_kinds.f90" -o "$mod/seams_kinds.o"
+  "$FC" -J"$mod" -I"$mod" -c "$root/bindings/fortran/src/seams_c.f90" -o "$mod/seams_c.o"
+  "$FC" -J"$mod" -I"$mod" -c "$root/bindings/fortran/src/seams_support.f90" -o "$mod/seams_support.o"
+  "$FC" -J"$mod" -I"$mod" -c "$root/bindings/fortran/src/seams.f90" -o "$mod/seams.o"
+  "$FC" -J"$mod" -I"$mod" -c "$root/bindings/fortran/src/seams_methods.f90" -o "$mod/seams_methods.o"
+  "$FC" -I"$mod" -c "$root/bindings/fortran/test_seams.f90" -o "$mod/test_seams.o"
+  # The C++ compiler links, so the conda ld that `gfortran` on PATH drives
+  # is not asked to resolve this library's glibc and OpenMP symbols.
+  gfort_so=$("$FC" -print-file-name=libgfortran.so)
+  gfort_link="-lgfortran"
+  case "$gfort_so" in
+    /*) gfort_dir=$(dirname "$gfort_so")
+        gfort_link="-L${gfort_dir} -lgfortran -Wl,-rpath,${gfort_dir}" ;;
+  esac
+  # shellcheck disable=SC2086
+  "$CXX" "$mod/test_seams.o" "$mod/seams_c.o" \
+    -o "$mod/test_seams" -L"$lib" -lseams $gfort_link $SEAMS_OPENMP_LINK -Wl,-rpath,"$lib"
+  "$FC" -I"$mod" -c "$root/bindings/fortran/test/test_high.f90" -o "$mod/test_high.o"
+  # shellcheck disable=SC2086
+  "$CXX" "$mod/test_high.o" \
     "$mod/seams_kinds.o" "$mod/seams_c.o" "$mod/seams_support.o" "$mod/seams.o" "$mod/seams_methods.o" \
-    -o "$mod/test_high" -L"$lib" -lseams -Wl,-rpath,"$lib"
+    -o "$mod/test_high" -L"$lib" -lseams $gfort_link $SEAMS_OPENMP_LINK -Wl,-rpath,"$lib"
   OMP_NUM_THREADS=1 LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} "$mod/test_seams" "$root"
   OMP_NUM_THREADS=1 LD_LIBRARY_PATH=$lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} "$mod/test_high" "$root"
   rm -rf "$mod"

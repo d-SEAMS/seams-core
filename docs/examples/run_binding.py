@@ -9,6 +9,8 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "docs"))
+from toolchain import cxx_compiler, fortran_compiler, gfortran_link, link_command  # noqa: E402
 
 
 def library_path(build):
@@ -20,9 +22,8 @@ def library_path(build):
 
 
 def run_fortran(build):
-    gfortran = shutil.which("gfortran")
-    if not gfortran:
-        raise SystemExit("gfortran is not on PATH")
+    gfortran = fortran_compiler()
+    linker = cxx_compiler()
     lib = build / "src"
     work = Path(tempfile.mkdtemp(prefix="seams-fortran-"))
     objects = []
@@ -33,36 +34,48 @@ def run_fortran(build):
         )
         objects.append(str(obj))
     exe = work / "test_seams"
+    capi_main = work / "test_seams.o"
     subprocess.check_call(
-        [
-            gfortran,
-            "-I",
-            str(work),
-            str(ROOT / "bindings/fortran/test_seams.f90"),
-            str(work / "seams_c.o"),
-            "-o",
-            str(exe),
-            "-L" + str(lib),
-            "-lseams",
-            "-ldl",
-            "-Wl,-rpath," + str(lib),
-        ],
+        [gfortran, "-I", str(work), "-c", str(ROOT / "bindings/fortran/test_seams.f90"), "-o", str(capi_main)],
+        cwd=work,
+    )
+    subprocess.check_call(
+        link_command(
+            linker,
+            [
+                str(capi_main),
+                str(work / "seams_c.o"),
+                "-o",
+                str(exe),
+                "-L" + str(lib),
+                "-lseams",
+                *gfortran_link(),
+                "-ldl",
+                "-Wl,-rpath," + str(lib),
+            ],
+        ),
         cwd=work,
     )
     high = work / "test_high"
+    high_main = work / "test_high.o"
     subprocess.check_call(
-        [
-            gfortran,
-            "-I",
-            str(work),
-            str(ROOT / "bindings/fortran/test/test_high.f90"),
-            *objects,
-            "-o",
-            str(high),
-            "-L" + str(lib),
-            "-lseams",
-            "-Wl,-rpath," + str(lib),
-        ]
+        [gfortran, "-I", str(work), "-c", str(ROOT / "bindings/fortran/test/test_high.f90"), "-o", str(high_main)],
+        cwd=work,
+    )
+    subprocess.check_call(
+        link_command(
+            linker,
+            [
+                str(high_main),
+                *objects,
+                "-o",
+                str(high),
+                "-L" + str(lib),
+                "-lseams",
+                *gfortran_link(),
+                "-Wl,-rpath," + str(lib),
+            ],
+        )
     )
     env = os.environ.copy()
     env["LD_LIBRARY_PATH"] = library_path(build)

@@ -14,6 +14,8 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "docs"))
+from toolchain import c_compiler, cxx_compiler, fortran_compiler, gfortran_link, link_command  # noqa: E402
 EXAMPLES = ROOT / "docs" / "examples"
 CANON = "pairs 512 rings 0 0 0 0 0 0 256 chill 0 128 0 0 0 0 0 0 0"
 
@@ -63,26 +65,26 @@ def compile_and_run(cmd, exe, env):
 
 
 def lang_c(build, env):
-    cc = shutil.which("cc") or shutil.which("gcc")
-    if not cc:
-        raise Skip("cc is not on PATH")
+    cc = c_compiler()
     work = Path(tempfile.mkdtemp(prefix="seams-lang-c-"))
     exe = work / "lang_tasks_c"
     lib = build / "src"
     text = compile_and_run(
-        [
+        link_command(
             cc,
-            "-I",
-            str(ROOT / "include"),
-            "-I",
-            str(build / "src"),
-            str(EXAMPLES / "lang_tasks_c.c"),
-            "-o",
-            str(exe),
-            "-L" + str(lib),
-            "-lseams",
-            "-Wl,-rpath," + str(lib),
-        ],
+            [
+                "-I",
+                str(ROOT / "include"),
+                "-I",
+                str(build / "src"),
+                str(EXAMPLES / "lang_tasks_c.c"),
+                "-o",
+                str(exe),
+                "-L" + str(lib),
+                "-lseams",
+                "-Wl,-rpath," + str(lib),
+            ],
+        ),
         exe,
         env,
     )
@@ -90,29 +92,29 @@ def lang_c(build, env):
 
 
 def lang_cpp(build, env):
-    cxx = shutil.which("c++") or shutil.which("g++")
-    if not cxx:
-        raise Skip("c++ is not on PATH")
+    cxx = cxx_compiler()
     work = Path(tempfile.mkdtemp(prefix="seams-lang-cpp-"))
     exe = work / "lang_tasks_cpp"
     src = build / "src"
     bindings = build / "bindings"
     text = compile_and_run(
-        [
+        link_command(
             cxx,
-            "-std=c++17",
-            "-I",
-            str(ROOT / "bindings" / "cxx"),
-            str(EXAMPLES / "lang_tasks_cpp.cpp"),
-            "-o",
-            str(exe),
-            "-L" + str(bindings),
-            "-L" + str(src),
-            "-lseams_lang",
-            "-lseams",
-            "-Wl,-rpath," + str(bindings),
-            "-Wl,-rpath," + str(src),
-        ],
+            [
+                "-std=c++17",
+                "-I",
+                str(ROOT / "bindings" / "cxx"),
+                str(EXAMPLES / "lang_tasks_cpp.cpp"),
+                "-o",
+                str(exe),
+                "-L" + str(bindings),
+                "-L" + str(src),
+                "-lseams_lang",
+                "-lseams",
+                "-Wl,-rpath," + str(bindings),
+                "-Wl,-rpath," + str(src),
+            ],
+        ),
         exe,
         env,
     )
@@ -203,28 +205,31 @@ def lang_lua(build, env):
 
 
 def lang_fortran(build, env):
-    gfortran = shutil.which("gfortran")
-    if not gfortran:
-        raise Skip("gfortran is not on PATH")
+    gfortran = fortran_compiler()
     if "SEAMS_LANG_LIB" not in env:
         raise Skip("libseams_lang.so was not built")
     work = Path(tempfile.mkdtemp(prefix="seams-lang-f90-"))
     exe = work / "lang_tasks_f90"
+    obj = work / "lang_tasks_f90.o"
     src = build / "src"
     bindings = build / "bindings"
+    run([gfortran, "-c", str(EXAMPLES / "lang_tasks.f90"), "-o", str(obj)], env)
     text = compile_and_run(
-        [
-            gfortran,
-            str(EXAMPLES / "lang_tasks.f90"),
-            "-o",
-            str(exe),
-            "-L" + str(bindings),
-            "-L" + str(src),
-            "-lseams_lang",
-            "-lseams",
-            "-Wl,-rpath," + str(bindings),
-            "-Wl,-rpath," + str(src),
-        ],
+        link_command(
+            cxx_compiler(),
+            [
+                str(obj),
+                "-o",
+                str(exe),
+                "-L" + str(bindings),
+                "-L" + str(src),
+                "-lseams_lang",
+                "-lseams",
+                *gfortran_link(),
+                "-Wl,-rpath," + str(bindings),
+                "-Wl,-rpath," + str(src),
+            ],
+        ),
         exe,
         env,
     )

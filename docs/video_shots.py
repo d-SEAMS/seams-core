@@ -94,25 +94,29 @@ def ice_walk(lang, closer_cmd, closer_expect, closer_narration):
 
 def videos():
     c_cmd = (
-        'gcc -Iinclude -I"$SEAMS_BUILD_SRC" docs/videos/c/ice.c -L"$SEAMS_BUILD_SRC" -lseams -lm '
-        '-Wl,-rpath,"$SEAMS_BUILD_SRC" -o "$VIDEO_OUT/ice-c" && "$VIDEO_OUT/ice-c" ' + ICE
+        '"$CC" -Iinclude -I"$SEAMS_BUILD_SRC" docs/videos/c/ice.c -L"$SEAMS_BUILD_SRC" -lseams -lm '
+        '$SEAMS_OPENMP_LINK -Wl,-rpath,"$SEAMS_BUILD_SRC" -o "$VIDEO_OUT/ice-c" && "$VIDEO_OUT/ice-c" ' + ICE
     )
     cpp_cmd = (
-        'g++ -Ibindings/cxx docs/videos/cpp/ice.cpp -L"$SEAMS_BUILD_SRC" -L"$SEAMS_LANGDIR" '
-        '-lseams_lang -lseams -Wl,-rpath,"$SEAMS_BUILD_SRC" -Wl,-rpath,"$SEAMS_LANGDIR" '
+        '"$CXX" -Ibindings/cxx docs/videos/cpp/ice.cpp -L"$SEAMS_BUILD_SRC" -L"$SEAMS_LANGDIR" '
+        '-lseams_lang -lseams $SEAMS_OPENMP_LINK -Wl,-rpath,"$SEAMS_BUILD_SRC" -Wl,-rpath,"$SEAMS_LANGDIR" '
         '-o "$VIDEO_OUT/ice-cpp" && "$VIDEO_OUT/ice-cpp" ' + ICE
     )
     py_cmd = 'python3 docs/videos/python/ice.py ' + ICE + ' "$SEAMS_BUILD_SRC"'
     fort_cmd = (
-        'gfortran -J "$VIDEO_OUT" -c bindings/fortran/src/seams_kinds.f90 -o "$VIDEO_OUT/seams_kinds.o" && '
-        'gfortran -J "$VIDEO_OUT" -I "$VIDEO_OUT" -c bindings/fortran/src/seams_c.f90 -o "$VIDEO_OUT/seams_c.o" && '
-        'gfortran -J "$VIDEO_OUT" -I "$VIDEO_OUT" -c bindings/fortran/src/seams_support.f90 -o "$VIDEO_OUT/seams_support.o" && '
-        'gfortran -J "$VIDEO_OUT" -I "$VIDEO_OUT" -c bindings/fortran/src/seams.f90 -o "$VIDEO_OUT/seams.o" && '
-        'gfortran -J "$VIDEO_OUT" -I "$VIDEO_OUT" -c bindings/fortran/src/seams_methods.f90 -o "$VIDEO_OUT/seams_methods.o" && '
-        'gfortran -I "$VIDEO_OUT" docs/examples/minimal_fortran.f90 '
+        '"$FC" -J "$VIDEO_OUT" -c bindings/fortran/src/seams_kinds.f90 -o "$VIDEO_OUT/seams_kinds.o" && '
+        '"$FC" -J "$VIDEO_OUT" -I "$VIDEO_OUT" -c bindings/fortran/src/seams_c.f90 -o "$VIDEO_OUT/seams_c.o" && '
+        '"$FC" -J "$VIDEO_OUT" -I "$VIDEO_OUT" -c bindings/fortran/src/seams_support.f90 -o "$VIDEO_OUT/seams_support.o" && '
+        '"$FC" -J "$VIDEO_OUT" -I "$VIDEO_OUT" -c bindings/fortran/src/seams.f90 -o "$VIDEO_OUT/seams.o" && '
+        '"$FC" -J "$VIDEO_OUT" -I "$VIDEO_OUT" -c bindings/fortran/src/seams_methods.f90 -o "$VIDEO_OUT/seams_methods.o" && '
+        '"$FC" -I "$VIDEO_OUT" -c docs/examples/minimal_fortran.f90 -o "$VIDEO_OUT/minimal_fortran.o" && '
+        'gfort=$("$FC" -print-file-name=libgfortran.so); gdir=$(dirname "$gfort"); '
+        '"$CXX" "$VIDEO_OUT/minimal_fortran.o" '
         '"$VIDEO_OUT/seams_kinds.o" "$VIDEO_OUT/seams_c.o" "$VIDEO_OUT/seams_support.o" '
         '"$VIDEO_OUT/seams.o" "$VIDEO_OUT/seams_methods.o" '
-        '-o "$VIDEO_OUT/ice-f" -L"$SEAMS_BUILD_SRC" -lseams -Wl,-rpath,"$SEAMS_BUILD_SRC" && '
+        '-o "$VIDEO_OUT/ice-f" -L"$SEAMS_BUILD_SRC" -lseams -L"$gdir" -lgfortran '
+        '-Wl,-rpath,"$gdir" $SEAMS_OPENMP_LINK '
+        '-Wl,-rpath,"$SEAMS_BUILD_SRC" && '
         '"$VIDEO_OUT/ice-f" ' + SI
     )
     rust_cmd = (

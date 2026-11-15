@@ -184,6 +184,14 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
   # script also accepts the active conda prefix, and skips a mismatch.
   _front_py = find_program('python3', 'python', required: false)
   _front_env = environment()
+  _front_env.set('CC', _snippet_cc)
+  _front_env.set('CXX', _snippet_cxx)
+  if _snippet_fc != ''
+    _front_env.set('FC', _snippet_fc)
+  endif
+  if _snippet_omp.length() > 0
+    _front_env.set('SEAMS_OPENMP_LINK', ' '.join(_snippet_omp))
+  endif
   if _front_py.found()
     _front_env.set('DSEAMS_PYTHON', _front_py.full_path())
   endif

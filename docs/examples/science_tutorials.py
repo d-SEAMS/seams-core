@@ -14,12 +14,15 @@ import ctypes
 import hashlib
 import math
 import os
+import sys
 import shutil
 import subprocess
-import sys
 import urllib.error
 import urllib.request
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from toolchain import c_compiler, link_command  # noqa: E402
 
 import numpy as np
 
@@ -528,30 +531,30 @@ def expect(condition, message):
 
 
 def run_c(root: Path, build: Path, mode: str, extra: list[str]):
-    cc = shutil.which("cc") or shutil.which("gcc")
-    if cc is None:
-        raise SystemExit("cc is required")
+    cc = c_compiler()
     work = build / "docs-science"
     work.mkdir(parents=True, exist_ok=True)
     binary = work / "science_tutorials"
     src = str(build / "src")
     if not binary.is_file():
         subprocess.check_call(
-            [
+            link_command(
                 cc,
-                "-I",
-                str(root / "include"),
-                "-I",
-                src,
-                str(root / "docs" / "examples" / "science_tutorials.c"),
-                "-L" + src,
-                "-lseams",
-                "-ldl",
-                "-Wl,-rpath," + src,
-                "-lm",
-                "-o",
-                str(binary),
-            ]
+                [
+                    "-I",
+                    str(root / "include"),
+                    "-I",
+                    src,
+                    str(root / "docs" / "examples" / "science_tutorials.c"),
+                    "-L" + src,
+                    "-lseams",
+                    "-ldl",
+                    "-Wl,-rpath," + src,
+                    "-lm",
+                    "-o",
+                    str(binary),
+                ],
+            )
         )
     env = os.environ.copy()
     env["LD_LIBRARY_PATH"] = src + os.pathsep + env.get("LD_LIBRARY_PATH", "")
@@ -612,29 +615,28 @@ def run_r(root: Path, build: Path, libdir: Path, frames):
     if rscript is None:
         print("r tutorial skipped: Rscript was not found")
         return
-    cc = shutil.which("cc") or shutil.which("gcc")
-    if cc is None:
-        print("r tutorial skipped: cc was not found")
-        return
+    cc = c_compiler()
     work = build / "docs-science"
     work.mkdir(parents=True, exist_ok=True)
     shared = work / "science_r.so"
     subprocess.check_call(
-        [
+        link_command(
             cc,
-            "-shared",
-            "-fPIC",
-            "-I",
-            str(root / "include"),
-            "-I",
-            str(libdir),
-            str(root / "docs" / "examples" / "science_r.c"),
-            "-L" + str(libdir),
-            "-lseams",
-            "-Wl,-rpath," + str(libdir),
-            "-o",
-            str(shared),
-        ]
+            [
+                "-shared",
+                "-fPIC",
+                "-I",
+                str(root / "include"),
+                "-I",
+                str(libdir),
+                str(root / "docs" / "examples" / "science_r.c"),
+                "-L" + str(libdir),
+                "-lseams",
+                "-Wl,-rpath," + str(libdir),
+                "-o",
+                str(shared),
+            ],
+        )
     )
     args = [rscript, str(root / "docs" / "examples" / "science_tutorials.R"), str(root), str(shared)]
     if frames is not None:

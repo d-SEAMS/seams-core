@@ -10,6 +10,8 @@ import tempfile
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO / "docs"))
+from toolchain import cxx_compiler, fortran_compiler, gfortran_link, link_command  # noqa: E402
 
 
 def fail(message):
@@ -43,9 +45,7 @@ def require(lines, pages):
 
 
 def fortran(build, env):
-    gfortran = shutil.which("gfortran")
-    if not gfortran:
-        fail("gfortran is not on PATH")
+    gfortran = fortran_compiler()
     work = Path(tempfile.mkdtemp(prefix="seams-fortran-"))
     lib = build / "src"
     run(
@@ -53,15 +53,23 @@ def fortran(build, env):
         env,
         REPO,
     )
+    main_obj = work / "test_seams.o"
+    run(
+        [gfortran, "-I", str(work), "-c", str(REPO / "bindings/fortran/test_seams.f90"), "-o", str(main_obj)],
+        env,
+        REPO,
+    )
     exe = work / "test_seams"
     run(
-        [
-            gfortran, "-I", str(work),
-            str(REPO / "bindings/fortran/test_seams.f90"),
-            str(work / "seams.o"),
-            "-o", str(exe),
-            "-L" + str(lib), "-lseams", "-Wl,-rpath," + str(lib),
-        ],
+        link_command(
+            cxx_compiler(),
+            [
+                str(main_obj),
+                str(work / "seams.o"),
+                "-o", str(exe),
+                "-L" + str(lib), "-lseams", *gfortran_link(), "-Wl,-rpath," + str(lib),
+            ],
+        ),
         env,
         REPO,
     )

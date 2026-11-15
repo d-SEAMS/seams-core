@@ -298,8 +298,8 @@ def compiler_includes():
 
 def library_file(name):
     """The shared library the linker would take for ``name``, or None."""
-    compiler = shutil.which("cc")
-    if compiler is not None:
+    compiler = os.environ.get("CC", "").strip()
+    if compiler:
         found = subprocess.run(
             [compiler, "-print-file-name=" + name],
             text=True,
@@ -419,9 +419,11 @@ def vendored_links(build):
 
 
 def compile_c_family(build, env, source, out, extra=None, more_sources=None):
-    compiler = which("c++" if source.suffix in {".cpp", ".cxx", ".cc"} else "cc")
+    from toolchain import c_compiler, cxx_compiler, link_command
+
+    compiler = cxx_compiler() if source.suffix in {".cpp", ".cxx", ".cc"} else c_compiler()
     if source.suffix == ".c":
-        compiler = which("cc")
+        compiler = c_compiler()
     cmd = [
         compiler,
         "-I",
@@ -468,6 +470,7 @@ def compile_c_family(build, env, source, out, extra=None, more_sources=None):
     if out.suffix == ".so":
         cmd.insert(1, "-fPIC")
         cmd.insert(1, "-shared")
+    cmd = link_command(cmd[0], cmd[1:])
     try:
         run(cmd, env)
     except Fail as exc:
@@ -592,25 +595,33 @@ def run_source(build, env, path):
             local["LUA_PATH"] = str(ROOT / "bindings" / "lua" / "?.lua") + ";;"
             run([lua, str(path), *program_args(text, build)], local)
         elif path.suffix in {".f90", ".F90"}:
-            gfortran = which("gfortran")
+            from toolchain import cxx_compiler, fortran_compiler, gfortran_link, link_command
+
+            gfortran = fortran_compiler()
+            linker = cxx_compiler()
             work = Path(tempfile.mkdtemp(prefix="seams-snippet-f90-"))
             is_program = re.search(r"(?m)^\s*program\s+\w+", text) is not None
             if "use seams" not in text and is_program:
                 exe = work / "snippet"
+                obj = work / "snippet.o"
+                run([gfortran, "-c", str(path), "-o", str(obj)], env)
                 run(
-                    [
-                        gfortran,
-                        str(path),
-                        "-o",
-                        str(exe),
-                        "-L" + str(build / "bindings"),
-                        "-L" + str(build / "src"),
-                        "-lseams_lang",
-                        "-lseams",
-                        "-Wl,-rpath," + str(build / "bindings"),
-                        "-Wl,-rpath," + str(build / "src"),
-                        *vendored_links(build),
-                    ],
+                    link_command(
+                        linker,
+                        [
+                            str(obj),
+                            "-o",
+                            str(exe),
+                            "-L" + str(build / "bindings"),
+                            "-L" + str(build / "src"),
+                            "-lseams_lang",
+                            "-lseams",
+                            *gfortran_link(),
+                            "-Wl,-rpath," + str(build / "bindings"),
+                            "-Wl,-rpath," + str(build / "src"),
+                            *vendored_links(build),
+                        ],
+                    ),
                     env,
                 )
                 run([str(exe), *program_args(text, build)], env)
@@ -630,21 +641,24 @@ def run_source(build, env, path):
                 run([gfortran, "-J", str(work), "-c", str(path), "-o", str(work / "unit.o")], env, cwd=work)
                 return
             exe = work / "snippet"
+            main_obj = work / "snippet.o"
+            run([gfortran, "-I", str(work), "-c", str(path), "-o", str(main_obj)], env, cwd=work)
             run(
-                [
-                    gfortran,
-                    "-I",
-                    str(work),
-                    str(path),
-                    *objects,
-                    "-o",
-                    str(exe),
-                    "-L" + str(build / "src"),
-                    "-lseams",
-                    "-ldl",
-                    "-Wl,-rpath," + str(build / "src"),
-                    *vendored_links(build),
-                ],
+                link_command(
+                    linker,
+                    [
+                        str(main_obj),
+                        *objects,
+                        "-o",
+                        str(exe),
+                        "-L" + str(build / "src"),
+                        "-lseams",
+                        *gfortran_link(),
+                        "-ldl",
+                        "-Wl,-rpath," + str(build / "src"),
+                        *vendored_links(build),
+                    ],
+                ),
                 env,
                 cwd=work,
             )

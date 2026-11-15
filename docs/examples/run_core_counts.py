@@ -11,6 +11,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "docs"))
+from toolchain import c_compiler, cxx_compiler, link_command  # noqa: E402
 
 
 def library_path(build):
@@ -26,44 +28,46 @@ def run(cmd, env=None, cwd=None):
 
 
 def compile_c_family(build, env):
-    cc = shutil.which("cc") or shutil.which("gcc")
-    cxx = shutil.which("c++") or shutil.which("g++")
-    if cc is None or cxx is None:
-        raise SystemExit("cc and c++ are required")
+    cc = c_compiler()
+    cxx = cxx_compiler()
     work = build / "docs-core-counts"
     work.mkdir(parents=True, exist_ok=True)
     c_bin = work / "core_counts_c"
     run(
-        [
+        link_command(
             cc,
-            "-I",
-            str(ROOT / "include"),
-            "-I",
-            str(build / "src"),
-            str(ROOT / "docs/examples/core_counts.c"),
-            "-L" + str(build / "src"),
-            "-lseams",
-            "-Wl,-rpath," + str(build / "src"),
-            "-o",
-            str(c_bin),
-        ]
+            [
+                "-I",
+                str(ROOT / "include"),
+                "-I",
+                str(build / "src"),
+                str(ROOT / "docs/examples/core_counts.c"),
+                "-L" + str(build / "src"),
+                "-lseams",
+                "-Wl,-rpath," + str(build / "src"),
+                "-o",
+                str(c_bin),
+            ],
+        )
     )
     run([str(c_bin)], env=env)
     cpp_bin = work / "core_counts_cpp"
     run(
-        [
+        link_command(
             cxx,
-            "-I",
-            str(ROOT / "include"),
-            "-I",
-            str(build / "src"),
-            str(ROOT / "docs/examples/core_counts.cpp"),
-            "-L" + str(build / "src"),
-            "-lseams",
-            "-Wl,-rpath," + str(build / "src"),
-            "-o",
-            str(cpp_bin),
-        ]
+            [
+                "-I",
+                str(ROOT / "include"),
+                "-I",
+                str(build / "src"),
+                str(ROOT / "docs/examples/core_counts.cpp"),
+                "-L" + str(build / "src"),
+                "-lseams",
+                "-Wl,-rpath," + str(build / "src"),
+                "-o",
+                str(cpp_bin),
+            ],
+        )
     )
     run([str(cpp_bin)], env=env)
 

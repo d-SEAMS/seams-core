@@ -157,6 +157,8 @@ endif
 # nvc++ 22.3 trips Meson's OpenMP version sniff (preprocessor
 # delimiters). The flag is -mp; do not call dependency('openmp').
 openmp_dep_ok = false
+_omp_rpath = ''
+_omp_libdir = ''
 if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
   openmp_dep = declare_dependency(compile_args: ['-mp'], link_args: ['-mp'])
   openmp_dep_ok = true
@@ -194,14 +196,50 @@ if openmp_dep_ok
       _omp_so = run_command(cppc.cmd_array() + ['-print-file-name=libomp.so'],
                             check: false).stdout().strip()
       if _omp_so.startswith('/') and import('fs').exists(_omp_so)
-        _deps += [declare_dependency(
-          link_args: ['-Wl,-rpath,' + import('fs').parent(_omp_so)])]
+        _omp_libdir = import('fs').parent(_omp_so)
+        _omp_rpath = '-Wl,-rpath,' + _omp_libdir
+        _deps += [declare_dependency(link_args: [_omp_rpath])]
       endif
     endif
   else
     message('OpenMP was found but a parallel region does not link; ' +
             'building the per-particle loops single-threaded')
   endif
+endif
+
+# Snippet and language-front tests compile against this library. They must
+# use the same compilers and OpenMP link line. ``cc`` on PATH is not that
+# compiler: a pixi environment's cc is conda's gcc, and its glibc 2.28
+# sysroot cannot resolve the host compiler's GLIBC and libomp symbols.
+_snippet_cc = meson.get_compiler('c').cmd_array()[0]
+_snippet_cxx = cppc.cmd_array()[0]
+_snippet_fc = ''
+if not get_option('with_fortran').disabled()
+  if add_languages('fortran', required: false, native: false)
+    _snippet_fc = meson.get_compiler('fortran').cmd_array()[0]
+  endif
+endif
+_snippet_omp = []
+if openmp_found
+  if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
+    _snippet_omp += ['-mp']
+  elif cpp_id == 'clang-cl'
+    _snippet_omp += ['-Xclang', '-fopenmp']
+  else
+    _snippet_omp += ['-fopenmp']
+  endif
+  if _omp_rpath != ''
+    _snippet_omp += [_omp_rpath]
+  endif
+endif
+_snippet_env = environment()
+_snippet_env.set('CC', _snippet_cc)
+_snippet_env.set('CXX', _snippet_cxx)
+if _snippet_fc != ''
+  _snippet_env.set('FC', _snippet_fc)
+endif
+if _snippet_omp.length() > 0
+  _snippet_env.set('SEAMS_OPENMP_LINK', ' '.join(_snippet_omp))
 endif
 
 # MPI is optional. Analysis splits atoms across ranks and Allgathervs
@@ -890,6 +928,7 @@ if get_option('with_cli')
       meson.project_build_root() / 'src',
       meson.project_build_root(),
     ],
+    env: _snippet_env,
     suite: 'docs',
     timeout: 120)
   test(
@@ -979,6 +1018,14 @@ if get_option('with_cli')
     timeout: 60)
   tutorial_env = environment()
   tutorial_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
+  tutorial_env.set('CC', _snippet_cc)
+  tutorial_env.set('CXX', _snippet_cxx)
+  if _snippet_fc != ''
+    tutorial_env.set('FC', _snippet_fc)
+  endif
+  if _snippet_omp.length() > 0
+    tutorial_env.set('SEAMS_OPENMP_LINK', ' '.join(_snippet_omp))
+  endif
   if get_option('fennel_lua') != ''
     tutorial_env.set('FENNEL_LUA', get_option('fennel_lua'))
   endif
@@ -1483,6 +1530,7 @@ if get_option('with_cli')
       meson.project_build_root(),
       meson.project_source_root(),
     ],
+    env: _snippet_env,
     suite: 'docs',
     depends: _installed_targets,
     timeout: 600)
@@ -1587,6 +1635,14 @@ if get_option('with_cli')
   binding_env = environment()
   binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
   binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'bindings')
+  binding_env.set('CC', _snippet_cc)
+  binding_env.set('CXX', _snippet_cxx)
+  if _snippet_fc != ''
+    binding_env.set('FC', _snippet_fc)
+  endif
+  if _snippet_omp.length() > 0
+    binding_env.set('SEAMS_OPENMP_LINK', ' '.join(_snippet_omp))
+  endif
   test(
     'docs_binding_docstrings',
     python3,
@@ -1924,13 +1980,17 @@ if get_option('with_cli')
 endif
 
 # C API proof. Sanitizers and valgrind are separate configure options.
+# clang-cl rejects a raw -std=c11. override_options lets meson emit /std:c11.
+# libm is in the C runtime on Windows.
+_libm = host_machine.system() == 'windows' ? [] : ['-lm']
 capi_suite = executable(
   'capi_suite',
   files('tests/capi_suite.c'),
   link_with: seams_api_lib,
   include_directories: include_directories('include'),
-  c_args: ['-std=c11', '-Wall', '-Wextra', '-Werror', '-I' + meson.current_build_dir() / 'src'],
-  link_args: ['-lm'])
+  override_options: ['c_std=c11'],
+  c_args: ['-Wall', '-Wextra', '-Werror', '-I' + meson.current_build_dir() / 'src'],
+  link_args: _libm)
 capi_cpp_ref = executable(
   'capi_cpp_ref',
   files('tests/capi_cpp_ref.cpp'),
@@ -2010,10 +2070,12 @@ _capi_headers = [
 foreach _hdr : _capi_headers
   test('capi_header_c99_' + _hdr[0],
     executable('capi_header_c99_' + _hdr[0], files('tests/capi_header_unit.c'),
-      c_args: ['-std=c99', '-include', _hdr[1]] + _capi_warn + _hdr[2]))
+      override_options: ['c_std=c99'],
+      c_args: ['-include', _hdr[1]] + _capi_warn + _hdr[2]))
   test('capi_header_cxx17_' + _hdr[0],
     executable('capi_header_cxx17_' + _hdr[0], files('tests/capi_header_unit.cpp'),
-      cpp_args: ['-std=c++17', '-include', _hdr[1]] + _capi_warn + _hdr[2]))
+      override_options: ['cpp_std=c++17'],
+      cpp_args: ['-include', _hdr[1]] + _capi_warn + _hdr[2]))
 endforeach
 
 capi_contract = executable(
@@ -2021,8 +2083,9 @@ capi_contract = executable(
   files('tests/capi_contract.c'),
   link_with: seams_api_lib,
   include_directories: include_directories('include'),
-  c_args: ['-std=c11'] + _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
-  link_args: ['-lm'])
+  override_options: ['c_std=c11'],
+  c_args: _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
+  link_args: _libm)
 test(
   'capi_contract',
   capi_contract,
@@ -2040,7 +2103,8 @@ foreach _family : ['neighbours', 'rings', 'chill_plus', 'q4q6', 'cages', 'errors
       files('docs/examples/c/' + _family + '.c'),
       link_with: seams_api_lib,
       include_directories: include_directories('include'),
-      c_args: ['-std=c11'] + _capi_warn + ['-I' + meson.current_build_dir() / 'src']),
+      override_options: ['c_std=c11'],
+      c_args: _capi_warn + ['-I' + meson.current_build_dir() / 'src']),
     args: _family == 'errors' ? [] : [meson.project_source_root()],
     env: _capi_env,
     timeout: 300)
@@ -2052,9 +2116,10 @@ test(
     files('tests/capi_const_threads.c'),
     link_with: seams_api_lib,
     include_directories: include_directories('include'),
-    c_args: ['-std=c11'] + _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
+    override_options: ['c_std=c11'],
+    c_args: _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
     dependencies: dependency('threads'),
-    link_args: ['-lm']),
+    link_args: _libm),
   env: _capi_env,
   timeout: 300)
 # GCC marks only ASan and TSan builds; clang reports every sanitizer.
@@ -2067,7 +2132,8 @@ test(
     files('tests/capi_signal_owner.c'),
     link_with: seams_api_lib,
     include_directories: include_directories('include'),
-    c_args: ['-std=c11'] + _capi_warn + ['-I' + meson.current_build_dir() / 'src']),
+    override_options: ['c_std=c11'],
+    c_args: _capi_warn + ['-I' + meson.current_build_dir() / 'src']),
   args: [_signal_mode],
   env: _capi_env,
   timeout: 60)
@@ -2078,9 +2144,10 @@ test(
     files('tests/capi_q_threads.c'),
     link_with: seams_api_lib,
     include_directories: include_directories('include'),
-    c_args: ['-std=c11'] + _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
+    override_options: ['c_std=c11'],
+    c_args: _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
     dependencies: dependency('threads'),
-    link_args: ['-lm']),
+    link_args: _libm),
   env: _capi_env,
   timeout: 300)
 executable(
@@ -2088,8 +2155,9 @@ executable(
   files('tests/bench_capi_rss.c'),
   link_with: seams_api_lib,
   include_directories: include_directories('include'),
-  c_args: ['-std=c11'] + _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
-  link_args: ['-lm'])
+  override_options: ['c_std=c11'],
+  c_args: _capi_warn + ['-I' + meson.current_build_dir() / 'src'],
+  link_args: _libm)
 test(
   'capi_symbols',
   find_program('python3', required: true),
@@ -2212,7 +2280,7 @@ if _fuzz_args.length() > 0
       _fuzz[1],
       output: _fuzz[1],
       command: _fuzz_cc.cmd_array() + _fuzz_bindir + [
-        '-std=c11', '-g', '-O1',
+        _fuzz_cc.get_id() == 'clang-cl' ? '/std:c11' : '-std=c11', '-g', '-O1',
         '-I' + meson.project_source_root() / 'include',
         '-I' + meson.current_build_dir() / 'src',
         meson.project_source_root() / 'fuzz' / (_fuzz[1] + '.c'),

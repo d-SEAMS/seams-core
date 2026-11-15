@@ -8,6 +8,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from toolchain import c_compiler, link_command  # noqa: E402
+
 
 def fail(message):
     print(message, file=sys.stderr)
@@ -24,18 +27,6 @@ def main():
     functions = re.findall(r"SEAMS_API\s+(?:const\s+char\s+\*|[\w\s\*]+?)\s*(seams_[A-Za-z0-9_]+)\s*\(", header)
     binary = build / "c_api_tour"
     binary.parent.mkdir(parents=True, exist_ok=True)
-    compile_cmd = [
-        "gcc",
-        "-I" + str(root / "include"),
-        "-I" + str(libdir.parent / "src") if (libdir.parent / "src" / "seams_version.h").is_file() else "-I" + str(libdir),
-        str(source),
-        "-L" + str(libdir),
-        "-lseams",
-        "-lm",
-        "-Wl,-rpath," + str(libdir),
-        "-o",
-        str(binary),
-    ]
     # seams_version.h is generated next to the library sources.
     version = None
     for folder in (libdir, libdir.parent / "src", Path(sys.argv[2])):
@@ -45,18 +36,20 @@ def main():
             break
     if version is None:
         fail("seams_version.h was not found beside the library")
-    compile_cmd = [
-        "gcc",
-        "-I" + str(root / "include"),
-        "-I" + str(version),
-        str(source),
-        "-L" + str(libdir),
-        "-lseams",
-        "-lm",
-        "-Wl,-rpath," + str(libdir),
-        "-o",
-        str(binary),
-    ]
+    compile_cmd = link_command(
+        c_compiler(),
+        [
+            "-I" + str(root / "include"),
+            "-I" + str(version),
+            str(source),
+            "-L" + str(libdir),
+            "-lseams",
+            "-lm",
+            "-Wl,-rpath," + str(libdir),
+            "-o",
+            str(binary),
+        ],
+    )
     done = subprocess.run(compile_cmd, text=True, capture_output=True)
     if done.returncode != 0:
         fail(done.stderr[-800:])
