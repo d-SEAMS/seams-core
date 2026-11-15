@@ -437,6 +437,14 @@ private:
   PinSession placed_;
 #ifdef SEAMS_HAS_OPENMP
   static constexpr double kSlowFork = 1.0e-3;
+  // A full-width fork that waits out a time slice is a busy machine, not
+  // jitter, and halves the team at once. Beside an 8-thread spinner the
+  // bound 8-thread probe came back in microseconds one call in two or three
+  // while the call itself took 45 to 85 ms, so waiting for two slow probes
+  // in a row left a CHILL run at full width for its whole life; at four
+  // threads it took 10 ms. Going below half still takes two slow probes:
+  // two threads took 18 ms. An idle fork takes tens of microseconds.
+  static constexpr double kSliceFork = 2.0e-3;
   static constexpr double kRetry = 1.0;
   int asked_ = 1;
   bool set_ = false;
@@ -476,10 +484,12 @@ private:
       width = std::min(state.base, 2 * width);
       state.tried = now;
     }
-    if (forkSeconds(width) <= kSlowFork) {
+    const double took = forkSeconds(width);
+    if (took <= kSlowFork) {
       state.slow = 0;
       state.granted = width;
-    } else if (width == state.granted && ++state.slow >= 2 && width > floor) {
+    } else if (width == state.granted && width > floor &&
+               (++state.slow >= 2 || (took > kSliceFork && width == state.base))) {
       state.granted = std::max(floor, width / 2);
       state.slow = 0;
       state.tried = now;
