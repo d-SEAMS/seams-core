@@ -148,3 +148,11 @@ Commit subjects follow ~fileName: description of change~. See
 The three-repo cut (~libyodaLib~ / ~seams~, then the PydSEAMSlib
 and yodaStruct wraps) is [[file:release.org][Release process]].
 The checked statements are [[file:lean.org][Lean proofs]].
+
+* Deployment
+
+Docs deploy from
+[[https://github.com/d-SEAMS/seams-core][d-SEAMS/seams-core]] ~main~
+to ~gh-pages~, which Netlify serves at https://docs.dseams.info.
+~.github/workflows/ci_docs.yml~ publishes ~docs/build~ on that
+push. A fork push does not publish the site.

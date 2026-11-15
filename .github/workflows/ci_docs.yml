@@ -6,18 +6,25 @@ on:
   pull_request:
     branches: [main]
 
-# The gh-pages deploy pushes with GITHUB_TOKEN. The repository default
-# token is contents: read, which is the 403 on `git push origin gh-pages`.
+# Publish gh-pages only from d-SEAMS/seams-core main. Netlify
+# (dseamsdocs) is Git-linked to that branch and serves
+# https://docs.dseams.info. The push uses GITHUB_TOKEN. The repository
+# default token is contents: read, which is the 403 on
+# `git push origin gh-pages`.
 permissions:
   contents: write
 
 jobs:
   build-docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Mermaid syntax
         run: python3 docs/check_mermaid.py
+      - name: Sitemap mapper
+        run: python3 docs/check_sitemap.py --self-test
       - uses: prefix-dev/setup-pixi@f00437f565399d418b0acc85936d12c1fb668347 # v0.10.1
         with:
           environments: docs
@@ -94,6 +101,9 @@ jobs:
 
       - run: pixi run -e docs docbld
 
+      - name: Sitemap
+        run: python3 docs/check_sitemap.py
+
       - name: Lychee
         uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
@@ -145,26 +155,12 @@ jobs:
           export LD_LIBRARY_PATH="$PWD/bbdir/src:$PWD/bbdir/bindings${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
           pixi run -e docs sphinx-build -W --keep-going -j 2 -b doctest -d docs/doctrees docs/source docs/doctest
 
+      # Upstream main only. Netlify reads this gh-pages tree and serves
+      # docs.dseams.info. A CNAME file in the tree would fight that site.
+      # peaceiris still writes .nojekyll.
       - name: Deploy to GitHub Pages
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.repository == 'd-SEAMS/seams-core' && github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@84c30a85c19949d7eee79c4ff27748b70285e453 # v4.1.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/build
-
-      - name: Deploy to Netlify
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
-        run: |
-          set -euo pipefail
-          if [ -z "${NETLIFY_AUTH_TOKEN}" ]; then
-            echo "Skipping Netlify deploy: NETLIFY_AUTH_TOKEN is not set."
-            exit 0
-          fi
-          if [ -z "${NETLIFY_SITE_ID}" ]; then
-            echo "NETLIFY_AUTH_TOKEN is set but NETLIFY_SITE_ID is empty."
-            exit 1
-          fi
-          npx --yes netlify-cli@27.19.0 deploy --prod --dir=docs/build

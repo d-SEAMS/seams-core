@@ -747,7 +747,13 @@ html_sidebars = {
     ],
 }
 
+# Shibuya writes the canonical link and og:url from this origin (pageurl).
+# The trailing slash stays: sphinx-sitemap joins html_baseurl to the page
+# link. Its default scheme is "{lang}{version}{link}". Sphinx sets language
+# to "en", so that scheme emits https://docs.dseams.info/en/... and those
+# paths 404. The HTML files live at the site root.
 html_baseurl = "https://docs.dseams.info/"
+sitemap_url_scheme = "{link}"
 
 
 def _copy_caption_tracks(app, exception):
@@ -789,7 +795,11 @@ def _relative_rst_links(app, doctree, docname):
 
 
 def _edit_org_source(app, pagename, templatename, context, doctree):
-    """Edit links name the Org source. Generated ``.rst`` is not in git."""
+    """Point Edit this page at the Org file on d-SEAMS/seams-core.
+
+    Generated ``.rst`` is not in git. The repository is ``html_context``,
+    the same owner and repo Shibuya uses for the sidebar link.
+    """
 
     def edit_source_link(filename):
         if not isinstance(filename, str) or not filename.endswith(".rst"):
@@ -798,9 +808,12 @@ def _edit_org_source(app, pagename, templatename, context, doctree):
         rel = os.path.join("docs", "orgmode", filename[:-4] + ".org")
         if not os.path.isfile(os.path.join(root, rel)):
             return None
-        # HaoZeke/seams-core is the public tree that contains these Org files.
-        # d-SEAMS/seams-core main does not yet have the videos pages.
-        return "https://github.com/HaoZeke/seams-core/blob/main/" + rel
+        return "https://github.com/{}/{}/blob/{}/{}".format(
+            html_context["source_user"],
+            html_context["source_repo"],
+            html_context["source_version"],
+            rel.replace(os.sep, "/"),
+        )
 
     context["edit_source_link"] = edit_source_link
 
