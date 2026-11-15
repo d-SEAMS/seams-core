@@ -84,10 +84,17 @@ if lammps_opt.allowed()
         endif
       endforeach
     endif
+    # lammps_close does not call MPI_Finalize. The hook does, so it
+    # needs the MPI library and not only the LAMMPS wrapper.
+    lammps_mpi = dependency('mpi', language: 'cpp', required: false)
+    run_hook_deps = [lammps_dep]
+    if lammps_mpi.found()
+      run_hook_deps += [lammps_mpi]
+    endif
     run_hook = executable(
       'run_hook',
       files('lammps/run_hook.cpp'),
-      dependencies: [lammps_dep],
+      dependencies: run_hook_deps,
       link_with: seams_api_lib,
       include_directories: lammps_incs,
       cpp_args: _args + lammps_args + seams_api_args,
@@ -103,7 +110,6 @@ if lammps_opt.allowed()
     # compute dseams as a `plugin load` module. The LAMMPS class headers
     # include mpi.h, from the MPI library or from the serial STUBS.
     # The host lmp already holds libmpi, so the module takes the headers only.
-    lammps_mpi = dependency('mpi', language: 'cpp', required: false)
     lammps_plugin_deps = [lammps_dep]
     if lammps_mpi.found()
       lammps_plugin_deps += lammps_mpi.partial_dependency(compile_args: true, includes: true)

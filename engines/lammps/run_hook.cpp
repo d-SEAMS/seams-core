@@ -6,6 +6,8 @@
 #include "seams.h"
 #include "../frame_census.hpp"
 
+#include <mpi.h>
+
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -113,6 +115,18 @@ int main(int argc, char **argv) {
   lammps_set_fix_external_callback(hook.lmp, "ext", callback, &hook);
   lammps_command(hook.lmp, run_line.c_str());
   lammps_close(hook.lmp);
+  // lammps_close leaves MPI initialized. Open MPI then leaks its
+  // singleton state at process exit. Finalize it when this process
+  // started it.
+  int mpi_inited = 0;
+  MPI_Initialized(&mpi_inited);
+  if (mpi_inited) {
+    int mpi_done = 0;
+    MPI_Finalized(&mpi_done);
+    if (!mpi_done) {
+      MPI_Finalize();
+    }
+  }
   bool spaced = hook.steps.size() == 1;
   if (hook.steps.size() >= 2) {
     spaced = true;
