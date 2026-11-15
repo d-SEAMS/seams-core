@@ -19,6 +19,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#if defined(SEAMS_HAS_OPENMP)
+#include <omp.h>
+#endif
+
 namespace {
 
 std::set<std::vector<int>>
@@ -620,6 +624,49 @@ TEST_CASE("a 2x2x2 sI supercell has eight times the unit-cell cages",
     REQUIRE(one == unitCounts[i]);
     REQUIRE(eight == 8 * one);
   }
+}
+
+TEST_CASE("the cage index gives the same cages for any team size",
+          "[cage_enum][threads]") {
+  // 368 atoms of 2x2x2 sI give 432 candidate rings. A team that does not
+  // divide that count splits the edge and wedge index unevenly; the
+  // cages must not change.
+  molSys::PointCloud<molSys::Point<double>, double> unit;
+  unit = sinp::readLammpsTrjO("traj/genice_sI.lammpstrj", 1, unit, 1);
+  molSys::PointCloud<molSys::Point<double>, double> super;
+  super.box = {2.0 * unit.box[0], 2.0 * unit.box[1], 2.0 * unit.box[2]};
+  super.boxLow = unit.boxLow;
+  super.currentFrame = 1;
+  int id = 1;
+  for (int ix = 0; ix < 2; ++ix) {
+    for (int iy = 0; iy < 2; ++iy) {
+      for (int iz = 0; iz < 2; ++iz) {
+        for (const auto &src : unit.pts) {
+          auto p = src;
+          p.x += ix * unit.box[0];
+          p.y += iy * unit.box[1];
+          p.z += iz * unit.box[2];
+          p.atomID = id;
+          super.idIndexMap[id] = super.nop;
+          super.pts.push_back(p);
+          ++super.nop;
+          ++id;
+        }
+      }
+    }
+  }
+#if defined(SEAMS_HAS_OPENMP)
+  const int before = omp_get_max_threads();
+  for (const int team : {1, 3, 5, 7, 13, 32}) {
+    INFO(team);
+    omp_set_num_threads(team);
+    REQUIRE(cagesOnCloud(super, "512") == 16);
+    REQUIRE(cagesOnCloud(super, "51262") == 48);
+  }
+  omp_set_num_threads(before);
+#else
+  REQUIRE(cagesOnCloud(super, "51262") == 48);
+#endif
 }
 
 TEST_CASE("doubling the thin sH edge doubles each cage kind and adds none",
