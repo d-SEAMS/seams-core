@@ -581,11 +581,14 @@ def run_source(build, env, path):
             lua = shutil.which("lua5.4") or shutil.which("lua")
             if not lua:
                 raise Skip("lua is not on PATH")
-            modules = list((build / "bindings" / "lua").glob("*/dseams_core.so"))
-            if not modules:
-                raise Skip("the Lua module was not built")
+            from lua_module import cpath_for
+
+            try:
+                cpath = cpath_for(build, lua)
+            except SystemExit as err:
+                raise Skip(str(err)) from err
             local = dict(env)
-            local["LUA_CPATH"] = str(modules[0].parent / "?.so") + ";;"
+            local["LUA_CPATH"] = cpath
             local["LUA_PATH"] = str(ROOT / "bindings" / "lua" / "?.lua") + ";;"
             run([lua, str(path), *program_args(text, build)], local)
         elif path.suffix in {".f90", ".F90"}:
@@ -1048,9 +1051,12 @@ def run_lua_text(build, env, body):
     lua = shutil.which("lua5.4") or shutil.which("lua")
     if not lua:
         raise Skip("lua is not on PATH")
-    modules = list((build / "bindings" / "lua").glob("*/dseams_core.so"))
-    if not modules:
-        raise Skip("the Lua module was not built")
+    from lua_module import cpath_for
+
+    try:
+        cpath = cpath_for(build, lua)
+    except SystemExit as err:
+        raise Skip(str(err)) from err
     work = Path(tempfile.mkdtemp(prefix="seams-snippet-lua-"))
     script = work / "snippet.lua"
     prelude = 'local dseams = require("dseams")\nlocal root = os.getenv("DSEAMS_ROOT")\n'
@@ -1058,7 +1064,7 @@ def run_lua_text(build, env, body):
         prelude += 'local frame = dseams.read(root .. "/input/traj/genice_sI.lammpstrj", {type = 1})\n'
     script.write_text(prelude + body + "\n", encoding="utf-8")
     local = dict(env)
-    local["LUA_CPATH"] = str(modules[0].parent / "?.so") + ";;"
+    local["LUA_CPATH"] = cpath
     local["LUA_PATH"] = str(ROOT / "bindings" / "lua" / "?.lua") + ";;"
     run([lua, str(script)], local)
 

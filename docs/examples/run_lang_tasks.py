@@ -175,20 +175,19 @@ def lang_julia(build, env):
     sys.stdout.write(text)
 
 
-def lua_module(build):
-    found = list((build / "bindings" / "lua").glob("*/dseams_core.so"))
-    return found[0] if found else None
-
-
 def lang_lua(build, env):
     lua = shutil.which("lua5.4") or shutil.which("lua")
     if not lua:
         raise Skip("lua is not on PATH")
-    module = lua_module(build)
-    if module is None:
-        raise Skip("the Lua module was not built")
+    sys.path.insert(0, str(ROOT / "docs"))
+    from lua_module import cpath_for
+
+    try:
+        cpath = cpath_for(build, lua)
+    except SystemExit as err:
+        raise Skip(str(err)) from err
     env = dict(env)
-    env["LUA_CPATH"] = str(module.parent / "?.so") + ";;"
+    env["LUA_CPATH"] = cpath
     env["LUA_PATH"] = str(ROOT / "bindings" / "lua" / "?.lua") + ";;"
     text = run([lua, str(EXAMPLES / "lang_tasks.lua")], env)
     sys.stdout.write(text)

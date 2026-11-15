@@ -79,12 +79,12 @@ def run_lua(build, env):
     lua = shutil.which("lua5.4") or shutil.which("lua")
     if lua is None:
         raise SystemExit("lua is not on PATH")
-    modules = list((build / "bindings").rglob("dseams_core.so"))
-    if not modules:
-        raise SystemExit("dseams_core.so was not built")
+    sys.path.insert(0, str(ROOT / "docs"))
+    from lua_module import cpath_for
+
     lua_env = env.copy()
     lua_env["LUA_PATH"] = str(ROOT / "bindings" / "lua") + "/?.lua;;"
-    lua_env["LUA_CPATH"] = str(modules[0].parent) + "/?.so;;"
+    lua_env["LUA_CPATH"] = cpath_for(build, lua)
     run([lua, str(ROOT / "docs/examples/core_counts.lua")], env=lua_env)
 
 
