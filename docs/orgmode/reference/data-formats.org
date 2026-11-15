@@ -185,7 +185,7 @@ ships chemfiles, so ~pixi run build~ reports ~chemfiles: enabled~.
 * eOn ~.con~
 
 Compiled when Meson finds readcon-core (~SEAMS_HAS_READCON~).
-~input/con/tiny_multi_cuh2.con~ is a two-frame fixture (Cu + H,
+~input/eon/tiny_multi_cuh2.con~ is a two-frame fixture (Cu + H,
 ~con_spec_version~ 2).
 
 ~type~ is the atomic number from the file. ~atomID~ is the file atom

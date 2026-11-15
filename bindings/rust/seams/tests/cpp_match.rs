@@ -242,7 +242,7 @@ fn analyses_match_the_cpp_path() {
         want["xyz cn"][0],
     );
 
-    let mut con = read(&root, "input/con/tiny_multi_cuh2.con", -1);
+    let mut con = read(&root, "input/eon/tiny_multi_cuh2.con", -1);
     assert_eq!(con.count() as f64, want["con n"][0]);
     assert_eq!(
         con.hbonds(&seams::BondOptions {

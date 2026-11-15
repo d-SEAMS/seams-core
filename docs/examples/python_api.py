@@ -196,7 +196,7 @@ def via_ctypes(libdir, xyz, edge):
         "input/traj/ice1h.lammpstrj": (128, -1),
         "input/traj/genice_sI.lammpstrj": (46, 1),
         "input/xyz/configuration.xyz": (256, -1),
-        "input/con/tiny_multi_cuh2.con": (None, -1),
+        "input/eon/tiny_multi_cuh2.con": (None, -1),
         "input/traj/genice_sH.lammpstrj": (136, 1),
     }
     for rel, (count, filt) in expect.items():

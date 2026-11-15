@@ -125,7 +125,7 @@ local xyz = (frame:match("^(.*)/") or ".") .. "/sample.xyz"
 nop_line("si", root .. "/input/traj/genice_sI.lammpstrj", {type = 1})
 nop_line("tip", root .. "/input/traj/exampleTraj.lammpstrj", {type = 2})
 nop_line("xyz", xyz, {all = true})
-nop_line("con", root .. "/input/con/tiny_multi_cuh2.con", {all = true})
+nop_line("con", root .. "/input/eon/tiny_multi_cuh2.con", {all = true})
 nop_line("tri", frame, {all = true})
 
 local guest = dseams.read(root .. "/input/traj/genice_sI.lammpstrj", {type = 1})

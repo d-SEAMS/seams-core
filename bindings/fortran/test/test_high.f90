@@ -160,7 +160,7 @@ program test_high
   call frame%read(trim(root) // "/input/xyz/configuration.xyz", stat=stat, errmsg=err)
   if (stat /= SEAMS_OK) stop 63
   if (frame%count() <= 0) stop 63
-  call frame%read(trim(root) // "/input/con/tiny_multi_cuh2.con", stat=stat, errmsg=err)
+  call frame%read(trim(root) // "/input/eon/tiny_multi_cuh2.con", stat=stat, errmsg=err)
   if (stat /= SEAMS_OK) stop 64
   if (frame%count() <= 0) stop 64
   call frame%read(trim(root) // "/input/traj/genice_sH.lammpstrj", type_filter=1_seams_int, &

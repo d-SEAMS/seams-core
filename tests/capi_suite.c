@@ -945,7 +945,7 @@ int main(int argc, char **argv) {
   snprintf(brine_path, sizeof brine_path, "%s/input/traj/nacl_front.lammpstrj", argv[1]);
   snprintf(nuc_path, sizeof nuc_path, "%s/input/traj/nucleation_f1.lammpstrj", argv[1]);
   snprintf(xyz_path, sizeof xyz_path, "%s/input/xyz/configuration.xyz", argv[1]);
-  snprintf(con_path, sizeof con_path, "%s/input/con/tiny_multi_cuh2.con", argv[1]);
+  snprintf(con_path, sizeof con_path, "%s/input/eon/tiny_multi_cuh2.con", argv[1]);
   char mmcif[1024];
   snprintf(mmcif, sizeof mmcif, "%s/empty.mmcif", argv[4]);
   FILE *empty = fopen(mmcif, "w");

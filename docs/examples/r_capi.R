@@ -64,7 +64,7 @@ stopifnot(seams_system_read(xyz, file.path(root, "input/xyz/configuration.xyz"),
 close_to(seams_coordination(xyz, rmax = 6), rows[["xyz cn"]])
 
 con <- seams_system_new()
-stopifnot(seams_system_read(con, file.path(root, "input/con/tiny_multi_cuh2.con"), 1L, -1L) == rows[["con n"]])
+stopifnot(seams_system_read(con, file.path(root, "input/eon/tiny_multi_cuh2.con"), 1L, -1L) == rows[["con n"]])
 stopifnot(seams_hbonds(con, oxygen_type = 0L) == rows[["con hbond"]])
 
 tri <- seams_system_new()

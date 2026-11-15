@@ -78,7 +78,7 @@ function check_seams_against_cpp()
     @test seams_system_count(xyz) == want["xyz n"][1]
     _close(seams_coordination(xyz; rmax=6.0), want["xyz cn"][1])
 
-    con = seams_system_read(System(), joinpath(root, "input/con/tiny_multi_cuh2.con"), 1, -1)
+    con = seams_system_read(System(), joinpath(root, "input/eon/tiny_multi_cuh2.con"), 1, -1)
     @test seams_system_count(con) == want["con n"][1]
     @test seams_hbonds(con; oxygen_type=0) == want["con hbond"][1]
 

@@ -82,7 +82,7 @@ seams-core/
   lean/                  Lean 4 model of ringAdjacentCompletion
   input/traj/            example LAMMPS dumps
   input/xyz/             fixtures
-  input/con/             eOn .con fixture
+  input/eon/             eOn .con fixture
   meson.build            Meson project
   meson_options.txt      with_tests, with_cli, optional backends
   flake.nix              nix build / nix develop

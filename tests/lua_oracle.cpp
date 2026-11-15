@@ -418,7 +418,7 @@ int main(int argc, char **argv) {
     std::cout << "read tip " << tip_oxygen.nop << "\n";
     Cloud xyz_cloud = sinp::openFrame(xyz_path, 1, -1);
     std::cout << "read xyz " << xyz_cloud.nop << "\n";
-    Cloud con = sinp::openFrame(root + "/input/con/tiny_multi_cuh2.con", 1, -1);
+    Cloud con = sinp::openFrame(root + "/input/eon/tiny_multi_cuh2.con", 1, -1);
     std::cout << "read con " << con.nop << "\n";
     std::cout << "read tri " << ih.nop << "\n";
     Cloud face = sinp::openFrame(root + "/input/traj/interface_f0.lammpstrj", 1, 1);

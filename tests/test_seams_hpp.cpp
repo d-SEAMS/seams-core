@@ -181,7 +181,7 @@ int main(int argc, char **argv) {
       return 1;
     }
     close(xyz.coordination(seams::DistributionOptions{6.0, 8, 0, 0}), want.at("xyz cn")[0]);
-    auto con = read_frame(root + "/input/con/tiny_multi_cuh2.con", -1);
+    auto con = read_frame(root + "/input/eon/tiny_multi_cuh2.con", -1);
     if (static_cast<double>(con.count()) != want.at("con n")[0] ||
         static_cast<double>(con.hbonds(seams::BondOptions{3.5, 0, 2, 2.42, 30.0})) != want.at("con hbond")[0]) {
       return 1;

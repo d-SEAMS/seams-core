@@ -161,7 +161,7 @@ program test_seams
   code = read_frame(sys, trim(root) // "/input/xyz/configuration.xyz", 1, -1)
   if (code /= SEAMS_OK) stop 63
   if (seams_system_count(sys) <= 0) stop 63
-  code = read_frame(sys, trim(root) // "/input/con/tiny_multi_cuh2.con", 1, -1)
+  code = read_frame(sys, trim(root) // "/input/eon/tiny_multi_cuh2.con", 1, -1)
   if (code /= SEAMS_OK) stop 64
   if (seams_system_count(sys) <= 0) stop 64
   code = read_frame(sys, trim(root) // "/input/traj/genice_sH.lammpstrj", 1, 1)

@@ -329,7 +329,7 @@ int main(int argc, char **argv) {
     std::cout.precision(12);
     std::cout << "xyz n " << xyz.nop << "\n";
     std::cout << "xyz cn " << coordinationOf(xyz, 6.0, 8) << "\n";
-    Cloud con = sinp::openFrame(root + "/input/con/tiny_multi_cuh2.con", 1, -1);
+    Cloud con = sinp::openFrame(root + "/input/eon/tiny_multi_cuh2.con", 1, -1);
     std::cout << "con n " << con.nop << "\n";
     std::cout.unsetf(std::ios::scientific);
     std::cout << "con hbond " << hbondCount(con) << "\n";
