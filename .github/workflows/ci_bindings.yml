@@ -34,7 +34,7 @@ jobs:
           cargo clippy --offline --manifest-path bindings/rust/Cargo.toml --all-targets -- -D warnings
           cargo test --offline --manifest-path bindings/rust/Cargo.toml -- --test-threads=1
           cargo test --offline --manifest-path bindings/rust/Cargo.toml --examples -- --test-threads=1
-          cargo doc --offline --manifest-path bindings/rust/Cargo.toml --no-deps -p seams
+          cargo doc --offline --manifest-path bindings/rust/Cargo.toml --no-deps -p dseams
 
   cpp:
     runs-on: ubuntu-latest
