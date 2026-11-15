@@ -11,13 +11,15 @@ threads:
   chill, chill_ovito,         libseams frame handle (seams_chill,
   chill_plus, chill_plus_ovito  seams_chill_plus, published and OVITO)
   symmetry                    seams_system_symmetry, the shell match
+  knn                         seams_neighbours_knn, four nearest, one-way
   rings_find                  seams_rings_find, rings with symmetry codes
   cages                       seams_cages_find
   prisms                      seams_prisms
   monolayer                   seams_monolayer, the ring census
   rdf2d                       seams_frame_rdf2d in libseams_lang, 8 A
 
-mdapy and pyscal3 q4 and q6 run at the rival widths (8 by default) on the
+mdapy and pyscal3 q4 and q6, and the four-nearest graph from mdapy,
+pyscal3 and freud, run at the rival widths (1 and 8 by default) on the
 small frame in the same sitting.
 
 The contended rows repeat the 8-thread rows while scripts/omp_spinner.c
@@ -65,11 +67,12 @@ WARMUP = 1
 MIN_REPEATS = 10
 WIDTHS = (1, 2, 4, 8)
 FLAT_OPS = ("neighbours", "q4", "q6", "rings")
-SYSTEM_OPS = ("chill", "chill_ovito", "chill_plus", "chill_plus_ovito", "symmetry",
+SYSTEM_OPS = ("chill", "chill_ovito", "chill_plus", "chill_plus_ovito", "symmetry", "knn",
               "rings_find", "cages", "prisms", "monolayer")
 LANG_OPS = ("rdf2d",)
 DSEAMS_OPS = FLAT_OPS + SYSTEM_OPS + LANG_OPS
-RIVAL_OPS = ("q4", "q6")
+KNN = 4
+RIVAL_OPS = {"mdapy": ("q4", "q6", "knn"), "pyscal3": ("q4", "q6", "knn"), "freud": ("knn",)}
 SPINNER = ROOT / "scripts" / "omp_spinner.c"
 TRACKED = ("src", "include", "bindings", "scripts")
 
@@ -196,6 +199,24 @@ def system_call(lib_path: str, op: str, xyz, side: float):
             tally = np.bincount(labels + 1, minlength=4)
             return "labels=" + ":".join(str(int(c)) for c in tally)
         return run
+    if op == "knn":
+        lib.seams_neighbours_knn.argtypes = [vp, ctypes.c_int, num, ctypes.c_int, ctypes.c_int,
+                                             ctypes.POINTER(vp)]
+        lib.seams_neighbours_copy.argtypes = [vp, ip, size, ctypes.POINTER(size), ip, size,
+                                              ctypes.POINTER(size)]
+        lib.seams_neighbours_destroy.argtypes = [vp]
+
+        def run():
+            graph = vp()
+            ok(lib.seams_neighbours_knn(handle, KNN, CUTOFF, 0, 0, ctypes.byref(graph)),
+               "seams_neighbours_knn")
+            rows = size()
+            pairs = size()
+            lib.seams_neighbours_copy(graph, None, 0, ctypes.byref(rows), None, 0,
+                                      ctypes.byref(pairs))
+            lib.seams_neighbours_destroy(graph)
+            return f"pairs={pairs.value}"
+        return run
     if op == "rings_find":
         lib.seams_rings_find.argtypes = [vp, num, ctypes.c_int, ctypes.c_int, ctypes.c_int,
                                          ctypes.POINTER(vp)]
@@ -299,6 +320,13 @@ def mdapy_call(op: str, threads: int, repetitions: int):
     xyz, side = frame(repetitions)
     set_num_threads(threads)
     system = System(xyz, box=side)
+    if op == "knn":
+        def run():
+            hold_affinity(threads)
+            set_num_threads(threads)
+            pairs = mdapy.NeighborList.build(system, num_neighbors=KNN)
+            return f"pairs={len(pairs.j)}"
+        return run, f"mdapy {mdapy.__version__}"
     tool = SteinhardtParameters(degrees=(int(op[1]),), cutoff=CUTOFF)
 
     def run():
@@ -318,6 +346,13 @@ def pyscal_call(op: str, threads: int, repetitions: int):
     xyz, side = frame(repetitions)
     atoms = Atoms(symbols=["O"] * len(xyz), positions=np.ascontiguousarray(xyz),
                   cell=[side, side, side], pbc=True)
+    if op == "knn":
+        def run():
+            hold_affinity(threads)
+            pyscal3.set_num_threads(threads)
+            pyscal3.find_neighbors(atoms, method="number", nmax=KNN, store_rows=False)
+            return f"pairs={len(atoms.info['pyscal_bond_neighbors'])}"
+        return run, f"pyscal3 {pyscal3.__version__}"
     order = int(op[1])
 
     def run():
@@ -327,6 +362,23 @@ def pyscal_call(op: str, threads: int, repetitions: int):
         values = np.asarray(pyscal3.steinhardt_parameter(atoms, order)[0]).reshape(-1)
         return f"rows={int(values.shape[0])}"
     return run, f"pyscal3 {pyscal3.__version__}"
+
+
+def freud_call(op: str, threads: int, repetitions: int):
+    import freud
+    if op != "knn":
+        raise ValueError(op)
+    freud.parallel.set_num_threads(threads)
+    xyz, side = frame(repetitions)
+    box = freud.box.Box.cube(side)
+    points = box.wrap(xyz - side / 2.0)
+    query = freud.locality.AABBQuery(box, points)
+
+    def run():
+        hold_affinity(threads)
+        found = query.query(points, {"num_neighbors": KNN, "exclude_ii": True})
+        return f"pairs={len(found.toNeighborList())}"
+    return run, f"freud {freud.__version__}"
 
 
 def worker(args) -> int:
@@ -341,6 +393,8 @@ def worker(args) -> int:
         call, version = mdapy_call(args.op, threads, args.repetitions)
     elif args.code == "pyscal3":
         call, version = pyscal_call(args.op, threads, args.repetitions)
+    elif args.code == "freud":
+        call, version = freud_call(args.op, threads, args.repetitions)
     else:
         raise ValueError(args.code)
     samples = []
@@ -448,8 +502,8 @@ def main() -> int:
     parser.add_argument("--repetitions", default=",".join(str(r) for r in REPETITIONS),
                         help="ice Ic cells per edge; 8 * r**3 molecules")
     parser.add_argument("--ops", default=",".join(DSEAMS_OPS))
-    parser.add_argument("--rival-widths", default="8")
-    parser.add_argument("--rivals", default="mdapy,pyscal3")
+    parser.add_argument("--rival-widths", default="1,8")
+    parser.add_argument("--rivals", default="mdapy,pyscal3,freud")
     parser.add_argument("--contend-width", type=int, default=8,
                         help="width of the contended rows and the spinner; 0 skips them")
     parser.add_argument("--repeats", type=int, default=MIN_REPEATS)
@@ -497,7 +551,7 @@ def main() -> int:
                 for label, lib, extra in builds + [fixed]:
                     busy.append(("dseams", reps, op, contend, label, lib, extra))
     for code in rivals:
-        for op in RIVAL_OPS:
+        for op in RIVAL_OPS[code]:
             for threads in rival_widths:
                 idle.append((code, small, op, threads, code, args.lib, {}))
             if contend:

@@ -707,18 +707,19 @@ class OmpScaling:
 
     Ideal ice Ic, 110592 molecules, with the neighbour list built inside
     every call: neighbours, q4, q6 and rings through the flat C API, CHILL,
-    CHILL+, the shell match, rings with symmetry codes, cages, prisms and
-    the monolayer census through the libseams frame handle, and the 2D RDF
+    CHILL+, the shell match, the four-nearest graph, rings with symmetry
+    codes, cages, prisms and the monolayer census through the libseams frame
+    handle, and the 2D RDF
     through libseams_lang. setup narrows the process to cpus 0 .. threads-1
     and sets the OpenMP width; a width above the allowed cpus is skipped.
     The one-process-per-row sitting with the 884736-molecule cell, mdapy,
-    pyscal3 and the contended rows is scripts/omp_scaling.py (Snakemake rule
+    pyscal3, freud and the contended rows is scripts/omp_scaling.py (Snakemake rule
     omp_scaling).
     """
 
     params = (["neighbours", "q4", "q6", "rings", "chill", "chill_ovito", "chill_plus",
-               "chill_plus_ovito", "symmetry", "rings_find", "cages", "prisms", "monolayer",
-               "rdf2d"], [1, 2, 4, 8])
+               "chill_plus_ovito", "symmetry", "knn", "rings_find", "cages", "prisms",
+               "monolayer", "rdf2d"], [1, 2, 4, 8])
     param_names = ["operation", "threads"]
 
     def setup(self, operation, threads):
