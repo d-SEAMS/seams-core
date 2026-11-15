@@ -2457,24 +2457,22 @@ bool typeAllowed(int type, int typeI, const std::vector<int> *types) {
 }
 
 #ifdef SEAMS_HAS_LINKCELL
-// Writes n*k cloud indices, nearest first, unused slots -1.
-bool nominateByLinkcell(
-    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
-    int typeI, double cellHint, std::vector<int> &nom,
-    const std::vector<int> *types = nullptr,
-    std::vector<double> *keepXyz = nullptr) {
+// Packed positions and, when some atom is not a source, the mask the
+// linkcell search takes. False when there is nothing to search.
+bool stageLinkcell(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
+                   int typeI, const std::vector<int> *types, std::vector<double> &xyz,
+                   std::vector<int> &mask, const int *&maskPtr) {
   const int n = yCloud.nop;
-  if (n <= 0 || k <= 0 || yCloud.box.size() < 3) {
-    return true;
+  maskPtr = nullptr;
+  if (n <= 0 || yCloud.box.size() < 3) {
+    return false;
   }
   const double bx = yCloud.box[0];
   const double by = yCloud.box[1];
   const double bz = yCloud.box[2];
   if (!(bx > 0.0 && by > 0.0 && bz > 0.0)) {
-    return true;
+    return false;
   }
-  std::vector<double> localXyz;
-  std::vector<double> &xyz = keepXyz != nullptr ? *keepXyz : localXyz;
   if (static_cast<int>(xyz.size()) != n * 3) {
     xyz.resize(static_cast<std::size_t>(n) * 3);
   }
@@ -2492,12 +2490,10 @@ bool nominateByLinkcell(
     }
   }
   if (nSrc == 0) {
-    return true;
+    return false;
   }
   // An all-true mask takes the filtered walk. The unmasked walk is the
   // same set when every atom is a source.
-  std::vector<int> mask;
-  const int *maskPtr = nullptr;
   if (!uniform) {
     mask.assign(static_cast<std::size_t>(n), 0);
     for (int i = 0; i < n; i++) {
@@ -2506,6 +2502,26 @@ bool nominateByLinkcell(
       }
     }
     maskPtr = mask.data();
+  }
+  return true;
+}
+
+// Writes n*k cloud indices, nearest first, unused slots -1.
+bool nominateByLinkcell(
+    const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
+    int typeI, double cellHint, std::vector<int> &nom,
+    const std::vector<int> *types = nullptr,
+    std::vector<double> *keepXyz = nullptr) {
+  const int n = yCloud.nop;
+  if (n <= 0 || k <= 0) {
+    return true;
+  }
+  std::vector<double> localXyz;
+  std::vector<double> &xyz = keepXyz != nullptr ? *keepXyz : localXyz;
+  std::vector<int> mask;
+  const int *maskPtr = nullptr;
+  if (!stageLinkcell(yCloud, typeI, types, xyz, mask, maskPtr)) {
+    return true;
   }
   const linkcell::Cell cell =
       nneigh::lammpsBoxToLinkcell(yCloud.box, yCloud.boxLow);
@@ -3179,7 +3195,6 @@ extern "C" void csrFillSlab(void *raw, int begin, int end) {
 
 #ifdef SEAMS_HAS_LINKCELL
 extern "C" void lc_for_slabs(int n, void *ctx, void (*fn)(void *, int, int));
-extern "C" void lc_set_continuation(void *ctx, void (*fn)(void *));
 #else
 namespace {
 // Without the linkcell pool the slabs are split over the OpenMP team.
@@ -3220,9 +3235,9 @@ void nneigh::kNearestCsr(const molSys::PointCloud<molSys::Point<double>, double>
   seams::prepareCompute();
   [[maybe_unused]] const seams::TeamWidth team(yCloud.nop);
 #ifdef SEAMS_HAS_LINKCELL
-  // The scan and the CSR merge share one Rayon pool, split into z-slabs.
-  // An OpenMP team left in active wait by the previous region sits on
-  // those cores, so park it for this call when the caller asks. A caller
+  // The search and the graph build share one linkcell region. An OpenMP
+  // team left in active wait by the previous region sits on those cores,
+  // so park it for this call when the caller asks. A caller
   // that classifies in OpenMP immediately afterwards leaves the team
   // running: parking it makes that region pay the wake inside the same
   // call. A search already inside a parallel region stays on the caller.
@@ -3249,24 +3264,33 @@ void nneigh::kNearestCsr(const molSys::PointCloud<molSys::Point<double>, double>
     return;
   }
   const double hint = candidateCutoff > 0.0 ? 0.75 * candidateCutoff : 3.0;
-  // The mutual row is determined by the packed nominations: lower
-  // indices ascending, then the higher indices in nearest-first order.
-  // k above 64 keeps the row builder. The fast path merges the CSR on
-  // the same pool that wrote the nominations, before that pool sleeps.
-  if (mutual && k <= 64) {
-    std::vector<int> nom(static_cast<std::size_t>(n) * static_cast<std::size_t>(k), -1);
-    std::vector<int> deg(static_cast<std::size_t>(n), 0);
-    CsrSlabs job{&nom, &deg, &cols, &offsets, n, k, 0};
 #ifdef SEAMS_HAS_LINKCELL
-    // The continuation used to run on the Rayon pool before every knn
-    // task had stored its row. The degree scan then raced those stores.
-    // knearest_into joins the pool; the scan starts after that join.
-    if (nominateByLinkcell(yCloud, k, typeI, hint, nom)) {
-      csrContinue(&job);
+  // Linkcell builds the graph from its nominations in the search's own
+  // region: the rows are those fillGraphFromNom and csrFromRows give
+  // (mutual: lower partners ascending, then higher ones nearest first;
+  // otherwise each edge in the order of the nomination slot that adds
+  // it). No OpenMP team is started for the call.
+  {
+    std::vector<double> xyz;
+    std::vector<int> mask;
+    const int *maskPtr = nullptr;
+    if (!stageLinkcell(yCloud, typeI, nullptr, xyz, mask, maskPtr)) {
       return;
     }
-#endif
+    try {
+      linkcell::knearest_csr(xyz.data(), static_cast<std::size_t>(n),
+                             nneigh::lammpsBoxToLinkcell(yCloud.box, yCloud.boxLow),
+                             static_cast<std::size_t>(k), mutual, offsets, cols, maskPtr,
+                             hint);
+      return;
+    } catch (const linkcell::Error &e) {
+      std::cerr << "linkcell failed: " << e.what()
+                << "; falling back to the in-tree cell list.\n";
+      offsets.assign(static_cast<std::size_t>(n) + 1, 0);
+      cols.clear();
+    }
   }
+#endif
   const auto nom = nominatePacked(yCloud, k, typeI, hint);
   if (!mutual || k > 64) {
     std::vector<std::vector<int>> rows;

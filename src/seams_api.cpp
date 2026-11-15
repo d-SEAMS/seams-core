@@ -203,12 +203,16 @@ void remember() noexcept {
   note_error();
 }
 
-seams::FairWidth use_threads() {
+void set_threads() {
 #ifdef SEAMS_HAS_OPENMP
   if (g_threads > 0) {
     omp_set_num_threads(g_threads);
   }
 #endif
+}
+
+seams::FairWidth use_threads() {
+  set_threads();
   return seams::FairWidth(true);
 }
 
@@ -2626,25 +2630,32 @@ seams_status seams_neighbours_knn(seams_system *sys, int k, double cutoff, int t
     return fail(SEAMS_ERR_RANGE, "cutoff must be positive");
   }
   try {
-    const auto fair = use_threads();
-    int typ = 1;
+    // The search and the graph build are one linkcell region, which
+    // takes chunks as its workers get cpu time; no OpenMP team is
+    // started, so there is no width probe. Only the pool is placed: a
+    // host binding pins this thread to one cpu, and the pool would
+    // otherwise start every worker there.
+    set_threads();
+    const seams::PinSession placed(false);
+    // A positive type only selects sources, and a frame of one positive
+    // type is read as it is: neither needs the copy normalize_types
+    // would make. Mixed types read as one type in a local copy.
+    int typ = type > 0 ? type : 1;
     const Cloud *src = &sys->cloud;
     Cloud owned;
-    if (type > 0) {
-      typ = type;
-      bool uniform = sys->cloud.nop > 0;
-      for (int i = 0; i < sys->cloud.nop && uniform; ++i) {
-        if (sys->cloud.pts[static_cast<std::size_t>(i)].type != type) {
-          uniform = false;
-        }
+    if (type <= 0) {
+      const auto &pts = sys->cloud.pts;
+      const int first = sys->cloud.nop > 0 ? pts[0].type : 0;
+      bool uniform = first > 0;
+      for (int i = 1; i < sys->cloud.nop && uniform; ++i) {
+        uniform = pts[static_cast<std::size_t>(i)].type == first;
       }
-      if (!uniform) {
+      if (uniform) {
+        typ = first;
+      } else {
         owned = unified_copy(sys->cloud, type, typ);
         src = &owned;
       }
-    } else {
-      owned = unified_copy(sys->cloud, type, typ);
-      src = &owned;
     }
     auto nb = std::make_unique<seams_neighbours>();
     nb->n = src->nop;
