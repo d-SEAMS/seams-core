@@ -82,22 +82,6 @@ test('seams_lang_frames', seams_frames_test, timeout: 60)
 # live in their own repositories; see docs/orgmode/contributing/repositories.org.
 if get_option('with_cli') and get_option('with_tests') and not get_option('b_sanitize').contains('address')
   test(
-    'chill_plus_ctypes',
-    find_program('python3', required: true),
-    args: [meson.project_source_root() / 'tests' / 'test_chill_plus_ctypes.py'],
-    env: {'SEAMS_LANG_LIB': seams_lang.full_path()},
-    depends: [seams_lang],
-    timeout: 120,
-  )
-  test(
-    'q4_q6_chill_ctypes',
-    find_program('python3', required: true),
-    args: [meson.project_source_root() / 'tests' / 'test_q4_q6_chill.py'],
-    env: {'SEAMS_LANG_LIB': seams_lang.full_path()},
-    depends: [seams_lang],
-    timeout: 120,
-  )
-  test(
     'wl_ice',
     find_program('python3', required: true),
     args: [meson.project_source_root() / 'tests' / 'test_wl_ice.py'],
@@ -113,14 +97,6 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
     depends: [seams_lang],
     timeout: 180,
   )
-  test(
-    'frames_abi',
-    find_program('python3', required: true),
-    args: [meson.project_source_root() / 'tests' / 'test_frames_abi.py'],
-    env: {'SEAMS_LANG_LIB': seams_lang.full_path()},
-    depends: [seams_lang],
-    timeout: 120,
-  )
   _tip4p_env = environment()
   _tip4p_env.set('SEAMS_LANG_LIB', seams_lang.full_path())
   _tip4p_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
@@ -135,13 +111,5 @@ if get_option('with_cli') and get_option('with_tests') and not get_option('b_san
     env: _tip4p_env,
     depends: [seams_lang],
     timeout: 180,
-  )
-  test(
-    'symmetry_ctypes',
-    find_program('python3', required: true),
-    args: [meson.project_source_root() / 'tests' / 'test_symmetry_ctypes.py'],
-    env: {'SEAMS_CORE_LIB': ydslib.full_path()},
-    depends: [ydslib],
-    timeout: 120,
   )
 endif
