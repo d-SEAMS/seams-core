@@ -29,14 +29,18 @@ os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("RAYON_NUM_THREADS", "1")
 os.environ.setdefault("OVITO_THREAD_COUNT", "1")
 # The PyPI OVITO wheel dlopens libEGL from the conda prefix, which is
-# not on the wheel's own loader path.
-_conda = os.environ.get("CONDA_PREFIX", "")
-if _conda:
-    _lib = os.path.join(_conda, "lib")
-    if os.path.isfile(os.path.join(_lib, "libEGL.so.1")):
-        _current = os.environ.get("LD_LIBRARY_PATH", "")
-        if _lib not in _current.split(os.pathsep):
-            os.environ["LD_LIBRARY_PATH"] = _lib + (os.pathsep + _current if _current else "")
+# not on the wheel's own loader path. Qt looks that dependency up from
+# its own runpath, so the library has to be mapped before the import.
+# Meson does not forward CONDA_PREFIX, so the interpreter prefix counts.
+_egl_prefixes = []
+if os.environ.get("CONDA_PREFIX"):
+    _egl_prefixes.append(os.environ["CONDA_PREFIX"])
+_egl_prefixes.append(sys.prefix)
+for _egl_prefix in _egl_prefixes:
+    _egl_so = os.path.join(_egl_prefix, "lib", "libEGL.so.1")
+    if os.path.isfile(_egl_so):
+        ctypes.CDLL(_egl_so, mode=ctypes.RTLD_GLOBAL)
+        break
 
 try:
     import freud

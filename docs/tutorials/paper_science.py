@@ -84,11 +84,28 @@ def _fallback_png(png):
 _ovito_note = False
 
 
+def _load_libegl():
+    # The PyPI OVITO wheel dlopens libEGL from the conda prefix. Qt looks
+    # that dependency up from its own runpath, so map it before the import.
+    import ctypes
+
+    prefixes = []
+    if os.environ.get("CONDA_PREFIX"):
+        prefixes.append(os.environ["CONDA_PREFIX"])
+    prefixes.append(sys.prefix)
+    for prefix in prefixes:
+        lib = os.path.join(prefix, "lib", "libEGL.so.1")
+        if os.path.isfile(lib):
+            ctypes.CDLL(lib, mode=ctypes.RTLD_GLOBAL)
+            return
+
+
 def render(dump, png):
     """Tachyon draws in software, so no display or OpenGL context is needed."""
     global _ovito_note
     prepare_vulkan()
     os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+    _load_libegl()
     try:
         import warnings
 

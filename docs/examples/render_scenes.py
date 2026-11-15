@@ -368,15 +368,19 @@ def _camera(render, positions, forward, up):
 def _conda_libegl():
     # The PyPI OVITO wheel dlopens libEGL. A conda prefix has that library
     # and does not put it on the loader path of a wheel built for PyPI.
-    prefix = os.environ.get("CONDA_PREFIX", "")
-    if not prefix:
-        return
-    lib = os.path.join(prefix, "lib")
-    if not os.path.isfile(os.path.join(lib, "libEGL.so.1")):
-        return
-    current = os.environ.get("LD_LIBRARY_PATH", "")
-    if lib not in current.split(os.pathsep):
-        os.environ["LD_LIBRARY_PATH"] = lib + (os.pathsep + current if current else "")
+    # Qt resolves that dependency from its own runpath, so map the library
+    # before the import. Meson does not forward CONDA_PREFIX.
+    import ctypes
+
+    prefixes = []
+    if os.environ.get("CONDA_PREFIX"):
+        prefixes.append(os.environ["CONDA_PREFIX"])
+    prefixes.append(sys.prefix)
+    for prefix in prefixes:
+        lib = os.path.join(prefix, "lib", "libEGL.so.1")
+        if os.path.isfile(lib):
+            ctypes.CDLL(lib, mode=ctypes.RTLD_GLOBAL)
+            return
 
 
 def tachyon_scene(render, path, positions, colours, radii, meshes, forward, up, width, frame=None):

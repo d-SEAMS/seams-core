@@ -175,7 +175,27 @@ def fail(message):
     raise SystemExit(1)
 
 
+def _ensure_libegl(env, program=None):
+    # The PyPI OVITO wheel dlopens libEGL. A conda prefix has that library
+    # and does not put it on the loader path of a wheel built for PyPI.
+    current = env.get("LD_LIBRARY_PATH", "")
+    parts = [part for part in current.split(os.pathsep) if part]
+    candidates = []
+    if program:
+        candidates.append(os.path.join(os.path.dirname(os.path.dirname(program)), "lib"))
+    prefix = env.get("CONDA_PREFIX", "")
+    if prefix:
+        candidates.append(os.path.join(prefix, "lib"))
+    candidates.append(os.path.join(sys.prefix, "lib"))
+    for lib in candidates:
+        if os.path.isfile(os.path.join(lib, "libEGL.so.1")) and lib not in parts:
+            parts.insert(0, lib)
+    if parts:
+        env["LD_LIBRARY_PATH"] = os.pathsep.join(parts)
+
+
 def stack_ok():
+    _ensure_libegl(os.environ)
     try:
         import ase  # noqa: F401
         import chemparseplot  # noqa: F401
@@ -203,14 +223,16 @@ def relaunch(argv):
                 continue
         except OSError:
             continue
+        env = os.environ.copy()
+        _ensure_libegl(env, program)
         probe = subprocess.run(
             [program, "-c", "import chemparseplot, ovito, ase"],
             check=False,
             capture_output=True,
+            env=env,
         )
         if probe.returncode != 0:
             continue
-        env = os.environ.copy()
         env["MOLECULES_PY"] = "1"
         done = subprocess.run([program, str(Path(__file__).resolve()), *argv], env=env)
         return done.returncode
