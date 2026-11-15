@@ -1217,9 +1217,46 @@ void enumerateFromSource(const Graph &adjacency, const DistOracle &oracle,
  * @return A vector of vectors of the rings; each ring contains the atom
  *  indices of the ring members.
  */
+//! Ring sizes instead of rings: searchPacked fills counts[s] for s < len
+//! and returns no rings.
+struct SizeCounts {
+  int *counts = nullptr;
+  int len = 0;
+};
+
 static std::vector<std::vector<int>>
 searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &sources,
-             bool legacy);
+             bool legacy, SizeCounts sizes = {});
+
+//! Ring sizes held by the per-source pools, summed over the team.
+static void countSizes(RingPool *pools, int nPools, int use, SizeCounts sizes) {
+  for (int i = 0; i < sizes.len; i++) {
+    sizes.counts[i] = 0;
+  }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel num_threads(use) if (use > 1 && !omp_in_parallel())
+#endif
+  {
+    std::vector<long long> local(static_cast<std::size_t>(sizes.len), 0);
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static) nowait
+#endif
+    for (int k = 0; k < nPools; k++) {
+      for (const auto &ring : pools[k]) {
+        const std::size_t size = ring.size();
+        if (size < local.size()) {
+          local[size] += 1;
+        }
+      }
+    }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp critical(seams_ring_sizes)
+#endif
+    for (int i = 0; i < sizes.len; i++) {
+      sizes.counts[i] += static_cast<int>(local[static_cast<std::size_t>(i)]);
+    }
+  }
+}
 
 [[gnu::noinline]] PackedRows vectorNeighbourRows(
     const std::vector<std::vector<int>> &nList, int nVertices, int use) {
@@ -1512,29 +1549,54 @@ primitive::ringNetworkBalls(const std::vector<std::vector<int>> &nList, int maxD
   return searchRings(nList, maxDepth, std::vector<char>(), true);
 }
 
+//! Packed rows of a CSR graph, each row sorted.
+static PackedRows csrRows(const std::vector<int> &offsets, const std::vector<int> &cols) {
+  PackedRows adjacency;
+  const int nRows = static_cast<int>(offsets.size()) - 1;
+  adjacency.first.resize(offsets.size());
+  adjacency.cols.resize(cols.size());
+  std::size_t *first = adjacency.first.data();
+  int *dst = adjacency.cols.data();
+  const int *src = cols.data();
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nRows >= 2048 && !omp_in_parallel())
+#endif
+  for (int i = 0; i < nRows; ++i) {
+    const int a = offsets[static_cast<std::size_t>(i)];
+    const int b = offsets[static_cast<std::size_t>(i) + 1];
+    first[i] = static_cast<std::size_t>(a);
+    std::copy(src + a, src + b, dst + a);
+    std::sort(dst + a, dst + b);
+  }
+  first[nRows] = static_cast<std::size_t>(offsets[static_cast<std::size_t>(nRows)]);
+  return adjacency;
+}
+
 std::vector<std::vector<int>>
 primitive::ringNetwork(const std::vector<int> &offsets, const std::vector<int> &cols,
                        int maxDepth, const std::vector<char> &sources) {
   seams::adoptThreads();
-  PackedRows adjacency;
   if (offsets.size() < 2) {
     return {};
   }
-  adjacency.first.resize(offsets.size());
-  for (std::size_t i = 0; i < offsets.size(); i++) {
-    adjacency.first[i] = static_cast<std::size_t>(offsets[i]);
-  }
-  adjacency.cols = cols;
-  const int nRows = static_cast<int>(offsets.size()) - 1;
-  for (int i = 0; i < nRows; ++i) {
-    auto *begin = adjacency.cols.data() +
-                  static_cast<std::ptrdiff_t>(adjacency.first[static_cast<std::size_t>(i)]);
-    auto *end = adjacency.cols.data() +
-                static_cast<std::ptrdiff_t>(adjacency.first[static_cast<std::size_t>(i + 1)]);
-    std::sort(begin, end);
-  }
+  PackedRows adjacency = csrRows(offsets, cols);
   gRingSplit.adj_ms = 0;
   return searchPacked(std::move(adjacency), maxDepth, sources, false);
+}
+
+void primitive::ringSizeCounts(const std::vector<int> &offsets, const std::vector<int> &cols,
+                               int maxDepth, int *counts, int countsLen) {
+  for (int i = 0; i < countsLen; i++) {
+    counts[i] = 0;
+  }
+  seams::adoptThreads();
+  if (offsets.size() < 2 || countsLen <= 0) {
+    return;
+  }
+  PackedRows adjacency = csrRows(offsets, cols);
+  gRingSplit.adj_ms = 0;
+  (void)searchPacked(std::move(adjacency), maxDepth, std::vector<char>(), false,
+                     SizeCounts{counts, countsLen});
 }
 
 /**
@@ -1545,7 +1607,7 @@ primitive::ringNetwork(const std::vector<int> &offsets, const std::vector<int> &
  */
 static std::vector<std::vector<int>>
 searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &sources,
-             bool legacy) {
+             bool legacy, SizeCounts sizes) {
   seams::adoptThreads();
   gProfile = false;
   if (const char *prof = std::getenv("SEAMS_RING_PROFILE")) {
@@ -1765,7 +1827,9 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
     auto *pools = &perSource;
 #pragma omp parallel num_threads(use)
     {
-      RingScratch scratch;
+      // Kept by each worker for the next search, so the level and path
+      // tables are not faulted in again on every call.
+      thread_local RingScratch scratch;
 #pragma omp for schedule(guided)
       for (int k = 0; k < nFrom; k++) {
         if (gSourceWorkPtr == nullptr) {
@@ -1789,9 +1853,13 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
     }
     gRingSplit.enumerate_ms = millisSince(enumStart);
     const auto mergeStart = std::chrono::steady_clock::now();
-    for (int k = 0; k < nFrom; k++) {
-      for (const auto &ring : (*pools)[static_cast<std::size_t>(k)]) {
-        rings.push_back(ring);
+    if (sizes.counts != nullptr) {
+      countSizes(pools->data(), nFrom, use, sizes);
+    } else {
+      for (int k = 0; k < nFrom; k++) {
+        for (const auto &ring : (*pools)[static_cast<std::size_t>(k)]) {
+          rings.push_back(ring);
+        }
       }
     }
     balls.clear();
@@ -1805,8 +1873,25 @@ searchPacked(PackedRows adjacency, int maxDepth, const std::vector<char> &source
 #endif
 
   const auto enumStart = std::chrono::steady_clock::now();
-  RingScratch scratch;
-  if (gSourceWorkPtr == nullptr) {
+  thread_local RingScratch scratch;
+  if (sizes.counts != nullptr) {
+    // One pool, emptied per source, so the ring buffers are reused.
+    thread_local RingPool pool;
+    for (int i = 0; i < sizes.len; i++) {
+      sizes.counts[i] = 0;
+    }
+    for (const int src : from) {
+      pool.reset();
+      enumerateFromSource(adjacency, oracle, src, maxDepth, maxLvl, scratch, pool,
+                          nullptr, legacy);
+      for (const auto &ring : pool) {
+        const std::size_t size = ring.size();
+        if (size < static_cast<std::size_t>(sizes.len)) {
+          sizes.counts[size] += 1;
+        }
+      }
+    }
+  } else if (gSourceWorkPtr == nullptr) {
     for (const int src : from) {
       enumerateFromSource(adjacency, oracle, src, maxDepth, maxLvl, scratch,
                           rings, nullptr, legacy);

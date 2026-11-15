@@ -996,6 +996,7 @@ SteinhardtQl cutoffSolid(
     int orderL, int typeI, bool average, bool invariants,
     std::vector<double> *q6out = nullptr, bool rebuild = true) {
   const int n = yCloud.nop;
+  const auto tIn = std::chrono::steady_clock::now();
   SteinhardtQl result;
   result.ql.assign(static_cast<std::size_t>(n), 0.0);
   result.qlBar.assign(static_cast<std::size_t>(n), 0.0);
@@ -1046,13 +1047,15 @@ SteinhardtQl cutoffSolid(
   const double hz = 0.5 * Lz;
   const bool tilt = yCloud.box.size() >= 6;
   const gen::FracBox frac = gen::makeFracBox(yCloud);
-  bool uniform = true;
+  int mixed = 0;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) reduction(| : mixed) num_threads(seams::teamFor(n)) \
+    if (seams::teamFor(n) > 1 && !omp_in_parallel())
+#endif
   for (int i = 0; i < n; i++) {
-    if (yCloud.pts[static_cast<std::size_t>(i)].type != typeI) {
-      uniform = false;
-      break;
-    }
+    mixed |= static_cast<int>(yCloud.pts[static_cast<std::size_t>(i)].type != typeI);
   }
+  const bool uniform = mixed == 0;
   std::vector<int> subset;
   const std::vector<int> *which = nullptr;
   if (!uniform) {
@@ -1633,7 +1636,8 @@ SteinhardtQl cutoffSolid(
     };
     std::cerr << "ql-csr l=" << orderL << " n=" << n << " L=" << Lx
               << " pairs=" << scratch.cols.size() << " team=" << seams::teamFor(n)
-              << " csr_ms=" << ms(t0, tCsr) << " ylm_ms=" << ms(tCsr, tYlm)
+              << " pre_ms=" << ms(tIn, t0) << " csr_ms=" << ms(t0, tCsr)
+              << " ylm_ms=" << ms(tCsr, tYlm)
               << " bar_ms=" << ms(tYlm, tEnd) << "\n";
   }
   return result;

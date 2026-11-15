@@ -49,6 +49,15 @@ struct UninitD {
   UninitD() noexcept {}
 };
 
+struct UninitI {
+  int v;
+  UninitI() noexcept {}
+};
+
+struct alignas(64) TeamSum {
+  long long v = 0;
+};
+
 int teamRank() {
 #ifdef SEAMS_HAS_OPENMP
   return omp_get_thread_num();
@@ -94,13 +103,15 @@ struct Scratch {
   std::vector<int> hist;
   std::vector<int> counts;
   std::vector<int> cursor;
-  // Neighbour ids captured during the count walk, stride kStashCap.
-  // The fill then copies this instead of walking the cells again.
-  std::vector<int> stash;
-  int overflowed = 0;
+  // Neighbour ids of each packed slot, stride kSlotRow, and the slot of
+  // each cloud index (-1 outside the subset). Left uninitialised so the
+  // team, not the caller, first touches the pages it writes.
+  std::vector<UninitI> stash;
+  std::vector<UninitI> slotCount;
+  std::vector<UninitI> slotOf;
+  std::vector<TeamSum> part;
 };
 
-constexpr int kStashCap = 48;
 
 Scratch &scratch() {
   // One buffer per calling thread. A trial pool outside OpenMP used to
@@ -343,350 +354,128 @@ void passFast(const double *xs, const double *ys, const double *zs,
   }
 }
 
-// One z layer of the half stencil. The pair is stored only on the atom
-// in this layer. A forward step in x reaches back one z layer, so two
-// layers of the same parity both touch the atoms between them; the
-// partner row is filled after those layers have stopped.
-void halfZLayer(int cz, const double *xs, const double *ys, const double *zs,
-                const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
-                const double *shx, const double *shy, const double *shz, double rc2,
-                int *counts, int *stash, int *overflowed) {
-  for (int cy = 0; cy < ncy; ++cy) {
-    for (int cx = 0; cx < ncx; ++cx) {
-      const int c = (cx * ncy + cy) * ncz + cz;
+// Stride of one slot row. A row holds at most kSlotRow - 1 ids; the last
+// entry takes the stores of candidates that missed, so the walk does not
+// branch on the distance test.
+constexpr int kSlotRow = 48;
+
+// Exclusive scan of the per-thread cell histograms. Every thread of the
+// team calls it. Afterwards hist[t * nCells + c] is the first slot of
+// thread t's atoms in cell c, so the scatter keeps the atoms of a cell in
+// ascending input order whatever the team width.
+void teamCellPrefix(int *hist, int nCells, int tid, int nt, int *cellStart, TeamSum *part) {
+  const int c0 = static_cast<int>(static_cast<long long>(nCells) * tid / nt);
+  const int c1 = static_cast<int>(static_cast<long long>(nCells) * (tid + 1) / nt);
+  long long sum = 0;
+  for (int c = c0; c < c1; ++c) {
+    for (int t = 0; t < nt; ++t) {
+      sum += hist[static_cast<std::size_t>(t) * static_cast<std::size_t>(nCells) +
+                  static_cast<std::size_t>(c)];
+    }
+  }
+  part[tid].v = sum;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp barrier
+#endif
+  int acc = 0;
+  for (int t = 0; t < tid; ++t) {
+    acc += static_cast<int>(part[t].v);
+  }
+  for (int c = c0; c < c1; ++c) {
+    cellStart[c] = acc;
+    for (int t = 0; t < nt; ++t) {
+      int &h = hist[static_cast<std::size_t>(t) * static_cast<std::size_t>(nCells) +
+                    static_cast<std::size_t>(c)];
+      const int take = h;
+      h = acc;
+      acc += take;
+    }
+  }
+  if (tid == nt - 1) {
+    cellStart[nCells] = acc;
+  }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp barrier
+#endif
+}
+
+// Column range [k0, k1) of thread tid when the slots are split evenly.
+void slotBalancedColumns(const int *cellStart, int nCols, int ncz, int tid, int nt, int &k0,
+                         int &k1) {
+  const long long nSlots = cellStart[static_cast<std::size_t>(nCols) * ncz];
+  auto firstColumn = [&](int t) {
+    if (t <= 0) {
+      return 0;
+    }
+    if (t >= nt) {
+      return nCols;
+    }
+    const long long want = nSlots * t / nt;
+    int lo = 0;
+    int hi = nCols;
+    while (lo < hi) {
+      const int mid = lo + (hi - lo) / 2;
+      if (cellStart[static_cast<std::size_t>(mid) * ncz] < want) {
+        lo = mid + 1;
+      } else {
+        hi = mid;
+      }
+    }
+    return lo;
+  };
+  k0 = firstColumn(tid);
+  k1 = firstColumn(tid + 1);
+}
+
+// Rows of the slots in columns [k0, k1). A pair whose two columns both lie
+// in the range is tested once, from the lower column or the lower z cell,
+// and lands in both rows. A pair that crosses the range edge is tested from
+// each side, and each side writes only its own row. The two tests of a pair
+// negate every component of the separation, so every decision matches the
+// single test of a half stencil bit for bit. Returns the largest row
+// length in the range.
+template <bool Half>
+int pairedRows(const double *xs, const double *ys, const double *zs, const int *ids,
+               const int *cellStart, int ncx, int ncy, int ncz, const double *shx,
+               const double *shy, const double *shz, double rc2, int k0, int k1,
+               int *slotCount, int *stash, bool branchy) {
+  struct Run {
+    int begin;
+    int end;
+    double sx, sy, sz;
+  };
+  const int s0 = cellStart[static_cast<std::size_t>(k0) * ncz];
+  const int s1 = cellStart[static_cast<std::size_t>(k1) * ncz];
+  for (int s = s0; s < s1; ++s) {
+    slotCount[s] = 0;
+  }
+  constexpr int kLast = kSlotRow - 1;
+  for (int col = k0; col < k1; ++col) {
+    const int cx = col / ncy;
+    const int cy = col - cx * ncy;
+    for (int cz = 0; cz < ncz; ++cz) {
+      const int c = col * ncz + cz;
       const int b = cellStart[c];
       const int e = cellStart[c + 1];
       if (b == e) {
         continue;
       }
-      // Interior cells have no periodic image. The thirteen forward
-      // neighbours are plain index steps, and the shift is zero.
-      if (cx > 0 && cx + 1 < ncx && cy > 0 && cy + 1 < ncy && cz > 0 && cz + 1 < ncz) {
-        struct Step {
-          int begin;
-          int end;
-        };
-        Step nbr[14];
-        int nn = 0;
-        nbr[nn++] = {b, e};
-        const int delta[13][3] = {
-            {1, -1, -1}, {1, -1, 0}, {1, -1, 1}, {1, 0, -1}, {1, 0, 0},
-            {1, 0, 1},   {1, 1, -1}, {1, 1, 0},  {1, 1, 1},  {0, 1, -1},
-            {0, 1, 0},   {0, 1, 1},   {0, 0, 1},
-        };
-        for (const auto &d : delta) {
-          const int ncid = ((cx + d[0]) * ncy + (cy + d[1])) * ncz + (cz + d[2]);
-          const int jb = cellStart[ncid];
-          const int je = cellStart[ncid + 1];
+      const bool zInside = !branchy && cz > 0 && cz + 1 < ncz;
+      Run own[27];
+      Run both[27];
+      int nOwn = 0;
+      int nBoth = 0;
+      auto addColumn = [&](Run *runs, int &nr, int column, int ix, int iy) {
+        if (zInside) {
+          const int jb = cellStart[column + cz - 1];
+          const int je = cellStart[column + cz + 2];
           if (jb != je) {
-            nbr[nn++] = {jb, je};
+            const int k = (ix + 1) * 9 + (iy + 1) * 3 + 1;
+            runs[nr++] = {jb, je, shx[k], shy[k], shz[k]};
           }
+          return;
         }
-        for (int i = b; i < e; ++i) {
-          const int ii = ids[i];
-          const double xi = xs[i];
-          const double yi = ys[i];
-          const double zi = zs[i];
-          int *rowI = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
-          for (int t = 0; t < nn; ++t) {
-            const int j0 = (t == 0) ? i + 1 : nbr[t].begin;
-            for (int j = j0; j < nbr[t].end; ++j) {
-              const double dx = xi - xs[j];
-              const double dy = yi - ys[j];
-              const double dz = zi - zs[j];
-              if (!(dx * dx + dy * dy + dz * dz < rc2)) {
-                continue;
-              }
-              const int jj = ids[j];
-              int &ni = counts[ii];
-              if (ni < kStashCap) {
-                rowI[ni] = jj;
-              } else {
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp atomic write
-#endif
-                *overflowed = 1;
-              }
-              ++ni;
-            }
-          }
-        }
-        continue;
-      }
-      struct Nbr {
-        int begin;
-        int end;
-        double sx, sy, sz;
-      };
-      Nbr nbr[14];
-      int nn = 0;
-      nbr[nn++] = {b, e, 0.0, 0.0, 0.0};
-      for (int ox = -1; ox <= 1; ++ox) {
-        for (int oy = -1; oy <= 1; ++oy) {
-          for (int oz = -1; oz <= 1; ++oz) {
-            if (!(ox > 0 || (ox == 0 && oy > 0) || (ox == 0 && oy == 0 && oz > 0))) {
-              continue;
-            }
-            int nx = cx + ox;
-            int ix = 0;
-            if (nx >= ncx) {
-              nx -= ncx;
-              ix = 1;
-            } else if (nx < 0) {
-              nx += ncx;
-              ix = -1;
-            }
-            int ny = cy + oy;
-            int iy = 0;
-            if (ny >= ncy) {
-              ny -= ncy;
-              iy = 1;
-            } else if (ny < 0) {
-              ny += ncy;
-              iy = -1;
-            }
-            int nz = cz + oz;
-            int iz = 0;
-            if (nz >= ncz) {
-              nz -= ncz;
-              iz = 1;
-            } else if (nz < 0) {
-              nz += ncz;
-              iz = -1;
-            }
-            const int ncid = (nx * ncy + ny) * ncz + nz;
-            const int jb = cellStart[ncid];
-            const int je = cellStart[ncid + 1];
-            if (jb == je) {
-              continue;
-            }
-            const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
-            nbr[nn++] = {jb, je, shx[k], shy[k], shz[k]};
-          }
-        }
-      }
-      for (int i = b; i < e; ++i) {
-        const int ii = ids[i];
-        const double xi = xs[i];
-        const double yi = ys[i];
-        const double zi = zs[i];
-        int *rowI = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
-        for (int t = 0; t < nn; ++t) {
-          const Nbr nb = nbr[t];
-          const int j0 = (t == 0) ? i + 1 : nb.begin;
-          for (int j = j0; j < nb.end; ++j) {
-            const double dx = xi - xs[j] - nb.sx;
-            const double dy = yi - ys[j] - nb.sy;
-            const double dz = zi - zs[j] - nb.sz;
-            if (!(dx * dx + dy * dy + dz * dz < rc2)) {
-              continue;
-            }
-            const int jj = ids[j];
-            int &ni = counts[ii];
-            if (ni < kStashCap) {
-              rowI[ni] = jj;
-            } else {
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp atomic write
-#endif
-              *overflowed = 1;
-            }
-            ++ni;
-          }
-        }
-      }
-    }
-  }
-}
-
-// Copy each one-sided pair onto its partner. counts[] still holds the
-// one-sided lengths and is updated as the reverse rows grow.
-void mirrorStash(const int *ids, int nPacked, int *counts, int *stash, int *overflowed) {
-  std::vector<int> oneSided(static_cast<std::size_t>(nPacked));
-  for (int s = 0; s < nPacked; ++s) {
-    oneSided[static_cast<std::size_t>(s)] = counts[ids[s]];
-  }
-  for (int s = 0; s < nPacked; ++s) {
-    const int ii = ids[s];
-    const int n = oneSided[static_cast<std::size_t>(s)];
-    if (n <= 0) {
-      continue;
-    }
-    const int nUse = n < kStashCap ? n : kStashCap;
-    const int *row = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
-    for (int k = 0; k < nUse; ++k) {
-      const int jj = row[k];
-      int &nj = counts[jj];
-      if (nj < kStashCap) {
-        stash[static_cast<std::size_t>(jj) * static_cast<std::size_t>(kStashCap) +
-              static_cast<std::size_t>(nj)] = ii;
-      } else {
-        *overflowed = 1;
-      }
-      ++nj;
-    }
-  }
-}
-
-void passFastStashHalf(const double *xs, const double *ys, const double *zs,
-                       const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
-                       const double *shx, const double *shy, const double *shz, double rc2,
-                       int *counts, int *stash, int *overflowed, bool branchy = false);
-
-// Count pass that also keeps the neighbour ids. A shell longer than
-// kStashCap sets *overflowed and the caller repeats the geometry fill.
-// Several threads take the half stencil a z layer at a time. The full
-// stencil visited every pair twice and did not beat one thread. One pair
-// is recorded from the cell of its lower packed slot, and the fill sorts
-// the row so the CSR matches the one-thread half walk.
-
-void passFastStash(const double *xs, const double *ys, const double *zs,
-                   const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
-                   const double *shx, const double *shy, const double *shz, double rc2,
-                   int *counts, int *stash, int *overflowed) {
-  *overflowed = 0;
-#ifdef SEAMS_HAS_OPENMP
-  if (ncz >= 2 && omp_get_max_threads() > 1) {
-    // Each layer stores a pair only on its own atoms. The last layer's +z
-    // wraps onto layer 0 when the length is odd, which is the same parity,
-    // so that layer runs alone after the others have stopped.
-    const int lastWraps = (ncz % 2) == 1;
-    const int nEven = ncz / 2;
-#pragma omp parallel for schedule(static)
-    for (int k = 0; k < nEven; ++k) {
-      halfZLayer(k * 2, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
-                 counts, stash, overflowed);
-    }
-    if (lastWraps) {
-      halfZLayer(ncz - 1, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
-                 counts, stash, overflowed);
-    }
-    const int nOdd = ncz / 2;
-#pragma omp parallel for schedule(static)
-    for (int k = 0; k < nOdd; ++k) {
-      halfZLayer(k * 2 + 1, xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2,
-                 counts, stash, overflowed);
-    }
-    mirrorStash(ids, cellStart[ncx * ncy * ncz], counts, stash, overflowed);
-    return;
-  }
-#endif
-  passFastStashHalf(xs, ys, zs, ids, cellStart, ncx, ncy, ncz, shx, shy, shz, rc2, counts,
-                    stash, overflowed);
-}
-
-
-void passFastStashHalf(const double *xs, const double *ys, const double *zs,
-                       const int *ids, const int *cellStart, int ncx, int ncy, int ncz,
-                       const double *shx, const double *shy, const double *shz, double rc2,
-                       int *counts, int *stash, int *overflowed, bool branchy) {
-  const int nCells = ncx * ncy * ncz;
-  *overflowed = 0;
-  for (int c = 0; c < nCells; ++c) {
-    const int b = cellStart[c];
-    const int e = cellStart[c + 1];
-    if (b == e) {
-      continue;
-    }
-    const int cz = c % ncz;
-    const int cy = (c / ncz) % ncy;
-    const int cx = c / (ncy * ncz);
-    // An interior cell has no periodic image. The forward neighbours are
-    // index steps and the shift is zero, so the wrap tests stay on the
-    // boundary layer. branchy keeps those tests on every cell.
-    if (!branchy && cx > 0 && cx + 1 < ncx && cy > 0 && cy + 1 < ncy && cz > 0 &&
-        cz + 1 < ncz) {
-      int begin[14];
-      int end[14];
-      int nn = 0;
-      begin[nn] = b;
-      end[nn] = e;
-      ++nn;
-      const int delta[13][3] = {
-          {1, -1, -1}, {1, -1, 0}, {1, -1, 1}, {1, 0, -1}, {1, 0, 0},
-          {1, 0, 1},   {1, 1, -1}, {1, 1, 0},  {1, 1, 1},  {0, 1, -1},
-          {0, 1, 0},   {0, 1, 1},   {0, 0, 1},
-      };
-      for (const auto &d : delta) {
-        const int ncid = ((cx + d[0]) * ncy + (cy + d[1])) * ncz + (cz + d[2]);
-        const int jb = cellStart[ncid];
-        const int je = cellStart[ncid + 1];
-        if (jb != je) {
-          begin[nn] = jb;
-          end[nn] = je;
-          ++nn;
-        }
-      }
-      for (int i = b; i < e; ++i) {
-        const int ii = ids[i];
-        const double xi = xs[i];
-        const double yi = ys[i];
-        const double zi = zs[i];
-        int *rowI = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
-        for (int t = 0; t < nn; ++t) {
-          const int j0 = (t == 0) ? i + 1 : begin[t];
-          for (int j = j0; j < end[t]; ++j) {
-            const double dx = xi - xs[j];
-            const double dy = yi - ys[j];
-            const double dz = zi - zs[j];
-            if (!(dx * dx + dy * dy + dz * dz < rc2)) {
-              continue;
-            }
-            const int jj = ids[j];
-            int &ni = counts[ii];
-            int &nj = counts[jj];
-            if (ni < kStashCap) {
-              rowI[ni] = jj;
-            } else {
-              *overflowed = 1;
-            }
-            ++ni;
-            int *rowJ = stash + static_cast<std::size_t>(jj) * static_cast<std::size_t>(kStashCap);
-            if (nj < kStashCap) {
-              rowJ[nj] = ii;
-            } else {
-              *overflowed = 1;
-            }
-            ++nj;
-          }
-        }
-      }
-      continue;
-    }
-    struct Nbr {
-      int begin;
-      int end;
-      double sx, sy, sz;
-    };
-    Nbr nbr[14];
-    int nn = 0;
-    // Same cell, then the 13 cells on the positive side of the stencil.
-    // The opposite cell records the pair, so each pair is seen once.
-    nbr[nn++] = {b, e, 0.0, 0.0, 0.0};
-    for (int ox = -1; ox <= 1; ++ox) {
-      for (int oy = -1; oy <= 1; ++oy) {
         for (int oz = -1; oz <= 1; ++oz) {
-          if (!(ox > 0 || (ox == 0 && oy > 0) || (ox == 0 && oy == 0 && oz > 0))) {
-            continue;
-          }
-          int nx = cx + ox;
-          int ix = 0;
-          if (nx >= ncx) {
-            nx -= ncx;
-            ix = 1;
-          } else if (nx < 0) {
-            nx += ncx;
-            ix = -1;
-          }
-          int ny = cy + oy;
-          int iy = 0;
-          if (ny >= ncy) {
-            ny -= ncy;
-            iy = 1;
-          } else if (ny < 0) {
-            ny += ncy;
-            iy = -1;
-          }
           int nz = cz + oz;
           int iz = 0;
           if (nz >= ncz) {
@@ -696,69 +485,120 @@ void passFastStashHalf(const double *xs, const double *ys, const double *zs,
             nz += ncz;
             iz = -1;
           }
-          const int ncid = (nx * ncy + ny) * ncz + nz;
-          const int jb = cellStart[ncid];
-          const int je = cellStart[ncid + 1];
-          if (jb == je) {
-            continue;
+          const int jb = cellStart[column + nz];
+          const int je = cellStart[column + nz + 1];
+          if (jb != je) {
+            const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
+            runs[nr++] = {jb, je, shx[k], shy[k], shz[k]};
           }
-          const int k = (ix + 1) * 9 + (iy + 1) * 3 + (iz + 1);
-          nbr[nn++] = {jb, je, shx[k], shy[k], shz[k]};
+        }
+      };
+      for (int ox = -1; ox <= 1; ++ox) {
+        int nx = cx + ox;
+        int ix = 0;
+        if (nx >= ncx) {
+          nx -= ncx;
+          ix = 1;
+        } else if (nx < 0) {
+          nx += ncx;
+          ix = -1;
+        }
+        for (int oy = -1; oy <= 1; ++oy) {
+          int ny = cy + oy;
+          int iy = 0;
+          if (ny >= ncy) {
+            ny -= ncy;
+            iy = 1;
+          } else if (ny < 0) {
+            ny += ncy;
+            iy = -1;
+          }
+          const int other = nx * ncy + ny;
+          if (ox == 0 && oy == 0) {
+            // Own column: the cell above, then the cell itself below.
+            int nz = cz + 1;
+            int iz = 0;
+            if (nz >= ncz) {
+              nz -= ncz;
+              iz = 1;
+            }
+            const int jb = cellStart[col * ncz + nz];
+            const int je = cellStart[col * ncz + nz + 1];
+            if (jb != je) {
+              const int k = 9 + 3 + (iz + 1);
+              both[nBoth++] = {jb, je, shx[k], shy[k], shz[k]};
+            }
+          } else if (other < k0 || other >= k1) {
+            addColumn(own, nOwn, other * ncz, ix, iy);
+          } else if (other > col) {
+            addColumn(both, nBoth, other * ncz, ix, iy);
+          }
         }
       }
-    }
-    for (int i = b; i < e; ++i) {
-      const int ii = ids[i];
-      const double xi = xs[i];
-      const double yi = ys[i];
-      const double zi = zs[i];
-      int *rowI = stash + static_cast<std::size_t>(ii) * static_cast<std::size_t>(kStashCap);
-      for (int t = 0; t < nn; ++t) {
-        const Nbr nb = nbr[t];
-        const int j0 = (t == 0) ? i + 1 : nb.begin;
-        for (int j = j0; j < nb.end; ++j) {
-          const double dx = xi - xs[j] - nb.sx;
-          const double dy = yi - ys[j] - nb.sy;
-          const double dz = zi - zs[j] - nb.sz;
-          if (!(dx * dx + dy * dy + dz * dz < rc2)) {
-            continue;
-          }
+      for (int i = b; i < e; ++i) {
+        const int ii = ids[i];
+        const double xi = xs[i];
+        const double yi = ys[i];
+        const double zi = zs[i];
+        int *row = stash + static_cast<std::size_t>(i) * static_cast<std::size_t>(kSlotRow);
+        int n = slotCount[i];
+        for (int j = i + 1; j < e; ++j) {
+          const double dx = xi - xs[j];
+          const double dy = yi - ys[j];
+          const double dz = zi - zs[j];
           const int jj = ids[j];
-          int &ni = counts[ii];
-          int &nj = counts[jj];
-          if (ni < kStashCap) {
-            rowI[ni] = jj;
-          } else {
-            *overflowed = 1;
-          }
-          ++ni;
-          int *rowJ = stash + static_cast<std::size_t>(jj) * static_cast<std::size_t>(kStashCap);
-          if (nj < kStashCap) {
-            rowJ[nj] = ii;
-          } else {
-            *overflowed = 1;
-          }
-          ++nj;
+          const int hit = static_cast<int>(dx * dx + dy * dy + dz * dz < rc2);
+          const int hitI = Half ? hit & static_cast<int>(jj > ii) : hit;
+          const int hitJ = Half ? hit & static_cast<int>(ii > jj) : hit;
+          int *rowJ = stash + static_cast<std::size_t>(j) * static_cast<std::size_t>(kSlotRow);
+          const int m = slotCount[j];
+          row[n < kLast ? n : kLast] = jj;
+          rowJ[m < kLast ? m : kLast] = ii;
+          n += hitI;
+          slotCount[j] = m + hitJ;
         }
+        for (int t = 0; t < nBoth; ++t) {
+          const Run r = both[t];
+          for (int j = r.begin; j < r.end; ++j) {
+            const double dx = xi - xs[j] - r.sx;
+            const double dy = yi - ys[j] - r.sy;
+            const double dz = zi - zs[j] - r.sz;
+            const int jj = ids[j];
+            const int hit = static_cast<int>(dx * dx + dy * dy + dz * dz < rc2);
+            const int hitI = Half ? hit & static_cast<int>(jj > ii) : hit;
+            const int hitJ = Half ? hit & static_cast<int>(ii > jj) : hit;
+            int *rowJ = stash + static_cast<std::size_t>(j) * static_cast<std::size_t>(kSlotRow);
+            const int m = slotCount[j];
+            row[n < kLast ? n : kLast] = jj;
+            rowJ[m < kLast ? m : kLast] = ii;
+            n += hitI;
+            slotCount[j] = m + hitJ;
+          }
+        }
+        for (int t = 0; t < nOwn; ++t) {
+          const Run r = own[t];
+          for (int j = r.begin; j < r.end; ++j) {
+            const double dx = xi - xs[j] - r.sx;
+            const double dy = yi - ys[j] - r.sy;
+            const double dz = zi - zs[j] - r.sz;
+            const int jj = ids[j];
+            int hit = static_cast<int>(dx * dx + dy * dy + dz * dz < rc2);
+            if (Half) {
+              hit &= static_cast<int>(jj > ii);
+            }
+            row[n < kLast ? n : kLast] = jj;
+            n += hit;
+          }
+        }
+        slotCount[i] = n;
       }
     }
   }
-}
-
-void scatterStash(const int *stash, const int *counts, const int *offsets, int *cols,
-                  int nop) {
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (nop >= 256)
-#endif
-  for (int i = 0; i < nop; ++i) {
-    const int n = counts[i];
-    const int *src = stash + static_cast<std::size_t>(i) * static_cast<std::size_t>(kStashCap);
-    int *dst = cols + offsets[i];
-    for (int k = 0; k < n; ++k) {
-      dst[k] = src[k];
-    }
-    sortRow(dst, n);
+  int longest = 0;
+  for (int s = s0; s < s1; ++s) {
+    longest = slotCount[s] > longest ? slotCount[s] : longest;
   }
+  return longest;
 }
 
 template <bool Write>
@@ -1754,15 +1594,19 @@ bool orthoFullCsr(
 #endif
     }
   } serialBelow(nSubset);
-  offsets.assign(static_cast<std::size_t>(nop) + 1, 0);
-  cols.clear();
+  auto emptyRows = [&]() {
+    offsets.assign(static_cast<std::size_t>(nop) + 1, 0);
+    cols.clear();
+  };
   if (nop == 0 || nSubset == 0) {
+    emptyRows();
     return true;
   }
   if (subset != nullptr) {
     for (int k = 0; k < nSubset; ++k) {
       const int id = (*subset)[static_cast<std::size_t>(k)];
       if (id < 0 || id >= nop) {
+        emptyRows();
         return false;
       }
     }
@@ -1811,35 +1655,49 @@ bool orthoFullCsr(
   lc_set_threads(nested ? 1 : maxThreads);
 #endif
   Scratch &sc = nested ? local : scratch();
-  sc.px.resize(static_cast<std::size_t>(nSubset));
-  sc.py.resize(static_cast<std::size_t>(nSubset));
-  sc.pz.resize(static_cast<std::size_t>(nSubset));
-  sc.xs.resize(static_cast<std::size_t>(nSubset));
-  sc.ys.resize(static_cast<std::size_t>(nSubset));
-  sc.zs.resize(static_cast<std::size_t>(nSubset));
-  sc.cellOf.resize(static_cast<std::size_t>(nSubset));
-  sc.ids.resize(static_cast<std::size_t>(nSubset));
-  sc.cellStart.assign(static_cast<std::size_t>(nCells) + 1, 0);
-  sc.hist.assign(static_cast<std::size_t>(maxThreads) * static_cast<std::size_t>(nCells),
-                 0);
-  sc.counts.assign(static_cast<std::size_t>(nop), 0);
+  auto grow = [](auto &v, std::size_t n) {
+    if (v.size() < n) {
+      v.resize(n);
+    }
+  };
+  const std::size_t nPacked = static_cast<std::size_t>(nSubset);
+  grow(sc.px, nPacked);
+  grow(sc.py, nPacked);
+  grow(sc.pz, nPacked);
+  grow(sc.xs, nPacked);
+  grow(sc.ys, nPacked);
+  grow(sc.zs, nPacked);
+  grow(sc.cellOf, nPacked);
+  grow(sc.ids, nPacked);
+  grow(sc.slotOf, static_cast<std::size_t>(nop));
+  grow(sc.part, static_cast<std::size_t>(maxThreads));
+  // Every entry of cellStart and of each thread's histogram row is written
+  // inside the team, so neither is cleared here.
+  grow(sc.cellStart, static_cast<std::size_t>(nCells) + 1);
+  grow(sc.hist, static_cast<std::size_t>(maxThreads) * static_cast<std::size_t>(nCells));
+  const bool team = !nested && nSubset >= 256;
 
   const auto tBin = Clock::now();
   int threads = 1;
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel if (!nested && nSubset >= 256)
+#pragma omp parallel if (team)
 #endif
   {
     const int tid = teamRank();
     const int nt = teamSize();
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp single
-#endif
-    {
+    if (tid == 0) {
       threads = nt;
     }
     int *hist = sc.hist.data() + static_cast<std::size_t>(tid) * static_cast<std::size_t>(nCells);
     std::fill(hist, hist + nCells, 0);
+    if (subset != nullptr) {
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp for schedule(static) nowait
+#endif
+      for (int i = 0; i < nop; ++i) {
+        sc.slotOf[static_cast<std::size_t>(i)].v = -1;
+      }
+    }
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp for schedule(static)
 #endif
@@ -1872,32 +1730,10 @@ bool orthoFullCsr(
       sc.pz[static_cast<std::size_t>(k)].v = wrapped[2];
       ++hist[cid];
     }
+    teamCellPrefix(sc.hist.data(), nCells, tid, nt, sc.cellStart.data(), sc.part.data());
+    // Same static split as the count loop, so each thread places the atoms
+    // it counted.
 #ifdef SEAMS_HAS_OPENMP
-#pragma omp barrier
-#pragma omp single
-#endif
-    {
-      sc.cellStart[0] = 0;
-      for (int c = 0; c < nCells; ++c) {
-        int sum = 0;
-        for (int t = 0; t < nt; ++t) {
-          sum += sc.hist[static_cast<std::size_t>(t) * static_cast<std::size_t>(nCells) +
-                         static_cast<std::size_t>(c)];
-        }
-        sc.cellStart[static_cast<std::size_t>(c) + 1] =
-            sc.cellStart[static_cast<std::size_t>(c)] + sum;
-        int acc = sc.cellStart[static_cast<std::size_t>(c)];
-        for (int t = 0; t < nt; ++t) {
-          int &h = sc.hist[static_cast<std::size_t>(t) * static_cast<std::size_t>(nCells) +
-                           static_cast<std::size_t>(c)];
-          const int take = h;
-          h = acc;
-          acc += take;
-        }
-      }
-    }
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp barrier
 #pragma omp for schedule(static)
 #endif
     for (int k = 0; k < nSubset; ++k) {
@@ -1905,6 +1741,7 @@ bool orthoFullCsr(
       const int slot = hist[cid]++;
       const int id = subset == nullptr ? k : (*subset)[static_cast<std::size_t>(k)];
       sc.ids[static_cast<std::size_t>(slot)] = id;
+      sc.slotOf[static_cast<std::size_t>(id)].v = slot;
       sc.xs[static_cast<std::size_t>(slot)].v = sc.px[static_cast<std::size_t>(k)].v;
       sc.ys[static_cast<std::size_t>(slot)].v = sc.py[static_cast<std::size_t>(k)].v;
       sc.zs[static_cast<std::size_t>(slot)].v = sc.pz[static_cast<std::size_t>(k)].v;
@@ -1920,69 +1757,136 @@ bool orthoFullCsr(
   double shx[27], shy[27], shz[27];
   fillOrthoShift(len[0], len[1], len[2], shx, shy, shz);
 
-  const auto tCount = Clock::now();
-  const bool stashOk = fast && !half;
-  if (stashOk &&
-      sc.stash.size() < static_cast<std::size_t>(nop) * static_cast<std::size_t>(kStashCap)) {
-    sc.stash.resize(static_cast<std::size_t>(nop) * static_cast<std::size_t>(kStashCap));
-  }
-  // One half-stencil walk. Each unordered pair is tested once and written
-  // into both rows. Private degree rows keep the threads off one counts line.
-  //
-  // The linkcell block copies each thread's cells and halo before the
-  // stencil. On ice that copy is slower than the one-pass count walk, and
-  // the block never sized the Rayon pool, so eight threads lost to one
-  // thread and to vesin. The CSR and the row-vector callers both take the
-  // count walk. The caller builds row vectors from that CSR.
-  if (fast) {
-    if (half) {
-      passFast<false, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                            ncell[2], shx, shy, shz, rc2, sc.counts.data(), nullptr, nullptr,
-                            branchy);
-    } else if (maxThreads == 1) {
-      passFastStashHalf(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                        ncell[2], shx, shy, shz, rc2, sc.counts.data(), sc.stash.data(),
-                        &sc.overflowed, branchy);
-    } else {
-      passFastStash(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1], ncell[2],
-                    shx, shy, shz, rc2, sc.counts.data(), sc.stash.data(), &sc.overflowed);
-    }
-  } else {
+  if (!fast) {
+    const auto tCount = Clock::now();
+    offsets.assign(static_cast<std::size_t>(nop) + 1, 0);
+    cols.clear();
+    sc.counts.assign(static_cast<std::size_t>(nop), 0);
     passSafe<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                     ncell[2], reach[0], reach[1], reach[2], len[0], len[1], len[2], rc2,
                     sc.counts.data(), nullptr, nullptr, half);
-  }
-  phase().count = msSince(tCount);
-
-  const auto tPrefix = Clock::now();
-  offsets[0] = 0;
-  for (int i = 0; i < nop; ++i) {
-    offsets[static_cast<std::size_t>(i) + 1] =
-        offsets[static_cast<std::size_t>(i)] + sc.counts[static_cast<std::size_t>(i)];
-  }
-  const int nnz = offsets[static_cast<std::size_t>(nop)];
-  cols.resize(static_cast<std::size_t>(nnz));
-  phase().prefix = msSince(tPrefix);
-  phase().pairs = nnz;
-
-  const auto tFill = Clock::now();
-  if (nnz > 0) {
-    if (stashOk && sc.overflowed == 0) {
-      scatterStash(sc.stash.data(), sc.counts.data(), offsets.data(), cols.data(), nop);
-    } else if (fast) {
-      if (half) {
-        passFast<true, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                             ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data(),
-                             branchy);
-      } else {
-        passFast<true, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
-                              ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data(),
-                              branchy);
-      }
-    } else {
+    phase().count = msSince(tCount);
+    const auto tPrefix = Clock::now();
+    for (int i = 0; i < nop; ++i) {
+      offsets[static_cast<std::size_t>(i) + 1] =
+          offsets[static_cast<std::size_t>(i)] + sc.counts[static_cast<std::size_t>(i)];
+    }
+    const int nnz = offsets[static_cast<std::size_t>(nop)];
+    cols.resize(static_cast<std::size_t>(nnz));
+    phase().prefix = msSince(tPrefix);
+    phase().pairs = nnz;
+    const auto tFill = Clock::now();
+    if (nnz > 0) {
       passSafe<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
                      ncell[2], reach[0], reach[1], reach[2], len[0], len[1], len[2], rc2,
                      nullptr, offsets.data(), cols.data(), half);
+    }
+    phase().fill = msSince(tFill);
+    publishProfile();
+    return true;
+  }
+
+  // One walk records the rows by packed slot. Each thread takes the cell
+  // columns of an even share of the slots and writes only those rows.
+  //
+  // The linkcell block copies each thread's cells and halo before the
+  // stencil. On ice that copy is slower than this walk, so the CSR and the
+  // row-vector callers both take it. The caller builds row vectors from
+  // that CSR.
+  const auto tCount = Clock::now();
+  grow(sc.stash, nPacked * static_cast<std::size_t>(kSlotRow));
+  grow(sc.slotCount, nPacked);
+  int *stash = &sc.stash[0].v;
+  int *slotCount = &sc.slotCount[0].v;
+  int longest = 0;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (team) reduction(max : longest)
+#endif
+  {
+    int k0 = 0;
+    int k1 = ncell[0] * ncell[1];
+    slotBalancedColumns(sc.cellStart.data(), k1, ncell[2], teamRank(), teamSize(), k0, k1);
+    longest = half ? pairedRows<true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0],
+                                      ncell[1], ncell[2], shx, shy, shz, rc2, k0, k1,
+                                      slotCount, stash, branchy)
+                   : pairedRows<false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0],
+                                       ncell[1], ncell[2], shx, shy, shz, rc2, k0, k1,
+                                       slotCount, stash, branchy);
+  }
+  phase().count = msSince(tCount);
+
+  // Degree of each cloud index, the exclusive scan, and the copy of each
+  // stash row into its sorted CSR row, one contiguous range of rows per
+  // thread. A row longer than the stash is filled by a second walk.
+  const bool overflow = longest > kSlotRow - 1;
+  const auto tPrefix = Clock::now();
+  auto tFill = tPrefix;
+  grow(sc.counts, static_cast<std::size_t>(nop));
+  offsets.resize(static_cast<std::size_t>(nop) + 1);
+  int nnz = 0;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel if (!nested && nop >= 256)
+#endif
+  {
+    const int tid = teamRank();
+    const int nt = teamSize();
+    const int i0 = static_cast<int>(static_cast<long long>(nop) * tid / nt);
+    const int i1 = static_cast<int>(static_cast<long long>(nop) * (tid + 1) / nt);
+    long long sum = 0;
+    for (int i = i0; i < i1; ++i) {
+      const int s = sc.slotOf[static_cast<std::size_t>(i)].v;
+      const int c = s < 0 ? 0 : slotCount[s];
+      sc.counts[static_cast<std::size_t>(i)] = c;
+      sum += c;
+    }
+    sc.part[static_cast<std::size_t>(tid)].v = sum;
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp barrier
+#endif
+    int run = 0;
+    for (int t = 0; t < tid; ++t) {
+      run += static_cast<int>(sc.part[static_cast<std::size_t>(t)].v);
+    }
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp single
+#endif
+    {
+      long long total = 0;
+      for (int t = 0; t < nt; ++t) {
+        total += sc.part[static_cast<std::size_t>(t)].v;
+      }
+      nnz = static_cast<int>(total);
+      offsets[static_cast<std::size_t>(nop)] = nnz;
+      cols.resize(static_cast<std::size_t>(nnz));
+      tFill = Clock::now();
+    }
+    int *out = cols.data();
+    for (int i = i0; i < i1; ++i) {
+      offsets[static_cast<std::size_t>(i)] = run;
+      const int c = sc.counts[static_cast<std::size_t>(i)];
+      if (!overflow && c > 0) {
+        const int *src = stash + static_cast<std::size_t>(sc.slotOf[static_cast<std::size_t>(i)].v) *
+                                     static_cast<std::size_t>(kSlotRow);
+        int *dst = out + run;
+        for (int k = 0; k < c; ++k) {
+          dst[k] = src[k];
+        }
+        sortRow(dst, c);
+      }
+      run += c;
+    }
+  }
+  phase().prefix = std::chrono::duration<double, std::milli>(tFill - tPrefix).count();
+  phase().pairs = nnz;
+  if (overflow && nnz > 0) {
+    if (half) {
+      passFast<true, true>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                           ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data(),
+                           branchy);
+    } else {
+      passFast<true, false>(x, y, z, sc.ids.data(), sc.cellStart.data(), ncell[0], ncell[1],
+                            ncell[2], shx, shy, shz, rc2, nullptr, offsets.data(), cols.data(),
+                            branchy);
     }
   }
   phase().fill = msSince(tFill);
