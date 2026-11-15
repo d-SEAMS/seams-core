@@ -383,12 +383,12 @@ TEST_CASE("a range walks every chemfiles step and skips CON", "[chemfiles]") {
   REQUIRE(calls == 1);
 
   REQUIRE_FALSE(sinp::forEachChemfilesFrame(
-      "con/tiny_multi_cuh2.con", 1, 1, -1, "", 0, 1,
+      "eon/tiny_multi_cuh2.con", 1, 1, -1, "", 0, 1,
       [&](int, Cloud &) {}));
 #ifdef SEAMS_HAS_READCON
-  Cloud via = sinp::openFrame("con/tiny_multi_cuh2.con", 1, -1);
+  Cloud via = sinp::openFrame("eon/tiny_multi_cuh2.con", 1, -1);
   Cloud direct;
-  direct = sinp::readCon("con/tiny_multi_cuh2.con", 1, direct);
+  direct = sinp::readCon("eon/tiny_multi_cuh2.con", 1, direct);
   REQUIRE(via.nop == direct.nop);
   REQUIRE(via.nop > 0);
 #endif

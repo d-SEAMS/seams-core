@@ -11,14 +11,14 @@
 #include <neighbours.hpp>
 #include <seams_input.hpp>
 
-// The fixture con/tiny_multi_cuh2.con (from the readcon-core test suite)
+// The fixture eon/tiny_multi_cuh2.con (from the readcon-core test suite)
 // holds two frames of two Cu and two H atoms in a 15.3456 x 21.702 x 100
 // cell, spec version 2, atom IDs 0 to 3.
 
 TEST_CASE("readCon reads the first frame of a multi-frame con file",
           "[readcon]") {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
-  cloud = sinp::readCon("con/tiny_multi_cuh2.con", 1, cloud);
+  cloud = sinp::readCon("eon/tiny_multi_cuh2.con", 1, cloud);
 
   REQUIRE(cloud.nop == 4);
   REQUIRE(cloud.pts.size() == 4);
@@ -45,7 +45,7 @@ TEST_CASE("readCon reads the first frame of a multi-frame con file",
 
 TEST_CASE("readCon selects the requested frame", "[readcon]") {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
-  cloud = sinp::readCon("con/tiny_multi_cuh2.con", 2, cloud);
+  cloud = sinp::readCon("eon/tiny_multi_cuh2.con", 2, cloud);
 
   REQUIRE(cloud.nop == 4);
   REQUIRE(cloud.currentFrame == 2);
@@ -57,7 +57,7 @@ TEST_CASE("readCon selects the requested frame", "[readcon]") {
 
 TEST_CASE("readCon on a missing frame returns an empty cloud", "[readcon]") {
   molSys::PointCloud<molSys::Point<double>, double> cloud;
-  cloud = sinp::readCon("con/tiny_multi_cuh2.con", 99, cloud);
+  cloud = sinp::readCon("eon/tiny_multi_cuh2.con", 99, cloud);
   REQUIRE(cloud.nop == 0);
   REQUIRE(cloud.pts.empty());
 }
@@ -123,12 +123,12 @@ TEST_CASE("readConCorpus selects a campaign hit and decodes it with readcon",
       std::filesystem::temp_directory_path() / "seams-readcon-corpus";
   std::filesystem::remove_all(root);
   std::filesystem::create_directories(root);
-  const int n = sinp::ingestConCorpus(root.string(), 1, "con/tiny_multi_cuh2.con");
+  const int n = sinp::ingestConCorpus(root.string(), 1, "eon/tiny_multi_cuh2.con");
   REQUIRE(n == 2);
 
   molSys::PointCloud<molSys::Point<double>, double> direct;
   molSys::PointCloud<molSys::Point<double>, double> fromDb;
-  direct = sinp::readCon("con/tiny_multi_cuh2.con", 1, direct);
+  direct = sinp::readCon("eon/tiny_multi_cuh2.con", 1, direct);
   fromDb = sinp::readConCorpus(root.string(), "Cu", "Cu:2|H:2", 1, fromDb);
   REQUIRE(fromDb.nop == direct.nop);
   REQUIRE(fromDb.box == direct.box);
@@ -137,7 +137,7 @@ TEST_CASE("readConCorpus selects a campaign hit and decodes it with readcon",
   REQUIRE_THAT(fromDb.pts[2].z, Catch::Matchers::WithinAbs(direct.pts[2].z, 1e-6));
 
   fromDb = sinp::readConCorpus(root.string(), "Cu", "Cu:2|H:2", 2, fromDb);
-  direct = sinp::readCon("con/tiny_multi_cuh2.con", 2, direct);
+  direct = sinp::readCon("eon/tiny_multi_cuh2.con", 2, direct);
   REQUIRE_THAT(fromDb.pts[2].x, Catch::Matchers::WithinAbs(direct.pts[2].x, 1e-6));
 
   fromDb = sinp::readConCorpus(root.string(), "Xe", "", 1, fromDb);
@@ -157,7 +157,7 @@ TEST_CASE("readConCorpus fans a sharded campaign root out by traj id",
     std::ofstream manifest(root / "shards.json");
     manifest << "{\"n_shards\":2,\"version\":1}\n";
   }
-  const int n = sinp::ingestConCorpus(root.string(), 1, "con/tiny_multi_cuh2.con");
+  const int n = sinp::ingestConCorpus(root.string(), 1, "eon/tiny_multi_cuh2.con");
   REQUIRE(n == 2);
   REQUIRE(std::filesystem::is_regular_file(root / "shard_0001" / "data.mdb"));
   REQUIRE_FALSE(std::filesystem::is_regular_file(root / "data.mdb"));
