@@ -26,6 +26,7 @@
 #include "plumed/core/ActionRegister.h"
 #include "plumed/core/Colvar.h"
 #include "plumed/core/PlumedMain.h"
+#include "plumed/tools/Communicator.h"
 #include "plumed/tools/Units.h"
 #if PLUMED_VERSION_MAJOR == 2 && PLUMED_VERSION_MINOR < 10
 #include "plumed/core/Atoms.h"
