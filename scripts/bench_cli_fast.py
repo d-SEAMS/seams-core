@@ -530,10 +530,13 @@ def require_agreement(seams, dump, agreed):
 
 def main():
     root = Path(__file__).resolve().parents[1]
-    seams = root / "build" / "seams"
-    lib = root / "build" / "bindings" / "libseams_lang.so"
+    # The doc-block runner sets SEAMS_BUILD to the meson build root.
+    # A directory that is not named build still has to find the binary.
+    build = Path(os.environ["SEAMS_BUILD"]) if os.environ.get("SEAMS_BUILD") else root / "build"
+    seams = build / "seams"
+    lib = build / "bindings" / "libseams_lang.so"
     if not seams.is_file() or not lib.is_file():
-        raise SystemExit("build/seams or the language library is missing")
+        raise SystemExit("seams or the language library is missing from " + str(build))
     import importlib.metadata as meta
 
     versions = {
