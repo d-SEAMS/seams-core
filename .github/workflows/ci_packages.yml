@@ -53,7 +53,10 @@ jobs:
       - name: Toolchain
         run: |
           sudo apt-get update
-          sudo apt-get install -y g++ ninja-build pkg-config libeigen3-dev libflexiblas-dev
+          sudo apt-get install -y g++ ninja-build pkg-config libeigen3-dev
+          # 24.04 has no libflexiblas-dev. The script uses the distro
+          # package when a later image has it, and builds 3.4.4 otherwise.
+          sudo sh scripts/install_flexiblas.sh
           pipx install meson
       - name: Build and install libseams
         run: |
@@ -134,13 +137,9 @@ jobs:
               }
               let mut sys = seams::System::new()?;
               sys.set_ortho(&xyz, a, a, a)?;
-              let (_labels, counts) = sys.chill_plus(
-                  3.5,
-                  seams::ffi::SEAMS_GRAPH_CUTOFF,
-                  seams::ffi::SEAMS_CHILL_PUBLISHED,
-              )?;
-              assert_eq!(counts[0], 8);
-              println!("dseams {} cubic {}", seams::version(), counts[0]);
+              let ice = sys.chill_plus(&seams::ChillOptions::default())?;
+              assert_eq!(ice.counts[0], 8);
+              println!("dseams {} cubic {}", seams::version(), ice.counts[0]);
               Ok(())
           }
           EOF
@@ -162,7 +161,8 @@ jobs:
       - name: Unpack libseams
         run: |
           sudo apt-get update
-          sudo apt-get install -y libflexiblas3 libgomp1
+          sudo apt-get install -y libgomp1
+          sudo sh scripts/install_flexiblas.sh
           mkdir -p "$SEAMS_PREFIX"
           tar -xzf libseams-prefix.tar.gz -C "$SEAMS_PREFIX"
       - name: Test against the installed libseams (feature system)
@@ -183,7 +183,8 @@ jobs:
       - name: Toolchain and libseams
         run: |
           sudo apt-get update
-          sudo apt-get install -y gfortran pkg-config libflexiblas3 libgomp1
+          sudo apt-get install -y gfortran pkg-config libgomp1
+          sudo sh scripts/install_flexiblas.sh
           pipx install fpm
           mkdir -p "$SEAMS_PREFIX"
           tar -xzf libseams-prefix.tar.gz -C "$SEAMS_PREFIX"
@@ -231,7 +232,8 @@ jobs:
       - name: Lua, LuaRocks and libseams
         run: |
           sudo apt-get update
-          sudo apt-get install -y libflexiblas3 libgomp1
+          sudo apt-get install -y libgomp1
+          sudo sh scripts/install_flexiblas.sh
           mkdir -p "$SEAMS_PREFIX"
           tar -xzf libseams-prefix.tar.gz -C "$SEAMS_PREFIX"
           root="$RUNNER_TEMP/lua-root"
