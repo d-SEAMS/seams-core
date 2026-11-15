@@ -15,7 +15,6 @@ fi
 # otherwise download and patch 0.10.4.
 meson setup _build_lib ${MESON_ARGS} \
   --wrap-mode=nodownload \
-  -Dwith_python=false \
   -Dwith_tests=false \
   -Dwith_cli=true \
   -Dwith_blas=disabled \
@@ -26,7 +25,6 @@ meson setup _build_lib ${MESON_ARGS} \
   -Dwith_gpulite=disabled \
   -Dwith_openmp_offload=disabled \
   -Dwith_mpi=disabled \
-  -Dwith_lua=disabled \
   -Dwith_lammps=disabled \
   -Dwith_gromacs=disabled \
   -Dwith_openmm=disabled \

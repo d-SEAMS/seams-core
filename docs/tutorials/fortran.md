@@ -1,54 +1,16 @@
-# Fortran tutorial
+# Fortran
 
-`bindings/fortran/src/seams.f90` is the Fortran module. `src/seams_c.f90` is the `iso_c_binding` image of `seams.h`. `test_seams.f90` calls that image. `test/test_high.f90` calls the derived-type API.
+The Fortran binding is the fpm package `dseams`. It lives in its own repository,
+[d-SEAMS/dseams-fortran](https://github.com/d-SEAMS/dseams-fortran), with its API reference, tutorials,
+tests and release notes. It links the engine through the C API
+(`libseams`, `include/seams.h`) and the C ABI `libseams_lang`
+(`bindings/cxx/seams_lang.h`) that this repository builds and installs.
 
-```bash
-mkdir -p build/fmod
-gfortran -Jbuild/fmod -c bindings/fortran/src/seams_kinds.f90 -o build/fmod/seams_kinds.o
-gfortran -Jbuild/fmod -Ibuild/fmod -c bindings/fortran/src/seams_c.f90 -o build/fmod/seams_c.o
-gfortran -Jbuild/fmod -Ibuild/fmod -c bindings/fortran/src/seams_support.f90 -o build/fmod/seams_support.o
-gfortran -Jbuild/fmod -Ibuild/fmod -c bindings/fortran/src/seams.f90 -o build/fmod/seams.o
-gfortran -Jbuild/fmod -Ibuild/fmod -c bindings/fortran/src/seams_methods.f90 -o build/fmod/seams_methods.o
-gfortran -Ibuild/fmod bindings/fortran/test_seams.f90 build/fmod/seams_c.o \
-  -o build/test_seams -Lbuild/src -lseams -Wl,-rpath,build/src
-build/test_seams "$PWD"
+```toml
+[dependencies]
+dseams = { git = "https://github.com/d-SEAMS/dseams-fortran", tag = "v2.14.0" }
 ```
 
-It prints `fortran ok` after the 64-atom cell is entirely cubic under both CHILL+ rules, q6 is above 0.3, and the six-ring fraction is above one half.
-`meson test docs_api_fortran` compiles that program and runs it with the repository root as its argument.
-The same program calls `seams_chill`, `seams_steinhardt`, `seams_cages`, `seams_signature_cages`, `seams_neighbours_knn`, `seams_rdf`, `seams_running_cn`, `seams_coordination`, `seams_hbonds`, `seams_density_axis`, `seams_fingerprint`, `seams_contact_pairs`, `seams_domains`, `seams_prisms`, `seams_monolayer`, `seams_rings_vertices`, `seams_site_table`, and `seams_system_read`.
-The lines it prints are:
-
-```
-fortran call cubic 64
-fortran call q6 0.628539361055
-fortran call cages 0 64 0 0
-fortran call sig 0 0
-fortran call cn 4.063492063492
-fortran call hbond 0
-fortran call sheet 128
-fortran call vert 6 0
-fortran call read 128 46
-```
-
-`cubic 64` is the published CHILL+ count. `q6` is the mean of `seams_q4q6`.
-`cages` is the seeded census. `sig 0 0` is the `512` signature on this cubic cell.
-`read 128 46` is ice Ih and the sI guest frame.
-
-The program the script compiles:
-
-```{literalinclude} ../../../bindings/fortran/test_seams.f90
-:language: fortran
-:lines: 37-74
-```
-
-
-## Structure still
-
-```{figure} ../tutorials/molecules/fortran/overlay-web.png
-:alt: Molecule still for this front
-:width: 480px
-
-Ice Ih colored by published CHILL+, drawn with chemparseplot. `python docs/scripts/render_molecules.py --slug fortran` writes the 2400 by 1800 PNG.
-```
-
+The binding release with the same version as seams-core is built
+against that seams-core tag. `docs/orgmode/contributing/repositories.org`
+describes how the repositories fit together.

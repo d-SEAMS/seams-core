@@ -1,16 +1,39 @@
 Language APIs
 =============
 
-Each front is documented by its own tool and checked in the docs job.
-Ice Ih (``input/traj/ice1h.lammpstrj``, every atom) is 128 hexagonal
-waters and 256 primitive six-rings. Every page below asserts those counts.
+seams-core documents the C API and the C++ front here. Every other
+language binding is its own repository with its own documentation,
+tests and releases. Each one links ``libseams`` and ``libseams_lang``
+from this repository and is released after the seams-core tag with the
+same version.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Language
+     - Repository
+     - Package
+   * - Python
+     - `d-SEAMS/PydSEAMSlib <https://github.com/d-SEAMS/PydSEAMSlib>`_
+     - ``pydseamslib`` (``import dseams``)
+   * - R
+     - `d-SEAMS/dseams-r <https://github.com/d-SEAMS/dseams-r>`_
+     - ``dseams``
+   * - Julia
+     - `d-SEAMS/Dseams.jl <https://github.com/d-SEAMS/Dseams.jl>`_
+     - ``Dseams``
+   * - Rust
+     - `d-SEAMS/dseams-rs <https://github.com/d-SEAMS/dseams-rs>`_
+     - ``dseams-sys``, ``dseams``
+   * - Fortran
+     - `d-SEAMS/dseams-fortran <https://github.com/d-SEAMS/dseams-fortran>`_
+     - fpm ``dseams``
+   * - Lua, Fennel
+     - `d-SEAMS/yodaStruct <https://github.com/d-SEAMS/yodaStruct>`_
+     - LuaRocks ``dseams``
 
 .. toctree::
    :maxdepth: 1
 
    tasks
-   python
-   julia
-   r
-   lua
    cpp
