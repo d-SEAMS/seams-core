@@ -18,11 +18,13 @@
 #include <ozaki.hpp>
 #include <sphericart_ylm.hpp>
 #include <steinhardt_device.hpp>
+#include <team_run.hpp>
 #include <thread_team.hpp>
 #include <wigner_wl.hpp>
 #include <ylm_batch.hpp>
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cmath>
 #include <cstddef>
@@ -1140,15 +1142,18 @@ SteinhardtQl cutoffSolid(
   const double hz = 0.5 * Lz;
   const bool tilt = yCloud.box.size() >= 6;
   const gen::FracBox frac = gen::makeFracBox(yCloud);
-  int mixed = 0;
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) reduction(| : mixed) num_threads(seams::teamFor(n)) \
-    if (seams::teamFor(n) > 1 && !omp_in_parallel())
-#endif
-  for (int i = 0; i < n; i++) {
-    mixed |= static_cast<int>(yCloud.pts[static_cast<std::size_t>(i)].type != typeI);
-  }
-  const bool uniform = mixed == 0;
+  std::atomic<int> mixed{0};
+  seams::team::forRange(static_cast<std::size_t>(n), 16384,
+                        [&](std::size_t begin, std::size_t end, int) {
+                          int any = 0;
+                          for (std::size_t i = begin; i < end; ++i) {
+                            any |= static_cast<int>(yCloud.pts[i].type != typeI);
+                          }
+                          if (any != 0) {
+                            mixed.store(1, std::memory_order_relaxed);
+                          }
+                        });
+  const bool uniform = mixed.load(std::memory_order_relaxed) == 0;
   std::vector<int> subset;
   const std::vector<int> *which = nullptr;
   if (!uniform) {
@@ -1180,10 +1185,9 @@ SteinhardtQl cutoffSolid(
   const bool parallel = seams::teamFor(n) > 1;
 #endif
   if (!sameGeom) {
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (parallel)
-#endif
-  for (int i = 0; i < n; i++) {
+  seams::team::forRange(static_cast<std::size_t>(n), 4096,
+                        [&](std::size_t from, std::size_t to, int) {
+  for (int i = static_cast<int>(from); i < static_cast<int>(to); i++) {
     const auto &p = yCloud.pts[static_cast<std::size_t>(i)];
     if (tilt) {
       // Reduced coordinates. The bond loop then wraps those lengths
@@ -1214,6 +1218,7 @@ SteinhardtQl cutoffSolid(
       scratch.xyz[static_cast<std::size_t>(3 * i) + 2] = wrap(p.z, oz, Lz);
     }
   }
+                        });
     if (have) {
       scratch.geomN = n;
       scratch.geomType = typeI;
@@ -1249,10 +1254,9 @@ SteinhardtQl cutoffSolid(
       scratch.qlm.assign(static_cast<std::size_t>(n) * static_cast<std::size_t>(width), 0.0);
     }
     const int nTiles = (n + 7) / 8;
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (parallel)
-#endif
-    for (int tile = 0; tile < nTiles; ++tile) {
+    seams::team::forRange(static_cast<std::size_t>(nTiles), 64,
+                          [&](std::size_t first, std::size_t last, int) {
+    for (int tile = static_cast<int>(first); tile < static_cast<int>(last); ++tile) {
       const int begin = tile * 8;
       const int alive = std::min(8, n - begin);
       int nUsed[8] = {};
@@ -1347,6 +1351,7 @@ SteinhardtQl cutoffSolid(
         }
       }
     }
+                          });
   }
   // Pairing two atoms into one AVX-512 reduction was slower than the
   // four-bond kernel. The horizontal sum cost more than the idle lanes.
