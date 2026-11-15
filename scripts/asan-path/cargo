@@ -6,7 +6,11 @@
 # the whole meson budget inside that compile. Drop the preload for the
 # build. A test that loads libseams (SEAMS_LIB_DIR or SEAMS_LIB) gets it
 # back through the runner, which wraps only the test binary.
-here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+case $0 in
+  */*) _wrap_dir=${0%/*} ;;
+  *) _wrap_dir=. ;;
+esac
+here=$(CDPATH= cd -- "$_wrap_dir" && pwd)
 root=$(CDPATH= cd -- "$here/../.." && pwd)
 unset LD_PRELOAD
 if [ -n "${SEAMS_LIB_DIR:-}${SEAMS_LIB:-}" ]; then

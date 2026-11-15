@@ -22,8 +22,12 @@ unset LD_PRELOAD
 build=${1:?build directory}
 baseline=${2:?baseline file}
 mode=${3:-check}
-corpus=$(dirname "$baseline")/abi_baseline.abi
-include=$(cd "$(dirname "$0")/../include" && pwd)
+corpus=${baseline%/*}/abi_baseline.abi
+case $0 in
+  */*) _abi_dir=${0%/*} ;;
+  *) _abi_dir=. ;;
+esac
+include=$(cd "$_abi_dir/../include" && pwd)
 
 dump_lib() {
   lib=$1

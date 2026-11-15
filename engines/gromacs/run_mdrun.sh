@@ -2,7 +2,12 @@
 # Copyright (c) d-SEAMS developers
 # Run a few frozen mdrun steps and classify the trajectory.
 set -e
-root=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+case $0 in
+  */*) root=${0%/*} ;;
+  *) root=. ;;
+esac
+root=$(CDPATH= cd -- "$root" && pwd)
+
 tool=$1
 libdir=$2
 # mktemp and gmx abort when libasan is preloaded. The classifier below

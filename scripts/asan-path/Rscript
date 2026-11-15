@@ -1,7 +1,11 @@
 #!/bin/sh
 # R aborts in its own startup when libasan is preloaded. The runtime is
 # mapped when an R package loads libseams.
-here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+case $0 in
+  */*) _wrap_dir=${0%/*} ;;
+  *) _wrap_dir=. ;;
+esac
+here=$(CDPATH= cd -- "$_wrap_dir" && pwd)
 unset LD_PRELOAD
 case ":${ASAN_OPTIONS:-}:" in
   *verify_asan_link_order*) ;;

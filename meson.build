@@ -204,6 +204,17 @@ endif
 # sysroot cannot resolve the host compiler's GLIBC and libomp symbols.
 _snippet_cc = meson.get_compiler('c').cmd_array()[0]
 _snippet_cxx = cppc.cmd_array()[0]
+# AddressSanitizer is preloaded so Python can host libseams. That preload
+# makes the compiler driver and cc1 fail LeakSanitizer. The wrappers drop
+# it and exec the compiler meson used to build the library.
+_asan_wrap = get_option('b_sanitize').contains('address')
+_real_cc = _snippet_cc
+_real_cxx = _snippet_cxx
+if _asan_wrap
+  _asan_bin = meson.project_source_root() / 'scripts' / 'asan-path'
+  _snippet_cc = _asan_bin / 'cc'
+  _snippet_cxx = _asan_bin / 'c++'
+endif
 _snippet_omp = []
 if openmp_found
   if cpp_id == 'nvidia' or cpp_id == 'nvidia_hpc' or cpp_id == 'pgi'
@@ -220,6 +231,10 @@ endif
 _snippet_env = environment()
 _snippet_env.set('CC', _snippet_cc)
 _snippet_env.set('CXX', _snippet_cxx)
+if _asan_wrap
+  _snippet_env.set('REAL_CC', _real_cc)
+  _snippet_env.set('REAL_CXX', _real_cxx)
+endif
 if _snippet_omp.length() > 0
   _snippet_env.set('SEAMS_OPENMP_LINK', ' '.join(_snippet_omp))
 endif
@@ -990,6 +1005,10 @@ if get_option('with_cli')
   tutorial_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'src')
   tutorial_env.set('CC', _snippet_cc)
   tutorial_env.set('CXX', _snippet_cxx)
+  if _asan_wrap
+    tutorial_env.set('REAL_CC', _real_cc)
+    tutorial_env.set('REAL_CXX', _real_cxx)
+  endif
   if _snippet_omp.length() > 0
     tutorial_env.set('SEAMS_OPENMP_LINK', ' '.join(_snippet_omp))
   endif
@@ -1583,6 +1602,10 @@ if get_option('with_cli')
   binding_env.prepend('LD_LIBRARY_PATH', meson.project_build_root() / 'bindings')
   binding_env.set('CC', _snippet_cc)
   binding_env.set('CXX', _snippet_cxx)
+  if _asan_wrap
+    binding_env.set('REAL_CC', _real_cc)
+    binding_env.set('REAL_CXX', _real_cxx)
+  endif
   if _snippet_omp.length() > 0
     binding_env.set('SEAMS_OPENMP_LINK', ' '.join(_snippet_omp))
   endif

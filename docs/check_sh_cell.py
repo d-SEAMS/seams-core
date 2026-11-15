@@ -77,8 +77,9 @@ int main(void) {
         path = Path(tmp) / "shcell.c"
         path.write_text(source)
         binary = Path(tmp) / "shcell"
+        compiler = os.environ.get("CC", "cc")
         subprocess.check_call(
-            ["/usr/bin/cc", "-I", str(ROOT / "include"), str(path), "-o", str(binary)],
+            [compiler, "-I", str(ROOT / "include"), str(path), "-o", str(binary)],
         )
         text = subprocess.check_output([str(binary)], text=True).split()
     origin = (float(text[0]), 0.0, 0.0)

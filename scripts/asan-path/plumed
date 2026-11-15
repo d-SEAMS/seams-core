@@ -1,7 +1,11 @@
 #!/bin/sh
 # This plumed binary takes an illegal instruction inside libasan when the
 # runtime is preloaded. The plugin is linked to libasan and maps it itself.
-here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+case $0 in
+  */*) _wrap_dir=${0%/*} ;;
+  *) _wrap_dir=. ;;
+esac
+here=$(CDPATH= cd -- "$_wrap_dir" && pwd)
 unset LD_PRELOAD
 case ":${ASAN_OPTIONS:-}:" in
   *verify_asan_link_order*) ;;

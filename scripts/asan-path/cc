@@ -1,7 +1,13 @@
 #!/bin/sh
 # Compilers abort or spend the test budget inside LeakSanitizer when the
 # suite has preloaded libasan for Python. Drop it for this process only.
-here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+# Do not spawn dirname. Under the preloaded sanitizer that coreutils
+# binary leaks and aborts before this wrapper can drop LD_PRELOAD.
+case $0 in
+  */*) _wrap_dir=${0%/*} ;;
+  *) _wrap_dir=. ;;
+esac
+here=$(CDPATH= cd -- "$_wrap_dir" && pwd)
 real=${REAL_CC:-}
 if [ -z "$real" ]; then
   old_ifs=$IFS

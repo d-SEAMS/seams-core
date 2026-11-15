@@ -2,7 +2,11 @@
 # Julia's LLVM JIT deletes a string it allocated with malloc. That is
 # inside jl_init_llvm, before any seams call. Preloading libasan aborts
 # the process there. The runtime is mapped when Julia loads libseams.
-here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+case $0 in
+  */*) _wrap_dir=${0%/*} ;;
+  *) _wrap_dir=. ;;
+esac
+here=$(CDPATH= cd -- "$_wrap_dir" && pwd)
 unset LD_PRELOAD
 case ":${ASAN_OPTIONS:-}:" in
   *verify_asan_link_order*) ;;

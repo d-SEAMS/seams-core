@@ -4,9 +4,9 @@
 # 5734 bytes in 103 allocations. The stacks stay in CPython and in
 # matplotlib/_image. A seams, libyodaLib, or dseams frame is not listed.
 #
-# Shared libpython, when the interpreter is loaded as that library:
-leak:libpython*
-# CPython 3.12 Objects/obmalloc.c, the 1024-byte direct leak:
+# CPython 3.12 Objects/obmalloc.c, the 1024-byte direct leak.
+# These are the allocator frames. A libpython module pattern is not
+# listed: it would also match a seams leak reached through the interpreter.
 #   #1 _PyMem_RawCalloc
 #   #2 PyMem_RawCalloc
 #   #3 _PyObject_Calloc

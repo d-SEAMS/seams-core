@@ -1,7 +1,11 @@
 #!/bin/sh
 # rustc under libasan spends the language-task limit inside the compiler.
 # The test binary is run by the caller, which still has the preload.
-here=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
+case $0 in
+  */*) _wrap_dir=${0%/*} ;;
+  *) _wrap_dir=. ;;
+esac
+here=$(CDPATH= cd -- "$_wrap_dir" && pwd)
 unset LD_PRELOAD
 found=
 old_ifs=$IFS

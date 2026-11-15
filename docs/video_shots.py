@@ -110,7 +110,7 @@ def videos():
         '"$FC" -J "$VIDEO_OUT" -I "$VIDEO_OUT" -c bindings/fortran/src/seams.f90 -o "$VIDEO_OUT/seams.o" && '
         '"$FC" -J "$VIDEO_OUT" -I "$VIDEO_OUT" -c bindings/fortran/src/seams_methods.f90 -o "$VIDEO_OUT/seams_methods.o" && '
         '"$FC" -I "$VIDEO_OUT" -c docs/examples/minimal_fortran.f90 -o "$VIDEO_OUT/minimal_fortran.o" && '
-        'gfort=$("$FC" -print-file-name=libgfortran.so); gdir=$(dirname "$gfort"); '
+        'gfort=$("$FC" -print-file-name=libgfortran.so); gdir=${gfort%/*}; '
         '"$CXX" "$VIDEO_OUT/minimal_fortran.o" '
         '"$VIDEO_OUT/seams_kinds.o" "$VIDEO_OUT/seams_c.o" "$VIDEO_OUT/seams_support.o" '
         '"$VIDEO_OUT/seams.o" "$VIDEO_OUT/seams_methods.o" '
