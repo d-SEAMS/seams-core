@@ -205,6 +205,10 @@ def julia_front(env):
     if julia is None:
         raise Missing("julia is not installed")
     project = ROOT / "bindings" / "julia" / "Dseams"
+    sys.path.insert(0, str(ROOT / "bindings" / "julia"))
+    from instantiate import ensure
+
+    ensure(julia, env)
     script = f"""
 using Dseams
 frame = read_frame("{TIP}"; type = 2)

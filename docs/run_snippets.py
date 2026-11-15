@@ -1040,6 +1040,11 @@ def run_julia_text(build, env, body):
     script.write_text(prelude + "\n".join(lines) + "\n", encoding="utf-8")
     project = ROOT / "bindings" / "julia" / module
     local = dict(env)
+    if module == "Dseams":
+        sys.path.insert(0, str(ROOT / "bindings" / "julia"))
+        from instantiate import ensure
+
+        ensure(julia, local)
     local["JULIA_LOAD_PATH"] = str(project) + os.pathsep
     local["SEAMS_LIB"] = str(build / "src" / "libseams.so")
     run([julia, "--startup-file=no", "--project=" + str(project), str(script)], local)

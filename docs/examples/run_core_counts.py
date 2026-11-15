@@ -93,6 +93,10 @@ def run_julia(build, env):
     import run_binding
 
     julia = run_binding.julia_bin()
+    sys.path.insert(0, str(ROOT / "bindings" / "julia"))
+    from instantiate import ensure
+
+    ensure(julia, env)
     julia_env = env.copy()
     julia_env["DSEAMS_ROOT"] = str(ROOT)
     julia_env["SEAMS_LANG_LIB"] = str(build / "bindings" / "libseams_lang.so")

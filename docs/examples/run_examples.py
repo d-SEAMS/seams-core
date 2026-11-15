@@ -205,7 +205,11 @@ def binding_helpers():
 
 def run_julia(build, fixture):
     julia = binding_helpers().julia_bin()
+    sys.path.insert(0, str(ROOT / "bindings" / "julia"))
+    from instantiate import ensure
+
     env = os.environ.copy()
+    ensure(julia, env)
     env["DSEAMS_ROOT"] = str(ROOT)
     env["SEAMS_LANG_LIB"] = str(build / "bindings" / "libseams_lang.so")
     env["LD_LIBRARY_PATH"] = library_path(build)
