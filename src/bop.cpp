@@ -35,6 +35,12 @@
 #if defined(SEAMS_HOST_X86) && defined(SEAMS_GNU_TARGET)
 #include <immintrin.h>
 #define SEAMS_BOP_X86 1
+#elif defined(SEAMS_HOST_X86) && defined(_MSC_VER) && (defined(_M_X64) || defined(_M_AMD64))
+// cl.exe has no target attribute, so the AVX kernel stays on GCC and Clang
+// (including clang-cl). x64 Windows always has SSE2, which is the vector
+// kernel for that compiler.
+#include <emmintrin.h>
+#define SEAMS_BOP_SSE2 1
 #endif
 #include <iostream>
 #include <mutex>
@@ -46,6 +52,32 @@
 #endif
 
 namespace {
+
+// The four nearest neighbours live in a fixed array. GCC 14 and 15 outline
+// the OpenMP loop and then treat std::sort's runtime end as unbounded, so
+// the introsort is reported as a walk off Near[4]. Sort only a prefix that
+// has been clamped to that array.
+template <typename Near>
+void sortNearest(Near *best, int keep) {
+  if (keep > 4) {
+    keep = 4;
+  }
+  if (keep < 2) {
+    return;
+  }
+  for (int i = 1; i < 4; ++i) {
+    if (i >= keep) {
+      break;
+    }
+    Near item = best[i];
+    int hole = i;
+    while (hole > 0 && item < best[hole - 1]) {
+      best[hole] = best[hole - 1];
+      --hole;
+    }
+    best[hole] = item;
+  }
+}
 
 /**
  * @brief Powers of @f$\sin\theta@f$ and @f$\cos\theta@f$ together with the
@@ -359,6 +391,61 @@ SEAMS_TARGET("fma") double realL3Dot(const double *a, const double *b) {
 bool hostHasAvx2Fma() {
   return seams::cpu::features().avx2 && seams::cpu::features().fma;
 }
+#elif defined(SEAMS_BOP_SSE2)
+// Two bonds per step. SSE2 is the x64 baseline, so this kernel does not
+// need a runtime CPU check and does not require /arch:AVX2.
+double realL3DotScalar(const double *a, const double *b);
+
+void realYlm3Accumulate(const double *x, const double *y, const double *z, int nBond,
+                        double *acc) {
+  const auto &norm = normQ3();
+  int bond = 0;
+  const __m128d zero = _mm_setzero_pd();
+  const __m128d one = _mm_set1_pd(1.0);
+  const __m128d five = _mm_set1_pd(5.0);
+  const __m128d three = _mm_set1_pd(3.0);
+  const __m128d two = _mm_set1_pd(2.0);
+  const __m128d n0 = _mm_set1_pd(norm[0]);
+  const __m128d n1 = _mm_set1_pd(norm[1]);
+  const __m128d n2 = _mm_set1_pd(norm[2]);
+  const __m128d n3 = _mm_set1_pd(norm[3]);
+  for (; bond + 2 <= nBond; bond += 2) {
+    const __m128d X = _mm_loadu_pd(x + bond);
+    const __m128d Y = _mm_loadu_pd(y + bond);
+    const __m128d Z = _mm_loadu_pd(z + bond);
+    const __m128d x2 = _mm_mul_pd(X, X);
+    const __m128d y2 = _mm_mul_pd(Y, Y);
+    const __m128d z2 = _mm_mul_pd(Z, Z);
+    const __m128d r2 = _mm_add_pd(x2, _mm_add_pd(y2, z2));
+    const __m128d live = _mm_cmpgt_pd(r2, zero);
+    const __m128d inv =
+        _mm_and_pd(live, _mm_div_pd(one, _mm_mul_pd(r2, _mm_sqrt_pd(r2))));
+    const __m128d t1 = _mm_sub_pd(_mm_mul_pd(five, z2), r2);
+    const __m128d q0 = _mm_mul_pd(
+        n0, _mm_mul_pd(Z, _mm_sub_pd(_mm_mul_pd(five, z2), _mm_mul_pd(three, r2))));
+    const __m128d channel[kRealL3] = {
+        _mm_or_pd(_mm_and_pd(live, _mm_mul_pd(q0, inv)), _mm_andnot_pd(live, _mm_mul_pd(two, n0))),
+        _mm_and_pd(live, _mm_mul_pd(n1, _mm_mul_pd(Y, _mm_mul_pd(t1, inv)))),
+        _mm_and_pd(live, _mm_mul_pd(n1, _mm_mul_pd(X, _mm_mul_pd(t1, inv)))),
+        _mm_and_pd(live, _mm_mul_pd(n2, _mm_mul_pd(Z, _mm_mul_pd(_mm_sub_pd(y2, x2), inv)))),
+        _mm_and_pd(live, _mm_mul_pd(n2, _mm_mul_pd(two, _mm_mul_pd(X, _mm_mul_pd(Y, _mm_mul_pd(Z, inv)))))),
+        _mm_and_pd(live, _mm_mul_pd(n3, _mm_mul_pd(Y, _mm_mul_pd(_mm_sub_pd(y2, _mm_mul_pd(three, x2)), inv)))),
+        _mm_and_pd(live, _mm_mul_pd(n3, _mm_mul_pd(X, _mm_mul_pd(_mm_sub_pd(_mm_mul_pd(three, y2), x2), inv))))};
+    for (int k = 0; k < kRealL3; ++k) {
+      alignas(16) double lane[2];
+      _mm_store_pd(lane, channel[k]);
+      acc[k] += lane[0];
+      acc[k] += lane[1];
+    }
+  }
+  for (; bond < nBond; ++bond) {
+    addRealYlm3Scalar(x[bond], y[bond], z[bond], norm, acc);
+  }
+}
+
+double realL3Dot(const double *a, const double *b) { return realL3DotScalar(a, b); }
+
+bool hostHasAvx2Fma() { return true; }
 #else
 // Without x86 SIMD the dispatch below always takes the scalar branch;
 // these keep the call sites well-formed.
@@ -1470,11 +1557,11 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
         if (keep < 4) {
           best[keep++] = item;
           if (keep == 4) {
-            std::sort(best, best + 4);
+            sortNearest(best, 4);
           }
         } else if (item < best[3]) {
           best[3] = item;
-          std::sort(best, best + 4);
+          sortNearest(best, 4);
         }
       }
     } else if (live) {
@@ -1510,11 +1597,11 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
               if (keep < 4) {
                 best[keep++] = item;
                 if (keep == 4) {
-                  std::sort(best, best + 4);
+                  sortNearest(best, 4);
                 }
               } else if (item < best[3]) {
                 best[3] = item;
-                std::sort(best, best + 4);
+                sortNearest(best, 4);
               }
             }
           }
@@ -1522,7 +1609,7 @@ bool orthoChill(molSys::PointCloud<molSys::Point<double>, double> &yCloud, doubl
       }
     }
     if (keep > 1 && keep < 4) {
-      std::sort(best, best + keep);
+      sortNearest(best, keep);
     }
     scratch.nkeep[static_cast<std::size_t>(i)] = keep + (shell << 8);
     double xs[4], ys[4], zs[4];
@@ -1830,14 +1917,14 @@ bool chill::q4q6ChillPlus(
       ++shell;
       if (keep < 4) {
         best[keep++] = item;
-        if (keep == 4) std::sort(best, best + 4);
+        if (keep == 4) sortNearest(best, 4);
       } else if (item < best[3]) {
         best[3] = item;
-        std::sort(best, best + 4);
+        sortNearest(best, 4);
       }
     }
     flush();
-    if (keep > 1 && keep < 4) std::sort(best, best + keep);
+    if (keep > 1 && keep < 4) sortNearest(best, keep);
     shellCount[static_cast<std::size_t>(i)] = shell;
     nkeep[static_cast<std::size_t>(i)] = keep;
     if (nUsed > 0) {
@@ -2542,15 +2629,15 @@ int chill::chillPlusFromCsr(molSys::PointCloud<molSys::Point<double>, double> &y
       if (keep < 4) {
         best[keep++] = item;
         if (keep == 4) {
-          std::sort(best, best + 4);
+          sortNearest(best, 4);
         }
       } else if (item < best[3]) {
         best[3] = item;
-        std::sort(best, best + 4);
+        sortNearest(best, 4);
       }
     }
     if (keep > 1 && keep < 4) {
-      std::sort(best, best + keep);
+      sortNearest(best, keep);
     }
     shell[static_cast<std::size_t>(i)] = nShell;
     nkeep[static_cast<std::size_t>(i)] = keep;
@@ -2684,7 +2771,7 @@ int chill::chillPlusOvitoFromCsr(molSys::PointCloud<molSys::Point<double>, doubl
     return 0;
   }
   const gen::FracBox frame = gen::makeFracBox(yCloud);
-  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
+  const bool useAvx = hostHasAvx2Fma();
   const auto &norm = normQ3();
   const chill::BondClassifier rule = chill::chillPlusRule();
   // Reused across calls. Every slot a later loop reads is written below.
@@ -2829,7 +2916,7 @@ int chill::chillFromCsr(molSys::PointCloud<molSys::Point<double>, double> &yClou
     return 0;
   }
   const gen::FracBox frame = gen::makeFracBox(yCloud);
-  const bool useAvx = __builtin_cpu_supports("avx2") && __builtin_cpu_supports("fma");
+  const bool useAvx = hostHasAvx2Fma();
   const auto &norm = normQ3();
   const chill::BondClassifier rule = chill::chillRule();
   const int keepMax = rule.coordinationNumber > 0 ? rule.coordinationNumber : 4;

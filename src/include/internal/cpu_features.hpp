@@ -8,7 +8,11 @@
 
 #include <compiler_compat.hpp>
 
-#if defined(SEAMS_HOST_X86) && defined(_MSC_VER) && !defined(__clang__)
+// clang-cl defines __x86_64__ and _MSC_VER. Clang's <cpuid.h> #defines
+// __cpuid, and the MSVC STL later includes <intrin.h>, whose declaration
+// void __cpuid(int[4], int) is then a macro invocation. Every _MSC_VER
+// compiler, including clang-cl, uses the intrinsic instead.
+#if defined(SEAMS_HOST_X86) && defined(_MSC_VER)
 #include <intrin.h>
 #elif defined(__x86_64__) || defined(__i386__)
 #include <cpuid.h>
@@ -29,7 +33,7 @@ inline Features detectFeatures() {
 #if defined(SEAMS_HOST_X86)
   unsigned a = 0, b = 0, c = 0, d = 0;
   unsigned xlo = 0;
-#if defined(_MSC_VER) && !defined(__clang__)
+#if defined(_MSC_VER)
   int regs[4] = {};
   __cpuidex(regs, 1, 0);
   a = static_cast<unsigned>(regs[0]);
@@ -47,7 +51,7 @@ inline Features detectFeatures() {
   if (!osxsave || !avx) {
     return out;
   }
-#if defined(_MSC_VER) && !defined(__clang__)
+#if defined(_MSC_VER)
   xlo = static_cast<unsigned>(_xgetbv(0));
 #else
   unsigned xhi = 0;
@@ -57,7 +61,7 @@ inline Features detectFeatures() {
   // The OS saves the YMM state (bits 1, 2) and the ZMM state (bits 5-7).
   const bool ymm = (xlo & 0x6u) == 0x6u;
   const bool zmm = ymm && (xlo & 0xe0u) == 0xe0u;
-#if defined(_MSC_VER) && !defined(__clang__)
+#if defined(_MSC_VER)
   __cpuidex(regs, 7, 0);
   a = static_cast<unsigned>(regs[0]);
   b = static_cast<unsigned>(regs[1]);
