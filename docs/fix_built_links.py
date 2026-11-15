@@ -23,8 +23,12 @@ NAME_ANCHOR = re.compile(
 )
 # Documenter appends #Lstart-Lend. GitHub's static HTML has no such id, and a
 # commit that is not on the remote 404s. The file on main is the published source.
+# Documenter records the clone it was built from and a #L range. GitHub's
+# file page has no such id, and a commit that was never pushed 404s.
+# A citation of a historical commit has no #L range and is left alone.
 SOURCE_LINE = re.compile(
-    r"(https://github\.com/HaoZeke/seams-core/blob/)[0-9a-f]{40}"
+    r"https://github\.com/(?:HaoZeke|d-SEAMS)/seams-core/blob/"
+    r"(?:[0-9a-f]{7,40}|master|HEAD)"
     r"(/[^\"'#\s<>]+)#L\d+(?:-L\d+)?"
 )
 
@@ -94,7 +98,9 @@ def publish_source_lines(tree):
     changed = 0
     for path in tree.rglob("*.html"):
         text = path.read_text(encoding="utf-8", errors="replace")
-        updated = SOURCE_LINE.sub(r"\1main\2", text)
+        updated = SOURCE_LINE.sub(
+            r"https://github.com/d-SEAMS/seams-core/blob/main\1", text
+        )
         if updated != text:
             path.write_text(updated, encoding="utf-8")
             changed += 1

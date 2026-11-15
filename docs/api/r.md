@@ -50,7 +50,7 @@ warnings. `pkgdown::build_site()` writes the native HTML from the
 roxygen topics. The built site is linked from this book:
 
 ```{raw} html
-<p><a href="../pkgdown/index.html">dseams pkgdown reference</a>,
+<p><a href="../r/index.html">dseams pkgdown reference</a>,
 generated from the roxygen topics in <code>man/</code>.</p>
 ```
 

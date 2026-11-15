@@ -361,28 +361,33 @@ def _stage_native_html():
         env["SEAMS_LANG_LIB"] = os.path.join(root, "bbdir", "bindings", "libseams_lang.so")
         env["SEAMS_LIB"] = os.path.join(root, "bbdir", "src", "libseams.so")
         for name, project in pairs:
-            subprocess.run(
+            prepared = subprocess.run(
                 [julia, "--project=" + project, "-e", "using Pkg; Pkg.instantiate()"],
                 cwd=root,
                 env=env,
                 check=False,
             )
-            subprocess.run(
+            built_docs = subprocess.run(
                 [julia, "--project=" + project, os.path.join(project, "make.jl")],
                 cwd=root,
                 env=env,
                 check=False,
             )
             built = os.path.join(project, "build")
+            index = os.path.join(built, "index.html")
             dest = os.path.join(native, name)
-            if os.path.isdir(built):
+            if _docs_ci() and (
+                prepared.returncode != 0
+                or built_docs.returncode != 0
+                or not os.path.isfile(index)
+            ):
+                raise SystemExit("Documenter failed for " + name)
+            if os.path.isfile(index):
                 if os.path.isdir(dest):
                     shutil.rmtree(dest)
                 shutil.copytree(built, dest)
                 shutil.rmtree(built, ignore_errors=True)
             else:
-                if _docs_ci():
-                    raise SystemExit("Documenter did not write " + name)
                 _native_page(dest, name, "Documenter did not write this build.")
     else:
         if _docs_ci():
@@ -390,7 +395,8 @@ def _stage_native_html():
         print("julia is absent; Documenter pages are placeholders")
         for name, _project in pairs:
             _native_page(os.path.join(native, name), name, "Julia is not on PATH.")
-    r_dest = os.path.join(native, "pkgdown")
+    # The package site is served at /r/, the url in _pkgdown.yml.
+    r_dest = os.path.join(native, "r")
     rscript = shutil.which("Rscript")
     if rscript:
         env = os.environ.copy()

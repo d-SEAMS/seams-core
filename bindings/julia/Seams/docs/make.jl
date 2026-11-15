@@ -23,10 +23,10 @@ using Seams
 # the HTML checker. A commit that has not been pushed 404s as well. The
 # published file is the one on main.
 struct PublishedRemote <: Documenter.Remotes.Remote end
-Documenter.Remotes.repourl(::PublishedRemote) = "https://github.com/HaoZeke/seams-core"
+Documenter.Remotes.repourl(::PublishedRemote) = "https://github.com/d-SEAMS/seams-core"
 function Documenter.Remotes.fileurl(::PublishedRemote, ::AbstractString, filename::AbstractString, linerange)
     filename = lstrip(replace(filename, '\\' => '/'), '/')
-    return "https://github.com/HaoZeke/seams-core/blob/main/$(filename)"
+    return "https://github.com/d-SEAMS/seams-core/blob/main/$(filename)"
 end
 
 makedocs(;

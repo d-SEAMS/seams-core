@@ -2,6 +2,13 @@ url: https://docs.dseams.info/r/
 template:
   bootstrap: 5
 destination: ../../docs/build/r
+repo:
+  branch: main
+  url:
+    home: https://github.com/d-SEAMS/seams-core/
+    source: https://github.com/d-SEAMS/seams-core/blob/main/bindings/r/dseams/
+    issue: https://github.com/d-SEAMS/seams-core/issues/
+    user: https://github.com/
 
 reference:
   - title: Frames

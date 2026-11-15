@@ -14,14 +14,21 @@ Pkg.instantiate()
 using Documenter
 using Dseams
 
+root = normpath(joinpath(docsdir, "..", "..", "..", ".."))
+lang = joinpath(root, "bbdir", "bindings", "libseams_lang.so")
+if isfile(lang)
+    ENV["SEAMS_LANG_LIB"] = lang
+    ENV["LD_LIBRARY_PATH"] = joinpath(root, "bbdir", "bindings") * ":" * joinpath(root, "bbdir", "src")
+end
+
 DocMeta.setdocmeta!(Dseams, :DocTestSetup, :(using Dseams); recursive = true)
 
 # Same remote as the Seams manual: the file on main, with no line fragment.
 struct PublishedRemote <: Documenter.Remotes.Remote end
-Documenter.Remotes.repourl(::PublishedRemote) = "https://github.com/HaoZeke/seams-core"
+Documenter.Remotes.repourl(::PublishedRemote) = "https://github.com/d-SEAMS/seams-core"
 function Documenter.Remotes.fileurl(::PublishedRemote, ::AbstractString, filename::AbstractString, linerange)
     filename = lstrip(replace(filename, '\\' => '/'), '/')
-    return "https://github.com/HaoZeke/seams-core/blob/main/$(filename)"
+    return "https://github.com/d-SEAMS/seams-core/blob/main/$(filename)"
 end
 
 makedocs(;
