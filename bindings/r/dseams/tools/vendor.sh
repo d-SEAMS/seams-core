@@ -77,8 +77,13 @@ for f in "$dest"/*.cpp "$dest"/include/*.h "$dest"/include/*.hpp; do
   if grep -Eq 'std::(cerr|cout|exit)\b|fprintf\(stderr,' "$f.tmp"; then
     {
       echo '#include "dseams_r_io.h"'
-      sed -e 's/std::cerr\b/dseams_r::err()/g' \
-        -e 's/std::cout\b/dseams_r::out()/g' \
+      # BSD sed has no \b. The token is replaced when it ends the line or
+      # is followed by a character that cannot continue an identifier, and
+      # the call goes through dseams_r_io.h.
+      sed -e 's/std::cerr$/dseams_r::err()/' \
+        -e 's/std::cerr\([^A-Za-z0-9_]\)/dseams_r::err()\1/g' \
+        -e 's/std::cout$/dseams_r::out()/' \
+        -e 's/std::cout\([^A-Za-z0-9_]\)/dseams_r::out()\1/g' \
         -e 's/std::fprintf(stderr, */dseams_r::eprintf(/g' \
         -e 's/std::exit(/dseams_r::fail(/g' "$f.tmp"
     } > "$f"
