@@ -712,9 +712,9 @@ class OmpScaling:
     handle, and the 2D RDF
     through libseams_lang. setup narrows the process to cpus 0 .. threads-1
     and sets the OpenMP width; a width above the allowed cpus is skipped.
-    The one-process-per-row sitting with the 884736-molecule cell, mdapy,
-    pyscal3, freud and the contended rows is scripts/omp_scaling.py (Snakemake rule
-    omp_scaling).
+    The one-process-per-row sitting with the 884736-molecule cell, the
+    unbound rows, mdapy, pyscal3, freud, OVITO and the contended rows is
+    scripts/omp_scaling.py (Snakemake rule omp_scaling).
     """
 
     params = (["neighbours", "q4", "q6", "rings", "chill", "chill_ovito", "chill_plus",

@@ -18,20 +18,30 @@ threads:
   monolayer                   seams_monolayer, the ring census
   rdf2d                       seams_frame_rdf2d in libseams_lang, 8 A
 
-mdapy and pyscal3 q4 and q6, and the four-nearest graph from mdapy,
-pyscal3 and freud, run at the rival widths (1 and 8 by default) on the
-small frame in the same sitting.
+mdapy and pyscal3 q4 and q6, OVITO q6, and the four-nearest graph from
+mdapy, pyscal3, freud and OVITO, run at the rival widths (1, 2, 4 and 8
+by default) on both frames in the same sitting. Every rival call builds
+its own neighbour list, as the d-SEAMS calls do.
+
+Two placements. A bound row runs under taskset on cpus 0 .. width-1 with
+OMP_PROC_BIND=close and OMP_PLACES=cores; a rival's bound row keeps the
+taskset but not the OpenMP binding, which would pin its main thread and
+every thread its own pool starts later. An unbound row is the default
+environment: the whole process mask, OMP_NUM_THREADS (and the rival's
+own thread count) and nothing else, with OMP_PROC_BIND, OMP_PLACES,
+OMP_WAIT_POLICY and GOMP_SPINCOUNT removed. d-SEAMS runs the unbound
+placement for --unbound-ops.
 
 The contended rows repeat the 8-thread rows while scripts/omp_spinner.c
 holds an 8-thread OpenMP team in its default wait (OMP_WAIT_POLICY unset)
 on the same cpus. The build labelled "<label>-fixed" is the after build
 with SEAMS_FAIR_WIDTH=0, which keeps the requested width under contention.
 
-One process per code, frame, operation, width and load, pinned with
-taskset to cpus 0 .. width-1. One warm-up call, then n timed calls
-(n >= 10). The median of an even sample is the mean of the two central
-values and the IQR is type 7. Each row records the affinity of the
-worker. The header records the tree of the measuring checkout. No host
+One process per code, frame, operation, width, placement and load. One
+warm-up call, then n timed calls (n >= 10). The median of an even sample
+is the mean of the two central values and the IQR is type 7. Each row
+records the core count and the affinity of the worker. The header
+records the tree of the measuring checkout and no commit hash. No host
 name is read or written.
 
 --before times a second libyodaLib.so, for example a build of the parent
@@ -72,7 +82,13 @@ SYSTEM_OPS = ("chill", "chill_ovito", "chill_plus", "chill_plus_ovito", "symmetr
 LANG_OPS = ("rdf2d",)
 DSEAMS_OPS = FLAT_OPS + SYSTEM_OPS + LANG_OPS
 KNN = 4
-RIVAL_OPS = {"mdapy": ("q4", "q6", "knn"), "pyscal3": ("q4", "q6", "knn"), "freud": ("knn",)}
+RIVAL_OPS = {"mdapy": ("q4", "q6", "knn"), "pyscal3": ("q4", "q6", "knn"), "freud": ("knn",),
+             "ovito": ("q6", "knn")}
+PLACEMENTS = ("bound", "unbound")
+UNBOUND_OPS = ("neighbours", "q6", "knn")
+UNBOUND_DROP = ("OMP_PROC_BIND", "OMP_PLACES", "OMP_WAIT_POLICY", "GOMP_SPINCOUNT",
+                "GOMP_CPU_AFFINITY", "KMP_AFFINITY", "OMP_DISPLAY_ENV", "OMP_SCHEDULE",
+                "SEAMS_PIN")
 SPINNER = ROOT / "scripts" / "omp_spinner.c"
 TRACKED = ("src", "include", "bindings", "scripts")
 
@@ -82,10 +98,13 @@ def frame(repetitions: int):
     return proto.ice_ic(repetitions)
 
 
+START_MASK = set(os.sched_getaffinity(0)) if hasattr(os, "sched_getaffinity") else set()
+
+
 def hold_affinity(threads: int) -> int:
-    """Put the process back on its taskset cpus after a runtime narrows it."""
+    """Put the process back on the mask it started with after a runtime narrows it."""
     try:
-        os.sched_setaffinity(0, set(range(threads)))
+        os.sched_setaffinity(0, START_MASK)
         return len(os.sched_getaffinity(0))
     except (AttributeError, OSError):
         return threads
@@ -381,6 +400,40 @@ def freud_call(op: str, threads: int, repetitions: int):
     return run, f"freud {freud.__version__}"
 
 
+def ovito_call(op: str, threads: int, repetitions: int):
+    import numpy as np
+    import ovito
+    from ovito.data import DataCollection, NearestNeighborFinder, Particles, SimulationCell
+    from ovito.modifiers import SteinhardtParametersModifier
+    xyz, side = frame(repetitions)
+    data = DataCollection()
+    cell = SimulationCell(pbc=(True, True, True))
+    cell[...] = [[side, 0.0, 0.0, 0.0], [0.0, side, 0.0, 0.0], [0.0, 0.0, side, 0.0]]
+    data.objects.append(cell)
+    particles = Particles()
+    particles.create_property("Position", data=np.ascontiguousarray(xyz))
+    data.objects.append(particles)
+    version = f"ovito {ovito.version_string}"
+    if op == "knn":
+        def run():
+            hold_affinity(threads)
+            found, _ = NearestNeighborFinder(KNN, data).find_all()
+            return f"pairs={int(found.size)}"
+        return run, version
+    if op != "q6":
+        raise ValueError(op)
+    tool = SteinhardtParametersModifier(
+        neighbor_mode=SteinhardtParametersModifier.NeighborMode.Cutoff, cutoff=CUTOFF, max_l=6)
+
+    def run():
+        hold_affinity(threads)
+        out = data.clone()
+        out.apply(tool)
+        q6 = np.asarray(out.particles["Steinhardt"])[:, -1]
+        return f"mean={float(q6.mean()):.12f}"
+    return run, version
+
+
 def worker(args) -> int:
     # Read before a runtime loads: OMP_PROC_BIND narrows the main thread.
     cores, affinity = stats.cores_now()
@@ -395,6 +448,8 @@ def worker(args) -> int:
         call, version = pyscal_call(args.op, threads, args.repetitions)
     elif args.code == "freud":
         call, version = freud_call(args.op, threads, args.repetitions)
+    elif args.code == "ovito":
+        call, version = ovito_call(args.op, threads, args.repetitions)
     else:
         raise ValueError(args.code)
     samples = []
@@ -412,20 +467,28 @@ def worker(args) -> int:
     return 0
 
 
-def worker_env(code: str, threads: int, lib: str, extra: dict[str, str]) -> dict[str, str]:
-    if code == "dseams":
+def worker_env(code: str, threads: int, lib: str, extra: dict[str, str],
+               placement: str) -> dict[str, str]:
+    width = str(threads)
+    if code == "dseams" and placement == "bound":
         env = stats.pin_env(threads)
+    elif code == "dseams":
+        env = dict(os.environ)
+        for key in UNBOUND_DROP + ("OMP_DYNAMIC", "RAYON_NUM_THREADS"):
+            env.pop(key, None)
+        env.update({"OMP_NUM_THREADS": width, "OPENBLAS_NUM_THREADS": "1",
+                    "MKL_NUM_THREADS": "1", "NUMEXPR_NUM_THREADS": "1"})
     else:
         # OMP_PROC_BIND would pin the rival's main thread to one cpu, and
         # its own thread pool would inherit that mask.
         env = dict(os.environ)
-        env.pop("OMP_PROC_BIND", None)
-        env.pop("OMP_PLACES", None)
-        width = str(threads)
+        for key in UNBOUND_DROP:
+            env.pop(key, None)
         env.update({"OMP_NUM_THREADS": width, "OMP_DYNAMIC": "FALSE",
                     "RAYON_NUM_THREADS": width, "MDAPY_NUM_THREADS": width,
-                    "PYSCAL_NUM_THREADS": width, "OPENBLAS_NUM_THREADS": "1",
-                    "MKL_NUM_THREADS": "1", "NUMEXPR_NUM_THREADS": "1"})
+                    "PYSCAL_NUM_THREADS": width, "OVITO_THREAD_COUNT": width,
+                    "OPENBLAS_NUM_THREADS": "1", "MKL_NUM_THREADS": "1",
+                    "NUMEXPR_NUM_THREADS": "1"})
     env.pop("SEAMS_FAIR_WIDTH", None)
     env.update(extra)
     extra_paths = [str(Path(lib).resolve().parent),
@@ -438,13 +501,14 @@ def worker_env(code: str, threads: int, lib: str, extra: dict[str, str]) -> dict
 
 
 def drive(code: str, op: str, threads: int, lib: str, label: str, repeats: int,
-          repetitions: int, extra: dict[str, str]) -> dict:
-    cmd = ["taskset", "-c", stats.taskset_cores(threads), sys.executable, __file__,
-           "--worker", "--code", code, "--op", op, "--threads", str(threads),
-           "--repeats", str(repeats), "--lib", lib, "--label", label,
-           "--repetitions", str(repetitions)]
-    done = subprocess.run(cmd, env=worker_env(code, threads, lib, extra), capture_output=True,
-                          text=True, check=False)
+          repetitions: int, extra: dict[str, str], placement: str) -> dict:
+    cmd = [sys.executable, __file__, "--worker", "--code", code, "--op", op,
+           "--threads", str(threads), "--repeats", str(repeats), "--lib", lib,
+           "--label", label, "--repetitions", str(repetitions)]
+    if placement == "bound":
+        cmd = ["taskset", "-c", stats.taskset_cores(threads)] + cmd
+    done = subprocess.run(cmd, env=worker_env(code, threads, lib, extra, placement),
+                          capture_output=True, text=True, check=False)
     if done.returncode != 0:
         raise RuntimeError(f"{code} {op} {threads}: {done.stderr.strip()[-2000:]}")
     lines = [line for line in done.stdout.splitlines() if line.startswith("{")]
@@ -496,14 +560,16 @@ def main() -> int:
     parser.add_argument("--label", default="after")
     parser.add_argument("--before", default="", help="a second libyodaLib.so to time")
     parser.add_argument("--before-label", default="before")
-    parser.add_argument("--before-commit", default="", help="commit the --before build is from")
     parser.add_argument("--before-tree", default="", help="tree the --before build is from")
     parser.add_argument("--widths", default=",".join(str(w) for w in WIDTHS))
     parser.add_argument("--repetitions", default=",".join(str(r) for r in REPETITIONS),
                         help="ice Ic cells per edge; 8 * r**3 molecules")
     parser.add_argument("--ops", default=",".join(DSEAMS_OPS))
-    parser.add_argument("--rival-widths", default="1,8")
-    parser.add_argument("--rivals", default="mdapy,pyscal3,freud")
+    parser.add_argument("--rival-widths", default=",".join(str(w) for w in WIDTHS))
+    parser.add_argument("--rivals", default=",".join(RIVAL_OPS))
+    parser.add_argument("--placements", default=",".join(PLACEMENTS))
+    parser.add_argument("--unbound-ops", default=",".join(UNBOUND_OPS),
+                        help="d-SEAMS operations that also run unbound")
     parser.add_argument("--contend-width", type=int, default=8,
                         help="width of the contended rows and the spinner; 0 skips them")
     parser.add_argument("--repeats", type=int, default=MIN_REPEATS)
@@ -526,6 +592,10 @@ def main() -> int:
         parser.error(f"unknown operations {unknown}")
     rival_widths = [int(w) for w in args.rival_widths.split(",") if w]
     rivals = [r for r in args.rivals.split(",") if r]
+    placements = [p for p in args.placements.split(",") if p]
+    if set(placements) - set(PLACEMENTS):
+        parser.error(f"unknown placements {sorted(set(placements) - set(PLACEMENTS))}")
+    unbound_ops = [op for op in args.unbound_ops.split(",") if op in ops]
     contend = args.contend_width
     available = len(os.sched_getaffinity(0))
     if max(widths + rival_widths + [contend]) > available:
@@ -537,25 +607,28 @@ def main() -> int:
         builds.append((args.before_label, args.before, {}))
     builds.append((args.label, args.lib, {}))
     fixed = (f"{args.label}-fixed", args.lib, {"SEAMS_FAIR_WIDTH": "0"})
-    small = min(repetitions)
     idle = []
     busy = []
-    for reps in repetitions:
-        for op in ops:
-            for threads in widths:
-                for label, lib, extra in builds:
-                    idle.append(("dseams", reps, op, threads, label, lib, extra))
-                if threads == contend:
-                    idle.append(("dseams", reps, op, threads, *fixed))
-            if contend:
-                for label, lib, extra in builds + [fixed]:
-                    busy.append(("dseams", reps, op, contend, label, lib, extra))
-    for code in rivals:
-        for op in RIVAL_OPS[code]:
-            for threads in rival_widths:
-                idle.append((code, small, op, threads, code, args.lib, {}))
-            if contend:
-                busy.append((code, small, op, contend, code, args.lib, {}))
+    for place in placements:
+        for reps in repetitions:
+            for op in ops:
+                if place == "unbound" and op not in unbound_ops:
+                    continue
+                for threads in widths:
+                    for label, lib, extra in builds:
+                        idle.append(("dseams", reps, op, threads, label, lib, extra, place))
+                    if threads == contend and place == "bound":
+                        idle.append(("dseams", reps, op, threads, *fixed, place))
+                if contend:
+                    for label, lib, extra in builds + ([fixed] if place == "bound" else []):
+                        busy.append(("dseams", reps, op, contend, label, lib, extra, place))
+        for code in rivals:
+            for reps in repetitions:
+                for op in RIVAL_OPS[code]:
+                    for threads in rival_widths:
+                        idle.append((code, reps, op, threads, code, args.lib, {}, place))
+                    if contend:
+                        busy.append((code, reps, op, contend, code, args.lib, {}, place))
 
     args.out.mkdir(parents=True, exist_ok=True)
     molecules = ",".join(str(8 * r ** 3) for r in repetitions)
@@ -565,23 +638,24 @@ def main() -> int:
         f"# worktree {stats.worktree_state(ROOT, TRACKED)}",
         f"# frame ice Ic molecules={molecules} cutoff={CUTOFF} max_ring={MAX_RING} "
         f"rdf2d_cutoff={RDF_CUTOFF} rdf2d_bin={RDF_BIN}",
-        f"# warmup={WARMUP} repeats={args.repeats} taskset=0..width-1 one process per row",
+        f"# warmup={WARMUP} repeats={args.repeats} one process per row",
+        "# bound: taskset 0..width-1; d-SEAMS also OMP_PROC_BIND=close OMP_PLACES=cores",
+        "# unbound: whole process mask; OMP_NUM_THREADS and the code's own thread count only; "
+        + " ".join(UNBOUND_DROP) + " unset",
         f"# contended rows: scripts/omp_spinner.c on cpus 0-{contend - 1}, "
         f"OMP_NUM_THREADS={contend}, OMP_WAIT_POLICY unset"
         if contend else "# contended rows: none",
         f"# build {args.label}-fixed: build {args.label} with SEAMS_FAIR_WIDTH=0",
-    ] + [f"# {line}" for line in stats.machine_lines(ROOT)]
+    ] + [f"# {line}" for line in stats.machine_lines(ROOT, commit=False)]
     if args.before:
-        header.append(f"# build {args.before_label} commit {args.before_commit or 'unrecorded'}")
         header.append(f"# build {args.before_label} tree {args.before_tree or 'unrecorded'}")
-    header.append(f"# build {args.label} commit {stats.source_commit(ROOT)}")
     header.append(f"# build {args.label} tree {stats.source_tree(ROOT)}")
     raw_lines = list(header)
     rows = []
 
     def run(jobs, load):
-        for code, reps, op, threads, label, lib, extra in jobs:
-            got = drive(code, op, threads, lib, label, args.repeats, reps, extra)
+        for code, reps, op, threads, label, lib, extra, place in jobs:
+            got = drive(code, op, threads, lib, label, args.repeats, reps, extra, place)
             summary = stats.summarize(got["samples"])
             row = {
                 "code": code,
@@ -590,6 +664,7 @@ def main() -> int:
                 "molecules": 8 * reps ** 3,
                 "operation": op,
                 "threads": threads,
+                "placement": place,
                 "load": load,
                 "cores": got["cores"],
                 "affinity": got["affinity"],
@@ -602,10 +677,12 @@ def main() -> int:
             }
             rows.append(row)
             raw_lines.append(
-                f"{code} {label} molecules={8 * reps ** 3} {op} threads={threads} load={load} "
+                f"{code} {label} molecules={8 * reps ** 3} {op} threads={threads} "
+                f"placement={place} load={load} "
                 f"cores={got['cores']} affinity={got['affinity']} {got['check']} samples_ms "
                 f"{stats.fmt_samples(got['samples'])}")
-            print(f"{code:8s} {label:12s} {8 * reps ** 3:7d} {op:16s} {threads} {load:9s} "
+            print(f"{code:8s} {label:12s} {8 * reps ** 3:7d} {op:16s} {threads} {place:7s} "
+                  f"{load:9s} "
                   f"{row['median_ms']:>10s} ms", flush=True)
 
     run(idle, "idle")
