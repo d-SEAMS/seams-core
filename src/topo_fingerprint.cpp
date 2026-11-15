@@ -203,10 +203,19 @@ std::uint64_t wlHashWide(const std::vector<std::vector<int>> &adjacency, int roo
   thread_local std::vector<std::pair<std::uint64_t, int>> order;
   color.resize(static_cast<std::size_t>(n));
   next.resize(static_cast<std::size_t>(n));
+  bool uniform = n >= 2 && root >= 0 && root < n;
+  const std::size_t deg0 = adjacency.empty() ? 0 : adjacency[0].size();
+  const int paint0 = colored ? colors[0] : 0;
   for (int i = 0; i < n; i++) {
-    const std::uint64_t deg =
-        static_cast<std::uint64_t>(adjacency[static_cast<std::size_t>(i)].size());
-    std::uint64_t h = mix(kOffset, deg + (i == root ? 0x9e3779b97f4a7c15ULL : 0ULL));
+    const std::size_t deg = adjacency[static_cast<std::size_t>(i)].size();
+    if (deg != deg0) {
+      uniform = false;
+    }
+    if (colored && colors[static_cast<std::size_t>(i)] != paint0) {
+      uniform = false;
+    }
+    std::uint64_t h = mix(kOffset, static_cast<std::uint64_t>(deg) +
+                                       (i == root ? 0x9e3779b97f4a7c15ULL : 0ULL));
     if (colored) {
       h = mix(h, static_cast<std::uint64_t>(
                      static_cast<std::int64_t>(colors[static_cast<std::size_t>(i)])) +
@@ -215,6 +224,53 @@ std::uint64_t wlHashWide(const std::vector<std::vector<int>> &adjacency, int roo
     color[static_cast<std::size_t>(i)] = h;
   }
   for (int r = 0; r < rounds; r++) {
+    // Every non-root starts on one color, so the first round is the root's
+    // neighbour list: one hash for the root, one for its neighbours, one for
+    // the rest. Later rounds still walk the edges.
+    if (r == 0 && uniform) {
+      const std::uint64_t common = color[static_cast<std::size_t>(root == 0 ? 1 : 0)];
+      const std::uint64_t rooted = color[static_cast<std::size_t>(root)];
+      thread_local std::vector<int> hits;
+      hits.assign(static_cast<std::size_t>(n), 0);
+      bool simple = true;
+      for (const int j : adjacency[static_cast<std::size_t>(root)]) {
+        if (j < 0 || j >= n || ++hits[static_cast<std::size_t>(j)] > 1) {
+          simple = false;
+          break;
+        }
+      }
+      if (simple) {
+        const int deg = static_cast<int>(deg0);
+        auto sprinkle = [](std::uint64_t h, std::uint64_t col, int copies) {
+          for (int t = 0; t < copies; t++) {
+            h = mix(h, col);
+          }
+          return h;
+        };
+        const std::uint64_t hFar = sprinkle(mix(kOffset, common), common, deg);
+        std::uint64_t hTouch = mix(kOffset, common);
+        if (rooted < common) {
+          hTouch = sprinkle(mix(hTouch, rooted), common, deg - 1);
+        } else if (common < rooted) {
+          hTouch = sprinkle(hTouch, common, deg - 1);
+          hTouch = mix(hTouch, rooted);
+        } else {
+          hTouch = hFar;
+        }
+        const std::uint64_t hRoot = sprinkle(mix(kOffset, rooted), common, deg);
+        for (int i = 0; i < n; i++) {
+          if (i == root) {
+            next[static_cast<std::size_t>(i)] = hRoot;
+          } else if (hits[static_cast<std::size_t>(i)] != 0) {
+            next[static_cast<std::size_t>(i)] = hTouch;
+          } else {
+            next[static_cast<std::size_t>(i)] = hFar;
+          }
+        }
+        color.swap(next);
+        continue;
+      }
+    }
     order.resize(static_cast<std::size_t>(n));
     for (int i = 0; i < n; i++) {
       order[static_cast<std::size_t>(i)] = {color[static_cast<std::size_t>(i)], i};
