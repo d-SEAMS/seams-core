@@ -1,0 +1,70 @@
+diff --git a/scripts/copy-cargo-artifacts.py b/scripts/copy-cargo-artifacts.py
+index 8b2e055..15360a7 100644
+--- a/scripts/copy-cargo-artifacts.py
++++ b/scripts/copy-cargo-artifacts.py
+@@ -4,6 +4,7 @@
+ from __future__ import annotations
+ 
+ import argparse
++import os
+ import shutil
+ import subprocess
+ import sys
+@@ -30,8 +31,15 @@ def parse_args() -> argparse.Namespace:
+ 
+ def main() -> None:
+     args = parse_args()
+-    command = [
+-        args.cargo,
++    # ThreadSanitizer does not see Rayon's futex join unless std and rayon
++    # are rebuilt with the sanitizer. The final C++ link supplies one
++    # compiler-rt via -Zexternal-clangrt, so the pool stays multithreaded.
++    tsan = os.environ.get("LINKCELL_SANITIZE") == "thread"
++    # Pixi's cargo is a real binary, not the rustup proxy, and it is ahead
++    # of rustup on PATH. rustup run nightly still leaves that rustc first,
++    # so the nightly compiler has to be named by its own path.
++    command = [args.cargo]
++    command += [
+         "rustc",
+         "--lib",
+         "--manifest-path",
+@@ -41,7 +49,9 @@ def main() -> None:
+         "--features",
+         "capi",
+     ]
+-    if (args.source / "Cargo.lock").is_file():
++    if tsan:
++        command += ["-Zbuild-std", "--target", "x86_64-unknown-linux-gnu"]
++    if (args.source / "Cargo.lock").is_file() and not tsan:
+         command.append("--locked")
+     if args.profile == "release":
+         command.append("--release")
+@@ -52,9 +62,27 @@ def main() -> None:
+     elif sys.platform == "darwin":
+         rustc.append(f"-Clink-arg=-Wl,-install_name,@rpath/{args.shared}")
+     command.extend(["--", *rustc])
+-    subprocess.check_call(command)
++    env = os.environ.copy()
++    if tsan:
++        nightly_cargo = subprocess.check_output(
++            ["rustup", "which", "--toolchain", "nightly", "cargo"], text=True
++        ).strip()
++        nightly_rustc = subprocess.check_output(
++            ["rustup", "which", "--toolchain", "nightly", "rustc"], text=True
++        ).strip()
++        command[0] = nightly_cargo
++        env["RUSTC"] = nightly_rustc
++        nightly_bin = str(Path(nightly_rustc).parent)
++        env["PATH"] = nightly_bin + os.pathsep + env.get("PATH", "")
++        extra = "-Zsanitizer=thread -Zexternal-clangrt -Cforce-frame-pointers=yes"
++        flags = env.get("RUSTFLAGS", "")
++        if "-Zsanitizer=thread" not in flags:
++            env["RUSTFLAGS"] = (flags + " " + extra).strip()
++    subprocess.check_call(command, env=env)
+ 
+     built = args.target / args.profile
++    if tsan:
++        built = args.target / "x86_64-unknown-linux-gnu" / args.profile
+     shutil.copy2(built / args.shared, args.out_shared)
+     shutil.copy2(built / args.static, args.out_static)
+     if args.implib is not None:

@@ -23,6 +23,7 @@ doxyYoda_*
 /run*
 bbdir/
 bbdir-*/
+.tsan-openmp/
 bbdir-cov/
 bindings/rust/target/
 __pycache__/
