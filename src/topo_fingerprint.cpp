@@ -12,6 +12,7 @@ std::vector<int> ringCensusCounts(const std::vector<std::vector<int>> &nList, in
 }
 
 #include <algorithm>
+#include <bit>
 #include <limits>
 #include <numeric>
 #include <sstream>
@@ -550,6 +551,35 @@ std::uint64_t wlHashCount(const std::vector<std::vector<int>> &adjacency, int ro
           for (int c = 0; c < nColors; c++) {
             const std::uint64_t col = palette[static_cast<std::size_t>(c)];
             const int copies = row[c];
+            for (int t = 0; t < copies; t++) {
+              h = mix(h, col);
+            }
+          }
+        }
+        next[static_cast<std::size_t>(i)] = h;
+      }
+    } else if (nColors > 64) {
+      // Most of a wide palette is absent at each vertex, so the mix walks
+      // only the colors that occur, in palette order.
+      counts.assign(static_cast<std::size_t>(nColors), 0);
+      const int words = (nColors + 63) >> 6;
+      for (int i = 0; i < n; i++) {
+        std::uint64_t present[8] = {};
+        for (const int j : adjacency[static_cast<std::size_t>(i)]) {
+          const int id = colorId[static_cast<std::size_t>(j)];
+          counts[static_cast<std::size_t>(id)]++;
+          present[static_cast<unsigned>(id) >> 6] |= 1ull << (static_cast<unsigned>(id) & 63u);
+        }
+        std::uint64_t h = mix(kOffset, color[static_cast<std::size_t>(i)]);
+        for (int w = 0; w < words; w++) {
+          std::uint64_t bits = present[w];
+          const int base = w << 6;
+          while (bits != 0) {
+            const int c = base + std::countr_zero(bits);
+            bits &= bits - 1;
+            const std::uint64_t col = palette[static_cast<std::size_t>(c)];
+            const int copies = counts[static_cast<std::size_t>(c)];
+            counts[static_cast<std::size_t>(c)] = 0;
             for (int t = 0; t < copies; t++) {
               h = mix(h, col);
             }
