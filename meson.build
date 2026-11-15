@@ -1447,7 +1447,7 @@ if get_option('with_cli')
         _mpiexec.full_path(),
         seams_exe.full_path(),
         meson.project_source_root() / 'input' / 'traj' / 'mW_cubic.lammpstrj',
-        meson.project_source_root() / 'input' / 'con' / 'tiny_multi_cuh2.con',
+        meson.project_source_root() / 'input' / 'eon' / 'tiny_multi_cuh2.con',
       ],
       depends: [seams_exe],
       is_parallel: false,

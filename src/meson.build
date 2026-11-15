@@ -260,7 +260,7 @@ seams_api_test = executable(
 _capi_env = environment()
 _capi_env.set('SEAMS_SAMPLE', meson.project_source_root() / 'input' / 'traj' / 'agi_water_tiny.lammpstrj')
 _capi_env.set('SEAMS_XYZ', meson.project_source_root() / 'input' / 'xyz' / 'configuration.xyz')
-_capi_env.set('SEAMS_CON', meson.project_source_root() / 'input' / 'con' / 'tiny_multi_cuh2.con')
+_capi_env.set('SEAMS_CON', meson.project_source_root() / 'input' / 'eon' / 'tiny_multi_cuh2.con')
 test('seams_c_api', seams_api_test, timeout: 180, env: _capi_env)
 
 docs_ice_example = executable(
