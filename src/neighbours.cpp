@@ -882,7 +882,7 @@ bool nneigh::blockWindowRows(
                             yCloud.boxLow.size() > 1 ? yCloud.boxLow[1] : 0.0,
                             yCloud.boxLow.size() > 2 ? yCloud.boxLow[2] : 0.0};
   const int n = yCloud.nop;
-  const double windowT0 = omp_get_wtime();
+  const auto windowT0 = std::chrono::steady_clock::now();
 #ifdef SEAMS_HAS_OPENMP
   const int nThreads = std::max(1, omp_get_max_threads());
 #else
@@ -1193,10 +1193,12 @@ bool nneigh::blockWindowRows(
     cy[static_cast<std::size_t>(slot)] = p[1];
     cz[static_cast<std::size_t>(slot)] = p[2];
   }
-  const double pairT0 = omp_get_wtime();
+  const auto pairT0 = std::chrono::steady_clock::now();
   if (const char *split = std::getenv("SEAMS_SPLIT")) {
     if (split[0] == '1') {
-      std::fprintf(stderr, "prep ms %.3f\n", (pairT0 - windowT0) * 1.0e3);
+      const double prepMs =
+          std::chrono::duration<double, std::milli>(pairT0 - windowT0).count();
+      std::fprintf(stderr, "prep ms %.3f\n", prepMs);
     }
   }
   // One cache line per bag. Adjacent vector headers were sharing a
@@ -1242,8 +1244,11 @@ bool nneigh::blockWindowRows(
   }
   if (const char *split = std::getenv("SEAMS_SPLIT")) {
     if (split[0] == '1') {
+      const double pairMs =
+          std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - pairT0)
+              .count();
       std::fprintf(stderr, "pairs threads %d n %d cells %d hits %zu ms %.3f\n", nThreads, n, nCells,
-                   nPairs, (omp_get_wtime() - pairT0) * 1.0e3);
+                   nPairs, pairMs);
     }
   }
   const std::vector<int> indexToID = byId ? indexToIDTable(yCloud) : std::vector<int>{};
@@ -1363,7 +1368,10 @@ bool nneigh::blockWindowRows(
   }
   if (const char *split = std::getenv("SEAMS_SPLIT")) {
     if (split[0] == '1') {
-      std::fprintf(stderr, "rows ms %.3f\n", (omp_get_wtime() - pairT0) * 1.0e3);
+      const double rowMs =
+          std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - pairT0)
+              .count();
+      std::fprintf(stderr, "rows ms %.3f\n", rowMs);
     }
   }
   return true;
