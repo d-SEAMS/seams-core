@@ -1757,10 +1757,6 @@ if get_option('with_cli')
     depends: [seams_exe, seams_api_lib, seams_lang],
     suite: 'docs',
     timeout: 600)
-  _ctypes_env = environment()
-  _ctypes_env.set('PYTHONPATH', meson.project_source_root() / 'bindings' / 'python' / 'src')
-  _ctypes_env.set('SEAMS_LIB', seams_api_lib.full_path())
-  _ctypes_env.set('DSEAMS_ROOT', meson.project_source_root())
   foreach _lang : ['c', 'cpp']
     test(
       'docs_lang_' + _lang,

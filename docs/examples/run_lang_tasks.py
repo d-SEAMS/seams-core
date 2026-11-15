@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 # Copyright (c) d-SEAMS developers
-"""Run one language example of the ice Ih census.
+"""Run the C or C++ example of the ice Ih census.
 
-Exit status 77 means the compiler or the binding is not on this machine.
+Exit status 77 means the compiler is not on this machine. The Python,
+Rust, Julia, Lua, Fortran and R copies of this census run in the binding
+repositories.
 A successful run prints one line. ``parity`` runs every language, checks
 that the successful lines match, and writes the table Sphinx includes.
 """
 
 import os
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -16,11 +17,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "docs"))
-from toolchain import c_compiler, cxx_compiler, fortran_compiler, gfortran_link, link_command  # noqa: E402
+from toolchain import c_compiler, cxx_compiler, link_command  # noqa: E402
 EXAMPLES = ROOT / "docs" / "examples"
 CANON = "pairs 512 rings 0 0 0 0 0 0 256 chill 0 128 0 0 0 0 0 0 0"
 
-LANGS = ("c", "cpp", "python", "rust", "julia", "lua", "fortran", "r")
+LANGS = ("c", "cpp")
 
 
 class Skip(Exception):
@@ -122,150 +123,9 @@ def lang_cpp(build, env):
     sys.stdout.write(text)
 
 
-def lang_python(build, env):
-    try:
-        import numpy  # noqa: F401
-    except ImportError as err:
-        raise Skip("numpy is not importable") from err
-    if "SEAMS_LANG_LIB" not in env:
-        raise Skip("libseams_lang.so was not built")
-    text = run([sys.executable, str(EXAMPLES / "lang_tasks_python.py")], env)
-    sys.stdout.write(text)
-
-
-def lang_rust(build, env):
-    rustc = shutil.which("rustc")
-    if not rustc:
-        raise Skip("rustc is not on PATH")
-    if not (build / "src" / "libseams.so").is_file() and not (build / "src" / "libseams.a").is_file():
-        raise Skip("libseams was not built")
-    work = Path(tempfile.mkdtemp(prefix="seams-lang-rust-"))
-    exe = work / "lang_tasks_rs"
-    src = build / "src"
-    bindings = build / "bindings"
-    text = compile_and_run(
-        [
-            rustc,
-            "--edition",
-            "2021",
-            "-o",
-            str(exe),
-            str(EXAMPLES / "lang_tasks.rs"),
-            "-L",
-            str(bindings),
-            "-L",
-            str(src),
-            "-C",
-            "link-arg=-Wl,-rpath," + str(bindings),
-            "-C",
-            "link-arg=-Wl,-rpath," + str(src),
-        ],
-        exe,
-        env,
-    )
-    sys.stdout.write(text)
-
-
-def lang_julia(build, env):
-    julia = shutil.which("julia")
-    if not julia:
-        raise Skip("julia is not on PATH")
-    if "SEAMS_LANG_LIB" not in env:
-        raise Skip("libseams_lang.so was not built")
-    env = dict(env)
-    project = ROOT / "bindings" / "julia" / "Dseams"
-    # JULIA_LOAD_PATH loads the source and not the project depot, so
-    # Preferences is missing. instantiate.ensure runs develop_jll under a lock.
-    sys.path.insert(0, str(ROOT / "bindings" / "julia"))
-    from instantiate import ensure
-
-    ensure(julia, env)
-    text = run(
-        [julia, "--startup-file=no", "--project=" + str(project), str(EXAMPLES / "lang_tasks.jl")],
-        env,
-    )
-    sys.stdout.write(text)
-
-
-def lang_lua(build, env):
-    lua = shutil.which("lua5.4") or shutil.which("lua")
-    if not lua:
-        raise Skip("lua is not on PATH")
-    sys.path.insert(0, str(ROOT / "docs"))
-    from lua_module import cpath_for
-
-    try:
-        cpath = cpath_for(build, lua)
-    except SystemExit as err:
-        raise Skip(str(err)) from err
-    env = dict(env)
-    env["LUA_CPATH"] = cpath
-    env["LUA_PATH"] = str(ROOT / "bindings" / "lua" / "?.lua") + ";;"
-    text = run([lua, str(EXAMPLES / "lang_tasks.lua")], env)
-    sys.stdout.write(text)
-
-
-def lang_fortran(build, env):
-    gfortran = fortran_compiler()
-    if "SEAMS_LANG_LIB" not in env:
-        raise Skip("libseams_lang.so was not built")
-    work = Path(tempfile.mkdtemp(prefix="seams-lang-f90-"))
-    exe = work / "lang_tasks_f90"
-    obj = work / "lang_tasks_f90.o"
-    src = build / "src"
-    bindings = build / "bindings"
-    run([gfortran, "-c", str(EXAMPLES / "lang_tasks.f90"), "-o", str(obj)], env)
-    text = compile_and_run(
-        link_command(
-            cxx_compiler(),
-            [
-                str(obj),
-                "-o",
-                str(exe),
-                "-L" + str(bindings),
-                "-L" + str(src),
-                "-lseams_lang",
-                "-lseams",
-                *gfortran_link(),
-                "-Wl,-rpath," + str(bindings),
-                "-Wl,-rpath," + str(src),
-            ],
-        ),
-        exe,
-        env,
-    )
-    sys.stdout.write(text)
-
-
-def rscript():
-    found = shutil.which("Rscript")
-    if found:
-        return found
-    raise Skip("Rscript is not on PATH")
-
-
-def lang_r(build, env):
-    if shutil.which("Rscript") is None:
-        raise Skip("Rscript is not on PATH")
-    sys.path.insert(0, str(ROOT / "docs" / "examples"))
-    import run_binding
-
-    script, renv = run_binding.install_r_package(build)
-    merged = dict(env)
-    merged.update(renv)
-    text = run([script, str(EXAMPLES / "lang_tasks.R")], merged)
-    sys.stdout.write(text)
-
-
 DRIVERS = {
     "c": lang_c,
     "cpp": lang_cpp,
-    "python": lang_python,
-    "rust": lang_rust,
-    "julia": lang_julia,
-    "lua": lang_lua,
-    "fortran": lang_fortran,
-    "r": lang_r,
 }
 
 
@@ -302,7 +162,7 @@ def write_table(rows, destination):
     if skipped:
         note = "Skipped in this environment: " + ", ".join(f"``{name}``" for name in skipped) + "."
     else:
-        note = "No binding was skipped in this environment."
+        note = "No language was skipped in this environment."
     body = [
         note,
         "",
