@@ -2209,6 +2209,9 @@ if _fuzz_args.length() > 0
         seams_api_lib.full_path(),
       ] + _fuzz_args + [
         '-Wl,-rpath,' + meson.current_build_dir() / 'src',
+        # libseams is passed as a file, so the driver does not add the
+        # OpenMP runtime it was built with. The harness needs it.
+        '-fopenmp',
         '-lstdc++', '-lpthread', '-lm',
       ],
       depends: [seams_api_lib],
