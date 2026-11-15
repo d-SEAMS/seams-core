@@ -88,120 +88,10 @@ def c_header_symbols():
     return sorted(found)
 
 
-def python_symbols():
-    """Names a caller gets from ``import dseams``, including Frame methods."""
-    text = (ROOT / "bindings" / "python" / "dseams" / "__init__.py").read_text()
-    names = set(re.findall(r"^def ([A-Za-z][A-Za-z0-9_]*)\(", text, re.M))
-    names.update(re.findall(r"^([A-Za-z][A-Za-z0-9_]*) = ", text, re.M))
-    names.update(re.findall(r"^class ([A-Za-z][A-Za-z0-9_]*)", text, re.M))
-    core = (ROOT / "bindings" / "python" / "dseams" / "_core.cpp").read_text()
-    head, _, tail = core.partition("nb::class_")
-    names.update(re.findall(r'm\.def\(\s*"([A-Za-z][A-Za-z0-9_]*)"', head))
-    for method in re.findall(r'\.def\(\s*"([A-Za-z][A-Za-z0-9_]*)"', tail):
-        names.add(method)
-        names.add("Frame." + method)
-    user = (ROOT / "bindings" / "python" / "dseams" / "userframe.py").read_text()
-    current = None
-    for line in user.splitlines():
-        matched = re.match(r"^class ([A-Za-z][A-Za-z0-9_]*)", line)
-        if matched:
-            current = matched.group(1)
-            names.add("userframe." + current)
-            continue
-        matched = re.match(r"^def ([A-Za-z][A-Za-z0-9_]*)\(", line)
-        if matched:
-            current = None
-            if not matched.group(1).startswith("_"):
-                names.add("userframe." + matched.group(1))
-            continue
-        matched = re.match(r"^    def ([A-Za-z][A-Za-z0-9_]*)\(", line)
-        if matched and current and not matched.group(1).startswith("_"):
-            names.add("userframe.{}.{}".format(current, matched.group(1)))
-    return sorted(names)
-
-
-def rust_symbols():
-    """Public items of the safe ``seams`` crate."""
-    text = (ROOT / "bindings" / "rust" / "seams" / "src" / "lib.rs").read_text()
-    names = set(re.findall(r"^pub (?:struct|fn|enum|const|type) ([A-Za-z0-9_]+)", text, re.M))
-    names.update(re.findall(r"^    pub fn ([A-Za-z0-9_]+)", text, re.M))
-    return sorted(names)
-
-
-def fortran_symbols():
-    """Parameters and procedures of the Fortran modules ``seams`` and ``seams_c``.
-
-    >>> "seams_set_num_threads" in fortran_symbols()
-    True
-    """
-    names = set()
-    for unit in ("seams.f90", "seams_c.f90"):
-        text = (ROOT / "bindings" / "fortran" / "src" / unit).read_text()
-        names.update(re.findall(r"parameter :: ([A-Z0-9_]+)", text))
-        names.update(re.findall(r"(?:function|subroutine) ([a-z0-9_]+)\(", text))
-    return sorted(names)
-
-
-def _julia_export(path):
-    """Names from every ``export`` line, not only the first.
-
-    >>> names = _julia_export(ROOT / "bindings" / "julia" / "Dseams" / "src" / "Dseams.jl")
-    >>> "Frame" in names, "seams_site_table" in names
-    (True, True)
-    """
-    text = path.read_text()
-    names = []
-    for line in re.findall(r"^export (.+)$", text, re.M):
-        names.extend(part.strip() for part in line.split(",") if part.strip())
-    return names
-
-
-def julia_symbols():
-    """Exported names of both Julia packages, plus the Ice Ih path helper."""
-    dseams = ROOT / "bindings" / "julia" / "Dseams" / "src" / "Dseams.jl"
-    seams = ROOT / "bindings" / "julia" / "Seams" / "src" / "Seams.jl"
-    names = set(_julia_export(dseams))
-    if "ice_ih_path()" in dseams.read_text():
-        names.add("ice_ih_path")
-    seams_text = seams.read_text()
-    for name in _julia_export(seams):
-        names.add("Seams." + name)
-    names.update("Seams." + item for item in re.findall(r"^const ([A-Z][A-Z0-9_]*) =", seams_text, re.M))
-    return sorted(names)
-
-
-def lua_symbols():
-    """Names on the table returned by bindings/lua/dseams.lua."""
-    text = (ROOT / "bindings" / "lua" / "dseams.lua").read_text()
-    names = set(re.findall(r"^function dseams\.([A-Za-z_][A-Za-z0-9_]*)", text, re.M))
-    names.update(re.findall(r"^dseams\.([A-Za-z_][A-Za-z0-9_]*)\s*=", text, re.M))
-    names.update(re.findall(r'^dseams\["([^"]+)"\]\s*=', text, re.M))
-    names.update(re.findall(r"^\s+([A-Z][A-Z0-9_]*) =", text, re.M))
-    names.update({"core", "cloud.close", "cloud.box", "cloud.nop"})
-    return sorted(names)
-
-
-def rust_sys_symbols():
-    """Public items of the generated seams-sys crate. They mirror include/seams.h."""
-    text = (ROOT / "bindings" / "rust" / "seams-sys" / "src" / "lib.rs").read_text()
-    names = set(re.findall(r"^pub (?:const|fn|struct|enum|type|union) ([A-Za-z0-9_]+)", text, re.M))
-    return sorted(names)
-
-
-def r_symbols():
-    """Functions marked @export in any file of the R package.
-
-    >>> "seams_system_read" in r_symbols()
-    True
-    """
-    names = set()
-    for source in sorted((ROOT / "bindings" / "r" / "dseams" / "R").glob("*.R")):
-        names.update(re.findall(r"#' @export\n([A-Za-z0-9_.]+) <- function", source.read_text()))
-    return sorted(names)
-
-
 def missing_public_symbols():
-    """Undocumented public names in each shipped language front.
+    """Undocumented public names in the C API and the C++ language header.
+
+    The binding repositories check their own languages.
 
     >>> missing_public_symbols()
     []
@@ -210,10 +100,4 @@ def missing_public_symbols():
     missing = []
     missing.extend("c:" + name for name in _missing(c_header_symbols(), blob))
     missing.extend("cxx:" + name for name in _missing(cxx_symbols(), blob))
-    missing.extend("python:" + name for name in _missing(python_symbols(), blob))
-    missing.extend("rust:" + name for name in _missing(rust_symbols(), blob))
-    missing.extend("fortran:" + name for name in _missing(fortran_symbols(), blob))
-    missing.extend("julia:" + name for name in _missing(julia_symbols(), blob))
-    missing.extend("r:" + name for name in _missing(r_symbols(), blob))
-    missing.extend("lua:" + name for name in _missing(lua_symbols(), blob))
     return missing

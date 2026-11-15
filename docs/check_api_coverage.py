@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # Copyright (c) d-SEAMS developers
-"""Each public symbol needs a purpose, parameters, units, and an example."""
+"""Each public C and C++ symbol needs a purpose, parameters, units, and an example.
+
+The binding repositories document and check their own languages.
+"""
 
 import re
 import sys
@@ -16,22 +19,10 @@ END = "<!-- API_SYMBOLS_END -->"
 PAGES = {
     "c": "c.md",
     "cxx": "cpp.md",
-    "python": "python.md",
-    "rust": "rust.md",
-    "fortran": "fortran.md",
-    "julia": "julia.md",
-    "r": "r.md",
-    "lua": "lua.md",
 }
 EXAMPLES = {
     "c": "docs/examples/c_api_tour.c",
     "cxx": "docs/examples/minimal_cpp.cpp",
-    "python": "docs/examples/minimal_py.py",
-    "rust": "docs/examples/minimal_rust.rs",
-    "fortran": "docs/examples/minimal_fortran.f90",
-    "julia": "docs/examples/minimal_julia.jl",
-    "r": "docs/examples/minimal_r.R",
-    "lua": "docs/examples/minimal_lua.lua",
 }
 FIELDS = ("Purpose", "Parameters", "Returns", "Ownership", "Errors", "Units")
 
@@ -40,12 +31,6 @@ def groups():
     return {
         "c": check_c_symbols.c_header_symbols(),
         "cxx": check_c_symbols.cxx_symbols(),
-        "python": check_c_symbols.python_symbols(),
-        "rust": check_c_symbols.rust_symbols(),
-        "fortran": check_c_symbols.fortran_symbols(),
-        "julia": check_c_symbols.julia_symbols(),
-        "r": check_c_symbols.r_symbols(),
-        "lua": check_c_symbols.lua_symbols(),
     }
 
 
@@ -95,15 +80,6 @@ def problems():
         for name in have:
             if name not in names:
                 errors.append("documented symbol does not exist: {}: {}".format(lang, name))
-    c_page = sections(reference_body(API / PAGES["c"]))
-    for name in check_c_symbols.rust_sys_symbols():
-        block = c_page.get(name)
-        if block is None:
-            errors.append("undocumented rust-sys {}".format(name))
-            continue
-        for label in FIELDS:
-            if re.search(r"^" + label + r": \S.*$", block, re.M) is None:
-                errors.append("rust-sys {} needs {} on the C page".format(name, label))
     return errors
 
 
@@ -113,7 +89,6 @@ def main():
         print("\n".join(errors), file=sys.stderr)
         return 1
     count = sum(len(names) for names in groups().values())
-    count += len(check_c_symbols.rust_sys_symbols())
     undocumented = [item for item in errors if item.startswith("undocumented")]
     print("api coverage ok ({} symbols, {} undocumented)".format(count, len(undocumented)))
     return 0

@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # Copyright (c) d-SEAMS developers
-"""Count the code examples on the eight language pages and require each to be tested.
+"""Count the code examples on the C and C++ API pages and require each to be tested.
+
+The Python, Fortran, Julia, R, Rust and Lua pages link to the binding
+repositories, which test their own examples.
 
 A literalinclude is compiled by docs/run_snippets.py. A language fence must
 assert its result. A ``capi`` line on the C page is an expected-output
@@ -15,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "docs"))
 import run_snippets  # noqa: E402
 
-PAGES = ("c", "cpp", "python", "fortran", "julia", "r", "rust", "lua")
+PAGES = ("c", "cpp")
 FENCE = re.compile(r"```([^\n]*)\n(.*?)```", re.S)
 
 

@@ -9,6 +9,10 @@ that copy. An Org or Markdown fence whose first line is
     # excerpt: path/from/repo/root
 
 must be followed by text that occurs, unchanged, in that file.
+
+The C and C++ pages must cover every C API and language ABI entry point.
+The Python, Fortran, Julia, R, Rust and Lua pages are links to the binding
+repositories, which check their own API coverage.
 """
 
 import pathlib
@@ -56,11 +60,6 @@ def lang_symbols():
         if name not in seen:
             seen.append(name)
     return seen
-
-
-def fortran_symbols():
-    text = (ROOT / "bindings" / "fortran" / "src" / "seams_c.f90").read_text()
-    return re.findall(r'bind\(C, name="([^"]+)"\)', text)
 
 
 def present(text, token):
@@ -218,98 +217,6 @@ def main():
     howto = DOCS / "orgmode" / "howto"
     require_tokens(corpus, [api / "c.md"], c_symbols(), errors, "C API")
     require_tokens(corpus, [api / "cpp.md"], lang_symbols(), errors, "language ABI")
-    require_tokens(corpus, [api / "fortran.md"], fortran_symbols(), errors, "Fortran")
-    require_tokens(
-        corpus,
-        [api / "python.md"],
-        [
-            "version",
-            "set_num_threads",
-            "num_threads",
-            "Frame",
-            "set_frame",
-            "count",
-            "chill_plus",
-            "q4q6",
-            "neighbours",
-            "rings",
-            "cages",
-            "signature_cages",
-            "symmetry",
-            "from_ase",
-            "from_mdanalysis",
-            "PUBLISHED",
-            "OVITO",
-            "CUTOFF",
-        ],
-        errors,
-        "Python",
-    )
-    require_tokens(
-        corpus,
-        [api / "julia.md"],
-        [
-            "read_frame",
-            "nop",
-            "nframes",
-            "chill_plus",
-            "cages",
-            "primitive_rings",
-            "signature_cages",
-            "symmetry",
-            "steinhardt",
-            "q4_q6",
-            "jump_tau90",
-            "set_num_threads",
-            "num_threads",
-            "version",
-            "set_ortho!",
-            "q4q6",
-            "six_rings",
-            "System",
-        ],
-        errors,
-        "Julia",
-    )
-    require_tokens(
-        corpus,
-        [api / "r.md"],
-        [
-            "read_frame",
-            "positions",
-            "chill_plus",
-            "cages",
-            "primitive_rings",
-            "signature_cages",
-            "symmetry",
-            "steinhardt",
-            "nframes",
-            "print",
-            "q4_q6",
-            "jump_tau90",
-        ],
-        errors,
-        "R",
-    )
-    require_tokens(
-        corpus,
-        [api / "rust.md"],
-        [
-            "set_num_threads",
-            "num_threads",
-            "version",
-            "System::new",
-            "set_ortho",
-            "set_frame",
-            "count",
-            "chill_plus",
-            "q4q6",
-            "neighbour_degree",
-            "six_ring_fraction",
-        ],
-        errors,
-        "Rust",
-    )
     require_tokens(
         corpus,
         [engines / "lammps.md"],
@@ -372,13 +279,6 @@ def main():
         ["chill-plus"],
         errors,
         "CHILL+ how-to",
-    )
-    require_tokens(
-        corpus,
-        [howto / "lua.org"],
-        ["chill_plus", "ringNetwork", "chill-plus", "ring-network"],
-        errors,
-        "Lua how-to",
     )
     require_tokens(
         corpus,
