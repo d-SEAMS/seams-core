@@ -27,7 +27,7 @@ frame):
 
 The gap is mostly water that OVITO calls interfacial.
 
-The same split is in `discovery/v5-session.txt`. On step 15677000,
+The same split is in `docs/data/interface-order-nucleus.csv`. On step 15677000,
 `ovito-chill+` matches mdapy and OVITO on all 4096 atoms and the
 published rule differs on 397. On `input/traj/interface_f0.lammpstrj`
 the match is 864/864 and the published rule differs on 46. q6 on both
