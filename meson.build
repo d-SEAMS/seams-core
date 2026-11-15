@@ -2189,6 +2189,20 @@ if _fuzz_args.length() > 0
   _fuzz_env = environment()
   _fuzz_env.set('LSAN_OPTIONS',
                 'suppressions=' + meson.project_source_root() / 'fuzz' / 'lsan.supp')
+  # The compiler invokes whichever `ld` is first on PATH. A conda prefix
+  # puts its sysroot ld there. That ld links the prefix's libpthread and
+  # libdl, whose GLIBC_PRIVATE symbols are not in the host libc this
+  # compiler was built against. -B names the host linker when the
+  # compiler itself is not the conda one.
+  _fuzz_bindir = []
+  _conda_prefix = run_command('sh', '-c', 'printf %s "${CONDA_PREFIX:-}"', check: false).stdout().strip()
+  _cc_path = find_program(_fuzz_cc.cmd_array()[0], required: false)
+  if _cc_path.found() and host_machine.system() == 'linux' and import('fs').exists('/usr/bin/ld')
+    _cc_full = _cc_path.full_path()
+    if _conda_prefix == '' or not _cc_full.startswith(_conda_prefix + '/')
+      _fuzz_bindir = ['-B/usr/bin/']
+    endif
+  endif
   foreach _fuzz : [
     ['capi_fuzzer', 'capi_read_fuzzer'],
     ['capi_array_fuzzer', 'capi_array_fuzzer'],
@@ -2197,7 +2211,7 @@ if _fuzz_args.length() > 0
     _fuzz_exe = custom_target(
       _fuzz[1],
       output: _fuzz[1],
-      command: _fuzz_cc.cmd_array() + [
+      command: _fuzz_cc.cmd_array() + _fuzz_bindir + [
         '-std=c11', '-g', '-O1',
         '-I' + meson.project_source_root() / 'include',
         '-I' + meson.current_build_dir() / 'src',
