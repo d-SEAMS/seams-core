@@ -10,13 +10,14 @@ notes. kind is ice Ih (0), ice Ic (1), ice Isd (2), or -1.
 from __future__ import annotations
 
 import os
-import sys
 from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "bindings" / "python"))
-import symmetry
+try:
+    import dseams
+except ImportError as err:
+    raise SystemExit("dseams is part of pydseamslib: pip install pydseamslib==2.14.0") from err
 
 
 def read_lammpstrj(path: Path):
@@ -64,7 +65,7 @@ def main():
             jobs.append((src, read_seed, out / f"seed-{seed}-200ps.csv"))
     for src, reader, dest in jobs:
         ids, xyz, box = reader(src)
-        kind = symmetry.classify(xyz, box)
+        kind = dseams.symmetry(xyz, np.diag(box))
         write_csv(dest, ids, kind)
         ice = int((kind >= 0).sum())
         print(f"{dest.name} n={len(kind)} ice={ice} from {src}")

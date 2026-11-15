@@ -15,7 +15,6 @@ from __future__ import annotations
 
 import csv
 import os
-import sys
 from pathlib import Path
 
 import numpy as np
@@ -46,10 +45,12 @@ def library():
         built = ROOT / "bbdir" / "src" / "libseams.so"
         if built.is_file():
             os.environ["SEAMS_LIB"] = str(built)
-    src = ROOT / "bindings" / "python" / "src"
-    if str(src) not in sys.path:
-        sys.path.insert(0, str(src))
-    import seams
+    try:
+        import seams
+    except ImportError as err:
+        raise SystemExit(
+            "the seams ctypes package is part of pydseamslib: pip install pydseamslib==2.14.0"
+        ) from err
 
     return seams
 

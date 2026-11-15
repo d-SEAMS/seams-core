@@ -90,8 +90,10 @@ def median(values):
 
 
 def time_rule(pos, box, rule: str):
-    sys.path.insert(0, str(ROOT / "bindings" / "python"))
-    from chill_plus import chill_plus
+    try:
+        from dseams import chill_plus
+    except ImportError as err:
+        raise SystemExit("dseams is part of pydseamslib: pip install pydseamslib==2.14.0") from err
 
     labels = None
     samples = []
