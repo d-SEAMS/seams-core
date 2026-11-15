@@ -102,6 +102,12 @@ jobs:
             export OMPI_MCA_rmaps_base_oversubscribe=1
             extra=""
             if [ "$ENGINE" = lammps ]; then
+              # The runner NIC advertises a MANA device whose UD queues UCX
+              # cannot open. ob1 stays on the host and still runs at np=2.
+              # vader is the Open MPI 4 shared-memory BTL; tcp covers Open MPI 5,
+              # which renamed vader to sm.
+              export OMPI_MCA_pml=ob1
+              export OMPI_MCA_btl=self,vader,tcp
               # conda-forge LAMMPS ships library.h only; compute dseams needs
               # the class headers of the same release.
               extra="-Dlammps_src_include=$(sh scripts/fetch_lammps_headers.sh "$RUNNER_TEMP/lammps-src")"
@@ -126,7 +132,15 @@ jobs:
           environments: default
           cache-key: pixi-docs-engines-
       - name: Install the four engines from conda-forge
-        run: pixi add gromacs lammps openmm "plumed=2.10.*"
+        run: |
+          set -euo pipefail
+          pixi add gromacs lammps openmm
+          # The lock is solved for every platform. conda-forge lammps on
+          # osx-arm64 requires plumed<2.10, so 2.10 is pinned only where
+          # that lammps build accepts it. linux-64, where this job runs,
+          # still links PLUMED 2.10.
+          pixi add --platform linux-64 --platform osx-64 "plumed>=2.10,<2.11"
+          pixi add --platform osx-arm64 "plumed>=2.9.2,<2.10"
       - name: Build with each engine enabled and run the docs engine tests
         run: |
           set -euo pipefail
