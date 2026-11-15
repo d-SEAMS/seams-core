@@ -37,7 +37,7 @@ jobs:
           cache-key: pixi-default-
 
       - name: Language runtimes
-        run: sudo apt-get update && sudo apt-get install -y lua5.4 liblua5.4-dev r-base-core gfortran pandoc devscripts texlive-latex-base texlive-latex-recommended texlive-fonts-recommended xvfb libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-xkb1 libxkbcommon-x11-0 mesa-vulkan-drivers libgl1-mesa-dri
+        run: sudo apt-get update && sudo apt-get install -y lua5.4 liblua5.4-dev r-base-core gfortran pandoc devscripts texlive-latex-base texlive-latex-recommended texlive-fonts-recommended texlive-fonts-extra xvfb libxcb-cursor0 libxcb-icccm4 libxcb-keysyms1 libxcb-xkb1 libxkbcommon-x11-0 mesa-vulkan-drivers libgl1-mesa-dri
 
       - uses: julia-actions/setup-julia@v2
         with:
