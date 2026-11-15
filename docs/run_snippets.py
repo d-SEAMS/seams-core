@@ -325,7 +325,7 @@ def sdk_flags(text):
     if prefix is not None:
         include = prefix / "include"
         if "library.h" in text and (include / "lammps" / "library.h").is_file():
-            flags.extend(["-I", str(include / "lammps"), "-llammps"])
+            flags.extend(["-I", str(include / "lammps"), "-llammps", "-lmpi"])
         if "OpenMM.h" in text and (include / "OpenMM.h").is_file():
             flags.append("-lOpenMM")
         if "plumed/" in text and (prefix / "lib" / "libplumedKernel.so").is_file():

@@ -51,5 +51,5 @@ lammps_select` labels a TIP4P/Ice slab with hydrogens and sodium ions with
 
 ```{literalinclude} ../../../engines/lammps/run_hook.cpp
 :language: cpp
-:lines: 42-46
+:lines: 44-49
 ```
