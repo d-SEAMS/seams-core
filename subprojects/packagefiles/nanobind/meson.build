@@ -38,7 +38,9 @@ freethreaded = py.get_variable('Py_GIL_DISABLED', 0) != 0
 if limited_api != ''
   # nanobind's CMake pins the stable ABI at 3.12 whatever the interpreter.
   # The module and this library must agree, or the object layouts differ.
-  dep_compile_args += ['-DPy_LIMITED_API=0x030C0000']
+  # Meson spells the same stable-ABI level as 0x030c0000. GCC -Werror
+  # rejects a second -D whose tokens differ, even when the values match.
+  dep_compile_args += ['-DPy_LIMITED_API=0x030c0000']
 endif
 if freethreaded
   dep_compile_args += ['-DNB_FREE_THREADED']
