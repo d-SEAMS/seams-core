@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 /**
- * @file C++ language ABI header.
+ * @file seams_lang.h
  * @brief C ABI shared by the Python, R, and Julia fronts.
  *
  * @defgroup lang_frame Frames
