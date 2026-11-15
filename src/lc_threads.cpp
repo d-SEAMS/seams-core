@@ -134,6 +134,10 @@ double monoNow() {
 }
 
 double gBegan = 0.0;
+double gBusyAt = -1.0e9;
+int gNarrow = 0;
+bool gPinned = false;
+constexpr double kCalm = 1.0;
 
 void captureAllowed() {
   if (gAllowedKnown) {
@@ -166,6 +170,35 @@ int procsRunning() {
     }
   }
   std::fclose(file);
+  return running < 1 ? 1 : running;
+}
+
+bool readStatus(const char *path, char *buf, int cap);
+
+// Threads of this process that are runnable now, the caller included. Our
+// own workers can still be spinning from the last region.
+int ownRunning() {
+  DIR *tasks = opendir("/proc/self/task");
+  if (tasks == nullptr) {
+    return 1;
+  }
+  int running = 0;
+  char path[512];
+  char buf[1024];
+  while (const dirent *ent = readdir(tasks)) {
+    if (ent->d_name[0] < '0' || ent->d_name[0] > '9') {
+      continue;
+    }
+    std::snprintf(path, sizeof(path), "/proc/self/task/%s/stat", ent->d_name);
+    if (!readStatus(path, buf, sizeof(buf))) {
+      continue;
+    }
+    const char *close = std::strrchr(buf, ')');
+    if (close != nullptr && close[1] == ' ' && close[2] == 'R') {
+      ++running;
+    }
+  }
+  closedir(tasks);
   return running < 1 ? 1 : running;
 }
 
@@ -278,6 +311,7 @@ void scanOthers(int *owners, int *nowners) {
 void choosePlan(int width) {
   (void)width;
   gPlanN = 0;
+  gNarrow = 0;
   if (gAllowedN < 2) {
     return;
   }
@@ -303,10 +337,36 @@ void choosePlan(int width) {
         ids[nids++] = owners[i];
       }
   }
-  int parts = nids;
-  if (parts < 2 && running > 1 && !gDecided) {
-    parts = running < gAllowedN ? running : gAllowedN;
+  if (nids < 2) {
+    const int others = std::max(0, running - ownRunning());
+    // Other runnable threads hold half the mask or more. A worker tied to
+    // one of those cpus waits for that cpu's time slice at every barrier,
+    // and so do the regions that place and restore the team: a 2 ms call
+    // took 60 ms beside an 8-thread spinner. Unplaced, the scheduler moves
+    // the workers to whichever cpu frees up and FairWidth narrows the
+    // team. A busy neighbour that sleeps between bursts can read as idle
+    // for a moment, so the team stays unplaced for kCalm before the next
+    // look.
+    if (2 * others >= gAllowedN) {
+      gBusyAt = monoNow();
+      gParts = 1;
+      gRescan = true;
+      return;
+    }
+    // A few busy threads. A full team then has more workers than free
+    // cpus and every barrier waits out a time slice: q6 through the frame
+    // took 65 ms beside two busy threads at eight workers and 3 ms at six.
+    // The team takes the free cpus and stays unplaced, so the scheduler
+    // keeps it off the busy ones, wherever those run.
+    if (others > 0) {
+      gNarrow = gAllowedN - others;
+      gParts = 1;
+      gDecided = true;
+      gRescan = false;
+      return;
+    }
   }
+  int parts = nids;
   if (parts < 1) {
     parts = 1;
   }
@@ -404,6 +464,9 @@ void applyPin() {
   if (width < 2) {
     return;
   }
+  if (monoNow() - gBusyAt < kCalm) {
+    return;
+  }
   ++gCalls;
   // A lone process does not scan /proc on the timed calls. A shared
   // machine is noticed on the first busy entry and again every few
@@ -414,6 +477,19 @@ void applyPin() {
       gRescan = true;
     }
     choosePlan(width);
+  }
+  if (gNarrow > 0) {
+#ifdef SEAMS_HAS_OPENMP
+    gSavedOmp = width;
+    if (gNarrow < width) {
+      omp_set_num_threads(gNarrow);
+      gRestoreOmp = true;
+    }
+#endif
+    gPinned = false;
+    gApplied = true;
+    gBegan = monoNow();
+    return;
   }
   if (gPlanN < 1) {
     return;
@@ -444,6 +520,7 @@ void applyPin() {
     }
   }
   lc_set_places(gPlan, gPlanN);
+  gPinned = true;
   gApplied = true;
   gBegan = monoNow();
 }
@@ -456,17 +533,19 @@ void restorePin() {
   if (elapsed > 8.0e-3) {
     gRescan = true;
   }
+  if (gPinned) {
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel num_threads(gUse)
 #endif
-  {
+    {
 #ifdef SEAMS_HAS_OPENMP
-    const int tid = omp_get_thread_num();
+      const int tid = omp_get_thread_num();
 #else
-    const int tid = 0;
+      const int tid = 0;
 #endif
-    if (tid < gUse) {
-      sched_setaffinity(0, sizeof(gSaved[tid]), &gSaved[tid]);
+      if (tid < gUse) {
+        sched_setaffinity(0, sizeof(gSaved[tid]), &gSaved[tid]);
+      }
     }
   }
 #ifdef SEAMS_HAS_OPENMP

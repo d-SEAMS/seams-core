@@ -188,11 +188,13 @@ bool placementHeld();
 // places (OMP_PROC_BIND, OMP_PLACES, GOMP_CPU_AFFINITY, KMP_AFFINITY), or
 // a caller whose mask is a single cpu, is left alone. When several
 // processes share the mask, each keeps a disjoint slice and the team is
-// narrowed to that slice. The outermost session calls widenAffinity
-// before a load-narrowed width can make it skip, so the masks it saves
-// and restores are the widened ones. Placement adds no cpu outside the
-// host mask. One host thread holds the placement at a time; a call from
-// another thread meanwhile runs unplaced.
+// narrowed to that slice. Beside a few busy threads the team narrows to
+// the free cpus and is not pinned; when other threads hold half the mask
+// it is left to the scheduler and FairWidth. The outermost session calls
+// widenAffinity before a load-narrowed width can make it skip, so the
+// masks it saves and restores are the widened ones. Placement adds no cpu
+// outside the host mask. One host thread holds the placement at a time;
+// a call from another thread meanwhile runs unplaced.
 class PinSession {
 public:
   PinSession();
