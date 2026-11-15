@@ -42,6 +42,10 @@ jobs:
           echo "DISPLAY=:99" >> "$GITHUB_ENV"
           echo "QT_QPA_PLATFORM=xcb" >> "$GITHUB_ENV"
           echo "LIBGL_ALWAYS_SOFTWARE=1" >> "$GITHUB_ENV"
+      - name: Install pydseamslib
+        run: |
+          pixi run -e default python -m pip install "pydseamslib @ git+https://github.com/d-SEAMS/PydSEAMSlib@v2.14.0"
+          pixi run -e docs python -m pip install "pydseamslib @ git+https://github.com/d-SEAMS/PydSEAMSlib@v2.14.0"
       - name: Publish the book
         env:
           DOCS_CI: "1"
@@ -135,6 +139,11 @@ jobs:
       - name: Ice Ih, the C and C++ APIs, and science tutorials
         run: DOCS_CI=1 pixi run -e default meson test -C bbdir docs_core_counts docs_capi_examples docs_capi_symbols docs_lang_ice docs_science_render_copy docs_science_tutorials docs_engine_walkthrough --print-errorlogs
 
+      # The Python snippets import dseams and pydseams from pydseamslib,
+      # built from d-SEAMS/PydSEAMSlib at the tag that matches this release.
+      - name: Install pydseamslib
+        run: pixi run -e default python -m pip install "pydseamslib @ git+https://github.com/d-SEAMS/PydSEAMSlib@v2.14.0"
+
       - name: Every documented snippet
         run: |
           set -euo pipefail
@@ -151,6 +160,9 @@ jobs:
 
       - name: Export the org book for doctest
         run: pixi run -e docs mkrst
+
+      - name: Install pydseamslib for the doctest
+        run: pixi run -e docs python -m pip install "pydseamslib @ git+https://github.com/d-SEAMS/PydSEAMSlib@v2.14.0"
 
       - name: Python doctest
         run: |
