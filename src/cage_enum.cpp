@@ -9,6 +9,7 @@
 #include <ira_sofi.hpp>
 #include <mol_sys.hpp>
 #include <number_parse.hpp>
+#include <omp_tsan.hpp>
 #include <topo_bulk.hpp>
 
 #include <algorithm>
@@ -748,29 +749,48 @@ struct ClosedSearch {
       indexTeam = std::max(1, omp_get_max_threads());
     }
 #endif
-#if defined(SEAMS_HAS_OPENMP)
-#pragma omp parallel for schedule(static) if (nRings >= 128 && indexTeam > 1)
-#endif
-    for (int i = 0; i < nRings; ++i) {
+    auto admitRing = [&](int i) {
       const auto &ring = rings[static_cast<size_t>(i)];
       const int sz = static_cast<int>(ring.size());
       if (admit != nullptr &&
           (static_cast<size_t>(i) >= admit->size() ||
            (*admit)[static_cast<size_t>(i)] == 0)) {
-        continue;
+        return;
       }
       if (sz < 3 || sz > maxSize || inSome[static_cast<size_t>(sz)] == 0) {
-        continue;
+        return;
       }
       if (window.enabled && xyz != nullptr &&
           !waterFace(ring, *xyz, box, boxLow, window.lo, window.hi)) {
-        continue;
+        return;
       }
       if (!distinctVertices(ring)) {
-        continue;
+        return;
       }
       keep[static_cast<size_t>(i)] = 1;
+    };
+#if defined(SEAMS_TSAN_JOIN)
+    {
+      // The OpenMP join is real. ThreadSanitizer does not see libgomp's
+      // barrier, so the serial read of keep below needs this one.
+      seams::tsan::Slot keepSlot;
+#pragma omp parallel if (nRings >= 128 && indexTeam > 1)
+      {
+#pragma omp for schedule(static)
+        for (int i = 0; i < nRings; ++i) {
+          admitRing(i);
+        }
+        seams::tsan::arrive_and_wait(keepSlot, omp_get_num_threads());
+      }
     }
+#else
+#if defined(SEAMS_HAS_OPENMP)
+#pragma omp parallel for schedule(static) if (nRings >= 128 && indexTeam > 1)
+#endif
+    for (int i = 0; i < nRings; ++i) {
+      admitRing(i);
+    }
+#endif
     int slots = 0;
     int maxV = -1;
     cand.reserve(static_cast<size_t>(nRings));

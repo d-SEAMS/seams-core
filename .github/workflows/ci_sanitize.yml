@@ -30,6 +30,9 @@ jobs:
           cache-key: pixi-sanitize-tsan-
       - run: pixi run meson setup build-tsan --buildtype=debugoptimized -Dwith_tests=true -Dwith_python=false -Dwith_cli=true -Db_sanitize=thread
       - run: pixi run ninja -C build-tsan tests/test_neighbours tests/test_bop tests/test_chill_plus_rule tests/test_cage_enum tests/test_rings_ih
+      # ThreadSanitizer's shadow map does not cover the high-entropy
+      # mappings a 32-bit ASLR shift produces. 28 is the width it supports.
+      - run: sudo sysctl vm.mmap_rnd_bits=28
       - run: pixi run meson test -C build-tsan --print-errorlogs neighbours bop chill_plus_rule cage_enum rings_ih
         env:
           OMP_NUM_THREADS: "8"

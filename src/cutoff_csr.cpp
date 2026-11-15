@@ -13,6 +13,7 @@
 #include <cpu_features.hpp>
 #include <index_range.hpp>
 #include <neighbours.hpp>
+#include <omp_tsan.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -2251,6 +2252,9 @@ bool orthoFullCsr(
 
   const auto tBin = Clock::now();
   int threads = 1;
+#if defined(SEAMS_TSAN_JOIN)
+  seams::tsan::Slot histJoin;
+#endif
 #ifdef SEAMS_HAS_OPENMP
 #pragma omp parallel if (team)
 #endif
@@ -2307,6 +2311,11 @@ bool orthoFullCsr(
       sc.pz[static_cast<std::size_t>(k)].v = wrapped[2];
       ++hist[cid];
     }
+#if defined(SEAMS_TSAN_JOIN)
+    // Each thread has finished its own histogram row. libgomp's barrier
+    // at the end of the for is invisible to ThreadSanitizer.
+    seams::tsan::arrive_and_wait(histJoin, nt);
+#endif
     teamCellPrefix(sc.hist.data(), nCells, tid, nt, sc.cellStart.data(), sc.part.data());
     // Same static split as the count loop, so each thread places the atoms
     // it counted.
@@ -2486,13 +2495,10 @@ std::vector<std::vector<int>> idRowsFromCsr(
   const auto t0 = Clock::now();
   const int nop = yCloud.nop;
   std::vector<std::vector<int>> rows(static_cast<std::size_t>(std::max(nop, 0)));
-#ifdef SEAMS_HAS_OPENMP
-#pragma omp parallel for schedule(static) if (nop >= 256 && !omp_in_parallel())
-#endif
-  for (int i = 0; i < nop; ++i) {
+  auto fillRow = [&](int i) {
     if (static_cast<int>(indexToID.size()) <= i ||
         indexToID[static_cast<std::size_t>(i)] == -1) {
-      continue;
+      return;
     }
     const int a = offsets[static_cast<std::size_t>(i)];
     const int b = offsets[static_cast<std::size_t>(i) + 1];
@@ -2506,7 +2512,30 @@ std::vector<std::vector<int>> idRowsFromCsr(
         row.push_back(indexToID[static_cast<std::size_t>(j)]);
       }
     }
+  };
+#if defined(SEAMS_TSAN_JOIN)
+  {
+    // The caller destroys offsets and cols when this function returns.
+    // The OpenMP join already orders that; ThreadSanitizer needs the
+    // same edge in instrumented code.
+    seams::tsan::Slot rowSlot;
+#pragma omp parallel if (nop >= 256 && !omp_in_parallel())
+    {
+#pragma omp for schedule(static)
+      for (int i = 0; i < nop; ++i) {
+        fillRow(i);
+      }
+      seams::tsan::arrive_and_wait(rowSlot, omp_get_num_threads());
+    }
   }
+#else
+#ifdef SEAMS_HAS_OPENMP
+#pragma omp parallel for schedule(static) if (nop >= 256 && !omp_in_parallel())
+#endif
+  for (int i = 0; i < nop; ++i) {
+    fillRow(i);
+  }
+#endif
   phase().rows = msSince(t0);
   if (profileOn()) {
     publishProfile();
