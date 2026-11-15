@@ -2254,19 +2254,23 @@ bool chill::chillPlusPublishedCutoff(
   const linkcell::Cell cell = nneigh::lammpsBoxToLinkcell(yCloud.box, yCloud.boxLow);
   const lc_cell raw = cell.raw();
   std::size_t count = 0;
-  if (lc_pairs_within(scratch.xyz.data(), static_cast<std::size_t>(n), &raw, cutoff,
-                      maskPtr, cutoff, 0, nullptr, nullptr, nullptr, nullptr, 0,
-                      &count) != 0) {
-    return false;
-  }
-  scratch.ii.resize(count);
-  scratch.jj.resize(count);
-  scratch.shift.resize(count * 3);
-  scratch.d2.resize(count);
   std::size_t got = 0;
-  if (lc_pairs_within(scratch.xyz.data(), static_cast<std::size_t>(n), &raw, cutoff,
-                      maskPtr, cutoff, 0, scratch.ii.data(), scratch.jj.data(),
-                      scratch.shift.data(), scratch.d2.data(), count, &got) != 0) {
+  bool listed = false;
+  seams::withTeamAsleep(seams::teamWidth(), [&] {
+    if (lc_pairs_within(scratch.xyz.data(), static_cast<std::size_t>(n), &raw, cutoff,
+                        maskPtr, cutoff, 0, nullptr, nullptr, nullptr, nullptr, 0,
+                        &count) != 0) {
+      return;
+    }
+    scratch.ii.resize(count);
+    scratch.jj.resize(count);
+    scratch.shift.resize(count * 3);
+    scratch.d2.resize(count);
+    listed = lc_pairs_within(scratch.xyz.data(), static_cast<std::size_t>(n), &raw, cutoff,
+                             maskPtr, cutoff, 0, scratch.ii.data(), scratch.jj.data(),
+                             scratch.shift.data(), scratch.d2.data(), count, &got) == 0;
+  });
+  if (!listed) {
     return false;
   }
   for (std::size_t t = 0; t < got; t++) {

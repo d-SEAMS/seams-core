@@ -325,11 +325,13 @@ bool cutoffRows(const molSys::PointCloud<molSys::Point<double>, double> &yCloud,
         throw linkcell::Error(status, msg != nullptr ? msg : "unknown");
       }
     };
-    rowsInto(nullptr, 0);
-    if (count > 0) {
-      found.reset(new lc_pair[count]);
-      rowsInto(found.get(), count);
-    }
+    seams::withTeamAsleep(seams::teamWidth(), [&] {
+      rowsInto(nullptr, 0);
+      if (count > 0) {
+        found.reset(new lc_pair[count]);
+        rowsInto(found.get(), count);
+      }
+    });
     produced = true;
   } catch (const linkcell::Error &err) {
     std::cerr << "linkcell pairs_within failed: " << err.what()
@@ -2506,9 +2508,11 @@ bool nominateByLinkcell(
   const linkcell::Cell cell =
       nneigh::lammpsBoxToLinkcell(yCloud.box, yCloud.boxLow);
   try {
-    linkcell::knearest_into(xyz.data(), static_cast<std::size_t>(n), cell,
-                            static_cast<std::size_t>(k), nom.data(),
-                            nom.size(), maskPtr, cellHint);
+    seams::withTeamAsleep(seams::teamWidth(), [&] {
+      linkcell::knearest_into(xyz.data(), static_cast<std::size_t>(n), cell,
+                              static_cast<std::size_t>(k), nom.data(), nom.size(),
+                              maskPtr, cellHint);
+    });
   } catch (const linkcell::Error &e) {
     std::cerr << "linkcell failed: " << e.what()
               << "; falling back to the in-tree cell list.\n";

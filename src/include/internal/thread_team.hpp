@@ -1,9 +1,11 @@
 #pragma once
 
 #include <algorithm>
+#include <condition_variable>
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <exception>
 #include <mutex>
 #include <vector>
 
@@ -70,6 +72,58 @@ inline void widenAffinity() {
     }
   }
   sched_setaffinity(0, sizeof(mask), &mask);
+#endif
+}
+
+inline int teamWidth() {
+#ifdef SEAMS_HAS_OPENMP
+  return omp_get_max_threads();
+#else
+  return 1;
+#endif
+}
+
+// Runs `search` on the calling thread while the other OpenMP threads of
+// the team sleep on a condition variable. After a parallel region the
+// workers spin in the default wait policy, for milliseconds on cores
+// with a slow pause instruction, and a Rayon search started then shares
+// every core with a spinning worker. Inside the region they sleep in the
+// kernel and the pool has the cores. The team stays alive, so the next
+// region does not pay the wake-up of a paused team.
+template <class Search> void withTeamAsleep(int width, Search &&search) {
+#ifdef SEAMS_HAS_OPENMP
+  if (width < 2 || omp_in_parallel()) {
+    search();
+    return;
+  }
+  std::mutex lock;
+  std::condition_variable wake;
+  bool done = false;
+  std::exception_ptr failure;
+#pragma omp parallel num_threads(width)
+  {
+    if (omp_get_thread_num() == 0) {
+      try {
+        search();
+      } catch (...) {
+        failure = std::current_exception();
+      }
+      {
+        const std::lock_guard<std::mutex> hold(lock);
+        done = true;
+      }
+      wake.notify_all();
+    } else {
+      std::unique_lock<std::mutex> hold(lock);
+      wake.wait(hold, [&] { return done; });
+    }
+  }
+  if (failure) {
+    std::rethrow_exception(failure);
+  }
+#else
+  (void)width;
+  search();
 #endif
 }
 
