@@ -372,7 +372,7 @@ else
     # set refetches the source, since the patch step runs only on a fetch.
     _chem_patch_ids = []
     foreach _patch : ['chemfiles-0.10.4-mmcif.patch', 'chemfiles-0.10.4-mol2.patch',
-                      'chemfiles-0.10.4-zlib-apple.sh']
+                      'chemfiles-0.10.4-zlib-apple.sh', 'chemfiles-0.10.4-fmt-libcxx.sh']
       _chem_patch_ids += [_patch + ' ' + fs.hash(meson.project_source_root() / 'cmake' / 'patches' / _patch, 'sha256')]
     endforeach
     _chem_patch_text = '\n'.join(_chem_patch_ids)
