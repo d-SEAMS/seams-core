@@ -1079,6 +1079,7 @@ SteinhardtQl cutoffSolid(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
     int orderL, int typeI, bool average, bool invariants,
     std::vector<double> *q6out = nullptr, bool rebuild = true) {
+  const seams::PinSession placed;
   const int n = yCloud.nop;
   const auto tIn = std::chrono::steady_clock::now();
   SteinhardtQl result;
@@ -1775,6 +1776,9 @@ SteinhardtQl steinhardtQlCutoff(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, double cutoff,
     int orderL, int typeI, bool average, bool invariants) {
   lastQlCutoffStages() = {};
+  // One session for the whole call: the regions after the neighbour
+  // search run at the width it chose.
+  const seams::PinSession placed;
   if ((orderL == 3 || orderL == 4 || orderL == 6) &&
       (yCloud.box.size() == 3 || yCloud.box.size() >= 6) && yCloud.nop > 0 &&
       cutoff > 0.0) {
@@ -1859,6 +1863,7 @@ SteinhardtQl steinhardtQlCutoff(
 SteinhardtQl steinhardtQlMutual(
     const molSys::PointCloud<molSys::Point<double>, double> &yCloud, int k,
     double candidateCutoff, int typeI, int orderL) {
+  const seams::PinSession placed;
   const int n = yCloud.nop;
   if (n <= 0 || k <= 0 || k > 32 ||
       (orderL != 3 && orderL != 4 && orderL != 6)) {
