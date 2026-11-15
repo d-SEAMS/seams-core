@@ -15,8 +15,6 @@ export LD_LIBRARY_PATH="$prefix/lib:$prefix/lib.AVX2_256${LD_LIBRARY_PATH:+:$LD_
 # headers of the same release.
 scratch=${RUNNER_TEMP:-$(mktemp -d)}
 lammps_src=$(sh scripts/fetch_lammps_headers.sh "$scratch/lammps-src")
-# The Lua examples and the lua video tape compile Fennel.
-fennel=$(sh scripts/fetch_fennel.sh "$scratch/fennel")
 
 meson setup build --buildtype=release \
   -Dwith_tests=true -Dwith_cli=true \

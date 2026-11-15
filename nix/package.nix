@@ -61,8 +61,6 @@ stdenv.mkDerivation (finalAttrs: {
   mesonFlags = [
     (lib.mesonBool "with_tests" true)
     (lib.mesonBool "with_cli" true)
-    (lib.mesonBool "with_python" false)
-    (lib.mesonEnable "with_lua" false)
     (lib.mesonEnable "with_mpi" false)
     (lib.mesonEnable "with_openmp_offload" false)
   ];

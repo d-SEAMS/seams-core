@@ -78,6 +78,8 @@ jobs:
           cache-write: false
       - name: Install EGL for OVITO
         run: sudo apt-get update && sudo apt-get install -y libegl1 libglvnd0
+      - name: Install pydseamslib
+        run: pixi run python -m pip install "pydseamslib @ git+https://github.com/d-SEAMS/PydSEAMSlib@v2.14.0"
       - run: pixi run coverage-setup
       - run: pixi run coverage-build
       - run: pixi run coverage-run
@@ -87,7 +89,7 @@ jobs:
           fail_ci_if_error: false
 
   # The linux-64 pixi stack: engines, OVITO, GenIce, packmol, the paper
-  # tutorials, and the language fronts. A skip fails the job.
+  # tutorials, and the docs snippets against pydseamslib. A skip fails the job.
   pixi-suite:
     runs-on: ubuntu-latest
     steps:
@@ -101,6 +103,9 @@ jobs:
       # wheel needs a newer Qt and import ovito fails.
       - name: Install Snakemake into the pixi interpreter
         run: pixi run python -m pip install 'snakemake>=8' 'sqq==0.5.8'
+      # The docs snippet tests import dseams and pydseams from pydseamslib.
+      - name: Install pydseamslib
+        run: pixi run python -m pip install "pydseamslib @ git+https://github.com/d-SEAMS/PydSEAMSlib@v2.14.0"
       - name: Install EGL for OVITO
         run: sudo apt-get update && sudo apt-get install -y libegl1 libglvnd0
       - name: Build and run the full suite
