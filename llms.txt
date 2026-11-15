@@ -91,7 +91,7 @@ Each link below is a page of the published manual on https://docs.dseams.info. C
 ## Reference
 
 - [Lookup pages](https://docs.dseams.info/reference/index.html): Lookup pages for the engine. Tutorials and how-tos live elsewhere.
-- [Python Frame](https://docs.dseams.info/reference/python-frame.html): pydseams.read returns a Frame. Each call below is the example the suite runs, and the line under it is the output.
+- [Python Frame](https://docs.dseams.info/reference/python-frame.html): dseams.userframe.read in pydseamslib 2.14.0 returns a Frame over libseams_lang.
 - [seams CLI](https://docs.dseams.info/reference/cli.html): The engine command is seams. The parser is Argum (the same parser as eonclient).
 - [Data Formats](https://docs.dseams.info/reference/data-formats.html): seams and the C++ readers share one suffix table.
 - [walk_compare](https://docs.dseams.info/reference/walk-compare.html): tests/walk_compare walks a LAMMPS dump and prints one row per frame.

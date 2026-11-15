@@ -6,7 +6,7 @@ CHILL+ reads a staggered or eclipsed star.
 A cage signature counts closed polyhedra of a given ring census.
 The runnable copy is =docs/tutorials/test_ice_and_clathrate.py=.
 Python is ~pip install 'pydseamslib==2.14.0'~.
-The import is ~pydseams~.
+The import is ~dseams.userframe~, the Frame over ~libseams_lang~.
 
 * The mixed TIP4P frame
 
@@ -47,7 +47,7 @@ The installed Python ~Frame.cages_by_signature~ takes the signature, an optional
 The Lua binding in [[https://github.com/d-SEAMS/yodaStruct][yodaStruct]] takes the same edge window.
 
 #+begin_src python
-import pydseams as ds
+from dseams import userframe as ds
 
 frame = ds.read("input/traj/genice_sI.lammpstrj", atom_type=1)
 found = frame.cages_by_signature("512")

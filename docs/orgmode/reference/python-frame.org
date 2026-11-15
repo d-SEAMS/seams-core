@@ -5,14 +5,18 @@
 .. include:: ../videos/embeds/python.rst
 #+end_export
 
-~pydseams.read~ returns a ~Frame~. Each call below is the example the
-suite runs, and the line under it is the output. The frame is
+~dseams.userframe.read~ in pydseamslib 2.14.0 returns a ~Frame~ over
+~libseams_lang~. The examples import it under the name ~pydseams~; the
+top-level ~import pydseams~ is the 2.11 ~yoda~ Frame, whose reference
+is in the [[https://d-seams.github.io/PydSEAMSlib/][PydSEAMSlib documentation]].
+Each call below is the example the suite runs, and the line under it is
+the output. The frame is
 ~input/traj/ice1h.lammpstrj~, 128 oxygens.
 
 * read
 
 #+begin_src python
->>> import pydseams
+>>> from dseams import userframe as pydseams
 >>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
 >>> frame.n_atoms
 128
@@ -21,7 +25,7 @@ suite runs, and the line under it is the output. The frame is
 * steinhardt
 
 #+begin_src python
->>> import pydseams
+>>> from dseams import userframe as pydseams
 >>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
 >>> q = frame.steinhardt(6)
 >>> len(q["ql"])
@@ -33,7 +37,7 @@ suite runs, and the line under it is the output. The frame is
 * ring_census
 
 #+begin_src python
->>> import pydseams
+>>> from dseams import userframe as pydseams
 >>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
 >>> frame.ring_census(6)
 {6: 256}
@@ -43,7 +47,7 @@ suite runs, and the line under it is the output. The frame is
 
 #+begin_src python
 >>> import tempfile
->>> import pydseams
+>>> from dseams import userframe as pydseams
 >>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
 >>> radius, values = frame.rdf_2d(tempfile.mkdtemp(), cutoff=6.0, binwidth=0.5)
 >>> len(radius)
@@ -56,7 +60,7 @@ suite runs, and the line under it is the output. The frame is
 
 #+begin_src python
 >>> import tempfile
->>> import pydseams
+>>> from dseams import userframe as pydseams
 >>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
 >>> sheet = frame.monolayer_rings(tempfile.mkdtemp(), sheet_area=1.0, max_depth=6)
 >>> sheet[6]["count"]
@@ -67,7 +71,7 @@ suite runs, and the line under it is the output. The frame is
 
 #+begin_src python
 >>> import tempfile
->>> import pydseams
+>>> from dseams import userframe as pydseams
 >>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
 >>> frame.find_prisms(output_dir=tempfile.mkdtemp(), max_depth=4)
 [{'size': 3, 'perfect': 0, 'imperfect': 0}, {'size': 4, 'perfect': 0, 'imperfect': 0}]
@@ -76,7 +80,7 @@ suite runs, and the line under it is the output. The frame is
 * to_ase
 
 #+begin_src python
->>> import pydseams
+>>> from dseams import userframe as pydseams
 >>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
 >>> atoms = frame.to_ase()
 >>> len(atoms)
@@ -86,7 +90,7 @@ suite runs, and the line under it is the output. The frame is
 * to_solvis
 
 #+begin_src python
->>> import pydseams
+>>> from dseams import userframe as pydseams
 >>> frame = pydseams.read("input/traj/ice1h.lammpstrj", atom_type=1)
 >>> type(frame.to_solvis()).__name__
 'System'

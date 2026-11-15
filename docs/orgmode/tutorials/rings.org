@@ -11,7 +11,7 @@ Distances are read on the whole graph, and only then are levels below the source
 The hexagon with vertex 0 joined to vertices 1 and 4 is the worked example on the primitive-rings page.
 ~pydseams.band.ring_census~ counts those rings on the frame's default graph.
 A type-2 read of this dump uses the hydrogen-bond list: one three-ring, 230 four-rings, four five-rings, and 192 six-rings.
-~graph="cutoff"~ is the neighbour list inside 3.5 angstrom: 37 three-rings, 273 four-rings, 34 five-rings, and 167 six-rings.
+~dseams.userframe~ ~Frame.ring_census(8, graph="cutoff")~ uses the neighbour list inside 3.5 angstrom: 37 three-rings, 273 four-rings, 34 five-rings, and 167 six-rings.
 
 The runnable copy of the hydrogen-bond census is =docs/tutorials/test_rings.py=.
 
@@ -22,7 +22,9 @@ from pydseams.band import ring_census
 frame = ds.read("input/traj/exampleTraj.lammpstrj", atom_type=2)
 print(ring_census(frame, max_size=8))
 assert ring_census(frame, max_size=8) == {3: 1, 4: 230, 5: 4, 6: 192}
-cutoff = frame.ring_census(8, graph="cutoff")
+from dseams import userframe
+
+cutoff = userframe.read("input/traj/exampleTraj.lammpstrj", atom_type=2).ring_census(8, graph="cutoff")
 print(cutoff)
 assert cutoff == {3: 37, 4: 273, 5: 34, 6: 167}
 #+end_src
