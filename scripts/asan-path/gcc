@@ -1,0 +1,25 @@
+#!/bin/sh
+# The video tapes invoke gcc by name. The suite preloads libasan for
+# Python, and this compiler then leaks at exit. Drop the preload here.
+case $0 in
+  */*) _wrap_dir=${0%/*} ;;
+  *) _wrap_dir=. ;;
+esac
+here=$(CDPATH= cd -- "$_wrap_dir" && pwd)
+old_ifs=$IFS
+IFS=:
+real=
+for dir in $PATH; do
+  [ "$dir" = "$here" ] && continue
+  if [ -x "$dir/gcc" ]; then
+    real=$dir/gcc
+    break
+  fi
+done
+IFS=$old_ifs
+if [ -z "$real" ]; then
+  echo "gcc is not on PATH" >&2
+  exit 1
+fi
+unset LD_PRELOAD
+exec "$real" "$@"

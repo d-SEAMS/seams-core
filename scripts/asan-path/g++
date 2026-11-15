@@ -1,0 +1,27 @@
+#!/bin/sh
+# The video tapes invoke g++ by name. Drop the preloaded sanitizer the
+# same way the c++ wrapper does, so the compiler is not leak-checked.
+case $0 in
+  */*) _wrap_dir=${0%/*} ;;
+  *) _wrap_dir=. ;;
+esac
+here=$(CDPATH= cd -- "$_wrap_dir" && pwd)
+real=${REAL_CXX:-}
+if [ -z "$real" ]; then
+  old_ifs=$IFS
+  IFS=:
+  for dir in $PATH; do
+    [ "$dir" = "$here" ] && continue
+    if [ -x "$dir/g++" ]; then
+      real=$dir/g++
+      break
+    fi
+  done
+  IFS=$old_ifs
+fi
+if [ -z "$real" ]; then
+  echo "g++ is not on PATH" >&2
+  exit 1
+fi
+unset LD_PRELOAD
+exec "$real" "$@"

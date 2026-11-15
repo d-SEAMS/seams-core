@@ -66,6 +66,11 @@ int main(int argc, char **argv) {
     std::fprintf(stderr, "usage: run_hook in.dseams\n");
     return 2;
   }
+#if defined(__SANITIZE_ADDRESS__)
+  // Open MPI's memory patcher rewrites the sanitizer's mprotect and the
+  // process dies with SIGILL inside lammps_open, before any seams call.
+  setenv("OMPI_MCA_memory", "^patcher", 0);
+#endif
   Hook hook;
   // The deck directory is in the source tree; screen output is the log.
   char log_flag[] = "-log";
