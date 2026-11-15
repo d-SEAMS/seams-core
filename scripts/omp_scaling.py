@@ -37,8 +37,11 @@ holds an 8-thread OpenMP team in its default wait (OMP_WAIT_POLICY unset)
 on the same cpus. The build labelled "<label>-fixed" is the after build
 with SEAMS_FAIR_WIDTH=0, which keeps the requested width under contention.
 
-One process per code, frame, operation, width, placement and load. One
-warm-up call, then n timed calls (n >= 10). The median of an even sample
+Each code, frame, operation, width, placement and load runs in --rounds
+processes (3 by default), taken in turn with the other rows of the same
+load, so a stall of the host lands in one of them. Each process makes one
+warm-up call, then --repeats timed calls (at least 10); the summary pools
+the timed calls of every process of the row. The median of an even sample
 is the mean of the two central values and the IQR is type 7. Each row
 records the core count and the affinity of the worker. The header
 records the tree of the measuring checkout and no commit hash. No host
@@ -573,6 +576,8 @@ def main() -> int:
     parser.add_argument("--contend-width", type=int, default=8,
                         help="width of the contended rows and the spinner; 0 skips them")
     parser.add_argument("--repeats", type=int, default=MIN_REPEATS)
+    parser.add_argument("--rounds", type=int, default=3,
+                        help="processes per row, run in turn with the other rows")
     parser.add_argument("--worker", action="store_true")
     parser.add_argument("--code", default="dseams")
     parser.add_argument("--op", default="q4")
@@ -583,6 +588,8 @@ def main() -> int:
         return worker(args)
     if args.repeats < MIN_REPEATS:
         parser.error(f"--repeats must be at least {MIN_REPEATS}")
+    if args.rounds < 1:
+        parser.error("--rounds must be at least 1")
 
     widths = [int(w) for w in args.widths.split(",") if w]
     repetitions = [int(r) for r in args.repetitions.split(",") if r]
@@ -638,7 +645,9 @@ def main() -> int:
         f"# worktree {stats.worktree_state(ROOT, TRACKED)}",
         f"# frame ice Ic molecules={molecules} cutoff={CUTOFF} max_ring={MAX_RING} "
         f"rdf2d_cutoff={RDF_CUTOFF} rdf2d_bin={RDF_BIN}",
-        f"# warmup={WARMUP} repeats={args.repeats} one process per row",
+        f"# warmup={WARMUP} repeats={args.repeats} rounds={args.rounds}: each row is "
+        f"{args.rounds} processes of {args.repeats} samples, taken in turn with the other "
+        "rows of its load; the summary pools them",
         "# bound: taskset 0..width-1; d-SEAMS also OMP_PROC_BIND=close OMP_PLACES=cores",
         "# unbound: whole process mask; OMP_NUM_THREADS and the code's own thread count only; "
         + " ".join(UNBOUND_DROP) + " unset",
@@ -654,8 +663,25 @@ def main() -> int:
     rows = []
 
     def run(jobs, load):
-        for code, reps, op, threads, label, lib, extra, place in jobs:
-            got = drive(code, op, threads, lib, label, args.repeats, reps, extra, place)
+        # Each row is several processes, taken in turn with the other rows,
+        # so a stall of the host that lasts a second lands in one of them
+        # instead of in every sample of one row.
+        pooled = [None] * len(jobs)
+        for turn in range(args.rounds):
+            for index, (code, reps, op, threads, label, lib, extra, place) in enumerate(jobs):
+                got = drive(code, op, threads, lib, label, args.repeats, reps, extra, place)
+                if pooled[index] is None:
+                    pooled[index] = dict(got, samples=[])
+                elif got["check"] != pooled[index]["check"]:
+                    raise RuntimeError(f"{code} {label} {op} {threads}: check "
+                                       f"{got['check']} != {pooled[index]['check']}")
+                pooled[index]["samples"].extend(got["samples"])
+                raw_lines.append(
+                    f"{code} {label} molecules={8 * reps ** 3} {op} threads={threads} "
+                    f"placement={place} load={load} round={turn + 1} "
+                    f"cores={got['cores']} affinity={got['affinity']} {got['check']} samples_ms "
+                    f"{stats.fmt_samples(got['samples'])}")
+        for (code, reps, op, threads, label, lib, extra, place), got in zip(jobs, pooled):
             summary = stats.summarize(got["samples"])
             row = {
                 "code": code,
@@ -676,11 +702,6 @@ def main() -> int:
                 "check": got["check"],
             }
             rows.append(row)
-            raw_lines.append(
-                f"{code} {label} molecules={8 * reps ** 3} {op} threads={threads} "
-                f"placement={place} load={load} "
-                f"cores={got['cores']} affinity={got['affinity']} {got['check']} samples_ms "
-                f"{stats.fmt_samples(got['samples'])}")
             print(f"{code:8s} {label:12s} {8 * reps ** 3:7d} {op:16s} {threads} {place:7s} "
                   f"{load:9s} "
                   f"{row['median_ms']:>10s} ms", flush=True)
